@@ -11,6 +11,9 @@
 #include "sndfile.h"
 #include "it_defs.h"
 #include "wavConverter.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/Moddoc.h"
+#endif //MODPLUG_TRACKER
 #include "Wav.h"
 
 #pragma warning(disable:4244)
@@ -116,8 +119,13 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_szInstrumentPath[nInstr-1][0] = '\0';
-	instrumentModified[nInstr-1] = false;
+	m_szInstrumentPath[nInstr - 1][0] = '\0';
+#ifdef MODPLUG_TRACKER
+	if(GetpModDoc())
+	{
+		GetpModDoc()->m_bsInstrumentModified.reset(nInstr - 1);
+	}
+#endif // MODPLUG_TRACKER
 // -! NEW_FEATURE#0023
 
 	MODINSTRUMENT *pIns = Instruments[nInstr];

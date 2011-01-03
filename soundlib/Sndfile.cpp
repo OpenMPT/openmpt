@@ -484,7 +484,6 @@ CSoundFile::CSoundFile() :
 	for(UINT i = 0; i < MAX_INSTRUMENTS; i++)
 	{
 		m_szInstrumentPath[i][0] = '\0';
-		instrumentModified[i] = false;
 	}
 // -! NEW_FEATURE#0023
 

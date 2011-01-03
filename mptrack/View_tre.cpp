@@ -968,9 +968,9 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				if((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0)
 				{
 					// path info for ITP instruments
-					bool pathOk = pSndFile->m_szInstrumentPath[nIns-1][0] != '\0';
-					bool instOk = pSndFile->instrumentModified[nIns-1] == false;
-					wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", nIns, (LPCTSTR)pSndFile->GetInstrumentName(nIns));
+					const bool pathOk = pSndFile->m_szInstrumentPath[nIns - 1][0] != '\0';
+					const bool instMod = pDoc->m_bsInstrumentModified.test(nIns - 1);
+					wsprintf(s, pathOk ? (instMod ? "%3d: * %s" : "%3d: %s") : "%3d: ? %s", nIns, (LPCTSTR)pSndFile->GetInstrumentName(nIns));
 				} else
 				{
 					wsprintf(s, "%3d: %s", nIns, (LPCTSTR)pSndFile->GetInstrumentName(nIns));
@@ -3050,7 +3050,8 @@ void CModTree::OnSaveItem()
 			strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], files.first_file.c_str());
 		}
 
-		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] != '\0'){
+		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] != '\0')
+		{
 			int size = strlen(pSndFile->m_szInstrumentPath[modItemID - 1]);
 			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[modItemID - 1][size-3],"iti") == 0;
 			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[modItemID - 1][size-2],"xi") == 0;
@@ -3060,7 +3061,7 @@ void CModTree::OnSaveItem()
 			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
 				pSndFile->SaveXIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1]);
 
-			pSndFile->instrumentModified[modItemID - 1] = false;
+			pModDoc->m_bsInstrumentModified.reset(modItemID - 1);
 		}
 
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);

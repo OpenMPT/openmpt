@@ -182,6 +182,9 @@ protected:
 	vector<FileHistory> m_FileHistory;	// File edit history
 	time_t m_creationTime;
 
+public:
+	std::bitset<MAX_INSTRUMENTS> m_bsInstrumentModified;	// which instruments have been modified? (for ITP functionality)
+
 protected: // create from serialization only
 	CModDoc();
 	DECLARE_SERIAL(CModDoc)

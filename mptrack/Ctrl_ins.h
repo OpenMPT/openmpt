@@ -120,7 +120,8 @@ public:
 	VOID UpdateFilterText();
 	LONG* GetSplitPosRef() {return &CMainFrame::glInstrumentWindowHeight;} 	//rewbs.varWindowSize
 
-	
+protected:
+	void CCtrlInstruments::SetInstrumentModified(const bool modified);
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)
