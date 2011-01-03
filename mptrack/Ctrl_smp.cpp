@@ -45,8 +45,9 @@ float Round(const float value, const int digit)
 // Deduce exponent from equation : v = 2^exponent
 int PowerOf2Exponent(const unsigned int v)
 {
-	float v2f = (float)v;
-	return ( (*(int *)&v2f >> 23) & 0xff ) - 127;
+	return (int)_logb((double)v);
+	//float v2f = (float)v;
+	//return ( (*(int *)&v2f >> 23) & 0xff ) - 127;
 }
 // -! TEST#0029
 
@@ -1075,7 +1076,7 @@ void CCtrlSamples::OnSamplePlay()
 {
 	if ((m_pModDoc) && (m_pSndFile))
 	{
-		// Fix (bug report 1366).
+		// Commented out line to fix http://forum.openmpt.org/index.php?topic=1366.0
 		// if ((m_pSndFile->IsPaused()) && (m_pModDoc->IsNotePlaying(0, m_nSample, 0)))
 		if (m_pModDoc->IsNotePlaying(0, m_nSample, 0))
 		{
@@ -1378,9 +1379,8 @@ void CCtrlSamples::OnUpsample()
 		dwEnd = pSmp->nLength;
 	}
 
-	smplsize = (pSmp->uFlags & CHN_16BIT) ? 2 : 1;
-	if (pSmp->uFlags & CHN_STEREO) smplsize *= 2;
-	newsmplsize = (pSmp->uFlags & CHN_STEREO) ? 4 : 2;
+	smplsize = pSmp->GetBytesPerSample();
+	newsmplsize = pSmp->GetNumChannels() * 2;	// new sample is always 16-Bit
 	pOriginal = pSmp->pSample;
 	dwNewLen = pSmp->nLength + (dwEnd-dwStart);
 	pNewSample = NULL;
@@ -1389,7 +1389,7 @@ void CCtrlSamples::OnUpsample()
 	{
 		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 
-		UINT nCh = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
+		const UINT nCh = pSmp->GetNumChannels();
 		for (UINT iCh=0; iCh<nCh; iCh++)
 		{
 			int len = dwEnd-dwStart;
@@ -1526,8 +1526,7 @@ void CCtrlSamples::OnDownsample()
 		dwStart = 0;
 		dwEnd = pSmp->nLength;
 	}
-	smplsize = (pSmp->uFlags & CHN_16BIT) ? 2 : 1;
-	if (pSmp->uFlags & CHN_STEREO) smplsize *= 2;
+	smplsize = pSmp->GetSampleSizeInBytes();
 	pOriginal = pSmp->pSample;
 	dwRemove = (dwEnd-dwStart+1)>>1;
 	dwNewLen = pSmp->nLength - dwRemove;
@@ -1539,7 +1538,7 @@ void CCtrlSamples::OnDownsample()
 
 		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 
-		UINT nCh = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
+		const UINT nCh = pSmp->GetNumChannels();
 		for (UINT iCh=0; iCh<nCh; iCh++)
 		{
 			int len = dwRemove;
@@ -2599,7 +2598,7 @@ void CCtrlSamples::OnLoopStartChanged()
 		if(pSmp->uFlags & CHN_LOOP) 
 		{
 			/* only update sample buffer if the loop is actually enabled
-			  (resets sound without any reason otherwise) - bug report 1874 */
+			  (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
@@ -2620,7 +2619,7 @@ void CCtrlSamples::OnLoopEndChanged()
 		if(pSmp->uFlags & CHN_LOOP)
 		{
 			/* only update sample buffer if the loop is actually enabled
-			  (resets sound without any reason otherwise) - bug report 1874 */
+			  (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);

@@ -777,8 +777,14 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		return;
 	}
 
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
-	note = CLAMP(note, NOTE_MIN, NOTE_MAX);
+	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
+	{
+		note += pChn->nTranspose;
+		note = CLAMP(note, NOTE_MIN, 131);	// why 131? 120+11, how does this make sense?
+	} else
+	{
+		note = CLAMP(note, NOTE_MIN, NOTE_MAX);
+	}
 	pChn->nNote = note;
 	pChn->m_CalculateFreq = true;
 
@@ -3000,6 +3006,7 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 
 	// TRASH IT!!! (Yes, the sample!)
 	pModSample->pSample[pModSample->nLoopStart + pChn->nEFxOffset] = ~pModSample->pSample[pModSample->nLoopStart + pChn->nEFxOffset];
+	//AdjustSampleLoop(pModSample);
 }
 
 

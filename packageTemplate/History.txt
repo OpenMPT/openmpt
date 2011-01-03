@@ -10,22 +10,35 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.01.00 (October 2010, revision 757)
+v1.19.01.00 (January 2011, revision 781)
 ----------------------------------------
 Pattern tab
+   [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
    [Mod] <Jojo> Using the Goto Dialog should now update channel parameters and set the elapsed time. (http://bugs.openmpt.org/view.php?id=28)
+   [Mod] <Jojo> Undo steps have been increased from 100 to 1000.
    [Fix] <Jojo> Cursor paste was possible even when editing was disabled.
+   [Fix] <Jojo> Using Right-Click -> Change Plugin on PC notes did not work for plugin numbers that were higher than the highest instrument number.
    [Fix] <Jojo> When entering chords into the pattern editor, the module was only marked as modified if the base note of the chord was changed.
    [Fix] <Jojo> When jumping to an order which is normally not played, the song variables are now reset (previously, if the main song had f.e. a global volume fade out at the end, this was retained when switching to an unplayed order, effectively muting all sub songs).
+   [Fix] <Jojo> OpenMPT should not crash anymore when applying the Amplify command on a pattern selection that just covers the note / instrument column of the first channel.
    [Reg] <Jojo> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
 
 Pattern tab::Note properties
    [Fix] <Jojo> The meaning of Q0x was displayed wrong for S3M / IT.
+   [Fix] <Jojo> Changing a value didn't create an undo point. (http://bugs.openmpt.org/view.php?id=56)
+
+Pattern tab::Find/replace
+   [New] <Jojo> Added Find / Replace mode: Find in current pattern selection.
+   [Imp] <Jojo> When changing the content of a combobox, the corresponding checkbox is now automatically checked. Likewise, the "Replace By" checkbox is checked if a checkbox or combobox on the "Replace" tab is enabled.
+   [Mod] <Jojo> "Replace All" just creates one undo point now.
 
 Sample tab
+   [New] <Jojo> The new "sample grid" feature can create equally-sized sample selections, so it is f.e. easy to split a sample into four equally-sized samples.
    [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the sample data.
+   [Mod] <Jojo> Undo steps have been increased from 100 to 1000.
    [Fix] <Jojo> When cutting samples with a loop, the loop end point was not always moved correctly if the cut start was in the loop.
+   [Fix] <re>   Changing zoom level should now preserve the view position better.
 
 Instrument tab
    [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the envelopes.
@@ -37,13 +50,13 @@ Mod Conversion
    [Imp] <Jojo> Sample sustain loops are now converted to normal loops if needed and possible.
    [Imp] <Jojo> Bidi loops are disabled when converting to MOD / S3M now.
    [Imp] <Jojo> More warnings are shown, old warning messages were improved.
+   [Imp] <Jojo> Volume command priority when converting from XM to IT / S3M has been changed - Cxx overrides vxx in XM, so this is now taken into account.
    [Fix] <Jojo> Q0y means "no volume change" in S3M / IT, but R0y means "continue volume change" in FT2, and converting from IT / S3M to XM didn't consider this. Q0y is now converted to R8y, and E9y is now converted to Q0y (instead of Q8y).
 
 Playback
-   [New] <Jojo> New mix mode: Compatible. This is used for MOD / S3M / XM / IT by default and has more appropriate mixing levels for those formats (same levels as Schism Tracker) than mix mode RC3. Please use compatible mixing levels when working with legacy formats from now on.
+   [New] <Jojo> New mix mode: Compatible. This is used for MOD / S3M / XM / IT by default and has more appropriate mixing levels for those formats (same levels as Schism Tracker) than mix mode RC3, and it forces soft panning to be *disabled*. Please use compatible mixing levels when working with legacy formats from now on.
    [Imp] <Jojo> Improved the algorithm for finding a free channel for note playback in the editor (does not affect normal module playback).
    [Fix] <Jojo> Pattern jumps to the same row + pattern as the jump command are not ignored anymore. (http://forum.openmpt.org/index.php?topic=1810.0)
-
 
 IT
    [New] <Jojo> Edit history information can now be read from IT files and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information. 
@@ -79,11 +92,14 @@ S3M
    [Mod] <Jojo> Changed some code in the S3M loader that should only affect really broken S3M files which every player handles different anyway (at least my broken version of aa-polym.s3m sounds better now)
    [Fix] <Jojo> Octave 8 was allowed in S3M files while it shouldn't (it wasn't even saved in the file)
    [Fix] <Jojo> Removed the X param (#) effect from the supported effect list.
-   [Fix] <Jojo> Speed and tempo values are now adjusted to what Screamtracker actually expects (speed 1 - 254, tempo 32 - 255) - anything out of this range is ignored by Screamtracker, so it is now also ignored by OpenMPT.
+   [Fix] <Jojo> Speed and tempo values are now adjusted to what Scream Tracker actually expects (speed 1 - 254, tempo 32 - 255) - anything out of this range is ignored by Scream Tracker, so it is now also ignored by OpenMPT.
 
 VST
+   [New] <Jojo> Plugins can now request common file dialogs (file and directory selection).
    [Mod] <Jojo> When automatically inserting a new instrument from the VST editor, the bank and patch values are now not filled in anymore, so it is easier to change to another patch while editing.
-   [Fix] <Jojo> VST: The time signature sent to VST plugins should be correct now.
+   [Mod] <Jojo> Various small improvements to support VST 2.4 plugins better.
+   [Fix] <Jojo> Speaker arrangement is now sent to the plugins upon initialization. This fixes Voxengo SPAN 2 (a VST 2.4 plugin). Does this break other multichannel plugins?
+   [Fix] <Jojo> The time signature sent to VST plugins should be correct now.
 
 Other modules
    [Imp] <Jojo> Garbage characters in sample / instrument / song names should be gone now.. This should f.e. avoid sample names like " ntitled" turning up in modules after deleting sample names.
@@ -101,7 +117,10 @@ Misc
    [Mod] <Jojo> On first run, the default ASIO driver is now chosen instead of DirectSound (if there is one).
    [Mod] <Jojo> The "Original" mix mode now also has a version number (1.16) to reflect what the "original" thing is.
    [Mod] <Jojo> Updated genre list in the MP3 export dialog.
+   [Mod] <Jojo> When using the ACM MP3 codec, 320kbit/s bitrate should now theoretically be available.
+   [Mod] <Jojo> The MMX acceleration label in the Soundcard setup dialog is now updated according to the multimedia extensions that are supported by the CPU (3DNow! / SSE)
    [Fix] <Jojo> Mod Cleanup: Rearrange patterns was broken when using more than one sequence in the MPTM format. (tx Skaven)
+   [Fix] <Jojo> Mod Cleanup: Various sample / instrument rearranging functions broke PC Notes.
    [Fix] <Jojo> The text length was calculated wrong in the message reader, leading to a possible buffer overflow when reading song messages with mixed line endings where CR or LF line endings where expected.
    [Fix] <Jojo> When there was no INI file, the size of the upper pattern view was defaulting to a wrong value.
    [Fix] <Jojo> The ID3v2 "comments" field was not formatted properly when exporting to MP3. 
@@ -122,7 +141,7 @@ Sequence editor
 
 Pattern tab::pattern editing
    [Imp] <Jojo> Just like in MPT 1.16, it is now possible again to interpolate between an effect and "nothing". In that case, the same value as the already existing one is repeated between the two rows.
-   [Fix] <Jojo> When the first column of a pattern selection (larger than one selection field) was the parameter column, PCNote values in this column were not reset properly.
+   [Fix] <Jojo> When the first column of a pattern selection (larger than one selection field) was the parameter column, PC Note values in this column were not reset properly.
    [Fix] <Jojo> Pattern Editor: Transposing notes up/down doesn't allow notes which are actually supported by the current module format (f.e. notes below C-1 in XMs) anymore.
    [Fix] <Jojo> Keyboard shortcut for toggling record state didn't save the change, so it was reset with every new module.
 
@@ -218,12 +237,12 @@ Sequence editor
 
 Pattern tab::pattern editing
    [New] <Jojo> Extended context menu for PC Notes
-   [New] <Jojo> Key shortcut + context menu entry for toggling the plugin editor of the PC note that's under the cursor.
+   [New] <Jojo> Key shortcut + context menu entry for toggling the plugin editor of the PC Note that's under the cursor.
    [Imp] <Jojo> Overflow paste now only uses one undo step.
    [Imp] <Jojo> Instead of simply ignoring note off/cut/fade when working with .MOD files, it is converted to C00.
-   [Fix] <rewbs> Effect visualizer is now aware of PC notes (http://forum.openmpt.org/index.php?topic=3836.0).
+   [Fix] <rewbs> Effect visualizer is now aware of PC Notes (http://forum.openmpt.org/index.php?topic=3836.0).
    [Fix] <Jojo> When using MIDI record or split keyboard settings, volume data was written into the volume column in MOD format.
-   [Fix] <Jojo> When converting PC Notes to MIDI Macros, the instrument index is now also cleaned as well. Noticeable for example when pasting PC notes into an IT module.
+   [Fix] <Jojo> When converting PC Notes to MIDI Macros, the instrument index is now also cleaned as well. Noticeable for example when pasting PC Notes into an IT module.
    [Fix] <Jojo> Now, plugin slot 100 can also be automated using PC Notes.
    [Fix] <Jojo> When pasting pattern data that exactly reached the pattern end with overflow paste enabled, a redundant undo point was created.
    [Fix] <Jojo> Entered (volume) effects are now properly validated (makes a difference f.e. in MOD format where it was previously possible to enter effects like Hxx)
@@ -233,7 +252,7 @@ Pattern tab::pattern editing
 
 Pattern tab::GUI
    [New] <Jojo> When the PT1x mode or the S3M "Amiga" flag are enabled, dodgy notes (i.e lower than C-4 or higher than B-6) are marked red.
-   [Imp] <Jojo> The status bar shows plugin and parameter names for PC notes now as well.
+   [Imp] <Jojo> The status bar shows plugin and parameter names for PC Notes now as well.
    [Imp] <Jojo> Effect vis: Make use of song's own row highlighting variables instead of fixed global ones.
    [Fix] <Jojo> The status bar ("Position x of y") only the showed order length for the first sub tune if sub tunes were separated by an "---" order item.
    [Fix] <Jojo> Changing a channel plugin in MOD/S3M files doesn't mark them as modified anymore.
@@ -421,14 +440,14 @@ Pattern tab::Pattern editing
    [Fix] <Jojo> Pattern c&p: invalid commands are not pasted anymore.
    [Imp] <Jojo> If "record note off" is enabled and Note Off commands are not supported by the current format, try Note Cut and volume commands.
    [Mod] <Jojo> It is impossible to enter something into the volume column in MOD format now.
-   [Mod] <Jojo> When interpolating PC notes, the plugin number and note type won't get overridden if the note type is already PC or PCs.
+   [Mod] <Jojo> When interpolating PC Notes, the plugin number and note type won't get overridden if the note type is already PC or PCs.
    [Fix] <re>   Pattern c&p: Mix paste should behave better with parameter control notes.
    [Fix] <Jojo> Amplify acted VERY weird when it was applied on an instrument that's not assigned to any sample. Should be a bit better now.
    [Fix] <Jojo> Amplify doesn't use volume column in MOD format anymore.
    [Fix] <Jojo> When recording live from the keyboard, SDx shouldn't exceed the song speed anymore.
    [Fix] <Jojo> Got rid of possible redundant undo points.
-   [Fix] <Jojo> PC notes are now deleted properly (last column).
-   [Fix] <Jojo> Copying only the param column of PC notes overwrote the value column when pasting them.
+   [Fix] <Jojo> PC Notes are now deleted properly (last column).
+   [Fix] <Jojo> Copying only the param column of PC Notes overwrote the value column when pasting them.
    [Fix] <Jojo> Entering Note Fade notes didn't work the "old style" way.
 
 Pattern tab::GUI
@@ -721,7 +740,7 @@ Playback (see also format-specific changes below)
    [Fix] <Jojo> Don't ignore value of pattern break commands on last pattern anymore.
 
 MPTM
-   [New] <re>   New experimental parameter controls (PC notes) for controlling plug params.
+   [New] <re>   New experimental parameter controls (PC Notes) for controlling plug params.
    [New] <re>   Can now have multiple sequences in a module (access from orderlist context menu).
    [New] <Jojo> Allow up to 240 envelope points.
    [New] <Jojo> IT "Note Fade" command: This existed in IT's player routines already, but there was no way to actually use it in the editor. Triggering an invalid note would cause a note fade, so this is a new note type.

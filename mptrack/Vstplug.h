@@ -71,7 +71,7 @@ protected:
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
 	UINT m_nSampleRate;
-	BOOL m_bIsVst2;
+	bool m_bIsVst2;
 	SNDMIXPLUGINSTATE m_MixState;
 	UINT m_nInputs, m_nOutputs;
 	VstEvents *m_pEvList;

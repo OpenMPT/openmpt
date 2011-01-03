@@ -802,13 +802,6 @@ BOOL CTrackApp::InitInstance()
 	// Initialize OLE MFC support
 	AfxOleInit();
 	// Standard initialization
-/*
-#ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
-#else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
-#endif
-*/
 
 	// Change the registry key under which our settings are stored.
 	//SetRegistryKey(_T("Olivier Lapicque"));
@@ -1793,12 +1786,12 @@ BOOL CAboutDlg::OnInitDialog()
 
 	const char* const pArrCredit = { 
 		"OpenMPT / ModPlug Tracker|"
-		"Copyright © 2004-2010 Contributors|"
+		"Copyright © 2004-2011 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
 		"Contributors:|"
-		"Ahti Leppänen (2005-2010)|"
-		"Johannes Schultz (2008-2010)|"
+		"Ahti Leppänen (2005-2011)|"
+		"Johannes Schultz (2008-2011)|"
 		"Robin Fernandes (2004-2007)|"
 		"Sergiy Pylypenko (2007)|"
 		"Eric Chavanon (2004-2005)|"
@@ -2708,6 +2701,7 @@ MMRESULT CTrackApp::AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACMF
 				}
 				switch(iFmt & 7)
 				{
+				case 5:	wfx.wfx.nAvgBytesPerSec = 320/8; break;
 				case 4:	wfx.wfx.nAvgBytesPerSec = 64/8; break;
 				case 3:	wfx.wfx.nAvgBytesPerSec = 96/8; break;
 				case 2:	wfx.wfx.nAvgBytesPerSec = 128/8; break;
