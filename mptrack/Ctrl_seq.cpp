@@ -1041,7 +1041,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		if(bPatternExists) break;
 	}
 
-	DWORD greyed = bPatternExists ? 0 : MF_GRAYED;
+	const DWORD greyed = bPatternExists ? 0 : MF_GRAYED;
 
 	CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
@@ -1432,13 +1432,24 @@ void COrderList::QueuePattern(CPoint pt)
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return;
 
+	const PATTERNINDEX nIgnore = pSndFile->Order.GetIgnoreIndex();
+	const PATTERNINDEX nInvalid = pSndFile->Order.GetInvalidPatIndex();
+	const ORDERINDEX nLength = pSndFile->Order.GetLength();
 	ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
 
-	if (nOrder < pSndFile->Order.GetLength())
+	// If this is not a playable order item, find the next valid item.
+	while(nOrder < nLength && (pSndFile->Order[nOrder] == nIgnore || pSndFile->Order[nOrder] == nInvalid))
 	{
-		if (pSndFile->m_nSeqOverride == static_cast<UINT>(nOrder) + 1) {
+		nOrder++;
+	}
+
+	if (nOrder < nLength)
+	{
+		if (pSndFile->m_nSeqOverride == static_cast<UINT>(nOrder) + 1)
+		{
 			pSndFile->m_nSeqOverride = 0;
-		} else {
+		} else
+		{
 			pSndFile->m_nSeqOverride = nOrder + 1;
 		}
 		InvalidateRect(NULL, FALSE);
