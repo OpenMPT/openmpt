@@ -302,13 +302,13 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		SpaceToNullStringFixed<12>(pIns->filename);
 		pIns->nFadeOut = pis->fadeout << 6;
 		pIns->nGlobalVol = 64;
-		for (UINT j=0; j<NOTE_MAX; j++)
+		for (UINT j = 0; j < 120; j++)
 		{
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
 			if (ins < MAX_SAMPLES) pIns->Keyboard[j] = ins;
-			if (note < 128) pIns->NoteMap[j] = note+1;
-			else if (note >= 0xFE) pIns->NoteMap[j] = note;
+			if (note < 120) pIns->NoteMap[j] = note + 1;
+			else pIns->NoteMap[j] = j + 1;
 		}
 		if (pis->flags & 0x01) pIns->VolEnv.dwFlags |= ENV_ENABLED;
 		if (pis->flags & 0x02) pIns->VolEnv.dwFlags |= ENV_LOOP;
@@ -361,8 +361,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
 			if (ins < MAX_SAMPLES) pIns->Keyboard[j] = ins;
-			if (note < 128) pIns->NoteMap[j] = note+1;
-			else if (note >= 0xFE) pIns->NoteMap[j] = note;
+			if (note < 120) pIns->NoteMap[j] = note + 1;
+			else pIns->NoteMap[j] = j + 1;
 		}
 		// Olivier's MPT Instrument Extension
 		if (*((int *)pis->dummy) == 'MPTX')
@@ -1548,7 +1548,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 					smpcount[smp>>3] |= 1 << (smp&7);
 					iti.nos++;
 				}
-				iti.keyboard[i*2] = pIns->NoteMap[i] - 1;
+				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;
 				iti.keyboard[i*2+1] = smp;
 				if (smp > 0xff) bKbdEx = true;
 				keyboardex[i] = (smp>>8);
@@ -2143,7 +2143,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 					smpcount[smp>>3] |= 1 << (smp&7);
 					iti.nos++;
 				}
-				iti.keyboard[i*2] = pIns->NoteMap[i] - 1;
+				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;
 				iti.keyboard[i*2+1] = smp;
 				//if (smp > 0xFF) bKbdEx = true;	// no extended sample map in compat mode
 				keyboardex[i] = (smp>>8);
