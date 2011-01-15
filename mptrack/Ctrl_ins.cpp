@@ -125,7 +125,7 @@ BOOL CNoteMapWnd::SetCurrentNote(UINT nNote)
 //------------------------------------------
 {
 	if (nNote == m_nNote) return TRUE;
-	if (nNote >= NOTE_MAX) return FALSE;
+	if (!NOTE_IS_VALID(nNote + 1)) return FALSE;
 	m_nNote = nNote;
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
@@ -189,14 +189,14 @@ void CNoteMapWnd::OnPaint()
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos]))
 			{
 				UINT n = pIns->NoteMap[nPos];
-				if(n < NOTE_MIN_SPECIAL)
+				if(NOTE_IS_VALID(n))
 				{
 					string temp = pSndFile->GetNoteName(n, m_nInstrument);
 					temp.resize(4);
 					wsprintf(s, "%s", temp.c_str());
 				} else
 				{
-					strcpy(s, szSpecialNoteNames[pIns->NoteMap[n] - NOTE_MIN_SPECIAL]);
+					strcpy(s, "???");
 				}
 			}
 			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
@@ -275,9 +275,11 @@ void CNoteMapWnd::OnLButtonDown(UINT, CPoint pt)
 		CRect rcClient;
 		GetClientRect(&rcClient);
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
-		UINT n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
-		m_nNote = n;
-		InvalidateRect(NULL, FALSE);
+		int n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
+		if(n >= 0)
+		{
+			SetCurrentNote(n);
+		}
 	}
 	SetFocus();
 }
@@ -314,21 +316,21 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample &Map\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap));
 				if (hSubMenu)
 				{
-					BYTE smpused[(MAX_SAMPLES+7)/8];
-					memset(smpused, 0, sizeof(smpused));
+					const SAMPLEINDEX numSamps = pSndFile->GetNumSamples();
+					vector<bool> smpused(numSamps + 1, false);
 					for (UINT i=1; i<NOTE_MAX; i++)
 					{
-						UINT nsmp = pIns->Keyboard[i];
-						if (nsmp < MAX_SAMPLES) smpused[nsmp>>3] |= 1 << (nsmp & 7);
+						SAMPLEINDEX nsmp = pIns->Keyboard[i];
+						if (nsmp <= numSamps) smpused[nsmp] = true;
 					}
-					for (UINT j=1; j<MAX_SAMPLES; j++)
+					for (SAMPLEINDEX j = 1; j <= numSamps; j++)
 					{
-						if (smpused[j>>3] & (1 << (j & 7)))
+						if (smpused[j])
 						{
 							wsprintf(s, "%d: ", j);
 							UINT l = strlen(s);
-							memcpy(s+l, pSndFile->m_szNames[j], MAX_SAMPLENAME);
-							s[l+32] = 0;
+							memcpy(s + l, pSndFile->m_szNames[j], MAX_SAMPLENAME);
+							s[l + MAX_SAMPLENAME] = 0;
 							AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE+j, s);
 						}
 					}
@@ -340,11 +342,11 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 				if(pSndFile->GetType() != MOD_TYPE_XM)
 				{
-					if(pIns->NoteMap[m_nNote] < NOTE_MIN_SPECIAL)
+					if(NOTE_IS_VALID(pIns->NoteMap[m_nNote]))
+					{
 						wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
-					else
-						wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), szSpecialNoteNames[pIns->NoteMap[m_nNote] - NOTE_MIN_SPECIAL]);
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
+						AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
+					}
 					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, "Transpose map &up\t" + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp));
 					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, "Transpose map &down\t" + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown));
 				}
@@ -714,14 +716,15 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 			}
 		}
 		return true;
+	default:
+		return false;
 	}
 	if (bRedraw) 
 	{
 		InvalidateRect(NULL, FALSE);
-		return true;
 	}
 
-	return false;
+	return true;
 }
 
 
@@ -1162,7 +1165,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 		BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		//rewbs.instroVSTi
-		BOOL bITandXM = (((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		BOOL bITandXM = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		bool bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
@@ -1183,7 +1186,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		else
 			m_SpinFadeOut.SetRange(0, 8192);
 
-		// Panning ranges
+		// Panning ranges (0...64 for IT, 0...256 for MPTM)
 		m_SpinPanning.SetRange(0, (m_pModDoc->GetModType() & MOD_TYPE_IT) ? 64 : 256);
 
 		m_NoteMap.EnableWindow(bITandXM);

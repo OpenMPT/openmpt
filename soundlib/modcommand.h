@@ -14,6 +14,7 @@
 #define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
 #define NOTE_MIN_SPECIAL	NOTE_PCS
+#define NOTE_IS_VALID(n)	((n) == NOTE_NONE || ((n) >= NOTE_MIN && (n) <= NOTE_MAX))	// Checks whether a number represents a valid note (a "normal" note or no note, but not something like note off)
 
 
 //==============
