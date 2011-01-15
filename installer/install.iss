@@ -1,12 +1,12 @@
 ; OpenMPT Install script
 ; Written by Johannes Schultz
+; http://openmpt.org/
 ; http://sagamusix.de/
-; http://sagagames.de/
 
 ; ISPP is needed for automated version retrieval.
-; Furthermore, the ISTool IDE with its downloader extension is required for "unmo3-free" packages which don't contain unmo3.dll, but download it from a server.
-; Check install-unmo3-free.iss for details on this matter.
-; To download and install ISPP and ISTool, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
+; Furthermore, either the ISTool IDE or InnoIDE with their downloader extensions are required for "unmo3-free" packages which don't contain unmo3.dll, but download it from a server.
+; Check install-unmo3-free.iss and install-unmo3-free-itd.iss for details on this matter.
+; To download and install ISPP and InnoIDE, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
 
 #define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
