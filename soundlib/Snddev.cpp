@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <vector>
+using std::vector;
 
 #include "snddev.h"
 #include "snddevx.h"
@@ -1298,6 +1300,39 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 	va_end(va);
 	
 	return TRUE;
+}
+
+
+bool CASIODevice::CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result)
+//--------------------------------------------------------------------------------------------
+{
+	const bool wasOpen = (m_pAsioDrv != NULL);
+	if(!wasOpen)
+	{
+		OpenDevice(nDevice);
+		if(m_pAsioDrv == NULL)
+		{
+			return false;
+		}
+	}
+
+	bool foundSomething = false;	// is at least one sample rate supported by the device?
+	result.clear();
+	for(size_t i = 0; i < samplerates.size(); i++)
+	{
+		result.push_back((m_pAsioDrv->canSampleRate((ASIOSampleRate)samplerates[i]) == ASE_OK));
+		if(result.back())
+		{
+			foundSomething = true;
+		}
+	}
+
+	if(!wasOpen)
+	{
+		CloseDevice();
+	}
+
+	return foundSomething;
 }
 
 
