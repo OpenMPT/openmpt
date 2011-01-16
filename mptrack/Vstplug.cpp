@@ -189,6 +189,8 @@ VOID CVstPluginManager::EnumerateDirectXDMOs()
 PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
 //------------------------------------------------------------------------------------------------------------------------------
 {
+	TCHAR szPath[_MAX_PATH];
+
 	if(checkFileExistence && (PathFileExists(pszDllPath) == FALSE))
 	{
 		if(errStr)
@@ -207,8 +209,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	// Look if the plugin info is stored in the PluginCache
 	if (bCache)
 	{
-		CString cacheSection = "PluginCache";
-		CString cacheFile = theApp.GetPluginCacheFileName();
+		const CString cacheSection = "PluginCache";
+		const CString cacheFile = theApp.GetPluginCacheFileName();
 		char fileName[_MAX_PATH];
 		_splitpath(pszDllPath, NULL, NULL, fileName, NULL);
 
@@ -216,8 +218,12 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 
 		if (IDs.GetLength() >= 16)
 		{
-			CString fullPath = CMainFrame::GetPrivateProfileCString(cacheSection, IDs, "", cacheFile);
-			if ((fullPath) && (fullPath[0]) && (!lstrcmpi(fullPath, pszDllPath)))
+			// Get path from cache file
+			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath) - 1, cacheFile);
+			SetNullTerminator(szPath);
+			CMainFrame::RelativePathToAbsolute(szPath);
+
+			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
 			{
 				PVSTPLUGINLIB p = new VSTPLUGINLIB;
 				if (!p) return NULL;
@@ -352,6 +358,15 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				CString IDs, flagsKey;
 				IDs.Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
 				flagsKey.Format("%s.Flags", IDs);			
+
+				_tcsncpy(szPath, pszDllPath, CountOf(szPath) - 1);
+				if(theApp.IsPortableMode())
+				{
+					CMainFrame::AbsolutePathToRelative(szPath);
+				}
+				SetNullTerminator(szPath);
+
+				WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
 				CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
 				CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
 				CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->bIsInstrument, cacheFile);

@@ -3048,7 +3048,7 @@ MMRESULT CTrackApp::AcmStreamConvert(HACMSTREAM has, LPACMSTREAMHEADER pash, DWO
 BOOL CTrackApp::InitializeDXPlugins()
 //-----------------------------------
 {
-	CHAR s[_MAX_PATH], tmp[32];
+	TCHAR s[_MAX_PATH], tmp[32];
 	LONG nPlugins;
 
 	m_pPluginManager = new CVstPluginManager;
@@ -3071,7 +3071,11 @@ BOOL CTrackApp::InitializeDXPlugins()
 		s[0] = 0;
 		wsprintf(tmp, "Plugin%d", iPlug);
 		GetPrivateProfileString("VST Plugins", tmp, "", s, sizeof(s), m_szConfigFileName);
-		if (s[0]) m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
+		if (s[0])
+		{
+			CMainFrame::RelativePathToAbsolute(s);
+			m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
+		}
 	}
 	if(nonFoundPlugs.GetLength() > 0)
 	{
@@ -3085,7 +3089,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 BOOL CTrackApp::UninitializeDXPlugins()
 //-------------------------------------
 {
-	CHAR s[_MAX_PATH], tmp[32];
+	TCHAR s[_MAX_PATH], tmp[32];
 	PVSTPLUGINLIB pPlug;
 	UINT iPlug;
 
@@ -3099,6 +3103,10 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			s[0] = 0;
 			wsprintf(tmp, "Plugin%d", iPlug);
 			strcpy(s, pPlug->szDllPath);
+			if(theApp.IsPortableMode())
+			{
+				CMainFrame::AbsolutePathToRelative(s);
+			}
 			WritePrivateProfileString("VST Plugins", tmp, s, m_szConfigFileName);
 			iPlug++;
 		}
