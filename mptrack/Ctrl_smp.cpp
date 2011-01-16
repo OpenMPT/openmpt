@@ -1526,7 +1526,7 @@ void CCtrlSamples::OnDownsample()
 		dwStart = 0;
 		dwEnd = pSmp->nLength;
 	}
-	smplsize = pSmp->GetSampleSizeInBytes();
+	smplsize = pSmp->GetBytesPerSample();
 	pOriginal = pSmp->pSample;
 	dwRemove = (dwEnd-dwStart+1)>>1;
 	dwNewLen = pSmp->nLength - dwRemove;
@@ -1633,7 +1633,7 @@ void CCtrlSamples::OnDownsample()
 
 
 #define MAX_BUFFER_LENGTH	8192
-#define CLIP_SOUND(v)		v = v < -1.0f ? -1.0f : v > 1.0f ? 1.0f : v
+#define CLIP_SOUND(v)		Limit(v, -1.0f, 1.0f);
 
 void CCtrlSamples::ReadTimeStretchParameters()
 //--------------------------------------------
@@ -2122,7 +2122,8 @@ int CCtrlSamples::PitchShift(float pitch)
 
 			for(UINT j = startoffset ; j < len + finaloffset ; j++){
 				// Just perform a little bit of clipping...
-				float v = outbuf[j]; CLIP_SOUND(v);
+				float v = outbuf[j];
+				CLIP_SOUND(v);
 				// ...before converting back to buffer
 				switch(smpsize){
 					case 2:
@@ -3060,7 +3061,7 @@ SELECTIONPOINTS CCtrlSamples::GetSelectionPoints()
 	return points;
 }
 
-// Set the currently select part of the sample.
+// Set the currently selected part of the sample.
 // To reset the selection, use nStart = nEnd = 0.
 void CCtrlSamples::SetSelectionPoints(UINT nStart, UINT nEnd)
 //-----------------------------------------------------------

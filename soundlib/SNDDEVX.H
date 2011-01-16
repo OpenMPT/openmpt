@@ -131,6 +131,7 @@ public:
 	UINT GetCurrentLatency() { return m_nAsioBufferLen; }
 	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
+	bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);
 
 public:
