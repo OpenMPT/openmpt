@@ -1641,7 +1641,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 #endif
 	pIns = new MODINSTRUMENT;
 	if (!pIns) return FALSE;
-	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	MemsetZero(*pIns);
 	pIns->pTuning = pIns->s_DefaultTuning;
 	if (pSndFile->Instruments[nInstr])
 	{
