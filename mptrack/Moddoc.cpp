@@ -254,12 +254,15 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					if (dwKey < 0x80) nDrumRgn = pEmbeddedBank->GetRegionFromKey(nDlsIns, dwKey);
 					if (pEmbeddedBank->ExtractInstrument(&m_SndFile, nIns, nDlsIns, nDrumRgn))
 					{
+						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 						if ((dwKey >= 24) && (dwKey < 100))
 						{
 							lstrcpyn(pIns->name, szMidiPercussionNames[dwKey-24], sizeof(pIns->name));
 						}
 						bEmbedded = TRUE;
 					}
+					else
+						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 				}
 			}
 			if ((pszMidiMapName) && (pszMidiMapName[0]) && (!bEmbedded))
@@ -293,6 +296,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 						{
 							if (dwKey < 0x80) nDrumRgn = pDLSBank->GetRegionFromKey(nDlsIns, dwKey);
 							pDLSBank->ExtractInstrument(&m_SndFile, nIns, nDlsIns, nDrumRgn);
+							pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 							if ((dwKey >= 24) && (dwKey < 24+61))
 							{
 								lstrcpyn(pIns->name, szMidiPercussionNames[dwKey-24], sizeof(pIns->name));
