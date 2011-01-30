@@ -25,6 +25,7 @@ public:
 		  m_nBufferLength = bufsize; m_nSoundDevice = sd; m_PreAmpNoteShowed = false;}
 
 private:
+	void UpdateSampleRates(int dev);
 	void SetPreAmpSliderPosition();
 
 protected:

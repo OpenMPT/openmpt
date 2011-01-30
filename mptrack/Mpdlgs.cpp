@@ -124,16 +124,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 
 	// Sampling Rate
-	{
-		UINT n = 1;
-		for (UINT i=0; i<NUMMIXRATE; i++)
-		{
-			wsprintf(s, "%u Hz", nMixingRates[i]);
-			m_CbnMixingFreq.AddString(s);
-			if (m_dwRate == nMixingRates[i]) n = i;
-		}
-		m_CbnMixingFreq.SetCurSel(n);
-	}
+	UpdateSampleRates(m_nSoundDevice);
+
 	// Max Mixing Channels
 	{
 		for (UINT n=0; n<8; n++)
@@ -225,7 +217,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 				nDev++;
 			}
 		}
-		GetDlgItem(IDC_CHECK4)->EnableWindow(((m_nSoundDevice>>8)==SNDDEV_DSOUND) ? TRUE : FALSE);
+		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_DSOUND) ? TRUE : FALSE);
 	}
 	// Sample Format
 	{
@@ -311,53 +303,66 @@ void COptionsSoundcard::OnDeviceChanged()
 	{
 		int dev = m_CbnDevice.GetItemData(n);
 		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_DSOUND) ? TRUE : FALSE);
-		
-		CHAR s[128];
-		m_CbnMixingFreq.ResetContent();
-
-		bool knowRates = false;
-		vector<bool> supportedRates;
-		vector<UINT> samplerates;
-		for(size_t i = 0; i < NUMMIXRATE; i++)
-		{
-			samplerates.push_back(nMixingRates[i]);
-		}
-		
-		ISoundDevice *dummy;
-		if(CreateSoundDevice(SNDDEV_GET_TYPE(dev), &dummy))
-		{
-			knowRates = dummy->CanSampleRate(SNDDEV_GET_NUMBER(dev), samplerates, supportedRates);
-			delete dummy;
-		}
-
-		if(knowRates)
-		{
-			// We have a valid list of supported playback rates.
-			int n = 1;
-			for(size_t i = 0; i < NUMMIXRATE; i++)
-			{
-				if(supportedRates[i])
-				{
-					wsprintf(s, "%u Hz", nMixingRates[i]);
-					int pos = m_CbnMixingFreq.AddString(s);
-					if (m_dwRate == nMixingRates[i]) n = pos;
-				}
-			}
-			m_CbnMixingFreq.SetCurSel(n);
-		} else
-		{
-			// Rates supported by the device are not known, show all rates supported by OpenMPT instead.
-			UINT n = 1;
-			for (UINT i=0; i<NUMMIXRATE; i++)
-			{
-				wsprintf(s, "%u Hz", nMixingRates[i]);
-				m_CbnMixingFreq.AddString(s);
-				if (m_dwRate == nMixingRates[i]) n = i;
-			}
-			m_CbnMixingFreq.SetCurSel(n);
-		}
+		UpdateSampleRates(dev);
 		OnSettingsChanged();
 	}
+}
+
+
+// Fill the dropdown box with a list of valid sample rates, depending on the selected sound device.
+void COptionsSoundcard::UpdateSampleRates(int dev)
+//------------------------------------------------
+{
+	CHAR s[16];
+	m_CbnMixingFreq.ResetContent();
+
+	vector<bool> supportedRates;
+	vector<UINT> samplerates;
+	for(size_t i = 0; i < NUMMIXRATE; i++)
+	{
+		samplerates.push_back(nMixingRates[i]);
+	}
+
+	ISoundDevice *dummy = nullptr;
+	bool justCreated = false, knowRates = false;
+	if(CMainFrame::m_nWaveDevice == dev)
+	{
+		// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
+		dummy = CMainFrame::gpSoundDevice;
+	}
+	if(dummy == nullptr)
+	{
+		justCreated = true;
+		CreateSoundDevice(SNDDEV_GET_TYPE(dev), &dummy);
+	}
+
+	if(dummy != nullptr)
+	{
+		// Now we can query the supported sample rates.
+		knowRates = dummy->CanSampleRate(SNDDEV_GET_NUMBER(dev), samplerates, supportedRates);
+		if(justCreated)
+		{
+			delete dummy;
+		}
+	}
+
+	if(!knowRates)
+	{
+		// We have no valid list of supported playback rates! Assume all rates supported by OpenMPT are possible...
+		supportedRates.assign(samplerates.size(), true);
+	}
+	int n = 1;
+	for(size_t i = 0; i < NUMMIXRATE; i++)
+	{
+		if(supportedRates[i])
+		{
+			wsprintf(s, "%u Hz", nMixingRates[i]);
+			int pos = m_CbnMixingFreq.AddString(s);
+			m_CbnMixingFreq.SetItemData(pos, nMixingRates[i]);
+			if(m_dwRate == nMixingRates[i]) n = pos;
+		}
+	}
+	m_CbnMixingFreq.SetCurSel(n);
 }
 
 
@@ -379,9 +384,7 @@ void COptionsSoundcard::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwSoundSetup |= SOUNDSETUP_SECONDARY;
 	// Mixing Freq
 	{
-		UINT n = m_CbnMixingFreq.GetCurSel();
-		if (n >= NUMMIXRATE) n = 3;
-		m_dwRate = nMixingRates[n];
+		m_dwRate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
 	}
 	// Quality
 	{
