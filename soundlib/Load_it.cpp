@@ -718,7 +718,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// the first parapointer, we assume that it's actually no history data.
 	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02))
 	{
-		size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
+		const size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
 		dwMemPos += 2;
 
 		if (nflt * 8 <= dwMemLength - dwMemPos && dwMemPos + nflt * 8 <= minptr)
@@ -766,6 +766,17 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos -= 2;
 		}
 	}
+	// Another non-conforming application is unmo3 < v2.4.0.1, which doesn't set the special bit
+	// at all, but still writes the two edit history length bytes (zeroes)...
+	else if(dwMemPos + 2 < dwMemLength && pifh->highlight_major == 0 && pifh->highlight_minor == 0 && pifh->cmwt == 0x0214 && pifh->cwtv == 0x0214 && pifh->reserved == 0 && (pifh->special & (0x02|0x04)) == 0)
+	{
+		const size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
+		if(nflt == 0)
+		{
+			dwMemPos += 2;
+		}
+	}
+
 	// Reading MIDI Output & Macros
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
@@ -866,9 +877,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				continue;
 			}
 
-			UINT ch = b & IT_bitmask_patternChanField_c;   // 0x7f We have some data grab a byte keeping only 127 bits
+			UINT ch = b & IT_bitmask_patternChanField_c;   // 0x7f We have some data grab a byte keeping only 7 bits
 			if (ch) 
-				ch = (ch - 1);// & IT_bitmask_patternChanMask_c;   // 0x3f mask of the byte again, keeping only 64 bits
+				ch = (ch - 1);// & IT_bitmask_patternChanMask_c;   // 0x3f mask of the byte again, keeping only 6 bits
 
 			if (b & IT_bitmask_patternChanEnabled_c)            // 0x80 check if the upper bit is enabled.
 			{
@@ -2776,12 +2787,12 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 	const BYTE *p = (const BYTE *)pData;
 	UINT nPos = 0;
 
-	while (nPos+8 < nLen)	// so plugin data chunks must be multiples of 8 bytes?
+	while (nPos+8 < nLen)	// read 4 magic bytes + size
 	{
 		DWORD nPluginSize;
 		UINT nPlugin;
 
-		nPluginSize = *(DWORD *)(p+nPos+4);		// why +4?
+		nPluginSize = *(DWORD *)(p+nPos+4);
 		if (nPluginSize > nLen-nPos-8) break;;
 		if ((*(DWORD *)(p+nPos)) == 'XFHC')
 		{
