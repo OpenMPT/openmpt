@@ -15,14 +15,14 @@
 #include "install.iss"
 
 [_ISToolDownload]
-Source: http://openmpt.com/download/unmo3.dll; DestDir: {tmp}; DestName: openmpt-unmo3.dll.tmp; Tasks: downloadmo3
+Source: http://openmpt.org/files/unmo3/2.4.0.1/unmo3.dll; DestDir: {tmp}; DestName: openmpt-unmo3.dll.tmp; Tasks: downloadmo3
 [Code]
 // Verify checksum of downloaded file, and if it is OK, copy it to the app directory.
 procedure VerifyUNMO3Checksum();
 begin
     if(IsTaskSelected('downloadmo3') And FileExists(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'))) then
     begin
-	    if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '2e17f7bb6d19ce326851333b918070c5357cacd1') then
+	    if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '393be7e0f50c62d142386a16d6855ca771025554') then
     	begin
     	   MsgBox('Warning: unmo3.dll has been downloaded, but its checksum is wrong! This means that either the downloaded file is corrupted or that a newer version of unmo3.dll is available. The file has thus not been installed. Please obtain unmo3.dll from http://openmpt.com/ and verify its checksum.', mbCriticalError, MB_OK)
     	end else
