@@ -1070,6 +1070,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 	if(!destructor)
 	{
 		pFileSel->nbReturnPath = 0;
+		pFileSel->reserved = 0;
 
 		if(pFileSel->command != kVstDirectorySelect)
 		{
@@ -1130,24 +1131,32 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			} else
 			{
 				// Single path
+
+				// VOPM doesn't initialize required information properly (it doesn't memset the struct to 0)...
+				if(!memcmp(&(effect->uniqueID), "MPOV", 4))
+				{
+					pFileSel->sizeReturnPath = _MAX_PATH;
+				}
+
 				if(pFileSel->returnPath == nullptr || pFileSel->sizeReturnPath == 0)
 				{
 					
 					// Provide some memory for the return path.
-					pFileSel->sizeReturnPath = files.first_file.length();
-					pFileSel->returnPath = new char[pFileSel->sizeReturnPath + 1];
+					pFileSel->sizeReturnPath = files.first_file.length() + 1;
+					pFileSel->returnPath = new char[pFileSel->sizeReturnPath];
 					if(pFileSel->returnPath == nullptr)
 					{
 						return 0;
 					}
-					pFileSel->returnPath[pFileSel->sizeReturnPath] = '\0';
+					pFileSel->returnPath[pFileSel->sizeReturnPath - 1] = '\0';
 					pFileSel->reserved = 1;
 				} else
 				{
 					pFileSel->reserved = 0;
 				}
-				strncpy(pFileSel->returnPath, files.first_file.c_str(), pFileSel->sizeReturnPath);
+				strncpy(pFileSel->returnPath, files.first_file.c_str(), pFileSel->sizeReturnPath - 1);
 				pFileSel->nbReturnPath = 1;
+				pFileSel->returnMultiplePaths = nullptr;
 			}
 			return 1;
 
@@ -1179,25 +1188,25 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
 					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
-					pFileSel->sizeReturnPath = strlen(szBuffer);
-					pFileSel->returnPath[pFileSel->sizeReturnPath] = '\0';
+					pFileSel->sizeReturnPath = strlen(szBuffer) + 1;
+					pFileSel->returnPath[pFileSel->sizeReturnPath - 1] = '\0';
 				}
 				if(pFileSel->returnPath == nullptr || pFileSel->sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					pFileSel->sizeReturnPath = strlen(szBuffer);
-					pFileSel->returnPath = new char[pFileSel->sizeReturnPath + 1];
+					pFileSel->sizeReturnPath = strlen(szBuffer) + 1;
+					pFileSel->returnPath = new char[pFileSel->sizeReturnPath];
 					if(pFileSel->returnPath == nullptr)
 					{
 						return 0;
 					}
-					pFileSel->returnPath[pFileSel->sizeReturnPath] = '\0';
+					pFileSel->returnPath[pFileSel->sizeReturnPath - 1] = '\0';
 					pFileSel->reserved = 1;
 				} else
 				{
 					pFileSel->reserved = 0;
 				}
-				strncpy(pFileSel->returnPath, szBuffer, pFileSel->sizeReturnPath);
+				strncpy(pFileSel->returnPath, szBuffer, pFileSel->sizeReturnPath - 1);
 				pFileSel->nbReturnPath = 1;
 				return 1;
 			} else
@@ -2009,8 +2018,8 @@ long CVstPlugin::GetNumPrograms()
 }
 
 //rewbs.VSTcompliance: changed from BOOL to long
-long CVstPlugin::GetNumParameters()
-//---------------------------------
+PlugParamIndex CVstPlugin::GetNumParameters()
+//-------------------------------------------
 {
 	if ((m_pEffect) && (m_pEffect->numParams > 0))
 	{
@@ -2084,7 +2093,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
     
 	bool success;
 	//Collect required data
-	long numParams = GetNumParameters();
+	PlugParamIndex numParams = GetNumParameters();
 	long ID = GetUID();
 	long plugVersion = GetVersion();
 	float *params = new float[numParams]; 
@@ -2115,7 +2124,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
 }
 
 bool CVstPlugin::LoadProgram(CString fileName)
-//------------------------------------
+//--------------------------------------------
 {
 	if (!(m_pEffect))
 		return false;

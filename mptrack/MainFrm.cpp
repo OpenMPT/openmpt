@@ -187,7 +187,7 @@ DWORD CMainFrame::m_nSrcMode = SRCMODE_LINEAR;
 DWORD CMainFrame::m_nBitsPerSample = 16;
 DWORD CMainFrame::m_nPreAmp = 128;
 DWORD CMainFrame::gbLoopSong = TRUE;
-LONG CMainFrame::m_nWaveDevice = (SNDDEV_DSOUND << SNDDEV_DEVICE_SHIFT);
+LONG CMainFrame::m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND);
 LONG CMainFrame::m_nMidiDevice = 0;
 DWORD CMainFrame::m_nBufferLength = 75;
 LONG CMainFrame::gnLVuMeter = 0;
@@ -713,10 +713,10 @@ VOID CMainFrame::Initialize()
 	// Check for valid sound device
 	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(m_nWaveDevice), SNDDEV_GET_NUMBER(m_nWaveDevice), nullptr, 0))
 	{
-		m_nWaveDevice = (SNDDEV_DSOUND << SNDDEV_DEVICE_SHIFT);
+		m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND);
 		if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(m_nWaveDevice), SNDDEV_GET_NUMBER(m_nWaveDevice), nullptr, 0))
 		{
-			m_nWaveDevice = (SNDDEV_WAVEOUT << SNDDEV_DEVICE_SHIFT);
+			m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);
 		}
 	}
 	// Default directory location
@@ -986,7 +986,8 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
 
 	CHAR s[16];
-	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {
+	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)
+	{
 		wsprintf(s, "Color%02d", ncol);
 		WritePrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}

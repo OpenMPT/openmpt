@@ -106,7 +106,7 @@ public:
 	PVSTPLUGINLIB GetPluginFactory() const { return m_pFactory; }
 	BOOL HasEditor();
 	long GetNumPrograms();
-	long GetNumParameters();
+	PlugParamIndex GetNumParameters();
 	long GetCurrentProgram();
 	long GetNumProgramCategories();	//rewbs.VSTpresets
 	long GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
@@ -198,13 +198,13 @@ private:
 	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
 #else // case: NO_VST
 public:
-	long GetNumParameters() {return 0;}
+	PlugParamIndex GetNumParameters() {return 0;}
 	VOID GetParamName(UINT, LPSTR, UINT) {}
 	void ToggleEditor() {}
 	BOOL HasEditor() {return FALSE;}
 	UINT GetNumCommands() {return 0;}
 	VOID GetPluginType(LPSTR) {}
-	long GetNumPrograms() {return 0;}
+	PlugParamIndex GetNumPrograms() {return 0;}
 	long GetProgramNameIndexed(long, long, char*) {return 0;}
 	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
 	VOID GetParamLabel(UINT, LPSTR) {}

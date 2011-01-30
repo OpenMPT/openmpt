@@ -1050,6 +1050,8 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 }
 
 
+// Check if a given note of an instrument or sample is playing.
+// If note == 0, just check if an instrument or sample is playing.
 BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 //----------------------------------------------------------
 {
@@ -2299,9 +2301,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool
 				case sfx_drywet: chanSpec.Append("Plug wet/dry ratio"); break;
 				case sfx_cc: {
 					int nCC = MacroToMidiCC(macroText);
-					CString temp; 
-					temp.Format("MidiCC %d", nCC);
-					chanSpec.Append(temp); 
+					chanSpec.AppendFormat("MidiCC %d", nCC); 
 					break;
 				}
 				case sfx_plug: {
@@ -2318,9 +2318,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool
 					}
 					if (paramName[0] == 0)
 						strcpy(paramName, "N/A - no plug");
-					CString temp; 
-					temp.Format("param %d (%s)", nParam, paramName);
-					chanSpec.Append(temp); 
+					chanSpec.AppendFormat("param %d (%s)", nParam, paramName); 
 					break; }
 				case sfx_custom: 
 				default: chanSpec.Append("Custom");
