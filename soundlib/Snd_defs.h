@@ -349,7 +349,6 @@ enum enmEnvelopeTypes
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
 #define SNDMIX_SMARTRAMP		0x200000	// Don't apply ramping to sample beginning, but only when it ends
-#define SNDMIX_ITBIDIMODE		0x400000	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for explanation)
 
 
 #define MAX_GLOBAL_VOLUME 256

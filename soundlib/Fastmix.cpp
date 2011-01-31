@@ -1479,8 +1479,8 @@ static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples)
 			pChn->nPos = pChn->nLength - nDeltaHi - (nDeltaLo>>16);
 			pChn->nPosLo = nDeltaLo & 0xffff;
 			// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-			// TODO: How can we add IT compatibility here without slowing down the mixing routines?
-			if ((pChn->nPos <= pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLength-1;
+			// The bidi mode flag is stored in a static CSoundFile variable. Dirty!
+			if ((pChn->nPos <= pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLength - (CSoundFile::m_bITBidiMode ? 2 : 1);
 		} else
 		{
 			if (nInc < 0) // This is a bug
