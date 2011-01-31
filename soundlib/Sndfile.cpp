@@ -438,6 +438,7 @@ CTuning* MODINSTRUMENT::s_DefaultTuning = 0;
 CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+bool CSoundFile::m_bITBidiMode = false;
 
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 CSoundFile::CSoundFile() :
@@ -3031,6 +3032,7 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
 	SetupMODPanning(); // Setup LRRL panning scheme if needed
+	SetupITBidiMode(); // Setup IT bidi mode
 
 	m_ModFlags = m_ModFlags & GetModFlagMask(oldtype, newType);
 
@@ -3086,4 +3088,12 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 		else
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
 	}
+}
+
+
+// Set or unset the IT bidi loop mode (see Fastmix.cpp for an explanation). The variable has to be static...
+void CSoundFile::SetupITBidiMode()
+//--------------------------------
+{
+	CSoundFile::m_bITBidiMode = IsCompatibleMode(TRK_IMPULSETRACKER);
 }

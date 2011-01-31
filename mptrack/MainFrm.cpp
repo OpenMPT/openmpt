@@ -1885,6 +1885,9 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	const bool bPaused = pSndFile->IsPaused();
 	const bool bPatLoop = (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP) ? true : false;
 	pSndFile->ResetChannels();
+	// Select correct bidi loop mode when playing a module.
+	pSndFile->SetupITBidiMode();
+
 	if ((m_pSndFile) || (m_dwStatus & MODSTATUS_PLAYING)) PauseMod();
 	if (((m_pSndFile) && (pSndFile != m_pSndFile)) || (!m_dwElapsedTime)) CSoundFile::ResetAGC();
 	m_pSndFile = pSndFile;

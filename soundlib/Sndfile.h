@@ -107,7 +107,7 @@ struct MODINSTRUMENT
 	INSTRUMENTENVELOPE PanEnv;		// Panning envelope data
 	INSTRUMENTENVELOPE PitchEnv;	// Pitch / filter envelope data
 
-	BYTE NoteMap[128];	// Note mapping, f.e. C-5 => D-5
+	BYTE NoteMap[128];	// Note mapping, f.e. C-5 => D-5.
 	WORD Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
 
 	BYTE nNNA;			// New note action
@@ -376,6 +376,7 @@ struct SNDMIXPLUGININFO
 	CHAR szLibraryName[64];	// original DLL name
 }; // Size should be 128 							
 typedef SNDMIXPLUGININFO* PSNDMIXPLUGININFO;
+STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to files, so the size must be correct!
 
 struct SNDMIXPLUGIN
 {
@@ -452,6 +453,7 @@ struct MODMIDICFG
 	CHAR szMidiZXXExt[128*32];
 };
 typedef MODMIDICFG* LPMODMIDICFG;
+STATIC_ASSERT(sizeof(MODMIDICFG) == 4896); // this is directly written to files, so the size must be correct!
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
@@ -581,11 +583,12 @@ public:	// Static Members
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 	static uint8 s_DefaultPlugVolumeHandling;
+	static bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
 
 
 public:	// for Editing
-	CModDoc* m_pModDoc;
+	CModDoc* m_pModDoc;		// Can be a null pointer f.e. when previewing samples from the treeview.
 	MODTYPE m_nType;
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
@@ -710,6 +713,8 @@ public:
 	BOOL GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
 	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
+
+	void SetupITBidiMode();
 
 	bool InitChannel(CHANNELINDEX nChn);
 	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);

@@ -479,6 +479,8 @@ void CModTypeDlg::OnOK()
 	m_pSndFile->m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
 	m_pSndFile->m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
 
+	m_pSndFile->SetupITBidiMode();
+
 	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->Update();
 	CDialog::OnOK();
@@ -1433,13 +1435,15 @@ void CPageEditNote::UpdateDialog()
 		combo->SetItemData(combo->AddString("No note"), 0);
 		AppendNotesToControlEx(*combo, pSndFile, m_nInstr);
 
-		if (m_nNote <= NOTE_MAX)
+		if (NOTE_IS_VALID(m_nNote))
 		{
+			// Normal note / no note
 			const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
 			combo->SetCurSel(m_nNote - (noteStart - 1));
 		}
 		else
 		{
+			// Special notes
 			for(int i = combo->GetCount() - 1; i >= 0; --i)
 			{
 				if(combo->GetItemData(i) == m_nNote)
@@ -3191,7 +3195,6 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	
 	for(size_t n = 0; n < num; n++)
 	{
-		CString temp;
 		FileHistory *hist = &(m_pModDoc->GetFileHistory()->at(n));
 		totalTime += hist->openTime;
 
@@ -3200,9 +3203,8 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		_tcsftime(szDate, sizeof(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
 		// Time + stuff
 		uint32 duration = (uint32)((double)(hist->openTime) / HISTORY_TIMER_PRECISION);
-		temp.Format(_T("Loaded %s, open in the editor for %luh %02lum %02lus\r\n"),
+		s.AppendFormat(_T("Loaded %s, open in the editor for %luh %02lum %02lus\r\n"),
 			szDate, duration / 3600, (duration / 60) % 60, duration % 60);
-		s += temp;
 	}
 	if(num == 0)
 	{
