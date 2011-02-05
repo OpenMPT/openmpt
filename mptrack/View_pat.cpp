@@ -3242,8 +3242,8 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
 			TempEnterNote(nNote, true, nVol);
 			
-			// continue playing as soon as MIDI notes are being received (request 2813)
-			if(pSndFile->IsPaused() && CMainFrame::m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN)
+			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
+			if(pSndFile->IsPaused() && (CMainFrame::m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 				pModDoc->OnPatternPlayNoLoop();
 				
 		break;
@@ -4025,7 +4025,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	const UINT nTick = pSndFile->m_nTickCount;
 	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
-	const bool isSplit = (note <= pModDoc->GetSplitKeyboardSettings()->splitNote);
+	const bool isSplit = (pModDoc->GetSplitKeyboardSettings()->IsSplitActive()) && (note <= pModDoc->GetSplitKeyboardSettings()->splitNote);
 	UINT ins = 0;
 	if (pModDoc)
 	{
@@ -4050,7 +4050,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	//Enter note off in pattern?
-	if ((note < 1) || (note > NOTE_MAX))
+	if ((note < NOTE_MIN) || (note > NOTE_MAX))
 		return;
 	if ((m_dwCursor & 7) > 1 && (bChordMode || !fromMidi))
 		return;
@@ -4066,7 +4066,9 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
 
-	if  (!(CMainFrame::m_dwPatternSetup&PATTERN_KBDNOTEOFF || fromMidi)) {
+	if (!((CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi))
+	{
+		// We don't want to write the note-off into the pattern if this feature is disabled and we're not recording from MIDI.
 		return;
 	}
 
