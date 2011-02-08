@@ -5502,6 +5502,7 @@ void CViewPattern::OnRenameChannel()
 	if(dlg.DoModal() != IDOK || dlg.bChanged == false) return;
 
 	strcpy(pSndFile->ChnSettings[nChn].szName, dlg.m_sName);
+	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 }
 
