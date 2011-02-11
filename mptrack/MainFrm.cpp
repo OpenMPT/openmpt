@@ -261,6 +261,8 @@ COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] =
 		GetSysColor(COLOR_BTNSHADOW), GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT),
 		// Blend colour
 		GetSysColor(COLOR_BTNFACE),
+		// Dodgy commands
+		RGB(0xC0, 0x00, 0x00),
 	};
 
 // Directory Arrays (Default + Last)

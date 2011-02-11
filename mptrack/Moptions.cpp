@@ -28,6 +28,7 @@ static MPTCOLORDEF gColorDefs[] =
 	{"Play Cursor",		0,	MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, "Background:", "Foreground:", NULL},
 	{"Note Highlight",	0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
 	{"Effect Highlight",0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
+	{"Invalid Commands",0,	MODCOLOR_DODGY_COMMANDS, 0, 0, "Invalid Note:", NULL, NULL},
 	{"Channel Separator",0,	MODCOLOR_SEPSHADOW, MODCOLOR_SEPFACE, MODCOLOR_SEPHILITE, "Shadow:", "Face:", "Highlight:"},
 	{"Next/Prev Pattern",0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend color:", NULL, NULL},
 	{"Sample Editor",	1,	MODCOLOR_SAMPLE, 0, 0, "Sample Data:", NULL, NULL},
@@ -397,6 +398,7 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
 	CustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
 	CustomColors[MODCOLOR_BLENDCOLOR] = GetSysColor(COLOR_BTNFACE);
+	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
 	OnPreviewChanged();
 }
 
@@ -429,6 +431,7 @@ void COptionsColors::OnPresetFT2()
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x40, 0x80);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x99, 0x99, 0xCC);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x2E, 0x2E, 0x5A);
+	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x40, 0x40);
 	OnPreviewChanged();
 }
 
@@ -461,6 +464,7 @@ void COptionsColors::OnPresetIT()
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x68, 0x40);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x94, 0xBC, 0x94);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x00, 0x40, 0x00);
+	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xFF, 0x80, 0x80);
 	OnPreviewChanged();
 }
 
@@ -492,6 +496,7 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD6, 0xD0, 0xC6);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xEC, 0xE8, 0xE1);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0xE1, 0xDB, 0xD0);
+	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
 	OnPreviewChanged();
 }
 
@@ -700,8 +705,8 @@ void COptionsGeneral::BrowseForFolder(UINT nID)
 	CHAR szPath[_MAX_PATH] = "";
 	BROWSEINFO bi;
 
-	GetDlgItemText(nID, szPath, sizeof(szPath));
-	memset(&bi, 0, sizeof(bi));
+	GetDlgItemText(nID, szPath, CountOf(szPath));
+	MemsetZero(bi);
 	bi.hwndOwner = m_hWnd;
 	bi.lpszTitle = "Select a default folder...";
 	bi.pszDisplayName = szPath;
