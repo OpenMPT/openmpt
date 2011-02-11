@@ -5453,7 +5453,7 @@ void CViewPattern::OnShowTimeAtRow()
 	ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 	if(pSndFile->Order[currentOrder] == m_nPattern)
 	{
-		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, m_nRow, true);
+		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, m_nRow, false);
 		if(t < 0)
 			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence", currentOrder, m_nRow);
 		else

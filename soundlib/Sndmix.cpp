@@ -657,7 +657,7 @@ BOOL CSoundFile::ProcessRow()
 				if ((m_nPattern == Order.GetInvalidPatIndex()) || (m_nCurrentPattern >= Order.size()))
 				{
 
-					if (!m_nRepeatCount) return FALSE;
+					//if (!m_nRepeatCount) return FALSE;
 
 					ORDERINDEX nRestartPosOverride = m_nRestartPos;
 					if(!m_nRestartPos && m_nCurrentPattern <= Order.size() && m_nCurrentPattern > 0)
@@ -734,9 +734,10 @@ BOOL CSoundFile::ProcessRow()
 					}
 					//Check for end of song or bad pattern
 					if (m_nCurrentPattern >= Order.size()
-						||
-						(Order[m_nCurrentPattern] >= Patterns.Size()) 
-						|| (!Patterns[Order[m_nCurrentPattern]]) ) 	{
+						|| (Order[m_nCurrentPattern] >= Patterns.Size()) 
+						|| (!Patterns[Order[m_nCurrentPattern]]) )
+					{
+						InitializeVisitedRows(true);
 						return FALSE;
 					}
 
@@ -761,9 +762,42 @@ BOOL CSoundFile::ProcessRow()
 		}
 
 		// Weird stuff?
-		if ((m_nPattern >= Patterns.Size()) || (!Patterns[m_nPattern])) return FALSE;
+		if (!Patterns.IsValidPat(m_nPattern)) return FALSE;
 		// Should never happen
 		if (m_nRow >= Patterns[m_nPattern].GetNumRows()) m_nRow = 0;
+
+		// Has this row been visited before? We might want to stop playback now.
+		// But: We will not mark the row as modified if the song is not in loop mode but
+		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
+		// flag is set - because in that case, the module would stop after the first pattern loop...
+		const bool overrideLoopCheck = (m_nRepeatCount != -1) && (m_dwSongFlags & SONG_PATTERNLOOP);
+		if(!overrideLoopCheck && IsRowVisited(m_nCurrentPattern, m_nRow, true))
+		{
+			InitializeVisitedRows(true);
+			if(m_nRepeatCount)
+			{
+				// repeat count == -1 means repeat infinitely.
+				if (m_nRepeatCount > 0)
+				{
+					m_nRepeatCount--;
+				}
+				// We shouldn't forget that we actually just visited this row (InitializeVisitedRows cleared it).
+				SetRowVisited(m_nCurrentPattern, m_nRow);
+			} else
+			{
+#ifdef MODPLUG_TRACKER
+				// Let's check again if this really is the end of the song.
+				// The visited rows vector might have been screwed up while editing...
+				GetLengthType t = GetLength(false);
+				if(t.endOrder == m_nCurrentPattern && t.endRow == m_nRow)
+#endif // MODPLUG_TRACKER
+				{
+					// This is really the song's end!
+					return FALSE;
+				}
+			}
+		}
+
 		m_nNextRow = m_nRow + 1;
 		if (m_nNextRow >= Patterns[m_nPattern].GetNumRows())
 		{
@@ -1611,7 +1645,6 @@ BOOL CSoundFile::ReadNote()
 						if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
 							pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
 					}
-					const int vibpos = pChn->nAutoVibPos & 0xFF;
 					pChn->nAutoVibPos += pSmp->nVibRate;
 					int vdelta;
 					switch(pSmp->nVibType)
