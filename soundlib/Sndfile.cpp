@@ -755,6 +755,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nNextRow = 0;
 	m_nRow = 0;
 
+	InitializeVisitedRows(true);
+
 	switch(m_nTempoMode)
 	{
 		case tempo_mode_alternative: 
@@ -1212,7 +1214,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 
 //rewbs.VSTCompliance
 void CSoundFile::SuspendPlugins()	
-//------------------------------
+//-------------------------------
 {
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
@@ -1269,7 +1271,7 @@ void CSoundFile::StopAllVsti()
 
 
 void CSoundFile::RecalculateGainForAllPlugs()
-//------------------------------------------
+//-------------------------------------------
 {
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
@@ -1337,7 +1339,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 }
 
 ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX nPat, UINT startFromOrder, bool direction)
-//-------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 {
 	ORDERINDEX foundAtOrder = ORDERINDEX_INVALID;
 	ORDERINDEX candidateOrder = 0;
@@ -1626,7 +1628,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 }
 
 bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
-//-----------------------------------------------------
+//----------------------------------------------------
 {
     //Implementation of move channel using ReArrangeChannels(...). So this function
     //only creates correct newOrder-vector used in the ReArrangeChannels(...).
@@ -1734,7 +1736,7 @@ bool CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *re
 #ifndef MODPLUG_NO_FILESAVE
 
 UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen)
-//-----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 {
 	UINT len = 0, bufcount;
 	char buffer[4096];
@@ -1949,7 +1951,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 //	6 = unsigned 16-bit PCM data
 
 UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
-//-----------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------
 {
 	if ((!pSmp) || (pSmp->nLength < 2) || (!lpMemFile)) return 0;
 
@@ -2429,7 +2431,7 @@ UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWOR
 
 
 void CSoundFile::AdjustSampleLoop(MODSAMPLE *pSmp)
-//----------------------------------------------------
+//------------------------------------------------
 {
 	if ((!pSmp->pSample) || (!pSmp->nLength)) return;
 	if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
@@ -2578,7 +2580,7 @@ int CSoundFile::FrequencyToTranspose(DWORD freq)
 
 
 void CSoundFile::FrequencyToTranspose(MODSAMPLE *psmp)
-//--------------------------------------------------------
+//----------------------------------------------------
 {
 	int f2t = FrequencyToTranspose(psmp->nC5Speed);
 	int transp = f2t >> 7;
@@ -2814,14 +2816,14 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
 	if (/*!Ins[from].pSample ||*/ Samples[to].pSample) return true;
 
-	MODSAMPLE *pinsf = &Samples[from];
-	MODSAMPLE *pinst = &Samples[to];
+	MODSAMPLE *pFrom = &Samples[from];
+	MODSAMPLE *pTo = &Samples[to];
 
-	memcpy(pinst, pinsf, sizeof(MODSAMPLE));
+	memcpy(pTo, pFrom, sizeof(MODSAMPLE));
 
-	pinsf->pSample = nullptr;
-	pinsf->nLength = 0;
-	pinsf->uFlags &= ~(CHN_16BIT);
+	pFrom->pSample = nullptr;
+	pFrom->nLength = 0;
+	pFrom->uFlags &= ~(CHN_16BIT);
 
 	return true;
 }
@@ -2847,7 +2849,7 @@ void CSoundFile::BuildDefaultInstrument()
 {
 // m_defaultInstrument is currently only used to get default values for extented properties. 
 // In the future we can make better use of this.
-	memset(&m_defaultInstrument, 0, sizeof(MODINSTRUMENT));
+	MemsetZero(m_defaultInstrument);
 	m_defaultInstrument.nResampling = SRCMODE_DEFAULT;
 	m_defaultInstrument.nFilterMode = FLTMODE_UNCHANGED;
 	m_defaultInstrument.nPPC = 5*12;
@@ -2889,7 +2891,7 @@ void SimpleMessageBox(const char* message, const char* title)
 }
 
 bool CSoundFile::LoadStaticTunings()
-//-----------------------------------
+//----------------------------------
 {
 	if(s_pTuningsSharedLocal || s_pTuningsSharedBuiltIn) return true;
 	//For now not allowing to reload tunings(one should be careful when reloading them
@@ -2941,8 +2943,8 @@ bool CSoundFile::LoadStaticTunings()
 
 
 
-void CSoundFile::SetDefaultInstrumentValues(MODINSTRUMENT *pIns) 
-//-----------------------------------------------------------------
+void CSoundFile::SetDefaultInstrumentValues(MODINSTRUMENT *pIns)
+//--------------------------------------------------------------
 {
 	pIns->nResampling = m_defaultInstrument.nResampling;
 	pIns->nFilterMode = m_defaultInstrument.nFilterMode;
@@ -2957,7 +2959,7 @@ void CSoundFile::SetDefaultInstrumentValues(MODINSTRUMENT *pIns)
 
 
 long CSoundFile::GetSampleOffset() 
-//-------------------------------
+//--------------------------------
 {
 	//TODO: This is where we could inform patterns of the exact song position when playback starts.
 	//order: m_nNextPattern
@@ -2967,7 +2969,7 @@ long CSoundFile::GetSampleOffset()
 }
 
 string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
-//----------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 {
 	if((inst >= MAX_INSTRUMENTS && inst != INSTRUMENTINDEX_INVALID) || note < 1 || note > NOTE_MAX) return "BUG";
 
@@ -3054,12 +3056,11 @@ bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
 }
 
 
-double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool resetVars)
-//--------------------------------------------------------------------------------
+double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars)
+//---------------------------------------------------------------------------------
 {
-	bool targetReached = false;
-	const double t = GetLength(targetReached, !resetVars, ord, row);
-	if(targetReached) return t;
+	const GetLengthType t = GetLength(updateVars, ord, row);
+	if(t.targetReached) return t.duration;
 	else return -1; //Given position not found from play sequence.
 }
 

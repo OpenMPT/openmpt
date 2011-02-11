@@ -73,23 +73,24 @@ void CSoundFile::GenerateSamplePosMap() {
 }
 */
 
-double CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
-//------------------------------------------------------------------------------
-{
-	bool dummy = false;
-	double result = GetLength(dummy, bAdjust, endOrder, endRow);
-	return result;
-}
-
 
 // Get mod length in various cases. Parameters:
-// &targetReached: Will be set to true if the specified order/row combination has been reached while going through the module.
-// bAdjust: If enabled, the mod parameters (such as global volume, speed, tempo, etc...) will be memorized (if the target has been reached) when leaving the function (i.e. they won't be reset to the previous values)
-// endOrder: Order which should be reached (ORDERINDEX_INVALID means whole song)
-// endRow: Row in that order that should be reached
-double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
-//---------------------------------------------------------------------------------------------------
+// [in]  bAdjust: If enabled, the mod parameters (such as global volume, speed, tempo, etc...) will be memorized (if the target has been reached) when leaving the function (i.e. they won't be reset to the previous values)
+// [in]  endOrder: Order which should be reached (ORDERINDEX_INVALID means whole song)
+// [in]  endRow: Row in that order that should be reached
+// [out] duration: total time in seconds
+// [out] targetReached: true if the specified order/row combination has been reached while going through the module.
+// [out] endOrder: last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
+// [out] endRow: last parsed row (dito)
+GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
+//-------------------------------------------------------------------------------------
 {
+	GetLengthType retval;
+	retval.duration = 0.0;
+	retval.targetReached = false;
+	retval.endOrder = ORDERINDEX_INVALID;
+	retval.endRow = ROWINDEX_INVALID;
+
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 //	UINT dwElapsedTime=0, nRow=0, nCurrentPattern=0, nNextPattern=0, nPattern=Order[0];
@@ -166,7 +167,7 @@ double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOr
 		//Check whether target reached.
 		if(nCurrentPattern == endOrder && nRow == endRow)
 		{
-			targetReached = true;
+			retval.targetReached = true;
 			break;
 		}
 
@@ -420,10 +421,17 @@ double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOr
 		}
 	}
 
+	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
+	{
+		retval.endOrder = nCurrentPattern;
+		retval.endRow = nRow;
+	}
+	retval.duration = dElapsedTime / 1000.0;
+
 	// Store final variables
 	if (bAdjust)
 	{
-		if (targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
+		if (retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 		{
 			// Target found, or there is no target (i.e. play whole song)...
 			m_nGlobalVolume = nGlbVol;
@@ -438,7 +446,7 @@ double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOr
 				if (vols[n] != 0xFF)
 				{
 					if (vols[n] > 64) vols[n] = 64;
-					Chn[n].nVolume = vols[n] << 2;
+					Chn[n].nVolume = vols[n] * 4;
 				}
 			}
 		} else
@@ -449,10 +457,10 @@ double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOr
 			m_nGlobalVolume = m_nDefaultGlobalVolume;
 		}
 		// When adjusting the playback status, we will also want to update the visited rows vector according to the current position.
-		m_bVisitedRows = visitedRows;
+		m_VisitedRows = visitedRows;
 	}
 
-	return dElapsedTime / 1000.0;
+	return retval;
 
 }
 
@@ -1194,7 +1202,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			
 			//rewbs: Copy mute and FX status from master chan.
 			//I'd like to copy other flags too, but this would change playback behaviour.
-			p->dwFlags |= (pChn->dwFlags & CHN_MUTE) | (pChn->dwFlags & CHN_NOFX);
+			p->dwFlags |= (pChn->dwFlags & (CHN_MUTE|CHN_NOFX));
 
 			p->nMasterChn = nChn+1;
 			p->nCommand = 0;
@@ -1241,7 +1249,8 @@ BOOL CSoundFile::ProcessEffects()
 //-------------------------------
 {
 	MODCHANNEL *pChn = Chn;
-	int nBreakRow = -1, nPosJump = -1, nPatLoopRow = -1;
+	ROWINDEX nBreakRow = ROWINDEX_INVALID, nPatLoopRow = ROWINDEX_INVALID;
+	ORDERINDEX nPosJump = ORDERINDEX_INVALID;
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
@@ -2088,45 +2097,28 @@ BOOL CSoundFile::ProcessEffects()
 	if(m_dwSongFlags & SONG_FIRSTTICK)
 	{
 		// Pattern Loop
-		if (nPatLoopRow >= 0)
+		if (nPatLoopRow != ROWINDEX_INVALID)
 		{
 			m_nNextPattern = m_nCurrentPattern;
 			m_nNextRow = nPatLoopRow;
 			if (m_nPatternDelay) m_nNextRow++;
+			// As long as the pattern loop is running, mark the looped rows as not visited yet
+			for(ROWINDEX nRow = nPatLoopRow; nRow <= m_nRow; nRow++)
+			{
+				SetRowVisited(m_nCurrentPattern, nRow, false);
+			}
 		} else
 		// Pattern Break / Position Jump only if no loop running
-		if ((nBreakRow >= 0) || (nPosJump >= 0))
+		if ((nBreakRow != ROWINDEX_INVALID) || (nPosJump != ORDERINDEX_INVALID))
 		{
-			bool bNoLoop = false;
-			if (nPosJump < 0) nPosJump = m_nCurrentPattern+1;
-			if (nBreakRow < 0) nBreakRow = 0;
+			if (nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentPattern + 1;
+			if (nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
+			m_dwSongFlags |= SONG_BREAKTOROW;
 
-			if(nBreakRow >= 0) m_dwSongFlags |= SONG_BREAKTOROW;
-			// ModPlug Tracker & ModPlugin allow backward jumps
-		#ifndef FASTSOUNDLIB
-			if ((nPosJump < (int)m_nCurrentPattern)
-			 || ((nPosJump == (int)m_nCurrentPattern) && (nBreakRow <= (int)m_nRow)))
+			if (nPosJump >= Order.size()) 
 			{
-				if (!IsValidBackwardJump(m_nCurrentPattern, m_nRow, nPosJump, nBreakRow))
-				{
-					if (m_nRepeatCount)
-					{
-						if (m_nRepeatCount > 0) m_nRepeatCount--;
-					} else
-					{
-					#ifdef MODPLUG_TRACKER
-						if (gdwSoundSetup & SNDMIX_NOBACKWARDJUMPS)
-					#endif
-						// Backward jump disabled
-						bNoLoop = true;
-					}
-				}
-			}
-		#endif	// FASTSOUNDLIB
-			//rewbs.fix 
-			//if (((!bNoLoop) && (nPosJump < MAX_ORDERS))
-			if (nPosJump>=Order.size()) 
 				nPosJump = 0;
+			}
 
 			// This checks whether we're jumping to the same row we're already on.
 			// Sounds pretty stupid and pointless to me. And noone else does this, either.
@@ -2145,6 +2137,7 @@ BOOL CSoundFile::ProcessEffects()
 				m_bPatternTransitionOccurred = true;
 			}
 		} //Ends condition (nBreakRow >= 0) || (nPosJump >= 0)
+		//SetRowVisited(m_nCurrentPattern, m_nRow);
 	}
 	return TRUE;
 }
@@ -3864,6 +3857,7 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 }
 
 
+// This is how backward jumps should not be tested. :) (now unused)
 BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const
 //----------------------------------------------------------------------------------------------------------
 {
@@ -4236,7 +4230,7 @@ void CSoundFile::InitializeVisitedRows(const bool bReset, VisitedRowsType *pRowV
 {
 	if(pRowVector == nullptr)
 	{
-		pRowVector = &m_bVisitedRows;
+		pRowVector = &m_VisitedRows;
 	}
 	pRowVector->resize(Order.GetLengthTailTrimmed());
 
@@ -4268,7 +4262,7 @@ void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const
 
 	if(pRowVector == nullptr)
 	{
-		pRowVector = &m_bVisitedRows;
+		pRowVector = &m_VisitedRows;
 	}
 
 	// The module might have been edited in the meantime - so we have to extend this a bit.
@@ -4296,7 +4290,7 @@ bool CSoundFile::IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const 
 
 	if(pRowVector == nullptr)
 	{
-		pRowVector = &m_bVisitedRows;
+		pRowVector = &m_VisitedRows;
 	}
 
 	// The row slot for this row has not been assigned yet - Just return false, as this means that the program has not played the row yet.

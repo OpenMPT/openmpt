@@ -303,24 +303,26 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 			if ((bIsPlaying) && (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP))
 			{
 				BEGIN_CRITICAL();
+				// update channel parameters and play time
+				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
+
 				pSndFile->m_nPattern = n;
 				pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = m_nScrollPos;
 				pMainFrm->ResetNotificationBuffer(); //rewbs.toCheck
 				pSndFile->m_nNextRow = 0;
 				END_CRITICAL();
-			} else
-			if (m_pParent->GetFollowSong())
+			} else if (m_pParent->GetFollowSong())
 			{
 				BEGIN_CRITICAL();
 				DWORD dwPaused = pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP|SONG_PATTERNLOOP);
+
+				//if (!(dwPaused & SONG_PATTERNLOOP))	// why?
+				// update channel parameters and play time
+				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
+
 				pSndFile->m_nCurrentPattern = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
-				//if (!(dwPaused & SONG_PATTERNLOOP))	// why?
-				{
-					// update channel parameters and play time
-					m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
-				}
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
 				END_CRITICAL();
 			}

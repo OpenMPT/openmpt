@@ -1923,6 +1923,7 @@ void CModDoc::OnPlayerPlayFromStart()
 		//m_SndFile.m_dwSongFlags &= ~SONG_STEP;
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
+		m_SndFile.InitializeVisitedRows(true);
 		pMainFrm->ResetElapsedTime();
 		BEGIN_CRITICAL();
 		m_SndFile.ResumePlugins();
@@ -3692,7 +3693,7 @@ void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 	if(pMainFrm == NULL)
 		return;
 
-	const double dPatternPlaytime = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, false);
+	const double dPatternPlaytime = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
 	pMainFrm->SetElapsedTime((DWORD) (max(0, dPatternPlaytime) * 1000));
 }
 

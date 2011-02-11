@@ -690,6 +690,8 @@ void CDoWaveConvert::OnButton1()
 		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
 		if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
 	}
+	m_pSndFile->InitializeVisitedRows(true);
+
 	if (l < max) max = l;
 
 	if (progress != NULL)
@@ -1048,6 +1050,7 @@ void CDoAcmConvert::OnButton1()
 	CSoundFile::InitPlayer(TRUE);
 	CSoundFile::gdwSoundSetup |= SNDMIX_DIRECTTODISK;
 	if ((!m_dwFileLimit) && (!m_dwSongLimit)) CSoundFile::gdwSoundSetup |= SNDMIX_NOBACKWARDJUMPS;
+	m_pSndFile->InitializeVisitedRows(true);
 	// Setting up file limits and progress range
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 512000)) m_dwFileLimit = 512000;
 	m_dwFileLimit <<= 10;
@@ -1138,6 +1141,7 @@ void CDoAcmConvert::OnButton1()
 	CSoundFile::gdwSoundSetup &= ~(SNDMIX_DIRECTTODISK|SNDMIX_NOBACKWARDJUMPS);
 	m_pSndFile->SetRepeatCount(oldrepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
+	m_pSndFile->InitializeVisitedRows(true);
 	CMainFrame::UpdateAudioParameters(TRUE);
 	// Success
 	if (bSaveWave)

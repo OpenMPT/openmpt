@@ -487,6 +487,16 @@ typedef vector<bool> VisitedRowsBaseType;
 typedef vector<VisitedRowsBaseType> VisitedRowsType;
 
 
+// Return values for GetLength()
+struct GetLengthType
+{
+	double duration;		// total time in seconds
+	bool targetReached;		// true if the specified order/row combination has been reached while going through the module
+	ORDERINDEX endOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
+	ROWINDEX endRow;		// last parsed row (dito)
+};
+
+
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
 const BYTE MSF_COMPATIBLE_PLAY		= 0;		//IT/MPT/XM
@@ -508,8 +518,8 @@ public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
 	
 	// Returns value in seconds. If given position won't be played at all, returns -1.
-	// If resetVars is true, the state of various playback variables will be retained.
-	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool resetVars);
+	// If updateVars is true, the state of various playback variables will be updated according to the playback position.
+	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars);
 
 	uint16 GetModFlags() const {return m_ModFlags;}
 	void SetModFlags(const uint16 v) {m_ModFlags = v;}
@@ -566,7 +576,7 @@ private: //Misc data
 	const CModSpecifications* m_pModSpecs;
 
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-	VisitedRowsType m_bVisitedRows;
+	VisitedRowsType m_VisitedRows;
 
 
 
@@ -693,15 +703,13 @@ public:
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
     
-	double GetLength(bool bAdjust, ORDERINDEX ord = ORDERINDEX_MAX, ROWINDEX row = ROWINDEX_MAX);
-private:
 	//Get modlength in various cases: total length, length to 
 	//specific order&row etc. Return value is in seconds.
-	double GetLength(bool& targetReached, bool bAdjust, ORDERINDEX ord, ROWINDEX row);
+	GetLengthType GetLength(bool bAdjust, ORDERINDEX ord = ORDERINDEX_INVALID, ROWINDEX row = ROWINDEX_INVALID);
 
 public:
 	//Returns song length in seconds.
-	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(false) + 1.0 : GetLength(false) + 0.5); }
+	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(false).duration + 1.0 : GetLength(false).duration + 0.5); }
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
@@ -901,6 +909,7 @@ private:
 	BOOL IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const;
 	void UpdateTimeSignature();
 
+	UINT GetNumTicksOnCurrentRow() { return m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay; };
 public:
 	// Write pattern effect functions
 	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, bool bAllowNextRow = false, bool bRetry = true);
