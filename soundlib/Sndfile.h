@@ -574,10 +574,10 @@ private: //'Controllers'
 private: //Misc data
 	uint16 m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
+	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 	VisitedRowsType m_VisitedRows;
-
 
 
 public:	// Static Members
@@ -593,8 +593,6 @@ public:	// Static Members
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 	static uint8 s_DefaultPlugVolumeHandling;
-	static bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
-
 
 
 public:	// for Editing
