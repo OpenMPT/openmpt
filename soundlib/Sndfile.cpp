@@ -438,7 +438,6 @@ CTuning* MODINSTRUMENT::s_DefaultTuning = 0;
 CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
-bool CSoundFile::m_bITBidiMode = false;
 
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 CSoundFile::CSoundFile() :
@@ -473,6 +472,7 @@ CSoundFile::CSoundFile() :
 	m_nMaxSample = 0;
 
 	m_ModFlags = 0;
+	m_bITBidiMode = false;
 
 	m_pModDoc = NULL;
 	m_dwLastSavedWithVersion=0;
@@ -3096,5 +3096,5 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 void CSoundFile::SetupITBidiMode()
 //--------------------------------
 {
-	CSoundFile::m_bITBidiMode = IsCompatibleMode(TRK_IMPULSETRACKER);
+	m_bITBidiMode = IsCompatibleMode(TRK_IMPULSETRACKER);
 }

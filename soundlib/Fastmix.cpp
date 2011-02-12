@@ -1425,8 +1425,8 @@ const LPMIXINTERFACE gpMMXFunctionTable[5*16] =     //rewbs.resamplerConf: incre
 
 /////////////////////////////////////////////////////////////////////////
 
-static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples)
-//---------------------------------------------------------------------
+static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples, bool bITBidiMode)
+//---------------------------------------------------------------------------------------
 {
 	LONG nLoopStart = (pChn->dwFlags & CHN_LOOP) ? pChn->nLoopStart : 0;
 	LONG nInc = pChn->nInc;
@@ -1479,8 +1479,7 @@ static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples)
 			pChn->nPos = pChn->nLength - nDeltaHi - (nDeltaLo>>16);
 			pChn->nPosLo = nDeltaLo & 0xffff;
 			// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-			// The bidi mode flag is stored in a static CSoundFile variable. Dirty!
-			if ((pChn->nPos <= pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLength - (CSoundFile::m_bITBidiMode ? 2 : 1);
+			if ((pChn->nPos <= pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLength - (bITBidiMode ? 2 : 1);
 		} else
 		{
 			if (nInc < 0) // This is a bug
@@ -1663,7 +1662,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		{
 			if ((LONG)nrampsamples > pChannel->nRampLength) nrampsamples = pChannel->nRampLength;
 		}
-		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples)) <= 0)
+		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples, m_bITBidiMode)) <= 0)
 		{
 			// Stopping the channel
 			pChannel->pCurrentSample = NULL;
