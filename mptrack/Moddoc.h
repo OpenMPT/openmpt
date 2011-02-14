@@ -340,6 +340,9 @@ public:
 	// [in] bIncludeIndex: True to include instrument index in front of the instrument name, false otherwise.
 	CString GetPatternViewInstrumentName(UINT nInstr, bool bEmptyInsteadOfNoName = false, bool bIncludeIndex = true) const;
 
+	// Check if a given channel contains data.
+	bool IsChannelUnused(CHANNELINDEX nChn) const;
+
 // protected members
 protected:
 	CSize m_szOldPatternScrollbarsPos;
@@ -347,7 +350,7 @@ protected:
 	BOOL InitializeMod();
 	void* GetChildFrame(); //rewbs.customKeys
 
-	void CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS);
+	void CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -197,7 +197,7 @@ struct ConvertInstrumentsToSamplesInPatterns
 		{
 			MODCOMMAND::INSTR instr = m.instr, newinstr = 0;
 			MODCOMMAND::NOTE note = m.note, newnote = note;
-			if((note) && (note <= NOTE_MAX))
+			if((note >= NOTE_MIN) && (note <= NOTE_MAX))
 				note--;
 			else
 				note = NOTE_MIDDLEC - 1;
@@ -1231,33 +1231,48 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 }
 
 
-void CModDoc::CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount)
-//-------------------------------------------------------------------------------------
+// Check which channels contain note data. maxRemoveCount specified how many empty channels are reported at max.
+void CModDoc::CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount) const
+//-----------------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
 	const int nChannels = m_SndFile.GetNumChannels();
 	for(int iRst = nChannels - 1; iRst >= 0; iRst--)
 	{
-		mask[iRst] = true;
-		for (PATTERNINDEX ipat = 0; ipat < m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns.IsValidPat(ipat))
+		mask[iRst] = IsChannelUnused(iRst);
+		if(mask[iRst])
 		{
-			MODCOMMAND *p = m_SndFile.Patterns[ipat] + iRst;
-			UINT len = m_SndFile.Patterns[ipat].GetNumRows();
-			for (UINT idata = 0; idata < len; idata++, p += m_SndFile.m_nChannels)
-			{
-				if (!p->IsEmpty())
-				{
-					mask[iRst] = false;
-					break;
-				}
-			}
-			if (!mask[iRst]) break;
-		}
-		if (mask[iRst])
-		{
-			if ((--maxRemoveCount) == 0) break;
+			// Found enough empty channels yet?
+			if((--maxRemoveCount) == 0) break;
 		}
 	}
+}
+
+
+// Check if a given channel contains note data.
+bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
+//----------------------------------------------------
+{
+	const CHANNELINDEX nChannels = m_SndFile.GetNumChannels();
+	if(nChn >= nChannels)
+	{
+		return true;
+	}
+	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
+	{
+		if(m_SndFile.Patterns.IsValidPat(nPat))
+		{
+			const MODCOMMAND *p = m_SndFile.Patterns[nPat] + nChn;
+			for(ROWINDEX nRow = m_SndFile.Patterns[nPat].GetNumRows(); nRow > 0; nRow--, p += nChannels)
+			{
+				if(!p->IsEmpty())
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 
