@@ -1609,12 +1609,13 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		}
 
 		// Render song (or current channel, or current sample/instrument)
+		m_SndFile.InitializeVisitedRows(true);
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
 		if (wsdlg.m_bSelectPlay)
 		{
 			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-			m_SndFile.GetLength(true, wsdlg.m_nMinOrder, 0);
+			m_SndFile.GetLength(true, wsdlg.m_nMinOrder, 0);	// adjust playback variables / visited rows vector
 			m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 		}
@@ -2393,7 +2394,7 @@ UINT CModDoc::GetEffectFromIndex(UINT ndx)
 }
 
 UINT CModDoc::GetEffectMaskFromIndex(UINT ndx)
-//-------------------------------------------------------
+//--------------------------------------------
 {
 	if (ndx >= MAX_FXINFO) {
 		return 0;
