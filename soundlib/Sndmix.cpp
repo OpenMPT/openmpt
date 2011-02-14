@@ -773,7 +773,6 @@ BOOL CSoundFile::ProcessRow()
 		const bool overrideLoopCheck = (m_nRepeatCount != -1) && (m_dwSongFlags & SONG_PATTERNLOOP);
 		if(!overrideLoopCheck && IsRowVisited(m_nCurrentPattern, m_nRow, true))
 		{
-			InitializeVisitedRows(true);
 			if(m_nRepeatCount)
 			{
 				// repeat count == -1 means repeat infinitely.
@@ -781,7 +780,8 @@ BOOL CSoundFile::ProcessRow()
 				{
 					m_nRepeatCount--;
 				}
-				// We shouldn't forget that we actually just visited this row (InitializeVisitedRows cleared it).
+				// Forget all but the current row.
+				InitializeVisitedRows(true);
 				SetRowVisited(m_nCurrentPattern, m_nRow);
 			} else
 			{
@@ -793,7 +793,12 @@ BOOL CSoundFile::ProcessRow()
 #endif // MODPLUG_TRACKER
 				{
 					// This is really the song's end!
+					InitializeVisitedRows(true);
 					return FALSE;
+				} else
+				{
+					// Ok, this is really dirty, but we have to update the visited rows vector...
+					GetLength(true, m_nCurrentPattern, m_nRow);
 				}
 			}
 		}

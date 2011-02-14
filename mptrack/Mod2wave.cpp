@@ -690,7 +690,6 @@ void CDoWaveConvert::OnButton1()
 		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
 		if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
 	}
-	m_pSndFile->InitializeVisitedRows(true);
 
 	if (l < max) max = l;
 
