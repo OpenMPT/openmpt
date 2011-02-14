@@ -2583,7 +2583,7 @@ void CViewPattern::OnRemoveChannel()
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile;
-	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+	if (pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return;
 
 	if(pSndFile->m_nChannels <= pSndFile->GetModSpecifications().channelsMin)
 	{
@@ -2592,9 +2592,11 @@ void CViewPattern::OnRemoveChannel()
 	}
 
 	CHANNELINDEX nChn = GetChanFromCursor(m_nMenuParam);
+	const bool isEmpty = pModDoc->IsChannelUnused(nChn);
+
 	CString str;
-	str.Format("Remove channel %d?\nNote: Affects all patterns and no undo", nChn+1);
-	if(CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	str.Format("Remove channel %d? This channel still contains note data!\nNote: Operation affects all patterns and has no undo", nChn + 1);
+	if(isEmpty || CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
 		bool chnMask[MAX_BASECHANNELS];
 		for(CHANNELINDEX i = 0; i < MAX_BASECHANNELS; i++) {chnMask[i] = false;}
