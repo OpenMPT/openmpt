@@ -210,6 +210,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			psmp->nLength = LittleEndian(*((LPDWORD)(lpStream+dwMemPos+25)));
 			psmp->nLoopStart = LittleEndian(*((LPDWORD)(lpStream+dwMemPos+29)));
 			psmp->nLoopEnd = psmp->nLoopStart + LittleEndian(*((LPDWORD)(lpStream+dwMemPos+33)));
+			if (psmp->nLoopEnd <= 2) psmp->nLoopEnd = 0;
 			if ((psmp->nLoopEnd > psmp->nLoopStart) && (psmp->nLoopEnd <= psmp->nLength))
 			{
 				psmp->uFlags = CHN_LOOP;

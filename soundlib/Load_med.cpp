@@ -621,6 +621,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		if (pSmp->nVolume > 256) pSmp->nVolume = 256;
 		pSmp->RelativeTone = -12 * pmsh->sample[iSHdr].strans;
 		pSmp->nPan = 128;
+		if (pSmp->nLoopEnd <= 2) pSmp->nLoopEnd = 0;
 		if (pSmp->nLoopEnd) pSmp->uFlags |= CHN_LOOP;
 	}
 	// Common Flags
