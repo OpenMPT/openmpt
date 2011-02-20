@@ -35,6 +35,7 @@ enum {
 	INSLIST_SAMPLES,
 	INSLIST_ENVELOPES,
 	INSLIST_FILENAME,
+	INSLIST_PLUGIN,
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	INSLIST_PATH,
@@ -68,6 +69,7 @@ LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
 	{"Samples", 64},
 	{"Envelopes", 128},
 	{"File Name", 128},
+	{"Plugin", 128},
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	{"Path", 128},
@@ -396,6 +398,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						{
 							memcpy(s, pIns->filename, sizeof(pIns->filename));
 							s[sizeof(pIns->filename)] = 0;
+						}
+						break;
+					case INSLIST_PLUGIN:
+						if (pIns != nullptr && pIns->nMixPlug > 0 && pSndFile->m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
+						{
+							wsprintf(s, "FX%02d: %s", pIns->nMixPlug, pSndFile->m_MixPlugins[pIns->nMixPlug - 1].Info.szLibraryName);
 						}
 						break;
 // -> CODE#0023

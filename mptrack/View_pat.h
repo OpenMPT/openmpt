@@ -201,7 +201,7 @@ public:
 	void TempEnterIns(int val);
 	void TempEnterOctave(int val);
 	void TempEnterVol(int v);
-	void TempEnterFX(int v);
+	void TempEnterFX(int c, int v = -1);
 	void TempEnterFXparam(int v);
 	void SetSpacing(int n);
 	void OnClearField(int, bool, bool=false);

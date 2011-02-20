@@ -10,8 +10,8 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.01.00 (January 2011, revision 791)
-----------------------------------------
+v1.19.01.00 (February 2011, revision 802)
+-----------------------------------------
 Pattern tab
    [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
@@ -23,7 +23,9 @@ Pattern tab
    [Fix] <Jojo> When jumping to an order which is normally not played, the song variables are now reset (previously, if the main song had f.e. a global volume fade out at the end, this was retained when switching to an unplayed order, effectively muting all sub songs).
    [Fix] <Jojo> OpenMPT should not crash anymore when applying the Amplify command on a pattern selection that just covers the note / instrument column of the first channel.
    [Fix] <Jojo> Queueing a "---" or "+++" item now automatically moves the queue "cursor" to the next available pattern. Previously, queueing a "---" pattern restarted the song.
+   [Fix] <Jojo> Changing a channel name from the pattern editor didn't set the document as modified (http://bugs.openmpt.org/view.php?id=65)
    [Fix] <Jojo> When restarting a pattern, the timer was not reset properly.
+   [Fix] <Jojo> Entering a note-off event in the MOD format created an unnecessary undo event.
    [Reg] <Jojo> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
 
 Pattern tab::Note properties
@@ -34,6 +36,10 @@ Pattern tab::Find/replace
    [New] <Jojo> Added Find / Replace mode: Find in current pattern selection.
    [Imp] <Jojo> When changing the content of a combobox, the corresponding checkbox is now automatically checked. Likewise, the "Replace By" checkbox is checked if a checkbox or combobox on the "Replace" tab is enabled.
    [Mod] <Jojo> "Replace All" just creates one undo point now.
+
+Pattern tab::GUI
+   [Imp] <Jojo> The dodgy note colour is now also customisable.
+   [Mod] <Jojo> When removing a channel (via context menu) that contains no data in any pattern, no warning is shown anymore.
 
 Sample tab
    [New] <Jojo> The new "sample grid" feature can create equally-sized sample selections, so it is f.e. easy to split a sample into four equally-sized samples.
@@ -61,6 +67,7 @@ Mod Conversion
 Playback
    [New] <Jojo> New mix mode: Compatible. This is used for MOD / S3M / XM / IT by default and has more appropriate mixing levels for those formats (same levels as Schism Tracker) than mix mode RC3, and it forces soft panning to be *disabled*. Please use compatible mixing levels when working with legacy formats from now on.
    [Imp] <Jojo> Improved the algorithm for finding a free channel for note playback in the editor (does not affect normal module playback).
+   [Mod] <Jojo> A new mechanism is used to determine the end of playback. This introduces some great changes in the code. One advantage of the new mechanism is that backwards playing patterns can now be exported to WAV properly (hehe). The new code might not stop playback properly if "loop song" is disabled and the user jumped around in the module - let's see how that works...
    [Fix] <Jojo> Pattern jumps to the same row + pattern as the jump command are not ignored anymore. (http://forum.openmpt.org/index.php?topic=1810.0)
 
 IT
@@ -68,6 +75,7 @@ IT
    [Imp] <Jojo> IT files made with Modplug Tracker 1.00a5 are now also detected as such.
    [Mod] <Jojo> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
    [Mod] <Jojo> IT Loader: MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
+   [Fix] <Jojo> In compatible mode, bidi loops are now treated like in IT's software mixer.
    [Fix] <Jojo> Sample autovibrato is now hopefully a bit closer to Impulse Tracker in compatible mode...
    [Fix] <Jojo> The envelope handling was altered slightly to work more like in Schism Tracker. This fixes a combination of Envelope Carry + Portamento as it can be found in "electric bunny" by Alpha C.
    [Fix] <Jojo> Various fixes to playback of multi-sample instruments. "Ultima Ratio" by Nebularia and "Shuttle Departure" by Sphenx sound better now.
@@ -113,6 +121,7 @@ Other modules
    [Mod] <Jojo> Improved portamento import precision for DBM and ULT loaders (patch from Schism Tracker)
    [Mod] <Jojo> Added a version check to the ITP loader (why was this not there in the first place?)
    [Fix] <Jojo> As MTM files were converted to MOD automatically when being loaded, channel panning was lost. Now they're loaded as S3M instead.
+   [Fix] <Jojo> Short loops in AMF / MED files are now ignored (http://bugs.openmpt.org/view.php?id=70) - probably caused by bad MOD conversions, at least in the AMF example?
    [Reg] <Jojo> Disabled the Velvet Studio loader for now, since it either crashes on almost all AMS files or at least imports them completely wrong.
 
 Misc
@@ -121,16 +130,17 @@ Misc
    [Imp] <Jojo> New keyboard shortcuts: Panic, View Edit History, Set Invalid / Ignore (--- / +++) Pattern (in the orderlist)
    [Imp] <Jojo> Some improvements were made to the Registry / INI reading: If there were no Registry settings because MPT 1.16 was previously not installed, the INI file is now also read as it might contain some lines created by the installer.
    [Imp] <Jojo> Sound Setup: For ASIO devices, only supported sampling rates are now shown.
+   [Imp] <Jojo> The instrument list on the comments tab also shows assigned plugins now.
    [Mod] <Jojo> Changes to keymap file handling: The active keymap is now always saved to Keybindings.mkb (in either %APPDATA%\OpenMPT or the executable's directory). Any other keymaps are now only overwritten when using the "Save keys as" function.
    [Mod] <Jojo> On first run, the default ASIO driver is now chosen instead of DirectSound (if there is one).
    [Mod] <Jojo> The "Original" mix mode now also has a version number (1.16) to reflect what the "original" thing is.
    [Mod] <Jojo> Updated genre list in the MP3 export dialog.
-   [Mod] <Jojo> When using the ACM MP3 codec, 320kbit/s bitrate should now theoretically be available.
+   [Mod] <Jojo> When using the ACM MP3 codec, 320kbit/s bitrate should now be available.
    [Mod] <Jojo> The MMX acceleration label in the Soundcard setup dialog is now updated according to the multimedia extensions that are supported by the CPU (3DNow! / SSE)
    [Mod] <Jojo> Updated unmo3.dll to version 2.4.0.1
    [Fix] <Jojo> Mod Cleanup: Rearrange patterns was broken when using more than one sequence in the MPTM format. (tx Skaven)
    [Fix] <Jojo> Mod Cleanup: Various sample / instrument rearranging functions broke PC Notes.
-   [Fix] <Jojo> The text length was calculated wrong in the message reader, leading to a possible buffer overflow when reading song messages with mixed line endings where CR or LF line endings where expected.
+   [Fix] <Jojo> The text length was calculated wrong in the message reader, leading to a possible buffer overflow when reading song messages with mixed line endings where CR or LF line endings were expected.
    [Fix] <Jojo> When there was no INI file, the size of the upper pattern view was defaulting to a wrong value.
    [Fix] <Jojo> The ID3v2 "comments" field was not formatted properly when exporting to MP3. 
    [Fix] <Jojo> unmo3.dll and uxtheme.dll (for theming the general tab) are now loaded "safely", to avoid the currently spreading DLL exploits.
