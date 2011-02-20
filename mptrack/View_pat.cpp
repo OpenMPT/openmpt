@@ -3913,8 +3913,8 @@ void CViewPattern::SetSpacing(int n)
 
 
 // Enter an effect letter in the pattenr
-void CViewPattern::TempEnterFX(int c)
-//-----------------------------------
+void CViewPattern::TempEnterFX(int c, int v)
+//------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -3945,6 +3945,10 @@ void CViewPattern::TempEnterFX(int c)
 				m_cmdOld.command = c;
 			}
 			p->command = c;
+			if(v >= 0)
+			{
+				p->param = v;
+			}
 
 			// Check for MOD/XM Speed/Tempo command
 			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
@@ -4261,8 +4265,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// Special case: Convert note off commands to C00 for MOD files
 		if((pSndFile->GetType() == MOD_TYPE_MOD) && (note == NOTE_NOTECUT || note == NOTE_FADE || note == NOTE_KEYOFF))
 		{
-			TempEnterFX(CMD_VOLUME);
-			TempEnterFXparam(0);
+			TempEnterFX(CMD_VOLUME, 0);
 			return;
 		}
 
