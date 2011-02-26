@@ -97,7 +97,7 @@ VOID COwnerVstEditor::DoClose()
 {
 #ifdef VST_LOG
 	Log("CVstEditor::DoClose()\n");
-#endif
+#endif // VST_LOG
 	if ((m_pVstPlugin) && (m_hWnd))
 	{
 		CRect rect;
@@ -105,19 +105,22 @@ VOID COwnerVstEditor::DoClose()
 		m_pVstPlugin->m_nEditorX = rect.left;
 		m_pVstPlugin->m_nEditorY = rect.top;
 	}
-	if (m_hWnd)
-	{
-	#ifdef VST_LOG
-		Log("Destroying window...\n");
-	#endif
-		DestroyWindow();
-	}
 	if (m_pVstPlugin)
 	{
-	#ifdef VST_LOG
+#ifdef VST_LOG
 		Log("Dispatching effEditClose...\n");
-	#endif
+#endif // VST_LOG
 		m_pVstPlugin->Dispatch(effEditClose, 0, 0, NULL, 0);
+	}
+	if (m_hWnd)
+	{
+#ifdef VST_LOG
+		Log("Destroying window...\n");
+#endif // VST_LOG
+		// Initially, this was called before the last Dispatch() call.
+		// Now it's done after that call so that energyXT's GUI still works after re-opening the VST editor.
+		// Let's hope that other plugins don't break...
+		DestroyWindow();
 	}
 }
 #endif // NO_VST
