@@ -3065,11 +3065,13 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 {	
 	CModDoc *pModDoc = GetDocument();
 	//if (!m_bRecord || !pModDoc) {
-	if (!IsEditingEnabled() || !pModDoc) {
+	if (!IsEditingEnabled() || !pModDoc)
+	{
 		return 0;
 	}
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if (!pSndFile) {
+	if (!pSndFile)
+	{
 		return 0;
 	}
 
@@ -3080,8 +3082,6 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	PATTERNINDEX nPattern = m_nPattern;
 	if(bUsePlaybackPosition == true)
 		SetEditPos(*pSndFile, nRow, nPattern, pSndFile->m_nRow, pSndFile->m_nPattern);
-
-	pModDoc->GetPatternUndo()->PrepareUndo(nPattern, nChn, nRow, 1, 1);
 
 	MODCOMMAND *pRow = pSndFile->Patterns[nPattern].GetpModCommand(nRow, nChn);
 
@@ -3098,10 +3098,12 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// only overwrite existing PC Notes
 		if(pRow->IsEmpty() || pRow->IsPcNote())
 		{
+			pModDoc->GetPatternUndo()->PrepareUndo(nPattern, nChn, nRow, 1, 1);
+
 			pRow->Set(NOTE_PCS, plugSlot + 1, paramIndex, static_cast<uint16>(pPlug->GetParameter(paramIndex) * MODCOMMAND::maxColumnValue));
 			InvalidateRow(nRow);
 		}
-	} else
+	} else if(pSndFile->GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
 	{
 		// Other formats: Use MIDI macros
 
@@ -3109,17 +3111,23 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		long activePlugParam  = -1;
 		BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
 		CString activeMacroString = &(pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro*32]);
-		if (pModDoc->GetMacroType(activeMacroString) == sfx_plug) {
+		if (pModDoc->GetMacroType(activeMacroString) == sfx_plug)
+		{
 			activePlugParam = pModDoc->MacroToPlugParam(activeMacroString);
 		}
 		//If the wrong macro is active, see if we can find the right one.
 		//If we can, activate it for this chan by writing appropriate SFx command it.
-		if (activePlugParam != paramIndex) { 
+		if (activePlugParam != paramIndex)
+		{ 
 			int foundMacro = pModDoc->FindMacroForParam(paramIndex);
-			if (foundMacro >= 0) {
+			if (foundMacro >= 0)
+			{
 				pSndFile->Chn[nChn].nActiveMacro = foundMacro;
-				if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
-					pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))?CMD_S3MCMDEX:CMD_MODCMDEX;;
+				if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) //we overwrite existing Zxx and \xx only.
+				{
+					pModDoc->GetPatternUndo()->PrepareUndo(nPattern, nChn, nRow, 1, 1);
+
+					pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_MODCMDEX;;
 					pRow->param = 0xF0 + (foundMacro&0x0F);
 					InvalidateRow(nRow);
 				}
@@ -3128,7 +3136,10 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		}
 
 		//Write the data, but we only overwrite if the command is a macro anyway.
-		if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) {
+		if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)
+		{
+			pModDoc->GetPatternUndo()->PrepareUndo(nPattern, nChn, nRow, 1, 1);
+
 			pRow->command = CMD_SMOOTHMIDI;
 			pRow->param = pPlug->GetZxxParameter(paramIndex);
 			InvalidateRow(nRow);
