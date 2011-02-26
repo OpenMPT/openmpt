@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.18  *
+*  OpenMPT 1.19  *
 ******************
 
 
@@ -21,13 +21,15 @@ your personal settings, none of these will be deleted automatically.
 Changes
 -------
 
-See history.txt.
+See History.txt.
 
 
 Questions, comments, bug reports...
 -----------------------------------
 
-See forums at http://openmpt.com/forum/.
+For help and general talk, visit our forums at http://forum.openmpt.org/.
+If you found a bug or want to request a new feature, you can do so at our issue
+tracker at http://bugs.openmpt.org/
 
 
 Release package contents:
@@ -45,14 +47,14 @@ OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
     stretching feature.
 readme.txt: this document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.18_ReleaseNotes.html: Release notes for this version.
+OMPT_1.19_ReleaseNotes.html: Release notes for this version.
 
 Misc:
 -----
 
 OpenMPT is partially under the following license:
 
-> Copyright (c) 2004-2010, OpenMPT contributors
+> Copyright (c) 2004-2011, OpenMPT contributors
 > Copyright (c) 1997-2003, Olivier Lapicque
 > All rights reserved.
 >
@@ -86,7 +88,7 @@ For more information about SoundTouch, see folder SoundTouch.
 
 unmo3.dll
 ---------
-Copyright (c) 2001-2009 Ian Luck. All rights reserved
+Copyright (c) 2001-2011 Ian Luck. All rights reserved
 
 The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!
