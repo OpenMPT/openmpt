@@ -1,15 +1,17 @@
 ******************
-*  OpenMPT 1.18  *
+*  OpenMPT 1.19  *
 ******************
 
 
 Installation
 ------------
 
--If you have an existing installation of OpenMPT and wish to re-use its
+-If you have an existing portable installation of OpenMPT and wish to re-use its
  settings, copy your mptrack.ini and plugin.cache to the directory into which
  you extract the archive.
--If not, you're done: just extract the archive and launch mptrack.exe.
+-If there is no previous installation or if you have an existing standard
+ installation of OpenMPT, you're done: just extract the archive and launch
+ mptrack.exe.
 
 
 Uninstallation
@@ -28,17 +30,23 @@ it does not exist yet) and add the following lines to this file:
 [Paths]
 UseAppDataDirectory=0
 
+Alternatively, you can copy your existing configuration file over from
+%appdata%\OpenMPT and add UseAppDataDirectory=0 in the [Paths] section of this
+file.
+
 
 Changes
 -------
 
-See history.txt.
+See History.txt.
 
 
 Questions, comments, bug reports...
 -----------------------------------
 
-See forums at http://openmpt.com/forum/.
+For help and general talk, visit our forums at http://forum.openmpt.org/.
+If you found a bug or want to request a new feature, you can do so at our issue
+tracker at http://bugs.openmpt.org/
 
 
 Release package contents:
@@ -55,7 +63,7 @@ OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
                             stretching feature.
 readme.txt: this document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.18_ReleaseNotes.html: Release notes for this version.
+OMPT_1.19_ReleaseNotes.html: Release notes for this version.
 
 
 Misc:
@@ -63,7 +71,7 @@ Misc:
 
 OpenMPT is partially under the following license:
 
-> Copyright (c) 2004-2010, OpenMPT contributors
+> Copyright (c) 2004-2011, OpenMPT contributors
 > Copyright (c) 1997-2003, Olivier Lapicque
 > All rights reserved.
 >
@@ -97,7 +105,7 @@ For more information about SoundTouch, see folder SoundTouch.
 
 unmo3.dll
 ---------
-Copyright (c) 2001-2009 Ian Luck. All rights reserved
+Copyright (c) 2001-2011 Ian Luck. All rights reserved
 
 The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!

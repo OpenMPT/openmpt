@@ -21,9 +21,9 @@ AppVerName=OpenMPT {#GetAppVersionShort}
 AppVersion={#GetAppVersion}
 AppName=OpenMPT
 AppPublisher=OpenMPT Devs / Olivier Lapicque
-AppPublisherURL=http://openmpt.com/
-AppSupportURL=http://openmpt.com/forum/
-AppUpdatesURL=http://openmpt.com/
+AppPublisherURL=http://openmpt.org/
+AppSupportURL=http://forum.openmpt.org/
+AppUpdatesURL=http://openmpt.org/
 DefaultDirName={pf}\OpenMPT
 DefaultGroupName=OpenMPT
 AllowNoIcons=yes
@@ -109,7 +109,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: 
 ; enable portable mode
 Filename: {app}\mptrack.ini; Section: Paths; Key: UseAppDataDirectory; String: 0; Flags: createkeyifdoesntexist; Tasks: portable
 ; internet shortcut
-Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: http://openmpt.com/forum/; Flags: createkeyifdoesntexist
+Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: http://forum.openmpt.org/; Flags: createkeyifdoesntexist
 
 [Run]
 ; duh

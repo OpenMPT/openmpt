@@ -10,7 +10,7 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.01.00 (February 2011, revision 802)
+v1.19.01.00 (February 2011, revision 803)
 -----------------------------------------
 Pattern tab
    [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
@@ -26,6 +26,7 @@ Pattern tab
    [Fix] <Jojo> Changing a channel name from the pattern editor didn't set the document as modified (http://bugs.openmpt.org/view.php?id=65)
    [Fix] <Jojo> When restarting a pattern, the timer was not reset properly.
    [Fix] <Jojo> Entering a note-off event in the MOD format created an unnecessary undo event.
+   [Fix] <Jojo> Automation data is not written to the pattern if the current module format does not support smooth midi macros.
    [Reg] <Jojo> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
 
 Pattern tab::Note properties
@@ -114,6 +115,7 @@ VST
    [Mod] <Jojo> Various small improvements to support VST 2.4 plugins better.
    [Fix] <Jojo> Speaker arrangement is now sent to the plugins upon initialization. This fixes Voxengo SPAN 2 (a VST 2.4 plugin). Does this break other multichannel plugins?
    [Fix] <Jojo> The time signature sent to VST plugins should be correct now. The denominator is always assumed to be 4, so a 6/8 signature is for example not possible.
+   [Fix] <Jojo> The EnergyXT GUI does now also work after closing and re-opening the VST editor. (tx Nahkranoth, http://forum.openmpt.org/index.php?topic=2307.0)
 
 Other modules
    [Imp] <Jojo> Garbage characters in sample / instrument / song names should be gone now.. This should f.e. avoid sample names like " ntitled" turning up in modules after deleting sample names.
