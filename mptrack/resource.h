@@ -927,6 +927,7 @@
 #define IDC_BTN_CLEAR                   2430
 #define IDC_TOTAL_EDIT_TIME             2431
 #define IDC_EDIT_HISTORY                2432
+#define IDC_SAMPLE_QUICKFADE            2433
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1187,6 +1188,7 @@
 #define ID_PANIC                        60451
 #define ID_VIEW_EDITHISTORY             60452
 #define ID_SAMPLE_GRID                  60453
+#define ID_SAMPLE_QUICKFADE             60454
 
 // Next default values for new objects
 // 
@@ -1194,8 +1196,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        528
-#define _APS_NEXT_COMMAND_VALUE         60454
-#define _APS_NEXT_CONTROL_VALUE         2433
+#define _APS_NEXT_COMMAND_VALUE         60455
+#define _APS_NEXT_CONTROL_VALUE         2434
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

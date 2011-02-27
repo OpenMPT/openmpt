@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_DRAW,				OnDrawingToggle)
 	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		OnAddSilence)
 	ON_COMMAND(ID_SAMPLE_GRID,				OnChangeGridSize)
+	ON_COMMAND(ID_SAMPLE_QUICKFADE,			OnQuickFade)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
@@ -1524,11 +1525,11 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			
 			sTrimMenuText += "\t" + ih->GetKeyTextFromCommand(kcSampleTrim);
 
-			// change by jojo: "trim" menu item is also available
-			// if there's no selection, but loop points
-			//::AppendMenu(hMenu, MF_STRING|(m_dwEndSel>m_dwBeginSel)?0:MF_GRAYED, 
-			//	ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
 			::AppendMenu(hMenu, MF_STRING|(bIsGrayed) ? MF_GRAYED : 0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
+			if((m_dwBeginSel == 0 && m_dwEndSel != 0) || (m_dwBeginSel < pSmp->nLength && m_dwEndSel == pSmp->nLength))
+			{
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, "Quick fade\t" + ih->GetKeyTextFromCommand(kcSampleQuickFade));
+			}
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
@@ -2645,6 +2646,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleInvert:			PostCtrlMessage(IDC_SAMPLE_INVERT); return wParam;
 		case kcSampleSignUnsign:		PostCtrlMessage(IDC_SAMPLE_SIGN_UNSIGN); return wParam;
 		case kcSampleRemoveDCOffset:	PostCtrlMessage(IDC_SAMPLE_DCOFFSET); return wParam;
+		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
 
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;

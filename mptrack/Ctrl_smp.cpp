@@ -475,6 +475,10 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnAmplify();
 		break;
 
+	case IDC_SAMPLE_QUICKFADE:
+		OnQuickFade();
+		break;
+
 	case IDC_SAMPLE_OPEN:
 		OnSampleOpen();
 		break;
@@ -1348,6 +1352,26 @@ void CCtrlSamples::OnAmplify()
 	if (dlg.DoModal() != IDOK) return;
 	snOldAmp = dlg.m_nFactor;
 	ApplyAmplify(dlg.m_nFactor, dlg.m_bFadeIn, dlg.m_bFadeOut);
+}
+
+
+// Quickly fade the selection in/out without asking the user.
+// Fade-In is applied if the selection starts at the beginning of the sample.
+// Fade-Out is applied if the selection ends and the end of the sample.
+void CCtrlSamples::OnQuickFade()
+//------------------------------
+{
+	if ((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
+
+	SELECTIONPOINTS sel = GetSelectionPoints();
+	if(sel.bSelected && (sel.nStart == 0 || sel.nEnd == m_pSndFile->Samples[m_nSample].nLength))
+	{
+		ApplyAmplify(100, (sel.nStart == 0), (sel.nEnd == m_pSndFile->Samples[m_nSample].nLength));
+	} else
+	{
+		// Can't apply quick fade as no appropriate selection has been made, so ask the user to amplify the whole sample instead.
+		OnAmplify();
+	}
 }
 
 

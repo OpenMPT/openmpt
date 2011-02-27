@@ -82,6 +82,7 @@ protected:
 	afx_msg void OnSamplePlay();
 	afx_msg void OnNormalize();
 	afx_msg void OnAmplify();
+	afx_msg void OnQuickFade();
 	afx_msg void OnRemoveDCOffset();
 	afx_msg void OnUpsample();
 	afx_msg void OnDownsample();

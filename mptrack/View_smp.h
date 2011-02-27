@@ -129,6 +129,7 @@ protected:
 	afx_msg void OnDrawingToggle();
 	afx_msg void OnAddSilence();
 	afx_msg void OnChangeGridSize();
+	afx_msg void OnQuickFade() { PostCtrlMessage(IDC_SAMPLE_QUICKFADE); };
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
