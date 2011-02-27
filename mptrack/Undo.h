@@ -82,6 +82,7 @@ enum sampleUndoTypes
 struct SAMPLEUNDOBUFFER
 {
 	MODSAMPLE OldSample;
+	CHAR szOldName[MAX_SAMPLENAME];
 	LPSTR SamplePtr;
 	UINT nChangeStart, nChangeEnd;
 	sampleUndoTypes nChangeType;
