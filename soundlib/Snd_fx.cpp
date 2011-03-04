@@ -80,16 +80,18 @@ void CSoundFile::GenerateSamplePosMap() {
 // [in]  endRow: Row in that order that should be reached
 // [out] duration: total time in seconds
 // [out] targetReached: true if the specified order/row combination has been reached while going through the module.
-// [out] endOrder: last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
-// [out] endRow: last parsed row (dito)
+// [out] lastOrder: last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
+// [out] lastRow: last parsed row (dito)
+// [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
+// [out] endRow: last row before module loops (dito)
 GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
 //-------------------------------------------------------------------------------------
 {
 	GetLengthType retval;
 	retval.duration = 0.0;
 	retval.targetReached = false;
-	retval.endOrder = ORDERINDEX_INVALID;
-	retval.endRow = ROWINDEX_INVALID;
+	retval.lastOrder = retval.endOrder = ORDERINDEX_INVALID;
+	retval.lastRow = retval.endRow = ROWINDEX_INVALID;
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
@@ -173,6 +175,9 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 
 		if(IsRowVisited(nCurrentPattern, nRow, true, &visitedRows))
 			break;
+
+		retval.endOrder = nCurrentPattern;
+		retval.endRow = nRow;
 
 		// Update next position
 		nNextRow = nRow + 1;
@@ -423,8 +428,8 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 	{
-		retval.endOrder = nCurrentPattern;
-		retval.endRow = nRow;
+		retval.lastOrder = nCurrentPattern;
+		retval.lastRow = nRow;
 	}
 	retval.duration = dElapsedTime / 1000.0;
 

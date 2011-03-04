@@ -474,7 +474,7 @@ void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
 {
 	if(pIns == nullptr)
 		return;
-	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	MemsetZero(*pIns);
 	pIns->nFadeOut = 256;
 	pIns->nGlobalVol = 64;
 	pIns->nPan = 128;
@@ -1276,3 +1276,16 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 }
 
 
+// Convert the module's restart position information to a pattern command.
+bool CModDoc::RestartPosToPattern()
+//---------------------------------
+{
+	bool result = false;
+	GetLengthType length = m_SndFile.GetLength(false);
+	if(length.endOrder != ORDERINDEX_INVALID && length.endRow != ROWINDEX_INVALID)
+	{
+		result = m_SndFile.TryWriteEffect(m_SndFile.Order[length.endOrder], length.endRow, CMD_POSITIONJUMP, m_SndFile.m_nRestartPos, false, CHANNELINDEX_INVALID, false, true);
+	}
+	m_SndFile.m_nRestartPos = 0;
+	return result;
+}
