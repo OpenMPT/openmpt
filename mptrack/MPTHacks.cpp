@@ -10,7 +10,7 @@
 #include "Moddoc.h"
 
 /* TODO:
-stereo/16bit samples (only XM? maybe S3M? many new IT trackers support stereo samples)
+stereo/16bit samples (only XM? stereo/16bit flags are defined in the S3M and IT specs...)
 out-of range sample pre-amp
 song flags and properties (just look at the song properties window)
 +++/--- orders in XM/MOD sequence
@@ -351,7 +351,9 @@ bool CModDoc::HasMPTHacks(bool autofix)
 		AddToLog("Found restart position\n");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nRestartPos = 0;
+		{
+			RestartPosToPattern();
+		}
 	}
 
 	if(m_SndFile.m_nMixLevels != mixLevels_compatible)

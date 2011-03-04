@@ -34,6 +34,7 @@ enum enmWarnings
 	wReleaseNode,
 	wEditHistory,
 	wMixmode,
+	wCompatibilityMode,
 	wNumWarnings
 };
 

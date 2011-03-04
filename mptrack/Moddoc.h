@@ -323,6 +323,8 @@ public:
 
 	bool RemoveChannels(bool bChnMask[MAX_BASECHANNELS]);
 
+	bool RestartPosToPattern();
+
 	bool HasMPTHacks(bool autofix = false);
 
 	void FixNullStrings();

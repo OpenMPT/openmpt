@@ -656,11 +656,17 @@ uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
 		  bAllowMultipleEffects - If false, No effect will be written if an effect of the same type is already present in the channel(s). Useful for f.e. tempo effects.
 		  bAllowNextRow - Indicates whether it is allowed to use the next row if there's no space for the effect
 		  bRetry - For internal use only. Indicates whether an effect "rewrite" has already taken place (for recursive calls)
+   NOTE: Effect remapping is only implemented for a few basic effects.
 */ 
 bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn, bool bAllowMultipleEffects, bool bAllowNextRow, bool bRetry)
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	// NOTE: Effect remapping is only implemented for a few basic effects.
+	// First, reject invalid parameters.
+	if(!Patterns.IsValidIndex(nPat) || nRow >= Patterns[nPat].GetNumRows() || (nChn >= GetNumChannels() && nChn != CHANNELINDEX_INVALID))
+	{
+		return false;
+	}
+
 	CHANNELINDEX nScanChnMin = nChn, nScanChnMax = nChn;
 	MODCOMMAND *p = Patterns[nPat], *m;
 

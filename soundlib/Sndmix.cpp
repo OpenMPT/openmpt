@@ -789,7 +789,7 @@ BOOL CSoundFile::ProcessRow()
 				// Let's check again if this really is the end of the song.
 				// The visited rows vector might have been screwed up while editing...
 				GetLengthType t = GetLength(false);
-				if(t.endOrder == m_nCurrentPattern && t.endRow == m_nRow)
+				if(t.lastOrder == m_nCurrentPattern && t.lastRow == m_nRow)
 #endif // MODPLUG_TRACKER
 				{
 					// This is really the song's end!

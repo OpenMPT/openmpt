@@ -369,7 +369,7 @@ struct SNDMIXPLUGININFO
 {
 	DWORD dwPluginId1;
 	DWORD dwPluginId2;
-	DWORD dwInputRouting;	// MIXPLUG_INPUTF_XXXX
+	DWORD dwInputRouting;	// MIXPLUG_INPUTF_XXXX, bits 16-23 = gain
 	DWORD dwOutputRouting;	// 0=mix 0x80+=fx
 	DWORD dwReserved[4];	// Reserved for routing info
 	CHAR szName[32];
@@ -492,8 +492,10 @@ struct GetLengthType
 {
 	double duration;		// total time in seconds
 	bool targetReached;		// true if the specified order/row combination has been reached while going through the module
-	ORDERINDEX endOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
-	ROWINDEX endRow;		// last parsed row (dito)
+	ORDERINDEX lastOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
+	ROWINDEX lastRow;		// last parsed row (dito)
+	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
+	ROWINDEX endRow;		// last row before module loops (dito)
 };
 
 

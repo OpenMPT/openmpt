@@ -178,6 +178,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			cEffectMemory[i].resize(MAX_EFFECTS, 0);
 		}
 
+		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
 		CHANNELINDEX nChannel = m_SndFile.m_nChannels - 1;
 
 		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.m_nChannels; len; m++, len--)
@@ -222,6 +223,28 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 				}
 			}
+
+			// When converting to XM, avoid the E60 bug.
+			if(newTypeIsXM)
+			{
+				switch(m->command)
+				{
+				case CMD_MODCMDEX:
+					if((m->param & 0xF0) == 0x60)
+					{
+						addBreak = true;
+					}
+					break;
+				case CMD_POSITIONJUMP:
+				case CMD_PATTERNBREAK:
+					addBreak = false;
+					break;
+				}
+			}
+		}
+		if(addBreak)
+		{
+			m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, false);
 		}
 	}
 
@@ -370,7 +393,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Is the "restart position" value allowed in this format?
 	if(m_SndFile.m_nRestartPos > 0 && !CSoundFile::GetModSpecifications(nNewType).hasRestartPos)
 	{
-		m_SndFile.m_nRestartPos = 0;
+		// Try to fix it
+		RestartPosToPattern();
 		CHANGEMODTYPE_WARNING(wRestartPos);
 	}
 
@@ -439,6 +463,11 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wMixmode);
 	}
 
+	if((nNewType & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
+	{
+		CHANGEMODTYPE_WARNING(wCompatibilityMode);
+	}
+
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
 
@@ -475,6 +504,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wReleaseNode, "Instrument envelope release nodes are not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wEditHistory, "Edit history will not be saved in the new format.\n");
 	CHANGEMODTYPE_CHECK(wMixmode, "Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats.\n");
+	CHANGEMODTYPE_CHECK(wCompatibilityMode, "Consider enabling the \"compatible playback\" option in the song properties to increase compatiblity with other players.\n");
 
 	SetModified();
 	GetPatternUndo()->ClearUndo();
