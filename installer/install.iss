@@ -3,10 +3,10 @@
 ; http://openmpt.org/
 ; http://sagamusix.de/
 
-; ISPP is needed for automated version retrieval.
+; ISPP is needed for automated version retrieval. Since InnoSetup 5.4.1, ISPP is included in the default InnoSetup installer.
 ; Furthermore, either the ISTool IDE or InnoIDE with their downloader extensions are required for "unmo3-free" packages which don't contain unmo3.dll, but download it from a server.
-; Check install-unmo3-free.iss and install-unmo3-free-itd.iss for details on this matter.
-; To download and install ISPP and InnoIDE, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
+; Check install-unmo3-free.iss (ISTool) and install-unmo3-free-itd.iss (InnoIDE) for details on this matter.
+; To download and install InnoIDE, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
 
 #define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
@@ -68,7 +68,7 @@ Source: ..\mptrack\bin\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
-Source: ..\packageTemplate\history.txt; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
 
 ; release notes
 Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
@@ -114,6 +114,7 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 [Run]
 ; duh
 Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\xaimus - digital sentience.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
+Filename: "https://sourceforge.net/projects/kernelex/"; Description: "Download KernelEx (required on Windows 98 / Me)"; Flags: shellexec nowait postinstall skipifsilent; Check: not UsingWinNT();
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually

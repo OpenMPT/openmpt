@@ -6,9 +6,7 @@
 ; This file is provided for creating an install package without the proprietary unmo3.dll (for example for the SourceForge package).
 ; Instead of including the file in the setup package, the user instead has the possibility to automatically download unmo3.dll from
 ; our servers.
-; The download code requires the ISTool IDE with its downloader extension. ISPP is also required.
-; To download and install ISPP, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
-; The QuickStart Pack doesn't provide a ISTool downloader anymore, so you'll have to download it manually from http://www.istool.org/
+; The download code requires the ISTool IDE with its downloader extension. You can download it from http://www.istool.org/
 
 #define DOWNLOAD_MO3
 #define BaseNameAddition "_sf"
