@@ -603,6 +603,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcOrderlistPatInvalid, 1854, kcVisible, kcNoDummy, _T("Invalid (---) Index"));
 	DefineKeyCommand(kcViewEditHistory, 1855, kcVisible, kcNoDummy, _T("View Edit History"));
 	DefineKeyCommand(kcSampleQuickFade, 1856, kcVisible, kcNoDummy, _T("Quick fade"));
+	DefineKeyCommand(kcSampleXFade, 1857, kcVisible, kcNoDummy, _T("Crossfade sample loop"));
 	// Add new key commands here.
 
 #ifdef _DEBUG
@@ -1550,7 +1551,13 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 					CString err;
 					if (errorCount < 10)
 					{
-						err.Format("Line %d was not understood.", l);
+						if(spos == -1)
+						{
+							err.Format("Line %d was not understood.", l);
+						} else
+						{
+							err.Format("Line %d contained an unknown command.", l);
+						}
 						errText += err + "\n";
 						Log(err);
 					} else if (errorCount == 10)

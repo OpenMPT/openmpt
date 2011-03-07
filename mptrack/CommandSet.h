@@ -612,7 +612,8 @@ enum CommandID
 	kcSampleSignUnsign,
 	kcSampleRemoveDCOffset,
 	kcSampleQuickFade,
-	kcEndSampleEditing=kcSampleQuickFade,
+	kcSampleXFade,
+	kcEndSampleEditing=kcSampleXFade,
 
 	//kcSampStartNotes to kcInsNoteMapEndNoteStops must be contiguous.
 	kcSampStartNotes,

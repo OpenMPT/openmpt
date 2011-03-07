@@ -173,6 +173,19 @@ BEGIN
     LTEXT           "Grid Segments:",IDC_STATIC,6,8,60,8
 END
 
+IDD_SAMPLE_XFADE DIALOGEX 0, 0, 178, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sample Crossfader"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,66,60,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,120,60,50,14
+    EDITTEXT        IDC_EDIT1,108,6,54,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,144,6,11,14
+    LTEXT           "Higher numbers generate smoother loop transitions. However, the number is limited by the loop length and the amount of samples before the loop start.",IDC_STATIC,6,24,168,36
+    LTEXT           "Samples used for fading:",IDC_STATIC,6,8,96,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -244,6 +257,14 @@ BEGIN
         RIGHTMARGIN, 147
         TOPMARGIN, 7
         BOTTOMMARGIN, 64
+    END
+
+    IDD_SAMPLE_XFADE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -723,7 +744,7 @@ BEGIN
     CTEXT           "Resampling",IDC_STATIC,7,151,39,13,SS_CENTERIMAGE,WS_EX_STATICEDGE
     CONTROL         "Highpass",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,181,19,45,10
     CTEXT           "Mode",IDC_STATIC,135,70,23,13,SS_CENTERIMAGE,WS_EX_STATICEDGE
-    RTEXT           "--",IDC_TEXT1,204,62,27,8
+    RTEXT           "--",IDC_TEXT1,186,62,45,8
     GROUPBOX        "Pitch/Tempo Lock",IDC_STATIC,364,57,89,25
     GROUPBOX        "Sample Map",IDC_STATIC,461,27,62,141
     CTEXT           "Velocity handling",IDC_STATIC,367,102,83,10,SS_CENTERIMAGE,WS_EX_STATICEDGE
@@ -1309,7 +1330,7 @@ BEGIN
 END
 
 IDD_PLUGINEDITOR DIALOGEX 0, 0, 187, 95
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
 CAPTION "Editor"
 MENU IDR_PLUGINMENU
@@ -2453,6 +2474,11 @@ END
 STRINGTABLE 
 BEGIN
     ID_VIEW_SONGPROPERTIES  "Edit global song properties or convert the module to another format"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_SAMPLE_XFADE        "Crossfade Loop Points\nCrossfade between loop start and loop end to create seamless sample loops."
 END
 
 #endif    // Englisch (USA) resources

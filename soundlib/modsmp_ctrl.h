@@ -62,6 +62,9 @@ bool UnsignSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 // Invert sample data (flip by 180 degrees)
 bool InvertSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
 
+// Crossfade sample data to create smooth loops
+bool XFadeSample(MODSAMPLE *pSmp, SmpLength iFadeLength, CSoundFile *pSndFile);
+
 } // Namespace ctrlSmp
 
 namespace ctrlChn

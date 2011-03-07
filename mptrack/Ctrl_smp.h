@@ -108,6 +108,7 @@ protected:
 	afx_msg void OnVibDepthChanged();
 	afx_msg void OnVibSweepChanged();
 	afx_msg void OnVibRateChanged();
+	afx_msg void OnXFade();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
