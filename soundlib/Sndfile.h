@@ -498,6 +498,17 @@ struct GetLengthType
 	ROWINDEX endRow;		// last row before module loops (dito)
 };
 
+// Reset mode for GetLength()
+enum enmGetLengthResetMode
+{
+	// Never adjust global variables / mod parameters
+	eNoAdjust			= 0x00,
+	// Mod parameters (such as global volume, speed, tempo, etc...) will always be memorized if the target was reached (i.e. they won't be reset to the previous values).  If target couldn't be reached, they are reset to their default values.
+	eAdjust				= 0x01,
+	// Same as above, but global variables will only be memorized if the target could be reached. This does *NOT* influence the visited rows vector - it will *ALWAYS* be adjusted in this mode.
+	eAdjustOnSuccess	= 0x02 | eAdjust,
+};
+
 
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
@@ -705,11 +716,11 @@ public:
     
 	//Get modlength in various cases: total length, length to 
 	//specific order&row etc. Return value is in seconds.
-	GetLengthType GetLength(bool bAdjust, ORDERINDEX ord = ORDERINDEX_INVALID, ROWINDEX row = ROWINDEX_INVALID);
+	GetLengthType GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX ord = ORDERINDEX_INVALID, ROWINDEX row = ROWINDEX_INVALID);
 
 public:
 	//Returns song length in seconds.
-	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(false).duration + 1.0 : GetLength(false).duration + 0.5); }
+	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(eNoAdjust).duration + 1.0 : GetLength(eNoAdjust).duration + 0.5); }
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }

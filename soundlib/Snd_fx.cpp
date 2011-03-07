@@ -75,7 +75,7 @@ void CSoundFile::GenerateSamplePosMap() {
 
 
 // Get mod length in various cases. Parameters:
-// [in]  bAdjust: If enabled, the mod parameters (such as global volume, speed, tempo, etc...) will be memorized (if the target has been reached) when leaving the function (i.e. they won't be reset to the previous values)
+// [in]  adjustMode: See enmGetLengthResetMode for possible adjust modes.
 // [in]  endOrder: Order which should be reached (ORDERINDEX_INVALID means whole song)
 // [in]  endRow: Row in that order that should be reached
 // [out] duration: total time in seconds
@@ -84,8 +84,8 @@ void CSoundFile::GenerateSamplePosMap() {
 // [out] lastRow: last parsed row (dito)
 // [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
 // [out] endRow: last row before module loops (dito)
-GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
-//-------------------------------------------------------------------------------------
+GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX endOrder, ROWINDEX endRow)
+//---------------------------------------------------------------------------------------------------------
 {
 	GetLengthType retval;
 	retval.duration = 0.0;
@@ -219,7 +219,7 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 				if(!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM))
 					nNextRow = 0;
 
-				if (bAdjust)
+				if ((adjustMode & eAdjust))
 				{
 					pChn->nPatternLoopCount = 0;
 					pChn->nPatternLoop = 0;
@@ -247,7 +247,7 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 				{
 					nNextPattern = nCurrentPattern + 1;
 				}
-				if (bAdjust)
+				if ((adjustMode & eAdjust))
 				{
 					pChn->nPatternLoopCount = 0;
 					pChn->nPatternLoop = 0;
@@ -264,7 +264,7 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 				break;
 			// Set Tempo
 			case CMD_TEMPO:
-				if ((bAdjust) && (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
+				if ((adjustMode & eAdjust) && (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
 				}
@@ -310,7 +310,7 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 				if (((param & 0xF0) == 0xA0) && !IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nOldHiOffset = param & 0x0F;
 				break;
 			}
-			if (!bAdjust) continue;
+			if ((adjustMode & eAdjust) == 0) continue;
 			switch(command)
 			{
 			// Portamento Up/Down
@@ -434,7 +434,7 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 	retval.duration = dElapsedTime / 1000.0;
 
 	// Store final variables
-	if (bAdjust)
+	if ((adjustMode & eAdjust))
 	{
 		if (retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 		{
@@ -454,7 +454,7 @@ GetLengthType CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX 
 					Chn[n].nVolume = vols[n] * 4;
 				}
 			}
-		} else
+		} else if(adjustMode != eAdjustOnSuccess)
 		{
 			// Target not found (f.e. when jumping to a hidden sub song), reset global variables...
 			m_nMusicSpeed = m_nDefaultSpeed;
