@@ -4,7 +4,7 @@
 #include "childfrm.h"
 #include "moddoc.h"
 #include "globals.h"
-#include "dlg_misc.h"
+#include "PatternEditorDialogs.h"
 #include "ctrl_pat.h"
 #include "view_pat.h"
 #include "ChannelManagerDlg.h"

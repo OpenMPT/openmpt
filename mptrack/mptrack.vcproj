@@ -427,6 +427,9 @@
 				RelativePath="..\soundlib\patternContainer.cpp">
 			</File>
 			<File
+				RelativePath=".\PatternEditorDialogs.cpp">
+			</File>
+			<File
 				RelativePath=".\PatternGotoDialog.cpp">
 			</File>
 			<File
@@ -437,6 +440,9 @@
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp">
+			</File>
+			<File
+				RelativePath=".\SampleEditorDialogs.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\Sampleio.cpp">
@@ -867,6 +873,9 @@
 				RelativePath="..\soundlib\patternContainer.h">
 			</File>
 			<File
+				RelativePath=".\PatternEditorDialogs.h">
+			</File>
+			<File
 				RelativePath=".\PatternGotoDialog.h">
 			</File>
 			<File
@@ -880,6 +889,9 @@
 			</File>
 			<File
 				RelativePath=".\Resource.h">
+			</File>
+			<File
+				RelativePath=".\SampleEditorDialogs.h">
 			</File>
 			<File
 				RelativePath=".\ScaleEnvPointsDlg.h">

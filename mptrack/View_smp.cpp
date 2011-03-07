@@ -9,7 +9,7 @@
 #include "channelManagerDlg.h"
 #include "view_smp.h"
 #include "midi.h"
-#include "dlg_misc.h"
+#include "SampleEditorDialogs.h"
 #include "modsmp_ctrl.h"
 #include "Wav.h"
 
@@ -2135,7 +2135,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (pMainFrm))
 	{
-		if (note >= NOTE_NOTECUT)
+		if (note >= NOTE_MIN_SPECIAL)
 		{
 			pModDoc->NoteOff(0, (note == NOTE_NOTECUT) ? TRUE : FALSE);
 		} 
@@ -2648,6 +2648,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleRemoveDCOffset:	PostCtrlMessage(IDC_SAMPLE_DCOFFSET); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
 
+		// Those don't seem to work.
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 

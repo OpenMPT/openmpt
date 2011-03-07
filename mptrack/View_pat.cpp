@@ -3,7 +3,8 @@
 #include "mainfrm.h"
 #include "childfrm.h"
 #include "moddoc.h"
-#include "dlg_misc.h"
+#include "PatternEditorDialogs.h"
+#include "SampleEditorDialogs.h" // For amplification dialog (which is re-used from sample editor)
 #include "globals.h"
 #include "view_pat.h"
 #include "ctrl_pat.h"
