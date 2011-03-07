@@ -37,7 +37,7 @@ void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample, const SmpLength nNewL
 
 
 SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
-//----------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
 {
 	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
 		return smp.nLength;
@@ -92,7 +92,7 @@ SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const Sm
 }
 
 SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* pSndFile)
-//----------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 {
 	// Invalid sample size
 	if(nNewLength > MAX_SAMPLE_LENGTH || nNewLength == smp.nLength)
@@ -139,7 +139,7 @@ namespace // Unnamed namespace for local implementation functions.
 
 template <class T>
 void AdjustEndOfSampleImpl(MODSAMPLE& smp)
-//--------------------------------------------
+//----------------------------------------
 {
 	MODSAMPLE* const pSmp = &smp;
 	const UINT len = pSmp->nLength;
@@ -168,7 +168,7 @@ void AdjustEndOfSampleImpl(MODSAMPLE& smp)
 
 
 bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile)
-//--------------------------------------------------------------
+//----------------------------------------------------------
 {
 	MODSAMPLE* const pSmp = &smp;
 
@@ -469,6 +469,43 @@ bool InvertSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 		InvertSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart);
 	else if(pSmp->GetElementarySampleSize() == 1)
 		InvertSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else
+		return false;
+
+	AdjustEndOfSample(*pSmp, pSndFile);
+	return true;
+}
+
+
+template <class T>
+void XFadeSampleImpl(T* pStart, const SmpLength nOffset, SmpLength nFadeLength)
+//-----------------------------------------------------------------------------
+{
+	for(SmpLength i = 0; i <= nFadeLength; i++)
+	{
+		double dPercentage = sqrt((double)i / (double)nFadeLength); // linear fades are boring
+		pStart[nOffset + i] = (T)(((double)pStart[nOffset + i]) * (1 - dPercentage) + ((double)pStart[i]) * dPercentage);
+	}
+}
+
+// X-Fade sample data to create smooth loop transitions
+bool XFadeSample(MODSAMPLE *pSmp, SmpLength iFadeLength, CSoundFile *pSndFile)
+//----------------------------------------------------------------------------
+{
+	if(pSmp->pSample == nullptr) return false;
+	if(pSmp->nLoopEnd <= pSmp->nLoopStart || pSmp->nLoopEnd > pSmp->nLength) return false;
+	if(pSmp->nLoopStart < iFadeLength) return false;
+
+	SmpLength iStart = pSmp->nLoopStart - iFadeLength;
+	SmpLength iEnd = pSmp->nLoopEnd - iFadeLength;
+	iStart *= pSmp->GetNumChannels();
+	iEnd *= pSmp->GetNumChannels();
+	iFadeLength *= pSmp->GetNumChannels();
+
+	if(pSmp->GetElementarySampleSize() == 2)
+		XFadeSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart, iFadeLength);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		XFadeSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart, iFadeLength);
 	else
 		return false;
 

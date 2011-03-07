@@ -170,3 +170,37 @@ void CSampleGridDlg::OnOK()
 	CDialog::OnOK();
 }
 
+
+/////////////////////////////////////////////////////////////////////////
+// Sample cross-fade dialog
+
+void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
+//------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CSampleGridDlg)
+	DDX_Control(pDX, IDC_EDIT1,			m_EditSamples);
+	DDX_Control(pDX, IDC_SPIN1,			m_SpinSamples);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL CSampleXFadeDlg::OnInitDialog()
+//----------------------------------
+{
+	CDialog::OnInitDialog();
+	m_SpinSamples.SetRange32(0, m_nMaxSamples);
+	m_SpinSamples.SetPos(m_nSamples);
+	SetDlgItemInt(IDC_EDIT1, m_nSamples, FALSE);
+	GetDlgItem(IDC_EDIT1)->SetFocus();
+	return TRUE;
+}
+
+
+void CSampleXFadeDlg::OnOK()
+//--------------------------
+{
+	m_nSamples = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
+	CDialog::OnOK();
+}
+

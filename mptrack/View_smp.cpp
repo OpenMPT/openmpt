@@ -2646,6 +2646,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleInvert:			PostCtrlMessage(IDC_SAMPLE_INVERT); return wParam;
 		case kcSampleSignUnsign:		PostCtrlMessage(IDC_SAMPLE_SIGN_UNSIGN); return wParam;
 		case kcSampleRemoveDCOffset:	PostCtrlMessage(IDC_SAMPLE_DCOFFSET); return wParam;
+		case kcSampleXFade:				PostCtrlMessage(IDC_SAMPLE_XFADE); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
 
 		// Those don't seem to work.

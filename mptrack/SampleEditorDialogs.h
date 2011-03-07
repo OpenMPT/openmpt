@@ -96,4 +96,29 @@ protected:
 	virtual void OnOK();
 };
 
+
+/////////////////////////////////////////////////////////////////////////
+// Sample cross-fade dialog
+
+//===================================
+class CSampleXFadeDlg: public CDialog
+//===================================
+{
+public:
+	UINT m_nSamples, m_nMaxSamples;
+
+protected:
+	CEdit m_EditSamples;
+	CSpinButtonCtrl m_SpinSamples;
+
+public:
+	CSampleXFadeDlg(CWnd *parent, UINT nSamples, UINT nMaxSamples) : CDialog(IDD_SAMPLE_XFADE, parent) { m_nSamples = nSamples; m_nMaxSamples = nMaxSamples; };
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+};
+
+
 #endif

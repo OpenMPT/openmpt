@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_INVERT,		OnInvert)
 	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,  OnSignUnSign)
 	ON_COMMAND(IDC_SAMPLE_DCOFFSET,		OnRemoveDCOffset)
+	ON_COMMAND(IDC_SAMPLE_XFADE,		OnXFade)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
@@ -213,13 +214,16 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_SILENCE, TIMAGE_SAMPLE_SILENCE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, TIMAGE_SAMPLE_INVERT);
 	m_ToolBar2.AddButton(IDC_SAMPLE_SIGN_UNSIGN, TIMAGE_SAMPLE_UNSIGN);
+	m_ToolBar2.AddButton(IDC_SAMPLE_XFADE, TIMAGE_SAMPLE_FIXLOOP);
 	// Setup Controls
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 	//rewbs.fix36944
-	if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+	if (m_pSndFile->m_nType == MOD_TYPE_XM)
+	{
 		m_SpinPanning.SetRange(0, 255);
-	} else 	{
+	} else
+	{
 		m_SpinPanning.SetRange(0, 64);
 	}
 	//end rewbs.fix36944
@@ -459,6 +463,9 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case IDC_SAMPLE_INVERT:
 		OnInvert();
 		break;
+
+	case IDC_SAMPLE_XFADE:
+		OnXFade();
 
 	case IDC_SAMPLE_SIGN_UNSIGN:
 		OnSignUnSign();
@@ -3102,3 +3109,49 @@ void CCtrlSamples::SetSelectionPoints(UINT nStart, UINT nEnd)
 	viewstate.dwEndSel = nEnd;
 	SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 }
+
+
+// Crossfade loop to create smooth loop transitions
+#define DEFAULT_XFADE_LENGTH 16384 //4096
+#define LimitXFadeLength(x)	min(min(x, pSmp->nLoopEnd - pSmp->nLoopStart), pSmp->nLoopEnd / 2)
+
+void CCtrlSamples::OnXFade()
+//--------------------------
+{
+	static UINT nFadeLength = DEFAULT_XFADE_LENGTH;
+	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
+
+	if(pSmp->pSample == nullptr) return;
+	if(pSmp->nLoopEnd <= pSmp->nLoopStart || pSmp->nLoopEnd > pSmp->nLength) return;
+	// Case 1: The loop start is preceeded by > XFADE_LENGTH samples. Nothing has to be adjusted.
+	// Case 2: The actual loop is shorter than XFADE_LENGTH samples.
+	// Case 3: There is not enough sample material before the loop start. Move the loop start.
+	nFadeLength = LimitXFadeLength(nFadeLength);
+
+	CSampleXFadeDlg dlg(this, nFadeLength, LimitXFadeLength(GetDocument()->GetSoundFile()->Samples[m_nSample].nLength));
+	if(dlg.DoModal() == IDOK)
+	{
+		nFadeLength = dlg.m_nSamples;
+
+		if(nFadeLength < 4) return;
+
+		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_update, pSmp->nLoopEnd - nFadeLength, pSmp->nLoopEnd);
+		// If we want to fade nFadeLength bytes, we need as much sample material before the loop point. nFadeLength has been adjusted above.
+		if(pSmp->nLoopStart < nFadeLength)
+		{
+			pSmp->nLoopStart = nFadeLength;
+		}
+
+		if(ctrlSmp::XFadeSample(pSmp, nFadeLength, m_pSndFile))
+		{
+			m_pModDoc->AdjustEndOfSample(m_nSample);
+			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+			m_pModDoc->SetModified();
+		} else
+		{
+			m_pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
+		}
+
+	}
+}
+
