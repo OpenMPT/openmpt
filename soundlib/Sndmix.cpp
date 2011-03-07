@@ -788,7 +788,7 @@ BOOL CSoundFile::ProcessRow()
 #ifdef MODPLUG_TRACKER
 				// Let's check again if this really is the end of the song.
 				// The visited rows vector might have been screwed up while editing...
-				GetLengthType t = GetLength(false);
+				GetLengthType t = GetLength(eNoAdjust);
 				if(t.lastOrder == m_nCurrentPattern && t.lastRow == m_nRow)
 #endif // MODPLUG_TRACKER
 				{
@@ -798,7 +798,7 @@ BOOL CSoundFile::ProcessRow()
 				} else
 				{
 					// Ok, this is really dirty, but we have to update the visited rows vector...
-					GetLength(true, m_nCurrentPattern, m_nRow);
+					GetLength(eAdjustOnSuccess, m_nCurrentPattern, m_nRow);
 				}
 			}
 		}

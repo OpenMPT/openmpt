@@ -1615,7 +1615,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		if (wsdlg.m_bSelectPlay)
 		{
 			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-			m_SndFile.GetLength(true, wsdlg.m_nMinOrder, 0);	// adjust playback variables / visited rows vector
+			m_SndFile.GetLength(eAdjust, wsdlg.m_nMinOrder, 0);	// adjust playback variables / visited rows vector
 			m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 		}

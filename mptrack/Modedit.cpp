@@ -1281,7 +1281,7 @@ bool CModDoc::RestartPosToPattern()
 //---------------------------------
 {
 	bool result = false;
-	GetLengthType length = m_SndFile.GetLength(false);
+	GetLengthType length = m_SndFile.GetLength(eNoAdjust);
 	if(length.endOrder != ORDERINDEX_INVALID && length.endRow != ROWINDEX_INVALID)
 	{
 		result = m_SndFile.TryWriteEffect(m_SndFile.Order[length.endOrder], length.endRow, CMD_POSITIONJUMP, m_SndFile.m_nRestartPos, false, CHANNELINDEX_INVALID, false, true);
