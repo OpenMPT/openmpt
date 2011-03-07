@@ -202,7 +202,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
+				RandomizedBaseAddress="2"
 				DataExecutionPrevention="0"
 			/>
 			<Tool
@@ -573,6 +573,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PatternEditorDialogs.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PatternGotoDialog.cpp"
 				>
 			</File>
@@ -586,6 +590,10 @@
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SampleEditorDialogs.cpp"
 				>
 			</File>
 			<File
@@ -1151,6 +1159,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PatternEditorDialogs.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PatternGotoDialog.h"
 				>
 			</File>
@@ -1168,6 +1180,14 @@
 			</File>
 			<File
 				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SampleEditorDialogs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SampleGenerator.h"
 				>
 			</File>
 			<File

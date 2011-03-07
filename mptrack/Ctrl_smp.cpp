@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "ctrl_smp.h"
 #include "view_smp.h"
+#include "SampleEditorDialogs.h"
 #include "dlg_misc.h"
 #include "PSRatioCalc.h" //rewbs.timeStretchMods
 #include "mpdlgs.h"
