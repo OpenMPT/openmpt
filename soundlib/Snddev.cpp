@@ -253,6 +253,8 @@ BOOL CWaveDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSiz
 // DirectSound device
 //
 
+#ifndef NO_DSOUND
+
 #ifndef DSBCAPS_GLOBALFOCUS
 #define DSBCAPS_GLOBALFOCUS		0x8000
 #endif
@@ -536,6 +538,8 @@ BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DW
 	}
 	return TRUE;
 }
+
+#endif // NO_DIRECTSOUND
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1378,10 +1382,12 @@ BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
 	switch(nType)
 	{
 	case SNDDEV_WAVEOUT:	return CWaveDevice::EnumerateDevices(nIndex, pszDesc, cbSize);
+#ifndef NO_DSOUND
 	case SNDDEV_DSOUND:		return CDSoundDevice::EnumerateDevices(nIndex, pszDesc, cbSize);
+#endif // NO_DIRECTSOUND
 #ifndef NO_ASIO
 	case SNDDEV_ASIO:		return CASIODevice::EnumerateDevices(nIndex, pszDesc, cbSize);
-#endif
+#endif // NO_ASIO
 	}
 	return FALSE;
 }
@@ -1394,10 +1400,12 @@ BOOL CreateSoundDevice(UINT nType, ISoundDevice **ppsd)
 	switch(nType)
 	{
 	case SNDDEV_WAVEOUT:	*ppsd = new CWaveDevice(); break;
+#ifndef NO_DSOUND
 	case SNDDEV_DSOUND:		*ppsd = new CDSoundDevice(); break;
+#endif // NO_DIRECTSOUND
 #ifndef NO_ASIO
 	case SNDDEV_ASIO:		*ppsd = new CASIODevice(); break;
-#endif
+#endif // NO_ASIO
 	}
 	return (*ppsd) ? TRUE : FALSE;
 }
@@ -1406,12 +1414,14 @@ BOOL CreateSoundDevice(UINT nType, ISoundDevice **ppsd)
 BOOL SndDevInitialize()
 //---------------------
 {
+#ifndef NO_DSOUND
 	if (ghDSoundDLL) return TRUE;
 	if ((ghDSoundDLL = LoadLibrary("dsound.dll")) == NULL) return FALSE;
 	static_assert(sizeof(TCHAR) == 1, "Check DirectSoundEnumerateA below");
 	if ((gpDSoundEnumerate = (LPDSOUNDENUMERATE)GetProcAddress(ghDSoundDLL, "DirectSoundEnumerateA")) == NULL) return FALSE;
 	if ((gpDSoundCreate = (LPDSOUNDCREATE)GetProcAddress(ghDSoundDLL, "DirectSoundCreate")) == NULL) return FALSE;
 	RtlZeroMemory(glpDSoundGUID, sizeof(glpDSoundGUID));
+#endif // NO_DIRECTSOUND
 	return TRUE;
 }
 
@@ -1419,6 +1429,7 @@ BOOL SndDevInitialize()
 BOOL SndDevUninitialize()
 //-----------------------
 {
+#ifndef NO_DSOUND
 	gpDSoundEnumerate = NULL;
 	gpDSoundCreate = NULL;
 	if (ghDSoundDLL)
@@ -1436,6 +1447,7 @@ BOOL SndDevUninitialize()
 	}
 	gbDSoundEnumerated = FALSE;
 	gnDSoundDevices = 0;
+#endif // NO_DIRECTSOUND
 	return TRUE;
 }
 

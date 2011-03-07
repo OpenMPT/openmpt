@@ -88,6 +88,9 @@ typedef struct {
 // Define to build without MO3 support.
 //#define NO_MO3_SUPPORT
 				  
+// Define to build without DirectSound support.
+//#define NO_DSOUND
+
 
 void Log(LPCSTR format,...);
 

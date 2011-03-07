@@ -2,7 +2,10 @@
 #define _SNDDEVX_H_
 
 #include <mmsystem.h>
+
+#ifndef NO_DSOUND
 #include <dsound.h>
+#endif
 
 #ifndef NO_ASIO
 #include <iasiodrv.h>
@@ -50,10 +53,13 @@ public:
 	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
 };
 
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // DirectSound device
 //
+
+#ifndef NO_DSOUND
 
 //======================================
 class CDSoundDevice: public ISoundDevice
@@ -88,6 +94,8 @@ protected:
 public:
 	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
 };
+
+#endif // NO_DIRECTSOUND
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -164,6 +172,7 @@ protected:
 };
 
 #endif // NO_ASIO
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 
