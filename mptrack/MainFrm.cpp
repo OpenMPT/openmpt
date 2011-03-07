@@ -187,7 +187,11 @@ DWORD CMainFrame::m_nSrcMode = SRCMODE_LINEAR;
 DWORD CMainFrame::m_nBitsPerSample = 16;
 DWORD CMainFrame::m_nPreAmp = 128;
 DWORD CMainFrame::gbLoopSong = TRUE;
+#ifndef NO_DSOUND
 LONG CMainFrame::m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND);
+#else
+LONG CMainFrame::m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);
+#endif // NO_DSOUND
 LONG CMainFrame::m_nMidiDevice = 0;
 DWORD CMainFrame::m_nBufferLength = 75;
 LONG CMainFrame::gnLVuMeter = 0;
@@ -412,12 +416,16 @@ void CMainFrame::LoadIniSettings()
 		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
 
-	DWORD defaultDevice = SNDDEV_DSOUND << 8; // first DirectSound device
+#ifndef NO_DSOUND
+	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND); // first DirectSound device
+#else
+	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first DirectSound device
+#endif // NO_DSOUND
 #ifndef NO_ASIO
 	// If there's an ASIO device available, prefer it over DirectSound
 	if(EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0))
 	{
-		defaultDevice = SNDDEV_ASIO << 8;
+		defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_ASIO);
 	}
 #endif // NO_ASIO
 	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
@@ -706,6 +714,9 @@ VOID CMainFrame::Initialize()
 	#endif
 	#ifdef NO_ASIO
 		title += " NO_ASIO";
+	#endif
+	#ifdef NO_DSOUND
+		title += " NO_DSOUND";
 	#endif
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
