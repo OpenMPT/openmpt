@@ -2031,15 +2031,8 @@ BEGIN
         MENUITEM "&Search...",                  ID_HELP_SEARCH
         MENUITEM "&Report a bug",               ID_REPORT_BUG
         MENUITEM SEPARATOR
-        POPUP "&Internet"
-        BEGIN
-            MENUITEM "ModPlug Central &Forums",     ID_NETLINK_FORUMS
-            MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
-            MENUITEM "OpenMPT Wiki (German)",       ID_NETLINK_OPENMPTWIKI_GERMAN
-            MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
-            MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
-            MENUITEM "The Mod Archive",             ID_NETLINK_MODARCHIVE
-        END
+        MENUITEM "&OpenMPT Website",            ID_NETLINK_MODPLUG
+        MENUITEM "&Web Resources",              ID_NETLINK_TOP_PICKS
         MENUITEM SEPARATOR
         MENUITEM "&About OpenMPT...",           ID_APP_ABOUT
     END
@@ -2371,10 +2364,8 @@ BEGIN
     ID_PATTERN_EXPAND       "Expand pattern\nExpand Pattern"
     ID_PATTERN_SHRINK       "Shrink Pattern\nShrink Pattern"
     ID_HELP_SEARCH          "Displays the help index\nHelp Index"
-    ID_NETLINK_MODPLUG      "Go to ModPlug Central"
-    ID_NETLINK_UT           "Go to United Trackers"
-    ID_NETLINK_OSMUSIC      "Go to OSMusic.net"
-    ID_NETLINK_HANDBOOK     "Go to the Tracker's Handbook"
+    ID_NETLINK_MODPLUG      "Visit the OpenMPT website"
+    ID_NETLINK_TOP_PICKS    "Visit our list of free web resources!"
 END
 
 STRINGTABLE 
@@ -2386,9 +2377,7 @@ STRINGTABLE
 BEGIN
     ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
     ID_FILE_SAVEMIDI        "Export the current song to a standard MIDI file"
-    ID_NETLINK_FORUMS       "Go to the ModPlug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
-    ID_NETLINK_PLUGINS      "Go to KVR Audio to download plugins"
     ID_PATTERNDETAIL_LO     "Low pattern detail level\nLow pattern detail level"
     ID_PATTERNDETAIL_MED    "Medium pattern detail level\nMedium pattern detail level"
     ID_PATTERNDETAIL_HI     "High pattern detail level\nHigh pattern detail level"

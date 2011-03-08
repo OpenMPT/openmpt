@@ -222,11 +222,13 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER) + 64)) return false;
 
 	UINT insnum, patnum, nins, npat;
-	DWORD insfile[128];
-	WORD ptr[256];
 	BYTE s[1024];
 	DWORD dwMemPos;
-	BYTE insflags[128], inspack[128];
+	vector<DWORD> smpdatapos;
+	vector<WORD> smppos;
+	vector<WORD> patpos;
+	vector<BYTE> insflags;
+	vector<BYTE> inspack;
 	S3MFILEHEADER psfh = *(S3MFILEHEADER *)lpStream;
 	bool bKeepMidiMacros = false, bHasAdlibPatches = false;
 
@@ -321,44 +323,46 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nSamples = insnum;
 	patnum = npat = psfh.patnum;
 	if (patnum > MAX_PATTERNS) patnum = MAX_PATTERNS;
-	memset(ptr, 0, sizeof(ptr));
 
-	// this seems to be corrupted, the table can't really hold that many values.
-	if(nins + npat > 256)
-		return false;
-
-	if (nins + npat)
+	// Read sample header offsets
+	smppos.resize(nins, 0);
+	for(UINT i = 0; i < nins; i++, dwMemPos += 2)
 	{
-		memcpy(ptr, lpStream + dwMemPos, 2 * (nins + npat));
-		dwMemPos += 2 * (nins + npat);
-		const UINT nLoopEnd = min(256, nins + npat);
-		for(UINT j = 0; j < nLoopEnd; ++j)
+		WORD ptr = *((WORD *)(lpStream + dwMemPos));
+		smppos[i] = LittleEndianW(ptr);
+	}
+	// Read pattern offsets
+	patpos.resize(npat, 0);
+	for(UINT i = 0; i < npat; i++, dwMemPos += 2)
+	{
+		WORD ptr = *((WORD *)(lpStream + dwMemPos));
+		patpos[i] = LittleEndianW(ptr);
+	}
+	// Read channel panning
+	if (psfh.panning_present == 0xFC)
+	{
+		const BYTE *chnpan = lpStream+dwMemPos;
+		for (UINT i=0; i<32; i++) if (chnpan[i] & 0x20)
 		{
-		        ptr[j] = LittleEndianW(ptr[j]);
-		}
-		if (psfh.panning_present == 252)
-		{
-			const BYTE *chnpan = lpStream+dwMemPos;
-			for (UINT i=0; i<32; i++) if (chnpan[i] & 0x20)
-			{
-				ChnSettings[i].nPan = ((chnpan[i] & 0x0F) << 4) + 8;
-			}
+			ChnSettings[i].nPan = ((chnpan[i] & 0x0F) << 4) + 8;
 		}
 	}
-	if (!m_nChannels) return true;
+
 	// Reading instrument headers
-	memset(insfile, 0, sizeof(insfile));
+	smpdatapos.resize(insnum, 0);
+	inspack.resize(insnum, 0);
+	insflags.resize(insnum, 0);
 	for (UINT iSmp=1; iSmp<=insnum; iSmp++)
 	{
-		UINT nInd = ((DWORD)ptr[iSmp-1])*16;
+		UINT nInd = ((DWORD)smppos[iSmp - 1]) * 16;
 		if ((!nInd) || (nInd + 0x50 > dwMemLength)) continue;
 
-		memcpy(s, lpStream+nInd, 0x50);
+		memcpy(s, lpStream + nInd, 0x50);
 		memcpy(Samples[iSmp].filename, s+1, 12);
 		SpaceToNullStringFixed<12>(Samples[iSmp].filename);
 
-		insflags[iSmp-1] = s[0x1F];
-		inspack[iSmp-1] = s[0x1E];
+		insflags[iSmp - 1] = s[0x1F];
+		inspack[iSmp - 1] = s[0x1E];
 		s[0x4C] = 0;
 		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
 		SpaceToNullStringFixed<28>(m_szNames[iSmp]);
@@ -378,7 +382,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 			if (c5Speed < 1024) c5Speed = 1024;
 			Samples[iSmp].nC5Speed = c5Speed;
 
-			insfile[iSmp - 1] = (s[0x0E] << 4) | (s[0x0F] << 12) | (s[0x0D] << 20);
+			smpdatapos[iSmp - 1] = (s[0x0E] << 4) | (s[0x0F] << 12) | (s[0x0D] << 20);
 
 			if(Samples[iSmp].nLoopEnd < 2)
 				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
@@ -393,6 +397,8 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 	}
 
+	if (!m_nChannels) return true;
+
 	/* Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
 	   We won't convert if there are not enough Zxx commands, too "high" Zxx commands
 	   or there are only "left" or "right" pannings (we assume that stereo should be somewhat balanced) */
@@ -400,13 +406,13 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	int iZxxCountRight = 0, iZxxCountLeft = 0;
 
 	// Reading patterns
-	for (UINT iPat=0; iPat<patnum; iPat++)
+	for (UINT iPat = 0; iPat < patnum; iPat++)
 	{
-		UINT nInd = ((DWORD)ptr[nins+iPat]) << 4;
-		if (nInd + 0x40 > dwMemLength) continue;
-		WORD len = LittleEndianW(*((WORD *)(lpStream+nInd)));
-		nInd += 2;
 		bool fail = Patterns.Insert(iPat, 64);
+		UINT nInd = ((DWORD)patpos[iPat]) * 16;
+		if (nInd == 0 || nInd + 0x40 > dwMemLength) continue;
+		WORD len = LittleEndianW(*((WORD *)(lpStream + nInd)));
+		nInd += 2;
 		if ((!len) || (nInd + len > dwMemLength - 6)
 		 || (fail) ) continue;
 		LPBYTE src = (LPBYTE)(lpStream+nInd);
@@ -426,7 +432,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 				UINT chn = b & 0x1F;
 				if (chn < m_nChannels)
 				{
-					MODCOMMAND *m = &p[row*m_nChannels+chn];
+					MODCOMMAND *m = &p[row * m_nChannels + chn];
 					if (b & 0x20)
 					{
 						if(j + nInd + 2 >= dwMemLength) break;
@@ -498,15 +504,15 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading samples
-	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if ((Samples[iRaw].nLength) && (insfile[iRaw - 1]))
+	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if ((Samples[iRaw].nLength) && (smpdatapos[iRaw - 1]))
 	{
 		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;
 		if (insflags[iRaw-1] & 2) flags |= RSF_STEREO;
 		if (inspack[iRaw-1] == 4) flags = RS_ADPCM4;
-		if(insfile[iRaw - 1] < dwMemLength)
+		if(smpdatapos[iRaw - 1] < dwMemLength)
 		{
-			dwMemPos = insfile[iRaw - 1];
+			dwMemPos = smpdatapos[iRaw - 1];
 		}
 		if(dwMemPos < dwMemLength)
 		{
