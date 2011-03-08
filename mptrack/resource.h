@@ -1036,17 +1036,13 @@
 #define ID_PATTERNCOPY                  32874
 #define ID_PATTERNPASTE                 32875
 #define ID_NETLINK_MODPLUG              32876
-#define ID_NETLINK_UT                   32877
-#define ID_NETLINK_OSMUSIC              32878
-#define ID_NETLINK_HANDBOOK             32879
+#define ID_NETLINK_TOP_PICKS            32877
 #define ID_SAMPLE_TRIM                  32880
 #define ID_FILE_SAVEMIDI                32881
 #define ID_MODTREE_OPENITEM             32882
-#define ID_NETLINK_FORUMS               32883
 #define ID_CONTROLENTER                 32885
 #define ID_INSTRUMENT_SAMPLEMAP         32886
 #define ID_SAMPLE_MONOCONVERT           32887
-#define ID_NETLINK_PLUGINS              32888
 #define ID_SAMPLE_ZOOMUP                32889
 #define ID_SAMPLE_ZOOMDOWN              32890
 #define ID_PATTERNDETAIL_LO             32891
@@ -1116,7 +1112,6 @@
 #define ID_VSTPRESETBACKWARDJUMP        36031
 #define ID_VSTPRESETFORWARDJUMP         36032
 #define ID_SELECTINST                   36100
-#define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
 #define ID_LEARN_MACRO_FROM_PLUGGUI     37004
 #define ID_CHANGE_INSTRUMENT            37020
@@ -1152,10 +1147,7 @@
 #define ID_ENVELOPE_TOGGLERELEASENODE   59206
 #define ID_Menu59207                    59207
 #define ID_ENVELOPE_SCALEPOINTS         59208
-#define ID_NETLINK_OPENMPTWIKI          59210
 #define ID_VIEW_MIDIMAPPING             59211
-#define ID_NETLINK_OPENMPTWIKI_GERMAN   59213
-#define ID_NETLINK_MODARCHIVE           59214
 #define ID_PATTERN_DUPLICATECHANNEL     59216
 #define ID_EDIT_GOTO_MENU               59220
 #define ID_CLEANUP_COMPO                59221

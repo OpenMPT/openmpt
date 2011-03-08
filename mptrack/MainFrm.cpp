@@ -92,16 +92,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_PANIC,					OnPanic)
 	ON_COMMAND(ID_PLAYER_PAUSE,				OnPlayerPause)
 	ON_COMMAND_EX(IDD_TREEVIEW,				OnBarCheck)
-	ON_COMMAND_EX(ID_NETLINK_OPENMPTWIKI,	OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_UT,			OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_OSMUSIC,		OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_MPTFR,			OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_HANDBOOK,		OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_FORUMS,		OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_PLUGINS,		OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_OPENMPTWIKI_GERMAN, OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_MODARCHIVE,	OnInternetLink)
+	ON_COMMAND_EX(ID_NETLINK_TOP_PICKS,		OnInternetLink)
 	ON_CBN_SELCHANGE(IDC_COMBO_BASEOCTAVE,	OnOctaveChanged)
 	ON_UPDATE_COMMAND_UI(ID_MIDI_RECORD,	OnUpdateMidiRecord)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,	OnUpdateTime)
@@ -2801,6 +2793,8 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	switch(nID)
 	{
 	case ID_NETLINK_MODPLUG:	pszURL = "http://openmpt.org/"; break;
+	case ID_NETLINK_TOP_PICKS:	pszURL = "http://openmpt.org/top_picks"; break;
+	/*
 	case ID_NETLINK_OPENMPTWIKI:pszURL = "http://wiki.openmpt.org/"; break;
 //	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 //	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
@@ -2810,6 +2804,7 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com/"; break;
 	case ID_NETLINK_MODARCHIVE: pszURL = "http://modarchive.org/"; break;
 	case ID_NETLINK_OPENMPTWIKI_GERMAN: pszURL = "http://wikide.openmpt.org/Hauptseite"; break;
+	*/
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);
 	return FALSE;
