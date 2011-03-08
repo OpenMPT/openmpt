@@ -1183,6 +1183,7 @@
 #define ID_VIEW_EDITHISTORY             60452
 #define ID_SAMPLE_GRID                  60453
 #define ID_SAMPLE_QUICKFADE             60454
+#define ID_EDIT_MIXPASTE_ITSTYLE        60455
 
 // Next default values for new objects
 // 
@@ -1190,7 +1191,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        529
-#define _APS_NEXT_COMMAND_VALUE         60455
+#define _APS_NEXT_COMMAND_VALUE         60456
 #define _APS_NEXT_CONTROL_VALUE         2435
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

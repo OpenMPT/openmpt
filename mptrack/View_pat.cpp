@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_COPY,		OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,		OnEditPaste)
 	ON_COMMAND(ID_EDIT_MIXPASTE,	OnEditMixPaste)
+	ON_COMMAND(ID_EDIT_MIXPASTE_ITSTYLE,OnEditMixPasteITStyle)
 	ON_COMMAND(ID_EDIT_PASTEFLOOD,	OnEditPasteFlood)
 	ON_COMMAND(ID_EDIT_PUSHFORWARDPASTE,OnEditPushForwardPaste)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,	OnEditSelectAll)
@@ -5080,15 +5081,19 @@ bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pModDoc)
 //-----------------------------------------------------------------------------------
 {
+	HMENU pasteSpecialMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
+	AppendMenu(hMenu, MF_POPUP, (UINT)pasteSpecialMenu, "Paste Special");
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, "Mix Paste (IT Style)\t" + ih->GetKeyTextFromCommand(kcEditMixPasteITStyle));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
 
 	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo()?FALSE:MF_GRAYED;
-	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+	if (!greyed || !(CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 	}
 

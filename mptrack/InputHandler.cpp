@@ -447,6 +447,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c=kcShowSplitKeyboardSettings; break;
 			// "Paste Special" sub menu
 		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c=kcEditMixPaste; break;
+		case ID_EDIT_MIXPASTE_ITSTYLE:	s="&Mix Paste (IT Style)\t"; c=kcEditMixPasteITStyle; break;
 		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c=kcEditPasteFlood; break;
 		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste\t"; c=kcEditPushForwardPaste; break;
 
@@ -511,6 +512,7 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(ID_EDIT_COPY, MF_BYCOMMAND | MF_STRING, ID_EDIT_COPY, GetMenuText(ID_EDIT_COPY));
 	pMenu->ModifyMenu(ID_EDIT_PASTE, MF_BYCOMMAND | MF_STRING, ID_EDIT_PASTE, GetMenuText(ID_EDIT_PASTE));
 	pMenu->ModifyMenu(ID_EDIT_PASTE_SPECIAL, MF_BYCOMMAND | MF_STRING, ID_EDIT_PASTE_SPECIAL, GetMenuText(ID_EDIT_PASTE_SPECIAL));
+	pMenu->ModifyMenu(ID_EDIT_MIXPASTE_ITSTYLE, MF_BYCOMMAND | MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, GetMenuText(ID_EDIT_MIXPASTE_ITSTYLE));
 	pMenu->ModifyMenu(ID_EDIT_PASTEFLOOD, MF_BYCOMMAND | MF_STRING, ID_EDIT_PASTEFLOOD, GetMenuText(ID_EDIT_PASTEFLOOD));
 	pMenu->ModifyMenu(ID_EDIT_PUSHFORWARDPASTE, MF_BYCOMMAND | MF_STRING, ID_EDIT_PUSHFORWARDPASTE, GetMenuText(ID_EDIT_PUSHFORWARDPASTE));
 	pMenu->ModifyMenu(ID_EDIT_SELECT_ALL, MF_BYCOMMAND | MF_STRING, ID_EDIT_SELECT_ALL, GetMenuText(ID_EDIT_SELECT_ALL));
