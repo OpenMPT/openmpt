@@ -91,10 +91,8 @@
         <li>Based on an undocumented feature in Impulse Tracker, OpenMPT can now save an <strong>edit history</strong> in IT and MPTM files, which reveals when and for how long a module has been edited in the tracker.</li>
         <li>When exporting to WAV, <strong>cue points</strong> are now inserted at every pattern transition.</li>
         <li>The last remaining absolute paths in the settings files have been removed; OpenMPT is now <strong>fully portable</strong>!</li>
-        <li>The <strong>sample grid</strong> can be used to create equally-sized sample selections.</li>
-        <li>Ctrl + Mouse Wheel can now be used to <strong>zoom into samples and envelopes</strong>.</li>
         <li>The instrument list on the comments tab also shows <strong>assigned plugins</strong> now.</li>
-        <li>New <strong>keyboard shortcuts</strong>: Panic, View Edit History, Set Invalid / Ignore Pattern (in the orderlist)</li>
+        <li>New <strong>keyboard shortcuts</strong>: Panic, View Edit History, Set Invalid / Ignore Pattern (in the orderlist), Quick fade (sample editor)</li>
         <li>Changes to <strong>keymap file handling</strong>: The active keymap is now always saved to Keybindings.mkb. Any other keymaps are now only overwritten when using the "Save keys as" function.</li>
         <li>When using the ACM MP3 codec, 320kbit/s bitrate should now be available.</li>
     </ul>
@@ -105,10 +103,18 @@
     </div>
     <ul>
         <li><strong>Per-pattern time signatures</strong> allow to override the global time signature. This is especially useful in modern tempo mode if you want to use several time signatures in the same song, or if you just temporarily need more detail in a pattern.</li>
-        <li>You can now <strong>select a whole row</strong> by clicking the row index on the left side of the pattern.</li>
+        <li>You can now <strong>select whole rows</strong> by clicking / dragging the row index on the left side of the pattern.</li>
         <li>The search feature has been extended to allow for <strong>searching in pattern selections</strong>.</li>
         <li>Furthermore, the usability of the Find / Replace dialog has been improved: Corresponding checkboxes are now automatically ticked when the value of a dropdown box has been changed. "Replace All" no longer creates an undo point for every replaced command.</li>
         <li>It is now possible to <strong>play the whole pattern row when entering notes</strong> and chords into the pattern editor. This behaviour can be enabled from the setup screen.</li>
+    </ul>
+    
+    <h3>Sample Editor / Instrument Editor</h3>
+    <ul>
+        <li>The <strong>sample grid</strong> can be used to create equally-sized sample selections.</li>
+        <li>You can now create seamless loop transitations using the <strong>sample loop crossfader</strong>.</li>
+        <li>There is a new context menu item for <strong>quickly fading</strong> in the sample start or fading out the sample end.</li> 
+        <li>Ctrl + Mouse Wheel can now be used to <strong>zoom into samples and envelopes</strong>.</li>
     </ul>
     
     <h3>Compatibility</h3>
@@ -135,7 +141,7 @@
         <i>This list has mostly been copied over from the old 1.17RC2 release notes, so this not very comprehensive... :-)</i>
     </p>
     <ul>
-        <li>Far from perfect VST support (routing, etc...)</li>
+        <li>Far from perfect VST support (no busses for routing, no MIDI routing, only a few tracker effects are supported, etc...)</li>
         <li>Some controls vanish randomly all the time, most notably under Windows Vista and Windows 7.</li> 
         <li>Previewing samples from the treeview's file browser stops the playing module.</li>
         <li>Cannot preview instruments directly from the MIDI library in the treeview.</li>
