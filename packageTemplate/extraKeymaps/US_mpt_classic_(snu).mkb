@@ -319,6 +319,16 @@ version:1
 //----( Sample Context [top] (16) )------------
 
 //----( Instrument Context [top] (17) )------------
+17:1851:2:68:1		//Duplicate instrument: Ctrl+D (KeyDown)
+17:1850:3:69:1		//Edit sample map: Shift+Ctrl+E (KeyDown)
+17:1849:2:69:1		//Edit current sample: Ctrl+E (KeyDown)
+17:1846:3:77:1		//Map all notes to selected note: Shift+Ctrl+M (KeyDown)
+17:1847:2:77:1		//Map all notes to selected sample: Ctrl+M (KeyDown)
+17:1848:2:82:1		//Reset note mapping: Ctrl+R (KeyDown)
+17:1843:2:81:1		//Transpose +1 (note map): Ctrl+Q (KeyDown)
+17:1842:2:65:1		//Transpose -1 (note map): Ctrl+A (KeyDown)
+17:1845:3:81:1		//Transpose +12 (note map): Shift+Ctrl+Q (KeyDown)
+17:1844:3:65:1		//Transpose -12 (note map): Shift+Ctrl+A (KeyDown)
 
 //----( Comments Context [top] (18) )------------
 

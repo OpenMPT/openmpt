@@ -282,6 +282,7 @@ version:1
 8:1785:2:85:1		//Signed/Unsigned conversion: Ctrl+U (KeyDown)
 8:1790:2:69:1		//Remove DC Offset: Ctrl+E (KeyDown)
 8:1856:2:68:1		//Quick fade: Ctrl+D (KeyDown)
+8:1857:2:76:1		//Crossfade sample loop: Ctrl+L (KeyDown)
 
 //----( Instrument Context [bottom] (9) )------------
 9:1837:0:107:5		//Zoom In: + (ZEHNERTASTATUR) (KeyDown|KeyHold)

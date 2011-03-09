@@ -72,8 +72,8 @@ Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
 
 ; release notes
 Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
-Source: ..\packageTemplate\ReleaseNotesImages\1.18\*.*; DestDir: {app}\ReleaseNotesImages\1.18\; Flags: ignoreversion sortfilesbyextension
-Source: ..\packageTemplate\OMPT_1.18_ReleaseNotes.html; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\1.19\*.*; DestDir: {app}\ReleaseNotesImages\1.18\; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\OMPT_1.19_ReleaseNotes.html; DestDir: {app}; Flags: ignoreversion
 
 ; soundtouch license stuff
 Source: ..\packageTemplate\SoundTouch\*.*; DestDir: {app}\SoundTouch; Flags: ignoreversion sortfilesbyextension
