@@ -86,6 +86,10 @@ public:
 	//4. Length of the stream.
 	//Returns true on error.
 
+	// Static allocation / deallocation helpers
+	static MODCOMMAND* AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns);
+	static void FreePattern(MODCOMMAND *pat);
+
 //END: INTERFACE METHODS
 
 	typedef MODCOMMAND* iterator;

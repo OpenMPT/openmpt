@@ -241,6 +241,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 	BYTE inspanenv[MAX_INSTRUMENTS];
 	LPCBYTE pvolenv, ppanenv, ppitchenv;
 	UINT nvolenv, npanenv, npitchenv;
+	vector<ROWINDEX> patternLength;
 
 	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pmsh->id != 0x4C444D44) || ((pmsh->version & 0xF0) > 0x10)) return false;
@@ -313,6 +314,9 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			npatterns = lpStream[dwMemPos];
 			if (npatterns > MAX_PATTERNS) npatterns = MAX_PATTERNS;
 			dwPos = dwMemPos + 1;
+
+			patternLength.assign(npatterns, 64);
+
 			for (i=0; i<npatterns; i++)
 			{
 				const WORD *pdata;
@@ -323,7 +327,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				{
 					const MDLPATTERNDATA *pmpd = (const MDLPATTERNDATA *)(lpStream + dwPos);
 					if (pmpd->channels > 32) break;
-					Patterns[i].Resize(pmpd->lastrow+1);
+					patternLength[i] = pmpd->lastrow + 1;
 					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
 					dwPos += 18 + 2*pmpd->channels;
 					pdata = pmpd->data;
@@ -331,7 +335,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				} else
 				{
 					pdata = (const WORD *)(lpStream + dwPos);
-					Patterns[i].Resize(64, false);
+					//Patterns[i].Resize(64, false);
 					if (m_nChannels < 32) m_nChannels = 32;
 					dwPos += 2*32;
 					ch = 32;
@@ -527,7 +531,10 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		for (UINT ipat=0; ipat<npatterns; ipat++)
 		{
-			if ((Patterns[ipat] = AllocatePattern(Patterns[ipat].GetNumRows(), m_nChannels)) == NULL) break;
+			if(Patterns.Insert(ipat, patternLength[ipat]))
+			{
+				break;
+			}
 			for (UINT chn=0; chn<m_nChannels; chn++) if ((patterntracks[ipat*32+chn]) && (patterntracks[ipat*32+chn] <= ntracks))
 			{
 				MODCOMMAND *m = Patterns[ipat] + chn;

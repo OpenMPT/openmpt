@@ -571,7 +571,6 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	memset(midichstate, 0, sizeof(midichstate));
 	// Initializing Patterns
 	Order[0] = 0;
-	for (UINT ipat=0; ipat<Patterns.Size(); ipat++) Patterns[ipat].Resize(gnMidiPatternLen, false);
 	// Initializing Channels
 	for (UINT ics=0; ics<MAX_BASECHANNELS; ics++)
 	{
@@ -628,10 +627,9 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	do
 	{
 		// Allocate current pattern if not allocated yet
-		if (!Patterns[pat])
+		if (!Patterns[pat] && Patterns.Insert(pat, gnMidiPatternLen))
 		{
-			Patterns[pat] = AllocatePattern(Patterns[pat].GetNumRows(), m_nChannels);
-			if (!Patterns[pat]) break;
+			break;
 		}
 		dwGlobalFlags |= MIDIGLOBAL_SONGENDED;
 		MODCOMMAND *m = Patterns[pat] + row * m_nChannels;
