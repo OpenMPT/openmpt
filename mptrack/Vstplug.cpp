@@ -2093,32 +2093,38 @@ bool CVstPlugin::SaveProgram(CString fileName)
     
 	bool success;
 	//Collect required data
-	PlugParamIndex numParams = GetNumParameters();
 	long ID = GetUID();
 	long plugVersion = GetVersion();
-	float *params = new float[numParams]; 
-	GetParams(params, 0, numParams);
 
-	Cfxp* fxp = NULL;
+	Cfxp* fxp = nullptr;
 
 	//Construct & save fxp
+
+	// try chunk-based preset:
 	if(m_pEffect->flags & effFlagsProgramChunks)
-	{ // try chunk-based preset:
+	{
 		void *chunk = NULL;
 		long chunkSize = Dispatch(effGetChunk, 1,0, &chunk, 0);
-		if ((chunkSize > 8) && (chunk))	//If chunk is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+		if ((chunkSize > 8) && (chunk))	//If chunk is less than 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 			fxp = new Cfxp(ID, plugVersion, 1, chunkSize, chunk);
 	}
-	if (fxp == NULL)
-	{ // fall back on parameter based preset:
+	// fall back on parameter based preset:
+	if (fxp == nullptr)
+	{
+		//Collect required data
+		PlugParamIndex numParams = GetNumParameters();
+		float *params = new float[numParams]; 
+		GetParams(params, 0, numParams);
+
 		fxp = new Cfxp(ID, plugVersion, numParams, params);
+
+		delete[] params;
 	}
 	
 	success = fxp->Save(fileName);
 	if (fxp)
 		delete fxp;
 
-	delete[] params;
 	return success;
 	
 }
@@ -2182,14 +2188,14 @@ long CVstPlugin::GetCurrentProgram()
 	return 0;
 }
 
-long CVstPlugin::GetProgramNameIndexed(long index, long category, char *text)
+bool CVstPlugin::GetProgramNameIndexed(long index, long category, char *text)
 //---------------------------------------------------------------------------
 {
 	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
 	{
-		return Dispatch(effGetProgramNameIndexed, index, category, text, 0);
+		return (Dispatch(effGetProgramNameIndexed, index, category, text, 0) == 1);
 	}
-	return 0;
+	return false;
 }
 
 
@@ -2251,10 +2257,10 @@ VOID CVstPlugin::GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize)
 	pszName[0] = 0;
 	if ((m_pEffect) && (m_pEffect->numParams > 0) && (nIndex < (UINT)m_pEffect->numParams))
 	{
-		CHAR s[64]; //Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs.
+		CHAR s[64]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
 		s[0] = 0;
 		Dispatch(effGetParamName, nIndex, 0, s, 0);
-		s[min(sizeof(s)-1, cbSize-1)] = 0;
+		s[min(CountOf(s) - 1, cbSize - 1)] = 0;
 		lstrcpyn(pszName, s, min(cbSize, sizeof(s)));
 	}
 }
@@ -2295,7 +2301,7 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 }
 
 void CVstPlugin::Init(unsigned long /*nFreq*/, int /*bReset*/)
-//----------------------------------------------------
+//------------------------------------------------------------
 {
 
 }

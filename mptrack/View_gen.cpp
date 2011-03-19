@@ -1507,7 +1507,11 @@ void CViewGlobals::OnFillProgramCombo()
 	m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
 	for (UINT i = 0; i < nProg; i++)
 	{
-		pVstPlugin->GetProgramNameIndexed(i, 0, sname);
+		if(!pVstPlugin->GetProgramNameIndexed(i, 0, sname))
+		{
+			strcpy(sname, "");
+		}
+		SetNullTerminator(sname);
 
 		if(sname[0] < ' ')
 		{
