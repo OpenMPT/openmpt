@@ -3697,24 +3697,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		case kcSelectBeat:
 		case kcSelectMeasure:
-			// Select whole beat / measure
-			{
-				const ROWINDEX adjust = (wParam == kcSelectBeat) ? GetRowsPerBeat() : GetRowsPerMeasure();
-				const ROWINDEX startRow = GetSelectionStartRow() - (GetSelectionStartRow() % adjust);	// Snap to start of beat / measure of upper-left corner of current selection
-				const ROWINDEX endRow = GetSelectionEndRow() + adjust - (GetSelectionEndRow() % adjust) - 1;	// Snap to end of beat / measure of lower-right corner of current selection
-				DWORD startMask = (GetSelectionStartChan() << 3), endMask = (GetSelectionEndChan() << 3);
-				if(m_dwBeginSel == m_dwEndSel)
-				{
-					endMask |= LAST_COLUMN;	// Extend to param column;
-				} else
-				{
-					// Remember start / end column
-					startMask |= (m_dwBeginSel & 0x07);
-					endMask |= (m_dwEndSel & 0x07);
-				}
-				SetCurSel((startRow << 16) | startMask, (endRow << 16) | endMask);
-			}
-			return wParam;
+			SelectBeatOrMeasure(wParam == kcSelectBeat); return wParam;
 
 		case kcClearRow:		OnClearField(-1, false);	return wParam;
 		case kcClearField:		OnClearField(m_dwCursor & 0x07, false);	return wParam;
@@ -5670,4 +5653,45 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	}
 	EndWaitCursor();
+}
+
+
+// Select a whole beat (selectBeat = true) or measure.
+void CViewPattern::SelectBeatOrMeasure(bool selectBeat)
+//-----------------------------------------------------
+{
+	const ROWINDEX adjust = selectBeat ? GetRowsPerBeat() : GetRowsPerMeasure();
+
+	// Snap to start of beat / measure of upper-left corner of current selection
+	const ROWINDEX startRow = GetSelectionStartRow() - (GetSelectionStartRow() % adjust);
+	// Snap to end of beat / measure of lower-right corner of current selection
+	const ROWINDEX endRow = GetSelectionEndRow() + adjust - (GetSelectionEndRow() % adjust) - 1;
+
+	DWORD startMask = (GetSelectionStartChan() << 3), endMask = (GetSelectionEndChan() << 3);
+	
+	if(m_dwBeginSel == m_dwEndSel)
+	{
+		// No selection has been made yet => expand selection to whole channel.
+		endMask |= LAST_COLUMN;	// Extend to param column;
+	} else if(startRow == GetSelectionStartRow() && endRow == GetSelectionEndRow())
+	{
+		// Whole beat or measure is already selected
+		if((m_dwBeginSel & 0x07) == 0 && (m_dwEndSel & 0x07) == LAST_COLUMN)
+		{
+			// Whole channel is already selected => expand selection to whole row.
+			startMask = 0;
+			endMask = 0xFFFF;
+		} else
+		{
+			// Channel is only partly selected => expand to whole channel first.
+			endMask |= LAST_COLUMN;	// Extend to param column;
+		}
+	}
+	else
+	{
+		// Some arbitrary selection: Remember start / end column
+		startMask |= (m_dwBeginSel & 0x07);
+		endMask |= (m_dwEndSel & 0x07);
+	}
+	SetCurSel((startRow << 16) | startMask, (endRow << 16) | endMask);
 }
