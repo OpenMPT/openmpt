@@ -10,10 +10,11 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.01.00 (February 2011, revision 813)
------------------------------------------
+v1.19.01.00 (March 2011, revision 820)
+--------------------------------------
 Pattern tab
    [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
+   [New] <Jojo> The new keyboard shortcuts "Select beat" and "Select measure" can be used to automatically extend the current selection to the beat / measure boundaries.
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
    [Imp] <Jojo> Special paste modes have been moved to a sub menu in the context menu, to save some space.
    [Mod] <Jojo> Using the Goto Dialog should now update channel parameters and set the elapsed time. (http://bugs.openmpt.org/view.php?id=28)
@@ -68,6 +69,7 @@ VST
    [Fix] <Jojo> Speaker arrangement is now sent to the plugins upon initialization. This fixes Voxengo SPAN 2 (a VST 2.4 plugin). Does this break other multichannel plugins?
    [Fix] <Jojo> The time signature sent to VST plugins should be correct now. The denominator is always assumed to be 4, so a 6/8 signature is for example not possible.
    [Fix] <Jojo> The EnergyXT GUI does now also work after closing and re-opening the VST editor. (tx Nahkranoth, http://forum.openmpt.org/index.php?topic=2307.0)
+   [Fix] <Jojo> Fixed garbage characters shown in preset fields of plugins that don't return program names.
 
 Mod Conversion
    [Imp] <Jojo> If the new format doesn't support restart positions, it is now tried to convert the restart position to a pattern command.
@@ -87,7 +89,8 @@ Playback
 
 IT
    [New] <Jojo> Edit history information can now be read from and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information. 
-   [Imp] <Jojo> IT files made with Modplug Tracker 1.00a5 are now also detected as such.
+   [Imp] <Jojo> IT files made with Modplug Tracker 1.00a5 are now also detected as such. Since long patterns can also be created in other trackers (e.g. Chibi), long patterns are not used to identify files made with MPT anymore.
+   [Imp] <Jojo> IT Loader: Autovibrato sweep is now fixed when loading IT files made with old versions of (Open)MPT.
    [Mod] <Jojo> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
    [Mod] <Jojo> IT Loader: MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
    [Fix] <Jojo> In compatible mode, bidi loops are now treated like in IT's software mixer. (http://bugs.openmpt.org/view.php?id=29)
@@ -156,6 +159,7 @@ Misc
    [Fix] <Jojo> The ID3v2 "comments" field was not formatted properly when exporting to MP3. 
    [Fix] <Jojo> unmo3.dll and uxtheme.dll (for theming the general tab) are now loaded "safely", to avoid the currently spreading DLL exploits.
    [Fix] <Jojo> Editing a sample / instrument name on the comments tab didn't mark the module as modified (tx djmakas)
+   [Fix] <Jojo> When changing the font size of the song message while the comments tab is open, the message editor is now resized instantly. Previously, only the font size was updated.
    [Reg] <Jojo> "Set highlights to songs' time signatures" is gone. Custom song highlighting is now always applied, and the values found in the colour options are now always applied to new modules.
 
 
