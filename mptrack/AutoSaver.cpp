@@ -378,8 +378,8 @@ void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 	CHAR szPath[_MAX_PATH] = "";
 	BROWSEINFO bi;
 
-	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, sizeof(szPath));
-	memset(&bi, 0, sizeof(bi));
+	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
+	MemsetZero(bi);
 	bi.hwndOwner = m_hWnd;
 	bi.lpszTitle = "Select a folder to store autosaved files in...";
 	bi.pszDisplayName = szPath;

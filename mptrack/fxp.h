@@ -26,7 +26,7 @@ public:
 	bool Save(CString fileName);
 
 protected:
-	BOOL m_bNeedSwap;
+	int m_bNeedSwap;
 	bool Load(CString fileName);
 
 	bool ReadLE(CFile &in, long &l);

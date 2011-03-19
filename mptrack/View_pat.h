@@ -30,8 +30,18 @@ class COpenGLEditor;
 #define PATSTATUS_PLUGNAMESINHEADERS	0x2000	// Show plugin names in channel headers //rewbs.patPlugName
 #define PATSTATUS_SELECTROW				0x4000	// Selecting a whole pattern row by clicking the row numbers
 
+
 // Row Spacing
 #define MAX_SPACING		64 // MAX_PATTERN_ROWS
+
+
+// Selection - bit masks
+// ---------------------
+// A selection point (m_dwStartSel and the like) is stored in a 32-Bit variable. The structure is as follows (MSB to LSB):
+// | 16 bits - row | 13 bits - channel | 3 bits - channel component |
+// As you can see, the highest 16 bits contain a row index.
+// It is followed by a channel index, which is 13 bits wide.
+// The lowest 3 bits are used for addressing the components of a channel. They are *not* used as a bit set, but treated as one of the following integer numbers:
 
 enum PatternColumns
 {
@@ -42,6 +52,8 @@ enum PatternColumns
 	PARAM_COLUMN,
 	LAST_COLUMN = PARAM_COLUMN
 };
+
+static_assert(MAX_CHANNELS <= 0x1FFF, "Check: Channel index in pattern editor is only 13 bits wide!");
 
 
 //Struct for controlling selection clearing. This is used to define which data fields
@@ -67,10 +79,10 @@ struct ModCommandPos
 struct FindReplaceStruct
 {
 	MODCOMMAND cmdFind, cmdReplace;			// Find/replace notes/instruments/effects
-	DWORD dwFindFlags, dwReplaceFlags;		// PATSEARCH_XXX flags
+	DWORD dwFindFlags, dwReplaceFlags;		// PATSEARCH_XXX flags (=> PatternEditorDialogs.h)
 	CHANNELINDEX nFindMinChn, nFindMaxChn;	// Find in these channels (if PATSEARCH_CHANNEL is set)
 	signed char cInstrRelChange;			// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
-	DWORD dwBeginSel, dwEndSel;				// Find in this selection (if PATSEARCH_PATSEL is set)
+	DWORD dwBeginSel, dwEndSel;				// Find in this selection (if PATSEARCH_PATSELECTION is set)
 };
 
 
@@ -94,7 +106,8 @@ protected:
 	bool m_bDragging, m_bInItemRect, m_bContinueSearch, m_bWholePatternFitsOnScreen;
 	RECT m_rcDragItem;
 	DWORD m_dwStatus, m_dwCursor;
-	DWORD m_dwBeginSel, m_dwEndSel, m_dwStartSel, m_dwDragPos;
+	DWORD m_dwBeginSel, m_dwEndSel;		// Upper-left / Lower-right corners of selection
+	DWORD m_dwStartSel, m_dwDragPos;	// Point where selection was started
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 	CListBox *ChnEffectList[MAX_BASECHANNELS]; //rewbs.patPlugName

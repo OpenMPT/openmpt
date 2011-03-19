@@ -276,7 +276,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += 6;
 		if (dwMemPos + wDataLen > dwMemLength) break;
 		UINT nLines = pmp->wLines;
-		if ((iPat < MAX_PATTERNS) && (nLines > 0) && (nLines <= 256))
+		if ((iPat < MAX_PATTERNS) && (nLines > 0) && (nLines <= MAX_PATTERN_ROWS))
 		{
 	#ifdef MT2DEBUG
 			Log("Pattern #%d @%04X: %d lines, %d bytes\n", iPat, dwMemPos-6, nLines, pmp->wDataLen);
