@@ -853,7 +853,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(rows <= ModSpecs::itEx.patternRowsMax && rows > ModSpecs::it.patternRowsMax)
 		{
-			interpretModPlugMade = true;
+			//interpretModPlugMade = true;	// Chibi also does this.
 			hasModPlugExtensions = true;
 		}
 
@@ -970,6 +970,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			pSmp->nVibRate = pis->vis;
 			pSmp->nVibDepth = pis->vid & 0x7F;
 			pSmp->nVibSweep = pis->vir; //(pis->vir + 3) / 4;
+			if(pSmp->nVibSweep == 0 && (pSmp->nVibDepth || pSmp->nVibRate) && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+			{
+				pSmp->nVibSweep = 255;	// Let's correct this little stupid mistake in history.
+			}
 
 			if(pis->samplepointer) lastSampleOffset = pis->samplepointer; // MPTX hack
 
