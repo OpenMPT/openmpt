@@ -81,6 +81,7 @@ Source: ..\packageTemplate\SoundTouch\*.*; DestDir: {app}\SoundTouch; Flags: ign
 Source: ..\packageTemplate\extraKeymaps\*.*; DestDir: {app}\extraKeymaps; Flags: ignoreversion sortfilesbyextension
 
 ; kind of auto-backup - handy!
+Source: {userappdata}\OpenMPT\Keybindings.mkb; DestDir: {userappdata}\OpenMPT; DestName: Keybindings.mkb.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 Source: {userappdata}\OpenMPT\mptrack.ini; DestDir: {userappdata}\OpenMPT; DestName: mptrack.ini.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 Source: {userappdata}\OpenMPT\plugin.cache; DestDir: {userappdata}\OpenMPT; DestName: plugin.cache.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 
@@ -246,31 +247,15 @@ begin
             begin
                 if(GetIniInt('Paths', 'UseAppDataDirectory', 1, 0, 0, ExpandConstant('{app}\mptrack.ini')) = 1) then
                 begin
-                    filepath := ExpandConstant('{userappdata}\OpenMPT\mptrack.ini');
-                    if FileExists(filepath) then DeleteFile(filepath);
-
-                    filepath := ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb');
-                    if FileExists(filepath) then DeleteFile(filepath);
-
-                    filepath := ExpandConstant('{userappdata}\OpenMPT\plugin.cache');
-                    if FileExists(filepath) then DeleteFile(filepath);
-
-                    filepath := ExpandConstant('{userappdata}\OpenMPT\tunings\local_tunings.tc');
-                    if FileExists(filepath) then DeleteFile(filepath);
+                    filepath := ExpandConstant('{userappdata}\OpenMPT\');
                 end else
+                    filepath := ExpandConstant('{app}\');
                 begin
-                    filepath := ExpandConstant('{app}\mptrack.ini');
-                    if FileExists(filepath) then DeleteFile(filepath);
-
-                    filepath := ExpandConstant('{app}\Keybindings.mkb');
-                    if FileExists(filepath) then DeleteFile(filepath);
-
-                    filepath := ExpandConstant('{app}\plugin.cache');
-                    if FileExists(filepath) then DeleteFile(filepath);
-
-                    filepath := ExpandConstant('{app}\tunings\local_tunings.tc');
-                    if FileExists(filepath) then DeleteFile(filepath);
                 end;
+                DeleteFile(filepath + 'mptrack.ini');
+                DeleteFile(filepath + 'Keybindings.mkb');
+                DeleteFile(filepath + 'plugin.cache');
+                DeleteFile(filepath + 'tunings\local_tunings.tc');
             end;
         end;
     end;

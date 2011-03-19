@@ -77,6 +77,8 @@ version:1
 2:1050:1:16:1		//Selection key: Shift+UMSCHALT (KeyDown)
 2:1051:2:17:1		//Copy select key: Ctrl+STRG (KeyDown)
 2:1011:2:76:1		//Select channel / Select all: Ctrl+L (KeyDown)
+2:1858:2:66:1		//Select beat: Ctrl+B (KeyDown)
+2:1859:3:66:1		//Select measure: Shift+Ctrl+B (KeyDown)
 2:1663:0:19:1		//Toggle follow song:  (KeyDown)
 2:1003:0:13:1		//Quick copy: EINGABE (KeyDown)
 2:1004:0:32:5		//Quick paste: LEER (KeyDown|KeyHold)
