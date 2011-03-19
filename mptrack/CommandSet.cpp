@@ -604,6 +604,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcViewEditHistory, 1855, kcVisible, kcNoDummy, _T("View Edit History"));
 	DefineKeyCommand(kcSampleQuickFade, 1856, kcVisible, kcNoDummy, _T("Quick fade"));
 	DefineKeyCommand(kcSampleXFade, 1857, kcVisible, kcNoDummy, _T("Crossfade sample loop"));
+	DefineKeyCommand(kcSelectBeat, 1858, kcVisible, kcNoDummy, _T("Select beat"));
+	DefineKeyCommand(kcSelectMeasure, 1859, kcVisible, kcNoDummy, _T("Select measure"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

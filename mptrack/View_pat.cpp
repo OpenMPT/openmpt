@@ -1694,8 +1694,8 @@ void CViewPattern::OnEditFind()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CFindReplaceTab pageFind(IDD_EDIT_FIND, FALSE, pModDoc);
-		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, TRUE, pModDoc);
+		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc);
+		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc);
 		CPropertySheet dlg("Find/Replace");
 
 		pageFind.m_nNote = m_findReplace.cmdFind.note;
@@ -3695,6 +3695,27 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcCopySelectOffWithNav:
 		case kcCopySelectOff:	m_dwStatus &= ~PATSTATUS_CTRLDRAGSEL; return wParam;
 
+		case kcSelectBeat:
+		case kcSelectMeasure:
+			// Select whole beat / measure
+			{
+				const ROWINDEX adjust = (wParam == kcSelectBeat) ? GetRowsPerBeat() : GetRowsPerMeasure();
+				const ROWINDEX startRow = GetSelectionStartRow() - (GetSelectionStartRow() % adjust);	// Snap to start of beat / measure of upper-left corner of current selection
+				const ROWINDEX endRow = GetSelectionEndRow() + adjust - (GetSelectionEndRow() % adjust) - 1;	// Snap to end of beat / measure of lower-right corner of current selection
+				DWORD startMask = (GetSelectionStartChan() << 3), endMask = (GetSelectionEndChan() << 3);
+				if(m_dwBeginSel == m_dwEndSel)
+				{
+					endMask |= LAST_COLUMN;	// Extend to param column;
+				} else
+				{
+					// Remember start / end column
+					startMask |= (m_dwBeginSel & 0x07);
+					endMask |= (m_dwEndSel & 0x07);
+				}
+				SetCurSel((startRow << 16) | startMask, (endRow << 16) | endMask);
+			}
+			return wParam;
+
 		case kcClearRow:		OnClearField(-1, false);	return wParam;
 		case kcClearField:		OnClearField(m_dwCursor & 0x07, false);	return wParam;
 		case kcClearFieldITStyle: OnClearField(m_dwCursor & 0x07, false, true);	return wParam;
@@ -4778,8 +4799,8 @@ void CViewPattern::OnSelectInstrument(UINT nID)
 
 	if (newIns == 0)
 	{
-		RowMask sp = {0,1,0,0,0};    // Setup mask to only clear instrument data in OnClearSelection
-		OnClearSelection(false, sp); // Clears instrument selection from pattern
+		RowMask sp = {false, true, false, false, false};    // Setup mask to only clear instrument data in OnClearSelection
+		OnClearSelection(false, sp);	// Clears instrument selection from pattern
 	} else
 	{
 		SetSelectionInstrument(newIns);
