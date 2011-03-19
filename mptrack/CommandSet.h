@@ -201,7 +201,9 @@ enum CommandID
 	kcCopySelectWithSelect,
 	kcCopySelectOffWithSelect,
 	kcSelectColumn,
-	kcEndSelect=kcSelectColumn,
+	kcSelectBeat,
+	kcSelectMeasure,
+	kcEndSelect=kcSelectMeasure,
 
 	kcStartPatternEditMisc,
 	kcToggleFollowSong=kcStartPatternEditMisc,

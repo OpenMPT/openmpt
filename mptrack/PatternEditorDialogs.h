@@ -35,7 +35,7 @@ class CFindReplaceTab: public CPropertyPage
 //=========================================
 {
 protected:
-	BOOL m_bReplace;
+	bool m_bReplace;	// is this the replace tab?
 	CModDoc *m_pModDoc;
 
 public:
@@ -69,7 +69,7 @@ protected:
 	void ChangeEffect();
 
 public:
-	CFindReplaceTab(UINT nIDD, BOOL bReplaceTab, CModDoc *pModDoc):CPropertyPage(nIDD) { m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
+	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc):CPropertyPage(nIDD) { m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
 
 protected:
 	virtual BOOL OnInitDialog();
