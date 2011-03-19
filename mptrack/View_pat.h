@@ -186,6 +186,7 @@ public:
 // -! NEW_FEATURE#0014// -> CODE#0012
 	BOOL ShowEditWindow();
 	UINT GetCurrentInstrument() const;
+	void SelectBeatOrMeasure(bool selectBeat);
 
 	BOOL TransposeSelection(int transp);
 	BOOL PrepareUndo(DWORD dwBegin, DWORD dwEnd);
