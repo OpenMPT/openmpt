@@ -139,6 +139,7 @@ VOID CAbstractVstEditor::OnSavePreset()
 	//TODO: exception handling
 	if (!(m_pVstPlugin->SaveProgram(files.first_file.c_str())))
 		::AfxMessageBox("Error saving preset.");
+
 }
 
 VOID CAbstractVstEditor::OnRandomizePreset()
@@ -172,25 +173,29 @@ VOID CAbstractVstEditor::SetupMenu()
 void CAbstractVstEditor::UpdatePresetField()
 //------------------------------------------
 {
-	
-	if(m_pVstPlugin->GetNumPrograms() > 0 && m_pMenu->GetMenuItemCount() < 5)
+	if(m_pVstPlugin->GetNumPrograms() > 0)
 	{
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, TEXT("<<"));
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, TEXT("<"));
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, TEXT(">"));
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, TEXT(">>"));
-		m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
+		if(m_pMenu->GetMenuItemCount() < 5)
+		{
+			m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, TEXT("<<"));
+			m_pMenu->AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, TEXT("<"));
+			m_pMenu->AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, TEXT(">"));
+			m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, TEXT(">>"));
+			m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
+		}
+		long index = m_pVstPlugin->GetCurrentProgram();
+		char name[266];
+		char rawname[256];
+		if(!m_pVstPlugin->GetProgramNameIndexed(index, -1, rawname))
+		{
+			strcpy(rawname, "");
+		}
+		SetNullTerminator(rawname);
+		CreateVerifiedProgramName(rawname, sizeof(rawname), name, sizeof(name), index);
+
+		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
 	}
 	
-	long index = m_pVstPlugin->GetCurrentProgram();
-	char name[266];
-	char rawname[256];
-	m_pVstPlugin->GetProgramNameIndexed(index, -1, rawname);
-	rawname[sizeof(rawname)-1] = 0;
-	CreateVerifiedProgramName(rawname, sizeof(rawname), name, sizeof(name), index);
-
-	m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
-
 	DrawMenuBar();
 	
 }
@@ -255,7 +260,8 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 		if ( (!m_pVstPlugin->m_bPassKeypressesToPlug) &&  
 			((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
-			 (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN)) )	{
+			 (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN)) )
+		{
 
 			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 			
@@ -267,13 +273,15 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			InputTargetContext ctx = (InputTargetContext)(kCtxVSTGUI);
 			
 			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull) {
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull)
+			{
 				return true; 
 			}
 			
 			// Don't forward key repeats if plug does not listen for keypresses
 		    // (avoids system beeps on note hold)
-			if (kT == kKeyEventRepeat) {
+			if (kT == kKeyEventRepeat)
+			{
 				return true;
 			}
 		}
@@ -361,7 +369,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 		if(!pModDoc || !pSndFile)
 			return false;
 
-		if(pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
+		if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
 			AfxMessageBox(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION) == IDNO)
 		{
 			return false;
@@ -376,8 +384,8 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 			MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
 			m_nInstrument = nIns;
 
-			_snprintf(pIns->name, ARRAYELEMCOUNT(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
-			strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szLibraryName, ARRAYELEMCOUNT(pIns->filename) - 1);
+			_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
+			strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szLibraryName, CountOf(pIns->filename) - 1);
 			pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
 			pIns->nMidiChannel = 1;
 			// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
@@ -432,9 +440,12 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	}
 
 	for (long p=0; p<numProgs; p++) {
-		m_pVstPlugin->GetProgramNameIndexed(p, -1, sname);
+		if(!m_pVstPlugin->GetProgramNameIndexed(p, -1, sname))
+		{
+			strcpy(sname, "");
+		}
+		SetNullTerminator(sname);
 
-		sname[sizeof(sname)-1] = 0;
 		CreateVerifiedProgramName(sname, sizeof(sname), s, sizeof(s), p);
 
 		// Get menu item properties

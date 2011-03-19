@@ -109,7 +109,7 @@ public:
 	PlugParamIndex GetNumParameters();
 	long GetCurrentProgram();
 	long GetNumProgramCategories();	//rewbs.VSTpresets
-	long GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
+	bool GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
 	bool LoadProgram(CString fileName);
 	bool SaveProgram(CString fileName);
 	VstInt32 GetUID();			//rewbs.VSTpresets
@@ -205,7 +205,7 @@ public:
 	UINT GetNumCommands() {return 0;}
 	VOID GetPluginType(LPSTR) {}
 	PlugParamIndex GetNumPrograms() {return 0;}
-	long GetProgramNameIndexed(long, long, char*) {return 0;}
+	bool GetProgramNameIndexed(long, long, char*) {return 0;}
 	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
 	VOID GetParamLabel(UINT, LPSTR) {}
 	VOID GetParamDisplay(UINT, LPSTR) {}

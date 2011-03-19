@@ -96,7 +96,6 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	if ((pHint == this) || (!m_pSndFile) || (!(dwHint & (HINT_MODCOMMENTS|HINT_MPTOPTIONS|HINT_MODTYPE)))) return;
 	if (m_nLockCount) return;
 	m_nLockCount++;
-	m_EditComments.SetRedraw(FALSE);
 	HFONT newfont;
 	if (CMainFrame::m_dwPatternSetup & PATTERN_LARGECOMMENTS)
 		newfont = CMainFrame::GetLargeFixedFont();
@@ -106,7 +105,9 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	{
 		m_hFont = newfont;
 		m_EditComments.SendMessage(WM_SETFONT, (WPARAM)newfont);
+		RecalcLayout();
 	}
+	m_EditComments.SetRedraw(FALSE);
 	m_EditComments.SetSel(0, -1, TRUE);
 	m_EditComments.ReplaceSel("");
 	if (m_pSndFile->m_lpszSongComments)
