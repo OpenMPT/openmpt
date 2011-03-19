@@ -5,11 +5,30 @@
 #include "../mptrack/serialization_utils.h"
 #include "../mptrack/version.h"
 
+
+void CPatternContainer::ClearPatterns()
+//-------------------------------------
+{
+	DestroyPatterns();
+	m_Patterns.assign(m_Patterns.size(), MODPATTERN(*this));
+}
+
+
+void CPatternContainer::DestroyPatterns()
+//---------------------------------------
+{
+	for(PATTERNINDEX i = 0; i < m_Patterns.size(); i++)
+	{
+		Remove(i);
+	}
+}
+
+
 PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
 //---------------------------------------------------------
 {
 	PATTERNINDEX i = 0;
-	for(i = 0; i<m_Patterns.size(); i++)
+	for(i = 0; i < m_Patterns.size(); i++)
 		if(!m_Patterns[i]) break;
 	if(Insert(i, rows))
 		return PATTERNINDEX_INVALID;
@@ -38,7 +57,11 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 		}
 	}
 
-	m_Patterns[index] = CSoundFile::AllocatePattern(rows, m_rSndFile.m_nChannels);
+	if(m_Patterns[index].m_ModCommands != nullptr)
+	{
+		CPattern::FreePattern(m_Patterns[index].m_ModCommands);
+	}
+	m_Patterns[index].m_ModCommands = CPattern::AllocatePattern(rows, m_rSndFile.m_nChannels);
 	m_Patterns[index].m_Rows = rows;
 	m_Patterns[index].RemoveSignature();
 

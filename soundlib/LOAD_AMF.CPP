@@ -312,13 +312,13 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	// Setup sequence list
 	Order.resize(pfh->numorders, Order.GetInvalidPatIndex());
+	vector<ROWINDEX> patternLength(pfh->numorders, 64);
 	for (UINT iOrd=0; iOrd < pfh->numorders; iOrd++)
 	{
 		Order[iOrd] = iOrd;
-		Patterns[iOrd].Resize(64, false);
 		if (pfh->version >= 14)
 		{
-			Patterns[iOrd].Resize(LittleEndianW(*(USHORT *)(lpStream+dwMemPos)));
+			patternLength[iOrd] = LittleEndianW(*(uint16 *)(lpStream+dwMemPos));
 			dwMemPos += 2;
 		}
 		ptracks[iOrd] = (USHORT *)(lpStream+dwMemPos);
@@ -386,9 +386,10 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Create the patterns from the list of tracks
 	for (UINT iPat=0; iPat<pfh->numorders; iPat++)
 	{
-		MODCOMMAND *p = AllocatePattern(Patterns[iPat].GetNumRows(), m_nChannels);
-		if (!p) break;
-		Patterns[iPat] = p;
+		if(Patterns.Insert(iPat, patternLength[iPat]))
+		{
+			break;
+		}
 		for (UINT iChn=0; iChn<m_nChannels; iChn++)
 		{
 			UINT nTrack = LittleEndianW(ptracks[iPat][iChn]);
@@ -400,7 +401,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 					realtrk--;
 					if ((realtrk < realtrackcnt) && (pTrackData[realtrk]))
 					{
-						AMF_Unpack(p+iChn, pTrackData[realtrk], Patterns[iPat].GetNumRows(), m_nChannels);
+						AMF_Unpack(Patterns[iPat].GetpModCommand(0, iChn), pTrackData[realtrk], Patterns[iPat].GetNumRows(), m_nChannels);
 					}
 				}
 			}

@@ -256,21 +256,20 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	for(PATTERNINDEX npat=0; npat<size; npat++)
 	{
-		// Free pattern if not empty
-		if(Patterns[npat]) { FreePattern(Patterns[npat]); Patterns[npat] = NULL; }
-
 		// Patterns[npat].GetNumRows()
 		ASSERT_CAN_READ(4);
 		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
 		if(id > MAX_PATTERN_ROWS) return false;
-		Patterns[npat].Resize(id, false);
+		const ROWINDEX nRows = id;
 		dwMemPos += sizeof(DWORD);
 
 		// Try to allocate & read only sized patterns
-		if(Patterns[npat].GetNumRows()){
+		if(nRows)
+		{
 
 			// Allocate pattern
-			if(Patterns.Insert(npat, Patterns[npat].GetNumRows())){
+			if(Patterns.Insert(npat, nRows))
+			{
 				dwMemPos += m_nChannels * Patterns[npat].GetNumRows() * n;
 				continue;
 			}

@@ -2483,7 +2483,7 @@ void CViewPattern::OnDropSelection()
 	dy = (int)(m_dwDragPos >> 16) - (int)(m_dwStartSel >> 16);
 	if ((!dx) && (!dy)) return;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, nChannels, nRows);
-	pNewPattern = CSoundFile::AllocatePattern(nRows, nChannels);
+	pNewPattern = CPattern::AllocatePattern(nRows, nChannels);
 	if (!pNewPattern) return;
 	x1 = (m_dwBeginSel & 0xFFF8) >> 3;
 	y1 = (m_dwBeginSel) >> 16;
@@ -2559,7 +2559,7 @@ void CViewPattern::OnDropSelection()
 	SetCursorPosition( y1, (x1<<3)|c1 );
 	SetCurSel((y1<<16)|(x1<<3)|c1, (y2<<16)|(x2<<3)|c2);
 	InvalidatePattern();
-	CSoundFile::FreePattern(pOldPattern);
+	CPattern::FreePattern(pOldPattern);
 	pModDoc->SetModified();
 	EndWaitCursor();
 }

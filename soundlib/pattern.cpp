@@ -55,11 +55,11 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 	BEGIN_CRITICAL();
 	if (newRowCount > m_Rows)
 	{
-		MODCOMMAND *p = CSoundFile::AllocatePattern(newRowCount, sndFile.m_nChannels);
+		MODCOMMAND *p = AllocatePattern(newRowCount, sndFile.m_nChannels);
 		if (p)
 		{
 			memcpy(p, m_ModCommands, sndFile.m_nChannels*m_Rows*sizeof(MODCOMMAND));
-			CSoundFile::FreePattern(m_ModCommands);
+			FreePattern(m_ModCommands);
 			m_ModCommands = p;
 			m_Rows = newRowCount;
 		}
@@ -93,11 +93,11 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 #endif // MODPLUG_TRACKER
 		if (bOk)
 		{
-			MODCOMMAND *pnew = CSoundFile::AllocatePattern(newRowCount, sndFile.m_nChannels);
+			MODCOMMAND *pnew = AllocatePattern(newRowCount, sndFile.m_nChannels);
 			if (pnew)
 			{
 				memcpy(pnew, m_ModCommands, sndFile.m_nChannels*newRowCount*sizeof(MODCOMMAND));
-				CSoundFile::FreePattern(m_ModCommands);
+				FreePattern(m_ModCommands);
 				m_ModCommands = pnew;
 				m_Rows = newRowCount;
 			}
@@ -121,11 +121,12 @@ void CPattern::ClearCommands()
 void CPattern::Deallocate()
 //-------------------------
 {
-	BEGIN_CRITICAL();
+	// Removed critical section as it can cause problems when destroying patterns in the CSoundFile constructor.
+	//BEGIN_CRITICAL();
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
-	CSoundFile::FreePattern(m_ModCommands);
+	FreePattern(m_ModCommands);
 	m_ModCommands = nullptr;
-	END_CRITICAL();
+	//END_CRITICAL();
 }
 
 bool CPattern::Expand()
@@ -143,7 +144,7 @@ bool CPattern::Expand()
 	rModDoc.BeginWaitCursor();
 	const ROWINDEX nRows = m_Rows;
 	const CHANNELINDEX nChns = sndFile.m_nChannels;
-	newPattern = CSoundFile::AllocatePattern(nRows * 2, nChns);
+	newPattern = AllocatePattern(nRows * 2, nChns);
 	if (!newPattern) return true;
 
 	const PATTERNINDEX nPattern = m_rPatternContainer.GetIndex(this);
@@ -155,7 +156,7 @@ bool CPattern::Expand()
 	}
 	m_ModCommands = newPattern;
 	m_Rows = nRows * 2;
-	CSoundFile::FreePattern(oldPattern); oldPattern = nullptr;
+	FreePattern(oldPattern); oldPattern = nullptr;
 	rModDoc.SetModified();
 	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
 	rModDoc.EndWaitCursor();
@@ -209,6 +210,21 @@ bool CPattern::Shrink()
 	return false;
 }
 
+
+MODCOMMAND *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
+//----------------------------------------------------------------------
+{
+	MODCOMMAND *p = new MODCOMMAND[rows*nchns];
+	if (p) memset(p, 0, rows*nchns*sizeof(MODCOMMAND));
+	return p;
+}
+
+
+void CPattern::FreePattern(MODCOMMAND *pat)
+//-----------------------------------------
+{
+	if (pat) delete[] pat;
+}
 
 
 bool CPattern::WriteITPdata(FILE* f) const

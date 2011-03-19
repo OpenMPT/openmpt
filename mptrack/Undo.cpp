@@ -133,7 +133,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 	{
 		if((!pSndFile->Patterns[nPattern]) || (pSndFile->Patterns[nPattern].GetNumRows() < nRows))
 		{
-			MODCOMMAND *newPattern = CSoundFile::AllocatePattern(nRows, pSndFile->m_nChannels);
+			MODCOMMAND *newPattern = CPattern::AllocatePattern(nRows, pSndFile->m_nChannels);
 			MODCOMMAND *oldPattern = pSndFile->Patterns[nPattern];
 			if (!newPattern) return PATTERNINDEX_INVALID;
 			const ROWINDEX nOldRowCount = pSndFile->Patterns[nPattern].GetNumRows();
@@ -141,7 +141,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 			if(oldPattern)
 			{
 				memcpy(newPattern, oldPattern, pSndFile->m_nChannels * nOldRowCount * sizeof(MODCOMMAND));
-				CSoundFile::FreePattern(oldPattern);
+				CPattern::FreePattern(oldPattern);
 			}
 		}
 		linkToPrevious = pUndo->linkToPrevious;

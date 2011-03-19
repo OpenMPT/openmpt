@@ -31,8 +31,10 @@ public:
 	// Clears existing patterns and resizes array to default size.
 	void Init();
 
-	//Note: No memory handling here.
-	void ClearPatterns() {m_Patterns.assign(m_Patterns.size(), MODPATTERN(*this));}
+	// Empty and initialize all patterns.
+	void ClearPatterns();
+	// Delete all patterns.
+	void DestroyPatterns();
 	
 	//Insert (default)pattern to given position. If pattern already exists at that position,
 	//ignoring request. Returns true on failure, false otherwise.

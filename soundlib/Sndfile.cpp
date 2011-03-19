@@ -517,9 +517,9 @@ CSoundFile::~CSoundFile()
 
 
 BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 {
-	m_pModDoc=pModDoc;
+	m_pModDoc = pModDoc;
 	m_nType = MOD_TYPE_NONE;
 	m_dwSongFlags = 0;
 	m_nChannels = 0;
@@ -564,7 +564,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	ResetMidiCfg();
 
-	//for (UINT npt=0; npt<Patterns.Size(); npt++) Patterns[npt].GetNumRows() = 64;
 	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
 		InitChannel(nChn);
@@ -731,8 +730,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			pSmp->nSustainStart = 0;
 			pSmp->nSustainEnd = 0;
 		}
-		if (!pSmp->nLoopEnd) pSmp->uFlags &= ~CHN_LOOP;
-		if (!pSmp->nSustainEnd) pSmp->uFlags &= ~CHN_SUSTAINLOOP;
+		if (!pSmp->nLoopEnd) pSmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
+		if (!pSmp->nSustainEnd) pSmp->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
 	}
 	// Check invalid instruments
@@ -827,7 +826,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
 				CString sUrl;
-				sUrl.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", m_MixPlugins[*i].Info.szLibraryName);
+				sUrl.Format("http://www.kvraudio.com/search.php?lq=inurl%3Aget&q=%s", m_MixPlugins[*i].Info.szLibraryName);
 				CTrackApp::OpenURL(sUrl);
 			}
 	}
@@ -853,11 +852,7 @@ BOOL CSoundFile::Destroy()
 //------------------------
 {
 	size_t i;
-	for (i=0; i<Patterns.Size(); i++) if (Patterns[i])
-	{
-		FreePattern(Patterns[i]);
-		Patterns[i] = NULL;
-	}
+	Patterns.DestroyPatterns();
 	m_nPatternNames = 0;
 
 	delete[] m_lpszPatternNames;
@@ -902,23 +897,6 @@ BOOL CSoundFile::Destroy()
 
 //////////////////////////////////////////////////////////////////////////
 // Memory Allocation
-
-MODCOMMAND *CSoundFile::AllocatePattern(UINT rows, UINT nchns)
-//------------------------------------------------------------
-{
-	MODCOMMAND *p = new MODCOMMAND[rows*nchns];
-	if (p) memset(p, 0, rows*nchns*sizeof(MODCOMMAND));
-	return p;
-}
-
-
-void CSoundFile::FreePattern(LPVOID pat)
-//--------------------------------------
-{
-	
-	if (pat) delete pat;
-}
-
 
 LPSTR CSoundFile::AllocateSample(UINT nbytes)
 //-------------------------------------------
@@ -1551,7 +1529,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 		if (Patterns[nPat])
 		{
 			MODCOMMAND *p = Patterns[nPat];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(Patterns[nPat].GetNumRows(), nRemainingChannels);
+			MODCOMMAND *newp = CPattern::AllocatePattern(Patterns[nPat].GetNumRows(), nRemainingChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
@@ -1571,7 +1549,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 				}
 			}
 			Patterns[nPat] = newp;
-			CSoundFile::FreePattern(p);
+			CPattern::FreePattern(p);
 		}
 	}
 

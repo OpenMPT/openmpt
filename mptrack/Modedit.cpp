@@ -74,7 +74,7 @@ bool CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nNewChannels);
+			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nNewChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
@@ -86,7 +86,7 @@ bool CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 				memcpy(&newp[j*nNewChannels], &p[j*m_SndFile.m_nChannels], m_SndFile.m_nChannels*sizeof(MODCOMMAND));
 			}
 			m_SndFile.Patterns[i] = newp;
-			CSoundFile::FreePattern(p);
+			CPattern::FreePattern(p);
 		}
 
 		//if channel was removed before and is added again, mute status has to be unset! (bug 1814)
@@ -134,7 +134,7 @@ bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 		for (i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nRemainingChannels);
+			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nRemainingChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
@@ -150,7 +150,7 @@ bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 				}
 			}
 			m_SndFile.Patterns[i] = newp;
-			CSoundFile::FreePattern(p);
+			CPattern::FreePattern(p);
 		}
 		UINT tmpchn = 0;
 		for (i=0; i<m_SndFile.m_nChannels; i++)
@@ -517,10 +517,8 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat]))
 	{
 		BEGIN_CRITICAL();
-		LPVOID p = m_SndFile.Patterns[nPat];
-		m_SndFile.Patterns[nPat] = nullptr;
 		m_SndFile.SetPatternName(nPat, "");
-		CSoundFile::FreePattern(p);
+		m_SndFile.Patterns.Remove(nPat);
 		END_CRITICAL();
 		SetModified();
 		return true;

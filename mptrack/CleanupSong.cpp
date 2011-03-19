@@ -392,6 +392,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	}
 
 	// Remove all completely empty patterns above last used pattern (those are safe to remove)
+	BEGIN_CRITICAL();
 	for (PATTERNINDEX nPat = maxpat; nPat < maxPatIndex; nPat++) if ((pSndFile->Patterns[nPat]) && (nPat >= nMinToRemove))
 	{
 		if(pSndFile->Patterns.IsPatternEmpty(nPat))
@@ -400,6 +401,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			nPatRemoved++;
 		}
 	}
+	END_CRITICAL();
 
 	// Number of unused patterns
 	size_t nWaste = 0;
