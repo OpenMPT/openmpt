@@ -205,7 +205,7 @@ public:
 	UINT GetNumCommands() {return 0;}
 	VOID GetPluginType(LPSTR) {}
 	PlugParamIndex GetNumPrograms() {return 0;}
-	bool GetProgramNameIndexed(long, long, char*) {return 0;}
+	bool GetProgramNameIndexed(long, long, char*) {return false;}
 	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
 	VOID GetParamLabel(UINT, LPSTR) {}
 	VOID GetParamDisplay(UINT, LPSTR) {}

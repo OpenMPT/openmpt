@@ -279,14 +279,14 @@ bool Cfxp::WriteLE(CFile &out, const char *c, UINT length)
 bool Cfxp::NeedSwap()
 //-------------------
 {
-	if (m_bNeedSwap<0)		//don't yet know if we need to swap - find out!
+	if (m_bNeedSwap < 0)		//don't yet know if we need to swap - find out!
 	{
 		static char szChnk[] = "CcnK";  
 		static long lChnk = 'CcnK';
 		m_bNeedSwap = !!memcmp(szChnk, &lChnk, 4);
 	}
 
-	return m_bNeedSwap;
+	return m_bNeedSwap ? true : false;
 }
 
 
