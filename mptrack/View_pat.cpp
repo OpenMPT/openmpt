@@ -775,7 +775,7 @@ void CViewPattern::OnGrowSelection()
 	for (int row=finalDest; row>(int)(startSel >> 16); row-=2)
 	{
 		int offset = row-(startSel>>16);
-		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if ((i & 7) < 5)
+		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if ((i & 7) <= LAST_COLUMN)
 		{
 			UINT chn = i >> 3;
 			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
@@ -786,12 +786,12 @@ void CViewPattern::OnGrowSelection()
 			//Log("dst: %d; src: %d; blk: %d\n", row, (row-offset/2), (row-1));
 			switch(i & 7)
 			{
-				case NOTE_COLUMN:	dest->note    = src->note;    blank->note = 0;    break;
-				case INST_COLUMN:	dest->instr   = src->instr;   blank->instr = 0;   break;
-				case VOL_COLUMN:	dest->vol     = src->vol;     blank->vol = 0;   
-									dest->volcmd  = src->volcmd;  blank->volcmd = 0;  break;
-				case EFFECT_COLUMN:	dest->command = src->command; blank->command = 0; break;
-				case PARAM_COLUMN:	dest->param   = src->param;   blank->param = 0;   break;
+				case NOTE_COLUMN:	dest->note    = src->note;    blank->note = NOTE_NONE;		break;
+				case INST_COLUMN:	dest->instr   = src->instr;   blank->instr = 0;				break;
+				case VOL_COLUMN:	dest->vol     = src->vol;     blank->vol = 0;
+									dest->volcmd  = src->volcmd;  blank->volcmd = VOLCMD_NONE;	break;
+				case EFFECT_COLUMN:	dest->command = src->command; blank->command = 0;			break;
+				case PARAM_COLUMN:	dest->param   = src->param;   blank->param = CMD_NONE;		break;
 			}
 		}
 	}
@@ -817,24 +817,42 @@ void CViewPattern::OnShrinkSelection()
 	if (!p) return;
 	BeginWaitCursor();
 
-	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwBeginSel:m_dwEndSel;
-	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwEndSel:m_dwBeginSel;
+	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwBeginSel : m_dwEndSel;
+	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwEndSel : m_dwBeginSel;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->Patterns[m_nPattern].GetNumRows());
 
 	int finalDest = (startSel>>16)+((endSel>>16)-(startSel>>16))/2;
 
-	for (int row=(startSel>>16)+1; row<=finalDest; row++)
+	for (int row=(startSel >> 16); row <= finalDest; row++)
 	{
-		int offset = row-(startSel>>16);
-		int srcRow = (startSel>>16)+(offset*2);
+		int offset = row - (startSel >> 16);
+		int srcRow = (startSel >> 16) + (offset * 2);
 
-		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if ((i & 7) < 5)
+		for (UINT i = (startSel & 0xFFFF); i <= (endSel & 0xFFFF); i++) if ((i & 7) <= LAST_COLUMN)
 		{
-			UINT chn = i >> 3;
-			if ((chn >= pSndFile->m_nChannels) || (srcRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
+			const CHANNELINDEX chn = i >> 3;
+			if ((chn >= pSndFile->GetNumChannels()) || (srcRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 											   || (row    >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
-			MODCOMMAND *dest = &p[row    * pSndFile->m_nChannels + chn];
-			MODCOMMAND *src  = &p[srcRow * pSndFile->m_nChannels + chn];
+			MODCOMMAND *dest = pSndFile->Patterns[m_nPattern].GetpModCommand(row, chn);
+			MODCOMMAND *src = pSndFile->Patterns[m_nPattern].GetpModCommand(srcRow, chn);
+			// if source command is empty, try next source row.
+			if(srcRow < pSndFile->Patterns[m_nPattern].GetNumRows() - 1)
+			{
+				const MODCOMMAND *srcNext = pSndFile->Patterns[m_nPattern].GetpModCommand(srcRow + 1, chn);
+				if(src->note == NOTE_NONE) src->note = srcNext->note;
+				if(src->instr == 0) src->instr = srcNext->instr;
+				if(src->volcmd == VOLCMD_NONE)
+				{
+					src->volcmd = srcNext->volcmd;
+					src->vol = srcNext->vol;
+				}
+				if(src->command == CMD_NONE)
+				{
+					src->command = srcNext->command;
+					src->param = srcNext->param;
+				}
+			}
+			
 			//memcpy(dest/*+(i%5)*/, src/*+(i%5)*/, /*sizeof(MODCOMMAND) - (i-chn)*/ sizeof(BYTE));
 			Log("dst: %d; src: %d\n", row, srcRow);
 			switch(i & 7)
@@ -850,11 +868,19 @@ void CViewPattern::OnShrinkSelection()
 	}
 	for (int row=finalDest+1; row<=(endSel>>16); row++)
 	{
-		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if ((i & 7) < 5)
+		for (UINT i = (startSel & 0xFFFF); i <= (endSel & 0xFFFF); i++) if ((i & 7) <= LAST_COLUMN)
 		{
 			UINT chn = i >> 3;
-			MODCOMMAND *blank= &p[row * pSndFile->m_nChannels + chn];
-			*blank = MODCOMMAND::Empty();
+			MODCOMMAND *dest = pSndFile->Patterns[m_nPattern].GetpModCommand(row, chn);
+			switch(i & 7)
+			{
+				case NOTE_COLUMN:	dest->note    = NOTE_NONE;		break;
+				case INST_COLUMN:	dest->instr   = 0;				break;
+				case VOL_COLUMN:	dest->vol     = 0;
+									dest->volcmd  = VOLCMD_NONE;	break;
+				case EFFECT_COLUMN:	dest->command = CMD_NONE;		break;
+				case PARAM_COLUMN:	dest->param   = 0;				break;
+			}
 		}
 	}
 	m_dwBeginSel = startSel;
