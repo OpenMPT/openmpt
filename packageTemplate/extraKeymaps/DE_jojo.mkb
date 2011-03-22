@@ -16,6 +16,7 @@ version:1
 0:1031:0:119:1		//Pause song: F8 (KeyDown)
 0:1375:0:27:1		//Stop Song: ESC (KeyDown)
 0:1029:0:117:1		//Play song from start: F6 (KeyDown)
+0:1028:2:117:1		//Play song from cursor: Ctrl+F6 (KeyDown)
 0:1027:0:118:5		//Play pattern from start: F7 (KeyDown|KeyHold)
 0:1026:2:118:5		//Play pattern from cursor: Ctrl+F7 (KeyDown|KeyHold)
 0:1376:0:120:1		//Toggle Midi Record: F9 (KeyDown)
@@ -271,6 +272,7 @@ version:1
 7:1262:0:70:1		//FX Param digit F: F (KeyDown)
 
 //----( Sample Context [bottom] (8) )------------
+8:1673:0:13:1		//Load a Sample: EINGABE (KeyDown)
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
 8:1383:0:8:1		//Silence sample selection: RÜCK (KeyDown)
 8:1384:1:78:1		//Normalise Sample: Shift+N (KeyDown)
