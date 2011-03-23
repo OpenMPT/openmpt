@@ -90,17 +90,32 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT
 STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SEQUENCE) ); 
 
 
-//parametered macro presets:
-enum
+// parametered macro presets:
+enum enmParameteredMacroType
 {
-	sfx_unused=0,
+	sfx_unused = 0,
 	sfx_cutoff,
 	sfx_reso,
 	sfx_mode,
 	sfx_drywet,
 	sfx_plug,
 	sfx_cc,
-	sfx_custom
+	sfx_custom,
+
+	sfx_max
+};
+
+// fixed macro presets:
+enum enmFixedMacroType
+{
+	sfx_fixed_custom = 0,
+	sfx_fixed_reso4Bit,		// Type 1 - Z80 - Z8F controls resonance
+	sfx_fixed_reso7Bit,		// Type 2 - Z80 - ZFF controls resonance
+	sfx_fixed_cutoff,		// Type 3 - Z80 - ZFF controls cutoff
+	sfx_fixed_mode,			// Type 4 - Z80 - ZFF controls filter mode
+	sfx_fixed_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
+
+	sfx_fixed_max
 };
 
 
@@ -191,8 +206,10 @@ protected: // create from serialization only
 
 // public members
 public:
-	void InitPlayer();
 	CSoundFile *GetSoundFile() { return &m_SndFile; }
+	const CSoundFile *GetSoundFile() const { return &m_SndFile; }
+
+	void InitPlayer();
 	void SetPause(BOOL bPause) { m_bPaused = bPause; }
 	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = (bModified != FALSE); }
 	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
@@ -235,12 +252,16 @@ public:
 	LONG GetIndexFromVolCmd(UINT volcmd);
 	UINT GetVolCmdFromIndex(UINT ndx);
 	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
-	static int GetMacroType(CString value); //rewbs.xinfo
-	int MacroToPlugParam(CString value); //rewbs.xinfo
-	int MacroToMidiCC(CString value);
-	int FindMacroForParam(long param);
-	static int GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32]);
-	static void CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], int iZxxType);
+
+	// Various MIDI Macro helpers
+	static enmParameteredMacroType GetMacroType(CString value); //rewbs.xinfo
+	static int MacroToPlugParam(CString value); //rewbs.xinfo
+	static int MacroToMidiCC(CString value);
+	static enmFixedMacroType GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32]);
+	static void CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], enmFixedMacroType iZxxType);
+	bool IsMacroDefaultSetupUsed() const;
+	int FindMacroForParam(long param) const;
+
 	void SongProperties();
 
 	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }

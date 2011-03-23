@@ -3012,11 +3012,11 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 //---------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	DWORD dwMacro = (*((LPDWORD)pszMidiMacro)) & 0x7F5F7F5F;
+	DWORD dwMacro = (*((LPDWORD)pszMidiMacro)) & MACRO_MASK;
 	int nInternalCode;
 
 	// Not Internal Device ?
-	if (dwMacro != 0x30463046 && dwMacro != 0x31463046)
+	if (dwMacro != MACRO_INTERNAL && dwMacro != MACRO_INTERNALEX)
 	{
 		UINT pos = 0, nNib = 0, nBytes = 0;
 		DWORD dwMidiCode = 0, dwByteCode = 0;
@@ -3070,10 +3070,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 
 	// Internal device
 	//HACK:
-	bool extendedParam = false;
-	if (dwMacro == 0x31463046) {
-		extendedParam = true;
-	}
+	const bool extendedParam = (dwMacro == MACRO_INTERNALEX);
 
 	pszMidiMacro += 4;
 	nInternalCode = -256;
@@ -3179,14 +3176,13 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 //---------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	DWORD dwMacro = (*((LPDWORD)pszMidiMacro)) & 0x7F5F7F5F;
+	DWORD dwMacro = (*((LPDWORD)pszMidiMacro)) & MACRO_MASK;
 	int nInternalCode;
 	CHAR cData1;		// rewbs.smoothVST: 
 	DWORD dwParam;		// increased scope to fuction.
 
-	bool extendedParam = false;
-
-	if (dwMacro != 0x30463046 && dwMacro != 0x31463046) {
+	if (dwMacro != MACRO_INTERNAL && dwMacro != MACRO_INTERNALEX)
+	{
 		// we don't cater for external devices at tick resolution.
 		if(m_dwSongFlags & SONG_FIRSTTICK) {
 			ProcessMidiMacro(nChn, pszMidiMacro, param);
@@ -3195,9 +3191,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 	}
 	
 	//HACK:
-	if (dwMacro == 0x31463046) {
-		extendedParam = true;
-	}
+	const bool extendedParam = (dwMacro == MACRO_INTERNALEX);
 
 	// not sure what we're doing here; some sort of info gathering from the macros
 	pszMidiMacro += 4;
