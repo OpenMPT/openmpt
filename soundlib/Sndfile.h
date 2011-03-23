@@ -446,6 +446,7 @@ enum {
 };
 
 
+#define NUM_MACROS 16	// number of parametered macros
 struct MODMIDICFG
 {
 	CHAR szMidiGlb[9*32];
@@ -1006,9 +1007,6 @@ public:
 	static LPSTR AllocateSample(UINT nbytes);
 	static void FreeSample(LPVOID p);
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
-//private:
-	static MODCOMMAND *AllocatePattern(UINT rows, UINT nchns);
-	static void FreePattern(LPVOID pat);
 
 	// Song message helper functions
 public:
@@ -1067,7 +1065,7 @@ private:
 	size_t GetVisitedRowsVectorSize(const PATTERNINDEX nPat);
 
 public:
-	// "importance" of every FX command. Table is used for importing from formats with multiple effect colums
+	// "importance" of every FX command. Table is used for importing from formats with multiple effect columns
 	// and is approximately the same as in SchismTracker.
 	static uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd);
 	// try to convert a an effect into a volume column effect.

@@ -409,6 +409,11 @@ enum PLUGVOLUMEHANDLING
 	INST_NUMFILTERMODES
 };*/
 
+// MIDI Macros
+#define MACRO_MASK			0x7F5F7F5F
+#define MACRO_INTERNAL		0x30463046	// internal macro, low 7 bits (f.e. cutoff, resonance, low plugin params)
+#define MACRO_INTERNALEX	0x31463046	// internal macro, high 7 bits (high plugin params)
+
 // Vibrato Types
 #define VIB_SINE		0
 #define VIB_SQUARE		1
