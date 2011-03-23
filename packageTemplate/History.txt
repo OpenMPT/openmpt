@@ -10,23 +10,25 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.01.00 (March 2011, revision 820)
+v1.19.01.00 (March 2011, revision 827)
 --------------------------------------
 Pattern tab
    [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
    [New] <Jojo> The new keyboard shortcuts "Select beat" and "Select measure" can be used to automatically extend the current selection to the beat / measure boundaries.
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
    [Imp] <Jojo> Special paste modes have been moved to a sub menu in the context menu, to save some space.
+   [Imp] <Jojo> Status bar now indicates if highpass filter is enabled on a channel.
    [Mod] <Jojo> Using the Goto Dialog should now update channel parameters and set the elapsed time. (http://bugs.openmpt.org/view.php?id=28)
    [Mod] <Jojo> Undo steps have been increased from 100 to 1000.
+   [Fix] <Jojo> Shrink selection is more consistent with Shrink pattern now: Entries on odd rows are not ignored anymore if there is no entry in the even rows. Also, cleaning of the pattern after shrinking the selection has been fixed - it cleaned whole commands instead of just the selected parts of a command.
    [Fix] <Jojo> Cursor paste was possible even when editing was disabled.
    [Fix] <Jojo> Using Right-Click -> Change Plugin on PC notes did not work for plugin numbers that were higher than the highest instrument number.
    [Fix] <Jojo> When entering chords into the pattern editor, the module was only marked as modified if the base note of the chord was changed.
    [Fix] <Jojo> When jumping to an order which is normally not played, the song variables are now reset (previously, if the main song had f.e. a global volume fade out at the end, this was retained when switching to an unplayed order, effectively muting all sub songs).
-   [Fix] <Jojo> OpenMPT should not crash anymore when applying the Amplify command on a pattern selection that just covers the note / instrument column of the first channel.
+   [Fix] <Jojo> OpenMPT does not crash anymore when applying the Amplify command on a pattern selection that just covers the note / instrument column of the first channel.
    [Fix] <Jojo> Queueing a "---" or "+++" item now automatically moves the queue "cursor" to the next available pattern. Previously, queueing a "---" pattern restarted the song.
-   [Fix] <Jojo> Changing a channel name from the pattern editor didn't set the document as modified (http://bugs.openmpt.org/view.php?id=65)
-   [Fix] <Jojo> When restarting a pattern, the timer was not reset properly.
+   [Fix] <Jojo> Changing a channel name from the pattern editor didn't mark the document as modified (http://bugs.openmpt.org/view.php?id=65)
+   [Fix] <Jojo> When restarting a pattern, the song timer was not reset properly.
    [Fix] <Jojo> Entering a note-off event in the MOD format created an unnecessary undo event.
    [Fix] <Jojo> Automation data is not written to the pattern if the current module format does not support smooth midi macros.
    [Reg] <Jojo> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
@@ -93,6 +95,7 @@ IT
    [Imp] <Jojo> IT Loader: Autovibrato sweep is now fixed when loading IT files made with old versions of (Open)MPT.
    [Mod] <Jojo> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
    [Mod] <Jojo> IT Loader: MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
+   [Fix] <Jojo> Incorrect notes were memorized for PPS (and possibly other effects) when working with instruments that had non-default note assignments (f.e. C-5 => D-4)
    [Fix] <Jojo> In compatible mode, bidi loops are now treated like in IT's software mixer. (http://bugs.openmpt.org/view.php?id=29)
    [Fix] <Jojo> Sample autovibrato is now hopefully a bit closer to Impulse Tracker in compatible mode... (http://bugs.openmpt.org/view.php?id=5)
    [Fix] <Jojo> The envelope handling was altered slightly to work more like in Schism Tracker. This fixes a combination of Envelope Carry + Portamento as it can be found in "electric bunny" by Alpha C.
@@ -144,6 +147,7 @@ Misc
    [Imp] <Jojo> Sound Setup: For ASIO devices, only supported sampling rates are now shown.
    [Imp] <Jojo> The instrument list on the comments tab also shows assigned plugins now.
    [Imp] <Jojo> Added Mix Paste (IT Style) to the "Paste Special" edit menu
+   [Imp] <Jojo> Macro Editor: User is now warned if the current macro configuration differs from the default configuration but embedding macro configuration is disabled.
    [Mod] <Jojo> Changes to keymap file handling: The active keymap is now always saved to Keybindings.mkb (in either %APPDATA%\OpenMPT or the executable's directory). Any other keymaps are now only overwritten when using the "Save keys as" function. (http://bugs.openmpt.org/view.php?id=20)
    [Mod] <Jojo> On first run, the default ASIO driver is now chosen instead of DirectSound (if there is one).
    [Mod] <Jojo> The "Original" mix mode now also has a version number (1.16) to reflect what the "original" thing is.

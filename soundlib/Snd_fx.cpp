@@ -522,7 +522,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	} else
 	if (m_nInstruments)
 	{
-		if (note >= 0xFE) return;
+		if (note >= NOTE_MIN_SPECIAL) return;
 		pSmp = NULL;
 	}
 
@@ -725,6 +725,8 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
 
 	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && pIns && pIns->pTuning);
+	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
+	const int realnote = note;
 
 	if ((pIns) && (note <= 0x80))
 	{
@@ -798,7 +800,14 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	{
 		note = CLAMP(note, NOTE_MIN, NOTE_MAX);
 	}
-	pChn->nNote = note;
+	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		// need to memorize the original note for various effects (f.e. PPS)
+		pChn->nNote = CLAMP(realnote, NOTE_MIN, NOTE_MAX);
+	} else
+	{
+		pChn->nNote = note;
+	}
 	pChn->m_CalculateFreq = true;
 
 	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
