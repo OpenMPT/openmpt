@@ -911,8 +911,7 @@ private:
 	void ExtendedS3MCommands(UINT nChn, UINT param);
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
 	inline void InvertLoop(MODCHANNEL* pChn);
-	void ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0);
-	void ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0); //rewbs.smoothVST
+	void ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro, UINT param = 0);
 	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);

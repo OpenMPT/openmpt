@@ -14,6 +14,9 @@ struct CModSpecifications
 	bool HasNote(MODCOMMAND::NOTE note) const;
 	bool HasVolCommand(MODCOMMAND::VOLCMD volcmd) const;
 	bool HasCommand(MODCOMMAND::COMMAND cmd) const;
+	// Return corresponding effect letter for this format
+	char GetEffectLetter(MODCOMMAND::COMMAND cmd) const;
+	char GetVolEffectLetter(MODCOMMAND::VOLCMD cmd) const;
 
 	// NOTE: If changing order, update all initializations below.
 	char fileExtension[6];	  // File extension without dot.
@@ -64,7 +67,7 @@ const CModSpecifications mptm =
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
 	"mptm",								// File extension
-	1,									// Minimum note index
+	NOTE_MIN,							// Minimum note index
 	NOTE_MAX,							// Maximum note index
 	true,								// Has notecut.
 	true,								// Has noteoff.
@@ -383,7 +386,7 @@ const CModSpecifications itEx =
 	// TODO: Set correct values.
 	"it",								// File extension
 	1,									// Minimum note index
-	NOTE_MAX,							// Maximum note index
+	120,								// Maximum note index
 	true,								// Has notecut.
 	true,								// Has noteoff.
 	true,								// Has notefade.

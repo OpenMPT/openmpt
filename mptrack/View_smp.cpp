@@ -1282,11 +1282,12 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 
 		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
 		{
-			if(m_nSample > 0 && m_nSample < MAX_SAMPLES && x < pSndFile->Samples[m_nSample].nLength )
+			if(m_nSample > 0 && m_nSample < MAX_SAMPLES && x < pSndFile->Samples[m_nSample].nLength)
 			{
 				const DWORD xLow = (x / 0x100) % 0x100;
 				const DWORD xHigh = x / 0x10000;
-				const char cOffsetChar = (pSndFile->TypeIsS3M_IT_MPT()) ? gszS3mCommands[CMD_OFFSET] : gszModCommands[CMD_OFFSET];
+
+				const char cOffsetChar = pSndFile->GetModSpecifications().GetEffectLetter(CMD_OFFSET);
 				const bool bHasHighOffset = (pSndFile->TypeIsS3M_IT_MPT() || (pSndFile->GetType() == MOD_TYPE_XM));
 				const char cHighOffsetChar = (pSndFile->TypeIsS3M_IT_MPT()) ? gszS3mCommands[CMD_S3MCMDEX] : gszModCommands[CMD_XFINEPORTAUPDOWN];
 
@@ -1299,7 +1300,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				pMainFrm->SetInfoText(s);
 			}
 			else
+			{
 				pMainFrm->SetInfoText("");
+			}
 		}
 	} else UpdateIndicator(NULL);
 	if (m_dwStatus & SMPSTATUS_MOUSEDRAG)

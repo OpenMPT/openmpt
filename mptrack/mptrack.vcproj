@@ -259,90 +259,6 @@
 				RelativePath=".\KeyConfigDlg.cpp">
 			</File>
 			<File
-				RelativePath="..\soundlib\Load_669.cpp">
-			</File>
-			<File
-				RelativePath="..\Soundlib\load_amf.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_ams.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\load_dbm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\load_dmf.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_dsm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_far.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_gdm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_imf.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_it.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_itp.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\load_j2b.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_mdl.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_med.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\load_mid.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_mo3.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_mod.cpp">
-			</File>
-			<File
-				RelativePath="..\Soundlib\load_mt2.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_mtm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_okt.cpp">
-			</File>
-			<File
-				RelativePath="..\Soundlib\load_psm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\load_ptm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_s3m.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_stm.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_ult.cpp">
-			</File>
-			<File
-				RelativePath="..\Soundlib\Load_umx.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_wav.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\Load_xm.cpp">
-			</File>
-			<File
 				RelativePath=".\mainbar.cpp">
 			</File>
 			<File
@@ -804,9 +720,6 @@
 				RelativePath=".\KeyConfigDlg.h">
 			</File>
 			<File
-				RelativePath="..\soundlib\Loaders.h">
-			</File>
-			<File
 				RelativePath=".\mainbar.h">
 			</File>
 			<File
@@ -990,6 +903,97 @@
 			</File>
 			<File
 				RelativePath=".\test\test.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="Module Loaders"
+			Filter="">
+			<File
+				RelativePath="..\soundlib\Load_669.cpp">
+			</File>
+			<File
+				RelativePath="..\Soundlib\load_amf.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_ams.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\load_dbm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\load_dmf.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_dsm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_far.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_gdm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_imf.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_it.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_itp.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\load_j2b.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_mdl.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_med.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\load_mid.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_mo3.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_mod.cpp">
+			</File>
+			<File
+				RelativePath="..\Soundlib\load_mt2.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_mtm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_okt.cpp">
+			</File>
+			<File
+				RelativePath="..\Soundlib\load_psm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\load_ptm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_s3m.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_stm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_ult.cpp">
+			</File>
+			<File
+				RelativePath="..\Soundlib\Load_umx.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_wav.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Load_xm.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\Loaders.h">
 			</File>
 		</Filter>
 		<File
