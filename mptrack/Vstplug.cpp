@@ -18,7 +18,7 @@
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #define ZLIB_WINAPI
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
-#endif
+#endif // VST_USE_ALTERNATIVE_MAGIC
 
 #define new DEBUG_NEW
 
@@ -52,7 +52,7 @@ UINT32 CalculateCRC32fromFilename(const char * s)
 	return crc32(0, (BYTE *)fn, f);
 
 }
-#endif
+#endif // VST_USE_ALTERNATIVE_MAGIC
 
 VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -261,16 +261,16 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				{
 					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure (for VSTs with same UID)
 				};
-			#endif
+			#endif // VST_USE_ALTERNATIVE_MAGIC
 			#ifdef VST_LOG
 				Log("Plugin \"%s\" found in PluginCache\n", p->szLibraryName);
-			#endif
+			#endif // VST_LOG
 				return p;
 			} else
 			{
 			#ifdef VST_LOG
 				Log("Plugin \"%s\" mismatch in PluginCache: \"%s\" [%s]=\"%s\"\n", s, pszDllPath, (LPCTSTR)IDs, (LPCTSTR)strFullPath);
-			#endif
+			#endif // VST_LOG
 			}
 		}
 	}
@@ -278,20 +278,21 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	HINSTANCE hLib = NULL;
 
 
-	try {
+	try
+	{
 			hLib = LoadLibrary(pszDllPath);
 	//rewbs.VSTcompliance
 #ifdef _DEBUG
-	if (!hLib)
-	{
-		TCHAR szBuf[256]; 
-		LPVOID lpMsgBuf;
-		DWORD dw = GetLastError(); 
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
-		wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, lpMsgBuf); 
-		MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
-		LocalFree(lpMsgBuf);
-	}
+			if (!hLib)
+			{
+				TCHAR szBuf[256]; 
+				LPVOID lpMsgBuf;
+				DWORD dw = GetLastError(); 
+				FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
+				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, lpMsgBuf); 
+				MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
+				LocalFree(lpMsgBuf);
+			}
 #endif //_DEBUG	
 	//end rewbs.VSTcompliance
 	} catch(...)
@@ -304,7 +305,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "main");
 	#ifdef ENABLE_BUZZ
 		GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLib, "GetInfo");
-	#endif
+	#endif // ENABLE_BUZZ
 		if (pMainProc)
 		{
 			PVSTPLUGINLIB p = new VSTPLUGINLIB;
@@ -329,9 +330,9 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 					pEffect->dispatcher(pEffect, effOpen, 0,0,0,0);
 				#ifdef VST_USE_ALTERNATIVE_MAGIC
 					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure
-				#else					
+				#else
 					p->dwPluginId1 = pEffect->magic;
-				#endif
+				#endif // VST_USE_ALTERNATIVE_MAGIC
 					p->dwPluginId2 = pEffect->uniqueID;
 					if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs)) p->bIsInstrument = TRUE;
 				#ifdef VST_LOG
@@ -342,7 +343,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 						pEffect->numInputs, pEffect->numOutputs,
 						pEffect->numPrograms, pEffect->numParams,
 						pEffect->flags, pEffect->realQualities, pEffect->offQualities);
-				#endif
+				#endif // VST_LOG
 					pEffect->dispatcher(pEffect, effClose, 0,0,0,0);
 					bOk = TRUE;
 				}
@@ -406,7 +407,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		{
 		#ifdef VST_LOG
 			Log("Entry point not found!\n");
-		#endif
+		#endif // VST_LOG
 		}
 
 		try {
@@ -420,7 +421,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	{
 	#ifdef VST_LOG
 		Log("LoadLibrary(%s) failed!\n", pszDllPath);
-	#endif
+	#endif // VST_LOG
 	}
 	return NULL;
 }
@@ -753,7 +754,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	//---from here VST 2.0 extension opcodes------------------------------------------------------
 
-	// <value> is a filter which is currently ignored
+	// <value> is a filter which is currently ignored - DEPRECATED in VST 2.4
 	// Herman Seib only processes Midi events for plugs that call this. Keep in mind.
 	case audioMasterWantMidi:	return 1;
 	// returns const VstTimeInfo* (or 0 if not supported)
@@ -761,43 +762,53 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetTime: {
 
 		CVstPlugin* pVstPlugin = (CVstPlugin*)effect->resvd1;
-		memset(&timeInfo, 0, sizeof(timeInfo));
+		MemsetZero(timeInfo);
 		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
-		if (pVstPlugin) {
+		if (pVstPlugin)
+		{
 			CSoundFile* pSndFile = pVstPlugin->GetSoundFile();
 
-			if (pVstPlugin->IsSongPlaying()) {
+			if (pVstPlugin->IsSongPlaying())
+			{
 				timeInfo.flags |= kVstTransportPlaying;
 				timeInfo.samplePos = CMainFrame::GetMainFrame()->GetTotalSampleCount();
 				if (timeInfo.samplePos == 0) //samplePos=0 means we just started playing
-				timeInfo.flags |= kVstTransportChanged;	
-			} else {
+				{
+					timeInfo.flags |= kVstTransportChanged;	
+				}
+			} else
+			{
 				timeInfo.flags |= kVstTransportChanged; //just stopped.
 				timeInfo.samplePos = 0;
 			}
-			if ((value & kVstNanosValid)) {
+			if ((value & kVstNanosValid))
+			{
 				timeInfo.flags |= kVstNanosValid;
 				timeInfo.nanoSeconds = pVstPlugin->GetTimeAtStartOfProcess();
 			}
-			if ((value & kVstPpqPosValid) && pSndFile) {
+			if ((value & kVstPpqPosValid) && pSndFile)
+			{
 				timeInfo.flags |= kVstPpqPosValid;
-				if (timeInfo.flags & kVstTransportPlaying) {
+				if (timeInfo.flags & kVstTransportPlaying)
+				{
 					timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(pSndFile->GetCurrentBPM()/60.0);
-				} else {
+				} else
+				{
 					timeInfo.ppqPos = 0;
 				}
 			}
-			if ((value & kVstTempoValid) && pSndFile) {	
+			if ((value & kVstTempoValid) && pSndFile)
+			{	
 				timeInfo.tempo = pSndFile->GetCurrentBPM();
-				if (timeInfo.tempo) {
+				if (timeInfo.tempo)
+				{
 					timeInfo.flags |= kVstTempoValid;
 				}
 			}
-			if ((value & kVstTimeSigValid) && pSndFile) {
-				timeInfo.flags |= 	kVstTimeSigValid;
-				//timeInfo.timeSigNumerator = pSndFile->m_nCurrentRowsPerBeat;
-				//timeInfo.timeSigDenominator = pSndFile->m_nCurrentRowsPerMeasure;
+			if ((value & kVstTimeSigValid) && pSndFile)
+			{
+				timeInfo.flags |= kVstTimeSigValid;
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
@@ -811,27 +822,31 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// We don't support plugs that send VSTEvents to the host
 	case audioMasterProcessEvents:		
 		Log("VST plugin to host: Process Events\n");
-		break; 
+		break;
+	// DEPRECATED in VST 2.4
 	case audioMasterSetTime:						
 		Log("VST plugin to host: Set Time\n");
 		break;
-	// returns tempo (in bpm * 10000) at sample frame location passed in <value>
+	// returns tempo (in bpm * 10000) at sample frame location passed in <value> - DEPRECATED in VST 2.4
 	case audioMasterTempoAt: 
 		//Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
-		if (effect->resvd1) {
+		if (effect->resvd1)
+		{
 			CSoundFile *pSndFile = ((CVstPlugin*)effect->resvd1)->GetSoundFile();
-			if (pSndFile) {
-				return pSndFile->GetCurrentBPM()*10000;
-			} else {
-				return 125*10000;
+			if (pSndFile)
+			{
+				return (VstInt32)(pSndFile->GetCurrentBPM() * 10000);
+			} else
+			{
+				return (VstInt32)(125 * 10000);
 			}
 		}
 		return 125*10000;
-	// parameters
+	// parameters - DEPRECATED in VST 2.4
 	case audioMasterGetNumAutomatableParameters:						
 		Log("VST plugin to host: Get Num Automatable Parameters\n");
 		break;
-	// Apparently, this one is broken in VST SDK anyway.
+	// Apparently, this one is broken in VST SDK anyway. - DEPRECATED in VST 2.4
 	case audioMasterGetParameterQuantization:						
 		Log("VST plugin to host: Audio Master Get Parameter Quantization\n");
 		break;
@@ -839,7 +854,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterIOChanged:					
 		Log("VST plugin to host: IOchanged\n");
 		break;	
-	// plug needs idle calls (outside its editor window)
+	// plug needs idle calls (outside its editor window) - DEPRECATED in VST 2.4
 	case audioMasterNeedIdle:
 		if (effect && effect->resvd1)
 		{
@@ -880,16 +895,16 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			VstIntPtr latency = CMainFrame::GetMainFrame()->m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate()/1000L);
 			return latency;
 		}
-	// input pin in <value> (-1: first to come), returns cEffect*
+	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetPreviousPlug:
 		Log("VST plugin to host: Get Previous Plug\n");
 		break;
-	// output pin in <value> (-1: first to come), returns cEffect*
+	// output pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetNextPlug:
 		Log("VST plugin to host: Get Next Plug\n");
 		break;
 	// realtime info
-	// returns: 0: not supported, 1: replace, 2: accumulate
+	// returns: 0: not supported, 1: replace, 2: accumulate - DEPRECATED in VST 2.4 (replace is default)
 	case audioMasterWillReplaceOrAccumulate:
 		return 1; //we replace.
 	case audioMasterGetCurrentProcessLevel:
@@ -924,16 +939,16 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterOfflineGetCurrentMetaPass:	
 		Log("VST plugin to host: OfflineGetCurrentMetapass\n");
 		break;
-	// for variable i/o, sample rate in <opt>
+	// for variable i/o, sample rate in <opt> - DEPRECATED in VST 2.4
 	case audioMasterSetOutputSampleRate:
 		Log("VST plugin to host: Set Output Sample Rate\n");
 		break;
-	// result in ret
+	// result in ret - DEPRECATED in VST 2.4
 	case audioMasterGetOutputSpeakerArrangement:
 		Log("VST plugin to host: Get Output Speaker Arrangement\n");
 		break;
 	case audioMasterGetVendorString:	
-		strcpy((char*)ptr, s_szHostVendorString);
+		strcpy((char *) ptr, s_szHostVendorString);
 		//strcpy((char*)ptr,"Steinberg");
 		//return 0;
 		return true;
@@ -941,13 +956,13 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return s_nHostVendorVersion;
 		//return 7000;					
 	case audioMasterGetProductString:
-		strcpy((char*)ptr, s_szHostProductString);
+		strcpy((char *) ptr, s_szHostProductString);
 		//strcpy((char*)ptr,"Cubase VST");
 		//return 0;
 		return true;
 	case audioMasterVendorSpecific:		
 		return 0;
-	// void* in <ptr>, format not defined yet	
+	// void* in <ptr>, format not defined yet - DEPRECATED in VST 2.4	
 	case audioMasterSetIcon:					
 		Log("VST plugin to host: Set Icon\n");
 		break;
@@ -978,11 +993,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	//
 	case audioMasterGetLanguage:		
 		return kVstLangEnglish;
-	// returns platform specific ptr
+	// returns platform specific ptr - DEPRECATED in VST 2.4
 	case audioMasterOpenWindow:
 		Log("VST plugin to host: Open Window\n");
 		break;
-	// close window, platform specific handle in <ptr>
+	// close window, platform specific handle in <ptr> - DEPRECATED in VST 2.4
 	case audioMasterCloseWindow:				
 		Log("VST plugin to host: Close Window\n");
 		break;
@@ -1026,19 +1041,19 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterCloseFileSelector:
 		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr, effect);
 	
-	// open an editor for audio (defined by XML text in ptr) - DEPRECATED
+	// open an editor for audio (defined by XML text in ptr) - DEPRECATED in VST 2.4
 	case audioMasterEditFile:				
 		Log("VST plugin to host: Edit File\n");
 		break;
 	// get the native path of currently loading bank or project
-	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED
+	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED in VST 2.4
 	case audioMasterGetChunkFile:			
 		Log("VST plugin to host: Get Chunk File\n");
 		break;
 										
 	//---from here VST 2.3 extension opcodes------------------------------------------------------
 
-	// result a VstSpeakerArrangement in ret - DEPRECATED
+	// result a VstSpeakerArrangement in ret - DEPRECATED in VST 2.4
 	case audioMasterGetInputSpeakerArrangement:	
 		Log("VST plugin to host: Get Input Speaker Arrangement\n");
 		break;

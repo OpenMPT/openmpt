@@ -38,4 +38,16 @@ bool CModSpecifications::HasCommand(MODCOMMAND::COMMAND cmd) const
 	return true;
 }
 
+char CModSpecifications::GetVolEffectLetter(MODCOMMAND::VOLCMD volcmd) const
+//--------------------------------------------------------------------------
+{
+	if(volcmd >= MAX_VOLCMDS) return '?';
+	return volcommands[volcmd];
+}
 
+char CModSpecifications::GetEffectLetter(MODCOMMAND::COMMAND cmd) const
+//---------------------------------------------------------------------
+{
+	if(cmd >= MAX_EFFECTS) return '?';
+	return commands[cmd];
+}
