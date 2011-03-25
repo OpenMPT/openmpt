@@ -237,9 +237,10 @@ static inline UINT ConvertVolParam(UINT value)
 	return (value > 9)  ? 9 : value;
 }
 
+
 // Convert MPT's internal nvelope format into an IT/MPTM envelope.
-void MPTEnvToIT(const INSTRUMENTENVELOPE *mptEnv, ITENVELOPE *itEnv, const BYTE envOffset)
-//----------------------------------------------------------------------------------------
+void MPTEnvToIT(const INSTRUMENTENVELOPE *mptEnv, ITENVELOPE *itEnv, const BYTE envOffset, const BYTE envDefault)
+//---------------------------------------------------------------------------------------------------------------
 {
 	if(mptEnv->dwFlags & ENV_ENABLED)	itEnv->flags |= 1;
 	if(mptEnv->dwFlags & ENV_LOOP)		itEnv->flags |= 2;
@@ -251,14 +252,25 @@ void MPTEnvToIT(const INSTRUMENTENVELOPE *mptEnv, ITENVELOPE *itEnv, const BYTE 
 	itEnv->slb = (BYTE)mptEnv->nSustainStart;
 	itEnv->sle = (BYTE)mptEnv->nSustainEnd;
 
-	// Attention: Full MPTM envelope is stored in extended instrument properties
-	for (UINT ev = 0; ev < 25; ev++)
+	if(mptEnv->nNodes > 0)
 	{
-		itEnv->data[ev * 3] = mptEnv->Values[ev] - envOffset;
-		itEnv->data[ev * 3 + 1] = mptEnv->Ticks[ev] & 0xFF;
-		itEnv->data[ev * 3 + 2] = mptEnv->Ticks[ev] >> 8;
+		// Attention: Full MPTM envelope is stored in extended instrument properties
+		for(size_t ev = 0; ev < 25; ev++)
+		{
+			itEnv->data[ev * 3] = mptEnv->Values[ev] - envOffset;
+			itEnv->data[ev * 3 + 1] = mptEnv->Ticks[ev] & 0xFF;
+			itEnv->data[ev * 3 + 2] = mptEnv->Ticks[ev] >> 8;
+		}
+	} else
+	{
+		// Fix non-existing envelopes so that they can still be edited in Impulse Tracker.
+		itEnv->num = 2;
+		MemsetZero(itEnv->data);
+		itEnv->data[0] = itEnv->data[3] = envDefault - envOffset;
+		itEnv->data[4] = 10;
 	}
 }
+
 
 // Convert IT/MPTM envelope data into MPT's internal envelope format - To be used by ITInstrToMPT()
 void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE envOffset, const int iEnvMax)
@@ -281,6 +293,7 @@ void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE 
 		mptEnv->Ticks[ev] = (itEnv->data[ev * 3 + 2] << 8) | (itEnv->data[ev * 3 + 1]);
 	}
 }
+
 
 //BOOL CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers)
 long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) //rewbs.modularInstData
@@ -1569,11 +1582,11 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
-			MPTEnvToIT(&pIns->VolEnv, &iti.volenv, 0);
+			MPTEnvToIT(&pIns->VolEnv, &iti.volenv, 0, 64);
 			// Writing Panning envelope
-			MPTEnvToIT(&pIns->PanEnv, &iti.panenv, 32);
+			MPTEnvToIT(&pIns->PanEnv, &iti.panenv, 32, 32);
 			// Writing Pitch Envelope
-			MPTEnvToIT(&pIns->PitchEnv, &iti.pitchenv, 32);
+			MPTEnvToIT(&pIns->PitchEnv, &iti.pitchenv, 32, 32);
 			if (pIns->PitchEnv.dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
 		} else
 		// Save Empty Instrument
@@ -2164,11 +2177,11 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
-			MPTEnvToIT(&pIns->VolEnv, &iti.volenv, 0);
+			MPTEnvToIT(&pIns->VolEnv, &iti.volenv, 0, 64);
 			// Writing Panning envelope
-			MPTEnvToIT(&pIns->PanEnv, &iti.panenv, 32);
+			MPTEnvToIT(&pIns->PanEnv, &iti.panenv, 32, 32);
 			// Writing Pitch Envelope
-			MPTEnvToIT(&pIns->PitchEnv, &iti.pitchenv, 32);
+			MPTEnvToIT(&pIns->PitchEnv, &iti.pitchenv, 32, 32);
 			if (pIns->PitchEnv.dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
 		} else
 		// Save Empty Instrument
