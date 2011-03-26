@@ -825,6 +825,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);	//rewbs.instroVSTi
 	DDX_Control(pDX, IDC_COMBO9,				m_CbnResampling);
 	DDX_Control(pDX, IDC_FILTERMODE,			m_CbnFilterMode);
+	DDX_Control(pDX, IDC_EDIT7,					m_EditFadeOut);
 	DDX_Control(pDX, IDC_SPIN7,					m_SpinFadeOut);
 	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
 	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
@@ -1163,10 +1164,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditName.SetLimitText(specs->instrNameLengthMax);
 		m_EditFileName.SetLimitText(specs->instrFilenameLengthMax);
 
-		BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		const BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		//rewbs.instroVSTi
-		BOOL bITandXM = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
-		bool bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		const BOOL bITandXM = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		const BOOL bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
@@ -1180,11 +1181,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinMidiBK.EnableWindow(bITandXM);	//rewbs.MidiBank
 		//end rewbs.instroVSTi
 
+		const bool extendedFadeoutRange = (m_pSndFile->m_nType & MOD_TYPE_XM) != 0;
 		m_SpinFadeOut.EnableWindow(bITandXM);
-		if(m_pSndFile->m_nType & MOD_TYPE_XM)
-			m_SpinFadeOut.SetRange(0, 32767);
-		else
-			m_SpinFadeOut.SetRange(0, 8192);
+		m_SpinFadeOut.SetRange(0, extendedFadeoutRange ? 32767 : 8192);
+		m_EditFadeOut.SetLimitText(extendedFadeoutRange ? 5 : 4);
 
 		// Panning ranges (0...64 for IT, 0...256 for MPTM)
 		m_SpinPanning.SetRange(0, (m_pModDoc->GetModType() & MOD_TYPE_IT) ? 64 : 256);
@@ -1551,7 +1551,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			{
 				m_CbnPluginVelocityHandling.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-				wsprintf(pszText, "To enable, clear plugin volume command bug emulation flag from song properties");
+				wsprintf(pszText, "To enable, clear Plugin volume command bug emulation flag from Song Properties");
 				return TRUE;
 			}
 			else
@@ -1825,8 +1825,10 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
+		int minval = 0, maxval = 32767;
+		m_SpinFadeOut.GetRange(minval, maxval);
 		int nVol = GetDlgItemInt(IDC_EDIT7);
-		nVol = CLAMP(nVol, 0, 32767);
+		nVol = CLAMP(nVol, minval, maxval);
 		
 		if(nVol != (int)pIns->nFadeOut)
 		{
