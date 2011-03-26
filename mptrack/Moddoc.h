@@ -346,7 +346,7 @@ public:
 
 	bool RestartPosToPattern();
 
-	bool HasMPTHacks(bool autofix = false);
+	bool HasMPTHacks(const bool autofix = false);
 
 	void FixNullStrings();
 
@@ -436,6 +436,7 @@ public:
 	afx_msg void OnPatternPlay(); //rewbs.customKeys
 	afx_msg void OnPatternPlayNoLoop(); //rewbs.customKeys
 	afx_msg void OnViewEditHistory();
+	afx_msg void OnViewMPTHacks();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

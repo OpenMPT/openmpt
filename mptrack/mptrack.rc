@@ -2008,12 +2008,13 @@ BEGIN
             MENUITEM "&Tree",                       IDD_TREEVIEW
         END
         MENUITEM SEPARATOR
-        MENUITEM "Set&up...",                   ID_VIEW_OPTIONS
-        MENUITEM "Add &Plugin...",              ID_PLUGIN_SETUP
-        MENUITEM "Channel &Manager...",         ID_CHANNEL_MANAGER
-        MENUITEM "Song Properties...",          ID_VIEW_SONGPROPERTIES
+        MENUITEM "S&etup...",                   ID_VIEW_OPTIONS
+        MENUITEM "Pl&ugin Manager...",          ID_PLUGIN_SETUP
+        MENUITEM "Ch&annel Manager...",         ID_CHANNEL_MANAGER
+        MENUITEM "Song P&roperties...",         ID_VIEW_SONGPROPERTIES
         MENUITEM "&MIDI Mapping...",            ID_VIEW_MIDIMAPPING
         MENUITEM "Edit &History...",            ID_VIEW_EDITHISTORY
+        MENUITEM "Find MPT Hacks in Song",      ID_VIEW_MPTHACKS
     END
     POPUP "&Window"
     BEGIN

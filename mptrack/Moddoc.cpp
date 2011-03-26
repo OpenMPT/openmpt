@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_VIEW_COMMENTS,		OnEditComments)
 	ON_COMMAND(ID_VIEW_GRAPH,			OnEditGraph) //rewbs.graph
 	ON_COMMAND(ID_VIEW_EDITHISTORY,		OnViewEditHistory)
+	ON_COMMAND(ID_VIEW_MPTHACKS,		OnViewMPTHacks)
 	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
 	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
@@ -3510,6 +3511,18 @@ void CModDoc::OnViewEditHistory()
 {
 	CEditHistoryDlg dlg(CMainFrame::GetMainFrame(), this);
 	dlg.DoModal();
+}
+
+
+void CModDoc::OnViewMPTHacks()
+//----------------------------
+{
+	if(!HasMPTHacks())
+	{
+		AddToLog("No hacks found.\n");
+	}
+	ShowLog();
+	ClearLog();
 }
 
 
