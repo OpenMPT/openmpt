@@ -917,7 +917,6 @@ private:
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
 	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
-	BOOL IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const;
 	void UpdateTimeSignature();
 
 	UINT GetNumTicksOnCurrentRow() { return m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay; };

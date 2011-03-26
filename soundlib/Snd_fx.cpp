@@ -227,6 +227,11 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				break;
 			// Pattern Break
 			case CMD_PATTERNBREAK:
+				if(param >= 64 && (GetType() & MOD_TYPE_S3M))
+				{
+					// ST3 ignores invalid pattern breaks.
+					break;
+				}
 				patternBreakOnThisRow = true;
 				//Try to check next row for XPARAM
 				nextRow = nullptr;
@@ -338,10 +343,16 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
-				if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
-				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+				// ST3 applies global volume on tick 1 and does other weird things, but we just emulate this part for now.
+				if((GetType() & MOD_TYPE_S3M) && nMusicSpeed <= 1)
 				{
-					//IT compatibility 16. Both FT2 and IT ignore out-of-range values
+					break;
+				}
+
+				if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
+				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER))
+				{
+					//IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
 					if (param <= 128)
 						nGlbVol = param << 1;
 				}
@@ -1869,11 +1880,16 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set Global Volume
 		case CMD_GLOBALVOLUME:
-			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
+			// ST3 applies global volume on tick 1 and does other weird things, but we just emulate this part for now.
+			if(((GetType() & MOD_TYPE_S3M) && m_nTickCount != 1)
+				|| (!(GetType() & MOD_TYPE_S3M) && !(m_dwSongFlags & SONG_FIRSTTICK)))
+			{
+				break;
+			}
 			
-			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-			//IT compatibility 16. Both FT2 and IT ignore out-of-range values
-			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+			if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+			//IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
+			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER))
 			{
 				if (param <= 128)
 					m_nGlobalVolume = param << 1;
@@ -2056,6 +2072,11 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Pattern Break
 		case CMD_PATTERNBREAK:
+			if(param >= 64 && (GetType() & MOD_TYPE_S3M))
+			{
+				// ST3 ignores invalid pattern breaks.
+				break;
+			}
 			m_nNextPatStartRow = 0; // FT2 E60 bug
 			m = NULL;
 			if (m_nRow < Patterns[m_nPattern].GetNumRows()-1)
@@ -3021,7 +3042,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro,
 //------------------------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	DWORD dwMacro = (*((DWORD *)pszMidiMacro)) & MACRO_MASK;
+	DWORD dwMacro = LittleEndian(*((DWORD *)pszMidiMacro)) & MACRO_MASK;
 	int nInternalCode;
 
 	// Not Internal Device ?
@@ -3772,57 +3793,6 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 		}
 	}
 	return (nOrd < Order.size()) ? nOrd : Order.size()-1;
-}
-
-
-// This is how backward jumps should not be tested. :) (now unused)
-BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const
-//----------------------------------------------------------------------------------------------------------
-{
-	while ((nJumpOrder < Patterns.Size()) && (Order[nJumpOrder] == Order.GetIgnoreIndex())) nJumpOrder++;
-	if ((nStartOrder >= Patterns.Size()) || (nJumpOrder >= Patterns.Size())) return FALSE;
-	// Treat only case with jumps in the same pattern
-	if (nJumpOrder > nStartOrder) return TRUE;
-
-	if ((nJumpOrder < nStartOrder) || (nJumpRow >= Patterns[nStartOrder].GetNumRows())
-	 || (!(Patterns[nStartOrder])) || (nStartRow >= MAX_PATTERN_ROWS) || (nJumpRow >= MAX_PATTERN_ROWS)) return FALSE;
-	
-	// See if the pattern is being played backward
-	BYTE row_hist[MAX_PATTERN_ROWS];
-
-	memset(row_hist, 0, sizeof(row_hist));
-	UINT nRows = Patterns[nStartOrder].GetNumRows(), row = nJumpRow;
-
-	if (nRows > MAX_PATTERN_ROWS) nRows = MAX_PATTERN_ROWS;
-	row_hist[nStartRow] = TRUE;
-	while ((row < MAX_PATTERN_ROWS) && (!row_hist[row]))
-	{
-		if (row >= nRows) return TRUE;
-		row_hist[row] = TRUE;
-		const MODCOMMAND* p = Patterns[nStartOrder].GetpModCommand(row, m_nChannels);
-		row++;
-		int breakrow = -1, posjump = 0;
-		for (UINT i=0; i<m_nChannels; i++, p++)
-		{
-			if (p->command == CMD_POSITIONJUMP)
-			{
-				if (p->param < nStartOrder) return FALSE;
-				if (p->param > nStartOrder) return TRUE;
-				posjump = TRUE;
-			} else
-			if (p->command == CMD_PATTERNBREAK)
-			{
-				breakrow = p->param;
-			}
-		}
-		if (breakrow >= 0)
-		{
-			if (!posjump) return TRUE;
-			row = breakrow;
-		}
-		if (row >= nRows) return TRUE;
-	}
-	return FALSE;
 }
 
 

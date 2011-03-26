@@ -92,16 +92,17 @@ BOOL CCtrlGeneral::OnInitDialog()
 // -> CODE#0016
 // -> DESC="default tempo update"
 //	m_SpinTempo.SetRange(32, 255);	// 255 bpm max
-	// S3M HACK
+
 	if(m_pSndFile->GetType() & MOD_TYPE_S3M)
 	{
-		m_SpinTempo.SetRange(33, 255);
-		m_SpinSpeed.SetRange(1, 255);
+		// S3M HACK: ST3 will ignore speed 255, even though it can be used with Axx.
+		m_SpinSpeed.SetRange(1, 254);
 	} else
 	{
-		m_SpinTempo.SetRange((short)specs.tempoMin, (short)specs.tempoMax);
 		m_SpinSpeed.SetRange((short)specs.speedMin, (short)specs.speedMax);
 	}
+	m_SpinTempo.SetRange((short)specs.tempoMin, (short)specs.tempoMax);
+
 // -! BEHAVIOUR_CHANGE#0016
 	m_SpinGlobalVol.SetRange(0, 128);
 	m_SpinSamplePA.SetRange(0, 2000);
