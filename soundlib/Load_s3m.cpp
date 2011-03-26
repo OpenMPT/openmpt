@@ -598,8 +598,8 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x2E] = 'R';
 	header[0x2F] = 'M';
 	header[0x30] = m_nDefaultGlobalVolume >> 2;
-	header[0x31] = CLAMP(m_nDefaultSpeed, 1, 255);
-	header[0x32] = CLAMP(m_nDefaultTempo, 32, 255);
+	header[0x31] = CLAMP(m_nDefaultSpeed, 1, 254);
+	header[0x32] = CLAMP(m_nDefaultTempo, 33, 255);
 	header[0x33] = CLAMP(m_nSamplePreAmp, 0x10, 0x7F) | 0x80;	// Bit 8 = Stereo
 	header[0x34] = 0x08; // 8 Channels for UltraClick removal (default)
 	header[0x35] = 0xFC; // Write pan positions

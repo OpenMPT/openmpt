@@ -276,7 +276,7 @@ const CModSpecifications s3m =
 	255,								// Order max.
 	1,									// Channel min
 	32,									// Channel max
-	32,									// Min tempo
+	33,									// Min tempo
 	255,								// Max tempo
 	64,									// Min pattern rows
 	64,									// Max pattern rows
@@ -316,7 +316,7 @@ const CModSpecifications s3mEx =
 	255,								// Order max.
 	1,									// Channel min
 	32,									// Channel max
-	32,									// Min tempo
+	33,									// Min tempo
 	255,								// Max tempo
 	64,									// Min pattern rows
 	64,									// Max pattern rows

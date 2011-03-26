@@ -1318,9 +1318,9 @@ void CViewPattern::SetCurSel(DWORD dwBegin, DWORD dwEnd)
 		if (pSndFile)
 		{
 			y1 = max(y1, 0);
-			y2 = min(y2, (int)pSndFile->Patterns[m_nPattern].GetNumRows());
+			y2 = min(y2, (int)pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
 			x1 = max(x1, 0);
-			x2 = min(x2, pSndFile->GetNumChannels() * 8 - 4);
+			x2 = min(x2, pSndFile->GetNumChannels() * 8 - (8 - LAST_COLUMN));
 		}
 	}
 	// end rewbs.fix3417
