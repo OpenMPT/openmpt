@@ -193,7 +193,7 @@ const CModSpecifications xm =
 	false,								// No notecut.
 	true,								// Has noteoff.
 	false,								// No notefade.
-	255,								// Pattern max.
+	256,								// Pattern max.
 	255,								// Order max.
 	1,									// Channel min
 	32,									// Channel max
@@ -233,8 +233,8 @@ const CModSpecifications xmEx =
 	false,								// No notecut.
 	true,								// Has noteoff.
 	false,								// No notefade.
-	255,								// Pattern max.
-	256,								// Order max.
+	256,								// Pattern max.
+	255,								// Order max.
 	1,									// Channel min
 	127,								// Channel max
 	32,									// Min tempo
@@ -272,7 +272,7 @@ const CModSpecifications s3m =
 	true,								// Has notecut.
 	false,								// No noteoff.
 	false,								// No notefade.
-	99,									// Pattern max.
+	100,								// Pattern max.
 	255,								// Order max.
 	1,									// Channel min
 	32,									// Channel max
@@ -312,7 +312,7 @@ const CModSpecifications s3mEx =
 	true,								// Has notecut.
 	false,								// No noteoff.
 	false,								// No notefade.
-	99,									// Pattern max.
+	100,								// Pattern max.
 	255,								// Order max.
 	1,									// Channel min
 	32,									// Channel max
