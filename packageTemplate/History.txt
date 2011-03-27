@@ -10,17 +10,17 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.01.00 (March 2011, revision 827)
+v1.19.01.00 (March 2011, revision 833)
 --------------------------------------
 Pattern tab
    [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
    [New] <Jojo> The new keyboard shortcuts "Select beat" and "Select measure" can be used to automatically extend the current selection to the beat / measure boundaries.
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
    [Imp] <Jojo> Special paste modes have been moved to a sub menu in the context menu, to save some space.
-   [Imp] <Jojo> Status bar now indicates if highpass filter is enabled on a channel.
+   [Imp] <Jojo> Status bar now indicates if highpass filter is enabled on a channel. (http://bugs.openmpt.org/view.php?id=92)
    [Mod] <Jojo> Using the Goto Dialog should now update channel parameters and set the elapsed time. (http://bugs.openmpt.org/view.php?id=28)
    [Mod] <Jojo> Undo steps have been increased from 100 to 1000.
-   [Fix] <Jojo> Shrink selection is more consistent with Shrink pattern now: Entries on odd rows are not ignored anymore if there is no entry in the even rows. Also, cleaning of the pattern after shrinking the selection has been fixed - it cleaned whole commands instead of just the selected parts of a command.
+   [Fix] <Jojo> Shrink selection is more consistent with Shrink pattern now: Entries on odd rows are not ignored anymore if there is no entry in the even rows. Also, cleaning of the pattern after shrinking the selection has been fixed - it cleaned whole commands instead of just the selected parts of a command. (http://bugs.openmpt.org/view.php?id=89)
    [Fix] <Jojo> Cursor paste was possible even when editing was disabled.
    [Fix] <Jojo> Using Right-Click -> Change Plugin on PC notes did not work for plugin numbers that were higher than the highest instrument number.
    [Fix] <Jojo> When entering chords into the pattern editor, the module was only marked as modified if the base note of the chord was changed.
@@ -31,6 +31,7 @@ Pattern tab
    [Fix] <Jojo> When restarting a pattern, the song timer was not reset properly.
    [Fix] <Jojo> Entering a note-off event in the MOD format created an unnecessary undo event.
    [Fix] <Jojo> Automation data is not written to the pattern if the current module format does not support smooth midi macros.
+   [Fix] <Jojo> Selections were not clamped properly to the end of the pattern sometimes.
    [Reg] <Jojo> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
 
 Pattern tab::Note properties
@@ -53,6 +54,7 @@ Sample tab
    [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the sample data.
    [Mod] <Jojo> Undo steps have been increased from 100 to 1000 (per sample).
    [Fix] <Jojo> When cutting samples with a loop, the loop end point was not always moved correctly if the cut start was in the loop.
+   [Fix] <Jojo> Loop point controls also accept large numbers to be inputted manually.
    [Fix] <Jojo> Sample Undo didn't preserve the sample name.
    [Fix] <re>   Changing zoom level should now preserve the view position better. (http://bugs.openmpt.org/view.php?id=3)
 
@@ -60,6 +62,7 @@ Instrument tab
    [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the envelopes.
    [Imp] <Jojo> When pressing the up arrow key in the sample map while the cursor is on the lowest note (C-0), the sample map doesn't lose focus anymore. It is also not possible anymore to move the sample map out of view by clicking the area above the lowest note.
    [Mod] <Jojo> Copying and pasting envelopes with no points isn't possible anymore. (Who wants to do that anyway?)
+   [Fix] <Jojo> Fadeout control also accepts large numbers to be inputted manually. (http://bugs.openmpt.org/view.php?id=81)
    [Fix] <Jojo> Changing the filter mode didn't mark the file as modified.
    [Fix] <Jojo> The note mapping doesn't allow items anymore that aren't notes (such as "no note" or "note cut"). Such notes couldn't be entered manually, however when converting from other formats this was possible and it could crash the tracker (http://bugs.openmpt.org/view.php?id=61).
    [Fix] <Jojo> Various actions in the instrument note map and envelope view should now also mark the instrument as modified (when working in the ITP format).
@@ -102,6 +105,7 @@ IT
    [Fix] <Jojo> Various fixes to playback of multi-sample instruments. "Ultima Ratio" by Nebularia and "Shuttle Departure" by Sphenx sound better now.
    [Fix] <Jojo> The extended sample map is not saved anymore in the instrument headers when using compatibility export.    
    [Fix] <Jojo> IT Loader / Saver: Note mapping items that aren't notes are now ignored.
+   [Fix] <Jojo> IT Saver: Non-existing envelopes are now replaced by a default (disabled) envelope, so that they can still be edited in Impulse Tracker.
 
 MPTM
    [New] <Jojo> Each pattern can now have a custom time signature (rows per beat and rows per measure) which can be set from the pattern properties dialog.
@@ -128,7 +132,9 @@ S3M
    [Fix] <Jojo> Octave 8 was allowed in S3M files while it shouldn't (it wasn't even saved in the file)
    [Fix] <Jojo> S3M Loader: Fix to pattern loader (for empty patterns)
    [Fix] <Jojo> Removed the X param (#) effect from the supported effect list.
-   [Fix] <Jojo> Speed and tempo values are now adjusted to what Scream Tracker actually expects (speed 1 - 254, tempo 32 - 255) - anything out of this range is ignored by Scream Tracker, so it is now also ignored by OpenMPT.
+   [Fix] <Jojo> Speed and tempo values are now adjusted to what Scream Tracker actually expects (speed 1 - 254, tempo 33 - 255) - anything out of this range is ignored by Scream Tracker, so it is now also ignored by OpenMPT.
+   [Fix] <Jojo> Pattern breaks >= C40 are now ingnored.
+   [Fix] <Jojo> Global volume commands > V40 are now ignored. Global volume is processed on tick 1 to emulate ST3's behaviour (far from perfect).
 
 Other modules
    [Imp] <Jojo> Garbage characters in sample / instrument / song names should be gone now.. This should f.e. avoid sample names like " ntitled" turning up in modules after deleting sample names.
@@ -141,6 +147,7 @@ Other modules
 
 Misc
    [New] <Jojo> WAV Export: Sample-exact cue points are now written at each pattern transition.
+   [New] <Jojo> Most MPT hacks in modules can now be found through View -> Find MPT Hacks in Song.
    [Imp] <Jojo> Paths to VST plugins in mptrack.ini and plugin.cache are now also relative in portable mode. This means that finally, *all* stored paths are now relative in portable mode.
    [Imp] <Jojo> Additional new keyboard shortcuts: Panic, View Edit History, Set Invalid / Ignore (--- / +++) Pattern (in the orderlist), plus the ones mentioned in above categories
    [Imp] <Jojo> Some improvements were made to the Registry / INI reading: If there were no Registry settings because MPT 1.16 was previously not installed, the INI file is now also read as it might contain some lines created by the installer.
