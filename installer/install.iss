@@ -208,6 +208,14 @@ begin
                 begin
                     keyboardFilepath := 'DE_jojo';
                 end;
+            $0a:  // Spanish
+                begin
+                    // Spanish latin-american keymap, so we ignore Spain.
+                    if(GetUILanguage <> $0c0a) then
+                    begin
+                        keyboardFilepath := 'es-LA_mpt_(jmkz)';
+                    end;
+                end;
             $0c:  // French
                 begin
                     keyboardFilepath := 'FR_mpt_(legovitch)';
