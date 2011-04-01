@@ -114,7 +114,7 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 
 [Run]
 ; duh
-Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\xaimus - digital sentience.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
+Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 Filename: "https://sourceforge.net/projects/kernelex/"; Description: "Download KernelEx (required on Windows 98 / Me)"; Flags: shellexec nowait postinstall skipifsilent; Check: not UsingWinNT();
 
 [UninstallDelete]
@@ -251,7 +251,7 @@ begin
     case CurUninstallStep of
     usUninstall:
         begin
-            if MsgBox('Do you want to remove OpenMPT settings files (mptrack.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+            if MsgBox('Do you want to keep OpenMPT your settings files (mptrack.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDNO then
             begin
                 if(GetIniInt('Paths', 'UseAppDataDirectory', 1, 0, 0, ExpandConstant('{app}\mptrack.ini')) = 1) then
                 begin
