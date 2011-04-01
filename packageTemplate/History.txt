@@ -7,18 +7,16 @@ OpenMPT - Full Version History
 [Reg]: known issue / regression
 [Mod]: change
 [Var]: other
-(tx XYZ): thanks to XYZ for telling us about the bug
+(tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
-v1.19.01.00 (March 2011, revision 833)
+v1.19.01.00 (April 2011, revision 836)
 --------------------------------------
 Pattern tab
-   [New] <Jojo> Clicking and dragging the row numbers selects the whole row now (Excel / Calc style) - see http://bugs.openmpt.org/view.php?id=45
+   [New] <Jojo> Clicking and dragging the row numbers selects the whole row in Excel / Calc style (http://bugs.openmpt.org/view.php?id=45)
    [New] <Jojo> The new keyboard shortcuts "Select beat" and "Select measure" can be used to automatically extend the current selection to the beat / measure boundaries.
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
-   [Imp] <Jojo> Special paste modes have been moved to a sub menu in the context menu, to save some space.
-   [Imp] <Jojo> Status bar now indicates if highpass filter is enabled on a channel. (http://bugs.openmpt.org/view.php?id=92)
-   [Mod] <Jojo> Using the Goto Dialog should now update channel parameters and set the elapsed time. (http://bugs.openmpt.org/view.php?id=28)
+   [Mod] <Jojo> Using the Goto Dialog updates channel parameters and sets the elapsed time now. (http://bugs.openmpt.org/view.php?id=28)
    [Mod] <Jojo> Undo steps have been increased from 100 to 1000.
    [Fix] <Jojo> Shrink selection is more consistent with Shrink pattern now: Entries on odd rows are not ignored anymore if there is no entry in the even rows. Also, cleaning of the pattern after shrinking the selection has been fixed - it cleaned whole commands instead of just the selected parts of a command. (http://bugs.openmpt.org/view.php?id=89)
    [Fix] <Jojo> Cursor paste was possible even when editing was disabled.
@@ -37,6 +35,7 @@ Pattern tab
 Pattern tab::Note properties
    [Fix] <Jojo> The meaning of Q0x was displayed wrong for S3M / IT.
    [Fix] <Jojo> Changing a value didn't create an undo point. (http://bugs.openmpt.org/view.php?id=56)
+   [Fix] <Jojo> Setting the PC note plugin didn't work.
 
 Pattern tab::Find/replace
    [New] <Jojo> Added Find / Replace mode: Find in current pattern selection. (http://bugs.openmpt.org/view.php?id=42)
@@ -44,6 +43,8 @@ Pattern tab::Find/replace
    [Mod] <Jojo> "Replace All" just creates one undo point now.
 
 Pattern tab::GUI
+   [Imp] <Jojo> Special paste modes have been moved to a sub menu in the context menu, to save some space.
+   [Imp] <Jojo> Status bar now indicates if highpass filter is enabled on a channel. (http://bugs.openmpt.org/view.php?id=92)
    [Imp] <Jojo> The dodgy note colour is now also customisable.
    [Mod] <Jojo> When removing a channel (via context menu) that contains no data in any pattern, no warning is shown anymore.
 
@@ -59,6 +60,7 @@ Sample tab
    [Fix] <re>   Changing zoom level should now preserve the view position better. (http://bugs.openmpt.org/view.php?id=3)
 
 Instrument tab
+   [New] <Jojo> Clicking on an empty plugin slot in the plugin dropdown list opens the "Add Plugin" dialog (tx coda)
    [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the envelopes.
    [Imp] <Jojo> When pressing the up arrow key in the sample map while the cursor is on the lowest note (C-0), the sample map doesn't lose focus anymore. It is also not possible anymore to move the sample map out of view by clicking the area above the lowest note.
    [Mod] <Jojo> Copying and pasting envelopes with no points isn't possible anymore. (Who wants to do that anyway?)
@@ -69,6 +71,7 @@ Instrument tab
 
 VST
    [New] <Jojo> Plugins can now request common file dialogs (file and directory selection).
+   [New] <Jojo> New menu entry in the plugin editor: Create instrument from plugin
    [Mod] <Jojo> When automatically inserting a new instrument from the VST editor, the bank and patch values are now not filled in anymore, so it is easier to change to another patch while editing.
    [Mod] <Jojo> Various small improvements to support VST 2.4 plugins better.
    [Fix] <Jojo> Speaker arrangement is now sent to the plugins upon initialization. This fixes Voxengo SPAN 2 (a VST 2.4 plugin). Does this break other multichannel plugins?
@@ -95,26 +98,28 @@ Playback
 IT
    [New] <Jojo> Edit history information can now be read from and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information. 
    [Imp] <Jojo> IT files made with Modplug Tracker 1.00a5 are now also detected as such. Since long patterns can also be created in other trackers (e.g. Chibi), long patterns are not used to identify files made with MPT anymore.
-   [Imp] <Jojo> IT Loader: Autovibrato sweep is now fixed when loading IT files made with old versions of (Open)MPT.
    [Mod] <Jojo> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
-   [Mod] <Jojo> IT Loader: MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
    [Fix] <Jojo> Incorrect notes were memorized for PPS (and possibly other effects) when working with instruments that had non-default note assignments (f.e. C-5 => D-4)
    [Fix] <Jojo> In compatible mode, bidi loops are now treated like in IT's software mixer. (http://bugs.openmpt.org/view.php?id=29)
    [Fix] <Jojo> Sample autovibrato is now hopefully a bit closer to Impulse Tracker in compatible mode... (http://bugs.openmpt.org/view.php?id=5)
    [Fix] <Jojo> The envelope handling was altered slightly to work more like in Schism Tracker. This fixes a combination of Envelope Carry + Portamento as it can be found in "electric bunny" by Alpha C.
    [Fix] <Jojo> Various fixes to playback of multi-sample instruments. "Ultima Ratio" by Nebularia and "Shuttle Departure" by Sphenx sound better now.
    [Fix] <Jojo> The extended sample map is not saved anymore in the instrument headers when using compatibility export.    
-   [Fix] <Jojo> IT Loader / Saver: Note mapping items that aren't notes are now ignored.
-   [Fix] <Jojo> IT Saver: Non-existing envelopes are now replaced by a default (disabled) envelope, so that they can still be edited in Impulse Tracker.
+
+IT::Loading and Saving
+   [Imp] <Jojo> Autovibrato sweep is now fixed when loading IT files made with old versions of (Open)MPT.
+   [Mod] <Jojo> MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
+   [Fix] <Jojo> Note mapping items that aren't notes (f.e. empty notes) are now ignored when loading and saving.
+   [Fix] <Jojo> When saving, non-existing envelopes are now replaced by a default (disabled) envelope, so that they can still be edited in Impulse Tracker.
 
 MPTM
-   [New] <Jojo> Each pattern can now have a custom time signature (rows per beat and rows per measure) which can be set from the pattern properties dialog.
+   [New] <Jojo> Each pattern can now have a custom time signature (rows per beat and rows per measure) which can be set from the pattern properties dialog. (http://forum.openmpt.org/index.php?topic=4022.0)
    [New] <Jojo> Edit history information (read the "IT" section above for an explanation)
 
 XM
-   [Fix] <Jojo> XM Compatibility: Various mind-boggling combinations of EDx, notes and instrument numbers should work correctly now.
-   [Fix] <Jojo> XM Compatibility: When there's a instrument number next to a 3xx effect which differs from the previous instrument number, it resets the instrument properties of the previous instrument now.
-   [Fix] <Jojo> XM Compatibility: Portamento combined with an Offset command results in the offset command being ignored.
+   [Fix] <Jojo> Various mind-boggling combinations of EDx, notes and instrument numbers should work correctly in compatible mode now.
+   [Fix] <Jojo> When there's a instrument number next to a 3xx effect which differs from the previous instrument number, it resets the instrument properties of the previous instrument in compatible mode.
+   [Fix] <Jojo> Portamento combined with an Offset command results in the offset command being ignored in compatible mode.
    [Fix] <Jojo> XM Loader: Fixed handling of instruments with no samples, so that instruments assigned to VST plugins work correctly.
 
 MOD
@@ -122,9 +127,9 @@ MOD
    [Fix] <Jojo> The maximum speed for MOD files was off by one in some places (31 instead of 32).
 
 MOD::Loading
-   [New] <Jojo> Added a heuristic detection for VBlank MODs. Most MODs use the CIA timer instead of VBlank timing, but some don't.
-   [New] <Jojo> Added a heuristic detection for PT 1.x playback mode: If there is pattern data that looks like it needs on-the-fly sample swapping, PT 1.x mode is enabled.
-   [New] <Jojo> Added a heuristic detection for MODs with 7-bit panning, which is then automatically converted to 8-bit panning.
+   [New] <Jojo> Heuristic detection for VBlank MODs. Most MODs use the CIA timer instead of VBlank timing, but some don't.
+   [New] <Jojo> Heuristic detection for PT 1.x playback mode: If there is pattern data that looks like it needs on-the-fly sample swapping, PT 1.x mode is enabled.
+   [New] <Jojo> Heuristic detection for MODs with 7-bit panning, which is then automatically converted to 8-bit panning.
    [Fix] <Jojo> Tentative fix for MODs with short loops at the sample start that were most likely not intended.
 
 S3M
@@ -133,8 +138,8 @@ S3M
    [Fix] <Jojo> S3M Loader: Fix to pattern loader (for empty patterns)
    [Fix] <Jojo> Removed the X param (#) effect from the supported effect list.
    [Fix] <Jojo> Speed and tempo values are now adjusted to what Scream Tracker actually expects (speed 1 - 254, tempo 33 - 255) - anything out of this range is ignored by Scream Tracker, so it is now also ignored by OpenMPT.
-   [Fix] <Jojo> Pattern breaks >= C40 are now ingnored.
-   [Fix] <Jojo> Global volume commands > V40 are now ignored. Global volume is processed on tick 1 to emulate ST3's behaviour (far from perfect).
+   [Fix] <Jojo> Pattern breaks >= C40 are now ignored.
+   [Fix] <Jojo> Global volume commands > V40 are now ignored.
 
 Other modules
    [Imp] <Jojo> Garbage characters in sample / instrument / song names should be gone now.. This should f.e. avoid sample names like " ntitled" turning up in modules after deleting sample names.
@@ -160,6 +165,7 @@ Misc
    [Mod] <Jojo> The "Original" mix mode now also has a version number (1.16) to reflect what the "original" thing is.
    [Mod] <Jojo> Updated genre list in the MP3 export dialog.
    [Mod] <Jojo> When using the ACM MP3 codec, 320kbit/s bitrate should now be available.
+   [Mod] <Jojo> "No extra-loud samples" is now enabled by default (as it's more suitable for mixmodes RC3 and Original)
    [Mod] <Jojo> The MMX acceleration label in the Soundcard setup dialog is now updated according to the multimedia extensions that are supported by the CPU (3DNow! / SSE)
    [Mod] <Jojo> Updated unmo3.dll to version 2.4.0.1
    [Mod] <Jojo> Updated the internet link list in the Help menu.
@@ -766,16 +772,14 @@ VST / MIDI mapping
 
 Mod conversion
    [Imp] <Jojo> Convert E9x to Q8x as Q0x actually means "continue" and not "no change" for the volume change.
-   [Imp] <Jojo> Even better conversion of various pattern effects, including 8-Bit Panning, Arpeggio (XM swaps the two parameters) including Surround, Note Cut/Off/Fade conversion, MOD retrigger, XM->IT volume column limitations, illegal notes).
+   [Imp] <Jojo> Even better conversion of various pattern effects, including 7/8-Bit Panning, Surround, Note Cut/Off/Fade conversion, MOD retrigger, XM->IT volume column limitations, illegal notes).
    [Imp] <Jojo> Proper conversion of Pxy effect.
    [Imp] <Jojo> Full volume column conversion, resetting default global volume / tempo / speed for MOD files.
    [Imp] <Jojo> \xx is converted to Zxx when converting to / saving S3M files or "compatible" IT files.
    [Imp] <Jojo> Somewhat decent conversion of Kxx (Key Off) from XM to S3M/IT.
    [Imp] <Jojo> Trim instrument envelopes if they're too long for the new format.
-   [Imp] <Jojo> Convert 500/600 commands properly from MOD to any format, Adjust sustain loops for XM files, removed XM arpeggio conversion (it might be unwanted).
+   [Imp] <Jojo> Convert 500/600 commands properly from MOD to any format, Adjust sustain loops for XM files.
    [Imp] <Jojo> Try to use fix commands that don't have a "memory" (00 value) in XM (Arpeggio) and MOD format (Arpeggio and a few others) by using the previous value.
-   [Fix] <Jojo> Proper conversion between IT 8-Bit panning effect and S3M 7-Bit panning effect with surround.
-   [Fix] <Jojo> Unset release nodes were corrupted when converting modules.
 
 Playback (see also format-specific changes below)
    [Imp] <Jojo> Mixing: It's now possible to go down to 1ms latency (works with ASIO).
@@ -843,7 +847,7 @@ S3M::Saving
 
 S3M::Loading
    [Imp] <Jojo> Smarter Zxx conversion without message box (heuristic detection).
-   [Fix] <Jojo> Limit minimum sample preamp value to 16.
+   [Fix] <Jojo> Minimum sample preamp value is now 16 (like in ST3).
    [Fix] <Jojo> Small modifications to pattern loader to load somewhat broken S3M files (fix from xmp).
    [Fix] <Jojo> Don't reset global volume to max if it is 0 for "new" S3M modules.
    [Fix] <Jojo> Disable loop for sample with very short loop at the beginning.
@@ -901,7 +905,7 @@ MOD::Saving
    [Fix] <Jojo> F20 won't turn into G20.
 
 MOD::Playback compatibility
-   [Fix] <Jojo> 8-Bit Panning is not 7-Bit panning (using 800...8FF instead of 800...880 now - fixes f.e. DOPE.MOD).
+   [Fix] <Jojo> Using 8-Bit (800-8FF) Panning instead of 7-Bit panning (800-880) now - fixes f.e. DOPE.MOD.
    [Fix] <Jojo> Pattern loops are now handled correctly.
 
 Setup

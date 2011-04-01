@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_NEXTVSTPRESET,		OnSetNextVSTPreset)
 	ON_COMMAND(ID_VSTPRESETBACKWARDJUMP,OnVSTPresetBackwardJump)
 	ON_COMMAND(ID_VSTPRESETFORWARDJUMP,	OnVSTPresetForwardJump)
+	ON_COMMAND(ID_PLUGINTOINSTRUMENT,	OnCreateInstrument)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET+MAX_PLUGPRESETS, OnSetPreset)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
@@ -188,7 +189,11 @@ void CAbstractVstEditor::UpdatePresetField()
 		char rawname[256];
 		if(!m_pVstPlugin->GetProgramNameIndexed(index, -1, rawname))
 		{
-			strcpy(rawname, "");
+			// Fallback: Try to get current program name.
+			if(m_pVstPlugin->Dispatch(effGetProgramName, 0, 0, rawname, 0) != 1)
+			{
+				strcpy(rawname, "");
+			}
 		}
 		SetNullTerminator(rawname);
 		CreateVerifiedProgramName(rawname, sizeof(rawname), name, sizeof(name), index);
@@ -202,9 +207,9 @@ void CAbstractVstEditor::UpdatePresetField()
 
 
 void CAbstractVstEditor::OnSetPreset(UINT nID)
-//---------------------------------------------
+//--------------------------------------------
 {
-	int nIndex=nID-ID_PRESET_SET;
+	int nIndex = nID - ID_PRESET_SET;
 	if (nIndex>=0)
 	{
 		m_pVstPlugin->SetCurrentProgram(nIndex);
@@ -310,7 +315,7 @@ void CAbstractVstEditor::SetTitle()
 }
 
 LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
-//----------------------------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -365,8 +370,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 	if(m_nInstrument < 0 && m_pVstPlugin->CanRecieveMidiEvents())
 	{
 		CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
-		CSoundFile *pSndFile = m_pVstPlugin->GetSoundFile();
-		if(!pModDoc || !pSndFile)
+		if(pModDoc == nullptr)
 			return false;
 
 		if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
@@ -375,28 +379,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 			return false;
 		} else
 		{
-			// try to set up a new instrument
-			bool bFirst = (pSndFile->GetNumInstruments() == 0);
-			INSTRUMENTINDEX nIns = pModDoc->InsertInstrument(0); 
-			if(nIns == INSTRUMENTINDEX_INVALID)
-				return false;
-
-			MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
-			m_nInstrument = nIns;
-
-			_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
-			strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szLibraryName, CountOf(pIns->filename) - 1);
-			pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
-			pIns->nMidiChannel = 1;
-			// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
-			//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
-			//pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
-
-			pModDoc->UpdateAllViews(NULL, (nIns << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE | (bFirst ? HINT_MODTYPE : 0));
-			if(pSndFile->GetModSpecifications().supportsPlugins)
-				pModDoc->SetModified();
-
-			return true;
+			return CreateInstrument();
 		}
 	} else
 	{
@@ -741,10 +724,57 @@ void CAbstractVstEditor::OnVSTPresetBackwardJump()
 }
 
 void CAbstractVstEditor::OnVSTPresetForwardJump()
-//----------------------------------------------------
+//-----------------------------------------------
 {
 	OnSetPreset(min(10+ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram(), ID_PRESET_SET+m_pVstPlugin->GetNumPrograms()-1));
 }
+
+
+void CAbstractVstEditor::OnCreateInstrument()
+//-------------------------------------------
+{
+	CreateInstrument();
+}
+
+
+// Try to set up a new instrument that is linked to the current plugin.
+bool CAbstractVstEditor::CreateInstrument()
+//-----------------------------------------
+{
+	CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+	CSoundFile *pSndFile = m_pVstPlugin->GetSoundFile();
+	if(pModDoc == nullptr || pSndFile == nullptr)
+	{
+		return false;
+	}
+
+	bool bFirst = (pSndFile->GetNumInstruments() == 0);
+	INSTRUMENTINDEX nIns = pModDoc->InsertInstrument(0); 
+	if(nIns == INSTRUMENTINDEX_INVALID)
+	{
+		return false;
+	}
+
+	MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
+	m_nInstrument = nIns;
+
+	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
+	strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szLibraryName, CountOf(pIns->filename) - 1);
+	pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
+	pIns->nMidiChannel = 1;
+	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
+	//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
+	//pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
+
+	pModDoc->UpdateAllViews(NULL, (nIns << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE | (bFirst ? HINT_MODTYPE : 0));
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+	{
+		pModDoc->SetModified();
+	}
+
+	return true;
+}
+
 
 void CAbstractVstEditor::PrepareToLearnMacro(UINT nID)
 {
