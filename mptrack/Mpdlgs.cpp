@@ -9,7 +9,7 @@
 #include "snddev.h"
 #include ".\mpdlgs.h"
 
-#define str_preampChangeNote GetStrI18N(_TEXT("Note: Pre-Amp setting affects sample volume only. Changing this setting may cause undesired effects on volume balance between sample based instruments and plugin instruments."))
+#define str_preampChangeNote GetStrI18N(_TEXT("Note: The Pre-Amp setting affects sample volume only. Changing it may cause undesired effects on volume balance between sample based instruments and plugin instruments.\nIn other words: Don't touch this slider unless you know what you are doing."))
 
 //#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 

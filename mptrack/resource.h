@@ -1185,6 +1185,7 @@
 #define ID_SAMPLE_QUICKFADE             60454
 #define ID_EDIT_MIXPASTE_ITSTYLE        60455
 #define ID_VIEW_MPTHACKS                60456
+#define ID_PLUGINTOINSTRUMENT           60457
 
 // Next default values for new objects
 // 
@@ -1192,7 +1193,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        529
-#define _APS_NEXT_COMMAND_VALUE         60457
+#define _APS_NEXT_COMMAND_VALUE         60458
 #define _APS_NEXT_CONTROL_VALUE         2435
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

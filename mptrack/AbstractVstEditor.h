@@ -23,6 +23,7 @@ public:
 	int GetLearnMacro();
 
 	void UpdatePresetField();
+	bool CreateInstrument();
 
 	afx_msg void OnLoadPreset();
 	afx_msg void OnSavePreset();
@@ -37,6 +38,7 @@ public:
 	afx_msg void OnSetNextVSTPreset();
 	afx_msg void OnVSTPresetBackwardJump();
 	afx_msg void OnVSTPresetForwardJump();
+	afx_msg void OnCreateInstrument();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
 	//Overridden methods:

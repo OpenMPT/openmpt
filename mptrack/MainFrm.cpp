@@ -194,7 +194,7 @@ DWORD CMainFrame::m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEO
 // Pattern Setup
 DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 								   | PATTERN_SMALLFONT | PATTERN_CENTERROW
-								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS 
+								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS | PATTERN_NOEXTRALOUD
 								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT /*| PATTERN_HILITETIMESIGS*/
 								   | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL | PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE;
 DWORD CMainFrame::m_nRowSpacing = 16;	// primary highlight (measures)
@@ -823,7 +823,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_wndToolBar.Create(this)) return -1;
 	if (!m_wndStatusBar.Create(this)) return -1;
 	if (!m_wndTree.Create(this, IDD_TREEVIEW, CBRS_LEFT|CBRS_BORDER_RIGHT, IDD_TREEVIEW)) return -1;
-	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+	m_wndStatusBar.SetIndicators(indicators, CountOf(indicators));
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
 
@@ -3078,7 +3078,7 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 		str += (librarynames) ? p->GetLibraryName() : p->GetName();
 		if(str.GetLength() <= size0) str += "undefined";
 
-		CBox.AddString(str);
+		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
 	}
 #endif // NO_VST
 }
@@ -3094,8 +3094,8 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 //-----------------------------------------------------------------------
 {
 	char s[72], sname[64];
-	UINT nParams = plug.GetNumParameters();
-	for (UINT i=0; i<nParams; i++)
+	const PlugParamIndex nParams = plug.GetNumParameters();
+	for (PlugParamIndex i = 0; i < nParams; i++)
 	{
 		plug.GetParamName(i, sname, sizeof(sname));
 		wsprintf(s, "%02d: %s", i, sname);

@@ -621,6 +621,7 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 	m_nRow = nRow;
 	m_nChannel = nChannel;
 	m_nPattern = nPat;
+	m_bModified = false;
 	// Init Pages
 	if (m_pageNote) m_pageNote->Init(m_Command);
 	if (m_pageVolume) m_pageVolume->Init(m_Command);
@@ -871,7 +872,7 @@ void CPageEditNote::OnNoteChanged()
 			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
 			m_nInstr = combo->GetItemData(n);
 			//Checking whether note names should be recreated.
-			if(pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
+			if(!MODCOMMAND::IsPcNote(m_nNote) && pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
 			{
 				if(pSndFile->Instruments[m_nInstr]->pTuning != pSndFile->Instruments[oldInstr]->pTuning)
 					UpdateDialog();

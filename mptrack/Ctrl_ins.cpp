@@ -9,6 +9,7 @@
 #include "dlg_misc.h"
 #include "tuningDialog.h"
 #include "misc_util.h"
+#include "Vstplug.h"
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
@@ -2088,7 +2089,23 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 			if (pIns->nMixPlug)	//if we have not just set to no plugin
 			{
-				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[pIns->nMixPlug-1]);
+				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[pIns->nMixPlug - 1]);
+				if (pPlug == nullptr || pPlug->pMixPlugin == nullptr)
+				{
+					// No plugin in this slot: Ask user to add one.
+					CSelectPluginDlg dlg(m_pModDoc, nPlug - 1, this); 
+					if (dlg.DoModal() == IDOK)
+					{
+						if(m_pSndFile->GetModSpecifications().supportsPlugins)
+						{
+							m_pModDoc->SetModified();
+						}
+						UpdatePluginList();
+						m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
+					}
+
+				}
+
 				if (pPlug && pPlug->pMixPlugin)
 				{
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
@@ -2102,7 +2119,6 @@ void CCtrlInstruments::OnMixPlugChanged()
 					}
 					return;
 				}
-								
 			}
 		}
 		
