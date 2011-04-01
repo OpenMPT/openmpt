@@ -355,7 +355,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	for (UINT iSmp=1; iSmp<=insnum; iSmp++)
 	{
 		UINT nInd = ((DWORD)smppos[iSmp - 1]) * 16;
-		if ((!nInd) || (nInd + 0x50 > dwMemLength)) continue;
+		if (nInd + 0x50 > dwMemLength) continue;
 
 		memcpy(s, lpStream + nInd, 0x50);
 		memcpy(Samples[iSmp].filename, s+1, 12);
@@ -504,7 +504,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading samples
-	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if ((Samples[iRaw].nLength) && (smpdatapos[iRaw - 1]))
+	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if (Samples[iRaw].nLength)
 	{
 		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;

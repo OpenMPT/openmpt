@@ -343,11 +343,11 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
-				// ST3 applies global volume on tick 1 and does other weird things, but we just emulate this part for now.
-				if((GetType() & MOD_TYPE_S3M) && nMusicSpeed <= 1)
-				{
-					break;
-				}
+				// ST3 applies global volume on tick 1 and does other weird things, but we won't emulate this for now.
+// 				if((GetType() & MOD_TYPE_S3M) && nMusicSpeed <= 1)
+// 				{
+// 					break;
+// 				}
 
 				if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
 				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER))
@@ -1880,12 +1880,12 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set Global Volume
 		case CMD_GLOBALVOLUME:
-			// ST3 applies global volume on tick 1 and does other weird things, but we just emulate this part for now.
-			if(((GetType() & MOD_TYPE_S3M) && m_nTickCount != 1)
-				|| (!(GetType() & MOD_TYPE_S3M) && !(m_dwSongFlags & SONG_FIRSTTICK)))
-			{
-				break;
-			}
+			// ST3 applies global volume on tick 1 and does other weird things, but we won't emulate this for now.
+// 			if(((GetType() & MOD_TYPE_S3M) && m_nTickCount != 1)
+// 				|| (!(GetType() & MOD_TYPE_S3M) && !(m_dwSongFlags & SONG_FIRSTTICK)))
+// 			{
+// 				break;
+// 			}
 			
 			if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 			//IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
