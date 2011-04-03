@@ -138,6 +138,7 @@
 #define IDD_EDITHISTORY                 526
 #define IDD_SAMPLE_GRID_SIZE            527
 #define IDD_SAMPLE_XFADE                528
+#define IDD_OPTIONS_UPDATE              529
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -930,6 +931,7 @@
 #define IDC_EDIT_HISTORY                2432
 #define IDC_SAMPLE_QUICKFADE            2433
 #define IDC_SAMPLE_XFADE                2434
+#define IDC_LASTUPDATE                  2435
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1186,15 +1188,16 @@
 #define ID_EDIT_MIXPASTE_ITSTYLE        60455
 #define ID_VIEW_MPTHACKS                60456
 #define ID_PLUGINTOINSTRUMENT           60457
+#define ID_INTERNETUPDATE               60458
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        529
-#define _APS_NEXT_COMMAND_VALUE         60458
-#define _APS_NEXT_CONTROL_VALUE         2435
+#define _APS_NEXT_RESOURCE_VALUE        530
+#define _APS_NEXT_COMMAND_VALUE         60459
+#define _APS_NEXT_CONTROL_VALUE         2436
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

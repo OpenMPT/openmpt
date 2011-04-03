@@ -423,7 +423,6 @@ public:
 	static DWORD gdwNotificationType;
 	static CString gcsPreviousVersion;
 	static CString gcsInstallGUID;
-	static int gnCheckForUpdates;
 	
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
@@ -698,6 +697,7 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnViewMIDIMapping();
 	afx_msg void OnViewEditHistory();
+	afx_msg void OnInternetUpdate();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
