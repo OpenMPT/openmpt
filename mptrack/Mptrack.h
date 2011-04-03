@@ -16,11 +16,6 @@
 #include "../soundlib/Sndfile.h"
 #include <windows.h>
 
-#ifdef UPDATECHECKENABLED
-	#include <Specstrings.h>	// In VC2003, '__in' was undefined in winhttp.h
-	#include <winhttp.h>
-#endif
-
 class CModDoc;
 class CVstPluginManager;
 
@@ -101,20 +96,6 @@ enum {
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Internet connection context
-
-#ifdef UPDATECHECKENABLED
-typedef struct REQUEST_CONTEXT {
-	HINTERNET hSession; 
-	HINTERNET hConnection;
-	HINTERNET hRequest;
-	LPSTR     lpBuffer;       // Buffer for storing read data
-	LPSTR	  postData;
-} REQUEST_CONTEXT;
-#endif
-
-
-/////////////////////////////////////////////////////////////////////////////
 // File dialog (open/save) results
 struct FileDlgResult
 {
@@ -160,11 +141,6 @@ protected:
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
 	TCHAR m_szStringsFileName[_MAX_PATH];
 	static bool m_bPortableMode;
-
-	#ifdef UPDATECHECKENABLED
-	// Internet request context
-	REQUEST_CONTEXT *m_pRequestContext;
-	#endif
 
 public:
 	CTrackApp();
@@ -212,13 +188,6 @@ public:
 protected:
 	VOID StartSplashScreen();
 	VOID StopSplashScreen();
-
-	#ifdef UPDATECHECKENABLED
-		VOID UpdateCheck();
-		static void __stdcall InternetRequestCallback( HINTERNET hInternet, DWORD_PTR dwContext, DWORD dwInternetStatus,
-									  LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
-		static void CleanupInternetRequest(REQUEST_CONTEXT *pRequestContext);
-	#endif
 
 // Localized strings
 public:

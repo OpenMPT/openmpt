@@ -45,6 +45,7 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 #ifdef DOWNLOAD_MO3
 Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); Check: not IsUNMO3Installed; GroupDescription: Options:
 #endif
+Name: update_c; Description: Automatically check for updates; GroupDescription: Options:
 Name: portable; Description: Portable mode (use program folder for storing settings, no registry changes); GroupDescription: Options:; Flags: unchecked
 Name: vst_scan; Description: Scan for previously installed VST plugins; GroupDescription: Options:; Flags: unchecked
 ; file associations - put this below all other [tasks]!
@@ -231,6 +232,12 @@ begin
             begin
                 keyboardFilepath := ExpandConstant('{app}\extraKeymaps\' + keyboardFilepath + '.mkb');
                 SetIniString('Paths', 'Key_Config_File', keyboardFilepath, INIFile);
+            end;
+
+            // Update check
+            if(not IsTaskSelected('update_c')) then
+            begin
+                SetIniString('Update', 'UpdateCheckPeriod', '0', INIFile);
             end;
 
             // Scan for pre-installed VST plugins

@@ -186,6 +186,24 @@ BEGIN
     LTEXT           "Samples used for fading:",IDC_STATIC,6,8,96,8
 END
 
+IDD_OPTIONS_UPDATE DIALOGEX 0, 0, 274, 281
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Update"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Check for Updates",IDC_STATIC,6,6,258,66
+    CONTROL         "Never",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,12,18,240,8
+    CONTROL         "Daily",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,12,30,240,8
+    CONTROL         "Weekly (recommended)",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,12,42,240,8
+    CONTROL         "Monthly",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,12,54,240,8
+    GROUPBOX        "Advanced Settings",IDC_STATIC,6,78,258,60
+    LTEXT           "Update server URL:",IDC_STATIC,12,90,246,8
+    EDITTEXT        IDC_EDIT1,12,102,246,12,ES_AUTOHSCROLL
+    LTEXT           "",IDC_LASTUPDATE,6,168,258,24
+    LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,120,246,12
+    PUSHBUTTON      "Check for Updates",IDC_BUTTON1,6,144,84,18
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -265,6 +283,14 @@ BEGIN
         RIGHTMARGIN, 171
         TOPMARGIN, 7
         BOTTOMMARGIN, 75
+    END
+
+    IDD_OPTIONS_UPDATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 267
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 274
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2035,6 +2061,7 @@ BEGIN
         MENUITEM "&OpenMPT Website",            ID_NETLINK_MODPLUG
         MENUITEM "&Web Resources",              ID_NETLINK_TOP_PICKS
         MENUITEM SEPARATOR
+        MENUITEM "Check for &Updates...",       ID_INTERNETUPDATE
         MENUITEM "&About OpenMPT...",           ID_APP_ABOUT
     END
 END
@@ -2750,6 +2777,7 @@ BEGIN
     BEGIN
         MENUITEM "&Load Preset...",             ID_PRESET_LOAD
         MENUITEM "&Save Preset As...",          ID_PRESET_SAVE
+        MENUITEM "Create instrument from plugin", ID_PLUGINTOINSTRUMENT
         MENUITEM SEPARATOR
         MENUITEM "&Randomize Params",           ID_PRESET_RANDOM
     END

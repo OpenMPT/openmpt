@@ -126,7 +126,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib delayimp.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib delayimp.lib wininet.lib"
 				OutputFile=".\Bin/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -425,6 +425,9 @@
 			</File>
 			<File
 				RelativePath=".\Undo.cpp">
+			</File>
+			<File
+				RelativePath=".\UpdateCheck.cpp">
 			</File>
 			<File
 				RelativePath=".\view_com.cpp">
@@ -838,6 +841,9 @@
 			</File>
 			<File
 				RelativePath=".\Undo.h">
+			</File>
+			<File
+				RelativePath=".\UpdateCheck.h">
 			</File>
 			<File
 				RelativePath=".\version.h">
