@@ -21,6 +21,7 @@
 time_t CUpdateCheck::lastUpdateCheck = 0;
 int CUpdateCheck::updateCheckPeriod = 7;
 CString CUpdateCheck::updateBaseURL = "http://update.openmpt.org/check/%s";
+bool CUpdateCheck::showUpdateHint = true;
 
 
 CUpdateCheck::CUpdateCheck(const bool autoUpdate)
@@ -73,7 +74,22 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 			caller->Terminate();
 			return 0;
 		}
+
+		// Never ran update checks before, so we notify the user of automatic update checks.
+		if(CUpdateCheck::showUpdateHint)
+		{
+			CString msg;
+			msg.Format("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup.", CUpdateCheck::updateCheckPeriod);
+			if(::MessageBox(0, msg, "OpenMPT Internet Update", MB_YESNO | MB_ICONQUESTION) == IDNO)
+			{
+				CUpdateCheck::showUpdateHint = false;
+				caller->Terminate();
+				return 0;
+			}
+			
+		}
 	}
+	CUpdateCheck::showUpdateHint = false;
 
 	const CString userAgent = CString("OpenMPT ") + MptVersion::str;
 	CString updateURL;
@@ -123,9 +139,10 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	// Download data.
 	CString resultData = "";
 	char *downloadBuffer = new char[DOWNLOAD_BUFFER_SIZE];
-    DWORD availableSize = 0, bytesRead = 0;
+    DWORD availableSize, bytesRead;
 	do
 	{
+		// Query number of available bytes to download
 		if(InternetQueryDataAvailable(caller->connectionHandle, &availableSize, 0, NULL) == FALSE)
 		{
 			caller->Die("Error while downloading update information data:\n", GetLastError());
@@ -133,12 +150,15 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 
 		LimitMax(availableSize, (DWORD)DOWNLOAD_BUFFER_SIZE);
 
+		// Put downloaded bytes into our buffer
 		if(InternetReadFile(caller->connectionHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
 		{
 			caller->Die("Error while downloading update information data:\n", GetLastError());
 		}
 
 		resultData.Append(downloadBuffer, availableSize);
+		Sleep(1);
+
 	} while(bytesRead != 0);
 	delete[] downloadBuffer;
 	
@@ -302,7 +322,7 @@ void CUpdateSetupDlg::OnOK()
 
 	CString updateURL;
 	GetDlgItemText(IDC_EDIT1, updateURL);
-	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL);
+	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL, CUpdateCheck::GetShowUpdateHint());
 	
 	CPropertyPage::OnOK();
 }
@@ -319,7 +339,6 @@ BOOL CUpdateSetupDlg::OnSetActive()
 void CUpdateSetupDlg::OnCheckNow()
 //--------------------------------
 {
-	CUpdateCheck *updateCheck = CUpdateCheck::Create(false);
-	updateCheck->DoUpdateCheck();
+	CMainFrame::GetMainFrame()->PostMessage(WM_COMMAND, ID_INTERNETUPDATE);
 }
 

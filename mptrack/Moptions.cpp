@@ -29,14 +29,13 @@ static MPTCOLORDEF gColorDefs[] =
 	{"Note Highlight",	0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
 	{"Effect Highlight",0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
 	{"Invalid Commands",0,	MODCOLOR_DODGY_COMMANDS, 0, 0, "Invalid Note:", NULL, NULL},
-	{"Channel Separator",0,	MODCOLOR_SEPSHADOW, MODCOLOR_SEPFACE, MODCOLOR_SEPHILITE, "Shadow:", "Face:", "Highlight:"},
+	{"Channel Separator",0,	MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, "Highlight:", "Face:", "Shadow:"},
 	{"Next/Prev Pattern",0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend color:", NULL, NULL},
 	{"Sample Editor",	1,	MODCOLOR_SAMPLE, 0, 0, "Sample Data:", NULL, NULL},
 	{"Instrument Editor",2,	MODCOLOR_ENVELOPES, 0, 0, "Envelopes:", NULL, NULL},
 	{"VU-Meters",		0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"}
 };
 
-#define NUMCOLORDEFS		(sizeof(gColorDefs)/sizeof(MPTCOLORDEF))
 #define PREVIEWBMP_WIDTH	88
 #define PREVIEWBMP_HEIGHT	39
 
@@ -85,7 +84,7 @@ BOOL COptionsColors::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
 	memcpy(CustomColors, CMainFrame::rgbCustomColors, sizeof(CustomColors));
-	for (UINT i=0; i<NUMCOLORDEFS; i++)
+	for (UINT i = 0; i < CountOf(gColorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(gColorDefs[i].pszName), i);
 	}

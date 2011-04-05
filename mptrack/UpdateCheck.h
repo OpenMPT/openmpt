@@ -34,7 +34,9 @@ public:
 	static time_t GetLastUpdateCheck() { return lastUpdateCheck; };
 	static int GetUpdateCheckPeriod() { return updateCheckPeriod; };
 	static CString GetUpdateURL() { return updateBaseURL; };
-	static void SetUpdateSettings(time_t last, int period, CString url) { lastUpdateCheck = last; updateCheckPeriod = period; updateBaseURL = url; };
+	static bool GetShowUpdateHint() { return showUpdateHint; };
+	static void SetUpdateSettings(time_t last, int period, CString url, bool showHint)
+		{ lastUpdateCheck = last; updateCheckPeriod = period; updateBaseURL = url; showUpdateHint = showHint; };
 
 protected:
 
@@ -42,6 +44,7 @@ protected:
 	static time_t lastUpdateCheck;	// Time of last successful update check
 	static int updateCheckPeriod;	// Check for updates every x days
 	static CString updateBaseURL;	// URL where the version check should be made.
+	static bool showUpdateHint;		// Show hint on first automatic update
 
 	bool isAutoUpdate;	// Are we running an automatic update check?
 
