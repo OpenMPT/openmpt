@@ -238,6 +238,10 @@ begin
             if(not IsTaskSelected('update_c')) then
             begin
                 SetIniString('Update', 'UpdateCheckPeriod', '0', INIFile);
+            end else
+            begin
+                SetIniString('Update', 'UpdateCheckPeriod', '7', INIFile);
+                //SetIniString('Update', 'LastUpdateCheck', GetDateTimeString('yyyy-mm-dd hh:nn', #0, #0), INIFile);
             end;
 
             // Scan for pre-installed VST plugins
