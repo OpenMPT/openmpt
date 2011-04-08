@@ -12,6 +12,9 @@
 ///////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Loaders.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/Moddoc.h"
+#endif // MODPLUG_TRACKER
 
 //#define DMFLOG
 
@@ -86,6 +89,16 @@ extern void Log(LPCSTR s, ...);
 #endif
 
 
+// Convert portamento value (not very accurate, to say the least)
+uint8 DMFporta2MPT(uint8 val)
+//---------------------------
+{
+	if(val <= 0x0F)
+		return (val | 0xF0);
+	else
+		return (val / 4);
+}
+
 bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 //---------------------------------------------------------------------
 {
@@ -102,10 +115,25 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 	memcpy(m_szNames[0], pfh->songname, 30);
 	SpaceToNullStringFixed<30>(m_szNames[0]);
 	m_nType = MOD_TYPE_DMF;
+	m_dwSongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = 0;
 #ifdef DMFLOG
 	Log("DMF version %d: \"%s\": %d bytes (0x%04X)\n", pfh->version, m_szNames[0], dwMemLength, dwMemLength);
 #endif
+
+#ifdef MODPLUG_TRACKER
+	if(GetpModDoc() != nullptr)
+	{
+		FileHistory mptHistory;
+		MemsetZero(mptHistory);
+		mptHistory.loadDate.tm_mday = CLAMP(pfh->date[0], 0, 31);
+		mptHistory.loadDate.tm_mon = CLAMP(pfh->date[1], 1, 12) - 1;
+		mptHistory.loadDate.tm_year = pfh->date[2];
+		GetpModDoc()->GetFileHistory()->clear();
+		GetpModDoc()->GetFileHistory()->push_back(mptHistory);
+	}
+#endif // MODPLUG_TRACKER
+
 	while (dwMemPos + 7 < dwMemLength)
 	{
 		DWORD id = *((LPDWORD)(lpStream+dwMemPos));
@@ -135,7 +163,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 				if (nseq >= MAX_ORDERS-1) nseq = MAX_ORDERS-1;
 				Order.resize(nseq, Order.GetInvalidPatIndex());
 				if (sequ->loopstart < nseq) m_nRestartPos = sequ->loopstart;
-				for (UINT i = 0; i < nseq; i++) Order[i] = (PATTERNINDEX)sequ->sequ[i];
+				for (UINT i = 0; i < nseq - 2; i++) Order[i] = (PATTERNINDEX)sequ->sequ[i];
 			}
 			dwMemPos += sequ->seqsize + 8;
 			break;
@@ -150,10 +178,12 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 				if ((patt->patsize >= dwMemLength) || (dwMemPos + patt->patsize + 8 > dwMemLength)) goto dmfexit;
 				numpat = patt->numpat;
 				if (numpat > MAX_PATTERNS) numpat = MAX_PATTERNS;
+
 				m_nChannels = patt->tracks;
 				if (m_nChannels < patt->firstpatinfo) m_nChannels = patt->firstpatinfo;
 				if (m_nChannels > 32) m_nChannels = 32;
 				if (m_nChannels < 1) m_nChannels = 1;
+
 				for (UINT npat=0; npat<numpat; npat++)
 				{
 					DMFTRACK *pt = (DMFTRACK *)(lpStream+dwPos);
@@ -163,12 +193,18 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 					UINT tracks = pt->tracks;
 					if (tracks > 32) tracks = 32;
 					UINT ticks = pt->ticks;
-					if (ticks > 256) ticks = 256;
-					if (ticks < 16) ticks = 16;
+					if (ticks > MAX_PATTERN_ROWS) ticks = MAX_PATTERN_ROWS;
+					if (ticks < 1) ticks = 1;
 					dwPos += 8;
 					if ((pt->jmpsize >= dwMemLength) || (dwPos + pt->jmpsize + 4 >= dwMemLength)) break;
 					if(Patterns.Insert(npat, ticks)) goto dmfexit;
 					MODCOMMAND *m = Patterns[npat];
+
+					// If pattern "width" changes, leftover voices are killed:
+					for(CHANNELINDEX nChn = tracks; nChn < m_nChannels; nChn++)
+					{
+						m[nChn].note = NOTE_NOTECUT;
+					}
 
 					DWORD d = dwPos;
 					dwPos += pt->jmpsize;
@@ -217,8 +253,17 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 							if (info & 0x20)
 							{
 								cmd.note = lpStream[d++];
-								if ((cmd.note) && (cmd.note < 0xfe)) cmd.note &= 0x7f;
-								if ((cmd.note) && (cmd.note < 128)) cmd.note += 24;
+								if (cmd.note >= 1 && cmd.note <= 108)
+								{
+									cmd.note += 24;
+								} else if (cmd.note >= 129 && cmd.note <= 236)
+								{
+									// "ghost notes" for portamento that are actually not played... how the hell should we treat them?!
+									cmd.note += 24;
+								} else if (cmd.note == 255)
+								{
+									cmd.note = NOTE_NOTECUT;
+								}
 							}
 							// Volume
 							if (info & 0x10)
@@ -226,7 +271,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								cmd.volcmd = VOLCMD_VOLUME;
 								cmd.vol = (lpStream[d++]+3)>>2;
 							}
-							// Effect 1
+							// Effect 1 - Instrument
 							if (info & 0x08)
 							{
 								BYTE efx = lpStream[d++];
@@ -234,20 +279,23 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								switch(efx)
 								{
 								// 1: Key Off
-								case 1: if (!cmd.note) cmd.note = 0xFE; break;
-								// 2: Set Loop
-								// 4: Sample Delay
+								case 1: if (!cmd.note) cmd.note = NOTE_NOTECUT; break;
+								// 2: Stop Sample Loop
+								case 2: if (!cmd.note) cmd.note = NOTE_KEYOFF; break;
+								// 4: Sample Delay, in 1/256th rows
 								case 4: if (eval&0xe0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>5)|0xD0; } break;
-								// 5: Retrig
+								// 5: Retrig, in 1/256th rows
 								case 5: if (eval&0xe0) { cmd.command = CMD_RETRIG; cmd.param = (eval>>5); } break;
 								// 6: Offset
 								case 6: cmd.command = CMD_OFFSET; cmd.param = eval; break;
+								// 10: Tekkno Invert
+								case 10: cmd.command = CMD_S3MCMDEX; cmd.param = 0x9F; break;
 								#ifdef DMFLOG
 								default: Log("FX1: %02X.%02X\n", efx, eval);
 								#endif
 								}
 							}
-							// Effect 2
+							// Effect 2 - Note
 							if (info & 0x04)
 							{
 								BYTE efx = lpStream[d++];
@@ -261,22 +309,22 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								// 3: Arpeggio
 								case 3: if (eval) { cmd.command = CMD_ARPEGGIO; cmd.param = eval; } break;
 								// 4: Portamento Up
-								case 4: cmd.command = CMD_PORTAMENTOUP; cmd.param = (eval >= 0xe0) ? 0xdf : eval; break;
+								case 4: cmd.command = CMD_PORTAMENTOUP; cmd.param = DMFporta2MPT(eval); break;
 								// 5: Portamento Down
-								case 5: cmd.command = CMD_PORTAMENTODOWN; cmd.param = (eval >= 0xe0) ? 0xdf : eval; break;
+								case 5: cmd.command = CMD_PORTAMENTODOWN; cmd.param = DMFporta2MPT(eval); break;
 								// 6: Tone Portamento
-								case 6: cmd.command = CMD_TONEPORTAMENTO; cmd.param = eval; break;
+								case 6: cmd.command = CMD_TONEPORTAMENTO; cmd.param = DMFporta2MPT(eval); break;
 								// 8: Vibrato
 								case 8: cmd.command = CMD_VIBRATO; cmd.param = eval; break;
-								// 12: Note cut
+								// 12: Note cut, in 1/256th rows
 								case 12: if (eval & 0xe0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>5)|0xc0; }
-										else if (!cmd.note) { cmd.note = 0xfe; } break;
+										else if (!cmd.note) { cmd.note = NOTE_NOTECUT; } break;
 								#ifdef DMFLOG
 								default: Log("FX2: %02X.%02X\n", efx, eval);
 								#endif
 								}
 							}
-							// Effect 3
+							// Effect 3 - Volume
 							if (info & 0x02)
 							{
 								BYTE efx = lpStream[d++];
@@ -296,7 +344,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 										else { cmd.command = CMD_PANNING8; cmd.param = eval; } break;
 								// 8: Pan Slide Left
 								case 8: eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
-										cmd.command = CMD_PANNINGSLIDE; cmd.param = eval<<4; break;
+										cmd.command = CMD_PANNINGSLIDE; cmd.param = eval << 4; break;
 								// 9: Pan Slide Right
 								case 9: eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
 										cmd.command = CMD_PANNINGSLIDE; cmd.param = eval; break;
@@ -305,6 +353,21 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								#endif
 								}
 							}
+
+							// Note without instrument == just reset pitch, do not retrigger
+							if(cmd.instr == 0 && cmd.note != NOTE_NONE && NOTE_IS_VALID(cmd.note) && cmd.command != CMD_TONEPORTAMENTO)
+							{
+								if(cmd.volcmd == VOLCMD_NONE)
+								{
+									cmd.volcmd = VOLCMD_TONEPORTAMENTO;
+									cmd.vol = 9;
+								} else
+								{
+									cmd.command = CMD_TONEPORTAMENTO;
+									cmd.param = 0xFF;
+								}
+							}
+
 							// Store effect
 							if (i < m_nChannels) p[i] = cmd;
 							if (d > dwPos)
@@ -389,14 +452,14 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 						DMFSAMPLE *psh = (DMFSAMPLE *)(lpStream+dwPos);
 						MODSAMPLE *psmp = &Samples[iSmp];
 						psmp->nLength = psh->len;
-						psmp->nLoopStart = psh->loopstart;
-						psmp->nLoopEnd = psh->loopend;
+						psmp->nSustainStart = psh->loopstart;
+						psmp->nSustainEnd = psh->loopend;
 						psmp->nC5Speed = psh->c3speed;
 						psmp->nGlobalVol = 64;
 						psmp->nVolume = (psh->volume) ? ((WORD)psh->volume)+1 : (WORD)256;
 						psmp->uFlags = (psh->flags & 2) ? CHN_16BIT : 0;
 						if (psmp->uFlags & CHN_16BIT) psmp->nLength >>= 1;
-						if (psh->flags & 1) psmp->uFlags |= CHN_LOOP;
+						if (psh->flags & 1) psmp->uFlags |= CHN_SUSTAINLOOP;
 						smplflags[iSmp] = psh->flags;
 						dwPos += (pfh->version < 8) ? 22 : 30;
 					#ifdef DMFLOG
