@@ -16,8 +16,6 @@
 #endif
 
 
-bool CCommandSet::s_bShowErrorOnUnknownKeybinding = true;
-
 CCommandSet::CCommandSet(void)
 {
 	// Which keybinding rules to enforce?
@@ -1579,7 +1577,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 
 		l++;
 	}
-	if(s_bShowErrorOnUnknownKeybinding && !errText.IsEmpty())
+	if(!errText.IsEmpty())
 	{
 		CString err;
 		err.Format("The following problems have been encountered while trying to load the key binding file %s:\n", szFilename);

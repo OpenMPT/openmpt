@@ -51,10 +51,10 @@ void CSoundFile::S3MSxx2MODExx(MODCOMMAND *m)
 	case 0x40:	m->param = (m->param & 0x0F) | 0x70; break;
 	case 0x50:	
 	case 0x60:	
-	case 0x70:  if(((m->param & 0xF0) == 0x70) && ((m->param & 0x0F) > 0x0A)) { m->command = CMD_NONE; break; }	// no pitch env in XM format
 	case 0x90:
 	case 0xA0:	m->command = CMD_XFINEPORTAUPDOWN; break;
 	case 0xB0:	m->param = (m->param & 0x0F) | 0x60; break;
+	case 0x70:  m->command = CMD_NONE;	// No NNA / envelope control in MOD/XM format
 		// rest are the same
 	}
 }
@@ -106,8 +106,18 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 	{
 		if(m->IsPcNote())
 		{
+			MODCOMMAND::COMMAND newcommand = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI;
+			if(!GetModSpecifications(nNewType).HasCommand(newcommand))
+			{
+				newcommand = CMD_MIDI;	// assuming that this was CMD_SMOOTHMIDI
+			}
+			if(!GetModSpecifications(nNewType).HasCommand(newcommand))
+			{
+				newcommand = CMD_NONE;
+			}
+
 			m->param = (BYTE)(min(MODCOMMAND::maxColumnValue, m->GetValueEffectCol()) * 0x7F / MODCOMMAND::maxColumnValue);
-			m->command = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI; // might be removed later
+			m->command = newcommand; // might be removed later
 			m->volcmd = VOLCMD_NONE;
 			m->note = NOTE_NONE;
 			m->instr = 0;
@@ -298,11 +308,21 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		switch(m->command)
 		{
 		case CMD_S3MCMDEX:
-			if(m->param == 0x91)
+			switch(m->param & 0xF0)
 			{
-				// surround remap (this is the "official" command)
-				m->command = CMD_PANNING8;
-				m->param = 0xA4;
+			case 0x70: m->command = CMD_NONE; break;	// No NNA / envelope control in S3M format
+			case 0x90:
+				if(m->param == 0x91)
+				{
+					// surround remap (this is the "official" command)
+					m->command = CMD_PANNING8;
+					m->param = 0xA4;
+				} else if(m->param == 0x90)
+				{
+					m->command = CMD_PANNING8;
+					m->param = 0x40;
+				}
+				break;
 			}
 			break;
 		case CMD_SMOOTHMIDI:
