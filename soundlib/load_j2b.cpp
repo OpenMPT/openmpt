@@ -35,6 +35,9 @@
 #define AMCHUNKID_AI__ 0x20204941
 #define AMCHUNKID_AS__ 0x20205341
 
+// Header flags
+#define AMHEAD_LINEAR	0x01
+
 // Envelope flags
 #define AMENV_ENABLED	0x01
 #define AMENV_SUSTAIN	0x02
@@ -78,7 +81,7 @@ struct AMFFCHUNK_MAIN
 	uint8  channels;
 	uint8  speed;
 	uint8  tempo;
-	uint32 unknown;		// 0x16078035 if original file was MOD, 0xC50100FF for everything else?
+	uint32 unknown;		// 0x16078035 if original file was MOD, 0xC50100FF for everything else? it's 0xFF00FFFF in Carrotus.j2b (AMFF version)
 	uint8  globalvolume;
 };
 
@@ -489,7 +492,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				memcpy(m_szNames[0], mainchunk->songname, 32);
 				SpaceToNullStringFixed<31>(m_szNames[0]);
 				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
-				if(!(mainchunk->flags & 0x01)) m_dwSongFlags |= SONG_LINEARSLIDES;
+				if(!(mainchunk->flags & AMHEAD_LINEAR)) m_dwSongFlags |= SONG_LINEARSLIDES;
 				if(mainchunk->channels < 1) return false;
 				m_nChannels = min(mainchunk->channels, MAX_BASECHANNELS);
 				m_nDefaultSpeed = mainchunk->speed;
@@ -497,7 +500,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nDefaultGlobalVolume = mainchunk->globalvolume << 1;
 				m_nSamplePreAmp = m_nVSTiVolume = 48;
 				m_nType = MOD_TYPE_J2B;
-				ASSERT(LittleEndian(mainchunk->unknown) == 0xFF0001C5 || LittleEndian(mainchunk->unknown) == 0x35800716);
+				ASSERT(LittleEndian(mainchunk->unknown) == 0xFF0001C5 || LittleEndian(mainchunk->unknown) == 0x35800716 || LittleEndian(mainchunk->unknown) == 0xFF00FFFF);
 
 				// It seems like there's no way to differentiate between
 				// Muted and Surround channels (they're all 0xA0) - might
@@ -688,6 +691,11 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				const size_t nTotalSmps = LittleEndianW(instheader->numsamples);
 
+				if(nTotalSmps == 0)
+				{
+					MemsetZero(pIns->Keyboard);
+				}
+
 				DWORD dwChunkPos;
 
 				// read sample sub-chunks (RIFF nesting ftw)
@@ -705,14 +713,15 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if(LittleEndian(*(uint32 *)(lpStream + dwChunkPos)) != AMCHUNKID_AS__) break;
 					dwChunkPos += 4;
 
+					// Moved this stuff here (was below the next ASSERT_CAN_READ_CHUNK) because of instrument 12 in Carrotus.j2b
+					if(m_nSamples + 1 >= MAX_SAMPLES)
+						break;
+					const SAMPLEINDEX nSmp = ++m_nSamples;
+
 					ASSERT_CAN_READ_CHUNK(sizeof(AMCHUNK_SAMPLE));
 					const AMCHUNK_SAMPLE *smpchunk = (AMCHUNK_SAMPLE *)(lpStream + dwChunkPos);
 
 					if(smpchunk->signature != AMCHUNKID_SAMP) break; // SAMP
-
-					if(m_nSamples + 1 >= MAX_SAMPLES)
-						break;
-					const SAMPLEINDEX nSmp = ++m_nSamples;
 
 					MemsetZero(Samples[nSmp]);
 
