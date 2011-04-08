@@ -1166,7 +1166,6 @@ protected:
 	bool enforceRule[kNumRules];
 
 public:
-	static bool s_bShowErrorOnUnknownKeybinding;
 
 	CCommandSet(void);
 	~CCommandSet(void);

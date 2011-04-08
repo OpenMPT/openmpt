@@ -2432,7 +2432,7 @@ bool CModDoc::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD
 			break;
 		case CMD_SPEED:
 			nmin = 1;
-			nmax = 0x7F;
+			nmax = 0xFF;
 			if (nType & MOD_TYPE_MOD) nmax = 0x20; else
 			if (nType & MOD_TYPE_XM) nmax = 0x1F;
 			break;
@@ -3074,7 +3074,7 @@ BOOL CModDoc::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMa
 
 		case VOLCMD_PANNING:
 			*prangeMax = 64;
-			if (m_SndFile.m_nType & MOD_TYPE_XM)
+			if (m_SndFile.GetType() & MOD_TYPE_XM)
 			{
 				*prangeMin = 2;		// 0*4+2
 				*prangeMax = 62;	// 15*4+2
@@ -3082,7 +3082,7 @@ BOOL CModDoc::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMa
 			break;
 
 		default:
-			*prangeMax = (m_SndFile.m_nType & MOD_TYPE_XM) ? 15 : 9;
+			*prangeMax = (m_SndFile.GetType() & MOD_TYPE_XM) ? 15 : 9;
 		}
 	}
 	return (gVolCmdInfo[ndx].dwFormats & m_SndFile.m_nType) ? TRUE : FALSE;
@@ -3165,6 +3165,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	return followSonghWnd;
 
 }
+
 
 enmParameteredMacroType CModDoc::GetMacroType(CString value)
 //----------------------------------------------------------
