@@ -213,10 +213,10 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 					UINT glbinfobyte = 0;
 					UINT pbeat = (pt->beat & 0xf0) ? pt->beat>>4 : 8;
 					BOOL tempochange = (pt->beat & 0xf0) ? TRUE : FALSE;
-					memset(infobyte, 0, sizeof(infobyte));
+					MemsetZero(infobyte);
 					for (UINT row=0; row<ticks; row++)
 					{
-						MODCOMMAND *p = &m[row*m_nChannels];
+						MODCOMMAND *p = &m[row * m_nChannels];
 						// Parse track global effects
 						if (!glbinfobyte)
 						{
@@ -259,7 +259,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								} else if (cmd.note >= 129 && cmd.note <= 236)
 								{
 									// "ghost notes" for portamento that are actually not played... how the hell should we treat them?!
-									cmd.note += 24;
+									cmd.note = (cmd.note & 0x7F) + 24;
 								} else if (cmd.note == 255)
 								{
 									cmd.note = NOTE_NOTECUT;
@@ -314,8 +314,15 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								case 5: cmd.command = CMD_PORTAMENTODOWN; cmd.param = DMFporta2MPT(eval); break;
 								// 6: Tone Portamento
 								case 6: cmd.command = CMD_TONEPORTAMENTO; cmd.param = DMFporta2MPT(eval); break;
-								// 8: Vibrato
-								case 8: cmd.command = CMD_VIBRATO; cmd.param = eval; break;
+								// 8: Vibrato Sine
+								// 9: Vibrato Triangle
+								// 10: Vibrato Square
+								case 8:
+								case 9:
+								case 10:
+									cmd.command = CMD_VIBRATO;
+									cmd.param = (0xF0 - (eval & 0xF0)) | ((eval & 0x0F) / 2);
+									break;
 								// 12: Note cut, in 1/256th rows
 								case 12: if (eval & 0xe0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>5)|0xc0; }
 										else if (!cmd.note) { cmd.note = NOTE_NOTECUT; } break;
@@ -339,6 +346,19 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 								case 2:	if (eval == 0xff) break;
 										eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
 										cmd.command = CMD_VOLUMESLIDE; cmd.param = eval; break;
+								// 3: Tremor
+								case 3:
+									cmd.command = CMD_TREMOR; cmd.param = eval;
+									break;
+								// 4: Tremolo Sine
+								// 5: Tremolo Triangle
+								// 6: Tremolo Square
+								case 4:
+								case 5:
+								case 6:
+									cmd.command = CMD_TREMOLO;
+									cmd.param = (0xF0 - (eval & 0xF0)) | ((eval & 0x0F) / 2);
+									break;
 								// 7: Set Pan
 								case 7: if (!cmd.volcmd) { cmd.volcmd = VOLCMD_PANNING; cmd.vol = (eval+3)>>2; }
 										else { cmd.command = CMD_PANNING8; cmd.param = eval; } break;
@@ -627,7 +647,7 @@ int DMFUnpack(LPBYTE psample, LPBYTE ibuf, LPBYTE ibufmax, UINT maxlen)
 	UINT actnode;
 	BYTE value, sign, delta = 0;
 	
-	memset(&tree, 0, sizeof(tree));
+	MemsetZero(tree);
 	tree.ibuf = ibuf;
 	tree.ibufmax = ibufmax;
 	DMFNewNode(&tree);

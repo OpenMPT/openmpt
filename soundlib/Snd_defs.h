@@ -375,6 +375,7 @@ enum enmResetEnv
 // Release node defines
 #define ENV_RELEASE_NODE_UNSET	0xFF
 #define NOT_YET_RELEASED		(-1)
+STATIC_ASSERT(ENV_RELEASE_NODE_UNSET > MAX_ENVPOINTS);
 
 
 enum {
@@ -411,8 +412,8 @@ enum PLUGVOLUMEHANDLING
 
 // MIDI Macros
 #define MACRO_MASK			0x7F5F7F5F
-#define MACRO_INTERNAL		0x30463046	// internal macro, low 7 bits (f.e. cutoff, resonance, low plugin params)
-#define MACRO_INTERNALEX	0x31463046	// internal macro, high 7 bits (high plugin params)
+#define MACRO_INTERNAL		0x30463046	// internal macro (F0F0), controls lower 8 bits (f.e. cutoff, resonance, low plugin params)
+#define MACRO_INTERNALEX	0x31463046	// internal extended macro (F0F1), controls higher 8 bits (high plugin params)
 
 // Vibrato Types
 #define VIB_SINE		0

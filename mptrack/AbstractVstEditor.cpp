@@ -383,7 +383,9 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 		}
 	} else
 	{
-		return true;
+		// used to return true but that doesn't make sense to me.
+		// if this is true, random (sample) channels will be retriggered when pressing notes in the editor...
+		return false;
 	}
 	
 }
