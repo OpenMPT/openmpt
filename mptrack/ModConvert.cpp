@@ -53,7 +53,7 @@ void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, CSoundFile *pSndFile, std::bits
 	// shorten instrument envelope if necessary (for mod conversion)
 	const UINT iEnvMax = pSndFile->GetModSpecifications().envelopePointsMax;
 
-	#define TRIMENV(nPat) if(nPat > iEnvMax) { nPat = iEnvMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
+	#define TRIMENV(iEnvLen) if(iEnvLen > iEnvMax) { iEnvLen = iEnvMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
 
 	TRIMENV(mptEnv->nNodes);
 	TRIMENV(mptEnv->nLoopStart);
@@ -62,8 +62,10 @@ void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, CSoundFile *pSndFile, std::bits
 	TRIMENV(mptEnv->nSustainEnd);
 	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET)
 	{
-		TRIMENV(mptEnv->nReleaseNode);
-		if(!pSndFile->GetModSpecifications().hasReleaseNode)
+		if(pSndFile->GetModSpecifications().hasReleaseNode)
+		{
+			TRIMENV(mptEnv->nReleaseNode);
+		} else
 		{
 			mptEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			CHANGEMODTYPE_WARNING(wReleaseNode);
@@ -117,7 +119,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			nResizedPatterns++;
 	}
 
-	if(((m_SndFile.m_nInstruments) || (nResizedPatterns)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
+	if((m_SndFile.GetNumInstruments() || nResizedPatterns) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	{
 		if(::MessageBox(NULL,
 				"This operation will convert all instruments to samples,\n"
@@ -145,7 +147,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
 		}
 
-		// Removing all instrument headers
+		// Removing all instrument headers from channels
 		for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
 		{
 			m_SndFile.Chn[nChn].pModInstrument = nullptr;
@@ -253,8 +255,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 
 	// Do some sample conversion
-	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.m_nSamples; nSmp++)
+	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
 	{
+		// Too many samples? Only 31 samples allowed in MOD format...
+		if(newTypeIsMOD && nSmp > 31 && m_SndFile.Samples[nSmp].nLength > 0)
+		{
+			CHANGEMODTYPE_WARNING(wMOD31Samples);
+		}
+
 		// No Bidi / Sustain loops / Autovibrato for MOD/S3M
 		if(newTypeIsMOD || newTypeIsS3M)
 		{
@@ -265,20 +273,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
 			}
 
-			// Sustain loops
-			if(m_SndFile.Samples[nSmp].nSustainStart || m_SndFile.Samples[nSmp].nSustainEnd)
+			// Sustain loops - convert to normal loops
+			if((m_SndFile.Samples[nSmp].uFlags & CHN_SUSTAINLOOP) != 0)
 			{
-				// We can at least try to convert sustain loops to normal loops
-				if(m_SndFile.Samples[nSmp].nLoopEnd == 0)
-				{
-					m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nLoopStart;
-					m_SndFile.Samples[nSmp].nSustainEnd = m_SndFile.Samples[nSmp].nLoopEnd;
-					m_SndFile.Samples[nSmp].uFlags |= CHN_LOOP;
-				}
-				m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nSustainEnd = 0;
-				m_SndFile.Samples[nSmp].uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+				// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
+				m_SndFile.Samples[nSmp].nLoopStart = m_SndFile.Samples[nSmp].nSustainStart;
+				m_SndFile.Samples[nSmp].nLoopEnd = m_SndFile.Samples[nSmp].nSustainEnd;
+				m_SndFile.Samples[nSmp].uFlags |= CHN_LOOP;
 				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
 			}
+			m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nSustainEnd = 0;
+			m_SndFile.Samples[nSmp].uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 
 			// Autovibrato
 			if(m_SndFile.Samples[nSmp].nVibDepth || m_SndFile.Samples[nSmp].nVibRate || m_SndFile.Samples[nSmp].nVibSweep)
@@ -323,10 +328,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
-	// Convert IT/MPT to XM (instruments)
-	if(oldTypeIsIT_MPT && newTypeIsXM)
+	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 	{
-		for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
+		// Convert IT/MPT to XM (fix instruments)
+		if(oldTypeIsIT_MPT && newTypeIsXM)
 		{
 			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
 			if (pIns)
@@ -358,12 +363,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				pIns->nIFR &= 0x7F;
 			}
 		}
-	}
-
-	// Instrument tunings
-	if(oldTypeIsMPT)
-	{
-		for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
+		// Convert MPT to anything - remove instrument tunings
+		if(oldTypeIsMPT)
 		{
 			if(m_SndFile.Instruments[nIns] != nullptr && m_SndFile.Instruments[nIns]->pTuning != nullptr)
 			{
@@ -382,12 +383,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		m_SndFile.m_nSamplePreAmp = 48;
 		m_SndFile.m_nVSTiVolume = 48;
 		CHANGEMODTYPE_WARNING(wMODGlobalVars);
-
-		// Too many samples?
-		if(m_SndFile.m_nSamples > 31)
-		{
-			CHANGEMODTYPE_WARNING(wMOD31Samples);
-		}
 	}
 
 	// Is the "restart position" value allowed in this format?
