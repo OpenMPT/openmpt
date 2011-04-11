@@ -2643,8 +2643,15 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 		{
 			if (!(m_dwSongFlags & SONG_FIRSTTICK))
 			{
-				if (param & 0x0F) nPanSlide = (int)((param & 0x0F) << 2);
-				else nPanSlide = -(int)((param & 0xF0) >> 2);
+				if (param & 0x0F)
+				{
+					if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+						nPanSlide = (int)((param & 0x0F) << 2);
+				} else
+				{
+					if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
+						nPanSlide = -(int)((param & 0xF0) >> 2);
+				}
 			}
 		}
 	} else
@@ -2654,13 +2661,11 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 			// IT compatibility: Ignore slide commands with both nibbles set.
 			if (param & 0x0F)
 			{
-				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
-					nPanSlide = -(int)((param & 0x0F) << 2);
+				nPanSlide = -(int)((param & 0x0F) << 2);
 			}
 			else
 			{
-				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
-					nPanSlide = (int)((param & 0xF0) >> 2);
+				nPanSlide = (int)((param & 0xF0) >> 2);
 			}
 			// XM compatibility: FT2's panning slide is not as deep
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
@@ -3157,7 +3162,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro,
 							pChn->m_nPlugParamValueStep = (float)((int)dwParam - pChn->m_nPlugInitialParamValue) / (float)m_nMusicSpeed;
 						}
 						//update param on all ticks
-						pChn->nCutOff = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1 ) *pChn->m_nPlugParamValueStep + 0.5);
+						pChn->nCutOff = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5);
 					}
 					pChn->nRestoreCutoffOnNewNote = 0;
 				}

@@ -674,12 +674,12 @@ uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
           bIsVolumeEffect  - Indicates whether the given effect is a volume column effect or not
 		  nChn - Channel that should be modified - use CHANNELINDEX_INVALID to allow all channels of the given row
 		  bAllowMultipleEffects - If false, No effect will be written if an effect of the same type is already present in the channel(s). Useful for f.e. tempo effects.
-		  bAllowNextRow - Indicates whether it is allowed to use the next row if there's no space for the effect
+		  allowRowChange - Indicates whether it is allowed to use the next or previous row if there's no space for the effect
 		  bRetry - For internal use only. Indicates whether an effect "rewrite" has already taken place (for recursive calls)
    NOTE: Effect remapping is only implemented for a few basic effects.
 */ 
-bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn, bool bAllowMultipleEffects, bool bAllowNextRow, bool bRetry)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn, bool bAllowMultipleEffects, writeEffectAllowRowChange allowRowChange, bool bRetry)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// First, reject invalid parameters.
 	if(!Patterns.IsValidIndex(nPat) || nRow >= Patterns[nPat].GetNumRows() || (nChn >= GetNumChannels() && nChn != CHANNELINDEX_INVALID))
@@ -810,14 +810,17 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 		}
 		if(nNewEffect != CMD_NONE)
 		{
-			if(TryWriteEffect(nPat, nRow, nNewEffect, nParam, !bIsVolumeEffect, nChn, bAllowMultipleEffects, bAllowNextRow, false) == true) return true;
+			if(TryWriteEffect(nPat, nRow, nNewEffect, nParam, !bIsVolumeEffect, nChn, bAllowMultipleEffects, allowRowChange, false) == true) return true;
 		}
 	}
 
 	// Try in the next row if possible (this may also happen if we already retried)
-	if(bAllowNextRow && (nRow + 1 < Patterns[nPat].GetNumRows()))
+	if(allowRowChange == weTryNextRow && (nRow + 1 < Patterns[nPat].GetNumRows()))
 	{
-		return TryWriteEffect(nPat, nRow + 1, nEffect, nParam, bIsVolumeEffect, nChn, bAllowMultipleEffects, bAllowNextRow, bRetry);
+		return TryWriteEffect(nPat, nRow + 1, nEffect, nParam, bIsVolumeEffect, nChn, bAllowMultipleEffects, allowRowChange, bRetry);
+	} else if(allowRowChange == weTryPreviousRow && (nRow > 0))
+	{
+		return TryWriteEffect(nPat, nRow - 1, nEffect, nParam, bIsVolumeEffect, nChn, bAllowMultipleEffects, allowRowChange, bRetry);
 	}
 
 	return false;
@@ -859,7 +862,7 @@ bool CSoundFile::ConvertVolEffect(uint8 *e, uint8 *p, bool bForce)
 		{
 			// hack for people who can't type F twice :)
 			*e = VOLCMD_TONEPORTAMENTO;
-			*p = 0xFF;
+			*p = 9;
 			return true;
 		}
 		for (uint8 n = 0; n < 10; n++)

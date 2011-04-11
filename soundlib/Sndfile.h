@@ -511,6 +511,15 @@ enum enmGetLengthResetMode
 };
 
 
+// Row advance mode for TryWriteEffect()
+enum writeEffectAllowRowChange
+{
+	weIgnore,			// If effect can't be written, abort.
+	weTryNextRow,		// If effect can't be written, try next row.
+	weTryPreviousRow,	// If effect can't be written, try previous row.
+};
+
+
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
 const BYTE MSF_COMPATIBLE_PLAY		= 0;		//IT/MPT/XM
@@ -922,7 +931,7 @@ private:
 	UINT GetNumTicksOnCurrentRow() { return m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay; };
 public:
 	// Write pattern effect functions
-	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, bool bAllowNextRow = false, bool bRetry = true);
+	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, writeEffectAllowRowChange allowRowChange = weIgnore, bool bRetry = true);
 	
 	// Read/Write sample functions
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }

@@ -157,7 +157,10 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	foundHere = false;
 	m_SndFile.Patterns.ForEachModCommand(FixHackedPatterns(originalSpecs, m_SndFile.GetType(), autofix, &foundHere));
 	if(foundHere)
+	{
 		AddToLog("Found invalid pattern commands\n");
+		foundHacks = true;
+	}
 
 	// Check for pattern names
 	foundHere = false;

@@ -775,14 +775,14 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 				{
 					if(subsongs[i].channelSurround[nChn] == true)
-						TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, nChn, false, true);
+						TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, nChn, false, weTryNextRow);
 					else
-						TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[nChn], false, nChn, false, true);
+						TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[nChn], false, nChn, false, weTryNextRow);
 				}
 			}
 			// write default tempo/speed to pattern
-			TryWriteEffect(startPattern, 0, CMD_SPEED, subsongs[i].defaultSpeed, false, CHANNELINDEX_INVALID, false, true);
-			TryWriteEffect(startPattern, 0, CMD_TEMPO, subsongs[i].defaultTempo, false, CHANNELINDEX_INVALID, false, true);
+			TryWriteEffect(startPattern, 0, CMD_SPEED, subsongs[i].defaultSpeed, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+			TryWriteEffect(startPattern, 0, CMD_TEMPO, subsongs[i].defaultTempo, false, CHANNELINDEX_INVALID, false, weTryNextRow);
 
 			// don't write channel volume for now, as it's always set to 100% anyway
 
@@ -800,7 +800,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						break;
 					}
 				}
-				TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, true);
+				TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, weTryNextRow);
 			}
 		}
 	}
@@ -1194,7 +1194,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 			// Pattern break for short patterns (so saving the modules as S3M won't break it)
 			if(phdr->numRows != 64)
-				TryWriteEffect(nPat, phdr->numRows - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, false);
+				TryWriteEffect(nPat, phdr->numRows - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
 
 			dwMemPos = dwNextPattern;
 			if(dwMemPos > dwPatEndPos) break;
