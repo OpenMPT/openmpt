@@ -66,7 +66,7 @@ extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
 // External decompressors
 extern void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char packcharacter);
 extern WORD MDLReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n);
-extern int DMFUnpack(LPBYTE psample, LPBYTE ibuf, LPBYTE ibufmax, UINT maxlen);
+extern int DMFUnpack(LPBYTE psample, uint8 *ibuf, uint8 *ibufmax, UINT maxlen);
 extern DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n);
 extern void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215);
 extern void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215);
@@ -2288,7 +2288,7 @@ UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWOR
 		{
 			UINT maxlen = pSmp->nLength;
 			if (pSmp->uFlags & CHN_16BIT) maxlen <<= 1;
-			LPBYTE ibuf = (LPBYTE)lpMemFile, ibufmax = (LPBYTE)(lpMemFile+dwMemLength);
+			uint8 *ibuf = (uint8 *)lpMemFile, *ibufmax = (uint8 *)(lpMemFile + dwMemLength);
 			len = DMFUnpack((LPBYTE)pSmp->pSample, ibuf, ibufmax, maxlen);
 		}
 		break;
