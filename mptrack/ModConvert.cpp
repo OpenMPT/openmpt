@@ -141,7 +141,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// try to save short patterns by inserting a pattern break.
 			if(m_SndFile.Patterns[nPat].GetNumRows() < 64)
 			{
-				m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, true);
+				m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
 			}
 			m_SndFile.Patterns[nPat].Resize(64, false);
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
@@ -246,7 +246,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 		if(addBreak)
 		{
-			m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, false);
+			m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weIgnore);
 		}
 	}
 
