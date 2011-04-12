@@ -1523,11 +1523,25 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 		return 0;
 	}
 
+	CModDoc *pModDoc = GetpModDoc();
+	bool first = true;
+	if(pModDoc != nullptr && nRemainingChannels != GetNumChannels())
+	{
+		// For now, changing number of channels can't be undone
+		pModDoc->GetPatternUndo()->ClearUndo();
+	}
+
 	BEGIN_CRITICAL();
 	for (PATTERNINDEX nPat = 0; nPat < Patterns.Size(); nPat++) 
 	{
 		if (Patterns[nPat])
 		{
+			if(pModDoc != nullptr && nRemainingChannels == GetNumChannels())
+			{
+				pModDoc->GetPatternUndo()->PrepareUndo(nPat, 0, 0, GetNumChannels(), Patterns[nPat].GetNumRows(), !first);
+				first = false;
+			}
+
 			MODCOMMAND *p = Patterns[nPat];
 			MODCOMMAND *newp = CPattern::AllocatePattern(Patterns[nPat].GetNumRows(), nRemainingChannels);
 			if (!newp)

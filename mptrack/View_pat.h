@@ -9,6 +9,7 @@ class CPatternRandomizer;
 class COpenGLEditor;
 
 // Drag & Drop info
+#define DRAGITEM_VALUEMASK		0x00FFFF
 #define DRAGITEM_MASK			0xFF0000
 #define DRAGITEM_CHNHEADER		0x010000
 #define DRAGITEM_PATTERNHEADER	0x020000
@@ -102,9 +103,14 @@ protected:
 	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 
 	int m_nXScroll, m_nYScroll;
-	DWORD m_nDragItem, m_nMenuParam, m_nDetailLevel;
-	bool m_bDragging, m_bInItemRect, m_bContinueSearch, m_bWholePatternFitsOnScreen;
-	RECT m_rcDragItem;
+	DWORD m_nMenuParam, m_nDetailLevel;
+
+	DWORD m_nDragItem;	// Currently dragged item
+	DWORD m_nDropItem;	// Currently hovered item during dragondrop
+	bool m_bDragging, m_bInItemRect, m_bShiftDragging;
+	RECT m_rcDragItem, m_rcDropItem;
+
+	bool m_bContinueSearch, m_bWholePatternFitsOnScreen;
 	DWORD m_dwStatus, m_dwCursor;
 	DWORD m_dwBeginSel, m_dwEndSel;		// Upper-left / Lower-right corners of selection
 	DWORD m_dwStartSel, m_dwDragPos;	// Point where selection was started

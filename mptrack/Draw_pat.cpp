@@ -314,7 +314,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 //---------------------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
-	
+
 	UINT xsrc = pfnt->nNoteX, ysrc = pfnt->nNoteY, dx = pfnt->nEltWidths[0];
 	if (!note)
 	{
@@ -471,6 +471,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		rect.right = m_szHeader.cx;
 		DrawButtonRect(hdc, &rect, s, FALSE,
 			((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PATTERNHEADER)) ? TRUE : FALSE);
+
 		// Drawing Channel Headers
 		while (xpaint < rcClient.right)
 		{
@@ -482,7 +483,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
 //				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
 // -! NEW_FEATURE#0012
-				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= 0x20))
+				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= ' '))
 					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"%d: [%s]":"%d: %s";
 				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Ch%d]":"Ch%d";
 				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Chn %d]":"Chn %d";
@@ -491,12 +492,28 @@ void CViewPattern::OnDraw(CDC *pDC)
 // -> DESC="midi keyboard split"
 //				DrawButtonRect(hdc, &rect, s,
 //					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
-//					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+//					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 //				rect.bottom = rect.top + COLHDR_HEIGHT;
 				DrawButtonRect(hdc, &rect, s,
 					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
-					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE,
+					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
 					pModDoc->IsChannelRecord(ncolhdr) ? DT_RIGHT : DT_CENTER);
+
+				// When dragging around channel headers, mark insertion position
+				if(m_bDragging && !m_bInItemRect
+					&& (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
+					&& (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
+					&& (m_nDropItem & DRAGITEM_VALUEMASK) == ncolhdr)
+				{
+					RECT r;
+					r.top = rect.top;
+					r.bottom = rect.bottom;
+					// Drop position depends on whether hovered channel is left or right of dragged item.
+					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_bShiftDragging) ? rect.left : rect.right - 3;
+					r.right = r.left + 2;
+					::FillRect(hdc, &r, CMainFrame::brushText);
+				}
+
 				rect.bottom = rect.top + COLHDR_HEIGHT;
 
 				CRect insRect;
@@ -543,8 +560,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 						wsprintf(s, "---");
 					}
 					DrawButtonRect(hdc, &rect, s, FALSE, 
-						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}
+
 			} else break;
 			ncolhdr++;
 			xpaint += nColumnWidth;

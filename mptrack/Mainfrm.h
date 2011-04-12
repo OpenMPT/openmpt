@@ -442,7 +442,7 @@ public:
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
-	static HBRUSH brushGray, brushBlack, brushWhite, brushHighLight, brushHighLightRed, brushWindow, brushYellow;
+	static HBRUSH brushGray, brushBlack, brushWhite, brushText, brushHighLight, brushHighLightRed, brushWindow, brushYellow;
 //	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
