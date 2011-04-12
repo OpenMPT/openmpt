@@ -471,7 +471,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 	GetClientRect(&rcClient);
 	xofs = GetXScrollPos();
 	yofs = GetYScrollPos();
-	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);
+	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth() /*- 2*/, m_szHeader.cy);
 	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy-PLUGNAME_HEIGHT, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);	//rewbs.patPlugNames
 	pSndFile = pModDoc->GetSoundFile();
 	const UINT nmax = pSndFile->GetNumChannels();
@@ -1029,6 +1029,9 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	m_nDragItem = GetDragItem(point, &m_rcDragItem);
 	m_bDragging = true;
 	m_bInItemRect = true;
+	m_bShiftDragging = false;
+	m_nDropItem = 0;
+
 	SetCapture();
 	if ((point.x >= m_szHeader.cx) && (point.y <= m_szHeader.cy))
 	{
@@ -1121,8 +1124,12 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 //-------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	const bool bItemSelected = m_bInItemRect;
+
+	const bool bItemSelected = m_bInItemRect || ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER);
 	if (/*(!m_bDragging) ||*/ (!pModDoc)) return;
+
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+
 	m_bDragging = false;
 	m_bInItemRect = false;
 	ReleaseCapture();
@@ -1158,31 +1165,82 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	if ((!bItemSelected) || (!m_nDragItem)) return;
 	InvalidateRect(&m_rcDragItem, FALSE);
-	DWORD nItemNo = m_nDragItem & 0xFFFF;
+	const DWORD nItemNo = (m_nDragItem & DRAGITEM_VALUEMASK);
+	const DWORD nTargetNo = (m_nDropItem != 0) ? (m_nDropItem & DRAGITEM_VALUEMASK) : nItemNo;
+
 	switch(m_nDragItem & DRAGITEM_MASK)
 	{
 	case DRAGITEM_CHNHEADER:
-		if (nFlags & MK_SHIFT)	{
-			if (nItemNo < MAX_CHANNELS)	{
-				pModDoc->Record1Channel(nItemNo);
-				InvalidateChannelsHeaders();
-			}
-		}
-		else if (!(nFlags&MK_CONTROL))
+		if(nItemNo == nTargetNo)
 		{
-			pModDoc->MuteChannel(nItemNo, !pModDoc->IsChannelMuted(nItemNo));
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+			// Just clicked a channel header...
+
+			if (nFlags & MK_SHIFT)
+			{
+				if (nItemNo < MAX_BASECHANNELS)
+				{
+					pModDoc->Record1Channel(nItemNo);
+					InvalidateChannelsHeaders();
+				}
+			}
+			else if (!(nFlags & MK_CONTROL))
+			{
+				pModDoc->MuteChannel(nItemNo, !pModDoc->IsChannelMuted(nItemNo));
+				pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+			}
+		} else if(nTargetNo < pSndFile->GetNumChannels())
+		{
+			// Dragged to other channel header => move or copy channel
+
+			InvalidateRect(&m_rcDropItem, FALSE);
+
+			const bool duplicate = (nFlags & MK_SHIFT) ? true : false;
+			vector<CHANNELINDEX> channels(pSndFile->GetNumChannels() + (duplicate ? 1 : 0), 0);
+			CHANNELINDEX i = 0;
+			bool modified = duplicate;
+
+			for(CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+			{
+				if(nChn == nTargetNo)
+				{
+					channels[nChn] = nItemNo;
+				}
+				else
+				{
+					if(i == nItemNo && !duplicate)	// Don't want that source channel twice if we're just moving
+					{
+						i++;
+					}
+					channels[nChn] = i++;
+				}
+				if(channels[nChn] != nChn)
+				{
+					modified = true;
+				}
+			}
+			if(modified && pSndFile->ReArrangeChannels(channels) != 0)
+			{
+				if(duplicate)
+				{
+					pModDoc->UpdateAllViews(this, HINT_MODCHANNELS);
+					pModDoc->UpdateAllViews(this, HINT_MODTYPE);
+					SetCurrentPattern(m_nPattern);
+				}
+				InvalidatePattern();
+				pModDoc->SetModified();
+			}
 		}
 		break;
 	case DRAGITEM_PATTERNHEADER:
 		OnPatternProperties();
 		break;
 	case DRAGITEM_PLUGNAME:			//rewbs.patPlugNames
-		if (nItemNo < MAX_CHANNELS)	{
+		if (nItemNo < MAX_BASECHANNELS)
 			TogglePluginEditor(nItemNo);
-		}
 		break;
 	}
+
+	m_nDropItem = 0;
 }
 
 
@@ -1319,15 +1377,18 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 
 	//CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	m_nDragItem = GetDragItem(point, &m_rcDragItem);
-	DWORD nItemNo = m_nDragItem & 0xFFFF;
-	switch(m_nDragItem & DRAGITEM_MASK)	{
-		case DRAGITEM_CHNHEADER:
-			if (nFlags & MK_SHIFT) {
-				if (nItemNo < MAX_CHANNELS) {
-					pModDoc->Record2Channel(nItemNo);
-					InvalidateChannelsHeaders();
-				}
+	DWORD nItemNo = m_nDragItem & DRAGITEM_VALUEMASK;
+	switch(m_nDragItem & DRAGITEM_MASK)
+	{
+	case DRAGITEM_CHNHEADER:
+		if (nFlags & MK_SHIFT)
+		{
+			if (nItemNo < MAX_BASECHANNELS)
+			{
+				pModDoc->Record2Channel(nItemNo);
+				InvalidateChannelsHeaders();
 			}
+		}
 		break;
 	}
 
@@ -1335,21 +1396,35 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CViewPattern::OnMouseMove(UINT, CPoint point)
-//------------------------------------------------
+void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
+//-------------------------------------------------------
 {
 	if (!m_bDragging) return;
+
 	if (m_nDragItem)
 	{
-		DWORD nItem = GetDragItem(point, NULL);
-		bool b = (nItem == m_nDragItem) ? true : false;
-		if (b != m_bInItemRect)
+		const CRect oldDropRect = m_rcDropItem;
+		const DWORD oldDropItem = m_nDropItem;
+
+		m_bShiftDragging = (nFlags & MK_SHIFT) ? true : false;
+		m_nDropItem = GetDragItem(point, &m_rcDropItem);
+
+		const bool b = (m_nDropItem == m_nDragItem) ? true : false;
+		const bool dragChannel = (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER;
+
+		if (b != m_bInItemRect || (m_nDropItem != oldDropItem && dragChannel))
 		{
 			m_bInItemRect = b;
 			InvalidateRect(&m_rcDragItem, FALSE);
+
+			// Dragging around channel headers? Update move indicator...
+			if((m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) InvalidateRect(&m_rcDropItem, FALSE);
+			if((oldDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) InvalidateRect(&oldDropRect, FALSE);
+
 			UpdateWindow();
 		}
 	}
+
 	if ((m_dwStatus & PATSTATUS_SELECTROW) /*&& (point.x < m_szHeader.cx)*/ && (point.y > m_szHeader.cy))
 	{
 		// Mark row number => mark whole row (continue)
@@ -2716,7 +2791,6 @@ void CViewPattern::OnDuplicateChannel()
 	if(nNumChnNew == vecChns.size())
 	{
 		pModDoc->SetModified();
-		pModDoc->GetPatternUndo()->ClearUndo();
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
 		SetCurrentPattern(m_nPattern);
