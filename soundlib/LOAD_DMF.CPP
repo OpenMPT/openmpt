@@ -28,6 +28,7 @@
 #define DMF_SMPD	0x44504D53
 #define DMF_SMPJ	0x4A504D53
 #define DMF_ENDE	0x45444E45
+#define DMF_SETT	0x9C219DE4
 
 // Pattern flags - global track
 #define DMFPAT_GLOBPACK	0x80	// Pack information for global track follows
@@ -150,7 +151,7 @@ uint8 DMFslide2MPT(uint8 val, const uint8 internalTicks, const bool up)
 	val = max(1, val / 4);
 	const bool isFine = (val < 0x0F) || (internalTicks < 2);
 	if(!isFine)
-		val = max(1, (val + 3) / (internalTicks - 1));	// no slides on first tick! +3 for rounding precision
+		val = max(1, (val + internalTicks - 2) / (internalTicks - 1));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
 
 	if(up)
 		return (isFine ? 0x0F : 0x00) | (val << 4);
@@ -176,8 +177,9 @@ uint8 DMFtremor2MPT(uint8 val, const uint8 internalTicks)
 uint8 DMFdelay2MPT(uint8 val, const uint8 internalTicks)
 //------------------------------------------------------
 {
-	const int newval = (int)val * (int)internalTicks / 255;
-	return (uint8)CLAMP(newval, 0, 0x0F);
+	int newval = (int)val * (int)internalTicks / 255;
+	Limit(newval, 0, 15);
+	return (uint8)newval;
 }
 
 
@@ -351,7 +353,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						break;
 					}
 				}
-				tempo = CLAMP(tempo, 32, 255);
+				Limit(tempo, 32, 255);
 				settings.internalTicks = (uint8)speed;
 			} else
 			{
@@ -359,7 +361,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 			}
 		}
 
-		MODCOMMAND *m = pSndFile->Patterns[nPat].GetpModCommand(nRow, 1);	// Reserve first channel for global effects
+		m = pSndFile->Patterns[nPat].GetpModCommand(nRow, 1);	// Reserve first channel for global effects
 
 		for(CHANNELINDEX nChn = 1; nChn <= numChannels; nChn++, m++)
 		{
@@ -368,6 +370,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 			{
 				ASSERT_CAN_READ_PATTERN(1);
 				const uint8 channelInfo = lpStream[dwMemPos++];
+				////////////////////////////////////////////////////////////////
 				// 0x80: Packing counter (if not present, counter stays at 0)
 				if((channelInfo & DMFPAT_COUNTER) != 0)
 				{
@@ -375,6 +378,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					channelCounter[nChn] = lpStream[dwMemPos++];
 				}
 
+				////////////////////////////////////////////////////////////////
 				// 0x40: Instrument
 				bool slideNote = true;		// If there is no instrument number next to a note, the note is not retriggered!
 				if((channelInfo & DMFPAT_INSTR) != 0)
@@ -387,6 +391,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					}
 				}
 
+				////////////////////////////////////////////////////////////////
 				// 0x20: Note
 				if((channelInfo & DMFPAT_NOTE) != 0)
 				{
@@ -394,12 +399,13 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					m->note = lpStream[dwMemPos++];
 					if(m->note >= 1 && m->note <= 108)
 					{
-						m->note += 24;
+						m->note = CLAMP(m->note + 24, NOTE_MIN, NOTE_MAX);
 						settings.lastNote[nChn] = m->note;
 					} else if(m->note >= 129 && m->note <= 236)
 					{
 						// "Buffer notes" for portamento (and other effects?) that are actually not played, but just "queued"...
-						settings.noteBuffer[nChn] = (m->note & 0x7F) + 24;
+						m->note = CLAMP((m->note & 0x7F) + 24, NOTE_MIN, NOTE_MAX);
+						settings.noteBuffer[nChn] = m->note;
 						m->note = NOTE_NONE;
 					} else if(m->note == 255)
 					{
@@ -422,6 +428,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				uint8 effect1 = CMD_NONE, effect2 = CMD_NONE, effect3 = CMD_NONE;
 				uint8 effectParam1 = 0, effectParam2 = 0, effectParam3 = 0;
 
+				////////////////////////////////////////////////////////////////
 				// 0x10: Volume
 				if((channelInfo & DMFPAT_VOLUME) != 0)
 				{
@@ -430,6 +437,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					m->vol = (lpStream[dwMemPos++] + 3) / 4;
 				}
 
+				////////////////////////////////////////////////////////////////
 				// 0x08: Instrument effect
 				if((channelInfo & DMFPAT_INSEFF) != 0)
 				{
@@ -499,6 +507,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					}
 				}
 
+				////////////////////////////////////////////////////////////////
 				// 0x04: Note effect
 				if((channelInfo & DMFPAT_NOTEEFF) != 0)
 				{
@@ -541,7 +550,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						effect2 = CMD_TONEPORTAMENTO;
 						break;
 					case 7:		// Scratch to Note (neat! but we don't have such an effect...)
-						m->note = effectParam2 + 25;
+						m->note = CLAMP(effectParam2 + 25, NOTE_MIN, NOTE_MAX);
 						effect2 = CMD_TONEPORTAMENTO;
 						effectParam2 = 0xFF;
 						break;
@@ -578,6 +587,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					}
 				}
 
+				////////////////////////////////////////////////////////////////
 				// 0x02: Volume effect
 				if((channelInfo & DMFPAT_VOLEFF) != 0)
 				{
@@ -957,16 +967,16 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 			break;
 
 		case DMF_SMPJ:	// "SMPJ" - Sample jump points (xtracker32 only)
+		case DMF_SETT:	// "Unprintable ID" - those might be GUI settings and other related stuff
 			break;
 
-#if 0
+#ifdef DEBUG
 		default:
-			// There is some (encrypted?) IFF chunk with a very weird ID at the end of many DMF files. What does it mean?
 			{
-				char s[32];
+				char s[40];
 				const char *sig = (char *)&chunkheader.signature;
-				wsprintf(s, "Unknown chunk ID %c%c%c%c at %d", sig[0], sig[1], sig[2], sig[3], dwMemPos - sizeof(DMF_IFFCHUNK));
-				MessageBox(0, s, 0, 0);
+				wsprintf(s, "Unknown chunk ID %c%c%c%c at %d\n", sig[0], sig[1], sig[2], sig[3], dwMemPos - sizeof(DMF_IFFCHUNK));
+				if(GetpModDoc()) GetpModDoc()->AddToLog(s);
 			}
 #endif
 		}

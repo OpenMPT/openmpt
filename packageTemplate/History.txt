@@ -10,6 +10,32 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
+v1.19.02.00 (***** 2011, revision 848)
+--------------------------------------
+Pattern tab::Note properties
+   [New] <Jojo> Channels can now be moved by dragging their channel header. Holding Shift while doing so duplicates the channel
+   [Imp] <Jojo> Moving channels through the channel manager creates an undo point now. 
+   [Fix] <Jojo> Axx is not limited to value 7F anymore in IT / S3M format.
+
+VST
+   [New] <Jojo> New menu entry in the plugin editor: Create instrument from plugin
+   [Fix] <Jojo> Fixed note handling in VST editor of plugins that actually don't support MIDI input (http://bugs.openmpt.org/view.php?id=102)
+
+Mod Conversion
+   [Imp] <Jojo> Improved conversion of Sxx (IT / S3M) and PC Notes.
+   [Fix] <Jojo> Sustain loop conversion didn't work
+
+IT
+   [Fix] <Jojo> Panning slides with both parameter nibbles set were not ignored in compatible mode.
+
+Other modules
+   [Imp] <Jojo> DMF Loader was rewritten completely and is a whole lot more accurate now.
+   [Fix] <Jojo> J2B Loader: Empty sample slots are now treated correct in new J2B (AM) files.
+
+Misc
+   [New] <Jojo> OpenMPT can now automatically check for updates (daily / weekly / monthly)
+   [Reg] <Jojo> Removed hidden INI flag to suppress warnings when encountering keymaps with unknown items. This option was introduced when faulty keymaps threw multiple message boxes, but now it's just one and it shouldn't be ignored...
+
 v1.19.01.00 (April 2011, revision 836)
 --------------------------------------
 Pattern tab
@@ -33,7 +59,7 @@ Pattern tab
    [Reg] <Jojo> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
 
 Pattern tab::Note properties
-   [Fix] <Jojo> The meaning of Q0x was displayed wrong for S3M / IT.
+   [Fix] <Jojo> The meaning of Q0x was displayed wrong for IT / S3M.
    [Fix] <Jojo> Changing a value didn't create an undo point. (http://bugs.openmpt.org/view.php?id=56)
    [Fix] <Jojo> Setting the PC note plugin didn't work.
 
@@ -71,7 +97,6 @@ Instrument tab
 
 VST
    [New] <Jojo> Plugins can now request common file dialogs (file and directory selection).
-   [New] <Jojo> New menu entry in the plugin editor: Create instrument from plugin
    [Mod] <Jojo> When automatically inserting a new instrument from the VST editor, the bank and patch values are now not filled in anymore, so it is easier to change to another patch while editing.
    [Mod] <Jojo> Various small improvements to support VST 2.4 plugins better.
    [Fix] <Jojo> Speaker arrangement is now sent to the plugins upon initialization. This fixes Voxengo SPAN 2 (a VST 2.4 plugin). Does this break other multichannel plugins?
