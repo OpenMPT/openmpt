@@ -282,8 +282,8 @@ protected:
 	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnPendingSoloChnFromClick();
 	afx_msg void OnPendingUnmuteAllChnFromClick();
-	afx_msg void OnSoloChannel(BOOL current); //rewbs.customKeys
-	afx_msg void OnMuteChannel(BOOL current); //rewbs.customKeys
+	afx_msg void OnSoloChannel(bool current); //rewbs.customKeys
+	afx_msg void OnMuteChannel(bool current); //rewbs.customKeys
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
 // -> CODE#0012
@@ -367,15 +367,15 @@ private:
 	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile);
 	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
 
-	UINT GetSelectionStartRow();
-	UINT GetSelectionEndRow();
-	UINT GetSelectionStartChan();
-	UINT GetSelectionEndChan();
+	ROWINDEX GetSelectionStartRow();
+	ROWINDEX GetSelectionEndRow();
+	CHANNELINDEX GetSelectionStartChan();
+	CHANNELINDEX GetSelectionEndChan();
 	UINT ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans);
 
-	static ROWINDEX GetRowFromCursor(DWORD cursor);
-	static CHANNELINDEX GetChanFromCursor(DWORD cursor);
-	static UINT GetColTypeFromCursor(DWORD cursor);
+	static ROWINDEX GetRowFromCursor(DWORD cursor) { return (cursor >> 16); };
+	static CHANNELINDEX GetChanFromCursor(DWORD cursor) { return static_cast<CHANNELINDEX>((cursor & 0xFFFF) >> 3); };
+	static UINT GetColTypeFromCursor(DWORD cursor) { return (cursor & 0x07); };
 
 	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternColumns colType, CSoundFile* pSndFile);
 	void Interpolate(PatternColumns type);

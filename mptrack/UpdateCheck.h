@@ -27,6 +27,8 @@ class CUpdateCheck
 {
 public:
 
+	static const CString defaultUpdateURL;
+
 	// Force creation via "new" as we're using "delete this".
 	static CUpdateCheck *Create(bool autoUpdate) { return new CUpdateCheck(autoUpdate); };
 	void DoUpdateCheck();
@@ -76,6 +78,7 @@ protected:
 	virtual BOOL OnSetActive();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheckNow();
+	afx_msg void OnResetURL();
 	DECLARE_MESSAGE_MAP()
 };
 

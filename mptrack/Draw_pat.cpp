@@ -509,7 +509,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					r.top = rect.top;
 					r.bottom = rect.bottom;
 					// Drop position depends on whether hovered channel is left or right of dragged item.
-					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_bShiftDragging) ? rect.left : rect.right - 3;
+					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_bShiftDragging) ? rect.left : rect.right - 2;
 					r.right = r.left + 2;
 					::FillRect(hdc, &r, CMainFrame::brushText);
 				}
