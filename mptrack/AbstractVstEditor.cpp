@@ -367,25 +367,30 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 		m_nInstrument = GetBestInstrumentCandidate();
 
 	//only show messagebox if plug is able to process notes.
-	if(m_nInstrument < 0 && m_pVstPlugin->CanRecieveMidiEvents())
+	if(m_nInstrument < 0)
 	{
-		CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
-		if(pModDoc == nullptr)
-			return false;
-
-		if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
-			AfxMessageBox(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION) == IDNO)
+		if(m_pVstPlugin->CanRecieveMidiEvents())
 		{
-			return false;
+			CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+			if(pModDoc == nullptr)
+				return false;
+
+			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
+				AfxMessageBox(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION) == IDNO)
+			{
+				return false;
+			} else
+			{
+				return CreateInstrument();
+			}
 		} else
 		{
-			return CreateInstrument();
+			// Can't process notes
+			return false;
 		}
 	} else
 	{
-		// used to return true but that doesn't make sense to me.
-		// if this is true, random (sample) channels will be retriggered when pressing notes in the editor...
-		return false;
+		return true;
 	}
 	
 }
