@@ -17,10 +17,12 @@
 #endif
 
 
+const CString CUpdateCheck::defaultUpdateURL = "http://update.openmpt.org/check/%s";
+
 // Static configuration variables
 time_t CUpdateCheck::lastUpdateCheck = 0;
 int CUpdateCheck::updateCheckPeriod = 7;
-CString CUpdateCheck::updateBaseURL = "http://update.openmpt.org/check/%s";
+CString CUpdateCheck::updateBaseURL = CUpdateCheck::defaultUpdateURL;
 bool CUpdateCheck::showUpdateHint = true;
 
 
@@ -271,6 +273,7 @@ void CUpdateCheck::Terminate()
 
 BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON1,			OnCheckNow)
+	ON_COMMAND(IDC_BUTTON2,			OnResetURL)
 	ON_COMMAND(IDC_RADIO1,			OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO2,			OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO3,			OnSettingsChanged)
@@ -342,3 +345,9 @@ void CUpdateSetupDlg::OnCheckNow()
 	CMainFrame::GetMainFrame()->PostMessage(WM_COMMAND, ID_INTERNETUPDATE);
 }
 
+
+void CUpdateSetupDlg::OnResetURL()
+//--------------------------------
+{
+	SetDlgItemText(IDC_EDIT1, CUpdateCheck::defaultUpdateURL);
+}

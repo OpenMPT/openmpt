@@ -458,6 +458,11 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wMixmode);
 	}
 
+	// Automatically enable compatible mode when converting from MOD and S3M, since it's automatically enabled in those formats.
+	if((nOldType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) && (nNewType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+	{
+		m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
+	}
 	if((nNewType & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
 	{
 		CHANGEMODTYPE_WARNING(wCompatibilityMode);
