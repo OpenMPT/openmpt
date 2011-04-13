@@ -951,7 +951,7 @@ public:
 	bool IsSampleUsed(SAMPLEINDEX nSample);
 	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr);
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);
-	UINT DetectUnusedSamples(BYTE *); // bitmask
+	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed);
 	bool RemoveSelectedSamples(bool *pbIns);
 	void AdjustSampleLoop(MODSAMPLE *pSmp);
 	// Samples file I/O

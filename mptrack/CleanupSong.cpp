@@ -528,10 +528,9 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	if(pSndFile == nullptr) return false;
 
 	CHAR s[512];
-	vector<bool> bIns;
-	int nExt = 0;
+	vector<bool> samplesUsed;
 	int nRemoved = 0;
-	bIns.resize(pSndFile->GetNumSamples() + 1, false);
+	samplesUsed.resize(pSndFile->GetNumSamples() + 1, false);
 
 	BeginWaitCursor();
 	for (SAMPLEINDEX nSmp = pSndFile->m_nSamples; nSmp >= 1; nSmp--) if (pSndFile->Samples[nSmp].pSample)
@@ -546,49 +545,12 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			nRemoved++;
 		}
 	}
-	if (pSndFile->m_nInstruments)
-	{
-		for (PATTERNINDEX nPat = 0; nPat < pSndFile->GetNumPatterns(); nPat++)
-		{
-			MODCOMMAND *p = pSndFile->Patterns[nPat];
-			if (p)
-			{
-				UINT jmax = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels();
-				for (UINT j=0; j<jmax; j++, p++)
-				{
-					if ((p->note) && (p->note <= NOTE_MAX) && (!p->IsPcNote()))
-					{
-						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
-						{
-							MODINSTRUMENT *pIns = pSndFile->Instruments[p->instr];
-							if (pIns)
-							{
-								UINT n = pIns->Keyboard[p->note-1];
-								if (n <= pSndFile->GetNumSamples()) bIns[n] = true;
-							}
-						} else
-						{
-							for (UINT k=1; k<=pSndFile->m_nInstruments; k++)
-							{
-								MODINSTRUMENT *pIns = pSndFile->Instruments[k];
-								if (pIns)
-								{
-									UINT n = pIns->Keyboard[p->note-1];
-									if (n <= pSndFile->GetNumSamples()) bIns[n] = true;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		for (SAMPLEINDEX ichk = 1; ichk <= pSndFile->GetNumSamples(); ichk++)
-		{
-			if ((!bIns[ichk]) && (pSndFile->Samples[ichk].pSample)) nExt++;
-		}
-	}
+
+	SAMPLEINDEX nExt = pSndFile->DetectUnusedSamples(samplesUsed);
+
 	EndWaitCursor();
-	if (nExt &&  !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
+
+	if (nExt && !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
 	{	//We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
 			"but not used in the song. Do you want to remove them?", nExt, (nExt == 1) ? "" : "s");
@@ -596,7 +558,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		{
 			for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 			{
-				if ((!bIns[nSmp]) && (pSndFile->Samples[nSmp].pSample))
+				if ((!samplesUsed[nSmp]) && (pSndFile->Samples[nSmp].pSample))
 				{
 					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
 					BEGIN_CRITICAL();

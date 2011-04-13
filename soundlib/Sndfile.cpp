@@ -2550,54 +2550,58 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
 }
 
 
-UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
-//-----------------------------------------------
+SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed)
+//-------------------------------------------------------------------
 {
-	UINT nExt = 0;
+	sampleUsed.assign(GetNumSamples() + 1, false);
 
-	if (!pbIns) return 0;
-	if (m_nInstruments)
+	if(GetNumInstruments() == 0)
 	{
-		memset(pbIns, 0, (MAX_SAMPLES+7)/8);
-		for (UINT ipat=0; ipat<Patterns.Size(); ipat++)
+		return 0;
+	}
+	SAMPLEINDEX nExt = 0;
+
+	for (PATTERNINDEX nPat = 0; nPat < GetNumPatterns(); nPat++)
+	{
+		const MODCOMMAND *p = Patterns[nPat];
+		if(p == nullptr)
 		{
-			MODCOMMAND *p = Patterns[ipat];
-			if (p)
+			continue;
+		}
+
+		UINT jmax = Patterns[nPat].GetNumRows() * GetNumChannels();
+		for (UINT j=0; j<jmax; j++, p++)
+		{
+			if ((p->note) && (p->note <= NOTE_MAX) && (!p->IsPcNote()))
 			{
-				UINT jmax = Patterns[ipat].GetNumRows() * m_nChannels;
-				for (UINT j=0; j<jmax; j++, p++)
+				if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 				{
-					if ((p->note) && (p->note <= NOTE_MAX))
+					MODINSTRUMENT *pIns = Instruments[p->instr];
+					if (pIns)
 					{
-						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
+						SAMPLEINDEX n = pIns->Keyboard[p->note-1];
+						if (n <= GetNumSamples()) sampleUsed[n] = true;
+					}
+				} else
+				{
+					for (INSTRUMENTINDEX k = GetNumInstruments(); k >= 1; k--)
+					{
+						MODINSTRUMENT *pIns = Instruments[k];
+						if (pIns)
 						{
-							MODINSTRUMENT *pIns = Instruments[p->instr];
-							if (pIns)
-							{
-								UINT n = pIns->Keyboard[p->note-1];
-								if (n < MAX_SAMPLES) pbIns[n>>3] |= 1<<(n&7);
-							}
-						} else
-						{
-							for (UINT k=1; k<=m_nInstruments; k++)
-							{
-								MODINSTRUMENT *pIns = Instruments[k];
-								if (pIns)
-								{
-									UINT n = pIns->Keyboard[p->note-1];
-									if (n < MAX_SAMPLES) pbIns[n>>3] |= 1<<(n&7);
-								}
-							}
+							SAMPLEINDEX n = pIns->Keyboard[p->note-1];
+							if (n <= GetNumSamples()) sampleUsed[n] = true;
 						}
 					}
 				}
 			}
 		}
-		for (UINT ichk=1; ichk<=m_nSamples; ichk++)
-		{
-			if ((0 == (pbIns[ichk>>3]&(1<<(ichk&7)))) && (Samples[ichk].pSample)) nExt++;
-		}
 	}
+	for (SAMPLEINDEX ichk = GetNumSamples(); ichk >= 1; ichk--)
+	{
+		if ((!sampleUsed[ichk]) && (Samples[ichk].pSample)) nExt++;
+	}
+
 	return nExt;
 }
 
