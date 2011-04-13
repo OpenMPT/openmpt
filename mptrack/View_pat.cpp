@@ -1026,11 +1026,10 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	CModDoc *pModDoc = GetDocument();
 	if (/*(m_bDragging) ||*/ (pModDoc == nullptr) || (pModDoc->GetSoundFile() == nullptr)) return;
 	SetFocus();
-	m_nDragItem = GetDragItem(point, &m_rcDragItem);
+	m_nDropItem = m_nDragItem = GetDragItem(point, &m_rcDragItem);
 	m_bDragging = true;
 	m_bInItemRect = true;
 	m_bShiftDragging = false;
-	m_nDropItem = 0;
 
 	SetCapture();
 	if ((point.x >= m_szHeader.cx) && (point.y <= m_szHeader.cy))
@@ -1165,8 +1164,8 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	if ((!bItemSelected) || (!m_nDragItem)) return;
 	InvalidateRect(&m_rcDragItem, FALSE);
-	const DWORD nItemNo = (m_nDragItem & DRAGITEM_VALUEMASK);
-	const DWORD nTargetNo = (m_nDropItem != 0) ? (m_nDropItem & DRAGITEM_VALUEMASK) : nItemNo;
+	const CHANNELINDEX nItemNo = (m_nDragItem & DRAGITEM_VALUEMASK);
+	const CHANNELINDEX nTargetNo = (m_nDropItem != 0) ? (m_nDropItem & DRAGITEM_VALUEMASK) : CHANNELINDEX_INVALID;
 
 	switch(m_nDragItem & DRAGITEM_MASK)
 	{
