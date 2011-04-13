@@ -175,7 +175,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 						p->command = src[j++];
 						p->param = src[j++];
 					}
-					if (p->note == 97) p->note = 0xFF; else
+					if (p->note == 97) p->note = NOTE_KEYOFF; else
 					if ((p->note) && (p->note < 97)) p->note += 12;
 					if (p->command | p->param) pSndFile->ConvertModCommand(p);
 					if (p->instr == 0xff) p->instr = 0;
@@ -241,8 +241,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	XMSAMPLEHEADER xmsh;
 	XMSAMPLESTRUCT xmss;
 	DWORD dwMemPos;
-	BYTE samples_used[(MAX_SAMPLES + 7) / 8]; // for removing unused samples
-	UINT unused_samples; // dito
 
 	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false, bProbablyMPT109 = false, bIsFT2 = false;
 
@@ -300,8 +298,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		if(dwMemPos == 0) return true;
 	}
 
-	memset(samples_used, 0, sizeof(samples_used));
-	unused_samples = 0;
+	vector<bool> samples_used; // for removing unused samples
+	SAMPLEINDEX unused_samples = 0; // dito
 
 	// Reading instruments
 	for (INSTRUMENTINDEX iIns = 1; iIns <= m_nInstruments; iIns++)
@@ -316,7 +314,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		DWORD ihsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
 		if (dwMemPos + ihsize > dwMemLength) return true;
 
-		memset(&pih, 0, sizeof(pih));
+		MemsetZero(pih);
 		memcpy(&pih, lpStream + dwMemPos, min(sizeof(pih), ihsize));
 
 		if ((Instruments[iIns] = new MODINSTRUMENT) == nullptr) continue;
@@ -357,6 +355,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 				bIsFT2 = true; // definitely not MPT. (or any other tracker)
 
 		}
+
 		if (LittleEndian(pih.size))
 			dwMemPos += LittleEndian(pih.size);
 		else
@@ -400,14 +399,14 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 					if (!unused_samples)
 					{
 						unused_samples = DetectUnusedSamples(samples_used);
-						if (!unused_samples) unused_samples = 0xFFFF;
+						if (!unused_samples) unused_samples = SAMPLEINDEX_INVALID;
 					}
-					if ((unused_samples) && (unused_samples != 0xFFFF))
+					if ((unused_samples) && (unused_samples != SAMPLEINDEX_INVALID))
 					{
-						for (UINT iext=m_nSamples; iext>=1; iext--) if (0 == (samples_used[iext>>3] & (1<<(iext&7))))
+						for (UINT iext=m_nSamples; iext>=1; iext--) if (!samples_used[iext])
 						{
 							unused_samples--;
-							samples_used[iext>>3] |= (1<<(iext&7));
+							samples_used[iext] = true;
 							DestroySample(iext);
 							n = iext;
 							for (UINT mapchk=0; mapchk<nmap; mapchk++)
@@ -422,7 +421,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 									if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
 								}
 							}
-							memset(&Samples[n], 0, sizeof(Samples[0]));
+							MemsetZero(Samples[n]);
 							break;
 						}
 					}
@@ -836,7 +835,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			UINT param = ModSaveCommand(p, true, bCompatibilityExport);
 			UINT command = param >> 8;
 			param &= 0xFF;
-			if (note >= 0xFE) note = 97; else
+			if (note >= NOTE_MIN_SPECIAL) note = 97; else
 			if ((note <= 12) || (note > 96+12)) note = 0; else
 			note -= 12;
 			UINT vol = 0;
@@ -993,7 +992,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 						smptable[xmih.samples++] = sample; //record in instrument's sample table
 					}
 					
-					if (xmih.samples >= 32) break;
+					if ((xmih.samples >= 32) || (xmih.samples >= 16 && bCompatibilityExport)) break;
 					xmsh.snum[j] = k;	//record sample table offset in instrument's note map
 				}
 			}
