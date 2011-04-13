@@ -32,153 +32,264 @@ inline TCHAR GetDigit(const size_t val)
 }
 
 
-// Change the number of channels
-bool CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg)
-//----------------------------------------------------------------------------------
+// Change the number of channels.
+// Return true on success.
+bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg)
+//------------------------------------------------------------------------------------------
 {
 	const CHANNELINDEX maxChans = m_SndFile.GetModSpecifications().channelsMax;
 
-	if (nNewChannels > maxChans) {
+	if (nNewChannels > maxChans)
+	{
 		CString error;
 		error.Format("Error: Max number of channels for this file type is %d", maxChans);
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 		return false;
 	}
 
-	if (nNewChannels == m_SndFile.m_nChannels) return false;
-	if (nNewChannels < m_SndFile.m_nChannels)
+	if (nNewChannels == GetNumChannels()) return false;
+
+	if (nNewChannels < GetNumChannels())
 	{
+		// Remove channels
 		UINT nChnToRemove = 0;
 		CHANNELINDEX nFound = 0;
 
 		//nNewChannels = 0 means user can choose how many channels to remove
-		if(nNewChannels > 0) {
-			nChnToRemove = m_SndFile.m_nChannels - nNewChannels;
+		if(nNewChannels > 0)
+		{
+			nChnToRemove = GetNumChannels() - nNewChannels;
 			nFound = nChnToRemove;
-		} else {
+		} else
+		{
 			nChnToRemove = 0;
-			nFound = m_SndFile.m_nChannels;
+			nFound = GetNumChannels();
 		}
 		
 		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove, showCancelInRemoveDlg);
-		CheckUnusedChannels(rem.m_bChnMask, nFound);
+		CheckUsedChannels(rem.m_bKeepMask, nFound);
 		if (rem.DoModal() != IDOK) return false;
 
 		// Removing selected channels
-		RemoveChannels(rem.m_bChnMask);
+		return RemoveChannels(rem.m_bKeepMask);
 	} else
 	{
-		BeginWaitCursor();
 		// Increasing number of channels
-		BEGIN_CRITICAL();
-		for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
+		BeginWaitCursor();
+		vector<CHANNELINDEX> channels(nNewChannels, CHANNELINDEX_INVALID);
+		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 		{
-			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nNewChannels);
-			if (!newp)
-			{
-				END_CRITICAL();
-				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!\n");
-				return false;
-			}
-			for (UINT j=0; j<m_SndFile.Patterns[i].GetNumRows(); j++)
-			{
-				memcpy(&newp[j*nNewChannels], &p[j*m_SndFile.m_nChannels], m_SndFile.m_nChannels*sizeof(MODCOMMAND));
-			}
-			m_SndFile.Patterns[i] = newp;
-			CPattern::FreePattern(p);
+			channels[nChn] = nChn;
 		}
 
-		//if channel was removed before and is added again, mute status has to be unset! (bug 1814)
-		for (UINT i=m_SndFile.m_nChannels; i<nNewChannels; i++)
+		const bool success = (ReArrangeChannels(channels) == nNewChannels);
+		if(success)
 		{
-			m_SndFile.InitChannel(i);
+			SetModified();
+			UpdateAllViews(NULL, HINT_MODTYPE);
 		}
-	
-		m_SndFile.m_nChannels = nNewChannels;
-		m_SndFile.SetupMODPanning();
-		END_CRITICAL();
-		EndWaitCursor();
+		return success;
 	}
-	SetModified();
-	GetPatternUndo()->ClearUndo();
-	UpdateAllViews(NULL, HINT_MODTYPE);
-	return true;
 }
 
 
-bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
-//---------------------------------------------------------
-//To remove all channels whose index corresponds to true value at m_bChnMask[] array. Code is almost non-modified copy of
-//the code which was in CModDoc::ChangeNumChannels(UINT nNewChannels) - the only differences are the lines before 
-//BeginWaitCursor(), few lines in the end and that nNewChannels is renamed to nRemaningChannels.
+// To remove all channels whose index corresponds to false in the keepMask vector.
+// Return true on success.
+bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
+//--------------------------------------------------------
 {
-		UINT nRemainingChannels = 0;
-		//First calculating how many channels are to be left
-		UINT i = 0;
-		for(i = 0; i<m_SndFile.m_nChannels; i++)
-		{
-			if(!m_bChnMask[i]) nRemainingChannels++;
-		}
-		if(nRemainingChannels == m_SndFile.m_nChannels || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
-		{
-			CString str;	
-			if(nRemainingChannels == m_SndFile.m_nChannels) str.Format("No channels chosen to be removed.");
-			else str.Format("No removal done - channel number is already at minimum.");
-			CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_OK | MB_ICONINFORMATION);
-			return false;
-		}
+	UINT nRemainingChannels = 0;
+	//First calculating how many channels are to be left
+	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
+	{
+		if(keepMask[nChn]) nRemainingChannels++;
+	}
+	if(nRemainingChannels == GetNumChannels() || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
+	{
+		CString str;	
+		if(nRemainingChannels == GetNumChannels()) str.Format("No channels chosen to be removed.");
+		else str.Format("No removal done - channel number is already at minimum.");
+		CMainFrame::GetMainFrame()->MessageBox(str, "Remove channel", MB_OK | MB_ICONINFORMATION);
+		return false;
+	}
 
-		BeginWaitCursor();
-		BEGIN_CRITICAL();
-		for (i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
+	BeginWaitCursor();
+	// Create new channel order, with only channels from m_bChnMask left.
+	vector<CHANNELINDEX> channels(nRemainingChannels, 0);
+	CHANNELINDEX i = 0;
+	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
+	{
+		if(keepMask[nChn])
 		{
-			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nRemainingChannels);
-			if (!newp)
+			channels[i++] = nChn;
+		}
+	}
+	const bool success = (ReArrangeChannels(channels) == nRemainingChannels);
+	if(success)
+	{
+		SetModified();
+		UpdateAllViews(NULL, HINT_MODTYPE);
+	}
+	EndWaitCursor();
+	return success;
+
+}
+
+
+// Base code for adding, removing, moving and duplicating channels. Returns new number of channels on success, CHANNELINDEX_INVALID otherwise.
+// The new channel vector can contain CHANNELINDEX_INVALID for adding new (empty) channels.
+CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder)
+//---------------------------------------------------------------------------
+{
+	//newOrder[i] tells which current channel should be placed to i:th position in
+	//the new order, or if i is not an index of current channels, then new channel is
+	//added to position i. If index of some current channel is missing from the
+	//newOrder-vector, then the channel gets removed.
+
+	const CHANNELINDEX nRemainingChannels = static_cast<CHANNELINDEX>(newOrder.size());
+
+	if(nRemainingChannels > m_SndFile.GetModSpecifications().channelsMax || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin) 	
+	{
+		CString str;
+		str.Format(GetStrI18N(_TEXT("Can't apply change: Number of channels should be within [%u,%u]")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
+		return CHANNELINDEX_INVALID;
+	}
+
+	bool first = true;
+	if(nRemainingChannels != GetNumChannels())
+	{
+		// For now, changing number of channels can't be undone
+		GetPatternUndo()->ClearUndo();
+	}
+
+	BEGIN_CRITICAL();
+	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) 
+	{
+		if(m_SndFile.Patterns[nPat])
+		{
+			if(nRemainingChannels == GetNumChannels())
+			{
+				GetPatternUndo()->PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), !first);
+				first = false;
+			}
+
+			MODCOMMAND *p = m_SndFile.Patterns[nPat];
+			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[nPat].GetNumRows(), nRemainingChannels);
+			if(!newp)
 			{
 				END_CRITICAL();
-				AddToLog("ERROR: Not enough memory to resize patterns!\nPattern Data is corrupted!");
-				return true;
+				CMainFrame::GetMainFrame()->MessageBox("ERROR: Pattern allocation failed in ReArrangechannels(...)" , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
+				return CHANNELINDEX_INVALID;
 			}
 			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
-			for (UINT j=0; j<m_SndFile.Patterns[i].GetNumRows(); j++)
+			for(ROWINDEX nRow = 0; nRow < m_SndFile.Patterns[nPat].GetNumRows(); nRow++) //Scrolling rows
 			{
-				for (UINT k=0; k<m_SndFile.m_nChannels; k++, tmpsrc++)
+				for(CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++, tmpdest++) //Scrolling channels.
 				{
-					if (!m_bChnMask[k]) *tmpdest++ = *tmpsrc;
+					if(newOrder[nChn] < GetNumChannels()) //Case: getting old channel to the new channel order.
+						*tmpdest = tmpsrc[nRow * GetNumChannels() + newOrder[nChn]];
+					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
+						*tmpdest = MODCOMMAND::Empty();
+
 				}
 			}
-			m_SndFile.Patterns[i] = newp;
+			m_SndFile.Patterns[nPat] = newp;
 			CPattern::FreePattern(p);
 		}
-		UINT tmpchn = 0;
-		for (i=0; i<m_SndFile.m_nChannels; i++)
+	}
+
+	MODCHANNEL chns[MAX_BASECHANNELS];		
+	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
+	vector<UINT> recordStates(GetNumChannels(), 0);
+	vector<bool> chnMutePendings(GetNumChannels(), false);
+
+	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
+	{
+		settings[nChn] = m_SndFile.ChnSettings[nChn];
+		chns[nChn] = m_SndFile.Chn[nChn];
+		recordStates[nChn] = IsChannelRecord(nChn);
+		chnMutePendings[nChn] = m_SndFile.m_bChannelMuteTogglePending[nChn];
+	}
+
+	ReinitRecordState();
+
+	for(CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++)
+	{
+		if(newOrder[nChn] < GetNumChannels())
 		{
-			if (!m_bChnMask[i])
-			{
-				if (tmpchn != i)
-				{
-					m_SndFile.ChnSettings[tmpchn] = m_SndFile.ChnSettings[i];
-					m_SndFile.Chn[tmpchn] = m_SndFile.Chn[i];
-				}
-				tmpchn++;
-			} else
-			{
-				if (i >= nRemainingChannels)
-				{
-					m_SndFile.InitChannel(i);
-					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-				}
-			}
+			m_SndFile.ChnSettings[nChn] = settings[newOrder[nChn]];
+			m_SndFile.Chn[nChn] = chns[newOrder[nChn]];
+			if(recordStates[newOrder[nChn]] == 1) Record1Channel(nChn, true);
+			if(recordStates[newOrder[nChn]] == 2) Record2Channel(nChn, true);
+			m_SndFile.m_bChannelMuteTogglePending[nChn] = chnMutePendings[newOrder[nChn]];
 		}
-		m_SndFile.m_nChannels = nRemainingChannels;
-		END_CRITICAL();
-		EndWaitCursor();
-		SetModified();
-		GetPatternUndo()->ClearUndo();
-		UpdateAllViews(NULL, HINT_MODTYPE);
-		return false;
+		else
+		{
+			m_SndFile.InitChannel(nChn);
+		}
+	}
+	// Reset MOD panning (won't affect other module formats)
+	m_SndFile.SetupMODPanning();
+
+	m_SndFile.m_nChannels = nRemainingChannels;
+
+	// Reset removed channels. Most notably, clear the channel name.
+	for(CHANNELINDEX nChn = GetNumChannels(); nChn < MAX_BASECHANNELS; nChn++)
+	{
+		m_SndFile.InitChannel(nChn);
+		m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
+	}
+
+	END_CRITICAL();
+
+	return GetNumChannels();
+}
+
+
+bool CModDoc::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
+//-----------------------------------------------------------------
+{
+	//Implementation of move channel using ReArrangeChannels(...). So this function
+	//only creates correct newOrder-vector used in the ReArrangeChannels(...).
+	if(chnFrom == chnTo) return false;
+	if(chnFrom >= GetNumChannels() || chnTo >= GetNumChannels())
+	{
+		CString str = "Error: Bad move indexes in CSoundFile::MoveChannel(...)";	
+		CMainFrame::GetMainFrame()->MessageBox(str , "MoveChannel(...)", MB_OK | MB_ICONINFORMATION);
+		return true;
+	}
+	vector<CHANNELINDEX> newOrder;
+	//First creating new order identical to current order...
+	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+	{
+		newOrder.push_back(i);
+	}
+	//...and then add the move channel effect.
+	if(chnFrom < chnTo)
+	{
+		CHANNELINDEX temp = newOrder[chnFrom];
+		for(UINT i = chnFrom; i < chnTo; i++)
+		{
+			newOrder[i] = newOrder[i + 1];
+		}
+		newOrder[chnTo] = temp;
+	}
+	else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
+	{
+		CHANNELINDEX temp = newOrder[chnFrom];
+		for(UINT i = chnFrom; i >= chnTo + 1; i--)
+		{
+			newOrder[i] = newOrder[i - 1];
+		}
+		newOrder[chnTo] = temp;
+	}
+
+	if(newOrder.size() != ReArrangeChannels(newOrder))
+	{
+		CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number changed in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
+	}
+	return false;
 }
 
 
@@ -1230,15 +1341,16 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 
 
 // Check which channels contain note data. maxRemoveCount specified how many empty channels are reported at max.
-void CModDoc::CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount) const
-//-----------------------------------------------------------------------------------------------
+void CModDoc::CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount) const
+//----------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
-	const int nChannels = m_SndFile.GetNumChannels();
+	const int nChannels = GetNumChannels();
+	usedMask.resize(nChannels);
 	for(int iRst = nChannels - 1; iRst >= 0; iRst--)
 	{
-		mask[iRst] = IsChannelUnused(iRst);
-		if(mask[iRst])
+		usedMask[iRst] = !IsChannelUnused(iRst);
+		if(!usedMask[iRst])
 		{
 			// Found enough empty channels yet?
 			if((--maxRemoveCount) == 0) break;
@@ -1251,7 +1363,7 @@ void CModDoc::CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxR
 bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 //----------------------------------------------------
 {
-	const CHANNELINDEX nChannels = m_SndFile.GetNumChannels();
+	const CHANNELINDEX nChannels = GetNumChannels();
 	if(nChn >= nChannels)
 	{
 		return true;

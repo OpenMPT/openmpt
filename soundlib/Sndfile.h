@@ -740,8 +740,6 @@ public:
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(PATTERNINDEX nPat, LPCSTR lpszName);
 	BOOL GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
-	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX>& fromToArray);
-	bool MoveChannel(UINT chn_from, UINT chn_to);
 
 	void SetupITBidiMode();
 

@@ -1491,7 +1491,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	int nRenderPasses = 1;
 	// Channel mode
-	bool unusedChannels[MAX_BASECHANNELS];
+	vector<bool> usedChannels;
 	vector<DWORD> channelFlags;
 	// Instrument mode
 	vector<bool> instrMuteState;
@@ -1500,8 +1500,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	if(wsdlg.m_bChannelMode)
 	{
 		// Don't save empty channels
-		memset(unusedChannels, false, sizeof(unusedChannels));
-		CheckUnusedChannels(unusedChannels);
+		CheckUsedChannels(usedChannels);
 
 		nRenderPasses = m_SndFile.GetNumChannels();
 		channelFlags.resize(nRenderPasses, 0);
@@ -1510,7 +1509,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			// Save channels' flags
 			channelFlags[i] = m_SndFile.ChnSettings[i].dwFlags;
 			// Ignore muted channels
-			if(channelFlags[i] & CHN_MUTE) unusedChannels[i] = true;
+			if(channelFlags[i] & CHN_MUTE) usedChannels[i] = false;
 			// Mute each channel
 			m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
 		}
@@ -1559,7 +1558,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags |= CHN_MUTE;
 
 			// Was this channel actually muted? Don't process it then.
-			if(unusedChannels[i] == true)
+			if(usedChannels[i] == false)
 				continue;
 			// Add channel number & name (if available) to path string
 			if(strlen(m_SndFile.ChnSettings[i].szName) > 0)

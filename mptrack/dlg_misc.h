@@ -84,17 +84,17 @@ class CRemoveChannelsDlg: public CDialog
 {
 public:
 	CSoundFile *m_pSndFile;
-	bool m_bChnMask[MAX_BASECHANNELS];
-	UINT m_nChannels, m_nRemove;
+	vector<bool> m_bKeepMask;
+	CHANNELINDEX m_nChannels, m_nRemove;
 	CListBox m_RemChansList;		//rewbs.removeChansDlgCleanup
 	bool m_ShowCancel;
 
 public:
-	CRemoveChannelsDlg(CSoundFile *pSndFile, UINT nChns, bool showCancel = true, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
+	CRemoveChannelsDlg(CSoundFile *pSndFile, CHANNELINDEX nChns, bool showCancel = true, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
 		{ m_pSndFile = pSndFile; 
-		  m_nChannels = m_pSndFile->m_nChannels; 
-		  m_nRemove = nChns; 
-		  memset(m_bChnMask, false, sizeof(m_bChnMask));
+		  m_nChannels = m_pSndFile->GetNumChannels(); 
+		  m_nRemove = nChns;
+		  m_bKeepMask.assign(m_nChannels, true);
 		  m_ShowCancel = showCancel;
 		}
 
