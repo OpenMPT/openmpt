@@ -315,8 +315,8 @@ protected:
 	afx_msg void OnTransposeOctUp();
 	afx_msg void OnTransposeOctDown();
 	afx_msg void OnSetSelInstrument();
-	afx_msg void OnAddChannelFront();
-	afx_msg void OnAddChannelAfter();
+	afx_msg void OnAddChannelFront() { AddChannelBefore(GetChanFromCursor(m_nMenuParam)); }
+	afx_msg void OnAddChannelAfter() { AddChannelBefore(GetChanFromCursor(m_nMenuParam) + 1); };
 	afx_msg void OnDuplicateChannel();
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
@@ -405,6 +405,9 @@ private:
 
 	// Play one pattern row and stop ("step mode")
 	void PatternStep(bool autoStep);
+
+	// Add a channel.
+	void AddChannelBefore(CHANNELINDEX nBefore);
 
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);

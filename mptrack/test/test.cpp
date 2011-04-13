@@ -239,16 +239,16 @@ void TestPCnoteSerialization()
 	CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm == nullptr)
 		throw(std::runtime_error("pMainFrm is nullptr"));
-	CModDoc* pModdoc = pMainFrm->GetActiveDoc();
-	if(pModdoc == nullptr)
+	CModDoc* pModDoc = pMainFrm->GetActiveDoc();
+	if(pModDoc == nullptr)
 		throw(std::runtime_error("pModdoc is nullptr"));
 
-	CSoundFile* pSndFile = pModdoc->GetSoundFile();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 	if(pSndFile == nullptr)
 		throw(std::runtime_error("pSndFile is nullptr"));
 
 	// Set maximum number of channels.
-	pSndFile->ReArrangeChannels(std::vector<CHANNELINDEX>(ModSpecs::mptm.channelsMax , 0));
+	pModDoc->ReArrangeChannels(std::vector<CHANNELINDEX>(ModSpecs::mptm.channelsMax , 0));
 
 	pSndFile->Patterns.Remove(0);
 	pSndFile->Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
@@ -305,7 +305,7 @@ void TestPCnoteSerialization()
 		VERIFY_EQUAL( bPatternDataMatch, true);
 	}
 		
-	pModdoc->OnCloseDocument();
+	pModDoc->OnCloseDocument();
 }
 
 

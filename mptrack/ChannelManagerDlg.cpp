@@ -200,11 +200,11 @@ void CChannelManagerDlg::OnApply()
 	{
 		newChnOrder.push_back(newpat[nChn]);
 	}
-	if(m_pSndFile->ReArrangeChannels(newChnOrder) != nChannels)
+	if(pModDoc->ReArrangeChannels(newChnOrder) != nChannels)
 	{
-		MessageBox("Rearranging channels failed");
 		END_CRITICAL();
 		EndWaitCursor();
+		MessageBox("Rearranging channels failed");
 
 		ResetState(true, true, true, true, true);
 		LeaveCriticalSection(&applying);

@@ -1127,8 +1127,6 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	const bool bItemSelected = m_bInItemRect || ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER);
 	if (/*(!m_bDragging) ||*/ (!pModDoc)) return;
 
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-
 	m_bDragging = false;
 	m_bInItemRect = false;
 	ReleaseCapture();
@@ -1187,18 +1185,18 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 				pModDoc->MuteChannel(nItemNo, !pModDoc->IsChannelMuted(nItemNo));
 				pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 			}
-		} else if(nTargetNo < pSndFile->GetNumChannels())
+		} else if(nTargetNo < pModDoc->GetNumChannels())
 		{
 			// Dragged to other channel header => move or copy channel
 
 			InvalidateRect(&m_rcDropItem, FALSE);
 
 			const bool duplicate = (nFlags & MK_SHIFT) ? true : false;
-			vector<CHANNELINDEX> channels(pSndFile->GetNumChannels() + (duplicate ? 1 : 0), 0);
+			vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + (duplicate ? 1 : 0), 0);
 			CHANNELINDEX i = 0;
 			bool modified = duplicate;
 
-			for(CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			{
 				if(nChn == nTargetNo)
 				{
@@ -1217,7 +1215,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 					modified = true;
 				}
 			}
-			if(modified && pSndFile->ReArrangeChannels(channels) != 0)
+			if(modified && pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 			{
 				if(duplicate)
 				{
@@ -2671,14 +2669,16 @@ void CViewPattern::OnSetSelInstrument()
 	SetSelectionInstrument(GetCurrentInstrument());
 }
 
+
 void CViewPattern::OnRemoveChannelDialog()
 //----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == 0) return;
+	if(pModDoc == nullptr) return;
 	pModDoc->ChangeNumChannels(0);
 	SetCurrentPattern(m_nPattern); //Updating the screen.
 }
+
 
 void CViewPattern::OnRemoveChannel()
 //----------------------------------
@@ -2700,33 +2700,35 @@ void CViewPattern::OnRemoveChannel()
 	str.Format("Remove channel %d? This channel still contains note data!\nNote: Operation affects all patterns and has no undo", nChn + 1);
 	if(isEmpty || CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
-		bool chnMask[MAX_BASECHANNELS];
-		for(CHANNELINDEX i = 0; i < MAX_BASECHANNELS; i++) {chnMask[i] = false;}
-		chnMask[nChn] = TRUE;
-		pModDoc->RemoveChannels(chnMask);
+		vector<bool> keepMask(pModDoc->GetNumChannels(), true);
+		keepMask[nChn] = false;
+		pModDoc->RemoveChannels(keepMask);
 		SetCurrentPattern(m_nPattern); //Updating the screen.
 	}
 }
 
 
-void CViewPattern::OnAddChannelFront()
-//------------------------------------
+void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
+//-------------------------------------------------------
 {
-	UINT nChn = GetChanFromCursor(m_nMenuParam);
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile;
-	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+	if(pModDoc == nullptr) return;
 
 	BeginWaitCursor();
-	//First adding channel as the last channel...
-	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels + 1))
+	// Create new channel order, with channel nBefore being an invalid (and thus empty) channel.
+	vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + 1, CHANNELINDEX_INVALID);
+	CHANNELINDEX i = 0;
+	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + 1; nChn++)
 	{
-		pSndFile->InitChannel(pSndFile->m_nChannels-1);
-		//...and then moving it to right position.
-		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
+		if(nChn != nBefore)
+		{
+			channels[nChn] = i++;
+		}
+	}
 
+	if (pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
+	{
 		pModDoc->SetModified();
-		pModDoc->GetPatternUndo()->ClearUndo();
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
 		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE); //updates(?) the channel number to general tab display
 		SetCurrentPattern(m_nPattern);
@@ -2735,22 +2737,36 @@ void CViewPattern::OnAddChannelFront()
 }
 
 
-void CViewPattern::OnAddChannelAfter()
+void CViewPattern::OnDuplicateChannel()
 //------------------------------------
 {
-	UINT nChn = ((m_nMenuParam&0xFFFF)>>3)+1;
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile;
-	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+	if (pModDoc == nullptr) return;
+
+	if(AfxMessageBox(GetStrI18N(_TEXT("This affects all patterns, proceed?")), MB_YESNO) != IDYES)
+		return;
+
+	const CHANNELINDEX nDupChn = GetChanFromCursor(m_nMenuParam);
+	if(nDupChn >= pModDoc->GetNumChannels())
+		return;
 
 	BeginWaitCursor();
-	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels + 1))
+	// Create new channel order, with channel nDupChn duplicated.
+	vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + 1, 0);
+	CHANNELINDEX i = 0;
+	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + 1; nChn++)
 	{
-		pSndFile->InitChannel(pSndFile->m_nChannels-1);
-		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
+		channels[nChn] = i;
+		if(nChn != nDupChn)
+		{
+			i++;
+		}
+	}
 
+	// Check that duplication happened and in that case update.
+	if(pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
+	{
 		pModDoc->SetModified();
-		pModDoc->GetPatternUndo()->ClearUndo();
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
 		SetCurrentPattern(m_nPattern);
@@ -2758,47 +2774,8 @@ void CViewPattern::OnAddChannelAfter()
 	EndWaitCursor();
 }
 
-void CViewPattern::OnDuplicateChannel()
-//------------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile;
-	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0)
-		return;
-
-	if(AfxMessageBox(GetStrI18N(_TEXT("This affects all patterns, proceed?")), MB_YESNO) != IDYES)
-		return;
-
-	const CHANNELINDEX nDupChn = GetChanFromCursor(m_nMenuParam);
-	if(nDupChn >= pSndFile->GetNumChannels())
-		return;
-
-	CHANNELINDEX nNumChnNew = pSndFile->GetNumChannels()+1;
-	// Create vector {0, 1,..., n-1, n, n, n+1, n+2, ..., nNumChnNew-2), where n = nDupChn.
-	vector<CHANNELINDEX> vecChns(nNumChnNew);
-	CHANNELINDEX i = 0;
-	for(i = 0; i<nDupChn+1; i++)
-		vecChns[i] = i;
-	vecChns[i] = nDupChn;
-	i++;
-	for(; i<nNumChnNew; i++)
-		vecChns[i] = i-1;
-
-	nNumChnNew = pSndFile->ReArrangeChannels(vecChns);
-
-	// Check that duplication happened and in that case update.
-	if(nNumChnNew == vecChns.size())
-	{
-		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
-		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
-		SetCurrentPattern(m_nPattern);
-	}
-
-}
-
 void CViewPattern::OnRunScript()
-//--------------------------------
+//------------------------------
 {
 	;
 }

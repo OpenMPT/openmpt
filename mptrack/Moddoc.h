@@ -274,7 +274,12 @@ public:
 // operations
 public:
 	bool ChangeModType(MODTYPE wType);
-	bool ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
+
+	bool ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg = true);
+	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX> &fromToArray);
+	bool MoveChannel(CHANNELINDEX chn_from, CHANNELINDEX chn_to);
+	bool RemoveChannels(const vector<bool> &keepMask);
+	void CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 	bool ConvertInstrumentsToSamples();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
@@ -342,8 +347,6 @@ public:
 	void LearnMacro(int macro, long param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
 
-	bool RemoveChannels(bool bChnMask[MAX_BASECHANNELS]);
-
 	bool RestartPosToPattern();
 
 	bool HasMPTHacks(const bool autofix = false);
@@ -372,8 +375,6 @@ protected:
 
 	BOOL InitializeMod();
 	void* GetChildFrame(); //rewbs.customKeys
-
-	void CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

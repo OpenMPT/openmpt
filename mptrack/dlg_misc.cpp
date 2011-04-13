@@ -570,7 +570,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 			wsprintf(label, "Channel %d", n + 1);
 
 		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
-		if (m_bChnMask[n]) m_RemChansList.SetSel(n);
+		if (!m_bKeepMask[n]) m_RemChansList.SetSel(n);
 	}
 
 	if (m_nRemove > 0) {
@@ -590,15 +590,15 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 void CRemoveChannelsDlg::OnOK()
 //-----------------------------
 {
-	memset(m_bChnMask, false, sizeof(m_bChnMask));
 	int nCount = m_RemChansList.GetSelCount();
 	CArray<int,int> aryListBoxSel;
 	aryListBoxSel.SetSize(nCount);
 	m_RemChansList.GetSelItems(nCount, aryListBoxSel.GetData()); 
 
-	for (int n=0; n<nCount; n++)
+	m_bKeepMask.assign(m_nChannels, true);
+	for (int n = 0; n < nCount; n++)
 	{
-		m_bChnMask[aryListBoxSel[n]] = true;
+		m_bKeepMask[aryListBoxSel[n]] = false;
 	}
 	if ((static_cast<UINT>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetModSpecifications().channelsMin)))
 		CDialog::OnOK();
