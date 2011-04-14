@@ -528,23 +528,20 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	if(pSndFile == nullptr) return false;
 
 	CHAR s[512];
-	vector<bool> samplesUsed;
-	int nRemoved = 0;
-	samplesUsed.resize(pSndFile->GetNumSamples() + 1, false);
+	vector<bool> samplesUsed(pSndFile->GetNumSamples() + 1, true);
 
 	BeginWaitCursor();
-	for (SAMPLEINDEX nSmp = pSndFile->m_nSamples; nSmp >= 1; nSmp--) if (pSndFile->Samples[nSmp].pSample)
+	for (SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->Samples[nSmp].pSample)
 	{
 		if (!pSndFile->IsSampleUsed(nSmp))
 		{
+			samplesUsed[nSmp] = false;
 			m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
-			BEGIN_CRITICAL();
-			pSndFile->DestroySample(nSmp);
-			if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
-			END_CRITICAL();
-			nRemoved++;
 		}
 	}
+	BEGIN_CRITICAL();
+	SAMPLEINDEX nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
+	END_CRITICAL();
 
 	SAMPLEINDEX nExt = pSndFile->DetectUnusedSamples(samplesUsed);
 
@@ -569,7 +566,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 					m_pModDoc->GetSampleUndo()->ClearUndo(nSmp);
 				}
 			}
-			wsprintf(s, "%d unused sample%s removed\n" ,nRemoved, (nRemoved == 1) ? "" : "s");
+			wsprintf(s, "%d unused sample%s removed\n" , nRemoved, (nRemoved == 1) ? "" : "s");
 			m_pModDoc->AddToLog(s);
 			return true;
 		}
@@ -971,19 +968,17 @@ bool CModCleanupDlg::RemoveAllSamples()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	if (pSndFile->m_nSamples == 0) return false;
-	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
+	if (pSndFile->GetNumSamples() == 0) return false;
+	vector<bool> keepSamples(pSndFile->GetNumSamples() + 1, false);
+
+	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
 		m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, 0, pSndFile->Samples[nSmp].nLength);
-		if(pSndFile->Samples[nSmp].pSample)
-		{
-			BEGIN_CRITICAL();
-			pSndFile->DestroySample(nSmp);
-			END_CRITICAL();
-		}
 	}
 	ctrlSmp::ResetSamples(*pSndFile, ctrlSmp::SmpResetInit);
-	pSndFile->m_nSamples = 1;
+	BEGIN_CRITICAL();
+	pSndFile->RemoveSelectedSamples(keepSamples);
+	END_CRITICAL();
 	return true;
 }
 
@@ -994,27 +989,20 @@ bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	if (pSndFile->m_nInstruments == 0) return false;
+	if (pSndFile->GetNumInstruments() == 0) return false;
 
-	char removeSamples = -1;
 	if(bConfirm)
 	{
-		if (CMainFrame::GetMainFrame()->MessageBox("Do you want to convert all instruments to samples ?\n",
+		if (CMainFrame::GetMainFrame()->MessageBox("Do you want to convert all instruments to samples?",
 			"Removing all instruments", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			m_pModDoc->ConvertInstrumentsToSamples();
 		}
-
-		if (::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing all instruments", MB_YESNO | MB_ICONQUESTION) == IDYES) {
-			removeSamples = 1;
-		}
 	}
 
-	if(removeSamples == -1) m_pModDoc->GetSampleUndo()->ClearUndo();
-
-	for (INSTRUMENTINDEX i = 1; i <= pSndFile->m_nInstruments; i++)
+	for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
 	{
-		pSndFile->DestroyInstrument(i, removeSamples);
+		pSndFile->DestroyInstrument(i, -1);
 	}
 
 	pSndFile->m_nInstruments = 0;

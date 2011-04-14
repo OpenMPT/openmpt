@@ -226,6 +226,8 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 		switch(resetflag)
 		{
 		case SmpResetInit:
+			strcpy(rSndFile.m_szNames[i], "");
+			strcpy(rSndFile.Samples[i].filename, "");
 			rSndFile.Samples[i].nC5Speed = 8363;
 			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
 		case SmpResetCompo:
@@ -411,7 +413,7 @@ bool ReverseSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile
 
 template <class T>
 void UnsignSampleImpl(T* pStart, T nOffset, const SmpLength nLength)
-//---------------------------------------------------------------------
+//------------------------------------------------------------------
 {
 	for(SmpLength i = 0; i < nLength; i++)
 	{

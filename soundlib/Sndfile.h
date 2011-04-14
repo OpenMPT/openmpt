@@ -948,11 +948,11 @@ public:
 	//BOOL DestroyInstrument(UINT nInstr);
 	bool DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples = 0);
 // -! BEHAVIOUR_CHANGE#0003
-	bool IsSampleUsed(SAMPLEINDEX nSample);
-	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr);
+	bool IsSampleUsed(SAMPLEINDEX nSample) const;
+	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr) const;
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);
-	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed);
-	bool RemoveSelectedSamples(bool *pbIns);
+	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed) const;
+	SAMPLEINDEX RemoveSelectedSamples(const vector<bool> &keepSamples);
 	void AdjustSampleLoop(MODSAMPLE *pSmp);
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
