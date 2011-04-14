@@ -113,8 +113,10 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 	//rewbs: changed message
-	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove samples associated with an instrument if it is unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+	{
 		RemoveInstrumentSamples(nInstr);
+	}
 // -! BEHAVIOUR_CHANGE#0003
 
 // -> CODE#0023
@@ -146,8 +148,7 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 //--------------------------------------------------------------
 {
-	vector<bool> sampleused;
-	sampleused.resize(GetNumSamples() + 1, false);
+	vector<bool> sampleused(GetNumSamples() + 1, false);
 
 	if (Instruments[nInstr])
 	{
@@ -169,7 +170,7 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 		for (SAMPLEINDEX nSmp = 1; nSmp <= GetNumSamples(); nSmp++) if (sampleused[nSmp])
 		{
 			DestroySample(nSmp);
-			m_szNames[nSmp][0] = 0;
+			strcpy(m_szNames[nSmp], "");
 		}
 		return true;
 	}

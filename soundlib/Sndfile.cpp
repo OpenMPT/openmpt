@@ -2505,16 +2505,19 @@ BOOL CSoundFile::GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize) 
 
 #ifndef FASTSOUNDLIB
 
-bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
-//------------------------------------------------
+// Check whether a sample is used.
+// In sample mode, the sample numbers in all patterns are checked.
+// In instrument mode, it is only checked if a sample is referenced by an instrument (but not if the sample is actually played anywhere)
+bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample) const
+//------------------------------------------------------
 {
-	if ((!nSample) || (nSample > m_nSamples)) return false;
-	if (m_nInstruments)
+	if ((!nSample) || (nSample > GetNumSamples())) return false;
+	if (GetNumInstruments())
 	{
-		for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
+		for (UINT i = 1; i <= GetNumInstruments(); i++) if (Instruments[i])
 		{
 			MODINSTRUMENT *pIns = Instruments[i];
-			for (UINT j=0; j<128; j++)
+			for (UINT j = 0; j < CountOf(pIns->Keyboard); j++)
 			{
 				if (pIns->Keyboard[j] == nSample) return true;
 			}
@@ -2523,7 +2526,7 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
 	{
 		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 		{
-			MODCOMMAND *m = Patterns[i];
+			const MODCOMMAND *m = Patterns[i];
 			for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
 			{
 				if (m->instr == nSample && !m->IsPcNote()) return true;
@@ -2534,13 +2537,13 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
 }
 
 
-bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
-//-------------------------------------------------------
+bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
+//-------------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_nInstruments) || (!Instruments[nInstr])) return false;
+	if ((!nInstr) || (nInstr > GetNumInstruments()) || (!Instruments[nInstr])) return false;
 	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
-		MODCOMMAND *m = Patterns[i];
+		const MODCOMMAND *m = Patterns[i];
 		for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
 		{
 			if (m->instr == nInstr && !m->IsPcNote()) return true;
@@ -2550,8 +2553,10 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
 }
 
 
-SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed)
-//-------------------------------------------------------------------
+// Detect samples are are referenced by an instrument, but actually not used in a song.
+// Only works in instrument mode. Unused samples are marked as false in the vector.
+SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
+//-------------------------------------------------------------------------
 {
 	sampleUsed.assign(GetNumSamples() + 1, false);
 
@@ -2606,19 +2611,23 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed)
 }
 
 
-bool CSoundFile::RemoveSelectedSamples(bool *pbIns)
-//-------------------------------------------------
+// Destroy samples where keepSamples index is false. First sample is keepSamples[1]!
+SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
+//----------------------------------------------------------------------------
 {
-	if (!pbIns) return false;
-	for (SAMPLEINDEX nSmp=1; nSmp<MAX_SAMPLES; nSmp++)
+	SAMPLEINDEX nRemoved = 0;
+	for (SAMPLEINDEX nSmp = (SAMPLEINDEX)min(MAX_SAMPLES - 1, keepSamples.size()); nSmp >= 1; nSmp--)
 	{
-		if ((!pbIns[nSmp]) && (Samples[nSmp].pSample))
+		if(!keepSamples[nSmp])
 		{
-			DestroySample(nSmp);
-			if ((nSmp == m_nSamples) && (nSmp > 1)) m_nSamples--;
+			if(DestroySample(nSmp))
+			{
+				nRemoved++;
+			}
+			if((nSmp == GetNumSamples()) && (nSmp > 1)) m_nSamples--;
 		}
 	}
-	return true;
+	return nRemoved;
 }
 
 
