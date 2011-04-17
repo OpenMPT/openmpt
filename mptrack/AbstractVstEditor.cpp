@@ -51,7 +51,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
 	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST+MAX_INSTRUMENTS, OnSetInputInstrument) //rewbs.patPlugName
-	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI+NMACROS, PrepareToLearnMacro)
+	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
 CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
@@ -246,7 +246,7 @@ void CAbstractVstEditor::OnPassKeypressesToPlug()
 void CAbstractVstEditor::OnMacroInfo()
 { //TODO	
 /*
-	for (UINT m=0; m<NMACROS; m++)
+	for (UINT m=0; m<NUM_MACROS; m++)
 	{
 	}
 */
@@ -568,24 +568,28 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	int macroType,nParam,action;
 
 	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
-	if (!pModDoc) {
+	if (!pModDoc)
+	{
 		return;
 	}
 
  	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(2, MF_BYPOSITION);	
 
-	if (m_pMacroMenu->m_hMenu) {
+	if (m_pMacroMenu->m_hMenu)
+	{
 		m_pMacroMenu->DestroyMenu();
 	}
-	if (!m_pMacroMenu->m_hMenu) {
+	if (!m_pMacroMenu->m_hMenu)
+	{
 		m_pMacroMenu->CreatePopupMenu();
 	}
 
-	for (int nMacro=0; nMacro<NMACROS; nMacro++)	{
+	for (int nMacro=0; nMacro<NUM_MACROS; nMacro++)
+	{
 		action=NULL;
 		greyed=true;
-		macroText = &(pModDoc->GetSoundFile()->m_MidiCfg.szMidiSFXExt[nMacro*32]);
+		macroText = pModDoc->GetSoundFile()->m_MidiCfg.szMidiSFXExt[nMacro];
  		macroType = pModDoc->GetMacroType(macroText);
 
 		switch (macroType)	{
@@ -790,8 +794,10 @@ void CAbstractVstEditor::PrepareToLearnMacro(UINT nID)
 	//Then pModDoc->LearnMacro(macro, param) is called
 }
 
-void CAbstractVstEditor::SetLearnMacro(int inMacro) {
-	if (inMacro<NMACROS) {
+void CAbstractVstEditor::SetLearnMacro(int inMacro)
+{
+	if (inMacro < NUM_MACROS)
+	{
 		m_nLearnMacro=inMacro;
 	}
 }

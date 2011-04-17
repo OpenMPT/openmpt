@@ -130,8 +130,6 @@ public:
 ////////////////////////////////////////////////////////////////////////
 // Midi Macros (Zxx)
 
-#define NMACROS 16
-
 //class CColourEdit;
 #include "ColourEdit.h"
 
@@ -149,8 +147,8 @@ public:
 protected:
 	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
 	CEdit m_EditSFx, m_EditZxx;
-	CColourEdit m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
-	CButton m_EditMacro[NMACROS], m_BtnMacroShowAll[NMACROS];
+	CColourEdit m_EditMacroValue[NUM_MACROS], m_EditMacroType[NUM_MACROS]; //rewbs.macroGUI
+	CButton m_EditMacro[NUM_MACROS], m_BtnMacroShowAll[NUM_MACROS];
 	CSoundFile *m_pSndFile;
 	CModDoc *m_pModDoc;
 

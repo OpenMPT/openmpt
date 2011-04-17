@@ -2274,7 +2274,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool
 			case CMD_S3MCMDEX:
 				if ((param & 0xF0) == 0xF0 && !(m_SndFile.m_nType & MOD_TYPE_MOD))	//Set Macro
 				{
-					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[(param & 0x0F) * 32];
+					macroText = m_SndFile.m_MidiCfg.szMidiSFXExt[(param & 0x0F)];
 					chanSpec.Format(" to %d: ", param & 0x0F);
 				}
 				break;
@@ -2282,7 +2282,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool
 			case CMD_SMOOTHMIDI:
 				if (param < 0x80 && nChn != CHANNELINDEX_INVALID)
 				{
-					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[m_SndFile.Chn[nChn].nActiveMacro*32];
+					macroText = m_SndFile.m_MidiCfg.szMidiSFXExt[m_SndFile.Chn[nChn].nActiveMacro];
 					chanSpec.Format(": currently %d: ", m_SndFile.Chn[nChn].nActiveMacro);
 				}
 				else
@@ -3221,7 +3221,7 @@ int CModDoc::FindMacroForParam(long param) const
 	}
 	for (int macro = 0; macro < NUM_MACROS; macro++)
 	{
-		CString macroString = &(pSndFile->m_MidiCfg.szMidiSFXExt[macro * 32]);
+		CString macroString = pSndFile->m_MidiCfg.szMidiSFXExt[macro];
 		if (GetMacroType(macroString) == sfx_plug && MacroToPlugParam(macroString) == param)
 		{
 			return macro;
@@ -3232,20 +3232,20 @@ int CModDoc::FindMacroForParam(long param) const
 }
 
 // Retrieve Zxx (Z80-ZFF) type from current macro configuration
-enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32])
-//-------------------------------------------------------------------------
+enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128][MACRO_LENGTH])
+//----------------------------------------------------------------------------------
 {
 	// Compare with all possible preset patterns
 	for(int i = 1; i < sfx_fixed_max; i++)
 	{
 		// Prepare pattern to compare
-		CHAR szPatterns[128 * 32];
+		CHAR szPatterns[128][MACRO_LENGTH];
 		CreateZxxFromType(szPatterns, static_cast<enmFixedMacroType>(i));
 
 		bool bFound = true;
 		for(int j = 0; j < 128; j++)
 		{
-			if(strncmp(&szPatterns[j * 32], &szMidiZXXExt[j * 32], 32))
+			if(strncmp(szPatterns[j], szMidiZXXExt[j], MACRO_LENGTH))
 			{
 				bFound = false;
 				break;
@@ -3257,8 +3257,8 @@ enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32])
 }
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
-void CModDoc::CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], enmFixedMacroType iZxxType)
-//-----------------------------------------------------------------------------------------
+void CModDoc::CreateZxxFromType(CHAR (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType)
+//--------------------------------------------------------------------------------------------------
 {
 	for(int i = 0; i < 128; i++)
 	{
@@ -3266,30 +3266,30 @@ void CModDoc::CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], enmFixedMacroTyp
 		{
 		case sfx_fixed_reso4Bit:
 			// Type 1 - Z80 - Z8F controls resonance
-			if (i < 16) wsprintf(&szMidiZXXExt[i * 32], "F0F001%02X", i * 8);
-			else szMidiZXXExt[i * 32] = 0;
+			if (i < 16) wsprintf(szMidiZXXExt[i], "F0F001%02X", i * 8);
+			else strcpy(szMidiZXXExt[i], "");
 			break;
 
 		case sfx_fixed_reso7Bit:
 			// Type 2 - Z80 - ZFF controls resonance
-			wsprintf(&szMidiZXXExt[i * 32], "F0F001%02X", i);
+			wsprintf(szMidiZXXExt[i], "F0F001%02X", i);
 			break;
 
 		case sfx_fixed_cutoff:
 			// Type 3 - Z80 - ZFF controls cutoff
-			wsprintf(&szMidiZXXExt[i * 32], "F0F000%02X", i);
+			wsprintf(szMidiZXXExt[i], "F0F000%02X", i);
 			break;
 
 		case sfx_fixed_mode:
 			// Type 4 - Z80 - ZFF controls filter mode
-			wsprintf(&szMidiZXXExt[i * 32], "F0F002%02X", i);
+			wsprintf(szMidiZXXExt[i], "F0F002%02X", i);
 			break;
 
 		case sfx_fixed_resomode:
 			// Type 5 - Z80 - Z9F controls resonance + filter mode
-			if (i < 16) wsprintf(&szMidiZXXExt[i * 32], "F0F001%02X", i * 8);
-			else if (i < 32) wsprintf(&szMidiZXXExt[i * 32], "F0F002%02X", (i - 16) * 8);
-			else szMidiZXXExt[i * 32] = 0;
+			if (i < 16) wsprintf(szMidiZXXExt[i], "F0F001%02X", i * 8);
+			else if (i < 32) wsprintf(szMidiZXXExt[i], "F0F002%02X", (i - 16) * 8);
+			else strcpy(szMidiZXXExt[i], "");
 			break;
 		}
 	}
@@ -3307,7 +3307,7 @@ bool CModDoc::IsMacroDefaultSetupUsed() const
 		return false;
 	}
 	// SF0: Z00-Z7F controls cutoff
-	if(GetMacroType(&(pSndFile->m_MidiCfg.szMidiSFXExt[0])) != sfx_cutoff)
+	if(GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]) != sfx_cutoff)
 	{
 		return false;
 	}
@@ -3319,7 +3319,7 @@ bool CModDoc::IsMacroDefaultSetupUsed() const
 	// All other parametered macros are unused
 	for(size_t i = 1; i < NUM_MACROS; i++)
 	{
-		if(GetMacroType(&(pSndFile->m_MidiCfg.szMidiSFXExt[i * 32])) != sfx_unused)
+		if(GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[i]) != sfx_unused)
 		{
 			return false;
 		}
@@ -3666,14 +3666,15 @@ void CModDoc::RecordParamChange(int plugSlot, long paramIndex)
 void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 //-------------------------------------------------------
 {
-	if (macroToSet<0 || macroToSet>NMACROS)
+	if (macroToSet < 0 || macroToSet > NUM_MACROS)
 	{
 		return;
 	}
 	
 	//if macro already exists for this param, alert user and return
-	for (int checkMacro=0; checkMacro<NMACROS; checkMacro++)	{
-		CString macroText = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[checkMacro*32]);
+	for (int checkMacro=0; checkMacro < NUM_MACROS; checkMacro++)
+	{
+		CString macroText = GetSoundFile()->m_MidiCfg.szMidiSFXExt[checkMacro];
  		int macroType = GetMacroType(macroText);
 		
 		if (macroType==sfx_plug && MacroToPlugParam(macroText)==paramToUse) {
@@ -3685,7 +3686,7 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	}
 
 	//set new macro
-	CHAR *pMacroToSet = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet*32]);
+	CHAR *pMacroToSet = GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet];
 	if (paramToUse<128) {
 		wsprintf(pMacroToSet, "F0F0%Xz",paramToUse+128);
 	} else if (paramToUse<384) {

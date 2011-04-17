@@ -257,8 +257,8 @@ public:
 	static enmParameteredMacroType GetMacroType(CString value); //rewbs.xinfo
 	static int MacroToPlugParam(CString value); //rewbs.xinfo
 	static int MacroToMidiCC(CString value);
-	static enmFixedMacroType GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32]);
-	static void CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], enmFixedMacroType iZxxType);
+	static enmFixedMacroType GetZxxType(const CHAR (&szMidiZXXExt)[128][MACRO_LENGTH]);
+	static void CreateZxxFromType(CHAR (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType);
 	bool IsMacroDefaultSetupUsed() const;
 	int FindMacroForParam(long param) const;
 

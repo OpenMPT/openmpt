@@ -3184,7 +3184,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		//Figure out which plug param (if any) is controllable using the active macro on this channel.
 		long activePlugParam  = -1;
 		BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
-		CString activeMacroString = &(pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro*32]);
+		CString activeMacroString = pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro];
 		if (pModDoc->GetMacroType(activeMacroString) == sfx_plug)
 		{
 			activePlugParam = pModDoc->MacroToPlugParam(activeMacroString);

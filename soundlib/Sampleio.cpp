@@ -113,7 +113,7 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 	//rewbs: changed message
-	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove samples associated with an instrument if it is unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
 	{
 		RemoveInstrumentSamples(nInstr);
 	}
@@ -505,7 +505,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	// xtra field
 	if (pxh)
 	{
-		if (m_nType > MOD_TYPE_S3M)
+		if (!(GetType() & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 		{
 			if (pxh->dwFlags & CHN_PINGPONGLOOP) pSmp->uFlags |= CHN_PINGPONGLOOP;
 			if (pxh->dwFlags & CHN_SUSTAINLOOP) pSmp->uFlags |= CHN_SUSTAINLOOP;
