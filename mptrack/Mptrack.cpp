@@ -608,13 +608,13 @@ CTrackApp::CTrackApp()
 	m_szConfigFileName[0] = 0;
 	for (UINT i=0; i<MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
 	// Default macro config
-	memset(&m_MidiCfg, 0, sizeof(m_MidiCfg));
-	strcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_START*32], "FF");
-	strcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_STOP*32], "FC");
-	strcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_NOTEON*32], "9c n v");
-	strcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF*32], "9c n 0");
-	strcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM*32], "Cc p");
-	strcpy(&m_MidiCfg.szMidiSFXExt[0], "F0F000z");
+	MemsetZero(m_MidiCfg);
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_START], "FF");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_STOP], "FC");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
+	strcpy(m_MidiCfg.szMidiSFXExt[0], "F0F000z");
 	CModDoc::CreateZxxFromType(m_MidiCfg.szMidiZXXExt, sfx_fixed_reso4Bit);
 }
 
@@ -867,17 +867,17 @@ BOOL CTrackApp::InitInstance()
 	{
 		CHAR s[64], snam[32];
 		wsprintf(snam, "SF%X", isfx);
-		GetPrivateProfileString("Zxx Macros", snam, &m_MidiCfg.szMidiSFXExt[isfx*32], s, sizeof(s), m_szConfigFileName);
-		s[31] = 0;
-		memcpy(&m_MidiCfg.szMidiSFXExt[isfx*32], s, 32);
+		GetPrivateProfileString("Zxx Macros", snam, m_MidiCfg.szMidiSFXExt[isfx], s, CountOf(s), m_szConfigFileName);
+		s[MACRO_LENGTH - 1] = 0;
+		memcpy(m_MidiCfg.szMidiSFXExt[isfx], s, MACRO_LENGTH);
 	}
 	for (UINT izxx=0; izxx<128; izxx++)
 	{
 		CHAR s[64], snam[32];
 		wsprintf(snam, "Z%02X", izxx|0x80);
-		GetPrivateProfileString("Zxx Macros", snam, &m_MidiCfg.szMidiZXXExt[izxx*32], s, sizeof(s), m_szConfigFileName);
-		s[31] = 0;
-		memcpy(&m_MidiCfg.szMidiZXXExt[izxx*32], s, 32);
+		GetPrivateProfileString("Zxx Macros", snam, m_MidiCfg.szMidiZXXExt[izxx], s, CountOf(s), m_szConfigFileName);
+		s[MACRO_LENGTH - 1] = 0;
+		memcpy(m_MidiCfg.szMidiZXXExt[izxx], s, MACRO_LENGTH);
 	}
 
 	// Parse command line for standard shell commands, DDE, file open
@@ -997,7 +997,7 @@ int CTrackApp::ExitInstance()
 		{
 			CHAR s[64], snam[32];
 			wsprintf(snam, "SF%X", isfx);
-			memcpy(s, &m_MidiCfg.szMidiSFXExt[isfx*32], 32);
+			memcpy(s, m_MidiCfg.szMidiSFXExt[isfx], MACRO_LENGTH);
 			s[31] = 0;
 			if (!WritePrivateProfileString("Zxx Macros", snam, s, m_szConfigFileName)) break;
 		}
@@ -1005,8 +1005,8 @@ int CTrackApp::ExitInstance()
 		{
 			CHAR s[64], snam[32];
 			wsprintf(snam, "Z%02X", izxx|0x80);
-			memcpy(s, &m_MidiCfg.szMidiZXXExt[izxx*32], 32);
-			s[31] = 0;
+			memcpy(s, m_MidiCfg.szMidiZXXExt[izxx], MACRO_LENGTH);
+			s[MACRO_LENGTH - 1] = 0;
 			if (!WritePrivateProfileString("Zxx Macros", snam, s, m_szConfigFileName)) break;
 		}
 	}

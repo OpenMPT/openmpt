@@ -447,11 +447,12 @@ enum {
 
 
 #define NUM_MACROS 16	// number of parametered macros
+#define MACRO_LENGTH 32	// max number of chars per macro
 struct MODMIDICFG
 {
-	CHAR szMidiGlb[9*32];
-	CHAR szMidiSFXExt[16*32];
-	CHAR szMidiZXXExt[128*32];
+	CHAR szMidiGlb[9][MACRO_LENGTH];
+	CHAR szMidiSFXExt[16][MACRO_LENGTH];
+	CHAR szMidiZXXExt[128][MACRO_LENGTH];
 };
 typedef MODMIDICFG* LPMODMIDICFG;
 STATIC_ASSERT(sizeof(MODMIDICFG) == 4896); // this is directly written to files, so the size must be correct!
@@ -654,7 +655,7 @@ public:	// for Editing
 	UINT m_nMaxOrderPosition, m_nPatternNames;
 	LPSTR m_lpszSongComments, m_lpszPatternNames;
 	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
-	MODCHANNEL Chn[MAX_CHANNELS];						// Mixing channels
+	MODCHANNEL Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
 	CPatternContainer Patterns;							// Patterns
 	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.

@@ -2106,9 +2106,9 @@ BOOL CSoundFile::ProcessEffects()
 			
 			if((cmd == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			if (param < 0x80)
-				ProcessMidiMacro(nChn, (cmd == CMD_SMOOTHMIDI), &m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro << 5], param);
+				ProcessMidiMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], param);
 			else
-				ProcessMidiMacro(nChn, (cmd == CMD_SMOOTHMIDI), &m_MidiCfg.szMidiZXXExt[(param & 0x7F) << 5], 0);
+				ProcessMidiMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(param & 0x7F)], 0);
 			break;
 
 		// IMF Commands
