@@ -2615,8 +2615,12 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
 //----------------------------------------------------------------------------
 {
+	if(keepSamples.empty())
+	{
+		return 0;
+	}
 	SAMPLEINDEX nRemoved = 0;
-	for (SAMPLEINDEX nSmp = (SAMPLEINDEX)min(MAX_SAMPLES - 1, keepSamples.size()); nSmp >= 1; nSmp--)
+	for (SAMPLEINDEX nSmp = (SAMPLEINDEX)min(GetNumSamples(), keepSamples.size() - 1); nSmp >= 1; nSmp--)
 	{
 		if(!keepSamples[nSmp])
 		{
