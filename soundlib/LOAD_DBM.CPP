@@ -106,43 +106,48 @@ static MODCOMMAND::COMMAND dbm_efftrans[23] =
 };
 
 
-void ConvertDBMEffect(uint8 *command, uint8 *param)
+void ConvertDBMEffect(uint8 &command, uint8 &param)
 //-------------------------------------------------
 {
-	if(*command < ARRAYELEMCOUNT(dbm_efftrans))
-		*command = dbm_efftrans[*command];
+	if(command < CountOf(dbm_efftrans))
+		command = dbm_efftrans[command];
 	else
-		*command = CMD_NONE;
+		command = CMD_NONE;
 
-	switch (*command)
+	switch (command)
 	{
 	case CMD_ARPEGGIO:
-		if(*param == 0)
-			*command = CMD_NONE;
+		if(param == 0)
+			command = CMD_NONE;
 		break;
 	case CMD_VOLUMESLIDE:
-		if(*param & 0xF0)
-			*param &= 0xF0;
+		if(param & 0xF0)
+			param &= 0xF0;
 		break;
+	case CMD_GLOBALVOLUME:
+		if(param <= 64)
+			param *= 2;
+		else
+			param = 128;
 	case CMD_MODCMDEX:
-		switch(*param & 0xF0)
+		switch(param & 0xF0)
 		{
 		case 0x00:	// set filter
-			*command = CMD_NONE;
+			command = CMD_NONE;
 			break;
 		case 0x30:	// play backwards
-			*command = CMD_S3MCMDEX;
-			*param = 0x9F;
+			command = CMD_S3MCMDEX;
+			param = 0x9F;
 			break;
 		case 0x40:	// turn off sound in channel
 			// TODO
 			break;
 		case 0x50:	// turn on/off channel
 			// TODO is this correct?
-			if((*param & 0x0F) <= 0x01)
+			if((param & 0x0F) <= 0x01)
 			{
-				*command = CMD_CHANNELVOLUME;
-				*param = (*param == 0x50) ? 0x00 : 0x40;
+				command = CMD_CHANNELVOLUME;
+				param = (param == 0x50) ? 0x00 : 0x40;
 			}
 			break;
 		case 0x60:	// set loop begin / loop
@@ -160,17 +165,17 @@ void ConvertDBMEffect(uint8 *command, uint8 *param)
 		}
 		break;
 	case CMD_TEMPO:
-		if(*param <= 0x1F) *command = CMD_SPEED;
+		if(param <= 0x1F) command = CMD_SPEED;
 		break;
 	case CMD_KEYOFF:
-		if (*param == 0)
+		if (param == 0)
 		{
 			// TODO key of at tick 0
 		}
 		break;
 	case CMD_OFFSET:
 		// TODO Sample offset slide
-		*command = CMD_NONE;
+		command = CMD_NONE;
 		break;
 	}
 }
@@ -370,8 +375,8 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 										if (b & 0x08) param2 = pkdata[i++];
 										if (b & 0x10) cmd1 = pkdata[i++];
 										if (b & 0x20) param1 = pkdata[i++];
-										ConvertDBMEffect(&cmd1, &param1);
-										ConvertDBMEffect(&cmd2, &param2);
+										ConvertDBMEffect(cmd1, param1);
+										ConvertDBMEffect(cmd2, param2);
 
 										// this is the same conversion algorithm as in the ULT loader. maybe this should be merged at some point...
 										if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
