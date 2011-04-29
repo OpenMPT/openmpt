@@ -172,8 +172,10 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// midi cfg
 	ASSERT_CAN_READ(id);
-	if (id<=sizeof(m_MidiCfg)) {
-		memcpy(&m_MidiCfg,lpStream+dwMemPos,id);
+	if (id <= sizeof(m_MidiCfg))
+	{
+		memcpy(&m_MidiCfg, lpStream + dwMemPos, id);
+		SanitizeMacros();
 		dwMemPos += id;
 	}
 

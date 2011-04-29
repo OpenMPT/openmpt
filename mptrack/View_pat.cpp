@@ -155,7 +155,6 @@ void CViewPattern::OnInitialUpdate()
 {
 	memset(ChnVUMeters, 0, sizeof(ChnVUMeters));
 	memset(OldVUMeters, 0, sizeof(OldVUMeters));
-	memset(MultiRecordMask, 0, sizeof(MultiRecordMask));
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
@@ -2260,9 +2259,9 @@ void CViewPattern::OnCursorPaste()
 
 		if (((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused()) || (!(m_dwStatus & PATSTATUS_FOLLOWSONG))))
 		{
-			DWORD sel = m_dwCursor | (m_nRow << 16);
-			InvalidateArea(sel, sel+5); //rewbs.fix3010 (no refresh under on last row)
-			SetCurrentRow(m_nRow+m_nSpacing);
+			DWORD sel = (nChn << 3) | (m_nRow << 16);
+			InvalidateArea(sel, sel + LAST_COLUMN);
+			SetCurrentRow(m_nRow + m_nSpacing);
 			sel = m_dwCursor | (m_nRow << 16);
 			SetCurSel(sel, sel);
 		}
@@ -2569,7 +2568,7 @@ void CViewPattern::OnDropSelection()
 
 	if ((pModDoc = GetDocument()) == NULL || !(IsEditingEnabled_bmsg())) return;
 	pSndFile = pModDoc->GetSoundFile();
-	nChannels = pSndFile->m_nChannels;
+	nChannels = pSndFile->GetNumChannels();
 	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	pOldPattern = pSndFile->Patterns[m_nPattern];
 	if ((nChannels < 1) || (nRows < 1) || (!pOldPattern)) return;
@@ -3978,7 +3977,7 @@ void CViewPattern::TempEnterVol(int v)
 			if(oldcmd != *p)
 			{
 				pModDoc->SetModified();
-				InvalidateArea(sel, sel+5);
+				InvalidateArea(sel, sel + LAST_COLUMN);
 				UpdateIndicator();
 			}
 		}
@@ -4053,7 +4052,7 @@ void CViewPattern::TempEnterFX(int c, int v)
 		if(oldcmd != *p)
 		{
 			pModDoc->SetModified();
-			InvalidateArea(sel, sel+5);
+			InvalidateArea(sel, sel + LAST_COLUMN);
 			UpdateIndicator();
 		}
 	}	// end if mainframe & moddoc exist
@@ -4100,7 +4099,7 @@ void CViewPattern::TempEnterFXparam(int v)
 		if(*p != oldcmd)
 		{
 			pModDoc->SetModified();
-			InvalidateArea(sel, sel+5);
+			InvalidateArea(sel, sel + LAST_COLUMN);
 			UpdateIndicator();
 		}
 	}
@@ -4234,7 +4233,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	if(bIsLiveRecord == false)
 	{
 		DWORD sel = (nRow << 16) | (nChn << 3);
-		InvalidateArea(sel, sel+5);
+		InvalidateArea(sel, sel + LAST_COLUMN);
 		UpdateIndicator();
 	}
 
@@ -4314,7 +4313,7 @@ void CViewPattern::TempEnterIns(int val)
 			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
-				InvalidateArea(sel, sel+5);
+				InvalidateArea(sel, sel + LAST_COLUMN);
 				UpdateIndicator();
 			}
 		}
@@ -4372,7 +4371,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn)->note = note;
 			const DWORD sel = (nRow << 16) | m_dwCursor;
 			pModDoc->SetModified();
-			InvalidateArea(sel, sel+5);
+			InvalidateArea(sel, sel + LAST_COLUMN);
 			UpdateIndicator();
 			return;
 		}
@@ -4521,7 +4520,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				pModDoc->SetModified();
 				if(bIsLiveRecord == false)
 				{   // Update only when not recording live.
-					InvalidateArea(sel, sel+5);
+					InvalidateArea(sel, sel + LAST_COLUMN);
 					UpdateIndicator();
 				}
 			}

@@ -234,11 +234,11 @@ BYTE autovibxm2it[8] =
 static inline UINT ConvertVolParam(UINT value)
 //--------------------------------------------
 {
-	return (value > 9)  ? 9 : value;
+	return (value > 9) ? 9 : value;
 }
 
 
-// Convert MPT's internal nvelope format into an IT/MPTM envelope.
+// Convert MPT's internal envelope format into an IT/MPTM envelope.
 void MPTEnvToIT(const INSTRUMENTENVELOPE *mptEnv, ITENVELOPE *itEnv, const BYTE envOffset, const BYTE envDefault)
 //---------------------------------------------------------------------------------------------------------------
 {
@@ -795,7 +795,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		if (dwMemPos + sizeof(MODMIDICFG) < dwMemLength)
 		{
-			memcpy(&m_MidiCfg, lpStream+dwMemPos, sizeof(MODMIDICFG));
+			memcpy(&m_MidiCfg, lpStream + dwMemPos, sizeof(MODMIDICFG));
+			SanitizeMacros();
 			dwMemPos += sizeof(MODMIDICFG);
 		}
 	}
@@ -1173,7 +1174,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					{ 
 						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
 						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that
-						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModPlugMade)
+						if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
 							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
 					} else
 					// 213-222: Unused (was velocity)
@@ -1348,7 +1349,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	ITFILEHEADER header;
 	ITINSTRUMENT iti;
 	ITSAMPLESTRUCT itss;
-	BYTE smpcount[(MAX_SAMPLES+7)/8];
+	vector<bool>smpcount(GetNumSamples(), false);
 	DWORD inspos[MAX_INSTRUMENTS];
 	vector<DWORD> patpos;
 	DWORD smppos[MAX_SAMPLES];
@@ -1539,7 +1540,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		if (Instruments[nins])
 		{
 			MODINSTRUMENT *pIns = Instruments[nins];
-			memset(smpcount, 0, sizeof(smpcount));
 			memcpy(iti.filename, pIns->filename, 12);
 			memcpy(iti.name, pIns->name, 26);
 			iti.mbank = pIns->wMidiBank;
@@ -1570,10 +1570,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			iti.nos = 0;
 			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{
-				UINT smp = pIns->Keyboard[i];
-				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
+				const UINT smp = pIns->Keyboard[i];
+				if (smp && !smpcount[smp - 1])
 				{
-					smpcount[smp>>3] |= 1 << (smp&7);
+					smpcount[smp - 1] = true;
 					iti.nos++;
 				}
 				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;
@@ -1978,7 +1978,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	ITFILEHEADER header;
 	ITINSTRUMENT iti;
 	ITSAMPLESTRUCT itss;
-	BYTE smpcount[(MAX_SAMPLES+7)/8];
+	vector<bool>smpcount(GetNumSamples(), false);
 	DWORD inspos[MAX_INSTRUMENTS];
 	DWORD patpos[MAX_PATTERNS];
 	DWORD smppos[MAX_SAMPLES];
@@ -2142,7 +2142,6 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		if (Instruments[nins])
 		{
 			MODINSTRUMENT *pIns = Instruments[nins];
-			memset(smpcount, 0, sizeof(smpcount));
 			memcpy(iti.filename, pIns->filename, 12);
 			memcpy(iti.name, pIns->name, 26);
 			SetNullTerminator(iti.name);
@@ -2165,10 +2164,10 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			iti.nos = 0;
 			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{
-				UINT smp = pIns->Keyboard[i];
-				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
+				const UINT smp = pIns->Keyboard[i];
+				if (smp && !smpcount[smp - 1])
 				{
-					smpcount[smp>>3] |= 1 << (smp&7);
+					smpcount[smp - 1] = true;
 					iti.nos++;
 				}
 				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;

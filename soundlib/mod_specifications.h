@@ -178,7 +178,7 @@ const CModSpecifications modEx =
 	false,								// No envelope release node
 	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
 	" ???????????????",					// Supported Volume Column commands
-	true,								// Has "+++" pattern
+	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
@@ -257,7 +257,7 @@ const CModSpecifications xmEx =
 	false,								// No envelope release node
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#",	// Supported Effects
 	" vpcdabuhlrgfe?o",					// Supported Volume Column commands
-	true,								// Has "+++" pattern
+	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures

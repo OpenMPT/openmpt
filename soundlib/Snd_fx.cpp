@@ -3965,10 +3965,10 @@ UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
 }
 
 
-UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes)
-//--------------------------------------------------------------
+UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes) const
+//---------------------------------------------------------------------------
 {
-	MODCHANNEL *pChn= &Chn[nChn];
+	const MODCHANNEL *pChn = &Chn[nChn];
 
 	// If it looks like this is an NNA channel, we need to find the master channel.
 	// This ensures we pick up the right ChnSettings. 
@@ -3988,10 +3988,10 @@ UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes)
 }
 
 
-UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
-//-----------------------------------------------------------------------
+UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes) const
+//----------------------------------------------------------------------------
 {
-	MODCHANNEL *pChn = &Chn[nChn];
+	const MODCHANNEL *pChn = &Chn[nChn];
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
 	// so we don't nee to worry about finding the master chan.
 
@@ -4007,8 +4007,8 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 }
 
 
-UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn)
-//------------------------------------------------
+UINT CSoundFile::GetBestMidiChan(const MODCHANNEL *pChn) const
+//------------------------------------------------------------
 {
 	if (pChn && pChn->pModInstrument && pChn->pModInstrument->nMidiChannel)
 	{

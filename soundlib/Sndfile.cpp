@@ -936,6 +936,25 @@ void CSoundFile::ResetMidiCfg()
 }
 
 
+// Set null terminator for all MIDI macros
+void CSoundFile::SanitizeMacros()
+//-------------------------------
+{
+	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiGlb); i++)
+	{
+		SetNullTerminator(m_MidiCfg.szMidiGlb[i]);
+	}
+	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiSFXExt); i++)
+	{
+		SetNullTerminator(m_MidiCfg.szMidiSFXExt[i]);
+	}
+	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiZXXExt); i++)
+	{
+		SetNullTerminator(m_MidiCfg.szMidiZXXExt[i]);
+	}
+}
+
+
 BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
 //----------------------------------------------------------------------------
 {
@@ -2620,7 +2639,7 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
 		return 0;
 	}
 	SAMPLEINDEX nRemoved = 0;
-	for (SAMPLEINDEX nSmp = (SAMPLEINDEX)min(GetNumSamples(), keepSamples.size() - 1); nSmp >= 1; nSmp--)
+	for(SAMPLEINDEX nSmp = (SAMPLEINDEX)min(GetNumSamples(), keepSamples.size() - 1); nSmp >= 1; nSmp--)
 	{
 		if(!keepSamples[nSmp])
 		{

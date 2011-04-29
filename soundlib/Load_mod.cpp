@@ -617,7 +617,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	UINT nbp = 0, norders = 128;
 	for (UINT iord=0; iord<128; iord++)
 	{
-		if (Order[iord] == Order.GetInvalidPatIndex())
+		if (Order[iord] == Order.GetInvalidPatIndex() || Order[iord] == Order.GetIgnoreIndex())
 		{
 			norders = iord;
 			break;
@@ -644,7 +644,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	}
 	fwrite(bTab, 4, 1, f);
 	// Writing patterns
-	for (UINT ipat=0; ipat<nbp; ipat++) {	//for all patterns
+	for (UINT ipat=0; ipat<nbp; ipat++)		//for all patterns
+	{
 		BYTE s[64*4];
 		if (Patterns[ipat])					//if pattern exists
 		{

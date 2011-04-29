@@ -711,21 +711,22 @@ void COrderList::UpdateInfoText()
 //-------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (m_pModDoc) && (::GetFocus() == m_hWnd))
+	CSoundFile *pSndFile;
+	if ((pMainFrm != nullptr) && (m_pModDoc != nullptr) && (pSndFile = m_pModDoc->GetSoundFile()) != nullptr && (::GetFocus() == m_hWnd))
 	{
 		CHAR s[128];
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+		strcpy(s, "");
 
-		s[0] = 0;
+		// MOD orderlist always ends after first empty pattern
+		const ORDERINDEX nLength = (pSndFile->GetType() & MOD_TYPE_MOD) ? pSndFile->Order.GetLengthFirstEmpty() : pSndFile->Order.GetLengthTailTrimmed();
+
 		if(CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
-			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, pSndFile->Order.GetLengthTailTrimmed());
+			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, nLength);
 		}
 		else
 		{
-			const ORDERINDEX nLength = pSndFile->Order.GetLengthTailTrimmed();
-			wsprintf(s, "Position %d of %d (%02Xh of %02Xh)",
-			m_nScrollPos, nLength, m_nScrollPos, nLength);
+			wsprintf(s, "Position %d of %d (%02Xh of %02Xh)", m_nScrollPos, nLength, m_nScrollPos, nLength);
 		}
 		
 		if (m_nScrollPos < pSndFile->Order.GetLength())
