@@ -1787,14 +1787,14 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	ITINSTRUMENT *iti = (ITINSTRUMENT *)buffer;
 	ITSAMPLESTRUCT itss;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
-	UINT smpcount[MAX_SAMPLES], smptable[MAX_SAMPLES], smpmap[MAX_SAMPLES];
+	vector<bool> smpcount(GetNumSamples(), false);
+	UINT smptable[MAX_SAMPLES], smpmap[MAX_SAMPLES];
 	DWORD dwPos;
 	FILE *f;
 
 	if ((!pIns) || (!lpszFileName)) return false;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	memset(buffer, 0, sizeof(buffer));
-	memset(smpcount, 0, sizeof(smpcount));
 	memset(smptable, 0, sizeof(smptable));
 	memset(smpmap, 0, sizeof(smpmap));
 	iti->id = LittleEndian(IT_IMPI);	// "IMPI"
@@ -1822,10 +1822,10 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	iti->nos = 0;
 	for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 	{
-		UINT smp = pIns->Keyboard[i];
-		if ((smp) && (!smpcount[smp]))
+		const UINT smp = pIns->Keyboard[i];
+		if (smp && !smpcount[smp - 1])
 		{
-			smpcount[smp] = 1;
+			smpcount[smp - 1] = true;
 			smptable[iti->nos] = smp;
 			smpmap[smp] = iti->nos;
 			iti->nos++;

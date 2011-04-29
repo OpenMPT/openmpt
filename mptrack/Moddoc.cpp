@@ -3153,9 +3153,11 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	//end rewbs.fix3185
 
 	//ensure order correlates with pattern.
-	if (pSndFile->Order[ord]!=pat) {
+	if (pSndFile->Order[ord]!=pat)
+	{
 		ORDERINDEX tentativeOrder = pSndFile->FindOrder(pat);
-		if (tentativeOrder != ORDERINDEX_INVALID) {	//ensure a valid order exists.
+		if (tentativeOrder != ORDERINDEX_INVALID)	//ensure a valid order exists.
+		{
 			ord = tentativeOrder;
 		}
 	}
@@ -3192,11 +3194,13 @@ int CModDoc::MacroToPlugParam(CString macro)
 	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
 	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
 
-	if (macro.GetLength()>=4 && macro.GetAt(3)=='0')
+	if (macro.GetLength() >= 4 && macro.GetAt(3) == '0')
 		return (code - 128);
 	else
 		return (code + 128);
 }
+
+
 int CModDoc::MacroToMidiCC(CString macro)
 //---------------------------------------
 {
@@ -3210,6 +3214,7 @@ int CModDoc::MacroToMidiCC(CString macro)
 
 	return code;
 }
+
 
 int CModDoc::FindMacroForParam(long param) const
 //----------------------------------------------
@@ -3230,6 +3235,7 @@ int CModDoc::FindMacroForParam(long param) const
 
 	return -1;
 }
+
 
 // Retrieve Zxx (Z80-ZFF) type from current macro configuration
 enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128][MACRO_LENGTH])
@@ -3255,6 +3261,7 @@ enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128][MACRO_LENG
 	}
 	return sfx_fixed_custom; // Custom setup
 }
+
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
 void CModDoc::CreateZxxFromType(CHAR (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType)
@@ -3306,6 +3313,9 @@ bool CModDoc::IsMacroDefaultSetupUsed() const
 	{
 		return false;
 	}
+	// Global macros
+	// TODO
+
 	// SF0: Z00-Z7F controls cutoff
 	if(GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]) != sfx_cutoff)
 	{

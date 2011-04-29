@@ -433,7 +433,9 @@ LPCSTR GetReverbPresetName(UINT nPreset);
 
 ////////////////////////////////////////////////////////////////////
 
-enum {
+// Global MIDI macros
+enum
+{
 	MIDIOUT_START=0,
 	MIDIOUT_STOP,
 	MIDIOUT_TICK,
@@ -454,7 +456,6 @@ struct MODMIDICFG
 	CHAR szMidiSFXExt[16][MACRO_LENGTH];
 	CHAR szMidiZXXExt[128][MACRO_LENGTH];
 };
-typedef MODMIDICFG* LPMODMIDICFG;
 STATIC_ASSERT(sizeof(MODMIDICFG) == 4896); // this is directly written to files, so the size must be correct!
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
@@ -990,6 +991,7 @@ public:
 	// Misc functions
 	MODSAMPLE *GetSample(UINT n) { return Samples+n; }
 	void ResetMidiCfg();
+	void SanitizeMacros();
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	long ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
@@ -1051,9 +1053,9 @@ public:
     void resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset = ENV_RESET_ALL);
 	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
 private:
-	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
-	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
-	UINT GetBestMidiChan(MODCHANNEL *pChn);
+	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes) const;
+	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes) const;
+	UINT GetBestMidiChan(const MODCHANNEL *pChn) const;
 
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();

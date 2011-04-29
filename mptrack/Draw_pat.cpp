@@ -860,7 +860,9 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				tx_col = MODCOLOR_TEXTSELECTED;
 				bk_col = MODCOLOR_BACKSELECTED;
 			}
-			if ((!*((LPDWORD)m)) && (!*(((LPWORD)m)+2)) && ((!col_sel) || (col_sel == 0x1F)))
+			// Speedup: Empty command which is either not or fully selected
+			//if ((!*((LPDWORD)m)) && (!*(((LPWORD)m)+2)) && ((!col_sel) || (col_sel == 0x1F)))
+			if (m->IsEmpty() && ((!col_sel) || (col_sel == 0x1F)))
 			{
 				m_Dib.SetTextColor(tx_col, bk_col);
 				m_Dib.TextBlt(xbmp, 0, nColumnWidth-4, m_szCell.cy, pfnt->nClrX, pfnt->nClrY);
@@ -875,7 +877,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				if ((CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= NOTE_MAX))
 				{
 					tx_col = MODCOLOR_NOTE;
-					// Highlight notes that are not supported by the Amiga
+					// Highlight notes that are not supported by the Amiga (for S3M this is not always correct)
 					if((pSndFile->m_dwSongFlags & (SONG_PT1XMODE|SONG_AMIGALIMITS)) && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
 						tx_col = MODCOLOR_DODGY_COMMANDS;
 				}
@@ -1187,11 +1189,13 @@ void CViewPattern::UpdateScrollSize()
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue
-		if (rect.Height() >= sizeTotal.cy) {
-			m_bWholePatternFitsOnScreen=true;
+		if (rect.Height() >= sizeTotal.cy)
+		{
+			m_bWholePatternFitsOnScreen = true;
 			m_nYScroll = 0;  //rewbs.fix2977
-		} else {
-			m_bWholePatternFitsOnScreen=false;
+		} else
+		{
+			m_bWholePatternFitsOnScreen = false;
 		}
 	}
 }
@@ -1450,7 +1454,7 @@ void CViewPattern::UpdateIndicator()
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		CHAR s[512];
 		UINT nChn;
-		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel()+1);
+		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel() + 1);
 		pMainFrm->SetUserText(s);
 		if (::GetFocus() == m_hWnd)
 		{
@@ -1464,12 +1468,12 @@ void CViewPattern::UpdateIndicator()
 
 				switch (GetColTypeFromCursor(m_dwCursor))
 				{
-				case 0:
+				case NOTE_COLUMN:
 					// display note
 					if(m->note >= NOTE_MIN_SPECIAL)
 						strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
 					break;
-				case 1:
+				case INST_COLUMN:
 					// display instrument
 					if (m->instr)
 					{
@@ -1485,9 +1489,9 @@ void CViewPattern::UpdateIndicator()
 						} else
 						{
 							// "normal" instrument
-							if (pSndFile->m_nInstruments)
+							if (pSndFile->GetNumInstruments())
 							{
-								if ((m->instr <= pSndFile->m_nInstruments) && (pSndFile->Instruments[m->instr]))
+								if ((m->instr <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[m->instr]))
 								{
 									MODINSTRUMENT *pIns = pSndFile->Instruments[m->instr];
 									memcpy(sztmp, pIns->name, 32);
@@ -1495,7 +1499,7 @@ void CViewPattern::UpdateIndicator()
 									if ((m->note) && (m->note <= NOTE_MAX))
 									{
 										UINT nsmp = pIns->Keyboard[m->note-1];
-										if ((nsmp) && (nsmp <= pSndFile->m_nSamples))
+										if ((nsmp) && (nsmp <= pSndFile->GetNumSamples()))
 										{
 											CHAR sztmp2[64] = "";
 											memcpy(sztmp2, pSndFile->m_szNames[nsmp], MAX_SAMPLENAME);
@@ -1509,7 +1513,7 @@ void CViewPattern::UpdateIndicator()
 								}
 							} else
 							{
-								if (m->instr <= pSndFile->m_nSamples)
+								if (m->instr <= pSndFile->GetNumSamples())
 								{
 									memcpy(sztmp, pSndFile->m_szNames[m->instr], MAX_SAMPLENAME);
 									sztmp[32] = 0;
@@ -1520,7 +1524,7 @@ void CViewPattern::UpdateIndicator()
 						if (sztmp[0]) wsprintf(s, "%d: %s", m->instr, sztmp);
 					}
 					break;
-				case 2:
+				case VOL_COLUMN:
 					// display volume command
 					if(m->IsPcNote())
 					{
@@ -1538,8 +1542,8 @@ void CViewPattern::UpdateIndicator()
 						if (!pModDoc->GetVolCmdInfo(pModDoc->GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
 					}
 					break;
-				case 3:
-				case 4:
+				case EFFECT_COLUMN:
+				case PARAM_COLUMN:
 					// display effect command
 					if(!m->IsPcNote())
 					{

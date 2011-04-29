@@ -54,7 +54,7 @@ enum PatternColumns
 	LAST_COLUMN = PARAM_COLUMN
 };
 
-static_assert(MAX_CHANNELS <= 0x1FFF, "Check: Channel index in pattern editor is only 13 bits wide!");
+static_assert(MAX_BASECHANNELS <= 0x1FFF, "Check: Channel index in pattern editor is only 13 bits wide!");
 
 
 //Struct for controlling selection clearing. This is used to define which data fields
@@ -117,7 +117,6 @@ protected:
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 	CListBox *ChnEffectList[MAX_BASECHANNELS]; //rewbs.patPlugName
-	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];
 	UINT m_nFoundInstrument;
 	UINT m_nMenuOnChan;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys

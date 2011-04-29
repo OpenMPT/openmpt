@@ -615,7 +615,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		dwMemPos += 8;
 		if (len == sizeof(MODMIDICFG))
 		{
-			memcpy(&m_MidiCfg, lpStream+dwMemPos, len);
+			memcpy(&m_MidiCfg, lpStream + dwMemPos, len);
+			SanitizeMacros();
 			m_dwSongFlags |= SONG_EMBEDMIDICFG;
 			dwMemPos += len;	//rewbs.fix36946
 		}
