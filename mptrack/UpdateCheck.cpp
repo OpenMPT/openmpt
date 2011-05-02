@@ -17,12 +17,13 @@
 #endif
 
 
-const CString CUpdateCheck::defaultUpdateURL = "http://update.openmpt.org/check/%s";
+const CString CUpdateCheck::defaultUpdateURL = "http://update.openmpt.org/check/$VERSION/$GUID";
 
 // Static configuration variables
 time_t CUpdateCheck::lastUpdateCheck = 0;
 int CUpdateCheck::updateCheckPeriod = 7;
 CString CUpdateCheck::updateBaseURL = CUpdateCheck::defaultUpdateURL;
+bool CUpdateCheck::sendGUID = true;
 bool CUpdateCheck::showUpdateHint = true;
 
 
@@ -93,20 +94,11 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	}
 	CUpdateCheck::showUpdateHint = false;
 
+	// Prepare UA / URL strings...
 	const CString userAgent = CString("OpenMPT ") + MptVersion::str;
-	CString updateURL;
-	updateURL.Format(CUpdateCheck::updateBaseURL, MptVersion::str);
-
-	/*if (CMainFrame::gcsInstallGUID == "")
-	{
-		//No GUID found in INI file - generate one.
-		GUID guid;
-		CoCreateGuid(&guid);
-		BYTE* Str;
-		UuidToString((UUID*)&guid, &Str);
-		CMainFrame::gcsInstallGUID.Format("%s", (LPTSTR)Str);
-		RpcStringFree(&Str);
-	}*/
+	CString updateURL = CUpdateCheck::updateBaseURL;
+	updateURL.Replace("$VERSION", MptVersion::str);
+	updateURL.Replace("$GUID", GetSendGUID() ? CMainFrame::gcsInstallGUID : "anonymous");
 
 	// Establish a connection.
 	caller->internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -278,6 +270,7 @@ BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_RADIO2,			OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO3,			OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO4,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
 	ON_EN_CHANGE(IDC_EDIT1,			OnSettingsChanged)
 END_MESSAGE_MAP()
 
@@ -296,6 +289,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 	case 31:	radioID = IDC_RADIO4; break;
 	}
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, radioID);
+	CheckDlgButton(IDC_CHECK1, CUpdateCheck::GetSendGUID() ? MF_CHECKED : MF_UNCHECKED);
 	SetDlgItemText(IDC_EDIT1, CUpdateCheck::GetUpdateURL());
 
 	const time_t t = CUpdateCheck::GetLastUpdateCheck();
@@ -325,7 +319,7 @@ void CUpdateSetupDlg::OnOK()
 
 	CString updateURL;
 	GetDlgItemText(IDC_EDIT1, updateURL);
-	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL, CUpdateCheck::GetShowUpdateHint());
+	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL, IsDlgButtonChecked(IDC_CHECK1) ? true : false, CUpdateCheck::GetShowUpdateHint());
 	
 	CPropertyPage::OnOK();
 }

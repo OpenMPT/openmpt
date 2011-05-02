@@ -387,6 +387,17 @@ void CMainFrame::LoadIniSettings()
 		vIniVersion = MptVersion::ToNum(gcsPreviousVersion);
 
 	gcsInstallGUID = GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
+	if(gcsInstallGUID == "")
+	{
+		//No GUID found in INI file - generate one.
+		GUID guid;
+		CoCreateGuid(&guid);
+		BYTE* Str;
+		UuidToString((UUID*)&guid, &Str);
+		gcsInstallGUID.Format("%s", (LPTSTR)Str);
+		RpcStringFree(&Str);
+	}
+
 	gbMdiMaximize = GetPrivateProfileLong("Display", "MDIMaximize", true, iniFile);
 	glTreeWindowWidth = GetPrivateProfileLong("Display", "MDITreeWidth", 160, iniFile);
 	glTreeSplitRatio = GetPrivateProfileLong("Display", "MDITreeRatio", 128, iniFile);
@@ -421,6 +432,7 @@ void CMainFrame::LoadIniSettings()
 			outTime,
 			GetPrivateProfileInt("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod(), iniFile),
 			GetPrivateProfileCString("Update", "UpdateURL", CUpdateCheck::GetUpdateURL(), iniFile),
+			GetPrivateProfileInt("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0, iniFile) ? true : false,
 			GetPrivateProfileInt("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0, iniFile) ? true : false
 		);
 	}
@@ -435,7 +447,7 @@ void CMainFrame::LoadIniSettings()
 #ifndef NO_DSOUND
 	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND); // first DirectSound device
 #else
-	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first DirectSound device
+	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first WaveOut device
 #endif // NO_DSOUND
 #ifndef NO_ASIO
 	// If there's an ASIO device available, prefer it over DirectSound
@@ -1026,6 +1038,7 @@ void CMainFrame::SaveIniSettings()
 		WritePrivateProfileString("Update", "LastUpdateCheck", outDate, iniFile);
 		WritePrivateProfileLong("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod(), iniFile);
 		WritePrivateProfileString("Update", "UpdateURL", CUpdateCheck::GetUpdateURL(), iniFile);
+		WritePrivateProfileLong("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0, iniFile);
 		WritePrivateProfileLong("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0, iniFile);
 	}
 
