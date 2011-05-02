@@ -262,8 +262,11 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		bKeepMidiMacros = true; // simply load Zxx commands
 	}
 
-	if(!bKeepMidiMacros) // Remove macros so they don't interfere with other tunes
-		memset(&m_MidiCfg, 0, sizeof(m_MidiCfg));
+	if(!bKeepMidiMacros) // Remove macros so they don't interfere with tunes made in trackers that don't support Zxx
+	{
+		MemsetZero(m_MidiCfg.szMidiSFXExt);
+		MemsetZero(m_MidiCfg.szMidiZXXExt);
+	}
 
 	dwMemPos = 0x60;
 	m_nType = MOD_TYPE_S3M;

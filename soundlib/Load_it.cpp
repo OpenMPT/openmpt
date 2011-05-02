@@ -803,7 +803,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
 	if (pifh->cwtv < 0x0214)
 	{
-		MemsetZero(m_MidiCfg);
+		MemsetZero(m_MidiCfg.szMidiSFXExt);
+		MemsetZero(m_MidiCfg.szMidiZXXExt);
 		m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	}
 
