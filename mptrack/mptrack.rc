@@ -196,13 +196,17 @@ BEGIN
     CONTROL         "Daily",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,12,30,240,8
     CONTROL         "Weekly (recommended)",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,12,42,240,8
     CONTROL         "Monthly",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,12,54,240,8
-    GROUPBOX        "Advanced Settings",IDC_STATIC,6,78,258,60
-    LTEXT           "Update server URL:",IDC_STATIC,12,90,186,8
-    EDITTEXT        IDC_EDIT1,12,102,246,12,ES_AUTOHSCROLL
-    LTEXT           "",IDC_LASTUPDATE,6,168,258,24
-    LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,120,246,12
-    PUSHBUTTON      "Check for Updates",IDC_BUTTON1,6,144,84,18
-    PUSHBUTTON      "Reset",IDC_BUTTON2,204,87,54,12
+    GROUPBOX        "Privacy Settings",IDC_STATIC,6,78,258,54
+    CONTROL         "Allow us to collect basic update statistics",IDC_CHECK1,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,90,246,12
+    LTEXT           "If enabled, a randomized user ID is created and transmitted with every update check. This ID can not be linked to you or your computer in any way.",IDC_STATIC,12,102,246,24
+    GROUPBOX        "Advanced Settings",IDC_STATIC,6,138,258,60
+    LTEXT           "Update server URL:",IDC_STATIC,12,150,186,8
+    EDITTEXT        IDC_EDIT1,12,162,246,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Reset",IDC_BUTTON2,204,146,54,12
+    LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,180,246,12
+    PUSHBUTTON      "Check for Updates",IDC_BUTTON1,6,204,84,18
+    LTEXT           "",IDC_LASTUPDATE,6,228,258,24
 END
 
 
@@ -1194,7 +1198,7 @@ BEGIN
 END
 
 IDD_MIDIMACRO DIALOGEX 0, 0, 358, 354
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Zxx Macros Configuration"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
