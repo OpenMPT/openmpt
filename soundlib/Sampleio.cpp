@@ -2138,14 +2138,15 @@ bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 		DWORD dwChunkId = *((LPDWORD)(lpMemFile+dwMemPos));
 		DWORD dwChunkLen = BigEndian(*((LPDWORD)(lpMemFile+dwMemPos+4)));
 		LPBYTE pChunkData = (LPBYTE)(lpMemFile+dwMemPos+8);
-		if (dwChunkLen > dwFileLength - dwMemPos) break;
+		// Hack for broken files: Trim claimed length if it's too long
+		dwChunkLen = min(dwChunkLen, dwFileLength - dwMemPos);
+		//if (dwChunkLen > dwFileLength - dwMemPos) break;
 		switch(dwChunkId)
 		{
 		case IFFID_NAME:
 			{
-				UINT len = dwChunkLen;
-				if (len > 31) len = 31;
-				memset(m_szNames[nSample], 0, 32);
+				const UINT len = min(dwChunkLen, MAX_SAMPLENAME - 1);
+				MemsetZero(m_szNames[nSample]);
 				memcpy(m_szNames[nSample], pChunkData, len);
 			}
 			break;
@@ -2165,6 +2166,6 @@ bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 		}
 		dwMemPos += dwChunkLen + 8;
 	}
-	return true;
+	return (pSmp->pSample != nullptr);
 }
 
