@@ -10,12 +10,13 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
-v1.19.02.00 (***** 2011, revision 848)
+v1.19.02.00 (***** 2011, revision 861)
 --------------------------------------
 Pattern tab::Note properties
    [New] <Jojo> Channels can now be moved by dragging their channel header. Holding Shift while doing so duplicates the channel
    [Imp] <Jojo> Moving channels through the channel manager creates an undo point now. 
    [Fix] <Jojo> Axx is not limited to value 7F anymore in IT / S3M format.
+   [Fix] <Jojo> Order list info text now truncates list length after the first "---" pattern for MOD files in hex display mode as well.
 
 VST
    [New] <Jojo> New menu entry in the plugin editor: Create instrument from plugin
@@ -23,17 +24,28 @@ VST
 
 Mod Conversion
    [Imp] <Jojo> Improved conversion of Sxx (IT / S3M) and PC Notes.
+   [Mod] <Jojo> When converting from MOD/S3M to XM/IT, compatible play is automatically enabled.
    [Fix] <Jojo> Sustain loop conversion didn't work
 
 IT
    [Fix] <Jojo> Panning slides with both parameter nibbles set were not ignored in compatible mode.
 
-Other modules
+XM
+   [Fix] <Jojo> When using compatibility export, the number of samples per instrument is now limited to 16.
+
+MOD
+   [Fix] <Jojo> "+++" separator patterns were allowed in MOD files, which made them break in other trackers / players (tx 404notfound)
+
+
+Other formats
    [Imp] <Jojo> DMF Loader was rewritten completely and is a whole lot more accurate now.
    [Fix] <Jojo> J2B Loader: Empty sample slots are now treated correct in new J2B (AM) files.
+   [Fix] <Jojo> DBM Loader: Global volume was scaled wrong.
+   [Fix] <Jojo> 8SVX Loader: If no sample could be found in the file, the loader does not claim to have successfully loaded a sample anymore. 
 
 Misc
    [New] <Jojo> OpenMPT can now automatically check for updates (daily / weekly / monthly)
+   [Fix] <Jojo> When using "Convert instruments to samples" in the Song Cleanup dialog, "Remove samples associated with an instrument" actually destroyed all samples.
    [Reg] <Jojo> Removed hidden INI flag to suppress warnings when encountering keymaps with unknown items. This option was introduced when faulty keymaps threw multiple message boxes, but now it's just one and it shouldn't be ignored...
 
 v1.19.01.00 (April 2011, revision 836)
@@ -166,7 +178,7 @@ S3M
    [Fix] <Jojo> Pattern breaks >= C40 are now ignored.
    [Fix] <Jojo> Global volume commands > V40 are now ignored.
 
-Other modules
+Other formats
    [Imp] <Jojo> Garbage characters in sample / instrument / song names should be gone now.. This should f.e. avoid sample names like " ntitled" turning up in modules after deleting sample names.
    [Imp] <Jojo> Improved handling of the note cut effect in PTM (Polytracker) files a bit.
    [Mod] <Jojo> Improved portamento import precision for DBM and ULT loaders (patch from Schism Tracker)
@@ -277,7 +289,7 @@ S3M
    [Fix] <Jojo> Samples with very short loops (4 bytes) are now loaded properly. Fixes "a tiny problem.s3m" by \slash.
    [Fix] <Jojo> Notes with an SD0 effect were not ignored properly when there was a row delay effect on the same row. Now they should be ignored in any case.
 
-Other modules
+Other formats
    [Imp] <Jojo> Song messages are now loaded with more accuracy for some formats.
    [Imp] <Jojo> J2B Loader: Files with extended instrument settings and multiple samples per instrument work properly now. Such J2B files were not used in the game but have been created by JJ2 players using MOD2J2B.
    [Imp] <Jojo> OKT Loader: Completely new IFF-based loader, translated from SchismTracker code with permission from Storlek. This loader is a *lot* more accurate, but still misses a few pattern effects.
@@ -447,7 +459,7 @@ MPTM
    [New] <Jojo> MPTM command S7D explicitly enforces pitch envelope, S7E enforces filter envelope.
    [Fix] <Jojo> MPTM Saving: A missing null pointer check crashed OpenMPT when trying to access a deleted instrument slot.
 
-Other modules
+Other formats
    [Imp] <Jojo> MT2 Loader (MadTracker): Make use of the "lines per beat" header field. Release node is not set anymore for each and every instrument envelope. MT2 files are now loaded as IT files by default (instead of XM) because of their extended instrument properties (NNAs, filters, etc) - I wonder what this breaks, but I don't bother much because MT2 support was already 100% broken before this. :) Some MT example tunes sound a bit better now at least.
    [Fix] <Jojo> PTM Loader: Fixed an unhandled null pointer exception that occured when loading some unsupported RAR files.
    [Fix] <Jojo> PSM16 Loader: Fix for note cut on tick 0 (warbot tune from Silverball)
