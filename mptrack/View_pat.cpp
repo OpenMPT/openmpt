@@ -1184,7 +1184,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 				pModDoc->MuteChannel(nItemNo, !pModDoc->IsChannelMuted(nItemNo));
 				pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 			}
-		} else if(nTargetNo < pModDoc->GetNumChannels())
+		} else if(nTargetNo < pModDoc->GetNumChannels() && (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER)
 		{
 			// Dragged to other channel header => move or copy channel
 
@@ -5230,7 +5230,7 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 
 
 bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu)
-//--------------------------------------------------------------------
+//--------------------------------------------------------
 {
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
