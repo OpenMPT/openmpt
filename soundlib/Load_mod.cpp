@@ -385,7 +385,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 
 	if(bFLT8)
 	{
-		// FLT8 has only equal order items, so divide by two.
+		// FLT8 has only even order items, so divide by two.
 		for(ORDERINDEX nOrd = 0; nOrd < Order.GetLength(); nOrd++)
 			Order[nOrd] >>= 1;
 	}
@@ -564,11 +564,11 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 
 	if ((!m_nChannels) || (!lpszFileName)) return false;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	memset(ord, 0, sizeof(ord));
-	memset(inslen, 0, sizeof(inslen));
+	MemsetZero(ord);
+	MemsetZero(inslen);
 	if (m_nInstruments)
 	{
-		memset(insmap, 0, sizeof(insmap));
+		MemsetZero(insmap);
 		for (UINT i=1; i<32; i++) if (Instruments[i])
 		{
 			for (UINT j=0; j<128; j++) if (Instruments[i]->Keyboard[j])
@@ -614,22 +614,19 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		fwrite(bTab, 30, 1, f);
 	}
 	// Writing number of patterns
-	UINT nbp = 0, norders = 128;
-	for (UINT iord=0; iord<128; iord++)
+	UINT nbp = 0, norders = 0;
+	for (UINT iord = 0; iord < 128; iord++)
 	{
-		if (Order[iord] == Order.GetInvalidPatIndex() || Order[iord] == Order.GetIgnoreIndex())
+		// Ignore +++ and --- patterns in order list, as well as high patterns (MOD officially only supports up to 128 patterns)
+		if (Order[iord] < 0x80)
 		{
-			norders = iord;
-			break;
+			if (nbp <= Order[iord]) nbp = Order[iord] + 1;
+			ord[norders++] = Order[iord];
 		}
-		if ((Order[iord] < 0x80) && (nbp <= Order[iord])) nbp = Order[iord] + 1;
 	}
 	bTab[0] = norders;
 	bTab[1] = m_nRestartPos;
 	fwrite(bTab, 2, 1, f);
-	// Writing pattern list
-	if (norders) Order.WriteToByteArray(ord, norders, 128);
-
 	fwrite(ord, 128, 1, f);
 	// Writing signature
 	if (m_nChannels == 4)
