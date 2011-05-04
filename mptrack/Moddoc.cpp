@@ -154,13 +154,19 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.Create(NULL, this, 0);
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
-	if(CTrackApp::IsProject()) {
+	if(CTrackApp::IsProject())
+	{
 		m_SndFile.m_dwSongFlags |= SONG_ITPROJECT;
 	}
 
-	if (m_SndFile.m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) {
+	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
+	if (m_SndFile.m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT))
+	{
 		m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
-		m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
+		if(!IsMacroDefaultSetupUsed())
+		{
+			m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
+		}
 	}
 
 
@@ -170,7 +176,6 @@ BOOL CModDoc::OnNewDocument()
 	// ...and the order length
 	m_SndFile.Order.resize(min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 
-	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 	ReinitRecordState();
 	InitializeMod();
 	SetModifiedFlag(FALSE);
@@ -849,6 +854,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 	if (nVol > 256) nVol = 256;
 	if (note <= NOTE_MAX)
 	{
+
 		BEGIN_CRITICAL();
 		
 		//kill notes if required.
@@ -864,6 +870,17 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				}
 			}
 		}
+
+		END_CRITICAL();
+
+		if (pMainFrm->GetModPlaying() != this)
+		{
+			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
+			pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
+		}
+		CMainFrame::EnableLowLatencyMode();
+
+		BEGIN_CRITICAL();
 
 		//find a channel if required
 		//if (nCurrentChn<0) { 
@@ -986,12 +1003,6 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 
 		END_CRITICAL();
 
-		if (pMainFrm->GetModPlaying() != this)
-		{
-			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
-			pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
-		}
-		CMainFrame::EnableLowLatencyMode();
 	} else
 	{
 		BEGIN_CRITICAL();
@@ -3171,6 +3182,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 enmParameteredMacroType CModDoc::GetMacroType(CString value)
 //----------------------------------------------------------
 {
+	value.Remove(' ');
 	if (value.Compare("")==0) return sfx_unused;
 	if (value.Compare("F0F000z")==0) return sfx_cutoff;
 	if (value.Compare("F0F001z")==0) return sfx_reso;
@@ -3186,6 +3198,7 @@ enmParameteredMacroType CModDoc::GetMacroType(CString value)
 int CModDoc::MacroToPlugParam(CString macro)
 //------------------------------------------
 {
+	macro.Remove(' ');
 	int code=0;
 	char* param = (char *) (LPCTSTR) macro;
 	param += 4;
@@ -3204,6 +3217,7 @@ int CModDoc::MacroToPlugParam(CString macro)
 int CModDoc::MacroToMidiCC(CString macro)
 //---------------------------------------
 {
+	macro.Remove(' ');
 	int code=0;
 	char* param = (char *) (LPCTSTR) macro;
 	param += 2;
