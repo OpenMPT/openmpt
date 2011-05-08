@@ -1,0 +1,42 @@
+How to compile the code:
+
+- Visual Studio 2003/2005/2008/2010 is required. Express versions won't work as
+  they don't include MFC.
+- The VST 2.4 and ASIO SDKs are needed for compiling with VST and ASIO support.
+  If you don't want this, uncomment #define NO_VST and #define NO_ASIO in the
+  file StdAfx.h. If you need further help with the VST and ASIO SDKs, get in
+  touch with the main developers.
+- You need the DirectX SDK to enable DirectSound output. If you don't want this,
+  uncomment #define NO_DSOUND in the file StdAfx.h.
+
+
+
+Coding conventions (see below for an example):
+
+* Functions / methods are "underlined".
+* Place curly braces at the beginning of the line, not at the end
+* Generally make use of the custom index types like SAMPLEINDEX or ORDERINDEX
+  when referring to samples, orders, etc.
+* When changing playback behaviour, make sure that you use the function
+* CSoundFile::IsCompatibleMode() so that modules made with previous versions of
+  MPT still sound correct (if the change is extremely small, this might be
+  unnecessary)
+* When checking the module type, use something like
+    if(GetType() & MOD_TYPE_XXX)
+  instead of
+    if(GetType() == MOD_TYPE_XXX)
+  as it could be theoretically possible that two mod types are set (currently
+  this doesn't happen, but in the future this might actually be used as a code
+  feature :)
+
+Code example:
+
+void foo::bar(int foobar)
+//-----------------------
+{
+    while(true)
+    {
+        // some code
+    }
+}
+
