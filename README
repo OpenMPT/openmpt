@@ -13,7 +13,8 @@ How to compile the code:
 
 Coding conventions (see below for an example):
 
-* Functions / methods are "underlined".
+* Functions / methods are "underlined" (The "//------" comment, see below for an
+  example what it should look like).
 * Place curly braces at the beginning of the line, not at the end
 * Generally make use of the custom index types like SAMPLEINDEX or ORDERINDEX
   when referring to samples, orders, etc.
@@ -21,6 +22,7 @@ Coding conventions (see below for an example):
 * CSoundFile::IsCompatibleMode() so that modules made with previous versions of
   MPT still sound correct (if the change is extremely small, this might be
   unnecessary)
+* CamelCase function and variable names are preferred.
 * When checking the module type, use something like
     if(GetType() & MOD_TYPE_XXX)
   instead of
@@ -31,7 +33,7 @@ Coding conventions (see below for an example):
 
 Code example:
 
-void foo::bar(int foobar)
+void Foo::Bar(int foobar)
 //-----------------------
 {
     while(true)
