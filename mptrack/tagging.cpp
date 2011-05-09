@@ -125,7 +125,7 @@ void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE 
 	WAVEDATAHEADER chunk;
 	CHAR s[256];
 	DWORD info_ofs, end_ofs;
-	DWORD zero = 0;
+	const DWORD zero = 0;
 
 	info_ofs = ftell(f);
 	if (info_ofs & 1)

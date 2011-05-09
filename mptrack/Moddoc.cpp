@@ -845,26 +845,29 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 }
 
 UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, int nCurrentChn, const uint32 nStartPos) //rewbs.vstiLive: added current chan param
-//-----------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	UINT nChn = m_SndFile.m_nChannels;
 	
 	if ((!pMainFrm) || (!note)) return FALSE;
 	if (nVol > 256) nVol = 256;
-	if (note <= NOTE_MAX)
+	if (NOTE_IS_VALID(note))
 	{
 
 		BEGIN_CRITICAL();
 		
 		//kill notes if required.
-		if ( (bpause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this) { 
+		if ( (bpause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this)
+		{ 
 			//OnPlayerPause();				  // pause song - pausing VSTis is too slow
 			pMainFrm->SetLastMixActiveTime(); // mark activity
 
 			// All notes off
-			for (UINT i=0; i<MAX_CHANNELS; i++)	{
-				if ((i < m_SndFile.m_nChannels) || (m_SndFile.Chn[i].nMasterChn)) {
+			for (UINT i=0; i<MAX_CHANNELS; i++)
+			{
+				if ((i < m_SndFile.m_nChannels) || (m_SndFile.Chn[i].nMasterChn))
+				{
 					m_SndFile.Chn[i].dwFlags |= CHN_KEYOFF | CHN_NOTEFADE;
 					m_SndFile.Chn[i].nFadeOutVol = 0;
 				}
@@ -890,12 +893,13 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
 		
 		//stop channel, just in case.
-		if (pChn->nLength)	{
+		if (pChn->nLength)
+		{
 			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
 		}
 
-		//reset channel properties; in theory the chan is completely unused anyway.
-		pChn->dwFlags &= 0xFF;
+		// reset channel properties; in theory the chan is completely unused anyway.
+		pChn->dwFlags &= CHN_SAMPLEFLAGS;
 		pChn->dwFlags &= ~(CHN_MUTE);
 		pChn->nGlobalVol = 64;
 		pChn->nInsVol = 64;
@@ -905,14 +909,16 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		pChn->nCutOff = 0x7F;
 		pChn->nResonance = 0;
 		pChn->nVolume = 256;
-		pChn->nMasterChn = 0;	//remove NNA association
+		pChn->nMasterChn = 0;	// remove NNA association
 		pChn->nNewNote = static_cast<BYTE>(note);
 
-		if (nins) {									//Set instrument
+		if (nins)									// Set instrument
+		{
 			m_SndFile.resetEnvelopes(pChn);
 			m_SndFile.InstrumentChange(pChn, nins);
 		} 
-		else if ((nsmp) && (nsmp < MAX_SAMPLES)) {	//Or set sample
+		else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
+		{
 			MODSAMPLE *pSmp = &m_SndFile.Samples[nsmp];
 			pChn->pCurrentSample = pSmp->pSample;
 			pChn->pModInstrument = nullptr;
@@ -946,9 +952,11 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 
 		// handle extra-loud flag
-		if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) {
+		if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp))
+		{
 			pChn->dwFlags |= CHN_EXTRALOUD;
-		} else {
+		} else
+		{
 			pChn->dwFlags &= ~CHN_EXTRALOUD;
 		}
 

@@ -10,13 +10,15 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
-v1.19.02.00 (***** 2011, revision 861)
---------------------------------------
-Pattern tab::Note properties
-   [New] <Jojo> Channels can now be moved by dragging their channel header. Holding Shift while doing so duplicates the channel
+v1.19.02.00 (May 2011, revision 869)
+------------------------------------
+Pattern tab
+   [New] <Jojo> Channels can now be moved by dragging their channel header. Holding Shift while doing so duplicates the channel.
    [Imp] <Jojo> Moving channels through the channel manager creates an undo point now. 
-   [Fix] <Jojo> Axx is not limited to value 7F anymore in IT / S3M format.
    [Fix] <Jojo> Order list info text now truncates list length after the first "---" pattern for MOD files in hex display mode as well.
+
+Pattern tab::Note properties
+   [Fix] <Jojo> Axx is not limited to value 7F anymore in IT / S3M format.
 
 VST
    [New] <Jojo> New menu entry in the plugin editor: Create instrument from plugin
@@ -24,29 +26,38 @@ VST
 
 Mod Conversion
    [Imp] <Jojo> Improved conversion of Sxx (IT / S3M) and PC Notes.
-   [Mod] <Jojo> When converting from MOD/S3M to XM/IT, compatible play is automatically enabled.
+   [Mod] <Jojo> When converting from MOD / S3M to XM / IT, compatible play is automatically enabled.
    [Fix] <Jojo> Sustain loop conversion didn't work
 
+Playback
+   [Fix] <Jojo> The first triggered note in the pattern / sample / instrument editor is not cut off anymore (tx C-jeff, http://bugs.openmpt.org/view.php?id=123)
+
 IT
+   [Imp] <Jojo> When clearing MIDI macros during loading, only the Zxx macros are cleared, but not the global (currently unused) configuration.
    [Fix] <Jojo> Panning slides with both parameter nibbles set were not ignored in compatible mode.
 
 XM
    [Fix] <Jojo> When using compatibility export, the number of samples per instrument is now limited to 16.
 
 MOD
-   [Fix] <Jojo> "+++" separator patterns were allowed in MOD files, which made them break in other trackers / players (tx 404notfound)
+   [Imp] <Jojo> Instead of cutting the order list after the first --- pattern, such order items are simply removed from the saved order list. (http://bugs.openmpt.org/view.php?id=118)
+   [Fix] <Jojo> "+++" separator patterns were allowed in MOD files, which made them break in other trackers / players. (http://bugs.openmpt.org/view.php?id=118)
 
+S3M
+   [Imp] <Jojo> When clearing MIDI macros during loading, only the Zxx macros are cleared, but not the global (currently unused) configuration.
 
 Other formats
    [Imp] <Jojo> DMF Loader was rewritten completely and is a whole lot more accurate now.
-   [Fix] <Jojo> J2B Loader: Empty sample slots are now treated correct in new J2B (AM) files.
+   [Fix] <Jojo> J2B Loader: Empty sample slots are now treated correct in new (RIFF AM) J2B files.
    [Fix] <Jojo> DBM Loader: Global volume was scaled wrong.
-   [Fix] <Jojo> 8SVX Loader: If no sample could be found in the file, the loader does not claim to have successfully loaded a sample anymore. 
+   [Fix] <Jojo> 8SVX Loader: If no sample could be found in the file, the loader does not claim to have successfully loaded a sample anymore. (http://bugs.openmpt.org/view.php?id=117)
 
 Misc
    [New] <Jojo> OpenMPT can now automatically check for updates (daily / weekly / monthly)
+   [Mod] <Jojo> "Embed MIDI macros" is now only enabled during song creation if the user's default MIDI macro setup differs from standard configuration.
    [Fix] <Jojo> When using "Convert instruments to samples" in the Song Cleanup dialog, "Remove samples associated with an instrument" actually destroyed all samples.
    [Reg] <Jojo> Removed hidden INI flag to suppress warnings when encountering keymaps with unknown items. This option was introduced when faulty keymaps threw multiple message boxes, but now it's just one and it shouldn't be ignored...
+
 
 v1.19.01.00 (April 2011, revision 836)
 --------------------------------------
@@ -1046,13 +1057,13 @@ Sample tab
    [Mod] <Jojo> Sustain loop will now be enabled when setting it to sample selection. (rev. 231)
    [Mod] <Jojo> Sample editing: If possible, use loop points as trim limits if there's no selection chosen. (rev. 230)
    [Mod] <re> Time stretching is now implemented with SoundTouch library. (rev. 228)
-   [Mod] <re> Disabled pitchshifting/time stretching of 8-bit samples(didn't seem to work). (rev. 228)
+   [Mod] <re> Disabled pitchshifting/time stretching of 8-bit samples (didn't seem to work). (rev. 228)
 
 Instrument tab
    [Fix] <Jojo> Envelope view: Middle line will now be drawn in panning and pitch/filter envelopes even if row guidelines are enabled. (rev. 254)
 
    [Mod] <Jojo> Instrument tab: Sample map can now map "No sample". (rev. 236)
-   [Mod] <re> Changed default instrument plug volume command handling from Dry/Wet to none. Also added ini-setting with which one can set the default value used for new instruments. Ini setting is "DefaultPlugVolumeHandling" in [Misc], possible values are 0,1,2. (rev. 238)
+   [Mod] <re> Changed default instrument plug volume command handling from Dry/Wet to none. Also added INI setting with which one can set the default value used for new instruments. INI setting is "DefaultPlugVolumeHandling" in [Misc], possible values are 0,1,2. (rev. 238)
 
 MPTM
    [Fix] <re> Pattern cleanup: In some cases sequence wasn't cleaned properly for mptm. (rev. 239)
@@ -1081,12 +1092,11 @@ MOD
    [Fix] <Jojo & re> Fixes to MOD saving: it should now be possible to create ProTracker compatible MOD files with compatibility export. (rev. 256)
 
 Package template
-   [Mod] <Jojo> PackageTemplate: Update to DE_jojo.mkb keymap
+   [Mod] <Jojo> Updated DE_jojo.mkb keymap
 
 Misc
    [Fix] <from libmodplug> Fix to faulty portamento handling on loading AMF.
    [Fix] <various> Lots of smaller bug fixes.
-
 
 
 v1.17.02.52 (14 Apr 2008, revision 210)

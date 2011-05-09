@@ -57,7 +57,7 @@ bool CSampleGenerator::ShowDialog()
 			sample_clipping = dlg.GetClipping();
 			expression = dlg.GetExpression();
 			isDone = CanRenderSample();
-			if(isDone) isDone = TestExpression();	// show dialog again if the formular can't be parsed.
+			if(isDone) isDone = TestExpression();	// show dialog again if the formula can't be parsed.
 			result = true;
 		} else
 		{

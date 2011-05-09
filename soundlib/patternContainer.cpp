@@ -87,7 +87,7 @@ bool CPatternContainer::IsPatternEmpty(const PATTERNINDEX nPat) const
 	if(!IsValidPat(nPat))
 		return false;
 	
-	MODCOMMAND *m = m_Patterns[nPat].m_ModCommands;
+	const MODCOMMAND *m = m_Patterns[nPat].m_ModCommands;
 	for(size_t i = m_Patterns[nPat].GetNumChannels() * m_Patterns[nPat].GetNumRows(); i > 0; i--, m++)
 	{
 		if(!m->IsEmpty(true))
