@@ -134,7 +134,7 @@ CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParen
 	strcpy(m_szFileName, pszPathName);
 	_splitpath(pszPathName, NULL, NULL, NULL, fext);
 	if (!_stricmp(fext, ".rmi")) m_bRmi = TRUE;
-	memset(m_InstrMap, 0, sizeof(m_InstrMap));
+	MemsetZero(m_InstrMap);
 	for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 	{
 		MODINSTRUMENT *pIns = m_pSndFile->Instruments[nIns];

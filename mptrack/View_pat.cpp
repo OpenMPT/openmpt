@@ -2567,20 +2567,20 @@ void CViewPattern::OnDropSelection()
 	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	pOldPattern = pSndFile->Patterns[m_nPattern];
 	if ((nChannels < 1) || (nRows < 1) || (!pOldPattern)) return;
-	dx = (int)((m_dwDragPos & 0xFFF8) >> 3) - (int)((m_dwStartSel & 0xFFF8) >> 3);
+	dx = (int)GetChanFromCursor(m_dwDragPos) - (int)GetChanFromCursor(m_dwStartSel);
 	dy = (int)GetRowFromCursor(m_dwDragPos) - (int)GetRowFromCursor(m_dwStartSel);
 	if ((!dx) && (!dy)) return;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, nChannels, nRows);
 	pNewPattern = CPattern::AllocatePattern(nRows, nChannels);
 	if (!pNewPattern) return;
-	x1 = (m_dwBeginSel & 0xFFF8) >> 3;
-	y1 = (m_dwBeginSel) >> 16;
-	x2 = (m_dwEndSel & 0xFFF8) >> 3;
-	y2 = (m_dwEndSel) >> 16;
-	c1 = (m_dwBeginSel&7);
-	c2 = (m_dwEndSel&7);
-	if (c1 > 3) c1 = 3;
-	if (c2 > 3) c2 = 3;
+	x1 = GetChanFromCursor(m_dwBeginSel);
+	y1 = GetRowFromCursor(m_dwBeginSel);
+	x2 = GetChanFromCursor(m_dwEndSel);
+	y2 = GetRowFromCursor(m_dwEndSel);
+	c1 = GetColTypeFromCursor(m_dwBeginSel);
+	c2 = GetColTypeFromCursor(m_dwEndSel);
+	if (c1 > EFFECT_COLUMN) c1 = EFFECT_COLUMN;
+	if (c2 > EFFECT_COLUMN) c2 = EFFECT_COLUMN;
 	xc1 = x1*4+c1;
 	xc2 = x2*4+c2;
 	xmc1 = xc1+dx*4;
@@ -2645,7 +2645,7 @@ void CViewPattern::OnDropSelection()
 	if (c2 >= 3) c2 = 4;
 	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
 	SetCursorPosition( y1, (x1<<3)|c1 );
-	SetCurSel((y1<<16)|(x1<<3)|c1, (y2<<16)|(x2<<3)|c2);
+	SetCurSel(CreateCursor(y1, x1, c1), CreateCursor(y2, x2, c2));
 	InvalidatePattern();
 	CPattern::FreePattern(pOldPattern);
 	pModDoc->SetModified();

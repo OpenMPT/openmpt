@@ -160,10 +160,10 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nVSTiVolume = m_nSamplePreAmp = 48; // not supported in this format, so use a good default value
 
 	// pattern offset and identifier
-	PATTERNINDEX numPatterns = 0; // used for setting up the orderlist - final pattern count
-	vector<uint32> patternOffsets; // pattern offsets (sorted as they occour in the file)
-	vector<uint32> patternIDs; // pattern IDs (sorted as they occour in the file)
-	vector<uint32> orderOffsets; // combine the upper two vectors to get the offsets for each order item
+	PATTERNINDEX numPatterns = 0;	// used for setting up the orderlist - final pattern count
+	vector<uint32> patternOffsets;	// pattern offsets (sorted as they occour in the file)
+	vector<uint32> patternIDs;		// pattern IDs (sorted as they occour in the file)
+	vector<uint32> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
 	patternOffsets.clear();
 	patternIDs.clear();
 	orderOffsets.clear();
@@ -253,7 +253,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							if(subChunkSize < 9) return false;
 							// First two bytes = Number of chunks that follow
 							//uint16 nTotalChunks = LittleEndian(*(uint16 *)(lpStream + dwChunkPos));
-							
+
 							// Now, the interesting part begins!
 							DWORD dwSettingsOffset = dwChunkPos + 2;
 							uint16 nChunkCount = 0, nFirstOrderChunk = uint16_max;

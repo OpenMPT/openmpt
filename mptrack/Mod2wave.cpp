@@ -700,6 +700,7 @@ void CDoWaveConvert::OnButton1()
 
 	// No pattern cue points yet
 	m_pSndFile->m_PatternCuePoints.clear();
+	m_pSndFile->m_PatternCuePoints.reserve(m_pSndFile->Order.GetLength());
 
 	// Process the conversion
 	UINT nBytesPerSample = (CSoundFile::gnBitsPerSample * CSoundFile::gnChannels) / 8;

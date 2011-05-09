@@ -489,7 +489,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 					}
 				}
 			}
-			// Arbitrary thershold for going into PT1x mode: 16 "sample swaps" in one pattern.
+			// Arbitrary threshold for going into PT1x mode: 16 "sample swaps" in one pattern.
 			if(instrWithoutNoteCount > 16)
 			{
 				m_dwSongFlags |= SONG_PT1XMODE;

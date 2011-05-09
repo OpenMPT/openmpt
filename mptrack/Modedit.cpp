@@ -356,7 +356,7 @@ UINT CModDoc::RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS])
 
 		if (pPlug->pPluginData)
 		{
-			delete pPlug->pPluginData;
+			delete[] pPlug->pPluginData;
 			pPlug->pPluginData = NULL;
 		}
 		if (pPlug->pMixPlugin)
@@ -369,7 +369,7 @@ UINT CModDoc::RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS])
 			delete pPlug->pMixState;
 		}
 
-		memset(&(pPlug->Info), 0, sizeof(SNDMIXPLUGININFO));
+		MemsetZero(pPlug->Info);
 		Log("Zeroing range (%d) %X - %X\n", nPlug, &(pPlug->Info),  &(pPlug->Info)+sizeof(SNDMIXPLUGININFO));
 		pPlug->nPluginDataSize=0;
 		pPlug->fDryRatio=0;	
