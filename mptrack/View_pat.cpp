@@ -5159,7 +5159,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pMo
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, "Mix Paste (IT Style)\t" + ih->GetKeyTextFromCommand(kcEditMixPasteITStyle));
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
-	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste (Insert)\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
 
 	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo()?FALSE:MF_GRAYED;
 	if (!greyed || !(CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
