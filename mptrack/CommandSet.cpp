@@ -564,7 +564,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcOrderlistPatPlus, 1817, kcVisible, kcNoDummy, _T("Increase pattern index "));
 	DefineKeyCommand(kcOrderlistPatMinus, 1818, kcVisible, kcNoDummy, _T("Decrease pattern index"));
 	DefineKeyCommand(kcShowSplitKeyboardSettings, 1819, kcVisible, kcNoDummy, _T("Split Keyboard Settings dialog"));
-	DefineKeyCommand(kcEditPushForwardPaste, 1820, kcVisible, kcNoDummy, _T("Push Forward Paste"));
+	DefineKeyCommand(kcEditPushForwardPaste, 1820, kcVisible, kcNoDummy, _T("Push Forward Paste (Insert)"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveLeft, 1821, kcVisible, kcNoDummy, _T("Move envelope point left"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveRight, 1822, kcVisible, kcNoDummy, _T("Move envelope point right"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveUp, 1823, kcVisible, kcNoDummy, _T("Move envelope point up"));
@@ -597,7 +597,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInsNoteMapEditSampleMap, 1850, kcVisible, kcNoDummy, _T("Edit sample map"));
 	DefineKeyCommand(kcInstrumentCtrlDuplicate, 1851, kcVisible, kcNoDummy, _T("Duplicate instrument"));
 	DefineKeyCommand(kcPanic, 1852, kcVisible, kcNoDummy, _T("Panic"));
-	DefineKeyCommand(kcOrderlistPatIgnore, 1853, kcVisible, kcNoDummy, _T("Ignore (+++) Index"));
+	DefineKeyCommand(kcOrderlistPatIgnore, 1853, kcVisible, kcNoDummy, _T("Separator (+++) Index"));
 	DefineKeyCommand(kcOrderlistPatInvalid, 1854, kcVisible, kcNoDummy, _T("Invalid (---) Index"));
 	DefineKeyCommand(kcViewEditHistory, 1855, kcVisible, kcNoDummy, _T("View Edit History"));
 	DefineKeyCommand(kcSampleQuickFade, 1856, kcVisible, kcNoDummy, _T("Quick fade"));

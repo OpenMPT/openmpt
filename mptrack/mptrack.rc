@@ -2014,7 +2014,7 @@ BEGIN
             MENUITEM "&Mix Paste\tCtrl+M",          ID_EDIT_PASTE_SPECIAL
             MENUITEM "Mix Paste (IT Style)",        ID_EDIT_MIXPASTE_ITSTYLE
             MENUITEM "Paste &Flood",                ID_EDIT_PASTEFLOOD
-            MENUITEM "&Push Forward Paste",         ID_EDIT_PUSHFORWARDPASTE
+            MENUITEM "&Push Forward Paste (Insert)", ID_EDIT_PUSHFORWARDPASTE
         END
         MENUITEM "Select &All\tCtrl+5",         ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR

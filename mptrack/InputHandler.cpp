@@ -448,7 +448,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c=kcEditMixPaste; break;
 		case ID_EDIT_MIXPASTE_ITSTYLE:	s="&Mix Paste (IT Style)\t"; c=kcEditMixPasteITStyle; break;
 		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c=kcEditPasteFlood; break;
-		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste\t"; c=kcEditPushForwardPaste; break;
+		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste (Insert)\t"; c=kcEditPushForwardPaste; break;
 
 		case ID_VIEW_GLOBALS:		s="&General\t"; c=kcViewGeneral; break;
 		case ID_VIEW_SAMPLES:		s="&Samples\t"; c=kcViewSamples; break;

@@ -124,8 +124,8 @@ void ArrayCopy(T* pDst, const T* pSrc, const size_t n)
 
 // Sanitize a filename (remove special chars)
 template <size_t size>
-inline void SanitizeFilename(char (&buffer)[size])
-//------------------------------------------------
+void SanitizeFilename(char (&buffer)[size])
+//-----------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	for(size_t i = 0; i < size; i++)
