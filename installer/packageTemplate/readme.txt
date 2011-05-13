@@ -34,14 +34,14 @@ tracker at http://bugs.openmpt.org/
 
 Release package contents:
 -------------------------
-extraKeymaps(folder): Additional key bindings for the keyboard manager,
-    available in several flavours (including MPT classic, FastTracker and
+extraKeymaps (folder): Additional key bindings for the keyboard manager,
+    available in several flavours (including MPT classic, Fasttracker 2 and
     Impulse Tracker) and country-specific layouts.
-soundtouch(folder): SoundTouch readme and copying.txt
-ReleaseNotesImages(folder): Images using in the release notes document.
-ExampleSongs(folder): A set of module files which should give an impression of
+SoundTouch (folder): SoundTouch readme and license
+ReleaseNotesImages (folder): Files used in the release notes document.
+ExampleSongs (folder): A set of module files which should give an impression of
     what can be done in OpenMPT with only a few kilobytes.
-history.txt: Version history.
+History.txt: Version history.
 mptrack.exe: Main executable.
 OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
     stretching feature.

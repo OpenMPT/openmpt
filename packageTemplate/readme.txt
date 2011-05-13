@@ -18,20 +18,20 @@ Uninstallation
 --------------
 
 -Delete the files extracted from the archive and optionally the OpenMPT
- setting files, which are by default stored in %appdata%\OpenMPT.
+ setting files, which are by default stored in %APPDATA%\OpenMPT.
 
 
 Making OpenMPT portable
 -----------------------
 
-By default, OpenMPT stores its settings in %appdata%\OpenMPT. To avoid this,
+By default, OpenMPT stores its settings in %APPDATA%\OpenMPT. To avoid this,
 create a file called "mptrack.ini" in the same directory as mptrack.exe (if
 it does not exist yet) and add the following lines to this file:
 [Paths]
 UseAppDataDirectory=0
 
 Alternatively, you can copy your existing configuration file over from
-%appdata%\OpenMPT and add UseAppDataDirectory=0 in the [Paths] section of this
+%APPDATA%\OpenMPT and add UseAppDataDirectory=0 in the [Paths] section of this
 file.
 
 
@@ -51,16 +51,18 @@ tracker at http://bugs.openmpt.org/
 
 Release package contents:
 -------------------------
-extraKeymaps(folder):
-soundtouch(folder): SoundTouch readme and copying.txt
-ReleaseNotesImages(folder): Images using in the release notes document.
-ExampleSongs(folder): A set of module files which should give an impression of
+extraKeymaps (folder): Additional key bindings for the keyboard manager,
+    available in several flavours (including MPT classic, Fasttracker 2 and
+    Impulse Tracker) and country-specific layouts.
+SoundTouch (folder): SoundTouch readme and license
+ReleaseNotesImages (folder): Files used in the release notes document.
+ExampleSongs (folder): A set of module files which should give an impression of
     what can be done in OpenMPT with only a few kilobytes.
-history.txt: Version history.
+History.txt: Version history.
 mptrack.exe: Main executable.
-open_settings_folder.bat: Opens settings folder.
+open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
 OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
-                            stretching feature.
+    stretching feature.
 readme.txt: this document
 unmo3.dll: Used in MO3-file import.
 OMPT_1.19_ReleaseNotes.html: Release notes for this version.

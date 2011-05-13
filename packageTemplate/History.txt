@@ -3,14 +3,14 @@ OpenMPT - Full Version History
 
 [Fix]: bug fix
 [New]: new feature
-[Imp]: Improvement
+[Imp]: improvement
 [Reg]: known issue / regression
 [Mod]: change
 [Var]: other
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
-v1.19.02.00 (May 2011, revision 869)
+v1.19.02.00 (May 2011, revision 871)
 ------------------------------------
 Pattern tab
    [New] <Jojo> Channels can now be moved by dragging their channel header. Holding Shift while doing so duplicates the channel.

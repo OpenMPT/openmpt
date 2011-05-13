@@ -139,7 +139,9 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 		// Query number of available bytes to download
 		if(InternetQueryDataAvailable(caller->connectionHandle, &availableSize, 0, NULL) == FALSE)
 		{
+			delete[] downloadBuffer;
 			caller->Die("Error while downloading update information data:\n", GetLastError());
+			return 0;
 		}
 
 		LimitMax(availableSize, (DWORD)DOWNLOAD_BUFFER_SIZE);
@@ -147,7 +149,9 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 		// Put downloaded bytes into our buffer
 		if(InternetReadFile(caller->connectionHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
 		{
+			delete[] downloadBuffer;
 			caller->Die("Error while downloading update information data:\n", GetLastError());
+			return 0;
 		}
 
 		resultData.Append(downloadBuffer, availableSize);
