@@ -805,7 +805,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				if (pSndFile->Order.GetSequence(nSeq)[iOrd] < pSndFile->Patterns.Size())
 				{
 					stmp[0] = 0;
-					pSndFile->GetPatternName(pSndFile->Order.GetSequence(nSeq)[iOrd], stmp, sizeof(stmp));
+					pSndFile->Patterns[pSndFile->Order.GetSequence(nSeq)[iOrd]].GetName(stmp, CountOf(stmp));
 					if (stmp[0])
 					{
 						wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
@@ -866,7 +866,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			if (pSndFile->Patterns[iPat])
 			{
 				stmp[0] = 0;
-				pSndFile->GetPatternName(iPat, stmp, sizeof(stmp));
+				pSndFile->Patterns[iPat].GetName(stmp, CountOf(stmp));
 				if (stmp[0])
 				{
 					wsprintf(s, "%d: %s", iPat, stmp);

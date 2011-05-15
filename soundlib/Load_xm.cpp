@@ -625,15 +625,15 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	// Read pattern names: "PNAM"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e50))
 	{
-		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
+		UINT len = *((DWORD *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
-		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_PATTERNS*MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
+		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_PATTERNS * MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
 		{
-			m_lpszPatternNames = new char[len];
-			if (m_lpszPatternNames)
+			DWORD pos = 0;
+			PATTERNINDEX nPat = 0;
+			for(pos = 0; pos < len; pos += MAX_PATTERNNAME, nPat++)
 			{
-				m_nPatternNames = len / MAX_PATTERNNAME;
-				memcpy(m_lpszPatternNames, lpStream+dwMemPos, len);
+				Patterns[nPat].SetName((char *)(lpStream + dwMemPos + pos), min(MAX_PATTERNNAME, len - pos));
 			}
 			dwMemPos += len;
 		}
@@ -1100,16 +1100,20 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
 		}
 		// Writing Pattern Names
-		if ((m_nPatternNames) && (m_lpszPatternNames))
+		const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
+		if (numNamedPats > 0)
 		{
-			DWORD dwLen = m_nPatternNames * MAX_PATTERNNAME;
-			while ((dwLen >= MAX_PATTERNNAME) && (!m_lpszPatternNames[dwLen-MAX_PATTERNNAME])) dwLen -= MAX_PATTERNNAME;
-			if (dwLen >= MAX_PATTERNNAME)
+			DWORD dwLen = numNamedPats * MAX_PATTERNNAME;
+			DWORD d = 0x4d414e50;
+			fwrite(&d, 1, 4, f);
+			fwrite(&dwLen, 1, 4, f);
+
+			for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
 			{
-				DWORD d = 0x4d414e50;
-				fwrite(&d, 1, 4, f);
-				fwrite(&dwLen, 1, 4, f);
-				fwrite(m_lpszPatternNames, 1, dwLen, f);
+				char name[MAX_PATTERNNAME];
+				MemsetZero(name);
+				Patterns[nPat].GetName(name, MAX_PATTERNNAME);
+				fwrite(name, 1, MAX_PATTERNNAME, f);
 			}
 		}
 		// Writing Channel Names

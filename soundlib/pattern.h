@@ -30,6 +30,7 @@ public:
 		m_Rows = pat.m_Rows;
 		m_RowsPerBeat = pat.m_RowsPerBeat;
 		m_RowsPerMeasure = pat.m_RowsPerMeasure;
+		m_PatternName = pat.m_PatternName;
 		return *this;
 	}
 //END: OPERATORS
@@ -70,6 +71,12 @@ public:
 	// Set pattern signature (rows per beat, rows per measure). Returns true on success.
 	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure);
 	void RemoveSignature() { m_RowsPerBeat = m_RowsPerMeasure = 0; }
+
+	// Patter name functions (for both CString and char[] arrays) - bool functions return true on success.
+	bool SetName(char *newName, size_t maxChars = MAX_PATTERNNAME);
+	bool SetName(CString newName) { m_PatternName = newName; return true; };
+	bool GetName(char *buffer, size_t maxChars = MAX_PATTERNNAME) const;
+	CString GetName() const { return m_PatternName; };
 
 	// Double number of rows
 	bool Expand();
@@ -117,6 +124,7 @@ protected:
 	ROWINDEX m_Rows;
 	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
 	ROWINDEX m_RowsPerMeasure;	// dito
+	CString m_PatternName;
 	CPatternContainer& m_rPatternContainer;
 //END: DATA
 };

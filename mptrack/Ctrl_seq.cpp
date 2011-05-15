@@ -493,6 +493,7 @@ void COrderList::EnterPatternNum(int enterNum)
 		if (nCurNdx >= pSndFile->Patterns.Size()) nCurNdx = 0;
 
 		nCurNdx = nCurNdx * 10 + static_cast<PATTERNINDEX>(enterNum);
+		STATIC_ASSERT(MAX_PATTERNS < 10000);
 		if ((nCurNdx >= 1000) && (nCurNdx > nMaxNdx)) nCurNdx %= 1000;
 		if ((nCurNdx >= 100) && (nCurNdx > nMaxNdx)) nCurNdx %= 100;
 		if ((nCurNdx >= 10) && (nCurNdx > nMaxNdx)) nCurNdx %= 10;
@@ -732,10 +733,10 @@ void COrderList::UpdateInfoText()
 		if (m_nScrollPos < pSndFile->Order.GetLength())
 		{
 			PATTERNINDEX nPat = pSndFile->Order[m_nScrollPos];
-			if ((nPat < pSndFile->Patterns.Size()) && (nPat < pSndFile->m_nPatternNames))
+			if (nPat < pSndFile->Patterns.Size())
 			{
-				CHAR szpat[40] = "";
-				if (pSndFile->GetPatternName(nPat, szpat))
+				CHAR szpat[MAX_PATTERNNAME] = "";
+				if (pSndFile->Patterns[nPat].GetName(szpat, MAX_PATTERNNAME) && strlen(szpat))
 				{
 					wsprintf(s+strlen(s), ": %s", szpat);
 				}

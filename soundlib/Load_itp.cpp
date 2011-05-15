@@ -230,24 +230,18 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// m_nPatternNames
 	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nPatternNames = id;
+	const PATTERNINDEX numNamedPats = id;
 	dwMemPos += sizeof(DWORD);
 
 	// pattern name string length (=MAX_PATTERNNAME)
 	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	len = id;
+	const DWORD patNameLen = id;
 	dwMemPos += sizeof(DWORD);
 
 	// m_lpszPatternNames
-	if (len<=MAX_PATTERNNAME && m_nPatternNames<=MAX_PATTERNS) 
-	{
-		m_lpszPatternNames = new char[m_nPatternNames * len];
-		ASSERT_CAN_READ(m_nPatternNames * len);
-		memcpy(&m_lpszPatternNames[0],lpStream+dwMemPos,m_nPatternNames * len);
-	}
-	else return false;
-
-	dwMemPos += m_nPatternNames * len;
+	ASSERT_CAN_READ(numNamedPats * patNameLen);
+	char *patNames = (char *)(lpStream + dwMemPos);
+	dwMemPos += numNamedPats * patNameLen;
 
 	// modcommand data length
 	ASSERT_CAN_READ(4);
@@ -274,6 +268,11 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 			{
 				dwMemPos += m_nChannels * Patterns[npat].GetNumRows() * n;
 				continue;
+			}
+			if(npat < numNamedPats && patNameLen > 0)
+			{
+				Patterns[npat].SetName(patNames, patNameLen);
+				patNames += patNameLen;
 			}
 
 			// Pattern data
@@ -583,7 +582,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// order array
-	Order.WriteAsByte(f, MAX_ORDERS);
+	Order.WriteAsByte(f, id);
 
 	// Song Patterns
 
@@ -592,13 +591,22 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// number of pattern name strings
-	id = m_nPatternNames;
+	PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
+	numNamedPats = min(numNamedPats, MAX_PATTERNS);
+	id = numNamedPats;
 	fwrite(&id, 1, sizeof(id), f);
 
 	// length of a pattern name string
 	id = MAX_PATTERNNAME;
 	fwrite(&id, 1, sizeof(id), f);
-	fwrite(&m_lpszPatternNames[0], 1, m_nPatternNames * MAX_PATTERNNAME, f);
+	// pattern name string
+	for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
+	{
+		char name[MAX_PATTERNNAME];
+		MemsetZero(name);
+		Patterns[nPat].GetName(name, MAX_PATTERNNAME);
+		fwrite(name, 1, MAX_PATTERNNAME, f);
+	}
 
 	// modcommand data length
 	id = sizeof(MODCOMMAND_ORIGINAL);

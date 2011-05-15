@@ -340,6 +340,20 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 ///////////////////////////////////////////////////////////////////////
 // Actual cleanup implementations
 
+struct OrigPatSettings
+{
+	bool isPatUsed;				// Is pattern used in sequence?
+	PATTERNINDEX newIndex;		// map old pattern index <-> new pattern index
+	// This stuff is needed for copying the old pattern properties to the new pattern number
+	MODCOMMAND *data;			// original pattern data
+	ROWINDEX numRows;			// original pattern sizes
+	ROWINDEX rowsPerBeat;		// original pattern highlight
+	ROWINDEX rowsPerMeasure;	// original pattern highlight
+	CString name;				// original pattern name
+};
+
+const OrigPatSettings defaultSettings = {false, 0, nullptr, 0, 0, 0, ""};
+
 // Remove unused patterns / rearrange patterns
 // If argument bRemove is true, unused patterns are removed. Else, patterns are only rearranged.
 bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
@@ -350,13 +364,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 
 	const SEQUENCEINDEX maxSeqIndex = pSndFile->Order.GetNumSequences();
 	const PATTERNINDEX maxPatIndex = pSndFile->Patterns.Size();
-	vector<bool> bPatUsed(maxPatIndex, false);				// used patterns
-	vector<PATTERNINDEX> nPatMap(maxPatIndex, 0);			// map old pattern index <-> new pattern index
-	// Those vectors are needed for copying the old pattern properties to the new pattern number
-	vector<MODCOMMAND*> pPatterns(maxPatIndex, nullptr);	// original pattern data
-	vector<ROWINDEX> nPatRows(maxPatIndex, 0);				// original pattern sizes
-	vector<ROWINDEX> nPatRowsPerBeat(maxPatIndex, 0);		// original pattern highlight
-	vector<ROWINDEX> nPatRowsPerMeasure(maxPatIndex, 0);	// original pattern highlight
+	vector<OrigPatSettings> patternSettings(maxPatIndex, defaultSettings);
 
 	CHAR s[512];
 	bool bReordered = false;
@@ -374,7 +382,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			if (n < maxPatIndex)
 			{
 				if (n >= maxpat) maxpat = n + 1;
-				bPatUsed[n] = true;
+				patternSettings[n].isPatUsed = true;
 			}
 		}
 	}
@@ -386,7 +394,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 		while (imax > 0)
 		{
 			imax--;
-			if ((pSndFile->Patterns[imax]) && (bPatUsed[imax])) break;
+			if ((pSndFile->Patterns[imax]) && (patternSettings[imax].isPatUsed)) break;
 		}
 		nMinToRemove = imax + 1;
 	}
@@ -407,7 +415,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	size_t nWaste = 0;
 	for (UINT ichk=0; ichk < maxPatIndex; ichk++)
 	{
-		if ((pSndFile->Patterns[ichk]) && (!bPatUsed[ichk])) nWaste++;
+		if ((pSndFile->Patterns[ichk]) && (!patternSettings[ichk].isPatUsed)) nWaste++;
 	}
 
 	if ((bRemove) && (nWaste))
@@ -419,7 +427,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	}
 
 	for(PATTERNINDEX i = 0; i < maxPatIndex; i++)
-		nPatMap[i] = PATTERNINDEX_INVALID;
+		patternSettings[i].newIndex = PATTERNINDEX_INVALID;
 
 	SEQUENCEINDEX oldSequence = pSndFile->Order.GetCurrentSequenceIndex();	// workaround, as GetSequence doesn't allow writing to sequences ATM
 
@@ -434,8 +442,8 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			PATTERNINDEX n = pSndFile->Order.GetSequence(nSeq)[imap];
 			if (n < maxPatIndex)
 			{
-				if (nPatMap[n] == PATTERNINDEX_INVALID) nPatMap[n] = nPats++;
-				pSndFile->Order[imap] = nPatMap[n];
+				if (patternSettings[n].newIndex == PATTERNINDEX_INVALID) patternSettings[n].newIndex = nPats++;
+				pSndFile->Order[imap] = patternSettings[n].newIndex;
 			}
 		}
 		// Add unused patterns at the end
@@ -443,9 +451,9 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 		{
 			for(PATTERNINDEX iadd = 0; iadd < maxPatIndex; iadd++)
 			{
-				if((pSndFile->Patterns[iadd]) && (nPatMap[iadd] >= maxPatIndex))
+				if((pSndFile->Patterns[iadd]) && (patternSettings[iadd].newIndex >= maxPatIndex))
 				{
-					nPatMap[iadd] = nPats++;
+					patternSettings[iadd].newIndex = nPats++;
 				}
 			}
 		}
@@ -460,35 +468,20 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	// Reorder patterns & Delete unused patterns
 	BEGIN_CRITICAL();
 	{
-		const UINT npatnames = pSndFile->m_nPatternNames;
-		const LPSTR lpszpatnames = pSndFile->m_lpszPatternNames;
-		pSndFile->m_nPatternNames = 0;
-		pSndFile->m_lpszPatternNames = nullptr;
 		for (PATTERNINDEX i = 0; i < maxPatIndex; i++)
 		{
-			PATTERNINDEX k = nPatMap[i];
+			PATTERNINDEX k = patternSettings[i].newIndex;
 			if (k < maxPatIndex)
 			{
 				if (i != k) bReordered = true;
-				// Remap pattern names
-				if (i < npatnames)
-				{
-					UINT noldpatnames = pSndFile->m_nPatternNames;
-					LPSTR lpszoldpatnames = pSndFile->m_lpszPatternNames;
-					pSndFile->m_nPatternNames = npatnames;
-					pSndFile->m_lpszPatternNames = lpszpatnames;
-					pSndFile->GetPatternName(i, s);
-					pSndFile->m_nPatternNames = noldpatnames;
-					pSndFile->m_lpszPatternNames = lpszoldpatnames;
-					if (s[0]) pSndFile->SetPatternName(k, s);
-				}
-				nPatRows[k] = pSndFile->Patterns[i].GetNumRows();
-				pPatterns[k] = pSndFile->Patterns[i];
+				patternSettings[k].numRows = pSndFile->Patterns[i].GetNumRows();
+				patternSettings[k].data = pSndFile->Patterns[i];
 				if(pSndFile->Patterns[i].GetOverrideSignature())
 				{
-					nPatRowsPerBeat[k] = pSndFile->Patterns[i].GetRowsPerBeat();
-					nPatRowsPerMeasure[k] = pSndFile->Patterns[i].GetRowsPerMeasure();
+					patternSettings[k].rowsPerBeat = pSndFile->Patterns[i].GetRowsPerBeat();
+					patternSettings[k].rowsPerMeasure = pSndFile->Patterns[i].GetRowsPerMeasure();
 				}
+				patternSettings[k].name = pSndFile->Patterns[i].GetName();
 			} else
 				if (pSndFile->Patterns[i])
 				{
@@ -498,11 +491,10 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 		}
 		for (PATTERNINDEX nPat = 0; nPat < maxPatIndex; nPat++)
 		{
-			pSndFile->Patterns[nPat].SetData(pPatterns[nPat], nPatRows[nPat]);
-			pSndFile->Patterns[nPat].SetSignature(nPatRowsPerBeat[nPat], nPatRowsPerMeasure[nPat]);
+			pSndFile->Patterns[nPat].SetData(patternSettings[nPat].data, patternSettings[nPat].numRows);
+			pSndFile->Patterns[nPat].SetSignature(patternSettings[nPat].rowsPerBeat, patternSettings[nPat].rowsPerMeasure);
+			pSndFile->Patterns[nPat].SetName(patternSettings[nPat].name);
 		}
-
-		delete[] lpszpatnames;
 	}
 	END_CRITICAL();
 	EndWaitCursor();

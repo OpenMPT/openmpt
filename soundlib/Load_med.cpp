@@ -867,7 +867,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 					UINT namelen = BigEndian(pbi->blocknamelen);
 					if ((nameofs < dwMemLength) && (namelen < dwMemLength - nameofs))
 					{
-						SetPatternName(iBlk, (LPCSTR)(lpStream+nameofs));
+						Patterns[iBlk].SetName((char *)(lpStream + nameofs), namelen);
 					}
 				}
 				if (pbi->cmdexttable)
