@@ -465,6 +465,18 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 }
 
 
+void CopyPatternName(CPattern &pattern, char **patNames, UINT &patNamesLen)
+//-------------------------------------------------------------------------
+{
+	if(*patNames != nullptr && patNamesLen > 0)
+	{
+		pattern.SetName(*patNames, min(MAX_PATTERNNAME, patNamesLen));
+		*patNames += MAX_PATTERNNAME;
+		patNamesLen -= min(MAX_PATTERNNAME, patNamesLen);
+	}
+}
+
+
 bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 //----------------------------------------------------------------------
 {
@@ -809,19 +821,16 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Read pattern names: "PNAM"
+	char *patNames = nullptr;
+	UINT patNamesLen = 0;
 	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4d414e50))
 	{
-		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
+		patNamesLen = *((DWORD *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
-		if ((dwMemPos + len <= dwMemLength) && (len <= patpos.size()*MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
+		if ((dwMemPos + patNamesLen <= dwMemLength) && (patNamesLen > 0))
 		{
-			m_lpszPatternNames = new char[len];
-			if (m_lpszPatternNames)
-			{
-				m_nPatternNames = len / MAX_PATTERNNAME;
-				memcpy(m_lpszPatternNames, lpStream+dwMemPos, len);
-			}
-			dwMemPos += len;
+			patNames = (char *)(lpStream + dwMemPos);
+			dwMemPos += patNamesLen;
 		}
 	}
 
@@ -923,6 +932,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if (i >= len) break;
 		}
 	}
+
+
 	// Reading Instruments
 	m_nInstruments = 0;
 	if (pifh->flags & 0x04) m_nInstruments = pifh->insnum;
@@ -1061,6 +1072,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 				break;
 			}
+			// Now (after the Insert() call), we can read the pattern name.
+			CopyPatternName(Patterns[npat], &patNames, patNamesLen);
 			continue;
 		}
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
@@ -1069,6 +1082,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (patpos[npat]+8+len > dwMemLength) continue;
 
 		if(Patterns.Insert(npat, rows)) continue;
+
+		// Now (after the Insert() call), we can read the pattern name.
+		CopyPatternName(Patterns[npat], &patNames, patNamesLen);
 
 		memset(lastvalue, 0, sizeof(lastvalue));
 		memset(chnmask, 0, sizeof(chnmask));
@@ -1469,12 +1485,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		dwExtra += sizeof(MODMIDICFG);
 	}
 	// Pattern Names
-	if ((m_nPatternNames) && (m_lpszPatternNames))
+	const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
+	if (numNamedPats > 0)
 	{
-		dwPatNamLen = m_nPatternNames * MAX_PATTERNNAME;
-		while ((dwPatNamLen >= MAX_PATTERNNAME) && (!m_lpszPatternNames[dwPatNamLen-MAX_PATTERNNAME])) dwPatNamLen -= MAX_PATTERNNAME;
-		if (dwPatNamLen < MAX_PATTERNNAME) dwPatNamLen = 0;
-		if (dwPatNamLen) dwExtra += dwPatNamLen + 8;
+		dwExtra += (numNamedPats * MAX_PATTERNNAME) + 8;
 	}
 	// Mix Plugins
 	dwExtra += SaveMixPlugins(NULL, TRUE);
@@ -1500,14 +1514,22 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
 	}
 	// Writing pattern names
-	if (dwPatNamLen)
+	if (numNamedPats)
 	{
 		DWORD d = 0x4d414e50;
 		fwrite(&d, 1, 4, f);
-		fwrite(&dwPatNamLen, 1, 4, f);
-		fwrite(m_lpszPatternNames, 1, dwPatNamLen, f);
+		d = numNamedPats * MAX_PATTERNNAME;
+		fwrite(&d, 1, 4, f);
+
+		for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
+		{
+			char name[MAX_PATTERNNAME];
+			MemsetZero(name);
+			Patterns[nPat].GetName(name, MAX_PATTERNNAME);
+			fwrite(name, 1, MAX_PATTERNNAME, f);
+		}
 	}
-	// Writing channel Names
+	// Writing channel names
 	if (dwChnNamLen)
 	{
 		DWORD d = 0x4d414e43;

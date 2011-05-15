@@ -126,6 +126,7 @@ void CPattern::Deallocate()
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	FreePattern(m_ModCommands);
 	m_ModCommands = nullptr;
+	m_PatternName.Empty();
 	//END_CRITICAL();
 }
 
@@ -211,6 +212,38 @@ bool CPattern::Shrink()
 }
 
 
+bool CPattern::SetName(char *newName, size_t maxChars)
+//----------------------------------------------------
+{
+	if(newName == nullptr || maxChars == 0)
+	{
+		return false;
+	}
+	m_PatternName.SetString(newName, maxChars - 1);
+	return true;
+}
+
+
+bool CPattern::GetName(char *buffer, size_t maxChars) const
+//---------------------------------------------------------
+{
+	if(buffer == nullptr || maxChars == 0)
+	{
+		return false;
+	}
+	strncpy(buffer, m_PatternName, maxChars - 1);
+	buffer[maxChars - 1] = '\0';
+	return true;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+//
+//	Static allocation / deallocation methods
+//
+////////////////////////////////////////////////////////////////////////
+
+
 MODCOMMAND *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 //----------------------------------------------------------------------
 {
@@ -225,6 +258,13 @@ void CPattern::FreePattern(MODCOMMAND *pat)
 {
 	if (pat) delete[] pat;
 }
+
+
+////////////////////////////////////////////////////////////////////////
+//
+//	ITP functions
+//
+////////////////////////////////////////////////////////////////////////
 
 
 bool CPattern::WriteITPdata(FILE* f) const

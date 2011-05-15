@@ -149,7 +149,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_EditSequence.SetParent(this);
 	m_EditSpacing.SetParent(this);
 	m_EditPatName.SetParent(this);
-	m_EditPatName.SetLimitText(MAX_PATTERNNAME);
+	m_EditPatName.SetLimitText(MAX_PATTERNNAME - 1);
 	m_EditOrderListMargins.SetParent(this);
 	m_EditOrderListMargins.SetLimitText(3);
 	// Spin controls
@@ -328,7 +328,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
-			m_pSndFile->GetPatternName(nPat, s, sizeof(s));
+			m_pSndFile->Patterns[nPat].GetName(s, CountOf(s));
 			m_EditPatName.SetWindowText(s);
 			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 			m_ToolBar.EnableButton(ID_PATTERN_MIDIMACRO, bXMIT);
@@ -1071,13 +1071,15 @@ void CCtrlPatterns::OnPatternNameChanged()
 		PATTERNINDEX nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 
 		m_EditPatName.GetWindowText(s, MAX_PATTERNNAME);
-		s[MAX_PATTERNNAME-1] = 0;
-		m_pSndFile->GetPatternName(nPat, sold, sizeof(sold));
+		s[MAX_PATTERNNAME - 1] = 0;
+		m_pSndFile->Patterns[nPat].GetName(sold, CountOf(sold));
 		if (strcmp(s, sold))
 		{
-			 m_pSndFile->SetPatternName(nPat, s);
-			 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
-			 m_pModDoc->UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
+			 if(m_pSndFile->Patterns[nPat].SetName(s))
+			 {
+				 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
+				 m_pModDoc->UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
+			 }
 		}
 	}
 }

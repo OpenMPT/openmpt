@@ -653,8 +653,8 @@ public:	// for Editing
 	LONG m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
-	UINT m_nMaxOrderPosition, m_nPatternNames;
-	LPSTR m_lpszSongComments, m_lpszPatternNames;
+	UINT m_nMaxOrderPosition;
+	LPSTR m_lpszSongComments;
 	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
 	MODCHANNEL Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
@@ -740,8 +740,6 @@ public:
 	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) ? true : false; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
-	BOOL SetPatternName(PATTERNINDEX nPat, LPCSTR lpszName);
-	BOOL GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
 
 	void SetupITBidiMode();
 
@@ -928,7 +926,7 @@ private:
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	void UpdateTimeSignature();
 
-	UINT GetNumTicksOnCurrentRow() { return m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay; };
+	UINT GetNumTicksOnCurrentRow() const { return m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay; };
 public:
 	// Write pattern effect functions
 	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, writeEffectAllowRowChange allowRowChange = weIgnore, bool bRetry = true);

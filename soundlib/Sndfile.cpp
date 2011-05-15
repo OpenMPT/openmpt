@@ -455,8 +455,6 @@ CSoundFile::CSoundFile() :
 	m_nMixChannels = 0;
 	m_nSamples = 0;
 	m_nInstruments = 0;
-	m_nPatternNames = 0;
-	m_lpszPatternNames = NULL;
 	m_lpszSongComments = nullptr;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMasterVolume = 128;
@@ -547,9 +545,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMaxPeriod = 32767;
 	m_nSamplePreAmp = 48;
 	m_nVSTiVolume = 48;
-	m_nPatternNames = 0;
 	m_nMaxOrderPosition = 0;
-	m_lpszPatternNames = NULL;
 	m_lpszSongComments = nullptr;
 	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
 	memset(Samples, 0, sizeof(Samples));
@@ -853,10 +849,6 @@ BOOL CSoundFile::Destroy()
 {
 	size_t i;
 	Patterns.DestroyPatterns();
-	m_nPatternNames = 0;
-
-	delete[] m_lpszPatternNames;
-	m_lpszPatternNames = NULL;
 
 	FreeMessage();
 
@@ -2477,51 +2469,6 @@ void CSoundFile::CheckCPUUsage(UINT nCPU)
 }
 
 
-BOOL CSoundFile::SetPatternName(PATTERNINDEX  nPat, LPCSTR lpszName)
-//------------------------------------------------------------------
-{
-	CHAR szName[MAX_PATTERNNAME] = "";
-	if (nPat >= Patterns.Size()) return FALSE;
-	if (lpszName) lstrcpyn(szName, lpszName, MAX_PATTERNNAME);
-	SpaceToNullString(szName); //szName[MAX_PATTERNNAME-1] = 0;
-	if (!m_lpszPatternNames) m_nPatternNames = 0;
-	if (nPat >= m_nPatternNames)
-	{
-		//if (!lpszName[0]) return TRUE;
-		UINT len = (nPat+1)*MAX_PATTERNNAME;
-		CHAR *p = new CHAR[len];
-		if (!p) return FALSE;
-		memset(p, 0, len);
-		if (m_lpszPatternNames)
-		{
-			memcpy(p, m_lpszPatternNames, m_nPatternNames * MAX_PATTERNNAME);
-			delete[] m_lpszPatternNames;
-			m_lpszPatternNames = NULL;
-		}
-		m_lpszPatternNames = p;
-		m_nPatternNames = nPat + 1;
-	}
-	memcpy(m_lpszPatternNames + nPat * MAX_PATTERNNAME, szName, MAX_PATTERNNAME);
-	return TRUE;
-}
-
-
-BOOL CSoundFile::GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize) const
-//-----------------------------------------------------------------------------------
-{
-	if ((!lpszName) || (!cbSize)) return FALSE;
-	lpszName[0] = 0;
-	if (cbSize > MAX_PATTERNNAME) cbSize = MAX_PATTERNNAME;
-	if ((m_lpszPatternNames) && (nPat < m_nPatternNames))
-	{
-		memcpy(lpszName, m_lpszPatternNames + nPat * MAX_PATTERNNAME, cbSize);
-		lpszName[cbSize-1] = 0;
-		return TRUE;
-	}
-	return FALSE;
-}
-
-
 #ifndef FASTSOUNDLIB
 
 // Check whether a sample is used.
@@ -2572,7 +2519,7 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
 }
 
 
-// Detect samples are are referenced by an instrument, but actually not used in a song.
+// Detect samples that are referenced by an instrument, but actually not used in a song.
 // Only works in instrument mode. Unused samples are marked as false in the vector.
 SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 //-------------------------------------------------------------------------
@@ -2737,8 +2684,8 @@ void CSoundFile::BuildDefaultInstrument()
 void CSoundFile::DeleteStaticdata()
 //---------------------------------
 {
-	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = 0;
-	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = 0;
+	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = nullptr;
+	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = nullptr;
 }
 
 bool CSoundFile::SaveStaticTunings()

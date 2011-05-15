@@ -146,19 +146,20 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Read Pattern Names
-	m_lpszPatternNames = new char[pfh->patterns * 32];
-	if (!m_lpszPatternNames) return true;
-	m_nPatternNames = pfh->patterns;
-	memset(m_lpszPatternNames, 0, m_nPatternNames * 32);
-	for (UINT pNam=0; pNam < m_nPatternNames; pNam++)
+	for (UINT pNam = 0; pNam < pfh->patterns; pNam++)
 	{
-		if (dwMemPos + 32 >= dwMemLength) return true;
+		if (dwMemPos + 1 >= dwMemLength) return true;
 		tmp = lpStream[dwMemPos++];
-		tmp2 = (tmp < 32) ? tmp : 31;
-		if (tmp2) memcpy(m_lpszPatternNames+pNam*32, lpStream+dwMemPos, tmp2);
+		tmp2 = min(tmp, MAX_PATTERNNAME - 1);		// not counting null char
+		if (dwMemPos + tmp >= dwMemLength) return true;
+		Patterns.Insert(pNam, 64);	// Create pattern now, so that the name won't be overwritten later.
+		if(tmp2)
+		{
+			Patterns[pNam].SetName((char *)(lpStream + dwMemPos), tmp2 + 1);
+		}
 		dwMemPos += tmp;
 	}
-
+	
 	// Read Song Comments
 	tmp = *((WORD *)(lpStream+dwMemPos));
 	dwMemPos += 2;
@@ -183,7 +184,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		UINT len = *((DWORD *)(lpStream + dwMemPos));
 		dwMemPos += 4;
 		if ((len >= dwMemLength) || (dwMemPos + len > dwMemLength)) return true;
-		Patterns.Insert(iPat, 64);
+		// Pattern has been inserted when reading pattern names
 		MODCOMMAND* m = Patterns[iPat];
 		if (!m) return true;
 		const BYTE *p = lpStream + dwMemPos;

@@ -427,8 +427,8 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title		
-		CHAR szName[MAX_PATTERNNAME + 2];
-		pSndFile->GetPatternName(m_nPattern, szName, MAX_PATTERNNAME);
+		CHAR szName[MAX_PATTERNNAME + 1];
+		pSndFile->Patterns[m_nPattern].GetName(szName, MAX_PATTERNNAME);
 		if(strlen(szName))
 		{
 			strcat(szName, ")");

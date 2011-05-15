@@ -61,9 +61,10 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 	{
 		CPattern::FreePattern(m_Patterns[index].m_ModCommands);
 	}
-	m_Patterns[index].m_ModCommands = CPattern::AllocatePattern(rows, m_rSndFile.m_nChannels);
+	m_Patterns[index].m_ModCommands = CPattern::AllocatePattern(rows, m_rSndFile.GetNumChannels());
 	m_Patterns[index].m_Rows = rows;
 	m_Patterns[index].RemoveSignature();
+	m_Patterns[index].SetName("");
 
 	if(!m_Patterns[index]) return true;
 
@@ -151,6 +152,25 @@ void CPatternContainer::Init()
 
 	ResizeArray(MAX_PATTERNS);
 }
+
+
+PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
+//---------------------------------------------------------
+{
+	if(Size() == 0)
+	{
+		return 0;
+	}
+	for(PATTERNINDEX nPat = Size(); nPat > 0; nPat--)
+	{
+		if(m_Patterns[nPat - 1].GetName() != "")
+		{
+			return nPat;
+		}
+	}
+	return 0;
+}
+
 
 
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)

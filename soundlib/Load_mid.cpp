@@ -760,7 +760,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 								} else
 								if (!trk)
 								{
-									SetPatternName(pat, s);
+									Patterns[pat].SetName(s);
 								}
 #ifdef MIDI_LOG
 								Log("Track #%d, META 0x%02X, Pattern %d: ", trk, i, pat);

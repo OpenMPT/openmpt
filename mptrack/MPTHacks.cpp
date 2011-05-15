@@ -163,26 +163,18 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for pattern names
-	foundHere = false;
-	for(PATTERNINDEX i = 0; i < m_SndFile.GetNumPatterns(); i++)
+	if(m_SndFile.Patterns.GetNumNamedPatterns() > 0)
 	{
-		if(m_SndFile.Patterns.IsValidPat(i))
+		AddToLog("Found pattern names\n");
+		foundHacks = true;
+		if(autofix)
 		{
-			TCHAR tempname[MAX_PATTERNNAME];
-			MemsetZero(tempname);
-			m_SndFile.GetPatternName(i, tempname, sizeof(tempname));
-			if(strcmp(tempname, "") != 0)
+			for(PATTERNINDEX i = 0; i < m_SndFile.GetNumPatterns(); i++)
 			{
-				foundHere = foundHacks = true;
-				if(autofix)
-					m_SndFile.SetPatternName(i, "");
-				else
-					break;
+				m_SndFile.Patterns[i].SetName("");
 			}
 		}
 	}
-	if(foundHere)
-		AddToLog("Found pattern names\n");
 
 	// Check for too many channels
 	if(m_SndFile.GetNumChannels() > originalSpecs->channelsMax || m_SndFile.GetNumChannels() < originalSpecs->channelsMin)

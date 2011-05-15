@@ -766,7 +766,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			// set the subsong name to all pattern names
 			for(PATTERNINDEX nPat = startPattern; nPat <= endPattern; nPat++)
 			{
-				SetPatternName(nPat, subsongs[i].songName);
+				Patterns[nPat].SetName(subsongs[i].songName);
 			}
 
 			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)

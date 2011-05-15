@@ -628,7 +628,6 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat]))
 	{
 		BEGIN_CRITICAL();
-		m_SndFile.SetPatternName(nPat, "");
 		m_SndFile.Patterns.Remove(nPat);
 		END_CRITICAL();
 		SetModified();
