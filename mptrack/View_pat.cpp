@@ -5070,17 +5070,21 @@ bool CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih,
 	UINT startRow = GetSelectionStartRow();
 	UINT endRow   = GetSelectionEndRow();
 	
-	if (ListChansWhereColSelected(NOTE_COLUMN, validChans)>0) {
-		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
+	if (ListChansWhereColSelected(NOTE_COLUMN, validChans) > 0)
+	{
+		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++)
+		{
 			if (IsInterpolationPossible(startRow, endRow, 
-									    validChans[valChnIdx], NOTE_COLUMN, pSndFile)) {
+									    validChans[valChnIdx], NOTE_COLUMN, pSndFile))
+			{
 				greyed=0;	//Can do interpolation.
 				break;
 			}
 		}
 
 	}
-	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE))
+	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_NOTE, "Interpolate Note\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateNote));
 		return true;
 	}
@@ -5096,16 +5100,20 @@ bool CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 	UINT startRow = GetSelectionStartRow();
 	UINT endRow   = GetSelectionEndRow();
 	
-	if (ListChansWhereColSelected(VOL_COLUMN, validChans)>0) {
-		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
+	if (ListChansWhereColSelected(VOL_COLUMN, validChans) > 0)
+	{
+		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++)
+		{
 			if (IsInterpolationPossible(startRow, endRow, 
-									    validChans[valChnIdx], VOL_COLUMN, pSndFile)) {
-				greyed=0;	//Can do interpolation.
+									    validChans[valChnIdx], VOL_COLUMN, pSndFile))
+			{
+				greyed = 0;	//Can do interpolation.
 				break;
 			}
 		}
 	}
-	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE))
+	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_VOLUME, "Interpolate Vol Col\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateVol));
 		return true;
 	}
@@ -5122,26 +5130,33 @@ bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 	UINT startRow = GetSelectionStartRow();
 	UINT endRow   = GetSelectionEndRow();
 	
-	if (ListChansWhereColSelected(EFFECT_COLUMN, validChans)>0) {
-		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
-			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], EFFECT_COLUMN, pSndFile)) {
+	if (ListChansWhereColSelected(EFFECT_COLUMN, validChans) > 0)
+	{
+		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++)
+		{
+			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], EFFECT_COLUMN, pSndFile))
+			{
 				greyed=0;	//Can do interpolation.
 				break;
 			}
 		}
 	}
 
-	if (ListChansWhereColSelected(PARAM_COLUMN, validChans)>0) {
-		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
-			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], EFFECT_COLUMN, pSndFile)) {
-				greyed=0;	//Can do interpolation.
+	if (ListChansWhereColSelected(PARAM_COLUMN, validChans) > 0)
+	{
+		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++)
+		{
+			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], EFFECT_COLUMN, pSndFile))
+			{
+				greyed = 0;	//Can do interpolation.
 				break;
 			}
 		}
 	}
 
 
-	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE))
+	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_EFFECT, "Interpolate Effect\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect));
 		return true;
 	}
@@ -5161,10 +5176,10 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pMo
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste (Insert)\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
 
-	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo()?FALSE:MF_GRAYED;
+	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo() ? MF_ENABLED : MF_GRAYED;
 	if (!greyed || !(CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING|greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 	}
 
 	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, "Clear selection\t" + ih->GetKeyTextFromCommand(kcSampleDelete));

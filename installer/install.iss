@@ -115,8 +115,9 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 
 [Run]
 ; duh
-Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 Filename: "https://sourceforge.net/projects/kernelex/"; Description: "Download KernelEx (required on Windows 98 / Me)"; Flags: shellexec nowait postinstall skipifsilent; Check: not UsingWinNT();
+Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
+Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
