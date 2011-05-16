@@ -56,6 +56,45 @@ void CAmpDlg::OnOK()
 }
 
 
+//////////////////////////////////////////////////////////////
+// Sample import dialog
+
+UINT CRawSampleDlg::m_nFormat = ER_8BIT | ER_UNSIGNED | ER_MONO;
+
+BOOL CRawSampleDlg::OnInitDialog()
+//--------------------------------
+{
+	CDialog::OnInitDialog();
+	UpdateDialog();
+	return TRUE;
+}
+
+
+void CRawSampleDlg::OnOK()
+//------------------------
+{
+	m_nFormat = 0;
+	if(IsDlgButtonChecked(IDC_RADIO1)) m_nFormat |= ER_8BIT;
+	if(IsDlgButtonChecked(IDC_RADIO2)) m_nFormat |= ER_16BIT;
+	if(IsDlgButtonChecked(IDC_RADIO3)) m_nFormat |= ER_UNSIGNED;
+	if(IsDlgButtonChecked(IDC_RADIO4)) m_nFormat |= ER_SIGNED;
+	if(IsDlgButtonChecked(IDC_RADIO5)) m_nFormat |= ER_MONO;
+	if(IsDlgButtonChecked(IDC_RADIO6)) m_nFormat |= ER_STEREO;
+	m_bRememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) ? true : false;
+	CDialog::OnOK();
+}
+
+
+void CRawSampleDlg::UpdateDialog()
+//--------------------------------
+{
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat & ER_8BIT) ? IDC_RADIO1 : IDC_RADIO2 );
+	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat & ER_UNSIGNED) ? IDC_RADIO3 : IDC_RADIO4);
+	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat & ER_MONO) ? IDC_RADIO5 : IDC_RADIO6);
+	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat) ? MF_CHECKED : MF_UNCHECKED);
+}
+
+
 /////////////////////////////////////////////////////////////////////////
 // Add silence dialog - add silence to a sample
 
