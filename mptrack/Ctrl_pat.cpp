@@ -1067,13 +1067,13 @@ void CCtrlPatterns::OnPatternNameChanged()
 {
 	if ((m_pSndFile) && (m_pModDoc) && (!IsLocked()))
 	{
-		CHAR s[256], sold[128] = "";
-		PATTERNINDEX nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+		const PATTERNINDEX nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 
-		m_EditPatName.GetWindowText(s, MAX_PATTERNNAME);
-		s[MAX_PATTERNNAME - 1] = 0;
-		m_pSndFile->Patterns[nPat].GetName(sold, CountOf(sold));
-		if (strcmp(s, sold))
+		CHAR s[MAX_PATTERNNAME];
+		m_EditPatName.GetWindowText(s, CountOf(s));
+		SetNullTerminator(s);
+		
+		if (m_pSndFile->Patterns[nPat].GetName().Compare(s))
 		{
 			 if(m_pSndFile->Patterns[nPat].SetName(s))
 			 {
