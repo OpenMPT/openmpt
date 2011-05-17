@@ -3993,7 +3993,7 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes) const
 {
 	const MODCHANNEL *pChn = &Chn[nChn];
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
-	// so we don't nee to worry about finding the master chan.
+	// so we don't need to worry about finding the master chan.
 
 	UINT nPlugin=0;
 	if (pChn && pChn->pModInstrument) {
@@ -4148,7 +4148,7 @@ void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const
 //--------------------------------------------------------------------------------------------------------------------------
 {
 	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
-	if(nOrd >= nMaxOrd || nRow > Patterns[Order[nOrd]].GetNumRows())
+	if(nOrd >= nMaxOrd || nRow >= Patterns[Order[nOrd]].GetNumRows())
 	{
 		return;
 	}
