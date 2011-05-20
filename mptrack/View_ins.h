@@ -81,6 +81,7 @@ protected:
 
 	// Misc.
 	bool EnvSetValue(int nPoint, int nTick=-1, int nValue=-1);
+	bool CanMovePoint(UINT envPoint, int step);
 
 	// Set loop points
 	bool EnvSetLoopStart(int nPoint);

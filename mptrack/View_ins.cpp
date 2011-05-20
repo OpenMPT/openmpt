@@ -274,8 +274,14 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 	{
 		if (nTick >= 0)
 		{
-			int mintick = (nPoint) ? envelope->Ticks[nPoint-1] : 0;
-			int maxtick = envelope->Ticks[nPoint+1];
+			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
+			int maxtick = envelope->Ticks[nPoint + 1];
+			// Can't have multiple points on same tick
+			if(GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2))
+			{
+				mintick++;
+				maxtick--;
+			}
 			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			if (nTick < mintick) nTick = mintick;
 			if (nTick > maxtick) nTick = maxtick;
@@ -2310,7 +2316,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(m_nDragItem == 1 || pEnv->Ticks[m_nDragItem - 1] == pEnv->Ticks[m_nDragItem - 2])
+	if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, -1))
 		return;
 	pEnv->Ticks[m_nDragItem - 1]--;
 
@@ -2324,7 +2330,7 @@ void CViewInstrument::EnvKbdMovePointRight()
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(m_nDragItem == 1 || (m_nDragItem < pEnv->nNodes && pEnv->Ticks[m_nDragItem - 1] == pEnv->Ticks[m_nDragItem]))
+	if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, 1))
 		return;
 	pEnv->Ticks[m_nDragItem - 1]++;
 
@@ -2497,6 +2503,36 @@ INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
 	}
 
 	return envelope;
+}
+
+
+bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
+//---------------------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr) return false;
+	
+	// Can't move first point
+	if(envPoint == 0)
+	{
+		return false;
+	}
+	// Can't move left of previous point
+	if((step < 0) && (pEnv->Ticks[envPoint] - pEnv->Ticks[envPoint - 1] >= -step + GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) ? 0 : 1))
+	{
+		return false;
+	}
+	// Can't move right of next point
+	if((step > 0) && (envPoint < pEnv->nNodes - 1) && (pEnv->Ticks[envPoint + 1] - pEnv->Ticks[envPoint] >= step + GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) ? 0 : 1))
+	{
+		return false;
+	}
+	// Limit envelope length
+	if((envPoint == pEnv->nNodes - 1) && pEnv->Ticks[envPoint] + step > ENVELOPE_MAX_LENGTH)
+	{
+		return false;
+	}
+	return true;
 }
 
 
