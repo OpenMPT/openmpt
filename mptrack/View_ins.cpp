@@ -276,13 +276,13 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 		{
 			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
 			int maxtick = envelope->Ticks[nPoint + 1];
+			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			// Can't have multiple points on same tick
-			if(GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2))
+			if(GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) && mintick < maxtick - 1)
 			{
 				mintick++;
-				maxtick--;
+				if (nPoint + 1 < (int)envelope->nNodes) maxtick--;
 			}
-			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			if (nTick < mintick) nTick = mintick;
 			if (nTick > maxtick) nTick = maxtick;
 			if (nTick != envelope->Ticks[nPoint])
