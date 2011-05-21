@@ -177,6 +177,9 @@ static void import_imf_effect(MODCOMMAND *note)
 		else
 			note->param |= 0xe0;
 		break;
+	case 0x16: // cutoff
+		note->param >>= 1;
+		break;
 	case 0x1f: // set global volume
 		note->param = min(note->param << 1, 0xff);
 		break;
@@ -352,15 +355,15 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// read patterns
 	for(PATTERNINDEX nPat = 0; nPat < hdr.patnum; nPat++)
 	{
-		UINT16 length, nrows;
+		uint16 length, nrows;
 		BYTE mask, channel;
 		int row;
 		unsigned int lostfx = 0;
 		MODCOMMAND *row_data, *note, junk_note;
 
 		ASSERT_CAN_READ(4);
-		length = LittleEndianW(*((UINT16 *)(lpStream + dwMemPos)));
-		nrows = LittleEndianW(*((UINT16 *)(lpStream + dwMemPos + 2)));
+		length = LittleEndianW(*((uint16 *)(lpStream + dwMemPos)));
+		nrows = LittleEndianW(*((uint16 *)(lpStream + dwMemPos + 2)));
 		dwMemPos += 4;
 
 		if(Patterns.Insert(nPat, nrows))
@@ -531,7 +534,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		for(SAMPLEINDEX nSmp = 0; nSmp < imfins.smpnum; nSmp++)
 		{
 			IMFSAMPLE imfsmp;
-			UINT32 blen;
+			uint32 blen;
 			ASSERT_CAN_READ(sizeof(IMFSAMPLE));
 			memset(&imfsmp, 0, sizeof(IMFSAMPLE));
 			memcpy(&imfsmp, lpStream + dwMemPos, sizeof(IMFSAMPLE));
