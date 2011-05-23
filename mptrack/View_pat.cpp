@@ -1195,7 +1195,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			CHANNELINDEX i = 0;
 			bool modified = duplicate;
 
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + (duplicate ? 1 : 0); nChn++)
 			{
 				if(nChn == nTargetNo)
 				{
