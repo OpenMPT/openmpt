@@ -283,11 +283,11 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			hLib = LoadLibrary(pszDllPath);
 	//rewbs.VSTcompliance
 #ifdef _DEBUG
-			if (!hLib)
+			DWORD dw = GetLastError();
+			if (!hLib && dw != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
 			{
 				TCHAR szBuf[256]; 
 				LPVOID lpMsgBuf;
-				DWORD dw = GetLastError(); 
 				FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
 				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, lpMsgBuf); 
 				MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
@@ -785,7 +785,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			if ((value & kVstNanosValid))
 			{
 				timeInfo.flags |= kVstNanosValid;
-				timeInfo.nanoSeconds = pVstPlugin->GetTimeAtStartOfProcess();
+				timeInfo.nanoSeconds = timeGetTime() * 1000000;
 			}
 			if ((value & kVstPpqPosValid) && pSndFile)
 			{
