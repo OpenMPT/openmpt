@@ -698,7 +698,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						BOOL bPlaying, UINT yofs, UINT nrows, UINT xofs, CRect &rcClient, int *pypaint)
 //-----------------------------------------------------------------------------------------------------
 {
-	BYTE bColSel[MAX_CHANNELS];
+	BYTE bColSel[MAX_BASECHANNELS];
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 	MODCOMMAND m0, *pPattern = pSndFile->Patterns[nPattern];
 	CHAR s[256];
@@ -707,7 +707,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	int row_col, row_bkcol;
 	UINT bRowSel, bSpeedUp, nColumnWidth, ncols, maxcol;
 	
-	ncols = pSndFile->m_nChannels;
+	ncols = pSndFile->GetNumChannels();
 	m0.note = m0.instr = m0.vol = m0.volcmd = m0.command = m0.param = 0;
 	nColumnWidth = m_szCell.cx;
 	rect.SetRect(m_szHeader.cx, rcClient.top, m_szHeader.cx+nColumnWidth, rcClient.bottom);
@@ -731,7 +731,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	while ((maxcol > xofs) && (bColSel[maxcol-1] & 0x80)) maxcol--;
 	// Init bitmap border
 	{
-		UINT maxndx = pSndFile->m_nChannels * m_szCell.cx;
+		UINT maxndx = pSndFile->GetNumChannels() * m_szCell.cx;
 		UINT ibmp = 0;
 		if (maxndx > FASTBMP_MAXWIDTH) maxndx = FASTBMP_MAXWIDTH;
 		do
