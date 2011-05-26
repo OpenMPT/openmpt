@@ -84,6 +84,27 @@ struct FixHackedPatterns
 	bool *foundHacks;
 };
 
+
+// Find and fix envelopes where two nodes are on the same tick.
+bool FindIncompatibleEnvelopes(INSTRUMENTENVELOPE &env, bool autofix)
+//-------------------------------------------------------------------
+{
+	bool found = false;
+	for(UINT i = 1; i < env.nNodes; i++)
+	{
+		if(env.Ticks[i] <= env.Ticks[i - 1])	// "<=" so we can fix envelopes "on the fly"
+		{
+			found = true;
+			if(autofix)
+			{
+				env.Ticks[i] = env.Ticks[i - 1] + 1;
+			}
+		}
+	}
+	return found;
+}
+
+
 // Go through the module to find out if it contains any hacks introduced by (Open)MPT
 bool CModDoc::HasMPTHacks(const bool autofix)
 //-------------------------------------------
@@ -139,12 +160,29 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	{
 		if(m_SndFile.Patterns.IsValidPat(i))
 		{
-			if(m_SndFile.Patterns[i].GetNumRows() > originalSpecs->patternRowsMax || m_SndFile.Patterns[i].GetNumRows() < originalSpecs->patternRowsMin)
+			const ROWINDEX patSize = m_SndFile.Patterns[i].GetNumRows();
+			if(patSize > originalSpecs->patternRowsMax)
 			{
 				foundHacks = foundHere = true;
-				break;
+				if(autofix)
+				{
+					// REQUIRES (INTELLIGENT) AUTOFIX
+				} else
+				{
+					break;
+				}
+			} else if(patSize < originalSpecs->patternRowsMin)
+			{
+				foundHacks = foundHere = true;
+				if(autofix)
+				{
+					m_SndFile.Patterns[i].Resize(originalSpecs->patternRowsMin);
+					m_SndFile.TryWriteEffect(i, patSize - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+				} else
+				{
+					break;
+				}
 			}
-			// REQUIRES (INTELLIGENT) AUTOFIX
 		}
 	}
 	if(foundHere)
@@ -182,7 +220,13 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		message.Format("Found incompatible channel count (must be between %d and %d channels)\n", originalSpecs->channelsMin, originalSpecs->channelsMax);
 		AddToLog(message);
 		foundHacks = true;
-		// REQUIRES (INTELLIGENT) AUTOFIX
+		if(autofix)
+		{
+			vector<bool> usedChannels;
+			CheckUsedChannels(usedChannels);
+			RemoveChannels(usedChannels);
+			// REQUIRES (INTELLIGENT) AUTOFIX
+		}
 	}
 
 	// Check for channel names
@@ -221,11 +265,13 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 	// Check for instrument extensions
 	foundHere = false;
+	bool foundEnvelopes = false;
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++)
 	{
 		MODINSTRUMENT *instr = m_SndFile.Instruments[i];
 		if(instr == nullptr) continue;
 
+		// Extended instrument attributes
 		if(instr->nFilterMode != FLTMODE_UNCHANGED || instr->nVolRamp != 0 || instr->nResampling != SRCMODE_DEFAULT ||
 			instr->nCutSwing != 0 || instr->nResSwing != 0 || instr->nMixPlug != 0 || instr->wPitchToTempoLock != 0 ||
 			instr->nDCT == DCT_PLUGIN ||
@@ -248,10 +294,16 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				instr->VolEnv.nReleaseNode = instr->PanEnv.nReleaseNode = instr->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 		}
-
+		// Incompatible envelope shape
+		foundEnvelopes |= FindIncompatibleEnvelopes(instr->VolEnv, autofix);
+		foundEnvelopes |= FindIncompatibleEnvelopes(instr->PanEnv, autofix);
+		foundEnvelopes |= FindIncompatibleEnvelopes(instr->PitchEnv, autofix);
+		foundHacks |= foundEnvelopes;
 	}
 	if(foundHere)
 		AddToLog("Found MPT instrument extensions\n");
+	if(foundEnvelopes)
+		AddToLog("Two envelope points may not share the same tick.\n");
 
 	// Check for too many orders
 	if(m_SndFile.Order.GetLengthTailTrimmed() > originalSpecs->ordersMax)
