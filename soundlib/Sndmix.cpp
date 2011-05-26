@@ -1041,6 +1041,8 @@ BOOL CSoundFile::ReadNote()
 
 		MODINSTRUMENT *pIns = pChn->pModInstrument;
 
+		// Calc Frequency
+		if ((pChn->nPeriod)	&& (pChn->nLength))
 		{
 			int vol = pChn->nVolume;
 
