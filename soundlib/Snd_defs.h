@@ -348,7 +348,6 @@ enum enmEnvelopeTypes
 #define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
-#define SNDMIX_SMARTRAMP		0x200000	// Don't apply ramping to sample beginning, but only when it ends
 
 
 #define MAX_GLOBAL_VOLUME 256
@@ -364,14 +363,6 @@ enum {
 	NUM_SRC_MODES
 };
 
-// Envelope reset choices
-enum enmResetEnv
-{
-	ENV_RESET_ALL,
-	ENV_RESET_VOL,
-	ENV_RESET_PAN,
-	ENV_RESET_PITCH,
-};
 // Release node defines
 #define ENV_RELEASE_NODE_UNSET	0xFF
 #define NOT_YET_RELEASED		(-1)
@@ -416,10 +407,14 @@ enum PLUGVOLUMEHANDLING
 #define MACRO_INTERNALEX	0x31463046	// internal extended macro (F0F1), controls higher 8 bits (high plugin params)
 
 // Vibrato Types
-#define VIB_SINE		0
-#define VIB_SQUARE		1
-#define VIB_RAMP_UP		2
-#define VIB_RAMP_DOWN	3
-#define VIB_RANDOM		4
+enum VibratoType
+{
+	VIB_SINE = 0,
+	VIB_SQUARE,
+	VIB_RAMP_UP,
+	VIB_RAMP_DOWN,
+	VIB_RANDOM
+};
+
 
 #endif

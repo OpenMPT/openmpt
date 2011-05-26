@@ -986,8 +986,6 @@ BOOL CSoundFile::ReadNote()
 	{
 	skipchn:
 
-		MODINSTRUMENT *pIns = pChn->pModInstrument;
-
 		// XM Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
 		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
@@ -1003,6 +1001,7 @@ BOOL CSoundFile::ReadNote()
 #ifdef ENABLE_STEREOVU
 			pChn->nLeftVU = pChn->nRightVU = 0;
 #endif
+
 			nChn++;
 			pChn++;
 			if (nChn >= m_nChannels)
@@ -1021,7 +1020,7 @@ BOOL CSoundFile::ReadNote()
 		pChn->nInc = 0;
 		pChn->nRealVolume = 0;
 
-		if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || GetModFlag(MSF_OLDVOLSWING))
+		if(GetModFlag(MSF_OLDVOLSWING))
 		{
 			pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
 		}
@@ -1040,8 +1039,8 @@ BOOL CSoundFile::ReadNote()
 		CTuning::RATIOTYPE vibratoFactor = 1;
 		CTuning::NOTEINDEXTYPE arpeggioSteps = 0;
 
-		// Calc Frequency
-		if ((pChn->nPeriod)	&& (pChn->nLength))
+		MODINSTRUMENT *pIns = pChn->pModInstrument;
+
 		{
 			int vol = pChn->nVolume;
 
@@ -1146,15 +1145,14 @@ BOOL CSoundFile::ReadNote()
 			vol = CLAMP(vol, 0, 256) << 6;
 
 			// Process Envelopes
-			if (pChn->pModInstrument)
+			if (pIns)
 			{
-				MODINSTRUMENT *pIns = pChn->pModInstrument;
 				// Volume Envelope
 				// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
 				// Problem: This pauses on the wrong tick at the moment...
 				if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
 				{
-					int envvol = getVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
+					int envvol = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
 					
 					// if we are in the release portion of the envelope,
 					// rescale envelope factor so that it is proportional to the release point
@@ -2153,7 +2151,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 	// Get instrument info and plugin reference
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
-	IMixPlugin *pPlugin = NULL;
+	IMixPlugin *pPlugin = nullptr;
 
 	if ((instr) && (instr < MAX_INSTRUMENTS))
 		pIns = Instruments[instr];
@@ -2224,18 +2222,19 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 			case PLUGIN_VOLUMEHANDLING_DRYWET:
 				if(hasVolCommand) pPlugin->SetDryRatio(2*vol);
 				else pPlugin->SetDryRatio(2*defaultVolume);
-			break;
+				break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
 				if(hasVolCommand) pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*vol), nChn);
 				else pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*defaultVolume), nChn);
-			break;
+				break;
+
 		}
 	}
 }
 
-int CSoundFile::getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns)
-//---------------------------------------------------------------------------
+int CSoundFile::GetVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns) const
+//---------------------------------------------------------------------------------
 {
 	UINT pt = pIns->VolEnv.nNodes - 1;
 
