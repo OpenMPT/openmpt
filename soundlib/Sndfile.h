@@ -1047,8 +1047,9 @@ protected:
 	UINT GetRawSongMessage(LPSTR s, UINT cbsize, UINT linesize=32);
 
 public:
-	int getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns);
-    void resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset = ENV_RESET_ALL);
+	int GetVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns) const;
+    void ResetChannelEnvelopes(MODCHANNEL *pChn);
+	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env);
 	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes) const;

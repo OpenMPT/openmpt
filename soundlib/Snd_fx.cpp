@@ -620,12 +620,12 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
-				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
-				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
-				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PitchEnv);
 			} else
 			{
-				resetEnvelopes(pChn);
+				ResetChannelEnvelopes(pChn);
 			}
 			// IT Compatibility: Autovibrato reset
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -635,7 +635,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			}
 		} else if ((pIns) && (!(pIns->VolEnv.dwFlags & ENV_ENABLED)))
 		{
-			resetEnvelopes(pChn, IsCompatibleMode(TRK_IMPULSETRACKER) ? ENV_RESET_VOL : ENV_RESET_ALL);
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				ResetChannelEnvelope(pChn->VolEnv);
+			} else
+			{
+				ResetChannelEnvelopes(pChn);
+			}
 		}
 	}
 	// Invalid sample ?
@@ -882,7 +888,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	{
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
-			resetEnvelopes(pChn);
+			ResetChannelEnvelopes(pChn);
 			// IT Compatibility: Autovibrato reset
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
@@ -1362,7 +1368,7 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			//:xy --> note delay until tick x, note cut at tick x+y
 			nStartTick = (param & 0xF0) >> 4;
-			int cutAtTick = nStartTick + (param & 0x0F);
+			const UINT cutAtTick = nStartTick + (param & 0x0F);
 			NoteCut(nChn, cutAtTick);
 		} else
 		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
@@ -1493,7 +1499,7 @@ BOOL CSoundFile::ProcessEffects()
 					if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 					{
 						pChn->dwFlags |= CHN_FASTVOLRAMP;
-						resetEnvelopes(pChn);	
+						ResetChannelEnvelopes(pChn);
 						// IT Compatibility: Autovibrato reset
 						if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
@@ -1574,7 +1580,7 @@ BOOL CSoundFile::ProcessEffects()
 				if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
-					resetEnvelopes(pChn);
+					ResetChannelEnvelopes(pChn);
 					// IT Compatibility: Autovibrato reset
 					if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
@@ -2172,32 +2178,20 @@ BOOL CSoundFile::ProcessEffects()
 }
 
 
-void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset)
-//-----------------------------------------------------------------------
+void CSoundFile::ResetChannelEnvelopes(MODCHANNEL* pChn)
+//------------------------------------------------------
 {
-	switch (envToReset)
-	{
-		case ENV_RESET_ALL:
-			pChn->VolEnv.nEnvPosition = 0;
-			pChn->PanEnv.nEnvPosition = 0;
-			pChn->PitchEnv.nEnvPosition = 0;
-			pChn->VolEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			pChn->PitchEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			pChn->PanEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			break;
-		case ENV_RESET_VOL:
-			pChn->VolEnv.nEnvPosition = 0;
-			pChn->VolEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			break;
-		case ENV_RESET_PAN:
-			pChn->PanEnv.nEnvPosition = 0;
-			pChn->PanEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			break;
-		case ENV_RESET_PITCH:
-			pChn->PitchEnv.nEnvPosition = 0;
-			pChn->PitchEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			break;				
-	}
+	ResetChannelEnvelope(pChn->VolEnv);
+	ResetChannelEnvelope(pChn->PanEnv);
+	ResetChannelEnvelope(pChn->PitchEnv);
+}
+
+
+void CSoundFile::ResetChannelEnvelope(MODCHANNEL_ENVINFO &env)
+//------------------------------------------------------------
+{
+	env.nEnvPosition = 0;
+	env.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
 }
 
 
@@ -3620,7 +3614,7 @@ void CSoundFile::KeyOff(UINT nChn)
 	
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
-			pChn->VolEnv.nEnvValueAtReleaseJump = getVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
+			pChn->VolEnv.nEnvValueAtReleaseJump = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
 			pChn->VolEnv.nEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
