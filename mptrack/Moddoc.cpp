@@ -3391,6 +3391,9 @@ void CModDoc::OnPatternRestart()
 		
 		BEGIN_CRITICAL();
 
+		// set playback timer in the status bar (and update channel status)
+		SetElapsedTime(nOrd, 0);
+
 		// Cut instruments/samples
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
@@ -3413,9 +3416,6 @@ void CModDoc::OnPatternRestart()
 		//end rewbs.vstCompliance
 		END_CRITICAL();
 		
-		// set playback timer in the status bar
-		SetElapsedTime(nOrd, 0);
-
 		if (pModPlaying != this)
 		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
@@ -3450,6 +3450,10 @@ void CModDoc::OnPatternPlay()
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 	
 		BEGIN_CRITICAL();
+
+		// set playback timer in the status bar (and update channel status)
+		SetElapsedTime(nOrd, nRow);
+
 		// Cut instruments/samples
 		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
 		{
@@ -3467,9 +3471,6 @@ void CModDoc::OnPatternPlay()
 		}
 		//end rewbs.VSTCompliance
 		END_CRITICAL();
-
-		// set playback timer in the status bar
-		SetElapsedTime(nOrd, nRow);
 
 		if (pModPlaying != this) {
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
@@ -3505,6 +3506,10 @@ void CModDoc::OnPatternPlayNoLoop()
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		BEGIN_CRITICAL();
+
+		// set playback timer in the status bar (and update channel status)
+		SetElapsedTime(nOrd, nRow);
+
 		// Cut instruments/samples
 		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
 		{
@@ -3526,9 +3531,6 @@ void CModDoc::OnPatternPlayNoLoop()
 		//rewbs.VSTCompliance
 		END_CRITICAL();
 
-		// set playback timer in the status bar
-		SetElapsedTime(nOrd, nRow);
-		
 		if (pModPlaying != this)
 		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
@@ -3751,7 +3753,7 @@ void CModDoc::SongProperties()
 			bShowLog = true;
 		}
 		
-		UINT nNewChannels = CLAMP(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		CHANNELINDEX nNewChannels = CLAMP(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 
 		if (nNewChannels != GetSoundFile()->GetNumChannels())
 		{
