@@ -302,18 +302,19 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 			s[0] = 0;
 			if (m_dwEndSel > m_dwBeginSel)
 			{
-				wsprintf(s, "[%d,%d]", m_dwBeginSel, m_dwEndSel);
+				const DWORD selLength = m_dwEndSel - m_dwBeginSel;
+				wsprintf(s, "[%d,%d] (%d sample%s, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
 				LONG lSampleRate = pSndFile->Samples[m_nSample].nC5Speed;
 				if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 				{
 					lSampleRate = CSoundFile::TransposeToFrequency(pSndFile->Samples[m_nSample].RelativeTone, pSndFile->Samples[m_nSample].nFineTune);
 				}
 				if (!lSampleRate) lSampleRate = 8363;
-				ULONG msec = ((ULONG)(m_dwEndSel - m_dwBeginSel) * 1000) / lSampleRate;
+				ULONG msec = ((ULONG)selLength * 1000) / lSampleRate;
 				if (msec < 1000)
-					wsprintf(s+strlen(s), " (%lums)", msec);
+					wsprintf(s+strlen(s), "%lums)", msec);
 				else
-					wsprintf(s+strlen(s), " (%lu.%lus)", msec/1000, (msec/100) % 10);
+					wsprintf(s+strlen(s), "%lu.%lus)", msec/1000, (msec/100) % 10);
 			}
 			pMainFrm->SetInfoText(s);
 		}
