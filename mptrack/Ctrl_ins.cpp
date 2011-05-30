@@ -2061,7 +2061,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 //---------------------------------------
 {
 	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
-	PLUGINDEX nPlug = static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) & 0xff);	// TODO is the 0xFF necessary?
+	PLUGINDEX nPlug = static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()));
 
 	if (pIns)
 	{
@@ -2090,7 +2090,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 			if (pIns->nMixPlug)	//if we have not just set to no plugin
 			{
 				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[pIns->nMixPlug - 1]);
-				if (pPlug == nullptr || pPlug->pMixPlugin == nullptr)
+				if ((pPlug == nullptr || pPlug->pMixPlugin == nullptr) && !IsLocked())
 				{
 					// No plugin in this slot: Ask user to add one.
 					CSelectPluginDlg dlg(m_pModDoc, nPlug - 1, this); 

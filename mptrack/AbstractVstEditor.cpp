@@ -121,8 +121,14 @@ VOID CAbstractVstEditor::OnLoadPreset()
 	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 
 	//TODO: exception handling to distinguish errors at this level.
-	if (!(m_pVstPlugin->LoadProgram(files.first_file.c_str())))
+	if (m_pVstPlugin->LoadProgram(files.first_file.c_str()))
+	{
+		if(m_pVstPlugin->GetModDoc() != nullptr)
+			m_pVstPlugin->GetModDoc()->SetModified();
+	} else
+	{
 		::AfxMessageBox("Error loading preset. Are you sure it is for this plugin?");
+	}
 }
 
 VOID CAbstractVstEditor::OnSavePreset()
