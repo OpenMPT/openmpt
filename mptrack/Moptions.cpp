@@ -6,8 +6,6 @@
 #include "moptions.h"
 #include "moddoc.h"
 
-#pragma warning(disable:4244)
-
 
 //////////////////////////////////////////////////////////////
 // COptionsColors
@@ -552,44 +550,14 @@ BEGIN_MESSAGE_MAP(COptionsGeneral, CPropertyPage)
 	ON_CLBN_CHKCHANGE(IDC_LIST1,				OnSettingsChanged)
 END_MESSAGE_MAP()
 
-typedef struct OPTGENDESC
+
+struct OPTGENDESC
 {
 	DWORD dwFlagID;
 	LPCSTR pszListName, pszDescription;
-} OPTGENDESC;
-
-enum
-{
-	OPTGEN_PLAYNEWNOTES=0,
-	OPTGEN_PLAYEDITROW,
-	OPTGEN_CENTERROW,
-	OPTGEN_LARGECOMMENTSFONT,
-	OPTGEN_HEXROWDISP,
-	OPTGEN_CURSORWRAP,
-	OPTGEN_CREATEBACKUP,
-	OPTGEN_DRAGNDROPEDIT,
-	OPTGEN_FLATBUTTONS,
-	OPTGEN_SINGLEEXPAND,
-	OPTGEN_MUTECHNMODE,
-	OPTGEN_AUTOSPACEBAR,
-	OPTGEN_NOEXTRALOUD,
-	OPTGEN_SHOWPREVIOUS,
-	OPTGEN_CONTSCROLL,
-	OPTGEN_KBDNOTEOFF,
-	OPTGEN_FOLLOWSONGOFF,
-	OPTGEN_MIDIRECORD,
-	OPTGEN_PATTERNCTXMENUSTYLE,
-	OPTGEN_SYNCMUTE,
-	OPTGEN_AUTODELAY,
-	OPTGEN_PATNOTEFADE,
-	OPTGEN_OVERFLOWPASTE,
-	OPTGEN_POSITIONAWARETIMER,
-	OPTGEN_RESETCHANNELS,
-	OPTGEN_LIVEUPDATETREE,
-	OPTGEN_MAXOPTIONS
 };
 
-static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
+static OPTGENDESC gOptGenDesc[] =
 {
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
 	{PATTERN_PLAYEDITROW,	"Play whole row while recording",	"When this option is enabled, all notes on the current row are played when entering notes in the pattern editor."},
@@ -617,6 +585,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a different icon in the treeview."}
 };
 
+
 void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
 //------------------------------------------------------
 {
@@ -633,16 +602,16 @@ BOOL COptionsGeneral::OnInitDialog()
 	CHAR sname[32], s[256];
 
 	CPropertyPage::OnInitDialog();
-	for (UINT i = 0; i < OPTGEN_MAXOPTIONS; i++)
+	for (UINT i = 0; i < CountOf(gOptGenDesc); i++)
 	{
-		bool bCheck;
-		wsprintf(sname, "Setup.Gen.Opt%d.Name", i+1);
+		wsprintf(sname, "Setup.Gen.Opt%d.Name", i + 1);
 		if ((theApp.GetLocalizedString(sname, s, sizeof(s))) && (s[0]))
 			m_CheckList.AddString(s);
 		else
 			m_CheckList.AddString(gOptGenDesc[i].pszListName);
-		bCheck = (CMainFrame::m_dwPatternSetup & gOptGenDesc[i].dwFlagID) != 0 ? true : false;
-		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
+
+		const int check = (CMainFrame::m_dwPatternSetup & gOptGenDesc[i].dwFlagID) != 0 ? BST_CHECKED : BST_UNCHECKED;
+		m_CheckList.SetCheck(i, check);
 	}
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
@@ -669,14 +638,12 @@ void COptionsGeneral::OnOK()
 	GetDlgItemText(IDC_OPTIONS_DIR_VSTS,		szVstDir, _MAX_PATH);
 	GetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	szPresetDir, _MAX_PATH);
 
-	for (UINT i = 0; i < OPTGEN_MAXOPTIONS; i++)
+	for (UINT i = 0; i < CountOf(gOptGenDesc); i++)
 	{
-		BOOL bCheck = m_CheckList.GetCheck(i);
+		const bool check = (m_CheckList.GetCheck(i) != BST_UNCHECKED);
 
-		if(bCheck) CMainFrame::m_dwPatternSetup |= gOptGenDesc[i].dwFlagID;
+		if(check) CMainFrame::m_dwPatternSetup |= gOptGenDesc[i].dwFlagID;
 		else CMainFrame::m_dwPatternSetup &= ~gOptGenDesc[i].dwFlagID;
-
-		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -725,8 +692,8 @@ void COptionsGeneral::OnOptionSelChanged()
 {
 	CHAR sname[32], s[256];
 	LPCSTR pszDesc = NULL;
-	int sel = m_CheckList.GetCurSel();
-	if ((sel >= 0) && (sel < OPTGEN_MAXOPTIONS))
+	const int sel = m_CheckList.GetCurSel();
+	if ((sel >= 0) && (sel < CountOf(gOptGenDesc)))
 	{
 		pszDesc = gOptGenDesc[sel].pszDescription;
 		wsprintf(sname, "Setup.Gen.Opt%d.Desc", sel+1);
@@ -734,5 +701,3 @@ void COptionsGeneral::OnOptionSelChanged()
 	}
 	SetDlgItemText(IDC_TEXT1, (pszDesc) ? pszDesc : "");
 }
-
-
