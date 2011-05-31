@@ -4142,7 +4142,7 @@ void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const
 //--------------------------------------------------------------------------------------------------------------------------
 {
 	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
-	if(nOrd >= nMaxOrd || nRow >= Patterns[Order[nOrd]].GetNumRows())
+	if(nOrd >= nMaxOrd || nRow >= GetVisitedRowsVectorSize(Order[nOrd]))
 	{
 		return;
 	}
