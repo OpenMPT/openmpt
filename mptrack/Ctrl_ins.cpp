@@ -950,6 +950,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnPluginVolumeHandling.AddString("MIDI volume");
 	m_CbnPluginVolumeHandling.AddString("Dry/Wet ratio");
 	m_CbnPluginVolumeHandling.AddString("None");
+	m_CbnPluginVolumeHandling.AddString("Custom (Macro)");
 
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 64);
@@ -2093,6 +2094,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 				if ((pPlug == nullptr || pPlug->pMixPlugin == nullptr) && !IsLocked())
 				{
 					// No plugin in this slot: Ask user to add one.
+#ifndef NO_VST
 					CSelectPluginDlg dlg(m_pModDoc, nPlug - 1, this); 
 					if (dlg.DoModal() == IDOK)
 					{
@@ -2103,7 +2105,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 						UpdatePluginList();
 						m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
 					}
-
+#endif // NO_VST
 				}
 
 				if (pPlug && pPlug->pMixPlugin)
