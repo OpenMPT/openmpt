@@ -950,7 +950,6 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnPluginVolumeHandling.AddString("MIDI volume");
 	m_CbnPluginVolumeHandling.AddString("Dry/Wet ratio");
 	m_CbnPluginVolumeHandling.AddString("None");
-	m_CbnPluginVolumeHandling.AddString("Custom (Macro)");
 
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 64);
