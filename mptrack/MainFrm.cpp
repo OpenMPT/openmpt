@@ -382,14 +382,14 @@ void CMainFrame::LoadIniSettings()
 
 	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", iniFile);
 	if(gcsPreviousVersion == "")
-		vIniVersion = MPT_VERSION_NUMERIC;
+		vIniVersion = MptVersion::num;
 	else
 		vIniVersion = MptVersion::ToNum(gcsPreviousVersion);
 
 	gcsInstallGUID = GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
 	if(gcsInstallGUID == "")
 	{
-		//No GUID found in INI file - generate one.
+		// No GUID found in INI file - generate one.
 		GUID guid;
 		CoCreateGuid(&guid);
 		BYTE* Str;
@@ -502,7 +502,7 @@ void CMainFrame::LoadIniSettings()
 		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1,19,00,07))
 		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
-	if(vIniVersion < MPT_VERSION_NUMERIC) 
+	if(vIniVersion < MptVersion::num) 
 		m_dwPatternSetup &= ~(0x200000|0x400000|0x10000000);	// various deprecated old options
 
 	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
@@ -1968,20 +1968,27 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	}
 	m_nMixChn = m_nAvgMixChn = 0;
 	gsdwTotalSamples = 0;
-	if (!bPatLoop) {
-		if (bPaused) {
+	if (!bPatLoop)
+	{
+		if (bPaused)
+		{
 			pSndFile->m_dwSongFlags |= SONG_PAUSED;
-		} else	{
+		} else
+		{
 			pModDoc->SetPause(FALSE);
 			//rewbs.fix3185: removed this check so play position stays on last pattern if song ends and loop is off.
 			//Otherwise play from cursor screws up.
 			//if (pSndFile->GetCurrentPos() + 2 >= pSndFile->GetMaxPosition()) pSndFile->SetCurrentPos(0);
-			pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
+
+			// Tentative fix for http://bugs.openmpt.org/view.php?id=11 - Moved following line out of any condition checks
+			//pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
 		}
 	}
+	pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
+
 	m_pSndFile->SetMasterVolume(m_nPreAmp, true);
 	m_pSndFile->InitPlayer(TRUE);
-	memset(NotifyBuffer, 0, sizeof(NotifyBuffer));
+	MemsetZero(NotifyBuffer);
 	m_dwStatus |= MODSTATUS_PLAYING;
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 	if (gpSoundDevice) gpSoundDevice->Start();
@@ -2124,7 +2131,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nGlobalVolume=64;
 	m_WaveFile.m_nDefaultSpeed = 4;
-	m_WaveFile.m_nRepeatCount = 0;
+	m_WaveFile.SetRepeatCount(0);
 	m_WaveFile.m_nType = MOD_TYPE_IT;
 	m_WaveFile.m_nChannels = 4;
 	m_WaveFile.m_nInstruments = 1;
@@ -2191,7 +2198,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 	m_WaveFile.Create(NULL, 0);
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
-	m_WaveFile.m_nRepeatCount = 0;
+	m_WaveFile.SetRepeatCount(0);
 	m_WaveFile.m_nType = pSong->m_nType;
 	m_WaveFile.m_nChannels = 4;
 	if ((nInstrument) && (nInstrument <= pSong->m_nInstruments))
