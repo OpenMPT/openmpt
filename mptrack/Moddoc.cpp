@@ -3761,8 +3761,8 @@ void CModDoc::SongProperties()
 			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = true;
 		}
 
-		// Force update of pattern highlights
-		UpdateAllViews(NULL, HINT_PATTERNDATA);
+		// Force update of pattern highlights / num channels
+		UpdateAllViews(NULL, HINT_PATTERNDATA | HINT_MODCHANNELS);
 
 		SetModified();
 
