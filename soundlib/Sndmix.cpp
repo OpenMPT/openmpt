@@ -788,8 +788,11 @@ BOOL CSoundFile::ProcessRow()
 #ifdef MODPLUG_TRACKER
 				// Let's check again if this really is the end of the song.
 				// The visited rows vector might have been screwed up while editing...
+				// This is of course not possible during rendering to WAV, so we ignore that case.
 				GetLengthType t = GetLength(eNoAdjust);
-				if(t.lastOrder == m_nCurrentPattern && t.lastRow == m_nRow)
+				if((gdwSoundSetup & SNDMIX_DIRECTTODISK) || (t.lastOrder == m_nCurrentPattern && t.lastRow == m_nRow))
+#else
+				if(1)
 #endif // MODPLUG_TRACKER
 				{
 					// This is really the song's end!
@@ -1048,7 +1051,7 @@ BOOL CSoundFile::ReadNote()
 
 			if(pChn->nVolSwing)
 			{
-				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || GetModFlag(MSF_OLDVOLSWING))
+				if(GetModFlag(MSF_OLDVOLSWING))
 				{
 					vol += pChn->nVolSwing;
 				}
