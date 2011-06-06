@@ -248,8 +248,17 @@ namespace Util
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only interger types are allowed."); return (std::numeric_limits<T>::max)();}
 
+	
+};
+
+namespace Util { namespace sdTime
+{
 	// Returns string containing date and time ended with newline.
 	std::basic_string<TCHAR> GetDateTimeStr();
-};
+
+	time_t MakeGmTime(tm& timeUtc);
+
+}}; // namespace Util::sdTime
+
 
 #endif
