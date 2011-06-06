@@ -53,10 +53,21 @@ CString GetErrorMessage(DWORD nErrorCode)
 }
 
 
-std::basic_string<TCHAR> Util::GetDateTimeStr()
+std::basic_string<TCHAR> Util::sdTime::GetDateTimeStr()
 {
 	time_t t;
 	std::time(&t);
 	return _tctime(&t);
+}
+
+time_t Util::sdTime::MakeGmTime(tm& timeUtc)
+{
+	TIME_ZONE_INFORMATION tzi;
+	GetTimeZoneInformation(&tzi);
+	const time_t timeUtcTimeT = mktime(&timeUtc) - 60 * tzi.Bias;
+#if (_MSC_VER >= MSVC_VER_2005) && defined(_DEBUG)
+	ASSERT(timeUtcTimeT < 0 || timeUtcTimeT == _mkgmtime(&timeUtc));
+#endif
+	return timeUtcTimeT;
 }
 

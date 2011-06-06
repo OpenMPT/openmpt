@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib delayimp.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib delayimp.lib wininet.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"

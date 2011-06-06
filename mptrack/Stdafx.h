@@ -99,6 +99,19 @@ void Log(LPCSTR format,...);
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 
+#pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
+
+// Definitions for MSVC versions to write more understandable conditional-compilation,
+// e.g. #if (_MSC_VER > MSVC_VER_2008) instead of #if (_MSC_VER > 1500) 
+#define MSVC_VER_VC71		1310
+#define MSVC_VER_2003		MSVC_VER_VC71
+#define MSVC_VER_VC8		1400
+#define MSVC_VER_2005		MSVC_VER_VC8
+#define MSVC_VER_VC9		1500
+#define MSVC_VER_2008		MSVC_VER_VC9
+#define MSVC_VER_VC10		1600
+#define MSVC_VER_2010		MSVC_VER_VC10
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 

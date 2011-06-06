@@ -785,7 +785,7 @@ void CModDoc::AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR p
 	strMsg.FormatV(pszFormat, args);
     va_end(args);
 
-	m_logEvents << Util::GetDateTimeStr()
+	m_logEvents << Util::sdTime::GetDateTimeStr()
 				<< _T("Event type: ") << eventType << std::endl
 				<< _T("Function: ") << pszFuncName << std::endl
 				<< _T("Message: ") << strMsg << std::endl << std::endl;

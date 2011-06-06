@@ -424,7 +424,9 @@ void CMainFrame::LoadIniSettings()
 			lastUpdate.tm_year -= 1900;
 			lastUpdate.tm_mon--;
 		}
-		time_t outTime = _mkgmtime(&lastUpdate);
+
+		time_t outTime = Util::sdTime::MakeGmTime(lastUpdate);
+		
 		if(outTime < 0) outTime = 0;
 
 		CUpdateCheck::SetUpdateSettings
@@ -486,7 +488,7 @@ void CMainFrame::LoadIniSettings()
 	m_nPreAmp = GetPrivateProfileDWord("Sound Settings", "PreAmp", 128, iniFile);
 	CSoundFile::m_nStereoSeparation = GetPrivateProfileLong("Sound Settings", "StereoSeparation", 128, iniFile);
 	CSoundFile::m_nMaxMixChannels = GetPrivateProfileLong("Sound Settings", "MixChannels", MAX_CHANNELS, iniFile);
-	gbWFIRType = GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", 7, iniFile);
+	gbWFIRType = static_cast<BYTE>(GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", 7, iniFile));
 	gdWFIRCutoff = static_cast<double>(GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", 97, iniFile))/100.0;
 	glVolumeRampSamples = GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", 42, iniFile);
 
@@ -527,7 +529,7 @@ void CMainFrame::LoadIniSettings()
 		if(m_szDirectoryToSettingsName[i][0] == 0)
 			continue;
 
-		GetPrivateProfileString("Paths", m_szDirectoryToSettingsName[i], GetDefaultDirectory(static_cast<Directory>(i)), szPath, INIBUFFERSIZE, iniFile);
+		GetPrivateProfileString("Paths", m_szDirectoryToSettingsName[i], GetDefaultDirectory(static_cast<Directory>(i)), szPath, CountOf(szPath), iniFile);
 		RelativePathToAbsolute(szPath);
 		SetDefaultDirectory(szPath, static_cast<Directory>(i), false);
 
@@ -1389,11 +1391,13 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
-	CloseHandle(sleepEvent);
+	// Commented as this caused "warning C4702: unreachable code"
+	//CloseHandle(sleepEvent);
 // -! BEHAVIOUR_CHANGE#0021
 
-	ExitThread(0);
-	return 0;
+	// Commented the two lines below as those caused "warning C4702: unreachable code"
+	//ExitThread(0);
+	//return 0;
 }
 
 
@@ -1449,8 +1453,9 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 			}
 		}
 	}
-	ExitThread(0);
-	return 0;
+	// Commented the two lines below as those caused "warning C4702: unreachable code"
+	//ExitThread(0);
+	//return 0;
 }
 
 

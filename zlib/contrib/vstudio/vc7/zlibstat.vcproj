@@ -24,7 +24,7 @@
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI"
 				ExceptionHandling="FALSE"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\zlibstatDebug/zlibstat.pch"
 				AssemblerListingLocation=".\zlibstatDebug/"
 				ObjectFile=".\zlibstatDebug/"
