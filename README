@@ -4,10 +4,14 @@ How to compile the code:
   they don't include MFC.
 - The VST 2.4 and ASIO SDKs are needed for compiling with VST and ASIO support.
   If you don't want this, uncomment #define NO_VST and #define NO_ASIO in the
-  file StdAfx.h. If you need further help with the VST and ASIO SDKs, get in
-  touch with the main developers.
+  file StdAfx.h. Have a look at include/readme.txt to find out which exact files
+  you need and where you can get them. If you need further help with the VST and
+  ASIO SDKs, get in touch with the main developers. 
 - You need the DirectX SDK to enable DirectSound output. If you don't want this,
   uncomment #define NO_DSOUND in the file StdAfx.h.
+- To compile the project, open mptrack/MPTRACK.SLN (if you're using VS2003 or
+  VS2005), mptrack/MPTRACK_08.SLN (VS2008) or mptrack/MPTRACK_10.SLN (VS2010)
+  and hit the compile button! :)
 
 
 
