@@ -1594,7 +1594,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{
 				const UINT smp = pIns->Keyboard[i];
-				if (smp && !smpcount[smp - 1])
+				if (smp && smp <= GetNumSamples() && !smpcount[smp - 1])
 				{
 					smpcount[smp - 1] = true;
 					iti.nos++;
@@ -2188,7 +2188,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{
 				const UINT smp = pIns->Keyboard[i];
-				if (smp && !smpcount[smp - 1])
+				if (smp && smp <= GetNumSamples() && !smpcount[smp - 1])
 				{
 					smpcount[smp - 1] = true;
 					iti.nos++;
