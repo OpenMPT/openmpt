@@ -53,9 +53,9 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	if (!pSndFile->Patterns.IsValidPat(pattern)) return false;
 	nRows = pSndFile->Patterns[pattern].GetNumRows();
 	pPattern = pSndFile->Patterns[pattern];
-	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= pSndFile->m_nChannels)) return false;
+	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= pSndFile->GetNumChannels())) return false;
 	if (firstRow + numRows >= nRows) numRows = nRows - firstRow;
-	if (firstChn + numChns >= pSndFile->m_nChannels) numChns = pSndFile->m_nChannels - firstChn;
+	if (firstChn + numChns >= pSndFile->GetNumChannels()) numChns = pSndFile->GetNumChannels() - firstChn;
 
 	pUndoData = new MODCOMMAND[numChns * numRows];
 	if (!pUndoData) return false;
@@ -76,12 +76,12 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	sUndo.numRows = numRows;
 	sUndo.pbuffer = pUndoData;
 	sUndo.linkToPrevious = linkToPrevious;
-	pPattern += firstChn + firstRow * pSndFile->m_nChannels;
+	pPattern += firstChn + firstRow * pSndFile->GetNumChannels();
 	for(ROWINDEX iy = 0; iy < numRows; iy++)
 	{
 		memcpy(pUndoData, pPattern, numChns * sizeof(MODCOMMAND));
 		pUndoData += numChns;
-		pPattern += pSndFile->m_nChannels;
+		pPattern += pSndFile->GetNumChannels();
 	}
 
 	UndoBuffer.push_back(sUndo);
@@ -129,18 +129,18 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 
 	nPattern = pUndo->pattern;
 	nRows = pUndo->patternsize;
-	if(pUndo->firstChannel + pUndo->numChannels <= pSndFile->m_nChannels)
+	if(pUndo->firstChannel + pUndo->numChannels <= pSndFile->GetNumChannels())
 	{
 		if((!pSndFile->Patterns[nPattern]) || (pSndFile->Patterns[nPattern].GetNumRows() < nRows))
 		{
-			MODCOMMAND *newPattern = CPattern::AllocatePattern(nRows, pSndFile->m_nChannels);
+			MODCOMMAND *newPattern = CPattern::AllocatePattern(nRows, pSndFile->GetNumChannels());
 			MODCOMMAND *oldPattern = pSndFile->Patterns[nPattern];
 			if (!newPattern) return PATTERNINDEX_INVALID;
 			const ROWINDEX nOldRowCount = pSndFile->Patterns[nPattern].GetNumRows();
 			pSndFile->Patterns[nPattern].SetData(newPattern, nRows);
 			if(oldPattern)
 			{
-				memcpy(newPattern, oldPattern, pSndFile->m_nChannels * nOldRowCount * sizeof(MODCOMMAND));
+				memcpy(newPattern, oldPattern, pSndFile->GetNumChannels() * nOldRowCount * sizeof(MODCOMMAND));
 				CPattern::FreePattern(oldPattern);
 			}
 		}
@@ -148,11 +148,11 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 		pUndoData = pUndo->pbuffer;
 		pPattern = pSndFile->Patterns[nPattern];
 		if (!pSndFile->Patterns[nPattern]) return PATTERNINDEX_INVALID;
-		pPattern += pUndo->firstChannel + (pUndo->firstRow * pSndFile->m_nChannels);
+		pPattern += pUndo->firstChannel + (pUndo->firstRow * pSndFile->GetNumChannels());
 		for(ROWINDEX iy = 0; iy < pUndo->numRows; iy++)
 		{
 			memcpy(pPattern, pUndoData, pUndo->numChannels * sizeof(MODCOMMAND));
-			pPattern += pSndFile->m_nChannels;
+			pPattern += pSndFile->GetNumChannels();
 			pUndoData += pUndo->numChannels;
 		}
 	}		
