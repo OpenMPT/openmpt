@@ -986,9 +986,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 
 	// If invalidation on all columns is wanted, extent invalidation area.
 	if(invalidateAllCols)
-		tmp += LAST_COLUMN - (tmp % 8);
-
-	ASSERT(tmp % 8 <= LAST_COLUMN);
+		tmp += LAST_COLUMN - GetColTypeFromCursor(tmp);
 
 	InvalidateArea(m_dwBeginSel, tmp);
 	pModDoc->SetModified();
@@ -1191,11 +1189,12 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			InvalidateRect(&m_rcDropItem, FALSE);
 
 			const bool duplicate = (nFlags & MK_SHIFT) ? true : false;
-			vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + (duplicate ? 1 : 0), 0);
+			const CHANNELINDEX newChannels = pModDoc->GetNumChannels() + (duplicate ? 1 : 0);
+			vector<CHANNELINDEX> channels(newChannels, 0);
 			CHANNELINDEX i = 0;
 			bool modified = duplicate;
 
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + (duplicate ? 1 : 0); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < newChannels; nChn++)
 			{
 				if(nChn == nTargetNo)
 				{
@@ -4397,7 +4396,15 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		
 		// If record is enabled, create undo point.
 		if(bRecordEnabled)
+		{
 			pModDoc->GetPatternUndo()->PrepareUndo(nPat, nChn, nRow, 1, 1);
+		}
+
+		// We're overwriting a PC note here.
+		if(pTarget->IsPcNote() && !MODCOMMAND::IsPcNote(note))
+		{
+			newcmd.Clear();
+		}
 
 		// -- write note and instrument data.
 		const bool isSplit = HandleSplit(&newcmd, note);
