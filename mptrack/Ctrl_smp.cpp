@@ -998,12 +998,11 @@ void CCtrlSamples::OnSampleSave()
 		}
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			memcpy(szFileName, m_pSndFile->Samples[m_nSample].filename, MAX_SAMPLEFILENAME);
-			szFileName[22] = 0;
+			strncpy(szFileName, m_pSndFile->Samples[m_nSample].filename, min(CountOf(m_pSndFile->Samples[m_nSample].filename), CountOf(szFileName) - 1));
 		} else
 		{
-			memcpy(szFileName, m_pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
-			szFileName[32] = 0;		}
+			strncpy(szFileName, m_pSndFile->m_szNames[m_nSample], min(CountOf(m_pSndFile->m_szNames[m_nSample]), CountOf(szFileName) - 1));
+		}
 		if (!szFileName[0]) strcpy(szFileName, "untitled");
 	}
 	else
@@ -1020,6 +1019,7 @@ void CCtrlSamples::OnSampleSave()
 		sPath += ".wav";
 		_splitpath(sPath, NULL, NULL, szFileName, NULL);
 	}
+	SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", szFileName,

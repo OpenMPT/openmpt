@@ -3564,6 +3564,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		{
 			CModDoc *pModDoc = GetDocument();
 			if (pModDoc) pModDoc->PastePattern(m_nPattern, 0, pm_overwrite);
+			InvalidatePattern();
 		}
 		break;
 
