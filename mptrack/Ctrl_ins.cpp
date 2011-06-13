@@ -1712,13 +1712,12 @@ void CCtrlInstruments::OnInstrumentSave()
 	if (!pIns) return;
 	if (pIns->filename[0])
 	{
-		memcpy(szFileName, pIns->filename, 12);
-		szFileName[12] = 0;
+		strncpy(szFileName, pIns->filename, min(CountOf(pIns->filename), CountOf(szFileName) - 1));
 	} else
 	{
-		memcpy(szFileName, pIns->name, 22);
-		szFileName[22] = 0;
+		strncpy(szFileName, pIns->name, min(CountOf(pIns->name), CountOf(szFileName) - 1));
 	}
+	SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (m_pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", szFileName,
