@@ -593,6 +593,7 @@ void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
 		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
 		pModDoc->SurroundChannel(nChn, b);
 		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
+		UpdateView(HINT_MODCHANNELS);
 	}
 }
 
@@ -635,6 +636,7 @@ void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
 		{
 			m_sbPan[chnMod4].SetPos(pan/4);
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
+			UpdateView(HINT_MODCHANNELS);
 		}
 	}
 }
@@ -683,6 +685,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				if (pModDoc->SetChannelDefaultPan(nChn+iCh, pos*4))
 				{
 					SetDlgItemInt(IDC_EDIT2+iCh*2, pos*4);
+					CheckDlgButton(IDC_CHECK2 + iCh * 2, BST_UNCHECKED);
 					bUpdate = TRUE;
 				}
 			}

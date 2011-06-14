@@ -56,19 +56,20 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 	tHeader.flags = 0x00; // No flags
 	fwrite(&tHeader, 1, sizeof(tHeader), f);
 
-	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
+	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER / TDRC (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
 	WriteID3v2Frame("TIT2", title, f);
 	WriteID3v2Frame("TPE1", artist, f);
 	WriteID3v2Frame("TCOM", artist, f);
 	WriteID3v2Frame("TALB", album, f);
 	WriteID3v2Frame("TCON", genre, f);
 	WriteID3v2Frame("TYER", year, f);
+	WriteID3v2Frame("TDRC", year, f);
 	WriteID3v2Frame("WXXX", url, f);
 	WriteID3v2Frame("TENC", encoder, f);
 	WriteID3v2Frame("COMM", comments, f);
 
 	// Write Padding
-	for(UINT i = 0; i < ID3v2_PADDING; i++)
+	for(size_t i = 0; i < ID3v2_PADDING; i++)
 	{
 		fputc(0, f);
 	}
@@ -123,9 +124,24 @@ void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE 
 	
 	WAVEFILEHEADER list;
 	WAVEDATAHEADER chunk;
-	CHAR s[256];
 	DWORD info_ofs, end_ofs;
-	const DWORD zero = 0;
+	const uint8 zero = 0;
+
+	struct
+	{
+		DWORD id;
+		string *data;
+	} chunks[] =
+	{
+		{ IFFID_ICMT, &comments },
+		{ IFFID_INAM, &title },
+		{ IFFID_IART, &artist },
+		{ IFFID_IPRD, &album },
+		{ IFFID_ICOP, &url },
+		{ IFFID_IGNR, &genre },
+		{ IFFID_ISFT, &encoder },
+		{ IFFID_ICRD, &year },
+	};
 
 	info_ofs = ftell(f);
 	if (info_ofs & 1)
@@ -138,53 +154,33 @@ void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE 
 	list.id_WAVE = IFFID_INFO;
 	list.filesize = 4;
 	fwrite(&list, 1, sizeof(list), f);
-	// ICMT
-	if (!comments.empty())
+
+	for(size_t iCmt = 0; iCmt < CountOf(chunks); iCmt++)
 	{
-		chunk.id_data = IFFID_ICMT;
-		chunk.length = strlen(comments.c_str()) + 1;
+		if(chunks[iCmt].data->empty())
+		{
+			continue;
+		}
+
+		string data = *chunks[iCmt].data;
+		// Special case: Expand year to full date
+		if(chunks[iCmt].id == IFFID_ICRD)
+		{
+			data += "-01-01";
+		}
+
+		chunk.id_data = chunks[iCmt].id;
+		chunk.length = data.length() + 1;
+
 		fwrite(&chunk, 1, sizeof(chunk), f);
-		fwrite(comments.c_str(), 1, chunk.length, f);
+		fwrite(data.c_str(), 1, chunk.length, f);
 		list.filesize += chunk.length + sizeof(chunk);
-		if (chunk.length & 1)
+
+		// Chunks must be even-sized
+		if(chunk.length & 1)
 		{
 			fwrite(&zero, 1, 1, f);
 			list.filesize++;
-		}
-	}
-	for (UINT iCmt=0; iCmt<=6; iCmt++)
-	{
-		s[0] = 0;
-		switch(iCmt)
-		{
-		// INAM
-		case 0: memcpy(s, title.c_str(), 255); s[255] = 0; chunk.id_data = IFFID_INAM; break;
-		// IART
-		case 1: memcpy(s, artist.c_str(), 255); s[255] = 0; chunk.id_data = IFFID_IART; break;
-		// IPRD
-		case 2: memcpy(s, album.c_str(), 255); s[255] = 0; chunk.id_data = IFFID_IPRD; break;
-		// ICOP
-		case 3: memcpy(s, url.c_str(), 255); s[255] = 0; chunk.id_data = IFFID_ICOP; break;
-		// IGNR
-		case 4: memcpy(s, genre.c_str(), 255); s[255] = 0; chunk.id_data = IFFID_IGNR; break;
-		// ISFT
-		case 5: memcpy(s, encoder.c_str(), 255); s[255] = 0; chunk.id_data = IFFID_ISFT; break;
-		// ICRD
-		case 6: memcpy(s, year.c_str(), 4); s[4] = 0; strcat(s, "-01-01"); if (s[0] <= '0') s[0] = 0; chunk.id_data = IFFID_ICRD; break;
-		}
-		int l = strlen(s);
-		while ((l > 0) && (s[l-1] == ' ')) s[--l] = 0;
-		if (s[0])
-		{
-			chunk.length = strlen(s)+1;
-			fwrite(&chunk, 1, sizeof(chunk), f);
-			fwrite(s, 1, chunk.length, f);
-			list.filesize += chunk.length + sizeof(chunk);
-			if (chunk.length & 1)
-			{
-				fwrite(&zero, 1, 1, f);
-				list.filesize++;
-			}
 		}
 	}
 	// Update INFO size
