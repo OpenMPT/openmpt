@@ -848,7 +848,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	UINT nChn = m_SndFile.m_nChannels;
+	UINT nChn = GetNumChannels();
 	
 	if ((!pMainFrm) || (!note)) return FALSE;
 	if (nVol > 256) nVol = 256;
@@ -866,7 +866,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			// All notes off
 			for (UINT i=0; i<MAX_CHANNELS; i++)
 			{
-				if ((i < m_SndFile.m_nChannels) || (m_SndFile.Chn[i].nMasterChn))
+				if ((i < GetNumChannels()) || (m_SndFile.Chn[i].nMasterChn))
 				{
 					m_SndFile.Chn[i].dwFlags |= CHN_KEYOFF | CHN_NOTEFADE;
 					m_SndFile.Chn[i].nFadeOutVol = 0;
@@ -939,7 +939,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		m_SndFile.NoteChange(nChn, note, false, true, true);
 		if (nVol >= 0) pChn->nVolume = nVol;
 		
-		// handle sample looping.
+		// Handle sample looping.
 		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
 		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != nullptr))
@@ -951,7 +951,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			pChn->nLength = min(UINT(loopend), pChn->pModSample->nLength);
 		}
 
-		// handle extra-loud flag
+		// Handle extra-loud flag
 		if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp))
 		{
 			pChn->dwFlags |= CHN_EXTRALOUD;
@@ -1284,8 +1284,15 @@ bool CModDoc::SurroundChannel(CHANNELINDEX nChn, bool bSurround)
 	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SURROUND))
 	{
 		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
-		if (d)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SURROUND;
-		else	m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+		if (d)
+		{
+			m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+			m_SndFile.ChnSettings[nChn].nPan = 128;
+		}
+		else
+		{
+			m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+		}
 		
 	}
 	if (d)	m_SndFile.Chn[nChn].dwFlags |= CHN_SURROUND;
@@ -1318,6 +1325,7 @@ bool CModDoc::SetChannelDefaultPan(CHANNELINDEX nChn, UINT nPan)
 	if (m_SndFile.ChnSettings[nChn].nPan != nPan)
 	{
 		m_SndFile.ChnSettings[nChn].nPan = nPan;
+		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
 		if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 		bOk = true;
 	}
