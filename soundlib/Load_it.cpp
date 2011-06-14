@@ -590,7 +590,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			m_nDefaultRowsPerMeasure = pifh->highlight_major;
 		}
 #ifdef DEBUG
-		if((pifh->highlight_minor & pifh->highlight_major) == 0)
+		if((pifh->highlight_minor | pifh->highlight_major) == 0)
 		{
 			Log("IT Header: Row highlight is 0");
 		}
@@ -2981,14 +2981,17 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)
 		{
+			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(m_defaultInstrument.VolEnv.nNodes), f, instruments, nInstruments);
 			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(m_defaultInstrument.VolEnv.Ticks ), f, instruments, nInstruments);
 			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(m_defaultInstrument.VolEnv.Values), f, instruments, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks), f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values),  f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(m_defaultInstrument.PanEnv.nNodes), f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks),  f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values), f, instruments, nInstruments);
 
+			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(m_defaultInstrument.PitchEnv.nNodes), f, instruments, nInstruments);
 			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(m_defaultInstrument.PitchEnv.Ticks),  f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values),  f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values), f, instruments, nInstruments);
 		}
 	}
 
