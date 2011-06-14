@@ -64,6 +64,7 @@ catch(...)  \
 
 void TestVersion();
 void TestTypes();
+void TestLoadFile();
 void TestPCnoteSerialization();
 void TestMisc();
 
@@ -77,6 +78,7 @@ void DoTests()
 	DO_TEST(TestTypes);
 	//DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestMisc);
+	DO_TEST(TestLoadFile)
 
 	Log(TEXT("Tests were run\n"));
 }
@@ -230,6 +232,217 @@ void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc
     }
 }
 
+
+void TestLoadFile()
+//-----------------
+{
+	CString theFile = __FILE__;
+	theFile.Replace(".cpp", ".mptm");
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile);
+	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+
+	// Global Variables
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "Test Module"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_lpszSongComments[0], 'O');
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 139);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 5);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 42);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 23);
+	VERIFY_EQUAL_NONCONT((pSndFile->m_dwSongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_modern);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerBeat, 6);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerMeasure, 12);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
+	
+	// Edit history
+	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory()->size() > 0, true);
+	const FileHistory &fh = pModDoc->GetFileHistory()->at(0);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_year, 111);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mon, 5);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mday, 14);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_hour, 21);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_min, 8);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_sec, 32);
+	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
+
+	// Macros
+	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]), sfx_reso);
+	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[1]), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(pModDoc->GetZxxType(pSndFile->m_MidiCfg.szMidiZXXExt), zxx_resomode);
+
+	// Channels
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[0].szName, "First Channel"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nPan, 32);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nVolume, 32);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].dwFlags, CHN_MUTE);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nMixPlugin, 0);
+
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[1].szName, "Second Channel"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nPan, 128);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nVolume, 16);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].dwFlags, CHN_SURROUND);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nMixPlugin, 1);
+
+	// Samples
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 1);
+	const MODSAMPLE *pSmp = &pSndFile->Samples[1];
+	VERIFY_EQUAL_NONCONT(pSmp->GetBytesPerSample(), 1);
+	VERIFY_EQUAL_NONCONT(pSmp->GetNumChannels(), 1);
+	VERIFY_EQUAL_NONCONT(pSmp->GetElementarySampleSize(), 1);
+	VERIFY_EQUAL_NONCONT(pSmp->GetSampleSizeInBytes(), 16);
+	VERIFY_EQUAL_NONCONT(pSmp->GetSampleRate(MOD_TYPE_MPT), 9001);
+	VERIFY_EQUAL_NONCONT(pSmp->uFlags, CHN_PANNING | CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+
+	VERIFY_EQUAL_NONCONT(pSmp->nLoopStart, 1);
+	VERIFY_EQUAL_NONCONT(pSmp->nLoopEnd, 8);
+	VERIFY_EQUAL_NONCONT(pSmp->nSustainStart, 1);
+	VERIFY_EQUAL_NONCONT(pSmp->nSustainEnd, 7);
+
+	VERIFY_EQUAL_NONCONT(pSmp->nVibType, VIB_SQUARE);
+	VERIFY_EQUAL_NONCONT(pSmp->nVibSweep, 3);
+	VERIFY_EQUAL_NONCONT(pSmp->nVibRate, 4);
+	VERIFY_EQUAL_NONCONT(pSmp->nVibDepth, 5);
+
+	// Instruments
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
+	const MODINSTRUMENT *pIns = pSndFile->Instruments[1];
+	VERIFY_EQUAL_NONCONT(pIns->nGlobalVol, 32);
+	VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
+	VERIFY_EQUAL_NONCONT(pIns->nPan, 64);
+	VERIFY_EQUAL_NONCONT(pIns->dwFlags, INS_SETPANNING);
+
+	VERIFY_EQUAL_NONCONT(pIns->nPPS, 16);
+	VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - 1) + 6);	// F#5
+
+	VERIFY_EQUAL_NONCONT(pIns->nVolRamp, 1200);
+	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
+
+	VERIFY_EQUAL_NONCONT(pIns->nIFC, 0x80 | 0x32);
+	VERIFY_EQUAL_NONCONT(pIns->nIFR, 0x80 | 0x64);
+	VERIFY_EQUAL_NONCONT(pIns->nFilterMode, FLTMODE_HIGHPASS);
+
+	VERIFY_EQUAL_NONCONT(pIns->nVolSwing, 0x30);
+	VERIFY_EQUAL_NONCONT(pIns->nPanSwing, 0x18);
+	VERIFY_EQUAL_NONCONT(pIns->nCutSwing, 0x0C);
+	VERIFY_EQUAL_NONCONT(pIns->nResSwing, 0x3C);
+
+	VERIFY_EQUAL_NONCONT(pIns->nNNA, NNA_CONTINUE);
+	VERIFY_EQUAL_NONCONT(pIns->nDCT, DCT_NOTE);
+	VERIFY_EQUAL_NONCONT(pIns->nDNA, DNA_NOTEFADE);
+
+	VERIFY_EQUAL_NONCONT(pIns->nMixPlug, 1);
+	VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);
+	VERIFY_EQUAL_NONCONT(pIns->nMidiProgram, 64);
+	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
+
+	VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning)
+
+	VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 130);
+
+	VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
+	VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
+
+	for(size_t i = 0; i < NOTE_MAX; i++)
+	{
+		if(i == NOTE_MIDDLEC - 1)
+		{
+			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 99);
+			VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], i + 13);
+		}
+		else
+		{
+			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 1);
+			VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], i + 1);
+		}
+	}
+
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.dwFlags, ENV_ENABLED | ENV_CARRY);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nNodes, 3);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nReleaseNode, 1);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.Ticks[2], 96);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.Values[2], 0);
+
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.dwFlags, ENV_LOOP);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nNodes, 76);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopStart, 22);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopEnd, 29);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Ticks[75], 427);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Values[75], 27);
+
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, ENV_ENABLED | ENV_CARRY | ENV_SUSTAIN | ENV_FILTER);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nNodes, 3);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nSustainStart, 1);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nSustainEnd, 2);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.Ticks[1], 96);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.Values[1], 64);
+
+	// Sequences
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetNumSequences(), 2);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0).GetLengthTailTrimmed(), 3);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0).m_sName, "First Sequence");
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0)[0], pSndFile->Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0)[1], 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0)[2], pSndFile->Order.GetIgnoreIndex());
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1).GetLengthTailTrimmed(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1).m_sName, "Second Sequence");
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1)[0], 1);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1)[1], 2);
+
+	// Patterns
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumPatterns(), 2);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetName(), "First Pattern");
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 70);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetOverrideSignature(), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerBeat(), 5);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerMeasure(), 10);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(0), true);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetName(), "Second Pattern");
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumRows(), 32);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerBeat(), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->IsPcNote(), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
+
+	// Plugins
+	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
+	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
+	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
+	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT), MIXPLUG_INPUTF_MASTEREFFECT);
+	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting >> 16), 11);
+
+	// MIDI Mapping
+	VERIFY_EQUAL_NONCONT(pSndFile->GetMIDIMapper().GetCount(), 1);
+	const CMIDIMappingDirective &mapping = pSndFile->GetMIDIMapper().GetDirective(0);
+	VERIFY_EQUAL_NONCONT(mapping.GetAllowPatternEdit(), true);
+	VERIFY_EQUAL_NONCONT(mapping.GetCaptureMIDI(), false);
+	VERIFY_EQUAL_NONCONT(mapping.IsActive(), true);
+	VERIFY_EQUAL_NONCONT(mapping.GetAnyChannel(), false);
+	VERIFY_EQUAL_NONCONT(mapping.GetChannel(), 5);
+	VERIFY_EQUAL_NONCONT(mapping.GetPlugIndex(), 1);
+	VERIFY_EQUAL_NONCONT(mapping.GetParamIndex(), 0);
+	VERIFY_EQUAL_NONCONT(mapping.GetEvent(), MIDIEVENT_CONTROLLERCHANGE);
+	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDICC_ModulationWheel_Coarse);
+
+	pModDoc->OnCloseDocument();
+}
 
 
 void TestPCnoteSerialization()
