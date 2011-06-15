@@ -1325,9 +1325,25 @@ void CViewGlobals::OnMovePlugToSlot()
 	CArray<UINT, UINT> emptySlots;
 	BuildEmptySlotList(emptySlots);
 
-	dlg.SetupMove(m_nCurrentPlugin, emptySlots);
+	// If any plugin routes its output to the current plugin, we shouldn't try to move it before that plugin...
+	PLUGINDEX defaultIndex = 0;
+	const CSoundFile *pSndFile = GetDocument() ? (GetDocument()->GetSoundFile()) : nullptr;
+	if(pSndFile)
+	{
+		for(PLUGINDEX i = 0; i < m_nCurrentPlugin; i++)
+		{
+			const DWORD toPlug = pSndFile->m_MixPlugins[i].Info.dwOutputRouting;
+			if((toPlug & 0x80) && (toPlug & 0x7F) == m_nCurrentPlugin)
+			{
+				defaultIndex = i + 1;
+			}
+		}
+	}
 
-	if (dlg.DoModal() == IDOK) { 
+	dlg.SetupMove(m_nCurrentPlugin, emptySlots, defaultIndex);
+
+	if (dlg.DoModal() == IDOK)
+	{ 
 		MovePlug(m_nCurrentPlugin, dlg.m_nToSlot);
 		m_CbnPlugin.SetCurSel(dlg.m_nToSlot);
 		OnPluginChanged();
