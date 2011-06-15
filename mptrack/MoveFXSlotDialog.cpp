@@ -43,10 +43,11 @@ void CMoveFXSlotDialog::OnOK()
 	CDialog::OnOK();
 }
 
-void CMoveFXSlotDialog::SetupMove(UINT currentSlot, CArray<UINT, UINT> &emptySlots)
-//---------------------------------------------------------------------------------
+void CMoveFXSlotDialog::SetupMove(PLUGINDEX currentSlot, CArray<UINT, UINT> &emptySlots, PLUGINDEX defaultIndex)
+//--------------------------------------------------------------------------------------------------------------
 {	
-	m_csPrompt.Format("Move plugin in slot %d to the following empty slot:", currentSlot+1);
+	m_nDefaultSlot = defaultIndex;
+	m_csPrompt.Format("Move plugin in slot %d to the following empty slot:", currentSlot + 1);
 	m_csTitle.Format("Move To Slot..");
 	m_EmptySlots.Copy(emptySlots);
 }
@@ -59,11 +60,19 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 	SetWindowText(m_csTitle);
 
  	CString slotText;
-	for (int nSlot=0; nSlot<m_EmptySlots.GetSize(); nSlot++) {
-		slotText.Format("FX%d", m_EmptySlots[nSlot]+1);
+	int defaultSlot = 0;
+	bool foundDefault = false;
+	for (int nSlot=0; nSlot<m_EmptySlots.GetSize(); nSlot++)
+	{
+		slotText.Format("FX%d", m_EmptySlots[nSlot] + 1);
 		m_CbnEmptySlots.SetItemData(m_CbnEmptySlots.AddString(slotText), m_EmptySlots[nSlot]);
+		if(m_EmptySlots[nSlot] >= m_nDefaultSlot && !foundDefault)
+		{
+			defaultSlot = nSlot;
+			foundDefault = true;
+		}
 	}
-	m_CbnEmptySlots.SetCurSel(0);
+	m_CbnEmptySlots.SetCurSel(defaultSlot);
 
 	return TRUE;
 }
