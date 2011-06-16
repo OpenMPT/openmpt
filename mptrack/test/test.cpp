@@ -64,7 +64,7 @@ catch(...)  \
 
 void TestVersion();
 void TestTypes();
-void TestLoadFile();
+void TestLoadSaveFile();
 void TestPCnoteSerialization();
 void TestMisc();
 
@@ -78,11 +78,13 @@ void DoTests()
 	DO_TEST(TestTypes);
 	//DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestMisc);
-	DO_TEST(TestLoadFile)
+	DO_TEST(TestLoadSaveFile)
 
 	Log(TEXT("Tests were run\n"));
 }
 
+
+// Test if functions related to program version data work
 void TestVersion()
 //----------------
 {
@@ -146,6 +148,7 @@ void TestVersion()
 }
 
 
+// Test if data types are interpreted correctly
 void TestTypes()
 //--------------
 {
@@ -198,47 +201,10 @@ void TestMisc()
 }
 
 
-template<class T>
-T Round(double a) {return static_cast<T>(floor(a + 0.5));}
-
-double Rand01() {return rand() / double(RAND_MAX);}
-
-template <class T>
-T Rand(const T& min, const T& max) {return Round<T>(min + Rand01() * (max - min));}
-
-
-
-void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
-//-------------------------------------------------------------------------------
+// Check if our test file was loaded correctly.
+void TestLoadFile(const CModDoc *pModDoc)
+//---------------------------------------
 {
-    const double dPcxProb = dProbPcs + dProbPc;
-    const CPattern::const_iterator end = pat.End();
-    for(CPattern::iterator i = pat.Begin(); i != end; i++)
-    {
-        const double rand = Rand01();
-        if(rand < dPcxProb)
-        {
-            if(rand < dProbPcs)
-                i->note = NOTE_PCS;
-            else
-                i->note = NOTE_PC;
-
-            i->instr = Rand<BYTE>(0, MAX_MIXPLUGINS);
-			i->SetValueVolCol(Rand<uint16>(0, MODCOMMAND::maxColumnValue));
-			i->SetValueEffectCol(Rand<uint16>(0, MODCOMMAND::maxColumnValue));
-        }
-        else
-            i->Clear();
-    }
-}
-
-
-void TestLoadFile()
-//-----------------
-{
-	CString theFile = __FILE__;
-	theFile.Replace(".cpp", ".mptm");
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile);
 	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
 	// Global Variables
@@ -441,10 +407,67 @@ void TestLoadFile()
 	VERIFY_EQUAL_NONCONT(mapping.GetEvent(), MIDIEVENT_CONTROLLERCHANGE);
 	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDICC_ModulationWheel_Coarse);
 
+}
+
+
+// Test file loading and saving
+void TestLoadSaveFile()
+//---------------------
+{
+	CString theFile = __FILE__;
+	theFile.Replace(".cpp", ".mptm");
+	// Test file loading
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile);
+	TestLoadFile(pModDoc);
+
+	// Test file saving
+	theFile += ".saved";
+	pModDoc->GetSoundFile()->SaveIT(theFile);
+	pModDoc->OnCloseDocument();
+	
+	// Reload the saved file and test if everything is still working correctly.
+	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile);
+	TestLoadFile(pModDoc);
 	pModDoc->OnCloseDocument();
 }
 
 
+template<class T>
+T Round(double a) {return static_cast<T>(floor(a + 0.5));}
+
+double Rand01() {return rand() / double(RAND_MAX);}
+
+template <class T>
+T Rand(const T& min, const T& max) {return Round<T>(min + Rand01() * (max - min));}
+
+
+
+void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
+//-------------------------------------------------------------------------------
+{
+	const double dPcxProb = dProbPcs + dProbPc;
+	const CPattern::const_iterator end = pat.End();
+	for(CPattern::iterator i = pat.Begin(); i != end; i++)
+	{
+		const double rand = Rand01();
+		if(rand < dPcxProb)
+		{
+			if(rand < dProbPcs)
+				i->note = NOTE_PCS;
+			else
+				i->note = NOTE_PC;
+
+			i->instr = Rand<BYTE>(0, MAX_MIXPLUGINS);
+			i->SetValueVolCol(Rand<uint16>(0, MODCOMMAND::maxColumnValue));
+			i->SetValueEffectCol(Rand<uint16>(0, MODCOMMAND::maxColumnValue));
+		}
+		else
+			i->Clear();
+	}
+}
+
+
+// Test PC note serialization
 void TestPCnoteSerialization()
 //----------------------------
 {
