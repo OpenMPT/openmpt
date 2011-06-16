@@ -269,6 +269,7 @@ public:
 	SplitKeyboardSettings *GetSplitKeyboardSettings() { return &m_SplitKeyboardSettings; }
 
 	vector<FileHistory> *GetFileHistory() { return &m_FileHistory; }
+	const vector<FileHistory> *GetFileHistory() const { return &m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
 	
 // operations
