@@ -91,6 +91,7 @@ SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const Sm
 	return smp.nLength;
 }
 
+
 SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* pSndFile)
 //--------------------------------------------------------------------------------------
 {
@@ -136,6 +137,7 @@ SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* p
 
 namespace // Unnamed namespace for local implementation functions.
 {
+
 
 template <class T>
 void AdjustEndOfSampleImpl(MODSAMPLE& smp)
@@ -183,7 +185,7 @@ bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile)
 		AdjustEndOfSampleImpl<int8>(*pSmp);
 
 	// Update channels with new loop values
-	if(pSndFile != 0)
+	if(pSndFile != nullptr)
 	{
 		CSoundFile& rSndFile = *pSndFile;
 		for (UINT i=0; i<MAX_CHANNELS; i++) if ((rSndFile.Chn[i].pModSample == pSmp) && (rSndFile.Chn[i].nLength))
@@ -308,6 +310,7 @@ namespace
 	}
 };
 
+
 // Remove DC offset
 float RemoveDCOffset(MODSAMPLE& smp,
 					 SmpLength iStart,
@@ -412,12 +415,13 @@ bool ReverseSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile
 
 
 template <class T>
-void UnsignSampleImpl(T* pStart, T nOffset, const SmpLength nLength)
-//------------------------------------------------------------------
+void UnsignSampleImpl(T* pStart, const SmpLength nLength)
+//-------------------------------------------------------
 {
+	const T offset = (T)std::numeric_limits<T>::min;
 	for(SmpLength i = 0; i < nLength; i++)
 	{
-		pStart[i] += nOffset;
+		pStart[i] += offset;
 	}
 }
 
@@ -434,9 +438,9 @@ bool UnsignSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 	iStart *= pSmp->GetNumChannels();
 	iEnd *= pSmp->GetNumChannels();
 	if(pSmp->GetElementarySampleSize() == 2)
-		UnsignSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, (int16)-0x8000, iEnd - iStart);
+		UnsignSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart);
 	else if(pSmp->GetElementarySampleSize() == 1)
-		UnsignSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, (int8)-0x80, iEnd - iStart);
+		UnsignSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart);
 	else
 		return false;
 
@@ -510,6 +514,48 @@ bool XFadeSample(MODSAMPLE *pSmp, SmpLength iFadeLength, CSoundFile *pSndFile)
 		XFadeSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart, iFadeLength);
 	else
 		return false;
+
+	AdjustEndOfSample(*pSmp, pSndFile);
+	return true;
+}
+
+
+template <class T>
+void ConvertStereoToMonoImpl(T* pDest, const SmpLength length)
+//------------------------------------------------------------
+{
+	const T* pEnd = pDest + length;
+	for(T* pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
+	{
+		*pDest = (pSource[0] + pSource[1] + 1) >> 1;
+	}
+}
+
+
+// Convert a multichannel sample to mono (currently only implemented for stereo)
+bool ConvertToMono(MODSAMPLE *pSmp, CSoundFile *pSndFile)
+//-------------------------------------------------------
+{
+	if(pSmp->pSample == nullptr || pSmp->nLength == 0 || pSmp->GetNumChannels() != 2) return false;
+
+	// Note: Sample is overwritten in-place! Unused data is not deallocated!
+	if(pSmp->GetElementarySampleSize() == 2)
+		ConvertStereoToMonoImpl(reinterpret_cast<int16*>(pSmp->pSample), pSmp->nLength);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		ConvertStereoToMonoImpl(reinterpret_cast<int8*>(pSmp->pSample), pSmp->nLength);
+	else
+		return false;
+
+	BEGIN_CRITICAL();
+	pSmp->uFlags &= ~(CHN_STEREO);
+	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		if(pSndFile->Chn[i].pSample == pSmp->pSample)
+		{
+			pSndFile->Chn[i].dwFlags &= ~CHN_STEREO;
+		}
+	}
+	END_CRITICAL();
 
 	AdjustEndOfSample(*pSmp, pSndFile);
 	return true;
