@@ -65,6 +65,9 @@ bool InvertSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 // Crossfade sample data to create smooth loops
 bool XFadeSample(MODSAMPLE *pSmp, SmpLength iFadeLength, CSoundFile *pSndFile);
 
+// Convert a sample with any number of channels to mono
+bool ConvertToMono(MODSAMPLE *pSmp, CSoundFile *pSndFile);
+
 } // Namespace ctrlSmp
 
 namespace ctrlChn

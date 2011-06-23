@@ -3143,7 +3143,6 @@ void CCtrlSamples::OnXFade()
 
 		if(ctrlSmp::XFadeSample(pSmp, nFadeLength, m_pSndFile))
 		{
-			m_pModDoc->AdjustEndOfSample(m_nSample);
 			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 			m_pModDoc->SetModified();
 		} else

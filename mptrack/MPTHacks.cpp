@@ -8,6 +8,7 @@
 
 #include "stdafx.h"
 #include "Moddoc.h"
+#include "../soundlib/modsmp_ctrl.h"
 
 /* TODO:
 stereo/16bit samples (only XM? stereo/16bit flags are defined in the S3M and IT specs...)
@@ -253,6 +254,26 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		foundHacks = true;
 		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
+
+	// Check for sample extensions
+	foundHere = false;
+	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
+	{
+		MODSAMPLE &smp = m_SndFile.Samples[i];
+		if(m_SndFile.GetType() == MOD_TYPE_XM && smp.GetNumChannels() > 1)
+		{
+			foundHere = foundHacks = true;
+			if(autofix)
+			{
+				ctrlSmp::ConvertToMono(&smp, &m_SndFile);
+			} else
+			{
+				break;
+			}
+		}
+	}
+	if(foundHere)
+		AddToLog("Stereo samples are not supported in the original XM format\n");
 
 	// Check for too many instruments
 	if(m_SndFile.GetNumInstruments() > originalSpecs->instrumentsMax)

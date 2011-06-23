@@ -1999,8 +1999,7 @@ void CViewSample::On8BitConvert()
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 			BEGIN_CRITICAL();
 			signed char *p = (signed char *)(pSmp->pSample);
-			UINT len = pSmp->nLength+1;
-			if (pSmp->uFlags & CHN_STEREO) len *= 2;
+			UINT len = (pSmp->nLength + 1) * pSmp->GetNumChannels();
 			for (UINT i=0; i<=len; i++)
 			{
 				p[i] = (signed char) ((*((short int *)(p+i*2))) / 256);
@@ -2032,32 +2031,14 @@ void CViewSample::OnMonoConvert()
 		if ((pSmp->uFlags & CHN_STEREO) && (pSmp->pSample) && (pSmp->nLength))
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-			BEGIN_CRITICAL();
-			if (pSmp->uFlags & CHN_16BIT)
+			if(ctrlSmp::ConvertToMono(pSmp, pSndFile))
 			{
-				signed short *p = (signed short *)(pSmp->pSample);
-				for (UINT i=0; i<=pSmp->nLength+1; i++)
-				{
-					p[i] = (signed short)((p[i*2]+p[i*2+1]+1)>>1);
-				}
+				pModDoc->SetModified();
+				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 			} else
 			{
-				signed char *p = (signed char *)(pSmp->pSample);
-				for (UINT i=0; i<=pSmp->nLength+1; i++)
-				{
-					p[i] = (signed char)((p[i*2]+p[i*2+1]+1)>>1);
-				}
+				pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
 			}
-			pSmp->uFlags &= ~(CHN_STEREO);
-			for (UINT j=0; j<MAX_CHANNELS; j++) if (pSndFile->Chn[j].pSample == pSmp->pSample)
-			{
-				pSndFile->Chn[j].dwFlags &= ~(CHN_STEREO);
-			}
-			END_CRITICAL();
-			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
-	
-			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		}
 	}
 	EndWaitCursor();
@@ -2074,8 +2055,9 @@ void CViewSample::OnSampleTrim()
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	MODSAMPLE *pSmp = &pSndFile->Samples[m_nSample];
 
-	if(m_dwBeginSel == m_dwEndSel) {
-		// trim around loop points if there's no selection (suggested by jojo in topic 2258)
+	if(m_dwBeginSel == m_dwEndSel)
+	{
+		// Trim around loop points if there's no selection (http://forum.openmpt.org/index.php?topic=2258.0)
 		m_dwBeginSel = pSmp->nLoopStart;
 		m_dwEndSel = pSmp->nLoopEnd;
 	}
@@ -2090,16 +2072,15 @@ void CViewSample::OnSampleTrim()
 	{
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 		BEGIN_CRITICAL();
+		
+		// Note: Sample is overwritten in-place! Unused data is not deallocated!
+		const UINT bend = nEnd * pSmp->GetBytesPerSample() , bstart = nStart * pSmp->GetBytesPerSample();
+		signed char *p = (signed char *)pSmp->pSample;
+		for (UINT i = 0; i < bend; i++)
 		{
-			UINT bend = nEnd, bstart = nStart;
-			if (pSmp->uFlags & CHN_16BIT) { bend <<= 1; bstart <<= 1; }
-			if (pSmp->uFlags & CHN_STEREO) { bend <<= 1; bstart <<= 1; }
-			signed char *p = (signed char *)pSmp->pSample;
-			for (UINT i=0; i<bend; i++)
-			{
-				p[i] = p[i+bstart];
-			}
+			p[i] = p[i + bstart];
 		}
+
 		if (pSmp->nLoopStart >= nStart) pSmp->nLoopStart -= nStart;
 		if (pSmp->nLoopEnd >= nStart) pSmp->nLoopEnd -= nStart;
 		if (pSmp->nSustainStart >= nStart) pSmp->nSustainStart -= nStart;
