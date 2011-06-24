@@ -100,7 +100,7 @@ public:
 	void WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE *f);
 
 	// Tag data
-	string title, artist, album, year, comments, genre, url, encoder;
+	string title, artist, album, year, comments, genre, url, encoder, bpm;
 
 	CFileTagging();
 

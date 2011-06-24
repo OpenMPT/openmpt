@@ -211,10 +211,10 @@ POINT CViewPattern::GetPointFromPosition(DWORD dwPos)
 	POINT pt;
 	int xofs = GetXScrollPos();
 	int yofs = GetYScrollPos();
-	pt.x = (((dwPos >> 3) & 0xFF) - xofs) * GetColumnWidth();
-	UINT imax = (dwPos & 7);
-	if (imax > 5) imax = 5;
-	if (imax > m_nDetailLevel+1) imax = m_nDetailLevel+1;
+	pt.x = (GetChanFromCursor(dwPos) - xofs) * GetColumnWidth();
+	UINT imax = GetColTypeFromCursor(dwPos);
+	if (imax > LAST_COLUMN + 1) imax = LAST_COLUMN + 1;
+	if (imax > m_nDetailLevel + 1) imax = m_nDetailLevel + 1;
 	for (UINT i=0; i<imax; i++)
 	{
 		pt.x += pfnt->nEltWidths[i];

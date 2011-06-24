@@ -123,7 +123,7 @@ BOOL CWaveConvert::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT4, m_nMaxOrder);
 	
 
-	for (UINT i=0; i<NUMMIXRATE; i++)
+	for (size_t i = 0; i < CountOf(nMixingRates); i++)
 	{
 		UINT n = nMixingRates[i];
 		wsprintf(s, "%d Hz", n);
@@ -531,7 +531,7 @@ void CLayer3Convert::OnCheck2()
 void CLayer3Convert::OnOK()
 //-------------------------
 {
-	CHAR sText[256] = {0};
+	CHAR sText[256] = "";
 
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
@@ -580,6 +580,9 @@ void CLayer3Convert::OnOK()
 	{
 		m_FileTags.comments = "";
 	}
+
+	wsprintf(sText, "%d", (int)m_pSndFile->GetCurrentBPM());
+	m_FileTags.bpm = sText;
 
 	CDialog::OnOK();
 }
@@ -983,7 +986,7 @@ void CDoAcmConvert::OnButton1()
 	_splitpath(m_lpszFileName, NULL, NULL, NULL, fext);
 	if (((m_bSaveInfoField) && (m_pwfx->wFormatTag != WAVE_FORMAT_MPEGLAYER3))
 	 || (!lstrcmpi(fext, ".wav"))) bSaveWave = TRUE;
-	memset(&wfxSrc, 0, sizeof(wfxSrc));
+	MemsetZero(wfxSrc);
 	wfxSrc.wFormatTag = WAVE_FORMAT_PCM;
 	wfxSrc.nSamplesPerSec = m_pwfx->nSamplesPerSec;
 	if (wfxSrc.nSamplesPerSec < 11025) wfxSrc.nSamplesPerSec = 11025;
@@ -1001,7 +1004,7 @@ void CDoAcmConvert::OnButton1()
 	pcmBuffer = (LPBYTE)GlobalAllocPtr(GHND, WAVECONVERTBUFSIZE);
 	dstBuffer = (LPBYTE)GlobalAllocPtr(GHND, dwDstBufSize);
 	if ((!dstBuffer) || (!pcmBuffer)) goto OnError;
-	memset(&ash, 0, sizeof(ash));
+	MemsetZero(ash);
 	ash.cbStruct = sizeof(ash);
 	ash.pbSrc = pcmBuffer;
 	ash.cbSrcLength = WAVECONVERTBUFSIZE;
@@ -1010,7 +1013,8 @@ void CDoAcmConvert::OnButton1()
 	if (theApp.AcmStreamPrepareHeader(has, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
 	bPrepared = TRUE;
 	// Creating the output file
-	if ((f = fopen(m_lpszFileName, "wb")) == NULL) {
+	if ((f = fopen(m_lpszFileName, "wb")) == NULL)
+	{
 		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
 		goto OnError;
 	}
@@ -1158,7 +1162,7 @@ void CDoAcmConvert::OnButton1()
 			fseek(f, data_ofs, SEEK_SET);
 			fwrite(&wdh, 1, sizeof(wdh), f);
 		}
-	} else
+	}
 	fclose(f);
 	if (!m_bAbort) retval = IDOK;
 OnError:

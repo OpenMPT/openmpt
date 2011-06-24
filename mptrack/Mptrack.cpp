@@ -65,8 +65,8 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVis
 			if (pPluginManager)
 			{
 				pPluginManager->AddPlugin(lpszPathName);
+				return NULL;
 			}
-			return NULL;
 		}
 	}
 
@@ -1614,6 +1614,8 @@ BOOL CAboutDlg::OnInitDialog()
 		"http://www.hermannseib.com/english/vsthost.htm|"
 		"Ian Luck for UNMO3|"
 		"http://www.un4seen.com/mo3.html|"
+		"Jean-loup Gailly and Mark Adler for zlib|"
+		"http://zlib.net/|"
 		"coda for sample drawing code|"
 		"http://coda.s3m.us/|"
 		"Storlek for all the IT compatibility hints and testcases|"
@@ -1626,10 +1628,10 @@ BOOL CAboutDlg::OnInitDialog()
 		"|The people at ModPlug forums for crucial contribution|"
 		"in the form of ideas, testing and support; thanks|"
 		"particularly to:|"
-		"LPChip, Ganja, Diamond, Nofold, Goor00, Georg|"
-		"Skilletaudio, Squirrel Havoc, Snu, Anboi|"
-		"Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead|"
-		"KrazyKatz, Bvanoudtshoorn, Skaven|"
+		"33, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn|"
+		"christofori, Diamond, Ganja, Georg, Goor00|"
+		"KrazyKatz, LPChip, Nofold, Rakib, Sam Zen|"
+		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead|"
 		"|||||||"
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH|"
 		"ASIO Technology by Steinberg Media Technologies GmbH|"
