@@ -60,10 +60,11 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// name string
 	ASSERT_CAN_READ(len);
-	if (len<=sizeof(m_szNames[0])) {
+	if (len<=sizeof(m_szNames[0]))
+	{
 		memcpy(m_szNames[0],lpStream+dwMemPos,len);
 		dwMemPos += len;
-		m_szNames[0][sizeof(m_szNames[0])-1] = '\0';
+		SetNullTerminator(m_szNames[0]);
 	}
 	else return false;
 
@@ -330,7 +331,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos += sizeof(DWORD);
 		if(dwMemPos >= dwMemLength || len > dwMemLength - dwMemPos) return false;
 
-		// Copy sample struct data
+		// Copy sample struct data (ut-oh... this code looks very familiar!)
 		if(pis.id == LittleEndian(IT_IMPS))
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp];

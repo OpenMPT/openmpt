@@ -421,8 +421,8 @@ void TestLoadSaveFile()
 	TestLoadFile(pModDoc);
 
 	// Test file saving
-	theFile += ".saved";
-	pModDoc->GetSoundFile()->SaveIT(theFile);
+	theFile.Replace(".mptm", ".saved.mptm");
+ 	pModDoc->DoSave(theFile);
 	pModDoc->OnCloseDocument();
 	
 	// Reload the saved file and test if everything is still working correctly.

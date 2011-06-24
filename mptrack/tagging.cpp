@@ -67,6 +67,7 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 	WriteID3v2Frame("WXXX", url, f);
 	WriteID3v2Frame("TENC", encoder, f);
 	WriteID3v2Frame("COMM", comments, f);
+	WriteID3v2Frame("TBPM", bpm, f);
 
 	// Write Padding
 	for(size_t i = 0; i < ID3v2_PADDING; i++)
