@@ -952,7 +952,7 @@ void CMidiMacroSetup::OnZxxPresetChanged()
 {
 	enmFixedMacroType zxx_preset = static_cast<enmFixedMacroType>(m_CbnZxxPreset.GetCurSel());
 
-	if (zxx_preset != sfx_fixed_custom && m_pModDoc != nullptr)
+	if (zxx_preset != zxx_custom && m_pModDoc != nullptr)
 	{
 		m_pModDoc->CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_preset);
 		UpdateDialog();

@@ -615,7 +615,7 @@ CTrackApp::CTrackApp()
 	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
 	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
 	strcpy(m_MidiCfg.szMidiSFXExt[0], "F0F000z");
-	CModDoc::CreateZxxFromType(m_MidiCfg.szMidiZXXExt, sfx_fixed_reso4Bit);
+	CModDoc::CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_reso4Bit);
 }
 
 /////////////////////////////////////////////////////////////////////////////
