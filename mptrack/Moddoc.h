@@ -108,14 +108,14 @@ enum enmParameteredMacroType
 // fixed macro presets:
 enum enmFixedMacroType
 {
-	sfx_fixed_custom = 0,
-	sfx_fixed_reso4Bit,		// Type 1 - Z80 - Z8F controls resonance
-	sfx_fixed_reso7Bit,		// Type 2 - Z80 - ZFF controls resonance
-	sfx_fixed_cutoff,		// Type 3 - Z80 - ZFF controls cutoff
-	sfx_fixed_mode,			// Type 4 - Z80 - ZFF controls filter mode
-	sfx_fixed_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
+	zxx_custom = 0,
+	zxx_reso4Bit,		// Type 1 - Z80 - Z8F controls resonance
+	zxx_reso7Bit,		// Type 2 - Z80 - ZFF controls resonance
+	zxx_cutoff,			// Type 3 - Z80 - ZFF controls cutoff
+	zxx_mode,			// Type 4 - Z80 - ZFF controls filter mode
+	zxx_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
 
-	sfx_fixed_max
+	zxx_max
 };
 
 
