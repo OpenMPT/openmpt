@@ -418,7 +418,7 @@ template <class T>
 void UnsignSampleImpl(T* pStart, const SmpLength nLength)
 //-------------------------------------------------------
 {
-	const T offset = (T)std::numeric_limits<T>::min;
+	const T offset = (std::numeric_limits<T>::min)();
 	for(SmpLength i = 0; i < nLength; i++)
 	{
 		pStart[i] += offset;
