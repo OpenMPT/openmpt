@@ -999,11 +999,13 @@ void CDoAcmConvert::OnButton1()
 	// Open the ACM Driver
 	if (theApp.AcmDriverOpen(&had, m_hadid, 0L) != MMSYSERR_NOERROR) goto OnError;
 	if (theApp.AcmStreamOpen(&has, had, &wfxSrc, m_pwfx, NULL, 0L, 0L, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR) goto OnError;
-	if (theApp.AcmStreamSize(has, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE) != MMSYSERR_NOERROR) goto OnError;
-	if (dwDstBufSize > 0x10000) dwDstBufSize = 0x10000;
-	pcmBuffer = (LPBYTE)GlobalAllocPtr(GHND, WAVECONVERTBUFSIZE);
-	dstBuffer = (LPBYTE)GlobalAllocPtr(GHND, dwDstBufSize);
+	if (theApp.AcmStreamSize(has, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE | ACM_STREAMSIZEF_DESTINATION) != MMSYSERR_NOERROR) goto OnError;
+	//if (dwDstBufSize > 0x10000) dwDstBufSize = 0x10000;
+	pcmBuffer = new BYTE[WAVECONVERTBUFSIZE];
+	dstBuffer = new BYTE[dwDstBufSize];
 	if ((!dstBuffer) || (!pcmBuffer)) goto OnError;
+	memset(pcmBuffer, 0, WAVECONVERTBUFSIZE);
+	memset(dstBuffer, 0, dwDstBufSize);
 	MemsetZero(ash);
 	ash.cbStruct = sizeof(ash);
 	ash.pbSrc = pcmBuffer;
@@ -1114,6 +1116,7 @@ void CDoAcmConvert::OnButton1()
 		}
 		if (ash.cbDstLengthUsed > 0)
 		{
+			ASSERT(ash.cbDstLengthUsed <= dwDstBufSize);
 			UINT lWrite = fwrite(dstBuffer, 1, ash.cbDstLengthUsed, f);
 			if (!lWrite) break;
 			wdh.length += lWrite;
@@ -1169,8 +1172,8 @@ OnError:
 	if (bPrepared) theApp.AcmStreamUnprepareHeader(has, &ash, 0L);
 	if (has != NULL) theApp.AcmStreamClose(has, 0L);
 	if (had != NULL) theApp.AcmDriverClose(had, 0L);
-	if (pcmBuffer) GlobalFreePtr(pcmBuffer);
-	if (dstBuffer) GlobalFreePtr(dstBuffer);
+	if (pcmBuffer) delete[] pcmBuffer;
+	if (dstBuffer) delete[] dstBuffer;
 //rewbs: reduce to normal priority during debug for easier hang debugging
 	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
