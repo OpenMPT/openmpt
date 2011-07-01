@@ -956,36 +956,30 @@ BOOL CDoAcmConvert::OnInitDialog()
 void CDoAcmConvert::OnButton1()
 //-----------------------------
 {
-	BOOL bSaveWave;
+	bool bSaveWave = false;
 	CHAR s[80], fext[_MAX_EXT];
 	WAVEFILEHEADER wfh;
 	WAVEDATAHEADER wdh, chunk;
 	ACMSTREAMHEADER ash;
 	WAVEFORMATEX wfxSrc;
-	HACMDRIVER had;
-	HACMSTREAM has;
+	HACMDRIVER hADriver = nullptr;
+	HACMSTREAM hAStream = nullptr;
 	HWND progress;
 	MSG msg;
-	LPBYTE pcmBuffer, dstBuffer;
+	LPBYTE pcmBuffer = nullptr, dstBuffer = nullptr;	// Render and conversion buffers
 	UINT retval = IDCANCEL, pos, n;
 	DWORD dwDstBufSize, pcmBufSize, data_ofs;
 	uint64 ullMaxSamples, ullSamples;
 	int oldrepeat;
-	BOOL bPrepared, bFinished;
+	bool bPrepared = false, bFinished = false;
 	FILE *f;
 
-	had = NULL;
-	has = NULL;
-	dstBuffer = NULL;
-	pcmBuffer = NULL;
-	bPrepared = FALSE;
 	progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	if ((!m_pSndFile) || (!m_lpszFileName) || (!m_pwfx) || (!m_hadid)) goto OnError;
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-	bSaveWave = FALSE;
 	_splitpath(m_lpszFileName, NULL, NULL, NULL, fext);
 	if (((m_bSaveInfoField) && (m_pwfx->wFormatTag != WAVE_FORMAT_MPEGLAYER3))
-	 || (!lstrcmpi(fext, ".wav"))) bSaveWave = TRUE;
+	 || (!lstrcmpi(fext, ".wav"))) bSaveWave = true;
 	MemsetZero(wfxSrc);
 	wfxSrc.wFormatTag = WAVE_FORMAT_PCM;
 	wfxSrc.nSamplesPerSec = m_pwfx->nSamplesPerSec;
@@ -997,9 +991,12 @@ void CDoAcmConvert::OnButton1()
 	wfxSrc.cbSize = 0;
 	dwDstBufSize = WAVECONVERTBUFSIZE;
 	// Open the ACM Driver
-	if (theApp.AcmDriverOpen(&had, m_hadid, 0L) != MMSYSERR_NOERROR) goto OnError;
-	if (theApp.AcmStreamOpen(&has, had, &wfxSrc, m_pwfx, NULL, 0L, 0L, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR) goto OnError;
-	if (theApp.AcmStreamSize(has, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE | ACM_STREAMSIZEF_DESTINATION) != MMSYSERR_NOERROR) goto OnError;
+	if (theApp.AcmDriverOpen(&hADriver, m_hadid, 0L) != MMSYSERR_NOERROR) goto OnError;
+	if (theApp.AcmStreamOpen(&hAStream, hADriver, &wfxSrc, m_pwfx, NULL, 0L, 0L, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR) goto OnError;
+	// Next call is useless for BLADEenc/LAMEenc. Is it required for ACM codecs?
+	if (theApp.AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE) != MMSYSERR_NOERROR) goto OnError;
+	ASSERT(dwDstBufSize <= WAVECONVERTBUFSIZE);
+	if (theApp.AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_DESTINATION) != MMSYSERR_NOERROR) goto OnError;
 	//if (dwDstBufSize > 0x10000) dwDstBufSize = 0x10000;
 	pcmBuffer = new BYTE[WAVECONVERTBUFSIZE];
 	dstBuffer = new BYTE[dwDstBufSize];
@@ -1012,8 +1009,8 @@ void CDoAcmConvert::OnButton1()
 	ash.cbSrcLength = WAVECONVERTBUFSIZE;
 	ash.pbDst = dstBuffer;
 	ash.cbDstLength = dwDstBufSize;
-	if (theApp.AcmStreamPrepareHeader(has, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
-	bPrepared = TRUE;
+	if (theApp.AcmStreamPrepareHeader(hAStream, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
+	bPrepared = true;
 	// Creating the output file
 	if ((f = fopen(m_lpszFileName, "wb")) == NULL)
 	{
@@ -1082,7 +1079,6 @@ void CDoAcmConvert::OnButton1()
 	ullSamples = 0;
 	pos = 0;
 	pcmBufSize = WAVECONVERTBUFSIZE;
-	bFinished = FALSE;
 
 	// Writing File
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
@@ -1092,12 +1088,12 @@ void CDoAcmConvert::OnButton1()
 		if (!bFinished)
 		{
 			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize);
-			if (!lRead) bFinished = TRUE;
+			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;
 		ash.cbSrcLength = lRead * wfxSrc.nBlockAlign + WAVECONVERTBUFSIZE - pcmBufSize;
 		ash.cbDstLengthUsed = 0;
-		if (theApp.AcmStreamConvert(has, &ash, (lRead) ? ACM_STREAMCONVERTF_BLOCKALIGN : ACM_STREAMCONVERTF_END) != MMSYSERR_NOERROR) break;
+		if (theApp.AcmStreamConvert(hAStream, &ash, (lRead) ? ACM_STREAMCONVERTF_BLOCKALIGN : ACM_STREAMCONVERTF_END) != MMSYSERR_NOERROR) break;
 		do
 		{
 			if (::PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
@@ -1169,9 +1165,9 @@ void CDoAcmConvert::OnButton1()
 	fclose(f);
 	if (!m_bAbort) retval = IDOK;
 OnError:
-	if (bPrepared) theApp.AcmStreamUnprepareHeader(has, &ash, 0L);
-	if (has != NULL) theApp.AcmStreamClose(has, 0L);
-	if (had != NULL) theApp.AcmDriverClose(had, 0L);
+	if (bPrepared) theApp.AcmStreamUnprepareHeader(hAStream, &ash, 0L);
+	if (hAStream != NULL) theApp.AcmStreamClose(hAStream, 0L);
+	if (hADriver != NULL) theApp.AcmDriverClose(hADriver, 0L);
 	if (pcmBuffer) delete[] pcmBuffer;
 	if (dstBuffer) delete[] dstBuffer;
 //rewbs: reduce to normal priority during debug for easier hang debugging
