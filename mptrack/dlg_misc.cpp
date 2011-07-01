@@ -66,8 +66,8 @@ BOOL CModTypeDlg::OnInitDialog()
 //------------------------------
 {
 	CDialog::OnInitDialog();
-	m_nType = m_pSndFile->m_nType;
-	m_nChannels = m_pSndFile->m_nChannels;
+	m_nType = m_pSndFile->GetType();
+	m_nChannels = m_pSndFile->GetNumChannels();
 	m_dwSongFlags = m_pSndFile->m_dwSongFlags;
 	SetDlgItemInt(IDC_ROWSPERBEAT, m_pSndFile->m_nDefaultRowsPerBeat);
 	SetDlgItemInt(IDC_ROWSPERMEASURE, m_pSndFile->m_nDefaultRowsPerMeasure);
@@ -98,28 +98,32 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
-	switch(m_pSndFile->m_nTempoMode)
+	m_TempoModeBox.SetCurSel(0);
+	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
 	{
-		case tempo_mode_alternative:	m_TempoModeBox.SetCurSel(1); break;
-		case tempo_mode_modern:			m_TempoModeBox.SetCurSel(2); break;
-		case tempo_mode_classic:
-		default:						m_TempoModeBox.SetCurSel(0); break;
+		if(m_TempoModeBox.GetItemData(i) == m_pSndFile->m_nTempoMode)
+		{
+			m_TempoModeBox.SetCurSel(i);
+			break;
+		}
 	}
 
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),		mixLevels_117RC2);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),		mixLevels_117RC1);
+	if(m_pSndFile->m_nMixLevels == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
+	if(m_pSndFile->m_nMixLevels == mixLevels_117RC1)	// Dito
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
 	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),				mixLevels_Test);
-	switch(m_pSndFile->m_nMixLevels)
+	m_PlugMixBox.SetCurSel(0);
+	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
 	{
-		//case mixLevels_Test:		m_PlugMixBox.SetCurSel(5); break;
-		case mixLevels_compatible:	m_PlugMixBox.SetCurSel(4); break;		case mixLevels_original:	m_PlugMixBox.SetCurSel(3); break;
-		case mixLevels_117RC1:		m_PlugMixBox.SetCurSel(2); break;
-		case mixLevels_117RC2:		m_PlugMixBox.SetCurSel(1); break;
-		case mixLevels_117RC3:
-		default:					m_PlugMixBox.SetCurSel(0); break;
+		if(m_PlugMixBox.GetItemData(i) == m_pSndFile->m_nMixLevels)
+		{
+			m_PlugMixBox.SetCurSel(i);
+			break;
+		}
 	}
 
 	SetDlgItemText(IDC_TEXT_CREATEDWITH, "Created with:");
@@ -720,8 +724,8 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	CHAR s[128];
 	CDialog::OnInitDialog();
 	CheckDlgButton(IDC_CHECK1, m_bEmbed);
-	m_EditSFx.SetLimitText(31);
-	m_EditZxx.SetLimitText(31);
+	m_EditSFx.SetLimitText(MACRO_LENGTH - 1);
+	m_EditZxx.SetLimitText(MACRO_LENGTH - 1);
 
 	for (UINT isfx=0; isfx<16; isfx++)
 	{
@@ -739,12 +743,14 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnSFxPreset.AddString("Custom");
 	OnSFxChanged();
 
-	for (UINT cc=MIDICC_start; cc<=MIDICC_end; cc++) {
+	for (UINT cc=MIDICC_start; cc<=MIDICC_end; cc++)
+	{
 		wsprintf(s, "CC %02d %s", cc, MidiCCNames[cc]);
 		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);	
 	}
 
-	for (UINT zxx=0; zxx<128; zxx++) {
+	for (UINT zxx=0; zxx<128; zxx++)
+	{
 		wsprintf(s, "Z%02X", zxx|0x80);
 		m_CbnZxx.AddString(s);
 	}
@@ -759,7 +765,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	UpdateDialog();
 
 	int offsetx=108, offsety=30, separatorx=4, separatory=2, 
-		height=18, widthMacro=30, widthVal=55, widthType=135, widthBtn=60;
+		height=18, widthMacro=30, widthVal=90, widthType=135, widthBtn=60;
 	
 	for (UINT m=0; m<NUM_MACROS; m++)
 	{
@@ -784,7 +790,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
 	{
 		PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[plug]);
-		p->Info.szLibraryName[63] = 0;
+		SetNullTerminator(p->Info.szLibraryName);
 		if (p->Info.szLibraryName[0])
 		{
 			wsprintf(s, "FX%d: %s", plug+1, p->Info.szName);
@@ -801,7 +807,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 //----------------------------------------------
 {
 	if (!m_EditMacro[0])
-		return; //GUI not yet initiali
+		return; //GUI not yet initialized
 
 	CString s, macroText;
 	UINT start, end, macroType;
@@ -861,15 +867,16 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 void CMidiMacroSetup::UpdateDialog()
 //----------------------------------
 {
-	CHAR s[32];
+	CHAR s[MACRO_LENGTH];
 	UINT sfx, sfx_preset, zxx;
 
 	sfx = m_CbnSFx.GetCurSel();
 	sfx_preset = m_CbnSFxPreset.GetCurSel();
-	if (sfx < 16) {
+	if (sfx < 16)
+	{
 		ToggleBoxes(sfx_preset, sfx);
 		memcpy(s, m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
-		s[MACRO_LENGTH - 1] = 0;
+		SetNullTerminator(s);
 		m_EditSFx.SetWindowText(s);
 	}
 
@@ -877,7 +884,7 @@ void CMidiMacroSetup::UpdateDialog()
 	if (zxx < 0x80)
 	{
 		memcpy(s, m_MidiCfg.szMidiZXXExt[zxx], MACRO_LENGTH);
-		s[MACRO_LENGTH - 1] = 0;
+		SetNullTerminator(s);
 		m_EditZxx.SetWindowText(s);
 	}
 	UpdateMacroList();
@@ -914,7 +921,7 @@ void CMidiMacroSetup::OnSFxChanged()
 	if (sfx < 16)
 	{
 		CString macroText;
-		memcpy(macroText.GetBuffer(32), m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
+		memcpy(macroText.GetBuffer(MACRO_LENGTH), m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
 		int preset = m_pModDoc->GetMacroType(macroText);
 		m_CbnSFxPreset.SetCurSel(preset);
 	}
@@ -933,7 +940,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 		CHAR *pmacro = m_MidiCfg.szMidiSFXExt[sfx];
 		switch(sfx_preset)
 		{
-		case sfx_unused:	pmacro[0] = 0; break;				// unused
+		case sfx_unused:	strcpy(pmacro, ""); break;			// unused
 		case sfx_cutoff:	strcpy(pmacro, "F0F000z"); break;	// cutoff
 		case sfx_reso:		strcpy(pmacro, "F0F001z"); break;   // reso
 		case sfx_mode:		strcpy(pmacro, "F0F002z"); break;   // mode
@@ -996,7 +1003,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 void CMidiMacroSetup::OnZxxEditChanged()
 //--------------------------------------
 {
-	CHAR s[32];
+	CHAR s[MACRO_LENGTH];
 	UINT zxx = m_CbnZxx.GetCurSel();
 	if (zxx < 128)
 	{
@@ -1008,12 +1015,14 @@ void CMidiMacroSetup::OnZxxEditChanged()
 }
 
 void CMidiMacroSetup::OnSetSFx(UINT id)
+//-------------------------------------
 {
 	m_CbnSFx.SetCurSel(id-(ID_PLUGSELECT + NUM_MACROS));
 	OnSFxChanged();
 }
 
 void CMidiMacroSetup::OnViewAllParams(UINT id)
+//--------------------------------------------
 {
 	if (!m_pSndFile)
 		return;
@@ -1045,7 +1054,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 }
 
 void CMidiMacroSetup::OnPlugChanged()
-//------------------------------------
+//-----------------------------------
 {
 	if (!m_pSndFile)
 		return;
@@ -1073,62 +1082,71 @@ void CMidiMacroSetup::OnPlugChanged()
 }
 
 void CMidiMacroSetup::OnPlugParamChanged()
+//----------------------------------------
 {
 	CString macroText;
 	UINT param = m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel());
 
-	if (param<128) {
-		macroText.Format("F0F0%02Xz",param+128);
+	if (param < 128)
+	{
+		macroText.Format("F0F0%02Xz",param + 128);
 		m_EditSFx.SetWindowText(macroText);
-	} else if (param<384) {
-		macroText.Format("F0F1%02Xz",param-128);
+	} else if (param < 384)
+	{
+		macroText.Format("F0F1%02Xz",param - 128);
 		m_EditSFx.SetWindowText(macroText);
-	} else 	{
+	} else
+	{
 		::AfxMessageBox("Warning: Currently MPT can only assign macros to parameters 0 to 383");
 		param = 383;
 	}	
 }
 
-void CMidiMacroSetup::OnCCChanged() {
+void CMidiMacroSetup::OnCCChanged()
+//---------------------------------
+{
 	CString macroText;
 	UINT cc = m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel());
 	macroText.Format("BK%02Xz", cc&0xFF);
 	m_EditSFx.SetWindowText(macroText);
 }
 
-void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx) {
+void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
+//----------------------------------------------------------
+{
 
-	if (sfx_preset == sfx_plug)	{
+	if (sfx_preset == sfx_plug)
+	{
 		m_CbnMacroCC.ShowWindow(FALSE);
 		m_CbnMacroPlug.ShowWindow(TRUE);
-		m_CbnMacroPlug.ShowWindow(TRUE);
+		m_CbnMacroParam.ShowWindow(TRUE);
 		m_CbnMacroPlug.EnableWindow(TRUE);
 		m_CbnMacroParam.EnableWindow(TRUE);
 		SetDlgItemText(IDC_GENMACROLABEL, "Plug/Param");
 		m_CbnMacroParam.SetCurSel(m_pModDoc->MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]));
-	} else {
+	} else
+	{
 		m_CbnMacroPlug.EnableWindow(FALSE);
 		m_CbnMacroParam.EnableWindow(FALSE);
 	}
 	
-	if (sfx_preset == sfx_cc) {
+	if (sfx_preset == sfx_cc)
+	{
 		m_CbnMacroCC.EnableWindow(TRUE);
 		m_CbnMacroCC.ShowWindow(TRUE);
 		m_CbnMacroPlug.ShowWindow(FALSE);
-		m_CbnMacroPlug.ShowWindow(FALSE);
+		m_CbnMacroParam.ShowWindow(FALSE);
 		SetDlgItemText(IDC_GENMACROLABEL, "MIDI CC");
 		m_CbnMacroCC.SetCurSel(m_pModDoc->MacroToMidiCC(m_MidiCfg.szMidiSFXExt[sfx]));
-	} else {
+	} else
+	{
 		m_CbnMacroCC.EnableWindow(FALSE);
 	}
 
-	if (sfx_preset == sfx_unused) {
-		m_EditSFx.EnableWindow(FALSE);
-	} else {
-		m_EditSFx.EnableWindow(TRUE);
-	}
+	//m_EditSFx.EnableWindow((sfx_preset == sfx_unused) ? FALSE : TRUE);
 
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Keyboard Control
@@ -1557,7 +1575,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	
 	for(size_t n = 0; n < num; n++)
 	{
-		FileHistory *hist = &(m_pModDoc->GetFileHistory()->at(n));
+		const FileHistory *hist = &(m_pModDoc->GetFileHistory()->at(n));
 		totalTime += hist->openTime;
 
 		// Date
