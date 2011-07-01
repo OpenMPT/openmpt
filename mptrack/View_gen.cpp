@@ -636,7 +636,8 @@ void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
 		{
 			m_sbPan[chnMod4].SetPos(pan/4);
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
-			UpdateView(HINT_MODCHANNELS);
+			// Surround is forced off when changing pan, so uncheck the checkbox.
+			CheckDlgButton(IDC_CHECK2 + chnMod4 * 2, BST_UNCHECKED);
 		}
 	}
 }
