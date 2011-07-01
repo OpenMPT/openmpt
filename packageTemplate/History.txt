@@ -10,26 +10,51 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
-v1.20.01.00 (*** 2011, revision 887)
+v1.19.03.00 (*** 2011, revision 912)
 ------------------------------------
+General tab
+   [Imp] <Jojo> When editing panning, surround is disabled and when enabling surround, panning is reset.
+   [Imp] <Jojo> When moving a plugin to another slot, plugins routing their output to the selected plugin are now taken into account when choosing a default slot to move the plugin to.
+
 Pattern tab
    [Fix] <Jojo> When playing a pattern that is actually not in the sequence and that has more rows than the last played order item, a crash could occour while playing those extra rows. (Welcome to episode 2938 of "this should not have happened afterall")
-   [Fix] <Jojo> Shift + Channel Dragging killed the last channel.
+   [Fix] <Jojo> Shift + Channel Dragging killed the last channel (http://bugs.openmpt.org/view.php?id=133).
    [Fix] <Jojo> When using the pattern play controls (f.e. "Replay Pattern") on a pattern that isn't played in the normal play sequence, tempo and global volume commands on the first played row are not ignored anymore.
+   [Fix] <Jojo> Songs shouldn't stop anymore after playing them one time and if playback was initially started using a pattern play mode with loop enabled (http://bugs.openmpt.org/view.php?id=11)
+   [Fix] <Jojo> When overwriting PC notes with normal notes, the pattern cell is now cleared properly.
+   [Fix] <Jojo> Using the "Paste Pattern" menu entry in the order list didn't refresh the pattern display.
 
 Sample tab
-   [Imp] <Jojo> When selecting parts of the sample, the selection range is now also displayed in samples, not only seconds.
+   [Imp] <Jojo> When selecting parts of the sample, the selection range is now also displayed in samples, not only seconds (tx jmkz, http://bugs.openmpt.org/view.php?id=136).
+   [Imp] <Jojo> When changing the sample's global volume while removing DC offset, the change is now instantly applied to all channels that are currently playing the sample.
 
 Instrument tab
    [Imp] <Jojo> When in compatible mode, two envelope points cannot share the same tick anymore.
+   [Fix] <Jojo> Suggested filename when saving instrument was sometimes cut off.
 
 VST
    [Fix] <Jojo> When a plugin requests song position in nano secods, the correct value should now be returned.
    [Fix] <Jojo> Loading a VST preset (fxp) didn't mark the document as modified (tx BooT-SectoR-ViruZ)
 
+IT
+   [Fix] <Jojo> Saving IT instruments (in both IT and ITI files) with an invalid sample map crashed the tracker (http://bugs.openmpt.org/view.php?id=142)
+   [Fix] <Jojo> (Also applies to MOD) When swapping samples on the fly and the current playback position is beyond the new sample's length, it's reset to 0.
+
+MPTM
+   [Fix] <Jojo> Saving long envelopes (> 25 envelope points) in the MPTM format was broken since... well, actually, it never worked in any officially released version.
+
 Other formats
    [Fix] <Jojo> ITP Saver: Fixed nasty bug when the internal order length was not 256.
    [Fix] <Jojo> IMF Loader: Orpheus' 8-Bit cutoff range was not converted to MPT's 7-Bit range.
+
+Misc
+   [Imp] <Jojo> Tagging: ID3 tags also contain a TDRC tag now, since this should be used instead of TYER in ID3v2.4. Also added a TPBM (beats per minute) tag.
+   [Imp] <Jojo> Hack detection also notifies about stereo samples in XM files now.
+   [Imp] <Jojo> Fixed tab order in the pitch shift dialog.
+   [Mod] <Jojo> Song Properties: Legacy Mixmodes RC1 and RC2 are now only displayed if they are actually used by the module.
+   [Fix] <Jojo> MP3 export should no longer result in a heap corruption and thus crash the tracker (http://bugs.openmpt.org/view.php?id=97).
+   [Fix] <Jojo> Rendering sub songs to WAV resulted in an endless render loop.
+   [Fix] <Jojo> Setup Dialog: Fixed the checkbox list so that it doesn't look weird under Wine and doesn't crash when compiling OpenMPT with VS2010 (tx jmkz).
 
 
 v1.19.02.00 (May 2011, revision 871)

@@ -164,6 +164,7 @@ void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 		m_nScrollFactor = 0;
 		UINT cx0 = m_sizeTotal.cx;
 		UINT cx = cx0;
+		// Limit scroll size. FIXME: For long samples, this causes the last few sampling points to be invisible! (Rounding error?)
 		while (cx > 30000)
 		{
 			m_nScrollFactor++;
