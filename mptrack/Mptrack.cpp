@@ -2322,7 +2322,7 @@ BOOL CMappedFile::Unlock()
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// MPEG Layer-3 Functions (through ACM)
+// MPEG Layer-3 Functions (through ACM - access to LAMEenc and BLADEenc is emulated through the ACM interface)
 
 typedef struct BLADEENCSTREAMINFO
 {
@@ -2424,8 +2424,8 @@ BOOL CTrackApp::InitializeACM(BOOL bNoAcm)
 			BYTE wfx[256];
 			WAVEFORMATEX *pwfx = (WAVEFORMATEX *)&wfx;
 
-			memset(&afd, 0, sizeof(afd));
-			memset(pwfx, 0, sizeof(wfx));
+			MemsetZero(afd);
+			MemsetZero(*pwfx);
 			afd.cbStruct = sizeof(ACMFORMATDETAILS);
 			afd.dwFormatTag = WAVE_FORMAT_PCM;
 			afd.pwfx = pwfx;
@@ -2731,11 +2731,11 @@ MMRESULT CTrackApp::AcmStreamSize(HACMSTREAM has, DWORD cbInput, LPDWORD pdwOutp
 		{
 			if (fdwSize & ACM_STREAMSIZEF_DESTINATION)
 			{
-				*pdwOutputBytes = pbeCfg->dwInputSamples * sizeof(SHORT);
+				*pdwOutputBytes = pbeCfg->dwOutputSamples * sizeof(short);
 			} else
 			if (fdwSize & ACM_STREAMSIZEF_SOURCE)
 			{
-				*pdwOutputBytes = pbeCfg->dwOutputSamples;
+				*pdwOutputBytes = pbeCfg->dwInputSamples * sizeof(short);
 			}
 			return MMSYSERR_NOERROR;
 		}
