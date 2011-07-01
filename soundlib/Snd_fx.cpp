@@ -730,6 +730,19 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		if (pChn->dwFlags & CHN_PINGPONGSUSTAIN) pChn->dwFlags |= CHN_PINGPONGLOOP;
 	}
 	if ((pChn->dwFlags & CHN_LOOP) && (pChn->nLoopEnd < pChn->nLength)) pChn->nLength = pChn->nLoopEnd;
+
+	// Fix sample position on instrument change. This is needed for PT1x MOD and IT "on the fly" sample change.
+	if(pChn->nPos >= pChn->nLength)
+	{
+		if((m_nType & MOD_TYPE_IT))
+		{
+			pChn->nPos = pChn->nPosLo = 0;
+		} else if((m_nType & MOD_TYPE_MOD))	// TODO does not always seem to work, especially with short chip samples?
+		{
+			pChn->nPos = pChn->nLoopStart;
+			pChn->nPosLo = 0;
+		}
+	}
 }
 
 
@@ -773,8 +786,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		//IT compatibility tentative fix: Clear channel note memory.
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			pChn->nNote = NOTE_NONE;
-			pChn->nNewNote = NOTE_NONE;
+			pChn->nNote = pChn->nNewNote = NOTE_NONE;
 		}
 		return;
 	}

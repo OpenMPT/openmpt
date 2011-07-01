@@ -287,11 +287,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			if (!hLib && dw != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
 			{
 				TCHAR szBuf[256]; 
-				LPVOID lpMsgBuf;
-				FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
-				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, lpMsgBuf); 
+				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, GetErrorMessage(dw)); 
 				MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
-				LocalFree(lpMsgBuf);
 			}
 #endif //_DEBUG	
 	//end rewbs.VSTcompliance
@@ -1801,7 +1798,6 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
-	//Assuming 32bit address space...
     m_pEffect->resvd1=ToVstPtr(this);
 	//rewbs.plugDocAware
 	m_pSndFile = pSndFile;
@@ -2935,6 +2931,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	if ((nMidiProg < 0x80) && (progChanged || bankChanged /*|| chanChanged */ ))
 	{
 		pCh->nProgram = nMidiProg;
+		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
 		MidiSend((nMidiProg<<8)|(0xC0|nCh));
 	}
 
