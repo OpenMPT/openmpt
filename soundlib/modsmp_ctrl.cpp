@@ -367,7 +367,18 @@ float RemoveDCOffset(MODSAMPLE& smp,
 	
 	// step 3: adjust global vol (if available)
 	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == pSmp->nLength * pSmp->GetNumChannels()))
+	{
+		BEGIN_CRITICAL();
 		pSmp->nGlobalVol = min((WORD)(pSmp->nGlobalVol / dAmplify), 64);
+		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		{
+			if(pSndFile->Chn[i].pSample == pSmp->pSample)
+			{
+				pSndFile->Chn[i].nGlobalVol = pSmp->nGlobalVol;
+			}
+		}
+		END_CRITICAL();
+	}
 
 	AdjustEndOfSample(smp, pSndFile);
 

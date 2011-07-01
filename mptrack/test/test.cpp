@@ -414,19 +414,23 @@ void TestLoadFile(const CModDoc *pModDoc)
 void TestLoadSaveFile()
 //---------------------
 {
-	CString theFile = __FILE__;
-	theFile.Replace(".cpp", ".mptm");
+	CString theFile = theApp.GetAppDirPath();
+	// Only run the tests when we're in the project directory structure.
+	if(theFile.Mid(theFile.GetLength() - 6, 5) != "Debug")
+		return;
+	theFile.Delete(theFile.GetLength() - 6, 6);
+	theFile.Append("test/test.");
+
 	// Test file loading
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile);
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "mptm");
 	TestLoadFile(pModDoc);
 
 	// Test file saving
-	theFile.Replace(".mptm", ".saved.mptm");
- 	pModDoc->DoSave(theFile);
+ 	pModDoc->DoSave(theFile + "saved.mptm");
 	pModDoc->OnCloseDocument();
 	
 	// Reload the saved file and test if everything is still working correctly.
-	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile);
+	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm");
 	TestLoadFile(pModDoc);
 	pModDoc->OnCloseDocument();
 }
