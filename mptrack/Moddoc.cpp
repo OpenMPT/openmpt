@@ -397,9 +397,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
 
-	// Show warning if file was made with more recent version of OpenMPT except for MPTM-files,
-	// which uses CModDocs log-mechanism to show messages.
-	if (m_SndFile.m_dwLastSavedWithVersion > MptVersion::num && m_SndFile.GetType() != MOD_TYPE_MPT)
+	// Show warning if file was made with more recent version of OpenMPT except
+	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
 	{
 		char s[256];
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
