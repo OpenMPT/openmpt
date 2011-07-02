@@ -807,7 +807,7 @@ BOOL CTrackApp::InitInstance()
 
 	//m_hAlternateResourceHandle = LoadLibrary("mpt_intl.dll");
 
-	memset(&gMemStatus, 0, sizeof(gMemStatus));
+	MemsetZero(gMemStatus);
 	GlobalMemoryStatus(&gMemStatus);
 #if 0
 	Log("Physical: %lu\n", gMemStatus.dwTotalPhys);
@@ -2075,7 +2075,7 @@ void CFastBitmap::Init(LPMODPLUGDIB lpTextDib)
 								// & release builds when ran directly from vs.net 
 
 	m_pTextDib = lpTextDib;
-	memset(&m_Dib, 0, sizeof(m_Dib));
+	MemsetZero(m_Dib);
 	m_nTextColor = 0;
 	m_nBkColor = 1;
 	m_Dib.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -2743,6 +2743,8 @@ MMRESULT CTrackApp::AcmStreamSize(HACMSTREAM has, DWORD cbInput, LPDWORD pdwOutp
 	}
 	if (m_hACMInst)
 	{
+		if (fdwSize & ACM_STREAMSIZEF_DESTINATION)	// Why does acmStreamSize return ACMERR_NOTPOSSIBLE in this case?
+			return MMSYSERR_NOERROR;
 		PFNACMSTREAMSIZE pfnAcmStreamSize = (PFNACMSTREAMSIZE)GetProcAddress(m_hACMInst, "acmStreamSize");
 		if (pfnAcmStreamSize) return pfnAcmStreamSize(has, cbInput, pdwOutputBytes, fdwSize);
 	}
