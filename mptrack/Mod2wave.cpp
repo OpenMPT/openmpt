@@ -81,7 +81,7 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX nMinOrder, ORDERINDEX nMaxOr
 	}
 	m_dwFileLimit = 0;
 	m_dwSongLimit = 0;
-	memset(&WaveFormat, 0, sizeof(WaveFormat));
+	MemsetZero(WaveFormat);
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = 2;
 	WaveFormat.Format.nSamplesPerSec = 44100;
@@ -359,8 +359,8 @@ BOOL CLayer3Convert::OnInitDialog()
 	m_bDriversEnumerated = FALSE;
 	m_nNumFormats = 0;
 	m_nNumDrivers = 0;
-	memset(&afd, 0, sizeof(afd));
-	memset(pwfx, 0, sizeof(wfx));
+	MemsetZero(afd);
+	MemsetZero(*pwfx);
 	afd.cbStruct = sizeof(ACMFORMATDETAILS);
 	afd.dwFormatTag = WAVE_FORMAT_PCM;
 	afd.pwfx = pwfx;
@@ -401,8 +401,8 @@ VOID CLayer3Convert::UpdateDialog()
 	m_nDriverIndex = m_CbnDriver.GetItemData(m_CbnDriver.GetCurSel());
 	m_bInitialFound = FALSE;
 	if (m_nDriverIndex >= m_nNumDrivers) m_nDriverIndex = 0;
-	memset(&afd, 0, sizeof(afd));
-	memset(wfx, 0, sizeof(wfx));
+	MemsetZero(afd);
+	MemsetZero(wfx);
 	afd.cbStruct = sizeof(ACMFORMATDETAILS);
 	afd.dwFormatTag = WAVE_FORMAT_PCM;
 	afd.pwfx = pwfx;
@@ -452,7 +452,7 @@ BOOL CLayer3Convert::DriverEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DW
 		{
 			if (Drivers[i] == hdid) return TRUE;
 		}
-		memset(&add, 0, sizeof(add));
+		MemsetZero(add);
 		add.cbStruct = sizeof(add);
 		if (theApp.AcmDriverDetails(hdid, &add, 0L) == MMSYSERR_NOERROR)
 		{
@@ -993,9 +993,9 @@ void CDoAcmConvert::OnButton1()
 	// Open the ACM Driver
 	if (theApp.AcmDriverOpen(&hADriver, m_hadid, 0L) != MMSYSERR_NOERROR) goto OnError;
 	if (theApp.AcmStreamOpen(&hAStream, hADriver, &wfxSrc, m_pwfx, NULL, 0L, 0L, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR) goto OnError;
-	// Next call is useless for BLADEenc/LAMEenc. Is it required for ACM codecs?
+	// This call is useless for BLADEenc/LAMEenc, but required for ACM codecs!
 	if (theApp.AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE) != MMSYSERR_NOERROR) goto OnError;
-	ASSERT(dwDstBufSize <= WAVECONVERTBUFSIZE);
+	// This call is useless for ACM, but required for BLADEenc/LAMEenc codecs!
 	if (theApp.AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_DESTINATION) != MMSYSERR_NOERROR) goto OnError;
 	//if (dwDstBufSize > 0x10000) dwDstBufSize = 0x10000;
 	pcmBuffer = new BYTE[WAVECONVERTBUFSIZE];
