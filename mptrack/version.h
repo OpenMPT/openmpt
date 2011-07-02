@@ -34,15 +34,16 @@ namespace MptVersion
 	const VersionNum num = MPT_VERSION_NUMERIC;
 	const char* const str = MPT_VERSION_STR;
 
-	//Returns numerical version value from given version string.
-	inline VersionNum ToNum(const char* const s)
+	// Returns numerical version value from given version string.
+	static VersionNum ToNum(const char* const s)
 	{
 		int v1, v2, v3, v4; 
 		sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);
 		return ((v1 << 24) +  (v2 << 16) + (v3 << 8) + v4);
-	}
-	//Returns version string from given numerical version value.
-	inline CString ToStr(const VersionNum v)
+	};
+
+	// Returns version string from given numerical version value.
+	static CString ToStr(const VersionNum v)
 	{
 		CString strVersion;
 		if(v == 0)
@@ -50,6 +51,20 @@ namespace MptVersion
 		else
 			strVersion.Format("%X.%02X.%02X.%02X", (v>>24)&0xFF, (v>>16)&0xFF, (v>>8)&0xFF, (v)&0xFF);
 		return strVersion;
+	};
+
+	// Return a version without build number (the last number in the version).
+	// The current versioning scheme uses this number only for test builds, and it should be 00 for official builds,
+	// So sometimes it might be wanted to do comparisons without the build number.
+	static VersionNum RemoveBuildNumber(const VersionNum num)
+	{
+		return (num & 0xFFFFFF00);
+	};
+
+	// Returns true if a given version number is from a test build, false if it's a release build.
+	static bool IsTestBuild(const VersionNum num)
+	{
+		return ((num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00)) || (num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num));
 	}
 }; //namespace MptVersion
 

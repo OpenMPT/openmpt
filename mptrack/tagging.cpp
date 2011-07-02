@@ -62,12 +62,12 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 	WriteID3v2Frame("TCOM", artist, f);
 	WriteID3v2Frame("TALB", album, f);
 	WriteID3v2Frame("TCON", genre, f);
-	WriteID3v2Frame("TYER", year, f);
+	//WriteID3v2Frame("TYER", year, f);		// Deprecated
 	WriteID3v2Frame("TDRC", year, f);
+	WriteID3v2Frame("TBPM", bpm, f);
 	WriteID3v2Frame("WXXX", url, f);
 	WriteID3v2Frame("TENC", encoder, f);
 	WriteID3v2Frame("COMM", comments, f);
-	WriteID3v2Frame("TBPM", bpm, f);
 
 	// Write Padding
 	for(size_t i = 0; i < ID3v2_PADDING; i++)
@@ -102,6 +102,7 @@ void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE 
 		sFramecontent = ID3v2_TEXTENDING + sFramecontent;
 	}
 	sFramecontent = ID3v2_CHARSET + sFramecontent;
+	sFramecontent += ID3v2_TEXTENDING;
 
 	TAGID3v2FRAME tFrame;
 
