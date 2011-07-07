@@ -1574,14 +1574,15 @@ void CViewPattern::UpdateXInfoText()
 		if (!pSndFile) return;
 		
 		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
-		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X",
+		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
 						nChn+1,
 						pSndFile->Chn[nChn].nGlobalVol,
 						pSndFile->Chn[nChn].nActiveMacro,
                         pSndFile->Chn[nChn].nCutOff,
 						(pSndFile->Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? "-Hi" : "",
                         pSndFile->Chn[nChn].nResonance,
-                        pSndFile->Chn[nChn].nPan);
+                        pSndFile->Chn[nChn].nPan,
+						(pSndFile->Chn[nChn].dwFlags & CHN_SURROUND) ? "-S" : "");
 
 		pMainFrm->SetXInfoText(xtraInfo);
 	}

@@ -475,27 +475,27 @@ CSoundFile::CSoundFile() :
 	m_pModDoc = NULL;
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
-	memset(m_bChannelMuteTogglePending, 0, sizeof(m_bChannelMuteTogglePending));
+	MemsetZero(m_bChannelMuteTogglePending);
 
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	for(UINT i = 0; i < MAX_INSTRUMENTS; i++)
 	{
-		m_szInstrumentPath[i][0] = '\0';
+		MemsetZero(m_szInstrumentPath[i]);
 	}
 // -! NEW_FEATURE#0023
 
-	memset(Chn, 0, sizeof(Chn));
-	memset(ChnMix, 0, sizeof(ChnMix));
-	memset(Samples, 0, sizeof(Samples));
-	memset(ChnSettings, 0, sizeof(ChnSettings));
-	memset(Instruments, 0, sizeof(Instruments));
+	MemsetZero(Chn);
+	MemsetZero(ChnMix);
+	MemsetZero(Samples);
+	MemsetZero(ChnSettings);
+	MemsetZero(Instruments);
+	MemsetZero(m_szNames);
+	MemsetZero(m_MixPlugins);
+	MemsetZero(m_SongEQ);
 	Order.Init();
 	Patterns.ClearPatterns();
-	memset(m_szNames, 0, sizeof(m_szNames));
-	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
-	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	m_lTotalSampleCount=0;
 
 	m_pConfig = new CSoundFilePlayConfig();
@@ -548,16 +548,16 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMaxOrderPosition = 0;
 	m_lpszSongComments = nullptr;
 	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
-	memset(Samples, 0, sizeof(Samples));
-	memset(ChnMix, 0, sizeof(ChnMix));
-	memset(Chn, 0, sizeof(Chn));
-	memset(Instruments, 0, sizeof(Instruments));
+	MemsetZero(Samples);
+	MemsetZero(ChnMix);
+	MemsetZero(Chn);
+	MemsetZero(Instruments);
+	MemsetZero(m_szNames);
+	MemsetZero(m_MixPlugins);
+	MemsetZero(m_SongEQ);
 	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order.resize(1);
 	Patterns.ClearPatterns();
-	memset(m_szNames, 0, sizeof(m_szNames));
-	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
-	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	ResetMidiCfg();
 
 	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
