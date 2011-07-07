@@ -351,7 +351,7 @@ CMainFrame::CMainFrame()
 	}
 
 	// Create Audio Critical Section
-	memset(&m_csAudio, 0, sizeof(CRITICAL_SECTION));
+	MemsetZero(m_csAudio);
 	InitializeCriticalSection(&m_csAudio);
 
 	m_csRegKey.Format("%s%s", MAINFRAME_REGKEY_BASE, MAINFRAME_REGKEY_DEFAULT);
@@ -2022,7 +2022,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		if (m_hFollowSong)
 		{
 			MPTNOTIFICATION mn;
-			memset(&mn, 0, sizeof(mn));
+			MemsetZero(mn);
 			mn.dwType = MPTNOTIFY_STOP;
 			::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
 		}
@@ -2038,12 +2038,16 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		//Commented above line - why loop should be disabled when pausing?
 
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
-		if (m_pSndFile == &m_WaveFile)	{
+		if (m_pSndFile == &m_WaveFile)
+		{
 			m_pSndFile = NULL;
 			m_WaveFile.Destroy();
-		} else {
-			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++) {
-				if (!(m_pSndFile->Chn[i].nMasterChn)) {
+		} else
+		{
+			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+			{
+				if (!(m_pSndFile->Chn[i].nMasterChn))
+				{
 					m_pSndFile->Chn[i].nPos = m_pSndFile->Chn[i].nPosLo = m_pSndFile->Chn[i].nLength = 0;
 				}
 			}
@@ -2509,12 +2513,15 @@ void CMainFrame::OnPluginManager()
 	int nPlugslot=-1;
 	CModDoc* pModDoc = GetActiveDoc();
 
-	if (pModDoc) {
+	if (pModDoc)
+	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		//Find empty plugin slot
-		for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+		for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
+		{
 			PSNDMIXPLUGIN pCandidatePlugin = &pSndFile->m_MixPlugins[nPlug];
-			if (pCandidatePlugin->pMixPlugin == NULL) {
+			if (pCandidatePlugin->pMixPlugin == NULL)
+			{
 				nPlugslot=nPlug;
 				break;
 			}
@@ -2522,7 +2529,8 @@ void CMainFrame::OnPluginManager()
 	}
 	CSelectPluginDlg dlg(GetActiveDoc(), nPlugslot, this);
 	dlg.DoModal();
-	if (pModDoc) {
+	if (pModDoc)
+	{
 		//Refresh views
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS|HINT_MODTYPE);
 		//Refresh Controls
@@ -2539,10 +2547,12 @@ void CMainFrame::OnPluginManager()
 void CMainFrame::OnChannelManager()
 //---------------------------------
 {
-	if(GetActiveDoc() && CChannelManagerDlg::sharedInstance()){
+	if(GetActiveDoc() && CChannelManagerDlg::sharedInstance())
+	{
 		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
 			CChannelManagerDlg::sharedInstance()->Hide();
-		else{
+		else
+		{
 			CChannelManagerDlg::sharedInstance()->SetDocument(NULL);
 			CChannelManagerDlg::sharedInstance()->Show();
 		}
@@ -2640,9 +2650,11 @@ void CMainFrame::OnTimer(UINT)
 	}
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
-	if (m_pAutoSaver && m_pAutoSaver->IsEnabled()) {
+	if (m_pAutoSaver && m_pAutoSaver->IsEnabled())
+	{
 		bool success = m_pAutoSaver->DoSave(curTime);
-		if (!success) {					//autosave failure; bring up options.
+		if (!success)		// autosave failure; bring up options.
+		{
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
 			OnViewOptions();
 		}
@@ -2656,7 +2668,8 @@ void CMainFrame::OnTimer(UINT)
 		pModDoc->SetModifiedFlag(pModDoc->m_bDocModified);
 		pModDoc->m_bModifiedChanged=false;
 	}*/
-	if (m_pJustModifiedDoc) {
+	if (m_pJustModifiedDoc)
+	{
 		m_pJustModifiedDoc->SetModified(true);
 		m_pJustModifiedDoc = NULL;
 	}
@@ -3091,10 +3104,12 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 //---------------------------------------------------------
 {
     static bool firstShow = true;
-    if (bShow && !IsWindowVisible() && firstShow)  {
+    if (bShow && !IsWindowVisible() && firstShow)
+	{
         firstShow = false;
 		WINDOWPLACEMENT wpl;
-		if (GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName())) {
+		if (GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName()))
+		{
 			SetWindowPlacement(&wpl);
 		}
     }

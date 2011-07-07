@@ -1412,7 +1412,7 @@ VOID CSelectPluginDlg::OnOK()
 			if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
 			m_pPlugin->pPluginData = NULL;
 			// Initialize plugin info
-			memset(&m_pPlugin->Info, 0, sizeof(m_pPlugin->Info));
+			MemsetZero(m_pPlugin->Info);
 			m_pPlugin->Info.dwPluginId1 = pFactory->dwPluginId1;
 			m_pPlugin->Info.dwPluginId2 = pFactory->dwPluginId2;
 
@@ -1462,7 +1462,7 @@ VOID CSelectPluginDlg::OnOK()
 		if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
 		m_pPlugin->pPluginData = NULL;
 		// Clear plugin info
-		memset(&m_pPlugin->Info, 0, sizeof(m_pPlugin->Info));
+		MemsetZero(m_pPlugin->Info);
 		END_CRITICAL();
 	}
 	
@@ -1599,7 +1599,7 @@ HTREEITEM CSelectPluginDlg::AddTreeItem(LPSTR szTitle, int iImage, bool bSort, H
 //--------------------------------------------------------------------------------------------------------------
 {
 	TVINSERTSTRUCT tvis;
-	memset(&tvis, 0, sizeof(tvis));
+	MemsetZero(tvis);
 
 	tvis.hParent = hParent;
 	tvis.hInsertAfter = (bSort) ? TVI_SORT : TVI_FIRST;
