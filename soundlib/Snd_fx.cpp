@@ -1225,7 +1225,13 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			{
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				applyNNAtoPlug = pPlugin->isPlaying(pChn->nNote, pChn->pModInstrument->nMidiChannel, nChn);
+				MODCOMMAND::NOTE note = pChn->nNote;
+				// Caution: When in compatible mode, MODCHANNEL::nNote stores the "real" note, not the mapped note!
+				if(IsCompatibleMode(TRK_IMPULSETRACKER) && note < CountOf(pChn->pModInstrument->NoteMap))
+				{
+					note = pChn->pModInstrument->NoteMap[note - 1];
+				}
+				applyNNAtoPlug = pPlugin->isPlaying(note, pChn->pModInstrument->nMidiChannel, nChn);
 			}
 		}
 	}
@@ -4231,3 +4237,4 @@ size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat)
 		return 1;
 	}
 }
+
