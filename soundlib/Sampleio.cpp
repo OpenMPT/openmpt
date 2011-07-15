@@ -566,22 +566,20 @@ bool CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	format.format = 1;
 	format.freqHz = pSmp->nC5Speed;
 	if (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) format.freqHz = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
-	format.channels = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
-	format.bitspersample = (pSmp->uFlags & CHN_16BIT) ? 16 : 8;
-	format.samplesize = (format.channels*format.bitspersample)>>3;
+	format.channels = pSmp->GetNumChannels();
+	format.bitspersample = pSmp->GetElementarySampleSize() * 8;
+	format.samplesize = pSmp->GetBytesPerSample() * 8;
 	format.bytessec = format.freqHz*format.samplesize;
 	data.id_data = IFFID_data;
 	UINT nType;
-	data.length = pSmp->nLength;
+	data.length = pSmp->GetSampleSizeInBytes();
 	if (pSmp->uFlags & CHN_STEREO)
 	{
 		nType = (pSmp->uFlags & CHN_16BIT) ? RS_STIPCM16S : RS_STIPCM8U;
-		data.length *= 2;
 	} else
 	{
 		nType = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8U;
 	}
-	if (pSmp->uFlags & CHN_16BIT) data.length *= 2;
 	header.filesize += data.length;
 	fwrite(&header, 1, sizeof(header), f);
 	fwrite(&format, 1, sizeof(format), f);
@@ -781,7 +779,7 @@ LONG PatchFreqToNote(ULONG nFreq)
 }
 
 
-VOID PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
+void PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
 //------------------------------------------------------------------------------------
 {
 	MODSAMPLE *pIns = &that->Samples[nSample];
@@ -877,7 +875,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 // -! BEHAVIOUR_CHANGE#0003
 	pIns = new MODINSTRUMENT;
 	if (!pIns) return false;
-	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	MemsetZero(*pIns);
 	pIns->pTuning = pIns->s_DefaultTuning;
 	Instruments[nInstr] = pIns;
 	nSamples = plh->samples;
