@@ -1743,6 +1743,23 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 		if(f) fwrite(pSample, 1, len, f);
 		break;
 
+	//	Stereo unsigned interleaved
+	case RS_STIPCM8U:
+		len = nLen * 2;
+		bufcount = 0;
+		for (UINT j=0; j<len; j++)
+		{
+			*((uint8 *)(&buffer[bufcount])) = *((uint8 *)(&pSample[j])) + 0x80;
+			bufcount++;
+			if (bufcount >= sizeof(buffer))
+			{
+				if(f) fwrite(buffer, 1, bufcount, f);
+				bufcount = 0;
+			}
+		}
+		if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+		break;
+
 	// Default: assume 8-bit PCM data
 	default:
 		len = nLen;
