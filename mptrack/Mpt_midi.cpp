@@ -5,6 +5,7 @@
 #include "moddoc.h"
 #include "dlsbank.h"
 #include "midi.h"
+#include "Moptions.h"	// for OPTIONS_PAGE_MIDI
 
 //#define MPTMIDI_RECORDLOG
 
@@ -122,6 +123,11 @@ BOOL CMainFrame::midiOpenDevice()
 		if (midiInOpen(&shMidiIn, m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
+
+			// Show MIDI configuration on fail.
+			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
+			CMainFrame::GetMainFrame()->OnViewOptions();
+
 			return FALSE;
 		}
 		midiInStart(shMidiIn);
