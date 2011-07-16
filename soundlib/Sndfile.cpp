@@ -2687,7 +2687,7 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nPPC = 5*12;
 	m_defaultInstrument.nGlobalVol=64;
 	m_defaultInstrument.nPan = 0x20 << 2;
-	m_defaultInstrument.nIFC = 0xFF;
+	//m_defaultInstrument.nIFC = 0xFF;
 	m_defaultInstrument.PanEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.PitchEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.VolEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
