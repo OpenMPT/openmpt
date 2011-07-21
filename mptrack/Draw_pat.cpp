@@ -973,7 +973,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						if (m->command)
 						{
 							UINT command = m->command & 0x3F;
-							int n =	(pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands[command] : gszS3mCommands[command];
+							int n =	pSndFile->GetModSpecifications().GetEffectLetter(command);
 							ASSERT(n > ' ');
 							//if (n <= ' ') n = '?';
 							DrawLetter(xbmp+x, 0, (char)n, pfnt->nEltWidths[3], pfnt->nCmdOfs);

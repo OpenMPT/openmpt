@@ -2120,7 +2120,7 @@ EndSearch:
 		if (m_findReplace.dwFindFlags & PATSEARCH_VOLCMD)
 		{
 			if (m_findReplace.cmdFind.volcmd)
-				wsprintf(&szFind[strlen(szFind)], "%c", gszVolCommands[m_findReplace.cmdFind.volcmd]);
+				wsprintf(&szFind[strlen(szFind)], "%c", pSndFile->GetModSpecifications().GetVolEffectLetter(m_findReplace.cmdFind.volcmd));
 			else
 				strcat(szFind, ".");
 		} else strcat(szFind, "?");
@@ -2133,12 +2133,11 @@ EndSearch:
 		{
 			if (m_findReplace.cmdFind.command)
 			{
-				if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
-					wsprintf(&szFind[strlen(szFind)], "%c", gszS3mCommands[m_findReplace.cmdFind.command]);
-				else
-					wsprintf(&szFind[strlen(szFind)], "%c", gszModCommands[m_findReplace.cmdFind.command]);
+				wsprintf(&szFind[strlen(szFind)], "%c", pSndFile->GetModSpecifications().GetEffectLetter(m_findReplace.cmdFind.command));
 			} else
+			{
 				strcat(szFind, ".");
+			}
 		} else strcat(szFind, "?");
 		if (m_findReplace.dwFindFlags & PATSEARCH_PARAM)
 		{
@@ -3328,6 +3327,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				
 		break;
 
+		case MIDIEVENT_POLYAFTERTOUCH:
+		case MIDIEVENT_CHANAFTERTOUCH:
+			break;
+
 		case MIDIEVENT_CONTROLLERCHANGE: //Controller change
 			switch(nByte1)
 			{
@@ -4020,7 +4023,6 @@ void CViewPattern::TempEnterFX(int c, int v)
 		else if(pSndFile->GetModSpecifications().HasCommand(c))
 		{
 
-			//LPCSTR lpcmd = (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
 			if (c)
 			{
 				if ((c == m_cmdOld.command) && (!p->param) && (!p->command)) p->param = m_cmdOld.param;
