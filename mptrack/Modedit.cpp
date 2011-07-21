@@ -269,7 +269,7 @@ bool CModDoc::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
 	if(chnFrom < chnTo)
 	{
 		CHANNELINDEX temp = newOrder[chnFrom];
-		for(UINT i = chnFrom; i < chnTo; i++)
+		for(CHANNELINDEX i = chnFrom; i < chnTo; i++)
 		{
 			newOrder[i] = newOrder[i + 1];
 		}
@@ -278,7 +278,7 @@ bool CModDoc::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
 	else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
 	{
 		CHANNELINDEX temp = newOrder[chnFrom];
-		for(UINT i = chnFrom; i >= chnTo + 1; i--)
+		for(CHANNELINDEX i = chnFrom; i >= chnTo + 1; i--)
 		{
 			newOrder[i] = newOrder[i - 1];
 		}
@@ -836,7 +836,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 						{
 							if ((m->volcmd) && (m->volcmd <= MAX_VOLCMDS))
 							{
-								p[6] = gszVolCommands[m->volcmd];
+								p[6] = m_SndFile.GetModSpecifications().GetVolEffectLetter(m->volcmd);
 								p[7] = '0' + (m->vol / 10);
 								p[8] = '0' + (m->vol % 10);
 							} else p[6] = p[7] = p[8] = '.';
@@ -861,10 +861,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 						{
 							if (m->command)
 							{
-								if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
-									p[9] = gszS3mCommands[m->command];
-								else
-									p[9] = gszModCommands[m->command];
+								p[9] = m_SndFile.GetModSpecifications().GetEffectLetter(m->command);
 							} else p[9] = '.';
 							if (m->param)
 							{
@@ -944,6 +941,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 				}
 			}
 
+			const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(origFormat);
 			const bool bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
 			pos = startPos;
 
@@ -1057,7 +1055,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 									m[col].volcmd = 0;
 									for (UINT i=1; i<MAX_VOLCMDS; i++)
 									{
-										if (s[5] == gszVolCommands[i])
+										const char cmd = sourceSpecs.GetVolEffectLetter(i);
+										if (s[5] == cmd && cmd != '?')
 										{
 											m[col].volcmd = i;
 											break;
@@ -1086,10 +1085,14 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 								m[col].command = 0;
 								if (s[8] != '.')
 								{
-									LPCSTR psc = (bS3MCommands) ? gszS3mCommands : gszModCommands;
 									for (UINT i=1; i<MAX_EFFECTS; i++)
 									{
-										if ((s[8] == psc[i]) && (psc[i] != '?')) m[col].command = i;
+										const char cmd = sourceSpecs.GetEffectLetter(i);
+										if (s[8] == cmd && cmd != '?')
+										{
+											m[col].command = i;
+											break;
+										}
 									}
 								}
 							}

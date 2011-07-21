@@ -2282,8 +2282,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool
 		if ((bXX) && (bSupported))
 		{
 			strcpy(pszDescription, " xx: ");
-			LPCSTR pszCmd = (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
-			pszDescription[0] = pszCmd[command];
+			pszDescription[0] = m_SndFile.GetModSpecifications().GetEffectLetter(command);
 			if ((gFXInfo[fxndx].dwParamMask & 0xF0) == 0xF0) pszDescription[1] = szHexChar[gFXInfo[fxndx].dwParamValue >> 4];
 			if ((gFXInfo[fxndx].dwParamMask & 0x0F) == 0x0F) pszDescription[2] = szHexChar[gFXInfo[fxndx].dwParamValue & 0x0F];
 		}
