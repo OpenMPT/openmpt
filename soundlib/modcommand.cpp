@@ -328,10 +328,37 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		case CMD_SMOOTHMIDI:
 			m->command = CMD_MIDI;
 			break;
+		case CMD_GLOBALVOLUME:
+			m->param = (min(0x80, m->param) + 1) / 2;
+			break;
 		default:
 			break;
 		}
 	} // End if (oldTypeIsIT_MPT && newTypeIsS3M)
+
+	//////////////////////
+	// Convert IT to XM
+	if(oldTypeIsIT_MPT && newTypeIsXM)
+	{
+		switch(m->command)
+		{
+		case CMD_GLOBALVOLUME:
+			m->param = (min(0x80, m->param) + 1) / 2;
+			break;
+		}
+	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
+
+	//////////////////////
+	// Convert XM to IT
+	if(oldTypeIsXM && newTypeIsIT_MPT)
+	{
+		switch(m->command)
+		{
+		case CMD_GLOBALVOLUME:
+			m->param = min(0x80, m->param * 2);
+			break;
+		}
+	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
 
 	///////////////////////////////////
 	// MOD <-> XM: Speed/Tempo update
