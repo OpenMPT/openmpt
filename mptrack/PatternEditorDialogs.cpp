@@ -154,8 +154,8 @@ BOOL CFindReplaceTab::OnInitDialog()
 		combo->SetItemData(combo->AddString("..."), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("note-1"), replaceNoteMinusOne);
-			combo->SetItemData(combo->AddString("note+1"), replaceNotePlusOne);
+			combo->SetItemData(combo->AddString("note -1"), replaceNoteMinusOne);
+			combo->SetItemData(combo->AddString("note +1"), replaceNotePlusOne);
 			combo->SetItemData(combo->AddString("-1 oct"), replaceNoteMinusOctave);
 			combo->SetItemData(combo->AddString("+1 oct"), replaceNotePlusOctave);
 		} else
@@ -177,8 +177,8 @@ BOOL CFindReplaceTab::OnInitDialog()
 		combo->SetItemData(combo->AddString(".."), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("ins-1"), replaceInstrumentMinusOne);
-			combo->SetItemData(combo->AddString("ins+1"), replaceInstrumentPlusOne);
+			combo->SetItemData(combo->AddString("ins -1"), replaceInstrumentMinusOne);
+			combo->SetItemData(combo->AddString("ins +1"), replaceInstrumentPlusOne);
 		}
 		for (UINT n=1; n<MAX_INSTRUMENTS; n++)
 		{
@@ -209,8 +209,10 @@ BOOL CFindReplaceTab::OnInitDialog()
 		UINT count = m_pModDoc->GetNumVolCmds();
 		for (UINT n=0; n<count; n++)
 		{
-			m_pModDoc->GetVolCmdInfo(n, s);
-			if (s[0]) combo->SetItemData(combo->AddString(s), n);
+			if(m_pModDoc->GetVolCmdInfo(n, s) && s[0])
+			{
+				combo->SetItemData(combo->AddString(s), n);
+			}
 		}
 		combo->SetCurSel(0);
 		UINT fxndx = m_pModDoc->GetIndexFromVolCmd(m_nVolCmd);
@@ -244,8 +246,10 @@ BOOL CFindReplaceTab::OnInitDialog()
 		UINT count = m_pModDoc->GetNumEffects();
 		for (UINT n=0; n<count; n++)
 		{
-			m_pModDoc->GetEffectInfo(n, s, true);
-			if (s[0]) combo->SetItemData(combo->AddString(s), n);
+			if(m_pModDoc->GetEffectInfo(n, s, true) && s[0])
+			{
+				combo->SetItemData(combo->AddString(s), n);
+			}
 		}
 		combo->SetCurSel(0);
 		UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
@@ -423,17 +427,18 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 			m_nPattern,
 			pSndFile->Patterns[m_nPattern].GetNumRows(),
 			(pSndFile->Patterns[m_nPattern].GetNumRows() == 1) ? "" : "s",
-			(pSndFile->Patterns[m_nPattern].GetNumRows() * pSndFile->m_nChannels * sizeof(MODCOMMAND)) / 1024);
+			(pSndFile->Patterns[m_nPattern].GetNumRows() * pSndFile->GetNumChannels() * sizeof(MODCOMMAND)) / 1024);
 		SetDlgItemText(IDC_TEXT1, s);
 
-		// Window title		
-		CHAR szName[MAX_PATTERNNAME + 1];
-		pSndFile->Patterns[m_nPattern].GetName(szName, MAX_PATTERNNAME);
-		if(strlen(szName))
+		// Window title
+		const CString patternName = pSndFile->Patterns[m_nPattern].GetName();
+		wsprintf(s, "Pattern Properties for Pattern #%d", m_nPattern);
+		if(!patternName.IsEmpty())
 		{
-			strcat(szName, ")");
+			strcat(s, " (");
+			strcat(s, patternName);
+			strcat(s, ")");
 		}
-		wsprintf(s, "Pattern Properties for Pattern #%d%s%s", m_nPattern, strlen(szName) ? " (" : "", szName);
 		SetWindowText(s);
 
 		// pattern time signature
