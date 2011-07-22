@@ -98,6 +98,37 @@ const PATTERNFONT gSmallPatternFont =
 // some additions there.
 
 
+/////////////////////////////////////////////////////////////////////////////
+// Effect colour codes
+
+// Effect number => Effect colour assignment
+const BYTE effectColors[] =
+{
+	0,					0,					MODCOLOR_PITCH,		MODCOLOR_PITCH,
+	MODCOLOR_PITCH,		MODCOLOR_PITCH,		MODCOLOR_VOLUME,	MODCOLOR_VOLUME,
+	MODCOLOR_VOLUME,	MODCOLOR_PANNING,	0,					MODCOLOR_VOLUME,
+	MODCOLOR_GLOBALS,	MODCOLOR_VOLUME,	MODCOLOR_GLOBALS,	0,
+	MODCOLOR_GLOBALS,	MODCOLOR_GLOBALS,	0,					0,					
+	0,					MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_GLOBALS,	
+	MODCOLOR_GLOBALS,	0,					MODCOLOR_PITCH,		MODCOLOR_PANNING,
+	MODCOLOR_PITCH,		MODCOLOR_PANNING,	0,					0,
+	0,					0,					0,					MODCOLOR_PITCH,
+	MODCOLOR_PITCH,
+};
+
+STATIC_ASSERT(CountOf(effectColors) == MAX_EFFECTS);
+
+// Volume effect number => Effect colour assignment
+const BYTE volEffectColors[] =
+{
+	0,					MODCOLOR_VOLUME,	MODCOLOR_PANNING,	MODCOLOR_VOLUME,
+	MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_PITCH,
+	MODCOLOR_PITCH,		MODCOLOR_PANNING,	MODCOLOR_PANNING,	MODCOLOR_PITCH,
+	MODCOLOR_PITCH,		MODCOLOR_PITCH,		0,					0,
+};
+
+STATIC_ASSERT(CountOf(volEffectColors) == MAX_VOLCMDS);
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CViewPattern Drawing Implementation
@@ -930,8 +961,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					} else
 					if ((!m->IsPcNote()) && (m->volcmd) && (m->volcmd < MAX_VOLCMDS) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
-						if(gVolEffectColors[m->volcmd] != 0)
-							tx_col = gVolEffectColors[m->volcmd];
+						if(volEffectColors[m->volcmd] != 0)
+							tx_col = volEffectColors[m->volcmd];
 					}
 					// Drawing Volume
 					m_Dib.SetTextColor(tx_col, bk_col);
@@ -948,8 +979,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				fx_col = row_col;
 				if (!isPCnote && (m->command) && (m->command < MAX_EFFECTS) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
-					if(gEffectColors[m->command] != 0)
-						fx_col = gEffectColors[m->command];
+					if(effectColors[m->command] != 0)
+						fx_col = effectColors[m->command];
 				}
 				if (!(dwSpeedUpMask & 0x08))
 				{

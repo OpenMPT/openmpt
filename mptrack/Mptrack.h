@@ -395,8 +395,6 @@ LPCTSTR GetNoteStr(const MODCOMMAND::NOTE);
 ///////////////////////////////////////////////////
 // Tables
 
-extern const BYTE gEffectColors[MAX_EFFECTS];
-extern const BYTE gVolEffectColors[MAX_VOLCMDS];
 extern const LPCSTR szNoteNames[12];
 extern const LPCTSTR szDefaultNoteNames[NOTE_MAX];
 //const LPCTSTR szSpecialNoteNames[NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1] = {TEXT("PCs"), TEXT("PC"), TEXT("~~"), TEXT("^^"), TEXT("==")};
