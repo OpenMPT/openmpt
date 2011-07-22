@@ -426,7 +426,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_IMPORT_MIDILIB:		s="Import &MIDI Library...\t"; c=kcFileImportMidiLib; break;
 		case ID_ADD_SOUNDBANK:		s="Add Sound &Bank...\t"; c=kcFileAddSoundBank; break;
 
-		case ID_PLAYER_PLAY:		s="Pause/&Resume\t"; c= kcPlayPauseSong; break;
+		case ID_PLAYER_PLAY:		s="Pause / &Resume\t"; c= kcPlayPauseSong; break;
 		case ID_PLAYER_PLAYFROMSTART:	s="&Play from start\t"; c=kcPlaySongFromStart; break;
 		case ID_PLAYER_STOP:		s="&Stop\t"; c=kcStopSong; break;
 		case ID_PLAYER_PAUSE:		s="P&ause\t"; c=kcPauseSong; break;
@@ -440,7 +440,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_PASTE:			s="&Paste\t"; c=kcEditPaste; break;
 		case ID_EDIT_SELECT_ALL:	s="Select &All\t"; c=kcEditSelectAll; break;
 		case ID_EDIT_CLEANUP:		s="C&leanup"; break;
-		case ID_EDIT_FIND:			s="&Find\t"; c=kcEditFind; break;
+		case ID_EDIT_FIND:			s="&Find / Replace\t"; c=kcEditFind; break;
 		case ID_EDIT_FINDNEXT:		s="Find &Next\t"; c=kcEditFindNext; break;
 		case ID_EDIT_GOTO_MENU:		s="&Goto\t"; c=kcPatternGoto; break;
 		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c=kcShowSplitKeyboardSettings; break;
