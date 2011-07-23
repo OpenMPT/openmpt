@@ -628,7 +628,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
 		filter,
-		CMainFrame::GetWorkingDirectory(DIR_TUNING));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_TUNING));
 	if(files.abort) return;
 
 	BeginWaitCursor();
@@ -669,12 +669,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, TEXT(""), TEXT(""),
 		(LPCTSTR)sFilter,
-		CMainFrame::GetWorkingDirectory(DIR_TUNING),
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_TUNING),
 		true);
 	if(files.abort)
 		return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
 
 	CString sLoadReport;
 

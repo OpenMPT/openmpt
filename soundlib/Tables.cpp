@@ -657,7 +657,7 @@ static void getdownsample2x(short int *psinc)
 VOID SndMixInitializeTables()
 {
 	CWindowedFIR::InitTable();
-	getsinc(gKaiserSinc, 9.6377, CMainFrame::gdWFIRCutoff);
+	getsinc(gKaiserSinc, 9.6377, CMainFrame::GetSettings().gdWFIRCutoff);
  	//ericus' downsampling improvement.
  	//getsinc(gDownsample13x, 8.5, 3.0/4.0);
 	//getdownsample2x(gDownsample2x);

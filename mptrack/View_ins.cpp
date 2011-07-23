@@ -1190,7 +1190,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		int xofs = 0, yofs = 0, nImage = 0;
 			
 		c1 = c2 = c3 = c4 = crFc;
-		if (!(CMainFrame::m_dwPatternSetup & PATTERN_FLATBUTTONS))
+		if (!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS))
 		{
 			c1 = c3 = crHi;
 			c2 = crDk;
@@ -1200,14 +1200,14 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		{
 			c1 = crDk;
 			c2 = crHi;
-			if (!(CMainFrame::m_dwPatternSetup & PATTERN_FLATBUTTONS))
+			if (!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS))
 			{
 				c4 = crHi;
 				c3 = (dwStyle & NCBTNS_PUSHED) ? RGB(0,0,0) : crDk;
 			}
 			xofs = yofs = 1;
 		} else
-		if ((dwStyle & NCBTNS_MOUSEOVER) && (CMainFrame::m_dwPatternSetup & PATTERN_FLATBUTTONS))
+		if ((dwStyle & NCBTNS_MOUSEOVER) && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS))
 		{
 			c1 = crHi;
 			c2 = crDk;
@@ -1240,7 +1240,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 	} else
 	{
 		c1 = c2 = crFc;
-		if (CMainFrame::m_dwPatternSetup & PATTERN_FLATBUTTONS)
+		if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS)
 		{
 			c1 = crDk;
 			c2 = crHi;
@@ -2138,7 +2138,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				break;
 			}
 		default:
-			if(CMainFrame::m_dwMidiSetup & MIDISETUP_MIDITOPLUG && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
+			if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDITOPLUG && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
 			{
 				const INSTRUMENTINDEX instr = m_nInstrument;
 				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);

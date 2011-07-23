@@ -594,10 +594,10 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		
 		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultExtension, s,
 			extFilter,
-			CMainFrame::GetWorkingDirectory(DIR_MODS));
+			CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS));
 		if(files.abort) return FALSE;
 
-		CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
 
 		strcpy(s, files.first_file.c_str());
 		_splitpath(s, drive, path, fname, fext);
@@ -610,7 +610,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcat(s, fext);
 	}
 	// Do we need to create a backup file ?
-	if ((CMainFrame::m_dwPatternSetup & PATTERN_CREATEBACKUP)
+	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CREATEBACKUP)
 	 && (IsModified()) && (!lstrcmpi(s, m_strPathName)))
 	{
 		CFileStatus rStatus;
@@ -951,7 +951,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 
 		// Handle extra-loud flag
-		if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp))
+		if ((!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp))
 		{
 			pChn->dwFlags |= CHN_EXTRALOUD;
 		} else
@@ -980,7 +980,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			}
 			m_SndFile.m_nBufferCount = 0;
 			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
-			if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) pChn->dwFlags |= CHN_EXTRALOUD;
+			if ((!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) pChn->dwFlags |= CHN_EXTRALOUD;
 		} else pChn->dwFlags &= ~CHN_EXTRALOUD;
 		*/
 
@@ -1089,7 +1089,7 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 //-------------------------------------------------------
 {
-	DWORD muteType = (CMainFrame::m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
+	DWORD muteType = (CMainFrame::GetSettings().m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
 
 	if (nChn >= m_SndFile.m_nChannels) {
 		return false;
@@ -1500,11 +1500,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", fname,
 		"Wave Files (*.wav)|*.wav||",
-		CMainFrame::GetWorkingDirectory(DIR_EXPORT));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_EXPORT));
 	if(files.abort) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	CMainFrame::SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
+	CMainFrame::GetSettings().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
 	TCHAR sFilename[_MAX_PATH];
 	strcpy(sFilename, files.first_file.c_str());
@@ -1691,7 +1691,7 @@ void CModDoc::OnFileMP3Convert()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mp3", sFName,
 		"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||",
-		CMainFrame::GetWorkingDirectory(DIR_EXPORT),
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_EXPORT),
 		false,
 		&nFilterIndex);
 	if(files.abort) return;
@@ -1700,7 +1700,7 @@ void CModDoc::OnFileMP3Convert()
 	HACMDRIVERID hadid;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	pMainFrm->SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
+	CMainFrame::GetSettings().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
 	TCHAR s[_MAX_PATH], fext[_MAX_EXT];
 	strcpy(s, files.first_file.c_str());
@@ -1817,7 +1817,7 @@ void CModDoc::OnFileCompatibilitySave()
 		filename += ".";
 	filename += ext;
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, CMainFrame::GetWorkingDirectory(DIR_MODS));
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS));
 	if(files.abort) return;
 
 	ClearLog();

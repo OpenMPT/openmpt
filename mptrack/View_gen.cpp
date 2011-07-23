@@ -1027,7 +1027,7 @@ void CViewGlobals::OnLoadParam()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
 		"VST FX Program (*.fxp)|*.fxp||",
-		CMainFrame::GetDefaultDirectory(DIR_PLUGINPRESETS));
+		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
     
 	//TODO: exception handling
@@ -1056,7 +1056,7 @@ void CViewGlobals::OnSaveParam()
 	//rewbs.fxpPresets: changed Eric's code to use fxp load/save
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
 		"VST Program (*.fxp)|*.fxp||",
-		CMainFrame::GetDefaultDirectory(DIR_PLUGINPRESETS));
+		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
 
 	//TODO: exception handling

@@ -569,6 +569,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TrackerSettings.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Undo.cpp"
 				>
 			</File>
@@ -1112,6 +1116,10 @@
 			</File>
 			<File
 				RelativePath=".\tagging.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TrackerSettings.h"
 				>
 			</File>
 			<File

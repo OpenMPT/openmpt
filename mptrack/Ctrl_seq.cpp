@@ -68,8 +68,6 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 END_MESSAGE_MAP()
 
 
-BYTE COrderList::s_nDefaultMargins = 0;
-
 bool COrderList::IsOrderInMargins(int order, int startOrder)
 //----------------------------------------------------------
 {
@@ -111,7 +109,7 @@ COrderList::COrderList()
 	m_pModDoc = nullptr;
 	m_nScrollPos = m_nXScroll = 0;
 	m_nScrollPos2nd = ORDERINDEX_INVALID;
-	m_nOrderlistMargins = s_nDefaultMargins;
+	m_nOrderlistMargins = CMainFrame::GetSettings().orderlistMargins;
 	m_bScrolling = false;
 	m_bDragging = false;
 }
@@ -721,7 +719,7 @@ void COrderList::UpdateInfoText()
 		// MOD orderlist always ends after first empty pattern
 		const ORDERINDEX nLength = (pSndFile->GetType() & MOD_TYPE_MOD) ? pSndFile->Order.GetLengthFirstEmpty() : pSndFile->Order.GetLengthTailTrimmed();
 
-		if(CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY)
+		if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
 			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, nLength);
 		}
@@ -1385,7 +1383,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM bDoDrop, LPARAM lParam)
 BYTE COrderList::SetMargins(int i)
 //--------------------------------
 {
-	m_nOrderlistMargins = static_cast<BYTE>(i);
+	m_nOrderlistMargins = i;
 	return GetMargins();
 }
 

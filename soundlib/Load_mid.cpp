@@ -14,6 +14,9 @@
 #include "Loaders.h"
 #include "dlsbank.h"
 #include "Wav.h"
+#ifdef MODPLUG_TRACKER
+#include "..\mptrack\Mainfrm.h"
+#endif // MODPLUG_TRACKER
 
 
 #pragma warning(disable:4244)
@@ -27,8 +30,8 @@ extern void Log(LPCSTR, ...);
 #define MIDI_DRUMCHANNEL	10
 #define MIDI_MAXTRACKS		64
 
-UINT gnMidiImportSpeed = 3;
-UINT gnMidiPatternLen = 128;
+//UINT gnMidiImportSpeed = 3;
+//UINT gnMidiPatternLen = 128;
 
 #pragma pack(1)
 
@@ -357,13 +360,13 @@ static LONG __fastcall getmidilong(LPCBYTE &p, LPCBYTE pmax)
 
 
 // Returns MOD tempo and tick multiplier
-static int ConvertMidiTempo(int tempo_us, int *pTickMultiplier)
-//-------------------------------------------------------------
+static int ConvertMidiTempo(int tempo_us, int &tickMultiplier, int importSpeed)
+//------------------------------------------------------------------------------
 {
 	int nBestModTempo = 120;
 	int nBestError = 1000000; // 1s
 	int nBestMultiplier = 1;
-	int nSpeed = gnMidiImportSpeed;
+	int nSpeed = importSpeed;
 	for (int nModTempo=110; nModTempo<=240; nModTempo++)
 	{
 		int tick_us = (2500000) / nModTempo;
@@ -379,7 +382,7 @@ static int ConvertMidiTempo(int tempo_us, int *pTickMultiplier)
 		}
 		if ((!nError) || ((nError<=1) && (nFactor==64))) break;
 	}
-	*pTickMultiplier = nBestMultiplier * nSpeed;
+	tickMultiplier = nBestMultiplier * nSpeed;
 	return nBestModTempo;
 }
 
@@ -498,11 +501,18 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	short int division;
 	int midi_clock, nTempoUsec, nPPQN, nTickMultiplier;
 
+#ifdef MODPLUG_TRACKER
+	int importSpeed = CMainFrame::GetSettings().midiImportSpeed;
+	int importPatternLen = CMainFrame::GetSettings().midiImportPatternLen;
+#else
+	int importSpeed = 3;
+	int importPatternLen = 128;
+#endif // MODPLUG_TRACKER
+
 	// Fix import parameters
-	if (gnMidiImportSpeed < 2) gnMidiImportSpeed = 2;
-	if (gnMidiImportSpeed > 6) gnMidiImportSpeed = 6;
-	if (gnMidiPatternLen < 64) gnMidiPatternLen = 64;
-	if (gnMidiPatternLen > 256) gnMidiPatternLen = 256;
+	Limit(importSpeed, 2, 6);
+	Limit(importPatternLen, 64, 256);
+
 	// Detect RMI files
 	if ((dwMemLength > 12)
 	 && (*(DWORD *)(lpStream) == IFFID_RIFF)
@@ -555,9 +565,9 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 		nPPQN = (division) ? division : 96;
 	}
 	nTempoUsec = 500000 / nPPQN;
-	tempo = ConvertMidiTempo(nTempoUsec, &nTickMultiplier);
+	tempo = ConvertMidiTempo(nTempoUsec, nTickMultiplier, importSpeed);
 	m_nDefaultTempo = tempo;
-	m_nDefaultSpeed = gnMidiImportSpeed;
+	m_nDefaultSpeed = importSpeed;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	midimastervol = m_nDefaultGlobalVolume;
 	
@@ -627,7 +637,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	do
 	{
 		// Allocate current pattern if not allocated yet
-		if (!Patterns[pat] && Patterns.Insert(pat, gnMidiPatternLen))
+		if (!Patterns[pat] && Patterns.Insert(pat, importPatternLen))
 		{
 			break;
 		}
@@ -784,7 +794,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 								if (l <= 0) break;
 								nTempoUsec = l / nPPQN;
 								if (nTempoUsec < 100) nTempoUsec = 100;
-								tempo = ConvertMidiTempo(nTempoUsec, &nTickMultiplier);
+								tempo = ConvertMidiTempo(nTempoUsec, nTickMultiplier, importSpeed);
 								dwGlobalFlags |= MIDIGLOBAL_UPDATETEMPO;
 #ifdef MIDI_LOG
 								Log("META Tempo: %d usec\n", nTempoUsec);
@@ -1125,7 +1135,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 #endif
 						if (slideamount)
 						{
-							const int ppdiv = (16 * 128 * (gnMidiImportSpeed-1));
+							const int ppdiv = (16 * 128 * (importSpeed - 1));
 							newpitch = (int)chnstate[ichn].pitchsrc + slideamount;
 							if (slideamount < 0)
 							{

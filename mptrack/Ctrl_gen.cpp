@@ -252,9 +252,9 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	}
 	if (dwHint & HINT_MPTSETUP)
 	{
-		DWORD dwSetup = CMainFrame::m_dwQuality;
-		m_ComboResampling.SetCurSel(CMainFrame::m_nSrcMode);
-		CheckDlgButton(IDC_CHECK_LOOPSONG,	(CMainFrame::gbLoopSong) ? TRUE : FALSE);
+		DWORD dwSetup = CMainFrame::GetSettings().m_dwQuality;
+		m_ComboResampling.SetCurSel(CMainFrame::GetSettings().m_nSrcMode);
+		CheckDlgButton(IDC_CHECK_LOOPSONG,	(CMainFrame::GetSettings().gbLoopSong) ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK_AGC,		(dwSetup & QUALITY_AGC) ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK_BASS,		(dwSetup & QUALITY_MEGABASS) ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK_REVERB,	(dwSetup & QUALITY_REVERB) ? TRUE : FALSE);
@@ -508,10 +508,10 @@ void CCtrlGeneral::OnResamplingChanged()
 //--------------------------------------
 {
 	DWORD n = m_ComboResampling.GetCurSel();
-	if ((n < NUM_SRC_MODES) && (n != CMainFrame::m_nSrcMode))
+	if ((n < NUM_SRC_MODES) && (n != CMainFrame::GetSettings().m_nSrcMode))
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(CMainFrame::m_dwQuality, n);
+		if (pMainFrm) pMainFrm->SetupPlayer(CMainFrame::GetSettings().m_dwQuality, n);
 	}
 }
 
@@ -519,12 +519,12 @@ void CCtrlGeneral::OnResamplingChanged()
 void CCtrlGeneral::OnLoopSongChanged()
 //------------------------------------
 {
-	CMainFrame::gbLoopSong = IsDlgButtonChecked(IDC_CHECK_LOOPSONG);
+	CMainFrame::GetSettings().gbLoopSong = IsDlgButtonChecked(IDC_CHECK_LOOPSONG);
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile) pSndFile->SetRepeatCount((CMainFrame::gbLoopSong) ? -1 : 0);
+		if (pSndFile) pSndFile->SetRepeatCount((CMainFrame::GetSettings().gbLoopSong) ? -1 : 0);
 	}
 }
 
@@ -533,12 +533,12 @@ void CCtrlGeneral::OnAGCChanged()
 //-------------------------------
 {
 	BOOL b = IsDlgButtonChecked(IDC_CHECK_AGC);
-	DWORD dwQuality = CMainFrame::m_dwQuality & ~QUALITY_AGC;
+	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_AGC;
 	if (b) dwQuality |= QUALITY_AGC;
-	if (dwQuality != CMainFrame::m_dwQuality)
+	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::m_nSrcMode);
+		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
 	}
 }
 
@@ -547,12 +547,12 @@ void CCtrlGeneral::OnXBassChanged()
 //---------------------------------
 {
 	BOOL b = IsDlgButtonChecked(IDC_CHECK_BASS);
-	DWORD dwQuality = CMainFrame::m_dwQuality & ~QUALITY_MEGABASS;
+	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_MEGABASS;
 	if (b) dwQuality |= QUALITY_MEGABASS;
-	if (dwQuality != CMainFrame::m_dwQuality)
+	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::m_nSrcMode);
+		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
 	}
 }
 
@@ -561,12 +561,12 @@ void CCtrlGeneral::OnReverbChanged()
 //----------------------------------
 {
 	BOOL b = IsDlgButtonChecked(IDC_CHECK_REVERB);
-	DWORD dwQuality = CMainFrame::m_dwQuality & ~QUALITY_REVERB;
+	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_REVERB;
 	if (b) dwQuality |= QUALITY_REVERB;
-	if (dwQuality != CMainFrame::m_dwQuality)
+	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::m_nSrcMode);
+		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
 	}
 }
 
@@ -575,12 +575,12 @@ void CCtrlGeneral::OnSurroundChanged()
 //------------------------------------
 {
 	BOOL b = IsDlgButtonChecked(IDC_CHECK_SURROUND);
-	DWORD dwQuality = CMainFrame::m_dwQuality & ~QUALITY_SURROUND;
+	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_SURROUND;
 	if (b) dwQuality |= QUALITY_SURROUND;
-	if (dwQuality != CMainFrame::m_dwQuality)
+	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::m_nSrcMode);
+		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
 	}
 }
 
@@ -589,12 +589,12 @@ void CCtrlGeneral::OnEqualizerChanged()
 //-------------------------------------
 {
 	BOOL b = IsDlgButtonChecked(IDC_CHECK_EQ);
-	DWORD dwQuality = CMainFrame::m_dwQuality & ~QUALITY_EQ;
+	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_EQ;
 	if (b) dwQuality |= QUALITY_EQ;
-	if (dwQuality != CMainFrame::m_dwQuality)
+	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::m_nSrcMode);
+		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
 	}
 }
 

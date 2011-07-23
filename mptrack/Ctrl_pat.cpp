@@ -91,9 +91,9 @@ CCtrlPatterns::CCtrlPatterns()
 {
 	m_nInstrument = 0;
 	
-	m_bVUMeters = CMainFrame::gbPatternVUMeters;
-	m_bPluginNames = CMainFrame::gbPatternPluginNames;	 	//rewbs.patPlugNames
-	m_bRecord = CMainFrame::gbPatternRecord;
+	m_bVUMeters = CMainFrame::GetSettings().gbPatternVUMeters;
+	m_bPluginNames = CMainFrame::GetSettings().gbPatternPluginNames;	 	//rewbs.patPlugNames
+	m_bRecord = CMainFrame::GetSettings().gbPatternRecord;
 	m_nDetailLevel = 4;
 }
 
@@ -143,7 +143,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_MED, TIMAGE_PATTERN_DETAIL_MED, TBSTYLE_CHECK, TBSTATE_ENABLED);
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_HI, TIMAGE_PATTERN_DETAIL_HI, TBSTYLE_CHECK, TBSTATE_ENABLED|TBSTATE_CHECKED);
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
-	m_ToolBar.AddButton(ID_OVERFLOWPASTE, TIMAGE_PATTERN_OVERFLOWPASTE, TBSTYLE_CHECK, ((CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
+	m_ToolBar.AddButton(ID_OVERFLOWPASTE, TIMAGE_PATTERN_OVERFLOWPASTE, TBSTYLE_CHECK, ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 
 	// Special edit controls -> tab switch to view
 	m_EditSequence.SetParent(this);
@@ -154,12 +154,12 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_EditOrderListMargins.SetLimitText(3);
 	// Spin controls
 	m_SpinSpacing.SetRange(0, MAX_SPACING);
-	m_SpinSpacing.SetPos(CMainFrame::gnPatternSpacing);
+	m_SpinSpacing.SetPos(CMainFrame::GetSettings().gnPatternSpacing);
 
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
 
-	if(CMainFrame::gbShowHackControls == true)
+	if(CMainFrame::GetSettings().gbShowHackControls == true)
 	{
 		m_SpinOrderListMargins.ShowWindow(SW_SHOW);
 		m_EditOrderListMargins.ShowWindow(SW_SHOW);
@@ -172,9 +172,9 @@ BOOL CCtrlPatterns::OnInitDialog()
 		m_EditOrderListMargins.ShowWindow(SW_HIDE);
 	}
 
-	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
+	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::GetSettings().gnPatternSpacing);
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
-	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
+	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
 
 	m_SpinSequence.SetRange(0, m_pSndFile->Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_pSndFile->Order.GetCurrentSequenceIndex());
@@ -264,8 +264,8 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar.UpdateStyle();
 // -> CODE#0007
 // -> DESC="uncheck follow song checkbox by default"
-		//CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? MF_UNCHECKED : MF_CHECKED);
-		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
+		//CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? MF_UNCHECKED : MF_CHECKED);
+		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 // -! BEHAVIOUR_CHANGE#0007
 	}
 	if (dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
@@ -436,7 +436,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SETRECORD:
 		if (lParam >= 0) m_bRecord = (BOOL)(lParam); else m_bRecord = !m_bRecord;
 		m_ToolBar.SetState(IDC_PATTERN_RECORD, ((m_bRecord) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
-		CMainFrame::gbPatternRecord = m_bRecord;
+		CMainFrame::GetSettings().gbPatternRecord = m_bRecord;
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		break;
 
@@ -701,13 +701,13 @@ void CCtrlPatterns::OnSpacingChanged()
 {
 	if ((m_EditSpacing.m_hWnd) && (m_EditSpacing.GetWindowTextLength() > 0))
 	{
-		CMainFrame::gnPatternSpacing = GetDlgItemInt(IDC_EDIT_SPACING);
-		if (CMainFrame::gnPatternSpacing > MAX_SPACING) 
+		CMainFrame::GetSettings().gnPatternSpacing = GetDlgItemInt(IDC_EDIT_SPACING);
+		if (CMainFrame::GetSettings().gnPatternSpacing > MAX_SPACING) 
 		{
-			CMainFrame::gnPatternSpacing = MAX_SPACING;
-			SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing, FALSE);
+			CMainFrame::GetSettings().gnPatternSpacing = MAX_SPACING;
+			SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::GetSettings().gnPatternSpacing, FALSE);
 		}
-		SendViewMessage(VIEWMSG_SETSPACING, CMainFrame::gnPatternSpacing);
+		SendViewMessage(VIEWMSG_SETSPACING, CMainFrame::GetSettings().gnPatternSpacing);
 	}
 }
 
@@ -940,7 +940,7 @@ void CCtrlPatterns::OnPatternRecord()
 {
 	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
 	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
-	CMainFrame::gbPatternRecord = m_bRecord;
+	CMainFrame::GetSettings().gbPatternRecord = m_bRecord;
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
@@ -951,7 +951,7 @@ void CCtrlPatterns::OnPatternVUMeters()
 {
 	UINT nState = m_ToolBar.GetState(ID_PATTERN_VUMETERS);
 	m_bVUMeters = ((nState & TBSTATE_CHECKED) != 0);
-	CMainFrame::gbPatternVUMeters = m_bVUMeters;
+	CMainFrame::GetSettings().gbPatternVUMeters = m_bVUMeters;
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
 	SwitchToView();
 }
@@ -962,7 +962,7 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 {
 	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
 	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
-	CMainFrame::gbPatternPluginNames = m_bPluginNames;
+	CMainFrame::GetSettings().gbPatternPluginNames = m_bPluginNames;
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 	SwitchToView();
 }
@@ -1191,7 +1191,7 @@ void CCtrlPatterns::OnDetailHi()
 void CCtrlPatterns::OnToggleOverflowPaste()
 //-------------------------------------
 {
-	CMainFrame::m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
+	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
 	UpdateView(HINT_MPTOPTIONS, NULL);
 	SwitchToView();
 }

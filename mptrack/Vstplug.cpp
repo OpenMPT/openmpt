@@ -3,7 +3,6 @@
 #include <dmoreg.h>
 #include <shlwapi.h>
 #include <medparam.h>
-#include "mptrack.h"
 #include "mainfrm.h"
 #include "vstplug.h"
 #include "moddoc.h"
@@ -221,7 +220,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			// Get path from cache file
 			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath) - 1, cacheFile);
 			SetNullTerminator(szPath);
-			CMainFrame::RelativePathToAbsolute(szPath);
+			theApp.RelativePathToAbsolute(szPath);
 
 			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
 			{
@@ -360,7 +359,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				_tcsncpy(szPath, pszDllPath, CountOf(szPath) - 1);
 				if(theApp.IsPortableMode())
 				{
-					CMainFrame::AbsolutePathToRelative(szPath);
+					theApp.AbsolutePathToRelative(szPath);
 				}
 				SetNullTerminator(szPath);
 
@@ -889,7 +888,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		break;
 	case audioMasterGetOutputLatency:
 		{
-			VstIntPtr latency = CMainFrame::GetMainFrame()->m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate()/1000L);
+			VstIntPtr latency = CMainFrame::GetSettings().m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate()/1000L);
 			return latency;
 		}
 	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
@@ -1001,7 +1000,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// get plug directory, FSSpec on MAC, else char*
 	case audioMasterGetDirectory:
 		//Log("VST plugin to host: Get Directory\n");
-		return ToVstPtr(CMainFrame::GetDefaultDirectory(DIR_PLUGINS));
+		return ToVstPtr(CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINS));
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
 		if (effect && effect->resvd1)
@@ -1114,7 +1113,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			} else
 			{
 				// Plugins are probably looking for presets...?
-				workingDir = ""; //CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
+				workingDir = ""; //CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS);
 			}
 
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
@@ -1331,10 +1330,10 @@ BOOL CSelectPluginDlg::OnInitDialog()
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
 	}
 	
-	MoveWindow(CMainFrame::GetMainFrame()->gnPlugWindowX,
-			   CMainFrame::GetMainFrame()->gnPlugWindowY,
-			   CMainFrame::GetMainFrame()->gnPlugWindowWidth,
-			   CMainFrame::GetMainFrame()->gnPlugWindowHeight);
+	MoveWindow(CMainFrame::GetSettings().gnPlugWindowX,
+			   CMainFrame::GetSettings().gnPlugWindowY,
+			   CMainFrame::GetSettings().gnPlugWindowWidth,
+			   CMainFrame::GetSettings().gnPlugWindowHeight);
 		
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
@@ -1469,13 +1468,13 @@ VOID CSelectPluginDlg::OnOK()
 	//remember window size:
 	RECT rect;
 	GetWindowRect(&rect);
-	CMainFrame::GetMainFrame()->gnPlugWindowX = rect.left;
-	CMainFrame::GetMainFrame()->gnPlugWindowY = rect.top;
-	CMainFrame::GetMainFrame()->gnPlugWindowWidth  = rect.right - rect.left;
-	CMainFrame::GetMainFrame()->gnPlugWindowHeight = rect.bottom - rect.top;
+	CMainFrame::GetSettings().gnPlugWindowX = rect.left;
+	CMainFrame::GetSettings().gnPlugWindowY = rect.top;
+	CMainFrame::GetSettings().gnPlugWindowWidth  = rect.right - rect.left;
+	CMainFrame::GetSettings().gnPlugWindowHeight = rect.bottom - rect.top;
 
 	if (bChanged) {
-		CMainFrame::GetMainFrame()->gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
+		CMainFrame::GetSettings().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
 	}
 	else {
@@ -1489,10 +1488,10 @@ VOID CSelectPluginDlg::OnCancel()
 	//remember window size:
 	RECT rect;
 	GetWindowRect(&rect);
-	CMainFrame::GetMainFrame()->gnPlugWindowX = rect.left;
-	CMainFrame::GetMainFrame()->gnPlugWindowY = rect.top;
-	CMainFrame::GetMainFrame()->gnPlugWindowWidth  = rect.right - rect.left;
-	CMainFrame::GetMainFrame()->gnPlugWindowHeight = rect.bottom - rect.top;
+	CMainFrame::GetSettings().gnPlugWindowX = rect.left;
+	CMainFrame::GetSettings().gnPlugWindowY = rect.top;
+	CMainFrame::GetSettings().gnPlugWindowWidth  = rect.right - rect.left;
+	CMainFrame::GetSettings().gnPlugWindowHeight = rect.bottom - rect.top;
 
 	CDialog::OnCancel();
 }
@@ -1578,7 +1577,7 @@ VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 				//Last selected plugin
 				else
 				{
-					if (p->dwPluginId2 == CMainFrame::GetMainFrame()->gnPlugWindowLast) {
+					if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast) {
 						pCurrent = p;
 					}
 				}
@@ -1648,11 +1647,11 @@ VOID CSelectPluginDlg::OnAddPlugin()
 {
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dll", "",
 		"VST Plugins (*.dll)|*.dll||",
-		CMainFrame::GetWorkingDirectory(DIR_PLUGINS),
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINS),
 		true);
 	if(files.abort) return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINS, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINS, true);
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	bool bOk = false;

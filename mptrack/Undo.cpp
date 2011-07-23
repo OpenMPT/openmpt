@@ -438,7 +438,7 @@ void CSampleUndo::RestrictBufferSize()
 //------------------------------------
 {
 	UINT nCapacity = GetUndoBufferCapacity();
-	while(nCapacity > CMainFrame::m_nSampleUndoMaxBuffer)
+	while(nCapacity > CMainFrame::GetSettings().m_nSampleUndoMaxBuffer)
 	{
 		for(SAMPLEINDEX nSmp = 1; nSmp <= UndoBuffer.size(); nSmp++)
 		{
@@ -447,7 +447,7 @@ void CSampleUndo::RestrictBufferSize()
 				nCapacity -= (UndoBuffer[nSmp - 1][0].nChangeEnd - UndoBuffer[nSmp - 1][0].nChangeStart) * UndoBuffer[nSmp - 1][0].OldSample.GetBytesPerSample();
 				DeleteUndoStep(nSmp, 0);
 			}
-			if(nCapacity <= CMainFrame::m_nSampleUndoMaxBuffer) return;
+			if(nCapacity <= CMainFrame::GetSettings().m_nSampleUndoMaxBuffer) return;
 		}
 	}
 }

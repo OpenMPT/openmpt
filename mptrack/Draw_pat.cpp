@@ -136,7 +136,7 @@ STATIC_ASSERT(CountOf(volEffectColors) == MAX_VOLCMDS);
 inline PCPATTERNFONT GetCurrentPatternFont()
 //------------------------------------------
 {
-	return (CMainFrame::m_dwPatternSetup & PATTERN_SMALLFONT) ? &gSmallPatternFont : &gDefaultPatternFont;
+	return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SMALLFONT) ? &gSmallPatternFont : &gDefaultPatternFont;
 }
 
 
@@ -158,15 +158,15 @@ void CViewPattern::UpdateColors()
 {
 	BYTE r,g,b;
 
-	m_Dib.SetAllColors(0, MAX_MODCOLORS, CMainFrame::rgbCustomColors);
-	r = hilightcolor(GetRValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-					GetRValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	g = hilightcolor(GetGValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-					GetGValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	b = hilightcolor(GetBValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-					GetBValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	m_Dib.SetAllColors(0, MAX_MODCOLORS, CMainFrame::GetSettings().rgbCustomColors);
+	r = hilightcolor(GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
+					GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	g = hilightcolor(GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
+					GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	b = hilightcolor(GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
+					GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	m_Dib.SetColor(MODCOLOR_2NDHIGHLIGHT, RGB(r,g,b));
-	m_Dib.SetBlendColor(CMainFrame::rgbCustomColors[MODCOLOR_BLENDCOLOR]);
+	m_Dib.SetBlendColor(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BLENDCOLOR]);
 }
 
 
@@ -612,7 +612,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			BOOL bPrevPatFound = FALSE;
 
 			// Display previous pattern
-			if (CMainFrame::m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
+			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 			{
 				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 				if(startOrder > 0)
@@ -657,7 +657,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	DrawPatternData(hdc, pSndFile, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc) ? TRUE : FALSE,
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
-	if ((CMainFrame::m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
+	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
 	{
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
 		if ((nVisRows > 0) && (m_nMidRow))
@@ -777,7 +777,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
 		
-		wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "%02X" : "%d", row);
+		wsprintf(s, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "%02X" : "%d", row);
 		rect.left = 0;
 		rect.top = ypaint;
 		rect.right = rcClient.right;
@@ -803,7 +803,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			nMeasure = pSndFile->Patterns[nPattern].GetRowsPerMeasure();
 		}
 		// secondary highlight (beats)
-		if ((CMainFrame::m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
+		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
 		 && (nBeat) && (nBeat < nrows))
 		{
 			if (!(row % nBeat))
@@ -812,7 +812,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			}
 		}
 		// primary highlight (measures)
-		if ((CMainFrame::m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
+		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
 		 && (nMeasure) && (nMeasure < nrows))
 		{
 			if (!(row % nMeasure))
@@ -905,7 +905,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
-				if ((CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= NOTE_MAX))
+				if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= NOTE_MAX))
 				{
 					tx_col = MODCOLOR_NOTE;
 					// Highlight notes that are not supported by the Amiga (for S3M this is not always correct)
@@ -932,7 +932,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				{
 					tx_col = row_col;
 					bk_col = row_bkcol;
-					if ((CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->instr))
+					if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->instr))
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
@@ -959,7 +959,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
 					} else
-					if ((!m->IsPcNote()) && (m->volcmd) && (m->volcmd < MAX_VOLCMDS) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+					if ((!m->IsPcNote()) && (m->volcmd) && (m->volcmd < MAX_VOLCMDS) && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
 						if(volEffectColors[m->volcmd] != 0)
 							tx_col = volEffectColors[m->volcmd];
@@ -977,7 +977,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				uint16 val = m->GetValueEffectCol();
 				if(val > MODCOMMAND::maxColumnValue) val = MODCOMMAND::maxColumnValue;
 				fx_col = row_col;
-				if (!isPCnote && (m->command) && (m->command < MAX_EFFECTS) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+				if (!isPCnote && (m->command) && (m->command < MAX_EFFECTS) && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
 					if(effectColors[m->command] != 0)
 						fx_col = effectColors[m->command];
@@ -1216,7 +1216,7 @@ void CViewPattern::UpdateScrollSize()
 		sizePage.cy = sizeLine.cy * 8;
 		GetClientRect(&rect);
 		m_nMidRow = 0;
-		if (CMainFrame::m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy << 1);
+		if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy << 1);
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue

@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include <vector>
-using std::vector;
 
 #include "snddev.h"
 #include "snddevx.h"

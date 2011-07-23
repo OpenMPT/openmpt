@@ -425,7 +425,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
 		// Turn on ramping after first read (fix http://forum.openmpt.org/index.php?topic=523.0 )
-		gnVolumeRampSamples = CMainFrame::glVolumeRampSamples;
+		gnVolumeRampSamples = CMainFrame::GetSettings().glVolumeRampSamples;
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
@@ -678,7 +678,7 @@ BOOL CSoundFile::ProcessRow()
 
 					// If channel resetting is disabled in MPT, we will emulate a pattern break (and we always do it if we're not in MPT)
 #ifdef MODPLUG_TRACKER
-					if(CMainFrame::GetMainFrame() && !(CMainFrame::GetMainFrame()->m_dwPatternSetup & PATTERN_RESETCHANNELS))
+					if(!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_RESETCHANNELS))
 #endif // MODPLUG_TRACKER
 					{
 						m_dwSongFlags |= SONG_BREAKTOROW;

@@ -182,7 +182,12 @@ public:
 	static bool IsPortableMode() { return m_bPortableMode; }
 	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
 	LPCSTR GetConfigPath() const { return m_szConfigDirectory; }
-	void SetupPaths();
+	void SetupPaths(bool overridePortable);
+	// Relative / absolute paths conversion
+	template <size_t nLength>
+	void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
+	template <size_t nLength>
+	void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
 
 // Splash Screen
 protected:
