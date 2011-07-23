@@ -796,7 +796,7 @@ OpenError:
 	if (bOk)
 	{
 		MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
-		CMainFrame::SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
+		CMainFrame::GetSettings().SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
 		if (!pSmp->filename[0])
 		{
 			CHAR szFullFilename[_MAX_PATH];
@@ -951,12 +951,12 @@ void CCtrlSamples::OnSampleOpen()
 		"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
 		"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
 		"All Files (*.*)|*.*||",
-		CMainFrame::GetWorkingDirectory(DIR_SAMPLES),
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_SAMPLES),
 		true,
 		&nLastIndex);
 	if(files.abort) return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
 
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
@@ -1025,7 +1025,7 @@ void CCtrlSamples::OnSampleSave()
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", szFileName,
 		"Wave File (*.wav)|*.wav|"
 		"RAW Audio (*.raw)|*.raw||",
-		CMainFrame::GetWorkingDirectory(DIR_SAMPLES));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_SAMPLES));
 	if(files.abort) return;
 
 	BeginWaitCursor();
@@ -1076,7 +1076,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
+		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
 	}
 	SwitchToView();
 }

@@ -306,7 +306,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 void CMainToolBar::Init(CMainFrame *pMainFrm)
 //-------------------------------------------
 {
-	EnableFlatButtons(CMainFrame::m_dwPatternSetup & PATTERN_FLATBUTTONS);
+	EnableFlatButtons(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS);
 	SetHorizontal();
 	pMainFrm->DockControlBar(this);
 }
@@ -600,7 +600,7 @@ CModTreeBar::CModTreeBar()
 //------------------------
 {
 	m_pModTree = m_pModTreeData = NULL;
-	m_nTreeSplitRatio = CMainFrame::glTreeSplitRatio;
+	m_nTreeSplitRatio = CMainFrame::GetSettings().glTreeSplitRatio;
 }
 
 
@@ -613,7 +613,7 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	m_pModTree = new CModTree(m_pModTreeData);
 	if (m_pModTree)	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
 	m_dwStatus = 0;
-	m_sizeDefault.cx = CMainFrame::glTreeWindowWidth + 3;
+	m_sizeDefault.cx = CMainFrame::GetSettings().glTreeWindowWidth + 3;
 	m_sizeDefault.cy = 32767;
 	return l;
 }
@@ -638,7 +638,7 @@ CModTreeBar::~CModTreeBar()
 void CModTreeBar::Init()
 //----------------------
 {
-	m_nTreeSplitRatio = CMainFrame::glTreeSplitRatio;
+	m_nTreeSplitRatio = CMainFrame::GetSettings().glTreeSplitRatio;
 	if (m_pModTree)
 	{
 		m_pModTreeData->Init();
@@ -692,9 +692,9 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 //--------------------------------------------
 {
 	CSize sz;
-	m_sizeDefault.cx = CMainFrame::glTreeWindowWidth;
+	m_sizeDefault.cx = CMainFrame::GetSettings().glTreeWindowWidth;
 	m_sizeDefault.cy = 32767;
-	sz.cx = CMainFrame::glTreeWindowWidth + 3;
+	sz.cx = CMainFrame::GetSettings().glTreeWindowWidth + 3;
 	if (sz.cx < 4) sz.cx = 4;
 	sz.cy = 32767;
 	return sz;
@@ -832,7 +832,7 @@ VOID CModTreeBar::DoLButtonUp()
 			if (ratio < 0) ratio = 0;
 			if (ratio > 256) ratio = 256;
 			m_nTreeSplitRatio = ratio;
-			CMainFrame::glTreeSplitRatio = ratio;
+			CMainFrame::GetSettings().glTreeSplitRatio = ratio;
 			RecalcLayout();
 		} else
 		{
@@ -842,7 +842,7 @@ VOID CModTreeBar::DoLButtonUp()
 			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			if ((m_nTrackPos != (UINT)rect.Width()) && (pMainFrm))
 			{
-				CMainFrame::glTreeWindowWidth = m_nTrackPos - 3;
+				CMainFrame::GetSettings().glTreeWindowWidth = m_nTrackPos - 3;
 				m_sizeDefault.cx = m_nTrackPos;
 				m_sizeDefault.cy = 32767;
 				pMainFrm->RecalcLayout();

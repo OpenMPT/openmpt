@@ -33,7 +33,7 @@ class CCtrlGeneral: public CModControlDlg
 {
 public:
 	CCtrlGeneral();
-	LONG* GetSplitPosRef() {return &CMainFrame::glGeneralWindowHeight;} 	//rewbs.varWindowSize
+	LONG* GetSplitPosRef() {return &CMainFrame::GetSettings().glGeneralWindowHeight;} 	//rewbs.varWindowSize
 
 private:
 	void setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB);

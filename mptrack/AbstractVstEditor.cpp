@@ -115,10 +115,10 @@ VOID CAbstractVstEditor::OnLoadPreset()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
 		"VST Program (*.fxp)|*.fxp||",
-		CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 
 	//TODO: exception handling to distinguish errors at this level.
 	if (m_pVstPlugin->LoadProgram(files.first_file.c_str()))
@@ -138,10 +138,10 @@ VOID CAbstractVstEditor::OnSavePreset()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
 		"VST Program (*.fxp)|*.fxp||",
-		CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 
 	//TODO: exception handling
 	if (!(m_pVstPlugin->SaveProgram(files.first_file.c_str())))

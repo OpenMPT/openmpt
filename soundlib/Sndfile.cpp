@@ -463,8 +463,8 @@ CSoundFile::CSoundFile() :
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;
 	m_bPatternTransitionOccurred = false;
-	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::m_nRowSpacing2) ? CMainFrame::m_nRowSpacing2 : 4;
-	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::m_nRowSpacing >= m_nDefaultRowsPerBeat) ? CMainFrame::m_nRowSpacing : m_nDefaultRowsPerBeat * 4;
+	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::GetSettings().m_nRowHighlightBeats) ? CMainFrame::GetSettings().m_nRowHighlightBeats : 4;
+	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::GetSettings().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? CMainFrame::GetSettings().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
 	m_nMaxSample = 0;
@@ -2756,7 +2756,7 @@ bool CSoundFile::LoadStaticTunings()
 		
 	// Load local tunings.
 	CString sPath;
-	sPath.Format(TEXT("%slocal_tunings%s"), CMainFrame::GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
+	sPath.Format(TEXT("%slocal_tunings%s"), CMainFrame::GetSettings().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
 	s_pTuningsSharedLocal->SetSavefilePath(sPath);
 	s_pTuningsSharedLocal->Deserialize();
 

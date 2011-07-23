@@ -264,7 +264,7 @@ void COptionsSoundcard::UpdateStereoSep()
 void COptionsSoundcard::SetPreAmpSliderPosition()
 //-----------------------------------------------
 {
-	int n = (CMainFrame::m_nPreAmp - 64) / 8;
+	int n = (CMainFrame::GetSettings().m_nPreAmp - 64) / 8;
 	if ((n < 0) || (n > 40)) n = 16;
 	m_SliderPreAmp.SetPos(40 - n);
 }
@@ -325,7 +325,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 
 	ISoundDevice *dummy = nullptr;
 	bool justCreated = false, knowRates = false;
-	if(CMainFrame::m_nWaveDevice == dev)
+	if(CMainFrame::GetSettings().m_nWaveDevice == dev)
 	{
 		// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
 		dummy = CMainFrame::gpSoundDevice;
@@ -475,7 +475,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	DWORD dwQuality;
 	
 	CPropertyPage::OnInitDialog();
-	dwQuality = CMainFrame::m_dwQuality;
+	dwQuality = CMainFrame::GetSettings().m_dwQuality;
 	// Resampling type
 	{
 		m_CbnResampling.AddString("No Interpolation");
@@ -485,7 +485,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("Polyphase");
 		m_CbnResampling.AddString("XMMS-ModPlug");
 		//end rewbs.resamplerConf
-		m_CbnResampling.SetCurSel(CMainFrame::m_nSrcMode);
+		m_CbnResampling.SetCurSel(CMainFrame::GetSettings().m_nSrcMode);
 	}
 	// Effects
 	if (dwQuality & QUALITY_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
@@ -538,7 +538,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	//rewbs.resamplerConf
 	OnResamplerChanged();
 	char s[20] = "";
-	_ltoa(CMainFrame::glVolumeRampSamples,s, 10);
+	_ltoa(CMainFrame::GetSettings().glVolumeRampSamples,s, 10);
 	m_CEditRamping.SetWindowText(s);
 	//end rewbs.resamplerConf
 	return TRUE;
@@ -573,7 +573,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	CMainFrame::gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
+	CMainFrame::GetSettings().gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -590,7 +590,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().gdWFIRCutoff*100)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -601,10 +601,10 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
 		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
 		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(CMainFrame::gbWFIRType);
+		m_CbnWFIRType.SetCurSel(CMainFrame::GetSettings().gbWFIRType);
 		m_CbnWFIRType.EnableWindow(TRUE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().gdWFIRCutoff*100)));
 		break;
 	default: 
 		m_CbnWFIRType.AddString("None");
@@ -618,9 +618,9 @@ void COptionsPlayer::OnResamplerChanged()
 
 void COptionsPlayer::OnDefaultResampling()
 {
-	//CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T
-	//CMainFrame::gdWFIRCutoff = 0.97;
-	//CMainFrame::m_nSrcMode = SRCMODE_POLYPHASE
+	//CMainFrame::GetSettings().gbWFIRType = 7; //WFIR_KAISER4T
+	//CMainFrame::GetSettings().gdWFIRCutoff = 0.97;
+	//CMainFrame::GetSettings().m_nSrcMode = SRCMODE_POLYPHASE
 	//CMainFrame::glVolumeRampSamples = 42;
 	m_CbnResampling.SetCurSel(SRCMODE_POLYPHASE);
 	OnResamplerChanged();
@@ -675,10 +675,10 @@ void COptionsPlayer::OnOK()
 	CString s;
 	m_CEditWFIRCutoff.GetWindowText(s);
 	if (s != "")
-		CMainFrame::gdWFIRCutoff = atoi(s)/100.0;
-	//CMainFrame::gbWFIRType set in OnWFIRTypeChange
+		CMainFrame::GetSettings().gdWFIRCutoff = atoi(s)/100.0;
+	//CMainFrame::GetSettings().gbWFIRType set in OnWFIRTypeChange
 	m_CEditRamping.GetWindowText(s);
-	CMainFrame::glVolumeRampSamples = atol(s);
+	CMainFrame::GetSettings().glVolumeRampSamples = atol(s);
 	SndMixInitializeTables(); //regenerate resampling tables
 	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);
@@ -1107,9 +1107,6 @@ BOOL CEQSetupDlg::OnSetActive()
 /////////////////////////////////////////////////////////////
 // CMidiSetupDlg
 
-extern UINT gnMidiImportSpeed;
-extern UINT gnMidiPatternLen;
-
 BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
@@ -1165,8 +1162,8 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		combo->SetCurSel((m_nMidiDevice == MIDI_MAPPER) ? 0 : m_nMidiDevice);
 	}
 	// Midi Import settings
-	SetDlgItemInt(IDC_EDIT1, gnMidiImportSpeed);
-	SetDlgItemInt(IDC_EDIT2, gnMidiPatternLen);
+	SetDlgItemInt(IDC_EDIT1, CMainFrame::GetSettings().midiImportSpeed);
+	SetDlgItemInt(IDC_EDIT2, CMainFrame::GetSettings().midiImportPatternLen);
 	m_SpinSpd.SetRange(2, 6);
 	m_SpinPat.SetRange(64, 256);
 	return TRUE;
@@ -1195,8 +1192,8 @@ void CMidiSetupDlg::OnOK()
 		int n = combo->GetCurSel();
 		if (n >= 0) m_nMidiDevice = combo->GetItemData(n);
 	}
-	gnMidiImportSpeed = GetDlgItemInt(IDC_EDIT1);
-	gnMidiPatternLen = GetDlgItemInt(IDC_EDIT2);
+	CMainFrame::GetSettings().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
+	CMainFrame::GetSettings().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();
 }

@@ -230,14 +230,14 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 {
 public:
 	bool m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
-		 m_bNoSettingsOnNewVersion;
+		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 	CString m_csExtension;
 
 public:
 	CMPTCommandLineInfo() { 
 		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx = 
-		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = false; 
+		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false; 
 		m_csExtension = "";
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
@@ -256,6 +256,7 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = true; } else
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; } else
 		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; } else
+		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; } else
 		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; }
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
@@ -352,7 +353,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 			{
 				if ((glpMidiLibrary->MidiMap[iMidi] = new TCHAR[_MAX_PATH]) == nullptr) return FALSE;
 			}
-			CMainFrame::RelativePathToAbsolute(szFileName);
+			theApp.RelativePathToAbsolute(szFileName);
 			_tcscpy(glpMidiLibrary->MidiMap[iMidi], szFileName);
 		}
 	}
@@ -378,7 +379,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 		if(szFileName[0])
 		{
 			if(IsPortableMode())
-				CMainFrame::AbsolutePathToRelative(szFileName);
+				theApp.AbsolutePathToRelative(szFileName);
 			if (!WritePrivateProfileString("Midi Library", s, szFileName, lpszConfigFile)) break;
 		}
 	}
@@ -411,7 +412,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 			wsprintf(s, _T("Bank%d"), i + 1);
 			TCHAR szPath[_MAX_PATH];
 			GetPrivateProfileString("DLS Banks", s, "", szPath, INIBUFFERSIZE, theApp.GetConfigFileName());
-			CMainFrame::RelativePathToAbsolute(szPath);
+			theApp.RelativePathToAbsolute(szPath);
 			AddDLSBank(szPath);
 		}
 	} else
@@ -491,7 +492,7 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), ARRAYELEMCOUNT(szPath) - 1);
 		if(IsPortableMode())
 		{
-			CMainFrame::AbsolutePathToRelative(szPath);
+			theApp.AbsolutePathToRelative(szPath);
 		}
 
 		wsprintf(s, _T("Bank%d"), nBanks+1);
@@ -667,8 +668,9 @@ bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PA
 #endif	// WIN32 Legacy Stuff
 
 
-void CTrackApp::SetupPaths()
-//--------------------------
+// Set up paths were configuration data is written to. Set overridePortable to true if application's own directory should always be used.
+void CTrackApp::SetupPaths(bool overridePortable)
+//-----------------------------------------------
 {
 	if(GetModuleFileName(NULL, m_szExePath, _MAX_PATH))
 	{
@@ -680,12 +682,11 @@ void CTrackApp::SetupPaths()
 
 	m_szConfigDirectory[0] = 0;
 	// Try to find a nice directory where we should store our settings (default: %APPDATA%)
-	bool bIsAppDir = false;
+	bool bIsAppDir = overridePortable;
 	if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
 	{
 		if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
 		{
-			strcpy(m_szConfigDirectory, m_szExePath);
 			bIsAppDir = true;
 		}
 	}
@@ -695,7 +696,6 @@ void CTrackApp::SetupPaths()
 	strcat(m_szConfigFileName, "mptrack.ini");
 	if(GetPrivateProfileInt("Paths", "UseAppDataDirectory", 1, m_szConfigFileName) == 0)
 	{
-		strcpy(m_szConfigDirectory, m_szExePath);
 		bIsAppDir = true;
 	}
 
@@ -716,16 +716,19 @@ void CTrackApp::SetupPaths()
 		MoveConfigFile("plugin.cache");
 		MoveConfigFile("mpt_intl.ini");
 		#endif	// WIN32 Legacy Stuff
+	} else
+	{
+		strcpy(m_szConfigDirectory, m_szExePath);
 	}
 	
 	// Create tunings dir
 	CString sTuningPath;
 	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
-	CMainFrame::SetDefaultDirectory(sTuningPath, DIR_TUNING);
+	CMainFrame::GetSettings().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectory(CMainFrame::GetDefaultDirectory(DIR_TUNING)) == 0)
+	if(PathIsDirectory(CMainFrame::GetSettings().GetDefaultDirectory(DIR_TUNING)) == 0)
 	{
-		CreateDirectory(CMainFrame::GetDefaultDirectory(DIR_TUNING), 0);
+		CreateDirectory(CMainFrame::GetSettings().GetDefaultDirectory(DIR_TUNING), 0);
 	}
 
 	if(!bIsAppDir)
@@ -795,8 +798,8 @@ BOOL CTrackApp::InitInstance()
 	// Allow allocations of at least 16MB
 	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
 
-	CMainFrame::m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
-	if(CMainFrame::m_nSampleUndoMaxBuffer < (1 << 20)) CMainFrame::m_nSampleUndoMaxBuffer = (1 << 20);
+	CMainFrame::GetSettings().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
+	if(CMainFrame::GetSettings().m_nSampleUndoMaxBuffer < (1 << 20)) CMainFrame::GetSettings().m_nSampleUndoMaxBuffer = (1 << 20);
 
 	ASSERT(NULL == m_pDocManager);
 	m_pDocManager = new CModDocManager();
@@ -806,8 +809,14 @@ BOOL CTrackApp::InitInstance()
 	// Disabled by rewbs for smoothVST. Might cause minor perf issues due to increased cache misses?
 #endif
 
+	// Parse command line for standard shell commands, DDE, file open
+	CMPTCommandLineInfo cmdInfo;
+	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = true;
+	ParseCommandLine(cmdInfo);
+
+
 	// Set up paths to store configuration in
-	SetupPaths();
+	SetupPaths(cmdInfo.m_bPortable);
 
 	//Force use of custom ini file rather than windowsDir\executableName.ini
 	if (m_pszProfileName) {
@@ -830,12 +839,12 @@ BOOL CTrackApp::InitInstance()
 	CSoundFile::InitSysInfo();
 	if (CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX)
 	{
-		CMainFrame::m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
-		CMainFrame::m_nSrcMode = SRCMODE_SPLINE;
+		CMainFrame::GetSettings().m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
+		CMainFrame::GetSettings().m_nSrcMode = SRCMODE_SPLINE;
 	}
 	if (CSoundFile::gdwSysInfo & SYSMIX_MMXEX)
 	{
-		CMainFrame::m_nSrcMode = SRCMODE_POLYPHASE;
+		CMainFrame::GetSettings().m_nSrcMode = SRCMODE_POLYPHASE;
 	}
 	// Load Midi Library
 	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);
@@ -857,11 +866,6 @@ BOOL CTrackApp::InitInstance()
 		s[MACRO_LENGTH - 1] = 0;
 		memcpy(m_MidiCfg.szMidiZXXExt[izxx], s, MACRO_LENGTH);
 	}
-
-	// Parse command line for standard shell commands, DDE, file open
-	CMPTCommandLineInfo cmdInfo;
-	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = true;
-	ParseCommandLine(cmdInfo);
 
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);
@@ -927,7 +931,7 @@ BOOL CTrackApp::InitInstance()
 	}
 
 	// Open settings if the previous execution was with an earlier version.
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::gcsPreviousVersion) < MptVersion::num) {
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::GetSettings().gcsPreviousVersion) < MptVersion::num) {
 		StopSplashScreen();
 		ShowChangesDialog();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
@@ -1191,12 +1195,12 @@ void CTrackApp::OnFileOpen()
 		"Wave Files (*.wav)|*.wav|"
 		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||",
-		CMainFrame::GetWorkingDirectory(DIR_MODS),
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS),
 		true,
 		&nFilterIndex);
 	if(files.abort) return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
 
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
@@ -1565,7 +1569,7 @@ BOOL CAboutDlg::OnInitDialog()
 		"Contact / Discussion:\r\n"
 		"http://forum.openmpt.org/\r\n"
 		"\r\nUpdates:\r\n"
-		"http://sourceforge.net/projects/modplug/");
+		"http://openmpt.org/download");
 
 	const char* const pArrCredit = { 
 		"OpenMPT / ModPlug Tracker|"
@@ -2860,7 +2864,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 		GetPrivateProfileString("VST Plugins", tmp, "", s, sizeof(s), m_szConfigFileName);
 		if (s[0])
 		{
-			CMainFrame::RelativePathToAbsolute(s);
+			RelativePathToAbsolute(s);
 			m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
 		}
 	}
@@ -2892,7 +2896,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			strcpy(s, pPlug->szDllPath);
 			if(theApp.IsPortableMode())
 			{
-				CMainFrame::AbsolutePathToRelative(s);
+				AbsolutePathToRelative(s);
 			}
 			WritePrivateProfileString("VST Plugins", tmp, s, m_szConfigFileName);
 			iPlug++;
@@ -3098,4 +3102,76 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(const bool load, const std::stri
 	result.extension = dlg.GetFileExt();
 
 	return result;
+}
+
+
+// Convert an absolute path to a path that's relative to OpenMPT's directory.
+// Paths are relative to the executable path.
+// nLength specifies the maximum number of character that can be written into szPath,
+// including the trailing null char.
+template <size_t nLength>
+void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
+//---------------------------------------------------------------
+{
+	STATIC_ASSERT(nLength >= 3);
+
+	if(_tcslen(szPath) == 0)
+		return;
+
+	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
+	TCHAR szExePath[nLength], szTempPath[nLength];
+	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
+	SetNullTerminator(szExePath);
+
+	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
+	{
+		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
+		_tcscpy(szTempPath, _T(".\\"));	// ".\"
+		_tcsncat(szTempPath, &szPath[_tcslen(szExePath)], nStrLength - 2);	// "Somepath"
+		_tcscpy(szPath, szTempPath);
+	} else if(!_tcsncicmp(szExePath, szPath, 2))
+	{
+		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
+		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
+		_tcscpy(szPath, szTempPath);
+	}
+	SetNullTerminator(szPath);
+}
+
+
+// Convert a relative path to an absolute path.
+// Paths are relative to the executable path.
+// nLength specifies the maximum number of character that can be written into szPath,
+// including the trailing null char.
+template <size_t nLength>
+void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
+//---------------------------------------------------------------
+{
+	STATIC_ASSERT(nLength >= 3);
+
+	if(_tcslen(szPath) == 0)
+		return;
+
+	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
+	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
+	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
+	SetNullTerminator(szExePath);
+
+	if(!_tcsncicmp(szPath, _T("\\"), 1))
+	{
+		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\")
+		_tcsncat(szTempPath, szExePath, 2);	// "C:"
+		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
+		_tcscpy(szPath, szTempPath);
+	} else if(!_tcsncicmp(szPath, _T(".\\"), 2))
+	{
+		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
+		_tcsncpy(szTempPath, szExePath, nStrLength);	// "C:\OpenMPT\"
+		if(_tcslen(szTempPath) < nStrLength)
+		{
+			_tcsncat(szTempPath, &szPath[2], nStrLength - _tcslen(szTempPath));	//	"Somepath"
+		}
+		_tcscpy(szPath, szTempPath);
+	}
+	SetNullTerminator(szPath);
 }

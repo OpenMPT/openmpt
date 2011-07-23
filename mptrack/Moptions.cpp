@@ -81,19 +81,19 @@ BOOL COptionsColors::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
-	memcpy(CustomColors, CMainFrame::rgbCustomColors, sizeof(CustomColors));
+	memcpy(CustomColors, CMainFrame::GetSettings().rgbCustomColors, sizeof(CustomColors));
 	for (UINT i = 0; i < CountOf(gColorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(gColorDefs[i].pszName), i);
 	}
 	m_ComboItem.SetCurSel(0);
 	m_BtnPreview.SetWindowPos(NULL, 0,0, PREVIEWBMP_WIDTH*2+2, PREVIEWBMP_HEIGHT*2+2, SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
-	if (CMainFrame::m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
-	if (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if (CMainFrame::m_dwPatternSetup & PATTERN_SMALLFONT) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
-	if (CMainFrame::m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::m_nRowSpacing);
-	SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::m_nRowSpacing2);
+	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
+	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SMALLFONT) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::GetSettings().m_nRowHighlightMeasures);
+	SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::GetSettings().m_nRowHighlightBeats);
 	
 	OnColorSelChanged();
 	return TRUE;
@@ -116,19 +116,20 @@ BOOL COptionsColors::OnKillActive()
 	return CPropertyPage::OnKillActive();
 }
 
+
 void COptionsColors::OnOK()
 //-------------------------
 {
-	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT);
-	if (IsDlgButtonChecked(IDC_CHECK1)) CMainFrame::m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
-	if (IsDlgButtonChecked(IDC_CHECK2)) CMainFrame::m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
-	if (IsDlgButtonChecked(IDC_CHECK3)) CMainFrame::m_dwPatternSetup |= PATTERN_SMALLFONT;
-	if (IsDlgButtonChecked(IDC_CHECK4)) CMainFrame::m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
+	CMainFrame::GetSettings().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT);
+	if (IsDlgButtonChecked(IDC_CHECK1)) CMainFrame::GetSettings().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
+	if (IsDlgButtonChecked(IDC_CHECK2)) CMainFrame::GetSettings().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
+	if (IsDlgButtonChecked(IDC_CHECK3)) CMainFrame::GetSettings().m_dwPatternSetup |= PATTERN_SMALLFONT;
+	if (IsDlgButtonChecked(IDC_CHECK4)) CMainFrame::GetSettings().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 
-	CMainFrame::m_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
-	CMainFrame::m_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
+	CMainFrame::GetSettings().m_nRowHighlightMeasures = GetDlgItemInt(IDC_PRIMARYHILITE);
+	CMainFrame::GetSettings().m_nRowHighlightBeats = GetDlgItemInt(IDC_SECONDARYHILITE);
 
-	memcpy(CMainFrame::rgbCustomColors, CustomColors, sizeof(CMainFrame::rgbCustomColors));
+	memcpy(CMainFrame::GetSettings().rgbCustomColors, CustomColors, sizeof(CMainFrame::GetSettings().rgbCustomColors));
 	CMainFrame::UpdateColors();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
@@ -610,17 +611,17 @@ BOOL COptionsGeneral::OnInitDialog()
 		else
 			m_CheckList.AddString(gOptGenDesc[i].pszListName);
 
-		const int check = (CMainFrame::m_dwPatternSetup & gOptGenDesc[i].dwFlagID) != 0 ? BST_CHECKED : BST_UNCHECKED;
+		const int check = (CMainFrame::GetSettings().m_dwPatternSetup & gOptGenDesc[i].dwFlagID) != 0 ? BST_CHECKED : BST_UNCHECKED;
 		m_CheckList.SetCheck(i, check);
 	}
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
 
-	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		CMainFrame::GetDefaultDirectory(DIR_MODS));
-	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		CMainFrame::GetDefaultDirectory(DIR_SAMPLES));
-	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		CMainFrame::GetDefaultDirectory(DIR_INSTRUMENTS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		CMainFrame::GetDefaultDirectory(DIR_PLUGINS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	CMainFrame::GetDefaultDirectory(DIR_PLUGINPRESETS));
+	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		CMainFrame::GetSettings().GetDefaultDirectory(DIR_MODS));
+	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		CMainFrame::GetSettings().GetDefaultDirectory(DIR_SAMPLES));
+	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		CMainFrame::GetSettings().GetDefaultDirectory(DIR_INSTRUMENTS));
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINS));
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
 
 	return TRUE;
 }
@@ -642,8 +643,8 @@ void COptionsGeneral::OnOK()
 	{
 		const bool check = (m_CheckList.GetCheck(i) != BST_UNCHECKED);
 
-		if(check) CMainFrame::m_dwPatternSetup |= gOptGenDesc[i].dwFlagID;
-		else CMainFrame::m_dwPatternSetup &= ~gOptGenDesc[i].dwFlagID;
+		if(check) CMainFrame::GetSettings().m_dwPatternSetup |= gOptGenDesc[i].dwFlagID;
+		else CMainFrame::GetSettings().m_dwPatternSetup &= ~gOptGenDesc[i].dwFlagID;
 	}
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();

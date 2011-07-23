@@ -18,18 +18,18 @@ int ApplyVolumeRelatedMidiSettings(const DWORD& dwParam1, const BYTE midivolume)
 //----------------------------------------------------------------
 {
 	int nVol = GetFromMIDIMsg_DataByte2(dwParam1);
-	if (CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
+	if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 	{
 		nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+255) >> 8;
-		if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
+		if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
 		if (nVol < 1) nVol = 1;
 		if (nVol > 256) nVol = 256;
-		if(CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
+		if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = static_cast<int>((midivolume / 127.0) * nVol);
 	}
 	else //Case: No velocity record.
 	{	
-		if(CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
+		if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = 4*((midivolume+1)/2);
 		else //Use default volume
 			nVol = -1;
@@ -41,7 +41,7 @@ int ApplyVolumeRelatedMidiSettings(const DWORD& dwParam1, const BYTE midivolume)
 void ApplyTransposeKeyboardSetting(CMainFrame& rMainFrm, DWORD& dwParam1)
 //------------------------------------------------------------------------
 {
-	if ( (CMainFrame::m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
+	if ( (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
 		&& (GetFromMIDIMsg_Channel(dwParam1) != 9) )
 	{
 		int nTranspose = rMainFrm.GetBaseOctave() - 4;
@@ -120,7 +120,7 @@ BOOL CMainFrame::midiOpenDevice()
 {
 	if (shMidiIn) return TRUE;
 	try {
-		if (midiInOpen(&shMidiIn, m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		if (midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
 

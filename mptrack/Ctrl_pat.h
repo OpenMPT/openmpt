@@ -30,15 +30,13 @@ protected:
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
-	BYTE m_nOrderlistMargins;
+	int m_nOrderlistMargins;
 	CModDoc *m_pModDoc;
 	CCtrlPatterns *m_pParent;
 
 public:
 	COrderList();
 	virtual ~COrderList() {}
-
-	static BYTE s_nDefaultMargins;
 
 public:
 	BOOL Init(const CRect&, CCtrlPatterns *pParent, CModDoc *, HFONT hFont);
@@ -176,7 +174,7 @@ protected:
 
 public:
 	CCtrlPatterns();
-	LONG* GetSplitPosRef() {return &CMainFrame::glPatternWindowHeight;} 	//rewbs.varWindowSize
+	LONG* GetSplitPosRef() {return &CMainFrame::GetSettings().glPatternWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	void SetCurrentPattern(PATTERNINDEX nPat);

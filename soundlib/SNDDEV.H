@@ -1,6 +1,9 @@
 #ifndef _SNDDEV_H_
 #define _SNDDEV_H_
 
+#include <vector>
+using std::vector;
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // ISoundSource: provides streaming audio data to a device

@@ -134,12 +134,12 @@ BOOL COptionsKeyboard::OnInitDialog()
 //-----------------------------------
 {
 	CPropertyPage::OnInitDialog();
-	m_nCurCategory=-1;
-	m_nCurHotKey=-1;
-	m_nCurKeyChoice=-1;
-	m_bModified=false;
-	m_bChoiceModified=false;
-	m_sFullPathName=CMainFrame::m_szKbdFile;
+	m_nCurCategory = -1;
+	m_nCurHotKey = -1;
+	m_nCurKeyChoice = -1;
+	m_bModified = false;
+	m_bChoiceModified = false;
+	m_sFullPathName = CMainFrame::GetSettings().m_szKbdFile;
 
 	plocalCmdSet = new CCommandSet();
 	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);
@@ -159,7 +159,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eReport.SetWindowText("");
 
 	CString s;
-	s.Format("%d", CMainFrame::gnAutoChordWaitTime);
+	s.Format("%d", CMainFrame::GetSettings().gnAutoChordWaitTime);
 	m_eChordWaitTime.SetWindowText(s);
 	return TRUE;
 }
@@ -622,7 +622,7 @@ void COptionsKeyboard::OnOK()
 
 	CString cs;
 	m_eChordWaitTime.GetWindowText(cs);
-	CMainFrame::gnAutoChordWaitTime = atoi(cs);
+	CMainFrame::GetSettings().gnAutoChordWaitTime = atoi(cs);
 
 	CPropertyPage::OnOK();
 }
@@ -639,7 +639,7 @@ void COptionsKeyboard::OnLoad()
 	std::string filename = m_sFullPathName;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mkb", filename,
 		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
-		CMainFrame::m_szKbdFile);
+		CMainFrame::GetSettings().m_szKbdFile);
 	if(files.abort)	return;
 
 	m_sFullPathName = files.first_file.c_str();
@@ -653,7 +653,7 @@ void COptionsKeyboard::OnSave()
 	std::string filename = m_sFullPathName;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mkb", filename,
 		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
-		CMainFrame::m_szKbdFile);
+		CMainFrame::GetSettings().m_szKbdFile);
 	if(files.abort)	return;
 
 	m_sFullPathName = files.first_file.c_str();
@@ -663,11 +663,11 @@ void COptionsKeyboard::OnSave()
 
 bool COptionsKeyboard::TentativeSetToDefaultFile(CString m_sFullPathName)
 {
-	if (m_sFullPathName.Compare(CMainFrame::m_szKbdFile))
+	if (m_sFullPathName.Compare(CMainFrame::GetSettings().m_szKbdFile))
 	{
 		if (AfxMessageBox("Load this keyboard config file when MPT starts up?", MB_YESNO) == IDYES)
 		{
-			strcpy(CMainFrame::m_szKbdFile,m_sFullPathName);
+			strcpy(CMainFrame::GetSettings().m_szKbdFile,m_sFullPathName);
 			OnSettingsChanged();			// Enable "apply" button
 			UpdateDialog();					
 			return true;

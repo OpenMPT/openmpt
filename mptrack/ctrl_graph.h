@@ -6,6 +6,6 @@ public:
 	CCtrlGraph(void);
 	~CCtrlGraph(void);
 
-	LONG* GetSplitPosRef() {return &CMainFrame::glGraphWindowHeight;} 	//rewbs.varWindowSize
+	LONG* GetSplitPosRef() {return &CMainFrame::GetSettings().glGraphWindowHeight;} 	//rewbs.varWindowSize
 	virtual CRuntimeClass *GetAssociatedViewClass();
 };

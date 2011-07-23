@@ -85,7 +85,7 @@ CChildFrame::~CChildFrame()
 {
 	if ((--glMdiOpenCount) == 0)
 	{
-		CMainFrame::gbMdiMaximize = m_bMaxWhenClosed;
+		CMainFrame::GetSettings().gbMdiMaximize = m_bMaxWhenClosed;
 	}
 }
 
@@ -98,7 +98,7 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 
 	// add the first splitter pane - the default view in row 0
 	//int cy = CMainFrame::glCtrlWindowHeight;
-	int cy = CMainFrame::glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
+	int cy = CMainFrame::GetSettings().glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
 	
@@ -134,7 +134,7 @@ BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 void CChildFrame::ActivateFrame(int nCmdShow)
 //-------------------------------------------
 {
-	if ((glMdiOpenCount == 1) && (CMainFrame::gbMdiMaximize) && (nCmdShow == -1))
+	if ((glMdiOpenCount == 1) && (CMainFrame::GetSettings().gbMdiMaximize) && (nCmdShow == -1))
 	{
 		nCmdShow = SW_SHOWMAXIMIZED;
 	}
@@ -239,7 +239,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 		CRect rect;
 		
 		m_bMaxWhenClosed = IsZoomed();
-		if (bForce) CMainFrame::gbMdiMaximize = m_bMaxWhenClosed;
+		if (bForce) CMainFrame::GetSettings().gbMdiMaximize = m_bMaxWhenClosed;
 		if (!IsIconic())
 		{
 			CWnd *pWnd = m_wndSplitter.GetPane(0, 0);
@@ -249,18 +249,18 @@ void CChildFrame::SavePosition(BOOL bForce)
 				LONG l = rect.Height();
 				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
 				if (strcmp("CViewGlobals",m_szCurrentViewClassName) == 0)
-					CMainFrame::glGeneralWindowHeight = l;
+					CMainFrame::GetSettings().glGeneralWindowHeight = l;
 				else if (strcmp("CViewPattern", m_szCurrentViewClassName) == 0)
-					CMainFrame::glPatternWindowHeight = l;
+					CMainFrame::GetSettings().glPatternWindowHeight = l;
 				else if (strcmp("CViewSample", m_szCurrentViewClassName) == 0)
-					CMainFrame::glSampleWindowHeight = l;
+					CMainFrame::GetSettings().glSampleWindowHeight = l;
 				else if (strcmp("CViewInstrument", m_szCurrentViewClassName) == 0)
-					CMainFrame::glInstrumentWindowHeight = l;				
+					CMainFrame::GetSettings().glInstrumentWindowHeight = l;
 				else if (strcmp("CViewComments", m_szCurrentViewClassName) == 0)
-					CMainFrame::glCommentsWindowHeight = l;				
+					CMainFrame::GetSettings().glCommentsWindowHeight = l;
 				//rewbs.graph
 				else if (strcmp("CViewGraph", m_szCurrentViewClassName) == 0)
-					CMainFrame::glGraphWindowHeight = l;				
+					CMainFrame::GetSettings().glGraphWindowHeight = l;
 				//end rewbs.graph
 
 			}

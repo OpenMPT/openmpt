@@ -913,7 +913,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			size_t pos, startPos = 0;
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
 
-			const bool doOverflowPaste = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
+			const bool doOverflowPaste = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
 			const bool doITStyleMix = (pasteMode == pm_mixpaste_it);
 			const bool doMixPaste = ((pasteMode == pm_mixpaste) || doITStyleMix);
 

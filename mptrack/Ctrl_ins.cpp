@@ -1436,7 +1436,7 @@ OpenError:
 		{
 			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
-			CMainFrame::SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
+			CMainFrame::GetSettings().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
 	
 			if (!pIns->name[0])
 			{
@@ -1672,12 +1672,12 @@ void CCtrlInstruments::OnInstrumentOpen()
 		"GF1 Patches (*.pat)|*.pat|"
 		"Impulse Tracker Instruments (*.iti)|*.iti|"
 		"All Files (*.*)|*.*||",
-		CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS),
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_INSTRUMENTS),
 		true,
 		&nLastIndex);
 	if(files.abort) return;
 
-	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS, true);
+	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS, true);
 
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
@@ -1726,7 +1726,7 @@ void CCtrlInstruments::OnInstrumentSave()
 			"Impulse Tracker Instruments (*.iti)|*.iti||" :
 			"Impulse Tracker Instruments (*.iti)|*.iti|"
 			"FastTracker II Instruments (*.xi)|*.xi||",
-		CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_INSTRUMENTS));
 	if(files.abort) return;
 	
 	BeginWaitCursor();
@@ -1752,7 +1752,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		strcpy(szFileName, drive);
 		strcat(szFileName, path);
 		
-		CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS);
+		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

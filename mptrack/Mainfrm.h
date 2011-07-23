@@ -27,7 +27,8 @@ class CPerformanceCounter;
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
 #define INIBUFFERSIZE				MAX_PATH
 
-enum {
+enum
+{
 	CTRLMSG_BASE=0,
 	CTRLMSG_SETVIEWWND,
 	CTRLMSG_ACTIVATEPAGE,
@@ -73,7 +74,8 @@ enum {
 	CTRLMSG_PAT_DUPPATTERN,
 };
 
-enum {
+enum
+{
 	VIEWMSG_BASE=0,
 	VIEWMSG_SETCTRLWND,
 	VIEWMSG_SETACTIVE,
@@ -211,7 +213,8 @@ enum
 
 
 // Image List index
-enum {
+enum
+{
 	IMAGE_COMMENTS=0,
 	IMAGE_PATTERNS,
 	IMAGE_SAMPLES,
@@ -245,7 +248,8 @@ enum {
 
 
 // Toolbar Image List index
-enum {
+enum
+{
 	TIMAGE_PATTERN_NEW=0,
 	TIMAGE_PATTERN_STOP,
 	TIMAGE_PATTERN_PLAY,
@@ -358,6 +362,7 @@ typedef struct MPTNOTIFICATION
 	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
 } MPTNOTIFICATION, *PMPTNOTIFICATION;
 
+
 /////////////////////////////////////////////////////////////////////////
 // EQ Presets
 
@@ -370,36 +375,21 @@ typedef struct _EQPRESET
 
 
 /////////////////////////////////////////////////////////////////////////
-// Default directories
-
-enum Directory
-{
-	DIR_MODS = 0,
-	DIR_SAMPLES,
-	DIR_INSTRUMENTS,
-	DIR_PLUGINS,
-	DIR_PLUGINPRESETS,
-	DIR_EXPORT,
-	DIR_TUNING,
-	NUM_DIRS
-};
-
-
-/////////////////////////////////////////////////////////////////////////
 // Misc. Macros
 
 
 #define DeleteGDIObject(h) if (h) { ::DeleteObject(h); h = NULL; }
 #define UPDATEDSPEFFECTS() SetDspEffects(\
-								m_dwQuality & QUALITY_SURROUND,\
-								m_dwQuality & QUALITY_REVERB,\
-								m_dwQuality & QUALITY_MEGABASS,\
-								m_dwQuality & QUALITY_NOISEREDUCTION,\
-								m_dwQuality & QUALITY_EQ)
+								GetSettings().m_dwQuality & QUALITY_SURROUND,\
+								GetSettings().m_dwQuality & QUALITY_REVERB,\
+								GetSettings().m_dwQuality & QUALITY_MEGABASS,\
+								GetSettings().m_dwQuality & QUALITY_NOISEREDUCTION,\
+								GetSettings().m_dwQuality & QUALITY_EQ)
 #define BEGIN_CRITICAL()		EnterCriticalSection(&CMainFrame::m_csAudio)
 #define END_CRITICAL()			LeaveCriticalSection(&CMainFrame::m_csAudio)
 
 #include "mainbar.h"
+#include "TrackerSettings.h"
 
 //===================================
 class CMainFrame: public CMDIFrameWnd
@@ -408,37 +398,12 @@ class CMainFrame: public CMDIFrameWnd
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
 public:
-	CString m_csRegKey;
-	CString m_csRegExt;
-	CString m_csRegSettings;
-	CString m_csRegWindow;
+
 	// Globals
 	static UINT m_nLastOptionsPage;
-	static BOOL gbMdiMaximize;
-	static bool gbShowHackControls;
-	static LONG glTreeWindowWidth, glTreeSplitRatio;
-	static LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
-		        glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize
     static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType;
-	static CString gcsPreviousVersion;
-	static CString gcsInstallGUID;
 	
-	// Audio Setup
-	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
-	static LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
-	static LONG m_nMidiDevice;
-	static DWORD m_nBufferLength;
-	static EQPRESET m_EqSettings;
-	// Pattern Setup
-	static UINT gnPatternSpacing;
-	static BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
-	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nKeyboardCfg, gnHotKeyMask;
-	static DWORD m_nRowSpacing, m_nRowSpacing2;	// primary (measures) and secondary (beats) highlight
-	static bool m_bHideUnavailableCtxMenuItems;
-	// Sample Editor Setup
-	static UINT m_nSampleUndoMaxBuffer;
-
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
@@ -446,15 +411,17 @@ public:
 //	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
-	static COLORREF rgbCustomColors[MAX_MODCOLORS];
 	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters, bmpVisNode, bmpVisPcNode;
 	static HPEN gpenVuMeter[NUM_VUMETER_PENS*2];
-	// key config
-	static TCHAR m_szKbdFile[_MAX_PATH];
 
-	// Low-Level Audio
+protected:
+
+	// All application settings
+	static TrackerSettings m_Settings;
+
 public:
 
+	// Low-Level Audio
 	static CRITICAL_SECTION m_csAudio;
 	static ISoundDevice *gpSoundDevice;
 	static HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
@@ -463,20 +430,6 @@ public:
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
 	static LONG slSampleSize, sdwSamplesPerSec, sdwAudioBufferSize;
-	//rewbs.resamplerConf
-	static double gdWFIRCutoff;
-	static BYTE gbWFIRType;
-	static long glVolumeRampSamples;
-	//end rewbs.resamplerConf
-	static UINT gnAutoChordWaitTime;
-
-	static int gnPlugWindowX;
-	static int gnPlugWindowY;
-	static int gnPlugWindowWidth;
-	static int gnPlugWindowHeight;
-	static DWORD gnPlugWindowLast;
-
-	static uint32 gnMsgBoxVisiblityFlags;
 
 	// Midi Input
 public:
@@ -484,7 +437,8 @@ public:
 
 
 protected:
-    CSoundFile m_WaveFile;
+
+	CSoundFile m_WaveFile;
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
@@ -495,8 +449,6 @@ protected:
 	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType;
 	UINT m_nTimer, m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
-	// Chords
-	MPTCHORD Chords[3*12]; // 3 octaves
 	// Notification Buffer
 	MPTNOTIFICATION NotifyBuffer[MAX_UPDATE_HISTORY];
 	// Misc
@@ -538,6 +490,7 @@ public:
 // static functions
 public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
+	static TrackerSettings &GetSettings() { return m_Settings; }
 	static VOID UpdateColors();
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
@@ -569,7 +522,7 @@ public:
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
 	CImageList *GetImageList() { return &m_ImageList; }
-	PMPTCHORD GetChords() { return Chords; }
+	PMPTCHORD GetChords() { return GetSettings().Chords; }
 	VOID OnDocumentCreated(CModDoc *pModDoc);
 	VOID OnDocumentClosed(CModDoc *pModDoc);
 	VOID UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
@@ -613,28 +566,8 @@ public:
 	BOOL ResetNotificationBuffer(HWND hwnd=NULL);
 
 
-public:
-	// access to default + working directories
-	static void SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	static LPCTSTR GetWorkingDirectory(Directory dir);
-	static void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	static LPCTSTR GetDefaultDirectory(Directory dir);
-
-	template <size_t nLength>
-	static void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
-	template <size_t nLength>
-	static void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
-
-protected:
-	static void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
-
-	// Directory Arrays (default dir + last dir)
-	static TCHAR m_szDefaultDirectory[NUM_DIRS][_MAX_PATH];
-	static TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
-	static const TCHAR m_szDirectoryToSettingsName[NUM_DIRS][32];
-
-
 // Overrides
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -706,10 +639,6 @@ public:
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
-private:
-	bool LoadRegistrySettings();
-	void LoadIniSettings();
-	void SaveIniSettings();
 };
 
 const CHAR gszBuildDate[] = __DATE__ " " __TIME__;

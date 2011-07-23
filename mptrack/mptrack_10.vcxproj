@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -246,6 +246,7 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\Tables.cpp" />
     <ClCompile Include="tagging.cpp" />
+    <ClCompile Include="TrackerSettings.cpp" />
     <ClCompile Include="Undo.cpp" />
     <ClCompile Include="UpdateCheck.cpp" />
     <ClCompile Include="view_com.cpp" />
@@ -391,6 +392,7 @@
     <ClInclude Include="SoundFilePlayConfig.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="tagging.h" />
+    <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="typedefs.h" />
     <ClInclude Include="Undo.h" />
     <ClInclude Include="UpdateCheck.h" />

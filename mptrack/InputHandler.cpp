@@ -26,7 +26,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	if (sDefaultPath.GetLength() > MAX_PATH - 1)
 		sDefaultPath = "";
 
-	const bool bNoExistingKbdFileSetting = (CMainFrame::m_szKbdFile[0] == 0);
+	const bool bNoExistingKbdFileSetting = (CMainFrame::GetSettings().m_szKbdFile[0] == 0);
 
 	// 1. Try to load keybindings from the path saved in the settings.
 	// 2. If the setting doesn't exist or the loading fails, try to load from default location.
@@ -34,10 +34,10 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	// 4. If there were no keybinging setting already, create a keybinding file to default location
 	//    and set it's path to settings.
 
-	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile)))
+	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(CMainFrame::GetSettings().m_szKbdFile)))
 	{
 		if (bNoExistingKbdFileSetting)
-			_tcscpy(CMainFrame::m_szKbdFile, sDefaultPath);
+			_tcscpy(CMainFrame::GetSettings().m_szKbdFile, sDefaultPath);
 		bool bSuccess = false;
 		if (PathFileExists(sDefaultPath) == TRUE)
 			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
@@ -54,14 +54,14 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 				bSuccess = activeCommandSet->LoadFile(iStrm, TEXT("\"executable resource\""));
 				FreeResource(hglob);
 				if (bSuccess && bNoExistingKbdFileSetting)
-					activeCommandSet->SaveFile(CMainFrame::m_szKbdFile, false);
+					activeCommandSet->SaveFile(CMainFrame::GetSettings().m_szKbdFile, false);
 			}
 		}
 		if (bSuccess == false)
 			AfxMessageBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS, MB_ICONERROR);
 	}
 	// We will only overwrite the default Keybindings.mkb file from now on.
-	_tcscpy(CMainFrame::m_szKbdFile, sDefaultPath);
+	_tcscpy(CMainFrame::GetSettings().m_szKbdFile, sDefaultPath);
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);
