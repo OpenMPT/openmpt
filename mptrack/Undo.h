@@ -14,6 +14,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // Pattern Undo
 
+// Additional undo information, as required
+struct PATTERNUNDOINFO
+{
+	MODCHANNELSETTINGS *settings;
+	CHANNELINDEX oldNumChannels;
+};
+
 struct PATTERNUNDOBUFFER
 {
 	PATTERNINDEX pattern;
@@ -21,6 +28,7 @@ struct PATTERNUNDOBUFFER
 	CHANNELINDEX firstChannel, numChannels;
 	ROWINDEX firstRow, numRows;
 	MODCOMMAND *pbuffer;
+	PATTERNUNDOINFO *channelInfo;
 	bool linkToPrevious;
 };
 
@@ -29,7 +37,7 @@ class CPatternUndo
 //================
 {
 
-private:
+protected:
 
 	std::vector<PATTERNUNDOBUFFER> UndoBuffer;
 	CModDoc *m_pModDoc;
@@ -42,7 +50,7 @@ public:
 
 	// Pattern undo functions
 	void ClearUndo();
-	bool PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious = false);
+	bool PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious = false, bool storeChannelInfo = false);
 	PATTERNINDEX Undo();
 	bool CanUndo();
 	void RemoveLastUndoStep();
@@ -93,7 +101,7 @@ class CSampleUndo
 //===============
 {
 
-private:
+protected:
 
 	// Undo buffer
 	std::vector<std::vector<SAMPLEUNDOBUFFER> > UndoBuffer;
