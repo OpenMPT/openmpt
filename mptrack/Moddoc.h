@@ -277,9 +277,9 @@ public:
 	bool ChangeModType(MODTYPE wType);
 
 	bool ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg = true);
-	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX> &fromToArray);
-	bool MoveChannel(CHANNELINDEX chn_from, CHANNELINDEX chn_to);
 	bool RemoveChannels(const vector<bool> &keepMask);
+	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
+	bool MoveChannel(CHANNELINDEX chn_from, CHANNELINDEX chn_to);
 	void CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 	bool ConvertInstrumentsToSamples();

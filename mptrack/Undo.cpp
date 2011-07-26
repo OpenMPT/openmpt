@@ -39,8 +39,9 @@ void CPatternUndo::ClearUndo()
 //   - numChns: width
 //   - numRows: height
 //   - linkToPrevious: Don't create a separate undo step, but link this to the previous undo event. Useful for commands that modify several patterns at once.
-bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
+//   - storeChannelInfo: Also store current channel header information (pan / volume / etc. settings) and number of channels in this undo point.
+bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious, bool storeChannelInfo)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(m_pModDoc == nullptr) return false;
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -82,6 +83,17 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 		memcpy(pUndoData, pPattern, numChns * sizeof(MODCOMMAND));
 		pUndoData += numChns;
 		pPattern += pSndFile->GetNumChannels();
+	}
+
+	if(storeChannelInfo)
+	{
+		sUndo.channelInfo = new PATTERNUNDOINFO;
+		sUndo.channelInfo->oldNumChannels = pSndFile->GetNumChannels();
+		sUndo.channelInfo->settings = new MODCHANNELSETTINGS[pSndFile->GetNumChannels()];
+		memcpy(sUndo.channelInfo->settings, pSndFile->ChnSettings, sizeof(MODCHANNELSETTINGS) * pSndFile->GetNumChannels());
+	} else
+	{
+		sUndo.channelInfo = nullptr;
 	}
 
 	UndoBuffer.push_back(sUndo);
@@ -127,6 +139,30 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 	// Select most recent undo slot
 	const PATTERNUNDOBUFFER *pUndo = &UndoBuffer.back();
 
+	if(pUndo->channelInfo != nullptr)
+	{
+		if(pUndo->channelInfo->oldNumChannels > pSndFile->GetNumChannels())
+		{
+			// First add some channels again...
+			vector<CHANNELINDEX> channels(pUndo->channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
+			for(CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
+			{
+				channels[i] = i;
+			}
+			m_pModDoc->ReArrangeChannels(channels, false);
+		} else if(pUndo->channelInfo->oldNumChannels < pSndFile->GetNumChannels())
+		{
+			// ... or remove newly added channels
+			vector<CHANNELINDEX> channels(pUndo->channelInfo->oldNumChannels);
+			for(CHANNELINDEX i = 0; i < pUndo->channelInfo->oldNumChannels; i++)
+			{
+				channels[i] = i;
+			}
+			m_pModDoc->ReArrangeChannels(channels, false);
+		}
+		memcpy(pSndFile->ChnSettings, pUndo->channelInfo->settings, sizeof(MODCHANNELSETTINGS) * pUndo->channelInfo->oldNumChannels);
+	}
+
 	nPattern = pUndo->pattern;
 	nRows = pUndo->patternsize;
 	if(pUndo->firstChannel + pUndo->numChannels <= pSndFile->GetNumChannels())
@@ -159,14 +195,14 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 
 	RemoveLastUndoStep();
 
-	if (CanUndo() == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
+	if(CanUndo() == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
+
 	if(linkToPrevious)
 	{
-		return Undo(true);		
-	} else
-	{
-		return nPattern;
+		nPattern = Undo(true);		
 	}
+
+	return nPattern;
 }
 
 
@@ -183,7 +219,12 @@ void CPatternUndo::DeleteUndoStep(UINT nStep)
 //-------------------------------------------
 {
 	if(nStep >= UndoBuffer.size()) return;
-	if (UndoBuffer[nStep].pbuffer) delete[] UndoBuffer[nStep].pbuffer;
+	if(UndoBuffer[nStep].pbuffer) delete[] UndoBuffer[nStep].pbuffer;
+	if(UndoBuffer[nStep].channelInfo)
+	{
+		delete[] UndoBuffer[nStep].channelInfo->settings;
+		delete UndoBuffer[nStep].channelInfo;
+	}
 	UndoBuffer.erase(UndoBuffer.begin() + nStep);
 }
 

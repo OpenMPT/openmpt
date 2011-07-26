@@ -138,8 +138,8 @@ bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
 
 // Base code for adding, removing, moving and duplicating channels. Returns new number of channels on success, CHANNELINDEX_INVALID otherwise.
 // The new channel vector can contain CHANNELINDEX_INVALID for adding new (empty) channels.
-CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder)
-//---------------------------------------------------------------------------
+CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, const bool createUndoPoint)
+//-------------------------------------------------------------------------------------------------------
 {
 	//newOrder[i] tells which current channel should be placed to i:th position in
 	//the new order, or if i is not an index of current channels, then new channel is
@@ -157,20 +157,25 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder)
 	}
 
 	bool first = true;
-	if(nRemainingChannels != GetNumChannels())
+	// Find highest valid pattern number for storing channel undo data with, since the pattern with the highest number will be undone first.
+	PATTERNINDEX highestPattern = 0;
+	for(PATTERNINDEX nPat = m_SndFile.Patterns.Size() - 1; nPat > 0; nPat--)
 	{
-		// For now, changing number of channels can't be undone
-		GetPatternUndo()->ClearUndo();
+		if(m_SndFile.Patterns.IsValidPat(nPat))
+		{
+			highestPattern = nPat;
+			break;
+		}
 	}
 
 	BEGIN_CRITICAL();
-	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) 
+	for(PATTERNINDEX nPat = 0; nPat <= highestPattern; nPat++) 
 	{
-		if(m_SndFile.Patterns[nPat])
+		if(m_SndFile.Patterns.IsValidPat(nPat))
 		{
-			if(nRemainingChannels == GetNumChannels())
+			if(createUndoPoint)
 			{
-				GetPatternUndo()->PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), !first);
+				GetPatternUndo()->PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), !first, (nPat == highestPattern));
 				first = false;
 			}
 
@@ -795,9 +800,9 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 						case NOTE_NONE:		p[1] = p[2] = p[3] = '.'; break;
 						case NOTE_KEYOFF:	p[1] = p[2] = p[3] = '='; break;
 						case NOTE_NOTECUT:	p[1] = p[2] = p[3] = '^'; break;
-						case NOTE_FADE:	p[1] = p[2] = p[3] = '~'; break;
-						case NOTE_PC: p[1] = 'P'; p[2] = 'C'; p[3] = ' '; break;
-						case NOTE_PCS: p[1] = 'P'; p[2] = 'C'; p[3] = 'S'; break;
+						case NOTE_FADE:		p[1] = p[2] = p[3] = '~'; break;
+						case NOTE_PC:		p[1] = 'P'; p[2] = 'C'; p[3] = ' '; break;
+						case NOTE_PCS:		p[1] = 'P'; p[2] = 'C'; p[3] = 'S'; break;
 						default:
 							p[1] = szNoteNames[(note-1) % 12][0];
 							p[2] = szNoteNames[(note-1) % 12][1];
