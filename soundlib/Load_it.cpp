@@ -556,7 +556,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
 				interpretModPlugMade = true;
 			}
 		}
@@ -3265,8 +3265,8 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 				if( (size <= 63*2) && (size % 2 == 0) )
 				{
 					const BYTE* pData = ptr;
-					STATIC_ASSERT(ARRAYELEMCOUNT(ChnSettings) >= 64);
-					const __int16 nLoopLimit = min(size/2, ARRAYELEMCOUNT(ChnSettings) - 64);
+					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
+					const __int16 nLoopLimit = min(size/2, CountOf(ChnSettings) - 64);
 					for(__int16 i = 0; i<nLoopLimit; i++, pData += 2) if(pData[0] != 0xFF)
 					{
 						ChnSettings[i+64].nVolume = pData[1];
