@@ -278,7 +278,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 			int maxtick = envelope->Ticks[nPoint + 1];
 			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			// Can't have multiple points on same tick
-			if(GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) && mintick < maxtick - 1)
+			if(nPoint > 0 && GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) && mintick < maxtick - 1)
 			{
 				mintick++;
 				if (nPoint + 1 < (int)envelope->nNodes) maxtick--;
