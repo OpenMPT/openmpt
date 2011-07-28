@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -147,7 +147,6 @@ BEGIN
     PUSHBUTTON      "Remove",IDC_BUTTON_REMOVE,120,78,50,14
     PUSHBUTTON      "Add",IDC_BUTTON_ADD,174,78,50,14
 END
-
 
 IDD_EDITHISTORY DIALOGEX 0, 0, 316, 185
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -300,12 +299,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -1982,10 +1981,12 @@ BEGIN
             MENUITEM "IT &Project",                 ID_NEW_ITPROJECT
             MENUITEM "Open&MPT Module",             ID_NEW_MPT
         END
-        MENUITEM "&Open...\tCtrl+O",            57601
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "Open template",               65535
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Save as Template...",         ID_FILE_SAVEASTEMPLATE
         MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
         MENUITEM "Export as &Wave...",          ID_FILE_SAVEASWAVE
         MENUITEM "Export as M&P3...",           ID_FILE_SAVEASMP3
@@ -2069,6 +2070,8 @@ BEGIN
         MENUITEM "&Contents",                   ID_HELP_FINDER
         MENUITEM "&Search...",                  ID_HELP_SEARCH
         MENUITEM "&Report a bug",               ID_REPORT_BUG
+        MENUITEM SEPARATOR
+        MENUITEM "&Example modules",            ID_EXAMPLE_MODULES
         MENUITEM SEPARATOR
         MENUITEM "&OpenMPT Website",            ID_NETLINK_MODPLUG
         MENUITEM "&Web Resources",              ID_NETLINK_TOP_PICKS
@@ -2481,12 +2484,23 @@ BEGIN
     IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 
                             "-Unable to import file ""%1%2"": unrecognized file.\n"
     IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
+    IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER 
+                            """Error: Unable to create template folder '%1'"""
+    IDS_FILE_DOES_NOT_EXIST "The file '%1' does not exist"
+    IDS_FILE_EXISTS_BUT_IS_NOT_READABLE 
+                            "The file '%1' exists but can't be read"
 END
 
 STRINGTABLE 
 BEGIN
     ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
     ID_VIEW_EDITHISTORY     "View the edit history of this module"
+    ID_FILE_SAVEASTEMPLATE  "Save the active document as template module\nSave as Template"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_OPENTEMPLATE    "Open a template document\nOpen template document"
 END
 
 STRINGTABLE 
@@ -2510,12 +2524,12 @@ BEGIN
     IDC_SAMPLE_XFADE        "Crossfade Loop Points\nCrossfade between loop start and loop end to create seamless sample loops."
 END
 
-#endif    // Englisch (USA) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (GB) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2888,7 +2902,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 //
 
 IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
-#endif    // Englisch (GB) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

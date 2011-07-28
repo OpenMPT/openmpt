@@ -223,6 +223,7 @@ public:
 	LPCSTR GetLog() const { return m_lpszLog; }
 	BOOL ClearLog();
 	UINT ShowLog(LPCSTR lpszTitle=NULL, CWnd *parent=NULL);
+	void ClearFilePath() {m_strPathName.Empty();}
 
 	// Logging for general progress and error events.
 	void AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...);
@@ -383,9 +384,10 @@ protected:
 	public:
 	virtual BOOL OnNewDocument();
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
+	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName) {return OnSaveDocument(lpszPathName, false);}
 	virtual void OnCloseDocument();
 	void SafeFileClose();
+	BOOL OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -439,6 +441,7 @@ public:
 	afx_msg void OnPatternPlayNoLoop(); //rewbs.customKeys
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnViewMPTHacks();
+	afx_msg void OnSaveTemplateModule();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

@@ -17,6 +17,7 @@
 #include "version.h"
 #include "test/test.h"
 #include <shlwapi.h>
+#include <afxadv.h>
 #include "UpdateCheck.h"
 
 // rewbs.memLeak
@@ -767,6 +768,11 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	strcpy(m_szPluginCacheFileName, m_szConfigDirectory); // plugin cache
 	strcat(m_szPluginCacheFileName, "plugin.cache");
+
+	TCHAR szTemplatePath[MAX_PATH];
+	_tcscpy(szTemplatePath, m_szConfigDirectory);
+	_tcscat(szTemplatePath, _T("TemplateModules\\"));
+	CMainFrame::GetSettings().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
 
 	m_bPortableMode = bIsAppDir;
 }
@@ -3137,4 +3143,10 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 		_tcscpy(szPath, szTempPath);
 	}
 	SetNullTerminator(szPath);
+}
+
+void CTrackApp::RemoveMruItem(const int nItem)
+{
+	if (m_pRecentFileList && nItem >= 0 && nItem < m_pRecentFileList->GetSize())
+		m_pRecentFileList->Remove(nItem);
 }

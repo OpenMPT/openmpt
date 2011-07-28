@@ -4,9 +4,11 @@
 #include <sstream>
 #include <string>
 #include <limits>
+#include "typedefs.h"
 #if _HAS_TR1
 	#include <type_traits>
 #endif
+#include <io.h> // for _taccess
 
 //Convert object(typically number) to string
 template<class T>
@@ -245,6 +247,9 @@ namespace Util
 	// Like std::max, but avoids conflict with max-macro.
 	template <class T> inline const T& Max(const T& a, const T& b) {return (std::max)(a, b);}
 
+	// Like std::min, but avoids conflict with min-macro.
+	template <class T> inline const T& Min(const T& a, const T& b) {return (std::min)(a, b);}
+
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only interger types are allowed."); return (std::numeric_limits<T>::max)();}
 
@@ -260,5 +265,12 @@ namespace Util { namespace sdTime
 
 }}; // namespace Util::sdTime
 
+namespace Util { namespace sdOs
+{
+	/// Checks whether file or folder exists and whether it has the given mode.
+	enum FileMode {FileModeExists = 0, FileModeRead = 4, FileModeWrite = 2, FileModeReadWrite = 6};
+	inline bool IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm) {return (_taccess(pszFilePath, fm) == 0);}
+
+} } // namespace Util::sdOs
 
 #endif

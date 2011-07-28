@@ -1,7 +1,7 @@
 #ifndef TUNINGRATIOMAPWND_H
 #define TUNINGRATIOMAPWND_H
 
-#include "../soundlib/tuningbase.h"
+#include "../soundlib/tuning.h"
 
 class CTuningDialog;
 
