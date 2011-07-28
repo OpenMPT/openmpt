@@ -31,25 +31,24 @@ LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, 
 }
 
 
-// Returns error message corresponding to error code returned by GetLastError().
+// Returns WinAPI error message corresponding to error code returned by GetLastError().
 CString GetErrorMessage(DWORD nErrorCode)
 //---------------------------------------
 {
-	const size_t nBufferSize = 256;
-	CString sMsg;
-	LPTSTR pszBuf = sMsg.GetBuffer(nBufferSize);
+	LPVOID lpMsgBuf;
 
-    FormatMessage(  FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+    FormatMessage(  FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 					NULL,
 					nErrorCode,
 					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-					pszBuf,
-					nBufferSize,
+					(LPTSTR)&lpMsgBuf,
+					0,
 					NULL );
 
-	sMsg.ReleaseBuffer();
+	CString msg = (LPTSTR)lpMsgBuf;
+	LocalFree(lpMsgBuf);
 
-	return sMsg;
+	return msg;
 }
 
 

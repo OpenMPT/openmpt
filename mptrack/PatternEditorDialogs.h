@@ -67,6 +67,7 @@ public:
 
 protected:
 	void ChangeEffect();
+	void ChangeVolCmd();
 
 public:
 	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc):CPropertyPage(nIDD) { m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
@@ -79,7 +80,7 @@ protected:
 	void CheckOnChange(int nIDButton) { CheckDlgButton(nIDButton, BST_CHECKED); CheckReplace(nIDButton); };
 	afx_msg void OnNoteChanged()	{ CheckOnChange(IDC_CHECK1); };
 	afx_msg void OnInstrChanged()	{ CheckOnChange(IDC_CHECK2); };
-	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); };
+	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); ChangeVolCmd(); };
 	afx_msg void OnVolumeChanged()	{ CheckOnChange(IDC_CHECK4); };
 	afx_msg void OnEffectChanged()	{ CheckOnChange(IDC_CHECK5); ChangeEffect(); };
 	afx_msg void OnParamChanged()	{ CheckOnChange(IDC_CHECK6); };

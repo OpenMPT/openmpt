@@ -17,7 +17,7 @@ using std::string;
 #define COLHDR_HEIGHT		16	// Column header
 #define COLUMN_HEIGHT		13
 #define	VUMETERS_HEIGHT		13	// Height of vu-meters
-#define	PLUGNAME_HEIGHT		16	// Height of vu-meters
+#define	PLUGNAME_HEIGHT		16	// Height of plugin names
 #define VUMETERS_BMPWIDTH		32
 #define VUMETERS_BMPHEIGHT		10
 #define VUMETERS_MEDWIDTH		24
@@ -102,7 +102,7 @@ const PATTERNFONT gSmallPatternFont =
 // Effect colour codes
 
 // Effect number => Effect colour assignment
-const BYTE effectColors[] =
+const int effectColors[] =
 {
 	0,					0,					MODCOLOR_PITCH,		MODCOLOR_PITCH,
 	MODCOLOR_PITCH,		MODCOLOR_PITCH,		MODCOLOR_VOLUME,	MODCOLOR_VOLUME,
@@ -119,7 +119,7 @@ const BYTE effectColors[] =
 STATIC_ASSERT(CountOf(effectColors) == MAX_EFFECTS);
 
 // Volume effect number => Effect colour assignment
-const BYTE volEffectColors[] =
+const int volEffectColors[] =
 {
 	0,					MODCOLOR_VOLUME,	MODCOLOR_PANNING,	MODCOLOR_VOLUME,
 	MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_PITCH,
@@ -342,7 +342,7 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 
 
 void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 

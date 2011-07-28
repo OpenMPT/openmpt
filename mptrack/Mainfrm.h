@@ -165,7 +165,7 @@ enum
 
 // Pattern Setup (contains also non-pattern related settings)
 // Feel free to replace the deprecated flags by new flags, but be sure to
-// update CMainFrame::LoadIniSettings() as well.
+// update TrackerSettings::LoadINISettings() / TrackerSettings::LoadRegistrySettings() as well.
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
 #define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
 #define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)

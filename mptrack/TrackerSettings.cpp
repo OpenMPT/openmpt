@@ -17,7 +17,6 @@
 #include "snddev.h"
 #include "version.h"
 #include "UpdateCheck.h"
-#include "Ctrl_pat.h"
 #include "Mpdlgs.h"
 #include "AutoSaver.h"
 #include "TrackerSettings.h"
@@ -150,20 +149,20 @@ TrackerSettings::TrackerSettings()
 		Chords[ichord].notes[0] = 0;
 		Chords[ichord].notes[1] = 0;
 		Chords[ichord].notes[2] = 0;
-		// Major Chords
+
 		if (ichord < 12)
 		{
+			// Major Chords
 			Chords[ichord].notes[0] = (BYTE)(ichord+5);
 			Chords[ichord].notes[1] = (BYTE)(ichord+8);
 			Chords[ichord].notes[2] = (BYTE)(ichord+11);
-		} else
+		} else if (ichord < 24)
+		{
 			// Minor Chords
-			if (ichord < 24)
-			{
-				Chords[ichord].notes[0] = (BYTE)(ichord-8);
-				Chords[ichord].notes[1] = (BYTE)(ichord-4);
-				Chords[ichord].notes[2] = (BYTE)(ichord-1);
-			}
+			Chords[ichord].notes[0] = (BYTE)(ichord-8);
+			Chords[ichord].notes[1] = (BYTE)(ichord-4);
+			Chords[ichord].notes[2] = (BYTE)(ichord-1);
+		}
 	}
 
 	gnPlugWindowX = 243;
@@ -178,16 +177,39 @@ TrackerSettings::TrackerSettings()
 void TrackerSettings::LoadSettings()
 //----------------------------------
 {
-	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	const CString iniFile = theApp.GetConfigFileName();
+
+	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile);
 	// If version number stored in INI is 1.17.02.40 or later, always load setting from INI file.
 	// If it isn't, try loading from Registry first, then from the INI file.
 	if (storedVersion >= "1.17.02.40" || !LoadRegistrySettings())
 	{
-		LoadINISettings();
+		LoadINISettings(iniFile);
 	}
+
+	// The following stuff was also stored in mptrack.ini while the registry was still being used...
 
 	// Load Chords
 	theApp.LoadChords(Chords);
+
+	// Load default macro configuration
+	MODMIDICFG macros;
+	theApp.GetDefaultMidiMacro(&macros);
+	for(int isfx = 0; isfx < 16; isfx++)
+	{
+		CHAR snam[8];
+		wsprintf(snam, "SF%X", isfx);
+		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiSFXExt[isfx], macros.szMidiSFXExt[isfx], CountOf(macros.szMidiSFXExt[isfx]), iniFile);
+		SetNullTerminator(macros.szMidiSFXExt[isfx]);
+	}
+	for(int izxx = 0; izxx < 128; izxx++)
+	{
+		CHAR snam[8];
+		wsprintf(snam, "Z%02X", izxx | 0x80);
+		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], macros.szMidiZXXExt[izxx], CountOf(macros.szMidiZXXExt[izxx]), iniFile);
+		SetNullTerminator(macros.szMidiZXXExt[izxx]);
+	}
+	theApp.SetDefaultMidiMacro(&macros);
 
 	// Default directory location
 	for(UINT i = 0; i < NUM_DIRS; i++)
@@ -198,10 +220,9 @@ void TrackerSettings::LoadSettings()
 }
 
 
-void TrackerSettings::LoadINISettings()
-//-------------------------------------
+void TrackerSettings::LoadINISettings(const CString &iniFile)
+//----------------------------------------------------------
 {
-	CString iniFile = theApp.GetConfigFileName();
 	//CHAR collectedString[INIBUFFERSIZE];
 	MptVersion::VersionNum vIniVersion;
 
@@ -392,7 +413,7 @@ void TrackerSettings::LoadINISettings()
 	CMainFrame::m_pAutoSaver->SetPath(szPath);
 	CMainFrame::m_pAutoSaver->SetFilenameTemplate(CMainFrame::GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
 
-	GetPrivateProfileString("Misc", "DefaultModType", gdefaultModType->fileExtension, szPath, INIBUFFERSIZE, iniFile);
+	GetPrivateProfileString("Misc", "DefaultModType", defaultModType->fileExtension, szPath, INIBUFFERSIZE, iniFile);
 	// 	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 	// 	{
 	// 		if(!strcmp(szPath, ModSpecs::Collection[i]->fileExtension))
@@ -718,7 +739,21 @@ void TrackerSettings::SaveSettings()
 
 	theApp.SaveChords(Chords);
 
-	WritePrivateProfileString("Misc", "DefaultModType", gdefaultModType->fileExtension, iniFile);
+	// Save default macro configuration
+	MODMIDICFG macros;
+	theApp.GetDefaultMidiMacro(&macros);
+	for(int isfx = 0; isfx < 16; isfx++)
+	{
+		CHAR snam[8];
+		wsprintf(snam, "SF%X", isfx);
+		WritePrivateProfileString("Zxx Macros", snam, macros.szMidiSFXExt[isfx], iniFile);
+	}
+	for(int izxx = 0; izxx < 128; izxx++)
+	{
+		CHAR snam[8];
+		wsprintf(snam, "Z%02X", izxx | 0x80);
+		if (!WritePrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], iniFile)) break;
+	}
 
 	CMainFrame::GetMainFrame()->SaveBarState("Toolbars");
 }
