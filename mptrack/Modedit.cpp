@@ -156,6 +156,12 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 		return CHANNELINDEX_INVALID;
 	}
 
+	if(m_SndFile.Patterns.Size() == 0)
+	{
+		// Nothing to do
+		return GetNumChannels();
+	}
+
 	bool first = true;
 	// Find highest valid pattern number for storing channel undo data with, since the pattern with the highest number will be undone first.
 	PATTERNINDEX highestPattern = 0;
@@ -645,14 +651,17 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 //------------------------------------------
 {
-	if ((nSmp) && (nSmp <= m_SndFile.m_nSamples))
+	if ((nSmp) && (nSmp <= m_SndFile.GetNumSamples()))
 	{
 		BEGIN_CRITICAL();
 		m_SndFile.DestroySample(nSmp);
 		m_SndFile.m_szNames[nSmp][0] = 0;
-		while ((m_SndFile.m_nSamples > 1)
-		 && (!m_SndFile.m_szNames[m_SndFile.m_nSamples][0])
-		 && (!m_SndFile.Samples[m_SndFile.m_nSamples].pSample)) m_SndFile.m_nSamples--;
+		while ((m_SndFile.GetNumSamples() > 1)
+			&& (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
+			&& (!m_SndFile.Samples[m_SndFile.GetNumSamples()].pSample))
+		{
+			m_SndFile.m_nSamples--;
+		}
 		END_CRITICAL();
 		SetModified();
 		return true;
@@ -664,14 +673,14 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 //--------------------------------------------------
 {
-	if ((nIns) && (nIns <= m_SndFile.m_nInstruments) && (m_SndFile.Instruments[nIns]))
+	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
-		BOOL bIns = FALSE;
+		bool instrumentsLeft = false;
 		BEGIN_CRITICAL();
 		m_SndFile.DestroyInstrument(nIns);
 		if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
-		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) bIns = TRUE;
-		if (!bIns) m_SndFile.m_nInstruments = 0;
+		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) instrumentsLeft = true;
+		if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();
 		SetModified();
 		return true;

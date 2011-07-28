@@ -766,9 +766,9 @@ void CViewPattern::OnGrowSelection()
 	if (!p) return;
 	BeginWaitCursor();
 
-	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwBeginSel : m_dwEndSel;
-	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwEndSel : m_dwBeginSel;
-	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->Patterns[m_nPattern].GetNumRows());
+	const DWORD startSel = (GetRowFromCursor(m_dwBeginSel) < GetRowFromCursor(m_dwEndSel)) ? m_dwBeginSel : m_dwEndSel;
+	const DWORD endSel   = (GetRowFromCursor(m_dwBeginSel) < GetRowFromCursor(m_dwEndSel)) ? m_dwEndSel : m_dwBeginSel;
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
 
 	int finalDest = GetRowFromCursor(startSel) + (GetRowFromCursor(endSel) - GetRowFromCursor(startSel))*2;
 	for (int row = finalDest; row > (int)GetRowFromCursor(startSel); row -= 2)
@@ -816,9 +816,9 @@ void CViewPattern::OnShrinkSelection()
 	if (!p) return;
 	BeginWaitCursor();
 
-	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwBeginSel : m_dwEndSel;
-	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwEndSel : m_dwBeginSel;
-	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->Patterns[m_nPattern].GetNumRows());
+	const DWORD startSel = (GetRowFromCursor(m_dwBeginSel) < GetRowFromCursor(m_dwEndSel)) ? m_dwBeginSel : m_dwEndSel;
+	const DWORD endSel   = (GetRowFromCursor(m_dwBeginSel) < GetRowFromCursor(m_dwEndSel)) ? m_dwEndSel : m_dwBeginSel;
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
 
 	int finalDest = GetRowFromCursor(startSel) + (GetRowFromCursor(endSel) - GetRowFromCursor(startSel))/2;
 
@@ -5613,6 +5613,9 @@ void CViewPattern::OnRenameChannel()
 	CChannelRenameDlg dlg(this, pSndFile->ChnSettings[nChn].szName, nChn + 1);
 	if(dlg.DoModal() != IDOK || dlg.bChanged == false) return;
 
+	// Backup old name.
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, 1, 1, false, true);
+
 	strcpy(pSndFile->ChnSettings[nChn].szName, dlg.m_sName);
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
@@ -5719,7 +5722,7 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 
 	for (UINT r=startRow; r<endRow+1; r++)
 	{
-		p = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + startChan;
+		p = pSndFile->Patterns[m_nPattern] + r * pSndFile->GetNumChannels() + startChan;
 		for (UINT c = startChan; c < endChan + 1; c++, p++)
 		{
 			// If a note or an instr is present on the row, do the change, if required.
