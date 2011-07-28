@@ -95,9 +95,14 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	UpdateChannelCBox();
 	
+	// Don't show new tempo modes for XM/IT, unless they are currently used
+	const bool showNewTempoModes = (m_pSndFile->GetType() == MOD_TYPE_MPT || (m_pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0);
+
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
+	if(showNewTempoModes || m_pSndFile->m_nTempoMode == tempo_mode_alternative)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
+	if(showNewTempoModes || m_pSndFile->m_nTempoMode == tempo_mode_modern)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
 	{

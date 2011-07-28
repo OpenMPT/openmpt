@@ -174,18 +174,18 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 		// This is used for -> MOD/XM conversion
 		vector<vector<MODCOMMAND::PARAM> > cEffectMemory;
-		cEffectMemory.resize(m_SndFile.GetNumChannels());
-		for(size_t i = 0; i < m_SndFile.GetNumChannels(); i++)
+		cEffectMemory.resize(GetNumChannels());
+		for(size_t i = 0; i < GetNumChannels(); i++)
 		{
 			cEffectMemory[i].resize(MAX_EFFECTS, 0);
 		}
 
 		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
-		CHANNELINDEX nChannel = m_SndFile.m_nChannels - 1;
+		CHANNELINDEX nChannel = GetNumChannels() - 1;
 
 		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.m_nChannels; len; m++, len--)
 		{
-			nChannel = (nChannel + 1) % m_SndFile.m_nChannels; // 0...Channels - 1
+			nChannel = (nChannel + 1) % GetNumChannels(); // 0...Channels - 1
 
 			m_SndFile.ConvertCommand(m, nOldType, nNewType);
 
@@ -301,11 +301,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			m_SndFile.Samples[nSmp].nFineTune = 0;
 		}
 
-		// Frequency to Transpose, panning (S3M/IT/MPT to MOD/XM)
+		// Frequency to Transpose (S3M/IT/MPT to MOD/XM)
 		if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 		{
 			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[nSmp]);
-			if (!(m_SndFile.Samples[nSmp].uFlags & CHN_PANNING)) m_SndFile.Samples[nSmp].nPan = 128;
 			// No relative note for MOD files
 			// TODO: Pattern notes could be transposed based on the previous relative tone?
 			if(newTypeIsMOD && m_SndFile.Samples[nSmp].RelativeTone != 0)
@@ -313,6 +312,21 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				m_SndFile.Samples[nSmp].RelativeTone = 0;
 				CHANGEMODTYPE_WARNING(wMODSampleFrequency);
 			}
+		}
+
+		// All XM samples have default panning
+		if(newTypeIsXM)
+		{
+			if(!(m_SndFile.Samples[nSmp].uFlags & CHN_PANNING))
+			{
+				m_SndFile.Samples[nSmp].uFlags |= CHN_PANNING;
+				m_SndFile.Samples[nSmp].nPan = 128;
+			}
+		}
+		// S3M / MOD samples don't have panning.
+		if(newTypeIsMOD || newTypeIsS3M)
+		{
+			m_SndFile.Samples[nSmp].uFlags &= ~CHN_PANNING;
 		}
 
 		if(oldTypeIsXM && newTypeIsIT_MPT)
@@ -394,7 +408,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Fix channel settings (pan/vol)
-	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.m_nChannels; nChn++)
+	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 	{
 		if(newTypeIsMOD_XM || newTypeIsS3M)
 		{
@@ -405,7 +419,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				CHANGEMODTYPE_WARNING(wChannelVolSurround);
 			}
 		}
-		if(newTypeIsXM && !oldTypeIsMOD_XM)
+		if(newTypeIsXM)
 		{
 			if(m_SndFile.ChnSettings[nChn].nPan != 128)
 			{
@@ -514,7 +528,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	//rewbs.customKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if	(newTypeIsMOD_XM)
+	if(newTypeIsMOD_XM)
 		ih->SetXMEffects();
 	else
 		ih->SetITEffects();
