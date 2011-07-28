@@ -849,24 +849,6 @@ BOOL CTrackApp::InitInstance()
 	// Load Midi Library
 	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);
 
-	// Load default macro configuration
-	for (UINT isfx=0; isfx<16; isfx++)
-	{
-		CHAR s[64], snam[32];
-		wsprintf(snam, "SF%X", isfx);
-		GetPrivateProfileString("Zxx Macros", snam, m_MidiCfg.szMidiSFXExt[isfx], s, CountOf(s), m_szConfigFileName);
-		s[MACRO_LENGTH - 1] = 0;
-		memcpy(m_MidiCfg.szMidiSFXExt[isfx], s, MACRO_LENGTH);
-	}
-	for (UINT izxx=0; izxx<128; izxx++)
-	{
-		CHAR s[64], snam[32];
-		wsprintf(snam, "Z%02X", izxx|0x80);
-		GetPrivateProfileString("Zxx Macros", snam, m_MidiCfg.szMidiZXXExt[izxx], s, CountOf(s), m_szConfigFileName);
-		s[MACRO_LENGTH - 1] = 0;
-		memcpy(m_MidiCfg.szMidiZXXExt[izxx], s, MACRO_LENGTH);
-	}
-
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);
 	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
@@ -972,26 +954,7 @@ int CTrackApp::ExitInstance()
 			gpDLSBanks[i] = NULL;
 		}
 	}
-	// Save default macro configuration
-	if (m_szConfigFileName[0])
-	{
-		for (UINT isfx=0; isfx<16; isfx++)
-		{
-			CHAR s[64], snam[32];
-			wsprintf(snam, "SF%X", isfx);
-			memcpy(s, m_MidiCfg.szMidiSFXExt[isfx], MACRO_LENGTH);
-			s[31] = 0;
-			if (!WritePrivateProfileString("Zxx Macros", snam, s, m_szConfigFileName)) break;
-		}
-		for (UINT izxx=0; izxx<128; izxx++)
-		{
-			CHAR s[64], snam[32];
-			wsprintf(snam, "Z%02X", izxx|0x80);
-			memcpy(s, m_MidiCfg.szMidiZXXExt[izxx], MACRO_LENGTH);
-			s[MACRO_LENGTH - 1] = 0;
-			if (!WritePrivateProfileString("Zxx Macros", snam, s, m_szConfigFileName)) break;
-		}
-	}
+
 	// Uninitialize DX-Plugins
 	UninitializeDXPlugins();
 

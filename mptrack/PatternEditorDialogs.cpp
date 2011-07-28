@@ -260,6 +260,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		}
 	}
 	ChangeEffect();
+	ChangeVolCmd();
 	OnCheckChannelSearch();
 	return TRUE;
 }
@@ -285,9 +286,47 @@ void CFindReplaceTab::ChangeEffect()
 			int newpos;
 			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_nParam % newcount;
 			combo->ResetContent();
+			combo->InitStorage(newcount, 4);
 			for (UINT i=0; i<newcount; i++)
 			{
 				wsprintf(s, (newcount == 256) ? "%02X" : "%X", i);
+				combo->SetItemData(combo->AddString(s), i);
+			}
+			combo->SetCurSel(newpos);
+		}
+	}
+}
+
+
+void CFindReplaceTab::ChangeVolCmd()
+//----------------------------------
+{
+	int fxndx = -1;
+	CComboBox *combo;
+	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL)
+	{
+		fxndx = combo->GetItemData(combo->GetCurSel());
+	}
+	// Update Param range
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL) && (m_pModDoc))
+	{
+		DWORD rangeMin, rangeMax;
+		if(!m_pModDoc->GetVolCmdInfo(fxndx, nullptr, &rangeMin, &rangeMax))
+		{
+			rangeMin = 0;
+			rangeMax = 64;
+		}
+		UINT oldcount = combo->GetCount();
+		UINT newcount = rangeMax - rangeMin + 1;
+		if (oldcount != newcount)
+		{
+			CHAR s[16];
+			int newpos;
+			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_nParam % newcount;
+			combo->ResetContent();
+			for (UINT i = rangeMin; i <= rangeMax; i++)
+			{
+				wsprintf(s, (rangeMax < 10) ? "%d" : "%02d", i);
 				combo->SetItemData(combo->AddString(s), i);
 			}
 			combo->SetCurSel(newpos);
@@ -389,7 +428,10 @@ void CFindReplaceTab::OnOK()
 	{
 		m_nMinChannel = GetDlgItemInt(IDC_EDIT1) - 1;
 		m_nMaxChannel = GetDlgItemInt(IDC_EDIT2) - 1;
-		if (m_nMaxChannel < m_nMinChannel) m_nMaxChannel = m_nMinChannel;
+		if (m_nMaxChannel < m_nMinChannel)
+		{
+			std::swap(m_nMinChannel, m_nMaxChannel);
+		}
 	}
 	CPropertyPage::OnOK();
 }

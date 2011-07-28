@@ -42,7 +42,7 @@ public:
 		glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize
 	CString gcsPreviousVersion;
 	CString gcsInstallGUID;
-	CModSpecifications const *gdefaultModType;
+	CModSpecifications const *defaultModType;
 	// Audio Setup
 	DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
@@ -103,7 +103,7 @@ public:
 
 protected:
 
-	void LoadINISettings();
+	void LoadINISettings(const CString &iniFile);
 	bool LoadRegistrySettings();
 
 	void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
