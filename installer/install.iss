@@ -124,9 +124,11 @@ Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening g
 ; internet shortcut has to be deleted manually
 Type: files; Name: {app}\ModPlug Central.url
 ; normal installation
+Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT; Tasks: not portable
 ; portable installation
+Type: dirifempty; Name: {app}\TemplateModules; Tasks: portable
 Type: dirifempty; Name: {app}\tunings; Tasks: portable
 #ifdef DOWNLOAD_MO3
 Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
