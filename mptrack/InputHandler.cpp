@@ -416,9 +416,11 @@ CString CInputHandler::GetMenuText(UINT id)
 	{
 		case FILENEW:				s="&New\t"; c=kcFileNew; break;
 		case ID_FILE_OPEN:			s="&Open...\t"; c=kcFileOpen;  break;
+		case ID_FILE_OPENTEMPLATE:	return "Open Template\t";
 		case ID_FILE_CLOSE:			s="&Close\t"; c=kcFileClose; break;
 		case ID_FILE_SAVE:			s="&Save\t"; c=kcFileSave; break;
 		case ID_FILE_SAVE_AS:		s="Save &As...\t"; c=kcFileSaveAs; break;
+		case ID_FILE_SAVEASTEMPLATE:s="Save as Template\t"; break;
 		case ID_FILE_SAVEASWAVE:	s="Export as &Wave...\t"; c=kcFileSaveAsWave; break;
 		case ID_FILE_SAVEASMP3:		s="Export as M&P3...\t"; c=kcFileSaveAsMP3; break;
 		case ID_FILE_SAVEMIDI:		s="Export as M&IDI...\t"; c=kcFileSaveMidi; break;
@@ -465,6 +467,8 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_VIEW_SONGPROPERTIES:s="Song P&roperties...\t"; c=kcViewSongProperties; break; //rewbs.graph
 		case ID_VIEW_MIDIMAPPING:	s="&MIDI Mapping...\t"; c = kcViewMIDImapping; break;
 		case ID_VIEW_EDITHISTORY:	s="Edit &History...\t"; c = kcViewEditHistory; break;
+		// Help submenu:
+		case ID_EXAMPLE_MODULES:	return "&Example Modules\t";
 
 		/*	
 		case ID_WINDOW_NEW:			s="&New Window\t"; c=kcWindowNew; break;

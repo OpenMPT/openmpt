@@ -178,16 +178,21 @@ public:
 	BOOL CanEncodeLayer3() const { return m_bLayer3Present; }
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
-	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
+	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
 	static bool IsPortableMode() { return m_bPortableMode; }
-	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
-	LPCSTR GetConfigPath() const { return m_szConfigDirectory; }
+	LPCTSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
+
+	/// Returns path to config folder including trailing '\'.
+	LPCTSTR GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
 	// Relative / absolute paths conversion
 	template <size_t nLength>
 	void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
 	template <size_t nLength>
 	void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
+
+	/// Removes item from MRU-list; most recent item has index zero.
+	void RemoveMruItem(const int nItem);
 
 // Splash Screen
 protected:

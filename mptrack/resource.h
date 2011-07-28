@@ -67,6 +67,9 @@
 #define IDS_TUNING_IMPORT_SCL_FAILURE   228
 #define IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 229
 #define IDS_SOUNDTOUCH_LOADFAILURE      230
+#define IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER 231
+#define IDS_FILE_DOES_NOT_EXIST         232
+#define IDS_FILE_EXISTS_BUT_IS_NOT_READABLE 233
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -1124,6 +1127,10 @@
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define ID_RUN_SCRIPT                   40003
+#define ID_EXAMPLE_MODULES              40004
+#define ID_EXAMPLE_MODULES_LASTINRANGE  40053
+#define ID_FILE_OPENTEMPLATE            40054
+#define ID_FILE_OPENTEMPLATE_LASTINRANGE 40103
 #define IDS_ERR_FILEOPEN                55001
 #define IDS_ERR_FILETYPE                55002
 #define IDS_ERR_SAVEINS                 55003
@@ -1189,6 +1196,8 @@
 #define ID_VIEW_MPTHACKS                60456
 #define ID_PLUGINTOINSTRUMENT           60457
 #define ID_INTERNETUPDATE               60458
+#define ID_HELP_EXAMPLEMODULES          60459
+#define ID_FILE_SAVEASTEMPLATE          60460
 
 // Next default values for new objects
 // 
@@ -1196,7 +1205,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        530
-#define _APS_NEXT_COMMAND_VALUE         60459
+#define _APS_NEXT_COMMAND_VALUE         60461
 #define _APS_NEXT_CONTROL_VALUE         2436
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

@@ -15,6 +15,7 @@
 #include "version.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
+#include <shlwapi.h>
 
 extern WORD S3MFineTuneTable[16];
 
@@ -30,6 +31,21 @@ const TCHAR FileFilterS3M[] = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
 const TCHAR FileFilterIT[]	= _T("Impulse Tracker Modules (*.it)|*.it||");
 const TCHAR FileFilterITP[] = _T("Impulse Tracker Projects (*.itp)|*.itp||");
 const TCHAR FileFilterMPT[] = _T("OpenMPT Modules (*.mptm)|*.mptm||");
+const TCHAR FileFilterNone[] = _T("");
+
+const TCHAR* ModTypeToFilter(const CSoundFile& sndFile)
+{
+	const MODTYPE modtype = sndFile.GetType();
+	switch(modtype)
+	{
+		case MOD_TYPE_MOD: return FileFilterMOD;
+		case MOD_TYPE_XM: return FileFilterXM;
+		case MOD_TYPE_S3M: return FileFilterS3M;
+		case MOD_TYPE_IT: return (sndFile.m_dwSongFlags & SONG_ITPROJECT) ? FileFilterITP : FileFilterIT;
+		case MOD_TYPE_MPT: return FileFilterMPT;
+		default: return FileFilterNone;
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc
@@ -38,6 +54,7 @@ IMPLEMENT_SERIAL(CModDoc, CDocument, 0 /* schema number*/ )
 
 BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	//{{AFX_MSG_MAP(CModDoc)
+	ON_COMMAND(ID_FILE_SAVEASTEMPLATE,	OnSaveTemplateModule)
 	ON_COMMAND(ID_FILE_SAVEASWAVE,		OnFileWaveConvert)
 	ON_COMMAND(ID_FILE_SAVEASMP3,		OnFileMP3Convert)
 	ON_COMMAND(ID_FILE_SAVEMIDI,		OnFileMidiConvert)
@@ -414,26 +431,32 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 }
 
 
-BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
+BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 //------------------------------------------------
 {
 	static int greccount = 0;
-	TCHAR fext[_MAX_EXT]="";
-	UINT nType = m_SndFile.m_nType, dwPacking = 0;
+	TCHAR fext[_MAX_EXT] = _T("");
+	UINT dwPacking = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
-	if (!lpszPathName) return FALSE;
+	if (!lpszPathName) 
+		return FALSE;
 	_tsplitpath(lpszPathName, NULL, NULL, NULL, fext);
-	if (!lstrcmpi(fext, ".mod")) nType = MOD_TYPE_MOD; else
-	if (!lstrcmpi(fext, ".s3m")) nType = MOD_TYPE_S3M; else
-	if (!lstrcmpi(fext, ".xm")) nType = MOD_TYPE_XM; else
+	MODTYPE type = CModSpecifications::ExtensionToType(fext);
+
+	/*
+	if (!lstrcmpi(fext, ".mod")) type = MOD_TYPE_MOD; else
+	if (!lstrcmpi(fext, ".s3m")) type = MOD_TYPE_S3M; else
+	if (!lstrcmpi(fext, ".xm")) type = MOD_TYPE_XM; else
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //	if (!lstrcmpi(fext, ".it")) nType = MOD_TYPE_IT; else
-	if (!lstrcmpi(fext, ".it") || !lstrcmpi(fext, ".itp")) nType = MOD_TYPE_IT; else
-	if (!lstrcmpi(fext, ".mptm")) nType = MOD_TYPE_MPT; else
+	if (!lstrcmpi(fext, ".it") || !lstrcmpi(fext, ".itp")) type = MOD_TYPE_IT; else
+	if (!lstrcmpi(fext, ".mptm")) type = MOD_TYPE_MPT; else
 // -! NEW_FEATURE#0023
-	if (!greccount)
+*/
+
+	if (type == MOD_TYPE_NONE && !greccount)
 	{
 		greccount++;
 		bOk = DoSave(NULL, TRUE);
@@ -443,23 +466,32 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	BeginWaitCursor();
 	ClearLog();
 	FixNullStrings();
-	switch(nType)
+	switch(type)
 	{
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
-	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, ".itp")) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, _T(".itp"))) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
 	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
 	}
 	EndWaitCursor();
 	if (bOk)
 	{
-		if (nType == m_SndFile.m_nType) SetPathName(lpszPathName);
+		if (type == m_SndFile.GetType() && !bTemplateFile)
+			SetPathName(lpszPathName);
 		ShowLog();
+		if (bTemplateFile)
+		{
+			CMainFrame* const pMainFrame = CMainFrame::GetMainFrame();
+			if (pMainFrame)
+				pMainFrame->CreateTemplateModulesMenu();
+		}
 	} else
 	{
-		if(nType == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ::MessageBox(NULL,"ITP projects need to have a path set for each instrument...",NULL,MB_ICONERROR | MB_OK);
-		else ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
+		if(type == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) 
+			AfxMessageBox(_T("ITP projects need to have a path set for each instrument..."), MB_ICONERROR | MB_OK);
+		else 
+			ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
 	return bOk;
 }
@@ -3897,4 +3929,41 @@ void CModDoc::FixNullStrings()
 	
 	// Sequence names.
 	// Not needed?
+}
+
+void CModDoc::OnSaveTemplateModule()
+{
+	// Create template folder if doesn't exist already.
+	const LPCTSTR pszTemplateFolder = CMainFrame::GetSettings().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
+	if (!PathIsDirectory(pszTemplateFolder))
+	{
+		if (!CreateDirectory(pszTemplateFolder, nullptr))
+		{
+			CString sErrMsg;
+			AfxFormatString1(sErrMsg, IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER, pszTemplateFolder);
+			AfxMessageBox(sErrMsg);
+			return;
+		}
+	}
+
+	// Generate file name candidate.
+	CString sName;
+	for(size_t i = 0; i<1000; ++i)
+	{
+		sName.Format(_T("newTemplate%u."), i);
+		sName += m_SndFile.GetModSpecifications().fileExtension;
+		if (!Util::sdOs::IsPathFileAvailable(pszTemplateFolder + sName, Util::sdOs::FileModeExists))
+			break;
+	}
+
+	// Ask file name from user.
+	FileDlgResult fdr = CTrackApp::ShowOpenSaveFileDialog(false, m_SndFile.GetModSpecifications().fileExtension, (LPCTSTR)sName,
+														  ModTypeToFilter(m_SndFile), pszTemplateFolder);
+
+	if (fdr.abort)
+		return;
+
+	const CString sOldPath = m_strPathName;
+	OnSaveDocument(fdr.first_file.c_str(), true/*template file*/);
+	m_strPathName = sOldPath;
 }

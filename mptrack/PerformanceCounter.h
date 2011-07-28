@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 class CPerformanceCounter
 {
 protected: 
@@ -59,3 +60,4 @@ public:
 	}
 
 };
+#endif

@@ -202,7 +202,7 @@ void CAbstractVstEditor::UpdatePresetField()
 			}
 		}
 		SetNullTerminator(rawname);
-		CreateVerifiedProgramName(rawname, sizeof(rawname), name, sizeof(name), index);
+		CreateVerifiedProgramName(rawname, CountOf(rawname), name, CountOf(name), index);
 
 		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
 	}

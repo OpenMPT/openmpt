@@ -203,6 +203,23 @@ void TestMisc()
 	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_MAX), false);
 	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_PC), true);
 	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_PCS), true);
+
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T(".mod")), MOD_TYPE_MOD);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("mod")), MOD_TYPE_MOD);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T(".s3m")), MOD_TYPE_S3M);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("s3m")), MOD_TYPE_S3M);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T(".xm")), MOD_TYPE_XM);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("xm")), MOD_TYPE_XM);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T(".it")), MOD_TYPE_IT);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("it")), MOD_TYPE_IT);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T(".itp")), MOD_TYPE_IT);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("itp")), MOD_TYPE_IT);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("mptm")), MOD_TYPE_MPT);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("invalidExtension")), MOD_TYPE_NONE);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("ita")), MOD_TYPE_NONE);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("s2m")), MOD_TYPE_NONE);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("")), MOD_TYPE_NONE);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(LPCTSTR(nullptr)), MOD_TYPE_NONE);
 }
 
 

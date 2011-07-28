@@ -502,7 +502,7 @@ public:
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
-	static CPerformanceCounter *m_pPerfCounter;
+	//static CPerformanceCounter *m_pPerfCounter;
 
 	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
 	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
@@ -534,6 +534,19 @@ public:
 	long GetTotalSampleCount(); //rewbs.VSTTimeInfo
 	double GetApproxBPM();		//rewbs.VSTTimeInfo
 	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
+
+	void CreateExampleModulesMenu();
+	void CreateTemplateModulesMenu();
+
+	/// Creates submenu whose items are filenames of files in both
+	/// AppDirectory\pszFolderName\   (usually C:\program files\OpenMPT\pszFolderName\)
+	/// and
+	/// ConfigDirectory\pszFolderName  (usually %appdata%\OpenMPT\pszFolderName\)
+	/// [in] nMaxCount: Maximum number of items allowed in the menu
+	/// [out] vPaths: Receives the full paths of the files added to the menu.
+	/// [in] pszFolderName: Name of the folder (should end with \)
+	/// [in] nIdRangeBegin: First ID for the menu item.
+	static HMENU CreateFileMenu(const size_t nMaxCount, std::vector<CString>& vPaths, const LPCTSTR pszFolderName, const uint16 nIdRangeBegin);
 
 // Player functions
 public:
@@ -575,6 +588,9 @@ protected:
 	virtual BOOL DestroyWindow();
 	virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
 	//}}AFX_VIRTUAL
+
+	/// Opens either template or example menu item.
+	void OpenMenuItemFile(const UINT nId, const bool bTemplateFile);
 
 // Implementation
 public:
@@ -625,6 +641,8 @@ protected:
 	afx_msg void OnReportBug();	//rewbs.customKeys
 	afx_msg BOOL OnInternetLink(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
+	afx_msg void OnExampleSong(UINT nId);
+	afx_msg void OnOpenTemplateModule(UINT nId);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
@@ -639,6 +657,14 @@ public:
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
+	// Defines maximum number of items in example modules menu.
+	static const size_t nMaxItemsInExampleModulesMenu = 50; 
+	static const size_t nMaxItemsInTemplateModulesMenu = 50; 
+
+	/// Array of paths of example modules that are available from help menu.
+	static std::vector<CString> s_ExampleModulePaths;
+	/// Array of paths of template modules that are available from file menu.
+	static std::vector<CString> s_TemplateModulePaths;
 };
 
 const CHAR gszBuildDate[] = __DATE__ " " __TIME__;

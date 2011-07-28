@@ -66,7 +66,7 @@ public:
 	BYTE GetMargins() {return GetMargins(GetMarginsMax());}
 
 	// Returns the effective margin value.
-	BYTE GetMargins(const BYTE nMaxMargins) {return min(nMaxMargins, m_nOrderlistMargins);}
+	BYTE GetMargins(const BYTE nMaxMargins) {return Util::Min(nMaxMargins, static_cast<BYTE>(m_nOrderlistMargins));}
 
 	// Returns maximum margin value given current window width.
 	BYTE GetMarginsMax() {return GetMarginsMax(GetLength());}

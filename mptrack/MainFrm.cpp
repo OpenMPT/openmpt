@@ -79,11 +79,13 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_DEFAULT_HELP,				CMDIFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_NEXTOCTAVE,				OnNextOctave)
 	ON_COMMAND(ID_PREVOCTAVE,				OnPrevOctave)
+	ON_COMMAND_RANGE(ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE, OnOpenTemplateModule)
 	ON_COMMAND(ID_ADD_SOUNDBANK,			OnAddDlsBank)
 	ON_COMMAND(ID_IMPORT_MIDILIB,			OnImportMidiLib)
 	ON_COMMAND(ID_MIDI_RECORD,				OnMidiRecord)
 	ON_COMMAND(ID_PANIC,					OnPanic)
 	ON_COMMAND(ID_PLAYER_PAUSE,				OnPlayerPause)
+	ON_COMMAND_RANGE(ID_EXAMPLE_MODULES, ID_EXAMPLE_MODULES_LASTINRANGE, OnExampleSong)
 	ON_COMMAND_EX(IDD_TREEVIEW,				OnBarCheck)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_TOP_PICKS,		OnInternetLink)
@@ -119,6 +121,9 @@ TrackerSettings CMainFrame::m_Settings;
 DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
 UINT CMainFrame::m_nLastOptionsPage = 0;
 HHOOK CMainFrame::ghKbdHook = NULL;
+
+std::vector<CString> CMainFrame::s_ExampleModulePaths;
+std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
 CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
@@ -183,7 +188,7 @@ HPEN CMainFrame::gpenVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
-CPerformanceCounter *CMainFrame::m_pPerfCounter = nullptr;
+//CPerformanceCounter *CMainFrame::m_pPerfCounter = nullptr;
 
 static UINT indicators[] =
 {
@@ -231,7 +236,7 @@ CMainFrame::CMainFrame()
 	m_Settings.LoadSettings();
 
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
-	m_pPerfCounter= new CPerformanceCounter();
+	//m_pPerfCounter= new CPerformanceCounter();
 
 	//Loading static tunings here - probably not the best place to do that but anyway.
 	CSoundFile::LoadStaticTunings();
@@ -288,6 +293,9 @@ VOID CMainFrame::Initialize()
 	UpdateAudioParameters(TRUE);
 	// Update the tree
 	m_wndTree.Init();
+	
+	CreateExampleModulesMenu();
+	CreateTemplateModulesMenu();
 }
 
 
@@ -297,7 +305,7 @@ CMainFrame::~CMainFrame()
 	DeleteCriticalSection(&m_csAudio);
 	delete m_InputHandler; 	//rewbs.customKeys
 	delete m_pAutoSaver; //rewbs.autosaver
-	delete m_pPerfCounter;
+	//delete m_pPerfCounter;
 
 	CChannelManagerDlg::DestroySharedInstance();
 	CSoundFile::DeleteStaticdata();
@@ -2160,6 +2168,61 @@ void CMainFrame::OnPlayerPause()
 }
 
 
+void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
+{
+	const UINT nIdBegin = (bTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
+	const std::vector<CString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
+
+	const UINT nIndex = nId - nIdBegin;
+	if (nIndex < vecFilePaths.size())
+	{
+		const CString& sPath = vecFilePaths[nIndex];
+		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
+		if (bAvailable)
+		{
+			CDocument* pDoc = theApp.OpenDocumentFile(sPath);
+			if (pDoc != nullptr)
+			{
+				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
+				CModDoc* pModDoc = static_cast<CModDoc*>(pDoc);
+				pModDoc->ClearFilePath(); // Clear path so that saving will not take place in templates/examples folder.
+				if (bTemplateFile)
+				{
+					theApp.RemoveMruItem(0);
+				}
+			}
+		}
+		else
+		{
+			const bool bExists = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists);
+			CString str;
+			if (bExists)
+				AfxFormatString1(str, IDS_FILE_EXISTS_BUT_IS_NOT_READABLE, (LPCTSTR)sPath);
+			else
+				AfxFormatString1(str, IDS_FILE_DOES_NOT_EXIST, (LPCTSTR)sPath);
+			AfxMessageBox(str);	
+		}
+	}
+	else
+		ASSERT(false);
+}
+
+
+void CMainFrame::OnOpenTemplateModule(UINT nId)
+//---------------------------------------------
+{
+	OpenMenuItemFile(nId, true/*open template menu file*/);
+}
+
+
+void CMainFrame::OnExampleSong(UINT nId)
+//--------------------------------------
+{
+	OpenMenuItemFile(nId, false/*open example menu file*/);
+
+}
+
+
 LRESULT CMainFrame::OnInvalidatePatterns(WPARAM wParam, LPARAM)
 //-------------------------------------------------------------
 {
@@ -2520,6 +2583,87 @@ void CMainFrame::OnInternetUpdate()
 }
 
 
+HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& vPaths, const LPCTSTR pszFolderName, const uint16 nIdRangeBegin)
+//---------------------------------------------------------------------------------------------------------------------------------------------
+{
+	vPaths.clear();
+	HMENU hMenu = ::CreatePopupMenu();
+	ASSERT(hMenu != NULL);
+	if (hMenu != NULL)
+	{
+		UINT_PTR nAddCounter = 0;
+		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
+		{
+			// To avoid duplicates, check whether app path and config path are the same.
+			if (i == 1 && _tcsicmp(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
+				break;
+			CFileFind fileFind;
+			CFixedStringT<CString, MAX_PATH> sPath;
+			sPath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
+			sPath += pszFolderName;
+			if (Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists) == false)
+				continue;
+			sPath += _T("*");
+
+			BOOL bWorking = fileFind.FindFile(sPath);
+			// Note: The order in which the example files appears in the menu is unspecified.
+			while (bWorking && nAddCounter < nMaxCount)
+			{
+				bWorking = fileFind.FindNextFile();
+				const CString fn = fileFind.GetFileName();
+				if (fileFind.IsDirectory() == FALSE)
+				{
+					vPaths.push_back(fileFind.GetFilePath());
+					AppendMenu(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, fileFind.GetFileName());
+					++nAddCounter;
+				}
+			}
+			fileFind.Close();
+		}
+
+		if (nAddCounter == 0)
+			AppendMenu(hMenu, MF_STRING | MF_GRAYED | MF_DISABLED, 0, _T("No items found"));
+	}
+
+	return hMenu;
+}
+
+
+void CMainFrame::CreateExampleModulesMenu()
+//-----------------------------------------
+{
+	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES + 1,
+				  "Make sure that there's a proper range for menu commands in resources.");
+	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, _T("ExampleSongs\\"), ID_EXAMPLE_MODULES);
+	CMenu* const pMainMenu = GetMenu();
+	if (hMenu && pMainMenu && m_InputHandler)
+		VERIFY(pMainMenu->ModifyMenu(ID_EXAMPLE_MODULES, MF_BYCOMMAND | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_EXAMPLE_MODULES)));
+	else
+		ASSERT(false);
+}
+
+
+void CMainFrame::CreateTemplateModulesMenu()
+//------------------------------------------
+{
+	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE + 1,
+				  "Make sure that there's a proper range for menu commands in resources.");
+	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, _T("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
+	CMenu* const pMainMenu = GetMenu();
+	CMenu* pFileMenu = (pMainMenu) ? pMainMenu->GetSubMenu(0) : nullptr;
+	if (hMenu && pFileMenu && m_InputHandler)
+	{
+		if (pFileMenu->GetMenuItemID(1) != ID_FILE_OPEN)
+			pFileMenu = pMainMenu->GetSubMenu(1);
+		ASSERT(pFileMenu->GetMenuItemID(1) == ID_FILE_OPEN);
+		VERIFY(pFileMenu->RemoveMenu(2, MF_BYPOSITION));
+		VERIFY(pFileMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_FILE_OPENTEMPLATE)));
+	}
+	else
+		ASSERT(false);
+}
+
+
 /////////////////////////////////////////////
 //Misc helper functions
 /////////////////////////////////////////////
@@ -2533,10 +2677,10 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 		PSNDMIXPLUGIN p = &plugarray[iPlug];
 		CString str;
 		str.Preallocate(80);
-		str.Format("FX%d: ", iPlug+1);
+		str.Format(_T("FX%d: "), iPlug+1);
 		const int size0 = str.GetLength();
 		str += (librarynames) ? p->GetLibraryName() : p->GetName();
-		if(str.GetLength() <= size0) str += "undefined";
+		if(str.GetLength() <= size0) str += _T("undefined");
 
 		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
 	}

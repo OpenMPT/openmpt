@@ -7,6 +7,7 @@
 #include <string>
 #include "afxcmn.h"
 #include "afxwin.h"
+#include "resource.h"
 
 using std::vector;
 using std::string;

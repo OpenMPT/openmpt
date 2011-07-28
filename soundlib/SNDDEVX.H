@@ -2,6 +2,7 @@
 #define _SNDDEVX_H_
 
 #include <mmsystem.h>
+#include "snddev.h"
 
 #ifndef NO_DSOUND
 #include <dsound.h>
