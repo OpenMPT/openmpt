@@ -1,7 +1,10 @@
 #include <stdafx.h>
 #include "mod_specifications.h"
+#include "..\mptrack\misc_util.h"
+
 
 MODTYPE CModSpecifications::ExtensionToType(LPCTSTR pszExt)
+//---------------------------------------------------------
 {
 	if (pszExt == nullptr)
 		return MOD_TYPE_NONE;
@@ -30,6 +33,7 @@ MODTYPE CModSpecifications::ExtensionToType(LPCTSTR pszExt)
 		return MOD_TYPE_NONE;
 }
 
+
 bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 //------------------------------------------------------------
 {
@@ -50,6 +54,7 @@ bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 	return false;
 }
 
+
 bool CModSpecifications::HasVolCommand(MODCOMMAND::VOLCMD volcmd) const
 //---------------------------------------------------------------------
 {
@@ -57,6 +62,7 @@ bool CModSpecifications::HasVolCommand(MODCOMMAND::VOLCMD volcmd) const
 	if(volcommands[volcmd] == '?') return false;
 	return true;
 }
+
 
 bool CModSpecifications::HasCommand(MODCOMMAND::COMMAND cmd) const
 //----------------------------------------------------------------
@@ -66,12 +72,14 @@ bool CModSpecifications::HasCommand(MODCOMMAND::COMMAND cmd) const
 	return true;
 }
 
+
 char CModSpecifications::GetVolEffectLetter(MODCOMMAND::VOLCMD volcmd) const
 //--------------------------------------------------------------------------
 {
 	if(volcmd >= MAX_VOLCMDS) return '?';
 	return volcommands[volcmd];
 }
+
 
 char CModSpecifications::GetEffectLetter(MODCOMMAND::COMMAND cmd) const
 //---------------------------------------------------------------------
