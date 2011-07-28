@@ -165,6 +165,8 @@ TrackerSettings::TrackerSettings()
 		}
 	}
 
+	defaultModType = MOD_TYPE_IT;
+
 	gnPlugWindowX = 243;
 	gnPlugWindowY = 273;
 	gnPlugWindowWidth = 370;
@@ -369,6 +371,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
 
+	
+	// Default Paths
 	TCHAR szPath[_MAX_PATH] = "";
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
@@ -383,6 +387,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	GetPrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, m_szKbdFile, INIBUFFERSIZE, iniFile);
 	theApp.RelativePathToAbsolute(m_szKbdFile);
 
+
+	// Effects Settings
 	CSoundFile::m_nXBassDepth = CMainFrame::GetPrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_nXBassDepth, iniFile);
 	CSoundFile::m_nXBassRange = CMainFrame::GetPrivateProfileLong("Effects", "XBassRange", CSoundFile::m_nXBassRange, iniFile);
 	CSoundFile::m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_nReverbDepth, iniFile);
@@ -390,6 +396,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CSoundFile::m_nProLogicDepth = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_nProLogicDepth, iniFile);
 	CSoundFile::m_nProLogicDelay = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_nProLogicDelay, iniFile);
 
+
+	// EQ Settings
 	GetPrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPRESET), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPRESET), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPRESET), iniFile);
@@ -397,6 +405,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPRESET), iniFile);
 
 
+	// Auto saver settings
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 	if(CMainFrame::GetPrivateProfileLong("AutoSave", "Enabled", true, iniFile))
 	{
@@ -413,15 +422,14 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CMainFrame::m_pAutoSaver->SetPath(szPath);
 	CMainFrame::m_pAutoSaver->SetFilenameTemplate(CMainFrame::GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
 
-	GetPrivateProfileString("Misc", "DefaultModType", defaultModType->fileExtension, szPath, INIBUFFERSIZE, iniFile);
-	// 	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
-	// 	{
-	// 		if(!strcmp(szPath, ModSpecs::Collection[i]->fileExtension))
-	// 		{
-	// 			gdefaultModType = ModSpecs::Collection[i];
-	// 			break;
-	// 		}
-	// 	}
+
+	// Default mod type when using the "New" button
+	const MODTYPE oldDefault = defaultModType;
+	defaultModType = CModSpecifications::ExtensionToType(CMainFrame::GetPrivateProfileCString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile));
+	if(defaultModType == MOD_TYPE_NONE)
+	{
+		defaultModType = oldDefault;
+	}
 }
 
 
@@ -754,6 +762,8 @@ void TrackerSettings::SaveSettings()
 		wsprintf(snam, "Z%02X", izxx | 0x80);
 		if (!WritePrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], iniFile)) break;
 	}
+
+	WritePrivateProfileString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile);
 
 	CMainFrame::GetMainFrame()->SaveBarState("Toolbars");
 }

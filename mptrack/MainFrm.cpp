@@ -2169,6 +2169,7 @@ void CMainFrame::OnPlayerPause()
 
 
 void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
+//-------------------------------------------------------------------------
 {
 	const UINT nIdBegin = (bTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
 	const std::vector<CString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
@@ -2188,6 +2189,9 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 				pModDoc->ClearFilePath(); // Clear path so that saving will not take place in templates/examples folder.
 				if (bTemplateFile)
 				{
+					pModDoc->GetFileHistory()->empty();	// Reset edit history for template files
+					pModDoc->GetSoundFile()->m_dwCreatedWithVersion = MptVersion::num;
+					pModDoc->GetSoundFile()->m_dwLastSavedWithVersion = 0;
 					theApp.RemoveMruItem(0);
 				}
 			}
