@@ -4,7 +4,7 @@
 typedef struct _MOD2MIDIINSTR
 {
 	UINT nChannel;
-	UINT nProgram;
+	uint8 nProgram;
 } MOD2MIDIINSTR, *PMOD2MIDIINSTR;
 
 
