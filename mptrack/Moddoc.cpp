@@ -2173,7 +2173,7 @@ void CModDoc::OnApproximateBPM()
 
 typedef struct MPTEFFECTINFO
 {
-	DWORD dwEffect;		// CMD_XXXX
+	MODCOMMAND::COMMAND dwEffect;		// CMD_XXXX
 	DWORD dwParamMask;	// 0 = default
 	DWORD dwParamValue;	// 0 = default
 	DWORD dwFlags;		// FXINFO_XXXX
@@ -2288,7 +2288,7 @@ BOOL CModDoc::IsExtendedEffect(UINT ndx) const
 }
 
 
-bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool bXX, CHANNELINDEX nChn) //rewbs.xinfo: added chan arg
+bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, UINT param, bool bXX, CHANNELINDEX nChn) //rewbs.xinfo: added chan arg
 //------------------------------------------------------------------------------------------------------
 {
 	bool bSupported;
@@ -2413,13 +2413,13 @@ LONG CModDoc::GetIndexFromEffect(UINT command, UINT param)
 
 
 //Returns command and corrects parameter refParam if necessary
-UINT CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
-//-------------------------------------------------------
+MODCOMMAND::COMMAND CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
+//----------------------------------------------------------------------
 {
 	//if (pParam) *pParam = -1;
 	if (ndx >= MAX_FXINFO) {
 		refParam = 0;
-		return 0;
+		return CMD_NONE;
 	}
 
 	//Cap parameter to match FX if necessary.
@@ -2440,11 +2440,11 @@ UINT CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
 }
 
 
-UINT CModDoc::GetEffectFromIndex(UINT ndx)
-//----------------------------------------
+MODCOMMAND::COMMAND CModDoc::GetEffectFromIndex(UINT ndx)
+//-------------------------------------------------------
 {
 	if (ndx >= MAX_FXINFO) {
-		return 0;
+		return CMD_NONE;
 	}
 
 	return gFXInfo[ndx].dwEffect;
@@ -3059,7 +3059,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 
 typedef struct MPTVOLCMDINFO
 {
-	DWORD dwVolCmd;		// VOLCMD_XXXX
+	MODCOMMAND::VOLCMD dwVolCmd;		// VOLCMD_XXXX
 	DWORD dwFormats;	// MOD_TYPE_XXX combo
 	LPCSTR pszName;		// ie "Set Volume"
 } MPTVOLCMDINFO;
@@ -3105,8 +3105,8 @@ LONG CModDoc::GetIndexFromVolCmd(UINT volcmd)
 }
 
 
-UINT CModDoc::GetVolCmdFromIndex(UINT ndx)
-//----------------------------------------
+MODCOMMAND::VOLCMD CModDoc::GetVolCmdFromIndex(UINT ndx)
+//------------------------------------------------------
 {
 	return (ndx < MAX_VOLINFO) ? gVolCmdInfo[ndx].dwVolCmd : 0;
 }

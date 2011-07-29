@@ -237,12 +237,12 @@ public:
 	void ActivateWindow();
 
 	// Effects Description
-	bool GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool bXX = false, CHANNELINDEX nChn = CHANNELINDEX_INVALID); // bXX: Nxx: ...
+	bool GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, UINT param, bool bXX = false, CHANNELINDEX nChn = CHANNELINDEX_INVALID); // bXX: Nxx: ...
 	UINT GetNumEffects() const;
 	bool GetEffectInfo(UINT ndx, LPSTR s, bool bXX = false, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	LONG GetIndexFromEffect(UINT command, UINT param);
-	UINT GetEffectFromIndex(UINT ndx, int &refParam);
-	UINT GetEffectFromIndex(UINT ndx);
+	MODCOMMAND::COMMAND GetEffectFromIndex(UINT ndx, int &refParam);
+	MODCOMMAND::COMMAND GetEffectFromIndex(UINT ndx);
 	UINT GetEffectMaskFromIndex(UINT ndx);
 	bool GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
 	BOOL IsExtendedEffect(UINT ndx) const;
@@ -251,7 +251,7 @@ public:
 	// Volume column effects description
 	UINT GetNumVolCmds() const;
 	LONG GetIndexFromVolCmd(UINT volcmd);
-	UINT GetVolCmdFromIndex(UINT ndx);
+	MODCOMMAND::VOLCMD GetVolCmdFromIndex(UINT ndx);
 	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 
 	// Various MIDI Macro helpers

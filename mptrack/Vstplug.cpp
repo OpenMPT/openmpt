@@ -286,7 +286,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			if (!hLib && dw != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
 			{
 				TCHAR szBuf[256]; 
-				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, GetErrorMessage(dw)); 
+				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, (LPCTSTR)GetErrorMessage(dw)); 
 				MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
 			}
 #endif //_DEBUG	
@@ -406,11 +406,11 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		#endif // VST_LOG
 		}
 
-		try {
+		//try {
 			FreeLibrary(hLib);
-		} catch (...) {
-			CVstPluginManager::ReportPlugException("Exception in FreeLibrary(\"%s\")!\n", pszDllPath);
-		}
+		//} catch (...) {
+		//	CVstPluginManager::ReportPlugException("Exception in FreeLibrary(\"%s\")!\n", pszDllPath);
+		//}
 
 		return (bOk) ? m_pVstHead : NULL;
 	} else
@@ -1087,7 +1087,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 		{
 			// Plugin wants to load or save a file.
 			std::string extensions, workingDir;
-			for(size_t i = 0; i < pFileSel->nbFileTypes; i++)
+			for(VstInt32 i = 0; i < pFileSel->nbFileTypes; i++)
 			{
 				VstFileType *pType = &(pFileSel->fileTypes[i]);
 				extensions += pType->name;
@@ -1230,7 +1230,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 		// Close file selector - delete allocated strings.
 		if(pFileSel->command == kVstMultipleFilesLoad && pFileSel->returnMultiplePaths != nullptr)
 		{
-			for(size_t i = 0; i < pFileSel->nbReturnPath; i++)
+			for(VstInt32 i = 0; i < pFileSel->nbReturnPath; i++)
 			{
 				if(pFileSel->returnMultiplePaths[i] != nullptr)
 				{
@@ -1739,7 +1739,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nEditorX = m_nEditorY = -1;
 	m_pEvList = NULL;
 	m_pModDoc = NULL; //rewbs.plugDocAware
-	m_nPreviousMidiChan = -1; //rewbs.VSTCompliance
+	m_nPreviousMidiChan = nInvalidMidiChan; //rewbs.VSTCompliance
 	m_pProcessFP = NULL;
 
 	// Insert ourselves in the beginning of the list
@@ -1766,7 +1766,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_bPlugResumed = false;
 	m_bModified = false;
 	m_dwTimeAtStartOfProcess=0;
-	m_nSampleRate = -1; //rewbs.VSTCompliance: gets set on Resume()
+	m_nSampleRate = nInvalidSampleRate; //rewbs.VSTCompliance: gets set on Resume()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 
 	for (int ch=0; ch<16; ch++) {
@@ -1860,7 +1860,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	}
 
 	m_nSampleRate=CSoundFile::gdwMixingFreq;
-	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
+	Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(CSoundFile::gdwMixingFreq));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0.0f);
 	if (m_pEffect->numPrograms > 0)	{
 		Dispatch(effSetProgram, 0, 0, NULL, 0);
@@ -1911,7 +1911,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
 
  // issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
-	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
+	Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(CSoundFile::gdwMixingFreq));
 
 }
 
@@ -2319,7 +2319,7 @@ void CVstPlugin::Init(unsigned long /*nFreq*/, int /*bReset*/)
 void CVstPlugin::Resume()
 //-----------------------
 {
-	long sampleRate = CSoundFile::gdwMixingFreq;
+	const DWORD sampleRate = CSoundFile::gdwMixingFreq;
 
 	try {
 		//reset some stuf
@@ -2329,7 +2329,7 @@ void CVstPlugin::Resume()
 		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f);	// calls plugin's suspend
 		if (sampleRate != m_nSampleRate) {
 			m_nSampleRate=sampleRate;
-			Dispatch(effSetSampleRate, 0, 0, NULL, m_nSampleRate);
+			Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(m_nSampleRate));
 		}
 		Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
 		//start off some stuff
@@ -2389,7 +2389,7 @@ void CVstPlugin::RecalculateGain()
 
 	if (m_bIsInstrument && m_pSndFile) {
 		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
-		gain *= (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol());
+		gain = static_cast<float>(gain * (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol()));
 	}
 	m_fGain = gain;
 }
@@ -2399,7 +2399,7 @@ void CVstPlugin::SetDryRatio(UINT param)
 //--------------------------------------
 {
 	param = min(param, 127);
-	m_pMixStruct->fDryRatio = 1.0-(static_cast<float>(param)/127.0f);
+	m_pMixStruct->fDryRatio = static_cast<float>(1.0-(static_cast<double>(param)/127.0));
 }
 
 /*
@@ -2870,8 +2870,8 @@ short CVstPlugin::getMIDI14bitValueFromShort(short value)
 
 	// pre: 0 <= value <= 16383
 
-	BYTE byte1 = value >> 7;			// get last   7 bytes only
-	BYTE byte2 = value & 0x7F;			// get first  7 bytes only
+	BYTE byte1 = static_cast<BYTE>(value >> 7);		// get last   7 bytes only
+	BYTE byte2 = static_cast<BYTE>(value & 0x7F);	// get first  7 bytes only
 	short converted = byte1<<8 | byte2; // merge
 
 	return converted;
@@ -2884,9 +2884,9 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 {
 	nMidiCh--;		// move from 1-17 range to 0-16 range
 	
-	short increment = nParam * 0x2000/0xFF;
-	short newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
-    newPitchBendPos = max(MIDI_PitchBend_Min, min(MIDI_PitchBend_Max, newPitchBendPos)); // cap
+	const int16 increment = static_cast<int16>(nParam * 0x2000/0xFF);
+	int16 newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
+	Limit(newPitchBendPos, int16(MIDI_PitchBend_Min), int16(MIDI_PitchBend_Max));
 	
 	MidiPitchBend(nMidiCh, newPitchBendPos);
 }
@@ -4167,12 +4167,10 @@ void X86_FloatToStereo16Mix(const float *pIn1, const float *pIn2, short int *pOu
 	{
 		int xl = (int)(pIn1[i] * _f2si);
 		int xr = (int)(pIn2[i] * _f2si);
-		if (xl < -32768) xl = -32768;
-		if (xl > 32767) xl = 32767;
-		if (xr < -32768) xr = -32768;
-		if (xr > 32767) xr = 32767;
-		pOut[i*2] = xl;
-		pOut[i*2+1] = xr;
+		Limit(xl, int16_min, int16_max);
+		Limit(xr, int16_min, int16_max);
+		pOut[i*2] = static_cast<int16>(xl);
+		pOut[i*2+1] = static_cast<int16>(xr);
 	}
 }
 

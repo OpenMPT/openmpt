@@ -13,6 +13,7 @@
 #include "mptrack.h"
 #include "Mainfrm.h"
 #include "PatternEditorDialogs.h"
+#include "view_pat.h"
 
 
 // -> CODE#0010
@@ -426,8 +427,8 @@ void CFindReplaceTab::OnOK()
 	// Min/Max channels
 	if (!m_bReplace)
 	{
-		m_nMinChannel = GetDlgItemInt(IDC_EDIT1) - 1;
-		m_nMaxChannel = GetDlgItemInt(IDC_EDIT2) - 1;
+		m_nMinChannel = static_cast<CHANNELINDEX>(GetDlgItemInt(IDC_EDIT1) - 1);
+		m_nMaxChannel = static_cast<CHANNELINDEX>(GetDlgItemInt(IDC_EDIT2) - 1);
 		if (m_nMaxChannel < m_nMinChannel)
 		{
 			std::swap(m_nMinChannel, m_nMaxChannel);
@@ -653,13 +654,13 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 }
 
 
-BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
+BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor)
 //----------------------------------------------------------
 {
 	CHAR s[64];
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	UINT nRow = dwCursor >> 16;
-	UINT nChannel = (dwCursor & 0xFFFF) >> 3;
+	const ROWINDEX nRow = CViewPattern::GetRowFromCursor(dwCursor);
+	const CHANNELINDEX nChannel = CViewPattern::GetChanFromCursor(dwCursor);
 
 	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 		|| (nRow >= pSndFile->Patterns[nPat].GetNumRows()) || (nChannel >= pSndFile->m_nChannels)
@@ -702,8 +703,8 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 }
 
 
-void CEditCommand::UpdateNote(UINT note, UINT instr)
-//--------------------------------------------------
+void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
+//---------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
@@ -731,8 +732,8 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 }
 
 
-void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
-//----------------------------------------------------
+void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
+//-----------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
@@ -759,8 +760,8 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 }
 
 
-void CEditCommand::UpdateEffect(UINT command, UINT param)
-//-------------------------------------------------------
+void CEditCommand::UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM param)
+//-----------------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
@@ -908,16 +909,16 @@ void CPageEditNote::OnNoteChanged()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		int n = combo->GetCurSel();
-		if (n >= 0) m_nNote = combo->GetItemData(n);
+		if (n >= 0) m_nNote = static_cast<MODCOMMAND::NOTE>(combo->GetItemData(n));
 	}
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
 		int n = combo->GetCurSel();
 		if(n >= 0)
 		{
-			const UINT oldInstr = m_nInstr;
+			const MODCOMMAND::INSTR oldInstr = m_nInstr;
 			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
-			m_nInstr = combo->GetItemData(n);
+			m_nInstr = static_cast<MODCOMMAND::INSTR>(combo->GetItemData(n));
 			//Checking whether note names should be recreated.
 			if(!MODCOMMAND::IsPcNote(m_nNote) && pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
 			{
@@ -1020,7 +1021,7 @@ void CPageEditVolume::OnVolCmdChanged()
 		int n = combo->GetCurSel();
 		if (n >= 0)
 		{
-			UINT volcmd = m_pModDoc->GetVolCmdFromIndex(combo->GetItemData(n));
+			MODCOMMAND::VOLCMD volcmd = m_pModDoc->GetVolCmdFromIndex(combo->GetItemData(n));
 			if (volcmd != m_nVolCmd)
 			{
 				m_nVolCmd = volcmd;
@@ -1030,7 +1031,7 @@ void CPageEditVolume::OnVolCmdChanged()
 	}
 	if ((slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1)) != NULL)
 	{
-		m_nVolume = slider->GetPos();
+		m_nVolume = static_cast<MODCOMMAND::VOL>(slider->GetPos());
 	}
 	if (m_pParent) m_pParent->UpdateVolume(m_nVolCmd, m_nVolume);
 }
@@ -1151,7 +1152,7 @@ void CPageEditEffect::OnCommandChanged()
 		{
 			int param = -1, ndx = combo->GetItemData(n);
 			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, param) : 0;
-			if (param >= 0) m_nParam = param;
+			if (param >= 0) m_nParam = static_cast<MODCOMMAND::PARAM>(param);
 			bSet = TRUE;
 		}
 		UpdateRange(bSet);
@@ -1173,7 +1174,7 @@ void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
 			UINT param = m_pModDoc->MapPosToValue(fxndx, pos);
 			if (param != m_nParam)
 			{
-				m_nParam = param;
+				m_nParam = static_cast<MODCOMMAND::PARAM>(param);
 				UpdateValue(TRUE);
 			}
 		}
@@ -1268,7 +1269,7 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 			if ((cnote < 3) || (i == (UINT)nKey))
 			{
 				UINT k = (cnote < 3) ? cnote : 2;
-				pChords[chord].notes[k] = i+1;
+				pChords[chord].notes[k] = static_cast<BYTE>(i+1);
 				if (cnote < 3) cnote++;
 			}
 		}
@@ -1498,11 +1499,11 @@ void CSplitKeyboadSettings::OnOK()
 {
 	CDialog::OnOK();
 
-	m_pOptions->splitNote = m_CbnSplitNote.GetCurSel();
+	m_pOptions->splitNote = static_cast<MODCOMMAND::NOTE>(m_CbnSplitNote.GetCurSel());
 	m_pOptions->octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
 	m_pOptions->octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE) ? true : false;
-	m_pOptions->splitVolume = m_CbnSplitVolume.GetCurSel();
-	m_pOptions->splitInstrument = m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel());
+	m_pOptions->splitVolume = static_cast<MODCOMMAND::VOL>(m_CbnSplitVolume.GetCurSel());
+	m_pOptions->splitInstrument = static_cast<MODCOMMAND::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));
 }
 
 

@@ -506,10 +506,10 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			{
 				if (n < 0)
 				{
-					pSndFile->m_nMusicSpeed = max(nCurrentSpeed - 1, pSndFile->GetModSpecifications().speedMin);
+					pSndFile->m_nMusicSpeed = Util::Max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
 				} else
 				{
-					pSndFile->m_nMusicSpeed = min(nCurrentSpeed + 1, pSndFile->GetModSpecifications().speedMax);
+					pSndFile->m_nMusicSpeed = Util::Min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
 				}
 				m_SpinSpeed.SetPos(0);
 			}
@@ -523,7 +523,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					}
 				} else
 				{
-					if (nCurrentRowsPerBeat < pSndFile->m_nCurrentRowsPerMeasure)
+					if (static_cast<ROWINDEX>(nCurrentRowsPerBeat) < pSndFile->m_nCurrentRowsPerMeasure)
 					{
 						SetRowsPerBeat(nCurrentRowsPerBeat + 1);
 					}
