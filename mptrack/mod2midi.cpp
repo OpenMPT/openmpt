@@ -315,7 +315,7 @@ VOID CModToMidi::OnProgramChanged()
 	if (nProgram > 127) return;
 	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
 	{
-		m_InstrMap[m_nCurrInstr].nProgram = nProgram;
+		m_InstrMap[m_nCurrInstr].nProgram = static_cast<uint8>(nProgram);
 	}
 }
 
@@ -347,7 +347,7 @@ BOOL CModToMidi::DoConvert()
 	UINT nMidiChCurPrg[16];
 	BYTE tmp[256];
 	CHAR s[256];
-	UINT nPPQN, nTickMultiplier, nClock, nOrder, nRow;
+	UINT nTickMultiplier, nClock, nOrder, nRow;
 	UINT nSpeed;
 	CFile f;
 
@@ -362,7 +362,7 @@ BOOL CModToMidi::DoConvert()
 	memset(Tracks, 0, sizeof(Tracks));
 	if (!m_pSndFile->m_nDefaultTempo) m_pSndFile->m_nDefaultTempo = 125;
 	nTickMultiplier = MOD2MIDI_TEMPOFACTOR;
-	nPPQN = (m_pSndFile->m_nDefaultTempo*nTickMultiplier) / 5;
+	const uint16 wPPQN = static_cast<uint16>((m_pSndFile->m_nDefaultTempo*nTickMultiplier) / 5);
 	rmid.id_RIFF = IFFID_RIFF;
 	rmid.filelen = sizeof(rmid)+sizeof(mthd)-8;
 	rmid.id_RMID = 0x44494D52; // "RMID"
@@ -371,9 +371,9 @@ BOOL CModToMidi::DoConvert()
 	mthd.id = 0x6468544d; // "MThd"
 	mthd.len = BigEndian(sizeof(mthd)-8);
 	mthd.wFmt = BigEndianW(1);
-	mthd.wTrks = chnCount; // 1 track/channel
+	mthd.wTrks = static_cast<uint16>(chnCount); // 1 track/channel
 	mthd.wTrks = BigEndianW(mthd.wTrks); //Convert to big endian value.
-	mthd.wDivision = BigEndianW(nPPQN);
+	mthd.wDivision = BigEndianW(wPPQN);
 	if (m_bRmi) f.Write(&rmid, sizeof(rmid));
 	f.Write(&mthd, sizeof(mthd));
 
@@ -431,10 +431,12 @@ BOOL CModToMidi::DoConvert()
 			nRow = 0;
 			continue;
 		}
+		PatternRow patternRow = m_pSndFile->Patterns[nPat].GetRow(nRow);
 		for (UINT nChn=0; nChn<chnCount; nChn++)
 		{
 			PDYNMIDITRACK pTrk = &Tracks[nChn];
-			MODCOMMAND *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+			//MODCOMMAND *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+			const MODCOMMAND *m = &patternRow[nChn];
 			UINT delta_time = nClock - pTrk->nLastEventClock;
 			UINT len = 0;
 
@@ -454,8 +456,8 @@ BOOL CModToMidi::DoConvert()
 					pTrk->nInstrument = nIns;
 					if ((nMidiCh != 9) && (nProgram != nMidiChCurPrg[nMidiCh]))
 					{
-						tmp[len] = 0xC0|nMidiCh;
-						tmp[len+1] = nProgram;
+						tmp[len] = static_cast<BYTE>(0xC0|nMidiCh);
+						tmp[len+1] = static_cast<BYTE>(nProgram);
 						tmp[len+2] = 0;
 						len += 3;
 					}
@@ -469,7 +471,7 @@ BOOL CModToMidi::DoConvert()
 						if (pTrk->NoteOn[i])
 						{
 							tmp[len] = 0x90|(pTrk->NoteOn[i]-1);
-							tmp[len+1] = i;
+							tmp[len+1] = static_cast<BYTE>(i);
 							tmp[len+2] = 0;
 							tmp[len+3] = 0;
 							len += 4;
@@ -478,9 +480,9 @@ BOOL CModToMidi::DoConvert()
 					}
 					if (m->note <= NOTE_MAX)
 					{
-						pTrk->NoteOn[note] = pTrk->nMidiChannel+1;
-						tmp[len] = 0x90|pTrk->nMidiChannel;
-						tmp[len+1] = (pTrk->nMidiChannel==9) ? pTrk->nMidiProgram : note;
+						pTrk->NoteOn[note] = static_cast<BYTE>(pTrk->nMidiChannel+1);
+						tmp[len] = static_cast<BYTE>(0x90|pTrk->nMidiChannel);
+						tmp[len+1] = (pTrk->nMidiChannel==9) ? static_cast<BYTE>(pTrk->nMidiProgram) : static_cast<BYTE>(note);
 						UINT vol = 0x7f;
 						UINT nsmp = pTrk->nInstrument;
 						if (m_pSndFile->m_nInstruments)
