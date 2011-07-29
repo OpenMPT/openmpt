@@ -1,6 +1,8 @@
 #ifndef _VIEW_PATTERNS_H_
 #define _VIEW_PATTERNS_H_
 
+#include "globals.h"
+
 class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
@@ -342,8 +344,13 @@ protected:
 
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-private:
 
+	static ROWINDEX GetRowFromCursor(DWORD cursor) { return (cursor >> 16); };
+	static CHANNELINDEX GetChanFromCursor(DWORD cursor) { return static_cast<CHANNELINDEX>((cursor & 0xFFFF) >> 3); };
+	static UINT GetColTypeFromCursor(DWORD cursor) { return (cursor & 0x07); };
+	static DWORD CreateCursor(ROWINDEX row, CHANNELINDEX channel = 0, UINT column = 0) { return (row << 16) | ((channel << 3) & 0x1FFF) | (column & 0x07); };
+
+private:
 	void SetSplitKeyboardSettings();
 	bool HandleSplit(MODCOMMAND* p, int note);
 	bool BuildChannelControlCtxMenu(HMENU hMenu);
@@ -371,11 +378,6 @@ private:
 	CHANNELINDEX GetSelectionStartChan();
 	CHANNELINDEX GetSelectionEndChan();
 	UINT ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans);
-
-	static ROWINDEX GetRowFromCursor(DWORD cursor) { return (cursor >> 16); };
-	static CHANNELINDEX GetChanFromCursor(DWORD cursor) { return static_cast<CHANNELINDEX>((cursor & 0xFFFF) >> 3); };
-	static UINT GetColTypeFromCursor(DWORD cursor) { return (cursor & 0x07); };
-	static DWORD CreateCursor(ROWINDEX row, CHANNELINDEX channel = 0, UINT column = 0) { return (row << 16) | ((channel << 3) & 0x1FFF) | (column & 0x07); };
 
 	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternColumns colType, CSoundFile* pSndFile);
 	void Interpolate(PatternColumns type);

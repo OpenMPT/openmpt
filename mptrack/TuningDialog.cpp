@@ -32,7 +32,7 @@ TODOS:
 
 
 // CTuningDialog dialog
-
+#pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 IMPLEMENT_DYNAMIC(CTuningDialog, CDialog)
 CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* pTun)
 	: CDialog(CTuningDialog::IDD, pParent),
@@ -44,6 +44,7 @@ CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* p
 	m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning),
 	m_TreeCtrlTuning(this),
 	m_DoErrorExit(false)
+#pragma warning(default : 4355) // "'this' : used in base member initializer list"
 //----------------------------------------
 {
 	m_pActiveTuning = pTun;

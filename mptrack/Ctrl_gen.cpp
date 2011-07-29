@@ -281,7 +281,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		if (pSlider==&m_SliderTempo) {
 			int min, max;
 			m_SpinTempo.GetRange(min, max);
-			int tempo = max - m_SliderTempo.GetPos();
+			const UINT tempo = max - m_SliderTempo.GetPos();
 			if ((tempo >= m_pSndFile->GetModSpecifications().tempoMin) && (tempo <= m_pSndFile->GetModSpecifications().tempoMax) && (tempo != m_pSndFile->m_nDefaultTempo)) {
 				m_pSndFile->m_nDefaultTempo = tempo;
 				m_pSndFile->m_nMusicTempo = tempo;
@@ -292,7 +292,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		}
 
 		else if (pSlider==&m_SliderGlobalVol) {
-			int gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
+			const UINT gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
 			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
@@ -303,7 +303,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		}
 
 		else if (pSlider==&m_SliderSamplePreAmp) {
-			int spa = MAX_SLIDER_SAMPLE_VOL - m_SliderSamplePreAmp.GetPos();
+			const UINT spa = MAX_SLIDER_SAMPLE_VOL - m_SliderSamplePreAmp.GetPos();
 			if ((spa >= 0) && (spa <= MAX_SLIDER_SAMPLE_VOL) && (spa != m_pSndFile->m_nSamplePreAmp)) {
 				m_pSndFile->m_nSamplePreAmp = spa;
 				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
@@ -313,7 +313,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		}
 
 		else if (pSlider==&m_SliderVSTiVol) {
-			int vv = MAX_SLIDER_VSTI_VOL - m_SliderVSTiVol.GetPos();
+			const UINT vv = MAX_SLIDER_VSTI_VOL - m_SliderVSTiVol.GetPos();
 			if ((vv >= 0) && (vv <= MAX_SLIDER_VSTI_VOL) && (vv != m_pSndFile->m_nVSTiVolume)) {
 				m_pSndFile->m_nVSTiVolume = vv;
 				m_pSndFile->RecalculateGainForAllPlugs();
@@ -402,7 +402,7 @@ void CCtrlGeneral::OnVSTiVolChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
 		m_EditVSTiVol.GetWindowText(s, sizeof(s));
 		if (s[0]) {
-			int n = atoi(s);
+			UINT n = ConvertStrTo<UINT>(s);
 			n = CLAMP(n, 0, 2000);
 			if (n != m_pSndFile->m_nVSTiVolume) {
 				m_bEditsLocked=true;
@@ -424,7 +424,7 @@ void CCtrlGeneral::OnSamplePAChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
 		m_EditSamplePA.GetWindowText(s, sizeof(s));
 		if (s[0]) {
-			int n = atoi(s);
+			UINT n = ConvertStrTo<UINT>(s);
 			n = CLAMP(n, 0, 2000);
 			if (n != m_pSndFile->m_nSamplePreAmp) {
 				m_bEditsLocked=true;

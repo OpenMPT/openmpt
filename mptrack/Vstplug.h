@@ -70,6 +70,7 @@ protected:
 	AEffect *m_pEffect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
+	static const UINT nInvalidSampleRate = UINT_MAX;
 	UINT m_nSampleRate;
 	bool m_bIsVst2;
 	SNDMIXPLUGINSTATE m_MixState;
@@ -87,6 +88,7 @@ protected:
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
 	CSoundFile* m_pSndFile;			 //rewbs.plugDocAware
 //	PSNDMIXPLUGIN m_pSndMixPlugin;	 //rewbs.plugDocAware
+	static const UINT nInvalidMidiChan = UINT_MAX;
 	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
 	bool m_bSongPlaying; //rewbs.VSTCompliance
 	bool m_bPlugResumed; //rewbs.VSTCompliance

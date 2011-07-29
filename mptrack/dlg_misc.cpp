@@ -384,7 +384,7 @@ void CModTypeDlg::OnOK()
 	sel = m_ChannelsBox.GetCurSel();
 	if (sel >= 0)
 	{
-		m_nChannels = m_ChannelsBox.GetItemData(sel);
+		m_nChannels = static_cast<CHANNELINDEX>(m_ChannelsBox.GetItemData(sel));
 		//if (m_nType & MOD_TYPE_XM) m_nChannels = (m_nChannels+1) & 0xFE;
 	}
 	

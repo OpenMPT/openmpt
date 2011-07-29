@@ -231,7 +231,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// m_nPatternNames
 	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	const PATTERNINDEX numNamedPats = id;
+	const PATTERNINDEX numNamedPats = static_cast<PATTERNINDEX>(id);
 	dwMemPos += sizeof(DWORD);
 
 	// pattern name string length (=MAX_PATTERNNAME)
@@ -583,7 +583,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// order array
-	Order.WriteAsByte(f, id);
+	Order.WriteAsByte(f, static_cast<uint16>(id));
 
 	// Song Patterns
 

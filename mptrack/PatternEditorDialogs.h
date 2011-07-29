@@ -149,7 +149,8 @@ class CPageEditNote: public CPageEditCommand
 //==========================================
 {
 protected:
-	UINT m_nNote, m_nInstr;
+	MODCOMMAND::NOTE m_nNote;
+	MODCOMMAND::INSTR m_nInstr;
 
 public:
 	CPageEditNote(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITNOTE) {}
@@ -170,7 +171,8 @@ class CPageEditVolume: public CPageEditCommand
 //============================================
 {
 protected:
-	UINT m_nVolCmd, m_nVolume;
+	MODCOMMAND::VOLCMD m_nVolCmd;
+	MODCOMMAND::VOL m_nVolume;
 	bool m_bIsParamControl;
 
 public:
@@ -193,7 +195,9 @@ class CPageEditEffect: public CPageEditCommand
 //============================================
 {
 protected:
-	UINT m_nCommand, m_nParam, m_nPlugin;
+	MODCOMMAND::COMMAND m_nCommand;
+	MODCOMMAND::PARAM m_nParam;
+	PLUGINDEX m_nPlugin;
 	UINT m_nPluginParam;
 	bool m_bIsParamControl;
 	// -> CODE#0010
@@ -234,7 +238,9 @@ protected:
 	CPageEditEffect *m_pageEffect;
 	CModDoc *m_pModDoc;
 	HWND m_hWndView;
-	UINT m_nPattern, m_nRow, m_nChannel;
+	ROWINDEX m_nRow;
+	PATTERNINDEX m_nPattern;
+	CHANNELINDEX m_nChannel;
 	MODCOMMAND m_Command;
 	bool m_bModified;
 
@@ -243,14 +249,14 @@ public:
 
 public:
 	BOOL SetParent(CWnd *parent, CModDoc *pModDoc);
-	BOOL ShowEditWindow(UINT nPat, DWORD dwCursor);
+	BOOL ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor);
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	void OnSelListChange();
 	// -! NEW_FEATURE#0010
-	void UpdateNote(UINT note, UINT instr);
-	void UpdateVolume(UINT volcmd, UINT vol);
-	void UpdateEffect(UINT command, UINT param);
+	void UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr);
+	void UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol);
+	void UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM param);
 
 protected:
 	//{{AFX_VIRTUAL(CEditCommand)
