@@ -1019,7 +1019,7 @@ void CTrackApp::OnFileNew()
 	if (!m_bInitialized) return;
 
 	// Default module type
-	MODTYPE nNewType = MOD_TYPE_IT;
+	MODTYPE nNewType = CMainFrame::GetSettings().defaultModType;
 	bool bIsProject = false;
 
 	// Get active document to make the new module of the same type
