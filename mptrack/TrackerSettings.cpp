@@ -211,6 +211,11 @@ void TrackerSettings::LoadSettings()
 		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], macros.szMidiZXXExt[izxx], CountOf(macros.szMidiZXXExt[izxx]), iniFile);
 		SetNullTerminator(macros.szMidiZXXExt[izxx]);
 	}
+	// Fix old nasty broken (non-standard) MIDI configs in INI file.
+	if(storedVersion >= "1.17" && storedVersion < "1.20")
+	{
+		CSoundFile::FixMIDIConfigStrings(macros);
+	}
 	theApp.SetDefaultMidiMacro(&macros);
 
 	// Default directory location
@@ -435,7 +440,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 
 #define SETTINGS_REGKEY_BASE		"Software\\Olivier Lapicque\\"
-#define SETTINGS_REGKEY_DEFAULT	"ModPlug Tracker"
+#define SETTINGS_REGKEY_DEFAULT		"ModPlug Tracker"
 #define SETTINGS_REGEXT_WINDOW		"\\Window"
 #define SETTINGS_REGEXT_SETTINGS	"\\Settings"
 

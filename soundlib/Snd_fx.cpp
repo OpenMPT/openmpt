@@ -457,7 +457,14 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			for (CHANNELINDEX n = 0; n < m_nChannels; n++)
 			{
 				Chn[n].nGlobalVol = chnvols[n];
-				if (notes[n]) Chn[n].nNewNote = notes[n];
+				if (notes[n])
+				{
+					Chn[n].nNewNote = notes[n];
+					if(NOTE_IS_VALID(notes[n]))
+					{
+						Chn[n].nLastNote = notes[n];
+					}
+				}
 				if (instr[n]) Chn[n].nNewIns = instr[n];
 				if (vols[n] != 0xFF)
 				{
@@ -1539,7 +1546,10 @@ BOOL CSoundFile::ProcessEffects()
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL) instr = 0;
 
-			if ((note) && (note <= NOTE_MAX)) pChn->nNewNote = note;
+			if ((note) && (note <= NOTE_MAX))
+			{
+				pChn->nNewNote = pChn->nLastNote = note;
+			}
 
 			// New Note Action ?
 			if ((note) && (note <= NOTE_MAX) && (!bPorta))
@@ -2125,14 +2135,14 @@ BOOL CSoundFile::ProcessEffects()
 			break;
 
 		// Midi Controller
-		case CMD_MIDI:			// Midi Controller (on first tick only)
-		case CMD_SMOOTHMIDI:	// Midi Controller (smooth, i.e. on every tick)
+		case CMD_MIDI:			// MIDI Controller (on first tick only)
+		case CMD_SMOOTHMIDI:	// MIDI Controller (smooth, i.e. on every tick)
 			
-			if((cmd == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) break;
+			/*if((cmd == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			if (param < 0x80)
-				ProcessMidiMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], param);
+				ProcessMIDIMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], param);
 			else
-				ProcessMidiMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(param & 0x7F)], 0);
+				ProcessMIDIMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(param & 0x7F)], 0);*/
 			break;
 
 		// IMF Commands
@@ -3049,121 +3059,219 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 }
 
 
-// Process a Midi Macro.
+// Process a MIDI Macro.
 // Parameters:
 // [in] nChn: Mod channel to apply macro on
 // [in] isSmooth: If true, internal macros are interpolated between two rows
-// [in] pszMidiMacro: Actual Midi Macro
-// [in] param: Parameter for parametric macros
-void CSoundFile::ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro, UINT param)
-//------------------------------------------------------------------------------------------
+// [in] macro: Actual MIDI Macro string
+// [in] param: Parameter for parametric macros (Z00 - Z7F)
+// [in] plugin: Plugin to send MIDI message to (if not specified but needed, it is autodetected)
+void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param, PLUGINDEX plugin)
+//-------------------------------------------------------------------------------------------------------------
 {
-	MODCHANNEL *pChn = &Chn[nChn];
-	DWORD dwMacro = LittleEndian(*((DWORD *)pszMidiMacro)) & MACRO_MASK;
-	int nInternalCode;
+	const MODCHANNEL *pChn = &Chn[nChn];
+	const MODINSTRUMENT *pIns = GetNumInstruments() ? pChn->pModInstrument : nullptr;
 
-	// Not Internal Device ?
-	if (dwMacro != MACRO_INTERNAL && dwMacro != MACRO_INTERNALEX)
+	unsigned char out[MACRO_LENGTH];
+	size_t outPos = 0;	// output buffer position, which also equals the number of complete bytes
+	bool firstNibble = true;
+
+	for(size_t pos = 0; pos < MACRO_LENGTH && macro[pos]; pos++)
 	{
-		// we don't cater for external devices at tick resolution.
-		if(isSmooth && !(m_dwSongFlags & SONG_FIRSTTICK))
+		bool isNibble = false;		// did we parse a nibble or a byte value?
+		unsigned char data = 0;		// data that has just been parsed
+
+		// Parse next macro byte... See Impulse Tracker's MIDI.TXT for detailed information on each possible character.
+		if(macro[pos] >= '0' && macro[pos] <= '9')
 		{
-			return;
+			isNibble = true;
+			data = (unsigned char)macro[pos] - '0';
 		}
-
-		UINT pos = 0, nNib = 0, nBytes = 0;
-		DWORD dwMidiCode = 0, dwByteCode = 0;
-
-		while (pos + 6 <= 32)
+		else if(macro[pos] >= 'A' && macro[pos] <= 'F')
 		{
-			const CHAR cData = pszMidiMacro[pos++];
-			if (!cData) break;
-			if ((cData >= '0') && (cData <= '9')) { dwByteCode = (dwByteCode << 4) | (cData - '0'); nNib++; } else
-			if ((cData >= 'A') && (cData <= 'F')) { dwByteCode = (dwByteCode << 4) | (cData - 'A' + 10); nNib++; } else
-			if ((cData >= 'a') && (cData <= 'f')) { dwByteCode = (dwByteCode << 4) | (cData - 'a' + 10); nNib++; } else
-			if ((cData == 'z') || (cData == 'Z')) { dwByteCode = param & 0x7F; nNib = 2; } else
-			if ((cData == 'x') || (cData == 'X')) { dwByteCode = param & 0x70; nNib = 2; } else
-			if ((cData == 'y') || (cData == 'Y')) { dwByteCode = (param & 0x0F) << 3; nNib = 2; }
-			if ((cData == 'k') || (cData == 'K')) { dwByteCode = (dwByteCode << 4) | GetBestMidiChan(pChn); nNib++; }
-
-			if (nNib >= 2)
+			isNibble = true;
+			data = (unsigned char)macro[pos] - 'A' + 0x0A;
+		} else if(macro[pos] == 'c')		// c: MIDI channel
+		{
+			isNibble = true;
+			data = (unsigned char)GetBestMidiChan(pChn);
+		} else if(macro[pos] == 'n')		// n: note value (last triggered note)
+		{
+			if(pChn->nLastNote != NOTE_NONE && NOTE_IS_VALID(pChn->nLastNote))
 			{
-				nNib = 0;
-				dwMidiCode |= dwByteCode << (nBytes * 8);
-				dwByteCode = 0;
-				nBytes++;
-
-				if (nBytes >= 3)
-				{
-					UINT nMasterCh = (nChn < m_nChannels) ? nChn + 1 : pChn->nMasterChn;
-					if ((nMasterCh) && (nMasterCh <= m_nChannels))
-					{
-// -> CODE#0015
-// -> DESC="channels management dlg"
-						UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-						if(pChn->dwFlags & CHN_NOFX) nPlug = 0;
-// -! NEW_FEATURE#0015
-						if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
-						{
-							IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
-							if ((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState))
-							{
-								pPlugin->MidiSend(dwMidiCode);
-							}
-						}
-					}
-					nBytes = 0;
-					dwMidiCode = 0;
-				}
+				data = (unsigned char)(pChn->nLastNote - NOTE_MIN);
 			}
+		} else if(macro[pos] == 'v')		// v: velocity
+		{
+			data = (unsigned char)min(pChn->nVolume / 2, 127);
 
+		} else if(macro[pos] == 'u')		// u: volume (calculated)
+		{
+			data = (unsigned char)min(pChn->nCalcVolume >> 7, 127);
+		} else if(macro[pos] == 'x')		// x: pan set
+		{
+			data = (unsigned char)min(pChn->nPan / 2, 127);
+		} else if(macro[pos] == 'y')		// y: calculated pan
+		{
+			data = (unsigned char)min(pChn->nRealPan / 2, 127);
+		} else if(macro[pos] == 'a')		// a: high byte of bank select
+		{
+			if(pIns && pIns->wMidiBank)
+			{
+				data = (unsigned char)(((pIns->wMidiBank - 1) >> 7) & 0x7F);
+			}
+		} else if(macro[pos] == 'b')		// b: low byte of bank select
+		{
+			if(pIns && pIns->wMidiBank)
+			{
+				data = (unsigned char)((pIns->wMidiBank - 1) & 0x7F);
+			}
+		} else if(macro[pos] == 'p')		// p: program select
+		{
+			if(pIns && pIns->nMidiProgram)
+			{
+				data = (unsigned char)((pIns->nMidiProgram - 1) & 0x7F);
+			}
+		} else if(macro[pos] == 'z')		// z: macro data
+		{
+			data = (unsigned char)(param & 0x7F);
+		} else								// unrecognized byte (f.e. space char)
+		{
+			continue;
 		}
-		
+
+		// Append parsed data
+		if(isNibble)	// parsed a nibble (constant or 'c' variable)
+		{
+			if(firstNibble)
+			{
+				out[outPos] = data;
+			} else
+			{
+				out[outPos] = (out[outPos] << 4) | data;
+				outPos++;
+			}
+			firstNibble = !firstNibble;
+		} else			// parsed a byte (variable)
+		{
+			if(!firstNibble)	// From MIDI.TXT: '9n' is exactly the same as '09 n' or '9 n' -- so finish current byte first
+			{
+				outPos++;
+			}
+			out[outPos++] = data;
+			firstNibble = true;
+		}
+	}
+	if(!firstNibble)
+	{
+		// Finish current byte
+		outPos++;
+	}
+
+	if(outPos == 0)
+	{
+		// Nothing there to send!
 		return;
 	}
 
-	// Internal device
-	const bool extendedParam = (dwMacro == MACRO_INTERNALEX);
-
-	pszMidiMacro += 4;	// skip the F0.F0 part of the macro
-	// Determine which internal device is called; every internal code looks like F0.F0.yy.xx,
-	// where yy is the "device" (cutoff, resonance, plugin parameter, etc.) and xx is the value.
-	nInternalCode = -256;
-	if ((pszMidiMacro[0] >= '0') && (pszMidiMacro[0] <= '9')) nInternalCode = (pszMidiMacro[0] - '0') << 4; else
-	if ((pszMidiMacro[0] >= 'A') && (pszMidiMacro[0] <= 'F')) nInternalCode = (pszMidiMacro[0] - 'A' + 0x0A) << 4;
-	if ((pszMidiMacro[1] >= '0') && (pszMidiMacro[1] <= '9')) nInternalCode += (pszMidiMacro[1] - '0'); else
-	if ((pszMidiMacro[1] >= 'A') && (pszMidiMacro[1] <= 'F')) nInternalCode += (pszMidiMacro[1] - 'A' + 0x0A);
-	// Filter ?
-	if (nInternalCode >= 0)
+	// Macro string has been parsed and translated, now send the message(s)...
+	size_t sendPos = 0;
+	while(sendPos < outPos)
 	{
-		CHAR cData1 = pszMidiMacro[2];
-		DWORD dwParam = 0;
-
-		if ((cData1 == 'z') || (cData1 == 'Z'))
+		size_t sendLen = 0;
+		if(out[sendPos] == 0xF0)
 		{
-			// parametric macro
-			dwParam = param;
+			// SysEx start
+			if((sendPos <= outPos - 4) && (out[sendPos + 1] == 0xF0 || out[sendPos + 1] == 0xF1))
+			{
+				// Internal macro (normal (F0F0) or extended (F0F1)), 4 bytes long
+				sendLen = 4;
+			} else
+			{
+				// SysEx message, find end of message
+				for(size_t i = sendPos + 1; i < outPos; i++)
+				{
+					if(out[i] == 0xF7)
+					{
+						// Found end of SysEx message
+						sendLen = i - sendPos + 1;
+						break;
+					}
+				}
+				if(sendLen == 0)
+				{
+					// Didn't find end, so "invent" end of SysEx message
+					out[outPos++] = 0xF7;
+					sendLen = outPos - sendPos;
+				}
+			}
 		} else
 		{
-			// fixed macro
-			CHAR cData2 = pszMidiMacro[3];
-			if ((cData1 >= '0') && (cData1 <= '9')) dwParam += (cData1 - '0') << 4; else
-			if ((cData1 >= 'A') && (cData1 <= 'F')) dwParam += (cData1 - 'A' + 0x0A) << 4;
-			if ((cData2 >= '0') && (cData2 <= '9')) dwParam += (cData2 - '0'); else
-			if ((cData2 >= 'A') && (cData2 <= 'F')) dwParam += (cData2 - 'A' + 0x0A);
+			// Other MIDI messages, find beginning of next message
+			while(sendPos + (++sendLen) < outPos)
+			{
+				if((out[sendPos + sendLen] & 0x80) != 0)
+				{
+					// Next message begins here.
+					break;
+				}
+			}
 		}
 
-		switch(nInternalCode)
+		if(sendLen == 0)
+		{
+			break;
+		}
+
+		size_t bytesSent = SendMIDIData(nChn, isSmooth, out + sendPos, sendLen, plugin);
+		// Ideally (if there's no error in the macro data), we should have sendLen == bytesSent.
+		if(bytesSent > 0)
+		{
+			sendPos += bytesSent;
+		} else
+		{
+			sendPos += sendLen;
+		}
+
+	}
+
+}
+
+
+// Process MIDI macro data parsed by ProcessMIDIMacro... return bytes sent on success, 0 on (parse) failure.
+size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin)
+//------------------------------------------------------------------------------------------------------------------------------
+{
+	if(macroLen < 1)
+	{
+		return 0;
+	}
+
+	MODCHANNEL *pChn = &Chn[nChn];
+
+	if(macro[0] == 0xF0 && (macro[1] == 0xF0 || macro[1] == 0xF1))
+	{
+		// Internal device.
+		if(macroLen < 4)
+		{
+			return 0;
+		}
+		const bool isExtended = (macro[1] == 0xF1);
+		const uint8 macroCode = macro[2];
+		const uint8 param = macro[3];
+
+		switch(macroCode)
 		{
 		// F0.F0.00.xx: Set CutOff
 		case 0x00:
+			if(!isExtended)
 			{
 				int oldcutoff = pChn->nCutOff;
-				if (dwParam < 0x80)
+				if(param < 0x80)
 				{
 					if(!isSmooth)
 					{
-						pChn->nCutOff = dwParam;
+						pChn->nCutOff = param;
 					} else
 					{
 						// on the first tick only, calculate step
@@ -3171,7 +3279,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro,
 						{
 							pChn->m_nPlugInitialParamValue = pChn->nCutOff;
 							// (dwParam & 0x7F) extracts the actual value that we're going to pass
-							pChn->m_nPlugParamValueStep = (float)((int)dwParam - pChn->m_nPlugInitialParamValue) / (float)m_nMusicSpeed;
+							pChn->m_nPlugParamValueStep = (float)((int)param - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
 						}
 						//update param on all ticks
 						pChn->nCutOff = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5);
@@ -3180,61 +3288,71 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro,
 				}
 #ifndef NO_FILTER
 				oldcutoff -= pChn->nCutOff;
-				if (oldcutoff < 0) oldcutoff = -oldcutoff;
-				if ((pChn->nVolume > 0) || (oldcutoff < 0x10)
+				if(oldcutoff < 0) oldcutoff = -oldcutoff;
+				if((pChn->nVolume > 0) || (oldcutoff < 0x10)
 					|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
 					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 #endif // NO_FILTER
+				return 4;
 			}
 			break;
-		
+
 		// F0.F0.01.xx: Set Resonance
 		case 0x01:
-			if (dwParam < 0x80) 
+			if(!isExtended)
 			{
-				pChn->nRestoreResonanceOnNewNote = 0;
-				if(!isSmooth)
+				if(param < 0x80) 
 				{
-					pChn->nResonance = dwParam;
-				} else
-				{
-					// on the first tick only, calculate step
-					if(m_dwSongFlags & SONG_FIRSTTICK)
+					pChn->nRestoreResonanceOnNewNote = 0;
+					if(!isSmooth)
 					{
-						pChn->m_nPlugInitialParamValue = pChn->nResonance;
-						// (dwParam & 0x7F) extracts the actual value that we're going to pass
-						pChn->m_nPlugParamValueStep = (float)((int)dwParam - pChn->m_nPlugInitialParamValue) / (float)m_nMusicSpeed;
+						pChn->nResonance = param;
+					} else
+					{
+						// on the first tick only, calculate step
+						if(m_dwSongFlags & SONG_FIRSTTICK)
+						{
+							pChn->m_nPlugInitialParamValue = pChn->nResonance;
+							// (dwParam & 0x7F) extracts the actual value that we're going to pass
+							pChn->m_nPlugParamValueStep = (float)((int)param - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
+						}
+						//update param on all ticks
+						pChn->nResonance = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5);
 					}
-					//update param on all ticks
-					pChn->nResonance = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5);
 				}
-			}
-				
+
 #ifndef NO_FILTER
-			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 #endif // NO_FILTER
+				return 4;
+			}
 			break;
 
 		// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
 		case 0x02:
-			if (dwParam < 0x20)
+			if(!isExtended)
 			{
-				pChn->nFilterMode = (dwParam >> 4);
+				if(param < 0x20)
+				{
+					pChn->nFilterMode = (param >> 4);
 #ifndef NO_FILTER
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 #endif // NO_FILTER
+				}
+				return 4;
 			}
 			break;
 
-	// F0.F0.03.xx: Set plug dry/wet
+		// F0.F0.03.xx: Set plug dry/wet
 		case 0x03:
+			if(!isExtended)
 			{
-				const UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && dwParam < 0x80)
+				const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
 				{
 					if(!isSmooth)
 					{
-						m_MixPlugins[nPlug - 1].fDryRatio = 1.0 - (static_cast<float>(dwParam) / 127.0f);
+						m_MixPlugins[nPlug - 1].fDryRatio = 1.0 - (static_cast<float>(param) / 127.0f);
 					} else
 					{
 						// on the first tick only, calculate step
@@ -3242,48 +3360,73 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro,
 						{
 							pChn->m_nPlugInitialParamValue = m_MixPlugins[nPlug - 1].fDryRatio;
 							// (dwParam & 0x7F) extracts the actual value that we're going to pass
-							pChn->m_nPlugParamValueStep = ((1 - ((float)(dwParam) / 127.0f)) - pChn->m_nPlugInitialParamValue) / (float)m_nMusicSpeed;
+							pChn->m_nPlugParamValueStep = ((1 - ((float)(param) / 127.0f)) - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
 						}
 						//update param on all ticks
 						m_MixPlugins[nPlug - 1].fDryRatio = pChn->m_nPlugInitialParamValue + (float)(m_nTickCount + 1) * pChn->m_nPlugParamValueStep;
 					}
 				}
+				return 4;
 			}
 			break;
 
-
-		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
+		// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
 		default:
-			if (nInternalCode & 0x80  || extendedParam)
+			if((macroCode & 0x80) || isExtended)
 			{
-				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+				const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+				const UINT plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
+				if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
-					if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
+					if((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
 					{
 						if(!isSmooth)
 						{
-							pPlugin->SetZxxParameter(extendedParam ? (0x80 + nInternalCode) : (nInternalCode & 0x7F), dwParam & 0x7F);
+							pPlugin->SetZxxParameter(plugParam, param & 0x7F);
 						} else
 						{
 							// on the first tick only, calculate step
 							if(m_dwSongFlags & SONG_FIRSTTICK)
 							{
-								pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(extendedParam ? (0x80 + nInternalCode) : (nInternalCode & 0x7F));
+								pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(plugParam);
 								// (dwParam & 0x7F) extracts the actual value that we're going to pass
-								pChn->m_nPlugParamValueStep = ((int)(dwParam & 0x7F) - pChn->m_nPlugInitialParamValue) / (float)m_nMusicSpeed;
+								pChn->m_nPlugParamValueStep = ((int)(param & 0x7F) - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
 							}
 							//update param on all ticks
-							pPlugin->SetZxxParameter(extendedParam ? (0x80 + nInternalCode) : (nInternalCode & 0x7F), (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5));
+							pPlugin->SetZxxParameter(plugParam, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5));
 						}
 					}
 				}
+				return 4;
 			}
-
-		} // end switch
-	} // end internal device
-
+			break;
+		}
+	} else
+	{
+		// Not an internal device. Pass on to appropriate plugin.
+		const UINT nMasterCh = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
+		if((nMasterCh) && (nMasterCh <= GetNumChannels()))
+		{
+			const PLUGINDEX nPlug = (pChn->dwFlags & CHN_NOFX) ? 0 : ((plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED));
+			if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+			{
+				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
+				if ((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState))
+				{
+					// currently, we don't support sending long MIDI messages in one go... split it up
+					for(size_t pos = 0; pos < macroLen; pos += 3)
+					{
+						DWORD curData = 0;
+						memcpy(&curData, macro + pos, min(3, macroLen - pos));
+						pPlugin->MidiSend(curData);
+					}
+				}
+			}
+		}
+		return macroLen;
+	}
+	return 0;
 }
 
 
@@ -3322,14 +3465,6 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 
 	if ((pChn->nRowNote >= NOTE_MIN) && (pChn->nRowNote <= NOTE_MAX))
 	{
-		/* if (bPorta)
-			pChn->nPos = param;
-		else
-			pChn->nPos += param; */
-		// The code above doesn't make sense at all. If there's a note and no porta, how on earth could nPos be something else than 0?
-		// Anyway, keeping a debug assert here, just in case...
-		ASSERT(bPorta || pChn->nPos == 0);
-
 		// XM compatibility: Portamento + Offset = Ignore offset
 		if(bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
 		{

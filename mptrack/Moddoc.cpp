@@ -3227,12 +3227,39 @@ enmParameteredMacroType CModDoc::GetMacroType(CString value)
 	if (value.Compare("F0F001z")==0) return sfx_reso;
 	if (value.Compare("F0F002z")==0) return sfx_mode;
 	if (value.Compare("F0F003z")==0) return sfx_drywet;
-	if (value.Compare("BK00z")>=0 && value.Compare("BKFFz")<=0 && value.GetLength()==5)
+	if (value.Compare("Bc00z")>=0 && value.Compare("BcFFz")<=0 && value.GetLength()==5)
 		return sfx_cc;
 	if (value.Compare("F0F079z")>0 && value.Compare("F0F1G")<0 && value.GetLength()==7)
 		return sfx_plug; 
 	return sfx_custom; //custom/unknown
 }
+
+
+CString CModDoc::GetMacroName(enmParameteredMacroType macro)
+//----------------------------------------------------------
+{
+	switch(macro)
+	{
+	case sfx_unused:
+		return _T("Unused");
+	case sfx_cutoff:
+		return _T("Set Filter Cutoff");
+	case sfx_reso:
+		return _T("Set Filter Resonance");
+	case sfx_mode:
+		return _T("Set Filter Mode");
+	case sfx_drywet:
+		return _T("Set Plugin Dry/Wet Ratio");
+	case sfx_plug:
+		return _T("Control Plugin Param...");
+	case sfx_cc:
+		return _T("MIDI CC...");
+	case sfx_custom:
+	default:
+		return _T("Custom");
+	}
+}
+
 
 int CModDoc::MacroToPlugParam(CString macro)
 //------------------------------------------
@@ -3291,14 +3318,14 @@ int CModDoc::FindMacroForParam(long param) const
 
 
 // Retrieve Zxx (Z80-ZFF) type from current macro configuration
-enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128][MACRO_LENGTH])
+enmFixedMacroType CModDoc::GetZxxType(const char (&szMidiZXXExt)[128][MACRO_LENGTH])
 //----------------------------------------------------------------------------------
 {
 	// Compare with all possible preset patterns
 	for(size_t i = 1; i < zxx_max; i++)
 	{
 		// Prepare pattern to compare
-		CHAR szPatterns[128][MACRO_LENGTH];
+		char szPatterns[128][MACRO_LENGTH];
 		CreateZxxFromType(szPatterns, static_cast<enmFixedMacroType>(i));
 
 		bool bFound = true;
@@ -3317,7 +3344,7 @@ enmFixedMacroType CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128][MACRO_LENG
 
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
-void CModDoc::CreateZxxFromType(CHAR (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType)
+void CModDoc::CreateZxxFromType(char (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType)
 //--------------------------------------------------------------------------------------------------
 {
 	for(size_t i = 0; i < 128; i++)
@@ -3759,7 +3786,7 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	}
 
 	//set new macro
-	CHAR *pMacroToSet = GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet];
+	char *pMacroToSet = GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet];
 	if (paramToUse < 128)
 	{
 		wsprintf(pMacroToSet, "F0F0%Xz",paramToUse+128);

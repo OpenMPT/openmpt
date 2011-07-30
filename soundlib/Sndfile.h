@@ -211,6 +211,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nRealVolume, nRealPan;
 	LONG nVolume, nPan, nFadeOutVol;
 	LONG nPeriod, nC5Speed, nPortamentoDest;
+	int nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	MODINSTRUMENT *pModInstrument;					// Currently assigned instrument slot
 	MODCHANNEL_ENVINFO VolEnv, PanEnv, PitchEnv;	// Envelope playback info
 	MODSAMPLE *pModSample;							// Currently assigned sample slot
@@ -230,6 +231,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
 	BYTE nNote, nNNA;
+	BYTE nLastNote;				// Last note, ignoring note offs and cuts - for MIDI macros
 	BYTE nNewNote, nNewIns, nCommand, nArpeggio;
 	BYTE nOldVolumeSlide, nOldFineVolUpDown;
 	BYTE nOldPortaUpDown, nOldFinePortaUpDown;
@@ -453,9 +455,9 @@ enum
 #define MACRO_LENGTH 32	// max number of chars per macro
 struct MODMIDICFG
 {
-	CHAR szMidiGlb[9][MACRO_LENGTH];
-	CHAR szMidiSFXExt[16][MACRO_LENGTH];
-	CHAR szMidiZXXExt[128][MACRO_LENGTH];
+	char szMidiGlb[9][MACRO_LENGTH];		// Global MIDI macros
+	char szMidiSFXExt[16][MACRO_LENGTH];	// Parametric MIDI macros
+	char szMidiZXXExt[128][MACRO_LENGTH];	// Fixed MIDI macros
 };
 STATIC_ASSERT(sizeof(MODMIDICFG) == 4896); // this is directly written to files, so the size must be correct!
 
@@ -778,6 +780,8 @@ public:
 	bool ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
+	static void FixMIDIConfigStrings(MODMIDICFG &midiCfg);
+
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
 	UINT WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0);
@@ -942,7 +946,9 @@ protected:
 	void ExtendedS3MCommands(UINT nChn, UINT param);
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
 	inline void InvertLoop(MODCHANNEL* pChn);
-	void ProcessMidiMacro(UINT nChn, bool isSmooth, LPCSTR pszMidiMacro, UINT param = 0);
+	void ProcessMacroOnChannel(CHANNELINDEX nChn);
+	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
+	size_t SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin);
 	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);

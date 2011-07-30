@@ -1220,6 +1220,7 @@ void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
 					pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nFadeOutVol = 0;
 					pChn->nRealVolume = 0;
+					pChn->nCalcVolume = 0;
 				}
 			}
 	}
@@ -1922,6 +1923,12 @@ BOOL CSoundFile::ReadNote()
 		// Check for unused channel
 		if ((pChn->dwFlags & CHN_MUTE) || ((nChn >= m_nChannels) && (!pChn->nLength)))
 		{
+			if(nChn < m_nChannels)
+			{
+				// Process MIDI macros on channels that are currently muted.
+				ProcessMacroOnChannel(nChn);
+			}
+
 			pChn->nVUMeter = 0;
 #ifdef ENABLE_STEREOVU
 			pChn->nLeftVU = pChn->nRightVU = 0;
@@ -1944,6 +1951,7 @@ BOOL CSoundFile::ReadNote()
 		// Reset channel data
 		pChn->nInc = 0;
 		pChn->nRealVolume = 0;
+		pChn->nCalcVolume = 0;
 
 		pChn->nRampLength = 0;
 
@@ -1955,7 +1963,11 @@ BOOL CSoundFile::ReadNote()
 
 		// Calc Frequency
 		int period;
-		if (pChn->nPeriod && pChn->nLength)
+
+		// Also process envelopes etc. when there's a plugin on this channel, for possible fake automation using volume and pan data.
+		// We only care about master channels, though, since automation only "happens" on them.
+		const bool plugAssigned = (nChn < m_nChannels) && (ChnSettings[nChn].nMixPlugin || (pChn->pModInstrument != nullptr && pChn->pModInstrument->nMixPlug));
+		if ((pChn->nPeriod && pChn->nLength) || plugAssigned)
 		{
 			int vol = pChn->nVolume;
 
@@ -2004,6 +2016,9 @@ BOOL CSoundFile::ReadNote()
 					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 				}
 			}
+
+			pChn->nCalcVolume = vol;	// Update calculated volume for MIDI macros
+
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			period = pChn->nPeriod;
 			if ((pChn->dwFlags & (CHN_GLISSANDO|CHN_PORTAMENTO)) ==	(CHN_GLISSANDO|CHN_PORTAMENTO))
@@ -2021,6 +2036,14 @@ BOOL CSoundFile::ReadNote()
 
 			ProcessPanbrello(pChn);
 
+		}
+
+		// Now that all relevant envelopes etc. have been processed, we can parse the MIDI macro data.
+		ProcessMacroOnChannel(nChn);
+
+		// After MIDI macros have been processed, we can also process the pitch / filter envelope and other pitch-related things.
+		if (pChn->nPeriod && pChn->nLength)
+		{
 			int nPeriodFrac = 0;
 
 			ProcessPitchFilterEnvelope(pChn, period);
@@ -2075,6 +2098,7 @@ BOOL CSoundFile::ReadNote()
 				pChn->nFadeOutVol = 0;
 				pChn->dwFlags |= CHN_NOTEFADE;
 				pChn->nRealVolume = 0;
+				pChn->nCalcVolume = 0;
 			}
 
 			UINT ninc = _muldiv(freq, 0x10000, gdwMixingFreq);
@@ -2303,6 +2327,22 @@ BOOL CSoundFile::ReadNote()
 }
 
 
+void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
+//-------------------------------------------------------
+{
+	MODCHANNEL *pChn = &Chn[nChn];
+	if(nChn < m_nChannels && pChn->nRowCommand == CMD_MIDI || pChn->nRowCommand == CMD_SMOOTHMIDI)
+	{
+		// Only smooth MIDI macros are processed on every tick
+		if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
+		if(pChn->nRowParam < 0x80)
+			ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->nRowParam);
+		else
+			ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->nRowParam & 0x7F)], 0);
+	}
+}
+
+
 #ifdef MODPLUG_TRACKER
 
 VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
@@ -2329,6 +2369,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 	// Get instrument info and plugin reference
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
+	PLUGINDEX nPlugin = 0;
 	IMixPlugin *pPlugin = nullptr;
 
 	if ((instr) && (instr < MAX_INSTRUMENTS))
@@ -2339,7 +2380,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 		// Check instrument plugins
 		if ((pIns->nMidiChannel >= 1) && (pIns->nMidiChannel <= 16))
 		{
-			UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+			nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
 				pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
@@ -2387,6 +2428,8 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 		MODCOMMAND::NOTE realNote = note;
 		if((note >= NOTE_MIN) && (note <= NOTE_MAX))
 			realNote = pIns->NoteMap[note - 1];
+		// Experimental VST panning
+		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN], 0, nPlugin);
 		pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, realNote, velocity, nChn);
 	}
 

@@ -680,6 +680,7 @@ BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
 	ON_COMMAND(IDC_CHECK1,			OnEmbedMidiCfg)
 	ON_COMMAND(IDC_BUTTON1,			OnSetAsDefault)
 	ON_COMMAND(IDC_BUTTON2,			OnResetCfg)
+	ON_COMMAND(IDC_BUTTON3,			OnMacroHelp)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnSFxChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnSFxPresetChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,	OnZxxPresetChanged)
@@ -916,6 +917,26 @@ void CMidiMacroSetup::OnResetCfg()
 }
 
 
+void CMidiMacroSetup::OnMacroHelp()
+//---------------------------------
+{
+	MessageBox(_T("Valid characters in macros:\n\n"
+		"0-9, A-F - Raw hex data (4-Bit value)\n"
+		"c - MIDI channel (4-Bit value)\n"
+		"n - Note value\n\n"
+		"v - Note velocity\n"
+		"u - Computed note volume (including envelopes)\n\n"
+		"x - Note panning\n"
+		"y - Computed panning (including envelopes)\n\n"
+		"a - High byte of bank select\n"
+		"b - Low byte of bank select\n"
+		"p - Program select\n\n"
+		"z - Zxx parameter (00-7F)\n\n"
+		"Macros can be up to 31 characters long and contain multiple MIDI messages. SysEx messages are automatically terminated if not specified by the user."),
+		_T("OpenMPT MIDI Macro quick reference"), MB_OK | MB_ICONINFORMATION);
+}
+
+
 void CMidiMacroSetup::OnEmbedMidiCfg()
 //------------------------------------
 {
@@ -946,7 +967,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 
 	if (sfx < 16)
 	{
-		CHAR *pmacro = m_MidiCfg.szMidiSFXExt[sfx];
+		char *pmacro = m_MidiCfg.szMidiSFXExt[sfx];
 		switch(sfx_preset)
 		{
 		case sfx_unused:	strcpy(pmacro, ""); break;			// unused
@@ -954,7 +975,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 		case sfx_reso:		strcpy(pmacro, "F0F001z"); break;   // reso
 		case sfx_mode:		strcpy(pmacro, "F0F002z"); break;   // mode
 		case sfx_drywet:	strcpy(pmacro, "F0F003z"); break;   
-		case sfx_cc:		strcpy(pmacro, "BK00z"); break;		// MIDI cc - TODO: get value from other menus
+		case sfx_cc:		strcpy(pmacro, "Bc00z"); break;		// MIDI cc - TODO: get value from other menus
 		case sfx_plug:		strcpy(pmacro, "F0F080z"); break;	// plug param - TODO: get value from other menus
 		case sfx_custom:	/*strcpy(pmacro, "z");*/ break;		// custom - leave as is.
 		}
@@ -983,28 +1004,20 @@ void CMidiMacroSetup::OnSFxEditChanged()
 	UINT sfx = m_CbnSFx.GetCurSel();
 	if (sfx < 16)
 	{
-		memset(s, 0, sizeof(s));
-		m_EditSFx.GetWindowText(s, MACRO_LENGTH - 1);
-		s[MACRO_LENGTH - 1] = 0;
-		// Fix letter case
-		for(size_t i = 0; i < MACRO_LENGTH; i++)
+		if(ValidateMacroString(m_EditSFx, m_MidiCfg.szMidiSFXExt[sfx], true))
 		{
-			if(s[i] >= 'd' && s[i] <= 'f') // a,b,c have special meanings
-			{
-				s[i] = s[i] - 'a' + 'A';
-			} else if(s[i] == 'N' || s[i] == 'V' || s[i] == 'U' || s[i] == 'X' || s[i] == 'Y' || s[i] == 'Z' || s[i] == 'P')
-			{
-				s[i] = s[i] - 'A' + 'a';
-			}
-		}
+			MemsetZero(s);
+			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
+			SetNullTerminator(s);
+			memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
 
-		memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
-		int sfx_preset = m_pModDoc->GetMacroType(m_MidiCfg.szMidiSFXExt[sfx]);
-		//int param = m_pModDoc->MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]);
-		
-		m_CbnSFxPreset.SetCurSel(sfx_preset);
-		ToggleBoxes(sfx_preset, sfx);
-		UpdateMacroList(sfx);
+			int sfx_preset = m_pModDoc->GetMacroType(m_MidiCfg.szMidiSFXExt[sfx]);
+			//int param = m_pModDoc->MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]);
+
+			m_CbnSFxPreset.SetCurSel(sfx_preset);
+			ToggleBoxes(sfx_preset, sfx);
+			UpdateMacroList(sfx);
+		}
 	}
 }
 
@@ -1016,10 +1029,13 @@ void CMidiMacroSetup::OnZxxEditChanged()
 	UINT zxx = m_CbnZxx.GetCurSel();
 	if (zxx < 128)
 	{
-		memset(s, 0, sizeof(s));
-		m_EditZxx.GetWindowText(s, MACRO_LENGTH - 1);
-		s[MACRO_LENGTH - 1] = 0;
-		memcpy(m_MidiCfg.szMidiZXXExt[zxx], s, MACRO_LENGTH);
+		if(ValidateMacroString(m_EditZxx, m_MidiCfg.szMidiZXXExt[zxx], false))
+		{
+			MemsetZero(s);
+			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
+			SetNullTerminator(s);
+			memcpy(m_MidiCfg.szMidiZXXExt[zxx], s, MACRO_LENGTH);
+		}
 	}
 }
 
@@ -1116,7 +1132,7 @@ void CMidiMacroSetup::OnCCChanged()
 {
 	CString macroText;
 	UINT cc = m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel());
-	macroText.Format("BK%02Xz", cc&0xFF);
+	macroText.Format("Bc%02Xz", cc & 0xFF);
 	m_EditSFx.SetWindowText(macroText);
 }
 
@@ -1156,6 +1172,62 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 
 }
 
+
+bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isParametric)
+//---------------------------------------------------------------------------------------
+{
+	CString macroStr;
+	wnd.GetWindowText(macroStr);
+
+	bool allowed = true, caseChange = false;
+	for(int i = 0; i < macroStr.GetLength(); i++)
+	{
+		char c = macroStr.GetAt(i);
+		if(c == 'k' || c == 'K')			// Previously, 'K' was used for MIDI channel
+		{
+			caseChange = true;
+			macroStr.SetAt(i, 'c');
+		} else if (c >= 'd' && c <= 'f')	// abc have special meanings, but def can be fixed
+		{
+			caseChange = true;
+			macroStr.SetAt(i, c - 'a' + 'A');
+		} else if(c == 'N' || c == 'V' || c == 'U' || c == 'X' || c == 'Y' || c == 'Z' || c == 'P')
+		{
+			caseChange = true;
+			macroStr.SetAt(i, c - 'A' + 'a');
+		} else if(!(
+			(c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'c') ||
+			(c == 'v' || c == 'u' || c == 'x' || c == 'y' || c == 'p' || c == 'n' || c == ' ') ||
+			(c == 'z' && isParametric)))
+		{
+			allowed = false;
+			break;
+		}
+	}
+
+	if(!allowed)
+	{
+		// Replace text and keep cursor position if we just typed in an invalid character
+		int start, end;
+		wnd.GetSel(start, end);
+		wnd.SetWindowText(lastMacro);
+		wnd.SetSel(start - 1, end - 1, true);
+		MessageBeep(MB_OK);
+		return false;
+	}
+	else
+	{
+		if(caseChange)
+		{
+			// Replace text and keep cursor position if there was a case conversion
+			int start, end;
+			wnd.GetSel(start, end);
+			wnd.SetWindowText(macroStr);
+			wnd.SetSel(start, end, true);
+		}
+		return true;
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Keyboard Control
