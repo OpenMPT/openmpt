@@ -154,6 +154,24 @@ void CPatternContainer::Init()
 }
 
 
+PATTERNINDEX CPatternContainer::GetNumPatterns() const
+//----------------------------------------------------
+{
+	if(Size() == 0)
+	{
+		return 0;
+	}
+	for(PATTERNINDEX nPat = Size(); nPat > 0; nPat--)
+	{
+		if(IsValidPat(nPat - 1))
+		{
+			return nPat;
+		}
+	}
+	return 0;
+}
+
+
 PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
 //---------------------------------------------------------
 {

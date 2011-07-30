@@ -34,6 +34,7 @@ const TCHAR FileFilterMPT[] = _T("OpenMPT Modules (*.mptm)|*.mptm||");
 const TCHAR FileFilterNone[] = _T("");
 
 const TCHAR* ModTypeToFilter(const CSoundFile& sndFile)
+//-----------------------------------------------------
 {
 	const MODTYPE modtype = sndFile.GetType();
 	switch(modtype)
@@ -432,7 +433,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 
 BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
-//------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	static int greccount = 0;
 	TCHAR fext[_MAX_EXT] = _T("");
@@ -442,19 +443,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 	if (!lpszPathName) 
 		return FALSE;
 	_tsplitpath(lpszPathName, NULL, NULL, NULL, fext);
-	MODTYPE type = CModSpecifications::ExtensionToType(fext);
-
-	/*
-	if (!lstrcmpi(fext, ".mod")) type = MOD_TYPE_MOD; else
-	if (!lstrcmpi(fext, ".s3m")) type = MOD_TYPE_S3M; else
-	if (!lstrcmpi(fext, ".xm")) type = MOD_TYPE_XM; else
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//	if (!lstrcmpi(fext, ".it")) nType = MOD_TYPE_IT; else
-	if (!lstrcmpi(fext, ".it") || !lstrcmpi(fext, ".itp")) type = MOD_TYPE_IT; else
-	if (!lstrcmpi(fext, ".mptm")) type = MOD_TYPE_MPT; else
-// -! NEW_FEATURE#0023
-*/
+	MODTYPE type = m_SndFile.GetType(); // CModSpecifications::ExtensionToType(fext);
 
 	if (type == MOD_TYPE_NONE && !greccount)
 	{
@@ -565,26 +554,17 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	CHAR s[_MAX_PATH] = "";
 	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
 	CHAR fname[_MAX_FNAME]="", fext[_MAX_EXT]="";
-	std::string extFilter = "", defaultExtension = "";
+	std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
 	
 	switch(m_SndFile.GetType())
 	{
 	case MOD_TYPE_MOD:
 		MsgBoxHidable(ModCompatibilityExportTip);
-		defaultExtension = "mod";
-		extFilter = FileFilterMOD;
-		strcpy(fext, ".mod");
 		break;
 	case MOD_TYPE_S3M:
-		defaultExtension = "s3m";
-		extFilter = FileFilterS3M;
-		strcpy(fext, ".s3m");
 		break;
 	case MOD_TYPE_XM:
 		MsgBoxHidable(XMCompatibilityExportTip);
-		defaultExtension = "xm";
-		extFilter = FileFilterXM;
-		strcpy(fext, ".xm");
 		break;
 	case MOD_TYPE_IT:
 // -> CODE#0023
@@ -592,29 +572,27 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 //		lpszDefExt = "it";
 //		lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
 //		strcpy(fext, ".it");
-		if(m_SndFile.m_dwSongFlags & SONG_ITPROJECT){
+		if(m_SndFile.m_dwSongFlags & SONG_ITPROJECT)
+		{
+			// Special case...
 			defaultExtension = "itp";
-			extFilter = FileFilterITP;
-			strcpy(fext, ".itp");
 		}
 		else
 		{
 			MsgBoxHidable(ItCompatibilityExportTip);
-			defaultExtension = "it";
-			extFilter = FileFilterIT;
-			strcpy(fext, ".it");
 		}
 // -! NEW_FEATURE#0023
 		break;
 	case MOD_TYPE_MPT:
-			defaultExtension = "mptm";
-			extFilter = FileFilterMPT;
-			strcpy(fext, ".mptm");
 		break;
 	default:	
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 		return FALSE;
 	}
+
+	strcpy(fext, ".");
+	strcat(fext, defaultExtension.c_str());
+
 	if ((!lpszPathName) || (!lpszPathName[0]) || m_ShowSavedialog)
 	{
 		_splitpath(m_strPathName, drive, path, fname, NULL);
@@ -625,7 +603,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcat(s, fext);
 		
 		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultExtension, s,
-			extFilter,
+			ModTypeToFilter(m_SndFile),
 			CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS));
 		if(files.abort) return FALSE;
 
@@ -2192,12 +2170,12 @@ typedef struct MPTEFFECTINFO
 #define MAX_FXINFO		70
 
 
-const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
+const MPTEFFECTINFO gFXInfo[] =
 {
 	{CMD_ARPEGGIO,		0,0,		0,	MOD_TYPE_ALL,	"Arpeggio"},
 	{CMD_PORTAMENTOUP,	0,0,		0,	MOD_TYPE_ALL,	"Portamento Up"},
 	{CMD_PORTAMENTODOWN,0,0,		0,	MOD_TYPE_ALL,	"Portamento Down"},
-	{CMD_TONEPORTAMENTO,0,0,		0,	MOD_TYPE_ALL,	"Tone portamento"},
+	{CMD_TONEPORTAMENTO,0,0,		0,	MOD_TYPE_ALL,	"Tone Portamento"},
 	{CMD_VIBRATO,		0,0,		0,	MOD_TYPE_ALL,	"Vibrato"},
 	{CMD_TONEPORTAVOL,	0,0,		0,	MOD_TYPE_ALL,	"Volslide+Toneporta"},
 	{CMD_VIBRATOVOL,	0,0,		0,	MOD_TYPE_ALL,	"VolSlide+Vibrato"},
@@ -2212,59 +2190,59 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_SPEED,			0,0,		0,	MOD_TYPE_ALL,	"Set Speed"},
 	{CMD_TEMPO,			0,0,		0,	MOD_TYPE_ALL,	"Set Tempo"},
 	{CMD_TREMOR,		0,0,		0,	MOD_TYPE_NOMOD,	"Tremor"},
-	{CMD_CHANNELVOLUME,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Set channel volume"},
-	{CMD_CHANNELVOLSLIDE,0,0,		0,	MOD_TYPE_S3MITMPT,	"Channel volslide"},
-	{CMD_GLOBALVOLUME,	0,0,		0,	MOD_TYPE_NOMOD,	"Set global volume"},
-	{CMD_GLOBALVOLSLIDE,0,0,		0,	MOD_TYPE_NOMOD,	"Global volume slide"},
-	{CMD_KEYOFF,		0,0,		0,	MOD_TYPE_XM,	"Key off"},
-	{CMD_FINEVIBRATO,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Fine vibrato"},
+	{CMD_CHANNELVOLUME,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Set Channel Volume"},
+	{CMD_CHANNELVOLSLIDE,0,0,		0,	MOD_TYPE_S3MITMPT,	"Channel Volume Slide"},
+	{CMD_GLOBALVOLUME,	0,0,		0,	MOD_TYPE_NOMOD,	"Set Global Volume"},
+	{CMD_GLOBALVOLSLIDE,0,0,		0,	MOD_TYPE_NOMOD,	"Global Volume Slide"},
+	{CMD_KEYOFF,		0,0,		0,	MOD_TYPE_XM,	"Key Off"},
+	{CMD_FINEVIBRATO,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Fine Vibrato"},
 	{CMD_PANBRELLO,		0,0,		0,	MOD_TYPE_NOMOD,	"Panbrello"},
-	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning slide"},
+	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning Slide"},
 	{CMD_SETENVPOSITION,0,0,		0,	MOD_TYPE_XM,	"Envelope position"},
-	{CMD_MIDI,			0,0,		0x7F,	MOD_TYPE_NOMOD,	"Midi macro"},
-	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_NOMOD,	"Smooth Midi macro"},	//rewbs.smoothVST
+	{CMD_MIDI,			0,0,		0x7F,	MOD_TYPE_NOMOD,	"MIDI Macro"},
+	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_NOMOD,	"Smooth MIDI Macro"},	//rewbs.smoothVST
 	// Extended MOD/XM effects
-	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine porta up"},
-	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine porta down"},
+	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine Porta Up"},
+	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine Porta Down"},
 	{CMD_MODCMDEX,		0xF0,0x30,	0,	MOD_TYPE_MODXM,	"Glissando Control"},
-	{CMD_MODCMDEX,		0xF0,0x40,	0,	MOD_TYPE_MODXM,	"Vibrato waveform"},
-	{CMD_MODCMDEX,		0xF0,0x50,	0,	MOD_TYPE_MODXM,	"Set finetune"},
-	{CMD_MODCMDEX,		0xF0,0x60,	0,	MOD_TYPE_MODXM,	"Pattern loop"},
-	{CMD_MODCMDEX,		0xF0,0x70,	0,	MOD_TYPE_MODXM,	"Tremolo waveform"},
-	{CMD_MODCMDEX,		0xF0,0x80,	0,	MOD_TYPE_MODXM,	"Set panning"},
-	{CMD_MODCMDEX,		0xF0,0x90,	0,	MOD_TYPE_MODXM,	"Retrigger note"},
-	{CMD_MODCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_MODXM,	"Fine volslide up"},
-	{CMD_MODCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_MODXM,	"Fine volslide down"},
-	{CMD_MODCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_MODXM,	"Note cut"},
-	{CMD_MODCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_MODXM,	"Note delay"},
-	{CMD_MODCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_MODXM,	"Pattern delay"},
-	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_XM,	"Set active macro"},
+	{CMD_MODCMDEX,		0xF0,0x40,	0,	MOD_TYPE_MODXM,	"Vibrato Waveform"},
+	{CMD_MODCMDEX,		0xF0,0x50,	0,	MOD_TYPE_MODXM,	"Set Finetune"},
+	{CMD_MODCMDEX,		0xF0,0x60,	0,	MOD_TYPE_MODXM,	"Pattern Loop"},
+	{CMD_MODCMDEX,		0xF0,0x70,	0,	MOD_TYPE_MODXM,	"Tremolo Waveform"},
+	{CMD_MODCMDEX,		0xF0,0x80,	0,	MOD_TYPE_MODXM,	"Set Panning"},
+	{CMD_MODCMDEX,		0xF0,0x90,	0,	MOD_TYPE_MODXM,	"Retrigger Note"},
+	{CMD_MODCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_MODXM,	"Fine Volslide Up"},
+	{CMD_MODCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_MODXM,	"Fine Volslide Down"},
+	{CMD_MODCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_MODXM,	"Note Cut"},
+	{CMD_MODCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_MODXM,	"Note Delay"},
+	{CMD_MODCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_MODXM,	"Pattern Delay"},
+	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_XM,	"Set Active Macro"},
 	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_MOD,	"Invert Loop"},
 	// Extended S3M/IT effects
-	{CMD_S3MCMDEX,		0xF0,0x10,	0,	MOD_TYPE_S3MITMPT,	"Glissando control"},
-	{CMD_S3MCMDEX,		0xF0,0x20,	0,	MOD_TYPE_S3M,	"Set finetune"},
-	{CMD_S3MCMDEX,		0xF0,0x30,	0,	MOD_TYPE_S3MITMPT,	"Vibrato waveform"},
-	{CMD_S3MCMDEX,		0xF0,0x40,	0,	MOD_TYPE_S3MITMPT,	"Tremolo waveform"},
-	{CMD_S3MCMDEX,		0xF0,0x50,	0,	MOD_TYPE_S3MITMPT,	"Panbrello waveform"},
-	{CMD_S3MCMDEX,		0xF0,0x60,	0,	MOD_TYPE_S3MITMPT,	"Fine pattern delay"},
-	{CMD_S3MCMDEX,		0xF0,0x80,	0,	MOD_TYPE_S3MITMPT,	"Set panning"},
-	{CMD_S3MCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_S3MITMPT,	"Set high offset"},
-	{CMD_S3MCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_S3MITMPT,	"Pattern loop"},
-	{CMD_S3MCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_S3MITMPT,	"Note cut"},
-	{CMD_S3MCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_S3MITMPT,	"Note delay"},
-	{CMD_S3MCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_S3MITMPT,	"Pattern delay"},
-	{CMD_S3MCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_ITMPT,	"Set active macro"},
+	{CMD_S3MCMDEX,		0xF0,0x10,	0,	MOD_TYPE_S3MITMPT,	"Glissando Control"},
+	{CMD_S3MCMDEX,		0xF0,0x20,	0,	MOD_TYPE_S3M,	"Set Finetune"},
+	{CMD_S3MCMDEX,		0xF0,0x30,	0,	MOD_TYPE_S3MITMPT,	"Vibrato Waveform"},
+	{CMD_S3MCMDEX,		0xF0,0x40,	0,	MOD_TYPE_S3MITMPT,	"Tremolo Waveform"},
+	{CMD_S3MCMDEX,		0xF0,0x50,	0,	MOD_TYPE_S3MITMPT,	"Panbrello Waveform"},
+	{CMD_S3MCMDEX,		0xF0,0x60,	0,	MOD_TYPE_S3MITMPT,	"Fine Pattern Delay"},
+	{CMD_S3MCMDEX,		0xF0,0x80,	0,	MOD_TYPE_S3MITMPT,	"Set Panning"},
+	{CMD_S3MCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_S3MITMPT,	"Set High Offset"},
+	{CMD_S3MCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_S3MITMPT,	"Pattern Loop"},
+	{CMD_S3MCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_S3MITMPT,	"Note Cut"},
+	{CMD_S3MCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_S3MITMPT,	"Note Delay"},
+	{CMD_S3MCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_S3MITMPT,	"Pattern Delay"},
+	{CMD_S3MCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_ITMPT,	"Set Active Macro"},
 	// MPT XM extensions and special effects
-	{CMD_XFINEPORTAUPDOWN,0xF0,0x10,0,	MOD_TYPE_XM,	"Extra fine porta up"},
-	{CMD_XFINEPORTAUPDOWN,0xF0,0x20,0,	MOD_TYPE_XM,	"Extra fine porta down"},
-	{CMD_XFINEPORTAUPDOWN,0xF0,0x50,0,	MOD_TYPE_XM,	"Panbrello waveform"},
-	{CMD_XFINEPORTAUPDOWN,0xF0,0x60,0,	MOD_TYPE_XM,	"Fine pattern delay"},
-	{CMD_XFINEPORTAUPDOWN,0xF0,0x90,0,	MOD_TYPE_XM,	"Sound control"},
-	{CMD_XFINEPORTAUPDOWN,0xF0,0xA0,0,	MOD_TYPE_XM,	"Set high offset"},
+	{CMD_XFINEPORTAUPDOWN,0xF0,0x10,0,	MOD_TYPE_XM,	"Extra Fine Porta Up"},
+	{CMD_XFINEPORTAUPDOWN,0xF0,0x20,0,	MOD_TYPE_XM,	"Extra Fine Porta Down"},
+	{CMD_XFINEPORTAUPDOWN,0xF0,0x50,0,	MOD_TYPE_XM,	"Panbrello Waveform"},
+	{CMD_XFINEPORTAUPDOWN,0xF0,0x60,0,	MOD_TYPE_XM,	"Fine Pattern Delay"},
+	{CMD_XFINEPORTAUPDOWN,0xF0,0x90,0,	MOD_TYPE_XM,	"Sound Control"},
+	{CMD_XFINEPORTAUPDOWN,0xF0,0xA0,0,	MOD_TYPE_XM,	"Set High Offset"},
 	// MPT IT extensions and special effects
-	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MITMPT,	"Sound control"},
-	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	"Instr. control"},
-	{CMD_DELAYCUT,		0x00,0x00,	0,	MOD_TYPE_MPT,	"Note delay and cut"},
+	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MITMPT,	"Sound Control"},
+	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	"Instr. Control"},
+	{CMD_DELAYCUT,		0x00,0x00,	0,	MOD_TYPE_MPT,	"Note Delay and Cut"},
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"X param"},
@@ -2272,6 +2250,8 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up"}, // .IMF effect
 	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down"}, // .IMF effect
 };
+
+STATIC_ASSERT(CountOf(gFXInfo) == MAX_FXINFO);
 
 
 UINT CModDoc::GetNumEffects() const
@@ -2417,21 +2397,27 @@ MODCOMMAND::COMMAND CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
 //----------------------------------------------------------------------
 {
 	//if (pParam) *pParam = -1;
-	if (ndx >= MAX_FXINFO) {
+	if (ndx >= MAX_FXINFO)
+	{
 		refParam = 0;
 		return CMD_NONE;
 	}
 
 	//Cap parameter to match FX if necessary.
-	if (gFXInfo[ndx].dwParamMask) {
-		if (refParam < static_cast<int>(gFXInfo[ndx].dwParamValue)) {
+	if (gFXInfo[ndx].dwParamMask)
+	{
+		if (refParam < static_cast<int>(gFXInfo[ndx].dwParamValue))
+		{
 			refParam = gFXInfo[ndx].dwParamValue;	 // for example: delay with param < D0 becomes SD0
-		} else if (refParam > static_cast<int>(gFXInfo[ndx].dwParamValue)+15) {
-			refParam = gFXInfo[ndx].dwParamValue+15; // for example: delay with param > DF becomes SDF
+		} else if (refParam > static_cast<int>(gFXInfo[ndx].dwParamValue) + 15)
+		{
+			refParam = gFXInfo[ndx].dwParamValue + 15; // for example: delay with param > DF becomes SDF
 		}
 	}
-	if (gFXInfo[ndx].dwFlags) {
-		if (refParam > static_cast<int>(gFXInfo[ndx].dwFlags)) {
+	if (gFXInfo[ndx].dwFlags)
+	{
+		if (refParam > static_cast<int>(gFXInfo[ndx].dwFlags))
+		{
 			refParam = gFXInfo[ndx].dwFlags;	//used for Zxx macro control: limit to 7F max.
 		}
 	}
@@ -2443,7 +2429,8 @@ MODCOMMAND::COMMAND CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
 MODCOMMAND::COMMAND CModDoc::GetEffectFromIndex(UINT ndx)
 //-------------------------------------------------------
 {
-	if (ndx >= MAX_FXINFO) {
+	if (ndx >= MAX_FXINFO)
+	{
 		return CMD_NONE;
 	}
 
@@ -2453,7 +2440,8 @@ MODCOMMAND::COMMAND CModDoc::GetEffectFromIndex(UINT ndx)
 UINT CModDoc::GetEffectMaskFromIndex(UINT ndx)
 //--------------------------------------------
 {
-	if (ndx >= MAX_FXINFO) {
+	if (ndx >= MAX_FXINFO)
+	{
 		return 0;
 	}
 
@@ -3064,10 +3052,10 @@ typedef struct MPTVOLCMDINFO
 	LPCSTR pszName;		// ie "Set Volume"
 } MPTVOLCMDINFO;
 
-#define MAX_VOLINFO		15
+#define MAX_VOLINFO		(MAX_VOLCMDS - 1)
 
 
-const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
+const MPTVOLCMDINFO gVolCmdInfo[] =
 {
 	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		"v: Set Volume"},
 	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		"p: Set Panning"},
@@ -3086,6 +3074,8 @@ const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
 	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"o: Offset"},		//rewbs.volOff
 };
 
+STATIC_ASSERT(CountOf(gVolCmdInfo) == MAX_VOLINFO);
+
 
 UINT CModDoc::GetNumVolCmds() const
 //---------------------------------
@@ -3097,7 +3087,7 @@ UINT CModDoc::GetNumVolCmds() const
 LONG CModDoc::GetIndexFromVolCmd(UINT volcmd)
 //-------------------------------------------
 {
-	for (UINT i=0; i<MAX_VOLINFO; i++)
+	for (UINT i = 0; i < MAX_VOLINFO; i++)
 	{
 		if (gVolCmdInfo[i].dwVolCmd == volcmd) return i;
 	}
@@ -3150,7 +3140,7 @@ void* CModDoc::GetChildFrame()
 //----------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (!pMainFrm) return 0;
+	if (!pMainFrm) return nullptr;
 	CMDIChildWnd *pMDIActive = pMainFrm->MDIGetActive();
 	if (pMDIActive)
 	{
@@ -3166,7 +3156,7 @@ void* CModDoc::GetChildFrame()
 			return (CChildFrame *)pView->GetParentFrame();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
@@ -3197,14 +3187,17 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		ord = patternViewState->nOrder;
 	}
 	//rewbs.fix3185: if position is invalid, go to start of song.
-	if (ord >= m_SndFile.Order.size()) {
+	if (ord >= m_SndFile.Order.size())
+	{
 		ord = 0;
 		pat = pSndFile->Order[ord];
 	}
-	if (pat >= m_SndFile.Patterns.Size()) {
+	if (pat >= m_SndFile.Patterns.Size())
+	{
 		pat=0;
 	}
-	if (row >= pSndFile->Patterns[pat].GetNumRows()) {
+	if (row >= pSndFile->Patterns[pat].GetNumRows())
+	{
 		row=0;
 	}
 	//end rewbs.fix3185
@@ -3446,9 +3439,11 @@ void CModDoc::OnPatternRestart()
 		pSndFile->m_nNextRow = 0;
 		pSndFile->ResetTotalTickCount();
 		//rewbs.vstCompliance
-		if (pModPlaying == this) {
+		if (pModPlaying == this)
+		{
 			pSndFile->StopAllVsti();
-		} else {
+		} else
+		{
 			pSndFile->ResumePlugins();
 		}
 		//end rewbs.vstCompliance
@@ -3502,15 +3497,18 @@ void CModDoc::OnPatternPlay()
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
 		//rewbs.VSTCompliance		
-		if (pModPlaying == this) {
+		if (pModPlaying == this)
+		{
 			pSndFile->StopAllVsti();
-		} else {
+		} else
+		{
 			pSndFile->ResumePlugins();
 		}
 		//end rewbs.VSTCompliance
 		END_CRITICAL();
 
-		if (pModPlaying != this) {
+		if (pModPlaying != this)
+		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
 	}
@@ -3668,16 +3666,18 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		newPath += path;
 
 		//Catch case where we don't have a filename yet.
-		if (fname[0] == 0) {
+		if (fname[0] == 0)
+		{
 			newPath += GetTitle();
-		} else {
+		} else
+		{
 			newPath += fname;
 		}
 
 		switch(nNewType)
 		{
 		case MOD_TYPE_XM:  newPath += ".xm"; break;
-		case MOD_TYPE_IT:  m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? newPath+=".itp" : newPath+=".it"; break;
+		case MOD_TYPE_IT:  newPath += m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? ".itp" : ".it"; break;
 		case MOD_TYPE_MPT: newPath += ".mptm"; break;
 		case MOD_TYPE_S3M: newPath += ".s3m"; break;
 		case MOD_TYPE_MOD: newPath += ".mod"; break;
@@ -3931,7 +3931,9 @@ void CModDoc::FixNullStrings()
 	// Not needed?
 }
 
+
 void CModDoc::OnSaveTemplateModule()
+//----------------------------------
 {
 	// Create template folder if doesn't exist already.
 	const LPCTSTR pszTemplateFolder = CMainFrame::GetSettings().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);

@@ -1028,34 +1028,6 @@ void CSoundFile::SetAGC(BOOL b)
 }
 
 
-PATTERNINDEX CSoundFile::GetNumPatterns() const
-//---------------------------------------------
-{
-	PATTERNINDEX max = 0;
-	for(PATTERNINDEX i = 0; i < Patterns.Size(); i++)
-	{
-		if(Patterns.IsValidPat(i))
-			max = i + 1;
-	}
-	return max;
-}
-
-
-UINT CSoundFile::GetMaxPosition() const
-//-------------------------------------
-{
-	UINT max = 0;
-	UINT i = 0;
-
-	while ((i < Order.size()) && (Order[i] != Order.GetInvalidPatIndex()))
-	{
-		if (Order[i] < Patterns.Size()) max += Patterns[Order[i]].GetNumRows();
-		i++;
-	}
-	return max;
-}
-
-
 UINT CSoundFile::GetCurrentPos() const
 //------------------------------------
 {
@@ -2549,7 +2521,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 	}
 	SAMPLEINDEX nExt = 0;
 
-	for (PATTERNINDEX nPat = 0; nPat < GetNumPatterns(); nPat++)
+	for (PATTERNINDEX nPat = 0; nPat < Patterns.GetNumPatterns(); nPat++)
 	{
 		const MODCOMMAND *p = Patterns[nPat];
 		if(p == nullptr)

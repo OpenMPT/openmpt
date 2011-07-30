@@ -12,25 +12,27 @@ MODTYPE CModSpecifications::ExtensionToType(LPCTSTR pszExt)
 		pszExt++;
 	char szExtA[CountOf(ModSpecs::mod.fileExtension)];
 	MemsetZero(szExtA);
-	size_t i = 0;
 	const size_t nLength = _tcslen(pszExt);
 	if (nLength >= CountOf(szExtA))
 		return MOD_TYPE_NONE;
-	for(i = 0; i<nLength; ++i)
+	for(size_t i = 0; i < nLength; i++)
 		szExtA[i] = static_cast<char>(pszExt[i]);
-	if (!lstrcmpiA(szExtA, ModSpecs::mod.fileExtension) || !lstrcmpiA(szExtA, ModSpecs::modEx.fileExtension))
-		return MOD_TYPE_MOD;
-	else if (!lstrcmpiA(szExtA, ModSpecs::s3m.fileExtension) || !lstrcmpiA(szExtA, ModSpecs::s3mEx.fileExtension))
-		return MOD_TYPE_S3M;
-	else if (!lstrcmpiA(szExtA, ModSpecs::xm.fileExtension) || !lstrcmpiA(szExtA, ModSpecs::xmEx.fileExtension))
-		return MOD_TYPE_XM;
-	else if (!lstrcmpiA(szExtA, ModSpecs::it.fileExtension) || !lstrcmpiA(szExtA, ModSpecs::itEx.fileExtension)
-			 || !lstrcmpi(szExtA, _T("itp")))
+
+	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
+	{
+		if (!lstrcmpiA(szExtA, ModSpecs::Collection[i]->fileExtension))
+		{
+			return ModSpecs::Collection[i]->internalType;
+		}
+	}
+	// Special case: ITP files...
+	if(!lstrcmpi(szExtA, _T("itp")))
+	{
 		return MOD_TYPE_IT;
-	else if (!lstrcmpiA(szExtA, ModSpecs::mptm.fileExtension))
-		return MOD_TYPE_MPT;
-	else
-		return MOD_TYPE_NONE;
+	}
+
+	return MOD_TYPE_NONE;
+
 }
 
 

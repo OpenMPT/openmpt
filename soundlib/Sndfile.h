@@ -700,14 +700,11 @@ public:
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 
-	// Returns 1 + index of last valid pattern, zero if no such pattern exists.
-	PATTERNINDEX GetNumPatterns() const;
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; } 
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentPattern); }
-	UINT GetMaxPosition() const;
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
@@ -719,7 +716,6 @@ public:
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(ORDERINDEX nOrder);
-	void GetTitle(LPSTR s) const { lstrcpyn(s,m_szNames[0],32); }
 	LPCSTR GetTitle() const { return m_szNames[0]; }
 	LPCTSTR GetSampleName(UINT nSample) const;
 	CString GetInstrumentName(UINT nInstr) const;

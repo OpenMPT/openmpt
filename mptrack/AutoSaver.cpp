@@ -42,16 +42,20 @@ CAutoSaver::~CAutoSaver(void)
 {
 }
 
+
 //////////////
 // Entry Point
 //////////////
 
+
 bool CAutoSaver::DoSave(DWORD curTime)
+//------------------------------------
 {
 	bool success = true;
     
 	//If time to save and not already having save in progress.
-	if (CheckTimer(curTime) && !m_bSaveInProgress) { 
+	if (CheckTimer(curTime) && !m_bSaveInProgress)
+	{ 
 		m_bSaveInProgress = true;
 		CDocTemplate *pDocTemplate;
 		CModDoc *pModDoc;
@@ -70,7 +74,8 @@ bool CAutoSaver::DoSave(DWORD curTime)
 			pDocTemplate = pTrackApp->GetNextDocTemplate(posTemplate);
 			posDocument = pDocTemplate->GetFirstDocPosition();
 
-			while (posDocument) { //for all open documents
+			while (posDocument)	//for all open documents
+			{
 				pModDoc = (CModDoc*)(pDocTemplate->GetNextDoc(posDocument));
 				if (pModDoc && pModDoc->ModifiedSinceLastAutosave() && pModDoc->GetSoundFile())
 				{
@@ -95,188 +100,215 @@ bool CAutoSaver::DoSave(DWORD curTime)
 	return success;
 }
 
+
 ////////////////
 // Member access
 ////////////////
+
+
 void CAutoSaver::Enable()
+//-----------------------
 {
-	m_bEnabled=true;
+	m_bEnabled = true;
 }
+
 
 void CAutoSaver::Disable()
+//------------------------
 {
-	m_bEnabled=false;
+	m_bEnabled = false;
 }
 
+
 bool CAutoSaver::IsEnabled()
+//--------------------------
 {
 	return m_bEnabled;
 }
 
+
 void CAutoSaver::SetUseOriginalPath(bool useOrgPath)
+//--------------------------------------------------
 {
 	m_bUseOriginalPath=useOrgPath;
 }
 
+
 bool CAutoSaver::GetUseOriginalPath()
+//-----------------------------------
 {
 	return m_bUseOriginalPath;
 }
 
+
 void CAutoSaver::SetPath(CString path)
+//------------------------------------
 {
 	m_csPath = path;
 }
 
+
 CString CAutoSaver::GetPath()
+//---------------------------
 {
 	return m_csPath;
 }
 
+
 void CAutoSaver::SetFilenameTemplate(CString fnTemplate)
+//------------------------------------------------------
 {
 	m_csFileNameTemplate = fnTemplate;
 }
 
+
 CString CAutoSaver::GetFilenameTemplate()
+//---------------------------------------
 {
 	return m_csFileNameTemplate;
 }
 
+
 void CAutoSaver::SetHistoryDepth(int history)
+//-------------------------------------------
 {
-	if (history<1) {
-		m_nBackupHistory=1;
-	} else if (history>100) {
-		m_nBackupHistory=100;
-	} else {
-		m_nBackupHistory=history;
-	}
+	Limit(history, 1, 100);
+	m_nBackupHistory = history;
 }
 
+
 int CAutoSaver::GetHistoryDepth()
+//_------------------------------
 {
 	return m_nBackupHistory;
 }
 
+
 void CAutoSaver::SetSaveInterval(int minutes)
+//-------------------------------------------
 {
-	if (minutes<1) {
-		minutes=1;
-	} else if (minutes>10000) {
-		minutes=10000;
-	}
+	Limit(minutes, 1, 10000);
 	
-	m_nSaveInterval=minutes*60*1000; //minutes to milliseconds
+	m_nSaveInterval=minutes * 60 * 1000; //minutes to milliseconds
 }
 
+
 int CAutoSaver::GetSaveInterval()
+//-------------------------------
 {
 	return m_nSaveInterval/60/1000;
 }
+
 
 ///////////////////////////
 // Implementation internals
 ///////////////////////////
 
+
 bool CAutoSaver::CheckTimer(DWORD curTime) 
+//----------------------------------------
 {
 	DWORD curInterval = curTime-m_nLastSave;
-	return (curInterval>=m_nSaveInterval);
+	return (curInterval >= m_nSaveInterval);
 }
 
 
 CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
+//-------------------------------------------------
 {
 	CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
 	CString name;
 	
-	if (m_bUseOriginalPath) {
-		if (pModDoc->m_bHasValidPath) { // Check that the file has a user-chosen path
+	if (m_bUseOriginalPath)
+	{
+		if (pModDoc->m_bHasValidPath)
+		{
+			// Check that the file has a user-chosen path
 			name = pModDoc->GetPathName(); 
-		} else {						// if it doesnt, put it in settings dir
+		} else
+		{
+			// if it doesnt, put it in settings dir
 			name = theApp.GetConfigPath() + pModDoc->GetTitle(); 		
 		}
 	
-	} else {
+	} else
+	{
 		name = m_csPath+pModDoc->GetTitle();
 	}
 	
 	
 	name.Append(".AutoSave.");					//append backup tag
 	name.Append(timeStamp);						//append timestamp
-	switch (pModDoc->GetModType()) {			//append extension
-		case MOD_TYPE_MOD:
-            name.Append(".mod");
-			break;
-		case MOD_TYPE_IT:
-			if((pModDoc->GetSoundFile())->m_dwSongFlags & SONG_ITPROJECT){
-				name.Append(".itp");
-			} else{
- 				name.Append(".it");
-			}
-			break;
-		case MOD_TYPE_MPT:
-			name.Append(".mptm");
-			break;
-		case MOD_TYPE_XM:
-			name.Append(".xm");
-			break;
-		case MOD_TYPE_S3M:
-			name.Append(".s3m");
-			break;
+	name.Append(".");							//append extension
+	if((pModDoc->GetSoundFile()->m_dwSongFlags & SONG_ITPROJECT) != 0)
+	{
+		name.Append("itp");
+	} else
+	{
+		name.Append(pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 	}
 
 	return name;
 }
+
+
 bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc) 
+//-----------------------------------------------
 {
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
-	BOOL success=false;
+	bool success = false;
 	CSoundFile* pSndFile = pModDoc->GetSoundFile(); 
 	
-	if (pSndFile) {
+	if (pSndFile)
+	{
 		CString fileName = BuildFileName(pModDoc);
 
-		switch (pModDoc->GetModType()) {
-			case MOD_TYPE_MOD:
-				success = pSndFile->SaveMod(fileName, 0); 
-				break;
-			case MOD_TYPE_S3M:
-				success = pSndFile->SaveS3M(fileName, 0); 
-				break;
-			case MOD_TYPE_XM:
-				success = pSndFile->SaveXM(fileName, 0); 
-				break;
-			case MOD_TYPE_IT:
-				success = (pSndFile->m_dwSongFlags & SONG_ITPROJECT) ? 
-						   pSndFile->SaveITProject(fileName) : 
-						   pSndFile->SaveIT(fileName, 0); 
-				break;
-			case MOD_TYPE_MPT:
-				//Using IT save function also for MPT.
-				success = pSndFile->SaveIT(fileName, 0);
-				break;
+		switch (pModDoc->GetModType())
+		{
+		case MOD_TYPE_MOD:
+			success = pSndFile->SaveMod(fileName, 0); 
+			break;
+		case MOD_TYPE_S3M:
+			success = pSndFile->SaveS3M(fileName, 0); 
+			break;
+		case MOD_TYPE_XM:
+			success = pSndFile->SaveXM(fileName, 0); 
+			break;
+		case MOD_TYPE_IT:
+			success = (pSndFile->m_dwSongFlags & SONG_ITPROJECT) ? 
+				pSndFile->SaveITProject(fileName) : 
+			pSndFile->SaveIT(fileName, 0); 
+			break;
+		case MOD_TYPE_MPT:
+			//Using IT save function also for MPT.
+			success = pSndFile->SaveIT(fileName, 0);
+			break;
 			//default:
-				//Do nothing
+			//Do nothing
 		}
 	}
-	return (success == TRUE);
+	return success;
 }
 
+
 void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
+//-----------------------------------------------
 {
 	CString path;
 	
-	if (m_bUseOriginalPath) {
-		if (pModDoc->m_bHasValidPath) { // Check that the file has a user-chosen path
+	if (m_bUseOriginalPath)
+	{
+		if (pModDoc->m_bHasValidPath)	// Check that the file has a user-chosen path
+		{
 			CString fullPath = pModDoc->GetPathName();
 			path = fullPath.Left(fullPath.GetLength()-pModDoc->GetTitle().GetLength()); //remove file name if necessary
-		} else {
+		} else
+		{
 			path = theApp.GetConfigPath();
 		}
-	} else {
+	} else
+	{
 		path = m_csPath;
 	}
 
@@ -286,15 +318,18 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 	BOOL bResult = finder.FindFile(searchPattern);
 	CArray<CString> foundfiles;
 	
-	while(bResult) {
+	while(bResult)
+	{
 		bResult = finder.FindNextFile();
 		foundfiles.Add(path+finder.GetFileName());
 	}
 	finder.Close();
 	
 	std::sort(foundfiles.GetData(), foundfiles.GetData() + foundfiles.GetSize());
-	while (foundfiles.GetSize()>m_nBackupHistory) {
-		try	{
+	while (foundfiles.GetSize()>m_nBackupHistory)
+	{
+		try
+		{
 			CString toRemove=foundfiles[0];
 			CFile::Remove(toRemove);
 		} catch (CFileException* /*pEx*/){}
@@ -304,9 +339,11 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 }
 
 
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // CAutoSaverGUI dialog : AutoSaver GUI
 ///////////////////////////////////////////////////////////////////////////////////////
+
 
 IMPLEMENT_DYNAMIC(CAutoSaverGUI, CPropertyPage)
 CAutoSaverGUI::CAutoSaverGUI(CAutoSaver* pAutoSaver)
