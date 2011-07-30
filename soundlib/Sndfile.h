@@ -18,6 +18,7 @@
 #include "midi.h"
 #include "Snd_defs.h"
 #include "Endianness.h"
+#include "tuning.h"
 
 // For VstInt32 and stuff - a stupid workaround for IMixPlugin.
 #ifndef NO_VST
@@ -28,8 +29,8 @@ typedef int32 VstInt32;
 typedef intptr_t VstIntPtr;
 #endif
 
-class CTuningBase;
-typedef CTuningBase CTuning;
+//class CTuningBase;
+//typedef CTuningBase CTuning;
 
 
 // Sample Struct
@@ -887,7 +888,31 @@ public:
 	void SetTempo(UINT param, bool setAsNonModcommand = false);
 	void SetSpeed(UINT param);
 
-private:
+protected:
+	// Channel effect processing
+	void ProcessVolumeSwing(MODCHANNEL *pChn, int &vol);
+	void ProcessPanningSwing(MODCHANNEL *pChn);
+	void ProcessTremolo(MODCHANNEL *pChn, int &vol);
+	void ProcessTremor(MODCHANNEL *pChn, int &vol);
+
+	void ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol);
+	void ProcessPanningEnvelope(MODCHANNEL *pChn);
+	void ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period);
+
+	void IncrementVolumeEnvelopePosition(MODCHANNEL *pChn);
+	void IncrementPanningEnvelopePosition(MODCHANNEL *pChn);
+	void IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn);
+
+	void ProcessInstrumentFade(MODCHANNEL *pChn, int &vol);
+
+	void ProcessPitchPanSeparation(MODCHANNEL *pChn);
+	void ProcessPanbrello(MODCHANNEL *pChn);
+
+	void ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps);
+	void ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
+	void ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac);
+
+protected:
 	// Channel Effects
 	void PortamentoUp(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
 	void PortamentoDown(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
@@ -1046,7 +1071,7 @@ protected:
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 
 public:
-	int GetVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns) const;
+	int GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const;
     void ResetChannelEnvelopes(MODCHANNEL *pChn);
 	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env);
 	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
