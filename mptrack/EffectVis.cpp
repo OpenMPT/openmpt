@@ -37,7 +37,7 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, U
 	m_nParamToErase = -1;
 	m_nLastDrawnRow	= -1;
 	m_nLastDrawnY = -1;
-	m_nOldPlayPos = -1;
+	m_nOldPlayPos = UINT_MAX;
 	m_nFillEffect = m_pModDoc->GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
 	m_nAction=kAction_OverwriteFX;
 	m_templatePCNote.Set(NOTE_PCS, 1, 0, 0);
@@ -334,6 +334,7 @@ void CEffectVis::SetPlayCursor(UINT nPat, UINT nRow)
 //-----------------------------------------------------------------------------------------
 void CEffectVis::ShowVis(CDC * pDC, CRect rectBorder)
 {
+	UNREFERENCED_PARAMETER(rectBorder);
 	if (m_boolForceRedraw)
 	{
 		m_boolForceRedraw = FALSE ;
@@ -438,7 +439,7 @@ void CEffectVis::DrawNodes()
 //---------------------------------------
 {
 	//erase
-	if (m_nRowToErase<m_startRow ||  m_nParamToErase < 0)
+	if ((UINT)m_nRowToErase<m_startRow ||  m_nParamToErase < 0)
 	{
 		::FillRect(m_dcNodes.m_hDC, &m_rcDraw, m_brushBlack);
 	}
@@ -461,7 +462,7 @@ void CEffectVis::DrawNodes()
 
 void CEffectVis::InvalidateRow(int row)
 {
-	if ((row < m_startRow) ||  (row > m_endRow)) return;
+	if (((UINT)row < m_startRow) ||  ((UINT)row > m_endRow)) return;
 
 //It seems this optimisation doesn't work properly yet.	Disable in Update()
 
@@ -538,6 +539,9 @@ VOID CEffectVis::DoClose()
 
 void CEffectVis::OnSize(UINT nType, int cx, int cy)
 {
+	UNREFERENCED_PARAMETER(nType);
+	UNREFERENCED_PARAMETER(cx);
+	UNREFERENCED_PARAMETER(cy);
 	GetClientRect(&m_rcFullWin);
 	m_rcDraw.SetRect( m_rcFullWin.left  + LEFTBORDER,  m_rcFullWin.top    + TOPBORDER,
 				      m_rcFullWin.right - RIGHTBORDER, m_rcFullWin.bottom - BOTTOMBORDER);
@@ -585,7 +589,7 @@ void CEffectVis::UpdateSelection(UINT startRow, UINT endRow, UINT nchn, CModDoc*
 	m_startRow = startRow;
     m_endRow = endRow;
 	m_nRows = endRow - startRow;
-	m_nChan = nchn;
+	m_nChan = static_cast<CHANNELINDEX>(nchn);
 	m_nPattern = pat;
 
 	//Check document exists
@@ -648,7 +652,7 @@ void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 			rect.SetRect(x-NODEHALF, y-NODEHALF, x+NODEHALF+1, y+NODEHALF+1);
 			if (rect.PtInRect(point))
 			{
-				m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChan, row, m_nChan+1, row+1);
+				m_pModDoc->GetPatternUndo()->PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, row, m_nChan+1, row+1);
 				m_nDragItem = row;
 			}
 		}		
@@ -687,7 +691,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	{		
 		// Interpolate if we detect that rows have been skipped but the left mouse button was not released.
 		// This ensures we produce a smooth curve even when we are not notified of mouse movements at a high frequency (e.g. if CPU usage is high)
-		if ((m_nLastDrawnRow>(int)m_startRow) && (row != m_nLastDrawnRow) && (row != m_nLastDrawnRow+1) && (row != m_nLastDrawnRow-1))
+		if ((m_nLastDrawnRow>(int)m_startRow) && ((int)row != m_nLastDrawnRow) && ((int)row != m_nLastDrawnRow+1) && ((int)row != m_nLastDrawnRow-1))
 		{
 			int steps = abs((long)row-(long)m_nLastDrawnRow);
 			ASSERT(steps!=0);
@@ -698,7 +702,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 			for (int i=1; i<=steps; i++)
 			{
 				currentRow = m_nLastDrawnRow+(direction*i);
-				int interpolatedY = m_nLastDrawnY+((float)i*factor+0.5f);
+				int interpolatedY = static_cast<int>(m_nLastDrawnY+((float)i*factor+0.5f));
 				MakeChange(currentRow, interpolatedY);
 			}
 			
@@ -746,7 +750,7 @@ void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 		SetFocus();
 		SetCapture();
 
-		m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChan, m_startRow, m_nChan+1, m_endRow);
+		m_pModDoc->GetPatternUndo()->PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, m_startRow, m_nChan+1, m_endRow);
 		m_dwStatus |= FXVSTATUS_LDRAGGING;
 	}
 
@@ -806,7 +810,7 @@ BOOL CEffectVis::OnInitDialog()
 		{
 			k =m_cmbEffectList.AddString(s);
 			m_cmbEffectList.SetItemData(k, i);
-			if (i==m_nFillEffect)
+			if ((long)i == m_nFillEffect)
 				m_cmbEffectList.SetCurSel(k);
 		}
 	}

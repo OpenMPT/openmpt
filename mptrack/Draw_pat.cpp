@@ -374,7 +374,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	{
 		if(pTuning)
 		{   // Drawing custom note names
-			string noteStr = pTuning->GetNoteName(note-NOTE_MIDDLEC);
+			string noteStr = pTuning->GetNoteName(static_cast<CTuningBase::NOTEINDEXTYPE>(note-NOTE_MIDDLEC));
 			if(noteStr.size() < 3)
 				noteStr.resize(3, ' ');
 			
@@ -528,7 +528,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				DrawButtonRect(hdc, &rect, s,
 					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
 					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
-					pModDoc->IsChannelRecord(ncolhdr) ? DT_RIGHT : DT_CENTER);
+					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
 
 				// When dragging around channel headers, mark insertion position
 				if(m_bDragging && !m_bInItemRect
@@ -550,7 +550,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				CRect insRect;
 				insRect.SetRect(xpaint, ypaint, xpaint+nColumnWidth / 8 + 3, ypaint + 16);
 //				if (MultiRecordMask[ncolhdr>>3] & (1 << (ncolhdr&7)))
-				if (pModDoc->IsChannelRecord1(ncolhdr))
+				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
 //					rect.DeflateRect(1, 1);
 //					InvertRect(hdc, &rect);
@@ -562,7 +562,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
 					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
 				}
-				else if (pModDoc->IsChannelRecord2(ncolhdr))
+				else if (pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
 					FrameRect(hdc,&rect,CMainFrame::brushGray);
 					InvertRect(hdc, &rect);
@@ -1003,7 +1003,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					{
 						if (m->command)
 						{
-							UINT command = m->command & 0x3F;
+							MODCOMMAND::COMMAND command = m->command & 0x3F;
 							int n =	pSndFile->GetModSpecifications().GetEffectLetter(command);
 							ASSERT(n > ' ');
 							//if (n <= ' ') n = '?';
@@ -1484,7 +1484,7 @@ void CViewPattern::UpdateIndicator()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		CHAR s[512];
-		UINT nChn;
+		CHANNELINDEX nChn;
 		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel() + 1);
 		pMainFrm->SetUserText(s);
 		if (::GetFocus() == m_hWnd)

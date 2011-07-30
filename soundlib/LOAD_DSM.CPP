@@ -91,7 +91,8 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
 	DSMSONG *psong;
 	DWORD dwMemPos;
-	UINT nPat, nSmp;
+	UINT nSmp;
+	PATTERNINDEX nPat;
 
 	if ((!lpStream) || (dwMemLength < 1024) || (pfh->id_RIFF != DSMID_RIFF)
 	 || (pfh->riff_len + 8 > dwMemLength) || (pfh->riff_len < 1024)

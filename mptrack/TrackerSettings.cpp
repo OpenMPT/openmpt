@@ -337,7 +337,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CSoundFile::m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
 	CSoundFile::m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
 	gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", gbWFIRType, iniFile));
-	gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
+	//gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
+	gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(gdWFIRCutoff * 100.0), iniFile)) / 100.0;
 	glVolumeRampSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", glVolumeRampSamples, iniFile);
 
 	m_dwMidiSetup = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);

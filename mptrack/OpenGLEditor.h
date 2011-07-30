@@ -1,4 +1,7 @@
 #pragma once
+
+#if 0
+
 #include "globals.h"
 #include "OpenGLControl.h"
 
@@ -25,3 +28,5 @@ private:
 public:
 	afx_msg void OnPaint();
 };
+
+#endif // 0

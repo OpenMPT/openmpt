@@ -51,7 +51,7 @@ void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, CSoundFile *pSndFile, std::bits
 //---------------------------------------------------------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
-	const UINT iEnvMax = pSndFile->GetModSpecifications().envelopePointsMax;
+	const uint8 iEnvMax = pSndFile->GetModSpecifications().envelopePointsMax;
 
 	#define TRIMENV(iEnvLen) if(iEnvLen > iEnvMax) { iEnvLen = iEnvMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
 

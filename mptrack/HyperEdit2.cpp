@@ -20,6 +20,9 @@
 #include "stdafx.h"
 #include "HyperEdit.h"
 
+#pragma warning(disable:4244) // "conversion from 'type1' to 'type2', possible loss of data"
+#pragma warning(disable:4018) // "'<' : signed/unsigned mismatch"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -235,3 +238,5 @@ BOOL CHyperEdit::IsWordHyper(const CString& csToken) const
 	return FALSE; // Not a valid token by default
 }	  
 
+#pragma warning(default:4244)
+#pragma warning(default:4018)

@@ -618,7 +618,7 @@ static void getsinc(short int *psinc, double beta, double lowpass_factor)
 			fsinc = sin(x*kPi) * izero(beta*sqrt(1-x*x*(1.0/16.0))) / (izero_beta*x*kPi); // Kaiser window
 		}
 		int n = (int)(fsinc * lowpass_factor * (16384*256));
-		*psinc++ = (n+0x80)>>8; // force rounding
+		*psinc++ = static_cast<short>((n+0x80)>>8); // force rounding
 	}
 }
 

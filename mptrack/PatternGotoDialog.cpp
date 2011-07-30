@@ -48,7 +48,7 @@ void CPatternGotoDialog::UpdatePos(UINT row, UINT chan, UINT pat, UINT ord, CSou
 {
 	m_nRow = row;
 	m_nChannel = chan;
-	m_nPattern = pat;
+	m_nPattern = static_cast<PATTERNINDEX>(pat);
 	m_nActiveOrder = ord;
 	m_nOrder = ord;
 	m_pSndFile = pSndFile;
@@ -103,7 +103,7 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	}
 		
 	UpdateData();
-	m_nOrder = m_pSndFile->FindOrder(m_nPattern, m_nActiveOrder);
+	m_nOrder = m_pSndFile->FindOrder(static_cast<PATTERNINDEX>(m_nPattern), m_nActiveOrder);
 
 	if (m_nOrder >= m_pSndFile->Order.size()) {
 		m_nOrder=0;

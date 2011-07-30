@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#if 0
 #include "OpenGLControl.h"
 
 #ifdef _DEBUG
@@ -164,3 +165,5 @@ BOOL COpenGLControl::OnEraseBkgnd(CDC* pDC)
 {
 	return TRUE;
 }
+
+#endif // 0

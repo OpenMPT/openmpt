@@ -1120,7 +1120,7 @@ int DMFUnpack(LPBYTE psample, uint8 *ibuf, uint8 *ibufmax, UINT maxlen)
 	DMFNewNode(&tree);
 	value = 0;
 
-	for (int i = 0; i < maxlen; i++)
+	for (UINT i = 0; i < maxlen; i++)
 	{
 		actnode = 0;
 		sign = DMFReadBits(&tree, 1);
