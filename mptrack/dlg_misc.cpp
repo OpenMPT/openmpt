@@ -223,6 +223,10 @@ void CModTypeDlg::UpdateDialog()
 	CheckDlgButton(IDC_CHK_MIDICCBUG, m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION));
 	CheckDlgButton(IDC_CHK_OLDRANDOM, m_pSndFile->GetModFlag(MSF_OLDVOLSWING));
 
+	// Deprecated flags are greyed out if they are not being used.
+	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow(m_pSndFile->GetModFlag(MSF_OLDVOLSWING) ? TRUE : FALSE);
+
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
 	m_PlugMixBox.ShowWindow(XMorITorMPT);
