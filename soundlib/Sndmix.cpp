@@ -823,7 +823,7 @@ BOOL CSoundFile::ProcessRow()
 		}
 		// Reset channel values
 		MODCHANNEL *pChn = Chn;
-		MODCOMMAND *m = Patterns[m_nPattern] + m_nRow * m_nChannels;
+		MODCOMMAND *m = Patterns[m_nPattern].GetRow(m_nRow);
 		for (UINT nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
 		{
 			pChn->nRowNote = m->note;
@@ -871,6 +871,861 @@ BOOL CSoundFile::ProcessRow()
 
 	// Update Effects
 	return ProcessEffects();
+}
+
+
+void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
+//-------------------------------------------------------------
+{
+	if(pChn->nVolSwing)
+	{
+		if(GetModFlag(MSF_OLDVOLSWING))
+		{
+			vol += pChn->nVolSwing;
+		}
+		else
+		{
+			pChn->nVolume += pChn->nVolSwing;
+			pChn->nVolume = CLAMP(pChn->nVolume, 0, 256);
+			vol = pChn->nVolume;
+			pChn->nVolSwing = 0;
+		}
+	}
+
+	vol = CLAMP(vol, 0, 256);
+}
+
+
+void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
+//----------------------------------------------------
+{
+	if(GetModFlag(MSF_OLDVOLSWING))
+	{
+		pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
+	}
+	else
+	{
+		pChn->nPan += pChn->nPanSwing;
+		pChn->nPan = CLAMP(pChn->nPan, 0, 256);
+		pChn->nPanSwing = 0;
+		pChn->nRealPan = pChn->nPan;
+	}
+
+	pChn->nRealPan = CLAMP(pChn->nRealPan, 0, 256);
+}
+
+
+void CSoundFile::ProcessTremolo(MODCHANNEL *pChn, int &vol)
+//---------------------------------------------------------
+{
+	if (pChn->dwFlags & CHN_TREMOLO)
+	{
+		UINT trempos = pChn->nTremoloPos;
+		// IT compatibility: Why would you not want to execute tremolo at volume 0?
+		if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
+			const int tremattn = (m_nType & MOD_TYPE_XM || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
+			switch (pChn->nTremoloType & 0x03)
+			{
+			case 1:
+				// IT compatibility: IT has its own, more precise tables
+				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[trempos] : ModRampDownTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
+				break;
+			case 2:
+				// IT compatibility: IT has its own, more precise tables
+				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[trempos] : ModSquareTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
+				break;
+			case 3:
+				//IT compatibility 19. Use random values
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					vol += (((rand() & 0x7F) - 0x40) * (int)pChn->nTremoloDepth) >> tremattn;
+				else
+					vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
+				break;
+			default:
+				// IT compatibility: IT has its own, more precise tables
+				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[trempos] : ModSinusTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
+			}
+		}
+		if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+		{
+			// IT compatibility: IT has its own, more precise tables
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				pChn->nTremoloPos = (pChn->nTremoloPos + 4 * pChn->nTremoloSpeed) & 0xFF;
+			else
+				pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
+		}
+	}
+}
+
+
+void CSoundFile::ProcessTremor(MODCHANNEL *pChn, int &vol)
+//--------------------------------------------------------
+{
+	if(pChn->nCommand == CMD_TREMOR)
+	{
+		// IT compatibility 12. / 13.: Tremor
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			if ((pChn->nTremorCount & 128) && pChn->nLength)
+			{
+				if (pChn->nTremorCount == 128)
+					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
+				else if (pChn->nTremorCount == 192)
+					pChn->nTremorCount = (pChn->nTremorParam & 0xf) | 128;
+				else
+					pChn->nTremorCount--;
+			}
+
+			if ((pChn->nTremorCount & 192) == 128)
+				vol = 0;
+		}
+		else
+		{
+			UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
+			UINT ontime = pChn->nTremorParam >> 4;
+			if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS))
+			{
+				n += 2;
+				ontime++;
+			}
+			UINT tremcount = (UINT)pChn->nTremorCount;
+			if (tremcount >= n) tremcount = 0;
+			if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+			{
+				if (tremcount >= ontime) vol = 0;
+				pChn->nTremorCount = (BYTE)(tremcount + 1);
+			}
+		}
+		pChn->dwFlags |= CHN_FASTVOLRAMP;
+	}
+}
+
+
+void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
+//----------------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
+	// Problem: This pauses on the wrong tick at the moment...
+	if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
+	{
+		int envvol = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
+
+		// if we are in the release portion of the envelope,
+		// rescale envelope factor so that it is proportional to the release point
+		// and release envelope beginning.
+		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
+			&& pChn->VolEnv.nEnvPosition >= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
+		&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
+		{
+			int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
+			int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] << 2;
+
+			//If we have just hit the release node, force the current env value
+			//to be that of the release node. This works around the case where 
+			// we have another node at the same position as the release node.
+			if (pChn->VolEnv.nEnvPosition == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
+				envvol = envValueAtReleaseNode;
+
+			int relativeVolumeChange = (envvol - envValueAtReleaseNode) * 2;
+			envvol = envValueAtReleaseJump + relativeVolumeChange;
+		}
+		vol = (vol * CLAMP(envvol, 0, 512)) >> 8;
+	}
+
+}
+
+
+void CSoundFile::ProcessPanningEnvelope(MODCHANNEL *pChn)
+//-------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
+	// Problem: This pauses on the wrong tick at the moment...
+	if (((pChn->dwFlags & CHN_PANENV) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
+	{
+		int envpos = pChn->PanEnv.nEnvPosition;
+		UINT pt = pIns->PanEnv.nNodes - 1;
+		for (UINT i=0; i<(UINT)(pIns->PanEnv.nNodes-1); i++)
+		{
+			if (envpos <= pIns->PanEnv.Ticks[i])
+			{
+				pt = i;
+				break;
+			}
+		}
+		int x2 = pIns->PanEnv.Ticks[pt], y2 = pIns->PanEnv.Values[pt];
+		int x1, envpan;
+		if (envpos >= x2)
+		{
+			envpan = y2;
+			x1 = x2;
+		} else if (pt)
+		{
+			envpan = pIns->PanEnv.Values[pt-1];
+			x1 = pIns->PanEnv.Ticks[pt-1];
+		} else
+		{
+			envpan = 128;
+			x1 = 0;
+		}
+		if ((x2 > x1) && (envpos > x1))
+		{
+			envpan += ((envpos - x1) * (y2 - envpan)) / (x2 - x1);
+		}
+
+		envpan = CLAMP(envpan, 0, 64);
+		int pan = pChn->nPan;
+		if (pan >= 128)
+		{
+			pan += ((envpan - 32) * (256 - pan)) / 32;
+		} else
+		{
+			pan += ((envpan - 32) * (pan)) / 32;
+		}
+
+		pChn->nRealPan = CLAMP(pan, 0, 256);
+	}
+}
+
+
+void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
+//------------------------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
+	// Problem: This pauses on the wrong tick at the moment...
+	if ((pIns) && ((pChn->dwFlags & CHN_PITCHENV) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
+	{
+		int envpos = pChn->PitchEnv.nEnvPosition;
+		UINT pt = pIns->PitchEnv.nNodes - 1;
+		for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
+		{
+			if (envpos <= pIns->PitchEnv.Ticks[i])
+			{
+				pt = i;
+				break;
+			}
+		}
+		int x2 = pIns->PitchEnv.Ticks[pt];
+		int x1, envpitch;
+		if (envpos >= x2)
+		{
+			envpitch = (((int)pIns->PitchEnv.Values[pt]) - ENVELOPE_MID) * 8;
+			x1 = x2;
+		} else if (pt)
+		{
+			envpitch = (((int)pIns->PitchEnv.Values[pt-1]) - ENVELOPE_MID) * 8;
+			x1 = pIns->PitchEnv.Ticks[pt-1];
+		} else
+		{
+			envpitch = 0;
+			x1 = 0;
+		}
+		if (envpos > x2) envpos = x2;
+		if ((x2 > x1) && (envpos > x1))
+		{
+			int envpitchdest = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
+			envpitch += ((envpos - x1) * (envpitchdest - envpitch)) / (x2 - x1);
+		}
+		envpitch = CLAMP(envpitch, -256, 256);
+
+		//if (pIns->PitchEnv.dwFlags & ENV_FILTER)
+		if (pChn->dwFlags & CHN_FILTERENV)
+		{
+			// Filter Envelope: controls cutoff frequency
+#ifndef NO_FILTER
+			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true, envpitch);
+#endif // NO_FILTER
+		} else
+		{
+			// Pitch Envelope
+			if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+			{
+				if(pChn->nFineTune != envpitch)
+				{
+					pChn->nFineTune = envpitch;
+					pChn->m_CalculateFreq = true;
+					//Preliminary tests indicated that this behavior
+					//is very close to original(with 12TET) when finestep count
+					//is 15.
+				}
+			}
+			else //Original behavior
+			{
+				int l = envpitch;
+				if (l < 0)
+				{
+					l = -l;
+					if (l > 255) l = 255;
+					period = _muldiv(period, LinearSlideUpTable[l], 0x10000);
+				} else
+				{
+					if (l > 255) l = 255;
+					period = _muldiv(period, LinearSlideDownTable[l], 0x10000);
+				}
+			} //End: Original behavior.
+		}
+	}
+}
+
+
+void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
+//----------------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	if (pChn->dwFlags & CHN_VOLENV)
+	{
+		// Increase position
+		pChn->VolEnv.nEnvPosition++;
+		// Volume Loop ?
+		if (pIns->VolEnv.dwFlags & ENV_LOOP)
+		{
+			UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
+			if (m_nType != MOD_TYPE_XM) volloopend++;
+			if (pChn->VolEnv.nEnvPosition == volloopend)
+			{
+				pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
+				if ((pIns->VolEnv.nLoopEnd == pIns->VolEnv.nLoopStart) && (!pIns->VolEnv.Values[pIns->VolEnv.nLoopStart])
+					&& ((!(m_nType & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
+				{
+					pChn->dwFlags |= CHN_NOTEFADE;
+					pChn->nFadeOutVol = 0;
+				}
+			}
+		}
+		// Volume Sustain ?
+		if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
+		{
+			if (pChn->VolEnv.nEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
+				pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
+		} else
+			// End of Envelope ?
+			if (pChn->VolEnv.nEnvPosition > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
+			{
+				if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
+				pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
+				if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes-1]) && ((pChn->nMasterChn > 0) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
+				{
+					pChn->dwFlags |= CHN_NOTEFADE;
+					pChn->nFadeOutVol = 0;
+					pChn->nRealVolume = 0;
+				}
+			}
+	}
+}
+
+
+void CSoundFile::IncrementPanningEnvelopePosition(MODCHANNEL *pChn)
+//-----------------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	if (pChn->dwFlags & CHN_PANENV)
+	{
+		pChn->PanEnv.nEnvPosition++;
+		if (pIns->PanEnv.dwFlags & ENV_LOOP)
+		{
+			UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
+			if (m_nType != MOD_TYPE_XM) panloopend++;
+			if (pChn->PanEnv.nEnvPosition == panloopend)
+				pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
+		}
+		// Panning Sustain ?
+		if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (pChn->PanEnv.nEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
+			&& (!(pChn->dwFlags & CHN_KEYOFF)))
+		{
+			// Panning sustained
+			pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
+		} else
+		{
+			if (pChn->PanEnv.nEnvPosition > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
+				pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
+		}
+	}
+}
+
+
+void CSoundFile::IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn)
+//---------------------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	if (pChn->dwFlags & CHN_PITCHENV)
+	{
+		// Increase position
+		pChn->PitchEnv.nEnvPosition++;
+		// Pitch Loop ?
+		if (pIns->PitchEnv.dwFlags & ENV_LOOP)
+		{
+			UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
+			//IT compatibility 24. Short envelope loops
+			if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
+			if (pChn->PitchEnv.nEnvPosition >= pitchloopend)
+				pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
+		}
+		// Pitch Sustain ?
+		if ((pIns->PitchEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
+		{
+			if (pChn->PitchEnv.nEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
+				pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
+		} else
+		{
+			if (pChn->PitchEnv.nEnvPosition > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
+				pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
+		}
+	}
+}
+
+
+void CSoundFile::ProcessInstrumentFade(MODCHANNEL *pChn, int &vol)
+//----------------------------------------------------------------
+{
+	// FadeOut volume
+	if (pChn->dwFlags & CHN_NOTEFADE)
+	{
+		const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+		UINT fadeout = pIns->nFadeOut;
+		if (fadeout)
+		{
+			pChn->nFadeOutVol -= fadeout << 1;
+			if (pChn->nFadeOutVol <= 0) pChn->nFadeOutVol = 0;
+			vol = (vol * pChn->nFadeOutVol) >> 16;
+		} else if (!pChn->nFadeOutVol)
+		{
+			vol = 0;
+		}
+	}
+}
+
+
+void CSoundFile::ProcessPitchPanSeparation(MODCHANNEL *pChn)
+//----------------------------------------------------------
+{
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+
+	if ((pIns->nPPS) && (pChn->nRealPan) && (pChn->nNote))
+	{
+		// PPS value is 1/512, i.e. PPS=1 will adjust by 8/512 = 1/64 for each 8 semitones
+		// with PPS = 32 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
+		// IT compatibility: IT has a wider pan range here
+		int pandelta = (int)pChn->nRealPan + (int)((int)(pChn->nNote - pIns->nPPC - 1) * (int)pIns->nPPS) / (int)(IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 8);
+		pChn->nRealPan = CLAMP(pandelta, 0, 256);
+	}
+}
+
+
+void CSoundFile::ProcessPanbrello(MODCHANNEL *pChn)
+//-------------------------------------------------
+{
+	if (pChn->dwFlags & CHN_PANBRELLO)
+	{
+		UINT panpos;
+		// IT compatibility: IT has its own, more precise tables
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			panpos = pChn->nPanbrelloPos & 0xFF;
+		else
+			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
+		LONG pdelta;
+		switch (pChn->nPanbrelloType & 0x03)
+		{
+		case 1:
+			// IT compatibility: IT has its own, more precise tables
+			pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[panpos] : ModRampDownTable[panpos];
+			break;
+		case 2:
+			// IT compatibility: IT has its own, more precise tables
+			pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[panpos] : ModSquareTable[panpos];
+			break;
+		case 3:
+			//IT compatibility 19. Use random values
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				pdelta = (rand() & 0x7f) - 0x40;
+			else
+				pdelta = ModRandomTable[panpos];
+			break;
+		default:
+			// IT compatibility: IT has its own, more precise tables
+			pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[panpos] : ModSinusTable[panpos];
+		}
+		pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
+		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
+		pdelta += pChn->nRealPan;
+
+		pChn->nRealPan = CLAMP(pdelta, 0, 256);
+		//if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan; // TODO
+	}
+}
+
+
+void CSoundFile::ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps)
+//----------------------------------------------------------------------------------------------------
+{
+	if (pChn->nCommand == CMD_ARPEGGIO)
+	{
+#ifndef NO_VST
+#if 0
+		// EXPERIMENTAL VSTi arpeggio. Far from perfect!
+		if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug && !(m_dwSongFlags & SONG_FIRSTTICK))
+		{
+			const MODINSTRUMENT *pIns = pChn->pModInstrument;
+			IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
+			if(pPlugin)
+			{
+				// Temporary logic: This ensures that the first and last tick are both playing the base note.
+				int nCount = (int)m_nTickCount - (int)(m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay - 1);
+				int nStep = 0, nLastStep = 0;
+				nCount = -nCount;
+				switch(nCount % 3)
+				{
+				case 0:
+					nStep = 0;
+					nLastStep = pChn->nArpeggio & 0x0F;
+					break;
+				case 1: 
+					nStep = pChn->nArpeggio >> 4;
+					nLastStep = 0;
+					break;
+				case 2:
+					nStep = pChn->nArpeggio & 0x0F;
+					nLastStep = pChn->nArpeggio >> 4;
+					break;
+				}
+				// First tick is always 0
+				if(m_nTickCount == 1)
+					nLastStep = 0;
+
+				pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pChn->nNote + nStep, pChn->nVolume, nChn);
+				pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pChn->nNote + nLastStep + NOTE_KEYOFF, 0, nChn);
+			}
+		}
+#endif // 0
+#endif // NO_VST
+
+		if((m_nType & MOD_TYPE_MPT) && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+		{
+			switch(m_nTickCount % 3)
+			{
+			case 0:
+				arpeggioSteps = 0;
+				break;
+			case 1: 
+				arpeggioSteps = pChn->nArpeggio >> 4; // >> 4 <-> division by 16. This gives the first number in the parameter.
+				break;
+			case 2:
+				arpeggioSteps = pChn->nArpeggio % 16; //Gives the latter number in the parameter.
+				break;
+			}
+			pChn->m_CalculateFreq = true;
+			pChn->m_ReCalculateFreqOnFirstTick = true;
+		}
+		else
+		{
+			//IT playback compatibility 01 & 02
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
+				{
+					switch(m_nTickCount % 3)
+					{
+					case 1:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
+					case 2:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
+					}
+				}
+			}
+			// FastTracker 2: Swedish tracker logic (TM) arpeggio
+			else if(IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				BYTE note = pChn->nNote;
+				int arpPos = 0;
+
+				if (!(m_dwSongFlags & SONG_FIRSTTICK))
+				{
+					arpPos = ((int)m_nMusicSpeed - (int)m_nTickCount) % 3;
+					if((m_nMusicSpeed > 18) && (m_nMusicSpeed - m_nTickCount > 16)) arpPos = 2; // swedish tracker logic, I love it
+					switch(arpPos)
+					{
+					case 1:	note += (pChn->nArpeggio >> 4); break;
+					case 2:	note += (pChn->nArpeggio & 0x0F); break;
+					}
+				}
+
+				if (note > 109 && arpPos != 0)
+					note = 109; // FT2's note limit
+
+				period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+
+			}
+			// Other trackers
+			else
+			{
+				switch(m_nTickCount % 3)
+				{
+				case 1:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC5Speed); break;
+				case 2:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC5Speed); break;
+				}
+			}
+		}
+	}
+}
+
+
+void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
+//-----------------------------------------------------------------------------------------------
+{
+	if (pChn->dwFlags & CHN_VIBRATO)
+	{
+		UINT vibpos = pChn->nVibratoPos;
+		LONG vdelta;
+		switch (pChn->nVibratoType & 0x03)
+		{
+		case 1:
+			// IT compatibility: IT has its own, more precise tables
+			vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[vibpos] : ModRampDownTable[vibpos];
+			break;
+		case 2:
+			// IT compatibility: IT has its own, more precise tables
+			vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[vibpos] : ModSquareTable[vibpos];
+			break;
+		case 3:
+			//IT compatibility 19. Use random values
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				vdelta = (rand() & 0x7F) - 0x40;
+			else
+				vdelta = ModRandomTable[vibpos];
+			break;
+		default:
+			// IT compatibility: IT has its own, more precise tables
+			vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[vibpos] : ModSinusTable[vibpos];
+		}
+
+		if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+		{
+			//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
+			//using figure from above tables and vibratodepth parameter
+			vibratoFactor += 0.05F * vdelta * pChn->m_VibratoDepth / 128.0F;
+			pChn->m_CalculateFreq = true;
+			pChn->m_ReCalculateFreqOnFirstTick = false;
+
+			if(m_nTickCount + 1 == m_nMusicSpeed)
+				pChn->m_ReCalculateFreqOnFirstTick = true;
+		}
+		else //Original behavior
+		{
+			UINT vdepth;
+			// IT compatibility: correct vibrato depth
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				// Yes, vibrato goes backwards with old effects enabled!
+				if(m_dwSongFlags & SONG_ITOLDEFFECTS)
+				{
+					vdepth = 5;
+					vdelta = -vdelta;
+				} else
+				{
+					vdepth = 6;
+				}
+			}
+			else
+			{
+				vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+			}
+			vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+			{
+				LONG l = vdelta;
+				if (l < 0)
+				{
+					l = -l;
+					vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+					if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+				} else
+				{
+					vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+					if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+				}
+			}
+			period += vdelta;
+		}
+		if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+		{
+			// IT compatibility: IT has its own, more precise tables
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				pChn->nVibratoPos = (vibpos + 4 * pChn->nVibratoSpeed) & 0xFF;
+			else
+				pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
+		}
+	}
+}
+
+
+void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	// Sample Auto-Vibrato
+	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
+	{
+		MODSAMPLE *pSmp = pChn->pModSample;
+		const bool alternativeTuning = pChn->pModInstrument && pChn->pModInstrument->pTuning;
+
+		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && !alternativeTuning)
+		{
+			// Schism's autovibrato code
+
+			/*
+			X86 Assembler from ITTECH.TXT:
+			1) Mov AX, [SomeVariableNameRelatingToVibrato]
+			2) Add AL, Rate
+			3) AdC AH, 0
+			4) AH contains the depth of the vibrato as a fine-linear slide.
+			5) Mov [SomeVariableNameRelatingToVibrato], AX  ; For the next cycle.
+			*/
+			const int vibpos = pChn->nAutoVibPos & 0xFF;
+			int adepth = pChn->nAutoVibDepth; // (1)
+			adepth += pSmp->nVibSweep & 0xFF; // (2 & 3)
+			adepth = min(adepth, (int)(pSmp->nVibDepth << 8));
+			pChn->nAutoVibDepth = adepth; // (5)
+			adepth >>= 8; // (4)
+
+			pChn->nAutoVibPos += pSmp->nVibRate;
+
+			int vdelta;
+			switch(pSmp->nVibType)
+			{
+			case VIB_RANDOM:
+				vdelta = (rand() & 0x7F) - 0x40;
+				break;
+			case VIB_RAMP_DOWN:
+				vdelta = ITRampDownTable[vibpos];
+				break;
+			case VIB_RAMP_UP:
+				vdelta = -ITRampDownTable[vibpos];
+				break;
+			case VIB_SQUARE:
+				vdelta = ITSquareTable[vibpos];
+				break;
+			case VIB_SINE:
+			default:
+				vdelta = ITSinusTable[vibpos];
+				break;
+			}
+
+			vdelta = (vdelta * adepth) >> 6;
+			int l = abs(vdelta);
+			if(vdelta < 0)
+			{
+				vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+				if (l & 0x03)
+				{
+					vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+				}
+			} else
+			{
+				vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+				if (l & 0x03)
+				{
+					vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+				}
+			}
+			period -= vdelta;
+
+		} else
+		{
+			// MPT's autovibrato code
+			if (pSmp->nVibSweep == 0)
+			{
+				pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
+			} else
+			{
+				// Calculate current autovibrato depth using vibsweep
+				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				{
+					// Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
+					// - so we divide sweep by 4 here.
+					pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
+				} else
+				{
+					if (!(pChn->dwFlags & CHN_KEYOFF))
+					{
+						pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
+					}
+				}
+				if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
+					pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
+			}
+			pChn->nAutoVibPos += pSmp->nVibRate;
+			int vdelta;
+			switch(pSmp->nVibType)
+			{
+			case VIB_RANDOM:
+				vdelta = ModRandomTable[pChn->nAutoVibPos & 0x3F];
+				pChn->nAutoVibPos++;
+				break;
+			case VIB_RAMP_DOWN:
+				vdelta = ((0x40 - (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
+				break;
+			case VIB_RAMP_UP:
+				vdelta = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7f) - 0x40;
+				break;
+			case VIB_SQUARE:
+				vdelta = (pChn->nAutoVibPos & 128) ? +64 : -64;
+				break;
+			case VIB_SINE:
+			default:
+				vdelta = ft2VibratoTable[pChn->nAutoVibPos & 0xFF];
+			}
+			int n;
+			n =	((vdelta * pChn->nAutoVibDepth) >> 8);
+
+			if(alternativeTuning)
+			{
+				//Vib sweep is not taken into account here.
+				vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0F; //4096 == 64^2
+				//See vibrato for explanation.
+				pChn->m_CalculateFreq = true;
+				/*
+				Finestep vibrato:
+				const float autoVibDepth = pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
+				vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pModInstrument->pTuning->GetFineStepCount() *  autoVibDepth);
+				pChn->m_CalculateFreq = true;
+				*/
+			}
+			else //Original behavior
+			{
+				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				{
+					int df1, df2;
+					if (n < 0)
+					{
+						n = -n;
+						UINT n1 = n >> 8;
+						df1 = LinearSlideUpTable[n1];
+						df2 = LinearSlideUpTable[n1+1];
+					} else
+					{
+						UINT n1 = n >> 8;
+						df1 = LinearSlideDownTable[n1];
+						df2 = LinearSlideDownTable[n1+1];
+					}
+					n >>= 2;
+					period = _muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
+					nPeriodFrac = period & 0xFF;
+					period >>= 8;
+				} else
+				{
+					period += (n >> 6);
+				}
+			} //Original MPT behavior
+		}
+	}
 }
 
 
@@ -958,12 +1813,14 @@ BOOL CSoundFile::ReadNote()
 		if (m_pConfig->getUseGlobalPreAmp())
 		{
 			int realmastervol = m_nMasterVolume;
-			if (realmastervol > 0x80) {
+			if (realmastervol > 0x80)
+			{
 				//Attenuate global pre-amp depending on num channels
 				realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
 			}
 			mastervol = (realmastervol * (m_nSamplePreAmp)) >> 6;
-		} else {
+		} else
+		{
 			//Preferred option: don't use global pre-amp at all.
 			mastervol = m_nSamplePreAmp;
 		}
@@ -973,11 +1830,13 @@ BOOL CSoundFile::ReadNote()
 			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
 		}
 
-		if (m_pConfig->getUseGlobalPreAmp()) {
+		if (m_pConfig->getUseGlobalPreAmp())
+		{
 			UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
 			if(attenuation < 1) attenuation = 1;
 			nMasterVol = (mastervol << 7) / attenuation;
-		} else {
+		} else
+		{
 			nMasterVol = mastervol;
 		}
 	}
@@ -1023,19 +1882,6 @@ BOOL CSoundFile::ReadNote()
 		pChn->nInc = 0;
 		pChn->nRealVolume = 0;
 
-		if(GetModFlag(MSF_OLDVOLSWING))
-		{
-			pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
-		}
-		else
-		{
-			pChn->nPan += pChn->nPanSwing;
-			pChn->nPan = CLAMP(pChn->nPan, 0, 256);
-			pChn->nPanSwing = 0;
-			pChn->nRealPan = pChn->nPan;
-		}
-
-		pChn->nRealPan = CLAMP(pChn->nRealPan, 0, 256);
 		pChn->nRampLength = 0;
 
 		//Aux variables
@@ -1045,106 +1891,15 @@ BOOL CSoundFile::ReadNote()
 		MODINSTRUMENT *pIns = pChn->pModInstrument;
 
 		// Calc Frequency
-		if ((pChn->nPeriod)	&& (pChn->nLength))
+		int period;
+		if (pChn->nPeriod && pChn->nLength)
 		{
 			int vol = pChn->nVolume;
 
-			if(pChn->nVolSwing)
-			{
-				if(GetModFlag(MSF_OLDVOLSWING))
-				{
-					vol += pChn->nVolSwing;
-				}
-				else
-				{
-					pChn->nVolume += pChn->nVolSwing;
-					pChn->nVolume = CLAMP(pChn->nVolume, 0, 256);
-					vol = pChn->nVolume;
-					pChn->nVolSwing = 0;
-				}
-			}
-
-			vol = CLAMP(vol, 0, 256);
-
-			// Tremolo
-			if (pChn->dwFlags & CHN_TREMOLO)
-			{
-				UINT trempos = pChn->nTremoloPos;
-				// IT compatibility: Why would you not want to execute tremolo at volume 0?
-				if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
-				{
-					// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
-					const int tremattn = (m_nType & MOD_TYPE_XM || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
-					switch (pChn->nTremoloType & 0x03)
-					{
-					case 1:
-						// IT compatibility: IT has its own, more precise tables
-						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[trempos] : ModRampDownTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
-						break;
-					case 2:
-						// IT compatibility: IT has its own, more precise tables
-						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[trempos] : ModSquareTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
-						break;
-					case 3:
-						//IT compatibility 19. Use random values
-						if(IsCompatibleMode(TRK_IMPULSETRACKER))
-							vol += (((rand() & 0x7F) - 0x40) * (int)pChn->nTremoloDepth) >> tremattn;
-						else
-							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
-						break;
-					default:
-						// IT compatibility: IT has its own, more precise tables
-						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[trempos] : ModSinusTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
-					}
-				}
-				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
-				{
-					// IT compatibility: IT has its own, more precise tables
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						pChn->nTremoloPos = (pChn->nTremoloPos + 4 * pChn->nTremoloSpeed) & 0xFF;
-					else
-						pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
-				}
-			}
-
-			// Tremor
-			if(pChn->nCommand == CMD_TREMOR)
-			{
-				// IT compatibility 12. / 13.: Tremor
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
-				{
-					if ((pChn->nTremorCount & 128) && pChn->nLength)
-					{
-						if (pChn->nTremorCount == 128)
-							pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
-						else if (pChn->nTremorCount == 192)
-							pChn->nTremorCount = (pChn->nTremorParam & 0xf) | 128;
-						else
-							pChn->nTremorCount--;
-					}
-
-					if ((pChn->nTremorCount & 192) == 128)
-						vol = 0;
-				}
-				else
-				{
-					UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
-					UINT ontime = pChn->nTremorParam >> 4;
-					if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS))
-					{
-						n += 2;
-						ontime++;
-					}
-					UINT tremcount = (UINT)pChn->nTremorCount;
-					if (tremcount >= n) tremcount = 0;
-					if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
-					{
-						if (tremcount >= ontime) vol = 0;
-						pChn->nTremorCount = (BYTE)(tremcount + 1);
-					}
-				}
-				pChn->dwFlags |= CHN_FASTVOLRAMP;
-			}
+			ProcessVolumeSwing(pChn, vol);
+			ProcessPanningSwing(pChn);
+			ProcessTremolo(pChn, vol);
+			ProcessTremor(pChn, vol);
 
 			// Clip volume and multiply
 			vol = CLAMP(vol, 0, 256) << 6;
@@ -1152,106 +1907,10 @@ BOOL CSoundFile::ReadNote()
 			// Process Envelopes
 			if (pIns)
 			{
-				// Volume Envelope
-				// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
-				// Problem: This pauses on the wrong tick at the moment...
-				if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
-				{
-					int envvol = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
-					
-					// if we are in the release portion of the envelope,
-					// rescale envelope factor so that it is proportional to the release point
-					// and release envelope beginning.
-					if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
-						&& pChn->VolEnv.nEnvPosition>=pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
-						&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
-					{
-						int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
-						int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] << 2;
-
-						//If we have just hit the release node, force the current env value
-						//to be that of the release node. This works around the case where 
-						// we have another node at the same position as the release node.
-						if (pChn->VolEnv.nEnvPosition == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
-							envvol = envValueAtReleaseNode;
-
-						int relativeVolumeChange = (envvol - envValueAtReleaseNode) * 2;
-						envvol = envValueAtReleaseJump + relativeVolumeChange;
-					}
-					vol = (vol * CLAMP(envvol, 0, 512)) >> 8;
-				}
-				// Panning Envelope
-				// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
-				// Problem: This pauses on the wrong tick at the moment...
-				if (((pChn->dwFlags & CHN_PANENV) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
-				{
-					int envpos = pChn->PanEnv.nEnvPosition;
-					UINT pt = pIns->PanEnv.nNodes - 1;
-					for (UINT i=0; i<(UINT)(pIns->PanEnv.nNodes-1); i++)
-					{
-						if (envpos <= pIns->PanEnv.Ticks[i])
-						{
-							pt = i;
-							break;
-						}
-					}
-					int x2 = pIns->PanEnv.Ticks[pt], y2 = pIns->PanEnv.Values[pt];
-					int x1, envpan;
-					if (envpos >= x2)
-					{
-						envpan = y2;
-						x1 = x2;
-					} else
-					if (pt)
-					{
-						envpan = pIns->PanEnv.Values[pt-1];
-						x1 = pIns->PanEnv.Ticks[pt-1];
-					} else
-					{
-						envpan = 128;
-						x1 = 0;
-					}
-					if ((x2 > x1) && (envpos > x1))
-					{
-						envpan += ((envpos - x1) * (y2 - envpan)) / (x2 - x1);
-					}
-					
-					envpan = CLAMP(envpan, 0, 64);
-					int pan = pChn->nPan;
-					if (pan >= 128)
-					{
-						pan += ((envpan - 32) * (256 - pan)) / 32;
-					} else
-					{
-						pan += ((envpan - 32) * (pan)) / 32;
-					}
-
-					pChn->nRealPan = CLAMP(pan, 0, 256);
-				}
-				// FadeOut volume
-				if (pChn->dwFlags & CHN_NOTEFADE)
-				{
-					UINT fadeout = pIns->nFadeOut;
-					if (fadeout)
-					{
-						pChn->nFadeOutVol -= fadeout << 1;
-						if (pChn->nFadeOutVol <= 0) pChn->nFadeOutVol = 0;
-						vol = (vol * pChn->nFadeOutVol) >> 16;
-					} else
-					if (!pChn->nFadeOutVol)
-					{
-						vol = 0;
-					}
-				}
-				// Pitch/Pan separation
-				if ((pIns->nPPS) && (pChn->nRealPan) && (pChn->nNote))
-				{
-					// PPS value is 1/512, i.e. PPS=1 will adjust by 8/512 = 1/64 for each 8 semitones
-					// with PPS = 32 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
-					// IT compatibility: IT has a wider pan range here
-					int pandelta = (int)pChn->nRealPan + (int)((int)(pChn->nNote - pIns->nPPC - 1) * (int)pIns->nPPS) / (int)(IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 8);
-					pChn->nRealPan = CLAMP(pandelta, 0, 256);
-				}
+				ProcessVolumeEnvelope(pChn, vol);
+				ProcessInstrumentFade(pChn, vol);
+				ProcessPanningEnvelope(pChn);
+				ProcessPitchPanSeparation(pChn);
 			} else
 			{
 				// No Envelope: key off => note cut
@@ -1283,442 +1942,28 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
-			int period = pChn->nPeriod;
+			period = pChn->nPeriod;
 			if ((pChn->dwFlags & (CHN_GLISSANDO|CHN_PORTAMENTO)) ==	(CHN_GLISSANDO|CHN_PORTAMENTO))
 			{
 				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
 			}
 
-			// Arpeggio ?
-			if (pChn->nCommand == CMD_ARPEGGIO)
-			{
-				if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
-				{
-					switch(m_nTickCount % 3)
-					{
-						case 0:
-							arpeggioSteps = 0;
-							break;
-						case 1: 
-							arpeggioSteps = pChn->nArpeggio >> 4; // >> 4 <-> division by 16. This gives the first number in the parameter.
-							break;
-						case 2:
-							arpeggioSteps = pChn->nArpeggio % 16; //Gives the latter number in the parameter.
-							break;
-					}
-					pChn->m_CalculateFreq = true;
-					pChn->m_ReCalculateFreqOnFirstTick = true;
-				}
-				else
-				{
-					//IT playback compatibility 01 & 02
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-					{
-						if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
-						{
-							switch(m_nTickCount % 3)
-							{
-								case 1:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
-								case 2:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
-							}
-						}
-					}
-					// FastTracker 2: Swedish tracker logic (TM) arpeggio
-					else if(IsCompatibleMode(TRK_FASTTRACKER2))
-					{
-						BYTE note = pChn->nNote;
-						int arpPos = 0;
-
-						if (!(m_dwSongFlags & SONG_FIRSTTICK))
-						{
-							arpPos = ((int)m_nMusicSpeed - (int)m_nTickCount) % 3;
-							if((m_nMusicSpeed > 18) && (m_nMusicSpeed - m_nTickCount > 16)) arpPos = 2; // swedish tracker logic, I love it
-							switch(arpPos)
-							{
-								case 1:	note += (pChn->nArpeggio >> 4); break;
-								case 2:	note += (pChn->nArpeggio & 0x0F); break;
-							}
-						}
-
-						if (note > 109 && arpPos != 0)
-							note = 109; // FT2's note limit
-
-						period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
-
-					}
-					// Other trackers
-					else
-					{
-						switch(m_nTickCount % 3)
-						{
-							case 1:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC5Speed); break;
-							case 2:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC5Speed); break;
-						}
-					}
-				}
-			}
+			ProcessArpeggio(pChn, period, arpeggioSteps);
 
 			// Preserve Amiga freq limits
 			if (m_dwSongFlags & (SONG_AMIGALIMITS|SONG_PT1XMODE))
+			{
 				period = CLAMP(period, 113 * 4, 856 * 4);
-
-			// Pitch/Filter Envelope
-			// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
-			// Problem: This pauses on the wrong tick at the moment...
-			if ((pIns) && ((pChn->dwFlags & CHN_PITCHENV) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
-			{
-				int envpos = pChn->PitchEnv.nEnvPosition;
-				UINT pt = pIns->PitchEnv.nNodes - 1;
-				for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
-				{
-					if (envpos <= pIns->PitchEnv.Ticks[i])
-					{
-						pt = i;
-						break;
-					}
-				}
-				int x2 = pIns->PitchEnv.Ticks[pt];
-				int x1, envpitch;
-				if (envpos >= x2)
-				{
-					envpitch = (((int)pIns->PitchEnv.Values[pt]) - ENVELOPE_MID) * 8;
-					x1 = x2;
-				} else
-				if (pt)
-				{
-					envpitch = (((int)pIns->PitchEnv.Values[pt-1]) - ENVELOPE_MID) * 8;
-					x1 = pIns->PitchEnv.Ticks[pt-1];
-				} else
-				{
-					envpitch = 0;
-					x1 = 0;
-				}
-				if (envpos > x2) envpos = x2;
-				if ((x2 > x1) && (envpos > x1))
-				{
-					int envpitchdest = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
-					envpitch += ((envpos - x1) * (envpitchdest - envpitch)) / (x2 - x1);
-				}
-				envpitch = CLAMP(envpitch, -256, 256);
-				// Filter Envelope: controls cutoff frequency
-				//if (pIns->PitchEnv.dwFlags & ENV_FILTER)
-				if (pChn->dwFlags & CHN_FILTERENV)
-				{
-#ifndef NO_FILTER
-					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true, envpitch);
-#endif // NO_FILTER
-				} else
-				// Pitch Envelope
-				{
-					if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
-					{
-						if(pChn->nFineTune != envpitch)
-						{
-							pChn->nFineTune = envpitch;
-                            pChn->m_CalculateFreq = true;
-							//Preliminary tests indicated that this behavior
-							//is very close to original(with 12TET) when finestep count
-							//is 15.
-						}
-					}
-					else //Original behavior
-					{
-						int l = envpitch;
-						if (l < 0)
-						{
-							l = -l;
-							if (l > 255) l = 255;
-							period = _muldiv(period, LinearSlideUpTable[l], 0x10000);
-						} else
-						{
-							if (l > 255) l = 255;
-							period = _muldiv(period, LinearSlideDownTable[l], 0x10000);
-						}
-					} //End: Original behavior.
-				}
 			}
-			
-			// Vibrato
-			if (pChn->dwFlags & CHN_VIBRATO)
-			{
-				UINT vibpos = pChn->nVibratoPos;
-				LONG vdelta;
-				switch (pChn->nVibratoType & 0x03)
-				{
-				case 1:
-					// IT compatibility: IT has its own, more precise tables
-					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[vibpos] : ModRampDownTable[vibpos];
-					break;
-				case 2:
-					// IT compatibility: IT has its own, more precise tables
-					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[vibpos] : ModSquareTable[vibpos];
-					break;
-				case 3:
-					//IT compatibility 19. Use random values
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						vdelta = (rand() & 0x7F) - 0x40;
-					else
-						vdelta = ModRandomTable[vibpos];
-					break;
-				default:
-					// IT compatibility: IT has its own, more precise tables
-					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[vibpos] : ModSinusTable[vibpos];
-				}
 
-				if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
-				{
-					//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
-					//using figure from above tables and vibratodepth parameter
-					vibratoFactor += 0.05F * vdelta * pChn->m_VibratoDepth / 128.0F;
-					pChn->m_CalculateFreq = true;
-					pChn->m_ReCalculateFreqOnFirstTick = false;
+			ProcessPanbrello(pChn);
 
-					if(m_nTickCount + 1 == m_nMusicSpeed)
-						pChn->m_ReCalculateFreqOnFirstTick = true;
-				}
-				else //Original behavior
-				{
-					UINT vdepth;
-					// IT compatibility: correct vibrato depth
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-					{
-						// Yes, vibrato goes backwards with old effects enabled!
-						if(m_dwSongFlags & SONG_ITOLDEFFECTS)
-						{
-							vdepth = 5;
-							vdelta = -vdelta;
-						} else
-						{
-							vdepth = 6;
-						}
-					}
-					else
-					{
-						vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
-					}
-					vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
-					if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-					{
-						LONG l = vdelta;
-						if (l < 0)
-						{
-							l = -l;
-							vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
-							if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
-						} else
-						{
-							vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
-							if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
-						}
-					}
-					period += vdelta;
-				}
-				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
-				{
-					// IT compatibility: IT has its own, more precise tables
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						pChn->nVibratoPos = (vibpos + 4 * pChn->nVibratoSpeed) & 0xFF;
-					else
-						pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
-				}
-			}
-			// Panbrello
-			if (pChn->dwFlags & CHN_PANBRELLO)
-			{
-				UINT panpos;
-				// IT compatibility: IT has its own, more precise tables
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
-					panpos = pChn->nPanbrelloPos & 0xFF;
-				else
-					panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
-				LONG pdelta;
-				switch (pChn->nPanbrelloType & 0x03)
-				{
-				case 1:
-					// IT compatibility: IT has its own, more precise tables
-					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[panpos] : ModRampDownTable[panpos];
-					break;
-				case 2:
-					// IT compatibility: IT has its own, more precise tables
-					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[panpos] : ModSquareTable[panpos];
-					break;
-				case 3:
-					//IT compatibility 19. Use random values
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						pdelta = (rand() & 0x7f) - 0x40;
-					else
-						pdelta = ModRandomTable[panpos];
-					break;
-				default:
-					// IT compatibility: IT has its own, more precise tables
-					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[panpos] : ModSinusTable[panpos];
-				}
-				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
-				pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
-				pdelta += pChn->nRealPan;
-				
-				pChn->nRealPan = CLAMP(pdelta, 0, 256);
-				//if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan; // TODO
-			}
 			int nPeriodFrac = 0;
-			// Sample Auto-Vibrato
-			if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
-			{
-				MODSAMPLE *pSmp = pChn->pModSample;
-				const bool alternativeTuning = pChn->pModInstrument && pChn->pModInstrument->pTuning;
 
-				// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
-				if(IsCompatibleMode(TRK_IMPULSETRACKER) && !alternativeTuning)
-				{
-					// Schism's autovibrato code
+			ProcessPitchFilterEnvelope(pChn, period);
+			ProcessVibrato(pChn, period, vibratoFactor);
+			ProcessSampleAutoVibrato(pChn, period, vibratoFactor, nPeriodFrac);
 
-					/*
-					X86 Assembler from ITTECH.TXT:
-					1) Mov AX, [SomeVariableNameRelatingToVibrato]
-					2) Add AL, Rate
-					3) AdC AH, 0
-					4) AH contains the depth of the vibrato as a fine-linear slide.
-					5) Mov [SomeVariableNameRelatingToVibrato], AX  ; For the next cycle.
-					*/
-					const int vibpos = pChn->nAutoVibPos & 0xFF;
-					int adepth = pChn->nAutoVibDepth; // (1)
-					adepth += pSmp->nVibSweep & 0xFF; // (2 & 3)
-					adepth = min(adepth, (int)(pSmp->nVibDepth << 8));
-					pChn->nAutoVibDepth = adepth; // (5)
-					adepth >>= 8; // (4)
-
-					pChn->nAutoVibPos += pSmp->nVibRate;
-
-					int vdelta;
-					switch(pSmp->nVibType)
-					{
-					case VIB_RANDOM:
-						vdelta = (rand() & 0x7F) - 0x40;
-						break;
-					case VIB_RAMP_DOWN:
-						vdelta = ITRampDownTable[vibpos];
-						break;
-					case VIB_RAMP_UP:
-						vdelta = -ITRampDownTable[vibpos];
-						break;
-					case VIB_SQUARE:
-						vdelta = ITSquareTable[vibpos];
-						break;
-					case VIB_SINE:
-					default:
-						vdelta = ITSinusTable[vibpos];
-						break;
-					}
-
-					vdelta = (vdelta * adepth) >> 6;
-					int l = abs(vdelta);
-					if(vdelta < 0)
-					{
-						vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
-						if (l & 0x03)
-						{
-							vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
-						}
-					} else
-					{
-						vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
-						if (l & 0x03)
-						{
-							vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
-						}
-					}
-					period -= vdelta;
-					
-				} else
-				{
-					// MPT's autovibrato code
-					if (pSmp->nVibSweep == 0)
-					{
-						pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
-					} else
-					{
-						// Calculate current autovibrato depth using vibsweep
-						if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-						{
-							// Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
-							// - so we divide sweep by 4 here.
-							pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
-						} else
-						{
-							if (!(pChn->dwFlags & CHN_KEYOFF))
-							{
-								pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
-							}
-						}
-						if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
-							pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
-					}
-					pChn->nAutoVibPos += pSmp->nVibRate;
-					int vdelta;
-					switch(pSmp->nVibType)
-					{
-					case VIB_RANDOM:
-						vdelta = ModRandomTable[pChn->nAutoVibPos & 0x3F];
-						pChn->nAutoVibPos++;
-						break;
-					case VIB_RAMP_DOWN:
-						vdelta = ((0x40 - (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
-						break;
-					case VIB_RAMP_UP:
-						vdelta = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7f) - 0x40;
-						break;
-					case VIB_SQUARE:
-						vdelta = (pChn->nAutoVibPos & 128) ? +64 : -64;
-						break;
-					case VIB_SINE:
-					default:
-						vdelta = ft2VibratoTable[pChn->nAutoVibPos & 0xFF];
-					}
-					int n;
-					n =	((vdelta * pChn->nAutoVibDepth) >> 8);
-
-					if(alternativeTuning)
-					{
-						//Vib sweep is not taken into account here.
-						vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0F; //4096 == 64^2
-						//See vibrato for explanation.
-						pChn->m_CalculateFreq = true;
-						/*
-						Finestep vibrato:
-						const float autoVibDepth = pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
-						vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pModInstrument->pTuning->GetFineStepCount() *  autoVibDepth);
-						pChn->m_CalculateFreq = true;
-						*/
-					}
-					else //Original behavior
-					{
-						if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-						{
-							int df1, df2;
-							if (n < 0)
-							{
-								n = -n;
-								UINT n1 = n >> 8;
-								df1 = LinearSlideUpTable[n1];
-								df2 = LinearSlideUpTable[n1+1];
-							} else
-							{
-								UINT n1 = n >> 8;
-								df1 = LinearSlideDownTable[n1];
-								df2 = LinearSlideDownTable[n1+1];
-							}
-							n >>= 2;
-							period = _muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
-							nPeriodFrac = period & 0xFF;
-							period >>= 8;
-						} else
-						{
-							period += (n >> 6);
-						}
-					} //Original MPT behavior
-				}
-
-			} //End: AutoVibrato
 			// Final Period
 			if (period <= m_nMinPeriod)
 			{
@@ -1775,99 +2020,15 @@ BOOL CSoundFile::ReadNote()
 			if (ninc > 0xFF0000) ninc = 0xFF0000;
 			pChn->nInc = (ninc+1) & ~3;
 		}
-		
-		// Increment envelope position
+
+		// Increment envelope positions
 		if (pIns)
 		{
-			// Volume Envelope
-			if (pChn->dwFlags & CHN_VOLENV)
-			{
-				// Increase position
-				pChn->VolEnv.nEnvPosition++;
-				// Volume Loop ?
-				if (pIns->VolEnv.dwFlags & ENV_LOOP)
-				{
-					UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
-					if (m_nType != MOD_TYPE_XM) volloopend++;
-					if (pChn->VolEnv.nEnvPosition == volloopend)
-					{
-						pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
-						if ((pIns->VolEnv.nLoopEnd == pIns->VolEnv.nLoopStart) && (!pIns->VolEnv.Values[pIns->VolEnv.nLoopStart])
-						 && ((!(m_nType & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
-						{
-							pChn->dwFlags |= CHN_NOTEFADE;
-							pChn->nFadeOutVol = 0;
-						}
-					}
-				}
-				// Volume Sustain ?
-				if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
-				{
-					if (pChn->VolEnv.nEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
-						pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
-				} else
-				// End of Envelope ?
-				if (pChn->VolEnv.nEnvPosition > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
-				{
-					if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
-					pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
-					if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes-1]) && ((nChn >= m_nChannels) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
-					{
-						pChn->dwFlags |= CHN_NOTEFADE;
-						pChn->nFadeOutVol = 0;
-						pChn->nRealVolume = 0;
-					}
-				}
-			}
-			// Panning Envelope
-			if (pChn->dwFlags & CHN_PANENV)
-			{
-				pChn->PanEnv.nEnvPosition++;
-				if (pIns->PanEnv.dwFlags & ENV_LOOP)
-				{
-					UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
-					if (m_nType != MOD_TYPE_XM) panloopend++;
-					if (pChn->PanEnv.nEnvPosition == panloopend)
-						pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
-				}
-				// Panning Sustain ?
-				if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (pChn->PanEnv.nEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
-				 && (!(pChn->dwFlags & CHN_KEYOFF)))
-				{
-					// Panning sustained
-					pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
-				} else
-				{
-					if (pChn->PanEnv.nEnvPosition > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
-						pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
-				}
-			}
-			// Pitch Envelope
-			if (pChn->dwFlags & CHN_PITCHENV)
-			{
-				// Increase position
-				pChn->PitchEnv.nEnvPosition++;
-				// Pitch Loop ?
-				if (pIns->PitchEnv.dwFlags & ENV_LOOP)
-				{
-					UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
-					//IT compatibility 24. Short envelope loops
-					if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
-					if (pChn->PitchEnv.nEnvPosition >= pitchloopend)
-						pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
-				}
-				// Pitch Sustain ?
-				if ((pIns->PitchEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
-				{
-					if (pChn->PitchEnv.nEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
-						pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
-				} else
-				{
-					if (pChn->PitchEnv.nEnvPosition > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
-						pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
-				}
-			}
+			IncrementVolumeEnvelopePosition(pChn);
+			IncrementPanningEnvelopePosition(pChn);
+			IncrementPitchFilterEnvelopePosition(pChn);
 		}
+
 
 #ifdef MODPLUG_PLAYER
 		// Limit CPU -> > 80% -> don't ramp
@@ -2238,8 +2399,8 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	}
 }
 
-int CSoundFile::GetVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns) const
-//---------------------------------------------------------------------------------
+int CSoundFile::GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const
+//---------------------------------------------------------------------------------------
 {
 	UINT pt = pIns->VolEnv.nNodes - 1;
 
@@ -2289,38 +2450,45 @@ int CSoundFile::GetVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns) co
 VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 //---------------------------------------------------------------------------
 {
-		long delta=0;
-		long step=0;
+	long delta=0;
+	long step=0;
 
-		if (m_nGlobalVolumeDestination != m_nGlobalVolume) { //user has provided new global volume
-			m_nGlobalVolumeDestination = m_nGlobalVolume;
-			m_nSamplesToGlobalVolRampDest = gnVolumeRampSamples;
-		} 
+	if (m_nGlobalVolumeDestination != m_nGlobalVolume)
+	{
+		//user has provided new global volume
+		m_nGlobalVolumeDestination = m_nGlobalVolume;
+		m_nSamplesToGlobalVolRampDest = gnVolumeRampSamples;
+	} 
 
-		if (m_nSamplesToGlobalVolRampDest>0) {	// still some ramping left to do.
-			long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination)<<VOLUMERAMPPRECISION;
-			
-			delta = highResGlobalVolumeDestination-m_lHighResRampingGlobalVolume;
+	if (m_nSamplesToGlobalVolRampDest>0)
+	{
+		// still some ramping left to do.
+		long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination)<<VOLUMERAMPPRECISION;
+
+		delta = highResGlobalVolumeDestination-m_lHighResRampingGlobalVolume;
+		step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
+
+		UINT maxStep = max(50, (10000/gnVolumeRampSamples+1));	// define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
+		while (static_cast<UINT>(abs(step)) > maxStep)			// if step is too big (might cause click), extend ramp length.
+		{
+			m_nSamplesToGlobalVolRampDest += gnVolumeRampSamples;
 			step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
-			
-			UINT maxStep = max(50, (10000/gnVolumeRampSamples+1)); //define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
-			while (static_cast<UINT>(abs(step)) > maxStep) //if step is too big (might cause click), extend ramp length.
-			{					 
-				m_nSamplesToGlobalVolRampDest += gnVolumeRampSamples;
-				step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
-			}
+		}
+	}
+
+	for (int pos=0; pos<lTotalSampleCount; pos++) {
+
+		if (m_nSamplesToGlobalVolRampDest > 0)
+		{
+			//ramping required
+			m_lHighResRampingGlobalVolume += step;
+			SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME<<VOLUMERAMPPRECISION);
+			m_nSamplesToGlobalVolRampDest--;
+		} else
+		{
+			SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
 		}
 
-		for (int pos=0; pos<lTotalSampleCount; pos++) {
-
-			if (m_nSamplesToGlobalVolRampDest>0) { //ramping required
-				m_lHighResRampingGlobalVolume += step;
-				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME<<VOLUMERAMPPRECISION);
-				m_nSamplesToGlobalVolRampDest--;
-			} else {
-				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
-				m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
-			}
-
-		}
+	}
 }
