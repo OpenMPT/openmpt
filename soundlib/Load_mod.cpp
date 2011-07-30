@@ -40,7 +40,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 0x0C:	command = CMD_VOLUME; break;
 	case 0x0D:	command = CMD_PATTERNBREAK; param = ((param >> 4) * 10) + (param & 0x0F); break;
 	case 0x0E:	command = CMD_MODCMDEX; break;
-	case 0x0F:	command = (param <= ((m_nType & (MOD_TYPE_MOD)) ? 0x20 : 0x1F)) ? CMD_SPEED : CMD_TEMPO;
+	case 0x0F:	command = (param <= ((m_nType & (MOD_TYPE_MOD)) ? 0x20u : 0x1Fu)) ? CMD_SPEED : CMD_TEMPO;
 				if ((param == 0xFF) && (m_nSamples == 15) && (m_nType & MOD_TYPE_MOD)) command = 0; break; //<rewbs> what the hell is this?! :) //<jojo> it's the "stop tune" command! :-P
 	// Extension for XM extended effects
 	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;		//16
@@ -123,8 +123,8 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 	case CMD_VOLUME:			command = 0x0C; break;
 	case CMD_PATTERNBREAK:		command = 0x0D; param = ((param / 10) << 4) | (param % 10); break;
 	case CMD_MODCMDEX:			command = 0x0E; break;
-	case CMD_SPEED:				command = 0x0F; param = min(param, (bXM) ? 0x1F : 0x20); break;
-	case CMD_TEMPO:				command = 0x0F; param = max(param, (bXM) ? 0x20 : 0x21); break;
+	case CMD_SPEED:				command = 0x0F; param = min(param, (bXM) ? 0x1Fu : 0x20u); break;
+	case CMD_TEMPO:				command = 0x0F; param = max(param, (bXM) ? 0x20u : 0x21u); break;
 	case CMD_GLOBALVOLUME:		command = 'G' - 55; break;
 	case CMD_GLOBALVOLSLIDE:	command = 'H' - 55; break;
 	case CMD_KEYOFF:			command = 'K' - 55; break;
@@ -395,7 +395,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	norders--;
 	m_nRestartPos = pMagic->nRestartPos;
 	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;
-	if (m_nRestartPos + 1 >= (UINT)norders) m_nRestartPos = 0;
+	if (m_nRestartPos + 1u >= norders) m_nRestartPos = 0;
 	if (!nbp) return false;
 	DWORD dwWowTest = dwTotalSampleLen+dwMemPos;
 	if ((IsMagic(pMagic->Magic, "M.K.")) && (dwWowTest + nbp*8*256 == dwMemLength)) m_nChannels = 8;
@@ -706,7 +706,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
 		if(bCompatibilityExport == true) // first two bytes have to be 0 due to PT's one-shot loop ("no loop")
 		{
-			int iOverwriteLen = 2 * pSmp->GetBytesPerSample();
+			size_t iOverwriteLen = 2 * pSmp->GetBytesPerSample();
 			memset(pSmp->pSample, 0, min(iOverwriteLen, pSmp->GetSampleSizeInBytes()));
 		}
 		UINT flags = RS_PCM8S;

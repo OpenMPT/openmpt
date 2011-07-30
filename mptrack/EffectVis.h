@@ -62,7 +62,7 @@ public:
 	UINT m_startRow;
     UINT m_endRow;
 	UINT m_nRows;
-	UINT m_nChan;
+	CHANNELINDEX m_nChan;
 	UINT m_nPattern;
 	long m_nFillEffect, m_nAction;
 

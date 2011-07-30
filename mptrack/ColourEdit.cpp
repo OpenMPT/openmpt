@@ -25,6 +25,7 @@ END_MESSAGE_MAP()
 
 HBRUSH CColourEdit::CtlColor(CDC* pDC, UINT nCtlColor) 
 {
+	UNREFERENCED_PARAMETER(nCtlColor);
 	pDC->SetTextColor(m_crText);		//set text color
 	pDC->SetBkColor(m_crBackGnd);		//set the text's background color
 	return m_brBackGnd;	//return the brush used for background - this sets control background

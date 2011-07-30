@@ -85,9 +85,9 @@ private:
 	float m_VSTiAttenuation;	
 	float m_VSTiVolume;			
 
-	float m_normalSamplePreAmp;
-	float m_normalVSTiVol;
-	float m_normalGlobalVol;
+	double m_normalSamplePreAmp;
+	double m_normalVSTiVol;
+	double m_normalGlobalVol;
 
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;

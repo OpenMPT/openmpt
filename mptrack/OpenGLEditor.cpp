@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#if 0
 #include "mptrack.h"
 #include "mainfrm.h"
 #include "childfrm.h"
@@ -83,3 +84,5 @@ void COpenGLEditor::OnPaint()
 		CDialog::OnPaint();
 	}
 }
+
+#endif // 0

@@ -271,7 +271,7 @@ static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
 {
 	const BYTE bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
 
-	UINT command = p->command;
+	MODCOMMAND::COMMAND command = p->command;
 	UINT param = p->param;
 	switch(command)
 	{
@@ -467,10 +467,11 @@ static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
 		// 0x2E ?
 		Log("Unknown command: cmd=0x%02X param=0x%02X\n", command, param);
 #endif
-		command = param = 0;
+		command = 0;
+		param = 0;
 	}
 	p->command = command;
-	p->param = param;
+	p->param = static_cast<MODCOMMAND::PARAM>(param);
 }
 
 
@@ -636,13 +637,13 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		playtransp = pmsh->playtransp;
 	} else
 	{
-		UINT nOrders, nSections;
+		UINT nSections;
+		ORDERINDEX nOrders = 0;
 		WORD nTrks = BigEndianW(pmsh2->numtracks);
 		if ((nTrks >= 4) && (nTrks <= 32)) m_nChannels = nTrks;
 		DWORD playseqtable = BigEndian(pmsh2->playseqtable);
 		UINT numplayseqs = BigEndianW(pmsh2->numpseqs);
 		if (!numplayseqs) numplayseqs = 1;
-		nOrders = 0;
 		nSections = BigEndianW(pmsh2->numsections);
 		DWORD sectiontable = BigEndian(pmsh2->sectiontable);
 		if ((!nSections) || (!sectiontable) || (sectiontable >= dwMemLength-2)) nSections = 1;
@@ -736,7 +737,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 		// Track Names
 		DWORD trackinfo_ofs = BigEndian(pmex->trackinfo_ofs);
-		if ((trackinfo_ofs) && (trackinfo_ofs < dwMemLength) && (m_nChannels * 4 < dwMemLength - trackinfo_ofs))
+		if ((trackinfo_ofs) && (trackinfo_ofs < dwMemLength) && (m_nChannels * 4u < dwMemLength - trackinfo_ofs))
 		{
 			DWORD *ptrktags = (DWORD *)(lpStream + trackinfo_ofs);
 			for (UINT i=0; i<m_nChannels; i++)
@@ -830,7 +831,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 					BYTE instr = s[1] >> 4;
 					if (s[0] & 0x80) instr |= 0x10;
 					if (s[0] & 0x40) instr |= 0x20;
-					if ((note) && (note <= 132)) p->note = note + playtransp;
+					if ((note) && (note <= 132)) p->note = static_cast<BYTE>(note + playtransp);
 					p->instr = instr;
 					p->command = s[1] & 0x0F;
 					p->param = s[2];

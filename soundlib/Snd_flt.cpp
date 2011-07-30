@@ -86,16 +86,16 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 		{
 			if(pChn->nCutSwing)
 			{
-				pChn->nCutOff += pChn->nCutSwing;
-				if(pChn->nCutOff > 127) pChn->nCutOff = 127;
-				if(pChn->nCutOff < 0) pChn->nCutOff = 0;
+				static_assert(sizeof(pChn->nCutOff) == 1, "check cast if this fails");
+				pChn->nCutOff = static_cast<BYTE>(pChn->nCutOff + pChn->nCutSwing);
+				Limit(pChn->nCutOff, BYTE(0), BYTE(127));
 				pChn->nCutSwing = 0;
 			}
 			if(pChn->nResSwing)
 			{
-				pChn->nResonance += pChn->nResSwing;
-				if(pChn->nResonance > 127) pChn->nResonance = 127;
-				if(pChn->nResonance < 0) pChn->nResonance = 0;
+				static_assert(sizeof(pChn->nResonance) == 1, "check cast if this fails");
+				pChn->nResonance = static_cast<BYTE>(pChn->nResonance + pChn->nResSwing);
+				Limit(pChn->nResonance, BYTE(0), BYTE(127));
 				pChn->nResSwing = 0;
 			}
 			cutoff = max( min((int)pChn->nCutOff,127), 0); // cap cutoff

@@ -16,7 +16,7 @@ CPSRatioCalc::CPSRatioCalc(ULONGLONG samples, ULONGLONG sampleRate, UINT speed, 
 	, m_lSamplesOrig(samples), m_nSpeed(speed), m_nTempo(tempo), m_dRatio(ratio), m_nRowsPerBeat(rowsPerBeat), m_nTempoMode(tempoMode)
 {
 	//Sample rate will not change. We can calculate original duration once and disgard sampleRate.
-	m_lMsOrig=1000.0*((double)m_lSamplesOrig / sampleRate);
+	m_lMsOrig= static_cast<ULONGLONG>(1000.0*((double)m_lSamplesOrig / sampleRate));
 	CalcSamples();
 	CalcMs();
 	CalcRows();
@@ -122,13 +122,13 @@ void CPSRatioCalc::OnEnChangeratio()
 
 void CPSRatioCalc::CalcSamples()
 {
-	m_lSamplesNew=m_lSamplesOrig*(m_dRatio/100.0);
+	m_lSamplesNew = static_cast<ULONGLONG>(m_lSamplesOrig*(m_dRatio/100.0));
 	return;
 }
 
 void CPSRatioCalc::CalcMs()
 {
-	m_lMsNew=m_lMsOrig*(m_dRatio/100.0);
+	m_lMsNew = static_cast<ULONGLONG>(m_lMsOrig*(m_dRatio/100.0));
 	return;
 }
 

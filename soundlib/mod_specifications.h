@@ -50,7 +50,7 @@ struct CModSpecifications
 	UINT speedMin;					// Minimum ticks per frame
 	UINT speedMax;					// Maximum ticks per frame
 	bool hasComments;				// True if format has a comments field
-	UINT envelopePointsMax;			// Maximum number of points of each envelope
+	uint8 envelopePointsMax;		// Maximum number of points of each envelope
 	bool hasReleaseNode;			// Envelope release node
 	char commands[MAX_EFFECTS + 1]; // An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1]; // dito, but for volume column

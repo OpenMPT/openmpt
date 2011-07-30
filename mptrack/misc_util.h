@@ -253,6 +253,20 @@ namespace Util
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only interger types are allowed."); return (std::numeric_limits<T>::max)();}
 
+	/// Returns value rounded to nearest integer.
+	inline double Round(const double& val) {return std::floor(val + 0.5);}
+
+	/// Rounds given double value to nearest integer value of type T.
+	template <class T> inline T Round(const double& val)
+	{
+		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
+		static_assert(sizeof(T) <= 4, "Revise the implementation for integers > 32-bits.");
+		const double valRounded = Round(val);
+		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
+		const T intval = static_cast<T>(valRounded);
+		return intval;
+	}
+
 	
 };
 

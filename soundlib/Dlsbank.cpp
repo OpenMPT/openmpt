@@ -1468,7 +1468,7 @@ static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 }
 
 
-BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT nRgn, int transpose)
+BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose)
 //---------------------------------------------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
@@ -1602,13 +1602,14 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 }
 
 
-BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, UINT nDrumRgn)
+BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn)
 //-------------------------------------------------------------------------------------------
 {
 	BYTE RgnToSmp[DLSMAXREGIONS];
 	DLSINSTRUMENT *pDlsIns;
 	MODINSTRUMENT *pIns;
-	UINT nSample, nRgnMin, nRgnMax, nEnv;
+	UINT nRgnMin, nRgnMax, nEnv;
+	SAMPLEINDEX nSample;
 	
 	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
 	pDlsIns = &m_pInstruments[nIns];

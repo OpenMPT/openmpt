@@ -173,7 +173,9 @@ VOID CWaveDevice::Reset()
 
 void CWaveDevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
 {
-
+	UNREFERENCED_PARAMETER(pSource);
+	UNREFERENCED_PARAMETER(nMaxLatency);
+	UNREFERENCED_PARAMETER(dwBuffer);
 }
 
 
@@ -506,7 +508,9 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 
 void CDSoundDevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
 {
-
+	UNREFERENCED_PARAMETER(pSource);
+	UNREFERENCED_PARAMETER(nMaxLatency);
+	UNREFERENCED_PARAMETER(dwBuffer);
 }
 
 BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
@@ -902,6 +906,8 @@ void CASIODevice::CloseDevice()
 void CASIODevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
 //--------------------------------------------------------------------------------------------
 {
+	UNREFERENCED_PARAMETER(pSource);
+	UNREFERENCED_PARAMETER(nMaxLatency);
 	for (UINT ich=0; ich<m_nChannels; ich++){
 		memset(m_BufferInfo[ich].buffers[dwBuffer], 0, m_nAsioBufferLen);
 	}
@@ -911,6 +917,8 @@ void CASIODevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, D
 BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
 //-----------------------------------------------------------------------------------------
 {
+	UNREFERENCED_PARAMETER(nMaxLatency);
+
 	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
 	DWORD dwSamplesLeft = m_nAsioBufferLen;
 	DWORD dwFrameLen = (ASIO_BLOCK_LEN*sizeof(int)) / dwSampleSize;
@@ -1006,6 +1014,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWOR
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
+	UNREFERENCED_PARAMETER(directProcess);
 	if ((gpCurrentAsio) && (gpCurrentAsio->m_bMixRunning)) SoundDeviceCallback(doubleBufferIndex);
 }
 
@@ -1013,12 +1022,16 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 //---------------------------------------------------------
 {
+	UNREFERENCED_PARAMETER(sRate);
 }
 
 
 long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
 //----------------------------------------------------------------------------------
 {
+	UNREFERENCED_PARAMETER(value);
+	UNREFERENCED_PARAMETER(message);
+	UNREFERENCED_PARAMETER(opt);
 #ifdef ASIO_LOG
 	// Log("AsioMessage(%d, %d)\n", selector, value);
 #endif

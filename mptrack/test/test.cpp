@@ -220,6 +220,31 @@ void TestMisc()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("s2m")), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("")), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(LPCTSTR(nullptr)), MOD_TYPE_NONE);
+
+	VERIFY_EQUAL( Util::Round(1.99), 2.0 );
+	VERIFY_EQUAL( Util::Round(1.5), 2.0 );
+	VERIFY_EQUAL( Util::Round(1.1), 1.0 );
+	VERIFY_EQUAL( Util::Round(-0.1), 0.0 );
+	VERIFY_EQUAL( Util::Round(-0.5), 0.0 );
+	VERIFY_EQUAL( Util::Round(-0.9), -1.0 );
+	VERIFY_EQUAL( Util::Round(-1.4), -1.0 );
+	VERIFY_EQUAL( Util::Round(-1.7), -2.0 );
+	VERIFY_EQUAL( Util::Round<int32>(int32_max + 0.1), int32_max );
+	VERIFY_EQUAL( Util::Round<int32>(int32_max - 0.4), int32_max );
+	VERIFY_EQUAL( Util::Round<int32>(int32_min + 0.1), int32_min );
+	VERIFY_EQUAL( Util::Round<int32>(int32_min - 0.1), int32_min );
+	VERIFY_EQUAL( Util::Round<uint32>(uint32_max + 0.499), uint32_max );
+	VERIFY_EQUAL( Util::Round<int8>(110.1), 110 );
+	VERIFY_EQUAL( Util::Round<int8>(-110.1), -110 );
+
+	// These should fail to compile
+	//Util::Round<std::string>(1.0);
+	//Util::Round<int64>(1.0);
+	//Util::Round<uint64>(1.0);
+	
+	// This should trigger assert in Round.
+	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );	
+
 }
 
 
@@ -461,14 +486,10 @@ void TestLoadSaveFile()
 	theApp.RemoveMruItem(0);
 }
 
-
-template<class T>
-T Round(double a) {return static_cast<T>(floor(a + 0.5));}
-
 double Rand01() {return rand() / double(RAND_MAX);}
 
 template <class T>
-T Rand(const T& min, const T& max) {return Round<T>(min + Rand01() * (max - min));}
+T Rand(const T& min, const T& max) {return Util::Round<T>(min + Rand01() * (max - min));}
 
 
 

@@ -1318,8 +1318,8 @@ BOOL CSoundFile::ReadNote()
 						{
 							switch(m_nTickCount % 3)
 							{
-								case 1:	period = period / TwoToPowerXOver12(pChn->nArpeggio >> 4); break;
-								case 2:	period = period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F); break;
+								case 1:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
+								case 2:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
 							}
 						}
 					}
@@ -1747,7 +1747,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
-					pChn->m_Freq = pChn->nC5Speed * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps);
+					pChn->m_Freq = Util::Round<UINT>(pChn->nC5Speed * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else
@@ -1759,7 +1759,7 @@ BOOL CSoundFile::ReadNote()
 
 			//Applying Pitch/Tempo lock.
             if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
-				freq *= (float)m_nMusicTempo / (float)pIns->wPitchToTempoLock;
+				freq = MulDiv(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
 
 
 			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
@@ -2304,7 +2304,8 @@ VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 			step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
 			
 			UINT maxStep = max(50, (10000/gnVolumeRampSamples+1)); //define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
-			while (abs(step)>maxStep) {					 //if step is too big (might cause click), extend ramp length.
+			while (static_cast<UINT>(abs(step)) > maxStep) //if step is too big (might cause click), extend ramp length.
+			{					 
 				m_nSamplesToGlobalVolRampDest += gnVolumeRampSamples;
 				step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
 			}

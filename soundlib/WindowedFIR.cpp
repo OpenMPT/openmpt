@@ -66,7 +66,7 @@ void CWindowedFIR::InitTable() {
 	int _LPcl;
 	float _LPcllen	= (float)(1L<<WFIR_FRACBITS);	// number of precalculated lines for 0..1 (-1..0)
 	float _LNorm	= 1.0f / (float)(2.0f * _LPcllen);
-	float _LCut		= CMainFrame::GetSettings().gdWFIRCutoff;
+	float _LCut		= static_cast<float>(CMainFrame::GetSettings().gdWFIRCutoff);
 	float _LScale	= (float)WFIR_QUANTSCALE;
 	for( _LPcl=0;_LPcl<WFIR_LUTLEN;_LPcl++ )
 	{	

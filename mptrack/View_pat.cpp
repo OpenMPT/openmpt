@@ -136,7 +136,7 @@ static_assert(MODCOMMAND::maxColumnValue <= 999, "Command range for ID_CHANGE_PC
 CViewPattern::CViewPattern()
 //--------------------------
 {
-	m_pOpenGLEditor = NULL; //rewbs.fxvis
+	//m_pOpenGLEditor = NULL; //rewbs.fxvis
 	m_pEffectVis = NULL; //rewbs.fxvis
 	m_pRandomizer = NULL;
 	m_bLastNoteEntryBlocked=false;
@@ -436,10 +436,11 @@ BOOL CViewPattern::UpdateScrollbarPositions( BOOL UpdateHorizontalScrollbar )
 	{
 		UINT ncol = GetCurrentColumn();
 		UINT xofs = GetXScrollPos();
-		int nchn = ncol >> 3;
+		const UINT nchn = ncol >> 3;
 		if (nchn < xofs)
 		{
-			scroll.cx = (int)(nchn - xofs) * m_szCell.cx;
+			scroll.cx = (int)(xofs - nchn) * m_szCell.cx;
+			scroll.cx *= -1;
 		} else
 		if (nchn > xofs)
 		{
@@ -713,11 +714,13 @@ void CViewPattern::OnDestroy()
 		m_pRandomizer=NULL;
 	}
 
+	/*
 	if (m_pOpenGLEditor)	{
 		m_pOpenGLEditor->DoClose();
 		delete m_pOpenGLEditor;
 		m_pOpenGLEditor = NULL;
 	}
+	*/
 
 
 	CModScrollView::OnDestroy();
@@ -770,14 +773,14 @@ void CViewPattern::OnGrowSelection()
 	const DWORD endSel   = (GetRowFromCursor(m_dwBeginSel) < GetRowFromCursor(m_dwEndSel)) ? m_dwEndSel : m_dwBeginSel;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
 
-	int finalDest = GetRowFromCursor(startSel) + (GetRowFromCursor(endSel) - GetRowFromCursor(startSel))*2;
+	const ROWINDEX finalDest = GetRowFromCursor(startSel) + (GetRowFromCursor(endSel) - GetRowFromCursor(startSel))*2;
 	for (int row = finalDest; row > (int)GetRowFromCursor(startSel); row -= 2)
 	{
 		int offset = row - GetRowFromCursor(startSel);
 		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if (GetColTypeFromCursor(i) <= LAST_COLUMN)
 		{
 			UINT chn = GetChanFromCursor(i);
-			if ((chn >= pSndFile->GetNumChannels()) || (row >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
+			if ((chn >= pSndFile->GetNumChannels()) || (ROWINDEX(row) >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
 			MODCOMMAND *dest = &p[row * pSndFile->GetNumChannels() + chn];
 			MODCOMMAND *src  = &p[(row-offset/2) * pSndFile->GetNumChannels() + chn];
 			MODCOMMAND *blank= &p[(row-1) * pSndFile->GetNumChannels() + chn];
@@ -820,12 +823,12 @@ void CViewPattern::OnShrinkSelection()
 	const DWORD endSel   = (GetRowFromCursor(m_dwBeginSel) < GetRowFromCursor(m_dwEndSel)) ? m_dwEndSel : m_dwBeginSel;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
 
-	int finalDest = GetRowFromCursor(startSel) + (GetRowFromCursor(endSel) - GetRowFromCursor(startSel))/2;
+	const ROWINDEX finalDest = GetRowFromCursor(startSel) + (GetRowFromCursor(endSel) - GetRowFromCursor(startSel))/2;
 
-	for (int row = GetRowFromCursor(startSel); row <= finalDest; row++)
+	for (ROWINDEX row = GetRowFromCursor(startSel); row <= finalDest; row++)
 	{
-		int offset = row - GetRowFromCursor(startSel);
-		int srcRow = GetRowFromCursor(startSel) + (offset * 2);
+		const ROWINDEX offset = row - GetRowFromCursor(startSel);
+		const ROWINDEX srcRow = GetRowFromCursor(startSel) + (offset * 2);
 
 		for (UINT i = (startSel & 0xFFFF); i <= (endSel & 0xFFFF); i++) if (GetColTypeFromCursor(i) <= LAST_COLUMN)
 		{
@@ -865,7 +868,7 @@ void CViewPattern::OnShrinkSelection()
 			}
 		}
 	}
-	for (int row = finalDest + 1; row <= GetRowFromCursor(endSel); row++)
+	for (ROWINDEX row = finalDest + 1; row <= GetRowFromCursor(endSel); row++)
 	{
 		for (UINT i = (startSel & 0xFFFF); i <= (endSel & 0xFFFF); i++) if (GetColTypeFromCursor(i) <= LAST_COLUMN)
 		{
@@ -2385,8 +2388,9 @@ void CViewPattern::Interpolate(PatternColumns type)
 
 		bool doPCinterpolation = false;
 
-		int vsrc, vdest, vcmd = 0, verr = 0, distance;
-		distance = row1 - row0;
+		int vsrc, vdest, vcmd = 0, verr = 0;
+		ASSERT(row1 >= row0);
+		UINT distance = row1 - row0;
 
 		const MODCOMMAND srcCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
 		const MODCOMMAND destCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row1, nchn);
@@ -3014,7 +3018,7 @@ void CViewPattern::OnPatternAmplify()
 						if (vol > 64) vol = 64;
 						m->vol = (BYTE)vol;
 					}
-					if ((((nChn << 3) | 3) >= (m_dwBeginSel & 0xFFFF)) && (((nChn << 3) | 3) <= (m_dwEndSel & 0xFFFF)))
+					if ((((nChn << 3) | 3u) >= (m_dwBeginSel & 0xFFFF)) && (((nChn << 3) | 3u) <= (m_dwEndSel & 0xFFFF)))
 					{
 						if ((m->command == CMD_VOLUME) && (m->param <= 64))
 						{
@@ -3698,7 +3702,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 									SetCurrentColumn(m_dwCursor - 1);
 								return wParam;
 		case kcNavigateRightSelect:
-		case kcNavigateRight:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_dwCursor >= (((pSndFile->m_nChannels-1) << 3) | 4)))
+		case kcNavigateRight:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_dwCursor >= (((pSndFile->m_nChannels-1) << 3u) | 4u)))
 									SetCurrentColumn(0);
 								else
 									SetCurrentColumn(m_dwCursor + 1);
@@ -3725,12 +3729,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcHomeAbsolute:	if (m_dwCursor) SetCurrentColumn(0); if (m_nRow > 0) SetCurrentRow(0); return wParam;
 
 		case kcEndHorizontalSelect:
-		case kcEndHorizontal:	if (m_dwCursor!=(((pSndFile->GetNumChannels() - 1) << 3) | 4)) SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4);
+		case kcEndHorizontal:	if (m_dwCursor!=(((pSndFile->GetNumChannels() - 1u) << 3u) | 4)) SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4);
 								else if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 		case kcEndVerticalSelect:
 		case kcEndVertical:		if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								else if (m_dwCursor!=(((pSndFile->GetNumChannels() - 1) << 3) | 4)) SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4);
+								else if (m_dwCursor!=(((pSndFile->GetNumChannels() - 1) << 3u) | 4u)) SetCurrentColumn(((pSndFile->m_nChannels-1) << 3u) | 4);
 								return wParam;
 		case kcEndAbsoluteSelect:
 		case kcEndAbsolute:		SetCurrentColumn(((pSndFile->GetNumChannels() - 1) << 3) | 4); if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1); return wParam;
@@ -3990,9 +3994,9 @@ void CViewPattern::TempEnterVol(int v)
 void CViewPattern::SetSpacing(int n)
 //----------------------------------
 {
-	if (n != m_nSpacing)
+	if (static_cast<UINT>(n) != m_nSpacing)
 	{
-		m_nSpacing = n;
+		m_nSpacing = static_cast<UINT>(n);
 		PostCtrlMessage(CTRLMSG_SETSPACING, m_nSpacing);
 	}
 }

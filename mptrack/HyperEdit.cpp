@@ -21,6 +21,8 @@
 #include "stdafx.h"
 #include "HyperEdit.h"
 
+#pragma warning(disable:4018) // "'<' : signed/unsigned mismatch"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -214,4 +216,6 @@ void CHyperEdit::OnTimer(UINT nIDEvent)
 
 	CEdit::OnTimer(nIDEvent);
 }
+
+#pragma warning(default:4018)
 
