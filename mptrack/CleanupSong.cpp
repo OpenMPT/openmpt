@@ -706,7 +706,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	INSTRUMENTINDEX nSwap, nIndex;
 	bool bReorg = false;
 
-	if (!pSndFile->m_nInstruments) return false;
+	if (!pSndFile->GetNumInstruments()) return false;
 
 	char removeSamples = -1;
 	if ( !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT))) //never remove an instrument's samples in ITP.

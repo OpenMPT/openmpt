@@ -147,7 +147,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		AddToLog("Found VST plugins\n");
 
 	// Pattern count
-	if(m_SndFile.GetNumPatterns() > originalSpecs->patternsMax)
+	if(m_SndFile.Patterns.GetNumPatterns() > originalSpecs->patternsMax)
 	{
 		message.Format("Found too many patterns (%d allowed)\n", originalSpecs->patternsMax);
 		AddToLog(message);
@@ -208,7 +208,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		foundHacks = true;
 		if(autofix)
 		{
-			for(PATTERNINDEX i = 0; i < m_SndFile.GetNumPatterns(); i++)
+			for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.GetNumPatterns(); i++)
 			{
 				m_SndFile.Patterns[i].SetName("");
 			}
@@ -371,7 +371,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	if(!originalSpecs->hasPatternSignatures)
 	{
 		foundHere = false;
-		for(PATTERNINDEX i = 0; i < m_SndFile.GetNumPatterns(); i++)
+		for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.GetNumPatterns(); i++)
 		{
 			if(m_SndFile.Patterns[i].GetOverrideSignature())
 			{

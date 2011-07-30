@@ -76,6 +76,9 @@ public:
 
 	void OnModTypeChanged(const MODTYPE oldtype);
 
+	// Returns index of last valid pattern + 1, zero if no such pattern exists.
+	PATTERNINDEX GetNumPatterns() const;
+
 	// Returns index of highest pattern with pattern named + 1.
 	PATTERNINDEX GetNumNamedPatterns() const;
 

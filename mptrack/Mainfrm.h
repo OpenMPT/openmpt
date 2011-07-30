@@ -412,7 +412,7 @@ public:
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters, bmpVisNode, bmpVisPcNode;
-	static HPEN gpenVuMeter[NUM_VUMETER_PENS*2];
+	static HPEN gpenVuMeter[NUM_VUMETER_PENS * 2];	// General tab VU meters
 
 protected:
 
@@ -498,8 +498,6 @@ public:
 	static HFONT GetLargeFixedFont() { return m_hLargeFixedFont; }
 	static void UpdateAllViews(DWORD dwHint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
-	static void TranslateKeyboardMap(LPSTR pszKbd);
-	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 	//static CPerformanceCounter *m_pPerfCounter;

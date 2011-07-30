@@ -218,7 +218,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		if (IDs.GetLength() >= 16)
 		{
 			// Get path from cache file
-			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath) - 1, cacheFile);
+			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath), cacheFile);
 			SetNullTerminator(szPath);
 			theApp.RelativePathToAbsolute(szPath);
 

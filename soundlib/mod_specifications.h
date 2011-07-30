@@ -24,6 +24,7 @@ struct CModSpecifications
 
 	// NOTE: If changing order, update all initializations below.
 	char fileExtension[6];	  // File extension without dot.
+	MODTYPE internalType;	  // Internal MODTYPE value
 	MODCOMMAND::NOTE noteMin; // Minimum note index (index starts from 1)
 	MODCOMMAND::NOTE noteMax; // Maximum note index (index starts from 1)
 	bool hasNoteCut;		  // True if format has notecut.
@@ -71,6 +72,7 @@ const CModSpecifications mptm =
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
 	"mptm",								// File extension
+	MOD_TYPE_MPT,						// Internal MODTYPE value
 	NOTE_MIN,							// Minimum note index
 	NOTE_MAX,							// Maximum note index
 	true,								// Has notecut.
@@ -113,6 +115,7 @@ const CModSpecifications mod =
 {
 	// TODO: Set correct values.
 	"mod",								// File extension
+	MOD_TYPE_MOD,						// Internal MODTYPE value
 	37,									// Minimum note index
 	108,								// Maximum note index
 	false,								// No notecut.
@@ -153,6 +156,7 @@ const CModSpecifications modEx =
 {
 	// TODO: Set correct values.
 	"mod",								// File extension
+	MOD_TYPE_MOD,						// Internal MODTYPE value
 	37,									// Minimum note index
 	108,								// Maximum note index
 	false,								// No notecut.
@@ -192,6 +196,7 @@ const CModSpecifications xm =
 {
 	// TODO: Set correct values.
 	"xm",								// File extension
+	MOD_TYPE_XM,						// Internal MODTYPE value
 	13,									// Minimum note index
 	108,								// Maximum note index
 	false,								// No notecut.
@@ -232,6 +237,7 @@ const CModSpecifications xmEx =
 {
 	// TODO: Set correct values.
 	"xm",								// File extension
+	MOD_TYPE_XM,						// Internal MODTYPE value
 	13,									// Minimum note index
 	108,								// Maximum note index
 	false,								// No notecut.
@@ -271,6 +277,7 @@ const CModSpecifications s3m =
 {
 	// TODO: Set correct values.
 	"s3m",								// File extension
+	MOD_TYPE_S3M,						// Internal MODTYPE value
 	13,									// Minimum note index
 	108,								// Maximum note index
 	true,								// Has notecut.
@@ -311,6 +318,7 @@ const CModSpecifications s3mEx =
 {
 	// TODO: Set correct values.
 	"s3m",								// File extension
+	MOD_TYPE_S3M,						// Internal MODTYPE value
 	13,									// Minimum note index
 	108,								// Maximum note index
 	true,								// Has notecut.
@@ -350,6 +358,7 @@ const CModSpecifications it =
 {
 	// TODO: Set correct values.
 	"it",								// File extension
+	MOD_TYPE_IT,						// Internal MODTYPE value
 	1,									// Minimum note index
 	120,								// Maximum note index
 	true,								// Has notecut.
@@ -389,6 +398,7 @@ const CModSpecifications itEx =
 {
 	// TODO: Set correct values.
 	"it",								// File extension
+	MOD_TYPE_IT,						// Internal MODTYPE value
 	1,									// Minimum note index
 	120,								// Maximum note index
 	true,								// Has notecut.
@@ -423,6 +433,8 @@ const CModSpecifications itEx =
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures
 };
+
+static const CModSpecifications *Collection[] = { &mptm, &mod, &modEx, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };
 
 } // namespace ModSpecs
 

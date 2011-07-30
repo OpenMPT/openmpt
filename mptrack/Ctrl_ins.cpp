@@ -1868,10 +1868,10 @@ void CCtrlInstruments::OnSetPanningChanged()
 		if (b) pIns->dwFlags |= INS_SETPANNING;
 		else pIns->dwFlags &= ~INS_SETPANNING;
 
-		if(b && m_pSndFile->GetType() & MOD_TYPE_IT|MOD_TYPE_MPT)
+		if(b && m_pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			bool smpPanningInUse = false;
-			for(BYTE i = 0; i<ARRAYELEMCOUNT(pIns->Keyboard); i++)
+			for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
 			{
 				const SAMPLEINDEX smp = pIns->Keyboard[i];
 				if(smp <= m_pSndFile->GetNumSamples() && m_pSndFile->Samples[smp].uFlags & CHN_PANNING)
@@ -1889,7 +1889,7 @@ void CCtrlInstruments::OnSetPanningChanged()
 						_T(""),
 						MB_YESNO) == IDYES)
 				{
-					for(BYTE i = 0; i < ARRAYELEMCOUNT(pIns->Keyboard); i++)
+					for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
 					{
 						const SAMPLEINDEX smp = pIns->Keyboard[i];
 						if(smp <= m_pSndFile->GetNumSamples())

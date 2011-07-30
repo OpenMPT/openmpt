@@ -346,7 +346,7 @@ void CCtrlGeneral::OnTitleChanged()
 void CCtrlGeneral::OnTempoChanged()
 //---------------------------------
 {
-	CHAR s[32];
+	CHAR s[16];
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
 	{
 		m_EditTempo.GetWindowText(s, sizeof(s));
@@ -373,7 +373,7 @@ void CCtrlGeneral::OnTempoChanged()
 void CCtrlGeneral::OnSpeedChanged()
 //---------------------------------
 {
-	CHAR s[32];
+	CHAR s[16];
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
 	{
 		m_EditSpeed.GetWindowText(s, sizeof(s));
@@ -381,7 +381,8 @@ void CCtrlGeneral::OnSpeedChanged()
 		{
 			UINT n = atoi(s);
 			n = CLAMP(n, m_pSndFile->GetModSpecifications().speedMin, m_pSndFile->GetModSpecifications().speedMax);
-			if (n != m_pSndFile->m_nDefaultSpeed) {
+			if (n != m_pSndFile->m_nDefaultSpeed)
+			{
 				m_bEditsLocked=true;
 				m_EditSpeed.SetModify(FALSE);
 				m_pSndFile->m_nDefaultSpeed = n;
@@ -398,8 +399,9 @@ void CCtrlGeneral::OnSpeedChanged()
 void CCtrlGeneral::OnVSTiVolChanged()
 //-------------------------------------
 {
-	CHAR s[32];
-	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
+	CHAR s[16];
+	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
+	{
 		m_EditVSTiVol.GetWindowText(s, sizeof(s));
 		if (s[0]) {
 			UINT n = ConvertStrTo<UINT>(s);
@@ -420,8 +422,9 @@ void CCtrlGeneral::OnVSTiVolChanged()
 void CCtrlGeneral::OnSamplePAChanged()
 //-------------------------------------
 {
-	CHAR s[32];
-	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
+	CHAR s[16];
+	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
+	{
 		m_EditSamplePA.GetWindowText(s, sizeof(s));
 		if (s[0]) {
 			UINT n = ConvertStrTo<UINT>(s);
@@ -441,7 +444,7 @@ void CCtrlGeneral::OnSamplePAChanged()
 void CCtrlGeneral::OnGlobalVolChanged()
 //-------------------------------------
 {
-	CHAR s[32];
+	CHAR s[16];
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
 	{
 		m_EditGlobalVol.GetWindowText(s, sizeof(s));
@@ -619,14 +622,16 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
-BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText) {
-//----------------------------------------------------------
+BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
+//--------------------------------------------------------
+{
 	const char moreRecentMixModeNote[] = "Use a more recent mixmode to see dB offsets.";
 	if ((pszText) && (uId))
 	{
 		const bool displayDBValues = m_pSndFile->m_pConfig->getDisplayDBValues();
 
-		switch(uId) 	{
+		switch(uId)
+		{
 			case IDC_SLIDER_SAMPLEPREAMP:
 				(displayDBValues) ? setAsDecibels(pszText, m_pSndFile->m_nSamplePreAmp, m_pSndFile->m_pConfig->getNormalSamplePreAmp()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
@@ -645,18 +650,19 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText) {
 	
 }
 
-void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB) {
+void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB)
 //-------------------------------------------------------------------------------------
-
-	if (value==0) {
+{
+	if (value == 0)
+	{
 		wsprintf(stringToSet, "-inf");
 		return;
 	}
 	
 	double changeFactor = value / valueAtZeroDB;
-    double dB = 10*log(changeFactor);
+    double dB = 10 * log(changeFactor);
 
-	char sign = (dB>=0)?'+':' ';
+	char sign = (dB>=0) ? '+' : ' ';
 	sprintf(stringToSet, "%c%.2f dB", sign, dB);
 	return;
 

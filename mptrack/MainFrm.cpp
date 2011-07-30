@@ -1216,6 +1216,7 @@ void CMainFrame::UpdateColors()
 	if (penEnvelopeHighlight) DeleteObject(penEnvelopeHighlight);
 	penEnvelopeHighlight = ::CreatePen(PS_SOLID, 0, RGB(0xFF, 0xFF, 0x00));
 
+	// Generel tab VU meters
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
 	{
 		int r0,g0,b0, r1,g1,b1;
@@ -1271,17 +1272,6 @@ void CMainFrame::UpdateColors()
         brushWindow = CreateSolidBrush(crBkgnd);
 		if (penSeparator) DeleteObject(penSeparator);
 		penSeparator = CreatePen(PS_SOLID, 0, RGB(GetRValue(crBkgnd)/2, GetGValue(crBkgnd)/2, GetBValue(crBkgnd)/2));
-	}
-}
-
-
-VOID CMainFrame::GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize)
-//------------------------------------------------------------------
-{
-	pszName[0] = (char)cbSize;
-	if ((cbSize > 0) && (lParam))
-	{
-		GetKeyNameText(lParam, pszName, cbSize);
 	}
 }
 
@@ -2471,7 +2461,8 @@ double CMainFrame::GetApproxBPM()
 	CSoundFile *pSndFile = NULL;
 
 	pSndFile = GetActiveDoc()->GetSoundFile();
-	if (pSndFile) {
+	if (pSndFile)
+	{
 		return pSndFile->GetCurrentBPM();
 	}
 	return 0;
@@ -2691,12 +2682,14 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 #endif // NO_VST
 }
 
+
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
 //-------------------------------------------------------------------------
 {
 	if(plug.pMixPlugin)
 		AddPluginParameternamesToCombobox(CBox, *(CVstPlugin *)plug.pMixPlugin);
 }
+
 
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 //-----------------------------------------------------------------------

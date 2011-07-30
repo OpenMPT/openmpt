@@ -387,7 +387,7 @@ void TestLoadFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1)[1], 2);
 
 	// Patterns
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumPatterns(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.GetNumPatterns(), 2);
 
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetName(), "First Pattern");
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 70);
