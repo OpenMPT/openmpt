@@ -912,6 +912,8 @@ protected:
 	void ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
 	void ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac);
 
+	void ProcessRamping(MODCHANNEL *pChn);
+
 protected:
 	// Channel Effects
 	void PortamentoUp(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
