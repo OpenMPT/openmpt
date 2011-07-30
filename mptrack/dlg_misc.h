@@ -152,6 +152,8 @@ protected:
 	CSoundFile *m_pSndFile;
 	CModDoc *m_pModDoc;
 
+	bool ValidateMacroString(CEdit &wnd, char *lastMacro, bool isParametric);
+
 	void UpdateMacroList(int macro=-1);
 	void ToggleBoxes(UINT preset, UINT sfx);
 	virtual BOOL OnInitDialog();
@@ -159,6 +161,7 @@ protected:
 	afx_msg void UpdateDialog();
 	afx_msg void OnSetAsDefault();
 	afx_msg void OnResetCfg();
+	afx_msg void OnMacroHelp();
 	afx_msg void OnEmbedMidiCfg();
 	afx_msg void OnSFxChanged();
 	afx_msg void OnSFxPresetChanged();

@@ -764,6 +764,12 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
+	// Fix old nasty broken (non-standard) MIDI configs in files.
+	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+	{
+		FixMIDIConfigStrings(m_MidiCfg);
+	}
+
 	// plugin loader
 	string sNotFound;
 	std::list<PLUGINDEX> notFoundIDs;
@@ -918,13 +924,13 @@ void CSoundFile::ResetMidiCfg()
 //-----------------------------
 {
 	MemsetZero(m_MidiCfg);
-	lstrcpy(m_MidiCfg.szMidiGlb[MIDIOUT_START], "FF");
-	lstrcpy(m_MidiCfg.szMidiGlb[MIDIOUT_STOP], "FC");
-	lstrcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
-	lstrcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
-	lstrcpy(m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
-	lstrcpy(m_MidiCfg.szMidiSFXExt[0], "F0F000z");
-	for (int iz=0; iz<16; iz++) wsprintf(m_MidiCfg.szMidiZXXExt[iz], "F0F001%02X", iz*8);
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_START], "FF");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_STOP], "FC");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
+	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
+	strcpy(m_MidiCfg.szMidiSFXExt[0], "F0F000z");
+	CModDoc::CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_reso4Bit);
 }
 
 
@@ -2902,3 +2908,38 @@ void CSoundFile::SetupITBidiMode()
 {
 	m_bITBidiMode = IsCompatibleMode(TRK_IMPULSETRACKER);
 }
+
+
+void FixMIDIConfigString(char *line)
+//----------------------------------
+{
+	for(size_t i = 0; i < MACRO_LENGTH; i++)
+	{
+		if(line[i] >= 'a' && line[i] <= 'f')		// both A-F and a-f were treated as hex constants
+		{
+			line[i] = line[i] - 'a' + 'A';
+		} else if(line[i] == 'K' || line[i] == 'k')	// channel was K or k
+		{
+			line[i] = 'c';
+		} else if(line[i] == 'X' || line[i] == 'x' || line[i] == 'Y' || line[i] == 'y')	// those were pointless
+		{
+			line[i] = 'z';
+		}
+	}
+}
+
+
+// Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
+void CSoundFile::FixMIDIConfigStrings(MODMIDICFG &midiCfg)
+//--------------------------------------------------------
+{
+	for(size_t i = 0; i < CountOf(midiCfg.szMidiSFXExt); i++)
+	{
+		FixMIDIConfigString(midiCfg.szMidiSFXExt[i]);
+	}
+	for(size_t i = 0; i < CountOf(midiCfg.szMidiZXXExt); i++)
+	{
+		FixMIDIConfigString(midiCfg.szMidiZXXExt[i]);
+	}
+}
+

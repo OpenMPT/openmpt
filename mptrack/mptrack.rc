@@ -299,12 +299,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // German (Germany) resources
+#endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -1228,6 +1228,7 @@ BEGIN
     CONTROL         "Embed macro configuration in file when saving",IDC_CHECK1,
                     "Button",BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,6,338,288,10
     COMBOBOX        IDC_MACROCC,63,257,111,111,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Macro Help",IDC_BUTTON3,300,84,50,14
 END
 
 IDD_CHORDEDIT DIALOGEX 0, 0, 245, 148
@@ -2524,12 +2525,12 @@ BEGIN
     IDC_SAMPLE_XFADE        "Crossfade Loop Points\nCrossfade between loop start and loop end to create seamless sample loops."
 END
 
-#endif    // English (U.S.) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// Englisch (GB) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2902,7 +2903,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 //
 
 IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
-#endif    // English (U.K.) resources
+#endif    // Englisch (GB) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
