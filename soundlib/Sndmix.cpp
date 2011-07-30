@@ -874,6 +874,10 @@ BOOL CSoundFile::ProcessRow()
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Channel effect processing
+
+
 void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 //-------------------------------------------------------------
 {
@@ -1729,6 +1733,65 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 }
 
 
+void CSoundFile::ProcessRamping(MODCHANNEL *pChn)
+//-----------------------------------------------
+{
+	pChn->nRightRamp = pChn->nLeftRamp = 0;
+	if ((pChn->dwFlags & CHN_VOLUMERAMP) // && gnVolumeRampSamples //rewbs: this allows us to use non ramping mix functions if ramping is 0
+		&& ((pChn->nRightVol != pChn->nNewRightVol) || (pChn->nLeftVol != pChn->nNewLeftVol)))
+	{
+		LONG nRampLength = gnVolumeRampSamples;
+		// -> CODE#0027
+		// -> DESC="per-instrument volume ramping setup"
+		BOOL enableCustomRamp = pChn->pModInstrument && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
+		if(enableCustomRamp) nRampLength = pChn->pModInstrument->nVolRamp ? (gdwMixingFreq * pChn->pModInstrument->nVolRamp / 100000) : gnVolumeRampSamples;
+		if(!nRampLength) nRampLength = 1;
+		// -! NEW_FEATURE#0027
+		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
+		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
+#ifndef FASTSOUNDLIB
+		// -> CODE#0027
+		// -> DESC="per-instrument volume ramping setup "
+		//				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
+		//				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
+		//				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))
+		if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
+			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
+			&& (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50) && !(enableCustomRamp && pChn->pModInstrument->nVolRamp)))
+			// -! NEW_FEATURE#0027
+		{
+			if ((pChn->nRightVol|pChn->nLeftVol) && (pChn->nNewRightVol|pChn->nNewLeftVol) && (!(pChn->dwFlags & CHN_FASTVOLRAMP)))
+			{
+				nRampLength = m_nBufferCount;
+				if (nRampLength > (1 << (VOLUMERAMPPRECISION-1))) nRampLength = (1 << (VOLUMERAMPPRECISION-1));
+				if (nRampLength < (LONG)gnVolumeRampSamples) nRampLength = gnVolumeRampSamples;
+			}
+		}
+#endif // FASTSOUNDLIB
+		pChn->nRightRamp = nRightDelta / nRampLength;
+		pChn->nLeftRamp = nLeftDelta / nRampLength;
+		pChn->nRightVol = pChn->nNewRightVol - ((pChn->nRightRamp * nRampLength) >> VOLUMERAMPPRECISION);
+		pChn->nLeftVol = pChn->nNewLeftVol - ((pChn->nLeftRamp * nRampLength) >> VOLUMERAMPPRECISION);
+		if (pChn->nRightRamp|pChn->nLeftRamp)
+		{
+			pChn->nRampLength = nRampLength;
+		} else
+		{
+			pChn->dwFlags &= ~CHN_VOLUMERAMP;
+			pChn->nRightVol = pChn->nNewRightVol;
+			pChn->nLeftVol = pChn->nNewLeftVol;
+		}
+	} else
+	{
+		pChn->dwFlags &= ~CHN_VOLUMERAMP;
+		pChn->nRightVol = pChn->nNewRightVol;
+		pChn->nLeftVol = pChn->nNewLeftVol;
+	}
+	pChn->nRampRightVol = pChn->nRightVol << VOLUMERAMPPRECISION;
+	pChn->nRampLeftVol = pChn->nLeftVol << VOLUMERAMPPRECISION;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Handles envelopes & mixer setup
 
@@ -2187,64 +2250,13 @@ BOOL CSoundFile::ReadNote()
 			pChn->nNewRightVol >>= extraAttenuation;
 			pChn->nNewLeftVol >>= extraAttenuation;
 
-			pChn->nRightRamp = pChn->nLeftRamp = 0;
 			// Dolby Pro-Logic Surround
 			if ((pChn->dwFlags & CHN_SURROUND) && (gnChannels == 2)) pChn->nNewLeftVol = - pChn->nNewLeftVol;
 			// Checking Ping-Pong Loops
 			if (pChn->dwFlags & CHN_PINGPONGFLAG) pChn->nInc = -pChn->nInc;
 			// Setting up volume ramp
-			if ((pChn->dwFlags & CHN_VOLUMERAMP) // && gnVolumeRampSamples //rewbs: this allows us to use non ramping mix functions if ramping is 0
-			 && ((pChn->nRightVol != pChn->nNewRightVol) || (pChn->nLeftVol != pChn->nNewLeftVol)))
-			{
-				LONG nRampLength = gnVolumeRampSamples;
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup"
-				BOOL enableCustomRamp = pChn->pModInstrument && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
-				if(enableCustomRamp) nRampLength = pChn->pModInstrument->nVolRamp ? (gdwMixingFreq * pChn->pModInstrument->nVolRamp / 100000) : gnVolumeRampSamples;
-				if(!nRampLength) nRampLength = 1;
-// -! NEW_FEATURE#0027
-				LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
-				LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
-#ifndef FASTSOUNDLIB
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup "
-//				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
-//				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
-//				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))
-				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
-				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
-				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50) && !(enableCustomRamp && pChn->pModInstrument->nVolRamp)))
-// -! NEW_FEATURE#0027
-				{
-					if ((pChn->nRightVol|pChn->nLeftVol) && (pChn->nNewRightVol|pChn->nNewLeftVol) && (!(pChn->dwFlags & CHN_FASTVOLRAMP)))
-					{
-						nRampLength = m_nBufferCount;
-						if (nRampLength > (1 << (VOLUMERAMPPRECISION-1))) nRampLength = (1 << (VOLUMERAMPPRECISION-1));
-						if (nRampLength < (LONG)gnVolumeRampSamples) nRampLength = gnVolumeRampSamples;
-					}
-				}
-#endif // FASTSOUNDLIB
-				pChn->nRightRamp = nRightDelta / nRampLength;
-				pChn->nLeftRamp = nLeftDelta / nRampLength;
-				pChn->nRightVol = pChn->nNewRightVol - ((pChn->nRightRamp * nRampLength) >> VOLUMERAMPPRECISION);
-				pChn->nLeftVol = pChn->nNewLeftVol - ((pChn->nLeftRamp * nRampLength) >> VOLUMERAMPPRECISION);
-				if (pChn->nRightRamp|pChn->nLeftRamp)
-				{
-					pChn->nRampLength = nRampLength;
-				} else
-				{
-					pChn->dwFlags &= ~CHN_VOLUMERAMP;
-					pChn->nRightVol = pChn->nNewRightVol;
-					pChn->nLeftVol = pChn->nNewLeftVol;
-				}
-			} else
-			{
-				pChn->dwFlags &= ~CHN_VOLUMERAMP;
-				pChn->nRightVol = pChn->nNewRightVol;
-				pChn->nLeftVol = pChn->nNewLeftVol;
-			}
-			pChn->nRampRightVol = pChn->nRightVol << VOLUMERAMPPRECISION;
-			pChn->nRampLeftVol = pChn->nLeftVol << VOLUMERAMPPRECISION;
+			ProcessRamping(pChn);
+
 			// Adding the channel in the channel list
 			ChnMix[m_nMixChannels++] = nChn;
 		} else
