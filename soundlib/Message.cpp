@@ -113,14 +113,14 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 		{
 		case '\r':
 			if(lineEnding != leLF)
-				m_lpszSongComments[cpos] = '\r';
+				m_lpszSongComments[cpos] = INTERNAL_LINEENDING;
 			else
 				m_lpszSongComments[cpos] = ' ';
 			if(lineEnding == leCRLF) i++;	// skip the LF
 			break;
 		case '\n':
 			if(lineEnding != leCR && lineEnding != leCRLF)
-				m_lpszSongComments[cpos] = '\r';
+				m_lpszSongComments[cpos] = INTERNAL_LINEENDING;
 			else
 				m_lpszSongComments[cpos] = ' ';
 			break;
@@ -158,7 +158,7 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 	for(size_t line = 0, fpos = 0, cpos = 0; line < num_lines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
 	{
 		memcpy(m_lpszSongComments + cpos, data + fpos, min(lineLength, length - fpos));
-		m_lpszSongComments[cpos + lineLength] = '\r';
+		m_lpszSongComments[cpos + lineLength] = INTERNAL_LINEENDING;
 
 		// fix weird chars
 		for(size_t lpos = 0; lpos < lineLength; lpos++)
@@ -181,73 +181,47 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 }
 
 
-// OLD and unused function. Do we still need it?
-UINT CSoundFile::GetSongMessage(LPSTR s, UINT len, UINT linesize)
-//---------------------------------------------------------------
+// Retrieve song message.
+// [in]  lineEnding: line ending formatting of the text in memory.
+// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
+// [out] returns formatted song message.
+CString CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &))
+//-------------------------------------------------------------------------------------------------
 {
-	LPCSTR p = m_lpszSongComments;
-	if (!p) return 0;
-	UINT i = 2, ln=0;
-	if ((len) && (s)) s[0] = '\r';
-	if ((len > 1) && (s)) s[1] = '\n';
-	while ((*p)	&& (i+2 < len))
+	CString comments;
+
+	if(m_lpszSongComments == nullptr)
 	{
-		BYTE c = (BYTE)*p++;
-		if ((c == 0x0D) || ((c == ' ') && (ln >= linesize)))
-		{ if (s) { s[i++] = '\r'; s[i++] = '\n'; } else i+= 2; ln=0; }
-		else
-			if (c >= 0x20) { if (s) s[i++] = c; else i++; ln++; }
+		return comments;
 	}
-	if (s) s[i] = 0;
-	return i;
-}
 
+	const size_t len = strlen(m_lpszSongComments);
+	comments.Preallocate(len);
 
-// OLD and unused function. Do we still need it?
-UINT CSoundFile::GetRawSongMessage(LPSTR s, UINT len, UINT linesize)
-//------------------------------------------------------------------
-{
-	LPCSTR p = m_lpszSongComments;
-	if (!p) return 0;
-	UINT i = 0, ln=0;
-	while ((*p)	&& (i < len-1))
+	for(size_t i = 0; i < len; i++)
 	{
-		BYTE c = (BYTE)*p++;
-		if ((c == 0x0D)	|| (c == 0x0A))
+		if(m_lpszSongComments[i] == INTERNAL_LINEENDING)
 		{
-			if (ln) 
+			switch(lineEnding)
 			{
-				while (ln < linesize) { if (s) s[i] = ' '; i++; ln++; }
-				ln = 0;
+			case leCR:
+			default:
+				comments.Append("\r");
+				break;
+			case leLF:
+				comments.Append("\n");
+				break;
+			case leCRLF:
+				comments.Append("\r\n");
+				break;
 			}
 		} else
-			if ((c == ' ') && (!ln))
-			{
-				UINT k=0;
-				while ((p[k]) && (p[k] >= ' '))	k++;
-				if (k <= linesize)
-				{
-					if (s) s[i] = ' ';
-					i++;
-					ln++;
-				}
-			} else
-			{
-				if (s) s[i] = c;
-				i++;
-				ln++;
-				if (ln == linesize) ln = 0;
-			}
-	}
-	if (ln)
-	{
-		while ((ln < linesize) && (i < len))
 		{
-			if (s) s[i] = ' ';
-			i++;
-			ln++;
+			char c = m_lpszSongComments[i];
+			// Pre-process text
+			if(pTextConverter != nullptr) pTextConverter(c);
+			comments.AppendChar(c);
 		}
 	}
-	if (s) s[i] = 0;
-	return i;
+	return comments;
 }

@@ -476,6 +476,8 @@ enum enmLineEndings
 	leAutodetect,	// Detect suitable line ending
 };
 
+#define INTERNAL_LINEENDING	'\r'	// The character that represents line endings internally
+
 
 // For WAV export (writing pattern positions to file)
 struct PatternCuePoint
@@ -695,7 +697,6 @@ public:
 	inline bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
 	inline bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
 	CModDoc* GetpModDoc() const { return m_pModDoc; }
-	CModDoc* GetModDocPtr() const { return m_pModDoc; }
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
@@ -1020,6 +1021,12 @@ public:
 	// Free previously allocated song message memory.
 	void FreeMessage();
 
+	// Retrieve song message.
+	// [in]  lineEnding: line ending formatting of the text in memory.
+	// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
+	// [out] returns formatted song message.
+	CString GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
+
 protected:
 	// Read song message from a mapped file.
 	// [in]  data: pointer to the data in memory that is going to be read
@@ -1037,10 +1044,6 @@ protected:
 	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
-
-	// Currently unused (and the code doesn't look very nice :)
-	UINT GetSongMessage(LPSTR s, UINT cbsize, UINT linesize=32);
-	UINT GetRawSongMessage(LPSTR s, UINT cbsize, UINT linesize=32);
 
 public:
 	int GetVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns) const;
