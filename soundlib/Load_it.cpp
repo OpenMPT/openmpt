@@ -1332,8 +1332,8 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 			const tm* const p = localtime(&creationTime);
 			if (p != nullptr)
 				loadDate = *p;
-			else if (pSndFile->GetModDocPtr() != nullptr)
-				pSndFile->GetModDocPtr()->AddLogEvent(LogEventUnexpectedError,
+			else if (pSndFile->GetpModDoc() != nullptr)
+				pSndFile->GetpModDoc()->AddLogEvent(LogEventUnexpectedError,
 													  __FUNCTION__,
 													  _T("localtime() returned nullptr."));
 			openTime = (uint32)((double)difftime(time(nullptr), creationTime) * 18.2f);

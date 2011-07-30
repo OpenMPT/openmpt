@@ -450,11 +450,15 @@ void TestLoadSaveFile()
 	// Test file saving
  	pModDoc->DoSave(theFile + "saved.mptm");
 	pModDoc->OnCloseDocument();
-	
+
 	// Reload the saved file and test if everything is still working correctly.
 	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm");
 	TestLoadFile(pModDoc);
 	pModDoc->OnCloseDocument();
+
+	// Forget about the files we just loaded
+	theApp.RemoveMruItem(0);
+	theApp.RemoveMruItem(0);
 }
 
 

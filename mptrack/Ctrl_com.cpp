@@ -119,9 +119,9 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 			if ((ln >= LINE_LENGTH-1) || (!*p))
 			{
 				if (((BYTE)c) > ' ') s[ln++] = c;
-				c = 0x0D;
+				c = INTERNAL_LINEENDING;
 			}
-			if (c == 0x0D)
+			if (c == INTERNAL_LINEENDING)
 			{
 				s[ln] = 0x0D;
 				s[ln+1] = 0x0A;
@@ -175,11 +175,16 @@ void CCtrlComments::OnCommentsChanged()
 			if (ln > LINE_LENGTH-1) ln = LINE_LENGTH-1;
 			s[ln] = 0;
 			while ((ln > 0) && (((BYTE)s[ln-1]) <= ' ')) s[--ln] = 0;
-			if (i+1 < n) strcat(s, "\r");
+			if (i+1 < n)
+			{
+				size_t l = strlen(s);
+				s[l++] = INTERNAL_LINEENDING;
+				s[l] = '\0';
+			}
 			strcat(p, s);
 		}
 		UINT len = strlen(p);
-		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == '\r')))
+		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == INTERNAL_LINEENDING)))
 		{
 			len--;
 			p[len] = 0;

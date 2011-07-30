@@ -560,21 +560,7 @@ void CLayer3Convert::OnOK()
 
 	if (m_pSndFile->m_lpszSongComments)
 	{
-		m_FileTags.comments = m_pSndFile->m_lpszSongComments;
-		// convert \r to \n, remove bad characters
-		for(size_t i = 0; i < m_FileTags.comments.length(); i++)
-		{
-			if(m_FileTags.comments.substr(i, 1) == "\r")
-				m_FileTags.comments.replace(i, 1, "\n");
-			if(m_FileTags.comments.substr(i, 1) < " " && m_FileTags.comments.substr(i, 1) != "\n")
-				m_FileTags.comments.replace(i, 1, " ");
-		}
-
-		/*size_t spos;
-		while((spos = m_FileTags.comments.find("\r")) != string::npos)
-		{
-			m_FileTags.comments.replace(spos, 1, "\n");
-		}*/
+		m_FileTags.comments = m_pSndFile->GetSongMessage(leLF);
 	}
 	else
 	{
@@ -631,6 +617,7 @@ void CDoWaveConvert::OnButton1()
 		EndDialog(IDCANCEL);
 		return;
 	}
+
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	int oldVol = m_pSndFile->GetMasterVolume();
 	int nOldRepeat = m_pSndFile->GetRepeatCount();
