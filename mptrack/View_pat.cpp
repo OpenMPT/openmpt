@@ -2890,7 +2890,7 @@ void CViewPattern::OnPatternAmplify()
 				}
 				firstChannel++;
 			}
-			if(CreateCursor(0, lastChannel << 3, useVolCol ? VOL_COLUMN : EFFECT_COLUMN) > (m_dwEndSel & 0xFFFF))
+			if(CreateCursor(0, lastChannel, useVolCol ? VOL_COLUMN : EFFECT_COLUMN) > (m_dwEndSel & 0xFFFF))
 			{
 				if(lastChannel == 0)
 				{

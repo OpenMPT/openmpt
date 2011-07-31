@@ -69,8 +69,8 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nDefaultSpeed = 6;
 	m_nChannels = 8;
 
-	memcpy(m_szNames[0], pfh->songmessage, 16);
-	SpaceToNullStringFixed<16>(m_szNames[0]);
+	memcpy(m_szNames[0], pfh->songmessage, min(MAX_SAMPLENAME - 1, 36));
+	SpaceToNullStringFixed<min(MAX_SAMPLENAME - 1, 36)>(m_szNames[0]);
 
 	m_nSamples = pfh->samples;
 	for (SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++, psmp++)
