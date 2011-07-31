@@ -617,7 +617,7 @@ BOOL CViewPattern::ShowEditWindow()
 }
 
 
-BOOL CViewPattern::PrepareUndo(DWORD dwBegin, DWORD dwEnd)
+bool CViewPattern::PrepareUndo(DWORD dwBegin, DWORD dwEnd)
 //--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -627,9 +627,8 @@ BOOL CViewPattern::PrepareUndo(DWORD dwBegin, DWORD dwEnd)
 	nRowBeg = GetRowFromCursor(dwBegin);
 	nChnEnd = GetChanFromCursor(dwEnd);
 	nRowEnd = GetRowFromCursor(dwEnd);
-	if( (nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) ) return FALSE;
-	if (pModDoc) return pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd-nChnBeg+1, nRowEnd-nRowBeg+1);
-	return FALSE;
+	if((nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) || pModDoc == nullptr) return false;
+	return pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd-nChnBeg+1, nRowEnd-nRowBeg+1);
 }
 
 
@@ -2388,9 +2387,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 
 		bool doPCinterpolation = false;
 
-		int vsrc, vdest, vcmd = 0, verr = 0;
-		ASSERT(row1 >= row0);
-		UINT distance = row1 - row0;
+		int vsrc, vdest, vcmd = 0, verr = 0, distance = row1 - row0;
 
 		const MODCOMMAND srcCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
 		const MODCOMMAND destCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row1, nchn);
@@ -2404,7 +2401,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 				vsrc = srcCmd.note;
 				vdest = destCmd.note;
 				vcmd = srcCmd.instr;
-				verr = (distance * 59) / NOTE_MAX;
+				verr = (distance * (NOTE_MAX - 1)) / NOTE_MAX;
 				break;
 			case VOL_COLUMN:
 				vsrc = srcCmd.vol;
@@ -2459,19 +2456,23 @@ void CViewPattern::Interpolate(PatternColumns type)
 
 		MODCOMMAND* pcmd = pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
 
-		for (UINT i=0; i<=distance; i++, pcmd += pSndFile->m_nChannels)	{
+		for (int i = 0; i <= distance; i++, pcmd += pSndFile->GetNumChannels())
+		{
 
-			switch(type) {
+			switch(type)
+			{
 				case NOTE_COLUMN:
-					if ((!pcmd->note) || (pcmd->instr == vcmd))	{
-						int note = vsrc + ((vdest - vsrc) * (int)i + verr) / distance;
+					if ((!pcmd->note) || (pcmd->instr == vcmd))
+					{
+						int note = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->note = (BYTE)note;
 						pcmd->instr = vcmd;
 					}
 					break;
 				case VOL_COLUMN:
-					if ((!pcmd->volcmd) || (pcmd->volcmd == vcmd))	{
-						int vol = vsrc + ((vdest - vsrc) * (int)i + verr) / distance;
+					if ((!pcmd->volcmd) || (pcmd->volcmd == vcmd))
+					{
+						int vol = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->vol = (BYTE)vol;
 						pcmd->volcmd = vcmd;
 					}
@@ -2480,7 +2481,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 					if(doPCinterpolation)
 					{	// With PC/PCs notes, copy PCs note and plug index to all rows where
 						// effect interpolation is done if no PC note with non-zero instrument is there.
-						const uint16 val = static_cast<uint16>(vsrc + ((vdest - vsrc) * (int)i + verr) / distance);
+						const uint16 val = static_cast<uint16>(vsrc + ((vdest - vsrc) * i + verr) / distance);
 						if (pcmd->IsPcNote() == false || pcmd->instr == 0)
 						{
 							pcmd->note = PCnote;
@@ -2493,7 +2494,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 					{
 						if ((!pcmd->command) || (pcmd->command == vcmd))
 						{
-							int val = vsrc + ((vdest - vsrc) * (int)i + verr) / distance;
+							int val = vsrc + ((vdest - vsrc) * i + verr) / distance;
 							pcmd->param = (BYTE)val;
 							pcmd->command = vcmd;
 						}
@@ -2508,7 +2509,8 @@ void CViewPattern::Interpolate(PatternColumns type)
 
 	} //end for all channels where type is selected
 
-	if (changed) {
+	if (changed)
+	{
 		pModDoc->SetModified();
 		InvalidatePattern(FALSE);
 	}
@@ -2870,8 +2872,6 @@ void CViewPattern::OnPatternAmplify()
 
 		if (pSndFile->Patterns[m_nPattern])
 		{
-			MODCOMMAND *p = pSndFile->Patterns[m_nPattern];
-
 			CHANNELINDEX firstChannel = GetSelectionStartChan(), lastChannel = GetSelectionEndChan();
 			ROWINDEX firstRow = GetSelectionStartRow(), lastRow = GetSelectionEndRow();
 			firstChannel = CLAMP(firstChannel, 0, pSndFile->GetNumChannels() - 1);
@@ -2906,7 +2906,7 @@ void CViewPattern::OnPatternAmplify()
 
 			for (ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 			{
-				MODCOMMAND *m = p + nRow * pSndFile->m_nChannels + firstChannel;
+				MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, firstChannel);
 				for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
 				{
 					if ((m->command == CMD_VOLUME) && (m->param <= 64))
@@ -2922,9 +2922,9 @@ void CViewPattern::OnPatternAmplify()
 					if ((m->note) && (m->note <= NOTE_MAX) && (m->instr))
 					{
 						UINT nSmp = m->instr;
-						if (pSndFile->m_nInstruments)
+						if (pSndFile->GetNumInstruments())
 						{
-							if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
+							if ((nSmp <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[nSmp]))
 							{
 								nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
 								if(!nSmp) chvol[nChn] = 64;	// hack for instruments without samples
@@ -2933,7 +2933,7 @@ void CViewPattern::OnPatternAmplify()
 								nSmp = 0;
 							}
 						}
-						if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
+						if ((nSmp) && (nSmp <= pSndFile->GetNumSamples()))
 						{
 							chvol[nChn] = (BYTE)(pSndFile->Samples[nSmp].nVolume >> 2);
 							break;
@@ -2958,7 +2958,7 @@ void CViewPattern::OnPatternAmplify()
 
 			for (ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 			{
-				MODCOMMAND *m = p + nRow * pSndFile->m_nChannels + firstChannel;
+				MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, firstChannel);
 				const int cy = lastRow - firstRow + 1; // total rows (for fading)
 				for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
 				{
