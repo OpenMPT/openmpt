@@ -196,7 +196,7 @@ public:
 	void SelectBeatOrMeasure(bool selectBeat);
 
 	BOOL TransposeSelection(int transp);
-	BOOL PrepareUndo(DWORD dwBegin, DWORD dwEnd);
+	bool PrepareUndo(DWORD dwBegin, DWORD dwEnd);
 	void DeleteRows(UINT colmin, UINT colmax, UINT nrows);
 	void OnDropSelection();
 	void ProcessChar(UINT nChar, UINT nFlags);
