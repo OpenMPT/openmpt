@@ -113,7 +113,8 @@ protected:
 	RECT m_rcDragItem, m_rcDropItem;
 
 	bool m_bContinueSearch, m_bWholePatternFitsOnScreen;
-	DWORD m_dwStatus, m_dwCursor;
+	DWORD m_dwStatus;
+	DWORD m_dwCursor;					// Current cursor position, without row number.
 	DWORD m_dwBeginSel, m_dwEndSel;		// Upper-left / Lower-right corners of selection
 	DWORD m_dwStartSel, m_dwDragPos;	// Point where selection was started
 	WORD ChnVUMeters[MAX_BASECHANNELS];

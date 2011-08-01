@@ -3018,7 +3018,7 @@ void CViewPattern::OnPatternAmplify()
 						if (vol > 64) vol = 64;
 						m->vol = (BYTE)vol;
 					}
-					if ((((nChn << 3) | 3u) >= (m_dwBeginSel & 0xFFFF)) && (((nChn << 3) | 3u) <= (m_dwEndSel & 0xFFFF)))
+					if ((CreateCursor(0, nChn, EFFECT_COLUMN) >= (m_dwBeginSel & 0xFFFF)) && (CreateCursor(0, nChn, EFFECT_COLUMN) <= (m_dwEndSel & 0xFFFF)))
 					{
 						if ((m->command == CMD_VOLUME) && (m->param <= 64))
 						{
@@ -3697,23 +3697,23 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (!m_dwCursor))
-									SetCurrentColumn((((pSndFile->GetNumChannels() - 1) << 3) | 4));
+									SetCurrentColumn(CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN));
 								else
 									SetCurrentColumn(m_dwCursor - 1);
 								return wParam;
 		case kcNavigateRightSelect:
-		case kcNavigateRight:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_dwCursor >= (((pSndFile->m_nChannels-1) << 3u) | 4u)))
+		case kcNavigateRight:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_dwCursor >= CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN)))
 									SetCurrentColumn(0);
 								else
 									SetCurrentColumn(m_dwCursor + 1);
 								return wParam;
 		case kcNavigateNextChanSelect:
-		case kcNavigateNextChan: SetCurrentColumn((((GetChanFromCursor(m_dwCursor) + 1) % pSndFile->m_nChannels) << 3) | GetColTypeFromCursor(m_dwCursor)); return wParam;
+		case kcNavigateNextChan: SetCurrentColumn(CreateCursor(0, (GetChanFromCursor(m_dwCursor) + 1) % pSndFile->GetNumChannels(), GetColTypeFromCursor(m_dwCursor))); return wParam;
 		case kcNavigatePrevChanSelect:
 		case kcNavigatePrevChan:{if(GetChanFromCursor(m_dwCursor) > 0)
-									SetCurrentColumn((((GetChanFromCursor(m_dwCursor) - 1) % pSndFile->m_nChannels) << 3) | GetColTypeFromCursor(m_dwCursor));
+									SetCurrentColumn(CreateCursor(0, (GetChanFromCursor(m_dwCursor) - 1) % pSndFile->GetNumChannels(), GetColTypeFromCursor(m_dwCursor)));
 								else
-									SetCurrentColumn(GetColTypeFromCursor(m_dwCursor) | ((pSndFile->m_nChannels-1) << 3));
+									SetCurrentColumn(CreateCursor(0, (pSndFile->GetNumChannels() - 1), GetColTypeFromCursor(m_dwCursor)));
 								UINT n = CreateCursor(m_nRow) | m_dwCursor;
 								SetCurSel(n, n);  return wParam;}
 
@@ -3729,15 +3729,17 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcHomeAbsolute:	if (m_dwCursor) SetCurrentColumn(0); if (m_nRow > 0) SetCurrentRow(0); return wParam;
 
 		case kcEndHorizontalSelect:
-		case kcEndHorizontal:	if (m_dwCursor!=(((pSndFile->GetNumChannels() - 1u) << 3u) | 4)) SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4);
+		case kcEndHorizontal:	if (m_dwCursor != CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN)) SetCurrentColumn(CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN));
 								else if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 		case kcEndVerticalSelect:
 		case kcEndVertical:		if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								else if (m_dwCursor!=(((pSndFile->GetNumChannels() - 1) << 3u) | 4u)) SetCurrentColumn(((pSndFile->m_nChannels-1) << 3u) | 4);
+								else if (m_dwCursor != CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN)) SetCurrentColumn(CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN));
 								return wParam;
 		case kcEndAbsoluteSelect:
-		case kcEndAbsolute:		SetCurrentColumn(((pSndFile->GetNumChannels() - 1) << 3) | 4); if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1); return wParam;
+		case kcEndAbsolute:		SetCurrentColumn(CreateCursor(0, pSndFile->GetNumChannels() - 1, LAST_COLUMN));
+								if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
+								return wParam;
 
 		case kcNextPattern:	{	UINT n = m_nPattern + 1;
             					while ((n < pSndFile->Patterns.Size()) && (!pSndFile->Patterns[n])) n++;
@@ -4207,9 +4209,9 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	//Enter note off
-	if(pModDoc->GetSoundFile()->GetModSpecifications().hasNoteOff) // ===
+	if(pSndFile->GetModSpecifications().hasNoteOff) // ===
 		p->note = NOTE_KEYOFF;
-	else if(pModDoc->GetSoundFile()->GetModSpecifications().hasNoteCut) // ^^^
+	else if(pSndFile->GetModSpecifications().hasNoteCut) // ^^^
 		p->note = NOTE_NOTECUT;
 	else { // we don't have anything to cut (MOD format) - use volume or ECx
 		if(usePlaybackPosition && nTick) // ECx
