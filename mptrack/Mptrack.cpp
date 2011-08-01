@@ -830,8 +830,9 @@ BOOL CTrackApp::InitInstance()
 	}
 	m_pszProfileName = _tcsdup(m_szConfigFileName); 
 
-
-	LoadStdProfileSettings(10);  // Load standard INI file options (including MRU)
+	int mruListLength = GetPrivateProfileInt("Misc", "MRUListLength", 10, m_pszProfileName);
+	Limit(mruListLength, 0, 15);
+	LoadStdProfileSettings((UINT)mruListLength);  // Load standard INI file options (including MRU)
 
 	// Register document templates
 	m_pModTemplate = new CModDocTemplate(
