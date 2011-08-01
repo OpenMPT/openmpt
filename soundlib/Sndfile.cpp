@@ -940,15 +940,15 @@ void CSoundFile::SanitizeMacros()
 {
 	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiGlb); i++)
 	{
-		SetNullTerminator(m_MidiCfg.szMidiGlb[i]);
+		FixNullString(m_MidiCfg.szMidiGlb[i]);
 	}
 	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiSFXExt); i++)
 	{
-		SetNullTerminator(m_MidiCfg.szMidiSFXExt[i]);
+		FixNullString(m_MidiCfg.szMidiSFXExt[i]);
 	}
 	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiZXXExt); i++)
 	{
-		SetNullTerminator(m_MidiCfg.szMidiZXXExt[i]);
+		FixNullString(m_MidiCfg.szMidiZXXExt[i]);
 	}
 }
 
@@ -2662,9 +2662,9 @@ void CSoundFile::BuildDefaultInstrument()
 	MemsetZero(m_defaultInstrument);
 	m_defaultInstrument.nResampling = SRCMODE_DEFAULT;
 	m_defaultInstrument.nFilterMode = FLTMODE_UNCHANGED;
-	m_defaultInstrument.nPPC = 5*12;
-	m_defaultInstrument.nGlobalVol=64;
-	m_defaultInstrument.nPan = 0x20 << 2;
+	m_defaultInstrument.nPPC = 5 * 12;
+	m_defaultInstrument.nGlobalVol = 64;
+	m_defaultInstrument.nPan = 32 * 4;
 	//m_defaultInstrument.nIFC = 0xFF;
 	m_defaultInstrument.PanEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.PitchEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
@@ -2942,4 +2942,3 @@ void CSoundFile::FixMIDIConfigStrings(MODMIDICFG &midiCfg)
 		FixMIDIConfigString(midiCfg.szMidiZXXExt[i]);
 	}
 }
-

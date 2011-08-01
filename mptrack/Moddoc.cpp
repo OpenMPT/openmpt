@@ -436,13 +436,11 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 //--------------------------------------------------------------------------
 {
 	static int greccount = 0;
-	TCHAR fext[_MAX_EXT] = _T("");
 	UINT dwPacking = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
 	if (!lpszPathName) 
 		return FALSE;
-	_tsplitpath(lpszPathName, NULL, NULL, NULL, fext);
 	MODTYPE type = m_SndFile.GetType(); // CModSpecifications::ExtensionToType(fext);
 
 	if (type == MOD_TYPE_NONE && !greccount)
@@ -460,17 +458,21 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
-	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, _T(".itp"))) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
 	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
 	}
 	EndWaitCursor();
 	if (bOk)
 	{
-		if (type == m_SndFile.GetType() && !bTemplateFile)
+		if (!bTemplateFile)
+		{
+			// Set new path for this file, unless we are saving a template, in which case we want to keep the old file path.
 			SetPathName(lpszPathName);
+		}
 		ShowLog();
 		if (bTemplateFile)
 		{
+			// Update template menu.
 			CMainFrame* const pMainFrame = CMainFrame::GetMainFrame();
 			if (pMainFrame)
 				pMainFrame->CreateTemplateModulesMenu();
@@ -491,7 +493,8 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 BOOL CModDoc::SaveModified()
 //--------------------------
 {
-	if((m_SndFile.m_nType & MOD_TYPE_IT) && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH)){
+	if((m_SndFile.m_nType & MOD_TYPE_IT) && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH))
+	{
 
 		bool unsavedInstrument = false;
 
@@ -506,8 +509,10 @@ BOOL CModDoc::SaveModified()
 
 		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
 
-			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++){
-				if(m_SndFile.m_szInstrumentPath[i][0] != '\0'){
+			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++)
+			{
+				if(m_SndFile.m_szInstrumentPath[i][0] != '\0')
+				{
 					int size = strlen(m_SndFile.m_szInstrumentPath[i]);
 					bool iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
 					bool xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
@@ -596,7 +601,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	if ((!lpszPathName) || (!lpszPathName[0]) || m_ShowSavedialog)
 	{
 		_splitpath(m_strPathName, drive, path, fname, NULL);
-		if (!fname[0]) strcpy(fname, m_strTitle);
+		if (!fname[0]) strcpy(fname, GetTitle());
 		strcpy(s, drive);
 		strcat(s, path);
 		strcat(s, fname);
@@ -1787,15 +1792,10 @@ void CModDoc::OnFileCompatibilitySave()
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 	switch (type)
 	{
-		/*case MOD_TYPE_XM:
-			ext = "xm";
-			pattern = "Fast Tracker Files (*.xm)|*.xm||";
-			break;*/
 		case MOD_TYPE_MOD:
-			ext = ModSpecs::mod.fileExtension;
 			pattern = FileFilterMOD;
 			if( AfxMessageBox(GetStrI18N(TEXT(
-				"Compared to regular MOD save, compatibility export adjust the beginning of oneshot samples "
+				"Compared to regular MOD save, compatibility export adjusts the beginning of oneshot samples "
 				"in order to make the file compatible with ProTracker and other Amiga-based trackers. "
 				"Note that this feature does not remove effects \"invented\" by other PC-based trackers (f.e. panning commands)."
 				"\n\n Proceed?")), MB_ICONINFORMATION|MB_YESNO) != IDYES
@@ -1803,12 +1803,10 @@ void CModDoc::OnFileCompatibilitySave()
 				return;
 			break;
 		case MOD_TYPE_IT:
-			ext = ModSpecs::it.fileExtension;
 			pattern = FileFilterIT;
 			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 			break;
 		case MOD_TYPE_XM:
-			ext = ModSpecs::xm.fileExtension;
 			pattern = FileFilterXM;
 			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 			break;
@@ -1816,6 +1814,7 @@ void CModDoc::OnFileCompatibilitySave()
 			::MessageBox(NULL,"Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
 			return;
 	}
+	ext = m_SndFile.GetModSpecifications().fileExtension;
 
 	_splitpath(GetPathName(), drive, path, fname, NULL);
 	filename = drive;
@@ -3951,11 +3950,14 @@ void CModDoc::FixNullStrings()
 		FixNullString(m_SndFile.ChnSettings[nChn].szName);
 	}
 
+	// Macros
+	m_SndFile.SanitizeMacros();
+
 	// Pattern names
-	// Halp, this is currently not possible. Is it even needed?
+	// Those are CStrings and don't need to be fixed.
 	
 	// Sequence names.
-	// Not needed?
+	// Those are CStrings and don't need to be fixed.
 }
 
 
