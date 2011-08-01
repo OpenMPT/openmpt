@@ -481,6 +481,9 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 //------------------------
 {
+	// TODO: Here we could add a custom dialog that lists all modified files, and the user could select which should be saved.
+	// How do we get all files? Does the document manager help here?
+
 	CChildFrame *pMDIActive = (CChildFrame *)MDIGetActive();
 
 	BeginWaitCursor();
@@ -2177,6 +2180,14 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
 				CModDoc* pModDoc = static_cast<CModDoc*>(pDoc);
 				pModDoc->ClearFilePath(); // Clear path so that saving will not take place in templates/examples folder.
+				// Remove extension from title, so that saving the file will not suggest a filename like f.e. "template.mptm.mptm".
+				const CString title = pModDoc->GetTitle();
+				const int dotPos = title.ReverseFind('.');
+				if(dotPos >= 0)
+				{
+					pModDoc->SetTitle(title.Left(dotPos));
+				}
+
 				if (bTemplateFile)
 				{
 					pModDoc->GetFileHistory()->clear();	// Reset edit history for template files
@@ -2362,7 +2373,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	{
 		case kcViewTree: OnBarCheck(IDD_TREEVIEW); break;
 		case kcViewOptions: OnViewOptions(); break;
-		case kcViewMain: OnBarCheck(59392); break;
+		case kcViewMain: OnBarCheck(59392 /* MAINVIEW */); break;
 	 	case kcFileImportMidiLib: OnImportMidiLib(); break;
 		case kcFileAddSoundBank: OnAddDlsBank(); break;
 		case kcPauseSong:	OnPlayerPause(); break;
