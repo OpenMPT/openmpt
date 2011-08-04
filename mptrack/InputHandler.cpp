@@ -416,7 +416,7 @@ CString CInputHandler::GetMenuText(UINT id)
 	{
 		case FILENEW:				s="&New\t"; c = kcFileNew; break;
 		case ID_FILE_OPEN:			s="&Open...\t"; c = kcFileOpen; break;
-		case ID_FILE_OPENTEMPLATE:	s="Open Template\t"; break;
+		case ID_FILE_OPENTEMPLATE:	return "Open Template\t";
 		case ID_FILE_CLOSE:			s="&Close\t"; c = kcFileClose; break;
 		case ID_FILE_SAVE:			s="&Save\t"; c = kcFileSave; break;
 		case ID_FILE_SAVE_AS:		s="Save &As...\t"; c = kcFileSaveAs; break;
@@ -479,7 +479,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		default: return "Unknown Item.";
 	}
 
-	s+=activeCommandSet->GetKeyTextFromCommand(c,0);
+	s += activeCommandSet->GetKeyTextFromCommand(c, 0);
 
 	return s;
 }
