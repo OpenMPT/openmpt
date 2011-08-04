@@ -171,6 +171,7 @@
     <ClCompile Include="ChannelManagerDlg.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="CleanupSong.cpp" />
+    <ClCompile Include="CloseMainDialog.cpp" />
     <ClCompile Include="ColourEdit.cpp" />
     <ClCompile Include="CommandSet.cpp" />
     <ClCompile Include="CreditStatic.cpp" />
@@ -334,6 +335,7 @@
     <ClInclude Include="ChannelManagerDlg.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="CleanupSong.h" />
+    <ClInclude Include="CloseMainDialog.h" />
     <ClInclude Include="ColourEdit.h" />
     <ClInclude Include="CommandSet.h" />
     <ClInclude Include="CreditStatic.h" />

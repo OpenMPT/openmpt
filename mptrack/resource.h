@@ -151,6 +151,7 @@
 #define IDD_SAMPLE_GRID_SIZE            527
 #define IDD_SAMPLE_XFADE                528
 #define IDD_OPTIONS_UPDATE              529
+#define IDD_CLOSEDOCUMENTS              530
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -1198,7 +1199,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        530
+#define _APS_NEXT_RESOURCE_VALUE        531
 #define _APS_NEXT_COMMAND_VALUE         40461
 #define _APS_NEXT_CONTROL_VALUE         2436
 #define _APS_NEXT_SYMED_VALUE           901

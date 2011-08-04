@@ -209,6 +209,19 @@ BEGIN
 END
 
 
+IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 233
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save modified files"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&OK",IDOK,300,174,66,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,300,193,66,14
+    LISTBOX         IDC_LIST1,6,6,288,204,LBS_SORT | LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Show &full paths",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,216,252,12
+    PUSHBUTTON      "&Select none",IDC_BUTTON1,300,12,66,14
+END
+
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -295,6 +308,14 @@ BEGIN
         RIGHTMARGIN, 267
         TOPMARGIN, 7
         BOTTOMMARGIN, 274
+    END
+
+    IDD_CLOSEDOCUMENTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 363
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2152,17 +2173,33 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_TUNING_IMPORT_LIMIT "-Failed to load file %1%2: maximum number(=%3!u!) of temporary tunings is already open.\n"
+    IDS_TUNING_IMPORT_UNKNOWN_FAILURE 
+                            "-Unable to import file ""%1%2"": unknown reason.\n"
+    IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT 
+                            "-Unable to load ""%1%2"": unrecognized file extension.\n"
+    IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE 
+                            "-Unable to import tuning collection ""%1%2"": unrecognized file.\n"
+    IDS_TUNING_IMPORT_SCL_FAILURE "-Unable to import ""%1%2"": %3.\n"
+    IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 
+                            "-Unable to import file ""%1%2"": unrecognized file.\n"
+    IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
+    IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER 
+                            """Error: Unable to create template folder '%1'"""
+    IDS_FILE_DOES_NOT_EXIST "The file '%1' does not exist"
+    IDS_FILE_EXISTS_BUT_IS_NOT_READABLE 
+                            "The file '%1' exists but can't be read"
     IDS_ERR_FILEOPEN        "Unable to open file."
     IDS_ERR_FILETYPE        "Unsupported file type"
     IDS_ERR_SAVEINS         "Unable to save instrument"
     IDS_ERR_OUTOFMEMORY     "Not enough memory"
     IDS_ERR_TOOMANYINS      "Too many instruments!"
     IDS_ERR_SAVESONG        "Unable to save song!"
-    IDS_ERR_TOOMANYPAT      "Too many patterns!"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_ERR_TOOMANYPAT      "Too many patterns!"
     IDS_ERR_TOOMANYSMP      "Too many samples!"
     IDS_ERR_SAVESMP         "Unable to save sample"
 END
@@ -2175,10 +2212,19 @@ BEGIN
     ID_INDICATOR_SCRL       "SCRL"
     ID_INDICATOR_OVR        "OVR"
     ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
     ID_INDICATOR_TIME       "00:00:00 [100] 200ch"
+END
+
+STRINGTABLE 
+BEGIN
     ID_INDICATOR_USER       "Row 000, Col 000"
     ID_INDICATOR_INFO       "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     ID_INDICATOR_XINFO      "123456789|123456789|123456789|123456789|"
+    ID_VIEW_MIDIMAPPING     "Configure the MIDI Mapping"
 END
 
 STRINGTABLE 
@@ -2474,39 +2520,18 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_TUNING_IMPORT_LIMIT "-Failed to load file %1%2: maximum number(=%3!u!) of temporary tunings is already open.\n"
-    IDS_TUNING_IMPORT_UNKNOWN_FAILURE 
-                            "-Unable to import file ""%1%2"": unknown reason.\n"
-    IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT 
-                            "-Unable to load ""%1%2"": unrecognized file extension.\n"
-    IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE 
-                            "-Unable to import tuning collection ""%1%2"": unrecognized file.\n"
-    IDS_TUNING_IMPORT_SCL_FAILURE "-Unable to import ""%1%2"": %3.\n"
-    IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 
-                            "-Unable to import file ""%1%2"": unrecognized file.\n"
-    IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
-    IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER 
-                            """Error: Unable to create template folder '%1'"""
-    IDS_FILE_DOES_NOT_EXIST "The file '%1' does not exist"
-    IDS_FILE_EXISTS_BUT_IS_NOT_READABLE 
-                            "The file '%1' exists but can't be read"
+    ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
+    ID_VIEW_EDITHISTORY     "View the edit history of this module"
 END
 
 STRINGTABLE 
 BEGIN
-    ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
-    ID_VIEW_EDITHISTORY     "View the edit history of this module"
     ID_FILE_SAVEASTEMPLATE  "Save the active document as template module\nSave as Template"
 END
 
 STRINGTABLE 
 BEGIN
     ID_FILE_OPENTEMPLATE    "Open a template document\nOpen template document"
-END
-
-STRINGTABLE 
-BEGIN
-    ID_VIEW_MIDIMAPPING     "Configure the MIDI Mapping"
 END
 
 STRINGTABLE 

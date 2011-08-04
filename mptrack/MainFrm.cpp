@@ -25,6 +25,7 @@
 #include "version.h"
 #include "ctrl_pat.h"
 #include "UpdateCheck.h"
+#include "CloseMainDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -481,8 +482,15 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 //------------------------
 {
-	// TODO: Here we could add a custom dialog that lists all modified files, and the user could select which should be saved.
-	// How do we get all files? Does the document manager help here?
+	if(GetPrivateProfileLong("Misc", "NoModifiedDocumentsDialog", 0, theApp.GetConfigFileName()) == 0)
+	{
+		// Show modified documents window
+		CloseMainDialog dlg;
+		if(dlg.DoModal() != IDOK)
+		{
+			return;
+		}
+	}
 
 	CChildFrame *pMDIActive = (CChildFrame *)MDIGetActive();
 
