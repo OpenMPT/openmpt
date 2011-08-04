@@ -56,6 +56,7 @@ enum CommandID
 	kcFileClose,
 	kcFileSave,
 	kcFileSaveAs,
+	kcFileSaveTemplate,
 	kcFileSaveAsWave,
 	kcFileSaveAsMP3,
 	kcFileSaveMidi,
