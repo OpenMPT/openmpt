@@ -261,6 +261,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CloseMainDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ColourEdit.cpp"
 				>
 			</File>
@@ -884,6 +888,10 @@
 			</File>
 			<File
 				RelativePath=".\CleanupSong.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CloseMainDialog.h"
 				>
 			</File>
 			<File
