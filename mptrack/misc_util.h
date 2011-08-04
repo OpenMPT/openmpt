@@ -191,6 +191,7 @@ void FixNullString(char (&buffer)[size])
 //--------------------------------------
 {
 	STATIC_ASSERT(size > 0);
+	SetNullTerminator(buffer);
 	size_t pos = 0;
 	// Find the first null char.
 	while(buffer[pos] != '\0' && pos < size)
