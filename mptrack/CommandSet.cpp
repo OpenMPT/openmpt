@@ -604,6 +604,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleXFade, 1857, kcVisible, kcNoDummy, _T("Crossfade sample loop"));
 	DefineKeyCommand(kcSelectBeat, 1858, kcVisible, kcNoDummy, _T("Select beat"));
 	DefineKeyCommand(kcSelectMeasure, 1859, kcVisible, kcNoDummy, _T("Select measure"));
+	DefineKeyCommand(kcFileSaveTemplate, 1860, kcVisible, kcNoDummy, _T("File/Save As Template"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

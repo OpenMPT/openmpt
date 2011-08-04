@@ -3645,7 +3645,8 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
 		case kcFileSave:		DoSave(m_strPathName, 0); break;
-		case kcFileSaveAs:		DoSave(NULL, 1); break;
+		case kcFileSaveAs:		DoSave(NULL, TRUE); break;
+		case kcFileSaveTemplate: OnSaveTemplateModule(); break;
 		case kcFileClose:		SafeFileClose(); break;
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;

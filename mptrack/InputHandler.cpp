@@ -414,57 +414,57 @@ CString CInputHandler::GetMenuText(UINT id)
 
 	switch(id)
 	{
-		case FILENEW:				s="&New\t"; c=kcFileNew; break;
-		case ID_FILE_OPEN:			s="&Open...\t"; c=kcFileOpen;  break;
-		case ID_FILE_OPENTEMPLATE:	return "Open Template\t";
-		case ID_FILE_CLOSE:			s="&Close\t"; c=kcFileClose; break;
-		case ID_FILE_SAVE:			s="&Save\t"; c=kcFileSave; break;
-		case ID_FILE_SAVE_AS:		s="Save &As...\t"; c=kcFileSaveAs; break;
-		case ID_FILE_SAVEASTEMPLATE:s="Save as Template\t"; break;
-		case ID_FILE_SAVEASWAVE:	s="Export as &Wave...\t"; c=kcFileSaveAsWave; break;
-		case ID_FILE_SAVEASMP3:		s="Export as M&P3...\t"; c=kcFileSaveAsMP3; break;
-		case ID_FILE_SAVEMIDI:		s="Export as M&IDI...\t"; c=kcFileSaveMidi; break;
-		case ID_FILE_SAVECOMPAT:	s="Compatibility &Export...\t"; c=kcFileExportCompat; break;
-		case ID_IMPORT_MIDILIB:		s="Import &MIDI Library...\t"; c=kcFileImportMidiLib; break;
-		case ID_ADD_SOUNDBANK:		s="Add Sound &Bank...\t"; c=kcFileAddSoundBank; break;
+		case FILENEW:				s="&New\t"; c = kcFileNew; break;
+		case ID_FILE_OPEN:			s="&Open...\t"; c = kcFileOpen; break;
+		case ID_FILE_OPENTEMPLATE:	s="Open Template\t"; break;
+		case ID_FILE_CLOSE:			s="&Close\t"; c = kcFileClose; break;
+		case ID_FILE_SAVE:			s="&Save\t"; c = kcFileSave; break;
+		case ID_FILE_SAVE_AS:		s="Save &As...\t"; c = kcFileSaveAs; break;
+		case ID_FILE_SAVEASTEMPLATE:s="Save as &Template\t"; c = kcFileSaveTemplate; break;
+		case ID_FILE_SAVEASWAVE:	s="Export as &Wave...\t"; c = kcFileSaveAsWave; break;
+		case ID_FILE_SAVEASMP3:		s="Export as M&P3...\t"; c = kcFileSaveAsMP3; break;
+		case ID_FILE_SAVEMIDI:		s="Export as M&IDI...\t"; c = kcFileSaveMidi; break;
+		case ID_FILE_SAVECOMPAT:	s="Compatibility &Export...\t"; c = kcFileExportCompat; break;
+		case ID_IMPORT_MIDILIB:		s="Import &MIDI Library...\t"; c = kcFileImportMidiLib; break;
+		case ID_ADD_SOUNDBANK:		s="Add Sound &Bank...\t"; c = kcFileAddSoundBank; break;
 
-		case ID_PLAYER_PLAY:		s="Pause / &Resume\t"; c= kcPlayPauseSong; break;
-		case ID_PLAYER_PLAYFROMSTART:	s="&Play from start\t"; c=kcPlaySongFromStart; break;
-		case ID_PLAYER_STOP:		s="&Stop\t"; c=kcStopSong; break;
-		case ID_PLAYER_PAUSE:		s="P&ause\t"; c=kcPauseSong; break;
-		case ID_MIDI_RECORD:		s="&MIDI Record\t"; c=kcMidiRecord; break;
-		case ID_ESTIMATESONGLENGTH:	s="&Estimate Song Length\t"; c=kcEstimateSongLength; break;
-		case ID_APPROX_BPM:			s="Approx. real &BPM\t"; c=kcApproxRealBPM; break;
+		case ID_PLAYER_PLAY:		s="Pause / &Resume\t"; c = kcPlayPauseSong; break;
+		case ID_PLAYER_PLAYFROMSTART:	s="&Play from start\t"; c = kcPlaySongFromStart; break;
+		case ID_PLAYER_STOP:		s="&Stop\t"; c = kcStopSong; break;
+		case ID_PLAYER_PAUSE:		s="P&ause\t"; c = kcPauseSong; break;
+		case ID_MIDI_RECORD:		s="&MIDI Record\t"; c = kcMidiRecord; break;
+		case ID_ESTIMATESONGLENGTH:	s="&Estimate Song Length\t"; c = kcEstimateSongLength; break;
+		case ID_APPROX_BPM:			s="Approx. real &BPM\t"; c = kcApproxRealBPM; break;
 
-		case ID_EDIT_UNDO:			s="&Undo\t"; c=kcEditUndo; break;
-		case ID_EDIT_CUT:			s="Cu&t\t"; c=kcEditCut; break;
-		case ID_EDIT_COPY:			s="&Copy\t"; c=kcEditCopy; break;
-		case ID_EDIT_PASTE:			s="&Paste\t"; c=kcEditPaste; break;
-		case ID_EDIT_SELECT_ALL:	s="Select &All\t"; c=kcEditSelectAll; break;
+		case ID_EDIT_UNDO:			s="&Undo\t"; c = kcEditUndo; break;
+		case ID_EDIT_CUT:			s="Cu&t\t"; c = kcEditCut; break;
+		case ID_EDIT_COPY:			s="&Copy\t"; c = kcEditCopy; break;
+		case ID_EDIT_PASTE:			s="&Paste\t"; c = kcEditPaste; break;
+		case ID_EDIT_SELECT_ALL:	s="Select &All\t"; c = kcEditSelectAll; break;
 		case ID_EDIT_CLEANUP:		s="C&leanup"; break;
-		case ID_EDIT_FIND:			s="&Find / Replace\t"; c=kcEditFind; break;
-		case ID_EDIT_FINDNEXT:		s="Find &Next\t"; c=kcEditFindNext; break;
-		case ID_EDIT_GOTO_MENU:		s="&Goto\t"; c=kcPatternGoto; break;
-		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c=kcShowSplitKeyboardSettings; break;
+		case ID_EDIT_FIND:			s="&Find / Replace\t"; c = kcEditFind; break;
+		case ID_EDIT_FINDNEXT:		s="Find &Next\t"; c = kcEditFindNext; break;
+		case ID_EDIT_GOTO_MENU:		s="&Goto\t"; c = kcPatternGoto; break;
+		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c = kcShowSplitKeyboardSettings; break;
 			// "Paste Special" sub menu
-		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c=kcEditMixPaste; break;
-		case ID_EDIT_MIXPASTE_ITSTYLE:	s="&Mix Paste (IT Style)\t"; c=kcEditMixPasteITStyle; break;
-		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c=kcEditPasteFlood; break;
-		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste (Insert)\t"; c=kcEditPushForwardPaste; break;
+		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c = kcEditMixPaste; break;
+		case ID_EDIT_MIXPASTE_ITSTYLE:	s="&Mix Paste (IT Style)\t"; c = kcEditMixPasteITStyle; break;
+		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c = kcEditPasteFlood; break;
+		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste (Insert)\t"; c = kcEditPushForwardPaste; break;
 
-		case ID_VIEW_GLOBALS:		s="&General\t"; c=kcViewGeneral; break;
-		case ID_VIEW_SAMPLES:		s="&Samples\t"; c=kcViewSamples; break;
-		case ID_VIEW_PATTERNS:		s="&Patterns\t"; c=kcViewPattern; break;
-		case ID_VIEW_INSTRUMENTS:	s="&Instruments\t"; c=kcViewInstruments; break;
-		case ID_VIEW_COMMENTS:		s="&Comments\t"; c=kcViewComments; break;
-		case ID_VIEW_GRAPH:			s="G&raph\t"; c=kcViewGraph; break; //rewbs.graph
-		case MAINVIEW:				s="&Main\t"; c=kcViewMain; break;
-		case IDD_TREEVIEW:			s="&Tree\t"; c=kcViewTree; break;
-		case ID_VIEW_OPTIONS:		s="S&etup...\t"; c=kcViewOptions; break;
-		case ID_HELP:				s="C&ontents (todo)"; c=kcHelp; break;
-		case ID_PLUGIN_SETUP:		s="Pl&ugin Manager...\t"; c=kcViewAddPlugin; break;
-		case ID_CHANNEL_MANAGER:	s="Ch&annel Manager...\t"; c=kcViewChannelManager; break;
-		case ID_VIEW_SONGPROPERTIES:s="Song P&roperties...\t"; c=kcViewSongProperties; break; //rewbs.graph
+		case ID_VIEW_GLOBALS:		s="&General\t"; c = kcViewGeneral; break;
+		case ID_VIEW_SAMPLES:		s="&Samples\t"; c = kcViewSamples; break;
+		case ID_VIEW_PATTERNS:		s="&Patterns\t"; c = kcViewPattern; break;
+		case ID_VIEW_INSTRUMENTS:	s="&Instruments\t"; c = kcViewInstruments; break;
+		case ID_VIEW_COMMENTS:		s="&Comments\t"; c = kcViewComments; break;
+		case ID_VIEW_GRAPH:			s="G&raph\t"; c = kcViewGraph; break; //rewbs.graph
+		case MAINVIEW:				s="&Main\t"; c = kcViewMain; break;
+		case IDD_TREEVIEW:			s="&Tree\t"; c = kcViewTree; break;
+		case ID_VIEW_OPTIONS:		s="S&etup...\t"; c = kcViewOptions; break;
+		case ID_HELP:				s="C&ontents (todo)"; c = kcHelp; break;
+		case ID_PLUGIN_SETUP:		s="Pl&ugin Manager...\t"; c = kcViewAddPlugin; break;
+		case ID_CHANNEL_MANAGER:	s="Ch&annel Manager...\t"; c = kcViewChannelManager; break;
+		case ID_VIEW_SONGPROPERTIES:s="Song P&roperties...\t"; c = kcViewSongProperties; break; //rewbs.graph
 		case ID_VIEW_MIDIMAPPING:	s="&MIDI Mapping...\t"; c = kcViewMIDImapping; break;
 		case ID_VIEW_EDITHISTORY:	s="Edit &History...\t"; c = kcViewEditHistory; break;
 		// Help submenu:
