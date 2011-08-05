@@ -482,7 +482,7 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 //------------------------
 {
-	if(GetPrivateProfileLong("Misc", "NoModifiedDocumentsDialog", 0, theApp.GetConfigFileName()) == 0)
+	if(!(GetSettings().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
 	{
 		// Show modified documents window
 		CloseMainDialog dlg;
@@ -1310,7 +1310,7 @@ BOOL CMainFrame::ResetNotificationBuffer(HWND hwnd)
 {
 	if ((!hwnd) || (m_hFollowSong == hwnd))
 	{
-		memset(NotifyBuffer, 0, sizeof(NotifyBuffer));
+		MemsetZero(NotifyBuffer);
 		gsdwTotalSamples = 0;
 		return TRUE;
 	}

@@ -146,8 +146,10 @@ void CloseMainDialog::OnSwitchSelection()
 void CloseMainDialog::UpdateSwitchButtonState()
 //---------------------------------------------
 {
-	const CString text = (m_List.GetSelCount() == m_List.GetCount()) ? "&Select none" : "&Select all";
+	CString text = (m_List.GetSelCount() == m_List.GetCount()) ? "Se&lect none" : "Se&lect all";
 	((CButton *)GetDlgItem(IDC_BUTTON1))->SetWindowText(text);
+	text = (m_List.GetSelCount() > 0) ? "&Save selected" : "Cl&ose";
+	((CButton *)GetDlgItem(IDOK))->SetWindowText(text);
 }
 
 
