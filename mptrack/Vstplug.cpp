@@ -340,7 +340,13 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 						pEffect->numPrograms, pEffect->numParams,
 						pEffect->flags, pEffect->realQualities, pEffect->offQualities);
 				#endif // VST_LOG
-					pEffect->dispatcher(pEffect, effClose, 0,0,0,0);
+
+					// Tunefish 2.0 doesn't seem to like that we call effClose at this point...
+					if(memcmp("02FT", &(pEffect->uniqueID), 4))
+					{
+						pEffect->dispatcher(pEffect, effClose, 0,0,0,0);
+					}
+
 					bOk = TRUE;
 				}
 			} catch(...) {
@@ -1483,7 +1489,7 @@ VOID CSelectPluginDlg::OnOK()
 }
 
 VOID CSelectPluginDlg::OnCancel()
-//---------------------------
+//-------------------------------
 {
 	//remember window size:
 	RECT rect;
@@ -1497,7 +1503,7 @@ VOID CSelectPluginDlg::OnCancel()
 }
 
 void CSelectPluginDlg::OnNameFilterChanged() 
-//-------------------------------------
+//------------------------------------------
 {
 	GetDlgItem(IDC_NAMEFILTER)->GetWindowText(m_sNameFilter);
 	m_sNameFilter = m_sNameFilter.MakeLower();
@@ -2744,14 +2750,19 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 	if ((m_pEvList) && (m_pEvList->numEvents < VSTEVENT_QUEUE_LEN-1))
 	{
 		int insertPos;
-		if ((dwMidiCode & 0xF0) == 0x80) {	//noteoffs go at the start of the queue.
-			if (m_pEvList->numEvents) {
-				for (int i=m_pEvList->numEvents; i>=1; i--){
+		if ((dwMidiCode & 0xF0) == 0x80)
+		{
+			// noteoffs go at the start of the queue.
+			if (m_pEvList->numEvents)
+			{
+				for (int i=m_pEvList->numEvents; i>=1; i--)
+				{
 					m_pEvList->events[i] = m_pEvList->events[i-1];
 				}
 			}
 			insertPos=0;
-		} else {
+		} else
+		{
 			insertPos=m_pEvList->numEvents;
 		}
 
