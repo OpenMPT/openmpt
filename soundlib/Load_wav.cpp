@@ -29,7 +29,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (pfmt->id_fmt != IFFID_fmt)) return false;
 	dwMemPos = sizeof(WAVEFILEHEADER) + 8 + pfmt->hdrlen;
 	if ((dwMemPos + 8 >= dwMemLength)
-	 || ((pfmt->format != WAVE_FORMAT_PCM) && (pfmt->format != WAVE_FORMAT_EXTENSIBLE))
+	 || ((pfmt->format != WAVE_FORMAT_PCM) && (pfmt->format != WAVE_FORMAT_EXTENSIBLE) && (pfmt->format != WAVE_FORMAT_IEEE_FLOAT))
 	 || (pfmt->channels > 4)
 	 || (!pfmt->channels)
 	 || (!pfmt->freqHz)
@@ -42,7 +42,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 		pdata = (WAVEDATAHEADER *)(lpStream + dwMemPos);
 		if (pdata->id_data == IFFID_data) break;
 		dwMemPos += pdata->length + 8;
-		if (dwMemPos + 8 >= dwMemLength) return false;
+		if (dwMemPos >= dwMemLength - 8) return false;
 	}
 	m_nType = MOD_TYPE_WAV;
 	m_nSamples = 0;
@@ -117,7 +117,20 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		}
 		if ((pSmp->pSample = AllocateSample(bytelen+8)) == NULL) return true;
-		if (pfmt->bitspersample >= 16)
+		if (pfmt->bitspersample == 32 && pfmt->format == WAVE_FORMAT_IEEE_FLOAT)
+		{
+			// Hack-ish 32-bit float support
+			signed short *p = (signed short *)pSmp->pSample;
+			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn*4);
+			for (UINT i=0; i<len; i++)
+			{
+				float v = *((float *)psrc);
+				Limit(v, -1.0f, 1.0f);
+				p[i] = (int16)(v * int16_max);
+				psrc += samplesize;
+			}
+			p[len+1] = p[len] = p[len-1];
+		} else if (pfmt->bitspersample >= 16)
 		{
 			int slsize = pfmt->bitspersample >> 3;
 			signed short *p = (signed short *)pSmp->pSample;
