@@ -1088,7 +1088,7 @@ struct CommandStruct
 	bool isDummy;
 	bool isHidden;
 	CString Message;
-	CArray <KeyCombination,KeyCombination> kcList;
+	CArray <KeyCombination, KeyCombination> kcList;
 	//KeyCombination kcList[10];
 	
 	bool operator = (const CommandStruct &other)
@@ -1147,7 +1147,7 @@ class CCommandSet
 {
 protected:
 	//util
-	inline void DefineKeyCommand(CommandID kc, UINT uid, enmKcVisibility visible, enmKcDummy dummy, CString message);
+	inline void DefineKeyCommand(CommandID kc, UINT uid, CString message, enmKcVisibility visible = kcVisible, enmKcDummy dummy = kcNoDummy);
 	void SetupCommands();
 	void SetupContextHierarchy();
 	bool IsDummyCommand(CommandID cmd);
