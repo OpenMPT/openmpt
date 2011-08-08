@@ -636,7 +636,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 BOOL CSoundFile::ProcessRow()
 //---------------------------
 {
-	if (++m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay)
+	if (++m_nTickCount >= GetNumTicksOnCurrentRow())
 	{
 		HandlePatternTransitionEvents();
 		m_nPatternDelay = 0;
@@ -837,7 +837,7 @@ BOOL CSoundFile::ProcessRow()
 			pChn->nRightVol = pChn->nNewRightVol;
 			pChn->dwFlags &= ~(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
 			pChn->nCommand = 0;
-			pChn->m_nPlugParamValueStep = 0;
+			pChn->m_plugParamValueStep = 0;
 		}
 
 		// Now that we know which pattern we're on, we can update time signatures (global or pattern-specific)
@@ -850,7 +850,7 @@ BOOL CSoundFile::ProcessRow()
 
 	//End of row? stop pattern step (aka "play row").
 #ifdef MODPLUG_TRACKER
-	if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay - 1)
+	if (m_nTickCount >= GetNumTicksOnCurrentRow() - 1)
 	{
 		if (m_dwSongFlags & SONG_STEP)
 		{
@@ -2340,7 +2340,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 		if(pChn->nRowCommand == CMD_MIDI || pChn->nRowCommand == CMD_SMOOTHMIDI)
 		{
 			// Only smooth MIDI macros are processed on every tick
-			if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
+			//if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
 			if(pChn->nRowParam < 0x80)
 				ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->nRowParam);
 			else

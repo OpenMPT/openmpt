@@ -253,10 +253,10 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nActiveMacro, nFilterMode;
 	BYTE nEFxSpeed, nEFxDelay; // memory for Invert Loop (EFx, .MOD only)
 
-	uint16 m_RowPlugParam;			//NOTE_PCs memory.
-	float m_nPlugParamValueStep;  //rewbs.smoothVST 
-	float m_nPlugInitialParamValue; //rewbs.smoothVST
-	PLUGINDEX m_RowPlug;			//NOTE_PCs memory.
+	//NOTE_PCs memory.
+	uint16 m_RowPlugParam;
+	float m_plugParamValueStep, m_plugInitialParamValue;
+	PLUGINDEX m_RowPlug;
 	
 	void ClearRowCmd() {nRowNote = NOTE_NONE; nRowInstr = 0; nRowVolCmd = VOLCMD_NONE; nRowVolume = 0; nRowCommand = CMD_NONE; nRowParam = 0;}
 
@@ -949,6 +949,7 @@ protected:
 	inline void InvertLoop(MODCHANNEL* pChn);
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
+	float CalculateSmoothParamChange(float currentValue, float param) const;
 	size_t SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin);
 	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
