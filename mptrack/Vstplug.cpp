@@ -342,7 +342,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				#endif // VST_LOG
 
 					// Tunefish 2.0 doesn't seem to like that we call effClose at this point...
-					if(memcmp("02FT", &(pEffect->uniqueID), 4))
+					if(CCONST('T', 'F', '2', '0') != pEffect->uniqueID)
 					{
 						pEffect->dispatcher(pEffect, effClose, 0,0,0,0);
 					}
@@ -1150,7 +1150,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 				// Single path
 
 				// VOPM doesn't initialize required information properly (it doesn't memset the struct to 0)...
-				if(!memcmp(&(effect->uniqueID), "MPOV", 4))
+				if(CCONST('V', 'O', 'P', 'M') == effect->uniqueID)
 				{
 					pFileSel->sizeReturnPath = _MAX_PATH;
 				}
@@ -1308,9 +1308,11 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent
 	m_pModDoc = pModDoc;
 	m_nPlugSlot = nPlugSlot;
 	
-	 if (m_pModDoc) {
+	 if (m_pModDoc)
+	 {
 		CSoundFile* pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile && (0<=m_nPlugSlot && m_nPlugSlot<MAX_MIXPLUGINS)) {
+		if (pSndFile && (0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS))
+		{
 			m_pPlugin = &pSndFile->m_MixPlugins[m_nPlugSlot];
 		}
 	 }
@@ -1347,18 +1349,17 @@ BOOL CSelectPluginDlg::OnInitDialog()
 }
 
 
-typedef struct _PROBLEMATIC_PLUG
+struct PROBLEMATIC_PLUG
 {
 	DWORD id1;
 	DWORD id2;
 	DWORD version;
 	LPCSTR name;
 	LPCSTR problem;
-} _PROBLEMATIC_PLUG, *PPROBLEMATIC_PLUG;
+};
 
 //TODO: Check whether the list is still valid.
-#define NUM_PROBLEMPLUGS 2
-static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
+static PROBLEMATIC_PLUG gProblemPlugs[] =
 {
 	{kEffectMagic, CCONST('N', 'i', '4', 'S'), 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.  *"},
 	{kEffectMagic, CCONST('m', 'd', 'a', 'C'), 1, "MDA Degrade", "*  This plugin can cause OpenMPT to behave erratically.\r\nYou should try SoundHack's Decimate, ConcreteFX's Lowbit or Subtek's LoFi Plus instead.  *"},
@@ -1368,13 +1369,26 @@ bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug)
 //---------------------------------------------------
 {
 	CString s;
-	for (int p=0; p<NUM_PROBLEMPLUGS; p++)
+	for (size_t p = 0; p < CountOf(gProblemPlugs); p++)
 	{
 		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2)
 			/*&& (gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
 		{
 			s.Format("WARNING: This plugin has been identified as %s,\r\nwhich is known to have the following problem with OpenMPT:\r\n\r\n%s\r\n\r\nWould you like to continue to load this plugin?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
 			return (AfxMessageBox(s, MB_YESNO)  == IDYES);
+		}
+	}
+
+	// OK, this is a very specific problem with Superwave P8 and Farbrausch V2...
+	const CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	if((CCONST('f', 'V', '2', 's') == plug->dwPluginId2 || CCONST('f', 'r', 'V', '2') == plug->dwPluginId2) && pSndFile != nullptr && m_nPlugSlot >= 0 && m_nPlugSlot < MAX_MIXPLUGINS)
+	{
+		for(PLUGINDEX i = 0; i < m_nPlugSlot; i++)
+		{
+			if(CCONST('S', 'W', 'P', '8') == pSndFile->m_MixPlugins[i].Info.dwPluginId2)
+			{
+				return (AfxMessageBox("WARNING: Using Farbrausch V2 in a plugin slot after Superwave P8 will freeze OpenMPT when closing this module.\nThis problem is not specific to OpenMPT but happens in other music softwares as well.\nWould you still like to continue to load Farbrausch V2?", MB_YESNO)  == IDYES);
+			}
 		}
 	}
 
