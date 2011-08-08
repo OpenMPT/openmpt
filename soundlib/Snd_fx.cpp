@@ -1342,7 +1342,7 @@ BOOL CSoundFile::ProcessEffects()
 		// the need for parameter control. The condition cmd == 0
 		// is to make sure that m_nPlugParamValueStep != 0 because 
 		// of NOTE_PCS, not because of macro.
-		if(pChn->nRowNote == NOTE_PCS || (cmd == 0 && pChn->m_nPlugParamValueStep != 0))
+		if(pChn->nRowNote == NOTE_PCS || (cmd == 0 && pChn->m_plugParamValueStep != 0))
 		{
 			const bool isFirstTick = (m_dwSongFlags & SONG_FIRSTTICK) != 0;
 			if(isFirstTick)
@@ -1358,17 +1358,17 @@ BOOL CSoundFile::ProcessEffects()
 				{
 					PlugParamValue targetvalue = MODCOMMAND::GetValueEffectCol(pChn->nRowCommand, pChn->nRowParam) / PlugParamValue(MODCOMMAND::maxColumnValue);
 					// Hack: Use m_nPlugInitialParamValue to store the target value, not initial.
-					pChn->m_nPlugInitialParamValue = targetvalue;
-					pChn->m_nPlugParamValueStep = (targetvalue - m_MixPlugins[nPlug-1].pMixPlugin->GetParameter(plugparam)) / float(m_nMusicSpeed);
+					pChn->m_plugInitialParamValue = targetvalue;
+					pChn->m_plugParamValueStep = (targetvalue - m_MixPlugins[nPlug-1].pMixPlugin->GetParameter(plugparam)) / float(m_nMusicSpeed);
 				}
-				if(m_nTickCount + 1 == m_nMusicSpeed)
+				if(m_nTickCount + 1 == GetNumTicksOnCurrentRow())
 				{	// On last tick, set parameter exactly to target value.
 					// Note: m_nPlugInitialParamValue is used to store the target value,
 					//		 not the initial value as the name suggests.
-					m_MixPlugins[nPlug-1].pMixPlugin->SetParameter(plugparam, pChn->m_nPlugInitialParamValue);
+					m_MixPlugins[nPlug-1].pMixPlugin->SetParameter(plugparam, pChn->m_plugInitialParamValue);
 				}
 				else
-					m_MixPlugins[nPlug-1].pMixPlugin->ModifyParameter(plugparam, pChn->m_nPlugParamValueStep);
+					m_MixPlugins[nPlug-1].pMixPlugin->ModifyParameter(plugparam, pChn->m_plugParamValueStep);
 			}
 		}
 
@@ -3238,6 +3238,25 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 }
 
 
+// Calculate smooth MIDI macro slide parameter for current tick.
+float CSoundFile::CalculateSmoothParamChange(float currentValue, float param) const
+//---------------------------------------------------------------------------------
+{
+	ASSERT(GetNumTicksOnCurrentRow() > m_nTickCount);
+	const UINT ticksLeft = GetNumTicksOnCurrentRow() - m_nTickCount;
+	if(ticksLeft > 1)
+	{
+		// Slide param
+		const float step = ((float)param - currentValue) / (float)ticksLeft;
+		return (currentValue + step);
+	} else
+	{
+		// On last tick, set exact value.
+		return (float)param;
+	}
+}
+
+
 // Process MIDI macro data parsed by ProcessMIDIMacro... return bytes sent on success, 0 on (parse) failure.
 size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin)
 //------------------------------------------------------------------------------------------------------------------------------
@@ -3274,15 +3293,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 						pChn->nCutOff = param;
 					} else
 					{
-						// on the first tick only, calculate step
-						if(m_dwSongFlags & SONG_FIRSTTICK)
-						{
-							pChn->m_nPlugInitialParamValue = pChn->nCutOff;
-							// (dwParam & 0x7F) extracts the actual value that we're going to pass
-							pChn->m_nPlugParamValueStep = (float)((int)param - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
-						}
-						//update param on all ticks
-						pChn->nCutOff = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5);
+						pChn->nCutOff = (BYTE)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
 					}
 					pChn->nRestoreCutoffOnNewNote = 0;
 				}
@@ -3309,15 +3320,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 						pChn->nResonance = param;
 					} else
 					{
-						// on the first tick only, calculate step
-						if(m_dwSongFlags & SONG_FIRSTTICK)
-						{
-							pChn->m_nPlugInitialParamValue = pChn->nResonance;
-							// (dwParam & 0x7F) extracts the actual value that we're going to pass
-							pChn->m_nPlugParamValueStep = (float)((int)param - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
-						}
-						//update param on all ticks
-						pChn->nResonance = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5);
+						pChn->nResonance = (BYTE)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
 					}
 				}
 
@@ -3350,20 +3353,13 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
 				{
+					const float newRatio = 1.0 - (static_cast<float>(param) / 127.0f);
 					if(!isSmooth)
 					{
-						m_MixPlugins[nPlug - 1].fDryRatio = 1.0 - (static_cast<float>(param) / 127.0f);
+						m_MixPlugins[nPlug - 1].fDryRatio = newRatio;
 					} else
 					{
-						// on the first tick only, calculate step
-						if(m_dwSongFlags & SONG_FIRSTTICK)
-						{
-							pChn->m_nPlugInitialParamValue = m_MixPlugins[nPlug - 1].fDryRatio;
-							// (dwParam & 0x7F) extracts the actual value that we're going to pass
-							pChn->m_nPlugParamValueStep = ((1 - ((float)(param) / 127.0f)) - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
-						}
-						//update param on all ticks
-						m_MixPlugins[nPlug - 1].fDryRatio = pChn->m_nPlugInitialParamValue + (float)(m_nTickCount + 1) * pChn->m_nPlugParamValueStep;
+						m_MixPlugins[nPlug - 1].fDryRatio = CalculateSmoothParamChange(m_MixPlugins[nPlug - 1].fDryRatio, newRatio);
 					}
 				}
 				return 4;
@@ -3378,23 +3374,15 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				const UINT plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
 				if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 				{
-					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
-					if((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
+					IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
+					if((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState) && (param < 0x80))
 					{
 						if(!isSmooth)
 						{
-							pPlugin->SetZxxParameter(plugParam, param & 0x7F);
+							pPlugin->SetZxxParameter(plugParam, param);
 						} else
 						{
-							// on the first tick only, calculate step
-							if(m_dwSongFlags & SONG_FIRSTTICK)
-							{
-								pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(plugParam);
-								// (dwParam & 0x7F) extracts the actual value that we're going to pass
-								pChn->m_nPlugParamValueStep = ((int)(param & 0x7F) - pChn->m_nPlugInitialParamValue) / (float)GetNumTicksOnCurrentRow();
-							}
-							//update param on all ticks
-							pPlugin->SetZxxParameter(plugParam, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount + 1) * pChn->m_nPlugParamValueStep + 0.5));
+							pPlugin->SetZxxParameter(plugParam, (UINT)CalculateSmoothParamChange(pPlugin->GetZxxParameter(plugParam), (float)param));
 						}
 					}
 				}
