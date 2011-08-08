@@ -292,6 +292,8 @@ void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE 
 		mptEnv->Values[ev] = itEnv->data[ev * 3] + envOffset;
 		mptEnv->Ticks[ev] = (itEnv->data[ev * 3 + 2] << 8) | (itEnv->data[ev * 3 + 1]);
 	}
+	// Sanitize envelope
+	mptEnv->Ticks[0] = 0;
 }
 
 
@@ -500,7 +502,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if ((!lpStream) || (dwMemLength < 0xC0)) return false;
 	if ((pifh->id != LittleEndian(IT_IMPM) && pifh->id != LittleEndian(IT_MPTM)) || (pifh->insnum > 0xFF)
-	 || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return false;
+	 || (pifh->smpnum >= MAX_SAMPLES)) return false;
 	if (dwMemPos + pifh->ordnum + pifh->insnum*4
 	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return false;
 
@@ -2998,22 +3000,23 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 	return;
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT *instruments[], UINT nInstruments) 
-//-------------------------------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 size, FILE* f, MODINSTRUMENT *instruments[], UINT nInstruments) 
+//---------------------------------------------------------------------------------------------------------------------------------------------
 {
 	fwrite(&code, 1, sizeof(__int32), f);		//write code
 	fwrite(&size, 1, sizeof(__int16), f);		//write size
-	for(UINT nins=1; nins<=nInstruments; nins++) {  //for all instruments...
+	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
+	{
 		BYTE* pField;
-		if (instruments[nins])	{
+		if (instruments[nins])
+		{
 			pField = GetInstrumentHeaderFieldPointer(instruments[nins], code, size); //get ptr to field
-		} else { 
+		} else
+		{ 
 			pField = GetInstrumentHeaderFieldPointer(&m_defaultInstrument, code, size); //get ptr to field
 		}
 		fwrite(pField, 1, size, f);				//write field data
 	}
-
-	return;
 }
 
 void CSoundFile::SaveExtendedSongProperties(FILE* f)
