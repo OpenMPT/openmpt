@@ -824,7 +824,7 @@ BOOL CSoundFile::ProcessRow()
 		// Reset channel values
 		MODCHANNEL *pChn = Chn;
 		MODCOMMAND *m = Patterns[m_nPattern].GetRow(m_nRow);
-		for (UINT nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
+		for (CHANNELINDEX nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
 		{
 			pChn->nRowNote = m->note;
 			pChn->nRowInstr = m->instr;
@@ -1864,7 +1864,7 @@ BOOL CSoundFile::ReadNote()
 	{
 		/*int nchn32 = 0;
 		MODCHANNEL *pChn = Chn;
-		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++)
+		for (CHANNELINDEX nChn=0; nChn<m_nChannels; nChn++,pChn++)
 		{
 			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
 				nchn32++;
@@ -1908,7 +1908,7 @@ BOOL CSoundFile::ReadNote()
 	// Update channels data
 	m_nMixChannels = 0;
 	MODCHANNEL *pChn = Chn;
-	for (UINT nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
+	for (CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
 	{
 	skipchn:
 
@@ -2331,22 +2331,29 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 //-------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	if(nChn < m_nChannels && pChn->nRowCommand == CMD_MIDI || pChn->nRowCommand == CMD_SMOOTHMIDI)
+	if(nChn < m_nChannels)
 	{
-		// Only smooth MIDI macros are processed on every tick
-		if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
-		if(pChn->nRowParam < 0x80)
-			ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->nRowParam);
-		else
-			ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->nRowParam & 0x7F)], 0);
+		// TODO evaluate per-plugin macros here
+		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN]);
+		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_VOLUME]);
+
+		if(pChn->nRowCommand == CMD_MIDI || pChn->nRowCommand == CMD_SMOOTHMIDI)
+		{
+			// Only smooth MIDI macros are processed on every tick
+			if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
+			if(pChn->nRowParam < 0x80)
+				ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->nRowParam);
+			else
+				ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->nRowParam & 0x7F)], 0);
+		}
 	}
 }
 
 
 #ifdef MODPLUG_TRACKER
 
-VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
-//----------------------------------------------------------
+VOID CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
+//------------------------------------------------------------------
 {
 	// Do we need to process midi?
 	// For now there is no difference between mute and sync mute with VSTis.
