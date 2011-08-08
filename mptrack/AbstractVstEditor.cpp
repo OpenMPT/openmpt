@@ -9,6 +9,7 @@
 #include "fxp.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
+#include "../soundlib/StringFixer.h"
 
 #ifndef NO_VST
 
@@ -201,7 +202,7 @@ void CAbstractVstEditor::UpdatePresetField()
 				strcpy(rawname, "");
 			}
 		}
-		SetNullTerminator(rawname);
+		StringFixer::SetNullTerminator(rawname);
 		CreateVerifiedProgramName(rawname, CountOf(rawname), name, CountOf(name), index);
 
 		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
@@ -440,7 +441,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 		{
 			strcpy(sname, "");
 		}
-		SetNullTerminator(sname);
+		StringFixer::SetNullTerminator(sname);
 
 		CreateVerifiedProgramName(sname, sizeof(sname), s, sizeof(s), p);
 

@@ -8,6 +8,8 @@
 #include "ctrl_pat.h"
 #include "view_pat.h"
 #include "ChannelManagerDlg.h"
+#include "../soundlib/StringFixer.h"
+
 
 //////////////////////////////////////////////////////////////
 // CCtrlPatterns
@@ -1071,7 +1073,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 
 		CHAR s[MAX_PATTERNNAME];
 		m_EditPatName.GetWindowText(s, CountOf(s));
-		SetNullTerminator(s);
+		StringFixer::SetNullTerminator(s);
 		
 		if (m_pSndFile->Patterns[nPat].GetName().Compare(s))
 		{

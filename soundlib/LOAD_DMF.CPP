@@ -753,7 +753,7 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 	const size_t lenNameImport = min(30, lenName);
 	ASSERT_CAN_READ_SAMPLE(lenName);
 	memcpy(pSndFile->m_szNames[nSmp], lpStream + dwMemPos, lenNameImport);
-	SpaceToNullStringFixed(pSndFile->m_szNames[nSmp], lenNameImport);
+	StringFixer::SpaceToNullStringFixed(pSndFile->m_szNames[nSmp], lenNameImport);
 	dwMemPos += lenName;
 
 	ASSERT_CAN_READ_SAMPLE(sizeof(DMFCHUNK_SAMPLEHEADER));
@@ -798,7 +798,7 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 		// Read library name in version 8 files
 		ASSERT_CAN_READ_SAMPLE(8);
 		memcpy(pSmp->filename, lpStream + dwMemPos, 8);
-		SpaceToNullStringFixed<8>(pSmp->filename);
+		StringFixer::SpaceToNullStringFixed<8>(pSmp->filename);
 		dwMemPos += 8;
 	}
 
@@ -829,7 +829,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 	dwMemPos += sizeof(DMFHEADER);
 
 	memcpy(m_szNames[0], pHeader->songname, 30);
-	SpaceToNullStringFixed<30>(m_szNames[0]);
+	StringFixer::SpaceToNullStringFixed<30>(m_szNames[0]);
 	m_nChannels = 0;
 
 #ifdef MODPLUG_TRACKER

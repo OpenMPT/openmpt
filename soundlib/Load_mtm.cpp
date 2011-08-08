@@ -61,7 +61,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	 || (!pmh->numtracks) || (!pmh->numchannels)
 	 || (!pmh->lastpattern) || (pmh->lastpattern > MAX_PATTERNS)) return false;
 	memcpy(m_szNames[0], pmh->songname, 20);
-	SpaceToNullStringFixed<20>(m_szNames[0]);
+	StringFixer::SpaceToNullStringFixed<20>(m_szNames[0]);
 
 	if (dwMemPos + 37 * pmh->numsamples + 128 + 192 * pmh->numtracks
 	 + 64 * (pmh->lastpattern+1) + pmh->commentsize >= dwMemLength) return false;
@@ -73,7 +73,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		MTMSAMPLE *pms = (MTMSAMPLE *)(lpStream + dwMemPos);
 		memcpy(m_szNames[i], pms->samplename, 22);
-		SpaceToNullStringFixed<22>(m_szNames[i]);
+		StringFixer::SpaceToNullStringFixed<22>(m_szNames[i]);
 		Samples[i].nVolume = pms->volume << 2;
 		Samples[i].nGlobalVol = 64;
 		UINT len = pms->length;

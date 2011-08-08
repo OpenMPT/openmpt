@@ -9,6 +9,7 @@
 #include "ChannelManagerDlg.h"
 #include "midi.h"
 #include "version.h"
+#include "../soundlib/StringFixer.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -800,7 +801,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
 	{
 		PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[plug]);
-		SetNullTerminator(p->Info.szLibraryName);
+		StringFixer::SetNullTerminator(p->Info.szLibraryName);
 		if (p->Info.szLibraryName[0])
 		{
 			wsprintf(s, "FX%d: %s", plug+1, p->Info.szName);
@@ -886,7 +887,7 @@ void CMidiMacroSetup::UpdateDialog()
 	{
 		ToggleBoxes(sfx_preset, sfx);
 		memcpy(s, m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
-		SetNullTerminator(s);
+		StringFixer::SetNullTerminator(s);
 		m_EditSFx.SetWindowText(s);
 	}
 
@@ -894,7 +895,7 @@ void CMidiMacroSetup::UpdateDialog()
 	if (zxx < 0x80)
 	{
 		memcpy(s, m_MidiCfg.szMidiZXXExt[zxx], MACRO_LENGTH);
-		SetNullTerminator(s);
+		StringFixer::SetNullTerminator(s);
 		m_EditZxx.SetWindowText(s);
 	}
 	UpdateMacroList();
@@ -1008,7 +1009,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 		{
 			MemsetZero(s);
 			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
-			SetNullTerminator(s);
+			StringFixer::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
 
 			int sfx_preset = m_pModDoc->GetMacroType(m_MidiCfg.szMidiSFXExt[sfx]);
@@ -1033,7 +1034,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 		{
 			MemsetZero(s);
 			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
-			SetNullTerminator(s);
+			StringFixer::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiZXXExt[zxx], s, MACRO_LENGTH);
 		}
 	}

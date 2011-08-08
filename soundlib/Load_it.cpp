@@ -311,8 +311,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
 		memcpy(pIns->name, pis->name, 26);
 		memcpy(pIns->filename, pis->filename, 12);
-		SpaceToNullStringFixed<26>(pIns->name);
-		SpaceToNullStringFixed<12>(pIns->filename);
+		StringFixer::SpaceToNullStringFixed<26>(pIns->name);
+		StringFixer::SpaceToNullStringFixed<12>(pIns->filename);
 		pIns->nFadeOut = pis->fadeout << 6;
 		pIns->nGlobalVol = 64;
 		for (UINT j = 0; j < 120; j++)
@@ -353,8 +353,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		const ITINSTRUMENT *pis = (const ITINSTRUMENT *)p;
 		memcpy(pIns->name, pis->name, 26);
 		memcpy(pIns->filename, pis->filename, 12);
-		SpaceToNullStringFixed<26>(pIns->name);
-		SpaceToNullStringFixed<12>(pIns->filename);
+		StringFixer::SpaceToNullStringFixed<26>(pIns->name);
+		StringFixer::SpaceToNullStringFixed<12>(pIns->filename);
 		if (pis->mpr<=128)
 			pIns->nMidiProgram = pis->mpr;
 		pIns->nMidiChannel = pis->mch;
@@ -604,7 +604,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
 	memcpy(m_szNames[0], pifh->songname, 26);
-	SpaceToNullStringFixed<26>(m_szNames[0]);
+	StringFixer::SpaceToNullStringFixed<26>(m_szNames[0]);
 
 	// Global Volume
 	m_nDefaultGlobalVolume = pifh->globalvol << 1;
@@ -971,7 +971,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp+1];
 			memcpy(pSmp->filename, pis->filename, 12);
-			SpaceToNullStringFixed<12>(pSmp->filename);
+			StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
 			pSmp->uFlags = 0;
 			pSmp->nLength = 0;
 			pSmp->nLoopStart = pis->loopbegin;
@@ -1030,7 +1030,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 		}
 		memcpy(m_szNames[nsmp + 1], pis->name, 26);
-		SpaceToNullStringFixed<26>(m_szNames[nsmp + 1]);
+		StringFixer::SpaceToNullStringFixed<26>(m_szNames[nsmp + 1]);
 	}
 	m_nSamples = max(1, m_nSamples);
 
@@ -2167,7 +2167,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			MODINSTRUMENT *pIns = Instruments[nins];
 			memcpy(iti.filename, pIns->filename, 12);
 			memcpy(iti.name, pIns->name, 26);
-			SetNullTerminator(iti.name);
+			StringFixer::SetNullTerminator(iti.name);
 			iti.mbank = pIns->wMidiBank;
 			iti.mpr = pIns->nMidiProgram;
 			iti.mch = pIns->nMidiChannel;
@@ -2433,7 +2433,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		memset(&itss, 0, sizeof(itss));
 		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
-		SetNullTerminator(itss.name);
+		StringFixer::SetNullTerminator(itss.name);
 		itss.id = LittleEndian(IT_IMPS);
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 

@@ -16,6 +16,7 @@
 #include "smbPitchShift.cpp"
 #pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #include "modsmp_ctrl.h"
+#include "../soundlib/StringFixer.h"
 #include <Shlwapi.h>
 
 #ifdef _DEBUG
@@ -1019,7 +1020,7 @@ void CCtrlSamples::OnSampleSave()
 		sPath += ".wav";
 		_splitpath(sPath, NULL, NULL, szFileName, NULL);
 	}
-	SetNullTerminator(szFileName);
+	StringFixer::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", szFileName,

@@ -19,6 +19,7 @@
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
 #include "AutoSaver.h"
+#include "../soundlib/StringFixer.h"
 #include "TrackerSettings.h"
 
 
@@ -202,14 +203,14 @@ void TrackerSettings::LoadSettings()
 		CHAR snam[8];
 		wsprintf(snam, "SF%X", isfx);
 		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiSFXExt[isfx], macros.szMidiSFXExt[isfx], CountOf(macros.szMidiSFXExt[isfx]), iniFile);
-		SetNullTerminator(macros.szMidiSFXExt[isfx]);
+		StringFixer::SetNullTerminator(macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
 		CHAR snam[8];
 		wsprintf(snam, "Z%02X", izxx | 0x80);
 		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], macros.szMidiZXXExt[izxx], CountOf(macros.szMidiZXXExt[izxx]), iniFile);
-		SetNullTerminator(macros.szMidiZXXExt[izxx]);
+		StringFixer::SetNullTerminator(macros.szMidiZXXExt[izxx]);
 	}
 	// Fix old nasty broken (non-standard) MIDI configs in INI file.
 	if(storedVersion >= "1.17" && storedVersion < "1.20")

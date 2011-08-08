@@ -9,6 +9,7 @@
 #include "dlg_misc.h"
 #include "tuningDialog.h"
 #include "misc_util.h"
+#include "../soundlib/StringFixer.h"
 #include "Vstplug.h"
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
@@ -1717,7 +1718,7 @@ void CCtrlInstruments::OnInstrumentSave()
 	{
 		strncpy(szFileName, pIns->name, min(CountOf(pIns->name), CountOf(szFileName) - 1));
 	}
-	SetNullTerminator(szFileName);
+	StringFixer::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (m_pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", szFileName,

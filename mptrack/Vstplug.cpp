@@ -14,6 +14,7 @@
 #include "midi.h"
 #include "version.h"
 #include "midimappingdialog.h"
+#include "../soundlib/StringFixer.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #define ZLIB_WINAPI
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
@@ -219,7 +220,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		{
 			// Get path from cache file
 			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath), cacheFile);
-			SetNullTerminator(szPath);
+			StringFixer::SetNullTerminator(szPath);
 			theApp.RelativePathToAbsolute(szPath);
 
 			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
@@ -367,7 +368,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				{
 					theApp.AbsolutePathToRelative(szPath);
 				}
-				SetNullTerminator(szPath);
+				StringFixer::SetNullTerminator(szPath);
 
 				WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
 				CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);

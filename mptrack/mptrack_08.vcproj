@@ -1123,6 +1123,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\StringFixer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\tagging.h"
 				>
 			</File>

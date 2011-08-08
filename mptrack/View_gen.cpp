@@ -10,6 +10,7 @@
 #include "EffectVis.h"
 #include "movefxslotdialog.h"
 #include "ChannelManagerDlg.h"
+#include "../soundlib/StringFixer.h"
 #include ".\view_gen.h"
 
 #define ID_FXCOMMANDS_BASE	41000
@@ -1531,7 +1532,7 @@ void CViewGlobals::OnFillProgramCombo()
 		{
 			strcpy(sname, "");
 		}
-		SetNullTerminator(sname);
+		StringFixer::SetNullTerminator(sname);
 
 		if(sname[0] < ' ')
 		{

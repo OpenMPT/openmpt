@@ -64,7 +64,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		memcpy(m_szNames[0],lpStream+dwMemPos,len);
 		dwMemPos += len;
-		SetNullTerminator(m_szNames[0]);
+		StringFixer::SetNullTerminator(m_szNames[0]);
 	}
 	else return false;
 
@@ -150,7 +150,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 		// ChnSettings[i].szName
 		memcpy(&ChnSettings[i].szName[0],lpStream+dwMemPos,len);
-		SetNullTerminator(ChnSettings[i].szName);
+		StringFixer::SetNullTerminator(ChnSettings[i].szName);
 		dwMemPos += len;
 	}
 
@@ -200,7 +200,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	for(i=0; i<m_nInstruments; i++){
 		ASSERT_CAN_READ(len);
 		memcpy(&m_szInstrumentPath[i][0],lpStream+dwMemPos,len);
-		SetNullTerminator(m_szInstrumentPath[i]);
+		StringFixer::SetNullTerminator(m_szInstrumentPath[i]);
 		dwMemPos += len;
 	}
 
