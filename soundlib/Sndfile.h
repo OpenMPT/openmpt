@@ -215,7 +215,8 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	MODINSTRUMENT *pModInstrument;					// Currently assigned instrument slot
 	MODCHANNEL_ENVINFO VolEnv, PanEnv, PitchEnv;	// Envelope playback info
 	MODSAMPLE *pModSample;							// Currently assigned sample slot
-	DWORD nMasterChn, nVUMeter;
+	CHANNELINDEX nMasterChn;
+	DWORD nVUMeter;
 	LONG nGlobalVol, nInsVol;
 	LONG nFineTune, nTranspose;
 	LONG nPortamentoSlide, nAutoVibDepth;
@@ -881,13 +882,13 @@ public:
 	BOOL ReadNote();
 	BOOL ProcessRow();
 	BOOL ProcessEffects();
-	UINT GetNNAChannel(UINT nChn) const;
-	void CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut);
-	void NoteChange(UINT nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
+	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
+	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCut);
+	void NoteChange(CHANNELINDEX nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
 	void InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true);
 
 	// Channel Effects
-	void KeyOff(UINT nChn);
+	void KeyOff(CHANNELINDEX nChn);
 	// Global Effects
 	void SetTempo(UINT param, bool setAsNonModcommand = false);
 	void SetSpeed(UINT param);
@@ -938,12 +939,12 @@ protected:
 	void FineVolumeDown(MODCHANNEL *pChn, UINT param);
 	void Tremolo(MODCHANNEL *pChn, UINT param);
 	void Panbrello(MODCHANNEL *pChn, UINT param);
-	void RetrigNote(UINT nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
-	void SampleOffset(UINT nChn, UINT param, bool bPorta);	//rewbs.volOffset: moved offset code to own method
-	void NoteCut(UINT nChn, UINT nTick);
+	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
+	void SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta);	//rewbs.volOffset: moved offset code to own method
+	void NoteCut(CHANNELINDEX nChn, UINT nTick);
 	int PatternLoop(MODCHANNEL *, UINT param);
-	void ExtendedMODCommands(UINT nChn, UINT param);
-	void ExtendedS3MCommands(UINT nChn, UINT param);
+	void ExtendedMODCommands(CHANNELINDEX nChn, UINT param);
+	void ExtendedS3MCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
 	inline void InvertLoop(MODCHANNEL* pChn);
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
@@ -952,7 +953,7 @@ protected:
 	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
-	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);
+	void GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	void UpdateTimeSignature();
 
@@ -1028,7 +1029,7 @@ public:
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-255] => [1-10KHz]
 #endif
 #ifdef MODPLUG_TRACKER
-	VOID ProcessMidiOut(UINT nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
+	VOID ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
 #endif
 	VOID ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount);
 
@@ -1084,8 +1085,8 @@ public:
 	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env);
 	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
 private:
-	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes) const;
-	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes) const;
+	UINT  __cdecl GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const;
+	UINT  __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, bool respectMutes) const;
 	UINT GetBestMidiChan(const MODCHANNEL *pChn) const;
 
 	void HandlePatternTransitionEvents();
@@ -1093,7 +1094,7 @@ private:
 	long GetSampleOffset();
 
 public:
-	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
+	UINT GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes);
 
 // A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 public:

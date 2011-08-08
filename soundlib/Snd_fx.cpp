@@ -753,8 +753,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 }
 
 
-void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bool bManual)
-//-----------------------------------------------------------------------------------------
+void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bResetEnv, bool bManual)
+//-------------------------------------------------------------------------------------------------
 {
 	if (note < NOTE_MIN) return;
 	MODCHANNEL * const pChn = &Chn[nChn];
@@ -1045,20 +1045,20 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 }
 
 
-UINT CSoundFile::GetNNAChannel(UINT nChn) const
-//---------------------------------------------
+CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
+//-------------------------------------------------------------
 {
 	const MODCHANNEL *pChn = &Chn[nChn];
 	// Check for empty channel
 	const MODCHANNEL *pi = &Chn[m_nChannels];
-	for (UINT i=m_nChannels; i<MAX_CHANNELS; i++, pi++) if (!pi->nLength) return i;
+	for (CHANNELINDEX i=m_nChannels; i<MAX_CHANNELS; i++, pi++) if (!pi->nLength) return i;
 	if (!pChn->nFadeOutVol) return 0;
 	// All channels are used: check for lowest volume
-	UINT result = 0;
+	CHANNELINDEX result = 0;
 	DWORD vol = 64*65536;	// 25%
 	DWORD envpos = 0xFFFFFF;
 	const MODCHANNEL *pj = &Chn[m_nChannels];
-	for (UINT j=m_nChannels; j<MAX_CHANNELS; j++, pj++)
+	for (CHANNELINDEX j=m_nChannels; j<MAX_CHANNELS; j++, pj++)
 	{
 		if (!pj->nFadeOutVol) return j;
 		DWORD v = pj->nVolume;
@@ -1078,8 +1078,8 @@ UINT CSoundFile::GetNNAChannel(UINT nChn) const
 }
 
 
-void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
-//------------------------------------------------------------------------
+void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCut)
+//--------------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
 	MODINSTRUMENT* pHeader = 0;
@@ -1131,7 +1131,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	if (pChn->dwFlags & CHN_MUTE) return;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
-	for (UINT i=nChn; i<MAX_CHANNELS; p++, i++)
+	for (CHANNELINDEX i=nChn; i<MAX_CHANNELS; p++, i++)
 	if ((i >= m_nChannels) || (p == pChn))
 	{
 		applyDNAtoPlug = false; //rewbs.VSTiNNA
@@ -1248,7 +1248,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	//if ((pChn->nVolume) && (pChn->nLength))
 	if (((pChn->nVolume) && (pChn->nLength)) || applyNNAtoPlug) //rewbs.VSTiNNA
 	{
-		UINT n = GetNNAChannel(nChn);
+		CHANNELINDEX n = GetNNAChannel(nChn);
 		if (n)
 		{
 			MODCHANNEL *p = &Chn[n];
@@ -1939,9 +1939,9 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_GLOBALVOLSLIDE:
 			//IT compatibility 16. Saving last global volume slide param per channel (FT2/IT)
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
-				GlobalVolSlide(param, &pChn->nOldGlobalVolSlide);
+				GlobalVolSlide(param, pChn->nOldGlobalVolSlide);
 			else
-				GlobalVolSlide(param, &m_nOldGlbVolSlide);
+				GlobalVolSlide(param, m_nOldGlbVolSlide);
 			break;
 
 		// Set 8-bit Panning
@@ -2768,8 +2768,8 @@ void CSoundFile::ChannelVolSlide(MODCHANNEL *pChn, UINT param)
 }
 
 
-void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
-//---------------------------------------------------------
+void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
+//-----------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
 	UINT command = param & 0xF0;
@@ -2833,8 +2833,8 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 }
 
 
-void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
-//---------------------------------------------------------
+void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
+//-----------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
 	UINT command = param & 0xF0;
@@ -2895,7 +2895,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				case 2:
 					{
 						MODCHANNEL *bkp = &Chn[m_nChannels];
-						for (UINT i=m_nChannels; i<MAX_CHANNELS; i++, bkp++)
+						for (CHANNELINDEX i=m_nChannels; i<MAX_CHANNELS; i++, bkp++)
 						{
 							if (bkp->nMasterChn == nChn+1)
 							{
@@ -3431,8 +3431,8 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 
 
 //rewbs.volOffset: moved offset code to own method as it will be used in several places now
-void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
-//---------------------------------------------------------------
+void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
+//-----------------------------------------------------------------------
 {
 
 	MODCHANNEL *pChn = &Chn[nChn];
@@ -3510,8 +3510,8 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 }
 //end rewbs.volOffset:
 
-void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset: added offset param.
-//------------------------------------------------------------
+void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.VolOffset: added offset param.
+//--------------------------------------------------------------------
 {
 	// Retrig: bit 8 is set if it's the new XM retrig
 	MODCHANNEL *pChn = &Chn[nChn];
@@ -3681,8 +3681,8 @@ void CSoundFile::DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide)
 }
 
 
-void CSoundFile::NoteCut(UINT nChn, UINT nTick)
-//---------------------------------------------
+void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
+//-----------------------------------------------------
 {
 	if(nTick == 0)
 	{
@@ -3725,8 +3725,8 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 }
 
 
-void CSoundFile::KeyOff(UINT nChn)
-//--------------------------------
+void CSoundFile::KeyOff(CHANNELINDEX nChn)
+//----------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
 	const bool bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? false : true;
@@ -3881,11 +3881,11 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 }
 
 
-void CSoundFile::GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide)
-//-----------------------------------------
+void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
+//--------------------------------------------------------------------
 {
 	LONG nGlbSlide = 0;
-	if (param) *nOldGlobalVolSlide = param; else param = *nOldGlobalVolSlide;
+	if (param) nOldGlobalVolSlide = param; else param = nOldGlobalVolSlide;
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 	{
 		if (m_dwSongFlags & SONG_FIRSTTICK) nGlbSlide = (param >> 4) * 2;
@@ -4077,8 +4077,8 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 }
 
 
-UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
-//-------------------------------------------------------------------------
+UINT CSoundFile::GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes)
+//---------------------------------------------------------------------------------
 {
 	if (nChn > MAX_CHANNELS)		//Check valid channel number
 	{
@@ -4112,41 +4112,46 @@ UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
 }
 
 
-UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes) const
-//---------------------------------------------------------------------------
+UINT __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const
+//-----------------------------------------------------------------------------------
 {
 	const MODCHANNEL *pChn = &Chn[nChn];
 
 	// If it looks like this is an NNA channel, we need to find the master channel.
 	// This ensures we pick up the right ChnSettings. 
 	// NB: nMasterChn==0 means no master channel, so we need to -1 to get correct index.
-	if (nChn>=m_nChannels && pChn && pChn->nMasterChn>0) { 
+	if (nChn>=m_nChannels && pChn && pChn->nMasterChn > 0)
+	{ 
 		nChn = pChn->nMasterChn-1;				  
 	}
 
 	UINT nPlugin;
-	if ( (respectMutes && (pChn->dwFlags & CHN_MUTE)) || 
-	 (pChn->dwFlags&CHN_NOFX) ) {
+	if ( (respectMutes && (pChn->dwFlags & CHN_MUTE)) || (pChn->dwFlags&CHN_NOFX) )
+	{
 		nPlugin = 0;
-	} else {
+	} else
+	{
 		nPlugin = ChnSettings[nChn].nMixPlugin;
 	}
 	return nPlugin;
 }
 
 
-UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes) const
-//----------------------------------------------------------------------------
+UINT CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, bool respectMutes) const
+//------------------------------------------------------------------------------------
 {
 	const MODCHANNEL *pChn = &Chn[nChn];
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
 	// so we don't need to worry about finding the master chan.
 
 	UINT nPlugin=0;
-	if (pChn && pChn->pModInstrument) {
-		if (respectMutes && pChn->pModSample && (pChn->pModSample->uFlags & CHN_MUTE)) { 
+	if (pChn && pChn->pModInstrument)
+	{
+		if (respectMutes && pChn->pModSample && (pChn->pModSample->uFlags & CHN_MUTE))
+		{ 
 			nPlugin = 0;
-		} else {
+		} else
+		{
 			nPlugin = pChn->pModInstrument->nMixPlug;
 		}
 	}
