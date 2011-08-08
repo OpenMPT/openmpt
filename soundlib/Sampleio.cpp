@@ -15,6 +15,7 @@
 #include "../mptrack/Moddoc.h"
 #endif //MODPLUG_TRACKER
 #include "Wav.h"
+#include "StringFixer.h"
 
 #pragma warning(disable:4244)
 
@@ -1798,7 +1799,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	iti->id = LittleEndian(IT_IMPI);	// "IMPI"
 	memcpy(iti->filename, pIns->filename, 12);
 	memcpy(iti->name, pIns->name, 26);
-	SetNullTerminator(iti->name);
+	StringFixer::SetNullTerminator(iti->name);
 	iti->mpr = pIns->nMidiProgram;
 	iti->mch = pIns->nMidiChannel;
 	iti->mbank = pIns->wMidiBank; //rewbs.MidiBank

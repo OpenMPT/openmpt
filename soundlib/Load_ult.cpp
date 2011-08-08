@@ -322,7 +322,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 
 	ASSERT_CAN_READ(32);
 	memcpy(m_szNames[0], lpStream + dwMemPos, 32);
-	SetNullTerminator(m_szNames[0]);
+	StringFixer::SetNullTerminator(m_szNames[0]);
 	dwMemPos += 32;
 
 	m_nType = MOD_TYPE_ULT;
@@ -369,9 +369,9 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 		ultSmp.size_end = LittleEndian(ultSmp.size_end);
 
 		memcpy(m_szNames[nSmp + 1], ultSmp.name, 32);
-		SetNullTerminator(m_szNames[nSmp + 1]);
+		StringFixer::SetNullTerminator(m_szNames[nSmp + 1]);
 		memcpy(pSmp->filename, ultSmp.filename, 12);
-		SpaceToNullStringFixed<12>(pSmp->filename);
+		StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
 
 		if(ultSmp.size_end <= ultSmp.size_start)
 			continue;

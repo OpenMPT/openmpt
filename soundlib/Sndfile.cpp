@@ -16,6 +16,7 @@
 #include "sndfile.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
+#include "StringFixer.h"
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -940,15 +941,15 @@ void CSoundFile::SanitizeMacros()
 {
 	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiGlb); i++)
 	{
-		FixNullString(m_MidiCfg.szMidiGlb[i]);
+		StringFixer::FixNullString(m_MidiCfg.szMidiGlb[i]);
 	}
 	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiSFXExt); i++)
 	{
-		FixNullString(m_MidiCfg.szMidiSFXExt[i]);
+		StringFixer::FixNullString(m_MidiCfg.szMidiSFXExt[i]);
 	}
 	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiZXXExt); i++)
 	{
-		FixNullString(m_MidiCfg.szMidiZXXExt[i]);
+		StringFixer::FixNullString(m_MidiCfg.szMidiZXXExt[i]);
 	}
 }
 

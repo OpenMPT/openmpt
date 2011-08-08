@@ -74,7 +74,7 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 
 		MemsetZero(*pSmp);
 		strncpy(pSndFile->m_szNames[nSmp], oktsmp.name, 20);
-		SpaceToNullStringFixed<20>(pSndFile->m_szNames[nSmp]);
+		StringFixer::SpaceToNullStringFixed<20>(pSndFile->m_szNames[nSmp]);
 
 		pSmp->nC5Speed = 8287;
 		pSmp->nGlobalVol = 64;

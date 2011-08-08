@@ -17,6 +17,7 @@
 #include "../mptrack/mptrack.h"
 #include "dlsbank.h"
 #include "Wav.h"
+#include "StringFixer.h"
 
 
 //#define DLSBANK_LOG
@@ -1675,7 +1676,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	} else
 	{
 		memcpy(pIns->name, pDlsIns->szName, 32);
-		SetNullTerminator(pIns->name);
+		StringFixer::SetNullTerminator(pIns->name);
 	}
 	int nTranspose = 0;
 	for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)

@@ -100,9 +100,9 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
 
 	// song name
-	memset(m_szNames, 0, sizeof(m_szNames));
+	MemsetZero(m_szNames);
 	memcpy(m_szNames[0], pHeader->SongTitle, 32);
-	SpaceToNullStringFixed<31>(m_szNames[0]);
+	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
 
 	// read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
@@ -163,9 +163,9 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		// sample header
 
 		memcpy(m_szNames[iSmp], pSample->SamName, 32);
-		SpaceToNullStringFixed<31>(m_szNames[iSmp]);
+		StringFixer::SpaceToNullStringFixed<31>(m_szNames[iSmp]);
 		memcpy(Samples[iSmp].filename, pSample->FileName, 12);
-		SpaceToNullStringFixed<12>(Samples[iSmp].filename);
+		StringFixer::SpaceToNullStringFixed<12>(Samples[iSmp].filename);
 
 		Samples[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
 		Samples[iSmp].nGlobalVol = 256; // not supported in this format
@@ -196,7 +196,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(pSample->Flags & 0x04)
 		{
-			Samples[iSmp].nVolume = min(pSample->Volume << 2, 256); // 0...64, 255 = no default volume
+			Samples[iSmp].nVolume = min(pSample->Volume, 64) * 4; // 0...64, 255 = no default volume
 		}
 		else
 		{
@@ -206,7 +206,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(pSample->Flags & 0x08) // default panning is used
 		{
 			Samples[iSmp].uFlags |= CHN_PANNING;
-			Samples[iSmp].nPan = (pSample->Pan > 15) ? 128 : min((pSample->Pan << 4) + 8, 256); // 0...15, 16 = surround (not supported), 255 = no default panning
+			Samples[iSmp].nPan = (pSample->Pan > 15) ? 128 : min((pSample->Pan * 16) + 8, 256); // 0...15, 16 = surround (not supported), 255 = no default panning
 		}
 		else
 		{

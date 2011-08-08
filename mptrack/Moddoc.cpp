@@ -15,6 +15,7 @@
 #include "version.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
+#include "../soundlib/StringFixer.h"
 #include <shlwapi.h>
 
 extern WORD S3MFineTuneTable[16];
@@ -3926,13 +3927,13 @@ void CModDoc::FixNullStrings()
 //----------------------------
 {
 	// Song title
-	FixNullString(m_SndFile.m_szNames[0]);
+	StringFixer::FixNullString(m_SndFile.m_szNames[0]);
 
 	// Sample names + filenames
 	for(SAMPLEINDEX nSmp = 1; nSmp < m_SndFile.GetNumSamples(); nSmp++)
 	{
-		FixNullString(m_SndFile.m_szNames[nSmp]);
-		FixNullString(m_SndFile.Samples[nSmp].filename);
+		StringFixer::FixNullString(m_SndFile.m_szNames[nSmp]);
+		StringFixer::FixNullString(m_SndFile.Samples[nSmp].filename);
 	}
 
 	// Instrument names
@@ -3940,15 +3941,15 @@ void CModDoc::FixNullStrings()
 	{
 		if(m_SndFile.Instruments[nIns] != nullptr)
 		{		
-			FixNullString(m_SndFile.Instruments[nIns]->name);
-			FixNullString(m_SndFile.Instruments[nIns]->filename);
+			StringFixer::FixNullString(m_SndFile.Instruments[nIns]->name);
+			StringFixer::FixNullString(m_SndFile.Instruments[nIns]->filename);
 		}
 	}
 
 	// Channel names
 	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.GetNumChannels(); nChn++)
 	{
-		FixNullString(m_SndFile.ChnSettings[nChn].szName);
+		StringFixer::FixNullString(m_SndFile.ChnSettings[nChn].szName);
 	}
 
 	// Macros

@@ -8,6 +8,7 @@
 #include "EffectVis.h"		//rewbs.fxvis
 #include "ChannelManagerDlg.h"
 #include "../soundlib/tuningbase.h"
+#include "../soundlib/StringFixer.h"
 #include <string>
 
 using std::string;
@@ -1515,7 +1516,7 @@ void CViewPattern::UpdateIndicator()
 							if(m->instr <= MAX_MIXPLUGINS)
 							{
 								strncpy(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName(), sizeof(sztmp));
-								SetNullTerminator(sztmp);
+								StringFixer::SetNullTerminator(sztmp);
 							}
 						} else
 						{
@@ -1564,7 +1565,7 @@ void CViewPattern::UpdateIndicator()
 						{
 							CHAR sztmp[128] = "";
 							strncpy(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()), sizeof(sztmp));
-							SetNullTerminator(sztmp);
+							StringFixer::SetNullTerminator(sztmp);
 							if (sztmp[0]) wsprintf(s, "%d: %s", m->GetValueVolCol(), sztmp);
 						}
 					} else

@@ -393,6 +393,7 @@
     <ClInclude Include="..\Soundlib\Sndfile.h" />
     <ClInclude Include="SoundFilePlayConfig.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="..\Soundlib\StringFixer.h" />
     <ClInclude Include="tagging.h" />
     <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="typedefs.h" />

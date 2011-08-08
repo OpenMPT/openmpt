@@ -5,8 +5,9 @@
 #include "moddoc.h"
 #include "globals.h"
 #include "ctrl_com.h"
-#include "view_com.h"
 #include "ChannelManagerDlg.h"
+#include "../soundlib/StringFixer.h"
+#include "view_com.h"
 
 #define DETAILS_TOOLBAR_CY	28
 
@@ -505,7 +506,7 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			if (iItem < pSndFile->m_nSamples)
 			{
 				memcpy(pSndFile->m_szNames[iItem + 1], s, sizeof(pSndFile->m_szNames[iItem + 1]));
-				SetNullTerminator(pSndFile->m_szNames[iItem + 1]);
+				StringFixer::SetNullTerminator(pSndFile->m_szNames[iItem + 1]);
 				// 05/01/05 : ericus replaced "<< 24" by "<< 20" : 4000 samples -> 12bits [see Moddoc.h]
 				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 				pModDoc->SetModified();
@@ -517,7 +518,7 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			{
 				MODINSTRUMENT *pIns = pSndFile->Instruments[iItem+1];
 				memcpy(pIns->name, s, sizeof(pIns->name));
-				SetNullTerminator(pIns->name);
+				StringFixer::SetNullTerminator(pIns->name);
 				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
 				pModDoc->SetModified();
 			}

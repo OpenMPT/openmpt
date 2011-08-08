@@ -13,7 +13,7 @@
 //Convert object(typically number) to string
 template<class T>
 inline std::string Stringify(const T& x)
-//--------------------------
+//--------------------------------------
 {
 	std::ostringstream o;
 	if(!(o << x)) return "FAILURE";
@@ -38,20 +38,11 @@ template<> inline uint32 ConvertStrTo(LPCSTR psz) {return strtoul(psz, nullptr, 
 template<> inline int64 ConvertStrTo(LPCSTR psz) {return _strtoi64(psz, nullptr, 10);}
 template<> inline uint64 ConvertStrTo(LPCSTR psz) {return _strtoui64(psz, nullptr, 10);}
 
-// Sets last character to null in given char array.
-// Size of the array must be known at compile time.
-template <size_t size>
-inline void SetNullTerminator(char (&buffer)[size])
-//-------------------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	buffer[size-1] = 0;
-}
-
 
 // Memset given object to zero.
 template <class T>
 inline void MemsetZero(T& a)
+//_-------------------------
 {
 	#if _HAS_TR1
 		static_assert(std::tr1::is_pointer<T>::value == false, "Won't memset pointers.");
@@ -150,98 +141,6 @@ void SanitizeFilename(char (&buffer)[size])
 	}
 }
 
-
-// Convert a 0-terminated string to a space-padded string
-template <size_t size>
-void NullToSpaceString(char (&buffer)[size])
-//------------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	size_t pos = size;
-	while (pos-- > 0)
-		if (buffer[pos] == 0)
-			buffer[pos] = 32;
-	buffer[size - 1] = 0;
-}
-
-
-// Convert a space-padded string to a 0-terminated string
-template <size_t size>
-void SpaceToNullString(char (&buffer)[size])
-//------------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	// First, remove any Nulls
-	NullToSpaceString(buffer);
-	size_t pos = size;
-	while (pos-- > 0)
-	{
-		if (buffer[pos] == 32)
-			buffer[pos] = 0;
-		else if(buffer[pos] != 0)
-			break;
-	}
-	buffer[size - 1] = 0;
-}
-
-
-// Remove any chars after the first null char
-template <size_t size>
-void FixNullString(char (&buffer)[size])
-//--------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	SetNullTerminator(buffer);
-	size_t pos = 0;
-	// Find the first null char.
-	while(buffer[pos] != '\0' && pos < size)
-	{
-		pos++;
-	}
-	// Remove everything after the null char.
-	while(pos < size)
-	{
-		buffer[pos++] = '\0';
-	}
-}
-
-
-// Convert a space-padded string to a 0-terminated string. STATIC VERSION! (use this if the maximum string length is known)
-// Additional template parameter to specifify the max length of the final string,
-// not including null char (useful for e.g. mod loaders)
-template <size_t length, size_t size>
-void SpaceToNullStringFixed(char (&buffer)[size])
-//------------------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	STATIC_ASSERT(length < size);
-	// Remove Nulls in string
-	SpaceToNullString(buffer);
-	// Overwrite trailing chars
-	for(size_t pos = length; pos < size; pos++)
-	{
-		buffer[pos] = 0;
-	}
-}
-
-
-// Convert a space-padded string to a 0-terminated string. DYNAMIC VERSION!
-// Additional function parameter to specifify the max length of the final string,
-// not including null char (useful for e.g. mod loaders)
-template <size_t size>
-void SpaceToNullStringFixed(char (&buffer)[size], size_t length)
-//--------------------------------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	ASSERT(length < size);
-	// Remove Nulls in string
-	SpaceToNullString(buffer);
-	// Overwrite trailing chars
-	for(size_t pos = length; pos < size; pos++)
-	{
-		buffer[pos] = 0;
-	}
-}
 
 namespace Util
 {

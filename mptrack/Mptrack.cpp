@@ -19,6 +19,7 @@
 #include <shlwapi.h>
 #include <afxadv.h>
 #include "UpdateCheck.h"
+#include "../soundlib/StringFixer.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -3106,7 +3107,7 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
 	TCHAR szExePath[nLength], szTempPath[nLength];
 	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
-	SetNullTerminator(szExePath);
+	StringFixer::SetNullTerminator(szExePath);
 
 	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
 	{
@@ -3120,7 +3121,7 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
 		_tcscpy(szPath, szTempPath);
 	}
-	SetNullTerminator(szPath);
+	StringFixer::SetNullTerminator(szPath);
 }
 
 
@@ -3140,7 +3141,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
 	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
 	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
-	SetNullTerminator(szExePath);
+	StringFixer::SetNullTerminator(szExePath);
 
 	if(!_tcsncicmp(szPath, _T("\\"), 1))
 	{
@@ -3158,7 +3159,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 		}
 		_tcscpy(szPath, szTempPath);
 	}
-	SetNullTerminator(szPath);
+	StringFixer::SetNullTerminator(szPath);
 }
 
 void CTrackApp::RemoveMruItem(const int nItem)

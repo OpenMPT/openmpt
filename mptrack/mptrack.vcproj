@@ -843,6 +843,9 @@
 				RelativePath=".\StdAfx.h">
 			</File>
 			<File
+				RelativePath="..\Soundlib\StringFixer.h">
+			</File>
+			<File
 				RelativePath=".\tagging.h">
 			</File>
 			<File
