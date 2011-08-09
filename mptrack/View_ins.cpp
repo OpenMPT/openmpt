@@ -2118,10 +2118,10 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	switch(event)
 	{
-		case 0x8: // Note Off
+		case MIDIEVENT_NOTEOFF: // Note Off
 			midiByte2 = 0;
 
-		case 0x9: // Note On
+		case MIDIEVENT_NOTEON: // Note On
 			pModDoc->NoteOff(nNote, FALSE, m_nInstrument);
 			if (midiByte2 & 0x7F)
 			{
@@ -2130,15 +2130,16 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			}
 		break;
 
-		case 0xB: //Controller change
+		case MIDIEVENT_CONTROLLERCHANGE: //Controller change
 			switch(midiByte1)
 			{
 				case 0x7: //Volume
 					midivolume = midiByte2;
 				break;
 			}
+
 		default:
-			if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDITOPLUG && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
+			if((CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
 			{
 				const INSTRUMENTINDEX instr = m_nInstrument;
 				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
@@ -2146,9 +2147,11 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				{
 					plug->MidiSend(dwMidiData);
 					// Sending midi may modify the plug. For now, if MIDI data
-					// is not active sensing, set modified.
-					if(dwMidiData != MIDISTATUS_ACTIVESENSING)
+					// is not active sensing or aftertouch messages, set modified.
+					if(dwMidiData != MIDISTATUS_ACTIVESENSING && event != MIDIEVENT_POLYAFTERTOUCH && event != MIDIEVENT_CHANAFTERTOUCH)
+					{
 						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+					}
 				}
 			}
 		break;
