@@ -1966,8 +1966,9 @@ BOOL CSoundFile::ReadNote()
 
 		// Also process envelopes etc. when there's a plugin on this channel, for possible fake automation using volume and pan data.
 		// We only care about master channels, though, since automation only "happens" on them.
+		const bool samplePlaying = (pChn->nPeriod && pChn->nLength);
 		const bool plugAssigned = (nChn < m_nChannels) && (ChnSettings[nChn].nMixPlugin || (pChn->pModInstrument != nullptr && pChn->pModInstrument->nMixPlug));
-		if ((pChn->nPeriod && pChn->nLength) || plugAssigned)
+		if (samplePlaying || plugAssigned)
 		{
 			int vol = pChn->nVolume;
 
@@ -2001,8 +2002,6 @@ BOOL CSoundFile::ReadNote()
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
-				//UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
-
 				//Don't let global volume affect level of sample if
 				//global volume is going to be applied to master output anyway.
 				if (pChn->dwFlags & CHN_SYNCMUTE)
@@ -2042,7 +2041,7 @@ BOOL CSoundFile::ReadNote()
 		ProcessMacroOnChannel(nChn);
 
 		// After MIDI macros have been processed, we can also process the pitch / filter envelope and other pitch-related things.
-		if (pChn->nPeriod && pChn->nLength)
+		if (samplePlaying)
 		{
 			int nPeriodFrac = 0;
 
@@ -2106,6 +2105,11 @@ BOOL CSoundFile::ReadNote()
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
 			if (ninc > 0xFF0000) ninc = 0xFF0000;
 			pChn->nInc = (ninc+1) & ~3;
+		} else
+		{
+			// Avoid nasty noises...
+			// This could have been != 0 if a plugin was assigned to the channel, for macro purposes.
+			pChn->nRealVolume = 0;
 		}
 
 		// Increment envelope positions
