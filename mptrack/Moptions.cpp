@@ -576,7 +576,7 @@ static OPTGENDESC gOptGenDesc[] =
 	{PATTERN_CONTSCROLL,	"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{PATTERN_KBDNOTEOFF,	"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
 	{PATTERN_FOLLOWSONGOFF,	"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."},
-	{PATTERN_MIDIRECORD,	"Midi record",						"Enable midi in record by default."},
+	{PATTERN_MIDIRECORD,	"MIDI record",						"Enable MIDI in record by default."},
 	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
 	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{PATTERN_AUTODELAY,		"Automatic delay commands",			"Automatically insert appropriate note-delay commands when recording notes during live playback."},
@@ -585,6 +585,7 @@ static OPTGENDESC gOptGenDesc[] =
 	{PATTERN_RESETCHANNELS,	"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands) and is recommended to be enabled."},
 	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a different icon in the treeview."},
 	{PATTERN_NOCLOSEDIALOG,	"Disable modern close dialog",		"When closing the main window, a confirmation window is shown for every unsaved document instead of one single window with a list of unsaved documents."},
+	{PATTERN_DBLCLICKSELECT, "Double-click to select channel",	"Instead of showing the note properties, double-clicking a pattern cell selects the whole channel."},
 };
 
 

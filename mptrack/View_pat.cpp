@@ -1112,7 +1112,14 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 	DWORD dwPos = GetPositionFromPoint(point);
 	if ((dwPos == (CreateCursor(m_nRow) | m_dwCursor)) && (point.y >= m_szHeader.cy))
 	{
-		if (ShowEditWindow()) return;
+		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DBLCLICKSELECT))
+		{
+			OnSelectCurrentColumn();
+			return;
+		} else
+		{
+			if (ShowEditWindow()) return;
+		}
 	}
 	OnLButtonDown(uFlags, point);
 }
@@ -3247,7 +3254,7 @@ MODCOMMAND* CViewPattern::GetModCommand(CSoundFile& rSf, const ModCommandPos& po
 
 
 LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
-//--------------------------------------------------------
+//-------------------------------------------------------------
 {
 	const DWORD dwMidiData = dwMidiDataParam;
 	static BYTE midivolume = 127;

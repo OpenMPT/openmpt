@@ -188,7 +188,7 @@ enum
 #define PATTERN_FOLLOWSONGOFF		0x80000		// follow song off by default
 #define PATTERN_MIDIRECORD			0x100000	// MIDI Record on by default
 #define PATTERN_NOCLOSEDIALOG		0x200000	// Don't use OpenMPT's custom close dialog with a list of saved files when closing the main window
-//#define PATTERN_HILITETIMESIGS		0x400000	// highlight on song signature, deprecated (now always enabled)
+#define PATTERN_DBLCLICKSELECT		0x400000	// Double-clicking pattern selects whole channel
 #define PATTERN_OLDCTXMENUSTYLE		0x800000	// mpt 1.16 pattern context menu style
 #define PATTERN_SYNCMUTE			0x1000000	// maintain sample sync on mute
 #define PATTERN_AUTODELAY			0x2000000	// automatically insert delay commands in pattern when entering notes
