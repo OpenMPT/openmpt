@@ -791,7 +791,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 
 
 void Terminate_NotifyThread()
-//----------------------------------------------
+//---------------------------
 {	
 	//TODO: Why does this not get called.
 	AfxMessageBox("Notify thread terminated unexpectedly. Attempting to shut down audio device");
@@ -1908,9 +1908,9 @@ void CMainFrame::OnPluginManager()
 		}
 	}
 	CSelectPluginDlg dlg(GetActiveDoc(), nPlugslot, this);
-	dlg.DoModal();
-	if (pModDoc)
+	if(dlg.DoModal() == IDOK && pModDoc)
 	{
+		pModDoc->SetModified();
 		//Refresh views
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS|HINT_MODTYPE);
 		//Refresh Controls
