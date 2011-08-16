@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -384,7 +384,6 @@
     <ClInclude Include="PSRatioCalc.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SampleEditorDialogs.h" />
-    <ClInclude Include="SampleGenerator.h" />
     <ClInclude Include="ScaleEnvPointsDlg.h" />
     <ClInclude Include="serialization_utils.h" />
     <ClInclude Include="..\soundlib\Snd_defs.h" />
