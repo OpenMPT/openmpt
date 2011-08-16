@@ -807,6 +807,7 @@
   <ItemGroup>
     <Filter Include="Header Files">
       <UniqueIdentifier>{41a5e65d-7591-4871-b2b3-29e5293c5782}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="Module Loaders">
       <UniqueIdentifier>{bbe72ed0-6ebf-4cba-ace9-94d090d10e49}</UniqueIdentifier>
@@ -816,6 +817,7 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{cd3e5871-5f13-4cdf-a869-f807737d2906}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Source Files\MixGraph">
       <UniqueIdentifier>{f0af5cea-2ec1-45c0-abe8-b93aa90e1df2}</UniqueIdentifier>
@@ -837,6 +839,7 @@
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{5a7bae01-9526-4d85-9c00-0a280e22ad0b}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
