@@ -827,11 +827,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		Log("VST plugin to host: Process Events\n");
 		break;
 	// DEPRECATED in VST 2.4
-	case audioMasterSetTime:						
+	case audioMasterSetTime:
 		Log("VST plugin to host: Set Time\n");
 		break;
 	// returns tempo (in bpm * 10000) at sample frame location passed in <value> - DEPRECATED in VST 2.4
-	case audioMasterTempoAt: 
+	case audioMasterTempoAt:
 		//Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
 		if (effect->resvd1)
 		{
@@ -844,17 +844,17 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 				return (VstInt32)(125 * 10000);
 			}
 		}
-		return 125*10000;
+		return 125 * 10000;
 	// parameters - DEPRECATED in VST 2.4
-	case audioMasterGetNumAutomatableParameters:						
+	case audioMasterGetNumAutomatableParameters:
 		Log("VST plugin to host: Get Num Automatable Parameters\n");
 		break;
 	// Apparently, this one is broken in VST SDK anyway. - DEPRECATED in VST 2.4
-	case audioMasterGetParameterQuantization:						
+	case audioMasterGetParameterQuantization:
 		Log("VST plugin to host: Audio Master Get Parameter Quantization\n");
 		break;
 	// numInputs and/or numOutputs has changed
-	case audioMasterIOChanged:					
+	case audioMasterIOChanged:
 		Log("VST plugin to host: IOchanged\n");
 		break;	
 	// plug needs idle calls (outside its editor window) - DEPRECATED in VST 2.4
@@ -886,9 +886,9 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		}
 		Log("VST plugin to host: Size Window\n");
 		return 1;
-	case audioMasterGetSampleRate:		
+	case audioMasterGetSampleRate:
 		return CMainFrame::GetMainFrame()->GetSampleRate();
-	case audioMasterGetBlockSize:		
+	case audioMasterGetBlockSize:
 		return MIXBUFFERSIZE;
 	case audioMasterGetInputLatency:
 		Log("VST plugin to host: Get Input Latency\n");
@@ -927,19 +927,19 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//Log("VST plugin to host: Get Automation State\n");
 		return kVstAutomationRead;
 
-	case audioMasterOfflineStart:				
+	case audioMasterOfflineStart:
 		Log("VST plugin to host: Offlinestart\n");
 		break;
-	case audioMasterOfflineRead:					
+	case audioMasterOfflineRead:
 		Log("VST plugin to host: Offlineread\n");
 		break;
-	case audioMasterOfflineWrite:				
+	case audioMasterOfflineWrite:
 		Log("VST plugin to host: Offlinewrite\n");
 		break;
-	case audioMasterOfflineGetCurrentPass:		
+	case audioMasterOfflineGetCurrentPass:
 		Log("VST plugin to host: OfflineGetcurrentpass\n");
 		break;
-	case audioMasterOfflineGetCurrentMetaPass:	
+	case audioMasterOfflineGetCurrentMetaPass:
 		Log("VST plugin to host: OfflineGetCurrentMetapass\n");
 		break;
 	// for variable i/o, sample rate in <opt> - DEPRECATED in VST 2.4
@@ -950,12 +950,12 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetOutputSpeakerArrangement:
 		Log("VST plugin to host: Get Output Speaker Arrangement\n");
 		break;
-	case audioMasterGetVendorString:	
+	case audioMasterGetVendorString:
 		strcpy((char *) ptr, s_szHostVendorString);
 		//strcpy((char*)ptr,"Steinberg");
 		//return 0;
 		return true;
-	case audioMasterGetVendorVersion:	
+	case audioMasterGetVendorVersion:
 		return s_nHostVendorVersion;
 		//return 7000;					
 	case audioMasterGetProductString:
@@ -963,10 +963,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//strcpy((char*)ptr,"Cubase VST");
 		//return 0;
 		return true;
-	case audioMasterVendorSpecific:		
+	case audioMasterVendorSpecific:
 		return 0;
 	// void* in <ptr>, format not defined yet - DEPRECATED in VST 2.4	
-	case audioMasterSetIcon:					
+	case audioMasterSetIcon:
 		Log("VST plugin to host: Set Icon\n");
 		break;
 	// string in ptr, see below
@@ -994,14 +994,14 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		else
 			return HostCanNotDo;
 	//
-	case audioMasterGetLanguage:		
+	case audioMasterGetLanguage:
 		return kVstLangEnglish;
 	// returns platform specific ptr - DEPRECATED in VST 2.4
 	case audioMasterOpenWindow:
 		Log("VST plugin to host: Open Window\n");
 		break;
 	// close window, platform specific handle in <ptr> - DEPRECATED in VST 2.4
-	case audioMasterCloseWindow:				
+	case audioMasterCloseWindow:
 		Log("VST plugin to host: Close Window\n");
 		break;
 	// get plug directory, FSSpec on MAC, else char*
@@ -1045,19 +1045,19 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr, effect);
 	
 	// open an editor for audio (defined by XML text in ptr) - DEPRECATED in VST 2.4
-	case audioMasterEditFile:				
+	case audioMasterEditFile:
 		Log("VST plugin to host: Edit File\n");
 		break;
 	// get the native path of currently loading bank or project
 	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED in VST 2.4
-	case audioMasterGetChunkFile:			
+	case audioMasterGetChunkFile:
 		Log("VST plugin to host: Get Chunk File\n");
 		break;
 										
 	//---from here VST 2.3 extension opcodes------------------------------------------------------
 
 	// result a VstSpeakerArrangement in ret - DEPRECATED in VST 2.4
-	case audioMasterGetInputSpeakerArrangement:	
+	case audioMasterGetInputSpeakerArrangement:
 		Log("VST plugin to host: Get Input Speaker Arrangement\n");
 		break;
 
@@ -1777,9 +1777,11 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
 	m_MixState.pMixBuffer = (int *)((((DWORD)m_MixBuffer)+7)&~7);
-	m_MixState.pOutBufferL = (float *)((((DWORD)&m_FloatBuffer[0])+7)&~7);
-	m_MixState.pOutBufferR = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE])+7)&~7);
-	
+	m_MixState.pOutBufferL = (float *)((((DWORD)&m_FloatBuffer[0]) + 7) & ~7);
+	m_MixState.pOutBufferR = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE]) + 7) & ~7);
+	MemsetZero(dummyBuffer_);
+
+
 	//rewbs.dryRatio: we now initialise this in CVstPlugin::Initialize(). 
 	//m_pTempBuffer = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*2])+7)&~7);
 
@@ -1905,6 +1907,11 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_pInputs = (m_nInputs >= 2) ? new (float *[m_nInputs]) : new (float*[2]);
 	m_pInputs[0] = m_MixState.pOutBufferL;
 	m_pInputs[1] = m_MixState.pOutBufferR;
+	// Assign dummy inputs
+	for(size_t i = 2; i < m_nInputs; i++)
+	{
+		m_pInputs[i] = dummyBuffer_;
+	}
 
 	m_pOutputs = new (float *[m_nOutputs]);
 	m_pTempBuffer = new (float *[m_nOutputs]);	//rewbs.dryRatio
