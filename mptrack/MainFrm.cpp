@@ -2182,7 +2182,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
 		if (bAvailable)
 		{
-			CDocument* pDoc = theApp.OpenDocumentFile(sPath);
+			CDocument* pDoc = theApp.OpenDocumentFile(sPath, bTemplateFile ? FALSE : TRUE);
 			if (pDoc != nullptr)
 			{
 				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
@@ -2201,7 +2201,6 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 					pModDoc->GetFileHistory()->clear();	// Reset edit history for template files
 					pModDoc->GetSoundFile()->m_dwCreatedWithVersion = MptVersion::num;
 					pModDoc->GetSoundFile()->m_dwLastSavedWithVersion = 0;
-					theApp.RemoveMruItem(0);
 				}
 			}
 		}

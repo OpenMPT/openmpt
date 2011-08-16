@@ -50,42 +50,45 @@ class CModDocTemplate: public CMultiDocTemplate
 public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
-	virtual CDocument* OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVisible = TRUE);
+	virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
+
+private:
+	bool DocumentIsOpen(const char*, CDocument**);
 };
 
 
-CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVisible)
-//-----------------------------------------------------------------------------------
+CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL makeVisible)
+//-----------------------------------------------------------------------------------------
 {
-	if (lpszPathName)
+	if (path)
 	{
 		TCHAR s[_MAX_EXT];
-		_tsplitpath(lpszPathName, NULL, NULL, NULL, s);
+		_tsplitpath(path, NULL, NULL, NULL, s);
 		if (!_tcsicmp(s, _TEXT(".dll")))
 		{
 			CVstPluginManager *pPluginManager = theApp.GetPluginManager();
 			if (pPluginManager)
 			{
-				pPluginManager->AddPlugin(lpszPathName);
+				pPluginManager->AddPlugin(path);
 				return NULL;
 			}
 		}
 	}
 
-	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(lpszPathName, bMakeVisible);
+	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
 	if (pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->OnDocumentCreated((CModDoc *)pDoc);
+		if (pMainFrm) pMainFrm->OnDocumentCreated(static_cast<CModDoc *>(pDoc));
 	}
 	else //Case: pDoc == 0, opening document failed.
 	{
-		if(lpszPathName != 0)
+		if(path != NULL)
 		{
-			if(PathFileExists(lpszPathName) == FALSE)
+			if(PathFileExists(path) == FALSE)
 			{
 				CString str;
-				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), lpszPathName);
+				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), path);
 				AfxMessageBox(str);
 			}
 			else //Case: Valid path but opening fails.
@@ -97,7 +100,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVis
 					"recognised. If the former is true, it's "
 					"recommended to close some documents as otherwise crash is likely"
 					"(currently there %s %d document%s open).")),
-					lpszPathName, (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
+					path, (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
 				AfxMessageBox(str);
 			}
 		}

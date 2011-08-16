@@ -469,21 +469,20 @@ void TestLoadSaveFile()
 	theFile.Append("test/test.");
 
 	// Test file loading
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "mptm");
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "mptm", FALSE);
 	TestLoadFile(pModDoc);
 
 	// Test file saving
  	pModDoc->DoSave(theFile + "saved.mptm");
 	pModDoc->OnCloseDocument();
 
+	// Saving the file puts it in the MRU list...
+	theApp.RemoveMruItem(0);
+
 	// Reload the saved file and test if everything is still working correctly.
-	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm");
+	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm", FALSE);
 	TestLoadFile(pModDoc);
 	pModDoc->OnCloseDocument();
-
-	// Forget about the files we just loaded
-	theApp.RemoveMruItem(0);
-	theApp.RemoveMruItem(0);
 }
 
 double Rand01() {return rand() / double(RAND_MAX);}
