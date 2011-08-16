@@ -1,0 +1,847 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ArrayUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoSaver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChildFrm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CleanupSong.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CreditStatic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_com.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_gen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_ins.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_pat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_seq.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_smp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultVstEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_669.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_xm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_wav.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_s3m.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_stm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_ult.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Soundlib\Load_umx.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\load_ptm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Soundlib\load_psm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_okt.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_mtm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Soundlib\load_mt2.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_mod.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_mo3.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_med.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\load_mid.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_mdl.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_itp.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\load_j2b.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_it.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_imf.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_gdm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_far.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_ams.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Soundlib\load_amf.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\load_dmf.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Load_dsm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\load_dbm.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\dlsbank.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_pat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fxp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Fastmix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectVis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyConfigDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelNode.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl_graph.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectNode.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="FinalNode.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="HyperEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HyperEdit3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HyperEdit2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InstrumentNode.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Message.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\mod_specifications.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\modcommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ModConvert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moddoc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Modedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\ModSequence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\modsmp_ctrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mod2wave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MIDIMappingDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="misc_util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\mmcmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Mmx_mix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mod2midi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternRandomizerGUI.cpp">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternRandomizerGUIEffect.cpp">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternRandomizerGUIInstrument.cpp">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternRandomizerGUINote.cpp">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternRandomizerGUIVolCmd.cpp">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\pattern.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_com.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_gen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_ins.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_pat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_smp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_tre.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\WindowedFIR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Waveform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vstplug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VSTEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UpdateCheck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackerSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tagging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFilePlayConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Sndmix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Sndfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Soundlib\snddev.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Soundlib\Snd_rvb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Snd_fx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\snd_flt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\snd_eq.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\snd_dsp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="serialization_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelManagerDlg.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="CloseMainDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractVstEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dlg_misc.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Mpdlgs.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternEditorDialogs.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternGotoDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternRandomizer.cpp">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="view_graph.cpp">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\PlaybackEventer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PerformanceCounter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\patternContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PSRatioCalc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleEditorDialogs.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Moptions.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="ScaleEnvPointsDlg.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="mptrack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveFXSlotDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="tuningRatioMapWnd.cpp">
+      <Filter>Source Files\Tuning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\tuning.cpp">
+      <Filter>Source Files\Tuning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\tuningbase.cpp">
+      <Filter>Source Files\Tuning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\tuningCollection.cpp">
+      <Filter>Source Files\Tuning</Filter>
+    </ClCompile>
+    <ClCompile Include="TuningDialog.cpp">
+      <Filter>Source Files\Tuning</Filter>
+    </ClCompile>
+    <ClCompile Include="mpt_midi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MPTHacks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Sampleio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Undo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AbstractVstEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoSaver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChildFrm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CleanupSong.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CreditStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrl_com.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrl_gen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrl_ins.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrl_pat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrl_smp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultVstEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\IT_DEFS.H">
+      <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Loaders.h">
+      <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Soundlib\Dlsbank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fxp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Endianness.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectVis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChannelNode.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrl_graph.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectNode.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="FinalNode.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InstrumentNode.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="mainbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyboardSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyConfigDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\midi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MIDIMappingDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="misc_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mod2midi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mod2wave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\mod_specifications.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\modcommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModConvert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\modsmp_ctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mptrack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ModSequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternRandomizerGUIVolCmd.h">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternRandomizerGUI.h">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternRandomizerGUIEffect.h">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternRandomizerGUIInstrument.h">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternRandomizerGUINote.h">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\WindowedFIR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\wavConverter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Wav.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vstplug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VSTEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_tre.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_smp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_pat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_ins.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_gen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_com.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Undo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="typedefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\tuningbase.h">
+      <Filter>Header Files\Tuning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\tuning.h">
+      <Filter>Header Files\Tuning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\tuningcollection.h">
+      <Filter>Header Files\Tuning</Filter>
+    </ClInclude>
+    <ClInclude Include="TuningDialog.h">
+      <Filter>Header Files\Tuning</Filter>
+    </ClInclude>
+    <ClInclude Include="tuningRatioMapWnd.h">
+      <Filter>Header Files\Tuning</Filter>
+    </ClInclude>
+    <ClInclude Include="test\test.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="ChannelManagerDlg.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="CloseMainDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="dlg_misc.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="Mpdlgs.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternGotoDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternEditorDialogs.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternRandomizer.h">
+      <Filter>Source Files\PatternRandomizer</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="view_graph.h">
+      <Filter>Source Files\MixGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Moptions.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="moddoc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\patternContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\pattern.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PerformanceCounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\PlaybackEventer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PSRatioCalc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="serialization_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Snd_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Soundlib\snddev.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Soundlib\snddevx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Soundlib\Sndfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFilePlayConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Soundlib\StringFixer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tagging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackerSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScaleEnvPointsDlg.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveFXSlotDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleEditorDialogs.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="UpdateCheck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\vumeters.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\built-inTunings.tc">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\colors.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\defaultKeybindings.mkb">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\dragging.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Res\envbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\img_list.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\mainbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\moddoc.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MPTRACK.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\mptrack.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\mptrack.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="mptrack.reg">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="VTune\mptrack.vpj">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Res\nodrag.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\nodrop.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\patterns.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\rt_manif.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Res\smptoolb.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\splashno.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\view_pat.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\visnode1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\vispcnode.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{41a5e65d-7591-4871-b2b3-29e5293c5782}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module Loaders">
+      <UniqueIdentifier>{bbe72ed0-6ebf-4cba-ace9-94d090d10e49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{fda74a72-cae0-4dfa-b22c-31f7ddcb1ec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{cd3e5871-5f13-4cdf-a869-f807737d2906}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MixGraph">
+      <UniqueIdentifier>{f0af5cea-2ec1-45c0-abe8-b93aa90e1df2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PatternRandomizer">
+      <UniqueIdentifier>{f0e1b59c-04c9-4620-8314-06fd4ea21616}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tuning">
+      <UniqueIdentifier>{86c7663b-6b61-4512-8a39-043d9b87ea1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Dialogs">
+      <UniqueIdentifier>{0ae72d82-d4a4-408f-919e-d54d696101d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Dialogs">
+      <UniqueIdentifier>{7526c521-5a42-4ad4-9d39-76f5871e5771}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tuning">
+      <UniqueIdentifier>{c0e5ad67-2b13-44b5-bb00-99b7949c1915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{5a7bae01-9526-4d85-9c00-0a280e22ad0b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mptrack.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
