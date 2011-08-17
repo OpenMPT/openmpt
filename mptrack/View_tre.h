@@ -124,7 +124,7 @@ protected:
 	HTREEITEM m_tiDLS[MAX_DLS_BANKS];
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
-	PMODTREEDOCINFO DocInfo[MODTREE_MAX_DOCUMENTS];
+	vector<PMODTREEDOCINFO> DocInfo;
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 
 public:
@@ -133,14 +133,14 @@ public:
 
 // Attributes
 public:
-	VOID Init();
-	VOID InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongFolder);
-	VOID InsLibGetFullPath(HTREEITEM hItem, LPSTR pszFullPath) const;
-	VOID RefreshMidiLibrary();
-	VOID RefreshDlsBanks();
-	VOID RefreshInstrumentLibrary();
-	VOID EmptyInstrumentLibrary();
-	VOID FillInstrumentLibrary();
+	void Init();
+	void InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongFolder);
+	void InsLibGetFullPath(HTREEITEM hItem, LPSTR pszFullPath) const;
+	void RefreshMidiLibrary();
+	void RefreshDlsBanks();
+	void RefreshInstrumentLibrary();
+	void EmptyInstrumentLibrary();
+	void FillInstrumentLibrary();
 	uint64 GetModItem(HTREEITEM hItem);
 	inline uint32 GetModItemType(const uint64 modItem) {return static_cast<uint32>(modItem & 0xFFFF);};	// return "item type" part of mod item variable ( & 0xFFFF )
 	inline uint32 GetModItemID(const uint64 modItem) {return static_cast<uint32>(modItem >> 16);};		// return "item ID" part of mod item variable ( >> 16 )
@@ -153,13 +153,13 @@ public:
 	BOOL OpenMidiInstrument(DWORD dwItem);
 	BOOL InstrumentLibraryChDir(LPCSTR lpszDir);
 	BOOL GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR lpszPath);
-	VOID OnOptionsChanged();
-	VOID AddDocument(CModDoc *pModDoc);
-	VOID RemoveDocument(CModDoc *pModDoc);
-	VOID UpdateView(UINT nDocNdx, DWORD dwHint);
-	VOID OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
+	void OnOptionsChanged();
+	void AddDocument(CModDoc *pModDoc);
+	void RemoveDocument(CModDoc *pModDoc);
+	void UpdateView(PMODTREEDOCINFO pInfo, DWORD dwHint);
+	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
-	VOID UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
+	void UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 
 // Overrides
@@ -180,7 +180,7 @@ protected:
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void ModTreeBuildTVIParam(TV_INSERTSTRUCT &tvis, LPCSTR lpszName, int iImage);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
-	UINT GetDocumentIDFromModDoc(CModDoc *pModDoc);
+	PMODTREEDOCINFO GetDocumentInfoFromModDoc(CModDoc *pModDoc);
 
 // Generated message map functions
 protected:
