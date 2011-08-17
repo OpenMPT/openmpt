@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CViewExSplitWnd, CSplitterWnd)
 
-CWnd* CViewExSplitWnd::GetActivePane(int*, int*)	// pRow, pCol
+/*CWnd* CViewExSplitWnd::GetActivePane(int*, int*)	// pRow, pCol
 //----------------------------------------------
 {
 	// attempt to use active view of frame window
@@ -37,7 +37,7 @@ CWnd* CViewExSplitWnd::GetActivePane(int*, int*)	// pRow, pCol
 		pView = GetFocus();
 
 	return pView;
-}
+}*/
 
 
 
@@ -93,11 +93,10 @@ CChildFrame::~CChildFrame()
 BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 //-----------------------------------------------------------------------------
 {
-	// create a splitter with 1 row, 2 columns
+	// create a splitter with 2 rows, 1 column
 	if (!m_wndSplitter.CreateStatic(this, 2, 1)) return FALSE;
 
 	// add the first splitter pane - the default view in row 0
-	//int cy = CMainFrame::glCtrlWindowHeight;
 	int cy = CMainFrame::GetSettings().glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
