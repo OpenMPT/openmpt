@@ -51,9 +51,6 @@ public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
 	virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
-
-private:
-	bool DocumentIsOpen(const char*, CDocument**);
 };
 
 
@@ -677,12 +674,15 @@ bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PA
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-	if(GetModuleFileName(NULL, m_szExePath, _MAX_PATH))
+	if(GetModuleFileName(NULL, m_szExePath, CountOf(m_szExePath)))
 	{
 		TCHAR szDrive[_MAX_DRIVE] = "", szDir[_MAX_PATH] = "";
 		_splitpath(m_szExePath, szDrive, szDir, NULL, NULL);
 		strcpy(m_szExePath, szDrive);
 		strcat(m_szExePath, szDir);
+
+		GetFullPathName(m_szExePath, CountOf(szDir), szDir, NULL);
+		strcpy(m_szExePath, szDir);
 	}
 
 	m_szConfigDirectory[0] = 0;
