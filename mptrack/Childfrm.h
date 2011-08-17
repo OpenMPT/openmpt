@@ -70,7 +70,7 @@ class CViewExSplitWnd: public CSplitterWnd
 public:
 	CViewExSplitWnd() {}
 	~CViewExSplitWnd() {}
-	CWnd* GetActivePane(int* pRow = NULL, int* pCol = NULL);
+	//CWnd* GetActivePane(int* pRow = NULL, int* pCol = NULL);
 };
 
 
