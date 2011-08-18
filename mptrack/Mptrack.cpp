@@ -25,7 +25,6 @@
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#include ".\mptrack.h"
 //end  rewbs.memLeak
 
 #ifdef _DEBUG
@@ -3146,9 +3145,9 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
 	StringFixer::SetNullTerminator(szExePath);
 
-	if(!_tcsncicmp(szPath, _T("\\"), 1))
+	if(!_tcsncicmp(szPath, _T("\\"), 1) && _tcsncicmp(szPath, _T("\\\\"), 2))
 	{
-		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\")
+		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		_tcsncat(szTempPath, szExePath, 2);	// "C:"
 		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
 		_tcscpy(szPath, szTempPath);
