@@ -49,11 +49,19 @@ class CModDocTemplate: public CMultiDocTemplate
 public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
-	virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
+	
+	#if (_MSC_VER < MSVC_VER_2010)
+		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE);
+	#else
+		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
+	#endif
 };
 
-
-CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL makeVisible)
+#if (_MSC_VER < MSVC_VER_2010)
+	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL makeVisible)
+#else
+	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL makeVisible)
+#endif
 //-----------------------------------------------------------------------------------------
 {
 	if (path)
@@ -71,7 +79,11 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL m
 		}
 	}
 
-	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
+	#if (_MSC_VER < MSVC_VER_2010)
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, makeVisible); 
+	#else
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
+	#endif
 	if (pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
