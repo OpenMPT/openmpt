@@ -781,7 +781,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
 			if ((m_MixPlugins[iPlug].Info.dwPluginId1)
-			 || (m_MixPlugins[iPlug].Info.dwPluginId2))
+				|| (m_MixPlugins[iPlug].Info.dwPluginId2))
 			{
 				gpMixPluginCreateProc(&m_MixPlugins[iPlug], this);
 				if (m_MixPlugins[iPlug].pMixPlugin)
@@ -792,17 +792,17 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 				else
 				{
 					// plugin not found - add to list
-					bool bFound = false;
+					bool found = false;
 					for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 					{
 						if(m_MixPlugins[*i].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
 						{
-							bFound = true;
+							found = true;
 							break;
 						}
 					}
 
-					if(bFound == false)
+					if(found == false)
 					{
 						sNotFound = sNotFound + m_MixPlugins[iPlug].Info.szLibraryName + "\n";
 						notFoundIDs.push_back(iPlug); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
@@ -818,20 +818,21 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	{
 		if(notFoundIDs.size() == 1)
 		{
-			sNotFound = "The following plugin has not been found:\n\n" + sNotFound + "\nDo you want to search for it on KVRAudio?";
+			sNotFound = "The following plugin has not been found:\n\n" + sNotFound + "\nDo you want to search for it online?";
 		}
 		else
 		{
-			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them on KVRAudio?"
-						"\nWARNING: A browser window / tab is opened for every plugin. If you do not want that, you can visit http://www.kvraudio.com/search.php";
+			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them online?";
 		}
 		if (::MessageBox(0, sNotFound.c_str(), "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
+		{
+			CString sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
-				CString sUrl;
-				sUrl.Format("http://www.kvraudio.com/search.php?lq=inurl%3Aget&q=%s", m_MixPlugins[*i].Info.szLibraryName);
-				CTrackApp::OpenURL(sUrl);
+				sUrl.AppendFormat("%08X%s%%0a", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2), m_MixPlugins[*i].Info.szLibraryName);
 			}
+			CTrackApp::OpenURL(sUrl);
+		}
 	}
 
 	// Set up mix levels
@@ -1223,7 +1224,7 @@ void CSoundFile::ResumePlugins()
 void CSoundFile::StopAllVsti()
 //----------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
@@ -2684,6 +2685,7 @@ void CSoundFile::DeleteStaticdata()
 	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = nullptr;
 }
 
+
 bool CSoundFile::SaveStaticTunings()
 //----------------------------------
 {
@@ -2695,11 +2697,13 @@ bool CSoundFile::SaveStaticTunings()
 	return false;
 }
 
+
 void SimpleMessageBox(const char* message, const char* title)
 //-----------------------------------------------------------
 {
 	MessageBox(0, message, title, MB_ICONINFORMATION);
 }
+
 
 bool CSoundFile::LoadStaticTunings()
 //----------------------------------
@@ -2859,8 +2863,8 @@ bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
 {
 	if(strcmp(m_szNames[0], titleCandidate))
 	{
-		memset(m_szNames[0], 0, sizeof(m_szNames[0]));
-		memcpy(m_szNames[0], titleCandidate, min(sizeof(m_szNames[0])-1, strSize));
+		strncpy(m_szNames[0], titleCandidate, min(MAX_SAMPLENAME - 1, strSize));
+		StringFixer::SetNullTerminator(m_szNames[0]);
 		return true;
 	}
 	return false;
