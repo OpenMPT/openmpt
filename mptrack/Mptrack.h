@@ -127,6 +127,17 @@ public:
 	static MEMORYSTATUS gMemStatus;
 	static CDLSBank *gpDLSBanks[MAX_DLS_BANKS];
 
+#if (_MSC_VER < MSVC_VER_2010)
+	virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
+	{
+		CDocument* pDoc = CWinApp::OpenDocumentFile(lpszFileName);
+		if (pDoc && bAddToMRU != TRUE)
+			RemoveMruItem(0); // This doesn't result to the same behaviour as not adding to MRU 
+							  // (if the new item got added, it might have already dropped the last item out)
+		return pDoc;
+	}
+#endif
+
 protected:
 	CMultiDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
