@@ -1,3 +1,4 @@
+MB_ICONERROR
 // mptrack.cpp : Defines the class behaviors for the application.
 //
 
@@ -587,6 +588,12 @@ CTrackApp::CTrackApp()
 	#if (_MSC_VER >= 1400)
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
+
+	
+#ifdef WIN32
+	::SetUnhandledExceptionFilter(UnhandledExceptionFilter);
+#endif // WIN32
+
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_bInitialized = FALSE;
@@ -2965,6 +2972,54 @@ void Log(LPCSTR format,...)
 		va_end(va);
 	#endif //_DEBUG
 }
+
+
+#ifdef WIN32
+// Try to close the audio device and rescue unsaved work if an unhandled exception occours...
+LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
+//-------------------------------------------------------------
+{
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if(pMainFrame)
+	{
+		if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+		pMainFrame->audioCloseDevice();
+	}
+
+	// Rescue modified files...
+	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	if(pDocTmpl)
+	{
+		POSITION pos = pDocTmpl->GetFirstDocPosition();
+		CDocument *pDoc;
+
+		int fileID = 0;
+		const CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
+
+		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
+		{
+			CModDoc *pModDoc = (CModDoc *)pDoc;
+			if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
+			{
+				fileID++;
+				CString filename;
+				filename.Format("%scrash_%s_%d.%s", theApp.GetConfigPath(), timeStamp, fileID, pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+				pModDoc->OnSaveDocument(filename);
+			}
+		}
+
+		if(fileID > 0)
+		{
+			CString message;
+			message.Format("A crash has been detected.\n%d modified file%s been rescued to %s", fileID, (fileID == 1 ? " has" : "s have"), theApp.GetConfigPath());
+			::MessageBox((pMainFrame ? pMainFrame->m_hWnd : NULL), message, "OpenMPT Crash", MB_ICONERROR);
+		}
+	}
+
+	// Let Windows handle the exception...
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif // WIN32
 
 
 //////////////////////////////////////////////////////////////////////////////////

@@ -679,9 +679,11 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	if (gbStopSent) return FALSE;
 	BEGIN_CRITICAL();
-	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice)) {
+	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
+	{
 		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
-	}/* else {
+	}/* else
+	{
 		CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
 	}*/
 	if (!bOk)
@@ -694,18 +696,6 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 }
 
 
-void Terminate_AudioThread()
-//----------------------------------------------
-{	
-	//TODO: Why does this not get called.
-	AfxMessageBox("Audio thread terminated unexpectedly. Attempting to shut down audio device");
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-	pMainFrame->audioCloseDevice();
-	exit(-1);
-}
-
-
 // Audio thread
 DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 //------------------------------------------
@@ -714,7 +704,9 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	BOOL bWait;
 	UINT nSleep;
 
-	set_terminate(Terminate_AudioThread);
+#ifdef WIN32
+	::SetUnhandledExceptionFilter(CTrackApp::UnhandledExceptionFilter);
+#endif // WIN32
 
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
