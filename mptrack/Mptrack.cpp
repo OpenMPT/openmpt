@@ -589,7 +589,6 @@ CTrackApp::CTrackApp()
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 
-	
 #ifdef WIN32
 	::SetUnhandledExceptionFilter(UnhandledExceptionFilter);
 #endif // WIN32
@@ -2980,6 +2979,7 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 //-------------------------------------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	// Shut down audio device...
 	if(pMainFrame)
 	{
 		if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
@@ -2993,26 +2993,39 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 		POSITION pos = pDocTmpl->GetFirstDocPosition();
 		CDocument *pDoc;
 
-		int fileID = 0;
-		const CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
+		const HWND window = (pMainFrame ? pMainFrame->m_hWnd : NULL);
+		const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
+		CString baseRescuePath;
+		int numFiles = 0;
 
 		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
 		{
 			CModDoc *pModDoc = (CModDoc *)pDoc;
 			if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
 			{
-				fileID++;
+				if(numFiles == 0)
+				{
+					// Need to create a rescue directory first
+					baseRescuePath.Format("%sCrashFiles\\", theApp.GetConfigPath());
+					CreateDirectory(baseRescuePath, nullptr);
+					baseRescuePath.Append(timestampDir);
+					if(!CreateDirectory(baseRescuePath, nullptr))
+					{
+						::MessageBox(window, "A crash has been detected.\nThere are still some modified files open, but OpenMPT could not create a directory for rescueing them.", "OpenMPT Crash", MB_ICONERROR);
+						break;
+					}
+				}
 				CString filename;
-				filename.Format("%scrash_%s_%d.%s", theApp.GetConfigPath(), timeStamp, fileID, pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+				filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 				pModDoc->OnSaveDocument(filename);
 			}
 		}
 
-		if(fileID > 0)
+		if(numFiles > 0)
 		{
 			CString message;
-			message.Format("A crash has been detected.\n%d modified file%s been rescued to %s", fileID, (fileID == 1 ? " has" : "s have"), theApp.GetConfigPath());
-			::MessageBox((pMainFrame ? pMainFrame->m_hWnd : NULL), message, "OpenMPT Crash", MB_ICONERROR);
+			message.Format("A crash has been detected.\n%d modified file%s been rescued to the following directory:\n%s", numFiles, (numFiles == 1 ? " has" : "s have"), baseRescuePath);
+			::MessageBox(window, message, "OpenMPT Crash", MB_ICONERROR);
 		}
 	}
 
