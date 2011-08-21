@@ -42,7 +42,7 @@ enum {
 
 #define MODTREE_MAX_DOCUMENTS		32
 
-struct MODTREEDOCINFO
+struct ModTreeDocInfo
 {
 	CModDoc *pModDoc;
 	// Module information
@@ -59,7 +59,7 @@ struct MODTREEDOCINFO
 	bool bIsSamplePlaying[MAX_SAMPLES];
 	bool bIsInstrPlaying[MAX_INSTRUMENTS];
 	
-	MODTREEDOCINFO(const CSoundFile* const pSndFile)
+	ModTreeDocInfo(const CSoundFile* const pSndFile)
 	{
 		pModDoc = NULL;
 		nSeqSel = SEQUENCEINDEX_INVALID;
@@ -82,9 +82,6 @@ struct MODTREEDOCINFO
 		memset(bIsInstrPlaying, false, MAX_INSTRUMENTS * sizeof(bool));
 	}
 };
-
-typedef MODTREEDOCINFO _MODTREEDOCINFO;
-typedef MODTREEDOCINFO* PMODTREEDOCINFO;
 
 
 //=============================================
@@ -124,7 +121,7 @@ protected:
 	HTREEITEM m_tiDLS[MAX_DLS_BANKS];
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
-	vector<PMODTREEDOCINFO> DocInfo;
+	vector<ModTreeDocInfo *> DocInfo;
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 
 public:
@@ -156,7 +153,7 @@ public:
 	void OnOptionsChanged();
 	void AddDocument(CModDoc *pModDoc);
 	void RemoveDocument(CModDoc *pModDoc);
-	void UpdateView(PMODTREEDOCINFO pInfo, DWORD dwHint);
+	void UpdateView(ModTreeDocInfo *pInfo, DWORD dwHint);
 	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	void UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
@@ -180,7 +177,7 @@ protected:
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void ModTreeBuildTVIParam(TV_INSERTSTRUCT &tvis, LPCSTR lpszName, int iImage);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
-	PMODTREEDOCINFO GetDocumentInfoFromModDoc(CModDoc *pModDoc);
+	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc *pModDoc);
 
 // Generated message map functions
 protected:

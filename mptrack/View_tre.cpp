@@ -124,7 +124,7 @@ CModTree::CModTree(CModTree *pDataTree)
 CModTree::~CModTree()
 //-------------------
 {
-	vector<PMODTREEDOCINFO>::iterator iter;
+	vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		delete (*iter);
@@ -280,7 +280,7 @@ void CModTree::AddDocument(CModDoc *pModDoc)
 //------------------------------------------
 {
 	// Check if document is already in the list
-	vector<PMODTREEDOCINFO>::iterator iter;
+	vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if ((*iter)->pModDoc == pModDoc)
@@ -289,7 +289,7 @@ void CModTree::AddDocument(CModDoc *pModDoc)
 		}
 	}
 
-	PMODTREEDOCINFO pInfo = new MODTREEDOCINFO(pModDoc->GetSoundFile());
+	ModTreeDocInfo *pInfo = new ModTreeDocInfo(pModDoc->GetSoundFile());
 	pInfo->pModDoc = pModDoc;
 	pInfo->nSeqSel = SEQUENCEINDEX_INVALID;
 	pInfo->nOrdSel = ORDERINDEX_INVALID;
@@ -308,7 +308,7 @@ void CModTree::AddDocument(CModDoc *pModDoc)
 void CModTree::RemoveDocument(CModDoc *pModDoc)
 //---------------------------------------------
 {
-	vector<PMODTREEDOCINFO>::iterator iter;
+	vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if((*iter)->pModDoc == pModDoc)
@@ -322,6 +322,7 @@ void CModTree::RemoveDocument(CModDoc *pModDoc)
 }
 
 
+// Get CModDoc that is associated with a tree item
 CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 //-----------------------------------------------------
 {
@@ -333,7 +334,7 @@ CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 	}
 	if (hItem != NULL)
 	{
-		vector<PMODTREEDOCINFO>::iterator iter;
+		vector<ModTreeDocInfo *>::iterator iter;
 		for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 		{
 			if (hItem == (*iter)->hSong) return (*iter)->pModDoc;
@@ -343,11 +344,11 @@ CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 }
 
 
-PMODTREEDOCINFO CModTree::GetDocumentInfoFromModDoc(CModDoc *pModDoc)
+// Get modtree doc information for a given CModDoc
+ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc *pModDoc)
 //-------------------------------------------------------------------
 {
-	// returns DocInfo[] information
-	vector<PMODTREEDOCINFO>::iterator iter;
+	vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if ((*iter)->pModDoc == pModDoc)
@@ -596,7 +597,7 @@ void CModTree::RefreshInstrumentLibrary()
 }
 
 
-void CModTree::UpdateView(PMODTREEDOCINFO pInfo, DWORD lHint)
+void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 //----------------------------------------------------------
 {
 	CModDoc *pDoc;
@@ -1070,7 +1071,7 @@ uint64 CModTree::GetModItem(HTREEITEM hItem)
 	for (size_t i = 0; i < DocInfo.size(); i++)
 	{
 		m_nDocNdx = i;
-		PMODTREEDOCINFO pInfo = DocInfo[i];
+		ModTreeDocInfo *pInfo = DocInfo[i];
 		if (hItem == pInfo->hSong) return MODITEM_HDR_SONG;
 		if (hRootParent == pInfo->hSong)
 		{
@@ -1156,7 +1157,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 		const uint64 modItem = GetModItem(hItem);
 		const uint32 modItemType = GetModItemType(modItem);
 		uint32 modItemID = GetModItemID(modItem);
-		PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
+		ModTreeDocInfo *pInfo = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 		CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
 		switch(modItemType)
 		{
@@ -1225,7 +1226,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 		const uint64 modItem = GetModItem(hItem);
 		const uint32 modItemType = GetModItemType(modItem);
 		uint32 modItemID = GetModItemID(modItem);
-		PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
+		ModTreeDocInfo *pInfo = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 		CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
 		switch(modItemType)
 		{
@@ -1390,7 +1391,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	const uint32 modItemID = GetModItemID(modItem);
 	TCHAR s[64];
 
-	PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
+	ModTreeDocInfo *pInfo = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	switch(modItemType)
@@ -1924,7 +1925,7 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 //-------------------------------------------------------------------
 {
-	PMODTREEDOCINFO pInfo = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
+	ModTreeDocInfo *pInfo = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
 	pdropinfo->pModDoc = (pInfo) ? pInfo->pModDoc : nullptr;
 	pdropinfo->dwDropType = DRAGONDROP_NOTHING;
 	pdropinfo->dwDropItem = GetModItemID(m_qwItemDrag);
@@ -2022,8 +2023,8 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const uint32 modItemDragType = GetModItemType(m_qwItemDrag);
 	const uint32 modItemDragID = GetModItemID(m_qwItemDrag);
 
-	const PMODTREEDOCINFO pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
-	const PMODTREEDOCINFO pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
+	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
+	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? pInfoDrop->pModDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 
@@ -2135,7 +2136,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 void CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 //----------------------------------------------------------------------
 {
-	PMODTREEDOCINFO pInfo = GetDocumentInfoFromModDoc(pModDoc);
+	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(pModDoc);
 	if(pInfo == nullptr) return;
 
 	ORDERINDEX nNewOrd = (pNotify) ? pNotify->nOrder : ORDERINDEX_INVALID;
@@ -2212,7 +2213,7 @@ void CModTree::OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint)
 	dwHint &= (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|HINT_MASK_ITEM|HINT_SEQNAMES);
 	if ((pHint != this) && (dwHint & HINT_MASK_FLAGS))
 	{
-		vector<PMODTREEDOCINFO>::iterator iter;
+		vector<ModTreeDocInfo *>::iterator iter;
 		for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 		{
 			if (((*iter)->pModDoc == pModDoc) || (!pModDoc))
@@ -2269,7 +2270,7 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 		case MODITEM_HDR_ORDERS:
 			// can we drag an order header? (only in MPTM format and if there's only one sequence)
 			{
-				CModDoc *pModDoc = DocInfo[m_nDragDocNdx]->pModDoc;
+				CModDoc *pModDoc = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx]->pModDoc : nullptr);
 				CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 				if(pSndFile && pSndFile->Order.GetNumSequences() == 1)
 					bDrag = true;
@@ -2787,7 +2788,7 @@ void CModTree::OnRefreshTree()
 //----------------------------
 {
 	BeginWaitCursor();
-	vector<PMODTREEDOCINFO>::iterator iter;
+	vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		UpdateView((*iter), HINT_MODTYPE);
