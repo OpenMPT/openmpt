@@ -1924,8 +1924,8 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 //-------------------------------------------------------------------
 {
-	PMODTREEDOCINFO pInfo = DocInfo[m_nDragDocNdx];
-	pdropinfo->pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
+	PMODTREEDOCINFO pInfo = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
+	pdropinfo->pModDoc = (pInfo) ? pInfo->pModDoc : nullptr;
 	pdropinfo->dwDropType = DRAGONDROP_NOTHING;
 	pdropinfo->dwDropItem = GetModItemID(m_qwItemDrag);
 	pdropinfo->lDropParam = 0;
@@ -1957,14 +1957,14 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		if (m_szSongName[0])
 		{
 			CHAR s[32];
-			lstrcpyn(s, GetItemText(m_hItemDrag), sizeof(s));
+			lstrcpyn(s, GetItemText(m_hItemDrag), CountOf(s));
 			UINT n = 0;
 			if (s[0] >= '0') n += (s[0] - '0');
 			if ((s[1] >= '0') && (s[1] <= '9')) n = n*10 + (s[1] - '0');
 			if ((s[2] >= '0') && (s[2] <= '9'))  n = n*10 + (s[2] - '0');
 			pdropinfo->dwDropType = ((m_qwItemDrag & 0xFFFF) == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
 			pdropinfo->dwDropItem = n;
-			pdropinfo->pModDoc = NULL;
+			pdropinfo->pModDoc = nullptr;
 			pdropinfo->lDropParam = (LPARAM)&m_SongFile;
 		} else
 		{
@@ -2022,8 +2022,8 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const uint32 modItemDragType = GetModItemType(m_qwItemDrag);
 	const uint32 modItemDragID = GetModItemID(m_qwItemDrag);
 
-	const PMODTREEDOCINFO pInfoDrag = DocInfo[m_nDragDocNdx];
-	const PMODTREEDOCINFO pInfoDrop = DocInfo[m_nDocNdx];
+	const PMODTREEDOCINFO pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
+	const PMODTREEDOCINFO pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? pInfoDrop->pModDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 
@@ -2062,7 +2062,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 		// At the moment, only dropping sequences into another module is possible.
 		if((modItemDragType == MODITEM_SEQUENCE || modItemDragType == MODITEM_HDR_ORDERS) && pSndFile && pInfoDrag && pModDoc != pInfoDrag->pModDoc)
 		{
-			if(bDoDrop)
+			if(bDoDrop && pInfoDrag != nullptr)
 			{
 				// copy mod sequence over.
 				CModDoc *pDragDoc = pInfoDrag->pModDoc;
