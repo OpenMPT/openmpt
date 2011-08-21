@@ -275,9 +275,16 @@ public:
 private:
 	static void LoadRegistryDLS();
 
-	#ifdef WIN32	// Legacy stuff
+#ifdef WIN32	// Legacy stuff
 	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = "", TCHAR sNewFileName[_MAX_PATH] = "");
-	#endif
+#endif // WIN32
+
+// Exception handling
+#ifdef WIN32
+public:
+	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *);
+#endif // WIN32
+
 };
 
 
