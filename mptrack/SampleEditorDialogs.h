@@ -7,9 +7,9 @@
  *          OpenMPT Devs
  */
 
+#pragma once
 #ifndef SAMPLEEDITORDIALOGS_H
 #define SAMPLEEDITORDIALOGS_H
-#pragma once
 
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog

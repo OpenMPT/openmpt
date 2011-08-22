@@ -370,6 +370,9 @@
 				RelativePath=".\ScaleEnvPointsDlg.cpp">
 			</File>
 			<File
+				RelativePath=".\SelectPluginDialog.cpp">
+			</File>
+			<File
 				RelativePath=".\serialization_utils.cpp">
 			</File>
 			<File
@@ -820,6 +823,9 @@
 			</File>
 			<File
 				RelativePath=".\ScaleEnvPointsDlg.h">
+			</File>
+			<File
+				RelativePath=".\SelectPluginDialog.h">
 			</File>
 			<File
 				RelativePath=".\serialization_utils.h">

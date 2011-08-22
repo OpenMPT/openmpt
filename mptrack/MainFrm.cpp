@@ -26,6 +26,7 @@
 #include "ctrl_pat.h"
 #include "UpdateCheck.h"
 #include "CloseMainDialog.h"
+#include "SelectPluginDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

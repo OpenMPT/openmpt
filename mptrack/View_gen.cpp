@@ -10,8 +10,8 @@
 #include "EffectVis.h"
 #include "movefxslotdialog.h"
 #include "ChannelManagerDlg.h"
+#include "SelectPluginDialog.h"
 #include "../soundlib/StringFixer.h"
-#include ".\view_gen.h"
 
 #define ID_FXCOMMANDS_BASE	41000
 
