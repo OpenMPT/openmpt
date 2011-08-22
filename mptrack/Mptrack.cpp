@@ -2931,8 +2931,8 @@ BOOL CTrackApp::UninitializeDXPlugins()
 ///////////////////////////////////////////////////////////////////////////////////
 // Internet-related functions
 
-BOOL CTrackApp::OpenURL(LPCSTR lpszURL)
-//-------------------------------------
+BOOL CTrackApp::OpenURL(const LPCSTR lpszURL)
+//-------------------------------------------
 {
 	if ((lpszURL) && (lpszURL[0]) && (theApp.m_pMainWnd))
 	{
@@ -2942,7 +2942,7 @@ BOOL CTrackApp::OpenURL(LPCSTR lpszURL)
 					lpszURL,
 					NULL,
 					NULL,
-					0)) >= 32) return TRUE;				
+					SW_SHOW)) >= 32) return TRUE;
 	}
 	return FALSE;
 }
@@ -3006,12 +3006,14 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 				if(numFiles == 0)
 				{
 					// Need to create a rescue directory first
-					baseRescuePath.Format("%sCrashFiles\\", theApp.GetConfigPath());
+					TCHAR tempPath[_MAX_PATH];
+					GetTempPath(CountOf(tempPath), tempPath);
+					baseRescuePath.Format("%sOpenMPT Crash Files\\", tempPath);
 					CreateDirectory(baseRescuePath, nullptr);
 					baseRescuePath.Append(timestampDir);
 					if(!CreateDirectory(baseRescuePath, nullptr))
 					{
-						::MessageBox(window, "A crash has been detected.\nThere are still some modified files open, but OpenMPT could not create a directory for rescueing them.", "OpenMPT Crash", MB_ICONERROR);
+						::MessageBox(window, "A crash has been detected and OpenMPT will be closed.\nThere are still some modified files open, but OpenMPT could not create a directory for rescueing them.", "OpenMPT Crash", MB_ICONERROR);
 						break;
 					}
 				}
@@ -3024,8 +3026,9 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 		if(numFiles > 0)
 		{
 			CString message;
-			message.Format("A crash has been detected.\n%d modified file%s been rescued to the following directory:\n%s", numFiles, (numFiles == 1 ? " has" : "s have"), baseRescuePath);
+			message.Format("A crash has been detected and OpenMPT will be closed.\n%d modified file%s been rescued to\n\n%s\n\nNote: It cannot be guaranteed that rescued files are still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), baseRescuePath);
 			::MessageBox(window, message, "OpenMPT Crash", MB_ICONERROR);
+			OpenDirectory(baseRescuePath);
 		}
 	}
 
