@@ -696,7 +696,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.Patterns.Insert(0, 64);
 		}
 
-		memset(m_SndFile.m_szNames, 0, sizeof(m_SndFile.m_szNames));
+		MemsetZero(m_SndFile.m_szNames);
 		strcpy(m_SndFile.m_szNames[0], "untitled");
 
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
@@ -1043,7 +1043,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 	BEGIN_CRITICAL();
 
 	//rewbs.vstiLive
-	if((nins > 0) && (nins <= m_SndFile.m_nInstruments) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
+	if((nins > 0) && (nins <= m_SndFile.GetNumInstruments()) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
 	{
 
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
@@ -1107,40 +1107,50 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 {
 	DWORD muteType = (CMainFrame::GetSettings().m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
 
-	if (nChn >= m_SndFile.m_nChannels) {
+	if (nChn >= m_SndFile.m_nChannels)
+	{
 		return false;
 	}
 
 	//Mark channel as muted in channel settings
-	if (doMute)	{
+	if (doMute)
+	{
 		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
-	} else {
+	} else
+	{
 		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
 	}
 	
 	//Mute pattern channel
-	if (doMute) {
+	if (doMute)
+	{
 		m_SndFile.Chn[nChn].dwFlags |= muteType;
 		//Kill VSTi notes on muted channel.
-		UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
-		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))	{
-			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
+		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
+		{
+			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
 			MODINSTRUMENT* pIns = m_SndFile.Chn[nChn].pModInstrument;
-			if (pPlug && pIns) {
+			if (pPlug && pIns)
+			{
 				pPlug->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
 			}
 		}
-	} else {
+	} else
+	{
 		//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
 		m_SndFile.Chn[nChn].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
 	}
 
 	//mute any NNA'd channels
-	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) {
+	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++)
+	{
 		if (m_SndFile.Chn[i].nMasterChn == nChn + 1u)	{
-			if (doMute) { 
+			if (doMute)
+			{ 
 				m_SndFile.Chn[i].dwFlags |= muteType;
-			} else {
+			} else
+			{
 				//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
 				m_SndFile.Chn[i].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
 			}
@@ -1148,7 +1158,8 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 	}
 
 	//Mark IT/MPTM/S3M as modified
-	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) {
+	if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M))
+	{
 		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 	}
 
@@ -2220,18 +2231,18 @@ const MPTEFFECTINFO gFXInfo[] =
 	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_MOD,	"Invert Loop"},
 	// Extended S3M/IT effects
 	{CMD_S3MCMDEX,		0xF0,0x10,	0,	MOD_TYPE_S3MITMPT,	"Glissando Control"},
-	{CMD_S3MCMDEX,		0xF0,0x20,	0,	MOD_TYPE_S3M,	"Set Finetune"},
+	{CMD_S3MCMDEX,		0xF0,0x20,	0,	MOD_TYPE_S3M,		"Set Finetune"},
 	{CMD_S3MCMDEX,		0xF0,0x30,	0,	MOD_TYPE_S3MITMPT,	"Vibrato Waveform"},
 	{CMD_S3MCMDEX,		0xF0,0x40,	0,	MOD_TYPE_S3MITMPT,	"Tremolo Waveform"},
 	{CMD_S3MCMDEX,		0xF0,0x50,	0,	MOD_TYPE_S3MITMPT,	"Panbrello Waveform"},
 	{CMD_S3MCMDEX,		0xF0,0x60,	0,	MOD_TYPE_S3MITMPT,	"Fine Pattern Delay"},
 	{CMD_S3MCMDEX,		0xF0,0x80,	0,	MOD_TYPE_S3MITMPT,	"Set Panning"},
-	{CMD_S3MCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_S3MITMPT,	"Set High Offset"},
+	{CMD_S3MCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_ITMPT,		"Set High Offset"},
 	{CMD_S3MCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_S3MITMPT,	"Pattern Loop"},
 	{CMD_S3MCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_S3MITMPT,	"Note Cut"},
 	{CMD_S3MCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_S3MITMPT,	"Note Delay"},
 	{CMD_S3MCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_S3MITMPT,	"Pattern Delay"},
-	{CMD_S3MCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_ITMPT,	"Set Active Macro"},
+	{CMD_S3MCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_ITMPT,		"Set Active Macro"},
 	// MPT XM extensions and special effects
 	{CMD_XFINEPORTAUPDOWN,0xF0,0x10,0,	MOD_TYPE_XM,	"Extra Fine Porta Up"},
 	{CMD_XFINEPORTAUPDOWN,0xF0,0x20,0,	MOD_TYPE_XM,	"Extra Fine Porta Down"},
@@ -2346,8 +2357,8 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 				case sfx_plug: {
 					int nParam = MacroToPlugParam(macroText);
 					char paramName[128];
-					memset(paramName, 0, sizeof(paramName));				
-					UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+					MemsetZero(paramName);
+					PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
 					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS)) {
 						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
 						if (pPlug) 

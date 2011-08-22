@@ -31,7 +31,7 @@ protected:
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
 	void DoClose();
-	void UpdatePluginsList(DWORD forceSelect=0);
+	void UpdatePluginsList(DWORD forceSelect = 0);
 	bool VerifyPlug(PVSTPLUGINLIB plug);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
@@ -40,8 +40,8 @@ public:
 	afx_msg void OnAddPlugin();
 	afx_msg void OnRemovePlugin();
 	afx_msg void OnNameFilterChanged();
-	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT * result);
-	afx_msg void OnSelDblClk(NMHDR *pNotifyStruct, LRESULT * result);
+	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelDblClk(NMHDR *pNotifyStruct, LRESULT *result);
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
