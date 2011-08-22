@@ -228,6 +228,7 @@
     <ClCompile Include="SampleEditorDialogs.cpp" />
     <ClCompile Include="..\soundlib\Sampleio.cpp" />
     <ClCompile Include="ScaleEnvPointsDlg.cpp" />
+    <ClCompile Include="SelectPluginDialog.cpp" />
     <ClCompile Include="serialization_utils.cpp" />
     <ClCompile Include="..\soundlib\snd_dsp.cpp" />
     <ClCompile Include="..\soundlib\snd_eq.cpp" />
@@ -326,6 +327,7 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="InstrumentNode.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="SelectPluginDialog.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="view_graph.h" />
     <ClInclude Include="AbstractVstEditor.h" />

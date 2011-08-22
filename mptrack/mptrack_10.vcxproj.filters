@@ -418,6 +418,9 @@
     <ClCompile Include="Undo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SelectPluginDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -728,6 +731,9 @@
     </ClInclude>
     <ClInclude Include="UpdateCheck.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectPluginDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
