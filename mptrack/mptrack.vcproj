@@ -178,6 +178,9 @@
 				RelativePath=".\AbstractVstEditor.cpp">
 			</File>
 			<File
+				RelativePath=".\ACMConvert.cpp">
+			</File>
+			<File
 				RelativePath=".\ArrayUtils.cpp">
 			</File>
 			<File
@@ -658,6 +661,9 @@
 			Filter="h;hpp;hxx;hm;inl">
 			<File
 				RelativePath=".\AbstractVstEditor.h">
+			</File>
+			<File
+				RelativePath=".\ACMConvert.h">
 			</File>
 			<File
 				RelativePath=".\ArrayUtils.h">

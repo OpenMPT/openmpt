@@ -14,24 +14,11 @@
 
 #include "resource.h"       // main symbols
 #include "../soundlib/Sndfile.h"
+#include "ACMConvert.h"
 #include <windows.h>
 
 class CModDoc;
 class CVstPluginManager;
-
-/////////////////////////////////////////////////////////////////////////////
-// ACM Functions (for dynamic linking)
-
-typedef VOID (ACMAPI *PFNACMMETRICS)(HACMOBJ, UINT, LPVOID);
-typedef MMRESULT (ACMAPI *PFNACMFORMATENUM)(HACMDRIVER, LPACMFORMATDETAILSA, ACMFORMATENUMCBA, DWORD dwInstance, DWORD fdwEnum);
-typedef MMRESULT (ACMAPI *PFNACMDRIVEROPEN)(LPHACMDRIVER, HACMDRIVERID, DWORD);
-typedef MMRESULT (ACMAPI *PFNACMDRIVERCLOSE)(HACMDRIVER, DWORD);
-typedef MMRESULT (ACMAPI *PFNACMSTREAMOPEN)(LPHACMSTREAM, HACMDRIVER, LPWAVEFORMATEX, LPWAVEFORMATEX, LPWAVEFILTER, DWORD, DWORD, DWORD);
-typedef MMRESULT (ACMAPI *PFNACMSTREAMCLOSE)(HACMSTREAM, DWORD);
-typedef MMRESULT (ACMAPI *PFNACMSTREAMSIZE)(HACMSTREAM, DWORD, LPDWORD, DWORD);
-typedef MMRESULT (ACMAPI *PFNACMSTREAMCONVERT)(HACMSTREAM, LPACMSTREAMHEADER, DWORD);
-typedef MMRESULT (ACMAPI *PFNACMDRIVERDETAILS)(HACMDRIVERID, LPACMDRIVERDETAILS, DWORD);
-
 
 /////////////////////////////////////////////////////////////////////////////
 // 16-colors DIB
@@ -141,7 +128,7 @@ public:
 protected:
 	CMultiDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
-	BOOL m_bInitialized, m_bLayer3Present, m_bExWaveSupport, m_bDebugMode;
+	BOOL m_bInitialized, m_bExWaveSupport, m_bDebugMode;
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
@@ -152,6 +139,7 @@ protected:
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
 	TCHAR m_szStringsFileName[_MAX_PATH];
 	static bool m_bPortableMode;
+	ACMConvert acmConvert;
 
 public:
 	CTrackApp();
@@ -188,7 +176,7 @@ public:
 	void SetDefaultMidiMacro(const MODMIDICFG *pcfg) { m_MidiCfg = *pcfg; }
 	void LoadChords(PMPTCHORD pChords);
 	void SaveChords(PMPTCHORD pChords);
-	BOOL CanEncodeLayer3() const { return m_bLayer3Present; }
+	BOOL CanEncodeLayer3() const { return acmConvert.IsLayer3Present(); }
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
@@ -207,6 +195,8 @@ public:
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const int nItem);
 
+	ACMConvert &GetACMConvert() { return acmConvert; };
+
 // Splash Screen
 protected:
 	VOID StartSplashScreen();
@@ -216,32 +206,6 @@ protected:
 public:
 	VOID ImportLocalizedStrings();
 	BOOL GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize);
-
-// ACM and MPEG Layer3 support
-protected:
-	HINSTANCE m_hACMInst;
-	HINSTANCE m_hBladeEnc, m_hLameEnc;
-	PFNACMFORMATENUM m_pfnAcmFormatEnum;
-	
-public:
-	BOOL InitializeACM(BOOL bNoAcm=FALSE);
-	BOOL UninitializeACM();
-	BOOL InitializeDXPlugins();
-	BOOL UninitializeDXPlugins();
-	static void AcmExceptionHandler();
-	MMRESULT AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACMFORMATENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum);
-	MMRESULT AcmDriverOpen(LPHACMDRIVER, HACMDRIVERID, DWORD);
-	MMRESULT AcmDriverDetails(HACMDRIVERID hadid, LPACMDRIVERDETAILS padd, DWORD fdwDetails);
-	MMRESULT AcmDriverClose(HACMDRIVER, DWORD);
-	MMRESULT AcmStreamOpen(LPHACMSTREAM, HACMDRIVER, LPWAVEFORMATEX, LPWAVEFORMATEX, LPWAVEFILTER pwfltr, DWORD dwCallback, DWORD dwInstance, DWORD fdwOpen);
-	MMRESULT AcmStreamClose(HACMSTREAM, DWORD);
-	MMRESULT AcmStreamSize(HACMSTREAM has, DWORD cbInput, LPDWORD pdwOutputBytes, DWORD fdwSize);
-	MMRESULT AcmStreamPrepareHeader(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwPrepare);
-	MMRESULT AcmStreamUnprepareHeader(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwUnprepare);
-	MMRESULT AcmStreamConvert(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwConvert);
-
-protected:
-	static BOOL CALLBACK AcmFormatEnumCB(HACMDRIVERID, LPACMFORMATDETAILS, DWORD, DWORD);
 
 // Overrides
 public:
@@ -274,8 +238,13 @@ public:
 	DECLARE_MESSAGE_MAP()
 	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
 
-private:
+protected:
 	static void LoadRegistryDLS();
+
+protected:
+	BOOL InitializeDXPlugins();
+	BOOL UninitializeDXPlugins();
+
 
 #ifdef WIN32	// Legacy stuff
 	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = "", TCHAR sNewFileName[_MAX_PATH] = "");
@@ -284,7 +253,7 @@ private:
 // Exception handling
 #ifdef WIN32
 public:
-	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *);
+	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);
 #endif // WIN32
 
 };

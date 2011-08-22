@@ -117,7 +117,6 @@
       <TypeLibraryName>.\Bin/mptrack.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/EHsc /O2 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -137,6 +136,8 @@
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <AdditionalOptions>/O2 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -165,6 +166,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AbstractVstEditor.cpp" />
+    <ClCompile Include="ACMConvert.cpp" />
     <ClCompile Include="ArrayUtils.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />
@@ -314,6 +316,7 @@
     <ResourceCompile Include="mptrack.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="PatternRandomizer.h" />
     <ClInclude Include="PatternRandomizerGUI.h" />
     <ClInclude Include="PatternRandomizerGUIEffect.h" />

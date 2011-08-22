@@ -1,4 +1,3 @@
-MB_ICONERROR
 // mptrack.cpp : Defines the class behaviors for the application.
 //
 
@@ -13,14 +12,13 @@ MB_ICONERROR
 #include "vstplug.h"
 #include "CreditStatic.h"
 #include "hyperEdit.h"
-#include "bladedll.h"
 #include "commctrl.h"
 #include "version.h"
 #include "test/test.h"
-#include <shlwapi.h>
 #include <afxadv.h>
 #include "UpdateCheck.h"
 #include "../soundlib/StringFixer.h"
+#include "dbghelp.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -596,12 +594,8 @@ CTrackApp::CTrackApp()
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_bInitialized = FALSE;
-	m_bLayer3Present = FALSE;
 	m_bExWaveSupport = FALSE;
 	m_bDebugMode = FALSE;
-	m_hBladeEnc = NULL;
-	m_hLameEnc = NULL;
-	m_hACMInst = NULL;
 	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
 	for (UINT i=0; i<MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
@@ -644,17 +638,6 @@ static DWORD GetDSoundVersion()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp initialization
-
-void Terminate_AppThread()
-//----------------------------------------------
-{	
-	//TODO: Why does this not get called.
-	AfxMessageBox("Application thread terminated unexpectedly. Attempting to shut down audio device");
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-	pMainFrame->audioCloseDevice();
-	exit(-1);
-}
 
 #ifdef WIN32	// Legacy stuff
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
@@ -802,8 +785,6 @@ BOOL CTrackApp::InitInstance()
 //----------------------------
 {
 
-	set_terminate(Terminate_AppThread);
-
 	// Initialize OLE MFC support
 	AfxOleInit();
 	// Standard initialization
@@ -906,7 +887,7 @@ BOOL CTrackApp::InitInstance()
 
 	// Initialize ACM Support
 	if (GetProfileInt("Settings", "DisableACM", 0)) cmdInfo.m_bNoAcm = true;
-	if (!cmdInfo.m_bNoMp3) InitializeACM(cmdInfo.m_bNoAcm);
+	if (!cmdInfo.m_bNoMp3) GetACMConvert().InitializeACM(cmdInfo.m_bNoAcm);
 
 	// Initialize DXPlugins
 	if (!cmdInfo.m_bNoPlugins) InitializeDXPlugins();
@@ -987,7 +968,7 @@ int CTrackApp::ExitInstance()
 	UninitializeDXPlugins();
 
 	// Uninitialize ACM
-	UninitializeACM();
+	GetACMConvert().UninitializeACM();
 
 	return CWinApp::ExitInstance();
 }
@@ -2294,534 +2275,6 @@ BOOL CMappedFile::Unlock()
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// MPEG Layer-3 Functions (through ACM - access to LAMEenc and BLADEenc is emulated through the ACM interface)
-
-typedef struct BLADEENCSTREAMINFO
-{
-	BE_CONFIG beCfg;
-	LONGLONG dummy;
-	DWORD dwInputSamples;
-	DWORD dwOutputSamples;
-	HBE_STREAM hBeStream;
-	SHORT *pPCMBuffer;
-	DWORD dwReadPos;
-} BLADEENCSTREAMINFO, *PBLADEENCSTREAMINFO;
-
-static PBLADEENCSTREAMINFO gpbeBladeCfg = NULL;
-static PBLADEENCSTREAMINFO gpbeLameCfg = NULL;
-
-#define TRAP_ACM_FAULTS
-
-#ifdef TRAP_ACM_FAULTS
-void CTrackApp::AcmExceptionHandler()
-{
-	theApp.m_hACMInst = NULL;
-	theApp.WriteProfileInt("Settings", "DisableACM", 1);
-}
-#endif
-
-BOOL CTrackApp::InitializeACM(BOOL bNoAcm)
-//----------------------------------------
-{
-	DWORD (ACMAPI *pfnAcmGetVersion)(void);
-	DWORD dwVersion;
-	UINT fuErrorMode;
-	BOOL bOk = FALSE;
-
-	fuErrorMode = SetErrorMode(SEM_NOOPENFILEERRORBOX);
-	try {
-		m_hBladeEnc = LoadLibrary(TEXT("BLADEENC.DLL"));
-		m_hLameEnc = LoadLibrary(TEXT("LAME_ENC.DLL"));
-	} catch(...) {}
-	if (!bNoAcm)
-	{
-	#ifdef TRAP_ACM_FAULTS
-		try {
-	#endif
-			m_hACMInst = LoadLibrary(TEXT("MSACM32.DLL"));
-	#ifdef TRAP_ACM_FAULTS
-		} catch(...) {}
-	#endif
-	}
-	SetErrorMode(fuErrorMode);
-	if (m_hBladeEnc != NULL)
-	{
-		BEVERSION pfnBeVersion = (BEVERSION)GetProcAddress(m_hBladeEnc, TEXT_BEVERSION);
-		if (!pfnBeVersion)
-		{
-			FreeLibrary(m_hBladeEnc);
-			m_hBladeEnc = NULL;
-		} else
-		{
-			m_bLayer3Present = TRUE;
-			bOk = TRUE;
-		}
-	}
-	if (m_hLameEnc != NULL)
-	{
-		BEVERSION pfnBeVersion = (BEVERSION)GetProcAddress(m_hLameEnc, TEXT_BEVERSION);
-		if (!pfnBeVersion)
-		{
-			FreeLibrary(m_hLameEnc);
-			m_hLameEnc = NULL;
-		} else
-		{
-			m_bLayer3Present = TRUE;
-			bOk = TRUE;
-		}
-	}
-    if ((m_hACMInst < (HINSTANCE)HINSTANCE_ERROR) || (!m_hACMInst))
-	{
-		m_hACMInst = NULL;
-		return bOk;
-	}
-#ifdef TRAP_ACM_FAULTS
-	try {
-#endif
-		*(FARPROC *)&pfnAcmGetVersion = GetProcAddress(m_hACMInst, "acmGetVersion");
-		dwVersion = 0;
-		if (pfnAcmGetVersion) dwVersion = pfnAcmGetVersion();
-		if (HIWORD(dwVersion) < 0x0200)
-		{
-			FreeLibrary(m_hACMInst);
-			m_hACMInst = NULL;
-			return bOk;
-		}
-		// Load Function Pointers
-		m_pfnAcmFormatEnum = (PFNACMFORMATENUM)GetProcAddress(m_hACMInst, "acmFormatEnumA");
-		// Enumerate formats
-		if (m_pfnAcmFormatEnum)
-		{
-			ACMFORMATDETAILS afd;
-			BYTE wfx[256];
-			WAVEFORMATEX *pwfx = (WAVEFORMATEX *)&wfx;
-
-			MemsetZero(afd);
-			MemsetZero(*pwfx);
-			afd.cbStruct = sizeof(ACMFORMATDETAILS);
-			afd.dwFormatTag = WAVE_FORMAT_PCM;
-			afd.pwfx = pwfx;
-			afd.cbwfx = sizeof(wfx);
-			pwfx->wFormatTag = WAVE_FORMAT_PCM;
-			pwfx->nChannels = 2;
-			pwfx->nSamplesPerSec = 44100;
-			pwfx->wBitsPerSample = 16;
-			pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
-			pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-			m_pfnAcmFormatEnum(NULL, &afd, AcmFormatEnumCB, NULL, ACM_FORMATENUMF_CONVERT);
-		}
-#ifdef TRAP_ACM_FAULTS
-	} catch(...){}
-#endif
-	return TRUE;
-}
-
-
-BOOL CTrackApp::UninitializeACM()
-//-------------------------------
-{
-	if (m_hACMInst)
-	{
-		FreeLibrary(m_hACMInst);
-		m_hACMInst = NULL;
-	}
-	if (m_hLameEnc)
-	{
-		FreeLibrary(m_hLameEnc);
-		m_hLameEnc = NULL;
-	}
-	if (m_hBladeEnc)
-	{
-		FreeLibrary(m_hBladeEnc);
-		m_hBladeEnc = NULL;
-	}
-	return TRUE;
-}
-
-
-MMRESULT CTrackApp::AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACMFORMATENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
-//---------------------------------------------------------------------------------------------------------------------------------------
-{
-	MMRESULT err = MMSYSERR_INVALPARAM;
-	if ((m_hBladeEnc) || (m_hLameEnc))
-	{
-		HACMDRIVER hBlade = (HACMDRIVER)&m_hBladeEnc;
-		HACMDRIVER hLame = (HACMDRIVER)&m_hLameEnc;
-		if (((had == hBlade) || (had == hLame) || (had == NULL)) && (pafd) && (fnCallback)
-		 && (fdwEnum & ACM_FORMATENUMF_CONVERT) && (pafd->dwFormatTag == WAVE_FORMAT_PCM))
-		{
-			ACMFORMATDETAILS afd;
-			MPEGLAYER3WAVEFORMAT wfx;
-
-			afd.dwFormatIndex = 0;
-			for (UINT iFmt=0; iFmt<0x40; iFmt++)
-			{
-				afd.cbStruct = sizeof(afd);
-				afd.dwFormatTag = WAVE_FORMAT_MPEGLAYER3;
-				afd.fdwSupport = ACMDRIVERDETAILS_SUPPORTF_CODEC;
-				afd.pwfx = (LPWAVEFORMATEX)&wfx;
-				afd.cbwfx = sizeof(wfx);
-				wfx.wfx.wFormatTag = WAVE_FORMAT_MPEGLAYER3;
-				wfx.wfx.nChannels = (WORD)((iFmt & 0x20) ? 1 : 2);
-				wfx.wfx.nSamplesPerSec = 0;
-				wfx.wfx.nBlockAlign = 1;
-				wfx.wfx.wBitsPerSample = 0;
-				wfx.wfx.cbSize = MPEGLAYER3_WFX_EXTRA_BYTES;
-				wfx.wID = MPEGLAYER3_ID_MPEG;
-				wfx.fdwFlags = MPEGLAYER3_FLAG_PADDING_ISO;
-				wfx.nBlockSize = 384;
-				wfx.nFramesPerBlock = 1;
-				wfx.nCodecDelay = 1000;
-				switch((iFmt >> 3) & 0x03)
-				{
-				case 0x00: wfx.wfx.nSamplesPerSec = 48000; break;
-				case 0x01: wfx.wfx.nSamplesPerSec = 44100; break;
-				case 0x02: wfx.wfx.nSamplesPerSec = 32000; break;
-				}
-				switch(iFmt & 7)
-				{
-				case 5:	wfx.wfx.nAvgBytesPerSec = 320/8; break;
-				case 4:	wfx.wfx.nAvgBytesPerSec = 64/8; break;
-				case 3:	wfx.wfx.nAvgBytesPerSec = 96/8; break;
-				case 2:	wfx.wfx.nAvgBytesPerSec = 128/8; break;
-				case 1:	if (wfx.wfx.nChannels == 2) { wfx.wfx.nAvgBytesPerSec = 192/8; break; }
-				case 0:	if (wfx.wfx.nChannels == 2) { wfx.wfx.nAvgBytesPerSec = 256/8; break; }
-				default: wfx.wfx.nSamplesPerSec = 0;
-				}
-				wsprintf(afd.szFormat, "%dkbps, %dHz, %s", wfx.wfx.nAvgBytesPerSec*8, wfx.wfx.nSamplesPerSec, (wfx.wfx.nChannels == 2) ? "stereo" : "mono");
-				if (wfx.wfx.nSamplesPerSec)
-				{
-					if (m_hBladeEnc) fnCallback((HACMDRIVERID)hBlade, &afd, dwInstance, ACMDRIVERDETAILS_SUPPORTF_CODEC);
-					if (m_hLameEnc) fnCallback((HACMDRIVERID)hLame, &afd, dwInstance, ACMDRIVERDETAILS_SUPPORTF_CODEC);
-					afd.dwFormatIndex++;
-				}
-			}
-			err = MMSYSERR_NOERROR;
-		}
-	}
-	if (m_pfnAcmFormatEnum)
-	{
-		err = m_pfnAcmFormatEnum(had, pafd, fnCallback, dwInstance, fdwEnum);
-	}
-	return err;
-}
-
-
-BOOL CTrackApp::AcmFormatEnumCB(HACMDRIVERID, LPACMFORMATDETAILS pafd, DWORD, DWORD fdwSupport)
-//---------------------------------------------------------------------------------------------
-{
-	if ((pafd) && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC))
-	{
-		if (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3) theApp.m_bLayer3Present = TRUE;
-	}
-	return TRUE;
-}
-
-
-MMRESULT CTrackApp::AcmDriverOpen(LPHACMDRIVER phad, HACMDRIVERID hadid, DWORD fdwOpen)
-//-------------------------------------------------------------------------------------
-{
-	if ((m_hBladeEnc) && (hadid == (HACMDRIVERID)&m_hBladeEnc))
-	{
-		*phad = (HACMDRIVER)&m_hBladeEnc;
-		return MMSYSERR_NOERROR;
-	}
-	if ((m_hLameEnc) && (hadid == (HACMDRIVERID)&m_hLameEnc))
-	{
-		*phad = (HACMDRIVER)&m_hLameEnc;
-		return MMSYSERR_NOERROR;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMDRIVEROPEN pfnAcmDriverOpen = (PFNACMDRIVEROPEN)GetProcAddress(m_hACMInst, "acmDriverOpen");
-		if (pfnAcmDriverOpen) return pfnAcmDriverOpen(phad, hadid, fdwOpen);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmDriverClose(HACMDRIVER had, DWORD fdwClose)
-//----------------------------------------------------------------
-{
-	if ((m_hBladeEnc) && (had == (HACMDRIVER)&m_hBladeEnc))
-	{
-		return MMSYSERR_NOERROR;
-	}
-	if ((m_hLameEnc) && (had == (HACMDRIVER)&m_hLameEnc))
-	{
-		return MMSYSERR_NOERROR;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMDRIVERCLOSE pfnAcmDriverClose = (PFNACMDRIVERCLOSE)GetProcAddress(m_hACMInst, "acmDriverClose");
-		if (pfnAcmDriverClose) return pfnAcmDriverClose(had, fdwClose);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmDriverDetails(HACMDRIVERID hadid, LPACMDRIVERDETAILS padd, DWORD fdwDetails)
-//-------------------------------------------------------------------------------------------------
-{
-	if (((m_hBladeEnc) && (hadid == (HACMDRIVERID)(&m_hBladeEnc)))
-	 || ((m_hLameEnc) && (hadid == (HACMDRIVERID)(&m_hLameEnc))))
-	{
-		if (!padd) return MMSYSERR_INVALPARAM;
-		padd->cbStruct = sizeof(ACMDRIVERDETAILS);
-		padd->fccType = ACMDRIVERDETAILS_FCCTYPE_AUDIOCODEC;
-		padd->fccComp = ACMDRIVERDETAILS_FCCCOMP_UNDEFINED;
-		padd->wMid = 0;
-		padd->wPid = 0;
-		padd->vdwACM = 0x04020000;
-		padd->vdwDriver = 0x04020000;
-		padd->fdwSupport = ACMDRIVERDETAILS_SUPPORTF_CODEC;
-		padd->cFormatTags = 1;
-		padd->cFilterTags = 0;
-		padd->hicon = NULL;
-		strcpy(padd->szShortName, (hadid == (HACMDRIVERID)(&m_hBladeEnc)) ? "BladeEnc MP3" : "LAME Encoder");
-		strcpy(padd->szLongName, padd->szShortName);
-		padd->szCopyright[0] = 0;
-		padd->szLicensing[0] = 0;
-		padd->szFeatures[0] = 0;
-		return MMSYSERR_NOERROR;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMDRIVERDETAILS pfnAcmDriverDetails = (PFNACMDRIVERDETAILS)GetProcAddress(m_hACMInst, "acmDriverDetailsA");
-		if (pfnAcmDriverDetails) return pfnAcmDriverDetails(hadid, padd, fdwDetails);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmStreamOpen(
-	LPHACMSTREAM            phas,       // pointer to stream handle
-    HACMDRIVER              had,        // optional driver handle
-    LPWAVEFORMATEX          pwfxSrc,    // source format to convert
-    LPWAVEFORMATEX          pwfxDst,    // required destination format
-    LPWAVEFILTER            pwfltr,     // optional filter
-    DWORD                   dwCallback, // callback
-    DWORD                   dwInstance, // callback instance data
-    DWORD                   fdwOpen)    // ACM_STREAMOPENF_* and CALLBACK_*
-//-------------------------------------------------------------------------
-{
-	PBLADEENCSTREAMINFO *ppbeCfg = NULL;
-	HINSTANCE hLib = NULL;
-
-	if ((m_hBladeEnc) && (had == (HACMDRIVER)&m_hBladeEnc))
-	{
-		ppbeCfg = &gpbeBladeCfg;
-		hLib = m_hBladeEnc;
-	}
-	if ((m_hLameEnc) && (had == (HACMDRIVER)&m_hLameEnc))
-	{
-		ppbeCfg = &gpbeLameCfg;
-		hLib = m_hLameEnc;
-	}
-	if ((ppbeCfg) && (hLib))
-	{
-		BEINITSTREAM pfnbeInitStream = (BEINITSTREAM)GetProcAddress(hLib, TEXT_BEINITSTREAM);
-		if (!pfnbeInitStream) return MMSYSERR_INVALPARAM;
-		PBLADEENCSTREAMINFO pbeCfg = new BLADEENCSTREAMINFO;
-		if ((pbeCfg) && (pwfxSrc) && (pwfxDst) && (pwfxSrc->nChannels == pwfxDst->nChannels)
-		 && (pwfxSrc->wFormatTag == WAVE_FORMAT_PCM) && (pwfxDst->wFormatTag == WAVE_FORMAT_MPEGLAYER3)
-		 && (pwfxSrc->wBitsPerSample == 16))
-		{
-			pbeCfg->dwInputSamples = 2048;
-			pbeCfg->dwOutputSamples = 2048;
-			pbeCfg->beCfg.dwConfig = BE_CONFIG_MP3;
-			pbeCfg->beCfg.format.mp3.dwSampleRate = pwfxDst->nSamplesPerSec; // 48000, 44100 and 32000 allowed
-			pbeCfg->beCfg.format.mp3.byMode = (BYTE)((pwfxSrc->nChannels == 2) ? BE_MP3_MODE_STEREO : BE_MP3_MODE_MONO);
-			pbeCfg->beCfg.format.mp3.wBitrate = (WORD)(pwfxDst->nAvgBytesPerSec * 8);	// 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256 and 320 allowed
-			pbeCfg->beCfg.format.mp3.bPrivate = FALSE;
-			pbeCfg->beCfg.format.mp3.bCRC = FALSE;
-			pbeCfg->beCfg.format.mp3.bCopyright = FALSE;
-			pbeCfg->beCfg.format.mp3.bOriginal = TRUE;
-			pbeCfg->hBeStream = NULL;
-			if (pfnbeInitStream(&pbeCfg->beCfg, &pbeCfg->dwInputSamples, &pbeCfg->dwOutputSamples, &pbeCfg->hBeStream) == BE_ERR_SUCCESSFUL)
-			{
-				*phas = (HACMSTREAM)had;
-				*ppbeCfg = pbeCfg;
-				pbeCfg->pPCMBuffer = (SHORT *)GlobalAllocPtr(GHND, pbeCfg->dwInputSamples * sizeof(SHORT));
-				pbeCfg->dwReadPos = 0;
-				return MMSYSERR_NOERROR;
-			}
-		}
-		if (pbeCfg) delete pbeCfg;
-		return MMSYSERR_INVALPARAM;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMSTREAMOPEN pfnAcmStreamOpen = (PFNACMSTREAMOPEN)GetProcAddress(m_hACMInst, "acmStreamOpen");
-		if (pfnAcmStreamOpen) return pfnAcmStreamOpen(phas, had, pwfxSrc, pwfxDst, pwfltr, dwCallback, dwInstance, fdwOpen);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmStreamClose(HACMSTREAM has, DWORD fdwClose)
-//----------------------------------------------------------------
-{
-	if (((m_hBladeEnc) && (has == (HACMSTREAM)&m_hBladeEnc))
-	 || ((m_hLameEnc) && (has == (HACMSTREAM)&m_hLameEnc)))
-	{
-		HINSTANCE hLib = *(HINSTANCE *)has;
-		PBLADEENCSTREAMINFO pbeCfg = (has == (HACMSTREAM)&m_hBladeEnc) ? gpbeBladeCfg : gpbeLameCfg;
-		BECLOSESTREAM pfnbeCloseStream = (BECLOSESTREAM)GetProcAddress(hLib, TEXT_BECLOSESTREAM);
-		if ((pbeCfg) && (pfnbeCloseStream))
-		{
-			pfnbeCloseStream(pbeCfg->hBeStream);
-			if (pbeCfg->pPCMBuffer)
-			{
-				GlobalFreePtr(pbeCfg->pPCMBuffer);
-				pbeCfg->pPCMBuffer = NULL;
-			}
-			delete pbeCfg;
-			pbeCfg = NULL;
-			return MMSYSERR_NOERROR;
-		}
-		return MMSYSERR_INVALPARAM;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMSTREAMCLOSE pfnAcmStreamClose = (PFNACMSTREAMCLOSE)GetProcAddress(m_hACMInst, "acmStreamClose");
-		if (pfnAcmStreamClose) return pfnAcmStreamClose(has, fdwClose);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmStreamSize(HACMSTREAM has, DWORD cbInput, LPDWORD pdwOutputBytes, DWORD fdwSize)
-//-----------------------------------------------------------------------------------------------------
-{
-	if (((m_hBladeEnc) && (has == (HACMSTREAM)&m_hBladeEnc))
-	 || ((m_hLameEnc) && (has == (HACMSTREAM)&m_hLameEnc)))
-	{
-		PBLADEENCSTREAMINFO pbeCfg = (has == (HACMSTREAM)&m_hBladeEnc) ? gpbeBladeCfg : gpbeLameCfg;
-
-		if ((pbeCfg) && (pdwOutputBytes))
-		{
-			if (fdwSize & ACM_STREAMSIZEF_DESTINATION)
-			{
-				*pdwOutputBytes = pbeCfg->dwOutputSamples * sizeof(short);
-			} else
-			if (fdwSize & ACM_STREAMSIZEF_SOURCE)
-			{
-				*pdwOutputBytes = pbeCfg->dwInputSamples * sizeof(short);
-			}
-			return MMSYSERR_NOERROR;
-		}
-		return MMSYSERR_INVALPARAM;
-	}
-	if (m_hACMInst)
-	{
-		if (fdwSize & ACM_STREAMSIZEF_DESTINATION)	// Why does acmStreamSize return ACMERR_NOTPOSSIBLE in this case?
-			return MMSYSERR_NOERROR;
-		PFNACMSTREAMSIZE pfnAcmStreamSize = (PFNACMSTREAMSIZE)GetProcAddress(m_hACMInst, "acmStreamSize");
-		if (pfnAcmStreamSize) return pfnAcmStreamSize(has, cbInput, pdwOutputBytes, fdwSize);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmStreamPrepareHeader(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwPrepare)
-//--------------------------------------------------------------------------------------------------
-{
-	if (((m_hBladeEnc) && (has == (HACMSTREAM)&m_hBladeEnc))
-	 || ((m_hLameEnc) && (has == (HACMSTREAM)&m_hLameEnc)))
-	{
-		pash->fdwStatus = ACMSTREAMHEADER_STATUSF_PREPARED;
-		return MMSYSERR_NOERROR;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMSTREAMCONVERT pfnAcmStreamPrepareHeader = (PFNACMSTREAMCONVERT)GetProcAddress(m_hACMInst, "acmStreamPrepareHeader");
-		if (pfnAcmStreamPrepareHeader) return pfnAcmStreamPrepareHeader(has, pash, fdwPrepare);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmStreamUnprepareHeader(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwUnprepare)
-//------------------------------------------------------------------------------------------------------
-{
-	if (((m_hBladeEnc) && (has == (HACMSTREAM)&m_hBladeEnc))
-	 || ((m_hLameEnc) && (has == (HACMSTREAM)&m_hLameEnc)))
-	{
-		pash->fdwStatus &= ~ACMSTREAMHEADER_STATUSF_PREPARED;
-		return MMSYSERR_NOERROR;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMSTREAMCONVERT pfnAcmStreamUnprepareHeader = (PFNACMSTREAMCONVERT)GetProcAddress(m_hACMInst, "acmStreamUnprepareHeader");
-		if (pfnAcmStreamUnprepareHeader) return pfnAcmStreamUnprepareHeader(has, pash, fdwUnprepare);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
-MMRESULT CTrackApp::AcmStreamConvert(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwConvert)
-//--------------------------------------------------------------------------------------------
-{
-	static BEENCODECHUNK pfnbeEncodeChunk = NULL;
-	static BEDEINITSTREAM pfnbeDeinitStream = NULL;
-	static HINSTANCE hInstEncode = NULL;
-
-	if (((m_hBladeEnc) && (has == (HACMSTREAM)&m_hBladeEnc))
-	 || ((m_hLameEnc) && (has == (HACMSTREAM)&m_hLameEnc)))
-	{
-		PBLADEENCSTREAMINFO pbeCfg = (has == (HACMSTREAM)&m_hBladeEnc) ? gpbeBladeCfg : gpbeLameCfg;
-		HINSTANCE hLib = *(HINSTANCE *)has;
-
-		if (hInstEncode != hLib)
-		{
-			pfnbeEncodeChunk = (BEENCODECHUNK)GetProcAddress(hLib, TEXT_BEENCODECHUNK);
-			pfnbeDeinitStream = (BEDEINITSTREAM)GetProcAddress(hLib, TEXT_BEDEINITSTREAM);
-			hInstEncode = hLib;
-		}
-		pash->fdwStatus |= ACMSTREAMHEADER_STATUSF_DONE;
-		if (fdwConvert & ACM_STREAMCONVERTF_END)
-		{
-			if ((pfnbeDeinitStream) && (pbeCfg))
-			{
-				pfnbeDeinitStream(pbeCfg->hBeStream, pash->pbDst, &pash->cbDstLengthUsed);
-				return MMSYSERR_NOERROR;
-			}
-		} else
-		{
-			if ((pfnbeEncodeChunk) && (pbeCfg))
-			{
-				DWORD dwBytesLeft = pbeCfg->dwInputSamples*2 - pbeCfg->dwReadPos;
-				if (!dwBytesLeft)
-				{
-					dwBytesLeft = pbeCfg->dwInputSamples*2;
-					pbeCfg->dwReadPos = 0;
-				}
-				if (dwBytesLeft > pash->cbSrcLength) dwBytesLeft = pash->cbSrcLength;
-				memcpy(&pbeCfg->pPCMBuffer[pbeCfg->dwReadPos/2], pash->pbSrc, dwBytesLeft);
-				pbeCfg->dwReadPos += dwBytesLeft;
-				pash->cbSrcLengthUsed = dwBytesLeft;
-				pash->cbDstLengthUsed = 0;
-				if (pbeCfg->dwReadPos == pbeCfg->dwInputSamples*2)
-				{
-					if (pfnbeEncodeChunk(pbeCfg->hBeStream, pbeCfg->dwInputSamples, pbeCfg->pPCMBuffer, pash->pbDst, &pash->cbDstLengthUsed) != 0) return MMSYSERR_INVALPARAM;
-					pbeCfg->dwReadPos = 0;
-				}
-				return MMSYSERR_NOERROR;
-			}
-		}
-		return MMSYSERR_INVALPARAM;
-	}
-	if (m_hACMInst)
-	{
-		PFNACMSTREAMCONVERT pfnAcmStreamConvert = (PFNACMSTREAMCONVERT)GetProcAddress(m_hACMInst, "acmStreamConvert");
-		if (pfnAcmStreamConvert) return pfnAcmStreamConvert(has, pash, fdwConvert);
-	}
-	return MMSYSERR_INVALPARAM;
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////////
 //
 // DirectX Plugins
@@ -2974,16 +2427,65 @@ void Log(LPCSTR format,...)
 
 
 #ifdef WIN32
+
+typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
+	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
+	CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
+	);
+
 // Try to close the audio device and rescue unsaved work if an unhandled exception occours...
-LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
-//-------------------------------------------------------------
+LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
+//---------------------------------------------------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	const HWND window = (pMainFrame ? pMainFrame->m_hWnd : NULL);
+
 	// Shut down audio device...
 	if(pMainFrame)
 	{
 		if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
 		pMainFrame->audioCloseDevice();
+	}
+
+	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
+	CString baseRescuePath;
+	{
+		// Create a crash directory
+		TCHAR tempPath[_MAX_PATH];
+		GetTempPath(CountOf(tempPath), tempPath);
+		baseRescuePath.Format("%sOpenMPT Crash Files\\", tempPath);
+		CreateDirectory(baseRescuePath, nullptr);
+		baseRescuePath.Append(timestampDir);
+		if(!CreateDirectory(baseRescuePath, nullptr))
+		{
+			::MessageBox(window, "A crash has been detected and OpenMPT will be closed.\nOpenMPT was unable to create a directory for saving debug information and modified files to.", "OpenMPT Crash", MB_ICONERROR);
+		}
+	}
+
+	// Create minidump...
+	HMODULE hDll = ::LoadLibrary("DBGHELP.DLL");
+	if (hDll)
+	{
+		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
+		if (pDump)
+		{
+			const CString filename = baseRescuePath + "crash.dmp";
+
+			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hFile != INVALID_HANDLE_VALUE)
+			{
+				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
+
+				ExInfo.ThreadId = ::GetCurrentThreadId();
+				ExInfo.ExceptionPointers = pExceptionInfo;
+				ExInfo.ClientPointers = NULL;
+
+				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
+				::CloseHandle(hFile);
+			}
+		}
+		::FreeLibrary(hDll);
 	}
 
 	// Rescue modified files...
@@ -2993,9 +2495,6 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 		POSITION pos = pDocTmpl->GetFirstDocPosition();
 		CDocument *pDoc;
 
-		const HWND window = (pMainFrame ? pMainFrame->m_hWnd : NULL);
-		const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
-		CString baseRescuePath;
 		int numFiles = 0;
 
 		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
@@ -3005,17 +2504,8 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 			{
 				if(numFiles == 0)
 				{
-					// Need to create a rescue directory first
-					TCHAR tempPath[_MAX_PATH];
-					GetTempPath(CountOf(tempPath), tempPath);
-					baseRescuePath.Format("%sOpenMPT Crash Files\\", tempPath);
-					CreateDirectory(baseRescuePath, nullptr);
-					baseRescuePath.Append(timestampDir);
-					if(!CreateDirectory(baseRescuePath, nullptr))
-					{
-						::MessageBox(window, "A crash has been detected and OpenMPT will be closed.\nThere are still some modified files open, but OpenMPT could not create a directory for rescueing them.", "OpenMPT Crash", MB_ICONERROR);
-						break;
-					}
+					// Show the rescue directory in Explorer...
+					OpenDirectory(baseRescuePath);
 				}
 				CString filename;
 				filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
@@ -3028,7 +2518,6 @@ LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *)
 			CString message;
 			message.Format("A crash has been detected and OpenMPT will be closed.\n%d modified file%s been rescued to\n\n%s\n\nNote: It cannot be guaranteed that rescued files are still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), baseRescuePath);
 			::MessageBox(window, message, "OpenMPT Crash", MB_ICONERROR);
-			OpenDirectory(baseRescuePath);
 		}
 	}
 
