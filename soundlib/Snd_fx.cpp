@@ -3275,121 +3275,113 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		const uint8 macroCode = macro[2];
 		const uint8 param = macro[3];
 
-		switch(macroCode)
+		if(macroCode == 0x00 && !isExtended)
 		{
-		// F0.F0.00.xx: Set CutOff
-		case 0x00:
-			if(!isExtended)
+			// F0.F0.00.xx: Set CutOff
+			int oldcutoff = pChn->nCutOff;
+			if(param < 0x80)
 			{
-				int oldcutoff = pChn->nCutOff;
-				if(param < 0x80)
+				if(!isSmooth)
 				{
-					if(!isSmooth)
-					{
-						pChn->nCutOff = param;
-					} else
-					{
-						pChn->nCutOff = (BYTE)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
-					}
-					pChn->nRestoreCutoffOnNewNote = 0;
+					pChn->nCutOff = param;
+				} else
+				{
+					pChn->nCutOff = (BYTE)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
 				}
-#ifndef NO_FILTER
-				oldcutoff -= pChn->nCutOff;
-				if(oldcutoff < 0) oldcutoff = -oldcutoff;
-				if((pChn->nVolume > 0) || (oldcutoff < 0x10)
-					|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
-					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
-#endif // NO_FILTER
-				return 4;
+				pChn->nRestoreCutoffOnNewNote = 0;
 			}
-			break;
+#ifndef NO_FILTER
+			oldcutoff -= pChn->nCutOff;
+			if(oldcutoff < 0) oldcutoff = -oldcutoff;
+			if((pChn->nVolume > 0) || (oldcutoff < 0x10)
+				|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
+				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+#endif // NO_FILTER
 
-		// F0.F0.01.xx: Set Resonance
-		case 0x01:
-			if(!isExtended)
+			return 4;
+
+		} else if(macroCode == 0x01 && !isExtended)
+		{
+			// F0.F0.01.xx: Set Resonance
+			if(param < 0x80) 
 			{
-				if(param < 0x80) 
+				pChn->nRestoreResonanceOnNewNote = 0;
+				if(!isSmooth)
 				{
-					pChn->nRestoreResonanceOnNewNote = 0;
-					if(!isSmooth)
-					{
-						pChn->nResonance = param;
-					} else
-					{
-						pChn->nResonance = (BYTE)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
-					}
+					pChn->nResonance = param;
+				} else
+				{
+					pChn->nResonance = (BYTE)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
 				}
+			}
 
+#ifndef NO_FILTER
+			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+#endif // NO_FILTER
+
+			return 4;
+
+		} else if(macroCode == 0x02 && !isExtended)
+		{
+			// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
+			if(param < 0x20)
+			{
+				pChn->nFilterMode = (param >> 4);
 #ifndef NO_FILTER
 				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 #endif // NO_FILTER
-				return 4;
 			}
-			break;
 
-		// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
-		case 0x02:
-			if(!isExtended)
+			return 4;
+
+		} else if(macroCode == 0x03 && !isExtended)
+		{
+			// F0.F0.03.xx: Set plug dry/wet
+			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
 			{
-				if(param < 0x20)
+				const float newRatio = 1.0 - (static_cast<float>(param & 0x7F) / 127.0f);
+				if(!isSmooth)
 				{
-					pChn->nFilterMode = (param >> 4);
-#ifndef NO_FILTER
-					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
-#endif // NO_FILTER
+					m_MixPlugins[nPlug - 1].fDryRatio = newRatio;
+				} else
+				{
+					m_MixPlugins[nPlug - 1].fDryRatio = CalculateSmoothParamChange(m_MixPlugins[nPlug - 1].fDryRatio, newRatio);
 				}
-				return 4;
 			}
-			break;
 
-		// F0.F0.03.xx: Set plug dry/wet
-		case 0x03:
-			if(!isExtended)
+			return 4;
+
+		} else if((macroCode & 0x80) || isExtended)
+		{
+			// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
+			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+			const UINT plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
+			if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 			{
-				const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
+				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
+				if((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState) && (param < 0x80))
 				{
-					const float newRatio = 1.0 - (static_cast<float>(param) / 127.0f);
 					if(!isSmooth)
 					{
-						m_MixPlugins[nPlug - 1].fDryRatio = newRatio;
+						pPlugin->SetZxxParameter(plugParam, param & 0x7F);
 					} else
 					{
-						m_MixPlugins[nPlug - 1].fDryRatio = CalculateSmoothParamChange(m_MixPlugins[nPlug - 1].fDryRatio, newRatio);
+						pPlugin->SetZxxParameter(plugParam, (UINT)CalculateSmoothParamChange((float)pPlugin->GetZxxParameter(plugParam), (float)(param & 0x7F)));
 					}
 				}
-				return 4;
 			}
-			break;
 
-		// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
-		default:
-			if((macroCode & 0x80) || isExtended)
-			{
-				const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				const UINT plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
-				if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
-				{
-					IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
-					if((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState) && (param < 0x80))
-					{
-						if(!isSmooth)
-						{
-							pPlugin->SetZxxParameter(plugParam, param);
-						} else
-						{
-							pPlugin->SetZxxParameter(plugParam, (UINT)CalculateSmoothParamChange(pPlugin->GetZxxParameter(plugParam), (float)param));
-						}
-					}
-				}
-				return 4;
-			}
-			break;
+			return 4;
+
 		}
+
+		// If we reach this point, the internal macro was invalid.
+
 	} else
 	{
 		// Not an internal device. Pass on to appropriate plugin.
-		const UINT nMasterCh = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
+		const CHANNELINDEX nMasterCh = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
 		if((nMasterCh) && (nMasterCh <= GetNumChannels()))
 		{
 			const PLUGINDEX nPlug = (pChn->dwFlags & CHN_NOFX) ? 0 : ((plugin != 0) ? plugin : GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED));
@@ -3408,9 +3400,13 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				}
 			}
 		}
+
 		return macroLen;
+
 	}
+
 	return 0;
+
 }
 
 
