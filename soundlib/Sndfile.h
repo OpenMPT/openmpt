@@ -402,12 +402,6 @@ typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
 class CModDoc;
 typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CSoundFile*);
 
-struct SNDMIXSONGEQ
-{
-	ULONG nEQBands;
-	ULONG EQFreq_Gains[MAX_EQ_BANDS];
-};
-typedef SNDMIXSONGEQ* PSNDMIXSONGEQ;
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
@@ -645,7 +639,7 @@ public:	// for Editing
 	ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
 	BYTE m_nTempoMode;			// rewbs.betterBPM
 	BYTE m_nMixLevels;
-    UINT m_nMusicSpeed, m_nMusicTempo;
+    UINT m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
 	ROWINDEX m_nNextRow, m_nRow;
 	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
 	PATTERNINDEX m_nPattern;
@@ -672,7 +666,6 @@ public:	// for Editing
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	MODMIDICFG m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
-	SNDMIXSONGEQ m_SongEQ;								// Default song EQ preset
 	CHAR CompressionTable[16];							// ADPCM compression LUT
 	bool m_bChannelMuteTogglePending[MAX_BASECHANNELS];
 
@@ -695,11 +688,11 @@ public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	MODTYPE GetType() const { return m_nType; }
-	inline bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
-	inline bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
-	inline bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
-	inline bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
-	inline bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
+	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
+	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
+	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
+	bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
+	bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
 	CModDoc* GetpModDoc() const { return m_pModDoc; }
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
@@ -951,6 +944,7 @@ protected:
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
 	float CalculateSmoothParamChange(float currentValue, float param) const;
 	size_t SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin);
+
 	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
@@ -1030,9 +1024,9 @@ public:
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-255] => [1-10KHz]
 #endif
 #ifdef MODPLUG_TRACKER
-	VOID ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
+	void ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
 #endif
-	VOID ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount);
+	void ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount);
 
 	// Static helper functions
 public:
@@ -1086,8 +1080,8 @@ public:
 	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env);
 	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
 private:
-	UINT  __cdecl GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const;
-	UINT  __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, bool respectMutes) const;
+	PLUGINDEX  __cdecl GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const;
+	PLUGINDEX  __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, bool respectMutes) const;
 	UINT GetBestMidiChan(const MODCHANNEL *pChn) const;
 
 	void HandlePatternTransitionEvents();
@@ -1095,7 +1089,7 @@ private:
 	long GetSampleOffset();
 
 public:
-	UINT GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes);
+	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes);
 
 // A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 public:
@@ -1108,7 +1102,7 @@ private:
 public:
 	// "importance" of every FX command. Table is used for importing from formats with multiple effect columns
 	// and is approximately the same as in SchismTracker.
-	static uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd);
+	static size_t CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd);
 	// try to convert a an effect into a volume column effect.
 	static bool ConvertVolEffect(uint8 *e, uint8 *p, bool bForce);
 };

@@ -1218,7 +1218,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 	IMixPlugin *pPlugin = NULL;
 	if (pChn->pModInstrument && pChn->pModInstrument->nMidiChannel > 0 && pChn->pModInstrument->nMidiChannel < 17 && pChn->nNote>0 && pChn->nNote<128) // instro sends to a midi chan
 	{
-		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+		PLUGINDEX nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
 		/*
 		UINT nPlugin = 0;
 		nPlugin = pChn->pModInstrument->nMixPlug;  		   // first try intrument VST
@@ -1609,12 +1609,8 @@ BOOL CSoundFile::ProcessEffects()
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					ResetChannelEnvelopes(pChn);
-					// IT Compatibility: Autovibrato reset
-					if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-					{
-						pChn->nAutoVibDepth = 0;
-						pChn->nAutoVibPos = 0;
-					}
+					pChn->nAutoVibDepth = 0;
+					pChn->nAutoVibPos = 0;
 				}
 			}
 			// Tick-0 only volume commands
@@ -3076,7 +3072,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 	size_t outPos = 0;	// output buffer position, which also equals the number of complete bytes
 	bool firstNibble = true;
 
-	for(size_t pos = 0; pos < MACRO_LENGTH && macro[pos]; pos++)
+	for(size_t pos = 0; pos < (MACRO_LENGTH - 1) && macro[pos]; pos++)
 	{
 		bool isNibble = false;		// did we parse a nibble or a byte value?
 		unsigned char data = 0;		// data that has just been parsed
@@ -3247,12 +3243,12 @@ float CSoundFile::CalculateSmoothParamChange(float currentValue, float param) co
 	if(ticksLeft > 1)
 	{
 		// Slide param
-		const float step = ((float)param - currentValue) / (float)ticksLeft;
+		const float step = (param - currentValue) / (float)ticksLeft;
 		return (currentValue + step);
 	} else
 	{
 		// On last tick, set exact value.
-		return (float)param;
+		return param;
 	}
 }
 
@@ -3601,7 +3597,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		}
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER) ? true : false, bResetEnv);
-		if (m_nInstruments) {
+		if (m_nInstruments)
+		{
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
 		}
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->nRowNote) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
@@ -4065,17 +4062,18 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 }
 
 
-UINT CSoundFile::GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes)
-//---------------------------------------------------------------------------------
+PLUGINDEX CSoundFile::GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes)
+//--------------------------------------------------------------------------------------
 {
-	if (nChn > MAX_CHANNELS)		//Check valid channel number
+	if (nChn >= MAX_CHANNELS)		//Check valid channel number
 	{
 		return 0;
 	}
 	
 	//Define search source order
-	UINT nPlugin=0;
-	switch (priority) {
+	PLUGINDEX nPlugin = 0;
+	switch (priority)
+	{
 		case CHANNEL_ONLY:						
 			nPlugin = GetChannelPlugin(nChn, respectMutes);
 			break;
@@ -4084,13 +4082,15 @@ UINT CSoundFile::GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMut
 			break;
 		case PRIORITISE_INSTRUMENT:						
 			nPlugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
-			if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS)) {
+			if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS))
+			{
 				nPlugin = GetChannelPlugin(nChn, respectMutes);
 			}
 			break;
 		case PRIORITISE_CHANNEL:										
 			nPlugin  = GetChannelPlugin(nChn, respectMutes);
-			if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS)) {
+			if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS))
+			{
 				nPlugin = GetActiveInstrumentPlugin(nChn, respectMutes);
 			}
 			break;
@@ -4100,8 +4100,8 @@ UINT CSoundFile::GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMut
 }
 
 
-UINT __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const
-//-----------------------------------------------------------------------------------
+PLUGINDEX __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const
+//----------------------------------------------------------------------------------------
 {
 	const MODCHANNEL *pChn = &Chn[nChn];
 
@@ -4110,7 +4110,7 @@ UINT __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) 
 	// NB: nMasterChn==0 means no master channel, so we need to -1 to get correct index.
 	if (nChn>=m_nChannels && pChn && pChn->nMasterChn > 0)
 	{ 
-		nChn = pChn->nMasterChn-1;				  
+		nChn = pChn->nMasterChn - 1;
 	}
 
 	UINT nPlugin;
@@ -4125,8 +4125,8 @@ UINT __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) 
 }
 
 
-UINT CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, bool respectMutes) const
-//------------------------------------------------------------------------------------
+PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, bool respectMutes) const
+//-----------------------------------------------------------------------------------------
 {
 	const MODCHANNEL *pChn = &Chn[nChn];
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
@@ -4176,7 +4176,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 	}
 
 	// Channel mutes
-	for (CHANNELINDEX chan=0; chan<m_nChannels; chan++)
+	for (CHANNELINDEX chan = 0; chan < GetNumChannels(); chan++)
 	{
 		if (m_bChannelMuteTogglePending[chan])
 		{

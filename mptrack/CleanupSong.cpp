@@ -653,7 +653,7 @@ bool CModCleanupDlg::RearrangeSamples()
 			pSndFile->Samples[i].pSample = nullptr;
 			END_CRITICAL();
 			if(nSampleMap[i] > 0) strcpy(pSndFile->m_szNames[nSampleMap[i]], pSndFile->m_szNames[i]);
-			memset(pSndFile->m_szNames[i], 0, sizeof(pSndFile->m_szNames[i]));
+			MemsetZero(pSndFile->m_szNames[i]);
 
 			// Also update instrument mapping (if module is in instrument mode)
 			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)

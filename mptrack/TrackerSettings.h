@@ -44,6 +44,7 @@ public:
 	CString gcsPreviousVersion;
 	CString gcsInstallGUID;
 	MODTYPE defaultModType;
+
 	// Audio Setup
 	DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
@@ -57,8 +58,10 @@ public:
 	DWORD m_nRowHighlightMeasures, m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
 	bool m_bHideUnavailableCtxMenuItems;
 	int orderlistMargins;
+
 	// Sample Editor Setup
 	UINT m_nSampleUndoMaxBuffer;
+
 	// key config
 	TCHAR m_szKbdFile[_MAX_PATH];
 	COLORREF rgbCustomColors[MAX_MODCOLORS];
@@ -88,19 +91,20 @@ public:
 	int gnPlugWindowY;
 	int gnPlugWindowWidth;
 	int gnPlugWindowHeight;
-	DWORD gnPlugWindowLast;
+	DWORD gnPlugWindowLast;	// Last selected plugin ID
 
 public:
 
 	TrackerSettings();
 	void LoadSettings();
 	void SaveSettings();
+	static void GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS]);
 
 	// access to default + working directories
 	void SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetWorkingDirectory(Directory dir);
+	LPCTSTR GetWorkingDirectory(Directory dir) const;
 	void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetDefaultDirectory(Directory dir);
+	LPCTSTR GetDefaultDirectory(Directory dir) const;
 
 protected:
 

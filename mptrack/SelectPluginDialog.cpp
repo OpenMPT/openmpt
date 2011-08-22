@@ -180,14 +180,17 @@ void CSelectPluginDlg::OnOK()
 	CMainFrame::GetSettings().gnPlugWindowWidth  = rect.right - rect.left;
 	CMainFrame::GetSettings().gnPlugWindowHeight = rect.bottom - rect.top;
 
-	if (bChanged) {
+	if (bChanged)
+	{
 		CMainFrame::GetSettings().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
 	}
-	else {
+	else
+	{
 		CDialog::OnCancel();
 	}
 }
+
 
 void CSelectPluginDlg::OnCancel()
 //-------------------------------
@@ -203,6 +206,7 @@ void CSelectPluginDlg::OnCancel()
 	CDialog::OnCancel();
 }
 
+
 void CSelectPluginDlg::OnNameFilterChanged() 
 //------------------------------------------
 {
@@ -211,8 +215,9 @@ void CSelectPluginDlg::OnNameFilterChanged()
 	UpdatePluginsList();
 }
 
-void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
-//---------------------------------------------------------------
+
+void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect /* = 0*/)
+//------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	HTREEITEM cursel, hDmo, hVst, hSynth;
@@ -232,18 +237,22 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 		while (p)
 		{
 			// Apply name filter
-			if (m_sNameFilter != "") {
+			if (m_sNameFilter != "")
+			{
 				CString displayName = p->szLibraryName;
-				if (displayName.MakeLower().Find(m_sNameFilter) == -1) {
+				if (displayName.MakeLower().Find(m_sNameFilter) == -1)
+				{
 					p = p->pNext;
 					continue;
 				}
 			}
 
 			HTREEITEM hParent;
-			if (p->dwPluginId1 == kDmoMagic) {
+			if (p->dwPluginId1 == kDmoMagic)
+			{
 				hParent = hDmo;
-			} else {
+			} else
+			{
 				hParent = (p->bIsInstrument) ? hSynth : hVst;
 			}
 
@@ -276,7 +285,8 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 				else if (/* (!pCurrent) && */ m_pPlugin->Info.dwPluginId1 !=0 || m_pPlugin->Info.dwPluginId2 != 0)
 				{
 					if ((p->dwPluginId1 == m_pPlugin->Info.dwPluginId1)
-						&& (p->dwPluginId2 == m_pPlugin->Info.dwPluginId2)) {
+						&& (p->dwPluginId2 == m_pPlugin->Info.dwPluginId2))
+					{
 							pCurrent = p;
 					}
 				}
@@ -284,7 +294,8 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 				//Last selected plugin
 				else
 				{
-					if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast) {
+					if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
+					{
 						pCurrent = p;
 					}
 				}
@@ -294,7 +305,8 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 		}
 	}
 	m_treePlugins.SetRedraw(TRUE);
-	if (cursel) {
+	if (cursel)
+	{
 		m_treePlugins.SelectItem(cursel);
 		m_treePlugins.SetItemState(cursel, TVIS_BOLD, TVIS_BOLD);
 		m_treePlugins.EnsureVisible(cursel);
@@ -360,16 +372,16 @@ struct PROBLEMATIC_PLUG
 };
 
 //TODO: Check whether the list is still valid.
-static PROBLEMATIC_PLUG gProblemPlugs[] =
+static const PROBLEMATIC_PLUG gProblemPlugs[] =
 {
-	{kEffectMagic, CCONST('N', 'i', '4', 'S'), 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.  *"},
-	{kEffectMagic, CCONST('m', 'd', 'a', 'C'), 1, "MDA Degrade", "*  This plugin can cause OpenMPT to behave erratically.\r\nYou should try SoundHack's Decimate, ConcreteFX's Lowbit or Subtek's LoFi Plus instead.  *"},
-	{kEffectMagic, CCONST('f', 'V', '2', 's'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze when closing a module that uses V2 in a combination with various other plugins.\r\nIt is recommended to not use V2 in combination with any other plugins.  *"},
-	{kEffectMagic, CCONST('f', 'r', 'V', '2'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze when closing a module that uses V2 in a combination with various other plugins.\r\nIt is recommended to not use V2 in combination with any other plugins.  *"},
+	{ kEffectMagic, CCONST('N', 'i', '4', 'S'), 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
+	{ kEffectMagic, CCONST('m', 'd', 'a', 'C'), 1, "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
+	{ kEffectMagic, CCONST('f', 'V', '2', 's'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
+	{ kEffectMagic, CCONST('f', 'r', 'V', '2'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
 };
 
 bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
-	//---------------------------------------------------
+//---------------------------------------------------
 {
 	CString s;
 	for (size_t p = 0; p < CountOf(gProblemPlugs); p++)
@@ -377,8 +389,8 @@ bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug)
 		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2)
 			/*&& (gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
 		{
-			s.Format("WARNING: This plugin has been identified as %s,\r\nwhich is known to have the following problem with OpenMPT:\r\n\r\n%s\r\n\r\nWould you still like to add this plugin to the library?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
-			return (AfxMessageBox(s, MB_YESNO)  == IDYES);
+			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
+			return (AfxMessageBox(s, MB_YESNO) == IDYES);
 		}
 	}
 
@@ -406,7 +418,8 @@ void CSelectPluginDlg::OnAddPlugin()
 
 		CString sFilename = files.filenames[counter].c_str();
 
-		if (pManager) {
+		if (pManager)
+		{
 			plugLib = pManager->AddPlugin(sFilename, FALSE);
 			if (plugLib)
 			{
@@ -424,7 +437,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		UpdatePluginsList(plugLib ? plugLib->dwPluginId2 : 0);
 	} else
 	{
-		MessageBox("At least one selected file was not a valid VST-Plugin", NULL, MB_ICONERROR | MB_OK);
+		MessageBox("At least one selected file was not a valid VST-Plugin.", NULL, MB_ICONERROR | MB_OK);
 	}
 }
 
@@ -447,7 +460,8 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 
-	if (m_treePlugins) {
+	if (m_treePlugins)
+	{
 		m_treePlugins.MoveWindow(8, 36, cx - 104, cy - 63, FALSE);
 
 		::MoveWindow(GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->m_hWnd, 8, 11, 40, 21, FALSE);

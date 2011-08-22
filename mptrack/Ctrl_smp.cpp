@@ -3077,7 +3077,7 @@ SELECTIONPOINTS CCtrlSamples::GetSelectionPoints()
 	SAMPLEVIEWSTATE viewstate;
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
 
-	memset(&viewstate, 0, sizeof(viewstate));
+	MemsetZero(viewstate);
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	points.nStart = viewstate.dwBeginSel;
 	points.nEnd = viewstate.dwEndSel;
@@ -3102,7 +3102,7 @@ void CCtrlSamples::SetSelectionPoints(UINT nStart, UINT nEnd)
 	nEnd = CLAMP(nEnd, 0, m_pSndFile->Samples[m_nSample].nLength);
 
 	SAMPLEVIEWSTATE viewstate;
-	memset(&viewstate, 0, sizeof(viewstate));
+	MemsetZero(viewstate);
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 
 	viewstate.dwBeginSel = nStart;

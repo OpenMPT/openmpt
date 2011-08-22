@@ -22,7 +22,7 @@ typedef void (WINAPI * UNMO3_FREE)(void *data);
 
 
 bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------
+//-----------------------------------------------------------------
 {
 	// no valid MO3 file (magic bytes: "MO3")
 	if(dwMemLength < 4 || lpStream[0] != 'M' || lpStream[1] != 'O' || lpStream[2] != '3')
@@ -60,7 +60,7 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 		if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")));
 #endif // MODPLUG_TRACKER
 	}
-	else //case: dll loaded succesfully.
+	else // case: dll loaded succesfully.
 	{
 		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)GetProcAddress(unmo3, "UNMO3_Decode");
 		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, "UNMO3_Free");
@@ -76,12 +76,12 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 				{
 					bResult = true;
 					if ((!ReadXM((const BYTE *)*mo3Stream, (DWORD)iLen))
-					&& (!ReadIT((const BYTE *)*mo3Stream, (DWORD)iLen))
-					&& (!ReadS3M((const BYTE *)*mo3Stream, (DWORD)iLen))
-					#ifndef FASTSOUNDLIB
-					&& (!ReadMTM((const BYTE *)*mo3Stream, (DWORD)iLen))
-					#endif // FASTSOUNDLIB
-					&& (!ReadMod((const BYTE *)*mo3Stream, (DWORD)iLen))) bResult = false;
+						&& (!ReadIT((const BYTE *)*mo3Stream, (DWORD)iLen))
+						&& (!ReadS3M((const BYTE *)*mo3Stream, (DWORD)iLen))
+#ifndef FASTSOUNDLIB
+						&& (!ReadMTM((const BYTE *)*mo3Stream, (DWORD)iLen))
+#endif // FASTSOUNDLIB
+						&& (!ReadMod((const BYTE *)*mo3Stream, (DWORD)iLen))) bResult = false;
 				}
 				
 				UNMO3_Free(*mo3Stream);

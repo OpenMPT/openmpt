@@ -494,7 +494,6 @@ CSoundFile::CSoundFile() :
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
-	MemsetZero(m_SongEQ);
 	Order.Init();
 	Patterns.ClearPatterns();
 	m_lTotalSampleCount=0;
@@ -555,7 +554,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
-	MemsetZero(m_SongEQ);
 	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order.resize(1);
 	Patterns.ClearPatterns();

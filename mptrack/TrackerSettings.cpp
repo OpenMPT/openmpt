@@ -101,36 +101,7 @@ TrackerSettings::TrackerSettings()
 	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
 
 	// TODO duplicate code (see Moptions.cpp)
-	rgbCustomColors[MODCOLOR_BACKNORMAL] = RGB(0xFF, 0xFF, 0xFF);
-	rgbCustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0x00, 0x00);
-	rgbCustomColors[MODCOLOR_BACKCURROW] = RGB(0xC0, 0xC0, 0xC0);
-	rgbCustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
-	rgbCustomColors[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
-	rgbCustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	rgbCustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
-	rgbCustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0xFF, 0xFF, 0x80);
-	rgbCustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0x00, 0x00);
-	rgbCustomColors[MODCOLOR_BACKHILIGHT] = RGB(0xE0, 0xE8, 0xE0);
-	// Effect Colors
-	rgbCustomColors[MODCOLOR_NOTE] = RGB(0x00, 0x00, 0x80);
-	rgbCustomColors[MODCOLOR_INSTRUMENT] = RGB(0x00, 0x80, 0x80);
-	rgbCustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0x80, 0x00);
-	rgbCustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
-	rgbCustomColors[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
-	rgbCustomColors[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
-	rgbCustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
-	// VU-Meters
-	rgbCustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
-	rgbCustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
-	rgbCustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	// Channel separators
-	rgbCustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
-	rgbCustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
-	rgbCustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
-	// Pattern blend colour
-	rgbCustomColors[MODCOLOR_BLENDCOLOR] = GetSysColor(COLOR_BTNFACE);
-	// Dodgy commands
-	rgbCustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
+	GetDefaultColourScheme(rgbCustomColors);
 
 	// Directory Arrays (Default + Last)
 	for(size_t i = 0; i < NUM_DIRS; i++)
@@ -174,6 +145,42 @@ TrackerSettings::TrackerSettings()
 	gnPlugWindowHeight = 332;
 	gnPlugWindowLast = 0;
 
+}
+
+
+void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
+//------------------------------------------------------------------------------
+{
+	colours[MODCOLOR_BACKNORMAL] = RGB(0xFF, 0xFF, 0xFF);
+	colours[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0x00, 0x00);
+	colours[MODCOLOR_BACKCURROW] = RGB(0xC0, 0xC0, 0xC0);
+	colours[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
+	colours[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
+	colours[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
+	colours[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
+	colours[MODCOLOR_BACKPLAYCURSOR] = RGB(0xFF, 0xFF, 0x80);
+	colours[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0x00, 0x00);
+	colours[MODCOLOR_BACKHILIGHT] = RGB(0xE0, 0xE8, 0xE0);
+	// Effect Colors
+	colours[MODCOLOR_NOTE] = RGB(0x00, 0x00, 0x80);
+	colours[MODCOLOR_INSTRUMENT] = RGB(0x00, 0x80, 0x80);
+	colours[MODCOLOR_VOLUME] = RGB(0x00, 0x80, 0x00);
+	colours[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
+	colours[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
+	colours[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
+	colours[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
+	// VU-Meters
+	colours[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
+	colours[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
+	colours[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
+	// Channel separators
+	colours[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
+	colours[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
+	colours[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
+	// Pattern blend colour
+	colours[MODCOLOR_BLENDCOLOR] = GetSysColor(COLOR_BTNFACE);
+	// Dodgy commands
+	colours[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
 }
 
 
@@ -824,15 +831,15 @@ void TrackerSettings::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Director
 }
 
 
-LPCTSTR TrackerSettings::GetDefaultDirectory(Directory dir)
-//---------------------------------------------------------
+LPCTSTR TrackerSettings::GetDefaultDirectory(Directory dir) const
+//---------------------------------------------------------------
 {
 	return m_szDefaultDirectory[dir];
 }
 
 
-LPCTSTR TrackerSettings::GetWorkingDirectory(Directory dir)
-//---------------------------------------------------------
+LPCTSTR TrackerSettings::GetWorkingDirectory(Directory dir) const
+//---------------------------------------------------------------
 {
 	return m_szWorkingDirectory[dir];
 }

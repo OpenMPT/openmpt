@@ -2805,18 +2805,6 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 		}
 		nTotalSize += nChInfo*4 + 8;
 	}
-	if (m_SongEQ.nEQBands > 0)
-	{
-		nTotalSize += 8 + m_SongEQ.nEQBands * 4;
-		if (f)
-		{
-			nPluginSize = 'XFQE';
-			fwrite(&nPluginSize, 1, 4, f);
-			nPluginSize = m_SongEQ.nEQBands*4;
-			fwrite(&nPluginSize, 1, 4, f);
-			fwrite(m_SongEQ.EQFreq_Gains, 1, nPluginSize, f);
-		}
-	}
 	return nTotalSize;
 }
 #endif
@@ -2828,40 +2816,27 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 	const BYTE *p = (const BYTE *)pData;
 	UINT nPos = 0;
 
-	while (nPos+8 < nLen)	// read 4 magic bytes + size
+	while (nLen - nPos >= 8)	// read 4 magic bytes + size
 	{
 		DWORD nPluginSize;
 		UINT nPlugin;
 
-		nPluginSize = *(DWORD *)(p+nPos+4);
-		if (nPluginSize > nLen-nPos-8) break;;
-		if ((*(DWORD *)(p+nPos)) == 'XFHC')
+		nPluginSize = *(DWORD *)(p + nPos + 4);
+		if (nPluginSize > nLen - nPos - 8) break;
+		
+		// Channel FX
+		if (!memcmp(p + nPos, "CHFX", 4))
 		{
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//			for (UINT ch=0; ch<64; ch++) if (ch*4 < nPluginSize)
-			for (UINT ch=0; ch<MAX_BASECHANNELS; ch++) if (ch*4 < nPluginSize)
-// -! BEHAVIOUR_CHANGE#0006
+			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++) if (ch * 4 < nPluginSize)
 			{
-				ChnSettings[ch].nMixPlugin = *(DWORD *)(p+nPos+8+ch*4);
+				ChnSettings[ch].nMixPlugin = *(DWORD *)(p + nPos + 8 + ch * 4);
 			}
 		}
-
-		else if ((*(DWORD *)(p+nPos)) == 'XFQE')
+		// Plugin Data
+		else if (memcmp(p + nPos, "FX00", 4) >= 0 && memcmp(p + nPos, "FX99", 4) <= 0)
 		{
-			m_SongEQ.nEQBands = nPluginSize/4;
-			if (m_SongEQ.nEQBands > MAX_EQ_BANDS) m_SongEQ.nEQBands = MAX_EQ_BANDS;
-			memcpy(m_SongEQ.EQFreq_Gains, p+nPos+8, m_SongEQ.nEQBands * 4);
-		} 
 
-		//Load plugin Data
-		else
-		{
-			if ((p[nPos] != 'F') || (p[nPos+1] != 'X') || (p[nPos+2] < '0') || (p[nPos+3] < '0'))
-			{
-				break;
-			}
-			nPlugin = (p[nPos+2]-'0')*10 + (p[nPos+3]-'0');			//calculate plug-in number.
+			nPlugin = (p[nPos + 2] - '0') * 10 + (p[nPos + 3] - '0');			//calculate plug-in number.
 
 			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO)+4))
 			{
@@ -2892,25 +2867,30 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 					DWORD endPos = startPos + dwXPlugData;						// end of extra data for this plug
 					DWORD currPos = startPos;
 
-					while (currPos < endPos) //cycle through all the bytes
+					while (endPos - currPos >= 4) //cycle through all the bytes
 					{
 						// do we recognize this chunk?
 						//rewbs.dryRatio
 						//TODO: turn this into a switch statement like for modular instrument data
-						if ((p[currPos] == 'D') && (p[currPos+1] == 'W') && (p[currPos+2] == 'R') && (p[currPos+3] == 'T'))
-						{	
-							currPos+=4;// move past ID
-							m_MixPlugins[nPlugin].fDryRatio = *(float*) (p+currPos);
-							currPos+= sizeof(float); //move past data
+						if (!memcmp(p + currPos, "DWRT", 4))
+						{
+							currPos += 4; // move past ID
+							if (endPos - currPos >= sizeof(float))
+							{
+								m_MixPlugins[nPlugin].fDryRatio = *(float*) (p+currPos);
+								currPos += sizeof(float); //move past data
+							}
 						}
 						//end rewbs.dryRatio
-						
 						//rewbs.plugDefaultProgram
-						else if ((p[currPos] == 'P') && (p[currPos+1] == 'R') && (p[currPos+2] == 'O') && (p[currPos+3] == 'G'))
-						{	
-							currPos+=4;// move past ID
-							m_MixPlugins[nPlugin].defaultProgram = *(long*) (p+currPos);
-							currPos+= sizeof(long); //move past data
+						else if (!memcmp(p + currPos, "PROG", 4))
+						{
+							currPos += 4; // move past ID
+							if (endPos - currPos >= sizeof(long))
+							{
+								m_MixPlugins[nPlugin].defaultProgram = *(long*) (p+currPos);
+								currPos += sizeof(long); //move past data
+							}
 						}
 						//end rewbs.plugDefaultProgram
                         //else if.. (add extra attempts to recognize chunks here)
@@ -3021,7 +3001,8 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 
 
 void CSoundFile::SaveExtendedSongProperties(FILE* f)
 //--------------------------------------------------
-{  //Extra song data - Yet Another Hack. 
+{
+	//Extra song data - Yet Another Hack.
 	__int16 size;
 	__int32 code = 'MPTS';					//Extra song file data
 	fwrite(&code, 1, sizeof(__int32), f);

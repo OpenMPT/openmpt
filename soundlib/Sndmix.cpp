@@ -2356,7 +2356,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 
 #ifdef MODPLUG_TRACKER
 
-VOID CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
+void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
 //------------------------------------------------------------------
 {
 	// Do we need to process midi?
@@ -2465,6 +2465,7 @@ VOID CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 	}
 }
 
+
 int CSoundFile::GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const
 //---------------------------------------------------------------------------------------
 {
@@ -2513,7 +2514,7 @@ int CSoundFile::GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pI
 #endif
 
 
-VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
+void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 //---------------------------------------------------------------------------
 {
 	long delta=0;

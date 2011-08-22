@@ -302,7 +302,7 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 		if (pModDoc->m_bHasValidPath)	// Check that the file has a user-chosen path
 		{
 			CString fullPath = pModDoc->GetPathName();
-			path = fullPath.Left(fullPath.GetLength()-pModDoc->GetTitle().GetLength()); //remove file name if necessary
+			path = fullPath.Left(fullPath.GetLength() - pModDoc->GetTitle().GetLength()); //remove file name if necessary
 		} else
 		{
 			path = theApp.GetConfigPath();
@@ -337,7 +337,6 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 	}
 	
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////////////////

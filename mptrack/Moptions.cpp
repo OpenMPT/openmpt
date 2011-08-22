@@ -372,31 +372,7 @@ void COptionsColors::OnPreviewChanged()
 void COptionsColors::OnPresetMPT()
 //--------------------------------
 {
-	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0xC0, 0xC0, 0xC0);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0xFF, 0xFF, 0x80);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0xE0, 0xE8, 0xE0);
-	CustomColors[MODCOLOR_NOTE] = RGB(0x00, 0x00, 0x80);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0x00, 0x80, 0x80);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0x80, 0x00);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
-	CustomColors[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
-	CustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
-	CustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
-	CustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
-	CustomColors[MODCOLOR_BLENDCOLOR] = GetSysColor(COLOR_BTNFACE);
-	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
+	TrackerSettings::GetDefaultColourScheme(CustomColors);
 	OnPreviewChanged();
 }
 
