@@ -16,6 +16,7 @@
 #include "version.h"
 #include "test/test.h"
 #include <afxadv.h>
+#include <shlwapi.h>
 #include "UpdateCheck.h"
 #include "../soundlib/StringFixer.h"
 #include "dbghelp.h"
