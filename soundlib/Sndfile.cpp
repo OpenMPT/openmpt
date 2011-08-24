@@ -1189,7 +1189,7 @@ void CSoundFile::SuspendPlugins()
 			continue;  //most common branch
 		
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState)
+		if (m_MixPlugins[iPlug].pMixState && pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(false);
 			pPlugin->HardAllNotesOff();
