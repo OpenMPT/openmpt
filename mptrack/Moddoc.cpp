@@ -2693,7 +2693,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		break;
 
 	case CMD_SPEED:
-		wsprintf(s, "%d frames/row", param);
+		wsprintf(s, "%d ticks/row", param);
 		break;
 
 	case CMD_TEMPO:
@@ -2944,7 +2944,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						break;
 
 					case 0x60: // fine pattern delay (ticks)
-						strcat(s, " rows");
+						strcat(s, " ticks");
 						break;
 
 					case 0xA0: // high offset
@@ -2961,9 +2961,9 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0xD0: // note delay
 						//IT compatibility 22. SD0 == SD1, SC0 == SC1
 						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER)))
-							strcpy(s, "1 frame");
+							strcpy(s, "1 tick");
 						else
-							strcat(s, " frames");
+							strcat(s, " ticks");
 						break;
 					case 0xE0: // pattern delay (rows)
 						strcat(s, " rows");
@@ -3019,7 +3019,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						break;
 					case 0xC0: // note cut
 					case 0xD0: // note delay
-						strcat(s, " frames");
+						strcat(s, " ticks");
 						break;
 					case 0xE0: // pattern delay (rows)
 						strcat(s, " rows");

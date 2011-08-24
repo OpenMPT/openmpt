@@ -319,7 +319,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			if (m_pVstHead) m_pVstHead->pPrev = p;
 			m_pVstHead = p;
 
-			try {
+			try
+			{
 				AEffect *pEffect = pMainProc(MasterCallBack);
 				if ((pEffect) && (pEffect->magic == kEffectMagic)
 				 && (pEffect->dispatcher))
@@ -350,7 +351,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 
 					bOk = TRUE;
 				}
-			} catch(...) {
+			} catch(...)
+			{
 				CVstPluginManager::ReportPlugException("Exception while trying to load plugin \"%s\"!\n", p->szLibraryName);
 			}
 
@@ -1741,7 +1743,8 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 {
 	long lresult = 0;
 
-	try {
+	try
+	{
 		if ((m_pEffect) && (m_pEffect->dispatcher))
 		{
 			#ifdef VST_LOG
@@ -1749,7 +1752,8 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 			#endif
 			lresult = m_pEffect->dispatcher(m_pEffect, opCode, index, value, ptr, opt);
 		}
-	} catch (...) {
+	} catch (...)
+	{
 		CVstPluginManager::ReportPlugException("Exception in Dispatch(%d) (Plugin=\"%s\")!\n", opCode, m_pFactory->szLibraryName);
 	}
 
@@ -1797,9 +1801,11 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 	FLOAT fResult = 0;
 	if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->getParameter))
 	{
-		try {
+		try
+		{
 			fResult = m_pEffect->getParameter(m_pEffect, nIndex);
-		} catch (...) {
+		} catch (...)
+		{
 			//CVstPluginManager::ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_pFactory->szLibraryName);
 		}
 	}
@@ -1817,13 +1823,15 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 VOID CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 //-------------------------------------------------------------------------
 {
-	try {
+	try
+	{
 		if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->setParameter))
 		{
 			if ((fValue >= 0.0f) && (fValue <= 1.0f))
 				m_pEffect->setParameter(m_pEffect, nIndex, fValue);
 		}
-	} catch (...) {
+	} catch (...)
+	{
 		CVstPluginManager::ReportPlugException("Exception in SetParameter(%d, 0.%03d) (Plugin=%s)\n", nIndex, (int)(fValue*1000), m_pFactory->szLibraryName);
 	}
 }
@@ -1890,7 +1898,8 @@ void CVstPlugin::Resume()
 {
 	const DWORD sampleRate = CSoundFile::gdwMixingFreq;
 
-	try {
+	try
+	{
 		//reset some stuf
 		m_MixState.nVolDecayL = 0;
 		m_MixState.nVolDecayR = 0;
@@ -1905,7 +1914,8 @@ void CVstPlugin::Resume()
 		Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
 		m_bPlugResumed = true;
-	} catch (...) {
+	} catch (...)
+	{
 		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 
@@ -1915,11 +1925,16 @@ void CVstPlugin::Resume()
 void CVstPlugin::Suspend() 
 //------------------------
 {
-	try {
-		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
-		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
-		m_bPlugResumed=false;
-	} catch (...) {
+	try
+	{
+		if(m_bPlugResumed)
+		{
+			Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
+			Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
+			m_bPlugResumed = false;
+		}
+	} catch (...)
+	{
 		CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }
@@ -1931,11 +1946,17 @@ void CVstPlugin::ProcessVSTEvents()
 	// Process VST events
 	if ((m_pEffect) && (m_pEffect->dispatcher) && (m_pEvList) && (m_pEvList->numEvents > 0))
 	{
-		try {
+		try
+		{
 			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, m_pEvList, 0);
-		} catch (...) {
-			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, pEventList:%p, numEvents:%d, MidicodeCh:%d, MidicodeEv:%d, MidicodeNote:%d, MidiCodeVel:%d)\n", m_pFactory->szLibraryName, m_pEvList, m_pEvList->numEvents,
-(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0x0f, (((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0xf0, (((VstMidiEvent *)(m_pEvList->events[0]))->midiData[1])&0xff, (((VstMidiEvent *)(m_pEvList->events[0]))->midiData[2])&0xff);
+		} catch (...)
+		{
+			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, pEventList:%p, numEvents:%d, MidicodeCh:%d, MidicodeEv:%d, MidicodeNote:%d, MidiCodeVel:%d)\n",
+				m_pFactory->szLibraryName, m_pEvList, m_pEvList->numEvents,
+				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0x0f,
+				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0xf0,
+				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[1])&0xff,
+				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[2])&0xff);
 		}
 	}
 	
@@ -1945,7 +1966,8 @@ void CVstPlugin::ClearVSTEvents()
 //-------------------------------
 {
 	// Clear VST events
-	if ((m_pEvList) && (m_pEvList->numEvents > 0)) {
+	if ((m_pEvList) && (m_pEvList->numEvents > 0))
+	{
 		m_pEvList->numEvents = 0;
 	}
 }
@@ -1956,7 +1978,8 @@ void CVstPlugin::RecalculateGain()
 	float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
 	if(gain < 0.1f) gain = 1.0f;
 
-	if (m_bIsInstrument && m_pSndFile) {
+	if (m_bIsInstrument && m_pSndFile)
+	{
 		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
 		gain = static_cast<float>(gain * (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol()));
 	}
@@ -2035,7 +2058,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
 		int mixop;
-		if (m_bIsInstrument) {
+		if (m_bIsInstrument)
+		{
 			mixop = 0; //force normal mix mode for instruments
 		} else {
 			mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>8) & 0xff : 0;
@@ -2046,23 +2070,26 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		//Merge stereo input before sending to the plug if the plug can only handle one input.
 		if (m_pEffect->numInputs == 1)
 		{
-			for (UINT i=0; i<nSamples; i++)	{
+			for (UINT i=0; i<nSamples; i++)
+			{
 				m_MixState.pOutBufferL[i] = 0.5f*m_MixState.pOutBufferL[i] + 0.5f*m_MixState.pOutBufferR[i];
 			}
 		}
 
 		for (UINT iOut=0; iOut<m_nOutputs; iOut++)
 		{
-			memset(m_pTempBuffer[iOut], 0, nSamples*sizeof(float));
+			memset(m_pTempBuffer[iOut], 0, nSamples * sizeof(float));
 			m_pOutputs[iOut] = m_pTempBuffer[iOut];
 		}
 
 		m_dwTimeAtStartOfProcess = timeGetTime();
 		//Do the VST processing magic
-		try {
-			ASSERT(nSamples<=MIXBUFFERSIZE);
+		try
+		{
+			ASSERT(nSamples <= MIXBUFFERSIZE);
 			m_pProcessFP(m_pEffect, m_pInputs, m_pOutputs, nSamples);
-		} catch (...) {
+		} catch (...)
+		{
 			m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
 			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod);
@@ -2071,22 +2098,26 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		}
 
 		//mix outputs of multi-output VSTs:
-		if(m_nOutputs>2){
+		if(m_nOutputs>2)
+		{
 			// first, mix extra outputs on a stereo basis
 			UINT nOuts = m_nOutputs;
 			// so if nOuts is not even, let process the last output later
 			if((nOuts % 2) == 1) nOuts--;
 
 			// mix extra stereo outputs
-			for(UINT iOut=2; iOut<nOuts; iOut++){
-				for(UINT i=0; i<nSamples; i++)
-					m_pTempBuffer[iOut%2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
+			for(UINT iOut = 2; iOut < nOuts; iOut++)
+			{
+				for(UINT i = 0; i < nSamples; i++)
+					m_pTempBuffer[iOut % 2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
 			}
 
 			// if m_nOutputs is odd, mix half the signal of last output to each channel
-			if(nOuts != m_nOutputs){
-				// trick : if we are here, nOuts = m_nOutputs-1 !!!
-				for(UINT i=0; i<nSamples; i++){
+			if(nOuts != m_nOutputs)
+			{
+				// trick : if we are here, nOuts = m_nOutputs - 1 !!!
+				for(UINT i=0; i<nSamples; i++)
+				{
 					float v = 0.5f * m_pTempBuffer[nOuts][i];
 					m_pTempBuffer[0][i] += v;
 					m_pTempBuffer[1][i] += v;
@@ -2097,7 +2128,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		// If there was just the one plugin output we copy it into our 2 outputs
 		if(m_pEffect->numOutputs == 1)
 		{
-			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
+			wetRatio = 1 - m_pMixStruct->fDryRatio;  //rewbs.dryRatio
 			dryRatio = m_bIsInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
 
 // -> CODE#0028
@@ -2119,7 +2150,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			}
 */
 			// Wet/Dry range expansion [0,1] -> [-1,1]	update#02
-			if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+			if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND)
+			{
 				wetRatio = 2.0f * wetRatio - 1.0f;
 				dryRatio = -wetRatio;
 			}
@@ -2128,11 +2160,13 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			dryRatio *= m_fGain;	// update#02
 
 			// Mix operation
-			switch(mixop){
+			switch(mixop)
+			{
 
 				// Default mix (update#02)
 				case 0:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i = 0; i < nSamples; i++)
+					{
 						//rewbs.wetratio - added the factors. [20040123]			
 						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
@@ -2141,7 +2175,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Wet subtract
 				case 1:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i = 0; i < nSamples; i++)
+					{
 						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
 						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]*wetRatio;
 					}
@@ -2149,7 +2184,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Dry subtract
 				case 2:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i = 0; i < nSamples; i++)
+					{
 						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*dryRatio;
 					}
@@ -2157,7 +2193,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Mix subtract
 				case 3:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i = 0; i < nSamples; i++)
+					{
 						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
 						pOutR[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*wetRatio;
 					}
@@ -2165,7 +2202,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Middle subtract
 				case 4:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i = 0; i < nSamples; i++)
+					{
 						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
 						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
 						pOutR[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
@@ -2174,11 +2212,13 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Left/Right balance
 				case 5:
-					if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+					if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND)
+					{
 						wetRatio /= 2.0f;
 						dryRatio /= 2.0f;
 					}
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i = 0; i < nSamples; i++)
+					{
 						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
 						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
 					}
@@ -2187,8 +2227,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 			//If dry mix is ticked we add the unprocessed buffer,
 			//except if this is an instrument since this it has already been done:
-			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument){
-				for (UINT i=0; i<nSamples; i++){
+			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument)
+			{
+				for (UINT i=0; i<nSamples; i++)
+				{
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];
 				}
@@ -2223,7 +2265,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			}
 */
 			// Wet/Dry range expansion [0,1] -> [-1,1]	update#02
-			if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+			if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND)
+			{
 				wetRatio = 2.0f * wetRatio - 1.0f;
 				dryRatio = -wetRatio;
 			}
@@ -2236,7 +2279,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Default mix (update#02)
 				case 0:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++)
+					{
 						//rewbs.wetratio - added the factors. [20040123]		
 						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
@@ -2245,7 +2289,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Wet subtract
 				case 1:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++)
+					{
 						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
 						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]*wetRatio;
 					}
@@ -2253,7 +2298,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Dry subtract
 				case 2:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++)
+					{
 						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*dryRatio;
 					}
@@ -2261,7 +2307,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Mix subtract
 				case 3:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++)
+					{
 						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
 						pOutR[i] -= m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*wetRatio;
 					}
@@ -2269,7 +2316,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Middle subtract
 				case 4:
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++)
+					{
 						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
 						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
 						pOutR[i] -= middle - m_pTempBuffer[1][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
@@ -2278,11 +2326,13 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Left/Right balance
 				case 5:
-					if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+					if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND)
+					{
 						wetRatio /= 2.0f;
 						dryRatio /= 2.0f;
 					}
-					for(UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++)
+					{
 						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
 						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
 					}
@@ -2291,7 +2341,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 			//If dry mix is ticked we add the unprocessed buffer,
 			//except if this is an instrument since this it has already been done:
-			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument){
+			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument)
+			{
 				for (UINT i=0; i<nSamples; i++){
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];
@@ -2370,7 +2421,8 @@ void CVstPlugin::HardAllNotesOff()
 	//if (IsBypassed())	
 	//	return;
 
-	do {
+	do
+	{
 		overflow=false;
 		for (int mc=0; mc<16; mc++)		//all midi chans
 		{	
@@ -2433,7 +2485,7 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trac
 }
 
 short CVstPlugin::getMIDI14bitValueFromShort(short value) 
-//---------------------------------------------------------------------------------
+//-------------------------------------------------------
 {
 	//http://www.srm.com/qtma/davidsmidispec.html: 
 	// The two bytes of the pitch bend message form a 14 bit number, 0 to 16383. 
@@ -2454,7 +2506,7 @@ short CVstPlugin::getMIDI14bitValueFromShort(short value)
 
 //Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
 void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/) 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 {
 	nMidiCh--;		// move from 1-17 range to 0-16 range
 	
@@ -2466,8 +2518,9 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 }
 
 //Set midi pitch for given midi channel using uncoverted midi value (0-16383)
-void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos) {
-//----------------------------------------------------------------
+void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
+//-----------------------------------------------------------------
+{
 	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos; //store pitch bend position
 	short converted = getMIDI14bitValueFromShort(newPitchBendPos);
 	MidiSend(converted<<8 | MIDI_PitchBend_Command|nMidiCh);
@@ -2535,10 +2588,8 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		dwMidiCode = 0x80|nCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
 		for (UINT i=0; i<128; i++)	//all notes
 		{
-			//if (!(m_pEffect->uniqueID==1413633619L) || pCh->uNoteOnMap[i][trackChannel]>0) { //only send necessary NOs for TBVS.
-				pCh->uNoteOnMap[i][trackChannel]=0;
-				MidiSend(dwMidiCode|(i<<8)); 
-			//}
+			pCh->uNoteOnMap[i][trackChannel]=0;
+			MidiSend(dwMidiCode|(i<<8)); 
 		}
 	
 	} 
@@ -2555,9 +2606,12 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 			// But this can cause a VST event overflow if we have many active notes...
 			while (pCh->uNoteOnMap[i][trackChannel])
 			{
-				if (MidiSend(dwMidiCode|(i<<8))) {
+				if (MidiSend(dwMidiCode|(i<<8)))
+				{
 					pCh->uNoteOnMap[i][trackChannel]--;
-				} else { //VST event queue overflow, no point in submitting more note offs.
+				} else
+				{
+					// VST event queue overflow, no point in submitting more note offs.
                     break; //todo: secondary buffer?
 				}
 			}
@@ -2572,7 +2626,8 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		note--;
 
 		//reset pitch bend on each new note, tracker style.
-		if (m_nMidiPitchBendPos[nCh] != MIDI_PitchBend_Centre) {
+		if (m_nMidiPitchBendPos[nCh] != MIDI_PitchBend_Centre)
+		{
 			MidiPitchBend(nCh, MIDI_PitchBend_Centre);
 		}
 
@@ -2620,7 +2675,7 @@ bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT d
 void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 //--------------------------------------------------------
 {
-	FLOAT fValue = nValue / 127.0f;
+	PlugParamValue fValue = (PlugParamValue)nValue / 127.0f;
 	SetParameter(nParam, fValue);
 }
 
@@ -2628,7 +2683,7 @@ void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 UINT CVstPlugin::GetZxxParameter(UINT nParam)
 //-------------------------------------------
 {
-	return (UINT) (GetParameter(nParam) * 127.0f+0.5f);
+	return (UINT) (GetParameter(nParam) * 127.0f + 0.5f);
 }
 //end rewbs.smoothVST
 
@@ -2649,13 +2704,18 @@ void CVstPlugin::SaveAllParameters()
 			LONG nByteSize = 0; 
 			
 			// Try to get whole bank
-			if (m_pEffect->uniqueID != 1984054788) { //special case: VB ffx4 pretends to get a valid bank but gives us garbage.
+			if (m_pEffect->uniqueID != CCONST('v', 'B', 'F', '\4'))
+			{
+				//special case: VB ffx4 pretends to get a valid bank but gives us garbage.
 				nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
 			}
 			
-			if (/*(nByteSize < 8) ||*/ !p) { //If bank is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+			if (/*(nByteSize < 8) ||*/ !p)
+			{
+				//If bank is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// Getting bank failed, try to get get just preset
-			} else {
+			} else
+			{
 				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
 			}
 			if (/*(nByteSize >= 8) && */(p)) //If program is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
@@ -2683,7 +2743,7 @@ void CVstPlugin::SaveAllParameters()
 		}
 		// This plug doesn't support chunks: save parameters
 		UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
-		UINT nLen = nParams * sizeof(FLOAT);
+		UINT nLen = nParams * sizeof(float);
 		if (!nLen) return;
 		nLen += 4;
 		if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nLen))
@@ -2701,7 +2761,7 @@ void CVstPlugin::SaveAllParameters()
 		}
 		if (m_pMixStruct->pPluginData)
 		{
-			FLOAT *p = (FLOAT *)m_pMixStruct->pPluginData;
+			float *p = (float *)m_pMixStruct->pPluginData;
 			*(ULONG *)p = 0;
 			p++;
 			for (UINT i=0; i<nParams; i++)
@@ -2720,7 +2780,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 	if ((m_pEffect) && (m_pMixStruct) && (m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= 4))
 	{
 		UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
-		UINT nLen = nParams * sizeof(FLOAT);
+		UINT nLen = nParams * sizeof(float);
 		ULONG nType = *(ULONG *)m_pMixStruct->pPluginData;
 
 		if ((Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf') && (nType == 'NvEf'))
@@ -2756,7 +2816,8 @@ VOID CVstPlugin::ToggleEditor()
 {
 	if (!m_pEffect) return;
 
-	try {
+	try
+	{
 		if ((m_pEditor) && (!m_pEditor->m_hWnd))
 		{
 			delete m_pEditor;
@@ -2779,7 +2840,8 @@ VOID CVstPlugin::ToggleEditor()
 			if (m_pEditor)
 				m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
 		}
-	} catch (...) {
+	} catch (...)
+	{
 		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }
