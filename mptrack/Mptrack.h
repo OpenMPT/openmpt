@@ -247,47 +247,11 @@ protected:
 
 
 #ifdef WIN32	// Legacy stuff
-	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = "", TCHAR sNewFileName[_MAX_PATH] = "");
-#endif // WIN32
-
-// Exception handling
-#ifdef WIN32
-public:
-	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);
+	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = _T(""), TCHAR sNewFileName[_MAX_PATH] = _T(""));
 #endif // WIN32
 
 };
 
-
-//=============================
-class CButtonEx: public CButton
-//=============================
-{
-protected:
-	MODPLUGDIB m_Dib;
-	RECT m_srcRect;
-	BOOL m_bPushed;
-
-public:
-	CButtonEx() { m_Dib.lpDibBits = NULL; m_bPushed = FALSE; }
-	BOOL Init(const LPMODPLUGDIB pDib, COLORREF colorkey=RGB(0,128,128));
-	BOOL SetSourcePos(int x, int y=0, int cx=16, int cy=15);
-	BOOL AlignButton(UINT nIdPrev, int dx=0);
-	BOOL AlignButton(const CWnd &wnd, int dx=0) { return AlignButton(wnd.m_hWnd, dx); }
-	BOOL AlignButton(HWND hwnd, int dx=0);
-	BOOL GetPushState() const { return m_bPushed; }
-	void SetPushState(BOOL bPushed);
-
-protected:
-	//{{AFX_VIRTUAL(CButtonEx)
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-	//}}AFX_VIRTUAL
-	//{{AFX_MSG(CButtonEx)
-	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
-	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP();
-};
 
 extern CTrackApp theApp;
 
@@ -366,7 +330,6 @@ LPMODPLUGDIB LoadDib(LPCSTR lpszName);
 RGBQUAD rgb2quad(COLORREF c);
 
 // Other bitmap functions
-void DrawBitmapButton(HDC hdc, LPRECT lpRect, LPMODPLUGDIB lpdib, int srcx, int srcy, BOOL bPushed);
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
 
 // Misc functions

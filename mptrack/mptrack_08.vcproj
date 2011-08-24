@@ -325,6 +325,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExceptionHandler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\Fastmix.cpp"
 				>
 			</File>
@@ -956,6 +960,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Endianness.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ExceptionHandler.h"
 				>
 			</File>
 			<File
