@@ -19,7 +19,7 @@
 #include <shlwapi.h>
 #include "UpdateCheck.h"
 #include "../soundlib/StringFixer.h"
-#include "dbghelp.h"
+#include "ExceptionHandler.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -588,9 +588,7 @@ CTrackApp::CTrackApp()
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 
-#ifdef WIN32
-	::SetUnhandledExceptionFilter(UnhandledExceptionFilter);
-#endif // WIN32
+	ExceptionHandler::RegisterMainThread();
 
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
@@ -923,7 +921,8 @@ BOOL CTrackApp::InitInstance()
 	}
 
 	// Open settings if the previous execution was with an earlier version.
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::GetSettings().gcsPreviousVersion) < MptVersion::num) {
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::GetSettings().gcsPreviousVersion) < MptVersion::num)
+	{
 		StopSplashScreen();
 		ShowChangesDialog();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
@@ -931,9 +930,9 @@ BOOL CTrackApp::InitInstance()
 
 	EndWaitCursor();
 
-	#ifdef ENABLE_TESTS
-		MptTest::DoTests();
-	#endif
+#ifdef ENABLE_TESTS
+	MptTest::DoTests();
+#endif
 
 	return TRUE;
 }
@@ -947,8 +946,10 @@ int CTrackApp::ExitInstance()
 	if (glpMidiLibrary)
 	{
 		if (m_szConfigFileName[0]) ExportMidiConfig(m_szConfigFileName);
-		for (UINT iMidi=0; iMidi<256; iMidi++) {
-			if (glpMidiLibrary->MidiMap[iMidi]) {
+		for (UINT iMidi=0; iMidi<256; iMidi++)
+		{
+			if (glpMidiLibrary->MidiMap[iMidi])
+			{
 				delete[] glpMidiLibrary->MidiMap[iMidi];
 			}
 		}
@@ -1819,54 +1820,6 @@ LPMODPLUGDIB LoadDib(LPCSTR lpszName)
 }
 
 
-void DrawBitmapButton(HDC hdc, LPRECT lpRect, LPMODPLUGDIB lpdib, int srcx, int srcy, BOOL bPushed)
-//-------------------------------------------------------------------------------------------------
-{
-	RECT rect;
-	int x = (lpRect->right + lpRect->left) / 2 - 8;
-	int y = (lpRect->top + lpRect->bottom) / 2 - 8;
-	HGDIOBJ oldpen = SelectObject(hdc, CMainFrame::penBlack);
-	rect.left = lpRect->left + 1;
-	rect.top = lpRect->top + 1;
-	rect.right = lpRect->right - 1;
-	rect.bottom = lpRect->bottom - 1;
-	if (bPushed)
-	{
-		::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
-		::LineTo(hdc, lpRect->left, lpRect->top);
-		::LineTo(hdc, lpRect->right-1, lpRect->top);
-		::SelectObject(hdc, CMainFrame::penLightGray);
-		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
-		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
-		::MoveToEx(hdc, lpRect->left+1, lpRect->bottom-2, NULL);
-		::SelectObject(hdc, CMainFrame::penDarkGray);
-		::LineTo(hdc, lpRect->left+1, lpRect->top+1);
-		::LineTo(hdc, lpRect->right-2, lpRect->top+1);
-		rect.left++;
-		rect.top++;
-		x++;
-		y++;
-	} else
-	{
-		::MoveToEx(hdc, lpRect->right-1, lpRect->top, NULL);
-		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
-		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
-		::SelectObject(hdc, CMainFrame::penLightGray);
-		::LineTo(hdc, lpRect->left, lpRect->top);
-		::LineTo(hdc, lpRect->right-1, lpRect->top);
-		::SelectObject(hdc, CMainFrame::penDarkGray);
-		::MoveToEx(hdc, lpRect->right-2, lpRect->top+1, NULL);
-		::LineTo(hdc, lpRect->right-2, lpRect->bottom-2);
-		::LineTo(hdc, lpRect->left+1, lpRect->bottom-2);
-		rect.right--;
-		rect.bottom--;
-	}
-	::FillRect(hdc, &rect, CMainFrame::brushGray);
-	::SelectObject(hdc, oldpen);
-	DibBlt(hdc, x, y, 16, 15, srcx, srcy, lpdib);
-}
-
-
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
 //-------------------------------------------------------------------------------------------------------
 {
@@ -1900,103 +1853,6 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////
-// CButtonEx: button with custom bitmap
-
-BEGIN_MESSAGE_MAP(CButtonEx, CButton)
-	//{{AFX_MSG_MAP(CButtonEx)
-	ON_WM_ERASEBKGND()
-	ON_WM_LBUTTONDBLCLK()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-BOOL CButtonEx::Init(const LPMODPLUGDIB pDib, COLORREF colorkey)
-//--------------------------------------------------------------
-{
-	COLORREF btnface = GetSysColor(COLOR_BTNFACE);
-	if (!pDib) return FALSE;
-	m_Dib = *pDib;
-	m_srcRect.left = 0;
-	m_srcRect.top = 0;
-	m_srcRect.right = 16;
-	m_srcRect.bottom = 15;
-	for (UINT i=0; i<16; i++)
-	{
-		COLORREF rgb = RGB(m_Dib.bmiColors[i].rgbRed, m_Dib.bmiColors[i].rgbGreen, m_Dib.bmiColors[i].rgbBlue);
-		if (rgb == colorkey)
-		{
-			m_Dib.bmiColors[i].rgbRed = GetRValue(btnface);
-			m_Dib.bmiColors[i].rgbGreen = GetGValue(btnface);
-			m_Dib.bmiColors[i].rgbBlue = GetBValue(btnface);
-		}
-	}
-	return TRUE;
-}
-
-
-void CButtonEx::SetPushState(BOOL bPushed)
-//----------------------------------------
-{
-	m_bPushed = bPushed;
-}
-
-
-BOOL CButtonEx::SetSourcePos(int x, int y, int cx, int cy)
-//--------------------------------------------------------
-{
-	m_srcRect.left = x;
-	m_srcRect.top = y;
-	m_srcRect.right = cx;
-	m_srcRect.bottom = cy;
-	return TRUE;
-}
-
-
-BOOL CButtonEx::AlignButton(HWND hwndPrev, int dx)
-//------------------------------------------------
-{
-	HWND hwndParent = ::GetParent(m_hWnd);
-	if (!hwndParent) return FALSE;
-	if (hwndPrev)
-	{
-		POINT pt;
-		RECT rect;
-		SIZE sz;
-		::GetWindowRect(hwndPrev, &rect);
-		pt.x = rect.left;
-		pt.y = rect.top;
-		sz.cx = rect.right - rect.left;
-		sz.cy = rect.bottom - rect.top;
-		::ScreenToClient(hwndParent, &pt);
-		SetWindowPos(NULL, pt.x + sz.cx + dx, pt.y, 0,0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
-	}
-	return FALSE;
-}
-
-
-BOOL CButtonEx::AlignButton(UINT nIdPrev, int dx)
-//-----------------------------------------------
-{
-	return AlignButton(::GetDlgItem(::GetParent(m_hWnd), nIdPrev), dx);
-}
-
-
-void CButtonEx::DrawItem(LPDRAWITEMSTRUCT lpdis)
-//----------------------------------------------
-{
-	DrawBitmapButton(lpdis->hDC, &lpdis->rcItem, &m_Dib, m_srcRect.left, m_srcRect.top,
-						((lpdis->itemState & ODS_SELECTED) || (m_bPushed)) ? TRUE : FALSE);
-}
-
-
-void CButtonEx::OnLButtonDblClk(UINT nFlags, CPoint point)
-//--------------------------------------------------------
-{
-	PostMessage(WM_LBUTTONDOWN, nFlags, MAKELPARAM(point.x, point.y));
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////
 // Misc functions
 
@@ -2026,9 +1882,7 @@ void ErrorBox(UINT nStringID, CWnd*p)
 void CFastBitmap::Init(LPMODPLUGDIB lpTextDib)
 //--------------------------------------------
 {
-	m_nBlendOffset = 0;			// rewbs.buildfix for pattern display bug in debug builds
-								// & release builds when ran directly from vs.net 
-
+	m_nBlendOffset = 0;
 	m_pTextDib = lpTextDib;
 	MemsetZero(m_Dib);
 	m_nTextColor = 0;
@@ -2425,107 +2279,6 @@ void Log(LPCSTR format,...)
 		va_end(va);
 	#endif //_DEBUG
 }
-
-
-#ifdef WIN32
-
-typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
-	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-	CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-	);
-
-// Try to close the audio device and rescue unsaved work if an unhandled exception occours...
-LONG CTrackApp::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
-//---------------------------------------------------------------------------
-{
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-	const HWND window = (pMainFrame ? pMainFrame->m_hWnd : NULL);
-
-	// Shut down audio device...
-	if(pMainFrame)
-	{
-		if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-		pMainFrame->audioCloseDevice();
-	}
-
-	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
-	CString baseRescuePath;
-	{
-		// Create a crash directory
-		TCHAR tempPath[_MAX_PATH];
-		GetTempPath(CountOf(tempPath), tempPath);
-		baseRescuePath.Format("%sOpenMPT Crash Files\\", tempPath);
-		CreateDirectory(baseRescuePath, nullptr);
-		baseRescuePath.Append(timestampDir);
-		if(!CreateDirectory(baseRescuePath, nullptr))
-		{
-			::MessageBox(window, "A crash has been detected and OpenMPT will be closed.\nOpenMPT was unable to create a directory for saving debug information and modified files to.", "OpenMPT Crash", MB_ICONERROR);
-		}
-	}
-
-	// Create minidump...
-	HMODULE hDll = ::LoadLibrary("DBGHELP.DLL");
-	if (hDll)
-	{
-		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
-		if (pDump)
-		{
-			const CString filename = baseRescuePath + "crash.dmp";
-
-			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hFile != INVALID_HANDLE_VALUE)
-			{
-				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
-
-				ExInfo.ThreadId = ::GetCurrentThreadId();
-				ExInfo.ExceptionPointers = pExceptionInfo;
-				ExInfo.ClientPointers = NULL;
-
-				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
-				::CloseHandle(hFile);
-			}
-		}
-		::FreeLibrary(hDll);
-	}
-
-	// Rescue modified files...
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
-	if(pDocTmpl)
-	{
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CDocument *pDoc;
-
-		int numFiles = 0;
-
-		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
-		{
-			CModDoc *pModDoc = (CModDoc *)pDoc;
-			if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
-			{
-				if(numFiles == 0)
-				{
-					// Show the rescue directory in Explorer...
-					OpenDirectory(baseRescuePath);
-				}
-				CString filename;
-				filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
-				pModDoc->OnSaveDocument(filename);
-			}
-		}
-
-		if(numFiles > 0)
-		{
-			CString message;
-			message.Format("A crash has been detected and OpenMPT will be closed.\n%d modified file%s been rescued to\n\n%s\n\nNote: It cannot be guaranteed that rescued files are still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), baseRescuePath);
-			::MessageBox(window, message, "OpenMPT Crash", MB_ICONERROR);
-		}
-	}
-
-	// Let Windows handle the exception...
-	return EXCEPTION_CONTINUE_SEARCH;
-}
-#endif // WIN32
 
 
 //////////////////////////////////////////////////////////////////////////////////

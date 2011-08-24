@@ -27,6 +27,7 @@
 #include "UpdateCheck.h"
 #include "CloseMainDialog.h"
 #include "SelectPluginDialog.h"
+#include "ExceptionHandler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -705,9 +706,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	BOOL bWait;
 	UINT nSleep;
 
-#ifdef WIN32
-	::SetUnhandledExceptionFilter(CTrackApp::UnhandledExceptionFilter);
-#endif // WIN32
+	ExceptionHandler::RegisterAudioThread();
 
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"

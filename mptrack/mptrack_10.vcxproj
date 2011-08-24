@@ -188,6 +188,7 @@
     <ClCompile Include="draw_pat.cpp" />
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
+    <ClCompile Include="ExceptionHandler.cpp" />
     <ClCompile Include="fxp.cpp" />
     <ClCompile Include="globals.cpp" />
     <ClCompile Include="HyperEdit.cpp" />
@@ -317,6 +318,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ACMConvert.h" />
+    <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="PatternRandomizer.h" />
     <ClInclude Include="PatternRandomizerGUI.h" />
     <ClInclude Include="PatternRandomizerGUIEffect.h" />
