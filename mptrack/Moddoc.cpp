@@ -870,11 +870,11 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 	if (NOTE_IS_VALID(note))
 	{
 
-		BEGIN_CRITICAL();
-		
 		//kill notes if required.
 		if ( (bpause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this)
 		{ 
+			CriticalSection cs;
+
 			//OnPlayerPause();				  // pause song - pausing VSTis is too slow
 			pMainFrm->SetLastMixActiveTime(); // mark activity
 
@@ -889,8 +889,6 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			}
 		}
 
-		END_CRITICAL();
-
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
@@ -898,7 +896,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 		CMainFrame::EnableLowLatencyMode();
 
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 
 		//find a channel if required
 		//if (nCurrentChn<0) { 
@@ -1024,14 +1022,11 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 		//end rewbs.vstiLive
 
-		END_CRITICAL();
-
 	} else
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		m_SndFile.NoteChange(nChn, note);
 		if (bpause) m_SndFile.m_dwSongFlags |= SONG_PAUSED;
-		END_CRITICAL();
 	}
 	return nChn;
 }
@@ -1040,7 +1035,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewbs.vstiLive: added chan and nins
 //-----------------------------------------------------------------------
 {
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 
 	//rewbs.vstiLive
 	if((nins > 0) && (nins <= m_SndFile.GetNumInstruments()) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
@@ -1080,7 +1075,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 			if (note) break;
 		}
 	}
-	END_CRITICAL();
+
 	return TRUE;
 }
 
@@ -1880,7 +1875,9 @@ void CModDoc::OnPlayerPlay()
 			OnPlayerPause();
 			return;
 		}
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
+
 		for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) if (!m_SndFile.Chn[i].nMasterChn)
 		{
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
@@ -1891,7 +1888,9 @@ void CModDoc::OnPlayerPlay()
 		} else {
 			m_SndFile.ResumePlugins();
 		}
-		END_CRITICAL();
+
+		cs.Leave();
+
 		//m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED|SONG_PATTERNLOOP);
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
@@ -1912,9 +1911,11 @@ void CModDoc::OnPlayerPause()
 			UINT nRow = m_SndFile.m_nRow;
 			UINT nNextRow = m_SndFile.m_nNextRow;
 			pMainFrm->PauseMod();
-			BEGIN_CRITICAL();
+
 			if ((bLoop) && (nPat < m_SndFile.Patterns.Size()))
 			{
+				CriticalSection cs;
+
 				if ((m_SndFile.m_nCurrentPattern < m_SndFile.Order.size()) && (m_SndFile.Order[m_SndFile.m_nCurrentPattern] == nPat))
 				{
 					m_SndFile.m_nNextPattern = m_SndFile.m_nCurrentPattern;
@@ -1936,7 +1937,6 @@ void CModDoc::OnPlayerPause()
 					}
 				}
 			}
-			END_CRITICAL();
 		} else
 		{
 			pMainFrm->PauseMod();
@@ -1973,9 +1973,11 @@ void CModDoc::OnPlayerPlayFromStart()
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.InitializeVisitedRows(true);
 		pMainFrm->ResetElapsedTime();
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
 		m_SndFile.ResumePlugins();
-		END_CRITICAL();
+		cs.Leave();
+
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 		CMainFrame::EnableLowLatencyMode(FALSE);
 	}
@@ -3458,7 +3460,7 @@ void CModDoc::OnPatternRestart()
 		followSonghWnd = GetEditPosition(nRow, nPat, nOrd);
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 		
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, 0);
@@ -3485,7 +3487,7 @@ void CModDoc::OnPatternRestart()
 			pSndFile->ResumePlugins();
 		}
 		//end rewbs.vstCompliance
-		END_CRITICAL();
+		cs.Leave();
 		
 		if (pModPlaying != this)
 		{
@@ -3520,7 +3522,7 @@ void CModDoc::OnPatternPlay()
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 	
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow);
@@ -3543,7 +3545,7 @@ void CModDoc::OnPatternPlay()
 			pSndFile->ResumePlugins();
 		}
 		//end rewbs.VSTCompliance
-		END_CRITICAL();
+		cs.Leave();
 
 		if (pModPlaying != this)
 		{
@@ -3579,7 +3581,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow);
@@ -3603,7 +3605,7 @@ void CModDoc::OnPatternPlayNoLoop()
 			pSndFile->ResumePlugins();
 		}
 		//rewbs.VSTCompliance
-		END_CRITICAL();
+		cs.Leave();
 
 		if (pModPlaying != this)
 		{
@@ -3925,10 +3927,9 @@ void CModDoc::SafeFileClose()
 void CModDoc::OnPanic()
 //---------------------
 {
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	m_SndFile.ResetChannels();
 	m_SndFile.StopAllVsti();
-	END_CRITICAL();
 }
 
 

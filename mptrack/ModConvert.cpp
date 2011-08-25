@@ -126,7 +126,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				"and resize all patterns to 64 rows.\n"
 				"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return false;
 		BeginWaitCursor();
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 
 		// Converting instruments to samples
 		if(m_SndFile.m_nInstruments)
@@ -159,7 +159,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			m_SndFile.Instruments[nIns] = nullptr;
 		}
 		m_SndFile.m_nInstruments = 0;
-		END_CRITICAL();
+
+		cs.Leave();
 		EndWaitCursor();
 	} //End if (((m_SndFile.m_nInstruments) || (b64)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	BeginWaitCursor();
@@ -448,7 +449,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wEditHistory);
 	}
 
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	m_SndFile.ChangeModTypeTo(nNewType);
 	if(!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
 	{
@@ -482,7 +483,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wCompatibilityMode);
 	}
 
-	END_CRITICAL();
+	cs.Leave();
 	ChangeFileExtension(nNewType);
 
 	// Check mod specifications

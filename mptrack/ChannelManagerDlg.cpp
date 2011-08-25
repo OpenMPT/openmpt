@@ -192,7 +192,7 @@ void CChannelManagerDlg::OnApply()
 	}
 
 	BeginWaitCursor();
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 
 	//Creating new order-vector for ReArrangeChannels.
 	vector<CHANNELINDEX> newChnOrder; newChnOrder.reserve(nChannels);
@@ -202,7 +202,7 @@ void CChannelManagerDlg::OnApply()
 	}
 	if(pModDoc->ReArrangeChannels(newChnOrder) != nChannels)
 	{
-		END_CRITICAL();
+		cs.Leave();
 		EndWaitCursor();
 		MessageBox("Rearranging channels failed");
 
@@ -232,7 +232,7 @@ void CChannelManagerDlg::OnApply()
 	}
 	*/	
 
-	END_CRITICAL();
+	cs.Leave();
 	EndWaitCursor();
 
 	ResetState(true, true, true, true, true);

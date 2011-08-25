@@ -720,12 +720,12 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	if (len > CTrackApp::gMemStatus.dwTotalPhys) len = CTrackApp::gMemStatus.dwTotalPhys;
 	lpFile = f.Lock(len);
 	if (!lpFile) goto OpenError;
-	BEGIN_CRITICAL();
-
-	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-	bOk = m_pSndFile->ReadSampleFromFile(m_nSample, lpFile, len);
-
-	END_CRITICAL();
+	
+	{
+		CriticalSection cs;
+		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+		bOk = m_pSndFile->ReadSampleFromFile(m_nSample, lpFile, len);
+	}
 
 	if (!bOk)
 	{
@@ -744,7 +744,9 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			BeginWaitCursor();
 			UINT flags = 0;
 			MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
-			BEGIN_CRITICAL();
+			
+			CriticalSection cs;
+
 			m_pSndFile->DestroySample(m_nSample);
 			pSmp->nLength = len;
 			pSmp->uFlags = RS_PCM8S;
@@ -784,7 +786,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			{
 				m_pModDoc->GetSampleUndo()->Undo(m_nSample);
 			}
-			END_CRITICAL();
+
 		} else
 		{
 			m_pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
@@ -839,7 +841,9 @@ bool CCtrlSamples::OpenSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
 	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return false;
 
 	BeginWaitCursor();
-	BEGIN_CRITICAL();
+
+	CriticalSection cs;
+
 	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 	m_pSndFile->DestroySample(m_nSample);
 	m_pSndFile->ReadSampleFromSong(m_nSample, pSndFile, nSample);
@@ -849,10 +853,13 @@ bool CCtrlSamples::OpenSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
 		pSmp->nPan = 128;
 		pSmp->uFlags |= CHN_PANNING;
 	}
-	END_CRITICAL();
+
+	cs.Leave();
+	EndWaitCursor();
+
 	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 	m_pModDoc->SetModified();
-	EndWaitCursor();
+
 	return true;
 }
 
@@ -1500,7 +1507,9 @@ void CCtrlSamples::OnUpsample()
 		if (pSmp->nSustainStart > dwStart) pSmp->nSustainStart += (pSmp->nSustainStart - dwStart);
 		if (pSmp->nSustainEnd >= dwEnd) pSmp->nSustainEnd += (dwEnd-dwStart); else
 		if (pSmp->nSustainEnd > dwStart) pSmp->nSustainEnd += (pSmp->nSustainEnd - dwStart);
-		BEGIN_CRITICAL();
+		
+		CriticalSection cs;
+
 		for (UINT iFix=0; iFix<MAX_CHANNELS; iFix++)
 		{
 			if ((PVOID)m_pSndFile->Chn[iFix].pSample == pOriginal)
@@ -1523,7 +1532,9 @@ void CCtrlSamples::OnUpsample()
 		pSmp->nLength = dwNewLen;
 
 		CSoundFile::FreeSample(pOriginal);
-		END_CRITICAL();
+
+		cs.Leave();
+
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		if (selection.bSelected == true)
 		{
@@ -1629,7 +1640,9 @@ void CCtrlSamples::OnDownsample()
 		if (pSmp->nSustainEnd >= dwEnd) pSmp->nSustainEnd -= dwRemove; else
 		if (pSmp->nSustainEnd > dwStart) pSmp->nSustainEnd -= (pSmp->nSustainEnd - dwStart)/2;
 		if (pSmp->nSustainEnd > dwNewLen) pSmp->nSustainEnd = dwNewLen;
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
+
 		for (UINT iFix=0; iFix<MAX_CHANNELS; iFix++)
 		{
 			if ((PVOID)m_pSndFile->Chn[iFix].pSample == pOriginal)
@@ -1650,7 +1663,9 @@ void CCtrlSamples::OnDownsample()
 		pSmp->nLength = dwNewLen;
 		pSmp->pSample = (LPSTR)pNewSample;
 		CSoundFile::FreeSample(pOriginal);
-		END_CRITICAL();
+
+		cs.Leave();
+
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		if (selection.bSelected == true)
 		{

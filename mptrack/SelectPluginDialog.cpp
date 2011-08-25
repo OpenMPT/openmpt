@@ -108,7 +108,7 @@ void CSelectPluginDlg::OnOK()
 	{
 		if ((!pCurrentPlugin) || (pCurrentPlugin->GetPluginFactory() != pFactory))
 		{
-			BEGIN_CRITICAL();
+			CriticalSection cs;
 			if (pCurrentPlugin) pCurrentPlugin->Release();
 			// Just in case...
 			m_pPlugin->pMixPlugin = NULL;
@@ -132,7 +132,9 @@ void CSelectPluginDlg::OnOK()
 
 			lstrcpyn(m_pPlugin->Info.szName, pFactory->szLibraryName, 32);
 			lstrcpyn(m_pPlugin->Info.szLibraryName, pFactory->szLibraryName, 64);
-			END_CRITICAL();
+
+			cs.Leave();
+
 			// Now, create the new plugin
 			if (pManager)
 			{
@@ -154,7 +156,7 @@ void CSelectPluginDlg::OnOK()
 	} else
 		// No effect
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		if (pCurrentPlugin)
 		{
 			pCurrentPlugin->Release();
@@ -169,7 +171,6 @@ void CSelectPluginDlg::OnOK()
 		m_pPlugin->pPluginData = NULL;
 		// Clear plugin info
 		MemsetZero(m_pPlugin->Info);
-		END_CRITICAL();
 	}
 
 	//remember window size:

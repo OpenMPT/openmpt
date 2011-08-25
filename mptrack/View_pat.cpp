@@ -2175,7 +2175,9 @@ void CViewPattern::PatternStep(bool autoStep)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		if ((!pSndFile->Patterns.IsValidPat(m_nPattern)) || (!pSndFile->Patterns[m_nPattern].GetNumRows())) return;
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
+
 		// Cut instruments/samples in virtual channels
 		for (CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
@@ -2185,7 +2187,9 @@ void CViewPattern::PatternStep(bool autoStep)
 		pSndFile->m_nNextRow = GetCurrentRow();
 		pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
 		pSndFile->m_dwSongFlags |= SONG_STEP;
-		END_CRITICAL();
+
+		cs.Leave();
+
 		if (pMainFrm->GetModPlaying() != pModDoc)
 		{
 			pMainFrm->PlayMod(pModDoc, m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
@@ -2636,9 +2640,9 @@ void CViewPattern::OnDropSelection()
 		}
 	}
 	
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	pSndFile->Patterns[m_nPattern] = pNewPattern;
-	END_CRITICAL();
+	cs.Leave();
 
 
 	x1 += dx;

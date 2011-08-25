@@ -115,6 +115,7 @@ public:
 	long GetCurrentProgram();
 	long GetNumProgramCategories();	//rewbs.VSTpresets
 	bool GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
+	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false);
 	bool LoadProgram(CString fileName);
 	bool SaveProgram(CString fileName);
 	VstInt32 GetUID();			//rewbs.VSTpresets
@@ -129,7 +130,7 @@ public:
 	UINT GetSlot();
 	void UpdateMixStructPtr(PSNDMIXPLUGIN);
 
-	VOID SetCurrentProgram(UINT nIndex);
+	void SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:
 // -> CODE#0002
 // -> DESC="VST plugins presets"
@@ -138,13 +139,13 @@ public:
 	//BOOL LoadPreset(LPCSTR lpszFileName);
 // -! NEW_FEATURE#0002
 	PlugParamValue GetParameter(PlugParamIndex nIndex);
-	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
-	VOID GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize);
-	VOID GetParamLabel(UINT nIndex, LPSTR pszLabel);
-	VOID GetParamDisplay(UINT nIndex, LPSTR pszDisplay);
+	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
+	void GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize);
+	void GetParamLabel(UINT nIndex, LPSTR pszLabel);
+	void GetParamDisplay(UINT nIndex, LPSTR pszDisplay);
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	VOID ToggleEditor();
-	VOID GetPluginType(LPSTR pszType);
+	void ToggleEditor();
+	void GetPluginType(LPSTR pszType);
 	BOOL GetDefaultEffectName(LPSTR pszName);
 	UINT GetNumCommands();
 	BOOL GetCommandName(UINT index, LPSTR pszName);
@@ -204,20 +205,21 @@ private:
 #else // case: NO_VST
 public:
 	PlugParamIndex GetNumParameters() {return 0;}
-	VOID GetParamName(UINT, LPSTR, UINT) {}
+	void GetParamName(UINT, LPSTR, UINT) {}
 	void ToggleEditor() {}
 	BOOL HasEditor() {return FALSE;}
 	UINT GetNumCommands() {return 0;}
-	VOID GetPluginType(LPSTR) {}
+	void GetPluginType(LPSTR) {}
 	PlugParamIndex GetNumPrograms() {return 0;}
 	bool GetProgramNameIndexed(long, long, char*) {return false;}
-	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
-	VOID GetParamLabel(UINT, LPSTR) {}
-	VOID GetParamDisplay(UINT, LPSTR) {}
+	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false) { return "" };
+	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
+	void GetParamLabel(UINT, LPSTR) {}
+	void GetParamDisplay(UINT, LPSTR) {}
 	PlugParamValue GetParameter(PlugParamIndex nIndex) {return 0;}
 	bool LoadProgram(CString) {return false;}
 	bool SaveProgram(CString) {return false;}
-	VOID SetCurrentProgram(UINT) {}
+	void SetCurrentProgram(UINT) {}
 	BOOL ExecuteCommand(UINT) {return FALSE;}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}
@@ -245,11 +247,11 @@ public:
 	PVSTPLUGINLIB AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
 	BOOL RemovePlugin(PVSTPLUGINLIB);
 	BOOL CreateMixPlugin(PSNDMIXPLUGIN, CSoundFile*);
-	VOID OnIdle();
+	void OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
 
 protected:
-	VOID EnumerateDirectXDMOs();
+	void EnumerateDirectXDMOs();
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
@@ -267,7 +269,7 @@ public:
 public:
 	PVSTPLUGINLIB AddPlugin(LPCSTR, BOOL =TRUE, const bool = false, CString* const = 0) {return 0;}
 	PVSTPLUGINLIB GetFirstPlugin() const { return 0; }
-	VOID OnIdle() {}
+	void OnIdle() {}
 #endif // NO_VST
 };
 

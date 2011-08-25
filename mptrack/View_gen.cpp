@@ -1383,11 +1383,11 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 
 	BeginWaitCursor();
 	
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 		
 	// Move plug data
 	memcpy(&(pSndFile->m_MixPlugins[dest]), &(pSndFile->m_MixPlugins[src]), sizeof(SNDMIXPLUGIN));
-	memset(&(pSndFile->m_MixPlugins[src]), 0, sizeof(SNDMIXPLUGIN));
+	MemsetZero(pSndFile->m_MixPlugins[src]);
 	
 	//Prevent plug from pointing backwards.
 	if (pSndFile->m_MixPlugins[dest].Info.dwOutputRouting & 0x80) {
@@ -1429,7 +1429,7 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	if (bAdjustPat && pSndFile->GetType() == MOD_TYPE_MPT)
 		pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(src + 1, src + 1, int(dest) - int(src)));
 
-	END_CRITICAL();
+	cs.Leave();
 
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
@@ -1448,8 +1448,10 @@ void CViewGlobals::BuildEmptySlotList(CArray<UINT, UINT> &emptySlots)
 	
 	emptySlots.RemoveAll();
 
-	for (UINT nSlot=0; nSlot<MAX_MIXPLUGINS; nSlot++) {
-		if (pSndFile->m_MixPlugins[nSlot].pMixPlugin == NULL) {
+	for (UINT nSlot=0; nSlot<MAX_MIXPLUGINS; nSlot++)
+	{
+		if (pSndFile->m_MixPlugins[nSlot].pMixPlugin == nullptr)
+		{
 			emptySlots.Add(nSlot);	
 		}
 	}
@@ -1463,13 +1465,16 @@ void CViewGlobals::OnInsertSlot()
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin+1);
-	if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin) {
+	if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin)
+	{
 		prompt.Append("\nWarning: plugin data in last slot will be lost."); 
 	}
-	if (AfxMessageBox(prompt, MB_YESNO) == IDYES) {
+	if (AfxMessageBox(prompt, MB_YESNO) == IDYES)
+	{
 
 		//Delete last plug...
-		if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin) {
+		if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin)
+		{
 			pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin->Release();
 			memset(&(pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1]), 0, sizeof(SNDMIXPLUGIN));
 			//possible mem leak here...
@@ -1480,8 +1485,10 @@ void CViewGlobals::OnInsertSlot()
 			pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
 
 
-		for (PLUGINDEX nSlot = MAX_MIXPLUGINS-1; nSlot > m_nCurrentPlugin; nSlot--) {
-			if (pSndFile->m_MixPlugins[nSlot-1].pMixPlugin) {
+		for (PLUGINDEX nSlot = MAX_MIXPLUGINS-1; nSlot > m_nCurrentPlugin; nSlot--)
+		{
+			if (pSndFile->m_MixPlugins[nSlot-1].pMixPlugin)
+			{
 				MovePlug(nSlot-1, nSlot, NoPatternAdjust);
 			}
 		}
@@ -1519,32 +1526,13 @@ void CViewGlobals::OnFillProgramCombo()
 	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
 	if(pVstPlugin == nullptr) return;
 
-	CHAR sname[64];
-	CHAR s2[128];
 	UINT nProg = pVstPlugin->GetNumPrograms(); 
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
-	wsprintf(s2, _T("current"));
-	m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
+	m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
 	for (UINT i = 0; i < nProg; i++)
 	{
-		if(!pVstPlugin->GetProgramNameIndexed(i, 0, sname))
-		{
-			strcpy(sname, "");
-		}
-		StringFixer::SetNullTerminator(sname);
-
-		if(sname[0] < ' ')
-		{
-			wsprintf(s2, "%02X - Program %d", i, i);
-		} else
-		{
-			size_t k = 0;
-			while(k < ARRAYELEMCOUNT(sname) - 1 && sname[k] <= ' ') k++;
-			wsprintf(s2, "%02X - %s",i,&sname[k]);
-		}
-
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), i+1);
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i + 1);
 	}
 	m_nCurrentPreset = 0;
 	m_CbnPreset.SetRedraw(TRUE);

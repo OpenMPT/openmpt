@@ -174,7 +174,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 		}
 	}
 
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	for(PATTERNINDEX nPat = 0; nPat <= highestPattern; nPat++) 
 	{
 		if(m_SndFile.Patterns.IsValidPat(nPat))
@@ -189,7 +189,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[nPat].GetNumRows(), nRemainingChannels);
 			if(!newp)
 			{
-				END_CRITICAL();
+				cs.Leave();
 				CMainFrame::GetMainFrame()->MessageBox("ERROR: Pattern allocation failed in ReArrangechannels(...)" , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
 				return CHANNELINDEX_INVALID;
 			}
@@ -251,8 +251,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 		m_SndFile.InitChannel(nChn);
 		m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
 	}
-
-	END_CRITICAL();
 
 	return GetNumChannels();
 }
@@ -348,7 +346,6 @@ bool CModDoc::ConvertInstrumentsToSamples()
 	m_SndFile.Patterns.ForEachModCommand(ConvertInstrumentsToSamplesInPatterns(&m_SndFile));
 	return true;
 }
-
 
 
 UINT CModDoc::RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS])
@@ -566,7 +563,8 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 				if (inssmp != SAMPLEINDEX_INVALID) newsmp = inssmp;
 			}
 		}
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
 		if (pDup)
 		{
 			*pIns = *pDup;
@@ -580,7 +578,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 			InitializeInstrument(pIns, newsmp);
 		}
 		m_SndFile.Instruments[newins] = pIns;
-		END_CRITICAL();
+
 		SetModified();
 	} else
 	{
@@ -617,7 +615,8 @@ bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 	if (nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order.GetSequence(nSeq).size())
 		return false;
 
-	BEGIN_CRITICAL();
+	CriticalSection cs;
+
 	SEQUENCEINDEX nOldSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 	m_SndFile.Order.SetSequence(nSeq);
 	for (ORDERINDEX i = nOrd; i < m_SndFile.Order.GetSequence(nSeq).size() - 1; i++)
@@ -626,8 +625,8 @@ bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 	}
 	m_SndFile.Order[m_SndFile.Order.GetLastIndex()] = m_SndFile.Order.GetInvalidPatIndex();
 	m_SndFile.Order.SetSequence(nOldSeq);
-	END_CRITICAL();
 	SetModified();
+
 	return true;
 }
 
@@ -638,10 +637,11 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 {
 	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat]))
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
+
 		m_SndFile.Patterns.Remove(nPat);
-		END_CRITICAL();
 		SetModified();
+
 		return true;
 	}
 	return false;
@@ -653,7 +653,8 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 {
 	if ((nSmp) && (nSmp <= m_SndFile.GetNumSamples()))
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
+
 		m_SndFile.DestroySample(nSmp);
 		m_SndFile.m_szNames[nSmp][0] = 0;
 		while ((m_SndFile.GetNumSamples() > 1)
@@ -662,8 +663,8 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 		{
 			m_SndFile.m_nSamples--;
 		}
-		END_CRITICAL();
 		SetModified();
+
 		return true;
 	}
 	return false;
@@ -676,13 +677,14 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
 		bool instrumentsLeft = false;
-		BEGIN_CRITICAL();
+		CriticalSection cs;
+
 		m_SndFile.DestroyInstrument(nIns);
 		if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
 		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) instrumentsLeft = true;
 		if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;
-		END_CRITICAL();
 		SetModified();
+
 		return true;
 	}
 	return false;

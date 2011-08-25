@@ -501,12 +501,11 @@ void CMainFrame::OnClose()
 	if (pMDIActive) pMDIActive->SavePosition(TRUE);
 	if (gpSoundDevice)
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		//gpSoundDevice->Reset();
 		//audioCloseDevice();
 		gpSoundDevice->Release();
 		gpSoundDevice = NULL;
-		END_CRITICAL();
 	}
 	// Save Settings
 	RemoveControlBar(&m_wndStatusBar); //Remove statusbar so that its state won't get saved.
@@ -680,7 +679,7 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	BOOL bOk = FALSE;
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	if (gbStopSent) return FALSE;
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
 	{
 		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
@@ -693,7 +692,6 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 		gbStopSent = TRUE;
 		pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 	}
-	END_CRITICAL();
 	return bOk;
 }
 
@@ -743,7 +741,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 		}
 		bWait = TRUE;
 		pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		if ((!gbStopSent) && (pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
 		{
 			if (!CMainFrame::gpSoundDevice->Directcallback())
@@ -767,7 +765,6 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 				nSleep = 50;
 			}
 		}
-        END_CRITICAL();
 	}
 
 // -> CODE#0021
@@ -978,13 +975,12 @@ BOOL CMainFrame::audioOpenDevice()
 void CMainFrame::audioCloseDevice()
 //---------------------------------
 {
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	if (gpSoundDevice)
 	{
 		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
     }
-	END_CRITICAL();
 }
 
 
@@ -1374,9 +1370,10 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		if (gpSoundDevice) gpSoundDevice->Reset();
 		audioCloseDevice();
 
-		BEGIN_CRITICAL();
-		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
-		END_CRITICAL();
+		{
+			CriticalSection cs;
+			m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
+		}
 
 		m_nMixChn = m_nAvgMixChn = 0;
 		Sleep(1);
@@ -1665,9 +1662,10 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 		GetSettings().m_nBufferLength = bufsize;
 		GetSettings().m_nBitsPerSample = nBits;
 		GetSettings().m_nChannels = nChns;
-		BEGIN_CRITICAL();
-		UpdateAudioParameters(FALSE);
-		END_CRITICAL();
+		{
+			CriticalSection cs;
+			UpdateAudioParameters(FALSE);
+		}
 		if (pActiveMod) PlayMod(pActiveMod, hFollow, m_dwNotifyType);
 		UpdateWindow();
 	} else
@@ -1691,11 +1689,12 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 	{
 		GetSettings().m_nSrcMode = srcmode;
 		GetSettings().m_dwQuality = q;
-		BEGIN_CRITICAL();
-		CSoundFile::SetResamplingMode(GetSettings().m_nSrcMode);
-		CSoundFile::UPDATEDSPEFFECTS();
-		CSoundFile::SetAGC(GetSettings().m_dwQuality & QUALITY_AGC);
-		END_CRITICAL();
+		{
+			CriticalSection cs;
+			CSoundFile::SetResamplingMode(GetSettings().m_nSrcMode);
+			CSoundFile::UPDATEDSPEFFECTS();
+			CSoundFile::SetAGC(GetSettings().m_dwQuality & QUALITY_AGC);
+		}
 		PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTSETUP);
 	}
 	return TRUE;
@@ -2459,11 +2458,10 @@ double CMainFrame::GetApproxBPM()
 BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------
 {
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	pSndFile->m_bIsRendering=true;
 	pSndFile->SuspendPlugins();
 	pSndFile->ResumePlugins();
-	END_CRITICAL();
 	m_dwStatus |= MODSTATUS_RENDERING;
 	m_pModPlaying = GetActiveDoc();
 	return true;
@@ -2472,12 +2470,11 @@ BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------
 {
+	CriticalSection cs;
 	m_dwStatus &= ~MODSTATUS_RENDERING;
 	m_pModPlaying = NULL;
-	BEGIN_CRITICAL();
 	pSndFile->SuspendPlugins();
 	pSndFile->m_bIsRendering=false;
-	END_CRITICAL();
 	return true;
 }
 //end rewbs.VSTTimeInfo

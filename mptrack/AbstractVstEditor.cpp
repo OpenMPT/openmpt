@@ -13,25 +13,6 @@
 
 #ifndef NO_VST
 
-static void CreateVerifiedProgramName(const char* rawname, const size_t rnSize,
-									  char* name, const size_t nSize,
-									  const long p)
-//-----------------------------------------------------------------------------
-{
-	if(rawname[0] < 32) 
-	{
-		wsprintf(name, "%02d - Program %d",p,p);
-	} 
-	else 
-	{
-		size_t k=0;
-		while(k < rnSize-1 && rawname[k] != 0 && rawname[k] <= ' ' && k<255) k++;
-		wsprintf(name, "%02d - %s", p, &rawname[k]);
-	}
-	name[nSize-1] = 0;
-}
-
-
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
@@ -96,8 +77,10 @@ CAbstractVstEditor::~CAbstractVstEditor()
 		delete m_pMacroMenu;
 		delete m_pOptionsMenu;
 
-		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++) {
-			if (m_pPresetMenuGroup[i]->m_hMenu) {
+		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++)
+		{
+			if (m_pPresetMenuGroup[i]->m_hMenu)
+			{
 				m_pPresetMenuGroup[i]->DestroyMenu();
 				delete m_pPresetMenuGroup[i];
 			}
@@ -191,21 +174,8 @@ void CAbstractVstEditor::UpdatePresetField()
 			m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, TEXT(">>"));
 			m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
 		}
-		long index = m_pVstPlugin->GetCurrentProgram();
-		char name[266];
-		char rawname[256];
-		if(!m_pVstPlugin->GetProgramNameIndexed(index, -1, rawname))
-		{
-			// Fallback: Try to get current program name.
-			if(m_pVstPlugin->Dispatch(effGetProgramName, 0, 0, rawname, 0) != 1)
-			{
-				strcpy(rawname, "");
-			}
-		}
-		StringFixer::SetNullTerminator(rawname);
-		CreateVerifiedProgramName(rawname, CountOf(rawname), name, CountOf(name), index);
 
-		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
+		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, m_pVstPlugin->GetFormattedProgramName(m_pVstPlugin->GetCurrentProgram(), true));
 	}
 	
 	DrawMenuBar();
@@ -229,7 +199,8 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 void CAbstractVstEditor::OnBypassPlug()
 //-------------------------------------
 {
-	if (m_pVstPlugin) {
+	if (m_pVstPlugin)
+	{
 		m_pVstPlugin->Bypass();
 	}
 }
@@ -237,7 +208,8 @@ void CAbstractVstEditor::OnBypassPlug()
 void CAbstractVstEditor::OnRecordAutomation()
 //-------------------------------------------
 {
-	if (m_pVstPlugin) {
+	if (m_pVstPlugin)
+	{
 		m_pVstPlugin->m_bRecordAutomation = !m_pVstPlugin->m_bRecordAutomation;
 	}
 }
@@ -409,18 +381,17 @@ void CAbstractVstEditor::UpdatePresetMenu()
 {
 	long numProgs = m_pVstPlugin->GetNumPrograms();
 	long curProg  = m_pVstPlugin->GetCurrentProgram();
-	char s[266];
-	char sname[256];
-
-	
 
 	if (m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
 	{												// So remove any exiting menus...	
 		if (curProg == m_nCurProg)					//.. unless menu exists and is accurate,	
 			return;									//in which case we are done.
 
-		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++) {	//Destroy any submenus
-			if (m_pPresetMenuGroup[i]->m_hMenu) {
+		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++)
+		{
+			//Destroy any submenus
+			if (m_pPresetMenuGroup[i]->m_hMenu)
+			{
 				m_pPresetMenuGroup[i]->DestroyMenu();
 				delete m_pPresetMenuGroup[i];
 			}
@@ -432,49 +403,51 @@ void CAbstractVstEditor::UpdatePresetMenu()
 		m_pMenu->DeleteMenu(1, MF_BYPOSITION);
 
 	}
-	if (!m_pPresetMenu->m_hMenu) {					// Create Factory preset menu
+	if (!m_pPresetMenu->m_hMenu)
+	{
+		// Create Factory preset menu
 		m_pPresetMenu->CreatePopupMenu();
 	}
 
-	for (long p=0; p<numProgs; p++) {
-		if(!m_pVstPlugin->GetProgramNameIndexed(p, -1, sname))
-		{
-			strcpy(sname, "");
-		}
-		StringFixer::SetNullTerminator(sname);
-
-		CreateVerifiedProgramName(sname, sizeof(sname), s, sizeof(s), p);
+	for (long p = 0; p < numProgs; p++)
+	{
+		CString programName = m_pVstPlugin->GetFormattedProgramName(p);
 
 		// Get menu item properties
- 		bool checkedItem = (p==curProg);			
-		bool splitMenu   = (p%PRESETS_PER_COLUMN==0 && p%PRESETS_PER_GROUP!=0);
-		int subMenuIndex = p/PRESETS_PER_GROUP;
+ 		const bool checkedItem = (p == curProg);			
+		const bool splitMenu   = (p % PRESETS_PER_COLUMN == 0 && p % PRESETS_PER_GROUP != 0);
+		const int subMenuIndex = p / PRESETS_PER_GROUP;
 		
-		if (numProgs>PRESETS_PER_GROUP) { // If necessary, add to appropriate submenu.
-			if (subMenuIndex >= m_pPresetMenuGroup.GetSize()) {	//create new submenu if required.
-				m_pPresetMenuGroup.SetSize(m_pPresetMenuGroup.GetSize()+1);
+		if (numProgs > PRESETS_PER_GROUP)
+		{
+			// If necessary, add to appropriate submenu.
+			if (subMenuIndex >= m_pPresetMenuGroup.GetSize())
+			{
+				//create new submenu if required.
+				m_pPresetMenuGroup.SetSize(m_pPresetMenuGroup.GetSize() + 1);
 				m_pPresetMenuGroup[subMenuIndex] = new CMenu();
 				m_pPresetMenuGroup[subMenuIndex]->CreatePopupMenu();
 
 				CString label;
-				label.Format("Presets %d-%d", subMenuIndex*PRESETS_PER_GROUP, min((subMenuIndex+1)*PRESETS_PER_GROUP-1, numProgs));
+				label.Format("Bank %d (%d-%d)", subMenuIndex, 1 + subMenuIndex * PRESETS_PER_GROUP, 1 + min((subMenuIndex + 1) * PRESETS_PER_GROUP - 1, numProgs));
 				m_pPresetMenu->AppendMenu(MF_POPUP, (UINT) m_pPresetMenuGroup[subMenuIndex]->m_hMenu, label);
 			}
-			m_pPresetMenuGroup[subMenuIndex]->AppendMenu(MF_STRING|(checkedItem?MF_CHECKED:0)|(splitMenu?MF_MENUBARBREAK:0), ID_PRESET_SET+p, (LPCTSTR)s);
-		} 
-		else {							  // If there would only be 1 submenu, we add directly to factory menu
-			m_pPresetMenu->AppendMenu(MF_STRING|(checkedItem?MF_CHECKED:0)|(splitMenu?MF_MENUBARBREAK:0), ID_PRESET_SET+p, (LPCTSTR)s);
+			m_pPresetMenuGroup[subMenuIndex]->AppendMenu(MF_STRING | (checkedItem ? MF_CHECKED : 0) | (splitMenu ? MF_MENUBARBREAK : 0), ID_PRESET_SET + p, programName);
+
+		} else
+		{
+			// If there would only be 1 submenu, we add directly to factory menu
+			m_pPresetMenu->AppendMenu(MF_STRING | (checkedItem ? MF_CHECKED : MF_UNCHECKED) | (splitMenu ? MF_MENUBARBREAK : 0), ID_PRESET_SET + p, programName);
 		}
 	}
 
-	for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++) {
-	}
-
 	//Add Factory menu to main menu
-	if (numProgs) {
-		m_pMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
-	} else {
-		m_pMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP|MF_GRAYED, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
+	if (numProgs)
+	{
+		m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
+	} else
+	{
+		m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP | MF_GRAYED, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
 	}
 
 	m_nCurProg=curProg;
