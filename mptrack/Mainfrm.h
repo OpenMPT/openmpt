@@ -385,8 +385,6 @@ typedef struct _EQPRESET
 								GetSettings().m_dwQuality & QUALITY_MEGABASS,\
 								GetSettings().m_dwQuality & QUALITY_NOISEREDUCTION,\
 								GetSettings().m_dwQuality & QUALITY_EQ)
-#define BEGIN_CRITICAL()		EnterCriticalSection(&CMainFrame::m_csAudio)
-#define END_CRITICAL()			LeaveCriticalSection(&CMainFrame::m_csAudio)
 
 #include "mainbar.h"
 #include "TrackerSettings.h"
@@ -663,6 +661,22 @@ public:
 	static std::vector<CString> s_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.
 	static std::vector<CString> s_TemplateModulePaths;
+};
+
+// Critical section handling done in (safe) RAII style.
+// Create a CriticalSection object whenever you need exclusive access CSoundFile.
+// One object = one lock.
+// The critical section is automatically left when the object is destroyed, but
+// Enter() and Leave() can also be called manually if needed.
+class CriticalSection
+{
+protected:
+	bool inSection;
+public:
+	CriticalSection() { inSection = false; Enter(); };
+	~CriticalSection() { Leave(); };
+	void Enter() { if(!inSection) { inSection = true; EnterCriticalSection(&CMainFrame::m_csAudio); } };
+	void Leave() { if(inSection) { inSection = false; LeaveCriticalSection(&CMainFrame::m_csAudio); } };
 };
 
 const CHAR gszBuildDate[] = __DATE__ " " __TIME__;

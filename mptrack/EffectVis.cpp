@@ -131,18 +131,16 @@ void CEffectVis::SetParamFromY(UINT row, long y)
 	if (IsPcNote(row))
 	{
 		uint16 param = ScreenYToPCParam(y);
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		pcmd[offset].SetValueEffectCol(param);
-		END_CRITICAL();
 	}
 	else
 	{		
 		int param = ScreenYToFXParam(y);
 		// Cap the parameter value as appropriate, based on effect type (e.g. Zxx gets capped to [0x00,0x7F])
 		m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(pcmd[offset].command, param), param);
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		pcmd[offset].param = static_cast<BYTE>(param);
-		END_CRITICAL();
 	}	
 }
 
@@ -159,8 +157,9 @@ BYTE CEffectVis::GetCommand(UINT row)
 void CEffectVis::SetCommand(UINT row, BYTE command)
 {
 	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
-	BEGIN_CRITICAL();
-	if (pcmd) {
+	if (pcmd)
+	{
+		CriticalSection cs;
 		int offset = row*m_pSndFile->m_nChannels + m_nChan;
 		if (pcmd[offset].IsPcNote()) {
 			// Clear PC note
@@ -171,7 +170,6 @@ void CEffectVis::SetCommand(UINT row, BYTE command)
 		}
 		pcmd[offset].command = command;
 	}
-	END_CRITICAL();
 }
 
 int CEffectVis::RowToScreenX(UINT row)
@@ -893,17 +891,16 @@ void CEffectVis::SetPcNote(int row)
 		return;
 	}
 
-	int offset = row*m_pSndFile->m_nChannels + m_nChan;
-	BEGIN_CRITICAL();
+	int offset = row * m_pSndFile->GetNumChannels() + m_nChan;
+	CriticalSection cs;
 	pcmd[offset].Set(m_templatePCNote.note, m_templatePCNote.instr, m_templatePCNote.GetValueVolCol(), 0);
-	END_CRITICAL();
 }
 
 bool CEffectVis::IsPcNote(int row)
 {
 	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (pcmd)
-		return pcmd[row*m_pSndFile->m_nChannels + m_nChan].IsPcNote();
+		return pcmd[row * m_pSndFile->GetNumChannels() + m_nChan].IsPcNote();
 	else
 		return false;
 }

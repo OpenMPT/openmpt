@@ -2042,9 +2042,8 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 				bCanDrop = FALSE;
 				if (pDlsIns)
 				{
-					BEGIN_CRITICAL();
+					CriticalSection cs;
 					bCanDrop = dlsbank.ExtractInstrument(pSndFile, m_nInstrument, nIns, nRgn);
-					END_CRITICAL();
 				}
 				bUpdate = TRUE;
 				break;
@@ -2069,9 +2068,10 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 			{
 				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
 			}
-			BEGIN_CRITICAL();
+
+			CriticalSection cs;
+
 			bCanDrop = pDLSBank->ExtractInstrument(pSndFile, m_nInstrument, nIns, nRgn);
-			END_CRITICAL();
 			bUpdate = TRUE;
 		}
 		break;

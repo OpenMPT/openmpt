@@ -300,7 +300,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 			bool bIsPlaying = (pMainFrm->GetModPlaying() == m_pModDoc);
 			if ((bIsPlaying) && (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP))
 			{
-				BEGIN_CRITICAL();
+				CriticalSection cs;
 				// update channel parameters and play time
 				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 
@@ -308,10 +308,11 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = m_nScrollPos;
 				pMainFrm->ResetNotificationBuffer(); //rewbs.toCheck
 				pSndFile->m_nNextRow = 0;
-				END_CRITICAL();
+
 			} else if (m_pParent->GetFollowSong())
 			{
-				BEGIN_CRITICAL();
+				CriticalSection cs;
+
 				DWORD dwPaused = pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP|SONG_PATTERNLOOP);
 
 				//if (!(dwPaused & SONG_PATTERNLOOP))	// why?
@@ -322,7 +323,6 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
-				END_CRITICAL();
 			}
 			m_pParent->SetCurrentPattern(n);
 		}
@@ -1390,7 +1390,8 @@ BYTE COrderList::SetMargins(int i)
 void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 //-------------------------------------------------------
 {
-	BEGIN_CRITICAL();
+	CriticalSection cs;
+
 	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
 	CSoundFile& rSf = *m_pModDoc->GetSoundFile();
 	if (nSeq == MAX_SEQUENCES + 2)
@@ -1402,7 +1403,6 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 			rSf.Order.RemoveSequence();
 		else
 		{
-			END_CRITICAL();
 			return;
 		}
 	}
@@ -1416,7 +1416,9 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 		m_pParent->SetCurrentPattern(rSf.Order[m_nScrollPos]);
 
 	UpdateScrollInfo();
-	END_CRITICAL();
+
+	cs.Leave();
+
 	UpdateView(HINT_MODSEQUENCE);
 	m_pModDoc->SetModified();
 	m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);

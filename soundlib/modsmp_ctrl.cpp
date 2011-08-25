@@ -26,13 +26,13 @@ void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample, const SmpLength nNewL
 	else
 		dwAndFlags &= ~CHN_STEREO;
 
-	BEGIN_CRITICAL();
-		if (pSndFile != nullptr)
-			ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength, dwOrFlags, dwAndFlags);
-		smp.pSample = pNewSample;
-		smp.nLength = nNewLength;
-		CSoundFile::FreeSample(pOldSmp);	
-	END_CRITICAL();	
+	CriticalSection cs;
+
+	if (pSndFile != nullptr)
+		ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength, dwOrFlags, dwAndFlags);
+	smp.pSample = pNewSample;
+	smp.nLength = nNewLength;
+	CSoundFile::FreeSample(pOldSmp);	
 }
 
 
@@ -177,7 +177,7 @@ bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile)
 	if ((!pSmp->nLength) || (!pSmp->pSample)) 
 		return false;
 
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 
 	if (pSmp->GetElementarySampleSize() == 2)
 		AdjustEndOfSampleImpl<int16>(*pSmp);
@@ -214,7 +214,7 @@ bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile)
 			}
 		}
 	}
-	END_CRITICAL();
+
 	return true;
 }
 
@@ -368,7 +368,8 @@ float RemoveDCOffset(MODSAMPLE& smp,
 	// step 3: adjust global vol (if available)
 	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == pSmp->nLength * pSmp->GetNumChannels()))
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
+
 		pSmp->nGlobalVol = min((WORD)(pSmp->nGlobalVol / dAmplify), 64);
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
@@ -377,7 +378,6 @@ float RemoveDCOffset(MODSAMPLE& smp,
 				pSndFile->Chn[i].nGlobalVol = pSmp->nGlobalVol;
 			}
 		}
-		END_CRITICAL();
 	}
 
 	AdjustEndOfSample(smp, pSndFile);
@@ -557,7 +557,7 @@ bool ConvertToMono(MODSAMPLE *pSmp, CSoundFile *pSndFile)
 	else
 		return false;
 
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	pSmp->uFlags &= ~(CHN_STEREO);
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
@@ -566,7 +566,6 @@ bool ConvertToMono(MODSAMPLE *pSmp, CSoundFile *pSndFile)
 			pSndFile->Chn[i].dwFlags &= ~CHN_STEREO;
 		}
 	}
-	END_CRITICAL();
 
 	AdjustEndOfSample(*pSmp, pSndFile);
 	return true;

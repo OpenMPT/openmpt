@@ -1402,32 +1402,35 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	if (len > CTrackApp::gMemStatus.dwTotalPhys) len = CTrackApp::gMemStatus.dwTotalPhys;
 	lpFile = f.Lock(len);
 	bOk = FALSE;
-	if (!lpFile) goto OpenError;
-	BEGIN_CRITICAL();
-	if (!m_pSndFile->m_nInstruments)
+	if (lpFile)
 	{
-		bFirst = TRUE;
-		m_pSndFile->m_nInstruments = 1;
-		m_NoteMap.SetCurrentInstrument(m_pModDoc, 1);
-		m_pModDoc->SetModified();
+		CriticalSection cs;
+
+		if (!m_pSndFile->GetNumInstruments())
+		{
+			bFirst = TRUE;
+			m_pSndFile->m_nInstruments = 1;
+			m_NoteMap.SetCurrentInstrument(m_pModDoc, 1);
+			m_pModDoc->SetModified();
+		}
+		if (!m_nInstrument) m_nInstrument = 1;
+		if (m_pSndFile->ReadInstrumentFromFile(m_nInstrument, lpFile, len))
+		{
+			m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
+			// -> CODE#0023
+			// -> DESC="IT project files (.itp)"
+			int n = strlen(lpszFileName);
+			if(n >= _MAX_PATH) n = _MAX_PATH-1;
+			strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1],lpszFileName,n);
+			m_pSndFile->m_szInstrumentPath[m_nInstrument-1][n] = '\0';
+			SetInstrumentModified(false);
+			// -! NEW_FEATURE#0023
+			bOk = TRUE;
+		}
+
+		f.Unlock();
 	}
-	if (!m_nInstrument) m_nInstrument = 1;
-	if (m_pSndFile->ReadInstrumentFromFile(m_nInstrument, lpFile, len))
-	{
-		m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-		int n = strlen(lpszFileName);
-		if(n >= _MAX_PATH) n = _MAX_PATH-1;
-		strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1],lpszFileName,n);
-		m_pSndFile->m_szInstrumentPath[m_nInstrument-1][n] = '\0';
-		SetInstrumentModified(false);
-// -! NEW_FEATURE#0023
-		bOk = TRUE;
-	}
-	END_CRITICAL();
-	f.Unlock();
-OpenError:
+
 	f.Close();
 	EndWaitCursor();
 	if (bOk)
@@ -1471,7 +1474,9 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile *pSndFile, UINT nInstr)
 {
 	if ((!pSndFile) || (!nInstr) || (nInstr > pSndFile->m_nInstruments)) return FALSE;
 	BeginWaitCursor();
-	BEGIN_CRITICAL();
+
+	CriticalSection cs;
+
 	BOOL bFirst = FALSE;
 	if (!m_pSndFile->m_nInstruments)
 	{
@@ -1487,7 +1492,9 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile *pSndFile, UINT nInstr)
 		bFirst = TRUE;
 	}
 	m_pSndFile->ReadInstrumentFromSong(m_nInstrument, pSndFile, nInstr);
-	END_CRITICAL();
+
+	cs.Leave();
+
 	m_pModDoc->SetModified();
 	m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
 	if (bFirst) m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
@@ -2536,9 +2543,10 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	size_t sel = m_ComboTuning.GetCurSel();
 	if(sel == 0) //Setting IT behavior
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		pInstH->SetTuning(NULL);
-		END_CRITICAL();
+		cs.Leave();
+
 		m_pModDoc->SetModified();
 		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 		return;
@@ -2564,9 +2572,10 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 
 	if(tc)
 	{
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		pInstH->SetTuning(&tc->GetTuning(sel));
-		END_CRITICAL();
+		cs.Leave();
+
 		m_pModDoc->SetModified();
 		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 		return;
@@ -2642,9 +2651,10 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	CString str;
 	str.Format(TEXT("Tuning %s was not found. Setting to default tuning."), m_pSndFile->Instruments[m_nInstrument]->pTuning->GetName().c_str());
 	MessageBox(str);
-	BEGIN_CRITICAL();
+
+	CriticalSection cs;
 	pIns->SetTuning(pIns->s_DefaultTuning);
-	END_CRITICAL();
+
 	m_pModDoc->SetModified();
 }
 
@@ -2663,9 +2673,9 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 	if(ptlTempo > MAXTEMPO)
 		ptlTempo = MAXTEMPO;
 	
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	m_pSndFile->Instruments[m_nInstrument]->wPitchToTempoLock = ptlTempo;
-	END_CRITICAL();
+
 	m_pModDoc->SetModified();
 }
 
@@ -2738,9 +2748,9 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 		if(m_pSndFile && m_nInstrument && m_pSndFile->Instruments[m_nInstrument] &&
 			m_pSndFile->Instruments[m_nInstrument]->wPitchToTempoLock > 0)
 		{
-			BEGIN_CRITICAL();
+			CriticalSection cs;
 			m_pSndFile->Instruments[m_nInstrument]->wPitchToTempoLock = 0;
-			END_CRITICAL();
+
 			m_pModDoc->SetModified();
 		}
 	}

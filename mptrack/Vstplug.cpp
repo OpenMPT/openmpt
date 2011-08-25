@@ -41,15 +41,15 @@ AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo
 AEffect *DmoToVst(PVSTPLUGINLIB pLib);
 
 #ifdef VST_USE_ALTERNATIVE_MAGIC
-UINT32 CalculateCRC32fromFilename(const char * s)
-//-----------------------------------------------
+UINT32 CalculateCRC32fromFilename(const char *s)
+//----------------------------------------------
 {
 	char fn[_MAX_PATH];
 	strncpy(fn, s, sizeof(fn));
 	fn[sizeof(fn)-1] = 0;
 	int f;
 	for(f = 0; fn[f] != 0; f++) fn[f] = toupper(fn[f]);
-	return crc32(0, (BYTE *)fn, f);
+	return LittleEndian(crc32(0, (BYTE *)fn, f));
 
 }
 #endif // VST_USE_ALTERNATIVE_MAGIC
@@ -120,7 +120,7 @@ BOOL CVstPluginManager::IsValidPlugin(const VSTPLUGINLIB *pLib)
 }
 
 
-VOID CVstPluginManager::EnumerateDirectXDMOs()
+void CVstPluginManager::EnumerateDirectXDMOs()
 //--------------------------------------------
 {
 	HKEY hkEnum;
@@ -311,7 +311,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			p->dwPluginId2 = 0;
 			p->bIsInstrument = FALSE;
 			p->pPluginsList = NULL;
-			lstrcpyn(p->szDllPath, pszDllPath, sizeof(p->szDllPath));
+			lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
 			_splitpath(pszDllPath, NULL, NULL, p->szLibraryName, NULL);
 			p->szLibraryName[63] = 0;
 			p->pNext = m_pVstHead;
@@ -386,25 +386,27 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			p->dwPluginId1 = kBuzzMagic;
 			p->dwPluginId2 = 0;
 			p->pPluginsList = NULL;
-			lstrcpyn(p->szDllPath, pszDllPath, sizeof(p->szDllPath));
+			lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
 			_splitpath(pszDllPath, NULL, NULL, p->szLibraryName, NULL);
 			p->szLibraryName[63] = 0;
 			p->pNext = m_pVstHead;
 			p->pPrev = NULL;
 			if (m_pVstHead) m_pVstHead->pPrev = p;
 			m_pVstHead = p;
-			try {
+			try
+			{
 				const CMachineInfo *pInfo = pBuzzGetInfo();
 				if (pInfo)
 				{
 					p->dwPluginId2 = pInfo->Version;
 					if (pInfo->Name)
 					{
-						lstrcpyn(p->szLibraryName, pInfo->Name, sizeof(p->szLibraryName));
+						lstrcpyn(p->szLibraryName, pInfo->Name, CountOf(p->szLibraryName));
 					}
 					bOk = TRUE;
 				}
-			} catch (...) {
+			} catch (...)
+			{
 				CVstPluginManager::ReportPlugException("Exception while trying to load buzz plugin \"%s\"!\n", p->szLibraryName);
 			}
 		} else
@@ -421,14 +423,14 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		//	CVstPluginManager::ReportPlugException("Exception in FreeLibrary(\"%s\")!\n", pszDllPath);
 		//}
 
-		return (bOk) ? m_pVstHead : NULL;
+		return (bOk) ? m_pVstHead : nullptr;
 	} else
 	{
 	#ifdef VST_LOG
 		Log("LoadLibrary(%s) failed!\n", pszDllPath);
 	#endif // VST_LOG
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -445,19 +447,21 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 			if (p->pPrev) p->pPrev->pNext = p->pNext;
 			if (p->pNext) p->pNext->pPrev = p->pPrev;
 			p->pPrev = p->pNext = NULL;
-			BEGIN_CRITICAL();
 
-			try {
+			try
+			{
+				CriticalSection cs;
+
 				while ((volatile void *)(p->pPluginsList) != NULL)
 				{
 					p->pPluginsList->Release();
 				}
 				delete p;
-			} catch (...) {
+			} catch (...)
+			{
 				CVstPluginManager::ReportPlugException("Exception while trying to release plugin \"%s\"!\n", pFactory->szLibraryName);
 			}
 
-			END_CRITICAL();
 			return TRUE;
 		}
 		p = p->pNext;
@@ -516,14 +520,15 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 		if ((pEffect) && (pEffect->dispatcher) && (pEffect->magic == kDmoMagic))
 		{
 			BOOL bOk = FALSE;
-			BEGIN_CRITICAL();
+
+			CriticalSection cs;
+
 			CVstPlugin *pVstPlug = new CVstPlugin(NULL, pFound, pMixPlugin, pEffect);
 			if (pVstPlug)
 			{
 				pVstPlug->Initialize(pSndFile);
 				bOk = TRUE;
 			}
-			END_CRITICAL();
 			return bOk;
 		}
 	}
@@ -555,9 +560,10 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 		HINSTANCE hLibrary = NULL;
 		BOOL bOk = FALSE;
 
-		BEGIN_CRITICAL();
-		
-		try {
+		try
+		{
+			CriticalSection cs;
+
 			hLibrary = LoadLibrary(pFound->szDllPath);
 			if (hLibrary != NULL)
 			{
@@ -614,11 +620,11 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 			#endif
 			}
 			if ((!bOk) && (hLibrary)) FreeLibrary(hLibrary);
-		} catch(...) {
+		} catch(...)
+		{
 			CVstPluginManager::ReportPlugException("Exception while trying to create plugin \"%s\"!\n", pFound->szLibraryName);
 		}
 
-		END_CRITICAL();
 		return bOk;
 	} else
 	{
@@ -631,7 +637,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 }
 
 
-VOID CVstPluginManager::OnIdle()
+void CVstPluginManager::OnIdle()
 //------------------------------
 {
 	PVSTPLUGINLIB pFactory = m_pVstHead;
@@ -648,7 +654,8 @@ VOID CVstPluginManager::OnIdle()
 					p->m_bNeedIdle=false;
 			}
 			//We need to update all open editors
-			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd)) {
+			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd))
+			{
 				p->m_pEditor->UpdateParamDisplays();
 			}
 			//end rewbs. VSTCompliance:
@@ -685,20 +692,22 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			
 			//Mark track modified
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
-			if (pModDoc) {
+			if (pModDoc)
+			{
 				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 				if (pVstEditor && pVstEditor->m_hWnd)	// Check GUI is open
 				{
 					if(pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->GetModSpecifications().supportsPlugins)
 						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 				}
-				// Could be used to update general tab in real time, but causes flickers in treeview
+				// TODO: Could be used to update general tab in real time, but causes flickers in treeview
 				// Better idea: add an update hint just for plugin params?
 				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
 			}
 
 			//Record param change
-			if (pVstPlugin->m_bRecordAutomation) {
+			if (pVstPlugin->m_bRecordAutomation)
+			{
 				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);
 			}
 
@@ -1560,7 +1569,7 @@ int CVstPlugin::Release()
 }
 
 
-VOID CVstPlugin::GetPluginType(LPSTR pszType)
+void CVstPlugin::GetPluginType(LPSTR pszType)
 //-------------------------------------------
 {
 	pszType[0] = 0;
@@ -1771,6 +1780,7 @@ long CVstPlugin::GetCurrentProgram()
 	return 0;
 }
 
+
 bool CVstPlugin::GetProgramNameIndexed(long index, long category, char *text)
 //---------------------------------------------------------------------------
 {
@@ -1782,7 +1792,38 @@ bool CVstPlugin::GetProgramNameIndexed(long index, long category, char *text)
 }
 
 
-VOID CVstPlugin::SetCurrentProgram(UINT nIndex)
+CString CVstPlugin::GetFormattedProgramName(VstInt32 index, bool allowFallback)
+//-----------------------------------------------------------------------------
+{
+	char rawname[256];	// kVstMaxProgNameLen is 24...
+	if(!GetProgramNameIndexed(index, -1, rawname))
+	{
+		// Fallback: Try to get current program name.
+		if(!allowFallback || Dispatch(effGetProgramName, 0, 0, rawname, 0) != 1)
+		{
+			strcpy(rawname, "");
+		}
+	}
+	StringFixer::SetNullTerminator(rawname);
+
+	// Let's start counting at 1 for the program name (as most MIDI hardware / software does)
+	index++;
+
+	CString formattedName;
+	if(rawname[0] < ' ') 
+	{
+		formattedName.Format("%02d - Program %d", index, index);
+	} 
+	else 
+	{
+		formattedName.Format("%02d - %s", index, rawname);
+	}
+
+	return formattedName;
+}
+
+
+void CVstPlugin::SetCurrentProgram(UINT nIndex)
 //---------------------------------------------
 {
 	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
@@ -1798,7 +1839,7 @@ VOID CVstPlugin::SetCurrentProgram(UINT nIndex)
 PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 //------------------------------------------------------------
 {
-	FLOAT fResult = 0;
+	float fResult = 0;
 	if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->getParameter))
 	{
 		try
@@ -1820,7 +1861,7 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 }
 
 
-VOID CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
+void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 //-------------------------------------------------------------------------
 {
 	try
@@ -1837,7 +1878,7 @@ VOID CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 }
 
 
-VOID CVstPlugin::GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize)
+void CVstPlugin::GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize)
 //--------------------------------------------------------------------
 {
 	if ((!pszName) || (!cbSize)) return;
@@ -1853,7 +1894,7 @@ VOID CVstPlugin::GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize)
 }
 
 
-VOID CVstPlugin::GetParamLabel(UINT nIndex, LPSTR pszLabel)
+void CVstPlugin::GetParamLabel(UINT nIndex, LPSTR pszLabel)
 //---------------------------------------------------------
 {
 	pszLabel[0] = 0;
@@ -1864,7 +1905,7 @@ VOID CVstPlugin::GetParamLabel(UINT nIndex, LPSTR pszLabel)
 }
 
 
-VOID CVstPlugin::GetParamDisplay(UINT nIndex, LPSTR pszDisplay)
+void CVstPlugin::GetParamDisplay(UINT nIndex, LPSTR pszDisplay)
 //-------------------------------------------------------------
 {
 	pszDisplay[0] = 0;
@@ -1881,7 +1922,7 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 	pszName[0] = 0;
 	if (m_bIsVst2)
 	{
-		Dispatch(effGetEffectName, 0,0, pszName, 0);
+		Dispatch(effGetEffectName, 0, 0, pszName, 0);
 		return TRUE;
 	}
 	return FALSE;
@@ -1900,12 +1941,13 @@ void CVstPlugin::Resume()
 
 	try
 	{
-		//reset some stuf
+		//reset some stuff
 		m_MixState.nVolDecayL = 0;
 		m_MixState.nVolDecayR = 0;
 		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);	
 		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f);	// calls plugin's suspend
-		if (sampleRate != m_nSampleRate) {
+		if (sampleRate != m_nSampleRate)
+		{
 			m_nSampleRate=sampleRate;
 			Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(m_nSampleRate));
 		}
@@ -1994,50 +2036,7 @@ void CVstPlugin::SetDryRatio(UINT param)
 	m_pMixStruct->fDryRatio = static_cast<float>(1.0-(static_cast<double>(param)/127.0));
 }
 
-/*
-void CVstPlugin::Process(float **pOutputs, unsigned long nSamples)
-//----------------------------------------------------------------
-{
-	float wetRatio, dryRatio;
-	wetRatio *= m_fGain;
-	dryRatio *= m_fGain;
 
-	ProcessVSTEvents();
-	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct)) {
-		
-		//Merge stereo input before sending to the plug if the plug can only handle one input.
-		if (m_pEffect->numInputs == 1) {
-			for (UINT i=0; i<nSamples; i++)	{
-				m_pInputs[0][i] = 0.5f*m_pInputs[0][i] + 0.5f*m_pInputs[1][i];
-			}
-		}
-
-		//Clear the buffers that will be receiving the plugin's output.
-		for (UINT iOut=0; iOut<m_nOutputs; iOut++) {
-			memset(m_pTempBuffer[iOut], 0, nSamples*sizeof(float));
-			m_pOutputs[iOut] = m_pTempBuffer[iOut];
-		}
-
-		//Do the VST processing magic
-		m_dwTimeAtStartOfProcess = timeGetTime();
-		try {
-			ASSERT(nSamples<=MIXBUFFERSIZE);
-			m_pProcessFP(m_pEffect, m_pInputs, m_pOutputs, nSamples);
-		} catch (char * str) {
-			m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
-			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
-			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s: %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod, str);
-			ClearVSTEvents();
-			SetEvent(processCalled);
-		}
-
-		for(UINT i=0; i<nSamples; i++) {
-			pOutL[stream][i] += m_pTempBuffer[stream][i]*wetRatio + m_pInputs[stream%2][i]*dryRatio;
-		}
-	
-	}
-}
-*/
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {
@@ -2343,7 +2342,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			//except if this is an instrument since this it has already been done:
 			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument)
 			{
-				for (UINT i=0; i<nSamples; i++){
+				for (UINT i=0; i<nSamples; i++)
+				{
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];
 				}
@@ -2468,13 +2468,17 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trac
 //------------------------------------------------------------------------------------------
 {
 	//Error checking
-	if (--nMidiCh>16) { // Decrement midi chan cos we recieve a value in [1,17]; we want [0,16].
+	// Decrement midi chan cos we recieve a value in [1,17]; we want [0,16].
+	if (--nMidiCh>16)
+	{
 		nMidiCh=16;
 	}
-	if (nController>127) {
+	if (nController>127)
+	{
 		nController=127;
 	}
-	if (nParam>127) {
+	if (nParam>127)
+	{
 		nParam=127;
 	}
 
@@ -2797,7 +2801,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 
 		} else
 		{
-			FLOAT *p = (FLOAT *)m_pMixStruct->pPluginData;
+			float *p = (float *)m_pMixStruct->pPluginData;
 			if (m_pMixStruct->nPluginDataSize >= nLen+4) p++;
 			if (m_pMixStruct->nPluginDataSize >= nLen)
 			{
@@ -2811,7 +2815,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 }
 
 
-VOID CVstPlugin::ToggleEditor()
+void CVstPlugin::ToggleEditor()
 //-----------------------------
 {
 	if (!m_pEffect) return;
@@ -3738,7 +3742,7 @@ void CDmo2Vst::SetParameter(VstInt32 index, float fValue)
 
 	if ((index < m_Effect.numParams) && (m_pParamInfo) && (m_pMediaParams))
 	{
-		memset(&mpi, 0, sizeof(mpi));
+		MemsetZero(mpi);
 		if (m_pParamInfo->GetParamInfo(index, &mpi) == S_OK)
 		{
 			float fMin = mpi.mpdMinValue;
@@ -3769,7 +3773,7 @@ float CDmo2Vst::GetParameter(VstInt32 index)
 		MP_PARAMINFO mpi;
 		MP_DATA md;
 
-		memset(&mpi, 0, sizeof(mpi));
+		MemsetZero(mpi);
 		md = 0;
 		if ((m_pParamInfo->GetParamInfo(index, &mpi) == S_OK)
 		 && (m_pMediaParams->GetParam(index, &md) == S_OK))
@@ -3998,5 +4002,3 @@ CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 	else
 		return CString();
 }
-
-

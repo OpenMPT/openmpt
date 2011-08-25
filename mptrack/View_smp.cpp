@@ -1733,14 +1733,18 @@ void CViewSample::OnEditDelete()
 	{
 		if (MessageBox("Remove this sample?", "Remove Sample", MB_YESNOCANCEL | MB_ICONQUESTION) != IDYES) return;
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
 		pSndFile->DestroySample(m_nSample);
-		END_CRITICAL();
+		cs.Leave();
+
 		dwUpdateFlags |= HINT_SMPNAMES;
 	} else
 	{
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, m_dwBeginSel, m_dwEndSel);
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
+
 		UINT cutlen = m_dwEndSel - m_dwBeginSel;
 		UINT istart = m_dwBeginSel;
 		UINT iend = len;
@@ -1794,7 +1798,6 @@ void CViewSample::OnEditDelete()
 			pSmp->nLoopStart = pSmp->nLoopEnd = 0;
 			pSmp->uFlags &= ~CHN_LOOP;
 		}
-		END_CRITICAL();
 	}
 	SetCurSel(0, 0);
 	pModDoc->AdjustEndOfSample(m_nSample);
@@ -1948,7 +1951,9 @@ void CViewSample::OnEditPaste()
 
 			CSoundFile *pSndFile = pModDoc->GetSoundFile();
 			DWORD dwMemSize = GlobalSize(hCpy);
-			BEGIN_CRITICAL();
+			
+			CriticalSection cs;
+
 			memcpy(s, pSndFile->m_szNames[m_nSample], 32);
 			memcpy(s2, pSndFile->Samples[m_nSample].filename, 22);
 			pSndFile->DestroySample(m_nSample);
@@ -1963,7 +1968,9 @@ void CViewSample::OnEditPaste()
 			{
 				memcpy(pSndFile->Samples[m_nSample].filename, s2, 22);
 			}
-			END_CRITICAL();
+
+			cs.Leave();
+
 			GlobalUnlock(hCpy);
 			SetCurSel(0, 0);
 			pModDoc->AdjustEndOfSample(m_nSample);
@@ -1998,7 +2005,9 @@ void CViewSample::On8BitConvert()
 		if ((pSmp->uFlags & CHN_16BIT) && (pSmp->pSample) && (pSmp->nLength))
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-			BEGIN_CRITICAL();
+
+			CriticalSection cs;
+
 			signed char *p = (signed char *)(pSmp->pSample);
 			UINT len = (pSmp->nLength + 1) * pSmp->GetNumChannels();
 			for (UINT i=0; i<=len; i++)
@@ -2010,7 +2019,9 @@ void CViewSample::On8BitConvert()
 			{
 				pSndFile->Chn[j].dwFlags &= ~(CHN_16BIT);
 			}
-			END_CRITICAL();
+
+			cs.Leave();
+
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
@@ -2072,7 +2083,9 @@ void CViewSample::OnSampleTrim()
 	if ((pSmp->pSample) && (nStart+nEnd <= pSmp->nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-		BEGIN_CRITICAL();
+
+		CriticalSection cs;
+
 		
 		// Note: Sample is overwritten in-place! Unused data is not deallocated!
 		const UINT bend = nEnd * pSmp->GetBytesPerSample() , bstart = nStart * pSmp->GetBytesPerSample();
@@ -2099,7 +2112,9 @@ void CViewSample::OnSampleTrim()
 			pSmp->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		}
 		pSmp->nLength = nEnd;
-		END_CRITICAL();
+		
+		cs.Leave();
+
 		pModDoc->SetModified();
 		pModDoc->AdjustEndOfSample(m_nSample);
 		SetCurSel(0, 0);
@@ -2267,10 +2282,10 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 				bCanDrop = FALSE;
 				if (pDlsIns)
 				{
-					BEGIN_CRITICAL();
+					CriticalSection cs;
+
 					pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 					bCanDrop = dlsbank.ExtractSample(pSndFile, m_nSample, nIns, nRgn);
-					END_CRITICAL();
 				}
 				bUpdate = TRUE;
 				break;
@@ -2295,10 +2310,11 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 			{
 				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
 			}
-			BEGIN_CRITICAL();
+			CriticalSection cs;
+
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 			bCanDrop = pDLSBank->ExtractSample(pSndFile, m_nSample, nIns, nRgn);
-			END_CRITICAL();
+
 			bUpdate = TRUE;
 		}
 		break;
@@ -2487,13 +2503,14 @@ void CViewSample::OnAddSilence()
 	}
 	
 	BeginWaitCursor();
-	BEGIN_CRITICAL();
 
 	if(dlg.m_nEditOption == addsilence_resize)
 	{
 		// resize - dlg.m_nSamples = new size
 		if(dlg.m_nSamples != pSmp->nLength)
 		{
+			CriticalSection cs;
+
 			if(dlg.m_nSamples < pSmp->nLength)	// make it shorter!
 				pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, pSmp->nLength);
 			else	// make it longer!
@@ -2505,13 +2522,14 @@ void CViewSample::OnAddSilence()
 		// add silence - dlg.m_nSamples = amount of bytes to be added
 		if(dlg.m_nSamples > 0)
 		{
+			CriticalSection cs;
+
 			UINT nStart = (dlg.m_nEditOption == addsilence_at_end) ? pSndFile->Samples[m_nSample].nLength : 0;
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_insert, nStart, nStart + dlg.m_nSamples);
 			ctrlSmp::InsertSilence(pSndFile->Samples[m_nSample], dlg.m_nSamples, nStart, pSndFile);
 		}
 	}
 
-	END_CRITICAL();
 	EndWaitCursor();
 
 	if(nOldLength != pSmp->nLength)

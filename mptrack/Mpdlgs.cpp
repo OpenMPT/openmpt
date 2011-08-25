@@ -590,7 +590,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().gdWFIRCutoff * 100)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -926,9 +926,8 @@ void CEQSetupDlg::UpdateDialog()
 void CEQSetupDlg::UpdateEQ(BOOL bReset)
 //-------------------------------------
 {
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	CSoundFile::SetEQGains(	m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset);
-	END_CRITICAL();
 }
 
 

@@ -400,7 +400,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	}
 
 	// Remove all completely empty patterns above last used pattern (those are safe to remove)
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 	for (PATTERNINDEX nPat = maxpat; nPat < maxPatIndex; nPat++) if ((pSndFile->Patterns[nPat]) && (nPat >= nMinToRemove))
 	{
 		if(pSndFile->Patterns.IsPatternEmpty(nPat))
@@ -409,7 +409,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			nPatRemoved++;
 		}
 	}
-	END_CRITICAL();
+	cs.Leave();
 
 	// Number of unused patterns
 	size_t nWaste = 0;
@@ -466,7 +466,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	pSndFile->Order.SetSequence(oldSequence);
 
 	// Reorder patterns & Delete unused patterns
-	BEGIN_CRITICAL();
+	cs.Enter();
 	{
 		for (PATTERNINDEX i = 0; i < maxPatIndex; i++)
 		{
@@ -496,7 +496,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			pSndFile->Patterns[nPat].SetName(patternSettings[nPat].name);
 		}
 	}
-	END_CRITICAL();
+	cs.Leave();
 	EndWaitCursor();
 	if ((nPatRemoved) || (bReordered))
 	{
@@ -531,9 +531,12 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
 		}
 	}
-	BEGIN_CRITICAL();
-	SAMPLEINDEX nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
-	END_CRITICAL();
+
+	SAMPLEINDEX nRemoved;
+	{
+		CriticalSection cs;
+		nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
+	}
 
 	SAMPLEINDEX nExt = pSndFile->DetectUnusedSamples(samplesUsed);
 
@@ -545,15 +548,14 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			"but not used in the song. Do you want to remove them?", nExt, (nExt == 1) ? "" : "s");
 		if (::MessageBox(NULL, s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
+			CriticalSection cs;
 			for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 			{
 				if ((!samplesUsed[nSmp]) && (pSndFile->Samples[nSmp].pSample))
 				{
 					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
-					BEGIN_CRITICAL();
 					pSndFile->DestroySample(nSmp);
 					if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
-					END_CRITICAL();
 					nRemoved++;
 					m_pModDoc->GetSampleUndo()->ClearUndo(nSmp);
 				}
@@ -648,10 +650,9 @@ bool CModCleanupDlg::RearrangeSamples()
 		if(nSampleMap[i] != i)
 		{
 			// This gotta be moved
-			BEGIN_CRITICAL();
+			CriticalSection cs;
 			pSndFile->MoveSample(i, nSampleMap[i]);
 			pSndFile->Samples[i].pSample = nullptr;
-			END_CRITICAL();
 			if(nSampleMap[i] > 0) strcpy(pSndFile->m_szNames[nSampleMap[i]], pSndFile->m_szNames[i]);
 			MemsetZero(pSndFile->m_szNames[i]);
 
@@ -727,7 +728,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	{
 		if (!pSndFile->IsInstrumentUsed(i))
 		{
-			BEGIN_CRITICAL();
+			CriticalSection cs;
 			// -> CODE#0003
 			// -> DESC="remove instrument's samples"
 			//			pSndFile->DestroyInstrument(i);
@@ -737,7 +738,6 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 				pSndFile->m_nInstruments--;
 			else
 				bReorg = true;
-			END_CRITICAL();
 			nRemoved++;
 		} else
 		{
@@ -749,7 +749,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		&& (::MessageBox(NULL, "Do you want to reorganize the remaining instruments?", "Removing unused instruments", MB_YESNO | MB_ICONQUESTION) == IDYES))
 	{
 		BeginWaitCursor();
-		BEGIN_CRITICAL();
+		CriticalSection cs;
 		nSwap = 0;
 		nIndex = 1;
 		for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
@@ -775,7 +775,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 			}
 		}
 		while ((pSndFile->m_nInstruments > 1) && (!pSndFile->Instruments[pSndFile->m_nInstruments])) pSndFile->m_nInstruments--;
-		END_CRITICAL();
+		cs.Leave();
 		if (nSwap > 0)
 		{
 			for (PATTERNINDEX iPat = 0; iPat < pSndFile->Patterns.Size(); iPat++) if (pSndFile->Patterns[iPat])
@@ -876,7 +876,7 @@ bool CModCleanupDlg::ResetVariables()
 	CMainFrame::GetMainFrame()->StopMod(m_pModDoc);
 
 	BeginWaitCursor();
-	BEGIN_CRITICAL();
+	CriticalSection cs;
 
 	// convert to IT...
 	m_pModDoc->ChangeModType(MOD_TYPE_IT);
@@ -915,7 +915,7 @@ bool CModCleanupDlg::ResetVariables()
 	pSndFile->SetModFlag(MSF_OLDVOLSWING, false);
 	pSndFile->SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
-	END_CRITICAL();
+	cs.Leave();
 	EndWaitCursor();
 
 	return true;
@@ -968,9 +968,10 @@ bool CModCleanupDlg::RemoveAllSamples()
 		m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, 0, pSndFile->Samples[nSmp].nLength);
 	}
 	ctrlSmp::ResetSamples(*pSndFile, ctrlSmp::SmpResetInit);
-	BEGIN_CRITICAL();
+
+	CriticalSection cs;
 	pSndFile->RemoveSelectedSamples(keepSamples);
-	END_CRITICAL();
+
 	return true;
 }
 

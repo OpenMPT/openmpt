@@ -52,7 +52,9 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 
 	if (newRowCount == m_Rows) return false;
 	rModDoc.BeginWaitCursor();
-	BEGIN_CRITICAL();
+
+	CriticalSection cs;
+
 	if (newRowCount > m_Rows)
 	{
 		MODCOMMAND *p = AllocatePattern(newRowCount, sndFile.m_nChannels);
@@ -82,12 +84,12 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 			}
 			if (!bOk)
 			{
-				END_CRITICAL();
+				cs.Leave();
 				rModDoc.EndWaitCursor();
 				if (CMainFrame::GetMainFrame()->MessageBox("Data at the end of the pattern will be lost.\nDo you want to continue?",
 									"Shrink Pattern", MB_YESNO|MB_ICONQUESTION) == IDYES) bOk = true;
 				rModDoc.BeginWaitCursor();
-				BEGIN_CRITICAL();
+				cs.Enter();
 			}
 		}
 #endif // MODPLUG_TRACKER
@@ -103,9 +105,12 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 			}
 		}
 	}
-	END_CRITICAL();
+
+	cs.Leave();
+
 	rModDoc.EndWaitCursor();
 	rModDoc.SetModified();
+
 	return (newRowCount == m_Rows) ? false : true;
 }
 
