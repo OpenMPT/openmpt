@@ -2380,13 +2380,9 @@ void CViewSample::OnSetLoopStart()
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
 			pSmp->nLoopStart = m_dwMenuParam;
+			pSmp->uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
-			if(pSmp->uFlags & CHN_LOOP)
-			{
-				/* only update sample buffer if the loop is actually enabled
-				(resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
-				pModDoc->AdjustEndOfSample(m_nSample);
-			}
+			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2405,13 +2401,9 @@ void CViewSample::OnSetLoopEnd()
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
 			pSmp->nLoopEnd = m_dwMenuParam;
+			pSmp->uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
-			if(pSmp->uFlags & CHN_LOOP)
-			{
-				/* only update sample buffer if the loop is actually enabled
-				(resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
-				pModDoc->AdjustEndOfSample(m_nSample);
-			}
+			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2430,6 +2422,7 @@ void CViewSample::OnSetSustainStart()
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
 			pSmp->nSustainStart = m_dwMenuParam;
+			pSmp->uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2450,6 +2443,7 @@ void CViewSample::OnSetSustainEnd()
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
 			pSmp->nSustainEnd = m_dwMenuParam;
+			pSmp->uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
