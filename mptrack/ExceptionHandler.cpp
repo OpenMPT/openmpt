@@ -12,22 +12,9 @@
 #include "Mainfrm.h"
 #include "snddev.h"
 #include "Moddoc.h"
+#include <shlwapi.h>
 #include "ExceptionHandler.h"
 #include "dbghelp.h"
-
-
-void ExceptionHandler::RegisterMainThread()
-//-----------------------------------------
-{
-	::SetUnhandledExceptionFilter(UnhandledExceptionFilterMain);
-}
-
-
-void ExceptionHandler::RegisterAudioThread()
-//------------------------------------------
-{
-	::SetUnhandledExceptionFilter(UnhandledExceptionFilterAudio);
-}
 
 
 LONG ExceptionHandler::UnhandledExceptionFilterMain(_EXCEPTION_POINTERS *pExceptionInfo)
@@ -41,6 +28,13 @@ LONG ExceptionHandler::UnhandledExceptionFilterAudio(_EXCEPTION_POINTERS *pExcep
 //---------------------------------------------------------------------------------------
 {
 	return UnhandledExceptionFilter(pExceptionInfo, "audio");
+}
+
+
+LONG ExceptionHandler::UnhandledExceptionFilterNotify(_EXCEPTION_POINTERS *pExceptionInfo)
+//----------------------------------------------------------------------------------------
+{
+	return UnhandledExceptionFilter(pExceptionInfo, "notify");
 }
 
 
@@ -64,6 +58,9 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 		pMainFrame->audioCloseDevice();
 	}
 
+	CString errorMessage;
+	errorMessage.Format("Unhandled exception 0x%X at address %p occoured in the %s thread.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress, threadName);
+
 	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
 	CString baseRescuePath;
 	{
@@ -78,7 +75,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 		baseRescuePath.Append(timestampDir);
 		if(!PathIsDirectory(baseRescuePath) && !CreateDirectory(baseRescuePath, nullptr))
 		{
-			::MessageBox(window, "A crash has been detected and OpenMPT will be closed.\nOpenMPT was unable to create a directory for saving debug information and modified files to.", "OpenMPT Crash", MB_ICONERROR);
+			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", baseRescuePath);
 		}
 	}
 
@@ -102,6 +99,8 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 
 				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
 				::CloseHandle(hFile);
+
+				errorMessage.AppendFormat("\n\nDebug information have been saved to\n%s", baseRescuePath);
 			}
 		}
 		::FreeLibrary(hDll);
@@ -134,11 +133,11 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 
 		if(numFiles > 0)
 		{
-			CString message;
-			message.Format("A crash has been detected in the %s thread and OpenMPT will be closed.\n%d modified file%s been rescued to\n\n%s\n\nNote: It cannot be guaranteed that rescued files are still intact.", threadName, numFiles, (numFiles == 1 ? " has" : "s have"), baseRescuePath);
-			::MessageBox(window, message, "OpenMPT Crash", MB_ICONERROR);
+			errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), (numFiles == 1 ? "it is" : "they are"));
 		}
 	}
+	
+	::MessageBox(window, errorMessage, "OpenMPT Crash", MB_ICONERROR);
 
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;
