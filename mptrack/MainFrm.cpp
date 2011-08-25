@@ -782,24 +782,13 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 }
 
 
-void Terminate_NotifyThread()
-//---------------------------
-{	
-	//TODO: Why does this not get called.
-	AfxMessageBox("Notify thread terminated unexpectedly. Attempting to shut down audio device");
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-	pMainFrame->audioCloseDevice();
-	exit(-1);
-}
-
 // Notify thread
 DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 //-------------------------------------------
 {
 	CMainFrame *pMainFrm;
 
-	set_terminate(Terminate_NotifyThread);
+	ExceptionHandler::RegisterNotifyThread();
 
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
 	for (;;)
@@ -1317,7 +1306,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
 	const bool bPaused = pSndFile->IsPaused();
-	const bool bPatLoop = (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP) ? true : false;
+	const bool bPatLoop = (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP) != 0;
 	pSndFile->ResetChannels();
 	// Select correct bidi loop mode when playing a module.
 	pSndFile->SetupITBidiMode();
@@ -2311,17 +2300,6 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	{
 	case ID_NETLINK_MODPLUG:	pszURL = "http://openmpt.org/"; break;
 	case ID_NETLINK_TOP_PICKS:	pszURL = "http://openmpt.org/top_picks"; break;
-	/*
-	case ID_NETLINK_OPENMPTWIKI:pszURL = "http://wiki.openmpt.org/"; break;
-//	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
-//	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
-//	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
-	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
-	case ID_NETLINK_FORUMS:		pszURL = "http://forum.openmpt.org/"; break;
-	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com/"; break;
-	case ID_NETLINK_MODARCHIVE: pszURL = "http://modarchive.org/"; break;
-	case ID_NETLINK_OPENMPTWIKI_GERMAN: pszURL = "http://wikide.openmpt.org/Hauptseite"; break;
-	*/
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);
 	return FALSE;
