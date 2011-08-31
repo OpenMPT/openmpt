@@ -702,7 +702,6 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	vector<bool> usedmap;
 	INSTRUMENTINDEX swapmap[MAX_INSTRUMENTS];
 	INSTRUMENTINDEX swapdest[MAX_INSTRUMENTS];
-	CHAR s[512];
 	UINT nRemoved = 0;
 	INSTRUMENTINDEX nSwap, nIndex;
 	bool bReorg = false;
@@ -718,7 +717,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		}
 	} else
 	{
-		::MessageBox(NULL, "This is an IT project file, so no samples associated with a used instrument will be removed.", "Removing unused instruments", MB_OK | MB_ICONINFORMATION);
+		::MessageBox(NULL, "This is an IT project file, so no samples associated with an used instrument will be removed.", "Removing unused instruments", MB_OK | MB_ICONINFORMATION);
 	}
 
 	BeginWaitCursor();
@@ -734,7 +733,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 			//			pSndFile->DestroyInstrument(i);
 			pSndFile->DestroyInstrument(i, removeSamples);
 			// -! BEHAVIOUR_CHANGE#0003
-			if ((i == pSndFile->GetNumInstruments()) && (i>1))
+			if ((i == pSndFile->GetNumInstruments()) && (i >1))
 				pSndFile->m_nInstruments--;
 			else
 				bReorg = true;
@@ -799,6 +798,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	}
 	if (nRemoved)
 	{
+		CHAR s[64];
 		wsprintf(s, "%d unused instrument%s removed\n", nRemoved, (nRemoved == 1) ? "" : "s");
 		m_pModDoc->AddToLog(s);
 		return true;
@@ -814,12 +814,12 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	bool usedmap[MAX_MIXPLUGINS];
-	memset(usedmap, false, sizeof(usedmap));
+	vector<bool> usedmap(MAX_MIXPLUGINS, false);
 	
-	for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++) {
+	for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
+	{
 
-		//Is the plugin assigned to a channel?
+		// Is the plugin assigned to a channel?
 		for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
 		{
 			if (pSndFile->ChnSettings[nChn].nMixPlugin == nPlug + 1)
@@ -829,8 +829,8 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 			}
 		}
 
-		//Is the plugin used by an instrument?
-		for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->GetNumInstruments(); nIns++)
+		// Is the plugin used by an instrument?
+		for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
 		{
 			if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == nPlug + 1))
 			{
@@ -839,11 +839,11 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 			}
 		}
 
-		//Is the plugin assigned to master?
+		// Is the plugin assigned to master?
 		if (pSndFile->m_MixPlugins[nPlug].Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT)
 			usedmap[nPlug] = true;
 
-		//all outputs of used plugins count as used
+		// All outputs of used plugins count as used
 		if (usedmap[nPlug] != false)
 		{
 			if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80)
@@ -1006,8 +1006,7 @@ bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
 bool CModCleanupDlg::RemoveAllPlugins()
 //-------------------------------------
 {
-	bool keepMask[MAX_MIXPLUGINS];
-	memset(keepMask, false, sizeof(keepMask));
+	vector<bool> keepMask(MAX_MIXPLUGINS, false);
 	m_pModDoc->RemovePlugs(keepMask);
 	return true;
 }

@@ -664,8 +664,8 @@ public:
 };
 
 // Critical section handling done in (safe) RAII style.
-// Create a CriticalSection object whenever you need exclusive access CSoundFile.
-// One object = one lock.
+// Create a CriticalSection object whenever you need exclusive access to CSoundFile.
+// One object = one lock / critical section.
 // The critical section is automatically left when the object is destroyed, but
 // Enter() and Leave() can also be called manually if needed.
 class CriticalSection

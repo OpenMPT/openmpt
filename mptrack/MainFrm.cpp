@@ -975,9 +975,10 @@ BOOL CMainFrame::audioOpenDevice()
 void CMainFrame::audioCloseDevice()
 //---------------------------------
 {
-	CriticalSection cs;
 	if (gpSoundDevice)
 	{
+		CriticalSection cs;
+
 		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
     }

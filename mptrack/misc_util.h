@@ -1,5 +1,6 @@
 #ifndef MISC_UTIL_H
 #define MISC_UTIL_H
+#pragma once
 
 #include <sstream>
 #include <string>
@@ -41,14 +42,27 @@ template<> inline uint64 ConvertStrTo(LPCSTR psz) {return _strtoui64(psz, nullpt
 
 // Memset given object to zero.
 template <class T>
-inline void MemsetZero(T& a)
-//_-------------------------
+inline void MemsetZero(T &a)
+//--------------------------
 {
-	#if _HAS_TR1
-		static_assert(std::tr1::is_pointer<T>::value == false, "Won't memset pointers.");
-		static_assert(std::tr1::is_pod<T>::value == true, "Won't memset non-pods.");
-	#endif
+#if _HAS_TR1
+	static_assert(std::tr1::is_pointer<T>::value == false, "Won't memset pointers.");
+	static_assert(std::tr1::is_pod<T>::value == true, "Won't memset non-pods.");
+#endif
 	memset(&a, 0, sizeof(T));
+}
+
+
+// Copy given object to other location.
+template <class T>
+inline void MemCopy(T &destination, T &source)
+//--------------------------------------------
+{
+#if _HAS_TR1
+	static_assert(std::tr1::is_pointer<T>::value == false, "Won't copy pointers.");
+	static_assert(std::tr1::is_pod<T>::value == true, "Won't copy non-pods.");
+#endif
+	memcpy(&destination, &source, sizeof(T));
 }
 
 
@@ -62,6 +76,18 @@ inline void Limit(T& val, const C lowerLimit, const C upperLimit)
 	if(lowerLimit > upperLimit) return;
 	if(val < lowerLimit) val = lowerLimit;
 	else if(val > upperLimit) val = upperLimit;
+}
+
+
+// Like Limit, but returns value
+template<class T, class C>
+inline T Clamp(T val, const C lowerLimit, const C upperLimit)
+//-----------------------------------------------------------
+{
+	if(lowerLimit > upperLimit) return val;
+	if(val < lowerLimit) return lowerLimit;
+	else if(val > upperLimit) return upperLimit;
+	else return val;
 }
 
 
@@ -151,7 +177,7 @@ namespace Util
 	template <class T> inline const T& Min(const T& a, const T& b) {return (std::min)(a, b);}
 
 	// Returns maximum value of given integer type.
-	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only interger types are allowed."); return (std::numeric_limits<T>::max)();}
+	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
 	/// Returns value rounded to nearest integer.
 	inline double Round(const double& val) {return std::floor(val + 0.5);}

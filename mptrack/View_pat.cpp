@@ -2321,6 +2321,8 @@ void CViewPattern::OnVisualizeEffect()
 		else
 		{
 			//Open window & send data
+			CriticalSection cs;
+
 			m_pEffectVis = new CEffectVis(this, row0, row1, nchn, pModDoc, m_nPattern);
 			if (m_pEffectVis)
 			{
@@ -2885,10 +2887,10 @@ void CViewPattern::OnPatternAmplify()
 		{
 			CHANNELINDEX firstChannel = GetSelectionStartChan(), lastChannel = GetSelectionEndChan();
 			ROWINDEX firstRow = GetSelectionStartRow(), lastRow = GetSelectionEndRow();
-			firstChannel = CLAMP(firstChannel, 0, pSndFile->GetNumChannels() - 1);
-			lastChannel = CLAMP(lastChannel, firstChannel, pSndFile->GetNumChannels() - 1);
-			firstRow = CLAMP(firstRow, 0, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
-			lastRow = CLAMP(lastRow, firstRow, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
+			Limit(firstChannel, (CHANNELINDEX)0, (CHANNELINDEX)(pSndFile->GetNumChannels() - 1));
+			Limit(lastChannel, firstChannel, (CHANNELINDEX)(pSndFile->GetNumChannels() - 1));
+			Limit(firstRow, (ROWINDEX)0, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
+			Limit(lastRow, firstRow, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
 
 			// adjust min/max channel if they're only partly selected (i.e. volume column or effect column (when using .MOD) is not covered)
 			if(CreateCursor(0, firstChannel, useVolCol ? VOL_COLUMN : EFFECT_COLUMN) < (m_dwBeginSel & 0xFFFF))
@@ -3071,7 +3073,8 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			m_nLastPlayedOrder = nOrd;
 		}
 
-		if (nRow < m_nLastPlayedRow) {
+		if (nRow < m_nLastPlayedRow)
+		{
 			InvalidateChannelsHeaders();
 		}
 		m_nLastPlayedRow = nRow;
@@ -3092,12 +3095,14 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		}
 		*/
 
-		if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat) {
+		if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat)
+		{
 			//order doesn't correlate with pattern, so mark it as invalid
 			nOrd = 0xFFFF;
 		}
 
-		if (m_pEffectVis && m_pEffectVis->m_hWnd) {
+		if (m_pEffectVis && m_pEffectVis->m_hWnd)
+		{
 			m_pEffectVis->SetPlayCursor(nPat, nRow);
 		}
 
@@ -4948,7 +4953,7 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 			if (pModDoc->GetSplitKeyboardSettings()->octaveLink && note <= NOTE_MAX)
 			{
 				note += 12 * pModDoc->GetSplitKeyboardSettings()->octaveModifier;
-				note = CLAMP(note, NOTE_MIN, NOTE_MAX);
+				Limit(note, NOTE_MIN, NOTE_MAX);
 			}
 			if (pModDoc->GetSplitKeyboardSettings()->splitInstrument)
 			{
@@ -4969,27 +4974,34 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFi
 {
 	CHAR s[512];
 	bool itemFound;
-	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)	{
+	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)
+	{
 
 		itemFound=false;
 		s[0] = 0;
 
-		if (!plug) {
+		if (!plug)
+		{
 			strcpy(s, "No plugin");
 			itemFound=true;
-		} else	{
+		} else
+		{
 			PSNDMIXPLUGIN p = &(pSndFile->m_MixPlugins[plug-1]);
-			if (p->Info.szLibraryName[0]) {
+			if (p->Info.szLibraryName[0])
+			{
 				wsprintf(s, "FX%d: %s", plug, p->Info.szName);
 				itemFound=true;
 			}
 		}
 
-		if (itemFound){
-			m_nMenuOnChan=nChn+1;
-			if (plug == pSndFile->ChnSettings[nChn].nMixPlugin) {
+		if (itemFound)
+		{
+			m_nMenuOnChan = nChn + 1;
+			if (plug == pSndFile->ChnSettings[nChn].nMixPlugin)
+			{
 				AppendMenu(hMenu, (MF_STRING|MF_CHECKED), ID_PLUGSELECT+plug, s);
-			} else {
+			} else
+			{
 				AppendMenu(hMenu, MF_STRING, ID_PLUGSELECT+plug, s);
 			}
 		}
@@ -5006,7 +5018,8 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 	bool bSolo = false, bUnmuteAll = false;
 	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
-	for (CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++) {
+	for (CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++)
+	{
 		if (i != nChn)
 		{
 			if (!(pSndFile->ChnSettings[i].dwFlags & CHN_MUTE)) bSolo = bSoloPending = true;
@@ -5024,8 +5037,7 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
 	
 	AppendMenu(hMenu, 
-			pSndFile->m_bChannelMuteTogglePending[nChn] ? 
-					(MF_STRING|MF_CHECKED) : MF_STRING,
+			pSndFile->m_bChannelMuteTogglePending[nChn] ? (MF_STRING|MF_CHECKED) : MF_STRING,
 			 ID_PATTERN_TRANSITIONMUTE,
 			(pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ?
 			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
@@ -5052,12 +5064,7 @@ bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc)
 bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
 //----------------------------------------------------------------------
 {
-	CString label = "";
-	if (GetSelectionStartRow() != GetSelectionEndRow()) {
-		label = "Rows";
-	} else { 
-		label = "Row";
-	}
+	const CString label = (GetSelectionStartRow() != GetSelectionEndRow() ? "Rows" : "Row");
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, "Insert " + label + "\t" + ih->GetKeyTextFromCommand(kcInsertRow));
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, "Delete " + label + "\t" + ih->GetKeyTextFromCommand(kcDeleteRows) );
@@ -5241,7 +5248,8 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih)
 
 	//AppendMenu(hMenu, MF_STRING, ID_RUN_SCRIPT, "Run script");
 
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE)) {
+	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
 		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
 		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
@@ -5257,7 +5265,8 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(VOL_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE))
+	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_AMPLIFY, "Amplify\t" + ih->GetKeyTextFromCommand(kcPatternAmplify));
 		return true;
 	}
@@ -5450,13 +5459,16 @@ UINT CViewPattern::ListChansWhereColSelected(PatternColumns colType, CArray<UINT
 	UINT startChan = GetSelectionStartChan();
 	UINT endChan   = GetSelectionEndChan();
 
-	if (GetColTypeFromCursor(m_dwBeginSel) <= colType) {
+	if (GetColTypeFromCursor(m_dwBeginSel) <= colType)
+	{
 		chans.Add(startChan);	//first selected chan includes this col type
 	}
-	for (UINT chan=startChan+1; chan<endChan; chan++) {
+	for (UINT chan=startChan+1; chan<endChan; chan++)
+	{
 		chans.Add(chan); //All chans between first & last must include this col type
 	}
-	if ((startChan != endChan) && colType <= GetColTypeFromCursor(m_dwEndSel)) {
+	if ((startChan != endChan) && colType <= GetColTypeFromCursor(m_dwEndSel))
+	{
 		chans.Add(endChan);		//last selected chan includes this col type
 	}
 
