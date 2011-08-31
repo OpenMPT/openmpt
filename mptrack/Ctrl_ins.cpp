@@ -17,8 +17,6 @@
 /////////////////////////////////////////////////////////////////////////
 // CNoteMapWnd
 
-#define ID_NOTEMAP_EDITSAMPLE	40000
-
 BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
@@ -1026,8 +1024,8 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 	if (bUpdNum)
 	{
 		SetDlgItemInt(IDC_EDIT_INSTRUMENT, m_nInstrument);
-		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
-		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
+		m_SpinInstrument.SetRange(1, m_pSndFile->GetNumInstruments());
+		m_SpinInstrument.EnableWindow((m_pSndFile->GetNumInstruments()) ? TRUE : FALSE);
 		// Is this a bug ?
 		m_SliderCutOff.InvalidateRect(NULL, FALSE);
 		m_SliderResonance.InvalidateRect(NULL, FALSE);
@@ -1073,6 +1071,8 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	if (pFrame) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetInstrumentViewState());
 	SwitchToView();
 
+	// Combo boxes randomly disappear without this... why?
+	Invalidate();
 }
 
 
@@ -1836,7 +1836,7 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 		int minval = 0, maxval = 32767;
 		m_SpinFadeOut.GetRange(minval, maxval);
 		int nVol = GetDlgItemInt(IDC_EDIT7);
-		nVol = CLAMP(nVol, minval, maxval);
+		Limit(nVol, minval, maxval);
 		
 		if(nVol != (int)pIns->nFadeOut)
 		{
@@ -1854,8 +1854,7 @@ void CCtrlInstruments::OnGlobalVolChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int nVol = GetDlgItemInt(IDC_EDIT8);
-		if (nVol < 0) nVol = 0;
-		if (nVol > 64) nVol = 64;
+		Limit(nVol, 0, 64);
 		if (nVol != (int)pIns->nGlobalVol)
 		{
 			pIns->nGlobalVol = nVol;
@@ -2808,6 +2807,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 	m_ComboTuning.SetCurSel(0);
 }
 
+
 void CCtrlInstruments::UpdatePluginList()
 //---------------------------------------
 {
@@ -2817,14 +2817,13 @@ void CCtrlInstruments::UpdatePluginList()
 	CHAR s[64];
 	for (PLUGINDEX nPlug = 0; nPlug <= MAX_MIXPLUGINS; nPlug++)
 	{
-		s[0] = 0;
 		if (!nPlug) 
 		{ 
 			strcpy(s, "No plugin");
 		} 
 		else
 		{
-			PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[nPlug-1]);
+			PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[nPlug - 1]);
 			p->Info.szLibraryName[63] = 0;
 			if (p->Info.szLibraryName[0])
 				wsprintf(s, "FX%d: %s", nPlug, p->Info.szName);

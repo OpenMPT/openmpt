@@ -154,6 +154,9 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 	CMainFrame::EnableLowLatencyMode(FALSE);
 	PostViewMessage(VIEWMSG_SETACTIVE, NULL);
 	SetFocus();
+
+	// Combo boxes randomly disappear without this... why?
+	Invalidate();
 }
 
 
@@ -403,10 +406,12 @@ void CCtrlGeneral::OnVSTiVolChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
 	{
 		m_EditVSTiVol.GetWindowText(s, sizeof(s));
-		if (s[0]) {
+		if (s[0])
+		{
 			UINT n = ConvertStrTo<UINT>(s);
-			n = CLAMP(n, 0, 2000);
-			if (n != m_pSndFile->m_nVSTiVolume) {
+			Limit(n, 0u, 2000u);
+			if (n != m_pSndFile->m_nVSTiVolume)
+			{
 				m_bEditsLocked=true;
 				m_pSndFile->m_nVSTiVolume = n;
 				m_pSndFile->RecalculateGainForAllPlugs();
@@ -426,10 +431,12 @@ void CCtrlGeneral::OnSamplePAChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
 	{
 		m_EditSamplePA.GetWindowText(s, sizeof(s));
-		if (s[0]) {
+		if (s[0])
+		{
 			UINT n = ConvertStrTo<UINT>(s);
-			n = CLAMP(n, 0, 2000);
-			if (n != m_pSndFile->m_nSamplePreAmp) {
+			Limit(n, 0u, 2000u);
+			if (n != m_pSndFile->m_nSamplePreAmp)
+			{
 				m_bEditsLocked=true;
 				m_pSndFile->m_nSamplePreAmp = n;
 				m_pModDoc->SetModified();
@@ -451,7 +458,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			n = CLAMP(n, 0, 128);
+			Limit(n, 0u, 128u);
 			if (n != (m_pSndFile->m_nDefaultGlobalVolume >> 1))
 			{ 
 				m_bEditsLocked=true;
@@ -478,7 +485,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 		if (s[0])
 		{
 			ORDERINDEX n = (ORDERINDEX)atoi(s);
-			n = CLAMP(n, 0, m_pSndFile->Order.size());
+			Limit(n, (ORDERINDEX)0, m_pSndFile->Order.size());
 			for (ORDERINDEX i = 0; i <= n; i++)
 				if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) return;
 

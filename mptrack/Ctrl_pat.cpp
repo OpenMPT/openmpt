@@ -607,6 +607,9 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		
 		SwitchToView();
 	}
+
+	// Combo boxes randomly disappear without this... why?
+	Invalidate();
 }
 
 

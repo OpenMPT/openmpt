@@ -404,6 +404,9 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetSampleViewState());
 	SwitchToView();
+
+	// Combo boxes randomly disappear without this... why?
+	Invalidate();
 }
 
 
@@ -3113,8 +3116,8 @@ SELECTIONPOINTS CCtrlSamples::GetSelectionPoints()
 void CCtrlSamples::SetSelectionPoints(UINT nStart, UINT nEnd)
 //-----------------------------------------------------------
 {
-	nStart = CLAMP(nStart, 0, m_pSndFile->Samples[m_nSample].nLength);
-	nEnd = CLAMP(nEnd, 0, m_pSndFile->Samples[m_nSample].nLength);
+	Limit(nStart, 0u, m_pSndFile->Samples[m_nSample].nLength);
+	Limit(nEnd, 0u, m_pSndFile->Samples[m_nSample].nLength);
 
 	SAMPLEVIEWSTATE viewstate;
 	MemsetZero(viewstate);
