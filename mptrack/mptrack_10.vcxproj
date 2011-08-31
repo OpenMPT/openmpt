@@ -158,7 +158,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res/rt_manif.bin;%(AdditionalManifestFiles)</AdditionalManifestFiles>
