@@ -58,7 +58,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	if (firstRow + numRows >= nRows) numRows = nRows - firstRow;
 	if (firstChn + numChns >= pSndFile->GetNumChannels()) numChns = pSndFile->GetNumChannels() - firstChn;
 
-	pUndoData = new MODCOMMAND[numChns * numRows];
+	pUndoData = CPattern::AllocatePattern(numRows, numChns);
 	if (!pUndoData) return false;
 
 	const bool bUpdate = !CanUndo(); // update undo status?
@@ -210,7 +210,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 bool CPatternUndo::CanUndo()
 //--------------------------
 {
-	return (UndoBuffer.size() > 0) ? true : false;
+	return (UndoBuffer.size() > 0);
 }
 
 
@@ -291,8 +291,8 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX nSmp, sampleUndoTypes nChangeTyp
 	SAMPLEUNDOBUFFER sUndo;
 
 	// Save old sample header
-	memcpy(&sUndo.OldSample, &pSndFile->Samples[nSmp], sizeof(MODSAMPLE));
-	memcpy(sUndo.szOldName, pSndFile->m_szNames[nSmp], sizeof(sUndo.szOldName));
+	MemCopy(sUndo.OldSample, pSndFile->Samples[nSmp]);
+	MemCopy(sUndo.szOldName, pSndFile->m_szNames[nSmp]);
 	sUndo.nChangeType = nChangeType;
 
 	if(nChangeType == sundo_replace)
@@ -426,9 +426,9 @@ bool CSampleUndo::Undo(const SAMPLEINDEX nSmp)
 	}
 
 	// Restore old sample header
-	memcpy(&pSndFile->Samples[nSmp], &pUndo->OldSample, sizeof(MODSAMPLE));
+	MemCopy(pSndFile->Samples[nSmp], pUndo->OldSample);
 	pSndFile->Samples[nSmp].pSample = pCurrentSample; // select the "correct" old sample
-	memcpy(pSndFile->m_szNames[nSmp], pUndo->szOldName, sizeof(pUndo->szOldName));
+	MemCopy(pSndFile->m_szNames[nSmp], pUndo->szOldName);
 
 	if(pNewSample != nullptr)
 	{

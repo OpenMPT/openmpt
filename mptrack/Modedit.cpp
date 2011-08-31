@@ -348,17 +348,18 @@ bool CModDoc::ConvertInstrumentsToSamples()
 }
 
 
-UINT CModDoc::RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS])
-//---------------------------------------------------------------
+UINT CModDoc::RemovePlugs(const vector<bool> &keepMask)
+//-----------------------------------------------------
 {
 	//Remove all plugins whose keepMask[plugindex] is false.
-	UINT nRemoved=0;
-	for (PLUGINDEX nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
+	UINT nRemoved = 0;
+	const PLUGINDEX maxPlug = min(MAX_MIXPLUGINS, keepMask.size());
+
+	for (PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
 	{
 		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];		
 		if (keepMask[nPlug] || !pPlug)
 		{
-			Log("Keeping mixplug addess (%d): %X\n", nPlug, &(pPlug->pMixPlugin));	
 			continue;
 		}
 

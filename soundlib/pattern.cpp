@@ -252,9 +252,15 @@ bool CPattern::GetName(char *buffer, size_t maxChars) const
 MODCOMMAND *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 //----------------------------------------------------------------------
 {
-	MODCOMMAND *p = new MODCOMMAND[rows*nchns];
-	if (p) memset(p, 0, rows*nchns*sizeof(MODCOMMAND));
-	return p;
+	try
+	{
+		MODCOMMAND *p = new MODCOMMAND[rows*nchns];
+		memset(p, 0, rows * nchns * sizeof(MODCOMMAND));
+		return p;
+	} catch (...)
+	{
+		return nullptr;
+	}
 }
 
 
