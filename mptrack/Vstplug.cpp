@@ -473,7 +473,7 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
 //-------------------------------------------------------------------------------------
 {
-	UINT nMatch=0;
+	UINT nMatch = 0;
 	PVSTPLUGINLIB pFound = NULL;
 
 	if (pMixPlugin)
@@ -850,12 +850,9 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			if (pSndFile)
 			{
 				return (VstInt32)(pSndFile->GetCurrentBPM() * 10000);
-			} else
-			{
-				return (VstInt32)(125 * 10000);
 			}
 		}
-		return 125 * 10000;
+		return (VstInt32)(125 * 10000);
 	// parameters - DEPRECATED in VST 2.4
 	case audioMasterGetNumAutomatableParameters:
 		Log("VST plugin to host: Get Num Automatable Parameters\n");
@@ -1212,7 +1209,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			LPITEMIDLIST pid = SHBrowseForFolder(&bi);
 			if(pid != NULL && SHGetPathFromIDList(pid, szBuffer))
 			{
-				if(!memcmp(&(effect->uniqueID), "rTSV", 4) && pFileSel->returnPath != nullptr && pFileSel->sizeReturnPath == 0)
+				if(CCONST('V', 'S', 'T', 'r') == effect->uniqueID && pFileSel->returnPath != nullptr && pFileSel->sizeReturnPath == 0)
 				{
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
@@ -1342,7 +1339,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_bModified = false;
 	m_dwTimeAtStartOfProcess=0;
 	m_nSampleRate = nInvalidSampleRate; //rewbs.VSTCompliance: gets set on Resume()
-	memset(m_MidiCh, 0, sizeof(m_MidiCh));
+	MemsetZero(m_MidiCh);
 
 	for (int ch=0; ch<16; ch++) {
 		m_nMidiPitchBendPos[ch]=MIDI_PitchBend_Centre; //centre pitch bend on all channels
@@ -1368,7 +1365,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_bRecordAutomation=false;
 	m_bPassKeypressesToPlug=false;
 
-	memset(m_MidiCh, 0, sizeof(m_MidiCh));
+	MemsetZero(m_MidiCh);
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
@@ -2060,7 +2057,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		if (m_bIsInstrument)
 		{
 			mixop = 0; //force normal mix mode for instruments
-		} else {
+		} else
+		{
 			mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>8) & 0xff : 0;
 		}
 
@@ -2542,7 +2540,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	bool progChanged = (pCh->nProgram != --nMidiProg) && (nMidiProg < 0x80);
 	//bool chanChanged = nCh != m_nPreviousMidiChan;
 	//get vol in [0,128[
-	vol = min(vol/2, 127); 
+	vol = min(vol / 2, 127); 
 	
 	// Note: Some VSTis update bank/prog on midi channel change, others don't.
 	//       For those that don't, we do it for them.
@@ -3525,7 +3523,7 @@ CDmo2Vst::CDmo2Vst(IMediaObject *pMO, IMediaObjectInPlace *pMOIP, DWORD uid)
 	m_pMediaProcess = pMOIP;
 	m_pParamInfo = NULL;
 	m_pMediaParams = NULL;
-	memset(&m_Effect, 0, sizeof(m_Effect));
+	MemsetZero(m_Effect);
 	m_Effect.magic = kDmoMagic;
 	m_Effect.numPrograms = 0;
 	m_Effect.numParams = 0;
@@ -3671,10 +3669,26 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 								wsprintf(pszName, (bNeg) ? "-%d.%02d" : "%d.%02d", nValue/100, nValue%100);
 							}
 							break;
+
 						case MPT_BOOL:
 							strcpy(pszName, ((int)md) ? "Yes" : "No");
 							break;
-						// TODO: case MPT_ENUM: -> GetParamText
+
+						case MPT_ENUM:
+							{
+								WCHAR *text = nullptr;
+								m_pParamInfo->GetParamText(index, &text);
+
+								const int nValue = (int)(md * (mpi.mpdMaxValue - mpi.mpdMinValue) + 0.5f);
+								// Always skip first two strings (param name, unit name)
+								for(int i = 0; i < nValue + 2; i++)
+								{
+									text += wcslen(text) + 1;
+								}
+								WideCharToMultiByte(CP_ACP, 0, text, -1, pszName, 32, NULL, NULL);
+							}
+							break;
+
 						default:
 							wsprintf(pszName, "%d", (int)md);
 							break;
