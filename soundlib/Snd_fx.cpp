@@ -2881,7 +2881,17 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 					pChn->nPanbrelloType = param & 0x07;
 				break;
 	// S6x: Pattern Delay for x frames
-	case 0x60:	m_nFrameDelay = param; break;
+	case 0x60:
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
+					if(!(m_dwSongFlags & SONG_FIRSTTICK) || m_nTickCount > 0) break;
+					m_nFrameDelay += param;
+				}
+				else
+				{
+					m_nFrameDelay = param;
+				}
+				break;
 	// S7x: Envelope Control / Instrument Control
 	case 0x70:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 				switch(param)
@@ -2957,7 +2967,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	case 0xA0:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{
 					pChn->nOldHiOffset = param;
-					if ((pChn->nRowNote) && (pChn->nRowNote < 0x80))
+					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && (pChn->nRowNote != NOTE_NONE) && NOTE_IS_VALID(pChn->nRowNote))
 					{
 						DWORD pos = param << 16;
 						if (pos < pChn->nLength) pChn->nPos = pos;
