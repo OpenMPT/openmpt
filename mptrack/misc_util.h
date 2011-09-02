@@ -65,6 +65,17 @@ inline void MemCopy(T &destination, T &source)
 	memcpy(&destination, &source, sizeof(T));
 }
 
+template <class T>
+inline void MemCopy(T &destination, const T &source)
+//--------------------------------------------------
+{
+#if _HAS_TR1
+	static_assert(std::tr1::is_pointer<T>::value == false, "Won't copy pointers.");
+	static_assert(std::tr1::is_pod<T>::value == true, "Won't copy non-pods.");
+#endif
+	memcpy(&destination, &source, sizeof(T));
+}
+
 
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.

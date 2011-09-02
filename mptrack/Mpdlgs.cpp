@@ -397,7 +397,7 @@ void COptionsSoundcard::OnOK()
 	// Polyphony
 	{
 		int nmmx = m_CbnPolyphony.GetCurSel();
-		if ((nmmx >= 0) && (nmmx < sizeof(nCPUMix)/sizeof(nCPUMix[0]))) CSoundFile::m_nMaxMixChannels = nCPUMix[nmmx];
+		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix))) CSoundFile::m_nMaxMixChannels = nCPUMix[nmmx];
 	}
 	// Sound Device
 	{
@@ -691,30 +691,20 @@ void COptionsPlayer::OnOK()
 // EQ Globals
 //
 
-enum {
-	EQPRESET_FLAT=0,
-	EQPRESET_JAZZ,
-	EQPRESET_POP,
-	EQPRESET_ROCK,
-	EQPRESET_CONCERT,
-	EQPRESET_CLEAR,
-};
-
-
 #define EQ_MAX_FREQS	5
 
-const UINT gEqBandFreqs[EQ_MAX_FREQS*MAX_EQ_BANDS] =
+const UINT gEqBandFreqs[MAX_EQ_BANDS][EQ_MAX_FREQS] =
 {
-	100, 125, 150, 200, 250,
-	300, 350, 400, 450, 500,
-	600, 700, 800, 900, 1000,
-	1250, 1500, 1750, 2000, 2500,
-	3000, 3500, 4000, 4500, 5000,
-	6000, 7000, 8000, 9000, 10000
+	{ 100, 125, 150, 200, 250 },
+	{ 300, 350, 400, 450, 500 },
+	{ 600, 700, 800, 900, 1000 },
+	{ 1250, 1500, 1750, 2000, 2500 },
+	{ 3000, 3500, 4000, 4500, 5000 },
+	{ 6000, 7000, 8000, 9000, 10000 },
 };
 
 
-const EQPRESET gEQPresets[6] =
+const EQPRESET CEQSetupDlg::gEQPresets[] =
 {
 	{ "Flat",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// Flat
 	{ "Jazz",	{16,16,24,20,20,14}, { 125, 300, 600, 1250, 4000, 8000 } },	// Jazz
@@ -725,17 +715,13 @@ const EQPRESET gEQPresets[6] =
 };
 
 
-EQPRESET CEQSetupDlg::gUserPresets[4] =
+EQPRESET CEQSetupDlg::gUserPresets[] =
 {
-	{ "User1",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// User1
-	{ "User2",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// User2
-	{ "User3",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// User3
+	{ "User1",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User1
+	{ "User2",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User2
+	{ "User3",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User3
 	{ "User4",	{16,16,16,16,16,16}, { 150, 500, 1000, 2500, 5000, 10000 } }	// User4
 };
-
-
-#define ID_EQSLIDER_BASE	41000
-#define ID_EQMENU_BASE		41100
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -748,10 +734,10 @@ class CEQSavePresetDlg: public CDialog
 //====================================
 {
 protected:
-	PEQPRESET m_pEq;
+	EQPRESET *m_pEq;
 
 public:
-	CEQSavePresetDlg(PEQPRESET pEq, CWnd *parent=NULL):CDialog(IDD_SAVEPRESET, parent) { m_pEq = pEq; }
+	CEQSavePresetDlg(EQPRESET *pEq, CWnd *parent=NULL):CDialog(IDD_SAVEPRESET, parent) { m_pEq = pEq; }
 	BOOL OnInitDialog();
 	VOID OnOK();
 };
@@ -797,27 +783,6 @@ VOID CEQSavePresetDlg::OnOK()
 //
 // CEQSetupDlg
 //
-
-VOID CEQSetupDlg::LoadEQ(HKEY key, LPCSTR pszName, PEQPRESET pEqSettings)
-//-----------------------------------------------------------------------
-{
-	DWORD dwType = REG_BINARY;
-	DWORD dwSize = sizeof(EQPRESET);
-	RegQueryValueEx(key, pszName, NULL, &dwType, (LPBYTE)pEqSettings, &dwSize);
-	for (UINT i=0; i<MAX_EQ_BANDS; i++)
-	{
-		if (pEqSettings->Gains[i] > 32) pEqSettings->Gains[i] = 16;
-		if ((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000)) pEqSettings->Freqs[i] = gEQPresets[0].Freqs[i];
-	}
-	pEqSettings->szName[sizeof(pEqSettings->szName)-1] = 0;
-}
-
-
-VOID CEQSetupDlg::SaveEQ(HKEY key, LPCSTR pszName, PEQPRESET pEqSettings)
-//-----------------------------------------------------------------------
-{
-	RegSetValueEx(key, pszName, NULL, REG_BINARY, (LPBYTE)pEqSettings, sizeof(EQPRESET));
-}
 
 
 VOID CEQSlider::Init(UINT nID, UINT n, CWnd *parent)
@@ -944,91 +909,10 @@ void CEQSetupDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 }
 
 
-void CEQSetupDlg::OnEqFlat()
-//--------------------------
+void CEQSetupDlg::LoadEQPreset(const EQPRESET &preset)
+//----------------------------------------------------
 {
-	*m_pEqPreset = gEQPresets[EQPRESET_FLAT];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqJazz()
-//--------------------------
-{
-	*m_pEqPreset = gEQPresets[EQPRESET_JAZZ];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqPop()
-//-------------------------
-{
-	*m_pEqPreset = gEQPresets[EQPRESET_POP];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqRock()
-//--------------------------
-{
-	*m_pEqPreset = gEQPresets[EQPRESET_ROCK];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqConcert()
-//-----------------------------
-{
-	*m_pEqPreset = gEQPresets[EQPRESET_CONCERT];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqClear()
-//---------------------------
-{
-	*m_pEqPreset = gEQPresets[EQPRESET_CLEAR];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqUser1()
-//---------------------------
-{
-	*m_pEqPreset = gUserPresets[0];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqUser2()
-//---------------------------
-{
-	*m_pEqPreset = gUserPresets[1];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqUser3()
-//---------------------------
-{
-	*m_pEqPreset = gUserPresets[2];
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnEqUser4()
-//---------------------------
-{
-	*m_pEqPreset = gUserPresets[3];
+	*m_pEqPreset = preset;
 	UpdateEQ(TRUE);
 	UpdateDialog();
 }
@@ -1055,8 +939,8 @@ void CEQSetupDlg::OnSliderMenu(UINT nID)
 		HMENU hMenu = ::CreatePopupMenu();
 		m_nSliderMenu = n;
 		if (!hMenu)	return;
-		const UINT *pFreqs = &gEqBandFreqs[m_nSliderMenu*EQ_MAX_FREQS];
-		for (UINT i=0; i<EQ_MAX_FREQS; i++)
+		const UINT *pFreqs = gEqBandFreqs[m_nSliderMenu];
+		for (UINT i = 0; i < EQ_MAX_FREQS; i++)
 		{
 			DWORD d = MF_STRING;
 			if (m_pEqPreset->Freqs[m_nSliderMenu] == pFreqs[i]) d |= MF_CHECKED;
@@ -1077,7 +961,7 @@ void CEQSetupDlg::OnSliderFreq(UINT nID)
 	UINT n = nID - ID_EQMENU_BASE;
 	if ((m_nSliderMenu < MAX_EQ_BANDS) && (n < EQ_MAX_FREQS))
 	{
-		UINT f = gEqBandFreqs[m_nSliderMenu*EQ_MAX_FREQS+n];
+		UINT f = gEqBandFreqs[m_nSliderMenu][n];
 		if (f != m_pEqPreset->Freqs[m_nSliderMenu])
 		{
 			m_pEqPreset->Freqs[m_nSliderMenu] = f;

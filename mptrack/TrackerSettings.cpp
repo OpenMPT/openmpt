@@ -21,6 +21,7 @@
 #include "AutoSaver.h"
 #include "../soundlib/StringFixer.h"
 #include "TrackerSettings.h"
+#include "misc_util.h"
 
 
 const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
@@ -71,17 +72,7 @@ TrackerSettings::TrackerSettings()
 	m_nBufferLength = 50;
 
 	// Default EQ settings
-	strcpy(m_EqSettings.szName, "");
-	for(size_t i = 0; i < CountOf(m_EqSettings.Gains); i++)
-	{
-		m_EqSettings.Gains[i] = 16;
-	}
-	m_EqSettings.Freqs[0] = 125;
-	m_EqSettings.Freqs[1] = 300;
-	m_EqSettings.Freqs[2] = 600;
-	m_EqSettings.Freqs[3] = 1250;
-	m_EqSettings.Freqs[4] = 4000;
-	m_EqSettings.Freqs[5] = 8000;
+	MemCopy(m_EqSettings, CEQSetupDlg::gEQPresets[0]);
 
 	// MIDI Setup
 	m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEOFF;
@@ -100,7 +91,6 @@ TrackerSettings::TrackerSettings()
 
 	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
 
-	// TODO duplicate code (see Moptions.cpp)
 	GetDefaultColourScheme(rgbCustomColors);
 
 	// Directory Arrays (Default + Last)
@@ -457,6 +447,21 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 #define SETTINGS_REGEXT_WINDOW		"\\Window"
 #define SETTINGS_REGEXT_SETTINGS	"\\Settings"
 
+void TrackerSettings::LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPRESET *pEqSettings)
+//-----------------------------------------------------------------------------------
+{
+	DWORD dwType = REG_BINARY;
+	DWORD dwSize = sizeof(EQPRESET);
+	RegQueryValueEx(key, pszName, NULL, &dwType, (LPBYTE)pEqSettings, &dwSize);
+	for (UINT i=0; i<MAX_EQ_BANDS; i++)
+	{
+		if (pEqSettings->Gains[i] > 32) pEqSettings->Gains[i] = 16;
+		if ((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000)) pEqSettings->Freqs[i] = CEQSetupDlg::gEQPresets[0].Freqs[i];
+	}
+	pEqSettings->szName[sizeof(pEqSettings->szName)-1] = 0;
+}
+
+
 bool TrackerSettings::LoadRegistrySettings()
 //------------------------------------------
 {
@@ -556,11 +561,11 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "MidiImportSpeed", NULL, &dwREG_DWORD, (LPBYTE)&midiImportSpeed, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportPatLen", NULL, &dwREG_DWORD, (LPBYTE)&midiImportPatternLen, &dwDWORDSize);
 		// EQ
-		CEQSetupDlg::LoadEQ(key, "EQ_Settings", &m_EqSettings);
-		CEQSetupDlg::LoadEQ(key, "EQ_User1", &CEQSetupDlg::gUserPresets[0]);
-		CEQSetupDlg::LoadEQ(key, "EQ_User2", &CEQSetupDlg::gUserPresets[1]);
-		CEQSetupDlg::LoadEQ(key, "EQ_User3", &CEQSetupDlg::gUserPresets[2]);
-		CEQSetupDlg::LoadEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
+		LoadRegistryEQ(key, "EQ_Settings", &m_EqSettings);
+		LoadRegistryEQ(key, "EQ_User1", &CEQSetupDlg::gUserPresets[0]);
+		LoadRegistryEQ(key, "EQ_User2", &CEQSetupDlg::gUserPresets[1]);
+		LoadRegistryEQ(key, "EQ_User3", &CEQSetupDlg::gUserPresets[2]);
+		LoadRegistryEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
 
 		//rewbs.resamplerConf
 		dwDWORDSize = sizeof(gbWFIRType);

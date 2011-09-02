@@ -109,6 +109,8 @@ public:
 protected:
 
 	void LoadINISettings(const CString &iniFile);
+
+	void LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPRESET *pEqSettings);
 	bool LoadRegistrySettings();
 
 	void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
