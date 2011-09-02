@@ -1313,8 +1313,8 @@ void CKeyboardControl::OnPaint()
 }
 
 
-void CKeyboardControl::OnMouseMove(UINT, CPoint point)
-//----------------------------------------------------
+void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
+//----------------------------------------------------------
 {
 	int sel = -1, xmin, xmax;
 	CRect rcClient, rect;
@@ -1385,6 +1385,10 @@ void CKeyboardControl::OnMouseMove(UINT, CPoint point)
 		if ((m_bCursorNotify) && (m_hParent))
 		{
 			::PostMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_MOUSEMOVE, m_nSelection);
+			if((flags & MK_LBUTTON))
+			{
+				::SendMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONDOWN, m_nSelection);
+			}
 		}
 	}
 	if (sel >= 0)
