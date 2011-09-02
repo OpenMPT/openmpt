@@ -393,12 +393,11 @@ UINT CModDoc::RemovePlugs(const vector<bool> &keepMask)
 BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 //-------------------------------------------
 {
-	MODSAMPLE *pSmp;
 	if (nSample >= MAX_SAMPLES) return FALSE;
-	pSmp = &m_SndFile.Samples[nSample];
-	if ((!pSmp->nLength) || (!pSmp->pSample)) return FALSE;
+	MODSAMPLE &sample = m_SndFile.GetSample(nSample);
+	if ((!sample.nLength) || (!sample.pSample)) return FALSE;
 
-	ctrlSmp::AdjustEndOfSample(*pSmp, &m_SndFile);
+	ctrlSmp::AdjustEndOfSample(sample, &m_SndFile);
 
 	return TRUE;
 }
@@ -450,7 +449,7 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 	SAMPLEINDEX i = 1;
 	for(i = 1; i <= m_SndFile.m_nSamples; i++)
 	{
-		if ((!m_SndFile.m_szNames[i][0]) && (m_SndFile.Samples[i].pSample == NULL))
+		if ((!m_SndFile.m_szNames[i][0]) && (m_SndFile.GetSample(i).pSample == NULL))
 		{
 			if ((!m_SndFile.m_nInstruments) || (!m_SndFile.IsSampleUsed(i)))
 			break;
@@ -463,20 +462,8 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 		return SAMPLEINDEX_INVALID;
 	}
 	if (!m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
-	MODSAMPLE *pSmp = &m_SndFile.Samples[i];
-	pSmp->nVolume = 256;
-	pSmp->nGlobalVol = 64;
-	pSmp->nPan = 128;
-	pSmp->nC5Speed = 8363;
-	pSmp->RelativeTone = 0;
-	pSmp->nFineTune = 0;
-	pSmp->nVibType = 0;
-	pSmp->nVibSweep = 0;
-	pSmp->nVibDepth = 0;
-	pSmp->nVibRate = 0;
-	pSmp->uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP);
-	if (m_SndFile.m_nType == MOD_TYPE_XM) pSmp->uFlags |= CHN_PANNING;
-	if (i > m_SndFile.m_nSamples) m_SndFile.m_nSamples = i;
+	InitializeSample(m_SndFile.GetSample(i));
+	if (i > m_SndFile.GetNumSamples()) m_SndFile.m_nSamples = i;
 	SetModified();
 	return i;
 }
@@ -494,7 +481,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	{
 		pDup = m_SndFile.Instruments[nDuplicate];
 	}
-	if ((!m_SndFile.m_nInstruments) && ((m_SndFile.m_nSamples > 1) || (m_SndFile.Samples[1].pSample)))
+	if ((!m_SndFile.GetNumInstruments()) && ((m_SndFile.GetNumSamples() > 1) || (m_SndFile.GetSample(1).pSample)))
 	{
 		if (pDup) return INSTRUMENTINDEX_INVALID;
 		UINT n = CMainFrame::GetMainFrame()->MessageBox("Convert existing samples to instruments first?", NULL, MB_YESNOCANCEL|MB_ICONQUESTION);
@@ -504,7 +491,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 			if (nInstruments > nInstrumentMax) nInstruments = nInstrumentMax;
 			for (SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
 			{
-				m_SndFile.Samples[smp].uFlags &= ~CHN_MUTE;
+				m_SndFile.GetSample(smp).uFlags &= ~CHN_MUTE;
 				if (!m_SndFile.Instruments[smp])
 				{
 					MODINSTRUMENT *p = new MODINSTRUMENT;
@@ -590,6 +577,27 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 }
 
 
+void CModDoc::InitializeSample(MODSAMPLE &sample)
+//-----------------------------------------------
+{
+	sample.nVolume = 256;
+	sample.nGlobalVol = 64;
+	sample.nPan = 128;
+	sample.nC5Speed = 8363;
+	sample.RelativeTone = 0;
+	sample.nFineTune = 0;
+	sample.nVibType = 0;
+	sample.nVibSweep = 0;
+	sample.nVibDepth = 0;
+	sample.nVibRate = 0;
+	sample.uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP);
+	if(m_SndFile.GetType() == MOD_TYPE_XM)
+	{
+		sample.uFlags |= CHN_PANNING;
+	}
+}
+
+
 void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
 //-------------------------------------------------------------------
 {
@@ -660,7 +668,7 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 		m_SndFile.m_szNames[nSmp][0] = 0;
 		while ((m_SndFile.GetNumSamples() > 1)
 			&& (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
-			&& (!m_SndFile.Samples[m_SndFile.GetNumSamples()].pSample))
+			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).pSample))
 		{
 			m_SndFile.m_nSamples--;
 		}

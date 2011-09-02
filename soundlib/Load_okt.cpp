@@ -62,7 +62,7 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 
 	for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		MODSAMPLE *pSmp = &pSndFile->Samples[nSmp];
+		MODSAMPLE &sample = pSndFile->GetSample(nSmp);
 		OKT_SAMPLE oktsmp;
 		memcpy(&oktsmp, lpStream + (nSmp - 1) * 32, sizeof(OKT_SAMPLE));
 
@@ -72,23 +72,23 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 		oktsmp.volume = BigEndianW(oktsmp.volume);
 		oktsmp.type = BigEndianW(oktsmp.type);
 
-		MemsetZero(*pSmp);
+		MemsetZero(sample);
 		strncpy(pSndFile->m_szNames[nSmp], oktsmp.name, 20);
 		StringFixer::SpaceToNullStringFixed<20>(pSndFile->m_szNames[nSmp]);
 
-		pSmp->nC5Speed = 8287;
-		pSmp->nGlobalVol = 64;
-		pSmp->nVolume = min(oktsmp.volume, 64) * 4;
-		pSmp->nLength = oktsmp.length & ~1;	// round down
+		sample.nC5Speed = 8287;
+		sample.nGlobalVol = 64;
+		sample.nVolume = min(oktsmp.volume, 64) * 4;
+		sample.nLength = oktsmp.length & ~1;	// round down
 		// parse loops
-		if (oktsmp.looplen > 2 && ((UINT)oktsmp.loopstart) + ((UINT)oktsmp.looplen) <= pSmp->nLength)
+		if (oktsmp.looplen > 2 && ((UINT)oktsmp.loopstart) + ((UINT)oktsmp.looplen) <= sample.nLength)
 		{
-			pSmp->nSustainStart = oktsmp.loopstart;
-			pSmp->nSustainEnd = oktsmp.loopstart + oktsmp.looplen;
-			if (pSmp->nSustainStart < pSmp->nLength && pSmp->nSustainEnd <= pSmp->nLength)
-				pSmp->uFlags |= CHN_SUSTAINLOOP;
+			sample.nSustainStart = oktsmp.loopstart;
+			sample.nSustainEnd = oktsmp.loopstart + oktsmp.looplen;
+			if (sample.nSustainStart < sample.nLength && sample.nSustainEnd <= sample.nLength)
+				sample.uFlags |= CHN_SUSTAINLOOP;
 			else
-				pSmp->nSustainStart = pSmp->nSustainEnd = 0;
+				sample.nSustainStart = sample.nSustainEnd = 0;
 		}
 		sample7bit[nSmp - 1] = (oktsmp.type == 0 || oktsmp.type == 2) ? true : false;
 	}

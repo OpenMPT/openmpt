@@ -1881,7 +1881,7 @@ void CCtrlInstruments::OnSetPanningChanged()
 			for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
 			{
 				const SAMPLEINDEX smp = pIns->Keyboard[i];
-				if(smp <= m_pSndFile->GetNumSamples() && m_pSndFile->Samples[smp].uFlags & CHN_PANNING)
+				if(smp <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(smp).uFlags & CHN_PANNING)
 				{
 					smpPanningInUse = true;
 					break;
@@ -1900,7 +1900,7 @@ void CCtrlInstruments::OnSetPanningChanged()
 					{
 						const SAMPLEINDEX smp = pIns->Keyboard[i];
 						if(smp <= m_pSndFile->GetNumSamples())
-							m_pSndFile->Samples[smp].uFlags &= ~CHN_PANNING;
+							m_pSndFile->GetSample(smp).uFlags &= ~CHN_PANNING;
 					}
 					m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE);
 				}

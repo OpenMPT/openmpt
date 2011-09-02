@@ -232,7 +232,6 @@ static void ShowChangesDialog()
 
 
 TCHAR CTrackApp::m_szExePath[_MAX_PATH] = TEXT("");
-bool CTrackApp::m_bPortableMode = false;
 
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
@@ -245,13 +244,11 @@ public:
 	bool m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
-	CString m_csExtension;
-
 public:
-	CMPTCommandLineInfo() { 
+	CMPTCommandLineInfo()
+	{ 
 		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx = 
 		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false; 
-		m_csExtension = "";
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
 };
@@ -266,11 +263,11 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
 		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = true; return; } else
 		if (!lstrcmpi(lpszParam, "nomp3")) { m_bNoMp3 = true; return; } else
-		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = true; } else
-		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; } else
-		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; } else
-		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; } else
-		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; }
+		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = true; return; } else
+		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
+		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; return; } else
+		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
+		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; return; }
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 }
@@ -291,7 +288,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 	{
 		glpMidiLibrary = new MIDILIBSTRUCT;
 		if (!glpMidiLibrary) return FALSE;
-		memset(glpMidiLibrary, 0, sizeof(MIDILIBSTRUCT));
+		MemsetZero(*glpMidiLibrary);
 	}
 	if (CDLSBank::IsDLSBank(lpszConfigFile))
 	{
@@ -303,7 +300,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 												"Warning", MB_YESNOCANCEL|MB_ICONQUESTION );
 		}
 		if (id == IDCANCEL) return FALSE;
-		BOOL bReplaceAll = (id == IDNO) ? TRUE : FALSE;
+		const bool bReplaceAll = (id == IDNO);
 		CDLSBank dlsbank;
 		if (dlsbank.Open(lpszConfigFile))
 		{
@@ -391,7 +388,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 
 		if(szFileName[0])
 		{
-			if(IsPortableMode())
+			if(theApp.IsPortableMode())
 				theApp.AbsolutePathToRelative(szFileName);
 			if (!WritePrivateProfileString("Midi Library", s, szFileName, lpszConfigFile)) break;
 		}
@@ -497,13 +494,14 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 	TCHAR s[64];
 	TCHAR szPath[_MAX_PATH];
 	DWORD nBanks = 0;
-	for (UINT i=0; i<MAX_DLS_BANKS; i++) {
+	for (UINT i=0; i<MAX_DLS_BANKS; i++)
+	{
 		
 		if (!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
 			continue;
 		
 		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), ARRAYELEMCOUNT(szPath) - 1);
-		if(IsPortableMode())
+		if(theApp.IsPortableMode())
 		{
 			theApp.AbsolutePathToRelative(szPath);
 		}
@@ -584,12 +582,13 @@ END_MESSAGE_MAP()
 CTrackApp::CTrackApp()
 //--------------------
 {
-	#if (_MSC_VER >= 1400)
+	#if (_MSC_VER >= MSVC_VER_2005)
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 
 	ExceptionHandler::RegisterMainThread();
 
+	m_bPortableMode = false;
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_bInitialized = FALSE;
@@ -598,15 +597,8 @@ CTrackApp::CTrackApp()
 	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
 	for (UINT i=0; i<MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
-	// Default macro config
-	MemsetZero(m_MidiCfg);
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_START], "FF");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_STOP], "FC");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
-	strcpy(m_MidiCfg.szMidiSFXExt[0], "F0F000z");
-	CModDoc::CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_reso4Bit);
+	// Reset default macro config
+	CSoundFile::ResetMidiCfg(m_MidiCfg);
 }
 
 /////////////////////////////////////////////////////////////////////////////

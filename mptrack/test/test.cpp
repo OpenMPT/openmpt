@@ -103,6 +103,8 @@ void TestVersion()
 		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,01,13)), true);
 		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,19,01,00)), false);
 		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,17,02,54)), false);
+		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,02,00)), false);
+		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,02,01)), true);
 		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,2,28) == 18285096 );
 		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,02,48) == 18285128 );
 		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,02,52) == 18285138 );
@@ -305,23 +307,23 @@ void TestLoadFile(const CModDoc *pModDoc)
 
 	// Samples
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 1);
-	const MODSAMPLE *pSmp = &pSndFile->Samples[1];
-	VERIFY_EQUAL_NONCONT(pSmp->GetBytesPerSample(), 1);
-	VERIFY_EQUAL_NONCONT(pSmp->GetNumChannels(), 1);
-	VERIFY_EQUAL_NONCONT(pSmp->GetElementarySampleSize(), 1);
-	VERIFY_EQUAL_NONCONT(pSmp->GetSampleSizeInBytes(), 16);
-	VERIFY_EQUAL_NONCONT(pSmp->GetSampleRate(MOD_TYPE_MPT), 9001);
-	VERIFY_EQUAL_NONCONT(pSmp->uFlags, CHN_PANNING | CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	const MODSAMPLE &sample = pSndFile->GetSample(1);
+	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
+	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
+	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
+	VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16);
+	VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 9001);
+	VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_PANNING | CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
-	VERIFY_EQUAL_NONCONT(pSmp->nLoopStart, 1);
-	VERIFY_EQUAL_NONCONT(pSmp->nLoopEnd, 8);
-	VERIFY_EQUAL_NONCONT(pSmp->nSustainStart, 1);
-	VERIFY_EQUAL_NONCONT(pSmp->nSustainEnd, 7);
+	VERIFY_EQUAL_NONCONT(sample.nLoopStart, 1);
+	VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 8);
+	VERIFY_EQUAL_NONCONT(sample.nSustainStart, 1);
+	VERIFY_EQUAL_NONCONT(sample.nSustainEnd, 7);
 
-	VERIFY_EQUAL_NONCONT(pSmp->nVibType, VIB_SQUARE);
-	VERIFY_EQUAL_NONCONT(pSmp->nVibSweep, 3);
-	VERIFY_EQUAL_NONCONT(pSmp->nVibRate, 4);
-	VERIFY_EQUAL_NONCONT(pSmp->nVibDepth, 5);
+	VERIFY_EQUAL_NONCONT(sample.nVibType, VIB_SQUARE);
+	VERIFY_EQUAL_NONCONT(sample.nVibSweep, 3);
+	VERIFY_EQUAL_NONCONT(sample.nVibRate, 4);
+	VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
 
 	// Instruments
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);

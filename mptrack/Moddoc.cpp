@@ -932,20 +932,20 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		} 
 		else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
 		{
-			MODSAMPLE *pSmp = &m_SndFile.Samples[nsmp];
-			pChn->pCurrentSample = pSmp->pSample;
+			MODSAMPLE &sample = m_SndFile.GetSample(nsmp);
+			pChn->pCurrentSample = sample.pSample;
 			pChn->pModInstrument = nullptr;
-			pChn->pModSample = pSmp;
-			pChn->pSample = pSmp->pSample;
-			pChn->nFineTune = pSmp->nFineTune;
-			pChn->nC5Speed = pSmp->nC5Speed;
+			pChn->pModSample = &sample;
+			pChn->pSample = sample.pSample;
+			pChn->nFineTune = sample.nFineTune;
+			pChn->nC5Speed = sample.nC5Speed;
 			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
-			pChn->nLoopStart = pSmp->nLoopStart;
-			pChn->nLoopEnd = pSmp->nLoopEnd;
-			pChn->dwFlags = pSmp->uFlags & (0xFF & ~CHN_MUTE);
+			pChn->nLoopStart = sample.nLoopStart;
+			pChn->nLoopEnd = sample.nLoopEnd;
+			pChn->dwFlags = sample.uFlags & (0xFF & ~CHN_MUTE);
 			pChn->nPan = 128;
-			if (pSmp->uFlags & CHN_PANNING) pChn->nPan = pSmp->nPan;
-			pChn->nInsVol = pSmp->nGlobalVol;
+			if (sample.uFlags & CHN_PANNING) pChn->nPan = sample.nPan;
+			pChn->nInsVol = sample.nGlobalVol;
 			pChn->nFadeOutVol = 0x10000;
 		}
 
@@ -1090,7 +1090,7 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 	{
 		if ((pChn->nLength) && (!(pChn->dwFlags & (CHN_NOTEFADE|CHN_KEYOFF|CHN_MUTE)))
 		 && ((note == pChn->nNewNote) || (!note))
-		 && ((pChn->pModSample == &m_SndFile.Samples[nsmp]) || (!nsmp))
+		 && ((pChn->pModSample == &m_SndFile.GetSample(nsmp)) || (!nsmp))
 		 && ((pChn->pModInstrument == m_SndFile.Instruments[nins]) || (!nins))) return TRUE;
 	}
 	return FALSE;
@@ -1280,8 +1280,8 @@ bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)
 //-------------------------------------------------------
 {
 	if ((nSample < 1) || (nSample > m_SndFile.m_nSamples)) return false;
-	if (bMute) m_SndFile.Samples[nSample].uFlags |= CHN_MUTE;
-	else m_SndFile.Samples[nSample].uFlags &= ~CHN_MUTE;
+	if (bMute) m_SndFile.GetSample(nSample).uFlags |= CHN_MUTE;
+	else m_SndFile.GetSample(nSample).uFlags &= ~CHN_MUTE;
 	return true;
 }
 
@@ -1367,7 +1367,7 @@ bool CModDoc::IsSampleMuted(SAMPLEINDEX nSample) const
 //----------------------------------------------------
 {
 	if ((!nSample) || (nSample > m_SndFile.m_nSamples)) return false;
-	return (m_SndFile.Samples[nSample].uFlags & CHN_MUTE) ? true : false;
+	return (m_SndFile.GetSample(nSample).uFlags & CHN_MUTE) ? true : false;
 }
 
 
@@ -1624,7 +1624,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 				// Re-mute previously processed sample
 				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
 
-				if(m_SndFile.Samples[i + 1].pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
+				if(m_SndFile.GetSample(i + 1).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
 					continue;
 				// Add sample number & name (if available) to path string
 				if(strlen(m_SndFile.m_szNames[i + 1]) > 0)
@@ -3885,7 +3885,7 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 	if (instrumentName.IsEmpty())
 	{
 		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[NOTE_MIDDLEC - 1];
-		if (nSmp < ARRAYELEMCOUNT(m_SndFile.Samples) && m_SndFile.Samples[nSmp].pSample)
+		if (nSmp < MAX_SAMPLES && m_SndFile.GetSample(nSmp).pSample)
 			instrumentName.Format(TEXT("s: %s"), m_SndFile.GetSampleName(nSmp)); //60 is C-5
 	}
 
@@ -3945,7 +3945,7 @@ void CModDoc::FixNullStrings()
 	for(SAMPLEINDEX nSmp = 1; nSmp < m_SndFile.GetNumSamples(); nSmp++)
 	{
 		StringFixer::FixNullString(m_SndFile.m_szNames[nSmp]);
-		StringFixer::FixNullString(m_SndFile.Samples[nSmp].filename);
+		StringFixer::FixNullString(m_SndFile.GetSample(nSmp).filename);
 	}
 
 	// Instrument names

@@ -1487,7 +1487,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	{
 		pSndFile->DestroySample(nSample);
 		UINT nWaveLink = pDlsIns->Regions[nRgn].nWaveLink;
-		MODSAMPLE *psmp = &pSndFile->Samples[nSample];
+		MODSAMPLE &sample = pSndFile->GetSample(nSample);
 		if (pSndFile->m_nSamples < nSample) pSndFile->m_nSamples = nSample;
 		if ((nWaveLink < m_nSamplesEx) && (m_pSamplesEx))
 		{
@@ -1495,47 +1495,47 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 		#ifdef DLSINSTR_LOG
 			Log("  SF2 WaveLink #%3d: %5dHz\n", nWaveLink, p->dwSampleRate);
 		#endif
-			psmp->nLength = dwLen / 2;
-			psmp->uFlags = CHN_16BIT;
-			psmp->nLoopStart = pDlsIns->Regions[nRgn].ulLoopStart;
-			psmp->nLoopEnd = pDlsIns->Regions[nRgn].ulLoopEnd;
-			psmp->nC5Speed = p->dwSampleRate;
-			psmp->nGlobalVol = 64;
-			psmp->nVolume = 256;
-			psmp->nPan = 128;
-			pSndFile->ReadSample(psmp, RS_PCM16S, (LPSTR)pWaveForm, dwLen);
-			psmp->RelativeTone = p->byOriginalPitch;
-			psmp->nFineTune = p->chPitchCorrection;
+			sample.nLength = dwLen / 2;
+			sample.uFlags = CHN_16BIT;
+			sample.nLoopStart = pDlsIns->Regions[nRgn].ulLoopStart;
+			sample.nLoopEnd = pDlsIns->Regions[nRgn].ulLoopEnd;
+			sample.nC5Speed = p->dwSampleRate;
+			sample.nGlobalVol = 64;
+			sample.nVolume = 256;
+			sample.nPan = 128;
+			pSndFile->ReadSample(&sample, RS_PCM16S, (LPSTR)pWaveForm, dwLen);
+			sample.RelativeTone = p->byOriginalPitch;
+			sample.nFineTune = p->chPitchCorrection;
 		}
-		bWaveForm = (psmp->pSample) ? TRUE : FALSE;
+		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else
 	{
 		bWaveForm = pSndFile->ReadWAVSample(nSample, pWaveForm, dwLen, &dwWSMPOffset);
 	}
 	if (bWaveForm)
 	{
-		MODSAMPLE *psmp = &pSndFile->Samples[nSample];
+		MODSAMPLE &sample = pSndFile->GetSample(nSample);
 		DLSREGION *pRgn = &pDlsIns->Regions[nRgn];
-		psmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) psmp->uFlags |= CHN_LOOP;
-		if (pRgn->fuOptions & DLSREGION_SUSTAINLOOP) psmp->uFlags |= CHN_SUSTAINLOOP;
-		if (pRgn->fuOptions & DLSREGION_PINGPONGLOOP) psmp->uFlags |= CHN_PINGPONGLOOP;
-		if (psmp->uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
+		sample.uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) sample.uFlags |= CHN_LOOP;
+		if (pRgn->fuOptions & DLSREGION_SUSTAINLOOP) sample.uFlags |= CHN_SUSTAINLOOP;
+		if (pRgn->fuOptions & DLSREGION_PINGPONGLOOP) sample.uFlags |= CHN_PINGPONGLOOP;
+		if (sample.uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
 		{
 			if (pRgn->ulLoopEnd > pRgn->ulLoopStart)
 			{
-				if (psmp->uFlags & CHN_SUSTAINLOOP)
+				if (sample.uFlags & CHN_SUSTAINLOOP)
 				{
-					psmp->nSustainStart = pRgn->ulLoopStart;
-					psmp->nSustainEnd = pRgn->ulLoopEnd;
+					sample.nSustainStart = pRgn->ulLoopStart;
+					sample.nSustainEnd = pRgn->ulLoopEnd;
 				} else
 				{
-					psmp->nLoopStart = pRgn->ulLoopStart;
-					psmp->nLoopEnd = pRgn->ulLoopEnd;
+					sample.nLoopStart = pRgn->ulLoopStart;
+					sample.nLoopEnd = pRgn->ulLoopEnd;
 				}
 			} else
 			{
-				psmp->uFlags &= ~(CHN_LOOP|CHN_SUSTAINLOOP);
+				sample.uFlags &= ~(CHN_LOOP|CHN_SUSTAINLOOP);
 			}
 		}
 		// WSMP chunk
@@ -1554,45 +1554,45 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 					WSMPSAMPLELOOP *ploop = (WSMPSAMPLELOOP *)(pWaveForm+dwWSMPOffset+8+p->cbSize);
 					if (ploop->ulLoopLength > 3)
 					{
-						psmp->uFlags |= CHN_LOOP;
-						//if (ploop->ulLoopType) psmp->uFlags |= CHN_PINGPONGLOOP;
-						psmp->nLoopStart = ploop->ulLoopStart;
-						psmp->nLoopEnd = ploop->ulLoopStart + ploop->ulLoopLength;
+						sample.uFlags |= CHN_LOOP;
+						//if (ploop->ulLoopType) sample.uFlags |= CHN_PINGPONGLOOP;
+						sample.nLoopStart = ploop->ulLoopStart;
+						sample.nLoopEnd = ploop->ulLoopStart + ploop->ulLoopLength;
 					}
 				}
 			} else
 			if (m_nType & SOUNDBANK_TYPE_SF2)
 			{
-				usUnityNote += psmp->RelativeTone - 60;
-				sFineTune += psmp->nFineTune;
+				usUnityNote += sample.RelativeTone - 60;
+				sFineTune += sample.nFineTune;
 			}
 		#ifdef DLSINSTR_LOG
-			Log("WSMP: usUnityNote=%d.%d, %dHz (transp=%d)\n", usUnityNote, sFineTune, psmp->nC5Speed, transpose);
+			Log("WSMP: usUnityNote=%d.%d, %dHz (transp=%d)\n", usUnityNote, sFineTune, sample.nC5Speed, transpose);
 		#endif
 			if (usUnityNote > 0x7F) usUnityNote = 60;
 			int nBaseTune = DlsFreqToTranspose(
-								psmp->nC5Speed,
+								sample.nC5Speed,
 								sFineTune+(60 + transpose - usUnityNote)*100);
-			psmp->nFineTune = (CHAR)(nBaseTune & 0x7F);
-			psmp->RelativeTone = (CHAR)(nBaseTune >> 7);
-			psmp->nC5Speed = CSoundFile::TransposeToFrequency(psmp->RelativeTone, psmp->nFineTune);
+			sample.nFineTune = (CHAR)(nBaseTune & 0x7F);
+			sample.RelativeTone = (CHAR)(nBaseTune >> 7);
+			sample.nC5Speed = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
 			if (lVolume > 256) lVolume = 256;
 			if (lVolume < 16) lVolume = 16;
-			psmp->nGlobalVol = (BYTE)(lVolume / 4);	// 0-64
+			sample.nGlobalVol = (BYTE)(lVolume / 4);	// 0-64
 		}
 		if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 		{
 			if ((pRgn->uPercEnv) && (pRgn->uPercEnv <= m_nEnvelopes))
 			{
-				psmp->nPan = m_Envelopes[pRgn->uPercEnv-1].nDefPan;
-				if (pSndFile->m_nType & MOD_TYPE_XM) psmp->uFlags |= CHN_PANNING;
+				sample.nPan = m_Envelopes[pRgn->uPercEnv-1].nDefPan;
+				if (pSndFile->m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
 			}
 		} else
 		{
 			if ((pDlsIns->nMelodicEnv) && (pDlsIns->nMelodicEnv <= m_nEnvelopes))
 			{
-				psmp->nPan = m_Envelopes[pDlsIns->nMelodicEnv-1].nDefPan;
-				if (pSndFile->m_nType & MOD_TYPE_XM) psmp->uFlags |= CHN_PANNING;
+				sample.nPan = m_Envelopes[pDlsIns->nMelodicEnv-1].nDefPan;
+				if (pSndFile->m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
 			}
 		}
 		if (pDlsIns->szName[0]) memcpy(pSndFile->m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
@@ -1746,7 +1746,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				while ((nSample < MAX_SAMPLES) && ((pSndFile->Samples[nSample].pSample) || (pSndFile->m_szNames[nSample][0]))) nSample++;
+				while ((nSample < MAX_SAMPLES) && ((pSndFile->GetSample(nSample).pSample) || (pSndFile->m_szNames[nSample][0]))) nSample++;
 				if (nSample >= MAX_SAMPLES) break;
 				if (nSample > pSndFile->m_nSamples) pSndFile->m_nSamples = nSample;
 				nSmp = nSample;

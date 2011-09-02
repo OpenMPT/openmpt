@@ -105,7 +105,7 @@ CModTree::CModTree(CModTree *pDataTree)
 {
 	m_pDataTree = pDataTree;
 	m_dwStatus = 0;
-	m_bShowAllFiles = FALSE;
+	m_bShowAllFiles = false;
 	m_hItemDrag = m_hItemDrop = NULL;
 	m_szInstrLibPath[0] = 0;
 	m_szOldPath[0] = 0;
@@ -903,9 +903,9 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		{
 			if (nSmp <= pSndFile->m_nSamples)
 			{
-				bool bSamplePresent = (pSndFile->Samples[nSmp].pSample) ? true : false;
-				int nImage = (bSamplePresent) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
-				if(pInfo->bIsSamplePlaying[nSmp - 1] && bSamplePresent) nImage = IMAGE_SAMPLEACTIVE;
+				const bool sampleExists = (pSndFile->GetSample(nSmp).pSample != nullptr);
+				int nImage = (sampleExists) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
+				if(sampleExists && pInfo->samplesPlaying[nSmp]) nImage = IMAGE_SAMPLEACTIVE;
 				if(pInfo->pModDoc->IsSampleMuted(nSmp)) nImage = IMAGE_SAMPLEMUTE;
 
 				wsprintf(s, "%3d: %s", nSmp, pSndFile->m_szNames[nSmp]);
@@ -959,7 +959,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		}
 		for (INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)
 		{
-			if ((nIns <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nIns]))
+			if ((nIns <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[nIns]))
 			{
 				if((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0)
 				{
@@ -973,7 +973,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				}
 
 				int nImage = IMAGE_INSTRUMENTS;
-				if(pInfo->bIsInstrPlaying[nIns - 1]) nImage = IMAGE_INSTRACTIVE;
+				if(pInfo->instrumentsPlaying[nIns]) nImage = IMAGE_INSTRACTIVE;
 				if(pInfo->pModDoc->IsInstrumentMuted(nIns)) nImage = IMAGE_INSTRMUTE;
 
 				if (!pInfo->tiInstruments[nIns])
@@ -1568,9 +1568,9 @@ void CModTree::FillInstrumentLibrary()
 		}
 		for (UINT iSmp=1; iSmp<=m_SongFile.m_nSamples; iSmp++)
 		{
-			MODSAMPLE *psmp = &m_SongFile.Samples[iSmp];
+			const MODSAMPLE &sample = m_SongFile.GetSample(iSmp);
 			lstrcpyn(szPath, m_SongFile.m_szNames[iSmp], 32);
-			if (psmp->pSample)
+			if (sample.pSample)
 			{
 				wsprintf(s, "%3d: %s", iSmp, szPath);
 				ModTreeBuildTVIParam(tvis, s, IMAGE_SAMPLES);
@@ -2158,12 +2158,12 @@ void CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 	nUpdateCount = 0;*/
 
 	// check whether the lists are actually visible (don't waste resources)
-	bool bUpdateSamples = IsItemExpanded(pInfo->hSamples), bUpdateInstruments = IsItemExpanded(pInfo->hInstruments);
+	const bool updateSamples = IsItemExpanded(pInfo->hSamples), updateInstruments = IsItemExpanded(pInfo->hInstruments);
 
-	memset(pInfo->bIsSamplePlaying, false, MAX_SAMPLES * sizeof(bool));
-	memset(pInfo->bIsInstrPlaying, false, MAX_INSTRUMENTS * sizeof(bool));
+	pInfo->samplesPlaying.reset();
+	pInfo->instrumentsPlaying.reset();
 
-	if((bUpdateSamples == false) && (bUpdateInstruments == false)) return;
+	if(!updateSamples && !updateInstruments) return;
 
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return;
@@ -2172,24 +2172,24 @@ void CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 	{
 		if(pSndFile->Chn[nChn].pCurrentSample != nullptr)
 		{
-			if(bUpdateSamples)
+			if(updateSamples)
 			{
-				for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
+				for(SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--)
 				{
-					if(pSndFile->Chn[nChn].pModSample == &pSndFile->Samples[nSmp])
+					if(pSndFile->Chn[nChn].pModSample == &pSndFile->GetSample(nSmp))
 					{
-						pInfo->bIsSamplePlaying[nSmp - 1] = true;
+						pInfo->samplesPlaying.set(nSmp);
 						break;
 					}
 				}
 			}
-			if(bUpdateInstruments)
+			if(updateInstruments)
 			{
-				for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
+				for(INSTRUMENTINDEX nIns = pSndFile->GetNumInstruments(); nIns >= 1; nIns--)
 				{
 					if(pSndFile->Chn[nChn].pModInstrument == pSndFile->Instruments[nIns])
 					{
-						pInfo->bIsInstrPlaying[nIns - 1] = true;
+						pInfo->instrumentsPlaying.set(nIns);
 						break;
 					}
 				}
@@ -2197,7 +2197,7 @@ void CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 		}
 	}
 	// what should be updated?
-	DWORD dwHintFlags = (bUpdateSamples ? HINT_SAMPLEINFO : 0) | (bUpdateInstruments ? HINT_INSTRUMENT : 0);
+	DWORD dwHintFlags = (updateSamples ? HINT_SAMPLEINFO : 0) | (updateInstruments ? HINT_INSTRUMENT : 0);
 	if(dwHintFlags != 0) UpdateView(pInfo, dwHintFlags);
 }
 
@@ -3215,7 +3215,7 @@ void CModTree::OnShowAllFiles()
 {
 	if (!m_bShowAllFiles)
 	{
-		m_bShowAllFiles = TRUE;
+		m_bShowAllFiles = true;
 		OnRefreshInstrLib();
 	}
 }
@@ -3226,7 +3226,7 @@ void CModTree::OnShowSoundFiles()
 {
 	if (m_bShowAllFiles)
 	{
-		m_bShowAllFiles = FALSE;
+		m_bShowAllFiles = false;
 		OnRefreshInstrLib();
 	}
 }
@@ -3254,6 +3254,7 @@ void CModTree::OnSoundBankProperties()
 
 
 LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
+//----------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -3262,7 +3263,7 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	if (wParam>=kcTreeViewStartNotes && wParam<=kcTreeViewEndNotes)
 	{
-		PlayItem(GetSelectedItem(), wParam-kcTreeViewStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		PlayItem(GetSelectedItem(), wParam - kcTreeViewStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
 		return wParam;
 	}
 	if (wParam>=kcTreeViewStartNoteStops && wParam<=kcTreeViewEndNoteStops)
@@ -3273,17 +3274,21 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	return NULL;
 }
 
+
 void CModTree::OnKillFocus(CWnd* pNewWnd)
+//--------------------------------------
 {
 	CTreeCtrl::OnKillFocus(pNewWnd);
-	CMainFrame::GetMainFrame()->m_bModTreeHasFocus=false;
+	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
 	
 }
 
+
 void CModTree::OnSetFocus(CWnd* pOldWnd)
+//--------------------------------------
 {
 	CTreeCtrl::OnSetFocus(pOldWnd);
-	CMainFrame::GetMainFrame()->m_bModTreeHasFocus=true;
+	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = true;
 }
 
 

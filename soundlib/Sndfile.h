@@ -632,7 +632,7 @@ public:	// for Editing
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
 	double m_dBufferDiff;
 	UINT m_nTickCount, m_nTotalCount;
-	UINT m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay, m_nFrameDelay = fine pattern delay
+	UINT m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
 	UINT m_nSamplesPerTick;		// rewbs.betterBPM
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
@@ -660,7 +660,9 @@ public:	// for Editing
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
 	CPatternContainer Patterns;							// Patterns
 	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.
+protected:
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
+public:
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MODINSTRUMENT m_defaultInstrument;					// Currently only used to get default values for extented properties. 
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
@@ -1013,8 +1015,9 @@ public:
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
 	UINT GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac=0) const;
 	// Misc functions
-	MODSAMPLE *GetSample(UINT n) { return Samples+n; }
-	void ResetMidiCfg();
+	MODSAMPLE &GetSample(SAMPLEINDEX sample) { ASSERT(sample < CountOf(Samples)); return Samples[sample]; }
+	const MODSAMPLE &GetSample(SAMPLEINDEX sample) const { ASSERT(sample < CountOf(Samples)); return Samples[sample]; }
+	static void ResetMidiCfg(MODMIDICFG &midiConfig);
 	void SanitizeMacros();
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	long ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData

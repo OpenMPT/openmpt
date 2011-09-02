@@ -760,45 +760,45 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 	DMFCHUNK_SAMPLEHEADER *smpHead = (DMFCHUNK_SAMPLEHEADER *)(lpStream + dwMemPos);
 	dwMemPos += sizeof(DMFCHUNK_SAMPLEHEADER);
 
-	MODSAMPLE *pSmp = &pSndFile->Samples[nSmp];
-	MemsetZero(*pSmp);
-	pSmp->nLength = min(MAX_SAMPLE_LENGTH, LittleEndian(smpHead->length));
-	pSmp->nSustainEnd = min(pSmp->nLength, LittleEndian(smpHead->loopEnd));
-	pSmp->nSustainStart = min(pSmp->nSustainEnd, LittleEndian(smpHead->loopStart));
-	if(pSmp->nSustainEnd > 0)
+	MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+	MemsetZero(sample);
+	sample.nLength = min(MAX_SAMPLE_LENGTH, LittleEndian(smpHead->length));
+	sample.nSustainEnd = min(sample.nLength, LittleEndian(smpHead->loopEnd));
+	sample.nSustainStart = min(sample.nSustainEnd, LittleEndian(smpHead->loopStart));
+	if(sample.nSustainEnd > 0)
 	{
-		pSmp->nSustainEnd--;
+		sample.nSustainEnd--;
 	}
 
-	pSmp->nC5Speed = LittleEndianW(smpHead->c3freq);
-	pSmp->nGlobalVol = 64;
+	sample.nC5Speed = LittleEndianW(smpHead->c3freq);
+	sample.nGlobalVol = 64;
 	if(smpHead->volume)
 	{
-		pSmp->nVolume = smpHead->volume + 1;
+		sample.nVolume = smpHead->volume + 1;
 	} else
 	{
-		pSmp->nVolume = 256;
+		sample.nVolume = 256;
 	}
 	sampleFlags = smpHead->flags;
-	pSmp->uFlags = 0;
-	if((sampleFlags & DMFSMP_LOOP) != 0 && pSmp->nSustainEnd > pSmp->nSustainStart)
+	sample.uFlags = 0;
+	if((sampleFlags & DMFSMP_LOOP) != 0 && sample.nSustainEnd > sample.nSustainStart)
 	{
-		pSmp->uFlags |= CHN_SUSTAINLOOP;
+		sample.uFlags |= CHN_SUSTAINLOOP;
 	}
 	if((sampleFlags & DMFSMP_16BIT) != 0)
 	{
-		pSmp->uFlags |= CHN_16BIT;
-		pSmp->nLength /= 2;
-		pSmp->nSustainStart /= 2;
-		pSmp->nSustainEnd /= 2;
+		sample.uFlags |= CHN_16BIT;
+		sample.nLength /= 2;
+		sample.nSustainStart /= 2;
+		sample.nSustainEnd /= 2;
 	}
 
 	if(isV8)
 	{
 		// Read library name in version 8 files
 		ASSERT_CAN_READ_SAMPLE(8);
-		memcpy(pSmp->filename, lpStream + dwMemPos, 8);
-		StringFixer::SpaceToNullStringFixed<8>(pSmp->filename);
+		memcpy(sample.filename, lpStream + dwMemPos, 8);
+		StringFixer::SpaceToNullStringFixed<8>(sample.filename);
 		dwMemPos += 8;
 	}
 
