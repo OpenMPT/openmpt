@@ -366,12 +366,12 @@ typedef struct MPTNOTIFICATION
 /////////////////////////////////////////////////////////////////////////
 // EQ Presets
 
-typedef struct _EQPRESET
+struct EQPRESET
 {
 	CHAR szName[12];
 	UINT Gains[MAX_EQ_BANDS];
 	UINT Freqs[MAX_EQ_BANDS];
-} EQPRESET, *PEQPRESET;
+};
 
 
 /////////////////////////////////////////////////////////////////////////

@@ -1081,6 +1081,10 @@
 #define ID_PRESET_LIST                  32919
 #define ID_INFO                         32920
 #define ID_VIEWPLUGNAMES                32921
+#define ID_EQSLIDER_BASE				32922
+// From here: Command range [ID_EQSLIDER_BASE, ID_EQSLIDER_BASE + MAX_EQ_BANDS]
+#define ID_EQMENU_BASE					32950
+// From here: Command range [ID_EQMENU_BASE, ID_EQMENU_BASE + EQ_MAX_FREQS]
 #define ID_EDIT_SPLITRECSELECT          33900
 #define ID_REARRANGE_SAMPLES            33901
 #define ID_CHANNEL_MANAGER              33905
@@ -1095,7 +1099,9 @@
 #define ID_MODTREE_SAVEITEM             33917
 #define ID_PLUGIN_SETUP                 33918
 #define ID_PRESET_SET                   33920
+// From here: Command range [ID_PRESET_SET, ID_PRESET_SET + MAX_PLUGPRESETS]
 #define ID_PLUGSELECT                   35000
+// From here: Command range [ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS]
 #define ID_VSTMACRO_INFO                36002
 #define ID_VSTINPUT_INFO                36003
 #define ID_APPROX_BPM                   36007
@@ -1122,9 +1128,11 @@
 #define ID_VSTPRESETBACKWARDJUMP        36031
 #define ID_VSTPRESETFORWARDJUMP         36032
 #define ID_SELECTINST                   36100
+// From here: Command range [ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS]
 #define ID_PLUG_RECORDAUTOMATION        37003
 #define ID_LEARN_MACRO_FROM_PLUGGUI     37004
 #define ID_CHANGE_INSTRUMENT            37020
+// From here: Command range [ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT + MAX_INSTRUMENTS]
 #define ID_CLEAR_SELECTION              38000
 #define ID_PLUG_PASSKEYS                38001
 #define ID_VIEW_SONGPROPERTIES          38002
