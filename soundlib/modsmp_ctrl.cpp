@@ -225,28 +225,29 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 	const UINT nSamples = rSndFile.GetNumSamples();
 	for(UINT i = 1; i <= nSamples; i++)
 	{
+		MODSAMPLE &sample = rSndFile.GetSample(i);
 		switch(resetflag)
 		{
 		case SmpResetInit:
 			strcpy(rSndFile.m_szNames[i], "");
-			strcpy(rSndFile.Samples[i].filename, "");
-			rSndFile.Samples[i].nC5Speed = 8363;
+			strcpy(sample.filename, "");
+			sample.nC5Speed = 8363;
 			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
 		case SmpResetCompo:
-			rSndFile.Samples[i].nPan = 128;
-			rSndFile.Samples[i].nGlobalVol = 64;
-			rSndFile.Samples[i].nVolume = 256;
-			rSndFile.Samples[i].nVibDepth = 0;
-			rSndFile.Samples[i].nVibRate = 0;
-			rSndFile.Samples[i].nVibSweep = 0;
-			rSndFile.Samples[i].nVibType = 0;
-			rSndFile.Samples[i].uFlags &= ~CHN_PANNING;
+			sample.nPan = 128;
+			sample.nGlobalVol = 64;
+			sample.nVolume = 256;
+			sample.nVibDepth = 0;
+			sample.nVibRate = 0;
+			sample.nVibSweep = 0;
+			sample.nVibType = 0;
+			sample.uFlags &= ~CHN_PANNING;
 			break;
 		case SmpResetVibrato:
-			rSndFile.Samples[i].nVibDepth = 0;
-			rSndFile.Samples[i].nVibRate = 0;
-			rSndFile.Samples[i].nVibSweep = 0;
-			rSndFile.Samples[i].nVibType = 0;
+			sample.nVibDepth = 0;
+			sample.nVibRate = 0;
+			sample.nVibSweep = 0;
+			sample.nVibType = 0;
 			break;
 		default:
 			break;

@@ -183,7 +183,7 @@ BOOL CModToMidi::OnInitDialog()
 	{
 		for(SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->m_nSamples; nSmp++)
 		{
-			if ((m_pSndFile->Samples[nSmp].pSample)
+			if ((m_pSndFile->GetSample(nSmp).pSample)
 			 && (m_pSndFile->IsSampleUsed(nSmp)))
 			{
 				memset(s, 0, sizeof(s));
@@ -493,7 +493,7 @@ BOOL CModToMidi::DoConvert()
 								nsmp = pIns->Keyboard[note];
 							} else nsmp = 0;
 						}
-						if ((nsmp) && (nsmp < MAX_SAMPLES)) vol = m_pSndFile->Samples[nsmp].nVolume;
+						if ((nsmp) && (nsmp < MAX_SAMPLES)) vol = m_pSndFile->GetSample(nsmp).nVolume;
 						if (m->volcmd == VOLCMD_VOLUME) vol = m->vol*4;
 						if (m->command == CMD_VOLUME) vol = m->param*4;
 						vol = LinearToDLSMidiVolume(vol<<8);

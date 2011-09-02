@@ -237,7 +237,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (lHint & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
 	{
 		UINT nMax = nCount;
-		if (nMax < pSndFile->m_nSamples) nMax = pSndFile->m_nSamples;
+		if (nMax < pSndFile->GetNumSamples()) nMax = pSndFile->GetNumSamples();
 		for (UINT iSmp=0; iSmp<nMax; iSmp++)
 		{
 			if (iSmp < pSndFile->m_nSamples)
@@ -245,7 +245,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
 				{
-					MODSAMPLE *pSmp = &pSndFile->Samples[iSmp+1];
+					const MODSAMPLE &sample = pSndFile->GetSample(iSmp + 1);
 					s[0] = 0;
 					switch(iCol)
 					{
@@ -256,18 +256,18 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						wsprintf(s, "%02d", iSmp+1);
 						break;
 					case SMPLIST_SIZE:
-						if (pSmp->nLength)
+						if (sample.nLength)
 						{
-							if(pSmp->GetSampleSizeInBytes() >= 1024)
-								wsprintf(s, "%d KB", pSmp->GetSampleSizeInBytes() >> 10);
+							if(sample.GetSampleSizeInBytes() >= 1024)
+								wsprintf(s, "%d KB", sample.GetSampleSizeInBytes() >> 10);
 							else
-								wsprintf(s, "%d B", pSmp->GetSampleSizeInBytes());
+								wsprintf(s, "%d B", sample.GetSampleSizeInBytes());
 						}
 						break;
 					case SMPLIST_TYPE:
-						if (pSmp->nLength)
+						if (sample.nLength)
 						{
-							wsprintf(s, "%d Bit", pSmp->GetElementarySampleSize() << 3);
+							wsprintf(s, "%d Bit", sample.GetElementarySampleSize() << 3);
 						}
 						break;
 					case SMPLIST_INSTR:
@@ -297,17 +297,17 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case SMPLIST_MIDDLEC:
-						if (pSmp->nLength)
+						if (sample.nLength)
 						{
 							wsprintf(s, "%d Hz", 
 								pSndFile->GetFreqFromPeriod(
-									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC + pSmp->RelativeTone, pSmp->nFineTune, pSmp->nC5Speed),
-									pSmp->nC5Speed));
+									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC + sample.RelativeTone, sample.nFineTune, sample.nC5Speed),
+									sample.nC5Speed));
 						}
 						break;
 					case SMPLIST_FILENAME:
-						memcpy(s, pSmp->filename, sizeof(pSmp->filename));
-						s[sizeof(pSmp->filename)] = 0;
+						memcpy(s, sample.filename, sizeof(sample.filename));
+						s[sizeof(sample.filename)] = 0;
 						break;
 					}
 					lvi.mask = LVIF_TEXT;

@@ -557,7 +557,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order.resize(1);
 	Patterns.ClearPatterns();
-	ResetMidiCfg();
+	ResetMidiCfg(m_MidiCfg);
 
 	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
@@ -920,17 +920,17 @@ void CSoundFile::FreeSample(LPVOID p)
 //////////////////////////////////////////////////////////////////////////
 // Misc functions
 
-void CSoundFile::ResetMidiCfg()
-//-----------------------------
+void CSoundFile::ResetMidiCfg(MODMIDICFG &midiConfig)
+//---------------------------------------------------
 {
-	MemsetZero(m_MidiCfg);
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_START], "FF");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_STOP], "FC");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
-	strcpy(m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
-	strcpy(m_MidiCfg.szMidiSFXExt[0], "F0F000z");
-	CModDoc::CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_reso4Bit);
+	MemsetZero(midiConfig);
+	strcpy(midiConfig.szMidiGlb[MIDIOUT_START], "FF");
+	strcpy(midiConfig.szMidiGlb[MIDIOUT_STOP], "FC");
+	strcpy(midiConfig.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
+	strcpy(midiConfig.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
+	strcpy(midiConfig.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
+	strcpy(midiConfig.szMidiSFXExt[0], "F0F000z");
+	CModDoc::CreateZxxFromType(midiConfig.szMidiZXXExt, zxx_reso4Bit);
 }
 
 

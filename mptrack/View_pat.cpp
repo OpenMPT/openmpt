@@ -153,8 +153,8 @@ CViewPattern::CViewPattern()
 void CViewPattern::OnInitialUpdate()
 //----------------------------------
 {
-	memset(ChnVUMeters, 0, sizeof(ChnVUMeters));
-	memset(OldVUMeters, 0, sizeof(OldVUMeters));
+	MemsetZero(ChnVUMeters);
+	MemsetZero(OldVUMeters);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
@@ -238,7 +238,7 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 
 // This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
 BOOL CViewPattern::SetCursorPosition(UINT nrow, UINT ncol, BOOL bWrap)
-//--------------------------------------------------------------------------
+//--------------------------------------------------------------------
 {
 	// Set row, but do not update scroll position yet
 	// as there is another position update on the way:
@@ -621,12 +621,9 @@ bool CViewPattern::PrepareUndo(DWORD dwBegin, DWORD dwEnd)
 //--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	UINT nChnBeg, nRowBeg, nChnEnd, nRowEnd;
+	const CHANNELINDEX nChnBeg = GetChanFromCursor(dwBegin), nChnEnd = GetChanFromCursor(dwEnd);
+	const ROWINDEX nRowBeg = GetRowFromCursor(dwBegin), nRowEnd = GetRowFromCursor(dwEnd);
 
-	nChnBeg = GetChanFromCursor(dwBegin);
-	nRowBeg = GetRowFromCursor(dwBegin);
-	nChnEnd = GetChanFromCursor(dwEnd);
-	nRowEnd = GetRowFromCursor(dwEnd);
 	if((nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) || pModDoc == nullptr) return false;
 	return pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd-nChnBeg+1, nRowEnd-nRowBeg+1);
 }
@@ -1272,12 +1269,14 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 	HMENU hMenu;
 
 	// Too far left to get a ctx menu:
-	if ((!pModDoc) || (pt.x < m_szHeader.cx)) {
+	if ((!pModDoc) || (pt.x < m_szHeader.cx))
+	{
 		return;
 	}
 
 	// Handle drag n drop
-	if (m_dwStatus & PATSTATUS_DRAGNDROPEDIT)	{
+	if (m_dwStatus & PATSTATUS_DRAGNDROPEDIT)
+	{
 		if (m_dwStatus & PATSTATUS_DRAGNDROPPING)
 		{
 			OnDrawDragSel();
@@ -1308,7 +1307,10 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 	 || ((m_nMenuParam & 0xFFFF) < (m_dwBeginSel & 0xFFFF))
 	 || ((m_nMenuParam & 0xFFFF) > (m_dwEndSel & 0xFFFF)))
 	{
-		if (pt.y > m_szHeader.cy) { //ensure we're not clicking header
+		if (pt.y > m_szHeader.cy)
+		{
+			//ensure we're not clicking header
+
 			// Fix: Horizontal scrollbar pos screwed when selecting with mouse
 			SetCursorPosition( GetRowFromCursor(m_nMenuParam), m_nMenuParam & 0xFFFF );
 		}
@@ -1321,15 +1323,19 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 
 		//------ Plugin Header Menu --------- :
 		if ((m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS) && 
-			(pt.y > m_szHeader.cy-PLUGNAME_HEIGHT) && (pt.y < m_szHeader.cy)) {
+			(pt.y > m_szHeader.cy-PLUGNAME_HEIGHT) && (pt.y < m_szHeader.cy))
+		{
 			BuildPluginCtxMenu(hMenu, nChn, pSndFile);
 		}
 		
 		//------ Channel Header Menu ---------- :
-		else if (pt.y < m_szHeader.cy){
-			if (ih->ShiftPressed()) {
+		else if (pt.y < m_szHeader.cy)
+		{
+			if (ih->ShiftPressed())
+			{
 				//Don't bring up menu if shift is pressed, else we won't get button up msg.
-			} else {
+			} else
+			{
 				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
@@ -1339,7 +1345,8 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		}
 		
 		//------ Standard Menu ---------- :
-		else if ((pt.x >= m_szHeader.cx) && (pt.y >= m_szHeader.cy))	{
+		else if ((pt.x >= m_szHeader.cx) && (pt.y >= m_szHeader.cy))
+		{
 			/*if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");*/
 			if (BuildSelectionCtxMenu(hMenu, ih))
@@ -1363,7 +1370,6 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 			if(BuildMiscCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			BuildRowInsDelCtxMenu(hMenu, ih);
-					
 		}
 
 		ClientToScreen(&pt);
@@ -1784,6 +1790,7 @@ void CViewPattern::OnInsertRows()
 }
 //end rewbs.customKeys
 
+
 void CViewPattern::OnEditFind()
 //-----------------------------
 {
@@ -1846,6 +1853,7 @@ void CViewPattern::OnEditFind()
 	}
 }
 
+
 void CViewPattern::OnEditGoto()
 //-----------------------------
 {
@@ -1888,6 +1896,7 @@ void CViewPattern::OnEditGoto()
 	}
 	return;
 }
+
 
 void CViewPattern::OnEditFindNext()
 //---------------------------------
@@ -2238,6 +2247,7 @@ void CViewPattern::OnCursorCopy()
 	}
 }
 
+
 void CViewPattern::OnCursorPaste()
 //--------------------------------
 {
@@ -2282,22 +2292,29 @@ void CViewPattern::OnInterpolateVolume()
 	Interpolate(VOL_COLUMN);
 }
 
+
 void CViewPattern::OnOpenRandomizer()
-//--------------------------------------
+//-----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) {
-		if (m_pRandomizer) {
-			if (m_pRandomizer->isGUIVisible()) { //window already there, update data
+	if (pModDoc)
+	{
+		if (m_pRandomizer)
+		{
+			if (m_pRandomizer->isGUIVisible())
+			{
+				//window already there, update data
 				//m_pRandomizer->UpdateSelection(rowStart, rowEnd, nchn, pModDoc, m_nPattern);
-			} else {
+			} else
+			{
 				m_pRandomizer->showGUI();
 			}
-		}
-		else {
+		} else
+		{
 			//Open window & send data
 			m_pRandomizer = new CPatternRandomizer(this);
-			if (m_pRandomizer) {
+			if (m_pRandomizer)
+			{
 				m_pRandomizer->showGUI();
 			}
 		}
@@ -2306,7 +2323,7 @@ void CViewPattern::OnOpenRandomizer()
 
 //begin rewbs.fxvis
 void CViewPattern::OnVisualizeEffect()
-//--------------------------------------
+//------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
@@ -2948,7 +2965,7 @@ void CViewPattern::OnPatternAmplify()
 						}
 						if ((nSmp) && (nSmp <= pSndFile->GetNumSamples()))
 						{
-							chvol[nChn] = (BYTE)(pSndFile->Samples[nSmp].nVolume >> 2);
+							chvol[nChn] = (BYTE)(pSndFile->GetSample(nSmp).nVolume / 4);
 							break;
 						}
 						else
@@ -3001,11 +3018,11 @@ void CViewPattern::OnPatternAmplify()
 							if(useVolCol)
 							{
 								m->volcmd = VOLCMD_VOLUME;
-								m->vol = (overrideSampleVol) ? 64 : pSndFile->Samples[nSmp].nVolume >> 2;
+								m->vol = (overrideSampleVol) ? 64 : pSndFile->GetSample(nSmp).nVolume / 4;
 							} else
 							{
 								m->command = CMD_VOLUME;
-								m->param = (overrideSampleVol) ? 64 : pSndFile->Samples[nSmp].nVolume >> 2;
+								m->param = (overrideSampleVol) ? 64 : pSndFile->GetSample(nSmp).nVolume / 4;
 							}
 						}
 					}
@@ -3118,7 +3135,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 				}
 				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
 			}
-			SetPlayCursor(0xFFFF, 0);
+			SetPlayCursor(PATTERNINDEX_INVALID, 0);
 		} else
 		{
 			if(updateOrderList)
@@ -3619,17 +3636,19 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 }
 
 //rewbs.customKeys
-void CViewPattern::CursorJump(DWORD distance, bool direction, bool snap)
-//-----------------------------------------------------------------------
-{											  //up is true
+void CViewPattern::CursorJump(DWORD distance, bool upwards, bool snap)
+//--------------------------------------------------------------------
+{
 	switch(snap)
 	{
-		case false: //no snap
-			SetCurrentRow(m_nRow + ((int)(direction?-1:1))*distance, TRUE); 
+		case false:
+			//no snap
+			SetCurrentRow(m_nRow + ((int)(upwards ? -1 : 1)) * distance, TRUE); 
 			break;
 
-		case true: //snap
-			SetCurrentRow((((m_nRow+(int)(direction?-1:0))/distance)+(int)(direction?0:1))*distance, TRUE);
+		case true:
+			//snap
+			SetCurrentRow((((m_nRow + (int)(upwards ? -1 : 0)) / distance) + (int)(upwards ? 0 : 1)) * distance, TRUE);
 			break;
 	}
 
@@ -5346,8 +5365,8 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 			{
 				CHAR s[256];
 				UINT nmax = pSndFile->m_nSamples;
-				while ((nmax > 1) && (pSndFile->Samples[nmax].pSample == NULL) && (!pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->Samples[i].pSample))
+				while ((nmax > 1) && (pSndFile->GetSample(nmax).pSample == nullptr) && (!pSndFile->m_szNames[nmax][0])) nmax--;
+				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->GetSample(i).pSample))
 				{
 					wsprintf(s, "%02d: %s", i, pSndFile->m_szNames[i]);
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, s);
@@ -5453,8 +5472,9 @@ CHANNELINDEX CViewPattern::GetSelectionEndChan()
 	return max(GetChanFromCursor(m_dwBeginSel), GetChanFromCursor(m_dwEndSel));
 }
 
-UINT CViewPattern::ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans) {
-//----------------------------------------------------------------------------------
+UINT CViewPattern::ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans)
+//--------------------------------------------------------------------------------------------
+{
 	chans.RemoveAll();
 	UINT startChan = GetSelectionStartChan();
 	UINT endChan   = GetSelectionEndChan();

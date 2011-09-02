@@ -138,7 +138,7 @@ protected:
 	TCHAR m_szConfigFileName[_MAX_PATH];
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
 	TCHAR m_szStringsFileName[_MAX_PATH];
-	static bool m_bPortableMode;
+	bool m_bPortableMode;
 	ACMConvert acmConvert;
 
 public:
@@ -180,7 +180,7 @@ public:
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
-	static bool IsPortableMode() { return m_bPortableMode; }
+	bool IsPortableMode() { return m_bPortableMode; }
 	LPCTSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
 
 	/// Returns path to config folder including trailing '\'.

@@ -523,7 +523,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	vector<bool> samplesUsed(pSndFile->GetNumSamples() + 1, true);
 
 	BeginWaitCursor();
-	for (SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->Samples[nSmp].pSample)
+	for (SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->GetSample(nSmp).pSample)
 	{
 		if (!pSndFile->IsSampleUsed(nSmp))
 		{
@@ -551,7 +551,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			CriticalSection cs;
 			for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 			{
-				if ((!samplesUsed[nSmp]) && (pSndFile->Samples[nSmp].pSample))
+				if ((!samplesUsed[nSmp]) && (pSndFile->GetSample(nSmp).pSample))
 				{
 					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
 					pSndFile->DestroySample(nSmp);
@@ -580,8 +580,8 @@ bool CModCleanupDlg::OptimizeSamples()
 	
 	for (SAMPLEINDEX nSmp=1; nSmp <= pSndFile->m_nSamples; nSmp++)
 	{
-		if(pSndFile->Samples[nSmp].pSample && (pSndFile->Samples[nSmp].uFlags & CHN_LOOP)
-			&& (pSndFile->Samples[nSmp].nLength > pSndFile->Samples[nSmp].nLoopEnd + 2)) nLoopOpt++;
+		if(pSndFile->GetSample(nSmp).pSample && (pSndFile->GetSample(nSmp).uFlags & CHN_LOOP)
+			&& (pSndFile->GetSample(nSmp).nLength > pSndFile->GetSample(nSmp).nLoopEnd + 2)) nLoopOpt++;
 	}
 	if (nLoopOpt == 0) return false;
 
@@ -592,14 +592,15 @@ bool CModCleanupDlg::OptimizeSamples()
 	{
 		for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 		{
-			if ((pSndFile->Samples[nSmp].uFlags & CHN_LOOP)
-				&& (pSndFile->Samples[nSmp].nLength > pSndFile->Samples[nSmp].nLoopEnd + 2))
+			MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+			if ((sample.uFlags & CHN_LOOP)
+				&& (sample.nLength > sample.nLoopEnd + 2))
 			{
-				UINT lmax = pSndFile->Samples[nSmp].nLoopEnd + 2;
-				if ((lmax < pSndFile->Samples[nSmp].nLength) && (lmax >= 2))
+				UINT lmax = sample.nLoopEnd + 2;
+				if ((lmax < sample.nLength) && (lmax >= 2))
 				{
-					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, lmax, pSndFile->Samples[nSmp].nLength);
-					ctrlSmp::ResizeSample(pSndFile->Samples[nSmp], lmax, pSndFile);
+					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
+					ctrlSmp::ResizeSample(sample, lmax, pSndFile);
 				}
 			}
 		}
@@ -631,7 +632,7 @@ bool CModCleanupDlg::RearrangeSamples()
 	// First, find out which sample slots are unused and create the new sample map
 	for(SAMPLEINDEX i = 1; i <= pSndFile->GetNumSamples(); i++)
 	{
-		if(!pSndFile->Samples[i].pSample)
+		if(pSndFile->GetSample(i).pSample == nullptr)
 		{
 			// Move all following samples
 			nRemap++;
@@ -652,7 +653,7 @@ bool CModCleanupDlg::RearrangeSamples()
 			// This gotta be moved
 			CriticalSection cs;
 			pSndFile->MoveSample(i, nSampleMap[i]);
-			pSndFile->Samples[i].pSample = nullptr;
+			pSndFile->GetSample(i).pSample = nullptr;
 			if(nSampleMap[i] > 0) strcpy(pSndFile->m_szNames[nSampleMap[i]], pSndFile->m_szNames[i]);
 			MemsetZero(pSndFile->m_szNames[i]);
 
@@ -965,7 +966,7 @@ bool CModCleanupDlg::RemoveAllSamples()
 
 	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, 0, pSndFile->Samples[nSmp].nLength);
+		m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, 0, pSndFile->GetSample(nSmp).nLength);
 	}
 	ctrlSmp::ResetSamples(*pSndFile, ctrlSmp::SmpResetInit);
 

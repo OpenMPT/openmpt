@@ -783,50 +783,50 @@ LONG PatchFreqToNote(ULONG nFreq)
 void PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
 //------------------------------------------------------------------------------------
 {
-	MODSAMPLE *pIns = &that->Samples[nSample];
+	MODSAMPLE &sample = that->GetSample(nSample);
 	DWORD dwMemPos = sizeof(GF1SAMPLEHEADER);
 	GF1SAMPLEHEADER *psh = (GF1SAMPLEHEADER *)(lpStream);
 	UINT nSmpType;
-	
+
 	if (dwMemLength < sizeof(GF1SAMPLEHEADER)) return;
 	if (psh->name[0])
 	{
 		memcpy(that->m_szNames[nSample], psh->name, 7);
 		that->m_szNames[nSample][7] = 0;
 	}
-	pIns->filename[0] = 0;
-	pIns->nGlobalVol = 64;
-	pIns->uFlags = (psh->flags & 1) ? CHN_16BIT : 0;
-	if (psh->flags & 4) pIns->uFlags |= CHN_LOOP;
-	if (psh->flags & 8) pIns->uFlags |= CHN_PINGPONGLOOP;
-	pIns->nLength = psh->length;
-	pIns->nLoopStart = psh->loopstart;
-	pIns->nLoopEnd = psh->loopend;
-	pIns->nC5Speed = psh->freq;
-	pIns->RelativeTone = 0;
-	pIns->nFineTune = 0;
-	pIns->nVolume = 256;
-	pIns->nPan = (psh->balance << 4) + 8;
-	if (pIns->nPan > 256) pIns->nPan = 128;
-	pIns->nVibType = 0;
-	pIns->nVibSweep = psh->vibrato_sweep;
-	pIns->nVibDepth = psh->vibrato_depth;
-	pIns->nVibRate = psh->vibrato_rate/4;
-	that->FrequencyToTranspose(pIns);
-	pIns->RelativeTone += 84 - PatchFreqToNote(psh->root_freq);
-	if (psh->scale_factor) pIns->RelativeTone -= psh->scale_frequency - 60;
-	pIns->nC5Speed = that->TransposeToFrequency(pIns->RelativeTone, pIns->nFineTune);
-	if (pIns->uFlags & CHN_16BIT)
+	sample.filename[0] = 0;
+	sample.nGlobalVol = 64;
+	sample.uFlags = (psh->flags & 1) ? CHN_16BIT : 0;
+	if (psh->flags & 4) sample.uFlags |= CHN_LOOP;
+	if (psh->flags & 8) sample.uFlags |= CHN_PINGPONGLOOP;
+	sample.nLength = psh->length;
+	sample.nLoopStart = psh->loopstart;
+	sample.nLoopEnd = psh->loopend;
+	sample.nC5Speed = psh->freq;
+	sample.RelativeTone = 0;
+	sample.nFineTune = 0;
+	sample.nVolume = 256;
+	sample.nPan = (psh->balance << 4) + 8;
+	if (sample.nPan > 256) sample.nPan = 128;
+	sample.nVibType = 0;
+	sample.nVibSweep = psh->vibrato_sweep;
+	sample.nVibDepth = psh->vibrato_depth;
+	sample.nVibRate = psh->vibrato_rate/4;
+	that->FrequencyToTranspose(&sample);
+	sample.RelativeTone += 84 - PatchFreqToNote(psh->root_freq);
+	if (psh->scale_factor) sample.RelativeTone -= psh->scale_frequency - 60;
+	sample.nC5Speed = that->TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+	if (sample.uFlags & CHN_16BIT)
 	{
 		nSmpType = (psh->flags & 2) ? RS_PCM16U : RS_PCM16S;
-		pIns->nLength >>= 1;
-		pIns->nLoopStart >>= 1;
-		pIns->nLoopEnd >>= 1;
+		sample.nLength >>= 1;
+		sample.nLoopStart >>= 1;
+		sample.nLoopEnd >>= 1;
 	} else
 	{
 		nSmpType = (psh->flags & 2) ? RS_PCM8U : RS_PCM8S;
 	}
-	that->ReadSample(pIns, nSmpType, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+	that->ReadSample(&sample, nSmpType, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 }
 
 

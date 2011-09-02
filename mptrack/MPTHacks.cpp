@@ -259,7 +259,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	foundHere = false;
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
-		MODSAMPLE &smp = m_SndFile.Samples[i];
+		MODSAMPLE &smp = m_SndFile.GetSample(i);
 		if(m_SndFile.GetType() == MOD_TYPE_XM && smp.GetNumChannels() > 1)
 		{
 			foundHere = foundHacks = true;

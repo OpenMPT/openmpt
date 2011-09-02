@@ -1480,7 +1480,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	{
 		for (SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->m_nSamples; nSmp++)
 		{
-			if ((m_pSndFile->m_szNames[nSmp][0]) || (m_pSndFile->Samples[nSmp].pSample))
+			if ((m_pSndFile->m_szNames[nSmp][0]) || (m_pSndFile->GetSample(nSmp).pSample))
 			{
 				wsprintf(s, "%02d: %s", nSmp, m_pSndFile->m_szNames[nSmp]);
 				int n = m_CbnSplitInstrument.AddString(s);

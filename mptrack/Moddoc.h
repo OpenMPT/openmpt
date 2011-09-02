@@ -291,6 +291,7 @@ public:
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
 	void InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample=0);
+	void InitializeSample(MODSAMPLE &sample);
 	bool RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd);
 	bool RemovePattern(PATTERNINDEX nPat);
 	bool RemoveSample(SAMPLEINDEX nSmp);
