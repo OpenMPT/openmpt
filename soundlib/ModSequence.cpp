@@ -4,6 +4,7 @@
 #include "../mptrack/moddoc.h"
 #include "../mptrack/version.h"
 #include "../mptrack/serialization_utils.h"
+#include "../common/Reporting.h"
 #include <functional>
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
@@ -405,8 +406,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	bool modified = false;
 
 	if(hasSepPatterns &&
-		::MessageBox(NULL,
-		"The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
+		Reporting::Notification("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
 		"Order list conversion", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
 
@@ -651,7 +651,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	{
 		// Hack: Show message here if trying to load longer sequence than what is supported.
 		CString str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
-		AfxMessageBox(str, MB_ICONWARNING);
+		Reporting::Notification(str, MB_ICONWARNING);
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq.resize(max(size, MAX_ORDERS));

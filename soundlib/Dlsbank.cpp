@@ -17,7 +17,7 @@
 #include "../mptrack/mptrack.h"
 #include "dlsbank.h"
 #include "Wav.h"
-#include "StringFixer.h"
+#include "../common/StringFixer.h"
 
 
 //#define DLSBANK_LOG

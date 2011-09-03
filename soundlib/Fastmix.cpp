@@ -1802,8 +1802,8 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount);
 			} else
 			{
-				memset(pState->pOutBufferL, 0, nCount*sizeof(FLOAT));
-				memset(pState->pOutBufferR, 0, nCount*sizeof(FLOAT));
+				memset(pState->pOutBufferL, 0, nCount * sizeof(float));
+				memset(pState->pOutBufferR, 0, nCount * sizeof(float));
 			}
 			pState->dwFlags &= ~MIXPLUG_MIXREADY;
 		}

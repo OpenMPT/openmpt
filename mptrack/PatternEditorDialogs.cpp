@@ -711,7 +711,7 @@ void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		|| (m_nChannel >= pSndFile->m_nChannels)
 		|| (!pSndFile->Patterns[m_nPattern])) return;
-	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
+	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 	if ((m->note != note) || (m->instr != instr))
 	{
 		if(!m_bModified)	// let's create just one undo step.
@@ -740,7 +740,7 @@ void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		|| (m_nChannel >= pSndFile->m_nChannels)
 		|| (!pSndFile->Patterns[m_nPattern])) return;
-	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
+	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 	if ((m->volcmd != volcmd) || (m->vol != vol))
 	{
 		if(!m_bModified)	// let's create just one undo step.
@@ -768,7 +768,7 @@ void CEditCommand::UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM p
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		|| (m_nChannel >= pSndFile->m_nChannels)
 		|| (!pSndFile->Patterns[m_nPattern])) return;
-	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
+	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"

@@ -165,6 +165,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\misc_util.cpp" />
+    <ClCompile Include="..\common\Reporting.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="ACMConvert.cpp" />
     <ClCompile Include="ArrayUtils.cpp" />
@@ -200,7 +202,6 @@
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="..\soundlib\Message.cpp" />
     <ClCompile Include="MIDIMappingDialog.cpp" />
-    <ClCompile Include="misc_util.cpp" />
     <ClCompile Include="..\soundlib\mmcmp.cpp" />
     <ClCompile Include="..\soundlib\Mmx_mix.cpp" />
     <ClCompile Include="mod2midi.cpp" />
@@ -317,6 +318,10 @@
     <ResourceCompile Include="mptrack.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\misc_util.h" />
+    <ClInclude Include="..\common\Reporting.h" />
+    <ClInclude Include="..\common\StringFixer.h" />
+    <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="PatternRandomizer.h" />
@@ -365,7 +370,6 @@
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="..\soundlib\midi.h" />
     <ClInclude Include="MIDIMappingDialog.h" />
-    <ClInclude Include="misc_util.h" />
     <ClInclude Include="mod2midi.h" />
     <ClInclude Include="mod2wave.h" />
     <ClInclude Include="..\soundlib\mod_specifications.h" />
@@ -398,10 +402,8 @@
     <ClInclude Include="..\Soundlib\Sndfile.h" />
     <ClInclude Include="SoundFilePlayConfig.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="..\Soundlib\StringFixer.h" />
     <ClInclude Include="tagging.h" />
     <ClInclude Include="TrackerSettings.h" />
-    <ClInclude Include="typedefs.h" />
     <ClInclude Include="Undo.h" />
     <ClInclude Include="UpdateCheck.h" />
     <ClInclude Include="version.h" />

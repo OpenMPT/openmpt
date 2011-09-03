@@ -1,8 +1,9 @@
 //rewbs.customKeys
 
 #include "stdafx.h"
-#include ".\commandset.h"
+#include "commandset.h"
 #include "resource.h"
+#include "../common/Reporting.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
@@ -43,7 +44,7 @@ CCommandSet::~CCommandSet(void)
 {
 	//CHAR s[64];
 	//wsprintf(s, "pointer = %lX",plocalCmdSet);
-	//::MessageBox(NULL, "about to remove all", NULL, MB_OK|MB_ICONEXCLAMATION); //disabled by rewbs
+	//Reporting::Notification("about to remove all", NULL, MB_OK|MB_ICONEXCLAMATION); //disabled by rewbs
 	//commands.RemoveAll();
 }
 
@@ -1479,7 +1480,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 
 	while(iStrm.getline(s, sizeof(s)))
 	{
-		//::MessageBox(NULL, s, "", MB_ICONEXCLAMATION|MB_OK);
+		//Reporting::Notification(s, MB_ICONEXCLAMATION|MB_OK);
 		curLine = s;
 		
 		
@@ -1583,7 +1584,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 		CString err;
 		err.Format("The following problems have been encountered while trying to load the key binding file %s:\n", szFilename);
 		err += errText;
-		::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Notification(err, MB_ICONEXCLAMATION | MB_OK);
 	}
 
 	if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
@@ -1601,7 +1602,7 @@ bool CCommandSet::LoadFile(CString fileName)
 	{
 		CString strMsg;
 		AfxFormatString1(strMsg, IDS_CANT_OPEN_KEYBINDING_FILE, fileName);
-		AfxMessageBox(strMsg, MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Notification(strMsg, MB_ICONEXCLAMATION | MB_OK);
 		return false;
 	}
 	else

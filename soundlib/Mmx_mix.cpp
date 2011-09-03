@@ -25,6 +25,7 @@
 ////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "sndfile.h"
+#include "../common/Reporting.h"
 
 extern short int gFastSinc[];
 extern short int gKaiserSinc[];
@@ -38,14 +39,14 @@ extern short int gDownsample2x[];
 #define PROCSUPPORT_SSE		0x10
 
 // Byte offsets into the MODCHANNEL structure
-#define CHNOFS_PCURRENTSAMPLE	0
-#define CHNOFS_NPOS				4
-#define CHNOFS_NPOSLO			8
-#define CHNOFS_NINC				12
-#define CHNOFS_NRIGHTVOL		16
-#define CHNOFS_NLEFTVOL			20
-#define CHNOFS_NRIGHTRAMP		24
-#define CHNOFS_NLEFTRAMP		28
+#define CHNOFS_PCURRENTSAMPLE	MODCHANNEL.pCurrentSample	// 0
+#define CHNOFS_NPOS				MODCHANNEL.nPos				// 4
+#define CHNOFS_NPOSLO			MODCHANNEL.nPosLo			// 8
+#define CHNOFS_NINC				MODCHANNEL.nInc				// 12
+#define CHNOFS_NRIGHTVOL		MODCHANNEL.nRightVol		// 16
+#define CHNOFS_NLEFTVOL			MODCHANNEL.nLeftVol			// 20
+#define CHNOFS_NRIGHTRAMP		MODCHANNEL.nRightRamp		// 24
+#define CHNOFS_NLEFTRAMP		MODCHANNEL.nLeftRamp		// 28
 
 
 #ifdef ENABLE_MMX
@@ -161,14 +162,14 @@ DWORD CSoundFile::InitSysInfo()
 	{
 		CHAR s[64];
 		wsprintf(s, "MODCHANNEL not aligned: sizeof(MODCHANNEL) = %d", sizeof(MODCHANNEL));
-		::MessageBox(NULL, s, NULL, MB_OK|MB_ICONEXCLAMATION); //disabled by rewbs
+		Reporting::Notification(s);
 	}
 	DWORD dwFastSinc = (DWORD)(LPVOID)gFastSinc;
 	if (dwFastSinc & 7)
 	{
 		CHAR s[64];
 		wsprintf(s, "gFastSinc is not aligned (%08X)!", dwFastSinc);
-		::MessageBox(NULL, s, NULL, MB_OK|MB_ICONEXCLAMATION);
+		Reporting::Notification(s);
 	}
 #endif
 	memset(&osvi, 0, sizeof(osvi));

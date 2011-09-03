@@ -9,7 +9,7 @@
 #include "ChannelManagerDlg.h"
 #include "midi.h"
 #include "version.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -339,7 +339,7 @@ bool CModTypeDlg::VerifyData()
 	int temp_nRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
 	if ((temp_nRPB > temp_nRPM))
 	{
-		::AfxMessageBox("Error: Rows per measure must be greater than or equal rows per beat.", MB_OK|MB_ICONEXCLAMATION);
+		Reporting::Notification("Error: Rows per measure must be greater than or equal rows per beat.", MB_OK|MB_ICONEXCLAMATION);
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
 		return false;
 	}
@@ -353,13 +353,13 @@ bool CModTypeDlg::VerifyData()
 	{
 		CString error;
 		error.Format("Error: Max number of channels for this type is %d", maxChans);
-		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
+		Reporting::Notification(error, MB_OK|MB_ICONEXCLAMATION);
 		return FALSE;
 	}
 
 	if(maxChans < m_pSndFile->GetNumChannels())
 	{
-		if(MessageBox("New module type supports less channels than currently used, and reducing channel number is required. Continue?", "", MB_OKCANCEL) != IDOK)
+		if(Reporting::Notification("New module type supports less channels than currently used, and reducing channel number is required. Continue?", MB_OKCANCEL) != IDOK)
 			return false;
 	}
 
@@ -658,8 +658,8 @@ CSoundBankProperties::CSoundBankProperties(CDLSBank *pBank, CWnd *parent):CDialo
 		// Last lines: comments
 		if (bi.szComments[0])
 		{
-			strncat(m_szInfo, "\r\nComments:\r\n", sizeof(m_szInfo)-1);
-			strncat(m_szInfo, bi.szComments, sizeof(m_szInfo)-1);
+			strncat(m_szInfo, "\r\nComments:\r\n", strlen(m_szInfo) - sizeof(m_szInfo) - 1);
+			strncat(m_szInfo, bi.szComments, strlen(m_szInfo) - sizeof(m_szInfo) - 1);
 		}
 	}
 }
@@ -1076,7 +1076,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 		}
 	}
 
-	::MessageBox(NULL, message, "Macro -> Params", MB_OK);
+	Reporting::Notification(message, "Macro -> Params");
 }
 
 void CMidiMacroSetup::OnPlugChanged()
@@ -1123,7 +1123,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 		m_EditSFx.SetWindowText(macroText);
 	} else
 	{
-		::AfxMessageBox("Warning: Currently MPT can only assign macros to parameters 0 to 383");
+		Reporting::Notification("Warning: Currently MPT can only assign macros to parameters 0 to 383");
 		param = 383;
 	}	
 }
@@ -1566,7 +1566,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------------
 {
 	CHAR s[32] = "--";
-	const size_t sizeofS = sizeof(s)/sizeof(s[0]);
+	const size_t sizeofS = CountOf(s);
 
 	if ((lParam >= 0) && (lParam < 3*12) && (m_pSndFile))
 	{
@@ -1666,7 +1666,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 		// Date
 		TCHAR szDate[32];
-		_tcsftime(szDate, sizeof(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
+		_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
 		// Time + stuff
 		uint32 duration = (uint32)((double)(hist->openTime) / HISTORY_TIMER_PRECISION);
 		s.AppendFormat(_T("Loaded %s, open in the editor for %luh %02lum %02lus\r\n"),

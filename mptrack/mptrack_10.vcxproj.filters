@@ -211,9 +211,6 @@
     <ClCompile Include="MIDIMappingDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="misc_util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\mmcmp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -427,6 +424,12 @@
     <ClCompile Include="ExceptionHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\Reporting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\misc_util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -528,9 +531,6 @@
     <ClInclude Include="MIDIMappingDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="misc_util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="mod2midi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -619,9 +619,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Undo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="typedefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\tuningbase.h">
@@ -717,9 +714,6 @@
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Soundlib\StringFixer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tagging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -745,6 +739,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ExceptionHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Reporting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\typedefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\misc_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\StringFixer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

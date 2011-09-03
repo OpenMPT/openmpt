@@ -94,7 +94,7 @@ typedef struct {
 
 void Log(LPCSTR format,...);
 
-#include "typedefs.h"
+#include "../common/typedefs.h"
 
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)

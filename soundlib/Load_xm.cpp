@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "../mptrack/version.h"
-#include "../mptrack/misc_util.h"
+#include "../common/misc_util.h"
 
 ////////////////////////////////////////////////////////
 // FastTracker II XM file support
@@ -81,14 +81,14 @@ typedef struct tagXMSAMPLESTRUCT
 #pragma pack()
 
 
+
 // Read .XM patterns
 DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XMFILEHEADER *xmheader, CSoundFile *pSndFile)
 //-------------------------------------------------------------------------------------------------------------------------
 {
-	BYTE patterns_used[256];
-	BYTE pattern_map[256];
+	vector<BYTE> patterns_used(256, 0);
+	vector<BYTE> pattern_map(256, 0);
 
-	memset(patterns_used, 0, sizeof(patterns_used));
 	if (xmheader->patterns > MAX_PATTERNS)
 	{
 		UINT i, j;
@@ -105,7 +105,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 		{
 			if (!patterns_used[i])
 			{
-				pattern_map[i] = (j < MAX_PATTERNS) ? j : 0xFE;
+				pattern_map[i] = (j < MAX_PATTERNS) ? j : pSndFile->Order.GetIgnoreIndex();
 				j++;
 			}
 		}
@@ -175,8 +175,8 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 						p->command = src[j++];
 						p->param = src[j++];
 					}
-					if (p->note == 97) p->note = NOTE_KEYOFF; else
-					if ((p->note) && (p->note < 97)) p->note += 12;
+					if (p->note == 97) p->note = NOTE_KEYOFF;
+					else if ((p->note) && (p->note < 97)) p->note += 12;
 					if (p->command | p->param) pSndFile->ConvertModCommand(p);
 					if (p->instr == 0xff) p->instr = 0;
 					if ((vol >= 0x10) && (vol <= 0x50))
@@ -361,7 +361,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		else
 			dwMemPos += sizeof(XMINSTRUMENTHEADER);
 
-		memset(samplemap, 0, sizeof(samplemap));
+		MemsetZero(samplemap);
 		if (nsamples > 32) return true;
 		UINT newsamples = m_nSamples;
 
@@ -474,17 +474,19 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.penv[ienv*2+1];
 			if (ienv)
 			{
+				// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
+				// value. Try to compensate by adding the missing high byte" - I guess that's what this code is for.
 				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1])
 				{
 					pIns->VolEnv.Ticks[ienv] &= 0xFF;
-					pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv-1] & 0xFF00;
-					if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1]) pIns->VolEnv.Ticks[ienv] += 0x100;
+					pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv - 1] & 0xFF00;
+					if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1]) pIns->VolEnv.Ticks[ienv] += 0x100;
 				}
 				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1])
 				{
 					pIns->PanEnv.Ticks[ienv] &= 0xFF;
-					pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv-1] & 0xFF00;
-					if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1]) pIns->PanEnv.Ticks[ienv] += 0x100;
+					pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv - 1] & 0xFF00;
+					if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1]) pIns->PanEnv.Ticks[ienv] += 0x100;
 				}
 			}
 		}
@@ -497,8 +499,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		// Reading samples
 		for (UINT ins=0; ins<nsamples; ins++)
 		{
-			if ((dwMemPos + sizeof(xmss) > dwMemLength)
-			 || (dwMemPos + xmsh.shsize > dwMemLength)) return true;
+			if (dwMemPos + max(xmsh.shsize, sizeof(xmss)) > dwMemLength)
+				return true;
 			memcpy(&xmss, lpStream + dwMemPos, sizeof(xmss));
 			xmss.samplen = LittleEndian(xmss.samplen);
 			xmss.loopstart = LittleEndian(xmss.loopstart);
@@ -510,12 +512,14 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			if (!samplemap[ins]) continue;
 			if (xmss.type & 0x10)
 			{
+				// 16-Bit
 				xmss.looplen >>= 1;
 				xmss.loopstart >>= 1;
 				xmss.samplen >>= 1;
 			}
 			if (xmss.type & 0x20)
 			{
+				// Stereo
 				xmss.looplen >>= 1;
 				xmss.loopstart >>= 1;
 				xmss.samplen >>= 1;
@@ -650,7 +654,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			for (UINT i=0; i<n; i++)
 			{
 				memcpy(ChnSettings[i].szName, (lpStream+dwMemPos+i*MAX_CHANNELNAME), MAX_CHANNELNAME);
-				ChnSettings[i].szName[MAX_CHANNELNAME-1] = 0;
+				StringFixer::SetNullTerminator(ChnSettings[i].szName);
 			}
 			dwMemPos += len;
 		}
@@ -680,7 +684,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		CHAR sVersion[13];
 		memcpy(sVersion, lpStream + 0x26 + 8, 12);
-		sVersion[12] = 0;
+		StringFixer::SetNullTerminator(sVersion);
 		m_dwLastSavedWithVersion = MptVersion::ToNum(sVersion);
 	}
 
@@ -759,7 +763,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	fwrite(&s[0], 21, 1, f);
 
 	// Writing song header
-	memset(&xmheader, 0, sizeof(xmheader));
+	MemsetZero(xmheader);
 	xmheader.xmversion = LittleEndianW(0x0104); // XM Format v1.04
 	xmheader.size = sizeof(XMFILEHEADER) - 2; // minus the version field
 	xmheader.restartpos = LittleEndianW(m_nRestartPos);
@@ -823,7 +827,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPatNeedsFixing = (Patterns[i].GetNumRows() != 64);
 
-		memset(&xmph, 0, sizeof(xmph));
+		MemsetZero(xmph);
 		xmph[0] = 9;
 		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
 		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
@@ -923,7 +927,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		fwrite(&s[0], 1, len, f);
 	} else
 	{
-		memset(&xmph, 0, sizeof(xmph));
+		MemsetZero(xmph);
 		xmph[0] = 9;
 		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
 		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
@@ -936,9 +940,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		WORD smptable[32];
 		BYTE flags[32];
 
-		memset(&smptable, 0, sizeof(smptable));
-		memset(&xmih, 0, sizeof(xmih));
-		memset(&xmsh, 0, sizeof(xmsh));
+		MemsetZero(smptable);
+		MemsetZero(xmih);
+		MemsetZero(xmsh);
 		xmih.size = LittleEndian(sizeof(xmih) + sizeof(xmsh));
 		memcpy(xmih.name, m_szNames[i], 22);
 		xmih.type = 0;
@@ -1018,7 +1022,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		if (!xmih.samples) continue;
 		for (UINT ins = 0; ins < samples; ins++)
 		{
-			memset(&xmss, 0, sizeof(xmss));
+			MemsetZero(xmss);
 			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
 			pSmp = &Samples[smptable[ins]];
 			xmss.samplen = pSmp->nLength;

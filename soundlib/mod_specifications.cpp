@@ -1,6 +1,6 @@
 #include <stdafx.h>
 #include "mod_specifications.h"
-#include "..\mptrack\misc_util.h"
+#include "../common/misc_util.h"
 
 
 MODTYPE CModSpecifications::ExtensionToType(LPCTSTR pszExt)

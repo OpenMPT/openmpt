@@ -1365,21 +1365,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 {
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatExport ? ModSpecs::it : ModSpecs::itEx));
 
-	DWORD dwPatNamLen, dwChnNamLen;
+	DWORD dwChnNamLen;
 	ITFILEHEADER header;
 	ITINSTRUMENT iti;
 	ITSAMPLESTRUCT itss;
 	vector<bool>smpcount(GetNumSamples(), false);
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
 	WORD patinfo[4];
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	BYTE chnmask[64];
-//	MODCOMMAND lastvalue[64];
-	BYTE chnmask[MAX_BASECHANNELS];
-	MODCOMMAND lastvalue[MAX_BASECHANNELS];
-// -! BEHAVIOUR_CHANGE#0006
-	BYTE buf[8 * MAX_BASECHANNELS];
 	FILE *f;
 
 
@@ -1387,7 +1379,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 
 	// Writing Header
 	MemsetZero(header);
-	dwPatNamLen = 0;
 	dwChnNamLen = 0;
 	header.id = LittleEndian(IT_IMPM);
 	lstrcpyn(header.songname, m_szNames[0], 26);
@@ -1732,12 +1723,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
-		memset(chnmask, 0xFF, sizeof(chnmask));
-		memset(lastvalue, 0, sizeof(lastvalue));
+		vector<BYTE> chnmask(specs.channelsMax, 0xFF);
+		vector<MODCOMMAND> lastvalue(specs.channelsMax, MODCOMMAND::Empty());
 
-		for (UINT row=0; row<Patterns[npat].GetNumRows(); row++)
+		for (UINT row = 0; row<Patterns[npat].GetNumRows(); row++)
 		{
 			UINT len = 0;
+			BYTE buf[8 * MAX_BASECHANNELS];
 			MODCOMMAND *m = Patterns[npat].GetRow(row);
 
 			for (UINT ch = 0; ch < specs.channelsMax; ch++, m++)

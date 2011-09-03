@@ -215,7 +215,8 @@ public:
 
 	//rewbs.customKeys
 	BOOL ExecuteCommand(CommandID command);
-	void CursorJump(DWORD distance, bool direction, bool snap);
+	void CursorJump(DWORD distance, bool upwards, bool snap);
+
 	void TempEnterNote(int n, bool oldStyle = false, int vol = -1);
 	void TempStopNote(int note, bool fromMidi=false, const bool bChordMode=false);
 	void TempEnterChord(int n);

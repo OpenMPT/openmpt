@@ -16,6 +16,7 @@
 #include "../soundlib/Sndfile.h"
 #include "ACMConvert.h"
 #include <windows.h>
+#include "../common/Reporting.h"
 
 class CModDoc;
 class CVstPluginManager;

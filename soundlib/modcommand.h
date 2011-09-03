@@ -50,7 +50,7 @@ public:
 	void SetValueEffectCol(const uint16 val) {command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF);}
 
 	// Clears modcommand.
-	void Clear() {memset(this, 0, sizeof(MODCOMMAND));}
+	void Clear() {memset(this, 0, sizeof(MODCOMMAND)); }
 
 	// Returns true if modcommand is empty, false otherwise.
 	// If ignoreEffectValues is true (default), effect values are ignored are ignored if there is no effect command present.

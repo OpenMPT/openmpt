@@ -8,7 +8,7 @@
 #include "EffectVis.h"		//rewbs.fxvis
 #include "ChannelManagerDlg.h"
 #include "../soundlib/tuningbase.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #include <string>
 
 using std::string;
@@ -610,7 +610,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		{
 			UINT nSkip = m_nMidRow - yofs;
 			UINT nPrevPat = m_nPattern;
-			BOOL bPrevPatFound = FALSE;
+			bool bPrevPatFound = false;
 
 			// Display previous pattern
 			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
@@ -625,14 +625,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 					if(startOrder < pSndFile->Order.size() && pSndFile->Order[startOrder] == m_nPattern)
 					{
 						nPrevPat = pSndFile->Order[prevOrder];
-						bPrevPatFound = TRUE;
+						bPrevPatFound = true;
 					}
 				}
 			}
 			if ((bPrevPatFound) && (nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat]))
 			{
 				UINT nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
-				UINT n = (nSkip < nPrevRows) ? nSkip : nPrevRows;
+				UINT n = min(nSkip, nPrevRows);
 
 				ypaint += (nSkip-n)*m_szCell.cy;
 				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
@@ -664,7 +664,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
 			UINT nNextPat = m_nPattern;
-			BOOL bNextPatFound = FALSE;
+			bool bNextPatFound = false;
 			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 			ORDERINDEX nNextOrder;
 			nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
@@ -675,12 +675,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			if ((nNextOrder < ordCount) && (pSndFile->Order[startOrder] == m_nPattern))
 			{
 				nNextPat = pSndFile->Order[nNextOrder];
-				bNextPatFound = TRUE;
+				bNextPatFound = true;
 			}
 			if ((bNextPatFound) && (nNextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNextPat]))
 			{
 				UINT nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
-				UINT n = ((UINT)nVisRows < nNextRows) ? nVisRows : nNextRows;
+				UINT n = min((UINT)nVisRows, nNextRows);
 
 				m_Dib.SetBlendMode(0x80);
 				DrawPatternData(hdc, pSndFile, nNextPat, FALSE, FALSE,
@@ -1322,6 +1322,7 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 void CViewPattern::OnSize(UINT nType, int cx, int cy)
 //---------------------------------------------------
 {
+	// TODO: Switching between modules (when MDI childs are maximized) first calls this with the windowed size, then with the maximized size, which makes the scrollbars move. Eww!
 	CScrollView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{

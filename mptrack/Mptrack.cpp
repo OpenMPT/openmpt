@@ -18,7 +18,7 @@
 #include <afxadv.h>
 #include <shlwapi.h>
 #include "UpdateCheck.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #include "ExceptionHandler.h"
 
 // rewbs.memLeak
@@ -97,7 +97,7 @@ public:
 			{
 				CString str;
 				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), path);
-				AfxMessageBox(str);
+				Reporting::Notification(str);
 			}
 			else //Case: Valid path but opening fails.
 			{		
@@ -109,7 +109,7 @@ public:
 					"recommended to close some documents as otherwise crash is likely"
 					"(currently there %s %d document%s open).")),
 					path, (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
-				AfxMessageBox(str);
+				Reporting::Notification(str);
 			}
 		}
 	}
@@ -2177,7 +2177,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	if(nonFoundPlugs.GetLength() > 0)
 	{
 		nonFoundPlugs.Insert(0, "Problems were encountered with plugins:\n");
-		MessageBox(NULL, nonFoundPlugs, "", MB_OK);
+		Reporting::Notification(nonFoundPlugs);
 	}
 	return FALSE;
 }

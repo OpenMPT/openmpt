@@ -2,6 +2,9 @@
 
 #include "snddev.h"
 #include "snddevx.h"
+#include "../common/misc_util.h"
+#include "../common/Reporting.h"
+#include "../common/StringFixer.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -662,7 +665,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 {
 	BOOL bOk = FALSE;
 
-	if (m_pAsioDrv) Close();
+	if (IsOpen()) Close();
 	if (!gbAsioEnumerated) EnumerateDevices(nDevice, NULL, 0);
 	if (nDevice >= gnNumAsioDrivers) return FALSE;
 	if (nDevice != m_nCurrentDevice)
@@ -676,7 +679,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 #endif
 	OpenDevice(nDevice);
 
-	if (m_pAsioDrv)
+	if (IsOpen())
 	{
 		long nInputChannels = 0, nOutputChannels = 0;
 		long minSize = 0, maxSize = 0, preferredSize = 0, granularity = 0;
@@ -707,7 +710,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 				ich, m_ChannelInfo[ich].isActive, m_ChannelInfo[ich].channelGroup, m_ChannelInfo[ich].type, m_ChannelInfo[ich].name);
 		#endif
 			m_BufferInfo[ich].isInput = ASIOFalse;
-			m_BufferInfo[ich].channelNum = ich;
+			m_BufferInfo[ich].channelNum = ich;		// map MPT channel i to ASIO channel i
 			m_BufferInfo[ich].buffers[0] = NULL;
 			m_BufferInfo[ich].buffers[1] = NULL;
 			if ((m_ChannelInfo[ich].type & 0x0f) == ASIOSTInt16MSB)
@@ -808,7 +811,7 @@ abort:
 VOID CASIODevice::Start()
 //-----------------------
 {
-	if (m_pAsioDrv)
+	if (IsOpen())
 	{
 		m_bMixRunning = TRUE;
 		try {
@@ -823,7 +826,7 @@ VOID CASIODevice::Start()
 BOOL CASIODevice::Close()
 //-----------------------
 {
-	if (m_pAsioDrv)
+	if (IsOpen())
 	{
 		if (m_bMixRunning)
 		{
@@ -852,7 +855,7 @@ BOOL CASIODevice::Close()
 VOID CASIODevice::Reset()
 //-----------------------
 {
-	if (m_pAsioDrv)
+	if (IsOpen())
 	{
 		m_bMixRunning = FALSE;
 		try {
@@ -867,7 +870,7 @@ VOID CASIODevice::Reset()
 void CASIODevice::OpenDevice(UINT nDevice)
 //----------------------------------------
 {
-	if (m_pAsioDrv)
+	if (IsOpen())
 	{
 		return;
 	}
@@ -889,7 +892,7 @@ void CASIODevice::OpenDevice(UINT nDevice)
 void CASIODevice::CloseDevice()
 //-----------------------------
 {
-	if (m_pAsioDrv)
+	if (IsOpen())
 	{
 		try
 		{
@@ -1310,7 +1313,7 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 	va_list va;
 	va_start(va, format);
 	wvsprintf(cBuf, format, va);
-	AfxMessageBox(cBuf);
+	Reporting::Notification(cBuf);
 	Log(cBuf);
 	va_end(va);
 	

@@ -1399,7 +1399,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), (LPCTSTR)rSf.Order.m_sName);
 		CString str;
 		AfxFormatString1(str, IDS_CONFIRM_SEQUENCE_DELETE, strParam);
-		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
+		if (Reporting::Notification(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
 			rSf.Order.RemoveSequence();
 		else
 		{

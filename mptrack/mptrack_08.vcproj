@@ -377,7 +377,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\misc_util.cpp"
+				RelativePath="..\common\misc_util.cpp"
 				>
 			</File>
 			<File
@@ -490,6 +490,10 @@
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\common\Reporting.cpp"
 				>
 			</File>
 			<File
@@ -1007,7 +1011,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\misc_util.h"
+				RelativePath="..\common\misc_util.h"
 				>
 			</File>
 			<File
@@ -1099,6 +1103,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\Reporting.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Resource.h"
 				>
 			</File>
@@ -1147,7 +1155,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\StringFixer.h"
+				RelativePath="..\common\StringFixer.h"
 				>
 			</File>
 			<File
@@ -1159,7 +1167,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\typedefs.h"
+				RelativePath="..\common\typedefs.h"
 				>
 			</File>
 			<File

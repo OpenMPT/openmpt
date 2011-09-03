@@ -203,7 +203,7 @@ END_MESSAGE_MAP()
 CModControlView::CModControlView()
 //--------------------------------
 {
-	memset(m_Pages, 0, sizeof(m_Pages));
+	MemsetZero(m_Pages);
 	m_nActiveDlg = -1;
 	m_nInstrumentChanged = -1;
 	m_hWndView = NULL;

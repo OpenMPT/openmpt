@@ -7,7 +7,7 @@
 #include "ctrl_gen.h"
 #include "view_gen.h"
 #include "math.h"
-#include "misc_util.h"
+#include "../common/misc_util.h"
 
 // -> CODE#0015
 // -> DESC="channels management dlg"

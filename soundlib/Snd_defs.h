@@ -10,7 +10,7 @@
 #ifndef SND_DEF_H
 #define SND_DEF_H
 
-#include "../mptrack/typedefs.h"
+#include "../common/typedefs.h"
 
 #ifndef LPCBYTE
 typedef const BYTE * LPCBYTE;

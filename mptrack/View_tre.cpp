@@ -2080,7 +2080,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				}
 				else
 				{
-					if(::MessageBox(0, _T("Replace the current orderlist?"), _T("Sequence import"), MB_YESNO|MB_ICONQUESTION) == IDNO)
+					if(Reporting::Notification(_T("Replace the current orderlist?"), _T("Sequence import"), MB_YESNO | MB_ICONQUESTION) == IDNO)
 						return false;
 				}
 				pSndFile->Order.resize(min(pSndFile->GetModSpecifications().ordersMax, pOrigSeq->GetLength()), pSndFile->Order.GetInvalidPatIndex());

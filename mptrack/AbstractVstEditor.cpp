@@ -9,7 +9,7 @@
 #include "fxp.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 
 #ifndef NO_VST
 
@@ -29,10 +29,10 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_VSTPRESETBACKWARDJUMP,OnVSTPresetBackwardJump)
 	ON_COMMAND(ID_VSTPRESETFORWARDJUMP,	OnVSTPresetForwardJump)
 	ON_COMMAND(ID_PLUGINTOINSTRUMENT,	OnCreateInstrument)
-	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET+MAX_PLUGPRESETS, OnSetPreset)
+	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET + MAX_PLUGPRESETS, OnSetPreset)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
-	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
-	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST+MAX_INSTRUMENTS, OnSetInputInstrument) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS, OnSetInputInstrument) //rewbs.patPlugName
 	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
@@ -111,7 +111,7 @@ VOID CAbstractVstEditor::OnLoadPreset()
 			m_pVstPlugin->GetModDoc()->SetModified();
 	} else
 	{
-		::AfxMessageBox("Error loading preset. Are you sure it is for this plugin?");
+		Reporting::Notification("Error loading preset. Are you sure it is for this plugin?");
 	}
 }
 
@@ -129,7 +129,7 @@ VOID CAbstractVstEditor::OnSavePreset()
 
 	//TODO: exception handling
 	if (!(m_pVstPlugin->SaveProgram(files.first_file.c_str())))
-		::AfxMessageBox("Error saving preset.");
+		Reporting::Notification("Error saving preset.");
 
 }
 
@@ -138,7 +138,7 @@ VOID CAbstractVstEditor::OnRandomizePreset()
 {
 	if (m_pVstPlugin)
 	{
-		if (::AfxMessageBox("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+		if (Reporting::Notification("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 			m_pVstPlugin->RandomizeParams();
 		UpdateParamDisplays();
 	}
@@ -355,7 +355,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 
 			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
-				AfxMessageBox(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION) == IDNO)
+				Reporting::Notification(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION) == IDNO)
 			{
 				return false;
 			} else

@@ -14,8 +14,8 @@
 #include <fstream>
 #include <map>
 #include <limits>
-#include "../mptrack/misc_util.h"
-#include "../mptrack/typedefs.h"
+#include "../common/misc_util.h"
+#include "../common/typedefs.h"
 using std::string;
 using std::vector;
 using std::istream;

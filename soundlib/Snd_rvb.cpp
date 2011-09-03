@@ -220,13 +220,13 @@ void ReverbShutdown()
 	gnDCRRvb_Y1 = 0;
 
 	// Zero internal buffers
-	RtlZeroMemory(g_LateReverb.Diffusion1, sizeof(g_LateReverb.Diffusion1));
-	RtlZeroMemory(g_LateReverb.Diffusion2, sizeof(g_LateReverb.Diffusion2));
-	RtlZeroMemory(g_LateReverb.Delay1, sizeof(g_LateReverb.Delay1));
-	RtlZeroMemory(g_LateReverb.Delay2, sizeof(g_LateReverb.Delay2));
-	RtlZeroMemory(g_RefDelay.RefDelayBuffer, sizeof(g_RefDelay.RefDelayBuffer));
-	RtlZeroMemory(g_RefDelay.PreDifBuffer, sizeof(g_RefDelay.PreDifBuffer));
-	RtlZeroMemory(g_RefDelay.RefOut, sizeof(g_RefDelay.RefOut));
+	MemsetZero(g_LateReverb.Diffusion1);
+	MemsetZero(g_LateReverb.Diffusion2);
+	MemsetZero(g_LateReverb.Delay1);
+	MemsetZero(g_LateReverb.Delay2);
+	MemsetZero(g_RefDelay.RefDelayBuffer);
+	MemsetZero(g_RefDelay.PreDifBuffer);
+	MemsetZero(g_RefDelay.RefOut);
 }
 
 

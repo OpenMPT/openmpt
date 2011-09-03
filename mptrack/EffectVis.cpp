@@ -686,7 +686,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 		MakeChange(m_nDragItem, point.y);
 	}
 	else if ((m_dwStatus & FXVSTATUS_LDRAGGING))
-	{		
+	{
 		// Interpolate if we detect that rows have been skipped but the left mouse button was not released.
 		// This ensures we produce a smooth curve even when we are not notified of mouse movements at a high frequency (e.g. if CPU usage is high)
 		if ((m_nLastDrawnRow>(int)m_startRow) && ((int)row != m_nLastDrawnRow) && ((int)row != m_nLastDrawnRow+1) && ((int)row != m_nLastDrawnRow-1))
@@ -728,7 +728,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	if (IsPcNote(row)) 
 	{
 		paramValue = ScreenYToPCParam(point.y);
-		wsprintf(effectName, "%s", "Param Control"); //TODO - show smooth & plug+param
+		wsprintf(effectName, "%s", "Param Control"); // TODO - show smooth & plug+param
 	}
 	else 
 	{
@@ -765,14 +765,16 @@ void CEffectVis::OnLButtonUp(UINT nFlags, CPoint point)
 
 
 void CEffectVis::OnEditUndo()
+//---------------------------
 {
-		CHAR s[64];
-		wsprintf(s, "Undo Through!");
-		::MessageBox(NULL, s, NULL, MB_OK|MB_ICONEXCLAMATION);
+	CHAR s[64];
+	strcpy(s, "Undo Through!");
+	Reporting::Notification(s, MB_OK | MB_ICONEXCLAMATION);
 }
 
+
 BOOL CEffectVis::OnInitDialog()
-//--------------------------------
+//-----------------------------
 {
 	CModControlDlg::OnInitDialog();
 	if (m_pModDoc->GetModType() == MOD_TYPE_MPT && IsPcNote(m_startRow))
@@ -828,13 +830,15 @@ BOOL CEffectVis::OnInitDialog()
 }
 
 void CEffectVis::MakeChange(int row, long y)
+//------------------------------------------
 {
 	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
-	if (!pcmd) {
+	if (!pcmd)
+	{
 		return;
 	}
 
-	int offset = row*m_pSndFile->m_nChannels + m_nChan;
+	int offset = row * m_pSndFile->GetNumChannels() + m_nChan;
 	
 	switch (m_nAction)
 	{
@@ -871,7 +875,8 @@ void CEffectVis::MakeChange(int row, long y)
 			break;
 
 		case kAction_Preserve:
-			if (GetCommand(row) || IsPcNote(row))	{ 
+			if (GetCommand(row) || IsPcNote(row))
+			{ 
 				// Only set param if we have an effect type or if this is a PC note.
 				// Never change the effect type.
 				SetParamFromY(row, y);

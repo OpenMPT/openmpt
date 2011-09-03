@@ -162,7 +162,7 @@ void CPSRatioCalc::OnBnClickedOk()
 {
 	if (m_dRatio<50.0 || m_dRatio>200.0)
 	{
-		::MessageBox(NULL, "Error: ratio must be between 50% and 200%.", 
+		Reporting::Notification("Error: ratio must be between 50% and 200%.", 
 					       "Error", MB_ICONERROR | MB_OK);
 		return;
 	}
