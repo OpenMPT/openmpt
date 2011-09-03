@@ -16,7 +16,7 @@
 #include "sndfile.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
-#include "StringFixer.h"
+#include "../common/StringFixer.h"
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -822,7 +822,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		{
 			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them online?";
 		}
-		if (::MessageBox(0, sNotFound.c_str(), "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
+		if (Reporting::Notification(sNotFound.c_str(), "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
 		{
 			CString sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
@@ -1823,7 +1823,7 @@ UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWOR
 		pSmp->nLength = 0;
 		FreeSample(pSmp->pSample);
 		pSmp->pSample = nullptr;
-		MessageBox(0, str_SampleAllocationError, str_Error, MB_ICONERROR);
+		Reporting::Notification(str_SampleAllocationError, str_Error, MB_ICONERROR);
 		return 0;
 	}
 
@@ -2699,7 +2699,7 @@ bool CSoundFile::SaveStaticTunings()
 void SimpleMessageBox(const char* message, const char* title)
 //-----------------------------------------------------------
 {
-	MessageBox(0, message, title, MB_ICONINFORMATION);
+	Reporting::Notification(message, title, MB_ICONINFORMATION);
 }
 
 

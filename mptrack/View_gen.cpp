@@ -11,7 +11,7 @@
 #include "movefxslotdialog.h"
 #include "ChannelManagerDlg.h"
 #include "SelectPluginDialog.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 
 #define ID_FXCOMMANDS_BASE	41000
 
@@ -1034,7 +1034,7 @@ void CViewGlobals::OnLoadParam()
 	//TODO: exception handling
 	if (!(pVstPlugin->LoadProgram(files.first_file.c_str())))
 	{
-		::AfxMessageBox("Error loading preset.Are you sure it is for this plugin?");
+		Reporting::Notification("Error loading preset. Are you sure it is for this plugin?");
 	} else 
 	{
 		if(pSndFile->GetModSpecifications().supportsPlugins)
@@ -1062,7 +1062,7 @@ void CViewGlobals::OnSaveParam()
 
 	//TODO: exception handling
 	if (!(pVstPlugin->SaveProgram(files.first_file.c_str())))
-		::AfxMessageBox("Error saving preset.");
+		Reporting::Notification("Error saving preset.");
 	//end rewbs.fxpPresets
 
 }
@@ -1377,7 +1377,6 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 {
 	if (src == dest)
 		return false;
-	//AfxMessageBox("Moving %d to %d", src, dest);
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 
@@ -1469,7 +1468,7 @@ void CViewGlobals::OnInsertSlot()
 	{
 		prompt.Append("\nWarning: plugin data in last slot will be lost."); 
 	}
-	if (AfxMessageBox(prompt, MB_YESNO) == IDYES)
+	if (Reporting::Notification(prompt, MB_YESNO) == IDYES)
 	{
 
 		//Delete last plug...
@@ -1506,7 +1505,7 @@ void CViewGlobals::OnInsertSlot()
 void CViewGlobals::OnClonePlug()
 //------------------------------
 {
-	AfxMessageBox("Not yet implemented.");
+	//Reporting::Notification("Not yet implemented.");
 }
 
 

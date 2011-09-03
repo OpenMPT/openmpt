@@ -16,7 +16,7 @@
 #include "smbPitchShift.cpp"
 #pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #include "modsmp_ctrl.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #include <Shlwapi.h>
 
 #ifdef _DEBUG
@@ -1826,7 +1826,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 			default: wsprintf(str, _T("Unknown Error..."));
 				break;
 		}
-		AfxMessageBox(str, MB_ICONERROR);
+		Reporting::Notification(str, MB_ICONERROR);
 		return;
 	}
 
@@ -1897,7 +1897,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	{
 		CString str;
 		str.Format(TEXT(GetStrI18N("Current samplerate, %u Hz, is not in the supported samplerate range 8000 Hz - 48000 Hz. Continue?")), nSampleRate);
-		if(AfxMessageBox(str, MB_ICONQUESTION|MB_YESNO) != IDYES)
+		if(Reporting::Notification(str, MB_ICONQUESTION|MB_YESNO) != IDYES)
 			return -1;
 
 	}

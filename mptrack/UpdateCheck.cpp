@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "UpdateCheck.h"
 #include "version.h"
-#include "misc_util.h"
+#include "../common/misc_util.h"
 #include "Mptrack.h"
 
 #ifdef _DEBUG
@@ -83,7 +83,7 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 		{
 			CString msg;
 			msg.Format("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup.", CUpdateCheck::updateCheckPeriod);
-			if(::MessageBox(0, msg, "OpenMPT Internet Update", MB_YESNO | MB_ICONQUESTION) == IDNO)
+			if(Reporting::Notification(msg, "OpenMPT Internet Update", MB_YESNO | MB_ICONQUESTION) == IDNO)
 			{
 				CUpdateCheck::showUpdateHint = false;
 				caller->Terminate();
@@ -165,7 +165,7 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	{
 		if(!caller->isAutoUpdate)
 		{
-			::MessageBox(0, "You already have the latest version of OpenMPT.", "OpenMPT Internet Update", MB_OK | MB_ICONINFORMATION);
+			Reporting::Notification("You already have the latest version of OpenMPT.", "OpenMPT Internet Update", MB_OK | MB_ICONINFORMATION);
 		}
 	} else
 	{
@@ -198,7 +198,7 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 		if(parseStep >= 4)
 		{
 			resultData.Format("A new version is available!\nOpenMPT %s has been released on %s. Would you like to visit %s for more information?", releaseVersion, releaseDate, releaseURL);
-			if(::MessageBox(0, resultData, "OpenMPT Internet Update", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+			if(Reporting::Notification(resultData, "OpenMPT Internet Update", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 			{
 				CTrackApp::OpenURL(releaseURL);
 			}
@@ -222,7 +222,7 @@ void CUpdateCheck::Die(CString errorMessage)
 {
 	if(!isAutoUpdate)
 	{
-		::MessageBox(0, errorMessage, "OpenMPT Internet Update Error", MB_OK | MB_ICONERROR);
+		Reporting::Notification(errorMessage, "OpenMPT Internet Update Error", MB_OK | MB_ICONERROR);
 	}
 	Terminate();
 }

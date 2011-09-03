@@ -5,8 +5,8 @@
 #include <strstream>
 #include <vector>
 #include <bitset>
-#include "misc_util.h"
-#include "typedefs.h"
+#include "../common/misc_util.h"
+#include "../common/typedefs.h"
 #include <limits>
 #if _HAS_TR1
 	#include <type_traits>

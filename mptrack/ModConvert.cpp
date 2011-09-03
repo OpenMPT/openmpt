@@ -121,10 +121,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	if((m_SndFile.GetNumInstruments() || nResizedPatterns) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	{
-		if(::MessageBox(NULL,
-				"This operation will convert all instruments to samples,\n"
-				"and resize all patterns to 64 rows.\n"
-				"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return false;
+		if(Reporting::Notification(
+			"This operation will convert all instruments to samples,\n"
+			"and resize all patterns to 64 rows.\n"
+			"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return false;
 		BeginWaitCursor();
 		CriticalSection cs;
 

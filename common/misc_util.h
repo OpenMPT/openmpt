@@ -179,6 +179,95 @@ void SanitizeFilename(char (&buffer)[size])
 }
 
 
+// Greatest Common Divisor.
+template <class T>
+T gcd(T a, T b)
+//-------------
+{
+	if(a < 0)
+		a = -a;
+	if(b < 0)
+		b = -b;
+	do
+	{
+		if(a == 0)
+			return b;
+		b %= a;
+		if(b == 0)
+			return a;
+		a %= b;
+	}
+}
+
+
+// Convert a variable-length MIDI integer <value> to a normal integer <result>.
+// Function returns how many bytes have been read.
+template <class TIn, class TOut>
+size_t ConvertMIDI2Int(TOut &result, TIn value)
+//---------------------------------------------
+{
+	return ConvertMIDI2Int(result, (uint8 *)(&value), sizeof(TIn));
+}
+
+
+// Convert a variable-length MIDI integer held in the byte buffer <value> to a normal integer <result>.
+// maxLength bytes are read from the byte buffer at max.
+// Function returns how many bytes have been read.
+// TODO This should report overflow errors if TOut is too small!
+template <class TOut>
+size_t ConvertMIDI2Int(TOut &result, uint8 *value, size_t maxLength)
+//------------------------------------------------------------------
+{
+	static_assert(std::numeric_limits<TOut>::is_integer == true, "Output type is a not an integer");
+
+	if(maxLength <= 0)
+	{
+		result = 0;
+		return 0;
+	}
+	size_t bytesUsed = 0;
+	result = 0;
+	uint8 b;
+	do
+	{
+		b = *value;
+		result <<= 7;
+		result |= (b & 0x7F);
+		value++;
+	} while (++bytesUsed < maxLength && (b & 0x80) != 0);
+	return bytesUsed;
+}
+
+
+// Convert an integer <value> to a variable-length MIDI integer, held in the byte buffer <result>.
+// maxLength bytes are written to the byte buffer at max.
+// Function returns how many bytes have been written.
+template <class TIn>
+size_t ConvertInt2MIDI(uint8 *result, size_t maxLength, TIn value)
+//----------------------------------------------------------------
+{
+	static_assert(std::numeric_limits<TIn>::is_integer == true, "Input type is a not an integer");
+
+	if(maxLength <= 0)
+	{
+		*result = 0;
+		return 0;
+	}
+	size_t bytesUsed = 0;
+	do
+	{
+		*result = (value & 0x7F);
+		value >>= 7;
+		if(value != 0)
+		{
+			*result |= 0x80;
+		}
+		result++;
+	} while (++bytesUsed < maxLength && value != 0)
+	return bytesUsed;
+}
+
+
 namespace Util
 {
 	// Like std::max, but avoids conflict with max-macro.

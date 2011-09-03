@@ -13,7 +13,7 @@
 // -> DESC="alternative BPM/Speed interpretation method"
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
-#include "../mptrack/misc_util.h"
+#include "../common/misc_util.h"
 // -! NEW_FEATURE#0022
 #include "tuning.h"
 

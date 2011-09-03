@@ -14,7 +14,7 @@
 #include "midi.h"
 #include "version.h"
 #include "midimappingdialog.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #define ZLIB_WINAPI
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
@@ -288,7 +288,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			{
 				TCHAR szBuf[256]; 
 				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, (LPCTSTR)GetErrorMessage(dw)); 
-				MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
+				Reporting::Notification(szBuf, "DEBUG: Error when loading plugin dll");
 			}
 #endif //_DEBUG	
 	//end rewbs.VSTcompliance
@@ -1273,7 +1273,7 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 	va_list va;
 	va_start(va, format);
 	wvsprintf(cBuf, format, va);
-	AfxMessageBox(cBuf);
+	Reporting::Notification(cBuf);
 #ifdef VST_LOG
 	Log(cBuf);
 #endif
@@ -1449,7 +1449,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 		m_nOutputs = 32;
 		CString str;
 		str.Format("Plugin has unsupported number(=%d) of outputs; plugin may malfunction.", m_pEffect->numOutputs);
-		MessageBox(NULL, str, "Warning", MB_ICONWARNING);
+		Reporting::Notification(str, "Warning", MB_ICONWARNING);
 	}
 	
 	//input pointer array size must be >=2 for now - the input buffer assignment might write to non allocated mem. otherwise
@@ -2803,7 +2803,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 			if (m_pMixStruct->nPluginDataSize >= nLen+4) p++;
 			if (m_pMixStruct->nPluginDataSize >= nLen)
 			{
-				for (UINT i=0; i<nParams; i++)
+				for (UINT i = 0; i < nParams; i++)
 				{
 					SetParameter(i, p[i]);
 				}
@@ -2930,25 +2930,32 @@ BOOL CVstPlugin::GetSpeakerArrangement()
 //--------------------------------------
 {
 	VstSpeakerArrangement **pSA = NULL;
-	Dispatch(effGetSpeakerArrangement, 0,0,pSA,0);
+	Dispatch(effGetSpeakerArrangement, 0, 0, pSA, 0);
 	//Dispatch(effGetSpeakerArrangement, 0,(long)pSA,NULL,0);
 	if (pSA)
-		memcpy((void*)(&speakerArrangement), (void*)(pSA[0]), sizeof(VstSpeakerArrangement));
+	{
+		MemCopy(speakerArrangement, **pSA);
+	}
 
 	return true;
 }
+
+
 void CVstPlugin::NotifySongPlaying(bool playing)
 //----------------------------------------------
 {
 	m_bSongPlaying=playing;
 }
 
+
 UINT CVstPlugin::FindSlot() 
 //------------------------
 {
-	UINT slot=0;
-	if (m_pSndFile) {
-		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<MAX_MIXPLUGINS-1) {
+	UINT slot = 0;
+	if (m_pSndFile)
+	{
+		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<MAX_MIXPLUGINS - 1)
+		{
 			slot++;
 		}
 	}
@@ -2956,7 +2963,7 @@ UINT CVstPlugin::FindSlot()
 }
 
 void CVstPlugin::SetSlot(UINT slot) 
-//------------------------
+//---------------------------------
 {
 	m_nSlot = slot;
 }
@@ -2995,17 +3002,19 @@ bool CVstPlugin::KeysRequired()
 	return (CVstPlugin::Dispatch(effKeysRequired, 0, 0, NULL, 0) != 0);
 }
 
-void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
-//-----------------------------------------------------------------------
+void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list) 
+//------------------------------------------------------------------------
 {
 	// At the moment we know there will only be 1 output. 
 	// Returning NULL ptr means plugin outputs directly to master.
 	list.RemoveAll();
 
 	CVstPlugin *pOutputPlug = NULL;
-	if (m_pMixStruct->Info.dwOutputRouting & 0x80)	{
+	if (m_pMixStruct->Info.dwOutputRouting & 0x80)
+	{
 		UINT nOutput = m_pMixStruct->Info.dwOutputRouting & 0x7f;
-		if (m_pSndFile && (nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS)) {
+		if (m_pSndFile && (nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS))
+		{
 			pOutputPlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nOutput].pMixPlugin;
 		}
 	}
@@ -3014,8 +3023,8 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list)
 	return;
 }
 
-void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
-//----------------------------------------------------------------------
+void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list) 
+//-----------------------------------------------------------------------
 {
 	if(m_pSndFile == 0) return;
 
@@ -3023,13 +3032,17 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list)
 	CVstPlugin* pCandidatePlug = NULL;
 	list.RemoveAll();
 
-	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
+	{
 		pCandidatePlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nPlug].pMixPlugin;
-		if (pCandidatePlug) {
+		if (pCandidatePlug)
+		{
 			pCandidatePlug->GetOutputPlugList(candidatePlugOutputs);
 			
-			for(int nOutput=0; nOutput<candidatePlugOutputs.GetSize(); nOutput++) 	{
-				if (candidatePlugOutputs[nOutput] == this) {
+			for(int nOutput=0; nOutput<candidatePlugOutputs.GetSize(); nOutput++)
+			{
+				if (candidatePlugOutputs[nOutput] == this)
+				{
 					list.Add(pCandidatePlug);
 					break;
 				}
@@ -3047,8 +3060,10 @@ void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
 	if(m_pSndFile == 0) return;
 	
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
-	for (int nIns=0; nIns<MAX_INSTRUMENTS; nIns++) {
-		if (m_pSndFile->Instruments[nIns] && (m_pSndFile->Instruments[nIns]->nMixPlug==nThisMixPlug)) {
+	for (int nIns=0; nIns<MAX_INSTRUMENTS; nIns++)
+	{
+		if (m_pSndFile->Instruments[nIns] && (m_pSndFile->Instruments[nIns]->nMixPlug==nThisMixPlug))
+		{
 			list.Add(nIns);
 		}
 	}
@@ -3057,7 +3072,7 @@ void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
 
 }
 
-void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list)
+void CVstPlugin::GetInputChannelList(CArray<UINT, UINT> &list)
 //------------------------------------------------------------
 {
 	if(m_pSndFile == 0) return;
@@ -3065,8 +3080,10 @@ void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list)
 	
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
 	const CHANNELINDEX chnCount = m_pSndFile->GetNumChannels();
-	for (CHANNELINDEX nChn=0; nChn<chnCount; nChn++) {
-		if (m_pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug) {
+	for (CHANNELINDEX nChn=0; nChn<chnCount; nChn++)
+	{
+		if (m_pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug)
+		{
 			list.Add(nChn);
 		}
 	}
@@ -3130,7 +3147,7 @@ public:
 public:
 	virtual CWaveInfo const *GetWave(int const) { Log("GetWave\n"); return NULL; }
 	virtual CWaveLevel const *GetWaveLevel(int const i, int const level) { Log("GetWaveLevel\n"); return NULL; }
-	virtual void MessageBox(char const *txt) { ::MessageBox(CMainFrame::GetMainFrame()->m_hWnd, txt, m_pMachineInfo->Name, MB_OK); }
+	virtual void MessageBox(char const *txt) { Reporting::Notification(txt, m_pMachineInfo->Name); }
 	virtual void Lock() { Log("Lock\n"); }
 	virtual void Unlock() { Log("Unlock\n"); }
 	virtual int GetWritePos() { Log("GetWritePos\n"); return 0; }
@@ -3209,7 +3226,7 @@ CBuzz2Vst::CBuzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzI
 	m_pMachineInterface = pBuzzMachine;
 	m_pDataInput = new CVSTDataInput(this);
 
-	memset(&m_Effect, 0, sizeof(AEffect));
+	MemsetZero(m_Effect);
 	m_Effect.magic = kBuzzMagic;
 	m_Effect.numPrograms = 1;
 	m_Effect.numParams = pBuzzInfo->numGlobalParameters;
@@ -3236,7 +3253,7 @@ CBuzz2Vst::CBuzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzI
 	m_MasterInfo.PosInTick = 0;
 	m_MasterInfo.TicksPerSec = (float)m_MasterInfo.SamplesPerSec / (float)m_MasterInfo.SamplesPerTick;
 	// Dummy Wave Level
-	memset(m_Waveform, 0, sizeof(m_Waveform));
+	MemsetZero(m_Waveform);
 	m_WaveLevel.numSamples = 16;
 	m_WaveLevel.pSamples = m_Waveform;
 	m_WaveLevel.RootNote = 60;

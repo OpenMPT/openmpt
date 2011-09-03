@@ -15,7 +15,7 @@
 #include "version.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #include <shlwapi.h>
 
 extern WORD S3MFineTuneTable[16];
@@ -232,7 +232,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	{
 		CString sTemp;
 		sTemp.Format("File: %s\nLast saved with: %s, current version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLog());
-		AfxMessageBox(sTemp, MB_ICONINFORMATION);
+		Reporting::Notification(sTemp, MB_ICONINFORMATION);
 		ClearLog();
 	}
 
@@ -423,7 +423,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
 			(LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
 			MptVersion::str);
-		::AfxMessageBox(s);
+		Reporting::Notification(s);
 	}
 
 	SetModifiedFlag(FALSE); // (bModified);
@@ -481,7 +481,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 	} else
 	{
 		if(type == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) 
-			AfxMessageBox(_T("ITP projects need to have a path set for each instrument..."), MB_ICONERROR | MB_OK);
+			Reporting::Notification(_T("ITP projects need to have a path set for each instrument..."), MB_ICONERROR | MB_OK);
 		else 
 			ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
@@ -508,7 +508,8 @@ BOOL CModDoc::SaveModified()
 			}
 		}
 
-		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
+		if(unsavedInstrument && Reporting::Notification("Do you want to save modified instruments?", MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES)
+		{
 
 			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++)
 			{
@@ -853,7 +854,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 		CShowLogDlg dlg(parent);
 		return dlg.ShowLog(m_lpszLog, lpszTitle);
 #else
-		return ::MessageBox((parent) ? parent->m_hWnd : NULL, m_lpszLog, lpszTitle, MB_OK|MB_ICONINFORMATION);
+		return Reporting::Notification(m_lpszLog, lpszTitle, MB_OK | MB_ICONINFORMATION, (parent) ? parent->m_hWnd : nullptr);
 #endif
 	}
 	return IDCANCEL;
@@ -1801,24 +1802,24 @@ void CModDoc::OnFileCompatibilitySave()
 	{
 		case MOD_TYPE_MOD:
 			pattern = FileFilterMOD;
-			if( AfxMessageBox(GetStrI18N(TEXT(
+			if(Reporting::Notification(GetStrI18N(TEXT(
 				"Compared to regular MOD save, compatibility export adjusts the beginning of oneshot samples "
 				"in order to make the file compatible with ProTracker and other Amiga-based trackers. "
 				"Note that this feature does not remove effects \"invented\" by other PC-based trackers (f.e. panning commands)."
-				"\n\n Proceed?")), MB_ICONINFORMATION|MB_YESNO) != IDYES
+				"\n\n Proceed?")), MB_ICONINFORMATION | MB_YESNO) != IDYES
 				)
 				return;
 			break;
 		case MOD_TYPE_IT:
 			pattern = FileFilterIT;
-			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
+			Reporting::Notification("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.", MB_ICONINFORMATION | MB_OK);
 			break;
 		case MOD_TYPE_XM:
 			pattern = FileFilterXM;
-			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
+			Reporting::Notification("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.", MB_ICONINFORMATION | MB_OK);
 			break;
 		default:
-			::MessageBox(NULL,"Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
+			Reporting::Notification("Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.", MB_ICONINFORMATION | MB_OK);
 			return;
 	}
 	ext = m_SndFile.GetModSpecifications().fileExtension;
@@ -3811,13 +3812,13 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	{
 		CString message;
 		message.Format("Param %d beyond controllable range.", paramToUse);
-		::MessageBox(NULL,message, "Macro not assigned for this param",MB_ICONINFORMATION | MB_OK);
+		Reporting::Notification(message, "Macro not assigned for this param", MB_ICONINFORMATION | MB_OK);
 		return;
 	}
 
 	CString message;
 	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);
-	::MessageBox(NULL, message, "Macro assigned for this param",MB_ICONINFORMATION | MB_OK);
+	Reporting::Notification(message, "Macro assigned for this param", MB_ICONINFORMATION | MB_OK);
 	
 	return;
 }
@@ -3986,7 +3987,7 @@ void CModDoc::OnSaveTemplateModule()
 		{
 			CString sErrMsg;
 			AfxFormatString1(sErrMsg, IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER, pszTemplateFolder);
-			AfxMessageBox(sErrMsg);
+			Reporting::Notification(sErrMsg);
 			return;
 		}
 	}

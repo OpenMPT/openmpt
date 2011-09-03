@@ -19,9 +19,9 @@
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
 #include "AutoSaver.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #include "TrackerSettings.h"
-#include "misc_util.h"
+#include "../common/misc_util.h"
 
 
 const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
@@ -412,6 +412,11 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPRESET), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPRESET), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPRESET), iniFile);
+	StringFixer::SetNullTerminator(m_EqSettings.szName);
+	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[0].szName);
+	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[1].szName);
+	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[2].szName);
+	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[3].szName);
 
 
 	// Auto saver settings
@@ -458,7 +463,7 @@ void TrackerSettings::LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPRESET *pEqSett
 		if (pEqSettings->Gains[i] > 32) pEqSettings->Gains[i] = 16;
 		if ((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000)) pEqSettings->Freqs[i] = CEQSetupDlg::gEQPresets[0].Freqs[i];
 	}
-	pEqSettings->szName[sizeof(pEqSettings->szName)-1] = 0;
+	StringFixer::SetNullTerminator(pEqSettings->szName);
 }
 
 

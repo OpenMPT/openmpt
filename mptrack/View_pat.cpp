@@ -17,7 +17,7 @@
 #include "arrayutils.h"
 #include "view_pat.h"
 #include "View_gen.h"
-#include "misc_util.h"
+#include "../common/misc_util.h"
 #include "midi.h"
 #include <cmath>
 
@@ -2767,7 +2767,7 @@ void CViewPattern::OnDuplicateChannel()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc == nullptr) return;
 
-	if(AfxMessageBox(GetStrI18N(_TEXT("This affects all patterns, proceed?")), MB_YESNO) != IDYES)
+	if(Reporting::Notification(GetStrI18N(_TEXT("This affects all patterns, proceed?")), MB_YESNO) != IDYES)
 		return;
 
 	const CHANNELINDEX nDupChn = GetChanFromCursor(m_nMenuParam);

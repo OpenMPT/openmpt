@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include ".\fxp.h"
+#include "fxp.h"
+#include "../common/Reporting.h"
 
 /************************************
 *	Cons/Dest	
@@ -25,7 +26,7 @@ Cfxp::Cfxp(CString fileName)
 
 
 Cfxp::Cfxp(long ID, long version, long nParams, float *ps)
-//------------------------------------------------------------------
+//--------------------------------------------------------
 {
 	//Cfxp();
 	params=NULL;
@@ -87,7 +88,7 @@ bool Cfxp::Load(CString fileName)
 	if ( !inStream.Open(fileName, CFile::modeRead, &e) )
 	{
 		//TODO: exception
-		::AfxMessageBox("Error opening file.");
+		Reporting::Notification("Error opening file.");
 		return false; 
 	}
 
@@ -104,7 +105,7 @@ bool Cfxp::Load(CString fileName)
 		  ChunkMagic == 'CcnK'			&&  
 		  (fxMagic == 'FxCk' || fxMagic == 'FPCh')))
 	{
-		::AfxMessageBox("Bad Magic number: this does not look like a preset file.");
+		Reporting::Notification("Bad Magic number: this does not look like a preset file.");
 		inStream.Close();
 		return false;
 	}
@@ -116,7 +117,7 @@ bool Cfxp::Load(CString fileName)
 		{
 			if (!ReadLE(inStream, params[p]))
 			{
-				::AfxMessageBox("Error reading Params.");
+				Reporting::Notification("Error reading Params.");
 				inStream.Close();
 				return false;
 			}
@@ -126,7 +127,7 @@ bool Cfxp::Load(CString fileName)
 	{
 		if (!ReadLE(inStream, chunkSize))
 		{
-			::AfxMessageBox("Error reading chunk size.");
+			Reporting::Notification("Error reading chunk size.");
 			inStream.Close();
 			return false;
 		}
@@ -135,14 +136,14 @@ bool Cfxp::Load(CString fileName)
 
 		if (!chunk)
 		{
-			::AfxMessageBox("Error allocating memory for chunk.");
+			Reporting::Notification("Error allocating memory for chunk.");
 			inStream.Close();
 			return false;
 		}
 
 		if (!ReadLE(inStream, (char*)chunk, chunkSize))
 		{
-			::AfxMessageBox("Error reading chunk.");
+			Reporting::Notification("Error reading chunk.");
 			inStream.Close();
 			return false;
 		}
@@ -230,10 +231,10 @@ bool Cfxp::ReadLE(CFile &in, float &f)
 			return false;
 	} catch (CFileException *e)
 	{
-		::AfxMessageBox(e->m_strFileName);
+		Reporting::Notification(e->m_strFileName);
 		char s[256];
 		wsprintf(s, "%lx: %d; %d; %s;", e, e->m_cause, e->m_lOsError,  (LPCTSTR)e->m_strFileName);
-		::AfxMessageBox(s);
+		Reporting::Notification(s);
 		e->Delete();
 	}
 

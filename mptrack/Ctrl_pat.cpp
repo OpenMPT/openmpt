@@ -8,7 +8,7 @@
 #include "ctrl_pat.h"
 #include "view_pat.h"
 #include "ChannelManagerDlg.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 
 
 //////////////////////////////////////////////////////////////
@@ -1128,7 +1128,7 @@ void CCtrlPatterns::OnSetupZxxMacros()
 				// If this macro is not the default IT macro, display a warning.
 				if(!m_pModDoc->IsMacroDefaultSetupUsed())
 				{
-					if(AfxMessageBox(_T("You have chosen not to embed MIDI macros. However, the current macro configuration differs from the default macro configuration that is assumed when loading a file that has no macros embedded. This can result in data loss and broken playback.\nWould you like to embed MIDI macros now?"), MB_YESNO) == IDYES)
+					if(Reporting::Notification(_T("You have chosen not to embed MIDI macros. However, the current macro configuration differs from the default macro configuration that is assumed when loading a file that has no macros embedded. This can result in data loss and broken playback.\nWould you like to embed MIDI macros now?"), MB_YESNO) == IDYES)
 					{
 						m_pSndFile->m_dwSongFlags |= SONG_EMBEDMIDICFG;
 						m_pModDoc->SetModified();

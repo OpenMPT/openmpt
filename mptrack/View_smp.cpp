@@ -2495,7 +2495,7 @@ void CViewSample::OnAddSilence()
 	if( MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples )
 	{
 		CString str; str.Format(TEXT("Can't add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
-		AfxMessageBox(str, MB_ICONINFORMATION);
+		Reporting::Notification(str, MB_ICONINFORMATION);
 		return;
 	}
 

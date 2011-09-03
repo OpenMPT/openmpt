@@ -14,7 +14,7 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/MainFrm.h"
-#include "../mptrack/misc_util.h"
+#include "../common/misc_util.h"
 // -! NEW_FEATURE#0022
 #include "sndfile.h"
 #include "midi.h"
@@ -863,7 +863,7 @@ BOOL CSoundFile::ProcessRow()
 	if (m_nTickCount)
 	{
 		m_dwSongFlags &= ~SONG_FIRSTTICK;
-		if ((!(m_nType & MOD_TYPE_XM)) && (m_nTickCount < m_nMusicSpeed * (1 + m_nPatternDelay)))
+		if ((!(m_nType & MOD_TYPE_XM)) && (m_nTickCount < GetNumTicksOnCurrentRow()))
 		{
 			if (!(m_nTickCount % m_nMusicSpeed)) m_dwSongFlags |= SONG_FIRSTTICK;
 		}

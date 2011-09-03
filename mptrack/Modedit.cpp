@@ -8,7 +8,7 @@
 #include "dlg_misc.h"
 #include "dlsbank.h"
 #include "modsmp_ctrl.h"
-#include "misc_util.h"
+#include "../common/misc_util.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -43,7 +43,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 	{
 		CString error;
 		error.Format("Error: Max number of channels for this file type is %d", maxChans);
-		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
+		Reporting::Notification(error, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 

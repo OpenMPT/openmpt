@@ -50,7 +50,7 @@ SmpLength InsertSilence(MODSAMPLE &smp, const SmpLength nSilenceLength, const Sm
 	LPSTR pNewSmp = 0;
 	if( GetSampleCapacity(smp) >= nNewSmpBytes ) // If sample has room to expand.
 	{
-		AfxMessageBox("Not implemented: GetSampleCapacity(smp) >= nNewSmpBytes");
+		Reporting::Notification("Not implemented: GetSampleCapacity(smp) >= nNewSmpBytes");
 		// Not implemented, GetSampleCapacity() currently always returns length based value
 		// even if there is unused space in the sample.
 	}
@@ -70,7 +70,7 @@ SmpLength InsertSilence(MODSAMPLE &smp, const SmpLength nSilenceLength, const Sm
 			memset(pNewSmp + nOldBytes, 0, nSilenceBytes);
 		}
 		else
-			AfxMessageBox(TEXT("Unsupported start position in InsertSilence."));
+			Reporting::Notification(TEXT("Unsupported start position in InsertSilence."));
 	}
 
 	// Set loop points automatically

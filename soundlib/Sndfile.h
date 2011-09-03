@@ -11,7 +11,7 @@
 #define __SNDFILE_H
 
 #include "../mptrack/SoundFilePlayConfig.h"
-#include "../mptrack/misc_util.h"
+#include "../common/misc_util.h"
 #include "mod_specifications.h"
 #include <vector>
 #include <bitset>

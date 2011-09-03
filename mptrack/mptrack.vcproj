@@ -280,7 +280,7 @@
 				RelativePath=".\MIDIMappingDialog.cpp">
 			</File>
 			<File
-				RelativePath=".\misc_util.cpp">
+				RelativePath="..\common\misc_util.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\mmcmp.cpp">
@@ -365,6 +365,9 @@
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp">
+			</File>
+			<File
+				RelativePath="..\common\Reporting.cpp">
 			</File>
 			<File
 				RelativePath=".\SampleEditorDialogs.cpp">
@@ -759,7 +762,7 @@
 				RelativePath=".\MIDIMappingDialog.h">
 			</File>
 			<File
-				RelativePath=".\misc_util.h">
+				RelativePath="..\common\misc_util.h">
 			</File>
 			<File
 				RelativePath=".\mod2midi.h">
@@ -828,6 +831,9 @@
 				RelativePath=".\PSRatioCalc.h">
 			</File>
 			<File
+				RelativePath="..\common\Reporting.h">
+			</File>
+			<File
 				RelativePath=".\Resource.h">
 			</File>
 			<File
@@ -861,7 +867,7 @@
 				RelativePath=".\StdAfx.h">
 			</File>
 			<File
-				RelativePath="..\Soundlib\StringFixer.h">
+				RelativePath="..\common\StringFixer.h">
 			</File>
 			<File
 				RelativePath=".\tagging.h">
@@ -870,7 +876,7 @@
 				RelativePath=".\TrackerSettings.h">
 			</File>
 			<File
-				RelativePath=".\typedefs.h">
+				RelativePath="..\common\typedefs.h">
 			</File>
 			<File
 				RelativePath=".\Undo.h">

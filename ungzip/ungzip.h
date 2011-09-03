@@ -12,7 +12,7 @@
 #define ZLIB_WINAPI
 #endif // ZLIB_WINAPI
 #include "../zlib/zlib.h"
-#include "../mptrack/typedefs.h"
+#include "../common/typedefs.h"
 
 #pragma pack(1)
 

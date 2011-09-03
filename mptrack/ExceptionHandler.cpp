@@ -137,7 +137,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 		}
 	}
 	
-	::MessageBox(window, errorMessage, "OpenMPT Crash", MB_ICONERROR);
+	Reporting::Notification(errorMessage, "OpenMPT Crash", MB_ICONERROR, window);
 
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;

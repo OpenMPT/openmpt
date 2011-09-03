@@ -6,7 +6,7 @@
 #include "globals.h"
 #include "ctrl_com.h"
 #include "ChannelManagerDlg.h"
-#include "../soundlib/StringFixer.h"
+#include "../common/StringFixer.h"
 #include "view_com.h"
 
 #define DETAILS_TOOLBAR_CY	28

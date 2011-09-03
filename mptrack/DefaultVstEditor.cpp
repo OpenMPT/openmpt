@@ -42,14 +42,15 @@ void CDefaultVstEditor::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 //--------------------------------------------------------------------------------
 {
 	CSliderCtrl* pScrolledSlider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
-	if ((pScrolledSlider == &m_slParam) && (nSBCode != SB_ENDSCROLL) ) {
+	if ((pScrolledSlider == &m_slParam) && (nSBCode != SB_ENDSCROLL))
+	{
 		OnParamSliderChanged();
 	}
 	CAbstractVstEditor::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
-//---------------------------------------
+//----------------------------------------------
 {
 	Create(IDD_DEFAULTPLUGINEDITOR, parent);
 	SetTitle();
@@ -59,12 +60,14 @@ BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
 	ShowWindow(SW_SHOW);
 	
 	// Fill param listbox
-	if (m_pVstPlugin) {
+	if (m_pVstPlugin)
+	{
 		char s[128];
 		long nParams = m_pVstPlugin->GetNumParameters();
 		m_lbParameters.SetRedraw(FALSE);	//disable lisbox refreshes during fill to avoid flicker
 		m_lbParameters.ResetContent();
-		for (long i=0; i<nParams; i++) {
+		for (long i=0; i<nParams; i++)
+		{
 			CHAR sname[64];
 			m_pVstPlugin->GetParamName(i, sname, sizeof(sname));
 			wsprintf(s, "%02X: %s", i|0x80, sname);

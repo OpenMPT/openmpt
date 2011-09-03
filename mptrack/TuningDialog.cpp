@@ -3,8 +3,8 @@
 #include "TuningDialog.h"
 #include "MainFrm.h"
 #include <algorithm>
-#include "misc_util.h"
-#include ".\tuningdialog.h"
+#include "../common/misc_util.h"
+#include "tuningdialog.h"
 
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
@@ -458,7 +458,7 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
 		if(!m_pActiveTuning->IsOfType(newType))
 		{
-			if(MessageBox("This action may change the ratio values; continue?", 0, MB_YESNO) == IDYES)
+			if(Reporting::Notification("This action may change the ratio values; continue?", MB_YESNO) == IDYES)
 			{
 				m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 
@@ -787,7 +787,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 	}
 	if (sLoadReport.GetLength() > 0)
-		AfxMessageBox(sLoadReport, MB_ICONINFORMATION);
+		Reporting::Notification(sLoadReport, MB_ICONINFORMATION);
 	UpdateView();
 }
 

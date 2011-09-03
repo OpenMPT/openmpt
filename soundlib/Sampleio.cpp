@@ -15,7 +15,8 @@
 #include "../mptrack/Moddoc.h"
 #endif //MODPLUG_TRACKER
 #include "Wav.h"
-#include "StringFixer.h"
+#include "../common/StringFixer.h"
+#include "../common/Reporting.h"
 
 #pragma warning(disable:4244)
 
@@ -114,7 +115,7 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 	//rewbs: changed message
-	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+	if(removeSamples > 0 || (removeSamples == 0 && Reporting::Notification("Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
 	{
 		RemoveInstrumentSamples(nInstr);
 	}
@@ -1181,8 +1182,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		}
 	}
 	// Reading samples
-	memset(sampleflags, 0, sizeof(sampleflags));
-	memset(samplesize, 0, sizeof(samplesize));
+	MemsetZero(sampleflags);
+	MemsetZero(samplesize);
 	UINT maxsmp = nsamples;
 	if ((pih->reserved2 > maxsmp) && (pih->reserved2 <= 32)) maxsmp = pih->reserved2;
 	for (UINT ismp=0; ismp<maxsmp; ismp++)
@@ -1240,7 +1241,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		pSmp->nVibSweep = pih->vibsweep;
 		pSmp->nVibDepth = pih->vibdepth;
 		pSmp->nVibRate = pih->vibrate;
-		memset(m_szNames[samplemap[ismp]], 0, 32);
+		MemsetZero(m_szNames[samplemap[ismp]]);
 		memcpy(m_szNames[samplemap[ismp]], psh->name, 22);
 		memcpy(pSmp->filename, psh->name, 22);
 		pSmp->filename[21] = 0;
@@ -1282,10 +1283,11 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	if ((!pIns) || (!lpszFileName)) return false;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	// XI File Header
-	memset(&xfh, 0, sizeof(xfh));
-	memset(&xih, 0, sizeof(xih));
+	MemsetZero(xfh);
+	MemsetZero(xih);
 	memcpy(xfh.extxi, "Extended Instrument: ", 21);
 	memcpy(xfh.name, pIns->name, 22);
+	StringFixer::FixNullString(xfh.name);
 	xfh.name[22] = 0x1A;
 	memcpy(xfh.trkname, "Created by OpenMPT  ", 20);
 	xfh.shsize = 0x102;
@@ -1376,7 +1378,8 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 			xsh.finetune = (signed char)(f2t & 0x7F);
 		}
 		xsh.res = 0;
-		memcpy(xsh.name, pSmp->filename, 22);
+		memcpy(xsh.name, m_szNames[smptable[ismp]], 22);
+		StringFixer::FixNullString(xsh.name);
 		fwrite(&xsh, 1, sizeof(xsh), f);
 	}
 	// XI Sample Data
@@ -1631,8 +1634,9 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	DestroySample(nSample);
 	dwMemPos = pis->samplepointer - dwOffset;
 	memcpy(pSmp->filename, pis->filename, 12);
+	StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
 	memcpy(m_szNames[nSample], pis->name, 26);
-	m_szNames[nSample][26] = 0;
+	StringFixer::SpaceToNullStringFixed<26>(m_szNames[nSample]);
 	pSmp->nLength = pis->length;
 	if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
 	pSmp->nLoopStart = pis->loopbegin;
@@ -1711,9 +1715,9 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (!pIns) return false;
-	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	MemsetZero(*pIns);
 	pIns->pTuning = pIns->s_DefaultTuning;
-	memset(samplemap, 0, sizeof(samplemap));
+	MemsetZero(samplemap);
 	dwMemPos = 554;
 	dwMemPos += ITInstrToMPT(pinstr, pIns, pinstr->trkvers);
 	nsamples = pinstr->nos;
@@ -1741,7 +1745,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //		ReadITSSample(nsmp, lpMemFile+dwMemPos, dwFileLength-dwMemPos, dwMemPos);
-		lastSampleSize = ReadITSSample(nsmp, lpMemFile+dwMemPos, dwFileLength-dwMemPos, dwMemPos);
+		lastSampleSize = ReadITSSample(nsmp, lpMemFile + dwMemPos, dwFileLength - dwMemPos, dwMemPos);
 // -! NEW_FEATURE#0027
 		dwMemPos += sizeof(ITSAMPLESTRUCT);
 		nsmp++;
@@ -1793,13 +1797,14 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 
 	if ((!pIns) || (!lpszFileName)) return false;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	memset(buffer, 0, sizeof(buffer));
-	memset(smptable, 0, sizeof(smptable));
-	memset(smpmap, 0, sizeof(smpmap));
+	MemsetZero(buffer);
+	MemsetZero(smptable);
+	MemsetZero(smpmap);
 	iti->id = LittleEndian(IT_IMPI);	// "IMPI"
 	memcpy(iti->filename, pIns->filename, 12);
+	StringFixer::FixNullString(iti->filename);
 	memcpy(iti->name, pIns->name, 26);
-	StringFixer::SetNullTerminator(iti->name);
+	StringFixer::FixNullString(iti->name);
 	iti->mpr = pIns->nMidiProgram;
 	iti->mch = pIns->nMidiChannel;
 	iti->mbank = pIns->wMidiBank; //rewbs.MidiBank
@@ -1889,7 +1894,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	{
 		UINT smpsize = 0;
 		UINT nsmp = smptable[j];
-		memset(&itss, 0, sizeof(itss));
+		MemsetZero(itss);
 		MODSAMPLE *psmp = &Samples[nsmp];
 		itss.id = LittleEndian(IT_IMPS);
 		memcpy(itss.filename, psmp->filename, 12);

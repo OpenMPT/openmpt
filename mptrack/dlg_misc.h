@@ -210,7 +210,7 @@ public:
 
 public:
 	void Init(HWND parent, UINT nOctaves=1, BOOL bCursNotify=FALSE) { m_hParent = parent; 
-	m_nOctaves = nOctaves; m_bCursorNotify = bCursNotify; memset(KeyFlags, 0, sizeof(KeyFlags)); }
+	m_nOctaves = nOctaves; m_bCursorNotify = bCursNotify; MemsetZero(KeyFlags); }
 	void SetFlags(UINT key, UINT flags) { if (key < NOTE_MAX) KeyFlags[key] = (BYTE)flags; }
 	UINT GetFlags(UINT key) const { return (key < NOTE_MAX) ? KeyFlags[key] : 0; }
 	afx_msg void OnPaint();
