@@ -621,7 +621,7 @@ public:	// Static Members
 
 
 public:	// for Editing
-	CModDoc* m_pModDoc;		// Can be a null pointer f.e. when previewing samples from the treeview.
+	CModDoc *m_pModDoc;		// Can be a null pointer f.e. when previewing samples from the treeview.
 	MODTYPE m_nType;
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
@@ -784,8 +784,7 @@ public:
 	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
-	bool SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
-	bool SaveCompatIT(LPCSTR lpszFileName);
+	bool SaveIT(LPCSTR lpszFileName, UINT nPacking=0, const bool compatExport = false);
 	bool SaveITProject(LPCSTR lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT* instruments[], UINT nInstruments);
@@ -1015,8 +1014,8 @@ public:
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
 	UINT GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac=0) const;
 	// Misc functions
-	MODSAMPLE &GetSample(SAMPLEINDEX sample) { ASSERT(sample < CountOf(Samples)); return Samples[sample]; }
-	const MODSAMPLE &GetSample(SAMPLEINDEX sample) const { ASSERT(sample < CountOf(Samples)); return Samples[sample]; }
+	MODSAMPLE &GetSample(SAMPLEINDEX sample) { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
+	const MODSAMPLE &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 	static void ResetMidiCfg(MODMIDICFG &midiConfig);
 	void SanitizeMacros();
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
@@ -1024,7 +1023,7 @@ public:
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
 //	PSNDMIXPLUGIN GetSndPlugMixPlug(IMixPlugin *pPlugin); //rewbs.plugDocAware
 #ifndef NO_FILTER
-	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-255] => [1-10KHz]
+	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
 #endif
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.

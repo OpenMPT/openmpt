@@ -1361,17 +1361,16 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 #pragma warning(disable:4100)
 
 
-bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
-//---------------------------------------------------------
+bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExport)
+//----------------------------------------------------------------------------------
 {
+	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatExport ? ModSpecs::it : ModSpecs::itEx));
+
 	DWORD dwPatNamLen, dwChnNamLen;
 	ITFILEHEADER header;
 	ITINSTRUMENT iti;
 	ITSAMPLESTRUCT itss;
 	vector<bool>smpcount(GetNumSamples(), false);
-	DWORD inspos[MAX_INSTRUMENTS];
-	vector<DWORD> patpos;
-	DWORD smppos[MAX_SAMPLES];
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
 	WORD patinfo[4];
 // -> CODE#0006
@@ -1387,11 +1386,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
 
-
-	memset(inspos, 0, sizeof(inspos));
-	memset(smppos, 0, sizeof(smppos));
 	// Writing Header
-	memset(&header, 0, sizeof(header));
+	MemsetZero(header);
 	dwPatNamLen = 0;
 	dwChnNamLen = 0;
 	header.id = LittleEndian(IT_IMPM);
@@ -1411,7 +1407,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
-		header.ordnum = min(Order.GetLengthTailTrimmed(), ModSpecs::itEx.ordersMax) + 1;
+		header.ordnum = min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
 		if(header.ordnum < 2) header.ordnum = 2;
 	}
 
@@ -1421,7 +1417,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if(Patterns.Size() < header.patnum) Patterns.ResizeArray(header.patnum);
 	while ((header.patnum > 0) && (!Patterns[header.patnum - 1])) header.patnum--;
 
-	patpos.resize(header.patnum, 0);
+	// Parapointers
+	vector<DWORD> patpos(header.patnum, 0);
+	vector<DWORD> smppos(header.smpnum, 0);
+	vector<DWORD> inspos(header.insnum, 0);
 
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
@@ -1443,8 +1442,12 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				break;
 			}
 		}
-		// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
-		header.reserved = LittleEndian(IT_OMPT);
+		
+		if(!compatExport)
+		{
+			// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
+			header.reserved = LittleEndian(IT_OMPT);
+		}
 	}
 
 	header.flags = 0x0001;
@@ -1453,7 +1456,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
 	if (m_dwSongFlags & SONG_ITCOMPATGXX) header.flags |= 0x20;
-	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
+	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatExport) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
 	header.speed = m_nDefaultSpeed;
@@ -1463,6 +1466,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	// Channel Pan and Volume
 	memset(header.chnpan, 0xA0, 64);
 	memset(header.chnvol, 64, 64);
+
 	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
 	{
 		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
@@ -1471,14 +1475,18 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		if (ChnSettings[ich].dwFlags & CHN_MUTE) header.chnpan[ich] |= 0x80;
 	}
 
-	for (UINT ich=0; ich<m_nChannels; ich++)
+	// Channel names
+	if(!compatExport)
 	{
-		if (ChnSettings[ich].szName[0])
+		for (UINT ich=0; ich<m_nChannels; ich++)
 		{
-			dwChnNamLen = (ich+1) * MAX_CHANNELNAME;
+			if (ChnSettings[ich].szName[0])
+			{
+				dwChnNamLen = (ich + 1) * MAX_CHANNELNAME;
+			}
 		}
+		if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
 	}
-	if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
 
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
@@ -1486,15 +1494,23 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		header.special |= 0x08;
 		dwExtra += sizeof(MODMIDICFG);
 	}
+
 	// Pattern Names
 	const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
-	if (numNamedPats > 0)
+	if(numNamedPats > 0 && !compatExport)
 	{
 		dwExtra += (numNamedPats * MAX_PATTERNNAME) + 8;
 	}
-	// Mix Plugins
-	dwExtra += SaveMixPlugins(NULL, TRUE);
-	dwExtra += SaveITEditHistory(this, nullptr);	// Just calculate the size of this extra block for now.
+
+	// Mix Plugins. Just calculate the size of this extra block for now.
+	if(!compatExport)
+	{
+		dwExtra += SaveMixPlugins(NULL, TRUE);
+	}
+
+	// Edit History. Just calculate the size of this extra block for now.
+	dwExtra += SaveITEditHistory(this, nullptr);
+
 	// Comments
 	if (m_lpszSongComments)
 	{
@@ -1502,21 +1518,25 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		header.msglength = strlen(m_lpszSongComments)+1;
 		header.msgoffset = dwHdrPos + dwExtra + header.insnum*4 + header.patnum*4 + header.smpnum*4;
 	}
+
 	// Write file header
 	fwrite(&header, 1, sizeof(header), f);
 	Order.WriteAsByte(f, header.ordnum);
-	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
-	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
+	if (header.insnum) fwrite(&inspos[0], 4, header.insnum, f);
+	if (header.smpnum) fwrite(&smppos[0], 4, header.smpnum, f);
 	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
+
 	// Writing edit history information
 	SaveITEditHistory(this, f);
+
 	// Writing midi cfg
 	if (header.flags & 0x80)
 	{
 		fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
 	}
+
 	// Writing pattern names
-	if (numNamedPats)
+	if (numNamedPats && !compatExport)
 	{
 		DWORD d = 0x4d414e50;
 		fwrite(&d, 1, 4, f);
@@ -1531,8 +1551,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			fwrite(name, 1, MAX_PATTERNNAME, f);
 		}
 	}
+
 	// Writing channel names
-	if (dwChnNamLen)
+	if (dwChnNamLen && !compatExport)
 	{
 		DWORD d = 0x4d414e43;
 		fwrite(&d, 1, 4, f);
@@ -1543,8 +1564,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
 		}
 	}
+
 	// Writing mix plugins info
-	SaveMixPlugins(f, FALSE);
+	if(!compatExport)
+	{
+		SaveMixPlugins(f, FALSE);
+	}
+
 	// Writing song message
 	dwPos = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
 	if (header.special & 1)
@@ -1552,35 +1578,36 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		dwPos += strlen(m_lpszSongComments) + 1;
 		fwrite(m_lpszSongComments, 1, strlen(m_lpszSongComments)+1, f);
 	}
+
 	// Writing instruments
 	for (UINT nins=1; nins<=header.insnum; nins++)
 	{
 		bool bKbdEx = false;	// extended sample map (for samples > 255)
 		BYTE keyboardex[NOTE_MAX];
 
-		memset(&iti, 0, sizeof(iti));
+		MemsetZero(iti);
 		iti.id = LittleEndian(IT_IMPI);	// "IMPI"
-		//iti.trkvers = 0x211;
-		iti.trkvers = 0x220;	//rewbs.itVersion
+		iti.trkvers = (compatExport ? LittleEndianW(0x0214) : LittleEndianW(0x220));	//rewbs.itVersion
 		if (Instruments[nins])
 		{
 			MODINSTRUMENT *pIns = Instruments[nins];
 			memcpy(iti.filename, pIns->filename, 12);
 			memcpy(iti.name, pIns->name, 26);
+			StringFixer::SetNullTerminator(iti.name);
+
 			iti.mbank = pIns->wMidiBank;
 			iti.mpr = pIns->nMidiProgram;
-			if(pIns->nMidiChannel || pIns->nMixPlug == 0)
+			if(pIns->nMidiChannel || pIns->nMixPlug == 0 || compatExport)
 			{
-				// default. prefer midi channel over mixplug to keep the semantics intact.
+				// Default. Prefer MIDI channel over mixplug to keep the semantics intact.
 				iti.mch = pIns->nMidiChannel;
 			} else
 			{
-				// keep compatibility with MPT 1.16's instrument format if possible, as XMPlay/BASS also uses this.
+				// Keep compatibility with MPT 1.16's instrument format if possible, as XMPlay / BASS also uses this.
 				iti.mch = pIns->nMixPlug + 128;
 			}
 			iti.nna = pIns->nNNA;
-			//if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
-			iti.dct = pIns->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
+			iti.dct = (pIns->nDCT < DCT_PLUGIN || !compatExport) ? pIns->nDCT : 0;	
 			iti.dca = pIns->nDNA;
 			iti.fadeout = min(pIns->nFadeOut >> 5, 256);
 			iti.pps = pIns->nPPS;
@@ -1603,7 +1630,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				}
 				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;
 				iti.keyboard[i*2+1] = smp;
-				if (smp > 0xff) bKbdEx = true;
+				if (smp > 0xff && !compatExport) bKbdEx = true;
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
@@ -1635,7 +1662,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		}
 
 		//------------ rewbs.modularInstData
-		if (Instruments[nins])
+		if (Instruments[nins] && !compatExport)
 		{
 			long modularInstSize = 0;
 			UINT ModInstID = 'INSM';
@@ -1674,14 +1701,16 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		}
 		//------------ end rewbs.modularInstData
 	}
+
 	// Writing sample headers
-	memset(&itss, 0, sizeof(itss));
+	MemsetZero(itss);
 	for (UINT hsmp=0; hsmp<header.smpnum; hsmp++)
 	{
 		smppos[hsmp] = dwPos;
 		dwPos += sizeof(ITSAMPLESTRUCT);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 	}
+
 	// Writing Patterns
 	bool bNeedsMptPatSave = false;
 	for (UINT npat=0; npat<header.patnum; npat++)
@@ -1708,15 +1737,20 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		dwPos += 8;
 		memset(chnmask, 0xFF, sizeof(chnmask));
 		memset(lastvalue, 0, sizeof(lastvalue));
-		MODCOMMAND *m = Patterns[npat];
+
 		for (UINT row=0; row<Patterns[npat].GetNumRows(); row++)
 		{
 			UINT len = 0;
-			for (UINT ch=0; ch<m_nChannels; ch++, m++)
+			MODCOMMAND *m = Patterns[npat].GetRow(row);
+
+			for (UINT ch = 0; ch < specs.channelsMax; ch++, m++)
 			{
 				// Skip mptm-specific notes.
-				if(GetType() == MOD_TYPE_MPT && (m->IsPcNote()))
-					{bNeedsMptPatSave = true; continue;}
+				if(m->IsPcNote())
+				{
+					bNeedsMptPatSave = true;
+					continue;
+				}
 
 				BYTE b = 0;
 				UINT command = m->command;
@@ -1739,18 +1773,28 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m->vol); break;
 					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m->vol); break;
 					case VOLCMD_VIBRATODEPTH:	vol = 203 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VIBRATOSPEED:	vol = 0xFF /*203 + ConvertVolParam(m->vol)*/; break; // not supported!
+					case VOLCMD_VIBRATOSPEED:	if(command == CMD_NONE)
+												{
+													// illegal command -> move if possible
+													command = CMD_VIBRATO;
+													param = ConvertVolParam(m->vol) << 4;
+												} else
+												{
+													vol = 203;
+												}
+												break;
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
-					case VOLCMD_OFFSET:			vol = 223 + ConvertVolParam(m->vol); break; //rewbs.volOff
+					case VOLCMD_OFFSET:			if(!compatExport) vol = 223 + ConvertVolParam(m->vol); //rewbs.volOff
+												break;
 					default:					vol = 0xFF;
 					}
 				}
 				if (vol != 0xFF) b |= 4;
 				if (command)
 				{
-					S3MSaveConvert(&command, &param, true);
+					S3MSaveConvert(&command, &param, true, compatExport);
 					if (command) b |= 8;
 				}
 				// Packing information
@@ -1856,9 +1900,11 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
 	{
 		MODSAMPLE *psmp = &Samples[nsmp];
-		memset(&itss, 0, sizeof(itss));
+		MemsetZero(itss);
 		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
+		StringFixer::SetNullTerminator(itss.name);
+
 		itss.id = LittleEndian(IT_IMPS);
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		
@@ -1871,7 +1917,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
 			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
 #ifndef NO_PACKING
-			if (nPacking)
+			if (nPacking && !compatExport)
 			{
 				if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
 					&& (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
@@ -1926,13 +1972,16 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 
 	//Save hacked-on extra info
-	SaveExtendedInstrumentProperties(Instruments, header.insnum, f);
-	SaveExtendedSongProperties(f);
+	if(!compatExport)
+	{
+		SaveExtendedInstrumentProperties(Instruments, header.insnum, f);
+		SaveExtendedSongProperties(f);
+	}
 
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
-	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
-	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
+	if (header.insnum) fwrite(&inspos[0], 4, header.insnum, f);
+	if (header.smpnum) fwrite(&smppos[0], 4, header.smpnum, f);
 	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
 
 	if(GetType() == MOD_TYPE_IT)
@@ -1993,517 +2042,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 #pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE
 
-//HACK: This is a quick fix. Needs to be better integrated into player and GUI.
-//And need to split into subroutines and eliminate code duplication with SaveIT.
-bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName) 
-//------------------------------------------------
-{
-	const int IT_MAX_CHANNELS=64;
-	DWORD dwPatNamLen, dwChnNamLen;
-	ITFILEHEADER header;
-	ITINSTRUMENT iti;
-	ITSAMPLESTRUCT itss;
-	vector<bool>smpcount(GetNumSamples(), false);
-	DWORD inspos[MAX_INSTRUMENTS];
-	DWORD patpos[MAX_PATTERNS];
-	DWORD smppos[MAX_SAMPLES];
-	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
-	WORD patinfo[4];
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-	BYTE chnmask[IT_MAX_CHANNELS];
-	MODCOMMAND lastvalue[IT_MAX_CHANNELS];
-	UINT nChannels = min(m_nChannels, IT_MAX_CHANNELS);
-// -! BEHAVIOUR_CHANGE#0006
-	BYTE buf[512];
-	FILE *f;
-
-
-	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
-	memset(inspos, 0, sizeof(inspos));
-	memset(patpos, 0, sizeof(patpos));
-	memset(smppos, 0, sizeof(smppos));
-	// Writing Header
-	memset(&header, 0, sizeof(header));
-	dwPatNamLen = 0;
-	dwChnNamLen = 0;
-	header.id = LittleEndian(IT_IMPM);
-	lstrcpyn(header.songname, m_szNames[0], 26);
-
-	header.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
-	header.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
-
-	// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
-	// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
-	header.ordnum = min(Order.GetLengthTailTrimmed(), ModSpecs::it.ordersMax) + 1;
-	if(header.ordnum < 2) header.ordnum = 2;
-
-	header.patnum = MAX_PATTERNS;
-	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) {
-		header.patnum--;
-	}
-
-	header.insnum = m_nInstruments;
-	header.smpnum = m_nSamples;
-
-	MptVersion::VersionNum vVersion = MptVersion::num;
-	header.cwtv = LittleEndianW(0x5000 | (WORD)((vVersion >> 16) & 0x0FFF)); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
-	header.cmwt = LittleEndianW(0x0214);	// Common compatible tracker :)
-	// hack from schism tracker:
-	for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
-	{
-		if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
-		{
-			header.cmwt = LittleEndianW(0x0217);
-			break;
-		}
-	}
-
-	header.flags = 0x0001;
-	header.special = 0x02 | 0x04 ;	// 0x02: embed file edit history, 0x04: store row highlight in the header
-	if (m_nInstruments) header.flags |= 0x04;
-	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
-	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
-	if (m_dwSongFlags & SONG_ITCOMPATGXX) header.flags |= 0x20;
-	//if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
-	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
-	header.speed = m_nDefaultSpeed;
- 	header.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
-	header.sep = 128; // pan separation
-	dwHdrPos = sizeof(header) + header.ordnum;
-	// Channel Pan and Volume
-	memset(header.chnpan, 0xA0, 64);
-	memset(header.chnvol, 64, 64);
-	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
-	{
-		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
-		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;
-		header.chnvol[ich] = ChnSettings[ich].nVolume;
-		if (ChnSettings[ich].dwFlags & CHN_MUTE) header.chnpan[ich] |= 0x80;
-/*		if (ChnSettings[ich].szName[0])
-		{
-			dwChnNamLen = (ich+1) * MAX_CHANNELNAME;
-		}
-*/
-	}
-//	if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
-
-	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
-	{
-		header.flags |= 0x80;
-		header.special |= 0x08;
-		dwExtra += sizeof(MODMIDICFG);
-	}
-	// Pattern Names
-/*	if ((m_nPatternNames) && (m_lpszPatternNames))
-	{
-		dwPatNamLen = m_nPatternNames * MAX_PATTERNNAME;
-		while ((dwPatNamLen >= MAX_PATTERNNAME) && (!m_lpszPatternNames[dwPatNamLen-MAX_PATTERNNAME])) dwPatNamLen -= MAX_PATTERNNAME;
-		if (dwPatNamLen < MAX_PATTERNNAME) dwPatNamLen = 0;
-		if (dwPatNamLen) dwExtra += dwPatNamLen + 8;
-	}
-*/	// Mix Plugins
-	//dwExtra += SaveMixPlugins(NULL, TRUE);
-	dwExtra += SaveITEditHistory(this, nullptr);	// Just calculate the size of this extra block for now.
-	// Comments
-	if (m_lpszSongComments)
-	{
-		header.special |= 1;
-		header.msglength = strlen(m_lpszSongComments)+1;
-		header.msgoffset = dwHdrPos + dwExtra + header.insnum*4 + header.patnum*4 + header.smpnum*4;
-	}
-	// Write file header
-	fwrite(&header, 1, sizeof(header), f);
-	Order.WriteAsByte(f, header.ordnum);
-	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
-	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
-	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
-	// Writing edit history information
-	SaveITEditHistory(this, f);
-	// Writing midi cfg
-	if (header.flags & 0x80)
-	{
-		fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
-	}
-	// Writing pattern names
-/*	if (dwPatNamLen)
-	{
-		DWORD d = 0x4d414e50;
-		fwrite(&d, 1, 4, f);
-		fwrite(&dwPatNamLen, 1, 4, f);
-		fwrite(m_lpszPatternNames, 1, dwPatNamLen, f);
-	}
-*/	// Writing channel Names
-/*	if (dwChnNamLen)
-	{
-		DWORD d = 0x4d414e43;
-		fwrite(&d, 1, 4, f);
-		fwrite(&dwChnNamLen, 1, 4, f);
-		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
-		for (UINT inam=0; inam<nChnNames; inam++)
-		{
-			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
-		}
-	}
-*/	// Writing mix plugins info
-/*	SaveMixPlugins(f, FALSE);
-*/	// Writing song message
-	dwPos = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
-	if (header.special & 1)
-	{
-		dwPos += strlen(m_lpszSongComments) + 1;
-		fwrite(m_lpszSongComments, 1, strlen(m_lpszSongComments)+1, f);
-	}
-	// Writing instruments
-	for (UINT nins=1; nins<=header.insnum; nins++)
-	{
-		bool bKbdEx = false;	// extended sample map (for samples > 255)
-		BYTE keyboardex[NOTE_MAX];
-
-		memset(&iti, 0, sizeof(iti));
-		iti.id = LittleEndian(IT_IMPI);	// "IMPI"
-		iti.trkvers = 0x0214;
-		if (Instruments[nins])
-		{
-			MODINSTRUMENT *pIns = Instruments[nins];
-			memcpy(iti.filename, pIns->filename, 12);
-			memcpy(iti.name, pIns->name, 26);
-			StringFixer::SetNullTerminator(iti.name);
-			iti.mbank = pIns->wMidiBank;
-			iti.mpr = pIns->nMidiProgram;
-			iti.mch = pIns->nMidiChannel;
-			iti.nna = pIns->nNNA;
-			if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
-			iti.dca = pIns->nDNA;
-			iti.fadeout = min(pIns->nFadeOut >> 5 , 256);
-			iti.pps = pIns->nPPS;
-			iti.ppc = pIns->nPPC;
-			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
-			iti.dfp = (BYTE)(pIns->nPan >> 2);
-			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
-			iti.rv = pIns->nVolSwing;
-			iti.rp = pIns->nPanSwing;
-			iti.ifc = pIns->nIFC;
-			iti.ifr = pIns->nIFR;
-			iti.nos = 0;
-			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
-			{
-				const UINT smp = pIns->Keyboard[i];
-				if (smp && smp <= GetNumSamples() && !smpcount[smp - 1])
-				{
-					smpcount[smp - 1] = true;
-					iti.nos++;
-				}
-				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;
-				iti.keyboard[i*2+1] = smp;
-				//if (smp > 0xFF) bKbdEx = true;	// no extended sample map in compat mode
-				keyboardex[i] = (smp>>8);
-			} else keyboardex[i] = 0;
-			// Writing Volume envelope
-			MPTEnvToIT(&pIns->VolEnv, &iti.volenv, 0, 64);
-			// Writing Panning envelope
-			MPTEnvToIT(&pIns->PanEnv, &iti.panenv, 32, 32);
-			// Writing Pitch Envelope
-			MPTEnvToIT(&pIns->PitchEnv, &iti.pitchenv, 32, 32);
-			if (pIns->PitchEnv.dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
-		} else
-		// Save Empty Instrument
-		{
-			for (UINT i=0; i<NOTE_MAX; i++) iti.keyboard[i*2] = i;
-			iti.ppc = 5*12;
-			iti.gbv = 128;
-			iti.dfp = 0x20;
-			iti.ifc = 0xFF;
-		}
-		if (!iti.nos) iti.trkvers = 0;
-		// Writing instrument
-		if (bKbdEx) *((int *)iti.dummy) = 'MPTX';
-		inspos[nins-1] = dwPos;
-		dwPos += sizeof(ITINSTRUMENT);
-		fwrite(&iti, 1, sizeof(ITINSTRUMENT), f);
-		if (bKbdEx)
-		{
-			dwPos += NOTE_MAX;
-			fwrite(keyboardex, 1, NOTE_MAX, f);
-		}
-
-		//------------ rewbs.modularInstData
-/*		if (Instruments[nins])
-		{
-			long modularInstSize = 0;
-			UINT ModInstID = 'INSM';
-			fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
-			long sizePos = ftell(f);				// we will want to write the modular data's total size here
-			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
-			
-			//Write chunks
-			UINT ID;
-			{	//VST Slot chunk:
-				ID='PLUG';
-				fwrite(&ID, 1, sizeof(int), f);
-				MODINSTRUMENT *pIns = Instruments[nins];
-				fwrite(&(pIns->nMixPlug), 1, sizeof(BYTE), f);
-				modularInstSize += sizeof(int)+sizeof(BYTE);
-			}
-*/			//How to save your own modular instrument chunk:
-	/*		{
-				ID='MYID';
-				fwrite(&ID, 1, sizeof(int), f);
-				instModularDataSize+=sizeof(int);
-				
-				//You can save your chunk size somwhere here if you need variable chunk size.
-				fwrite(myData, 1, myDataSize, f);
-				instModularDataSize+=myDataSize;
-			}
-	*/
-/*			//write modular data's total size
-			long curPos = ftell(f);			// remember current pos
-			fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
-			fseek(f, curPos, SEEK_SET);		// go back to where we were.
-			
-			//move forward 
-			dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
-		}
-*/		//------------ end rewbs.modularInstData
-	}
-	// Writing sample headers
-	memset(&itss, 0, sizeof(itss));
-	for (UINT hsmp=0; hsmp<header.smpnum; hsmp++)
-	{
-		smppos[hsmp] = dwPos;
-		dwPos += sizeof(ITSAMPLESTRUCT);
-		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
-	}
-	// Writing Patterns
-	for (UINT npat=0; npat<header.patnum; npat++)
-	{
-		DWORD dwPatPos = dwPos;
-		UINT len;
-		if (!Patterns[npat]) continue;
-		patpos[npat] = dwPos;
-		patinfo[0] = 0;
-		patinfo[1] = Patterns[npat].GetNumRows();
-		patinfo[2] = 0;
-		patinfo[3] = 0;
-
-		// Check for empty pattern
-		if (Patterns[npat].GetNumRows() == 64 && Patterns.IsPatternEmpty(npat))
-		{
-			patpos[npat] = 0;
-			continue;
-		}
-
-		fwrite(patinfo, 8, 1, f);
-		dwPos += 8;
-		memset(chnmask, 0xFF, sizeof(chnmask));
-		memset(lastvalue, 0, sizeof(lastvalue));
-		MODCOMMAND *m = Patterns[npat];
-		for (UINT row=0; row<Patterns[npat].GetNumRows(); row++)
-		{
-			len = 0;
-			for (UINT ch = 0; ch < m_nChannels; ch++, m++)
-			{
-				if(ch >= nChannels) continue;
-				BYTE b = 0;
-				UINT command = m->command;
-				UINT param = m->param;
-				UINT vol = 0xFF;
-				UINT note = m->note;
-				if(note == NOTE_PC || note == NOTE_PCS) note = NOTE_NONE;
-				if (note) b |= 1;
-				if ((note) && (note < NOTE_MIN_SPECIAL)) note--;
-				if (note == NOTE_FADE) note = 0xF6;
-				if (m->instr) b |= 2;
-				if (m->volcmd)
-				{
-					UINT volcmd = m->volcmd;
-					switch(volcmd)
-					{
-					case VOLCMD_VOLUME:			vol = m->vol; if (vol > 64) vol = 64; break;
-					case VOLCMD_PANNING:		vol = m->vol + 128; if (vol > 192) vol = 192; break;
-					case VOLCMD_VOLSLIDEUP:		vol = 85 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VOLSLIDEDOWN:	vol = 95 + ConvertVolParam(m->vol); break;
-					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m->vol); break;
-					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VIBRATODEPTH:	vol = 203 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VIBRATOSPEED:	if(command == CMD_NONE) { // illegal command -> move if possible
-													command = CMD_VIBRATO; param = ConvertVolParam(m->vol) << 4; vol = 0xFF;
-												} else { vol = 203;}
-												break;
-					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
-					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
-					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
-					default:					vol = 0xFF;
-					}
-				}
-				if (vol != 0xFF) b |= 4;
-				if (command)
-				{
-					S3MSaveConvert(&command, &param, true, true);
-					if (command) b |= 8;
-				}
-				// Packing information
-				if (b)
-				{
-					// Same note ?
-					if (b & 1)
-					{
-						if ((note == lastvalue[ch].note) && (lastvalue[ch].volcmd & 1))
-						{
-							b &= ~1;
-							b |= 0x10;
-						} else
-						{
-							lastvalue[ch].note = note;	
-							lastvalue[ch].volcmd |= 1;
-						}
-					}
-					// Same instrument ?
-					if (b & 2)
-					{
-						if ((m->instr == lastvalue[ch].instr) && (lastvalue[ch].volcmd & 2))
-						{
-							b &= ~2;
-							b |= 0x20;
-						} else
-						{
-							lastvalue[ch].instr = m->instr;
-							lastvalue[ch].volcmd |= 2;
-						}
-					}
-					// Same volume column byte ?
-					if (b & 4)
-					{
-						if ((vol == lastvalue[ch].vol) && (lastvalue[ch].volcmd & 4))
-						{
-							b &= ~4;
-							b |= 0x40;
-						} else
-						{
-							lastvalue[ch].vol = vol;
-							lastvalue[ch].volcmd |= 4;
-						}
-					}
-					// Same command / param ?
-					if (b & 8)
-					{
-						if ((command == lastvalue[ch].command) && (param == lastvalue[ch].param) && (lastvalue[ch].volcmd & 8))
-						{
-							b &= ~8;
-							b |= 0x80;
-						} else
-						{
-							lastvalue[ch].command = command;
-							lastvalue[ch].param = param;
-							lastvalue[ch].volcmd |= 8;
-						}
-					}
-					if (b != chnmask[ch])
-					{
-						chnmask[ch] = b;
-						buf[len++] = (ch+1) | 0x80;
-						buf[len++] = b;
-					} else
-					{
-						buf[len++] = ch+1;
-					}
-					if (b & 1) buf[len++] = note;
-					if (b & 2) buf[len++] = m->instr;
-					if (b & 4) buf[len++] = vol;
-					if (b & 8)
-					{
-						buf[len++] = command;
-						buf[len++] = param;
-					}
-				}
-			}
-			buf[len++] = 0;
-			dwPos += len;
-			patinfo[0] += len;
-			fwrite(buf, 1, len, f);
-		}
-		fseek(f, dwPatPos, SEEK_SET);
-		fwrite(patinfo, 8, 1, f);
-		fseek(f, dwPos, SEEK_SET);
-	}
-	// Writing Sample Data
-	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
-	{
-		MODSAMPLE *psmp = &Samples[nsmp];
-		memset(&itss, 0, sizeof(itss));
-		memcpy(itss.filename, psmp->filename, 12);
-		memcpy(itss.name, m_szNames[nsmp], 26);
-		StringFixer::SetNullTerminator(itss.name);
-		itss.id = LittleEndian(IT_IMPS);
-		itss.gvl = (BYTE)psmp->nGlobalVol;
-
-		UINT flags = RS_PCM8S;
-		if(psmp->nLength && psmp->pSample)
-		{
-			itss.flags = 0x01;
-			if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
-			if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-
-			if (psmp->uFlags & CHN_STEREO)
-			{
-				flags = RS_STPCM8S;
-				itss.flags |= 0x04;
-			}
-			if (psmp->uFlags & CHN_16BIT)
-			{
-				itss.flags |= 0x02;
-				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
-			}
-
-			itss.cvt = 0x01;
-		}
-		else
-		{
-			itss.flags = 0x00;
-		}
-
-		itss.C5Speed = psmp->nC5Speed;
-		if (!itss.C5Speed) itss.C5Speed = 8363;
-		itss.length = psmp->nLength;
-		itss.loopbegin = psmp->nLoopStart;
-		itss.loopend = psmp->nLoopEnd;
-		itss.susloopbegin = psmp->nSustainStart;
-		itss.susloopend = psmp->nSustainEnd;
-		itss.vol = psmp->nVolume >> 2;
-		itss.dfp = psmp->nPan >> 2;
-		itss.vit = autovibxm2it[psmp->nVibType & 7];
-		itss.vis = min(psmp->nVibRate, 64);
-		itss.vid = min(psmp->nVibDepth, 32);
-		itss.vir = min(psmp->nVibSweep, 255);
-		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
-
-		itss.samplepointer = dwPos;
-		fseek(f, smppos[nsmp-1], SEEK_SET);
-		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
-		fseek(f, dwPos, SEEK_SET);
-		if ((psmp->pSample) && (psmp->nLength))
-		{
-			dwPos += WriteSample(f, psmp, flags);
-		}
-	}
-
-	//Save hacked-on extra info
-//	SaveExtendedInstrumentProperties(Instruments, header.insnum, f);
-//	SaveExtendedSongProperties(f);
-
-	// Updating offsets
-	fseek(f, dwHdrPos, SEEK_SET);
-	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
-	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
-	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
-	fclose(f);
-	return true;
-
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // IT 2.14 compression
