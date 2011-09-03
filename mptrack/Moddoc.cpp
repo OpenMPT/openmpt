@@ -1849,7 +1849,7 @@ void CModDoc::OnFileCompatibilitySave()
 			m_SndFile.SaveXM(files.first_file.c_str(), 0, true);
 			break;
 		case MOD_TYPE_IT:
-			m_SndFile.SaveCompatIT(files.first_file.c_str());
+			m_SndFile.SaveIT(files.first_file.c_str(), 0, true);
 			break;
 	}
 	ShowLog();
@@ -3885,7 +3885,7 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 	if (instrumentName.IsEmpty())
 	{
 		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[NOTE_MIDDLEC - 1];
-		if (nSmp < MAX_SAMPLES && m_SndFile.GetSample(nSmp).pSample)
+		if (nSmp <= m_SndFile.GetNumSamples() && m_SndFile.GetSample(nSmp).pSample)
 			instrumentName.Format(TEXT("s: %s"), m_SndFile.GetSampleName(nSmp)); //60 is C-5
 	}
 
