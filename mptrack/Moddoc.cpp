@@ -854,7 +854,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 		CShowLogDlg dlg(parent);
 		return dlg.ShowLog(m_lpszLog, lpszTitle);
 #else
-		return Reporting::Notification(m_lpszLog, lpszTitle, MB_OK | MB_ICONINFORMATION, (parent) ? parent->m_hWnd : nullptr);
+		return Reporting::Notification(m_lpszLog, lpszTitle, MB_OK | MB_ICONINFORMATION, parent);
 #endif
 	}
 	return IDCANCEL;
@@ -3887,7 +3887,7 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 	{
 		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[NOTE_MIDDLEC - 1];
 		if (nSmp <= m_SndFile.GetNumSamples() && m_SndFile.GetSample(nSmp).pSample)
-			instrumentName.Format(TEXT("s: %s"), m_SndFile.GetSampleName(nSmp)); //60 is C-5
+			instrumentName.Format(TEXT("s: %s"), m_SndFile.GetSampleName(nSmp));
 	}
 
 	// Get plugin name.

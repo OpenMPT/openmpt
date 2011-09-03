@@ -46,7 +46,7 @@ void CAmpDlg::OnOK()
 	if(nVal < m_nFactorMin || nVal > m_nFactorMax)
 	{
 		CString str; str.Format(GetStrI18N(__TEXT("Value should be within [%d, %d]")), m_nFactorMin, m_nFactorMax);
-		AfxMessageBox(str, MB_ICONINFORMATION);
+		Reporting::Notification(str, MB_ICONINFORMATION);
 		return;
 	}
 	m_nFactor = static_cast<int16>(nVal);

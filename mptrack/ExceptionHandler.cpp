@@ -49,7 +49,6 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 //------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-	const HWND window = (pMainFrame ? pMainFrame->m_hWnd : NULL);
 
 	// Shut down audio device...
 	if(pMainFrame)
@@ -137,7 +136,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 		}
 	}
 	
-	Reporting::Notification(errorMessage, "OpenMPT Crash", MB_ICONERROR, window);
+	Reporting::Notification(errorMessage, "OpenMPT Crash", MB_ICONERROR, pMainFrame);
 
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;

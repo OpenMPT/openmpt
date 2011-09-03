@@ -14,6 +14,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #endif //MODPLUG_TRACKER
+#include "../mptrack/Mainfrm.h" // For CriticalSection
 #include "Wav.h"
 #include "../common/StringFixer.h"
 #include "../common/Reporting.h"
@@ -132,6 +133,8 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 #endif // MODPLUG_TRACKER
 // -! NEW_FEATURE#0023
 
+	CriticalSection cs;
+
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	Instruments[nInstr] = nullptr;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
@@ -171,6 +174,8 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 		}
 		for (SAMPLEINDEX nSmp = 1; nSmp <= GetNumSamples(); nSmp++) if (sampleused[nSmp])
 		{
+			CriticalSection cs;
+
 			DestroySample(nSmp);
 			strcpy(m_szNames[nSmp], "");
 		}

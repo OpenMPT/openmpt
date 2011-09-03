@@ -613,7 +613,7 @@ void CDoWaveConvert::OnButton1()
 
 	if ((!m_pSndFile) || (!m_lpszFileName) || ((f = fopen(m_lpszFileName, "w+b")) == NULL))
 	{
-		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
+		Reporting::Notification("Could not open file for writing. Is it open in another application?");
 		EndDialog(IDCANCEL);
 		return;
 	}
@@ -1001,7 +1001,7 @@ void CDoAcmConvert::OnButton1()
 	// Creating the output file
 	if ((f = fopen(m_lpszFileName, "wb")) == NULL)
 	{
-		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
+		Reporting::Notification("Could not open file for writing. Is it open in another application?");
 		goto OnError;
 	}
 	wfh.id_RIFF = IFFID_RIFF;
