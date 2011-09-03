@@ -22,10 +22,17 @@ UINT Reporting::Notification(CString text, UINT flags /* = MB_OK*/, HWND parent 
 UINT Reporting::Notification(CString text, CString caption, UINT flags /* = MB_OK*/, HWND parent /* = NULL*/)
 //-----------------------------------------------------------------------------------------------------------
 {
-	if(parent == NULL && CMainFrame::GetMainFrame() != nullptr)
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+
+	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
 	{
-		parent = CMainFrame::GetMainFrame()->m_hWnd;
+		pMainFrm->GetInputHandler()->Bypass(true);
 	}
 
 	return ::MessageBox(parent, text, caption, flags);
+
+	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
+	{
+		pMainFrm->GetInputHandler()->Bypass(false);
+	}
 };
