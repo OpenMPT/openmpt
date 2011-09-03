@@ -1,3 +1,13 @@
+/*
+ *
+ * Reporting.h
+ * -----------
+ * Purpose: Header file for reporting class.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ */
+
+
 #pragma once
 #ifndef REPORTING_H
 #define REPORTING_H
