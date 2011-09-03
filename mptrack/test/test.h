@@ -1,7 +1,7 @@
 #ifndef _TEST_H
 #define _TEST_H
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	#define ENABLE_TESTS
 #endif
 

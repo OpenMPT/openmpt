@@ -432,9 +432,19 @@ void TestLoadFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerMeasure(), 0);
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->IsPcNote(), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->note, NOTE_PC);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->instr, 99);
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->instr, 45);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->volcmd, VOLCMD_VOLSLIDEDOWN);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->vol, 5);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
 
 	// Plugins
 	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
