@@ -1,9 +1,7 @@
-#if !defined(AFX_CREDITSTATIC_H__4ABD7701_49F5_11D1_9E3C_00A0245800CF__INCLUDED_)
-#define AFX_CREDITSTATIC_H__4ABD7701_49F5_11D1_9E3C_00A0245800CF__INCLUDED_
-
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
+#ifndef CREDITSTATIC_H
+#define CREDITSTATIC_H
+
 // CreditStatic.h : header file
 //
 
@@ -117,4 +115,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_CREDITSTATIC_H__4ABD7701_49F5_11D1_9E3C_00A0245800CF__INCLUDED_)
+#endif // CREDITSTATIC_H

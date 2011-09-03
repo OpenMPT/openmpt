@@ -665,7 +665,7 @@ bool COptionsKeyboard::TentativeSetToDefaultFile(CString m_sFullPathName)
 {
 	if (m_sFullPathName.Compare(CMainFrame::GetSettings().m_szKbdFile))
 	{
-		if (AfxMessageBox("Load this keyboard config file when MPT starts up?", MB_YESNO) == IDYES)
+		if (Reporting::Notification("Load this keyboard config file when MPT starts up?", MB_YESNO) == IDYES)
 		{
 			strcpy(CMainFrame::GetSettings().m_szKbdFile,m_sFullPathName);
 			OnSettingsChanged();			// Enable "apply" button

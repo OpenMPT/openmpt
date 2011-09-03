@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "commandset.h"
 #include "resource.h"
+#include "Mptrack.h"	// For MsgBox
 #include "../common/Reporting.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -1423,7 +1424,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 	if( (outStream  = fopen( fileName, "w" )) == NULL )
 	{
-		AfxMessageBox(IDS_CANT_OPEN_FILE_FOR_WRITING, MB_ICONEXCLAMATION|MB_OK);
+		MsgBox(IDS_CANT_OPEN_FILE_FOR_WRITING, NULL, NULL, MB_ICONEXCLAMATION | MB_OK);
 		return false;
 	}
 	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 

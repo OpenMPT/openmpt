@@ -12,15 +12,16 @@
 #include "Reporting.h"
 #include "../mptrack/Mainfrm.h"
 
-UINT Reporting::Notification(CString text, UINT flags /* = MB_OK*/, HWND parent /* = NULL*/)
-//------------------------------------------------------------------------------------------
+
+UINT Reporting::Notification(CString text, UINT flags, CWnd *parent)
+//------------------------------------------------------------------
 {
 	return Notification(text, MAINFRAME_TITLE, flags, parent);
-};
+}
 
 
-UINT Reporting::Notification(CString text, CString caption, UINT flags /* = MB_OK*/, HWND parent /* = NULL*/)
-//-----------------------------------------------------------------------------------------------------------
+UINT Reporting::Notification(CString text, CString caption, UINT flags, CWnd *parent)
+//-----------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -29,10 +30,12 @@ UINT Reporting::Notification(CString text, CString caption, UINT flags /* = MB_O
 		pMainFrm->GetInputHandler()->Bypass(true);
 	}
 
-	return ::MessageBox(parent, text, caption, flags);
+	UINT result = ::MessageBox((parent ? parent->m_hWnd : NULL), text, caption, flags);
 
 	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
 	{
 		pMainFrm->GetInputHandler()->Bypass(false);
 	}
-};
+
+	return result;
+}

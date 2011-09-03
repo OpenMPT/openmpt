@@ -689,9 +689,10 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
 		bool instrumentsLeft = false;
-		CriticalSection cs;
 
 		m_SndFile.DestroyInstrument(nIns);
+
+		CriticalSection cs;
 		if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
 		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) instrumentsLeft = true;
 		if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;

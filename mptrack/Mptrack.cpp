@@ -1854,15 +1854,14 @@ UINT MsgBox(UINT nStringID, CWnd *p, LPCSTR lpszTitle, UINT n)
 {
 	CString str;
 	str.LoadString(nStringID);
-	HWND hwnd = (p) ? p->m_hWnd : NULL;
-	return ::MessageBox(hwnd, str, lpszTitle, n);
+	return Reporting::Notification(str, CString(lpszTitle), n, p);
 }
 
 
 void ErrorBox(UINT nStringID, CWnd*p)
 //-----------------------------------
 {
-	MsgBox(nStringID, p, "Error!", MB_OK|MB_ICONSTOP);
+	MsgBox(nStringID, p, "Error!", MB_OK | MB_ICONSTOP);
 }
 
 

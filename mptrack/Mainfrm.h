@@ -1,12 +1,11 @@
 // MainFrm.h : interface of the CMainFrame class
 //
 /////////////////////////////////////////////////////////////////////////////
-#if !defined(AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_)
-#define AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_
 
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
+#ifndef MAINFRM_H
+#define MAINFRM_H
+
 
 #include "sndfile.h"
 #include "CommandSet.h"
@@ -682,10 +681,9 @@ public:
 const CHAR gszBuildDate[] = __DATE__ " " __TIME__;
 
 
-
 /////////////////////////////////////////////////////////////////////////////
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_)
+#endif // MAINFRM_H

@@ -1116,8 +1116,13 @@ void CViewSample::UpdateNcButtonState()
 		switch(cLeftBarButtons[i])
 		{
 			case ID_SAMPLE_DRAW: 
-				if(m_bDrawingEnabled) dwStyle |= NCBTNS_CHECKED; 
-				if(pSndFile->GetSample(m_nSample).GetNumChannels() > 1 || pSndFile->GetSample(m_nSample).pSample == nullptr) dwStyle |= NCBTNS_DISABLED;
+				if(m_bDrawingEnabled) dwStyle |= NCBTNS_CHECKED;
+				if(m_nSample > pSndFile->GetNumSamples() ||
+					pSndFile->GetSample(m_nSample).GetNumChannels() > 1 ||
+					pSndFile->GetSample(m_nSample).pSample == nullptr)
+				{
+					dwStyle |= NCBTNS_DISABLED;
+				}
 				break;
 		}
 

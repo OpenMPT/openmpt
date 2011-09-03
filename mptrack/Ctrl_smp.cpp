@@ -623,6 +623,10 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 	// Updating Values
 	if (dwHintMask & (HINT_MODTYPE|HINT_SAMPLEINFO))
 	{
+		if(m_nSample > m_pSndFile->GetNumSamples())
+		{
+			SetCurrentSample(m_pSndFile->GetNumSamples());
+		}
 		const MODSAMPLE &sample = m_pSndFile->GetSample(m_nSample);
 		CHAR s[128];
 		DWORD d;
@@ -1873,7 +1877,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	}
 	if (handleSt == NULL) 
 	{
-		AfxMessageBox(IDS_SOUNDTOUCH_LOADFAILURE);
+		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
 		return -1;
 	}
 

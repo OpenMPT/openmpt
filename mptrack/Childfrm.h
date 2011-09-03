@@ -2,12 +2,9 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_CHILDFRM_H__AE144DCA_DD0B_11D1_AF24_444553540000__INCLUDED_)
-#define AFX_CHILDFRM_H__AE144DCA_DD0B_11D1_AF24_444553540000__INCLUDED_
-
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
+#ifndef CHILDFRM_H
+#define CHILDFRM_H
 
 
 class CModControlDlg;
@@ -155,4 +152,4 @@ public:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_CHILDFRM_H__AE144DCA_DD0B_11D1_AF24_444553540000__INCLUDED_)
+#endif // CHILDFRM_H

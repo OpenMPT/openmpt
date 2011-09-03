@@ -1,12 +1,10 @@
 // mptrack.h : main header file for the MPTRACK application
 //
 
-#if !defined(AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_)
-#define AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_
-
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
+#ifndef MPTRACK_H
+#define MPTRACK_H
+
 
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
@@ -381,4 +379,4 @@ extern const LPCSTR szMidiGroupNames[17];		// 16 groups + Percussions
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_)
+#endif // MPTRACK_H

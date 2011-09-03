@@ -355,7 +355,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 
 			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
-				Reporting::Notification(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION, this->m_hWnd) == IDNO)
+				Reporting::Notification(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION, this) == IDNO)
 			{
 				return false;
 			} else
@@ -655,7 +655,6 @@ void CAbstractVstEditor::OnToggleEditor(UINT nID)
 void CAbstractVstEditor::OnInitMenu(CMenu* /*pMenu*/)
 //---------------------------------------------------
 {
-	//AfxMessageBox("");
 	SetupMenu();
 }
 
