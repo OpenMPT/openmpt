@@ -381,17 +381,17 @@ bool CSampleUndo::Undo(const SAMPLEINDEX nSmp)
 
 	case sundo_invert:
 		// invert again
-		ctrlSmp::InvertSample(&sample, pUndo->nChangeStart, pUndo->nChangeEnd, pSndFile);
+		ctrlSmp::InvertSample(sample, pUndo->nChangeStart, pUndo->nChangeEnd, pSndFile);
 		break;
 
 	case sundo_reverse:
 		// reverse again
-		ctrlSmp::ReverseSample(&sample, pUndo->nChangeStart, pUndo->nChangeEnd, pSndFile);
+		ctrlSmp::ReverseSample(sample, pUndo->nChangeStart, pUndo->nChangeEnd, pSndFile);
 		break;
 
 	case sundo_unsign:
 		// unsign again
-		ctrlSmp::UnsignSample(&sample, pUndo->nChangeStart, pUndo->nChangeEnd, pSndFile);
+		ctrlSmp::UnsignSample(sample, pUndo->nChangeStart, pUndo->nChangeEnd, pSndFile);
 		break;
 
 	case sundo_insert:

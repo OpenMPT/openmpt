@@ -2045,7 +2045,7 @@ void CViewSample::OnMonoConvert()
 		if ((sample.uFlags & CHN_STEREO) && (sample.pSample) && (sample.nLength))
 		{
 			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-			if(ctrlSmp::ConvertToMono(&sample, pSndFile))
+			if(ctrlSmp::ConvertToMono(sample, pSndFile))
 			{
 				pModDoc->SetModified();
 				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);

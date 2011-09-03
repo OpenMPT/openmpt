@@ -919,15 +919,18 @@ void CCtrlSamples::OnSampleNew()
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
 
-		if(bDuplicate && nOldSmp >= 1 && nOldSmp < MAX_SAMPLES)
+		if(bDuplicate && nOldSmp >= 1 && nOldSmp <= pSndFile->GetNumSamples())
 		{
 			m_pModDoc->GetSampleUndo()->PrepareUndo(smp, sundo_replace);
 			MemCopy(m_pSndFile->GetSample(smp), m_pSndFile->GetSample(nOldSmp));
 			strcpy(m_pSndFile->m_szNames[smp], m_pSndFile->m_szNames[nOldSmp]);
-			// clone sample.
-			if((m_pSndFile->GetSample(smp).pSample = CSoundFile::AllocateSample(m_pSndFile->GetSample(nOldSmp).GetSampleSizeInBytes())) != nullptr)
+			// Clone sample.
+			if(m_pSndFile->GetSample(nOldSmp).pSample != nullptr)
 			{
-				memcpy(m_pSndFile->GetSample(smp).pSample, m_pSndFile->GetSample(nOldSmp).pSample, m_pSndFile->GetSample(nOldSmp).GetSampleSizeInBytes());
+				if((m_pSndFile->GetSample(smp).pSample = CSoundFile::AllocateSample(m_pSndFile->GetSample(nOldSmp).GetSampleSizeInBytes())) != nullptr)
+				{
+					memcpy(m_pSndFile->GetSample(smp).pSample, m_pSndFile->GetSample(nOldSmp).pSample, m_pSndFile->GetSample(nOldSmp).GetSampleSizeInBytes());
+				}
 			}
 		}
 
@@ -1501,14 +1504,14 @@ void CCtrlSamples::OnUpsample()
 			}
 		}
 		if (sample.nLoopStart >= dwEnd) sample.nLoopStart += (dwEnd-dwStart); else
-			if (sample.nLoopStart > dwStart) sample.nLoopStart += (sample.nLoopStart - dwStart);
+		if (sample.nLoopStart > dwStart) sample.nLoopStart += (sample.nLoopStart - dwStart);
 		if (sample.nLoopEnd >= dwEnd) sample.nLoopEnd += (dwEnd-dwStart); else
-			if (sample.nLoopEnd > dwStart) sample.nLoopEnd += (sample.nLoopEnd - dwStart);
+		if (sample.nLoopEnd > dwStart) sample.nLoopEnd += (sample.nLoopEnd - dwStart);
 		if (sample.nSustainStart >= dwEnd) sample.nSustainStart += (dwEnd-dwStart); else
-			if (sample.nSustainStart > dwStart) sample.nSustainStart += (sample.nSustainStart - dwStart);
+		if (sample.nSustainStart > dwStart) sample.nSustainStart += (sample.nSustainStart - dwStart);
 		if (sample.nSustainEnd >= dwEnd) sample.nSustainEnd += (dwEnd-dwStart); else
-			if (sample.nSustainEnd > dwStart) sample.nSustainEnd += (sample.nSustainEnd - dwStart);
-
+		if (sample.nSustainEnd > dwStart) sample.nSustainEnd += (sample.nSustainEnd - dwStart);
+		
 		CriticalSection cs;
 
 		for (UINT iFix=0; iFix<MAX_CHANNELS; iFix++)
@@ -2215,7 +2218,7 @@ void CCtrlSamples::OnReverse()
 	SELECTIONPOINTS selection = GetSelectionPoints();
 
 	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_reverse, selection.nStart, selection.nEnd);
-	if(ctrlSmp::ReverseSample(&sample, selection.nStart, selection.nEnd, m_pSndFile) == true)
+	if(ctrlSmp::ReverseSample(sample, selection.nStart, selection.nEnd, m_pSndFile) == true)
 	{
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
@@ -2236,7 +2239,7 @@ void CCtrlSamples::OnInvert()
 	SELECTIONPOINTS selection = GetSelectionPoints();
 
 	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_invert, selection.nStart, selection.nEnd);
-	if(ctrlSmp::InvertSample(&sample, selection.nStart, selection.nEnd, m_pSndFile) == true)
+	if(ctrlSmp::InvertSample(sample, selection.nStart, selection.nEnd, m_pSndFile) == true)
 	{
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
@@ -2262,7 +2265,7 @@ void CCtrlSamples::OnSignUnSign()
 	SELECTIONPOINTS selection = GetSelectionPoints();
 
 	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_unsign, selection.nStart, selection.nEnd);
-	if(ctrlSmp::UnsignSample(&sample, selection.nStart, selection.nEnd, m_pSndFile) == true)
+	if(ctrlSmp::UnsignSample(sample, selection.nStart, selection.nEnd, m_pSndFile) == true)
 	{
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
@@ -3163,7 +3166,7 @@ void CCtrlSamples::OnXFade()
 			sample.nLoopStart = nFadeLength;
 		}
 
-		if(ctrlSmp::XFadeSample(&sample, nFadeLength, m_pSndFile))
+		if(ctrlSmp::XFadeSample(sample, nFadeLength, m_pSndFile))
 		{
 			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 			m_pModDoc->SetModified();

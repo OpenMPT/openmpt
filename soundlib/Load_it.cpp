@@ -493,7 +493,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -> DESC="misc quantity changes"
 //	BYTE chnmask[64], channels_used[64];
 //	MODCOMMAND lastvalue[64];
-	BYTE chnmask[MAX_BASECHANNELS], channels_used[MAX_BASECHANNELS];
+	BYTE chnmask[MAX_BASECHANNELS];
 	MODCOMMAND lastvalue[MAX_BASECHANNELS];
 // -! BEHAVIOUR_CHANGE#0006
 
@@ -825,7 +825,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read pattern names: "PNAM"
 	char *patNames = nullptr;
 	UINT patNamesLen = 0;
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4d414e50))
+	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(IT_PNAM)))
 	{
 		patNamesLen = *((DWORD *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
@@ -838,7 +838,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	m_nChannels = GetModSpecifications().channelsMin;
 	// Read channel names: "CNAM"
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4d414e43))
+	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(IT_CNAM)))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
@@ -1151,7 +1151,6 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					}
 					m[ch].note = note;
 					lastvalue[ch].note = note;
-					channels_used[ch] = TRUE;
 				}
 			}
 			if (chnmask[ch] & 2)
@@ -1411,11 +1410,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		if(header.ordnum < 2) header.ordnum = 2;
 	}
 
-	header.insnum = m_nInstruments;
-	header.smpnum = m_nSamples;
-	header.patnum = (GetType() == MOD_TYPE_MPT) ? Patterns.Size() : MAX_PATTERNS;
-	if(Patterns.Size() < header.patnum) Patterns.ResizeArray(header.patnum);
-	while ((header.patnum > 0) && (!Patterns[header.patnum - 1])) header.patnum--;
+	header.insnum = min(m_nInstruments, specs.instrumentsMax);
+	header.smpnum = min(m_nSamples, specs.samplesMax);
+	header.patnum = min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
 	vector<DWORD> patpos(header.patnum, 0);
@@ -1433,7 +1430,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		MptVersion::VersionNum vVersion = MptVersion::num;
 		header.cwtv = LittleEndianW(0x5000 | (WORD)((vVersion >> 16) & 0x0FFF)); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
 		header.cmwt = LittleEndianW(0x0214);	// Common compatible tracker :)
-		// hack from schism tracker:
+		// Hack from schism tracker:
 		for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
 		{
 			if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
@@ -1458,7 +1455,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	if (m_dwSongFlags & SONG_ITCOMPATGXX) header.flags |= 0x20;
 	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatExport) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
+	header.mv = min(m_nSamplePreAmp, 128);
 	header.speed = m_nDefaultSpeed;
  	header.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
 	header.sep = 128; // pan separation
@@ -1467,7 +1464,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	memset(header.chnpan, 0xA0, 64);
 	memset(header.chnvol, 64, 64);
 
-	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
+	for (size_t ich = 0; ich < 64; ich++) //Header only has room for settings for 64 chans...
 	{
 		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
 		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;
@@ -1515,8 +1512,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	if (m_lpszSongComments)
 	{
 		header.special |= 1;
-		header.msglength = strlen(m_lpszSongComments)+1;
-		header.msgoffset = dwHdrPos + dwExtra + header.insnum*4 + header.patnum*4 + header.smpnum*4;
+		header.msglength = strlen(m_lpszSongComments) + 1;
+		header.msgoffset = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
 	}
 
 	// Write file header
@@ -1538,7 +1535,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	// Writing pattern names
 	if (numNamedPats && !compatExport)
 	{
-		DWORD d = 0x4d414e50;
+		DWORD d = LittleEndian(IT_PNAM); // "PNAM"
 		fwrite(&d, 1, 4, f);
 		d = numNamedPats * MAX_PATTERNNAME;
 		fwrite(&d, 1, 4, f);
@@ -1555,7 +1552,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	// Writing channel names
 	if (dwChnNamLen && !compatExport)
 	{
-		DWORD d = 0x4d414e43;
+		DWORD d = LittleEndian(IT_CNAM); // "CNAM"
 		fwrite(&d, 1, 4, f);
 		fwrite(&dwChnNamLen, 1, 4, f);
 		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
