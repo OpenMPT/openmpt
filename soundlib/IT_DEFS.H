@@ -3,7 +3,7 @@
 
 #pragma pack(1)
 
-typedef struct tagITFILEHEADER
+struct ITFILEHEADER
 {
 	DWORD id;			// 0x4D504D49
 	CHAR songname[26];
@@ -28,10 +28,10 @@ typedef struct tagITFILEHEADER
 	DWORD reserved;		// ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
 	BYTE chnpan[64];
 	BYTE chnvol[64];
-} ITFILEHEADER;
+};
 
 
-typedef struct tagITENVELOPE
+struct ITENVELOPE
 {
 	BYTE flags;
 	BYTE num;
@@ -41,10 +41,10 @@ typedef struct tagITENVELOPE
 	BYTE sle;
 	BYTE data[25*3];
 	BYTE reserved;
-} ITENVELOPE;
+};
 
 // Old Impulse Instrument Format (cmwt < 0x200)
-typedef struct tagITOLDINSTRUMENT
+struct ITOLDINSTRUMENT
 {
 	DWORD id;			// IMPI = 0x49504D49
 	CHAR filename[12];	// DOS file name
@@ -66,11 +66,11 @@ typedef struct tagITOLDINSTRUMENT
 	BYTE keyboard[240];
 	BYTE volenv[200];
 	BYTE nodes[50];
-} ITOLDINSTRUMENT;
+};
 
 
 // Impulse Instrument Format
-typedef struct tagITINSTRUMENT
+struct ITINSTRUMENT
 {
 	DWORD id;
 	CHAR filename[12];
@@ -99,19 +99,19 @@ typedef struct tagITINSTRUMENT
 	ITENVELOPE panenv;
 	ITENVELOPE pitchenv;
 	BYTE dummy[4]; // was 7, but IT v2.17 saves 554 bytes
-} ITINSTRUMENT;
+};
 
 
 // MPT IT Instrument Extension
-typedef struct _ITINSTRUMENTEX
+struct ITINSTRUMENTEX
 {
 	ITINSTRUMENT iti;
 	BYTE keyboardhi[120];
-} ITINSTRUMENTEX, *PITINSTRUMENTEX;
+};
 
 
 // IT Sample Format
-typedef struct tagITSAMPLESTRUCT
+struct ITSAMPLESTRUCT
 {
 	DWORD id;		// 0x53504D49
 	CHAR filename[12];
@@ -133,16 +133,16 @@ typedef struct tagITSAMPLESTRUCT
 	BYTE vid;
 	BYTE vir;
 	BYTE vit;
-} ITSAMPLESTRUCT;
+};
 
 
 // IT Header extension: Save history
-typedef struct tagITHISTORYSTRUCT
+struct ITHISTORYSTRUCT
 {
-	uint16 fatdate;	// DOS/FAT date when the file was opened / created in the editor. For details, read http://msdn.microsoft.com/en-us/library/ms724247(VS.85).aspx
-	uint16 fattime;	// DOS/FAT time when the file was opened / created in the editor.
+	uint16 fatdate;	// DOS / FAT date when the file was opened / created in the editor. For details, read http://msdn.microsoft.com/en-us/library/ms724247(VS.85).aspx
+	uint16 fattime;	// DOS / FAT time when the file was opened / created in the editor.
 	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
-} ITHISTORYSTRUCT;
+};
 
 #pragma pack()
 
@@ -158,6 +158,10 @@ extern BYTE autovibxm2it[8];
 #define IT_MPTM	0x2E6D7074		// "tpm." old MPTM header magic bytes
 #define IT_OMPT 0x54504D4F		// "OMPT" magic bytes for non-standard OpenMPT IT files
 #define IT_CHBI 0x49424843		// "CHBI" magic bytes in the IT header to identify ChibiTracker
+
+// MPT stuff
+#define IT_PNAM 0x4D414E50		// "PNAM" pattern names
+#define IT_CNAM 0x4D414E43		// "CNAM" channel names
 
 enum IT_ReaderBitMasks
 {

@@ -81,7 +81,7 @@ BOOL COptionsColors::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
-	memcpy(CustomColors, CMainFrame::GetSettings().rgbCustomColors, sizeof(CustomColors));
+	MemCopy(CustomColors, CMainFrame::GetSettings().rgbCustomColors);
 	for (UINT i = 0; i < CountOf(gColorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(gColorDefs[i].pszName), i);
@@ -129,7 +129,7 @@ void COptionsColors::OnOK()
 	CMainFrame::GetSettings().m_nRowHighlightMeasures = GetDlgItemInt(IDC_PRIMARYHILITE);
 	CMainFrame::GetSettings().m_nRowHighlightBeats = GetDlgItemInt(IDC_SECONDARYHILITE);
 
-	memcpy(CMainFrame::GetSettings().rgbCustomColors, CustomColors, sizeof(CMainFrame::GetSettings().rgbCustomColors));
+	MemCopy(CMainFrame::GetSettings().rgbCustomColors, CustomColors);
 	CMainFrame::UpdateColors();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
