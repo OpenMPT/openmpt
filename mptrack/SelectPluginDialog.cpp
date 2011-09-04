@@ -391,7 +391,7 @@ bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug)
 			/*&& (gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
 		{
 			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
-			return (Reporting::Notification(s, MB_YESNO) == IDYES);
+			return (Reporting::Confirm(s) == cnfYes);
 		}
 	}
 
@@ -438,7 +438,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		UpdatePluginsList(plugLib ? plugLib->dwPluginId2 : 0);
 	} else
 	{
-		MessageBox("At least one selected file was not a valid VST-Plugin.", NULL, MB_ICONERROR | MB_OK);
+		Reporting::Error("At least one selected file was not a valid VST-Plugin.");
 	}
 }
 

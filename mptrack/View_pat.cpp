@@ -2028,9 +2028,14 @@ void CViewPattern::OnEditFindNext()
 				if (!(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACE)) goto EndSearch;
 				if (!(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL))
 				{
-					UINT ans = MessageBox("Replace this occurrence?", "Replace", MB_YESNOCANCEL);
-					if (ans == IDYES) bReplace = true; else
-					if (ans == IDNO) bReplace = false; else goto EndSearch;
+					ConfirmAnswer result = Reporting::Confirm("Replace this occurrence?", "Replace", true);
+					if(result == cnfCancel)
+					{
+						goto EndSearch;	// Yuck!
+					} else
+					{
+						bReplace = (result == cnfYes);
+					}
 				}
 				if (bReplace)
 				{
@@ -2162,7 +2167,7 @@ EndSearch:
 			wsprintf(&szFind[strlen(szFind)], "%02X", m_findReplace.cmdFind.param);
 		} else strcat(szFind, "??");
 		wsprintf(s, "Cannot find \"%s\"", szFind);
-		MessageBox(s, "Find/Replace", MB_OK | MB_ICONINFORMATION);
+		Reporting::Information(s, "Find/Replace");
 	}
 }
 
@@ -2713,7 +2718,7 @@ void CViewPattern::OnRemoveChannel()
 
 	if(pSndFile->m_nChannels <= pSndFile->GetModSpecifications().channelsMin)
 	{
-		CMainFrame::GetMainFrame()->MessageBox("No channel removed - channel number already at minimum.", "Remove channel", MB_OK | MB_ICONINFORMATION);
+		Reporting::Error("No channel removed - channel number already at minimum.", "Remove channel");
 		return;
 	}
 
@@ -2722,7 +2727,7 @@ void CViewPattern::OnRemoveChannel()
 
 	CString str;
 	str.Format("Remove channel %d? This channel still contains note data!", nChn + 1);
-	if(isEmpty || CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	if(isEmpty || Reporting::Confirm(str , "Remove channel") == cnfYes)
 	{
 		vector<bool> keepMask(pModDoc->GetNumChannels(), true);
 		keepMask[nChn] = false;
@@ -2767,7 +2772,7 @@ void CViewPattern::OnDuplicateChannel()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc == nullptr) return;
 
-	if(Reporting::Notification(GetStrI18N(_TEXT("This affects all patterns, proceed?")), MB_YESNO) != IDYES)
+	if(Reporting::Confirm(GetStrI18N(_TEXT("This affects all patterns, proceed?"))) != cnfYes)
 		return;
 
 	const CHANNELINDEX nDupChn = GetChanFromCursor(m_nMenuParam);
@@ -5626,7 +5631,7 @@ void CViewPattern::OnShowTimeAtRow()
 	else
 		msg.Format("Unable to determine the time: pattern at current order(=%d) does not correspond to pattern at pattern view(=pattern %d).", currentOrder, m_nPattern);
 	
-	MessageBox(msg);	
+	Reporting::Notification(msg);	
 }
 
 

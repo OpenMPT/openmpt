@@ -88,7 +88,7 @@ bool Cfxp::Load(CString fileName)
 	if ( !inStream.Open(fileName, CFile::modeRead, &e) )
 	{
 		//TODO: exception
-		Reporting::Notification("Error opening file.");
+		Reporting::Error("Error opening file.");
 		return false; 
 	}
 
@@ -105,7 +105,7 @@ bool Cfxp::Load(CString fileName)
 		  ChunkMagic == 'CcnK'			&&  
 		  (fxMagic == 'FxCk' || fxMagic == 'FPCh')))
 	{
-		Reporting::Notification("Bad Magic number: this does not look like a preset file.");
+		Reporting::Error("Bad Magic number: this does not look like a preset file.");
 		inStream.Close();
 		return false;
 	}
@@ -117,7 +117,7 @@ bool Cfxp::Load(CString fileName)
 		{
 			if (!ReadLE(inStream, params[p]))
 			{
-				Reporting::Notification("Error reading Params.");
+				Reporting::Error("Error reading Params.");
 				inStream.Close();
 				return false;
 			}
@@ -127,7 +127,7 @@ bool Cfxp::Load(CString fileName)
 	{
 		if (!ReadLE(inStream, chunkSize))
 		{
-			Reporting::Notification("Error reading chunk size.");
+			Reporting::Error("Error reading chunk size.");
 			inStream.Close();
 			return false;
 		}
@@ -136,14 +136,14 @@ bool Cfxp::Load(CString fileName)
 
 		if (!chunk)
 		{
-			Reporting::Notification("Error allocating memory for chunk.");
+			Reporting::Error("Error allocating memory for chunk.");
 			inStream.Close();
 			return false;
 		}
 
 		if (!ReadLE(inStream, (char*)chunk, chunkSize))
 		{
-			Reporting::Notification("Error reading chunk.");
+			Reporting::Error("Error reading chunk.");
 			inStream.Close();
 			return false;
 		}
@@ -231,10 +231,9 @@ bool Cfxp::ReadLE(CFile &in, float &f)
 			return false;
 	} catch (CFileException *e)
 	{
-		Reporting::Notification(e->m_strFileName);
 		char s[256];
 		wsprintf(s, "%lx: %d; %d; %s;", e, e->m_cause, e->m_lOsError,  (LPCTSTR)e->m_strFileName);
-		Reporting::Notification(s);
+		Reporting::Error(s);
 		e->Delete();
 	}
 

@@ -349,13 +349,13 @@ BOOL CModToMidi::DoConvert()
 
 	const CHANNELINDEX chnCount = min(64, m_pSndFile->GetNumChannels());
 	if(chnCount < m_pSndFile->GetNumChannels())
-		MessageBox("Note: Only 64 channels will be exported.");
+		Reporting::Information("Note: Only 64 channels will be exported.");
 
 	if (!f.Open(m_szFileName, CFile::modeCreate | CFile::modeWrite))
 	{
 		return FALSE;
 	}
-	memset(Tracks, 0, sizeof(Tracks));
+	MemsetZero(Tracks);
 	if (!m_pSndFile->m_nDefaultTempo) m_pSndFile->m_nDefaultTempo = 125;
 	nTickMultiplier = MOD2MIDI_TEMPOFACTOR;
 	const uint16 wPPQN = static_cast<uint16>((m_pSndFile->m_nDefaultTempo*nTickMultiplier) / 5);

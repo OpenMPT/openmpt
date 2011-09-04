@@ -103,7 +103,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
@@ -963,7 +963,7 @@ BOOL CMainFrame::audioOpenDevice()
 	// Display error message box
 	if (err != 0)
 	{
-		MessageBox("Unable to open sound device!", NULL, MB_OK|MB_ICONERROR);
+		Reporting::Error("Unable to open sound device!");
 		return FALSE;
 	}
 	// Device is ready

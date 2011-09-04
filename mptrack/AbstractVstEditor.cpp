@@ -111,7 +111,7 @@ VOID CAbstractVstEditor::OnLoadPreset()
 			m_pVstPlugin->GetModDoc()->SetModified();
 	} else
 	{
-		Reporting::Notification("Error loading preset. Are you sure it is for this plugin?");
+		Reporting::Error("Error loading preset. Are you sure it is for this plugin?");
 	}
 }
 
@@ -129,7 +129,7 @@ VOID CAbstractVstEditor::OnSavePreset()
 
 	//TODO: exception handling
 	if (!(m_pVstPlugin->SaveProgram(files.first_file.c_str())))
-		Reporting::Notification("Error saving preset.");
+		Reporting::Error("Error saving preset.");
 
 }
 
@@ -138,7 +138,7 @@ VOID CAbstractVstEditor::OnRandomizePreset()
 {
 	if (m_pVstPlugin)
 	{
-		if (Reporting::Notification("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+		if (Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.") == cnfYes)
 			m_pVstPlugin->RandomizeParams();
 		UpdateParamDisplays();
 	}
@@ -355,7 +355,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 
 			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
-				Reporting::Notification(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION, this) == IDNO)
+				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfYes)
 			{
 				return false;
 			} else

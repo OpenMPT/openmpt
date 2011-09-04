@@ -1647,12 +1647,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	pIns->pTuning = pIns->s_DefaultTuning;
 	if (pSndFile->Instruments[nInstr])
 	{
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//		pSndFile->RemoveInstrumentSamples(nInstr);
-//		pSndFile->DestroyInstrument(nInstr);
-		pSndFile->DestroyInstrument(nInstr,1);
-// -! BEHAVIOUR_CHANGE#0003
+		pSndFile->DestroyInstrument(nInstr, deleteAssociatedSamples);
 	}
 	// Initializes Instrument
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)

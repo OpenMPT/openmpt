@@ -101,7 +101,6 @@ protected:
 	CButton m_bDebugSave;
 
 	void ForceUpdateGUI();
-	bool TentativeSetToDefaultFile(CString);
 
 public:
 	COptionsKeyboard():CPropertyPage(IDD_OPTIONS_KEYBOARD) { m_nKeyboardCfg = 0; }

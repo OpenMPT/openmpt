@@ -406,8 +406,8 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	bool modified = false;
 
 	if(hasSepPatterns &&
-		Reporting::Notification("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
-		"Order list conversion", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
+		"Order list conversion") == cnfYes)
 	{
 
 		SetSequence(0);
@@ -651,7 +651,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	{
 		// Hack: Show message here if trying to load longer sequence than what is supported.
 		CString str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
-		Reporting::Notification(str, MB_ICONWARNING);
+		Reporting::Warning(str);
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq.resize(max(size, MAX_ORDERS));

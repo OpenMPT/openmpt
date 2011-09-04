@@ -531,7 +531,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	if (cmd<0 || m_nCurKeyChoice<0 || m_nCurKeyChoice>=ih->GetKeyListSize(cmd))
 	{
 		CString error = "Nothing to restore for this slot.";
-		Reporting::Notification(error, "Invalid key data", MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Error(error, "Invalid key data");
 		return;
 	}
 	
@@ -659,22 +659,6 @@ void COptionsKeyboard::OnSave()
 	m_sFullPathName = files.first_file.c_str();
 	plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck() != BST_UNCHECKED);
 	//TentativeSetToDefaultFile(m_sFullPathName);
-}
-
-bool COptionsKeyboard::TentativeSetToDefaultFile(CString m_sFullPathName)
-{
-	if (m_sFullPathName.Compare(CMainFrame::GetSettings().m_szKbdFile))
-	{
-		if (Reporting::Notification("Load this keyboard config file when MPT starts up?", MB_YESNO) == IDYES)
-		{
-			strcpy(CMainFrame::GetSettings().m_szKbdFile,m_sFullPathName);
-			OnSettingsChanged();			// Enable "apply" button
-			UpdateDialog();					
-			return true;
-		}
-	}
-
-	return false;
 }
 
 void COptionsKeyboard::OnNotesRepeat()

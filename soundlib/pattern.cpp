@@ -86,8 +86,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 			{
 				cs.Leave();
 				rModDoc.EndWaitCursor();
-				if (CMainFrame::GetMainFrame()->MessageBox("Data at the end of the pattern will be lost.\nDo you want to continue?",
-									"Shrink Pattern", MB_YESNO|MB_ICONQUESTION) == IDYES) bOk = true;
+				bOk = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
 				rModDoc.BeginWaitCursor();
 				cs.Enter();
 			}

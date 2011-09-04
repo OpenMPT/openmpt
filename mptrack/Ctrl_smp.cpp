@@ -941,8 +941,7 @@ void CCtrlSamples::OnSampleNew()
 		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
 		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
 		{
-			if (MessageBox("This sample is not used by any instrument. Do you want to create a new instrument using this sample?",
-					NULL, MB_YESNO|MB_ICONQUESTION) == IDYES)
+			if (Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
 			{
 				UINT nins = m_pModDoc->InsertInstrument(smp);
 				m_pModDoc->UpdateAllViews(NULL, (nins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
@@ -1133,7 +1132,7 @@ void CCtrlSamples::OnNormalize()
 	//Shift -> Normalize all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		if(MessageBox(GetStrI18N(TEXT("This will normalize all samples independently. Continue?")), GetStrI18N(TEXT("Normalize")), MB_YESNO | MB_ICONQUESTION) == IDNO)
+		if(Reporting::Confirm(GetStrI18N(TEXT("This will normalize all samples independently. Continue?")), GetStrI18N(TEXT("Normalize"))) == cnfNo)
 			return;
 		iMinSample = 1;
 		iMaxSample = m_pSndFile->m_nSamples;
@@ -1295,7 +1294,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 	//Shift -> Process all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		if(MessageBox(GetStrI18N(TEXT("This will process all samples independently. Continue?")), GetStrI18N(TEXT("DC Offset Removal")), MB_YESNO | MB_ICONQUESTION) == IDNO)
+		if(Reporting::Confirm(GetStrI18N(TEXT("This will process all samples independently. Continue?")), GetStrI18N(TEXT("DC Offset Removal"))) == cnfNo)
 			return;
 		iMinSample = 1;
 		iMaxSample = m_pSndFile->m_nSamples;
@@ -1830,7 +1829,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 			default: wsprintf(str, _T("Unknown Error..."));
 				break;
 		}
-		Reporting::Notification(str, MB_ICONERROR);
+		Reporting::Error(str);
 		return;
 	}
 
@@ -1901,7 +1900,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	{
 		CString str;
 		str.Format(TEXT(GetStrI18N("Current samplerate, %u Hz, is not in the supported samplerate range 8000 Hz - 48000 Hz. Continue?")), nSampleRate);
-		if(Reporting::Notification(str, MB_ICONQUESTION|MB_YESNO) != IDYES)
+		if(Reporting::Confirm(str) != cnfYes)
 			return -1;
 
 	}

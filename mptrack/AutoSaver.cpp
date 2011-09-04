@@ -85,7 +85,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 					} else
 					{
 						m_bEnabled = false;
-						Reporting::Notification("Warning: Autosave failed and has been disabled. Please:\n- Review your autosave paths\n- Check available diskspace & filesystem access rights\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
+						Reporting::Warning("Warning: Autosave failed and has been disabled. Please:\n- Review your autosave paths\n- Check available diskspace & filesystem access rights\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
 						success = false;
 					}
 				}
@@ -477,7 +477,7 @@ BOOL CAutoSaverGUI::OnKillActive()
 
 	if (!pathIsOK && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{
-		Reporting::Notification("Error: backup path does not exist.", MB_OK | MB_ICONEXCLAMATION);
+		Reporting::Error("Error: backup path does not exist.");
 		::SetFocus(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH));
 		return 0;
 	}

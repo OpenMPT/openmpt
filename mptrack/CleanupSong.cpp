@@ -422,7 +422,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	{
 		EndWaitCursor();
 		wsprintf(s, "%d pattern%s present in file, but not used in the song\nDo you want to reorder the sequence list and remove these patterns?", nWaste, (nWaste == 1) ? "" : "s");
-		if (m_wParent->MessageBox(s, "Pattern Cleanup", MB_YESNO) != IDYES) return false;
+		if (Reporting::Confirm(s, "Pattern Cleanup") != cnfYes) return false;
 		BeginWaitCursor();
 	}
 
@@ -546,7 +546,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	{	//We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
 			"but not used in the song. Do you want to remove them?", nExt, (nExt == 1) ? "" : "s");
-		if (Reporting::Notification(s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		if (Reporting::Confirm(s, "Sample Cleanup") == cnfYes)
 		{
 			CriticalSection cs;
 			for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
@@ -588,7 +588,7 @@ bool CModCleanupDlg::OptimizeSamples()
 	CHAR s[512];
 	wsprintf(s, "%d sample%s unused data after the loop end point,\n"
 		"Do you want to optimize %s and remove this unused data?", nLoopOpt, (nLoopOpt == 1) ? " has" : "s have", (nLoopOpt == 1) ? "it" : "them");
-	if (Reporting::Notification(s, "Sample Optimization", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	if (Reporting::Confirm(s, "Sample Optimization") == cnfYes)
 	{
 		for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 		{
@@ -709,16 +709,16 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 	if (!pSndFile->GetNumInstruments()) return false;
 
-	char removeSamples = -1;
+	deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples;
 	if ( !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT))) //never remove an instrument's samples in ITP.
 	{
-		if(Reporting::Notification("Remove samples associated with an instrument if they are unused?", "Removing unused instruments", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		if(Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing unused instruments") == cnfYes)
 		{
-			removeSamples = 1;
+			removeSamples = deleteAssociatedSamples;
 		}
 	} else
 	{
-		Reporting::Notification("This is an IT project file, so no samples associated with an used instrument will be removed.", "Removing unused instruments", MB_OK | MB_ICONINFORMATION);
+		Reporting::Information("This is an IT project file, so no samples associated with an used instrument will be removed.", "Removing unused instruments");
 	}
 
 	BeginWaitCursor();
@@ -729,16 +729,15 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		if (!pSndFile->IsInstrumentUsed(i))
 		{
 			CriticalSection cs;
-			// -> CODE#0003
-			// -> DESC="remove instrument's samples"
-			//			pSndFile->DestroyInstrument(i);
-			pSndFile->DestroyInstrument(i, removeSamples);
-			// -! BEHAVIOUR_CHANGE#0003
-			if ((i == pSndFile->GetNumInstruments()) && (i >1))
-				pSndFile->m_nInstruments--;
-			else
-				bReorg = true;
-			nRemoved++;
+
+			if(pSndFile->DestroyInstrument(i, removeSamples))
+			{
+				if ((i == pSndFile->GetNumInstruments()) && (i > 1))
+					pSndFile->m_nInstruments--;
+				else
+					bReorg = true;
+				nRemoved++;
+			}
 		} else
 		{
 			usedmap[i] = true;
@@ -746,7 +745,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	}
 	EndWaitCursor();
 	if ((bReorg) && (pSndFile->m_nInstruments > 1)
-		&& (Reporting::Notification("Do you want to reorganize the remaining instruments?", "Removing unused instruments", MB_YESNO | MB_ICONQUESTION) == IDYES))
+		&& (Reporting::Confirm("Do you want to reorganize the remaining instruments?", "Removing unused instruments") == cnfYes))
 	{
 		BeginWaitCursor();
 		CriticalSection cs;
@@ -870,7 +869,7 @@ bool CModCleanupDlg::ResetVariables()
 	if(pSndFile == nullptr) return false;
 
 	//jojo.compocleanup
-	if(Reporting::Notification(TEXT("WARNING: OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables"), MB_YESNO | MB_ICONWARNING) == IDNO)
+	if(Reporting::Confirm(TEXT("WARNING: OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables")) == cnfNo)
 		return false;
 
 	// Stop play.
@@ -987,8 +986,7 @@ bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
 
 	if(bConfirm)
 	{
-		if (CMainFrame::GetMainFrame()->MessageBox("Do you want to convert all instruments to samples?",
-			"Removing all instruments", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		if (Reporting::Confirm("Do you want to convert all instruments to samples?", "Removing all instruments") == cnfYes)
 		{
 			m_pModDoc->ConvertInstrumentsToSamples();
 		}
@@ -996,7 +994,7 @@ bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
 
 	for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
 	{
-		pSndFile->DestroyInstrument(i, -1);
+		pSndFile->DestroyInstrument(i, doNoDeleteAssociatedSamples);
 	}
 
 	pSndFile->m_nInstruments = 0;

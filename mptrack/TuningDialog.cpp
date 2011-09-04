@@ -458,7 +458,7 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
 		if(!m_pActiveTuning->IsOfType(newType))
 		{
-			if(Reporting::Notification("This action may change the ratio values; continue?", MB_YESNO) == IDYES)
+			if(Reporting::Confirm("This action may change the ratio values; continue?") == cnfYes)
 			{
 				m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 
@@ -787,7 +787,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 	}
 	if (sLoadReport.GetLength() > 0)
-		Reporting::Notification(sLoadReport, MB_ICONINFORMATION);
+		Reporting::Information(sLoadReport);
 	UpdateView();
 }
 
@@ -1170,14 +1170,14 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 
 	if(!pTC)
 	{
-		MessageBox("No tuning collection chosen", 0, MB_OK); 
+		Reporting::Notification("No tuning collection chosen");
 		return true;
 	}
 
 	CTuning* pNewTuning = new CTuningRTI(pT);
 	if(pTC->AddTuning(pNewTuning))
 	{
-		MessageBox("Add tuning failed");
+		Reporting::Notification("Add tuning failed");
 		delete pNewTuning;
 		return true;
 	}
@@ -1214,7 +1214,7 @@ void CTuningDialog::OnRemoveTuning()
 		if(pTC)
 		{
 			string str = string("Remove tuning '") + pT->GetName() + string("' from ' ") + pTC->GetName() + string("'?");
-			if(MessageBox(str.c_str(), 0, MB_YESNO) == IDYES)
+			if(Reporting::Confirm(str.c_str()) == cnfYes)
 			{
 				if(!pTC->Remove(pT))
 				{
@@ -1224,7 +1224,7 @@ void CTuningDialog::OnRemoveTuning()
 				}
 				else
 				{
-					MessageBox("Tuning removal failed");
+					Reporting::Notification("Tuning removal failed");
 				}
 			}
 		}
@@ -1333,7 +1333,7 @@ void CTuningDialog::OnBnClickedButtonTuningcollectionSave()
 	}
 	else
 	{
-		MessageBox("Saving succesful.");
+		Reporting::Notification("Saving succesful.");
 		m_ModifiedTCs[m_pActiveTuningCollection] = false;
 	}
 }

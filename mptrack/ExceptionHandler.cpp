@@ -136,7 +136,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 		}
 	}
 	
-	Reporting::Notification(errorMessage, "OpenMPT Crash", MB_ICONERROR, pMainFrame);
+	Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
 
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;

@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEASMP3,			OnUpdateMP3Encode)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		OnUpdateITMPTOnly)
+	ON_UPDATE_COMMAND_UI(ID_FILE_SAVECOMPAT,		OnUpdateCompatExportableOnly)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -232,7 +233,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	{
 		CString sTemp;
 		sTemp.Format("File: %s\nLast saved with: %s, current version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLog());
-		Reporting::Notification(sTemp, MB_ICONINFORMATION);
+		Reporting::Information(sTemp);
 		ClearLog();
 	}
 
@@ -481,7 +482,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 	} else
 	{
 		if(type == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) 
-			Reporting::Notification(_T("ITP projects need to have a path set for each instrument..."), MB_ICONERROR | MB_OK);
+			Reporting::Error(_T("ITP projects need to have a path set for each instrument..."));
 		else 
 			ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
@@ -508,7 +509,7 @@ BOOL CModDoc::SaveModified()
 			}
 		}
 
-		if(unsavedInstrument && Reporting::Notification("Do you want to save modified instruments?", MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES)
+		if(unsavedInstrument && Reporting::Confirm("Do you want to save modified instruments?") == cnfYes)
 		{
 
 			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++)
@@ -854,7 +855,8 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 		CShowLogDlg dlg(parent);
 		return dlg.ShowLog(m_lpszLog, lpszTitle);
 #else
-		return Reporting::Notification(m_lpszLog, lpszTitle, MB_OK | MB_ICONINFORMATION, parent);
+		Reporting::Information(m_lpszLog, lpszTitle, parent);
+		return IDOK;
 #endif
 	}
 	return IDCANCEL;
@@ -1802,24 +1804,24 @@ void CModDoc::OnFileCompatibilitySave()
 	{
 		case MOD_TYPE_MOD:
 			pattern = FileFilterMOD;
-			if(Reporting::Notification(GetStrI18N(TEXT(
+			if(Reporting::Confirm(GetStrI18N(TEXT(
 				"Compared to regular MOD save, compatibility export adjusts the beginning of oneshot samples "
 				"in order to make the file compatible with ProTracker and other Amiga-based trackers. "
 				"Note that this feature does not remove effects \"invented\" by other PC-based trackers (f.e. panning commands)."
-				"\n\n Proceed?")), MB_ICONINFORMATION | MB_YESNO) != IDYES
+				"\n\n Proceed?"))) != cnfYes
 				)
 				return;
 			break;
 		case MOD_TYPE_IT:
 			pattern = FileFilterIT;
-			Reporting::Notification("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.", MB_ICONINFORMATION | MB_OK);
+			Reporting::Information("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.");
 			break;
 		case MOD_TYPE_XM:
 			pattern = FileFilterXM;
-			Reporting::Notification("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.", MB_ICONINFORMATION | MB_OK);
+			Reporting::Information("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.");
 			break;
 		default:
-			Reporting::Notification("Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.", MB_ICONINFORMATION | MB_OK);
+			Reporting::Information("Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.");
 			return;
 	}
 	ext = m_SndFile.GetModSpecifications().fileExtension;
@@ -2086,6 +2088,14 @@ void CModDoc::OnUpdateMP3Encode(CCmdUI *p)
 }
 
 
+void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
+//---------------------------------------------------
+{
+	if (p)
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MOD)) ? TRUE : FALSE);
+}
+
+
 void CModDoc::OnInsertPattern()
 //-----------------------------
 {
@@ -2123,14 +2133,14 @@ void CModDoc::OnInsertInstrument()
 void CModDoc::OnEstimateSongLength()
 //----------------------------------
 {
-	CHAR s[256];
+	CHAR s[64];
 	DWORD dwSongLength = m_SndFile.GetSongTime();
-	wsprintf(s, "Approximate song length: %dmn%02ds", dwSongLength/60, dwSongLength%60);
-	CMainFrame::GetMainFrame()->MessageBox(s, NULL, MB_OK|MB_ICONINFORMATION);
+	wsprintf(s, "Approximate song length: %dmn%02ds", dwSongLength / 60, dwSongLength % 60);
+	Reporting::Information(s);
 }
 
 void CModDoc::OnApproximateBPM()
-//----------------------------------
+//------------------------------
 {
 	//Convert BPM to string:
 	CString Message;
@@ -2155,7 +2165,7 @@ void CModDoc::OnApproximateBPM()
 			break;
 	}
 
-	CMainFrame::GetMainFrame()->MessageBox(Message, NULL, MB_OK|MB_ICONINFORMATION);
+	Reporting::Information(Message);
 }
 
 
@@ -3795,7 +3805,7 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 		{
 			CString message;
 			message.Format("Param %d can already be controlled with macro %X", paramToUse, checkMacro);
-			CMainFrame::GetMainFrame()->MessageBox(message, "Macro exists for this param",MB_ICONINFORMATION | MB_OK);
+			Reporting::Information(message, "Macro exists for this param");
 			return;
 		}
 	}
@@ -3812,13 +3822,13 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	{
 		CString message;
 		message.Format("Param %d beyond controllable range.", paramToUse);
-		Reporting::Notification(message, "Macro not assigned for this param", MB_ICONINFORMATION | MB_OK);
+		Reporting::Information(message, "Macro not assigned for this param");
 		return;
 	}
 
 	CString message;
 	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);
-	Reporting::Notification(message, "Macro assigned for this param", MB_ICONINFORMATION | MB_OK);
+	Reporting::Information(message, "Macro assigned for this param");
 	
 	return;
 }

@@ -67,13 +67,11 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 		// Loading Instrument
 		MODINSTRUMENT *pIns = new MODINSTRUMENT;
 		if (!pIns) return false;
-		memset(pIns, 0, sizeof(MODINSTRUMENT));
+		MemsetZero(*pIns);
 		pIns->pTuning = pIns->s_DefaultTuning;
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//		RemoveInstrumentSamples(nInstr);
-		DestroyInstrument(nInstr,1);
-// -! BEHAVIOUR_CHANGE#0003
+
+		DestroyInstrument(nInstr, deleteAssociatedSamples);
+
 		Instruments[nInstr] = pIns;
 		// Scanning free sample
 		UINT nSample = 0;
@@ -104,23 +102,25 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 }
 
 
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-// BOOL CSoundFile::DestroyInstrument(UINT nInstr)
-bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
-//----------------------------------------------------------------------------
+bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples)
+//-----------------------------------------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr > m_nInstruments)) return false;
 	if (!Instruments[nInstr]) return true;
 
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-	//rewbs: changed message
-	if(removeSamples > 0 || (removeSamples == 0 && Reporting::Notification("Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+	if(removeSamples == askdeleteAssociatedSamples)
+	{
+		ConfirmAnswer result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
+		if(result == cnfCancel)
+		{
+			return false;
+		}
+		removeSamples = (result == cnfYes) ? deleteAssociatedSamples : doNoDeleteAssociatedSamples;
+	}
+	if(removeSamples == deleteAssociatedSamples)
 	{
 		RemoveInstrumentSamples(nInstr);
 	}
-// -! BEHAVIOUR_CHANGE#0003
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -195,11 +195,9 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrc
 	if ((!pSrcSong) || (!nSrcInstr) || (nSrcInstr > pSrcSong->m_nInstruments)
 	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[nSrcInstr])) return false;
 	if (m_nInstruments < nInstr) m_nInstruments = nInstr;
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr, 1);
-// -! BEHAVIOUR_CHANGE#0003
+
+	DestroyInstrument(nInstr, deleteAssociatedSamples);
+
 	if (!Instruments[nInstr]) Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (pIns)
@@ -875,11 +873,9 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 	 || (phdr->instrum < 1) || (!phdr->samples)
 	 || (!pih->layers) || (!plh->samples)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr,1);
-// -! BEHAVIOUR_CHANGE#0003
+
+	DestroyInstrument(nInstr, deleteAssociatedSamples);
+
 	pIns = new MODINSTRUMENT;
 	if (!pIns) return false;
 	MemsetZero(*pIns);
@@ -1098,11 +1094,9 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 	dwMemPos += pxh->shsize - 0x102;
 	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr,1);
-// -! BEHAVIOUR_CHANGE#0003
+
+	DestroyInstrument(nInstr, deleteAssociatedSamples);
+
 	Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (!pIns) return false;
@@ -1712,11 +1706,9 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITINSTRUMENT))
 	 || (pinstr->id != LittleEndian(IT_IMPI))) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr,1);
-// -! BEHAVIOUR_CHANGE#0003
+
+	DestroyInstrument(nInstr, deleteAssociatedSamples);
+
 	Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (!pIns) return false;

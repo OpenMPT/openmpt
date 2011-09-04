@@ -1400,7 +1400,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		if (pModDoc && pSndFile)
 		{
 			wsprintf(s, _T("Remove sequence %d?"), modItemID);
-			if(Reporting::Notification(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+			if(Reporting::Confirm(s, false, true) == cnfNo) break;
 			pSndFile->Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
@@ -1416,7 +1416,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_PATTERN:
 		wsprintf(s, _T("Remove pattern %d?"), modItemID);
-		if (pModDoc == nullptr || Reporting::Notification(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
 		if (pModDoc->RemovePattern((PATTERNINDEX)modItemID))
 		{
 			pModDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
@@ -1425,7 +1425,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_SAMPLE:
 		wsprintf(s, _T("Remove sample %d?"), modItemID);
-		if (pModDoc == nullptr || Reporting::Notification(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
 		pModDoc->GetSampleUndo()->PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
 		if (pModDoc->RemoveSample((SAMPLEINDEX)modItemID))
 		{
@@ -1435,7 +1435,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_INSTRUMENT:
 		wsprintf(s, _T("Remove instrument %d?"), modItemID);
-		if (pModDoc == nullptr || Reporting::Notification(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
 		if (pModDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
 		{
 			pModDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
@@ -1916,7 +1916,7 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 	if (!bOk)
 	{
 		wsprintf(s, "Unable to browse to \"%s\"", lpszDir);
-		MessageBox(s, NULL, MB_OK|MB_ICONERROR);
+		Reporting::Error(s);
 	}
 	return TRUE;
 }
@@ -2080,7 +2080,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				}
 				else
 				{
-					if(Reporting::Notification(_T("Replace the current orderlist?"), _T("Sequence import"), MB_YESNO | MB_ICONQUESTION) == IDNO)
+					if(Reporting::Confirm(_T("Replace the current orderlist?"), _T("Sequence import")) == cnfNo)
 						return false;
 				}
 				pSndFile->Order.resize(min(pSndFile->GetModSpecifications().ordersMax, pOrigSeq->GetLength()), pSndFile->Order.GetInvalidPatIndex());
