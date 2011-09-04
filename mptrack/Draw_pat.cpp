@@ -384,14 +384,13 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			{
 				DrawLetter(x, y, noteStr[0], 7, 0);
 				DrawLetter(x + 7, y, noteStr[1], 6, 0);
-				DrawLetter(x + 13, y, noteStr[2], 7, 1);
 			}
 			else
 			{
 				DrawLetter(x, y, noteStr[0], 5, 0);
 				DrawLetter(x + 5, y, noteStr[1], 5, 0);
-				DrawLetter(x + 10, y, noteStr[2], 6, 0);
 			}
+			DrawLetter(x + pfnt->nNoteWidth, y, noteStr[2], pfnt->nOctaveWidth, 0);
 		}
 		else //Original
 		{
@@ -1656,8 +1655,4 @@ void CViewPattern::UpdateAllVUMeters(MPTNOTIFICATION *pnotify)
 	}
 	::ReleaseDC(m_hWnd, hdc);
 }
-
-
-
-
 

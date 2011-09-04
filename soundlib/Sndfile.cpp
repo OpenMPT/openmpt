@@ -359,7 +359,7 @@ if( fsize <= sizeof( type ) * arraysize ) pointer = (BYTE *)&input-> name ;\
 break;
 
 // Return a pointer on the wanted field in 'input' MODINSTRUMENT given field code & size
-BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __int16 fsize)
+BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT * input, __int32 fcode, __int16 fsize)
 {
 if(input == NULL) return NULL;
 BYTE * pointer = NULL;
@@ -1305,21 +1305,24 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	//m_nSeqOverride = 0;
 }
 
-ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX nPat, UINT startFromOrder, bool direction)
-//--------------------------------------------------------------------------------------
+ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, bool direction)
+//--------------------------------------------------------------------------------------------
 {
+	const ORDERINDEX maxOrder = Order.GetLength();
 	ORDERINDEX foundAtOrder = ORDERINDEX_INVALID;
 	ORDERINDEX candidateOrder = 0;
 
-	for (ORDERINDEX p = 0; p < Order.size(); p++)
+	for (ORDERINDEX p = 0; p < maxOrder; p++)
 	{
 		if (direction)
 		{
-			candidateOrder = (startFromOrder + p) % Order.size();			//wrap around MAX_ORDERS
-		} else {
-			candidateOrder = (startFromOrder - p + Order.size()) % Order.size();	//wrap around 0 and MAX_ORDERS
+			candidateOrder = (startFromOrder + p) % maxOrder;			//wrap around MAX_ORDERS
+		} else
+		{
+			candidateOrder = (startFromOrder - p + maxOrder) % maxOrder;	//wrap around 0 and MAX_ORDERS
 		}
-		if (Order[candidateOrder] == nPat) {
+		if (Order[candidateOrder] == nPat)
+		{
 			foundAtOrder = candidateOrder;
 			break;
 		}
@@ -1370,9 +1373,12 @@ MODTYPE CSoundFile::GetSaveFormats() const
 LPCTSTR CSoundFile::GetSampleName(UINT nSample) const
 //---------------------------------------------------
 {
-	if (nSample<MAX_SAMPLES) {
+	ASSERT(nSample <= GetNumSamples());
+	if (nSample < MAX_SAMPLES)
+	{
 		return m_szNames[nSample];
-	} else {
+	} else
+	{
 		return gszEmpty;
 	}
 }
@@ -1384,6 +1390,7 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 	if ((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
 		return TEXT("");
 
+	ASSERT(nInstr <= GetNumInstruments());
 	const size_t nSize = ARRAYELEMCOUNT(Instruments[nInstr]->name);
 	CString str;
 	LPTSTR p = str.GetBuffer(nSize + 1);
@@ -1556,8 +1563,8 @@ bool CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *re
 
 #ifndef MODPLUG_NO_FILESAVE
 
-UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen)
-//-------------------------------------------------------------------------------
+UINT CSoundFile::WriteSample(FILE *f, const MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen) const
+//-------------------------------------------------------------------------------------------
 {
 	UINT len = 0, bufcount;
 	char buffer[4096];

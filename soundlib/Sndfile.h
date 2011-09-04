@@ -163,7 +163,7 @@ struct MODINSTRUMENT
 // MODULAR MODINSTRUMENT FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
 // -----------------------------------------------------------------------------------------
 extern void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file);
-extern BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __int16 fsize);
+extern BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT * input, __int32 fcode, __int16 fsize);
 
 // -! NEW_FEATURE#0027
 
@@ -721,7 +721,7 @@ public:
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
 	double GetCurrentBPM() const;
-	ORDERINDEX FindOrder(PATTERNINDEX nPat, UINT startFromOrder=0, bool direction = true);	//rewbs.playSongFromCursor
+	ORDERINDEX FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder = 0, bool direction = true);	//rewbs.playSongFromCursor
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(ORDERINDEX nOrder);
@@ -789,16 +789,16 @@ public:
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
-	UINT WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0);
+	UINT WriteSample(FILE *f, const MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0) const;
 	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	bool SaveIT(LPCSTR lpszFileName, UINT nPacking=0, const bool compatExport = false);
 	bool SaveITProject(LPCSTR lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
-	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT* instruments[], UINT nInstruments);
-	void SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f);
-	void SaveExtendedSongProperties(FILE* f);
+	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, UINT nInstruments) const;
+	void SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const;
+	void SaveExtendedSongProperties(FILE* f) const;
 	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
 #endif // MODPLUG_NO_FILESAVE
 

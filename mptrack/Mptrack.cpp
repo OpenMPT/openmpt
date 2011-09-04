@@ -2302,23 +2302,6 @@ BOOL CTrackApp::GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize)
 	return FALSE;
 }
 
-//rewbs.crashHandler
-LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
-//-----------------------------------------------------------------------
-{
-	// TODO: Add your specialized code here and/or call the base class
-	Log("Unhandled Exception\n");
-	Log("Attempting to close sound device\n");
-	
-	if (CMainFrame::gpSoundDevice) {
-		CMainFrame::gpSoundDevice->Reset(); 
-		CMainFrame::gpSoundDevice->Close();
-	}
-
-	return CWinApp::ProcessWndProcException(e, pMsg);
-}
-//end rewbs.crashHandler
-
 
 /* Open or save one or multiple files using the system's file dialog
  * Parameter list:

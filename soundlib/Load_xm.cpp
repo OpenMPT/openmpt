@@ -936,7 +936,6 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	// Writing instruments
 	for (i = 1; i <= xmheader.instruments; i++)
 	{
-		MODSAMPLE *pSmp;
 		WORD smptable[32];
 		BYTE flags[32];
 
@@ -1010,11 +1009,11 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		fwrite(&xmih, 1, sizeof(xmih), f);
 		if (smptable[0])
 		{
-			MODSAMPLE *pvib = &Samples[smptable[0]];
-			xmsh.vibtype = pvib->nVibType;
-			xmsh.vibsweep = min(pvib->nVibSweep, 0xFF);
-			xmsh.vibdepth = min(pvib->nVibDepth, 0x0F);
-			xmsh.vibrate = min(pvib->nVibRate, 0x3F);
+			const MODSAMPLE &sample = Samples[smptable[0]];
+			xmsh.vibtype = sample.nVibType;
+			xmsh.vibsweep = min(sample.nVibSweep, 0xFF);
+			xmsh.vibdepth = min(sample.nVibDepth, 0x0F);
+			xmsh.vibrate = min(sample.nVibRate, 0x3F);
 		}
 		WORD samples = xmih.samples;
 		xmih.samples = LittleEndianW(xmih.samples);
@@ -1024,20 +1023,20 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		{
 			MemsetZero(xmss);
 			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
-			pSmp = &Samples[smptable[ins]];
-			xmss.samplen = pSmp->nLength;
-			xmss.loopstart = pSmp->nLoopStart;
-			xmss.looplen = pSmp->nLoopEnd - pSmp->nLoopStart;
-			xmss.vol = pSmp->nVolume / 4;
-			xmss.finetune = (char)pSmp->nFineTune;
+			const MODSAMPLE &sample = Samples[smptable[ins]];
+			xmss.samplen = sample.nLength;
+			xmss.loopstart = sample.nLoopStart;
+			xmss.looplen = sample.nLoopEnd - sample.nLoopStart;
+			xmss.vol = sample.nVolume / 4;
+			xmss.finetune = (char)sample.nFineTune;
 			xmss.type = 0;
-			if (pSmp->uFlags & CHN_LOOP) xmss.type = (pSmp->uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
+			if (sample.uFlags & CHN_LOOP) xmss.type = (sample.uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
 			flags[ins] = RS_PCM8D;
 #ifndef NO_PACKING
-			if (nPacking)
+			if (nPacking && !bCompatibilityExport)
 			{
-				if ((!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
-				 && (CanPackSample(pSmp->pSample, pSmp->nLength, nPacking)))
+				if ((!(sample.uFlags & (CHN_16BIT|CHN_STEREO)))
+				 && (CanPackSample(sample.pSample, sample.nLength, nPacking)))
 				{
 					flags[ins] = RS_ADPCM4;
 					xmss.res = 0xAD;
@@ -1045,7 +1044,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			} else
 #endif
 			{
-				if (pSmp->uFlags & CHN_16BIT)
+				if (sample.uFlags & CHN_16BIT)
 				{
 					flags[ins] = RS_PCM16D;
 					xmss.type |= 0x10;
@@ -1053,9 +1052,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 					xmss.loopstart *= 2;
 					xmss.samplen *= 2;
 				}
-				if (pSmp->uFlags & CHN_STEREO && !bCompatibilityExport)
+				if (sample.uFlags & CHN_STEREO && !bCompatibilityExport)
 				{
-					flags[ins] = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
+					flags[ins] = (sample.uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
 					xmss.type |= 0x20;
 					xmss.looplen *= 2;
 					xmss.loopstart *= 2;
@@ -1063,8 +1062,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				}
 			}
 			xmss.pan = 255;
-			if (pSmp->nPan < 256) xmss.pan = (BYTE)pSmp->nPan;
-			xmss.relnote = (signed char)pSmp->RelativeTone;
+			if (sample.nPan < 256) xmss.pan = (BYTE)sample.nPan;
+			xmss.relnote = (signed char)sample.RelativeTone;
 			xmss.samplen = LittleEndianW(xmss.samplen);
 			xmss.loopstart = LittleEndianW(xmss.loopstart);
 			xmss.looplen = LittleEndianW(xmss.looplen);
@@ -1072,13 +1071,13 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		}
 		for (UINT ismpd=0; ismpd<xmih.samples; ismpd++)
 		{
-			pSmp = &Samples[smptable[ismpd]];
-			if (pSmp->pSample)
+			const MODSAMPLE &sample = Samples[smptable[ismpd]];
+			if (sample.pSample)
 			{
 #ifndef NO_PACKING
-				if ((flags[ismpd] == RS_ADPCM4) && (xmih.samples>1)) CanPackSample(pSmp->pSample, pSmp->nLength, nPacking);
+				if ((flags[ismpd] == RS_ADPCM4) && (xmih.samples > 1)) CanPackSample(sample.pSample, sample.nLength, nPacking);
 #endif // NO_PACKING
-				WriteSample(f, pSmp, flags[ismpd]);
+				WriteSample(f, &sample, flags[ismpd]);
 			}
 		}
 	}
@@ -1143,7 +1142,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 		//Save hacked-on extra info
 		SaveMixPlugins(f);
-		SaveExtendedInstrumentProperties(Instruments, xmheader.instruments, f);
+		SaveExtendedInstrumentProperties(xmheader.instruments, f);
 		SaveExtendedSongProperties(f);
 	}
 

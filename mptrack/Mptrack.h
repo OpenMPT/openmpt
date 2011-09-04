@@ -235,7 +235,6 @@ public:
 	afx_msg void OnHelpSearch();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
 
 protected:
 	static void LoadRegistryDLS();

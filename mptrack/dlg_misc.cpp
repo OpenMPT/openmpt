@@ -1491,31 +1491,36 @@ VOID CSampleMapDlg::OnUpdateSamples()
 {
 	UINT nOldPos = 0;
 	UINT nNewPos = 0;
-	BOOL bAll;
+	bool showAll;
 	
 	if ((!m_pSndFile) || (m_nInstrument >= MAX_INSTRUMENTS)) return;
 	if (m_CbnSample.GetCount() > 0)	{
 		nOldPos = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 	}
 	m_CbnSample.ResetContent();
-	bAll = IsDlgButtonChecked(IDC_CHECK1);
+	showAll = (IsDlgButtonChecked(IDC_CHECK1) != FALSE);
 	
 	UINT nInsertPos;
 	nInsertPos = m_CbnSample.AddString("0: No sample");
 	m_CbnSample.SetItemData(nInsertPos, 0);
 
-	for (UINT i=1; i<=m_pSndFile->m_nSamples; i++)	{
-		BOOL bUsed = bAll;
+	for (UINT i=1; i<=m_pSndFile->m_nSamples; i++)
+	{
+		bool isUsed = showAll;
 
-		if (!bUsed)	{
-			for (UINT j=0; j<NOTE_MAX; j++)	{
-				if (KeyboardMap[j] == i) {
-					bUsed = TRUE;
+		if (!isUsed)
+		{
+			for (UINT j=0; j<NOTE_MAX; j++)
+			{
+				if (KeyboardMap[j] == i)
+				{
+					isUsed = true;
 					break;
 				}
 			}
 		}
-		if (bUsed) {
+		if (isUsed)
+		{
 			CString sampleName;
 			sampleName.Format("%d: %s", i, m_pSndFile->GetSampleName(i));
 			nInsertPos = m_CbnSample.AddString(sampleName);
