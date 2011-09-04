@@ -266,7 +266,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			CHANGEMODTYPE_WARNING(wMOD31Samples);
 		}
 
-		// No Bidi / Sustain loops / Autovibrato for MOD/S3M
+		// No Bidi and Autovibrato for MOD/S3M
 		if(newTypeIsMOD || newTypeIsS3M)
 		{
 			// Bidi loops
@@ -276,6 +276,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
 			}
 
+			// Autovibrato
+			if(sample.nVibDepth || sample.nVibRate || sample.nVibSweep)
+			{
+				sample.nVibDepth = sample.nVibRate = sample.nVibSweep = sample.nVibType = 0;
+				CHANGEMODTYPE_WARNING(wSampleAutoVibrato);
+			}
+		}
+
+		// No sustain loops for MOD/S3M/XM
+		if(newTypeIsMOD_XM || newTypeIsS3M)
+		{
 			// Sustain loops - convert to normal loops
 			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
 			{
@@ -287,13 +298,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			}
 			sample.nSustainStart = sample.nSustainEnd = 0;
 			sample.uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-
-			// Autovibrato
-			if(sample.nVibDepth || sample.nVibRate || sample.nVibSweep)
-			{
-				sample.nVibDepth = sample.nVibRate = sample.nVibSweep = sample.nVibType = 0;
-				CHANGEMODTYPE_WARNING(wSampleAutoVibrato);
-			}
 		}
 
 		// Transpose to Frequency (MOD/XM to S3M/IT/MPT)
@@ -378,6 +382,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				pIns->dwFlags &= ~INS_SETPANNING;
 				pIns->nIFC &= 0x7F;
 				pIns->nIFR &= 0x7F;
+				pIns->nFilterMode = FLTMODE_UNCHANGED;
+
+				pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
+
+				pIns->wPitchToTempoLock = 0;
+
+				pIns->nPPC = NOTE_MIDDLEC - 1;
+				pIns->nPPS = 0;
+
+				pIns->nGlobalVol = 64;
+				pIns->nPan = 128;
 			}
 		}
 		// Convert MPT to anything - remove instrument tunings
