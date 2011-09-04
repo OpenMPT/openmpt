@@ -126,9 +126,14 @@ void TestVersion()
 		if (!dwVerInfoSize)
 			throw std::runtime_error("!dwVerInfoSize is true");
 
-		char* pVersionInfo = new char[dwVerInfoSize];
-		if (!pVersionInfo)
-			throw std::runtime_error("!pVersionInfo is true");
+		char* pVersionInfo;
+		try
+		{
+			pVersionInfo = new char[dwVerInfoSize];
+		} catch(MPTMemoryException *)
+		{
+			throw std::runtime_error("Could not allocate memory for pVersionInfo");
+		}
 
 		char* szVer = NULL;
 		UINT uVerLength;
@@ -251,8 +256,184 @@ void TestMisc()
 
 
 // Check if our test file was loaded correctly.
-void TestLoadFile(const CModDoc *pModDoc)
+void TestLoadXMFile(const CModDoc *pModDoc)
 //---------------------------------------
+{
+	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+
+	// Global Variables
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "Test Module"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_lpszSongComments[0], 'O');
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 139);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 5);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 42);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 23);
+	VERIFY_EQUAL_NONCONT((pSndFile->m_dwSongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_modern);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerBeat, 6);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerMeasure, 12);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
+
+	// Macros
+	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]), sfx_reso);
+	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[1]), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(pModDoc->GetZxxType(pSndFile->m_MidiCfg.szMidiZXXExt), zxx_resomode);
+
+	// Channels
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[0].szName, "First Channel"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nMixPlugin, 0);
+
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[1].szName, "Second Channel"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nMixPlugin, 1);
+
+	// Samples
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 2);
+	const MODSAMPLE &sample = pSndFile->GetSample(1);
+	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
+	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
+	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
+	VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16);
+	VERIFY_EQUAL_NONCONT(sample.nFineTune, 35);
+	VERIFY_EQUAL_NONCONT(sample.RelativeTone, 1);
+	VERIFY_EQUAL_NONCONT(sample.nVolume, 32 * 4);
+	VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 64);
+	VERIFY_EQUAL_NONCONT(sample.nPan, 160);
+	VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_PANNING | CHN_LOOP | CHN_PINGPONGLOOP);
+
+	VERIFY_EQUAL_NONCONT(sample.nLoopStart, 1);
+	VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 8);
+
+	VERIFY_EQUAL_NONCONT(sample.nVibType, VIB_SQUARE);
+	VERIFY_EQUAL_NONCONT(sample.nVibSweep, 3);
+	VERIFY_EQUAL_NONCONT(sample.nVibRate, 4);
+	VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
+
+	// Instruments
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
+	const MODINSTRUMENT *pIns = pSndFile->Instruments[1];
+	VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
+	VERIFY_EQUAL_NONCONT(pIns->nPan, 128);
+	VERIFY_EQUAL_NONCONT(pIns->dwFlags, 0);
+
+	VERIFY_EQUAL_NONCONT(pIns->nPPS, 0);
+	VERIFY_EQUAL_NONCONT(pIns->nPPC, NOTE_MIDDLEC - 1);
+
+	VERIFY_EQUAL_NONCONT(pIns->nVolRamp, 1200);
+	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
+
+	VERIFY_EQUAL_NONCONT(pIns->nIFC, 0);
+	VERIFY_EQUAL_NONCONT(pIns->nIFR, 0);
+	VERIFY_EQUAL_NONCONT(pIns->nFilterMode, FLTMODE_UNCHANGED);
+
+	VERIFY_EQUAL_NONCONT(pIns->nVolSwing, 0);
+	VERIFY_EQUAL_NONCONT(pIns->nPanSwing, 0);
+	VERIFY_EQUAL_NONCONT(pIns->nCutSwing, 0);
+	VERIFY_EQUAL_NONCONT(pIns->nResSwing, 0);
+
+	VERIFY_EQUAL_NONCONT(pIns->nNNA, NNA_NOTECUT);
+	VERIFY_EQUAL_NONCONT(pIns->nDCT, DCT_NONE);
+
+	VERIFY_EQUAL_NONCONT(pIns->nMixPlug, 1);
+	VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);
+	VERIFY_EQUAL_NONCONT(pIns->nMidiProgram, 64);
+	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
+
+	VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning);
+
+	VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 0);
+
+	VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
+	VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
+
+	for(size_t i = pSndFile->GetModSpecifications().noteMin; i < pSndFile->GetModSpecifications().noteMax; i++)
+	{
+		if(i == NOTE_MIDDLEC - 1)
+		{
+			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 2);
+		}
+		else
+		{
+			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 1);
+		}
+	}
+
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.dwFlags, ENV_ENABLED | ENV_SUSTAIN);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nNodes, 3);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.Ticks[2], 96);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.Values[2], 0);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nSustainStart, 1);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nSustainEnd, 1);
+
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.dwFlags, ENV_LOOP);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nNodes, 12);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopStart, 9);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopEnd, 11);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Ticks[9], 46);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Values[9], 23);
+
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nNodes, 0);
+
+	// Sequences
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetNumSequences(), 1);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[0], 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[1], 1);
+
+	// Patterns
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.GetNumPatterns(), 2);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetName(), "First Pattern");
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerBeat(), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(0), true);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetName(), "Second Pattern");
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumRows(), 32);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerBeat(), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->IsPcNote(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->note, NOTE_NONE);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->instr, 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->volcmd, VOLCMD_VIBRATOSPEED);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->vol, 15);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->instr, 45);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->volcmd, VOLCMD_VOLSLIDEDOWN);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->vol, 5);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
+
+	// Plugins
+	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
+	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
+	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
+	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT), MIXPLUG_INPUTF_MASTEREFFECT);
+	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting >> 16), 11);
+
+}
+
+
+// Check if our test file was loaded correctly.
+void TestLoadMPTMFile(const CModDoc *pModDoc)
+//-------------------------------------------
 {
 	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
@@ -313,6 +494,9 @@ void TestLoadFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16);
 	VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 9001);
+	VERIFY_EQUAL_NONCONT(sample.nVolume, 32 * 4);
+	VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 16);
+	VERIFY_EQUAL_NONCONT(sample.nPan, 160);
 	VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_PANNING | CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
 	VERIFY_EQUAL_NONCONT(sample.nLoopStart, 1);
@@ -357,7 +541,7 @@ void TestLoadFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->nMidiProgram, 64);
 	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 
-	VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning)
+	VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning);
 
 	VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 130);
 
@@ -480,21 +664,42 @@ void TestLoadSaveFile()
 	theFile.Delete(theFile.GetLength() - 6, 6);
 	theFile.Append("test/test.");
 
-	// Test file loading
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "mptm", FALSE);
-	TestLoadFile(pModDoc);
+	// Test MPTM file loading
+	{
+		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "mptm", FALSE);
+		TestLoadMPTMFile(pModDoc);
 
-	// Test file saving
- 	pModDoc->DoSave(theFile + "saved.mptm");
-	pModDoc->OnCloseDocument();
+		// Test file saving
+		pModDoc->DoSave(theFile + "saved.mptm");
+		pModDoc->OnCloseDocument();
 
-	// Saving the file puts it in the MRU list...
-	theApp.RemoveMruItem(0);
+		// Saving the file puts it in the MRU list...
+		theApp.RemoveMruItem(0);
 
-	// Reload the saved file and test if everything is still working correctly.
-	pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm", FALSE);
-	TestLoadFile(pModDoc);
-	pModDoc->OnCloseDocument();
+		// Reload the saved file and test if everything is still working correctly.
+		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm", FALSE);
+		TestLoadMPTMFile(pModDoc);
+		pModDoc->OnCloseDocument();
+
+	}
+
+	// Test XM file loading
+	{
+		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "xm", FALSE);
+		TestLoadXMFile(pModDoc);
+
+		// Test file saving
+		pModDoc->DoSave(theFile + "saved.xm");
+		pModDoc->OnCloseDocument();
+
+		// Saving the file puts it in the MRU list...
+		theApp.RemoveMruItem(0);
+
+		// Reload the saved file and test if everything is still working correctly.
+		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.xm", FALSE);
+		TestLoadXMFile(pModDoc);
+		pModDoc->OnCloseDocument();
+	}
 }
 
 double Rand01() {return rand() / double(RAND_MAX);}
