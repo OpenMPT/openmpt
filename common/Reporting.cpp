@@ -34,17 +34,17 @@ UINT Reporting::ShowNotification(const char *text, const char *caption, UINT fla
 }
 
 
-void Reporting::Notification(const char *text, UINT flags, const CWnd *parent)
-//----------------------------------------------------------------------------
+void Reporting::Notification(const char *text, const CWnd *parent)
+//----------------------------------------------------------------
 {
-	Notification(text, MAINFRAME_TITLE, flags, parent);
+	Notification(text, MAINFRAME_TITLE, parent);
 }
 
 
-void Reporting::Notification(const char *text, const char *caption, UINT flags, const CWnd *parent)
-//-------------------------------------------------------------------------------------------------
+void Reporting::Notification(const char *text, const char *caption, const CWnd *parent)
+//-------------------------------------------------------------------------------------
 {
-	ShowNotification(text, caption, flags, parent);
+	ShowNotification(text, caption, MB_OK, parent);
 }
 
 
@@ -65,7 +65,7 @@ void Reporting::Information(const char *text, const char *caption, const CWnd *p
 void Reporting::Warning(const char *text, const CWnd *parent)
 //-----------------------------------------------------------
 {
-	Warning(text, MAINFRAME_TITLE " - Error", parent);
+	Warning(text, MAINFRAME_TITLE " - Warning", parent);
 }
 
 

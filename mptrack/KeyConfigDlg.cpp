@@ -552,7 +552,7 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 	if (m_nCurHotKey<0 || m_nCurKeyChoice<0 || m_nCurKeyChoice>=plocalCmdSet->GetKeyListSize(cmd))
 	{
 		CString error = "No key currently set for this slot.";
-		Reporting::Notification(error, "Invalid key data", MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Warning(error, "Invalid key data");
 		return;
 	}
 
@@ -573,7 +573,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	if (cmd<0)
 	{
 		CString error = "Invalid slot.";
-		Reporting::Notification(error, "Invalid key data", MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Warning(error, "Invalid key data");
 		return;
 	}
 
@@ -589,13 +589,13 @@ void COptionsKeyboard::OnSetKeyChoice()
 	if (!kc.code)
 	{
 		CString error = "You need to say to which key you'd like to map this command.";
-		Reporting::Notification(error, "Invalid key data", MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Warning(error, "Invalid key data");
 		return;
 	}
 	if (!kc.event)
 	{
 /*		CString error = "You need to select at least one key event type (up, down or hold).";
-		Reporting::Notification(error, "Invalid key data", MB_ICONEXCLAMATION|MB_OK);
+		Reporting::Warning(error, "Invalid key data");
 		return;
 */
 		kc.event = kKeyEventDown;

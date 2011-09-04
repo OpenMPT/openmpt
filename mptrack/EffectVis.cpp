@@ -767,9 +767,7 @@ void CEffectVis::OnLButtonUp(UINT nFlags, CPoint point)
 void CEffectVis::OnEditUndo()
 //---------------------------
 {
-	CHAR s[64];
-	strcpy(s, "Undo Through!");
-	Reporting::Notification(s, MB_OK | MB_ICONEXCLAMATION);
+	Reporting::Notification("Undo Through!");
 }
 
 

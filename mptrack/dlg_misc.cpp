@@ -339,7 +339,7 @@ bool CModTypeDlg::VerifyData()
 	int temp_nRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
 	if ((temp_nRPB > temp_nRPM))
 	{
-		Reporting::Notification("Error: Rows per measure must be greater than or equal rows per beat.", MB_OK|MB_ICONEXCLAMATION);
+		Reporting::Warning("Error: Rows per measure must be greater than or equal rows per beat.");
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
 		return false;
 	}
@@ -353,7 +353,7 @@ bool CModTypeDlg::VerifyData()
 	{
 		CString error;
 		error.Format("Error: Max number of channels for this type is %d", maxChans);
-		Reporting::Notification(error, MB_OK|MB_ICONEXCLAMATION);
+		Reporting::Warning(error);
 		return FALSE;
 	}
 
