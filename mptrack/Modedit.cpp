@@ -109,7 +109,7 @@ bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
 		CString str;	
 		if(nRemainingChannels == GetNumChannels()) str.Format("No channels chosen to be removed.");
 		else str.Format("No removal done - channel number is already at minimum.");
-		CMainFrame::GetMainFrame()->MessageBox(str, "Remove channel", MB_OK | MB_ICONINFORMATION);
+		Reporting::Information(str, "Remove channel");
 		return false;
 	}
 
@@ -152,7 +152,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 	{
 		CString str;
 		str.Format(GetStrI18N(_TEXT("Can't apply change: Number of channels should be within [%u,%u]")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
-		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
+		Reporting::Error(str , "ReArrangeChannels");
 		return CHANNELINDEX_INVALID;
 	}
 
@@ -190,7 +190,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 			if(!newp)
 			{
 				cs.Leave();
-				CMainFrame::GetMainFrame()->MessageBox("ERROR: Pattern allocation failed in ReArrangechannels(...)" , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
+				Reporting::Error("ERROR: Pattern allocation failed in ReArrangechannels(...)");
 				return CHANNELINDEX_INVALID;
 			}
 			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
@@ -264,8 +264,7 @@ bool CModDoc::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
 	if(chnFrom == chnTo) return false;
 	if(chnFrom >= GetNumChannels() || chnTo >= GetNumChannels())
 	{
-		CString str = "Error: Bad move indexes in CSoundFile::MoveChannel(...)";	
-		CMainFrame::GetMainFrame()->MessageBox(str , "MoveChannel(...)", MB_OK | MB_ICONINFORMATION);
+		Reporting::Error("Error: Bad move indexes in CSoundFile::MoveChannel(...)" , "MoveChannel(...)");
 		return true;
 	}
 	vector<CHANNELINDEX> newOrder;
@@ -296,7 +295,7 @@ bool CModDoc::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
 
 	if(newOrder.size() != ReArrangeChannels(newOrder))
 	{
-		CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number changed in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
+		Reporting::Error("BUG: Channel number changed in MoveChannel()");
 	}
 	return false;
 }
@@ -485,8 +484,12 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	if ((!m_SndFile.GetNumInstruments()) && ((m_SndFile.GetNumSamples() > 1) || (m_SndFile.GetSample(1).pSample)))
 	{
 		if (pDup) return INSTRUMENTINDEX_INVALID;
-		UINT n = CMainFrame::GetMainFrame()->MessageBox("Convert existing samples to instruments first?", NULL, MB_YESNOCANCEL|MB_ICONQUESTION);
-		if (n == IDYES)
+		ConfirmAnswer result = Reporting::Confirm("Convert existing samples to instruments first?", true);
+		if (result == cnfCancel)
+		{
+			return INSTRUMENTINDEX_INVALID;
+		}
+		if (result == cnfYes)
 		{
 			SAMPLEINDEX nInstruments = m_SndFile.m_nSamples;
 			if (nInstruments > nInstrumentMax) nInstruments = nInstrumentMax;
@@ -509,8 +512,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 				}
 			}
 			m_SndFile.m_nInstruments = nInstruments;
-		} else
-		if (n != IDNO) return INSTRUMENTINDEX_INVALID;
+		}
 	}
 	UINT newins = 0;
 	for (INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++)
@@ -690,15 +692,16 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 	{
 		bool instrumentsLeft = false;
 
-		m_SndFile.DestroyInstrument(nIns);
+		if(m_SndFile.DestroyInstrument(nIns, askdeleteAssociatedSamples))
+		{
+			CriticalSection cs;
+			if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
+			for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) instrumentsLeft = true;
+			if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;
+			SetModified();
 
-		CriticalSection cs;
-		if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
-		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) instrumentsLeft = true;
-		if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;
-		SetModified();
-
-		return true;
+			return true;
+		}
 	}
 	return false;
 }

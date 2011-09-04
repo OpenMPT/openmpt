@@ -288,7 +288,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			{
 				TCHAR szBuf[256]; 
 				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, (LPCTSTR)GetErrorMessage(dw)); 
-				Reporting::Notification(szBuf, "DEBUG: Error when loading plugin dll");
+				Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
 			}
 #endif //_DEBUG	
 	//end rewbs.VSTcompliance
@@ -1449,7 +1449,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 		m_nOutputs = 32;
 		CString str;
 		str.Format("Plugin has unsupported number(=%d) of outputs; plugin may malfunction.", m_pEffect->numOutputs);
-		Reporting::Notification(str, "Warning", MB_ICONWARNING);
+		Reporting::Warning(str);
 	}
 	
 	//input pointer array size must be >=2 for now - the input buffer assignment might write to non allocated mem. otherwise

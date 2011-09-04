@@ -288,7 +288,7 @@ void COptionsSoundcard::OnVScroll(UINT n, UINT pos, CScrollBar *p)
 		else
 		{
 			m_PreAmpNoteShowed = true;
-			Reporting::Notification(str_preampChangeNote, MB_ICONINFORMATION);
+			Reporting::Information(str_preampChangeNote);
 			SetPreAmpSliderPosition();
 		}
 	}

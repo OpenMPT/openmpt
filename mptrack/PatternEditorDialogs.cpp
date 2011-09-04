@@ -554,7 +554,7 @@ void CPatternPropertiesDlg::OnOK()
 				{
 					if(!pSndFile->Patterns[m_nPattern].SetSignature(nNewBeat, nNewMeasure))
 					{
-						MessageBox("Invalid time signature!", "Pattern Properties", MB_OK|MB_ICONEXCLAMATION);
+						Reporting::Error("Invalid time signature!", "Pattern Properties");
 						GetDlgItem(IDC_EDIT_ROWSPERBEAT)->SetFocus();
 						return;
 					}

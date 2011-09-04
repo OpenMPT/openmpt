@@ -12,15 +12,46 @@
 #ifndef REPORTING_H
 #define REPORTING_H
 
+enum ConfirmAnswer
+{
+	cnfYes,
+	cnfNo,
+	cnfCancel,
+};
+
 //=============
 class Reporting
 //=============
 {
 
+protected:
+
+	static UINT ShowNotification(const char *text, const char *caption, UINT flags, const CWnd *parent);
+
 public:
 
-	static UINT Notification(CString text, UINT flags = MB_OK, CWnd *parent = nullptr);
-	static UINT Notification(CString text, CString caption, UINT flags = MB_OK, CWnd *parent = nullptr);
+	// TODO Quick'n'dirty workaround for MsgBox(). Shouldn't be public.
+	static UINT CustomNotification(const char *text, const char *caption, UINT flags, const CWnd *parent) { return ShowNotification(text, caption, flags, parent); };
+
+	// Show a simple notification
+	static void Notification(const char *text, UINT flags = MB_OK, const CWnd *parent = nullptr);
+	static void Notification(const char *text, const char *caption, UINT flags = MB_OK, const CWnd *parent = nullptr);
+
+	// Show a simple information
+	static void Information(const char *text, const CWnd *parent = nullptr);
+	static void Information(const char *text, const char *caption, const CWnd *parent = nullptr);
+
+	// Show a simple warning
+	static void Warning(const char *text, const CWnd *parent = nullptr);
+	static void Warning(const char *text, const char *caption, const CWnd *parent = nullptr);
+
+	// Show an error box.
+	static void Error(const char *text, const CWnd *parent = nullptr);
+	static void Error(const char *text, const char *caption, const CWnd *parent = nullptr);
+
+	// Show a confirmation dialog.
+	static ConfirmAnswer Confirm(const char *text, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
+	static ConfirmAnswer Confirm(const char *text, const char *caption, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
 
 };
 

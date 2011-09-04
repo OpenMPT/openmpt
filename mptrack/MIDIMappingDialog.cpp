@@ -247,7 +247,7 @@ void CMIDIMappingDialog::OnBnClickedButtonAdd()
 {
 	if(m_rSndFile.GetModSpecifications().MIDIMappingDirectivesMax <= m_rMIDIMapper.GetCount())
 	{
-		MessageBox("Max limit reached", 0, MB_ICONINFORMATION);
+		Reporting::Information("Maximum amount of MIDI Mapping directives reached.");
 	}
 	else
 	{

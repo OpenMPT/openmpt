@@ -1034,7 +1034,7 @@ void CViewGlobals::OnLoadParam()
 	//TODO: exception handling
 	if (!(pVstPlugin->LoadProgram(files.first_file.c_str())))
 	{
-		Reporting::Notification("Error loading preset. Are you sure it is for this plugin?");
+		Reporting::Error("Error loading preset. Are you sure it is for this plugin?");
 	} else 
 	{
 		if(pSndFile->GetModSpecifications().supportsPlugins)
@@ -1062,7 +1062,7 @@ void CViewGlobals::OnSaveParam()
 
 	//TODO: exception handling
 	if (!(pVstPlugin->SaveProgram(files.first_file.c_str())))
-		Reporting::Notification("Error saving preset.");
+		Reporting::Error("Error saving preset.");
 	//end rewbs.fxpPresets
 
 }
@@ -1463,12 +1463,12 @@ void CViewGlobals::OnInsertSlot()
 	CString prompt;
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
-	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin+1);
+	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin + 1);
 	if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin)
 	{
 		prompt.Append("\nWarning: plugin data in last slot will be lost."); 
 	}
-	if (Reporting::Notification(prompt, MB_YESNO) == IDYES)
+	if (Reporting::Confirm(prompt) == cnfYes)
 	{
 
 		//Delete last plug...

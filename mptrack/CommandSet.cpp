@@ -45,7 +45,7 @@ CCommandSet::~CCommandSet(void)
 {
 	//CHAR s[64];
 	//wsprintf(s, "pointer = %lX",plocalCmdSet);
-	//Reporting::Notification("about to remove all", NULL, MB_OK|MB_ICONEXCLAMATION); //disabled by rewbs
+	//Reporting::Notification("about to remove all", MB_OK | MB_ICONEXCLAMATION); //disabled by rewbs
 	//commands.RemoveAll();
 }
 

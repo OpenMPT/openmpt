@@ -522,6 +522,15 @@ enum writeEffectAllowRowChange
 };
 
 
+// Delete samples assigned to instrument
+enum deleteInstrumentSamples
+{
+	deleteAssociatedSamples,
+	doNoDeleteAssociatedSamples,
+	askdeleteAssociatedSamples,
+};
+
+
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
 const BYTE MSF_COMPATIBLE_PLAY		= 0;		//IT/MPT/XM
@@ -970,11 +979,7 @@ public:
 	bool MoveSample(SAMPLEINDEX from, SAMPLEINDEX to);
 // -! NEW_FEATURE#0020
 
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-	//BOOL DestroyInstrument(UINT nInstr);
-	bool DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples = 0);
-// -! BEHAVIOUR_CHANGE#0003
+	bool DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples);
 	bool IsSampleUsed(SAMPLEINDEX nSample) const;
 	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr) const;
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);

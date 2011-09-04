@@ -33,7 +33,7 @@ namespace MptTest
 	{					\
 		CString str;	\
 		str.Format("File: " STRINGIZE(__FILE__) "\nLine: " STRINGIZE(__LINE__) "\n\nVERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y); \
-		Reporting::Notification(str, "VERIFY_EQUAL failed", MB_ICONERROR);	\
+		Reporting::Error(str, "VERIFY_EQUAL failed");	\
 	}
 
 // Like VERIFY_EQUAL, but throws exception if comparison fails.
@@ -54,11 +54,11 @@ try								\
 }								\
 catch(const std::exception& e)	\
 {								\
-	Reporting::Notification(CString("Test \"" STRINGIZE(func) "\" threw an exception, message: ") + e.what(), "Test \"" STRINGIZE(func) "\": Exception was thrown", MB_ICONERROR); \
+	Reporting::Error(CString("Test \"" STRINGIZE(func) "\" threw an exception, message: ") + e.what(), "Test \"" STRINGIZE(func) "\": Exception was thrown"); \
 }	\
 catch(...)  \
 {			\
-	Reporting::Notification(CString("Test \"" STRINGIZE(func) "\" threw an unknown exception."), "Test \"" STRINGIZE(func) "\": Exception was thrown", MB_ICONERROR); \
+	Reporting::Error(CString("Test \"" STRINGIZE(func) "\" threw an unknown exception."), "Test \"" STRINGIZE(func) "\": Exception was thrown"); \
 }
 	
 

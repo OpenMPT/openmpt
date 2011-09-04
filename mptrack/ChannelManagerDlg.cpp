@@ -204,7 +204,7 @@ void CChannelManagerDlg::OnApply()
 	{
 		cs.Leave();
 		EndWaitCursor();
-		MessageBox("Rearranging channels failed");
+		Reporting::Error("Rearranging channels failed");
 
 		ResetState(true, true, true, true, true);
 		LeaveCriticalSection(&applying);

@@ -13,15 +13,8 @@
 #include "../mptrack/Mainfrm.h"
 
 
-UINT Reporting::Notification(CString text, UINT flags, CWnd *parent)
-//------------------------------------------------------------------
-{
-	return Notification(text, MAINFRAME_TITLE, flags, parent);
-}
-
-
-UINT Reporting::Notification(CString text, CString caption, UINT flags, CWnd *parent)
-//-----------------------------------------------------------------------------------
+UINT Reporting::ShowNotification(const char *text, const char *caption, UINT flags, const CWnd *parent)
+//-----------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -38,4 +31,84 @@ UINT Reporting::Notification(CString text, CString caption, UINT flags, CWnd *pa
 	}
 
 	return result;
+}
+
+
+void Reporting::Notification(const char *text, UINT flags, const CWnd *parent)
+//----------------------------------------------------------------------------
+{
+	Notification(text, MAINFRAME_TITLE, flags, parent);
+}
+
+
+void Reporting::Notification(const char *text, const char *caption, UINT flags, const CWnd *parent)
+//-------------------------------------------------------------------------------------------------
+{
+	ShowNotification(text, caption, flags, parent);
+}
+
+
+void Reporting::Information(const char *text, const CWnd *parent)
+//---------------------------------------------------------------
+{
+	Information(text, MAINFRAME_TITLE, parent);
+}
+
+
+void Reporting::Information(const char *text, const char *caption, const CWnd *parent)
+//------------------------------------------------------------------------------------
+{
+	ShowNotification(text, caption, MB_OK | MB_ICONINFORMATION, parent);
+}
+
+
+void Reporting::Warning(const char *text, const CWnd *parent)
+//-----------------------------------------------------------
+{
+	Warning(text, MAINFRAME_TITLE " - Error", parent);
+}
+
+
+void Reporting::Warning(const char *text, const char *caption, const CWnd *parent)
+//--------------------------------------------------------------------------------
+{
+	ShowNotification(text, caption, MB_OK | MB_ICONWARNING, parent);
+}
+
+
+void Reporting::Error(const char *text, const CWnd *parent)
+//---------------------------------------------------------
+{
+	Error(text, MAINFRAME_TITLE " - Error", parent);
+}
+
+
+void Reporting::Error(const char *text, const char *caption, const CWnd *parent)
+//------------------------------------------------------------------------------
+{
+	ShowNotification(text, caption, MB_OK | MB_ICONERROR, parent);
+}
+
+
+ConfirmAnswer Reporting::Confirm(const char *text, bool showCancel, bool defaultNo, const CWnd *parent)
+//-----------------------------------------------------------------------------------------------------
+{
+	return Confirm(text, MAINFRAME_TITLE " - Confirmation", showCancel, defaultNo, parent);
+}
+
+
+ConfirmAnswer Reporting::Confirm(const char *text, const char *caption, bool showCancel, bool defaultNo, const CWnd *parent)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	UINT result = ShowNotification(text, caption, (showCancel ? MB_YESNOCANCEL : MB_YESNO) | MB_ICONQUESTION | (defaultNo ? MB_DEFBUTTON2 : 0), parent);
+	switch(result)
+	{
+	case IDYES:
+		return cnfYes;
+	case IDNO:
+		return cnfNo;
+	default:
+	case IDCANCEL:
+		return cnfCancel;
+	}
 }

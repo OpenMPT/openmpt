@@ -1737,7 +1737,7 @@ void CViewSample::OnEditDelete()
 	if ((m_dwBeginSel >= m_dwEndSel)
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= len))
 	{
-		if (MessageBox("Remove this sample?", "Remove Sample", MB_YESNOCANCEL | MB_ICONQUESTION) != IDYES) return;
+		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 
 		CriticalSection cs;
@@ -2500,7 +2500,7 @@ void CViewSample::OnAddSilence()
 	if( MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples )
 	{
 		CString str; str.Format(TEXT("Can't add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
-		Reporting::Notification(str, MB_ICONINFORMATION);
+		Reporting::Information(str);
 		return;
 	}
 

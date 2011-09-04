@@ -261,8 +261,8 @@ void CWaveConvert::OnOK()
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? true : false;
 	if (m_bGivePlugsIdleTime)
 	{
-		if (MessageBox("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
-			"Really enable slow render?", MB_YESNO) == IDNO )
+		if (Reporting::Confirm("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
+			"Really enable slow render?") == cnfNo)
 		{
 			CheckDlgButton(IDC_GIVEPLUGSIDLETIME, BST_UNCHECKED);
 			return;

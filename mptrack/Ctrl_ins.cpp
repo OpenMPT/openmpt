@@ -1889,12 +1889,10 @@ void CCtrlInstruments::OnSetPanningChanged()
 			}
 			if(smpPanningInUse)
 			{
-				if(MessageBox(_T("Some of the samples used in the instrument have \"Set Pan\" enabled. "
+				if(Reporting::Confirm(_T("Some of the samples used in the instrument have \"Set Pan\" enabled. "
 						"When instrument is played with such sample, sample pan setting overrides instrument pan. "
 						"Do you wish to disable panning from those samples so that instrument pan setting is effective "
-						"for the whole instrument?"),
-						_T(""),
-						MB_YESNO) == IDYES)
+						"for the whole instrument?")) == cnfYes)
 				{
 					for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
 					{
@@ -2649,7 +2647,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 
 	CString str;
 	str.Format(TEXT("Tuning %s was not found. Setting to default tuning."), m_pSndFile->Instruments[m_nInstrument]->pTuning->GetName().c_str());
-	MessageBox(str);
+	Reporting::Notification(str);
 
 	CriticalSection cs;
 	pIns->SetTuning(pIns->s_DefaultTuning);

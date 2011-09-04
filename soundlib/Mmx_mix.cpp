@@ -162,14 +162,14 @@ DWORD CSoundFile::InitSysInfo()
 	{
 		CHAR s[64];
 		wsprintf(s, "MODCHANNEL not aligned: sizeof(MODCHANNEL) = %d", sizeof(MODCHANNEL));
-		Reporting::Notification(s);
+		Reporting::Warning(s);
 	}
 	DWORD dwFastSinc = (DWORD)(LPVOID)gFastSinc;
 	if (dwFastSinc & 7)
 	{
 		CHAR s[64];
 		wsprintf(s, "gFastSinc is not aligned (%08X)!", dwFastSinc);
-		Reporting::Notification(s);
+		Reporting::Warning(s);
 	}
 #endif
 	memset(&osvi, 0, sizeof(osvi));

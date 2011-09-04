@@ -292,15 +292,15 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 	}
 	if (CDLSBank::IsDLSBank(lpszConfigFile))
 	{
-		UINT id = IDYES;
+		ConfirmAnswer result = cnfYes;
 		if (!bNoWarn)
 		{
-			id = CMainFrame::GetMainFrame()->MessageBox("You are about to replace the current MIDI library:\n"
-												"Do you want to replace only the missing instruments? (recommended)",
-												"Warning", MB_YESNOCANCEL|MB_ICONQUESTION );
+			result = Reporting::Confirm("You are about to replace the current MIDI library:\n"
+									"Do you want to replace only the missing instruments? (recommended)",
+									"Warning", true);
 		}
-		if (id == IDCANCEL) return FALSE;
-		const bool bReplaceAll = (id == IDNO);
+		if (result == cnfCancel) return FALSE;
+		const bool bReplaceAll = (result == cnfNo);
 		CDLSBank dlsbank;
 		if (dlsbank.Open(lpszConfigFile))
 		{
@@ -933,7 +933,6 @@ BOOL CTrackApp::InitInstance()
 int CTrackApp::ExitInstance()
 //---------------------------
 {
-	//::MessageBox("Exiting/Crashing");
 	SndDevUninitialize();
 	if (glpMidiLibrary)
 	{
@@ -1849,19 +1848,19 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 // Misc functions
 
 
-UINT MsgBox(UINT nStringID, CWnd *p, LPCSTR lpszTitle, UINT n)
-//------------------------------------------------------------
+UINT MsgBox(UINT nStringID, CWnd *parent, LPCSTR lpszTitle, UINT n)
+//-----------------------------------------------------------------
 {
 	CString str;
 	str.LoadString(nStringID);
-	return Reporting::Notification(str, CString(lpszTitle), n, p);
+	return Reporting::CustomNotification(str, CString(lpszTitle), n, parent);
 }
 
 
-void ErrorBox(UINT nStringID, CWnd*p)
-//-----------------------------------
+void ErrorBox(UINT nStringID, CWnd *parent)
+//-----------------------------------------
 {
-	MsgBox(nStringID, p, "Error!", MB_OK | MB_ICONSTOP);
+	MsgBox(nStringID, parent, "Error!", MB_OK | MB_ICONSTOP);
 }
 
 

@@ -359,7 +359,7 @@ bool CModTypeDlg::VerifyData()
 
 	if(maxChans < m_pSndFile->GetNumChannels())
 	{
-		if(Reporting::Notification("New module type supports less channels than currently used, and reducing channel number is required. Continue?", MB_OKCANCEL) != IDOK)
+		if(Reporting::Confirm("New module type supports less channels than currently used, and reducing channel number is required. Continue?") != cnfYes)
 			return false;
 	}
 
@@ -921,7 +921,7 @@ void CMidiMacroSetup::OnResetCfg()
 void CMidiMacroSetup::OnMacroHelp()
 //---------------------------------
 {
-	MessageBox(_T("Valid characters in macros:\n\n"
+	Reporting::Information(_T("Valid characters in macros:\n\n"
 		"0-9, A-F - Raw hex data (4-Bit value)\n"
 		"c - MIDI channel (4-Bit value)\n"
 		"n - Note value\n\n"
@@ -934,7 +934,7 @@ void CMidiMacroSetup::OnMacroHelp()
 		"p - Program select\n\n"
 		"z - Zxx parameter (00-7F)\n\n"
 		"Macros can be up to 31 characters long and contain multiple MIDI messages. SysEx messages are automatically terminated if not specified by the user."),
-		_T("OpenMPT MIDI Macro quick reference"), MB_OK | MB_ICONINFORMATION);
+		_T("OpenMPT MIDI Macro quick reference"));
 }
 
 
