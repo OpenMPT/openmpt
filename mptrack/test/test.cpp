@@ -130,7 +130,7 @@ void TestVersion()
 		try
 		{
 			pVersionInfo = new char[dwVerInfoSize];
-		} catch(MPTMemoryException *)
+		} catch(...)
 		{
 			throw std::runtime_error("Could not allocate memory for pVersionInfo");
 		}
