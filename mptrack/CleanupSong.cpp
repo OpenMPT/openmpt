@@ -700,17 +700,10 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	vector<bool> usedmap;
-	INSTRUMENTINDEX swapmap[MAX_INSTRUMENTS];
-	INSTRUMENTINDEX swapdest[MAX_INSTRUMENTS];
-	UINT nRemoved = 0;
-	INSTRUMENTINDEX nSwap, nIndex;
-	bool bReorg = false;
-
 	if (!pSndFile->GetNumInstruments()) return false;
 
 	deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples;
-	if ( !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT))) //never remove an instrument's samples in ITP.
+	if (!((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT))) // Never remove an instrument's samples in ITP.
 	{
 		if(Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing unused instruments") == cnfYes)
 		{
@@ -722,7 +715,12 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	}
 
 	BeginWaitCursor();
-	usedmap.resize(pSndFile->GetNumInstruments() + 1, false);
+	vector<bool> usedmap(pSndFile->GetNumInstruments() + 1, false);
+	vector<INSTRUMENTINDEX> swapmap(pSndFile->GetNumInstruments() + 1, 0);
+	vector<INSTRUMENTINDEX> swapdest(pSndFile->GetNumInstruments() + 1, 0);
+	INSTRUMENTINDEX nRemoved = 0;
+	INSTRUMENTINDEX nSwap, nIndex;
+	bool bReorg = false;
 
 	for(INSTRUMENTINDEX i = pSndFile->GetNumInstruments(); i >= 1; i--)
 	{
@@ -751,7 +749,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		CriticalSection cs;
 		nSwap = 0;
 		nIndex = 1;
-		for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
+		for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
 		{
 			if (usedmap[nIns])
 			{

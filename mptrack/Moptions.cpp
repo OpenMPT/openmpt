@@ -108,7 +108,7 @@ BOOL COptionsColors::OnKillActive()
 
 	if ((temp_nRowSpacing2 > temp_nRowSpacing))
 	{
-		Reporting::Notification("Error: Primary highlight must be greater than or equal secondary highlight.", MB_OK | MB_ICONEXCLAMATION);
+		Reporting::Warning("Error: Primary highlight must be greater than or equal secondary highlight.");
 		::SetFocus(::GetDlgItem(m_hWnd, IDC_PRIMARYHILITE));
 		return 0;
 	}

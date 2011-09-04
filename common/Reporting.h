@@ -34,8 +34,8 @@ public:
 	static UINT CustomNotification(const char *text, const char *caption, UINT flags, const CWnd *parent) { return ShowNotification(text, caption, flags, parent); };
 
 	// Show a simple notification
-	static void Notification(const char *text, UINT flags = MB_OK, const CWnd *parent = nullptr);
-	static void Notification(const char *text, const char *caption, UINT flags = MB_OK, const CWnd *parent = nullptr);
+	static void Notification(const char *text, const CWnd *parent = nullptr);
+	static void Notification(const char *text, const char *caption, const CWnd *parent = nullptr);
 
 	// Show a simple information
 	static void Information(const char *text, const CWnd *parent = nullptr);

@@ -493,7 +493,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\common\Reporting.cpp"
+				RelativePath="..\common\Reporting.cpp"
 				>
 			</File>
 			<File

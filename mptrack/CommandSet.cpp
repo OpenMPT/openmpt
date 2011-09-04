@@ -1585,7 +1585,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 		CString err;
 		err.Format("The following problems have been encountered while trying to load the key binding file %s:\n", szFilename);
 		err += errText;
-		Reporting::Notification(err, MB_ICONEXCLAMATION | MB_OK);
+		Reporting::Warning(err);
 	}
 
 	if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
@@ -1603,7 +1603,7 @@ bool CCommandSet::LoadFile(CString fileName)
 	{
 		CString strMsg;
 		AfxFormatString1(strMsg, IDS_CANT_OPEN_KEYBINDING_FILE, fileName);
-		Reporting::Notification(strMsg, MB_ICONEXCLAMATION | MB_OK);
+		Reporting::Warning(strMsg);
 		return false;
 	}
 	else

@@ -1860,7 +1860,7 @@ UINT MsgBox(UINT nStringID, CWnd *parent, LPCSTR lpszTitle, UINT n)
 void ErrorBox(UINT nStringID, CWnd *parent)
 //-----------------------------------------
 {
-	MsgBox(nStringID, parent, "Error!", MB_OK | MB_ICONSTOP);
+	MsgBox(nStringID, parent, "Error!", MB_OK | MB_ICONERROR);
 }
 
 

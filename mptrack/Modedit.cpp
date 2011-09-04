@@ -43,7 +43,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 	{
 		CString error;
 		error.Format("Error: Max number of channels for this file type is %d", maxChans);
-		Reporting::Notification(error, MB_OK | MB_ICONEXCLAMATION);
+		Reporting::Warning(error);
 		return false;
 	}
 
