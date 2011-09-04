@@ -590,28 +590,35 @@ DWORD ModSequence::Deserialize(const BYTE* const src, const DWORD memLength)
 }
 
 
-size_t ModSequence::WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize)
-//-----------------------------------------------------------------------------
+size_t ModSequence::WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize) const
+//------------------------------------------------------------------------------------------------
 {
 	if(numOfBytes > destSize || numOfBytes > MAX_ORDERS) return true;
-	if(GetLength() < numOfBytes) resize(ORDERINDEX(numOfBytes), 0xFF);
-	UINT i = 0;
-	for(i = 0; i<numOfBytes; i++)
+
+	const size_t limit = min(numOfBytes, GetLength());
+
+	size_t i = 0;
+	for(i = 0; i < limit; i++)
 	{
 		dest[i] = static_cast<BYTE>((*this)[i]);
+	}
+	// Fill non-existing order items with stop indices
+	for(i = limit; i < numOfBytes; i++)
+	{
+		dest[i] = 0xFF;
 	}
 	return i; //Returns the number of bytes written.
 }
 
 
-size_t ModSequence::WriteAsByte(FILE* f, const uint16 count)
-//----------------------------------------------------------
+size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
+//----------------------------------------------------------------
 {
-	if(GetLength() < count) resize(count);
+	const size_t limit = min(count, GetLength());
 
 	size_t i = 0;
 	
-	for(i = 0; i<count; i++)
+	for(i = 0; i < limit; i++)
 	{
 		const PATTERNINDEX pat = (*this)[i];
 		BYTE temp = static_cast<BYTE>((*this)[i]);
@@ -621,6 +628,12 @@ size_t ModSequence::WriteAsByte(FILE* f, const uint16 count)
 			if(pat == GetInvalidPatIndex()) temp = 0xFF;
 			else temp = 0xFE;
 		}
+		fwrite(&temp, 1, 1, f);
+	}
+	// Fill non-existing order items with stop indices
+	for(i = limit; i < count; i++)
+	{
+		BYTE temp = 0xFF;
 		fwrite(&temp, 1, 1, f);
 	}
 	return i; //Returns the number of bytes written.

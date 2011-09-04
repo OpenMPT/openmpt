@@ -30,8 +30,10 @@ protected:
 
 public:
 
+#ifdef MODPLUG_TRACKER
 	// TODO Quick'n'dirty workaround for MsgBox(). Shouldn't be public.
 	static UINT CustomNotification(const char *text, const char *caption, UINT flags, const CWnd *parent) { return ShowNotification(text, caption, flags, parent); };
+#endif // MODPLUG_TRACKER
 
 	// Show a simple notification
 	static void Notification(const char *text, const CWnd *parent = nullptr);

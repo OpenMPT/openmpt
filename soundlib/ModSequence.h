@@ -82,8 +82,8 @@ public:
 	ModSequence& operator=(const ModSequence& seq);
 
 	// Read/write.
-	size_t WriteAsByte(FILE* f, const uint16 count);
-	size_t WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize);
+	size_t WriteAsByte(FILE* f, const uint16 count) const;
+	size_t WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize) const;
 	bool ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength);
 
 	// Deprecated function used for MPTm's created in 1.17.02.46 - 1.17.02.48.

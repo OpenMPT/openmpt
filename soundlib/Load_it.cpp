@@ -1730,7 +1730,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		{
 			UINT len = 0;
 			BYTE buf[8 * MAX_BASECHANNELS];
-			MODCOMMAND *m = Patterns[npat].GetRow(row);
+			const MODCOMMAND *m = Patterns[npat].GetRow(row);
 
 			for (UINT ch = 0; ch < specs.channelsMax; ch++, m++)
 			{
@@ -1888,28 +1888,28 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	// Writing Sample Data
 	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
 	{
-		MODSAMPLE *psmp = &Samples[nsmp];
+		const MODSAMPLE &sample = Samples[nsmp];
 		MemsetZero(itss);
-		memcpy(itss.filename, psmp->filename, 12);
+		memcpy(itss.filename, sample.filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
 		StringFixer::SetNullTerminator(itss.name);
 
 		itss.id = LittleEndian(IT_IMPS);
-		itss.gvl = (BYTE)psmp->nGlobalVol;
+		itss.gvl = (BYTE)sample.nGlobalVol;
 		
 		UINT flags = RS_PCM8S;
-		if(psmp->nLength && psmp->pSample)
+		if(sample.nLength && sample.pSample)
 		{
 			itss.flags = 0x01;
-			if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
-			if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+			if (sample.uFlags & CHN_LOOP) itss.flags |= 0x10;
+			if (sample.uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
+			if (sample.uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
+			if (sample.uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
 #ifndef NO_PACKING
 			if (nPacking && !compatExport)
 			{
-				if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
-					&& (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
+				if ((!(sample.uFlags & (CHN_16BIT|CHN_STEREO)))
+					&& (CanPackSample(sample.pSample, sample.nLength, nPacking)))
 				{
 					flags = RS_ADPCM4;
 					itss.cvt = 0xFF;
@@ -1917,15 +1917,15 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			} else
 #endif // NO_PACKING
 			{
-				if (psmp->uFlags & CHN_STEREO)
+				if (sample.uFlags & CHN_STEREO)
 				{
 					flags = RS_STPCM8S;
 					itss.flags |= 0x04;
 				}
-				if (psmp->uFlags & CHN_16BIT)
+				if (sample.uFlags & CHN_16BIT)
 				{
 					itss.flags |= 0x02;
-					flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
+					flags = (sample.uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
 				}
 			}
 			itss.cvt = 0x01;
@@ -1935,35 +1935,35 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			itss.flags = 0x00;
 		}
 
-		itss.C5Speed = psmp->nC5Speed;
+		itss.C5Speed = sample.nC5Speed;
 		if (!itss.C5Speed) itss.C5Speed = 8363;
-		itss.length = psmp->nLength;
-		itss.loopbegin = psmp->nLoopStart;
-		itss.loopend = psmp->nLoopEnd;
-		itss.susloopbegin = psmp->nSustainStart;
-		itss.susloopend = psmp->nSustainEnd;
-		itss.vol = psmp->nVolume >> 2;
-		itss.dfp = psmp->nPan >> 2;
-		itss.vit = autovibxm2it[psmp->nVibType & 7];
-		itss.vis = min(psmp->nVibRate, 64);
-		itss.vid = min(psmp->nVibDepth, 32);
-		itss.vir = min(psmp->nVibSweep, 255); //(psmp->nVibSweep < 64) ? psmp->nVibSweep * 4 : 255;
-		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
+		itss.length = sample.nLength;
+		itss.loopbegin = sample.nLoopStart;
+		itss.loopend = sample.nLoopEnd;
+		itss.susloopbegin = sample.nSustainStart;
+		itss.susloopend = sample.nSustainEnd;
+		itss.vol = sample.nVolume >> 2;
+		itss.dfp = sample.nPan >> 2;
+		itss.vit = autovibxm2it[sample.nVibType & 7];
+		itss.vis = min(sample.nVibRate, 64);
+		itss.vid = min(sample.nVibDepth, 32);
+		itss.vir = min(sample.nVibSweep, 255); //(sample.nVibSweep < 64) ? sample.nVibSweep * 4 : 255;
+		if (sample.uFlags & CHN_PANNING) itss.dfp |= 0x80;
 
 		itss.samplepointer = dwPos;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
-		if ((psmp->pSample) && (psmp->nLength))
+		if ((sample.pSample) && (sample.nLength))
 		{
-			dwPos += WriteSample(f, psmp, flags);
+			dwPos += WriteSample(f, &sample, flags);
 		}
 	}
 
 	//Save hacked-on extra info
 	if(!compatExport)
 	{
-		SaveExtendedInstrumentProperties(Instruments, header.insnum, f);
+		SaveExtendedInstrumentProperties(header.insnum, f);
 		SaveExtendedSongProperties(f);
 	}
 
@@ -2439,13 +2439,13 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 }
 
 
-void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f)
-//------------------------------------------------------------------------------------------------------------
 // Used only when saving IT, XM and MPTM. 
 // ITI, ITP saves using Ericus' macros etc...
 // The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
 // too late to turn back....
+void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const
+//---------------------------------------------------------------------------------
 {
 	__int32 code=0;
 
@@ -2459,24 +2459,24 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 	if (nInstruments == 0)
 		return;
 	
-	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(m_defaultInstrument.nVolRamp),    f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(m_defaultInstrument.nMixPlug),    f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(m_defaultInstrument.nMidiChannel),f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(m_defaultInstrument.nMidiProgram),f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(m_defaultInstrument.wMidiBank),   f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('P...', sizeof(m_defaultInstrument.nPan),        f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(m_defaultInstrument.nGlobalVol),  f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(m_defaultInstrument.nFadeOut),    f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('R...', sizeof(m_defaultInstrument.nResampling), f, instruments, nInstruments);
-   	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(m_defaultInstrument.nCutSwing),   f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(m_defaultInstrument.nResSwing),   f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(m_defaultInstrument.nFilterMode), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(m_defaultInstrument.PitchEnv.nReleaseNode ), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(m_defaultInstrument.PanEnv.nReleaseNode), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(m_defaultInstrument.VolEnv.nReleaseNode), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(m_defaultInstrument.wPitchToTempoLock),  f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(m_defaultInstrument.nPluginVelocityHandling),  f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(m_defaultInstrument.nPluginVolumeHandling),  f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(m_defaultInstrument.nVolRamp),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(m_defaultInstrument.nMixPlug),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(m_defaultInstrument.nMidiChannel),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(m_defaultInstrument.nMidiProgram),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(m_defaultInstrument.wMidiBank),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('P...', sizeof(m_defaultInstrument.nPan),        f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(m_defaultInstrument.nGlobalVol),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(m_defaultInstrument.nFadeOut),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('R...', sizeof(m_defaultInstrument.nResampling), f, nInstruments);
+   	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(m_defaultInstrument.nCutSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(m_defaultInstrument.nResSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(m_defaultInstrument.nFilterMode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(m_defaultInstrument.PitchEnv.nReleaseNode ), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(m_defaultInstrument.PanEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(m_defaultInstrument.VolEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(m_defaultInstrument.wPitchToTempoLock),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(m_defaultInstrument.nPluginVelocityHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(m_defaultInstrument.nPluginVolumeHandling),  f, nInstruments);
 
 	if(m_nType & MOD_TYPE_MPT)
 	{
@@ -2490,34 +2490,34 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(m_defaultInstrument.VolEnv.nNodes), f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(m_defaultInstrument.VolEnv.Ticks ), f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(m_defaultInstrument.VolEnv.Values), f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(m_defaultInstrument.VolEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(m_defaultInstrument.VolEnv.Ticks ), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(m_defaultInstrument.VolEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(m_defaultInstrument.PanEnv.nNodes), f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks),  f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values), f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(m_defaultInstrument.PanEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(m_defaultInstrument.PitchEnv.nNodes), f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(m_defaultInstrument.PitchEnv.Ticks),  f, instruments, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values), f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(m_defaultInstrument.PitchEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(m_defaultInstrument.PitchEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values), f, nInstruments);
 		}
 	}
 
 	return;
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 size, FILE* f, MODINSTRUMENT *instruments[], UINT nInstruments) 
-//---------------------------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 size, FILE* f, UINT nInstruments) const
+//---------------------------------------------------------------------------------------------------------------------
 {
 	fwrite(&code, 1, sizeof(__int32), f);		//write code
 	fwrite(&size, 1, sizeof(__int16), f);		//write size
 	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
 	{
 		BYTE* pField;
-		if (instruments[nins])
+		if (Instruments[nins])
 		{
-			pField = GetInstrumentHeaderFieldPointer(instruments[nins], code, size); //get ptr to field
+			pField = GetInstrumentHeaderFieldPointer(Instruments[nins], code, size); //get ptr to field
 		} else
 		{ 
 			pField = GetInstrumentHeaderFieldPointer(&m_defaultInstrument, code, size); //get ptr to field
@@ -2526,8 +2526,8 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 
 	}
 }
 
-void CSoundFile::SaveExtendedSongProperties(FILE* f)
-//--------------------------------------------------
+void CSoundFile::SaveExtendedSongProperties(FILE* f) const
+//--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
 	__int16 size;
