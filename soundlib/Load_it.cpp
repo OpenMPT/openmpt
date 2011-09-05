@@ -1360,7 +1360,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	ITSAMPLESTRUCT itss;
 	vector<bool>smpcount(GetNumSamples(), false);
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
-	WORD patinfo[4];
 	FILE *f;
 
 
@@ -1694,11 +1693,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	{
 		DWORD dwPatPos = dwPos;
 		if (!Patterns[npat]) continue;
-		patpos[npat] = dwPos;
-		patinfo[0] = 0;
-		patinfo[1] = Patterns[npat].GetNumRows();
-		patinfo[2] = 0;
-		patinfo[3] = 0;
 
 		if(Patterns[npat].GetOverrideSignature())
 			bNeedsMptPatSave = true;
@@ -1710,18 +1704,29 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			continue;
 		}
 
+		patpos[npat] = dwPos;
+
+		// Write pattern header
+		WORD patinfo[4];
+		patinfo[0] = 0;
+		patinfo[1] = LittleEndianW(Patterns[npat].GetNumRows());
+		patinfo[2] = 0;
+		patinfo[3] = 0;
+
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
-		vector<BYTE> chnmask(specs.channelsMax, 0xFF);
-		vector<MODCOMMAND> lastvalue(specs.channelsMax, MODCOMMAND::Empty());
 
-		for (UINT row = 0; row<Patterns[npat].GetNumRows(); row++)
+		const CHANNELINDEX maxChannels = min(specs.channelsMax, GetNumChannels());
+		vector<BYTE> chnmask(maxChannels, 0xFF);
+		vector<MODCOMMAND> lastvalue(maxChannels, MODCOMMAND::Empty());
+
+		for (ROWINDEX row = 0; row<Patterns[npat].GetNumRows(); row++)
 		{
 			UINT len = 0;
 			BYTE buf[8 * MAX_BASECHANNELS];
 			const MODCOMMAND *m = Patterns[npat].GetRow(row);
 
-			for (UINT ch = 0; ch < specs.channelsMax; ch++, m++)
+			for (CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
 			{
 				// Skip mptm-specific notes.
 				if(m->IsPcNote())
