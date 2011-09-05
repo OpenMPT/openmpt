@@ -2391,7 +2391,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 		// Check instrument plugins
 		if ((pIns->nMidiChannel >= 1) && (pIns->nMidiChannel <= 16))
 		{
-			nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+			nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
 				pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;

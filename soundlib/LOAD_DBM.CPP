@@ -231,14 +231,14 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				WORD nsmp;
 
 				if (chunk_pos + sizeof(DBMINSTRUMENT) > dwMemPos) break;
-				if ((pIns = new MODINSTRUMENT) == nullptr) break;
-				memset(pIns, 0, sizeof(MODINSTRUMENT));
-				SetDefaultInstrumentValues(pIns);
-				Instruments[iIns + 1] = pIns;
 
 				pih = (DBMINSTRUMENT *)(lpStream + chunk_pos);
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : nullptr;
+
+				if ((pIns = new MODINSTRUMENT(nsmp)) == nullptr) break;
+				Instruments[iIns + 1] = pIns;
+
 				memcpy(pIns->name, pih->name, 30);
 				StringFixer::SpaceToNullStringFixed<30>(pIns->name);
 				if (psmp)
@@ -248,19 +248,12 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				}
 
 				pIns->nFadeOut = 1024;	// ???
-				pIns->nGlobalVol = 64;
 				pIns->nPan = BigEndianW(pih->panning);
 				if ((pIns->nPan) && (pIns->nPan < 256))
 					pIns->dwFlags = INS_SETPANNING;
 				else
 					pIns->nPan = 128;
-				pIns->nPPC = 5 * 12;
 
-				for (BYTE i = 0; i < NOTE_MAX; i++)
-				{
-					pIns->Keyboard[i] = nsmp;
-					pIns->NoteMap[i] = i + 1;
-				}
 				// Sample Info
 				if (psmp)
 				{

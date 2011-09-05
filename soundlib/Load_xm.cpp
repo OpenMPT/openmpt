@@ -317,10 +317,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		MemsetZero(pih);
 		memcpy(&pih, lpStream + dwMemPos, min(sizeof(pih), ihsize));
 
-		if ((Instruments[iIns] = new MODINSTRUMENT) == nullptr) continue;
-		memcpy(Instruments[iIns], &m_defaultInstrument, sizeof(MODINSTRUMENT));
-		Instruments[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+		if ((Instruments[iIns] = new MODINSTRUMENT()) == nullptr) continue;
 
 		memcpy(Instruments[iIns]->name, pih.name, 22);
 		StringFixer::SpaceToNullStringFixed<22>(Instruments[iIns]->name);
@@ -436,11 +433,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		MODINSTRUMENT *pIns = Instruments[iIns];
 		pIns->nMidiProgram = pih.type;
 		pIns->nFadeOut = xmsh.volfade;
-		pIns->nPan = 128;
-		pIns->nPPC = 5*12;
-		SetDefaultInstrumentValues(pIns);
-		pIns->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		pIns->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 		if (xmsh.vtype & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
 		if (xmsh.vtype & 2) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
 		if (xmsh.vtype & 4) pIns->VolEnv.dwFlags |= ENV_LOOP;
@@ -465,7 +457,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		pIns->PanEnv.nLoopEnd = xmsh.ploope;
 		if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
 		if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
-		pIns->nGlobalVol = 64;
 		for (UINT ienv=0; ienv<12; ienv++)
 		{
 			pIns->VolEnv.Ticks[ienv] = (WORD)xmsh.venv[ienv*2];

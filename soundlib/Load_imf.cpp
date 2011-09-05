@@ -253,7 +253,6 @@ static void load_imf_envelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfi
 	env->nLoopStart = imfins->env[e].loop_start;
 	env->nLoopEnd = imfins->env[e].loop_end;
 	env->nSustainStart = env->nSustainEnd = imfins->env[e].sustain;
-	env->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 
 	for(UINT n = 0; n < env->nNodes; n++)
 	{
@@ -497,13 +496,16 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		//if(memcmp(imfins.ii10, "II10", 4) != 0)
 		//	return false;
 		
-		pIns = new MODINSTRUMENT;
-		if(!pIns)
+		try
+		{
+			pIns = new MODINSTRUMENT();
+		}
+		catch(...)
+		{
 			continue;
+		}
+
 		Instruments[nIns + 1] = pIns;
-		memset(pIns, 0, sizeof(MODINSTRUMENT));
-		pIns->nPPC = 5 * 12;
-		SetDefaultInstrumentValues(pIns);
 
 		memcpy(pIns->name, imfins.name, 31);
 		StringFixer::SpaceToNullStringFixed<31>(pIns->name);
@@ -518,7 +520,6 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 
 		pIns->nFadeOut = imfins.fadeout;
-		pIns->nGlobalVol = 64;
 
 		load_imf_envelope(&pIns->VolEnv, &imfins, IMF_ENV_VOL);
 		load_imf_envelope(&pIns->PanEnv, &imfins, IMF_ENV_PAN);

@@ -1641,10 +1641,15 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 		Log("  usVolume = %3d, Unity Note = %d\n", prgn->usVolume, prgn->uUnityNote);
 	}
 #endif
-	pIns = new MODINSTRUMENT;
-	if (!pIns) return FALSE;
-	MemsetZero(*pIns);
-	pIns->pTuning = pIns->s_DefaultTuning;
+	
+	try
+	{
+		pIns = new MODINSTRUMENT();
+	} catch(...)
+	{
+		return FALSE;
+	}
+
 	if (pSndFile->Instruments[nInstr])
 	{
 		pSndFile->DestroyInstrument(nInstr, deleteAssociatedSamples);
@@ -1691,22 +1696,14 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 		}
 	}
 	pIns->nFadeOut = 1024;
-	pIns->nGlobalVol = 64;	// Maximum
-	pIns->nPan = 128;		// Center Pan
 	pIns->nMidiProgram = (BYTE)(pDlsIns->ulInstrument & 0x7F);
 	pIns->nMidiChannel = (BYTE)((pDlsIns->ulBank & F_INSTRUMENT_DRUMS) ? 10 : 0);
 	pIns->wMidiBank = (WORD)(((pDlsIns->ulBank & 0x7F00) >> 1) | (pDlsIns->ulBank & 0x7F));
-	pIns->nPPC = 60;		// C-5
 	pIns->nNNA = NNA_NOTEOFF;
 	pIns->nDCT = DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
-	pIns->nResampling = SRCMODE_DEFAULT;
-	pIns->nFilterMode = FLTMODE_UNCHANGED;
-	pIns->PanEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
-	pIns->PitchEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
-	pIns->VolEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
 	pSndFile->Instruments[nInstr] = pIns;
-	nSample = 1;
+	nSample = 0;
 	UINT nLoadedSmp = 0;
 	// Extract Samples
 	for (UINT nRgn=nRgnMin; nRgn<nRgnMax; nRgn++)
@@ -1741,9 +1738,13 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				while ((nSample < MAX_SAMPLES) && ((pSndFile->GetSample(nSample).pSample) || (pSndFile->m_szNames[nSample][0]))) nSample++;
+				// Find a nice sample slot
+				do
+				{
+					nSample++;
+				} while (nSample < pSndFile->GetNumSamples() && (pSndFile->GetSample(nSample).pSample != nullptr || pSndFile->m_szNames[nSample][0]));
 				if (nSample >= MAX_SAMPLES) break;
-				if (nSample > pSndFile->m_nSamples) pSndFile->m_nSamples = nSample;
+				if (nSample > pSndFile->GetNumSamples()) pSndFile->m_nSamples = nSample;
 				nSmp = nSample;
 				nLoadedSmp++;
 			}
@@ -1900,6 +1901,3 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	}
 	return TRUE;
 }
-
-
-

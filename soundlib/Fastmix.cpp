@@ -1608,7 +1608,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 	#endif
 
 		//Look for plugins associated with this implicit tracker channel.
-		PLUGINDEX nMixPlugin = GetBestPlugin(ChnMix[nChn], PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+		PLUGINDEX nMixPlugin = GetBestPlugin(ChnMix[nChn], PrioritiseInstrument, RespectMutes);
 		
 		//rewbs.instroVSTi
 /*		UINT nMixPlugin=0;
@@ -2491,7 +2491,4 @@ void CSoundFile::ResetAGC()
 }
 
 #endif // NO_AGC
-
-
-
 

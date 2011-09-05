@@ -290,7 +290,7 @@ public:
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
-	void InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample=0);
+	void InitializeInstrument(MODINSTRUMENT *pIns);
 	void InitializeSample(MODSAMPLE &sample);
 	bool RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd);
 	bool RemovePattern(PATTERNINDEX nPat);

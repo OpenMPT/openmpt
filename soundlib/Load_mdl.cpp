@@ -370,21 +370,16 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				if (!Instruments[nins])
 				{
 					UINT note = 12;
-					if ((Instruments[nins] = new MODINSTRUMENT) == NULL) break;
+					if ((Instruments[nins] = new MODINSTRUMENT()) == nullptr) break;
 					MODINSTRUMENT *pIns = Instruments[nins];
-					memset(pIns, 0, sizeof(MODINSTRUMENT));
 					memcpy(pIns->name, lpStream+dwPos+2, 32);
 					StringFixer::SpaceToNullStringFixed<31>(pIns->name);
 
-					pIns->nGlobalVol = 64;
-					pIns->nPPC = 5*12;
-					SetDefaultInstrumentValues(pIns);
 					for (j=0; j<lpStream[dwPos+1]; j++)
 					{
 						const BYTE *ps = lpStream+dwPos+34+14*j;
 						while ((note < (UINT)(ps[1]+12)) && (note < NOTE_MAX))
 						{
-							pIns->NoteMap[note] = note+1;
 							if (ps[0] < MAX_SAMPLES)
 							{
 								int ismp = ps[0];
@@ -422,8 +417,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
 			{
-				Instruments[j] = new MODINSTRUMENT;
-				if (Instruments[j]) memset(Instruments[j], 0, sizeof(MODINSTRUMENT));
+				Instruments[j] = new MODINSTRUMENT();
 			}
 			break;
 		// VE: Volume Envelope
