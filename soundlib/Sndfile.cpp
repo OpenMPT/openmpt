@@ -359,7 +359,7 @@ if( fsize <= sizeof( type ) * arraysize ) pointer = (BYTE *)&input-> name ;\
 break;
 
 // Return a pointer on the wanted field in 'input' MODINSTRUMENT given field code & size
-BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT * input, __int32 fcode, __int16 fsize)
+BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT *input, __int32 fcode, __int16 fsize)
 {
 if(input == NULL) return NULL;
 BYTE * pointer = NULL;
@@ -500,8 +500,6 @@ CSoundFile::CSoundFile() :
 
 	m_pConfig = new CSoundFilePlayConfig();
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
-	
-	BuildDefaultInstrument();
 }
 
 
@@ -2661,28 +2659,6 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 //end rewbs.plugDocAware
 
 
-void CSoundFile::BuildDefaultInstrument() 
-//---------------------------------------
-{
-// m_defaultInstrument is currently only used to get default values for extented properties. 
-// In the future we can make better use of this.
-	MemsetZero(m_defaultInstrument);
-	m_defaultInstrument.nResampling = SRCMODE_DEFAULT;
-	m_defaultInstrument.nFilterMode = FLTMODE_UNCHANGED;
-	m_defaultInstrument.nPPC = 5 * 12;
-	m_defaultInstrument.nGlobalVol = 64;
-	m_defaultInstrument.nPan = 32 * 4;
-	//m_defaultInstrument.nIFC = 0xFF;
-	m_defaultInstrument.PanEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
-	m_defaultInstrument.PitchEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
-	m_defaultInstrument.VolEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
-	m_defaultInstrument.wPitchToTempoLock = 0;
-	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
-	m_defaultInstrument.nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-	m_defaultInstrument.nPluginVolumeHandling = CSoundFile::s_DefaultPlugVolumeHandling;
-}
-
-
 void CSoundFile::DeleteStaticdata()
 //---------------------------------
 {
@@ -2759,22 +2735,6 @@ bool CSoundFile::LoadStaticTunings()
 	MODINSTRUMENT::s_DefaultTuning = NULL;
 
 	return false;
-}
-
-
-
-void CSoundFile::SetDefaultInstrumentValues(MODINSTRUMENT *pIns)
-//--------------------------------------------------------------
-{
-	pIns->nResampling = m_defaultInstrument.nResampling;
-	pIns->nFilterMode = m_defaultInstrument.nFilterMode;
-	pIns->PitchEnv.nReleaseNode = m_defaultInstrument.PitchEnv.nReleaseNode;
-	pIns->PanEnv.nReleaseNode = m_defaultInstrument.PanEnv.nReleaseNode;
-	pIns->VolEnv.nReleaseNode = m_defaultInstrument.VolEnv.nReleaseNode;
-	pIns->pTuning = m_defaultInstrument.pTuning;
-	pIns->nPluginVelocityHandling = m_defaultInstrument.nPluginVelocityHandling;
-	pIns->nPluginVolumeHandling = m_defaultInstrument.nPluginVolumeHandling;
-
 }
 
 

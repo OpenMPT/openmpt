@@ -65,17 +65,10 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 	)
 	{
 		// Loading Instrument
-		MODINSTRUMENT *pIns = new MODINSTRUMENT;
-		if (!pIns) return false;
-		MemsetZero(*pIns);
-		pIns->pTuning = pIns->s_DefaultTuning;
 
-		DestroyInstrument(nInstr, deleteAssociatedSamples);
-
-		Instruments[nInstr] = pIns;
 		// Scanning free sample
-		UINT nSample = 0;
-		for (UINT iscan=1; iscan<MAX_SAMPLES; iscan++)
+		SAMPLEINDEX nSample = 0;
+		for (SAMPLEINDEX iscan = 1; iscan < MAX_SAMPLES; iscan++)
 		{
 			if ((!Samples[iscan].pSample) && (!m_szNames[iscan][0]))
 			{
@@ -84,17 +77,16 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 				break;
 			}
 		}
+
+		MODINSTRUMENT *pIns = new MODINSTRUMENT(nSample);
+		if (!pIns) return false;
+
+		DestroyInstrument(nInstr, deleteAssociatedSamples);
+
+		Instruments[nInstr] = pIns;
+
 		// Default values
 		pIns->nFadeOut = 1024;
-		pIns->nGlobalVol = 64;
-		pIns->nPan = 128;
-		pIns->nPPC = 5*12;
-		SetDefaultInstrumentValues(pIns);
-		for (UINT iinit=0; iinit<128; iinit++)
-		{
-			pIns->Keyboard[iinit] = nSample;
-			pIns->NoteMap[iinit] = iinit+1;
-		}
 		if (nSample) ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
 		return true;
 	}
@@ -198,7 +190,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrc
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
-	if (!Instruments[nInstr]) Instruments[nInstr] = new MODINSTRUMENT;
+	if (!Instruments[nInstr]) Instruments[nInstr] = new MODINSTRUMENT();
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (pIns)
 	{
@@ -876,21 +868,15 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
-	pIns = new MODINSTRUMENT;
+	pIns = new MODINSTRUMENT();
 	if (!pIns) return false;
-	MemsetZero(*pIns);
-	pIns->pTuning = pIns->s_DefaultTuning;
+
 	Instruments[nInstr] = pIns;
 	nSamples = plh->samples;
 	if (nSamples > 16) nSamples = 16;
 	memcpy(pIns->name, pih->name, 16);
 	pIns->name[16] = 0;
 	pIns->nFadeOut = 2048;
-	pIns->nGlobalVol = 64;
-	pIns->nPan = 128;
-	pIns->nPPC = 60;
-	pIns->nResampling = SRCMODE_DEFAULT;
-	pIns->nFilterMode = FLTMODE_UNCHANGED;
 	if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
 		pIns->nNNA = NNA_NOTEOFF;
@@ -1097,11 +1083,10 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
-	Instruments[nInstr] = new MODINSTRUMENT;
+	Instruments[nInstr] = new MODINSTRUMENT();
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (!pIns) return false;
-	memset(pIns, 0, sizeof(MODINSTRUMENT));
-	pIns->pTuning = pIns->s_DefaultTuning;
+
 	memcpy(pIns->name, pxh->name, 22);
 	nsamples = 0;
 	for (UINT i=0; i<96; i++)
@@ -1112,7 +1097,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 	nsamples++;
 	if (nsamples > 32) nsamples = 32;
 	// Allocate samples
-	memset(samplemap, 0, sizeof(samplemap));
+	MemsetZero(samplemap);
 	UINT nsmp = 1;
 	for (UINT j=0; j<nsamples; j++)
 	{
@@ -1155,9 +1140,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 	pIns->PanEnv.nLoopEnd = pih->ploope;
 	if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
 	if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
-	pIns->nGlobalVol = 64;
-	pIns->nPPC = 5*12;
-	SetDefaultInstrumentValues(pIns);
+
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
 		pIns->VolEnv.Ticks[ienv] = (WORD)pih->venv[ienv*2];
@@ -1709,11 +1692,10 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
-	Instruments[nInstr] = new MODINSTRUMENT;
+	Instruments[nInstr] = new MODINSTRUMENT();
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	if (!pIns) return false;
-	MemsetZero(*pIns);
-	pIns->pTuning = pIns->s_DefaultTuning;
+
 	MemsetZero(samplemap);
 	dwMemPos = 554;
 	dwMemPos += ITInstrToMPT(pinstr, pIns, pinstr->trkvers);

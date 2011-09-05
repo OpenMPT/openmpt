@@ -94,6 +94,17 @@ struct INSTRUMENTENVELOPE
 	BYTE nSustainStart;			// sustain start node
 	BYTE nSustainEnd;			// sustain end node
 	BYTE nReleaseNode;			// release node
+
+	INSTRUMENTENVELOPE()
+	{
+		dwFlags = 0;
+		MemsetZero(Ticks);
+		MemsetZero(Values);
+		nNodes = 0;
+		nLoopStart = nLoopEnd = 0;
+		nSustainStart = nSustainEnd = 0;
+		nReleaseNode = ENV_RELEASE_NODE_UNSET;
+	}
 };
 
 // Instrument Struct
@@ -123,6 +134,7 @@ struct MODINSTRUMENT
 	BYTE nMidiProgram;	// MIDI program
 	BYTE nMidiChannel;	// MIDI channel
 	BYTE nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
+
 	signed char nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
 	unsigned char nPPC;	//Pitch/Pan centre
 
@@ -153,7 +165,51 @@ struct MODINSTRUMENT
 		pTuning = pT;
 	}
 
-	
+	MODINSTRUMENT(SAMPLEINDEX sample = 0)
+	{
+		nFadeOut = 256;
+		dwFlags = 0;
+		nGlobalVol = 64;
+		nPan = 32 * 4;
+
+		for(size_t n = 0; n < CountOf(Keyboard); n++)
+		{
+			Keyboard[n] = (WORD)sample;
+			NoteMap[n] = (BYTE)(n + 1);
+		}
+
+		nNNA = NNA_NOTECUT;
+		nDCT = DCT_NONE;
+		nDNA = DNA_NOTECUT;
+
+		nPanSwing = 0;
+		nVolSwing = 0;
+		nIFC = 0;
+		nIFR = 0;
+
+		wMidiBank = 0;
+		nMidiProgram = 0;
+		nMidiChannel = 0;
+		nMidiDrumKey = 0;
+
+		nPPC = NOTE_MIDDLEC - 1;
+		nPPS = 0;
+
+		MemsetZero(name);
+		MemsetZero(filename);
+
+		nMixPlug = 0;
+		nVolRamp = 0;
+		nResampling = SRCMODE_DEFAULT;
+		nCutSwing = 0;
+		nResSwing = 0;
+		nFilterMode = FLTMODE_UNCHANGED;
+		wPitchToTempoLock = 0;
+		nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+
+		pTuning = s_DefaultTuning;
+	}
 
 };
 
@@ -673,7 +729,6 @@ protected:
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 public:
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
-	MODINSTRUMENT m_defaultInstrument;					// Currently only used to get default values for extented properties. 
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	MODMIDICFG m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
@@ -1083,20 +1138,18 @@ protected:
 
 public:
 	int GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const;
-    void ResetChannelEnvelopes(MODCHANNEL *pChn);
-	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env);
-	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
+    void ResetChannelEnvelopes(MODCHANNEL *pChn) const;
+	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env) const;
 private:
-	PLUGINDEX  __cdecl GetChannelPlugin(CHANNELINDEX nChn, bool respectMutes) const;
-	PLUGINDEX  __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, bool respectMutes) const;
+	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
+	PLUGINDEX __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
 	UINT GetBestMidiChan(const MODCHANNEL *pChn) const;
 
 	void HandlePatternTransitionEvents();
-	void BuildDefaultInstrument();
 	long GetSampleOffset();
 
 public:
-	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, UINT priority, bool respectMutes);
+	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 
 // A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 public:

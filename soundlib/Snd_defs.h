@@ -371,13 +371,18 @@ enum {
 STATIC_ASSERT(ENV_RELEASE_NODE_UNSET > MAX_ENVPOINTS);
 
 
-enum {
-	CHANNEL_ONLY		  = 0,
-	INSTRUMENT_ONLY       = 1,
-	PRIORITISE_INSTRUMENT = 2,
-	PRIORITISE_CHANNEL    = 3,
-	EVEN_IF_MUTED         = false,
-	RESPECT_MUTES         = true,
+enum PluginPriority
+{
+	ChannelOnly,
+	InstrumentOnly,
+	PrioritiseInstrument,
+	PrioritiseChannel,
+};
+
+enum PluginMutePriority
+{
+	EvenIfMuted,
+	RespectMutes,
 };
 
 //Plugin velocity handling options

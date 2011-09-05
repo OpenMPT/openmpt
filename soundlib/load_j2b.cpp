@@ -361,7 +361,6 @@ void Convert_RIFF_AMFF_Envelope(const uint8 flags, const uint8 numpoints, const 
 	if(flags & AMENV_SUSTAIN) pMPTEnv->dwFlags |= ENV_SUSTAIN;
 	if(flags & AMENV_LOOP) pMPTEnv->dwFlags |= ENV_LOOP;
 
-	pMPTEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	pMPTEnv->nNodes = min(numpoints, 10);	// the buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
 
 	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = sustainpoint;
@@ -402,7 +401,6 @@ void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, INSTRUMENTENVELOPE 
 	if(flags & AMENV_SUSTAIN) pMPTEnv->dwFlags |= ENV_SUSTAIN;
 	if(flags & AMENV_LOOP) pMPTEnv->dwFlags |= ENV_LOOP;
 
-	pMPTEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	pMPTEnv->nNodes = min(pAMEnv->numpoints + 1, 10);
 
 	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = pAMEnv->suslooppoint;
@@ -551,12 +549,10 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(Instruments[nIns] != nullptr)
 					delete Instruments[nIns];
 
-				MODINSTRUMENT *pIns = new MODINSTRUMENT;
+				MODINSTRUMENT *pIns = new MODINSTRUMENT();
 				if(pIns == nullptr)
 					break;
 				Instruments[nIns] = pIns;
-				MemsetZero(*pIns);
-				SetDefaultInstrumentValues(pIns);
 
 				m_nInstruments = max(m_nInstruments, nIns);
 
@@ -565,7 +561,6 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				for(BYTE i = 0; i < 128; i++)
 				{
-					pIns->NoteMap[i] = i + 1;
 					pIns->Keyboard[i] = instheader->samplemap[i] + m_nSamples + 1;
 				}
 
@@ -662,12 +657,10 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(Instruments[nIns] != nullptr)
 					delete Instruments[nIns];
 
-				MODINSTRUMENT *pIns = new MODINSTRUMENT;
+				MODINSTRUMENT *pIns = new MODINSTRUMENT();
 				if(pIns == nullptr)
 					break;
 				Instruments[nIns] = pIns;
-				MemsetZero(*pIns);
-				SetDefaultInstrumentValues(pIns);
 
 				m_nInstruments = max(m_nInstruments, nIns);
 
@@ -676,14 +669,10 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				for(BYTE i = 0; i < 128; i++)
 				{
-					pIns->NoteMap[i] = i + 1;
 					pIns->Keyboard[i] = instheader->samplemap[i] + m_nSamples + 1;
 				}
 
-				pIns->nGlobalVol = 64;
-				pIns->nPan = 128;
 				pIns->nFadeOut = LittleEndianW(instheader->volenv.fadeout) << 5;
-				pIns->nPPC = NOTE_MIDDLEC - 1;
 
 				Convert_RIFF_AM_Envelope(&instheader->volenv, &pIns->VolEnv, ENV_VOLUME);
 				Convert_RIFF_AM_Envelope(&instheader->pitchenv, &pIns->PitchEnv, ENV_PITCH);

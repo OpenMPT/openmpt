@@ -395,20 +395,17 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 		dwMemPos += 5 + panenv->points*3;
 		pitchenv = (AMS2ENVELOPE *)(lpStream+dwMemPos);
 		dwMemPos += 5 + pitchenv->points*3;
-		MODINSTRUMENT *pIns = new MODINSTRUMENT;
+		MODINSTRUMENT *pIns = new MODINSTRUMENT();
 		if (!pIns) return TRUE;
 		memset(smpmap, 0, sizeof(smpmap));
-		memset(pIns, 0, sizeof(MODINSTRUMENT));
+
 		for (UINT ismpmap=0; ismpmap<pSmp->samples; ismpmap++)
 		{
 			if ((ismpmap >= 16) || (m_nSamples+1 >= MAX_SAMPLES)) break;
 			m_nSamples++;
 			smpmap[ismpmap] = m_nSamples;
 		}
-		pIns->nGlobalVol = 64;
-		pIns->nPan = 128;
-		pIns->nPPC = 60;
-		SetDefaultInstrumentValues(pIns);
+
 		Instruments[nIns] = pIns;
 		if (insnamelen)
 		{

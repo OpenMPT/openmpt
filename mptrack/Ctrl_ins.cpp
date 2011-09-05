@@ -111,7 +111,7 @@ BOOL CNoteMapWnd::SetCurrentInstrument(CModDoc *pModDoc, UINT nIns)
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		if(m_nInstrument > 0 && pSndFile && m_nInstrument <= pSndFile->GetNumInstruments() && pSndFile->Instruments[m_nInstrument] == nullptr)
 		{
-			pSndFile->Instruments[m_nInstrument] = new MODINSTRUMENT;
+			pSndFile->Instruments[m_nInstrument] = new MODINSTRUMENT();
 			m_pModDoc->InitializeInstrument(pSndFile->Instruments[m_nInstrument]);
 		}
 
@@ -1444,16 +1444,14 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	
 			if (!pIns->name[0])
 			{
-				szName[31] = 0;
-				memset(pIns->name, 0, 32);
+				szName[m_pSndFile->GetModSpecifications().instrNameLengthMax - 1] = 0;
 				strcpy(pIns->name, szName);
 			}
 			if (!pIns->filename[0])
 			{
 				strcat(szName, szExt);
-				szName[11] = 0;
+				szName[m_pSndFile->GetModSpecifications().instrFilenameLengthMax - 1] = 0;
 				strcpy(pIns->filename, szName);
-				pIns->filename[11] = 0;
 			}
 			SetCurrentInstrument(m_nInstrument);
 			if (m_pModDoc)

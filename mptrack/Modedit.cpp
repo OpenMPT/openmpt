@@ -500,10 +500,10 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 				{
 					try
 					{
-						MODINSTRUMENT *p = new MODINSTRUMENT;
-						InitializeInstrument(p, smp);
+						MODINSTRUMENT *p = new MODINSTRUMENT(smp);
+						InitializeInstrument(p);
 						m_SndFile.Instruments[smp] = p;
-						lstrcpyn(p->name, m_SndFile.m_szNames[smp], sizeof(p->name));
+						lstrcpyn(p->name, m_SndFile.m_szNames[smp], CountOf(p->name));
 					} catch(...)
 					{
 						ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
@@ -532,52 +532,59 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		}
 		newins = ++m_SndFile.m_nInstruments;
 	}
-	MODINSTRUMENT *pIns = new MODINSTRUMENT;
-	if (pIns)
+
+	// Determine which sample slot to use
+	SAMPLEINDEX newsmp = 0;
+	if (nSample < m_SndFile.GetModSpecifications().samplesMax)
 	{
-		SAMPLEINDEX newsmp = 0;
-		if (nSample < m_SndFile.GetModSpecifications().samplesMax)
+		// Use specified slot
+		newsmp = nSample;
+	} else if (!pDup)
+	{
+		for(SAMPLEINDEX k = 1; k <= m_SndFile.m_nSamples; k++)
 		{
-			newsmp = nSample;
-		} else
-		if (!pDup)
-		{
-			for(SAMPLEINDEX k = 1; k <= m_SndFile.m_nSamples; k++)
+			if (!m_SndFile.IsSampleUsed(k))
 			{
-				if (!m_SndFile.IsSampleUsed(k))
-				{
-					newsmp = k;
-					break;
-				}
-			}
-			if (!newsmp)
-			{
-				int inssmp = InsertSample();
-				if (inssmp != SAMPLEINDEX_INVALID) newsmp = inssmp;
+				// Sample isn't referenced by any instrument yet, so let's use it...
+				newsmp = k;
+				break;
 			}
 		}
-
-		CriticalSection cs;
-		if (pDup)
+		if (!newsmp)
 		{
-			*pIns = *pDup;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-			strcpy(m_SndFile.m_szInstrumentPath[newins - 1], m_SndFile.m_szInstrumentPath[nDuplicate - 1]);
-			m_bsInstrumentModified.reset(newins - 1);
-// -! NEW_FEATURE#0023
-		} else
-		{
-			InitializeInstrument(pIns, newsmp);
+			// Add a new sample
+			int inssmp = InsertSample();
+			if (inssmp != SAMPLEINDEX_INVALID) newsmp = inssmp;
 		}
-		m_SndFile.Instruments[newins] = pIns;
+	}
 
-		SetModified();
-	} else
+	MODINSTRUMENT *pIns;
+	try
+	{
+		pIns = new MODINSTRUMENT(newsmp);
+		InitializeInstrument(pIns);
+	} catch(...)
 	{
 		ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
 		return INSTRUMENTINDEX_INVALID;
 	}
+
+	CriticalSection cs;
+
+	if (pDup)
+	{
+		*pIns = *pDup;
+		// -> CODE#0023
+		// -> DESC="IT project files (.itp)"
+		strcpy(m_SndFile.m_szInstrumentPath[newins - 1], m_SndFile.m_szInstrumentPath[nDuplicate - 1]);
+		m_bsInstrumentModified.reset(newins - 1);
+		// -! NEW_FEATURE#0023
+	}
+
+	m_SndFile.Instruments[newins] = pIns;
+
+	SetModified();
+
 	return newins;
 }
 
@@ -603,23 +610,11 @@ void CModDoc::InitializeSample(MODSAMPLE &sample)
 }
 
 
-void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
-//-------------------------------------------------------------------
+// Load default instrument values for inserting new instrument during editing
+void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns)
+//-----------------------------------------------------
 {
-	if(pIns == nullptr)
-		return;
-	MemsetZero(*pIns);
-	pIns->nFadeOut = 256;
-	pIns->nGlobalVol = 64;
-	pIns->nPan = 128;
-	pIns->nPPC = NOTE_MIDDLEC - 1;
-	m_SndFile.SetDefaultInstrumentValues(pIns);
-	for (UINT n=0; n<128; n++)
-	{
-		pIns->Keyboard[n] = nsample;
-		pIns->NoteMap[n] = n+1;
-	}
-	pIns->pTuning = pIns->s_DefaultTuning;
+	pIns->nPluginVolumeHandling = CSoundFile::s_DefaultPlugVolumeHandling;
 }
 
 

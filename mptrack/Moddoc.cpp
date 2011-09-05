@@ -237,7 +237,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		ClearLog();
 	}
 
-	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.m_nChannels)) return FALSE;
+	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
 	// Midi Import
 	if (m_SndFile.m_nType == MOD_TYPE_MID)
 	{
@@ -516,9 +516,9 @@ BOOL CModDoc::SaveModified()
 			{
 				if(m_SndFile.m_szInstrumentPath[i][0] != '\0')
 				{
-					int size = strlen(m_SndFile.m_szInstrumentPath[i]);
-					bool iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
-					bool xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
+					const size_t len = strlen(m_SndFile.m_szInstrumentPath[i]);
+					const bool iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][len - 3],"iti") == 0;
+					const bool xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][len - 2],"xi") == 0;
 
 					if(iti || (!iti && !xi  && m_SndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
@@ -736,8 +736,8 @@ BOOL CModDoc::InitializeMod()
 		if ((!m_SndFile.m_nInstruments) && (m_SndFile.m_nType & MOD_TYPE_XM))
 		{
 			m_SndFile.m_nInstruments = 1;
-			m_SndFile.Instruments[1] = new MODINSTRUMENT;
-			InitializeInstrument(m_SndFile.Instruments[1], 1);
+			m_SndFile.Instruments[1] = new MODINSTRUMENT(1);
+			InitializeInstrument(m_SndFile.Instruments[1]);
 		}
 		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT|MOD_TYPE_XM))
 		{
@@ -1124,7 +1124,7 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 	{
 		m_SndFile.Chn[nChn].dwFlags |= muteType;
 		//Kill VSTi notes on muted channel.
-		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseInstrument, EvenIfMuted);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 		{
 			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
@@ -2371,7 +2371,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 					int nParam = MacroToPlugParam(macroText);
 					char paramName[128];
 					MemsetZero(paramName);
-					PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+					PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS)) {
 						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
 						if (pPlug) 

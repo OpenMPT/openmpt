@@ -412,10 +412,15 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 		}
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
-	pIns = new MODINSTRUMENT;
-	if (!pIns) return 0;
-	memset(pIns, 0, sizeof(MODINSTRUMENT));
-	pIns->pTuning = pIns->s_DefaultTuning;
+	
+	try
+	{
+		pIns = new MODINSTRUMENT();
+	} catch(...)
+	{
+		return 0;
+	}
+
 	m_nSamples++;
 	m_nInstruments++;
 	Instruments[m_nInstruments] = pIns;
@@ -423,14 +428,10 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	pIns->nMidiProgram = nProgram;
 	pIns->nMidiChannel = nChannel;
 	if (nChannel == MIDI_DRUMCHANNEL) pIns->nMidiDrumKey = nNote;
-	pIns->nGlobalVol = 64;
 	pIns->nFadeOut = 1024;
-	pIns->nPan = 128;
-	pIns->nPPC = 5*12;
 	pIns->nNNA = NNA_NOTEOFF;
 	pIns->nDCT = (nChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
-	SetDefaultInstrumentValues(pIns);
 	for (UINT j=0; j<NOTE_MAX; j++)
 	{
 		int mapnote = j+1;
