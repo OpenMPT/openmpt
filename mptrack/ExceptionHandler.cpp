@@ -126,7 +126,14 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 				}
 				CString filename;
 				filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
-				pModDoc->OnSaveDocument(filename);
+
+				try
+				{
+					pModDoc->OnSaveDocument(filename);
+				} catch(...)
+				{
+					continue;
+				}
 			}
 		}
 
