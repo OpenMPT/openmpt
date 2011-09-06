@@ -91,7 +91,7 @@ protected:
 	bool EnvToggleReleaseNode(int nPoint);
 
 	// Set envelope status
-	bool EnvToggleEnv(INSTRUMENTENVELOPE *pEnv, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool bEnable, BYTE cDefaultValue, DWORD dwChanFlag, DWORD dwExtraFlags = 0);
+	bool EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool enable, BYTE defaultValue, DWORD extraFlags = 0);
 	bool EnvSetVolEnv(bool bEnable);
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);

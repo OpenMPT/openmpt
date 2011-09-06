@@ -151,17 +151,13 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define CHN_PANBRELLO		0x40000		// apply panbrello
 #define CHN_PORTAMENTO		0x80000		// apply portamento
 #define CHN_GLISSANDO		0x100000	// glissando mode
-#define CHN_VOLENV			0x200000	// volume envelope is active
-#define CHN_PANENV			0x400000	// pan envelope is active
-#define CHN_PITCHENV		0x800000	// pitch envelope is active
-#define CHN_FASTVOLRAMP		0x1000000	// ramp volume very fast
-#define CHN_EXTRALOUD		0x2000000	// force master volume to 0x100
-#define CHN_REVERB			0x4000000	// apply reverb
-#define CHN_NOREVERB		0x8000000	// forbid reverb
-#define CHN_SOLO			0x10000000	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
-#define CHN_NOFX			0x20000000	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
-#define CHN_SYNCMUTE		0x40000000	// keep sample sync on mute
-#define CHN_FILTERENV		0x80000000	// force pitch envelope to act as filter envelope
+#define CHN_FASTVOLRAMP		0x200000	// ramp volume very fast
+#define CHN_EXTRALOUD		0x400000	// force master volume to 0x100
+#define CHN_REVERB			0x800000	// apply reverb
+#define CHN_NOREVERB		0x1000000	// forbid reverb
+#define CHN_SOLO			0x2000000	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
+#define CHN_NOFX			0x4000000	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
+#define CHN_SYNCMUTE		0x8000000	// keep sample sync on mute
 
 #define CHN_SAMPLEFLAGS		(CHN_16BIT|CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN|CHN_PANNING|CHN_STEREO|CHN_PINGPONGFLAG)
 #define CHN_CHANNELFLAGS	(~CHN_SAMPLEFLAGS)

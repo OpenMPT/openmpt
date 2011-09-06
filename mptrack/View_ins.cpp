@@ -540,31 +540,81 @@ bool CViewInstrument::EnvSetFlag(const DWORD dwFlag, const bool bEnable) const
 }
 
 
-bool CViewInstrument::EnvToggleEnv(INSTRUMENTENVELOPE *pEnv, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool bEnable, BYTE cDefaultValue, DWORD dwChanFlag, DWORD dwExtraFlags)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool enable, BYTE defaultValue, DWORD extraFlags)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(pEnv == nullptr) return false;
-
-	if (bEnable)
+	if(pIns == nullptr || pSndFile == nullptr)
 	{
-		pEnv->dwFlags |= (ENV_ENABLED|dwExtraFlags);
-		if (!pEnv->nNodes)
+		return false;
+	}
+
+	INSTRUMENTENVELOPE *env;
+
+	switch(envelope)
+	{
+	case ENV_VOLUME:
+	default:
+		env = &pIns->VolEnv;
+		break;
+	case ENV_PANNING:
+		env = &pIns->PanEnv;
+		break;
+	case ENV_PITCH:
+		env = &pIns->PitchEnv;
+		break;
+	}
+
+	const DWORD flags = (ENV_ENABLED | extraFlags);
+
+	if (enable)
+	{
+		env->dwFlags |= flags;
+		if(!env->nNodes)
 		{
-			pEnv->Values[0] = pEnv->Values[1] = cDefaultValue;
-			pEnv->Ticks[0] = 0;
-			pEnv->Ticks[1] = 10;
-			pEnv->nNodes = 2;
+			env->Values[0] = env->Values[1] = defaultValue;
+			env->Ticks[0] = 0;
+			env->Ticks[1] = 10;
+			env->nNodes = 2;
 			InvalidateRect(NULL, FALSE);
 		}
 	} else
 	{
-		pEnv->dwFlags &= ~(ENV_ENABLED|dwExtraFlags);
-		for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+		env->dwFlags &= ~flags;
+	}
+
+	CriticalSection cs;
+
+	// Update mixing flags...
+	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+	{
+		if(pSndFile->Chn[nChn].pModInstrument == pIns)
 		{
-			if(pSndFile->Chn[nChn].pModInstrument == pIns)
-				pSndFile->Chn[nChn].dwFlags &= ~dwChanFlag;
+			MODCHANNEL_ENVINFO *envInfo;
+
+			switch(envelope)
+			{
+			case ENV_VOLUME:
+			default:
+				envInfo = &pSndFile->Chn[nChn].VolEnv;
+				break;
+			case ENV_PANNING:
+				envInfo = &pSndFile->Chn[nChn].PanEnv;
+				break;
+			case ENV_PITCH:
+				envInfo = &pSndFile->Chn[nChn].PitchEnv;
+				break;
+			}
+
+			if(enable)
+			{
+				envInfo->flags |= flags;
+			} else
+			{
+				envInfo->flags &= ~flags;
+			}
 		}
 	}
+
 	return true;
 }
 
@@ -576,7 +626,7 @@ bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
-	return EnvToggleEnv(&pIns->VolEnv, pSndFile, pIns, bEnable, 64, CHN_VOLENV);
+	return EnvToggleEnv(ENV_VOLUME, pSndFile, pIns, bEnable, 64);
 }
 
 
@@ -587,7 +637,7 @@ bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
-	return EnvToggleEnv(&pIns->PanEnv, pSndFile, pIns, bEnable, 32, CHN_PANENV);
+	return EnvToggleEnv(ENV_PANNING, pSndFile, pIns, bEnable, 32);
 }
 
 
@@ -599,7 +649,7 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
 	pIns->PitchEnv.dwFlags &= ~ENV_FILTER;
-	return EnvToggleEnv(&pIns->PitchEnv, pSndFile, pIns, bEnable, 32, CHN_PITCHENV);
+	return EnvToggleEnv(ENV_PITCH, pSndFile, pIns, bEnable, 32);
 }
 
 
@@ -610,8 +660,7 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
-	pIns->PitchEnv.dwFlags &= ~ENV_FILTER;
-	return EnvToggleEnv(&pIns->PitchEnv, pSndFile, pIns, bEnable, 64, CHN_PITCHENV, ENV_FILTER);
+	return EnvToggleEnv(ENV_PITCH, pSndFile, pIns, bEnable, 64, ENV_FILTER);
 }
 
 
@@ -1135,11 +1184,11 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		{
 			if (m_dwNotifyPos[i])
 			{
-				memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
+				MemsetZero(m_dwNotifyPos);
 				InvalidateEnvelope();
 				break;
 			}
-			memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX); 	//rewbs.instViewNNA
+			MemsetZero(m_baPlayingNote); 	//rewbs.instViewNNA
 			m_nPlayingChannel = CHANNELINDEX_INVALID;			//rewbs.instViewNNA
 		}
 	} else

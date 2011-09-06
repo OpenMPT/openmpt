@@ -1076,17 +1076,16 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					 && (pChn->pModInstrument) && (pChn->pModInstrument == m_pSndFile->Instruments[nIns])
 					 && ((!(pChn->dwFlags & CHN_NOTEFADE)) || (pChn->nFadeOutVol)))
 					{
+						MODCHANNEL_ENVINFO *env = &pChn->VolEnv;
 						if (m_dwNotifyType & MPTNOTIFY_PITCHENV)
 						{
-							if (pChn->dwFlags & CHN_PITCHENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->PitchEnv.nEnvPosition);
-						} else
-						if (m_dwNotifyType & MPTNOTIFY_PANENV)
+							env = &pChn->PitchEnv;
+						} else if (m_dwNotifyType & MPTNOTIFY_PANENV)
 						{
-							if (pChn->dwFlags & CHN_PANENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->PanEnv.nEnvPosition);
-						} else
-						{
-							if (pChn->dwFlags & CHN_VOLENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->VolEnv.nEnvPosition);
+							env = &pChn->PanEnv;
 						}
+
+						if (env->flags & ENV_ENABLED) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(env->nEnvPosition);
 					}
 				}
 			} else
