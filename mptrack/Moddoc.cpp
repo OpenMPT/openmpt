@@ -945,7 +945,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
 			pChn->nLoopStart = sample.nLoopStart;
 			pChn->nLoopEnd = sample.nLoopEnd;
-			pChn->dwFlags = sample.uFlags & (0xFF & ~CHN_MUTE);
+			pChn->dwFlags = sample.uFlags & (CHN_SAMPLEFLAGS & ~CHN_MUTE);
 			pChn->nPan = 128;
 			if (sample.uFlags & CHN_PANNING) pChn->nPan = sample.nPan;
 			pChn->nInsVol = sample.nGlobalVol;

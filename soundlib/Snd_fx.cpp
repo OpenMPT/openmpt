@@ -667,7 +667,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 	} else
 	{
-		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE|CHN_VOLENV|CHN_PANENV|CHN_PITCHENV);
+		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE);
 
 		//IT compatibility tentative fix: Don't change bidi loop direction when 
 		//no sample nor instrument is changed.
@@ -679,18 +679,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 		if (pIns)
 		{
-			if (pIns->VolEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_VOLENV;
-			if (pIns->PanEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_PANENV;
-			if (pIns->PitchEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_PITCHENV;
+			// Copy envelope flags (we actually only need the "enabled" and "pitch" flag)
+			pChn->VolEnv.flags = pIns->VolEnv.dwFlags;
+			pChn->PanEnv.flags = pIns->PanEnv.dwFlags;
+			pChn->PitchEnv.flags = pIns->PitchEnv.dwFlags;
 			if ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && (pIns->PitchEnv.dwFlags & ENV_FILTER))
 			{
-				pChn->dwFlags |= CHN_FILTERENV;
 				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
-			} else
-			{
-				// Special case: Reset filter envelope flag manually (because of S7D/S7E effects).
-				// This way, the S7x effects can be applied to several notes, as long as they don't come with an instrument number.
-				pChn->dwFlags &= ~CHN_FILTERENV;
 			}
 			if (pIns->nIFC & 0x80) pChn->nCutOff = pIns->nIFC & 0x7F;
 			if (pIns->nIFR & 0x80) pChn->nResonance = pIns->nIFR & 0x7F;
@@ -2072,9 +2067,9 @@ BOOL CSoundFile::ProcessEffects()
 					if (pChn->pModInstrument)
 					{
 						MODINSTRUMENT *pIns = pChn->pModInstrument;
-						if ((pChn->dwFlags & CHN_PANENV) && (pIns->PanEnv.nNodes) && (param > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes-1]))
+						if ((pChn->PanEnv.flags & ENV_ENABLED) && (pIns->PanEnv.nNodes) && (param > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1]))
 						{
-							pChn->dwFlags &= ~CHN_PANENV;
+							pChn->PanEnv.flags &= ~ENV_ENABLED;
 						}
 					}
 				}
@@ -2924,23 +2919,23 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 				case 4:		pChn->nNNA = NNA_CONTINUE; break;
 				case 5:		pChn->nNNA = NNA_NOTEOFF; break;
 				case 6:		pChn->nNNA = NNA_NOTEFADE; break;
-				case 7:		pChn->dwFlags &= ~CHN_VOLENV; break;
-				case 8:		pChn->dwFlags |= CHN_VOLENV; break;
-				case 9:		pChn->dwFlags &= ~CHN_PANENV; break;
-				case 10:	pChn->dwFlags |= CHN_PANENV; break;
-				case 11:	pChn->dwFlags &= ~CHN_PITCHENV; break;
-				case 12:	pChn->dwFlags |= CHN_PITCHENV; break;
+				case 7:		pChn->VolEnv.flags &= ~ENV_ENABLED; break;
+				case 8:		pChn->VolEnv.flags |= ENV_ENABLED; break;
+				case 9:		pChn->PanEnv.flags &= ~ENV_ENABLED; break;
+				case 10:	pChn->PanEnv.flags |= ENV_ENABLED; break;
+				case 11:	pChn->PitchEnv.flags &= ~ENV_ENABLED; break;
+				case 12:	pChn->PitchEnv.flags |= ENV_ENABLED; break;
 				case 13:	
 				case 14:
 					if(GetType() == MOD_TYPE_MPT)
 					{
-						pChn->dwFlags |= CHN_PITCHENV;
+						pChn->PitchEnv.flags |= ENV_ENABLED;
 						if(param == 13)	// pitch env on, filter env off
 						{
-							pChn->dwFlags &= ~CHN_FILTERENV;
+							pChn->PitchEnv.flags &= ~ENV_FILTER;
 						} else	// filter env on
 						{
-							pChn->dwFlags |= CHN_FILTERENV;
+							pChn->PitchEnv.flags |= ENV_FILTER;
 						}
 					}
 					break;
@@ -3723,7 +3718,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 	const bool bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? false : true;
 	pChn->dwFlags |= CHN_KEYOFF;
 	//if ((!pChn->pModInstrument) || (!(pChn->dwFlags & CHN_VOLENV)))
-	if ((pChn->pModInstrument) && (!(pChn->dwFlags & CHN_VOLENV)))
+	if ((pChn->pModInstrument) && (!(pChn->VolEnv.flags & ENV_ENABLED)))
 	{
 		pChn->dwFlags |= CHN_NOTEFADE;
 	}

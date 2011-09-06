@@ -1014,7 +1014,7 @@ void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
 
 	// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
 	// Problem: This pauses on the wrong tick at the moment...
-	if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
+	if (((pChn->VolEnv.flags & ENV_ENABLED) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
 	{
 		int envvol = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
 
@@ -1050,7 +1050,7 @@ void CSoundFile::ProcessPanningEnvelope(MODCHANNEL *pChn)
 
 	// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
 	// Problem: This pauses on the wrong tick at the moment...
-	if (((pChn->dwFlags & CHN_PANENV) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
+	if (((pChn->PanEnv.flags & ENV_ENABLED) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
 	{
 		int envpos = pChn->PanEnv.nEnvPosition;
 		UINT pt = pIns->PanEnv.nNodes - 1;
@@ -1104,7 +1104,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
 
 	// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
 	// Problem: This pauses on the wrong tick at the moment...
-	if ((pIns) && ((pChn->dwFlags & CHN_PITCHENV) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
+	if ((pIns) && ((pChn->PitchEnv.flags & ENV_ENABLED) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
 	{
 		int envpos = pChn->PitchEnv.nEnvPosition;
 		UINT pt = pIns->PitchEnv.nNodes - 1;
@@ -1140,7 +1140,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
 		envpitch = CLAMP(envpitch, -256, 256);
 
 		//if (pIns->PitchEnv.dwFlags & ENV_FILTER)
-		if (pChn->dwFlags & CHN_FILTERENV)
+		if (pChn->PitchEnv.flags & ENV_FILTER)
 		{
 			// Filter Envelope: controls cutoff frequency
 #ifndef NO_FILTER
@@ -1184,7 +1184,7 @@ void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
 {
 	const MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-	if (pChn->dwFlags & CHN_VOLENV)
+	if (pChn->VolEnv.flags & ENV_ENABLED)
 	{
 		// Increase position
 		pChn->VolEnv.nEnvPosition++;
@@ -1232,7 +1232,7 @@ void CSoundFile::IncrementPanningEnvelopePosition(MODCHANNEL *pChn)
 {
 	const MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-	if (pChn->dwFlags & CHN_PANENV)
+	if (pChn->PanEnv.flags & ENV_ENABLED)
 	{
 		pChn->PanEnv.nEnvPosition++;
 		if (pIns->PanEnv.dwFlags & ENV_LOOP)
@@ -1262,7 +1262,7 @@ void CSoundFile::IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn)
 {
 	const MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-	if (pChn->dwFlags & CHN_PITCHENV)
+	if (pChn->PitchEnv.flags & ENV_ENABLED)
 	{
 		// Increase position
 		pChn->PitchEnv.nEnvPosition++;
@@ -2426,7 +2426,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 
 	
 	//If new note, determine notevelocity to use.
-	if(note)
+	if(note != NOTE_NONE)
 	{
 		UINT velocity = 4*defaultVolume;
 		switch(pIns->nPluginVelocityHandling)
@@ -2437,7 +2437,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 		}
 
 		MODCOMMAND::NOTE realNote = note;
-		if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+		if(NOTE_IS_VALID(note))
 			realNote = pIns->NoteMap[note - 1];
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN], 0, nPlugin);

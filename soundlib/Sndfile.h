@@ -231,6 +231,7 @@ extern BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT * input, __int
 struct  MODCHANNEL_ENVINFO
 {
 	DWORD nEnvPosition;
+	DWORD flags;
 	LONG nEnvValueAtReleaseJump;
 };
 
