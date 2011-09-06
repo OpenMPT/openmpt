@@ -10,7 +10,7 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
-v1.19.04.00 (September 2011, revision 1026)
+v1.19.04.00 (September 2011, revision 1027)
 -------------------------------------------
 Pattern tab
    [Imp] <Jojo> MIDI controller changes that are not covered by MIDI Mapping also create an undo point now.

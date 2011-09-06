@@ -2870,7 +2870,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
 		// such OpenMPT version, clear the related settings to get a clean start.
-		const CString sPreviousVer = CMainFrame::GetSettings().gcsPreviousVersion;
+		const CString sPreviousVer = CMainFrame::gcsPreviousVersion;
 		if (!sPreviousVer.IsEmpty() && 
 			MptVersion::ToNum(sPreviousVer) < MAKE_VERSION_NUMERIC(1, 19, 03, 01) &&
 			strcmp(buffer, "OpenMPT") == 0)
