@@ -355,7 +355,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 
 			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
-				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfYes)
+				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfNo)
 			{
 				return false;
 			} else
