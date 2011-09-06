@@ -1202,7 +1202,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 }
 
 //rewbs.VSTCompliance
-void CSoundFile::SuspendPlugins()	
+void CSoundFile::SuspendPlugins()
 //-------------------------------
 {
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
@@ -1211,7 +1211,7 @@ void CSoundFile::SuspendPlugins()
 			continue;  //most common branch
 		
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState)
+		if (m_MixPlugins[iPlug].pMixState && pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(false);
 			pPlugin->HardAllNotesOff();

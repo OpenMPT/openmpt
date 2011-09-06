@@ -3292,11 +3292,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	// Write parameter control commands if needed.
 	if (paramValue != uint8_max && IsEditingEnabled() && pSndFile->GetType() == MOD_TYPE_MPT)
 	{
-		// Note: There's no undo for these modifications.
 		const bool bLiveRecord = IsLiveRecord(*pModDoc, *pSndFile);
 		ModCommandPos editpos = GetEditPos(*pSndFile, bLiveRecord);
 		MODCOMMAND* p = GetModCommand(*pSndFile, editpos);
-		pModDoc->GetPatternUndo()->PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, editpos.nChn, editpos.nRow);
+		pModDoc->GetPatternUndo()->PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
 		p->Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * MODCOMMAND::maxColumnValue)/127));
 		if(bLiveRecord == false)
 			InvalidateRow(editpos.nRow);
@@ -3341,14 +3340,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 			// Checking whether to record MIDI controller change as MIDI macro change.
 			// Don't write this if command was already written by MIDI mapping.
-			if((paramValue == uint8_max || pSndFile->GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
+			if((paramValue == uint8_max || pSndFile->GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
 			{  
-				// Note: There's no undo for these modifications.
 				const bool bLiveRecord = IsLiveRecord(*pModDoc, *pSndFile);
 				ModCommandPos editpos = GetEditPos(*pSndFile, bLiveRecord);
 				MODCOMMAND* p = GetModCommand(*pSndFile, editpos);
-				if(p->command == 0 || p->command == CMD_SMOOTHMIDI || p->command == CMD_MIDI)
+				if(p->command == CMD_NONE || p->command == CMD_SMOOTHMIDI || p->command == CMD_MIDI)
 				{   // Write command only if there's no existing command or already a midi macro command.
+					pModDoc->GetPatternUndo()->PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
 					p->command = CMD_SMOOTHMIDI;
 					p->param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);

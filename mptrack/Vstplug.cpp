@@ -1759,6 +1759,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_MixState.pMixBuffer = (int *)((((DWORD)m_MixBuffer)+7)&~7);
 	m_MixState.pOutBufferL = (float *)((((DWORD)&m_FloatBuffer[0])+7)&~7);
 	m_MixState.pOutBufferR = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE])+7)&~7);
+    MemsetZero(dummyBuffer_);
 	
 	//rewbs.dryRatio: we now initialise this in CVstPlugin::Initialize(). 
 	//m_pTempBuffer = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*2])+7)&~7);
@@ -1885,6 +1886,11 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_pInputs = (m_nInputs >= 2) ? new (float *[m_nInputs]) : new (float*[2]);
 	m_pInputs[0] = m_MixState.pOutBufferL;
 	m_pInputs[1] = m_MixState.pOutBufferR;
+	// Assign dummy inputs
+	for(size_t i = 2; i < m_nInputs; i++)
+	{
+		m_pInputs[i] = dummyBuffer_;
+	}
 
 	m_pOutputs = new (float *[m_nOutputs]);
 	m_pTempBuffer = new (float *[m_nOutputs]);	//rewbs.dryRatio
@@ -2344,14 +2350,19 @@ void CVstPlugin::Resume()
 
 }
 
-void CVstPlugin::Suspend() 
+void CVstPlugin::Suspend()
 //------------------------
 {
-	try {
-		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
-		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
-		m_bPlugResumed=false;
-	} catch (...) {
+	try
+	{
+		if(m_bPlugResumed)
+		{
+			Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
+			Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
+			m_bPlugResumed = false;
+		}
+	} catch (...)
+	{
 		CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }

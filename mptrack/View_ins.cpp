@@ -278,7 +278,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 			int maxtick = envelope->Ticks[nPoint + 1];
 			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			// Can't have multiple points on same tick
-			if(GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) && mintick < maxtick - 1)
+			if(nPoint > 0 && GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) && mintick < maxtick - 1)
 			{
 				mintick++;
 				if (nPoint + 1 < (int)envelope->nNodes) maxtick--;
@@ -2118,10 +2118,10 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	switch(event)
 	{
-		case 0x8: // Note Off
+		case MIDIEVENT_NOTEOFF: // Note Off
 			midiByte2 = 0;
 
-		case 0x9: // Note On
+		case MIDIEVENT_NOTEON: // Note On
 			pModDoc->NoteOff(nNote, FALSE, m_nInstrument);
 			if (midiByte2 & 0x7F)
 			{
@@ -2130,15 +2130,16 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			}
 		break;
 
-		case 0xB: //Controller change
+		case MIDIEVENT_CONTROLLERCHANGE: //Controller change
 			switch(midiByte1)
 			{
 				case 0x7: //Volume
 					midivolume = midiByte2;
 				break;
 			}
+
 		default:
-			if(CMainFrame::m_dwMidiSetup & MIDISETUP_MIDITOPLUG && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
+			if((CMainFrame::m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
 			{
 				const INSTRUMENTINDEX instr = m_nInstrument;
 				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
@@ -2146,9 +2147,11 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				{
 					plug->MidiSend(dwMidiData);
 					// Sending midi may modify the plug. For now, if MIDI data
-					// is not active sensing, set modified.
-					if(dwMidiData != MIDISTATUS_ACTIVESENSING)
+					// is not active sensing or aftertouch messages, set modified.
+					if(dwMidiData != MIDISTATUS_ACTIVESENSING && event != MIDIEVENT_POLYAFTERTOUCH && event != MIDIEVENT_CHANAFTERTOUCH)
+					{
 						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+					}
 				}
 			}
 		break;

@@ -2528,10 +2528,10 @@ void CMainFrame::OnPluginManager()
 		}
 	}
 	CSelectPluginDlg dlg(GetActiveDoc(), nPlugslot, this);
-	dlg.DoModal();
-	if (pModDoc)
+	if(dlg.DoModal() == IDOK && pModDoc)
 	{
-		//Refresh views
+		pModDoc->SetModified();
+        //Refresh views
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS|HINT_MODTYPE);
 		//Refresh Controls
 		CChildFrame *pActiveChild = (CChildFrame *)MDIGetActive();
@@ -3268,16 +3268,15 @@ void CMainFrame::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 	_tcsncpy(szExePath, theApp.GetAppDirPath(), nStrLength);
 	SetNullTerminator(szExePath);
 
-	// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
 	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
 	{
+		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
 		_tcscpy(szTempPath, _T(".\\"));	// ".\"
 		_tcsncat(szTempPath, &szPath[_tcslen(szExePath)], nStrLength - 2);	// "Somepath"
 		_tcscpy(szPath, szTempPath);
-	} else
-	// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
-	if(!_tcsncicmp(szExePath, szPath, 1))
+	} else if(!_tcsncicmp(szExePath, szPath, 2))
 	{
+		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
 		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
 		_tcscpy(szPath, szTempPath);
 	}
@@ -3303,16 +3302,15 @@ void CMainFrame::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 	_tcsncpy(szExePath, theApp.GetAppDirPath(), nStrLength);
 	SetNullTerminator(szExePath);
 
-	// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\")
-	if(!_tcsncicmp(szPath, _T("\\"), 1))
+	if(!_tcsncicmp(szPath, _T("\\"), 1) && _tcsncicmp(szPath, _T("\\\\"), 2))
 	{
+		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		_tcsncat(szTempPath, szExePath, 2);	// "C:"
 		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
 		_tcscpy(szPath, szTempPath);
-	} else
-	// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
-	if(!_tcsncicmp(szPath, _T(".\\"), 2))
+	} else if(!_tcsncicmp(szPath, _T(".\\"), 2))
 	{
+		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
 		_tcsncpy(szTempPath, szExePath, nStrLength);	// "C:\OpenMPT\"
 		if(_tcslen(szTempPath) < nStrLength)
 		{

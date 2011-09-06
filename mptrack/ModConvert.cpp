@@ -257,74 +257,94 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Do some sample conversion
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
 	{
+		MODSAMPLE &sample = m_SndFile.Samples[nSmp];
+
 		// Too many samples? Only 31 samples allowed in MOD format...
-		if(newTypeIsMOD && nSmp > 31 && m_SndFile.Samples[nSmp].nLength > 0)
+		if(newTypeIsMOD && nSmp > 31 && sample.nLength > 0)
 		{
 			CHANGEMODTYPE_WARNING(wMOD31Samples);
 		}
 
-		// No Bidi / Sustain loops / Autovibrato for MOD/S3M
+		// No Bidi and Autovibrato for MOD/S3M
 		if(newTypeIsMOD || newTypeIsS3M)
 		{
 			// Bidi loops
-			if((m_SndFile.Samples[nSmp].uFlags & CHN_PINGPONGLOOP) != 0)
+			if((sample.uFlags & CHN_PINGPONGLOOP) != 0)
 			{
-				m_SndFile.Samples[nSmp].uFlags &= ~CHN_PINGPONGLOOP;
+				sample.uFlags &= ~CHN_PINGPONGLOOP;
 				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
 			}
 
-			// Sustain loops - convert to normal loops
-			if((m_SndFile.Samples[nSmp].uFlags & CHN_SUSTAINLOOP) != 0)
-			{
-				// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
-				m_SndFile.Samples[nSmp].nLoopStart = m_SndFile.Samples[nSmp].nSustainStart;
-				m_SndFile.Samples[nSmp].nLoopEnd = m_SndFile.Samples[nSmp].nSustainEnd;
-				m_SndFile.Samples[nSmp].uFlags |= CHN_LOOP;
-				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
-			}
-			m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nSustainEnd = 0;
-			m_SndFile.Samples[nSmp].uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-
 			// Autovibrato
-			if(m_SndFile.Samples[nSmp].nVibDepth || m_SndFile.Samples[nSmp].nVibRate || m_SndFile.Samples[nSmp].nVibSweep)
+			if(sample.nVibDepth || sample.nVibRate || sample.nVibSweep)
 			{
-				m_SndFile.Samples[nSmp].nVibDepth = m_SndFile.Samples[nSmp].nVibRate = m_SndFile.Samples[nSmp].nVibSweep = m_SndFile.Samples[nSmp].nVibType = 0;
+				sample.nVibDepth = sample.nVibRate = sample.nVibSweep = sample.nVibType = 0;
 				CHANGEMODTYPE_WARNING(wSampleAutoVibrato);
 			}
+		}
+
+		// No sustain loops for MOD/S3M/XM
+		if(newTypeIsMOD_XM || newTypeIsS3M)
+		{
+			// Sustain loops - convert to normal loops
+			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
+			{
+				// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
+				sample.nLoopStart = sample.nSustainStart;
+				sample.nLoopEnd = sample.nSustainEnd;
+				sample.uFlags |= CHN_LOOP;
+				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
+			}
+			sample.nSustainStart = sample.nSustainEnd = 0;
+			sample.uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		}
 
 		// Transpose to Frequency (MOD/XM to S3M/IT/MPT)
 		if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
 		{
-			m_SndFile.Samples[nSmp].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Samples[nSmp].RelativeTone, m_SndFile.Samples[nSmp].nFineTune);
-			m_SndFile.Samples[nSmp].RelativeTone = 0;
-			m_SndFile.Samples[nSmp].nFineTune = 0;
+			sample.nC5Speed = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+			sample.RelativeTone = 0;
+			sample.nFineTune = 0;
 		}
 
-		// Frequency to Transpose, panning (S3M/IT/MPT to MOD/XM)
+		// Frequency to Transpose (S3M/IT/MPT to MOD/XM)
 		if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 		{
-			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[nSmp]);
-			if (!(m_SndFile.Samples[nSmp].uFlags & CHN_PANNING)) m_SndFile.Samples[nSmp].nPan = 128;
+			CSoundFile::FrequencyToTranspose(&sample);
 			// No relative note for MOD files
 			// TODO: Pattern notes could be transposed based on the previous relative tone?
-			if(newTypeIsMOD && m_SndFile.Samples[nSmp].RelativeTone != 0)
+			if(newTypeIsMOD && sample.RelativeTone != 0)
 			{
-				m_SndFile.Samples[nSmp].RelativeTone = 0;
+				sample.RelativeTone = 0;
 				CHANGEMODTYPE_WARNING(wMODSampleFrequency);
 			}
+		}
+
+		// All XM samples have default panning
+		if(newTypeIsXM)
+		{
+			if(!(sample.uFlags & CHN_PANNING))
+			{
+				sample.uFlags |= CHN_PANNING;
+				sample.nPan = 128;
+			}
+		}
+		// S3M / MOD samples don't have panning.
+		if(newTypeIsMOD || newTypeIsS3M)
+		{
+			sample.uFlags &= ~CHN_PANNING;
 		}
 
 		if(oldTypeIsXM && newTypeIsIT_MPT)
 		{
 			// Autovibrato settings (XM to IT, where sweep 0 means "no vibrato")
-			if(m_SndFile.Samples[nSmp].nVibSweep == 0 && m_SndFile.Samples[nSmp].nVibRate != 0 && m_SndFile.Samples[nSmp].nVibDepth != 0)
-				m_SndFile.Samples[nSmp].nVibSweep = 255;
+			if(sample.nVibSweep == 0 && sample.nVibRate != 0 && sample.nVibDepth != 0)
+				sample.nVibSweep = 255;
 		} else if(oldTypeIsIT_MPT && newTypeIsXM)
 		{
 			// Autovibrato settings (IT to XM, where sweep 0 means "no sweep")
-			if(m_SndFile.Samples[nSmp].nVibSweep == 0)
-				m_SndFile.Samples[nSmp].nVibRate = m_SndFile.Samples[nSmp].nVibDepth = 0;
+			if(sample.nVibSweep == 0)
+				sample.nVibRate = sample.nVibDepth = 0;
 		}
 	}
 
@@ -361,6 +381,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				pIns->dwFlags &= ~INS_SETPANNING;
 				pIns->nIFC &= 0x7F;
 				pIns->nIFR &= 0x7F;
+				pIns->nFilterMode = FLTMODE_UNCHANGED;
+
+				pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
+
+				pIns->wPitchToTempoLock = 0;
+
+				pIns->nPPC = NOTE_MIDDLEC - 1;
+				pIns->nPPS = 0;
+
+				pIns->nGlobalVol = 64;
+				pIns->nPan = 128;
 			}
 		}
 		// Convert MPT to anything - remove instrument tunings

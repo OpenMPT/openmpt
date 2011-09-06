@@ -2866,9 +2866,24 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 	#ifndef NO_VST
 		char buffer[64];
-		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, ARRAYELEMCOUNT(buffer), m_szConfigFileName);
+		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, CountOf(buffer), m_szConfigFileName);
+
+		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
+		// such OpenMPT version, clear the related settings to get a clean start.
+		const CString sPreviousVer = CMainFrame::GetSettings().gcsPreviousVersion;
+		if (!sPreviousVer.IsEmpty() && 
+			MptVersion::ToNum(sPreviousVer) < MAKE_VERSION_NUMERIC(1, 19, 03, 01) &&
+			strcmp(buffer, "OpenMPT") == 0)
+		{
+			// Remove keys by calling write with nullptr.
+			WritePrivateProfileString(_T("VST Plugins"), _T("HostProductString"), nullptr, m_szConfigFileName);
+			WritePrivateProfileString(_T("VST Plugins"), _T("HostVendorString"), nullptr, m_szConfigFileName);
+			WritePrivateProfileString(_T("VST Plugins"), _T("HostVendorVersion"), nullptr, m_szConfigFileName);
+		}
+
+		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, CountOf(buffer), m_szConfigFileName);
 		strcpy(CVstPluginManager::s_szHostProductString, buffer);
-		GetPrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, buffer, ARRAYELEMCOUNT(buffer), m_szConfigFileName);
+		GetPrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, buffer, CountOf(buffer), m_szConfigFileName);
 		strcpy(CVstPluginManager::s_szHostVendorString, buffer);
 		CVstPluginManager::s_nHostVendorVersion = GetPrivateProfileInt("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion, m_szConfigFileName);
 	#endif

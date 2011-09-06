@@ -10,6 +10,34 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
 
 
+v1.19.04.00 (September 2011, revision 1026)
+-------------------------------------------
+Pattern tab
+   [Imp] <Jojo> MIDI controller changes that are not covered by MIDI Mapping also create an undo point now.
+   [Fix] <Jojo> PC Note automation via MIDI Mapping didn't create an undo point if the cursor was in the first row or column (and if it wasn't, it stored too much undo data).
+
+Instrument tab
+   [Fix] <Jojo> When editing the first envelope node while compatible playback mode was enabled, the node was moved to the second tick.
+   [Fix] <Jojo> Aftertouch messages forwarded to plugins don't mark the module as modified anymore.
+
+Mod Conversion
+   [Fix] <Jojo> Sample panning is now properly reset / disabled for MOD / S3M / XM files.
+   [Fix] <Jojo> Various instrument properties were not cleared when converting to XM.
+   [Fix] <Jojo> Sample sustain loops were also not removed when converting to XM.
+
+VST / DMO Plugins
+   [Fix] <re>     VST host version fields didn't follow the actual version of OpenMPT.
+   [Fix] <Jojo>   Plugins based on the JUCE framework (f.e. TAL-NoiseMaker) don't crash anymore during WAV export.
+   [Fix] <xaimus> Some multi-input plugins like Guitar Rig shouldn't crash anymore.
+
+Other formats
+   [Fix] <Jojo> Fixed vulnerabilities in WAV, AMS and DSM loaders (http://secunia.com/advisories/45131/).
+
+Misc
+   [Fix] <Jojo> Network paths starting with "\\" are now loaded properly from settings. Previously, they were treated as relative paths.
+   [Fix] <Jojo> Adding plugins through the main menu didn't mark the module as modified (http://bugs.openmpt.org/view.php?id=163).
+
+
 v1.19.03.00 (July 2011, revision 921)
 -------------------------------------
 General tab

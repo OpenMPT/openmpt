@@ -14,7 +14,7 @@
 //Version definitions. The only thing that needs to be changed when changing version number.
 #define VER_MAJORMAJOR				1
 #define VER_MAJOR					19
-#define VER_MINOR					03
+#define VER_MINOR					04
 #define VER_MINORMINOR				00
 
 //Creates version number from version parts that appears in version string.

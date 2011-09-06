@@ -42,7 +42,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 		pdata = (WAVEDATAHEADER *)(lpStream + dwMemPos);
 		if (pdata->id_data == IFFID_data) break;
 		dwMemPos += pdata->length + 8;
-		if (dwMemPos + 8 >= dwMemLength) return false;
+		if (dwMemPos >= dwMemLength - 8) return false;
 	}
 	m_nType = MOD_TYPE_WAV;
 	m_nSamples = 0;
@@ -58,7 +58,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 	if(fail) return true;
 	UINT samplesize = (pfmt->channels * pfmt->bitspersample) >> 3;
 	UINT len = pdata->length, bytelen;
-	if (dwMemPos + len > dwMemLength - 8) len = dwMemLength - dwMemPos - 8;
+	if (len > dwMemLength - 8 - dwMemPos) len = dwMemLength - dwMemPos - 8;
 	len /= samplesize;
 	bytelen = len;
 	if (pfmt->bitspersample >= 16) bytelen *= 2;
