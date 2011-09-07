@@ -1939,12 +1939,12 @@ void CViewPattern::OnEditFindNext()
 	for (UINT nPat=nPatStart; nPat<nPatEnd; nPat++)
 	{
 		LPMODCOMMAND m = pSndFile->Patterns[nPat];
-		DWORD len = pSndFile->m_nChannels * pSndFile->Patterns[nPat].GetNumRows();
+		DWORD len = pSndFile->GetNumChannels() * pSndFile->Patterns[nPat].GetNumRows();
 		if ((!m) || (!len)) continue;
 		UINT n = 0;
 		if ((m_bContinueSearch) && (nPat == nPatStart) && (nPat == m_nPattern))
 		{
-			n = GetCurrentRow() * pSndFile->m_nChannels + GetCurrentChannel() + 1;
+			n = GetCurrentRow() * pSndFile->GetNumChannels() + GetCurrentChannel() + 1;
 			m += n;
 		}
 		for (; n<len; n++, m++)
@@ -1954,14 +1954,14 @@ void CViewPattern::OnEditFindNext()
 			if (m_findReplace.dwFindFlags & PATSEARCH_CHANNEL)
 			{
 				// limit to given channels
-				const CHANNELINDEX ch = n % pSndFile->m_nChannels;
+				const CHANNELINDEX ch = n % pSndFile->GetNumChannels();
 				if ((ch < m_findReplace.nFindMinChn) || (ch > m_findReplace.nFindMaxChn)) bFound = false;
 			}
 			if (m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
 			{
 				// limit to pattern selection
-				const CHANNELINDEX ch = n % pSndFile->m_nChannels;
-				const ROWINDEX row = n / pSndFile->m_nChannels;
+				const CHANNELINDEX ch = n % pSndFile->GetNumChannels();
+				const ROWINDEX row = n / pSndFile->GetNumChannels();
 				
 				if ((ch < GetChanFromCursor(m_findReplace.dwBeginSel)) || (ch > GetChanFromCursor(m_findReplace.dwEndSel))) bFound = false;
 				if ((row < GetRowFromCursor(m_findReplace.dwBeginSel)) || (row > GetRowFromCursor(m_findReplace.dwEndSel))) bFound = false;
@@ -2004,10 +2004,10 @@ void CViewPattern::OnEditFindNext()
 					SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
 					// go to place of finding
 					SetCurrentPattern(nPat);
-					SetCurrentRow(n / pSndFile->m_nChannels);
+					SetCurrentRow(n / pSndFile->GetNumChannels());
 				}
 
-				UINT ncurs = (n % pSndFile->m_nChannels) << 3;
+				UINT ncurs = CreateCursor(0, (n % pSndFile->GetNumChannels()));
 				if (!(m_findReplace.dwFindFlags & PATSEARCH_NOTE))
 				{
 					ncurs++;
@@ -2075,28 +2075,52 @@ void CViewPattern::OnEditFindNext()
 							m->note = m_findReplace.cmdReplace.note;
 						}
 					}
+
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_INSTR))
 					{
-						// Instr--
-						if (m_findReplace.cInstrRelChange == -1 && m->instr > 1)
-							m->instr--;
-						// Instr++
-						else if (m_findReplace.cInstrRelChange == 1 && m->instr > 0 && m->instr < (MAX_INSTRUMENTS - 1))
-							m->instr++;
-						else m->instr = m_findReplace.cmdReplace.instr;
+						if (m_findReplace.cInstrRelChange == -1)
+						{
+							// Instr--
+							if(m->instr > 1)
+								m->instr--;
+						} else if (m_findReplace.cInstrRelChange == 1)
+						{
+							// Instr++
+							if(m->instr > 0 && m->instr < (MAX_INSTRUMENTS - 1))
+								m->instr++;
+						} else
+						{
+							m->instr = m_findReplace.cmdReplace.instr;
+						}
 					}
+
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_VOLCMD))
 					{
 						m->volcmd = m_findReplace.cmdReplace.volcmd;
 					}
+
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_VOLUME))
 					{
 						m->vol = m_findReplace.cmdReplace.vol;
 					}
+
+					if ((m_findReplace.dwReplaceFlags & (PATSEARCH_VOLCMD | PATSEARCH_VOLUME)) && m->volcmd != VOLCMD_NONE)
+					{
+						// Fix volume command parameters if necessary. This is necesary f.e.
+						// When there was a command "v24" and the user searched for v and replaced it by d.
+						// In that case, d24 wouldn't be a valid command.
+						DWORD minVal = 0, maxVal = 64;
+						if(GetDocument()->GetVolCmdInfo(GetDocument()->GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
+						{
+							Limit(m->vol, (MODCOMMAND::VOL)minVal, (MODCOMMAND::VOL)maxVal);
+						}
+					}
+
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_COMMAND))
 					{
 						m->command = m_findReplace.cmdReplace.command;
 					}
+
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_PARAM))
 					{
 						if ((bEffectEx) && (!(m_findReplace.dwReplaceFlags & PATSEARCH_COMMAND)))
