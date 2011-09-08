@@ -463,17 +463,19 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			pIns->VolEnv.Values[ienv] = (BYTE)xmsh.venv[ienv*2+1];
 			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.penv[ienv*2];
 			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.penv[ienv*2+1];
-			if (ienv)
+			if (ienv > 0)
 			{
 				// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
 				// value. Try to compensate by adding the missing high byte" - I guess that's what this code is for.
-				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1])
+				// Note: It appears that MPT 1.07's XI instrument saver omitted the high byte of envelope nodes.
+				// This might be the source for some broken envelopes in IT and XM files.
+				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1])
 				{
 					pIns->VolEnv.Ticks[ienv] &= 0xFF;
 					pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv - 1] & 0xFF00;
 					if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1]) pIns->VolEnv.Ticks[ienv] += 0x100;
 				}
-				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1])
+				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1])
 				{
 					pIns->PanEnv.Ticks[ienv] &= 0xFF;
 					pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv - 1] & 0xFF00;
