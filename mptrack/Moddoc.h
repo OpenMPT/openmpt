@@ -301,6 +301,7 @@ public:
 
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
 	bool MuteChannel(CHANNELINDEX nChn, bool bMute);
+	bool UpdateChannelMuteStatus(CHANNELINDEX nChn);
 	bool MuteSample(SAMPLEINDEX nSample, bool bMute);
 	bool MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute);
 // -> CODE#0012

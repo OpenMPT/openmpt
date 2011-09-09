@@ -932,6 +932,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		{
 			m_SndFile.ResetChannelEnvelopes(pChn);
 			m_SndFile.InstrumentChange(pChn, nins);
+			pChn->nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
 		} 
 		else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
 		{
@@ -1063,10 +1064,10 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 	}
 	//end rewbs.vstiLive
 
+	const DWORD mask = (bFade) ? CHN_NOTEFADE : (CHN_NOTEFADE|CHN_KEYOFF);
 	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
-		DWORD mask = (bFade) ? CHN_NOTEFADE : (CHN_NOTEFADE|CHN_KEYOFF);
 
 		// Fade all channels > m_nChannels which are playing this note. 
 		// Could conflict with NNAs.
@@ -1103,14 +1104,12 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 //-------------------------------------------------------
 {
-	DWORD muteType = (CMainFrame::GetSettings().m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
-
-	if (nChn >= m_SndFile.m_nChannels)
+	if (nChn >= m_SndFile.GetNumChannels())
 	{
 		return false;
 	}
 
-	//Mark channel as muted in channel settings
+	// Mark channel as muted in channel settings
 	if (doMute)
 	{
 		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
@@ -1118,12 +1117,38 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 	{
 		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
 	}
-	
-	//Mute pattern channel
+
+	const bool success = UpdateChannelMuteStatus(nChn);
+	if(success)
+	{
+		//Mark IT/MPTM/S3M as modified
+		if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M))
+		{
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+		}
+	}
+
+	return success;
+}
+
+
+bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
+//------------------------------------------------------
+{
+	const DWORD muteType = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SYNCMUTE) ? CHN_SYNCMUTE : CHN_MUTE;
+
+	if (nChn >= m_SndFile.GetNumChannels())
+	{
+		return false;
+	}
+
+	const bool doMute = (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE) != 0;
+
+	// Mute pattern channel
 	if (doMute)
 	{
 		m_SndFile.Chn[nChn].dwFlags |= muteType;
-		//Kill VSTi notes on muted channel.
+		// Kill VSTi notes on muted channel.
 		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseInstrument, EvenIfMuted);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 		{
@@ -1136,29 +1161,24 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 		}
 	} else
 	{
-		//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
+		// On unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
 		m_SndFile.Chn[nChn].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
 	}
 
-	//mute any NNA'd channels
-	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++)
+	// Mute any NNA'd channels
+	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
 	{
-		if (m_SndFile.Chn[i].nMasterChn == nChn + 1u)	{
+		if (m_SndFile.Chn[i].nMasterChn == nChn + 1u)
+		{
 			if (doMute)
 			{ 
 				m_SndFile.Chn[i].dwFlags |= muteType;
 			} else
 			{
-				//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
+				// On unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
 				m_SndFile.Chn[i].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
 			}
 		}
-	}
-
-	//Mark IT/MPTM/S3M as modified
-	if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M))
-	{
-		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 	}
 
 	return true;
