@@ -161,6 +161,13 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 			m_pModDoc->ReArrangeChannels(channels, false);
 		}
 		memcpy(pSndFile->ChnSettings, pUndo->channelInfo->settings, sizeof(MODCHANNELSETTINGS) * pUndo->channelInfo->oldNumChannels);
+
+		// Channel mute status might have changed...
+		for(CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
+		{
+			m_pModDoc->UpdateChannelMuteStatus(i);
+		}
+
 	}
 
 	nPattern = pUndo->pattern;
