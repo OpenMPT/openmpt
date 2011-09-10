@@ -3973,14 +3973,14 @@ void CModDoc::FixNullStrings()
 	StringFixer::FixNullString(m_SndFile.m_szNames[0]);
 
 	// Sample names + filenames
-	for(SAMPLEINDEX nSmp = 1; nSmp < m_SndFile.GetNumSamples(); nSmp++)
+	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
 	{
 		StringFixer::FixNullString(m_SndFile.m_szNames[nSmp]);
 		StringFixer::FixNullString(m_SndFile.GetSample(nSmp).filename);
 	}
 
 	// Instrument names
-	for(INSTRUMENTINDEX nIns = 1; nIns < m_SndFile.GetNumInstruments(); nIns++)
+	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 	{
 		if(m_SndFile.Instruments[nIns] != nullptr)
 		{		

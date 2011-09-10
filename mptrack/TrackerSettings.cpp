@@ -30,7 +30,7 @@ const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Song
 TrackerSettings::TrackerSettings()
 //--------------------------------
 {
-	gnPatternSpacing = 1;
+	gnPatternSpacing = 0;
 	gbPatternRecord = TRUE;
 	gbPatternVUMeters = FALSE;
 	gbPatternPluginNames = TRUE;
