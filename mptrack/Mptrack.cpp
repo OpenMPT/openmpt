@@ -97,7 +97,7 @@ public:
 			{
 				CString str;
 				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), path);
-				Reporting::Notification(str);
+				Reporting::Error(str);
 			}
 			else //Case: Valid path but opening fails.
 			{		
