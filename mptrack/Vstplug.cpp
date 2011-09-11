@@ -1369,7 +1369,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
-    m_pEffect->resvd1=ToVstPtr(this);
+    m_pEffect->resvd1 = ToVstPtr(this);
 	//rewbs.plugDocAware
 	m_pSndFile = pSndFile;
 	m_pModDoc = pSndFile->GetpModDoc();
@@ -2419,6 +2419,13 @@ void CVstPlugin::HardAllNotesOff()
 	//if (IsBypassed())	
 	//	return;
 
+	// The JUCE framework doesn't like processing while being suspended.
+	const bool wasSuspended = !IsResumed();
+	if(wasSuspended)
+	{
+		Resume();
+	}
+
 	do
 	{
 		overflow=false;
@@ -2458,6 +2465,11 @@ void CVstPlugin::HardAllNotesOff()
 
 	// If we had hit an overflow, we need to loop around and start again.
 	} while (overflow);
+
+	if(wasSuspended)
+	{
+		Suspend();
+	}
 
 }
 //end rewbs.VSTiNoteHoldonStopFix
