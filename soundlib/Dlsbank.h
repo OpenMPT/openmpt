@@ -124,6 +124,7 @@ public:
 	BOOL ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen);
 	BOOL ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
 	BOOL ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
+	const CHAR *GetRegionName(UINT nIns, UINT nRgn) const;
 
 // Internal Loader Functions
 protected:

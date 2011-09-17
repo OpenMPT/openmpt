@@ -1255,7 +1255,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 			//I'd like to copy other flags too, but this would change playback behaviour.
 			p->dwFlags |= (pChn->dwFlags & (CHN_MUTE|CHN_NOFX));
 
-			p->nMasterChn = nChn+1;
+			p->nMasterChn = nChn + 1;
 			p->nCommand = 0;
 			//rewbs.VSTiNNA	
 			if (applyNNAtoPlug && pPlugin)
@@ -1278,10 +1278,14 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 			// Key Off the note
 			switch(pChn->nNNA)
 			{
-			case NNA_NOTEOFF:	KeyOff(n); break;
+			case NNA_NOTEOFF:
+				KeyOff(n);
+				break;
 			case NNA_NOTECUT:
 				p->nFadeOutVol = 0;
-			case NNA_NOTEFADE:	p->dwFlags |= CHN_NOTEFADE; break;
+			case NNA_NOTEFADE:
+				p->dwFlags |= CHN_NOTEFADE;
+				break;
 			}
 			if (!p->nVolume)
 			{
@@ -3754,7 +3758,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
 			pChn->VolEnv.nEnvValueAtReleaseJump = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
-			pChn->VolEnv.nEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
+			pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
 	}
@@ -4353,8 +4357,8 @@ bool CSoundFile::IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const 
 
 
 // Get the needed vector size for pattern nPat.
-size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat)
-//------------------------------------------------------------------
+size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat) const
+//------------------------------------------------------------------------
 {
 	if(Patterns.IsValidPat(nPat))
 	{

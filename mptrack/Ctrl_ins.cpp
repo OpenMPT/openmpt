@@ -401,7 +401,7 @@ void CNoteMapWnd::OnMapCopySample()
 	if (pIns)
 	{
 		bool bModified = false;
-		WORD n = pIns->Keyboard[m_nNote];
+		SAMPLEINDEX n = pIns->Keyboard[m_nNote];
 		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->Keyboard[i] != n)
 		{
 			pIns->Keyboard[i] = n;
@@ -577,7 +577,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 		{
 			UINT n = pIns->NoteMap[m_nNote];
 			bool bOk = false;
-			if ((note > 0) && (note <= NOTE_MAX))
+			if ((note >= pSndFile->GetModSpecifications().noteMin) && (note <= pSndFile->GetModSpecifications().noteMax))
 			{	
 				n = note;
 				bOk = true;

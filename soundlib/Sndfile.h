@@ -1116,7 +1116,7 @@ public:
 	// [in]  lineEnding: line ending formatting of the text in memory.
 	// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
 	// [out] returns formatted song message.
-	CString GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
+	CString GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr) const;
 
 protected:
 	// Read song message from a mapped file.
@@ -1157,7 +1157,7 @@ public:
 private:
 	void SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited = true, VisitedRowsType *pRowVector = nullptr);
 	bool IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet = true, VisitedRowsType *pRowVector = nullptr);
-	size_t GetVisitedRowsVectorSize(const PATTERNINDEX nPat);
+	size_t GetVisitedRowsVectorSize(const PATTERNINDEX nPat) const;
 
 public:
 	// "importance" of every FX command. Table is used for importing from formats with multiple effect columns

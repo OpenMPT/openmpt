@@ -13,7 +13,7 @@
 #include "ctrl_ins.h"
 #include "ctrl_com.h"
 #include "ctrl_graph.h" //rewbs.graph
-#include ".\globals.h"
+#include "globals.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

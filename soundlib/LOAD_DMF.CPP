@@ -856,7 +856,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		// Special case: Last 4 bytes should be "ENDE", without a size field (WTF)
 		ASSERT_CAN_READ(4);
-		if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) == DMF_ENDE)
+		if(*(uint32 *)(lpStream + dwMemPos) == LittleEndian(DMF_ENDE))
 		{
 			break;
 		}
