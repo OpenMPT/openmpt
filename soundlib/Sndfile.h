@@ -86,41 +86,34 @@ MODULAR STRUCT DECLARATIONS :
 struct INSTRUMENTENVELOPE
 {
 	DWORD dwFlags;				// envelope flags
-	WORD Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
-	BYTE Values[MAX_ENVPOINTS];	// envelope point value (y axis)
 	UINT nNodes;				// amount of nodes used
 	BYTE nLoopStart;			// loop start node
 	BYTE nLoopEnd;				// loop end node
 	BYTE nSustainStart;			// sustain start node
 	BYTE nSustainEnd;			// sustain end node
 	BYTE nReleaseNode;			// release node
+	WORD Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
+	BYTE Values[MAX_ENVPOINTS];	// envelope point value (y axis)
 
 	INSTRUMENTENVELOPE()
 	{
 		dwFlags = 0;
-		MemsetZero(Ticks);
-		MemsetZero(Values);
 		nNodes = 0;
 		nLoopStart = nLoopEnd = 0;
 		nSustainStart = nSustainEnd = 0;
 		nReleaseNode = ENV_RELEASE_NODE_UNSET;
+		MemsetZero(Ticks);
+		MemsetZero(Values);
 	}
 };
 
 // Instrument Struct
 struct MODINSTRUMENT
 {
-	UINT nFadeOut;				// Instrument fadeout speed
-	DWORD dwFlags;				// Instrument flags
-	UINT nGlobalVol;			// Global volume (all sample volumes are multiplied with this)
-	UINT nPan;					// Default pan (overrides sample panning), if the appropriate flag is set
-
-	INSTRUMENTENVELOPE VolEnv;		// Volume envelope data
-	INSTRUMENTENVELOPE PanEnv;		// Panning envelope data
-	INSTRUMENTENVELOPE PitchEnv;	// Pitch / filter envelope data
-
-	BYTE NoteMap[128];	// Note mapping, f.e. C-5 => D-5.
-	WORD Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
+	UINT nFadeOut;		// Instrument fadeout speed
+	DWORD dwFlags;		// Instrument flags
+	UINT nGlobalVol;	// Global volume (all sample volumes are multiplied with this)
+	UINT nPan;			// Default pan (overrides sample panning), if the appropriate flag is set
 
 	BYTE nNNA;			// New note action
 	BYTE nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
@@ -138,9 +131,6 @@ struct MODINSTRUMENT
 	signed char nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
 	unsigned char nPPC;	//Pitch/Pan centre
 
-	CHAR name[32];		// Note: not guaranteed to be null-terminated.
-	CHAR filename[32];
-
 	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
 	uint16 nVolRampUp;				// Default sample ramping up
 	UINT nResampling;				// Resampling mode
@@ -150,12 +140,22 @@ struct MODINSTRUMENT
 	WORD wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
 	BYTE nPluginVelocityHandling;	// How to deal with plugin velocity
 	BYTE nPluginVolumeHandling;		// How to deal with plugin volume
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	CTuning *pTuning;				// sample tuning assigned to this instrument
+	static CTuning *s_DefaultTuning;
 
-	CTuning* pTuning;				// sample tuning assigned to this instrument
-	static CTuning* s_DefaultTuning;
+	INSTRUMENTENVELOPE VolEnv;		// Volume envelope data
+	INSTRUMENTENVELOPE PanEnv;		// Panning envelope data
+	INSTRUMENTENVELOPE PitchEnv;	// Pitch / filter envelope data
+
+	BYTE NoteMap[128];			// Note mapping, f.e. C-5 => D-5.
+	SAMPLEINDEX Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
+
+	CHAR name[MAX_INSTRUMENTNAME];		// Note: not guaranteed to be null-terminated.
+	CHAR filename[MAX_INSTRUMENTFILENAME];
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	void SetTuning(CTuning* pT)
 	{
@@ -168,12 +168,6 @@ struct MODINSTRUMENT
 		dwFlags = 0;
 		nGlobalVol = 64;
 		nPan = 32 * 4;
-
-		for(size_t n = 0; n < CountOf(Keyboard); n++)
-		{
-			Keyboard[n] = (WORD)sample;
-			NoteMap[n] = (BYTE)(n + 1);
-		}
 
 		nNNA = NNA_NOTECUT;
 		nDCT = DCT_NONE;
@@ -192,9 +186,6 @@ struct MODINSTRUMENT
 		nPPC = NOTE_MIDDLEC - 1;
 		nPPS = 0;
 
-		MemsetZero(name);
-		MemsetZero(filename);
-
 		nMixPlug = 0;
 		nVolRampUp = 0;
 		nResampling = SRCMODE_DEFAULT;
@@ -206,6 +197,15 @@ struct MODINSTRUMENT
 		nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		pTuning = s_DefaultTuning;
+
+		for(size_t n = 0; n < CountOf(Keyboard); n++)
+		{
+			Keyboard[n] = sample;
+			NoteMap[n] = (BYTE)(n + 1);
+		}
+
+		MemsetZero(name);
+		MemsetZero(filename);
 	}
 
 };

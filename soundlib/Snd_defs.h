@@ -78,11 +78,14 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define MAX_ENVPOINTS		240
 #define MIN_PERIOD			0x0020
 #define MAX_PERIOD			0xFFFF
+
 // String lengths (including trailing null char)
-#define MAX_SAMPLENAME		32	// also affects module name!
-#define MAX_SAMPLEFILENAME	22
-#define MAX_PATTERNNAME		32
-#define MAX_CHANNELNAME		20
+#define MAX_SAMPLENAME			32	// also affects module name!
+#define MAX_SAMPLEFILENAME		22
+#define MAX_INSTRUMENTNAME		32
+#define MAX_INSTRUMENTFILENAME	32
+#define MAX_PATTERNNAME			32
+#define MAX_CHANNELNAME			20
 
 #define MAX_EQ_BANDS		6
 
