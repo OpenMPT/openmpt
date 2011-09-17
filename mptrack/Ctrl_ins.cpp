@@ -1304,7 +1304,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 			// Volume ramping (attack)
-			int n = pIns->nVolRamp; //? MAX_ATTACK_LENGTH - pIns->nVolRamp : 0;
+			int n = pIns->nVolRampUp; //? MAX_ATTACK_LENGTH - pIns->nVolRampUp : 0;
 			m_SliderAttack.SetPos(n);
 			if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
 			else SetDlgItemInt(IDC_EDIT2,n);
@@ -2160,9 +2160,9 @@ void CCtrlInstruments::OnAttackChanged()
 		if(n > MAX_ATTACK_VALUE) n = MAX_ATTACK_VALUE;
 		int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
 
-		if(pIns->nVolRamp != newRamp)
+		if(pIns->nVolRampUp != newRamp)
 		{
-			pIns->nVolRamp = newRamp;
+			pIns->nVolRampUp = newRamp;
 			SetInstrumentModified(true);
 		}
 
@@ -2343,12 +2343,13 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 			// Volume ramping (attack)
-			if (pSlider==&m_SliderAttack) {
+			if (pSlider==&m_SliderAttack)
+			{
 				n = m_SliderAttack.GetPos();
 				int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
-				if(pIns->nVolRamp != newRamp)
+				if(pIns->nVolRampUp != newRamp)
 				{
-					pIns->nVolRamp = newRamp;
+					pIns->nVolRampUp = newRamp;
 					SetDlgItemInt(IDC_EDIT2,n);
 					SetInstrumentModified(true);
 				}

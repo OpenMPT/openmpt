@@ -2476,7 +2476,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 
 	MODINSTRUMENT *sizeIns = new MODINSTRUMENT();
 
-	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(sizeIns->nVolRamp),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(sizeIns->nVolRampUp),  f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(sizeIns->nMixPlug),    f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(sizeIns->nMidiChannel),f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(sizeIns->nMidiProgram),f, nInstruments);

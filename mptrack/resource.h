@@ -716,8 +716,9 @@
 #define IDC_PATINSTROPLUGGUI            2201
 #define IDC_WFIRCUTOFF                  2202
 #define IDC_WFIRTYPE                    2203
-#define IDC_RAMPING                     2204
+#define IDC_RAMPING_IN                  2204
 #define IDC_PLAYEROPTIONS               2205
+#define IDC_RAMPING_OUT                 2205
 #define IDC_CHORDDETECTWAITTIME         2206
 #define IDC_STATIC2                     2207
 #define IDC_STATIC1                     2208

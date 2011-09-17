@@ -69,7 +69,7 @@ public:
 	//rewbs.resamplerConf
 	double gdWFIRCutoff;
 	BYTE gbWFIRType;
-	long glVolumeRampSamples;
+	long glVolumeRampUpSamples, glVolumeRampDownSamples;
 	//end rewbs.resamplerConf
 	UINT gnAutoChordWaitTime;
 

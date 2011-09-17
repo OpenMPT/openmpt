@@ -207,7 +207,7 @@ VE[.			VolEnv.Values[MAX_ENVPOINTS];
 VLE.			VolEnv.nLoopEnd;
 VLS.			VolEnv.nLoopStart;
 VP[.			VolEnv.Ticks[MAX_ENVPOINTS];
-VR..			nVolRamp;
+VR..			nVolRampUp;
 VS..			nVolSwing;
 VSB.			VolEnv.nSustainStart;
 VSE.			VolEnv.nSustainEnd;
@@ -326,7 +326,7 @@ WRITE_MPTHEADER_array_member(	Keyboard				, WORD			, K[..		, 128				)
 WRITE_MPTHEADER_array_member(	name					, CHAR			, n[..		, 32				)
 WRITE_MPTHEADER_array_member(	filename				, CHAR			, fn[.		, 12				)
 WRITE_MPTHEADER_sized_member(	nMixPlug				, BYTE			, MiP.							)
-WRITE_MPTHEADER_sized_member(	nVolRamp				, USHORT		, VR..							)
+WRITE_MPTHEADER_sized_member(	nVolRampUp				, uint16		, VR..							)
 WRITE_MPTHEADER_sized_member(	nResampling				, USHORT		, R...							)
 WRITE_MPTHEADER_sized_member(	nCutSwing				, BYTE			, CS..							)
 WRITE_MPTHEADER_sized_member(	nResSwing				, BYTE			, RS..							)
@@ -408,7 +408,7 @@ GET_MPTHEADER_array_member(	Keyboard				, WORD			, K[..		, 128				)
 GET_MPTHEADER_array_member(	name					, CHAR			, n[..		, 32				)
 GET_MPTHEADER_array_member(	filename				, CHAR			, fn[.		, 12				)
 GET_MPTHEADER_sized_member(	nMixPlug				, BYTE			, MiP.							)
-GET_MPTHEADER_sized_member(	nVolRamp				, USHORT		, VR..							)
+GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, VR..							)
 GET_MPTHEADER_sized_member(	nResampling				, UINT			, R...							)
 GET_MPTHEADER_sized_member(	nCutSwing				, BYTE			, CS..							)
 GET_MPTHEADER_sized_member(	nResSwing				, BYTE			, RS..							)

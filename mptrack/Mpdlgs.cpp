@@ -430,20 +430,21 @@ void COptionsSoundcard::OnOK()
 
 BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO1,OnResamplerChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	OnResamplerChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	OnSettingsChanged)
 	//rewbs.resamplerConf
-	ON_CBN_SELCHANGE(IDC_WFIRTYPE,OnWFIRTypeChanged)
-	ON_EN_UPDATE(IDC_WFIRCUTOFF,OnSettingsChanged)
-	ON_EN_UPDATE(IDC_RAMPING,	OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_WFIRTYPE,	OnWFIRTypeChanged)
+	ON_EN_UPDATE(IDC_WFIRCUTOFF,	OnSettingsChanged)
+	ON_EN_UPDATE(IDC_RAMPING_IN,	OnSettingsChanged)
+	ON_EN_UPDATE(IDC_RAMPING_OUT,	OnSettingsChanged)
 	//end rewbs.resamplerConf
-	ON_COMMAND(IDC_CHECK1,		OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK2,		OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK3,		OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,		OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK5,		OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK6,		OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK7,		OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK5,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK6,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK7,			OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON_DEFAULT_RESAMPLING,	OnDefaultResampling)
 END_MESSAGE_MAP()
 
@@ -457,7 +458,8 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 	//rewbs.resamplerConf
 	DDX_Control(pDX, IDC_WFIRTYPE,		m_CbnWFIRType);
 	DDX_Control(pDX, IDC_WFIRCUTOFF,	m_CEditWFIRCutoff);
-	DDX_Control(pDX, IDC_RAMPING,		m_CEditRamping);
+	DDX_Control(pDX, IDC_RAMPING_IN,	m_CEditRampUp);
+	DDX_Control(pDX, IDC_RAMPING_OUT,	m_CEditRampDown);
 	//end rewbs.resamplerConf
 	DDX_Control(pDX, IDC_COMBO2,		m_CbnReverbPreset);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SbXBassDepth);
@@ -537,9 +539,14 @@ BOOL COptionsPlayer::OnInitDialog()
 	}
 	//rewbs.resamplerConf
 	OnResamplerChanged();
-	char s[20] = "";
-	_ltoa(CMainFrame::GetSettings().glVolumeRampSamples,s, 10);
-	m_CEditRamping.SetWindowText(s);
+
+	char s[16] = "";
+	_ltoa(CMainFrame::GetSettings().glVolumeRampUpSamples, s, 10);
+	m_CEditRampUp.SetWindowText(s);
+
+	_ltoa(CMainFrame::GetSettings().glVolumeRampDownSamples, s, 10);
+	m_CEditRampDown.SetWindowText(s);
+
 	//end rewbs.resamplerConf
 	return TRUE;
 }
@@ -625,7 +632,8 @@ void COptionsPlayer::OnDefaultResampling()
 	m_CbnResampling.SetCurSel(SRCMODE_POLYPHASE);
 	OnResamplerChanged();
 	m_CEditWFIRCutoff.SetWindowText("97");
-	m_CEditRamping.SetWindowText("42");
+	m_CEditRampUp.SetWindowText("42");
+	m_CEditRampDown.SetWindowText("42");
 	
 }
 
@@ -677,8 +685,12 @@ void COptionsPlayer::OnOK()
 	if (s != "")
 		CMainFrame::GetSettings().gdWFIRCutoff = atoi(s)/100.0;
 	//CMainFrame::GetSettings().gbWFIRType set in OnWFIRTypeChange
-	m_CEditRamping.GetWindowText(s);
-	CMainFrame::GetSettings().glVolumeRampSamples = atol(s);
+
+	m_CEditRampUp.GetWindowText(s);
+	CMainFrame::GetSettings().glVolumeRampUpSamples = atol(s);
+	m_CEditRampDown.GetWindowText(s);
+	CMainFrame::GetSettings().glVolumeRampDownSamples = atol(s);
+
 	SndMixInitializeTables(); //regenerate resampling tables
 	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);

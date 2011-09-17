@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-#ifdef _WIN32
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -208,7 +206,6 @@ BEGIN
     LTEXT           "",IDC_LASTUPDATE,6,228,258,24
 END
 
-
 IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 197
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Save modified files"
@@ -228,7 +225,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MODLOADING_WARNINGS, DIALOG
     BEGIN
@@ -320,18 +317,16 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -382,7 +377,7 @@ BEGIN
     CONTROL         "Slider2",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,149,128,62,15
     LTEXT           "5ms",IDC_STATIC,131,131,18,8
     LTEXT           "50ms",IDC_STATIC,211,131,23,8
-    GROUPBOX        "Sound Quality",IDC_STATIC,6,162,256,108
+    GROUPBOX        "Sound Quality",IDC_STATIC,6,162,256,114
     LTEXT           "Resampling:",IDC_STATIC,18,182,42,8
     COMBOBOX        IDC_COMBO1,66,180,114,56,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "WFIR type:",IDC_STATIC,18,200,42,8
@@ -392,9 +387,11 @@ BEGIN
     LTEXT           "%",IDC_STATIC,186,219,8,8
     LTEXT           "Sample ramping (click avoidance):",IDC_STATIC,18,238,109,8
     LTEXT           "(can be overridden by instrument setting)",IDC_STATIC,18,248,138,8
-    EDITTEXT        IDC_RAMPING,156,235,24,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Samples",IDC_STATIC,182,238,29,8
+    EDITTEXT        IDC_RAMPING_IN,156,235,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Samples (Ramp In)",IDC_STATIC,182,238,70,8
     PUSHBUTTON      "Default Settings",IDC_BUTTON_DEFAULT_RESAMPLING,186,180,66,12
+    EDITTEXT        IDC_RAMPING_OUT,156,252,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Samples (Ramp Out)",IDC_STATIC,182,255,70,8
 END
 
 IDD_WAVECONVERT DIALOGEX 0, 0, 262, 221
@@ -428,7 +425,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,66,168,12
 END
 
-IDD_PROGRESS DIALOG  0, 0, 186, 55
+IDD_PROGRESS DIALOG 0, 0, 186, 55
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Saving Wave File"
 FONT 8, "MS Shell Dlg"
@@ -842,7 +839,7 @@ BEGIN
     RTEXT           "IDC_TEXT_SAVEDWITH",IDC_TEXT_SAVEDWITH,18,283,54,8
 END
 
-IDD_SHOWLOG DIALOG  0, 0, 300, 106
+IDD_SHOWLOG DIALOG 0, 0, 300, 106
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Information"
 FONT 8, "MS Shell Dlg"
@@ -1042,7 +1039,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
 END
 
-IDD_PAGEEDITNOTE DIALOG  0, 0, 220, 34
+IDD_PAGEEDITNOTE DIALOG 0, 0, 220, 34
 STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_VISIBLE | WS_CAPTION
 CAPTION "Note"
 FONT 8, "MS Shell Dlg"
@@ -1053,7 +1050,7 @@ BEGIN
     COMBOBOX        IDC_COMBO2,74,15,137,70,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_PAGEEDITVOLUME DIALOG  0, 0, 220, 34
+IDD_PAGEEDITVOLUME DIALOG 0, 0, 220, 34
 STYLE DS_SETFONT | DS_SETFOREGROUND | WS_CHILD | WS_VISIBLE | WS_CAPTION
 CAPTION "Volume"
 FONT 8, "MS Shell Dlg"
@@ -1303,14 +1300,14 @@ BEGIN
     EDITTEXT        IDC_EDIT6,174,180,31,12,ES_AUTOHSCROLL | ES_NUMBER
 END
 
-IDD_SPLASHSCREEN DIALOG  0, 0, 188, 95
+IDD_SPLASHSCREEN DIALOG 0, 0, 188, 95
 STYLE DS_SETFONT | DS_SETFOREGROUND | DS_CENTER | WS_POPUP
 FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         "",IDC_SPLASH,"Static",SS_WHITERECT,0,0,187,94
 END
 
-IDD_TREEVIEW DIALOG  0, 0, 85, 266
+IDD_TREEVIEW DIALOG 0, 0, 85, 266
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -1389,7 +1386,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
 END
 
-IDD_SETUP_REVERB DIALOG  0, 0, 240, 156
+IDD_SETUP_REVERB DIALOG 0, 0, 240, 156
 STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
 CAPTION "Reverb"
 FONT 8, "MS Shell Dlg"
@@ -1633,7 +1630,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -1990,7 +1987,7 @@ IDB_VISPCNODE           BITMAP                  "res\\vispcnode.bmp"
 // Menu
 //
 
-IDR_MAINFRAME MENU 
+IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -2103,7 +2100,7 @@ BEGIN
     END
 END
 
-IDR_TOOLBARS MENU 
+IDR_TOOLBARS MENU
 BEGIN
     POPUP "&ToolBars"
     BEGIN
@@ -2112,7 +2109,7 @@ BEGIN
     END
 END
 
-IDR_ENVELOPES MENU 
+IDR_ENVELOPES MENU
 BEGIN
     POPUP "&Envelope"
     BEGIN
@@ -2145,7 +2142,7 @@ IDC_NODRAG              CURSOR                  "res\\nodrag.cur"
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "OpenMPT"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
@@ -2158,20 +2155,20 @@ BEGIN
     IDS_APPLY_TUNING_MODIFICATIONS "Apply local tuning modifications to file?"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ENVELOPE_VIEWGRID    "Show/hide row guidelines"
     ID_REPORT_BUG           "Report a bug!\nReport a bug!"
     IDS_ERR_DIALOG          "Dialog encountered an error and needs to close"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "OpenMPT"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TUNING_IMPORT_LIMIT "-Failed to load file %1%2: maximum number(=%3!u!) of temporary tunings is already open.\n"
     IDS_TUNING_IMPORT_UNKNOWN_FAILURE 
@@ -2197,14 +2194,14 @@ BEGIN
     IDS_ERR_SAVESONG        "Unable to save song!"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ERR_TOOMANYPAT      "Too many patterns!"
     IDS_ERR_TOOMANYSMP      "Too many samples!"
     IDS_ERR_SAVESMP         "Unable to save sample"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -2214,20 +2211,20 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_TIME       "00:00:00 [100] 200ch"
-END
-
-STRINGTABLE 
-BEGIN
     ID_INDICATOR_USER       "Row 000, Col 000"
     ID_INDICATOR_INFO       "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     ID_INDICATOR_XINFO      "123456789|123456789|123456789|123456789|"
+END
+
+STRINGTABLE
+BEGIN
     ID_VIEW_MIDIMAPPING     "Configure the MIDI Mapping"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEW             "Create a new document\nNew"
     ID_FILE_OPEN            "Open an existing document\nOpen"
@@ -2236,7 +2233,7 @@ BEGIN
     ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "About OpenMPT\nAbout"
     ID_APP_EXIT             "Exit OpenMPT\nExit"
@@ -2247,7 +2244,7 @@ BEGIN
     ID_HELP                 "Display help for current task or command\nHelp"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -2267,13 +2264,13 @@ BEGIN
     ID_FILE_MRU_FILE16      "Open this document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_NEW           "Open another window for the active song\nNew Window"
     ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
@@ -2283,7 +2280,7 @@ BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -2299,13 +2296,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the main toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -2316,14 +2313,14 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
     AFX_IDS_MDICHILD        "Activate this window"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEWMOD          "Create a new ProTracker (MOD) music module\nNew MOD"
     ID_FILE_NEWXM           "Create a new FastTracker II (XM) music module\nNew XM"
@@ -2337,7 +2334,7 @@ BEGIN
     ID_PLAYER_SETUP         "Configure the sound device and player options"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_OPTIONS         "Configure the audio device, keyboard layout, colors etc...\nSetup"
     ID_INSERT_PATTERN       "Create a new pattern"
@@ -2351,12 +2348,12 @@ BEGIN
     ID_EDIT_FINDNEXT        "Continue search\nFind Next"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_COMBO_INSTRUMENT    "Change the current instrument for entering notes\nActive Instrument"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SAMPLE_NEW          "Create a new sample\nNew Sample"
     IDC_SAMPLE_OPEN         "Load sample from disk\nImport sample"
@@ -2369,12 +2366,12 @@ BEGIN
     IDC_SAMPLE_PLAY         "Play a middle C using the current sample\nPlay sample"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SAMPLE_DOWNSAMPLE   "Shrink selection\nDownsample"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_PATTERN_PLAY        "Play the curent pattern from the current position\nPlay Pattern"
     IDC_PATTERN_PLAYFROMSTART 
@@ -2384,7 +2381,7 @@ BEGIN
     IDC_PATTERN_NEW         "Create a new pattern\nInsert Pattern"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SAMPLE_SILENCE      "Silence Sample\nSilence"
     IDC_SAMPLE_INVERT       "Invert phase\nInvert phase"
@@ -2395,12 +2392,12 @@ BEGIN
     IDC_INSTRUMENT_PLAY     "Play the current instrument\nPlay instrument"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SAMPLE_DCOFFSET     "Remove DC Offset\nRemove DC Offset and normalize (hold shift to process all samples)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ENVELOPE_SETLOOP     "Enable or disable the envelope loop"
     ID_ENVELOPE_SUSTAIN     "Enable or disable the envelope sustain"
@@ -2409,21 +2406,21 @@ BEGIN
     ID_MODTREE_REFRESH      "Refresh the display\nRefresh"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PATTERN_PLAYROW      "Play current row\nPlay Row"
     ID_IMPORT_MIDILIB       "Defines the default MIDI library used when importing MIDI files"
     ID_CLEANUP_REARRANGE    "Rearrange all patterns so that they are sorted in the order list\nRearrange Patterns"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_GOTO_MENU       "Go to row / channel / pattern / order"
     ID_CLEANUP_COMPO        "Reset attributes to defaults (useful for creating sample packs)\nCompo Cleanup"
     ID_OVERFLOWPASTE        "Toggle overflow paste\nToggle overflow paste"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_COMMENTS        "Activates the song text editor"
     ID_ADD_SOUNDBANK        "Add a new DLS sound bank"
@@ -2432,7 +2429,7 @@ BEGIN
     ID_MIDI_RECORD          "Record from an external MIDI keyboard\nMIDI Record"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PATTERN_PROPERTIES   "Pattern Properties\nPattern Properties"
     ID_PATTERN_VUMETERS     "Show or hide channel VU-Meters\nVU-Meters"
@@ -2444,7 +2441,7 @@ BEGIN
     ID_ENVSEL_PANNING       "Show Panning Envelope"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ENVSEL_PITCH         "Show Pitch/Filter Envelope"
     ID_ENVELOPE_VOLUME      "Enable or disable the volume envelope"
@@ -2458,12 +2455,12 @@ BEGIN
     ID_NETLINK_TOP_PICKS    "Visit our list of free web resources!"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDD_TREEVIEW            "Show or hide the tree view"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
     ID_FILE_SAVEMIDI        "Export the current song to a standard MIDI file"
@@ -2474,27 +2471,27 @@ BEGIN
     ID_PATTERN_AMPLIFY      "Amplify selection\nAmplify"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ESTIMATESONGLENGTH   "Displays the approximate song length"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_GOTO            "Go to row, channel, pattern...\nGo to row"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ERR_TUNING_SERIALISATION "Static tuning serialisation failed"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ERR_NO_TUNING_SELECTION "Operation failed - No tuning file selected."
     IDS_UNSUPPORTED_TUNING_DnD 
@@ -2518,50 +2515,44 @@ BEGIN
     IDS_SCL_IMPORT_FAIL_8   "OpenMPT supports importing scl-files with at most %1 notes"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
     ID_VIEW_EDITHISTORY     "View the edit history of this module"
-END
-
-STRINGTABLE 
-BEGIN
     ID_FILE_SAVEASTEMPLATE  "Save the active document as template module\nSave as Template"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_OPENTEMPLATE    "Open a template document\nOpen template document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_CHANNEL_MANAGER      "Add, remove, mute and manage channels"
     ID_PLUGIN_SETUP         "Register plugins and add them to the current module"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_SONGPROPERTIES  "Edit global song properties or convert the module to another format"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SAMPLE_XFADE        "Crossfade Loop Points\nCrossfade between loop start and loop end to create seamless sample loops."
 END
 
-#endif    // Englisch (USA) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (GB) resources
+// English (United Kingdom) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2740,7 +2731,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MSGBOX_HIDABLE, DIALOG
     BEGIN
@@ -2823,7 +2814,7 @@ IDB_MAINBAR             BITMAP                  "res\\MAINBAR.BMP"
 // Menu
 //
 
-IDR_VSTMENU MENU 
+IDR_VSTMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -2846,7 +2837,7 @@ BEGIN
     END
 END
 
-IDR_PLUGINMENU MENU 
+IDR_PLUGINMENU MENU
 BEGIN
     POPUP "File"
     BEGIN
@@ -2928,7 +2919,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 //
 
 IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
-#endif    // Englisch (GB) resources
+#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
