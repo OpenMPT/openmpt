@@ -561,7 +561,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 					if (pmi->GroupsMapping[i] == iGrp)
 					{
 						UINT nSmp = pmg->nSmpNo+1;
-						pIns->Keyboard[i+12] = (BYTE)nSmp;
+						pIns->Keyboard[i + 12] = (SAMPLEINDEX)nSmp;
 						if (nSmp <= m_nSamples)
 						{
 							Samples[nSmp].nVibType = pmi->bVibType;

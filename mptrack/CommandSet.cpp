@@ -435,7 +435,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcEditCopy, 1361, _T("Copy"));
 	DefineKeyCommand(kcEditPaste, 1362, _T("Paste"));
 	DefineKeyCommand(kcEditMixPaste, 1363, _T("Mix Paste"));
-	DefineKeyCommand(kcEditSelectAll, 1364, _T("SelectAll"));
+	DefineKeyCommand(kcEditSelectAll, 1364, _T("Select All"));
 	DefineKeyCommand(kcEditFind, 1365, _T("Find / Replace"));
 	DefineKeyCommand(kcEditFindNext, 1366, _T("Find Next"));
 	DefineKeyCommand(kcViewMain, 1367, _T("Toggle Main View"));

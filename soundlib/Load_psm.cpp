@@ -155,7 +155,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	dwMemPos += 12;
 
-	memset(m_szNames, 0, sizeof(m_szNames));
+	MemsetZero(m_szNames);
 
 	m_nVSTiVolume = m_nSamplePreAmp = 48; // not supported in this format, so use a good default value
 

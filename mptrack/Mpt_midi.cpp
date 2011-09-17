@@ -14,16 +14,15 @@ HMIDIIN CMainFrame::shMidiIn = NULL;
 
 //Get Midi message(dwParam1), apply MIDI settings having effect on volume, and return
 //the volume value [0, 256]. In addition value -1 is used as 'use default value'-indicator.
-int ApplyVolumeRelatedMidiSettings(const DWORD& dwParam1, const BYTE midivolume)
-//----------------------------------------------------------------
+int ApplyVolumeRelatedMidiSettings(const DWORD &dwParam1, const BYTE midivolume)
+//------------------------------------------------------------------------------
 {
 	int nVol = GetFromMIDIMsg_DataByte2(dwParam1);
 	if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 	{
 		nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+255) >> 8;
 		if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
-		if (nVol < 1) nVol = 1;
-		if (nVol > 256) nVol = 256;
+		Limit(nVol, 1, 256);
 		if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = static_cast<int>((midivolume / 127.0) * nVol);
 	}
@@ -38,8 +37,8 @@ int ApplyVolumeRelatedMidiSettings(const DWORD& dwParam1, const BYTE midivolume)
 	return nVol;
 }
 
-void ApplyTransposeKeyboardSetting(CMainFrame& rMainFrm, DWORD& dwParam1)
-//------------------------------------------------------------------------
+void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, DWORD &dwParam1)
+//-----------------------------------------------------------------------
 {
 	if ( (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
 		&& (GetFromMIDIMsg_Channel(dwParam1) != 9) )
@@ -50,17 +49,12 @@ void ApplyTransposeKeyboardSetting(CMainFrame& rMainFrm, DWORD& dwParam1)
 			int note = GetFromMIDIMsg_DataByte1(dwParam1);
 			if (note < 0x80)
 			{
-				note += nTranspose*12;
-				if (note < 0) note = NOTE_NONE;
-				if (note > NOTE_MAX - 1) note = NOTE_MAX - 1;
+				note += nTranspose * 12;
+				Limit(note, 0, NOTE_MAX - NOTE_MIN);
 
-				// -> CODE#0011
-				// -> DESC="bug fix about transpose midi keyboard option"
-				//dwParam1 &= 0xffffff00;
 				dwParam1 &= 0xffff00ff;
-				// -! BUG_FIX#0011
 
-				dwParam1 |= (note<<8);
+				dwParam1 |= (note << 8);
 			}
 		}
 	}
@@ -97,7 +91,7 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dw
 				{
 					DWORD dwTime = timeGetTime();
 					const DWORD timediff = dwTime - gdwLastMidiEvtTime;
-					if (timediff < 20*3) break;
+					if (timediff < 20 * 3) break;
 					
 					gdwLastMidiEvtTime = dwTime; // continue
 				}
@@ -119,7 +113,8 @@ BOOL CMainFrame::midiOpenDevice()
 //-------------------------------
 {
 	if (shMidiIn) return TRUE;
-	try {
+	try
+	{
 		if (midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
@@ -186,7 +181,7 @@ CString CMIDIMappingDirective::ToString() const
 
 
 size_t CMIDIMapper::GetSerializationSize() const
-//---------------------------------------------
+//----------------------------------------------
 {
 	size_t s = 0;
 	for(const_iterator citer = Begin(); citer != End(); citer++)
@@ -234,7 +229,7 @@ void CMIDIMapper::Serialize(FILE* f) const
 
 
 bool CMIDIMapper::Deserialize(const BYTE* ptr, const size_t size)
-//----------------------------------------------------------------------------
+//---------------------------------------------------------------
 {
 	m_Directives.clear();
 	const BYTE* endptr = ptr + size;
@@ -278,7 +273,7 @@ bool CMIDIMapper::Deserialize(const BYTE* ptr, const size_t size)
 
 
 bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, BYTE& mappedIndex, uint32& paramindex, BYTE& paramval)
-//----------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
 {
 	bool captured = false;
 
@@ -337,5 +332,4 @@ bool CMIDIMapper::Swap(const size_t a, const size_t b)
 	}
 	else return true;
 }
-
 

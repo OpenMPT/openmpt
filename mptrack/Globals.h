@@ -111,9 +111,6 @@ class CModTabCtrl: public CTabCtrl
 //================================
 {
 public:
-	CModTabCtrl() {}
-
-public:
 	BOOL InsertItem(int nIndex, LPSTR pszText, LPARAM lParam=0, int iImage=-1);
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	UINT GetItemData(int nIndex);

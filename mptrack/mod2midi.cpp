@@ -481,18 +481,18 @@ BOOL CModToMidi::DoConvert()
 						tmp[len+1] = (pTrk->nMidiChannel==9) ? static_cast<BYTE>(pTrk->nMidiProgram) : static_cast<BYTE>(note);
 						UINT vol = 0x7f;
 						UINT nsmp = pTrk->nInstrument;
-						if (m_pSndFile->m_nInstruments)
+						if (m_pSndFile->GetNumInstruments())
 						{
-							if ((nsmp < MAX_INSTRUMENTS) && (m_pSndFile->Instruments[nsmp]))
+							if ((nsmp <= m_pSndFile->GetNumInstruments()) && (m_pSndFile->Instruments[nsmp]))
 							{
 								MODINSTRUMENT *pIns = m_pSndFile->Instruments[nsmp];
 								nsmp = pIns->Keyboard[note];
 							} else nsmp = 0;
 						}
-						if ((nsmp) && (nsmp < MAX_SAMPLES)) vol = m_pSndFile->GetSample(nsmp).nVolume;
-						if (m->volcmd == VOLCMD_VOLUME) vol = m->vol*4;
-						if (m->command == CMD_VOLUME) vol = m->param*4;
-						vol = LinearToDLSMidiVolume(vol<<8);
+						if (nsmp && nsmp <= m_pSndFile->GetNumSamples()) vol = m_pSndFile->GetSample(nsmp).nVolume;
+						if (m->command == CMD_VOLUME) vol = m->param * 4;
+						if (m->volcmd == VOLCMD_VOLUME) vol = m->vol * 4;
+						vol = LinearToDLSMidiVolume(vol << 8);
 						if (vol > 0x7f) vol = 0x7f;
 						tmp[len+2] = (BYTE)vol;
 						tmp[len+3] = 0;
@@ -506,7 +506,7 @@ BOOL CModToMidi::DoConvert()
 				UINT param = m->param;
 				switch(m->command)
 				{
-				case CMD_SPEED:	if ((param) && (param < 32)) nSpeed = param; break;
+				case CMD_SPEED:	if (param) nSpeed = param; break;
 				case CMD_PATTERNBREAK: pattern_break = param; break;
 				}
 			}

@@ -873,6 +873,7 @@ BOOL CDLSBank::UpdateSF2PresetData(LPVOID pvsf2, LPVOID pvchunk, DWORD dwMaxLen)
 			for (UINT i=0; i<m_nSamplesEx; i++, pDlsSmp++, p++)
 			{
 				memcpy(pDlsSmp->szName, p->achSampleName, 20);
+				StringFixer::SetNullTerminator(pDlsSmp->szName);
 				pDlsSmp->dwLen = 0;
 				pDlsSmp->dwSampleRate = p->dwSampleRate;
 				pDlsSmp->byOriginalPitch = p->byOriginalPitch;
@@ -1757,7 +1758,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 			{
 				if ((nRgn == nRgnMin) || ((iKey >= pRgn->uKeyMin) && (iKey <= pRgn->uKeyMax)))
 				{
-					pIns->Keyboard[iKey] = (BYTE)nSmp;
+					pIns->Keyboard[iKey] = (SAMPLEINDEX)nSmp;
 				}
 			}
 			// Load the sample
@@ -1900,4 +1901,26 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 		}
 	}
 	return TRUE;
+}
+
+
+const CHAR *CDLSBank::GetRegionName(UINT nIns, UINT nRgn) const
+//-------------------------------------------------------------
+{
+	DLSINSTRUMENT *pDlsIns;
+
+	if ((!m_pInstruments) || (nIns >= m_nInstruments)) return nullptr;
+	pDlsIns = &m_pInstruments[nIns];
+	if (nRgn >= pDlsIns->nRegions) return nullptr;
+
+	if (m_nType & SOUNDBANK_TYPE_SF2)
+	{
+		UINT nWaveLink = pDlsIns->Regions[nRgn].nWaveLink;
+		if ((nWaveLink < m_nSamplesEx) && (m_pSamplesEx))
+		{
+			DLSSAMPLEEX *p = &m_pSamplesEx[nWaveLink];
+			return p->szName;
+		}
+	}
+	return nullptr;
 }

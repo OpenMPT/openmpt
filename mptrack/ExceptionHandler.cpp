@@ -99,7 +99,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
 				::CloseHandle(hFile);
 
-				errorMessage.AppendFormat("\n\nDebug information have been saved to\n%s", baseRescuePath);
+				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", baseRescuePath);
 			}
 		}
 		::FreeLibrary(hDll);

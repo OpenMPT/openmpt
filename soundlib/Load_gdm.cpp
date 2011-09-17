@@ -20,7 +20,7 @@
 
 #pragma pack(1)
 
-typedef struct _GDMHEADER
+struct GDMHEADER
 {
 	uint32 ID;						// ID: 'GDMþ'
 	char   SongTitle[32];			// Music's title
@@ -53,9 +53,9 @@ typedef struct _GDMHEADER
 	uint16 SSLength;
 	uint32 TGOffset;				// Offset of text graphic (huh?)
 	uint16 TGLength;
-} GDMHEADER, *PGDMHEADER;
+};
 
-typedef struct _GDMSAMPLEHEADER
+struct GDMSAMPLEHEADER
 {
 	char   SamName[32];		// sample's name
 	char   FileName[12];	// sample's filename
@@ -67,11 +67,14 @@ typedef struct _GDMSAMPLEHEADER
 	uint16 C4Hertz;			// frequency
 	uint8  Volume;			// default volume
 	uint8  Pan;				// default pan
-} GDMSAMPLEHEADER, *PGDMSAMPLEHEADER;
+};
 
 #pragma pack()
 
-static MODTYPE GDMHeader_Origin[] =
+#define GDMHEAD_GDM_ 0xFE4D4447
+#define GDMHEAD_GMFS 0x53464D47
+
+static const MODTYPE GDMHeader_Origin[] =
 {
 	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
 };
@@ -81,55 +84,55 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 {
 	if ((!lpStream) || (dwMemLength < sizeof(GDMHEADER))) return false;
 
-	const PGDMHEADER pHeader = (PGDMHEADER)lpStream;
+	const GDMHEADER *pHeader = (GDMHEADER *)lpStream;
 
-	// is it a valid GDM file?
-	if(	(LittleEndian(pHeader->ID) != 0xFE4D4447) || //GDMþ
+	// Is it a valid GDM file?
+	if(	(pHeader->ID != LittleEndian(GDMHEAD_GDM_)) || //GDMþ
 		(pHeader->DOSEOF[0] != 13 || pHeader->DOSEOF[1] != 10 || pHeader->DOSEOF[2] != 26) || //CR+LF+EOF
-		(LittleEndian(pHeader->ID2) != 0x53464D47)) return false; //GMFS
+		(pHeader->ID2 != LittleEndian(GDMHEAD_GMFS))) return false; //GMFS
 
-	// there are no other format versions...
+	// There are no other format versions...
 	if(pHeader->FormMajorVer != 1 || pHeader->FormMinorVer != 0)
 		return false;
 
 	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
-	m_nType = GDMHeader_Origin[pHeader->FormOrigin % ARRAYELEMCOUNT(GDMHeader_Origin)];
+	m_nType = GDMHeader_Origin[pHeader->FormOrigin % CountOf(GDMHeader_Origin)];
 	if(m_nType == MOD_TYPE_NONE)
 		return false;
 
-	// interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
+	// Interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
 
-	// song name
+	// Song name
 	MemsetZero(m_szNames);
 	memcpy(m_szNames[0], pHeader->SongTitle, 32);
 	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
 
-	// read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
+	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
 	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
 		if(pHeader->PanMap[i] < 16)
 		{		
-			ChnSettings[i].nPan = min((pHeader->PanMap[i] << 4) + 8, 256);
+			ChnSettings[i].nPan = min((pHeader->PanMap[i] * 16) + 8, 256);
 		}
 		else if(pHeader->PanMap[i] == 16)
 		{
 			ChnSettings[i].nPan = 128;
 			ChnSettings[i].dwFlags |= CHN_SURROUND;
 		}
-		else if(pHeader->PanMap[i] == 0xff)
+		else if(pHeader->PanMap[i] == 0xFF)
 		{
 			m_nChannels = i;
 			break;
 		}
 	}
 
-	m_nDefaultGlobalVolume = min(pHeader->MastVol << 2, 256);
+	m_nDefaultGlobalVolume = min(pHeader->MastVol * 4, 256);
 	m_nDefaultSpeed = pHeader->Tempo;
 	m_nDefaultTempo = pHeader->BPM;
-	m_nRestartPos = 0; // not supported in this format, so use the default value
-	m_nSamplePreAmp = 48; // dito
-	m_nVSTiVolume = 48; // dito
+	m_nRestartPos = 0; // Not supported in this format, so use the default value
+	m_nSamplePreAmp = 48; // Dito
+	m_nVSTiVolume = 48; // Dito
 
 	uint32 iSampleOffset  = LittleEndian(pHeader->SamOffset),
 		   iPatternsOffset = LittleEndian(pHeader->PatOffset);
@@ -140,7 +143,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				 iTGOffset = LittleEndian(pHeader->TGOffset), iTGLength = LittleEndianW(pHeader->TGLength);
 	
 
-	// check if offsets are valid. we won't read the scrolly text or text graphics, but invalid pointers would probably indicate a broken file...
+	// Check if offsets are valid. we won't read the scrolly text or text graphics, but invalid pointers would probably indicate a broken file...
 	if(	   dwMemLength < iOrdOffset || dwMemLength - iOrdOffset < pHeader->NOO
 		|| dwMemLength < iPatternsOffset
 		|| dwMemLength < iSamHeadOffset || dwMemLength - iSamHeadOffset < (pHeader->NOS + 1) * sizeof(GDMSAMPLEHEADER)
@@ -150,17 +153,17 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		|| dwMemLength < iTGOffset || dwMemLength - iTGOffset < iTGLength)
 		return false;
 
-	// read orders
+	// Read orders
 	Order.ReadAsByte(lpStream + iOrdOffset, pHeader->NOO + 1, dwMemLength - iOrdOffset);
 
-	// read samples
+	// Read samples
 	m_nSamples = pHeader->NOS + 1;
 	
 	for(SAMPLEINDEX iSmp = 1; iSmp <= m_nSamples; iSmp++)
 	{
-		const PGDMSAMPLEHEADER pSample = (PGDMSAMPLEHEADER)(lpStream + iSamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
+		const GDMSAMPLEHEADER *pSample = (GDMSAMPLEHEADER *)(lpStream + iSamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
 
-		// sample header
+		// Sample header
 
 		memcpy(m_szNames[iSmp], pSample->SamName, 32);
 		StringFixer::SpaceToNullStringFixed<31>(m_szNames[iSmp]);
@@ -174,7 +177,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		Samples[iSmp].nLoopEnd = min(LittleEndian(pSample->LoopEnd) - 1, Samples[iSmp].nLength); // dito
 		FrequencyToTranspose(&Samples[iSmp]); // set transpose + finetune for mod files
 
-		// fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
+		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
 		if(m_nType == MOD_TYPE_MOD)
 		{
 			while(Samples[iSmp].RelativeTone != 0)
@@ -192,7 +195,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 		}
 
-		if(pSample->Flags & 0x01) Samples[iSmp].uFlags |= CHN_LOOP; // loop sample
+		if(pSample->Flags & 0x01) Samples[iSmp].uFlags |= CHN_LOOP; // Loop sample
 
 		if(pSample->Flags & 0x04)
 		{
@@ -200,10 +203,10 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		else
 		{
-			Samples[iSmp].nVolume = 256; // default volume
+			Samples[iSmp].nVolume = 256; // Default volume
 		}
 
-		if(pSample->Flags & 0x08) // default panning is used
+		if(pSample->Flags & 0x08) // Default panning is used
 		{
 			Samples[iSmp].uFlags |= CHN_PANNING;
 			Samples[iSmp].nPan = (pSample->Pan > 15) ? 128 : min((pSample->Pan * 16) + 8, 256); // 0...15, 16 = surround (not supported), 255 = no default panning
@@ -213,8 +216,8 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			Samples[iSmp].nPan = 128;
 		}
 
-		/* note: apparently (and according to zilym), 2GDM doesn't handle 16 bit or stereo samples properly.
-		   so those flags are pretty much meaningless and we will ignore them... in fact, samples won't load as expected if we don't! */
+		// Note: apparently (and according to zilym), 2GDM doesn't handle 16 bit or stereo samples properly.
+		// so those flags are pretty much meaningless and we will ignore them... in fact, samples won't load as expected if we don't!
 		
 		UINT iSampleFormat;
 		if(pSample->Flags & 0x02) // 16 bit
@@ -232,60 +235,60 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				iSampleFormat = RS_PCM8U;
 		}
 
-		// according to zilym, LZW support has never been finished, so this is also practically useless. Just ignore the flag.
+		// According to zilym, LZW support has never been finished, so this is also practically useless. Just ignore the flag.
 		// if(pSample->Flags & 0x10) {...}
 
-		// read sample data
+		// Read sample data
 		ReadSample(&Samples[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + iSampleOffset), dwMemLength - iSampleOffset);
 			
 		iSampleOffset += min(LittleEndian(pSample->Length), dwMemLength - iSampleOffset);
 
 	}
 
-	// read patterns
+	// Read patterns
 	Patterns.ResizeArray(max(MAX_PATTERNS, pHeader->NOP + 1));
 
-	bool bS3MCommandSet = (GetBestSaveFormat() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0 ? true : false;
+	const bool bS3MCommandSet = (GetBestSaveFormat() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
 
-	// we'll start at position iPatternsOffset and decode all patterns
-	for (PATTERNINDEX iPat = 0; iPat < pHeader->NOP + 1; iPat++)
+	// We'll start at position iPatternsOffset and decode all patterns
+	for(PATTERNINDEX iPat = 0; iPat < pHeader->NOP + 1; iPat++)
 	{
 		
 		if(iPatternsOffset + 2 > dwMemLength) break;
-		uint16 iPatternLength = LittleEndianW(*(uint16 *)(lpStream + iPatternsOffset)); // pattern length including the two "length" bytes
+		uint16 iPatternLength = LittleEndianW(*(uint16 *)(lpStream + iPatternsOffset)); // Pattern length including the two "length" bytes
 		if(iPatternLength > dwMemLength || iPatternsOffset > dwMemLength - iPatternLength) break;
 
 		if(Patterns.Insert(iPat, 64)) 
 			break;
 
-		// position in THIS pattern
+		// Position in THIS pattern
 		DWORD iPatternPos = iPatternsOffset + 2;
 
-		MODCOMMAND *p = Patterns[iPat];
-
-		for(UINT iRow = 0; iRow < 64; iRow++)
+		for(ROWINDEX iRow = 0; iRow < 64; iRow++)
 		{
-			while(true) // zero byte = next row
+			MODCOMMAND *p = Patterns[iPat].GetRow(iRow);
+
+			while(true) // Zero byte = next row
 			{
 				if(iPatternPos + 1 > dwMemLength) break;
 
 				BYTE bChannel = lpStream[iPatternPos++];
 
-				if(bChannel == 0) break; // next row, please!
+				if(bChannel == 0) break; // Next row, please!
 
-				UINT channel = bChannel & 0x1f;
-				if(channel >= m_nChannels) break; // better safe than sorry!
+				const UINT channel = bChannel & 0x1F;
+				if(channel >= m_nChannels) break; // Better safe than sorry!
 
-				MODCOMMAND *m = &p[iRow * m_nChannels + channel];
+				MODCOMMAND *m = &p[channel];
 
 				if(bChannel & 0x20)
 				{
-					// note and sample follows
+					// Note and sample follows
 					if(iPatternPos + 2 > dwMemLength) break;
 					BYTE bNote = lpStream[iPatternPos++];
 					BYTE bSample = lpStream[iPatternPos++];
 
-					bNote = (bNote & 0x7F) - 1; // this format doesn't have note cuts
+					bNote = (bNote & 0x7F) - 1; // This format doesn't have note cuts
 					if(bNote < 0xF0) bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
 					if(bNote == 0xFF) bNote = NOTE_NONE;
 					m->note = bNote;
@@ -295,7 +298,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				if(bChannel & 0x40)
 				{
-					// effect(s) follow
+					// Effect(s) follow(s)
 
 					m->command = CMD_NONE;
 					m->volcmd = CMD_NONE;
@@ -336,11 +339,11 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							}
 							break;
 						case 0x0D: command = CMD_PATTERNBREAK; break;
-						case 0x0E: 
+						case 0x0E:
 							if(bS3MCommandSet)
 							{
 								command = CMD_S3MCMDEX;
-								// need to do some remapping
+								// Need to do some remapping
 								switch(param >> 4)
 								{
 								case 0x0:
@@ -473,7 +476,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							if(m->command == CMD_S3MCMDEX && ((m->param >> 4) == 0x8) && volcommand == CMD_NONE)
 							{
 								volcommand = VOLCMD_PANNING;
-								volparam = ((param & 0x0F) << 2) + 2;
+								volparam = ((param & 0x0F) * 4) + 2;
 							}
 
 							m->command = command;

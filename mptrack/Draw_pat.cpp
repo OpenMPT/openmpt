@@ -1530,15 +1530,12 @@ void CViewPattern::UpdateIndicator()
 									sztmp[32] = 0;
 									if ((m->note) && (m->note <= NOTE_MAX))
 									{
-										UINT nsmp = pIns->Keyboard[m->note-1];
+										const SAMPLEINDEX nsmp = pIns->Keyboard[m->note-1];
 										if ((nsmp) && (nsmp <= pSndFile->GetNumSamples()))
 										{
-											CHAR sztmp2[64] = "";
-											memcpy(sztmp2, pSndFile->m_szNames[nsmp], MAX_SAMPLENAME);
-											sztmp2[32] = 0;
-											if (sztmp2[0])
+											if (pSndFile->m_szNames[nsmp][0])
 											{
-												wsprintf(sztmp+strlen(sztmp), " (%d: %s)", nsmp, sztmp2);
+												wsprintf(sztmp+strlen(sztmp), " (%d: %s)", nsmp, pSndFile->m_szNames[nsmp]);
 											}
 										}
 									}

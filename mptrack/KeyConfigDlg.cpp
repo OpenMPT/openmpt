@@ -588,7 +588,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	//detect invalid input	
 	if (!kc.code)
 	{
-		CString error = "You need to say to which key you'd like to map this command.";
+		CString error = "You need to say to which key you'd like to map this command to.";
 		Reporting::Warning(error, "Invalid key data");
 		return;
 	}
