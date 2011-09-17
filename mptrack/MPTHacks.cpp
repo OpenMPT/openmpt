@@ -293,7 +293,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		if(instr == nullptr) continue;
 
 		// Extended instrument attributes
-		if(instr->nFilterMode != FLTMODE_UNCHANGED || instr->nVolRamp != 0 || instr->nResampling != SRCMODE_DEFAULT ||
+		if(instr->nFilterMode != FLTMODE_UNCHANGED || instr->nVolRampUp != 0 || instr->nResampling != SRCMODE_DEFAULT ||
 			instr->nCutSwing != 0 || instr->nResSwing != 0 || instr->nMixPlug != 0 || instr->wPitchToTempoLock != 0 ||
 			instr->nDCT == DCT_PLUGIN ||
 			instr->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET ||
@@ -305,7 +305,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 			if(autofix)
 			{
 				instr->nFilterMode = FLTMODE_UNCHANGED;
-				instr->nVolRamp = 0;
+				instr->nVolRampUp = 0;
 				instr->nResampling = SRCMODE_DEFAULT;
 				instr->nCutSwing = 0;
 				instr->nResSwing = 0;

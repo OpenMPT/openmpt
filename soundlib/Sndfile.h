@@ -142,10 +142,7 @@ struct MODINSTRUMENT
 	CHAR filename[32];
 
 	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-	USHORT nVolRamp;				// Default sample ramping
-// -! NEW_FEATURE#0027
+	uint16 nVolRampUp;				// Default sample ramping up
 	UINT nResampling;				// Resampling mode
 	BYTE nCutSwing;					// Random cutoff factor
 	BYTE nResSwing;					// Random resonance factor
@@ -199,7 +196,7 @@ struct MODINSTRUMENT
 		MemsetZero(filename);
 
 		nMixPlug = 0;
-		nVolRamp = 0;
+		nVolRampUp = 0;
 		nResampling = SRCMODE_DEFAULT;
 		nCutSwing = 0;
 		nResSwing = 0;
@@ -680,7 +677,9 @@ public:	// Static Members
 	static UINT m_nMaxMixChannels;
 	static LONG m_nStreamVolume;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
-	static UINT gnAGC, gnVolumeRampSamples, gnCPUUsage;
+	static UINT gnAGC;
+	static UINT gnVolumeRampUpSamples, gnVolumeRampDownSamples;
+	static UINT gnCPUUsage;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 	static uint8 s_DefaultPlugVolumeHandling;
