@@ -1205,9 +1205,9 @@ void CSoundFile::ResumePlugins()
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
 
-		if (m_MixPlugins[iPlug].pMixState)
+		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
+		if (m_MixPlugins[iPlug].pMixState && !pPlugin->IsResumed())
 		{
-            IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
 			pPlugin->NotifySongPlaying(true);
 			pPlugin->Resume();
 		}
@@ -1226,7 +1226,7 @@ void CSoundFile::StopAllVsti()
 			continue;  //most common branch
 		
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState)
+		if (m_MixPlugins[iPlug].pMixState && pPlugin->IsResumed())
 		{
 			pPlugin->HardAllNotesOff();
 		}
