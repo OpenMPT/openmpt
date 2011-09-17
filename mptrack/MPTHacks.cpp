@@ -11,7 +11,6 @@
 #include "../soundlib/modsmp_ctrl.h"
 
 /* TODO:
-stereo/16bit samples (only XM? stereo/16bit flags are defined in the S3M and IT specs...)
 out-of range sample pre-amp
 song flags and properties (just look at the song properties window)
 +++/--- orders in XM/MOD sequence
@@ -106,6 +105,57 @@ bool FindIncompatibleEnvelopes(INSTRUMENTENVELOPE &env, bool autofix)
 }
 
 
+// Functor for fixing jump commands to moved order items
+struct FixJumpCommands
+//====================
+{
+	FixJumpCommands(const vector<PATTERNINDEX> &offsets) : jumpOffset(offsets) {};
+
+	void operator()(MODCOMMAND& m)
+	{
+		if(m.command == CMD_POSITIONJUMP && m.param < jumpOffset.size())
+		{
+			m.param = BYTE(int(m.param) - jumpOffset[m.param]);
+		}
+	}
+
+	const vector<PATTERNINDEX> jumpOffset;
+};
+
+
+void RemoveFromOrder(CSoundFile &rSndFile, PATTERNINDEX which)
+//------------------------------------------------------------
+{
+	const ORDERINDEX orderLength = rSndFile.Order.GetLengthTailTrimmed();
+	ORDERINDEX currentLength = orderLength;
+
+	// Associate order item index with jump offset (i.e. how much it moved forwards)
+	vector<PATTERNINDEX> jumpOffset(orderLength, 0);
+	PATTERNINDEX maxJump = 0;
+	
+	for(ORDERINDEX i = 0; i < currentLength; i++)
+	{
+		if(rSndFile.Order[i] == which)
+		{
+			maxJump++;
+			// Move order list forwards, update jump counters
+			for(ORDERINDEX j = i + 1; j < orderLength; j++)
+			{
+				rSndFile.Order[j - 1] = rSndFile.Order[j];
+				jumpOffset[j] = maxJump;
+			}
+			rSndFile.Order[--currentLength] = rSndFile.Order.GetInvalidPatIndex();
+		}
+	}
+
+	rSndFile.Patterns.ForEachModCommand(FixJumpCommands(jumpOffset));
+	if(rSndFile.m_nRestartPos < jumpOffset.size())
+	{
+		rSndFile.m_nRestartPos -= jumpOffset[rSndFile.m_nRestartPos];
+	}
+}
+
+
 // Go through the module to find out if it contains any hacks introduced by (Open)MPT
 bool CModDoc::HasMPTHacks(const bool autofix)
 //-------------------------------------------
@@ -145,6 +195,34 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 	if(foundHere)
 		AddToLog("Found VST plugins\n");
+
+	// Check for invalid order items
+	for(ORDERINDEX i = m_SndFile.Order.GetLengthTailTrimmed(); i > 0; i--)
+	{
+		if(m_SndFile.Order[i - 1] == m_SndFile.Order.GetIgnoreIndex() && !originalSpecs->hasIgnoreIndex)
+		{
+			foundHacks = true;
+			AddToLog("This format does not support separator (+++) patterns\n");
+
+			if(autofix)
+			{
+				RemoveFromOrder(m_SndFile, m_SndFile.Order.GetIgnoreIndex());
+			}
+
+			break;
+		}
+	}
+
+	if((m_SndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) && m_SndFile.Order.GetLengthFirstEmpty() != m_SndFile.Order.GetLengthTailTrimmed())
+	{
+		foundHacks = true;
+		AddToLog("The pattern sequence should end after the first stop (---) index in this format.\n");
+
+		if(autofix)
+		{
+			RemoveFromOrder(m_SndFile, m_SndFile.Order.GetInvalidPatIndex());
+		}
+	}
 
 	// Pattern count
 	if(m_SndFile.Patterns.GetNumPatterns() > originalSpecs->patternsMax)
@@ -448,3 +526,4 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 	return foundHacks;
 }
+
