@@ -16,8 +16,8 @@
 
 
 BEGIN_MESSAGE_MAP(CloseMainDialog, CDialog)
-	ON_LBN_SELCHANGE(IDC_LIST1,		OnSelectionChanged)
-	ON_COMMAND(IDC_BUTTON1,			OnSwitchSelection)
+	ON_COMMAND(IDC_BUTTON1,			OnSaveAll)
+	ON_COMMAND(IDC_BUTTON2,			OnSaveNone)
 	ON_COMMAND(IDC_CHECK1,			OnSwitchFullPaths)
 END_MESSAGE_MAP()
 
@@ -74,9 +74,6 @@ BOOL CloseMainDialog::OnInitDialog()
 	{
 		// No modified documents...
 		OnOK();
-	} else
-	{
-		UpdateSwitchButtonState();
 	}
 
 	return TRUE;
@@ -120,36 +117,19 @@ void CloseMainDialog::OnCancel()
 }
 
 
-void CloseMainDialog::OnSelectionChanged()
-//----------------------------------------
+void CloseMainDialog::OnSaveAll()
+//-------------------------------
 {
-	UpdateSwitchButtonState();
+	m_List.SelItemRange(TRUE, 0, m_List.GetCount() - 1);
+	OnOK();
 }
 
 
-// Switch between save all/none
-void CloseMainDialog::OnSwitchSelection()
-//---------------------------------------
+void CloseMainDialog::OnSaveNone()
+//--------------------------------
 {
-	const int count = m_List.GetCount();
-	// If all items are selected, deselect them all; Else, select all items.
-	const BOOL action = (m_List.GetSelCount() == count) ? FALSE : TRUE;
-	for(int i = 0; i < count; i++)
-	{
-		m_List.SetSel(i, action);
-	}
-	UpdateSwitchButtonState();
-}
-
-
-// Update Select none/all button
-void CloseMainDialog::UpdateSwitchButtonState()
-//---------------------------------------------
-{
-	CString text = (m_List.GetSelCount() == m_List.GetCount()) ? "Se&lect none" : "Se&lect all";
-	((CButton *)GetDlgItem(IDC_BUTTON1))->SetWindowText(text);
-	text = (m_List.GetSelCount() > 0) ? "&Save selected" : "Cl&ose";
-	((CButton *)GetDlgItem(IDOK))->SetWindowText(text);
+	m_List.SelItemRange(FALSE, 0, m_List.GetCount() - 1);
+	OnOK();
 }
 
 

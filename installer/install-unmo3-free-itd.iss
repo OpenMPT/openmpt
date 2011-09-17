@@ -47,7 +47,7 @@ begin
             if(IsTaskSelected('downloadmo3')) then
             begin
             	  ITD_AddFile('http://openmpt.org/files/unmo3/2.4.0.3/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
-            	  ITD_AddMirror('ftp://ftp.untergrund.net/users/sagamusix/openmpt/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
+            	  ITD_AddMirror('ftp://ftp.untergrund.net/users/sagamusix/openmpt/archive/unmo3/2.4.0.3/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
             end else
           	begin
                 ITD_ClearFiles();

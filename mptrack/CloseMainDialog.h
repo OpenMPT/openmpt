@@ -19,7 +19,6 @@ protected:
 	CListBox m_List;
 
 	CString FormatTitle(const CModDoc *pModDoc, bool fullPath);
-	void UpdateSwitchButtonState();
 
 public:
 	CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS) { };
@@ -31,8 +30,9 @@ protected:
 	virtual void OnOK();
 	virtual void OnCancel();
 
-	afx_msg void OnSelectionChanged();
-	afx_msg void OnSwitchSelection();
+	afx_msg void OnSaveAll();
+	afx_msg void OnSaveNone();
+
 	afx_msg void OnSwitchFullPaths();
 
 	DECLARE_MESSAGE_MAP()
