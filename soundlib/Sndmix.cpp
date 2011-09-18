@@ -287,33 +287,38 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 	LPCONVERTPROC pCvt = X86_Convert32To8;
 	UINT lRead, lMax, lSampleSize, lCount, lSampleCount, nStat=0;
 	UINT nMaxPlugins;
-		
+
 	nMaxPlugins = MAX_MIXPLUGINS;
 	while ((nMaxPlugins > 0) && (!m_MixPlugins[nMaxPlugins-1].pMixPlugin)) nMaxPlugins--;
 	m_nMixStat = 0;
+
 	lSampleSize = gnChannels;
 	if (gnBitsPerSample == 16) { lSampleSize *= 2; pCvt = X86_Convert32To16; }
 #ifndef FASTSOUNDLIB
 	else if (gnBitsPerSample == 24) { lSampleSize *= 3; pCvt = X86_Convert32To24; } 
 	else if (gnBitsPerSample == 32) { lSampleSize *= 4; pCvt = X86_Convert32To32; } 
-#endif
+#endif // FASTSOUNDLIB
+
 	lMax = cbBuffer / lSampleSize;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
 	lRead = lMax;
 	if (m_dwSongFlags & SONG_ENDREACHED) 
 		goto MixDone;
+
 	while (lRead > 0)
 	{
 		// Update Channel Data
 		if (!m_nBufferCount)
 		{
+
 #ifndef FASTSOUNDLIB
 			if (m_dwSongFlags & SONG_FADINGSONG)
 			{
 				m_dwSongFlags |= SONG_ENDREACHED;
 				m_nBufferCount = lRead;
 			} else
-#endif
+#endif // FASTSOUNDLIB
+
 			if (ReadNote())
 			{
 				// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
@@ -334,9 +339,10 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 					break;
 				}
 #endif // MODPLUG_TRACKER
+
 #ifndef FASTSOUNDLIB
 				if (!FadeSong(FADESONGDELAY) || m_bIsRendering)	//rewbs: disable song fade when rendering.
-#endif
+#endif // FASTSOUNDLIB
 				{
 					m_dwSongFlags |= SONG_ENDREACHED;
 					if (lRead == lMax || m_bIsRendering)		//rewbs: don't complete buffer when rendering
@@ -345,15 +351,19 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				}
 			}
 		}
+
 		lCount = m_nBufferCount;
 		if (lCount > MIXBUFFERSIZE) lCount = MIXBUFFERSIZE;
 		if (lCount > lRead) lCount = lRead;
 		if (!lCount) 
 			break;
+
 		lSampleCount = lCount;
-	#ifndef NO_REVERB
+
+#ifndef NO_REVERB
 		gnReverbSend = 0;
-	#endif
+#endif // NO_REVERB
+
 		// Resetting sound buffer
 		X86_StereoFill(MixSoundBuffer, lSampleCount, &gnDryROfsVol, &gnDryLOfsVol);
 		
@@ -362,23 +372,42 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		{
 			lSampleCount *= 2;
 			m_nMixStat += CreateStereoMix(lCount);
-		#ifndef NO_REVERB
+
+#ifndef NO_REVERB
 			ProcessReverb(lCount);
-		#endif
+#endif // NO_REVERB
+
 			if (nMaxPlugins) ProcessPlugins(lCount);
+
+			// Apply global volume
+			if (m_pConfig->getGlobalVolumeAppliesToMaster())
+			{
+				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lSampleCount);
+			}
+
 			ProcessStereoDSP(lCount);
 		} else
 		{
 			m_nMixStat += CreateStereoMix(lCount);
-		#ifndef NO_REVERB
+
+#ifndef NO_REVERB
 			ProcessReverb(lCount);
-		#endif
+#endif // NO_REVERB
+
 			if (nMaxPlugins) ProcessPlugins(lCount);
 			X86_MonoFromStereo(MixSoundBuffer, lCount);
+
+			// Apply global volume
+			if (m_pConfig->getGlobalVolumeAppliesToMaster())
+			{
+				ApplyGlobalVolume(MixSoundBuffer, nullptr, lSampleCount);
+			}
+
 			ProcessMonoDSP(lCount);
 		}
-		// Graphic Equalizer
+
 #ifdef ENABLE_EQ
+		// Graphic Equalizer
 		if (gdwSoundSetup & SNDMIX_EQ)
 		{
 			if (gnChannels >= 2)
@@ -386,13 +415,17 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			else
 				EQMono(MixSoundBuffer, lCount);
 		}
-#endif
+#endif // ENABLE_EQ
+
 		nStat++;
+
 #ifndef NO_AGC
 		// Automatic Gain Control
 		if (gdwSoundSetup & SNDMIX_AGC) ProcessAGC(lSampleCount);
-#endif
-		UINT lTotalSampleCount = lSampleCount;
+#endif // NO_AGC
+
+		UINT lTotalSampleCount = lSampleCount;	// Including rear channels
+
 #ifndef FASTSOUNDLIB
 		// Multichannel
 		if (gnChannels > 2)
@@ -400,6 +433,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			X86_InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lSampleCount);
 			lTotalSampleCount *= 2;
 		}
+#endif // FASTSOUNDLIB
+
+#ifndef FASTSOUNDLIB
 		// Noise Shaping
 		if (gnBitsPerSample <= 16)
 		{
@@ -408,16 +444,13 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, gnBitsPerSample);
 		}
 
-		//Apply global volume
-		if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
-			ApplyGlobalVolume(MixSoundBuffer, lTotalSampleCount);
-		}
-
 		// Hook Function
-		if (gpSndMixHook) {	//Currently only used for VU Meter, so it's OK to do it after global Vol.
+		if (gpSndMixHook)
+		{
+			//Currently only used for VU Meter, so it's OK to do it after global Vol.
 			gpSndMixHook(MixSoundBuffer, lTotalSampleCount, gnChannels);
 		}
-#endif
+#endif // FASTSOUNDLIB
 
 		// Perform clipping
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
@@ -1597,7 +1630,7 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 			*/
 			const int vibpos = pChn->nAutoVibPos & 0xFF;
 			int adepth = pChn->nAutoVibDepth; // (1)
-			adepth += pSmp->nVibSweep & 0xFF; // (2 & 3)
+			adepth += pSmp->nVibSweep; // (2 & 3)
 			adepth = min(adepth, (int)(pSmp->nVibDepth << 8));
 			pChn->nAutoVibDepth = adepth; // (5)
 			adepth >>= 8; // (4)
@@ -2529,52 +2562,61 @@ int CSoundFile::GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pI
 #endif
 
 
-void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
-//---------------------------------------------------------------------------
+void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount)
+//---------------------------------------------------------------------------------------------
 {
-	long delta = 0;
 	long step = 0;
 
 	if (m_nGlobalVolumeDestination != m_nGlobalVolume)
 	{
-		//user has provided new global volume
+		// User has provided new global volume
 		const bool rampUp = m_nGlobalVolumeDestination > m_nGlobalVolume;
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
 		m_nSamplesToGlobalVolRampDest = rampUp ? gnVolumeRampUpSamples : gnVolumeRampDownSamples;
 	} 
 
-	long rampLength = m_nSamplesToGlobalVolRampDest;
+	const long rampLength = m_nSamplesToGlobalVolRampDest;
 
 	if (m_nSamplesToGlobalVolRampDest > 0)
 	{
-		// still some ramping left to do.
-		long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination)<<VOLUMERAMPPRECISION;
+		// Still some ramping left to do.
+		long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination) << VOLUMERAMPPRECISION;
 
-		delta = highResGlobalVolumeDestination - m_lHighResRampingGlobalVolume;
+		const long delta = highResGlobalVolumeDestination - m_lHighResRampingGlobalVolume;
 		step = delta / static_cast<long>(m_nSamplesToGlobalVolRampDest);
 
-		UINT maxStep = max(50, (10000 / (rampLength + 1)));	// define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
-		while(abs(step) > maxStep)							// if step is too big (might cause click), extend ramp length.
+		UINT maxStep = max(50, (10000 / (rampLength + 1)));	// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
+		while(abs(step) > maxStep)							// If step is too big (might cause click), extend ramp length.
 		{
 			m_nSamplesToGlobalVolRampDest += rampLength;
 			step = delta / static_cast<long>(m_nSamplesToGlobalVolRampDest);
 		}
 	}
 
-	for (int pos = 0; pos < lTotalSampleCount; pos++)
+	const long highResVolume = m_lHighResRampingGlobalVolume;
+	const UINT samplesToRamp = m_nSamplesToGlobalVolRampDest;
+
+	// SoundBuffer has interleaved left/right channels for the front channels; RearBuffer has the rear left/right channels.
+	// So we process the pairs independently for ramping.
+	for (int pairs = max(gnChannels / 2, 1); pairs > 0; pairs--)
 	{
+		int *sample = (pairs == 1) ? SoundBuffer : RearBuffer;
+		m_lHighResRampingGlobalVolume = highResVolume;
+		m_nSamplesToGlobalVolRampDest = samplesToRamp;
 
-		if (m_nSamplesToGlobalVolRampDest > 0)
+		for (int pos = lTotalSampleCount; pos > 0; pos--, sample++)
 		{
-			//ramping required
-			m_lHighResRampingGlobalVolume += step;
-			SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME<<VOLUMERAMPPRECISION);
-			m_nSamplesToGlobalVolRampDest--;
-		} else
-		{
-			SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
-			m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
+			if (m_nSamplesToGlobalVolRampDest > 0)
+			{
+				// Ramping required
+				m_lHighResRampingGlobalVolume += step;
+				*sample = _muldiv(*sample, m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
+				m_nSamplesToGlobalVolRampDest--;
+			} else
+			{
+				*sample = _muldiv(*sample, m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+				m_lHighResRampingGlobalVolume = m_nGlobalVolume << VOLUMERAMPPRECISION;
+			}
 		}
-
 	}
 }

@@ -1088,7 +1088,7 @@ public:
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
 #endif
-	void ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount);
+	void ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount);
 
 	// Static helper functions
 public:
