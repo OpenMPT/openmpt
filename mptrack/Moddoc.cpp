@@ -735,9 +735,14 @@ BOOL CModDoc::InitializeMod()
 
 		if ((!m_SndFile.m_nInstruments) && (m_SndFile.m_nType & MOD_TYPE_XM))
 		{
-			m_SndFile.m_nInstruments = 1;
-			m_SndFile.Instruments[1] = new MODINSTRUMENT(1);
-			InitializeInstrument(m_SndFile.Instruments[1]);
+			try
+			{
+				m_SndFile.Instruments[1] = new MODINSTRUMENT(1);
+				m_SndFile.m_nInstruments = 1;
+				InitializeInstrument(m_SndFile.Instruments[1]);
+			} catch(MPTMemoryException)
+			{
+			}
 		}
 		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT|MOD_TYPE_XM))
 		{

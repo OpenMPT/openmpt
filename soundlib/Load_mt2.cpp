@@ -401,12 +401,14 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		MODINSTRUMENT *pIns = NULL;
 		if (iIns <= m_nInstruments)
 		{
-			pIns = new MODINSTRUMENT();
-			Instruments[iIns] = pIns;
-			if (pIns)
+			try
 			{
+				pIns = new MODINSTRUMENT();
+				Instruments[iIns] = pIns;
 				memcpy(pIns->name, pmi->szName, 32);
 				StringFixer::SpaceToNullStringFixed<31>(pIns->name);
+			} catch(MPTMemoryException)
+			{			
 			}
 		}
 	#ifdef MT2DEBUG

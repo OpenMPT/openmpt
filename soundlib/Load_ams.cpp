@@ -395,9 +395,16 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 		dwMemPos += 5 + panenv->points*3;
 		pitchenv = (AMS2ENVELOPE *)(lpStream+dwMemPos);
 		dwMemPos += 5 + pitchenv->points*3;
-		MODINSTRUMENT *pIns = new MODINSTRUMENT();
-		if (!pIns) return TRUE;
-		memset(smpmap, 0, sizeof(smpmap));
+		MODINSTRUMENT *pIns;
+		try
+		{
+			pIns = new MODINSTRUMENT();
+		} catch(MPTMemoryException)
+		{
+			return true;
+		}
+		
+		MemsetZero(smpmap);
 
 		for (UINT ismpmap=0; ismpmap<pSmp->samples; ismpmap++)
 		{
