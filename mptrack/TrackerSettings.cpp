@@ -513,9 +513,9 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "MDIGraphHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glGraphWindowHeight, &dwDWORDSize); //rewbs.graph
 		RegQueryValueEx(key, "MDITreeRatio", NULL, &dwREG_DWORD, (LPBYTE)&glTreeSplitRatio, &dwDWORDSize);
 		// Colors
-		for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)
+		for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 		{
-			CHAR s[64];
+			CHAR s[16];
 			wsprintf(s, "Color%02d", ncol);
 			RegQueryValueEx(key, s, NULL, &dwREG_DWORD, (LPBYTE)&rgbCustomColors[ncol], &dwCRSIZE);
 		}
@@ -752,7 +752,7 @@ void TrackerSettings::SaveSettings()
 	}
 	// Obsolete, since we always write to Keybindings.mkb now.
 	// Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so removing this entry after having read it is kind of backwards compatible.
-	WritePrivateProfileString("Paths", "Key_Config_File", NULL, iniFile);
+	WritePrivateProfileString("Paths", "Key_Config_File", nullptr, iniFile);
 
 	CMainFrame::WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_nXBassDepth, iniFile);
 	CMainFrame::WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_nXBassRange, iniFile);
@@ -822,7 +822,7 @@ void TrackerSettings::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, 
 		_tcscpy(szPath, szFilenameFrom);
 	}
 
-	TCHAR szOldDir[sizeof(directories[dir])]; // for comparison
+	TCHAR szOldDir[CountOf(directories[dir])]; // for comparison
 	_tcscpy(szOldDir, directories[dir]);
 
 	_tcscpy(directories[dir], szPath);

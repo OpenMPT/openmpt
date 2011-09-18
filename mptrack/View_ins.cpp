@@ -113,10 +113,10 @@ CViewInstrument::CViewInstrument()
 	m_rcClient.bottom = 2;
 	m_dwStatus = 0;
 	m_nBtnMouseOver = 0xFFFF;
-	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
-	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
+	MemsetZero(m_dwNotifyPos);
+	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
-	memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX);	//rewbs.customKeys
+	MemsetZero(m_baPlayingNote);	//rewbs.customKeys
 	m_nPlayingChannel = CHANNELINDEX_INVALID;			//rewbs.customKeys
 	//rewbs.envRowGrid
 	m_bGrid=true;								  

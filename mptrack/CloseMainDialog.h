@@ -21,8 +21,8 @@ protected:
 	CString FormatTitle(const CModDoc *pModDoc, bool fullPath);
 
 public:
-	CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS) { };
-
+	CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS) { CMainFrame::GetInputHandler()->Bypass(true); };
+	~CloseMainDialog() { CMainFrame::GetInputHandler()->Bypass(false); };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

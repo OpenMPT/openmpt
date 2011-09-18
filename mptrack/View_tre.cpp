@@ -469,8 +469,8 @@ void CModTree::RefreshDlsBanks()
 				// Memorize Banks
 				WORD wBanks[16];
 				HTREEITEM hBanks[16];
-				memset(wBanks, 0, sizeof(wBanks));
-				memset(hBanks, 0, sizeof(hBanks));
+				MemsetZero(wBanks);
+				MemsetZero(hBanks);
 				UINT nBanks = 0;
 				// Add Drum Kits folder
 				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
@@ -492,16 +492,25 @@ void CModTree::RefreshDlsBanks()
 							{
 								UINT keymin = pDlsIns->Regions[iRgn].uKeyMin;
 								UINT keymax = pDlsIns->Regions[iRgn].uKeyMax;
+
+								const CHAR *regionName = pDlsBank->GetRegionName(iIns, iRgn);
+								if(regionName == nullptr && (keymin >= 24) && (keymin <= 84))
+								{
+									regionName = szMidiPercussionNames[keymin - 24];
+								} else
+								{
+									regionName = "";
+								}
+
 								if (keymin >= keymax)
 								{
-									wsprintf(szName, "%s%d: %s", szNoteNames[keymin%12], keymin/12,
-										((keymin >= 24) && (keymin <= 84)) ? szMidiPercussionNames[keymin-24] : "");
+									wsprintf(szName, "%s%d: %s", szNoteNames[keymin % 12], keymin / 12, regionName);
 								} else
 								{
 									wsprintf(szName, "%s%d-%s%d: %s",
-										szNoteNames[keymin%12], keymin/12,
-										szNoteNames[keymax%12], keymax/12,
-										((keymin >= 24) && (keymin <= 84)) ? szMidiPercussionNames[keymin-24] : "");
+										szNoteNames[keymin % 12], keymin / 12,
+										szNoteNames[keymax % 12], keymax / 12,
+										regionName);
 								}
 								LPARAM lParam = 0x80000000|(iDls<<24)|(iRgn<<16)|iIns;
 								InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,

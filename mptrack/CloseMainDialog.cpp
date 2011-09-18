@@ -46,8 +46,6 @@ BOOL CloseMainDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	CMainFrame::GetInputHandler()->Bypass(true);
-
 	// Create list of unsaved documents
 	m_List.ResetContent();
 
@@ -104,8 +102,6 @@ void CloseMainDialog::OnOK()
 	}
 
 	CDialog::OnOK();
-	CMainFrame::GetInputHandler()->Bypass(false);
-
 }
 
 
@@ -113,7 +109,6 @@ void CloseMainDialog::OnCancel()
 //------------------------------
 {
 	CDialog::OnCancel();
-	CMainFrame::GetInputHandler()->Bypass(false);
 }
 
 

@@ -202,7 +202,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 			UINT nCol = 0;
 			for (UINT iSmp=0; iSmp<SMPLIST_COLUMNS; iSmp++)
 			{
-				memset(&lvc, 0, sizeof(LV_COLUMN));
+				MemsetZero(lvc);
 				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 				lvc.fmt = (iSmp) ? LVCFMT_RIGHT : LVCFMT_LEFT;
 				lvc.pszText = (LPSTR)gSampleHeaders[iSmp].pszName;
@@ -218,7 +218,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 			UINT nCol = 0;
 			for (UINT i=0; i<INSLIST_COLUMNS; i++)
 			{
-				memset(&lvc, 0, sizeof(LV_COLUMN));
+				MemsetZero(lvc);
 				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 				lvc.fmt = (i) ? LVCFMT_RIGHT : LVCFMT_LEFT;
 				lvc.pszText = (LPSTR)gInstrumentHeaders[i].pszName;
@@ -299,15 +299,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_MIDDLEC:
 						if (sample.nLength)
 						{
-							wsprintf(s, "%d Hz", 
-								pSndFile->GetFreqFromPeriod(
-									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC + sample.RelativeTone, sample.nFineTune, sample.nC5Speed),
-									sample.nC5Speed));
+							wsprintf(s, "%d Hz", sample.GetSampleRate(pSndFile->GetType()));
 						}
 						break;
 					case SMPLIST_FILENAME:
 						memcpy(s, sample.filename, sizeof(sample.filename));
-						s[sizeof(sample.filename)] = 0;
+						s[CountOf(sample.filename)] = 0;
 						break;
 					}
 					lvi.mask = LVIF_TEXT;
@@ -364,15 +361,14 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_SAMPLES:
 						if (pIns)
 						{
-							BYTE smp_tb[(MAX_SAMPLES+7)/8];
-							memset(smp_tb, 0, sizeof(smp_tb));
+							vector<bool> smpRef(MAX_SAMPLES, false);
 							for (UINT i=0; i<NOTE_MAX; i++)
 							{
 								UINT n = pIns->Keyboard[i];
-								if ((n) && (n < MAX_SAMPLES)) smp_tb[n>>3] |= (1<<(n&7));
+								if ((n) && (n < MAX_SAMPLES)) smpRef[n] = true;
 							}
 							UINT k = 0;
-							for (UINT j=1; j<MAX_SAMPLES; j++) if (smp_tb[j>>3] & (1<<(j&7)))
+							for (UINT j=1; j<MAX_SAMPLES; j++) if (smpRef[j])
 							{
 								if (k) strcat(s, ",");
 								UINT l = strlen(s);
@@ -398,7 +394,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						if (pIns)
 						{
 							memcpy(s, pIns->filename, sizeof(pIns->filename));
-							s[sizeof(pIns->filename)] = 0;
+							s[CountOf(pIns->filename)] = 0;
 						}
 						break;
 					case INSLIST_PLUGIN:
