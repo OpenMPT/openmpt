@@ -30,6 +30,7 @@ protected:
 
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
+	~CSelectPluginDlg();
 	void DoClose();
 	void UpdatePluginsList(DWORD forceSelect = 0);
 	bool VerifyPlug(PVSTPLUGINLIB plug);

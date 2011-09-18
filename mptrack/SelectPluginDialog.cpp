@@ -55,6 +55,15 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent
 			m_pPlugin = &pSndFile->m_MixPlugins[m_nPlugSlot];
 		}
 	}
+
+	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
+}
+
+
+CSelectPluginDlg::~CSelectPluginDlg()
+//-----------------------------------
+{
+	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(false);
 }
 
 
@@ -440,7 +449,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		UpdatePluginsList(plugLib ? plugLib->dwPluginId2 : 0);
 	} else
 	{
-		Reporting::Error("At least one selected file was not a valid VST-Plugin.");
+		Reporting::Error("At least one selected file was not a valid VST Plugin.");
 	}
 }
 
@@ -448,12 +457,16 @@ void CSelectPluginDlg::OnAddPlugin()
 void CSelectPluginDlg::OnRemovePlugin()
 //-------------------------------------
 {
+	const HTREEITEM pluginToDelete = m_treePlugins.GetSelectedItem();
+	PVSTPLUGINLIB pPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(pluginToDelete);
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	PVSTPLUGINLIB pPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
+
 	if ((pManager) && (pPlug))
 	{
-		pManager->RemovePlugin(pPlug);
-		UpdatePluginsList();
+		if(pManager->RemovePlugin(pPlug))
+		{
+			m_treePlugins.DeleteItem(pluginToDelete);
+		}
 	}
 }
 
