@@ -67,7 +67,7 @@ VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt3
 
 
 BOOL CVstPluginManager::CreateMixPluginProc(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
-//-------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
 	if (that)
@@ -1554,9 +1554,11 @@ int CVstPlugin::Release()
 {
 	if (!(--m_nRefCount))
 	{
-		try {
+		try
+		{
 			delete this;
-		} catch (...) {
+		} catch (...)
+		{
 			CVstPluginManager::ReportPlugException("Exception while destroying plugin!\n");
 		}
 
@@ -2916,8 +2918,10 @@ bool CVstPlugin::Bypass(bool bypass)
 	else
 		m_pMixStruct->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
 	
+#ifdef MODPLUG_TRACKER
 	if (m_pModDoc)
 		m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
+#endif // MODPLUG_TRACKER
 
 	return bypass;
 }
@@ -2956,7 +2960,7 @@ BOOL CVstPlugin::GetSpeakerArrangement()
 void CVstPlugin::NotifySongPlaying(bool playing)
 //----------------------------------------------
 {
-	m_bSongPlaying=playing;
+	m_bSongPlaying = playing;
 }
 
 
@@ -2966,7 +2970,7 @@ UINT CVstPlugin::FindSlot()
 	UINT slot = 0;
 	if (m_pSndFile)
 	{
-		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<MAX_MIXPLUGINS - 1)
+		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot < MAX_MIXPLUGINS - 1)
 		{
 			slot++;
 		}
@@ -3006,12 +3010,6 @@ bool CVstPlugin::CanRecieveMidiEvents()
 {
 	CString s = "receiveVstMidiEvent";
 	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0)) ? true : false;
-}
-
-bool CVstPlugin::KeysRequired()
-//-----------------------------
-{
-	return (CVstPlugin::Dispatch(effKeysRequired, 0, 0, NULL, 0) != 0);
 }
 
 void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list) 

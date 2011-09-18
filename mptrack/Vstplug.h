@@ -158,7 +158,6 @@ public:
 
 	bool isInstrument(); // ericus 18/02/2005
 	bool CanRecieveMidiEvents();
-	bool KeysRequired();
 
 	void GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);
 	void GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);

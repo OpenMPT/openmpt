@@ -68,12 +68,14 @@ BOOL CSelectPluginDlg::OnInitDialog()
 	m_treePlugins.ModifyStyle(dwRemove, dwAdd);
 	m_treePlugins.SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
 
-	if (m_pPlugin) {
+	if (m_pPlugin)
+	{
 		CString targetSlot;
-		targetSlot.Format("Put in FX%02d", m_nPlugSlot+1);
+		targetSlot.Format("&Put in FX%02d", m_nPlugSlot + 1);
 		SetDlgItemText(IDOK, targetSlot);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), TRUE);
-	} else {
+	} else
+	{
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
 	}
 
