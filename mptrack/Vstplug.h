@@ -244,7 +244,7 @@ public:
 	PVSTPLUGINLIB GetFirstPlugin() const { return m_pVstHead; }
 	BOOL IsValidPlugin(const VSTPLUGINLIB *pLib);
 	PVSTPLUGINLIB AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
-	BOOL RemovePlugin(PVSTPLUGINLIB);
+	bool RemovePlugin(PVSTPLUGINLIB);
 	BOOL CreateMixPlugin(PSNDMIXPLUGIN, CSoundFile*);
 	void OnIdle();
 	static void ReportPlugException(LPCSTR format,...);

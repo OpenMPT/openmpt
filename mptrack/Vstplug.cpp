@@ -434,7 +434,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 }
 
 
-BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
+bool CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 //----------------------------------------------------------
 {
 	PVSTPLUGINLIB p = m_pVstHead;
@@ -462,11 +462,11 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 				CVstPluginManager::ReportPlugException("Exception while trying to release plugin \"%s\"!\n", pFactory->szLibraryName);
 			}
 
-			return TRUE;
+			return true;
 		}
 		p = p->pNext;
 	}
-	return FALSE;
+	return false;
 }
 
 
