@@ -253,10 +253,10 @@ MODCOMMAND *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 {
 	try
 	{
-		MODCOMMAND *p = new MODCOMMAND[rows*nchns];
+		MODCOMMAND *p = new MODCOMMAND[rows * nchns];
 		memset(p, 0, rows * nchns * sizeof(MODCOMMAND));
 		return p;
-	} catch (...)
+	} catch(MPTMemoryException)
 	{
 		return nullptr;
 	}

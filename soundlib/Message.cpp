@@ -28,7 +28,7 @@ bool CSoundFile::AllocateMessage(size_t length)
 		m_lpszSongComments = new char[length + 1];	// + 1 for trailing null
 		memset(m_lpszSongComments, 0, length + 1);
 		return true;
-	} catch(...)
+	} catch(MPTMemoryException)
 	{
 		m_lpszSongComments = nullptr;
 		return false;

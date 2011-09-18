@@ -1646,7 +1646,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	try
 	{
 		pIns = new MODINSTRUMENT();
-	} catch(...)
+	} catch(MPTMemoryException)
 	{
 		return FALSE;
 	}
