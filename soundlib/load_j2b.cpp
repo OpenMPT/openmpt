@@ -549,10 +549,14 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(Instruments[nIns] != nullptr)
 					delete Instruments[nIns];
 
-				MODINSTRUMENT *pIns = new MODINSTRUMENT();
-				if(pIns == nullptr)
+				try
+				{
+					Instruments[nIns] = new MODINSTRUMENT();
+				} catch(MPTMemoryException)
+				{
 					break;
-				Instruments[nIns] = pIns;
+				}
+				MODINSTRUMENT *pIns = Instruments[nIns];
 
 				m_nInstruments = max(m_nInstruments, nIns);
 
@@ -657,10 +661,14 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(Instruments[nIns] != nullptr)
 					delete Instruments[nIns];
 
-				MODINSTRUMENT *pIns = new MODINSTRUMENT();
-				if(pIns == nullptr)
+				try
+				{
+					Instruments[nIns] = new MODINSTRUMENT();
+				} catch(MPTMemoryException)
+				{
 					break;
-				Instruments[nIns] = pIns;
+				}
+				MODINSTRUMENT *pIns = Instruments[nIns];
 
 				m_nInstruments = max(m_nInstruments, nIns);
 

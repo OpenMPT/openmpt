@@ -491,14 +491,6 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	vector<DWORD> inspos;
 	vector<DWORD> smppos;
 	vector<DWORD> patpos;
-// Using eric's code here to take care of NNAs etc..
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	BYTE chnmask[64], channels_used[64];
-//	MODCOMMAND lastvalue[64];
-	BYTE chnmask[MAX_BASECHANNELS];
-	MODCOMMAND lastvalue[MAX_BASECHANNELS];
-// -! BEHAVIOUR_CHANGE#0006
 
 	bool interpretModPlugMade = false;
 	bool hasModPlugExtensions = false;
@@ -880,8 +872,6 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Checking for unused channels
 	for (UINT patchk=0; patchk<npatterns; patchk++)
 	{
-		memset(chnmask, 0, sizeof(chnmask));
-
 		if ((!patpos[patchk]) || ((DWORD)patpos[patchk] >= dwMemLength - 4))
 			continue;
 
@@ -904,6 +894,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		const BYTE *p = lpStream+patpos[patchk]+8;
 		UINT nrow = 0;
 
+		vector<BYTE> chnmask;
+
 		while (nrow<rows)
 		{
 			if (i >= len) break;
@@ -917,6 +909,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			UINT ch = b & IT_bitmask_patternChanField_c;   // 0x7f We have some data grab a byte keeping only 7 bits
 			if (ch)
 				ch = (ch - 1);// & IT_bitmask_patternChanMask_c;   // 0x3f mask of the byte again, keeping only 6 bits
+
+			if(ch >= chnmask.size())
+			{
+				chnmask.resize(ch + 1, 0);
+			}
 
 			if (b & IT_bitmask_patternChanEnabled_c)            // 0x80 check if the upper bit is enabled.
 			{
@@ -955,10 +952,14 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		if ((inspos[nins] > 0) && (inspos[nins] < dwMemLength - (pifh->cmwt < 0x200 ? sizeof(ITOLDINSTRUMENT) : sizeof(ITINSTRUMENT))))
 		{
-			MODINSTRUMENT *pIns = new MODINSTRUMENT();
-			if (!pIns) continue;
-			Instruments[nins + 1] = pIns;
-			ITInstrToMPT(lpStream + inspos[nins], pIns, pifh->cmwt);
+			try
+			{
+				Instruments[nins + 1] = new MODINSTRUMENT();
+				ITInstrToMPT(lpStream + inspos[nins], Instruments[nins + 1], pifh->cmwt);
+			} catch(MPTMemoryException)
+			{
+				continue;
+			}
 		}
 	}
 
@@ -1098,8 +1099,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		// Now (after the Insert() call), we can read the pattern name.
 		CopyPatternName(Patterns[npat], &patNames, patNamesLen);
 
-		memset(lastvalue, 0, sizeof(lastvalue));
-		memset(chnmask, 0, sizeof(chnmask));
+		vector<BYTE> chnmask;
+		vector<MODCOMMAND> lastvalue;
+
 		MODCOMMAND *m = Patterns[npat];
 		UINT i = 0;
 		const BYTE *p = lpStream+patpos[npat]+8;
@@ -1119,6 +1121,13 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			if (ch)
 				ch = (ch - 1); //& IT_bitmask_patternChanMask_c; // 0x3f
+
+			if(ch >= chnmask.size())
+			{
+				chnmask.resize(ch + 1, 0);
+				lastvalue.resize(ch + 1, MODCOMMAND::Empty());
+				ASSERT(chnmask.size() <= GetNumChannels());
+			}
 
 			if (b & IT_bitmask_patternChanEnabled_c)  // 0x80
 			{
@@ -2474,7 +2483,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 	if (nInstruments == 0)
 		return;
 
-	MODINSTRUMENT *sizeIns = new MODINSTRUMENT();
+	MODINSTRUMENT *sizeIns = nullptr;
 
 	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(sizeIns->nVolRampUp),  f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(sizeIns->nMixPlug),    f, nInstruments);
@@ -2520,8 +2529,6 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(sizeIns->PitchEnv.Values), f, nInstruments);
 		}
 	}
-
-	delete sizeIns;
 
 	return;
 }

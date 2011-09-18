@@ -236,7 +236,14 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : nullptr;
 
-				if ((pIns = new MODINSTRUMENT(nsmp)) == nullptr) break;
+				try
+				{
+					pIns = new MODINSTRUMENT(nsmp);
+				} catch(MPTMemoryException)
+				{
+					break;
+				}
+
 				Instruments[iIns + 1] = pIns;
 
 				memcpy(pIns->name, pih->name, 30);

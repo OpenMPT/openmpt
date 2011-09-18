@@ -284,7 +284,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	if(xmheader.flags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if(xmheader.flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
-	Order.ReadAsByte(lpStream + 80, xmheader.orders, dwMemLength - 80);
+	Order.ReadAsByte(lpStream + 80, min(xmheader.orders, MAX_ORDERS), dwMemLength - 80);
 
 	dwMemPos = xmheader.size + 60;
 
@@ -317,7 +317,13 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		MemsetZero(pih);
 		memcpy(&pih, lpStream + dwMemPos, min(sizeof(pih), ihsize));
 
-		if ((Instruments[iIns] = new MODINSTRUMENT()) == nullptr) continue;
+		try
+		{
+			Instruments[iIns] = new MODINSTRUMENT();
+		} catch(MPTMemoryException)
+		{
+			continue;
+		}
 
 		memcpy(Instruments[iIns]->name, pih.name, 22);
 		StringFixer::SpaceToNullStringFixed<22>(Instruments[iIns]->name);
@@ -485,7 +491,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 		for (UINT j=0; j<96; j++)
 		{
-			pIns->NoteMap[j+12] = j+1+12;
 			if (xmsh.snum[j] < nsamples)
 				pIns->Keyboard[j+12] = samplemap[xmsh.snum[j]];
 		}

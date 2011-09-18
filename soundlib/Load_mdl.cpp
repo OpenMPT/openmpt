@@ -370,7 +370,13 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				if (!Instruments[nins])
 				{
 					UINT note = 12;
-					if ((Instruments[nins] = new MODINSTRUMENT()) == nullptr) break;
+					try
+					{
+						Instruments[nins] = new MODINSTRUMENT();
+					} catch(MPTMemoryException)
+					{
+						break;
+					}
 					MODINSTRUMENT *pIns = Instruments[nins];
 					memcpy(pIns->name, lpStream+dwPos+2, 32);
 					StringFixer::SpaceToNullStringFixed<31>(pIns->name);
@@ -417,7 +423,13 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
 			{
-				Instruments[j] = new MODINSTRUMENT();
+				try
+				{
+					Instruments[j] = new MODINSTRUMENT();
+				} catch(MPTMemoryException)
+				{
+				}
+				
 			}
 			break;
 		// VE: Volume Envelope

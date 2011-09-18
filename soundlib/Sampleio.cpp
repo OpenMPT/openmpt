@@ -78,11 +78,17 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 			}
 		}
 
-		MODINSTRUMENT *pIns = new MODINSTRUMENT(nSample);
-		if (!pIns) return false;
+		MODINSTRUMENT *pIns;
 
+		try
+		{
+			pIns = new MODINSTRUMENT(nSample);
+		} catch(MPTMemoryException)
+		{
+			return false;
+		}
+		 
 		DestroyInstrument(nInstr, deleteAssociatedSamples);
-
 		Instruments[nInstr] = pIns;
 
 		// Default values
@@ -188,59 +194,67 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrc
 	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[nSrcInstr])) return false;
 	if (m_nInstruments < nInstr) m_nInstruments = nInstr;
 
+	MODINSTRUMENT *pIns;
+
+	try
+	{
+		pIns = new MODINSTRUMENT();
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
+		
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
-	if (!Instruments[nInstr]) Instruments[nInstr] = new MODINSTRUMENT();
-	MODINSTRUMENT *pIns = Instruments[nInstr];
-	if (pIns)
+	Instruments[nInstr] = pIns;
+
+	// TODO we want to copy ALL samples, not just 32! Use vectors here.
+	WORD samplemap[32];
+	WORD samplesrc[32];
+	UINT nSamples = 0;
+	UINT nsmp = 1;
+	*pIns = *pSrcSong->Instruments[nSrcInstr];
+	for (UINT i=0; i<128; i++)
 	{
-		WORD samplemap[32];
-		WORD samplesrc[32];
-		UINT nSamples = 0;
-		UINT nsmp = 1;
-		*pIns = *pSrcSong->Instruments[nSrcInstr];
-		for (UINT i=0; i<128; i++)
+		UINT n = pIns->Keyboard[i];
+		if ((n) && (n <= pSrcSong->m_nSamples) && (i < NOTE_MAX))
 		{
-			UINT n = pIns->Keyboard[i];
-			if ((n) && (n <= pSrcSong->m_nSamples) && (i < NOTE_MAX))
+			UINT j = 0;
+			for (j=0; j<nSamples; j++)
 			{
-				UINT j = 0;
-				for (j=0; j<nSamples; j++)
+				if (samplesrc[j] == n) break;
+			}
+			if (j >= nSamples)
+			{
+				while ((nsmp < MAX_SAMPLES) && ((Samples[nsmp].pSample) || (m_szNames[nsmp][0]))) nsmp++;
+				if ((nSamples < 32) && (nsmp < MAX_SAMPLES))
 				{
-					if (samplesrc[j] == n) break;
-				}
-				if (j >= nSamples)
-				{
-					while ((nsmp < MAX_SAMPLES) && ((Samples[nsmp].pSample) || (m_szNames[nsmp][0]))) nsmp++;
-					if ((nSamples < 32) && (nsmp < MAX_SAMPLES))
-					{
-						samplesrc[nSamples] = (WORD)n;
-						samplemap[nSamples] = (WORD)nsmp;
-						nSamples++;
-						pIns->Keyboard[i] = (WORD)nsmp;
-						if (m_nSamples < nsmp) m_nSamples = nsmp;
-						nsmp++;
-					} else
-					{
-						pIns->Keyboard[i] = 0;
-					}
+					samplesrc[nSamples] = (WORD)n;
+					samplemap[nSamples] = (WORD)nsmp;
+					nSamples++;
+					pIns->Keyboard[i] = (SAMPLEINDEX)nsmp;
+					if (m_nSamples < nsmp) m_nSamples = nsmp;
+					nsmp++;
 				} else
 				{
-					pIns->Keyboard[i] = samplemap[j];
+					pIns->Keyboard[i] = 0;
 				}
 			} else
 			{
-				pIns->Keyboard[i] = 0;
+				pIns->Keyboard[i] = samplemap[j];
 			}
-		}
-		// Load Samples
-		for (UINT k=0; k<nSamples; k++)
+		} else
 		{
-			ReadSampleFromSong(samplemap[k], pSrcSong, samplesrc[k]);
+			pIns->Keyboard[i] = 0;
 		}
-		return true;
 	}
-	return false;
+	// Load Samples
+	for (UINT k=0; k<nSamples; k++)
+	{
+		ReadSampleFromSong(samplemap[k], pSrcSong, samplesrc[k]);
+	}
+
+	return true;
 }
 
 
@@ -866,10 +880,15 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 	 || (!pih->layers) || (!plh->samples)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 
-	DestroyInstrument(nInstr, deleteAssociatedSamples);
+	try
+	{
+		pIns = new MODINSTRUMENT();
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
 
-	pIns = new MODINSTRUMENT();
-	if (!pIns) return false;
+	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
 	Instruments[nInstr] = pIns;
 	nSamples = plh->samples;
@@ -1081,12 +1100,19 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 
+	MODINSTRUMENT *pIns;
+
+	try
+	{
+		pIns = new MODINSTRUMENT();
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
+
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
-
-	Instruments[nInstr] = new MODINSTRUMENT();
-	MODINSTRUMENT *pIns = Instruments[nInstr];
-	if (!pIns) return false;
-
+	
+	Instruments[nInstr] = pIns;
 	memcpy(pIns->name, pxh->name, 22);
 	nsamples = 0;
 	for (UINT i=0; i<96; i++)
@@ -1149,17 +1175,17 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		pIns->PanEnv.Values[ienv] = (BYTE)pih->pIns[ienv*2+1];
 		if (ienv)
 		{
-			if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1])
+			if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1])
 			{
 				pIns->VolEnv.Ticks[ienv] &= 0xFF;
-				pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv-1] & 0xFF00;
-				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1]) pIns->VolEnv.Ticks[ienv] += 0x100;
+				pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv - 1] & 0xFF00;
+				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1]) pIns->VolEnv.Ticks[ienv] += 0x100;
 			}
-			if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1])
+			if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1])
 			{
 				pIns->PanEnv.Ticks[ienv] &= 0xFF;
-				pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv-1] & 0xFF00;
-				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1]) pIns->PanEnv.Ticks[ienv] += 0x100;
+				pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv - 1] & 0xFF00;
+				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1]) pIns->PanEnv.Ticks[ienv] += 0x100;
 			}
 		}
 	}
@@ -1690,12 +1716,19 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	 || (pinstr->id != LittleEndian(IT_IMPI))) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 
+	MODINSTRUMENT *pIns;
+
+	try
+	{
+		pIns = new MODINSTRUMENT();
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
+
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
-	Instruments[nInstr] = new MODINSTRUMENT();
-	MODINSTRUMENT *pIns = Instruments[nInstr];
-	if (!pIns) return false;
-
+	Instruments[nInstr] = pIns;
 	MemsetZero(samplemap);
 	dwMemPos = 554;
 	dwMemPos += ITInstrToMPT(pinstr, pIns, pinstr->trkvers);
