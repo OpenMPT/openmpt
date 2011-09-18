@@ -126,11 +126,11 @@ void TestVersion()
 		if (!dwVerInfoSize)
 			throw std::runtime_error("!dwVerInfoSize is true");
 
-		char* pVersionInfo;
+		char *pVersionInfo;
 		try
 		{
 			pVersionInfo = new char[dwVerInfoSize];
-		} catch(...)
+		} catch(MPTMemoryException)
 		{
 			throw std::runtime_error("Could not allocate memory for pVersionInfo");
 		}

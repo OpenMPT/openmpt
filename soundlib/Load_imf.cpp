@@ -499,8 +499,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		try
 		{
 			pIns = new MODINSTRUMENT();
-		}
-		catch(...)
+		} catch(MPTMemoryException)
 		{
 			continue;
 		}

@@ -501,14 +501,14 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 					try
 					{
 						MODINSTRUMENT *p = new MODINSTRUMENT(smp);
-						InitializeInstrument(p);
 						m_SndFile.Instruments[smp] = p;
-						lstrcpyn(p->name, m_SndFile.m_szNames[smp], CountOf(p->name));
-					} catch(...)
+					} catch(MPTMemoryException)
 					{
 						ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
 						return INSTRUMENTINDEX_INVALID;
 					}
+					InitializeInstrument(m_SndFile.Instruments[smp]);
+					lstrcpyn(m_SndFile.Instruments[smp]->name, m_SndFile.m_szNames[smp], MAX_INSTRUMENTNAME);
 				}
 			}
 			m_SndFile.m_nInstruments = nInstruments;
@@ -562,12 +562,12 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	try
 	{
 		pIns = new MODINSTRUMENT(newsmp);
-		InitializeInstrument(pIns);
-	} catch(...)
+	} catch(MPTMemoryException)
 	{
 		ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
 		return INSTRUMENTINDEX_INVALID;
 	}
+	InitializeInstrument(pIns);
 
 	CriticalSection cs;
 

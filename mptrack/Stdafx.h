@@ -96,6 +96,9 @@ void Log(LPCSTR format,...);
 
 #include "../common/typedefs.h"
 
+// Exception type that is used to catch "operator new" exceptions.
+typedef CMemoryException * MPTMemoryException;
+
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 

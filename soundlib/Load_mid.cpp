@@ -416,7 +416,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	try
 	{
 		pIns = new MODINSTRUMENT();
-	} catch(...)
+	} catch(MPTMemoryException)
 	{
 		return 0;
 	}
