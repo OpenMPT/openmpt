@@ -173,7 +173,8 @@ void CViewPattern::OnInitialUpdate()
 	//m_dwStatus = 0;
 	m_dwStatus = PATSTATUS_PLUGNAMESINHEADERS;
 	m_nXScroll = m_nYScroll = 0;
-	m_nPattern = m_nRow = 0;
+	m_nPattern = 0;
+	m_nRow = 0;
 	m_nSpacing = 0;
 	m_nAccelChar = 0;
 // -> CODE#0018
@@ -190,8 +191,8 @@ void CViewPattern::OnInitialUpdate()
 }
 
 
-BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
-//-------------------------------------------------------
+BOOL CViewPattern::SetCurrentPattern(UINT npat, ROWINDEX nrow)
+//------------------------------------------------------------
 {
 	CSoundFile *pSndFile;
 	CModDoc *pModDoc = GetDocument();
@@ -211,7 +212,7 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	}
 	
 	m_nPattern = npat;
-	if ((nrow >= 0) && (nrow != (int)m_nRow) && (nrow < (int)pSndFile->Patterns[m_nPattern].GetNumRows()))
+	if ((nrow != ROWINDEX_INVALID) && (nrow != m_nRow) && (nrow < pSndFile->Patterns[m_nPattern].GetNumRows()))
 	{
 		m_nRow = nrow;
 		bUpdateScroll = true;
@@ -226,7 +227,7 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	if (m_bWholePatternFitsOnScreen) 		//rewbs.scrollFix
 		SetScrollPos(SB_VERT, 0);
 	else if (bUpdateScroll) //rewbs.fix3147
-		SetScrollPos(SB_VERT, m_nRow * GetColumnHeight());
+		SetScrollPos(SB_VERT, (int)m_nRow * GetColumnHeight());
 
 	UpdateScrollPos();
 	InvalidatePattern(TRUE);
@@ -2254,7 +2255,7 @@ void CViewPattern::OnCursorCopy()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		if ((!pSndFile->Patterns[m_nPattern].GetNumRows()) || (!pSndFile->Patterns[m_nPattern])) return;
-		MODCOMMAND *m = pSndFile->Patterns[m_nPattern] + m_nRow * pSndFile->GetNumChannels() + GetChanFromCursor(m_dwCursor);
+		const MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
 		switch(GetColTypeFromCursor(m_dwCursor))
 		{
 		case NOTE_COLUMN:
@@ -2290,7 +2291,7 @@ void CViewPattern::OnCursorPaste()
 		UINT nChn = GetChanFromCursor(m_dwCursor);
 		UINT nCursor = GetColTypeFromCursor(m_dwCursor);
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern] +  m_nRow*pSndFile->m_nChannels + nChn;
+		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 
 		switch(nCursor)
 		{
@@ -2916,7 +2917,7 @@ void CViewPattern::OnEditUndo()
 void CViewPattern::OnPatternAmplify()
 //-----------------------------------
 {
-	static UINT snOldAmp = 100;
+	static int16 snOldAmp = 100;
 	CAmpDlg dlg(this, snOldAmp, 0);
 	CModDoc *pModDoc = GetDocument();
 
@@ -2927,7 +2928,7 @@ void CViewPattern::OnPatternAmplify()
 
 		BeginWaitCursor();
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
-		snOldAmp = static_cast<UINT>(dlg.m_nFactor);
+		snOldAmp = dlg.m_nFactor;
 
 		if (pSndFile->Patterns[m_nPattern])
 		{
@@ -3749,14 +3750,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPatternSnapDownh2:		CursorJump(GetRowsPerBeat(), false, true);  return wParam;
 
 		case kcNavigateDownSelect:
-		case kcNavigateDown:	SetCurrentRow(m_nRow+1, TRUE); return wParam;
+		case kcNavigateDown:	SetCurrentRow(m_nRow + 1, TRUE); return wParam;
 		case kcNavigateUpSelect:
-		case kcNavigateUp:		SetCurrentRow(m_nRow-1, TRUE); return wParam;
+		case kcNavigateUp:		SetCurrentRow(m_nRow - 1, TRUE); return wParam;
 
 		case kcNavigateDownBySpacingSelect:
-		case kcNavigateDownBySpacing:	SetCurrentRow(m_nRow+m_nSpacing, TRUE); return wParam;
+		case kcNavigateDownBySpacing:	SetCurrentRow(m_nRow + m_nSpacing, TRUE); return wParam;
 		case kcNavigateUpBySpacingSelect:
-		case kcNavigateUpBySpacing:		SetCurrentRow(m_nRow-m_nSpacing, TRUE); return wParam;
+		case kcNavigateUpBySpacing:		SetCurrentRow(m_nRow - m_nSpacing, TRUE); return wParam;
 
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (!m_dwCursor))
@@ -4850,7 +4851,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		UINT nChn = GetChanFromCursor(m_dwCursor);
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern] +  m_nRow*pSndFile->m_nChannels + nChn;
+		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 		MODCOMMAND oldcmd = *p;
 
 		switch(field)
@@ -4880,7 +4881,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 			 || (!(m_dwStatus & PATSTATUS_FOLLOWSONG)))))
 			{
 				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
-					SetCurrentRow(m_nRow+m_nSpacing);
+					SetCurrentRow(m_nRow + m_nSpacing);
 				DWORD sel = CreateCursor(m_nRow) | m_dwCursor;
 				SetCurSel(sel, sel);
 			}

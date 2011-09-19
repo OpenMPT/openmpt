@@ -1429,16 +1429,16 @@ void CViewPattern::InvalidatePattern(BOOL bHdr)
 }
 
 
-void CViewPattern::InvalidateRow(int n)
-//-------------------------------------
+void CViewPattern::InvalidateRow(ROWINDEX n)
+//------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		int yofs = GetYScrollPos() - m_nMidRow;
-		if (n == -1) n = m_nRow;
-		if ((n < yofs) || (n >= (int)pSndFile->Patterns[m_nPattern].GetNumRows())) return;
+		if (n == ROWINDEX_INVALID) n = m_nRow;
+		if (((int)n < yofs) || (n >= pSndFile->Patterns[m_nPattern].GetNumRows())) return;
 		CRect rect;
 		GetClientRect(&rect);
 		rect.left = m_szHeader.cx;
@@ -1484,7 +1484,7 @@ void CViewPattern::UpdateIndicator()
 	if ((pMainFrm) && (pModDoc))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[512];
+		CHAR s[128];
 		CHANNELINDEX nChn;
 		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel() + 1);
 		pMainFrm->SetUserText(s);
@@ -1496,7 +1496,7 @@ void CViewPattern::UpdateIndicator()
 			 && (m_dwBeginSel == m_dwEndSel) && (pSndFile->Patterns[m_nPattern])
 			 && (m_nRow < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
 			{
-				MODCOMMAND *m = &pSndFile->Patterns[m_nPattern][m_nRow*pSndFile->m_nChannels+nChn];
+				MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 
 				switch (GetColTypeFromCursor(m_dwCursor))
 				{
