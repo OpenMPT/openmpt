@@ -962,8 +962,8 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 						// IT compatibility: MPT has a weird vol swing algorithm....
 						if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
-							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
-							pChn->nVolSwing = d * pIns->nVolSwing / 100.0 * pChn->nVolume;
+							double d = 128 * (((double) rand()) / RAND_MAX) - 64;
+							pChn->nVolSwing = d * pIns->nVolSwing / 100.0;
 						} else
 						{
 							int d = ((LONG)pIns->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;

@@ -456,8 +456,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		pIns->nPPC = pis->ppc;
 		pIns->nIFC = pis->ifc;
 		pIns->nIFR = pis->ifr;
-		pIns->nVolSwing = pis->rv;
-		pIns->nPanSwing = pis->rp;
+		pIns->nVolSwing = min(pis->rv, 100);
+		pIns->nPanSwing = min(pis->rp, 100);
 		pIns->nPan = (pis->dfp & 0x7F) << 2;
 		if (pIns->nPan > 256) pIns->nPan = 128;
 		if (pis->dfp < 0x80) pIns->dwFlags |= INS_SETPANNING;
@@ -1621,8 +1621,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
 			iti.dfp = (BYTE)(pIns->nPan >> 2);
 			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
-			iti.rv = pIns->nVolSwing;
-			iti.rp = pIns->nPanSwing;
+			iti.rv = min(pIns->nVolSwing, 100);
+			iti.rp = min(pIns->nPanSwing, 100);
 			iti.ifc = pIns->nIFC;
 			iti.ifr = pIns->nIFR;
 			iti.nos = 0;
