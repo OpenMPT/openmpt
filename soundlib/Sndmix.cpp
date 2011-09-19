@@ -2572,10 +2572,8 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 		// User has provided new global volume
 		const bool rampUp = m_nGlobalVolumeDestination > m_nGlobalVolume;
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
-		m_nSamplesToGlobalVolRampDest = rampUp ? gnVolumeRampUpSamples : gnVolumeRampDownSamples;
+		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? gnVolumeRampUpSamples : gnVolumeRampDownSamples;
 	} 
-
-	const long rampLength = m_nSamplesToGlobalVolRampDest;
 
 	if (m_nSamplesToGlobalVolRampDest > 0)
 	{
@@ -2585,10 +2583,12 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 		const long delta = highResGlobalVolumeDestination - m_lHighResRampingGlobalVolume;
 		step = delta / static_cast<long>(m_nSamplesToGlobalVolRampDest);
 
-		UINT maxStep = max(50, (10000 / (rampLength + 1)));	// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
-		while(abs(step) > maxStep)							// If step is too big (might cause click), extend ramp length.
+		// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
+		// If step is too big (might cause click), extend ramp length.
+		UINT maxStep = max(50, (10000 / (m_nGlobalVolumeRampAmount + 1)));
+		while(static_cast<UINT>(abs(step)) > maxStep)
 		{
-			m_nSamplesToGlobalVolRampDest += rampLength;
+			m_nSamplesToGlobalVolRampDest += m_nGlobalVolumeRampAmount;
 			step = delta / static_cast<long>(m_nSamplesToGlobalVolRampDest);
 		}
 	}
