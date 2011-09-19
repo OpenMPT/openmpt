@@ -711,7 +711,7 @@ public:	// for Editing
 	ORDERINDEX m_nCurrentPattern, m_nNextPattern, m_nRestartPos, m_nSeqOverride;
 	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
 	bool m_bPatternTransitionOccurred;
-	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest,
+	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
