@@ -918,9 +918,14 @@ void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 {
 	if(pChn->nVolSwing)
 	{
-		if(GetModFlag(MSF_OLDVOLSWING))
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			vol += pChn->nVolSwing;
+			Limit(vol, 0, 64);
+		} else if(GetModFlag(MSF_OLDVOLSWING))
+		{
+			vol += pChn->nVolSwing;
+			Limit(vol, 0, 256);
 		}
 		else
 		{
@@ -928,28 +933,16 @@ void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 			pChn->nVolume = CLAMP(pChn->nVolume, 0, 256);
 			vol = pChn->nVolume;
 			pChn->nVolSwing = 0;
+			Limit(vol, 0, 256);
 		}
 	}
-
-	vol = CLAMP(vol, 0, 256);
 }
 
 
 void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
 //----------------------------------------------------
 {
-	if(GetModFlag(MSF_OLDVOLSWING))
-	{
-		pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
-	}
-	else
-	{
-		pChn->nPan += pChn->nPanSwing;
-		pChn->nPan = CLAMP(pChn->nPan, 0, 256);
-		pChn->nPanSwing = 0;
-		pChn->nRealPan = pChn->nPan;
-	}
-
+	pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
 	pChn->nRealPan = CLAMP(pChn->nRealPan, 0, 256);
 }
 
@@ -2020,7 +2013,10 @@ BOOL CSoundFile::ReadNote()
 		{
 			int vol = pChn->nVolume;
 
-			ProcessVolumeSwing(pChn, vol);
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				ProcessVolumeSwing(pChn, vol);
+			}
 			ProcessPanningSwing(pChn);
 			ProcessTremolo(pChn, vol);
 			ProcessTremor(pChn, vol);
@@ -2047,6 +2043,12 @@ BOOL CSoundFile::ReadNote()
 			// vol is 14-bits
 			if (vol)
 			{
+				int insVol = pChn->nInsVol;	// This is the "SV" value in ITTECH.TXT
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
+					ProcessVolumeSwing(pChn, insVol);
+				}
+
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
@@ -2057,10 +2059,10 @@ BOOL CSoundFile::ReadNote()
 					pChn->nRealVolume = 0;
 				} else if (m_pConfig->getGlobalVolumeAppliesToMaster())
 				{
-					pChn->nRealVolume = _muldiv(vol * MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+					pChn->nRealVolume = _muldiv(vol * MAX_GLOBAL_VOLUME, pChn->nGlobalVol * insVol, 1 << 20);
 				} else
 				{
-					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * insVol, 1 << 20);
 				}
 			}
 
