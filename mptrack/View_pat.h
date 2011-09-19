@@ -102,7 +102,8 @@ protected:
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
-	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
+	ROWINDEX m_nRow;
+	UINT m_nPattern, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nMenuParam, m_nDetailLevel;
@@ -163,7 +164,7 @@ public:
 	int GetColumnWidth() const { return m_szCell.cx; }
 	int GetColumnHeight() const { return m_szCell.cy; }
 	UINT GetCurrentPattern() const { return m_nPattern; }
-	UINT GetCurrentRow() const { return m_nRow; }
+	ROWINDEX GetCurrentRow() const { return m_nRow; }
 	UINT GetCurrentColumn() const { return m_dwCursor; }
 	UINT GetCurrentChannel() const { return (m_dwCursor >> 3); }
 	UINT GetColumnOffset(DWORD dwPos) const;
@@ -174,12 +175,12 @@ public:
 	ROWINDEX GetRowsPerMeasure() const;
 
 	void InvalidatePattern(BOOL bHdr=FALSE);
-	void InvalidateRow(int n=-1);
+	void InvalidateRow(ROWINDEX n = ROWINDEX_INVALID);
 	void InvalidateArea(DWORD dwBegin, DWORD dwEnd);
 	void InvalidateSelection() { InvalidateArea(m_dwBeginSel, m_dwEndSel); }
 	void InvalidateChannelsHeaders();
 	void SetCurSel(DWORD dwBegin, DWORD dwEnd);
-	BOOL SetCurrentPattern(UINT npat, int nrow=-1);
+	BOOL SetCurrentPattern(UINT npat, ROWINDEX nrow = ROWINDEX_INVALID);
 	BOOL SetCurrentRow(UINT nrow, BOOL bWrap=FALSE, BOOL bUpdateHorizontalScrollbar=TRUE );
 	BOOL SetCurrentColumn(UINT ncol);
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
