@@ -958,7 +958,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 100);
-	m_SliderPanSwing.SetRange(0, 100);
+	m_SliderPanSwing.SetRange(0, 64);
 	m_SliderCutSwing.SetRange(0, 64);
 	m_SliderResSwing.SetRange(0, 64);
 	// Filter
@@ -2375,7 +2375,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			else if (pSlider==&m_SliderPanSwing) 
 			{
 				n = m_SliderPanSwing.GetPos();
-				if ((n >= 0) && (n <= 100) && (n != (int)pIns->nPanSwing))
+				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nPanSwing))
 				{
 					pIns->nPanSwing = (BYTE)n;
 					SetInstrumentModified(true);
