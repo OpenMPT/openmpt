@@ -960,7 +960,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 					if (pIns->nVolSwing)
 					{
 						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-						pChn->nVolSwing = (LONG)std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : (pChn->nVolume + 1)) * pIns->nVolSwing / 100.0);
+						pChn->nVolSwing = (LONG)std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0);
 					}
 					// Pan Swing
 					if (pIns->nPanSwing)
