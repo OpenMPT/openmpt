@@ -962,12 +962,12 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 						// IT compatibility: MPT has a weird vol swing algorithm....
 						if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
-							double d = 128 * (((double) rand()) / RAND_MAX) - 64;
-							pChn->nVolSwing = d * pIns->nVolSwing / 100.0;
+							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
+							pChn->nVolSwing = std::floor(d * pChn->nInsVol * pIns->nVolSwing / 100.0);
 						} else
 						{
 							int d = ((LONG)pIns->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-							pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1)/128);
+							pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1) / 128);
 						}
 					}
 					// Pan Swing
@@ -977,7 +977,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 						if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
 							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
-							pChn->nPanSwing = d * pIns->nPanSwing * 4;
+							pChn->nPanSwing = std::floor(d * pIns->nPanSwing * 4);
 						} else
 						{
 							int d = ((LONG)pIns->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
