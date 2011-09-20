@@ -942,8 +942,17 @@ void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
 //----------------------------------------------------
 {
-	pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
-	pChn->nRealPan = CLAMP(pChn->nRealPan, 0, 256);
+	if(IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING))
+	{
+		pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
+	} else
+	{
+		pChn->nPan += pChn->nPanSwing;
+		Limit(pChn->nPan, 0, 256);
+		pChn->nPanSwing = 0;
+		pChn->nRealPan = pChn->nPan;
+	}
+	Limit(pChn->nRealPan, 0, 256);
 }
 
 

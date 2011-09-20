@@ -118,10 +118,10 @@ struct MODINSTRUMENT
 	BYTE nNNA;			// New note action
 	BYTE nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
 	BYTE nDNA;			// Duplicate note action
-	BYTE nPanSwing;		// Random panning factor
-	BYTE nVolSwing;		// Random volume factor
-	BYTE nIFC;			// Default filter cutoff (00...7F). Used if the high bit is set
-	BYTE nIFR;			// Default filter resonance (00...7F). Used if the high bit is set
+	BYTE nPanSwing;		// Random panning factor (0...64)
+	BYTE nVolSwing;		// Random volume factor (0...100)
+	BYTE nIFC;			// Default filter cutoff (0...127). Used if the high bit is set
+	BYTE nIFR;			// Default filter resonance (0...127). Used if the high bit is set
 
 	WORD wMidiBank;		// MIDI bank
 	BYTE nMidiProgram;	// MIDI program
@@ -134,8 +134,8 @@ struct MODINSTRUMENT
 	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
 	uint16 nVolRampUp;				// Default sample ramping up
 	UINT nResampling;				// Resampling mode
-	BYTE nCutSwing;					// Random cutoff factor
-	BYTE nResSwing;					// Random resonance factor
+	BYTE nCutSwing;					// Random cutoff factor (0...64)
+	BYTE nResSwing;					// Random resonance factor (0...64)
 	BYTE nFilterMode;				// Default filter mode
 	WORD wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
 	BYTE nPluginVelocityHandling;	// How to deal with plugin velocity

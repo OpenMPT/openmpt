@@ -457,7 +457,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		pIns->nIFC = pis->ifc;
 		pIns->nIFR = pis->ifr;
 		pIns->nVolSwing = min(pis->rv, 100);
-		pIns->nPanSwing = min(pis->rp, 100);
+		pIns->nPanSwing = min(pis->rp, 64);
 		pIns->nPan = (pis->dfp & 0x7F) << 2;
 		if (pIns->nPan > 256) pIns->nPan = 128;
 		if (pis->dfp < 0x80) pIns->dwFlags |= INS_SETPANNING;
@@ -1249,6 +1249,15 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		SetModFlag(MSF_OLDVOLSWING, true);
 	}
 
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+	{
+		// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		{
+			Instruments[i]->nVolSwing = min(Instruments[i]->nVolSwing * 100 / 64, 100);
+		}
+	}
+
 	if(GetType() == MOD_TYPE_IT)
 	{
 		// Set appropriate mod flags if the file was not made with MPT.
@@ -1622,7 +1631,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			iti.dfp = (BYTE)(pIns->nPan >> 2);
 			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
 			iti.rv = min(pIns->nVolSwing, 100);
-			iti.rp = min(pIns->nPanSwing, 100);
+			iti.rp = min(pIns->nPanSwing, 64);
 			iti.ifc = pIns->nIFC;
 			iti.ifr = pIns->nIFR;
 			iti.nos = 0;

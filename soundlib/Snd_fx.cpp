@@ -959,29 +959,16 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 					// Volume Swing
 					if (pIns->nVolSwing)
 					{
-						// IT compatibility: MPT has a weird vol swing algorithm....
-						if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						{
-							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
-							pChn->nVolSwing = std::floor(d * pChn->nInsVol * pIns->nVolSwing / 100.0);
-						} else
-						{
-							int d = ((LONG)pIns->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-							pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1) / 128);
-						}
+						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
+						pChn->nVolSwing = (LONG)std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : (pChn->nVolume + 1)) * pIns->nVolSwing / 100.0);
 					}
 					// Pan Swing
 					if (pIns->nPanSwing)
 					{
-						// IT compatibility: MPT has a weird pan swing algorithm....
-						if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
+						pChn->nPanSwing = (LONG)std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing);
+						if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
-							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
-							pChn->nPanSwing = std::floor(d * pIns->nPanSwing * 4);
-						} else
-						{
-							int d = ((LONG)pIns->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-							pChn->nPanSwing = (signed short)d;
 							pChn->nRestorePanOnNewNote = pChn->nPan + 1;
 						}
 					}
