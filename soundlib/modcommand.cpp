@@ -192,8 +192,14 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			}
 			break;
 		case CMD_PANNINGSLIDE:
-			// swap L/R
-			m->param = ((m->param & 0x0F) << 4) | (m->param >> 4);
+			// swap L/R, convert to fine slide
+			if(m->param & 0xF0)
+			{
+				m->param = 0xF0 | min(0x0E, (m->param >> 4));
+			} else
+			{
+				m->param = 0x0F | (min(0x0E, m->param & 0x0F) << 4);
+			}
 		default:
 			break;
 		}
@@ -280,11 +286,24 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			if(m->param < 0x20) m->command = CMD_NONE; // no tempo slides
 			break;
 		case CMD_PANNINGSLIDE:
-			// swap L/R
-			m->param = ((m->param & 0x0F) << 4) | (m->param >> 4);
-			// remove fine slides
-			if((m->param > 0xF0) || ((m->param & 0x0F) == 0x0F && m->param != 0x0F))
-				m->command = CMD_NONE;
+			// swap L/R, convert fine slides to normal slides
+			if((m->param & 0x0F) == 0x0F && (m->param & 0xF0))
+			{
+				m->param = (m->param >> 4);
+			} else if((m->param & 0xF0) == 0xF0 && (m->param & 0x0F))
+			{
+				m->param = (m->param & 0x0F) << 4;
+			} else if(m->param & 0x0F)
+			{
+				m->param = 0xF0;
+			} else if(m->param & 0xF0)
+			{
+				m->param = 0x0F;
+			} else
+			{
+				m->param = 0;
+			}
+			break;
 		case CMD_RETRIG:
 			// Retrig: Q0y doesn't change volume in IT/S3M, but R0y in XM takes the last x parameter
 			if(m->param != 0 && (m->param & 0xF0) == 0)

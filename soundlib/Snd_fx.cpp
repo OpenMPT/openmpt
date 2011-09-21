@@ -2649,10 +2649,12 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 			{
 				if (param & 0x0F)
 				{
+					// IT compatibility: Ignore slide commands with both nibbles set.
 					if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
 						nPanSlide = (int)((param & 0x0F) << 2);
 				} else
 				{
+					// IT compatibility: Ignore slide commands with both nibbles set.
 					if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
 						nPanSlide = -(int)((param & 0xF0) >> 2);
 				}
@@ -2662,16 +2664,14 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 	{
 		if (!(m_dwSongFlags & SONG_FIRSTTICK))
 		{
-			// IT compatibility: Ignore slide commands with both nibbles set.
-			if (param & 0x0F)
+			if (param & 0xF0)
+			{
+				nPanSlide = (int)((param & 0xF0) >> 2);
+			} else
 			{
 				nPanSlide = -(int)((param & 0x0F) << 2);
 			}
-			else
-			{
-				nPanSlide = (int)((param & 0xF0) >> 2);
-			}
-			// XM compatibility: FT2's panning slide is not as deep
+			// XM compatibility: FT2's panning slide is like IT's fine panning slide (not as deep)
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 				nPanSlide >>= 2;
 		}
@@ -3882,7 +3882,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 	{
 		if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) nGlbSlide *= 2;
 		nGlbSlide += m_nGlobalVolume;
-		nGlbSlide = CLAMP(nGlbSlide, 0, 256);
+		Limit(nGlbSlide, 0, 256);
 		m_nGlobalVolume = nGlbSlide;
 	}
 }
