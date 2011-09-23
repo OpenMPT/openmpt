@@ -1894,14 +1894,14 @@ void CCtrlInstruments::OnSetPanningChanged()
 			if(smpPanningInUse)
 			{
 				if(Reporting::Confirm(_T("Some of the samples used in the instrument have \"Set Pan\" enabled. "
-						"When instrument is played with such sample, sample pan setting overrides instrument pan. "
-						"Do you wish to disable panning from those samples so that instrument pan setting is effective "
+						"Sample panning overrides instrument panning for the notes associated with such samples. "
+						"Do you wish to disable panning from those samples so that the instrument pan setting is effective "
 						"for the whole instrument?")) == cnfYes)
 				{
 					for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
 					{
 						const SAMPLEINDEX smp = pIns->Keyboard[i];
-						if(smp <= m_pSndFile->GetNumSamples())
+						if(smp > 0 && smp <= m_pSndFile->GetNumSamples())
 							m_pSndFile->GetSample(smp).uFlags &= ~CHN_PANNING;
 					}
 					m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE);

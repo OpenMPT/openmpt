@@ -1744,9 +1744,7 @@ void CCtrlSamples::OnEstimateSampleSize()
 	UpdateData(TRUE);
 
 	//Calculate/verify samplerate at C5.
-	long lSampleRate = sample.nC5Speed;
-	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		lSampleRate = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+	long lSampleRate = sample.GetSampleRate(m_pSndFile->GetType());
 	if(lSampleRate <= 0) 
 		lSampleRate = 8363;
 

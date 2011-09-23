@@ -58,7 +58,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 			}
 		}
 		if (bSuccess == false)
-			MsgBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS, NULL, MAINFRAME_TITLE, MB_ICONERROR);
+			ErrorBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS);
 	}
 	// We will only overwrite the default Keybindings.mkb file from now on.
 	_tcscpy(CMainFrame::GetSettings().m_szKbdFile, sDefaultPath);

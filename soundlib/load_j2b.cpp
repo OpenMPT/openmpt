@@ -568,10 +568,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					pIns->Keyboard[i] = instheader->samplemap[i] + m_nSamples + 1;
 				}
 
-				pIns->nGlobalVol = 64;
-				pIns->nPan = 128;
 				pIns->nFadeOut = LittleEndianW(instheader->fadeout) << 5;
-				pIns->nPPC = NOTE_MIDDLEC - 1;
 
 				// interleaved envelope data... meh. gotta split it up here and decode it separately.
 				// note: mod2j2b is BUGGY and always writes ($original_num_points & 0x0F) in the header,

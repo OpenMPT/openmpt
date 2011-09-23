@@ -1245,9 +1245,8 @@ bool CCtrlPatterns::HasValidPlug(UINT instr)
 BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 //--------------------------------------------------------------------
 {
-	// TODO: Add your message handler code here and/or call default
-
-	if (nFlags==0) {
+	if (nFlags==0)
+	{
 		PostViewMessage(VIEWMSG_DOSCROLL, zDelta);
 	}
 	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);

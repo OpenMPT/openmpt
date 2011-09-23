@@ -225,11 +225,6 @@ const LPCTSTR szDefaultNoteNames[NOTE_MAX] = {
 	TEXT("C-9"), TEXT("C#9"), TEXT("D-9"), TEXT("D#9"), TEXT("E-9"), TEXT("F-9"), TEXT("F#9"), TEXT("G-9"), TEXT("G#9"), TEXT("A-9"), TEXT("A#9"), TEXT("B-9"),
 };
 
-static void ShowChangesDialog()
-//-----------------------------
-{
-}
-
 
 TCHAR CTrackApp::m_szExePath[_MAX_PATH] = TEXT("");
 
@@ -800,13 +795,10 @@ BOOL CTrackApp::InitInstance()
 	CMainFrame::GetSettings().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
 	if(CMainFrame::GetSettings().m_nSampleUndoMaxBuffer < (1 << 20)) CMainFrame::GetSettings().m_nSampleUndoMaxBuffer = (1 << 20);
 
-	ASSERT(NULL == m_pDocManager);
+	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
 
-#ifdef _DEBUG
-		ASSERT((sizeof(MODCHANNEL)&7) == 0);
-	// Disabled by rewbs for smoothVST. Might cause minor perf issues due to increased cache misses?
-#endif
+	ASSERT((sizeof(MODCHANNEL) & 7) == 0);
 
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
@@ -818,7 +810,8 @@ BOOL CTrackApp::InitInstance()
 	SetupPaths(cmdInfo.m_bPortable);
 
 	//Force use of custom ini file rather than windowsDir\executableName.ini
-	if (m_pszProfileName) {
+	if (m_pszProfileName)
+	{
 		free((void *)m_pszProfileName);
 	}
 	m_pszProfileName = _tcsdup(m_szConfigFileName); 
@@ -916,7 +909,6 @@ BOOL CTrackApp::InitInstance()
 	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::GetSettings().gcsPreviousVersion) < MptVersion::num)
 	{
 		StopSplashScreen();
-		ShowChangesDialog();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 	}
 
@@ -1576,7 +1568,7 @@ BOOL CAboutDlg::OnInitDialog()
 		"in the form of ideas, testing and support; thanks|"
 		"particularly to:|"
 		"33, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn|"
-		"christofori, Diamond, Ganja, Georg, Goor00|"
+		"christofori, Diamond, Ganja, Georg, Goor00, jmkz,|"
 		"KrazyKatz, LPChip, Nofold, Rakib, Sam Zen|"
 		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead|"
 		"|||||||"
@@ -1603,7 +1595,6 @@ void CTrackApp::OnAppAbout()
 //--------------------------
 {
 	if (gpAboutDlg) return;
-	ShowChangesDialog();
 	gpAboutDlg = new CAboutDlg();
 	gpAboutDlg->Create(IDD_ABOUTBOX, m_pMainWnd);
 }

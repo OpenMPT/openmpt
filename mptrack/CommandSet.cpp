@@ -1424,7 +1424,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 	if( (outStream  = fopen( fileName, "w" )) == NULL )
 	{
-		MsgBox(IDS_CANT_OPEN_FILE_FOR_WRITING, NULL, NULL, MB_ICONEXCLAMATION | MB_OK);
+		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);
 		return false;
 	}
 	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 

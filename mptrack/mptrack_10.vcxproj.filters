@@ -142,9 +142,6 @@
     <ClCompile Include="globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KeyConfigDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ChannelNode.cpp">
       <Filter>Source Files\MixGraph</Filter>
     </ClCompile>
@@ -430,6 +427,9 @@
     <ClCompile Include="..\common\misc_util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KeyConfigDlg.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -517,9 +517,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyboardSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyConfigDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainFrm.h">
@@ -752,6 +749,9 @@
     </ClInclude>
     <ClInclude Include="..\common\StringFixer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyConfigDlg.h">
+      <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
