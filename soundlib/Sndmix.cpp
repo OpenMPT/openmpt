@@ -89,6 +89,8 @@ extern void ProcessReverb(UINT nSamples);
 #endif
 
 // Log tables for pre-amp
+// Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
+// Which this table takes care of.
 const UINT PreAmpTable[16] =
 {
 	0x60, 0x60, 0x60, 0x70,	// 0-7
@@ -1960,8 +1962,6 @@ BOOL CSoundFile::ReadNote()
 	MODCHANNEL *pChn = Chn;
 	for (CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
 	{
-	skipchn:
-
 		// XM Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
 		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
@@ -1984,19 +1984,7 @@ BOOL CSoundFile::ReadNote()
 			pChn->nLeftVU = pChn->nRightVU = 0;
 #endif
 
-			nChn++;
-			pChn++;
-			if (nChn >= m_nChannels)
-			{
-				while ((nChn < MAX_CHANNELS) && (!pChn->nLength))
-				{
-					nChn++;
-					pChn++;
-				}
-			}
-			if (nChn < MAX_CHANNELS)
-				goto skipchn;	// >:(
-			break;
+			continue;
 		}
 		// Reset channel data
 		pChn->nInc = 0;
@@ -2030,8 +2018,9 @@ BOOL CSoundFile::ReadNote()
 			ProcessTremolo(pChn, vol);
 			ProcessTremor(pChn, vol);
 
-			// Clip volume and multiply
-			vol = CLAMP(vol, 0, 256) << 6;
+			// Clip volume and multiply (extend to 14 bits)
+			Limit(vol, 0, 256);
+			vol <<= 6;
 
 			// Process Envelopes
 			if (pIns)
@@ -2061,8 +2050,8 @@ BOOL CSoundFile::ReadNote()
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
-				//Don't let global volume affect level of sample if
-				//global volume is going to be applied to master output anyway.
+				// Don't let global volume affect level of sample if
+				// Global volume is going to be applied to master output anyway.
 				if (pChn->dwFlags & CHN_SYNCMUTE)
 				{
 					pChn->nRealVolume = 0;
@@ -2079,6 +2068,7 @@ BOOL CSoundFile::ReadNote()
 
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			period = pChn->nPeriod;
+			// TODO Glissando effect is reset after portamento! What would this sound like without the CHN_PORTAMENTO flag?
 			if ((pChn->dwFlags & (CHN_GLISSANDO|CHN_PORTAMENTO)) ==	(CHN_GLISSANDO|CHN_PORTAMENTO))
 			{
 				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
@@ -2089,7 +2079,7 @@ BOOL CSoundFile::ReadNote()
 			// Preserve Amiga freq limits
 			if (m_dwSongFlags & (SONG_AMIGALIMITS|SONG_PT1XMODE))
 			{
-				period = CLAMP(period, 113 * 4, 856 * 4);
+				Limit(period, 113 * 4, 856 * 4);
 			}
 
 			ProcessPanbrello(pChn);
@@ -2146,9 +2136,9 @@ BOOL CSoundFile::ReadNote()
 				freq = pChn->m_Freq;
 			}
 
-			//Applying Pitch/Tempo lock.
+			// Applying Pitch/Tempo lock.
             if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
-				freq = MulDiv(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
+				freq = _muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
 
 
 			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
@@ -2487,7 +2477,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 	//If new note, determine notevelocity to use.
 	if(note != NOTE_NONE)
 	{
-		UINT velocity = 4*defaultVolume;
+		UINT velocity = 4 * defaultVolume;
 		switch(pIns->nPluginVelocityHandling)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:

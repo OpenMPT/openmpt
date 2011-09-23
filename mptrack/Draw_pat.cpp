@@ -1505,6 +1505,7 @@ void CViewPattern::UpdateIndicator()
 					if(m->note >= NOTE_MIN_SPECIAL)
 						strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
 					break;
+
 				case INST_COLUMN:
 					// display instrument
 					if (m->instr)
@@ -1515,8 +1516,7 @@ void CViewPattern::UpdateIndicator()
 							// display plugin name.
 							if(m->instr <= MAX_MIXPLUGINS)
 							{
-								strncpy(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName(), sizeof(sztmp));
-								StringFixer::SetNullTerminator(sztmp);
+								strncpy(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName(), CountOf(sztmp));
 							}
 						} else
 						{
@@ -1530,12 +1530,12 @@ void CViewPattern::UpdateIndicator()
 									sztmp[32] = 0;
 									if ((m->note) && (m->note <= NOTE_MAX))
 									{
-										const SAMPLEINDEX nsmp = pIns->Keyboard[m->note-1];
+										const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
 										if ((nsmp) && (nsmp <= pSndFile->GetNumSamples()))
 										{
 											if (pSndFile->m_szNames[nsmp][0])
 											{
-												wsprintf(sztmp+strlen(sztmp), " (%d: %s)", nsmp, pSndFile->m_szNames[nsmp]);
+												wsprintf(sztmp + strlen(sztmp), " (%d: %s)", nsmp, pSndFile->m_szNames[nsmp]);
 											}
 										}
 									}
@@ -1550,9 +1550,11 @@ void CViewPattern::UpdateIndicator()
 							}
 
 						}
+						StringFixer::SetNullTerminator(sztmp);
 						if (sztmp[0]) wsprintf(s, "%d: %s", m->instr, sztmp);
 					}
 					break;
+
 				case VOL_COLUMN:
 					// display volume command
 					if(m->IsPcNote())
@@ -1571,6 +1573,7 @@ void CViewPattern::UpdateIndicator()
 						if (!pModDoc->GetVolCmdInfo(pModDoc->GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
 					}
 					break;
+
 				case EFFECT_COLUMN:
 				case PARAM_COLUMN:
 					// display effect command

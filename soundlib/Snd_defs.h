@@ -45,39 +45,22 @@ typedef uint32 MODTYPE;
 
 
 #define MOD_AMIGAC2			0x1AB
-// -> CODE#0006 
-// -> DESC="misc quantity changes"
 #define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB).
                                         // Note: Sample size in bytes can be more than 256 MB.
-// -! BEHAVIOUR_CHANGE#0006
-#define MAX_SAMPLE_RATE		192000
+										// The meaning of this constant is handled differently in various places; sometimes it's samples, sometimes it's bytes...
+#define MAX_SAMPLE_RATE		192000		// Max playback / render rate in Hz
 #define MAX_ORDERS			256
 #define MAX_PATTERNS		240
 #define MAX_SAMPLES			4000
+#define MAX_INSTRUMENTS		256	//200
 
 const SEQUENCEINDEX MAX_SEQUENCES = 50;
 
-#define MAX_INSTRUMENTS		256	//200 // -> CODE#0006 -> DESC="misc quantity changes" // -! BEHAVIOUR_CHANGE#0006
-//#ifdef FASTSOUNDLIB
-//#define MAX_CHANNELS		80
-//#else
-// -> CODE#0006
-// -> DESC="misc quantity changes"
 #define MAX_CHANNELS		256	//200 // Note: This is the maximum number of sound channels,
-                                //            see MAX_BASECHANNELS for max pattern channels.
-// -! BEHAVIOUR_CHANGE#0006
-//#endif
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//#ifdef FASTSOUNDLIB
-//#define MAX_BASECHANNELS	64
-//#else
 #define MAX_BASECHANNELS	127	// Max pattern channels.
-//#endif
-// -! BEHAVIOUR_CHANGE#0006
-#define MAX_ENVPOINTS		240
-#define MIN_PERIOD			0x0020
-#define MAX_PERIOD			0xFFFF
+
+#define MIN_PERIOD			0x0020	// Note: Period is an Amiga metric that is inverse to frequency.
+#define MAX_PERIOD			0xFFFF	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides.
 
 // String lengths (including trailing null char)
 #define MAX_SAMPLENAME			32	// also affects module name!
@@ -89,7 +72,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 
 #define MAX_EQ_BANDS		6
 
-#define MAX_MIXPLUGINS		100	//50 // -> CODE#0006 -> DESC="misc quantity changes" -! BEHAVIOUR_CHANGE#0006
+#define MAX_MIXPLUGINS		100	//50
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
 
 #define MOD_TYPE_NONE		0x00
@@ -176,6 +159,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define ENVELOPE_MIN		0		// vertical min value of a point
 #define ENVELOPE_MID		32		// vertical middle line
 #define ENVELOPE_MAX		64		// vertical max value of a point
+#define MAX_ENVPOINTS		240		// Maximum length of each instrument envelope
 #define ENVELOPE_MAX_LENGTH 0x3FFF	// max envelope length in ticks. note: this value seems to be conservatively low...
 
 
@@ -216,6 +200,7 @@ enum enmEnvelopeTypes
 #define FLTMODE_HIGHPASS		1
 
 
+// Sample formats
 #define RSF_16BIT		0x04
 #define RSF_STEREO		0x08
 

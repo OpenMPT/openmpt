@@ -210,10 +210,10 @@ void CModTypeDlg::UpdateDialog()
 	// Misc Flags
 	if(ITorMPT)
 	{
-		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Impulse Tracker compatible playback"));
+		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Impulse Tracker &compatible playback"));
 	} else
 	{
-		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Fasttracker 2 compatible playback"));
+		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Fasttracker 2 &compatible playback"));
 	}
 
 	GetDlgItem(IDC_CHK_COMPATPLAY)->ShowWindow(XMorITorMPT);

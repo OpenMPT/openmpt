@@ -112,8 +112,8 @@ struct MODINSTRUMENT
 {
 	UINT nFadeOut;		// Instrument fadeout speed
 	DWORD dwFlags;		// Instrument flags
-	UINT nGlobalVol;	// Global volume (all sample volumes are multiplied with this)
-	UINT nPan;			// Default pan (overrides sample panning), if the appropriate flag is set
+	UINT nGlobalVol;	// Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
+	UINT nPan;			// Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
 
 	BYTE nNNA;			// New note action
 	BYTE nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
@@ -271,7 +271,8 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	MODSAMPLE *pModSample;							// Currently assigned sample slot
 	CHANNELINDEX nMasterChn;
 	DWORD nVUMeter;
-	LONG nGlobalVol, nInsVol;
+	LONG nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
+	LONG nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
 	LONG nFineTune, nTranspose;
 	LONG nPortamentoSlide, nAutoVibDepth;
 	UINT nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
@@ -282,6 +283,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	DWORD nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
 	int nRetrigCount, nRetrigParam;
 	ROWINDEX nPatternLoop;
+	UINT nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
@@ -291,7 +293,6 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nOldVolumeSlide, nOldFineVolUpDown;
 	BYTE nOldPortaUpDown, nOldFinePortaUpDown;
 	BYTE nOldPanSlide, nOldChnVolSlide;
-    UINT nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;
 	BYTE nVibratoType, nVibratoSpeed, nVibratoDepth;
 	BYTE nTremoloType, nTremoloSpeed, nTremoloDepth;
 	BYTE nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
@@ -305,7 +306,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nRowCommand, nRowParam;
 	BYTE nLeftVU, nRightVU;
 	BYTE nActiveMacro, nFilterMode;
-	BYTE nEFxSpeed, nEFxDelay; // memory for Invert Loop (EFx, .MOD only)
+	BYTE nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
 
 	//NOTE_PCs memory.
 	uint16 m_RowPlugParam;
@@ -315,7 +316,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	void ClearRowCmd() {nRowNote = NOTE_NONE; nRowInstr = 0; nRowVolCmd = VOLCMD_NONE; nRowVolume = 0; nRowCommand = CMD_NONE; nRowParam = 0;}
 
 	typedef UINT VOLUME;
-	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol*4 : nVolume;}
+	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume;}
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 		bool m_ReCalculateFreqOnFirstTick;
@@ -350,6 +351,7 @@ struct MODCHANNELSETTINGS
 };
 
 #include "modcommand.h"
+
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins

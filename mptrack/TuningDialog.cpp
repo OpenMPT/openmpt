@@ -1262,7 +1262,7 @@ void CTuningDialog::OnMoveTuning()
 	m_ModifiedTCs[pTCdest] = true;
 	if(CTuningCollection::TransferTuning(pTCsrc, pTCdest, pT))
 	{
-		MsgBox(IDS_OPERATION_FAIL, this, NULL, MB_OK);
+		MsgBox(IDS_OPERATION_FAIL, this);
 		AddTreeItem(pT, treeItemSrcTC, NULL);
 	}
 	else

@@ -222,10 +222,8 @@ void CSoundFile::InitializeDSP(BOOL bReset)
 		LONG a1 = 0, b0 = 1024, b1 = 0;
 		int nXBassCutOff = 50 + (m_nXBassRange+2) * 20;
 		int nXBassGain = m_nXBassDepth;
-		if (nXBassGain < 2) nXBassGain = 2;
-		if (nXBassGain > 8) nXBassGain = 8;
-		if (nXBassCutOff < 60) nXBassCutOff = 60;
-		if (nXBassCutOff > 600) nXBassCutOff = 600;
+		Limit(nXBassGain, 2, 8);
+		Limit(nXBassCutOff, 60, 600);
 		ShelfEQ(1024, &a1, &b0, &b1, nXBassCutOff, gdwMixingFreq,
 				1.0f + (1.0f/16.0f) * (0x300 >> nXBassGain),
 				1.0f,

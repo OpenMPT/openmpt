@@ -426,7 +426,7 @@ CHAR* CChildFrame::GetCurrentViewClassName()
 void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 {
 	CMDIChildWnd::OnSetFocus(pOldWnd);
-	// TODO: Add your message handler code here
+
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{

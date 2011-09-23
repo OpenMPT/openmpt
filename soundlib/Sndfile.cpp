@@ -955,6 +955,8 @@ void CSoundFile::SanitizeMacros()
 BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
 //----------------------------------------------------------------------------
 {
+	CriticalSection cs;
+
 	BOOL bReset = FALSE;
 	DWORD d = gdwSoundSetup & ~SNDMIX_ENABLEMMX;
 	if (bMMX) d |= SNDMIX_ENABLEMMX;
@@ -971,6 +973,8 @@ BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
 BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL bNR,BOOL bEQ)
 //------------------------------------------------------------------------------------------
 {
+	CriticalSection cs;
+
 	DWORD d = gdwSoundSetup & ~(SNDMIX_SURROUND | SNDMIX_REVERB | SNDMIX_MEGABASS | SNDMIX_NOISEREDUCTION | SNDMIX_EQ);
 	if (bSurround) d |= SNDMIX_SURROUND;
 	if ((bReverb) && (gdwSysInfo & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB;
@@ -2632,14 +2636,11 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
 	if (/*!Ins[from].pSample ||*/ Samples[to].pSample) return true;
 
-	MODSAMPLE *pFrom = &Samples[from];
-	MODSAMPLE *pTo = &Samples[to];
+	MemCopy(Samples[to], Samples[from]);
 
-	memcpy(pTo, pFrom, sizeof(MODSAMPLE));
-
-	pFrom->pSample = nullptr;
-	pFrom->nLength = 0;
-	pFrom->uFlags &= ~(CHN_16BIT);
+	Samples[from].pSample = nullptr;
+	Samples[from].nLength = 0;
+	Samples[from].uFlags &= ~(CHN_16BIT);
 
 	return true;
 }
