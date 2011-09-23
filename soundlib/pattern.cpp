@@ -223,7 +223,7 @@ bool CPattern::SetName(char *newName, size_t maxChars)
 	{
 		return false;
 	}
-	m_PatternName.SetString(newName, maxChars - 1);
+	m_PatternName.SetString(newName, strnlen(newName, maxChars));
 	return true;
 }
 
