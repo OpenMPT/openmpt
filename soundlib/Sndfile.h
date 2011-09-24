@@ -981,6 +981,7 @@ protected:
 
 protected:
 	// Channel Effects
+	void UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const;
 	void PortamentoUp(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
 	void PortamentoDown(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
 	void MidiPortamento(MODCHANNEL *pChn, int param);

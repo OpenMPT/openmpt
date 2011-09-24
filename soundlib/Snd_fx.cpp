@@ -105,18 +105,21 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 // -! NEW_FEATURE#0022
 	UINT nMusicSpeed = m_nDefaultSpeed, nMusicTempo = m_nDefaultTempo, nNextRow = 0;
 	LONG nGlbVol = m_nDefaultGlobalVolume, nOldGlbVolSlide = 0;
-	vector<BYTE> instr(m_nChannels, 0);
-	vector<UINT> notes(m_nChannels, 0);
-	vector<BYTE> vols(m_nChannels, 0xFF);
-	vector<BYTE> oldparam(m_nChannels, 0);
-	vector<UINT> chnvols(m_nChannels, 64);
-	vector<double> patloop(m_nChannels, 0);
-	vector<ROWINDEX> patloopstart(m_nChannels, 0);
+	vector<BYTE> instr(GetNumChannels(), 0);
+	vector<UINT> notes(GetNumChannels(), 0);
+	vector<BYTE> vols(GetNumChannels(), 0xFF);
+	vector<BYTE> oldparam(GetNumChannels(), 0);
+	vector<UINT> chnvols(GetNumChannels(), 64);
+	vector<double> patloop(GetNumChannels(), 0);
+	vector<ROWINDEX> patloopstart(GetNumChannels(), 0);
 	VisitedRowsType visitedRows;	// temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 
 	InitializeVisitedRows(true, &visitedRows);
 
-	for(CHANNELINDEX icv = 0; icv < m_nChannels; icv++) chnvols[icv] = ChnSettings[icv].nVolume;
+	for(CHANNELINDEX icv = 0; icv < GetNumChannels(); icv++)
+	{
+		chnvols[icv] = ChnSettings[icv].nVolume;
+	}
 	nCurrentPattern = nNextPattern = 0;
 	nPattern = Order[0];
 	nRow = nNextRow = 0;
@@ -208,7 +211,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			if (p->instr) { instr[nChn] = p->instr; notes[nChn] = 0; vols[nChn] = 0xFF; }
 			if ((note) && (note <= NOTE_MAX)) notes[nChn] = note;
 			if (p->volcmd == VOLCMD_VOLUME)	{ vols[nChn] = p->vol; }
-			if (command) switch (command)
+			switch(command)
 			{
 			// Position Jump
 			case CMD_POSITIONJUMP:
@@ -2131,10 +2134,16 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_NOTESLIDEUP:
 			NoteSlide(pChn, param, 1);
 			break;
+
 		case CMD_NOTESLIDEDOWN:
 			NoteSlide(pChn, param, -1);
 			break;
 		}
+
+		if(param != 0 && GetType() == MOD_TYPE_S3M)
+		{
+			UpdateS3MEffectMemory(pChn, param);
+		}			
 
 	} // for(...) end
 
@@ -2208,18 +2217,33 @@ void CSoundFile::ResetChannelEnvelope(MODCHANNEL_ENVINFO &env) const
 ////////////////////////////////////////////////////////////
 // Channels effects
 
+
+// Update the effect memory of all S3M effects that use the last non-zero effect parameter ot show up (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy)
+void CSoundFile::UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const
+//------------------------------------------------------------------------
+{
+	pChn->nOldVolumeSlide = param;	// Dxy / Kxy / Lxy
+	pChn->nOldPortaUpDown = param;	// Exx / Fxx
+	pChn->nTremorParam = param;		// Ixy
+	pChn->nArpeggio = param;		// Jxy
+	pChn->nRetrigParam = param;		// Qxy
+	pChn->nTremoloDepth = (param & 0x0F) << 2;	// Rxy
+	pChn->nTremoloSpeed = (param >> 4) & 0x0F;	// Rxy
+}
+
+
 void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePortamentoAsRegular)
-//---------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
 {
 	MidiPortamento(pChn, param); //Send midi pitch bend event if there's a plugin
 
+	if(param)
+		pChn->nOldPortaUpDown = param;
+	else
+		param = pChn->nOldPortaUpDown;
+
 	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
-		if(param)
-			pChn->nOldPortaUpDown = param;
-		else
-			param = pChn->nOldPortaUpDown;
-
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, param - 0xF0);
 		else
@@ -2227,7 +2251,6 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 		return;
 	}
 
-	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
 	if (!doFinePortamentoAsRegular && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
 		if (param & 0x0F)
@@ -2252,17 +2275,17 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 
 
 void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFinePortamentoAsRegular)
-//-----------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 {
 	MidiPortamento(pChn, -1*param); //Send midi pitch bend event if there's a plugin
 
+	if(param)
+		pChn->nOldPortaUpDown = param;
+	else
+		param = pChn->nOldPortaUpDown;
+
 	if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
-		if(param)
-			pChn->nOldPortaUpDown = param;
-		else
-			param = pChn->nOldPortaUpDown;
-
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, -1*(param - 0xF0));
 		else
@@ -2270,7 +2293,6 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFineP
 		return;
 	}
 
-	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
 	if (!doFinePortamentoAsRegular && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
 		if (param & 0x0F)
@@ -2566,6 +2588,7 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 		pChn->nOldVolumeSlide = param;
 	else
 		param = pChn->nOldVolumeSlide;
+
 	LONG newvolume = pChn->nVolume;
 	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
 	{
@@ -2712,12 +2735,12 @@ void CSoundFile::FineVolumeDown(MODCHANNEL *pChn, UINT param)
 }
 
 
-void CSoundFile::Tremolo(MODCHANNEL *p, UINT param)
-//-------------------------------------------------
+void CSoundFile::Tremolo(MODCHANNEL *pChn, UINT param)
+//----------------------------------------------------
 {
-	if (param & 0x0F) p->nTremoloDepth = (param & 0x0F) << 2;
-	if (param & 0xF0) p->nTremoloSpeed = (param >> 4) & 0x0F;
-	p->dwFlags |= CHN_TREMOLO;
+	if (param & 0x0F) pChn->nTremoloDepth = (param & 0x0F) << 2;
+	if (param & 0xF0) pChn->nTremoloSpeed = (param >> 4) & 0x0F;
+	pChn->dwFlags |= CHN_TREMOLO;
 }
 
 
@@ -2944,7 +2967,9 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 
 					//IT compatibility 20. Set pan overrides random pan
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					{
 						pChn->nPanSwing = 0;
+					}
 				}
 				break;
 	// S9x: Sound Control
@@ -3507,10 +3532,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			pChn->nRetrigCount = param & 0xf;
 			bDoRetrig = true;
 		}
-	}
-	// buggy-like-hell FT2 Rxy retrig!
-	else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
+	} else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
 	{
+		// buggy-like-hell FT2 Rxy retrig!
 		if(m_dwSongFlags & SONG_FIRSTTICK)
 		{
 			// here are some really stupid things FT2 does
@@ -3529,7 +3553,6 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 	} else
 	{
 		// old routines
-
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			if (!nRetrigSpeed) nRetrigSpeed = 1;
