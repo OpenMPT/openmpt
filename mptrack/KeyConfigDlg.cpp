@@ -83,23 +83,24 @@ void CCustEdit::OnKillFocus(CWnd* pNewWnd)
 //-----------------------------------------------------------
 
 BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
-	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,	OnKeyChoiceSelect)
-	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,	OnCommandKeySelChanged)
-	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,	OnCategorySelChanged)
-	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME, OnChordWaitTimeChanged) //rewbs.autochord
-	ON_COMMAND(IDC_SET, OnSetKeyChoice)
-	ON_COMMAND(IDC_DELETE, OnDeleteKeyChoice)
-	ON_COMMAND(IDC_RESTORE, OnRestoreKeyChoice)
-	ON_COMMAND(IDC_LOAD, OnLoad)
-	ON_COMMAND(IDC_SAVE, OnSave)
-	ON_COMMAND(IDC_CHECKKEYDOWN, OnCheck)
-	ON_COMMAND(IDC_CHECKKEYHOLD, OnCheck)
-	ON_COMMAND(IDC_CHECKKEYUP, OnCheck)
-	ON_COMMAND(IDC_NOTESREPEAT, OnNotesRepeat)
-	ON_COMMAND(IDC_NONOTESREPEAT, OnNoNotesRepeat)
-	ON_COMMAND(IDC_EFFECTLETTERSXM, OnSetXMEffects)
-	ON_COMMAND(IDC_EFFECTLETTERSIT, OnSetITEffects)
-	ON_COMMAND(IDC_CLEARLOG, OnClearLog)
+	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,		OnKeyChoiceSelect)
+	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,		OnCommandKeySelChanged)
+	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,		OnCategorySelChanged)
+	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME,	OnChordWaitTimeChanged) //rewbs.autochord
+	ON_COMMAND(IDC_SET,						OnSetKeyChoice)
+	ON_COMMAND(IDC_DELETE,					OnDeleteKeyChoice)
+	ON_COMMAND(IDC_RESTORE,					OnRestoreKeyChoice)
+	ON_COMMAND(IDC_LOAD,					OnLoad)
+	ON_COMMAND(IDC_SAVE,					OnSave)
+	ON_COMMAND(IDC_CHECKKEYDOWN,			OnCheck)
+	ON_COMMAND(IDC_CHECKKEYHOLD,			OnCheck)
+	ON_COMMAND(IDC_CHECKKEYUP,				OnCheck)
+	ON_COMMAND(IDC_NOTESREPEAT,				OnNotesRepeat)
+	ON_COMMAND(IDC_NONOTESREPEAT,			OnNoNotesRepeat)
+	ON_COMMAND(IDC_EFFECTLETTERSXM,			OnSetXMEffects)
+	ON_COMMAND(IDC_EFFECTLETTERSIT,			OnSetITEffects)
+	ON_COMMAND(IDC_CLEARLOG,				OnClearLog)
+	ON_COMMAND(IDC_RESTORE_KEYMAP,			OnRestoreDefaultKeymap)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -116,8 +117,6 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_CHECKKEYDOWN,	m_bKeyDown);
 	DDX_Control(pDX, IDC_CHECKKEYHOLD,	m_bKeyHold);
 	DDX_Control(pDX, IDC_CHECKKEYUP,	m_bKeyUp);
-	
-	DDX_Control(pDX, IDC_DEBUGSAVE,		m_bDebugSave);
 }
 
 
@@ -527,15 +526,16 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 
 	CInputHandler *ih=CMainFrame::GetInputHandler();
 
-	//Do nothing if there's nothing to restore
+	// Do nothing if there's nothing to restore
 	if (cmd<0 || m_nCurKeyChoice<0 || m_nCurKeyChoice>=ih->GetKeyListSize(cmd))
 	{
-		CString error = "Nothing to restore for this slot.";
-		Reporting::Error(error, "Invalid key data");
+		// Annoying message box is annoying.
+		//CString error = "Nothing to restore for this slot.";
+		//Reporting::Error(error, "Invalid key data");
 		return;
 	}
 	
-	//Restore current key combination choice for currently selected command.
+	// Restore current key combination choice for currently selected command.
 	kc = ih->activeCommandSet->GetKey(cmd, m_nCurKeyChoice);
 	plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
 	plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
@@ -548,11 +548,12 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 {
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
-	//Do nothing if there's no key defined for this slot.
+	// Do nothing if there's no key defined for this slot.
 	if (m_nCurHotKey<0 || m_nCurKeyChoice<0 || m_nCurKeyChoice>=plocalCmdSet->GetKeyListSize(cmd))
 	{
-		CString error = "No key currently set for this slot.";
-		Reporting::Warning(error, "Invalid key data");
+		// Annoying message box is annoying.
+		//CString error = "No key currently set for this slot.";
+		//Reporting::Warning(error, "Invalid key data");
 		return;
 	}
 
@@ -657,7 +658,7 @@ void COptionsKeyboard::OnSave()
 	if(files.abort)	return;
 
 	m_sFullPathName = files.first_file.c_str();
-	plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck() != BST_UNCHECKED);
+	plocalCmdSet->SaveFile(m_sFullPathName);
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
@@ -700,4 +701,15 @@ void COptionsKeyboard::OnClearLog()
 {
 	m_eReport.SetWindowText("");
 	ForceUpdateGUI();
+}
+
+
+void COptionsKeyboard::OnRestoreDefaultKeymap()
+//---------------------------------------------
+{
+	if(Reporting::Confirm("Discard all custom changes and restore default key configuration?") == cnfYes)
+	{
+		plocalCmdSet->LoadDefaultKeymap();
+		ForceUpdateGUI();
+	}
 }

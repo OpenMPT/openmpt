@@ -508,13 +508,13 @@ void CMainFrame::OnClose()
 		gpSoundDevice = NULL;
 	}
 	// Save Settings
-	RemoveControlBar(&m_wndStatusBar); //Remove statusbar so that its state won't get saved.
+	RemoveControlBar(&m_wndStatusBar); // Remove statusbar so that its state won't get saved.
 	m_Settings.SaveSettings();
-	AddControlBar(&m_wndStatusBar); //Restore statusbar to mainframe.
+	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
 
 	if(m_InputHandler && m_InputHandler->activeCommandSet)
 	{
-		m_InputHandler->activeCommandSet->SaveFile(GetSettings().m_szKbdFile, false);
+		m_InputHandler->activeCommandSet->SaveFile(GetSettings().m_szKbdFile);
 	}
 
 	EndWaitCursor();

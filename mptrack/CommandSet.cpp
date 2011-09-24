@@ -1407,7 +1407,7 @@ CString CCommandSet::GetCommandText(CommandID cmd)
 	return commands[cmd].Message;
 }
 
-bool CCommandSet::SaveFile(CString fileName, bool debug)
+bool CCommandSet::SaveFile(CString fileName)
 { //TODO: Make C++
 
 /* Layout:
@@ -1446,7 +1446,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 				if (kc.ctx != ctx)
 					continue;		//sort by context
 				
-				if (debug || !commands[cmd].isHidden)
+				if (!commands[cmd].isHidden)
 				{
 					fprintf(outStream, "%d:%d:%d:%d:%d\t\t//%s: %s (%s)\n", 
 							ctx, commands[cmd].UID,	kc.mod, kc.code, kc.event, 
@@ -1596,7 +1596,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 	return true;
 }
 
+
 bool CCommandSet::LoadFile(CString fileName)
+//------------------------------------------
 {
 	std::ifstream fin(fileName);
 	if (fin.fail())
@@ -1608,6 +1610,23 @@ bool CCommandSet::LoadFile(CString fileName)
 	}
 	else
 		return LoadFile(fin, fileName);
+}
+
+
+bool CCommandSet::LoadDefaultKeymap()
+//-----------------------------------
+{
+	bool success = false;
+	const char* pData = nullptr;
+	HGLOBAL hglob = nullptr;
+	size_t nSize = 0;
+	if (LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
+	{
+		std::istrstream iStrm(pData, nSize);
+		success = LoadFile(iStrm, TEXT("\"executable resource\""));
+		FreeResource(hglob);
+	}
+	return success;
 }
 
 

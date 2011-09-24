@@ -45,16 +45,10 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		{
 			// Load keybindings from resources.
 			Log("Loading keybindings from resources\n");
-			const char* pData = nullptr;
-			HGLOBAL hglob = nullptr;
-			size_t nSize = 0;
-			if (LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
+			bSuccess = activeCommandSet->LoadDefaultKeymap();
+			if (bSuccess && bNoExistingKbdFileSetting)
 			{
-				std::istrstream iStrm(pData, nSize);
-				bSuccess = activeCommandSet->LoadFile(iStrm, TEXT("\"executable resource\""));
-				FreeResource(hglob);
-				if (bSuccess && bNoExistingKbdFileSetting)
-					activeCommandSet->SaveFile(CMainFrame::GetSettings().m_szKbdFile, false);
+				activeCommandSet->SaveFile(CMainFrame::GetSettings().m_szKbdFile);
 			}
 		}
 		if (bSuccess == false)

@@ -98,8 +98,6 @@ protected:
 	bool m_bModified;
 	bool m_bChoiceModified;
 
-	CButton m_bDebugSave;
-
 	void ForceUpdateGUI();
 
 public:
@@ -135,6 +133,7 @@ protected:
 	afx_msg void OnLoad();
 	afx_msg void OnSave();
 	afx_msg void OnClearLog();
+	afx_msg void OnRestoreDefaultKeymap();
     DECLARE_MESSAGE_MAP();
 public:
 	afx_msg void OnDestroy();

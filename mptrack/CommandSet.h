@@ -1198,9 +1198,10 @@ public:
 	//Pululation ;)
 	void Copy(CCommandSet *source);	// copy the contents of a commandset into this command set
 	void GenKeyMap(KeyMap &km);		// Generate a keymap from this command set
-	bool SaveFile(CString FileName, bool debug);
+	bool SaveFile(CString FileName);
 	bool LoadFile(CString FileName);
 	bool LoadFile(std::istream& iStrm, LPCTSTR szFilename);
+	bool LoadDefaultKeymap();
 	void UpgradeKeymap(CCommandSet *pCommands, int oldVersion);
 
 	static DWORD GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke);
