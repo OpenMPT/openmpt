@@ -14,78 +14,85 @@
 #include "Mainfrm.h"
 #include "PatternEditorDialogs.h"
 #include "view_pat.h"
+#include "../muParser/include/muParser.h"
 
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-void getXParam(BYTE command, UINT nPat, UINT nRow, UINT nChannel, CSoundFile *pSndFile, UINT * xparam, UINT * multiplier)
+void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, CSoundFile *pSndFile, UINT &xparam, UINT &multiplier)
+//-----------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(xparam == NULL || multiplier == NULL) return;
-
-	MODCOMMAND mca = MODCOMMAND::Empty();
-	UINT i,xp = 0, ml = 1;
+	UINT xp = 0, mult = 1;
 	int nCmdRow = (int)nRow;
 
-	// If the current command is a parameter extension command
-	if(command == CMD_XPARAM){
-
+	if(command == CMD_XPARAM)
+	{
+		// current command is a parameter extension command
 		nCmdRow--;
 
 		// Try to find previous command parameter to be extended
-		while(nCmdRow >= 0){
-			i = nCmdRow * pSndFile->m_nChannels + nChannel;
-			mca = pSndFile->Patterns[nPat][i];
-			if(mca.command == CMD_OFFSET || mca.command == CMD_PATTERNBREAK || mca.command == CMD_PATTERNBREAK)
+		while(nCmdRow >= 0)
+		{
+			const MODCOMMAND *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
+			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_PATTERNBREAK)
 				break;
-			if(mca.command != CMD_XPARAM){
+			if(m->command != CMD_XPARAM)
+			{
 				nCmdRow = -1;
 				break;
 			}
 			nCmdRow--;
 		}
+	} else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK && command != CMD_TEMPO)
+	{
+		// If current row do not own any satisfying command parameter to extend, set return state
+		nCmdRow = -1;
 	}
-	// Else if current row do not own any satisfying command parameter to extend, set return state
-	else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK && command != CMD_TEMPO) nCmdRow = -1;
 
-	// If an 'extendable' command parameter has been found,
-	if(nCmdRow >= 0){
-		i = nCmdRow * pSndFile->m_nChannels + nChannel;
-		mca = pSndFile->Patterns[nPat][i];
+	if(nCmdRow >= 0)
+	{
+		// An 'extendable' command parameter has been found
+		const MODCOMMAND *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
 
 		// Find extension resolution (8 to 24 bits)
-		UINT n = 1;
-		while(n < 4 && nCmdRow+n < pSndFile->Patterns[nPat].GetNumRows()){
-			i = (nCmdRow+n) * pSndFile->m_nChannels + nChannel;
-			if(pSndFile->Patterns[nPat][i].command != CMD_XPARAM) break;
+		ROWINDEX n = 1;
+		while(n < 4 && nCmdRow + n < pSndFile->Patterns[nPat].GetNumRows())
+		{
+			if(pSndFile->Patterns[nPat].GetpModCommand(nCmdRow + n, nChannel)->command != CMD_XPARAM) break;
 			n++;
 		}
 
 		// Parameter extension found (above 8 bits non-standard parameters)
-		if(n > 1){
+		if(n > 1)
+		{
 			// Limit offset command to 24 bits, other commands to 16 bits
-			n = mca.command == CMD_OFFSET ? n : (n > 2 ? 2 : n);
+			n = m->command == CMD_OFFSET ? n : (n > 2 ? 2 : n);
 
 			// Compute extended value WITHOUT current row parameter value : this parameter
 			// is being currently edited (this is why this function is being called) so we
 			// only need to compute a multiplier so that we can add its contribution while
 			// its value is changed by user
-			for(UINT j = 0 ; j < n ; j++){
-				i = (nCmdRow+j) * pSndFile->m_nChannels + nChannel;
-				mca = pSndFile->Patterns[nPat][i];
+			for(UINT j = 0; j < n; j++)
+			{
+				m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow + j, nChannel);
 
-				UINT k = 8*(n-j-1);
-				if(nCmdRow+j == nRow) ml = 1<<k;
-				else xp += (mca.param<<k);
+				UINT k = 8 * (n - j - 1);
+				if(nCmdRow + j == nRow) 
+					mult = 1 << k;
+				else
+					xp += (m->param << k);
 			}
+		} else if(m->command == CMD_OFFSET)
+		{
+			// No parameter extension to perform (8 bits standard parameter),
+			// just care about offset command special case (16 bits, fake)
+			mult <<= 8;
 		}
-		// No parameter extension to perform (8 bits standard parameter),
-		// just care about offset command special case (16 bits, fake)
-		else if(mca.command == CMD_OFFSET) ml <<= 8;
 	}
 
 	// Return x-parameter
-	*multiplier = ml;
-	*xparam = xp;
+	multiplier = mult;
+	xparam = xp;
 }
 // -! NEW_FEATURE#0010
 
@@ -625,15 +632,18 @@ void CEditCommand::OnDestroy()
 {
 	CPropertySheet::OnDestroy();
 
-	if (m_pageNote) {
+	if (m_pageNote)
+	{
 		m_pageNote->DestroyWindow();
 		delete m_pageNote;
 	}
-	if (m_pageVolume) {
+	if (m_pageVolume)
+	{
 		m_pageVolume->DestroyWindow();
 		delete m_pageVolume;
 	}
-	if (m_pageEffect) {
+	if (m_pageEffect)
+	{
 		m_pageEffect->DestroyWindow();
 		delete m_pageEffect;
 	}
@@ -663,9 +673,9 @@ BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor)
 	const CHANNELINDEX nChannel = CViewPattern::GetChanFromCursor(dwCursor);
 
 	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-		|| (nRow >= pSndFile->Patterns[nPat].GetNumRows()) || (nChannel >= pSndFile->m_nChannels)
+		|| (nRow >= pSndFile->Patterns[nPat].GetNumRows()) || (nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[nPat])) return FALSE;
-	m_Command = pSndFile->Patterns[nPat][nRow * pSndFile->m_nChannels + nChannel];
+	m_Command = *pSndFile->Patterns[nPat].GetpModCommand(nRow, nChannel);
 	m_nRow = nRow;
 	m_nChannel = nChannel;
 	m_nPattern = nPat;
@@ -677,16 +687,17 @@ BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor)
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	//	if (m_pageEffect) m_pageEffect->Init(m_Command);
-	if (m_pageEffect){
+	if (m_pageEffect)
+	{
 		UINT xp = 0, ml = 1;
-		getXParam(m_Command.command,nPat,nRow,nChannel,pSndFile,&xp,&ml);
+		getXParam(m_Command.command, nPat, nRow, nChannel, pSndFile, xp, ml);
 		m_pageEffect->Init(m_Command);
 		m_pageEffect->XInit(xp,ml);
 	}
 	// -! NEW_FEATURE#0010
 
 	// Update Window Title
-	wsprintf(s, "Note Properties - Row %d, Channel %d", m_nRow, m_nChannel+1);
+	wsprintf(s, "Note Properties - Row %d, Channel %d", m_nRow, m_nChannel + 1);
 	SetTitle(s);
 	// Activate Page
 	UINT nPage = 2;
@@ -709,7 +720,7 @@ void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= pSndFile->m_nChannels)
+		|| (m_nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 	if ((m->note != note) || (m->instr != instr))
@@ -738,7 +749,7 @@ void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= pSndFile->m_nChannels)
+		|| (m_nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 	if ((m->volcmd != volcmd) || (m->vol != vol))
@@ -766,15 +777,16 @@ void CEditCommand::UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM p
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= pSndFile->m_nChannels)
+		|| (m_nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
-	if(command == CMD_OFFSET || command == CMD_PATTERNBREAK || command == CMD_TEMPO || command == CMD_XPARAM){
+	if(command == CMD_OFFSET || command == CMD_PATTERNBREAK || command == CMD_TEMPO || command == CMD_XPARAM)
+	{
 		UINT xp = 0, ml = 1;
-		getXParam(command,m_nPattern,m_nRow,m_nChannel,pSndFile,&xp,&ml);
+		getXParam(command, m_nPattern, m_nRow, m_nChannel, pSndFile, xp, ml);
 		m_pageEffect->XInit(xp,ml);
 		m_pageEffect->UpdateDialog();
 	}

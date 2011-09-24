@@ -1976,6 +1976,10 @@ BOOL CSoundFile::ProcessEffects()
 
 		// S3M/IT Sxx Extended Commands
 		case CMD_S3MCMDEX:
+			if(GetType() == MOD_TYPE_S3M && param == 0)
+			{
+				param = pChn->nArpeggio;	// S00 uses the last non-zero effect parameter as memory, like other effects including Arpeggio, so we "borrow" our memory there.
+			}
 			ExtendedS3MCommands(nChn, param);
 			break;
 
@@ -2140,7 +2144,7 @@ BOOL CSoundFile::ProcessEffects()
 			break;
 		}
 
-		if(param != 0 && GetType() == MOD_TYPE_S3M)
+		if(GetType() == MOD_TYPE_S3M && param != 0)
 		{
 			UpdateS3MEffectMemory(pChn, param);
 		}			
@@ -2218,7 +2222,7 @@ void CSoundFile::ResetChannelEnvelope(MODCHANNEL_ENVINFO &env) const
 // Channels effects
 
 
-// Update the effect memory of all S3M effects that use the last non-zero effect parameter ot show up (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy)
+// Update the effect memory of all S3M effects that use the last non-zero effect parameter ot show up (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy)
 void CSoundFile::UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const
 //------------------------------------------------------------------------
 {
@@ -2229,6 +2233,7 @@ void CSoundFile::UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const
 	pChn->nRetrigParam = param;		// Qxy
 	pChn->nTremoloDepth = (param & 0x0F) << 2;	// Rxy
 	pChn->nTremoloSpeed = (param >> 4) & 0x0F;	// Rxy
+	// Sxy is not handled here.
 }
 
 
