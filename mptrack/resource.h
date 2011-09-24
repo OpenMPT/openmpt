@@ -676,7 +676,6 @@
 #define IDC_CHECKKEYDOWN                2094
 #define IDC_CHECKKEYHOLD                2095
 #define IDC_CHECKKEYUP                  2096
-#define IDC_DEBUGSAVE                   2097
 #define IDC_CUSTHOTKEY                  2098
 #define IDC_SET                         2099
 #define IDC_RESTORE                     2100
@@ -946,6 +945,7 @@
 #define IDC_SAMPLE_QUICKFADE            2433
 #define IDC_SAMPLE_XFADE                2434
 #define IDC_LASTUPDATE                  2435
+#define IDC_RESTORE_KEYMAP              2436
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1205,6 +1205,7 @@
 #define ID_INTERNETUPDATE               44458
 #define ID_HELP_EXAMPLEMODULES          44459
 #define ID_FILE_SAVEASTEMPLATE          44460
+#define ID_ORDERLIST_INSERT_SEPARATOR   44461
 
 // Next default values for new objects
 // 
@@ -1212,8 +1213,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        531
-#define _APS_NEXT_COMMAND_VALUE         44461
-#define _APS_NEXT_CONTROL_VALUE         2436
+#define _APS_NEXT_COMMAND_VALUE         44462
+#define _APS_NEXT_CONTROL_VALUE         2437
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -63,18 +63,18 @@ public:
 	BYTE SetMargins(int);
 
 	// Returns the effective margin value.
-	BYTE GetMargins() {return GetMargins(GetMarginsMax());}
+	BYTE GetMargins() { return GetMargins(GetMarginsMax()); }
 
 	// Returns the effective margin value.
-	BYTE GetMargins(const BYTE nMaxMargins) {return Util::Min(nMaxMargins, static_cast<BYTE>(m_nOrderlistMargins));}
+	BYTE GetMargins(const BYTE nMaxMargins) const { return Util::Min(nMaxMargins, static_cast<BYTE>(m_nOrderlistMargins)); }
 
 	// Returns maximum margin value given current window width.
-	BYTE GetMarginsMax() {return GetMarginsMax(GetLength());}
+	BYTE GetMarginsMax() { return GetMarginsMax(GetLength()); }
 
 	// Returns maximum margin value when shown sequence has nLength orders.
 	// For example: If length is 4 orders -> maxMargins = 4/2 - 1 = 1;
 	// if maximum is 5 -> maxMargins = (int)5/2 = 2
-	BYTE GetMarginsMax(const BYTE nLength) {return (nLength > 0 && nLength % 2 == 0) ? nLength/2 - 1 : nLength/2;}
+	BYTE GetMarginsMax(const BYTE nLength) const { return (nLength > 0 && nLength % 2 == 0) ? nLength / 2 - 1 : nLength / 2; }
 
 	// Returns the number of sequence items visible in the list.
 	BYTE GetLength();
@@ -122,6 +122,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSwitchToView();
 	afx_msg void OnInsertOrder();
+	afx_msg void OnInsertSeparatorPattern();
 	afx_msg void OnDeleteOrder();
 	afx_msg void OnRenderOrder();
 	afx_msg void OnPatternProperties();

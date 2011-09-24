@@ -41,29 +41,30 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_WM_KILLFOCUS()
 	ON_WM_HSCROLL()
 	ON_WM_SIZE()
-	ON_COMMAND(ID_CONTROLTAB,			OnSwitchToView)
+	ON_COMMAND(ID_CONTROLTAB,					OnSwitchToView)
 
-	ON_COMMAND(ID_ORDERLIST_INSERT,		OnInsertOrder)
-	ON_COMMAND(ID_ORDERLIST_DELETE,		OnDeleteOrder)
-	ON_COMMAND(ID_ORDERLIST_RENDER,		OnRenderOrder)
-	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,	OnEditCopy)
-	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,	OnEditCut)
-	ON_COMMAND(ID_ORDERLIST_EDIT_PASTE,	OnEditPaste)
+	ON_COMMAND(ID_ORDERLIST_INSERT,				OnInsertOrder)
+	ON_COMMAND(ID_ORDERLIST_INSERT_SEPARATOR,	OnInsertSeparatorPattern)
+	ON_COMMAND(ID_ORDERLIST_DELETE,				OnDeleteOrder)
+	ON_COMMAND(ID_ORDERLIST_RENDER,				OnRenderOrder)
+	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,			OnEditCopy)
+	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,			OnEditCut)
+	ON_COMMAND(ID_ORDERLIST_EDIT_PASTE,			OnEditPaste)
 
-	ON_COMMAND(ID_PATTERN_PROPERTIES,	OnPatternProperties)
-	ON_COMMAND(ID_PLAYER_PLAY,			OnPlayerPlay)
-	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
-	ON_COMMAND(ID_PLAYER_PLAYFROMSTART,	OnPlayerPlayFromStart)
-	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,OnPatternPlayFromStart)
-	//ON_COMMAND(ID_PATTERN_RESTART,		OnPatternPlayFromStart)
-	ON_COMMAND(ID_ORDERLIST_NEW,		OnCreateNewPattern)
-	ON_COMMAND(ID_ORDERLIST_COPY,		OnDuplicatePattern)
-	ON_COMMAND(ID_PATTERNCOPY,			OnPatternCopy)
-	ON_COMMAND(ID_PATTERNPASTE,			OnPatternPaste)
+	ON_COMMAND(ID_PATTERN_PROPERTIES,			OnPatternProperties)
+	ON_COMMAND(ID_PLAYER_PLAY,					OnPlayerPlay)
+	ON_COMMAND(ID_PLAYER_PAUSE,					OnPlayerPause)
+	ON_COMMAND(ID_PLAYER_PLAYFROMSTART,			OnPlayerPlayFromStart)
+	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,		OnPatternPlayFromStart)
+	//ON_COMMAND(ID_PATTERN_RESTART,			OnPatternPlayFromStart)
+	ON_COMMAND(ID_ORDERLIST_NEW,				OnCreateNewPattern)
+	ON_COMMAND(ID_ORDERLIST_COPY,				OnDuplicatePattern)
+	ON_COMMAND(ID_PATTERNCOPY,					OnPatternCopy)
+	ON_COMMAND(ID_PATTERNPASTE,					OnPatternPaste)
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, OnSelectSequence)
-	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	OnDragonDropping)
-	ON_MESSAGE(WM_HELPHITTEST,			OnHelpHitTest)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_DRAGONDROPPING,			OnDragonDropping)
+	ON_MESSAGE(WM_HELPHITTEST,					OnHelpHitTest)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,				OnCustomKeyMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -245,7 +246,8 @@ ORD_SELECTION COrderList::GetCurSel(bool bIgnoreSelection) const
 	ORD_SELECTION result;
 	result.nOrdLo = result.nOrdHi = m_nScrollPos;
 	// bIgnoreSelection: true if only first selection marker is important.
-	if(!bIgnoreSelection && m_nScrollPos2nd != ORDERINDEX_INVALID) {
+	if(!bIgnoreSelection && m_nScrollPos2nd != ORDERINDEX_INVALID)
+	{
 		if(m_nScrollPos2nd < m_nScrollPos) // ord2 < ord1
 			result.nOrdLo = m_nScrollPos2nd;
 		else
@@ -1063,6 +1065,10 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	{
 		// only one pattern is selected
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
+		if(pSndFile->GetModSpecifications().hasIgnoreIndex)
+		{
+			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT_SEPARATOR, "&Insert Separator\t" + ih->GetKeyTextFromCommand(kcOrderlistPatIgnore));
+		}
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern\t" + ih->GetKeyTextFromCommand(kcNewPattern));
@@ -1189,12 +1195,12 @@ void COrderList::OnInsertOrder()
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
-		ORD_SELECTION selection = GetCurSel(false);	
-		ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo, nInsertEnd = selection.nOrdHi;
+		const ORD_SELECTION selection = GetCurSel(false);	
+		const ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo, nInsertEnd = selection.nOrdHi;
 
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
-			//Checking whether there is some pattern at the end of orderlist.
+			// Checking whether there is some pattern at the end of orderlist.
 			if (pSndFile->Order.GetLength() < 1 || pSndFile->Order.Last() < pSndFile->Patterns.Size())
 			{
 				if(pSndFile->Order.GetLength() < pSndFile->GetModSpecifications().ordersMax)
@@ -1227,6 +1233,34 @@ void COrderList::OnInsertOrder()
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 	}
 }
+
+
+void COrderList::OnInsertSeparatorPattern()
+//-----------------------------------------
+{
+	// Insert a separator pattern after the current pattern, don't move order list cursor
+	if (m_pModDoc)
+	{
+		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+
+		const ORD_SELECTION selection = GetCurSel(true);	
+		// Checking whether there is some pattern at the end of orderlist.
+		if (pSndFile->Order.GetLength() < 1 || pSndFile->Order.Last() < pSndFile->Patterns.Size())
+		{
+			if(pSndFile->Order.GetLength() < pSndFile->GetModSpecifications().ordersMax)
+				pSndFile->Order.Append();
+		}
+		for(int j = pSndFile->Order.GetLastIndex(); j > selection.nOrdHi; j--)
+			pSndFile->Order[j] = pSndFile->Order[j - 1];
+
+		pSndFile->Order[selection.nOrdHi + 1] = pSndFile->Order.GetIgnoreIndex();
+
+		InvalidateRect(NULL, FALSE);
+		m_pModDoc->SetModified();
+		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+	}
+}
+
 
 void COrderList::OnRenderOrder()
 //------------------------------
