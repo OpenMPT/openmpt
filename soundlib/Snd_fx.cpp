@@ -932,13 +932,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
-		// IT Compatibility: Autovibrato reset
-		if(bResetEnv && IsCompatibleMode(TRK_IMPULSETRACKER))
-		{
-			pChn->nAutoVibDepth = 0;
-			pChn->nAutoVibPos = 0;
-			pChn->nVibratoPos = 0;
-		}
+
 		//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -991,11 +985,14 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 					}
 				}
 			}
-			// IT Compatibility: Autovibrato reset
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+			pChn->nAutoVibDepth = 0;
+			pChn->nAutoVibPos = 0;
+			// IT Compatibility: Vibrato reset
+			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				pChn->nAutoVibDepth = 0;
-				pChn->nAutoVibPos = 0;
+				// I think this is not necessary, so let's check if it is actually called.
+				ASSERT(pChn->nVibratoPos == 0);
+				pChn->nVibratoPos = 0;
 			}
 		}
 		pChn->nLeftVol = pChn->nRightVol = 0;
@@ -1514,12 +1511,8 @@ BOOL CSoundFile::ProcessEffects()
 					{
 						pChn->dwFlags |= CHN_FASTVOLRAMP;
 						ResetChannelEnvelopes(pChn);
-						// IT Compatibility: Autovibrato reset
-						if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-						{
-							pChn->nAutoVibDepth = 0;
-							pChn->nAutoVibPos = 0;
-						}
+						pChn->nAutoVibDepth = 0;
+						pChn->nAutoVibPos = 0;
 						pChn->dwFlags &= ~CHN_NOTEFADE;
 						pChn->nFadeOutVol = 65536;
 					}
@@ -1650,7 +1643,7 @@ BOOL CSoundFile::ProcessEffects()
 					TonePortamento(pChn, vol * 16);
 			} else
 			{
-				// XM Compatibility: FT2 ignores some voluem commands with parameter = 0.
+				// XM Compatibility: FT2 ignores some volume commands with parameter = 0.
 				if(IsCompatibleMode(TRK_FASTTRACKER2) && vol == 0)
 				{
 					switch(volcmd)
