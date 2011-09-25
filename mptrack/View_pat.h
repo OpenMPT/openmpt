@@ -120,13 +120,13 @@ protected:
 	DWORD m_dwStartSel, m_dwDragPos;	// Point where selection was started
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
-	CListBox *ChnEffectList[MAX_BASECHANNELS]; //rewbs.patPlugName
 	UINT m_nFoundInstrument;
 	UINT m_nMenuOnChan;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked;
 
+	MODCOMMAND m_PCNoteEditMemory;			// PC Note edit memory
 	static MODCOMMAND m_cmdOld;				// Quick cursor copy/paste data
 	static FindReplaceStruct m_findReplace;	// Find/replace data
 
