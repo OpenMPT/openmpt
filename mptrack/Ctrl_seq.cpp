@@ -1243,17 +1243,25 @@ void COrderList::OnInsertSeparatorPattern()
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
-		const ORD_SELECTION selection = GetCurSel(true);	
-		// Checking whether there is some pattern at the end of orderlist.
-		if (pSndFile->Order.GetLength() < 1 || pSndFile->Order.Last() < pSndFile->Patterns.Size())
+		const ORD_SELECTION selection = GetCurSel(true);
+		ORDERINDEX insertPos = selection.nOrdLo;
+		
+		if(pSndFile->Order[selection.nOrdLo] != pSndFile->Order.GetInvalidPatIndex())
 		{
-			if(pSndFile->Order.GetLength() < pSndFile->GetModSpecifications().ordersMax)
-				pSndFile->Order.Append();
-		}
-		for(int j = pSndFile->Order.GetLastIndex(); j > selection.nOrdHi; j--)
-			pSndFile->Order[j] = pSndFile->Order[j - 1];
+			// If we're not inserting on a stop (---) index, we move on by one position.
+			insertPos++;
+			// Checking whether there is some pattern at the end of orderlist.
+			if (pSndFile->Order.GetLength() < 1 || pSndFile->Order.Last() < pSndFile->Patterns.Size())
+			{
+				if(pSndFile->Order.GetLength() < pSndFile->GetModSpecifications().ordersMax)
+					pSndFile->Order.Append();
+			}
+			for(int j = pSndFile->Order.GetLastIndex(); j > selection.nOrdLo; j--)
+				pSndFile->Order[j] = pSndFile->Order[j - 1];
 
-		pSndFile->Order[selection.nOrdHi + 1] = pSndFile->Order.GetIgnoreIndex();
+		}
+
+		pSndFile->Order[insertPos] = pSndFile->Order.GetIgnoreIndex();
 
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->SetModified();
