@@ -690,7 +690,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
 			
-			//Mark track modified
+			// Mark track modified
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
 			if (pModDoc)
 			{
@@ -705,9 +705,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
 			}
 
-			//Record param change
+			// Record param change
 			if (pVstPlugin->m_bRecordAutomation)
 			{
+				// Note that audioMasterAutomate is not called when using our own plugin GUI. For those plugins, the same mechanism is called from CDefaultVstEditor::OnParamSliderChanged().
 				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);
 			}
 
