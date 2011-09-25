@@ -148,6 +148,7 @@ CViewPattern::CViewPattern()
 	m_pGotoWnd = NULL;
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
+	m_PCNoteEditMemory = MODCOMMAND::Empty();
 }
 
 void CViewPattern::OnInitialUpdate()
@@ -1687,7 +1688,7 @@ void CViewPattern::DeleteRows(UINT colmin, UINT colmax, UINT nrows)
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
 	for (UINT r=row; r<maxrow; r++)
 	{
-		MODCOMMAND *m = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + colmin;
+		MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(r, colmin);
 		for (UINT c=colmin; c<=colmax; c++, m++)
 		{
 			if (r + nrows >= maxrow)
@@ -3963,12 +3964,13 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{ \
 		if((v >= 0) && (v <= 9)) \
 		{	\
-			uint16 val = p->Get##method##(); \
+			uint16 val = pTarget->Get##method##(); \
 			/* Move existing digits to left, drop out leftmost digit and */ \
 			/* push new digit to the least meaning digit. */ \
 			val = (val % 100) * 10 + v; \
 			if(val > MODCOMMAND::maxColumnValue) val = MODCOMMAND::maxColumnValue; \
-			p->Set##method##(val); \
+			pTarget->Set##method##(val); \
+			m_PCNoteEditMemory = *pTarget; \
 		} \
 	} 
 
@@ -3987,17 +3989,17 @@ void CViewPattern::TempEnterVol(int v)
 		
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
-		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+		MODCOMMAND* pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
+		MODCOMMAND oldcmd = *pTarget; // This is the command we are about to overwrite
 
-		if(p->IsPcNote())
+		if(pTarget->IsPcNote())
 		{
 			ENTER_PCNOTE_VALUE(v, ValueVolCol);
 		}
 		else
 		{
-			UINT volcmd = p->volcmd;
-			UINT vol = p->vol;
+			UINT volcmd = pTarget->volcmd;
+			UINT vol = pTarget->vol;
 			if ((v >= 0) && (v <= 9))
 			{
 				vol = ((vol * 10) + v) % 100;
@@ -4032,8 +4034,8 @@ void CViewPattern::TempEnterVol(int v)
 			if (vol > max) vol %= 10;
 			if(pSndFile->GetModSpecifications().HasVolCommand(volcmd))
 			{
-				p->volcmd = volcmd;
-				p->vol = vol;
+				pTarget->volcmd = volcmd;
+				pTarget->vol = vol;
 			}
 		}
 
@@ -4042,7 +4044,7 @@ void CViewPattern::TempEnterVol(int v)
 			DWORD sel = CreateCursor(m_nRow) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if(oldcmd != *p)
+			if(oldcmd != *pTarget)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel + LAST_COLUMN);
@@ -4052,7 +4054,7 @@ void CViewPattern::TempEnterVol(int v)
 		else
 		{
 			// recording disabled
-			*p = oldcmd;
+			*pTarget = oldcmd;
 		}
 	}
 }
@@ -4081,12 +4083,12 @@ void CViewPattern::TempEnterFX(int c, int v)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();	
 		
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
-		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+		MODCOMMAND *pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
+		MODCOMMAND oldcmd = *pTarget; // This is the command we are about to overwrite
 
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		if(p->IsPcNote())
+		if(pTarget->IsPcNote())
 		{
 			ENTER_PCNOTE_VALUE(c, ValueEffectCol);
 		}
@@ -4095,28 +4097,28 @@ void CViewPattern::TempEnterFX(int c, int v)
 
 			if (c)
 			{
-				if ((c == m_cmdOld.command) && (!p->param) && (!p->command)) p->param = m_cmdOld.param;
+				if ((c == m_cmdOld.command) && (!pTarget->param) && (!pTarget->command)) pTarget->param = m_cmdOld.param;
 				else m_cmdOld.param = 0;
 				m_cmdOld.command = c;
 			}
-			p->command = c;
+			pTarget->command = c;
 			if(v >= 0)
 			{
-				p->param = v;
+				pTarget->param = v;
 			}
 
 			// Check for MOD/XM Speed/Tempo command
 			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-			&& ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+			&& ((pTarget->command == CMD_SPEED) || (pTarget->command == CMD_TEMPO)))
 			{
-				p->command = (p->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
+				pTarget->command = (pTarget->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
 			}
 		}
 
 		DWORD sel = CreateCursor(m_nRow) | m_dwCursor;
 		SetCurSel(sel, sel);
 		sel &= ~7;
-		if(oldcmd != *p)
+		if(oldcmd != *pTarget)
 		{
 			pModDoc->SetModified();
 			InvalidateArea(sel, sel + LAST_COLUMN);
@@ -4137,33 +4139,33 @@ void CViewPattern::TempEnterFXparam(int v)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
-		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+		MODCOMMAND *pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
+		MODCOMMAND oldcmd = *pTarget; // This is the command we are about to overwrite
 
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		if(p->IsPcNote())
+		if(pTarget->IsPcNote())
 		{
 			ENTER_PCNOTE_VALUE(v, ValueEffectCol);
 		}
 		else
 		{
 
-			p->param = (p->param << 4) | v;
-			if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
+			pTarget->param = (pTarget->param << 4) | v;
+			if (pTarget->command == m_cmdOld.command) m_cmdOld.param = pTarget->param;
 
 			// Check for MOD/XM Speed/Tempo command
 			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-			 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+			 && ((pTarget->command == CMD_SPEED) || (pTarget->command == CMD_TEMPO)))
 			{
-				p->command = (p->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
+				pTarget->command = (pTarget->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
 			}
 		}
 
 		DWORD sel = CreateCursor(m_nRow) | m_dwCursor;
 		SetCurSel(sel, sel);
 		sel &= ~7;
-		if(*p != oldcmd)
+		if(*pTarget != oldcmd)
 		{
 			pModDoc->SetModified();
 			InvalidateArea(sel, sel + LAST_COLUMN);
@@ -4326,7 +4328,9 @@ void CViewPattern::TempEnterOctave(int val)
 		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 		if (oldcmd.note)
-			TempEnterNote(((oldcmd.note-1)%12)+val*12+1);
+		{
+			TempEnterNote(((oldcmd.note - 1) % 12) + val * 12 + 1);
+		}
 	}
 
 }
@@ -4383,6 +4387,10 @@ void CViewPattern::TempEnterIns(int val)
 				InvalidateArea(sel, sel + LAST_COLUMN);
 				UpdateIndicator();
 			}
+			if(p->IsPcNote())
+			{
+				m_PCNoteEditMemory = *p;
+			}
 		}
 		else
 		{
@@ -4410,7 +4418,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
 		const bool bRecordEnabled = IsEditingEnabled();
-		const UINT nChn = GetChanFromCursor(m_dwCursor);
+		const CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
 
 		if(note > pSndFile->GetModSpecifications().noteMax && note < NOTE_MIN_SPECIAL)
 			note = pSndFile->GetModSpecifications().noteMax;
@@ -4431,23 +4439,12 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
 		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !(pSndFile->m_dwSongFlags & SONG_STEP));
-		//Param control 'note'
-		if(MODCOMMAND::IsPcNote(note) && bRecordEnabled)
-		{
-			pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChn, nRow, 1, 1);
-			pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn)->note = note;
-			const DWORD sel = CreateCursor(nRow) | m_dwCursor;
-			pModDoc->SetModified();
-			InvalidateArea(sel, sel + LAST_COLUMN);
-			UpdateIndicator();
-			return;
-		}
-
+		bool isSplit = false;
 
 		// -- Chord autodetection: step back if we just entered a note
-		if ((bRecordEnabled) && (recordGroup) && !bIsLiveRecord)
+		if (bRecordEnabled && recordGroup && !bIsLiveRecord && !MODCOMMAND::IsPcNote(note))
 		{
-			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
+			if (m_nSpacing > 0 && m_nSpacing <= MAX_SPACING)
 			{
 				if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::GetSettings().gnAutoChordWaitTime)
 					&& (nRow >= m_nSpacing) && (!m_bLastNoteEntryBlocked))
@@ -4459,78 +4456,100 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		m_dwLastNoteEntryTime = timeGetTime();
 
 		PATTERNINDEX nPat = m_nPattern;
-
 		if(usePlaybackPosition)
 			SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
- 		// -- Work out where to put the new note
+		// -- Work out where to put the new note
 		MODCOMMAND *pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
 		MODCOMMAND newcmd = *pTarget;
-		
+
 		// If record is enabled, create undo point.
 		if(bRecordEnabled)
 		{
 			pModDoc->GetPatternUndo()->PrepareUndo(nPat, nChn, nRow, 1, 1);
 		}
 
-		// We're overwriting a PC note here.
-		if(pTarget->IsPcNote() && !MODCOMMAND::IsPcNote(note))
+		// Param control 'note'
+		if(MODCOMMAND::IsPcNote(note))
 		{
-			newcmd.Clear();
-		}
-
-		// -- write note and instrument data.
-		const bool isSplit = HandleSplit(&newcmd, note);
-
-		// Nice idea actually: Use lower section of the keyboard to play chords (but it won't work 100% correctly this way...)
-		/*if(isSplit)
-		{
-			TempEnterChord(note);
-			return;
-		}*/
-
-		// -- write vol data
-		int volWrite = -1;
-		if (vol >= 0 && vol <= 64 && !(isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume))	//write valid volume, as long as there's no split volume override.
-		{
-			volWrite = vol;
-		} else if (isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume)	//cater for split volume override.
-		{
-			if (pModDoc->GetSplitKeyboardSettings()->splitVolume > 0 && pModDoc->GetSplitKeyboardSettings()->splitVolume <= 64)
+			if(bRecordEnabled)
 			{
-				volWrite = pModDoc->GetSplitKeyboardSettings()->splitVolume;
+				if(!pTarget->IsPcNote())
+				{
+					// We're overwriting a normal cell with a PC note.
+					newcmd = m_PCNoteEditMemory;
+				} else
+				{
+					// Just update PC note edit memory.
+					m_PCNoteEditMemory = newcmd;
+				}
+
+				newcmd.note = note;
+				modified = true;
 			}
-		}
-
-		if(volWrite != -1)
+		} else
 		{
-			if(pSndFile->GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
+
+			// Are we overwriting a PC note here?
+			if(pTarget->IsPcNote())
 			{
-				newcmd.volcmd = VOLCMD_VOLUME;
-				newcmd.vol = (MODCOMMAND::VOL)volWrite;
-			} else
-			{
-				newcmd.command = CMD_VOLUME;
-				newcmd.param = (MODCOMMAND::PARAM)volWrite;
+				newcmd.Clear();
 			}
+
+			// -- write note and instrument data.
+			isSplit = HandleSplit(&newcmd, note);
+
+			// Nice idea actually: Use lower section of the keyboard to play chords (but it won't work 100% correctly this way...)
+			/*if(isSplit)
+			{
+				TempEnterChord(note);
+				return;
+			}*/
+
+			// -- write vol data
+			int volWrite = -1;
+			if (vol >= 0 && vol <= 64 && !(isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume))	//write valid volume, as long as there's no split volume override.
+			{
+				volWrite = vol;
+			} else if (isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume)	//cater for split volume override.
+			{
+				if (pModDoc->GetSplitKeyboardSettings()->splitVolume > 0 && pModDoc->GetSplitKeyboardSettings()->splitVolume <= 64)
+				{
+					volWrite = pModDoc->GetSplitKeyboardSettings()->splitVolume;
+				}
+			}
+
+			if(volWrite != -1)
+			{
+				if(pSndFile->GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
+				{
+					newcmd.volcmd = VOLCMD_VOLUME;
+					newcmd.vol = (MODCOMMAND::VOL)volWrite;
+				} else
+				{
+					newcmd.command = CMD_VOLUME;
+					newcmd.param = (MODCOMMAND::PARAM)volWrite;
+				}
+			}
+
+			// -- write sdx if playing live
+			if (usePlaybackPosition && nTick)	// avoid SD0 which will be mis-interpreted
+			{
+				if (newcmd.command == CMD_NONE)	//make sure we don't overwrite any existing commands.
+				{
+					newcmd.command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+					UINT maxSpeed = 0x0F;
+					if(pSndFile->m_nMusicSpeed > 0) maxSpeed = min(0x0F, pSndFile->m_nMusicSpeed - 1);
+					newcmd.param = 0xD0 + min(maxSpeed, nTick);
+				}
+			}
+
+			// -- old style note cut/off/fade: erase instrument number
+			if (oldStyle && newcmd.note >= NOTE_MIN_SPECIAL)
+				newcmd.instr = 0;
+
 		}
 
-		// -- write sdx if playing live
-		if (usePlaybackPosition && nTick)	// avoid SD0 which will be mis-interpreted
-		{
-			if (newcmd.command == CMD_NONE)	//make sure we don't overwrite any existing commands.
-			{
-				newcmd.command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-				UINT maxSpeed = 0x0F;
-				if(pSndFile->m_nMusicSpeed > 0) maxSpeed = min(0x0F, pSndFile->m_nMusicSpeed - 1);
-				newcmd.param = 0xD0 + min(maxSpeed, nTick);
-			}
-		}
-
-		// -- old style note cut/off/fade: erase instrument number
-		if (oldStyle && newcmd.note >= NOTE_MIN_SPECIAL)
-			newcmd.instr = 0;
-		
 
 		// -- if recording, write out modified command.
 		if (bRecordEnabled && *pTarget != newcmd)
@@ -4541,7 +4560,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 
 		// -- play note
-		if ((CMainFrame::GetSettings().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (!bRecordEnabled))
+		if (((CMainFrame::GetSettings().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || !bRecordEnabled) && !newcmd.IsPcNote())
 		{
 			const bool playWholeRow = ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !bIsLiveRecord);
 			if (playWholeRow)
@@ -4590,11 +4609,12 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				sel &= ~7;
 			}
 
-			if(modified) //has it really changed?
+			if(modified) // Has it really changed?
 			{
 				pModDoc->SetModified();
 				if(bIsLiveRecord == false)
-				{   // Update only when not recording live.
+				{
+					// Update only when not recording live.
 					InvalidateArea(sel, sel + LAST_COLUMN);
 					UpdateIndicator();
 				}
@@ -4619,33 +4639,39 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				SetCurSel(sel, sel);
 			}
 
+			if(newcmd.IsPcNote())
+			{
+				// Nothing to do here anymore.
+				return;
+			}
+			
 			BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 			if (newcmd.note <= NOTE_MAX)
 				activeNoteMap[newcmd.note] = nChn;
 
-			//Move to next channel if required
+			// Move to next channel if required
 			if (recordGroup)
 			{
 				bool channelLocked;
 
-				UINT n = nChn;
-				for (UINT i=1; i<pSndFile->m_nChannels; i++)
+				CHANNELINDEX n = nChn;
+				for (CHANNELINDEX i = 1; i < pSndFile->GetNumChannels(); i++)
 				{
-					if (++n >= pSndFile->m_nChannels) n = 0; //loop around
+					if (++n >= pSndFile->GetNumChannels()) n = 0; // loop around
 
 					channelLocked = false;
-					for (int k=0; k<NOTE_MAX; k++)
+					for (int k = 0; k < NOTE_MAX; k++)
 					{
-						if (activeNoteChannel[k]==n  || splitActiveNoteChannel[k]==n)
+						if (activeNoteChannel[k] == n || splitActiveNoteChannel[k] == n)
 						{
 							channelLocked = true;
 							break;
 						}
 					}
 
-					if (pModDoc->IsChannelRecord(n)==recordGroup && !channelLocked)
+					if (pModDoc->IsChannelRecord(n) == recordGroup && !channelLocked)
 					{
-						SetCurrentColumn(n<<3);
+						SetCurrentColumn(CreateCursor(0, n));
 						break;
 					}
 				}
