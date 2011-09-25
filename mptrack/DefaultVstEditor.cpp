@@ -148,14 +148,22 @@ void CDefaultVstEditor::OnParamTextboxChanged()
 void CDefaultVstEditor::OnParamSliderChanged()
 //----------------------------------------------
 {
-	if (m_nControlLock) {	// Lock will be set if the GUI change was triggered internally (in UpdateParamDisplays).
-		return;				// We're only interested in handling changes triggered by the user.
+	if (m_nControlLock)
+	{
+		// Lock will be set if the GUI change was triggered internally (in UpdateParamDisplays).
+		// We're only interested in handling changes triggered by the user.
+		return;
 	}
 
-	//Extract value and notify plug
+	// Extract value and notify plug
 	int val = PARAM_RESOLUTION-m_slParam.GetPos();
-	m_pVstPlugin->SetParameter(m_nCurrentParam, val/static_cast<float>(PARAM_RESOLUTION));
-	
+	m_pVstPlugin->SetParameter(m_nCurrentParam, val / static_cast<float>(PARAM_RESOLUTION));
+
+	if(m_pVstPlugin->m_bRecordAutomation)
+	{
+		m_pVstPlugin->GetModDoc()->RecordParamChange(m_pVstPlugin->GetSlot(), m_nCurrentParam);
+	}
+
 	UpdateParamDisplays();	// update other GUI controls
 	m_pVstPlugin->GetModDoc()->SetModified();
 
@@ -166,7 +174,9 @@ void CDefaultVstEditor::OnParamSliderChanged()
 void CDefaultVstEditor::UpdateParamDisplays()
 //-------------------------------------------
 {
-	if (m_nControlLock) {	//Just to make sure we're not here as a consequence of an internal GUI change.
+	if (m_nControlLock)
+	{
+		//Just to make sure we're not here as a consequence of an internal GUI change.
 		return;
 	}
 
@@ -180,11 +190,13 @@ void CDefaultVstEditor::UpdateParamDisplays()
 	m_pVstPlugin->GetParamDisplay(m_nCurrentParam, sdisplay);
 	wsprintf(label, "%s %s", sdisplay, sunits);
 
-	//Update the GUI controls
+	// Update the GUI controls
 	m_nControlLock++;	// Set lock to indicate that the changes to the GUI are internal - no need to notify the plug and re-update GUI.
 	m_statParamLabel.SetWindowText(label);
 	m_slParam.SetPos(PARAM_RESOLUTION-val);
-	if (&m_editParam !=	m_editParam.GetFocus()) {	//Don't update textbox when it has focus, else this will prevent user from changing the content
+	if (&m_editParam !=	m_editParam.GetFocus())
+	{
+		// Don't update textbox when it has focus, else this will prevent user from changing the content
 		m_editParam.SetWindowText(s);
 	}
 	m_nControlLock--;	// Unset lock - done with internal GUI updates.
