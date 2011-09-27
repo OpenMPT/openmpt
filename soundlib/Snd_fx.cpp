@@ -3749,6 +3749,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			pChn->nLoopStart = pSmp->nLoopStart;
 			pChn->nLoopEnd = pSmp->nLoopEnd;
 			if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
+			LimitMax(pChn->nPos, pChn->nLength);
 		} else
 		{
 			pChn->dwFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_PINGPONGFLAG);

@@ -578,10 +578,22 @@ bool CModCleanupDlg::OptimizeSamples()
 
 	UINT nLoopOpt = 0;
 	
-	for (SAMPLEINDEX nSmp=1; nSmp <= pSndFile->m_nSamples; nSmp++)
+	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		if(pSndFile->GetSample(nSmp).pSample && (pSndFile->GetSample(nSmp).uFlags & CHN_LOOP)
-			&& (pSndFile->GetSample(nSmp).nLength > pSndFile->GetSample(nSmp).nLoopEnd + 2)) nLoopOpt++;
+		const MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+
+		// Determine how much of the sample will be played
+		UINT loopLength = sample.nLength;
+		if(sample.uFlags & CHN_LOOP)
+		{
+			loopLength = sample.nLoopEnd;
+		}
+		if(sample.uFlags & CHN_SUSTAINLOOP)
+		{
+			loopLength = max(sample.nLoopEnd, sample.nSustainEnd);
+		}
+
+		if(sample.pSample && sample.nLength > loopLength + 2) nLoopOpt++;
 	}
 	if (nLoopOpt == 0) return false;
 
@@ -593,10 +605,21 @@ bool CModCleanupDlg::OptimizeSamples()
 		for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 		{
 			MODSAMPLE &sample = pSndFile->GetSample(nSmp);
-			if ((sample.uFlags & CHN_LOOP)
-				&& (sample.nLength > sample.nLoopEnd + 2))
+
+			// Determine how much of the sample will be played
+			UINT loopLength = sample.nLength;
+			if(sample.uFlags & CHN_LOOP)
 			{
-				UINT lmax = sample.nLoopEnd + 2;
+				loopLength = sample.nLoopEnd;
+			}
+			if(sample.uFlags & CHN_SUSTAINLOOP)
+			{
+				loopLength = max(sample.nLoopEnd, sample.nSustainEnd);
+			}
+
+			if (sample.nLength > loopLength + 2)
+			{
+				UINT lmax = loopLength + 2;
 				if ((lmax < sample.nLength) && (lmax >= 2))
 				{
 					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
