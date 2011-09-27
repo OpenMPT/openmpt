@@ -1720,6 +1720,41 @@ void CViewSample::OnEditSelectAll()
 }
 
 
+// Update loop points after deleting a sample selection
+void CViewSample::AdjustLoopPoints(UINT &loopStart, UINT &loopEnd, UINT length) const
+//-----------------------------------------------------------------------------------
+{
+	if(m_dwBeginSel < loopStart  && m_dwEndSel < loopStart)
+	{
+		// cut part is before loop start
+		loopStart -= m_dwEndSel - m_dwBeginSel;
+		loopEnd -= m_dwEndSel - m_dwBeginSel;
+	}
+	else if(m_dwBeginSel < loopStart  && m_dwEndSel < loopEnd)
+	{
+		// cut part is partly before loop start
+		loopStart = m_dwBeginSel;
+		loopEnd -= m_dwEndSel - m_dwBeginSel;
+	}
+	else if(m_dwBeginSel >= loopStart && m_dwEndSel < loopEnd)
+	{
+		// cut part is in the loop
+		loopEnd -= m_dwEndSel - m_dwBeginSel;
+	}
+	else if(m_dwBeginSel >= loopStart && m_dwBeginSel < loopEnd && m_dwEndSel > loopEnd)
+	{
+		// cut part is partly before loop end
+		loopEnd = m_dwBeginSel;
+	}
+
+	if(loopEnd > length) loopEnd = length;
+	if(loopStart + 4 >= loopEnd)
+	{
+		loopStart = loopEnd = 0;
+	}
+}
+
+
 void CViewSample::OnEditDelete()
 //------------------------------
 {
@@ -1774,35 +1809,19 @@ void CViewSample::OnEditDelete()
 		}
 		len = sample.nLength;
 
-		// adjust loop points (could need some optimization)
-		if(m_dwBeginSel < sample.nLoopStart  && m_dwEndSel < sample.nLoopStart)
+
+		// adjust loop points
+		AdjustLoopPoints(sample.nLoopStart, sample.nLoopEnd, len);
+		AdjustLoopPoints(sample.nSustainStart, sample.nSustainEnd, len);
+
+		if(sample.nLoopEnd == 0)
 		{
-			// cut part is before loop start
-			sample.nLoopStart -= m_dwEndSel - m_dwBeginSel;
-			sample.nLoopEnd -= m_dwEndSel - m_dwBeginSel;
-		}
-		else if(m_dwBeginSel < sample.nLoopStart  && m_dwEndSel < sample.nLoopEnd)
-		{
-			// cut part is partly before loop start
-			sample.nLoopStart = m_dwBeginSel;
-			sample.nLoopEnd -= m_dwEndSel - m_dwBeginSel;
-		}
-		else if(m_dwBeginSel >= sample.nLoopStart && m_dwEndSel < sample.nLoopEnd)
-		{
-			// cut part is in the loop
-			sample.nLoopEnd -= m_dwEndSel - m_dwBeginSel;
-		}
-		else if(m_dwBeginSel >= sample.nLoopStart && m_dwBeginSel < sample.nLoopEnd && m_dwEndSel > sample.nLoopEnd)
-		{
-			// cut part is partly before loop end
-			sample.nLoopEnd = m_dwBeginSel;
+			sample.uFlags &= ~(CHN_LOOP | CHN_PINGPONGLOOP);
 		}
 
-		if (sample.nLoopEnd > len) sample.nLoopEnd = len;
-		if (sample.nLoopStart + 4 >= sample.nLoopEnd)
+		if(sample.nSustainEnd == 0)
 		{
-			sample.nLoopStart = sample.nLoopEnd = 0;
-			sample.uFlags &= ~CHN_LOOP;
+			sample.uFlags &= ~(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 		}
 	}
 	SetCurSel(0, 0);
@@ -1844,7 +1863,7 @@ void CViewSample::OnEditCopy()
 	dwMemSize += sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER)
 			 + sizeof(WAVEEXTRAHEADER) + sizeof(WAVESAMPLERINFO);
 	// For name + fname
-	dwMemSize += 32*2;
+	dwMemSize += 32 * 2;
 	BeginWaitCursor();
 	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
 	{
@@ -1866,16 +1885,16 @@ void CViewSample::OnEditCopy()
 		}
 		pfmt->channels = (sample.uFlags & CHN_STEREO) ? (WORD)2 : (WORD)1;
 		pfmt->bitspersample = (sample.uFlags & CHN_16BIT) ? (WORD)16 : (WORD)8;
-		pfmt->samplesize = pfmt->channels*pfmt->bitspersample/8;
+		pfmt->samplesize = pfmt->channels * pfmt->bitspersample / 8;
 		pfmt->bytessec = pfmt->freqHz*pfmt->samplesize;
 		pdata->id_data = IFFID_data;
 		pdata->length = dwSmpLen;
 		phdr->filesize += pdata->length;
-		LPBYTE psamples = p+sizeof(WAVEFILEHEADER)+sizeof(WAVEFORMATHEADER)+sizeof(WAVEDATAHEADER);
+		LPBYTE psamples = p + sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER);
 		memcpy(psamples, sample.pSample+dwSmpOffset, dwSmpLen);
 		if (pfmt->bitspersample == 8)
 		{
-			for (UINT i=0; i<dwSmpLen; i++) psamples[i] += 0x80;
+			for (UINT i = 0; i < dwSmpLen; i++) psamples[i] += 0x80;
 		}
 		if (bExtra)
 		{

@@ -30,7 +30,7 @@ public:
 	CViewSample();
 	DECLARE_SERIAL(CViewSample)
 
-public:
+protected:
 	void UpdateScrollSize() {UpdateScrollSize(m_nZoom);}
 	void UpdateScrollSize(const UINT nZoomOld);
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
@@ -68,6 +68,8 @@ public:
 
 	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
+
+	void AdjustLoopPoints(UINT &loopStart, UINT &loopEnd, UINT length) const;
 
 public:
 	//{{AFX_VIRTUAL(CViewSample)
