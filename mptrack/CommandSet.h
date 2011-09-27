@@ -223,6 +223,8 @@ enum CommandID
 	kcSetSpacing7,
 	kcSetSpacing8,
 	kcSetSpacing9,
+	kcIncreaseSpacing,
+	kcDecreaseSpacing,
 	kcSwitchToOrderList,
 	kcNewPattern,
 	kcDuplicatePattern,

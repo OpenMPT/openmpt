@@ -386,7 +386,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcCopySelectWithNav, 1314, _T("kcCopySelectWithNav"), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcCopySelectOffWithNav, 1315, _T("kcCopySelectOffWithNav"), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcChordModifier, 1316, _T("Chord Modifier"), kcVisible, kcDummy);
-	DefineKeyCommand(kcSetSpacing, 1317, _T("Set row jump on note entry"), kcVisible, kcDummy);
+	DefineKeyCommand(kcSetSpacing, 1317, _T("Set row spacing on note entry"), kcVisible, kcDummy);
 	DefineKeyCommand(kcSetSpacing0, 1318, _T(""), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcSetSpacing1, 1319, _T(""), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcSetSpacing2, 1320, _T(""), kcHidden, kcNoDummy);
@@ -607,6 +607,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSelectBeat, 1858, _T("Select beat"));
 	DefineKeyCommand(kcSelectMeasure, 1859, _T("Select measure"));
 	DefineKeyCommand(kcFileSaveTemplate, 1860, _T("File/Save As Template"));
+	DefineKeyCommand(kcIncreaseSpacing, 1861, _T("Increase row spacing"));
+	DefineKeyCommand(kcDecreaseSpacing, 1862, _T("Decrease row spacing"));
 	// Add new key commands here.
 
 #ifdef _DEBUG
