@@ -3895,6 +3895,13 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSwitchOverflowPaste:	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
 
+		case kcDecreaseSpacing:
+			if(m_nSpacing > 0) SetSpacing(m_nSpacing - 1);
+			break;
+		case kcIncreaseSpacing:
+			if(m_nSpacing < MAX_SPACING) SetSpacing(m_nSpacing + 1);
+			break;
+
 	}
 	//Ranges:
 	if (wParam>=kcVPStartNotes && wParam<=kcVPEndNotes)
