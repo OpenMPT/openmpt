@@ -902,7 +902,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 
 	if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 	 || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
-	 || ((m_dwSongFlags & SONG_ITCOMPATGXX) && (pChn->nRowInstr)))
+	 || ((m_dwSongFlags & SONG_ITCOMPATGXX) && (pChn->rowCommand.instr)))
 	{
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
@@ -916,9 +916,9 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->dwFlags &= ~CHN_NOTEFADE;
 			pChn->nFadeOutVol = 65536;
 		}
-		if ((!bPorta) || (!(m_dwSongFlags & SONG_ITCOMPATGXX)) || (pChn->nRowInstr))
+		if ((!bPorta) || (!(m_dwSongFlags & SONG_ITCOMPATGXX)) || (pChn->rowCommand.instr))
 		{
-			if ((!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) || (pChn->nRowInstr))
+			if ((!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) || (pChn->rowCommand.instr))
 			{
 				pChn->dwFlags &= ~CHN_NOTEFADE;
 				pChn->nFadeOutVol = 65536;
@@ -1301,11 +1301,11 @@ BOOL CSoundFile::ProcessEffects()
 // -! NEW_FEATURE#0010
 	for (CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++, pChn++)
 	{
-		UINT instr = pChn->nRowInstr;
-		UINT volcmd = pChn->nRowVolCmd;
-		UINT vol = pChn->nRowVolume;
-		UINT cmd = pChn->nRowCommand;
-		UINT param = pChn->nRowParam;
+		UINT instr = pChn->rowCommand.instr;
+		UINT volcmd = pChn->rowCommand.volcmd;
+		UINT vol = pChn->rowCommand.vol;
+		UINT cmd = pChn->rowCommand.command;
+		UINT param = pChn->rowCommand.param;
 		bool bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? false : true;
 
 		UINT nStartTick = 0;
@@ -1313,11 +1313,11 @@ BOOL CSoundFile::ProcessEffects()
 		pChn->dwFlags &= ~CHN_FASTVOLRAMP;
 
 		// Process parameter control note.
-		if(pChn->nRowNote == NOTE_PC)
+		if(pChn->rowCommand.note == NOTE_PC)
 		{
-			const PLUGINDEX plug = pChn->nRowInstr;
-			const PlugParamIndex plugparam = MODCOMMAND::GetValueVolCol(pChn->nRowVolCmd, pChn->nRowVolume);
-			const PlugParamValue value = MODCOMMAND::GetValueEffectCol(pChn->nRowCommand, pChn->nRowParam) / PlugParamValue(MODCOMMAND::maxColumnValue);
+			const PLUGINDEX plug = pChn->rowCommand.instr;
+			const PlugParamIndex plugparam = MODCOMMAND::GetValueVolCol(pChn->rowCommand.volcmd, pChn->rowCommand.vol);
+			const PlugParamValue value = MODCOMMAND::GetValueEffectCol(pChn->rowCommand.command, pChn->rowCommand.param) / PlugParamValue(MODCOMMAND::maxColumnValue);
 
 			if(plug > 0 && plug <= MAX_MIXPLUGINS && m_MixPlugins[plug-1].pMixPlugin)
 				m_MixPlugins[plug-1].pMixPlugin->SetParameter(plugparam, value);
@@ -1329,30 +1329,27 @@ BOOL CSoundFile::ProcessEffects()
 		// the need for parameter control. The condition cmd == 0
 		// is to make sure that m_nPlugParamValueStep != 0 because 
 		// of NOTE_PCS, not because of macro.
-		if(pChn->nRowNote == NOTE_PCS || (cmd == 0 && pChn->m_plugParamValueStep != 0))
+		if(pChn->rowCommand.note == NOTE_PCS || (cmd == CMD_NONE && pChn->m_plugParamValueStep != 0))
 		{
 			const bool isFirstTick = (m_dwSongFlags & SONG_FIRSTTICK) != 0;
 			if(isFirstTick)
-				pChn->m_RowPlug = pChn->nRowInstr;
+				pChn->m_RowPlug = pChn->rowCommand.instr;
 			const PLUGINDEX nPlug = pChn->m_RowPlug;
 			const bool hasValidPlug = (nPlug > 0 && nPlug <= MAX_MIXPLUGINS && m_MixPlugins[nPlug-1].pMixPlugin);
 			if(hasValidPlug)
 			{
 				if(isFirstTick)
-					pChn->m_RowPlugParam = MODCOMMAND::GetValueVolCol(pChn->nRowVolCmd, pChn->nRowVolume);
+					pChn->m_RowPlugParam = MODCOMMAND::GetValueVolCol(pChn->rowCommand.volcmd, pChn->rowCommand.vol);
 				const PlugParamIndex plugparam = pChn->m_RowPlugParam;
 				if(isFirstTick)
 				{
-					PlugParamValue targetvalue = MODCOMMAND::GetValueEffectCol(pChn->nRowCommand, pChn->nRowParam) / PlugParamValue(MODCOMMAND::maxColumnValue);
-					// Hack: Use m_nPlugInitialParamValue to store the target value, not initial.
-					pChn->m_plugInitialParamValue = targetvalue;
-					pChn->m_plugParamValueStep = (targetvalue - m_MixPlugins[nPlug-1].pMixPlugin->GetParameter(plugparam)) / float(m_nMusicSpeed);
+					PlugParamValue targetvalue = MODCOMMAND::GetValueEffectCol(pChn->rowCommand.command, pChn->rowCommand.param) / PlugParamValue(MODCOMMAND::maxColumnValue);
+					pChn->m_plugParamTargetValue = targetvalue;
+					pChn->m_plugParamValueStep = (targetvalue - m_MixPlugins[nPlug-1].pMixPlugin->GetParameter(plugparam)) / float(GetNumTicksOnCurrentRow());
 				}
 				if(m_nTickCount + 1 == GetNumTicksOnCurrentRow())
 				{	// On last tick, set parameter exactly to target value.
-					// Note: m_nPlugInitialParamValue is used to store the target value,
-					//		 not the initial value as the name suggests.
-					m_MixPlugins[nPlug-1].pMixPlugin->SetParameter(plugparam, pChn->m_plugInitialParamValue);
+					m_MixPlugins[nPlug-1].pMixPlugin->SetParameter(plugparam, pChn->m_plugParamTargetValue);
 				}
 				else
 					m_MixPlugins[nPlug-1].pMixPlugin->ModifyParameter(plugparam, pChn->m_plugParamValueStep);
@@ -1361,7 +1358,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Apart from changing parameters, parameter control notes are intended to be 'invisible'.
 		// To achieve this, clearing the note data so that rest of the process sees the row as empty row.
-		if(MODCOMMAND::IsPcNote(pChn->nRowNote))
+		if(MODCOMMAND::IsPcNote(pChn->rowCommand.note))
 		{
 			pChn->ClearRowCmd();
 			instr = 0;
@@ -1438,7 +1435,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Handles note/instrument/volume changes
 		if (m_nTickCount == nStartTick) // can be delayed by a note delay effect
 		{
-			UINT note = pChn->nRowNote;
+			UINT note = pChn->rowCommand.note;
 			if (instr) pChn->nNewIns = instr;
 			bool retrigEnv = (!note) && (instr);
 			
@@ -2965,7 +2962,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	case 0xA0:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{
 					pChn->nOldHiOffset = param;
-					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && (pChn->nRowNote != NOTE_NONE) && NOTE_IS_VALID(pChn->nRowNote))
+					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && (pChn->rowCommand.note != NOTE_NONE) && NOTE_IS_VALID(pChn->rowCommand.note))
 					{
 						DWORD pos = param << 16;
 						if (pos < pChn->nLength) pChn->nPos = pos;
@@ -3451,7 +3448,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
 			}
 // -! NEW_FEATURE#0010
 
-	if ((pChn->nRowNote >= NOTE_MIN) && (pChn->nRowNote <= NOTE_MAX))
+	if ((pChn->rowCommand.note >= NOTE_MIN) && (pChn->rowCommand.note <= NOTE_MAX))
 	{
 		// XM compatibility: Portamento + Offset = Ignore offset
 		if(bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
@@ -3510,7 +3507,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 	//IT compatibility 15. Retrigger
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
-		if ((m_dwSongFlags & SONG_FIRSTTICK) && pChn->nRowNote)
+		if ((m_dwSongFlags & SONG_FIRSTTICK) && pChn->rowCommand.note)
 		{
 			pChn->nRetrigCount = param & 0xf;
 		}
@@ -3525,13 +3522,13 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		if(m_dwSongFlags & SONG_FIRSTTICK)
 		{
 			// here are some really stupid things FT2 does
-			if(pChn->nRowVolCmd == VOLCMD_VOLUME) return;
-			if(pChn->nRowInstr > 0 && pChn->nRowNote == NOTE_NONE) nRetrigCount = 1;
-			if(pChn->nRowNote != NOTE_NONE && pChn->nRowNote <= GetModSpecifications().noteMax) nRetrigCount++;
+			if(pChn->rowCommand.volcmd == VOLCMD_VOLUME) return;
+			if(pChn->rowCommand.instr > 0 && pChn->rowCommand.note == NOTE_NONE) nRetrigCount = 1;
+			if(pChn->rowCommand.note != NOTE_NONE && pChn->rowCommand.note <= GetModSpecifications().noteMax) nRetrigCount++;
 		}
 		if (nRetrigCount >= nRetrigSpeed)
 		{
-			if (!(m_dwSongFlags & SONG_FIRSTTICK) || (pChn->nRowNote == NOTE_NONE)) 
+			if (!(m_dwSongFlags & SONG_FIRSTTICK) || (pChn->rowCommand.note == NOTE_NONE)) 
 			{
 				bDoRetrig = true;
 				nRetrigCount = 0;
@@ -3549,7 +3546,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			int realspeed = nRetrigSpeed;
 			// FT2 bug: if a retrig (Rxy) occours together with a volume command, the first retrig interval is increased by one tick
-			if ((param & 0x100) && (pChn->nRowVolCmd == VOLCMD_VOLUME) && (pChn->nRowParam & 0xF0)) realspeed++;
+			if ((param & 0x100) && (pChn->rowCommand.volcmd == VOLCMD_VOLUME) && (pChn->rowCommand.param & 0xF0)) realspeed++;
 			if (!(m_dwSongFlags & SONG_FIRSTTICK) || (param & 0x100))
 			{
 				if (!realspeed) realspeed = 1;
@@ -3558,7 +3555,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			} else if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
 			if (nRetrigCount >= realspeed)
 			{
-				if ((m_nTickCount) || ((param & 0x100) && (!pChn->nRowNote))) bDoRetrig = true;
+				if ((m_nTickCount) || ((param & 0x100) && (!pChn->rowCommand.note))) bDoRetrig = true;
 			}
 		}
 	}
@@ -3571,7 +3568,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			int vol = pChn->nVolume;
 
 			// XM compatibility: Retrig + volume will not change volume of retrigged notes
-			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(pChn->nRowVolCmd == VOLCMD_VOLUME))
+			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(pChn->rowCommand.volcmd == VOLCMD_VOLUME))
 			{
 				if (retrigTable1[dv])
 					vol = (vol * retrigTable1[dv]) >> 4;
@@ -3590,9 +3587,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		bool bResetEnv = false;
 		if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
-			if ((pChn->nRowInstr) && (param < 0x100))
+			if ((pChn->rowCommand.instr) && (param < 0x100))
 			{
-				InstrumentChange(pChn, pChn->nRowInstr, false, false);
+				InstrumentChange(pChn, pChn->rowCommand.instr, false, false);
 				bResetEnv = true;
 			}
 			if (param < 0x100) bResetEnv = true;
@@ -3603,7 +3600,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
 		}
-		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->nRowNote) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
+		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->rowCommand.note) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
 		if (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
 		// IT compatibility: see previous IT compatibility comment =)
 		if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPos = pChn->nPosLo = 0;
