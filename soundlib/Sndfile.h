@@ -301,19 +301,18 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nCutOff, nResonance;
 	BYTE nTremorCount, nTremorParam;
 	BYTE nPatternLoopCount;
-	BYTE nRowNote, nRowInstr;
-	BYTE nRowVolCmd, nRowVolume;
-	BYTE nRowCommand, nRowParam;
 	BYTE nLeftVU, nRightVU;
 	BYTE nActiveMacro, nFilterMode;
 	BYTE nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
 
+	MODCOMMAND rowCommand;
+
 	//NOTE_PCs memory.
 	uint16 m_RowPlugParam;
-	float m_plugParamValueStep, m_plugInitialParamValue;
+	float m_plugParamValueStep, m_plugParamTargetValue;
 	PLUGINDEX m_RowPlug;
 	
-	void ClearRowCmd() {nRowNote = NOTE_NONE; nRowInstr = 0; nRowVolCmd = VOLCMD_NONE; nRowVolume = 0; nRowCommand = CMD_NONE; nRowParam = 0;}
+	void ClearRowCmd() { rowCommand = MODCOMMAND::Empty(); }
 
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume;}

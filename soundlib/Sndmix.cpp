@@ -851,7 +851,7 @@ BOOL CSoundFile::ProcessRow()
 			m_nNextRow = 0;
 
 			// FT2 idiosyncrasy: When E60 is used on a pattern row x, the following pattern also starts from row x
-			// instead of the beginning of the pattern, unless there was a Dxx or Cxx effect.
+			// instead of the beginning of the pattern, unless there was a Bxx or Dxx effect.
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				m_nNextRow = m_nNextPatStartRow;
@@ -863,12 +863,7 @@ BOOL CSoundFile::ProcessRow()
 		MODCOMMAND *m = Patterns[m_nPattern].GetRow(m_nRow);
 		for (CHANNELINDEX nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
 		{
-			pChn->nRowNote = m->note;
-			pChn->nRowInstr = m->instr;
-			pChn->nRowVolCmd = m->volcmd;
-			pChn->nRowVolume = m->vol;
-			pChn->nRowCommand = m->command;
-			pChn->nRowParam = m->param;
+			pChn->rowCommand = *m;
 
 			pChn->nLeftVol = pChn->nNewLeftVol;
 			pChn->nRightVol = pChn->nNewRightVol;
@@ -918,25 +913,21 @@ BOOL CSoundFile::ProcessRow()
 void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 //-------------------------------------------------------------
 {
-	if(pChn->nVolSwing)
+	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
-		{
-			vol += pChn->nVolSwing;
-			Limit(vol, 0, 64);
-		} else if(GetModFlag(MSF_OLDVOLSWING))
-		{
-			vol += pChn->nVolSwing;
-			Limit(vol, 0, 256);
-		}
-		else
-		{
-			pChn->nVolume += pChn->nVolSwing;
-			pChn->nVolume = CLAMP(pChn->nVolume, 0, 256);
-			vol = pChn->nVolume;
-			pChn->nVolSwing = 0;
-			Limit(vol, 0, 256);
-		}
+		vol += pChn->nVolSwing;
+		Limit(vol, 0, 64);
+	} else if(GetModFlag(MSF_OLDVOLSWING))
+	{
+		vol += pChn->nVolSwing;
+		Limit(vol, 0, 256);
+	}
+	else
+	{
+		pChn->nVolume += pChn->nVolSwing;
+		Limit(pChn->nVolume, 0, 256);
+		vol = pChn->nVolume;
+		pChn->nVolSwing = 0;
 	}
 }
 
@@ -947,6 +938,7 @@ void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
 	if(IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING))
 	{
 		pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
+		Limit(pChn->nRealPan, 0, 256);
 	} else
 	{
 		pChn->nPan += pChn->nPanSwing;
@@ -954,7 +946,6 @@ void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
 		pChn->nPanSwing = 0;
 		pChn->nRealPan = pChn->nPan;
 	}
-	Limit(pChn->nRealPan, 0, 256);
 }
 
 
@@ -2041,7 +2032,7 @@ BOOL CSoundFile::ReadNote()
 			// vol is 14-bits
 			if (vol)
 			{
-				int insVol = pChn->nInsVol;	// This is the "SV" value in ITTECH.TXT
+				int insVol = pChn->nInsVol;	// This is the "SV * IV" value in ITTECH.TXT
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					ProcessVolumeSwing(pChn, insVol);
@@ -2390,14 +2381,14 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN]);
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_VOLUME]);
 
-		if(pChn->nRowCommand == CMD_MIDI || pChn->nRowCommand == CMD_SMOOTHMIDI)
+		if(pChn->rowCommand.command == CMD_MIDI || pChn->rowCommand.command == CMD_SMOOTHMIDI)
 		{
 			// Only smooth MIDI macros are processed on every tick
 			//if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
-			if(pChn->nRowParam < 0x80)
-				ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->nRowParam);
+			if(pChn->rowCommand.param < 0x80)
+				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->rowCommand.param);
 			else
-				ProcessMIDIMacro(nChn, (pChn->nRowCommand == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->nRowParam & 0x7F)], 0);
+				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->rowCommand.param & 0x7F)], 0);
 		}
 	}
 }
@@ -2414,10 +2405,10 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 	if ((!m_nInstruments) || (m_nPattern >= Patterns.Size())
 		 || (m_nRow >= Patterns[m_nPattern].GetNumRows()) || (!Patterns[m_nPattern])) return;
 
-	const MODCOMMAND::NOTE note = pChn->nRowNote;
-	const MODCOMMAND::INSTR instr = pChn->nRowInstr;
-	const MODCOMMAND::VOL vol = pChn->nRowVolume;
-	const MODCOMMAND::VOLCMD volcmd = pChn->nRowVolCmd;
+	const MODCOMMAND::NOTE note = pChn->rowCommand.note;
+	const MODCOMMAND::INSTR instr = pChn->rowCommand.instr;
+	const MODCOMMAND::VOL vol = pChn->rowCommand.vol;
+	const MODCOMMAND::VOLCMD volcmd = pChn->rowCommand.volcmd;
 	// Debug
 	{
 		// Previously this function took modcommand directly from pattern. ASSERT is there
@@ -2451,15 +2442,15 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 		if (pIns && (pIns->dwFlags & INS_MUTE)) return;
 	}
 
-	// Do couldn't find a valid plugin
+	// Couldn't find a valid plugin
 	if (pPlugin == nullptr) return;
 
 	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
 	{
-		if(note)
+		if(note != NOTE_NONE)
 		{
 			MODCOMMAND::NOTE realNote = note;
-			if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+			if(NOTE_IS_VALID(note))
 				realNote = pIns->NoteMap[note - 1];
 			pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
