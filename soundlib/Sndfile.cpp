@@ -762,10 +762,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
-	// Fix old nasty broken (non-standard) MIDI configs in files.
-	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+	// When reading a file made with an older version of MPT, it might be necessary to upgrade some settings automatically.	
+	if(m_dwLastSavedWithVersion)
 	{
-		FixMIDIConfigStrings(m_MidiCfg);
+		UpgradeSong();
 	}
 
 	// plugin loader
@@ -2897,6 +2897,53 @@ void FixMIDIConfigString(char *line)
 		{
 			line[i] = 'z';
 		}
+	}
+}
+
+
+// For old files made with MPT that don't have m_dwSongFlags set yet, set the flags appropriately.
+void CSoundFile::UpgradeModFlags()
+//--------------------------------
+{
+	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50))
+	{
+		SetModFlag(MSF_COMPATIBLE_PLAY, false);
+		SetModFlag(MSF_MIDICC_BUGEMULATION, false);
+		// If there are any plugins, enable volume bug emulation.
+		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		{
+			if(m_MixPlugins[i].Info.dwPluginId1 | m_MixPlugins[i].Info.dwPluginId2)
+			{
+				SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+				break;
+			}
+		}
+		// If there are any instruments with random variation, enable the old random variation behaviour.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		{
+			if(Instruments[i] && (Instruments[i]->nVolSwing | Instruments[i]->nPanSwing | Instruments[i]->nCutSwing | Instruments[i]->nResSwing))
+			{
+				SetModFlag(MSF_OLDVOLSWING, true);
+				break;
+			}
+		}
+	}
+}
+
+
+void CSoundFile::UpgradeSong()
+//----------------------------
+{
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+	{
+		// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		{
+			Instruments[i]->nVolSwing = min(Instruments[i]->nVolSwing * 100 / 64, 100);
+		}
+
+		// Fix old nasty broken (non-standard) MIDI configs in files.
+		FixMIDIConfigStrings(m_MidiCfg);
 	}
 }
 

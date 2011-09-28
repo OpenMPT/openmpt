@@ -712,8 +712,10 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 
 	LoadExtendedSongProperties(GetType(), ptr, lpStream, dwMemLength, &bInterpretOpenMPTMade);
 
-	if(bInterpretOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
-		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+	if(bInterpretOpenMPTMade)
+	{
+		UpgradeModFlags();
+	}
 
 	if(bInterpretOpenMPTMade && m_dwLastSavedWithVersion == 0)
 		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 01, 00);	// early versions of OpenMPT had no version indication.

@@ -841,6 +841,8 @@ public:
 	bool ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
+	void UpgradeModFlags();
+	void UpgradeSong();
 	static void FixMIDIConfigStrings(MODMIDICFG &midiCfg);
 
 	// Save Functions
