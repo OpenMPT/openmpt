@@ -536,18 +536,18 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		} else
 		{
 			// Original behaviour
-			if(pIns->NoteMap[note-1] > NOTE_MAX) return;
-			UINT n = pIns->Keyboard[note-1];
+			if(pIns->NoteMap[note - 1] > NOTE_MAX) return;
+			UINT n = pIns->Keyboard[note - 1];
 			pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
 		}
 	} else
-	if (m_nInstruments)
+	if (GetNumInstruments())
 	{
 		if (note >= NOTE_MIN_SPECIAL) return;
 		pSmp = NULL;
 	}
 
-	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && pIns && pIns->pTuning);
+	const bool bNewTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
 	//Playback behavior change for MPT: With portamento don't change sample if it is in
 	//the same instrument as previous sample.
 	if(bPorta && bNewTuning && pIns == pChn->pModInstrument)
@@ -563,7 +563,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	else 
 	{	
 		// Special XM hack
-		if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (pIns)
+		if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (pIns)
 		&& (pChn->pModSample) && (pSmp != pChn->pModSample))
 		{
 			// FT2 doesn't change the sample in this case,
@@ -602,7 +602,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	// Instrument adjust
 	pChn->nNewIns = 0;
 	
-	if (pIns && (pIns->nMixPlug || pSmp))		//rewbs.VSTiNNA
+	// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes s7xinsnum.it).
+	if (pIns && !IsCompatibleMode(TRK_IMPULSETRACKER)  && (pIns->nMixPlug || pSmp))		//rewbs.VSTiNNA
 		pChn->nNNA = pIns->nNNA;
 
 	if (pSmp)
@@ -622,13 +623,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	// Reset envelopes
 	if (bResetEnv)
 	{
-		if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATGXX)
+		if ((!bPorta) || (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATGXX)
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
 		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && bInstrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
-			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
+			if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
@@ -665,7 +666,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	// Tone-Portamento doesn't reset the pingpong direction flag
 	if ((bPorta) && (pSmp == pChn->pModSample))
 	{
-		if(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) return;
+		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) return;
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE);
 		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 	} else
@@ -759,7 +760,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	MODSAMPLE *pSmp = pChn->pModSample;
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && pIns && pIns->pTuning);
+	const bool bNewTuning = (GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning);
 	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
 	const int realnote = note;
 
@@ -808,7 +809,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 
-	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2)))
+	if ((!bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2)))
 	{
 		if (pSmp)
 		{
@@ -826,7 +827,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		return;
 	}
 
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
 	{
 		note += pChn->nTranspose;
 		note = CLAMP(note, NOTE_MIN, 131);	// why 131? 120+11, how does this make sense?
@@ -844,7 +845,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	}
 	pChn->m_CalculateFreq = true;
 
-	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+	if ((!bPorta) || (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		pChn->nNewIns = 0;
 
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
@@ -854,7 +855,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	{
 		if ((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
 		if(!bNewTuning) pChn->nPortamentoDest = period;
-		if ((!bPorta) || ((!pChn->nLength) && (!(m_nType & MOD_TYPE_S3M))))
+		if ((!bPorta) || ((!pChn->nLength) && (!(GetType() & MOD_TYPE_S3M))))
 		{
 			pChn->pModSample = pSmp;
 			pChn->pSample = pSmp->pSample;
@@ -946,7 +947,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nResSwing = pChn->nCutSwing = 0;
 			if (pIns)
 			{
-				// IT compatibility tentative fix: Reset NNA action on every new note, even without instrument number next to note (fixes spx-farspacedance.it, but is this actually 100% correct?)
+				// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes spx-farspacedance.it).
 				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->VolEnv.nEnvPosition = 0;
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->PanEnv.nEnvPosition = 0;
@@ -973,14 +974,14 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 					if (pIns->nCutSwing)
 					{
 						int d = ((LONG)pIns->nCutSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nCutSwing = (signed short)((d * pChn->nCutOff + 1)/128);
+						pChn->nCutSwing = (signed short)((d * pChn->nCutOff + 1) / 128);
 						pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 					}
 					// Resonance Swing
 					if (pIns->nResSwing)
 					{
 						int d = ((LONG)pIns->nResSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1)/128);
+						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1) / 128);
 						pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 					}
 				}
@@ -1539,12 +1540,6 @@ BOOL CSoundFile::ProcessEffects()
 				CheckNNA(nChn, instr, note, FALSE);
 			}
 
-		//rewbs.VSTnoteDelay
-		#ifdef MODPLUG_TRACKER
-//			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
-		#endif // MODPLUG_TRACKER
-		//end rewbs.VSTnoteDelay
-
 			if(note)
 			{
 				if(pChn->nRestorePanOnNewNote > 0)
@@ -1613,10 +1608,9 @@ BOOL CSoundFile::ProcessEffects()
 					pChn->nPanSwing = 0;
 			}
 
-		//rewbs.VSTnoteDelay
-		#ifdef MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER
 			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
-		#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER
 		}
 
 		if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
@@ -1674,7 +1668,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_FINEVOLUP:
-					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+					if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
 						if (m_nTickCount == nStartTick) VolumeSlide(pChn, (vol << 4) | 0x0F);
 					} else
@@ -1682,7 +1676,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_FINEVOLDOWN:
-					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+					if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
 						if (m_nTickCount == nStartTick) VolumeSlide(pChn, 0xF0 | vol);
 					} else
@@ -1710,24 +1704,18 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTAUP:
-					//IT compatibility (one of the first testcases - link effect memory)
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						PortamentoUp(pChn, vol << 2, true);
-					else
-						PortamentoUp(pChn, vol << 2, false);
+					// IT compatibility (one of the first testcases - link effect memory)
+					PortamentoUp(pChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 
 				case VOLCMD_PORTADOWN:
-					//IT compatibility (one of the first testcases - link effect memory)
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						PortamentoDown(pChn, vol << 2, true);
-					else
-						PortamentoDown(pChn, vol << 2, false);
+					// IT compatibility (one of the first testcases - link effect memory)
+					PortamentoDown(pChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 							
 				case VOLCMD_OFFSET:					//rewbs.volOff
 					if (m_nTickCount == nStartTick)
-						SampleOffset(nChn, vol<<3, bPorta);
+						SampleOffset(nChn, vol << 3, bPorta);
 					break;
 				}
 			}
@@ -2267,7 +2255,7 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 	// Regular Slide
 	if (!(m_dwSongFlags & SONG_FIRSTTICK) || (m_nMusicSpeed == 1))  //rewbs.PortaA01fix
 	{
-		DoFreqSlide(pChn, -(int)(param * 4));
+		DoFreqSlide(pChn, -int(param) * 4);
 	}
 }
 
@@ -2306,8 +2294,9 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFineP
 		}
 		return;
 	}
-	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1)) {  //rewbs.PortaA01fix
-		DoFreqSlide(pChn, (int)(param << 2));
+	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1))	//rewbs.PortaA01fix
+	{
+		DoFreqSlide(pChn, int(param) * 4);
 	}
 }
 
@@ -3749,7 +3738,11 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			pChn->nLoopStart = pSmp->nLoopStart;
 			pChn->nLoopEnd = pSmp->nLoopEnd;
 			if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
-			LimitMax(pChn->nPos, pChn->nLength);
+			if(pChn->nPos > pChn->nLength)
+			{
+				pChn->nPos = pChn->nLength;
+				pChn->nPosLo = 0;
+			}
 		} else
 		{
 			pChn->dwFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_PINGPONGFLAG);
