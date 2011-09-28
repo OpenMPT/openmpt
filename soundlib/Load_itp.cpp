@@ -454,12 +454,7 @@ mpts:
 	m_nMaxPeriod = 0xF000;
 	m_nMinPeriod = 8;
 
-	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
-	{
-		SetModFlag(MSF_COMPATIBLE_PLAY, false);
-		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-		SetModFlag(MSF_OLDVOLSWING, true);
-	}
+	UpgradeModFlags();
 
 	return true;
 }

@@ -1242,21 +1242,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 
-	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
-	{
-		SetModFlag(MSF_COMPATIBLE_PLAY, false);
-		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-		SetModFlag(MSF_OLDVOLSWING, true);
-	}
-
-	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
-	{
-		// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
-		{
-			Instruments[i]->nVolSwing = min(Instruments[i]->nVolSwing * 100 / 64, 100);
-		}
-	}
+	UpgradeModFlags();
 
 	if(GetType() == MOD_TYPE_IT)
 	{
