@@ -102,8 +102,9 @@ protected:
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
+	PATTERNINDEX m_nPattern;
 	ROWINDEX m_nRow;
-	UINT m_nPattern, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
+	UINT m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nMenuParam, m_nDetailLevel;
@@ -121,7 +122,6 @@ protected:
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 	UINT m_nFoundInstrument;
-	UINT m_nMenuOnChan;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked;
@@ -134,7 +134,7 @@ protected:
 // -> DESC="midi keyboard split"
 	BYTE activeNoteChannel[NOTE_MAX + 1];
 	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
-	int oldrow,oldchn,oldsplitchn;
+	int oldrow, oldchn, oldsplitchn;
 // -! NEW_FEATURE#0012
 
 // -> CODE#0018
@@ -163,7 +163,7 @@ public:
 	int GetYScrollPos() const { return m_nYScroll; }
 	int GetColumnWidth() const { return m_szCell.cx; }
 	int GetColumnHeight() const { return m_szCell.cy; }
-	UINT GetCurrentPattern() const { return m_nPattern; }
+	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ROWINDEX GetCurrentRow() const { return m_nRow; }
 	UINT GetCurrentColumn() const { return m_dwCursor; }
 	UINT GetCurrentChannel() const { return (m_dwCursor >> 3); }
@@ -180,7 +180,7 @@ public:
 	void InvalidateSelection() { InvalidateArea(m_dwBeginSel, m_dwEndSel); }
 	void InvalidateChannelsHeaders();
 	void SetCurSel(DWORD dwBegin, DWORD dwEnd);
-	BOOL SetCurrentPattern(UINT npat, ROWINDEX nrow = ROWINDEX_INVALID);
+	BOOL SetCurrentPattern(PATTERNINDEX npat, ROWINDEX nrow = ROWINDEX_INVALID);
 	BOOL SetCurrentRow(UINT nrow, BOOL bWrap=FALSE, BOOL bUpdateHorizontalScrollbar=TRUE );
 	BOOL SetCurrentColumn(UINT ncol);
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
@@ -355,57 +355,66 @@ public:
 
 private:
 	void SetSplitKeyboardSettings();
-	bool HandleSplit(MODCOMMAND* p, int note);
-	bool BuildChannelControlCtxMenu(HMENU hMenu);
-	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile);
-	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc);
-	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile);
-	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	bool BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	bool BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih,  CModDoc* pModDoc);
-	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildRandomCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile);
-	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
+	bool HandleSplit(MODCOMMAND *p, int note);
 
-	ROWINDEX GetSelectionStartRow();
-	ROWINDEX GetSelectionEndRow();
-	CHANNELINDEX GetSelectionStartChan();
-	CHANNELINDEX GetSelectionEndChan();
-	UINT ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans);
+	bool BuildChannelControlCtxMenu(HMENU hMenu) const;
+	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
+	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc *pModDoc) const;
+	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const;
+	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildSelectionCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih,  CModDoc* pModDoc) const;
+	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildRandomCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile *pSndFile) const;
+	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
 
-	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternColumns colType, CSoundFile* pSndFile);
+	ROWINDEX GetSelectionStartRow() const;
+	ROWINDEX GetSelectionEndRow() const;
+	CHANNELINDEX GetSelectionStartChan() const;
+	CHANNELINDEX GetSelectionEndChan() const;
+	UINT ListChansWhereColSelected(PatternColumns colType, CArray<UINT, UINT> &chans) const;
+
+	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternColumns colType, CSoundFile *pSndFile) const;
 	void Interpolate(PatternColumns type);
 
 	// Return true if recording live (i.e. editing while following playback).
 	// rSndFile must be the CSoundFile object of given rModDoc.
-	bool IsLiveRecord(const CModDoc& rModDoc, const CSoundFile& rSndFile) const;
-	bool IsLiveRecord(const CMainFrame& rMainFrm, const CModDoc& rModDoc, const CSoundFile& rSndFile) const;
+	bool IsLiveRecord(const CModDoc &rModDoc, const CSoundFile &rSndFile) const
+	{
+		return IsLiveRecord(*CMainFrame::GetMainFrame(), rModDoc, rSndFile);
+	};
+	bool IsLiveRecord(const CMainFrame &rMainFrm, const CModDoc &rModDoc, const CSoundFile &rSndFile) const
+	{
+		//             (following song)             &&        (following in correct document)        &&    (playback is on)
+		return ((m_dwStatus & PATSTATUS_FOLLOWSONG) &&	(rMainFrm.GetFollowSong(&rModDoc) == m_hWnd) && !(rSndFile.IsPaused()));
+	};
 
 	// If given edit positions are valid, sets them to iRow and iPat.
 	// If not valid, set edit cursor position.
-	void SetEditPos(const CSoundFile& rSndFile, 
-					ROWINDEX& iRow, PATTERNINDEX& iPat,
+	void SetEditPos(const CSoundFile &rSndFile, 
+					ROWINDEX &iRow, PATTERNINDEX &iPat,
 					const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const;
 
 	// Returns edit position.
-	ModCommandPos GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const;
+	ModCommandPos GetEditPos(CSoundFile &rSf, const bool bLiveRecord) const;
 
 	// Returns pointer to modcommand at given position. If the position is not valid, returns pointer
 	// to a dummy command.
-	MODCOMMAND* GetModCommand(CSoundFile& rSf, const ModCommandPos& pos);
+	MODCOMMAND* GetModCommand(CSoundFile &rSf, const ModCommandPos &pos);
 
-	bool IsEditingEnabled() const {return ((m_dwStatus&PATSTATUS_RECORD) != 0);}
+	// Returns true if pattern editing is enabled.
+	bool IsEditingEnabled() const { return ((m_dwStatus & PATSTATUS_RECORD) != 0); }
 
-	//Like IsEditingEnabled(), but shows some notification when editing is not enabled.
+	// Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
 
 	// Play one pattern row and stop ("step mode")
@@ -426,19 +435,6 @@ public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
 
-
-inline bool CViewPattern::IsLiveRecord(const CMainFrame& rMainFrm, const CModDoc& rModDoc, const CSoundFile& rSndFile) const
-//----------------------------------------------------------------------------
-{   //       (following song) && (following in correct document(?))  && (playback is on)
-	return ((m_dwStatus & PATSTATUS_FOLLOWSONG) &&	(rMainFrm.GetFollowSong(&rModDoc) == m_hWnd) && !(rSndFile.IsPaused()));
-}
-
-
-inline bool CViewPattern::IsLiveRecord(const CModDoc& rModDoc, const CSoundFile& rSndFile) const
-//----------------------------------------------------------------------------
-{
-	return IsLiveRecord(*CMainFrame::GetMainFrame(), rModDoc, rSndFile);
-}
 
 #endif
 
