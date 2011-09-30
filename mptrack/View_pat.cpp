@@ -4216,7 +4216,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		}
 	}
 
-	//Enter note off in pattern?
+	// Enter note off in pattern?
 	if ((note < NOTE_MIN) || (note > NOTE_MAX))
 		return;
 	if (GetColTypeFromCursor(m_dwCursor) > INST_COLUMN && (bChordMode || !fromMidi))
@@ -5010,7 +5010,9 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 //-----------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return false;
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile;
+	if (pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return false;
 
 	MODCOMMAND::INSTR ins = GetCurrentInstrument();
 	bool isSplit = false;
@@ -5024,11 +5026,11 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 			if (pModDoc->GetSplitKeyboardSettings()->octaveLink && note <= NOTE_MAX)
 			{
 				note += 12 * pModDoc->GetSplitKeyboardSettings()->octaveModifier;
-				Limit(note, NOTE_MIN, NOTE_MAX);
+				Limit(note, pSndFile->GetModSpecifications().noteMin, pSndFile->GetModSpecifications().noteMax);
 			}
 			if (pModDoc->GetSplitKeyboardSettings()->splitInstrument)
 			{
-				p->instr = pModDoc->GetSplitKeyboardSettings()->splitInstrument;
+				ins = pModDoc->GetSplitKeyboardSettings()->splitInstrument;
 			}
 		}
 	}
@@ -5043,25 +5045,24 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const
 //---------------------------------------------------------------------------------------
 {
-	bool itemFound;
 	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)
 	{
 
-		itemFound=false;
+		bool itemFound = false;
 
-		CHAR s[64] = { '\0' };
+		CHAR s[64];
 
 		if (!plug)
 		{
 			strcpy(s, "No plugin");
-			itemFound=true;
+			itemFound = true;
 		} else
 		{
 			PSNDMIXPLUGIN p = &(pSndFile->m_MixPlugins[plug - 1]);
 			if (p->Info.szLibraryName[0])
 			{
 				wsprintf(s, "FX%d: %s", plug, p->Info.szName);
-				itemFound=true;
+				itemFound = true;
 			}
 		}
 
@@ -5088,7 +5089,7 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 	bool bSolo = false, bUnmuteAll = false;
 	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
-	for (CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++)
+	for (CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
 	{
 		if (i != nChn)
 		{
@@ -5180,7 +5181,7 @@ bool CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih,
 			if (IsInterpolationPossible(startRow, endRow, 
 									    validChans[valChnIdx], NOTE_COLUMN, pSndFile))
 			{
-				greyed=0;	//Can do interpolation.
+				greyed = 0;	// Can do interpolation.
 				break;
 			}
 		}
@@ -5210,7 +5211,7 @@ bool CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler *i
 			if (IsInterpolationPossible(startRow, endRow, 
 									    validChans[valChnIdx], VOL_COLUMN, pSndFile))
 			{
-				greyed = 0;	//Can do interpolation.
+				greyed = 0;	// Can do interpolation.
 				break;
 			}
 		}
@@ -5261,7 +5262,7 @@ bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler *i
 	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		// Figure out what we want to interpolate
-		CString interpolateWhat =  "Effect";
+		CString interpolateWhat = "Effect";
 		const CSoundFile *pSndFile = GetDocument() != nullptr ? GetDocument()->GetSoundFile() : nullptr;
 		if(pSndFile->Patterns.IsValidPat(m_nPattern) && pSndFile->Patterns[m_nPattern].GetpModCommand(GetSelectionStartRow(), GetSelectionStartChan())->IsPcNote())
 		{
@@ -5324,8 +5325,6 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(NOTE_COLUMN, validChans) > 0) ? FALSE:MF_GRAYED;
-
-	//AppendMenu(hMenu, MF_STRING, ID_RUN_SCRIPT, "Run script");
 
 	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
@@ -5407,34 +5406,38 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFil
 	
 		if(!greyed)
 		{
-			if (pSndFile->m_nInstruments)
+			bool addSeparator = false;
+			if (pSndFile->GetNumInstruments())
 			{
-				for (UINT i=1; i<=pSndFile->m_nInstruments; i++)
+				for (UINT i = 1; i <= pSndFile->GetNumInstruments() ; i++)
 				{
 					if (pSndFile->Instruments[i] == NULL)
 						continue;
 
 					CString instString = pModDoc->GetPatternViewInstrumentName(i, true);
-					if(instString.GetLength() > 0) AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, pModDoc->GetPatternViewInstrumentName(i));
-					//Adding the entry to the list only if it has some name, since if the name is empty,
-					//it likely is some non-used instrument.
+					if(!instString.IsEmpty())
+					{
+						AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, pModDoc->GetPatternViewInstrumentName(i));
+						addSeparator = true;
+					}
 				}
 
-			}
-			else
+			} else
 			{
-				CHAR s[256];
-				UINT nmax = pSndFile->m_nSamples;
-				while ((nmax > 1) && (pSndFile->GetSample(nmax).pSample == nullptr) && (!pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->GetSample(i).pSample))
+				CHAR s[64];
+				for (UINT i = 1; i <= pSndFile->GetNumSamples(); i++) if (pSndFile->GetSample(i).pSample != nullptr)
 				{
 					wsprintf(s, "%02d: %s", i, pSndFile->m_szNames[i]);
-					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, s);
+					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, s);
+					addSeparator = true;
 				}
 			}
 
-			//Add options to remove instrument from selection.
-     		AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
+			// Add options to remove instrument from selection.
+			if(addSeparator)
+			{
+				AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
+			}
 			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
 			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), "Set to current instrument");
 		}
@@ -5541,15 +5544,15 @@ UINT CViewPattern::ListChansWhereColSelected(PatternColumns colType, CArray<UINT
 
 	if (GetColTypeFromCursor(m_dwBeginSel) <= colType)
 	{
-		chans.Add(startChan);	//first selected chan includes this col type
+		chans.Add(startChan);	// First selected chan includes this col type
 	}
 	for (UINT chan=startChan + 1; chan < endChan; chan++)
 	{
-		chans.Add(chan); //All chans between first & last must include this col type
+		chans.Add(chan); // All chans between first & last must include this col type
 	}
 	if ((startChan != endChan) && colType <= GetColTypeFromCursor(m_dwEndSel))
 	{
-		chans.Add(endChan);		//last selected chan includes this col type
+		chans.Add(endChan);		// Last selected chan includes this col type
 	}
 
 	return chans.GetCount();
@@ -5649,7 +5652,7 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 	
 	CPoint pt = GetPointFromPosition(m_dwCursor);
 
-	AppendMenu(hMenu, MF_STRING, IDC_PATTERN_RECORD, "Editing(record) is disabled; click here to enable it.");
+	AppendMenu(hMenu, MF_STRING, IDC_PATTERN_RECORD, "Editing (recording) is disabled; click here to enable it.");
 
 	ClientToScreen(&pt);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -5676,7 +5679,7 @@ void CViewPattern::OnShowTimeAtRow()
 			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence", currentOrder, m_nRow);
 		else
 		{
-			const uint32 minutes = static_cast<uint32>(t/60.0);
+			const uint32 minutes = static_cast<uint32>(t / 60.0);
 			const float seconds = t - minutes*60;
 			msg.Format("Estimate for playback time at order %d(pattern %d), row %d: %d minute%s %.2f seconds", currentOrder, m_nPattern, m_nRow, minutes, (minutes == 1) ? "" : "s", seconds);
 		}
@@ -5777,6 +5780,7 @@ void CViewPattern::OnTogglePCNotePluginEditor()
 }
 
 
+// Get the active pattern's rows per beat, or, if they are not overriden, the song's default rows per beat.
 ROWINDEX CViewPattern::GetRowsPerBeat() const
 //-------------------------------------------
 {
@@ -5790,6 +5794,7 @@ ROWINDEX CViewPattern::GetRowsPerBeat() const
 }
 
 
+// Get the active pattern's rows per measure, or, if they are not overriden, the song's default rows per measure.
 ROWINDEX CViewPattern::GetRowsPerMeasure() const
 //----------------------------------------------
 {
@@ -5821,20 +5826,20 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
 	//rewbs: re-written to work regardless of selection
-	UINT startRow  = GetSelectionStartRow();
-	UINT endRow    = GetSelectionEndRow();
-	UINT startChan = GetSelectionStartChan();
-	UINT endChan   = GetSelectionEndChan();
+	ROWINDEX startRow  = GetSelectionStartRow();
+	ROWINDEX endRow    = GetSelectionEndRow();
+	CHANNELINDEX startChan = GetSelectionStartChan();
+	CHANNELINDEX endChan   = GetSelectionEndChan();
 
-	for (UINT r=startRow; r<endRow+1; r++)
+	for (ROWINDEX r = startRow; r < endRow + 1; r++)
 	{
-		p = pSndFile->Patterns[m_nPattern] + r * pSndFile->GetNumChannels() + startChan;
-		for (UINT c = startChan; c < endChan + 1; c++, p++)
+		p = pSndFile->Patterns[m_nPattern].GetpModCommand(r, startChan);
+		for (CHANNELINDEX c = startChan; c < endChan + 1; c++, p++)
 		{
 			// If a note or an instr is present on the row, do the change, if required.
-			// Do not set instr if note and instr are both blank.
-			// Do set instr if note is a PC note and instr is blank.
-			if ( ((p->note > 0 && p->note < NOTE_MIN_SPECIAL) || p->IsPcNote() || p->instr) && (p->instr!=nIns) )
+			// Do not set instr if note and instr are both blank,
+			// but set instr if note is a PC note and instr is blank.
+			if (((p->note != NOTE_NONE && NOTE_IS_VALID(p->note)) || p->IsPcNote() || p->instr) && (p->instr != nIns))
 			{
 				p->instr = nIns;
 				bModified = true;
@@ -5863,7 +5868,7 @@ void CViewPattern::SelectBeatOrMeasure(bool selectBeat)
 	const ROWINDEX endRow = GetSelectionEndRow() + adjust - (GetSelectionEndRow() % adjust) - 1;
 
 	CHANNELINDEX startChannel = GetSelectionStartChan(), endChannel = GetSelectionEndChan();
-	UINT startColumn = 0, endColumn = 0;
+	UINT startColumn = NOTE_COLUMN, endColumn = NOTE_COLUMN;
 	
 	if(m_dwBeginSel == m_dwEndSel)
 	{

@@ -1451,8 +1451,8 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	CHAR s[64];
 
 	// Split Notes
-	AppendNotesToControl(m_CbnSplitNote, 0, NOTE_MAX - 1);
-	m_CbnSplitNote.SetCurSel(m_pOptions->splitNote);
+	AppendNotesToControl(m_CbnSplitNote, m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN, m_pSndFile->GetModSpecifications().noteMax - NOTE_MIN);
+	m_CbnSplitNote.SetCurSel(m_pOptions->splitNote - (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
 
 	// Octave modifier
 	for(int i = -SPLIT_OCTAVE_RANGE; i < SPLIT_OCTAVE_RANGE + 1; i++)
@@ -1514,7 +1514,7 @@ void CSplitKeyboadSettings::OnOK()
 {
 	CDialog::OnOK();
 
-	m_pOptions->splitNote = static_cast<MODCOMMAND::NOTE>(m_CbnSplitNote.GetCurSel());
+	m_pOptions->splitNote = static_cast<MODCOMMAND::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
 	m_pOptions->octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
 	m_pOptions->octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE) ? true : false;
 	m_pOptions->splitVolume = static_cast<MODCOMMAND::VOL>(m_CbnSplitVolume.GetCurSel());
