@@ -1455,8 +1455,9 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	m_CbnSplitNote.SetCurSel(m_pOptions->splitNote);
 
 	// Octave modifier
-	for(int i = -SPLIT_OCTAVE_RANGE; i < SPLIT_OCTAVE_RANGE + 1; i++){
-		wsprintf(s,i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", abs(i));
+	for(int i = -SPLIT_OCTAVE_RANGE; i < SPLIT_OCTAVE_RANGE + 1; i++)
+	{
+		wsprintf(s, i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", abs(i));
 		int n = m_CbnOctaveModifier.AddString(s);
 		m_CbnOctaveModifier.SetItemData(n, i);
 	}
@@ -1467,8 +1468,9 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	// Volume
 	m_CbnSplitVolume.AddString("No Change");
 	m_CbnSplitVolume.SetItemData(0, 0);
-	for(int i = 1; i <= 64 ; i++){
-		wsprintf(s,"%d",i);
+	for(int i = 1; i <= 64 ; i++)
+	{
+		wsprintf(s, "%d", i);
 		int n = m_CbnSplitVolume.AddString(s);
 		m_CbnSplitVolume.SetItemData(n, i);
 	}
@@ -1476,12 +1478,13 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 
 	// Instruments
 	m_CbnSplitInstrument.ResetContent();
-	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString("No Instrument"), 0);
+	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString("No Change"), 0);
 
-	if (m_pSndFile->m_nInstruments)	{
-		for (INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->m_nInstruments; nIns++)
+	if(m_pSndFile->GetNumInstruments())
+	{
+		for (INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->GetNumInstruments(); nIns++)
 		{
-			if (m_pSndFile->Instruments[nIns] == nullptr)
+			if(m_pSndFile->Instruments[nIns] == nullptr)
 				continue;
 
 			CString displayName = m_pSndFile->GetpModDoc()->GetPatternViewInstrumentName(nIns);
@@ -1490,9 +1493,9 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 		}
 	} else
 	{
-		for (SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->m_nSamples; nSmp++)
+		for(SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->GetNumSamples(); nSmp++)
 		{
-			if ((m_pSndFile->m_szNames[nSmp][0]) || (m_pSndFile->GetSample(nSmp).pSample))
+			if(m_pSndFile->GetSample(nSmp).pSample)
 			{
 				wsprintf(s, "%02d: %s", nSmp, m_pSndFile->m_szNames[nSmp]);
 				int n = m_CbnSplitInstrument.AddString(s);
