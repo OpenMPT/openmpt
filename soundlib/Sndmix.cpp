@@ -921,8 +921,7 @@ void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 	{
 		vol += pChn->nVolSwing;
 		Limit(vol, 0, 256);
-	}
-	else
+	} else
 	{
 		pChn->nVolume += pChn->nVolSwing;
 		Limit(pChn->nVolume, 0, 256);
@@ -1007,7 +1006,7 @@ void CSoundFile::ProcessTremor(MODCHANNEL *pChn, int &vol)
 				if (pChn->nTremorCount == 128)
 					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
 				else if (pChn->nTremorCount == 192)
-					pChn->nTremorCount = (pChn->nTremorParam & 0xf) | 128;
+					pChn->nTremorCount = (pChn->nTremorParam & 0x0F) | 128;
 				else
 					pChn->nTremorCount--;
 			}
@@ -1017,19 +1016,33 @@ void CSoundFile::ProcessTremor(MODCHANNEL *pChn, int &vol)
 		}
 		else
 		{
-			UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
 			UINT ontime = pChn->nTremorParam >> 4;
-			if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS))
+			UINT n = ontime + (pChn->nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)
+			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS))
 			{
 				n += 2;
 				ontime++;
 			}
 			UINT tremcount = (UINT)pChn->nTremorCount;
-			if (tremcount >= n) tremcount = 0;
-			if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+			if(!(GetType() & MOD_TYPE_XM))
 			{
+				if (tremcount >= n) tremcount = 0;
 				if (tremcount >= ontime) vol = 0;
 				pChn->nTremorCount = (BYTE)(tremcount + 1);
+			} else
+			{
+				if(m_dwSongFlags & SONG_FIRSTTICK)
+				{
+					// tremcount is only 0 on the first tremor tick after triggering a note.
+					if(tremcount > 0)
+					{
+						tremcount--;
+					}
+				} else
+				{
+					pChn->nTremorCount = (BYTE)(tremcount + 1);
+				}
+				if (tremcount % n >= ontime) vol = 0;
 			}
 		}
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
@@ -2406,7 +2419,6 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 		 || (m_nRow >= Patterns[m_nPattern].GetNumRows()) || (!Patterns[m_nPattern])) return;
 
 	const MODCOMMAND::NOTE note = pChn->rowCommand.note;
-	const MODCOMMAND::INSTR instr = pChn->rowCommand.instr;
 	const MODCOMMAND::VOL vol = pChn->rowCommand.vol;
 	const MODCOMMAND::VOLCMD volcmd = pChn->rowCommand.volcmd;
 	// Debug
