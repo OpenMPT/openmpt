@@ -2421,22 +2421,11 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 	const MODCOMMAND::NOTE note = pChn->rowCommand.note;
 	const MODCOMMAND::VOL vol = pChn->rowCommand.vol;
 	const MODCOMMAND::VOLCMD volcmd = pChn->rowCommand.volcmd;
-	// Debug
-	{
-		// Previously this function took modcommand directly from pattern. ASSERT is there
-		// to detect possible behaviour change now that the data is accessed from channel.
-		const MODCOMMAND mc = *Patterns[m_nPattern].GetpModCommand(m_nRow, static_cast<CHANNELINDEX>(nChn));
-		ASSERT( mc.IsPcNote() ||
-			(note == mc.note && instr == mc.instr && volcmd == mc.volcmd && vol == mc.vol));
-	}
 
 	// Get instrument info and plugin reference
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
 	PLUGINDEX nPlugin = 0;
 	IMixPlugin *pPlugin = nullptr;
-
-	if ((instr) && (instr < MAX_INSTRUMENTS))
-		pIns = Instruments[instr];
 
 	if (pIns)
 	{
