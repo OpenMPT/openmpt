@@ -27,8 +27,9 @@ public:
 	bool VerifyData();
 	void UpdateDialog();
 
-private:
+protected:
 	void UpdateChannelCBox();
+	CString FormatVersionNumber(DWORD version);
 
 protected:
 	//{{AFX_VIRTUAL(CModTypeDlg)

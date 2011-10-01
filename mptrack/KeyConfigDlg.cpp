@@ -530,8 +530,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	if (cmd<0 || m_nCurKeyChoice<0 || m_nCurKeyChoice>=ih->GetKeyListSize(cmd))
 	{
 		// Annoying message box is annoying.
-		//CString error = "Nothing to restore for this slot.";
-		//Reporting::Error(error, "Invalid key data");
+		//Reporting::Error("Nothing to restore for this slot.", "Invalid key data", this);
 		return;
 	}
 	
@@ -552,8 +551,7 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 	if (m_nCurHotKey<0 || m_nCurKeyChoice<0 || m_nCurKeyChoice>=plocalCmdSet->GetKeyListSize(cmd))
 	{
 		// Annoying message box is annoying.
-		//CString error = "No key currently set for this slot.";
-		//Reporting::Warning(error, "Invalid key data");
+		//Reporting::Warning("No key currently set for this slot.", "Invalid key data", this);
 		return;
 	}
 
@@ -574,7 +572,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	if (cmd<0)
 	{
 		CString error = "Invalid slot.";
-		Reporting::Warning(error, "Invalid key data");
+		Reporting::Warning(error, "Invalid key data", this);
 		return;
 	}
 
@@ -590,7 +588,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	if (!kc.code)
 	{
 		CString error = "You need to say to which key you'd like to map this command to.";
-		Reporting::Warning(error, "Invalid key data");
+		Reporting::Warning(error, "Invalid key data", this);
 		return;
 	}
 	if (!kc.event)
@@ -604,12 +602,12 @@ void COptionsKeyboard::OnSetKeyChoice()
 
 	//process valid input
 	plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
-	report=plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
+	report = plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
 	
 	//Update log
 	m_eReport.GetWindowText(reportHistory);
 	//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
-	m_eReport.SetWindowText(report+reportHistory);
+	m_eReport.SetWindowText(report + reportHistory);
 
 	ForceUpdateGUI();
 	m_bModified=false;
@@ -707,7 +705,7 @@ void COptionsKeyboard::OnClearLog()
 void COptionsKeyboard::OnRestoreDefaultKeymap()
 //---------------------------------------------
 {
-	if(Reporting::Confirm("Discard all custom changes and restore default key configuration?") == cnfYes)
+	if(Reporting::Confirm("Discard all custom changes and restore default key configuration?", false, true, this) == cnfYes)
 	{
 		plocalCmdSet->LoadDefaultKeymap();
 		ForceUpdateGUI();
