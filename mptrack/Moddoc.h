@@ -256,6 +256,7 @@ public:
 
 	// Various MIDI Macro helpers
 	static enmParameteredMacroType GetMacroType(CString value); //rewbs.xinfo
+	CString GetMacroName(CString value, PLUGINDEX plugin);
 	static CString GetMacroName(enmParameteredMacroType macro);
 	static int MacroToPlugParam(CString value); //rewbs.xinfo
 	static int MacroToMidiCC(CString value);

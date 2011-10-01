@@ -2380,39 +2380,11 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 			
 			if (macroText != "_no macro_")
 			{
-				switch (GetMacroType(macroText))
-				{
-				case sfx_unused: chanSpec.Append("Unused"); break;
-				case sfx_cutoff: chanSpec.Append("Cutoff"); break;
-				case sfx_reso: chanSpec.Append("Resonance"); break;
-				case sfx_mode: chanSpec.Append("Filter Mode"); break;
-				case sfx_drywet: chanSpec.Append("Plug wet/dry ratio"); break;
-				case sfx_cc: {
-					int nCC = MacroToMidiCC(macroText);
-					chanSpec.AppendFormat("MidiCC %d", nCC); 
-					break;
-				}
-				case sfx_plug: {
-					int nParam = MacroToPlugParam(macroText);
-					char paramName[128];
-					MemsetZero(paramName);
-					PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
-					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS)) {
-						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
-						if (pPlug) 
-							pPlug->GetParamName(nParam, paramName, sizeof(paramName));
-						if (paramName[0] == 0)
-							strcpy(paramName, "N/A");
-					}
-					if (paramName[0] == 0)
-						strcpy(paramName, "N/A - no plug");
-					chanSpec.AppendFormat("param %d (%s)", nParam, paramName); 
-					break; }
-				case sfx_custom: 
-				default: chanSpec.Append("Custom");
-				}
+				const PLUGINDEX plugin = m_SndFile.GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted) - 1;
+				chanSpec.Append(GetMacroName(macroText, plugin));
 			}
-			if (chanSpec != "") {
+			if (chanSpec != "")
+			{
 				strcat(pszDescription, chanSpec);
 			}
 
@@ -3271,19 +3243,68 @@ enmParameteredMacroType CModDoc::GetMacroType(CString value)
 //----------------------------------------------------------
 {
 	value.Remove(' ');
-	if (value.Compare("")==0) return sfx_unused;
-	if (value.Compare("F0F000z")==0) return sfx_cutoff;
-	if (value.Compare("F0F001z")==0) return sfx_reso;
-	if (value.Compare("F0F002z")==0) return sfx_mode;
-	if (value.Compare("F0F003z")==0) return sfx_drywet;
-	if (value.Compare("Bc00z")>=0 && value.Compare("BcFFz")<=0 && value.GetLength()==5)
+	if (value.Compare("") == 0) return sfx_unused;
+	if (value.Compare("F0F000z") == 0) return sfx_cutoff;
+	if (value.Compare("F0F001z") == 0) return sfx_reso;
+	if (value.Compare("F0F002z") == 0) return sfx_mode;
+	if (value.Compare("F0F003z") == 0) return sfx_drywet;
+	if (value.Compare("Bc00z") >= 0 && value.Compare("BcFFz") <= 0 && value.GetLength() == 5)
 		return sfx_cc;
-	if (value.Compare("F0F079z")>0 && value.Compare("F0F1G")<0 && value.GetLength()==7)
+	if (value.Compare("F0F080z") >= 0 && value.Compare("F0F1FFz") <= 0 && value.GetLength() == 7)
 		return sfx_plug; 
 	return sfx_custom; //custom/unknown
 }
 
 
+// Returns macro description including plugin parameter / MIDI CC information
+CString CModDoc::GetMacroName(CString value, PLUGINDEX plugin)
+//------------------------------------------------------------
+{
+	const enmParameteredMacroType macroType = GetMacroType(value);
+
+	switch(macroType)
+	{
+	case sfx_plug:
+		{
+			const int param = MacroToPlugParam(value);
+			char paramName[128] = { '\0' };
+
+			if(plugin < MAX_MIXPLUGINS)
+			{
+				CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugin].pMixPlugin;
+				if(pPlug)
+				{
+					pPlug->GetParamName(param, paramName, sizeof(paramName));
+					StringFixer::SetNullTerminator(paramName);
+				}
+				if (paramName[0] == '\0')
+				{
+					return _T("N/A");
+				}
+
+				CString formattedName;
+				formattedName.Format(_T("Param %d (%s)"), param, paramName);
+				return CString(formattedName);
+			} else
+			{
+				return _T("N/A - No Plugin");
+			}
+		}
+
+	case sfx_cc:
+		{
+			CString formattedCC;
+			formattedCC.Format(_T("MIDI CC %d"), MacroToMidiCC(value));
+			return formattedCC;
+		}
+
+	default:
+		return GetMacroName(macroType);
+	}
+}
+
+
+// Returns generic macro description.
 CString CModDoc::GetMacroName(enmParameteredMacroType macro)
 //----------------------------------------------------------
 {
