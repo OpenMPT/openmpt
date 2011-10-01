@@ -2516,7 +2516,7 @@ void CViewSample::OnAddSilence()
 
 	const ctrlSmp::SmpLength nOldLength = sample.nLength;
 
-	if( MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples )
+	if(MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples)
 	{
 		CString str; str.Format(TEXT("Can't add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
 		Reporting::Information(str);
@@ -2557,7 +2557,7 @@ void CViewSample::OnAddSilence()
 	{
 		SetCurSel(0, 0);
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, NULL);
 	}
 }
 

@@ -611,11 +611,19 @@ void CDoWaveConvert::OnButton1()
 	DWORD dwDataOffset;
 	LONG lMax = 256;
 
-	if ((!m_pSndFile) || (!m_lpszFileName) || ((f = fopen(m_lpszFileName, "w+b")) == NULL))
+	if (!m_pSndFile || !m_lpszFileName)
 	{
-		Reporting::Notification("Could not open file for writing. Is it open in another application?");
 		EndDialog(IDCANCEL);
 		return;
+	}
+	
+	while((f = fopen(m_lpszFileName, "w+b")) == NULL)
+	{
+		if(Reporting::RetryCancel("Could not open file for writing. Is it open in another application?") == rtyCancel)
+		{
+			EndDialog(IDCANCEL);
+			return;
+		}
 	}
 
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
@@ -999,10 +1007,12 @@ void CDoAcmConvert::OnButton1()
 	if (theApp.GetACMConvert().AcmStreamPrepareHeader(hAStream, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
 	bPrepared = true;
 	// Creating the output file
-	if ((f = fopen(m_lpszFileName, "wb")) == NULL)
+	while ((f = fopen(m_lpszFileName, "wb")) == NULL)
 	{
-		Reporting::Notification("Could not open file for writing. Is it open in another application?");
-		goto OnError;
+		if(Reporting::RetryCancel("Could not open file for writing. Is it open in another application?") == rtyCancel)
+		{
+			goto OnError;
+		}
 	}
 	wfh.id_RIFF = IFFID_RIFF;
 	wfh.id_WAVE = IFFID_WAVE;

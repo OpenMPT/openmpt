@@ -112,3 +112,25 @@ ConfirmAnswer Reporting::Confirm(const char *text, const char *caption, bool sho
 		return cnfCancel;
 	}
 }
+
+
+RetryAnswer Reporting::RetryCancel(const char *text, const CWnd *parent)
+//----------------------------------------------------------------------
+{
+	return RetryCancel(text, MAINFRAME_TITLE, parent);
+}
+
+
+RetryAnswer Reporting::RetryCancel(const char *text, const char *caption, const CWnd *parent)
+//-------------------------------------------------------------------------------------------
+{
+	UINT result = ShowNotification(text, caption, MB_RETRYCANCEL, parent);
+	switch(result)
+	{
+	case IDRETRY:
+		return rtyRetry;
+	default:
+	case IDCANCEL:
+		return rtyCancel;
+	}
+}

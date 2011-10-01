@@ -460,12 +460,13 @@ BOOL CDLSBank::IsDLSBank(LPCSTR lpszFileName)
 	FILE *f;
 	if ((!lpszFileName) || (!lpszFileName[0])) return FALSE;
 	if ((f = fopen(lpszFileName, "rb")) == NULL) return FALSE;
-	memset(&riff, 0, sizeof(riff));
+	MemsetZero(riff);
 	fread(&riff, sizeof(RIFFCHUNKID), 1, f);
 	// Check for embedded DLS sections
 	if (riff.id_RIFF == IFFID_FORM)
 	{
-		do {
+		do
+		{
 			int len = BigEndian(riff.riff_len);
 			if (len <= 4) break;
 			if (riff.id_DLS == IFFID_XDLS)
