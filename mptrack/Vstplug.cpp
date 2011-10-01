@@ -2965,10 +2965,10 @@ void CVstPlugin::NotifySongPlaying(bool playing)
 }
 
 
-UINT CVstPlugin::FindSlot() 
-//------------------------
+PLUGINDEX CVstPlugin::FindSlot() 
+//------------------------------
 {
-	UINT slot = 0;
+	PLUGINDEX slot = 0;
 	if (m_pSndFile)
 	{
 		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot < MAX_MIXPLUGINS - 1)
@@ -2979,14 +2979,14 @@ UINT CVstPlugin::FindSlot()
 	return slot;
 }
 
-void CVstPlugin::SetSlot(UINT slot) 
-//---------------------------------
+void CVstPlugin::SetSlot(PLUGINDEX slot) 
+//--------------------------------------
 {
 	m_nSlot = slot;
 }
 
-UINT CVstPlugin::GetSlot() 
-//------------------------
+PLUGINDEX CVstPlugin::GetSlot() 
+//-----------------------------
 {
 	return m_nSlot;
 }

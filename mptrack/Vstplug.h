@@ -98,7 +98,7 @@ protected:
 	DWORD m_dwTimeAtStartOfProcess;
 	bool m_bModified;
 	HANDLE processCalled;
-	UINT m_nSlot;
+	PLUGINDEX m_nSlot;
 	float m_fGain;
 	bool m_bIsInstrument;
 
@@ -125,9 +125,9 @@ public:
 	bool isModified() {return m_bModified;}
 	inline CModDoc* GetModDoc() {return m_pModDoc;}
 	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
-	UINT FindSlot();
-	void SetSlot(UINT slot);
-	UINT GetSlot();
+	PLUGINDEX FindSlot();
+	void SetSlot(PLUGINDEX slot);
+	PLUGINDEX GetSlot();
 	void UpdateMixStructPtr(PSNDMIXPLUGIN);
 
 	void SetCurrentProgram(UINT nIndex);
