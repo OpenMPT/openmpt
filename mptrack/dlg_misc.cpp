@@ -94,8 +94,6 @@ BOOL CModTypeDlg::OnInitDialog()
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
 
-	UpdateChannelCBox();
-	
 	// Don't show new tempo modes for XM/IT, unless they are currently used
 	const bool showNewTempoModes = (m_pSndFile->GetType() == MOD_TYPE_MPT || (m_pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0);
 
@@ -121,7 +119,7 @@ BOOL CModTypeDlg::OnInitDialog()
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
-	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),				mixLevels_Test);
+
 	m_PlugMixBox.SetCurSel(0);
 	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
 	{
@@ -135,13 +133,20 @@ BOOL CModTypeDlg::OnInitDialog()
 	SetDlgItemText(IDC_TEXT_CREATEDWITH, "Created with:");
 	SetDlgItemText(IDC_TEXT_SAVEDWITH, "Last saved with:");
 
-	SetDlgItemText(IDC_EDIT_CREATEDWITH, MptVersion::ToStr(m_pSndFile->m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT_SAVEDWITH, MptVersion::ToStr(m_pSndFile->m_dwLastSavedWithVersion));
+	SetDlgItemText(IDC_EDIT_CREATEDWITH, FormatVersionNumber(m_pSndFile->m_dwCreatedWithVersion));
+	SetDlgItemText(IDC_EDIT_SAVEDWITH, FormatVersionNumber(m_pSndFile->m_dwLastSavedWithVersion));
 
 	UpdateDialog();
 
 	EnableToolTips(TRUE);
 	return TRUE;
+}
+
+
+CString CModTypeDlg::FormatVersionNumber(DWORD version)
+//-----------------------------------------------------
+{
+	return MptVersion::ToStr(version) + (MptVersion::IsTestBuild(version) ? " (Test Build)" : "");
 }
 
 
@@ -1838,7 +1843,7 @@ LPCTSTR GetNoteStr(const MODCOMMAND::NOTE nNote)
 void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart, const MODCOMMAND::NOTE noteEnd)
 //------------------------------------------------------------------------------------------------------------------
 {
-	const MODCOMMAND::NOTE upperLimit = min(ARRAYELEMCOUNT(szDefaultNoteNames)-1, noteEnd);
+	const MODCOMMAND::NOTE upperLimit = min(ARRAYELEMCOUNT(szDefaultNoteNames) - 1, noteEnd);
 	for(MODCOMMAND::NOTE note = noteStart; note <= upperLimit; ++note)
 		combobox.SetItemData(combobox.AddString(szDefaultNoteNames[note]), note);
 }
@@ -1847,16 +1852,16 @@ void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart,
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile* const pSndFile /* = nullptr*/, const INSTRUMENTINDEX nInstr/* = MAX_INSTRUMENTS*/)
 //----------------------------------------------------------------------------------------------------------------------------------
 {
-	const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
+	const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : NOTE_MIN;
 	const MODCOMMAND::NOTE noteEnd = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMax : NOTE_MAX;
 	for(MODCOMMAND::NOTE nNote = noteStart; nNote <= noteEnd; nNote++)
 	{
 		if(pSndFile != nullptr && nInstr != MAX_INSTRUMENTS)
 			combobox.SetItemData(combobox.AddString(pSndFile->GetNoteName(nNote, nInstr).c_str()), nNote);
 		else
-			combobox.SetItemData(combobox.AddString(szDefaultNoteNames[nNote-1]), nNote);
+			combobox.SetItemData(combobox.AddString(szDefaultNoteNames[nNote - 1]), nNote);
 	}
-	for(MODCOMMAND::NOTE nNote = NOTE_MIN_SPECIAL-1; nNote++ < NOTE_MAX_SPECIAL;)
+	for(MODCOMMAND::NOTE nNote = NOTE_MIN_SPECIAL - 1; nNote++ < NOTE_MAX_SPECIAL;)
 	{
 		if(pSndFile == nullptr || pSndFile->GetModSpecifications().HasNote(nNote) == true)
 			combobox.SetItemData(combobox.AddString(szSpecialNoteNames[nNote-NOTE_MIN_SPECIAL]), nNote);
