@@ -58,9 +58,9 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 	float Fc;
 	ASSERT(nCutOff<128);
 	if (m_dwSongFlags & SONG_EXFILTERRANGE)
-		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff*(flt_modifier+256)))/(20.0f*512.0f));
+		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (20.0f * 512.0f));
 	else
-		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff*(flt_modifier+256)))/(24.0f*512.0f));
+		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (24.0f * 512.0f));
 	LONG freq = (LONG)Fc;
 	if (freq < 120) return 120;
 	if (freq > 20000) return 20000;
@@ -76,53 +76,50 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 	float fs = (float)gdwMixingFreq;
 	float fg, fb0, fb1, fc, dmpfac;
 	
-/*	if (pChn->pHeader) {
-		fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier);
-		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
-	} else {*/
-
-		int cutoff = 0;
-		if(!GetModFlag(MSF_OLDVOLSWING))
+	int cutoff = 0;
+	if(!GetModFlag(MSF_OLDVOLSWING))
+	{
+		if(pChn->nCutSwing)
 		{
-			if(pChn->nCutSwing)
-			{
-				static_assert(sizeof(pChn->nCutOff) == 1, "check cast if this fails");
-				pChn->nCutOff = static_cast<BYTE>(pChn->nCutOff + pChn->nCutSwing);
-				Limit(pChn->nCutOff, BYTE(0), BYTE(127));
-				pChn->nCutSwing = 0;
-			}
-			if(pChn->nResSwing)
-			{
-				static_assert(sizeof(pChn->nResonance) == 1, "check cast if this fails");
-				pChn->nResonance = static_cast<BYTE>(pChn->nResonance + pChn->nResSwing);
-				Limit(pChn->nResonance, BYTE(0), BYTE(127));
-				pChn->nResSwing = 0;
-			}
-			cutoff = max( min((int)pChn->nCutOff,127), 0); // cap cutoff
-			fc = (float)CutOffToFrequency(cutoff, flt_modifier);
-			dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance)&0x7F)) / 20.0f);
+			static_assert(sizeof(pChn->nCutOff) == 1, "check cast if this fails");
+			pChn->nCutOff = static_cast<BYTE>(pChn->nCutOff + pChn->nCutSwing);
+			Limit(pChn->nCutOff, BYTE(0), BYTE(127));
+			pChn->nCutSwing = 0;
 		}
-		else
+		if(pChn->nResSwing)
 		{
-			cutoff = max( min((int)pChn->nCutOff+(int)pChn->nCutSwing,127), 0); // cap cutoff
-			fc = (float)CutOffToFrequency(cutoff, flt_modifier);
-			dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance+pChn->nResSwing)&0x7F)) / 20.0f);
+			static_assert(sizeof(pChn->nResonance) == 1, "check cast if this fails");
+			pChn->nResonance = static_cast<BYTE>(pChn->nResonance + pChn->nResSwing);
+			Limit(pChn->nResonance, BYTE(0), BYTE(127));
+			pChn->nResSwing = 0;
 		}
+		cutoff = CLAMP((int)pChn->nCutOff, 0, 127); // cap cutoff
+		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
+		dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)((pChn->nResonance) & 0x7F)) / 20.0f);
+	}
+	else
+	{
+		cutoff = CLAMP((int)pChn->nCutOff + (int)pChn->nCutSwing, 0, 127); // cap cutoff
+		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
+		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance + pChn->nResSwing) & 0x7F)) / 20.0f);
+	}
 
+	if(cutoff == 127 && IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		// Z7F shouldn't actually enable the filter.
+		return;
+	}
+
+	fc *= (float)(2.0 * 3.14159265358 / fs);
 		
+	float d = (1.0f - 2.0f * dmpfac) * fc;
+	LimitMax(d, 2.0f);
+	d = (2.0f * dmpfac - d) / fc;
+	float e = pow(1.0f / fc, 2.0f);
 
-//	}
-
-	fc *= (float)(2.0*3.14159265358/fs);
-		
-	float d = (1.0f-2.0f*dmpfac)* fc;
-	if (d>2.0) d = 2.0;
-	d = (2.0f*dmpfac - d)/fc;
-	float e = pow(1.0f/fc,2.0f);
-
-	fg=1/(1+d+e);
-	fb0=(d+e+e)/(1+d+e);
-	fb1=-e/(1+d+e);
+	fg = 1 / (1 + d + e);
+	fb0 = (d + e + e ) / (1 + d + e);
+	fb1 = -e / (1 + d + e);
 
 	switch(pChn->nFilterMode)
 	{
@@ -144,6 +141,7 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 		pChn->nFilter_Y1 = pChn->nFilter_Y2 = 0;
 		pChn->nFilter_Y3 = pChn->nFilter_Y4 = 0;
 	}
+
 	pChn->dwFlags |= CHN_FILTER;
 }
 

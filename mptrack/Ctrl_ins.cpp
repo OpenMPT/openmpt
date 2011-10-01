@@ -967,7 +967,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Pitch/Pan Separation
 	m_SpinPPS.SetRange(-32, +32);
 	// Pitch/Pan Center
-	AppendNotesToControl(m_ComboPPC, 0, NOTE_MAX-1);
+	AppendNotesToControl(m_ComboPPC, 0, NOTE_MAX - NOTE_MIN);
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -2233,6 +2233,7 @@ void CCtrlInstruments::OnEnableCutOff()
 				}
 			}
 		}
+		UpdateFilterText();
 		SetInstrumentModified(true);
 		SwitchToView();
 	}
