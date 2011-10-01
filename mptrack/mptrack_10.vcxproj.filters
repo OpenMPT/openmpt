@@ -205,9 +205,6 @@
     <ClCompile Include="MainFrm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MIDIMappingDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\mmcmp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -430,6 +427,9 @@
     <ClCompile Include="KeyConfigDlg.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="MIDIMappingDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -523,9 +523,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\midi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MIDIMappingDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mod2midi.h">
@@ -751,6 +748,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyConfigDlg.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="MIDIMappingDialog.h">
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>

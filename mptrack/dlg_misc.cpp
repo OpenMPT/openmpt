@@ -781,24 +781,24 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	UpdateDialog();
 
 	int offsetx=108, offsety=30, separatorx=4, separatory=2, 
-		height=18, widthMacro=30, widthVal=90, widthType=135, widthBtn=60;
+		height=18, widthMacro=30, widthVal=90, widthType=135, widthBtn=70;
 	
-	for (UINT m=0; m<NUM_MACROS; m++)
+	for (UINT m = 0; m < NUM_MACROS; m++)
 	{
 		m_EditMacro[m].Create("", /*BS_FLAT |*/ WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
-			CRect(offsetx, offsety+m*(separatory+height), offsetx+widthMacro, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NUM_MACROS+m);
+			CRect(offsetx, offsety + m * (separatory + height), offsetx + widthMacro, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacro[m].SetFont(GetFont());
 		
 		m_EditMacroType[m].Create(ES_READONLY | WS_CHILD| WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
-			CRect(offsetx+separatorx+widthMacro, offsety+m*(separatory+height), offsetx+widthMacro+widthType, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NUM_MACROS+m);
+			CRect(offsetx + separatorx + widthMacro, offsety + m* (separatory + height), offsetx + widthMacro + widthType, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacroType[m].SetFont(GetFont());
 
 		m_EditMacroValue[m].Create(ES_CENTER | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
-			CRect(offsetx+separatorx+widthType+widthMacro, offsety+m*(separatory+height), offsetx+widthMacro+widthType+widthVal, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NUM_MACROS+m);
+			CRect(offsetx + separatorx + widthType + widthMacro, offsety + m * (separatory + height), offsetx + widthMacro + widthType + widthVal, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacroValue[m].SetFont(GetFont());
 
 		m_BtnMacroShowAll[m].Create("Show All...", WS_CHILD | WS_TABSTOP | WS_VISIBLE,
-			CRect(offsetx+separatorx+widthType+widthMacro+widthVal, offsety+m*(separatory+height), offsetx+widthMacro+widthType+widthVal+widthBtn, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+m);
+			CRect(offsetx + separatorx + widthType + widthMacro + widthVal, offsety + m *(separatory + height), offsetx + widthMacro + widthType + widthVal + widthBtn, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + m);
 		m_BtnMacroShowAll[m].SetFont(GetFont());
 	}
 	UpdateMacroList();
@@ -1128,8 +1128,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 		m_EditSFx.SetWindowText(macroText);
 	} else
 	{
-		Reporting::Notification("Warning: Currently MPT can only assign macros to parameters 0 to 383");
-		param = 383;
+		Reporting::Notification("MPT can only assign macros to parameters 0 to 383. Use Parameter Control Notes to automate higher parameters.");
 	}	
 }
 

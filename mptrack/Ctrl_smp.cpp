@@ -914,7 +914,7 @@ void CCtrlSamples::OnZoomChanged()
 void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
-	bool bDuplicate = CMainFrame::GetInputHandler()->ShiftPressed();
+	const bool bDuplicate = CMainFrame::GetInputHandler()->ShiftPressed();
 
 	SAMPLEINDEX smp = m_pModDoc->InsertSample(true);
 	if (smp != SAMPLEINDEX_INVALID)

@@ -19,6 +19,12 @@ enum ConfirmAnswer
 	cnfCancel,
 };
 
+enum RetryAnswer
+{
+	rtyRetry,
+	rtyCancel,
+};
+
 //=============
 class Reporting
 //=============
@@ -54,6 +60,10 @@ public:
 	// Show a confirmation dialog.
 	static ConfirmAnswer Confirm(const char *text, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
 	static ConfirmAnswer Confirm(const char *text, const char *caption, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
+
+	// Show a confirmation dialog.
+	static RetryAnswer RetryCancel(const char *text, const CWnd *parent = nullptr);
+	static RetryAnswer RetryCancel(const char *text, const char *caption, const CWnd *parent = nullptr);
 
 };
 
