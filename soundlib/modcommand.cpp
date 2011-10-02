@@ -159,7 +159,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->volcmd = VOLCMD_VOLUME;
 				if(m->vol > 64) m->vol = 64;
 				m->command = CMD_S3MCMDEX;
-				m->param = 0x80 | (m->param * 15 / 64);	// XM volcol panning is 4-Bit, so we can use 4-Bit panning here.
+				m->param = 0x80 | ((m->param * 15 + 32) / 64);	// XM volcol panning is 4-Bit, so we can use 4-Bit panning here.
 			}
 			break;
 		case CMD_PORTAMENTOUP:
