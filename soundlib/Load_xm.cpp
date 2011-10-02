@@ -204,7 +204,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 						// B0-BF: Vibrato
 						case 0xB0:	p->volcmd = VOLCMD_VIBRATODEPTH; break;
 						// C0-CF: Set Panning
-						case 0xC0:	p->volcmd = VOLCMD_PANNING; p->vol = (vol * 64 / 15); break;
+						case 0xC0:	p->volcmd = VOLCMD_PANNING; p->vol = ((vol * 64 + 8) / 15); break;
 						// D0-DF: Panning Slide Left
 						case 0xD0:	p->volcmd = VOLCMD_PANSLIDELEFT; break;
 						// E0-EF: Panning Slide Right
@@ -855,7 +855,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				case VOLCMD_FINEVOLUP:		vol = 0x90 + (p->vol & 0x0F); break;
 				case VOLCMD_VIBRATOSPEED:	vol = 0xA0 + (p->vol & 0x0F); break;
 				case VOLCMD_VIBRATODEPTH:	vol = 0xB0 + (p->vol & 0x0F); break;
-				case VOLCMD_PANNING:		vol = 0xC0 + (p->vol * 15 / 64); if (vol > 0xCF) vol = 0xCF; break;
+				case VOLCMD_PANNING:		vol = 0xC0 + ((p->vol * 15 + 32) / 64); if (vol > 0xCF) vol = 0xCF; break;
 				case VOLCMD_PANSLIDELEFT:	vol = 0xD0 + (p->vol & 0x0F); break;
 				case VOLCMD_PANSLIDERIGHT:	vol = 0xE0 + (p->vol & 0x0F); break;
 				case VOLCMD_TONEPORTAMENTO:	vol = 0xF0 + (p->vol & 0x0F); break;
