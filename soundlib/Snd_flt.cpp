@@ -16,55 +16,24 @@
 
 #ifndef NO_FILTER
 
-//#define _ASM_MATH
-
-#ifdef _ASM_MATH
-
-// pow(a,b) returns a^^b -> 2^^(b.log2(a))
-
-static float pow(float a, float b)
-{
-	long tmpint;
-	float result;
-	_asm {
-	fld b				// Load b
-	fld a				// Load a
-	fyl2x				// ST(0) = b.log2(a)
-	fist tmpint			// Store integer exponent
-	fisub tmpint		// ST(0) = -1 <= (b*log2(a)) <= 1
-	f2xm1				// ST(0) = 2^(x)-1
-	fild tmpint			// load integer exponent
-	fld1				// Load 1
-	fscale				// ST(0) = 2^ST(1)
-	fstp ST(1)			// Remove the integer from the stack
-	fmul ST(1), ST(0)	// multiply with fractional part
-	faddp ST(1), ST(0)	// add integer_part
-	fstp result			// Store the result
-	}
-	return result;
-}
-
-
-#else
-
+#define _USE_MATH_DEFINES
 #include <math.h>
 
-#endif // _ASM_MATH
+extern float ITResonanceTable[128];
 
 
 DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 //-----------------------------------------------------------------------
 {
 	float Fc;
-	ASSERT(nCutOff<128);
+	ASSERT(nCutOff < 128);
 	if (m_dwSongFlags & SONG_EXFILTERRANGE)
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (20.0f * 512.0f));
 	else
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (24.0f * 512.0f));
 	LONG freq = (LONG)Fc;
-	if (freq < 120) return 120;
-	if (freq > 20000) return 20000;
-	if (freq*2 > (LONG)gdwMixingFreq) freq = gdwMixingFreq>>1;
+	Limit(freq, 120, 20000);
+	if (freq * 2 > (LONG)gdwMixingFreq) freq = gdwMixingFreq >> 1;
 	return (DWORD)freq;
 }
 
@@ -73,67 +42,82 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier) const
 //----------------------------------------------------------------------------------------
 {
-	float fs = (float)gdwMixingFreq;
-	float fg, fb0, fb1, fc, dmpfac;
-	
-	int cutoff = 0;
+	int cutoff = (int)pChn->nCutOff + (int)pChn->nCutSwing;
+	int resonance = (int)(pChn->nResonance & 0x7F) + (int)pChn->nResSwing;
+
+	Limit(cutoff, 0, 127);
+	Limit(resonance, 0, 127);
+
 	if(!GetModFlag(MSF_OLDVOLSWING))
 	{
-		if(pChn->nCutSwing)
-		{
-			static_assert(sizeof(pChn->nCutOff) == 1, "check cast if this fails");
-			pChn->nCutOff = static_cast<BYTE>(pChn->nCutOff + pChn->nCutSwing);
-			Limit(pChn->nCutOff, BYTE(0), BYTE(127));
-			pChn->nCutSwing = 0;
-		}
-		if(pChn->nResSwing)
-		{
-			static_assert(sizeof(pChn->nResonance) == 1, "check cast if this fails");
-			pChn->nResonance = static_cast<BYTE>(pChn->nResonance + pChn->nResSwing);
-			Limit(pChn->nResonance, BYTE(0), BYTE(127));
-			pChn->nResSwing = 0;
-		}
-		cutoff = CLAMP((int)pChn->nCutOff, 0, 127); // cap cutoff
-		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
-		dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)((pChn->nResonance) & 0x7F)) / 20.0f);
+		pChn->nCutOff = (BYTE)cutoff;
+		pChn->nCutSwing = 0;
+		pChn->nResonance = (BYTE)resonance;
+		pChn->nResSwing = 0;
 	}
-	else
+
+	float d, e;
+
+	if(UseITFilterMode())
 	{
-		cutoff = CLAMP((int)pChn->nCutOff + (int)pChn->nCutSwing, 0, 127); // cap cutoff
-		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
-		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance + pChn->nResSwing) & 0x7F)) / 20.0f);
-	}
 
-	if(cutoff == 127 && IsCompatibleMode(TRK_IMPULSETRACKER))
+		// flt_modifier is in [-256, 256], so cutoff is in [0, 127 * 2] after this calculation
+		cutoff = cutoff * (flt_modifier + 256) / 256;
+
+		// Filtering is only ever done if either cutoff is not full or if resonance is set.
+		if (cutoff < 254 || resonance != 0)
+		{
+			pChn->dwFlags |= CHN_FILTER;
+		} else
+		{
+			return;
+		}
+
+		static const float freqMultiplier = 2.0f * (float)M_PI * 110.0f * pow(2.0f, 0.25f);
+		static const float freqParameterMultiplier = 128.0f / (24.0f * 256.0f);
+
+		// 2 ^ (i / 24 * 256)
+		const float r = (float)gdwMixingFreq / (freqMultiplier * pow(2.0f, (float)cutoff * freqParameterMultiplier));
+
+		d = ITResonanceTable[resonance] * r + ITResonanceTable[resonance] - 1.0f;
+		e = r * r;
+
+	} else
 	{
-		// Z7F shouldn't actually enable the filter.
-		return;
+
+		pChn->dwFlags |= CHN_FILTER;
+
+		float fc = (float)CutOffToFrequency(cutoff, flt_modifier);
+		const float dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)resonance) / 20.0f);
+
+		fc *= (float)(2.0 * 3.14159265358 / (float)gdwMixingFreq);
+
+		d = (1.0f - 2.0f * dmpfac) * fc;
+		LimitMax(d, 2.0f);
+		d = (2.0f * dmpfac - d) / fc;
+		e = pow(1.0f / fc, 2.0f);
+
 	}
 
-	fc *= (float)(2.0 * 3.14159265358 / fs);
-		
-	float d = (1.0f - 2.0f * dmpfac) * fc;
-	LimitMax(d, 2.0f);
-	d = (2.0f * dmpfac - d) / fc;
-	float e = pow(1.0f / fc, 2.0f);
-
-	fg = 1 / (1 + d + e);
-	fb0 = (d + e + e ) / (1 + d + e);
-	fb1 = -e / (1 + d + e);
+	float fg = 1 / (1 + d + e);
+	float fb0 = (d + e + e) / (1 + d + e);
+	float fb1 = -e / (1 + d + e);
 
 	switch(pChn->nFilterMode)
 	{
 	case FLTMODE_HIGHPASS:
-		pChn->nFilter_A0 = (int)((1.0f-fg) * FILTER_PRECISION);
+		pChn->nFilter_A0 = (int)((1.0f - fg) * FILTER_PRECISION);
 		pChn->nFilter_B0 = (int)(fb0 * FILTER_PRECISION);
 		pChn->nFilter_B1 = (int)(fb1 * FILTER_PRECISION);
 		pChn->nFilter_HP = -1;
 		break;
+
 	default:
 		pChn->nFilter_A0 = (int)(fg * FILTER_PRECISION);
 		pChn->nFilter_B0 = (int)(fb0 * FILTER_PRECISION);
 		pChn->nFilter_B1 = (int)(fb1 * FILTER_PRECISION);
 		pChn->nFilter_HP = 0;
+		break;
 	}
 	
 	if (bReset)
@@ -142,7 +126,6 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 		pChn->nFilter_Y3 = pChn->nFilter_Y4 = 0;
 	}
 
-	pChn->dwFlags |= CHN_FILTER;
 }
 
 #endif // NO_FILTER

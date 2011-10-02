@@ -1013,7 +1013,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nCutSwing = pChn->nResSwing = 0;
 		}
 #ifndef NO_FILTER
-		if ((pChn->nCutOff < 0x7F) && (bFlt)) SetupChannelFilter(pChn, true);
+		if ((pChn->nCutOff < 0x7F || UseITFilterMode()) && (bFlt)) SetupChannelFilter(pChn, true);
 #endif // NO_FILTER
 	}
 	// Special case for MPT
@@ -2114,11 +2114,11 @@ BOOL CSoundFile::ProcessEffects()
 
 		// IMF Commands
 		case CMD_NOTESLIDEUP:
-			NoteSlide(pChn, param, 1);
+			NoteSlide(pChn, param, true);
 			break;
 
 		case CMD_NOTESLIDEDOWN:
-			NoteSlide(pChn, param, -1);
+			NoteSlide(pChn, param, false);
 			break;
 		}
 
@@ -2410,8 +2410,8 @@ void CSoundFile::ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param)
 
 // Implemented for IMF compatibility, can't actually save this in any formats
 // sign should be 1 (up) or -1 (down)
-void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, int sign)
-//----------------------------------------------------------------
+void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, bool slideUp)
+//--------------------------------------------------------------------
 {
 	BYTE x, y;
 	if (m_dwSongFlags & SONG_FIRSTTICK)
@@ -2430,7 +2430,7 @@ void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, int sign)
 			pChn->nNoteSlideCounter = pChn->nNoteSlideSpeed;
 			// update it
 			pChn->nPeriod = GetPeriodFromNote
-				(sign * pChn->nNoteSlideStep + GetNoteFromPeriod(pChn->nPeriod), 8363, 0);
+				((slideUp ? 1 : -1)  * pChn->nNoteSlideStep + GetNoteFromPeriod(pChn->nPeriod), 8363, 0);
 		}
 	}
 }

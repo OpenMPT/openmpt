@@ -1439,7 +1439,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		{
 			if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
 			{
-				header.cmwt = LittleEndianW(0x0217);
+				header.cmwt = LittleEndianW(0x0216);
 				break;
 			}
 		}
