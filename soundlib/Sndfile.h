@@ -624,6 +624,9 @@ public: //Misc
 			return true; // S3M and MOD format don't have compatibility flags, so we will always return true
 		return ((GetType() & type) && GetModFlag(MSF_COMPATIBLE_PLAY)) ? true : false;
 	}
+
+	// Check whether a filter algorithm closer to IT's should be used.
+	bool UseITFilterMode() const { return IsCompatibleMode(TRK_IMPULSETRACKER) && !(m_dwSongFlags & SONG_EXFILTERRANGE); }
 	
 	//Tuning-->
 public:
@@ -990,7 +993,7 @@ protected:
 	void FinePortamentoDown(MODCHANNEL *pChn, UINT param);
 	void ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param);
 	void ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param);
-	void NoteSlide(MODCHANNEL *pChn, UINT param, int sign);
+	void NoteSlide(MODCHANNEL *pChn, UINT param, bool slideUp);
 	void TonePortamento(MODCHANNEL *pChn, UINT param);
 	void Vibrato(MODCHANNEL *pChn, UINT param);
 	void FineVibrato(MODCHANNEL *pChn, UINT param);
