@@ -3136,16 +3136,8 @@ BOOL CModDoc::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMa
 		switch(gVolCmdInfo[ndx].dwVolCmd)
 		{
 		case VOLCMD_VOLUME:
-			*prangeMax = 64;
-			break;
-
 		case VOLCMD_PANNING:
 			*prangeMax = 64;
-			if (m_SndFile.GetType() & MOD_TYPE_XM)
-			{
-				*prangeMin = 2;		// 0*4+2
-				*prangeMax = 62;	// 15*4+2
-			}
 			break;
 
 		default:

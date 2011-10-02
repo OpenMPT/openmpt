@@ -151,8 +151,15 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			{
 				m->volcmd = VOLCMD_VOLUME;
 				m->vol = m->param;
-				if (m->vol > 0x40) m->vol = 0x40;
+				if(m->vol > 64) m->vol = 64;
 				m->command = m->param = 0;
+			} else if(m->volcmd == VOLCMD_PANNING)
+			{
+				m->SwapEffects();
+				m->volcmd = VOLCMD_VOLUME;
+				if(m->vol > 64) m->vol = 64;
+				m->command = CMD_S3MCMDEX;
+				m->param = 0x80 | (m->param * 15 / 64);	// XM volcol panning is 4-Bit, so we can use 4-Bit panning here.
 			}
 			break;
 		case CMD_PORTAMENTOUP:
@@ -745,7 +752,8 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 	}
 
 	CHANNELINDEX nScanChnMin = nChn, nScanChnMax = nChn;
-	MODCOMMAND *p = Patterns[nPat], *m;
+	MODCOMMAND  * const p = Patterns[nPat].GetpModCommand(nRow, nScanChnMin);
+	MODCOMMAND *m;
 
 	// Scan all channels
 	if(nChn == CHANNELINDEX_INVALID)
@@ -757,9 +765,9 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
 	if(!bAllowMultipleEffects)
 	{
-		for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++)
+		m = p;
+		for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++, m++)
 		{
-			m = p + nRow * m_nChannels + i;
 			if(!bIsVolumeEffect && m->command == nEffect)
 				return true;
 			if(bIsVolumeEffect && m->volcmd == nEffect)
@@ -768,9 +776,9 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 	}
 
 	// Easy case: check if there's some space left to put the effect somewhere
-	for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++)
+	m = p;
+	for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++, m++)
 	{
-		m = p + nRow * m_nChannels + i;
 		if(!bIsVolumeEffect && m->command == CMD_NONE)
 		{
 			m->command = nEffect;
@@ -791,9 +799,9 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 		// Move some effects that also work in the volume column, so there's place for our new effect.
 		if(!bIsVolumeEffect)
 		{
-			for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++)
+			m = p;
+			for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++, m++)
 			{
-				m = p + nRow * m_nChannels + i;
 				switch(m->command)
 				{
 				case CMD_VOLUME:

@@ -204,7 +204,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 						// B0-BF: Vibrato
 						case 0xB0:	p->volcmd = VOLCMD_VIBRATODEPTH; break;
 						// C0-CF: Set Panning
-						case 0xC0:	p->volcmd = VOLCMD_PANNING; p->vol = (vol << 2) + 2; break;
+						case 0xC0:	p->volcmd = VOLCMD_PANNING; p->vol = (vol * 64 / 15); break;
 						// D0-DF: Panning Slide Left
 						case 0xD0:	p->volcmd = VOLCMD_PANSLIDELEFT; break;
 						// E0-EF: Panning Slide Right
@@ -465,10 +465,10 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
 		for (UINT ienv=0; ienv<12; ienv++)
 		{
-			pIns->VolEnv.Ticks[ienv] = (WORD)xmsh.venv[ienv*2];
-			pIns->VolEnv.Values[ienv] = (BYTE)xmsh.venv[ienv*2+1];
-			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.penv[ienv*2];
-			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.penv[ienv*2+1];
+			pIns->VolEnv.Ticks[ienv] = (WORD)xmsh.venv[ienv * 2];
+			pIns->VolEnv.Values[ienv] = (BYTE)xmsh.venv[ienv * 2 + 1];
+			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.penv[ienv * 2];
+			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.penv[ienv * 2 + 1];
 			if (ienv > 0)
 			{
 				// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
@@ -492,10 +492,10 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		for (UINT j=0; j<96; j++)
 		{
 			if (xmsh.snum[j] < nsamples)
-				pIns->Keyboard[j+12] = samplemap[xmsh.snum[j]];
+				pIns->Keyboard[j + 12] = samplemap[xmsh.snum[j]];
 		}
 		// Reading samples
-		for (UINT ins=0; ins<nsamples; ins++)
+		for (UINT ins = 0; ins < nsamples; ins++)
 		{
 			if (dwMemPos + max(xmsh.shsize, sizeof(xmss)) > dwMemLength)
 				return true;
@@ -611,7 +611,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		bMadeWithModPlug = true;
 	}
 	// Read midi config: "MIDI"
-	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4944494D))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream + dwMemPos))) == 0x4944494D))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
@@ -625,7 +625,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		bMadeWithModPlug = true;
 	}
 	// Read pattern names: "PNAM"
-	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e50))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream + dwMemPos))) == 0x4d414e50))
 	{
 		UINT len = *((DWORD *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
@@ -642,7 +642,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		bMadeWithModPlug = true;
 	}
 	// Read channel names: "CNAM"
-	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e43))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream + dwMemPos))) == 0x4d414e43))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
@@ -651,7 +651,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			UINT n = len / MAX_CHANNELNAME;
 			for (UINT i=0; i<n; i++)
 			{
-				memcpy(ChnSettings[i].szName, (lpStream+dwMemPos+i*MAX_CHANNELNAME), MAX_CHANNELNAME);
+				memcpy(ChnSettings[i].szName, (lpStream+dwMemPos + i * MAX_CHANNELNAME), MAX_CHANNELNAME);
 				StringFixer::SetNullTerminator(ChnSettings[i].szName);
 			}
 			dwMemPos += len;
@@ -855,7 +855,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				case VOLCMD_FINEVOLUP:		vol = 0x90 + (p->vol & 0x0F); break;
 				case VOLCMD_VIBRATOSPEED:	vol = 0xA0 + (p->vol & 0x0F); break;
 				case VOLCMD_VIBRATODEPTH:	vol = 0xB0 + (p->vol & 0x0F); break;
-				case VOLCMD_PANNING:		vol = 0xC0 + (p->vol >> 2); if (vol > 0xCF) vol = 0xCF; break;
+				case VOLCMD_PANNING:		vol = 0xC0 + (p->vol * 15 / 64); if (vol > 0xCF) vol = 0xCF; break;
 				case VOLCMD_PANSLIDELEFT:	vol = 0xD0 + (p->vol & 0x0F); break;
 				case VOLCMD_PANSLIDERIGHT:	vol = 0xE0 + (p->vol & 0x0F); break;
 				case VOLCMD_TONEPORTAMENTO:	vol = 0xF0 + (p->vol & 0x0F); break;
