@@ -10,8 +10,6 @@
 namespace ctrlSmp
 {
 
-typedef uintptr_t SmpLength;
-
 enum ResetFlag
 {
 	SmpResetCompo = 1,
@@ -33,7 +31,7 @@ SmpLength ResizeSample(MODSAMPLE &smp, const SmpLength nNewLength, CSoundFile* p
 // If valid CSoundFile pointer is given, the sample will be replaced also from the sounds channels.
 void ReplaceSample(MODSAMPLE &smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile* pSndFile);
 
-bool AdjustEndOfSample(MODSAMPLE &smp, CSoundFile* pSndFile = 0);
+bool AdjustEndOfSample(MODSAMPLE &smp, CSoundFile *pSndFile = nullptr);
 
 // Returns the number of bytes allocated(at least) for sample data.
 // Note: Currently the return value is based on the sample length and the actual 
@@ -77,7 +75,7 @@ namespace ctrlChn
 void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
 					LPCSTR pOldSample,
 					LPSTR pNewSample,
-					const ctrlSmp::SmpLength nNewLength,
+					const SmpLength nNewLength,
 					DWORD orFlags = 0,
 					DWORD andFlags = MAXDWORD);
 

@@ -609,6 +609,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcFileSaveTemplate, 1860, _T("File/Save As Template"));
 	DefineKeyCommand(kcIncreaseSpacing, 1861, _T("Increase row spacing"));
 	DefineKeyCommand(kcDecreaseSpacing, 1862, _T("Decrease row spacing"));
+	DefineKeyCommand(kcSampleAutotune, 1863, _T("Autotune sample to C"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

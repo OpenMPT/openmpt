@@ -41,6 +41,8 @@ typedef uint8 SEQUENCEINDEX;
 	const SEQUENCEINDEX SEQUENCEINDEX_INVALID	= SEQUENCEINDEX_MAX;
 typedef uint32 MODTYPE;
 
+typedef uintptr_t SmpLength;
+
 #define MAX_PATTERN_ROWS	1024	// -> CODE#0008 -> DESC="#define to set pattern size" -! BEHAVIOUR_CHANGE#0008
 
 
