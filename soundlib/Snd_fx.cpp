@@ -1477,13 +1477,25 @@ BOOL CSoundFile::ProcessEffects()
 					// This is only applied if the instrument column is empty and if there is either no note or a "normal" note (e.g. no note off)
 					if(instr == 0 && note <= NOTE_MAX)
 					{
-						for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++)
+						for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
 						{
 							if(Instruments[nIns] == pChn->pModInstrument)
 							{
 								instr = nIns;
 								break;
 							}
+						}
+					}
+				} else if(note == NOTE_KEYOFF && instr && IsCompatibleMode(TRK_FASTTRACKER2))
+				{
+					// Instrument settings are recalled if an instrument number (no matter which) is found next to a Key-Off note.
+					// Using the same stupid HACK as above. Maybe it's time to change something?
+					for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
+					{
+						if(Instruments[nIns] == pChn->pModInstrument)
+						{
+							InstrumentChange(pChn, nIns, false, true, false);
+							break;
 						}
 					}
 				}
@@ -3693,17 +3705,17 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 		}
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
 
-		MODINSTRUMENT *pHeader = pChn->pModInstrument;
+		const MODINSTRUMENT *pIns = pChn->pModInstrument;
 		// instro sends to a midi chan
-		if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17)
+		if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17)
 		{
-			UINT nPlug = pHeader->nMixPlug;
+			UINT nPlug = pIns->nMixPlug;
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
 				if (pPlug)
 				{
-					pPlug->MidiCommand(pHeader->nMidiChannel, pHeader->nMidiProgram, pHeader->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
+					pPlug->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 				}
 			}
 		}
