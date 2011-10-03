@@ -475,8 +475,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcClearFieldITStyle, 1664, _T("Clear field (IT Style)"));
 	DefineKeyCommand(kcClearFieldStepITStyle, 1665, _T("Clear field and step (IT Style)"));
 	DefineKeyCommand(kcSetFXextension, 1666, _T("FX parameter extension command"));
-	DefineKeyCommand(kcNoteCutOld, 1667, _T("Note Cut (don't remember instrument)"));
-	DefineKeyCommand(kcNoteOffOld, 1668, _T("Note Off (don't remember instrument)"));
+	DefineKeyCommand(kcNoteCutOld, 1667, _T("Note Cut (without instrument number)"));
+	DefineKeyCommand(kcNoteOffOld, 1668, _T("Note Off (without instrument number)"));
 	DefineKeyCommand(kcViewAddPlugin, 1669, _T("View Plugin Manager"));
 	DefineKeyCommand(kcViewChannelManager, 1670, _T("View Channel Manager"));
 	DefineKeyCommand(kcCopyAndLoseSelection, 1671, _T("Copy and lose selection"));
@@ -538,7 +538,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcNotePCS, 1789, _T("Parameter control(smooth)(MPTm only)"));
 	DefineKeyCommand(kcSampleRemoveDCOffset, 1790, _T("Remove DC Offset"));
 	DefineKeyCommand(kcNoteFade, 1791, _T("Note Fade"));
-	DefineKeyCommand(kcNoteFadeOld, 1792, _T("Note Fade (don't remember instrument)"));
+	DefineKeyCommand(kcNoteFadeOld, 1792, _T("Note Fade (without instrument number)"));
 	DefineKeyCommand(kcEditPasteFlood, 1793, _T("Paste Flood"));
 	DefineKeyCommand(kcOrderlistNavigateLeft, 1794, _T("Previous Order"));
 	DefineKeyCommand(kcOrderlistNavigateRight, 1795, _T("Next Order"));
