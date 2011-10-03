@@ -65,7 +65,7 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 		cutoff = cutoff * (flt_modifier + 256) / 256;
 
 		// Filtering is only ever done if either cutoff is not full or if resonance is set.
-		if (cutoff < 254 || resonance != 0)
+		if(cutoff < 254 || resonance != 0)
 		{
 			pChn->dwFlags |= CHN_FILTER;
 		} else
@@ -85,6 +85,12 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 	} else
 	{
 
+		// We might end up here even if IT compatible playback mode is enabled and if extended filter range flag is set.
+		// We'd still want compatible behaviour then, but at the same time use MPT's cutoff / resonance settings
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && resonance == 0 && cutoff * (flt_modifier + 256) >= 254 * 256)
+		{
+			return;
+		}
 		pChn->dwFlags |= CHN_FILTER;
 
 		float fc = (float)CutOffToFrequency(cutoff, flt_modifier);

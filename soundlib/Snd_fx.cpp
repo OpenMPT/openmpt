@@ -1013,7 +1013,10 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nCutSwing = pChn->nResSwing = 0;
 		}
 #ifndef NO_FILTER
-		if ((pChn->nCutOff < 0x7F || UseITFilterMode()) && (bFlt)) SetupChannelFilter(pChn, true);
+		if ((pChn->nCutOff < 0x7F || IsCompatibleMode(TRK_IMPULSETRACKER)) && (bFlt))
+		{
+			SetupChannelFilter(pChn, true);
+		}
 #endif // NO_FILTER
 	}
 	// Special case for MPT

@@ -1376,9 +1376,14 @@ VOID CCtrlInstruments::UpdateFilterText()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			CHAR s[64];
-			if (pIns->nIFC&0x80 && pIns->nIFC<0xFF) {
-				wsprintf(s, "%d Hz", pSndFile->CutOffToFrequency(pIns->nIFC & 0x7F));
+			CHAR s[32];
+			// In IT Compatible mode, it is enough to just have resonance enabled to turn on the filter.
+			const bool resEnabled = ((pIns->nIFR & 0x80) && (pIns->nIFR & 0x7F) && pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER));
+
+			if (((pIns->nIFC & 0x80) && pIns->nIFC < 0xFF) || resEnabled)
+			{
+				const BYTE cutoff = (resEnabled && !(pIns->nIFC & 0x80)) ? 0x7F : (pIns->nIFC & 0x7F);
+				wsprintf(s, "%d Hz", pSndFile->CutOffToFrequency(cutoff));
 			} else {
 				wsprintf(s, "Off");
 			}
@@ -2272,6 +2277,7 @@ void CCtrlInstruments::OnEnableResonance()
 				}
 			}
 		}
+		UpdateFilterText();
 		SetInstrumentModified(true);
 		SwitchToView();
 	}
@@ -2350,7 +2356,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 			// Volume ramping (attack)
-			if (pSlider==&m_SliderAttack)
+			if (pSlider == &m_SliderAttack)
 			{
 				n = m_SliderAttack.GetPos();
 				int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
@@ -2363,7 +2369,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 // -! NEW_FEATURE#0027
 			} 
 			// Volume Swing
-			else if (pSlider==&m_SliderVolSwing) 
+			else if (pSlider == &m_SliderVolSwing) 
 			{
 				n = m_SliderVolSwing.GetPos();
 				if ((n >= 0) && (n <= 100) && (n != (int)pIns->nVolSwing))
@@ -2373,7 +2379,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				}
 			}
 			// Pan Swing
-			else if (pSlider==&m_SliderPanSwing) 
+			else if (pSlider == &m_SliderPanSwing) 
 			{
 				n = m_SliderPanSwing.GetPos();
 				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nPanSwing))
@@ -2383,7 +2389,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				}
 			}
 			//Cutoff swing
-			else if (pSlider==&m_SliderCutSwing) 
+			else if (pSlider == &m_SliderCutSwing) 
 			{
 				n = m_SliderCutSwing.GetPos();
 				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nCutSwing))
@@ -2393,7 +2399,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				}
 			}
 			//Resonance swing
-			else if (pSlider==&m_SliderResSwing) 
+			else if (pSlider == &m_SliderResSwing) 
 			{
 				n = m_SliderResSwing.GetPos();
 				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nResSwing))
@@ -2403,7 +2409,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				}
 			}
 			// Filter CutOff
-			else if (pSlider==&m_SliderCutOff)
+			else if (pSlider == &m_SliderCutOff)
 			{
 				n = m_SliderCutOff.GetPos();
 				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->nIFC & 0x7F)))
@@ -2415,7 +2421,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 					filterChanger = true;
 				}
 			}
-			else if (pSlider==&m_SliderResonance)
+			else if (pSlider == &m_SliderResonance)
 			{
 				// Filter Resonance
 				n = m_SliderResonance.GetPos();
@@ -2424,12 +2430,13 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 					pIns->nIFR &= 0x80;
 					pIns->nIFR |= (BYTE)n;
 					SetInstrumentModified(true);
+					UpdateFilterText();
 					filterChanger = true;
 				}
 			}
 			
 			// Update channels
-			if (filterChanger==true)
+			if (filterChanger == true)
 			{
 				for (UINT i=0; i<MAX_CHANNELS; i++)
 				{
