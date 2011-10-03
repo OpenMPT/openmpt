@@ -2514,7 +2514,7 @@ void CViewSample::OnAddSilence()
 	CAddSilenceDlg dlg(this, 32, sample.nLength);
 	if (dlg.DoModal() != IDOK) return;
 
-	const ctrlSmp::SmpLength nOldLength = sample.nLength;
+	const SmpLength nOldLength = sample.nLength;
 
 	if(MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples)
 	{
@@ -2672,6 +2672,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleSignUnsign:		PostCtrlMessage(IDC_SAMPLE_SIGN_UNSIGN); return wParam;
 		case kcSampleRemoveDCOffset:	PostCtrlMessage(IDC_SAMPLE_DCOFFSET); return wParam;
 		case kcSampleXFade:				PostCtrlMessage(IDC_SAMPLE_XFADE); return wParam;
+		case kcSampleAutotune:			PostCtrlMessage(IDC_SAMPLE_AUTOTUNE); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
 
 		// Those don't seem to work.

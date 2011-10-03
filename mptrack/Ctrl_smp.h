@@ -90,6 +90,7 @@ protected:
 	afx_msg void OnSilence();
 	afx_msg void OnInvert();
 	afx_msg void OnSignUnSign();
+	afx_msg void OnAutotune();
 	afx_msg void OnNameChanged();
 	afx_msg void OnFileNameChanged();
 	afx_msg void OnVolumeChanged();

@@ -16,6 +16,7 @@
 #include "smbPitchShift.cpp"
 #pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #include "modsmp_ctrl.h"
+#include "Autotune.h"
 #include "../common/StringFixer.h"
 #include <Shlwapi.h>
 
@@ -72,6 +73,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,  OnSignUnSign)
 	ON_COMMAND(IDC_SAMPLE_DCOFFSET,		OnRemoveDCOffset)
 	ON_COMMAND(IDC_SAMPLE_XFADE,		OnXFade)
+	ON_COMMAND(IDC_SAMPLE_AUTOTUNE,		OnAutotune)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
@@ -215,6 +217,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, TIMAGE_SAMPLE_INVERT);
 	m_ToolBar2.AddButton(IDC_SAMPLE_SIGN_UNSIGN, TIMAGE_SAMPLE_UNSIGN);
 	m_ToolBar2.AddButton(IDC_SAMPLE_XFADE, TIMAGE_SAMPLE_FIXLOOP);
+	m_ToolBar2.AddButton(IDC_SAMPLE_AUTOTUNE, TIMAGE_SAMPLE_AUTOTUNE);
 	// Setup Controls
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
@@ -469,6 +472,11 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case IDC_SAMPLE_XFADE:
 		OnXFade();
+		break;
+
+	case IDC_SAMPLE_AUTOTUNE:
+		OnAutotune();
+		break;
 
 	case IDC_SAMPLE_SIGN_UNSIGN:
 		OnSignUnSign();
@@ -3179,3 +3187,24 @@ void CCtrlSamples::OnXFade()
 	}
 }
 
+
+void CCtrlSamples::OnAutotune()
+//-----------------------------
+{
+	SELECTIONPOINTS selection = GetSelectionPoints();
+	if(!selection.bSelected)
+	{
+		selection.nStart = selection.nEnd = 0;
+	}
+
+	Autotune at(m_pSndFile->GetSample(m_nSample), m_pSndFile->GetType(), selection.nStart, selection.nEnd);
+	if(at.CanApply())
+	{
+		BeginWaitCursor();
+		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
+		at.Apply();
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
+		m_pModDoc->SetModified();
+		EndWaitCursor();
+	}
+}

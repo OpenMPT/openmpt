@@ -187,6 +187,9 @@
 				RelativePath=".\AutoSaver.cpp">
 			</File>
 			<File
+				RelativePath=".\Autotune.cpp">
+			</File>
+			<File
 				RelativePath=".\ChannelManagerDlg.cpp">
 			</File>
 			<File
@@ -676,6 +679,9 @@
 			</File>
 			<File
 				RelativePath=".\AutoSaver.h">
+			</File>
+			<File
+				RelativePath=".\Autotune.h">
 			</File>
 			<File
 				RelativePath=".\ChannelManagerDlg.h">

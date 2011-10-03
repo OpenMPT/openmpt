@@ -171,6 +171,7 @@
     <ClCompile Include="ACMConvert.cpp" />
     <ClCompile Include="ArrayUtils.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
+    <ClCompile Include="Autotune.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="CleanupSong.cpp" />
@@ -323,6 +324,7 @@
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="ACMConvert.h" />
+    <ClInclude Include="Autotune.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="PatternRandomizer.h" />
     <ClInclude Include="PatternRandomizerGUI.h" />

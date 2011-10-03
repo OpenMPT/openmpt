@@ -579,7 +579,7 @@ namespace ctrlChn
 void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
 					LPCSTR pOldSample,
 					LPSTR pNewSample,
-					const ctrlSmp::SmpLength nNewLength,
+					const SmpLength nNewLength,
 					DWORD orFlags /* = 0*/,
 					DWORD andFlags /* = MAXDWORD*/)
 {

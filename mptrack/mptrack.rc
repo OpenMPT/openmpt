@@ -2546,6 +2546,7 @@ END
 STRINGTABLE
 BEGIN
     IDC_SAMPLE_XFADE        "Crossfade Loop Points\nCrossfade between loop start and loop end to create seamless sample loops."
+    IDC_SAMPLE_AUTOTUNE     "Autotune sample to C\nTune the sample to the closest C."
 END
 
 #endif    // English (United States) resources
