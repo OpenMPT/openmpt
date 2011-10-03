@@ -112,6 +112,7 @@ protected:
 	afx_msg void OnFx4Changed();
 	afx_msg void OnPluginChanged();
 	afx_msg void OnPluginNameChanged();
+	afx_msg void OnFillParamCombo();
 	afx_msg void OnParamChanged();
 // -> CODE#0002
 // -> DESC="VST plugins presets"

@@ -13,8 +13,6 @@
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
 
-#define ID_FXCOMMANDS_BASE	41000
-
 
 IMPLEMENT_SERIAL(CViewGlobals, CFormView, 0)
 
@@ -79,7 +77,10 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_CBN_SELCHANGE(IDC_COMBO3, OnFx3Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnFx4Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO5, OnPluginChanged)
+
 	ON_CBN_SELCHANGE(IDC_COMBO6, OnParamChanged)
+	ON_CBN_SETFOCUS(IDC_COMBO6, OnFillParamCombo)
+
 	ON_CBN_SELCHANGE(IDC_COMBO7, OnOutputRoutingChanged)
 
 // -> CODE#0002
@@ -441,7 +442,9 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
-		if(pVstPlugin && pVstPlugin->isInstrument()){ // ericus 18/02/2005 : disable mix mode for VSTi
+		if(pVstPlugin && pVstPlugin->isInstrument())
+		{
+			// ericus 18/02/2005 : disable mix mode for VSTi
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), FALSE);
 		}
@@ -462,28 +465,26 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 		if (pVstPlugin)
 		{
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-			CHAR sname[64];
-// -! NEW_FEATURE#0002
 			UINT nParams = pVstPlugin->GetNumParameters();
 			m_CbnParam.SetRedraw(FALSE);
 			m_CbnParam.ResetContent();
-			UINT i = 0;
-			for (i=0; i<nParams; i++)
-			{
-				pVstPlugin->GetParamName(i, sname, sizeof(sname));
-				wsprintf(s, "%02X: %s", i|0x80, sname);
-				m_CbnParam.SetItemData(m_CbnParam.AddString(s), i);
-			}
-            m_CbnParam.SetRedraw(TRUE);
 			if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
-			m_CbnParam.SetCurSel(m_nCurrentParam);
+
+			if(nParams)
+			{
+				char sname[64];
+				pVstPlugin->GetParamName(m_nCurrentParam, sname, sizeof(sname));
+				wsprintf(s, "%02X: %s", m_nCurrentParam, sname);
+				m_CbnParam.SetItemData(m_CbnParam.AddString(s), m_nCurrentParam);
+			}
+
+			m_CbnParam.SetCurSel(0);
+			m_CbnParam.SetRedraw(TRUE);
 			OnParamChanged();
+
+			// Input / Output type
 			pVstPlugin->GetPluginType(s);
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 			// For now, only display the "current" preset.
 			// This prevents the program from hanging when switching between plugin slots or
 			// switching to the general tab and the first plugin in the list has a lot of presets.
@@ -500,15 +501,13 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_sbDryRatio.EnableWindow(TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), TRUE);
-// -! NEW_FEATURE#0002
 
 		} else
 		{
 			s[0] = 0;
 			if (m_CbnParam.GetCount() > 0) m_CbnParam.ResetContent();
 			m_nCurrentParam = 0;
-// -> CODE#0002
-// -> DESC="VST plugins presets"
+
 			CHAR s2[16];
 			m_CbnPreset.SetRedraw(FALSE);
 			m_CbnPreset.ResetContent();
@@ -521,7 +520,6 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_sbDryRatio.EnableWindow(FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), FALSE);
-// -! NEW_FEATURE#0002
 		}
 		SetDlgItemText(IDC_TEXT6, s);
 		int outputsel = 0;
@@ -955,7 +953,7 @@ void CViewGlobals::OnSelectPlugin()
 void CViewGlobals::OnParamChanged()
 //---------------------------------
 {
-	int cursel = m_CbnParam.GetCurSel();
+	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
 	CModDoc *pModDoc = GetDocument();
 	CHAR s[256];
 	PSNDMIXPLUGIN pPlugin;
@@ -964,11 +962,11 @@ void CViewGlobals::OnParamChanged()
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin)
+	if (pPlugin->pMixPlugin && cursel != CB_ERR)
 	{
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-		UINT nParams = pVstPlugin->GetNumParameters();
-		if ((cursel >= 0) && (cursel < (int)nParams)) m_nCurrentParam = cursel;
+		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+		if ((cursel >= 0) && (cursel < nParams)) m_nCurrentParam = cursel;
 		if (m_nCurrentParam < nParams)
 		{
 			CHAR sunits[64], sdisplay[64];
@@ -1506,6 +1504,41 @@ void CViewGlobals::OnClonePlug()
 //------------------------------
 {
 	//Reporting::Notification("Not yet implemented.");
+}
+
+
+// The plugin param box is only filled when it gets the focus (done here).
+void CViewGlobals::OnFillParamCombo()
+//-----------------------------------
+{
+	// no need to fill it again.
+	if(m_CbnParam.GetCount() > 1)
+		return;
+
+	if(GetDocument() ==  nullptr) return;
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+	if(pSndFile == nullptr) return;
+	if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
+	PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
+	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
+	if(pVstPlugin == nullptr) return;
+
+	CHAR s[128];
+	CHAR sname[64];
+	const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+	m_CbnParam.SetRedraw(FALSE);
+	m_CbnParam.ResetContent();
+
+	for(PlugParamIndex i = 0; i < nParams; i++)
+	{
+		pVstPlugin->GetParamName(i, sname, sizeof(sname));
+		wsprintf(s, "%02X: %s", i, sname);
+		m_CbnParam.SetItemData(m_CbnParam.AddString(s), i);
+	}
+
+	if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
+	m_CbnParam.SetCurSel(m_nCurrentParam);
+	m_CbnParam.SetRedraw(TRUE);
 }
 
 
