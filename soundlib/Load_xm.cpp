@@ -271,7 +271,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
 
-	if (xmheader.orders > MAX_ORDERS) return false;
 	if ((!xmheader.channels) || (xmheader.channels > MAX_BASECHANNELS)) return false;
 	if (xmheader.channels > 32) bMadeWithModPlug = true;
 	m_nRestartPos = xmheader.restartpos;
@@ -346,10 +345,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			xmsh.shsize = LittleEndian(xmsh.shsize);
 			if(xmsh.shsize == 0 && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
 
-			for (int i = 0; i < 24; ++i) {
-				xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);
-				xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
-			}
 			xmsh.volfade = LittleEndianW(xmsh.volfade);
 			xmsh.midiprogram = LittleEndianW(xmsh.midiprogram);
 			xmsh.pitchwheelrange = LittleEndianW(xmsh.pitchwheelrange);
@@ -463,12 +458,12 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		pIns->PanEnv.nLoopEnd = xmsh.ploope;
 		if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
 		if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
-		for (UINT ienv=0; ienv<12; ienv++)
+		for (UINT ienv = 0; ienv < 12; ienv++)
 		{
-			pIns->VolEnv.Ticks[ienv] = (WORD)xmsh.venv[ienv * 2];
-			pIns->VolEnv.Values[ienv] = (BYTE)xmsh.venv[ienv * 2 + 1];
-			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.penv[ienv * 2];
-			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.penv[ienv * 2 + 1];
+			pIns->VolEnv.Ticks[ienv] = (WORD)LittleEndianW(xmsh.venv[ienv * 2]);
+			pIns->VolEnv.Values[ienv] = (BYTE)LittleEndianW(xmsh.venv[ienv * 2 + 1]);
+			pIns->PanEnv.Ticks[ienv] = (WORD)LittleEndianW(xmsh.penv[ienv * 2]);
+			pIns->PanEnv.Values[ienv] = (BYTE)LittleEndianW(xmsh.penv[ienv * 2 + 1]);
 			if (ienv > 0)
 			{
 				// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
@@ -744,9 +739,6 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	//BYTE s[64*64*5];
 	vector<BYTE> s(64*64*5, 0);
 	XMFILEHEADER xmheader;
-	XMINSTRUMENTHEADER xmih;
-	XMSAMPLEHEADER xmsh;
-	XMSAMPLESTRUCT xmss;
 	BYTE xmph[9];
 	FILE *f;
 	int i;
@@ -936,6 +928,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	// Writing instruments
 	for (i = 1; i <= xmheader.instruments; i++)
 	{
+		XMINSTRUMENTHEADER xmih;
+		XMSAMPLEHEADER xmsh;
 		WORD smptable[32];
 		BYTE flags[32];
 
@@ -948,7 +942,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmih.samples = 0;
 		if (m_nInstruments)
 		{
-			MODINSTRUMENT *pIns = Instruments[i];
+			const MODINSTRUMENT *pIns = Instruments[i];
 			if (pIns)
 			{
 				memcpy(xmih.name, pIns->name, 22);
@@ -958,12 +952,12 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				xmsh.pnum = (BYTE)pIns->PanEnv.nNodes;
 				if (xmsh.vnum > 12) xmsh.vnum = 12;
 				if (xmsh.pnum > 12) xmsh.pnum = 12;
-				for (UINT ienv=0; ienv<12; ienv++)
+				for (UINT ienv = 0; ienv < 12; ienv++)
 				{
-					xmsh.venv[ienv*2] = LittleEndianW(pIns->VolEnv.Ticks[ienv]);
-					xmsh.venv[ienv*2+1] = LittleEndianW(pIns->VolEnv.Values[ienv]);
-					xmsh.penv[ienv*2] = LittleEndianW(pIns->PanEnv.Ticks[ienv]);
-					xmsh.penv[ienv*2+1] = LittleEndianW(pIns->PanEnv.Values[ienv]);
+					xmsh.venv[ienv * 2] = LittleEndianW(pIns->VolEnv.Ticks[ienv]);
+					xmsh.venv[ienv * 2 + 1] = LittleEndianW(pIns->VolEnv.Values[ienv]);
+					xmsh.penv[ienv * 2] = LittleEndianW(pIns->PanEnv.Ticks[ienv]);
+					xmsh.penv[ienv * 2 + 1] = LittleEndianW(pIns->PanEnv.Values[ienv]);
 				}
 				if (pIns->VolEnv.dwFlags & ENV_ENABLED) xmsh.vtype |= 1;
 				if (pIns->VolEnv.dwFlags & ENV_SUSTAIN) xmsh.vtype |= 2;
@@ -977,13 +971,13 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				xmsh.psustain = (BYTE)pIns->PanEnv.nSustainStart;
 				xmsh.ploops = (BYTE)pIns->PanEnv.nLoopStart;
 				xmsh.ploope = (BYTE)pIns->PanEnv.nLoopEnd;
-				for (UINT j=0; j<96; j++) if (pIns->Keyboard[j+12]) // for all notes
+				for (UINT j = 0; j < 96; j++) if (pIns->Keyboard[j + 12]) // for all notes
 				{
 					UINT k;
-					UINT sample = pIns->Keyboard[j+12];
+					UINT sample = pIns->Keyboard[j + 12];
 
 					// Check to see if sample mapped to this note is already accounted for in this instrument
-					for (k=0; k<xmih.samples; k++)
+					for (k = 0; k < xmih.samples; k++)
 					{
 						if (smptable[k] == sample)
 						{
@@ -1021,6 +1015,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		if (!xmih.samples) continue;
 		for (UINT ins = 0; ins < samples; ins++)
 		{
+			XMSAMPLESTRUCT xmss;
 			MemsetZero(xmss);
 			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
 			const MODSAMPLE &sample = Samples[smptable[ins]];
@@ -1142,7 +1137,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 		//Save hacked-on extra info
 		SaveMixPlugins(f);
-		SaveExtendedInstrumentProperties(xmheader.instruments, f);
+		SaveExtendedInstrumentProperties(min(GetNumInstruments(), xmheader.instruments), f);
 		SaveExtendedSongProperties(f);
 	}
 

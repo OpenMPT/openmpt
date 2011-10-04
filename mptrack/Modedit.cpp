@@ -341,9 +341,48 @@ bool CModDoc::ConvertInstrumentsToSamples()
 //-----------------------------------------
 {
 	if (!m_SndFile.GetNumInstruments())
+	{
 		return false;
+	}
 	m_SndFile.Patterns.ForEachModCommand(ConvertInstrumentsToSamplesInPatterns(&m_SndFile));
 	return true;
+}
+
+
+bool CModDoc::ConvertSamplesToInstruments()
+//-----------------------------------------
+{
+	if(GetNumInstruments() > 0)
+	{
+		return false;
+	}
+
+	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
+	const SAMPLEINDEX nInstruments = min(m_SndFile.GetNumSamples(), nInstrumentMax);
+
+	for(SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
+	{
+		const bool muted = IsSampleMuted(smp);
+		MuteSample(smp, false);
+
+		try
+		{
+			m_SndFile.Instruments[smp] = new MODINSTRUMENT(smp);
+		} catch(MPTMemoryException)
+		{
+			ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
+			return false;
+		}
+
+		InitializeInstrument(m_SndFile.Instruments[smp]);
+		lstrcpyn(m_SndFile.Instruments[smp]->name, m_SndFile.m_szNames[smp], MAX_INSTRUMENTNAME);
+		MuteInstrument(smp, muted);
+	}
+
+	m_SndFile.m_nInstruments = nInstruments;
+
+	return true;
+
 }
 
 
@@ -491,27 +530,10 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		}
 		if (result == cnfYes)
 		{
-			SAMPLEINDEX nInstruments = m_SndFile.m_nSamples;
-			if (nInstruments > nInstrumentMax) nInstruments = nInstrumentMax;
-			for (SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
+			if(!ConvertSamplesToInstruments())
 			{
-				m_SndFile.GetSample(smp).uFlags &= ~CHN_MUTE;
-				if (!m_SndFile.Instruments[smp])
-				{
-					try
-					{
-						MODINSTRUMENT *p = new MODINSTRUMENT(smp);
-						m_SndFile.Instruments[smp] = p;
-					} catch(MPTMemoryException)
-					{
-						ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
-						return INSTRUMENTINDEX_INVALID;
-					}
-					InitializeInstrument(m_SndFile.Instruments[smp]);
-					lstrcpyn(m_SndFile.Instruments[smp]->name, m_SndFile.m_szNames[smp], MAX_INSTRUMENTNAME);
-				}
+				return INSTRUMENTINDEX_INVALID;
 			}
-			m_SndFile.m_nInstruments = nInstruments;
 		}
 	}
 	UINT newins = 0;
@@ -1029,8 +1051,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						}
 
 						// Note
-						if (s[0] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.note==0) || 
-												     (doITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
+						if (s[0] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.note == NOTE_NONE) || 
+												     (doITStyleMix && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE))))
 						{
 							m[col].note = NOTE_NONE;
 							if (s[0] == '=') m[col].note = NOTE_KEYOFF; else
@@ -1055,7 +1077,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						}
 						// Instrument
 						if (s[3] > ' ' && (!doMixPaste || ( (!doITStyleMix && origModCmd.instr==0) || 
-												     (doITStyleMix  && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0) ) ))
+												     (doITStyleMix  && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE) ) ))
 
 						{
 							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
@@ -1065,7 +1087,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						}
 						// Volume
 						if (s[5] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.volcmd==0) || 
-												     (doITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
+												     (doITStyleMix && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE))))
 
 						{
 							if (s[5] != '.')
