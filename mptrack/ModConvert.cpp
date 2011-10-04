@@ -513,6 +513,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv), &m_SndFile, warnings);
 		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv), &m_SndFile, warnings);
 	}
+
+	// XM requires instruments, so we create them right away.
+	if(newTypeIsXM && GetNumInstruments() == 0)
+	{
+		ConvertSamplesToInstruments();
+	}
 		
 	CHAR s[64];
 	CHANGEMODTYPE_CHECK(wInstrumentsToSamples, "All instruments have been converted to samples.\n");

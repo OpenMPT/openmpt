@@ -286,6 +286,7 @@ public:
 	void CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 	bool ConvertInstrumentsToSamples();
+	bool ConvertSamplesToInstruments();
 	UINT RemovePlugs(const vector<bool> &keepMask);
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
