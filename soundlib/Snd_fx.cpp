@@ -1309,7 +1309,7 @@ BOOL CSoundFile::ProcessEffects()
 		UINT vol = pChn->rowCommand.vol;
 		UINT cmd = pChn->rowCommand.command;
 		UINT param = pChn->rowCommand.param;
-		bool bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? false : true;
+		bool bPorta = (cmd == CMD_TONEPORTAMENTO) || (cmd == CMD_TONEPORTAVOL) || (volcmd == VOLCMD_TONEPORTAMENTO);
 
 		UINT nStartTick = 0;
 
@@ -1441,10 +1441,17 @@ BOOL CSoundFile::ProcessEffects()
 			UINT note = pChn->rowCommand.note;
 			if (instr) pChn->nNewIns = instr;
 			bool retrigEnv = (!note) && (instr);
-			
+
 			// Now it's time for some FT2 crap...
-			if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+			if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
+				if(IsCompatibleMode(TRK_FASTTRACKER2) && instr)
+				{
+					// Apparently, any note number in a pattern causes instruments to retrigger - no matter if there's a Note Off next to it or whatever.
+					// Test cases: keyoff+instr.xm, delay.xm
+					retrigEnv = true;
+				}
+
 				// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
 				if(cmd == CMD_KEYOFF && param == 0 && IsCompatibleMode(TRK_FASTTRACKER2))
 				{
@@ -1468,38 +1475,10 @@ BOOL CSoundFile::ProcessEffects()
 					if(note == NOTE_NONE)
 					{
 						note = pChn->nNote - pChn->nTranspose;
-					} else if(note >= NOTE_MIN_SPECIAL)
-					{
-						// Gah! Note Off + Note Delay will cause envelopes to *retrigger*! How stupid is that?
-						retrigEnv = true;
-					}
-					// Stupid HACK to retrieve the last used instrument *number* for rouge note delays in XM
-					// This is only applied if the instrument column is empty and if there is either no note or a "normal" note (e.g. no note off)
-					if(instr == 0 && note <= NOTE_MAX)
-					{
-						for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
-						{
-							if(Instruments[nIns] == pChn->pModInstrument)
-							{
-								instr = nIns;
-								break;
-							}
-						}
-					}
-				} else if(note == NOTE_KEYOFF && instr && IsCompatibleMode(TRK_FASTTRACKER2))
-				{
-					// Instrument settings are recalled if an instrument number (no matter which) is found next to a Key-Off note.
-					// Using the same stupid HACK as above. Maybe it's time to change something?
-					for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
-					{
-						if(Instruments[nIns] == pChn->pModInstrument)
-						{
-							InstrumentChange(pChn, nIns, false, true, false);
-							break;
-						}
 					}
 				}
 			}
+
 			if (retrigEnv) //Case: instrument with no note data. 
 			{
 				//IT compatibility: Instrument with no note.
@@ -1547,7 +1526,7 @@ BOOL CSoundFile::ProcessEffects()
 			}
 
 			// New Note Action ?
-			if ((note) && (note <= NOTE_MAX) && (!bPorta))
+			if (note != NOTE_NONE && NOTE_IS_VALID(note) && !bPorta)
 			{
 				CheckNNA(nChn, instr, note, FALSE);
 			}
