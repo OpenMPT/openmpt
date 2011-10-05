@@ -353,15 +353,9 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 // 				}
 
 				if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
-				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER))
+				// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
+				if (param <= 128)
 				{
-					//IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
-					if (param <= 128)
-						nGlbVol = param << 1;
-				}
-				else
-				{
-					if (param > 128) param = 128;
 					nGlbVol = param << 1;
 				}
 				break;
@@ -1393,7 +1387,7 @@ BOOL CSoundFile::ProcessEffects()
 				if(nStartTick == 0)
 				{
 					//IT compatibility 22. SD0 == SD1
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 						nStartTick = 1;
 					//ST3 ignores notes with SD0 completely
 					else if(GetType() == MOD_TYPE_S3M)
@@ -3665,7 +3659,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 	if(nTick == 0)
 	{
 		//IT compatibility 22. SC0 == SC1
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 			nTick = 1;
 		// ST3 doesn't cut notes with SC0
 		else if(GetType() == MOD_TYPE_S3M)

@@ -1009,10 +1009,6 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			pSmp->nVibRate = pis->vis;
 			pSmp->nVibDepth = pis->vid & 0x7F;
 			pSmp->nVibSweep = pis->vir; //(pis->vir + 3) / 4;
-			if(pSmp->nVibSweep == 0 && (pSmp->nVibDepth || pSmp->nVibRate) && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02))
-			{
-				pSmp->nVibSweep = 255;	// Let's correct this little stupid mistake in history.
-			}
 
 			if(pis->samplepointer) lastSampleOffset = pis->samplepointer; // MPTX hack
 
@@ -1468,7 +1464,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	memset(header.chnpan, 0xA0, 64);
 	memset(header.chnvol, 64, 64);
 
-	for (size_t ich = 0; ich < min(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
+	for (CHANNELINDEX ich = 0; ich < min(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
 	{
 		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
 		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;
