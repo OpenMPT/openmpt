@@ -1180,7 +1180,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
 			int envpitchdest = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
 			envpitch += ((envpos - x1) * (envpitchdest - envpitch)) / (x2 - x1);
 		}
-		envpitch = CLAMP(envpitch, -256, 256);
+		Limit(envpitch, -256, 256);
 
 		//if (pIns->PitchEnv.dwFlags & ENV_FILTER)
 		if (pChn->PitchEnv.flags & ENV_FILTER)
@@ -1363,9 +1363,8 @@ void CSoundFile::ProcessPitchPanSeparation(MODCHANNEL *pChn)
 	{
 		// PPS value is 1/512, i.e. PPS=1 will adjust by 8/512 = 1/64 for each 8 semitones
 		// with PPS = 32 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
-		// IT compatibility: IT has a wider pan range here
-		int pandelta = (int)pChn->nRealPan + (int)((int)(pChn->nNote - pIns->nPPC - 1) * (int)pIns->nPPS) / (int)(IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 8);
-		pChn->nRealPan = CLAMP(pandelta, 0, 256);
+		int pandelta = (int)pChn->nRealPan + (int)((int)(pChn->nNote - pIns->nPPC - 1) * (int)pIns->nPPS) / 4;
+		pChn->nRealPan = Clamp(pandelta, 0, 256);
 	}
 }
 
@@ -1688,13 +1687,13 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 		} else
 		{
 			// MPT's autovibrato code
-			if (pSmp->nVibSweep == 0)
+			if (pSmp->nVibSweep == 0 && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
 				pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
 			} else
 			{
 				// Calculate current autovibrato depth using vibsweep
-				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 				{
 					// Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
 					// - so we divide sweep by 4 here.
@@ -1906,26 +1905,9 @@ BOOL CSoundFile::ReadNote()
 	m_nSamplesPerTick = m_nBufferCount; //rewbs.flu
 
 
-// robinf: this block causes envelopes to behave incorrectly when 
-// playback is triggered from instrument panel. 
-// I can't see why it would be useful. Dissabling for now.
-//
-//	if (m_dwSongFlags & SONG_PAUSED) {
-//		m_nBufferCount = gdwMixingFreq / 64; // 1/64 seconds
-//	}
-
-
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
 	{
-		/*int nchn32 = 0;
-		MODCHANNEL *pChn = Chn;
-		for (CHANNELINDEX nChn=0; nChn<m_nChannels; nChn++,pChn++)
-		{
-			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
-				nchn32++;
-		}
-		nchn32 = CLAMP(nchn32, 1, 31);*/
 		int nchn32 = CLAMP(m_nChannels, 1, 31);
 		
 		DWORD mastervol;
@@ -1960,6 +1942,7 @@ BOOL CSoundFile::ReadNote()
 			nMasterVol = mastervol;
 		}
 	}
+
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data
 	m_nMixChannels = 0;

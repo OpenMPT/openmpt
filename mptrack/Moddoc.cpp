@@ -1386,24 +1386,24 @@ bool CModDoc::SetChannelDefaultPan(CHANNELINDEX nChn, UINT nPan)
 bool CModDoc::IsChannelMuted(CHANNELINDEX nChn) const
 //---------------------------------------------------
 {
-	if (nChn >= m_SndFile.m_nChannels) return true;
-	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE) ? true : false;
+	if (nChn >= m_SndFile.GetNumChannels()) return true;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE) != 0;
 }
 
 
 bool CModDoc::IsSampleMuted(SAMPLEINDEX nSample) const
 //----------------------------------------------------
 {
-	if ((!nSample) || (nSample > m_SndFile.m_nSamples)) return false;
-	return (m_SndFile.GetSample(nSample).uFlags & CHN_MUTE) ? true : false;
+	if ((!nSample) || (nSample > m_SndFile.GetNumSamples())) return false;
+	return (m_SndFile.GetSample(nSample).uFlags & CHN_MUTE) != 0;
 }
 
 
 bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
 //-----------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return false;
-	return (m_SndFile.Instruments[nInstr]->dwFlags & INS_MUTE) ? true : false;
+	if ((!nInstr) || (nInstr > m_SndFile.GetNumInstruments()) || (!m_SndFile.Instruments[nInstr])) return false;
+	return (m_SndFile.Instruments[nInstr]->dwFlags & INS_MUTE) != 0;
 }
 
 
@@ -1425,20 +1425,19 @@ void CModDoc::SetFollowWnd(HWND hwnd, DWORD dwType)
 }
 
 
-BOOL CModDoc::IsChildSample(UINT nIns, UINT nSmp) const
-//-----------------------------------------------------
+bool CModDoc::IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const
+//-----------------------------------------------------------------------
 {
-	MODINSTRUMENT *pIns;
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments)) return FALSE;
-	pIns = m_SndFile.Instruments[nIns];
-	if (pIns)
+	if((nIns < 1) || (nIns > m_SndFile.GetNumInstruments())) return false;
+	MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
+	if(pIns != nullptr)
 	{
-		for (UINT i=0; i<NOTE_MAX; i++)
+		for(UINT i = 0; i < NOTE_MAX; i++)
 		{
-			if (pIns->Keyboard[i] == nSmp) return TRUE;
+			if(pIns->Keyboard[i] == nSmp) return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -2970,7 +2969,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0xC0: // note cut
 					case 0xD0: // note delay
 						//IT compatibility 22. SD0 == SD1, SC0 == SC1
-						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER)))
+						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 							strcpy(s, "1 tick");
 						else
 							strcat(s, " ticks");

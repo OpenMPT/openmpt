@@ -2882,25 +2882,6 @@ void CSoundFile::SetupITBidiMode()
 }
 
 
-void FixMIDIConfigString(char *line)
-//----------------------------------
-{
-	for(size_t i = 0; i < MACRO_LENGTH; i++)
-	{
-		if(line[i] >= 'a' && line[i] <= 'f')		// both A-F and a-f were treated as hex constants
-		{
-			line[i] = line[i] - 'a' + 'A';
-		} else if(line[i] == 'K' || line[i] == 'k')	// channel was K or k
-		{
-			line[i] = 'c';
-		} else if(line[i] == 'X' || line[i] == 'x' || line[i] == 'Y' || line[i] == 'y')	// those were pointless
-		{
-			line[i] = 'z';
-		}
-	}
-}
-
-
 // For old files made with MPT that don't have m_dwSongFlags set yet, set the flags appropriately.
 void CSoundFile::UpgradeModFlags()
 //--------------------------------
@@ -2931,19 +2912,102 @@ void CSoundFile::UpgradeModFlags()
 }
 
 
+struct UpgradePatternData
+//=======================
+{
+	UpgradePatternData(CSoundFile *pSndFile)
+	{
+		this->pSndFile = pSndFile;
+	}
+
+	void operator()(MODCOMMAND& m)
+	{
+		if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
+			(!pSndFile->IsCompatibleMode(TRK_ALLTRACKERS) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+		{
+			if(m.command == CMD_GLOBALVOLUME)
+			{
+				// Out-of-range global volume commands should be ignored.
+				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
+				// So for tracks made with older versions than OpenMPT 1.17.03.02 or tracks made with 1.17.03.02 <= version < 1.20, we limit invalid global volume commands.
+				LimitMax(m.param, (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? BYTE(128): BYTE(64));
+			} else if(m.command == CMD_S3MCMDEX && (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+			{
+				// SC0 and SD0 should be interpreted as SC1 and SD1 in IT files.
+				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
+				if(m.param == 0xC0)
+				{
+					m.command = CMD_NONE;
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = 0;
+				} else if(m.param == 0xD0)
+				{
+					m.command = CMD_NONE;
+				}
+			}
+		}
+		
+	}
+
+	CSoundFile *pSndFile;
+};
+
+
 void CSoundFile::UpgradeSong()
 //----------------------------
 {
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
 	{
-		// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
 		{
+			// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
 			Instruments[i]->nVolSwing = min(Instruments[i]->nVolSwing * 100 / 64, 100);
+
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
+			{
+				// Previously, Pitch/Pan Separation was only half depth.
+				// This was corrected in compatible mode in OpenMPT 1.18, and in OpenMPT 1.20 it is corrected in normal mode as well.
+				Instruments[i]->nPPS = (Instruments[i]->nPPS + (Instruments[i]->nPPS >= 0 ? 1 : -1)) / 2;
+			}
+		}
+
+		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) || !IsCompatibleMode(TRK_IMPULSETRACKER)))
+		{
+			// In the IT format, a sweep value of 0 shouldn't apply vibrato at all. Previously, a value of 0 was treated as "no sweep".
+			// In OpenMPT 1.17.03.02, this was corrected in compatible mode, in OpenMPT 1.20 it is corrected in normal mode as well,
+			// so we have to fix the setting while loading.
+			for(SAMPLEINDEX i = 1; i <= GetNumSamples(); i++)
+			{
+				if(Samples[i].nVibSweep == 0 && (Samples[i].nVibDepth | Samples[i].nVibRate))
+				{
+					Samples[i].nVibSweep = 255;
+				}
+			}
 		}
 
 		// Fix old nasty broken (non-standard) MIDI configs in files.
 		FixMIDIConfigStrings(m_MidiCfg);
+	}
+
+	Patterns.ForEachModCommand(UpgradePatternData(this));
+}
+
+
+void FixMIDIConfigString(char *line)
+//----------------------------------
+{
+	for(size_t i = 0; i < MACRO_LENGTH; i++)
+	{
+		if(line[i] >= 'a' && line[i] <= 'f')		// both A-F and a-f were treated as hex constants
+		{
+			line[i] = line[i] - 'a' + 'A';
+		} else if(line[i] == 'K' || line[i] == 'k')	// channel was K or k
+		{
+			line[i] = 'c';
+		} else if(line[i] == 'X' || line[i] == 'x' || line[i] == 'Y' || line[i] == 'y')	// those were pointless
+		{
+			line[i] = 'z';
+		}
 	}
 }
 
