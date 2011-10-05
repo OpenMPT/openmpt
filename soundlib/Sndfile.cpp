@@ -2946,7 +2946,21 @@ struct UpgradePatternData
 				}
 			}
 		}
-		
+
+		if(pSndFile->GetType() == MOD_TYPE_XM)
+		{
+			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00) ||
+				(!pSndFile->IsCompatibleMode(TRK_FASTTRACKER2) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			{
+				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
+				{
+					// If there are both a portamento and an offset effect, the portamento should be preferred in XM files.
+					// OpenMPT 1.19 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
+					m.command = CMD_NONE;
+				}
+			}
+		}
+
 	}
 
 	CSoundFile *pSndFile;
