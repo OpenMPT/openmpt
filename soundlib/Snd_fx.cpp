@@ -1437,9 +1437,9 @@ BOOL CSoundFile::ProcessEffects()
 			bool retrigEnv = (!note) && (instr);
 
 			// Now it's time for some FT2 crap...
-			if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
+			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 			{
-				if(IsCompatibleMode(TRK_FASTTRACKER2) && instr)
+				if(IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0)
 				{
 					// Apparently, any note number in a pattern causes instruments to retrigger - no matter if there's a Note Off next to it or whatever.
 					// Test cases: keyoff+instr.xm, delay.xm
@@ -1454,7 +1454,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
-				if ((note == NOTE_KEYOFF) && ((!instr && !vol && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED))))
+				if ((note == NOTE_KEYOFF) && ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;
@@ -3421,7 +3421,8 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
 
 			if(m_nRow < Patterns[m_nPattern].GetNumRows()-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 
-			if(m && m->command == CMD_XPARAM){
+			if(m && m->command == CMD_XPARAM)
+			{
 				UINT tmp = m->param;
 				m = NULL;
 				if(m_nRow < Patterns[m_nPattern].GetNumRows()-2) m = Patterns[m_nPattern] + (m_nRow+2) * m_nChannels  + nChn;
@@ -3429,7 +3430,8 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
 				if(m && m->command == CMD_XPARAM) param = (param<<16) + (tmp<<8) + m->param;
 				else param = (param<<8) + tmp;
 			}
-			else{
+			else
+			{
 				if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
 				param <<= 8;
 				param |= (UINT)(pChn->nOldHiOffset) << 16;
@@ -3439,7 +3441,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
 	if ((pChn->rowCommand.note >= NOTE_MIN) && (pChn->rowCommand.note <= NOTE_MAX))
 	{
 		// XM compatibility: Portamento + Offset = Ignore offset
-		if(bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
+		if(bPorta && GetType() == MOD_TYPE_XM)
 		{
 			return;
 		}
@@ -3725,7 +3727,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 			if(pChn->nPos > pChn->nLength)
 			{
-				pChn->nPos = pChn->nLength;
+				pChn->nPos = pChn->nPos - pChn->nLength + pChn->nLoopStart;
 				pChn->nPosLo = 0;
 			}
 		} else

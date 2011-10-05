@@ -597,6 +597,12 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			m->command = m->param = 0;
 		}
 
+		// Instrument numbers next to Key-Off reset instrument settings
+		if(m->note >= NOTE_MIN_SPECIAL)
+		{
+			m->instr = 0;
+		}
+
 		if(!m->command) switch(m->volcmd)
 		{
 			case VOLCMD_PORTADOWN:

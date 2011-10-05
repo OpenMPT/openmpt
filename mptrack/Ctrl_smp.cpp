@@ -369,9 +369,9 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		if (lParam < 0)
 		{
 			int nIns = m_pParent->GetInstrumentChange();
-			if (pSndFile->m_nInstruments)
+			if (pSndFile->GetNumInstruments())
 			{
-				if ((nIns > 0) && (!pModDoc->IsChildSample(m_nSample, nIns)))
+				if ((nIns > 0) && (!pModDoc->IsChildSample(nIns, m_nSample)))
 				{
 					UINT k = pModDoc->FindInstrumentChild(nIns);
 					if (k > 0) lParam = k;
@@ -384,7 +384,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		} else
 		if (lParam > 0)
 		{
-			if (pSndFile->m_nInstruments)
+			if (pSndFile->GetNumInstruments())
 			{
 				UINT k = m_pParent->GetInstrumentChange();
 				if (!pModDoc->IsChildSample(k, lParam))
