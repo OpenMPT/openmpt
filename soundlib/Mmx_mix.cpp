@@ -20,7 +20,11 @@
 // the different flavours of functionality:
 // ENABLE_MMX, ENABLE_AMDNOW, ENABLE_SSE flags must be set to
 // to compile the optimized sections of the code. In both cases the 
-// X86_xxxxxx functions will compile. 
+// X86_xxxxxx functions will compile.
+//
+// NOTE: Resonant filter mixing has been changed to use floating point
+// precision. The MMX code hasn't been updated for this, so the filtered
+// MMX functions mustn't be used anymore!
 //
 ////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"

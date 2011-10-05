@@ -12,7 +12,6 @@
 
 // AWE32: cutoff = reg[0-255] * 31.25 + 100 -> [100Hz-8060Hz]
 // EMU10K1 docs: cutoff = reg[0-127]*62+100
-#define FILTER_PRECISION	8192
 
 #ifndef NO_FILTER
 
@@ -105,23 +104,23 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 
 	}
 
-	float fg = 1 / (1 + d + e);
+	float fg = 1.0f / (1.0f + d + e);
 	float fb0 = (d + e + e) / (1 + d + e);
-	float fb1 = -e / (1 + d + e);
+	float fb1 = -e / (1.0f + d + e);
 
 	switch(pChn->nFilterMode)
 	{
 	case FLTMODE_HIGHPASS:
-		pChn->nFilter_A0 = (int)((1.0f - fg) * FILTER_PRECISION);
-		pChn->nFilter_B0 = (int)(fb0 * FILTER_PRECISION);
-		pChn->nFilter_B1 = (int)(fb1 * FILTER_PRECISION);
+		pChn->nFilter_A0 = 1.0f - fg;
+		pChn->nFilter_B0 = fb0;
+		pChn->nFilter_B1 = fb1;
 		pChn->nFilter_HP = -1;
 		break;
 
 	default:
-		pChn->nFilter_A0 = (int)(fg * FILTER_PRECISION);
-		pChn->nFilter_B0 = (int)(fb0 * FILTER_PRECISION);
-		pChn->nFilter_B1 = (int)(fb1 * FILTER_PRECISION);
+		pChn->nFilter_A0 = fg;
+		pChn->nFilter_B0 = fb0;
+		pChn->nFilter_B1 = fb1;
 		pChn->nFilter_HP = 0;
 		break;
 	}
