@@ -421,6 +421,12 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
 	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
 
+	// Test 4-Bit Panning conversion
+	for(int i = 0; i < 16; i++)
+	{
+		VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(10 + i, 0)->vol, ((i * 64 + 8) / 15));
+	}
+
 	// Plugins
 	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
 	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
