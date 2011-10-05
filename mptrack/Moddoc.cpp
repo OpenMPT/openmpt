@@ -232,7 +232,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	if (GetLog() != nullptr)
 	{
 		CString sTemp;
-		sTemp.Format("File: %s\nLast saved with: %s, current version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLog());
+		sTemp.Format("File: %s\nLast saved with: %s, your version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLog());
 		Reporting::Information(sTemp);
 		ClearLog();
 	}

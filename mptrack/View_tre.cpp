@@ -2457,7 +2457,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if ((pModDoc) && (!pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, (pModDoc->IsSampleMuted((SAMPLEINDEX)modItemID) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
+						AppendMenu(hMenu, (pModDoc->IsSampleMuted((SAMPLEINDEX)modItemID) ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 					}
@@ -2474,14 +2474,17 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if ((pModDoc) && (pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted((INSTRUMENTINDEX)modItemID) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
-						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Instrument");
+						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted((INSTRUMENTINDEX)modItemID) ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "S&olo Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SETPATH, "&Set path");
-						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEITEM, "&Save");
+						if(pModDoc->GetSoundFile()->m_dwSongFlags & SONG_ITPROJECT)
+						{
+							AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+							AppendMenu(hMenu, MF_STRING, ID_MODTREE_SETPATH, "Set p&ath");
+							AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEITEM, "&Save");
+						}
 // -! NEW_FEATURE#0023
 					}
 				}
