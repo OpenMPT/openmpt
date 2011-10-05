@@ -16,6 +16,8 @@
 #include "SelectPluginDialog.h"
 
 
+#ifndef NO_VST
+
 /////////////////////////////////////////////////////////////////////////////////
 // Plugin selection dialog
 
@@ -499,3 +501,5 @@ void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	lpMMI->ptMinTrackSize.y = 270;
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }
+
+#endif // NO_VST

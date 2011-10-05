@@ -211,7 +211,7 @@ public:
 	void GetPluginType(LPSTR) {}
 	PlugParamIndex GetNumPrograms() {return 0;}
 	bool GetProgramNameIndexed(long, long, char*) {return false;}
-	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false) { return "" };
+	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false) { return ""; };
 	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
 	void GetParamLabel(UINT, LPSTR) {}
 	void GetParamDisplay(UINT, LPSTR) {}
