@@ -531,6 +531,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	{
 		// Annoying message box is annoying.
 		//Reporting::Error("Nothing to restore for this slot.", "Invalid key data", this);
+		::MessageBeep(MB_ICONWARNING);
 		return;
 	}
 	
@@ -552,6 +553,7 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 	{
 		// Annoying message box is annoying.
 		//Reporting::Warning("No key currently set for this slot.", "Invalid key data", this);
+		::MessageBeep(MB_ICONWARNING);
 		return;
 	}
 
@@ -593,6 +595,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	}
 	if (!kc.event)
 	{
+		::MessageBeep(MB_ICONWARNING);
 /*		CString error = "You need to select at least one key event type (up, down or hold).";
 		Reporting::Warning(error, "Invalid key data");
 		return;
