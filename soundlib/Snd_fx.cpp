@@ -2603,8 +2603,7 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 		}
 		else
 		{
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
-				newvolume += (int)((param & 0xF0) >> 2);
+			newvolume += (int)((param & 0xF0) >> 2);
 		}
 		if (m_nType == MOD_TYPE_MOD) pChn->dwFlags |= CHN_FASTVOLRAMP;
 	}
@@ -2649,9 +2648,7 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 						nPanSlide = (int)((param & 0x0F) << 2);
 				} else
 				{
-					// IT compatibility: Ignore slide commands with both nibbles set.
-					if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
-						nPanSlide = -(int)((param & 0xF0) >> 2);
+					nPanSlide = -(int)((param & 0xF0) >> 2);
 				}
 			}
 		}
@@ -2732,8 +2729,14 @@ void CSoundFile::ChannelVolSlide(MODCHANNEL *pChn, UINT param)
 	{
 		if (!(m_dwSongFlags & SONG_FIRSTTICK))
 		{
-			if (param & 0x0F) nChnSlide = -(int)(param & 0x0F);
-			else nChnSlide = (int)((param & 0xF0) >> 4);
+			if (param & 0x0F)
+			{
+				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+					nChnSlide = -(int)(param & 0x0F);
+			} else
+			{
+				nChnSlide = (int)((param & 0xF0) >> 4);
+			}
 		}
 	}
 	if (nChnSlide)
@@ -3876,8 +3879,15 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 	{
 		if (!(m_dwSongFlags & SONG_FIRSTTICK))
 		{
-			if (param & 0xF0) nGlbSlide = (int)((param & 0xF0) >> 4) * 2;
-			else nGlbSlide = -(int)((param & 0x0F) * 2);
+			if (param & 0xF0)
+			{
+				// IT compatibility: Ignore slide commands with both nibbles set.
+				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
+					nGlbSlide = (int)((param & 0xF0) >> 4) * 2;
+			} else
+			{
+				nGlbSlide = -(int)((param & 0x0F) * 2);
+			}
 		}
 	}
 	if (nGlbSlide)
