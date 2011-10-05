@@ -255,8 +255,9 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	DWORD nLoopEnd;
 	LONG nRampRightVol;
 	LONG nRampLeftVol;
-	LONG nFilter_Y1, nFilter_Y2, nFilter_Y3, nFilter_Y4;
-	LONG nFilter_A0, nFilter_B0, nFilter_B1, nFilter_HP;
+	float nFilter_Y1, nFilter_Y2, nFilter_Y3, nFilter_Y4;
+	float nFilter_A0, nFilter_B0, nFilter_B1;
+	int nFilter_HP;
 	LONG nROfs, nLOfs;
 	LONG nRampLength;
 	// Information not used in the mixer
