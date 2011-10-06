@@ -138,6 +138,8 @@
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Async</ExceptionHandling>
       <AdditionalOptions>/O2 %(AdditionalOptions)</AdditionalOptions>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>

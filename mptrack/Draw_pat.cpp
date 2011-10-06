@@ -160,13 +160,23 @@ void CViewPattern::UpdateColors()
 	BYTE r,g,b;
 
 	m_Dib.SetAllColors(0, MAX_MODCOLORS, CMainFrame::GetSettings().rgbCustomColors);
+
 	r = hilightcolor(GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-					GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+		GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	g = hilightcolor(GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-					GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+		GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	b = hilightcolor(GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-					GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+		GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	m_Dib.SetColor(MODCOLOR_2NDHIGHLIGHT, RGB(r,g,b));
+
+	r = hilightcolor(GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_VOLUME]),
+					GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	g = hilightcolor(GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_VOLUME]),
+					GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	b = hilightcolor(GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_VOLUME]),
+					GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	m_Dib.SetColor(MODCOLOR_DEFAULTVOLUME, RGB(r,g,b));
+
 	m_Dib.SetBlendColor(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BLENDCOLOR]);
 }
 
@@ -429,8 +439,8 @@ void CViewPattern::DrawInstrument(int x, int y, UINT instr)
 }
 
 
-void CViewPattern::DrawVolumeCommand(int x, int y, const MODCOMMAND mc)
-//---------------------------------------------------------------------
+void CViewPattern::DrawVolumeCommand(int x, int y, const MODCOMMAND &mc, bool drawDefaultVolume)
+//----------------------------------------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 
@@ -448,10 +458,34 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const MODCOMMAND mc)
 	}
 	else
 	{
-		if (mc.volcmd)
+		static_assert(MAX_VOLCMDS <= 16, "Pattern draw code assumes <= 16 volume commands");
+		int volcmd = (mc.volcmd & 0x0F);
+		int vol  = (mc.vol & 0x7F);
+
+		if(drawDefaultVolume)
 		{
-			const int volcmd = (mc.volcmd & 0x0F);
-			const int vol  = (mc.vol & 0x7F);
+			// Displaying sample default volume if there is no volume command.
+			const CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+			SAMPLEINDEX sample = mc.instr;
+			if(pSndFile->GetNumInstruments())
+			{
+				if(mc.instr <= pSndFile->GetNumInstruments())
+				{
+					sample = pSndFile->Instruments[mc.instr]->Keyboard[mc.note - NOTE_MIN];
+				} else
+				{
+					sample = 0;
+				}
+			}
+			if(sample && sample <= pSndFile->GetNumSamples())
+			{
+				volcmd = VOLCMD_VOLUME;
+				vol = pSndFile->GetSample(sample).nVolume / 4;
+			}
+		}
+
+		if (volcmd)
+		{
 			m_Dib.TextBlt(x, y, pfnt->nVolCmdWidth, COLUMN_HEIGHT,
 							pfnt->nVolX, pfnt->nVolY+volcmd*COLUMN_HEIGHT);
 			m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, COLUMN_HEIGHT,
@@ -731,7 +765,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 {
 	BYTE bColSel[MAX_BASECHANNELS];
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
-	MODCOMMAND m0, *pPattern = pSndFile->Patterns[nPattern];
+	const MODCOMMAND m0 = MODCOMMAND::Empty();
+	const MODCOMMAND *pPattern = pSndFile->Patterns[nPattern];
 	CHAR s[256];
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
@@ -739,7 +774,6 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	UINT bRowSel, bSpeedUp, nColumnWidth, ncols, maxcol;
 	
 	ncols = pSndFile->GetNumChannels();
-	m0.note = m0.instr = m0.vol = m0.volcmd = m0.command = m0.param = 0;
 	nColumnWidth = m_szCell.cx;
 	rect.SetRect(m_szHeader.cx, rcClient.top, m_szHeader.cx+nColumnWidth, rcClient.bottom);
 	for (UINT cmk=xofs; cmk<ncols; cmk++)
@@ -855,15 +889,17 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		xbmp = nbmp = 0;
 		do
 		{
-			DWORD dwSpeedUpMask;
-			MODCOMMAND *m;
 			int x, bk_col, tx_col, col_sel, fx_col;
 
-			m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
-			dwSpeedUpMask = 0;
+			const MODCOMMAND *m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
+
+			// Should empty volume commands be replaced with a volume command showing the default volume?
+			const bool drawDefaultVolume = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->instr != 0 && m->note != NOTE_NONE && NOTE_IS_VALID(m->note);
+
+			DWORD dwSpeedUpMask = 0;
 			if ((bSpeedUp) && (bColSel[col] & 0x40) && (pPattern) && (row))
 			{
-				MODCOMMAND *mold = m - ncols;
+				const MODCOMMAND *mold = m - ncols;
 				if (m->note == mold->note) dwSpeedUpMask |= 0x01;
 				if ((m->instr == mold->instr) || (m_nDetailLevel < 1)) dwSpeedUpMask |= 0x02;
 				if ( m->IsPcNote() || mold->IsPcNote() )
@@ -876,8 +912,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				}
 				else
 				{
-					if (((m->volcmd == mold->volcmd) && ((!m->volcmd) || (m->vol == mold->vol))) || (m_nDetailLevel < 2)) dwSpeedUpMask |= 0x04;
-					if ((m->command == mold->command) || (m_nDetailLevel < 3)) dwSpeedUpMask |= (m->command) ? 0x08 : 0x18;
+					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume) || (m_nDetailLevel < 2)) dwSpeedUpMask |= 0x04;
+					if ((m->command == mold->command) || (m_nDetailLevel < 3)) dwSpeedUpMask |= (m->command != CMD_NONE) ? 0x08 : 0x18;
 				}
 				if (dwSpeedUpMask == 0x1F) goto DoBlit;
 			}
@@ -958,15 +994,19 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
-					} else
-					if ((!m->IsPcNote()) && (m->volcmd) && (m->volcmd < MAX_VOLCMDS) && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+					} else if (!m->IsPcNote() && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
-						if(volEffectColors[m->volcmd] != 0)
+						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && volEffectColors[m->volcmd] != 0)
+						{
 							tx_col = volEffectColors[m->volcmd];
+						} else if(drawDefaultVolume)
+						{
+							tx_col = MODCOLOR_DEFAULTVOLUME;
+						}
 					}
 					// Drawing Volume
 					m_Dib.SetTextColor(tx_col, bk_col);
-					DrawVolumeCommand(xbmp+x, 0, *m);
+					DrawVolumeCommand(xbmp + x, 0, *m, drawDefaultVolume);
 				}
 				x += pfnt->nEltWidths[2];
 			}
