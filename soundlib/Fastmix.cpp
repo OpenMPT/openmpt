@@ -352,7 +352,7 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 #define SNDMIX_PROCESSFILTER\
 	float fy = ((float)vol * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);\
 	fy2 = fy1;\
-	fy1 = fy + (float)(vol * pChn->nFilter_HP);\
+	fy1 = fy - (float)(vol & pChn->nFilter_HP);\
 	vol = (int)fy;
 	
 
@@ -371,10 +371,10 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 
 #define SNDMIX_PROCESSSTEREOFILTER\
 	float fy = ((float)vol_l * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);\
-	fy2 = fy1; fy1 = fy + (float)(vol_l * pChn->nFilter_HP);\
+	fy2 = fy1; fy1 = fy - (float)(vol_l & pChn->nFilter_HP);\
 	vol_l = (int)fy;\
 	fy = ((float)vol_r * pChn->nFilter_A0 + ClipFilter(fy3) * pChn->nFilter_B0 + ClipFilter(fy4) * pChn->nFilter_B1);\
-	fy4 = fy3; fy3 = fy + (float)(vol_r * pChn->nFilter_HP);\
+	fy4 = fy3; fy3 = fy - (float)(vol_r & pChn->nFilter_HP);\
 	vol_r = (int)fy;
 
 
