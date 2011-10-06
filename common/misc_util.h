@@ -95,7 +95,6 @@ template<class T, class C>
 inline T Clamp(T val, const C lowerLimit, const C upperLimit)
 //-----------------------------------------------------------
 {
-	if(lowerLimit > upperLimit) return val;
 	if(val < lowerLimit) return lowerLimit;
 	else if(val > upperLimit) return upperLimit;
 	else return val;
