@@ -366,8 +366,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		m_dwPatternSetup &= ~0x200000;				// dito
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1,20,00,07))
 		m_dwPatternSetup &= ~0x400000;				// dito
-	if(vIniVersion < MptVersion::num)
-		m_dwPatternSetup &= ~0x10000000;			// various deprecated old options
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1,20,00,39))
+		m_dwPatternSetup &= ~0x10000000;			// dito
 
 	m_nRowHighlightMeasures = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RowSpacing", m_nRowHighlightMeasures, iniFile);
 	m_nRowHighlightBeats = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", m_nRowHighlightBeats, iniFile);

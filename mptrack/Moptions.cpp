@@ -562,6 +562,7 @@ static OPTGENDESC gOptGenDesc[] =
 	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a different icon in the treeview."},
 	{PATTERN_NOCLOSEDIALOG,	"Disable modern close dialog",		"When closing the main window, a confirmation window is shown for every unsaved document instead of one single window with a list of unsaved documents."},
 	{PATTERN_DBLCLICKSELECT, "Double-click to select channel",	"Instead of showing the note properties, double-clicking a pattern cell selects the whole channel."},
+	{PATTERN_SHOWDEFAULTVOLUME, "Show default volume commands",	"If there is no volume command next to a note + instrument combination, the sample's default volume is shown."},
 };
 
 
