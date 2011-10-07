@@ -185,13 +185,6 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		// Update next position
 		nNextRow = nRow + 1;
 
-		if (nNextRow >= Patterns[nPattern].GetNumRows())
-		{
-			nNextPattern = nCurrentPattern + 1;
-			nNextRow = 0;
-			if(IsCompatibleMode(TRK_FASTTRACKER2)) nNextRow = nNextPatStartRow;  // FT2 E60 bug
-			nNextPatStartRow = 0;
-		}
 		if (!nRow)
 		{
 			for(UINT ipck = 0; ipck < m_nChannels; ipck++)
@@ -241,7 +234,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				nNextPatStartRow = 0;  // FT2 E60 bug
 				if (nRow < Patterns[nPattern].GetNumRows() - 1)
 				{
-					nextRow = Patterns[nPattern] + (nRow + 1) * m_nChannels + nChn;
+					nextRow = Patterns[nPattern].GetpModCommand(nRow +1, nChn);
 				}
 				if (nextRow && nextRow->command == CMD_XPARAM)
 				{
@@ -422,7 +415,17 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				break;
 			}
 		}
+
+		if (nNextRow >= Patterns[nPattern].GetNumRows())
+		{
+			nNextPattern = nCurrentPattern + 1;
+			nNextRow = 0;
+			if(IsCompatibleMode(TRK_FASTTRACKER2)) nNextRow = nNextPatStartRow;  // FT2 E60 bug
+			nNextPatStartRow = 0;
+		}
+
 		nSpeedCount += nMusicSpeed;
+
 		switch(m_nTempoMode)
 		{
 			case tempo_mode_alternative: 
@@ -567,6 +570,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// XM compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
+	// And this does *not* happen if volume column portamento is used together with note delay... (handled in ProcessEffects(), where all the other note delay stuff is.)
+	// Test case: porta-delay.xm
 	if(bInstrumentChanged && bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
 	{
 		pIns = pChn->pModInstrument;
@@ -769,11 +774,14 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	{
 		// Key Off (+ Invalid Note for XM - TODO is this correct?)
 		if (note == NOTE_KEYOFF || !(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+		{
 			KeyOff(nChn);
+		}
 		else // Invalid Note -> Note Fade
-		//if (note == NOTE_FADE)
-			if(m_nInstruments)	
+		{
+			if(/*note == NOTE_FADE && */ GetNumInstruments())	
 				pChn->dwFlags |= CHN_NOTEFADE;
+		}
 
 		// Note Cut
 		if (note == NOTE_NOTECUT)
@@ -1464,6 +1472,10 @@ BOOL CSoundFile::ProcessEffects()
 
 					retrigEnv = true;
 
+					// Portamento + Note Delay = No Portamento
+					// Test case: porta-delay.xm
+					bPorta = false;
+
 					if(note == NOTE_NONE)
 					{
 						// If there's a note delay but no real note, retrig the last note.
@@ -1993,7 +2005,7 @@ BOOL CSoundFile::ProcessEffects()
 					// XM: Key-Off + Sample == Note Cut
 					if ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED)))
 					{
-						if(param == 0) // FT2 is weird....
+						if(param == 0 && (pChn->rowCommand.instr || pChn->rowCommand.volcmd != VOLCMD_NONE)) // FT2 is weird....
 						{
 							pChn->dwFlags |= CHN_NOTEFADE;
 						}

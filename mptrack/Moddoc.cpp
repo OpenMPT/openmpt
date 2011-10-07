@@ -730,6 +730,10 @@ BOOL CModDoc::InitializeMod()
 	{
 		strcpy(m_SndFile.m_szNames[1], "untitled");
 		m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
+		if(GetModType() == MOD_TYPE_XM)
+		{
+			m_SndFile.GetSample(1).uFlags |= CHN_PANNING;
+		}
 
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
 
