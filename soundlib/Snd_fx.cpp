@@ -1402,8 +1402,7 @@ BOOL CSoundFile::ProcessEffects()
 						if(GetNumInstruments() < 1 && instr < MAX_SAMPLES)
 						{
 							pChn->pModSample = &Samples[instr];
-						}
-						else
+						} else
 						{	
 							if(instr < MAX_INSTRUMENTS)
 								pChn->pModInstrument = Instruments[instr];
@@ -1436,16 +1435,14 @@ BOOL CSoundFile::ProcessEffects()
 			if (instr) pChn->nNewIns = instr;
 			bool retrigEnv = (!note) && (instr);
 
+			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
+			// Test cases: keyoff+instr.xm, delay.xm
+			bool reloadInstrSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
+			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT));
+
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 			{
-				if(IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0)
-				{
-					// Apparently, any note number in a pattern causes instruments to retrigger - no matter if there's a Note Off next to it or whatever.
-					// Test cases: keyoff+instr.xm, delay.xm
-					retrigEnv = true;
-				}
-
 				// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
 				if(cmd == CMD_KEYOFF && param == 0 && IsCompatibleMode(TRK_FASTTRACKER2))
 				{
@@ -1465,10 +1462,49 @@ BOOL CSoundFile::ProcessEffects()
 					// XM Compatibility: Some special hacks for rogue note delays... (EDx with x > 0)
 					// Apparently anything that is next to a note delay behaves totally unpredictable in FT2. Swedish tracker logic. :)
 
-					// If there's a note delay but no note, retrig the last note.
 					if(note == NOTE_NONE)
 					{
+						// If there's a note delay but no real note, retrig the last note.
+						// Test case: delay2.xm
 						note = pChn->nNote - pChn->nTranspose;
+						retrigEnv = true;
+					} else if(note >= NOTE_MIN_SPECIAL)
+					{
+						// Gah! Even Note Off + Note Delay will cause envelopes to *retrigger*! How stupid is that?
+						retrigEnv = true;
+						// ... Well, and that is actually all it does if there's an envelope. No fade out, no nothing. *sigh*
+						// Test case: OffDelay.xm
+						note = NOTE_NONE;
+						keepInstr = false;
+					} else
+					{
+						retrigEnv = true;
+						keepInstr = true;
+					}
+				}
+			}
+
+			if(retrigEnv || reloadInstrSettings)
+			{
+				const MODSAMPLE *oldSample = nullptr;
+				// Reset default volume when retriggering envelopes
+
+				if (GetNumInstruments())
+				{
+					oldSample = pChn->pModSample;
+				} else if (instr <= GetNumSamples())
+				{
+					// Case: Only samples are used; no instruments.
+					oldSample = &Samples[instr];
+				}
+
+				if(oldSample != nullptr)
+				{
+					pChn->nVolume = oldSample->nVolume;
+					if(reloadInstrSettings)
+					{
+						// Also reload panning
+						pChn->nPan = oldSample->nPan;
 					}
 				}
 			}
@@ -1490,23 +1526,16 @@ BOOL CSoundFile::ProcessEffects()
 					}
 				}
 
-				if (m_nInstruments)
+				if (GetNumInstruments() && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 				{
-					if (pChn->pModSample) pChn->nVolume = pChn->pModSample->nVolume;
-					if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
-					{
-						pChn->dwFlags |= CHN_FASTVOLRAMP;
-						ResetChannelEnvelopes(pChn);
-						pChn->nAutoVibDepth = 0;
-						pChn->nAutoVibPos = 0;
-						pChn->dwFlags &= ~CHN_NOTEFADE;
-						pChn->nFadeOutVol = 65536;
-					}
-				} else //Case: Only samples are used; no instruments.
-				{
-					if (instr < MAX_SAMPLES) pChn->nVolume = Samples[instr].nVolume;
+					pChn->dwFlags |= CHN_FASTVOLRAMP;
+					ResetChannelEnvelopes(pChn);
+					pChn->nAutoVibDepth = 0;
+					pChn->nAutoVibPos = 0;
+					pChn->dwFlags &= ~CHN_NOTEFADE;
+					pChn->nFadeOutVol = 65536;
 				}
-				if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) instr = 0;
+				if (!keepInstr) instr = 0;
 			}
 			// Invalid Instrument ?
 			if (instr >= MAX_INSTRUMENTS) instr = 0;
@@ -1514,15 +1543,15 @@ BOOL CSoundFile::ProcessEffects()
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL) instr = 0;
 
-			if ((note) && (note <= NOTE_MAX))
+			if (note != NOTE_NONE && NOTE_IS_VALID(note))
 			{
 				pChn->nNewNote = pChn->nLastNote = note;
-			}
 
-			// New Note Action ?
-			if (note != NOTE_NONE && NOTE_IS_VALID(note) && !bPorta)
-			{
-				CheckNNA(nChn, instr, note, FALSE);
+				// New Note Action ?
+				if (!bPorta)
+				{
+					CheckNNA(nChn, instr, note, FALSE);
+				}
 			}
 
 			if(note)
@@ -1773,14 +1802,17 @@ BOOL CSoundFile::ProcessEffects()
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 				m = NULL;
-				if (m_nRow < Patterns[m_nPattern].GetNumRows()-1) {
+				if (m_nRow < Patterns[m_nPattern].GetNumRows()-1)
+				{
 					m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 				}
-				if (m && m->command == CMD_XPARAM) { 
-					if (m_nType & MOD_TYPE_XM) {
+				if (m && m->command == CMD_XPARAM)
+				{ 
+					if (GetType() & MOD_TYPE_XM)
+					{
                         param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
 					}
-					param = (param<<8) + m->param;
+					param = (param << 8) + m->param;
 				}
 // -! NEW_FEATURE#0010
 				if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
@@ -1802,14 +1834,14 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
 			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))) break;
-			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
+			if ((!param) && (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
 			break;
 
 		// Retrig
 		case CMD_RETRIG:
-			if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+			if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
 				if (!(param & 0xF0)) param |= pChn->nRetrigParam & 0xF0;
 				if (!(param & 0x0F)) param |= pChn->nRetrigParam & 0x0F;
@@ -3708,7 +3740,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 	MODCHANNEL *pChn = &Chn[nChn];
 	const bool bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? false : true;
 	pChn->dwFlags |= CHN_KEYOFF;
-	//if ((!pChn->pModInstrument) || (!(pChn->dwFlags & CHN_VOLENV)))
+	//if ((!pChn->pModInstrument) || (!(pChn->VolEnv.flags & CHN_VOLENV)))
 	if ((pChn->pModInstrument) && (!(pChn->VolEnv.flags & ENV_ENABLED)))
 	{
 		pChn->dwFlags |= CHN_NOTEFADE;
@@ -3739,9 +3771,10 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			pChn->nLength = pSmp->nLength;
 		}
 	}
+
 	if (pChn->pModInstrument)
 	{
-		MODINSTRUMENT *pIns = pChn->pModInstrument;
+		const MODINSTRUMENT *pIns = pChn->pModInstrument;
 		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut))
 		{
 			pChn->dwFlags |= CHN_NOTEFADE;
