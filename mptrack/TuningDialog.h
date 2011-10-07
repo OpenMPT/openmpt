@@ -266,8 +266,6 @@ private:
 	CComboBox m_CombobTuningType;
 
 	//Tuning Edits-->
-	CEdit m_EditTableSize;
-	CEdit m_EditBeginNote;
 	CEdit m_EditSteps;
 	CEdit m_EditRatioPeriod;
 	CEdit m_EditRatio;

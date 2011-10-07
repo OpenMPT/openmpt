@@ -70,8 +70,8 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_nType = m_pSndFile->GetType();
 	m_nChannels = m_pSndFile->GetNumChannels();
 	m_dwSongFlags = m_pSndFile->m_dwSongFlags;
-	SetDlgItemInt(IDC_ROWSPERBEAT, m_pSndFile->m_nDefaultRowsPerBeat);
-	SetDlgItemInt(IDC_ROWSPERMEASURE, m_pSndFile->m_nDefaultRowsPerMeasure);
+
+	// Mod types
 
 	m_TypeBox.SetItemData(m_TypeBox.AddString("ProTracker MOD"), MOD_TYPE_MOD);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("ScreamTracker S3M"), MOD_TYPE_S3M);
@@ -94,6 +94,8 @@ BOOL CModTypeDlg::OnInitDialog()
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
 
+	// Tempo modes
+
 	// Don't show new tempo modes for XM/IT, unless they are currently used
 	const bool showNewTempoModes = (m_pSndFile->GetType() == MOD_TYPE_MPT || (m_pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0);
 
@@ -112,6 +114,8 @@ BOOL CModTypeDlg::OnInitDialog()
 		}
 	}
 
+	// Mix levels
+
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
 	if(m_pSndFile->m_nMixLevels == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
@@ -129,6 +133,19 @@ BOOL CModTypeDlg::OnInitDialog()
 			break;
 		}
 	}
+
+	// Misc flags
+
+	CheckDlgButton(IDC_CHK_COMPATPLAY, m_pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY));
+	CheckDlgButton(IDC_CHK_MIDICCBUG, m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION));
+	CheckDlgButton(IDC_CHK_OLDRANDOM, m_pSndFile->GetModFlag(MSF_OLDVOLSWING));
+
+	// Time signature information
+
+	SetDlgItemInt(IDC_ROWSPERBEAT, m_pSndFile->m_nDefaultRowsPerBeat);
+	SetDlgItemInt(IDC_ROWSPERMEASURE, m_pSndFile->m_nDefaultRowsPerMeasure);
+
+	// Version information
 
 	SetDlgItemText(IDC_TEXT_CREATEDWITH, "Created with:");
 	SetDlgItemText(IDC_TEXT_SAVEDWITH, "Last saved with:");
@@ -183,6 +200,8 @@ void CModTypeDlg::UpdateChannelCBox()
 void CModTypeDlg::UpdateDialog()
 //------------------------------
 {
+	const MODTYPE type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
+
 	UpdateChannelCBox();
 
 	m_CheckBox1.SetCheck((m_pSndFile->m_dwSongFlags & SONG_LINEARSLIDES) ? MF_CHECKED : 0);
@@ -197,20 +216,20 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITPEMBEDIH) ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
-	m_CheckBox1.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBox2.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_S3M) ? TRUE : FALSE);
-	m_CheckBox3.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBox4.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBoxPT1x.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_MOD)) ? TRUE : FALSE);
+	m_CheckBox1.EnableWindow((type & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox2.EnableWindow((type == MOD_TYPE_S3M) ? TRUE : FALSE);
+	m_CheckBox3.EnableWindow((type & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox4.EnableWindow((type & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox5.EnableWindow((type & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBoxPT1x.EnableWindow((type & (MOD_TYPE_MOD)) ? TRUE : FALSE);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
 
-	const bool XMorITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
-	const bool ITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
+	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
+	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
 
 	// Misc Flags
 	if(ITorMPT)
@@ -224,10 +243,6 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_CHK_COMPATPLAY)->ShowWindow(XMorITorMPT);
 	GetDlgItem(IDC_CHK_MIDICCBUG)->ShowWindow(XMorITorMPT);
 	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(ITorMPT);
-
-	CheckDlgButton(IDC_CHK_COMPATPLAY, m_pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY));
-	CheckDlgButton(IDC_CHK_MIDICCBUG, m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION));
-	CheckDlgButton(IDC_CHK_OLDRANDOM, m_pSndFile->GetModFlag(MSF_OLDVOLSWING));
 
 	// Deprecated flags are greyed out if they are not being used.
 	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
