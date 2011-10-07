@@ -597,10 +597,18 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			m->command = m->param = 0;
 		}
 
-		// Instrument numbers next to Key-Off reset instrument settings
 		if(m->note >= NOTE_MIN_SPECIAL)
 		{
+			// Instrument numbers next to Note Off reset instrument settings
 			m->instr = 0;
+
+			if(m->command == CMD_MODCMDEX && (m->param & 0xF0) == 0xD0)
+			{
+				// Note Off + Note Delay does nothing when using envelopes.
+				m->note = NOTE_NONE;
+				m->command = CMD_KEYOFF;
+				m->param &= 0x0F;
+			}
 		}
 
 		if(!m->command) switch(m->volcmd)
