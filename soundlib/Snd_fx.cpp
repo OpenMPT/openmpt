@@ -1437,7 +1437,7 @@ BOOL CSoundFile::ProcessEffects()
 
 			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
 			// Test cases: keyoff+instr.xm, delay.xm
-			bool reloadInstrSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
+			bool reloadSampleSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
 			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT));
 
 			// Now it's time for some FT2 crap...
@@ -1462,29 +1462,31 @@ BOOL CSoundFile::ProcessEffects()
 					// XM Compatibility: Some special hacks for rogue note delays... (EDx with x > 0)
 					// Apparently anything that is next to a note delay behaves totally unpredictable in FT2. Swedish tracker logic. :)
 
+					retrigEnv = true;
+
 					if(note == NOTE_NONE)
 					{
 						// If there's a note delay but no real note, retrig the last note.
-						// Test case: delay2.xm
+						// Test case: delay2.xm, delay3.xm
 						note = pChn->nNote - pChn->nTranspose;
-						retrigEnv = true;
 					} else if(note >= NOTE_MIN_SPECIAL)
 					{
 						// Gah! Even Note Off + Note Delay will cause envelopes to *retrigger*! How stupid is that?
-						retrigEnv = true;
 						// ... Well, and that is actually all it does if there's an envelope. No fade out, no nothing. *sigh*
 						// Test case: OffDelay.xm
 						note = NOTE_NONE;
 						keepInstr = false;
+						reloadSampleSettings = true;
 					} else
 					{
-						retrigEnv = true;
+						// Normal note
 						keepInstr = true;
+						reloadSampleSettings = true;
 					}
 				}
 			}
 
-			if(retrigEnv || reloadInstrSettings)
+			if((retrigEnv && !IsCompatibleMode(TRK_FASTTRACKER2)) || reloadSampleSettings)
 			{
 				const MODSAMPLE *oldSample = nullptr;
 				// Reset default volume when retriggering envelopes
@@ -1501,7 +1503,7 @@ BOOL CSoundFile::ProcessEffects()
 				if(oldSample != nullptr)
 				{
 					pChn->nVolume = oldSample->nVolume;
-					if(reloadInstrSettings)
+					if(reloadSampleSettings)
 					{
 						// Also reload panning
 						pChn->nPan = oldSample->nPan;
