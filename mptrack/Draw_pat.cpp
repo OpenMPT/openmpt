@@ -894,12 +894,14 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			const MODCOMMAND *m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
-			const bool drawDefaultVolume = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->instr != 0 && m->note != NOTE_NONE && NOTE_IS_VALID(m->note);
+			const bool drawDefaultVolume = DrawDefaultVolume(m);
 
 			DWORD dwSpeedUpMask = 0;
 			if ((bSpeedUp) && (bColSel[col] & 0x40) && (pPattern) && (row))
 			{
 				const MODCOMMAND *mold = m - ncols;
+				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
+
 				if (m->note == mold->note) dwSpeedUpMask |= 0x01;
 				if ((m->instr == mold->instr) || (m_nDetailLevel < 1)) dwSpeedUpMask |= 0x02;
 				if ( m->IsPcNote() || mold->IsPcNote() )
@@ -912,7 +914,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				}
 				else
 				{
-					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume) || (m_nDetailLevel < 2)) dwSpeedUpMask |= 0x04;
+					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || (m_nDetailLevel < 2)) dwSpeedUpMask |= 0x04;
 					if ((m->command == mold->command) || (m_nDetailLevel < 3)) dwSpeedUpMask |= (m->command != CMD_NONE) ? 0x08 : 0x18;
 				}
 				if (dwSpeedUpMask == 0x1F) goto DoBlit;
