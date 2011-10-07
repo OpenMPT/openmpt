@@ -905,25 +905,28 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc || !(IsEditingEnabled_bmsg())) return;
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	MODCOMMAND *p = pSndFile->Patterns[m_nPattern];
-	if (!p) return;
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
+		return;
 
 	BeginWaitCursor();
 
-	if(ITStyle && GetColTypeFromCursor(m_dwEndSel) == NOTE_COLUMN) m_dwEndSel += 1;
 	//If selection ends to a note column, in ITStyle extending it to instrument column since the instrument data is
 	//removed with note data.
+	if(ITStyle && GetColTypeFromCursor(m_dwEndSel) == NOTE_COLUMN) m_dwEndSel += 1;
 
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
-	DWORD tmp = m_dwEndSel;
-	bool invalidateAllCols = false;
+	DWORD endCursor = m_dwEndSel;
 
-	for (UINT row = GetRowFromCursor(m_dwBeginSel); row <= GetRowFromCursor(m_dwEndSel); row++) { // for all selected rows
-		for (UINT i=(m_dwBeginSel & 0xFFFF); i<=(m_dwEndSel & 0xFFFF); i++) if (GetColTypeFromCursor(i) <= LAST_COLUMN) { // for all selected cols
+	for (ROWINDEX row = GetRowFromCursor(m_dwBeginSel); row <= GetRowFromCursor(m_dwEndSel); row++)
+	{
+		// for all selected rows
+		for (UINT i = (m_dwBeginSel & 0xFFFF); i <= (m_dwEndSel & 0xFFFF); i++) if (GetColTypeFromCursor(i) <= LAST_COLUMN)
+		{
+			// for all selected cols
 
 			UINT chn = GetChanFromCursor(i);
 			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
-			MODCOMMAND *m = &p[row * pSndFile->m_nChannels + chn];
+			MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(row, chn);
 			switch(GetColTypeFromCursor(i))
 			{
 			case NOTE_COLUMN:	// Clear note
@@ -932,7 +935,6 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 					if(m->IsPcNote())
 					{  // Clear whole cell if clearing PC note
 						m->Clear();
-						invalidateAllCols = true;
 					}
 					else
 					{
@@ -956,7 +958,6 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 					if(m->IsPcNote())
 					{
 						m->SetValueEffectCol(0);
-						invalidateAllCols = true;
 					}
 				}
 				break;
@@ -979,16 +980,13 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 		} //end selected columns
 	} //end selected rows
 
-	// If selection ends on effect command column, extent invalidation area to
-	// effect param column as well.
-	if (GetColTypeFromCursor(tmp) == EFFECT_COLUMN)
-		tmp++;
+	// Expand invalidation to the whole column. Needed for:
+	// - Last column is the effect character (parameter needs to be invalidated, too
+	// - PC Notes
+	// - Default volume display is enabled.
+	endCursor += LAST_COLUMN - GetColTypeFromCursor(endCursor);
 
-	// If invalidation on all columns is wanted, extent invalidation area.
-	if(invalidateAllCols)
-		tmp += LAST_COLUMN - GetColTypeFromCursor(tmp);
-
-	InvalidateArea(m_dwBeginSel, tmp);
+	InvalidateArea(m_dwBeginSel, endCursor);
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	EndWaitCursor();
@@ -1195,7 +1193,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 
 			InvalidateRect(&m_rcDropItem, FALSE);
 
-			const bool duplicate = (nFlags & MK_SHIFT) ? true : false;
+			const bool duplicate = (nFlags & MK_SHIFT) != 0;
 			const CHANNELINDEX newChannels = pModDoc->GetNumChannels() + (duplicate ? 1 : 0);
 			vector<CHANNELINDEX> channels(newChannels, 0);
 			CHANNELINDEX i = 0;
@@ -1224,8 +1222,8 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			{
 				if(duplicate)
 				{
-					pModDoc->UpdateAllViews(this, HINT_MODCHANNELS);
-					pModDoc->UpdateAllViews(this, HINT_MODTYPE);
+					// Number of channels changed: Update channel headers and other information.
+					pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | HINT_MODTYPE);
 					SetCurrentPattern(m_nPattern);
 				}
 				InvalidatePattern();
@@ -1233,9 +1231,11 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 		}
 		break;
+
 	case DRAGITEM_PATTERNHEADER:
 		OnPatternProperties();
 		break;
+
 	case DRAGITEM_PLUGNAME:			//rewbs.patPlugNames
 		if (nItemNo < MAX_BASECHANNELS)
 			TogglePluginEditor(nItemNo);
@@ -1641,10 +1641,12 @@ void CViewPattern::OnRecordSelect()
 void CViewPattern::OnSplitRecordSelect()
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc){
+	if (pModDoc)
+	{
 		UINT nNumChn = pModDoc->GetNumChannels();
 		UINT nChn = GetChanFromCursor(m_nMenuParam);
-		if (nChn < nNumChn){
+		if (nChn < nNumChn)
+		{
 			pModDoc->Record2Channel(nChn);
 			InvalidateChannelsHeaders();
 		}
@@ -1731,7 +1733,7 @@ void CViewPattern::OnDeleteRowsEx()
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	UINT nrows = GetRowFromCursor(m_dwEndSel) - GetRowFromCursor(m_dwBeginSel) + 1;
 	DeleteRows(0, pSndFile->GetNumChannels() - 1, nrows);
-	m_dwEndSel = (m_dwEndSel & 0x0000FFFF) | (m_dwBeginSel & 0xFFFF0000);
+	m_dwEndSel = CreateCursor(GetRowFromCursor(m_dwBeginSel), GetChanFromCursor(m_dwEndSel), GetColTypeFromCursor(m_dwEndSel));
 }
 
 void CViewPattern::InsertRows(UINT colmin, UINT colmax) //rewbs.customKeys: added args

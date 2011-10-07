@@ -302,8 +302,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 		}
 
 		m_CombobTuningType.EnableWindow(enableControls);
-		m_EditTableSize.SetReadOnly(!enableControls);
-		m_EditBeginNote.SetReadOnly(!enableControls);
 		m_EditSteps.SetReadOnly(!enableControls);
 		m_EditRatioPeriod.SetReadOnly(!enableControls);
 		m_EditRatio.SetReadOnly(!enableControls);
@@ -323,8 +321,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 		if(m_pActiveTuning == NULL) //No active tuning, clearing tuning part.
 		{
 			m_EditName.SetWindowText("");
-			m_EditTableSize.SetWindowText("");
-			m_EditBeginNote.SetWindowText("");
 			m_EditSteps.SetWindowText("");
 			m_EditRatioPeriod.SetWindowText("");
 			m_EditRatio.SetWindowText("");
@@ -354,8 +350,6 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATICRATIOMAP, m_RatioMapWnd);
 	DDX_Control(pDX, IDC_COMBO_TTYPE, m_CombobTuningType);
-	DDX_Control(pDX, IDC_EDIT_TABLESIZE, m_EditTableSize);
-	DDX_Control(pDX, IDC_EDIT_BEGINNOTE, m_EditBeginNote);
 	DDX_Control(pDX, IDC_EDIT_STEPS, m_EditSteps);
 	DDX_Control(pDX, IDC_EDIT_RATIOPERIOD, m_EditRatioPeriod);
 	DDX_Control(pDX, IDC_EDIT_RATIOVALUE, m_EditRatio);
