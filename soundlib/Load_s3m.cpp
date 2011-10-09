@@ -107,7 +107,7 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, bool bIT) const
 	case 'X':	command = CMD_PANNING8; break;
 	case 'Y':	command = CMD_PANBRELLO; break;
 	case 'Z':	command = CMD_MIDI; break;
-	case '\\':	command = CMD_SMOOTHMIDI; break; //rewbs.smoothVST
+	case '\\':	command = bIT ? CMD_SMOOTHMIDI : CMD_MIDI; break; //rewbs.smoothVST
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
 	case ']':	command = CMD_DELAYCUT; break;
 	case '[':	command = CMD_XPARAM; break;
@@ -164,7 +164,7 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 	case CMD_PANBRELLO:			command = 'Y'; break;
 	case CMD_MIDI:				command = 'Z'; break;
 	case CMD_SMOOTHMIDI:  //rewbs.smoothVST
-		if(bCompatibilityExport)
+		if(bCompatibilityExport || !bIT)
 			command = 'Z';
 		else
 			command = '\\';

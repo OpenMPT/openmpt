@@ -2252,7 +2252,7 @@ const MPTEFFECTINFO gFXInfo[] =
 	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning Slide"},
 	{CMD_SETENVPOSITION,0,0,		0,	MOD_TYPE_XM,	"Envelope position"},
 	{CMD_MIDI,			0,0,		0x7F,	MOD_TYPE_NOMOD,	"MIDI Macro"},
-	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_NOMOD,	"Smooth MIDI Macro"},	//rewbs.smoothVST
+	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_XMITMPT,	"Smooth MIDI Macro"},	//rewbs.smoothVST
 	// Extended MOD/XM effects
 	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine Porta Up"},
 	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine Porta Down"},
