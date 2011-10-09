@@ -100,6 +100,12 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		}
 	} // End if(m->command == CMD_PANNING8)
 
+	// Re-map \xx to Zxx if the new format only knows the latter command.
+	if(m->command == CMD_SMOOTHMIDI && !GetModSpecifications(nNewType).HasCommand(CMD_SMOOTHMIDI) && GetModSpecifications(nNewType).HasCommand(CMD_MIDI))
+	{
+		m->command = CMD_MIDI;
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////
 	// MPTM to anything: Convert param control, extended envelope control, note delay+cut
 	if(oldTypeIsMPT)
@@ -145,6 +151,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		case CMD_MODCMDEX:
 			MODExx2S3MSxx(m);
 			break;
+
 		case CMD_VOLUME:
 			// Effect column volume command overrides the volume column in XM.
 			if (m->volcmd == VOLCMD_NONE || m->volcmd == VOLCMD_VOLUME)
@@ -162,12 +169,15 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->param = 0x80 | ((m->param * 15 + 32) / 64);	// XM volcol panning is 4-Bit, so we can use 4-Bit panning here.
 			}
 			break;
+
 		case CMD_PORTAMENTOUP:
 			if (m->param > 0xDF) m->param = 0xDF;
 			break;
+
 		case CMD_PORTAMENTODOWN:
 			if (m->param > 0xDF) m->param = 0xDF;
 			break;
+
 		case CMD_XFINEPORTAUPDOWN:
 			switch(m->param & 0xF0)
 			{
@@ -188,8 +198,9 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				break;
 			}
 			break;
+
 		case CMD_KEYOFF:
-			if(m->note == 0)
+			if(m->note == NOTE_NONE)
 			{
 				m->note = (newTypeIsS3M) ? NOTE_NOTECUT : NOTE_KEYOFF;
 				m->command = CMD_S3MCMDEX;
@@ -198,6 +209,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->param = 0xD0 | (m->param & 0x0F);
 			}
 			break;
+
 		case CMD_PANNINGSLIDE:
 			// swap L/R, convert to fine slide
 			if(m->param & 0xF0)
@@ -207,6 +219,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			{
 				m->param = 0x0F | (min(0x0E, m->param & 0x0F) << 4);
 			}
+
 		default:
 			break;
 		}
@@ -234,6 +247,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		case CMD_S3MCMDEX:
 			S3MSxx2MODExx(m);
 			break;
+
 		case CMD_VOLUMESLIDE:
 			if ((m->param & 0xF0) && ((m->param & 0x0F) == 0x0F))
 			{
@@ -246,6 +260,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 					m->param = (m->param & 0x0F) | 0xB0;
 				}
 				break;
+
 		case CMD_PORTAMENTOUP:
 			if (m->param >= 0xF0)
 			{
@@ -265,6 +280,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 					}
 				} else m->command = CMD_PORTAMENTOUP;
 			break;
+
 		case CMD_PORTAMENTODOWN:
 			if (m->param >= 0xF0)
 			{
@@ -284,14 +300,17 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 					}
 				} else m->command = CMD_PORTAMENTODOWN;
 			break;
+
 		case CMD_SPEED:
 			{
 				m->param = min(m->param, (nNewType == MOD_TYPE_XM) ? 0x1F : 0x20);
 			}
 			break;
+
 		case CMD_TEMPO:
 			if(m->param < 0x20) m->command = CMD_NONE; // no tempo slides
 			break;
+
 		case CMD_PANNINGSLIDE:
 			// swap L/R, convert fine slides to normal slides
 			if((m->param & 0x0F) == 0x0F && (m->param & 0xF0))
@@ -311,6 +330,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->param = 0;
 			}
 			break;
+
 		case CMD_RETRIG:
 			// Retrig: Q0y doesn't change volume in IT/S3M, but R0y in XM takes the last x parameter
 			if(m->param != 0 && (m->param & 0xF0) == 0)
@@ -318,6 +338,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->param |= 0x80;
 			}
 			break;
+
 		default:
 			break;
 		}
@@ -351,12 +372,11 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				break;
 			}
 			break;
-		case CMD_SMOOTHMIDI:
-			m->command = CMD_MIDI;
-			break;
+
 		case CMD_GLOBALVOLUME:
 			m->param = (min(0x80, m->param) + 1) / 2;
 			break;
+
 		default:
 			break;
 		}
@@ -416,6 +436,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		case CMD_TONEPORTAVOL: // lacks memory -> 500 is the same as 300
 			if(m->param == 0x00) m->command = CMD_TONEPORTAMENTO;
 			break;
+
 		case CMD_VIBRATOVOL: // lacks memory -> 600 is the same as 400
 			if(m->param == 0x00) m->command = CMD_VIBRATO;
 			break;
@@ -453,6 +474,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->command = CMD_MODCMDEX;
 				m->param = 0x90 | (m->param & 0x0F);
 				break;
+
 			case CMD_MODCMDEX: // This would turn into "Invert Loop", so let's better remove it
 				if((m->param & 0xF0) == 0xF0) m->command = CMD_NONE;
 				break;
@@ -464,53 +486,63 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->command = CMD_VOLUME;
 				m->param = m->vol;
 				break;
+
 			case VOLCMD_PANNING:
 				m->command = CMD_PANNING8;
 				m->param = CLAMP(m->vol << 2, 0, 0xFF);
 				break;
+
 			case VOLCMD_VOLSLIDEDOWN:
 				m->command = CMD_VOLUMESLIDE;
 				m->param = m->vol;
 				break;
+
 			case VOLCMD_VOLSLIDEUP:
 				m->command = CMD_VOLUMESLIDE;
 				m->param = m->vol << 4;
 				break;
+
 			case VOLCMD_FINEVOLDOWN:
 				m->command = CMD_MODCMDEX;
 				m->param = 0xB0 | m->vol;
 				break;
+
 			case VOLCMD_FINEVOLUP:
 				m->command = CMD_MODCMDEX;
 				m->param = 0xA0 | m->vol;
 				break;
+
 			case VOLCMD_PORTADOWN:
 				m->command = CMD_PORTAMENTODOWN;
 				m->param = m->vol << 2;
 				break;
+
 			case VOLCMD_PORTAUP:
 				m->command = CMD_PORTAMENTOUP;
 				m->param = m->vol << 2;
 				break;
+
 			case VOLCMD_TONEPORTAMENTO:
 				m->command = CMD_TONEPORTAMENTO;
 				m->param = m->vol << 2;
 				break;
+
 			case VOLCMD_VIBRATODEPTH:
 				m->command = CMD_VIBRATO;
 				m->param = m->vol;
 				break;
+
 			case VOLCMD_VIBRATOSPEED:
 				m->command = CMD_VIBRATO;
 				m->param = m->vol << 4;
 				break;
 				// OpenMPT-specific commands
+
 			case VOLCMD_OFFSET:
 				m->command = CMD_OFFSET;
 				m->param = m->vol << 3;
 				break;
-			default:
-				break;
+
 		}
 		m->volcmd = CMD_NONE;
 	} // End if (newTypeIsMOD)
@@ -526,64 +558,74 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->param = m->vol;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_VOLSLIDEUP:
 				m->command = CMD_VOLUMESLIDE;
 				m->param = m->vol << 4;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_FINEVOLDOWN:
 				m->command = CMD_VOLUMESLIDE;
 				m->param = 0xF0 | m->vol;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_FINEVOLUP:
 				m->command = CMD_VOLUMESLIDE;
 				m->param = (m->vol << 4) | 0x0F;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_PORTADOWN:
 				m->command = CMD_PORTAMENTODOWN;
 				m->param = m->vol << 2;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_PORTAUP:
 				m->command = CMD_PORTAMENTOUP;
 				m->param = m->vol << 2;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_TONEPORTAMENTO:
 				m->command = CMD_TONEPORTAMENTO;
 				m->param = m->vol << 2;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_VIBRATODEPTH:
 				m->command = CMD_VIBRATO;
 				m->param = m->vol;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_VIBRATOSPEED:
 				m->command = CMD_VIBRATO;
 				m->param = m->vol << 4;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_PANSLIDELEFT:
 				m->command = CMD_PANNINGSLIDE;
 				m->param = m->vol << 4;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_PANSLIDERIGHT:
 				m->command = CMD_PANNINGSLIDE;
 				m->param = m->vol;
 				m->volcmd = CMD_NONE;
 				break;
 				// OpenMPT-specific commands
+
 			case VOLCMD_OFFSET:
 				m->command = CMD_OFFSET;
 				m->param = m->vol << 3;
 				m->volcmd = CMD_NONE;
 				break;
-			default:
-				break;
+
 		}
 	} // End if (newTypeIsS3M)
 
@@ -618,19 +660,20 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				m->param = m->vol << 2;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_PORTAUP:
 				m->command = CMD_PORTAMENTOUP;
 				m->param = m->vol << 2;
 				m->volcmd = CMD_NONE;
 				break;
 				// OpenMPT-specific commands
+
 			case VOLCMD_OFFSET:
 				m->command = CMD_OFFSET;
 				m->param = m->vol << 3;
 				m->volcmd = CMD_NONE;
 				break;
-			default:
-				break;
+
 		}
 	} // End if (newTypeIsXM)
 
@@ -652,23 +695,25 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			case VOLCMD_OFFSET:
 				m->vol = min(m->vol, 9);
 				break;
+
 			case VOLCMD_PANSLIDELEFT:
 				m->command = CMD_PANNINGSLIDE;
 				m->param = m->vol << 4;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_PANSLIDERIGHT:
 				m->command = CMD_PANNINGSLIDE;
 				m->param = m->vol;
 				m->volcmd = CMD_NONE;
 				break;
+
 			case VOLCMD_VIBRATOSPEED:
 				m->command = CMD_VIBRATO;
 				m->param = m->vol << 4;
 				m->volcmd = CMD_NONE;
 				break;
-			default:
-				break;
+
 		}
 	} // End if (newTypeIsIT)
 

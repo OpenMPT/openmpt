@@ -1005,8 +1005,11 @@ void CViewGlobals::OnProgramChanged()
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT nParams = pVstPlugin->GetNumPrograms();
 		if ((cursel > 0) && (cursel <= (int)nParams)) m_nCurrentPreset = cursel;
-		if (m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams){
-			pVstPlugin->SetCurrentProgram(m_nCurrentPreset-1);
+		if (m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams)
+		{
+			pVstPlugin->SetCurrentProgram(m_nCurrentPreset - 1);
+			// Update parameter display
+			OnParamChanged();
 		}
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
