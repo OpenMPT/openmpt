@@ -214,7 +214,7 @@ public:
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
 	// True if default volume should be drawn for a given cell.
-	bool DrawDefaultVolume(const MODCOMMAND *m) const { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->instr != 0 && m->note != NOTE_NONE && NOTE_IS_VALID(m->note); }
+	static bool DrawDefaultVolume(const MODCOMMAND *m) { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->note != NOTE_NONE && NOTE_IS_VALID(m->note); }
 
 	//rewbs.customKeys
 	BOOL ExecuteCommand(CommandID command);

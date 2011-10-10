@@ -283,9 +283,10 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			const INSTRUMENTINDEX nSplitIns = m_pModDoc->GetSplitKeyboardSettings()->splitInstrument;
 			const MODCOMMAND::NOTE noteSplit = 1 + m_pModDoc->GetSplitKeyboardSettings()->splitNote;
 			const CString sSplitInsName = m_pModDoc->GetPatternViewInstrumentName(nSplitIns, true, false);
-			if (m_pSndFile->m_nInstruments)
+			if (m_pSndFile->GetNumInstruments())
 			{
-				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++)
+				// Show instrument names
+				for (INSTRUMENTINDEX i = 1; i <= m_pSndFile->GetNumInstruments(); i++)
 				{
 					if (m_pSndFile->Instruments[i] == nullptr)
 						continue;
@@ -306,9 +307,9 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				}
 			} else
 			{
-				UINT nmax = m_pSndFile->m_nSamples;
-				while ((nmax > 1) && (m_pSndFile->GetSample(nmax).pSample == nullptr) && (!m_pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((m_pSndFile->m_szNames[i][0]) || (m_pSndFile->GetSample(i).pSample))
+				// Show sample names
+				SAMPLEINDEX nmax = m_pSndFile->GetNumSamples();
+				for (SAMPLEINDEX i = 1; i <= nmax; i++) if (m_pSndFile->GetSample(i).pSample)
 				{
 					if (m_pModDoc->GetSplitKeyboardSettings()->IsSplitActive() && nSplitIns < ARRAYELEMCOUNT(m_pSndFile->m_szNames))
 						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i, m_pSndFile->m_szNames[nSplitIns], m_pSndFile->m_szNames[i]);

@@ -2848,16 +2848,6 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		break;
 
 	case CMD_MIDI:
-		if (param < 0x80)
-		{
-			wsprintf(pszName, "SFx macro: z=%02X (%d)", param, param);
-		} else
-		{
-			wsprintf(pszName, "Fixed Macro Z%02X", param);
-		}
-		break;
-	
-	//rewbs.smoothVST
 	case CMD_SMOOTHMIDI:
 		if (param < 0x80)
 		{
@@ -2867,8 +2857,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 			wsprintf(pszName, "Fixed Macro Z%02X", param);
 		}
 		break;
-	//end rewbs.smoothVST
-
+	
 	case CMD_DELAYCUT:
 		wsprintf(pszName, "Note delay: %d, cut after %d ticks", (param >> 4), (param & 0x0F));
 		break;
@@ -3016,8 +3005,16 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						break;
 					case 0x50: // set finetune
 						{
-							int8 nFinetune = (param & 0x0F) << 4;
-							if(m_SndFile.GetType() & MOD_TYPE_XM) nFinetune += 128;
+							int8 nFinetune = (param & 0x0F);
+							if(m_SndFile.GetType() & MOD_TYPE_XM)
+							{
+								// XM finetune
+								nFinetune = (nFinetune - 8) * 16;
+							} else
+							{
+								// MOD finetune
+								if(nFinetune > 7) nFinetune -= 16;
+							}
 							wsprintf(s, "%d", nFinetune);
 						}
 						break;

@@ -15,7 +15,7 @@
 #define VER_MAJORMAJOR				1
 #define VER_MAJOR					20
 #define VER_MINOR					00
-#define VER_MINORMINOR				40
+#define VER_MINORMINOR				41
 
 //Creates version number from version parts that appears in version string.
 //For example MAKE_VERSION_NUMERIC(1,17,02,28) gives version number of 
@@ -64,7 +64,7 @@ namespace MptVersion
 	// Returns true if a given version number is from a test build, false if it's a release build.
 	static bool IsTestBuild(const VersionNum num)
 	{
-		return ((num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00)) || (num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num));
+		return ((num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00) && num != MAKE_VERSION_NUMERIC(1,18,00,00)) || (num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num));
 	}
 }; //namespace MptVersion
 

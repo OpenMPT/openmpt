@@ -95,7 +95,7 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 		float fc = (float)CutOffToFrequency(cutoff, flt_modifier);
 		const float dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)resonance) / 20.0f);
 
-		fc *= (float)(2.0 * 3.14159265358 / (float)gdwMixingFreq);
+		fc *= (float)(2.0f * (float)M_PI / (float)gdwMixingFreq);
 
 		d = (1.0f - 2.0f * dmpfac) * fc;
 		LimitMax(d, 2.0f);
