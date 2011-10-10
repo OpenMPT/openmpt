@@ -2786,7 +2786,7 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 
 		case MOD_TYPE_MOD:
 		default:
-			pModSpecs = &ModSpecs::modEx;
+			pModSpecs = &ModSpecs::mod;
 			break;
 	}
 }

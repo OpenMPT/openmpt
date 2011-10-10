@@ -13,7 +13,7 @@
  *           - Long instrument envelopes
  *           - Envelope release node (this was previously also usable in the IT format, but is now deprecated in that format)
  *
- *          Extended features in IT/XM/S3M/MOD (not all listed below are available in all of those formats):
+ *          Extended features in IT/XM/S3M (not all listed below are available in all of those formats):
  *           - Plugins
  *           - Extended ranges for
  *              - Sample count
@@ -28,7 +28,7 @@
  *           - Version info
  *           - Channel names
  *           - Pattern names
- *           - Alternative tempomodes
+ *           - Alternative tempo modes
  *           - For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
  *
  * Authors: OpenMPT Devs
@@ -420,9 +420,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Is the "restart position" value allowed in this format?
 	if(m_SndFile.m_nRestartPos > 0 && !CSoundFile::GetModSpecifications(nNewType).hasRestartPos)
 	{
-		// Try to fix it
-		RestartPosToPattern();
-		CHANGEMODTYPE_WARNING(wRestartPos);
+		// Try to fix it by placing a pattern jump command in the pattern.
+		if(!RestartPosToPattern())
+		{
+			// Couldn't fix it! :(
+			CHANGEMODTYPE_WARNING(wRestartPos);
+		}
 	}
 
 	// Fix channel settings (pan/vol)
