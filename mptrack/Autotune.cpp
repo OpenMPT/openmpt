@@ -180,7 +180,7 @@ bool Autotune::Apply()
 		const int8 *normalData = sampleData;
 		const int8 *shiftedData = sampleData + autocorrShift;
 		// Add up squared differences of all values
-		for(SmpLength i = processLength; i > 0; i--, normalData++, shiftedData++)
+		for(SmpLength i = processLength; i != 0; i--, normalData++, shiftedData++)
 		{
 			autocorrSum += (*normalData - *shiftedData) * (*normalData - *shiftedData);
 		}
@@ -196,9 +196,9 @@ bool Autotune::Apply()
 		for(int ki = kernelWidth; ki >= 0; ki--)
 		{
 			// Choose bins to interpolate with
-			int left = (int)i - ki;
+			int left = i - ki;
 			if(left < 0) left += historyBins;
-			int right = (int)i + ki;
+			int right = i + ki;
 			if(right >= historyBins) right -= historyBins;
 
 			interpolatedHistogram[i] = interpolatedHistogram[i] / 2 + (autocorrHistogram[left] + autocorrHistogram[right]) / 2;

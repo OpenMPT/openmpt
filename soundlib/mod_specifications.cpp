@@ -50,7 +50,7 @@ bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 		else if(note == NOTE_FADE)
 			return hasNoteFade;
 		else
-			return (memcmp(fileExtension, ModSpecs::mptm.fileExtension, 4) == 0);
+			return (internalType == MOD_TYPE_MPT);
 	} else if(note == NOTE_NONE)
 		return true;
 	return false;

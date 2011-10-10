@@ -167,23 +167,16 @@ void CChannelManagerDlg::OnApply()
 
 	if(!m_pSndFile || !pModDoc) return;
 
-
-	// Stop player (is this necessary?)
-	CModDoc *pActiveMod = NULL;
-	HWND followSong = pMainFrm->GetFollowSong(pModDoc);
-	if(pMainFrm->IsPlaying()){
-		if((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = pMainFrm->GetModPlaying();
-		pMainFrm->PauseMod();
-	}
-
 	EnterCriticalSection(&applying);
 
 	CHANNELINDEX nChannels, newpat[MAX_BASECHANNELS], newMemory[4][MAX_BASECHANNELS];
 
 	// Count new number of channels , copy pattern pointers & manager internal store memory
 	nChannels = 0;
-	for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++){
-		if(!removed[pattern[nChn]]){
+	for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+	{
+		if(!removed[pattern[nChn]])
+		{
 			newMemory[0][nChannels] = memory[0][nChannels];
 			newMemory[1][nChannels] = memory[1][nChannels];
 			newMemory[2][nChannels] = memory[2][nChannels];
@@ -214,8 +207,10 @@ void CChannelManagerDlg::OnApply()
 	
 
 	// Update manager internal store memory
-	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++){
-		if(nChn != newpat[nChn]){
+	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
+	{
+		if(nChn != newpat[nChn])
+		{
 			memory[0][nChn] = newMemory[0][newpat[nChn]];
 			memory[1][nChn] = newMemory[1][newpat[nChn]];
 			memory[2][nChn] = newMemory[2][newpat[nChn]];
@@ -223,14 +218,6 @@ void CChannelManagerDlg::OnApply()
 		memory[3][nChn] = nChn;
 	}
 
-	/*
-	if(pActiveMod == pModDoc){
-		i = m_pSndFile->GetCurrentPos();
-		m_pSndFile->m_dwSongFlags &= ~SONG_STEP;
-		m_pSndFile->SetCurrentPos(0);
-		m_pSndFile->SetCurrentPos(i);
-	}
-	*/	
 
 	cs.Leave();
 	EndWaitCursor();
@@ -242,7 +229,6 @@ void CChannelManagerDlg::OnApply()
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(NULL,0xff,NULL);
 	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS ); //refresh channel headers
-	pMainFrm->PlayMod(pActiveMod, followSong, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 
 	// Redraw channel manager window
 	InvalidateRect(NULL,TRUE);
@@ -794,7 +780,7 @@ void CChannelManagerDlg::OnPaint()
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 
-		if(m_pSndFile->ChnSettings[nThisChn].szName[0] >= 0x20)
+		if(m_pSndFile->ChnSettings[nThisChn].szName[0] != '\0')
 	        wsprintf(s, "%d: %s", (nThisChn + 1), m_pSndFile->ChnSettings[nThisChn].szName);
 		else
 			wsprintf(s, "Channel %d", nThisChn + 1);
