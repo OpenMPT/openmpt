@@ -188,7 +188,7 @@ void CChannelManagerDlg::OnApply()
 	CriticalSection cs;
 
 	//Creating new order-vector for ReArrangeChannels.
-	vector<CHANNELINDEX> newChnOrder; newChnOrder.reserve(nChannels);
+	vector<CHANNELINDEX> newChnOrder(nChannels);
 	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 	{
 		newChnOrder.push_back(newpat[nChn]);
@@ -227,8 +227,7 @@ void CChannelManagerDlg::OnApply()
 
 	// Update document & player
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(NULL,0xff,NULL);
-	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS ); //refresh channel headers
+	pModDoc->UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODCHANNELS, NULL); //refresh channel headers
 
 	// Redraw channel manager window
 	InvalidateRect(NULL,TRUE);
@@ -288,16 +287,19 @@ void CChannelManagerDlg::OnAction1()
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
 	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(pModDoc && m_pSndFile){
+	if(pModDoc && m_pSndFile)
+	{
 		
 		int nbOk = 0, nbSelect = 0;
 		
-		switch(currentTab){
+		switch(currentTab)
+		{
 			case 0:
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn]){
+					if(!removed[nThisChn])
+					{
 						if(select[nThisChn]) nbSelect++;
 						if(select[nThisChn] && pModDoc->IsChannelSolo(nThisChn)) nbOk++;
 					}
@@ -317,7 +319,8 @@ void CChannelManagerDlg::OnAction1()
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn]){
+					if(!removed[nThisChn])
+					{
 						if(select[nThisChn]) nbSelect++;
 						BYTE rec = pModDoc->IsChannelRecord(nThisChn);
 						if(select[nThisChn] && rec == 1) nbOk++;
@@ -326,7 +329,8 @@ void CChannelManagerDlg::OnAction1()
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn] && select[nThisChn]){
+					if(!removed[nThisChn] && select[nThisChn])
+					{
 						if(select[nThisChn] && nbSelect != nbOk && pModDoc->IsChannelRecord(nThisChn) != 1) pModDoc->Record1Channel(nThisChn);
 						else if(nbSelect == nbOk) pModDoc->Record1Channel(nThisChn, false);
 					}
@@ -354,7 +358,7 @@ void CChannelManagerDlg::OnAction1()
 		ResetState();
 		LeaveCriticalSection(&applying);
 
-		pModDoc->UpdateAllViews(NULL,0xff,NULL);
+		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 		InvalidateRect(NULL,FALSE);
 	}
 	else LeaveCriticalSection(&applying);
@@ -377,7 +381,8 @@ void CChannelManagerDlg::OnAction2()
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn]){
+					if(!removed[nThisChn])
+					{
 						if(select[nThisChn]) nbSelect++;
 						if(select[nThisChn] && pModDoc->IsChannelMuted(nThisChn)) nbOk++;
 					}
@@ -385,7 +390,8 @@ void CChannelManagerDlg::OnAction2()
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn]){
+					if(select[nThisChn] && !removed[nThisChn])
+					{
 						if(pModDoc->IsChannelSolo(nThisChn)) pModDoc->SoloChannel(nThisChn, false);
 						if(nbSelect == nbOk) pModDoc->MuteChannel(nThisChn, !pModDoc->IsChannelMuted(nThisChn));
 						else pModDoc->MuteChannel(nThisChn, true);
@@ -396,7 +402,8 @@ void CChannelManagerDlg::OnAction2()
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn]){
+					if(!removed[nThisChn])
+					{
 						if(select[nThisChn]) nbSelect++;
 						BYTE rec = pModDoc->IsChannelRecord(nThisChn);
 						if(select[nThisChn] && rec == 2) nbOk++;
@@ -405,7 +412,8 @@ void CChannelManagerDlg::OnAction2()
 				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn] && select[nThisChn]){
+					if(!removed[nThisChn] && select[nThisChn])
+					{
 						if(select[nThisChn] && nbSelect != nbOk && pModDoc->IsChannelRecord(nThisChn) != 2) pModDoc->Record2Channel(nThisChn);
 						else if(nbSelect == nbOk) pModDoc->Record2Channel(nThisChn, false);
 					}
@@ -428,7 +436,7 @@ void CChannelManagerDlg::OnAction2()
 		if(currentTab != 3) ResetState();
 		LeaveCriticalSection(&applying);
 
-		pModDoc->UpdateAllViews(NULL,0xff,NULL);
+		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 		InvalidateRect(NULL,FALSE);
 	}
 	else LeaveCriticalSection(&applying);
@@ -512,7 +520,7 @@ void CChannelManagerDlg::OnRestore(void)
 	if(currentTab != 3) ResetState();
 	LeaveCriticalSection(&applying);
 
-	pModDoc->UpdateAllViews(NULL,0xff,NULL);
+	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 	InvalidateRect(NULL,FALSE);
 }
 
@@ -1028,7 +1036,7 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS ; nChn++)
 		state[pattern[nChn]] = false;
 
-	if(pModDoc) pModDoc->UpdateAllViews(NULL,0xff,NULL);
+	if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 
 	LeaveCriticalSection(&applying);
 }
@@ -1060,7 +1068,7 @@ void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 	rightButton = false;
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm->GetActiveDoc();
-	if(pModDoc) pModDoc->UpdateAllViews(NULL,0xff,NULL);
+	if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 
 	LeaveCriticalSection(&applying);
 }

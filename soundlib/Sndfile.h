@@ -1006,13 +1006,14 @@ protected:
 	void Tremolo(MODCHANNEL *pChn, UINT param);
 	void Panbrello(MODCHANNEL *pChn, UINT param);
 	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
-	void SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta);	//rewbs.volOffset: moved offset code to own method
+	void SampleOffset(CHANNELINDEX nChn, UINT param);
 	void NoteCut(CHANNELINDEX nChn, UINT nTick);
-	int PatternLoop(MODCHANNEL *, UINT param);
+	ROWINDEX PatternLoop(MODCHANNEL *, UINT param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
-	inline void InvertLoop(MODCHANNEL* pChn);
+	void InvertLoop(MODCHANNEL* pChn);
+
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
 	float CalculateSmoothParamChange(float currentValue, float param) const;
