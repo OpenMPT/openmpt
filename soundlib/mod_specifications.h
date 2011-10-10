@@ -151,46 +151,6 @@ const CModSpecifications mod =
 	false,								// No custom pattern time signatures
 };
 
-// MOD with MPT extensions.
-const CModSpecifications modEx =
-{
-	// TODO: Set correct values.
-	"mod",								// File extension
-	MOD_TYPE_MOD,						// Internal MODTYPE value
-	37,									// Minimum note index
-	108,								// Maximum note index
-	false,								// No notecut.
-	false,								// No noteoff.
-	false,								// No notefade.
-	128,								// Pattern max.
-	128,								// Order max.
-	4,									// Channel min
-	32,									// Channel max
-	32,									// Min tempo
-	255,								// Max tempo
-	64,									// Min pattern rows
-	64,									// Max pattern rows
-    20,									// Max mod name length
-	22,									// Max sample name length
-	0,									// Max sample filename length
-	0,									// Max instrument name length
-	0,									// Max instrument filename length
-	31,									// SamplesMax
-	0,									// instrumentMax
-	mixLevels_compatible,				// defaultMixLevels
-	0,									// Max MIDI mapping directives
-	1,									// Min Speed
-	32,									// Max Speed
-	false,								// No song comments
-	0,									// No instrument envelopes
-	false,								// No envelope release node
-	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
-	" ???????????????",					// Supported Volume Column commands
-	false,								// Doesn't have "+++" pattern
-	true,								// Has restart position (order)
-	false,								// Doesn't support plugins
-	false,								// No custom pattern time signatures
-};
 
 const CModSpecifications xm =
 {
@@ -256,7 +216,7 @@ const CModSpecifications xmEx =
 	0,									// Max sample filename length
 	22,									// Max instrument name length
 	0,									// Max instrument filename length
-	4000,								// SamplesMax (actually 16 per instrument(256*16=4096), but limited to MAX_SAMPLES=4000)
+	MAX_SAMPLES,						// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	256,								// instrumentMax
 	mixLevels_compatible,				// defaultMixLevels
 	200,								// Max MIDI mapping directives
@@ -429,12 +389,12 @@ const CModSpecifications itEx =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#",	// Supported Effects
 	" vpcdab?h??gfe?o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
-	true,								// Has restart position (order)
+	false,								// Doesn't have restart position (order)
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures
 };
 
-static const CModSpecifications *Collection[] = { &mptm, &mod, &modEx, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };
+static const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };
 
 } // namespace ModSpecs
 

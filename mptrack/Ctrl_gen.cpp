@@ -231,7 +231,8 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
-		m_EditRestartPos.EnableWindow(specs.hasRestartPos ? TRUE : FALSE);
+		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_pSndFile->m_nRestartPos != 0) ? TRUE : FALSE);
+		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
 		
 		//Note: Sample volume slider is not disabled for MOD
 		//on purpose(can be used to control play volume)
@@ -250,7 +251,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 
 // -! NEW_FEATURE#0023
 		}
-		wsprintf(s, "%s, %d channel%s", pszModType, m_pSndFile->m_nChannels, (m_pSndFile->m_nChannels != 1) ? "s" : "");
+		wsprintf(s, "%s, %d channel%s", pszModType, m_pSndFile->GetNumChannels(), (m_pSndFile->GetNumChannels() != 1) ? "s" : "");
 		m_EditModType.SetWindowText(s);
 	}
 	if (dwHint & HINT_MPTSETUP)

@@ -805,21 +805,22 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// First, reject invalid parameters.
-	if(!Patterns.IsValidIndex(nPat) || nRow >= Patterns[nPat].GetNumRows() || (nChn >= GetNumChannels() && nChn != CHANNELINDEX_INVALID))
+	if(!Patterns.IsValidPat(nPat) || nRow >= Patterns[nPat].GetNumRows() || (nChn >= GetNumChannels() && nChn != CHANNELINDEX_INVALID))
 	{
 		return false;
 	}
 
 	CHANNELINDEX nScanChnMin = nChn, nScanChnMax = nChn;
-	MODCOMMAND  * const p = Patterns[nPat].GetpModCommand(nRow, nScanChnMin);
-	MODCOMMAND *m;
 
 	// Scan all channels
 	if(nChn == CHANNELINDEX_INVALID)
 	{
 		nScanChnMin = 0;
-		nScanChnMax = m_nChannels - 1;
+		nScanChnMax = GetNumChannels() - 1;
 	}
+
+	MODCOMMAND  * const p = Patterns[nPat].GetpModCommand(nRow, nScanChnMin);
+	MODCOMMAND *m;
 
 	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
 	if(!bAllowMultipleEffects)
