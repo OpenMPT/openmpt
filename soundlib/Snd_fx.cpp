@@ -1425,8 +1425,18 @@ BOOL CSoundFile::ProcessEffects()
 				if ((((param & 0xF0) == 0x60) && (cmd == CMD_MODCMDEX))
 				 || (((param & 0xF0) == 0xB0) && (cmd == CMD_S3MCMDEX)))
 				{
-					int nloop = PatternLoop(pChn, param & 0x0F);
-					if (nloop >= 0) nPatLoopRow = nloop;
+					ROWINDEX nloop = PatternLoop(pChn, param & 0x0F);
+					if (nloop != ROWINDEX_INVALID) nPatLoopRow = nloop;
+
+					if(GetType() == MOD_TYPE_S3M)
+					{
+						// ST3 doesn't have per-channel pattern loop memory, so spam all changes to other channels as well.
+						for (CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+						{
+							Chn[i].nPatternLoop = pChn->nPatternLoop;
+							Chn[i].nPatternLoopCount = pChn->nPatternLoopCount;
+						}
+					}
 				} else
 				// Pattern Delay
 				if ((param & 0xF0) == 0xE0)
@@ -1661,7 +1671,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					TonePortamento(pChn, ImpulseTrackerPortaVolCmd[vol & 0x0F]);
-				else
+				else if(vol != 0 || !IsCompatibleMode(TRK_FASTTRACKER2))
 					TonePortamento(pChn, vol * 16);
 			} else
 			{
@@ -1673,7 +1683,6 @@ BOOL CSoundFile::ProcessEffects()
 					case VOLCMD_VOLUME:
 					case VOLCMD_PANNING:
 					case VOLCMD_VIBRATODEPTH:
-					case VOLCMD_TONEPORTAMENTO:
 						break;
 					default:
 						// no memory here.
@@ -1743,7 +1752,7 @@ BOOL CSoundFile::ProcessEffects()
 							
 				case VOLCMD_OFFSET:					//rewbs.volOff
 					if (m_nTickCount == nStartTick)
-						SampleOffset(nChn, vol << 3, bPorta);
+						SampleOffset(nChn, vol << 3);
 					break;
 				}
 			}
@@ -1840,8 +1849,12 @@ BOOL CSoundFile::ProcessEffects()
 		// Set Offset
 		case CMD_OFFSET:
 			if (m_nTickCount) break;
-			//rewbs.volOffset: moved sample offset code to own method
-			SampleOffset(nChn, param, bPorta);
+			// XM compatibility: Portamento + Offset = Ignore offset
+			if(bPorta && GetType() == MOD_TYPE_XM)
+			{
+				break;
+			}
+			SampleOffset(nChn, param);
 			break;
 
 		// Arpeggio
@@ -3073,8 +3086,8 @@ void CSoundFile::ExtendedChannelEffect(MODCHANNEL *pChn, UINT param)
 }
 
 
-inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
-//--------------------------------------------------
+void CSoundFile::InvertLoop(MODCHANNEL *pChn)
+//-------------------------------------------
 {
 	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
 	// This effect trashes samples. Thanks to 8bitbubsy for making this work. :)
@@ -3453,8 +3466,8 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 
 
 //rewbs.volOffset: moved offset code to own method as it will be used in several places now
-void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
-//-----------------------------------------------------------------------
+void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
+//----------------------------------------------------------
 {
 
 	MODCHANNEL *pChn = &Chn[nChn];
@@ -3489,11 +3502,6 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param, bool bPorta)
 
 	if ((pChn->rowCommand.note >= NOTE_MIN) && (pChn->rowCommand.note <= NOTE_MAX))
 	{
-		// XM compatibility: Portamento + Offset = Ignore offset
-		if(bPorta && GetType() == MOD_TYPE_XM)
-		{
-			return;
-		}
 		pChn->nPos = param;
 
 		if (pChn->nPos >= pChn->nLength)
@@ -3648,7 +3656,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			if (pChn->pModSample)
 				pChn->nLength = pChn->pModSample->nLength;
-			SampleOffset(nChn, offset, false);
+			SampleOffset(nChn, offset);
 		}
 	}
 
@@ -3869,33 +3877,39 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 }
 
 
-int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
-//-------------------------------------------------------
+ROWINDEX CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
+//------------------------------------------------------------
 {
 	if (param)
 	{
+		// Loop Repeat
 		if (pChn->nPatternLoopCount)
 		{
+			// There's a loop left
 			pChn->nPatternLoopCount--;
 			if(!pChn->nPatternLoopCount)
 			{
-				//IT compatibility 10. Pattern loops (+ same fix for MOD files)
-				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_PROTRACKER))
+				// IT compatibility 10. Pattern loops (+ same fix for MOD / S3M files)
+				// When finishing a pattern loop, the next loop without a dedicated SB0 starts on the first row after the previous loop.
+				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_PROTRACKER | TRK_SCREAMTRACKER))
+				{
 					pChn->nPatternLoop = m_nRow + 1;
+				}
 
-				return -1;	
+				return ROWINDEX_INVALID;	
 			}
 		} else
 		{
-			MODCHANNEL *p = Chn;
+			// This was the last loop
 
-			//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER))
+			// IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER | TRK_SCREAMTRACKER))
 			{
-				for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
+				MODCHANNEL *p = Chn;
+				for (CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++) if (p != pChn)
 				{
 					// Loop already done
-					if (p->nPatternLoopCount) return -1;
+					if (p->nPatternLoopCount) return ROWINDEX_INVALID;
 				}
 			}
 			pChn->nPatternLoopCount = param;
@@ -3904,9 +3918,10 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 		return pChn->nPatternLoop;
 	} else
 	{
+		// Loop Start
 		pChn->nPatternLoop = m_nRow;
 	}
-	return -1;
+	return ROWINDEX_INVALID;
 }
 
 
