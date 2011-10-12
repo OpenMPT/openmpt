@@ -3055,7 +3055,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 			
 		} else
 		{
-			wsprintf(s, "%d", param);
+			wsprintf(s, "%u", param);
 		}
 	}
 	strcat(pszName, s);

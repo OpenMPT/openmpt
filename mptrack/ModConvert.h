@@ -35,6 +35,7 @@ enum enmWarnings
 	wEditHistory,
 	wMixmode,
 	wCompatibilityMode,
+	wPitchToTempoLock,
 	wNumWarnings
 };
 

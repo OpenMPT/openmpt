@@ -1164,6 +1164,9 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (((dwHintMask >> HINT_SHIFT_INS) != m_nInstrument) && (dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
+
+	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+
 	if (dwHintMask & HINT_MODTYPE)
 	{
 		const CModSpecifications *specs = &m_pSndFile->GetModSpecifications();
@@ -1172,10 +1175,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditName.SetLimitText(specs->instrNameLengthMax);
 		m_EditFileName.SetLimitText(specs->instrFilenameLengthMax);
 
-		const BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		const BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
 		//rewbs.instroVSTi
-		const BOOL bITandXM = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
-		const BOOL bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		const BOOL bITandXM = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
+		const BOOL bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
@@ -1223,13 +1226,12 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
 		m_ComboTuning.EnableWindow(bMPTOnly);
-		m_EditPitchTempoLock.EnableWindow(bITandMPT);
-		m_CheckPitchTempoLock.EnableWindow(bITandMPT);
+		m_EditPitchTempoLock.EnableWindow(bMPTOnly);
+		m_CheckPitchTempoLock.EnableWindow(bMPTOnly);
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
 		CHAR s[128];
-		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
 			memcpy(s, pIns->name, 32);
@@ -1260,28 +1262,36 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			//if (pIns->nMidiChannel & 0x80) m_CbnMidiCh.SetCurSel((pIns->nMidiChannel&0x7f)+16); else
 			//	m_CbnMidiCh.SetCurSel(0);
 			//now:
-			if (pIns->nMidiChannel < 17) {
+			if (pIns->nMidiChannel < 17)
+			{
 				m_CbnMidiCh.SetCurSel(pIns->nMidiChannel); 
-			} else {
+			} else
+			{
 				m_CbnMidiCh.SetCurSel(0);
 			}
-			if (pIns->nMixPlug <= MAX_MIXPLUGINS) {
+			if (pIns->nMixPlug <= MAX_MIXPLUGINS)
+			{
 				m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
-			} else {
+			} else
+			{
 				m_CbnMixPlug.SetCurSel(0);
 			}
 			OnMixPlugChanged();
 			//end rewbs.instroVSTi
-			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++) {
+			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++)
+			{
                 DWORD v = m_CbnResampling.GetItemData(nRes);
-		        if (pIns->nResampling == v) {
+		        if (pIns->nResampling == v)
+				{
 					m_CbnResampling.SetCurSel(nRes);
 					break;
 	             }
 			}
-			for(int nFltMode = 0; nFltMode<m_CbnFilterMode.GetCount(); nFltMode++) {
+			for(int nFltMode = 0; nFltMode<m_CbnFilterMode.GetCount(); nFltMode++)
+			{
                 DWORD v = m_CbnFilterMode.GetItemData(nFltMode);
-		        if (pIns->nFilterMode == v) {
+		        if (pIns->nFilterMode == v)
+				{
 					m_CbnFilterMode.SetCurSel(nFltMode);
 					break;
 	             }
@@ -1317,11 +1327,12 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 // -! NEW_FEATURE#0027
 
 			UpdateTuningComboBox();
-			if(pIns->wPitchToTempoLock > 0) //Current instrument uses pitchTempoLock.
-				CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_CHECKED);
-			else
-				CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
-			
+
+			// Only enable Pitch/Tempo Lock for MPTM files or legacy files that have this property enabled.
+			m_EditPitchTempoLock.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->wPitchToTempoLock > 0) ? TRUE : FALSE);
+			m_CheckPitchTempoLock.EnableWindow(m_EditPitchTempoLock.IsWindowEnabled());
+			CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, (pIns->wPitchToTempoLock > 0 ? MF_CHECKED : MF_UNCHECKED));
+
 			OnBnClickedCheckPitchtempolock();
 
 			if(m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
