@@ -351,57 +351,63 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 	{
+		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
+		if(pIns == nullptr)
+		{
+			continue;
+		}
+
 		// Convert IT/MPT to XM (fix instruments)
 		if(oldTypeIsIT_MPT && newTypeIsXM)
 		{
-			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
-			if (pIns)
+			for (UINT k = 0; k < NOTE_MAX; k++)
 			{
-				for (UINT k = 0; k < NOTE_MAX; k++)
+				if ((pIns->NoteMap[k]) && (pIns->NoteMap[k] != (BYTE)(k+1)))
 				{
-					if ((pIns->NoteMap[k]) && (pIns->NoteMap[k] != (BYTE)(k+1)))
-					{
-						CHANGEMODTYPE_WARNING(wBrokenNoteMap);
-						break;
-					}
+					CHANGEMODTYPE_WARNING(wBrokenNoteMap);
+					break;
 				}
-				// Convert sustain loops to sustain "points"
-				if(pIns->VolEnv.nSustainStart != pIns->VolEnv.nSustainEnd)
-				{
-					CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
-					pIns->VolEnv.nSustainEnd = pIns->VolEnv.nSustainStart;
-				}
-				if(pIns->PanEnv.nSustainStart != pIns->PanEnv.nSustainEnd)
-				{
-					CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
-					pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
-				}
-				pIns->VolEnv.dwFlags &= ~ENV_CARRY;
-				pIns->PanEnv.dwFlags &= ~ENV_CARRY;
-				pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
-				pIns->dwFlags &= ~INS_SETPANNING;
-				pIns->nIFC &= 0x7F;
-				pIns->nIFR &= 0x7F;
-				pIns->nFilterMode = FLTMODE_UNCHANGED;
-
-				pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
-
-				pIns->wPitchToTempoLock = 0;
-
-				pIns->nPPC = NOTE_MIDDLEC - 1;
-				pIns->nPPS = 0;
-
-				pIns->nGlobalVol = 64;
-				pIns->nPan = 128;
 			}
+			// Convert sustain loops to sustain "points"
+			if(pIns->VolEnv.nSustainStart != pIns->VolEnv.nSustainEnd)
+			{
+				CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
+				pIns->VolEnv.nSustainEnd = pIns->VolEnv.nSustainStart;
+			}
+			if(pIns->PanEnv.nSustainStart != pIns->PanEnv.nSustainEnd)
+			{
+				CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
+				pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
+			}
+			pIns->VolEnv.dwFlags &= ~ENV_CARRY;
+			pIns->PanEnv.dwFlags &= ~ENV_CARRY;
+			pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
+			pIns->dwFlags &= ~INS_SETPANNING;
+			pIns->nIFC &= 0x7F;
+			pIns->nIFR &= 0x7F;
+			pIns->nFilterMode = FLTMODE_UNCHANGED;
+
+			pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
+
+			pIns->nPPC = NOTE_MIDDLEC - 1;
+			pIns->nPPS = 0;
+
+			pIns->nGlobalVol = 64;
+			pIns->nPan = 128;
 		}
-		// Convert MPT to anything - remove instrument tunings
+		// Convert MPT to anything - remove instrument tunings, Pitch/Tempo Lock
 		if(oldTypeIsMPT)
 		{
-			if(m_SndFile.Instruments[nIns] != nullptr && m_SndFile.Instruments[nIns]->pTuning != nullptr)
+			if(pIns->pTuning != nullptr)
 			{
-				m_SndFile.Instruments[nIns]->SetTuning(nullptr);
+				pIns->SetTuning(nullptr);
 				CHANGEMODTYPE_WARNING(wInstrumentTuning);
+			}
+
+			if(pIns->wPitchToTempoLock != 0)
+			{
+				pIns->wPitchToTempoLock = 0;
+				CHANGEMODTYPE_WARNING(wPitchToTempoLock);
 			}
 		}
 	}
@@ -523,26 +529,34 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		ConvertSamplesToInstruments();
 	}
 		
+	// Pattern warnings
 	CHAR s[64];
-	CHANGEMODTYPE_CHECK(wInstrumentsToSamples, "All instruments have been converted to samples.\n");
 	wsprintf(s, "%d patterns have been resized to 64 rows\n", nResizedPatterns);
 	CHANGEMODTYPE_CHECK(wResizedPatterns, s);
+	CHANGEMODTYPE_CHECK(wRestartPos, "Restart position is not supported by the new format.\n");
+	CHANGEMODTYPE_CHECK(wPatternSignatures, "Pattern-specific time signatures are not supported by the new format.\n");
+	CHANGEMODTYPE_CHECK(wChannelVolSurround, "Channel volume and surround are not supported by the new format.\n");
+	CHANGEMODTYPE_CHECK(wChannelPanning, "Channel panning is not supported by the new format.\n");
+
+	// Sample warnings
 	CHANGEMODTYPE_CHECK(wSampleBidiLoops, "Sample bidi loops are not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wSampleSustainLoops, "New format doesn't support sample sustain loops.\n");
 	CHANGEMODTYPE_CHECK(wSampleAutoVibrato, "New format doesn't support sample autovibrato.\n");
 	CHANGEMODTYPE_CHECK(wMODSampleFrequency, "Sample C-5 frequencies will be lost.\n");
-	CHANGEMODTYPE_CHECK(wBrokenNoteMap, "Note Mapping will be lost when saving as XM.\n");
+	CHANGEMODTYPE_CHECK(wMOD31Samples, "Samples above 31 will be lost when saving as MOD. Consider rearranging samples if there are unused slots available.\n");
+
+	// Instrument warnings
+	CHANGEMODTYPE_CHECK(wInstrumentsToSamples, "All instruments have been converted to samples.\n");
+	CHANGEMODTYPE_CHECK(wTrimmedEnvelopes, "Instrument envelopes have been shortened.\n");
 	CHANGEMODTYPE_CHECK(wInstrumentSustainLoops, "Sustain loops were converted to sustain points.\n");
 	CHANGEMODTYPE_CHECK(wInstrumentTuning, "Instrument tunings will be lost.\n");
-	CHANGEMODTYPE_CHECK(wMODGlobalVars, "Default speed, tempo and global volume will be lost.\n");
-	CHANGEMODTYPE_CHECK(wMOD31Samples, "Samples above 31 will be lost when saving as MOD. Consider rearranging samples if there are unused slots available.\n");
-	CHANGEMODTYPE_CHECK(wRestartPos, "Restart position is not supported by the new format.\n");
-	CHANGEMODTYPE_CHECK(wChannelVolSurround, "Channel volume and surround are not supported by the new format.\n");
-	CHANGEMODTYPE_CHECK(wChannelPanning, "Channel panning is not supported by the new format.\n");
-	CHANGEMODTYPE_CHECK(wPatternSignatures, "Pattern-specific time signatures are not supported by the new format.\n");
-	CHANGEMODTYPE_CHECK(wLinearSlides, "Linear Frequency Slides not supported by the new format.\n");
-	CHANGEMODTYPE_CHECK(wTrimmedEnvelopes, "Instrument envelopes have been shortened.\n");
+	CHANGEMODTYPE_CHECK(wPitchToTempoLock, "Pitch / Tempo Lock instrument property is not supported by the new format.\n");
+	CHANGEMODTYPE_CHECK(wBrokenNoteMap, "Note Mapping will be lost when saving as XM.\n");
 	CHANGEMODTYPE_CHECK(wReleaseNode, "Instrument envelope release nodes are not supported by the new format.\n");
+
+	// General warnings
+	CHANGEMODTYPE_CHECK(wMODGlobalVars, "Default speed, tempo and global volume will be lost.\n");
+	CHANGEMODTYPE_CHECK(wLinearSlides, "Linear Frequency Slides not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wEditHistory, "Edit history will not be saved in the new format.\n");
 	CHANGEMODTYPE_CHECK(wMixmode, "Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats.\n");
 	CHANGEMODTYPE_CHECK(wCompatibilityMode, "Consider enabling the \"compatible playback\" option in the song properties to increase compatiblity with other players.\n");

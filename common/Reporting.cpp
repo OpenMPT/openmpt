@@ -23,6 +23,10 @@ UINT Reporting::ShowNotification(const char *text, const char *caption, UINT fla
 		pMainFrm->GetInputHandler()->Bypass(true);
 	}
 
+	if(parent == nullptr)
+	{
+		parent = pMainFrm;
+	}
 	UINT result = ::MessageBox((parent ? parent->m_hWnd : NULL), text, caption, flags);
 
 	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)

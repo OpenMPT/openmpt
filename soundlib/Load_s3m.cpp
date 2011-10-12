@@ -253,13 +253,18 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		// MPT 1.16 and older versions of OpenMPT
 		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-		bKeepMidiMacros = true; // simply load Zxx commands
+		// Simply keep default (filter) MIDI macros
+		bKeepMidiMacros = true;
 	}
 
 	if((psfh.cwtv & 0xF000) >= 0x2000)
 	{
 		// 2xyy - Orpheus, 3xyy - IT, 4xyy - Schism, 5xyy - OpenMPT
-		bKeepMidiMacros = true; // simply load Zxx commands
+		if((psfh.cwtv & 0xF000) != 0x3000 || psfh.cwtv >= 0x3214)
+		{
+			// Keep MIDI macros if this is not an old IT version (BABYLON.S3M by Necros has Zxx commands and was saved with IT 2.05)
+			bKeepMidiMacros = true;
+		}
 	}
 
 	if(!bKeepMidiMacros) // Remove macros so they don't interfere with tunes made in trackers that don't support Zxx
