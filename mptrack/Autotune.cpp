@@ -19,25 +19,25 @@
 #define MIN_SAMPLE_LENGTH 2
 
 
-double Autotune::FrequencyToNote(double freq) const
-//-------------------------------------------------
+double Autotune::FrequencyToNote(double freq, double pitchReference) const
+//------------------------------------------------------------------------
 {
-	return ((12.0 * (log(freq / (440.0 / 2.0)) / log(2.0))) + 57.0);
+	return ((12.0 * (log(freq / (pitchReference / 2.0)) / log(2.0))) + 57.0);
 }
 
 
-double Autotune::NoteToFrequency(double note) const
-//-------------------------------------------------
+double Autotune::NoteToFrequency(double note, double pitchReference) const
+//------------------------------------------------------------------------
 {
-	return 440.0 * pow(2.0, (note - 69.0) / 12.0);
+	return pitchReference * pow(2.0, (note - 69.0) / 12.0);
 }
 
 
 // Calculate the amount of samples for autocorrelation shifting for a given note
-SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note) const
-//-------------------------------------------------------------------
+SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note, double pitchReference) const
+//---------------------------------------------------------------------------------------
 {
-	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE);
+	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
 	return (SmpLength)max(Util::Round((double)sampleFreq / fundamentalFrequency), 1);
 }
 
@@ -134,14 +134,14 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 
 
 bool Autotune::CanApply() const
-	//-----------------------------
+//-----------------------------
 {
 	return (sample.pSample != nullptr && sample.nLength >= MIN_SAMPLE_LENGTH);
 }
 
 
-bool Autotune::Apply()
-//--------------------
+bool Autotune::Apply(double pitchReference, int targetNote)
+//---------------------------------------------------------
 {
 	if(!CanApply())
 	{
@@ -154,7 +154,7 @@ bool Autotune::Apply()
 
 	const uint32 sampleFreq = sample.GetSampleRate(modType);
 	// At the lowest frequency, we get the highest autocorrelation shift amount.
-	const SmpLength maxShift = NoteToShift(sampleFreq, autocorrStartNote);
+	const SmpLength maxShift = NoteToShift(sampleFreq, autocorrStartNote, pitchReference);
 	if(!PrepareSample(maxShift))
 	{
 		return false;
@@ -174,7 +174,7 @@ bool Autotune::Apply()
 			noteBin %= historyBins;
 		}
 
-		const SmpLength autocorrShift = NoteToShift(sampleFreq, note);
+		const SmpLength autocorrShift = NoteToShift(sampleFreq, note, pitchReference);
 
 		uint64 autocorrSum = 0;
 		const int8 *normalData = sampleData;
@@ -207,28 +207,33 @@ bool Autotune::Apply()
 
 	// ...and find global minimum
 	int minimumBin = 0;
-	//bool decrease = false;
 	for(int i = 0; i < historyBins; i++)
 	{
 		const int prev = (i > 0) ? (i - 1) : (historyBins - 1);
-		// Are we at a minimum?
-		//if(interpolatedHistogram[i] > interpolatedHistogram[prev] && decrease)
+		// Are we at the global minimum?
+		if(interpolatedHistogram[prev] < interpolatedHistogram[minimumBin])
 		{
-			// Are we at the global minimum?
-			if(interpolatedHistogram[prev] < interpolatedHistogram[minimumBin])
-			{
-				minimumBin = prev;
-			}
+			minimumBin = prev;
 		}
-		//decrease = (interpolatedHistogram[i] < interpolatedHistogram[prev]);
-
 	}
 
-	// Center around C
-	if(minimumBin >= 6 * BINS_PER_NOTE) minimumBin -= 12 * BINS_PER_NOTE;
-	const double newFundamentalFreq = NoteToFrequency(69.0 + (double)minimumBin / BINS_PER_NOTE);
+	// Center target notes around C
+	if(targetNote >= 6)
+	{
+		targetNote -= 12;
+	}
 
-	sample.nC5Speed = (UINT)Util::Round(sample.nC5Speed * 440.0 / newFundamentalFreq);
+	// Center bins around target note
+	minimumBin -= targetNote * BINS_PER_NOTE;
+	if(minimumBin >= 6 * BINS_PER_NOTE)
+	{
+		minimumBin -= 12 * BINS_PER_NOTE;
+	}
+	minimumBin += targetNote * BINS_PER_NOTE;
+
+	const double newFundamentalFreq = NoteToFrequency(static_cast<double>(69 - targetNote) + static_cast<double>(minimumBin) / BINS_PER_NOTE, pitchReference);
+
+	sample.nC5Speed = (UINT)Util::Round(sample.nC5Speed * pitchReference / newFundamentalFreq);
 
 	if((modType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0)
 	{
@@ -240,4 +245,61 @@ bool Autotune::Apply()
 	}
 
 	return true;
+}
+
+
+/////////////////////////////////////////////////////////////
+// CAutotuneDlg
+
+int CAutotuneDlg::pitchReference = 440;	// Pitch reference in Hz
+int CAutotuneDlg::targetNote = 0;		// Target note (C = 0, C# = 1, etc...)
+
+extern const LPCSTR szNoteNames[12];
+
+void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
+//---------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CAutotuneDlg)
+	DDX_Control(pDX, IDC_COMBO1,	m_CbnNoteBox);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL CAutotuneDlg::OnInitDialog()
+//-------------------------------
+{
+	CDialog::OnInitDialog();
+
+	m_CbnNoteBox.ResetContent();
+	for(int note = 0; note < 12; note++)
+	{
+		const int item = m_CbnNoteBox.AddString(szNoteNames[note]);
+		m_CbnNoteBox.SetItemData(item, note);
+		if(note == targetNote)
+		{
+			m_CbnNoteBox.SetCurSel(item);
+		}
+	}
+
+	SetDlgItemInt(IDC_EDIT1, pitchReference, FALSE);
+
+	return TRUE;
+}
+
+
+void CAutotuneDlg::OnOK()
+//-----------------------
+{
+	CDialog::OnOK();
+
+	targetNote = m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
+	pitchReference = GetDlgItemInt(IDC_EDIT1);
+}
+
+
+void CAutotuneDlg::OnCancel()
+//---------------------------
+{
+	CDialog::OnCancel();
 }

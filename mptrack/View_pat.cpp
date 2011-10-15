@@ -2420,7 +2420,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 	bool changed = false;
 	CArray<UINT,UINT> validChans;
 
-	if (type==EFFECT_COLUMN || type==PARAM_COLUMN)
+	if (type == EFFECT_COLUMN || type == PARAM_COLUMN)
 	{
 		CArray<UINT,UINT> moreValidChans;
         ListChansWhereColSelected(EFFECT_COLUMN, validChans);
@@ -2464,6 +2464,14 @@ void CViewPattern::Interpolate(PatternColumns type)
 				vdest = destCmd.note;
 				vcmd = srcCmd.instr;
 				verr = (distance * (NOTE_MAX - 1)) / NOTE_MAX;
+				if(srcCmd.note == NOTE_NONE)
+				{
+					vsrc = vdest;
+					vcmd = destCmd.note;
+				} else if(destCmd.note == NOTE_NONE)
+				{
+					vdest = vsrc;
+				}
 				break;
 			case VOL_COLUMN:
 				vsrc = srcCmd.vol;
@@ -2492,8 +2500,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 					PCinst = srcCmd.instr;
 					if(PCinst == 0)
 						PCinst = destCmd.instr;
-				}
-				else
+				} else
 				{
 					vsrc = srcCmd.param;
 					vdest = destCmd.param;
@@ -2524,7 +2531,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 			switch(type)
 			{
 				case NOTE_COLUMN:
-					if ((!pcmd->note) || (pcmd->instr == vcmd))
+					if ((pcmd->note == NOTE_NONE) || (pcmd->instr == vcmd))
 					{
 						int note = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->note = (BYTE)note;
@@ -2532,7 +2539,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 					}
 					break;
 				case VOL_COLUMN:
-					if ((!pcmd->volcmd) || (pcmd->volcmd == vcmd))
+					if ((pcmd->volcmd == VOLCMD_NONE) || (pcmd->volcmd == vcmd))
 					{
 						int vol = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->vol = (BYTE)vol;
@@ -2554,7 +2561,7 @@ void CViewPattern::Interpolate(PatternColumns type)
 					}
 					else
 					{
-						if ((!pcmd->command) || (pcmd->command == vcmd))
+						if ((pcmd->command == CMD_NONE) || (pcmd->command == vcmd))
 						{
 							int val = vsrc + ((vdest - vsrc) * i + verr) / distance;
 							pcmd->param = (BYTE)val;
@@ -5581,17 +5588,24 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 		case NOTE_COLUMN:
 			startRowCmd = startRowMC.note;
 			endRowCmd = endRowMC.note;
-			result = (startRowCmd >= NOTE_MIN && endRowCmd >= NOTE_MIN);
+			result = (startRowCmd == endRowCmd && startRowCmd != NOTE_NONE)		// Interpolate between two identical notes or Cut / Fade / etc...
+				|| (startRowCmd != NOTE_NONE && endRowCmd == NOTE_NONE)			// Fill in values from the first row
+				|| (startRowCmd == NOTE_NONE && endRowCmd != NOTE_NONE)			// Fill in values from the last row
+				|| (NOTE_IS_VALID(startRowCmd) && NOTE_IS_VALID(endRowCmd) && !(startRowCmd == NOTE_NONE && endRowCmd == NOTE_NONE));	// Interpolate between two notes of which one may be empty
 			break;
 		case EFFECT_COLUMN:
 			startRowCmd = startRowMC.command;
 			endRowCmd = endRowMC.command;
-			result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE) || (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE) || (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);
+			result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE)		// Interpolate between two identical commands
+				|| (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE)			// Fill in values from the first row
+				|| (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);			// Fill in values from the last row
 			break;
 		case VOL_COLUMN:
 			startRowCmd = startRowMC.volcmd;
 			endRowCmd = endRowMC.volcmd;
-			result = (startRowCmd == endRowCmd && startRowCmd != VOLCMD_NONE) || (startRowCmd != VOLCMD_NONE && endRowCmd == VOLCMD_NONE) || (startRowCmd == VOLCMD_NONE && endRowCmd != VOLCMD_NONE);
+			result = (startRowCmd == endRowCmd && startRowCmd != VOLCMD_NONE)	// Interpolate between two identical commands
+				|| (startRowCmd != VOLCMD_NONE && endRowCmd == VOLCMD_NONE)		// Fill in values from the first row
+				|| (startRowCmd == VOLCMD_NONE && endRowCmd != VOLCMD_NONE);	// Fill in values from the last row
 			break;
 		default:
 			result = false;
