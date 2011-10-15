@@ -2044,29 +2044,29 @@ void CViewPattern::OnEditFindNext()
 				{
 					// Just create one logic undo step when auto-replacing all occurences.
 					const bool linkUndoBuffer = (nFound > 1) && (m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL) != 0;
-					pModDoc->GetPatternUndo()->PrepareUndo(nPat, n % pSndFile->m_nChannels, n / pSndFile->m_nChannels, 1, 1, linkUndoBuffer);
+					pModDoc->GetPatternUndo()->PrepareUndo(nPat, n % pSndFile->GetNumChannels(), n / pSndFile->GetNumChannels(), 1, 1, linkUndoBuffer);
 
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_NOTE))
 					{
 						// -1 octave
 						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOctave)
 						{
-							if (m->note > 12) m->note -= 12;
+							if (m->note > (12 + NOTE_MIN - 1) && m->note <= NOTE_MAX) m->note -= 12;
 						} else
 						// +1 octave
 						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNotePlusOctave)
 						{
-							if (m->note <= NOTE_MAX - 12) m->note += 12;
+							if (m->note <= NOTE_MAX - 12 && m->note >= NOTE_MIN) m->note += 12;
 						} else
 						// Note--
 						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOne)
 						{
-							if (m->note > 1) m->note--;
+							if (m->note > NOTE_MIN && m->note <= NOTE_MAX) m->note--;
 						} else
 						// Note++
 						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNotePlusOne)
 						{
-							if (m->note < NOTE_MAX) m->note++;
+							if (m->note < NOTE_MAX && m->note >= NOTE_MIN) m->note++;
 						} else
 						// Replace with another note
 						{

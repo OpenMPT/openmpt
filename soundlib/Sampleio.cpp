@@ -1393,7 +1393,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	// XI Sample Data
 	for (UINT dsmp=0; dsmp<nsamples; dsmp++)
 	{
-		MODSAMPLE *pSmp = &Samples[smptable[dsmp]];
+		const MODSAMPLE *pSmp = &Samples[smptable[dsmp]];
 		UINT smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16D : RS_PCM8D;
 		if (pSmp->uFlags & CHN_STEREO) smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
 		WriteSample(f, pSmp, smpflags);
@@ -1910,7 +1910,9 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 		MODSAMPLE *psmp = &Samples[nsmp];
 		itss.id = LittleEndian(IT_IMPS);
 		memcpy(itss.filename, psmp->filename, 12);
+		StringFixer::FixNullString(itss.filename);
 		memcpy(itss.name, m_szNames[nsmp], 26);
+		StringFixer::FixNullString(itss.name);
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		itss.flags = 0x01;
 		if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
