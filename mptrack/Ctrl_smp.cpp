@@ -3200,11 +3200,15 @@ void CCtrlSamples::OnAutotune()
 	Autotune at(m_pSndFile->GetSample(m_nSample), m_pSndFile->GetType(), selection.nStart, selection.nEnd);
 	if(at.CanApply())
 	{
-		BeginWaitCursor();
-		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
-		at.Apply();
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
-		m_pModDoc->SetModified();
-		EndWaitCursor();
+		CAutotuneDlg dlg(this);
+		if(dlg.DoModal() == IDOK)
+		{
+			BeginWaitCursor();
+			m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
+			at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
+			m_pModDoc->SetModified();
+			EndWaitCursor();
+		}
 	}
 }

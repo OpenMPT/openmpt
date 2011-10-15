@@ -219,6 +219,21 @@ BEGIN
     PUSHBUTTON      "Save &None",IDC_BUTTON2,300,108,66,14
 END
 
+IDD_AUTOTUNE DIALOGEX 0, 0, 166, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sample Tuner"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,54,60,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,108,60,50,14
+    LTEXT           "Tune sample to closest",IDC_STATIC,6,8,96,8
+    COMBOBOX        IDC_COMBO1,102,6,36,12,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Pitch reference (A)",IDC_STATIC,6,26,96,8
+    EDITTEXT        IDC_EDIT1,102,24,36,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Hz",IDC_STATIC,144,26,18,8
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,6,48,150,1
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -314,6 +329,14 @@ BEGIN
         RIGHTMARGIN, 363
         TOPMARGIN, 7
         BOTTOMMARGIN, 190
+    END
+
+    IDD_AUTOTUNE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 159
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2546,7 +2569,7 @@ END
 STRINGTABLE
 BEGIN
     IDC_SAMPLE_XFADE        "Crossfade Loop Points\nCrossfade between loop start and loop end to create seamless sample loops."
-    IDC_SAMPLE_AUTOTUNE     "Autotune sample to C\nTune the sample to the closest C."
+    IDC_SAMPLE_AUTOTUNE     "Sample Tuner\nTune the sample to a given note."
 END
 
 #endif    // English (United States) resources

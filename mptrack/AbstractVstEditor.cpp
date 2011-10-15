@@ -411,36 +411,48 @@ void CAbstractVstEditor::UpdatePresetMenu()
 		m_pPresetMenu->CreatePopupMenu();
 	}
 
+	const int numSubMenus = (numProgs / PRESETS_PER_GROUP) + 1;
+	if(numSubMenus > 1)
+	{
+		// Create sub menus if necessary
+		m_pPresetMenuGroup.SetSize(numSubMenus);
+		for(int i = 0; i < numSubMenus; i++)
+		{
+			m_pPresetMenuGroup[i] = new CMenu();
+			m_pPresetMenuGroup[i]->CreatePopupMenu();
+
+			CString label;
+			label.Format("Bank %d (%d-%d)", i, 1 + i * PRESETS_PER_GROUP, 1 + min((i + 1) * PRESETS_PER_GROUP - 1, numProgs));
+			m_pPresetMenu->AppendMenu(MF_POPUP, (UINT) m_pPresetMenuGroup[i]->m_hMenu, label);
+		}
+	}
+
+	int subMenuIndex = 0;
+	int entryInThisMenu = 0;
+	int entryInThisColumn = 0;
+
+	// If there would only be 1 submenu, we add directly to factory menu
+	CMenu *targetMenu = (numProgs > PRESETS_PER_GROUP) ? m_pPresetMenuGroup[subMenuIndex] : m_pPresetMenu;
+
 	for (long p = 0; p < numProgs; p++)
 	{
 		CString programName = m_pVstPlugin->GetFormattedProgramName(p);
 
-		// Get menu item properties
- 		const bool checkedItem = (p == curProg);			
-		const bool splitMenu   = (p % PRESETS_PER_COLUMN == 0 && p % PRESETS_PER_GROUP != 0);
-		const int subMenuIndex = p / PRESETS_PER_GROUP;
-		
-		if (numProgs > PRESETS_PER_GROUP)
+		if(++entryInThisMenu == PRESETS_PER_GROUP)
 		{
-			// If necessary, add to appropriate submenu.
-			if (subMenuIndex >= m_pPresetMenuGroup.GetSize())
-			{
-				//create new submenu if required.
-				m_pPresetMenuGroup.SetSize(m_pPresetMenuGroup.GetSize() + 1);
-				m_pPresetMenuGroup[subMenuIndex] = new CMenu();
-				m_pPresetMenuGroup[subMenuIndex]->CreatePopupMenu();
-
-				CString label;
-				label.Format("Bank %d (%d-%d)", subMenuIndex, 1 + subMenuIndex * PRESETS_PER_GROUP, 1 + min((subMenuIndex + 1) * PRESETS_PER_GROUP - 1, numProgs));
-				m_pPresetMenu->AppendMenu(MF_POPUP, (UINT) m_pPresetMenuGroup[subMenuIndex]->m_hMenu, label);
-			}
-			m_pPresetMenuGroup[subMenuIndex]->AppendMenu(MF_STRING | (checkedItem ? MF_CHECKED : 0) | (splitMenu ? MF_MENUBARBREAK : 0), ID_PRESET_SET + p, programName);
-
-		} else
-		{
-			// If there would only be 1 submenu, we add directly to factory menu
-			m_pPresetMenu->AppendMenu(MF_STRING | (checkedItem ? MF_CHECKED : MF_UNCHECKED) | (splitMenu ? MF_MENUBARBREAK : 0), ID_PRESET_SET + p, programName);
+			// Advance to next preset group (sub menu)
+			subMenuIndex++;
+			targetMenu = m_pPresetMenuGroup[subMenuIndex];
+			entryInThisMenu = 0;
 		}
+		UINT splitMenuFlag = 0;
+		if(++entryInThisColumn == PRESETS_PER_COLUMN)
+		{
+			entryInThisColumn = 0;
+			splitMenuFlag = MF_MENUBARBREAK;
+		}
+		
+		targetMenu->AppendMenu(MF_STRING | (p == curProg ? MF_CHECKED : MF_UNCHECKED) | splitMenuFlag, ID_PRESET_SET + p, programName);
 	}
 
 	//Add Factory menu to main menu
