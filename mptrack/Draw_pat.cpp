@@ -477,10 +477,13 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const MODCOMMAND &mc, bool dr
 					sample = 0;
 				}
 			}
+			volcmd = VOLCMD_VOLUME;
 			if(sample && sample <= pSndFile->GetNumSamples())
 			{
-				volcmd = VOLCMD_VOLUME;
 				vol = pSndFile->GetSample(sample).nVolume / 4;
+			} else
+			{
+				vol = 64;
 			}
 		}
 
