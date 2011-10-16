@@ -416,14 +416,14 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	{
 		// Create sub menus if necessary
 		m_pPresetMenuGroup.SetSize(numSubMenus);
-		for(int i = 0; i < numSubMenus; i++)
+		for(int bank = 0, prog = 1; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
 		{
-			m_pPresetMenuGroup[i] = new CMenu();
-			m_pPresetMenuGroup[i]->CreatePopupMenu();
+			m_pPresetMenuGroup[bank] = new CMenu();
+			m_pPresetMenuGroup[bank]->CreatePopupMenu();
 
 			CString label;
-			label.Format("Bank %d (%d-%d)", i, 1 + i * PRESETS_PER_GROUP, 1 + min((i + 1) * PRESETS_PER_GROUP - 1, numProgs));
-			m_pPresetMenu->AppendMenu(MF_POPUP, (UINT) m_pPresetMenuGroup[i]->m_hMenu, label);
+			label.Format("Bank %d (%d-%d)", bank + 1, prog, min(prog + PRESETS_PER_GROUP - 1, numProgs));
+			m_pPresetMenu->AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), (UINT) m_pPresetMenuGroup[bank]->m_hMenu, label);
 		}
 	}
 
@@ -431,38 +431,33 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	int entryInThisMenu = 0;
 	int entryInThisColumn = 0;
 
-	// If there would only be 1 submenu, we add directly to factory menu
+	// If there would be only one sub menu, we add directly to factory menu
 	CMenu *targetMenu = (numProgs > PRESETS_PER_GROUP) ? m_pPresetMenuGroup[subMenuIndex] : m_pPresetMenu;
 
 	for (long p = 0; p < numProgs; p++)
 	{
 		CString programName = m_pVstPlugin->GetFormattedProgramName(p);
+		UINT splitMenuFlag = 0;
 
-		if(++entryInThisMenu == PRESETS_PER_GROUP)
+		if(entryInThisMenu++ == PRESETS_PER_GROUP)
 		{
 			// Advance to next preset group (sub menu)
 			subMenuIndex++;
 			targetMenu = m_pPresetMenuGroup[subMenuIndex];
-			entryInThisMenu = 0;
-		}
-		UINT splitMenuFlag = 0;
-		if(++entryInThisColumn == PRESETS_PER_COLUMN)
+			entryInThisMenu = 1;
+			entryInThisColumn = 1;
+		} else if(entryInThisColumn++ == PRESETS_PER_COLUMN)
 		{
-			entryInThisColumn = 0;
+			// Advance to next menu column
+			entryInThisColumn = 1;
 			splitMenuFlag = MF_MENUBARBREAK;
 		}
 		
 		targetMenu->AppendMenu(MF_STRING | (p == curProg ? MF_CHECKED : MF_UNCHECKED) | splitMenuFlag, ID_PRESET_SET + p, programName);
 	}
 
-	//Add Factory menu to main menu
-	if (numProgs)
-	{
-		m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
-	} else
-	{
-		m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP | MF_GRAYED, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
-	}
+	// Add Factory menu to main menu
+	m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
 
 	m_nCurProg=curProg;
 }
