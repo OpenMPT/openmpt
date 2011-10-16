@@ -321,7 +321,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			}
 		}
 
-		// All XM samples have default panning
+		// All XM samples have default panning, and XM's autovibrato settings are rather limited.
 		if(newTypeIsXM)
 		{
 			if(!(sample.uFlags & CHN_PANNING))
@@ -329,23 +329,24 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				sample.uFlags |= CHN_PANNING;
 				sample.nPan = 128;
 			}
+
+			LimitMax(sample.nVibDepth, BYTE(15));
+			LimitMax(sample.nVibRate, BYTE(63));
 		}
+
 		// S3M / MOD samples don't have panning.
 		if(newTypeIsMOD || newTypeIsS3M)
 		{
 			sample.uFlags &= ~CHN_PANNING;
 		}
 
-		if(oldTypeIsXM && newTypeIsIT_MPT)
+		if((oldTypeIsXM && newTypeIsIT_MPT) || (oldTypeIsIT_MPT && newTypeIsXM))
 		{
-			// Autovibrato settings (XM to IT, where sweep 0 means "no vibrato")
-			if(sample.nVibSweep == 0 && sample.nVibRate != 0 && sample.nVibDepth != 0)
-				sample.nVibSweep = 255;
-		} else if(oldTypeIsIT_MPT && newTypeIsXM)
-		{
-			// Autovibrato settings (IT to XM, where sweep 0 means "no sweep")
-			if(sample.nVibSweep == 0)
-				sample.nVibRate = sample.nVibDepth = 0;
+			// Autovibrato sweep setting is inverse in XM (0 = "no sweep") and IT (0 = "no vibrato")
+			if(sample.nVibRate != 0 && sample.nVibDepth != 0)
+			{
+				sample.nVibSweep = 255 - sample.nVibSweep;
+			}
 		}
 	}
 
