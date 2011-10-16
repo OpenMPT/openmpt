@@ -237,16 +237,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboAutoVib.AddString("Ramp Up");
 	m_ComboAutoVib.AddString("Ramp Down");
 	m_ComboAutoVib.AddString("Random");
-	m_SpinVibSweep.SetRange(0, 255);
-	if(m_pSndFile->m_nType & MOD_TYPE_XM)
-	{
-		m_SpinVibDepth.SetRange(0, 15);
-		m_SpinVibRate.SetRange(0, 63);
-	} else
-	{
-		m_SpinVibDepth.SetRange(0, 32);
-		m_SpinVibRate.SetRange(0, 64);
-	}
 
 	for (UINT i = BASENOTE_MIN; i < BASENOTE_MAX; i++)
 	{
@@ -275,7 +265,8 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// Pitch selection
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
-	if(combo){
+	if(combo)
+	{
 		// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
 		for(int i = -12 ; i <= 12 ; i++){
 			if(i == 0) wsprintf(str,"none");
@@ -290,7 +281,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
 	if(combo){
 		// Allow quality from 4 to 128
-		for(int i = 4 ; i <= 128 ; i++){
+		for(int i = 4 ; i <= 128 ; i++)
+		{
 			wsprintf(str,"%d",i);
 			combo->SetItemData(combo->AddString(str), i-4);
 		}
@@ -300,7 +292,8 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// FFT size selection
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO6);
-	if(combo){
+	if(combo)
+	{
 		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
 		int exponent = PowerOf2Exponent(MAX_FRAME_LENGTH);
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
@@ -572,42 +565,51 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ComboLoopType.ResetContent();
 		m_ComboLoopType.AddString("Off");
 		m_ComboLoopType.AddString("On");
+
 		// Sustain Loop Type
 		m_ComboSustainType.ResetContent();
 		m_ComboSustainType.AddString("Off");
 		m_ComboSustainType.AddString("On");
+
 		// Bidirectional Loops
-		if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if (m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			m_ComboLoopType.AddString("Bidi");
 			m_ComboSustainType.AddString("Bidi");
 		}
+
 		// Loop Start
 		m_SpinLoopStart.SetRange(-1, 1);
 		m_SpinLoopStart.SetPos(0);
+
 		// Loop End
 		m_SpinLoopEnd.SetRange(-1, 1);
 		m_SpinLoopEnd.SetPos(0);
+
 		// Sustain Loop Start
 		m_SpinSustainStart.SetRange(-1, 1);
 		m_SpinSustainStart.SetPos(0);
+
 		// Sustain Loop End
 		m_SpinSustainEnd.SetRange(-1, 1);
 		m_SpinSustainEnd.SetPos(0);
+
 		// Sustain Loops only available in IT
-		b = (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+		b = (m_pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_ComboSustainType.EnableWindow(b);
 		m_SpinSustainStart.EnableWindow(b);
 		m_SpinSustainEnd.EnableWindow(b);
 		m_EditSustainStart.EnableWindow(b);
 		m_EditSustainEnd.EnableWindow(b);
-		// Finetune / C-4 Speed / BaseNote
-		b = (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+
+		// Finetune / C-5 Speed / BaseNote
+		b = (m_pSndFile->GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		SetDlgItemText(IDC_TEXT7, (b) ? "Freq. (Hz)" : "Finetune");
 		m_SpinFineTune.SetRange(-1, 1);
 		m_EditFileName.EnableWindow(b);
+
 		// AutoVibrato
-		b = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+		b = (m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_ComboAutoVib.EnableWindow(b);
 		m_SpinVibSweep.EnableWindow(b);
 		m_SpinVibDepth.EnableWindow(b);
@@ -615,17 +617,29 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditVibSweep.EnableWindow(b);
 		m_EditVibDepth.EnableWindow(b);
 		m_EditVibRate.EnableWindow(b);
+		m_SpinVibSweep.SetRange(0, 255);
+		if(m_pSndFile->GetType() & MOD_TYPE_XM)
+		{
+			m_SpinVibDepth.SetRange(0, 15);
+			m_SpinVibRate.SetRange(0, 63);
+		} else
+		{
+			m_SpinVibDepth.SetRange(0, 32);
+			m_SpinVibRate.SetRange(0, 64);
+		}
+
 		// Global Volume
-		b = (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+		b = (m_pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_EditGlobalVol.EnableWindow(b);
 		m_SpinGlobalVol.EnableWindow(b);
+
 		// Panning
 		b = (m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_CheckPanning.EnableWindow(b && !(m_pSndFile->GetType() & MOD_TYPE_XM));
 		m_EditPanning.EnableWindow(b);
 		m_SpinPanning.EnableWindow(b);
 
-		b = (m_pSndFile->m_nType & MOD_TYPE_MOD) ? FALSE : TRUE;
+		b = (m_pSndFile->GetType() & MOD_TYPE_MOD) ? FALSE : TRUE;
 		m_CbnBaseNote.EnableWindow(b);
 	}
 	// Updating Values
