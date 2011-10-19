@@ -58,7 +58,6 @@ class CVstPlugin: public IMixPlugin
 //=================================
 {
 	friend class CAbstractVstEditor;	//rewbs.defaultPlugGUI
-	friend class COwnerVstEditor;		//rewbs.defaultPlugGUI
 	friend class CVstPluginManager;
 #ifndef NO_VST
 protected:
@@ -83,7 +82,6 @@ protected:
 	float **m_pTempBuffer;					//rewbs.dryRatio: changed from * to **
 	float **m_pInputs;
 	float **m_pOutputs;
-	int m_nEditorX, m_nEditorY;
 	int m_MixBuffer[MIXBUFFERSIZE*2+2];				// Stereo interleaved
 	float m_FloatBuffer[MIXBUFFERSIZE*(2+32)+34];	// 2ch separated + up to 32 VSTi outputs...
 	float dummyBuffer_[MIXBUFFERSIZE + 2];			// Other (unused) inputs
@@ -101,6 +99,8 @@ protected:
 	PLUGINDEX m_nSlot;
 	float m_fGain;
 	bool m_bIsInstrument;
+
+	int m_nEditorX, m_nEditorY;
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
@@ -129,6 +129,9 @@ public:
 	void SetSlot(PLUGINDEX slot);
 	PLUGINDEX GetSlot();
 	void UpdateMixStructPtr(PSNDMIXPLUGIN);
+
+	void SetEditorPos(int x, int y) { m_nEditorX = x; m_nEditorY = y; }
+	void GetEditorPos(int &x, int &y) const { x = m_nEditorX; y = m_nEditorY; }
 
 	void SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:
@@ -191,6 +194,7 @@ public:
 	void Suspend();
 	DWORD GetTimeAtStartOfProcess() {return m_dwTimeAtStartOfProcess;}
 	void SetDryRatio(UINT param);
+	void AutomateParameter(PlugParamIndex param);
 
 
 	void SetZxxParameter(UINT nParam, UINT nValue);

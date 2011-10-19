@@ -1,53 +1,397 @@
 #include "stdafx.h"
 //#include "vstplug.h"
 #include "moddoc.h"
-#include "defaultvsteditor.h"
-#include ".\defaultvsteditor.h"
+#include "DefaultVstEditor.h"
 
 #ifndef NO_VST
 
-CDefaultVstEditor::CDefaultVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
-//-------------------------------------------------------------------------------------
+
+// Window proportions
+enum
 {
-	m_nCurrentParam = 0;
-	m_nControlLock=0;
+	edSpacing = 5,		// Spacing between elements
+	edLineHeight = 20,	// Line of a single parameter line
+	edEditWidth = 45,	// Width of the parameter edit box
+	edPerMilWidth = 30,	// Width of the per mil label
+	edRightWidth = edEditWidth + edSpacing + edPerMilWidth,	// Width of the right part of a parameter control set (edit box, param value)
+	edTotalHeight = 2 * edLineHeight + edSpacing,			// Height of one set of controls
+};
+
+
+// Create a set of parameter controls
+ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID)
+//--------------------------------------------------------------------------
+{
+	// Offset of components on the right side
+	const int horizSplit = rect.left + rect.Width() - edRightWidth;
+	
+	// Parameter name
+	nameLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, horizSplit - edSpacing, rect.top + edLineHeight), parent);
+	nameLabel.SetFont(parent->GetFont());
+
+	// Parameter value as reported by the plugin
+	valueLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit, rect.top, rect.right, rect.top + edLineHeight), parent);
+	valueLabel.SetFont(parent->GetFont());
+
+	// Parameter value slider
+	valueSlider.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP /* | TBS_NOTICKS | TBS_BOTH */ | TBS_AUTOTICKS, CRect(rect.left, rect.bottom - edLineHeight, horizSplit - edSpacing, rect.bottom), parent, ID_PLUGINEDITOR_SLIDERS_BASE + setID);
+	valueSlider.SetFont(parent->GetFont());
+	valueSlider.SetRange(0, PARAM_RESOLUTION);
+	valueSlider.SetTicFreq(PARAM_RESOLUTION / 10);
+
+	// Parameter value edit box
+	valueEdit.CreateEx(WS_EX_CLIENTEDGE, _T("EDIT"), NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, CRect(horizSplit, rect.bottom - edLineHeight, horizSplit + edEditWidth, rect.bottom), parent, ID_PLUGINEDITOR_EDIT_BASE + setID);
+	valueEdit.SetFont(parent->GetFont());
+
+	// "Per mil" label
+	perMilLabel.Create("‰", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + edEditWidth + edSpacing, rect.bottom - edLineHeight, rect.right, rect.bottom), parent);
+	perMilLabel.SetFont(parent->GetFont());
 }
 
-CDefaultVstEditor::~CDefaultVstEditor(void)
-//-----------------------------------------
+
+ParamControlSet::~ParamControlSet()
+//---------------------------------
 {
+	nameLabel.DestroyWindow();
+	valueLabel.DestroyWindow();
+	valueSlider.DestroyWindow();
+	valueEdit.DestroyWindow();
+	perMilLabel.DestroyWindow();
 }
+
+
+// Enable a set of parameter controls
+void ParamControlSet::EnableControls(bool enable)
+//-----------------------------------------------
+{
+	const BOOL b = enable ? TRUE : FALSE;
+	nameLabel.EnableWindow(b);
+	valueLabel.EnableWindow(b);
+	valueSlider.EnableWindow(b);
+	valueEdit.EnableWindow(b);
+	perMilLabel.EnableWindow(b);
+}
+
+
+// Reset the content of a set of parameter controls
+void ParamControlSet::ResetContent()
+//----------------------------------
+{
+	nameLabel.SetWindowText("");
+	valueLabel.SetWindowText("");
+	valueSlider.SetPos(0);
+	valueEdit.SetWindowText("");
+}
+
+
+void ParamControlSet::SetParamName(const CString &name)
+//-----------------------------------------------------
+{
+	nameLabel.SetWindowText(name);
+}
+
+
+void ParamControlSet::SetParamValue(int value, const CString &text)
+//-----------------------------------------------------------------
+{
+	valueSlider.SetPos(value);
+	if (&valueEdit != valueEdit.GetFocus())
+	{
+		// Don't update textbox when it has focus, else this will prevent user from changing the content.
+		CString paramValue;
+		paramValue.Format("%0000d", value);
+		valueEdit.SetWindowText(paramValue);
+	}
+	valueLabel.SetWindowText(text);
+}
+
+
+int ParamControlSet::GetParamValueFromSlider() const
+//--------------------------------------------------
+{
+	return valueSlider.GetPos();
+}
+
+
+int ParamControlSet::GetParamValueFromEdit() const
+//------------------------------------------------
+{
+	char s[16];
+	valueEdit.GetWindowText(s, 16);
+	int val = atoi(s);
+	Limit(val, int(0), int(PARAM_RESOLUTION));
+	return val;
+}
+
 
 BEGIN_MESSAGE_MAP(CDefaultVstEditor, CAbstractVstEditor)
 	//{{AFX_MSG_MAP(CDefaultVstEditor)
-	ON_EN_CHANGE(IDC_PARAMVALUETEXT,OnParamTextboxChanged)
-	ON_LBN_SELCHANGE(IDC_PARAMLIST,	OnParamChanged)
+	ON_CONTROL_RANGE(EN_CHANGE, ID_PLUGINEDITOR_EDIT_BASE, ID_PLUGINEDITOR_EDIT_BASE + NUM_PLUGINEDITOR_PARAMETERS - 1, OnParamTextboxChanged)
 	//}}AFX_MSG_MAP
+	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
+
 
 void CDefaultVstEditor::DoDataExchange(CDataExchange* pDX)
 //--------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDefaultVstEditor)
-	DDX_Control(pDX, IDC_PARAMLIST,			m_lbParameters);
-	DDX_Control(pDX, IDC_PARAMLABEL,		m_statParamLabel);
-	DDX_Control(pDX, IDC_PARAMVALUESLIDE,	m_slParam);
-	DDX_Control(pDX, IDC_PARAMVALUETEXT,	m_editParam);
+	DDX_Control(pDX, IDC_SCROLLBAR1,	paramScroller);
 	//}}AFX_DATA_MAP
 }
+
+
+CDefaultVstEditor::CDefaultVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
+//-------------------------------------------------------------------------------------
+{
+	m_nControlLock = 0;
+	paramOffset = 0;
+
+	controls.clear();
+}
+
+CDefaultVstEditor::~CDefaultVstEditor()
+//-------------------------------------
+{
+	for(size_t i = 0; i < controls.size(); i++)
+	{
+		delete controls[i];
+	}
+}
+
+
+void CDefaultVstEditor::CreateControls()
+//--------------------------------------
+{
+	// Already initialized.
+	if(!controls.empty())
+	{
+		return;
+	}
+
+	CRect window;
+	GetWindowRect(&window);
+
+	CRect rect;
+	GetClientRect(&rect);
+	int origHeight = rect.bottom;
+
+	// Get parameter scroll bar dimensions and move it to the right side of the window
+	CRect scrollRect;
+	paramScroller.GetClientRect(&scrollRect);
+	scrollRect.bottom = rect.bottom;
+	scrollRect.MoveToX(rect.right - scrollRect.right);
+
+	// Ignore this space in our calculation from now on.
+	rect.right -= (scrollRect.right - scrollRect.left);
+
+	controls.clear();
+
+	// Create a bit of border space
+	rect.DeflateRect(edSpacing, edSpacing);
+	rect.bottom = edTotalHeight;
+
+	for(size_t i = 0; i < NUM_PLUGINEDITOR_PARAMETERS; i++)
+	{
+		try
+		{
+			controls.push_back(new ParamControlSet(this, rect, i));
+			rect.OffsetRect(0, edTotalHeight + edSpacing);
+		} catch(MPTMemoryException)
+		{
+		}
+	}
+
+	// Calculate new ideal window height.
+	const int heightChange = (rect.bottom - edTotalHeight + edSpacing) - origHeight;
+
+	// Update parameter scroll bar height
+	scrollRect.bottom += heightChange;
+	paramScroller.MoveWindow(scrollRect, FALSE);
+
+	// Resize window height
+	window.bottom += heightChange;
+	MoveWindow(&window);
+
+	// Set scrollbar page size.
+	SCROLLINFO sbInfo;
+	paramScroller.GetScrollInfo(&sbInfo);
+	sbInfo.nPage = NUM_PLUGINEDITOR_PARAMETERS;
+	paramScroller.SetScrollInfo(&sbInfo);
+
+	UpdateControls(true);
+}
+
+
+void CDefaultVstEditor::UpdateControls(bool updateParamNames)
+//-----------------------------------------------------------
+{
+	if(m_pVstPlugin == nullptr)
+	{
+		return;
+	}
+
+	const PlugParamIndex numParams = m_pVstPlugin->GetNumParameters();
+	const PlugParamIndex scrollMax = numParams - min(numParams, NUM_PLUGINEDITOR_PARAMETERS);
+	LimitMax(paramOffset, scrollMax);
+
+	int curScrollMin, curScrollMax;
+	paramScroller.GetScrollRange(&curScrollMin, &curScrollMax);
+	if(curScrollMax != scrollMax)
+	{
+		// Number of parameters changed - update scrollbar limits
+		paramScroller.SetScrollRange(0, scrollMax);
+		paramScroller.SetScrollPos(paramOffset);
+		paramScroller.EnableWindow(scrollMax > 0 ? TRUE : FALSE);
+		updateParamNames = true;
+	}
+
+	for(PlugParamIndex i = 0; i < NUM_PLUGINEDITOR_PARAMETERS; i++)
+	{
+		const PlugParamIndex param = paramOffset + i;
+
+		if(param >= numParams)
+		{
+			// This param doesn't exist.
+			controls[i]->EnableControls(false);
+			controls[i]->ResetContent();
+			continue;
+		}
+
+		controls[i]->EnableControls();
+
+		if(updateParamNames)
+		{
+			// Update param name
+			CString s;
+			CHAR sname[64];
+			m_pVstPlugin->GetParamName(param, sname, sizeof(sname));
+			s.Format("%02X: %s", paramOffset + i, sname);
+			controls[i]->SetParamName(s);
+		}
+
+		UpdateParamDisplay(param);
+	}
+}
+
+
+void CDefaultVstEditor::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+//--------------------------------------------------------------------------------
+{
+	CSliderCtrl* pScrolledSlider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+	// Check if any of the value sliders were affected.
+	for(size_t i = 0; i < controls.size(); i++)
+	{
+		if ((pScrolledSlider->GetDlgCtrlID() == controls[i]->GetSliderID()) && (nSBCode != SB_ENDSCROLL))
+		{
+			OnParamSliderChanged(controls[i]->GetSliderID());
+			break;
+		}
+	}
+
+	CAbstractVstEditor::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
 
 void CDefaultVstEditor::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //--------------------------------------------------------------------------------
 {
-	CSliderCtrl* pScrolledSlider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
-	if ((pScrolledSlider == &m_slParam) && (nSBCode != SB_ENDSCROLL))
+	if (pScrollBar == &paramScroller)
 	{
-		OnParamSliderChanged();
+		// Get the minimum and maximum scrollbar positions.
+		int minpos;
+		int maxpos;
+		pScrollBar->GetScrollRange(&minpos, &maxpos); 
+		//maxpos = pScrollBar->GetScrollLimit();
+
+		SCROLLINFO sbInfo;
+		paramScroller.GetScrollInfo(&sbInfo);
+
+		// Get the current position of scroll box.
+		int curpos = pScrollBar->GetScrollPos();
+
+		// Determine the new position of scroll box.
+		switch(nSBCode)
+		{
+		case SB_LEFT:			// Scroll to far left.
+			curpos = minpos;
+			break;
+
+		case SB_RIGHT:			// Scroll to far right.
+			curpos = maxpos;
+			break;
+
+		case SB_ENDSCROLL:		// End scroll.
+			break;
+
+		case SB_LINELEFT:		// Scroll left.
+			if(curpos > minpos)
+				curpos--;
+			break;
+
+		case SB_LINERIGHT:		// Scroll right.
+			if(curpos < maxpos)
+				curpos++;
+			break;
+
+		case SB_PAGELEFT:		// Scroll one page left.
+			if(curpos > minpos)
+			{
+				curpos = max(minpos, curpos - (int)sbInfo.nPage);
+			}
+			break;
+
+		case SB_PAGERIGHT:		// Scroll one page right.
+			if(curpos < maxpos)
+			{
+				curpos = min(maxpos, curpos + (int)sbInfo.nPage);
+			}
+			break;
+
+		case SB_THUMBPOSITION:	// Scroll to absolute position. nPos is the position
+			curpos = nPos;		// of the scroll box at the end of the drag operation.
+			break;
+
+		case SB_THUMBTRACK:		// Drag scroll box to specified position. nPos is the
+			curpos = nPos;		// position that the scroll box has been dragged to.
+			break;
+		}
+
+		// Set the new position of the thumb (scroll box).
+		pScrollBar->SetScrollPos(curpos);
+
+		paramOffset = curpos;
+		UpdateControls(true);
 	}
+
 	CAbstractVstEditor::OnVScroll(nSBCode, nPos, pScrollBar);
 }
+
+
+BOOL CDefaultVstEditor::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//------------------------------------------------------------------------
+{
+	UNREFERENCED_PARAMETER(nFlags);
+	UNREFERENCED_PARAMETER(pt);
+
+	// Mouse wheel - scroll parameter list
+	int minpos, maxpos;
+	paramScroller.GetScrollRange(&minpos, &maxpos);
+	if(minpos != maxpos)
+	{
+		paramOffset -= sgn(zDelta);
+		Limit(paramOffset, PlugParamIndex(minpos), PlugParamIndex(maxpos));
+		paramScroller.SetScrollPos(paramOffset);
+
+		UpdateControls(true);
+	}
+
+	return CAbstractVstEditor::OnMouseWheel(nFlags, zDelta, pt);
+}
+
 
 BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
 //----------------------------------------------
@@ -56,97 +400,74 @@ BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
 	SetTitle();
 	SetupMenu();
 
-	m_slParam.SetRange(0, PARAM_RESOLUTION);
-	ShowWindow(SW_SHOW);
-	
-	// Fill param listbox
-	if (m_pVstPlugin)
+	CreateControls();
+
+	// Restore previous editor position
+	int editorX, editorY;
+	m_pVstPlugin->GetEditorPos(editorX, editorY);
+
+	if((editorX >= 0) && (editorY >= 0))
 	{
-		char s[128];
-		long nParams = m_pVstPlugin->GetNumParameters();
-		m_lbParameters.SetRedraw(FALSE);	//disable lisbox refreshes during fill to avoid flicker
-		m_lbParameters.ResetContent();
-		for (long i=0; i<nParams; i++)
+		int cxScreen = GetSystemMetrics(SM_CXSCREEN);
+		int cyScreen = GetSystemMetrics(SM_CYSCREEN);
+		if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
 		{
-			CHAR sname[64];
-			m_pVstPlugin->GetParamName(i, sname, sizeof(sname));
-			wsprintf(s, "%02X: %s", i|0x80, sname);
-			m_lbParameters.SetItemData(m_lbParameters.AddString(s), i);
+			SetWindowPos(NULL, editorX, editorY, 0,0,
+				SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
 		}
-		m_lbParameters.SetRedraw(TRUE);		//re-enable lisbox refreshes
-		if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
-		m_lbParameters.SetCurSel(m_nCurrentParam);
-		UpdateParamDisplays();
-	} 
+	}
+
+	ShowWindow(SW_SHOW);
 
 	return TRUE;
 }
 
 
-VOID CDefaultVstEditor::OnClose()
-//------------------------
+void CDefaultVstEditor::OnClose()
+//-------------------------------
 {
 	DoClose();
 }
 
 
-VOID CDefaultVstEditor::OnOK()
-//---------------------
+void CDefaultVstEditor::OnOK()
+//----------------------------
 {
 	OnClose();
 }
 
 
-VOID CDefaultVstEditor::OnCancel()
-//-------------------------
+void CDefaultVstEditor::OnCancel()
+//--------------------------------
 {
 	OnClose();
 }
 
 
-VOID CDefaultVstEditor::DoClose()
-//------------------------
+void CDefaultVstEditor::DoClose()
+//-------------------------------
 {
-	DestroyWindow();
-	if (m_pVstPlugin) {
+	if((m_pVstPlugin) && (m_hWnd))
+	{
+		CRect rect;
+		GetWindowRect(&rect);
+		m_pVstPlugin->SetEditorPos(rect.left, rect.top);
+	}
+
+	if(m_pVstPlugin)
+	{
 		m_pVstPlugin->Dispatch(effEditClose, 0, 0, NULL, 0);
 	}
+
+	DestroyWindow();
 }
 
-void CDefaultVstEditor::OnParamChanged()
-//--------------------------------------
-{
-	m_nCurrentParam = m_lbParameters.GetItemData(m_lbParameters.GetCurSel());
-	UpdateParamDisplays();
-}
 
 // Called when a change occurs to the parameter textbox
 // If the change is triggered by the user, we'll need to notify the plugin and update 
 // the other GUI controls 
-void CDefaultVstEditor::OnParamTextboxChanged()
-//---------------------------------------------
-{
-	if (m_nControlLock) {	// Lock will be set if the GUI change was triggered internally (in UpdateParamDisplays).
-		return;				// We're only interested in handling changes triggered by the user.
-	}
-
-	//Extract value and notify plug
-	char s[64];
-	m_editParam.GetWindowText(s, 64);
-	int val = atoi(s);
-	if (val > PARAM_RESOLUTION) 
-		val=PARAM_RESOLUTION;
-	m_pVstPlugin->SetParameter(m_nCurrentParam, val/static_cast<float>(PARAM_RESOLUTION));
-	
-	UpdateParamDisplays();	// update other GUI controls
-	m_pVstPlugin->GetModDoc()->SetModified();
-}
-
-// Called when a change occurs to the parameter slider
-// If the change is triggered by the user, we'll need to notify the plugin and update 
-// the other GUI controls 
-void CDefaultVstEditor::OnParamSliderChanged()
-//----------------------------------------------
+void CDefaultVstEditor::OnParamTextboxChanged(UINT id)
+//----------------------------------------------------
 {
 	if (m_nControlLock)
 	{
@@ -155,53 +476,85 @@ void CDefaultVstEditor::OnParamSliderChanged()
 		return;
 	}
 
-	// Extract value and notify plug
-	int val = PARAM_RESOLUTION-m_slParam.GetPos();
-	m_pVstPlugin->SetParameter(m_nCurrentParam, val / static_cast<float>(PARAM_RESOLUTION));
+	const PlugParamIndex param = paramOffset + id - ID_PLUGINEDITOR_EDIT_BASE;
 
-	if(m_pVstPlugin->m_bRecordAutomation)
+	// Extract value and update
+	SetParam(param, controls[param - paramOffset]->GetParamValueFromEdit());
+}
+
+// Called when a change occurs to the parameter slider
+// If the change is triggered by the user, we'll need to notify the plugin and update 
+// the other GUI controls 
+void CDefaultVstEditor::OnParamSliderChanged(UINT id)
+//---------------------------------------------------
+{
+	if (m_nControlLock)
 	{
-		m_pVstPlugin->GetModDoc()->RecordParamChange(m_pVstPlugin->GetSlot(), m_nCurrentParam);
+		// Lock will be set if the GUI change was triggered internally (in UpdateParamDisplays).
+		// We're only interested in handling changes triggered by the user.
+		return;
 	}
 
-	UpdateParamDisplays();	// update other GUI controls
-	m_pVstPlugin->GetModDoc()->SetModified();
+	const PlugParamIndex param = paramOffset + id - ID_PLUGINEDITOR_SLIDERS_BASE;
+
+	// Extract value and update
+	SetParam(param, controls[param - paramOffset]->GetParamValueFromSlider());
+
+}
+
+
+// Update a given parameter to a given value and notify plugin
+void CDefaultVstEditor::SetParam(PlugParamIndex param, int value)
+//---------------------------------------------------------------
+{
+	if(m_pVstPlugin == nullptr)
+	{
+		return;
+	}
+
+	m_pVstPlugin->SetParameter(param, static_cast<PlugParamValue>(value) / static_cast<PlugParamValue>(PARAM_RESOLUTION));
+
+	// Update other GUI controls
+	UpdateParamDisplay(param);
+
+	// Act as if an automation message has been sent by the plugin (record param changes, set document modified, etc...)
+	m_pVstPlugin->AutomateParameter(param);
 
 }
 
 
 //Update all GUI controls with the new param value
-void CDefaultVstEditor::UpdateParamDisplays()
-//-------------------------------------------
+void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
+//--------------------------------------------------------------
 {
-	if (m_nControlLock)
+	if (m_nControlLock || param < paramOffset || param >= paramOffset + NUM_PLUGINEDITOR_PARAMETERS || m_pVstPlugin == nullptr)
 	{
-		//Just to make sure we're not here as a consequence of an internal GUI change.
+		//Just to make sure we're not here as a consequence of an internal GUI change, and avoid modifying a parameter that doesn't exist on the GUI.
 		return;
 	}
 
-	//Get the param value fromt the plug and massage it into the formats we need
-	char s[256];
-	int val = static_cast<int>(m_pVstPlugin->GetParameter(m_nCurrentParam)*static_cast<float>(PARAM_RESOLUTION)+0.5f);
-	wsprintf(s, "%0000d", val);
+	// Get the param value fromt the plug and massage it into the formats we need
+	const int val = static_cast<int>(m_pVstPlugin->GetParameter(param) * static_cast<float>(PARAM_RESOLUTION) + 0.5f);
 
-	CHAR sunits[64], sdisplay[64], label[128];
-	m_pVstPlugin->GetParamLabel(m_nCurrentParam, sunits);
-	m_pVstPlugin->GetParamDisplay(m_nCurrentParam, sdisplay);
-	wsprintf(label, "%s %s", sdisplay, sunits);
+	CString paramDisplay, paramUnits;
+	m_pVstPlugin->GetParamDisplay(param, paramDisplay.GetBuffer(64));
+	m_pVstPlugin->GetParamLabel(param, paramUnits.GetBuffer(64));
+	paramDisplay.ReleaseBuffer();
+	paramUnits.ReleaseBuffer();
+	paramDisplay.Trim();
+	paramUnits.Trim();
+	paramDisplay += " " + paramUnits;
 
 	// Update the GUI controls
-	m_nControlLock++;	// Set lock to indicate that the changes to the GUI are internal - no need to notify the plug and re-update GUI.
-	m_statParamLabel.SetWindowText(label);
-	m_slParam.SetPos(PARAM_RESOLUTION-val);
-	if (&m_editParam !=	m_editParam.GetFocus())
-	{
-		// Don't update textbox when it has focus, else this will prevent user from changing the content
-		m_editParam.SetWindowText(s);
-	}
-	m_nControlLock--;	// Unset lock - done with internal GUI updates.
+
+	// Set lock to indicate that the changes to the GUI are internal - no need to notify the plug and re-update GUI.
+	m_nControlLock++;
+
+	controls[param - paramOffset]->SetParamValue(val, paramDisplay);
+
+	// Unset lock - done with internal GUI updates.
+	m_nControlLock--;
 	
 }
 
 #endif // NO_VST
-

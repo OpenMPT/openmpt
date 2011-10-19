@@ -199,6 +199,15 @@ T gcd(T a, T b)
 }
 
 
+// Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
+template <class T>
+int sgn(T value)
+//--------------
+{
+	return (value > T(0)) - (value < T(0));
+}
+
+
 // Convert a variable-length MIDI integer <value> to a normal integer <result>.
 // Function returns how many bytes have been read.
 template <class TIn, class TOut>

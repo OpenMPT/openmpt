@@ -693,11 +693,6 @@
 #define IDC_EFFECTLETTERSIT             2110
 #define IDC_INSVIEWPLG                  2110
 #define IDC_EFFECTLETTERSXM             2111
-#define IDC_PARAMLABEL                  2111
-#define IDC_PARAMLIST                   2112
-#define IDC_PARAMVALUETEXT              2113
-#define IDC_PARAMVALUESLIDE             2114
-#define IDC_PARAMLABEL2                 2115
 #define IDC_VISFILLBLANKS               2115
 #define IDC_CHECK158                    2116
 #define IDC_TEXT70                      2116
@@ -947,7 +942,7 @@
 #define IDC_SAMPLE_XFADE                2434
 #define IDC_LASTUPDATE                  2435
 #define IDC_RESTORE_KEYMAP              2436
-#define IDC_SAMPLE_AUTOTUNE				2437
+#define IDC_SAMPLE_AUTOTUNE             2437
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1084,9 +1079,9 @@
 #define ID_PRESET_LIST                  32919
 #define ID_INFO                         32920
 #define ID_VIEWPLUGNAMES                32921
-#define ID_EQSLIDER_BASE				32922
+#define ID_EQSLIDER_BASE                32922
 // From here: Command range [ID_EQSLIDER_BASE, ID_EQSLIDER_BASE + MAX_EQ_BANDS]
-#define ID_EQMENU_BASE					32950
+#define ID_EQMENU_BASE                  32950
 // From here: Command range [ID_EQMENU_BASE, ID_EQMENU_BASE + EQ_MAX_FREQS]
 #define ID_EDIT_SPLITRECSELECT          33900
 #define ID_REARRANGE_SAMPLES            33901
@@ -1210,15 +1205,19 @@
 #define ID_ORDERLIST_INSERT_SEPARATOR   44461
 #define ID_FXCOMMANDS_BASE				44462
 // From here: Command range [ID_FXCOMMANDS_BASE, ID_FXCOMMANDS_BASE + 10]
+#define ID_PLUGINEDITOR_SLIDERS_BASE    44500
+// From here: Command range [ID_PLUGINEDITOR_SLIDERS_BASE, ID_PLUGINEDITOR_SLIDERS_BASE + NUM_PLUGINEDITOR_PARAMETERS]
+#define ID_PLUGINEDITOR_EDIT_BASE       44550
+// From here: Command range [ID_PLUGINEDITOR_EDIT_BASE, ID_PLUGINEDITOR_EDIT_BASE + NUM_PLUGINEDITOR_PARAMETERS]
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        532
-#define _APS_NEXT_COMMAND_VALUE         44474
-#define _APS_NEXT_CONTROL_VALUE         2438
+#define _APS_NEXT_RESOURCE_VALUE        535
+#define _APS_NEXT_COMMAND_VALUE         44600
+#define _APS_NEXT_CONTROL_VALUE         2448
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -29,8 +29,9 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 {
 	Create(IDD_PLUGINEDITOR, parent);
 	SetupMenu();
-	if (m_pVstPlugin)
+	if(m_pVstPlugin)
 	{
+		// Set editor window size
 		CRect rcWnd, rcClient;
 		ERect *pRect;
 
@@ -38,23 +39,28 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, (LPRECT)&pRect, 0);
 		m_pVstPlugin->Dispatch(effEditOpen, 0, 0, (void *)m_hWnd, 0);
 		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, (LPRECT)&pRect, 0);
-		if ((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
+		if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
 		{
 			GetWindowRect(&rcWnd);
 			GetClientRect(&rcClient);
 			SetWindowPos(NULL, 0,0, 
-				(rcWnd.right-rcWnd.left) - (rcClient.right-rcClient.left) + (pRect->right-pRect->left),
-				(rcWnd.bottom-rcWnd.top) - (rcClient.bottom-rcClient.top) + (pRect->bottom-pRect->top),
+				(rcWnd.Width()) - (rcClient.Width()) + (pRect->right - pRect->left),
+				(rcWnd.Height()) - (rcClient.Height()) + (pRect->bottom - pRect->top),
 				SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE);
 			
 		}
-		if ((m_pVstPlugin->m_nEditorX >= 0) && (m_pVstPlugin->m_nEditorY >= 0))
+
+		// Restore previous editor position
+		int editorX, editorY;
+		m_pVstPlugin->GetEditorPos(editorX, editorY);
+
+		if((editorX >= 0) && (editorY >= 0))
 		{
 			int cxScreen = GetSystemMetrics(SM_CXSCREEN);
 			int cyScreen = GetSystemMetrics(SM_CYSCREEN);
-			if ((m_pVstPlugin->m_nEditorX+8 < cxScreen) && (m_pVstPlugin->m_nEditorY+8 < cyScreen))
+			if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
 			{
-				SetWindowPos(NULL, m_pVstPlugin->m_nEditorX, m_pVstPlugin->m_nEditorY, 0,0,
+				SetWindowPos(NULL, editorX, editorY, 0, 0,
 					SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
 			}
 		}
@@ -102,8 +108,7 @@ VOID COwnerVstEditor::DoClose()
 	{
 		CRect rect;
 		GetWindowRect(&rect);
-		m_pVstPlugin->m_nEditorX = rect.left;
-		m_pVstPlugin->m_nEditorY = rect.top;
+		m_pVstPlugin->SetEditorPos(rect.left, rect.top);
 	}
 	if (m_pVstPlugin)
 	{

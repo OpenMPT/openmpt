@@ -480,6 +480,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 			m_CbnParam.SetCurSel(0);
 			m_CbnParam.SetRedraw(TRUE);
+			m_CbnParam.Invalidate();
 			OnParamChanged();
 
 			// Input / Output type
