@@ -4,48 +4,88 @@
 #include "VstPlug.h"
 #include "abstractvsteditor.h"
 
-enum {
-	PARAM_RESOLUTION=1000,
+enum
+{
+	PARAM_RESOLUTION = 1000,
+	NUM_PLUGINEDITOR_PARAMETERS = 8,	// Parameters on screen
 };
 
 #ifndef NO_VST
 
-class CDefaultVstEditor :
-	public CAbstractVstEditor
+//====================
+class ParamControlSet
+//====================
 {
+protected:
+	CSliderCtrl valueSlider;
+	CEdit valueEdit;
+	CStatic nameLabel;
+	CStatic valueLabel;
+	CStatic perMilLabel;
+
 public:
-	CListBox m_lbParameters;
-	CSliderCtrl m_slParam;
-	CEdit m_editParam;
-	CStatic m_statParamLabel;
+	ParamControlSet(CWnd *parent, const CRect &rect, int setID);
+	~ParamControlSet();
+
+	void EnableControls(bool enable = true);
+	void ResetContent();
+
+	void SetParamName(const CString &name);
+	void SetParamValue(int value, const CString &text);
+
+	int GetParamValueFromSlider() const;
+	int GetParamValueFromEdit() const;
+
+	int GetSliderID() const { return valueSlider.GetDlgCtrlID(); };
+};
+
+
+//=================================================
+class CDefaultVstEditor : public CAbstractVstEditor
+//=================================================
+{
+protected:
+
+	vector<ParamControlSet *> controls;
+
+	CScrollBar paramScroller;
+	PlugParamIndex paramOffset;
+
 	int m_nControlLock;
 
-	long m_nCurrentParam;
+public:
 
 	CDefaultVstEditor(CVstPlugin *pPlugin);
-	virtual ~CDefaultVstEditor(void);
-	virtual VOID OnOK();
-	virtual VOID OnCancel();
-	BOOL OpenEditor(CWnd *parent);
-	VOID DoClose();
-	
-	void OnParamChanged();
+	virtual ~CDefaultVstEditor();
 
+	void UpdateParamDisplays() { UpdateControls(false); };
+
+	virtual void OnOK();
+	virtual void OnCancel();
+	BOOL OpenEditor(CWnd *parent);
+	void DoClose();
 	afx_msg void OnClose();
-	afx_msg void OnLoadPreset();
-	afx_msg void OnSavePreset();
-	afx_msg void OnRandomizePreset();
-	afx_msg void OnParamTextboxChanged();
-	afx_msg void OnParamSliderChanged();
+
+protected:
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 	
 	DECLARE_MESSAGE_MAP()
 
-	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-private:
+	afx_msg void OnParamTextboxChanged(UINT id);
+	afx_msg void OnParamSliderChanged(UINT id);
 
-	void UpdateParamDisplays();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+
+protected:
+
+	void CreateControls();
+	void UpdateControls(bool updateParamNames);
+	void SetParam(PlugParamIndex param, int value);
+	void UpdateParamDisplay(PlugParamIndex param);
+
 };
 
 #endif // NO_VST

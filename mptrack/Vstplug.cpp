@@ -689,52 +689,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		if (effect && effect->resvd1)
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
-			
-			// Mark track modified
-            CModDoc* pModDoc = pVstPlugin->GetModDoc();
-			if (pModDoc)
-			{
-				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-				if (pVstEditor && pVstEditor->m_hWnd)	// Check GUI is open
-				{
-					if(pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->GetModSpecifications().supportsPlugins)
-						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
-				}
-				// TODO: Could be used to update general tab in real time, but causes flickers in treeview
-				// Better idea: add an update hint just for plugin params?
-				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
-			}
-
-			// Record param change
-			if (pVstPlugin->m_bRecordAutomation)
-			{
-				// Note that audioMasterAutomate is not called when using our own plugin GUI. For those plugins, the same mechanism is called from CDefaultVstEditor::OnParamSliderChanged().
-				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);
-			}
-
-			if (pModDoc && CMainFrame::GetInputHandler()->ShiftPressed() && pVstPlugin->GetEditor() && (pVstPlugin->GetEditor()->m_hWnd == ::GetForegroundWindow() || ::IsChild(pVstPlugin->GetEditor()->m_hWnd, ::GetForegroundWindow())))
-			{
-				CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
-				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-				const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
-				CMIDIMappingDialog dlg(pVstEditor, *pModDoc->GetSoundFile());
-				dlg.m_Setting.SetParamIndex(index);
-				dlg.m_Setting.SetPlugIndex(pVstPlugin->GetSlot()+1);
-				dlg.DoModal();
-				CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
-			}
-
-			// Learn macro
-			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-			if (pVstEditor) {
-				int macroToLearn = pVstEditor->GetLearnMacro();
-				if (macroToLearn>-1) {
-					pModDoc->LearnMacro(macroToLearn, index);
-					pVstEditor->SetLearnMacro(-1);
-				}
-				//Commenting this out to see if it fixes http://www.modplug.com/forum/viewtopic.php?t=3710
-				//pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
-			}
+			pVstPlugin->AutomateParameter(index);
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
@@ -1435,7 +1390,8 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_nSampleRate=CSoundFile::gdwMixingFreq;
 	Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(CSoundFile::gdwMixingFreq));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0.0f);
-	if (m_pEffect->numPrograms > 0)	{
+	if (m_pEffect->numPrograms > 0)
+	{
 		Dispatch(effSetProgram, 0, 0, NULL, 0);
 	}
 	Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
@@ -2047,7 +2003,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 // -> DESC="effect plugin mixing mode combo"
 // -> mixop == 0 : normal processing
 // -> mixop == 1 : MIX += DRY - WET * wetRatio
-// -> mixop == 2 : MIX += WET - DRY * wetRatio
+// -> mixop == 2 : MIX += WET - DRY * dryRatio
 // -> mixop == 3 : MIX -= WET - DRY * wetRatio
 // -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
 // -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
@@ -2703,6 +2659,64 @@ UINT CVstPlugin::GetZxxParameter(UINT nParam)
 	return (UINT) (GetParameter(nParam) * 127.0f + 0.5f);
 }
 //end rewbs.smoothVST
+
+
+// Automate a parameter from the plugin GUI (both custom and default plugin GUI)
+void CVstPlugin::AutomateParameter(PlugParamIndex param)
+//------------------------------------------------------
+{
+	CModDoc* pModDoc = GetModDoc();
+	if(pModDoc == nullptr)
+	{
+		return;
+	}
+
+	CAbstractVstEditor *pVstEditor = GetEditor();
+
+	if(pVstEditor && pVstEditor->m_hWnd)
+	{
+		// Mark track modified if GUI is open and format supports plugins
+		if(pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->GetModSpecifications().supportsPlugins)
+		{
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+		}
+	}
+
+	// TODO: Could be used to update general tab in real time, but causes flickers in treeview
+	// Better idea: add an update hint just for plugin params?
+	//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
+
+	if (m_bRecordAutomation)
+	{
+		// Record param change
+		pModDoc->RecordParamChange(GetSlot(), param);
+	}
+
+	if (CMainFrame::GetInputHandler()->ShiftPressed() && pVstEditor && (pVstEditor->m_hWnd == ::GetForegroundWindow() || ::IsChild(pVstEditor->m_hWnd, ::GetForegroundWindow())))
+	{
+		// Shift pressed -> Open MIDI mapping dialog
+		CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
+
+		const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
+		CMIDIMappingDialog dlg(pVstEditor, *pModDoc->GetSoundFile());
+		dlg.m_Setting.SetParamIndex(param);
+		dlg.m_Setting.SetPlugIndex(GetSlot() + 1);
+		dlg.DoModal();
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
+	}
+
+	if(pVstEditor)
+	{
+		// Learn macro
+		int macroToLearn = pVstEditor->GetLearnMacro();
+		if (macroToLearn > -1)
+		{
+			pModDoc->LearnMacro(macroToLearn, param);
+			pVstEditor->SetLearnMacro(-1);
+		}
+	}
+
+}
 
 
 void CVstPlugin::SaveAllParameters()
