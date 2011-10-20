@@ -1056,16 +1056,16 @@ void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
 	const MODINSTRUMENT *pIns = pChn->pModInstrument;
 
 	// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
-	// Problem: This pauses on the wrong tick at the moment...
 	if (((pChn->VolEnv.flags & ENV_ENABLED) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
 	{
-		int envvol = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
+		const int envpos = pChn->VolEnv.nEnvPosition - ((IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition > 0) ? 1 : 0);
+		int envvol = GetVolEnvValueFromPosition(envpos, pIns);
 
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
 		// and release envelope beginning.
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
-			&& pChn->VolEnv.nEnvPosition >= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
+			&& envpos >= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
 		&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 		{
 			int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
@@ -1074,7 +1074,7 @@ void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
 			//If we have just hit the release node, force the current env value
 			//to be that of the release node. This works around the case where 
 			// we have another node at the same position as the release node.
-			if (pChn->VolEnv.nEnvPosition == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
+			if (envpos == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
 				envvol = envValueAtReleaseNode;
 
 			int relativeVolumeChange = (envvol - envValueAtReleaseNode) * 2;
@@ -1092,10 +1092,9 @@ void CSoundFile::ProcessPanningEnvelope(MODCHANNEL *pChn)
 	const MODINSTRUMENT *pIns = pChn->pModInstrument;
 
 	// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
-	// Problem: This pauses on the wrong tick at the moment...
 	if (((pChn->PanEnv.flags & ENV_ENABLED) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
 	{
-		int envpos = pChn->PanEnv.nEnvPosition;
+		const int envpos = pChn->PanEnv.nEnvPosition - ((IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition > 0) ? 1 : 0);
 		UINT pt = pIns->PanEnv.nNodes - 1;
 		for (UINT i=0; i<(UINT)(pIns->PanEnv.nNodes-1); i++)
 		{
@@ -1146,10 +1145,9 @@ void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
 	const MODINSTRUMENT *pIns = pChn->pModInstrument;
 
 	// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
-	// Problem: This pauses on the wrong tick at the moment...
 	if ((pIns) && ((pChn->PitchEnv.flags & ENV_ENABLED) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
 	{
-		int envpos = pChn->PitchEnv.nEnvPosition;
+		int envpos = pChn->PitchEnv.nEnvPosition - ((IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition > 0) ? 1 : 0);
 		UINT pt = pIns->PitchEnv.nNodes - 1;
 		for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
 		{
@@ -1230,17 +1228,17 @@ void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
 	if (pChn->VolEnv.flags & ENV_ENABLED)
 	{
 		// Increase position
-		pChn->VolEnv.nEnvPosition++;
+		UINT position = pChn->VolEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
 		// Volume Loop ?
 		if (pIns->VolEnv.dwFlags & ENV_LOOP)
 		{
 			UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
-			if (m_nType != MOD_TYPE_XM) volloopend++;
-			if (pChn->VolEnv.nEnvPosition == volloopend)
+			if (GetType() != MOD_TYPE_XM) volloopend++;
+			if (position == volloopend)
 			{
-				pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
+				position = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
 				if ((pIns->VolEnv.nLoopEnd == pIns->VolEnv.nLoopStart) && (!pIns->VolEnv.Values[pIns->VolEnv.nLoopStart])
-					&& ((!(m_nType & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
+					&& ((!(GetType() & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
 				{
 					pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nFadeOutVol = 0;
@@ -1250,15 +1248,16 @@ void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
 		// Volume Sustain ?
 		if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 		{
-			if (pChn->VolEnv.nEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
-				pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
+			if (position == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
+				position = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
 		} else
+		{
 			// End of Envelope ?
-			if (pChn->VolEnv.nEnvPosition > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
+			if (position > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
 			{
-				if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
-				pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
-				if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes-1]) && ((pChn->nMasterChn > 0) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
+				if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
+				position = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
+				if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes - 1]) && ((pChn->nMasterChn > 0) || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 				{
 					pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nFadeOutVol = 0;
@@ -1266,6 +1265,9 @@ void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
 					pChn->nCalcVolume = 0;
 				}
 			}
+		}
+
+		pChn->VolEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 	}
 }
 
@@ -1277,25 +1279,30 @@ void CSoundFile::IncrementPanningEnvelopePosition(MODCHANNEL *pChn)
 
 	if (pChn->PanEnv.flags & ENV_ENABLED)
 	{
-		pChn->PanEnv.nEnvPosition++;
+		// Increase position
+		UINT position = pChn->PanEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
+
 		if (pIns->PanEnv.dwFlags & ENV_LOOP)
 		{
 			UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
-			if (m_nType != MOD_TYPE_XM) panloopend++;
-			if (pChn->PanEnv.nEnvPosition == panloopend)
-				pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
+			if (GetType() != MOD_TYPE_XM) panloopend++;
+			if (position == panloopend)
+				position = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
 		}
+
 		// Panning Sustain ?
-		if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (pChn->PanEnv.nEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
+		if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (position == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd] + 1)
 			&& (!(pChn->dwFlags & CHN_KEYOFF)))
 		{
 			// Panning sustained
-			pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
+			position = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
 		} else
 		{
-			if (pChn->PanEnv.nEnvPosition > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
-				pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
+			if (position > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
+				position = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
 		}
+
+		pChn->PanEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 	}
 }
 
@@ -1308,26 +1315,29 @@ void CSoundFile::IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn)
 	if (pChn->PitchEnv.flags & ENV_ENABLED)
 	{
 		// Increase position
-		pChn->PitchEnv.nEnvPosition++;
+		UINT position = pChn->PitchEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
+
 		// Pitch Loop ?
 		if (pIns->PitchEnv.dwFlags & ENV_LOOP)
 		{
 			UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
 			//IT compatibility 24. Short envelope loops
 			if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
-			if (pChn->PitchEnv.nEnvPosition >= pitchloopend)
-				pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
+			if (position >= pitchloopend)
+				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
 		}
 		// Pitch Sustain ?
 		if ((pIns->PitchEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 		{
-			if (pChn->PitchEnv.nEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
-				pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
+			if (position == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
+				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
 		} else
 		{
-			if (pChn->PitchEnv.nEnvPosition > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
-				pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
+			if (position > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
+				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
 		}
+
+		pChn->PitchEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 	}
 }
 
@@ -2012,6 +2022,17 @@ BOOL CSoundFile::ReadNote()
 			// Process Envelopes
 			if (pIns)
 			{
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
+					// In IT compatible mode, envelope position indices are shifted by one for proper envelope pausing,
+					// so we have to update the position before we actually process the envelopes.
+					// When using MPT behaviour, we get the envelope position for the next tick while we are still calculating the current tick,
+					// which then results in wrong position information when the envelope is paused on the next row.
+					// Test case: s77.it
+					IncrementVolumeEnvelopePosition(pChn);
+					IncrementPanningEnvelopePosition(pChn);
+					IncrementPitchFilterEnvelopePosition(pChn);
+				}
 				ProcessVolumeEnvelope(pChn, vol);
 				ProcessInstrumentFade(pChn, vol);
 				ProcessPanningEnvelope(pChn);
@@ -2149,8 +2170,10 @@ BOOL CSoundFile::ReadNote()
 		}
 
 		// Increment envelope positions
-		if (pIns)
+		if (pIns != nullptr && !IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
+			// In IT compatible mode, envelope positions are updated above.
+			// Test case: s77.it
 			IncrementVolumeEnvelopePosition(pChn);
 			IncrementPanningEnvelopePosition(pChn);
 			IncrementPitchFilterEnvelopePosition(pChn);
