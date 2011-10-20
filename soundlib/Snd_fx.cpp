@@ -662,6 +662,10 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		return;
 	}
 
+	pChn->nLength = pSmp->nLength;
+	pChn->nLoopStart = pSmp->nLoopStart;
+	pChn->nLoopEnd = pSmp->nLoopEnd;
+
 	// Tone-Portamento doesn't reset the pingpong direction flag
 	if ((bPorta) && (pSmp == pChn->pModSample))
 	{
@@ -697,9 +701,6 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		pChn->nResSwing = pChn->nCutSwing = 0;
 	}
 	pChn->pModSample = pSmp;
-	pChn->nLength = pSmp->nLength;
-	pChn->nLoopStart = pSmp->nLoopStart;
-	pChn->nLoopEnd = pSmp->nLoopEnd;
 
 	// IT Compatibility: Autovibrato reset
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1456,7 +1457,7 @@ BOOL CSoundFile::ProcessEffects()
 			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
-			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT));
+			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) != 0;
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -3731,9 +3732,11 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 		// if (m_nInstruments) KeyOff(pChn); ?
 		pChn->nVolume = 0;
 		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
+		// Test case: scx.it
 		if(IsCompatibleMode(TRK_IMPULSETRACKER|TRK_SCREAMTRACKER))
 		{
-			pChn->nPeriod = 0;
+			pChn->nLength = 0;
+			pChn->nPos = pChn->nPosLo = 0;
 		}
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
 
