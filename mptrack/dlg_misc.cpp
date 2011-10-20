@@ -1073,11 +1073,10 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 	if (!m_pSndFile)
 		return;
 
-	CString message, plugName, paramName, line;
+	CString message, plugName, line;
 	int sfx = id-ID_PLUGSELECT;
 	int param = m_pModDoc->MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]);
 	CVstPlugin *pVstPlugin; 
-	char s[256];
 	message.Format("These are the parameters that can be controlled by macro SF%X:\n\n",sfx);
 	
 	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
@@ -1086,11 +1085,9 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 		if (plugName != "")
 		{
 			pVstPlugin=(CVstPlugin*) m_pSndFile->m_MixPlugins[plug].pMixPlugin;
-			if (pVstPlugin && pVstPlugin->GetNumParameters()>param)
+			if (pVstPlugin && param <= pVstPlugin->GetNumParameters())
 			{
-				pVstPlugin->GetParamName(param, s, 256);
-				paramName = s;
-				line.Format("FX%d: %s\t Param %d (%x): %s\n", plug + 1, plugName, param, param+80, paramName);
+				line.Format("FX%d: %s\t %s\n", plug + 1, plugName, pVstPlugin->GetFormattedParamName(param));
 				message += line;
 			}
 		}

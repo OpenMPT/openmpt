@@ -134,18 +134,15 @@ public:
 	void GetEditorPos(int &x, int &y) const { x = m_nEditorX; y = m_nEditorY; }
 
 	void SetCurrentProgram(UINT nIndex);
-//rewbs.VSTCompliance: Eric's non standard preset stuff:
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-	//VOID GetProgramName(UINT nIndex, LPSTR pszName, UINT cbSize);
-	//BOOL SavePreset(LPCSTR lpszFileName);
-	//BOOL LoadPreset(LPCSTR lpszFileName);
-// -! NEW_FEATURE#0002
 	PlugParamValue GetParameter(PlugParamIndex nIndex);
 	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
-	void GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize);
-	void GetParamLabel(UINT nIndex, LPSTR pszLabel);
-	void GetParamDisplay(UINT nIndex, LPSTR pszDisplay);
+
+	CString GetFormattedParamName(PlugParamIndex param);
+	CString GetFormattedParamValue(PlugParamIndex param);
+	CString GetParamName(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamName); };
+	CString GetParamLabel(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamLabel); };
+	CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
+
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	void ToggleEditor();
 	void GetPluginType(LPSTR pszType);
@@ -205,20 +202,27 @@ public:
 private:
 	short getMIDI14bitValueFromShort(short value); 
 	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
+
+	// Helper function for retreiving parameter name / label / display
+	CString GetParamPropertyString(VstInt32 param, VstInt32 opcode);
+
 #else // case: NO_VST
 public:
 	PlugParamIndex GetNumParameters() {return 0;}
-	void GetParamName(UINT, LPSTR, UINT) {}
 	void ToggleEditor() {}
 	BOOL HasEditor() {return FALSE;}
 	UINT GetNumCommands() {return 0;}
 	void GetPluginType(LPSTR) {}
 	PlugParamIndex GetNumPrograms() {return 0;}
-	bool GetProgramNameIndexed(long, long, char*) {return false;}
-	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false) { return ""; };
-	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
-	void GetParamLabel(UINT, LPSTR) {}
-	void GetParamDisplay(UINT, LPSTR) {}
+	bool GetProgramNameIndexed(long, long, char*) { return false; }
+	CString GetFormattedProgramName(VstInt32, bool = false) { return ""; };
+	void SetParameter(PlugParamIndex, PlugParamValue) {}
+
+	CString GetFormattedParamName(PlugParamIndex) { return ""; };
+	CString GetParamName(PlugParamIndex) { return ""; };
+	CString GetParamLabel(PlugParamIndex) { return ""; };
+	CString GetParamDisplay(PlugParamIndex) { return ""; };
+
 	PlugParamValue GetParameter(PlugParamIndex nIndex) {return 0;}
 	bool LoadProgram(CString) {return false;}
 	bool SaveProgram(CString) {return false;}

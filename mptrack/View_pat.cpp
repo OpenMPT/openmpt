@@ -5502,14 +5502,11 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile
 			HMENU paramChangeMenu = ::CreatePopupMenu();
 			AppendMenu(hMenu, MF_POPUP, (UINT)paramChangeMenu, "Change Plugin Parameter\t");
 
-			char sname[64];
 			uint16 nThisParam = mSelStart->GetValueVolCol();
 			UINT nParams = plug->GetNumParameters();
 			for (UINT i = 0; i < nParams; i++)
 			{
-				plug->GetParamName(i, sname, sizeof(sname));
-				wsprintf(s, "%02d: %s", i, sname);
-				AppendMenu(paramChangeMenu, MF_STRING | (i == nThisParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, s);
+				AppendMenu(paramChangeMenu, MF_STRING | (i == nThisParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug->GetFormattedParamName(i));
 			}
 		}				
 

@@ -472,10 +472,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 			if(nParams)
 			{
-				char sname[64];
-				pVstPlugin->GetParamName(m_nCurrentParam, sname, sizeof(sname));
-				wsprintf(s, "%02X: %s", m_nCurrentParam, sname);
-				m_CbnParam.SetItemData(m_CbnParam.AddString(s), m_nCurrentParam);
+				m_CbnParam.SetItemData(m_CbnParam.AddString(pVstPlugin->GetFormattedParamName(m_nCurrentParam)), m_nCurrentParam);
 			}
 
 			m_CbnParam.SetCurSel(0);
@@ -970,10 +967,7 @@ void CViewGlobals::OnParamChanged()
 		if ((cursel >= 0) && (cursel < nParams)) m_nCurrentParam = cursel;
 		if (m_nCurrentParam < nParams)
 		{
-			CHAR sunits[64], sdisplay[64];
-			pVstPlugin->GetParamLabel(m_nCurrentParam, sunits);
-			pVstPlugin->GetParamDisplay(m_nCurrentParam, sdisplay);
-			wsprintf(s, "Value: %s %s", sdisplay, sunits);
+			wsprintf(s, "Value: %s", pVstPlugin->GetFormattedParamValue(m_nCurrentParam));
 			SetDlgItemText(IDC_TEXT5, s);
 			float fValue = pVstPlugin->GetParameter(m_nCurrentParam);
 			int nValue = (int)(fValue * 100.0f + 0.5f);
@@ -1535,9 +1529,7 @@ void CViewGlobals::OnFillParamCombo()
 
 	for(PlugParamIndex i = 0; i < nParams; i++)
 	{
-		pVstPlugin->GetParamName(i, sname, sizeof(sname));
-		wsprintf(s, "%02X: %s", i, sname);
-		m_CbnParam.SetItemData(m_CbnParam.AddString(s), i);
+		m_CbnParam.SetItemData(m_CbnParam.AddString(pVstPlugin->GetFormattedParamName(i)), i);
 	}
 
 	if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
