@@ -2679,12 +2679,9 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 //-----------------------------------------------------------------------
 {
-	char s[72], sname[64];
 	const PlugParamIndex nParams = plug.GetNumParameters();
 	for (PlugParamIndex i = 0; i < nParams; i++)
 	{
-		plug.GetParamName(i, sname, sizeof(sname));
-		wsprintf(s, "%02d: %s", i, sname);
-		CBox.SetItemData(CBox.AddString(s), i);
+		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
 	}
 }

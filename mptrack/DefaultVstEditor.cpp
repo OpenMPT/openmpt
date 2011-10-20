@@ -266,11 +266,7 @@ void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 		if(updateParamNames)
 		{
 			// Update param name
-			CString s;
-			CHAR sname[64];
-			m_pVstPlugin->GetParamName(param, sname, sizeof(sname));
-			s.Format("%02X: %s", paramOffset + i, sname);
-			controls[i]->SetParamName(s);
+			controls[i]->SetParamName(m_pVstPlugin->GetFormattedParamName(param));
 		}
 
 		UpdateParamDisplay(param);
@@ -482,6 +478,7 @@ void CDefaultVstEditor::OnParamTextboxChanged(UINT id)
 	SetParam(param, controls[param - paramOffset]->GetParamValueFromEdit());
 }
 
+
 // Called when a change occurs to the parameter slider
 // If the change is triggered by the user, we'll need to notify the plugin and update 
 // the other GUI controls 
@@ -507,7 +504,7 @@ void CDefaultVstEditor::OnParamSliderChanged(UINT id)
 void CDefaultVstEditor::SetParam(PlugParamIndex param, int value)
 //---------------------------------------------------------------
 {
-	if(m_pVstPlugin == nullptr)
+	if(m_pVstPlugin == nullptr || param >= m_pVstPlugin->GetNumParameters())
 	{
 		return;
 	}
@@ -533,24 +530,15 @@ void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
 		return;
 	}
 
-	// Get the param value fromt the plug and massage it into the formats we need
+	// Get the actual parameter value from the plugin
 	const int val = static_cast<int>(m_pVstPlugin->GetParameter(param) * static_cast<float>(PARAM_RESOLUTION) + 0.5f);
-
-	CString paramDisplay, paramUnits;
-	m_pVstPlugin->GetParamDisplay(param, paramDisplay.GetBuffer(64));
-	m_pVstPlugin->GetParamLabel(param, paramUnits.GetBuffer(64));
-	paramDisplay.ReleaseBuffer();
-	paramUnits.ReleaseBuffer();
-	paramDisplay.Trim();
-	paramUnits.Trim();
-	paramDisplay += " " + paramUnits;
 
 	// Update the GUI controls
 
 	// Set lock to indicate that the changes to the GUI are internal - no need to notify the plug and re-update GUI.
 	m_nControlLock++;
 
-	controls[param - paramOffset]->SetParamValue(val, paramDisplay);
+	controls[param - paramOffset]->SetParamValue(val, m_pVstPlugin->GetFormattedParamValue(param));
 
 	// Unset lock - done with internal GUI updates.
 	m_nControlLock--;

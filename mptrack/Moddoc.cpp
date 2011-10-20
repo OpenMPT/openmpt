@@ -3259,17 +3259,16 @@ CString CModDoc::GetMacroName(CString value, PLUGINDEX plugin)
 	case sfx_plug:
 		{
 			const int param = MacroToPlugParam(value);
-			char paramName[128] = { '\0' };
+			CString paramName;
 
 			if(plugin < MAX_MIXPLUGINS)
 			{
 				CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugin].pMixPlugin;
 				if(pPlug)
 				{
-					pPlug->GetParamName(param, paramName, sizeof(paramName));
-					StringFixer::SetNullTerminator(paramName);
+					paramName = pPlug->GetParamName(param);
 				}
-				if (paramName[0] == '\0')
+				if (paramName.IsEmpty())
 				{
 					return _T("N/A");
 				}
@@ -3842,8 +3841,8 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 		if (macroType==sfx_plug && MacroToPlugParam(macroText)==paramToUse)
 		{
 			CString message;
-			message.Format("Param %d can already be controlled with macro %X", paramToUse, checkMacro);
-			Reporting::Information(message, "Macro exists for this param");
+			message.Format("Parameter %02d can already be controlled with macro %X.", paramToUse, checkMacro);
+			Reporting::Information(message, "Macro exists for this parameter");
 			return;
 		}
 	}
@@ -3859,14 +3858,14 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	} else
 	{
 		CString message;
-		message.Format("Param %d beyond controllable range.", paramToUse);
-		Reporting::Information(message, "Macro not assigned for this param");
+		message.Format("Parameter %02d beyond controllable range. Use Parameter Control Events to automate this parameter.", paramToUse);
+		Reporting::Information(message, "Macro not assigned for this parameter");
 		return;
 	}
 
 	CString message;
-	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);
-	Reporting::Information(message, "Macro assigned for this param");
+	message.Format("Parameter %02d can now be controlled with macro %X.", paramToUse, macroToSet);
+	Reporting::Information(message, "Macro assigned for this parameter");
 	
 	return;
 }

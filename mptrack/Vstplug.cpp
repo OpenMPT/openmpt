@@ -688,8 +688,12 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterAutomate:	
 		if (effect && effect->resvd1)
 		{
-			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
-			pVstPlugin->AutomateParameter(index);
+			CVstPlugin *pVstPlugin = reinterpret_cast<CVstPlugin *>(effect->resvd1);
+			if(pVstPlugin->Dispatch(effCanBeAutomated, index, nullptr, nullptr, 0.0f) != 0)
+			{
+				// This parameter can be automated. Ugo Motion constantly sends automation callback events for parameters that cannot be automated...
+				pVstPlugin->AutomateParameter((PlugParamIndex)index);
+			}
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
@@ -731,7 +735,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// <value> should contain a mask indicating which fields are required
 	case audioMasterGetTime: {
 
-		CVstPlugin* pVstPlugin = (CVstPlugin*)effect->resvd1;
+		CVstPlugin* pVstPlugin = reinterpret_cast<CVstPlugin *>(effect->resvd1);
 		MemsetZero(timeInfo);
 		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
@@ -802,7 +806,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
 		if (effect->resvd1)
 		{
-			CSoundFile *pSndFile = ((CVstPlugin*)effect->resvd1)->GetSoundFile();
+			CSoundFile *pSndFile = reinterpret_cast<CVstPlugin *>(effect->resvd1)->GetSoundFile();
 			if (pSndFile)
 			{
 				return (VstInt32)(pSndFile->GetCurrentBPM() * 10000);
@@ -825,7 +829,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterNeedIdle:
 		if (effect && effect->resvd1)
 		{
-			CVstPlugin* pVstPlugin = (CVstPlugin*)effect->resvd1;
+			CVstPlugin* pVstPlugin = reinterpret_cast<CVstPlugin *>(effect->resvd1);
 			pVstPlugin->m_bNeedIdle=true;
 		}
 		
@@ -834,18 +838,18 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterSizeWindow:
 		if (effect->resvd1)
 		{
-			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
+			CVstPlugin *pVstPlugin = reinterpret_cast<CVstPlugin *>(effect->resvd1);
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
 			if (pVstEditor)
 			{
-			CRect rcWnd, rcClient;
-			pVstEditor->GetWindowRect(rcWnd);
-			pVstEditor->GetClientRect(rcClient);
+				CRect rcWnd, rcClient;
+				pVstEditor->GetWindowRect(rcWnd);
+				pVstEditor->GetClientRect(rcClient);
 
-			rcWnd.right  = rcWnd.left + (rcWnd.right-rcWnd.left) - (rcClient.right-rcClient.left) + index;
-			rcWnd.bottom = rcWnd.top + (rcWnd.bottom-rcWnd.top) - (rcClient.bottom-rcClient.top) + value;
+				rcWnd.right  = rcWnd.left + (rcWnd.Width()) - (rcClient.Width()) + index;
+				rcWnd.bottom = rcWnd.top + (rcWnd.Height()) - (rcClient.Height()) + value;
 
-			pVstEditor->SetWindowPos(NULL, rcWnd.left, rcWnd.top, rcWnd.Width(), rcWnd.Height(), SWP_NOMOVE | SWP_NOZORDER);
+				pVstEditor->SetWindowPos(NULL, rcWnd.left, rcWnd.top, rcWnd.Width(), rcWnd.Height(), SWP_NOMOVE | SWP_NOZORDER);
 			}
 		}
 		Log("VST plugin to host: Size Window\n");
@@ -976,7 +980,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterUpdateDisplay:
 		if (effect && effect->resvd1)
 		{
-//			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
+//			CVstPlugin *pVstPlugin = reinterpret_cast<CVstPlugin *>(effect->resvd1);
 //            pVstPlugin->GetModDoc()->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL); //No Need.
 
 /*			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
@@ -1334,7 +1338,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	Dispatch(effOpen, 0, 0, NULL, 0);
 	// VST 2.0 plugins return 2 here, VST 2.4 plugins return 2400... Great!
-	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? true : false;
+	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2);
     if (m_bIsVst2)
 	{
 		// Set VST speaker in/out setup to Stereo. Required for some plugins (possibly all VST 2.4+ plugins?)
@@ -1834,41 +1838,50 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 }
 
 
-void CVstPlugin::GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize)
-//--------------------------------------------------------------------
+// Helper function for retreiving parameter name / label / display
+CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
+//-------------------------------------------------------------------------
 {
-	if ((!pszName) || (!cbSize)) return;
-	pszName[0] = 0;
-	if ((m_pEffect) && (m_pEffect->numParams > 0) && (nIndex < (UINT)m_pEffect->numParams))
+	CHAR s[max(kVstMaxParamStrLen, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
+	s[0] = '\0';
+
+	if(m_pEffect != nullptr && m_pEffect->numParams > 0 && param < m_pEffect->numParams)
 	{
-		CHAR s[64]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
-		s[0] = 0;
-		Dispatch(effGetParamName, nIndex, 0, s, 0);
-		s[min(CountOf(s) - 1, cbSize - 1)] = 0;
-		lstrcpyn(pszName, s, min(cbSize, sizeof(s)));
+		Dispatch(opcode, param, 0, s, 0);
+		StringFixer::SetNullTerminator(s);
 	}
+	return CString(s);
 }
 
 
-void CVstPlugin::GetParamLabel(UINT nIndex, LPSTR pszLabel)
-//---------------------------------------------------------
-{
-	pszLabel[0] = 0;
-	if ((m_pEffect) && (m_pEffect->numParams > 0) && (nIndex < (UINT)m_pEffect->numParams))
-	{
-		Dispatch(effGetParamLabel, nIndex, 0, pszLabel, 0);
-	}
-}
-
-
-void CVstPlugin::GetParamDisplay(UINT nIndex, LPSTR pszDisplay)
+CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 //-------------------------------------------------------------
 {
-	pszDisplay[0] = 0;
-	if ((m_pEffect) && (m_pEffect->numParams > 0) && (nIndex < (UINT)m_pEffect->numParams))
+	const CString paramName = GetParamName(param);
+	CString name;
+	if(paramName.IsEmpty())
 	{
-		Dispatch(effGetParamDisplay, nIndex, 0, pszDisplay, 0);
+		name.Format("Parameter %02d", param);
+	} else
+	{
+		name.Format("%02d: %s", param, paramName);
 	}
+	return name;
+}
+
+
+// Get a parameter's current value, represented by the plugin.
+CString CVstPlugin::GetFormattedParamValue(PlugParamIndex param)
+//--------------------------------------------------------------
+{
+
+	CString paramDisplay = GetParamDisplay(param);
+	CString paramUnits = GetParamLabel(param);
+	paramDisplay.Trim();
+	paramUnits.Trim();
+	paramDisplay += " " + paramUnits;
+
+	return paramDisplay;
 }
 
 
@@ -2671,6 +2684,12 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 		return;
 	}
 
+	if (m_bRecordAutomation)
+	{
+		// Record parameter change
+		pModDoc->RecordParamChange(GetSlot(), param);
+	}
+
 	CAbstractVstEditor *pVstEditor = GetEditor();
 
 	if(pVstEditor && pVstEditor->m_hWnd)
@@ -2680,33 +2699,24 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 		{
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 		}
-	}
 
-	// TODO: Could be used to update general tab in real time, but causes flickers in treeview
-	// Better idea: add an update hint just for plugin params?
-	//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
+		// TODO: Could be used to update general tab in real time, but causes flickers in treeview
+		// Better idea: add an update hint just for plugin params?
+		//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
 
-	if (m_bRecordAutomation)
-	{
-		// Record param change
-		pModDoc->RecordParamChange(GetSlot(), param);
-	}
+		if (CMainFrame::GetInputHandler()->ShiftPressed())
+		{
+			// Shift pressed -> Open MIDI mapping dialog
+			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
 
-	if (CMainFrame::GetInputHandler()->ShiftPressed() && pVstEditor && (pVstEditor->m_hWnd == ::GetForegroundWindow() || ::IsChild(pVstEditor->m_hWnd, ::GetForegroundWindow())))
-	{
-		// Shift pressed -> Open MIDI mapping dialog
-		CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
+			const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
+			CMIDIMappingDialog dlg(pVstEditor, *pModDoc->GetSoundFile());
+			dlg.m_Setting.SetParamIndex(param);
+			dlg.m_Setting.SetPlugIndex(GetSlot() + 1);
+			dlg.DoModal();
+			CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
+		}
 
-		const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
-		CMIDIMappingDialog dlg(pVstEditor, *pModDoc->GetSoundFile());
-		dlg.m_Setting.SetParamIndex(param);
-		dlg.m_Setting.SetPlugIndex(GetSlot() + 1);
-		dlg.DoModal();
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
-	}
-
-	if(pVstEditor)
-	{
 		// Learn macro
 		int macroToLearn = pVstEditor->GetLearnMacro();
 		if (macroToLearn > -1)
@@ -2715,7 +2725,6 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			pVstEditor->SetLearnMacro(-1);
 		}
 	}
-
 }
 
 
@@ -3016,7 +3025,7 @@ void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
 bool CVstPlugin::isInstrument() // ericus 18/02/2005
 //-----------------------------
 {
-	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)) ? true : false; // rewbs.dryRatio
+	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)); // rewbs.dryRatio
 	return false;
 }
 
@@ -3024,7 +3033,7 @@ bool CVstPlugin::CanRecieveMidiEvents()
 //-------------------------------------
 {
 	CString s = "receiveVstMidiEvent";
-	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0)) ? true : false;
+	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0) != 0);
 }
 
 void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list) 
@@ -3040,7 +3049,7 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 		UINT nOutput = m_pMixStruct->Info.dwOutputRouting & 0x7f;
 		if (m_pSndFile && (nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS))
 		{
-			pOutputPlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nOutput].pMixPlugin;
+			pOutputPlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
 		}
 	}
 	list.Add(pOutputPlug);
@@ -3059,7 +3068,7 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 
 	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
 	{
-		pCandidatePlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nPlug].pMixPlugin;
+		pCandidatePlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nPlug].pMixPlugin);
 		if (pCandidatePlug)
 		{
 			pCandidatePlug->GetOutputPlugList(candidatePlugOutputs);
@@ -4050,10 +4059,7 @@ CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 {
 	if(pMixPlugin)
 	{
-		char s[64];
-		((CVstPlugin*)(pMixPlugin))->GetParamName(index, s, sizeof(s));
-		s[sizeof(s)-1] = 0;
-		return CString(s);
+		return reinterpret_cast<CVstPlugin *>(pMixPlugin)->GetParamName(index);
 	}
 	else
 		return CString();
