@@ -1205,7 +1205,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 	// Do we need to apply New/Duplicate Note Action to a VSTi?
 	bool applyNNAtoPlug = false;
 	IMixPlugin *pPlugin = NULL;
-	if (pChn->pModInstrument && pChn->pModInstrument->nMidiChannel > 0 && pChn->pModInstrument->nMidiChannel < 17 && pChn->nNote>0 && pChn->nNote<128) // instro sends to a midi chan
+	if (pChn->pModInstrument && pChn->pModInstrument->HasValidMIDIChannel() && pChn->nNote > 0 && pChn->nNote < 128) // instro sends to a midi chan
 	{
 		PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 		/*
@@ -2349,13 +2349,17 @@ void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
 //----------------------------------------------------------
 {
 	//Send midi pitch bend event if there's a plugin:
-	MODINSTRUMENT *pHeader = pChn->pModInstrument;
-	if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17) { // instro sends to a midi chan
-		UINT nPlug = pHeader->nMixPlug;
-		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
+	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	if (pIns && pIns->HasValidMIDIChannel())
+	{
+		// instro sends to a midi chan
+		UINT nPlug = pIns->nMixPlug;
+		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+		{
 			IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
-			if (pPlug) {
-				pPlug->MidiPitchBend(pHeader->nMidiChannel, param, 0);
+			if (pPlug)
+			{
+				pPlug->MidiPitchBend(pIns->nMidiChannel, param, 0);
 			}
 		}
 	}
@@ -3742,7 +3746,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 
 		const MODINSTRUMENT *pIns = pChn->pModInstrument;
 		// instro sends to a midi chan
-		if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17)
+		if (pIns && pIns->HasValidMIDIChannel())
 		{
 			UINT nPlug = pIns->nMixPlug;
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
@@ -4219,7 +4223,7 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 UINT CSoundFile::GetBestMidiChan(const MODCHANNEL *pChn) const
 //------------------------------------------------------------
 {
-	if (pChn && pChn->pModInstrument && pChn->pModInstrument->nMidiChannel)
+	if (pChn && pChn->pModInstrument && pChn->pModInstrument->HasValidMIDIChannel())
 	{
 		return (pChn->pModInstrument->nMidiChannel - 1) & 0x0F;
 	}

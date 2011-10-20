@@ -1014,8 +1014,8 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		//rewbs.vstiLive
 		if (nins <= m_SndFile.m_nInstruments)
 		{
-			MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
-			if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17) // instro sends to a midi chan
+			const MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
+			if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
 			{
 				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
 				 
@@ -1055,7 +1055,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 	{
 
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
-		if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17) // instro sends to a midi chan
+		if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
 		{
 
 			UINT nPlugin = pIns->nMixPlug;  		// First try intrument VST

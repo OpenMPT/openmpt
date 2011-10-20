@@ -958,7 +958,7 @@ void CSoundFile::ProcessTremolo(MODCHANNEL *pChn, int &vol)
 		if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
-			const int tremattn = (m_nType & MOD_TYPE_XM || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
+			const int tremattn = ((GetType() & MOD_TYPE_XM) || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
 			switch (pChn->nTremoloType & 0x03)
 			{
 			case 1:
@@ -981,7 +981,7 @@ void CSoundFile::ProcessTremolo(MODCHANNEL *pChn, int &vol)
 				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[trempos] : ModSinusTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 			}
 		}
-		if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+		if (!(m_dwSongFlags & SONG_FIRSTTICK) || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1619,7 +1619,7 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
 	{
-		MODSAMPLE *pSmp = pChn->pModSample;
+		const MODSAMPLE *pSmp = pChn->pModSample;
 		const bool alternativeTuning = pChn->pModInstrument && pChn->pModInstrument->pTuning;
 
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
@@ -1735,19 +1735,19 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 			if(alternativeTuning)
 			{
 				//Vib sweep is not taken into account here.
-				vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0F; //4096 == 64^2
+				vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0f; //4096 == 64^2
 				//See vibrato for explanation.
 				pChn->m_CalculateFreq = true;
 				/*
 				Finestep vibrato:
-				const float autoVibDepth = pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
+				const float autoVibDepth = pSmp->nVibDepth * val / 4096.0f; //4096 == 64^2
 				vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pModInstrument->pTuning->GetFineStepCount() *  autoVibDepth);
 				pChn->m_CalculateFreq = true;
 				*/
 			}
 			else //Original behavior
 			{
-				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 				{
 					int df1, df2;
 					if (n < 0)
@@ -2413,7 +2413,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 	if (pIns)
 	{
 		// Check instrument plugins
-		if ((pIns->nMidiChannel >= 1) && (pIns->nMidiChannel <= 16))
+		if (pIns->HasValidMIDIChannel())
 		{
 			nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))

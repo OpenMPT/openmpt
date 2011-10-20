@@ -28,11 +28,23 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 //--------------------------------------------
 {
 	Create(IDD_PLUGINEDITOR, parent);
+
 	SetupMenu();
+
+	CRect rcWnd, rcClient;
+	// First, get window size without menu
+	GetWindowRect(&rcWnd);
+	GetClientRect(&rcClient);
+
+	MENUBARINFO mbi;
+	MemsetZero(mbi);
+	mbi.cbSize = sizeof(mbi);
+	GetMenuBarInfo(m_hWnd, OBJID_MENU, 0, &mbi);
+	rcWnd.bottom -= mbi.rcBar.bottom - mbi.rcBar.top;
+
 	if(m_pVstPlugin)
 	{
 		// Set editor window size
-		CRect rcWnd, rcClient;
 		ERect *pRect;
 
 		pRect = NULL;
@@ -41,13 +53,27 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, (LPRECT)&pRect, 0);
 		if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
 		{
+			// Plugin provided valid window size
+			CRect rcContent;
+			rcContent.right = pRect->right - pRect->left;
+			rcContent.bottom = pRect->bottom - pRect->top;
+
+			// Preliminary setup, without taking menu bar size into account, just to find out the height of the menu bar.
+			// With small (narrow) plugin GUIs, the menu might be two lines high...
+			SetWindowPos(NULL, 0, 0,
+				rcWnd.Width() - rcClient.Width() + rcContent.Width(),
+				rcWnd.Height() - rcClient.Height() + rcContent.Height(),
+				SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+
+			GetMenuBarInfo(m_hWnd, OBJID_MENU, 0, &mbi);
+
 			GetWindowRect(&rcWnd);
-			GetClientRect(&rcClient);
-			SetWindowPos(NULL, 0,0, 
-				(rcWnd.Width()) - (rcClient.Width()) + (pRect->right - pRect->left),
-				(rcWnd.Height()) - (rcClient.Height()) + (pRect->bottom - pRect->top),
-				SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE);
-			
+			rcWnd.bottom += mbi.rcBar.bottom - mbi.rcBar.top;
+
+			// Now we have the real size.
+			SetWindowPos(NULL, 0, 0,
+				rcWnd.Width(), rcWnd.Height(),
+				SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
 		}
 
 		// Restore previous editor position
@@ -61,11 +87,10 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 			if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
 			{
 				SetWindowPos(NULL, editorX, editorY, 0, 0,
-					SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+					SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
 			}
 		}
 		SetTitle();
-		
 
 		m_pVstPlugin->Dispatch(effEditTop, 0,0, NULL, 0);
 		m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);

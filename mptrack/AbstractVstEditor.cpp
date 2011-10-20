@@ -411,7 +411,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 		m_pPresetMenu->CreatePopupMenu();
 	}
 
-	const int numSubMenus = (numProgs / PRESETS_PER_GROUP) + 1;
+	const int numSubMenus = ((numProgs - 1) / PRESETS_PER_GROUP) + 1;
 	if(numSubMenus > 1)
 	{
 		// Create sub menus if necessary
