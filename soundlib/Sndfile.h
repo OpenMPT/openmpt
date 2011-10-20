@@ -123,9 +123,9 @@ struct MODINSTRUMENT
 	BYTE nIFC;			// Default filter cutoff (0...127). Used if the high bit is set
 	BYTE nIFR;			// Default filter resonance (0...127). Used if the high bit is set
 
-	WORD wMidiBank;		// MIDI bank
-	BYTE nMidiProgram;	// MIDI program
-	BYTE nMidiChannel;	// MIDI channel
+	WORD wMidiBank;		// MIDI Bank (1...16384). 0 = Don't send.
+	BYTE nMidiProgram;	// MIDI Program (1...128). 0 = Don't send.
+	BYTE nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send.
 	BYTE nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
 
 	signed char nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
@@ -207,6 +207,8 @@ struct MODINSTRUMENT
 		MemsetZero(name);
 		MemsetZero(filename);
 	}
+
+	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 16); }
 
 };
 
