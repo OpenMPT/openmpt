@@ -314,12 +314,11 @@ protected:
 	CSoundFile *m_pSndFile;
 
 public:
-	SplitKeyboardSettings *m_pOptions;
+	SplitKeyboardSettings &m_Settings;
 
-	CSplitKeyboadSettings(CWnd *parent, CSoundFile *pSndFile, SplitKeyboardSettings *pOptions):CDialog(IDD_KEYBOARD_SPLIT, parent)
+	CSplitKeyboadSettings(CWnd *parent, CSoundFile *pSndFile, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), m_Settings(settings)
 	{
 		m_pSndFile = pSndFile;
-		m_pOptions = pOptions;
 	}
 
 protected:

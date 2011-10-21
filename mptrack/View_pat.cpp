@@ -4201,14 +4201,14 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	const UINT nTick = pSndFile->m_nTickCount;
 	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
-	const bool isSplit = (pModDoc->GetSplitKeyboardSettings()->IsSplitActive()) && (note <= pModDoc->GetSplitKeyboardSettings()->splitNote);
+	const bool isSplit = (pModDoc->GetSplitKeyboardSettings().IsSplitActive()) && (note <= pModDoc->GetSplitKeyboardSettings().splitNote);
 	UINT ins = 0;
 	if (pModDoc)
 	{
 		if (isSplit)
 		{
-			ins = pModDoc->GetSplitKeyboardSettings()->splitInstrument;
-			if (pModDoc->GetSplitKeyboardSettings()->octaveLink) note += 12 *pModDoc->GetSplitKeyboardSettings()->octaveModifier;
+			ins = pModDoc->GetSplitKeyboardSettings().splitInstrument;
+			if (pModDoc->GetSplitKeyboardSettings().octaveLink) note += 12 *pModDoc->GetSplitKeyboardSettings().octaveModifier;
 			if (note > NOTE_MAX && note < NOTE_MIN_SPECIAL) note = NOTE_MAX;
 			if (note < 0) note = 1;
 		}
@@ -4288,11 +4288,18 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	//Enter note off
-	if(pSndFile->GetModSpecifications().hasNoteOff) // ===
+	if(pSndFile->GetModSpecifications().hasNoteOff && (pSndFile->GetNumInstruments() > 0 || !pSndFile->GetModSpecifications().hasNoteCut))
+	{
+		 // ===
+		// Not used in sample (if module format supports ^^^ instead)
 		pTarget->note = NOTE_KEYOFF;
-	else if(pSndFile->GetModSpecifications().hasNoteCut) // ^^^
+	} else if(pSndFile->GetModSpecifications().hasNoteCut)
+	{
+		// ^^^
 		pTarget->note = NOTE_NOTECUT;
-	else { // we don't have anything to cut (MOD format) - use volume or ECx
+	} else
+	{
+		// we don't have anything to cut (MOD format) - use volume or ECx
 		if(usePlaybackPosition && nTick) // ECx
 		{
 			pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
@@ -4430,7 +4437,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
 		const bool bRecordEnabled = IsEditingEnabled();
-		const CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
+		CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
 
 		if(note < NOTE_MIN_SPECIAL)
 		{
@@ -4450,10 +4457,23 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			return;
 		}
 
-		const BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
+		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
 		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !(pSndFile->m_dwSongFlags & SONG_STEP));
-		bool isSplit = false;
+		const bool isSplit = IsNoteSplit(note);
+
+		if((recordGroup == 1 && isSplit) || (recordGroup == 2 && !isSplit))
+		{
+			// Record group 1 should be used for normal notes, record group 2 for split notes.
+			// If there are any channels assigned to the "other" record group, we switch to another channel.
+			const CHANNELINDEX newChannel = FindGroupRecordChannel(3 - recordGroup, true);
+			if(newChannel != CHANNELINDEX_INVALID)
+			{
+				// Found a free channel, switch to other record group.
+				nChn = newChannel;
+				recordGroup = 3 - recordGroup;
+			}
+		}
 
 		// -- Chord autodetection: step back if we just entered a note
 		if (bRecordEnabled && recordGroup && !bIsLiveRecord && !MODCOMMAND::IsPcNote(note))
@@ -4501,7 +4521,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			}
 
 			// -- write note and instrument data.
-			isSplit = HandleSplit(&newcmd, note);
+			HandleSplit(&newcmd, note);
 
 			// Nice idea actually: Use lower section of the keyboard to play chords (but it won't work 100% correctly this way...)
 			/*if(isSplit)
@@ -4512,14 +4532,14 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 			// -- write vol data
 			int volWrite = -1;
-			if (vol >= 0 && vol <= 64 && !(isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume))	//write valid volume, as long as there's no split volume override.
+			if (vol >= 0 && vol <= 64 && !(isSplit && pModDoc->GetSplitKeyboardSettings().splitVolume))	//write valid volume, as long as there's no split volume override.
 			{
 				volWrite = vol;
-			} else if (isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume)	//cater for split volume override.
+			} else if (isSplit && pModDoc->GetSplitKeyboardSettings().splitVolume)	//cater for split volume override.
 			{
-				if (pModDoc->GetSplitKeyboardSettings()->splitVolume > 0 && pModDoc->GetSplitKeyboardSettings()->splitVolume <= 64)
+				if (pModDoc->GetSplitKeyboardSettings().splitVolume > 0 && pModDoc->GetSplitKeyboardSettings().splitVolume <= 64)
 				{
-					volWrite = pModDoc->GetSplitKeyboardSettings()->splitVolume;
+					volWrite = pModDoc->GetSplitKeyboardSettings().splitVolume;
 				}
 			}
 
@@ -4606,7 +4626,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// -- if recording, handle post note entry behaviour (move cursor etc..)
 		if(bRecordEnabled)
 		{
-			DWORD sel = CreateCursor(nRow) | m_dwCursor;
+			DWORD sel = CreateCursor(nRow, nChn, GetColTypeFromCursor(m_dwCursor));
 			if(bIsLiveRecord == false)
 			{   // Update only when not recording live.
 				SetCurSel(sel, sel);
@@ -4649,35 +4669,17 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				return;
 			}
 			
-			BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+			BYTE *activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 			if (newcmd.note <= NOTE_MAX)
 				activeNoteMap[newcmd.note] = nChn;
 
-			// Move to next channel if required
 			if (recordGroup)
 			{
-				bool channelLocked;
-
-				CHANNELINDEX n = nChn;
-				for (CHANNELINDEX i = 1; i < pSndFile->GetNumChannels(); i++)
+				// Move to next channel in record group
+				nChn = FindGroupRecordChannel(recordGroup, false, nChn + 1);
+				if(nChn != CHANNELINDEX_INVALID)
 				{
-					if (++n >= pSndFile->GetNumChannels()) n = 0; // loop around
-
-					channelLocked = false;
-					for (int k = 0; k < NOTE_MAX; k++)
-					{
-						if (activeNoteChannel[k] == n || splitActiveNoteChannel[k] == n)
-						{
-							channelLocked = true;
-							break;
-						}
-					}
-
-					if (pModDoc->IsChannelRecord(n) == recordGroup && !channelLocked)
-					{
-						SetCurrentColumn(CreateCursor(0, n));
-						break;
-					}
+					SetCurrentColumn(CreateCursor(0, nChn));
 				}
 			}
 		}
@@ -4863,6 +4865,57 @@ void CViewPattern::TempEnterChord(int note)
 }
 
 
+// Find a free channel for a record group, starting search from a given channel.
+// If forceFreeChannel is true and all channels in the specified record group are active, some channel is picked from the specified record group.
+CHANNELINDEX CViewPattern::FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel) const
+//-------------------------------------------------------------------------------------------------------------------------
+{
+	const CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr)
+	{
+		return CHANNELINDEX_INVALID;
+	}
+
+	CHANNELINDEX nChn = startChannel;
+	CHANNELINDEX foundChannel = CHANNELINDEX_INVALID;
+
+	for(CHANNELINDEX i = 1; i < pModDoc->GetNumChannels(); i++, nChn++)
+	{
+		if(nChn >= pModDoc->GetNumChannels())
+		{
+			nChn = 0; // loop around
+		}
+
+		if(pModDoc->IsChannelRecord(nChn) == recordGroup)
+		{
+			// Check if any notes are playing on this channel
+			bool channelLocked = false;
+			for(size_t k = 0; k < CountOf(activeNoteChannel); k++)
+			{
+				if (activeNoteChannel[k] == nChn || splitActiveNoteChannel[k] == nChn)
+				{
+					channelLocked = true;
+					break;
+				}
+			}
+
+			if (!channelLocked)
+			{
+				// Channel belongs to correct record group and no note is currently playing.
+				return nChn;
+			}
+
+			if(forceFreeChannel)
+			{
+				// If all channels are active, we might still pick a random channel from the specified group.
+				foundChannel = nChn;
+			}
+		}
+	}
+	return foundChannel;
+}
+
+
 void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 //-----------------------------------------------------------------
 {
@@ -5019,37 +5072,45 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 //-----------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	if (pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return false;
-
 	MODCOMMAND::INSTR ins = GetCurrentInstrument();
-	bool isSplit = false;
+	const bool isSplit = IsNoteSplit(note);
 
-	if(pModDoc->GetSplitKeyboardSettings()->IsSplitActive())
+	if(isSplit)
 	{
-		if(note <= pModDoc->GetSplitKeyboardSettings()->splitNote)
-		{
-			isSplit = true;
+		CModDoc *pModDoc = GetDocument();
+		CSoundFile *pSndFile;
+		if (pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return false;
 
-			if (pModDoc->GetSplitKeyboardSettings()->octaveLink && note <= NOTE_MAX)
-			{
-				note += 12 * pModDoc->GetSplitKeyboardSettings()->octaveModifier;
-				Limit(note, pSndFile->GetModSpecifications().noteMin, pSndFile->GetModSpecifications().noteMax);
-			}
-			if (pModDoc->GetSplitKeyboardSettings()->splitInstrument)
-			{
-				ins = pModDoc->GetSplitKeyboardSettings()->splitInstrument;
-			}
+		if (pModDoc->GetSplitKeyboardSettings().octaveLink && note <= NOTE_MAX)
+		{
+			note += 12 * pModDoc->GetSplitKeyboardSettings().octaveModifier;
+			Limit(note, pSndFile->GetModSpecifications().noteMin, pSndFile->GetModSpecifications().noteMax);
+		}
+		if (pModDoc->GetSplitKeyboardSettings().splitInstrument)
+		{
+			ins = pModDoc->GetSplitKeyboardSettings().splitInstrument;
 		}
 	}
 	
 	p->note = note;	
-	if(ins) 
+	if(ins)
+	{
 		p->instr = ins;
+	}
 
 	return isSplit;
 }
+
+
+bool CViewPattern::IsNoteSplit(int note) const
+//--------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	return(pModDoc != nullptr
+		&& pModDoc->GetSplitKeyboardSettings().IsSplitActive()
+		&& note <= pModDoc->GetSplitKeyboardSettings().splitNote);
+}
+
 
 bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const
 //---------------------------------------------------------------------------------------

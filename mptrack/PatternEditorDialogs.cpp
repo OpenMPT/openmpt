@@ -1452,7 +1452,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 
 	// Split Notes
 	AppendNotesToControl(m_CbnSplitNote, m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN, m_pSndFile->GetModSpecifications().noteMax - NOTE_MIN);
-	m_CbnSplitNote.SetCurSel(m_pOptions->splitNote - (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
+	m_CbnSplitNote.SetCurSel(m_Settings.splitNote - (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
 
 	// Octave modifier
 	for(int i = -SPLIT_OCTAVE_RANGE; i < SPLIT_OCTAVE_RANGE + 1; i++)
@@ -1462,8 +1462,8 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 		m_CbnOctaveModifier.SetItemData(n, i);
 	}
 
-	m_CbnOctaveModifier.SetCurSel(m_pOptions->octaveModifier + SPLIT_OCTAVE_RANGE);
-	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_pOptions->octaveLink && m_pOptions->octaveModifier != 0) ? MF_CHECKED : MF_UNCHECKED);
+	m_CbnOctaveModifier.SetCurSel(m_Settings.octaveModifier + SPLIT_OCTAVE_RANGE);
+	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_Settings.octaveLink && m_Settings.octaveModifier != 0) ? MF_CHECKED : MF_UNCHECKED);
 
 	// Volume
 	m_CbnSplitVolume.AddString("No Change");
@@ -1474,7 +1474,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 		int n = m_CbnSplitVolume.AddString(s);
 		m_CbnSplitVolume.SetItemData(n, i);
 	}
-	m_CbnSplitVolume.SetCurSel(m_pOptions->splitVolume);
+	m_CbnSplitVolume.SetCurSel(m_Settings.splitVolume);
 
 	// Instruments
 	m_CbnSplitInstrument.ResetContent();
@@ -1503,7 +1503,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 			}
 		}
 	}
-	m_CbnSplitInstrument.SetCurSel(m_pOptions->splitInstrument);
+	m_CbnSplitInstrument.SetCurSel(m_Settings.splitInstrument);
 
 	return TRUE;
 }
@@ -1514,11 +1514,11 @@ void CSplitKeyboadSettings::OnOK()
 {
 	CDialog::OnOK();
 
-	m_pOptions->splitNote = static_cast<MODCOMMAND::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
-	m_pOptions->octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
-	m_pOptions->octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE) ? true : false;
-	m_pOptions->splitVolume = static_cast<MODCOMMAND::VOL>(m_CbnSplitVolume.GetCurSel());
-	m_pOptions->splitInstrument = static_cast<MODCOMMAND::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));
+	m_Settings.splitNote = static_cast<MODCOMMAND::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
+	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
+	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE);
+	m_Settings.splitVolume = static_cast<MODCOMMAND::VOL>(m_CbnSplitVolume.GetCurSel());
+	m_Settings.splitInstrument = static_cast<MODCOMMAND::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));
 }
 
 
