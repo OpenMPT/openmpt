@@ -42,12 +42,16 @@ public:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
 	//Overridden methods:
-	virtual VOID OnOK()=0;
-	virtual VOID OnCancel()=0;
-	virtual BOOL OpenEditor(CWnd *parent)=0;
-	virtual VOID DoClose()=0;
-	virtual void UpdateParamDisplays()=0;
-	virtual afx_msg void OnClose()=0;
+	virtual void OnOK() = 0;
+	virtual void OnCancel() = 0;
+	virtual bool OpenEditor(CWnd *parent) = 0;
+	virtual void DoClose() = 0;
+	virtual void UpdateParamDisplays() = 0;
+	virtual afx_msg void OnClose() = 0;
+
+	virtual bool IsResizable() const = 0;
+	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
+
 	DECLARE_MESSAGE_MAP()
 
 private:

@@ -389,7 +389,7 @@ BOOL CDefaultVstEditor::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 }
 
 
-BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
+bool CDefaultVstEditor::OpenEditor(CWnd *parent)
 //----------------------------------------------
 {
 	Create(IDD_DEFAULTPLUGINEDITOR, parent);
@@ -415,7 +415,7 @@ BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
 
 	ShowWindow(SW_SHOW);
 
-	return TRUE;
+	return true;
 }
 
 
