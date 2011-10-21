@@ -1521,8 +1521,6 @@ void CViewGlobals::OnFillParamCombo()
 	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
 	if(pVstPlugin == nullptr) return;
 
-	CHAR s[128];
-	CHAR sname[64];
 	const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 	m_CbnParam.SetRedraw(FALSE);
 	m_CbnParam.ResetContent();

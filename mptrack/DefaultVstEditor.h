@@ -62,9 +62,13 @@ public:
 
 	virtual void OnOK();
 	virtual void OnCancel();
-	BOOL OpenEditor(CWnd *parent);
+	bool OpenEditor(CWnd *parent);
 	void DoClose();
 	afx_msg void OnClose();
+
+	// Plugins may not request to change the GUI size, since we use our own GUI.
+	virtual bool IsResizable() const { return false; };
+	virtual bool SetSize(int, int) { return false; };
 
 protected:
 

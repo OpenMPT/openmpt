@@ -19,17 +19,18 @@ protected:
 public:
 	COwnerVstEditor(CVstPlugin *pPlugin);
 	virtual ~COwnerVstEditor();
-	virtual VOID OnOK();
-	virtual VOID OnCancel();
-	afx_msg void OnLoadPreset();
-	afx_msg void OnSavePreset();
-	afx_msg void OnRandomizePreset();
+	virtual void OnOK();
+	virtual void OnCancel();
+
+	// Plugins may request to change the GUI size.
+	virtual bool IsResizable() const { return true; };
+	virtual bool SetSize(int contentWidth, int contentHeight);
 
 	//Overridden:
-	void UpdateParamDisplays() {m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0); };	//we trust that the plugin GUI can update it's display with a bit of idle time.
+	void UpdateParamDisplays() { m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0); };	//we trust that the plugin GUI can update its display with a bit of idle time.
 	afx_msg void OnClose();
-	BOOL OpenEditor(CWnd *parent);
-	VOID DoClose();
+	bool OpenEditor(CWnd *parent);
+	void DoClose();
 };
 
 #endif // NO_VST
