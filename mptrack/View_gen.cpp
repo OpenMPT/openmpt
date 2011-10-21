@@ -426,7 +426,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
 		SetDlgItemText(IDC_EDIT13, pPlugin->Info.szName);
 		CheckDlgButton(IDC_CHECK9, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK10, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) ? TRUE : FALSE);
+		CheckDlgButton(IDC_CHECK10, (pPlugin->IsBypassed()) ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK11, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) ? TRUE : FALSE);
 		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
 		m_BtnEdit.EnableWindow(((pVstPlugin) && ((pVstPlugin->HasEditor()) || (pVstPlugin->GetNumCommands()))) ? TRUE : FALSE);
@@ -465,7 +465,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 		if (pVstPlugin)
 		{
-			UINT nParams = pVstPlugin->GetNumParameters();
+			const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 			m_CbnParam.SetRedraw(FALSE);
 			m_CbnParam.ResetContent();
 			if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
@@ -727,7 +727,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				if (pPlugin->pMixPlugin)
 				{
 					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-					UINT nParams = pVstPlugin->GetNumParameters();
+					const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 					if (m_nCurrentParam < nParams)
 					{
 						FLOAT fValue = 0.01f * n;
@@ -1069,7 +1069,6 @@ VOID CViewGlobals::OnSetParameter()
 //---------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CHAR s[256];
 	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	
@@ -1079,7 +1078,8 @@ VOID CViewGlobals::OnSetParameter()
 	if (pPlugin->pMixPlugin)
 	{
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-		UINT nParams = pVstPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+		CHAR s[32];
 		GetDlgItemText(IDC_EDIT14, s, sizeof(s));
 		if ((m_nCurrentParam < nParams) && (s[0]))
 		{
@@ -1176,13 +1176,7 @@ VOID CViewGlobals::OnBypassChanged()
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (IsDlgButtonChecked(IDC_CHECK10))
-	{
-		pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
-	} else
-	{
-		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
-	}
+	pPlugin->Bypass(IsDlgButtonChecked(IDC_CHECK10) != FALSE);
 
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();

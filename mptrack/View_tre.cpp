@@ -2499,9 +2499,9 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 					if (pSndFile) {
 						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[modItemID];
-						if (pPlugin) {
-							bool bypassed = ((pPlugin->Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS) != 0);
-							AppendMenu(hMenu, (bypassed?MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Bypass");
+						if (pPlugin)
+						{
+							AppendMenu(hMenu, (pPlugin->IsBypassed() ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, "&Bypass");
 						}
 					}
 				}
@@ -2875,7 +2875,7 @@ void CModTree::OnMuteTreeItem()
 			CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 			if(pVstPlugin == nullptr)
 				return;
-			pVstPlugin->Bypass();
+			pVstPlugin->ToggleBypass();
 			pModDoc->SetModified();
 			//UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_MIXPLUGINS);
 		}

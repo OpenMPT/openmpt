@@ -384,15 +384,19 @@ public:
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
 	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
+	virtual void AutomateParameter(PlugParamIndex param) = 0;
 	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
-	virtual void NotifySongPlaying(bool)=0;	//rewbs.VSTCompliance
-	virtual bool IsSongPlaying()=0;
-	virtual bool IsResumed()=0;
-	virtual void Resume()=0;
-	virtual void Suspend()=0;
-	virtual bool isInstrument()=0;
-	virtual bool CanRecieveMidiEvents()=0;
-	virtual void SetDryRatio(UINT param)=0;
+	virtual void NotifySongPlaying(bool) = 0;	//rewbs.VSTCompliance
+	virtual bool IsSongPlaying() = 0;
+	virtual bool IsResumed() = 0;
+	virtual void Resume() = 0;
+	virtual void Suspend() = 0;
+	virtual bool Bypass(bool = true) = 0;
+	virtual bool IsBypassed() const = 0;
+	bool ToggleBypass() { return Bypass(!IsBypassed()); };
+	virtual bool isInstrument() = 0;
+	virtual bool CanRecieveMidiEvents() = 0;
+	virtual void SetDryRatio(UINT param) = 0;
 
 };
 
@@ -445,6 +449,8 @@ struct SNDMIXPLUGIN
 	const char* GetName() const {return Info.szName;}
 	const char* GetLibraryName();
 	CString GetParamName(const UINT index) const;
+	bool Bypass(bool bypass);
+	bool IsBypassed() const { return (Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) != 0; };
 
 	IMixPlugin *pMixPlugin;
 	PSNDMIXPLUGINSTATE pMixState;

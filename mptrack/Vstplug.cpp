@@ -1896,7 +1896,7 @@ CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 	CString name;
 	if(paramName.IsEmpty())
 	{
-		name.Format("Parameter %02d", param);
+		name.Format("%02d: Parameter %02d", param, param);
 	} else
 	{
 		name.Format("%02d: %s", param, paramName);
@@ -2094,7 +2094,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			m_pProcessFP(m_pEffect, m_pInputs, m_pOutputs, nSamples);
 		} catch (...)
 		{
-			m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
+			Bypass();
 			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod);
 			ClearVSTEvents();
@@ -2962,12 +2962,14 @@ BOOL CVstPlugin::ExecuteCommand(UINT nIndex)
 	return 0;
 }
 
+
 //rewbs.defaultPlugGui
 CAbstractVstEditor* CVstPlugin::GetEditor()
 //-----------------------------------------
 {
 	return m_pEditor;
 }
+
 
 bool CVstPlugin::Bypass(bool bypass)
 //-----------------------------------
@@ -2977,6 +2979,8 @@ bool CVstPlugin::Bypass(bool bypass)
 	else
 		m_pMixStruct->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
 
+	Dispatch(effSetBypass, bypass ? 1 : 0, nullptr, nullptr, 0.0f);
+
 #ifdef MODPLUG_TRACKER
 	if (m_pModDoc)
 		m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
@@ -2984,17 +2988,7 @@ bool CVstPlugin::Bypass(bool bypass)
 
 	return bypass;
 }
-bool CVstPlugin::Bypass()
-//-----------------------
-{
-	return Bypass(!IsBypassed());
-}
 
-bool CVstPlugin::IsBypassed()
-//---------------------------
-{
-	return ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) != 0);
-}
 
 //end rewbs.defaultPlugGui
 //rewbs.defaultPlugGui: CVstEditor now COwnerVstEditor
@@ -4082,7 +4076,7 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 const char* SNDMIXPLUGIN::GetLibraryName()
 //------------------------------------
 {
-	Info.szLibraryName[63] = 0;
+	StringFixer::SetNullTerminator(Info.szLibraryName);
     if(Info.szLibraryName[0]) return Info.szLibraryName;
 	else return 0;
 }
@@ -4098,4 +4092,25 @@ CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 	}
 	else
 		return CString();
+}
+
+
+bool SNDMIXPLUGIN::Bypass(bool bypass)
+//------------------------------------
+{
+	if(pMixPlugin)
+	{
+		return pMixPlugin->Bypass(bypass);
+	} else
+	{
+		// No plugin loaded, just toggle the flags.
+		if(bypass)
+		{
+			Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
+		} else
+		{
+			Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
+		}
+		return bypass;
+	}
 }

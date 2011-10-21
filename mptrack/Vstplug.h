@@ -152,9 +152,9 @@ public:
 	BOOL ExecuteCommand(UINT nIndex);
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	BOOL GetSpeakerArrangement(); //rewbs.VSTCompliance
-	bool Bypass(bool);  //rewbs.defaultPlugGUI
-	bool Bypass();  //rewbs.defaultPlugGUI
-	bool IsBypassed();  //rewbs.defaultPlugGUI
+
+	bool Bypass(bool bypass = true);  //rewbs.defaultPlugGUI
+	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); }; //rewbs.defaultPlugGUI
 
 	bool isInstrument(); // ericus 18/02/2005
 	bool CanRecieveMidiEvents();
@@ -193,7 +193,6 @@ public:
 	void SetDryRatio(UINT param);
 	void AutomateParameter(PlugParamIndex param);
 
-
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 
@@ -219,6 +218,7 @@ public:
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
 
 	CString GetFormattedParamName(PlugParamIndex) { return ""; };
+	CString GetFormattedParamValue(PlugParamIndex){ return ""; };
 	CString GetParamName(PlugParamIndex) { return ""; };
 	CString GetParamLabel(PlugParamIndex) { return ""; };
 	CString GetParamDisplay(PlugParamIndex) { return ""; };
@@ -230,7 +230,9 @@ public:
 	BOOL ExecuteCommand(UINT) {return FALSE;}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}
-	bool Bypass() {return false;}
+
+	bool Bypass(bool) { return false; }
+	bool IsBypassed() const { return false; }
 
 #endif // NO_VST
 };

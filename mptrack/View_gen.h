@@ -30,7 +30,7 @@ protected:
 	CButton m_BtnSelect, m_BtnEdit;
 	int m_nActiveTab, m_nLockCount;
 	PLUGINDEX m_nCurrentPlugin;
-	UINT m_nCurrentParam;
+	PlugParamIndex m_nCurrentParam;
 // -> CODE#0002
 // -> DESC="VST plugins presets"
 	UINT m_nCurrentPreset;
