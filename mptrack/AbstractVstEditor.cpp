@@ -201,7 +201,7 @@ void CAbstractVstEditor::OnBypassPlug()
 {
 	if (m_pVstPlugin)
 	{
-		m_pVstPlugin->Bypass();
+		m_pVstPlugin->ToggleBypass();
 	}
 }
 
