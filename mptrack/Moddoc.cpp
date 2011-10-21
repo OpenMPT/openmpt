@@ -567,7 +567,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	switch(m_SndFile.GetType())
 	{
 	case MOD_TYPE_MOD:
-		MsgBoxHidable(ModCompatibilityExportTip);
+		MsgBoxHidable(ModSaveHint);
 		break;
 	case MOD_TYPE_S3M:
 		break;
@@ -1830,26 +1830,16 @@ void CModDoc::OnFileCompatibilitySave()
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 	switch (type)
 	{
-		case MOD_TYPE_MOD:
-			pattern = FileFilterMOD;
-			if(Reporting::Confirm(GetStrI18N(TEXT(
-				"Compared to regular MOD save, compatibility export adjusts the beginning of oneshot samples "
-				"in order to make the file compatible with ProTracker and other Amiga-based trackers. "
-				"Note that this feature does not remove effects \"invented\" by other PC-based trackers (f.e. panning commands)."
-				"\n\n Proceed?"))) != cnfYes
-				)
-				return;
-			break;
 		case MOD_TYPE_IT:
 			pattern = FileFilterIT;
-			Reporting::Information("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.");
+			MsgBoxHidable(CompatExportDefaultWarning);
 			break;
 		case MOD_TYPE_XM:
 			pattern = FileFilterXM;
-			Reporting::Information("Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.");
+			MsgBoxHidable(CompatExportDefaultWarning);
 			break;
 		default:
-			Reporting::Information("Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.");
+			// Not available for this format.
 			return;
 	}
 	ext = m_SndFile.GetModSpecifications().fileExtension;
@@ -1871,11 +1861,6 @@ void CModDoc::OnFileCompatibilitySave()
 	FixNullStrings();
 	switch (type)
 	{
-		case MOD_TYPE_MOD:
-			m_SndFile.SaveMod(files.first_file.c_str(), 0, true);
-			SetModified(); // Compatibility save may adjust samples so set modified...
-			m_ShowSavedialog = true;	// ...and force save dialog to appear when saving.
-			break;
 		case MOD_TYPE_XM:
 			m_SndFile.SaveXM(files.first_file.c_str(), 0, true);
 			break;
@@ -2120,7 +2105,7 @@ void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
 //---------------------------------------------------
 {
 	if (p)
-		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MOD)) ? TRUE : FALSE);
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 }
 
 
@@ -3312,7 +3297,7 @@ CString CModDoc::GetMacroName(enmParameteredMacroType macro)
 	case sfx_drywet:
 		return _T("Set Plugin Dry/Wet Ratio");
 	case sfx_plug:
-		return _T("Control Plugin Param...");
+		return _T("Control Plugin Parameter...");
 	case sfx_cc:
 		return _T("MIDI CC...");
 	case sfx_custom:

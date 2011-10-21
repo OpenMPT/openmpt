@@ -862,7 +862,7 @@ public:
 	UINT WriteSample(FILE *f, const MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0) const;
 	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
-	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
+	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
 	bool SaveIT(LPCSTR lpszFileName, UINT nPacking=0, const bool compatExport = false);
 	bool SaveITProject(LPCSTR lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
