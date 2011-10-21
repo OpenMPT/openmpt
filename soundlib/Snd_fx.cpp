@@ -662,14 +662,11 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		return;
 	}
 
-	pChn->nLength = pSmp->nLength;
-	pChn->nLoopStart = pSmp->nLoopStart;
-	pChn->nLoopEnd = pSmp->nLoopEnd;
-
 	// Tone-Portamento doesn't reset the pingpong direction flag
 	if ((bPorta) && (pSmp == pChn->pModSample))
 	{
-		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) return;
+		// If channel length is 0, we cut a previous sample using SCx. In that case, we have to update sample length, loop points, etc...
+		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && pChn->nLength != 0) return;
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE);
 		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 	} else
@@ -700,7 +697,11 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		pChn->nVolSwing = pChn->nPanSwing = 0;
 		pChn->nResSwing = pChn->nCutSwing = 0;
 	}
+
 	pChn->pModSample = pSmp;
+	pChn->nLength = pSmp->nLength;
+	pChn->nLoopStart = pSmp->nLoopStart;
+	pChn->nLoopEnd = pSmp->nLoopEnd;
 
 	// IT Compatibility: Autovibrato reset
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
