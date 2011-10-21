@@ -269,7 +269,7 @@ public:
 
 	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }
 	CSampleUndo *GetSampleUndo() { return &m_SampleUndo; }
-	SplitKeyboardSettings *GetSplitKeyboardSettings() { return &m_SplitKeyboardSettings; }
+	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
 	vector<FileHistory> *GetFileHistory() { return &m_FileHistory; }
 	const vector<FileHistory> *GetFileHistory() const { return &m_FileHistory; }

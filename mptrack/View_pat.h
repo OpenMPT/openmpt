@@ -358,6 +358,9 @@ public:
 private:
 	void SetSplitKeyboardSettings();
 	bool HandleSplit(MODCOMMAND *p, int note);
+	bool IsNoteSplit(int note) const;
+
+	CHANNELINDEX FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
 
 	bool BuildChannelControlCtxMenu(HMENU hMenu) const;
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
