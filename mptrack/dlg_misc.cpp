@@ -764,14 +764,10 @@ BOOL CMidiMacroSetup::OnInitDialog()
 		m_CbnSFx.AddString(s);
 	}
 	m_CbnSFx.SetCurSel(0);
-	m_CbnSFxPreset.AddString("Unused");
-	m_CbnSFxPreset.AddString("Set Filter Cutoff");
-	m_CbnSFxPreset.AddString("Set Filter Resonance");
-	m_CbnSFxPreset.AddString("Set Filter Mode");
-	m_CbnSFxPreset.AddString("Plugin Dry/Wet Ratio");
-	m_CbnSFxPreset.AddString("Control Plugin Param...");
-	m_CbnSFxPreset.AddString("MIDI CC...");
-	m_CbnSFxPreset.AddString("Custom");
+	for(int i = 0; i < sfx_max; i++)
+	{
+		m_CbnSFxPreset.SetItemData(m_CbnSFxPreset.AddString(CModDoc::GetMacroName(static_cast<enmParameteredMacroType>(i))), i);
+	}
 	OnSFxChanged();
 
 	for (UINT cc=MIDICC_start; cc<=MIDICC_end; cc++)
@@ -902,7 +898,7 @@ void CMidiMacroSetup::UpdateDialog()
 	UINT sfx, sfx_preset, zxx;
 
 	sfx = m_CbnSFx.GetCurSel();
-	sfx_preset = m_CbnSFxPreset.GetCurSel();
+	sfx_preset = m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel());
 	if (sfx < 16)
 	{
 		ToggleBoxes(sfx_preset, sfx);
@@ -984,7 +980,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 //----------------------------------------
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
-	UINT sfx_preset = m_CbnSFxPreset.GetCurSel();
+	UINT sfx_preset = m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel());
 
 	if (sfx < 16)
 	{
@@ -1767,10 +1763,11 @@ struct MsgBoxHidableMessage
 
 const MsgBoxHidableMessage HidableMessages[] =
 {
-	{TEXT("Tip: To create ProTracker compatible MOD-files, try compatibility export from File-menu."), 1, true},
-	{TEXT("Tip: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
+	{TEXT("Note: First two bytes of oneshot samples is silenced for ProTracker compatibility."), 1, true},
+	{TEXT("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
 	{TEXT("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false},
-	{TEXT("Tip: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
+	{TEXT("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true},
+	{TEXT("Warning: the exported file will not contain any of MPT's file format hacks."), 1 << 4, true},
 };
 
 STATIC_ASSERT(ARRAYELEMCOUNT(HidableMessages) == enMsgBoxHidableMessage_count);

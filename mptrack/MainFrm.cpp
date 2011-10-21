@@ -2371,6 +2371,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		case kcFileSaveAs:
 		case kcFileSaveAsWave:
+		case kcFileSaveAsMP3:
 		case kcFileSaveMidi:
 		case kcFileExportCompat:
 		case kcFileClose:
@@ -2651,20 +2652,18 @@ void CMainFrame::CreateTemplateModulesMenu()
 void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames)
 //----------------------------------------------------------------------------------------------
 {
-#ifndef NO_VST
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		PSNDMIXPLUGIN p = &plugarray[iPlug];
 		CString str;
 		str.Preallocate(80);
-		str.Format(_T("FX%d: "), iPlug+1);
+		str.Format(_T("FX%d: "), iPlug + 1);
 		const int size0 = str.GetLength();
 		str += (librarynames) ? p->GetLibraryName() : p->GetName();
 		if(str.GetLength() <= size0) str += _T("undefined");
 
 		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
 	}
-#endif // NO_VST
 }
 
 

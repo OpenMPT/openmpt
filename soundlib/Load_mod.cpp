@@ -553,8 +553,8 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 #include "../mptrack/moddoc.h"
 #endif	// MODPLUG_TRACKER
 
-bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
-//-------------------------------------------------------------------------------------------
+bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
+//----------------------------------------------------------
 {
 	BYTE insmap[32];
 	UINT inslen[32];
@@ -703,12 +703,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	// Writing instruments
 	for (UINT ismpd = 1; ismpd <= 31; ismpd++) if (inslen[ismpd])
 	{
-		MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
-		if(bCompatibilityExport == true) // first two bytes have to be 0 due to PT's one-shot loop ("no loop")
-		{
-			size_t iOverwriteLen = 2 * pSmp->GetBytesPerSample();
-			memset(pSmp->pSample, 0, min(iOverwriteLen, pSmp->GetSampleSizeInBytes()));
-		}
+		const MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
+
 		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING
 		if (!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
@@ -720,7 +716,20 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 			}
 		}
 #endif
-		WriteSample(f, pSmp, flags, inslen[ismpd]);
+		const long sampleStart = ftell(f);
+
+		const UINT writtenBytes = WriteSample(f, pSmp, flags, inslen[ismpd]);
+
+		if((pSmp->uFlags & CHN_LOOP) == 0)
+		{
+			// First two bytes of oneshot samples have to be 0 due to PT's one-shot loop
+			const long sampleEnd = ftell(f);
+			fseek(f, sampleStart, SEEK_SET);
+			int8 silence[] = { 0, 0 };
+			fwrite(&silence, 1, min(writtenBytes, 2), f);
+			fseek(f, sampleEnd, SEEK_SET);
+		}
+
 		// write padding byte if the sample size is odd.
 		if((pSmp->nLength & 1) && !nPacking)
 		{

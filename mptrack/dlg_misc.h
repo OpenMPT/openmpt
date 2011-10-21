@@ -283,10 +283,11 @@ protected:
 // Enums for message entries. See dlg_misc.cpp for the array of entries.
 enum enMsgBoxHidableMessage
 {
-	ModCompatibilityExportTip		= 0,
+	ModSaveHint						= 0,
 	ItCompatibilityExportTip		= 1,
 	ConfirmSignUnsignWhenPlaying	= 2,
 	XMCompatibilityExportTip		= 3,
+	CompatExportDefaultWarning		= 4,
 	enMsgBoxHidableMessage_count
 };
 
