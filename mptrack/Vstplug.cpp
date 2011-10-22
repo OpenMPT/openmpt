@@ -300,6 +300,10 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	{
 		BOOL bOk = FALSE;
 		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "main");
+		if(pMainProc == NULL)
+		{
+			pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "VSTPluginMain");
+		}
 	#ifdef ENABLE_BUZZ
 		GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLib, "GetInfo");
 	#endif // ENABLE_BUZZ
@@ -569,6 +573,10 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 			{
 				AEffect *pEffect = NULL;
 				PVSTPLUGENTRY pEntryPoint = (PVSTPLUGENTRY)GetProcAddress(hLibrary, "main");
+				if(pEntryPoint == NULL)
+				{
+					pEntryPoint = (PVSTPLUGENTRY)GetProcAddress(hLibrary, "VSTPluginMain");
+				}
 			#ifdef ENABLE_BUZZ
 				GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLibrary, "GetInfo");
 				CREATE_MACHINE pBuzzCreateMachine = (CREATE_MACHINE)GetProcAddress(hLibrary, "CreateMachine");
@@ -827,7 +835,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	
 	// parameters - DEPRECATED in VST 2.4
 	case audioMasterGetNumAutomatableParameters:
-		Log("VST plugin to host: Get Num Automatable Parameters\n");
+		//Log("VST plugin to host: Get Num Automatable Parameters\n");
+		if(pVstPlugin != nullptr)
+		{
+			return pVstPlugin->GetNumParameters();
+		}
 		break;
 	
 	// Apparently, this one is broken in VST SDK anyway. - DEPRECATED in VST 2.4
@@ -909,7 +921,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		// Not entirely sure what this means. We can write automation TO the plug.
 		// Is that "read" in this context?
 		//Log("VST plugin to host: Get Automation State\n");
-		return kVstAutomationRead;
+		return kVstAutomationReadWrite;
 
 	case audioMasterOfflineStart:
 		Log("VST plugin to host: Offlinestart\n");
@@ -942,7 +954,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		break;
 	
 	case audioMasterGetVendorString:
-		strcpy((char *) ptr, s_szHostVendorString);
+		strncpy((char *) ptr, s_szHostVendorString, 64);
 		//strcpy((char*)ptr,"Steinberg");
 		//return 0;
 		return true;
@@ -952,7 +964,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//return 7000;
 	
 	case audioMasterGetProductString:
-		strcpy((char *) ptr, s_szHostProductString);
+		strncpy((char *) ptr, s_szHostProductString, 64);
 		//strcpy((char*)ptr,"Cubase VST");
 		//return 0;
 		return true;
@@ -1602,7 +1614,7 @@ long CVstPlugin::GetNumPrograms()
 	return 0;
 }
 
-//rewbs.VSTcompliance: changed from BOOL to long
+
 PlugParamIndex CVstPlugin::GetNumParameters()
 //-------------------------------------------
 {
@@ -1613,7 +1625,7 @@ PlugParamIndex CVstPlugin::GetNumParameters()
 	return 0;
 }
 
-//rewbs.VSTpresets
+
 VstInt32 CVstPlugin::GetUID()
 //---------------------------
 {
@@ -1621,6 +1633,7 @@ VstInt32 CVstPlugin::GetUID()
 		return 0;
 	return m_pEffect->uniqueID;
 }
+
 
 VstInt32 CVstPlugin::GetVersion()
 //-------------------------------
@@ -1631,21 +1644,22 @@ VstInt32 CVstPlugin::GetVersion()
 	return m_pEffect->version;
 }
 
+
 bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
 //------------------------------------------------------------------
 {
 	if (!(m_pEffect))
 		return false;
 
-	if (max>m_pEffect->numParams)
-		max = m_pEffect->numParams;
+	LimitMax(max, m_pEffect->numParams);
 
 	for (VstInt32 p = min; p < max; p++)
-		param[p-min]=GetParameter(p);
+		param[p - min]=GetParameter(p);
 
 	return true;
 
 }
+
 
 bool CVstPlugin::RandomizeParams(VstInt32 minParam, VstInt32 maxParam)
 //--------------------------------------------------------------------
@@ -1653,22 +1667,20 @@ bool CVstPlugin::RandomizeParams(VstInt32 minParam, VstInt32 maxParam)
 	if (!(m_pEffect))
 		return false;
 
-	if (minParam==0 && maxParam==0)
+	if (minParam == 0 && maxParam == 0)
 	{
-		minParam=0;
-		maxParam=m_pEffect->numParams;
+		minParam = 0;
+		maxParam = m_pEffect->numParams;
 
 	}
-    else if (maxParam>m_pEffect->numParams)
-	{
-		maxParam=m_pEffect->numParams;
-	}
+	LimitMax(maxParam, m_pEffect->numParams);
 
 	for (VstInt32 p = minParam; p < maxParam; p++)
 		SetParameter(p, (rand() / float(RAND_MAX)));
 
 	return true;
 }
+
 
 bool CVstPlugin::SaveProgram(CString fileName)
 //--------------------------------------------
@@ -1714,6 +1726,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
 
 }
 
+
 bool CVstPlugin::LoadProgram(CString fileName)
 //--------------------------------------------
 {
@@ -1741,6 +1754,7 @@ bool CVstPlugin::LoadProgram(CString fileName)
 	return true;
 }
 //end rewbs.VSTpresets
+
 
 VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------
@@ -3031,17 +3045,20 @@ PLUGINDEX CVstPlugin::FindSlot()
 	return slot;
 }
 
+
 void CVstPlugin::SetSlot(PLUGINDEX slot)
 //--------------------------------------
 {
 	m_nSlot = slot;
 }
 
+
 PLUGINDEX CVstPlugin::GetSlot()
 //-----------------------------
 {
 	return m_nSlot;
 }
+
 
 void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
 //--------------------------------------------------
@@ -3058,12 +3075,13 @@ bool CVstPlugin::isInstrument() // ericus 18/02/2005
 	return false;
 }
 
+
 bool CVstPlugin::CanRecieveMidiEvents()
 //-------------------------------------
 {
-	CString s = "receiveVstMidiEvent";
-	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0) != 0);
+	return (CVstPlugin::Dispatch(effCanDo, 0, nullptr, "receiveVstMidiEvent", 0.0f) != 0);
 }
+
 
 void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 //------------------------------------------------------------------------
@@ -4073,15 +4091,16 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 }
 
 
+#endif // NO_VST
+
 const char* SNDMIXPLUGIN::GetLibraryName()
-//------------------------------------
+//----------------------------------------
 {
 	StringFixer::SetNullTerminator(Info.szLibraryName);
-    if(Info.szLibraryName[0]) return Info.szLibraryName;
+	if(Info.szLibraryName[0]) return Info.szLibraryName;
 	else return 0;
 }
 
-#endif // NO_VST
 
 CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 //--------------------------------------------------------
@@ -4091,7 +4110,9 @@ CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 		return reinterpret_cast<CVstPlugin *>(pMixPlugin)->GetParamName(index);
 	}
 	else
+	{
 		return CString();
+	}
 }
 
 

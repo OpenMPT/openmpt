@@ -396,6 +396,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			pIns->nGlobalVol = 64;
 			pIns->nPan = 128;
 		}
+
+		// Convert XM to IT/MPTM - fix fadeout length
+		if(oldTypeIsXM && newTypeIsIT_MPT)
+		{
+			LimitMax(pIns->nFadeOut, 8192u);
+		}
+
+
 		// Convert MPT to anything - remove instrument tunings, Pitch/Tempo Lock
 		if(oldTypeIsMPT)
 		{

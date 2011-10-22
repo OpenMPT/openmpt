@@ -1311,7 +1311,7 @@ void CModDoc::ReinitRecordState(bool unselect)
 bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)
 //-------------------------------------------------------
 {
-	if ((nSample < 1) || (nSample > m_SndFile.m_nSamples)) return false;
+	if ((nSample < 1) || (nSample > m_SndFile.GetNumSamples())) return false;
 	if (bMute) m_SndFile.GetSample(nSample).uFlags |= CHN_MUTE;
 	else m_SndFile.GetSample(nSample).uFlags &= ~CHN_MUTE;
 	return true;
@@ -1320,7 +1320,7 @@ bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)
 bool CModDoc::MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute)
 //--------------------------------------------------------------
 {
-	if ((nInstr < 1) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return false;
+	if ((nInstr < 1) || (nInstr > m_SndFile.GetNumInstruments()) || (!m_SndFile.Instruments[nInstr])) return false;
 	if (bMute) m_SndFile.Instruments[nInstr]->dwFlags |= INS_MUTE;
 	else m_SndFile.Instruments[nInstr]->dwFlags &= ~INS_MUTE;
 	return true;
@@ -1330,26 +1330,31 @@ bool CModDoc::MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute)
 bool CModDoc::SurroundChannel(CHANNELINDEX nChn, bool bSurround)
 //--------------------------------------------------------------
 {
-	DWORD d = (bSurround) ? CHN_SURROUND : 0;
+	DWORD d = (bSurround ? CHN_SURROUND : 0);
 	
-	if (nChn >= m_SndFile.m_nChannels) return false;
-	if (!(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) d = 0;
+	if (nChn >= m_SndFile.GetNumChannels()) return false;
+	if (!(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) d = 0;
 	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SURROUND))
 	{
-		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
+		if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 		if (d)
 		{
 			m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SURROUND;
 			m_SndFile.ChnSettings[nChn].nPan = 128;
-		}
-		else
+		} else
 		{
 			m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
 		}
 		
 	}
-	if (d)	m_SndFile.Chn[nChn].dwFlags |= CHN_SURROUND;
-	else	m_SndFile.Chn[nChn].dwFlags &= ~CHN_SURROUND;
+	if (d)
+	{
+		m_SndFile.Chn[nChn].dwFlags |= CHN_SURROUND;
+		m_SndFile.Chn[nChn].nPan = 128;
+	} else
+	{
+		m_SndFile.Chn[nChn].dwFlags &= ~CHN_SURROUND;
+	}
 	return true;
 }
 
@@ -1358,7 +1363,7 @@ bool CModDoc::SetChannelGlobalVolume(CHANNELINDEX nChn, UINT nVolume)
 //-------------------------------------------------------------------
 {
 	bool bOk = false;
-	if ((nChn >= m_SndFile.m_nChannels) || (nVolume > 64)) return false;
+	if ((nChn >= m_SndFile.GetNumChannels()) || (nVolume > 64)) return false;
 	if (m_SndFile.ChnSettings[nChn].nVolume != nVolume)
 	{
 		m_SndFile.ChnSettings[nChn].nVolume = nVolume;
@@ -1374,7 +1379,7 @@ bool CModDoc::SetChannelDefaultPan(CHANNELINDEX nChn, UINT nPan)
 //--------------------------------------------------------------
 {
 	bool bOk = false;
-	if ((nChn >= m_SndFile.m_nChannels) || (nPan > 256)) return false;
+	if ((nChn >= m_SndFile.GetNumChannels()) || (nPan > 256)) return false;
 	if (m_SndFile.ChnSettings[nChn].nPan != nPan)
 	{
 		m_SndFile.ChnSettings[nChn].nPan = nPan;
