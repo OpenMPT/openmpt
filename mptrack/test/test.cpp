@@ -464,8 +464,8 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
 	
 	// Edit history
-	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory()->size() > 0, true);
-	const FileHistory &fh = pModDoc->GetFileHistory()->at(0);
+	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory().size() > 0, true);
+	const FileHistory &fh = pModDoc->GetFileHistory().at(0);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_year, 111);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mon, 5);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mday, 14);

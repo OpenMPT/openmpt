@@ -756,7 +756,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 			if(GetpModDoc() != nullptr)
 			{
-				GetpModDoc()->GetFileHistory()->clear();
+				GetpModDoc()->GetFileHistory().clear();
 				for(size_t n = 0; n < nflt; n++)
 				{
 					ITHISTORYSTRUCT itHistory = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
@@ -774,7 +774,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					mptHistory.loadDate.tm_min = CLAMP((itHistory.fattime >> 5) & 0x3F, 0, 59);
 					mptHistory.loadDate.tm_sec = CLAMP((itHistory.fattime & 0x1F) * 2, 0, 59);
 					mptHistory.openTime = itHistory.runtime * (HISTORY_TIMER_PRECISION / 18.2f);
-					GetpModDoc()->GetFileHistory()->push_back(mptHistory);
+					GetpModDoc()->GetFileHistory().push_back(mptHistory);
 
 #ifdef DEBUG
 					const uint32 seconds = (uint32)(((double)itHistory.runtime) / 18.2f);
@@ -1305,7 +1305,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 {
 #ifdef MODPLUG_TRACKER
 	CModDoc *pModDoc = pSndFile->GetpModDoc();
-	const size_t num = (pModDoc != nullptr) ? pModDoc->GetFileHistory()->size() + 1 : 0;	// + 1 for this session
+	const size_t num = (pModDoc != nullptr) ? pModDoc->GetFileHistory().size() + 1 : 0;	// + 1 for this session
 #else
 	const size_t num = 0;
 #endif // MODPLUG_TRACKER
@@ -1332,7 +1332,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 		if(n < num - 1)
 		{
 			// Previous timestamps
-			const FileHistory *mptHistory = &(pModDoc->GetFileHistory()->at(n));
+			const FileHistory *mptHistory = &(pModDoc->GetFileHistory().at(n));
 			loadDate = mptHistory->loadDate;
 			openTime = mptHistory->openTime * (18.2f / HISTORY_TIMER_PRECISION);
 		} else

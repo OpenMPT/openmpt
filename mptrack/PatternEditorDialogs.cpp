@@ -727,7 +727,7 @@ void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
 	{
 		if(!m_bModified)	// let's create just one undo step.
 		{
-			m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
+			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
 			m_bModified = true;
 		}
 		m->note = note;
@@ -756,7 +756,7 @@ void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
 	{
 		if(!m_bModified)	// let's create just one undo step.
 		{
-			m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
+			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
 			m_bModified = true;
 		}
 		m->volcmd = volcmd;
@@ -796,7 +796,7 @@ void CEditCommand::UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM p
 	{
 		if(!m_bModified)	// let's create just one undo step.
 		{
-			m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
+			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
 			m_bModified = true;
 		}
 		m->command = command;

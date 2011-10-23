@@ -1674,11 +1674,11 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 	CString s;
 	uint64 totalTime = 0;
-	const size_t num = m_pModDoc->GetFileHistory()->size();
+	const size_t num = m_pModDoc->GetFileHistory().size();
 	
 	for(size_t n = 0; n < num; n++)
 	{
-		const FileHistory *hist = &(m_pModDoc->GetFileHistory()->at(n));
+		const FileHistory *hist = &(m_pModDoc->GetFileHistory().at(n));
 		totalTime += hist->openTime;
 
 		// Date
@@ -1708,7 +1708,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		SetWindowText(s);
 	}
 	// Enable or disable Clear button
-	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory()->empty()) ? FALSE : TRUE);
+	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory().empty()) ? FALSE : TRUE);
 
 	return TRUE;
 
@@ -1718,9 +1718,9 @@ BOOL CEditHistoryDlg::OnInitDialog()
 void CEditHistoryDlg::OnClearHistory()
 //------------------------------------
 {
-	if(m_pModDoc != nullptr && !m_pModDoc->GetFileHistory()->empty())
+	if(m_pModDoc != nullptr && !m_pModDoc->GetFileHistory().empty())
 	{
-		m_pModDoc->GetFileHistory()->clear();
+		m_pModDoc->GetFileHistory().clear();
 		m_pModDoc->SetModified();
 		OnInitDialog();
 	}

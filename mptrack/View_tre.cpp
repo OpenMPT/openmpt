@@ -1435,7 +1435,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_SAMPLE:
 		wsprintf(s, _T("Remove sample %d?"), modItemID);
 		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
-		pModDoc->GetSampleUndo()->PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
 		if (pModDoc->RemoveSample((SAMPLEINDEX)modItemID))
 		{
 			pModDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);

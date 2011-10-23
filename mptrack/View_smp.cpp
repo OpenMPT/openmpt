@@ -1418,7 +1418,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	if (m_bDrawingEnabled)
 	{
 		m_lastDrawPoint = point;
-		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 		if(sample.GetElementarySampleSize() == 2)
 			SetInitialDrawPoint<int16, uint16>(sample.pSample, point);
 		else if(sample.GetElementarySampleSize() == 1)
@@ -1546,7 +1546,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
 		::AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo()->CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -1773,7 +1773,7 @@ void CViewSample::OnEditDelete()
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= len))
 	{
 		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
-		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
 		CriticalSection cs;
 		pSndFile->DestroySample(m_nSample);
@@ -1782,7 +1782,7 @@ void CViewSample::OnEditDelete()
 		dwUpdateFlags |= HINT_SMPNAMES;
 	} else
 	{
-		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, m_dwBeginSel, m_dwEndSel);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, m_dwBeginSel, m_dwEndSel);
 
 		CriticalSection cs;
 
@@ -1971,7 +1971,7 @@ void CViewSample::OnEditPaste()
 
 		if ((hCpy) && ((p = (LPBYTE)GlobalLock(hCpy)) != NULL))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
 			CSoundFile *pSndFile = pModDoc->GetSoundFile();
 			DWORD dwMemSize = GlobalSize(hCpy);
@@ -2014,7 +2014,7 @@ void CViewSample::OnEditUndo()
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-	if(pModDoc->GetSampleUndo()->Undo(m_nSample) == true)
+	if(pModDoc->GetSampleUndo().Undo(m_nSample) == true)
 		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 }
 
@@ -2030,7 +2030,7 @@ void CViewSample::On8BitConvert()
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
 		if ((sample.uFlags & CHN_16BIT) && (sample.pSample) && (sample.nLength))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
 			CriticalSection cs;
 
@@ -2068,14 +2068,14 @@ void CViewSample::OnMonoConvert()
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
 		if ((sample.uFlags & CHN_STEREO) && (sample.pSample) && (sample.nLength))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 			if(ctrlSmp::ConvertToMono(sample, pSndFile))
 			{
 				pModDoc->SetModified();
 				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 			} else
 			{
-				pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
+				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 			}
 		}
 	}
@@ -2108,7 +2108,7 @@ void CViewSample::OnSampleTrim()
 
 	if ((sample.pSample) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
-		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
 		CriticalSection cs;
 
@@ -2310,7 +2310,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 				{
 					CriticalSection cs;
 
-					pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+					pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 					bCanDrop = dlsbank.ExtractSample(pSndFile, m_nSample, nIns, nRgn);
 				}
 				bUpdate = TRUE;
@@ -2338,7 +2338,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 			}
 			CriticalSection cs;
 
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 			bCanDrop = pDLSBank->ExtractSample(pSndFile, m_nSample, nIns, nRgn);
 
 			bUpdate = TRUE;
@@ -2404,7 +2404,7 @@ void CViewSample::OnSetLoopStart()
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nLoopEnd) && (sample.nLoopStart != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nLoopStart = m_dwMenuParam;
 			sample.uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
@@ -2425,7 +2425,7 @@ void CViewSample::OnSetLoopEnd()
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nLoopStart+4) && (sample.nLoopEnd != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nLoopEnd = m_dwMenuParam;
 			sample.uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
@@ -2446,7 +2446,7 @@ void CViewSample::OnSetSustainStart()
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nSustainEnd) && (sample.nSustainStart != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nSustainStart = m_dwMenuParam;
 			sample.uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
@@ -2467,7 +2467,7 @@ void CViewSample::OnSetSustainEnd()
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nSustainStart+4) && (sample.nSustainEnd != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nSustainEnd = m_dwMenuParam;
 			sample.uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
@@ -2533,9 +2533,9 @@ void CViewSample::OnAddSilence()
 			CriticalSection cs;
 
 			if(dlg.m_nSamples < sample.nLength)	// make it shorter!
-				pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, sample.nLength);
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, sample.nLength);
 			else	// make it longer!
-				pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_insert, sample.nLength, dlg.m_nSamples);
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, sample.nLength, dlg.m_nSamples);
 			ctrlSmp::ResizeSample(sample, dlg.m_nSamples, pSndFile);
 		}
 	} else
@@ -2546,7 +2546,7 @@ void CViewSample::OnAddSilence()
 			CriticalSection cs;
 
 			UINT nStart = (dlg.m_nEditOption == addsilence_at_end) ? sample.nLength : 0;
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_insert, nStart, nStart + dlg.m_nSamples);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, nStart, nStart + dlg.m_nSamples);
 			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, pSndFile);
 		}
 	}
