@@ -186,7 +186,7 @@ void CDefaultVstEditor::CreateControls()
 	scrollRect.MoveToX(rect.right - scrollRect.right);
 
 	// Ignore this space in our calculation from now on.
-	rect.right -= (scrollRect.right - scrollRect.left);
+	rect.right -= scrollRect.Width();
 
 	controls.clear();
 

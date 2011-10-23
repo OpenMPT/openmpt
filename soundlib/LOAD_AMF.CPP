@@ -202,11 +202,12 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			MODSAMPLE *psmp = &Samples[iSmp+1];
 			memcpy(m_szNames[iSmp + 1], lpStream+dwMemPos, 22);
 			StringFixer::SpaceToNullStringFixed<22>(m_szNames[iSmp + 1]);
+			psmp->nGlobalVol = 64;
 			psmp->nFineTune = MOD2XMFineTune(lpStream[dwMemPos+22]);
 			psmp->nVolume = lpStream[dwMemPos+23];
-			psmp->nGlobalVol = 64;
 			if (psmp->nVolume > 0x40) psmp->nVolume = 0x40;
 			psmp->nVolume <<= 2;
+			psmp->RelativeTone = (signed char)lpStream[dwMemPos + 24];
 			psmp->nLength = LittleEndian(*((LPDWORD)(lpStream+dwMemPos+25)));
 			psmp->nLoopStart = LittleEndian(*((LPDWORD)(lpStream+dwMemPos+29)));
 			psmp->nLoopEnd = psmp->nLoopStart + LittleEndian(*((LPDWORD)(lpStream+dwMemPos+33)));
@@ -371,8 +372,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (realtrackcnt < pTrackMap[iTrkMap]) realtrackcnt = pTrackMap[iTrkMap];
 	}
 	// Store tracks positions
-	BYTE **pTrackData = new BYTE *[realtrackcnt];
-	memset(pTrackData, 0, sizeof(pTrackData));
+	vector<BYTE *>pTrackData(realtrackcnt, 0);
 	for (UINT iTrack=0; iTrack<realtrackcnt; iTrack++) if (dwMemPos <= dwMemLength-3)
 	{
 		UINT nTrkSize = LittleEndianW(*(USHORT *)(lpStream+dwMemPos));
@@ -407,7 +407,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 		}
 	}
-	delete[] pTrackData;
+
 	// Read Sample Data
 	for (UINT iSeek=1; iSeek<=maxsampleseekpos; iSeek++)
 	{

@@ -311,7 +311,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				SAMPLEINDEX nmax = m_pSndFile->GetNumSamples();
 				for (SAMPLEINDEX i = 1; i <= nmax; i++) if (m_pSndFile->GetSample(i).pSample)
 				{
-					if (m_pModDoc->GetSplitKeyboardSettings().IsSplitActive() && nSplitIns < ARRAYELEMCOUNT(m_pSndFile->m_szNames))
+					if (m_pModDoc->GetSplitKeyboardSettings().IsSplitActive())
 						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i, m_pSndFile->m_szNames[nSplitIns], m_pSndFile->m_szNames[i]);
 					else
 						wsprintf(s, "%02u: %s", i, m_pSndFile->m_szNames[i]);

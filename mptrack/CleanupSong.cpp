@@ -998,21 +998,15 @@ bool CModCleanupDlg::RemoveAllSamples()
 }
 
 // Remove all instruments
-bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
-//------------------------------------------------------
+bool CModCleanupDlg::RemoveAllInstruments()
+//-----------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
 	if (pSndFile->GetNumInstruments() == 0) return false;
 
-	if(bConfirm)
-	{
-		if (Reporting::Confirm("Do you want to convert all instruments to samples?", "Removing all instruments") == cnfYes)
-		{
-			m_pModDoc->ConvertInstrumentsToSamples();
-		}
-	}
+	m_pModDoc->ConvertInstrumentsToSamples();
 
 	for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
 	{

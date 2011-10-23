@@ -60,7 +60,7 @@ private:
 	bool OptimizeSamples(); // Remove unused sample data
 	// Instruments
 	bool RemoveUnusedInstruments(); // Remove unused instruments
-	bool RemoveAllInstruments(bool bConfirm = true);
+	bool RemoveAllInstruments();
 	// Plugins
 	bool RemoveUnusedPlugins(); // Remove ununsed plugins
 	bool RemoveAllPlugins();
