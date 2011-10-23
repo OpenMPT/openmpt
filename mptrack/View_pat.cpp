@@ -4462,7 +4462,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !(pSndFile->m_dwSongFlags & SONG_STEP));
 		const bool isSplit = IsNoteSplit(note);
 
-		if((recordGroup == 1 && isSplit) || (recordGroup == 2 && !isSplit))
+		if(pModDoc->GetSplitKeyboardSettings().IsSplitActive()
+			&& ((recordGroup == 1 && isSplit) || (recordGroup == 2 && !isSplit)))
 		{
 			// Record group 1 should be used for normal notes, record group 2 for split notes.
 			// If there are any channels assigned to the "other" record group, we switch to another channel.

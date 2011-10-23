@@ -1799,6 +1799,13 @@ void CViewInstrument::OnEnvLoopChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
 	{
+		INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+		if(EnvGetLoop() && pEnv != nullptr && pEnv->nLoopEnd == 0)
+		{
+			// Enabled loop => set loop points if no loop has been specified yet.
+			pEnv->nLoopStart = 0;
+			pEnv->nLoopEnd = pEnv->nNodes - 1;
+		}
 		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		UpdateNcButtonState();
@@ -1812,6 +1819,12 @@ void CViewInstrument::OnEnvSustainChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
 	{
+		INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+		if(EnvGetSustain() && pEnv != nullptr && pEnv->nSustainStart == pEnv->nSustainEnd && IsDragItemEnvPoint())
+		{
+			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
+			pEnv->nSustainStart = pEnv->nSustainEnd = m_nDragItem - 1;
+		}
 		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		UpdateNcButtonState();

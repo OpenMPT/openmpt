@@ -1644,14 +1644,14 @@ BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, DWORD
 BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UINT bufsize, LONG wd)
 //-------------------------------------------------------------------------------------------------
 {
-	BOOL bPlaying = (m_dwStatus & MODSTATUS_PLAYING) ? TRUE : FALSE;
+	const bool isPlaying = (m_dwStatus & MODSTATUS_PLAYING) != 0;
 	if ((GetSettings().m_dwRate != rate) || ((GetSettings().m_dwSoundSetup & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
 	 || (GetSettings().m_nWaveDevice != wd) || (GetSettings().m_nBufferLength != bufsize) || (nBits != GetSettings().m_nBitsPerSample)
 	 || (GetSettings().m_nChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
 		HWND hFollow = m_hFollowSong;
-		if (bPlaying)
+		if (isPlaying)
 		{
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = m_pModPlaying;
 			PauseMod();
@@ -1672,7 +1672,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 	{
 		// No need to restart playback
 		GetSettings().m_dwSoundSetup = q;
-		CSoundFile::EnableMMX((GetSettings().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
+		CSoundFile::EnableMMX((GetSettings().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) != 0);
 		if (GetSettings().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
 			CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
 		else

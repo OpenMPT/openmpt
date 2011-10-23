@@ -566,7 +566,7 @@ void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
 	
 	if (pModDoc)
 	{
-		const bool b = (IsDlgButtonChecked(itemID)) ? true : false;
+		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
 		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
 		pModDoc->MuteChannel(nChn, b);
 		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
@@ -586,7 +586,7 @@ void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
 	
 	if (pModDoc)
 	{
-		const bool b = (IsDlgButtonChecked(itemID)) ? true : false;
+		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
 		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
 		pModDoc->SurroundChannel(nChn, b);
 		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));

@@ -312,11 +312,11 @@ struct ConvertInstrumentsToSamplesInPatterns
 
 	void operator()(MODCOMMAND& m)
 	{
-		if(m.instr)
+		if(m.instr && !m.IsPcNote())
 		{
 			MODCOMMAND::INSTR instr = m.instr, newinstr = 0;
 			MODCOMMAND::NOTE note = m.note, newnote = note;
-			if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+			if(note != NOTE_NONE && NOTE_IS_VALID(note))
 				note--;
 			else
 				note = NOTE_MIDDLEC - 1;
@@ -329,7 +329,10 @@ struct ConvertInstrumentsToSamplesInPatterns
 				if(newinstr >= MAX_SAMPLES) newinstr = 0;
 			}
 			m.instr = newinstr;
-			m.note = newnote;
+			if(m.note != NOTE_NONE && NOTE_IS_VALID(m.note))
+			{
+				m.note = newnote;
+			}
 		}
 	}
 

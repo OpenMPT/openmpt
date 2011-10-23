@@ -85,7 +85,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)			//rewbs.patPlayAllViews
 	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
+	//ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEASMP3,			OnUpdateMP3Encode)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		OnUpdateITMPTOnly)
@@ -1884,8 +1884,8 @@ void CModDoc::OnPlayerPlay()
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
                  
-		BOOL bPlaying = (pMainFrm->GetModPlaying() == this) ? TRUE : FALSE;
-		if ((bPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP/*|SONG_PATTERNLOOP*/))))
+		bool isPlaying = (pMainFrm->GetModPlaying() == this);
+		if ((isPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP/*|SONG_PATTERNLOOP*/))))
 		{
 			OnPlayerPause();
 			return;
@@ -1896,11 +1896,13 @@ void CModDoc::OnPlayerPlay()
 		for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) if (!m_SndFile.Chn[i].nMasterChn)
 		{
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
-			if (!bPlaying) m_SndFile.Chn[i].nLength = 0;
+			if (!isPlaying) m_SndFile.Chn[i].nLength = 0;
 		}
-		if (bPlaying) {
+		if (isPlaying)
+		{
 			m_SndFile.StopAllVsti();
-		} else {
+		} else
+		{
 			m_SndFile.ResumePlugins();
 		}
 
@@ -1921,13 +1923,13 @@ void CModDoc::OnPlayerPause()
 	{
 		if (pMainFrm->GetModPlaying() == this)
 		{
-			BOOL bLoop = (m_SndFile.m_dwSongFlags & SONG_PATTERNLOOP) ? TRUE : FALSE;
+			bool isLooping = (m_SndFile.m_dwSongFlags & SONG_PATTERNLOOP) != 0;
 			UINT nPat = m_SndFile.m_nPattern;
 			UINT nRow = m_SndFile.m_nRow;
 			UINT nNextRow = m_SndFile.m_nNextRow;
 			pMainFrm->PauseMod();
 
-			if ((bLoop) && (nPat < m_SndFile.Patterns.Size()))
+			if ((isLooping) && (nPat < m_SndFile.Patterns.Size()))
 			{
 				CriticalSection cs;
 
@@ -2046,14 +2048,14 @@ void CModDoc::OnEditInstruments()
 void CModDoc::OnEditComments()
 //----------------------------
 {
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
+	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
 }
 
 //rewbs.graph
 void CModDoc::OnEditGraph()
 //-------------------------
 {
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
+	if (m_SndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
 }
 //end rewbs.graph
 
@@ -2081,7 +2083,7 @@ void CModDoc::OnUpdateXMITMPTOnly(CCmdUI *p)
 //---------------------------------------
 {
 	if (p)
-		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE);
 }
 
 
@@ -2089,7 +2091,7 @@ void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
 //---------------------------------------
 {
 	if (p)
-		p->Enable((m_SndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE);
 }
 
 
@@ -2104,18 +2106,18 @@ void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
 //---------------------------------------------------
 {
 	if (p)
-		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT)) ? TRUE : FALSE);
 }
 
 
 void CModDoc::OnInsertPattern()
 //-----------------------------
 {
-	LONG pat = InsertPattern();
+	const PATTERNINDEX pat = InsertPattern();
 	if (pat >= 0)
 	{
-		UINT ord = 0;
-		for (UINT i=0; i<m_SndFile.Order.size(); i++)
+		ORDERINDEX ord = 0;
+		for (ORDERINDEX i = 0; i < m_SndFile.Order.size(); i++)
 		{
 			if (m_SndFile.Order[i] == pat) ord = i;
 			if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
@@ -2319,12 +2321,12 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 			// if format is compatible, everything is fine. if not, let's still search
 			// for another command. this fixes searching for the EFx command, which
 			// does different things in MOD format.
-			if((m_SndFile.m_nType & gFXInfo[i].dwFormats) != 0)
+			if((m_SndFile.GetType() & gFXInfo[i].dwFormats) != 0)
 				break;
 		}
 	}
 	if (fxndx == MAX_FXINFO) return false;
-	bSupported = ((m_SndFile.m_nType & gFXInfo[fxndx].dwFormats) != 0);
+	bSupported = ((m_SndFile.GetType() & gFXInfo[fxndx].dwFormats) != 0);
 	if (gFXInfo[fxndx].pszName)
 	{
 		if ((bXX) && (bSupported))
@@ -2345,7 +2347,7 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 			{
 			case CMD_MODCMDEX:
 			case CMD_S3MCMDEX:
-				if ((param & 0xF0) == 0xF0 && !(m_SndFile.m_nType & MOD_TYPE_MOD))	//Set Macro
+				if ((param & 0xF0) == 0xF0 && !(m_SndFile.GetType() & MOD_TYPE_MOD))	//Set Macro
 				{
 					macroText = m_SndFile.m_MidiCfg.szMidiSFXExt[(param & 0x0F)];
 					chanSpec.Format(" to %d: ", param & 0x0F);
