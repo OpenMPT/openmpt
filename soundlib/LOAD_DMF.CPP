@@ -840,8 +840,8 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 		mptHistory.loadDate.tm_mday = CLAMP(pHeader->creationDay, 0, 31);
 		mptHistory.loadDate.tm_mon = CLAMP(pHeader->creationMonth, 1, 12) - 1;
 		mptHistory.loadDate.tm_year = pHeader->creationYear;
-		GetpModDoc()->GetFileHistory()->clear();
-		GetpModDoc()->GetFileHistory()->push_back(mptHistory);
+		GetpModDoc()->GetFileHistory().clear();
+		GetpModDoc()->GetFileHistory().push_back(mptHistory);
 	}
 #endif // MODPLUG_TRACKER
 

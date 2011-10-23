@@ -160,6 +160,16 @@ struct SplitKeyboardSettings
 	MODCOMMAND::VOL splitVolume;
 	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
 	bool octaveLink;	// apply octaveModifier
+
+	SplitKeyboardSettings()
+	//---------------------
+	{
+		splitInstrument = 0;
+		splitNote = NOTE_MIDDLEC - 1;
+		splitVolume = 0;
+		octaveModifier = 0;
+		octaveLink = false;
+	}
 };
 
 enum LogEventType
@@ -267,12 +277,12 @@ public:
 
 	void SongProperties();
 
-	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }
-	CSampleUndo *GetSampleUndo() { return &m_SampleUndo; }
+	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }
+	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
-	vector<FileHistory> *GetFileHistory() { return &m_FileHistory; }
-	const vector<FileHistory> *GetFileHistory() const { return &m_FileHistory; }
+	vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
+	const vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
 	
 // operations

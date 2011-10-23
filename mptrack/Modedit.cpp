@@ -181,7 +181,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 		{
 			if(createUndoPoint)
 			{
-				GetPatternUndo()->PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), !first, (nPat == highestPattern));
+				GetPatternUndo().PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), !first, (nPat == highestPattern));
 				first = false;
 			}
 
@@ -1031,7 +1031,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						// Before changing anything in this pattern, we have to create an undo point.
 						if(bPrepareUndo)
 						{
-							GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.Patterns[nPattern].GetNumRows(), !bFirstUndo);
+							GetPatternUndo().PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.Patterns[nPattern].GetNumRows(), !bFirstUndo);
 							bPrepareUndo = false;
 							bFirstUndo = false;
 						}

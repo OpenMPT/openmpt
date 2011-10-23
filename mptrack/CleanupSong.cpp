@@ -500,7 +500,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	EndWaitCursor();
 	if ((nPatRemoved) || (bReordered))
 	{
-		m_pModDoc->GetPatternUndo()->ClearUndo();
+		m_pModDoc->GetPatternUndo().ClearUndo();
 		if (nPatRemoved)
 		{
 			wsprintf(s, "%d pattern%s removed.\n", nPatRemoved, (nPatRemoved == 1) ? "" : "s");
@@ -528,7 +528,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		if (!pSndFile->IsSampleUsed(nSmp))
 		{
 			samplesUsed[nSmp] = false;
-			m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
+			m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete);
 		}
 	}
 
@@ -553,11 +553,11 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			{
 				if ((!samplesUsed[nSmp]) && (pSndFile->GetSample(nSmp).pSample))
 				{
-					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
+					m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete);
 					pSndFile->DestroySample(nSmp);
 					if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
 					nRemoved++;
-					m_pModDoc->GetSampleUndo()->ClearUndo(nSmp);
+					m_pModDoc->GetSampleUndo().ClearUndo(nSmp);
 				}
 			}
 			wsprintf(s, "%d unused sample%s removed\n" , nRemoved, (nRemoved == 1) ? "" : "s");
@@ -622,7 +622,7 @@ bool CModCleanupDlg::OptimizeSamples()
 				UINT lmax = loopLength + 2;
 				if ((lmax < sample.nLength) && (lmax >= 2))
 				{
-					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
+					m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
 					ctrlSmp::ResizeSample(sample, lmax, pSndFile);
 				}
 			}
@@ -707,7 +707,7 @@ bool CModCleanupDlg::RearrangeSamples()
 	}
 
 	// Too lazy to fix sample undo...
-	m_pModDoc->GetSampleUndo()->ClearUndo();
+	m_pModDoc->GetSampleUndo().ClearUndo();
 
 	pSndFile->m_nSamples -= nRemap;
 
@@ -987,7 +987,7 @@ bool CModCleanupDlg::RemoveAllSamples()
 
 	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, 0, pSndFile->GetSample(nSmp).nLength);
+		m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete, 0, pSndFile->GetSample(nSmp).nLength);
 	}
 	ctrlSmp::ResetSamples(*pSndFile, ctrlSmp::SmpResetInit);
 

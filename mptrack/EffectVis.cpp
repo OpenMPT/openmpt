@@ -650,7 +650,7 @@ void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 			rect.SetRect(x-NODEHALF, y-NODEHALF, x+NODEHALF+1, y+NODEHALF+1);
 			if (rect.PtInRect(point))
 			{
-				m_pModDoc->GetPatternUndo()->PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, row, m_nChan+1, row+1);
+				m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, row, m_nChan+1, row+1);
 				m_nDragItem = row;
 			}
 		}		
@@ -748,7 +748,7 @@ void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 		SetFocus();
 		SetCapture();
 
-		m_pModDoc->GetPatternUndo()->PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, m_startRow, m_nChan+1, m_endRow);
+		m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, m_startRow, m_nChan+1, m_endRow);
 		m_dwStatus |= FXVSTATUS_LDRAGGING;
 	}
 

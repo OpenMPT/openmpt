@@ -124,12 +124,6 @@ CModDoc::CModDoc()
 	m_PatternUndo.SetParent(this);
 	m_SampleUndo.SetParent(this);
 
-	m_SplitKeyboardSettings.splitInstrument = 0;
-	m_SplitKeyboardSettings.splitNote = NOTE_MIDDLEC - 1;
-	m_SplitKeyboardSettings.splitVolume = 0;
-	m_SplitKeyboardSettings.octaveModifier = 0;
-	m_SplitKeyboardSettings.octaveLink = false;
-
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
 	m_FileHistory.clear();

@@ -479,7 +479,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Check whether the new format supports embedding the edit history in the file.
-	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetFileHistory()->size() > 0)
+	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetFileHistory().size() > 0)
 	{
 		CHANGEMODTYPE_WARNING(wEditHistory);
 	}
@@ -571,8 +571,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wCompatibilityMode, "Consider enabling the \"compatible playback\" option in the song properties to increase compatiblity with other players.\n");
 
 	SetModified();
-	GetPatternUndo()->ClearUndo();
-	GetSampleUndo()->ClearUndo();
+	GetPatternUndo().ClearUndo();
+	GetSampleUndo().ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
 
