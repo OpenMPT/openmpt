@@ -495,7 +495,7 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 		if (!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
 			continue;
 		
-		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), ARRAYELEMCOUNT(szPath) - 1);
+		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), CountOf(szPath) - 1);
 		if(theApp.IsPortableMode())
 		{
 			theApp.AbsolutePathToRelative(szPath);
@@ -2152,6 +2152,8 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 
 	CString nonFoundPlugs;
+	const CString failedPlugin = CMainFrame::GetPrivateProfileCString("VST Plugins", "FailedPlugin", "", m_szConfigFileName);
+
 	for (LONG iPlug=0; iPlug<nPlugins; iPlug++)
 	{
 		s[0] = 0;
@@ -2160,7 +2162,15 @@ BOOL CTrackApp::InitializeDXPlugins()
 		if (s[0])
 		{
 			RelativePathToAbsolute(s);
-			m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
+
+			if(failedPlugin.Compare(s) != 0)
+			{
+				m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
+			} else
+			{
+				const CString text = "The following plugin has previously crashed OpenMPT during initialisation and will thus not be loaded:\n\n" + failedPlugin;
+				Reporting::Information(text);
+			}
 		}
 	}
 	if(nonFoundPlugs.GetLength() > 0)
