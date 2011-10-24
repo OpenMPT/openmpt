@@ -90,35 +90,6 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT
 STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SEQUENCE) ); 
 
 
-// parametered macro presets:
-enum enmParameteredMacroType
-{
-	sfx_unused = 0,
-	sfx_cutoff,
-	sfx_reso,
-	sfx_mode,
-	sfx_drywet,
-	sfx_plug,
-	sfx_cc,
-	sfx_custom,
-
-	sfx_max
-};
-
-// fixed macro presets:
-enum enmFixedMacroType
-{
-	zxx_custom = 0,
-	zxx_reso4Bit,		// Type 1 - Z80 - Z8F controls resonance
-	zxx_reso7Bit,		// Type 2 - Z80 - ZFF controls resonance
-	zxx_cutoff,			// Type 3 - Z80 - ZFF controls cutoff
-	zxx_mode,			// Type 4 - Z80 - ZFF controls filter mode
-	zxx_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
-
-	zxx_max
-};
-
-
 // pattern paste modes
 enum enmPatternPasteModes
 {
@@ -263,17 +234,6 @@ public:
 	LONG GetIndexFromVolCmd(UINT volcmd);
 	MODCOMMAND::VOLCMD GetVolCmdFromIndex(UINT ndx);
 	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
-
-	// Various MIDI Macro helpers
-	static enmParameteredMacroType GetMacroType(CString value); //rewbs.xinfo
-	CString GetMacroName(CString value, PLUGINDEX plugin);
-	static CString GetMacroName(enmParameteredMacroType macro);
-	static int MacroToPlugParam(CString value); //rewbs.xinfo
-	static int MacroToMidiCC(CString value);
-	static enmFixedMacroType GetZxxType(const char (&szMidiZXXExt)[128][MACRO_LENGTH]);
-	static void CreateZxxFromType(char (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType);
-	bool IsMacroDefaultSetupUsed() const;
-	int FindMacroForParam(long param) const;
 
 	void SongProperties();
 

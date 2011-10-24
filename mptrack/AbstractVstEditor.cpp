@@ -10,6 +10,7 @@
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
 #include "../common/StringFixer.h"
+#include "MIDIMacros.h"
 
 #ifndef NO_VST
 
@@ -589,10 +590,12 @@ void CAbstractVstEditor::UpdateMacroMenu()
 
 	for (int nMacro = 0; nMacro < NUM_MACROS; nMacro++)
 	{
+		MIDIMacroTools macroTools(*pModDoc->GetSoundFile());
+
 		action = NULL;
 		greyed = true;
 		macroText = pModDoc->GetSoundFile()->m_MidiCfg.szMidiSFXExt[nMacro];
- 		const enmParameteredMacroType macroType = pModDoc->GetMacroType(macroText);
+ 		const enmParameteredMacroType macroType = macroTools.GetMacroType(macroText);
 
 		if(macroType == sfx_unused)
 		{
@@ -601,7 +604,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 			greyed = false; 
 		} else
 		{
-			macroName = pModDoc->GetMacroName(macroText, m_pVstPlugin->GetSlot());
+			macroName = macroTools.GetMacroName(macroText, m_pVstPlugin->GetSlot());
 			if(macroType != sfx_plug || macroName.Left(3) != "N/A")
 			{
 				greyed = false;
