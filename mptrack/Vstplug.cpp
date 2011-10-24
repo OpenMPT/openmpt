@@ -278,6 +278,9 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	HINSTANCE hLib = NULL;
 
 
+	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
+	WritePrivateProfileString("VST Plugins", "FailedPlugin", pszDllPath, theApp.GetConfigFileName());
+
 	try
 	{
 		hLib = LoadLibrary(pszDllPath);
@@ -421,11 +424,10 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		#endif // VST_LOG
 		}
 
-		//try {
-			FreeLibrary(hLib);
-		//} catch (...) {
-		//	CVstPluginManager::ReportPlugException("Exception in FreeLibrary(\"%s\")!\n", pszDllPath);
-		//}
+		FreeLibrary(hLib);
+
+		// Now it should be safe to assume that this plugin loaded properly. :)
+		WritePrivateProfileString("VST Plugins", "FailedPlugin", NULL, theApp.GetConfigFileName());
 
 		return (bOk) ? m_pVstHead : nullptr;
 	} else
@@ -433,6 +435,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	#ifdef VST_LOG
 		Log("LoadLibrary(%s) failed!\n", pszDllPath);
 	#endif // VST_LOG
+
+		WritePrivateProfileString("VST Plugins", "FailedPlugin", NULL, theApp.GetConfigFileName());
 	}
 	return nullptr;
 }
@@ -1394,7 +1398,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 		MemsetZero(sa);
 		sa.numChannels = 2;
 		sa.type = kSpeakerArrStereo;
-		for(int i = 0; i < ARRAYELEMCOUNT(sa.speakers); i++)
+		for(int i = 0; i < CountOf(sa.speakers); i++)
 		{
 			sa.speakers[i].azimuth = 0.0f;
 			sa.speakers[i].elevation = 0.0f;
