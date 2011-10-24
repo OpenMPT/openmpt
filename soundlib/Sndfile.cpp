@@ -16,6 +16,7 @@
 #include "sndfile.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
+#include "../mptrack/MIDIMacros.h"
 #include "../common/StringFixer.h"
 #include <vector>
 #include <list>
@@ -929,7 +930,7 @@ void CSoundFile::ResetMidiCfg(MODMIDICFG &midiConfig)
 	strcpy(midiConfig.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
 	strcpy(midiConfig.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
 	strcpy(midiConfig.szMidiSFXExt[0], "F0F000z");
-	CModDoc::CreateZxxFromType(midiConfig.szMidiZXXExt, zxx_reso4Bit);
+	MIDIMacroTools::CreateZxxFromType(midiConfig.szMidiZXXExt, zxx_reso4Bit);
 }
 
 
@@ -1394,7 +1395,7 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 		return TEXT("");
 
 	ASSERT(nInstr <= GetNumInstruments());
-	const size_t nSize = ARRAYELEMCOUNT(Instruments[nInstr]->name);
+	const size_t nSize = CountOf(Instruments[nInstr]->name);
 	CString str;
 	LPTSTR p = str.GetBuffer(nSize + 1);
 	ArrayCopy(p, Instruments[nInstr]->name, nSize);

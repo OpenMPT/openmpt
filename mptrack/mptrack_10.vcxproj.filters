@@ -433,6 +433,9 @@
     <ClCompile Include="Autotune.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MIDIMacros.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -757,6 +760,9 @@
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="Autotune.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MIDIMacros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

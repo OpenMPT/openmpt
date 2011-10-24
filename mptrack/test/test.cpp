@@ -9,6 +9,7 @@
 #include "../moddoc.h"
 #include "../MainFrm.h"
 #include "../version.h"
+#include "../MIDIMacros.h"
 #include "../../common/misc_util.h"
 #include "../serialization_utils.h"
 #include <limits>
@@ -282,9 +283,9 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
 
 	// Macros
-	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]), sfx_reso);
-	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[1]), sfx_drywet);
-	VERIFY_EQUAL_NONCONT(pModDoc->GetZxxType(pSndFile->m_MidiCfg.szMidiZXXExt), zxx_resomode);
+	VERIFY_EQUAL_NONCONT(MIDIMacroTools::GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]), sfx_reso);
+	VERIFY_EQUAL_NONCONT(MIDIMacroTools::GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[1]), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(MIDIMacroTools::GetZxxType(pSndFile->m_MidiCfg.szMidiZXXExt), zxx_resomode);
 
 	// Channels
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 2);
@@ -475,9 +476,9 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
 
 	// Macros
-	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]), sfx_reso);
-	VERIFY_EQUAL_NONCONT(pModDoc->GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[1]), sfx_drywet);
-	VERIFY_EQUAL_NONCONT(pModDoc->GetZxxType(pSndFile->m_MidiCfg.szMidiZXXExt), zxx_resomode);
+	VERIFY_EQUAL_NONCONT(MIDIMacroTools::GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[0]), sfx_reso);
+	VERIFY_EQUAL_NONCONT(MIDIMacroTools::GetMacroType(pSndFile->m_MidiCfg.szMidiSFXExt[1]), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(MIDIMacroTools::GetZxxType(pSndFile->m_MidiCfg.szMidiZXXExt), zxx_resomode);
 
 	// Channels
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 2);

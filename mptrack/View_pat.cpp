@@ -17,6 +17,7 @@
 #include "arrayutils.h"
 #include "view_pat.h"
 #include "View_gen.h"
+#include "MIDIMacros.h"
 #include "../common/misc_util.h"
 #include "midi.h"
 #include <cmath>
@@ -3215,6 +3216,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		return 0;
 	}
 
+	MIDIMacroTools macroTools(*pSndFile);
+
 	//Work out where to put the new data
 	const UINT nChn = GetChanFromCursor(m_dwCursor);
 	const bool bUsePlaybackPosition = IsLiveRecord(*pModDoc, *pSndFile);
@@ -3251,15 +3254,15 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		long activePlugParam  = -1;
 		BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
 		CString activeMacroString = pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro];
-		if (pModDoc->GetMacroType(activeMacroString) == sfx_plug)
+		if (macroTools.GetMacroType(activeMacroString) == sfx_plug)
 		{
-			activePlugParam = pModDoc->MacroToPlugParam(activeMacroString);
+			activePlugParam = macroTools.MacroToPlugParam(activeMacroString);
 		}
 		//If the wrong macro is active, see if we can find the right one.
 		//If we can, activate it for this chan by writing appropriate SFx command it.
 		if (activePlugParam != paramIndex)
 		{ 
-			int foundMacro = pModDoc->FindMacroForParam(paramIndex);
+			int foundMacro = macroTools.FindMacroForParam(paramIndex);
 			if (foundMacro >= 0)
 			{
 				pSndFile->Chn[nChn].nActiveMacro = foundMacro;
