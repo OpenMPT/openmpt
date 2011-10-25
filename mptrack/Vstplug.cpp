@@ -225,8 +225,14 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 
 			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
 			{
-				PVSTPLUGINLIB p = new VSTPLUGINLIB;
-				if (!p) return NULL;
+				PVSTPLUGINLIB p;
+				try
+				{
+					p = new VSTPLUGINLIB;
+				} catch(MPTMemoryException)
+				{
+					return nullptr;
+				}
 				p->dwPluginId1 = 0;
 				p->dwPluginId2 = 0;
 				p->bIsInstrument = FALSE;
@@ -312,8 +318,14 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	#endif // ENABLE_BUZZ
 		if (pMainProc)
 		{
-			PVSTPLUGINLIB p = new VSTPLUGINLIB;
-			if (!p) return NULL;
+			PVSTPLUGINLIB p;
+			try
+			{
+				p = new VSTPLUGINLIB;
+			} catch(MPTMemoryException)
+			{
+				return nullptr;
+			}
 			p->dwPluginId1 = 0;
 			p->dwPluginId2 = 0;
 			p->bIsInstrument = FALSE;
@@ -332,7 +344,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				if ((pEffect) && (pEffect->magic == kEffectMagic)
 				 && (pEffect->dispatcher))
 				{
-					pEffect->dispatcher(pEffect, effOpen, 0,0,0,0);
+					pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
 				#ifdef VST_USE_ALTERNATIVE_MAGIC
 					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure
 				#else
@@ -366,8 +378,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			// If OK, write the information in PluginCache
 			if (bOk)
 			{
-				CString cacheSection = "PluginCache";
-				CString cacheFile = theApp.GetPluginCacheFileName();
+				const CString cacheSection = "PluginCache";
+				const CString cacheFile = theApp.GetPluginCacheFileName();
 				CString IDs, flagsKey;
 				IDs.Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
 				flagsKey.Format("%s.Flags", IDs);
@@ -388,8 +400,15 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	#ifdef ENABLE_BUZZ
 		if (pBuzzGetInfo)
 		{
-			PVSTPLUGINLIB p = new VSTPLUGINLIB;
-			if (!p) return NULL;
+			PVSTPLUGINLIB p
+			try
+			{
+				p = new VSTPLUGINLIB;
+			} catch(MPTMemoryException)
+			{
+				return nullptr;
+			}
+			
 			p->dwPluginId1 = kBuzzMagic;
 			p->dwPluginId2 = 0;
 			p->pPluginsList = NULL;
@@ -958,7 +977,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		break;
 	
 	case audioMasterGetVendorString:
-		strncpy((char *) ptr, s_szHostVendorString, 64);
+		strcpy((char *) ptr, s_szHostVendorString);
 		//strcpy((char*)ptr,"Steinberg");
 		//return 0;
 		return true;
@@ -968,7 +987,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//return 7000;
 	
 	case audioMasterGetProductString:
-		strncpy((char *) ptr, s_szHostProductString, 64);
+		strcpy((char *) ptr, s_szHostProductString);
 		//strcpy((char*)ptr,"Cubase VST");
 		//return 0;
 		return true;
