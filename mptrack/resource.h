@@ -228,6 +228,7 @@
 #define IDC_TEXT8                       1308
 #define IDC_TEXT9                       1309
 #define IDC_TEXT10                      1310
+#define IDC_FILTERTEXT                  1310
 #define IDC_TEXT11                      1311
 #define IDC_TEXT12                      1312
 #define IDC_TEXT13                      1313

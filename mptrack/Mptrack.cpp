@@ -873,7 +873,7 @@ BOOL CTrackApp::InitInstance()
 	if (GetProfileInt("Settings", "DisableACM", 0)) cmdInfo.m_bNoAcm = true;
 	if (!cmdInfo.m_bNoMp3) GetACMConvert().InitializeACM(cmdInfo.m_bNoAcm);
 
-	// Initialize DXPlugins
+	// Initialize Plugins
 	if (!cmdInfo.m_bNoPlugins) InitializeDXPlugins();
 
 	// Initialize localized strings
@@ -882,7 +882,7 @@ BOOL CTrackApp::InitInstance()
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
 	InitCommonControls();
-	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
+	m_dwLastPluginIdleCall = 0;	//rewbs.VSTCompliance
 	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
 
 	// Dispatch commands specified on the command line
@@ -949,7 +949,7 @@ int CTrackApp::ExitInstance()
 		}
 	}
 
-	// Uninitialize DX-Plugins
+	// Uninitialize Plugins
 	UninitializeDXPlugins();
 
 	// Uninitialize ACM
@@ -1018,7 +1018,7 @@ void CTrackApp::OnFileNew()
 		if(pSndFile != nullptr)
 		{
 			nNewType = pSndFile->GetBestSaveFormat();
-			bIsProject = ((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0) ? true: false;
+			bIsProject = ((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0);
 		}
 	}
 
@@ -2190,6 +2190,8 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	UINT iPlug;
 
 	if (!m_pPluginManager) return FALSE;
+
+#ifndef NO_VST
 	pPlug = m_pPluginManager->GetFirstPlugin();
 	iPlug = 0;
 	while (pPlug)
@@ -2210,19 +2212,10 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	}
 	wsprintf(s, "%d", iPlug);
 	WritePrivateProfileString("VST Plugins", "NumPlugins", s, m_szConfigFileName);
+#endif // NO_VST
 
-	#ifndef NO_VST
-		//WritePrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, m_szConfigFileName);
-		//WritePrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, m_szConfigFileName);
-		//CMainFrame::WritePrivateProfileLong("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion, m_szConfigFileName);
-	#endif
-
-
-	if (m_pPluginManager)
-	{
-		delete m_pPluginManager;
-		m_pPluginManager = NULL;
-	}
+	delete m_pPluginManager;
+	m_pPluginManager = nullptr;
 	return TRUE;
 }
 
