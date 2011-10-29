@@ -93,13 +93,15 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	retval.lastOrder = retval.endOrder = ORDERINDEX_INVALID;
 	retval.lastRow = retval.endRow = ROWINDEX_INVALID;
 
+	// Are we trying to reach a certain pattern position?
+	const bool hasSearchTarget = (endOrder != ORDERINDEX_INVALID && endRow != ROWINDEX_INVALID);
+
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 //	UINT dwElapsedTime=0, nRow=0, nCurrentPattern=0, nNextPattern=0, nPattern=Order[0];
 	ROWINDEX nRow = 0;
 	ROWINDEX nNextPatStartRow = 0; // FT2 E60 bug
-	ORDERINDEX nCurrentPattern = 0;
-	ORDERINDEX nNextPattern = 0;
+	ORDERINDEX nCurrentOrder = 0, nNextOrder = 0;
 	PATTERNINDEX nPattern = Order[0];
 	double dElapsedTime=0.0;
 // -! NEW_FEATURE#0022
@@ -120,49 +122,68 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	{
 		chnvols[icv] = ChnSettings[icv].nVolume;
 	}
-	nCurrentPattern = nNextPattern = 0;
-	nPattern = Order[0];
-	nRow = nNextRow = 0;
 
 	for (;;)
 	{
 		UINT nSpeedCount = 0;
 		nRow = nNextRow;
-		nCurrentPattern = nNextPattern;
+		nCurrentOrder = nNextOrder;
 
-		if(nCurrentPattern >= Order.size())
+		if(nCurrentOrder >= Order.size())
 			break;
 		
 		// Check if pattern is valid
-		nPattern = Order[nCurrentPattern];
+		nPattern = Order[nCurrentOrder];
 		bool positionJumpOnThisRow = false;
 		bool patternBreakOnThisRow = false;
 
 		while(nPattern >= Patterns.Size())
 		{
 			// End of song?
-			if((nPattern == Order.GetInvalidPatIndex()) || (nCurrentPattern >= Order.size()))
+			if((nPattern == Order.GetInvalidPatIndex()) || (nCurrentOrder >= Order.size()))
 			{
-				if(nCurrentPattern == m_nRestartPos)
+				if(nCurrentOrder == m_nRestartPos)
 					break;
 				else
-					nCurrentPattern = m_nRestartPos;
+					nCurrentOrder = m_nRestartPos;
 			} else
 			{
-				nCurrentPattern++;
+				nCurrentOrder++;
 			}
-			nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Order.GetInvalidPatIndex();
-			nNextPattern = nCurrentPattern;
-			if((!Patterns.IsValidPat(nPattern)) && IsRowVisited(nCurrentPattern, 0, true, &visitedRows))
-				break;
+			nPattern = (nCurrentOrder < Order.size()) ? Order[nCurrentOrder] : Order.GetInvalidPatIndex();
+			nNextOrder = nCurrentOrder;
+			if((!Patterns.IsValidPat(nPattern)) && IsRowVisited(nCurrentOrder, 0, true, &visitedRows))
+			{
+				if(!hasSearchTarget || !GetFirstUnvisitedRow(nNextOrder, nNextRow, true, &visitedRows))
+				{
+					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
+					break;
+				} else
+				{
+					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
+					dElapsedTime = 0.0;
+					continue;
+				}
+			}
 		}
 		// Skip non-existing patterns
 		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern]))
 		{
 			// If there isn't even a tune, we should probably stop here.
-			if(nCurrentPattern == m_nRestartPos)
-				break;
-			nNextPattern = nCurrentPattern + 1;
+			if(nCurrentOrder == m_nRestartPos)
+			{
+				if(!hasSearchTarget || !GetFirstUnvisitedRow(nNextOrder, nNextRow, true, &visitedRows))
+				{
+					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
+					break;
+				} else
+				{
+					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
+					dElapsedTime = 0.0;
+					continue;
+				}
+			}
+			nNextOrder = nCurrentOrder + 1;
 			continue;
 		}
 		// Should never happen
@@ -170,16 +191,27 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			nRow = 0;
 
 		//Check whether target reached.
-		if(nCurrentPattern == endOrder && nRow == endRow)
+		if(nCurrentOrder == endOrder && nRow == endRow)
 		{
 			retval.targetReached = true;
 			break;
 		}
 
-		if(IsRowVisited(nCurrentPattern, nRow, true, &visitedRows))
-			break;
+		if(IsRowVisited(nCurrentOrder, nRow, true, &visitedRows))
+		{
+			if(!hasSearchTarget || !GetFirstUnvisitedRow(nNextOrder, nNextRow, true, &visitedRows))
+			{
+				// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
+				break;
+			} else
+			{
+				// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
+				dElapsedTime = 0.0;
+				continue;
+			}
+		}
 
-		retval.endOrder = nCurrentPattern;
+		retval.endOrder = nCurrentOrder;
 		retval.endRow = nRow;
 
 		// Update next position
@@ -192,8 +224,8 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		}
 
 		MODCHANNEL *pChn = Chn;
-		MODCOMMAND *p = Patterns[nPattern] + nRow * m_nChannels;
-		MODCOMMAND *nextRow = NULL;
+		MODCOMMAND *p = Patterns[nPattern].GetRow(nRow);
+		MODCOMMAND *nextRow = nullptr;
 		for (CHANNELINDEX nChn = 0; nChn < m_nChannels; p++, pChn++, nChn++) if (*((DWORD *)p))
 		{
 			if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
@@ -209,7 +241,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			// Position Jump
 			case CMD_POSITIONJUMP:
 				positionJumpOnThisRow = true;
-				nNextPattern = (ORDERINDEX)param;
+				nNextOrder = (ORDERINDEX)param;
 				nNextPatStartRow = 0;  // FT2 E60 bug
 				// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 				if(!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM))
@@ -246,7 +278,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 						
 				if (!positionJumpOnThisRow)
 				{
-					nNextPattern = nCurrentPattern + 1;
+					nNextOrder = nCurrentOrder + 1;
 				}
 				if ((adjustMode & eAdjust))
 				{
@@ -418,7 +450,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 
 		if (nNextRow >= Patterns[nPattern].GetNumRows())
 		{
-			nNextPattern = nCurrentPattern + 1;
+			nNextOrder = nCurrentOrder + 1;
 			nNextRow = 0;
 			if(IsCompatibleMode(TRK_FASTTRACKER2)) nNextRow = nNextPatStartRow;  // FT2 E60 bug
 			nNextPatStartRow = 0;
@@ -439,7 +471,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 	{
-		retval.lastOrder = nCurrentPattern;
+		retval.lastOrder = nCurrentOrder;
 		retval.lastRow = nRow;
 	}
 	retval.duration = dElapsedTime / 1000.0;
@@ -691,8 +723,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			{
 				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
 			}
-			if (pIns->nIFC & 0x80) pChn->nCutOff = pIns->nIFC & 0x7F;
-			if (pIns->nIFR & 0x80) pChn->nResonance = pIns->nIFR & 0x7F;
+			if (pIns->IsCutoffEnabled()) pChn->nCutOff = pIns->GetCutoff();
+			if (pIns->IsResonanceEnabled()) pChn->nResonance = pIns->GetResonance();
 		}
 		pChn->nVolSwing = pChn->nPanSwing = 0;
 		pChn->nResSwing = pChn->nCutSwing = 0;
@@ -834,10 +866,10 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
 	{
 		note += pChn->nTranspose;
-		note = CLAMP(note, NOTE_MIN, 131);	// why 131? 120+11, how does this make sense?
+		Limit(note, NOTE_MIN, 131);	// why 131? 120+11, how does this make sense?
 	} else
 	{
-		note = CLAMP(note, NOTE_MIN, NOTE_MAX);
+		Limit(note, NOTE_MIN, NOTE_MAX);
 	}
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
@@ -1001,12 +1033,12 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			}
 		}
 		pChn->nLeftVol = pChn->nRightVol = 0;
-		bool bFlt = (m_dwSongFlags & SONG_MPTFILTERMODE) ? false : true;
+		bool bFlt = (m_dwSongFlags & SONG_MPTFILTERMODE) == 0;
 		// Setup Initial Filter for this note
 		if (pIns)
 		{
-			if (pIns->nIFR & 0x80) { pChn->nResonance = pIns->nIFR & 0x7F; bFlt = true; }
-			if (pIns->nIFC & 0x80) { pChn->nCutOff = pIns->nIFC & 0x7F; bFlt = true; }
+			if (pIns->IsResonanceEnabled()) { pChn->nResonance = pIns->GetResonance(); bFlt = true; }
+			if (pIns->IsResonanceEnabled()) { pChn->nCutOff = pIns->GetCutoff(); bFlt = true; }
 			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED))
 			{
 				pChn->nFilterMode = pIns->nFilterMode;
@@ -1427,6 +1459,7 @@ BOOL CSoundFile::ProcessEffects()
 				if ((((param & 0xF0) == 0x60) && (cmd == CMD_MODCMDEX))
 				 || (((param & 0xF0) == 0xB0) && (cmd == CMD_S3MCMDEX)))
 				{
+
 					ROWINDEX nloop = PatternLoop(pChn, param & 0x0F);
 					if (nloop != ROWINDEX_INVALID) nPatLoopRow = nloop;
 
@@ -3648,7 +3681,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			if (param < 0x100) bResetEnv = true;
 		}
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
-		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER) ? true : false, bResetEnv);
+		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER), bResetEnv);
 		if (m_nInstruments)
 		{
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
@@ -4206,7 +4239,7 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
 	// so we don't need to worry about finding the master chan.
 
-	UINT nPlugin=0;
+	PLUGINDEX nPlugin = 0;
 	if (pChn && pChn->pModInstrument)
 	{
 		if (respectMutes == RespectMutes && pChn->pModSample && (pChn->pModSample->uFlags & CHN_MUTE))
@@ -4332,8 +4365,8 @@ void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
 // Resize / Clear the row vector.
 // If bReset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
 // If pRowVector is specified, an alternative row vector instead of the module's global one will be used (f.e. when using GetLength()).
-void CSoundFile::InitializeVisitedRows(const bool bReset, VisitedRowsType *pRowVector)
-//------------------------------------------------------------------------------------
+void CSoundFile::InitializeVisitedRows(bool bReset, VisitedRowsType *pRowVector)
+//------------------------------------------------------------------------------
 {
 	if(pRowVector == nullptr)
 	{
@@ -4358,8 +4391,8 @@ void CSoundFile::InitializeVisitedRows(const bool bReset, VisitedRowsType *pRowV
 // nOrd, nRow - which row should be (un)set
 // If bVisited is true, the row will be set as visited.
 // If pRowVector is specified, an alternative row vector instead of the module's global one will be used (f.e. when using GetLength()).
-void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited, VisitedRowsType *pRowVector)
-//--------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::SetRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bVisited, VisitedRowsType *pRowVector)
+//--------------------------------------------------------------------------------------------------------
 {
 	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
 	if(nOrd >= nMaxOrd || nRow >= GetVisitedRowsVectorSize(Order[nOrd]))
@@ -4386,8 +4419,8 @@ void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const
 // If bAutoSet is true, the queried row will automatically be marked as visited.
 // Use this parameter instead of consecutive IsRowVisited/SetRowVisited calls.
 // If pRowVector is specified, an alternative row vector instead of the module's global one will be used (f.e. when using GetLength()).
-bool CSoundFile::IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet, VisitedRowsType *pRowVector)
-//-------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::IsRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bAutoSet, VisitedRowsType *pRowVector)
+//-------------------------------------------------------------------------------------------------------
 {
 	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
 	if(nOrd >= nMaxOrd)
@@ -4426,8 +4459,8 @@ bool CSoundFile::IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const 
 
 
 // Get the needed vector size for pattern nPat.
-size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat) const
-//------------------------------------------------------------------------
+size_t CSoundFile::GetVisitedRowsVectorSize(PATTERNINDEX nPat) const
+//------------------------------------------------------------------
 {
 	if(Patterns.IsValidPat(nPat))
 	{
@@ -4440,3 +4473,47 @@ size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat) const
 	}
 }
 
+
+// Find the first row that has not been played yet.
+// The order and row is stored in the order and row variables on success, on failure they contain invalid values.
+// If fastSearch is true (default), only the first row of each pattern is looked at, otherwise every row is examined.
+// Function returns true on success.
+bool CSoundFile::GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fastSearch, const VisitedRowsType *pRowVector) const
+//-------------------------------------------------------------------------------------------------------------------------------
+{
+	if(pRowVector == nullptr)
+	{
+		pRowVector = &m_VisitedRows;
+	}
+
+	const ORDERINDEX endOrder = Order.GetLengthTailTrimmed();
+	for(order = 0; order < endOrder; order++)
+	{
+		const PATTERNINDEX pattern = Order[order];
+		if(!Patterns.IsValidPat(pattern))
+		{
+			continue;
+		}
+
+		if(order >= pRowVector->size())
+		{
+			// Not yet initialized => unvisited
+			return true;
+		}
+
+		const ROWINDEX endRow = (fastSearch ? 1 : Patterns[pattern].GetNumRows());
+		for(row = 0; row < endRow; row++)
+		{
+			if(row >= pRowVector->at(order).size() || pRowVector->at(order).at(row) == false)
+			{
+				// Not yet initialized, or unvisited
+				return true;
+			}
+		}
+	}
+
+	// Didn't find anything :(
+	order = ORDERINDEX_INVALID;
+	row = ROWINDEX_INVALID;
+	return false;
+}
