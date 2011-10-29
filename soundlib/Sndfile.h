@@ -115,31 +115,31 @@ struct MODINSTRUMENT
 	UINT nGlobalVol;	// Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
 	UINT nPan;			// Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
 
-	BYTE nNNA;			// New note action
-	BYTE nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
-	BYTE nDNA;			// Duplicate note action
-	BYTE nPanSwing;		// Random panning factor (0...64)
-	BYTE nVolSwing;		// Random volume factor (0...100)
-	BYTE nIFC;			// Default filter cutoff (0...127). Used if the high bit is set
-	BYTE nIFR;			// Default filter resonance (0...127). Used if the high bit is set
+	uint8 nNNA;			// New note action
+	uint8 nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
+	uint8 nDNA;			// Duplicate note action
+	uint8 nPanSwing;	// Random panning factor (0...64)
+	uint8 nVolSwing;	// Random volume factor (0...100)
+	uint8 nIFC;			// Default filter cutoff (0...127). Used if the high bit is set
+	uint8 nIFR;			// Default filter resonance (0...127). Used if the high bit is set
 
-	WORD wMidiBank;		// MIDI Bank (1...16384). 0 = Don't send.
-	BYTE nMidiProgram;	// MIDI Program (1...128). 0 = Don't send.
-	BYTE nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send.
-	BYTE nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
+	uint16 wMidiBank;	// MIDI Bank (1...16384). 0 = Don't send.
+	uint8 nMidiProgram;	// MIDI Program (1...128). 0 = Don't send.
+	uint8 nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send.
+	uint8 nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
 
-	signed char nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
-	unsigned char nPPC;	//Pitch/Pan centre
+	int8 nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
+	uint8 nPPC;	//Pitch/Pan centre
 
 	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
 	uint16 nVolRampUp;				// Default sample ramping up
 	UINT nResampling;				// Resampling mode
-	BYTE nCutSwing;					// Random cutoff factor (0...64)
-	BYTE nResSwing;					// Random resonance factor (0...64)
-	BYTE nFilterMode;				// Default filter mode
-	WORD wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
-	BYTE nPluginVelocityHandling;	// How to deal with plugin velocity
-	BYTE nPluginVolumeHandling;		// How to deal with plugin volume
+	uint8 nCutSwing;				// Random cutoff factor (0...64)
+	uint8 nResSwing;				// Random resonance factor (0...64)
+	uint8 nFilterMode;				// Default filter mode
+	uint16 wPitchToTempoLock;		// BPM at which the samples assigned to this instrument loop correctly
+	uint8 nPluginVelocityHandling;	// How to deal with plugin velocity
+	uint8 nPluginVolumeHandling;	// How to deal with plugin volume
 	CTuning *pTuning;				// sample tuning assigned to this instrument
 	static CTuning *s_DefaultTuning;
 
@@ -175,8 +175,8 @@ struct MODINSTRUMENT
 
 		nPanSwing = 0;
 		nVolSwing = 0;
-		nIFC = 0;
-		nIFR = 0;
+		SetCutoff(0, false);
+		SetResonance(0, false);
 
 		wMidiBank = 0;
 		nMidiProgram = 0;
@@ -207,6 +207,13 @@ struct MODINSTRUMENT
 		MemsetZero(name);
 		MemsetZero(filename);
 	}
+
+	bool IsCutoffEnabled() const { return (nIFC & 0x80) != 0; }
+	bool IsResonanceEnabled() const { return (nIFR & 0x80) != 0; }
+	uint8 GetCutoff() const { return (nIFC & 0x7F); }
+	uint8 GetResonance() const { return (nIFR & 0x7F); }
+	void SetCutoff(uint8 cutoff, bool enable) { nIFC = min(cutoff, 0x7F) | (enable ? 0x80 : 0x00); }
+	void SetResonance(uint8 resonance, bool enable) { nIFR = min(resonance, 0x7F) | (enable ? 0x80 : 0x00); }
 
 	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 16); }
 
@@ -446,7 +453,7 @@ STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to f
 
 struct SNDMIXPLUGIN
 {
-	const char* GetName() const {return Info.szName;}
+	const char* GetName() const { return Info.szName; }
 	const char* GetLibraryName();
 	CString GetParamName(const UINT index) const;
 	bool Bypass(bool bypass);
@@ -631,7 +638,7 @@ public: //Misc
 	{
 		if(GetType() & type & (MOD_TYPE_MOD | MOD_TYPE_S3M))
 			return true; // S3M and MOD format don't have compatibility flags, so we will always return true
-		return ((GetType() & type) && GetModFlag(MSF_COMPATIBLE_PLAY)) ? true : false;
+		return ((GetType() & type) && GetModFlag(MSF_COMPATIBLE_PLAY));
 	}
 
 	// Check whether a filter algorithm closer to IT's should be used.
@@ -810,7 +817,7 @@ public:
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
-	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) ? true : false; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
+	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) != 0; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
 
@@ -1172,14 +1179,15 @@ public:
 public:
 	void InitializeVisitedRows(const bool bReset = true, VisitedRowsType *pRowVector = nullptr);
 private:
-	void SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited = true, VisitedRowsType *pRowVector = nullptr);
-	bool IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet = true, VisitedRowsType *pRowVector = nullptr);
-	size_t GetVisitedRowsVectorSize(const PATTERNINDEX nPat) const;
+	void SetRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bVisited = true, VisitedRowsType *pRowVector = nullptr);
+	bool IsRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bAutoSet = true, VisitedRowsType *pRowVector = nullptr);
+	size_t GetVisitedRowsVectorSize(PATTERNINDEX nPat) const;
+	bool GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fastSearch = true, const VisitedRowsType *pRowVector = nullptr) const;
 
 public:
 	// "importance" of every FX command. Table is used for importing from formats with multiple effect columns
 	// and is approximately the same as in SchismTracker.
-	static size_t CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd);
+	static size_t GetEffectWeight(MODCOMMAND::COMMAND cmd);
 	// try to convert a an effect into a volume column effect.
 	static bool ConvertVolEffect(uint8 *e, uint8 *p, bool bForce);
 };
