@@ -221,7 +221,7 @@ typedef struct _MODMAGIC
 
 bool IsMagic(LPCSTR s1, LPCSTR s2)
 {
-	return ((*(DWORD *)s1) == (*(DWORD *)s2)) ? true : false;
+	return ((*(DWORD *)s1) == (*(DWORD *)s2));
 }
 
 // Functor for fixing VBlank MODs and MODs with 7-bit panning
@@ -286,9 +286,9 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	if (IsMagic(s,"16CN")) m_nChannels = 16; else
 	if (IsMagic(s,"32CN")) m_nChannels = 32; else m_nSamples = 15;
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	bool bFLT8 = IsMagic(s, "FLT8") ? true : false;
+	bool bFLT8 = IsMagic(s, "FLT8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
-	const bool bMdKd = IsMagic(s, "M.K.") ? true : false;
+	const bool bMdKd = IsMagic(s, "M.K.");
 
 	// Load Samples
 	nErr = 0;
@@ -532,7 +532,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
 	// The same check is also applied to original Ultimate Soundtracker 15 sample mods.
-	const bool bVBlank = ((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15) ? true : false;
+	const bool bVBlank = ((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15);
 	const bool b7BitPanning = bLeftPanning && !bExtendedPanning;
 	if(bVBlank || b7BitPanning)
 	{

@@ -373,7 +373,7 @@ bool CViewInstrument::EnvGetVolEnv() const
 //----------------------------------------
 {
 	MODINSTRUMENT *pIns = GetInstrumentPtr();
-	if (pIns) return (pIns->VolEnv.dwFlags & ENV_ENABLED) ? true : false;
+	if (pIns) return (pIns->VolEnv.dwFlags & ENV_ENABLED) != 0;
 	return false;
 }
 
@@ -382,7 +382,7 @@ bool CViewInstrument::EnvGetPanEnv() const
 //----------------------------------------
 {
 	MODINSTRUMENT *pIns = GetInstrumentPtr();
-	if (pIns) return (pIns->PanEnv.dwFlags & ENV_ENABLED) ? true : false;
+	if (pIns) return (pIns->PanEnv.dwFlags & ENV_ENABLED) != 0;
 	return false;
 }
 
@@ -391,7 +391,7 @@ bool CViewInstrument::EnvGetPitchEnv() const
 //------------------------------------------
 {
 	MODINSTRUMENT *pIns = GetInstrumentPtr();
-	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == ENV_ENABLED) ? true : false;
+	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == ENV_ENABLED);
 	return false;
 }
 
@@ -400,7 +400,7 @@ bool CViewInstrument::EnvGetFilterEnv() const
 //-------------------------------------------
 {
 	MODINSTRUMENT *pIns = GetInstrumentPtr();
-	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == (ENV_ENABLED|ENV_FILTER)) ? true : false;
+	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == (ENV_ENABLED|ENV_FILTER));
 	return false;
 }
 

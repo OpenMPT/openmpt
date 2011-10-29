@@ -1634,7 +1634,7 @@ void CModTree::FillInstrumentLibrary()
 		}
 
 		// The path is too long - we can't continue. This can actually only happen with an invalid path
-		if(strlen(szPath) >= ARRAYELEMCOUNT(szPath) - 1)
+		if(strlen(szPath) >= CountOf(szPath) - 1)
 			return;
 
 		// Enumerating Directories and samples/instruments
@@ -3315,7 +3315,7 @@ bool CModTree::IsItemExpanded(HTREEITEM hItem)
 	tvi.stateMask = TVIS_EXPANDED;
 	tvi.hItem = hItem;
 	GetItem(&tvi);
-	return (tvi.state & TVIS_EXPANDED) != 0 ? true : false;
+	return (tvi.state & TVIS_EXPANDED) != 0;
 }
 
 

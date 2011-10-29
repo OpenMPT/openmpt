@@ -129,7 +129,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CriticalSection cs;
 
 		// Converting instruments to samples
-		if(m_SndFile.m_nInstruments)
+		if(m_SndFile.GetNumInstruments())
 		{
 			ConvertInstrumentsToSamples();
 			CHANGEMODTYPE_WARNING(wInstrumentsToSamples);
@@ -384,8 +384,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			pIns->PanEnv.dwFlags &= ~ENV_CARRY;
 			pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
 			pIns->dwFlags &= ~INS_SETPANNING;
-			pIns->nIFC &= 0x7F;
-			pIns->nIFR &= 0x7F;
+			pIns->SetCutoff(pIns->GetCutoff(), false);
+			pIns->SetResonance(pIns->GetResonance(), false);
 			pIns->nFilterMode = FLTMODE_UNCHANGED;
 
 			pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;

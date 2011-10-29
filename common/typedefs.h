@@ -10,8 +10,6 @@
 	#define CountOf(x) (sizeof(x)/sizeof(x[0]))
 #endif
 
-#define ARRAYELEMCOUNT(x)	CountOf(x)
-
 //Compile time assert. 
 #define STATIC_ASSERT(expr)			C_ASSERT(expr)
 #define static_assert(expr, msg)	C_ASSERT(expr)

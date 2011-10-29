@@ -252,13 +252,13 @@ void CWaveConvert::OnOK()
 {
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
-	m_bSelectPlay = IsDlgButtonChecked(IDC_RADIO2) ? true : false;
+	m_bSelectPlay = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
 	m_nMinOrder = (ORDERINDEX)GetDlgItemInt(IDC_EDIT3, NULL, FALSE);
 	m_nMaxOrder = (ORDERINDEX)GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = false;
-	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? true : false; //rewbs.resamplerConf - we don't want this anymore.
-	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
-	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? true : false;
+	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED; //rewbs.resamplerConf - we don't want this anymore.
+	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
+	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) != BST_UNCHECKED;
 	if (m_bGivePlugsIdleTime)
 	{
 		if (Reporting::Confirm("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
@@ -271,9 +271,9 @@ void CWaveConvert::OnOK()
 
 // -> CODE#0024
 // -> DESC="wav export update"
-	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
+	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
 // -! NEW_FEATURE#0024
-	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) ? true : false;
+	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED;
 
 	// WaveFormatEx
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());

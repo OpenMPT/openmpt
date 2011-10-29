@@ -980,18 +980,18 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		strcpy((char *) ptr, s_szHostVendorString);
 		//strcpy((char*)ptr,"Steinberg");
 		//return 0;
-		return true;
-	
-	case audioMasterGetVendorVersion:
-		return s_nHostVendorVersion;
-		//return 7000;
-	
+		return 1;
+
 	case audioMasterGetProductString:
 		strcpy((char *) ptr, s_szHostProductString);
 		//strcpy((char*)ptr,"Cubase VST");
 		//return 0;
-		return true;
-	
+		return 1;
+
+	case audioMasterGetVendorVersion:
+		return s_nHostVendorVersion;
+		//return 7000;
+
 	case audioMasterVendorSpecific:
 		return 0;
 	
@@ -1164,7 +1164,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
 				(pFileSel->command == kVstFileSave ? false : true),
 				"", "", extensions, workingDir,
-				(pFileSel->command == kVstMultipleFilesLoad ? true : false)
+				(pFileSel->command == kVstMultipleFilesLoad)
 				);
 
 			if(files.abort)
@@ -1371,7 +1371,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nSampleRate = nInvalidSampleRate; //rewbs.VSTCompliance: gets set on Resume()
 	MemsetZero(m_MidiCh);
 
-	for (int ch=0; ch<16; ch++) {
+	for (int ch=0; ch<16; ch++)
+	{
 		m_nMidiPitchBendPos[ch]=MIDI_PitchBend_Centre; //centre pitch bend on all channels
 	}
 
@@ -2876,7 +2877,7 @@ void CVstPlugin::SaveAllParameters()
 			float *p = (float *)m_pMixStruct->pPluginData;
 			*(ULONG *)p = 0;
 			p++;
-			for (UINT i=0; i<nParams; i++)
+			for (UINT i = 0; i < nParams; i++)
 			{
 				p[i] = GetParameter(i);
 			}
@@ -2895,22 +2896,26 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 		UINT nLen = nParams * sizeof(float);
 		ULONG nType = *(ULONG *)m_pMixStruct->pPluginData;
 
-		if ((Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf') && (nType == 'NvEf'))
+		if ((Dispatch(effIdentify, 0, nullptr, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
 		{
 			PVOID p = NULL;
 			Dispatch(effGetChunk, 0,0, &p, 0); //init plug for chunk reception
 
-			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms)) { // Bank:
-				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize-4, ((BYTE *)m_pMixStruct->pPluginData)+4, 0);
+			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms))
+			{
+				// Bank
+				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize - 4, ((BYTE *)m_pMixStruct->pPluginData) + 4, 0);
 				SetCurrentProgram(nProgram);
-			} else { // Program:
-				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize-4, ((BYTE *)m_pMixStruct->pPluginData)+4, 0);
+			} else
+			{
+				// Program
+				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize - 4, ((BYTE *)m_pMixStruct->pPluginData) + 4, 0);
 			}
 
 		} else
 		{
 			float *p = (float *)m_pMixStruct->pPluginData;
-			if (m_pMixStruct->nPluginDataSize >= nLen+4) p++;
+			if (m_pMixStruct->nPluginDataSize >= nLen + 4) p++;
 			if (m_pMixStruct->nPluginDataSize >= nLen)
 			{
 				for (UINT i = 0; i < nParams; i++)
@@ -2933,13 +2938,13 @@ void CVstPlugin::ToggleEditor()
 		if ((m_pEditor) && (!m_pEditor->m_hWnd))
 		{
 			delete m_pEditor;
-			m_pEditor = NULL;
+			m_pEditor = nullptr;
 		}
 		if (m_pEditor)
 		{
 			if (m_pEditor->m_hWnd) m_pEditor->DoClose();
 			if ((volatile void *)m_pEditor) delete m_pEditor;
-			m_pEditor = NULL;
+			m_pEditor = nullptr;
 		} else
 		{
 			//rewbs.defaultPlugGui
@@ -2964,7 +2969,7 @@ UINT CVstPlugin::GetNumCommands()
 {
 	if ((m_pEffect) && (m_pEffect->magic == kBuzzMagic))
 	{
-		return Dispatch(effBuzzGetNumCommands, 0,0,NULL,0);
+		return Dispatch(effBuzzGetNumCommands, 0, nullptr, nullptr, 0.0f);
 	}
 	else if (m_pEffect)
 	{
@@ -2979,11 +2984,11 @@ BOOL CVstPlugin::GetCommandName(UINT nIndex, LPSTR pszName)
 {
 	if ((m_pEffect) && (m_pEffect->magic == kBuzzMagic))
 	{
-		return Dispatch(effBuzzGetCommandName, nIndex,0,pszName,0);
+		return Dispatch(effBuzzGetCommandName, nIndex, nullptr, pszName, 0.0f);
 	}
 	else if (m_pEffect)
 	{
-		return Dispatch(effGetParamName, nIndex,0,pszName,0);
+		return Dispatch(effGetParamName, nIndex, nullptr, pszName, 0.0f);
 	}
 	return 0;
 }
@@ -2994,7 +2999,7 @@ BOOL CVstPlugin::ExecuteCommand(UINT nIndex)
 {
 	if ((m_pEffect) && (m_pEffect->magic == kBuzzMagic))
 	{
-		return Dispatch(effBuzzExecuteCommand, nIndex,0,NULL,0);
+		return Dispatch(effBuzzExecuteCommand, nIndex, nullptr, nullptr, 0.0f);
 	}
 	return 0;
 }
@@ -3032,7 +3037,7 @@ bool CVstPlugin::Bypass(bool bypass)
 
 
 //rewbs.VSTcompliance
-BOOL CVstPlugin::GetSpeakerArrangement()
+bool CVstPlugin::GetSpeakerArrangement()
 //--------------------------------------
 {
 	VstSpeakerArrangement **pSA = NULL;
@@ -3136,7 +3141,7 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 	CVstPlugin* pCandidatePlug = NULL;
 	list.RemoveAll();
 
-	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
+	for (int nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 	{
 		pCandidatePlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nPlug].pMixPlugin);
 		if (pCandidatePlug)
@@ -3161,12 +3166,12 @@ void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
 //--------------------------------------------------------------
 {
 	list.RemoveAll();
-	if(m_pSndFile == 0) return;
+	if(m_pSndFile == nullptr) return;
 
-	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
-	for (int nIns=0; nIns<MAX_INSTRUMENTS; nIns++)
+	const PLUGINDEX nThisMixPlug = m_nSlot + 1;		//m_nSlot is position in mixplug array.
+	for (int nIns = 0; nIns <= m_pSndFile->GetNumInstruments(); nIns++)
 	{
-		if (m_pSndFile->Instruments[nIns] && (m_pSndFile->Instruments[nIns]->nMixPlug==nThisMixPlug))
+		if (m_pSndFile->Instruments[nIns] != nullptr && (m_pSndFile->Instruments[nIns]->nMixPlug == nThisMixPlug))
 		{
 			list.Add(nIns);
 		}

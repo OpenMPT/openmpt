@@ -330,8 +330,10 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
 	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
 
-	VERIFY_EQUAL_NONCONT(pIns->nIFC, 0);
-	VERIFY_EQUAL_NONCONT(pIns->nIFR, 0);
+	VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), false);
+	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0);
+	VERIFY_EQUAL_NONCONT(pIns->IsResonanceEnabled(), false);
+	VERIFY_EQUAL_NONCONT(pIns->GetResonance(), 0);
 	VERIFY_EQUAL_NONCONT(pIns->nFilterMode, FLTMODE_UNCHANGED);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolSwing, 0);
@@ -531,8 +533,10 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
 	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
 
-	VERIFY_EQUAL_NONCONT(pIns->nIFC, 0x80 | 0x32);
-	VERIFY_EQUAL_NONCONT(pIns->nIFR, 0x80 | 0x64);
+	VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), true);
+	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0x32);
+	VERIFY_EQUAL_NONCONT(pIns->IsResonanceEnabled(), true);
+	VERIFY_EQUAL_NONCONT(pIns->GetResonance(), 0x64);
 	VERIFY_EQUAL_NONCONT(pIns->nFilterMode, FLTMODE_HIGHPASS);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolSwing, 0x30);

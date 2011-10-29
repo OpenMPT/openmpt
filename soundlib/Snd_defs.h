@@ -43,23 +43,24 @@ typedef uint32 MODTYPE;
 
 typedef uintptr_t SmpLength;
 
-#define MAX_PATTERN_ROWS	1024	// -> CODE#0008 -> DESC="#define to set pattern size" -! BEHAVIOUR_CHANGE#0008
 
 
-#define MOD_AMIGAC2			0x1AB
+#define MOD_AMIGAC2			0x1AB		// Period of Amiga middle-c
 #define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB).
                                         // Note: Sample size in bytes can be more than 256 MB.
 										// The meaning of this constant is handled differently in various places; sometimes it's samples, sometimes it's bytes...
 #define MAX_SAMPLE_RATE		192000		// Max playback / render rate in Hz
-#define MAX_ORDERS			256
-#define MAX_PATTERNS		240
-#define MAX_SAMPLES			4000
-#define MAX_INSTRUMENTS		256	//200
 
-const SEQUENCEINDEX MAX_SEQUENCES = 50;
+const ROWINDEX MAX_PATTERN_ROWS			= 1024;	// -> CODE#0008 -> DESC="#define to set pattern size" -! BEHAVIOUR_CHANGE#0008
+const ORDERINDEX MAX_ORDERS				= 256;
+const PATTERNINDEX MAX_PATTERNS			= 240;
+const SAMPLEINDEX MAX_SAMPLES			= 4000;
+const INSTRUMENTINDEX MAX_INSTRUMENTS	= 256;	//200
 
-#define MAX_CHANNELS		256	//200 // Note: This is the maximum number of sound channels,
-#define MAX_BASECHANNELS	127	// Max pattern channels.
+const SEQUENCEINDEX MAX_SEQUENCES		= 50;
+
+const CHANNELINDEX MAX_BASECHANNELS		= 127;	// Max pattern channels.
+const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing channels.
 
 #define MIN_PERIOD			0x0020	// Note: Period is an Amiga metric that is inverse to frequency.
 #define MAX_PERIOD			0xFFFF	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides.
@@ -131,7 +132,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define CHN_NOTEFADE		0x400		// fade note (instrument mode)
 #define CHN_SURROUND		0x800		// use surround channel
 #define CHN_NOIDO			0x1000		// Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
-#define CHN_HQSRC			0x2000		// ???
+#define CHN_HQSRC			0x2000		// High quality sample rate conversion (i.e. apply interpolation)
 #define CHN_FILTER			0x4000		// filtered output
 #define CHN_VOLUMERAMP		0x8000		// ramp volume
 #define CHN_VIBRATO			0x10000		// apply vibrato

@@ -221,9 +221,11 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
+// IT Vibrato -> VibratoType
 BYTE autovibit2xm[8] =
-{ 0, 3, 1, 4, 2, 0, 0, 0 };
+{ VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_RANDOM, VIB_RAMP_UP, 0, 0, 0 };
 
+// VibratoType -> Vibrato
 BYTE autovibxm2it[8] =
 { 0, 2, 4, 1, 3, 0, 0, 0 };
 
@@ -454,8 +456,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		pIns->nDNA = pis->dca;
 		pIns->nPPS = pis->pps;
 		pIns->nPPC = pis->ppc;
-		pIns->nIFC = pis->ifc;
-		pIns->nIFR = pis->ifr;
+		pIns->SetCutoff(pis->ifc & 0x7F, (pis->ifc & 0x80) != 0);
+		pIns->SetResonance(pis->ifr & 0x7F, (pis->ifr & 0x80) != 0);
 		pIns->nVolSwing = min(pis->rv, 100);
 		pIns->nPanSwing = min(pis->rp, 64);
 		pIns->nPan = (pis->dfp & 0x7F) << 2;
@@ -1614,8 +1616,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
 			iti.rv = min(pIns->nVolSwing, 100);
 			iti.rp = min(pIns->nPanSwing, 64);
-			iti.ifc = pIns->nIFC;
-			iti.ifr = pIns->nIFR;
+			iti.ifc = pIns->GetCutoff() | (pIns->IsCutoffEnabled() ? 0x80 : 0x00);
+			iti.ifr = pIns->GetResonance() | (pIns->IsResonanceEnabled() ? 0x80 : 0x00);
 			iti.nos = 0;
 			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{

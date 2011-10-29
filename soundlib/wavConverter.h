@@ -59,7 +59,7 @@ inline void WavSigned24To16(const char* const inBuffer, char* outBuffer, const d
 	memcpy((char*)(&val)+1, inBuffer, 3);
 	//Reading 24 bit data to three last bytes in 32 bit int.
 
-	bool negative = (val < 0) ? true : false;
+	bool negative = (val < 0);
 	if(negative) val = -val;
 	double absval = (val < 0) ? -int32_min : val;
 

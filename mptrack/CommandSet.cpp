@@ -59,8 +59,8 @@ void CCommandSet::DefineKeyCommand(CommandID kc, UINT uid, CString message, enmK
 //-----------------------------------------------------------------------------------------------------------------------
 {
 	commands[kc].UID = uid;
-	commands[kc].isHidden = (visibility == kcHidden) ? true : false;
-	commands[kc].isDummy = (dummy == kcDummy) ? true : false;
+	commands[kc].isHidden = (visibility == kcHidden);
+	commands[kc].isDummy = (dummy == kcDummy);
 	commands[kc].Message = message;
 }
 
