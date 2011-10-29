@@ -352,7 +352,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		const BYTE *chnpan = lpStream+dwMemPos;
 		for (UINT i=0; i<32; i++) if (chnpan[i] & 0x20)
 		{
-			ChnSettings[i].nPan = ((chnpan[i] & 0x0F) << 4) + 8;
+			ChnSettings[i].nPan = (UINT(chnpan[i] & 0x0F) * 256 + 8) / 15;
 		}
 	}
 
@@ -637,8 +637,8 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		BYTE chnpan[32];
 		for (i=0; i<32; i++)
 		{
-			UINT nPan = ((ChnSettings[i].nPan+7) < 0xF0) ? ChnSettings[i].nPan+7 : 0xF0;
-			chnpan[i] = (i<m_nChannels) ? 0x20 | (nPan >> 4) : 0x08;
+			const UINT nPan = ((ChnSettings[i].nPan * 15 + 128) / 256);
+			chnpan[i] = (i < m_nChannels) ? (0x20 | nPan) : 0x08;
 		}
 		fwrite(chnpan, 0x20, 1, f);
 	}

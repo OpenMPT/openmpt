@@ -1307,14 +1307,14 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			// Filter
 			if (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 			{
-				m_CheckCutOff.SetCheck((pIns->nIFC & 0x80) ? TRUE : FALSE);
-				m_CheckResonance.SetCheck((pIns->nIFR & 0x80) ? TRUE : FALSE);
+				m_CheckCutOff.SetCheck((pIns->IsCutoffEnabled()) ? TRUE : FALSE);
+				m_CheckResonance.SetCheck((pIns->IsResonanceEnabled()) ? TRUE : FALSE);
 				m_SliderVolSwing.SetPos(pIns->nVolSwing);
 				m_SliderPanSwing.SetPos(pIns->nPanSwing);
 				m_SliderResSwing.SetPos(pIns->nResSwing);
 				m_SliderCutSwing.SetPos(pIns->nCutSwing);
-				m_SliderCutOff.SetPos(pIns->nIFC & 0x7F);
-				m_SliderResonance.SetPos(pIns->nIFR & 0x7F);
+				m_SliderCutOff.SetPos(pIns->GetCutoff());
+				m_SliderResonance.SetPos(pIns->GetResonance());
 				UpdateFilterText();
 			}
 // -> CODE#0027
@@ -1378,7 +1378,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 }
 
 
-VOID CCtrlInstruments::UpdateFilterText()
+void CCtrlInstruments::UpdateFilterText()
 //---------------------------------------
 {
 	if ((m_nInstrument) && (m_pModDoc))
@@ -1389,17 +1389,17 @@ VOID CCtrlInstruments::UpdateFilterText()
 		{
 			CHAR s[32];
 			// In IT Compatible mode, it is enough to just have resonance enabled to turn on the filter.
-			const bool resEnabled = ((pIns->nIFR & 0x80) && (pIns->nIFR & 0x7F) && pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER));
+			const bool resEnabled = (pIns->IsResonanceEnabled() && pIns->GetResonance() > 0 && pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER));
 
-			if (((pIns->nIFC & 0x80) && pIns->nIFC < 0xFF) || resEnabled)
+			if ((pIns->IsCutoffEnabled() && pIns->GetCutoff() < 0x7F) || resEnabled)
 			{
-				const BYTE cutoff = (resEnabled && !(pIns->nIFC & 0x80)) ? 0x7F : (pIns->nIFC & 0x7F);
-				wsprintf(s, "%d Hz", pSndFile->CutOffToFrequency(cutoff));
+				const BYTE cutoff = (resEnabled && !pIns->IsCutoffEnabled()) ? 0x7F : pIns->GetCutoff();
+				wsprintf(s, "Z%02X (%d Hz)", cutoff, pSndFile->CutOffToFrequency(cutoff));
 			} else {
 				wsprintf(s, "Off");
 			}
 			
-			SetDlgItemText(IDC_TEXT1, s);
+			SetDlgItemText(IDC_FILTERTEXT, s);
 		}
 	}
 }
@@ -1441,9 +1441,8 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 			// -> CODE#0023
 			// -> DESC="IT project files (.itp)"
-			int n = strlen(lpszFileName);
-			if(n >= _MAX_PATH) n = _MAX_PATH-1;
-			strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1],lpszFileName,n);
+			const size_t n = max(strlen(lpszFileName), size_t(_MAX_PATH - 1));
+			strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument - 1], lpszFileName, n);
 			m_pSndFile->m_szInstrumentPath[m_nInstrument-1][n] = '\0';
 			SetInstrumentModified(false);
 			// -! NEW_FEATURE#0023
@@ -1497,19 +1496,19 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile *pSndFile, UINT nInstr)
 
 	CriticalSection cs;
 
-	BOOL bFirst = FALSE;
+	bool bFirst = false;
 	if (!m_pSndFile->m_nInstruments)
 	{
-		bFirst = TRUE;
+		bFirst = true;
 		m_pSndFile->m_nInstruments = 1;
 		m_NoteMap.SetCurrentInstrument(m_pModDoc, 1);
 		m_pModDoc->SetModified();
-		bFirst = TRUE;
+		bFirst = true;
 	}
 	if (!m_nInstrument)
 	{
 		m_nInstrument = 1;
-		bFirst = TRUE;
+		bFirst = true;
 	}
 	m_pSndFile->ReadInstrumentFromSong(m_nInstrument, pSndFile, nInstr);
 
@@ -1551,13 +1550,6 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 	{
 		switch(uId)
 		{
-		case IDC_EDIT1:
-			{
-			MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
-			wsprintf(pszText, "Z%02X", pIns->nIFC & 0x7f);
-			return TRUE;
-			break;
-			}
 		case IDC_EDIT_PITCHTEMPOLOCK:
 		case IDC_CHECK_PITCHTEMPOLOCK:
 			{
@@ -2220,7 +2212,7 @@ void CCtrlInstruments::OnPPCChanged()
 void CCtrlInstruments::OnEnableCutOff()
 //-------------------------------------
 {
-	BOOL bCutOff = IsDlgButtonChecked(IDC_CHECK2);
+	const bool bCutOff = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
 
 	if (m_pModDoc)
 	{
@@ -2228,23 +2220,17 @@ void CCtrlInstruments::OnEnableCutOff()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			if (bCutOff)
-			{
-				pIns->nIFC |= 0x80;
-			} else
-			{
-				pIns->nIFC &= 0x7F;
-			}
+			pIns->SetCutoff(pIns->GetCutoff(), bCutOff);
 			for (UINT i=0; i<MAX_CHANNELS; i++)
 			{
 				if (pSndFile->Chn[i].pModInstrument == pIns)
 				{
 					if (bCutOff)
 					{
-						pSndFile->Chn[i].nCutOff = pIns->nIFC & 0x7f;
+						pSndFile->Chn[i].nCutOff = pIns->GetCutoff();
 					} else
 					{
-						pSndFile->Chn[i].nCutOff = 0x7f;
+						pSndFile->Chn[i].nCutOff = 0x7F;
 					}
 				}
 			}
@@ -2259,7 +2245,7 @@ void CCtrlInstruments::OnEnableCutOff()
 void CCtrlInstruments::OnEnableResonance()
 //----------------------------------------
 {
-	BOOL bReso = IsDlgButtonChecked(IDC_CHECK3);
+	const bool bReso = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
 
 	if (m_pModDoc)
 	{
@@ -2267,20 +2253,14 @@ void CCtrlInstruments::OnEnableResonance()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			if (bReso)
-			{
-				pIns->nIFR |= 0x80;
-			} else
-			{
-				pIns->nIFR &= 0x7F;
-			}
+			pIns->SetResonance(pIns->GetResonance(), bReso);
 			for (UINT i=0; i<MAX_CHANNELS; i++)
 			{
 				if (pSndFile->Chn[i].pModInstrument == pIns)
 				{
 					if (bReso)
 					{
-						pSndFile->Chn[i].nResonance = pIns->nIFC & 0x7f;
+						pSndFile->Chn[i].nResonance = pIns->GetResonance();
 					} else
 					{
 						pSndFile->Chn[i].nResonance = 0;
@@ -2423,10 +2403,9 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			else if (pSlider == &m_SliderCutOff)
 			{
 				n = m_SliderCutOff.GetPos();
-				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->nIFC & 0x7F)))
+				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetCutoff())))
 				{
-					pIns->nIFC &= 0x80;
-					pIns->nIFC |= (BYTE)n;
+					pIns->SetCutoff(n, pIns->IsCutoffEnabled());
 					SetInstrumentModified(true);
 					UpdateFilterText();
 					filterChanger = true;
@@ -2436,10 +2415,9 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			{
 				// Filter Resonance
 				n = m_SliderResonance.GetPos();
-				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->nIFR & 0x7F)))
+				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetResonance())))
 				{
-					pIns->nIFR &= 0x80;
-					pIns->nIFR |= (BYTE)n;
+					pIns->SetResonance(n, pIns->IsResonanceEnabled());
 					SetInstrumentModified(true);
 					UpdateFilterText();
 					filterChanger = true;
@@ -2453,8 +2431,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				{
 					if (pSndFile->Chn[i].pModInstrument == pIns)
 					{
-						if (pIns->nIFC & 0x80) pSndFile->Chn[i].nCutOff = pIns->nIFC & 0x7F;
-						if (pIns->nIFR & 0x80) pSndFile->Chn[i].nResonance = pIns->nIFR & 0x7F;
+						if (pIns->IsCutoffEnabled()) pSndFile->Chn[i].nCutOff = pIns->GetCutoff();
+						if (pIns->IsResonanceEnabled()) pSndFile->Chn[i].nResonance = pIns->GetResonance();
 					}
 				}
 			}
