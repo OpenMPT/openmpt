@@ -256,7 +256,7 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 				m->param = lpStream[dwMemPos];
 				dwMemPos += 2;
 
-				if(m->command < ARRAYELEMCOUNT(riffam_efftrans))
+				if(m->command < CountOf(riffam_efftrans))
 				{
 					// command translation
 					m->command = riffam_efftrans[m->command];
@@ -608,7 +608,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
 					Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
 
-					if(instheader->autovib_type < ARRAYELEMCOUNT(riffam_autovibtrans))
+					if(instheader->autovib_type < CountOf(riffam_autovibtrans))
 						Samples[nSmp].nVibType = riffam_autovibtrans[instheader->autovib_type];
 					Samples[nSmp].nVibSweep = (BYTE)(LittleEndianW(instheader->autovib_sweep));
 					Samples[nSmp].nVibRate = (BYTE)(LittleEndianW(instheader->autovib_rate) >> 4);
@@ -733,7 +733,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
 					Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
 
-					if(instheader->autovib_type < ARRAYELEMCOUNT(riffam_autovibtrans))
+					if(instheader->autovib_type < CountOf(riffam_autovibtrans))
 						Samples[nSmp].nVibType = riffam_autovibtrans[instheader->autovib_type];
 					Samples[nSmp].nVibSweep = (BYTE)(LittleEndianW(instheader->autovib_sweep));
 					Samples[nSmp].nVibRate = (BYTE)(LittleEndianW(instheader->autovib_rate) >> 4);

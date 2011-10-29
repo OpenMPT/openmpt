@@ -90,7 +90,7 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 			else
 				sample.nSustainStart = sample.nSustainEnd = 0;
 		}
-		sample7bit[nSmp - 1] = (oktsmp.type == 0 || oktsmp.type == 2) ? true : false;
+		sample7bit[nSmp - 1] = (oktsmp.type == 0 || oktsmp.type == 2);
 	}
 }
 

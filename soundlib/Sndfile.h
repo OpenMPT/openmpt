@@ -753,7 +753,7 @@ public:
 	MODMIDICFG m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	CHAR CompressionTable[16];							// ADPCM compression LUT
-	bool m_bChannelMuteTogglePending[MAX_BASECHANNELS];
+	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
 	CSoundFilePlayConfig* m_pConfig;
 	DWORD m_dwCreatedWithVersion;
@@ -925,7 +925,7 @@ public:
 	static DWORD GetBitsPerSample() { return gnBitsPerSample; }
 	static DWORD InitSysInfo();
 	static DWORD GetSysInfo() { return gdwSysInfo; }
-	static void EnableMMX(BOOL b) { if (b) gdwSoundSetup |= SNDMIX_ENABLEMMX; else gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
+	static void EnableMMX(bool b) { if (b) gdwSoundSetup |= SNDMIX_ENABLEMMX; else gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
 	// AGC
 	static BOOL GetAGC() { return (gdwSoundSetup & SNDMIX_AGC) ? TRUE : FALSE; }
 	static void SetAGC(BOOL b);

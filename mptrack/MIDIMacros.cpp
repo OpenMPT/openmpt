@@ -49,7 +49,7 @@ CString MIDIMacroTools::GetMacroName(CString value, PLUGINDEX plugin) const
 
 			if(plugin < MAX_MIXPLUGINS)
 			{
-				CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugin].pMixPlugin;
+				CVstPlugin *pPlug = reinterpret_cast<CVstPlugin *>(m_SndFile.m_MixPlugins[plugin].pMixPlugin);
 				if(pPlug)
 				{
 					paramName = pPlug->GetParamName(param);
@@ -254,6 +254,8 @@ bool MIDIMacroTools::IsMacroDefaultSetupUsed() const
 }
 
 
+#ifdef MODPLUG_TRACKER
+
 ////////////////////////////////////////////////////////////////////////
 // MIDI Macro Configuration Dialog
 
@@ -375,63 +377,62 @@ BOOL CMidiMacroSetup::OnInitDialog()
 }
 
 
-void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
+// macro == -1 for updating all macros at once
+void CMidiMacroSetup::UpdateMacroList(int macro)
 //----------------------------------------------
 {
 	if (!m_EditMacro[0])
-		return; //GUI not yet initialized
+	{
+		// GUI not yet initialized
+		return;
+	}
 
-	CString s, macroText;
-	UINT start, end, macroType;
-	int selectedMacro=m_CbnSFx.GetCurSel();
+	int start, end;
 
 	if (macro >= 0 && macro < 16)
 	{
-		start=macro;
-		end=macro;
+		start = end = macro;
 	} else
 	{
-		start=0;
-		end=NUM_MACROS;
+		start = 0;
+		end = NUM_MACROS - 1;
 	}
 
-	for (int m=0; m<NUM_MACROS; m++)
+	CString s;
+	const int selectedMacro = m_CbnSFx.GetCurSel();
+
+	for (int m = start; m <= end; m++)
 	{
-		//SFx
+		// SFx
 		s.Format("SF%X", m);
 		m_EditMacro[m].SetWindowText(s);
 
-		//Macro value:
+		// Macro value:
 		CString macroText = m_MidiCfg.szMidiSFXExt[m];
 		m_EditMacroValue[m].SetWindowText(macroText);
 		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
 
-		//Macro Type:
-		macroType = macroTools.GetMacroType(macroText);
+		// Macro Type:
+		const enmParameteredMacroType macroType = macroTools.GetMacroType(macroText);
 		switch (macroType)
 		{
-		case sfx_unused: s = "Unused"; break;
-		case sfx_cutoff: s = "Set Filter Cutoff"; break;
-		case sfx_reso: s = "Set Filter Resonance"; break;
-		case sfx_mode: s = "Set Filter Mode"; break;
-		case sfx_drywet: s = "Set Plugin dry/wet ratio"; break;
 		case sfx_cc:
 			s.Format("MIDI CC %d", macroTools.MacroToMidiCC(macroText)); 
 			break;
+
 		case sfx_plug: 
 			s.Format("Control Plugin Param %d", macroTools.MacroToPlugParam(macroText)); 
 			break;
-		case sfx_custom: 
-		default: s = "Custom";
+
+		default:
+			s = macroTools.GetMacroName(macroType);
+			break;
 		}
 		m_EditMacroType[m].SetWindowText(s);
 		m_EditMacroType[m].SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245) );
 
-		//Param details button:
-		if (macroType == sfx_plug)
-			m_BtnMacroShowAll[m].ShowWindow(SW_SHOW);
-		else 
-			m_BtnMacroShowAll[m].ShowWindow(SW_HIDE);
+		// Param details button:
+		m_BtnMacroShowAll[m].ShowWindow((macroType == sfx_plug) ? SW_SHOW : SW_HIDE);
 	}
 }
 
@@ -780,3 +781,5 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		return true;
 	}
 }
+
+#endif // MODPLUG_TRACKER

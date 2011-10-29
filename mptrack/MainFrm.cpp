@@ -1547,7 +1547,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 						m[63*4].param = 1;
 					}
 				}
-				bOk = PlaySoundFile(&m_WaveFile) ? true : false;
+				bOk = PlaySoundFile(&m_WaveFile) != FALSE;
 			}
 		}
 		f.Close();

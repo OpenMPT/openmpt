@@ -1196,7 +1196,7 @@ bool CModDoc::IsChannelSolo(CHANNELINDEX nChn) const
 //--------------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return true;
-	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SOLO) ? true : false;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SOLO) != 0;
 }
 
 bool CModDoc::SoloChannel(CHANNELINDEX nChn, bool bSolo)
@@ -1217,7 +1217,7 @@ bool CModDoc::IsChannelNoFx(CHANNELINDEX nChn) const
 //------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return true;
-	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_NOFX) ? true : false;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_NOFX) != 0;
 }
 
 bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)

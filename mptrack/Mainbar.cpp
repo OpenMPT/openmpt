@@ -229,7 +229,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
 	if (!LoadBitmap(IDB_MAINBAR)) return FALSE;
-	if (!SetButtons(MainButtons, ARRAYELEMCOUNT(MainButtons))) return FALSE;
+	if (!SetButtons(MainButtons, CountOf(MainButtons))) return FALSE;
 
 	nCurrentSpeed = 6;
 	nCurrentTempo = 125;

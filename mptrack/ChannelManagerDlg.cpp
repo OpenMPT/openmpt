@@ -492,8 +492,8 @@ void CChannelManagerDlg::OnRestore(void)
 			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
 			{
 				CHANNELINDEX nThisChn = pattern[nChn];
-				pModDoc->MuteChannel(nThisChn, (memory[0][nChn] & 1) != 0 ? true : false);
-				pModDoc->SoloChannel(nThisChn, (memory[0][nChn] & 2) != 0 ? true : false);
+				pModDoc->MuteChannel(nThisChn, (memory[0][nChn] & 1) != 0);
+				pModDoc->SoloChannel(nThisChn, (memory[0][nChn] & 2) != 0);
 			}
 			break;
 		case 1:
@@ -506,7 +506,7 @@ void CChannelManagerDlg::OnRestore(void)
 			break;
 		case 2:
 			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
-				pModDoc->NoFxChannel(pattern[nChn], memory[2][nChn] != 0 ? true : false);
+				pModDoc->NoFxChannel(pattern[nChn], memory[2][nChn] != 0);
 			break;
 		case 3:
 			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
@@ -957,7 +957,7 @@ void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 		tme.hwndTrack = m_hWnd;
 		tme.dwFlags = TME_LEAVE|TME_HOVER;
 		tme.dwHoverTime = 1;
-		mouseTracking = _TrackMouseEvent(&tme) ? true : false; 
+		mouseTracking = _TrackMouseEvent(&tme) != FALSE; 
 	}
 
 	if(!leftButton && !rightButton){

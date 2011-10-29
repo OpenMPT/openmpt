@@ -1831,8 +1831,8 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	if (!(pIns->dwFlags & INS_SETPANNING)) iti->dfp |= 0x80;
 	iti->rv = pIns->nVolSwing;
 	iti->rp = pIns->nPanSwing;
-	iti->ifc = pIns->nIFC;
-	iti->ifr = pIns->nIFR;
+	iti->ifc = pIns->GetCutoff() | (pIns->IsCutoffEnabled() ? 0x80 : 0x00);
+	iti->ifr = pIns->GetResonance() | (pIns->IsResonanceEnabled() ? 0x80 : 0x00);
 	//iti->trkvers = 0x202;
 	iti->trkvers =	0x220;	 //rewbs.ITVersion (was 0x202)
 	iti->nos = 0;

@@ -151,7 +151,7 @@ public:
 	BOOL GetCommandName(UINT index, LPSTR pszName);
 	BOOL ExecuteCommand(UINT nIndex);
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
-	BOOL GetSpeakerArrangement(); //rewbs.VSTCompliance
+	bool GetSpeakerArrangement(); //rewbs.VSTCompliance
 
 	bool Bypass(bool bypass = true);  //rewbs.defaultPlugGUI
 	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); }; //rewbs.defaultPlugGUI
@@ -223,7 +223,7 @@ public:
 	CString GetParamLabel(PlugParamIndex) { return ""; };
 	CString GetParamDisplay(PlugParamIndex) { return ""; };
 
-	PlugParamValue GetParameter(PlugParamIndex nIndex) {return 0;}
+	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
 	bool LoadProgram(CString) {return false;}
 	bool SaveProgram(CString) {return false;}
 	void SetCurrentProgram(UINT) {}

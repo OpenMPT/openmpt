@@ -669,7 +669,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				int n;
 				for (n = 0; n < 4; n++)
 				{
-					if(CSoundFile::ConvertVolEffect(&effect2, &effectParam2, (n >> 1) ? true : false))
+					if(CSoundFile::ConvertVolEffect(&effect2, &effectParam2, (n >> 1) != 0))
 					{
 						n = 5;
 						break;

@@ -80,7 +80,7 @@ void CRawSampleDlg::OnOK()
 	if(IsDlgButtonChecked(IDC_RADIO4)) m_nFormat |= ER_SIGNED;
 	if(IsDlgButtonChecked(IDC_RADIO5)) m_nFormat |= ER_MONO;
 	if(IsDlgButtonChecked(IDC_RADIO6)) m_nFormat |= ER_STEREO;
-	m_bRememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) ? true : false;
+	m_bRememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) != BST_UNCHECKED;
 	CDialog::OnOK();
 }
 

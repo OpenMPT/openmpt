@@ -71,6 +71,8 @@ public:
 };
 
 
+#ifdef MODPLUG_TRACKER
+
 ////////////////////////////////////////////////////////////////////////
 // MIDI Macro Configuration Dialog
 
@@ -125,5 +127,7 @@ protected:
 	afx_msg void OnSetSFx(UINT id);
 	DECLARE_MESSAGE_MAP()
 };
+
+#endif // MODPLUG_TRACKER
 
 #endif // MIDIMACROS_H

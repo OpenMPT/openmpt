@@ -1418,10 +1418,10 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		const CRect oldDropRect = m_rcDropItem;
 		const DWORD oldDropItem = m_nDropItem;
 
-		m_bShiftDragging = (nFlags & MK_SHIFT) ? true : false;
+		m_bShiftDragging = (nFlags & MK_SHIFT) != 0;
 		m_nDropItem = GetDragItem(point, &m_rcDropItem);
 
-		const bool b = (m_nDropItem == m_nDragItem) ? true : false;
+		const bool b = (m_nDropItem == m_nDragItem);
 		const bool dragChannel = (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER;
 
 		if (b != m_bInItemRect || (m_nDropItem != oldDropItem && dragChannel))
@@ -1814,7 +1814,7 @@ void CViewPattern::OnEditFind()
 		pageFind.m_dwFlags = m_findReplace.dwFindFlags;
 		pageFind.m_nMinChannel = m_findReplace.nFindMinChn;
 		pageFind.m_nMaxChannel = m_findReplace.nFindMaxChn;
-		pageFind.m_bPatSel = (m_dwBeginSel != m_dwEndSel) ? true : false;
+		pageFind.m_bPatSel = (m_dwBeginSel != m_dwEndSel);
 		pageReplace.m_nNote = m_findReplace.cmdReplace.note;
 		pageReplace.m_nInstr = m_findReplace.cmdReplace.instr;
 		pageReplace.m_nVolCmd = m_findReplace.cmdReplace.volcmd;
@@ -5754,16 +5754,16 @@ void CViewPattern::OnShowTimeAtRow()
 	{
 		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, m_nRow, false);
 		if(t < 0)
-			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence", currentOrder, m_nRow);
+			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence.", currentOrder, m_nRow);
 		else
 		{
 			const uint32 minutes = static_cast<uint32>(t / 60.0);
 			const float seconds = t - minutes*60;
-			msg.Format("Estimate for playback time at order %d(pattern %d), row %d: %d minute%s %.2f seconds", currentOrder, m_nPattern, m_nRow, minutes, (minutes == 1) ? "" : "s", seconds);
+			msg.Format("Estimate for playback time at order %d (pattern %d), row %d: %d minute%s %.2f seconds.", currentOrder, m_nPattern, m_nRow, minutes, (minutes == 1) ? "" : "s", seconds);
 		}
 	}
 	else
-		msg.Format("Unable to determine the time: pattern at current order(=%d) does not correspond to pattern at pattern view(=pattern %d).", currentOrder, m_nPattern);
+		msg.Format("Unable to determine the time: pattern at current order (%d) does not correspond to pattern at pattern view (pattern %d).", currentOrder, m_nPattern);
 	
 	Reporting::Notification(msg);	
 }

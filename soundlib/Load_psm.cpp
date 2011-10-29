@@ -50,9 +50,9 @@
 
 struct PSMNEWHEADER
 {
-	uint32 formatID;			// "PSM " (new format)
-	uint32 fileSize;			// Filesize - 12
-	uint32 fileInfoID;			// "FILE" Start of file info
+	uint32 formatID;		// "PSM " (new format)
+	uint32 fileSize;		// Filesize - 12
+	uint32 fileInfoID;		// "FILE" Start of file info
 };
 
 struct PSMSONGHEADER
@@ -102,32 +102,35 @@ struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 };
 #pragma pack()
 
+
 struct PSMSUBSONG // For internal use (pattern conversion)
 {
-	uint8 channelPanning[MAX_BASECHANNELS], channelVolume[MAX_BASECHANNELS];
-	bool  channelSurround[MAX_BASECHANNELS];
+	vector<uint8> channelPanning, channelVolume;
+	vector<bool> channelSurround;
 	uint8 defaultTempo, defaultSpeed;
 	char  songName[10];
 	ORDERINDEX startOrder, endOrder, restartPos;
 
 	PSMSUBSONG()
 	{
-		memset(channelPanning, 128, sizeof(channelPanning));
-		memset(channelVolume, 64, sizeof(channelVolume));
-		memset(channelSurround, false, sizeof(channelSurround));
-		memset(songName, 0, sizeof(songName));
+		channelPanning.assign(MAX_BASECHANNELS, 128);
+		channelVolume.assign(MAX_BASECHANNELS, 64);
+		channelSurround.assign(MAX_BASECHANNELS, false);
+		MemsetZero(songName);
 		defaultTempo = 125;
 		defaultSpeed = 6;
 		startOrder = endOrder = restartPos = ORDERINDEX_INVALID;
 	}
 };
 
+
 // Portamento effect conversion (depending on format version)
-inline BYTE convert_psm_porta(BYTE param, bool bNewFormat)
-//--------------------------------------------------------
+inline BYTE ConvertPSMPorta(BYTE param, bool bNewFormat)
+//------------------------------------------------------
 {
 	return ((bNewFormat) ? (param) : ((param < 4) ? (param | 0xF0) : (param >> 2)));
 }
+
 
 bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
@@ -164,9 +167,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	vector<uint32> patternOffsets;	// pattern offsets (sorted as they occour in the file)
 	vector<uint32> patternIDs;		// pattern IDs (sorted as they occour in the file)
 	vector<uint32> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
-	patternOffsets.clear();
-	patternIDs.clear();
-	orderOffsets.clear();
 	Order.clear();
 	// subsong setup
 	vector<PSMSUBSONG> subsongs;
@@ -215,7 +215,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(chunkSize < sizeof(PSMSONGHEADER)) return false;
 				PSMSONGHEADER *pSong = (PSMSONGHEADER *)(lpStream + dwMemPos);
 				if(pSong->compression != 0x01) return false; // no compression for PSM files
-				m_nChannels = CLAMP(pSong->numChannels, m_nChannels, MAX_BASECHANNELS); // subsongs *might* have different channel count
+				m_nChannels = Clamp(CHANNELINDEX(pSong->numChannels), m_nChannels, MAX_BASECHANNELS); // subsongs *might* have different channel count
 
 				PSMSUBSONG subsong;
 				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
@@ -616,19 +616,19 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					// Portamento
 					case 0x0B: // fine portamento up
 						command = CMD_PORTAMENTOUP;
-						param = 0xF0 | convert_psm_porta(param, bNewFormat);
+						param = 0xF0 | ConvertPSMPorta(param, bNewFormat);
 						break;
 					case 0x0C: // portamento up
 						command = CMD_PORTAMENTOUP;
-						param = convert_psm_porta(param, bNewFormat);
+						param = ConvertPSMPorta(param, bNewFormat);
 						break;
 					case 0x0D: // fine portamento down
 						command = CMD_PORTAMENTODOWN;
-						param = 0xF0 | convert_psm_porta(param, bNewFormat);
+						param = 0xF0 | ConvertPSMPorta(param, bNewFormat);
 						break;
 					case 0x0E: // portamento down
 						command = CMD_PORTAMENTODOWN;
-						param = convert_psm_porta(param, bNewFormat);
+						param = ConvertPSMPorta(param, bNewFormat);
 						break;					
 					case 0x0F: // tone portamento
 						command = CMD_TONEPORTAMENTO;

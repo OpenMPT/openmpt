@@ -1738,11 +1738,11 @@ void CCtrlSamples::OnEnableStretchToSize()
 //----------------------------------------
 {
 	// Enable time-stretching / disable unused pitch-shifting UI elements
-	bool bTimeStretch = IsDlgButtonChecked(IDC_CHECK3) ? true : false;
+	bool bTimeStretch = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
 	if(!bTimeStretch) ReadTimeStretchParameters();
-	((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(bTimeStretch ? false : true);
-	((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(bTimeStretch ? true : false);
-	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(bTimeStretch ? true : false); //rewbs.timeStretchMods
+	((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(bTimeStretch ? FALSE : TRUE);
+	((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(bTimeStretch ? TRUE : FALSE);
+	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(bTimeStretch ? TRUE : FALSE); //rewbs.timeStretchMods
 	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
 	GetDlgItem(IDC_COMBO5)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
 	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
@@ -2793,7 +2793,7 @@ bool MPT_LoopCheck(int sstart0, int sstart1, int send0, int send1)
 	if (!dend) dend = dstart >> 7;
 	if ((dstart ^ dend) < 0) return false;
 	int delta = dend - dstart;
-	return ((delta > -SMPLOOP_ACCURACY) && (delta < SMPLOOP_ACCURACY)) ? true : false;
+	return ((delta > -SMPLOOP_ACCURACY) && (delta < SMPLOOP_ACCURACY));
 }
 
 

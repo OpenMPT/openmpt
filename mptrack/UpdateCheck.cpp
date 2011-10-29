@@ -323,7 +323,7 @@ void CUpdateSetupDlg::OnOK()
 
 	CString updateURL;
 	GetDlgItemText(IDC_EDIT1, updateURL);
-	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL, IsDlgButtonChecked(IDC_CHECK1) ? true : false, CUpdateCheck::GetShowUpdateHint());
+	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED, CUpdateCheck::GetShowUpdateHint());
 	
 	CPropertyPage::OnOK();
 }

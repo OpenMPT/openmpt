@@ -630,7 +630,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	// Reading play sequence
 	if (version < '2')
 	{
-		UINT nbo = pmsh->songlen >> 8;
+		UINT nbo = BigEndianW(pmsh->songlen);
 		if (nbo >= MAX_ORDERS) nbo = MAX_ORDERS-1;
 		if (!nbo) nbo = 1;
 		Order.ReadAsByte(pmsh->playseq, nbo, nbo);
