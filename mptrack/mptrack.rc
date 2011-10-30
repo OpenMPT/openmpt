@@ -1702,6 +1702,10 @@ BEGIN
         BOTTOMMARGIN, 94
     END
 
+    IDD_CONTROL_GLOBALS, DIALOG
+    BEGIN
+    END
+
     IDD_CONTROL_COMMENTS, DIALOG
     BEGIN
         RIGHTMARGIN, 348
@@ -2116,9 +2120,10 @@ BEGIN
     BEGIN
         MENUITEM "&Contents",                   ID_HELP_FINDER
         MENUITEM "&Search...",                  ID_HELP_SEARCH
-        MENUITEM "&Report a bug",               ID_REPORT_BUG
+        MENUITEM "&Report a Bug",               ID_REPORT_BUG
         MENUITEM SEPARATOR
-        MENUITEM "&Example modules",            ID_EXAMPLE_MODULES
+        MENUITEM "&Example Modules",            ID_EXAMPLE_MODULES
+        MENUITEM "Show Settings Folder",        ID_HELP_SHOWSETTINGSFOLDER
         MENUITEM SEPARATOR
         MENUITEM "&OpenMPT Website",            ID_NETLINK_MODPLUG
         MENUITEM "&Web Resources",              ID_NETLINK_TOP_PICKS

@@ -1381,22 +1381,26 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 void CCtrlInstruments::UpdateFilterText()
 //---------------------------------------
 {
-	if ((m_nInstrument) && (m_pModDoc))
+	if((m_nInstrument) && (m_pModDoc))
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
+		if(pIns)
 		{
 			CHAR s[32];
 			// In IT Compatible mode, it is enough to just have resonance enabled to turn on the filter.
 			const bool resEnabled = (pIns->IsResonanceEnabled() && pIns->GetResonance() > 0 && pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER));
 
-			if ((pIns->IsCutoffEnabled() && pIns->GetCutoff() < 0x7F) || resEnabled)
+			if((pIns->IsCutoffEnabled() && pIns->GetCutoff() < 0x7F) || resEnabled)
 			{
 				const BYTE cutoff = (resEnabled && !pIns->IsCutoffEnabled()) ? 0x7F : pIns->GetCutoff();
 				wsprintf(s, "Z%02X (%d Hz)", cutoff, pSndFile->CutOffToFrequency(cutoff));
-			} else {
-				wsprintf(s, "Off");
+			} else if(pIns->IsCutoffEnabled())
+			{
+				strcpy(s, "Z7F (Off)");
+			} else
+			{
+				strcpy(s, "No Change");
 			}
 			
 			SetDlgItemText(IDC_FILTERTEXT, s);
