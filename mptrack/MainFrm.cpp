@@ -105,6 +105,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
+	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
 	ON_WM_KILLFOCUS() //rewbs.fix3116
@@ -2561,6 +2562,13 @@ void CMainFrame::OnInternetUpdate()
 {
 	CUpdateCheck *updateCheck = CUpdateCheck::Create(false);
 	updateCheck->DoUpdateCheck();
+}
+
+
+void CMainFrame::OnShowSettingsFolder()
+//-------------------------------------
+{
+	theApp.OpenDirectory(theApp.GetConfigPath());
 }
 
 

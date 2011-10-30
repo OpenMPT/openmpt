@@ -646,6 +646,7 @@ protected:
 	afx_msg void OnViewMIDIMapping();
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnInternetUpdate();
+	afx_msg void OnShowSettingsFolder();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
