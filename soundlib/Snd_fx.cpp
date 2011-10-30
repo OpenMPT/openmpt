@@ -1037,8 +1037,16 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		// Setup Initial Filter for this note
 		if (pIns)
 		{
-			if (pIns->IsResonanceEnabled()) { pChn->nResonance = pIns->GetResonance(); bFlt = true; }
-			if (pIns->IsResonanceEnabled()) { pChn->nCutOff = pIns->GetCutoff(); bFlt = true; }
+			if (pIns->IsResonanceEnabled())
+			{
+				pChn->nResonance = pIns->GetResonance();
+				bFlt = true;
+			}
+			if (pIns->IsCutoffEnabled())
+			{
+				pChn->nCutOff = pIns->GetCutoff();
+				bFlt = true;
+			}
 			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED))
 			{
 				pChn->nFilterMode = pIns->nFilterMode;
