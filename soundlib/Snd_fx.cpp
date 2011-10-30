@@ -74,6 +74,55 @@ void CSoundFile::GenerateSamplePosMap() {
 */
 
 
+// Memory class for GetLength() code
+class GetLengthMemory
+{
+public:
+	double elapsedTime;
+	UINT musicSpeed, musicTempo;
+	LONG glbVol;
+	vector<MODCOMMAND::PARAM> oldGlbVolSlide;
+	vector<MODCOMMAND::NOTE> notes;
+	vector<MODCOMMAND::INSTR> instr;
+	vector<MODCOMMAND::PARAM> oldParam;
+	vector<BYTE> vols;
+	vector<UINT> chnVols;
+	vector<double> patLoop;
+	vector<ROWINDEX> patLoopStart;
+
+protected:
+	const CSoundFile &sndFile;
+
+public:
+
+	GetLengthMemory(const CSoundFile &sf) : sndFile(sf)
+	{
+		Reset();
+	};
+
+	void Reset()
+	{
+		elapsedTime = 0.0;
+		musicSpeed = sndFile.m_nDefaultSpeed;
+		musicTempo = sndFile.m_nDefaultTempo;
+		glbVol = sndFile.m_nDefaultGlobalVolume;
+		oldGlbVolSlide.assign(sndFile.GetNumChannels(), 0);
+		instr.assign(sndFile.GetNumChannels(), 0);
+		notes.assign(sndFile.GetNumChannels(), NOTE_NONE);
+		vols.assign(sndFile.GetNumChannels(), 0xFF);
+		oldParam.assign(sndFile.GetNumChannels(), 0);
+		patLoop.assign(sndFile.GetNumChannels(), 0);
+		patLoopStart.assign(sndFile.GetNumChannels(), 0);
+
+		chnVols.resize(sndFile.GetNumChannels());
+		for(CHANNELINDEX icv = 0; icv < sndFile.GetNumChannels(); icv++)
+		{
+			chnVols[icv] = sndFile.ChnSettings[icv].nVolume;
+		}
+	}
+};
+
+
 // Get mod length in various cases. Parameters:
 // [in]  adjustMode: See enmGetLengthResetMode for possible adjust modes.
 // [in]  endOrder: Order which should be reached (ORDERINDEX_INVALID means whole song)
@@ -96,32 +145,15 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	// Are we trying to reach a certain pattern position?
 	const bool hasSearchTarget = (endOrder != ORDERINDEX_INVALID && endRow != ROWINDEX_INVALID);
 
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//	UINT dwElapsedTime=0, nRow=0, nCurrentPattern=0, nNextPattern=0, nPattern=Order[0];
-	ROWINDEX nRow = 0;
+	ROWINDEX nRow = 0, nNextRow = 0;
 	ROWINDEX nNextPatStartRow = 0; // FT2 E60 bug
 	ORDERINDEX nCurrentOrder = 0, nNextOrder = 0;
 	PATTERNINDEX nPattern = Order[0];
-	double dElapsedTime=0.0;
-// -! NEW_FEATURE#0022
-	UINT nMusicSpeed = m_nDefaultSpeed, nMusicTempo = m_nDefaultTempo, nNextRow = 0;
-	LONG nGlbVol = m_nDefaultGlobalVolume, nOldGlbVolSlide = 0;
-	vector<BYTE> instr(GetNumChannels(), 0);
-	vector<UINT> notes(GetNumChannels(), 0);
-	vector<BYTE> vols(GetNumChannels(), 0xFF);
-	vector<BYTE> oldparam(GetNumChannels(), 0);
-	vector<UINT> chnvols(GetNumChannels(), 64);
-	vector<double> patloop(GetNumChannels(), 0);
-	vector<ROWINDEX> patloopstart(GetNumChannels(), 0);
+
+	GetLengthMemory memory(*this);
 	VisitedRowsType visitedRows;	// temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 
 	InitializeVisitedRows(true, &visitedRows);
-
-	for(CHANNELINDEX icv = 0; icv < GetNumChannels(); icv++)
-	{
-		chnvols[icv] = ChnSettings[icv].nVolume;
-	}
 
 	for (;;)
 	{
@@ -161,7 +193,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				} else
 				{
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
-					dElapsedTime = 0.0;
+					memory.Reset();
 					continue;
 				}
 			}
@@ -179,7 +211,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				} else
 				{
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
-					dElapsedTime = 0.0;
+					memory.Reset();
 					continue;
 				}
 			}
@@ -206,7 +238,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			} else
 			{
 				// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
-				dElapsedTime = 0.0;
+				memory.Reset();
 				continue;
 			}
 		}
@@ -220,7 +252,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		if (!nRow)
 		{
 			for(UINT ipck = 0; ipck < m_nChannels; ipck++)
-				patloop[ipck] = dElapsedTime;
+				memory.patLoop[ipck] = memory.elapsedTime;
 		}
 
 		MODCHANNEL *pChn = Chn;
@@ -230,12 +262,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		{
 			if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
 				continue;
-			UINT command = p->command;
-			UINT param = p->param;
-			UINT note = p->note;
-			if (p->instr) { instr[nChn] = p->instr; notes[nChn] = 0; vols[nChn] = 0xFF; }
-			if ((note) && (note <= NOTE_MAX)) notes[nChn] = note;
-			if (p->volcmd == VOLCMD_VOLUME)	{ vols[nChn] = p->vol; }
+			MODCOMMAND::COMMAND command = p->command;
+			MODCOMMAND::PARAM param = p->param;
+			MODCOMMAND::NOTE note = p->note;
+			if (p->instr) { memory.instr[nChn] = p->instr; memory.notes[nChn] = NOTE_NONE; memory.vols[nChn] = 0xFF; }
+			if ((note >= NOTE_MIN) && (note <= NOTE_MAX)) memory.notes[nChn] = note;
+			if (p->volcmd == VOLCMD_VOLUME)	{ memory.vols[nChn] = p->vol; }
 			switch(command)
 			{
 			// Position Jump
@@ -292,7 +324,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
 				if ((param <= GetModSpecifications().speedMax) || (m_nType & MOD_TYPE_MOD))
 				{
-					nMusicSpeed = param;
+					memory.musicSpeed = param;
 				}
 				break;
 			// Set Tempo
@@ -301,21 +333,21 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				{
 					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
 				}
-				if (param >= 0x20) nMusicTempo = param; else
+				if (param >= 0x20) memory.musicTempo = param; else
 				// Tempo Slide
 				if ((param & 0xF0) == 0x10)
 				{
-					nMusicTempo += (param & 0x0F)  * (nMusicSpeed - 1);  //rewbs.tempoSlideFix
+					memory.musicTempo += (param & 0x0F)  * (memory.musicSpeed - 1);  //rewbs.tempoSlideFix
 				} else
 				{
-					nMusicTempo -= (param & 0x0F) * (nMusicSpeed - 1); //rewbs.tempoSlideFix
+					memory.musicTempo -= (param & 0x0F) * (memory.musicSpeed - 1); //rewbs.tempoSlideFix
 				}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-					nMusicTempo = CLAMP(nMusicTempo, 32, 255);
+					memory.musicTempo = CLAMP(memory.musicTempo, 32, 255);
 				else
-					nMusicTempo = CLAMP(nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
+					memory.musicTempo = CLAMP(memory.musicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 // -! NEW_FEATURE#0010
 				break;
 			// Pattern Delay
@@ -324,17 +356,17 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				if ((param & 0xF0) == 0xA0) { pChn->nOldHiOffset = param & 0x0F; break; } else
 				if ((param & 0xF0) == 0xB0) { param &= 0x0F; param |= 0x60; }
 			case CMD_MODCMDEX:
-				if ((param & 0xF0) == 0xE0) nSpeedCount = (param & 0x0F) * nMusicSpeed; else
+				if ((param & 0xF0) == 0xE0) nSpeedCount = (param & 0x0F) * memory.musicSpeed; else
 				if ((param & 0xF0) == 0x60)
 				{
 					if (param & 0x0F)
 					{
-						dElapsedTime += (dElapsedTime - patloop[nChn]) * (double)(param & 0x0F);
-						nNextPatStartRow = patloopstart[nChn]; // FT2 E60 bug
+						memory.elapsedTime += (memory.elapsedTime - memory.patLoop[nChn]) * (double)(param & 0x0F);
+						nNextPatStartRow = memory.patLoopStart[nChn]; // FT2 E60 bug
 					} else
 					{
-						patloop[nChn] = dElapsedTime;
-						patloopstart[nChn] = nRow;
+						memory.patLoop[nChn] = memory.elapsedTime;
+						memory.patLoopStart[nChn] = nRow;
 					}
 				}
 				break;
@@ -367,12 +399,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				break;
 			// Set Volume
 			case CMD_VOLUME:
-				vols[nChn] = param;
+				memory.vols[nChn] = param;
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
 				// ST3 applies global volume on tick 1 and does other weird things, but we won't emulate this for now.
-// 				if((GetType() & MOD_TYPE_S3M) && nMusicSpeed <= 1)
+// 				if((GetType() & MOD_TYPE_S3M) && memory.musicSpeed <= 1)
 // 				{
 // 					break;
 // 				}
@@ -381,7 +413,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
 				if (param <= 128)
 				{
-					nGlbVol = param << 1;
+					memory.glbVol = param << 1;
 				}
 				break;
 			// Global Volume Slide
@@ -389,61 +421,61 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 				{
 					//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
-					if (param) pChn->nOldGlobalVolSlide = param; else param = pChn->nOldGlobalVolSlide;
+					if (param) memory.oldGlbVolSlide[nChn] = param; else param = memory.oldGlbVolSlide[nChn];
 				}
 				else
 				{
-					if (param) nOldGlbVolSlide = param; else param = nOldGlbVolSlide;
+					if (param) memory.oldGlbVolSlide[0] = param; else param = memory.oldGlbVolSlide[0];
 
 				}
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
 					param >>= 4;
 					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-					nGlbVol += param << 1;
+					memory.glbVol += param << 1;
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
 					param = (param & 0x0F) << 1;
 					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-					nGlbVol -= param;
+					memory.glbVol -= param;
 				} else
 				if (param & 0xF0)
 				{
 					param >>= 4;
 					param <<= 1;
 					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-					nGlbVol += param * nMusicSpeed;
+					memory.glbVol += param * memory.musicSpeed;
 				} else
 				{
 					param = (param & 0x0F) << 1;
 					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-					nGlbVol -= param * nMusicSpeed;
+					memory.glbVol -= param * memory.musicSpeed;
 				}
-				nGlbVol = CLAMP(nGlbVol, 0, 256);
+				memory.glbVol = CLAMP(memory.glbVol, 0, 256);
 				break;
 			case CMD_CHANNELVOLUME:
-				if (param <= 64) chnvols[nChn] = param;
+				if (param <= 64) memory.chnVols[nChn] = param;
 				break;
 			case CMD_CHANNELVOLSLIDE:
-				if (param) oldparam[nChn] = param; else param = oldparam[nChn];
+				if (param) memory.oldParam[nChn] = param; else param = memory.oldParam[nChn];
 				pChn->nOldChnVolSlide = param;
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{	
-					param = (param >> 4) + chnvols[nChn];
+					param = (param >> 4) + memory.chnVols[nChn];
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
-					if (chnvols[nChn] > (int)(param & 0x0F)) param = chnvols[nChn] - (param & 0x0F);
+					if (memory.chnVols[nChn] > (int)(param & 0x0F)) param = memory.chnVols[nChn] - (param & 0x0F);
 					else param = 0;
 				} else
 				if (param & 0x0F)
 				{
-					param = (param & 0x0F) * nMusicSpeed;
-					param = (chnvols[nChn] > param) ? chnvols[nChn] - param : 0;
-				} else param = ((param & 0xF0) >> 4) * nMusicSpeed + chnvols[nChn];
+					param = (param & 0x0F) * memory.musicSpeed;
+					param = (memory.chnVols[nChn] > param) ? memory.chnVols[nChn] - param : 0;
+				} else param = ((param & 0xF0) >> 4) * memory.musicSpeed + memory.chnVols[nChn];
 				param = min(param, 64);
-				chnvols[nChn] = param;
+				memory.chnVols[nChn] = param;
 				break;
 			}
 		}
@@ -456,16 +488,16 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			nNextPatStartRow = 0;
 		}
 
-		nSpeedCount += nMusicSpeed;
+		nSpeedCount += memory.musicSpeed;
 
 		switch(m_nTempoMode)
 		{
 			case tempo_mode_alternative: 
-				dElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
+				memory.elapsedTime += 60000.0 / (1.65625 * (double)(memory.musicSpeed * memory.musicTempo)); break;
 			case tempo_mode_modern: 
-				dElapsedTime += 60000.0 / (double)nMusicTempo / (double)m_nCurrentRowsPerBeat; break;
+				memory.elapsedTime += 60000.0 / (double)memory.musicTempo / (double)m_nCurrentRowsPerBeat; break;
 			case tempo_mode_classic: default:
-				dElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
+				memory.elapsedTime += (2500.0 * (double)nSpeedCount) / (double)memory.musicTempo;
 		}
 	}
 
@@ -474,7 +506,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		retval.lastOrder = nCurrentOrder;
 		retval.lastRow = nRow;
 	}
-	retval.duration = dElapsedTime / 1000.0;
+	retval.duration = memory.elapsedTime / 1000.0;
 
 	// Store final variables
 	if ((adjustMode & eAdjust))
@@ -482,26 +514,36 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		if (retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 		{
 			// Target found, or there is no target (i.e. play whole song)...
-			m_nGlobalVolume = nGlbVol;
-			m_nOldGlbVolSlide = nOldGlbVolSlide;
-			m_nMusicSpeed = nMusicSpeed;
-			m_nMusicTempo = nMusicTempo;
-			for (CHANNELINDEX n = 0; n < m_nChannels; n++)
+			m_nGlobalVolume = memory.glbVol;
+			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{
-				Chn[n].nGlobalVol = chnvols[n];
-				if (notes[n])
+				//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
+				for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 				{
-					Chn[n].nNewNote = notes[n];
-					if(NOTE_IS_VALID(notes[n]))
+					Chn[n].nOldGlobalVolSlide = memory.oldGlbVolSlide[n];
+				}
+			} else
+			{
+				m_nOldGlbVolSlide = memory.oldGlbVolSlide[0];
+			}
+			m_nMusicSpeed = memory.musicSpeed;
+			m_nMusicTempo = memory.musicTempo;
+			for (CHANNELINDEX n = 0; n < GetNumChannels(); n++)
+			{
+				Chn[n].nGlobalVol = memory.chnVols[n];
+				if (memory.notes[n])
+				{
+					Chn[n].nNewNote = memory.notes[n];
+					if(NOTE_IS_VALID(memory.notes[n]))
 					{
-						Chn[n].nLastNote = notes[n];
+						Chn[n].nLastNote = memory.notes[n];
 					}
 				}
-				if (instr[n]) Chn[n].nNewIns = instr[n];
-				if (vols[n] != 0xFF)
+				if (memory.instr[n]) Chn[n].nNewIns = memory.instr[n];
+				if (memory.vols[n] != 0xFF)
 				{
-					if (vols[n] > 64) vols[n] = 64;
-					Chn[n].nVolume = vols[n] * 4;
+					if (memory.vols[n] > 64) memory.vols[n] = 64;
+					Chn[n].nVolume = memory.vols[n] * 4;
 				}
 			}
 		} else if(adjustMode != eAdjustOnSuccess)
