@@ -523,9 +523,9 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	vector<bool> samplesUsed(pSndFile->GetNumSamples() + 1, true);
 
 	BeginWaitCursor();
-	for (SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->GetSample(nSmp).pSample)
+	for(SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->GetSample(nSmp).pSample)
 	{
-		if (!pSndFile->IsSampleUsed(nSmp))
+		if(!pSndFile->IsSampleUsed(nSmp))
 		{
 			samplesUsed[nSmp] = false;
 			m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete);
@@ -533,38 +533,38 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	}
 
 	SAMPLEINDEX nRemoved;
-	{
-		CriticalSection cs;
-		nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
-	}
+	nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
 
-	SAMPLEINDEX nExt = pSndFile->DetectUnusedSamples(samplesUsed);
+	const SAMPLEINDEX unusedInsSamples = pSndFile->DetectUnusedSamples(samplesUsed);
 
 	EndWaitCursor();
 
-	if (nExt && !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
-	{	//We don't remove an instrument's unused samples in an ITP.
+	if(unusedInsSamples && !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
+	{
+		// We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
-			"but not used in the song. Do you want to remove them?", nExt, (nExt == 1) ? "" : "s");
-		if (Reporting::Confirm(s, "Sample Cleanup") == cnfYes)
+			"but not used in the song. Do you want to remove them?", unusedInsSamples, (unusedInsSamples == 1) ? "" : "s");
+		if(Reporting::Confirm(s, "Sample Cleanup") == cnfYes)
 		{
-			CriticalSection cs;
-			for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
+			nRemoved += pSndFile->RemoveSelectedSamples(samplesUsed);
+			// Reduce the number of sample slots if possible.
+			for(SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--)
 			{
-				if ((!samplesUsed[nSmp]) && (pSndFile->GetSample(nSmp).pSample))
+				if(samplesUsed[nSmp])
 				{
-					m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete);
-					pSndFile->DestroySample(nSmp);
-					if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
-					nRemoved++;
-					m_pModDoc->GetSampleUndo().ClearUndo(nSmp);
+					pSndFile->m_nSamples = nSmp;
+					break;
 				}
 			}
-			wsprintf(s, "%d unused sample%s removed\n" , nRemoved, (nRemoved == 1) ? "" : "s");
-			m_pModDoc->AddToLog(s);
-			return true;
 		}
 	}
+
+	if(nRemoved > 0)
+	{
+		wsprintf(s, "%d unused sample%s removed\n" , nRemoved, (nRemoved == 1) ? "" : "s");
+		m_pModDoc->AddToLog(s);
+	}
+
 	return (nRemoved > 0);
 }
 
@@ -611,10 +611,12 @@ bool CModCleanupDlg::OptimizeSamples()
 			if(sample.uFlags & CHN_LOOP)
 			{
 				loopLength = sample.nLoopEnd;
-			}
-			if(sample.uFlags & CHN_SUSTAINLOOP)
-			{
-				loopLength = max(sample.nLoopEnd, sample.nSustainEnd);
+
+				// Sustain loop is played before normal loop, and it can actually be located after the normal loop.
+				if(sample.uFlags & CHN_SUSTAINLOOP)
+				{
+					loopLength = max(sample.nLoopEnd, sample.nSustainEnd);
+				}
 			}
 
 			if (sample.nLength > loopLength + 2)
