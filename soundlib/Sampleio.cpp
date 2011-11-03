@@ -151,35 +151,36 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 //--------------------------------------------------------------
 {
-	vector<bool> sampleused(GetNumSamples() + 1, false);
-
-	if (Instruments[nInstr])
+	if(Instruments[nInstr] == nullptr)
 	{
-		MODINSTRUMENT *p = Instruments[nInstr];
-		for (UINT r=0; r<128; r++)
-		{
-			UINT n = p->Keyboard[r];
-			if (n <= GetNumSamples()) sampleused[n] = true;
-		}
-		for (INSTRUMENTINDEX nIns = 1; nIns < MAX_INSTRUMENTS; nIns++) if ((Instruments[nIns]) && (nIns != nInstr))
-		{
-			p = Instruments[nIns];
-			for (UINT r=0; r<128; r++)
-			{
-				UINT n = p->Keyboard[r];
-				if (n <= GetNumSamples()) sampleused[n] = false;
-			}
-		}
-		for (SAMPLEINDEX nSmp = 1; nSmp <= GetNumSamples(); nSmp++) if (sampleused[nSmp])
-		{
-			CriticalSection cs;
-
-			DestroySample(nSmp);
-			strcpy(m_szNames[nSmp], "");
-		}
-		return true;
+		return false;
 	}
-	return false;
+
+	vector<bool> keepSamples(GetNumSamples() + 1, true);
+
+	const MODINSTRUMENT *p = Instruments[nInstr];
+
+	// Check which samples are used by the instrument we are going to nuke.
+	for(size_t r = 0; r < CountOf(p->Keyboard); r++)
+	{
+		SAMPLEINDEX n = p->Keyboard[r];
+		if (n <= GetNumSamples()) keepSamples[n] = false;
+	}
+
+	// Check if any of those samples are referenced by other instruments as well, in which case we want to keep them of course.
+	for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++) if (Instruments[nIns] != nullptr && nIns != nInstr)
+	{
+		p = Instruments[nIns];
+		for(size_t r = 0; r < CountOf(p->Keyboard); r++)
+		{
+			SAMPLEINDEX n = p->Keyboard[r];
+			if (n <= GetNumSamples()) keepSamples[n] = true;
+		}
+	}
+
+	// Now nuke the selected samples.
+	RemoveSelectedSamples(keepSamples);
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

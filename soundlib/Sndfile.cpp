@@ -2591,13 +2591,24 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
 	{
 		return 0;
 	}
+	
 	SAMPLEINDEX nRemoved = 0;
 	for(SAMPLEINDEX nSmp = (SAMPLEINDEX)min(GetNumSamples(), keepSamples.size() - 1); nSmp >= 1; nSmp--)
 	{
 		if(!keepSamples[nSmp])
 		{
+			CriticalSection cs;
+
+#ifdef MODPLUG_TRACKER
+			if(GetpModDoc())
+			{
+				GetpModDoc()->GetSampleUndo().PrepareUndo(nSmp, sundo_replace);
+			}
+#endif //  MODPLUG_TRACKER
+
 			if(DestroySample(nSmp))
 			{
+				strcpy(m_szNames[nSmp], "");
 				nRemoved++;
 			}
 			if((nSmp == GetNumSamples()) && (nSmp > 1)) m_nSamples--;
