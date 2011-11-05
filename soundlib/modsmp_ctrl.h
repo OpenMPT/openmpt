@@ -39,7 +39,7 @@ bool AdjustEndOfSample(MODSAMPLE &smp, CSoundFile *pSndFile = nullptr);
 inline SmpLength GetSampleCapacity(MODSAMPLE &smp) {return smp.GetSampleSizeInBytes();}
 
 // Resets samples.
-void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag);
+void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag, SAMPLEINDEX minSample = SAMPLEINDEX_INVALID, SAMPLEINDEX maxSample = SAMPLEINDEX_INVALID);
 
 // Remove DC offset and normalize.
 // Return: If DC offset was removed, returns original offset value, zero otherwise.
@@ -51,6 +51,9 @@ float RemoveDCOffset(MODSAMPLE &smp,
 											// Volume adjustment is not done if this param is MOD_TYPE_NONE.
 					 CSoundFile* const pSndFile); // Passed to AdjustEndOfSample.
 
+// Amplify / fade  sample data
+bool AmplifySample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile, double amplifyStart, double amplifyEnd);
+
 // Reverse sample data
 bool ReverseSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
 
@@ -59,6 +62,9 @@ bool UnsignSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *
 
 // Invert sample data (flip by 180 degrees)
 bool InvertSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+
+// Detect whether to enable smart sample ramping.
+bool EnableSmartSampleRamping(const MODSAMPLE &smp, SmpLength sampleOffset, const CSoundFile *pSndFile);
 
 // Crossfade sample data to create smooth loops
 bool XFadeSample(MODSAMPLE &smp, SmpLength iFadeLength, CSoundFile *pSndFile);

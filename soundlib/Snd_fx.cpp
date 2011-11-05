@@ -761,10 +761,14 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			pChn->VolEnv.flags = pIns->VolEnv.dwFlags;
 			pChn->PanEnv.flags = pIns->PanEnv.dwFlags;
 			pChn->PitchEnv.flags = pIns->PitchEnv.dwFlags;
-			if ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && (pIns->PitchEnv.dwFlags & ENV_FILTER))
+
+			// A cutoff frequency of 0 should not be reset just because the filter envelope is enabled.
+			// Test case: FilterEnvReset.it
+			if ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == (ENV_ENABLED | ENV_FILTER) && !IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
 				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
 			}
+
 			if (pIns->IsCutoffEnabled()) pChn->nCutOff = pIns->GetCutoff();
 			if (pIns->IsResonanceEnabled()) pChn->nResonance = pIns->GetResonance();
 		}
