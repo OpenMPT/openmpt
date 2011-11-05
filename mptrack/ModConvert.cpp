@@ -174,8 +174,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		MODCOMMAND *m = m_SndFile.Patterns[nPat];
 
 		// This is used for -> MOD/XM conversion
-		vector<vector<MODCOMMAND::PARAM> > cEffectMemory;
-		cEffectMemory.resize(GetNumChannels());
+		vector<vector<MODCOMMAND::PARAM> > cEffectMemory(GetNumChannels());
 		for(size_t i = 0; i < GetNumChannels(); i++)
 		{
 			cEffectMemory[i].resize(MAX_EFFECTS, 0);
@@ -294,6 +293,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				sample.nLoopStart = sample.nSustainStart;
 				sample.nLoopEnd = sample.nSustainEnd;
 				sample.uFlags |= CHN_LOOP;
+				if(sample.uFlags & CHN_PINGPONGSUSTAIN)
+				{
+					sample.uFlags |= CHN_PINGPONGLOOP;
+				} else
+				{
+					sample.uFlags &= ~CHN_PINGPONGLOOP;
+				}
 				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
 			}
 			sample.nSustainStart = sample.nSustainEnd = 0;

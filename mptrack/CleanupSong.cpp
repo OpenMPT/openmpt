@@ -97,7 +97,7 @@ BOOL CModCleanupDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	for(int i = 0; i < CU_MAX_CLEANUP_OPTIONS; i++)
 	{
-		CheckDlgButton(m_nCleanupIDtoDlgID[i], (m_bCheckBoxes[i]) ? MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(m_nCleanupIDtoDlgID[i], (m_bCheckBoxes[i]) ? BST_CHECKED : BST_UNCHECKED);
 	}
 
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -183,17 +183,17 @@ void CModCleanupDlg::OnVerifyMutualExclusive()
 		if(hFocus == GetDlgItem(m_nCleanupIDtoDlgID[i])->m_hWnd)
 		{
 			// if we just unchecked it, there's nothing to verify.
-			if(IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) == FALSE)
+			if(IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) == BST_UNCHECKED)
 				return;
 
 			// now we can disable all elements that are mutually exclusive.
 			if(m_nMutuallyExclusive[i] != CU_NONE)
-				CheckDlgButton(m_nCleanupIDtoDlgID[m_nMutuallyExclusive[i]], MF_UNCHECKED);
+				CheckDlgButton(m_nCleanupIDtoDlgID[m_nMutuallyExclusive[i]], BST_UNCHECKED);
 			// find other elements which are mutually exclusive with the selected element.
 			for(int j = 0; j < CU_MAX_CLEANUP_OPTIONS; j++)	
 			{
 				if(m_nMutuallyExclusive[j] == i)
-					CheckDlgButton(m_nCleanupIDtoDlgID[j], MF_UNCHECKED);
+					CheckDlgButton(m_nCleanupIDtoDlgID[j], BST_UNCHECKED);
 			}
 			return;
 		}
@@ -205,50 +205,50 @@ void CModCleanupDlg::OnPresetCleanupSong()
 //----------------------------------------
 {
 	// patterns
-	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, BST_CHECKED);
 	// orders
-	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, BST_UNCHECKED);
 	// samples
-	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REARRANGE_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_OPTIMIZE_SAMPLES, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REARRANGE_SAMPLES, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_OPTIMIZE_SAMPLES, BST_CHECKED);
 	// instruments
-	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, BST_UNCHECKED);
 	// plugins
-	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, BST_UNCHECKED);
 	// misc
-	CheckDlgButton(IDC_CHK_SAMPLEPACK, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_SAMPLEPACK, BST_UNCHECKED);
 }
 
 void CModCleanupDlg::OnPresetCompoCleanup()
 //-----------------------------------------
 {
 	// patterns
-	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, BST_UNCHECKED);
 	// orders
-	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, BST_CHECKED);
 	// samples
-	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REARRANGE_SAMPLES, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_OPTIMIZE_SAMPLES, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REARRANGE_SAMPLES, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_OPTIMIZE_SAMPLES, BST_UNCHECKED);
 	// instruments
-	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, BST_CHECKED);
 	// plugins
-	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, BST_CHECKED);
 	// misc
-	CheckDlgButton(IDC_CHK_SAMPLEPACK, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_SAMPLEPACK, BST_CHECKED);
 }
 
 BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
@@ -352,7 +352,7 @@ struct OrigPatSettings
 	CString name;				// original pattern name
 };
 
-const OrigPatSettings defaultSettings = {false, 0, nullptr, 0, 0, 0, ""};
+const OrigPatSettings defaultSettings = { false, 0, nullptr, 0, 0, 0, "" };
 
 // Remove unused patterns / rearrange patterns
 // If argument bRemove is true, unused patterns are removed. Else, patterns are only rearranged.
@@ -409,7 +409,6 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			nPatRemoved++;
 		}
 	}
-	cs.Leave();
 
 	// Number of unused patterns
 	size_t nWaste = 0;
@@ -420,10 +419,12 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 
 	if ((bRemove) && (nWaste))
 	{
+		cs.Leave();
 		EndWaitCursor();
 		wsprintf(s, "%d pattern%s present in file, but not used in the song\nDo you want to reorder the sequence list and remove these patterns?", nWaste, (nWaste == 1) ? "" : "s");
 		if (Reporting::Confirm(s, "Pattern Cleanup") != cnfYes) return false;
 		BeginWaitCursor();
+		cs.Enter();
 	}
 
 	for(PATTERNINDEX i = 0; i < maxPatIndex; i++)
@@ -466,7 +467,6 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	pSndFile->Order.SetSequence(oldSequence);
 
 	// Reorder patterns & Delete unused patterns
-	cs.Enter();
 	{
 		for (PATTERNINDEX i = 0; i < maxPatIndex; i++)
 		{
@@ -496,6 +496,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 			pSndFile->Patterns[nPat].SetName(patternSettings[nPat].name);
 		}
 	}
+
 	cs.Leave();
 	EndWaitCursor();
 	if ((nPatRemoved) || (bReordered))
@@ -523,6 +524,9 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	vector<bool> samplesUsed(pSndFile->GetNumSamples() + 1, true);
 
 	BeginWaitCursor();
+
+	// Check if any samples are not referenced in the patterns (sample mode) or by an instrument (instrument mode).
+	// This doesn't check yet if a sample is referenced by an instrument, but actually unused in the patterns.
 	for(SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->GetSample(nSmp).pSample)
 	{
 		if(!pSndFile->IsSampleUsed(nSmp))
@@ -532,8 +536,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		}
 	}
 
-	SAMPLEINDEX nRemoved;
-	nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
+	SAMPLEINDEX nRemoved = pSndFile->RemoveSelectedSamples(samplesUsed);
 
 	const SAMPLEINDEX unusedInsSamples = pSndFile->DetectUnusedSamples(samplesUsed);
 
@@ -547,15 +550,6 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		if(Reporting::Confirm(s, "Sample Cleanup") == cnfYes)
 		{
 			nRemoved += pSndFile->RemoveSelectedSamples(samplesUsed);
-			// Reduce the number of sample slots if possible.
-			for(SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--)
-			{
-				if(samplesUsed[nSmp])
-				{
-					pSndFile->m_nSamples = nSmp;
-					break;
-				}
-			}
 		}
 	}
 
@@ -797,7 +791,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 			}
 		}
 		while ((pSndFile->m_nInstruments > 1) && (!pSndFile->Instruments[pSndFile->m_nInstruments])) pSndFile->m_nInstruments--;
-		cs.Leave();
+
 		if (nSwap > 0)
 		{
 			for (PATTERNINDEX iPat = 0; iPat < pSndFile->Patterns.Size(); iPat++) if (pSndFile->Patterns[iPat])
@@ -985,16 +979,11 @@ bool CModCleanupDlg::RemoveAllSamples()
 	if(pSndFile == nullptr) return false;
 
 	if (pSndFile->GetNumSamples() == 0) return false;
+
 	vector<bool> keepSamples(pSndFile->GetNumSamples() + 1, false);
-
-	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
-	{
-		m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete, 0, pSndFile->GetSample(nSmp).nLength);
-	}
-	ctrlSmp::ResetSamples(*pSndFile, ctrlSmp::SmpResetInit);
-
-	CriticalSection cs;
 	pSndFile->RemoveSelectedSamples(keepSamples);
+
+	ctrlSmp::ResetSamples(*pSndFile, ctrlSmp::SmpResetInit, 1, MAX_SAMPLES - 1);
 
 	return true;
 }

@@ -95,7 +95,7 @@ struct IMFSAMPLE
 };
 #pragma pack()
 
-static BYTE imf_efftrans[] =
+static BYTE imfEffects[] =
 {
 	CMD_NONE,
 	CMD_SPEED,			// 0x01 1xx Set Tempo
@@ -145,8 +145,8 @@ static BYTE imf_efftrans[] =
 	CMD_NONE,			// 0x23 Zxx Reverb - XXX
 };
 
-static void import_imf_effect(MODCOMMAND *note)
-//---------------------------------------------
+static void ImportIMFEffect(MODCOMMAND *note)
+//-------------------------------------------
 {
 	uint8 n;
 	// fix some of them
@@ -232,7 +232,7 @@ static void import_imf_effect(MODCOMMAND *note)
 			note->param = n | (note->param & 0xf);
 		break;
 	}
-	note->command = (note->command < 0x24) ? imf_efftrans[note->command] : CMD_NONE;
+	note->command = (note->command < CountOf(imfEffects)) ? imfEffects[note->command] : CMD_NONE;
 	if (note->command == CMD_VOLUME && note->volcmd == VOLCMD_NONE)
 	{
 		note->volcmd = VOLCMD_VOLUME;
@@ -242,8 +242,8 @@ static void import_imf_effect(MODCOMMAND *note)
 	}
 }
 
-static void load_imf_envelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfins, const int e)
-//----------------------------------------------------------------------------------------------
+static void LoadIMFEnvelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfins, const int e)
+//--------------------------------------------------------------------------------------------
 {
 	UINT min = 0; // minimum tick value for next node
 	const int shift = (e == IMF_ENV_VOL) ? 0 : 2;
@@ -272,10 +272,9 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	IMFHEADER hdr;
 	MODSAMPLE *pSample = Samples + 1;
 	WORD firstsample = 1; // first pSample for the current instrument
-	uint32 ignore_channels = 0; // bit set for each channel that's completely disabled
+	vector<bool> ignoreChannels(32, false); // bit set for each channel that's completely disabled
 
 	ASSERT_CAN_READ(sizeof(IMFHEADER));
-	memset(&hdr, 0, sizeof(IMFHEADER));
 	memcpy(&hdr, lpStream, sizeof(IMFHEADER));
 	dwMemPos = sizeof(IMFHEADER);
 
@@ -284,7 +283,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	hdr.insnum = LittleEndianW(hdr.insnum);
 	hdr.flags = LittleEndianW(hdr.flags);
 
-	if (memcmp(hdr.im10, "IM10", 4) != 0)
+	if(memcmp(hdr.im10, "IM10", 4) != 0)
 		return false;
 
 	m_nType = MOD_TYPE_IMF;
@@ -326,7 +325,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 		case 2: // disabled
 			ChnSettings[nChn].dwFlags |= CHN_MUTE;
-			ignore_channels |= (1 << nChn);
+			ignoreChannels[nChn] = true;
 			break;
 		default: // uhhhh.... freak out
 			//fprintf(stderr, "imf: channel %d has unknown status %d\n", n, hdr.channels[n].status);
@@ -376,7 +375,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			ASSERT_CAN_READ(1);
 			mask = *((BYTE *)(lpStream + dwMemPos));
 			dwMemPos += 1;
-			if (mask == 0) {
+			if (mask == 0)
+			{
 				row++;
 				row_data += m_nChannels;
 				continue;
@@ -384,7 +384,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			channel = mask & 0x1f;
 
-			if(ignore_channels & (1 << channel))
+			if(ignoreChannels[channel])
 			{
 				/* should do this better, i.e. not go through the whole process of deciding
 				what to do with the effects since they're just being thrown out */
@@ -474,7 +474,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				dwMemPos += 2;
 			}
 			if(note->command)
-				import_imf_effect(note);
+				ImportIMFEffect(note);
 		}
 	}
 
@@ -484,7 +484,6 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		IMFINSTRUMENT imfins;
 		MODINSTRUMENT *pIns;
 		ASSERT_CAN_READ(sizeof(IMFINSTRUMENT));
-		memset(&imfins, 0, sizeof(IMFINSTRUMENT));
 		memcpy(&imfins, lpStream + dwMemPos, sizeof(IMFINSTRUMENT));
 		dwMemPos += sizeof(IMFINSTRUMENT);
 		m_nInstruments++;
@@ -520,9 +519,9 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		pIns->nFadeOut = imfins.fadeout;
 
-		load_imf_envelope(&pIns->VolEnv, &imfins, IMF_ENV_VOL);
-		load_imf_envelope(&pIns->PanEnv, &imfins, IMF_ENV_PAN);
-		load_imf_envelope(&pIns->PitchEnv, &imfins, IMF_ENV_FILTER);
+		LoadIMFEnvelope(&pIns->VolEnv, &imfins, IMF_ENV_VOL);
+		LoadIMFEnvelope(&pIns->PanEnv, &imfins, IMF_ENV_PAN);
+		LoadIMFEnvelope(&pIns->PitchEnv, &imfins, IMF_ENV_FILTER);
 		if((pIns->PitchEnv.dwFlags & ENV_ENABLED) != 0)
 			pIns->PitchEnv.dwFlags |= ENV_FILTER;
 
@@ -536,7 +535,6 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			IMFSAMPLE imfsmp;
 			uint32 blen;
 			ASSERT_CAN_READ(sizeof(IMFSAMPLE));
-			memset(&imfsmp, 0, sizeof(IMFSAMPLE));
 			memcpy(&imfsmp, lpStream + dwMemPos, sizeof(IMFSAMPLE));
 			dwMemPos += sizeof(IMFSAMPLE);
 			m_nSamples++;

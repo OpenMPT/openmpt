@@ -217,11 +217,26 @@ bool AdjustEndOfSample(MODSAMPLE &smp, CSoundFile* pSndFile)
 }
 
 
-void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag)
-//----------------------------------------------------------
+void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag, SAMPLEINDEX minSample, SAMPLEINDEX maxSample)
+//--------------------------------------------------------------------------------------------------------
 {
-	const UINT nSamples = rSndFile.GetNumSamples();
-	for(UINT i = 1; i <= nSamples; i++)
+	if(minSample == SAMPLEINDEX_INVALID)
+	{
+		minSample = 1;
+	}
+	if(maxSample == SAMPLEINDEX_INVALID)
+	{
+		maxSample = rSndFile.GetNumSamples();
+	}
+	Limit(minSample, SAMPLEINDEX(1), SAMPLEINDEX(MAX_SAMPLES - 1));
+	Limit(maxSample, SAMPLEINDEX(1), SAMPLEINDEX(MAX_SAMPLES - 1));
+
+	if(minSample > maxSample)
+	{
+		std::swap(minSample, maxSample);
+	}
+
+	for(SAMPLEINDEX i = minSample; i <= maxSample; i++)
 	{
 		MODSAMPLE &sample = rSndFile.GetSample(i);
 		switch(resetflag)
@@ -488,6 +503,51 @@ bool InvertSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *
 
 	AdjustEndOfSample(smp, pSndFile);
 	return true;
+}
+
+
+template <class T>
+bool EnableSmartSampleRampingImpl(const T* pSample, const SmpLength smpCount)
+//---------------------------------------------------------------------------
+{
+	const T upperThreshold = (std::numeric_limits<T>::max)() / 2;		// >= 50%
+	const T lowerThreshold = (std::numeric_limits<T>::max)() / 40;		// <= 2.5%
+
+	// Count backwards for a weighted mean (first samples have the most significant weight).
+	T average = pSample[smpCount - 1];
+	for(SmpLength i = smpCount; i > 0; i--)
+	{
+		T data = pSample[i - 1];
+		if(data < 0) data = -data;
+		average = (data + average) / 2;
+	}
+	if(average >= upperThreshold || average <= lowerThreshold) return true;
+	return false;
+}
+
+// This function detects whether to enable smart sample ramping or not, based on the initial DC offset.
+// If the DC offset is very high (>= 50%), we can assume that it is somehow intentional (imagine f.e. a typical square waveform sample).
+// On the other side, if the initial DC offset is very low (<= 2.5%), we do not need to apply ramping, so we can retain the punch of properly aligned samples.
+// Eventually, ramping will (hopefully) only be performed on "bad" samples.
+// The function returns true if ramping should be forced off, false if it can stay enabled.
+// TODO: It would be a lot nicer if this would pre-normalize samples.
+bool EnableSmartSampleRamping(const MODSAMPLE &smp, SmpLength sampleOffset, const CSoundFile *pSndFile)
+//-----------------------------------------------------------------------------------------------------
+{
+	// First two sample points are supposed to be 0 for unlooped MOD samples, so don't take them into account.
+	if((smp.uFlags & CHN_LOOP) && (pSndFile->GetType() & MOD_TYPE_MOD) && sampleOffset == 0) sampleOffset = 2;
+
+	// Just look at the first four samples, starting from the given offset.
+	sampleOffset = min(sampleOffset, smp.nLength);
+	const SmpLength smpCount = min(4, smp.nLength - sampleOffset) * smp.GetNumChannels();
+
+	if(smp.pSample == nullptr || smpCount == 0) return false;
+	if(smp.GetElementarySampleSize() == 2)
+		return EnableSmartSampleRampingImpl(reinterpret_cast<int16*>(smp.pSample) + sampleOffset, smpCount);
+	else if(smp.GetElementarySampleSize() == 1)
+		return EnableSmartSampleRampingImpl(reinterpret_cast<int8*>(smp.pSample) + sampleOffset, smpCount);
+	else
+		return false;
 }
 
 
