@@ -1086,7 +1086,16 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 							env = &pChn->PanEnv;
 						}
 
-						if (env->flags & ENV_ENABLED) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(env->nEnvPosition);
+						if (env->flags & ENV_ENABLED)
+						{
+							DWORD pos = env->nEnvPosition;
+							if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER) && pos > 0)
+							{
+								// Impulse Tracker envelope handling (see SndMix.cpp for details)
+								pos--;
+							}
+							p->dwPos[k] = MPTNOTIFY_POSVALID | pos;
+						}
 					}
 				}
 			} else

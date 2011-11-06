@@ -8,6 +8,7 @@
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
 #include "view_com.h"
+#include <set>
 
 #define DETAILS_TOOLBAR_CY	28
 
@@ -238,9 +239,9 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	{
 		UINT nMax = nCount;
 		if (nMax < pSndFile->GetNumSamples()) nMax = pSndFile->GetNumSamples();
-		for (UINT iSmp=0; iSmp<nMax; iSmp++)
+		for (SAMPLEINDEX iSmp = 0; iSmp < nMax; iSmp++)
 		{
-			if (iSmp < pSndFile->m_nSamples)
+			if (iSmp < pSndFile->GetNumSamples())
 			{
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
@@ -271,24 +272,25 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case SMPLIST_INSTR:
-						if (pSndFile->m_nInstruments)
+						if (pSndFile->GetNumInstruments())
 						{
-							UINT k = 0;
-							for (UINT i=0; i<pSndFile->m_nInstruments; i++) if (pSndFile->Instruments[i+1])
+							bool first = true;
+							for (INSTRUMENTINDEX i = 0; i < pSndFile->GetNumInstruments(); i++) if (pSndFile->Instruments[i + 1])
 							{
-								MODINSTRUMENT *pIns = pSndFile->Instruments[i+1];
-								for (UINT j=0; j<NOTE_MAX; j++)
+								MODINSTRUMENT *pIns = pSndFile->Instruments[i + 1];
+								for (size_t j = 0; j < CountOf(pIns->Keyboard); j++)
 								{
-									if ((UINT)pIns->Keyboard[j] == (iSmp+1))
+									if (pIns->Keyboard[j] == (iSmp + 1))
 									{
-										if (k) strcat(s, ",");
-										wsprintf(stmp, "%d", i+1);
+										if (!first) strcat(s, ",");
+										first = false;
+
+										wsprintf(stmp, "%d", i + 1);
 										strcat(s, stmp);
-										k++;
 										break;
 									}
 								}
-								if (strlen(s) > sizeof(s)-10)
+								if (strlen(s) > sizeof(s) - 10)
 								{
 									strcat(s, "...");
 									break;
@@ -313,7 +315,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					lvi.pszText = (LPTSTR)s;
 					if ((iCol) || (iSmp < nCount))
 					{
-						BOOL bOk = TRUE;
+						bool bOk = true;
 						if (iSmp < nCount)
 						{
 							lvi2 = lvi;
@@ -321,7 +323,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 							lvi2.cchTextMax = sizeof(stmp);
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
-							if (!strcmp(s, stmp)) bOk = FALSE;
+							if (!strcmp(s, stmp)) bOk = false;
 						}
 						if (bOk) m_ItemList.SetItem(&lvi);
 					} else
@@ -340,7 +342,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (lHint & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
 	{
 		UINT nMax = nCount;
-		if (nMax < pSndFile->m_nInstruments) nMax = pSndFile->m_nInstruments;
+		if (nMax < pSndFile->GetNumInstruments()) nMax = pSndFile->GetNumInstruments();
 		for (UINT iIns=0; iIns<nMax; iIns++)
 		{
 			if (iIns < pSndFile->m_nInstruments)
@@ -361,24 +363,26 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_SAMPLES:
 						if (pIns)
 						{
-							vector<bool> smpRef(MAX_SAMPLES, false);
-							for (UINT i=0; i<NOTE_MAX; i++)
+							std::set<SAMPLEINDEX> referencedSamples;
+							for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
 							{
-								UINT n = pIns->Keyboard[i];
-								if ((n) && (n < MAX_SAMPLES)) smpRef[n] = true;
+								referencedSamples.insert(pIns->Keyboard[i]);
 							}
-							UINT k = 0;
-							for (UINT j=1; j<MAX_SAMPLES; j++) if (smpRef[j])
+
+							bool first = true;
+							for(std::set<SAMPLEINDEX>::iterator iter = referencedSamples.begin(); iter != referencedSamples.end(); iter++)
 							{
-								if (k) strcat(s, ",");
-								UINT l = strlen(s);
-								if (l >= sizeof(s)-8)
+								if(!first) strcat(s, ",");
+								first = false;
+
+								size_t l = strlen(s);
+								if(l >= sizeof(s) - 8)
 								{
 									strcat(s, "...");
 									break;
 								}
-								wsprintf(s+l, "%d", j);
-								k++;
+
+								wsprintf(s + l, "%d", *iter);
 							}
 						}
 						break;
