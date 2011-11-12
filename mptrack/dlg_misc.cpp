@@ -170,7 +170,7 @@ CString CModTypeDlg::FormatVersionNumber(DWORD version)
 void CModTypeDlg::UpdateChannelCBox()
 //-----------------------------------
 {
-	const MODTYPE type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
+	const MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 	CHANNELINDEX currChanSel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
 	const CHANNELINDEX minChans = CSoundFile::GetModSpecifications(type).channelsMin;
 	const CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
@@ -200,7 +200,7 @@ void CModTypeDlg::UpdateChannelCBox()
 void CModTypeDlg::UpdateDialog()
 //------------------------------
 {
-	const MODTYPE type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
+	const MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 
 	UpdateChannelCBox();
 
@@ -365,7 +365,7 @@ bool CModTypeDlg::VerifyData()
 	}
 
 	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
-	int type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
+	MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 
 	CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
 
@@ -395,7 +395,7 @@ void CModTypeDlg::OnOK()
 	int sel = m_TypeBox.GetCurSel();
 	if (sel >= 0)
 	{
-		m_nType = m_TypeBox.GetItemData(sel);
+		m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(sel));
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4)

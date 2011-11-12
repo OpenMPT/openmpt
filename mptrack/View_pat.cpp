@@ -3788,7 +3788,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 									SetCurrentColumn(CreateCursor(0, (GetChanFromCursor(m_dwCursor) - 1) % pSndFile->GetNumChannels(), GetColTypeFromCursor(m_dwCursor)));
 								else
 									SetCurrentColumn(CreateCursor(0, (pSndFile->GetNumChannels() - 1), GetColTypeFromCursor(m_dwCursor)));
-								UINT n = CreateCursor(m_nRow) | m_dwCursor;
+								DWORD n = CreateCursor(m_nRow) | m_dwCursor;
 								SetCurSel(n, n);  return wParam;}
 
 		case kcHomeHorizontalSelect:
@@ -3815,20 +3815,22 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 
-		case kcNextPattern:	{	UINT n = m_nPattern + 1;
+		case kcNextPattern:	{	PATTERNINDEX n = m_nPattern + 1;
             					while ((n < pSndFile->Patterns.Size()) && (!pSndFile->Patterns[n])) n++;
 								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
 								ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-								ORDERINDEX newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, true);
+								ORDERINDEX newOrder = pSndFile->Order.FindOrder(m_nPattern, currentOrder, true);
 								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
-								return wParam; }
-		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size()-1;
+								return wParam;
+							}
+		case kcPrevPattern: {	PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size() - 1;
 								while ((n > 0) && (!pSndFile->Patterns[n])) n--;
 								SetCurrentPattern(n);
 								ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-								ORDERINDEX newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, false);
+								ORDERINDEX newOrder = pSndFile->Order.FindOrder(m_nPattern, currentOrder, false);
 								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
-								return wParam; }
+								return wParam;
+							}
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
 		case kcSelect:			if (!(m_dwStatus & (PATSTATUS_DRAGNDROPEDIT|PATSTATUS_SELECTROW))) m_dwStartSel = CreateCursor(m_nRow) | m_dwCursor;

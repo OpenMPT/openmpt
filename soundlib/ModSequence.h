@@ -67,17 +67,20 @@ public:
 	// Returns length of sequence stopping counting on first '---' (or at the end of sequence).
 	ORDERINDEX GetLengthFirstEmpty() const;
 
-	PATTERNINDEX GetInvalidPatIndex() const {return m_nInvalidIndex;} //To correspond 0xFF
+	PATTERNINDEX GetInvalidPatIndex() const {return m_nInvalidIndex;} // To correspond 0xFF
 	static PATTERNINDEX GetInvalidPatIndex(const MODTYPE type);
 
-	PATTERNINDEX GetIgnoreIndex() const {return m_nIgnoreIndex;} //To correspond 0xFE
+	PATTERNINDEX GetIgnoreIndex() const {return m_nIgnoreIndex;} // To correspond 0xFE
 	static PATTERNINDEX GetIgnoreIndex(const MODTYPE type);
 
-	// Returns the previous/next order ignoring skip indeces(+++).
+	// Returns the previous/next order ignoring skip indices(+++).
 	// If no previous/next order exists, return first/last order, and zero
 	// when orderlist is empty.
 	ORDERINDEX GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const;
 	ORDERINDEX GetNextOrderIgnoringSkips(const ORDERINDEX start) const;
+
+	// Find an order item that contains a given pattern number.
+	ORDERINDEX FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder = 0, bool searchForward = true) const;
 	
 	ModSequence& operator=(const ModSequence& seq);
 
@@ -86,10 +89,10 @@ public:
 	size_t WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize) const;
 	bool ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength);
 
-	// Deprecated function used for MPTm's created in 1.17.02.46 - 1.17.02.48.
+	// Deprecated function used for MPTm files created with OpenMPT 1.17.02.46 - 1.17.02.48.
 	DWORD Deserialize(const BYTE* const src, const DWORD memLength);
 
-	//Returns true if the IT orderlist datafield is not sufficient to store orderlist information.
+	// Returns true if the IT orderlist datafield is not sufficient to store orderlist information.
 	bool NeedsExtraDatafield() const;
 
 protected:

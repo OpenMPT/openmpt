@@ -105,7 +105,7 @@ class CTrackApp: public CWinApp
 	friend class CMainFrame;
 // static data
 protected:
-	static UINT m_nDefaultDocType;
+	static MODTYPE m_nDefaultDocType;
 	static LPMIDILIBSTRUCT glpMidiLibrary;
 	static BOOL m_nProject;
 
@@ -152,8 +152,8 @@ public:
 // -! NEW_FEATURE#0023
 
 	static LPCTSTR GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
-	static UINT GetDefaultDocType() { return m_nDefaultDocType; }
-	static VOID SetDefaultDocType(UINT n) { m_nDefaultDocType = n; }
+	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
+	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
 	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
 	static BOOL ImportMidiConfig(LPCSTR lpszFileName, BOOL bNoWarning=FALSE);
 	static BOOL ExportMidiConfig(LPCSTR lpszFileName);

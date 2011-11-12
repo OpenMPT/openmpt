@@ -668,7 +668,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
-	// Adjust song names
+	// Adjust song / sample names
 	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
 	{
 		LPSTR p = m_szNames[iSmp];
@@ -698,9 +698,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			Chn[ich].nRetrigParam = Chn[ich].nRetrigCount = 1;
 		}
 	}
-	// Checking instruments
+	// Checking samples
 	MODSAMPLE *pSmp = Samples;
-	for (UINT iIns=0; iIns<MAX_INSTRUMENTS; iIns++, pSmp++)
+	for (SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
 	{
 		if (pSmp->pSample)
 		{
@@ -773,8 +773,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	string sNotFound;
 	std::list<PLUGINDEX> notFoundIDs;
 
-	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
-	if (gpMixPluginCreateProc && GetpModDoc())
+	// Load plugins only when m_pModDoc is valid.  (can be invalid for example when examining module samples in treeview.
+	if (gpMixPluginCreateProc && GetpModDoc() != nullptr)
 	{
 		for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
@@ -1187,7 +1187,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 void CSoundFile::SuspendPlugins()	
 //-------------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	for (PLUGINDEX iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
@@ -1206,7 +1206,7 @@ void CSoundFile::SuspendPlugins()
 void CSoundFile::ResumePlugins()	
 //------------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	for (PLUGINDEX iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
@@ -1309,68 +1309,23 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	//m_nSeqOverride = 0;
 }
 
-ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, bool direction)
-//--------------------------------------------------------------------------------------------
-{
-	const ORDERINDEX maxOrder = Order.GetLength();
-	ORDERINDEX foundAtOrder = ORDERINDEX_INVALID;
-	ORDERINDEX candidateOrder = 0;
 
-	for (ORDERINDEX p = 0; p < maxOrder; p++)
-	{
-		if (direction)
-		{
-			candidateOrder = (startFromOrder + p) % maxOrder;			//wrap around MAX_ORDERS
-		} else
-		{
-			candidateOrder = (startFromOrder - p + maxOrder) % maxOrder;	//wrap around 0 and MAX_ORDERS
-		}
-		if (Order[candidateOrder] == nPat)
-		{
-			foundAtOrder = candidateOrder;
-			break;
-		}
-	}
-
-	return foundAtOrder;
-}
 //end rewbs.playSongFromCursor
 
 
 MODTYPE CSoundFile::GetBestSaveFormat() const
 //-------------------------------------------
 {
-	if ((!m_nSamples) || (!m_nChannels)) return MOD_TYPE_NONE;
-	if (!m_nType) return MOD_TYPE_NONE;
-	if (m_nType & (MOD_TYPE_MOD/*|MOD_TYPE_OKT*/))
+	if ((!m_nSamples) || (!m_nChannels) || GetType() == MOD_TYPE_NONE) return MOD_TYPE_NONE;
+	if (GetType() & (MOD_TYPE_MOD/*|MOD_TYPE_OKT*/))
 		return MOD_TYPE_MOD;
-	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_ULT|MOD_TYPE_FAR|MOD_TYPE_PTM|MOD_TYPE_MTM))
+	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_ULT|MOD_TYPE_FAR|MOD_TYPE_PTM|MOD_TYPE_MTM))
 		return MOD_TYPE_S3M;
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED/*|MOD_TYPE_MT2*/))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MED/*|MOD_TYPE_MT2*/))
 		return MOD_TYPE_XM;
-	if(m_nType & MOD_TYPE_MPT)
+	if(GetType() & MOD_TYPE_MPT)
 		return MOD_TYPE_MPT;
 	return MOD_TYPE_IT;
-}
-
-
-MODTYPE CSoundFile::GetSaveFormats() const
-//----------------------------------------
-{
-	UINT n = 0;
-	if ((!m_nSamples) || (!m_nChannels) || (m_nType == MOD_TYPE_NONE)) return 0;
-	switch(m_nType)
-	{
-	case MOD_TYPE_MOD:	n = MOD_TYPE_MOD;
-	case MOD_TYPE_S3M:	n = MOD_TYPE_S3M;
-	}
-	n |= MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT;
-	if (!m_nInstruments)
-	{
-		if (m_nSamples < 32) n |= MOD_TYPE_MOD;
-		n |= MOD_TYPE_S3M;
-	}
-	return n;
 }
 
 

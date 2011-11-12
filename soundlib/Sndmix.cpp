@@ -1825,7 +1825,7 @@ void CSoundFile::ProcessRamping(MODCHANNEL *pChn)
 				{
 					rampLength = (1 << (VOLUMERAMPPRECISION-1));
 				}
-				if(rampLength < (LONG)globalRampLength)
+				if(rampLength < globalRampLength)
 				{
 					rampLength = globalRampLength;
 				}
@@ -2094,6 +2094,13 @@ BOOL CSoundFile::ReadNote()
 
 		}
 
+		// IT Compatibility: Ensure that there is no pan swing, panbrello, panning envelopes, etc. applied on surround channels.
+		// Test case: surround-pan.it
+		if((pChn->dwFlags & CHN_SURROUND) && !(m_dwSongFlags & SONG_SURROUNDPAN) && IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			pChn->nRealPan = 128;
+		}
+
 		// Now that all relevant envelopes etc. have been processed, we can parse the MIDI macro data.
 		ProcessMacroOnChannel(nChn);
 
@@ -2109,7 +2116,7 @@ BOOL CSoundFile::ReadNote()
 			// Final Period
 			if (period <= m_nMinPeriod)
 			{
-				if (m_nType & MOD_TYPE_S3M) pChn->nLength = 0;
+				if (GetType() & MOD_TYPE_S3M) pChn->nLength = 0;
 				period = m_nMinPeriod;
 			}
 			//rewbs: temporarily commenting out block to allow notes below A-0.
@@ -2126,12 +2133,12 @@ BOOL CSoundFile::ReadNote()
 			}*/
 			UINT freq = 0;
 
-			if(m_nType != MOD_TYPE_MPT || !pIns || pIns->pTuning == nullptr)
+			if(GetType() != MOD_TYPE_MPT || pIns == nullptr || pIns->pTuning == nullptr)
 			{
 				freq = GetFreqFromPeriod(period, pChn->nC5Speed, nPeriodFrac);
-			}
-			else //In this case: m_nType == MOD_TYPE_MPT and using custom tunings.
+			} else
 			{
+				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
 					pChn->m_Freq = Util::Round<UINT>(pChn->nC5Speed * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
@@ -2145,11 +2152,12 @@ BOOL CSoundFile::ReadNote()
 			}
 
 			// Applying Pitch/Tempo lock.
-            if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
+            if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
+			{
 				freq = _muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
+			}
 
-
-			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
+			if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
 			{
 				pChn->nFadeOutVol = 0;
 				pChn->dwFlags |= CHN_NOTEFADE;
@@ -2161,7 +2169,7 @@ BOOL CSoundFile::ReadNote()
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
 			if (ninc > 0xFF0000) ninc = 0xFF0000;
-			pChn->nInc = (ninc+1) & ~3;
+			pChn->nInc = (ninc + 1) & ~3;
 		} else
 		{
 			// Avoid nasty noises...
@@ -2179,7 +2187,6 @@ BOOL CSoundFile::ReadNote()
 			IncrementPitchFilterEnvelopePosition(pChn);
 		}
 
-
 #ifdef MODPLUG_PLAYER
 		// Limit CPU -> > 80% -> don't ramp
 		if ((gnCPUUsage >= 80) && (!pChn->nRealVolume))
@@ -2187,18 +2194,22 @@ BOOL CSoundFile::ReadNote()
 			pChn->nLeftVol = pChn->nRightVol = 0;
 		}
 #endif // MODPLUG_PLAYER
+
 		// Volume ramping
 		pChn->dwFlags &= ~CHN_VOLUMERAMP;
 		if ((pChn->nRealVolume) || (pChn->nLeftVol) || (pChn->nRightVol))
 			pChn->dwFlags |= CHN_VOLUMERAMP;
+
 #ifdef MODPLUG_PLAYER
 		// Decrease VU-Meter
 		if (pChn->nVUMeter > VUMETER_DECAY)	pChn->nVUMeter -= VUMETER_DECAY; else pChn->nVUMeter = 0;
 #endif // MODPLUG_PLAYER
+
 #ifdef ENABLE_STEREOVU
 		if (pChn->nLeftVU > VUMETER_DECAY) pChn->nLeftVU -= VUMETER_DECAY; else pChn->nLeftVU = 0;
 		if (pChn->nRightVU > VUMETER_DECAY) pChn->nRightVU -= VUMETER_DECAY; else pChn->nRightVU = 0;
 #endif
+
 		// Check for too big nInc
 		if (((pChn->nInc >> 16) + 1) >= (LONG)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags &= ~CHN_LOOP;
 		pChn->nNewRightVol = pChn->nNewLeftVol = 0;
@@ -2213,6 +2224,7 @@ BOOL CSoundFile::ReadNote()
 			vutmp >>= 1;
 			if (pChn->nVUMeter < vutmp)	pChn->nVUMeter = vutmp;
 #endif // MODPLUG_PLAYER
+
 #ifdef ENABLE_STEREOVU
 			UINT vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
 			if (vul > 127) vul = 127;
@@ -2225,11 +2237,13 @@ BOOL CSoundFile::ReadNote()
 			vur >>= 1;
 			if (pChn->nRightVU < vur) pChn->nRightVU = (BYTE)vur;
 #endif
+
 #ifdef MODPLUG_TRACKER
-			UINT kChnMasterVol = (pChn->dwFlags & CHN_EXTRALOUD) ? 0x100 : nMasterVol;
+			const UINT kChnMasterVol = (pChn->dwFlags & CHN_EXTRALOUD) ? 0x100 : nMasterVol;
 #else
 #define		kChnMasterVol	nMasterVol
 #endif // MODPLUG_TRACKER
+
 			// Adjusting volumes
 			if (gnChannels >= 2)
 			{
@@ -2237,7 +2251,7 @@ BOOL CSoundFile::ReadNote()
 				pan *= (int)m_nStereoSeparation;
 				pan /= 128;
 				pan += 128;
-				pan = CLAMP(pan, 0, 256);
+				Limit(pan, 0, 256);
 #ifndef FASTSOUNDLIB
 				if (gdwSoundSetup & SNDMIX_REVERSESTEREO) pan = 256 - pan;
 #endif
@@ -2248,7 +2262,7 @@ BOOL CSoundFile::ReadNote()
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 7;
 				} else
 				{
-					//Extra attenuation required here if we're bypassing pre-amp.
+					// Extra attenuation required here if we're bypassing pre-amp.
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 				
