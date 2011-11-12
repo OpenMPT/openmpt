@@ -249,10 +249,11 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 {
 	// First 32-bytes: Most used mixing information: don't change it
 	// These fields are accessed directly by the MMX mixing code (look out for CHNOFS_PCURRENTSAMPLE), so the order is crucial
+	// In the meantime, MMX mixing has been removed because it interfered with the new resonant filter code, and the byte offsets are also no longer hardcoded...
 	LPSTR pCurrentSample;		
 	DWORD nPos;
-	DWORD nPosLo;	// actually 16-bit
-	LONG nInc;		// 16.16
+	DWORD nPosLo;	// actually 16-bit (fractional part)
+	LONG nInc;		// 16.16 fixed point
 	LONG nRightVol;
 	LONG nLeftVol;
 	LONG nRightRamp;
@@ -796,7 +797,6 @@ public:
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
 	double GetCurrentBPM() const;
-	ORDERINDEX FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder = 0, bool direction = true);	//rewbs.playSongFromCursor
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(ORDERINDEX nOrder);
@@ -886,7 +886,6 @@ public:
 
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
-	MODTYPE GetSaveFormats() const;
 	void ConvertModCommand(MODCOMMAND *) const;
 	void S3MConvert(MODCOMMAND *m, bool bIT) const;
 	void S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport = false) const;

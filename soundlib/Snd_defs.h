@@ -39,7 +39,6 @@ typedef uint16 INSTRUMENTINDEX;
 typedef uint8 SEQUENCEINDEX;
 	const SEQUENCEINDEX SEQUENCEINDEX_MAX	= uint8_max;
 	const SEQUENCEINDEX SEQUENCEINDEX_INVALID	= SEQUENCEINDEX_MAX;
-typedef uint32 MODTYPE;
 
 typedef uintptr_t SmpLength;
 
@@ -56,6 +55,7 @@ const ORDERINDEX MAX_ORDERS				= 256;
 const PATTERNINDEX MAX_PATTERNS			= 240;
 const SAMPLEINDEX MAX_SAMPLES			= 4000;
 const INSTRUMENTINDEX MAX_INSTRUMENTS	= 256;	//200
+const PLUGINDEX MAX_MIXPLUGINS			= 100;	//50
 
 const SEQUENCEINDEX MAX_SEQUENCES		= 50;
 
@@ -75,37 +75,50 @@ const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing chann
 
 #define MAX_EQ_BANDS		6
 
-#define MAX_MIXPLUGINS		100	//50
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
 
-#define MOD_TYPE_NONE		0x00
-#define MOD_TYPE_MOD		0x01
-#define MOD_TYPE_S3M		0x02
-#define MOD_TYPE_XM			0x04
-#define MOD_TYPE_MED		0x08
-#define MOD_TYPE_MTM		0x10
-#define MOD_TYPE_IT			0x20
-#define MOD_TYPE_669		0x40
-#define MOD_TYPE_ULT		0x80
-#define MOD_TYPE_STM		0x100
-#define MOD_TYPE_FAR		0x200
-#define MOD_TYPE_WAV		0x400
-#define MOD_TYPE_AMF		0x800
-#define MOD_TYPE_AMS		0x1000
-#define MOD_TYPE_DSM		0x2000
-#define MOD_TYPE_MDL		0x4000
-#define MOD_TYPE_OKT		0x8000
-#define MOD_TYPE_MID		0x10000
-#define MOD_TYPE_DMF		0x20000
-#define MOD_TYPE_PTM		0x40000
-#define MOD_TYPE_DBM		0x80000
-#define MOD_TYPE_MT2		0x100000
-#define MOD_TYPE_AMF0		0x200000
-#define MOD_TYPE_PSM		0x400000
-#define MOD_TYPE_J2B		0x800000
-#define MOD_TYPE_MPT		0x1000000
-#define MOD_TYPE_IMF		0x2000000
-#define MOD_TYPE_UMX		0x80000000 // Fake type
+enum MODTYPE
+{
+	MOD_TYPE_NONE	= 0x00,
+	MOD_TYPE_MOD	= 0x01,
+	MOD_TYPE_S3M	= 0x02,
+	MOD_TYPE_XM		= 0x04,
+	MOD_TYPE_MED	= 0x08,
+	MOD_TYPE_MTM	= 0x10,
+	MOD_TYPE_IT		= 0x20,
+	MOD_TYPE_669	= 0x40,
+	MOD_TYPE_ULT	= 0x80,
+	MOD_TYPE_STM	= 0x100,
+	MOD_TYPE_FAR	= 0x200,
+	MOD_TYPE_WAV	= 0x400,
+	MOD_TYPE_AMF	= 0x800,
+	MOD_TYPE_AMS	= 0x1000,
+	MOD_TYPE_DSM	= 0x2000,
+	MOD_TYPE_MDL	= 0x4000,
+	MOD_TYPE_OKT	= 0x8000,
+	MOD_TYPE_MID	= 0x10000,
+	MOD_TYPE_DMF	= 0x20000,
+	MOD_TYPE_PTM	= 0x40000,
+	MOD_TYPE_DBM	= 0x80000,
+	MOD_TYPE_MT2	= 0x100000,
+	MOD_TYPE_AMF0	= 0x200000,
+	MOD_TYPE_PSM	= 0x400000,
+	MOD_TYPE_J2B	= 0x800000,
+	MOD_TYPE_MPT	= 0x1000000,
+	MOD_TYPE_IMF	= 0x2000000,
+	MOD_TYPE_UMX	= 0x80000000, // Fake type
+};
+
+// Allow for type safe combinations of MODTYPEs.
+inline MODTYPE operator | (MODTYPE a, MODTYPE b)
+{
+	return static_cast<MODTYPE>(+a | +b);
+};
+
+inline MODTYPE operator & (MODTYPE a, MODTYPE b)
+{
+	return static_cast<MODTYPE>(+a & +b);
+};
 
 // For compatibility mode
 #define TRK_IMPULSETRACKER	(MOD_TYPE_IT | MOD_TYPE_MPT)

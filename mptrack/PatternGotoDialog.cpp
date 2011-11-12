@@ -103,7 +103,7 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	}
 		
 	UpdateData();
-	m_nOrder = m_pSndFile->FindOrder(static_cast<PATTERNINDEX>(m_nPattern), m_nActiveOrder);
+	m_nOrder = m_pSndFile->Order.FindOrder(static_cast<PATTERNINDEX>(m_nPattern), m_nActiveOrder);
 
 	if (m_nOrder >= m_pSndFile->Order.size()) {
 		m_nOrder=0;

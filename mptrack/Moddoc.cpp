@@ -367,7 +367,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		EndWaitCursor();
 	}
 	// Convert to MOD/S3M/XM/IT
-	switch(m_SndFile.m_nType)
+	switch(m_SndFile.GetType())
 	{
 	case MOD_TYPE_MOD:
 	case MOD_TYPE_S3M:
@@ -914,13 +914,8 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 
 		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
 		
-		//stop channel, just in case.
-		if (pChn->nLength)
-		{
-			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
-		}
-
 		// reset channel properties; in theory the chan is completely unused anyway.
+		pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
 		pChn->dwFlags &= CHN_SAMPLEFLAGS;
 		pChn->dwFlags &= ~(CHN_MUTE);
 		pChn->nGlobalVol = 64;
@@ -964,7 +959,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		
 		// Handle sample looping.
 		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
-		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
+		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength))
 		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != nullptr))
 		{
 			pChn->nPos = loopstart;
@@ -993,23 +988,9 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				pChn->nLength = pChn->nLoopEnd = pChn->pModSample->nLength;
 		}
 
-		/*
-		if (bpause) {   
-			if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
-				pChn->nPos = loopstart;
-				pChn->nPosLo = 0;
-				pChn->nLoopStart = loopstart;
-				pChn->nLoopEnd = loopend;
-				pChn->nLength = loopend;
-			}
-			m_SndFile.m_nBufferCount = 0;
-			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
-			if ((!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) pChn->dwFlags |= CHN_EXTRALOUD;
-		} else pChn->dwFlags &= ~CHN_EXTRALOUD;
-		*/
 
 		//rewbs.vstiLive
-		if (nins <= m_SndFile.m_nInstruments)
+		if (nins <= m_SndFile.GetNumInstruments())
 		{
 			const MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
 			if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
@@ -1024,9 +1005,8 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
-					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
 					if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, MAX_BASECHANNELS);
-					//if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, pChn->GetVSTVolume(), MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -3206,9 +3186,9 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	//end rewbs.fix3185
 
 	//ensure order correlates with pattern.
-	if (pSndFile->Order[ord]!=pat)
+	if (pSndFile->Order[ord] != pat)
 	{
-		ORDERINDEX tentativeOrder = pSndFile->FindOrder(pat);
+		ORDERINDEX tentativeOrder = pSndFile->Order.FindOrder(pat);
 		if (tentativeOrder != ORDERINDEX_INVALID)	//ensure a valid order exists.
 		{
 			ord = tentativeOrder;

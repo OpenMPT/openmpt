@@ -542,7 +542,7 @@ BOOL CTrackApp::AddDLSBank(LPCSTR lpszFileName)
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp
 
-UINT CTrackApp::m_nDefaultDocType = MOD_TYPE_IT;
+MODTYPE CTrackApp::m_nDefaultDocType = MOD_TYPE_IT;
 MEMORYSTATUS CTrackApp::gMemStatus;
 
 // -> CODE#0023

@@ -264,6 +264,32 @@ ModSequence& ModSequence::operator=(const ModSequence& seq)
 }
 
 
+ORDERINDEX ModSequence::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, bool searchForward) const
+//-------------------------------------------------------------------------------------------------------
+{
+	const ORDERINDEX maxOrder = GetLength();
+	ORDERINDEX foundAtOrder = ORDERINDEX_INVALID;
+	ORDERINDEX candidateOrder = 0;
+
+	for (ORDERINDEX p = 0; p < maxOrder; p++)
+	{
+		if (searchForward)
+		{
+			candidateOrder = (startFromOrder + p) % maxOrder;				// wrap around MAX_ORDERS
+		} else
+		{
+			candidateOrder = (startFromOrder - p + maxOrder) % maxOrder;	// wrap around 0 and MAX_ORDERS
+		}
+		if ((*this)[candidateOrder] == nPat)
+		{
+			foundAtOrder = candidateOrder;
+			break;
+		}
+	}
+
+	return foundAtOrder;
+}
+
 
 /////////////////////////////////////
 // ModSequenceSet
