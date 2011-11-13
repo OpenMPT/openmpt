@@ -814,10 +814,10 @@ void CCtrlPatterns::OnPatternNew()
 }
 
 
+// Duplicates one or more patterns.
 void CCtrlPatterns::OnPatternDuplicate()
 //--------------------------------------
 {
-	// duplicates one or more patterns.
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -828,53 +828,64 @@ void CCtrlPatterns::OnPatternDuplicate()
 		if (nInsertWhere >= pSndFile->GetModSpecifications().ordersMax)
 			return;
 		bool bSuccess = false;
-		// has this pattern been duplicated already? (for multiselect)
-		vector<PATTERNINDEX> pReplaceIndex;
-		pReplaceIndex.resize(pSndFile->Patterns.Size(), PATTERNINDEX_INVALID);
+		// Has this pattern been duplicated already? (for multiselect)
+		vector<PATTERNINDEX> patReplaceIndex(pSndFile->Patterns.Size(), PATTERNINDEX_INVALID);
 
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
 			PATTERNINDEX nCurPat = pSndFile->Order[selection.nOrdLo + i];
-			ROWINDEX rows = 64;
-			if (pSndFile->Patterns.IsValidIndex(nCurPat) && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
+			if (pSndFile->Patterns.IsValidIndex(nCurPat) && patReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
-				rows = pSndFile->Patterns[nCurPat].GetNumRows();
-				rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
+				ROWINDEX rows = pSndFile->Patterns[nCurPat].GetNumRows();
+				Limit(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 
 				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
 				if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nCurPat] != nullptr))
 				{
-					// update time signature
+					// Update time signature and pattern name
 					if(pSndFile->Patterns[nCurPat].GetOverrideSignature())
 					{
 						pSndFile->Patterns[nNewPat].SetSignature(pSndFile->Patterns[nCurPat].GetRowsPerBeat(), pSndFile->Patterns[nCurPat].GetRowsPerMeasure());
 					}
-					// copy pattern data
-					MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
-					MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];
-					UINT n = pSndFile->Patterns[nCurPat].GetNumRows();
+					pSndFile->Patterns[nNewPat].SetName(pSndFile->Patterns[nCurPat].GetName());
+
+					// Copy pattern data
+					size_t n = pSndFile->Patterns[nCurPat].GetNumRows();
 					if (pSndFile->Patterns[nNewPat].GetNumRows() < n) n = pSndFile->Patterns[nNewPat].GetNumRows();
-					n *= pSndFile->m_nChannels;
-					if (n) memcpy(pDest, pSrc, n * sizeof(MODCOMMAND));
+					n *= pSndFile->GetNumChannels();
+					if(n)
+					{
+						memcpy(pSndFile->Patterns[nNewPat], pSndFile->Patterns[nCurPat], n * sizeof(MODCOMMAND));
+					}
 					bSuccess = true;
-					pReplaceIndex[nCurPat] = nNewPat; // mark as duplicated
-				}
-				else
+					// Mark as duplicated, so if this pattern is to be duplicated again, the same new pattern number is inserted into the order list.
+					patReplaceIndex[nCurPat] = nNewPat;
+				} else
 				{
-					break;
+					continue;
 				}
-			}
-			else
+			} else
 			{
-				// invalid pattern, or it has been duplicated before (multiselect)
+				// Invalid pattern, or it has been duplicated before (multiselect)
 				for (int j = pSndFile->Order.size() - 1; j > selection.nOrdLo + i + nInsertCount + 1; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
-				PATTERNINDEX nNewPat; 
-				if(nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] != PATTERNINDEX_INVALID)
-					nNewPat = pReplaceIndex[nCurPat]; // take care of patterns that have been duplicated before
-				else
-					nNewPat= pSndFile->Order[selection.nOrdLo + i];
+
+				PATTERNINDEX nNewPat;
+				if(nCurPat < pSndFile->Patterns.Size() && patReplaceIndex[nCurPat] != PATTERNINDEX_INVALID)
+				{
+					// Take care of patterns that have been duplicated before
+					nNewPat = patReplaceIndex[nCurPat];
+				} else
+				{
+					nNewPat = pSndFile->Order[selection.nOrdLo + i];
+				}
+
 				if (selection.nOrdLo + i + nInsertCount + 1 < pSndFile->Order.GetLength())
+				{
 					pSndFile->Order[selection.nOrdLo + i + nInsertCount + 1] = nNewPat;
+				}
+
+				bSuccess = true;
+
 			}
 		}
 		if(bSuccess)
@@ -883,7 +894,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			m_OrderList.SetCurSel(nInsertWhere);
 			SetCurrentPattern(pSndFile->Order[min(nInsertWhere, pSndFile->Order.GetLastIndex())]);
 			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE|HINT_PATNAMES, this);
+			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATNAMES, this);
 			if(selection.nOrdHi != selection.nOrdLo) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;
 		}
 	}
@@ -911,7 +922,8 @@ void CCtrlPatterns::OnPatternPlay()
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc)) {
+	if ((pMainFrm) && (pModDoc))
+	{
 		pModDoc->OnPatternPlay();
 	}
 	SwitchToView();
@@ -923,7 +935,8 @@ void CCtrlPatterns::OnPatternPlayNoLoop()
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc)) {
+	if ((pMainFrm) && (pModDoc))
+	{
 		pModDoc->OnPatternPlayNoLoop();
 	}
 	SwitchToView();
@@ -935,7 +948,8 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc)) {
+	if ((pMainFrm) && (pModDoc))
+	{
 		pModDoc->OnPatternRestart();
 	}
 	SwitchToView();
