@@ -237,7 +237,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	// Add Samples
 	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (lHint & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
 	{
-		UINT nMax = nCount;
+		SAMPLEINDEX nMax = static_cast<SAMPLEINDEX>(nCount);
 		if (nMax < pSndFile->GetNumSamples()) nMax = pSndFile->GetNumSamples();
 		for (SAMPLEINDEX iSmp = 0; iSmp < nMax; iSmp++)
 		{
@@ -341,11 +341,11 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	// Add Instruments
 	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (lHint & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
 	{
-		UINT nMax = nCount;
+		INSTRUMENTINDEX nMax = static_cast<INSTRUMENTINDEX>(nCount);
 		if (nMax < pSndFile->GetNumInstruments()) nMax = pSndFile->GetNumInstruments();
-		for (UINT iIns=0; iIns<nMax; iIns++)
+		for (INSTRUMENTINDEX iIns = 0; iIns < nMax; iIns++)
 		{
-			if (iIns < pSndFile->m_nInstruments)
+			if (iIns < pSndFile->GetNumInstruments())
 			{
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<INSLIST_COLUMNS; iCol++)
@@ -366,7 +366,11 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 							std::set<SAMPLEINDEX> referencedSamples;
 							for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
 							{
-								referencedSamples.insert(pIns->Keyboard[i]);
+								// 0 isn't a sample.
+								if(pIns->Keyboard[i] != 0)
+								{
+									referencedSamples.insert(pIns->Keyboard[i]);
+								}
 							}
 
 							bool first = true;
