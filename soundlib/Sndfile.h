@@ -896,6 +896,11 @@ public:
 	static void S3MSxx2MODExx(MODCOMMAND *m); // Convert Sxx to Exx
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 
+	// Translate sample properties between two given formats.
+	void ConvertSample(SAMPLEINDEX sample, MODTYPE fromType, MODTYPE toType = MOD_TYPE_NONE);
+	// Translate instrument properties between two given formats.
+	void ConvertInstrument(INSTRUMENTINDEX instr, MODTYPE fromType, MODTYPE toType = MOD_TYPE_NONE);
+
 public:
 	// Real-time sound functions
 	void SuspendPlugins(); //rewbs.VSTCompliance
@@ -1090,8 +1095,8 @@ public:
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName);
 	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName);
 	// I/O from another sound file
-	bool ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrcSong, UINT nSrcInstrument);
-	bool ReadSampleFromSong(SAMPLEINDEX nSample, CSoundFile *pSrcSong, UINT nSrcSample);
+	bool ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile *pSrcSong, INSTRUMENTINDEX sourceInstr);
+	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *pSrcSong, SAMPLEINDEX sourceSample);
 	// Period/Note functions
 	UINT GetNoteFromPeriod(UINT period) const;
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;

@@ -97,18 +97,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(nNewType == nOldType)
 		return true;
 
-	const bool oldTypeIsMOD = (nOldType == MOD_TYPE_MOD), oldTypeIsXM = (nOldType == MOD_TYPE_XM),
-				oldTypeIsS3M = (nOldType == MOD_TYPE_S3M), oldTypeIsIT = (nOldType == MOD_TYPE_IT),
-				oldTypeIsMPT = (nOldType == MOD_TYPE_MPT), oldTypeIsMOD_XM = (oldTypeIsMOD || oldTypeIsXM),
-                oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT),
-                oldTypeIsIT_MPT = (oldTypeIsIT || oldTypeIsMPT);
+	const bool oldTypeIsXM = (nOldType == MOD_TYPE_XM),
+		oldTypeIsS3M = (nOldType == MOD_TYPE_S3M), oldTypeIsIT = (nOldType == MOD_TYPE_IT),
+		oldTypeIsMPT = (nOldType == MOD_TYPE_MPT),
+		oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT),
+		oldTypeIsIT_MPT = (oldTypeIsIT || oldTypeIsMPT);
 
 	const bool newTypeIsMOD = (nNewType == MOD_TYPE_MOD), newTypeIsXM =  (nNewType == MOD_TYPE_XM), 
-				newTypeIsS3M = (nNewType == MOD_TYPE_S3M), newTypeIsIT = (nNewType == MOD_TYPE_IT),
-				newTypeIsMPT = (nNewType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM), 
-				newTypeIsS3M_IT_MPT = (newTypeIsS3M || newTypeIsIT || newTypeIsMPT), 
-				newTypeIsXM_IT_MPT = (newTypeIsXM || newTypeIsIT || newTypeIsMPT),
-				newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
+		newTypeIsS3M = (nNewType == MOD_TYPE_S3M), newTypeIsIT = (nNewType == MOD_TYPE_IT),
+		newTypeIsMPT = (nNewType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM), 
+		newTypeIsXM_IT_MPT = (newTypeIsXM || newTypeIsIT || newTypeIsMPT),
+		newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
 
 	const CModSpecifications& specs = m_SndFile.GetModSpecifications(nNewType);
 
@@ -271,14 +270,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// Bidi loops
 			if((sample.uFlags & CHN_PINGPONGLOOP) != 0)
 			{
-				sample.uFlags &= ~CHN_PINGPONGLOOP;
 				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
 			}
 
 			// Autovibrato
 			if(sample.nVibDepth || sample.nVibRate || sample.nVibSweep)
 			{
-				sample.nVibDepth = sample.nVibRate = sample.nVibSweep = sample.nVibType = 0;
 				CHANGEMODTYPE_WARNING(wSampleAutoVibrato);
 			}
 		}
@@ -289,71 +286,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// Sustain loops - convert to normal loops
 			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
 			{
-				// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
-				sample.nLoopStart = sample.nSustainStart;
-				sample.nLoopEnd = sample.nSustainEnd;
-				sample.uFlags |= CHN_LOOP;
-				if(sample.uFlags & CHN_PINGPONGSUSTAIN)
-				{
-					sample.uFlags |= CHN_PINGPONGLOOP;
-				} else
-				{
-					sample.uFlags &= ~CHN_PINGPONGLOOP;
-				}
 				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
 			}
-			sample.nSustainStart = sample.nSustainEnd = 0;
-			sample.uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		}
 
-		// Transpose to Frequency (MOD/XM to S3M/IT/MPT)
-		if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+		// TODO: Pattern notes could be transposed based on the previous relative tone?
+		if(newTypeIsMOD && sample.RelativeTone != 0)
 		{
-			sample.nC5Speed = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
-			sample.RelativeTone = 0;
-			sample.nFineTune = 0;
+			CHANGEMODTYPE_WARNING(wMODSampleFrequency);
 		}
 
-		// Frequency to Transpose (S3M/IT/MPT to MOD/XM)
-		if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
-		{
-			CSoundFile::FrequencyToTranspose(&sample);
-			// No relative note for MOD files
-			// TODO: Pattern notes could be transposed based on the previous relative tone?
-			if(newTypeIsMOD && sample.RelativeTone != 0)
-			{
-				sample.RelativeTone = 0;
-				CHANGEMODTYPE_WARNING(wMODSampleFrequency);
-			}
-		}
-
-		// All XM samples have default panning, and XM's autovibrato settings are rather limited.
-		if(newTypeIsXM)
-		{
-			if(!(sample.uFlags & CHN_PANNING))
-			{
-				sample.uFlags |= CHN_PANNING;
-				sample.nPan = 128;
-			}
-
-			LimitMax(sample.nVibDepth, BYTE(15));
-			LimitMax(sample.nVibRate, BYTE(63));
-		}
-
-		// S3M / MOD samples don't have panning.
-		if(newTypeIsMOD || newTypeIsS3M)
-		{
-			sample.uFlags &= ~CHN_PANNING;
-		}
-
-		if((oldTypeIsXM && newTypeIsIT_MPT) || (oldTypeIsIT_MPT && newTypeIsXM))
-		{
-			// Autovibrato sweep setting is inverse in XM (0 = "no sweep") and IT (0 = "no vibrato")
-			if(sample.nVibRate != 0 && sample.nVibDepth != 0)
-			{
-				sample.nVibSweep = 255 - sample.nVibSweep;
-			}
-		}
+		m_SndFile.ConvertSample(nSmp, nOldType, nNewType);
 	}
 
 	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
@@ -367,9 +310,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Convert IT/MPT to XM (fix instruments)
 		if(oldTypeIsIT_MPT && newTypeIsXM)
 		{
-			for (UINT k = 0; k < NOTE_MAX; k++)
+			for (size_t i = 0; i < CountOf(pIns->NoteMap); i++)
 			{
-				if ((pIns->NoteMap[k]) && (pIns->NoteMap[k] != (BYTE)(k+1)))
+				if ((pIns->NoteMap[i]) && (pIns->NoteMap[i] != (BYTE)(i + 1)))
 				{
 					CHANGEMODTYPE_WARNING(wBrokenNoteMap);
 					break;
@@ -379,34 +322,11 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			if(pIns->VolEnv.nSustainStart != pIns->VolEnv.nSustainEnd)
 			{
 				CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
-				pIns->VolEnv.nSustainEnd = pIns->VolEnv.nSustainStart;
 			}
 			if(pIns->PanEnv.nSustainStart != pIns->PanEnv.nSustainEnd)
 			{
 				CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
-				pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
 			}
-			pIns->VolEnv.dwFlags &= ~ENV_CARRY;
-			pIns->PanEnv.dwFlags &= ~ENV_CARRY;
-			pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
-			pIns->dwFlags &= ~INS_SETPANNING;
-			pIns->SetCutoff(pIns->GetCutoff(), false);
-			pIns->SetResonance(pIns->GetResonance(), false);
-			pIns->nFilterMode = FLTMODE_UNCHANGED;
-
-			pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
-
-			pIns->nPPC = NOTE_MIDDLEC - 1;
-			pIns->nPPS = 0;
-
-			pIns->nGlobalVol = 64;
-			pIns->nPan = 128;
-		}
-
-		// Convert XM to IT/MPTM - fix fadeout length
-		if(oldTypeIsXM && newTypeIsIT_MPT)
-		{
-			LimitMax(pIns->nFadeOut, 8192u);
 		}
 
 
@@ -415,16 +335,16 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			if(pIns->pTuning != nullptr)
 			{
-				pIns->SetTuning(nullptr);
 				CHANGEMODTYPE_WARNING(wInstrumentTuning);
 			}
 
 			if(pIns->wPitchToTempoLock != 0)
 			{
-				pIns->wPitchToTempoLock = 0;
 				CHANGEMODTYPE_WARNING(wPitchToTempoLock);
 			}
 		}
+
+		m_SndFile.ConvertInstrument(nIns, nOldType, nNewType);
 	}
 
 	if(newTypeIsMOD)
@@ -566,7 +486,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wInstrumentSustainLoops, "Sustain loops were converted to sustain points.\n");
 	CHANGEMODTYPE_CHECK(wInstrumentTuning, "Instrument tunings will be lost.\n");
 	CHANGEMODTYPE_CHECK(wPitchToTempoLock, "Pitch / Tempo Lock instrument property is not supported by the new format.\n");
-	CHANGEMODTYPE_CHECK(wBrokenNoteMap, "Note Mapping will be lost when saving as XM.\n");
+	CHANGEMODTYPE_CHECK(wBrokenNoteMap, "Instrument Note Mapping is not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wReleaseNode, "Instrument envelope release nodes are not supported by the new format.\n");
 
 	// General warnings

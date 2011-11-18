@@ -61,7 +61,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 	 || (psig[76/4] == LittleEndian(0x53524353))											// S3I signature
 	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x46464941)))	// AIFF signature
 	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x58565338)))	// 8SVX signature
-	 || (psig[0] == LittleEndian(LittleEndian(IT_IMPS)))									// ITS signature
+	 || (psig[0] == LittleEndian(IT_IMPS))													// ITS signature
 	)
 	{
 		// Loading Instrument
@@ -91,8 +91,6 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 		DestroyInstrument(nInstr, deleteAssociatedSamples);
 		Instruments[nInstr] = pIns;
 
-		// Default values
-		pIns->nFadeOut = 1024;
 		if (nSample) ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
 		return true;
 	}
@@ -188,12 +186,15 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 // I/O From another song
 //
 
-bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrcSong, UINT nSrcInstr)
-//---------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile *pSrcSong, INSTRUMENTINDEX sourceInstr)
+//---------------------------------------------------------------------------------------------------------------------------
 {
-	if ((!pSrcSong) || (!nSrcInstr) || (nSrcInstr > pSrcSong->m_nInstruments)
-	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[nSrcInstr])) return false;
-	if (m_nInstruments < nInstr) m_nInstruments = nInstr;
+	if ((!pSrcSong) || (!sourceInstr) || (sourceInstr > pSrcSong->GetNumInstruments())
+		|| (targetInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[sourceInstr]))
+	{
+		return false;
+	}
+	if (m_nInstruments < targetInstr) m_nInstruments = targetInstr;
 
 	MODINSTRUMENT *pIns;
 
@@ -205,95 +206,88 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrc
 		return false;
 	}
 		
-	DestroyInstrument(nInstr, deleteAssociatedSamples);
+	DestroyInstrument(targetInstr, deleteAssociatedSamples);
 
-	Instruments[nInstr] = pIns;
+	Instruments[targetInstr] = pIns;
+	*pIns = *pSrcSong->Instruments[sourceInstr];
 
-	// TODO we want to copy ALL samples, not just 32! Use vectors here.
-	WORD samplemap[32];
-	WORD samplesrc[32];
-	UINT nSamples = 0;
-	UINT nsmp = 1;
-	*pIns = *pSrcSong->Instruments[nSrcInstr];
-	for (UINT i=0; i<128; i++)
+	vector<SAMPLEINDEX> sourceSample;	// Sample index in source song
+	vector<SAMPLEINDEX> targetSample;	// Sample index in target song
+	SAMPLEINDEX targetIndex = 1;		// Next index for inserting sample
+
+	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
 	{
-		UINT n = pIns->Keyboard[i];
-		if ((n) && (n <= pSrcSong->m_nSamples) && (i < NOTE_MAX))
+		const SAMPLEINDEX sourceIndex = pIns->Keyboard[i];
+		if(sourceIndex > 0 && sourceIndex <= pSrcSong->GetNumSamples())
 		{
-			UINT j = 0;
-			for (j=0; j<nSamples; j++)
+			const vector<SAMPLEINDEX>::const_iterator entry = std::find(sourceSample.begin(), sourceSample.end(), sourceIndex);
+			if(entry == sourceSample.end())
 			{
-				if (samplesrc[j] == n) break;
-			}
-			if (j >= nSamples)
-			{
-				while ((nsmp < MAX_SAMPLES) && ((Samples[nsmp].pSample) || (m_szNames[nsmp][0]))) nsmp++;
-				if ((nSamples < 32) && (nsmp < MAX_SAMPLES))
+				// Didn't consider this sample yet, so add it to our map.
+				while((targetIndex < MAX_SAMPLES) && ((Samples[targetIndex].pSample) || (m_szNames[targetIndex][0]))) targetIndex++;
+				if(targetIndex <= GetModSpecifications().samplesMax)
 				{
-					samplesrc[nSamples] = (WORD)n;
-					samplemap[nSamples] = (WORD)nsmp;
-					nSamples++;
-					pIns->Keyboard[i] = (SAMPLEINDEX)nsmp;
-					if (m_nSamples < nsmp) m_nSamples = nsmp;
-					nsmp++;
+					sourceSample.push_back(sourceIndex);
+					targetSample.push_back(targetIndex);
+					pIns->Keyboard[i] = targetIndex++;
 				} else
 				{
 					pIns->Keyboard[i] = 0;
 				}
 			} else
 			{
-				pIns->Keyboard[i] = samplemap[j];
+				// Sample reference has already been created, so only need to update the sample map.
+				pIns->Keyboard[i] = *(entry - sourceSample.begin() + targetSample.begin());
 			}
 		} else
 		{
+			// Invalid or no source sample
 			pIns->Keyboard[i] = 0;
 		}
 	}
-	// Load Samples
-	for (UINT k=0; k<nSamples; k++)
+
+	ConvertInstrument(targetInstr, pSrcSong->GetType());
+
+	// Copy all referenced samples over
+	for(size_t i = 0; i < targetSample.size(); i++)
 	{
-		ReadSampleFromSong(samplemap[k], pSrcSong, samplesrc[k]);
+		ReadSampleFromSong(targetSample[i], pSrcSong, sourceSample[i]);
 	}
 
 	return true;
 }
 
 
-bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX nSample, CSoundFile *pSrcSong, UINT nSrcSample)
-//---------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *pSrcSong, SAMPLEINDEX sourceSample)
+//-----------------------------------------------------------------------------------------------------------------
 {
-	if ((!pSrcSong) || (!nSrcSample) || (nSrcSample > pSrcSong->m_nSamples) || (nSample >= MAX_SAMPLES)) return false;
-	MODSAMPLE *psmp = &pSrcSong->Samples[nSrcSample];
-	UINT nSize = psmp->nLength;
-	if (psmp->uFlags & CHN_16BIT) nSize *= 2;
-	if (psmp->uFlags & CHN_STEREO) nSize *= 2;
-	if (m_nSamples < nSample) m_nSamples = nSample;
-	if (Samples[nSample].pSample)
+	if ((!pSrcSong) || (!sourceSample) || (sourceSample > pSrcSong->m_nSamples) || (targetSample >= GetModSpecifications().samplesMax))
 	{
-		Samples[nSample].nLength = 0;
-		FreeSample(Samples[nSample].pSample);
+		return false;
 	}
-	Samples[nSample] = *psmp;
-	if (psmp->pSample)
+
+	const MODSAMPLE *pSourceSample = &pSrcSong->Samples[sourceSample];
+
+	if (m_nSamples < targetSample) m_nSamples = targetSample;
+	if (Samples[targetSample].pSample)
 	{
-		Samples[nSample].pSample = AllocateSample(nSize+8);
-		if (Samples[nSample].pSample)
+		Samples[targetSample].nLength = 0;
+		FreeSample(Samples[targetSample].pSample);
+	}
+	Samples[targetSample] = *pSourceSample;
+	if (pSourceSample->pSample)
+	{
+		UINT nSize = pSourceSample->GetSampleSizeInBytes();
+		Samples[targetSample].pSample = AllocateSample(nSize + 8);
+		if (Samples[targetSample].pSample)
 		{
-			memcpy(Samples[nSample].pSample, psmp->pSample, nSize);
-			AdjustSampleLoop(&Samples[nSample]);
+			memcpy(Samples[targetSample].pSample, pSourceSample->pSample, nSize);
+			AdjustSampleLoop(&Samples[targetSample]);
 		}
 	}
-	if ((!(m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))) && (pSrcSong->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)))
-	{
-		MODSAMPLE *pSmp = &Samples[nSample];
-		pSmp->nC5Speed = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
-		pSmp->RelativeTone = 0;
-		pSmp->nFineTune = 0;
-	} else
-	if ((m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) && (!(pSrcSong->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))))
-	{
-		FrequencyToTranspose(&Samples[nSample]);
-	}
+
+	ConvertSample(targetSample, pSrcSong->GetType());
+
 	return true;
 }
 
@@ -443,7 +437,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pSmp);
 	pSmp->nVibType = pSmp->nVibSweep = pSmp->nVibDepth = pSmp->nVibRate = 0;
 	pSmp->filename[0] = 0;
-	memset(m_szNames[nSample], 0, 32);
+	MemsetZero(m_szNames[nSample]);
 	if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
 	// IMA ADPCM 4:1
 	if (pfmtpk)
@@ -1029,7 +1023,9 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	pSmp->nC5Speed = pss->nC5Speed;
 	pSmp->RelativeTone = 0;
 	pSmp->nFineTune = 0;
-	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pSmp);
+
+	ConvertSample(nSample, MOD_TYPE_S3M);
+
 	if (pss->flags & 0x01) pSmp->uFlags |= CHN_LOOP;
 	flags = (pss->flags & 0x04) ? RS_PCM16U : RS_PCM8U;
 	if (pss->flags & 0x02) flags |= RSF_STEREO;
@@ -1254,6 +1250,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		memcpy(m_szNames[samplemap[ismp]], psh->name, 22);
 		memcpy(pSmp->filename, psh->name, 22);
 		pSmp->filename[21] = 0;
+
+		ConvertSample(samplemap[ismp], MOD_TYPE_XM);
 	}
 	// Reading sample data
 	for (UINT dsmp=0; dsmp<nsamples; dsmp++)
@@ -1263,6 +1261,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 			ReadSample(&Samples[samplemap[dsmp]], sampleflags[dsmp], (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
 		dwMemPos += samplesize[dsmp];
 	}
+
+	ConvertInstrument(nInstr, MOD_TYPE_XM);
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -1340,6 +1340,11 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 				xih.vibsweep = min(Samples[n].nVibSweep, 255);
 				xih.vibdepth = min(Samples[n].nVibDepth, 15);
 				xih.vibrate = min(Samples[n].nVibRate, 63);
+				if((xih.vibdepth | xih.vibrate) != 0 && !(GetType() & MOD_TYPE_XM))
+				{
+					// Sweep is upside down in XM
+					xih.vibsweep = 255 - xih.vibsweep;
+				}
 			}
 			if (nsamples < 32) smptable[nsamples++] = n;
 			k = nsamples - 1;
@@ -1476,12 +1481,6 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFil
 		pSmp->nFineTune = psh->finetune;
 		pSmp->nC5Speed = 8363;
 		pSmp->RelativeTone = (int)psh->relnote;
-		if (m_nType != MOD_TYPE_XM)
-		{
-			pSmp->nC5Speed = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
-			pSmp->RelativeTone = 0;
-			pSmp->nFineTune = 0;
-		}
 		pSmp->nPan = psh->pan;
 		pSmp->uFlags |= CHN_PANNING;
 		pSmp->nVibType = pih->vibtype;
@@ -1491,6 +1490,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFil
 		memcpy(pSmp->filename, psh->name, 22);
 		pSmp->filename[21] = 0;
 	}
+	ConvertSample(nSample, MOD_TYPE_XM);
 	if (dwMemPos >= dwFileLength) return true;
 	ReadSample(pSmp, sampleflags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
 	return true;
@@ -1657,7 +1657,6 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	if (pis->C5Speed < 256) pSmp->nC5Speed = 256;
 	pSmp->RelativeTone = 0;
 	pSmp->nFineTune = 0;
-	if (GetType() == MOD_TYPE_XM) FrequencyToTranspose(pSmp);
 	pSmp->nVolume = pis->vol << 2;
 	if (pSmp->nVolume > 256) pSmp->nVolume = 256;
 	pSmp->nGlobalVol = pis->gvl;
@@ -1696,10 +1695,14 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 		// IT 2.14 8-bit packed sample ?
 		if (pis->flags & 8)	flags =	RS_IT2148;
 	}
+
+	ConvertSample(nSample, MOD_TYPE_IT);
+
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //	ReadSample(pSmp, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
 //	return TRUE;
+
 	return ReadSample(pSmp, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
 // -! NEW_FEATURE#0027
 }
@@ -1787,6 +1790,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	dwMemPos += pis->samplepointer - dwMemPos + lastSampleSize;
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return true;
+
+	ConvertInstrument(nInstr, MOD_TYPE_IT);
 
 	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
@@ -1931,6 +1936,11 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 		itss.dfp = psmp->nPan >> 2;
 		itss.vit = autovibxm2it[psmp->nVibType & 7];
 		itss.vir = min(psmp->nVibSweep, 255);
+		if((itss.vid | itss.vis) && (GetType() & MOD_TYPE_XM))
+		{
+			// Sweep is upside down in XM
+			itss.vir = 255 - itss.vir;
+		}
 		itss.vid = min(psmp->nVibDepth, 32);
 		itss.vis = min(psmp->nVibRate, 64);
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
@@ -2188,3 +2198,158 @@ bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	return (pSmp->pSample != nullptr);
 }
 
+
+// Translate sample properties between two given formats.
+void CSoundFile::ConvertSample(SAMPLEINDEX sample, MODTYPE fromType, MODTYPE toType)
+//----------------------------------------------------------------------------------
+{
+	if(toType == MOD_TYPE_NONE)
+	{
+		toType = GetType();
+	}
+
+	if(sample < 1 || sample > GetNumSamples())
+	{
+		return;
+	}
+
+	MODSAMPLE &smp = GetSample(sample);
+	// Convert between frequency and transpose values if necessary.
+	if ((!(toType & (MOD_TYPE_MOD | MOD_TYPE_XM))) && (fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))
+	{
+		smp.nC5Speed = TransposeToFrequency(smp.RelativeTone, smp.nFineTune);
+		smp.RelativeTone = 0;
+		smp.nFineTune = 0;
+	} else if((toType & (MOD_TYPE_MOD | MOD_TYPE_XM)) && (!(fromType & (MOD_TYPE_MOD | MOD_TYPE_XM))))
+	{
+		FrequencyToTranspose(&smp);
+		if(toType & MOD_TYPE_MOD)
+		{
+			smp.RelativeTone = 0;
+		}
+	}
+
+	// No ping-pong loop, panning and auto-vibrato for MOD / S3M samples
+	if(toType & (MOD_TYPE_MOD | MOD_TYPE_S3M))
+	{
+		smp.uFlags &= ~(CHN_PINGPONGLOOP | CHN_PANNING);
+
+		smp.nVibDepth = 0;
+		smp.nVibRate = 0;
+		smp.nVibSweep = 0;
+		smp.nVibType = VIB_SINE;
+	}
+
+	// No sustain loops for MOD/S3M/XM
+	if(toType & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_S3M))
+	{
+		// Sustain loops - convert to normal loops
+		if((smp.uFlags & CHN_SUSTAINLOOP) != 0)
+		{
+			// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
+			smp.nLoopStart = smp.nSustainStart;
+			smp.nLoopEnd = smp.nSustainEnd;
+			smp.uFlags |= CHN_LOOP;
+			if(smp.uFlags & CHN_PINGPONGSUSTAIN)
+			{
+				smp.uFlags |= CHN_PINGPONGLOOP;
+			} else
+			{
+				smp.uFlags &= ~CHN_PINGPONGLOOP;
+			}
+		}
+		smp.nSustainStart = smp.nSustainEnd = 0;
+		smp.uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+	}
+
+	// All XM samples have default panning, and XM's autovibrato settings are rather limited.
+	if(toType & MOD_TYPE_XM)
+	{
+		if(!(smp.uFlags & CHN_PANNING))
+		{
+			smp.uFlags |= CHN_PANNING;
+			smp.nPan = 128;
+		}
+
+		LimitMax(smp.nVibDepth, BYTE(15));
+		LimitMax(smp.nVibRate, BYTE(63));
+	}
+
+
+	// Autovibrato sweep setting is inverse in XM (0 = "no sweep") and IT (0 = "no vibrato")
+	if(((fromType & MOD_TYPE_XM) && (toType & (MOD_TYPE_IT | MOD_TYPE_MPT))) || ((toType & MOD_TYPE_XM) && (fromType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
+	{
+		if(smp.nVibRate != 0 && smp.nVibDepth != 0)
+		{
+			smp.nVibSweep = 255 - smp.nVibSweep;
+		}
+	}
+}
+
+
+// Translate instrument properties between two given formats.
+void CSoundFile::ConvertInstrument(INSTRUMENTINDEX instr, MODTYPE fromType, MODTYPE toType)
+//-----------------------------------------------------------------------------------------
+{
+	UNREFERENCED_PARAMETER(fromType);
+
+	if(toType == MOD_TYPE_NONE)
+	{
+		toType = GetType();
+	}
+
+	if(instr < 1 || instr > GetNumInstruments() || Instruments[instr] == nullptr)
+	{
+		return;
+	}
+
+	MODINSTRUMENT *pIns = Instruments[instr];
+
+	if(toType & MOD_TYPE_XM)
+	{
+		for(size_t i = 0; i < CountOf(pIns->NoteMap); i++)
+		{
+			pIns->NoteMap[i] = static_cast<BYTE>(i + 1);
+		}
+
+		// Convert sustain loops to sustain "points"
+		pIns->VolEnv.nSustainEnd = pIns->VolEnv.nSustainStart;
+		pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
+
+		pIns->VolEnv.dwFlags &= ~ENV_CARRY;
+		pIns->PanEnv.dwFlags &= ~ENV_CARRY;
+		pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
+
+		pIns->dwFlags &= ~INS_SETPANNING;
+		pIns->SetCutoff(pIns->GetCutoff(), false);
+		pIns->SetResonance(pIns->GetResonance(), false);
+		pIns->nFilterMode = FLTMODE_UNCHANGED;
+
+		pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
+
+		pIns->nPPC = NOTE_MIDDLEC - 1;
+		pIns->nPPS = 0;
+
+		pIns->nNNA = NNA_NOTECUT;
+		pIns->nDCT = DCT_NONE;
+		pIns->nDNA = DNA_NOTECUT;
+
+		pIns->nGlobalVol = 64;
+		pIns->nPan = 128;
+
+		LimitMax(pIns->nFadeOut, 32767u);
+	}
+
+	// Limit fadeout length for IT / MPT
+	if(toType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+	{
+		LimitMax(pIns->nFadeOut, 8192u);
+	}
+
+	// MPT-specific features - remove instrument tunings, Pitch/Tempo Lock for other formats
+	if(!(toType & MOD_TYPE_MPT))
+	{
+		pIns->SetTuning(nullptr);
+		pIns->wPitchToTempoLock = 0;
+	}
+}
