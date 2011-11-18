@@ -38,8 +38,6 @@ typedef struct PTMFILEHEADER
 	WORD patseg[128];		// pattern offsets (*16)
 } PTMFILEHEADER, *LPPTMFILEHEADER;
 
-#define SIZEOF_PTMFILEHEADER	608
-
 
 typedef struct PTMSAMPLE
 {
@@ -52,12 +50,10 @@ typedef struct PTMSAMPLE
 	WORD length[2];			// sample size (in bytes)
 	WORD loopbeg[2];		// start of loop
 	WORD loopend[2];		// end of loop
-	WORD gusdata[8];
-	char  samplename[28];	// name of sample, asciiz
+	WORD gusdata[7];
+	char samplename[28];	// name of sample, asciiz
 	DWORD ptms_id;			// sample identification, 'PTMS' or 0x534d5450
 } PTMSAMPLE;
-
-#define SIZEOF_PTMSAMPLE	80
 
 #pragma pack()
 
@@ -79,7 +75,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	pfh.fileflags = LittleEndianW(pfh.fileflags);
 	pfh.reserved2 = LittleEndianW(pfh.reserved2);
 	pfh.ptmf_id = LittleEndian(pfh.ptmf_id);
-	for (UINT j = 0; j < 128; j++)
+	for (size_t j = 0; j < CountOf(pfh.patseg); j++)
 	{
 		pfh.patseg[j] = LittleEndianW(pfh.patseg[j]);
 	}
@@ -89,14 +85,14 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (pfh.norders > 256) || (!pfh.norders)
 	 || (!pfh.nsamples) || (pfh.nsamples > 255)
 	 || (!pfh.npatterns) || (pfh.npatterns > 128)
-	 || (SIZEOF_PTMFILEHEADER+pfh.nsamples*SIZEOF_PTMSAMPLE >= (int)dwMemLength)) return false;
+	 || (sizeof(PTMFILEHEADER) + pfh.nsamples * sizeof(PTMSAMPLE) >= dwMemLength)) return false;
 	memcpy(m_szNames[0], pfh.songname, 28);
 	StringFixer::SpaceToNullStringFixed<28>(m_szNames[0]);
 
 	m_nType = MOD_TYPE_PTM;
 	m_nChannels = pfh.nchannels;
-	m_nSamples = (pfh.nsamples < MAX_SAMPLES) ? pfh.nsamples : MAX_SAMPLES-1;
-	dwMemPos = SIZEOF_PTMFILEHEADER;
+	m_nSamples = min(pfh.nsamples, MAX_SAMPLES - 1);
+	dwMemPos = sizeof(PTMFILEHEADER);
 	nOrders = (pfh.norders < MAX_ORDERS) ? pfh.norders : MAX_ORDERS-1;
 	Order.ReadAsByte(pfh.orders, nOrders, nOrders);
 
@@ -105,7 +101,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 		ChnSettings[ipan].nVolume = 64;
 		ChnSettings[ipan].nPan = ((pfh.chnpan[ipan] & 0x0F) << 4) + 4;
 	}
-	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += SIZEOF_PTMSAMPLE)
+	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += sizeof(PTMSAMPLE))
 	{
 		MODSAMPLE *pSmp = &Samples[ismp+1];
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);

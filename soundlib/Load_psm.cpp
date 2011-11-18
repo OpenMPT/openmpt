@@ -453,7 +453,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
 				Samples[smp].nLength = LittleEndian(pSample->sampleLength);
 				Samples[smp].nLoopStart = LittleEndian(pSample->loopStart);
-				Samples[smp].nLoopEnd = LittleEndian(pSample->loopEnd);
+				Samples[smp].nLoopEnd = LittleEndian(pSample->loopEnd);	// Hmm... apparently we should add +1 for Extreme Pinball tunes here? See sample 8 in the medieval table music.
 				Samples[smp].nPan = 128;
 				Samples[smp].nVolume = (pSample->defaultVolume + 1) << 1;
 				Samples[smp].uFlags = (pSample->flags & 0x80) ? CHN_LOOP : 0;
@@ -852,7 +852,7 @@ struct PSM16SMPHEADER
 	uint32 length;		// in bytes
 	uint32 loopStart;	// in samples?
 	uint32 loopEnd;		// in samples?
-	int8   finetune;	// 0 ... 15 (useless? also, why is this almost always 70?)
+	int8   finetune;	// 0 ... 15 (high nibble is 7 in most cases, but why? is it maybe some transpose value?)
 	uint8  volume;		// default volume
 	uint16 c2freq;
 };
@@ -943,6 +943,16 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			Samples[iSmp].nLoopStart = LittleEndian(smphdr->loopStart);
 			Samples[iSmp].nLoopEnd = LittleEndian(smphdr->loopEnd);
 			Samples[iSmp].nC5Speed = LittleEndianW(smphdr->c2freq);
+			if(smphdr->finetune & 0x0F)
+			{
+				int finetune = smphdr->finetune & 0x0F;
+				if(finetune >= 8)
+				{
+					finetune -= 16;
+				}
+				// Copied over from DUMB
+				Samples[iSmp].nC5Speed = double(Samples[iSmp].nC5Speed) * pow(1.000225659305069791926712241547647863626, finetune * 32);
+			}
 			Samples[iSmp].nVolume = smphdr->volume << 2;
 			Samples[iSmp].nGlobalVol = 256;
 
@@ -1016,13 +1026,13 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 					continue;
 				}
 
-				row_data = Patterns[nPat] + iRow * m_nChannels + min(bChnFlag & 0x1F, m_nChannels - 1);
+				row_data = Patterns[nPat].GetpModCommand(iRow, min(bChnFlag & 0x1F, m_nChannels - 1));
 
 				if(bChnFlag & 0x80)
 				{
 					// note + instr present
 					ASSERT_CAN_READ(2);
-					row_data->note = lpStream[dwMemPos++] + 37;
+					row_data->note = lpStream[dwMemPos++] + 36;
 					row_data->instr = lpStream[dwMemPos++];
 				}
 				if(bChnFlag & 0x40)
