@@ -9,7 +9,7 @@
 #include "view_pat.h"
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
-#include "MIDIMacros.h"
+#include "MIDIMacroDialog.h"
 
 
 //////////////////////////////////////////////////////////////

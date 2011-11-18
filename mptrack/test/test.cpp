@@ -9,7 +9,7 @@
 #include "../moddoc.h"
 #include "../MainFrm.h"
 #include "../version.h"
-#include "../MIDIMacros.h"
+#include "../../soundlib/MIDIMacros.h"
 #include "../../common/misc_util.h"
 #include "../serialization_utils.h"
 #include <limits>

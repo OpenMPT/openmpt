@@ -280,7 +280,10 @@
 				RelativePath="..\soundlib\Message.cpp">
 			</File>
 			<File
-				RelativePath=".\MIDIMacros.cpp">
+				RelativePath=".\MIDIMacroDialog.cpp">
+			</File>
+			<File
+				RelativePath=".\soundlib\MIDIMacros.cpp">
 			</File>
 			<File
 				RelativePath=".\MIDIMappingDialog.cpp">
@@ -768,7 +771,10 @@
 				RelativePath="..\soundlib\midi.h">
 			</File>
 			<File
-				RelativePath=".\MIDIMacros.h">
+				RelativePath=".\MIDIMacroDialog.h">
+			</File>
+			<File
+				RelativePath=".\soundlib\MIDIMacros.h">
 			</File>
 			<File
 				RelativePath=".\MIDIMappingDialog.h">
