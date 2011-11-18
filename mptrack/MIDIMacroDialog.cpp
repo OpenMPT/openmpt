@@ -1,7 +1,7 @@
 /*
- * MIDIMacros.cpp
- * --------------
- * Purpose: Helper functions / classes for MIDI Macro functionality, including the MIDI Macro editor.
+ * MIDIMacroDialog.cpp
+ * -------------------
+ * Purpose: MIDI Macro Configuration Dialog implementation
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  */
@@ -14,250 +14,8 @@
 #include "Vstplug.h"
 #include "resource.h"
 #include "MIDIMacros.h"
+#include "MIDIMacroDialog.h"
 
-
-
-enmParameteredMacroType MIDIMacroTools::GetMacroType(CString value)
-//-----------------------------------------------------------------
-{
-	value.Remove(' ');
-	if (value.Compare("") == 0) return sfx_unused;
-	if (value.Compare("F0F000z") == 0) return sfx_cutoff;
-	if (value.Compare("F0F001z") == 0) return sfx_reso;
-	if (value.Compare("F0F002z") == 0) return sfx_mode;
-	if (value.Compare("F0F003z") == 0) return sfx_drywet;
-	if (value.Compare("Bc00z") >= 0 && value.Compare("BcFFz") <= 0 && value.GetLength() == 5)
-		return sfx_cc;
-	if (value.Compare("F0F080z") >= 0 && value.Compare("F0F1FFz") <= 0 && value.GetLength() == 7)
-		return sfx_plug; 
-	return sfx_custom;	// custom / unknown
-}
-
-
-// Returns macro description including plugin parameter / MIDI CC information
-CString MIDIMacroTools::GetMacroName(CString value, PLUGINDEX plugin) const
-//-------------------------------------------------------------------------
-{
-	const enmParameteredMacroType macroType = GetMacroType(value);
-
-	switch(macroType)
-	{
-	case sfx_plug:
-		{
-			const int param = MacroToPlugParam(value);
-			CString paramName;
-
-			if(plugin < MAX_MIXPLUGINS)
-			{
-				CVstPlugin *pPlug = reinterpret_cast<CVstPlugin *>(m_SndFile.m_MixPlugins[plugin].pMixPlugin);
-				if(pPlug)
-				{
-					paramName = pPlug->GetParamName(param);
-				}
-				if (paramName.IsEmpty())
-				{
-					return _T("N/A");
-				}
-
-				CString formattedName;
-				formattedName.Format(_T("Param %d (%s)"), param, paramName);
-				return CString(formattedName);
-			} else
-			{
-				return _T("N/A - No Plugin");
-			}
-		}
-
-	case sfx_cc:
-		{
-			CString formattedCC;
-			formattedCC.Format(_T("MIDI CC %d"), MacroToMidiCC(value));
-			return formattedCC;
-		}
-
-	default:
-		return GetMacroName(macroType);
-	}
-}
-
-
-// Returns generic macro description.
-CString MIDIMacroTools::GetMacroName(enmParameteredMacroType macro)
-//-----------------------------------------------------------------
-{
-	switch(macro)
-	{
-	case sfx_unused:
-		return _T("Unused");
-	case sfx_cutoff:
-		return _T("Set Filter Cutoff");
-	case sfx_reso:
-		return _T("Set Filter Resonance");
-	case sfx_mode:
-		return _T("Set Filter Mode");
-	case sfx_drywet:
-		return _T("Set Plugin Dry/Wet Ratio");
-	case sfx_plug:
-		return _T("Control Plugin Parameter...");
-	case sfx_cc:
-		return _T("MIDI CC...");
-	case sfx_custom:
-	default:
-		return _T("Custom");
-	}
-}
-
-
-int MIDIMacroTools::MacroToPlugParam(CString macro)
-//-------------------------------------------------
-{
-	macro.Remove(' ');
-	int code=0;
-	char* param = (char *) (LPCTSTR) macro;
-	param += 4;
-	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
-		if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
-	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
-		if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
-
-	if (macro.GetLength() >= 4 && macro.GetAt(3) == '0')
-		return (code - 128);
-	else
-		return (code + 128);
-}
-
-
-int MIDIMacroTools::MacroToMidiCC(CString macro)
-//----------------------------------------------
-{
-	macro.Remove(' ');
-	int code=0;
-	char* param = (char *) (LPCTSTR) macro;
-	param += 2;
-	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
-		if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
-	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
-		if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
-
-	return code;
-}
-
-
-int MIDIMacroTools::FindMacroForParam(long param) const
-//-----------------------------------------------------
-{
-	for (size_t macro = 0; macro < NUM_MACROS; macro++)
-	{
-		CString macroString = m_SndFile.m_MidiCfg.szMidiSFXExt[macro];
-		if (GetMacroType(macroString) == sfx_plug && MacroToPlugParam(macroString) == param)
-		{
-			return macro;
-		}
-	}
-
-	return -1;
-}
-
-
-// Retrieve Zxx (Z80-ZFF) type from current macro configuration
-enmFixedMacroType MIDIMacroTools::GetZxxType(const char (&szMidiZXXExt)[128][MACRO_LENGTH])
-//-----------------------------------------------------------------------------------------
-{
-	// Compare with all possible preset patterns
-	for(size_t i = 1; i < zxx_max; i++)
-	{
-		// Prepare pattern to compare
-		char szPatterns[128][MACRO_LENGTH];
-		CreateZxxFromType(szPatterns, static_cast<enmFixedMacroType>(i));
-
-		bool bFound = true;
-		for(size_t j = 0; j < 128; j++)
-		{
-			if(strncmp(szPatterns[j], szMidiZXXExt[j], MACRO_LENGTH))
-			{
-				bFound = false;
-				break;
-			}
-		}
-		if(bFound) return static_cast<enmFixedMacroType>(i);
-	}
-	return zxx_custom; // Custom setup
-}
-
-
-// Create Zxx (Z80 - ZFF) from one out of five presets
-void MIDIMacroTools::CreateZxxFromType(char (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType)
-//---------------------------------------------------------------------------------------------------------
-{
-	for(size_t i = 0; i < 128; i++)
-	{
-		switch(iZxxType)
-		{
-		case zxx_reso4Bit:
-			// Type 1 - Z80 - Z8F controls resonance
-			if (i < 16) wsprintf(szMidiZXXExt[i], "F0F001%02X", i * 8);
-			else strcpy(szMidiZXXExt[i], "");
-			break;
-
-		case zxx_reso7Bit:
-			// Type 2 - Z80 - ZFF controls resonance
-			wsprintf(szMidiZXXExt[i], "F0F001%02X", i);
-			break;
-
-		case zxx_cutoff:
-			// Type 3 - Z80 - ZFF controls cutoff
-			wsprintf(szMidiZXXExt[i], "F0F000%02X", i);
-			break;
-
-		case zxx_mode:
-			// Type 4 - Z80 - ZFF controls filter mode
-			wsprintf(szMidiZXXExt[i], "F0F002%02X", i);
-			break;
-
-		case zxx_resomode:
-			// Type 5 - Z80 - Z9F controls resonance + filter mode
-			if (i < 16) wsprintf(szMidiZXXExt[i], "F0F001%02X", i * 8);
-			else if (i < 32) wsprintf(szMidiZXXExt[i], "F0F002%02X", (i - 16) * 8);
-			else strcpy(szMidiZXXExt[i], "");
-			break;
-		}
-	}
-}
-
-
-// Check if the MIDI Macro configuration used is the default one,
-// i.e. the configuration that is assumed when loading a file that has no macros embedded.
-bool MIDIMacroTools::IsMacroDefaultSetupUsed() const
-//--------------------------------------------------
-{
-	// TODO - Global macros
-
-	// SF0: Z00-Z7F controls cutoff
-	if(GetMacroType(m_SndFile.m_MidiCfg.szMidiSFXExt[0]) != sfx_cutoff)
-	{
-		return false;
-	}
-	// Z80-Z8F controls resonance
-	if(GetZxxType(m_SndFile.m_MidiCfg.szMidiZXXExt) != zxx_reso4Bit)
-	{
-		return false;
-	}
-	// All other parametered macros are unused
-	for(size_t i = 1; i < NUM_MACROS; i++)
-	{
-		if(GetMacroType(m_SndFile.m_MidiCfg.szMidiSFXExt[i]) != sfx_unused)
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-
-#ifdef MODPLUG_TRACKER
-
-////////////////////////////////////////////////////////////////////////
-// MIDI Macro Configuration Dialog
 
 BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
 	ON_COMMAND(IDC_CHECK1,			OnEmbedMidiCfg)
@@ -526,21 +284,13 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 //----------------------------------------
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
-	UINT sfx_preset = m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel());
+	enmParameteredMacroType sfx_preset = static_cast<enmParameteredMacroType>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
 
 	if (sfx < 16)
 	{
-		char *pmacro = m_MidiCfg.szMidiSFXExt[sfx];
-		switch(sfx_preset)
+		if(sfx_preset != sfx_custom)
 		{
-		case sfx_unused:	strcpy(pmacro, ""); break;			// unused
-		case sfx_cutoff:	strcpy(pmacro, "F0F000z"); break;	// cutoff
-		case sfx_reso:		strcpy(pmacro, "F0F001z"); break;   // reso
-		case sfx_mode:		strcpy(pmacro, "F0F002z"); break;   // mode
-		case sfx_drywet:	strcpy(pmacro, "F0F003z"); break;   
-		case sfx_cc:		strcpy(pmacro, "Bc00z"); break;		// MIDI cc - TODO: get value from other menus
-		case sfx_plug:		strcpy(pmacro, "F0F080z"); break;	// plug param - TODO: get value from other menus
-		case sfx_custom:	/*strcpy(pmacro, "z");*/ break;		// custom - leave as is.
+			strcpy(m_MidiCfg.szMidiSFXExt[sfx], macroTools.CreateParameteredMacroFromType(sfx_preset));
 		}
 		UpdateDialog();
 	}
@@ -563,20 +313,18 @@ void CMidiMacroSetup::OnZxxPresetChanged()
 void CMidiMacroSetup::OnSFxEditChanged()
 //--------------------------------------
 {
-	CHAR s[MACRO_LENGTH];
 	UINT sfx = m_CbnSFx.GetCurSel();
 	if (sfx < 16)
 	{
 		if(ValidateMacroString(m_EditSFx, m_MidiCfg.szMidiSFXExt[sfx], true))
 		{
+			CHAR s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
 			StringFixer::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
 
 			int sfx_preset = macroTools.GetMacroType(m_MidiCfg.szMidiSFXExt[sfx]);
-			//int param = macroTools.MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]);
-
 			m_CbnSFxPreset.SetCurSel(sfx_preset);
 			ToggleBoxes(sfx_preset, sfx);
 			UpdateMacroList(sfx);
@@ -588,12 +336,12 @@ void CMidiMacroSetup::OnSFxEditChanged()
 void CMidiMacroSetup::OnZxxEditChanged()
 //--------------------------------------
 {
-	CHAR s[MACRO_LENGTH];
 	UINT zxx = m_CbnZxx.GetCurSel();
 	if (zxx < 128)
 	{
 		if(ValidateMacroString(m_EditZxx, m_MidiCfg.szMidiZXXExt[zxx], false))
 		{
+			CHAR s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
 			StringFixer::SetNullTerminator(s);
@@ -605,7 +353,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 void CMidiMacroSetup::OnSetSFx(UINT id)
 //-------------------------------------
 {
-	m_CbnSFx.SetCurSel(id-(ID_PLUGSELECT + NUM_MACROS));
+	m_CbnSFx.SetCurSel(id - (ID_PLUGSELECT + NUM_MACROS));
 	OnSFxChanged();
 }
 
@@ -613,18 +361,18 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 //--------------------------------------------
 {
 	CString message, plugName, line;
-	int sfx = id-ID_PLUGSELECT;
+	int sfx = id - ID_PLUGSELECT;
 	int param = macroTools.MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]);
 	CVstPlugin *pVstPlugin; 
-	message.Format("These are the parameters that can be controlled by macro SF%X:\n\n",sfx);
+	message.Format("These are the parameters that can be controlled by macro SF%X:\n\n", sfx);
 
-	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
+	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
 		plugName = m_SndFile.m_MixPlugins[plug].Info.szName;
-		if (plugName != "")
+		if(m_SndFile.m_MixPlugins[plug].Info.dwPluginId1 != 0)
 		{
-			pVstPlugin=(CVstPlugin*) m_SndFile.m_MixPlugins[plug].pMixPlugin;
-			if (pVstPlugin && param <= pVstPlugin->GetNumParameters())
+			pVstPlugin = (CVstPlugin*) m_SndFile.m_MixPlugins[plug].pMixPlugin;
+			if(pVstPlugin && param <= pVstPlugin->GetNumParameters())
 			{
 				line.Format("FX%d: %s\t %s\n", plug + 1, plugName, pVstPlugin->GetFormattedParamName(param));
 				message += line;
@@ -666,17 +414,17 @@ void CMidiMacroSetup::OnPlugParamChanged()
 	CString macroText;
 	UINT param = m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel());
 
-	if (param < 128)
+	if(param < 128)
 	{
 		macroText.Format("F0F0%02Xz",param + 128);
 		m_EditSFx.SetWindowText(macroText);
-	} else if (param < 384)
+	} else if(param < 384)
 	{
 		macroText.Format("F0F1%02Xz",param - 128);
 		m_EditSFx.SetWindowText(macroText);
 	} else
 	{
-		Reporting::Notification("MPT can only assign macros to parameters 0 to 383. Use Parameter Control Notes to automate higher parameters.");
+		Reporting::Notification("Only parameters 0 to 383 can be controlled using MIDI Macros. Use Parameter Control Events to automate higher parameters.");
 	}	
 }
 
@@ -740,7 +488,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		{
 			caseChange = true;
 			macroStr.SetAt(i, 'c');
-		} else if (c >= 'd' && c <= 'f')	// abc have special meanings, but def can be fixed
+		} else if(c >= 'd' && c <= 'f')	// abc have special meanings, but def can be fixed
 		{
 			caseChange = true;
 			macroStr.SetAt(i, c - 'a' + 'A');
@@ -781,5 +529,3 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		return true;
 	}
 }
-
-#endif // MODPLUG_TRACKER

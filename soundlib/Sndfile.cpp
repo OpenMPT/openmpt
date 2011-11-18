@@ -16,7 +16,7 @@
 #include "sndfile.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
-#include "../mptrack/MIDIMacros.h"
+#include "MIDIMacros.h"
 #include "../common/StringFixer.h"
 #include <vector>
 #include <list>

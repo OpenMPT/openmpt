@@ -169,6 +169,7 @@
   <ItemGroup>
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\Reporting.cpp" />
+    <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="ACMConvert.cpp" />
     <ClCompile Include="ArrayUtils.cpp" />
@@ -204,7 +205,7 @@
     <ClCompile Include="mainbar.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="..\soundlib\Message.cpp" />
-    <ClCompile Include="MIDIMacros.cpp" />
+    <ClCompile Include="MIDIMacroDialog.cpp" />
     <ClCompile Include="MIDIMappingDialog.cpp" />
     <ClCompile Include="..\soundlib\mmcmp.cpp" />
     <ClCompile Include="..\soundlib\Mmx_mix.cpp" />
@@ -326,10 +327,11 @@
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
+    <ClInclude Include="..\soundlib\MIDIMacros.h" />
     <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="Autotune.h" />
     <ClInclude Include="ExceptionHandler.h" />
-    <ClInclude Include="MIDIMacros.h" />
+    <ClInclude Include="MIDIMacroDialog.h" />
     <ClInclude Include="PatternRandomizer.h" />
     <ClInclude Include="PatternRandomizerGUI.h" />
     <ClInclude Include="PatternRandomizerGUIEffect.h" />
