@@ -957,6 +957,7 @@ void CCtrlSamples::OnSampleNew()
 				{
 					memcpy(m_pSndFile->GetSample(smp).pSample, m_pSndFile->GetSample(nOldSmp).pSample, m_pSndFile->GetSample(nOldSmp).GetSampleSizeInBytes());
 				}
+				m_pSndFile->AdjustSampleLoop(&m_pSndFile->GetSample(smp));
 			}
 		}
 
@@ -999,17 +1000,10 @@ void CCtrlSamples::OnSampleOpen()
 
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
-		//If loading multiple samples, advancing to next sample and creating
-		//new one if necessary.
+		// If loading multiple samples, create new slots for them
 		if(counter > 0)	
 		{
-			if(m_nSample >= MAX_SAMPLES-1)
-				break;
-			else
-				m_nSample++;
-
-			if(m_nSample > m_pSndFile->GetNumSamples())
-				OnSampleNew();
+			OnSampleNew();
 		}
 
 		if(!OpenSample(files.filenames[counter].c_str()))
@@ -1051,7 +1045,7 @@ void CCtrlSamples::OnSampleSave()
 		if(sPath.IsEmpty()) sPath = "untitled";
 
 		sPath += " - %sample_number% - ";
-		if(m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_MOD))
+		if(m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD))
 			sPath += "%sample_name%.wav";
 		else
 			sPath += "%sample_filename%.wav";
