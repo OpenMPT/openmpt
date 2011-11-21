@@ -1080,8 +1080,11 @@ void CPageEditEffect::UpdateDialog()
 		if(m_bIsParamControl)
 		{
 			// plugin param control note
-			AddPluginParameternamesToCombobox(*combo, pSndFile->m_MixPlugins[m_nPlugin]);
-			combo->SetCurSel(m_nPluginParam);
+			if(m_nPlugin > 0 && m_nPlugin <= MAX_MIXPLUGINS)
+			{
+				AddPluginParameternamesToCombobox(*combo, pSndFile->m_MixPlugins[m_nPlugin - 1]);
+				combo->SetCurSel(m_nPluginParam);
+			}
 		} else
 		{
 			// process as effect

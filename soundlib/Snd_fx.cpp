@@ -3677,7 +3677,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 	} else
 	{
 		// old routines
-		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			if (!nRetrigSpeed) nRetrigSpeed = 1;
 			if ((nRetrigCount) && (!(nRetrigCount % nRetrigSpeed))) bDoRetrig = true;
@@ -3692,12 +3692,19 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 				if (!realspeed) realspeed = 1;
 				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = true;
 				nRetrigCount++;
-			} else if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
+			} else if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
 			if (nRetrigCount >= realspeed)
 			{
 				if ((m_nTickCount) || ((param & 0x100) && (!pChn->rowCommand.note))) bDoRetrig = true;
 			}
 		}
+	}
+
+	// IT compatibility: If a sample is shorter than the retrig time (i.e. it stops before the retrig counter hits zero), it is not retriggered.
+	// Test case: retrig-short.it
+	if(pChn->nLength == 0 && IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		return;
 	}
 
 	if (bDoRetrig)
@@ -3716,7 +3723,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 					vol += ((int)retrigTable2[dv]) << 2;
 			}
 
-			vol = CLAMP(vol, 0, 256);
+			Limit(vol, 0, 256);
 
 			pChn->nVolume = vol;
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
@@ -3725,7 +3732,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		LONG nOldPeriod = pChn->nPeriod;
 		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, TRUE);
 		bool bResetEnv = false;
-		if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+		if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
 			if ((pChn->rowCommand.instr) && (param < 0x100))
 			{
@@ -3740,8 +3747,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
 		}
-		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->rowCommand.note) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
-		if (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
+		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->rowCommand.note) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
+		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
 		// IT compatibility: see previous IT compatibility comment =)
 		if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPos = pChn->nPosLo = 0;
 
