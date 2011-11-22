@@ -1399,7 +1399,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	m_dwStatus |= SMPSTATUS_MOUSEDRAG;
 	SetFocus();
 	SetCapture();
-	bool oldsel = (m_dwBeginSel != m_dwEndSel) ? true : false;
+	bool oldsel = (m_dwBeginSel != m_dwEndSel);
 
 	// shift + click = update selection
 	if(!m_bDrawingEnabled && CMainFrame::GetInputHandler()->ShiftPressed())
@@ -1870,10 +1870,10 @@ void CViewSample::OnEditCopy()
 		EmptyClipboard();
 		LPBYTE p = (LPBYTE)GlobalLock(hCpy);
 		WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)p;
-		WAVEFORMATHEADER *pfmt = (WAVEFORMATHEADER *)(p+sizeof(WAVEFILEHEADER));
-		WAVEDATAHEADER *pdata = (WAVEDATAHEADER *)(p+sizeof(WAVEFILEHEADER)+sizeof(WAVEFORMATHEADER));
+		WAVEFORMATHEADER *pfmt = (WAVEFORMATHEADER *)(p + sizeof(WAVEFILEHEADER));
+		WAVEDATAHEADER *pdata = (WAVEDATAHEADER *)(p + sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER));
 		phdr->id_RIFF = IFFID_RIFF;
-		phdr->filesize = sizeof(WAVEFILEHEADER)+sizeof(WAVEFORMATHEADER)+sizeof(WAVEDATAHEADER)-8;
+		phdr->filesize = sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER) - 8;
 		phdr->id_WAVE = IFFID_WAVE;
 		pfmt->id_fmt = IFFID_fmt;
 		pfmt->hdrlen = 16;
@@ -1929,26 +1929,34 @@ void CViewSample::OnEditCopy()
 			WAVEEXTRAHEADER *pxh = (WAVEEXTRAHEADER *)(psamples+dwSmpLen+psh->smpl_len+8);
 			pxh->xtra_id = IFFID_xtra;
 			pxh->xtra_len = sizeof(WAVEEXTRAHEADER)-8;
+
 			pxh->dwFlags = sample.uFlags;
 			pxh->wPan = sample.nPan;
 			pxh->wVolume = sample.nVolume;
 			pxh->wGlobalVol = sample.nGlobalVol;
+
 			pxh->nVibType = sample.nVibType;
 			pxh->nVibSweep = sample.nVibSweep;
 			pxh->nVibDepth = sample.nVibDepth;
 			pxh->nVibRate = sample.nVibRate;
+			if(pSndFile->GetType() & MOD_TYPE_XM && (pxh->nVibDepth | pxh->nVibRate))
+			{
+				// XM vibrato is upside down
+				pxh->nVibSweep = 255 - pxh->nVibSweep;
+			}
+
 			if ((pSndFile->m_szNames[m_nSample][0]) || (sample.filename[0]))
 			{
 				LPSTR pszText = (LPSTR)(pxh+1);
-				memcpy(pszText, pSndFile->m_szNames[m_nSample], 32);
-				pxh->xtra_len += 32;
+				memcpy(pszText, pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
+				pxh->xtra_len += MAX_SAMPLENAME;
 				if (sample.filename[0])
 				{
-					memcpy(pszText + 32, sample.filename, MAX_SAMPLEFILENAME);
+					memcpy(pszText + MAX_SAMPLENAME, sample.filename, MAX_SAMPLEFILENAME);
 					pxh->xtra_len += MAX_SAMPLEFILENAME;
 				}
 			}
-			phdr->filesize += sizeof(WAVESMPLHEADER) + pxh->xtra_len + 8;
+			phdr->filesize += (psh->smpl_len + 8) + (pxh->xtra_len + 8);
 		}
 		GlobalUnlock(hCpy);
 		SetClipboardData (CF_WAVE, (HANDLE) hCpy);

@@ -431,10 +431,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	pSmp->nVolume = 256;
 	pSmp->nGlobalVol = 64;
 	pSmp->uFlags = (pfmt->bitspersample > 8) ? CHN_16BIT : 0;
-	if (m_nType & MOD_TYPE_XM) pSmp->uFlags |= CHN_PANNING;
 	pSmp->RelativeTone = 0;
 	pSmp->nFineTune = 0;
-	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pSmp);
 	pSmp->nVibType = pSmp->nVibSweep = pSmp->nVibDepth = pSmp->nVibRate = 0;
 	pSmp->filename[0] = 0;
 	MemsetZero(m_szNames[nSample]);
@@ -530,16 +528,19 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 		LPSTR pszTextEx = (LPSTR)(pxh+1); 
 		if (xtrabytes >= MAX_SAMPLENAME)
 		{
-			memcpy(m_szNames[nSample], pszTextEx, MAX_SAMPLENAME - 1);
+			memcpy(m_szNames[nSample], pszTextEx, MAX_SAMPLENAME);
+			StringFixer::SetNullTerminator(m_szNames[nSample]);
 			pszTextEx += MAX_SAMPLENAME;
 			xtrabytes -= MAX_SAMPLENAME;
 			if (xtrabytes >= MAX_SAMPLEFILENAME)
 			{
 				memcpy(pSmp->filename, pszTextEx, MAX_SAMPLEFILENAME);
+				StringFixer::SetNullTerminator(pSmp->filename);
 				xtrabytes -= MAX_SAMPLEFILENAME;
 			}
 		}
 	}
+	ConvertSample(nSample, MOD_TYPE_IT);
 	return true;
 }
 
@@ -561,11 +562,11 @@ bool CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	FILE *f;
 
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	memset(&extra, 0, sizeof(extra));
-	memset(&smpl, 0, sizeof(smpl));
+	MemsetZero(extra);
+	MemsetZero(smpl);
 	header.id_RIFF = IFFID_RIFF;
-	header.filesize = sizeof(header)+sizeof(format)+sizeof(data)+sizeof(extra)-8;
-	header.filesize += 12+8+16+8+32; // LIST(INAM, ISFT)
+	header.filesize = sizeof(header) + sizeof(format) + sizeof(data) + sizeof(smpl) + sizeof(extra) - 8;
+	header.filesize += sizeof(list) + 8 + 16 + 8 + 32; // LIST(INAM, ISFT)
 	header.id_WAVE = IFFID_WAVE;
 	format.id_fmt = IFFID_fmt;
 	format.hdrlen = 16;
@@ -636,15 +637,23 @@ bool CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	// "xtra" field
 	extra.xtra_id = IFFID_xtra;
 	extra.xtra_len = sizeof(extra) - 8;
+
 	extra.dwFlags = pSmp->uFlags;
 	extra.wPan = pSmp->nPan;
 	extra.wVolume = pSmp->nVolume;
 	extra.wGlobalVol = pSmp->nGlobalVol;
 	extra.wReserved = 0;
+
 	extra.nVibType = pSmp->nVibType;
 	extra.nVibSweep = pSmp->nVibSweep;
 	extra.nVibDepth = pSmp->nVibDepth;
 	extra.nVibRate = pSmp->nVibRate;
+	if(GetType() & MOD_TYPE_XM && (extra.nVibDepth | extra.nVibRate))
+	{
+		// XM vibrato is upside down
+		extra.nVibSweep = 255 - extra.nVibSweep;
+	}
+
 	fwrite(&extra, 1, sizeof(extra), f);
 	fclose(f);
 	return true;
