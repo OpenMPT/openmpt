@@ -360,7 +360,7 @@ bool CModDoc::ConvertSamplesToInstruments()
 		return false;
 	}
 
-	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
+	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
 	const SAMPLEINDEX nInstruments = min(m_SndFile.GetNumSamples(), nInstrumentMax);
 
 	for(SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
@@ -460,7 +460,7 @@ PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 		m_SndFile.Order.Append();
 	}
 
-	for (UINT j=0; j<m_SndFile.Order.size(); j++)
+	for (ORDERINDEX j = 0; j < m_SndFile.Order.size(); j++)
 	{
 		if (m_SndFile.Order[j] == i) break;
 		if (m_SndFile.Order[j] == m_SndFile.Order.GetInvalidPatIndex() && nOrd == ORDERINDEX_INVALID)
@@ -468,11 +468,11 @@ PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 			m_SndFile.Order[j] = i;
 			break;
 		}
-		if ((nOrd >= 0) && (j == (UINT)nOrd))
+		if (j == nOrd)
 		{
-			for (UINT k=m_SndFile.Order.size()-1; k>j; k--)
+			for (ORDERINDEX k = m_SndFile.Order.size() - 1; k > j; k--)
 			{
-				m_SndFile.Order[k] = m_SndFile.Order[k-1];
+				m_SndFile.Order[k] = m_SndFile.Order[k - 1];
 			}
 			m_SndFile.Order[j] = i;
 			break;
@@ -511,14 +511,14 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 
 
 // Insert a new instrument assigned to sample nSample or duplicate instrument nDuplicate.
-// If nSample is invalid, an approriate sample slot is selected. 0 means "no sample".
+// If nSample is invalid, an appropriate sample slot is selected. 0 means "no sample".
 INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX nDuplicate)
 //----------------------------------------------------------------------------------------
 {
 	if (m_SndFile.GetModSpecifications().instrumentsMax == 0) return INSTRUMENTINDEX_INVALID;
 
 	MODINSTRUMENT *pDup = nullptr;
-	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
+	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
 	if ((nDuplicate > 0) && (nDuplicate <= m_SndFile.m_nInstruments))
 	{
 		pDup = m_SndFile.Instruments[nDuplicate];
@@ -566,7 +566,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		newsmp = nSample;
 	} else if (!pDup)
 	{
-		for(SAMPLEINDEX k = 1; k <= m_SndFile.m_nSamples; k++)
+		for(SAMPLEINDEX k = 1; k <= m_SndFile.GetNumSamples(); k++)
 		{
 			if (!m_SndFile.IsSampleUsed(k))
 			{
@@ -623,11 +623,11 @@ void CModDoc::InitializeSample(MODSAMPLE &sample)
 	sample.nC5Speed = 8363;
 	sample.RelativeTone = 0;
 	sample.nFineTune = 0;
-	sample.nVibType = 0;
+	sample.nVibType = VIB_SINE;
 	sample.nVibSweep = 0;
 	sample.nVibDepth = 0;
 	sample.nVibRate = 0;
-	sample.uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP);
+	sample.uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP|CHN_LOOP);
 	if(m_SndFile.GetType() == MOD_TYPE_XM)
 	{
 		sample.uFlags |= CHN_PANNING;
@@ -813,7 +813,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 	{
 		LPCSTR pszFormatName;
 		EmptyClipboard();
-		switch(m_SndFile.m_nType)
+		switch(m_SndFile.GetType())
 		{
 		case MOD_TYPE_S3M:	pszFormatName = "S3M"; break;
 		case MOD_TYPE_XM:	pszFormatName = "XM"; break;
@@ -994,7 +994,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			}
 
 			const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(origFormat);
-			const bool bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
+			const bool bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0;
 			pos = startPos;
 
 			while ((nrow < m_SndFile.Patterns[nPattern].GetNumRows()))

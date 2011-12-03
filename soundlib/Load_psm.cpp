@@ -813,6 +813,12 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //  PSM16 support starts here.
 //
 
+// 32-Bit chunk identifiers
+#define PSM16_PORD	0x44524f50
+#define PSM16_PPAN	0x4E415050
+#define PSM16_PSAH	0x48415350
+#define PSM16_PPAT	0x54415050
+
 #pragma pack(1)
 
 struct PSM16HEADER
@@ -823,7 +829,7 @@ struct PSM16HEADER
 	uint8  songType;		// Song Type bitfield
 	uint8  formatVersion;	// $10
 	uint8  patternVersion;  // 0 or 1
-	uint8  songSpeed;		//
+	uint8  songSpeed;		// 1 ... 255
 	uint8  songTempo;		// 32 ... 255
 	uint8  masterVolume;	// 0 ... 255
 	uint16 songLength;		// 0 ... 255 (number of patterns to play in the song)
@@ -832,11 +838,11 @@ struct PSM16HEADER
 	uint16 numSamples;		// 1 ... 255
 	uint16 numChannelsPlay;	// 0 ... 32 (max. number of channels to play)
 	uint16 numChannelsReal;	// 0 ... 32 (max. number of channels to process)
-	uint32 orderOffset;
-	uint32 panOffset;
-	uint32 patOffset;
-	uint32 smpOffset;
-	uint32 commentsOffset;
+	uint32 orderOffset;		// Pointer to order list
+	uint32 panOffset;		// Pointer to pan table
+	uint32 patOffset;		// Pointer to pattern data
+	uint32 smpOffset;		// Pointer to sample headers
+	uint32 commentsOffset;	// Pointer to song comment
 	uint32 patSize;			// Size of all patterns
 	uint8  filler[40];
 };
@@ -852,31 +858,31 @@ struct PSM16SMPHEADER
 	uint32 length;		// in bytes
 	uint32 loopStart;	// in samples?
 	uint32 loopEnd;		// in samples?
-	int8   finetune;	// 0 ... 15 (high nibble is 7 in most cases, but why? is it maybe some transpose value?)
+	int8   finetune;	// Low nibble = MOD finetune, high nibble = transpose (7 = center)
 	uint8  volume;		// default volume
-	uint16 c2freq;
+	uint16 c2freq;		// Middle-C frequency, which has to be combined with the finetune and transpose.
 };
 
 struct PSM16PATHEADER
 {
 	uint16 size;		// includes header bytes
 	uint8  numRows;		// 1 ... 64
-	uint8  numChans;	// 1 ... 31
+	uint8  numChans;	// 1 ... 32
 };
 
 #pragma pack()
 
 
 bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0;
 
 	ASSERT_CAN_READ(sizeof(PSM16HEADER));
-	PSM16HEADER *shdr = (PSM16HEADER *)lpStream;
+	const PSM16HEADER *shdr = (PSM16HEADER *)lpStream;
 
 	// Check header
-	if((LittleEndian(shdr->formatID) != PSM16HEAD_PSM_) // "PSMþ"
+	if((shdr->formatID != LittleEndian(PSM16HEAD_PSM_)) // "PSMþ"
 		|| (shdr->lineEnd != 0x1A)
 		|| (shdr->formatVersion != 0x10 && shdr->formatVersion != 0x01) // why is this sometimes 0x01?
 		|| (shdr->patternVersion != 0) // 255ch pattern version not supported (did anyone use this?)
@@ -893,14 +899,14 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nDefaultSpeed = shdr->songSpeed;
 	m_nDefaultTempo = shdr->songTempo;
 
-	memset(m_szNames, 0, sizeof(m_szNames));
+	MemsetZero(m_szNames);
 	memcpy(m_szNames[0], shdr->songName, 31);
 	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
 
 	// Read orders
 	dwMemPos = LittleEndian(shdr->orderOffset);
 	ASSERT_CAN_READ((DWORD)LittleEndianW(shdr->songOrders) + 2);
-	if(LittleEndian(shdr->orderOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == 0x44524f50) // PORD
+	if(LittleEndian(shdr->orderOffset) > 4 && *(uint32 *)(lpStream + dwMemPos - 4) == LittleEndian(PSM16_PORD)) // PORD
 	{
 		Order.ReadAsByte(lpStream + dwMemPos, LittleEndianW(shdr->songOrders), dwMemLength - dwMemPos);
 	}
@@ -908,11 +914,11 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read pan positions
 	dwMemPos = LittleEndian(shdr->panOffset);
 	ASSERT_CAN_READ(32);
-	if(LittleEndian(shdr->panOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == 0x4E415050) // PPAN
+	if(LittleEndian(shdr->panOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == PSM16_PPAN) // PPAN
 	{
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
-			ChnSettings[i].nPan = lpStream[dwMemPos + i] << 4;
+			ChnSettings[i].nPan = ((15 - (lpStream[dwMemPos + i] & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
 			ChnSettings[i].nVolume = 64;
 			ChnSettings[i].dwFlags = 0; // (i >= shdr->numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}
@@ -921,14 +927,14 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read samples
 	dwMemPos = LittleEndian(shdr->smpOffset);
 	ASSERT_CAN_READ(0);
-	if(LittleEndian(shdr->smpOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == 0x48415350) // PSAH
+	if(LittleEndian(shdr->smpOffset) > 4 && *(uint32 *)(lpStream + dwMemPos - 4) == LittleEndian(PSM16_PSAH)) // PSAH
 	{
 		SAMPLEINDEX iSmpCount = 0;
 		m_nSamples = LittleEndianW(shdr->numSamples);
 		while(iSmpCount < LittleEndianW(shdr->numSamples))
 		{
 			ASSERT_CAN_READ(sizeof(PSM16SMPHEADER));
-			PSM16SMPHEADER *smphdr = (PSM16SMPHEADER *)(lpStream + dwMemPos);
+			const PSM16SMPHEADER *smphdr = (PSM16SMPHEADER *)(lpStream + dwMemPos);
 			dwMemPos += sizeof(PSM16SMPHEADER);
 
 			SAMPLEINDEX iSmp = LittleEndianW(smphdr->sampleNumber);
@@ -943,39 +949,34 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			Samples[iSmp].nLoopStart = LittleEndian(smphdr->loopStart);
 			Samples[iSmp].nLoopEnd = LittleEndian(smphdr->loopEnd);
 			Samples[iSmp].nC5Speed = LittleEndianW(smphdr->c2freq);
-			if(smphdr->finetune & 0x0F)
-			{
-				int finetune = smphdr->finetune & 0x0F;
-				if(finetune >= 8)
-				{
-					finetune -= 16;
-				}
-				// Copied over from DUMB
-				Samples[iSmp].nC5Speed = double(Samples[iSmp].nC5Speed) * pow(1.000225659305069791926712241547647863626, finetune * 32);
-			}
+			
+			// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF! Why on earth would you want to use both systems at the same time?
+			FrequencyToTranspose(&Samples[iSmp]);
+			Samples[iSmp].nC5Speed = TransposeToFrequency(Samples[iSmp].RelativeTone + (smphdr->finetune >> 4) - 7, MOD2XMFineTune(smphdr->finetune & 0x0F));
+
 			Samples[iSmp].nVolume = smphdr->volume << 2;
 			Samples[iSmp].nGlobalVol = 256;
 
-			UINT iSampleFormat = RS_PCM8S;
+			UINT sampleFormat = RS_PCM8S;
 			if(smphdr->flags & 0x04) // 16-Bit
 			{
 				Samples[iSmp].uFlags |= CHN_16BIT;
 				Samples[iSmp].nLength >>= 1;
-				iSampleFormat = RS_PCM16S;
+				sampleFormat = RS_PCM16S;
 			}
 			if(smphdr->flags & 0x08) // Signed/Unsigned
 			{
 				if(Samples[iSmp].uFlags & CHN_16BIT)
-					iSampleFormat = RS_PCM16U;
+					sampleFormat = RS_PCM16U;
 				else
-					iSampleFormat = RS_PCM8U;
+					sampleFormat = RS_PCM8U;
 			}
 			if(smphdr->flags & 0x10) // Delta/Raw
 			{
 				if(Samples[iSmp].uFlags & CHN_16BIT)
-					iSampleFormat = RS_PCM16D;
+					sampleFormat = RS_PCM16D;
 				else
-					iSampleFormat = RS_PCM8D;
+					sampleFormat = RS_PCM8D;
 			}
 			if(smphdr->flags & 0x20) // Bidi Loop
 			{
@@ -986,9 +987,9 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 				Samples[iSmp].uFlags |= CHN_LOOP;
 			}
 			if((smphdr->flags & 0x7F) == 0)
-				iSampleFormat = RS_PCM8D;
+				sampleFormat = RS_PCM8D;
 
-			ReadSample(&Samples[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + LittleEndianW(smphdr->offset)), dwMemLength - LittleEndianW(smphdr->offset));
+			ReadSample(&Samples[iSmp], sampleFormat, reinterpret_cast<LPCSTR>(lpStream + LittleEndianW(smphdr->offset)), dwMemLength - LittleEndianW(smphdr->offset));
 
 			iSmpCount++;
 		}
@@ -997,7 +998,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read patterns
 	dwMemPos = LittleEndian(shdr->patOffset);
 	ASSERT_CAN_READ(LittleEndian(shdr->patSize));
-	if(LittleEndian(shdr->patOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x54415050) // PPAT
+	if(LittleEndian(shdr->patOffset) > 4 && *(uint32 *)(lpStream + dwMemPos - 4) == LittleEndian(PSM16_PPAT)) // PPAT
 	{
 		DWORD dwPatEndPos = LittleEndian(shdr->patOffset) + LittleEndian(shdr->patSize);
 
@@ -1013,34 +1014,33 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(Patterns.Insert(nPat, phdr->numRows))
 				break;
 
-			MODCOMMAND *row_data;
-			ROWINDEX iRow = 0;
+			ROWINDEX curRow = 0;
 
-			while(dwMemPos < dwNextPattern && iRow < phdr->numRows)
+			while(dwMemPos < dwNextPattern && curRow < phdr->numRows)
 			{
 				ASSERT_CAN_READ(1);
-				BYTE bChnFlag = lpStream[dwMemPos++];
+				uint8 bChnFlag = lpStream[dwMemPos++];
 				if(bChnFlag == 0)
 				{
-					iRow++;
+					curRow++;
 					continue;
 				}
 
-				row_data = Patterns[nPat].GetpModCommand(iRow, min(bChnFlag & 0x1F, m_nChannels - 1));
+				MODCOMMAND *rowData = Patterns[nPat].GetpModCommand(curRow, min(bChnFlag & 0x1F, m_nChannels - 1));
 
 				if(bChnFlag & 0x80)
 				{
 					// note + instr present
 					ASSERT_CAN_READ(2);
-					row_data->note = lpStream[dwMemPos++] + 36;
-					row_data->instr = lpStream[dwMemPos++];
+					rowData->note = lpStream[dwMemPos++] + 36;
+					rowData->instr = lpStream[dwMemPos++];
 				}
 				if(bChnFlag & 0x40)
 				{
 					// volume present
 					ASSERT_CAN_READ(1);
-					row_data->volcmd = VOLCMD_VOLUME;
-					row_data->vol = lpStream[dwMemPos++];
+					rowData->volcmd = VOLCMD_VOLUME;
+					rowData->vol = lpStream[dwMemPos++];
 				}
 				if(bChnFlag & 0x20)
 				{
@@ -1140,9 +1140,9 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 						command = CMD_S3MCMDEX;
 						if(param == 0)	// in S3M mode, SC0 is ignored, so we convert it to a note cut.
 						{
-							if(row_data->note == NOTE_NONE)
+							if(rowData->note == NOTE_NONE)
 							{
-								row_data->note = NOTE_NOTECUT;
+								rowData->note = NOTE_NOTECUT;
 								command = CMD_NONE;
 							} else
 							{
@@ -1198,8 +1198,8 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 						break;
 					}
 
-					row_data->command = command;
-					row_data->param = param;
+					rowData->command = command;
+					rowData->param = param;
 				}
 			}
 			// Pattern break for short patterns (so saving the modules as S3M won't break it)
