@@ -39,6 +39,15 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
 	DDX_Control(pDX, IDC_COMBO_TEMPOMODE,	m_TempoModeBox);
 	DDX_Control(pDX, IDC_COMBO_MIXLEVELS,	m_PlugMixBox);
+
+	DDX_Control(pDX, IDC_CHECK1,		m_CheckBox1);
+	DDX_Control(pDX, IDC_CHECK2,		m_CheckBox2);
+	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
+	DDX_Control(pDX, IDC_CHECK4,		m_CheckBox4);
+	DDX_Control(pDX, IDC_CHECK5,		m_CheckBox5);
+	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
+	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
+
 	//}}AFX_DATA_MAP
 }
 
