@@ -20,17 +20,7 @@
 
 BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	//{{AFX_MSG_MAP(CModTypeDlg)
-	ON_COMMAND(IDC_CHECK1,		OnCheck1)
-	ON_COMMAND(IDC_CHECK2,		OnCheck2)
-	ON_COMMAND(IDC_CHECK3,		OnCheck3)
-	ON_COMMAND(IDC_CHECK4,		OnCheck4)
-	ON_COMMAND(IDC_CHECK5,		OnCheck5)
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	ON_COMMAND(IDC_CHECK6,		OnCheck6)
-	ON_COMMAND(IDC_CHECK_PT1X,	OnCheckPT1x)
 	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
-// -! NEW_FEATURE#0023
 
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
@@ -49,16 +39,6 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
 	DDX_Control(pDX, IDC_COMBO_TEMPOMODE,	m_TempoModeBox);
 	DDX_Control(pDX, IDC_COMBO_MIXLEVELS,	m_PlugMixBox);
-	DDX_Control(pDX, IDC_CHECK1,		m_CheckBox1);
-	DDX_Control(pDX, IDC_CHECK2,		m_CheckBox2);
-	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
-	DDX_Control(pDX, IDC_CHECK4,		m_CheckBox4);
-	DDX_Control(pDX, IDC_CHECK5,		m_CheckBox5);
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
-// -! NEW_FEATURE#0023
-	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
 	//}}AFX_DATA_MAP
 }
 
@@ -69,7 +49,6 @@ BOOL CModTypeDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_nType = m_pSndFile->GetType();
 	m_nChannels = m_pSndFile->GetNumChannels();
-	m_dwSongFlags = m_pSndFile->m_dwSongFlags;
 
 	// Mod types
 
@@ -80,8 +59,8 @@ BOOL CModTypeDlg::OnInitDialog()
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker Project ITP"), MOD_TYPE_IT);
+	// -! NEW_FEATURE#0023
 	m_TypeBox.SetItemData(m_TypeBox.AddString("OpenMPT MPTM"), MOD_TYPE_MPT);
-// -! NEW_FEATURE#0023
 	switch(m_nType)
 	{
 	case MOD_TYPE_S3M:	m_TypeBox.SetCurSel(1); break;
@@ -216,12 +195,13 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITPEMBEDIH) ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
-	m_CheckBox1.EnableWindow((type & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBox2.EnableWindow((type == MOD_TYPE_S3M) ? TRUE : FALSE);
-	m_CheckBox3.EnableWindow((type & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBox4.EnableWindow((type & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBox5.EnableWindow((type & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	m_CheckBoxPT1x.EnableWindow((type & (MOD_TYPE_MOD)) ? TRUE : FALSE);
+	const DWORD allowedFlags = m_pSndFile->GetModSpecifications(type).songFlags;
+	m_CheckBox1.EnableWindow((allowedFlags & SONG_LINEARSLIDES) != 0);
+	m_CheckBox2.EnableWindow((allowedFlags & SONG_FASTVOLSLIDES) != 0);
+	m_CheckBox3.EnableWindow((allowedFlags & SONG_ITOLDEFFECTS) != 0);
+	m_CheckBox4.EnableWindow((allowedFlags & SONG_ITCOMPATGXX) != 0);
+	m_CheckBox5.EnableWindow((allowedFlags & SONG_EXFILTERRANGE) != 0);
+	m_CheckBoxPT1x.EnableWindow((allowedFlags & SONG_PT1XMODE) != 0);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -282,76 +262,7 @@ void CModTypeDlg::UpdateDialog()
 }
 
 
-void CModTypeDlg::OnCheck1()
-//--------------------------
-{
-	if (m_CheckBox1.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_LINEARSLIDES;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_LINEARSLIDES;
-}
-
-
-void CModTypeDlg::OnCheck2()
-//--------------------------
-{
-	if (m_CheckBox2.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_FASTVOLSLIDES;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
-}
-
-
-void CModTypeDlg::OnCheck3()
-//--------------------------
-{
-	if (m_CheckBox3.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITOLDEFFECTS;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITOLDEFFECTS;
-}
-
-
-void CModTypeDlg::OnCheck4()
-//--------------------------
-{
-	if (m_CheckBox4.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITCOMPATGXX;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITCOMPATGXX;
-}
-
-
-void CModTypeDlg::OnCheck5()
-//--------------------------
-{
-	if (m_CheckBox5.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_EXFILTERRANGE;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_EXFILTERRANGE;
-}
-
-
-void CModTypeDlg::OnCheck6()
-//--------------------------
-{
-	if (m_CheckBox6.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITPEMBEDIH;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
-}
-
-void CModTypeDlg::OnCheckPT1x()
-//-----------------------------
-{
-	if (m_CheckBoxPT1x.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_PT1XMODE;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_PT1XMODE;
-}
-
-
-bool CModTypeDlg::VerifyData() 
+bool CModTypeDlg::VerifyData()
 //----------------------------
 {
 
@@ -406,6 +317,37 @@ void CModTypeDlg::OnOK()
 		if(sel == 4) m_pSndFile->m_dwSongFlags |= SONG_ITPROJECT;
 // -! NEW_FEATURE#0023
 	}
+
+	if (m_CheckBox1.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_LINEARSLIDES;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_LINEARSLIDES;
+	if (m_CheckBox2.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_FASTVOLSLIDES;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
+	if (m_CheckBox3.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_ITOLDEFFECTS;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_ITOLDEFFECTS;
+	if (m_CheckBox4.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_ITCOMPATGXX;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_ITCOMPATGXX;
+	if (m_CheckBox5.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_EXFILTERRANGE;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_EXFILTERRANGE;
+	if (m_CheckBox6.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_ITPEMBEDIH;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
+	if (m_CheckBoxPT1x.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_PT1XMODE;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_PT1XMODE;
+
+
 	sel = m_ChannelsBox.GetCurSel();
 	if (sel >= 0)
 	{
@@ -445,14 +387,6 @@ void CModTypeDlg::OnOK()
 	CDialog::OnOK();
 }
 
-void CModTypeDlg::OnCancel()
-//--------------------------
-{
-	// Reset mod flags
-	m_pSndFile->m_dwSongFlags = m_dwSongFlags;
-	CDialog::OnCancel();
-}
-
 
 BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 //-------------------------------------------------------------------------
@@ -487,7 +421,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		strTipText = "Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.";
 		break;
 	case IDC_CHECK5:
-		strTipText = "The resonant filter's frequency range is increased from about 4KHz to 10KHz.";
+		strTipText = "The resonant filter's frequency range is increased from about 5KHz to 10KHz.";
 		break;
 	case IDC_CHECK6:
 		strTipText = "The instrument settings of the external ITI files will be ignored.";
@@ -607,9 +541,11 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 		if (!m_bKeepMask[n]) m_RemChansList.SetSel(n);
 	}
 
-	if (m_nRemove > 0) {
+	if (m_nRemove > 0)
+	{
 		wsprintf(label, "Select %d channel%s to remove:", m_nRemove, (m_nRemove != 1) ? "s" : "");
-	} else {
+	} else
+	{
 		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetModSpecifications().channelsMin);
 	}
 	
@@ -968,13 +904,13 @@ VOID CSampleMapDlg::OnUpdateSamples()
 	nInsertPos = m_CbnSample.AddString("0: No sample");
 	m_CbnSample.SetItemData(nInsertPos, 0);
 
-	for (UINT i=1; i<=m_pSndFile->m_nSamples; i++)
+	for (SAMPLEINDEX i = 1; i <= m_pSndFile->GetNumSamples(); i++)
 	{
 		bool isUsed = showAll;
 
 		if (!isUsed)
 		{
-			for (UINT j=0; j<NOTE_MAX; j++)
+			for (size_t j = 0; j < CountOf(KeyboardMap); j++)
 			{
 				if (KeyboardMap[j] == i)
 				{
@@ -1057,7 +993,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 				KeyboardMap[iNote] = pIns->Keyboard[iNote];
 			} else
 			{
-				KeyboardMap[iNote] = (WORD)nSample;
+				KeyboardMap[iNote] = (SAMPLEINDEX)nSample;
 			}
 /* rewbs.note: I don't think we need this with cust keys.
 // -> CODE#0009

@@ -251,10 +251,10 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						lstrcpyn(s, pSndFile->m_szNames[iSmp+1], MAX_SAMPLENAME);
+						lstrcpyn(s, pSndFile->m_szNames[iSmp + 1], MAX_SAMPLENAME);
 						break;
 					case SMPLIST_SAMPLENO:
-						wsprintf(s, "%02d", iSmp+1);
+						wsprintf(s, "%02d", iSmp + 1);
 						break;
 					case SMPLIST_SIZE:
 						if (sample.nLength)
@@ -268,16 +268,16 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_TYPE:
 						if (sample.nLength)
 						{
-							wsprintf(s, "%d Bit", sample.GetElementarySampleSize() << 3);
+							wsprintf(s, "%d Bit", sample.GetElementarySampleSize() * 8);
 						}
 						break;
 					case SMPLIST_INSTR:
 						if (pSndFile->GetNumInstruments())
 						{
 							bool first = true;
-							for (INSTRUMENTINDEX i = 0; i < pSndFile->GetNumInstruments(); i++) if (pSndFile->Instruments[i + 1])
+							for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++) if (pSndFile->Instruments[i])
 							{
-								MODINSTRUMENT *pIns = pSndFile->Instruments[i + 1];
+								const MODINSTRUMENT *pIns = pSndFile->Instruments[i];
 								for (size_t j = 0; j < CountOf(pIns->Keyboard); j++)
 								{
 									if (pIns->Keyboard[j] == (iSmp + 1))
@@ -285,7 +285,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 										if (!first) strcat(s, ",");
 										first = false;
 
-										wsprintf(stmp, "%d", i + 1);
+										wsprintf(stmp, "%d", i);
 										strcat(s, stmp);
 										break;
 									}

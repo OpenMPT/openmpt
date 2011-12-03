@@ -43,8 +43,8 @@ struct CModSpecifications
 	uint16 sampleFilenameLengthMax;	// Dito
 	uint16 instrNameLengthMax;		// Dito
 	uint16 instrFilenameLengthMax;	// Dito
-	SAMPLEINDEX samplesMax;
-	INSTRUMENTINDEX instrumentsMax;
+	SAMPLEINDEX samplesMax;			// Max number of samples == Highest possible sample index
+	INSTRUMENTINDEX instrumentsMax;	// Max number of instruments == Highest possible instrument index
 	BYTE defaultMixLevels;
 	BYTE MIDIMappingDirectivesMax;
 	UINT speedMin;					// Minimum ticks per frame
@@ -58,6 +58,7 @@ struct CModSpecifications
 	bool hasRestartPos;
 	bool supportsPlugins;
 	bool hasPatternSignatures;		// Can patterns have a custom time signature?
+	DWORD songFlags;				// Supported song flags
 };
 
 
@@ -91,8 +92,8 @@ const CModSpecifications mptm =
 	12,									// Max sample filename length
 	26,									// Max instrument name length
 	12,									// Max instrument filename length
-	4000,								// SamplesMax
-	256,								// instrumentMax
+	3999,								// SamplesMax
+	255,								// instrumentMax
 	mixLevels_117RC3,					// defaultMixLevels
 	200,								// Max MIDI mapping directives
 	1,									// Min Speed
@@ -106,6 +107,7 @@ const CModSpecifications mptm =
 	true,								// Has restart position (order)
 	true,								// Supports plugins
 	true,								// Custom pattern time signatures
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 
@@ -149,6 +151,7 @@ const CModSpecifications mod =
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	SONG_PT1XMODE,						// Supported song flags
 };
 
 
@@ -190,6 +193,7 @@ const CModSpecifications xm =
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	SONG_LINEARSLIDES,					// Supported song flags
 };
 
 // XM with MPT extensions
@@ -216,8 +220,8 @@ const CModSpecifications xmEx =
 	0,									// Max sample filename length
 	22,									// Max instrument name length
 	0,									// Max instrument filename length
-	MAX_SAMPLES,						// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
-	256,								// instrumentMax
+	MAX_SAMPLES - 1,					// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
+	255,								// instrumentMax
 	mixLevels_compatible,				// defaultMixLevels
 	200,								// Max MIDI mapping directives
 	1,									// Min Speed
@@ -231,6 +235,7 @@ const CModSpecifications xmEx =
 	true,								// Has restart position (order)
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 const CModSpecifications s3m =
@@ -271,6 +276,7 @@ const CModSpecifications s3m =
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 };
 
 // S3M with MPT extensions
@@ -312,6 +318,7 @@ const CModSpecifications s3mEx =
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 };
 
 const CModSpecifications it =
@@ -352,6 +359,7 @@ const CModSpecifications it =
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 const CModSpecifications itEx =
@@ -377,8 +385,8 @@ const CModSpecifications itEx =
 	12,									// Max sample filename length
 	25,									// Max instrument name length
 	12,									// Max instrument filename length
-	4000,								// SamplesMax
-	256,								// instrumentMax
+	3999,								// SamplesMax
+	255,								// instrumentMax
 	mixLevels_compatible,				// defaultMixLevels
 	200,								// Max MIDI mapping directives
 	1,									// Min Speed
@@ -392,6 +400,7 @@ const CModSpecifications itEx =
 	false,								// Doesn't have restart position (order)
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG | SONG_ITPROJECT | SONG_ITPEMBEDIH,	// Supported song flags
 };
 
 static const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };

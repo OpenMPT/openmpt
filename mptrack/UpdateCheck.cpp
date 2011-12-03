@@ -81,11 +81,12 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 		// Never ran update checks before, so we notify the user of automatic update checks.
 		if(CUpdateCheck::showUpdateHint)
 		{
+			CUpdateCheck::showUpdateHint = false;
 			CString msg;
 			msg.Format("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup.", CUpdateCheck::updateCheckPeriod);
 			if(Reporting::Confirm(msg, "OpenMPT Internet Update") == cnfNo)
 			{
-				CUpdateCheck::showUpdateHint = false;
+				CUpdateCheck::lastUpdateCheck = now;
 				caller->Terminate();
 				return 0;
 			}
@@ -165,7 +166,7 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	{
 		if(!caller->isAutoUpdate)
 		{
-			Reporting::Information("You already have the latest version of OpenMPT.", "OpenMPT Internet Update");
+			Reporting::Information("You already have the latest version of OpenMPT installed.", "OpenMPT Internet Update");
 		}
 	} else
 	{
@@ -293,7 +294,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 	case 31:	radioID = IDC_RADIO4; break;
 	}
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, radioID);
-	CheckDlgButton(IDC_CHECK1, CUpdateCheck::GetSendGUID() ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK1, CUpdateCheck::GetSendGUID() ? BST_CHECKED : BST_UNCHECKED);
 	SetDlgItemText(IDC_EDIT1, CUpdateCheck::GetUpdateURL());
 
 	const time_t t = CUpdateCheck::GetLastUpdateCheck();

@@ -15,7 +15,6 @@ public:
 	CSoundFile *m_pSndFile;
 	CHANNELINDEX m_nChannels;
 	MODTYPE m_nType;
-	DWORD m_dwSongFlags;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -36,24 +35,11 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
-	virtual void OnCancel();
 	
 	//}}AFX_VIRTUAL
 
 	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 
-	//{{AFX_MSG(CModTypeDlg)
-	afx_msg void OnCheck1();
-	afx_msg void OnCheck2();
-	afx_msg void OnCheck3();
-	afx_msg void OnCheck4();
-	afx_msg void OnCheck5();
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	afx_msg void OnCheck6();
-// -! NEW_FEATURE#0023
-	afx_msg void OnCheckPT1x();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -184,7 +170,7 @@ protected:
 	CSliderCtrl m_SbOctave;
 	CSoundFile *m_pSndFile;
 	UINT m_nInstrument;
-	WORD KeyboardMap[NOTE_MAX];
+	SAMPLEINDEX KeyboardMap[NOTE_MAX];
 
 public:
 	CSampleMapDlg(CSoundFile *pSndFile, UINT nInstr, CWnd *parent=NULL):CDialog(IDD_EDITSAMPLEMAP, parent)

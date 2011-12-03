@@ -106,7 +106,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	const bool newTypeIsMOD = (nNewType == MOD_TYPE_MOD), newTypeIsXM =  (nNewType == MOD_TYPE_XM), 
 		newTypeIsS3M = (nNewType == MOD_TYPE_S3M), newTypeIsIT = (nNewType == MOD_TYPE_IT),
 		newTypeIsMPT = (nNewType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM), 
-		newTypeIsXM_IT_MPT = (newTypeIsXM || newTypeIsIT || newTypeIsMPT),
 		newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
 
 	const CModSpecifications& specs = m_SndFile.GetModSpecifications(nNewType);
@@ -257,6 +256,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
 	{
 		MODSAMPLE &sample = m_SndFile.GetSample(nSmp);
+		GetSampleUndo().PrepareUndo(nSmp, sundo_none);
 
 		// Too many samples? Only 31 samples allowed in MOD format...
 		if(newTypeIsMOD && nSmp > 31 && sample.nLength > 0)
@@ -412,16 +412,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	CriticalSection cs;
 	m_SndFile.ChangeModTypeTo(nNewType);
-	if(!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
+
+	// Song flags
+	if(!(CSoundFile::GetModSpecifications(nNewType).songFlags & SONG_LINEARSLIDES) && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
 	{
 		CHANGEMODTYPE_WARNING(wLinearSlides);
-		m_SndFile.m_dwSongFlags &= ~SONG_LINEARSLIDES;
 	}
-	if(!newTypeIsIT_MPT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX);
-	if(!newTypeIsS3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
-	if(!newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_PT1XMODE;
-	if(newTypeIsS3M || newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_EXFILTERRANGE;
 	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATGXX;
+	m_SndFile.m_dwSongFlags &= SONG_PLAY_FLAGS | CSoundFile::GetModSpecifications(nNewType).songFlags;
 
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)
@@ -435,11 +433,11 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Automatically enable compatible mode when converting from MOD and S3M, since it's automatically enabled in those formats.
-	if((nOldType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) && (nNewType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+	if((nOldType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) && (nNewType & (MOD_TYPE_XM | MOD_TYPE_IT)))
 	{
 		m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	}
-	if((nNewType & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
+	if((nNewType & (MOD_TYPE_XM | MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
 	{
 		CHANGEMODTYPE_WARNING(wCompatibilityMode);
 	}
@@ -448,10 +446,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	ChangeFileExtension(nNewType);
 
 	// Check mod specifications
-	m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
-	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
+	Limit(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
+	Limit(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
-	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++) if(m_SndFile.Instruments[i] != nullptr)
+	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++) if(m_SndFile.Instruments[i] != nullptr)
 	{
 		UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv), &m_SndFile, warnings);
 		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv), &m_SndFile, warnings);
@@ -498,7 +496,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	SetModified();
 	GetPatternUndo().ClearUndo();
-	GetSampleUndo().ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
 
