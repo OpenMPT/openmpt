@@ -2389,7 +2389,7 @@ void CSoundFile::FrequencyToTranspose(MODSAMPLE *psmp)
 	int f2t = FrequencyToTranspose(psmp->nC5Speed);
 	int transp = f2t >> 7;
 	int ftune = f2t & 0x7F; //0x7F == 111 1111
-	if (ftune > 80)
+	if (ftune > 80)			// XXX I'm pretty sure this is supposed to be 0x80.
 	{
 		transp++;
 		ftune -= 128;
@@ -2820,6 +2820,89 @@ const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 	const CModSpecifications* p = nullptr;
 	SetModSpecsPointer(p, type);
 	return *p;
+}
+
+
+// Find an unused sample slot. If it is going to be assigned to an instrument, targetInstrument should be specified.
+// SAMPLEINDEX_INVLAID is returned if no free sample slot could be found.
+SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMPLEINDEX start) const
+//--------------------------------------------------------------------------------------------------
+{
+	// Find empty slot in two passes - in the first pass, we only search for samples with empty sample names,
+	// in the second pass we check all samples with non-empty sample names.
+	for(int passes = 0; passes < 2; passes++)
+	{
+		for(SAMPLEINDEX i = start; i <= GetModSpecifications().samplesMax; i++)
+		{
+			// When loading into an instrument, ignore non-empty sample names. Else, only use this slot if the sample name is empty or we're in second pass.
+			if(Samples[i].pSample == nullptr && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
+			{
+				// Empty slot, so it's a good candidate already.
+
+				// In instrument mode, check whether any instrument references this sample slot. If that is the case, we won't use it as it could lead to unwanted conflicts.
+				// If we are loading the sample *into* an instrument, we should also not consider that instrument's sample map, since it might be inconsistent at this time.
+				bool isReferenced = false;
+				for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)
+				{
+					if(ins == targetInstrument)
+					{
+						continue;
+					}
+					if(IsSampleReferencedByInstrument(i, ins))
+					{
+						isReferenced = true;
+						break;
+					}
+				}
+				if(!isReferenced)
+				{
+					return i;
+				}
+			}
+		}
+	}
+
+	return SAMPLEINDEX_INVALID;
+}
+
+
+// Find an unused instrument slot.
+// INSTRUMENTINDEX_INVALID is returned if no free instrument slot could be found.
+INSTRUMENTINDEX CSoundFile::GetNextFreeInstrument(INSTRUMENTINDEX start) const
+//----------------------------------------------------------------------------
+{
+	for(INSTRUMENTINDEX i = start; i <= GetModSpecifications().instrumentsMax; i++)
+	{
+		if(Instruments[i] == nullptr)
+		{
+			return i;
+		}
+	}
+
+	return INSTRUMENTINDEX_INVALID;
+}
+
+
+// Check whether a given sample is used by a given instrument.
+bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX instr) const
+//----------------------------------------------------------------------------------------------
+{
+	MODINSTRUMENT *targetIns = nullptr;
+	if(instr > 0 && instr <= GetNumInstruments())
+	{
+		targetIns = Instruments[instr];
+	}
+	if(targetIns != nullptr)
+	{
+		for(size_t note = 0; note < NOTE_MAX /*CountOf(targetIns->Keyboard)*/; note++)
+		{
+			if(targetIns->Keyboard[note] == sample)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
