@@ -198,14 +198,29 @@ struct MODINSTRUMENT
 
 		pTuning = s_DefaultTuning;
 
-		for(size_t n = 0; n < CountOf(Keyboard); n++)
-		{
-			Keyboard[n] = sample;
-			NoteMap[n] = (BYTE)(n + 1);
-		}
+		AssignSample(sample);
+		ResetNoteMap();
 
 		MemsetZero(name);
 		MemsetZero(filename);
+	}
+
+	// Assign all notes to a given sample.
+	void AssignSample(SAMPLEINDEX sample)
+	{
+		for(size_t n = 0; n < CountOf(Keyboard); n++)
+		{
+			Keyboard[n] = sample;
+		}
+	}
+
+	// Reset note mapping (i.e. every note is mapped to itself)
+	void ResetNoteMap()
+	{
+		for(size_t n = 0; n < CountOf(NoteMap); n++)
+		{
+			NoteMap[n] = static_cast<BYTE>(n + 1);
+		}
 	}
 
 	bool IsCutoffEnabled() const { return (nIFC & 0x80) != 0; }
@@ -250,7 +265,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	// First 32-bytes: Most used mixing information: don't change it
 	// These fields are accessed directly by the MMX mixing code (look out for CHNOFS_PCURRENTSAMPLE), so the order is crucial
 	// In the meantime, MMX mixing has been removed because it interfered with the new resonant filter code, and the byte offsets are also no longer hardcoded...
-	LPSTR pCurrentSample;		
+	LPSTR pCurrentSample;		// Currently playing sample (nullptr if no sample is playing)
 	DWORD nPos;
 	DWORD nPosLo;	// actually 16-bit (fractional part)
 	LONG nInc;		// 16.16 fixed point
@@ -271,7 +286,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nROfs, nLOfs;
 	LONG nRampLength;
 	// Information not used in the mixer
-	LPSTR pSample;
+	LPSTR pSample;			// Currently playing sample, or previously played sample if no sample is playing.
 	LONG nNewRightVol, nNewLeftVol;
 	LONG nRealVolume, nRealPan;
 	LONG nVolume, nPan, nFadeOutVol;
@@ -599,7 +614,9 @@ enum deleteInstrumentSamples
 {
 	deleteAssociatedSamples,
 	doNoDeleteAssociatedSamples,
-	askdeleteAssociatedSamples,
+#ifdef MODPLUG_TRACKER
+	askDeleteAssociatedSamples,
+#endif // MODPLUG_TRACKER
 };
 
 
@@ -1062,6 +1079,15 @@ public:
 	bool MoveSample(SAMPLEINDEX from, SAMPLEINDEX to);
 // -! NEW_FEATURE#0020
 
+	// Find an unused sample slot. If it is going to be assigned to an instrument, targetInstrument should be specified.
+	// SAMPLEINDEX_INVLAID is returned if no free sample slot could be found.
+	SAMPLEINDEX GetNextFreeSample(INSTRUMENTINDEX targetInstrument = INSTRUMENTINDEX_INVALID, SAMPLEINDEX start = 1) const;
+	// Find an unused instrument slot.
+	// INSTRUMENTINDEX_INVALID is returned if no free instrument slot could be found.
+	INSTRUMENTINDEX GetNextFreeInstrument(INSTRUMENTINDEX start = 1) const;
+	// Check whether a given sample is used by a given instrument.
+	bool IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX instr) const;
+
 	bool DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples);
 	bool IsSampleUsed(SAMPLEINDEX nSample) const;
 	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr) const;
@@ -1084,16 +1110,16 @@ public:
 // -! NEW_FEATURE#0027
 
 	bool Read8SVXSample(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool SaveWAVSample(UINT nSample, LPCSTR lpszFileName);
-	bool SaveRAWSample(UINT nSample, LPCSTR lpszFileName);
+	bool SaveWAVSample(UINT nSample, LPCSTR lpszFileName) const;
+	bool SaveRAWSample(UINT nSample, LPCSTR lpszFileName) const;
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName);
-	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName);
+	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const;
+	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const;
 	// I/O from another sound file
 	bool ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile *pSrcSong, INSTRUMENTINDEX sourceInstr);
 	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *pSrcSong, SAMPLEINDEX sourceSample);

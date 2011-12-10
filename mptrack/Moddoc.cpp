@@ -934,8 +934,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			m_SndFile.ResetChannelEnvelopes(pChn);
 			m_SndFile.InstrumentChange(pChn, nins);
 			pChn->nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
-		} 
-		else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
+		}  else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
 		{
 			MODSAMPLE &sample = m_SndFile.GetSample(nsmp);
 			pChn->pCurrentSample = sample.pSample;
@@ -1414,16 +1413,7 @@ void CModDoc::SetFollowWnd(HWND hwnd, DWORD dwType)
 bool CModDoc::IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const
 //-----------------------------------------------------------------------
 {
-	if((nIns < 1) || (nIns > m_SndFile.GetNumInstruments())) return false;
-	MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
-	if(pIns != nullptr)
-	{
-		for(UINT i = 0; i < NOTE_MAX; i++)
-		{
-			if(pIns->Keyboard[i] == nSmp) return true;
-		}
-	}
-	return false;
+	return m_SndFile.IsSampleReferencedByInstrument(nSmp, nIns);
 }
 
 
