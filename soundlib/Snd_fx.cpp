@@ -902,11 +902,20 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified (fixes the guitars in spx-shuttledeparture.it)
 	if(!bPorta && pSmp && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pSmp->nC5Speed;
 
-	// XM Compatibility: Ignore notes with portamento if there was no note playing.
-	if(bPorta && (pChn->nInc == 0) && IsCompatibleMode(TRK_FASTTRACKER2))
+	if(bPorta && pChn->nInc == 0)
 	{
-		pChn->nPeriod = 0;
-		return;
+		if(IsCompatibleMode(TRK_FASTTRACKER2))
+		{
+			// XM Compatibility: Ignore notes with portamento if there was no note playing.
+			// Test case: 3xx-no-old-samp.xm
+			pChn->nPeriod = 0;
+			return;
+		} else if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			// IT Compatibility: Ignore portamento command if no note was playing (f.e. if a previous note has faded out).
+			// Test case: Fade-Porta.it
+			bPorta = false;
+		}
 	}
 
 	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
@@ -3620,14 +3629,15 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 				}
 			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
-				// XM Compatibility: Don't play note
+				// XM Compatibility: Don't play note if offset is beyond sample length
+				// Test case: 3xx-no-old-samp.xm
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 				pChn->nVolume = pChn->nPeriod = 0;
 			}
 		}
-	} else
-	if ((param < pChn->nLength) && (m_nType & (MOD_TYPE_MTM|MOD_TYPE_DMF)))
+	} else if ((param < pChn->nLength) && (GetType() & (MOD_TYPE_MTM|MOD_TYPE_DMF)))
 	{
+		// XXX what's this?
 		pChn->nPos = param;
 	}
 
