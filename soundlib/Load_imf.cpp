@@ -38,7 +38,7 @@ struct IMFHEADER
 	uint8 unused2[8];
 	char im10[4];				// 'IM10'
 	IMFCHANNEL channels[32];	// Channel settings
-	uint8 orderlist[256];		// Order list (0xff = +++; blank out anything beyond ordnum)
+	uint8 orderlist[256];		// Order list (0xFF = +++; blank out anything beyond ordnum)
 };
 
 enum
@@ -80,9 +80,9 @@ struct IMFSAMPLE
 {
 	char filename[13];	// Sample filename (12345678.ABC) */
 	uint8 unused1[3];
-	uint32 length;		// Length
-	uint32 loop_start;	// Loop start
-	uint32 loop_end;	// Loop end
+	uint32 length;		// Length (in bytes)
+	uint32 loop_start;	// Loop start (in bytes)
+	uint32 loop_end;	// Loop end (in bytes)
 	uint32 C5Speed;		// Samplerate
 	uint8 volume;		// Default volume (0...64)
 	uint8 panning;		// Default pan (0...255)
@@ -152,27 +152,27 @@ static void ImportIMFEffect(MODCOMMAND *note)
 	// fix some of them
 	switch (note->command)
 	{
-	case 0xe: // fine volslide
+	case 0xE: // fine volslide
 		// hackaround to get almost-right behavior for fine slides (i think!)
-		if (note->param == 0)
+		if(note->param == 0)
 			/* nothing */;
-		else if (note->param == 0xf0)
-			note->param = 0xef;
-		else if (note->param == 0x0f)
-			note->param = 0xfe;
-		else if (note->param & 0xf0)
-			note->param |= 0xf;
+		else if(note->param == 0xF0)
+			note->param = 0xEF;
+		else if(note->param == 0x0F)
+			note->param = 0xFE;
+		else if(note->param & 0xF0)
+			note->param |= 0x0F;
 		else
-			note->param |= 0xf0;
+			note->param |= 0xF0;
 		break;
-	case 0xf: // set finetune
+	case 0xF: // set finetune
 		// we don't implement this, but let's at least import the value
 		note->param = 0x20 | min(note->param >> 4, 0xf);
 		break;
 	case 0x14: // fine slide up
 	case 0x15: // fine slide down
 		// this is about as close as we can do...
-		if (note->param >> 4)
+		if(note->param >> 4)
 			note->param = 0xf0 | min(note->param >> 4, 0xf);
 		else
 			note->param |= 0xe0;
@@ -180,7 +180,7 @@ static void ImportIMFEffect(MODCOMMAND *note)
 	case 0x16: // cutoff
 		note->param >>= 1;
 		break;
-	case 0x1f: // set global volume
+	case 0x1F: // set global volume
 		note->param = min(note->param << 1, 0xff);
 		break;
 	case 0x21:
@@ -194,7 +194,7 @@ static void ImportIMFEffect(MODCOMMAND *note)
 			break;
 		default: // undefined
 		case 0x1: // set filter
-		case 0xf: // invert loop
+		case 0xF: // invert loop
 			note->command = CMD_NONE;
 			break;
 		case 0x3: // glissando
@@ -206,17 +206,17 @@ static void ImportIMFEffect(MODCOMMAND *note)
 		case 0x8: // tremolo waveform
 			n = 0x40;
 			break;
-		case 0xa: // pattern loop
-			n = 0xb0;
+		case 0xA: // pattern loop
+			n = 0xB0;
 			break;
-		case 0xb: // pattern delay
-			n = 0xe0;
+		case 0xB: // pattern delay
+			n = 0xE0;
 			break;
-		case 0xc: // note cut
-		case 0xd: // note delay
+		case 0xC: // note cut
+		case 0xD: // note delay
 			// no change
 			break;
-		case 0xe: // ignore envelope
+		case 0xE: // ignore envelope
 			/* predicament: we can only disable one envelope at a time.
 			volume is probably most noticeable, so let's go with that.
 			(... actually, orpheus doesn't even seem to implement this at all) */
@@ -224,16 +224,16 @@ static void ImportIMFEffect(MODCOMMAND *note)
 			break;
 		case 0x18: // sample offset
 			// O00 doesn't pick up the previous value
-			if (!note->param)
+			if(!note->param)
 				note->command = CMD_NONE;
 			break;
 		}
-		if (n)
-			note->param = n | (note->param & 0xf);
+		if(n)
+			note->param = n | (note->param & 0x0F);
 		break;
 	}
 	note->command = (note->command < CountOf(imfEffects)) ? imfEffects[note->command] : CMD_NONE;
-	if (note->command == CMD_VOLUME && note->volcmd == VOLCMD_NONE)
+	if(note->command == CMD_VOLUME && note->volcmd == VOLCMD_NONE)
 	{
 		note->volcmd = VOLCMD_VOLUME;
 		note->vol = note->param;
@@ -249,7 +249,8 @@ static void LoadIMFEnvelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfins
 	const int shift = (e == IMF_ENV_VOL) ? 0 : 2;
 
 	env->dwFlags = ((imfins->env[e].flags & 1) ? ENV_ENABLED : 0) | ((imfins->env[e].flags & 2) ? ENV_SUSTAIN : 0) | ((imfins->env[e].flags & 4) ? ENV_LOOP : 0);
-	env->nNodes = CLAMP(imfins->env[e].points, 2, 25);
+	env->nNodes = imfins->env[e].points;
+	Limit(env->nNodes, 2u, 16u);
 	env->nLoopStart = imfins->env[e].loop_start;
 	env->nLoopEnd = imfins->env[e].loop_end;
 	env->nSustainStart = env->nSustainEnd = imfins->env[e].sustain;
@@ -269,12 +270,10 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0;
-	IMFHEADER hdr;
-	MODSAMPLE *pSample = Samples + 1;
-	WORD firstsample = 1; // first pSample for the current instrument
 	vector<bool> ignoreChannels(32, false); // bit set for each channel that's completely disabled
 
 	ASSERT_CAN_READ(sizeof(IMFHEADER));
+	IMFHEADER hdr;
 	memcpy(&hdr, lpStream, sizeof(IMFHEADER));
 	dwMemPos = sizeof(IMFHEADER);
 
@@ -290,11 +289,11 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// song name
-	memset(m_szNames, 0, sizeof(m_szNames));
+	MemsetZero(m_szNames);
 	memcpy(m_szNames[0], hdr.title, 31);
 	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
 
-	if (hdr.flags & 1)
+	if(hdr.flags & 1)
 		m_dwSongFlags |= SONG_LINEARSLIDES;
 	m_nDefaultSpeed = hdr.tempo;
 	m_nDefaultTempo = hdr.bpm;
@@ -335,29 +334,29 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(!m_nChannels) return false;
 
 	//From mikmod: work around an Orpheus bug
-	if (hdr.channels[0].status == 0)
+	if(hdr.channels[0].status == 0)
 	{
 		CHANNELINDEX nChn;
 		for(nChn = 1; nChn < 16; nChn++)
 			if(hdr.channels[nChn].status != 1)
 				break;
-		if (nChn == 16)
+		if(nChn == 16)
 			for(nChn = 1; nChn < 16; nChn++)
 				ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
 	}
 
 	Order.resize(hdr.ordnum);
 	for(ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
-		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xff) ? Order.GetIgnoreIndex() : (PATTERNINDEX)hdr.orderlist[nOrd]);
+		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xFF) ? Order.GetIgnoreIndex() : (PATTERNINDEX)hdr.orderlist[nOrd]);
 	
 	// read patterns
 	for(PATTERNINDEX nPat = 0; nPat < hdr.patnum; nPat++)
 	{
 		uint16 length, nrows;
-		BYTE mask, channel;
+		uint8 mask, channel;
 		int row;
 		unsigned int lostfx = 0;
-		MODCOMMAND *row_data, *note, junk_note;
+		MODCOMMAND *note, junk_note;
 
 		ASSERT_CAN_READ(4);
 		length = LittleEndianW(*((uint16 *)(lpStream + dwMemPos)));
@@ -367,22 +366,19 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(Patterns.Insert(nPat, nrows))
 			break;
 
-		row_data = Patterns[nPat];
-
 		row = 0;
 		while(row < nrows)
 		{
 			ASSERT_CAN_READ(1);
-			mask = *((BYTE *)(lpStream + dwMemPos));
+			mask = *((uint8 *)(lpStream + dwMemPos));
 			dwMemPos += 1;
-			if (mask == 0)
+			if(mask == 0)
 			{
 				row++;
-				row_data += m_nChannels;
 				continue;
 			}
 
-			channel = mask & 0x1f;
+			channel = mask & 0x1F;
 
 			if(ignoreChannels[channel])
 			{
@@ -392,7 +388,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				note = &junk_note;
 			} else
 			{
-				note = row_data + channel;
+				note = Patterns[nPat].GetpModCommand(row, channel);
 			}
 
 			if(mask & 0x20)
@@ -403,15 +399,15 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				note->instr = *((BYTE *)(lpStream + dwMemPos + 1));
 				dwMemPos += 2;
 
-				if (note->note == 160)
+				if(note->note == 160)
 				{
 					note->note = NOTE_KEYOFF; /* ??? */
-				} else if (note->note == 255)
+				} else if(note->note == 255)
 				{
 					note->note = NOTE_NONE; /* ??? */
 				} else
 				{
-					note->note = (note->note >> 4) * 12 + (note->note & 0xf) + 12 + 1;
+					note->note = (note->note >> 4) * 12 + (note->note & 0x0F) + 12 + 1;
 					if(note->note > NOTE_MAX)
 					{
 						/*printf("%d.%d.%d: funny note 0x%02x\n",
@@ -420,37 +416,35 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 					}
 				}
 			}
-			if((mask & 0xc0) == 0xc0)
+			if((mask & 0xc0) == 0xC0)
 			{
-				uint8 e1c, e1d, e2c, e2d;
-
 				// read both effects and figure out what to do with them
 				ASSERT_CAN_READ(4);
-				e1c = *((uint8 *)(lpStream + dwMemPos));
-				e1d = *((uint8 *)(lpStream + dwMemPos + 1));
-				e2c = *((uint8 *)(lpStream + dwMemPos + 2));
-				e2d = *((uint8 *)(lpStream + dwMemPos + 3));
+				uint8 e1c = *((uint8 *)(lpStream + dwMemPos));		// Command 1
+				uint8 e1d = *((uint8 *)(lpStream + dwMemPos + 1));	// Data 1
+				uint8 e2c = *((uint8 *)(lpStream + dwMemPos + 2));	// Command 2
+				uint8 e2d = *((uint8 *)(lpStream + dwMemPos + 3));	// Data 2
 				dwMemPos += 4;
 
-				if (e1c == 0xc)
+				if(e1c == 0x0C)
 				{
 					note->vol = min(e1d, 0x40);
 					note->volcmd = VOLCMD_VOLUME;
 					note->command = e2c;
 					note->param = e2d;
-				} else if (e2c == 0xc)
+				} else if(e2c == 0x0C)
 				{
 					note->vol = min(e2d, 0x40);
 					note->volcmd = VOLCMD_VOLUME;
 					note->command = e1c;
 					note->param = e1d;
-				} else if (e1c == 0xa)
+				} else if(e1c == 0x0A)
 				{
 					note->vol = e1d * 64 / 255;
 					note->volcmd = VOLCMD_PANNING;
 					note->command = e2c;
 					note->param = e2d;
-				} else if (e2c == 0xa)
+				} else if(e2c == 0x0A)
 				{
 					note->vol = e2d * 64 / 255;
 					note->volcmd = VOLCMD_PANNING;
@@ -465,7 +459,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 					note->command = e2c;
 					note->param = e2d;
 				}
-			} else if(mask & 0xc0)
+			} else if(mask & 0xC0)
 			{
 				// there's one effect, just stick it in the effect column
 				ASSERT_CAN_READ(2);
@@ -478,8 +472,10 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 
+	SAMPLEINDEX firstsample = 1; // first sample index of the current instrument
+
 	// read instruments
-	for (INSTRUMENTINDEX nIns = 0; nIns < hdr.insnum; nIns++)
+	for(INSTRUMENTINDEX nIns = 0; nIns < hdr.insnum; nIns++)
 	{
 		IMFINSTRUMENT imfins;
 		MODINSTRUMENT *pIns;
@@ -510,9 +506,9 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(imfins.smpnum)
 		{
-			for(BYTE cNote = 0; cNote < 120; cNote++)
+			STATIC_ASSERT(CountOf(pIns->Keyboard) >= CountOf(imfins.map));
+			for(size_t cNote = 0; cNote < CountOf(imfins.map); cNote++)
 			{
-				pIns->NoteMap[cNote] = cNote + 1;
 				pIns->Keyboard[cNote] = firstsample + imfins.map[cNote];
 			}
 		}
@@ -532,9 +528,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		// read this instrument's samples
 		for(SAMPLEINDEX nSmp = 0; nSmp < imfins.smpnum; nSmp++)
 		{
-			IMFSAMPLE imfsmp;
-			uint32 blen;
 			ASSERT_CAN_READ(sizeof(IMFSAMPLE));
+			IMFSAMPLE imfsmp;
 			memcpy(&imfsmp, lpStream + dwMemPos, sizeof(IMFSAMPLE));
 			dwMemPos += sizeof(IMFSAMPLE);
 			m_nSamples++;
@@ -542,39 +537,40 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(memcmp(imfsmp.is10, "IS10", 4) != 0)
 				return false;
 			
-			memcpy(pSample->filename, imfsmp.filename, 12);
-			StringFixer::SpaceToNullStringFixed<12>(pSample->filename);
-			strcpy(m_szNames[m_nSamples], pSample->filename);
+			MODSAMPLE &sample = Samples[firstsample + nSmp];
 
-			blen = pSample->nLength = LittleEndian(imfsmp.length);
-			pSample->nLoopStart = LittleEndian(imfsmp.loop_start);
-			pSample->nLoopEnd = LittleEndian(imfsmp.loop_end);
-			pSample->nC5Speed = LittleEndian(imfsmp.C5Speed);
-			pSample->nVolume = imfsmp.volume * 4;
-			pSample->nGlobalVol = 256;
-			pSample->nPan = imfsmp.panning;
-			if (imfsmp.flags & 1)
-				pSample->uFlags |= CHN_LOOP;
-			if (imfsmp.flags & 2)
-				pSample->uFlags |= CHN_PINGPONGLOOP;
-			if (imfsmp.flags & 4)
+			memcpy(sample.filename, imfsmp.filename, 12);
+			StringFixer::SpaceToNullStringFixed<12>(sample.filename);
+			strcpy(m_szNames[m_nSamples], sample.filename);
+
+			uint32 byteLen = sample.nLength = LittleEndian(imfsmp.length);
+			sample.nLoopStart = LittleEndian(imfsmp.loop_start);
+			sample.nLoopEnd = LittleEndian(imfsmp.loop_end);
+			sample.nC5Speed = LittleEndian(imfsmp.C5Speed);
+			sample.nVolume = imfsmp.volume * 4;
+			sample.nGlobalVol = 256;
+			sample.nPan = imfsmp.panning;
+			if(imfsmp.flags & 1)
+				sample.uFlags |= CHN_LOOP;
+			if(imfsmp.flags & 2)
+				sample.uFlags |= CHN_PINGPONGLOOP;
+			if(imfsmp.flags & 4)
 			{
-				pSample->uFlags |= CHN_16BIT;
-				pSample->nLength >>= 1;
-				pSample->nLoopStart >>= 1;
-				pSample->nLoopEnd >>= 1;
+				sample.uFlags |= CHN_16BIT;
+				sample.nLength /= 2;
+				sample.nLoopStart /= 2;
+				sample.nLoopEnd /= 2;
 			}
-			if (imfsmp.flags & 8)
-				pSample->uFlags |= CHN_PANNING;
+			if(imfsmp.flags & 8)
+				sample.uFlags |= CHN_PANNING;
 			
-			if(blen)
+			if(byteLen)
 			{
-				ASSERT_CAN_READ(blen);
-				ReadSample(pSample, (imfsmp.flags & 4) ? RS_PCM16S : RS_PCM8S, reinterpret_cast<LPCSTR>(lpStream + dwMemPos), blen);
+				ASSERT_CAN_READ(byteLen);
+				ReadSample(&sample, (imfsmp.flags & 4) ? RS_PCM16S : RS_PCM8S, reinterpret_cast<LPCSTR>(lpStream + dwMemPos), byteLen);
 			}
 
-			dwMemPos += blen;
-			pSample++;
+			dwMemPos += byteLen;
 		}
 		firstsample += imfins.smpnum;
 	}

@@ -902,7 +902,9 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 {
 	CRect rect;
 	GetClientRect(&rect);
-	bool bSelection = IsSelectionKeyPressed();
+
+	// Copy or move orders?
+	const bool copyOrders = IsSelectionKeyPressed();
 
 	if (m_bDragging)
 	{
@@ -916,46 +918,47 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				// drag multiple orders (not quite as easy...)
 				ORD_SELECTION selection = GetCurSel(false);
 				// move how many orders from where?
-				ORDERINDEX nMoveCount = (selection.nOrdHi - selection.nOrdLo), nMovePos = selection.nOrdLo;
+				ORDERINDEX moveCount = (selection.nOrdHi - selection.nOrdLo), nMovePos = selection.nOrdLo;
 				// drop before or after the selection
-				bool bMoveBack = !(m_nDragOrder < (UINT)m_nDropPos);
+				bool moveBack = !(m_nDragOrder < m_nDropPos);
 				// don't do anything if drop position is inside the selection
 				if((m_nDropPos >= selection.nOrdLo && m_nDropPos <= selection.nOrdHi) || m_nDragOrder == m_nDropPos) return;
 				// drag one order or multiple orders?
-				bool bMultiSelection = (selection.nOrdLo != selection.nOrdHi);
+				bool multiSelection = (selection.nOrdLo != selection.nOrdHi);
 
-				for(int i = 0; i <= nMoveCount; i++)
+				for(int i = 0; i <= moveCount; i++)
 				{
-					if(!m_pModDoc->MoveOrder(nMovePos, m_nDropPos, true, bSelection)) return;
-					if((bMoveBack ^ bSelection) == true && bMultiSelection)
+					if(!m_pModDoc->MoveOrder(nMovePos, m_nDropPos, true, copyOrders)) return;
+					if((moveBack ^ copyOrders) == true && multiSelection)
 					{
 						nMovePos++;
 						m_nDropPos++;
 					}
-					if(bMoveBack && bSelection && bMultiSelection) {
+					if(moveBack && copyOrders && multiSelection)
+					{
 						nMovePos += 2;
 						m_nDropPos++;
 					}
 				}
-				if(bMultiSelection)
+
+				if(multiSelection)
 				{
 					// adjust selection
 					m_nScrollPos2nd = m_nDropPos - 1;
-					m_nDropPos -= nMoveCount + (bMoveBack ? 0 : 1);
-					SetCurSel((bMoveBack && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
+					m_nDropPos -= moveCount + (moveBack ? 0 : 1);
+					SetCurSel((moveBack && !copyOrders) ? m_nDropPos - 1 : m_nDropPos);
 				} else
 				{
-					SetCurSel(((m_nDragOrder < m_nDropPos) && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
+					SetCurSel((m_nDragOrder < m_nDropPos && !copyOrders) ? m_nDropPos - 1 : m_nDropPos);
 				}
 				m_pModDoc->SetModified();
-			}
-			else
+			} else
 			{
 				ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
 				ORD_SELECTION selection = GetCurSel(false);
 
 				// this should actually have equal signs but that breaks multiselect: nOrder >= selection.nOrdLo && nOrder <= section.nOrdHi
-				if (pt.y < rect.bottom && m_nScrollPos2nd != ORDERINDEX_INVALID && nOrder > selection.nOrdLo && nOrder < selection.nOrdHi)
+				if(pt.y < rect.bottom && m_nScrollPos2nd != ORDERINDEX_INVALID && nOrder > selection.nOrdLo && nOrder < selection.nOrdHi)
 				{
 					// Remove selection if we didn't drag anything but multiselect was active
 					m_nScrollPos2nd = ORDERINDEX_INVALID;

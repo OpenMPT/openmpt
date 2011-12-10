@@ -219,7 +219,7 @@ typedef struct _MODMAGIC
 
 #pragma pack()
 
-bool IsMagic(LPCSTR s1, LPCSTR s2)
+bool IsMagic(const LPCSTR s1, const LPCSTR s2)
 {
 	return ((*(DWORD *)s1) == (*(DWORD *)s2));
 }

@@ -81,11 +81,14 @@ void ConvertMDLCommand(MODCOMMAND *m, UINT eff, UINT data)
 		break;
 	case 0x0F:	command = CMD_SPEED; break;
 	case 0x10:
-		if ((param & 0xF0) != 0xE0) {
+		if ((param & 0xF0) != 0xE0)
+		{
 			command = CMD_VOLUMESLIDE;
-			if ((param & 0xF0) == 0xF0) {
+			if ((param & 0xF0) == 0xF0)
+			{
 				param = ((param << 4) | 0x0F);
-			} else {
+			} else
+			{
 				param >>= 2;
 				if (param > 0xF)
 					param = 0xF;
@@ -94,9 +97,11 @@ void ConvertMDLCommand(MODCOMMAND *m, UINT eff, UINT data)
 		}
 		break;
 	case 0x20:
-		if ((param & 0xF0) != 0xE0) {
+		if ((param & 0xF0) != 0xE0)
+		{
 			command = CMD_VOLUMESLIDE;
-			if ((param & 0xF0) != 0xF0) {
+			if ((param & 0xF0) != 0xF0)
+			{
 				param >>= 2;
 				if (param > 0xF)
 					param = 0xF;
@@ -419,7 +424,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 							pIns->nFadeOut = 8192;		
 					}
 				}
-				dwPos += 34 + 14*lpStream[dwPos+1];
+				dwPos += 34 + 14 * lpStream[dwPos + 1];
 			}
 			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
 			{

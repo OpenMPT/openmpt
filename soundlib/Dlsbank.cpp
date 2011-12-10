@@ -1683,10 +1683,9 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	int nTranspose = 0;
 	for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
 	{
-		pIns->NoteMap[iNoteMap] = (BYTE)(iNoteMap+1);
 		if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 		{
-			if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
+			if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
 			{
 				if (iNoteMap < pDlsIns->Regions[nDrumRgn].uKeyMin) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMin + 1);
 				if (iNoteMap > pDlsIns->Regions[nDrumRgn].uKeyMax) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMax + 1);

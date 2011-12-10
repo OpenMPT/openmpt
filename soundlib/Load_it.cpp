@@ -2476,28 +2476,26 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 	if (nInstruments == 0)
 		return;
 
-	MODINSTRUMENT *sizeIns = nullptr;
+	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(MODINSTRUMENT().nVolRampUp),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(MODINSTRUMENT().nMixPlug),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(MODINSTRUMENT().nMidiChannel),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(MODINSTRUMENT().nMidiProgram),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(MODINSTRUMENT().wMidiBank),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('P...', sizeof(MODINSTRUMENT().nPan),        f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(MODINSTRUMENT().nGlobalVol),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(MODINSTRUMENT().nFadeOut),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('R...', sizeof(MODINSTRUMENT().nResampling), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(MODINSTRUMENT().nCutSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(MODINSTRUMENT().nResSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(MODINSTRUMENT().nFilterMode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(MODINSTRUMENT().PitchEnv.nReleaseNode ), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(MODINSTRUMENT().PanEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(MODINSTRUMENT().VolEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(MODINSTRUMENT().wPitchToTempoLock),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(MODINSTRUMENT().nPluginVelocityHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(MODINSTRUMENT().nPluginVolumeHandling),  f, nInstruments);
 
-	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(sizeIns->nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(sizeIns->nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(sizeIns->nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(sizeIns->nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(sizeIns->wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('P...', sizeof(sizeIns->nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(sizeIns->nGlobalVol),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(sizeIns->nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('R...', sizeof(sizeIns->nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(sizeIns->nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(sizeIns->nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(sizeIns->nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(sizeIns->PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(sizeIns->PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(sizeIns->VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(sizeIns->wPitchToTempoLock),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(sizeIns->nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(sizeIns->nPluginVolumeHandling),  f, nInstruments);
-
-	if(m_nType & MOD_TYPE_MPT)
+	if(GetType() & MOD_TYPE_MPT)
 	{
 		UINT maxNodes = 0;
 		for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++) if(Instruments[nIns] != nullptr)
@@ -2509,17 +2507,17 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(sizeIns->VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(sizeIns->VolEnv.Ticks ), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(sizeIns->VolEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(MODINSTRUMENT().VolEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(MODINSTRUMENT().VolEnv.Ticks ), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(MODINSTRUMENT().VolEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(sizeIns->PanEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(sizeIns->PanEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(sizeIns->PanEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(MODINSTRUMENT().PanEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(MODINSTRUMENT().PanEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(MODINSTRUMENT().PanEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(sizeIns->PitchEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(sizeIns->PitchEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(sizeIns->PitchEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(MODINSTRUMENT().PitchEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(MODINSTRUMENT().PitchEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(MODINSTRUMENT().PitchEnv.Values), f, nInstruments);
 		}
 	}
 

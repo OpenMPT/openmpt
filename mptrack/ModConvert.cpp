@@ -312,7 +312,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			for (size_t i = 0; i < CountOf(pIns->NoteMap); i++)
 			{
-				if ((pIns->NoteMap[i]) && (pIns->NoteMap[i] != (BYTE)(i + 1)))
+				if (pIns->NoteMap[i] && pIns->NoteMap[i] != static_cast<BYTE>(i + 1))
 				{
 					CHANGEMODTYPE_WARNING(wBrokenNoteMap);
 					break;

@@ -996,6 +996,8 @@ public:
 
 protected:
 	// Channel effect processing
+	int GetVibratoDelta(int type, int position) const;
+
 	void ProcessVolumeSwing(MODCHANNEL *pChn, int &vol);
 	void ProcessPanningSwing(MODCHANNEL *pChn);
 	void ProcessTremolo(MODCHANNEL *pChn, int &vol);

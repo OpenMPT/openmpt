@@ -1693,7 +1693,6 @@ bool CVstPlugin::RandomizeParams(VstInt32 minParam, VstInt32 maxParam)
 
 	if (minParam == 0 && maxParam == 0)
 	{
-		minParam = 0;
 		maxParam = m_pEffect->numParams;
 
 	}
@@ -1986,11 +1985,14 @@ void CVstPlugin::Resume()
 		//reset some stuff
 		m_MixState.nVolDecayL = 0;
 		m_MixState.nVolDecayR = 0;
-		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
-		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f);	// calls plugin's suspend
+		if(m_bPlugResumed)
+		{
+			Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
+			Dispatch(effMainsChanged, 0, 0, NULL, 0.0f);	// calls plugin's suspend
+		}
 		if (sampleRate != m_nSampleRate)
 		{
-			m_nSampleRate=sampleRate;
+			m_nSampleRate = sampleRate;
 			Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(m_nSampleRate));
 		}
 		Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
@@ -2014,7 +2016,7 @@ void CVstPlugin::Suspend()
 		if(m_bPlugResumed)
 		{
 			Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
-			Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
+			Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend (theoretically, plugins should clean their buffers here, but oh well, the number of plugins which don't do this is surprisingly high.)
 			m_bPlugResumed = false;
 		}
 	} catch (...)
@@ -2138,6 +2140,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			ClearVSTEvents();
 //			SetEvent(processCalled);
 		}
+
+		ASSERT(m_pTempBuffer != nullptr);
 
 		//mix outputs of multi-output VSTs:
 		if(m_nOutputs>2)
@@ -2813,7 +2817,7 @@ void CVstPlugin::SaveAllParameters()
 		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf')
 		 && (m_pEffect->uniqueID != CCONST('S', 'y', 't', 'r'))) //special case: imageline sytrus pretends to support chunks but gives us garbage.
 		{
-			PVOID p = NULL;
+			void *p = NULL;
 			LONG nByteSize = 0;
 
 			// Try to get whole bank
@@ -2898,7 +2902,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 
 		if ((Dispatch(effIdentify, 0, nullptr, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
 		{
-			PVOID p = NULL;
+			void *p = NULL;
 			Dispatch(effGetChunk, 0,0, &p, 0); //init plug for chunk reception
 
 			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms))
@@ -3765,7 +3769,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		break;
 
 	case effClose:
-		m_Effect.object = NULL;
+		m_Effect.object = nullptr;
 		delete this;
 		return 0;
 
@@ -3854,7 +3858,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 			wfx.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
 			wfx.nChannels = 2;
 			wfx.nSamplesPerSec = m_nSamplesPerSec;
-			wfx.wBitsPerSample = 32;
+			wfx.wBitsPerSample = sizeof(float) * 8;
 			wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample >> 3);
 			wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 			wfx.cbSize = 0;
@@ -3934,7 +3938,7 @@ float CDmo2Vst::GetParameter(VstInt32 index)
 				fMax = 1;
 			}
 			fValue -= fMin;
-			if (fMax > fMin) fValue /= (fMax-fMin);
+			if (fMax > fMin) fValue /= (fMax - fMin);
 			return fValue;
 		}
 	}
@@ -3986,7 +3990,8 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 	WCHAR w[100];
 	CLSID clsid;
 
-	MultiByteToWideChar(CP_ACP, 0, (LPCSTR)pLib->szDllPath,-1,(LPWSTR)w,98);
+	MultiByteToWideChar(CP_ACP, 0, (LPCSTR)pLib->szDllPath, -1, (LPWSTR)w, CountOf(w));
+	w[99] = 0;
 	if (CLSIDFromString(w, &clsid) == S_OK)
 	{
 		IMediaObject *pMO = NULL;
@@ -3998,12 +4003,10 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 		if ((pMO) && (pMOIP))
 		{
 			DWORD dwInputs, dwOutputs;
-			BOOL bError;
 
 			dwInputs = dwOutputs = 0;
 			pMO->GetStreamCount(&dwInputs, &dwOutputs);
-			bError = ((dwInputs == 1) && (dwOutputs == 1)) ? FALSE : TRUE;
-			if (!bError)
+			if (dwInputs == 1 && dwOutputs == 1)
 			{
 				CDmo2Vst *p = new CDmo2Vst(pMO, pMOIP, clsid.Data1);
 				return (p) ? p->GetEffect() : NULL;
