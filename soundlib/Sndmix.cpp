@@ -69,9 +69,9 @@ extern short int ModSinusTable[64];
 extern short int ModRampDownTable[64];
 extern short int ModSquareTable[64];
 extern short int ModRandomTable[64];
-extern short int ITSinusTable[64];
-extern short int ITRampDownTable[64];
-extern short int ITSquareTable[64];
+extern short int ITSinusTable[256];
+extern short int ITRampDownTable[256];
+extern short int ITSquareTable[256];
 extern DWORD LinearSlideUpTable[256];
 extern DWORD LinearSlideDownTable[256];
 extern DWORD FineLinearSlideUpTable[16];
@@ -910,6 +910,36 @@ BOOL CSoundFile::ProcessRow()
 // Channel effect processing
 
 
+// Calculate delta for Vibrato / Tremolo / Panbrello effect
+int CSoundFile::GetVibratoDelta(int type, int position) const
+//-----------------------------------------------------------
+{
+	switch(type & 0x03)
+	{
+	case 0:
+	default:
+		// IT compatibility: IT has its own, more precise tables
+		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[position] : ModSinusTable[position];
+
+	case 1:
+		// IT compatibility: IT has its own, more precise tables
+		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[position] : ModRampDownTable[position];
+
+	case 2:
+		// IT compatibility: IT has its own, more precise tables
+		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[position] : ModSquareTable[position];
+
+	case 3:
+		//IT compatibility 19. Use random values
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			// TODO delay is not taken into account!
+			return (rand() & 0x7F) - 0x40;
+		else
+			return ModRandomTable[position];
+	}
+}
+
+
 void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 //-------------------------------------------------------------
 {
@@ -959,27 +989,8 @@ void CSoundFile::ProcessTremolo(MODCHANNEL *pChn, int &vol)
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
 			const int tremattn = ((GetType() & MOD_TYPE_XM) || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
-			switch (pChn->nTremoloType & 0x03)
-			{
-			case 1:
-				// IT compatibility: IT has its own, more precise tables
-				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[trempos] : ModRampDownTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
-				break;
-			case 2:
-				// IT compatibility: IT has its own, more precise tables
-				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[trempos] : ModSquareTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
-				break;
-			case 3:
-				//IT compatibility 19. Use random values
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
-					vol += (((rand() & 0x7F) - 0x40) * (int)pChn->nTremoloDepth) >> tremattn;
-				else
-					vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
-				break;
-			default:
-				// IT compatibility: IT has its own, more precise tables
-				vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[trempos] : ModSinusTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
-			}
+
+			vol += (GetVibratoDelta(pChn->nTremoloType, trempos) * (int)pChn->nTremoloDepth) >> tremattn;
 		}
 		if (!(m_dwSongFlags & SONG_FIRSTTICK) || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 		{
@@ -1390,33 +1401,14 @@ void CSoundFile::ProcessPanbrello(MODCHANNEL *pChn)
 			panpos = pChn->nPanbrelloPos & 0xFF;
 		else
 			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
-		LONG pdelta;
-		switch (pChn->nPanbrelloType & 0x03)
-		{
-		case 1:
-			// IT compatibility: IT has its own, more precise tables
-			pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[panpos] : ModRampDownTable[panpos];
-			break;
-		case 2:
-			// IT compatibility: IT has its own, more precise tables
-			pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[panpos] : ModSquareTable[panpos];
-			break;
-		case 3:
-			//IT compatibility 19. Use random values
-			if(IsCompatibleMode(TRK_IMPULSETRACKER))
-				pdelta = (rand() & 0x7f) - 0x40;
-			else
-				pdelta = ModRandomTable[panpos];
-			break;
-		default:
-			// IT compatibility: IT has its own, more precise tables
-			pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[panpos] : ModSinusTable[panpos];
-		}
+
+		LONG pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
+
 		pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
 		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
 		pdelta += pChn->nRealPan;
 
-		pChn->nRealPan = CLAMP(pdelta, 0, 256);
+		pChn->nRealPan = Clamp(pdelta, 0, 256);
 		//if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan; // TODO
 	}
 }
@@ -1477,7 +1469,7 @@ void CSoundFile::ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEIND
 				arpeggioSteps = pChn->nArpeggio >> 4; // >> 4 <-> division by 16. This gives the first number in the parameter.
 				break;
 			case 2:
-				arpeggioSteps = pChn->nArpeggio % 16; //Gives the latter number in the parameter.
+				arpeggioSteps = pChn->nArpeggio & 0x0F; //Gives the latter number in the parameter.
 				break;
 			}
 			pChn->m_CalculateFreq = true;
@@ -1540,30 +1532,10 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 	if (pChn->dwFlags & CHN_VIBRATO)
 	{
 		UINT vibpos = pChn->nVibratoPos;
-		LONG vdelta;
-		switch (pChn->nVibratoType & 0x03)
-		{
-		case 1:
-			// IT compatibility: IT has its own, more precise tables
-			vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[vibpos] : ModRampDownTable[vibpos];
-			break;
-		case 2:
-			// IT compatibility: IT has its own, more precise tables
-			vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[vibpos] : ModSquareTable[vibpos];
-			break;
-		case 3:
-			//IT compatibility 19. Use random values
-			if(IsCompatibleMode(TRK_IMPULSETRACKER))
-				vdelta = (rand() & 0x7F) - 0x40;
-			else
-				vdelta = ModRandomTable[vibpos];
-			break;
-		default:
-			// IT compatibility: IT has its own, more precise tables
-			vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[vibpos] : ModSinusTable[vibpos];
-		}
 
-		if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+		LONG vdelta = GetVibratoDelta(pChn->nVibratoType, vibpos);
+
+		if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 		{
 			//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
 			//using figure from above tables and vibratodepth parameter
@@ -1592,7 +1564,7 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 			}
 			else
 			{
-				vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
 			}
 			vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
@@ -1611,7 +1583,7 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 			}
 			period += vdelta;
 		}
-		if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+		if ((m_nTickCount) || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1624,7 +1596,7 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 
 
 void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac)
-//--------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
@@ -1730,7 +1702,7 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 				vdelta = ((0x40 - (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
 				break;
 			case VIB_RAMP_UP:
-				vdelta = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7f) - 0x40;
+				vdelta = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
 				break;
 			case VIB_SQUARE:
 				vdelta = (pChn->nAutoVibPos & 128) ? +64 : -64;

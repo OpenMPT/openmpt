@@ -2163,14 +2163,15 @@ BOOL CTrackApp::InitializeDXPlugins()
 		{
 			RelativePathToAbsolute(s);
 
-			if(failedPlugin.Compare(s) != 0)
+			if(!failedPlugin.Compare(s))
 			{
-				m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
-			} else
-			{
-				const CString text = "The following plugin has previously crashed OpenMPT during initialisation and will thus not be loaded:\n\n" + failedPlugin;
-				Reporting::Information(text);
+				const CString text = "The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin + "\n\nDo you still want to load it?";
+				if(Reporting::Confirm(text, false, true) == cnfNo)
+				{
+					continue;
+				}
 			}
+			m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
 		}
 	}
 	if(nonFoundPlugs.GetLength() > 0)
@@ -2458,6 +2459,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 }
 
 void CTrackApp::RemoveMruItem(const int nItem)
+//--------------------------------------------
 {
 	if (m_pRecentFileList && nItem >= 0 && nItem < m_pRecentFileList->GetSize())
 		m_pRecentFileList->Remove(nItem);

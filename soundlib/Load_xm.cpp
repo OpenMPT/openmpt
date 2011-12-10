@@ -306,7 +306,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		XMINSTRUMENTHEADER pih;
 		BYTE flags[32];
 		DWORD samplesize[32];
-		UINT samplemap[32];
+		vector<SAMPLEINDEX>samplemap(32, 0);
 		WORD nsamples;
 				
 		if (dwMemPos + sizeof(DWORD) >= dwMemLength) return true;
@@ -359,7 +359,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		else
 			dwMemPos += sizeof(XMINSTRUMENTHEADER);
 
-		MemsetZero(samplemap);
 		if (nsamples > 32) return true;
 		UINT newsamples = m_nSamples;
 
@@ -380,7 +379,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 						for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
 						{
 							MODINSTRUMENT *pks = Instruments[clrs];
-							for (UINT ks=0; ks<128; ks++)
+							for (size_t ks = 0; ks < CountOf(pks->Keyboard); ks++)
 							{
 								if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
 							}
@@ -484,7 +483,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 				}
 			}
 		}
-		for (UINT j=0; j<96; j++)
+		for (size_t j = 0; j < CountOf(xmsh.snum); j++)
 		{
 			if (xmsh.snum[j] < nsamples)
 				pIns->Keyboard[j + 12] = samplemap[xmsh.snum[j]];

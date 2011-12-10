@@ -382,7 +382,7 @@ void CNoteMapWnd::OnMapCopyNote()
 	{
 		bool bModified = false;
 		BYTE n = pIns->NoteMap[m_nNote];
-		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->NoteMap[i] != n)
+		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != n)
 		{
 			pIns->NoteMap[i] = n;
 			bModified = true;
@@ -408,7 +408,7 @@ void CNoteMapWnd::OnMapCopySample()
 	{
 		bool bModified = false;
 		SAMPLEINDEX n = pIns->Keyboard[m_nNote];
-		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->Keyboard[i] != n)
+		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->Keyboard); i++) if (pIns->Keyboard[i] != n)
 		{
 			pIns->Keyboard[i] = n;
 			bModified = true;
@@ -435,7 +435,7 @@ void CNoteMapWnd::OnMapReset()
 	if (pIns)
 	{
 		bool bModified = false;
-		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->NoteMap[i] != i + 1)
+		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
 		{
 			pIns->NoteMap[i] = i + 1;
 			bModified = true;
