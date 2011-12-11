@@ -2,14 +2,19 @@
 #include "Sndfile.h"
 #include ".\soundfileplayconfig.h"
 
-CSoundFilePlayConfig::CSoundFilePlayConfig(void) {
+CSoundFilePlayConfig::CSoundFilePlayConfig()
+//------------------------------------------
+{
 	setVSTiVolume(1.0f);
 }
 
-CSoundFilePlayConfig::~CSoundFilePlayConfig(void) {
+CSoundFilePlayConfig::~CSoundFilePlayConfig()
+//-------------------------------------------
+{
 }
 
 void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
+//-------------------------------------------------------
 {
 	switch (mixLevelType)
 	{
@@ -91,8 +96,8 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setUseGlobalPreAmp(false);
 			setForcePanningMode(forceNoSoftPanning);
 			setDisplayDBValues(true);
-			setNormalSamplePreAmp(48.0);
-			setNormalVSTiVol(48.0);
+			setNormalSamplePreAmp(256.0);
+			setNormalVSTiVol(256.0);
 			setNormalGlobalVol(256.0);
 			setExtraSampleAttenuation(1);
 			break;
@@ -122,110 +127,156 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 
 
 //getters and setters.
-bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster() {
+bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster()
+//---------------------------------------------------------
+{
 	return m_globalVolumeAppliesToMaster;
 }
 
 
-void CSoundFilePlayConfig::setGlobalVolumeAppliesToMaster(bool inGlobalVolumeAppliesToMaster){
+void CSoundFilePlayConfig::setGlobalVolumeAppliesToMaster(bool inGlobalVolumeAppliesToMaster)
+//-------------------------------------------------------------------------------------------
+{
 	m_globalVolumeAppliesToMaster=inGlobalVolumeAppliesToMaster;
 }
 
-float CSoundFilePlayConfig::getVSTiGainFactor() {
+float CSoundFilePlayConfig::getVSTiGainFactor()
+//---------------------------------------------
+{
 	return m_VSTiVolume;
 }
 
-float CSoundFilePlayConfig::getVSTiVolume() {
+float CSoundFilePlayConfig::getVSTiVolume()
+//-----------------------------------------
+{
 	return m_VSTiVolume;
 }
 
-void  CSoundFilePlayConfig::setVSTiVolume(float inVSTiVolume) {
+void  CSoundFilePlayConfig::setVSTiVolume(float inVSTiVolume)
+//-----------------------------------------------------------
+{
 	m_VSTiVolume = inVSTiVolume;
 }
 
-float CSoundFilePlayConfig::getVSTiAttenuation() {
+float CSoundFilePlayConfig::getVSTiAttenuation()
+//----------------------------------------------
+{
 	return m_VSTiAttenuation;
 }
 
-void  CSoundFilePlayConfig::setVSTiAttenuation(float inVSTiAttenuation) {
+void  CSoundFilePlayConfig::setVSTiAttenuation(float inVSTiAttenuation)
+//---------------------------------------------------------------------
+{
 	m_VSTiAttenuation = inVSTiAttenuation;
 }
 
-float CSoundFilePlayConfig::getIntToFloat() {
+float CSoundFilePlayConfig::getIntToFloat()
+//-----------------------------------------
+{
 	return m_IntToFloat;
 }
 
-void  CSoundFilePlayConfig::setIntToFloat(float inIntToFloat) {
-	m_IntToFloat=inIntToFloat;
+void  CSoundFilePlayConfig::setIntToFloat(float inIntToFloat)
+//-----------------------------------------------------------
+{
+	m_IntToFloat = inIntToFloat;
 }
 
 
-float CSoundFilePlayConfig::getFloatToInt() {
+float CSoundFilePlayConfig::getFloatToInt()
+//-----------------------------------------
+{
 	return m_FloatToInt;
 }
 
 
-void  CSoundFilePlayConfig::setFloatToInt(float inFloatToInt) {
-	m_FloatToInt=inFloatToInt;
+void  CSoundFilePlayConfig::setFloatToInt(float inFloatToInt)
+//-----------------------------------------------------------
+{
+	m_FloatToInt = inFloatToInt;
 }
 
-bool CSoundFilePlayConfig::getUseGlobalPreAmp() {
+bool CSoundFilePlayConfig::getUseGlobalPreAmp()
+//---------------------------------------------
+{
 	return m_ignorePreAmp;
 }
 
-void CSoundFilePlayConfig::setUseGlobalPreAmp(bool inUseGlobalPreAmp) {
-	m_ignorePreAmp=inUseGlobalPreAmp;
+void CSoundFilePlayConfig::setUseGlobalPreAmp(bool inUseGlobalPreAmp)
+//-------------------------------------------------------------------
+{
+	m_ignorePreAmp = inUseGlobalPreAmp;
 }
 
 
-forcePanningMode CSoundFilePlayConfig::getForcePanningMode() {
+forcePanningMode CSoundFilePlayConfig::getForcePanningMode()
+//----------------------------------------------------------
+{
 	return m_forceSoftPanning;
 }
 
-void CSoundFilePlayConfig::setForcePanningMode(forcePanningMode inForceSoftPanning) {
-	m_forceSoftPanning=inForceSoftPanning;
+void CSoundFilePlayConfig::setForcePanningMode(forcePanningMode inForceSoftPanning)
+//---------------------------------------------------------------------------------
+{
+	m_forceSoftPanning = inForceSoftPanning;
 }
 
-void CSoundFilePlayConfig::setDisplayDBValues(bool in) {
-	m_displayDBValues=in;
+void CSoundFilePlayConfig::setDisplayDBValues(bool in)
+//----------------------------------------------------
+{
+	m_displayDBValues = in;
 }
 
-void CSoundFilePlayConfig::setNormalSamplePreAmp(double in) {
-	m_normalSamplePreAmp=in;
+void CSoundFilePlayConfig::setNormalSamplePreAmp(double in)
+//---------------------------------------------------------
+{
+	m_normalSamplePreAmp = in;
 }
 
-void CSoundFilePlayConfig::setNormalVSTiVol(double in) {
-	m_normalVSTiVol=in;
+void CSoundFilePlayConfig::setNormalVSTiVol(double in)
+//----------------------------------------------------
+{
+	m_normalVSTiVol = in;
 }
 
-void CSoundFilePlayConfig::setNormalGlobalVol(double in) {
-	m_normalGlobalVol=in;
+void CSoundFilePlayConfig::setNormalGlobalVol(double in)
+//------------------------------------------------------
+{
+	m_normalGlobalVol = in;
 }
 
-bool CSoundFilePlayConfig::getDisplayDBValues() {
+bool CSoundFilePlayConfig::getDisplayDBValues()
+//---------------------------------------------
+{
 	return m_displayDBValues;
 }
 
-double CSoundFilePlayConfig::getNormalSamplePreAmp() {
+double CSoundFilePlayConfig::getNormalSamplePreAmp()
+//--------------------------------------------------
+{
 	return m_normalSamplePreAmp;
 }
 
-double CSoundFilePlayConfig::getNormalVSTiVol() {
+double CSoundFilePlayConfig::getNormalVSTiVol()
+//---------------------------------------------
+{
 	return m_normalVSTiVol;
 }
 
-double CSoundFilePlayConfig::getNormalGlobalVol() {
+double CSoundFilePlayConfig::getNormalGlobalVol()
+//-----------------------------------------------
+{
 	return m_normalGlobalVol;
 }
 
 void CSoundFilePlayConfig::setExtraSampleAttenuation(int attn)
+//------------------------------------------------------------
 {
 	m_extraAttenuation = attn;
 }
 
 int CSoundFilePlayConfig::getExtraSampleAttenuation()
+//---------------------------------------------------
 {
 	return m_extraAttenuation;
 }
-
-

@@ -702,16 +702,16 @@ BOOL CModDoc::InitializeMod()
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
 
 		// Set up levels
-		if(m_SndFile.m_nMixLevels == mixLevels_original || m_SndFile.m_nMixLevels == mixLevels_compatible)
+		//if(m_SndFile.m_nMixLevels == mixLevels_original || m_SndFile.m_nMixLevels == mixLevels_compatible)
 		{
 			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
 		}
-		else
+		/*else
 		{
 			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME / 2;
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
-		}
+		}*/
 
 		for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 		{
@@ -727,14 +727,12 @@ BOOL CModDoc::InitializeMod()
 	{
 		strcpy(m_SndFile.m_szNames[1], "untitled");
 		m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
-		if(GetModType() == MOD_TYPE_XM)
-		{
-			m_SndFile.GetSample(1).uFlags |= CHN_PANNING;
-		}
 
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
 
-		if ((!m_SndFile.m_nInstruments) && (m_SndFile.m_nType & MOD_TYPE_XM))
+		InitializeSample(m_SndFile.GetSample(1));
+
+		if ((!m_SndFile.m_nInstruments) && (m_SndFile.GetType() & MOD_TYPE_XM))
 		{
 			try
 			{
@@ -745,7 +743,7 @@ BOOL CModDoc::InitializeMod()
 			{
 			}
 		}
-		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT|MOD_TYPE_XM))
+		if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 		{
 			m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
 		}
