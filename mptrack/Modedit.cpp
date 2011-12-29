@@ -550,6 +550,8 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		newsmp = nSample;
 	} else if (!pDup)
 	{
+		newsmp = m_SndFile.GetNextFreeSample(newins);
+		/*
 		for(SAMPLEINDEX k = 1; k <= m_SndFile.GetNumSamples(); k++)
 		{
 			if (!m_SndFile.IsSampleUsed(k))
@@ -560,9 +562,11 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 			}
 		}
 		if (!newsmp)
+		*/
+		if (newsmp > m_SndFile.GetNumSamples())
 		{
 			// Add a new sample
-			int inssmp = InsertSample();
+			const SAMPLEINDEX inssmp = InsertSample();
 			if (inssmp != SAMPLEINDEX_INVALID) newsmp = inssmp;
 		}
 	}
