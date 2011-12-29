@@ -1739,11 +1739,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				// Find a nice sample slot
-				do
-				{
-					nSample++;
-				} while (nSample < pSndFile->GetNumSamples() && (pSndFile->GetSample(nSample).pSample != nullptr || pSndFile->m_szNames[nSample][0]));
+				nSample = pSndFile->GetNextFreeSample(nInstr);
 				if (nSample >= MAX_SAMPLES) break;
 				if (nSample > pSndFile->GetNumSamples()) pSndFile->m_nSamples = nSample;
 				nSmp = nSample;
