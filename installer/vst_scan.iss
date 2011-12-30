@@ -32,7 +32,7 @@ begin
                     FilePath := NewRoot + FindRec.Name;
                     if FindRec.Attributes AND FILE_ATTRIBUTE_DIRECTORY > 0 then
                         ProcessDirectory (FilePath, Progress, INIFile)
-                    else
+                    else if(CompareText('.dll', Copy(FindRec.Name, Length(FindRec.Name) - 3, 4)) = 0) then
                     begin
                         // Start action -->
                         // .
@@ -43,7 +43,7 @@ begin
                         // as this could take a very long time.
                         // .
                         SetIniString('VST Plugins', 'Plugin' + IntToStr(VSTPluginNumber), FilePath, INIFile);
-                        VSTPluginNumber := VSTPluginNumber +1;
+                        VSTPluginNumber := VSTPluginNumber + 1;
                         // <-- End action.
             
                         ArrayLen := ArrayLen + 1;

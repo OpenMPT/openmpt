@@ -2135,17 +2135,17 @@ void CModDoc::OnApproximateBPM()
 	switch(m_SndFile.m_nTempoMode)
 	{
 		case tempo_mode_alternative: 
-			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
 			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm); 
 			break;
 
 		case tempo_mode_modern: 
-			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.20g BPM", bpm); 
+			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM", bpm); 
 			break;
 
 		case tempo_mode_classic: 
 		default:
-			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
 			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm); 
 			break;
 	}
@@ -2165,7 +2165,7 @@ typedef struct MPTEFFECTINFO
 	DWORD dwParamValue;	// 0 = default
 	DWORD dwFlags;		// FXINFO_XXXX
 	DWORD dwFormats;	// MOD_TYPE_XXX combo
-	LPCSTR pszName;		// ie "Tone Portamento"
+	LPCSTR pszName;		// e.g. "Tone Portamento"
 } MPTEFFECTINFO;
 
 #define MOD_TYPE_MODXM	(MOD_TYPE_MOD|MOD_TYPE_XM)
