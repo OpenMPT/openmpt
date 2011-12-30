@@ -89,7 +89,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 		// This is basically derived from mixmode 1.17 RC3, with panning mode and volume levels changed.
 		// Sample attenuation is the same as in Schism Tracker (more attenuation than with RC3, thus VSTi attenuation is also higher).
 		case mixLevels_compatible:
-			setVSTiAttenuation(4.0f);
+			setVSTiAttenuation(0.75f);
 			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
 			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
 			setGlobalVolumeAppliesToMaster(true);
