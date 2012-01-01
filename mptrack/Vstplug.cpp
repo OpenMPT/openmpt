@@ -1327,20 +1327,18 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 {
 	m_hLibrary = hLibrary;
 	m_nRefCount = 1;
-	m_pPrev = NULL;
-	m_pNext = NULL;
+	m_pPrev = nullptr;
+	m_pNext = nullptr;
 	m_pFactory = pFactory;
 	m_pMixStruct = pMixStruct;
 	m_pEffect = pEffect;
-	m_pInputs = NULL;
-	m_pOutputs = NULL;
-	m_pEditor = NULL;
+	m_pEditor = nullptr;
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
-	m_pEvList = NULL;
-	m_pModDoc = NULL; //rewbs.plugDocAware
+	m_pEvList = nullptr;
+	m_pModDoc = nullptr; //rewbs.plugDocAware
 	m_nPreviousMidiChan = nInvalidMidiChan; //rewbs.VSTCompliance
-	m_pProcessFP = NULL;
+	m_pProcessFP = nullptr;
 
 	// Insert ourselves in the beginning of the list
 	if (m_pFactory)
@@ -1356,13 +1354,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
 	m_MixState.pMixBuffer = (int *)((((DWORD)m_MixBuffer)+7)&~7);
-	m_MixState.pOutBufferL = (float *)((((DWORD)&m_FloatBuffer[0]) + 7) & ~7);
-	m_MixState.pOutBufferR = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE]) + 7) & ~7);
-	MemsetZero(dummyBuffer_);
-
-
-	//rewbs.dryRatio: we now initialise this in CVstPlugin::Initialize().
-	//m_pTempBuffer = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*2])+7)&~7);
+	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 
 	m_bSongPlaying = false; //rewbs.VSTCompliance
 	m_bPlugResumed = false;
@@ -1474,33 +1467,11 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_nInputs = m_pEffect->numInputs;
 	m_nOutputs = m_pEffect->numOutputs;
 
-	//32 is the maximum output count due to the size of m_FloatBuffer.
-	//TODO: How to handle properly plugs with numOutputs > 32?
-	if(m_nOutputs > 32)
-	{
-		m_nOutputs = 32;
-		CString str;
-		str.Format("Plugin has unsupported number(=%d) of outputs; plugin may malfunction.", m_pEffect->numOutputs);
-		Reporting::Warning(str);
-	}
+	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
+	mixBuffer.Initialize(max(m_nInputs, 2), m_nOutputs);
+	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 
-	//input pointer array size must be >=2 for now - the input buffer assignment might write to non allocated mem. otherwise
-	m_pInputs = (m_nInputs >= 2) ? new (float *[m_nInputs]) : new (float*[2]);
-	m_pInputs[0] = m_MixState.pOutBufferL;
-	m_pInputs[1] = m_MixState.pOutBufferR;
-	// Assign dummy inputs
-	for(size_t i = 2; i < m_nInputs; i++)
-	{
-		m_pInputs[i] = dummyBuffer_;
-	}
-
-	m_pOutputs = new (float *[m_nOutputs]);
-	m_pTempBuffer = new (float *[m_nOutputs]);	//rewbs.dryRatio
-
-	for (UINT iOut=0; iOut<m_nOutputs; iOut++)
-	{
-		m_pTempBuffer[iOut]=(float *)((((DWORD_PTR)&m_FloatBuffer[MIXBUFFERSIZE*(2+iOut)])+7)&~7); //rewbs.dryRatio
-	}
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
@@ -1565,17 +1536,8 @@ CVstPlugin::~CVstPlugin()
 		m_hLibrary = NULL;
 	}
 
-	delete[] m_pTempBuffer;
-	m_pTempBuffer = NULL;
-
-	delete[] m_pInputs;
-	m_pInputs = NULL;
-
-	delete[] m_pOutputs;
-	m_pOutputs = NULL;
-
 	delete[] (char *)m_pEvList;
-	m_pEvList = NULL;
+	m_pEvList = nullptr;
 
 	CloseHandle(processCalled);
 }
@@ -2098,7 +2060,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
 
 	//If the plug is found & ok, continue
-	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
+	if ((m_pEffect) && (m_pProcessFP) && (mixBuffer.GetInputBufferArray()) && (mixBuffer.GetOutputBufferArray()) && (m_pMixStruct))
 	{
 		int mixop;
 		if (m_bIsInstrument)
@@ -2114,24 +2076,21 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		//Merge stereo input before sending to the plug if the plug can only handle one input.
 		if (m_pEffect->numInputs == 1)
 		{
-			for (UINT i=0; i<nSamples; i++)
+			for (size_t i = 0; i < nSamples; i++)
 			{
-				m_MixState.pOutBufferL[i] = 0.5f*m_MixState.pOutBufferL[i] + 0.5f*m_MixState.pOutBufferR[i];
+				m_MixState.pOutBufferL[i] = 0.5f * m_MixState.pOutBufferL[i] + 0.5f * m_MixState.pOutBufferR[i];
 			}
 		}
 
-		for (UINT iOut=0; iOut<m_nOutputs; iOut++)
-		{
-			memset(m_pTempBuffer[iOut], 0, nSamples * sizeof(float));
-			m_pOutputs[iOut] = m_pTempBuffer[iOut];
-		}
+		float **outputBuffers = mixBuffer.GetOutputBufferArray();
+		mixBuffer.ClearOutputBuffers(nSamples);
 
 		m_dwTimeAtStartOfProcess = timeGetTime();
 		//Do the VST processing magic
 		try
 		{
 			ASSERT(nSamples <= MIXBUFFERSIZE);
-			m_pProcessFP(m_pEffect, m_pInputs, m_pOutputs, nSamples);
+			m_pProcessFP(m_pEffect, mixBuffer.GetInputBufferArray(), outputBuffers, nSamples);
 		} catch (...)
 		{
 			Bypass();
@@ -2141,7 +2100,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //			SetEvent(processCalled);
 		}
 
-		ASSERT(m_pTempBuffer != nullptr);
+		ASSERT(outputBuffers != nullptr);
 
 		//mix outputs of multi-output VSTs:
 		if(m_nOutputs>2)
@@ -2155,7 +2114,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			for(UINT iOut = 2; iOut < nOuts; iOut++)
 			{
 				for(UINT i = 0; i < nSamples; i++)
-					m_pTempBuffer[iOut % 2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
+					outputBuffers[iOut % 2][i] += outputBuffers[iOut][i]; //assumed stereo.
 			}
 
 			// if m_nOutputs is odd, mix half the signal of last output to each channel
@@ -2164,9 +2123,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				// trick : if we are here, nOuts = m_nOutputs - 1 !!!
 				for(UINT i=0; i<nSamples; i++)
 				{
-					float v = 0.5f * m_pTempBuffer[nOuts][i];
-					m_pTempBuffer[0][i] += v;
-					m_pTempBuffer[1][i] += v;
+					float v = 0.5f * outputBuffers[nOuts][i];
+					outputBuffers[0][i] += v;
+					outputBuffers[1][i] += v;
 				}
 			}
 		}
@@ -2183,8 +2142,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			for (UINT i=0; i<nSamples; i++)
 			{
 				//rewbs.wetratio - added the factors. [20040123]
-				pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
-				pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+				pOutL[i] += outputBuffers[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+				pOutR[i] += outputBuffers[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 
 				//If dry mix is ticked we add the unprocessed buffer,
 				//except if this is an instrument since this it already been done:
@@ -2214,8 +2173,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					for(UINT i = 0; i < nSamples; i++)
 					{
 						//rewbs.wetratio - added the factors. [20040123]
-						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
-						pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+						pOutL[i] += outputBuffers[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += outputBuffers[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 					}
 					break;
 
@@ -2223,8 +2182,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				case 1:
 					for(UINT i = 0; i < nSamples; i++)
 					{
-						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
-						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]*wetRatio;
+						pOutL[i] += m_MixState.pOutBufferL[i] - outputBuffers[0][i]*wetRatio;
+						pOutR[i] += m_MixState.pOutBufferR[i] - outputBuffers[0][i]*wetRatio;
 					}
 					break;
 
@@ -2232,8 +2191,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				case 2:
 					for(UINT i = 0; i < nSamples; i++)
 					{
-						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
-						pOutR[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*dryRatio;
+						pOutL[i] += outputBuffers[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += outputBuffers[0][i] - m_MixState.pOutBufferR[i]*dryRatio;
 					}
 					break;
 
@@ -2241,8 +2200,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				case 3:
 					for(UINT i = 0; i < nSamples; i++)
 					{
-						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
-						pOutR[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*wetRatio;
+						pOutL[i] -= outputBuffers[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
+						pOutR[i] -= outputBuffers[0][i] - m_MixState.pOutBufferR[i]*wetRatio;
 					}
 					break;
 
@@ -2251,8 +2210,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					for(UINT i = 0; i < nSamples; i++)
 					{
 						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
-						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
-						pOutR[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
+						pOutL[i] -= middle - outputBuffers[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
+						pOutR[i] -= middle - outputBuffers[0][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
 					}
 					break;
 
@@ -2265,8 +2224,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					}
 					for(UINT i = 0; i < nSamples; i++)
 					{
-						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
-						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
+						pOutL[i] += wetRatio * (outputBuffers[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - outputBuffers[0][i]);
+						pOutR[i] += dryRatio * (outputBuffers[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - outputBuffers[0][i]);
 					}
 					break;
 			}
@@ -2298,8 +2257,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				//rewbs.wetratio - added the factors. [20040123]
 
-				pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
-				pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+				pOutL[i] += outputBuffers[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+				pOutR[i] += outputBuffers[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 
 				//If dry mix is ticked, we add the unprocessed buffer,
 				//except if this is an instrument since it has already been done:
@@ -2328,8 +2287,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					for(UINT i=0; i<nSamples; i++)
 					{
 						//rewbs.wetratio - added the factors. [20040123]
-						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
-						pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+						pOutL[i] += outputBuffers[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += outputBuffers[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 					}
 					break;
 
@@ -2337,8 +2296,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				case 1:
 					for(UINT i=0; i<nSamples; i++)
 					{
-						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
-						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]*wetRatio;
+						pOutL[i] += m_MixState.pOutBufferL[i] - outputBuffers[0][i]*wetRatio;
+						pOutR[i] += m_MixState.pOutBufferR[i] - outputBuffers[1][i]*wetRatio;
 					}
 					break;
 
@@ -2346,8 +2305,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				case 2:
 					for(UINT i=0; i<nSamples; i++)
 					{
-						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
-						pOutR[i] += m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*dryRatio;
+						pOutL[i] += outputBuffers[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += outputBuffers[1][i] - m_MixState.pOutBufferR[i]*dryRatio;
 					}
 					break;
 
@@ -2355,8 +2314,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				case 3:
 					for(UINT i=0; i<nSamples; i++)
 					{
-						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
-						pOutR[i] -= m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*wetRatio;
+						pOutL[i] -= outputBuffers[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
+						pOutR[i] -= outputBuffers[1][i] - m_MixState.pOutBufferR[i]*wetRatio;
 					}
 					break;
 
@@ -2365,8 +2324,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					for(UINT i=0; i<nSamples; i++)
 					{
 						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
-						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
-						pOutR[i] -= middle - m_pTempBuffer[1][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
+						pOutL[i] -= middle - outputBuffers[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
+						pOutR[i] -= middle - outputBuffers[1][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
 					}
 					break;
 
@@ -2379,8 +2338,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					}
 					for(UINT i=0; i<nSamples; i++)
 					{
-						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
-						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
+						pOutL[i] += wetRatio * (outputBuffers[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - outputBuffers[1][i]);
+						pOutR[i] += dryRatio * (outputBuffers[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - outputBuffers[1][i]);
 					}
 					break;
 			}
