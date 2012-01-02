@@ -1107,7 +1107,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// Floating point processing precision
 	case effSetProcessPrecision:
-		return kVstProcessPrecision32;
+		return (value == kVstProcessPrecision32 ? 1 : 0);
 
 	}
 
