@@ -872,7 +872,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	
 	// numInputs and/or numOutputs has changed
 	case audioMasterIOChanged:
-		Log("VST plugin to host: IOchanged\n");
+		if (pVstPlugin != nullptr)
+		{
+			CriticalSection cs;
+			return pVstPlugin->InitializeIOBuffers() ? 1 : 0;
+		}
 		break;
 	
 	// plug needs idle calls (outside its editor window) - DEPRECATED in VST 2.4
@@ -1464,14 +1468,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	}
 	Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
 
-	m_nInputs = m_pEffect->numInputs;
-	m_nOutputs = m_pEffect->numOutputs;
-
-	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
-	mixBuffer.Initialize(max(m_nInputs, 2), m_nOutputs);
-	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
-
+	InitializeIOBuffers();
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
@@ -1493,6 +1490,21 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
  // issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
 	Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(CSoundFile::gdwMixingFreq));
 
+}
+
+
+bool CVstPlugin::InitializeIOBuffers()
+//------------------------------------
+{
+	m_nInputs = m_pEffect->numInputs;
+	m_nOutputs = m_pEffect->numOutputs;
+
+	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
+	bool result = mixBuffer.Initialize(max(m_nInputs, 2), m_nOutputs);
+	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
+
+	return result;
 }
 
 

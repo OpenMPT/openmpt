@@ -153,6 +153,8 @@ public:
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	bool GetSpeakerArrangement(); //rewbs.VSTCompliance
 
+	bool InitializeIOBuffers();
+
 	bool Bypass(bool bypass = true);  //rewbs.defaultPlugGUI
 	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); }; //rewbs.defaultPlugGUI
 
