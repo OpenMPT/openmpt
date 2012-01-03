@@ -2441,17 +2441,16 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample) const
 	if ((!nSample) || (nSample > GetNumSamples())) return false;
 	if (GetNumInstruments())
 	{
-		for (UINT i = 1; i <= GetNumInstruments(); i++) if (Instruments[i])
+		for (INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			MODINSTRUMENT *pIns = Instruments[i];
-			for (UINT j = 0; j < CountOf(pIns->Keyboard); j++)
+			if(IsSampleReferencedByInstrument(nSample, i))
 			{
-				if (pIns->Keyboard[j] == nSample) return true;
+				return true;
 			}
 		}
 	} else
 	{
-		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
+		for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns[i])
 		{
 			const MODCOMMAND *m = Patterns[i];
 			for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)

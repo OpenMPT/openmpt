@@ -749,7 +749,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 		//IT compatibility tentative fix: Don't change bidi loop direction when 
 		//no sample nor instrument is changed.
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pSmp == pChn->pModSample && !bInstrumentChanged)
+		if(IsCompatibleMode(TRK_ALLTRACKERS) && pSmp == pChn->pModSample && !bInstrumentChanged)
 			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 		else
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
@@ -819,10 +819,10 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	// Fix sample position on instrument change. This is needed for PT1x MOD and IT "on the fly" sample change.
 	if(pChn->nPos >= pChn->nLength)
 	{
-		if((m_nType & MOD_TYPE_IT))
+		if((GetType() & MOD_TYPE_IT))
 		{
 			pChn->nPos = pChn->nPosLo = 0;
-		} else if((m_nType & MOD_TYPE_MOD))	// TODO does not always seem to work, especially with short chip samples?
+		} else if((GetType() & MOD_TYPE_MOD))	// TODO does not always seem to work, especially with short chip samples?
 		{
 			pChn->nPos = pChn->nLoopStart;
 			pChn->nPosLo = 0;
@@ -853,7 +853,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if (note > NOTE_MAX)
 	{
 		// Key Off (+ Invalid Note for XM - TODO is this correct?)
-		if (note == NOTE_KEYOFF || !(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if (note == NOTE_KEYOFF || !(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			KeyOff(nChn);
 		}
@@ -991,11 +991,11 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	else 
 		bPorta = false;
 
-	if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+	if ((!bPorta) || (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 	 || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 	 || ((m_dwSongFlags & SONG_ITCOMPATGXX) && (pChn->rowCommand.instr)))
 	{
-		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
+		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
 			ResetChannelEnvelopes(pChn);
 			// IT Compatibility: Autovibrato reset
@@ -1009,7 +1009,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 		if ((!bPorta) || (!(m_dwSongFlags & SONG_ITCOMPATGXX)) || (pChn->rowCommand.instr))
 		{
-			if ((!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) || (pChn->rowCommand.instr))
+			if ((!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) || (pChn->rowCommand.instr))
 			{
 				pChn->dwFlags &= ~CHN_NOTEFADE;
 				pChn->nFadeOutVol = 65536;
@@ -1043,7 +1043,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->VolEnv.nEnvPosition = 0;
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->PanEnv.nEnvPosition = 0;
 				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->PitchEnv.nEnvPosition = 0;
-				if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
+				if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					// Volume Swing
 					if (pIns->nVolSwing)
@@ -3909,7 +3909,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 	if (pChn->pModInstrument)
 	{
 		const MODINSTRUMENT *pIns = pChn->pModInstrument;
-		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut))
+		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut))
 		{
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
@@ -3935,7 +3935,7 @@ void CSoundFile::SetSpeed(UINT param)
 #ifndef MODPLUG_TRACKER
 #ifndef FASTSOUNDLIB
 	// Big Hack!!!
-	if ((!param) || (param >= 0x80) || ((m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2)) && (param >= 0x1E)))
+	if ((!param) || (param >= 0x80) || ((GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2)) && (param >= 0x1E)))
 	{
 		if ((!m_nRepeatCount) && (IsSongFinished(m_nCurrentPattern, m_nRow+1)))
 		{
@@ -3944,9 +3944,8 @@ void CSoundFile::SetSpeed(UINT param)
 	}
 #endif // FASTSOUNDLIB
 #endif // MODPLUG_TRACKER
-	//if ((m_nType & MOD_TYPE_S3M) && (param > 0x80)) param -= 0x80;
 	// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
-	if ((param) && (param <= GetModSpecifications().speedMax || (m_nType & MOD_TYPE_MOD))) m_nMusicSpeed = param;
+	if ((param) && (param <= GetModSpecifications().speedMax || (GetType() & MOD_TYPE_MOD))) m_nMusicSpeed = param;
 }
 
 
@@ -3956,12 +3955,8 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 	const CModSpecifications& specs = GetModSpecifications();
 	if(setAsNonModcommand)
 	{
-		if(param < specs.tempoMin) m_nMusicTempo = specs.tempoMin;
-		else
-		{
-			if(param > specs.tempoMax) m_nMusicTempo = specs.tempoMax;
-			else m_nMusicTempo = param;
-		}
+		// Set tempo from UI - ignore slide commands and such.
+		m_nMusicTempo = CLAMP(param, specs.tempoMin, specs.tempoMax);
 	}
 	else
 	{
@@ -4439,21 +4434,22 @@ void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
 void CSoundFile::InitializeVisitedRows(bool bReset, VisitedRowsType *pRowVector)
 //------------------------------------------------------------------------------
 {
+	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
 	if(pRowVector == nullptr)
 	{
 		pRowVector = &m_VisitedRows;
 	}
-	pRowVector->resize(Order.GetLengthTailTrimmed());
+	pRowVector->resize(nMaxOrd);
 
-	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
+	for(ORDERINDEX nOrd = 0; nOrd < nMaxOrd; nOrd++)
 	{
-		VisitedRowsBaseType *pRow = &(pRowVector->at(nOrd));
+		VisitedRowsBaseType &row = pRowVector->at(nOrd);
 		// If we want to reset the vectors completely, we overwrite existing items with false.
 		if(bReset)
 		{
-			pRow->assign(pRow->size(), false);
+			row.assign(row.size(), false);
 		}
-		pRow->resize(GetVisitedRowsVectorSize(Order[nOrd]), false);
+		row.resize(GetVisitedRowsVectorSize(Order[nOrd]), false);
 	}
 }
 
@@ -4482,7 +4478,7 @@ void CSoundFile::SetRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bVisited, Vi
 		InitializeVisitedRows(false, pRowVector);
 	}
 
-	pRowVector->at(nOrd)[nRow] = bVisited;
+	pRowVector->at(nOrd).at(nRow) = bVisited;
 }
 
 
@@ -4514,7 +4510,7 @@ bool CSoundFile::IsRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bAutoSet, Vis
 		return false;
 	}
 
-	if(pRowVector->at(nOrd)[nRow])
+	if(pRowVector->at(nOrd).at(nRow))
 	{
 		// we visited this row already - this module must be looping.
 		return true;
@@ -4522,7 +4518,7 @@ bool CSoundFile::IsRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bAutoSet, Vis
 
 	if(bAutoSet)
 	{
-		pRowVector->at(nOrd)[nRow] = true;
+		pRowVector->at(nOrd).at(nRow) = true;
 	}
 
 	return false;

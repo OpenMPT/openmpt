@@ -368,10 +368,10 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (pis->mpr<=128)
 			pIns->nMidiProgram = pis->mpr;
 		pIns->nMidiChannel = pis->mch;
-		if (pIns->nMidiChannel > 16)	//rewbs.instroVSTi
+		if (pIns->nMidiChannel >= 128)	//rewbs.instroVSTi
 		{								//(handle old format where midichan
 										// and mixplug are 1 value)
-			pIns->nMixPlug = pIns->nMidiChannel-128;
+			pIns->nMixPlug = pIns->nMidiChannel - 128;
 			pIns->nMidiChannel = 0;
 		}
 		if (pis->mbank<=128)
@@ -952,7 +952,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if (m_nInstruments >= MAX_INSTRUMENTS) m_nInstruments = MAX_INSTRUMENTS-1;
 	for (UINT nins=0; nins<m_nInstruments; nins++)
 	{
-		if ((inspos[nins] > 0) && (inspos[nins] < dwMemLength - (pifh->cmwt < 0x200 ? sizeof(ITOLDINSTRUMENT) : sizeof(ITINSTRUMENT))))
+		if ((inspos[nins] > 0) && (inspos[nins] <= dwMemLength - (pifh->cmwt < 0x200 ? sizeof(ITOLDINSTRUMENT) : sizeof(ITINSTRUMENT))))
 		{
 			try
 			{
