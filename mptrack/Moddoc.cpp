@@ -924,10 +924,10 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		CriticalSection cs;
 
 		//find a channel if required
-		/* if (nCurrentChn == CHANNELINDEX_INVALID)
+		//if (nCurrentChn == CHANNELINDEX_INVALID)
 		{ 
 			nChn = FindAvailableChannel();
-		} */
+		}
 
 		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
 		

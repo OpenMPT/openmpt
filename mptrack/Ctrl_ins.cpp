@@ -1557,33 +1557,39 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 		{
 		case IDC_EDIT_PITCHTEMPOLOCK:
 		case IDC_CHECK_PITCHTEMPOLOCK:
+			// Pitch/Tempo lock
 			{
-			const CModSpecifications& specs = m_pSndFile->GetModSpecifications();
-			string str = string("Tempo range: ") + Stringify(specs.tempoMin) + string(" - ") + Stringify(specs.tempoMax);
-			if(str.size() >= 250) str.resize(250);
-			wsprintf(pszText, str.c_str());
-			return TRUE;
-			break;
+				const CModSpecifications& specs = m_pSndFile->GetModSpecifications();
+				string str = string("Tempo range: ") + Stringify(specs.tempoMin) + string(" - ") + Stringify(specs.tempoMax);
+				if(str.size() >= 250) str.resize(250);
+				strcpy(pszText, str.c_str());
+				return TRUE;
 			}
-		case IDC_EDIT7: //Fade out
+
+		case IDC_EDIT7:
+			// Fade Out
 			wsprintf(pszText, "Higher value <-> Faster fade out");
 			return TRUE;
-			break;
 
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
+			// Plugin volume handling
 			if(m_pSndFile->Instruments[m_nInstrument]->nMixPlug < 1) return FALSE;
 			if(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
 			{
 				m_CbnPluginVelocityHandling.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-				wsprintf(pszText, "To enable, clear Plugin volume command bug emulation flag from Song Properties");
+				strcpy(pszText, "To enable, clear Plugin volume command bug emulation flag from Song Properties");
 				return TRUE;
 			}
 			else
 				return FALSE;
-			
-			break;
+
+		case IDC_COMBO5:
+			// MIDI Channel
+			strcpy(pszText, "Mapped: MIDI channel corresponds to pattern channel modulo 16");
+			return TRUE;
+
 		}
 	}
 	return FALSE;
