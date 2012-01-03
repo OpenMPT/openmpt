@@ -125,7 +125,7 @@ struct MODINSTRUMENT
 
 	uint16 wMidiBank;	// MIDI Bank (1...16384). 0 = Don't send.
 	uint8 nMidiProgram;	// MIDI Program (1...128). 0 = Don't send.
-	uint8 nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send.
+	uint8 nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send. 17 = Mapped (Send to tracker channel modulo 16).
 	uint8 nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
 
 	int8 nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
@@ -230,7 +230,7 @@ struct MODINSTRUMENT
 	void SetCutoff(uint8 cutoff, bool enable) { nIFC = min(cutoff, 0x7F) | (enable ? 0x80 : 0x00); }
 	void SetResonance(uint8 resonance, bool enable) { nIFR = min(resonance, 0x7F) | (enable ? 0x80 : 0x00); }
 
-	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 16); }
+	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
 
 };
 
@@ -1025,9 +1025,9 @@ protected:
 protected:
 	// Channel Effects
 	void UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const;
-	void PortamentoUp(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
-	void PortamentoDown(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
-	void MidiPortamento(MODCHANNEL *pChn, int param);
+	void PortamentoUp(CHANNELINDEX nChn, UINT param, const bool fineAsRegular = false);
+	void PortamentoDown(CHANNELINDEX nChn, UINT param, const bool fineAsRegular = false);
+	void MidiPortamento(CHANNELINDEX nChn, int param);
 	void FinePortamentoUp(MODCHANNEL *pChn, UINT param);
 	void FinePortamentoDown(MODCHANNEL *pChn, UINT param);
 	void ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param);
@@ -1142,7 +1142,7 @@ public:
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
 #endif
 #ifdef MODPLUG_TRACKER
-	void ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
+	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif
 	void ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount);
 
@@ -1196,16 +1196,17 @@ public:
 	int GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const;
     void ResetChannelEnvelopes(MODCHANNEL *pChn) const;
 	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env) const;
+
 private:
 	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
 	PLUGINDEX __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
-	UINT GetBestMidiChan(const MODCHANNEL *pChn) const;
 
 	void HandlePatternTransitionEvents();
 	long GetSampleOffset();
 
 public:
 	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
+	UINT GetBestMidiChannel(CHANNELINDEX nChn) const;
 
 // A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 public:

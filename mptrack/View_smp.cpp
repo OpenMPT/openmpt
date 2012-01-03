@@ -1939,7 +1939,7 @@ void CViewSample::OnEditCopy()
 			pxh->nVibSweep = sample.nVibSweep;
 			pxh->nVibDepth = sample.nVibDepth;
 			pxh->nVibRate = sample.nVibRate;
-			if(pSndFile->GetType() & MOD_TYPE_XM && (pxh->nVibDepth | pxh->nVibRate))
+			if((pSndFile->GetType() & MOD_TYPE_XM) && (pxh->nVibDepth | pxh->nVibRate))
 			{
 				// XM vibrato is upside down
 				pxh->nVibSweep = 255 - pxh->nVibSweep;
@@ -2187,7 +2187,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 				loopend = loopstart = 0; // selection is too small -> no loop
 
 			if(nStartPos != uint32_max)
-				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend, -1, nStartPos);
+				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 			else
 				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
 

@@ -866,8 +866,26 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 	return IDCANCEL;
 }
 
-UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, int nCurrentChn, const uint32 nStartPos) //rewbs.vstiLive: added current chan param
-//----------------------------------------------------------------------------------------------------------------------------------------------------
+
+UINT CModDoc::GetPlaybackMidiChannel(const MODINSTRUMENT *pIns, CHANNELINDEX nChn) const
+//---------------------------------------------------------------------------------------
+{
+	if(pIns->nMidiChannel == MidiMappedChannel)
+	{
+		if(nChn != CHANNELINDEX_INVALID)
+		{
+			return nChn % 16;
+		}
+	} else if(pIns->HasValidMIDIChannel())
+	{
+		return pIns->nMidiChannel - 1;
+	}
+	return 0;
+}
+
+
+UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, CHANNELINDEX nCurrentChn, const uint32 nStartPos) //rewbs.vstiLive: added current chan param
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	UINT nChn = GetNumChannels();
@@ -906,9 +924,10 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		CriticalSection cs;
 
 		//find a channel if required
-		//if (nCurrentChn<0) { 
+		/* if (nCurrentChn == CHANNELINDEX_INVALID)
+		{ 
 			nChn = FindAvailableChannel();
-		//}
+		} */
 
 		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
 		
@@ -985,7 +1004,6 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				pChn->nLength = pChn->nLoopEnd = pChn->pModSample->nLength;
 		}
 
-
 		//rewbs.vstiLive
 		if (nins <= m_SndFile.GetNumInstruments())
 		{
@@ -997,13 +1015,17 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				UINT nPlugin = 0;
 				if (pChn->pModInstrument) 
 					nPlugin = pChn->pModInstrument->nMixPlug;  					// first try instrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS) && (nCurrentChn >=0))
+				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS) && (nCurrentChn != CHANNELINDEX_INVALID))
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
 				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, MAX_BASECHANNELS);
+
+					if (pPlugin)
+					{
+						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, MAX_BASECHANNELS);
+					}
 				}
 			}
 		}
@@ -1019,8 +1041,8 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 }
 
 
-BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewbs.vstiLive: added chan and nins
-//-----------------------------------------------------------------------
+BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, CHANNELINDEX nCurrentChn) //rewbs.vstiLive: added chan and nins
+//-------------------------------------------------------------------------------
 {
 	CriticalSection cs;
 
@@ -1034,14 +1056,16 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 
 			UINT nPlugin = pIns->nMixPlug;  		// First try intrument VST
 			if (((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) && //no good plug yet
-				(nCurrentChn<MAX_CHANNELS)) // chan OK
+				(nCurrentChn < MAX_BASECHANNELS)) // chan OK
 				nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
 			
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-				if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
-
+				if (pPlugin)
+				{
+					pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
+				}
 			}
 		}
 	}
@@ -1139,7 +1163,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 			MODINSTRUMENT* pIns = m_SndFile.Chn[nChn].pModInstrument;
 			if (pPlug && pIns)
 			{
-				pPlug->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
+				pPlug->MidiCommand(m_SndFile.GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
 			}
 		}
 	} else

@@ -1266,7 +1266,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 						//switch off duplicated note played on this plugin 
 						IMixPlugin *pPlugin =  m_MixPlugins[pHeader->nMixPlug-1].pMixPlugin;
 						if (pPlugin && p->nNote)
-							pPlugin->MidiCommand(p->pModInstrument->nMidiChannel, p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_KEYOFF, 0, i);
+							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_KEYOFF, 0, i);
 						break;
 					}
 				}
@@ -1323,7 +1323,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 				{
 					note = pChn->pModInstrument->NoteMap[note - 1];
 				}
-				applyNNAtoPlug = pPlugin->isPlaying(note, pChn->pModInstrument->nMidiChannel, nChn);
+				applyNNAtoPlug = pPlugin->isPlaying(note, GetBestMidiChannel(nChn), nChn);
 			}
 		}
 	}
@@ -1360,7 +1360,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 				case NNA_NOTEFADE:	
 					//switch off note played on this plugin, on this tracker channel and midi channel 
 					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote+0xFF, 0, n);
-					pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
+					pPlugin->MidiCommand(GetBestMidiChannel(nChn), pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 					break;
 				}
 			}
@@ -1745,7 +1745,7 @@ BOOL CSoundFile::ProcessEffects()
 			}
 
 #ifdef MODPLUG_TRACKER
-			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
+			if (m_nInstruments) ProcessMidiOut(nChn); 
 #endif // MODPLUG_TRACKER
 		}
 
@@ -1840,12 +1840,12 @@ BOOL CSoundFile::ProcessEffects()
 
 				case VOLCMD_PORTAUP:
 					// IT compatibility (one of the first testcases - link effect memory)
-					PortamentoUp(pChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
+					PortamentoUp(nChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 
 				case VOLCMD_PORTADOWN:
 					// IT compatibility (one of the first testcases - link effect memory)
-					PortamentoDown(pChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
+					PortamentoDown(nChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 							
 				case VOLCMD_OFFSET:					//rewbs.volOff
@@ -1876,13 +1876,13 @@ BOOL CSoundFile::ProcessEffects()
 		// Portamento Up
 		case CMD_PORTAMENTOUP:
 			if ((!param) && (m_nType & MOD_TYPE_MOD)) break;
-			PortamentoUp(pChn, param);
+			PortamentoUp(nChn, param);
 			break;
 
 		// Portamento Down
 		case CMD_PORTAMENTODOWN:
 			if ((!param) && (m_nType & MOD_TYPE_MOD)) break;
-			PortamentoDown(pChn, param);
+			PortamentoDown(nChn, param);
 			break;
 
 		// Volume Slide
@@ -2360,10 +2360,11 @@ void CSoundFile::UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const
 }
 
 
-void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePortamentoAsRegular)
-//-----------------------------------------------------------------------------------------------
+void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular)
+//------------------------------------------------------------------------------------------------
 {
-	MidiPortamento(pChn, param); //Send midi pitch bend event if there's a plugin
+	MODCHANNEL *pChn = &Chn[nChn];
+	MidiPortamento(nChn, param); //Send midi pitch bend event if there's a plugin
 
 	if(param)
 		pChn->nOldPortaUpDown = param;
@@ -2402,10 +2403,11 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 }
 
 
-void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFinePortamentoAsRegular)
-//-------------------------------------------------------------------------------------------------
+void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular)
+//--------------------------------------------------------------------------------------------------
 {
-	MidiPortamento(pChn, -1*param); //Send midi pitch bend event if there's a plugin
+	MODCHANNEL *pChn = &Chn[nChn];
+	MidiPortamento(nChn, -param); //Send midi pitch bend event if there's a plugin
 
 	if(param)
 		pChn->nOldPortaUpDown = param;
@@ -2442,11 +2444,11 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFineP
 	}
 }
 
-void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
-//----------------------------------------------------------
+void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param)
+//-----------------------------------------------------------
 {
 	//Send midi pitch bend event if there's a plugin:
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const MODINSTRUMENT *pIns = Chn[nChn].pModInstrument;
 	if (pIns && pIns->HasValidMIDIChannel())
 	{
 		// instro sends to a midi chan
@@ -2456,7 +2458,7 @@ void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
 			IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
 			if (pPlug)
 			{
-				pPlug->MidiPitchBend(pIns->nMidiChannel, param, 0);
+				pPlug->MidiPitchBend(GetBestMidiChannel(nChn), param, 0);
 			}
 		}
 	}
@@ -3247,7 +3249,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 		} else if(macro[pos] == 'c')		// c: MIDI channel
 		{
 			isNibble = true;
-			data = (unsigned char)GetBestMidiChan(pChn);
+			data = (unsigned char)GetBestMidiChannel(nChn);
 		} else if(macro[pos] == 'n')		// n: note value (last triggered note)
 		{
 			if(pChn->nLastNote != NOTE_NONE && NOTE_IS_VALID(pChn->nLastNote))
@@ -3755,7 +3757,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER), bResetEnv);
 		if (m_nInstruments)
 		{
-			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
+			ProcessMidiOut(nChn);	//Send retrig to Midi
 		}
 		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->rowCommand.note) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
 		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
@@ -3859,7 +3861,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
 				if (pPlug)
 				{
-					pPlug->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
+					pPlug->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 				}
 			}
 		}
@@ -4320,12 +4322,25 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 }
 
 
-UINT CSoundFile::GetBestMidiChan(const MODCHANNEL *pChn) const
-//------------------------------------------------------------
+UINT CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
+//----------------------------------------------------------
 {
-	if (pChn && pChn->pModInstrument && pChn->pModInstrument->HasValidMIDIChannel())
+	if(nChn == CHANNELINDEX_INVALID)
 	{
-		return (pChn->pModInstrument->nMidiChannel - 1) & 0x0F;
+		return 0;
+	}
+
+	const MODINSTRUMENT *ins = Chn[nChn].pModInstrument;
+	if(ins != nullptr)
+	{
+		if(ins->nMidiChannel == MidiMappedChannel)
+		{
+			// For mapped channels, return their pattern channel, modulo 16 (because there are only 16 MIDI channels)
+			return (Chn[nChn].nMasterChn ? (Chn[nChn].nMasterChn - 1) : nChn) % 16;
+		} else if(ins->HasValidMIDIChannel())
+		{
+			return (ins->nMidiChannel - 1) & 0x0F;
+		}
 	}
 	return 0;
 }

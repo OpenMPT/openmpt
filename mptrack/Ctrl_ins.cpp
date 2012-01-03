@@ -926,17 +926,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinMidiPR.SetRange(0, 128);
 	// rewbs.MidiBank
 	m_SpinMidiBK.SetRange(0, 128);
-	// Midi Channel
-	//rewbs.instroVSTi: we no longer combine midi chan and FX in same cbbox
-	for (UINT ich=0; ich<17; ich++)
-	{
-		UINT n = 0;
-		s[0] = 0;
-		if (!ich) { strcpy(s, "None"); n=0; } 
-		else { wsprintf(s, "%d", ich); n=ich; }
-		if (s[0]) m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), n);
-	}
-	//end rewbs.instroVSTi
+
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Default"), SRCMODE_DEFAULT);
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("None"), SRCMODE_NEAREST);
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Linear"), SRCMODE_LINEAR);
@@ -1228,6 +1218,22 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ComboTuning.EnableWindow(bMPTOnly);
 		m_EditPitchTempoLock.EnableWindow(bMPTOnly);
 		m_CheckPitchTempoLock.EnableWindow(bMPTOnly);
+
+		// MIDI Channel
+		// XM has no "mapped" MIDI channels.
+		m_CbnMidiCh.ResetContent();
+		for (UINT ich = MidiNoChannel; ich <= (bITandMPT ? MidiMappedChannel : MidiLastChannel); ich++)
+		{
+			CString s;
+			if (ich == MidiNoChannel)
+				s = "None";
+			else if (ich == MidiMappedChannel)
+				s = "Mapped";
+			else
+				s.Format("%d", ich);
+			m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), ich);
+		}
+
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
@@ -1256,13 +1262,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 				SetDlgItemInt(IDC_EDIT11, pIns->wMidiBank);
 			else
 				SetDlgItemText(IDC_EDIT11, "---");
-			//rewbs.instroVSTi
-			//was:
-			//if (pIns->nMidiChannel < 17) m_CbnMidiCh.SetCurSel(pIns->nMidiChannel); else
-			//if (pIns->nMidiChannel & 0x80) m_CbnMidiCh.SetCurSel((pIns->nMidiChannel&0x7f)+16); else
-			//	m_CbnMidiCh.SetCurSel(0);
-			//now:
-			if (pIns->nMidiChannel < 17)
+
+			if (pIns->nMidiChannel < 18)
 			{
 				m_CbnMidiCh.SetCurSel(pIns->nMidiChannel); 
 			} else

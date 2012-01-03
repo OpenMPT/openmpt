@@ -1010,20 +1010,23 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//"receiveVstEvents",
 		//"receiveVstMidiEvent",
 		//"receiveVstTimeInfo",
-		//"reportConnectionChanges",
-		//"acceptIOChanges",
 		//"asyncProcessing",
 		//"offline",
 		//"supportShell"
+		//"shellCategory"
 		//"editFile"
 		//"startStopProcess"
+		//"sendVstMidiEventFlagIsRealtime"
+
 		if ((strcmp((char*)ptr,"sendVstEvents") == 0 ||
 				strcmp((char*)ptr,"sendVstMidiEvent") == 0 ||
 				strcmp((char*)ptr,"sendVstTimeInfo") == 0 ||
 				strcmp((char*)ptr,"supplyIdle") == 0 ||
 				strcmp((char*)ptr,"sizeWindow") == 0 ||
 				strcmp((char*)ptr,"openFileSelector") == 0 ||
-				strcmp((char*)ptr,"closeFileSelector") == 0
+				strcmp((char*)ptr,"closeFileSelector") == 0 ||
+				strcmp((char*)ptr,"acceptIOChanges") == 0 ||
+				strcmp((char*)ptr,"reportConnectionChanges") == 0
 			))
 			return HostCanDo;
 		else
@@ -1469,6 +1472,8 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
 
 	InitializeIOBuffers();
+
+	Dispatch(effSetProcessPrecision, 0, kVstProcessPrecision32, nullptr, 0.0f);
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
@@ -2497,11 +2502,6 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trac
 //------------------------------------------------------------------------------------------
 {
 	//Error checking
-	// Decrement midi chan cos we recieve a value in [1,17]; we want [0,16].
-	if (--nMidiCh>16)
-	{
-		nMidiCh=16;
-	}
 	if (nController>127)
 	{
 		nController=127;
@@ -2541,8 +2541,6 @@ short CVstPlugin::getMIDI14bitValueFromShort(short value)
 void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 //-----------------------------------------------------------------------------
 {
-	nMidiCh--;		// move from 1-17 range to 0-16 range
-
 	const int16 increment = static_cast<int16>(nParam * 0x2000/0xFF);
 	int16 newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
 	Limit(newPitchBendPos, int16(MIDI_PitchBend_Min), int16(MIDI_PitchBend_Max));
@@ -2564,8 +2562,7 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
 void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChannel)
 //----------------------------------------------------------------------------------------------------------------
 {
-	UINT nCh = (--nMidiCh) & 0x0f;
-	PVSTINSTCH pCh = &m_MidiCh[nCh];
+	PVSTINSTCH pCh = &m_MidiCh[nMidiCh];
 	DWORD dwMidiCode = 0;
 	bool bankChanged = (pCh->wMidiBank != --wMidiBank) && (wMidiBank < 0x80);
 	bool progChanged = (pCh->nProgram != --nMidiProg) && (nMidiProg < 0x80);
@@ -2582,7 +2579,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	if ((wMidiBank < 0x80) && ( bankChanged /*|| chanChanged */))
 	{
 		pCh->wMidiBank = wMidiBank;
-		MidiSend(((wMidiBank<<16)|(0x20<<8))|(0xB0|nCh));
+		MidiSend(((wMidiBank<<16)|(0x20<<8))|(0xB0|nMidiCh));
 	}
 	// Program change
 	// Note: Some plugs (Edirol Orchestral) don't update on bank change only -
@@ -2591,14 +2588,14 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	{
 		pCh->nProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
-		MidiSend((nMidiProg<<8)|(0xC0|nCh));
+		MidiSend((nMidiProg<<8)|(0xC0|nMidiCh));
 	}
 
 
 	// Specific Note Off
 	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
 	{
-		dwMidiCode = 0x80|nCh; //note off, on chan nCh
+		dwMidiCode = 0x80|nMidiCh; //note off, on chan nCh
 
 		note--;
 		UINT i = note - NOTE_KEYOFF;
@@ -2615,10 +2612,10 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	else if (note == NOTE_NOTECUT)	// ^^
 	{
 		//MidiSend(0xB0|nCh|(0x79<<8)); // reset all controllers
-		MidiSend(0xB0|nCh|(0x7b<<8));   // all notes off
-		MidiSend(0xB0|nCh|(0x78<<8));   // all sounds off
+		MidiSend(0xB0|nMidiCh|(0x7b<<8));   // all notes off
+		MidiSend(0xB0|nMidiCh|(0x78<<8));   // all sounds off
 
-		dwMidiCode = 0x80|nCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
+		dwMidiCode = 0x80|nMidiCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
 		for (UINT i=0; i<128; i++)	//all notes
 		{
 			pCh->uNoteOnMap[i][trackChannel]=0;
@@ -2631,7 +2628,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// using note mask.
 	else if (note > 0x80) // ==
 	{
-		dwMidiCode = 0x80|nCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
+		dwMidiCode = 0x80|nMidiCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
 
 		for (UINT i=0; i<128; i++)
 		{
@@ -2654,14 +2651,14 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// Note On
 	else if (note > 0)
 	{
-		dwMidiCode = 0x90|nCh; //note on, on chan nCh
+		dwMidiCode = 0x90|nMidiCh; //note on, on chan nCh
 
 		note--;
 
 		//reset pitch bend on each new note, tracker style.
-		if (m_nMidiPitchBendPos[nCh] != MIDI_PitchBend_Centre)
+		if (m_nMidiPitchBendPos[nMidiCh] != MIDI_PitchBend_Centre)
 		{
-			MidiPitchBend(nCh, MIDI_PitchBend_Centre);
+			MidiPitchBend(nMidiCh, MIDI_PitchBend_Centre);
 		}
 
 		// count instances of active notes.
@@ -2677,23 +2674,25 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		MidiSend(dwMidiCode|(note<<8)|(vol<<16));
 	}
 
-	m_nPreviousMidiChan = nCh;
+	m_nPreviousMidiChan = nMidiCh;
 
 }
+
 
 bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 //------------------------------------------------------------------
 {
 	note--;
-	PVSTINSTCH pMidiCh = &m_MidiCh[(midiChn-1) & 0x0f];
-	return  (pMidiCh->uNoteOnMap[note][trackerChn] != 0);
+	PVSTINSTCH pMidiCh = &m_MidiCh[midiChn];
+	return (pMidiCh->uNoteOnMap[note][trackerChn] != 0);
 }
+
 
 bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn)
 //---------------------------------------------------------------------------------------------
 {
 	note--;
-	PVSTINSTCH pMidiCh = &m_MidiCh[(midiChn-1) & 0x0f];
+	PVSTINSTCH pMidiCh = &m_MidiCh[midiChn & 0x0f];
 
 	if (!(pMidiCh->uNoteOnMap[note][sourceTrackerChn]))
 		return false;

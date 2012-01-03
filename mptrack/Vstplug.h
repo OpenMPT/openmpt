@@ -153,8 +153,6 @@ public:
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	bool GetSpeakerArrangement(); //rewbs.VSTCompliance
 
-	bool InitializeIOBuffers();
-
 	bool Bypass(bool bypass = true);  //rewbs.defaultPlugGUI
 	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); }; //rewbs.defaultPlugGUI
 
@@ -206,6 +204,9 @@ private:
 
 	// Helper function for retreiving parameter name / label / display
 	CString GetParamPropertyString(VstInt32 param, VstInt32 opcode);
+
+	// Set up input / output buffers.
+	bool InitializeIOBuffers();
 
 #else // case: NO_VST
 public:

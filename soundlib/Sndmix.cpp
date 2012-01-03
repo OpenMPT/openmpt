@@ -2418,9 +2418,11 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 
 #ifdef MODPLUG_TRACKER
 
-void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
-//------------------------------------------------------------------
+void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
+//------------------------------------------------
 {
+	MODCHANNEL *pChn = &Chn[nChn];
+
 	// Do we need to process midi?
 	// For now there is no difference between mute and sync mute with VSTis.
 	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
@@ -2462,10 +2464,10 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 			MODCOMMAND::NOTE realNote = note;
 			if(NOTE_IS_VALID(note))
 				realNote = pIns->NoteMap[note - 1];
-			pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
+			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
 		{
-			pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Fine, vol, nChn);
+			pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Fine, vol, nChn);
 		}
 		return;
 	}
@@ -2491,7 +2493,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 			realNote = pIns->NoteMap[note - 1];
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN], 0, nPlugin);
-		pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, realNote, velocity, nChn);
+		pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, velocity, nChn);
 	}
 
 	
@@ -2507,8 +2509,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn, MODCHANNEL *pChn)	//rewbs.VST
 				break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*vol), nChn);
-				else pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*defaultVolume), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2*vol), nChn);
+				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2*defaultVolume), nChn);
 				break;
 
 		}

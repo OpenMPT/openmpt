@@ -2330,6 +2330,11 @@ void CSoundFile::ConvertInstrument(INSTRUMENTINDEX instr, MODTYPE fromType, MODT
 		pIns->nDCT = DCT_NONE;
 		pIns->nDNA = DNA_NOTECUT;
 
+		if(pIns->nMidiChannel == MidiMappedChannel)
+		{
+			pIns->nMidiChannel == 1;
+		}
+
 		pIns->nGlobalVol = 64;
 		pIns->nPan = 128;
 
