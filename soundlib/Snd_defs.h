@@ -295,7 +295,7 @@ enum enmEnvelopeTypes
 #define SONG_EMBEDMIDICFG	0x0001		// Embed macros in file
 #define SONG_FASTVOLSLIDES	0x0002		// Old Scream Tracker 3.0 volume slides
 #define SONG_ITOLDEFFECTS	0x0004		// Old Impulse Tracker effect implementations
-#define SONG_ITCOMPATGXX	0x0008		// IT "Compatible Gxx" (IT's flag to behave more like other trackers when it comes to portamento effects)
+#define SONG_ITCOMPATGXX	0x0008		// IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
 #define SONG_LINEARSLIDES	0x0010		// Linear slides vs. Amiga slides
 #define SONG_PATTERNLOOP	0x0020		// Loop current pattern (pattern editor)
 #define SONG_STEP			0x0040		// Song is in "step" mode (pattern editor)
@@ -407,6 +407,14 @@ enum PLUGVOLUMEHANDLING
 	INST_FILTERMODE_LOWPASS,
 	INST_NUMFILTERMODES
 };*/
+
+enum MidiChannel
+{
+	MidiNoChannel = 0,
+	MidiFirstChannel = 1,
+	MidiLastChannel = 16,
+	MidiMappedChannel = 17,
+};
 
 
 // Vibrato Types
