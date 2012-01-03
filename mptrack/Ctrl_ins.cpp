@@ -738,7 +738,7 @@ void CNoteMapWnd::PlayNote(int note)
 //----------------------------------
 {
 	if(m_nPlayingNote >= 0) return; //no polyphony in notemap window
-	m_pModDoc->PlayNote(note, m_nInstrument, 0, FALSE);
+	m_pModDoc->PlayNote(note, m_nInstrument, 0, false);
 	m_nPlayingNote = note;
 }
 
@@ -749,7 +749,7 @@ void CNoteMapWnd::StopNote(int note = -1)
 	if(note < 0) note = m_nPlayingNote;
 	if(note < 0) return;
 
-	m_pModDoc->NoteOff(note, TRUE, m_nInstrument);
+	m_pModDoc->NoteOff(note, true, m_nInstrument);
 	m_nPlayingNote = -1;
 }
 
@@ -1075,7 +1075,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 void CCtrlInstruments::OnDeactivatePage()
 //---------------------------------------
 {
-	if (m_pModDoc) m_pModDoc->NoteOff(0, TRUE);
+	if (m_pModDoc) m_pModDoc->NoteOff(0, true);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)pFrame->GetInstrumentViewState());
 }
@@ -1802,10 +1802,10 @@ void CCtrlInstruments::OnInstrumentPlay()
 	{
 		if (m_pModDoc->IsNotePlaying(NOTE_MIDDLEC, 0, m_nInstrument))
 		{
-			m_pModDoc->NoteOff(NOTE_MIDDLEC, TRUE, m_nInstrument);
+			m_pModDoc->NoteOff(NOTE_MIDDLEC, true, m_nInstrument);
 		} else
 		{
-			m_pModDoc->PlayNote(NOTE_MIDDLEC, m_nInstrument, 0, FALSE);
+			m_pModDoc->PlayNote(NOTE_MIDDLEC, m_nInstrument, 0, false);
 		}
 	}
 	SwitchToView();

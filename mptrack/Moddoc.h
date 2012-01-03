@@ -268,8 +268,9 @@ public:
 	bool RemovePattern(PATTERNINDEX nPat);
 	bool RemoveSample(SAMPLEINDEX nSmp);
 	bool RemoveInstrument(INSTRUMENTINDEX nIns);
-	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID, const uint32 nStartPos = uint32_max); //rewbs.vstiLive: added current chan param
-	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
+
+	UINT PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol=-1, SmpLength loopStart = 0, SmpLength loopEnd = 0, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID, const SmpLength sampleOffset = 0); //rewbs.vstiLive: added current chan param
+	BOOL NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX nins = INSTRUMENTINDEX_INVALID, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
 
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
 	bool MuteChannel(CHANNELINDEX nChn, bool bMute);

@@ -278,7 +278,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 			int maxtick = envelope->Ticks[nPoint + 1];
 			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			// Can't have multiple points on same tick
-			if(nPoint > 0 && GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) && mintick < maxtick - 1)
+			if(nPoint > 0 && mintick < maxtick - 1)
 			{
 				mintick++;
 				if (nPoint + 1 < (int)envelope->nNodes) maxtick--;
@@ -905,7 +905,8 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	// and then BitBlt it to the destination "pDC"
 	
 	//check for window resize
-	if (m_dcMemMain.GetSafeHdc()) {
+	if (m_dcMemMain.GetSafeHdc())
+	{
 		m_dcMemMain.SelectObject(oldBitmap);
 		m_dcMemMain.DeleteDC();
 		m_bmpMemMain.DeleteObject();
@@ -1958,7 +1959,7 @@ void CViewInstrument::PlayNote(UINT note)
 		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		if (note >= 0xFE)
 		{
-			pModDoc->NoteOff(0, (note == NOTE_NOTECUT) ? TRUE : FALSE, m_nInstrument);
+			pModDoc->NoteOff(0, (note == NOTE_NOTECUT), m_nInstrument);
 			pMainFrm->SetInfoText("");
 		} else
 		if (m_nInstrument && !m_baPlayingNote[note])
@@ -1980,7 +1981,7 @@ void CViewInstrument::PlayNote(UINT note)
 			MODINSTRUMENT *pIns = pModDoc->GetSoundFile()->Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note-1] && !pIns->nMixPlug)) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
-			m_nPlayingChannel = pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
+			m_nPlayingChannel = pModDoc->PlayNote(note, m_nInstrument, 0, false); //rewbs.instViewNNA
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX)) 
 			{
@@ -2184,11 +2185,11 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			midiByte2 = 0;
 
 		case MIDIEVENT_NOTEON: // Note On
-			pModDoc->NoteOff(nNote, FALSE, m_nInstrument);
+			pModDoc->NoteOff(nNote, false, m_nInstrument);
 			if (midiByte2 & 0x7F)
 			{
 				nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
-				pModDoc->PlayNote(nNote, m_nInstrument, 0, FALSE, nVol);
+				pModDoc->PlayNote(nNote, m_nInstrument, 0, false, nVol);
 			}
 		break;
 
@@ -2302,8 +2303,8 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	if (wParam>=kcInstrumentStartNoteStops && wParam<=kcInstrumentEndNoteStops)
 	{	
 		int note =wParam-kcInstrumentStartNoteStops+1+pMainFrm->GetBaseOctave()*12;
-		m_baPlayingNote[note]=false; 
-		pModDoc->NoteOff(note, FALSE, m_nInstrument);
+		m_baPlayingNote[note] = false; 
+		pModDoc->NoteOff(note, false, m_nInstrument);
 		return wParam;
 	}
 
@@ -2583,12 +2584,12 @@ bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
 		return false;
 	}
 	// Can't move left of previous point
-	if((step < 0) && (pEnv->Ticks[envPoint] - pEnv->Ticks[envPoint - 1] >= -step + GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) ? 0 : 1))
+	if((step < 0) && (pEnv->Ticks[envPoint] - pEnv->Ticks[envPoint - 1] <= -step))
 	{
 		return false;
 	}
 	// Can't move right of next point
-	if((step > 0) && (envPoint < pEnv->nNodes - 1) && (pEnv->Ticks[envPoint + 1] - pEnv->Ticks[envPoint] >= step + GetDocument()->GetSoundFile()->IsCompatibleMode(TRK_IMPULSETRACKER|TRK_FASTTRACKER2) ? 0 : 1))
+	if((step > 0) && (envPoint < pEnv->nNodes - 1) && (pEnv->Ticks[envPoint + 1] - pEnv->Ticks[envPoint] <= step))
 	{
 		return false;
 	}

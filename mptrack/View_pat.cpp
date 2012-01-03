@@ -4222,11 +4222,11 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		if(bChordMode == true)
 		{
 			m_dwStatus &= ~PATSTATUS_CHORDPLAYING;
-			pModDoc->NoteOff(0, TRUE, ins, GetChanFromCursor(m_dwCursor));	// XXX this only gets one chord channel!
+			pModDoc->NoteOff(0, true, ins, GetChanFromCursor(m_dwCursor));	// XXX this doesn't stop VSTi notes!
 		}
 		else
 		{
-			pModDoc->NoteOff(note, ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOTEFADE) || pSndFile->GetNumInstruments() == 0) ? TRUE : FALSE, ins, GetChanFromCursor(m_dwCursor));
+			pModDoc->NoteOff(note, ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOTEFADE) || pSndFile->GetNumInstruments() == 0), ins, GetChanFromCursor(m_dwCursor));
 		}
 	}
 
@@ -4623,8 +4623,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 						}
 					}
 				}
-				BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
-				pModDoc->PlayNote(newcmd.note, nPlayIns, 0, bNotPlaying, 4 * vol, 0, 0, nChn);
+				bool isPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying()));
+				pModDoc->PlayNote(newcmd.note, nPlayIns, 0, !isPlaying, 4 * vol, 0, 0, nChn);
 			}
 		}
 
@@ -4849,13 +4849,13 @@ void CViewPattern::TempEnterChord(int note)
 						}
 					}
 				}
-				BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
-				pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
+				bool isPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying()));
+				pModDoc->PlayNote(p->note, nPlayIns, 0, !isPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
 				for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
 				{
 					if (chordplaylist[kplchrd])
 					{
-						pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
+						pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, false, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
 						m_dwStatus |= PATSTATUS_CHORDPLAYING;
 					}
 				}
