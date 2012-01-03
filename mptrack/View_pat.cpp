@@ -4222,7 +4222,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		if(bChordMode == true)
 		{
 			m_dwStatus &= ~PATSTATUS_CHORDPLAYING;
-			pModDoc->NoteOff(0, TRUE, ins, m_dwCursor & 0xFFFF);
+			pModDoc->NoteOff(0, TRUE, ins, GetChanFromCursor(m_dwCursor));	// XXX this only gets one chord channel!
 		}
 		else
 		{
@@ -4748,6 +4748,11 @@ void CViewPattern::TempEnterChord(int note)
 				UINT nchordch = nChn, nchno = 0;
 				nNote = nchordnote;
 				p->note = nNote;
+				if(prowbase[nChn] != *p)
+				{
+					modified = true;
+				}
+
 				BYTE recordGroup, currentRecordGroup = 0;
 
 				recordGroup = pModDoc->IsChannelRecord(nChn);
