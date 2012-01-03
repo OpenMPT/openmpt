@@ -125,7 +125,7 @@ CModTree::~CModTree()
 //-------------------
 {
 	vector<ModTreeDocInfo *>::iterator iter;
-	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		delete (*iter);
 	}
@@ -1245,11 +1245,11 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				if (!nParam) nParam = NOTE_MIDDLEC;
 				if (nParam & 0x80)
 				{
-					pModDoc->NoteOff(nParam & 0x7F, TRUE);
+					pModDoc->NoteOff(nParam & 0x7F, true);
 				} else
 				{
-					pModDoc->NoteOff(0, TRUE); // cut previous playing samples
-					pModDoc->PlayNote(nParam & 0x7F, 0, modItemID, FALSE);
+					pModDoc->NoteOff(0, true); // cut previous playing samples
+					pModDoc->PlayNote(nParam & 0x7F, 0, modItemID, false);
 				}
 			}
 			return TRUE;
@@ -1260,11 +1260,11 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				if (!nParam) nParam = NOTE_MIDDLEC;
 				if (nParam & 0x80)
 				{
-					pModDoc->NoteOff(nParam, TRUE);
+					pModDoc->NoteOff(nParam, true);
 				} else
 				{
-					pModDoc->NoteOff(0, TRUE);
-					pModDoc->PlayNote(nParam, modItemID, 0, FALSE);
+					pModDoc->NoteOff(0, true);
+					pModDoc->PlayNote(nParam, modItemID, 0, false);
 				}
 			}
 			return TRUE;

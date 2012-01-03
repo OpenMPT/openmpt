@@ -2172,25 +2172,21 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 	{
 		if (note >= NOTE_MIN_SPECIAL)
 		{
-			pModDoc->NoteOff(0, (note == NOTE_NOTECUT) ? TRUE : FALSE);
+			pModDoc->NoteOff(0, (note == NOTE_NOTECUT));
 		} 
 		else
 		{
 			CHAR s[64];
 			if (m_dwStatus & SMPSTATUS_KEYDOWN)
-				pModDoc->NoteOff(note, TRUE);
+				pModDoc->NoteOff(note, true);
 			else
-				pModDoc->NoteOff(0, TRUE);
+				pModDoc->NoteOff(0, true);
 
 			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
 			if (loopend - loopstart < (UINT)(4 << m_nZoom))
 				loopend = loopstart = 0; // selection is too small -> no loop
 
-			if(nStartPos != uint32_max)
-				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
-			else
-				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
-
+			pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;

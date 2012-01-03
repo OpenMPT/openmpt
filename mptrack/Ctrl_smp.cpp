@@ -222,7 +222,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 	//rewbs.fix36944
-	if (m_pSndFile->m_nType == MOD_TYPE_XM)
+	if (m_pSndFile->GetType() == MOD_TYPE_XM)
 	{
 		m_SpinPanning.SetRange(0, 255);
 	} else
@@ -411,7 +411,7 @@ void CCtrlSamples::OnDeactivatePage()
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)pFrame->GetSampleViewState());
-	if (m_pModDoc) m_pModDoc->NoteOff(0, TRUE);
+	if (m_pModDoc) m_pModDoc->NoteOff(0, true);
 }
 
 
@@ -521,7 +521,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_EDIT5:
 		case IDC_SPIN5:
 		case IDC_COMBO_BASENOTE:
-			if ((m_pSndFile) && (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_MOD)) && (m_nSample))
+			if ((m_pSndFile) && (m_pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) && (m_nSample))
 			{
 				const MODSAMPLE &sample = m_pSndFile->GetSample(m_nSample);
 				UINT nFreqHz = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
@@ -663,7 +663,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// File Name
 		memcpy(s, sample.filename, MAX_SAMPLEFILENAME);
 		s[21] = 0;
-		if (m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) s[0] = 0;
+		if (m_pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) s[0] = 0;
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
 		// Volume
 		SetDlgItemInt(IDC_EDIT7, sample.nVolume >> 2);
@@ -672,15 +672,17 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Panning
 		CheckDlgButton(IDC_CHECK1, (sample.uFlags & CHN_PANNING) ? MF_CHECKED : MF_UNCHECKED);
 		//rewbs.fix36944
-		if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+		if (m_pSndFile->GetType() == MOD_TYPE_XM)
+		{
 			SetDlgItemInt(IDC_EDIT9, sample.nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine
-		} else {
-			SetDlgItemInt(IDC_EDIT9, sample.nPan>>2);	//displayed panning with anything but XM is 0-64 so we divide by 4
+		} else
+		{
+			SetDlgItemInt(IDC_EDIT9, sample.nPan / 4);	//displayed panning with anything but XM is 0-64 so we divide by 4
 		}
 		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
         int transp = 0;
-		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if (m_pSndFile->GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
 		{
 			wsprintf(s, "%lu", sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
@@ -689,7 +691,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		{
 			int ftune = ((int)sample.nFineTune);
 			// MOD finetune range -8 to 7 translates to -128 to 112
-			if(m_pSndFile->m_nType & MOD_TYPE_MOD) ftune >>= 4;
+			if(m_pSndFile->GetType() & MOD_TYPE_MOD) ftune >>= 4;
 			SetDlgItemInt(IDC_EDIT5, ftune);
 			transp = (int)sample.RelativeTone;
 		}
@@ -836,7 +838,7 @@ OpenError:
 
 			memset(szFullFilename, 0, 32);
 			strcpy(szFullFilename, szName);
-			if (m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+			if (m_pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
 			{
 				// MOD/XM
 				strcat(szFullFilename, szExt);
@@ -852,7 +854,7 @@ OpenError:
 			szFullFilename[21] = 0;
 			memcpy(sample.filename, szFullFilename, MAX_SAMPLEFILENAME);
 		}
-		if ((m_pSndFile->m_nType & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
+		if ((m_pSndFile->GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
 		{
 			sample.nPan = 128;
 			sample.uFlags |= CHN_PANNING;
@@ -877,7 +879,7 @@ bool CCtrlSamples::OpenSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
 	m_pSndFile->DestroySample(m_nSample);
 	m_pSndFile->ReadSampleFromSong(m_nSample, pSndFile, nSample);
 	MODSAMPLE &sample = m_pSndFile->GetSample(m_nSample);
-	if ((m_pSndFile->m_nType & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
+	if ((m_pSndFile->GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
 	{
 		sample.nPan = 128;
 		sample.uFlags |= CHN_PANNING;
@@ -966,7 +968,7 @@ void CCtrlSamples::OnSampleNew()
 		{
 			if (Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
 			{
-				UINT nins = m_pModDoc->InsertInstrument(smp);
+				INSTRUMENTINDEX nins = m_pModDoc->InsertInstrument(smp);
 				m_pModDoc->UpdateAllViews(NULL, (nins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
 				m_pParent->InstrumentChanged(nins);
 			}
@@ -1029,7 +1031,7 @@ void CCtrlSamples::OnSampleSave()
 			SwitchToView();
 			return;
 		}
-		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if (m_pSndFile->GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			strncpy(szFileName, m_pSndFile->GetSample(m_nSample).filename, min(CountOf(m_pSndFile->GetSample(m_nSample).filename), CountOf(szFileName) - 1));
 		} else
@@ -1124,10 +1126,10 @@ void CCtrlSamples::OnSamplePlay()
 		// if ((m_pSndFile->IsPaused()) && (m_pModDoc->IsNotePlaying(0, m_nSample, 0)))
 		if (m_pModDoc->IsNotePlaying(0, m_nSample, 0))
 		{
-			m_pModDoc->NoteOff(0, TRUE);
+			m_pModDoc->NoteOff(0, true);
 		} else
 		{
-			m_pModDoc->PlayNote(NOTE_MIDDLEC, 0, m_nSample, FALSE);
+			m_pModDoc->PlayNote(NOTE_MIDDLEC, 0, m_nSample, false);
 		}
 	}
 	SwitchToView();
@@ -1152,13 +1154,12 @@ void CCtrlSamples::OnNormalize()
 			return;
 		iMinSample = 1;
 		iMaxSample = m_pSndFile->m_nSamples;
-	} else {
-		SAMPLEVIEWSTATE viewstate;
-		memset(&viewstate, 0, sizeof(viewstate));
-		SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+	} else
+	{
+		SELECTIONPOINTS selection = GetSelectionPoints();
 
-		iStart = viewstate.dwBeginSel;
-		iEnd = viewstate.dwEndSel;
+		iStart = selection.nStart;
+		iEnd = selection.nEnd;
 	}
 
 
@@ -1180,9 +1181,10 @@ void CCtrlSamples::OnNormalize()
 			} else
 			{
 				//one sample: correct the boundaries, if needed
-				if (iEnd > sample.nLength) iEnd = sample.nLength;
-				if (iStart > iEnd) iStart = iEnd;
-				if (iStart == iEnd) {
+				LimitMax(iEnd, sample.nLength);
+				LimitMax(iStart, iEnd);
+				if(iStart == iEnd)
+				{
 					iStart = 0;
 					iEnd = sample.nLength;
 				}
@@ -1190,9 +1192,9 @@ void CCtrlSamples::OnNormalize()
 
 			m_pModDoc->GetSampleUndo().PrepareUndo(iSmp, sundo_update, iStart, iEnd);
 
-			if (sample.uFlags & CHN_STEREO) { iStart *= 2; iEnd *= 2; }
+			if(sample.uFlags & CHN_STEREO) { iStart *= 2; iEnd *= 2; }
 
-			if (sample.uFlags & CHN_16BIT)
+			if(sample.uFlags & CHN_16BIT)
 			{
 				int16 *p = (int16 *)sample.pSample;
 				int max = 1;
@@ -1444,9 +1446,9 @@ void CCtrlSamples::OnUpsample()
 	smplsize = sample.GetBytesPerSample();
 	newsmplsize = sample.GetNumChannels() * 2;	// new sample is always 16-Bit
 	pOriginal = sample.pSample;
-	dwNewLen = sample.nLength + (dwEnd-dwStart);
+	dwNewLen = sample.nLength + (dwEnd - dwStart);
 	pNewSample = NULL;
-	if (dwNewLen+4 <= MAX_SAMPLE_LENGTH) pNewSample = CSoundFile::AllocateSample((dwNewLen+4)*newsmplsize);
+	if (dwNewLen + 4 <= MAX_SAMPLE_LENGTH) pNewSample = CSoundFile::AllocateSample((dwNewLen + 4)*newsmplsize);
 	if (pNewSample)
 	{
 		m_pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
@@ -1454,7 +1456,7 @@ void CCtrlSamples::OnUpsample()
 		const UINT nCh = sample.GetNumChannels();
 		for (UINT iCh=0; iCh<nCh; iCh++)
 		{
-			int len = dwEnd-dwStart;
+			int len = dwEnd - dwStart;
 			int maxndx = sample.nLength;
 			if (sample.uFlags & CHN_16BIT)
 			{
@@ -1598,7 +1600,7 @@ void CCtrlSamples::OnDownsample()
 	dwNewLen = sample.nLength - dwRemove;
 	dwEnd = dwStart+dwRemove*2;
 	pNewSample = NULL;
-	if ((dwNewLen > 32) && (dwRemove)) pNewSample = CSoundFile::AllocateSample((dwNewLen+4)*smplsize);
+	if ((dwNewLen > 32) && (dwRemove)) pNewSample = CSoundFile::AllocateSample((dwNewLen + 4) * smplsize);
 	if (pNewSample)
 	{
 

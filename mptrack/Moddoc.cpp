@@ -884,8 +884,8 @@ UINT CModDoc::GetPlaybackMidiChannel(const MODINSTRUMENT *pIns, CHANNELINDEX nCh
 }
 
 
-UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, CHANNELINDEX nCurrentChn, const uint32 nStartPos) //rewbs.vstiLive: added current chan param
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset) //rewbs.vstiLive: added current chan param
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	UINT nChn = GetNumChannels();
@@ -896,7 +896,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 	{
 
 		//kill notes if required.
-		if ( (bpause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this)
+		if ( (pause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this)
 		{ 
 			CriticalSection cs;
 
@@ -976,13 +976,13 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		// Handle sample looping.
 		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength))
-		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != nullptr))
+		if ((loopStart + 16 < loopEnd) && (loopStart >= 0) && (pChn->pModSample != nullptr))
 		{
-			pChn->nPos = loopstart;
+			pChn->nPos = loopStart;
 			pChn->nPosLo = 0;
-			pChn->nLoopStart = loopstart;
-			pChn->nLoopEnd = loopend;
-			pChn->nLength = min(UINT(loopend), pChn->pModSample->nLength);
+			pChn->nLoopStart = loopStart;
+			pChn->nLoopEnd = loopEnd;
+			pChn->nLength = min(UINT(loopEnd), pChn->pModSample->nLength);
 		}
 
 		// Handle extra-loud flag
@@ -995,12 +995,12 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 
 		// Handle custom start position
-		if(nStartPos != uint32_max && pChn->pModSample)
+		if(sampleOffset > 0 && pChn->pModSample)
 		{
-			pChn->nPos = nStartPos;
+			pChn->nPos = sampleOffset;
 			// If start position is after loop end, set loop end to sample end so that the sample starts 
 			// playing.
-			if(pChn->nLoopEnd < nStartPos) 
+			if(pChn->nLoopEnd < sampleOffset) 
 				pChn->nLength = pChn->nLoopEnd = pChn->pModSample->nLength;
 		}
 
@@ -1020,7 +1020,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
-					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
+					IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
 
 					if (pPlugin)
 					{
@@ -1035,19 +1035,19 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 	{
 		CriticalSection cs;
 		m_SndFile.NoteChange(nChn, note);
-		if (bpause) m_SndFile.m_dwSongFlags |= SONG_PAUSED;
+		if (pause) m_SndFile.m_dwSongFlags |= SONG_PAUSED;
 	}
 	return nChn;
 }
 
 
-BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, CHANNELINDEX nCurrentChn) //rewbs.vstiLive: added chan and nins
-//-------------------------------------------------------------------------------
+BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX nCurrentChn) //rewbs.vstiLive: added chan and nins
+//-----------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
 
 	//rewbs.vstiLive
-	if((nins > 0) && (nins <= m_SndFile.GetNumInstruments()) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
+	if((nins != INSTRUMENTINDEX_INVALID) && (nins <= m_SndFile.GetNumInstruments()) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
 	{
 
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
@@ -1061,7 +1061,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, CHANNELINDEX nCurrentChn
 			
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
-				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
 				if (pPlugin)
 				{
 					pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
@@ -1071,9 +1071,9 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, CHANNELINDEX nCurrentChn
 	}
 	//end rewbs.vstiLive
 
-	const DWORD mask = (bFade) ? CHN_NOTEFADE : (CHN_NOTEFADE|CHN_KEYOFF);
+	const DWORD mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
 	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
-	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
+	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 
 		// Fade all channels > m_nChannels which are playing this note. 
@@ -1082,7 +1082,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, CHANNELINDEX nCurrentChn
 		{
 			m_SndFile.KeyOff(i);
 			if (!m_SndFile.m_nInstruments) pChn->dwFlags &= ~CHN_LOOP;
-			if (bFade) pChn->dwFlags |= CHN_NOTEFADE;
+			if (fade) pChn->dwFlags |= CHN_NOTEFADE;
 			if (note) break;
 		}
 	}
