@@ -1699,7 +1699,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
 	{
 		void *chunk = NULL;
 		long chunkSize = Dispatch(effGetChunk, 1,0, &chunk, 0);
-		if ((chunkSize > 8) && (chunk))	//If chunk is less than 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+		if (chunkSize && chunk)
 			fxp = new Cfxp(ID, plugVersion, 1, chunkSize, chunk);
 	}
 	// fall back on parameter based preset:
@@ -2451,9 +2451,8 @@ void CVstPlugin::HardAllNotesOff()
 		overflow=false;
 		for (int mc=0; mc<16; mc++)		//all midi chans
 		{
-			UINT nCh = mc & 0x0f;
-			DWORD dwMidiCode = 0x80|nCh; //command|channel|velocity
-			PVSTINSTCH pCh = &m_MidiCh[nCh];
+			DWORD dwMidiCode = 0x80 | (mc & 0x0f); //command|channel|velocity
+			PVSTINSTCH pCh = &m_MidiCh[mc];
 
 			MidiPitchBend(mc, MIDI_PitchBend_Centre); // centre pitch bend
 			MidiSend(0xB0|mc|(0x79<<8));			  // reset all controllers
@@ -2785,28 +2784,22 @@ void CVstPlugin::SaveAllParameters()
 		m_bModified = false;
 
 		if ((m_pEffect->flags & effFlagsProgramChunks)
-		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf')
-		 && (m_pEffect->uniqueID != CCONST('S', 'y', 't', 'r'))) //special case: imageline sytrus pretends to support chunks but gives us garbage.
+		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf'))
 		{
-			void *p = NULL;
+			void *p = nullptr;
 			LONG nByteSize = 0;
 
 			// Try to get whole bank
-			if (m_pEffect->uniqueID != CCONST('v', 'B', 'F', '\4'))
-			{
-				//special case: VB ffx4 pretends to get a valid bank but gives us garbage.
-				nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
-			}
+			nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
 
-			if (/*(nByteSize < 8) ||*/ !p)
+			if (!p)
 			{
-				//If bank is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// Getting bank failed, try to get get just preset
 			} else
 			{
 				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
 			}
-			if (/*(nByteSize >= 8) && */(p)) //If program is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+			if (p != nullptr)
 			{
 				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= (UINT)(nByteSize+4)))
 				{
