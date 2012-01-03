@@ -31,8 +31,8 @@ protected:
 	static const size_t additionalBuffer = ((sizeof(intptr_t) * 8) / sizeof(buffer_t));
 
 	// Return pointer to an aligned buffer
-	buffer_t *GetBuffer(size_t index)
-	//-------------------------------
+	buffer_t *GetBuffer(size_t index) const
+	//-------------------------------------
 	{
 		ASSERT(index < inputs + outputs);
 		return reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(&mixBuffer[MIXBUFFERSIZE * index]) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
@@ -44,9 +44,17 @@ public:
 	bool Initialize(size_t inputs, size_t outputs)
 	//--------------------------------------------
 	{
+		// Short cut - we do not need to recreate the buffers.
+		if(this->inputs == inputs && this->outputs == outputs)
+		{
+			return true;
+		}
+
 		Free();
+
 		this->inputs = inputs;
 		this->outputs = outputs;
+
 		try
 		{
 			// Create inputs + outputs buffers with additional alignment.
@@ -109,6 +117,9 @@ public:
 		mixBuffer = nullptr;
 		inputsArray = nullptr;
 		outputsArray = nullptr;
+
+		inputs = outputs = 0;
+
 		Initialize(2, 0);
 	}
 
@@ -119,14 +130,13 @@ public:
 	}
 
 	// Return pointer to a given input or output buffer
-	buffer_t *GetInputBuffer(size_t index) { return GetBuffer(index); }
-	buffer_t *GetOutputBuffer(size_t index) { return GetBuffer(inputs + index); }
+	buffer_t *GetInputBuffer(size_t index) const { return GetBuffer(index); }
+	buffer_t *GetOutputBuffer(size_t index) const { return GetBuffer(inputs + index); }
 
 	// Return pointer array to all input or output buffers
-	buffer_t **GetInputBufferArray() { return inputsArray; }
-	buffer_t **GetOutputBufferArray() { return outputsArray; }
+	buffer_t **GetInputBufferArray() const { return inputsArray; }
+	buffer_t **GetOutputBufferArray() const { return outputsArray; }
 
 };
 
 #endif // PLUGINMIXBUFFER_H
-

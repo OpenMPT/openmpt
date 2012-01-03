@@ -88,9 +88,9 @@ const CModSpecifications mptm =
 	1,									// Min pattern rows
 	1024,								// Max pattern rows
     25,									// Max mod name length
-	26,									// Max sample name length
+	25,									// Max sample name length
 	12,									// Max sample filename length
-	26,									// Max instrument name length
+	25,									// Max instrument name length
 	12,									// Max instrument filename length
 	3999,								// SamplesMax
 	255,								// instrumentMax

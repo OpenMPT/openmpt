@@ -64,6 +64,9 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 
 		m_pVstPlugin->Dispatch(effEditTop, 0,0, NULL, 0);
 		m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
+
+		// Set knob mode to linear (2) instead of circular (0) for those plugins that support it (e.g. Steinberg VB-1)
+		m_pVstPlugin->Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
 	}
 
 	ShowWindow(SW_SHOW);
