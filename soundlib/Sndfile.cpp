@@ -663,26 +663,20 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			lpStream = NULL;
 		}
 #endif
-	} else {
+	} else
+	{
 		// New song
 		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
 	// Adjust song / sample names
-	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
+	for(SAMPLEINDEX iSmp = 0; iSmp <= GetNumSamples(); iSmp++)
 	{
-		LPSTR p = m_szNames[iSmp];
-		int j = 31;
-		p[j] = 0;
-		while ((j>=0) && (p[j]<=' ')) p[j--] = 0;
-		while (j>=0)
-		{
-			if (((BYTE)p[j]) < ' ') p[j] = ' ';
-			j--;
-		}
+		StringFixer::SetNullTerminator(m_szNames[iSmp]);
 	}
+
 	// Adjust channels
-	for (UINT ich=0; ich<MAX_BASECHANNELS; ich++)
+	for(CHANNELINDEX ich = 0; ich < MAX_BASECHANNELS; ich++)
 	{
 		if (ChnSettings[ich].nVolume > 64) ChnSettings[ich].nVolume = 64;
 		if (ChnSettings[ich].nPan > 256) ChnSettings[ich].nPan = 128;
@@ -700,18 +694,18 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	}
 	// Checking samples
 	MODSAMPLE *pSmp = Samples;
-	for (SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
+	for(SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
 	{
-		if (pSmp->pSample)
+		if(pSmp->pSample)
 		{
-			if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
-			if (pSmp->nLoopStart >= pSmp->nLoopEnd)
+			if(pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
+			if(pSmp->nLoopStart >= pSmp->nLoopEnd)
 			{
 				pSmp->nLoopStart = 0;
 				pSmp->nLoopEnd = 0;
 			}
-			if (pSmp->nSustainEnd > pSmp->nLength) pSmp->nSustainEnd = pSmp->nLength;
-			if (pSmp->nSustainStart >= pSmp->nSustainEnd)
+			if(pSmp->nSustainEnd > pSmp->nLength) pSmp->nSustainEnd = pSmp->nLength;
+			if(pSmp->nSustainStart >= pSmp->nSustainEnd)
 			{
 				pSmp->nSustainStart = 0;
 				pSmp->nSustainEnd = 0;
@@ -724,9 +718,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			pSmp->nSustainStart = 0;
 			pSmp->nSustainEnd = 0;
 		}
-		if (!pSmp->nLoopEnd) pSmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
-		if (!pSmp->nSustainEnd) pSmp->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-		if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
+		if(!pSmp->nLoopEnd) pSmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
+		if(!pSmp->nSustainEnd) pSmp->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+		if(pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
 	}
 	// Check invalid instruments
 	while ((m_nInstruments > 0) && (!Instruments[m_nInstruments])) m_nInstruments--;
@@ -2992,6 +2986,31 @@ struct UpgradePatternData
 				} else if(m.param == 0xD0)
 				{
 					m.command = CMD_NONE;
+				}
+			}
+		}
+
+		if((pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		{
+			// In the IT format, slide commands with both nibbles set should be ignored.
+			// For note volume slides, OpenMPT 1.18 fixes this in compatible mode, OpenMPT 1.20 fixes this in normal mode as well.
+			const bool noteVolSlide =
+				(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
+				(!pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				&&
+				(m.command == CMD_VOLUMESLIDE || m.command == CMD_VIBRATOVOL || m.command == CMD_TONEPORTAVOL || m.command == CMD_PANNINGSLIDE);
+
+			// OpenMPT 1.20 also fixes this for global volume and channel volume slides.
+			const bool chanVolSlide =
+				(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+				&&
+				(m.command == CMD_GLOBALVOLSLIDE || m.command == CMD_CHANNELVOLSLIDE);
+
+			if(noteVolSlide || chanVolSlide)
+			{
+				if((m.param & 0x0F) != 0x00 && (m.param & 0x0F) != 0x0F && (m.param & 0xF0) != 0x00 && (m.param & 0xF0) != 0xF0)
+				{
+					m.param &= 0x0F;
 				}
 			}
 		}
