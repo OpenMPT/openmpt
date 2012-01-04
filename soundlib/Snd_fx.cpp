@@ -2761,7 +2761,7 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 		// IT compatibility: Ignore slide commands with both nibbles set.
 		if (param & 0x0F)
 		{
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+			if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
 				newvolume -= (int)((param & 0x0F) * 4);
 		}
 		else
@@ -2807,7 +2807,7 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 				if (param & 0x0F)
 				{
 					// IT compatibility: Ignore slide commands with both nibbles set.
-					if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+					if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
 						nPanSlide = (int)((param & 0x0F) << 2);
 				} else
 				{
@@ -2894,7 +2894,7 @@ void CSoundFile::ChannelVolSlide(MODCHANNEL *pChn, UINT param)
 		{
 			if (param & 0x0F)
 			{
-				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
 					nChnSlide = -(int)(param & 0x0F);
 			} else
 			{
@@ -2948,7 +2948,9 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 					}
-					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
+					//pChn->nPan = (param << 4) + 8;
+					pChn->nPan = (param * 256 + 8) / 15;
+					pChn->dwFlags |= CHN_FASTVOLRAMP;
 				}
 				break;
 	// E9x: Retrig
@@ -3101,7 +3103,9 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 					}
-					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
+					//pChn->nPan = (param << 4) + 8;
+					pChn->nPan = (param * 256 + 8) / 15;
+					pChn->dwFlags |= CHN_FASTVOLRAMP;
 
 					//IT compatibility 20. Set pan overrides random pan
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -4053,7 +4057,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 			if (param & 0xF0)
 			{
 				// IT compatibility: Ignore slide commands with both nibbles set.
-				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0x0F) == 0)
 					nGlbSlide = (int)((param & 0xF0) >> 4) * 2;
 			} else
 			{
