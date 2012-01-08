@@ -11,7 +11,9 @@
 #define PLUGINMIXBUFFER_H
 
 // At least this part of the code is ready for double-precision rendering... :>
-template<typename buffer_t>
+// buffer_t: Sample buffer type (float, double, ...)
+// bufferSize: Buffer size in samples
+template<typename buffer_t, size_t bufferSize>
 //===================
 class PluginMixBuffer
 //===================
@@ -19,6 +21,7 @@ class PluginMixBuffer
 protected:
 
 	buffer_t *mixBuffer;		// Actual buffer, contains all input and output buffers
+	buffer_t *alignedBuffer;	// Aligned pointer to the buffer
 	buffer_t **inputsArray;		// Pointers to input buffers
 	buffer_t **outputsArray;	// Pointers to output buffers
 
@@ -35,7 +38,7 @@ protected:
 	//-------------------------------------
 	{
 		ASSERT(index < inputs + outputs);
-		return reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(&mixBuffer[MIXBUFFERSIZE * index]) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
+		return &alignedBuffer[bufferSize * index];
 	}
 
 public:
@@ -58,9 +61,12 @@ public:
 		try
 		{
 			// Create inputs + outputs buffers with additional alignment.
-			const size_t bufferSize = MIXBUFFERSIZE * (inputs + outputs) + additionalBuffer;
-			mixBuffer = new buffer_t[bufferSize];
-			memset(mixBuffer, 0, bufferSize * sizeof(buffer_t));
+			const size_t totalBufferSize = bufferSize * (inputs + outputs) + additionalBuffer;
+			mixBuffer = new buffer_t[totalBufferSize];
+			memset(mixBuffer, 0, totalBufferSize * sizeof(buffer_t));
+
+			// Align buffer start.
+			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(mixBuffer) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
 
 			inputsArray = new (buffer_t *[inputs]);
 			outputsArray = new (buffer_t *[outputs]);
@@ -87,7 +93,7 @@ public:
 	//---------
 	{
 		delete[] mixBuffer;
-		mixBuffer = nullptr;
+		mixBuffer = alignedBuffer = nullptr;
 
 		delete[] inputsArray;
 		inputsArray = nullptr;
@@ -104,7 +110,7 @@ public:
 	void ClearOutputBuffers(size_t numSamples)
 	//----------------------------------------
 	{
-		ASSERT(numSamples <= MIXBUFFERSIZE);
+		ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < outputs; i++)
 		{
 			memset(outputsArray[i], 0, numSamples * sizeof(buffer_t));
@@ -115,6 +121,7 @@ public:
 	//---------------
 	{
 		mixBuffer = nullptr;
+		alignedBuffer = nullptr;
 		inputsArray = nullptr;
 		outputsArray = nullptr;
 

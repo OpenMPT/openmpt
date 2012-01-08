@@ -123,19 +123,19 @@ CString MIDIMacroTools::GetZxxName(enmFixedMacroType macro)
 	switch(macro)
 	{
 	case zxx_reso4Bit:
-		return _T("Z80 - Z8F controls resonant filter resonance");
+		return _T("Z80 - Z8F controls Resonant Filter Resonance");
 	case zxx_reso7Bit:
-		return _T("Z80 - ZFF controls resonant filter resonance");
+		return _T("Z80 - ZFF controls Resonant Filter Resonance");
 	case zxx_cutoff:
-		return _T("Z80 - ZFF controls resonant filter cutoff");
+		return _T("Z80 - ZFF controls Resonant Filter Cutoff");
 	case zxx_mode:
-		return _T("Z80 - ZFF controls resonant filter mode");
+		return _T("Z80 - ZFF controls Resonant Filter Mode");
 	case zxx_resomode:
-		return _T("Z80 - Z9F controls resonance + filter mode");
+		return _T("Z80 - Z9F controls Resonance + Filter Mode");
 	case zxx_channelAT:
 		return _T("Z80 - ZFF controls Channel Aftertouch");
 	case zxx_polyAT:
-		return _T("Z80 - ZFF controls Poly Aftertouch");
+		return _T("Z80 - ZFF controls Polyphonic Aftertouch");
 	case zxx_custom:
 	default:
 		return _T("Custom");
