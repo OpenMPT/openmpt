@@ -82,8 +82,8 @@ protected:
 	VSTINSTCH m_MidiCh[16];
 	short m_nMidiPitchBendPos[16];
 
-	int m_MixBuffer[MIXBUFFERSIZE*2+2];		// Stereo interleaved
-	PluginMixBuffer<float> mixBuffer;		// Float buffers (input and output) for plugins
+	int m_MixBuffer[MIXBUFFERSIZE*2+2];					// Stereo interleaved
+	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
 
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
@@ -172,7 +172,7 @@ public:
 	void ProcessVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void ClearVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void RecalculateGain();
-	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
+	void Process(float *pOutL, float *pOutR, size_t nSamples);
 	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);
 	void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel);
@@ -207,6 +207,8 @@ private:
 
 	// Set up input / output buffers.
 	bool InitializeIOBuffers();
+
+	void ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples);
 
 #else // case: NO_VST
 public:

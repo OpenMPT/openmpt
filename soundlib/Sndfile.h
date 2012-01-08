@@ -392,7 +392,7 @@ public:
 	virtual int Release() = 0;
 	virtual void SaveAllParameters() = 0;
 	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
-	virtual void Process(float *pOutL, float *pOutR, unsigned long nSamples) = 0;
+	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
 	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
 	virtual void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) = 0;

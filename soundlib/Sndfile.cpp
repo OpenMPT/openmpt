@@ -2933,15 +2933,20 @@ void CSoundFile::UpgradeModFlags()
 	{
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 		SetModFlag(MSF_MIDICC_BUGEMULATION, false);
-		// If there are any plugins, enable volume bug emulation.
-		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		
+		if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 		{
-			if(m_MixPlugins[i].Info.dwPluginId1 | m_MixPlugins[i].Info.dwPluginId2)
+			// If there are any plugins, enable volume bug emulation.
+			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 			{
-				SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-				break;
+				if(m_MixPlugins[i].Info.dwPluginId1 | m_MixPlugins[i].Info.dwPluginId2)
+				{
+					SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+					break;
+				}
 			}
 		}
+
 		// If there are any instruments with random variation, enable the old random variation behaviour.
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
