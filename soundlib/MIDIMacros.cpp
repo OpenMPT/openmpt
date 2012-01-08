@@ -105,7 +105,38 @@ CString MIDIMacroTools::GetMacroName(enmParameteredMacroType macro)
 		return _T("Control Plugin Parameter...");
 	case sfx_cc:
 		return _T("MIDI CC...");
+	case sfx_channelAT:
+		return _T("Channel Aftertouch");
+	case sfx_polyAT:
+		return _T("Polyphonic Aftertouch");
 	case sfx_custom:
+	default:
+		return _T("Custom");
+	}
+}
+
+
+// Returns generic macro description.
+CString MIDIMacroTools::GetZxxName(enmFixedMacroType macro)
+//---------------------------------------------------------
+{
+	switch(macro)
+	{
+	case zxx_reso4Bit:
+		return _T("Z80 - Z8F controls resonant filter resonance");
+	case zxx_reso7Bit:
+		return _T("Z80 - ZFF controls resonant filter resonance");
+	case zxx_cutoff:
+		return _T("Z80 - ZFF controls resonant filter cutoff");
+	case zxx_mode:
+		return _T("Z80 - ZFF controls resonant filter mode");
+	case zxx_resomode:
+		return _T("Z80 - Z9F controls resonance + filter mode");
+	case zxx_channelAT:
+		return _T("Z80 - ZFF controls Channel Aftertouch");
+	case zxx_polyAT:
+		return _T("Z80 - ZFF controls Poly Aftertouch");
+	case zxx_custom:
 	default:
 		return _T("Custom");
 	}
@@ -224,6 +255,16 @@ void MIDIMacroTools::CreateZxxFromType(char (&szMidiZXXExt)[128][MACRO_LENGTH], 
 			else if (i < 32) wsprintf(szMidiZXXExt[i], "F0F002%02X", (i - 16) * 8);
 			else strcpy(szMidiZXXExt[i], "");
 			break;
+
+		case zxx_channelAT:
+			// Type 6 - Z80 - ZFF controls Channel Aftertouch
+			wsprintf(szMidiZXXExt[i], "Dc%02X", i);
+			break;
+
+		case zxx_polyAT:
+			// Type 7 - Z80 - ZFF controls Poly Aftertouch
+			wsprintf(szMidiZXXExt[i], "Acn%02X", i);
+			break;
 		}
 	}
 }
@@ -256,6 +297,12 @@ CString MIDIMacroTools::CreateParameteredMacroFromType(enmParameteredMacroType t
 		break;
 	case sfx_plug:
 		result.Format("F0F%03Xz", subType + 0x80);
+		break;
+	case sfx_channelAT:
+		result.Format("Dcz");
+		break;
+	case sfx_polyAT:
+		result.Format("Acnz");
 		break;
 	}
 	return result;
