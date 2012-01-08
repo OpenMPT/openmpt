@@ -66,6 +66,9 @@ Source: ..\mptrack\bin\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignore
 Source: ..\mptrack\bin\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
 
+; VST2MID Plugin
+Source: ..\packageTemplate\Plugins\VST2MID.dll; DestDir: {app}\Plugins\; Flags: ignoreversion
+
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
@@ -79,7 +82,7 @@ Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestDir
 ; soundtouch license stuff
 Source: ..\packageTemplate\SoundTouch\*.*; DestDir: {app}\SoundTouch; Flags: ignoreversion sortfilesbyextension
 ; keymaps
-Source: ..\packageTemplate\extraKeymaps\*.*; DestDir: {app}\extraKeymaps; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags: ignoreversion sortfilesbyextension
 
 ; kind of auto-backup - handy!
 Source: {userappdata}\OpenMPT\Keybindings.mkb; DestDir: {userappdata}\OpenMPT; DestName: Keybindings.mkb.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
@@ -134,7 +137,9 @@ Type: dirifempty; Name: {app}\tunings; Tasks: portable
 Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
 #endif
 
+#include "utilities.iss"
 #include "vst_scan.iss"
+#include "VST2MID.iss"
 
 [Code]
 
@@ -185,13 +190,7 @@ var
 
 begin
     // Get the right INI path.
-    if(IsTaskSelected('portable')) then
-    begin
-        INIFile := ExpandConstant('{app}\mptrack.ini');
-    end else
-    begin
-        INIFile := ExpandConstant('{userappdata}\OpenMPT\mptrack.ini');
-    end;
+    INIFile := GetINIPath();
 
     case CurStep of
     ssPostInstall:
@@ -200,6 +199,8 @@ begin
 #ifdef DOWNLOAD_MO3
             VerifyUNMO3Checksum();
 #endif
+
+            RegisterVST2MID();
 
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
@@ -283,4 +284,3 @@ begin
         end;
     end;
 end;
-
