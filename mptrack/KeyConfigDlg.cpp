@@ -203,7 +203,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("  Pattern Editor - Orderlist", kCtxCtrlOrderlist);
+	newCat = new CommandCategory("  Pattern Editor - Order List", kCtxCtrlOrderlist);
 
 	for (int c=kcStartOrderlistCommands; c<=kcEndOrderlistCommands; c++)
 		newCat->commands.Add(c);
@@ -250,7 +250,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("        Pattern Editor - Note col", kCtxViewPatternsNote);
+	newCat = new CommandCategory("        Pattern Editor - Note Column", kCtxViewPatternsNote);
 	for (int c=kcVPStartNotes; c<=kcVPEndNotes; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
@@ -262,25 +262,25 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("        Pattern Editor - Volume col", kCtxViewPatternsVol);
-	for (int c=kcSetVolumeStart; c<=kcSetVolumeEnd; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
-
-	newCat = new CommandCategory("        Pattern Editor - Instrument col", kCtxViewPatternsIns);
+	newCat = new CommandCategory("        Pattern Editor - Instrument Column", kCtxViewPatternsIns);
 	for (int c=kcSetIns0; c<=kcSetIns9; c++)
 		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("        Pattern Editor - FX col", kCtxViewPatternsFX);
+	newCat = new CommandCategory("        Pattern Editor - Volume Column", kCtxViewPatternsVol);
+	for (int c=kcSetVolumeStart; c<=kcSetVolumeEnd; c++)
+		newCat->commands.Add(c);
+	commandCategories.Add(*newCat);
+	delete newCat;
+
+	newCat = new CommandCategory("        Pattern Editor - Effect Column", kCtxViewPatternsFX);
 	for (int c=kcSetFXStart; c<=kcSetFXEnd; c++)
 		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("        Pattern Editor - FX param col", kCtxViewPatternsFXparam);
+	newCat = new CommandCategory("        Pattern Editor - Effect Parameter Column", kCtxViewPatternsFXparam);
 	for (int c=kcSetFXParam0; c<=kcSetFXParamF; c++)
 		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);

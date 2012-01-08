@@ -13,7 +13,6 @@
 #include "mptrack.h"
 #include "Vstplug.h"
 #include "resource.h"
-#include "MIDIMacros.h"
 #include "MIDIMacroDialog.h"
 
 
@@ -63,11 +62,14 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_EditSFx.SetLimitText(MACRO_LENGTH - 1);
 	m_EditZxx.SetLimitText(MACRO_LENGTH - 1);
 
+	// Parametered macro selection
 	for (UINT isfx=0; isfx<16; isfx++)
 	{
 		wsprintf(s, "%d (SF%X)", isfx, isfx);
 		m_CbnSFx.AddString(s);
 	}
+
+	// Parametered macro presets
 	m_CbnSFx.SetCurSel(0);
 	for(int i = 0; i < sfx_max; i++)
 	{
@@ -75,38 +77,41 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	OnSFxChanged();
 
+	// MIDI CC selection box
 	for (int cc = MIDICC_start; cc <= MIDICC_end; cc++)
 	{
 		wsprintf(s, "CC %02d %s", cc, MidiCCNames[cc]);
 		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);	
 	}
 
+	// Z80...ZFF box
 	for (int zxx = 0; zxx < 128; zxx++)
 	{
 		wsprintf(s, "Z%02X", zxx | 0x80);
 		m_CbnZxx.AddString(s);
 	}
+
+	// Fixed macro presets
 	m_CbnZxx.SetCurSel(0);
-	m_CbnZxxPreset.AddString("Custom");
-	m_CbnZxxPreset.AddString("Z80-Z8F controls resonance");
-	m_CbnZxxPreset.AddString("Z80-ZFF controls resonance");
-	m_CbnZxxPreset.AddString("Z80-ZFF controls cutoff");
-	m_CbnZxxPreset.AddString("Z80-ZFF controls filter mode");
-	m_CbnZxxPreset.AddString("Z80-Z9F controls resonance+mode");
+	for(int i = 0; i < zxx_max; i++)
+	{
+		m_CbnZxxPreset.SetItemData(m_CbnZxxPreset.AddString(macroTools.GetZxxName(static_cast<enmFixedMacroType>(i))), i);
+	}
 	m_CbnZxxPreset.SetCurSel(macroTools.GetZxxType(m_MidiCfg.szMidiZXXExt));
+
 	UpdateDialog();
 
 	int offsetx=108, offsety=30, separatorx=4, separatory=2, 
 		height=18, widthMacro=30, widthVal=90, widthType=135, widthBtn=70;
 
-	for (UINT m = 0; m < NUM_MACROS; m++)
+	for(UINT m = 0; m < NUM_MACROS; m++)
 	{
 		m_EditMacro[m].Create("", /*BS_FLAT |*/ WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
 			CRect(offsetx, offsety + m * (separatory + height), offsetx + widthMacro, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacro[m].SetFont(GetFont());
 
 		m_EditMacroType[m].Create(ES_READONLY | WS_CHILD| WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
-			CRect(offsetx + separatorx + widthMacro, offsety + m* (separatory + height), offsetx + widthMacro + widthType, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
+			CRect(offsetx + separatorx + widthMacro, offsety + m * (separatory + height), offsetx + widthMacro + widthType, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacroType[m].SetFont(GetFont());
 
 		m_EditMacroValue[m].Create(ES_CENTER | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
@@ -114,18 +119,18 @@ BOOL CMidiMacroSetup::OnInitDialog()
 		m_EditMacroValue[m].SetFont(GetFont());
 
 		m_BtnMacroShowAll[m].Create("Show All...", WS_CHILD | WS_TABSTOP | WS_VISIBLE,
-			CRect(offsetx + separatorx + widthType + widthMacro + widthVal, offsety + m *(separatory + height), offsetx + widthMacro + widthType + widthVal + widthBtn, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + m);
+			CRect(offsetx + separatorx + widthType + widthMacro + widthVal, offsety + m * (separatory + height), offsetx + widthMacro + widthType + widthVal + widthBtn, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + m);
 		m_BtnMacroShowAll[m].SetFont(GetFont());
 	}
 	UpdateMacroList();
 
-	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
+	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
 		PSNDMIXPLUGIN p = &(m_SndFile.m_MixPlugins[plug]);
 		StringFixer::SetNullTerminator(p->Info.szLibraryName);
 		if (p->Info.szLibraryName[0])
 		{
-			wsprintf(s, "FX%d: %s", plug+1, p->Info.szName);
+			wsprintf(s, "FX%d: %s", plug + 1, p->Info.szName);
 			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), plug);
 		}
 	}
@@ -300,7 +305,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 void CMidiMacroSetup::OnZxxPresetChanged()
 //----------------------------------------
 {
-	enmFixedMacroType zxx_preset = static_cast<enmFixedMacroType>(m_CbnZxxPreset.GetCurSel());
+	enmFixedMacroType zxx_preset = static_cast<enmFixedMacroType>(m_CbnZxxPreset.GetItemData(m_CbnZxxPreset.GetCurSel()));
 
 	if (zxx_preset != zxx_custom)
 	{

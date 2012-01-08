@@ -20,6 +20,8 @@ enum enmParameteredMacroType
 	sfx_drywet,			// Type 4 - Z00 - Z7F controls plugin Dry / Wet ratio
 	sfx_plug,			// Type 5 - Z00 - Z7F controls a plugin parameter
 	sfx_cc,				// Type 6 - Z00 - Z7F controls MIDI CC
+	sfx_channelAT,		// Type 7 - Z00 - Z7F controls Channel Aftertouch
+	sfx_polyAT,			// Type 8 - Z00 - Z7F controls Poly Aftertouch
 	sfx_custom,
 
 	sfx_max
@@ -35,6 +37,8 @@ enum enmFixedMacroType
 	zxx_cutoff,			// Type 3 - Z80 - ZFF controls resonant filter cutoff
 	zxx_mode,			// Type 4 - Z80 - ZFF controls resonant filter mode (lowpass / highpass)
 	zxx_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
+	zxx_channelAT,		// Type 6 - Z80 - ZFF controls Channel Aftertouch
+	zxx_polyAT,			// Type 7 - Z80 - ZFF controls Poly Aftertouch
 
 	zxx_max
 };
@@ -53,6 +57,7 @@ public:
 	// Translate macro type or macro string to macro name
 	static CString GetMacroName(enmParameteredMacroType macro);
 	CString GetMacroName(CString value, PLUGINDEX plugin) const;
+	static CString GetZxxName(enmFixedMacroType macro);
 
 	// Extract information from a macro string.
 	static int MacroToPlugParam(CString value);
