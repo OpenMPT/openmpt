@@ -32,7 +32,7 @@ begin
                     FilePath := NewRoot + FindRec.Name;
                     if FindRec.Attributes AND FILE_ATTRIBUTE_DIRECTORY > 0 then
                         ProcessDirectory (FilePath, Progress, INIFile)
-                    else if(CompareText('.dll', Copy(FindRec.Name, Length(FindRec.Name) - 3, 4)) = 0) then
+                    else if CompareFilename(FindRec.Name, '.dll') then
                     begin
                         // Start action -->
                         // .
