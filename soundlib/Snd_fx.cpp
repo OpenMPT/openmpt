@@ -793,8 +793,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		pChn->nC5Speed = pSmp->nC5Speed;
 		pChn->m_CalculateFreq = true;
 		pChn->nFineTune = 0;
-	}
-	else
+	} else
 	{
 		pChn->nC5Speed = pSmp->nC5Speed;
 		pChn->nFineTune = pSmp->nFineTune;
@@ -839,7 +838,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	MODSAMPLE *pSmp = pChn->pModSample;
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-	const bool bNewTuning = (GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning);
+	const bool newTuning = (GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning);
 	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
 	const int realnote = note;
 
@@ -879,7 +878,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		return;
 	}
 
-	if(bNewTuning)
+	if(newTuning)
 	{
 		if(!bPorta || pChn->nNote == NOTE_NONE)
 			pChn->nPortamentoDest = 0;
@@ -921,7 +920,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
 	{
 		note += pChn->nTranspose;
-		Limit(note, NOTE_MIN, 131);	// why 131? 120+11, how does this make sense?
+		Limit(note, NOTE_MIN + 11, NOTE_MIN + 130);	// why 131? 120+11, how does this make sense?
 	} else
 	{
 		Limit(note, NOTE_MIN, NOTE_MAX);
@@ -945,7 +944,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if (period)
 	{
 		if ((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
-		if(!bNewTuning) pChn->nPortamentoDest = period;
+		if(!newTuning) pChn->nPortamentoDest = period;
 		if ((!bPorta) || ((!pChn->nLength) && (!(GetType() & MOD_TYPE_S3M))))
 		{
 			pChn->pModSample = pSmp;
@@ -1549,7 +1548,26 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			UINT note = pChn->rowCommand.note;
 			if (instr) pChn->nNewIns = instr;
-			bool retrigEnv = (!note) && (instr);
+
+			// Notes that exceed FT2's limit are completely ignored.
+			// Test case: note-limit.xm
+			if(note != NOTE_NONE && NOTE_IS_VALID(note) && IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				const int computedNote = note + pChn->nTranspose;
+				if((computedNote < NOTE_MIN + 11 || computedNote > NOTE_MIN + 130))
+				{
+					note = NOTE_NONE;
+				}
+			}
+
+			// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
+			if(cmd == CMD_KEYOFF && param == 0 && IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				note = NOTE_NONE;
+				instr = 0;
+			}
+
+			bool retrigEnv = note == NOTE_NONE && instr != 0;
 
 			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
 			// Test cases: keyoff+instr.xm, delay.xm
@@ -1559,19 +1577,14 @@ BOOL CSoundFile::ProcessEffects()
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 			{
-				// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
-				if(cmd == CMD_KEYOFF && param == 0 && IsCompatibleMode(TRK_FASTTRACKER2))
-				{
-					note = instr = 0;
-					retrigEnv = false;
-				}
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
 				if ((note == NOTE_KEYOFF) && ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;
-					note = instr = 0;
+					note = NOTE_NONE;
+					instr = 0;
 					retrigEnv = false;
 				} else if(IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
 				{
@@ -1604,6 +1617,7 @@ BOOL CSoundFile::ProcessEffects()
 						reloadSampleSettings = true;
 					}
 				}
+
 			}
 
 			if((retrigEnv && !IsCompatibleMode(TRK_FASTTRACKER2)) || reloadSampleSettings)
@@ -1703,8 +1717,8 @@ BOOL CSoundFile::ProcessEffects()
 				InstrumentChange(pChn, instr, bPorta, true);
 				pChn->nNewIns = 0;
 				// Special IT case: portamento+note causes sample change -> ignore portamento
-				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
-				 && (psmp != pChn->pModSample) && (note) && (note < 0x80))
+				if ((GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+					&& (psmp != pChn->pModSample) && (note) && (note < 0x80))
 				{
 					bPorta = false;
 				}
@@ -1714,11 +1728,11 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				if ((!instr) && (pChn->nNewIns) && (note < 0x80))
 				{
-					InstrumentChange(pChn, pChn->nNewIns, bPorta, false, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? false : true);
+					InstrumentChange(pChn, pChn->nNewIns, bPorta, false, (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) == 0);
 					pChn->nNewIns = 0;
 				}
-				NoteChange(nChn, note, bPorta, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? false : true);
-				if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
+				NoteChange(nChn, note, bPorta, (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) == 0);
+				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					ResetChannelEnvelopes(pChn);
