@@ -1075,7 +1075,7 @@ void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
 			return;
 		}
 		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
-		int envvol = GetVolEnvValueFromPosition(envpos, pIns);
+		int envvol = GetVolEnvValueFromPosition(envpos, pIns->VolEnv);
 
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
@@ -2405,8 +2405,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 
 		if(pChn->rowCommand.command == CMD_MIDI || pChn->rowCommand.command == CMD_SMOOTHMIDI)
 		{
-			// Only smooth MIDI macros are processed on every tick
-			//if((pChn->nRowCommand == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) return;
+			// Also non-smooth MIDI Macros are processed on every row to update macros with volume or panning variables.
 			if(pChn->rowCommand.param < 0x80)
 				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->rowCommand.param);
 			else
@@ -2505,12 +2504,12 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		{
 			case PLUGIN_VOLUMEHANDLING_DRYWET:
 				if(hasVolCommand) pPlugin->SetDryRatio(2*vol);
-				else pPlugin->SetDryRatio(2*defaultVolume);
+				else pPlugin->SetDryRatio(2 * defaultVolume);
 				break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2*vol), nChn);
-				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2*defaultVolume), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2 * vol), nChn);
+				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2 * defaultVolume), nChn);
 				break;
 
 		}
@@ -2518,35 +2517,33 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 }
 
 
-int CSoundFile::GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const
-//---------------------------------------------------------------------------------------
+int CSoundFile::GetVolEnvValueFromPosition(int position, const INSTRUMENTENVELOPE &env) const
+//-------------------------------------------------------------------------------------------
 {
-	UINT pt = pIns->VolEnv.nNodes - 1;
+	UINT pt = env.nNodes - 1;
 
-	//Checking where current 'tick' is relative to the 
-	//envelope points.
-	for (UINT i=0; i<(UINT)(pIns->VolEnv.nNodes-1); i++)
+	// Checking where current 'tick' is relative to the 
+	// envelope points.
+	for (UINT i = 0; i < (UINT)(env.nNodes-1); i++)
 	{
-		if (position <= pIns->VolEnv.Ticks[i])
+		if (position <= env.Ticks[i])
 		{
 			pt = i;
 			break;
 		}
 	}
 
-	int x2 = pIns->VolEnv.Ticks[pt];
+	int x2 = env.Ticks[pt];
 	int x1, envvol;
-	if (position >= x2) //Case: current 'tick' is on a envelope point.
+	if (position >= x2) // Case: current 'tick' is on a envelope point.
 	{
-		envvol = pIns->VolEnv.Values[pt] << 2;
-		x1 = x2;
-	}
-	else //Case: current 'tick' is between two envelope points.
+		envvol = env.Values[pt] * 4;
+	} else // Case: current 'tick' is between two envelope points.
 	{
 		if (pt)
 		{
-			envvol = pIns->VolEnv.Values[pt-1] << 2;
-			x1 = pIns->VolEnv.Ticks[pt-1];
+			envvol = env.Values[pt - 1] * 4;
+			x1 = env.Ticks[pt - 1];
 		} else
 		{
 			envvol = 0;
@@ -2555,9 +2552,9 @@ int CSoundFile::GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pI
 
 		if(x2 > x1 && position > x1)
 		{
-			//Linear approximation between the points;
-			//f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1)/(x2-x1)
-			envvol += ((position - x1) * (((int)pIns->VolEnv.Values[pt]<<2) - envvol)) / (x2 - x1);
+			// Linear approximation between the points;
+			// f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1)/(x2-x1)
+			envvol += ((position - x1) * (((int)env.Values[pt] * 4) - envvol)) / (x2 - x1);
 		}
 	}
 	return envvol;

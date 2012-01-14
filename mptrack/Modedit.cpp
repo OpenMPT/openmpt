@@ -1245,38 +1245,25 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	pIns = m_SndFile.Instruments[nIns];
 	if(pIns == nullptr) return false;
 	
-	INSTRUMENTENVELOPE *pEnv = nullptr;
-
-	switch(nEnv)
-	{
-	case ENV_PANNING:
-		pEnv = &pIns->PanEnv;
-		break;
-	case ENV_PITCH:
-		pEnv = &pIns->PitchEnv;
-		break;
-	default:
-		pEnv = &pIns->VolEnv;
-		break;
-	}
+	const INSTRUMENTENVELOPE &env = pIns->GetEnvelope(nEnv);
 
 	// We don't want to copy empty envelopes
-	if(pEnv->nNodes == 0)
+	if(env.nNodes == 0)
 	{
 		return false;
 	}
 
 	strcpy(s, pszEnvHdr);
-	wsprintf(s + strlen(s), pszEnvFmt, pEnv->nNodes, pEnv->nSustainStart, pEnv->nSustainEnd, pEnv->nLoopStart, pEnv->nLoopEnd, (pEnv->dwFlags & ENV_SUSTAIN) ? 1 : 0, (pEnv->dwFlags & ENV_LOOP) ? 1 : 0, (pEnv->dwFlags & ENV_CARRY) ? 1 : 0);
-	for (UINT i = 0; i < pEnv->nNodes; i++)
+	wsprintf(s + strlen(s), pszEnvFmt, env.nNodes, env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd, (env.dwFlags & ENV_SUSTAIN) ? 1 : 0, (env.dwFlags & ENV_LOOP) ? 1 : 0, (env.dwFlags & ENV_CARRY) ? 1 : 0);
+	for (UINT i = 0; i < env.nNodes; i++)
 	{
 		if (strlen(s) >= sizeof(s)-32) break;
-		wsprintf(s+strlen(s), "%d,%d\r\n", pEnv->Ticks[i], pEnv->Values[i]);
+		wsprintf(s+strlen(s), "%d,%d\r\n", env.Ticks[i], env.Values[i]);
 	}
 
 	//Writing release node
 	if(strlen(s) < sizeof(s) - 32)
-		wsprintf(s+strlen(s), "%u\r\n", pEnv->nReleaseNode);
+		wsprintf(s+strlen(s), "%u\r\n", env.nReleaseNode);
 
 	dwMemSize = strlen(s)+1;
 	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
@@ -1310,7 +1297,6 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 	{
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
-		INSTRUMENTENVELOPE *pEnv = nullptr;
 
 		UINT susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
@@ -1325,25 +1311,15 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			if (loopEnd >= nPoints) loopEnd = 0;
 			if (loopBegin > loopEnd) loopBegin = loopEnd;
 
-			switch(nEnv)
-			{
-			case ENV_PANNING:
-				pEnv = &pIns->PanEnv;
-				break;
-			case ENV_PITCH:
-				pEnv = &pIns->PitchEnv;
-				break;
-			default:
-				pEnv = &pIns->VolEnv;
-				break;
-			}
-			pEnv->nNodes = nPoints;
-			pEnv->nSustainStart = susBegin;
-			pEnv->nSustainEnd = susEnd;
-			pEnv->nLoopStart = loopBegin;
-			pEnv->nLoopEnd = loopEnd;
-			pEnv->nReleaseNode = releaseNode;
-			pEnv->dwFlags = (pEnv->dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0) | (nPoints > 0 ? ENV_ENABLED : 0);
+			INSTRUMENTENVELOPE &env = pIns->GetEnvelope(nEnv);
+
+			env.nNodes = nPoints;
+			env.nSustainStart = susBegin;
+			env.nSustainEnd = susEnd;
+			env.nLoopStart = loopBegin;
+			env.nLoopEnd = loopEnd;
+			env.nReleaseNode = releaseNode;
+			env.dwFlags = (env.dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0) | (nPoints > 0 ? ENV_ENABLED : 0);
 
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)
@@ -1356,8 +1332,8 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 				if (dwPos >= dwMemSize) break;
 				int n2 = atoi(p+dwPos);
 				if ((n1 < oldn) || (n1 > ENVELOPE_MAX_LENGTH)) n1 = oldn + 1;
-				pEnv->Ticks[i] = (WORD)n1;
-				pEnv->Values[i] = (BYTE)n2;
+				env.Ticks[i] = (WORD)n1;
+				env.Values[i] = (BYTE)n2;
 				oldn = n1;
 				while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
 				if (dwPos >= dwMemSize) break;
@@ -1369,7 +1345,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 				BYTE r = static_cast<BYTE>(atoi(p + dwPos));
 				if(r == 0 || r >= nPoints || !m_SndFile.GetModSpecifications().hasReleaseNode)
 					r = ENV_RELEASE_NODE_UNSET;
-				pEnv->nReleaseNode = r;
+				env.nReleaseNode = r;
 			}
 		}
 		GlobalUnlock(hCpy);

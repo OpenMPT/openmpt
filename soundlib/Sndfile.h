@@ -232,6 +232,20 @@ struct MODINSTRUMENT
 
 	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
 
+	INSTRUMENTENVELOPE &GetEnvelope(enmEnvelopeTypes envType)
+	{
+		switch(envType)
+		{
+		case ENV_VOLUME:
+		default:
+			return VolEnv;
+		case ENV_PANNING:
+			return PanEnv;
+		case ENV_PITCH:
+			return PitchEnv;
+		}
+	}
+
 };
 
 //MODINSTRUMENT;
@@ -339,6 +353,20 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	PLUGINDEX m_RowPlug;
 	
 	void ClearRowCmd() { rowCommand = MODCOMMAND::Empty(); }
+
+	MODCHANNEL_ENVINFO &GetEnvelope(enmEnvelopeTypes envType)
+	{
+		switch(envType)
+		{
+		case ENV_VOLUME:
+		default:
+			return VolEnv;
+		case ENV_PANNING:
+			return PanEnv;
+		case ENV_PITCH:
+			return PitchEnv;
+		}
+	}
 
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume;}
@@ -1193,7 +1221,7 @@ protected:
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 
 public:
-	int GetVolEnvValueFromPosition(int position, const MODINSTRUMENT* pIns) const;
+	int GetVolEnvValueFromPosition(int position, const INSTRUMENTENVELOPE &env) const;
     void ResetChannelEnvelopes(MODCHANNEL *pChn) const;
 	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env) const;
 

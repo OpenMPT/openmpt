@@ -548,38 +548,24 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 		return false;
 	}
 
-	INSTRUMENTENVELOPE *env;
-
-	switch(envelope)
-	{
-	case ENV_VOLUME:
-	default:
-		env = &pIns->VolEnv;
-		break;
-	case ENV_PANNING:
-		env = &pIns->PanEnv;
-		break;
-	case ENV_PITCH:
-		env = &pIns->PitchEnv;
-		break;
-	}
+	INSTRUMENTENVELOPE &env = pIns->GetEnvelope(envelope);
 
 	const DWORD flags = (ENV_ENABLED | extraFlags);
 
 	if (enable)
 	{
-		env->dwFlags |= flags;
-		if(!env->nNodes)
+		env.dwFlags |= flags;
+		if(!env.nNodes)
 		{
-			env->Values[0] = env->Values[1] = defaultValue;
-			env->Ticks[0] = 0;
-			env->Ticks[1] = 10;
-			env->nNodes = 2;
+			env.Values[0] = env.Values[1] = defaultValue;
+			env.Ticks[0] = 0;
+			env.Ticks[1] = 10;
+			env.nNodes = 2;
 			InvalidateRect(NULL, FALSE);
 		}
 	} else
 	{
-		env->dwFlags &= ~flags;
+		env.dwFlags &= ~flags;
 	}
 
 	CriticalSection cs;
@@ -589,28 +575,14 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 	{
 		if(pSndFile->Chn[nChn].pModInstrument == pIns)
 		{
-			MODCHANNEL_ENVINFO *envInfo;
-
-			switch(envelope)
-			{
-			case ENV_VOLUME:
-			default:
-				envInfo = &pSndFile->Chn[nChn].VolEnv;
-				break;
-			case ENV_PANNING:
-				envInfo = &pSndFile->Chn[nChn].PanEnv;
-				break;
-			case ENV_PITCH:
-				envInfo = &pSndFile->Chn[nChn].PitchEnv;
-				break;
-			}
+			MODCHANNEL_ENVINFO &chnEnv = pSndFile->Chn[nChn].GetEnvelope(envelope);
 
 			if(enable)
 			{
-				envInfo->flags |= flags;
+				chnEnv.flags |= flags;
 			} else
 			{
-				envInfo->flags &= ~flags;
+				chnEnv.flags &= ~flags;
 			}
 		}
 	}
@@ -1181,7 +1153,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	}
 	if (pnotify->dwType & MPTNOTIFY_STOP)
 	{
-		for (UINT i=0; i<MAX_CHANNELS; i++)
+		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			if (m_dwNotifyPos[i])
 			{
@@ -1196,7 +1168,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
 	{
 		BOOL bUpdate = FALSE;
-		for (UINT i=0; i<MAX_CHANNELS; i++)
+		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			//DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
 			DWORD newpos = pnotify->dwPos[i];
@@ -1210,7 +1182,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
 			DrawPositionMarks(hdc);
-			for (UINT j=0; j<MAX_CHANNELS; j++)
+			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
 				//DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[j] : 0;
 				DWORD newpos = pnotify->dwPos[j];
@@ -2552,23 +2524,7 @@ INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
 	MODINSTRUMENT *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return nullptr;
 			
-	// Now for the real thing.
-	INSTRUMENTENVELOPE *envelope = nullptr;
-
-	switch(m_nEnv)
-	{
-	case ENV_VOLUME:
-		envelope = &pIns->VolEnv;
-		break;
-	case ENV_PANNING:
-		envelope = &pIns->PanEnv;
-		break;
-	case ENV_PITCH:
-		envelope = &pIns->PitchEnv;
-		break;
-	}
-
-	return envelope;
+	return &pIns->GetEnvelope(m_nEnv);
 }
 
 

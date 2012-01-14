@@ -1889,19 +1889,19 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Portamento Up
 		case CMD_PORTAMENTOUP:
-			if ((!param) && (m_nType & MOD_TYPE_MOD)) break;
+			if ((!param) && (GetType() & MOD_TYPE_MOD)) break;
 			PortamentoUp(nChn, param);
 			break;
 
 		// Portamento Down
 		case CMD_PORTAMENTODOWN:
-			if ((!param) && (m_nType & MOD_TYPE_MOD)) break;
+			if ((!param) && (GetType() & MOD_TYPE_MOD)) break;
 			PortamentoDown(nChn, param);
 			break;
 
 		// Volume Slide
 		case CMD_VOLUMESLIDE:
-			if ((param) || (m_nType != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
+			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
 			break;
 
 		// Tone-Portamento
@@ -1911,7 +1911,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Tone-Portamento + Volume Slide
 		case CMD_TONEPORTAVOL:
-			if ((param) || (m_nType != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
+			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
 			TonePortamento(pChn, 0);
 			break;
 
@@ -1922,7 +1922,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Vibrato + Volume Slide
 		case CMD_VIBRATOVOL:
-			if ((param) || (m_nType != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
+			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
 			Vibrato(pChn, 0);
 			break;
 
@@ -1936,10 +1936,10 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_TEMPO:
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-				m = NULL;
+				m = nullptr;
 				if (m_nRow < Patterns[m_nPattern].GetNumRows()-1)
 				{
-					m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
+					m = Patterns[m_nPattern].GetpModCommand(m_nRow + 1, nChn);
 				}
 				if (m && m->command == CMD_XPARAM)
 				{ 
@@ -1950,7 +1950,7 @@ BOOL CSoundFile::ProcessEffects()
 					param = (param << 8) + m->param;
 				}
 // -! NEW_FEATURE#0010
-				if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+				if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 				}
@@ -3603,15 +3603,15 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 			MODCOMMAND *m;
 			m = NULL;
 
-			if(m_nRow < Patterns[m_nPattern].GetNumRows()-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
+			if(m_nRow < Patterns[m_nPattern].GetNumRows() - 1) m = Patterns[m_nPattern].GetpModCommand(m_nRow + 1, nChn);
 
 			if(m && m->command == CMD_XPARAM)
 			{
 				UINT tmp = m->param;
 				m = NULL;
-				if(m_nRow < Patterns[m_nPattern].GetNumRows()-2) m = Patterns[m_nPattern] + (m_nRow+2) * m_nChannels  + nChn;
+				if(m_nRow < Patterns[m_nPattern].GetNumRows() - 2) m = Patterns[m_nPattern].GetpModCommand(m_nRow + 2, nChn);
 
-				if(m && m->command == CMD_XPARAM) param = (param<<16) + (tmp<<8) + m->param;
+				if(m && m->command == CMD_XPARAM) param = (param << 16) + (tmp << 8) + m->param;
 				else param = (param<<8) + tmp;
 			}
 			else
@@ -3625,11 +3625,12 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 	if ((pChn->rowCommand.note >= NOTE_MIN) && (pChn->rowCommand.note <= NOTE_MAX))
 	{
 		pChn->nPos = param;
+		pChn->nPosLo = 0;
 
 		if (pChn->nPos >= pChn->nLength)
 		{
 			// Offset beyond sample size
-			if (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+			if (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 			{
 				// IT Compatibility: Offset
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -3659,6 +3660,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 	{
 		// XXX what's this?
 		pChn->nPos = param;
+		pChn->nPosLo = 0;
 	}
 
 	return;
@@ -3936,7 +3938,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 	
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
-			pChn->VolEnv.nEnvValueAtReleaseJump = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
+			pChn->VolEnv.nEnvValueAtReleaseJump = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns->VolEnv);
 			pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
