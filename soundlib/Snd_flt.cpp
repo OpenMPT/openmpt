@@ -57,40 +57,37 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modif
 
 	float d, e;
 
+	// flt_modifier is in [-256, 256], so cutoff is in [0, 127 * 2] after this calculation.
+	const int computedCutoff = cutoff * (flt_modifier + 256) / 256;
+
+	// Filtering is only ever done in IT if either cutoff is not full or if resonance is set.
+	if(IsCompatibleMode(TRK_IMPULSETRACKER) && resonance == 0 && computedCutoff >= 254)
+	{
+		if(pChn->rowCommand.note != NOTE_NONE && NOTE_IS_VALID(pChn->rowCommand.note) && !(pChn->dwFlags & CHN_PORTAMENTO))
+		{
+			// Z7F next to a note disables the filter, however in other cases this should not happen.
+			// Test cases: filter-reset.it, filter-reset-carry.it
+			pChn->dwFlags &= ~CHN_FILTER;
+		}
+		return;
+	}
+
+	pChn->dwFlags |= CHN_FILTER;
+
 	if(UseITFilterMode())
 	{
-
-		// flt_modifier is in [-256, 256], so cutoff is in [0, 127 * 2] after this calculation
-		cutoff = cutoff * (flt_modifier + 256) / 256;
-
-		// Filtering is only ever done if either cutoff is not full or if resonance is set.
-		if(cutoff < 254 || resonance != 0)
-		{
-			pChn->dwFlags |= CHN_FILTER;
-		} else
-		{
-			return;
-		}
 
 		static const float freqMultiplier = 2.0f * (float)M_PI * 110.0f * pow(2.0f, 0.25f);
 		static const float freqParameterMultiplier = 128.0f / (24.0f * 256.0f);
 
 		// 2 ^ (i / 24 * 256)
-		const float r = (float)gdwMixingFreq / (freqMultiplier * pow(2.0f, (float)cutoff * freqParameterMultiplier));
+		const float r = (float)gdwMixingFreq / (freqMultiplier * pow(2.0f, (float)computedCutoff * freqParameterMultiplier));
 
 		d = ITResonanceTable[resonance] * r + ITResonanceTable[resonance] - 1.0f;
 		e = r * r;
 
 	} else
 	{
-
-		// We might end up here even if IT compatible playback mode is enabled and if extended filter range flag is set.
-		// We'd still want compatible behaviour then, but at the same time use MPT's cutoff / resonance settings
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && resonance == 0 && cutoff * (flt_modifier + 256) >= 254 * 256)
-		{
-			return;
-		}
-		pChn->dwFlags |= CHN_FILTER;
 
 		float fc = (float)CutOffToFrequency(cutoff, flt_modifier);
 		const float dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)resonance) / 20.0f);
