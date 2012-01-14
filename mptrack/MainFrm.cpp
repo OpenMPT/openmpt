@@ -1053,12 +1053,12 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			p->nPattern = m_pSndFile->m_nPattern;
 			if (m_dwNotifyType & MPTNOTIFY_SAMPLE)
 			{
-				UINT nSmp = m_dwNotifyType & 0xFFFF;
-				for (UINT k=0; k<MAX_CHANNELS; k++)
+				SAMPLEINDEX nSmp = m_dwNotifyType & 0xFFFF;
+				for (CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 				{
 					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
-					if ((nSmp) && (nSmp <= m_pSndFile->m_nSamples) && (pChn->nLength)
+					if ((nSmp) && (nSmp <= m_pSndFile->GetNumSamples()) && (pChn->nLength)
 					 && (pChn->pSample) && (pChn->pSample == m_pSndFile->GetSample(nSmp).pSample)
 					 && ((!(pChn->dwFlags & CHN_NOTEFADE)) || (pChn->nFadeOutVol)))
 					{
@@ -1069,7 +1069,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			if (m_dwNotifyType & (MPTNOTIFY_VOLENV|MPTNOTIFY_PANENV|MPTNOTIFY_PITCHENV))
 			{
 				UINT nIns = m_dwNotifyType & 0xFFFF;
-				for (UINT k=0; k<MAX_CHANNELS; k++)
+				for (CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 				{
 					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
@@ -1077,18 +1077,17 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					 && (pChn->pModInstrument) && (pChn->pModInstrument == m_pSndFile->Instruments[nIns])
 					 && ((!(pChn->dwFlags & CHN_NOTEFADE)) || (pChn->nFadeOutVol)))
 					{
-						MODCHANNEL_ENVINFO *env = &pChn->VolEnv;
+						enmEnvelopeTypes notifyEnv = ENV_VOLUME;
 						if (m_dwNotifyType & MPTNOTIFY_PITCHENV)
-						{
-							env = &pChn->PitchEnv;
-						} else if (m_dwNotifyType & MPTNOTIFY_PANENV)
-						{
-							env = &pChn->PanEnv;
-						}
+							notifyEnv = ENV_PITCH;
+						else if (m_dwNotifyType & MPTNOTIFY_PANENV)
+							notifyEnv = ENV_PANNING;
 
-						if (env->flags & ENV_ENABLED)
+						const MODCHANNEL_ENVINFO &chnEnv = pChn->GetEnvelope(notifyEnv);
+
+						if (chnEnv.flags & ENV_ENABLED)
 						{
-							DWORD pos = env->nEnvPosition;
+							DWORD pos = chnEnv.nEnvPosition;
 							if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER) && pos > 0)
 							{
 								// Impulse Tracker envelope handling (see SndMix.cpp for details)
@@ -1607,7 +1606,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 		m[63*4].note = NOTE_KEYOFF;
 		m[63*4+1].note = NOTE_KEYOFF;
 	}
-	if ((nInstrument) && (nInstrument <= pSong->m_nInstruments))
+	if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
 	{
 		m_WaveFile.ReadInstrumentFromSong(1, pSong, nInstrument);
 	} else
