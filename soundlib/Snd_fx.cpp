@@ -466,7 +466,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
-					if (memory.chnVols[nChn] > (int)(param & 0x0F)) param = memory.chnVols[nChn] - (param & 0x0F);
+					if (memory.chnVols[nChn] > (param & 0x0F)) param = memory.chnVols[nChn] - (param & 0x0F);
 					else param = 0;
 				} else
 				if (param & 0x0F)
@@ -641,6 +641,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			// but still uses the sample info from the old one (bug?)
 			returnAfterVolumeAdjust = true;
 		}
+	}
+
+	// IT Compatibility: Envelope pickup after SCx cut
+	// Test case: cut-carry.it
+	if(pChn->nInc == 0 && IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		bInstrumentChanged = true;
 	}
 
 	// XM compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
@@ -2421,7 +2428,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 //--------------------------------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	MidiPortamento(nChn, -param); //Send midi pitch bend event if there's a plugin
+	MidiPortamento(nChn, -(int)param); //Send midi pitch bend event if there's a plugin
 
 	if(param)
 		pChn->nOldPortaUpDown = param;
@@ -3472,7 +3479,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			if(oldcutoff < 0) oldcutoff = -oldcutoff;
 			if((pChn->nVolume > 0) || (oldcutoff < 0x10)
 				|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+				SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER));
 #endif // NO_FILTER
 
 			return 4;
@@ -3493,7 +3500,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			}
 
 #ifndef NO_FILTER
-			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER));
 #endif // NO_FILTER
 
 			return 4;
@@ -3505,7 +3512,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			{
 				pChn->nFilterMode = (param >> 4);
 #ifndef NO_FILTER
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
+				SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER));
 #endif // NO_FILTER
 			}
 
