@@ -187,12 +187,6 @@ BOOL CModDoc::OnNewDocument()
 	}
 
 
-	// Refresh mix levels now that the correct mod type has been set
-	m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
-	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
-	// ...and the order length
-	m_SndFile.Order.resize(min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
-
 	ReinitRecordState();
 	InitializeMod();
 	SetModifiedFlag(FALSE);
@@ -687,6 +681,12 @@ BOOL CModDoc::InitializeMod()
 			break;
 		}
 
+		// Refresh mix levels now that the correct mod type has been set
+		m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
+		m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
+		// ...and the order length
+		m_SndFile.Order.resize(min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
+
 		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())
 			m_SndFile.Order[0] = 0;
 
@@ -712,6 +712,11 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME / 2;
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
 		}*/
+
+		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_XM))
+		{
+			m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
+		}
 
 		for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 		{
@@ -868,7 +873,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 
 
 UINT CModDoc::GetPlaybackMidiChannel(const MODINSTRUMENT *pIns, CHANNELINDEX nChn) const
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 {
 	if(pIns->nMidiChannel == MidiMappedChannel)
 	{
@@ -1462,14 +1467,14 @@ UINT CModDoc::FindInstrumentChild(UINT nIns) const
 //------------------------------------------------
 {
 	MODINSTRUMENT *pIns;
-	if ((!nIns) || (nIns > m_SndFile.m_nInstruments)) return 0;
+	if ((!nIns) || (nIns > m_SndFile.GetNumInstruments())) return 0;
 	pIns = m_SndFile.Instruments[nIns];
 	if (pIns)
 	{
 		for (UINT i=0; i<NOTE_MAX; i++)
 		{
 			UINT n = pIns->Keyboard[i];
-			if ((n) && (n <= m_SndFile.m_nSamples)) return n;
+			if ((n) && (n <= m_SndFile.GetNumSamples())) return n;
 		}
 	}
 	return 0;

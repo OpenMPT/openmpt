@@ -387,53 +387,55 @@ void Convert_RIFF_AMFF_Envelope(const uint8 flags, const uint8 numpoints, const 
 
 
 // Convert envelope data from a RIFF AM module (new format) to MPT envelope data.
-void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, INSTRUMENTENVELOPE *pMPTEnv, const enmEnvelopeTypes env)
-//-------------------------------------------------------------------------------------------------------------------
+void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, MODINSTRUMENT *instr, enmEnvelopeTypes env)
+//------------------------------------------------------------------------------------------------------
 {
-	if(pAMEnv == nullptr || pMPTEnv == nullptr)
+	if(pAMEnv == nullptr || instr == nullptr)
 		return;
 
 	if(pAMEnv->numpoints == 0xFF || pAMEnv->numpoints == 0x00)
 		return;
 
+	INSTRUMENTENVELOPE &mptEnv = instr->GetEnvelope(env);
+
 	uint16 flags = LittleEndianW(pAMEnv->flags);
-	pMPTEnv->dwFlags = (flags & AMENV_ENABLED) ? ENV_ENABLED : 0;
-	if(flags & AMENV_SUSTAIN) pMPTEnv->dwFlags |= ENV_SUSTAIN;
-	if(flags & AMENV_LOOP) pMPTEnv->dwFlags |= ENV_LOOP;
+	mptEnv.dwFlags = (flags & AMENV_ENABLED) ? ENV_ENABLED : 0;
+	if(flags & AMENV_SUSTAIN) mptEnv.dwFlags |= ENV_SUSTAIN;
+	if(flags & AMENV_LOOP) mptEnv.dwFlags |= ENV_LOOP;
 
-	pMPTEnv->nNodes = min(pAMEnv->numpoints + 1, 10);
+	mptEnv.nNodes = min(pAMEnv->numpoints + 1, 10);
 
-	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = pAMEnv->suslooppoint;
-	if(pMPTEnv->nSustainStart > pMPTEnv->nNodes)
-		pMPTEnv->dwFlags &= ~ENV_SUSTAIN;
+	mptEnv.nSustainStart = mptEnv.nSustainEnd = pAMEnv->suslooppoint;
+	if(mptEnv.nSustainStart > mptEnv.nNodes)
+		mptEnv.dwFlags &= ~ENV_SUSTAIN;
 
-	pMPTEnv->nLoopStart = pAMEnv->loopstart;
-	pMPTEnv->nLoopEnd = pAMEnv->loopend;
-	if(pMPTEnv->nLoopStart > pMPTEnv->nLoopEnd || pMPTEnv->nLoopStart > pMPTEnv->nNodes)
-		pMPTEnv->dwFlags &= ~ENV_LOOP;
+	mptEnv.nLoopStart = pAMEnv->loopstart;
+	mptEnv.nLoopEnd = pAMEnv->loopend;
+	if(mptEnv.nLoopStart > mptEnv.nLoopEnd || mptEnv.nLoopStart > mptEnv.nNodes)
+		mptEnv.dwFlags &= ~ENV_LOOP;
 
 	for(size_t i = 0; i < 10; i++)
 	{
-		pMPTEnv->Ticks[i] = LittleEndianW(pAMEnv->values[i].tick >> 4);
+		mptEnv.Ticks[i] = LittleEndianW(pAMEnv->values[i].tick >> 4);
 		if(i == 0)
-			pMPTEnv->Ticks[i] = 0;
-		else if(pMPTEnv->Ticks[i] < pMPTEnv->Ticks[i - 1])
-			pMPTEnv->Ticks[i] = pMPTEnv->Ticks[i - 1] + 1;
+			mptEnv.Ticks[i] = 0;
+		else if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
+			mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + 1;
 
 		const uint16 val = LittleEndianW(pAMEnv->values[i].pointval);
 		switch(env)
 		{
 		case ENV_VOLUME:	// 0....32767
-			pMPTEnv->Values[i] = (BYTE)((val + 1) >> 9);
+			mptEnv.Values[i] = (BYTE)((val + 1) >> 9);
 			break;
 		case ENV_PITCH:		// -4096....4096
-			pMPTEnv->Values[i] = (BYTE)((((int16)val) + 0x1001) >> 7);
+			mptEnv.Values[i] = (BYTE)((((int16)val) + 0x1001) >> 7);
 			break;
 		case ENV_PANNING:	// -32768...32767
-			pMPTEnv->Values[i] = (BYTE)((((int16)val) + 0x8001) >> 10);
+			mptEnv.Values[i] = (BYTE)((((int16)val) + 0x8001) >> 10);
 			break;
 		}
-		pMPTEnv->Values[i] = CLAMP(pMPTEnv->Values[i], ENVELOPE_MIN, ENVELOPE_MAX);
+		mptEnv.Values[i] = CLAMP(mptEnv.Values[i], ENVELOPE_MIN, ENVELOPE_MAX);
 	}
 }
 
@@ -679,9 +681,9 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				pIns->nFadeOut = LittleEndianW(instheader->volenv.fadeout) << 5;
 
-				Convert_RIFF_AM_Envelope(&instheader->volenv, &pIns->VolEnv, ENV_VOLUME);
-				Convert_RIFF_AM_Envelope(&instheader->pitchenv, &pIns->PitchEnv, ENV_PITCH);
-				Convert_RIFF_AM_Envelope(&instheader->panenv, &pIns->PanEnv, ENV_PANNING);
+				Convert_RIFF_AM_Envelope(&instheader->volenv, pIns, ENV_VOLUME);
+				Convert_RIFF_AM_Envelope(&instheader->pitchenv, pIns, ENV_PITCH);
+				Convert_RIFF_AM_Envelope(&instheader->panenv, pIns, ENV_PANNING);
 
 				const size_t nTotalSmps = LittleEndianW(instheader->numsamples);
 
