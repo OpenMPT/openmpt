@@ -275,25 +275,21 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						if (pSndFile->GetNumInstruments())
 						{
 							bool first = true;
-							for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++) if (pSndFile->Instruments[i])
+							for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
 							{
-								const MODINSTRUMENT *pIns = pSndFile->Instruments[i];
-								for (size_t j = 0; j < CountOf(pIns->Keyboard); j++)
+								if (pSndFile->IsSampleReferencedByInstrument(iSmp + 1, i))
 								{
-									if (pIns->Keyboard[j] == (iSmp + 1))
-									{
-										if (!first) strcat(s, ",");
-										first = false;
+									if (!first) strcat(s, ",");
+									first = false;
 
-										wsprintf(stmp, "%d", i);
-										strcat(s, stmp);
+									wsprintf(stmp, "%d", i);
+									strcat(s, stmp);
+
+									if (strlen(s) > sizeof(s) - 10)
+									{
+										strcat(s, "...");
 										break;
 									}
-								}
-								if (strlen(s) > sizeof(s) - 10)
-								{
-									strcat(s, "...");
-									break;
 								}
 							}
 						}
@@ -363,18 +359,10 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_SAMPLES:
 						if (pIns)
 						{
-							std::set<SAMPLEINDEX> referencedSamples;
-							for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
-							{
-								// 0 isn't a sample.
-								if(pIns->Keyboard[i] != 0)
-								{
-									referencedSamples.insert(pIns->Keyboard[i]);
-								}
-							}
+							const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 
 							bool first = true;
-							for(std::set<SAMPLEINDEX>::iterator iter = referencedSamples.begin(); iter != referencedSamples.end(); iter++)
+							for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 							{
 								if(!first) strcat(s, ",");
 								first = false;
@@ -386,7 +374,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 									break;
 								}
 
-								wsprintf(s + l, "%d", *iter);
+								wsprintf(s + l, "%d", *sample);
 							}
 						}
 						break;

@@ -490,15 +490,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 
 		nSpeedCount += memory.musicSpeed;
 
-		switch(m_nTempoMode)
-		{
-			case tempo_mode_alternative: 
-				memory.elapsedTime += 60000.0 / (1.65625 * (double)(memory.musicSpeed * memory.musicTempo)); break;
-			case tempo_mode_modern: 
-				memory.elapsedTime += 60000.0 / (double)memory.musicTempo / (double)m_nCurrentRowsPerBeat; break;
-			case tempo_mode_classic: default:
-				memory.elapsedTime += (2500.0 * (double)nSpeedCount) / (double)memory.musicTempo;
-		}
+		memory.elapsedTime += GetRowDuration(nSpeedCount, memory.musicTempo);
 	}
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
@@ -568,8 +560,6 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv)
 //--------------------------------------------------------------------------------------------------------
 {
-	bool bInstrumentChanged = false;
-
 	if (instr >= MAX_INSTRUMENTS) return;
 	MODINSTRUMENT *pIns = Instruments[instr];
 	MODSAMPLE *pSmp = &Samples[instr];
@@ -577,7 +567,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 	if(note == NOTE_NONE && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
 
-	if ((pIns) && (note) && (note <= 128))
+	if (pIns != nullptr && note != NOTE_NONE && NOTE_IS_VALID(note))
 	{
 		if(bPorta && pIns == pChn->pModInstrument && (pChn->pModSample != nullptr && pChn->pModSample->pSample != nullptr) && IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -611,11 +601,11 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			UINT n = pIns->Keyboard[note - 1];
 			pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
 		}
-	} else
-	if (GetNumInstruments())
+	} else if (GetNumInstruments())
 	{
+		// No valid instrument, or not a valid note.
 		if (note >= NOTE_MIN_SPECIAL) return;
-		pSmp = NULL;
+		pSmp = nullptr;
 	}
 
 	const bool bNewTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
@@ -625,13 +615,11 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		return;
 
 	bool returnAfterVolumeAdjust = false;
-	// bInstrumentChanged is used for IT carry-on env option
-	if (pIns != pChn->pModInstrument)
-	{
-		bInstrumentChanged = true;
-		// we will set the new instrument later.
-	} 
-	else 
+
+	// instrumentChanged is used for IT carry-on env option
+	bool instrumentChanged = (pIns != pChn->pModInstrument);
+
+	if(!instrumentChanged)
 	{	
 		// Special XM hack
 		if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (pIns)
@@ -645,19 +633,19 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 	// IT Compatibility: Envelope pickup after SCx cut
 	// Test case: cut-carry.it
-	if(pChn->nInc == 0 && IsCompatibleMode(TRK_IMPULSETRACKER))
+	if(pChn->nInc == 0 && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 	{
-		bInstrumentChanged = true;
+		instrumentChanged = true;
 	}
 
 	// XM compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
 	// And this does *not* happen if volume column portamento is used together with note delay... (handled in ProcessEffects(), where all the other note delay stuff is.)
 	// Test case: porta-delay.xm
-	if(bInstrumentChanged && bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
+	if(instrumentChanged && bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
 	{
 		pIns = pChn->pModInstrument;
 		pSmp = pChn->pModSample;
-		bInstrumentChanged = false;
+		instrumentChanged = false;
 	} else
 	{
 		pChn->pModInstrument = pIns;
@@ -706,10 +694,10 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		if ((!bPorta) || (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATGXX)
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
-		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && bInstrumentChanged))
+		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && instrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
-			if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
+			if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!instrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
@@ -756,7 +744,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 		//IT compatibility tentative fix: Don't change bidi loop direction when 
 		//no sample nor instrument is changed.
-		if(IsCompatibleMode(TRK_ALLTRACKERS) && pSmp == pChn->pModSample && !bInstrumentChanged)
+		if(IsCompatibleMode(TRK_ALLTRACKERS) && pSmp == pChn->pModSample && !instrumentChanged)
 			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 		else
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
@@ -892,7 +880,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		else
 		{
 			pChn->nPortamentoDest = pIns->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
-			//Here pCnh->nPortamentoDest means 'steps to slide'.
+			//Here pChn->nPortamentoDest means 'steps to slide'.
 			pChn->m_PortamentoFineSteps = -pChn->nPortamentoDest;
 		}
 	}
@@ -3901,7 +3889,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 //----------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	const bool bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? false : true;
+	const bool bKeyOn = !(pChn->dwFlags & CHN_KEYOFF);
 	pChn->dwFlags |= CHN_KEYOFF;
 	//if ((!pChn->pModInstrument) || (!(pChn->VolEnv.flags & CHN_VOLENV)))
 	if ((pChn->pModInstrument) && (!(pChn->VolEnv.flags & ENV_ENABLED)))
@@ -4176,7 +4164,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 //-------------------------------------------------------------------------------
 {
 	if ((!note) || (note >= NOTE_MIN_SPECIAL)) return 0;
-	if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV
+	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV
 				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
 	{
 		note--;
@@ -4191,7 +4179,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
 	} else
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 	{
 		if (note < 13) note = 13;
 		note -= 13;
@@ -4207,8 +4195,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 			UINT roct = note / 12;
 			int rfine = finetune / 16;
 			int i = rnote + rfine + 8;
-			if (i < 0) i = 0;
-			if (i >= 104) i = 103;
+			Limit(i , 0, 103);
 			UINT per1 = XMPeriodTable[i];
 			if ( finetune < 0 )
 			{
@@ -4330,19 +4317,18 @@ PLUGINDEX __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, PluginMutePrio
 PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const
 //-------------------------------------------------------------------------------------------------------
 {
-	const MODCHANNEL *pChn = &Chn[nChn];
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
 	// so we don't need to worry about finding the master chan.
 
 	PLUGINDEX nPlugin = 0;
-	if (pChn && pChn->pModInstrument)
+	if (Chn[nChn].pModInstrument)
 	{
-		if (respectMutes == RespectMutes && pChn->pModSample && (pChn->pModSample->uFlags & CHN_MUTE))
+		if (respectMutes == RespectMutes && Chn[nChn].pModSample && (Chn[nChn].pModSample->uFlags & CHN_MUTE))
 		{ 
 			nPlugin = 0;
 		} else
 		{
-			nPlugin = pChn->pModInstrument->nMixPlug;
+			nPlugin = Chn[nChn].pModInstrument->nMixPlug;
 		}
 	}
 	return nPlugin;

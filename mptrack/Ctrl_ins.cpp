@@ -322,24 +322,21 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample &Map\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap));
 				if (hSubMenu)
 				{
-					const SAMPLEINDEX numSamps = pSndFile->GetNumSamples();
-					vector<bool> smpused(numSamps + 1, false);
-					for (UINT i=1; i<NOTE_MAX; i++)
+					// Create sub menu with a list of all samples that are referenced by this instrument.
+					const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
+
+					for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 					{
-						SAMPLEINDEX nsmp = pIns->Keyboard[i];
-						if (nsmp <= numSamps) smpused[nsmp] = true;
-					}
-					for (SAMPLEINDEX j = 1; j <= numSamps; j++)
-					{
-						if (smpused[j])
+						if(*sample <= pSndFile->GetNumSamples())
 						{
-							wsprintf(s, "%d: ", j);
-							UINT l = strlen(s);
-							memcpy(s + l, pSndFile->m_szNames[j], MAX_SAMPLENAME);
-							s[l + MAX_SAMPLENAME] = 0;
-							AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE+j, s);
+							wsprintf(s, "%d: ", *sample);
+							size_t l = strlen(s);
+							memcpy(s + l, pSndFile->m_szNames[*sample], MAX_SAMPLENAME);
+							s[l + MAX_SAMPLENAME] = '\0';
+							AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + *sample, s);
 						}
 					}
+
 					AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, "&Edit Sample\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSample));
 					AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 				}
@@ -888,7 +885,6 @@ CRuntimeClass *CCtrlInstruments::GetAssociatedViewClass()
 BOOL CCtrlInstruments::OnInitDialog()
 //-----------------------------------
 {
-	CHAR s[64];
 	CModControlDlg::OnInitDialog();
 	m_bInitialized = FALSE;
 	if ((!m_pModDoc) || (!m_pSndFile)) return TRUE;
@@ -1901,15 +1897,18 @@ void CCtrlInstruments::OnSetPanningChanged()
 		if(b && m_pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			bool smpPanningInUse = false;
-			for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
+
+			const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
+
+			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 			{
-				const SAMPLEINDEX smp = pIns->Keyboard[i];
-				if(smp <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(smp).uFlags & CHN_PANNING)
+				if(*sample <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(*sample).uFlags & CHN_PANNING)
 				{
 					smpPanningInUse = true;
 					break;
 				}
 			}
+
 			if(smpPanningInUse)
 			{
 				if(Reporting::Confirm(_T("Some of the samples used in the instrument have \"Set Pan\" enabled. "
