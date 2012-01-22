@@ -48,6 +48,8 @@ protected:
 	SELECTIONPOINTS GetSelectionPoints();
 	void SetSelectionPoints(UINT nStart, UINT nEnd);
 
+	void PropagateAutoVibratoChanges() const;
+
 public:
 	CCtrlSamples();
 	~CCtrlSamples();

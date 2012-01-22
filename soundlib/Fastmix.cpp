@@ -1811,7 +1811,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				pMixR = pOutR;
 			}
 
-			if (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS)
+			if (pPlugin->IsBypassed())
 			{
 				const FLOAT * const pInL = pState->pOutBufferL;
 				const FLOAT * const pInR = pState->pOutBufferR;
@@ -1835,8 +1835,6 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 // Float <-> Int conversion
 //
 
-
-float CSoundFile::m_nMaxSample = 0;
 
 VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
 //-----------------------------------------------------------------------------------------

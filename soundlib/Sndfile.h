@@ -15,6 +15,7 @@
 #include "mod_specifications.h"
 #include <vector>
 #include <bitset>
+#include <set>
 #include "midi.h"
 #include "Snd_defs.h"
 #include "Endianness.h"
@@ -232,6 +233,7 @@ struct MODINSTRUMENT
 
 	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
 
+	// Get a reference to a specific envelope of this instrument
 	INSTRUMENTENVELOPE &GetEnvelope(enmEnvelopeTypes envType)
 	{
 		switch(envType)
@@ -244,6 +246,23 @@ struct MODINSTRUMENT
 		case ENV_PITCH:
 			return PitchEnv;
 		}
+	}
+
+	// Get a set of all samples referenced by this instrument
+	std::set<SAMPLEINDEX> GetSamples() const
+	{
+		std::set<SAMPLEINDEX> referencedSamples;
+
+		for(size_t i = 0; i < CountOf(Keyboard); i++)
+		{
+			// 0 isn't a sample.
+			if(Keyboard[i] != 0)
+			{
+				referencedSamples.insert(Keyboard[i]);
+			}
+		}
+
+		return referencedSamples;
 	}
 
 };
@@ -736,7 +755,6 @@ private: //Misc data
 
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
-	static float m_nMaxSample;
 	static UINT m_nReverbDepth, gnReverbType;
 	static UINT m_nProLogicDepth, m_nProLogicDelay;
 	static UINT m_nStereoSeparation;
@@ -795,9 +813,9 @@ protected:
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 public:
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
-	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	MODMIDICFG m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
+	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	CHAR CompressionTable[16];							// ADPCM compression LUT
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
@@ -858,6 +876,8 @@ public:
 public:
 	//Returns song length in seconds.
 	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(eNoAdjust).duration + 1.0 : GetLength(eNoAdjust).duration + 0.5); }
+
+	double GetRowDuration(UINT speed, UINT tempo) const;
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }

@@ -469,7 +469,6 @@ CSoundFile::CSoundFile() :
 	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::GetSettings().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? CMainFrame::GetSettings().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
-	m_nMaxSample = 0;
 
 	m_ModFlags = 0;
 	m_bITBidiMode = false;
@@ -2804,6 +2803,24 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVa
 	const GetLengthType t = GetLength(updateVars ? eAdjust : eNoAdjust, ord, row);
 	if(t.targetReached) return t.duration;
 	else return -1; //Given position not found from play sequence.
+}
+
+
+// Get the duration of a row in milliseconds, based on the current rows per beat and given speed and tempo settings.
+double CSoundFile::GetRowDuration(UINT speed, UINT tempo) const
+//-------------------------------------------------------------
+{
+	switch(m_nTempoMode)
+	{
+	case tempo_mode_alternative:
+		return 60000.0 / (1.65625 * static_cast<double>(speed * tempo));
+	case tempo_mode_modern:
+		// XXX We cannot calculate any row delays with this, since speed is not considered!
+		return 60000.0 / static_cast<double>(tempo) / static_cast<double>(m_nCurrentRowsPerBeat);
+	case tempo_mode_classic:
+	default:
+		return (2500.0 * static_cast<double>(speed)) / static_cast<double>(tempo);
+	}
 }
 
 

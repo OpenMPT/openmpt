@@ -579,7 +579,7 @@ void CRemoveChannelsDlg::OnOK()
 	{
 		m_bKeepMask[aryListBoxSel[n]] = false;
 	}
-	if ((static_cast<UINT>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetModSpecifications().channelsMin)))
+	if ((static_cast<CHANNELINDEX>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetModSpecifications().channelsMin)))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -903,7 +903,8 @@ VOID CSampleMapDlg::OnUpdateSamples()
 	bool showAll;
 	
 	if ((!m_pSndFile) || (m_nInstrument >= MAX_INSTRUMENTS)) return;
-	if (m_CbnSample.GetCount() > 0)	{
+	if (m_CbnSample.GetCount() > 0)
+	{
 		nOldPos = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 	}
 	m_CbnSample.ResetContent();
@@ -980,15 +981,14 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------------
 {
 	CHAR s[32] = "--";
-	const size_t sizeofS = CountOf(s);
 
 	if ((lParam >= 0) && (lParam < 3*12) && (m_pSndFile))
 	{
-		UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
+		SAMPLEINDEX nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
 		const std::string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
-        if(temp.size() >= sizeofS)
+        if(temp.size() >= CountOf(s))
 			wsprintf(s, "%s", "...");
 		else
 			wsprintf(s, "%s", temp.c_str());
@@ -996,13 +996,13 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
 		{
-			UINT iNote = nBaseOctave*12+lParam;
+			UINT iNote = nBaseOctave * 12 + lParam;
 			if (KeyboardMap[iNote] == nSample)
 			{
 				KeyboardMap[iNote] = pIns->Keyboard[iNote];
 			} else
 			{
-				KeyboardMap[iNote] = (SAMPLEINDEX)nSample;
+				KeyboardMap[iNote] = nSample;
 			}
 /* rewbs.note: I don't think we need this with cust keys.
 // -> CODE#0009

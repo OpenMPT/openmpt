@@ -1755,22 +1755,13 @@ void CCtrlSamples::OnEstimateSampleSize()
 //---------------------------------------
 {
 	if((!m_pSndFile) || (m_pSndFile->GetSample(m_nSample).pSample == nullptr)) return;
-	MODSAMPLE &sample = m_pSndFile->GetSample(m_nSample);
 
 	//rewbs.timeStretchMods
 	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
 	UpdateData(TRUE);
 
-	//Calculate/verify samplerate at C5.
-	long lSampleRate = sample.GetSampleRate(m_pSndFile->GetType());
-	if(lSampleRate <= 0) 
-		lSampleRate = 8363;
-
 	//Open dialog
-	CPSRatioCalc dlg(sample.nLength, lSampleRate, 
-					 m_pSndFile->m_nMusicSpeed,  m_pSndFile->m_nMusicTempo, 
-					 m_pSndFile->m_nDefaultRowsPerBeat, m_pSndFile->m_nTempoMode,
-					 m_dTimeStretchRatio, this);
+	CPSRatioCalc dlg(*m_pSndFile, m_nSample, m_dTimeStretchRatio, this);
 	if (dlg.DoModal() != IDOK) return;
 	
     //Update ratio value&textbox
@@ -2571,8 +2562,13 @@ void CCtrlSamples::OnVibTypeChanged()
 {
 	if (IsLocked()) return;
 	int n = m_ComboAutoVib.GetCurSel();
-	if (n >= 0) m_pSndFile->GetSample(m_nSample).nVibType = (BYTE)n;
-	m_pModDoc->SetModified();
+	if (n >= 0)
+	{
+		m_pSndFile->GetSample(m_nSample).nVibType = (BYTE)n;
+
+		PropagateAutoVibratoChanges();
+		m_pModDoc->SetModified();
+	}
 }
 
 
@@ -2586,6 +2582,8 @@ void CCtrlSamples::OnVibDepthChanged()
 	if ((n >= lmin) && (n <= lmax))
 	{
 		m_pSndFile->GetSample(m_nSample).nVibDepth = (BYTE)n;
+
+		PropagateAutoVibratoChanges();
 		m_pModDoc->SetModified();
 	}
 }
@@ -2601,6 +2599,8 @@ void CCtrlSamples::OnVibSweepChanged()
 	if ((n >= lmin) && (n <= lmax))
 	{
 		m_pSndFile->GetSample(m_nSample).nVibSweep = (BYTE)n;
+
+		PropagateAutoVibratoChanges();
 		m_pModDoc->SetModified();
 	}
 }
@@ -2616,6 +2616,8 @@ void CCtrlSamples::OnVibRateChanged()
 	if ((n >= lmin) && (n <= lmax))
 	{
 		m_pSndFile->GetSample(m_nSample).nVibRate = (BYTE)n;
+
+		PropagateAutoVibratoChanges();
 		m_pModDoc->SetModified();
 	}
 }
@@ -3221,4 +3223,36 @@ void CCtrlSamples::OnAutotune()
 			EndWaitCursor();
 		}
 	}
+}
+
+
+// When changing auto vibrato properties, propagate them to other samples of the same instrument in XM edit mode.
+void CCtrlSamples::PropagateAutoVibratoChanges() const
+//----------------------------------------------------
+{
+	if(!(m_pSndFile->GetType() & MOD_TYPE_XM))
+	{
+		return;
+	}
+
+	for(INSTRUMENTINDEX i = 1; i < m_pSndFile->GetNumInstruments(); i++)
+	{
+		if(m_pSndFile->IsSampleReferencedByInstrument(m_nSample, i))
+		{
+			const std::set<SAMPLEINDEX> referencedSamples = m_pSndFile->Instruments[i]->GetSamples();
+
+			// Propagate changes to all samples that belong to this instrument.
+			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+			{
+				if(*sample <= m_pSndFile->GetNumSamples())
+				{
+					m_pSndFile->GetSample(*sample).nVibDepth = m_pSndFile->GetSample(m_nSample).nVibDepth;
+					m_pSndFile->GetSample(*sample).nVibType = m_pSndFile->GetSample(m_nSample).nVibType;
+					m_pSndFile->GetSample(*sample).nVibRate = m_pSndFile->GetSample(m_nSample).nVibRate;
+					m_pSndFile->GetSample(*sample).nVibSweep = m_pSndFile->GetSample(m_nSample).nVibSweep;
+				}
+			}
+		}
+	}
+
 }

@@ -11,12 +11,21 @@
 // CPSRatioCalc dialog
 
 IMPLEMENT_DYNAMIC(CPSRatioCalc, CDialog)
-CPSRatioCalc::CPSRatioCalc(ULONGLONG samples, ULONGLONG sampleRate, UINT speed, UINT tempo, UINT rowsPerBeat, BYTE tempoMode, double ratio, CWnd* pParent /*=NULL*/)
+CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd* pParent /*=NULL*/)
 	: CDialog(CPSRatioCalc::IDD, pParent)
-	, m_lSamplesOrig(samples), m_nSpeed(speed), m_nTempo(tempo), m_dRatio(ratio), m_nRowsPerBeat(rowsPerBeat), m_nTempoMode(tempoMode)
+	, sndFile(sndFile), sampleIndex(sample), m_dRatio(ratio)
 {
-	//Sample rate will not change. We can calculate original duration once and disgard sampleRate.
-	m_lMsOrig= static_cast<ULONGLONG>(1000.0*((double)m_lSamplesOrig / sampleRate));
+	// Calculate/verify samplerate at C5.
+	const MODSAMPLE &smp = sndFile.GetSample(sampleIndex);
+	uint32 sampleRate = smp.GetSampleRate(sndFile.GetType());
+	if(sampleRate <= 0) 
+		sampleRate = 8363;
+
+	m_nSpeed = sndFile.m_nMusicSpeed;
+	m_nTempo = sndFile.m_nMusicTempo;
+
+	// Sample rate will not change. We can calculate original duration once and disgard sampleRate.
+	m_lMsOrig = static_cast<ULONGLONG>(1000.0 * ((double)smp.nLength / sampleRate));
 	CalcSamples();
 	CalcMs();
 	CalcRows();
@@ -31,7 +40,8 @@ void CPSRatioCalc::DoDataExchange(CDataExchange* pDX)
 	CWnd* hasFocus = GetFocus();
 
 	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_SAMPLE_LENGTH_ORIGINAL, m_lSamplesOrig);
+	SmpLength origLength = sndFile.GetSample(sampleIndex).nLength;
+	DDX_Text(pDX, IDC_SAMPLE_LENGTH_ORIGINAL, origLength);
 	DDX_Text(pDX, IDC_SAMPLE_LENGTH_NEW, m_lSamplesNew);
 	DDX_Text(pDX, IDC_MS_LENGTH_ORIGINAL2, m_lMsOrig);
 	DDX_Text(pDX, IDC_MS_LENGTH_NEW, m_lMsNew);
@@ -62,9 +72,9 @@ END_MESSAGE_MAP()
 void CPSRatioCalc::OnEnChangeSamples()
 {
 	UpdateData();
-	if (m_lSamplesOrig && m_lSamplesOrig)
+	if (m_lSamplesNew && sndFile.GetSample(sampleIndex).nLength)
 	{
-		m_dRatio = (double)m_lSamplesNew/(double)m_lSamplesOrig*100;
+		m_dRatio = (double)m_lSamplesNew / (double)sndFile.GetSample(sampleIndex).nLength * 100;
 		CalcMs();
 		CalcRows();
 		UpdateData(FALSE);
@@ -76,7 +86,7 @@ void CPSRatioCalc::OnEnChangeMs()
 	UpdateData();
 	if (m_lMsOrig && m_lMsNew)
 	{
-		m_dRatio = (double)m_lMsNew/(double)m_lMsOrig*100;
+		m_dRatio = (double)m_lMsNew / (double)m_lMsOrig * 100;
 		CalcSamples();
 		CalcRows();
 		UpdateData(FALSE);
@@ -87,9 +97,9 @@ void CPSRatioCalc::OnEnChangeMs()
 void CPSRatioCalc::OnEnChangeRows()
 {
 	UpdateData();
-	if (m_dRowsOrig && m_dRowsNew && m_nTempo && m_nSpeed)
+	if (m_dRowsOrig && m_dRowsNew)
 	{
-		m_dRatio = m_dRowsNew/m_dRowsOrig*100.0;
+		m_dRatio = m_dRowsNew/m_dRowsOrig * 100.0;
 		CalcSamples();
 		CalcMs();	
 		UpdateData(FALSE);
@@ -100,8 +110,8 @@ void CPSRatioCalc::OnEnChangeRows()
 void CPSRatioCalc::OnEnChangeSpeed()
 {
 	UpdateData();
-	if (m_nTempo == 0) m_nTempo=1;
-	if (m_nSpeed == 0) m_nSpeed=1;
+	if (m_nTempo == 0) m_nTempo = 1;
+	if (m_nSpeed == 0) m_nSpeed = 1;
 	CalcRows();
 	UpdateData(FALSE);
 }
@@ -122,38 +132,22 @@ void CPSRatioCalc::OnEnChangeratio()
 
 void CPSRatioCalc::CalcSamples()
 {
-	m_lSamplesNew = static_cast<ULONGLONG>(m_lSamplesOrig*(m_dRatio/100.0));
+	m_lSamplesNew = static_cast<ULONGLONG>(sndFile.GetSample(sampleIndex).nLength * (m_dRatio / 100.0));
 	return;
 }
 
 void CPSRatioCalc::CalcMs()
 {
-	m_lMsNew = static_cast<ULONGLONG>(m_lMsOrig*(m_dRatio/100.0));
+	m_lMsNew = static_cast<ULONGLONG>(m_lMsOrig * (m_dRatio / 100.0));
 	return;
 }
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime;
+	double rowTime = sndFile.GetRowDuration(sndFile.m_nMusicSpeed, sndFile.m_nMusicTempo);
 
-	switch(m_nTempoMode) {
-
-		case tempo_mode_alternative: 
-			rowTime = 60000.0 / (1.65625 * (double)(m_nSpeed * m_nTempo));
-			break;
-
-		case tempo_mode_modern: 
-			rowTime = 60000.0/(double)m_nTempo / (double)m_nRowsPerBeat;
-			break;
-
-		case tempo_mode_classic: 
-		default:
-			rowTime = 2500.0 * (double)m_nSpeed/(double)m_nTempo;
-			break;
-	}
-
-	m_dRowsOrig = (double)m_lMsOrig/rowTime;
-	m_dRowsNew = m_dRowsOrig*(m_dRatio/100);
+	m_dRowsOrig = (double)m_lMsOrig / rowTime;
+	m_dRowsNew = m_dRowsOrig*(m_dRatio / 100);
 
 	return;
 }
