@@ -271,22 +271,25 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	dwMemPos = 20;
 	m_nSamples = 31;
 	m_nChannels = 4;
+
 	pMagic = (PMODMAGIC)(lpStream + dwMemPos + sizeof(MODSAMPLEHEADER) * 31);
+
 	// Check Mod Magic
 	memcpy(s, pMagic->Magic, 4);
 	if ((IsMagic(s, "M.K.")) || (IsMagic(s, "M!K!"))
-	 || (IsMagic(s, "M&K!")) || (IsMagic(s, "N.T.")) || (IsMagic(s, "FEST"))) m_nChannels = 4; else
-	if ((IsMagic(s, "CD81")) || (IsMagic(s, "OKTA"))) m_nChannels = 8; else
-	if ((s[0]=='F') && (s[1]=='L') && (s[2]=='T') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
-	if ((s[0]>='4') && (s[0]<='9') && (s[1]=='C') && (s[2]=='H') && (s[3]=='N')) m_nChannels = s[0] - '0'; else
-	if ((s[0]=='1') && (s[1]>='0') && (s[1]<='9') && (s[2]=='C') && (s[3]=='H')) m_nChannels = s[1] - '0' + 10; else
-	if ((s[0]=='2') && (s[1]>='0') && (s[1]<='9') && (s[2]=='C') && (s[3]=='H')) m_nChannels = s[1] - '0' + 20; else
-	if ((s[0]=='3') && (s[1]>='0') && (s[1]<='2') && (s[2]=='C') && (s[3]=='H')) m_nChannels = s[1] - '0' + 30; else
-	if ((s[0]=='T') && (s[1]=='D') && (s[2]=='Z') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
-	if (IsMagic(s,"16CN")) m_nChannels = 16; else
-	if (IsMagic(s,"32CN")) m_nChannels = 32; else m_nSamples = 15;
+		|| (IsMagic(s, "M&K!")) || (IsMagic(s, "N.T.")) || (IsMagic(s, "FEST"))) m_nChannels = 4;
+	else if ((IsMagic(s, "CD81")) || (IsMagic(s, "OKTA"))) m_nChannels = 8;
+
+	else if (!memcmp(s, "FLT", 3) && s[3] >= '4' && s[3] <= '9') m_nChannels = s[3] - '0';
+	else if (s[0] >= '1' && s[0] <= '9' && !memcmp(s + 1, "CHN", 3)) m_nChannels = s[0] - '0';
+	else if (s[0] >= '1' && s[0] <= '9' && s[1]>='0' && s[1] <= '9' && (!memcmp(s + 2, "CH", 2) || !memcmp(s + 2, "CN", 2))) m_nChannels = s[0] * 10 + s[1] - '0';
+	else if (!memcmp(s, "TDZ", 3) && s[3] >= '4' && s[3] <= '9') m_nChannels = s[3] - '0';
+	else m_nSamples = 15;	// Ultimate SoundTracker MODs
+
+	LimitMax(m_nChannels, MAX_BASECHANNELS);
+
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	bool bFLT8 = IsMagic(s, "FLT8");
+	bool isFLT8 = IsMagic(s, "FLT8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
 	const bool bMdKd = IsMagic(s, "M.K.");
 
@@ -372,10 +375,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		if (i >= nbpbuggy2) nbpbuggy2 = i+1;
 
 		// from mikmod: if the file says FLT8, but the orderlist has odd numbers, it's probably really an FLT4
-		if(bFLT8 && (Order[iord] & 1))
+		if(isFLT8 && (Order[iord] & 1))
 		{
 			m_nChannels = 4;
-			bFLT8 = false;
+			isFLT8 = false;
 		}
 
 		// chances are very high that we're dealing with a non-MOD file here.
@@ -383,7 +386,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			return false;
 	}
 
-	if(bFLT8)
+	if(isFLT8)
 	{
 		// FLT8 has only even order items, so divide by two.
 		for(ORDERINDEX nOrd = 0; nOrd < Order.GetLength(); nOrd++)
@@ -421,10 +424,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// Setup channel pan positions and volume
 	SetupMODPanning();
 
-	const CHANNELINDEX nMaxChn = (bFLT8) ? 4 : m_nChannels; // 4 channels per pattern in FLT8 format.
-	if(bFLT8) nbp++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
-	bool bHasTempoCommands = false;	// for detecting VBlank MODs
-	bool bLeftPanning = false, bExtendedPanning = false;	// for detecting 800-880 panning
+	const CHANNELINDEX nMaxChn = (isFLT8) ? 4 : m_nChannels; // 4 channels per pattern in FLT8 format.
+	if(isFLT8) nbp++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
+	bool hasTempoCommands = false;	// for detecting VBlank MODs
+	bool leftPanning = false, extendedPanning = false;	// for detecting 800-880 panning
 
 	// Reading patterns
 	for (PATTERNINDEX ipat = 0; ipat < nbp; ipat++)
@@ -434,7 +437,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			if (dwMemPos + nMaxChn * 256 > dwMemLength) break;
 
 			MODCOMMAND *m;
-			if(bFLT8)
+			if(isFLT8)
 			{
 				if((ipat & 1) == 0)
 				{
@@ -455,7 +458,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 
 			for(ROWINDEX nRow = 0; nRow < 64; nRow++)
 			{
-				if(bFLT8)
+				if(isFLT8)
 				{
 					// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
 					m = Patterns[ipat >> 1] + nRow * 8 + ((ipat & 1) ? 4 : 0);
@@ -471,12 +474,12 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 					if ((m->command) || (m->param)) ConvertModCommand(m);
 
 					if (m->command == CMD_TEMPO && m->param < 100)
-						bHasTempoCommands = true;
+						hasTempoCommands = true;
 					if (m->command == CMD_PANNING8 && m->param < 0x80)
-						bLeftPanning = true;
+						leftPanning = true;
 					if (m->command == CMD_PANNING8 && m->param > 0x80 && m->param != 0xA4)
-						bExtendedPanning = true;
-					if (m->note == NOTE_NONE && m->instr > 0 && !bFLT8)
+						extendedPanning = true;
+					if (m->note == NOTE_NONE && m->instr > 0 && !isFLT8)
 					{
 						if(lastInstrument[nChn] > 0 && lastInstrument[nChn] != m->instr)
 						{
@@ -532,8 +535,8 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
 	// The same check is also applied to original Ultimate Soundtracker 15 sample mods.
-	const bool bVBlank = ((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15);
-	const bool b7BitPanning = bLeftPanning && !bExtendedPanning;
+	const bool bVBlank = ((bMdKd && hasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15);
+	const bool b7BitPanning = leftPanning && !extendedPanning;
 	if(bVBlank || b7BitPanning)
 	{
 		Patterns.ForEachModCommand(FixMODPatterns(bVBlank, b7BitPanning));
