@@ -38,6 +38,13 @@ public:
 private:
 	void setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB);
 
+	// Determine how the global volume slider should be scaled to actual global volume.
+	// Display range for XM / S3M should be 0...64, for other formats it's 0...256.
+	UINT GetGlobalVolumeFactor()
+	{
+		return (m_pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? UINT(MAX_SLIDER_GLOBAL_VOL / 64) : UINT(MAX_SLIDER_GLOBAL_VOL / 128);
+	}
+
 public:
 	bool m_bEditsLocked;
 	//{{AFX_DATA(CCtrlGeneral)

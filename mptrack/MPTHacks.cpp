@@ -12,8 +12,6 @@
 
 /* TODO:
 out-of range sample pre-amp
-song flags and properties (just look at the song properties window)
-+++/--- orders in XM/MOD sequence
 comments in XM files
 AUTOFIX actions!
 

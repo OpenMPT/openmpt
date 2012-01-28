@@ -104,7 +104,8 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SpinTempo.SetRange((short)specs.tempoMin, (short)specs.tempoMax);
 
 // -! BEHAVIOUR_CHANGE#0016
-	m_SpinGlobalVol.SetRange(0, 128);
+
+	m_SpinGlobalVol.SetRange(0, (short)(256 / GetGlobalVolumeFactor()));
 	m_SpinSamplePA.SetRange(0, 2000);
 	m_SpinVSTiVol.SetRange(0, 2000);
 	m_SpinRestartPos.SetRange(0, 255);
@@ -183,13 +184,14 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	}
 	if (dwHint & HINT_MODGENERAL)
 	{
-		if (!m_bEditsLocked) {
+		if (!m_bEditsLocked)
+		{
 			m_EditTitle.SetWindowText(m_pSndFile->m_szNames[0]);
 			wsprintf(s, "%d", m_pSndFile->m_nDefaultTempo);
 			m_EditTempo.SetWindowText(s);
 			wsprintf(s, "%d", m_pSndFile->m_nDefaultSpeed);
 			m_EditSpeed.SetWindowText(s);
-			wsprintf(s, "%d", m_pSndFile->m_nDefaultGlobalVolume / 2);
+			wsprintf(s, "%d", m_pSndFile->m_nDefaultGlobalVolume / GetGlobalVolumeFactor());
 			m_EditGlobalVol.SetWindowText(s);
 			wsprintf(s, "%d", m_pSndFile->m_nRestartPos);
 			m_EditRestartPos.SetWindowText(s);
@@ -282,11 +284,13 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 	{
 		CSliderCtrl* pSlider = (CSliderCtrl*) pscroll;
 
-		if (pSlider==&m_SliderTempo) {
+		if (pSlider==&m_SliderTempo)
+		{
 			int min, max;
 			m_SpinTempo.GetRange(min, max);
 			const UINT tempo = max - m_SliderTempo.GetPos();
-			if ((tempo >= m_pSndFile->GetModSpecifications().tempoMin) && (tempo <= m_pSndFile->GetModSpecifications().tempoMax) && (tempo != m_pSndFile->m_nDefaultTempo)) {
+			if ((tempo >= m_pSndFile->GetModSpecifications().tempoMin) && (tempo <= m_pSndFile->GetModSpecifications().tempoMax) && (tempo != m_pSndFile->m_nDefaultTempo))
+			{
 				m_pSndFile->m_nDefaultTempo = tempo;
 				m_pSndFile->m_nMusicTempo = tempo;
 				m_pModDoc->SetModified();
@@ -295,9 +299,11 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			}
 		}
 
-		else if (pSlider==&m_SliderGlobalVol) {
+		else if (pSlider==&m_SliderGlobalVol)
+		{
 			const UINT gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
-			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
+			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_pSndFile->m_nDefaultGlobalVolume))
+			{
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
 				m_pModDoc->SetModified();
@@ -306,9 +312,11 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			}
 		}
 
-		else if (pSlider==&m_SliderSamplePreAmp) {
+		else if (pSlider==&m_SliderSamplePreAmp)
+		{
 			const UINT spa = MAX_SLIDER_SAMPLE_VOL - m_SliderSamplePreAmp.GetPos();
-			if ((spa >= 0) && (spa <= MAX_SLIDER_SAMPLE_VOL) && (spa != m_pSndFile->m_nSamplePreAmp)) {
+			if ((spa >= 0) && (spa <= MAX_SLIDER_SAMPLE_VOL) && (spa != m_pSndFile->m_nSamplePreAmp))
+			{
 				m_pSndFile->m_nSamplePreAmp = spa;
 				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
 					m_pModDoc->SetModified();
@@ -318,7 +326,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 
 		else if (pSlider==&m_SliderVSTiVol) {
 			const UINT vv = MAX_SLIDER_VSTI_VOL - m_SliderVSTiVol.GetPos();
-			if ((vv >= 0) && (vv <= MAX_SLIDER_VSTI_VOL) && (vv != m_pSndFile->m_nVSTiVolume)) {
+			if ((vv >= 0) && (vv <= MAX_SLIDER_VSTI_VOL) && (vv != m_pSndFile->m_nVSTiVolume))
+			{
 				m_pSndFile->m_nVSTiVolume = vv;
 				m_pSndFile->RecalculateGainForAllPlugs();
 				m_pModDoc->SetModified();
@@ -459,13 +468,13 @@ void CCtrlGeneral::OnGlobalVolChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			Limit(n, 0u, 128u);
+			Limit(n, 0u, 256u / GetGlobalVolumeFactor());
 			if (n != (m_pSndFile->m_nDefaultGlobalVolume >> 1))
 			{ 
 				m_bEditsLocked=true;
 				m_EditGlobalVol.SetModify(FALSE);
-				m_pSndFile->m_nDefaultGlobalVolume = n << 1;
-				m_pSndFile->m_nGlobalVolume = n << 1;
+				m_pSndFile->m_nDefaultGlobalVolume = n * GetGlobalVolumeFactor();
+				m_pSndFile->m_nGlobalVolume = n * GetGlobalVolumeFactor();
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL);

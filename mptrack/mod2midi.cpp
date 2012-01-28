@@ -88,7 +88,9 @@ void DYNMIDITRACK::WriteLen(unsigned long len)
 static int LinearToDLSMidiVolume(int nVolume)
 //-------------------------------------------
 {
-	const float kLin2Mid = 127.0f*127.0f/65536.0f;
+	const float kLin2Mid = 127.0f * 127.0f / 65536.0f;
+	//return static_cast<int>(sqrtf(static_cast<float>(nVolume) * kLin2Mid));
+
 	int result;
 	
 	_asm {
@@ -339,7 +341,7 @@ BOOL CModToMidi::DoConvert()
 	RMIDDATACHUNK rmid;
 	MTHDCHUNK mthd;
 	MTRKCHUNK mtrk;
-	DYNMIDITRACK Tracks[64];
+	vector<DYNMIDITRACK> Tracks(m_pSndFile->GetNumChannels());
 	UINT nMidiChCurPrg[16];
 	BYTE tmp[256];
 	CHAR s[256];
@@ -347,15 +349,11 @@ BOOL CModToMidi::DoConvert()
 	UINT nSpeed;
 	CFile f;
 
-	const CHANNELINDEX chnCount = min(64, m_pSndFile->GetNumChannels());
-	if(chnCount < m_pSndFile->GetNumChannels())
-		Reporting::Information("Note: Only 64 channels will be exported.");
-
 	if (!f.Open(m_szFileName, CFile::modeCreate | CFile::modeWrite))
 	{
 		return FALSE;
 	}
-	MemsetZero(Tracks);
+
 	if (!m_pSndFile->m_nDefaultTempo) m_pSndFile->m_nDefaultTempo = 125;
 	nTickMultiplier = MOD2MIDI_TEMPOFACTOR;
 	const uint16 wPPQN = static_cast<uint16>((m_pSndFile->m_nDefaultTempo*nTickMultiplier) / 5);
@@ -367,13 +365,11 @@ BOOL CModToMidi::DoConvert()
 	mthd.id = 0x6468544d; // "MThd"
 	mthd.len = BigEndian(sizeof(mthd)-8);
 	mthd.wFmt = BigEndianW(1);
-	mthd.wTrks = static_cast<uint16>(chnCount); // 1 track/channel
+	mthd.wTrks = static_cast<uint16>(Tracks.size()); // 1 track/channel
 	mthd.wTrks = BigEndianW(mthd.wTrks); //Convert to big endian value.
 	mthd.wDivision = BigEndianW(wPPQN);
 	if (m_bRmi) f.Write(&rmid, sizeof(rmid));
 	f.Write(&mthd, sizeof(mthd));
-
-	
 
 	// Add Song Name on track 0
 	const CHAR *modTitle = m_pSndFile->GetTitle();
@@ -384,6 +380,7 @@ BOOL CModToMidi::DoConvert()
 		Tracks[0].WriteLen(strlen(modTitle));
 		Tracks[0].Write(modTitle, strlen(modTitle));
 	}
+
 	// Add Song comments on track 0
 	if ((m_pSndFile->m_lpszSongComments) && (m_pSndFile->m_lpszSongComments[0]))
 	{
@@ -392,20 +389,21 @@ BOOL CModToMidi::DoConvert()
 		Tracks[0].WriteLen(strlen(m_pSndFile->m_lpszSongComments));
 		Tracks[0].Write(m_pSndFile->m_lpszSongComments, strlen(m_pSndFile->m_lpszSongComments));
 	}
+
 	// Add channel names
-	for (UINT iInit=0; iInit<chnCount; iInit++)
+	for (CHANNELINDEX iInit = 0; iInit < m_pSndFile->GetNumChannels(); iInit++)
 	{
-		PDYNMIDITRACK pTrk = &Tracks[iInit];
+		DYNMIDITRACK &track = Tracks[iInit];
 		lstrcpyn(s, m_pSndFile->ChnSettings[iInit].szName, MAX_CHANNELNAME);
-		pTrk->nMidiChannel = iInit & 7;
+		track.nMidiChannel = iInit & 7;
 		if (s[0])
 		{
 			tmp[0] = 0x00;
 			tmp[1] = 0xff;
 			tmp[2] = 0x03;
-			pTrk->Write(tmp, 3);
-			pTrk->WriteLen(strlen(s));
-			pTrk->Write(s, strlen(s));
+			track.Write(tmp, 3);
+			track.WriteLen(strlen(s));
+			track.Write(s, strlen(s));
 		}
 	}
 	for (UINT iMidiCh=0; iMidiCh<16; iMidiCh++)
@@ -428,7 +426,7 @@ BOOL CModToMidi::DoConvert()
 			continue;
 		}
 		PatternRow patternRow = m_pSndFile->Patterns[nPat].GetRow(nRow);
-		for (UINT nChn=0; nChn<chnCount; nChn++)
+		for (CHANNELINDEX nChn = 0; nChn < m_pSndFile->GetNumChannels(); nChn++)
 		{
 			PDYNMIDITRACK pTrk = &Tracks[nChn];
 			//MODCOMMAND *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
@@ -534,7 +532,7 @@ BOOL CModToMidi::DoConvert()
 		}
 	}
 	// Write midi tracks
-	for (UINT iTrk=0; iTrk<chnCount; iTrk++)
+	for (UINT iTrk = 0; iTrk < Tracks.size(); iTrk++)
 	{
 		tmp[0] = 0x00;
 		tmp[1] = 0xff;
