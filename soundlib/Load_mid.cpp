@@ -28,7 +28,6 @@ extern void Log(LPCSTR, ...);
 #endif
 
 #define MIDI_DRUMCHANNEL	10
-#define MIDI_MAXTRACKS		64
 
 //UINT gnMidiImportSpeed = 3;
 //UINT gnMidiPatternLen = 128;
@@ -496,7 +495,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	const MIDITRACKHEADER *pmth;
 	MODCHANNELSTATE chnstate[MAX_BASECHANNELS];
 	MIDICHANNELSTATE midichstate[16];
-	MIDITRACK miditracks[MIDI_MAXTRACKS];
+	vector<MIDITRACK> miditracks;
 	DWORD dwMemPos, dwGlobalFlags, tracks, tempo;
 	UINT row, pat, midimastervol;
 	short int division;
@@ -545,7 +544,8 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
 	tracks = BigEndianW(pmfh->wTrks);
 	if ((pmth->id != 0x6B72544D) || (!tracks)) return false;
-	if (tracks > MIDI_MAXTRACKS) tracks = MIDI_MAXTRACKS;
+	miditracks.resize(tracks);
+
 	// Reading File...
 	m_nType = MOD_TYPE_MID;
 	m_nChannels = 32;
@@ -553,6 +553,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	m_nInstruments = 0;
 	m_dwSongFlags |= SONG_LINEARSLIDES;
 	m_szNames[0][0] = 0;
+
 	// MIDI->MOD Tempo Conversion
 	division = BigEndianW(pmfh->wDivision);
 	if (division < 0)
@@ -577,9 +578,8 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 #endif
 	// Initializing 
 	Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
-	memset(chnstate, 0, sizeof(chnstate));
-	memset(miditracks, 0, sizeof(miditracks));
-	memset(midichstate, 0, sizeof(midichstate));
+	MemsetZero(chnstate);
+	MemsetZero(midichstate);
 	// Initializing Patterns
 	Order[0] = 0;
 	// Initializing Channels
@@ -610,7 +610,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 			// Initializing midi tracks
 			miditracks[itrk].ptracks = lpStream+dwMemPos+8;
 			miditracks[itrk].ptrmax = miditracks[itrk].ptracks + len;
-			miditracks[itrk].nexteventtime = getmidilong(miditracks[itrk].ptracks, miditracks[itrk].ptrmax);
+			miditracks[itrk].ptracks += ConvertMIDI2Int(miditracks[itrk].nexteventtime, (uint8 *)miditracks[itrk].ptracks, len);
 #ifdef MIDI_DETAILED_LOG
 			Log(" init time=%d\n", miditracks[itrk].nexteventtime);
 #endif
@@ -673,7 +673,8 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 				case 0xF0:
 				case 0xF7:
 					{
-						LONG len = getmidilong(ptrk->ptracks, ptrk->ptrmax);
+						LONG len;
+						ptrk->ptracks += ConvertMIDI2Int(len, (uint8 *)ptrk->ptracks, (size_t)(ptrk->ptrmax - ptrk->ptracks));
 						if ((len > 1) && (ptrk->ptracks + len <ptrk->ptrmax) && (ptrk->ptracks[len-1] == 0xF7))
 						{
 							DWORD dwSysEx1 = 0, dwSysEx2 = 0;
@@ -725,7 +726,8 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 				case 0xFF:
 					{
 						UINT i = *(ptrk->ptracks++);
-						LONG len = getmidilong(ptrk->ptracks, ptrk->ptrmax);
+						LONG len;
+						ptrk->ptracks += ConvertMIDI2Int(len, (uint8 *)ptrk->ptracks, (size_t)(ptrk->ptrmax - ptrk->ptracks));
 						if (ptrk->ptracks+len > ptrk->ptrmax)
 						{
 							// EOF
@@ -1106,7 +1108,9 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 				// Process to next event
 				if (ptrk->ptracks)
 				{
-					ptrk->nexteventtime += getmidilong(ptrk->ptracks, ptrk->ptrmax);
+					LONG inc;
+					ptrk->ptracks += ConvertMIDI2Int(inc, (uint8 *)ptrk->ptracks, (size_t)(ptrk->ptrmax - ptrk->ptracks));
+					ptrk->nexteventtime += inc;
 				}
 				if (ptrk->ptracks >= ptrk->ptrmax) ptrk->ptracks = NULL;
 			}

@@ -1808,15 +1808,14 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) 
 	ITSAMPLESTRUCT itss;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
 	vector<bool> smpcount(GetNumSamples(), false);
-	UINT smptable[MAX_SAMPLES], smpmap[MAX_SAMPLES];
+	vector<SAMPLEINDEX> smptable;
+	vector<SAMPLEINDEX> smpmap(GetNumSamples() + 1, 0);
 	DWORD dwPos;
 	FILE *f;
 
 	if ((!pIns) || (!lpszFileName)) return false;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	MemsetZero(buffer);
-	MemsetZero(smptable);
-	MemsetZero(smpmap);
 	iti->id = LittleEndian(IT_IMPI);	// "IMPI"
 	memcpy(iti->filename, pIns->filename, 12);
 	StringFixer::FixNullString(iti->filename);
@@ -1843,20 +1842,15 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) 
 	iti->nos = 0;
 	for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 	{
-		const UINT smp = pIns->Keyboard[i];
+		const SAMPLEINDEX smp = pIns->Keyboard[i];
 		if (smp && smp <= GetNumSamples() && !smpcount[smp - 1])
 		{
 			smpcount[smp - 1] = true;
-			smptable[iti->nos] = smp;
-			smpmap[smp] = iti->nos;
-			iti->nos++;
+			smptable.push_back(smp);
+			smpmap[smp] = iti->nos++;
 		}
-		iti->keyboard[i*2] = pIns->NoteMap[i] - 1;
-// -> CODE#0019
-// -> DESC="correctly load ITI & XI instruments sample note map"
-//		iti->keyboard[i*2+1] = smpmap[smp] + 1;
-		iti->keyboard[i*2+1] = smp ? smpmap[smp] + 1 : 0;
-// -! BUG_FIX#0019
+		iti->keyboard[i * 2] = pIns->NoteMap[i] - 1;
+		iti->keyboard[i * 2 + 1] = smp ? smpmap[smp] + 1 : 0;
 	}
 	// Writing Volume envelope
 	if (pIns->VolEnv.dwFlags & ENV_ENABLED) iti->volenv.flags |= 0x01;
@@ -1890,7 +1884,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) 
 	iti->pitchenv.slb = (BYTE)pIns->PitchEnv.nSustainStart;
 	iti->pitchenv.sle = (BYTE)pIns->PitchEnv.nSustainEnd;
 	// Writing Envelopes data
-	for (UINT ev=0; ev<25; ev++)
+	for (UINT ev = 0; ev < 25; ev++)
 	{
 		iti->volenv.data[ev*3] = pIns->VolEnv.Values[ev];
 		iti->volenv.data[ev*3+1] = pIns->VolEnv.Ticks[ev] & 0xFF;
@@ -1972,19 +1966,12 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) 
 	WORD sampleType=0;
 	if (itss.flags | 0x02) sampleType=RS_PCM16S; else sampleType=RS_PCM8S;	//8 or 16 bit signed
 	if (itss.flags | 0x04) sampleType |= RSF_STEREO;						//mono or stereo
-	for (UINT k=0; k<iti->nos; k++)
+	for (UINT k = 0; k < iti->nos; k++)
 	{
-//rewbs.enableStereoITI - using eric's code as it is better here.
-// -> CODE#0001
-// -> DESC="enable saving stereo ITI"
-		//UINT nsmp = smptable[k];
-		//MODINSTRUMENT *psmp = &Ins[nsmp];
-		//WriteSample(f, psmp, (psmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S);
 		const MODSAMPLE *pSmp = &Samples[smptable[k]];
 		UINT smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 		if (pSmp->uFlags & CHN_STEREO) smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16S : RS_STPCM8S;
 		WriteSample(f, pSmp, smpflags);
-// -! BUG_FIX#0001
 	}
 
 	int32 code = 'MPTX';
@@ -2008,7 +1995,7 @@ bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size)
 
 
 void ReadInstrumentExtensionField(MODINSTRUMENT* pIns, LPCBYTE& ptr, const int32 code, const int16 size)
-//------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
 {
 	// get field's address in instrument's header
 	BYTE* fadr = GetInstrumentHeaderFieldPointer(pIns, code, size);
@@ -2023,7 +2010,7 @@ void ReadInstrumentExtensionField(MODINSTRUMENT* pIns, LPCBYTE& ptr, const int32
 
 
 void ReadExtendedInstrumentProperty(MODINSTRUMENT* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd)
-//---------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
 {
 	if(pEnd < pData || uintptr_t(pEnd - pData) < 2)
 		return;
@@ -2040,7 +2027,7 @@ void ReadExtendedInstrumentProperty(MODINSTRUMENT* pIns, const int32 code, LPCBY
 
 
 void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataStart, const size_t nMemLength)
-//--------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------
 {
 	if(pIns == 0 || pDataStart == 0 || nMemLength < 4)
 		return;
@@ -2332,7 +2319,7 @@ void CSoundFile::ConvertInstrument(INSTRUMENTINDEX instr, MODTYPE fromType, MODT
 
 		if(pIns->nMidiChannel == MidiMappedChannel)
 		{
-			pIns->nMidiChannel == 1;
+			pIns->nMidiChannel = 1;
 		}
 
 		pIns->nGlobalVol = 64;

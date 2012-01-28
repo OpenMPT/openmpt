@@ -282,7 +282,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 
 	else if (!memcmp(s, "FLT", 3) && s[3] >= '4' && s[3] <= '9') m_nChannels = s[3] - '0';
 	else if (s[0] >= '1' && s[0] <= '9' && !memcmp(s + 1, "CHN", 3)) m_nChannels = s[0] - '0';
-	else if (s[0] >= '1' && s[0] <= '9' && s[1]>='0' && s[1] <= '9' && (!memcmp(s + 2, "CH", 2) || !memcmp(s + 2, "CN", 2))) m_nChannels = s[0] * 10 + s[1] - '0';
+	else if (s[0] >= '1' && s[0] <= '9' && s[1]>='0' && s[1] <= '9' && (!memcmp(s + 2, "CH", 2) || !memcmp(s + 2, "CN", 2))) m_nChannels = (s[0] - '0') * 10 + s[1] - '0';
 	else if (!memcmp(s, "TDZ", 3) && s[3] >= '4' && s[3] <= '9') m_nChannels = s[3] - '0';
 	else m_nSamples = 15;	// Ultimate SoundTracker MODs
 
@@ -502,26 +502,18 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	}
 
 	// Reading samples
-	bool bSamplesPresent = false;
 	for (UINT ismp = 1; ismp <= m_nSamples; ismp++) if (Samples[ismp].nLength)
 	{
-		LPSTR p = (LPSTR)(lpStream + dwMemPos);
-		UINT flags = 0;
+		UINT flags = RS_PCM8S;
 		if (dwMemPos + 5 <= dwMemLength)
 		{
-			if (!_strnicmp(p, "ADPCM", 5))
+			if (!_strnicmp((LPSTR)(lpStream + dwMemPos), "ADPCM", 5))
 			{
-				flags = 3;
-				p += 5;
+				flags = RS_ADPCM4;
 				dwMemPos += 5;
 			}
 		}
-		DWORD dwSize = ReadSample(&Samples[ismp], flags, p, dwMemLength - dwMemPos);
-		if (dwSize)
-		{
-			dwMemPos += dwSize;
-			bSamplesPresent = true;
-		}
+		dwMemPos += ReadSample(&Samples[ismp], flags, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 	}
 
 	// Fix VBlank MODs. Arbitrary threshold: 10 minutes.
@@ -542,11 +534,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		Patterns.ForEachModCommand(FixMODPatterns(bVBlank, b7BitPanning));
 	}
 
-#ifdef MODPLUG_TRACKER
 	return true;
-#else
-	return bSamplesPresent;
-#endif	// MODPLUG_TRACKER
 }
 
 
@@ -675,14 +663,19 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 						p[3] = param;
 					}
 					fwrite(s, m_nChannels, 4, f);
-				} else {								//if row does not exist
-					memset(s, 0, m_nChannels*4);		//invent blank row
+				} else
+				{
+					// if row does not exist, invent blank row
+					memset(s, 0, m_nChannels * 4);
 					fwrite(s, m_nChannels, 4, f);
 				}
 			}										//end for all rows
-		} else	{								
-			memset(s, 0, m_nChannels*4);		//if pattern does not exist
-			for (UINT i=0; i<64; i++) {			//invent blank pattern
+		} else
+		{								
+			// if pattern does not exist, invent blank pattern
+			memset(s, 0, m_nChannels * 4);
+			for(size_t i = 0; i < 64; i++)
+			{
 				fwrite(s, m_nChannels, 4, f);
 			}
 		}
@@ -692,7 +685,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
 	{
-		for(UINT ipat = nbp; ipat < MAX_PATTERNS; ipat++)
+		for(UINT ipat = nbp; ipat < Patterns.Size(); ipat++)
 		{
 			if(Patterns[ipat])
 			{
