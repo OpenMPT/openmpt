@@ -214,7 +214,7 @@ UINT CViewPattern::GetColumnOffset(DWORD dwPos) const
 void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 //--------------------------------------------------------
 {
-	if (dwHintMask & HINT_MPTOPTIONS)
+	if(dwHintMask & HINT_MPTOPTIONS)
 	{
 		UpdateColors();
 		UpdateSizes();
@@ -222,25 +222,21 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 		InvalidatePattern(TRUE);
 		return;
 	}
-	if (dwHintMask & HINT_MODCHANNELS)
+	if(dwHintMask & HINT_MODCHANNELS)
 	{
 		InvalidateChannelsHeaders();
+		UpdateScrollSize();
 	}
-	//if (((dwHintMask & 0xFFFFFF) == HINT_PATTERNDATA) & (m_nPattern != (dwHintMask >> HINT_SHIFT_PAT))) return;
-	if ( (HintFlagPart(dwHintMask) == HINT_PATTERNDATA) && (m_nPattern != (dwHintMask >> HINT_SHIFT_PAT)) )
-			return;
+	if((HintFlagPart(dwHintMask) == HINT_PATTERNDATA) && (m_nPattern != (dwHintMask >> HINT_SHIFT_PAT)))
+		return;
 
-	if (dwHintMask & (HINT_MODTYPE|HINT_PATTERNDATA))
+	if(dwHintMask & (HINT_MODTYPE|HINT_PATTERNDATA))
 	{
 		InvalidatePattern(FALSE);
 	} else
-	if (dwHintMask & HINT_PATTERNROW)
+	if(dwHintMask & HINT_PATTERNROW)
 	{
-// -> CODE#0008
-// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
-//		InvalidateRow(dwHintMask >> 24);
 		InvalidateRow(dwHintMask >> HINT_SHIFT_ROW);
-// -! BEHAVIOUR_CHANGE#0008
 	}
 
 }
