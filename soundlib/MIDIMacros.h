@@ -10,8 +10,14 @@
 #ifndef MIDIMACROS_H
 #define MIDIMACROS_H
 
-// parametered macro presets:
-enum enmParameteredMacroType
+#ifdef MODPLUG_TRACKER
+class CSoundFile;
+#include "PlugInterface.h"
+#include "Snd_defs.h"
+#endif // MODPLUG_TRACKER
+
+// Parametered macro presets
+enum parameteredMacroType
 {
 	sfx_unused = 0,
 	sfx_cutoff,			// Type 1 - Z00 - Z7F controls resonant filter cutoff
@@ -28,8 +34,8 @@ enum enmParameteredMacroType
 };
 
 
-// fixed macro presets:
-enum enmFixedMacroType
+// Fixed macro presets
+enum fixedMacroType
 {
 	zxx_custom = 0,
 	zxx_reso4Bit,		// Type 1 - Z80 - Z8F controls resonant filter resonance
@@ -44,36 +50,94 @@ enum enmFixedMacroType
 };
 
 
-class MIDIMacroTools
+// Global macro types
+enum
 {
-protected:
-	CSoundFile &m_SndFile;
+	MIDIOUT_START = 0,
+	MIDIOUT_STOP,
+	MIDIOUT_TICK,
+	MIDIOUT_NOTEON,
+	MIDIOUT_NOTEOFF,
+	MIDIOUT_VOLUME,
+	MIDIOUT_PAN,
+	MIDIOUT_BANKSEL,
+	MIDIOUT_PROGRAM,
+};
+
+
+#define NUM_MACROS 16	// number of parametered macros
+#define MACRO_LENGTH 32	// max number of chars per macro
+
+//===================
+class MIDIMacroConfig
+//===================
+{
 
 public:
+
+	char szMidiGlb[9][MACRO_LENGTH];		// Global MIDI macros
+	char szMidiSFXExt[16][MACRO_LENGTH];	// Parametric MIDI macros
+	char szMidiZXXExt[128][MACRO_LENGTH];	// Fixed MIDI macros
+
+public:
+
+	MIDIMacroConfig() { Reset(); };
+
 	// Get macro type from a macro string
-	static enmParameteredMacroType GetMacroType(CString value);
-	static enmFixedMacroType GetZxxType(const char (&szMidiZXXExt)[128][MACRO_LENGTH]);
-
-	// Translate macro type or macro string to macro name
-	static CString GetMacroName(enmParameteredMacroType macro);
-	CString GetMacroName(CString value, PLUGINDEX plugin) const;
-	static CString GetZxxName(enmFixedMacroType macro);
-
-	// Extract information from a macro string.
-	static int MacroToPlugParam(CString value);
-	static int MacroToMidiCC(CString value);
-
-	// Check if any macro can automate a given plugin parameter
-	int FindMacroForParam(long param) const;
+	parameteredMacroType GetParameteredMacroType(size_t macroIndex) const;
+	fixedMacroType GetFixedMacroType() const;
 
 	// Create a new macro
-	static void CreateZxxFromType(char (&szMidiZXXExt)[128][MACRO_LENGTH], enmFixedMacroType iZxxType);
-	static CString CreateParameteredMacroFromType(enmParameteredMacroType type, int subType = 0);
-	
+	void CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const;
+	void CreateParameteredMacro(size_t macroIndex, parameteredMacroType macroType, int subType = 0)
+	{
+		CreateParameteredMacro(szMidiSFXExt[macroIndex], macroType, subType);
+	};
+	std::string CreateParameteredMacro(parameteredMacroType macroType, int subType = 0) const
+	{
+		char parameteredMacro[MACRO_LENGTH];
+		CreateParameteredMacro(parameteredMacro, macroType, subType);
+		return std::string(parameteredMacro);
+	};
+
+	void CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const;
+	void CreateFixedMacro(fixedMacroType macroType)
+	{
+		CreateFixedMacro(szMidiZXXExt, macroType);
+	};
+
+#ifdef MODPLUG_TRACKER
+
+	// Translate macro type or macro string to macro name
+	CString GetParameteredMacroName(size_t macroIndex, PLUGINDEX plugin, const CSoundFile &sndFile) const;
+	CString GetParameteredMacroName(parameteredMacroType macroType) const;
+	CString GetFixedMacroName(fixedMacroType macroType) const;
+
+	// Extract information from a parametered macro string.
+	int MacroToPlugParam(size_t macroIndex) const;
+	int MacroToMidiCC(size_t macroIndex) const;
+
+	// Check if any macro can automate a given plugin parameter
+	int FindMacroForParam(PlugParamIndex param) const;
+
+#endif // MODPLUG_TRACKER
+
 	// Check if a given set of macros is the default IT macro set.
 	bool IsMacroDefaultSetupUsed() const;
 
-	MIDIMacroTools(CSoundFile &sndFile) : m_SndFile(sndFile) { };
+	// Reset MIDI macro config to default values.
+	void Reset();
+
+	// Sanitize all macro config strings.
+	void Sanitize();
+
+protected:
+
+	// Remove blanks and other unwanted characters from macro strings for internal usage.
+	std::string GetSafeMacro(const char *macro) const;
+
 };
+
+STATIC_ASSERT(sizeof(MIDIMacroConfig) == 4896); // this is directly written to files, so the size must be correct!
 
 #endif // MIDIMACROS_H

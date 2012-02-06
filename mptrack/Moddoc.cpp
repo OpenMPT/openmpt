@@ -15,7 +15,6 @@
 #include "version.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
-#include "MIDIMacros.h"
 #include "../common/StringFixer.h"
 #include <shlwapi.h>
 
@@ -179,8 +178,7 @@ BOOL CModDoc::OnNewDocument()
 	{
 		m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
 		
-		MIDIMacroTools macroTools(m_SndFile);
-		if(!macroTools.IsMacroDefaultSetupUsed())
+		if(!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
 		{
 			m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
 		}
@@ -2307,7 +2305,7 @@ BOOL CModDoc::IsExtendedEffect(UINT ndx) const
 
 
 bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, UINT param, bool bXX, CHANNELINDEX nChn) //rewbs.xinfo: added chan arg
-//------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
 {
 	bool bSupported;
 	UINT fxndx = MAX_FXINFO;
@@ -2342,22 +2340,24 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 		if (nChn < m_SndFile.m_nChannels)
 		{
 			CString chanSpec = "";
-			CString macroText= "_no macro_";
+			size_t macroIndex = size_t(-1);
+
 			switch (command)
 			{
 			case CMD_MODCMDEX:
 			case CMD_S3MCMDEX:
 				if ((param & 0xF0) == 0xF0 && !(m_SndFile.GetType() & MOD_TYPE_MOD))	//Set Macro
 				{
-					macroText = m_SndFile.m_MidiCfg.szMidiSFXExt[(param & 0x0F)];
+					macroIndex = (param & 0x0F);
 					chanSpec.Format(" to %d: ", param & 0x0F);
 				}
 				break;
+
 			case CMD_MIDI:
 			case CMD_SMOOTHMIDI:
 				if (param < 0x80 && nChn != CHANNELINDEX_INVALID)
 				{
-					macroText = m_SndFile.m_MidiCfg.szMidiSFXExt[m_SndFile.Chn[nChn].nActiveMacro];
+					macroIndex = m_SndFile.Chn[nChn].nActiveMacro;
 					chanSpec.Format(": currently %d: ", m_SndFile.Chn[nChn].nActiveMacro);
 				}
 				else
@@ -2367,11 +2367,10 @@ bool CModDoc::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, U
 				break;
 			}
 			
-			if (macroText != "_no macro_")
+			if(macroIndex != size_t(-1))
 			{
-				MIDIMacroTools macroTools(m_SndFile);
 				const PLUGINDEX plugin = m_SndFile.GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted) - 1;
-				chanSpec.Append(macroTools.GetMacroName(macroText, plugin));
+				chanSpec.Append(m_SndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, plugin, *(this->GetSoundFile())));
 			}
 			if (chanSpec != "")
 			{
@@ -3574,10 +3573,9 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	//if macro already exists for this param, alert user and return
 	for (int checkMacro = 0; checkMacro < NUM_MACROS; checkMacro++)
 	{
-		CString macroText = GetSoundFile()->m_MidiCfg.szMidiSFXExt[checkMacro];
-		int macroType = MIDIMacroTools::GetMacroType(macroText);
+		int macroType = GetSoundFile()->m_MidiCfg.GetParameteredMacroType(checkMacro);
 		
-		if (macroType==sfx_plug && MIDIMacroTools::MacroToPlugParam(macroText) == paramToUse)
+		if (macroType == sfx_plug && GetSoundFile()->m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
 		{
 			CString message;
 			message.Format("Parameter %02d can already be controlled with macro %X.", paramToUse, checkMacro);
@@ -3752,7 +3750,7 @@ void CModDoc::FixNullStrings()
 	}
 
 	// Macros
-	m_SndFile.SanitizeMacros();
+	m_SndFile.m_MidiCfg.Sanitize();
 
 	// Pattern names
 	// Those are CStrings and don't need to be fixed.

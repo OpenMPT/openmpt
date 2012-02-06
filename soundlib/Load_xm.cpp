@@ -609,10 +609,10 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
-		if (len == sizeof(MODMIDICFG))
+		if (len == sizeof(MIDIMacroConfig))
 		{
 			memcpy(&m_MidiCfg, lpStream + dwMemPos, len);
-			SanitizeMacros();
+			m_MidiCfg.Sanitize();
 			m_dwSongFlags |= SONG_EMBEDMIDICFG;
 			dwMemPos += len;	//rewbs.fix36946
 		}
@@ -1092,9 +1092,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		{
 			DWORD d = 0x4944494D;
 			fwrite(&d, 1, 4, f);
-			d = sizeof(MODMIDICFG);
+			d = sizeof(MIDIMacroConfig);
 			fwrite(&d, 1, 4, f);
-			fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
+			fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
 		}
 		// Writing Pattern Names
 		const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();

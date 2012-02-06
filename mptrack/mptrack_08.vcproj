@@ -1131,6 +1131,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\soundlib\PlugInterface.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\Reporting.h"
 				>
 			</File>

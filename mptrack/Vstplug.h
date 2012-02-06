@@ -8,6 +8,7 @@
 	#include <vstfxstore.h>
 #endif
 
+#include "../soundlib/Snd_defs.h"
 #include "../soundlib/PluginMixBuffer.h"
 
 #define kBuzzMagic	'Buzz'

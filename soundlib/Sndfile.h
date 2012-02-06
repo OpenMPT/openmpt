@@ -20,15 +20,8 @@
 #include "Snd_defs.h"
 #include "Endianness.h"
 #include "tuning.h"
+#include "MIDIMacros.h"
 
-// For VstInt32 and stuff - a stupid workaround for IMixPlugin.
-#ifndef NO_VST
-#define VST_FORCE_DEPRECATED 0
-#include <aeffect.h>			// VST
-#else
-typedef int32 VstInt32;
-typedef intptr_t VstIntPtr;
-#endif
 
 //class CTuningBase;
 //typedef CTuningBase CTuning;
@@ -424,118 +417,7 @@ struct MODCHANNELSETTINGS
 
 #include "modcommand.h"
 
-
-////////////////////////////////////////////////////////////////////
-// Mix Plugins
-#define MIXPLUG_MIXREADY			0x01	// Set when cleared
-
-typedef VstInt32 PlugParamIndex;
-typedef float PlugParamValue;
-
-class IMixPlugin
-{
-public:
-	virtual int AddRef() = 0;
-	virtual int Release() = 0;
-	virtual void SaveAllParameters() = 0;
-	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
-	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
-	virtual void Init(unsigned long nFreq, int bReset) = 0;
-	virtual bool MidiSend(DWORD dwMidiCode) = 0;
-	virtual void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) = 0;
-	virtual void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) = 0;
-	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan) = 0;
-	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
-	virtual void RecalculateGain() = 0;		
-	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
-	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
-	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
-	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
-	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
-	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
-	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
-	virtual void AutomateParameter(PlugParamIndex param) = 0;
-	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
-	virtual void NotifySongPlaying(bool) = 0;	//rewbs.VSTCompliance
-	virtual bool IsSongPlaying() = 0;
-	virtual bool IsResumed() = 0;
-	virtual void Resume() = 0;
-	virtual void Suspend() = 0;
-	virtual bool Bypass(bool = true) = 0;
-	virtual bool IsBypassed() const = 0;
-	bool ToggleBypass() { return Bypass(!IsBypassed()); };
-	virtual bool isInstrument() = 0;
-	virtual bool CanRecieveMidiEvents() = 0;
-	virtual void SetDryRatio(UINT param) = 0;
-
-};
-
-inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff)
-//---------------------------------------------------------------------------------
-{
-	float val = GetParameter(nIndex) + diff;
-	Limit(val, PlugParamValue(0), PlugParamValue(1));
-	SetParameter(nIndex, val);
-}
-
-
-												///////////////////////////////////////////////////
-												// !!! bits 8 -> 15 reserved for mixing mode !!! //
-												///////////////////////////////////////////////////
-#define MIXPLUG_INPUTF_MASTEREFFECT				0x01	// Apply to master mix
-#define MIXPLUG_INPUTF_BYPASS					0x02	// Bypass effect
-#define MIXPLUG_INPUTF_WETMIX					0x04	// Wet Mix (dry added)
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
-#define MIXPLUG_INPUTF_MIXEXPAND				0x08	// [0%,100%] -> [-200%,200%]
-// -! BEHAVIOUR_CHANGE#0028
-
-
-struct SNDMIXPLUGINSTATE
-{
-	DWORD dwFlags;					// MIXPLUG_XXXX
-	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
-	int *pMixBuffer;				// Stereo effect send buffer
-	float *pOutBufferL;				// Temp storage for int -> float conversion
-	float *pOutBufferR;
-};
-typedef SNDMIXPLUGINSTATE* PSNDMIXPLUGINSTATE;
-
-struct SNDMIXPLUGININFO
-{
-	DWORD dwPluginId1;
-	DWORD dwPluginId2;
-	DWORD dwInputRouting;	// MIXPLUG_INPUTF_XXXX, bits 16-23 = gain
-	DWORD dwOutputRouting;	// 0=mix 0x80+=fx
-	DWORD dwReserved[4];	// Reserved for routing info
-	CHAR szName[32];
-	CHAR szLibraryName[64];	// original DLL name
-}; // Size should be 128 							
-typedef SNDMIXPLUGININFO* PSNDMIXPLUGININFO;
-STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to files, so the size must be correct!
-
-struct SNDMIXPLUGIN
-{
-	const char* GetName() const { return Info.szName; }
-	const char* GetLibraryName();
-	CString GetParamName(const UINT index) const;
-	bool Bypass(bool bypass);
-	bool IsBypassed() const { return (Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) != 0; };
-
-	IMixPlugin *pMixPlugin;
-	PSNDMIXPLUGINSTATE pMixState;
-	ULONG nPluginDataSize;
-	PVOID pPluginData;
-	SNDMIXPLUGININFO Info;
-	float fDryRatio;		    // rewbs.dryRatio [20040123]
-	long defaultProgram;		// rewbs.plugDefaultProgram
-}; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
-typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
-
-//class CSoundFile;
-class CModDoc;
-typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CSoundFile*);
-
+#include "PlugInterface.h"
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
@@ -562,33 +444,6 @@ typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
 LPCSTR GetReverbPresetName(UINT nPreset);
 
 #endif
-
-////////////////////////////////////////////////////////////////////
-
-// Global MIDI macros
-enum
-{
-	MIDIOUT_START=0,
-	MIDIOUT_STOP,
-	MIDIOUT_TICK,
-	MIDIOUT_NOTEON,
-	MIDIOUT_NOTEOFF,
-	MIDIOUT_VOLUME,
-	MIDIOUT_PAN,
-	MIDIOUT_BANKSEL,
-	MIDIOUT_PROGRAM,
-};
-
-
-#define NUM_MACROS 16	// number of parametered macros
-#define MACRO_LENGTH 32	// max number of chars per macro
-struct MODMIDICFG
-{
-	char szMidiGlb[9][MACRO_LENGTH];		// Global MIDI macros
-	char szMidiSFXExt[16][MACRO_LENGTH];	// Parametric MIDI macros
-	char szMidiZXXExt[128][MACRO_LENGTH];	// Fixed MIDI macros
-};
-STATIC_ASSERT(sizeof(MODMIDICFG) == 4896); // this is directly written to files, so the size must be correct!
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
@@ -673,8 +528,8 @@ const BYTE MSF_COMPATIBLE_PLAY		= 0;		//IT/MPT/XM
 const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
 const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
 
-
 class CTuningCollection;
+class CModDoc;
 
 //==============
 class CSoundFile
@@ -813,7 +668,7 @@ protected:
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 public:
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
-	MODMIDICFG m_MidiCfg;								// Midi macro config table
+	MIDIMacroConfig m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	CHAR CompressionTable[16];							// ADPCM compression LUT
@@ -927,7 +782,7 @@ public:
 
 	void UpgradeModFlags();
 	void UpgradeSong();
-	static void FixMIDIConfigStrings(MODMIDICFG &midiCfg);
+	static void FixMIDIConfigStrings(MIDIMacroConfig &midiCfg);
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
@@ -1180,8 +1035,7 @@ public:
 	// Misc functions
 	MODSAMPLE &GetSample(SAMPLEINDEX sample) { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 	const MODSAMPLE &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
-	static void ResetMidiCfg(MODMIDICFG &midiConfig);
-	void SanitizeMacros();
+
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	long ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
 	UINT LoadMixPlugins(const void *pData, UINT nLen);

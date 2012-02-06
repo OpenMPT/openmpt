@@ -73,7 +73,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnSFx.SetCurSel(0);
 	for(int i = 0; i < sfx_max; i++)
 	{
-		m_CbnSFxPreset.SetItemData(m_CbnSFxPreset.AddString(macroTools.GetMacroName(static_cast<enmParameteredMacroType>(i))), i);
+		m_CbnSFxPreset.SetItemData(m_CbnSFxPreset.AddString(m_MidiCfg.GetParameteredMacroName(static_cast<parameteredMacroType>(i))), i);
 	}
 	OnSFxChanged();
 
@@ -95,9 +95,9 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnZxx.SetCurSel(0);
 	for(int i = 0; i < zxx_max; i++)
 	{
-		m_CbnZxxPreset.SetItemData(m_CbnZxxPreset.AddString(macroTools.GetZxxName(static_cast<enmFixedMacroType>(i))), i);
+		m_CbnZxxPreset.SetItemData(m_CbnZxxPreset.AddString(m_MidiCfg.GetFixedMacroName(static_cast<fixedMacroType>(i))), i);
 	}
-	m_CbnZxxPreset.SetCurSel(macroTools.GetZxxType(m_MidiCfg.szMidiZXXExt));
+	m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 
 	UpdateDialog();
 
@@ -171,24 +171,23 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		m_EditMacro[m].SetWindowText(s);
 
 		// Macro value:
-		CString macroText = m_MidiCfg.szMidiSFXExt[m];
-		m_EditMacroValue[m].SetWindowText(macroText);
+		m_EditMacroValue[m].SetWindowText(m_MidiCfg.szMidiSFXExt[m]);
 		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
 
 		// Macro Type:
-		const enmParameteredMacroType macroType = macroTools.GetMacroType(macroText);
+		const parameteredMacroType macroType = m_MidiCfg.GetParameteredMacroType(m);
 		switch (macroType)
 		{
 		case sfx_cc:
-			s.Format("MIDI CC %d", macroTools.MacroToMidiCC(macroText)); 
+			s.Format("MIDI CC %d", m_MidiCfg.MacroToMidiCC(m));
 			break;
 
 		case sfx_plug: 
-			s.Format("Control Plugin Param %d", macroTools.MacroToPlugParam(macroText)); 
+			s.Format("Control Plugin Param %d", m_MidiCfg.MacroToPlugParam(m));
 			break;
 
 		default:
-			s = macroTools.GetMacroName(macroType);
+			s = m_MidiCfg.GetParameteredMacroName(macroType);
 			break;
 		}
 		m_EditMacroType[m].SetWindowText(s);
@@ -276,9 +275,7 @@ void CMidiMacroSetup::OnSFxChanged()
 	UINT sfx = m_CbnSFx.GetCurSel();
 	if (sfx < 16)
 	{
-		CString macroText;
-		memcpy(macroText.GetBuffer(MACRO_LENGTH), m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
-		int preset = macroTools.GetMacroType(macroText);
+		int preset = m_MidiCfg.GetParameteredMacroType(sfx);
 		m_CbnSFxPreset.SetCurSel(preset);
 	}
 	UpdateDialog();
@@ -289,13 +286,13 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 //----------------------------------------
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
-	enmParameteredMacroType sfx_preset = static_cast<enmParameteredMacroType>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
+	parameteredMacroType sfx_preset = static_cast<parameteredMacroType>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
 
 	if (sfx < 16)
 	{
 		if(sfx_preset != sfx_custom)
 		{
-			strcpy(m_MidiCfg.szMidiSFXExt[sfx], macroTools.CreateParameteredMacroFromType(sfx_preset));
+			m_MidiCfg.CreateParameteredMacro(sfx, sfx_preset);
 		}
 		UpdateDialog();
 	}
@@ -305,11 +302,11 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 void CMidiMacroSetup::OnZxxPresetChanged()
 //----------------------------------------
 {
-	enmFixedMacroType zxx_preset = static_cast<enmFixedMacroType>(m_CbnZxxPreset.GetItemData(m_CbnZxxPreset.GetCurSel()));
+	fixedMacroType zxx_preset = static_cast<fixedMacroType>(m_CbnZxxPreset.GetItemData(m_CbnZxxPreset.GetCurSel()));
 
 	if (zxx_preset != zxx_custom)
 	{
-		macroTools.CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_preset);
+		m_MidiCfg.CreateFixedMacro(zxx_preset);
 		UpdateDialog();
 	}
 }
@@ -329,7 +326,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 			StringFixer::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
 
-			int sfx_preset = macroTools.GetMacroType(m_MidiCfg.szMidiSFXExt[sfx]);
+			int sfx_preset = m_MidiCfg.GetParameteredMacroType(sfx);
 			m_CbnSFxPreset.SetCurSel(sfx_preset);
 			ToggleBoxes(sfx_preset, sfx);
 			UpdateMacroList(sfx);
@@ -367,7 +364,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 {
 	CString message, plugName, line;
 	int sfx = id - ID_PLUGSELECT;
-	int param = macroTools.MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]);
+	int param = m_MidiCfg.MacroToPlugParam(sfx);
 	CVstPlugin *pVstPlugin; 
 	message.Format("These are the parameters that can be controlled by macro SF%X:\n\n", sfx);
 
@@ -407,7 +404,7 @@ void CMidiMacroSetup::OnPlugChanged()
 		AddPluginParameternamesToCombobox(m_CbnMacroParam, *pVstPlugin);
 		m_CbnMacroParam.SetRedraw(TRUE);
 
-		int param = macroTools.MacroToPlugParam(m_MidiCfg.szMidiSFXExt[m_CbnSFx.GetCurSel()]);
+		int param = m_MidiCfg.MacroToPlugParam(m_CbnSFx.GetCurSel());
 		m_CbnMacroParam.SetCurSel(param);
 	}
 	//OnPlugParamChanged();
@@ -416,17 +413,12 @@ void CMidiMacroSetup::OnPlugChanged()
 void CMidiMacroSetup::OnPlugParamChanged()
 //----------------------------------------
 {
-	CString macroText;
 	UINT param = m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel());
 
-	if(param < 128)
+	if(param < 384)
 	{
-		macroText.Format("F0F0%02Xz",param + 128);
-		m_EditSFx.SetWindowText(macroText);
-	} else if(param < 384)
-	{
-		macroText.Format("F0F1%02Xz",param - 128);
-		m_EditSFx.SetWindowText(macroText);
+		const std::string macroText = m_MidiCfg.CreateParameteredMacro(sfx_plug, param);
+		m_EditSFx.SetWindowText(macroText.c_str());
 	} else
 	{
 		Reporting::Notification("Only parameters 0 to 383 can be controlled using MIDI Macros. Use Parameter Control Events to automate higher parameters.");
@@ -436,10 +428,9 @@ void CMidiMacroSetup::OnPlugParamChanged()
 void CMidiMacroSetup::OnCCChanged()
 //---------------------------------
 {
-	CString macroText;
 	UINT cc = m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel());
-	macroText.Format("Bc%02Xz", cc & 0xFF);
-	m_EditSFx.SetWindowText(macroText);
+	const std::string macroText = m_MidiCfg.CreateParameteredMacro(sfx_cc, cc);
+	m_EditSFx.SetWindowText(macroText.c_str());
 }
 
 void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
@@ -454,7 +445,7 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 		m_CbnMacroPlug.EnableWindow(TRUE);
 		m_CbnMacroParam.EnableWindow(TRUE);
 		SetDlgItemText(IDC_GENMACROLABEL, "Plug/Param");
-		m_CbnMacroParam.SetCurSel(macroTools.MacroToPlugParam(m_MidiCfg.szMidiSFXExt[sfx]));
+		m_CbnMacroParam.SetCurSel(m_MidiCfg.MacroToPlugParam(sfx));
 	} else
 	{
 		m_CbnMacroPlug.EnableWindow(FALSE);
@@ -468,7 +459,7 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 		m_CbnMacroPlug.ShowWindow(FALSE);
 		m_CbnMacroParam.ShowWindow(FALSE);
 		SetDlgItemText(IDC_GENMACROLABEL, "MIDI CC");
-		m_CbnMacroCC.SetCurSel(macroTools.MacroToMidiCC(m_MidiCfg.szMidiSFXExt[sfx]));
+		m_CbnMacroCC.SetCurSel(m_MidiCfg.MacroToMidiCC(sfx));
 	} else
 	{
 		m_CbnMacroCC.EnableWindow(FALSE);

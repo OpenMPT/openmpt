@@ -194,7 +194,7 @@ void TrackerSettings::LoadSettings()
 	theApp.LoadChords(Chords);
 
 	// Load default macro configuration
-	MODMIDICFG macros;
+	MIDIMacroConfig macros;
 	theApp.GetDefaultMidiMacro(&macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
@@ -785,7 +785,7 @@ void TrackerSettings::SaveSettings()
 	theApp.SaveChords(Chords);
 
 	// Save default macro configuration
-	MODMIDICFG macros;
+	MIDIMacroConfig macros;
 	theApp.GetDefaultMidiMacro(&macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{

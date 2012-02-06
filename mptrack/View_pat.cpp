@@ -3216,8 +3216,6 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		return 0;
 	}
 
-	MIDIMacroTools macroTools(*pSndFile);
-
 	//Work out where to put the new data
 	const UINT nChn = GetChanFromCursor(m_dwCursor);
 	const bool bUsePlaybackPosition = IsLiveRecord(*pModDoc, *pSndFile);
@@ -3253,16 +3251,17 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		//Figure out which plug param (if any) is controllable using the active macro on this channel.
 		long activePlugParam  = -1;
 		BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
-		CString activeMacroString = pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro];
-		if (macroTools.GetMacroType(activeMacroString) == sfx_plug)
+
+		if (pSndFile->m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
 		{
-			activePlugParam = macroTools.MacroToPlugParam(activeMacroString);
+			activePlugParam = pSndFile->m_MidiCfg.MacroToPlugParam(activeMacro);
 		}
+
 		//If the wrong macro is active, see if we can find the right one.
 		//If we can, activate it for this chan by writing appropriate SFx command it.
 		if (activePlugParam != paramIndex)
 		{ 
-			int foundMacro = macroTools.FindMacroForParam(paramIndex);
+			int foundMacro = pSndFile->m_MidiCfg.FindMacroForParam(paramIndex);
 			if (foundMacro >= 0)
 			{
 				pSndFile->Chn[nChn].nActiveMacro = foundMacro;
@@ -3271,7 +3270,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 					pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1);
 
 					pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_MODCMDEX;;
-					pRow->param = 0xF0 + (foundMacro&0x0F);
+					pRow->param = 0xF0 + (foundMacro & 0x0F);
 					InvalidateRow(nRow);
 				}
 
