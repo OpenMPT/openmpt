@@ -900,7 +900,7 @@ bool CModCleanupDlg::ResetVariables()
 	pSndFile->m_nMixLevels = mixLevels_compatible;
 	pSndFile->m_nTempoMode = tempo_mode_classic;
 	pSndFile->m_dwSongFlags = SONG_LINEARSLIDES;
-	CSoundFile::ResetMidiCfg(pSndFile->m_MidiCfg);
+	pSndFile->m_MidiCfg.Reset();
 	
 	// Global vars
 	pSndFile->m_nDefaultTempo = 125;

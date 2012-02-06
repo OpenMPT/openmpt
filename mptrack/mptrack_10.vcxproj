@@ -329,6 +329,7 @@
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
     <ClInclude Include="..\soundlib\PluginMixBuffer.h" />
+    <ClInclude Include="..\soundlib\PlugInterface.h" />
     <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="Autotune.h" />
     <ClInclude Include="ExceptionHandler.h" />

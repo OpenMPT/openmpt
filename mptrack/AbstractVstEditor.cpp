@@ -566,7 +566,7 @@ void CAbstractVstEditor::UpdateOutputMenu()
 void CAbstractVstEditor::UpdateMacroMenu()
 //----------------------------------------
 {
-	CString label, macroName, macroText;
+	CString label, macroName;
 	bool greyed;
 	int action;
 
@@ -590,12 +590,12 @@ void CAbstractVstEditor::UpdateMacroMenu()
 
 	for (int nMacro = 0; nMacro < NUM_MACROS; nMacro++)
 	{
-		MIDIMacroTools macroTools(*pModDoc->GetSoundFile());
-
 		action = NULL;
 		greyed = true;
-		macroText = pModDoc->GetSoundFile()->m_MidiCfg.szMidiSFXExt[nMacro];
- 		const enmParameteredMacroType macroType = macroTools.GetMacroType(macroText);
+
+		const MIDIMacroConfig &midiCfg = pModDoc->GetSoundFile()->m_MidiCfg;
+
+ 		const parameteredMacroType macroType = midiCfg.GetParameteredMacroType(nMacro);
 
 		if(macroType == sfx_unused)
 		{
@@ -604,7 +604,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 			greyed = false; 
 		} else
 		{
-			macroName = macroTools.GetMacroName(macroText, m_pVstPlugin->GetSlot());
+			macroName = midiCfg.GetParameteredMacroName(nMacro, m_pVstPlugin->GetSlot(), *pModDoc->GetSoundFile());
 			if(macroType != sfx_plug || macroName.Left(3) != "N/A")
 			{
 				greyed = false;

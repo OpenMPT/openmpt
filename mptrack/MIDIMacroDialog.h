@@ -19,13 +19,13 @@ class CMidiMacroSetup: public CDialog
 //===================================
 {
 public:
-	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), macroTools(sndFile), m_MidiCfg(sndFile.m_MidiCfg)
+	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_MidiCfg(sndFile.m_MidiCfg)
 	{
 		m_bEmbed = (m_SndFile.m_dwSongFlags & SONG_EMBEDMIDICFG) != 0;
 	}
 
 	bool m_bEmbed;
-	MODMIDICFG m_MidiCfg;
+	MIDIMacroConfig m_MidiCfg;
 
 
 protected:
@@ -35,7 +35,6 @@ protected:
 	CButton m_EditMacro[NUM_MACROS], m_BtnMacroShowAll[NUM_MACROS];
 
 	CSoundFile &m_SndFile;
-	MIDIMacroTools macroTools;
 
 	bool ValidateMacroString(CEdit &wnd, char *lastMacro, bool isParametric);
 

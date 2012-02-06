@@ -176,7 +176,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	if (id <= sizeof(m_MidiCfg))
 	{
 		memcpy(&m_MidiCfg, lpStream + dwMemPos, id);
-		SanitizeMacros();
+		m_MidiCfg.Sanitize();
 		dwMemPos += id;
 	}
 
@@ -552,11 +552,11 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Song midi config
 
 	// midi cfg data length
-	id = sizeof(MODMIDICFG);
+	id = sizeof(MIDIMacroConfig);
 	fwrite(&id, 1, sizeof(id), f);
 
 	// midi cfg
-	fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
+	fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
 
 	// Song Instruments
 

@@ -16,7 +16,6 @@
 #include "sndfile.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
-#include "MIDIMacros.h"
 #include "../common/StringFixer.h"
 #include <vector>
 #include <list>
@@ -555,7 +554,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order.resize(1);
 	Patterns.ClearPatterns();
-	ResetMidiCfg(m_MidiCfg);
 
 	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
@@ -912,38 +910,6 @@ void CSoundFile::FreeSample(LPVOID p)
 
 //////////////////////////////////////////////////////////////////////////
 // Misc functions
-
-void CSoundFile::ResetMidiCfg(MODMIDICFG &midiConfig)
-//---------------------------------------------------
-{
-	MemsetZero(midiConfig);
-	strcpy(midiConfig.szMidiGlb[MIDIOUT_START], "FF");
-	strcpy(midiConfig.szMidiGlb[MIDIOUT_STOP], "FC");
-	strcpy(midiConfig.szMidiGlb[MIDIOUT_NOTEON], "9c n v");
-	strcpy(midiConfig.szMidiGlb[MIDIOUT_NOTEOFF], "9c n 0");
-	strcpy(midiConfig.szMidiGlb[MIDIOUT_PROGRAM], "Cc p");
-	strcpy(midiConfig.szMidiSFXExt[0], "F0F000z");
-	MIDIMacroTools::CreateZxxFromType(midiConfig.szMidiZXXExt, zxx_reso4Bit);
-}
-
-
-// Set null terminator for all MIDI macros
-void CSoundFile::SanitizeMacros()
-//-------------------------------
-{
-	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiGlb); i++)
-	{
-		StringFixer::FixNullString(m_MidiCfg.szMidiGlb[i]);
-	}
-	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiSFXExt); i++)
-	{
-		StringFixer::FixNullString(m_MidiCfg.szMidiSFXExt[i]);
-	}
-	for(size_t i = 0; i < CountOf(m_MidiCfg.szMidiZXXExt); i++)
-	{
-		StringFixer::FixNullString(m_MidiCfg.szMidiZXXExt[i]);
-	}
-}
 
 
 BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
@@ -3117,7 +3083,7 @@ void FixMIDIConfigString(char *line)
 
 
 // Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
-void CSoundFile::FixMIDIConfigStrings(MODMIDICFG &midiCfg)
+void CSoundFile::FixMIDIConfigStrings(MIDIMacroConfig &midiCfg)
 //--------------------------------------------------------
 {
 	for(size_t i = 0; i < CountOf(midiCfg.szMidiSFXExt); i++)

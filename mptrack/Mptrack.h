@@ -131,7 +131,7 @@ protected:
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
-	MODMIDICFG m_MidiCfg;
+	MIDIMacroConfig m_MidiCfg;
 	static TCHAR m_szExePath[_MAX_PATH];
 	TCHAR m_szConfigDirectory[_MAX_PATH];
 	TCHAR m_szConfigFileName[_MAX_PATH];
@@ -171,8 +171,8 @@ public:
 public:
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
-	void GetDefaultMidiMacro(MODMIDICFG *pcfg) const { *pcfg = m_MidiCfg; }
-	void SetDefaultMidiMacro(const MODMIDICFG *pcfg) { m_MidiCfg = *pcfg; }
+	void GetDefaultMidiMacro(MIDIMacroConfig *pcfg) const { *pcfg = m_MidiCfg; }
+	void SetDefaultMidiMacro(const MIDIMacroConfig *pcfg) { m_MidiCfg = *pcfg; }
 	void LoadChords(PMPTCHORD pChords);
 	void SaveChords(PMPTCHORD pChords);
 	BOOL CanEncodeLayer3() const { return acmConvert.IsLayer3Present(); }

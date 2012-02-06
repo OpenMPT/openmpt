@@ -591,9 +591,7 @@ CTrackApp::CTrackApp()
 	m_bDebugMode = FALSE;
 	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
-	for (UINT i=0; i<MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
-	// Reset default macro config
-	CSoundFile::ResetMidiCfg(m_MidiCfg);
+	for (size_t i = 0; i < MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////

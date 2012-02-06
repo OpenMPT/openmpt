@@ -379,7 +379,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		{
 			if (pSndFile->GetNumInstruments())
 			{
-				UINT k = m_pParent->GetInstrumentChange();
+				INSTRUMENTINDEX k = m_pParent->GetInstrumentChange();
 				if (!pModDoc->IsChildSample(k, lParam))
 				{
 					UINT nins = pModDoc->FindSampleParent(lParam);

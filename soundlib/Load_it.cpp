@@ -812,11 +812,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Reading MIDI Output & Macros
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
-		if (dwMemPos + sizeof(MODMIDICFG) < dwMemLength)
+		if (dwMemPos + sizeof(MIDIMacroConfig) < dwMemLength)
 		{
-			memcpy(&m_MidiCfg, lpStream + dwMemPos, sizeof(MODMIDICFG));
-			SanitizeMacros();
-			dwMemPos += sizeof(MODMIDICFG);
+			memcpy(&m_MidiCfg, lpStream + dwMemPos, sizeof(MIDIMacroConfig));
+			m_MidiCfg.Sanitize();
+			dwMemPos += sizeof(MIDIMacroConfig);
 		}
 	}
 	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
@@ -1491,7 +1491,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	{
 		header.flags |= 0x80;
 		header.special |= 0x08;
-		dwExtra += sizeof(MODMIDICFG);
+		dwExtra += sizeof(MIDIMacroConfig);
 	}
 
 	// Pattern Names
@@ -1531,7 +1531,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	// Writing midi cfg
 	if (header.flags & 0x80)
 	{
-		fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
+		fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
 	}
 
 	// Writing pattern names
