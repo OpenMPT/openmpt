@@ -891,7 +891,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	UINT nChn = GetNumChannels();
+	CHANNELINDEX nChn = GetNumChannels();
 	
 	if ((!pMainFrm) || (!note)) return FALSE;
 	if (nVol > 256) nVol = 256;
@@ -1096,18 +1096,18 @@ BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX n
 
 // Check if a given note of an instrument or sample is playing.
 // If note == 0, just check if an instrument or sample is playing.
-BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
-//----------------------------------------------------------
+bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
+//----------------------------------------------------------------------------
 {
-	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
-	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
+	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.GetNumChannels()];
+	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 		if ((pChn->nLength) && (!(pChn->dwFlags & (CHN_NOTEFADE|CHN_KEYOFF|CHN_MUTE)))
 		 && ((note == pChn->nNewNote) || (!note))
 		 && ((pChn->pModSample == &m_SndFile.GetSample(nsmp)) || (!nsmp))
-		 && ((pChn->pModInstrument == m_SndFile.Instruments[nins]) || (!nins))) return TRUE;
+		 && ((pChn->pModInstrument == m_SndFile.Instruments[nins]) || (!nins))) return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -3534,8 +3534,8 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 
 
 
-UINT CModDoc::FindAvailableChannel()
-//----------------------------------
+CHANNELINDEX CModDoc::FindAvailableChannel()
+//------------------------------------------
 {
 	CHANNELINDEX nStoppedChannel = CHANNELINDEX_INVALID;
 	// Search for available channel

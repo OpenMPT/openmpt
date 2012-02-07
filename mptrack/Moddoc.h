@@ -252,7 +252,6 @@ public:
 	bool ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg = true);
 	bool RemoveChannels(const vector<bool> &keepMask);
 	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
-	bool MoveChannel(CHANNELINDEX chn_from, CHANNELINDEX chn_to);
 	void CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 	bool ConvertInstrumentsToSamples();
@@ -272,7 +271,7 @@ public:
 	UINT PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol=-1, SmpLength loopStart = 0, SmpLength loopEnd = 0, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID, const SmpLength sampleOffset = 0); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX nins = INSTRUMENTINDEX_INVALID, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
 
-	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
+	bool IsNotePlaying(UINT note, SAMPLEINDEX nsmp = 0, INSTRUMENTINDEX nins = 0);
 	bool MuteChannel(CHANNELINDEX nChn, bool bMute);
 	bool UpdateChannelMuteStatus(CHANNELINDEX nChn);
 	bool MuteSample(SAMPLEINDEX nSample, bool bMute);
@@ -426,7 +425,7 @@ public:
 private:
 
 	void ChangeFileExtension(MODTYPE nNewType);
-	UINT FindAvailableChannel();
+	CHANNELINDEX FindAvailableChannel();
 };
 
 /////////////////////////////////////////////////////////////////////////////

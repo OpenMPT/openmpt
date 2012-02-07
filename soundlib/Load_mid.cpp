@@ -341,23 +341,6 @@ const WORD kMidiChannelPriority[16] =
 ///////////////////////////////////////////////////////////////////////////
 // Helper functions
 
-static LONG __fastcall getmidilong(LPCBYTE &p, LPCBYTE pmax)
-//----------------------------------------------------------
-{
-	DWORD n;
-	UINT a;
-
-	a = (p < pmax) ? *(p++) : 0;
-	n = 0;
-	while (a&0x80)
-	{
-		n = (n<<7)|(a&0x7F);
-		a = (p < pmax) ? *(p++) : 0;
-	}
-	return (n<<7)|(LONG)a;
-}
-
-
 // Returns MOD tempo and tick multiplier
 static int ConvertMidiTempo(int tempo_us, int &tickMultiplier, int importSpeed)
 //------------------------------------------------------------------------------

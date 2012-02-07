@@ -256,51 +256,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 }
 
 
-bool CModDoc::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
-//-----------------------------------------------------------------
-{
-	//Implementation of move channel using ReArrangeChannels(...). So this function
-	//only creates correct newOrder-vector used in the ReArrangeChannels(...).
-	if(chnFrom == chnTo) return false;
-	if(chnFrom >= GetNumChannels() || chnTo >= GetNumChannels())
-	{
-		Reporting::Error("Error: Bad move indexes in CSoundFile::MoveChannel(...)" , "MoveChannel(...)");
-		return true;
-	}
-	vector<CHANNELINDEX> newOrder;
-	//First creating new order identical to current order...
-	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-	{
-		newOrder.push_back(i);
-	}
-	//...and then add the move channel effect.
-	if(chnFrom < chnTo)
-	{
-		CHANNELINDEX temp = newOrder[chnFrom];
-		for(CHANNELINDEX i = chnFrom; i < chnTo; i++)
-		{
-			newOrder[i] = newOrder[i + 1];
-		}
-		newOrder[chnTo] = temp;
-	}
-	else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
-	{
-		CHANNELINDEX temp = newOrder[chnFrom];
-		for(CHANNELINDEX i = chnFrom; i >= chnTo + 1; i--)
-		{
-			newOrder[i] = newOrder[i - 1];
-		}
-		newOrder[chnTo] = temp;
-	}
-
-	if(newOrder.size() != ReArrangeChannels(newOrder))
-	{
-		Reporting::Error("BUG: Channel number changed in MoveChannel()");
-	}
-	return false;
-}
-
-
 // Functor for converting instrument numbers to sample numbers in the patterns
 struct ConvertInstrumentsToSamplesInPatterns
 //==========================================
