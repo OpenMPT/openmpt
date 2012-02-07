@@ -3069,42 +3069,8 @@ void CSoundFile::UpgradeSong()
 		}
 
 		// Fix old nasty broken (non-standard) MIDI configs in files.
-		FixMIDIConfigStrings(m_MidiCfg);
+		m_MidiCfg.UpgradeMacros();
 	}
 
 	Patterns.ForEachModCommand(UpgradePatternData(this));
-}
-
-
-void FixMIDIConfigString(char *line)
-//----------------------------------
-{
-	for(size_t i = 0; i < MACRO_LENGTH; i++)
-	{
-		if(line[i] >= 'a' && line[i] <= 'f')		// both A-F and a-f were treated as hex constants
-		{
-			line[i] = line[i] - 'a' + 'A';
-		} else if(line[i] == 'K' || line[i] == 'k')	// channel was K or k
-		{
-			line[i] = 'c';
-		} else if(line[i] == 'X' || line[i] == 'x' || line[i] == 'Y' || line[i] == 'y')	// those were pointless
-		{
-			line[i] = 'z';
-		}
-	}
-}
-
-
-// Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
-void CSoundFile::FixMIDIConfigStrings(MIDIMacroConfig &midiCfg)
-//--------------------------------------------------------
-{
-	for(size_t i = 0; i < CountOf(midiCfg.szMidiSFXExt); i++)
-	{
-		FixMIDIConfigString(midiCfg.szMidiSFXExt[i]);
-	}
-	for(size_t i = 0; i < CountOf(midiCfg.szMidiZXXExt); i++)
-	{
-		FixMIDIConfigString(midiCfg.szMidiZXXExt[i]);
-	}
 }

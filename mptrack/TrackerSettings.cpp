@@ -213,7 +213,7 @@ void TrackerSettings::LoadSettings()
 	// Fix old nasty broken (non-standard) MIDI configs in INI file.
 	if(storedVersion >= "1.17" && storedVersion < "1.20")
 	{
-		CSoundFile::FixMIDIConfigStrings(macros);
+		macros.UpgradeMacros();
 	}
 	theApp.SetDefaultMidiMacro(&macros);
 
@@ -287,8 +287,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 			outTime,
 			GetPrivateProfileInt("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod(), iniFile),
 			CMainFrame::GetPrivateProfileCString("Update", "UpdateURL", CUpdateCheck::GetUpdateURL(), iniFile),
-			GetPrivateProfileInt("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0, iniFile) ? true : false,
-			GetPrivateProfileInt("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0, iniFile) ? true : false
+			GetPrivateProfileInt("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0, iniFile) != 0,
+			GetPrivateProfileInt("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0, iniFile) != 0
 			);
 	}
 
