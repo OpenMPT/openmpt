@@ -283,8 +283,8 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
 
 	// Macros
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0, sfx_reso);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1, sfx_drywet);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetFixedMacroType(), zxx_resomode);
 
 	// Channels
@@ -478,8 +478,8 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
 
 	// Macros
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0, sfx_reso);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1, sfx_drywet);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetFixedMacroType(), zxx_resomode);
 
 	// Channels
