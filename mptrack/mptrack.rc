@@ -2035,6 +2035,7 @@ BEGIN
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
         MENUITEM "Open template",               65535
         MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "C&lose All",                  ID_FILE_CLOSEALL
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM "Save as Template...",         ID_FILE_SAVEASTEMPLATE

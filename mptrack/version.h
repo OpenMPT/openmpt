@@ -15,7 +15,7 @@
 #define VER_MAJORMAJOR				1
 #define VER_MAJOR					20
 #define VER_MINOR					00
-#define VER_MINORMINOR				65
+#define VER_MINORMINOR				66
 
 //Creates version number from version parts that appears in version string.
 //For example MAKE_VERSION_NUMERIC(1,17,02,28) gives version number of 
@@ -35,7 +35,7 @@ namespace MptVersion
 	const char* const str = MPT_VERSION_STR;
 
 	// Returns numerical version value from given version string.
-	static VersionNum ToNum(const char* const s)
+	static VersionNum ToNum(const char *const s)
 	{
 		int v1, v2, v3, v4; 
 		sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);

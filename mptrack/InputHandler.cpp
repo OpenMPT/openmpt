@@ -410,11 +410,12 @@ CString CInputHandler::GetMenuText(UINT id)
 	{
 		case FILENEW:				s="&New\t"; c = kcFileNew; break;
 		case ID_FILE_OPEN:			s="&Open...\t"; c = kcFileOpen; break;
-		case ID_FILE_OPENTEMPLATE:	return "Open Template\t";
+		case ID_FILE_OPENTEMPLATE:	return "Open &Template\t";
 		case ID_FILE_CLOSE:			s="&Close\t"; c = kcFileClose; break;
+		case ID_FILE_CLOSEALL:		s="C&lose All\t"; c = kcFileCloseAll; break;
 		case ID_FILE_SAVE:			s="&Save\t"; c = kcFileSave; break;
 		case ID_FILE_SAVE_AS:		s="Save &As...\t"; c = kcFileSaveAs; break;
-		case ID_FILE_SAVEASTEMPLATE:s="Save as &Template\t"; c = kcFileSaveTemplate; break;
+		case ID_FILE_SAVEASTEMPLATE:s="Sa&ve as Template\t"; c = kcFileSaveTemplate; break;
 		case ID_FILE_SAVEASWAVE:	s="Export as &Wave...\t"; c = kcFileSaveAsWave; break;
 		case ID_FILE_SAVEASMP3:		s="Export as M&P3...\t"; c = kcFileSaveAsMP3; break;
 		case ID_FILE_SAVEMIDI:		s="Export as M&IDI...\t"; c = kcFileSaveMidi; break;

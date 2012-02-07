@@ -2377,6 +2377,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewEditHistory:	OnViewEditHistory(); break;
 		case kcNextDocument:	MDINext(); break;
 		case kcPrevDocument:	MDIPrev(); break;
+		case kcFileCloseAll:	theApp.OnFileCloseAll(); break;
 
 
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
@@ -2463,6 +2464,7 @@ double CMainFrame::GetApproxBPM()
 	pSndFile = GetActiveDoc()->GetSoundFile();
 	if (pSndFile)
 	{
+		pSndFile->RecalculateSamplesPerTick();
 		return pSndFile->GetCurrentBPM();
 	}
 	return 0;

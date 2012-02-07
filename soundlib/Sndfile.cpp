@@ -742,15 +742,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	InitializeVisitedRows(true);
 
-	switch(m_nTempoMode)
-	{
-		case tempo_mode_alternative: 
-			m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo; break;
-		case tempo_mode_modern: 
-			m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat)); break;
-		case tempo_mode_classic: default:
-			m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
-	}
+	RecalculateSamplesPerTick();
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
@@ -1007,8 +999,8 @@ UINT CSoundFile::GetCurrentPos() const
 	return pos + m_nRow; 
 }
 
-double  CSoundFile::GetCurrentBPM() const
-//---------------------------------------
+double CSoundFile::GetCurrentBPM() const
+//--------------------------------------
 {
 	double bpm;
 
@@ -2290,6 +2282,7 @@ void CSoundFile::AdjustSampleLoop(MODSAMPLE *pSmp)
 DWORD CSoundFile::TransposeToFrequency(int transp, int ftune)
 //-----------------------------------------------------------
 {
+	// return (unsigned int) (8363.0 * pow(2, (transp * 128.0 + ftune) / 1536.0));
 	const float _fbase = 8363;
 	const float _factor = 1.0f/(12.0f*128.0f);
 	int result;
@@ -2325,6 +2318,8 @@ DWORD CSoundFile::TransposeToFrequency(int transp, int ftune)
 int CSoundFile::FrequencyToTranspose(DWORD freq)
 //----------------------------------------------
 {
+	// return (int) (1536.0 * (log(freq / 8363.0) / log(2)));
+
 	const float _f1_8363 = 1.0f / 8363.0f;
 	const float _factor = 128 * 12;
 	LONG result;
@@ -2348,7 +2343,7 @@ void CSoundFile::FrequencyToTranspose(MODSAMPLE *psmp)
 	int f2t = FrequencyToTranspose(psmp->nC5Speed);
 	int transp = f2t >> 7;
 	int ftune = f2t & 0x7F; //0x7F == 111 1111
-	if (ftune > 80)			// XXX I'm pretty sure this is supposed to be 0x80.
+	if (ftune > 80)			// XXX Why is this 80?
 	{
 		transp++;
 		ftune -= 128;
@@ -2769,6 +2764,24 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVa
 	const GetLengthType t = GetLength(updateVars ? eAdjust : eNoAdjust, ord, row);
 	if(t.targetReached) return t.duration;
 	else return -1; //Given position not found from play sequence.
+}
+
+
+// Calculate the length of a tick, depending on the tempo mode.
+void CSoundFile::RecalculateSamplesPerTick()
+//------------------------------------------
+{
+	switch(m_nTempoMode)
+	{
+	case tempo_mode_alternative: 
+		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
+		break;
+	case tempo_mode_modern: 
+		m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
+		break;
+	case tempo_mode_classic: default:
+		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
 }
 
 
