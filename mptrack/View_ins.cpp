@@ -1066,11 +1066,18 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 		if (pIns)
 		{
 			if(nTick < 0) return 0;
-
-			nValue = CLAMP(nValue, 0, 64);
+			nValue = Clamp(nValue, 0, 64);
 
 			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
 			if(envelope == nullptr) return 0;
+
+			if(std::binary_search(envelope->Ticks, envelope->Ticks + envelope->nNodes, nTick))
+			{
+				// Don't want to insert a node at the same position as another node.
+				return 0;
+			}
+
+
 			BYTE cDefaultValue;
 
 			switch(m_nEnv)
@@ -1639,14 +1646,14 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGLOOPEND;
 			}
 		}
+
 		if (m_nDragItem)
 		{
 			SetCapture();
 			m_dwStatus |= INSSTATUS_DRAGGING;
 			// refresh active node colour
 			InvalidateRect(NULL, FALSE);
-		}
-		else
+		} else
 		{
 			// Shift-Click: Insert envelope point here
 			if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
@@ -1896,7 +1903,6 @@ void CViewInstrument::OnEnvRemovePoint()
 void CViewInstrument::OnEnvInsertPoint()
 //--------------------------------------
 {
-	
 	EnvInsertPoint(ScreenToTick(m_ptMenu.x), ScreenToValue(m_ptMenu.y));
 }
 

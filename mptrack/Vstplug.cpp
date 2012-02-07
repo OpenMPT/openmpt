@@ -362,12 +362,6 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 						pEffect->flags, pEffect->realQualities, pEffect->offQualities);
 				#endif // VST_LOG
 
-					// Tunefish 2.0 doesn't seem to like that we call effClose at this point...
-					if(CCONST('T', 'F', '2', '0') != pEffect->uniqueID)
-					{
-						pEffect->dispatcher(pEffect, effClose, 0,0,0,0);
-					}
-
 					bOk = TRUE;
 				}
 			} catch(...)
@@ -1054,16 +1048,12 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterUpdateDisplay:
 		if (pVstPlugin != nullptr)
 		{
-//          pVstPlugin->GetModDoc()->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL); //No Need.
-
-/*			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
+			// Note to self for testing: Electri-Q sends opcode.
+			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 			if (pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
 			{
-				//pVstEditor->SetupMenu();
+				pVstEditor->SetupMenu();
 			}
-*/
-//			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
-//			effect->dispatcher(effect, effEditTop, 0,0, NULL, 0);
 		}
 		return 0;
 
@@ -1169,7 +1159,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			}
 
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
-				(pFileSel->command == kVstFileSave ? false : true),
+				(pFileSel->command != kVstFileSave),
 				"", "", extensions, workingDir,
 				(pFileSel->command == kVstMultipleFilesLoad)
 				);
