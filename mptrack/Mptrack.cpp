@@ -20,6 +20,7 @@
 #include "UpdateCheck.h"
 #include "../common/StringFixer.h"
 #include "ExceptionHandler.h"
+#include "CloseMainDialog.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -200,6 +201,48 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 	}
 #endif
 	return bResult;
+}
+
+
+void CTrackApp::OnFileCloseAll()
+//------------------------------
+{
+	if(!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
+	{
+		// Show modified documents window
+		CloseMainDialog dlg;
+		if(dlg.DoModal() != IDOK)
+		{
+			return;
+		}
+	}
+
+	vector<CModDoc *> documents = theApp.GetOpenDocuments();
+	for(vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
+	{
+		(*doc)->SafeFileClose();
+	}
+}
+
+
+// Retrieve a list of all open modules.
+vector<CModDoc *> CTrackApp::GetOpenDocuments()
+//---------------------------------------------
+{
+	vector<CModDoc *> documents;
+
+	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	if(pDocTmpl)
+	{
+		POSITION pos = pDocTmpl->GetFirstDocPosition();
+		CDocument *pDoc;
+		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
+		{
+			documents.push_back(dynamic_cast<CModDoc *>(pDoc));
+		}
+	}
+
+	return documents;
 }
 
 
@@ -563,6 +606,7 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 // -! NEW_FEATURE#0023
 	ON_COMMAND(ID_NEW_MPT,		OnFileNewMPT)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
+	ON_COMMAND(ID_FILE_CLOSEALL, OnFileCloseAll)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
 	ON_COMMAND(ID_HELP_INDEX,	CWinApp::OnHelpIndex)
 	ON_COMMAND(ID_HELP_FINDER,	CWinApp::OnHelpFinder)
@@ -1528,12 +1572,12 @@ BOOL CAboutDlg::OnInitDialog()
 
 	const char* const pArrCredit = { 
 		"OpenMPT / ModPlug Tracker|"
-		"Copyright © 2004-2011 Contributors|"
+		"Copyright © 2004-2012 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
 		"Contributors:|"
+		"Johannes Schultz (2008-2012)|"
 		"Ahti Leppänen (2005-2011)|"
-		"Johannes Schultz (2008-2011)|"
 		"Robin Fernandes (2004-2007)|"
 		"Sergiy Pylypenko (2007)|"
 		"Eric Chavanon (2004-2005)|"

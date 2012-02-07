@@ -607,6 +607,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcIncreaseSpacing, 1861, _T("Increase Row Spacing"));
 	DefineKeyCommand(kcDecreaseSpacing, 1862, _T("Decrease Row Spacing"));
 	DefineKeyCommand(kcSampleAutotune, 1863, _T("Tune Sample to given Note"));
+	DefineKeyCommand(kcFileCloseAll, 1864, _T("File/Close All"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

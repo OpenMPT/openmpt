@@ -168,6 +168,8 @@ public:
 
 	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
 
+	vector<CModDoc *>GetOpenDocuments();
+
 public:
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
@@ -233,6 +235,8 @@ public:
 	afx_msg void OnFileOpen();
 	afx_msg void OnAppAbout();
 	afx_msg void OnHelpSearch();
+
+	afx_msg void OnFileCloseAll();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -282,16 +286,17 @@ public:
 //////////////////////////////////////////////////////////////////
 // More Bitmap Helpers
 
-#define FASTBMP_XSHIFT			12	// 4K pixels
+//#define FASTBMP_XSHIFT		12	// 4K pixels
+#define FASTBMP_XSHIFT			13	// 8K pixels
 #define FASTBMP_MAXWIDTH		(1 << FASTBMP_XSHIFT)
 #define FASTBMP_MAXHEIGHT		16
 
-typedef struct MODPLUGFASTDIB
+struct MODPLUGFASTDIB
 {
 	BITMAPINFOHEADER bmiHeader;
 	RGBQUAD bmiColors[256];
 	BYTE DibBits[FASTBMP_MAXWIDTH*FASTBMP_MAXHEIGHT];
-} MODPLUGFASTDIB, *LPMODPLUGFASTDIB;
+};
 
 //===============
 class CFastBitmap

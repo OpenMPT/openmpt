@@ -732,6 +732,7 @@ public:
 	//Returns song length in seconds.
 	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(eNoAdjust).duration + 1.0 : GetLength(eNoAdjust).duration + 0.5); }
 
+	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT speed, UINT tempo) const;
 
 	// A repeat count value of -1 means infinite loop
@@ -844,7 +845,6 @@ public:
 	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
 	static BOOL SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL xbass,BOOL dolbynr=FALSE,BOOL bEQ=FALSE);
 	static BOOL SetResamplingMode(UINT nMode); // SRCMODE_XXXX
-	static BOOL IsStereo() { return (gnChannels > 1) ? TRUE : FALSE; }
 	static DWORD GetSampleRate() { return gdwMixingFreq; }
 	static DWORD GetBitsPerSample() { return gnBitsPerSample; }
 	static DWORD InitSysInfo();

@@ -51,20 +51,15 @@ BOOL CloseMainDialog::OnInitDialog()
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
-	if(pDocTmpl)
+	vector<CModDoc *> documents = theApp.GetOpenDocuments();
+	for(vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
 	{
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CDocument *pDoc;
-		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
+		CModDoc *pModDoc = *doc;
+		if(pModDoc->IsModified())
 		{
-			CModDoc *pModDoc = (CModDoc *)pDoc;
-			if(pModDoc->IsModified())
-			{
-				int item = m_List.AddString(FormatTitle(pModDoc, true));
-				m_List.SetItemDataPtr(item, pModDoc);
-				m_List.SetSel(item, TRUE);
-			}
+			int item = m_List.AddString(FormatTitle(pModDoc, true));
+			m_List.SetItemDataPtr(item, pModDoc);
+			m_List.SetSel(item, TRUE);
 		}
 	}
 
