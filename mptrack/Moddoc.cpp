@@ -3585,13 +3585,9 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	}
 
 	//set new macro
-	char *pMacroToSet = GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet];
-	if (paramToUse < 128)
+	if (paramToUse < 384)
 	{
-		wsprintf(pMacroToSet, "F0F0%Xz",paramToUse+128);
-	} else if (paramToUse < 384)
-	{
-		wsprintf(pMacroToSet, "F0F1%Xz",paramToUse-128);
+		GetSoundFile()->m_MidiCfg.CreateParameteredMacro(macroToSet, sfx_plug, paramToUse);
 	} else
 	{
 		CString message;

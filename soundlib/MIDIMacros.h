@@ -131,7 +131,13 @@ public:
 	// Sanitize all macro config strings.
 	void Sanitize();
 
+	// Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
+	void UpgradeMacros();
+
 protected:
+
+	// Helper function for FixMacroFormat()
+	void UpgradeMacroString(char *macro) const;
 
 	// Remove blanks and other unwanted characters from macro strings for internal usage.
 	std::string GetSafeMacro(const char *macro) const;

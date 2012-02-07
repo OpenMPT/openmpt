@@ -382,6 +382,41 @@ void MIDIMacroConfig::Sanitize()
 }
 
 
+// Helper function for UpgradeMacros()
+void MIDIMacroConfig::UpgradeMacroString(char *macro) const
+//---------------------------------------------------------
+{
+	for(size_t i = 0; i < MACRO_LENGTH; i++)
+	{
+		if(macro[i] >= 'a' && macro[i] <= 'f')		// both A-F and a-f were treated as hex constants
+		{
+			macro[i] = macro[i] - 'a' + 'A';
+		} else if(macro[i] == 'K' || macro[i] == 'k')	// channel was K or k
+		{
+			macro[i] = 'c';
+		} else if(macro[i] == 'X' || macro[i] == 'x' || macro[i] == 'Y' || macro[i] == 'y')	// those were pointless
+		{
+			macro[i] = 'z';
+		}
+	}
+}
+
+
+// Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
+void MIDIMacroConfig::UpgradeMacros()
+//-----------------------------------
+{
+	for(size_t i = 0; i < CountOf(szMidiSFXExt); i++)
+	{
+		UpgradeMacroString(szMidiSFXExt[i]);
+	}
+	for(size_t i = 0; i < CountOf(szMidiZXXExt); i++)
+	{
+		UpgradeMacroString(szMidiZXXExt[i]);
+	}
+}
+
+
 // Remove blanks and other unwanted characters from macro strings for internal usage.
 std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
 //----------------------------------------------------------------

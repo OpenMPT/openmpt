@@ -783,7 +783,6 @@ public:
 
 	void UpgradeModFlags();
 	void UpgradeSong();
-	static void FixMIDIConfigStrings(MIDIMacroConfig &midiCfg);
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
