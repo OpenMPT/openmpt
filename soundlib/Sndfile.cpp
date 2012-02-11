@@ -753,16 +753,15 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	}
 
 	// plugin loader
-	string sNotFound;
-	std::list<PLUGINDEX> notFoundIDs;
+	string notFoundText;
+	std::vector<PLUGINDEX> notFoundIDs;
 
 	// Load plugins only when m_pModDoc is valid.  (can be invalid for example when examining module samples in treeview.
 	if (gpMixPluginCreateProc && GetpModDoc() != nullptr)
 	{
 		for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
-			if ((m_MixPlugins[iPlug].Info.dwPluginId1)
-				|| (m_MixPlugins[iPlug].Info.dwPluginId2))
+			if (m_MixPlugins[iPlug].Info.dwPluginId1 | m_MixPlugins[iPlug].Info.dwPluginId2)
 			{
 				gpMixPluginCreateProc(&m_MixPlugins[iPlug], this);
 				if (m_MixPlugins[iPlug].pMixPlugin)
@@ -774,7 +773,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 				{
 					// plugin not found - add to list
 					bool found = false;
-					for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+					for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 					{
 						if(m_MixPlugins[*i].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
 						{
@@ -783,9 +782,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 						}
 					}
 
-					if(found == false)
+					if(!found)
 					{
-						sNotFound = sNotFound + m_MixPlugins[iPlug].Info.szLibraryName + "\n";
+						notFoundText.append(m_MixPlugins[iPlug].Info.szLibraryName);
+						notFoundText.append("\n");
 						notFoundIDs.push_back(iPlug); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
 					}
 				}
@@ -799,16 +799,16 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	{
 		if(notFoundIDs.size() == 1)
 		{
-			sNotFound = "The following plugin has not been found:\n\n" + sNotFound + "\nDo you want to search for it online?";
+			notFoundText = "The following plugin has not been found:\n\n" + notFoundText + "\nDo you want to search for it online?";
 		}
 		else
 		{
-			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them online?";
+			notFoundText =	"The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
 		}
-		if (Reporting::Confirm(sNotFound.c_str(), "OpenMPT - Plugins missing", false, true) == cnfYes)
+		if (Reporting::Confirm(notFoundText.c_str(), "OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
 			CString sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
-			for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+			for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
 				sUrl.AppendFormat("%08X%s%%0a", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2), m_MixPlugins[*i].Info.szLibraryName);
 			}
@@ -2223,34 +2223,7 @@ void CSoundFile::AdjustSampleLoop(MODSAMPLE *pSmp)
 	} else
 	{
 		LPSTR pSample = pSmp->pSample;
-#ifndef FASTSOUNDLIB
-		// Crappy samples (except chiptunes) ?
-		if ((pSmp->nLength > 0x100) && (m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M))
-		 && (!(pSmp->uFlags & CHN_STEREO)))
-		{
-			int smpend = pSample[pSmp->nLength-1], smpfix = 0, kscan;
-			for (kscan=pSmp->nLength-1; kscan>0; kscan--)
-			{
-				smpfix = pSample[kscan-1];
-				if (smpfix != smpend) break;
-			}
-			int delta = smpfix - smpend;
-			if (((!(pSmp->uFlags & CHN_LOOP)) || (kscan > (int)pSmp->nLoopEnd))
-			 && ((delta < -8) || (delta > 8)))
-			{
-				while (kscan<(int)pSmp->nLength)
-				{
-					if (!(kscan & 7))
-					{
-						if (smpfix > 0) smpfix--;
-						if (smpfix < 0) smpfix++;
-					}
-					pSample[kscan] = (char)smpfix;
-					kscan++;
-				}
-			}
-		}
-#endif
+
 		// Adjust end of sample
 		if (pSmp->uFlags & CHN_STEREO)
 		{
