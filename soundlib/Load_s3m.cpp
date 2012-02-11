@@ -216,6 +216,21 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 }
 
 
+// Functor for fixing VBlank MODs and MODs with 7-bit panning
+struct FixPixPlayPanning
+//======================
+{
+	void operator()(MODCOMMAND& m)
+	{
+		if(m.command == CMD_MIDI)
+		{
+			m.command = CMD_S3MCMDEX;
+			m.param |= 0x80;
+		}
+	}
+};
+
+
 bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 //---------------------------------------------------------------------
 {
@@ -224,13 +239,8 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	UINT insnum, patnum, nins, npat;
 	BYTE s[1024];
 	DWORD dwMemPos;
-	vector<DWORD> smpdatapos;
-	vector<WORD> smppos;
-	vector<WORD> patpos;
-	vector<BYTE> insflags;
-	vector<BYTE> inspack;
 	S3MFILEHEADER psfh = *(S3MFILEHEADER *)lpStream;
-	bool bKeepMidiMacros = false, bHasAdlibPatches = false;
+	bool keepMidiMacros = false, hasAdlibPatches = false;
 
 	psfh.reserved1 = LittleEndianW(psfh.reserved1);
 	psfh.ordnum = LittleEndianW(psfh.ordnum);
@@ -247,14 +257,14 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	if((psfh.cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor)
 	{
 		m_dwLastSavedWithVersion = (psfh.cwtv & 0x0FFF) << 16;
-		bKeepMidiMacros = true; // simply load Zxx commands
+		keepMidiMacros = true; // simply load Zxx commands
 	}
 	if(psfh.cwtv  == 0x1320 && psfh.special == 0 && (psfh.ordnum & 0x0F) == 0 && psfh.ultraclicks == 0 && (psfh.flags & ~0x50) == 0)
 	{
 		// MPT 1.16 and older versions of OpenMPT
 		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 		// Simply keep default (filter) MIDI macros
-		bKeepMidiMacros = true;
+		keepMidiMacros = true;
 	}
 
 	if((psfh.cwtv & 0xF000) >= 0x2000)
@@ -263,33 +273,40 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		if((psfh.cwtv & 0xF000) != 0x3000 || psfh.cwtv >= 0x3214)
 		{
 			// Keep MIDI macros if this is not an old IT version (BABYLON.S3M by Necros has Zxx commands and was saved with IT 2.05)
-			bKeepMidiMacros = true;
+			keepMidiMacros = true;
 		}
 	}
 
-	if(!bKeepMidiMacros) // Remove macros so they don't interfere with tunes made in trackers that don't support Zxx
+	if(!keepMidiMacros) // Remove macros so they don't interfere with tunes made in trackers that don't support Zxx
 	{
 		MemsetZero(m_MidiCfg.szMidiSFXExt);
 		MemsetZero(m_MidiCfg.szMidiZXXExt);
 	}
 
-	dwMemPos = 0x60;
+	dwMemPos = sizeof(S3MFILEHEADER);
 	m_nType = MOD_TYPE_S3M;
-	memset(m_szNames, 0, sizeof(m_szNames));
+	MemsetZero(m_szNames);
 	memcpy(m_szNames[0], psfh.name, 28);
 	StringFixer::SpaceToNullStringFixed<28>(m_szNames[0]);
+
 	// Speed
 	m_nDefaultSpeed = psfh.speed;
 	if (!m_nDefaultSpeed || m_nDefaultSpeed == 255) m_nDefaultSpeed = 6;
+
 	// Tempo
 	m_nDefaultTempo = psfh.tempo;
 	//m_nDefaultTempo = CLAMP(m_nDefaultTempo, 32, 255);
 	if(m_nDefaultTempo < 33) m_nDefaultTempo = 125;
+
 	// Global Volume
 	m_nDefaultGlobalVolume = psfh.globalvol << 2;
-	if(!m_nDefaultGlobalVolume && psfh.cwtv < 0x1320) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME; // not very reliable, but it fixes a few tunes
+	// The following check is probably not very reliable, but it fixes a few tunes, f.e.
+	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
+	if(!m_nDefaultGlobalVolume && psfh.cwtv < 0x1320) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+
 	m_nSamplePreAmp = CLAMP(psfh.mastervol & 0x7F, 0x10, 0x7F); // Bit 8 = Stereo (we always use stereo)
+
 	// Channels
 	m_nChannels = 4;
 	for (UINT ich=0; ich<32; ich++)
@@ -316,6 +333,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	if (m_nChannels < 1) m_nChannels = 1;
 	if ((psfh.cwtv < 0x1320) || (psfh.flags & 0x40)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
+
 	// Reading pattern order
 	UINT iord = psfh.ordnum;
 	iord = CLAMP(iord, 1, MAX_ORDERS);
@@ -325,6 +343,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		dwMemPos += iord;
 	}
 	if ((iord & 1) && (lpStream[dwMemPos] == 0xFF)) dwMemPos++;
+
 	// Reading file pointers
 	insnum = nins = psfh.insnum;
 	if (insnum >= MAX_SAMPLES) insnum = MAX_SAMPLES-1;
@@ -333,19 +352,21 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	if (patnum > MAX_PATTERNS) patnum = MAX_PATTERNS;
 
 	// Read sample header offsets
-	smppos.resize(nins, 0);
+	vector<WORD> smppos(nins, 0);
 	for(UINT i = 0; i < nins; i++, dwMemPos += 2)
 	{
 		WORD ptr = *((WORD *)(lpStream + dwMemPos));
 		smppos[i] = LittleEndianW(ptr);
 	}
+
 	// Read pattern offsets
-	patpos.resize(npat, 0);
+	vector<WORD> patpos(npat, 0);
 	for(UINT i = 0; i < npat; i++, dwMemPos += 2)
 	{
 		WORD ptr = *((WORD *)(lpStream + dwMemPos));
 		patpos[i] = LittleEndianW(ptr);
 	}
+
 	// Read channel panning
 	if (psfh.panning_present == 0xFC)
 	{
@@ -357,13 +378,14 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading instrument headers
-	smpdatapos.resize(insnum, 0);
-	inspack.resize(insnum, 0);
-	insflags.resize(insnum, 0);
+	vector<DWORD> smpdatapos(insnum, 0);
+	vector<BYTE> insflags(insnum, 0);
+	vector<BYTE> inspack(insnum, 0);
+
 	for (UINT iSmp=1; iSmp<=insnum; iSmp++)
 	{
 		UINT nInd = ((DWORD)smppos[iSmp - 1]) * 16;
-		if (nInd + 0x50 > dwMemLength) continue;
+		if(nInd > dwMemLength || 0x50 > dwMemLength - nInd) continue;
 
 		memcpy(s, lpStream + nInd, 0x50);
 		memcpy(Samples[iSmp].filename, s+1, 12);
@@ -377,15 +399,15 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 
 		if ((s[0] == S3I_TYPE_PCM) && (s[0x4E] == 'R') && (s[0x4F] == 'S'))
 		{
-			Samples[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
-			Samples[iSmp].nLoopStart = CLAMP(LittleEndian(*((LPDWORD)(s + 0x14))), 0, Samples[iSmp].nLength - 1);
-			Samples[iSmp].nLoopEnd = CLAMP(LittleEndian(*((LPDWORD)(s+0x18))), 0, Samples[iSmp].nLength);
+			Samples[iSmp].nLength = CLAMP(LittleEndian(*((DWORD *)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
+			Samples[iSmp].nLoopStart = CLAMP(LittleEndian(*((DWORD *)(s + 0x14))), 0, Samples[iSmp].nLength - 1);
+			Samples[iSmp].nLoopEnd = CLAMP(LittleEndian(*((DWORD *)(s + 0x18))), 0, Samples[iSmp].nLength);
 			Samples[iSmp].nVolume = CLAMP(s[0x1C], 0, 64) << 2;
 			Samples[iSmp].nGlobalVol = 64;
 			if (s[0x1F] & 1) Samples[iSmp].uFlags |= CHN_LOOP;
 
 			UINT c5Speed;
-			c5Speed = LittleEndian(*((LPDWORD)(s+0x20)));
+			c5Speed = LittleEndian(*((DWORD *)(s + 0x20)));
 			if (!c5Speed) c5Speed = 8363;
 			if (c5Speed < 1024) c5Speed = 1024;
 			Samples[iSmp].nC5Speed = c5Speed;
@@ -401,31 +423,33 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 
 		} else if(s[0] >= S3I_TYPE_ADMEL)
 		{
-			bHasAdlibPatches = true;
+			hasAdlibPatches = true;
 		}
 	}
 
-	if (!m_nChannels) return true;
-
 	/* Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
+	   Actually I am only aware of one module that uses this panning style, namely "Crawling Despair" by $volkraq
+	   and I have no idea what PixPlay is, so this code is solely based on the sample text of that module.
 	   We won't convert if there are not enough Zxx commands, too "high" Zxx commands
-	   or there are only "left" or "right" pannings (we assume that stereo should be somewhat balanced) */
-	bool bDoNotConvertZxx = false;
-	int iZxxCountRight = 0, iZxxCountLeft = 0;
+	   or there are only "left" or "right" pannings (we assume that stereo should be somewhat balanced),
+	   and modules not made with an old version of ST3 were probably made in a tracker that supports panning anyway. */
+	bool pixPlayPanning = (psfh.cwtv  < 0x1320);
+	int zxxCountRight = 0, zxxCountLeft = 0;
 
 	// Reading patterns
 	for (UINT iPat = 0; iPat < patnum; iPat++)
 	{
 		bool fail = Patterns.Insert(iPat, 64);
 		UINT nInd = ((DWORD)patpos[iPat]) * 16;
-		if (nInd == 0 || nInd + 0x40 > dwMemLength) continue;
+		if (nInd == 0 || nInd > dwMemLength || 0x40 > dwMemLength - nInd) continue;
 		WORD len = LittleEndianW(*((WORD *)(lpStream + nInd)));
 		nInd += 2;
 		if ((!len) || (nInd + len > dwMemLength - 6)
 		 || (fail) ) continue;
-		LPBYTE src = (LPBYTE)(lpStream+nInd);
+		LPBYTE src = (LPBYTE)(lpStream + nInd);
+
 		// Unpacking pattern
-		MODCOMMAND *p = Patterns[iPat];
+
 		UINT row = 0;
 		UINT j = 0;
 		while (row < 64) // this fixes ftp://us.aminet.net/pub/aminet/mods/8voic/s3m_hunt.lha (was: while (j < len))
@@ -440,12 +464,12 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 				UINT chn = b & 0x1F;
 				if (chn < m_nChannels)
 				{
-					MODCOMMAND *m = &p[row * m_nChannels + chn];
+					MODCOMMAND *m = Patterns[iPat].GetpModCommand(row, chn);
 					if (b & 0x20)
 					{
 						if(j + nInd + 2 >= dwMemLength) break;
 						m->note = src[j++];
-						if (m->note < 0xF0) m->note = (m->note & 0x0F) + 12*(m->note >> 4) + 13;
+						if (m->note < 0xF0) m->note = (m->note & 0x0F) + 12 * (m->note >> 4) + 13;
 						else if (m->note == 0xFF) m->note = NOTE_NONE;
 						m->instr = src[j++];
 					}
@@ -475,12 +499,12 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 							if(m->param > 0x0F)
 							{
 								// PixPlay has Z00 to Z0F panning, so we ignore this.
-								bDoNotConvertZxx = true;
+								pixPlayPanning = false;
 							}
 							else
 							{
-								if(m->param < 0x08) iZxxCountLeft++;
-								if(m->param > 0x08) iZxxCountRight++;
+								if(m->param < 0x08) zxxCountLeft++;
+								if(m->param > 0x08) zxxCountRight++;
 							}
 						}
 					}
@@ -494,21 +518,10 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 	}
 
-	if((UINT)(iZxxCountLeft + iZxxCountRight) >= m_nChannels && !bDoNotConvertZxx && (iZxxCountLeft - iZxxCountRight > -(int)m_nChannels))
+	if((zxxCountLeft + zxxCountRight) >= m_nChannels && pixPlayPanning && (-zxxCountLeft + zxxCountRight < (int)m_nChannels))
 	{
-		// there are enough Zxx commands, so let's assume this was made to be played with PixPlay
-		for(PATTERNINDEX nPat = 0; nPat < Patterns.Size(); nPat++) if(Patterns[nPat])
-		{
-			MODCOMMAND *m = Patterns[nPat];
-			for(UINT len = Patterns[nPat].GetNumRows() * m_nChannels; len; m++, len--)
-			{
-				if(m->command == CMD_MIDI)
-				{
-					m->command = CMD_S3MCMDEX;
-					m->param |= 0x80;
-				}
-			}
-		}
+		// There are enough Zxx commands, so let's assume this was made to be played with PixPlay
+		Patterns.ForEachModCommand(FixPixPlayPanning());
 	}
 
 	// Reading samples
@@ -532,7 +545,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	if (psfh.flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
 
 #ifdef MODPLUG_TRACKER
-	if(bHasAdlibPatches && GetpModDoc() != nullptr)
+	if(hasAdlibPatches && GetpModDoc() != nullptr)
 	{
 		GetpModDoc()->AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
 	}
