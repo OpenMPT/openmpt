@@ -467,18 +467,18 @@ void CCtrlGeneral::OnGlobalVolChanged()
 		m_EditGlobalVol.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
-			Limit(n, 0u, 256u / GetGlobalVolumeFactor());
-			if (n != (m_pSndFile->m_nDefaultGlobalVolume >> 1))
+			UINT n = atoi(s) * GetGlobalVolumeFactor();
+			Limit(n, 0u, 256u);
+			if (n != m_pSndFile->m_nDefaultGlobalVolume)
 			{ 
-				m_bEditsLocked=true;
+				m_bEditsLocked = true;
 				m_EditGlobalVol.SetModify(FALSE);
-				m_pSndFile->m_nDefaultGlobalVolume = n * GetGlobalVolumeFactor();
-				m_pSndFile->m_nGlobalVolume = n * GetGlobalVolumeFactor();
+				m_pSndFile->m_nDefaultGlobalVolume = n;
+				m_pSndFile->m_nGlobalVolume = n;
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL);
-				m_bEditsLocked=false;
+				m_bEditsLocked = false;
 			}
 		}
 	}

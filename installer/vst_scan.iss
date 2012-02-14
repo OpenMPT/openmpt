@@ -99,6 +99,9 @@ begin
     if(VSTPluginNumber <> OldVSTPluginNumber) then
     begin
         SetIniInt('VST Plugins', 'NumPlugins', VSTPluginNumber, INIFile);
+        // Also write the detected VST dir to the INI file if there was no previous entry in it. 
+        if(GetIniString('Paths', 'Plugins_Directory', '', INIFile) = '') then
+            SetIniString('Paths', 'Plugins_Directory', Dir, INIFile);
     end;
 end;
 

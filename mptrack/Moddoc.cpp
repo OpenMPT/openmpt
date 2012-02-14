@@ -640,7 +640,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		SetModified(FALSE);
 		m_bHasValidPath=true;
 		m_ShowSavedialog = false;
-		UpdateAllViews(NULL, HINT_MODGENERAL); // Update treeview (e.g. filename might have changed).
+		CMainFrame::GetMainFrame()->UpdateTree(this, HINT_MODGENERAL); // Update treeview (e.g. filename might have changed).
 		return TRUE;
 	} else
 	{
@@ -1652,7 +1652,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 				// Re-mute previously processed sample
 				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
 
-				if(m_SndFile.GetSample(i + 1).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
+				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
 					continue;
 				// Add sample number & name (if available) to path string
 				if(strlen(m_SndFile.m_szNames[i + 1]) > 0)
@@ -2066,17 +2066,16 @@ void CModDoc::OnShowCleanup()
 }
 
 
+// Enable menu item only module types that support MIDI Mappings
 void CModDoc::OnUpdateHasMIDIMappings(CCmdUI *p)
 //----------------------------------------------
 {
-	if(!p) return;
-	if(m_SndFile.GetModSpecifications().MIDIMappingDirectivesMax > 0)
-		p->Enable();
-	else
-		p->Enable(FALSE);
+	if(p)
+		p->Enable((m_SndFile.GetModSpecifications().MIDIMappingDirectivesMax > 0) ? TRUE : FALSE);
 }
 
 
+// Enable menu item only for IT / MPTM / XM files
 void CModDoc::OnUpdateXMITMPTOnly(CCmdUI *p)
 //---------------------------------------
 {
@@ -2085,6 +2084,7 @@ void CModDoc::OnUpdateXMITMPTOnly(CCmdUI *p)
 }
 
 
+// Enable menu item only for IT / MPTM files
 void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
 //---------------------------------------
 {
@@ -2093,6 +2093,7 @@ void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
 }
 
 
+// Enable menu item if MP3 encoder is present
 void CModDoc::OnUpdateMP3Encode(CCmdUI *p)
 //----------------------------------------
 {
@@ -2100,6 +2101,7 @@ void CModDoc::OnUpdateMP3Encode(CCmdUI *p)
 }
 
 
+// Enable menu item if current module type supports compatibility export
 void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
 //---------------------------------------------------
 {
