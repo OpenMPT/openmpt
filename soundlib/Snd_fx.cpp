@@ -2456,6 +2456,14 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param)
 //-----------------------------------------------------------
 {
+	if((Chn[nChn].dwFlags & CHN_MUTE) != 0)
+	{
+		// Don't process portamento on muted channels. Note that this might have a side-effect
+		// on other channels which trigger notes on the same MIDI channel of the same plugin,
+		// as those won't be pitch-bent anymore.
+		return;
+	}
+	
 	//Send midi pitch bend event if there's a plugin:
 	const MODINSTRUMENT *pIns = Chn[nChn].pModInstrument;
 	if (pIns && pIns->HasValidMIDIChannel())
