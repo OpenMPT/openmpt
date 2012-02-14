@@ -168,7 +168,8 @@ public:
 
 	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
 
-	vector<CModDoc *>GetOpenDocuments();
+	int GetOpenDocumentCount() const;
+	vector<CModDoc *>GetOpenDocuments() const;
 
 public:
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }

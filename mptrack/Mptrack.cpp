@@ -102,7 +102,7 @@ public:
 			}
 			else //Case: Valid path but opening fails.
 			{		
-				const int nOdc = AfxGetApp()->m_pDocManager->GetOpenDocumentCount();
+				const int nOdc = theApp.GetOpenDocumentCount();
 				CString str;
 				str.Format(GetStrI18N(_TEXT("Opening \"%s\" failed. This can happen if "
 					"no more documents can be opened or if the file type was not "
@@ -225,9 +225,16 @@ void CTrackApp::OnFileCloseAll()
 }
 
 
+int CTrackApp::GetOpenDocumentCount() const
+//-----------------------------------------
+{
+	return AfxGetApp()->m_pDocManager->GetOpenDocumentCount();
+}
+
+
 // Retrieve a list of all open modules.
-vector<CModDoc *> CTrackApp::GetOpenDocuments()
-//---------------------------------------------
+vector<CModDoc *> CTrackApp::GetOpenDocuments() const
+//---------------------------------------------------
 {
 	vector<CModDoc *> documents;
 
