@@ -216,8 +216,8 @@ bool CPattern::Shrink()
 }
 
 
-bool CPattern::SetName(char *newName, size_t maxChars)
-//----------------------------------------------------
+bool CPattern::SetName(const char *newName, size_t maxChars)
+//----------------------------------------------------------
 {
 	if(newName == nullptr || maxChars == 0)
 	{
@@ -280,9 +280,9 @@ void CPattern::FreePattern(MODCOMMAND *pat)
 bool CPattern::WriteITPdata(FILE* f) const
 //----------------------------------------
 {
-	for(ROWINDEX r = 0; r<GetNumRows(); r++)
+	for(ROWINDEX r = 0; r < GetNumRows(); r++)
 	{
-		for(CHANNELINDEX c = 0; c<GetNumChannels(); c++)
+		for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 		{
 			MODCOMMAND mc = GetModCommand(r,c);
 			fwrite(&mc, sizeof(MODCOMMAND), 1, f);
@@ -302,7 +302,7 @@ bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const D
 	while(streamPos - startPos + sizeof(MODCOMMAND_ORIGINAL) <= datasize)
 	{
 		MODCOMMAND_ORIGINAL temp;
-		memcpy(&temp, lpStream+streamPos, sizeof(MODCOMMAND_ORIGINAL));
+		memcpy(&temp, lpStream + streamPos, sizeof(MODCOMMAND_ORIGINAL));
 		MODCOMMAND& mc = GetModCommand(counter);
 		mc.command = temp.command;
 		mc.instr = temp.instr;
@@ -416,7 +416,7 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 		for(CHANNELINDEX c = 0; c<chns; c++)
 		{
 			const MODCOMMAND m = *pat.GetpModCommand(r, c);
-			// Writing only commands not writting in IT-pattern writing:
+			// Writing only commands not written in IT-pattern writing:
 			// For now this means only NOTE_PC and NOTE_PCS.
 			if(!m.IsPcNote())
 				continue;

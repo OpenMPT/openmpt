@@ -221,15 +221,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	// Setup Controls
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
-	//rewbs.fix36944
-	if (m_pSndFile->GetType() == MOD_TYPE_XM)
-	{
-		m_SpinPanning.SetRange(0, 255);
-	} else
-	{
-		m_SpinPanning.SetRange(0, 64);
-	}
-	//end rewbs.fix36944
 
 	// Auto vibrato
 	m_ComboAutoVib.AddString("Sine");
@@ -638,6 +629,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_CheckPanning.EnableWindow(b && !(m_pSndFile->GetType() & MOD_TYPE_XM));
 		m_EditPanning.EnableWindow(b);
 		m_SpinPanning.EnableWindow(b);
+		m_SpinPanning.SetRange(0, (m_pSndFile->GetType() == MOD_TYPE_XM) ? 255 : 64);
 
 		b = (m_pSndFile->GetType() & MOD_TYPE_MOD) ? FALSE : TRUE;
 		m_CbnBaseNote.EnableWindow(b);

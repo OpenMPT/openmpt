@@ -73,8 +73,8 @@ public:
 	void RemoveSignature() { m_RowsPerBeat = m_RowsPerMeasure = 0; }
 
 	// Patter name functions (for both CString and char[] arrays) - bool functions return true on success.
-	bool SetName(char *newName, size_t maxChars = MAX_PATTERNNAME);
-	bool SetName(CString newName) { m_PatternName = newName; return true; };
+	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
+	bool SetName(const CString newName) { m_PatternName = newName; return true; };
 	bool GetName(char *buffer, size_t maxChars = MAX_PATTERNNAME) const;
 	CString GetName() const { return m_PatternName; };
 
