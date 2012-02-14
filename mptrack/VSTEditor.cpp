@@ -127,7 +127,7 @@ void COwnerVstEditor::DoClose()
 bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
 //----------------------------------------------------------------
 {
-	if(contentWidth < 0 || contentHeight < 0)
+	if(contentWidth < 0 || contentHeight < 0 || !m_hWnd)
 	{
 		return false;
 	}

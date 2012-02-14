@@ -472,8 +472,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 }
 
 
-void CopyPatternName(CPattern &pattern, char **patNames, UINT &patNamesLen)
-//-------------------------------------------------------------------------
+void CopyPatternName(CPattern &pattern, const char **patNames, UINT &patNamesLen)
+//-------------------------------------------------------------------------------
 {
 	if(*patNames != nullptr && patNamesLen > 0)
 	{
@@ -758,7 +758,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 			if(GetpModDoc() != nullptr)
 			{
-				GetpModDoc()->GetFileHistory().clear();
+				GetpModDoc()->GetFileHistory().resize(nflt);
 				for(size_t n = 0; n < nflt; n++)
 				{
 					ITHISTORYSTRUCT itHistory = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
@@ -776,7 +776,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					mptHistory.loadDate.tm_min = CLAMP((itHistory.fattime >> 5) & 0x3F, 0, 59);
 					mptHistory.loadDate.tm_sec = CLAMP((itHistory.fattime & 0x1F) * 2, 0, 59);
 					mptHistory.openTime = itHistory.runtime * (HISTORY_TIMER_PRECISION / 18.2f);
-					GetpModDoc()->GetFileHistory().push_back(mptHistory);
+					GetpModDoc()->GetFileHistory().at(n) = mptHistory;
 
 #ifdef DEBUG
 					const uint32 seconds = (uint32)(((double)itHistory.runtime) / 18.2f);
@@ -828,7 +828,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Read pattern names: "PNAM"
-	char *patNames = nullptr;
+	const char *patNames = nullptr;
 	UINT patNamesLen = 0;
 	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(IT_PNAM)))
 	{
@@ -847,14 +847,14 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
-		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_BASECHANNELS*MAX_CHANNELNAME))
+		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_BASECHANNELS * MAX_CHANNELNAME))
 		{
 			UINT n = len / MAX_CHANNELNAME;
 			if (n > m_nChannels) m_nChannels = n;
 			for (UINT i=0; i<n; i++)
 			{
-				memcpy(ChnSettings[i].szName, (lpStream+dwMemPos+i*MAX_CHANNELNAME), MAX_CHANNELNAME);
-				ChnSettings[i].szName[MAX_CHANNELNAME-1] = 0;
+				memcpy(ChnSettings[i].szName, (lpStream + dwMemPos + i * MAX_CHANNELNAME), MAX_CHANNELNAME);
+				ChnSettings[i].szName[MAX_CHANNELNAME - 1] = 0;
 			}
 			dwMemPos += len;
 		}
@@ -1090,7 +1090,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
 		UINT rows = *((WORD *)(lpStream+patpos[npat]+2));
 		if ((rows < GetModSpecifications().patternRowsMin) || (rows > GetModSpecifications().patternRowsMax)) continue;
-		if (patpos[npat]+8+len > dwMemLength) continue;
+		if (patpos[npat] + 8 + len > dwMemLength) continue;
 
 		if(Patterns.Insert(npat, rows)) continue;
 
@@ -2078,7 +2078,6 @@ DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n)
 	return (retval >> (32-i));
 }
 
-#define IT215_SUPPORT
 void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215)
 //-------------------------------------------------------------------------------------------
 {
@@ -2143,11 +2142,8 @@ void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLengt
 			wBits += bTemp;
 			bTemp = (BYTE)wBits;
 			bTemp2 += bTemp;
-#ifdef IT215_SUPPORT
 			pDst[dwPos] = (b215) ? bTemp2 : bTemp;
-#else
-			pDst[dwPos] = bTemp;
-#endif
+
 		SkipByte:
 			dwPos++;
 		Next:
@@ -2226,11 +2222,8 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 			dwBits += wTemp;
 			wTemp = (signed short)dwBits;
 			wTemp2 += wTemp;
-#ifdef IT215_SUPPORT
 			pDst[dwPos] = (b215) ? wTemp2 : wTemp;
-#else
-			pDst[dwPos] = wTemp;
-#endif
+
 		SkipByte:
 			dwPos++;
 		Next:
@@ -2315,7 +2308,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 					s[0] = 'P'; s[1] = 'R';	s[2] = 'O'; s[3] = 'G';
 					fwrite(s, 1, 4, f);
 					//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
-					fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(float), f);
+					fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(long), f);
 				//}
 				//end rewbs.plugDefaultProgram
 
@@ -2577,11 +2570,11 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nChannels, 1, size, f);
 
-	if(TypeIsIT_MPT() && m_nChannels > 64)	//IT header has room only for 64 channels. Save the
+	if(TypeIsIT_MPT() && GetNumChannels() > 64)	//IT header has room only for 64 channels. Save the
 	{											//settings that do not fit to the header here as an extension.
 		code = 'ChnS';
 		fwrite(&code, 1, sizeof(__int32), f);
-		size = (m_nChannels - 64)*2;
+		size = (GetNumChannels() - 64) * 2;
 		fwrite(&size, 1, sizeof(__int16), f);
 		for(UINT ich = 64; ich < m_nChannels; ich++)
 		{
