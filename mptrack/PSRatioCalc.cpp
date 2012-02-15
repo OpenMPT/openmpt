@@ -144,7 +144,7 @@ void CPSRatioCalc::CalcMs()
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime = sndFile.GetRowDuration(sndFile.m_nMusicSpeed, sndFile.m_nMusicTempo);
+	double rowTime = sndFile.GetRowDuration(sndFile.m_nMusicTempo, sndFile.m_nMusicSpeed);
 
 	m_dRowsOrig = (double)m_lMsOrig / rowTime;
 	m_dRowsNew = m_dRowsOrig*(m_dRatio / 100);

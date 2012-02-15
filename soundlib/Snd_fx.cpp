@@ -444,12 +444,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				{
 					param >>= 4;
 					param <<= 1;
-					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 					memory.glbVol += param * memory.musicSpeed;
 				} else
 				{
 					param = (param & 0x0F) << 1;
-					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 					memory.glbVol -= param * memory.musicSpeed;
 				}
 				memory.glbVol = CLAMP(memory.glbVol, 0, 256);
@@ -488,9 +488,8 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			nNextPatStartRow = 0;
 		}
 
-		nSpeedCount += memory.musicSpeed;
-
-		memory.elapsedTime += GetRowDuration(nSpeedCount, memory.musicTempo);
+		// XXX this does not take per-pattern time signatures into consideration!
+		memory.elapsedTime += GetRowDuration(memory.musicTempo, memory.musicSpeed, nSpeedCount);
 	}
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
