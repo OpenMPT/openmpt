@@ -733,7 +733,7 @@ public:
 	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(eNoAdjust).duration + 1.0 : GetLength(eNoAdjust).duration + 0.5); }
 
 	void RecalculateSamplesPerTick();
-	double GetRowDuration(UINT speed, UINT tempo) const;
+	double GetRowDuration(UINT tempo, UINT speed, UINT additionalTicks = 0) const;
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
