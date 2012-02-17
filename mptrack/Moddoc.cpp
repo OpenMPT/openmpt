@@ -895,7 +895,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 	
 	if ((!pMainFrm) || (!note)) return FALSE;
 	if (nVol > 256) nVol = 256;
-	if (NOTE_IS_VALID(note))
+	if (MODCOMMAND::IsNoteOrEmpty(note))
 	{
 
 		//kill notes if required.

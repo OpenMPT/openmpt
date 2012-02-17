@@ -1,20 +1,20 @@
+#pragma once
+
 #ifndef MODCOMMAND_H
 #define MODCOMMAND_H
 
-
 // Note definitions
 #define NOTE_NONE			0
-#define NOTE_MIDDLEC		(5*12+1)
-#define NOTE_KEYOFF			0xFF //255
-#define NOTE_NOTECUT		0xFE //254
-#define NOTE_FADE			0xFD //253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
-#define NOTE_PC				0xFC //252, Param Control 'note'. Changes param value on first tick.
-#define NOTE_PCS			0xFB //251, Param Control(Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_MIDDLEC		(5 * 12 + 1)
+#define NOTE_KEYOFF			0xFF // 255
+#define NOTE_NOTECUT		0xFE // 254
+#define NOTE_FADE			0xFD // 253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
+#define NOTE_PC				0xFC // 252, Param Control 'note'. Changes param value on first tick.
+#define NOTE_PCS			0xFB // 251, Param Control (Smooth) 'note'. Changes param value during the whole row.
 #define NOTE_MIN			1
 #define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
 #define NOTE_MIN_SPECIAL	NOTE_PCS
-#define NOTE_IS_VALID(n)	((n) == NOTE_NONE || ((n) >= NOTE_MIN && (n) <= NOTE_MAX))	// Checks whether a number represents a valid note (a "normal" note or no note, but not something like note off)
 
 
 //==============
@@ -31,26 +31,26 @@ public:
 
 	// Defines the maximum value for column data when interpreted as 2-byte value
 	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
-	enum {maxColumnValue = 999};
+	enum { maxColumnValue = 999 };
 
 	// Returns empty modcommand.
-	static MODCOMMAND Empty() {MODCOMMAND m = {0,0,0,0,0,0}; return m;}
+	static MODCOMMAND Empty() { MODCOMMAND m = {0,0,0,0,0,0}; return m; }
 
 	bool operator==(const MODCOMMAND& mc) const { return (memcmp(this, &mc, sizeof(MODCOMMAND)) == 0); }
 	bool operator!=(const MODCOMMAND& mc) const { return !(*this == mc); }
 
-	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) {note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol);}
+	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
 
-	uint16 GetValueVolCol() const {return GetValueVolCol(volcmd, vol);}
-	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) {return (volcmd << 8) + vol;}
-	void SetValueVolCol(const uint16 val) {volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF);}
+	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }
+	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) { return (volcmd << 8) + vol; }
+	void SetValueVolCol(const uint16 val) { volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF); }
 
-	uint16 GetValueEffectCol() const {return GetValueEffectCol(command, param);}
-	static uint16 GetValueEffectCol(BYTE command, BYTE param) {return (command << 8) + param;}
-	void SetValueEffectCol(const uint16 val) {command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF);}
+	uint16 GetValueEffectCol() const { return GetValueEffectCol(command, param); }
+	static uint16 GetValueEffectCol(BYTE command, BYTE param) { return (command << 8) + param; }
+	void SetValueEffectCol(const uint16 val) { command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF); }
 
 	// Clears modcommand.
-	void Clear() {memset(this, 0, sizeof(MODCOMMAND)); }
+	void Clear() { memset(this, 0, sizeof(MODCOMMAND)); }
 
 	// Returns true if modcommand is empty, false otherwise.
 	// If ignoreEffectValues is true (default), effect values are ignored are ignored if there is no effect command present.
@@ -63,11 +63,18 @@ public:
 	}
 
 	// Returns true if instrument column represents plugin index.
-	bool IsInstrPlug() const {return IsPcNote();}
+	bool IsInstrPlug() const { return IsPcNote(); }
 
 	// Returns true if and only if note is NOTE_PC or NOTE_PCS.
 	bool IsPcNote() const { return note == NOTE_PC || note == NOTE_PCS; }
 	static bool IsPcNote(const NOTE note_id) { return note_id == NOTE_PC || note_id == NOTE_PCS; }
+
+	// Returns true if and only if note is a valid musical note.
+	bool IsNote() const { return note >= NOTE_MIN && note <= NOTE_MAX; }
+	static bool IsNote(NOTE note) { return note >= NOTE_MIN && note <= NOTE_MAX; }
+	// Returns true if and only if note is a valid musical note or the note entry is empty.
+	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
+	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
 
 	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
 	void SwapEffects()

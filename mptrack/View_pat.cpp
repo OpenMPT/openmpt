@@ -4606,7 +4606,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 				// just play the newly inserted note using the already specified instrument...
 				UINT nPlayIns = newcmd.instr;
-				if(!nPlayIns && NOTE_IS_VALID(note))
+				if(!nPlayIns && MODCOMMAND::IsNoteOrEmpty(note))
 				{
 					// ...or one that can be found on a previous row of this pattern.
 					MODCOMMAND *search = pTarget;
@@ -5659,7 +5659,7 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 			result = (startRowCmd == endRowCmd && startRowCmd != NOTE_NONE)		// Interpolate between two identical notes or Cut / Fade / etc...
 				|| (startRowCmd != NOTE_NONE && endRowCmd == NOTE_NONE)			// Fill in values from the first row
 				|| (startRowCmd == NOTE_NONE && endRowCmd != NOTE_NONE)			// Fill in values from the last row
-				|| (NOTE_IS_VALID(startRowCmd) && NOTE_IS_VALID(endRowCmd) && !(startRowCmd == NOTE_NONE && endRowCmd == NOTE_NONE));	// Interpolate between two notes of which one may be empty
+				|| (MODCOMMAND::IsNoteOrEmpty(startRowCmd) && MODCOMMAND::IsNoteOrEmpty(endRowCmd) && !(startRowCmd == NOTE_NONE && endRowCmd == NOTE_NONE));	// Interpolate between two notes of which one may be empty
 			break;
 		case EFFECT_COLUMN:
 			startRowCmd = startRowMC.command;
@@ -5923,7 +5923,7 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 			// If a note or an instr is present on the row, do the change, if required.
 			// Do not set instr if note and instr are both blank,
 			// but set instr if note is a PC note and instr is blank.
-			if (((p->note != NOTE_NONE && NOTE_IS_VALID(p->note)) || p->IsPcNote() || p->instr) && (p->instr != nIns))
+			if ((p->IsNote() || p->IsPcNote() || p->instr) && (p->instr != nIns))
 			{
 				p->instr = nIns;
 				bModified = true;

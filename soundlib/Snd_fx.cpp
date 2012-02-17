@@ -522,10 +522,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			for (CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
 				Chn[n].nGlobalVol = memory.chnVols[n];
-				if (memory.notes[n])
+				if (memory.notes[n] != NOTE_NONE)
 				{
 					Chn[n].nNewNote = memory.notes[n];
-					if(NOTE_IS_VALID(memory.notes[n]))
+					if(MODCOMMAND::IsNote(memory.notes[n]))
 					{
 						Chn[n].nLastNote = memory.notes[n];
 					}
@@ -566,7 +566,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 	if(note == NOTE_NONE && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
 
-	if (pIns != nullptr && note != NOTE_NONE && NOTE_IS_VALID(note))
+	if (pIns != nullptr && MODCOMMAND::IsNote(note))
 	{
 		if(bPorta && pIns == pChn->pModInstrument && (pChn->pModSample != nullptr && pChn->pModSample->pSample != nullptr) && IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -1545,7 +1545,7 @@ BOOL CSoundFile::ProcessEffects()
 
 			// Notes that exceed FT2's limit are completely ignored.
 			// Test case: note-limit.xm
-			if(note != NOTE_NONE && NOTE_IS_VALID(note) && IsCompatibleMode(TRK_FASTTRACKER2))
+			if(MODCOMMAND::IsNote(note) && IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				const int computedNote = note + pChn->nTranspose;
 				if((computedNote < NOTE_MIN + 11 || computedNote > NOTE_MIN + 130))
@@ -1673,7 +1673,7 @@ BOOL CSoundFile::ProcessEffects()
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL) instr = 0;
 
-			if (note != NOTE_NONE && NOTE_IS_VALID(note))
+			if (MODCOMMAND::IsNote(note))
 			{
 				pChn->nNewNote = pChn->nLastNote = note;
 
@@ -1937,7 +1937,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 				if (m && m->command == CMD_XPARAM)
 				{ 
-					if (GetType() & MOD_TYPE_XM)
+					if ((GetType() & MOD_TYPE_XM))
 					{
                         param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
 					}
@@ -1967,7 +1967,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
 			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))) break;
-			if ((!param) && (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
+			if ((!param) && (!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
 			break;
@@ -2037,17 +2037,13 @@ BOOL CSoundFile::ProcessEffects()
 // 				break;
 // 			}
 			
-			if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-			//IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
-			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER))
+			if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param *= 2;
+
+			// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values.
+			// Test case: globalvol-invalid.it
+			if (param <= 128)
 			{
-				if (param <= 128)
-					m_nGlobalVolume = param << 1;
-			}
-			else
-			{
-				if (param > 128) param = 128;
-				m_nGlobalVolume = param << 1;
+				m_nGlobalVolume = param * 2;
 			}
 			break;
 
@@ -2065,7 +2061,7 @@ BOOL CSoundFile::ProcessEffects()
 			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			if ((m_dwSongFlags & SONG_PT1XMODE)) break;
 			if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
-			if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_XM|MOD_TYPE_MOD|MOD_TYPE_MT2))
+			if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD | MOD_TYPE_MT2))
 			{
 				pChn->nPan = param;
 			} else
@@ -2491,7 +2487,7 @@ void CSoundFile::FinePortamentoUp(MODCHANNEL *pChn, UINT param)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))))
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
 				pChn->nPeriod = _muldivr(pChn->nPeriod, LinearSlideDownTable[param & 0x0F], 65536);
 			} else
@@ -2515,7 +2511,7 @@ void CSoundFile::FinePortamentoDown(MODCHANNEL *pChn, UINT param)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))))
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
 				pChn->nPeriod = _muldivr(pChn->nPeriod, LinearSlideUpTable[param & 0x0F], 65536);
 			} else
@@ -2539,7 +2535,7 @@ void CSoundFile::ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))))
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
 				pChn->nPeriod = _muldivr(pChn->nPeriod, FineLinearSlideDownTable[param & 0x0F], 65536);
 			} else
@@ -2563,7 +2559,7 @@ void CSoundFile::ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))))
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
 				pChn->nPeriod = _muldivr(pChn->nPeriod, FineLinearSlideUpTable[param & 0x0F], 65536);
 			} else
@@ -3136,7 +3132,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	case 0xA0:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{
 					pChn->nOldHiOffset = param;
-					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && (pChn->rowCommand.note != NOTE_NONE) && NOTE_IS_VALID(pChn->rowCommand.note))
+					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->rowCommand.IsNote())
 					{
 						DWORD pos = param << 16;
 						if (pos < pChn->nLength) pChn->nPos = pos;
@@ -3272,7 +3268,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			data = (unsigned char)GetBestMidiChannel(nChn);
 		} else if(macro[pos] == 'n')		// n: note value (last triggered note)
 		{
-			if(pChn->nLastNote != NOTE_NONE && NOTE_IS_VALID(pChn->nLastNote))
+			if(MODCOMMAND::IsNote(pChn->nLastNote))
 			{
 				data = (unsigned char)(pChn->nLastNote - NOTE_MIN);
 			}

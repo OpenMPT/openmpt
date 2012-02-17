@@ -131,7 +131,7 @@ BOOL CNoteMapWnd::SetCurrentNote(UINT nNote)
 //------------------------------------------
 {
 	if (nNote == m_nNote) return TRUE;
-	if (!NOTE_IS_VALID(nNote + 1)) return FALSE;
+	if (!MODCOMMAND::IsNote(nNote + 1)) return FALSE;
 	m_nNote = nNote;
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
@@ -192,10 +192,10 @@ void CNoteMapWnd::OnPaint()
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
 			strcpy(s, "...");
-			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos]))
+			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos] != NOTE_NONE))
 			{
 				UINT n = pIns->NoteMap[nPos];
-				if(NOTE_IS_VALID(n))
+				if(MODCOMMAND::IsNote(n))
 				{
 					string temp = pSndFile->GetNoteName(n, m_nInstrument);
 					temp.resize(4);
@@ -345,7 +345,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 				if(pSndFile->GetType() != MOD_TYPE_XM)
 				{
-					if(NOTE_IS_VALID(pIns->NoteMap[m_nNote]))
+					if(MODCOMMAND::IsNote(pIns->NoteMap[m_nNote]))
 					{
 						wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
 						AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);

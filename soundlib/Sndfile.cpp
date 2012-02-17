@@ -2646,10 +2646,10 @@ long CSoundFile::GetSampleOffset()
 string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
 //--------------------------------------------------------------------------------------------------
 {
-	if((inst >= MAX_INSTRUMENTS && inst != INSTRUMENTINDEX_INVALID) || note < 1 || note > NOTE_MAX) return "BUG";
+	if((inst >= MAX_INSTRUMENTS && inst != INSTRUMENTINDEX_INVALID) || note < NOTE_MIN || note > NOTE_MAX) return "BUG";
 
 	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
-	if(inst != INSTRUMENTINDEX_INVALID && m_nType == MOD_TYPE_MPT && Instruments[inst] && Instruments[inst]->pTuning)
+	if(inst != INSTRUMENTINDEX_INVALID && GetType() == MOD_TYPE_MPT && Instruments[inst] && Instruments[inst]->pTuning)
 		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
 	else
 		return szDefaultNoteNames[note - 1];

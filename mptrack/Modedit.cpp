@@ -271,10 +271,10 @@ struct ConvertInstrumentsToSamplesInPatterns
 		{
 			MODCOMMAND::INSTR instr = m.instr, newinstr = 0;
 			MODCOMMAND::NOTE note = m.note, newnote = note;
-			if(note != NOTE_NONE && NOTE_IS_VALID(note))
-				note--;
+			if(MODCOMMAND::IsNote(note))
+				note = note - NOTE_MIN;
 			else
-				note = NOTE_MIDDLEC - 1;
+				note = NOTE_MIDDLEC - NOTE_MIN;
 
 			if((instr < MAX_INSTRUMENTS) && (pSndFile->Instruments[instr]))
 			{
@@ -284,7 +284,7 @@ struct ConvertInstrumentsToSamplesInPatterns
 				if(newinstr >= MAX_SAMPLES) newinstr = 0;
 			}
 			m.instr = newinstr;
-			if(m.note != NOTE_NONE && NOTE_IS_VALID(m.note))
+			if(m.IsNote())
 			{
 				m.note = newnote;
 			}
