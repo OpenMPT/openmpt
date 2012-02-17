@@ -857,7 +857,7 @@ void CPageEditNote::UpdateDialog()
 		combo->SetItemData(combo->AddString("No note"), 0);
 		AppendNotesToControlEx(*combo, pSndFile, m_nInstr);
 
-		if (NOTE_IS_VALID(m_nNote))
+		if (MODCOMMAND::IsNoteOrEmpty(m_nNote))
 		{
 			// Normal note / no note
 			const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;

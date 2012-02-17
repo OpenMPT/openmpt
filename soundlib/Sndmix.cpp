@@ -2461,7 +2461,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		if(note != NOTE_NONE)
 		{
 			MODCOMMAND::NOTE realNote = note;
-			if(NOTE_IS_VALID(note))
+			if(MODCOMMAND::IsNote(note))
 				realNote = pIns->NoteMap[note - 1];
 			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
@@ -2488,7 +2488,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		}
 
 		MODCOMMAND::NOTE realNote = note;
-		if(NOTE_IS_VALID(note))
+		if(MODCOMMAND::IsNote(note))
 			realNote = pIns->NoteMap[note - 1];
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN], 0, nPlugin);

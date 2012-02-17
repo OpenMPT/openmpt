@@ -414,13 +414,13 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				}
 
 				// If there's just an instrument number, but no note, retrigger sample.
-				if(m->note == NOTE_NONE && NOTE_IS_VALID(m->note) && m->instr > 0)
+				if(m->note == NOTE_NONE && m->instr > 0)
 				{
 					m->note = settings.lastNote[nChn];
 					m->instr = 0;
 				}
 
-				if(m->note != NOTE_NONE && NOTE_IS_VALID(m->note))
+				if(m->IsNote())
 				{
 					settings.playDir[nChn] = false;
 				}
@@ -636,7 +636,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				}
 
 				// I guess this is close enough to "not retriggering the note"
-				if(slideNote && m->note != NOTE_NONE && NOTE_IS_VALID(m->note))
+				if(slideNote && m->IsNote())
 				{
 					if(effect2 == CMD_NONE)
 					{
