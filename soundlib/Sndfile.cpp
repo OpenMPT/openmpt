@@ -533,8 +533,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nNextRow = 0;
 	m_nRow = 0;
 	m_nPattern = 0;
-	m_nCurrentPattern = 0;
-	m_nNextPattern = 0;
+	m_nCurrentOrder = 0;
+	m_nNextOrder = 0;
 	m_nNextPatStartRow = 0;
 	m_nSeqOverride = 0;
 	m_nRestartPos = 0;
@@ -731,8 +731,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nGlobalVolumeDestination = m_nGlobalVolume;
 	m_nSamplesToGlobalVolRampDest = 0;
 	m_nGlobalVolumeRampAmount = 0;
-	m_nNextPattern = 0;
-	m_nCurrentPattern = 0;
+	m_nNextOrder = 0;
+	m_nCurrentOrder = 0;
 	m_nPattern = 0;
 	m_nBufferCount = 0;
 	m_dBufferDiff = 0;
@@ -994,7 +994,7 @@ UINT CSoundFile::GetCurrentPos() const
 {
 	UINT pos = 0;
 
-	for (UINT i=0; i<m_nCurrentPattern; i++) if (Order[i] < Patterns.Size())
+	for (UINT i=0; i<m_nCurrentOrder; i++) if (Order[i] < Patterns.Size())
 		pos += Patterns[Order[i]].GetNumRows();
 	return pos + m_nRow; 
 }
@@ -1075,7 +1075,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 			}
 		}
 	}
-	m_nNextPattern = nPattern;
+	m_nNextOrder = nPattern;
 	m_nNextRow = nRow;
 	m_nTickCount = m_nMusicSpeed;
 	m_nBufferCount = 0;
@@ -1120,7 +1120,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		SetCurrentPos(0);
 	} else
 	{
-		m_nNextPattern = nOrder;
+		m_nNextOrder = nOrder;
 		m_nRow = m_nNextRow = 0;
 		m_nPattern = 0;
 		m_nTickCount = m_nMusicSpeed;

@@ -307,7 +307,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 
 				pSndFile->m_nPattern = n;
-				pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = m_nScrollPos;
+				pSndFile->m_nCurrentOrder = pSndFile->m_nNextOrder = m_nScrollPos;
 				pMainFrm->ResetNotificationBuffer(); //rewbs.toCheck
 				pSndFile->m_nNextRow = 0;
 
@@ -321,7 +321,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				// update channel parameters and play time
 				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 
-				pSndFile->m_nCurrentPattern = m_nScrollPos;
+				pSndFile->m_nCurrentOrder = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();

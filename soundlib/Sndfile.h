@@ -647,8 +647,7 @@ public:	// for Editing
 	ROWINDEX m_nNextRow, m_nRow;
 	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
 	PATTERNINDEX m_nPattern;
-	ORDERINDEX m_nCurrentPattern, m_nNextPattern, m_nRestartPos, m_nSeqOverride;
-	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
+	ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nRestartPos, m_nSeqOverride;
 	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
@@ -668,7 +667,7 @@ protected:
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 public:
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
-	MIDIMacroConfig m_MidiCfg;								// Midi macro config table
+	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	CHAR CompressionTable[16];							// ADPCM compression LUT
@@ -707,7 +706,7 @@ public:
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
-	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentPattern); }
+	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentOrder); }
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
