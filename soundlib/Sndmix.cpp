@@ -324,18 +324,18 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			if (ReadNote())
 			{
 				// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
-				if(m_bIsRendering && (m_PatternCuePoints.empty() || m_nCurrentPattern != m_PatternCuePoints.back().order))
+				if(m_bIsRendering && (m_PatternCuePoints.empty() || m_nCurrentOrder != m_PatternCuePoints.back().order))
 				{
 					PatternCuePoint cue;
 					cue.offset = lMax - lRead;
-					cue.order = m_nCurrentPattern;
+					cue.order = m_nCurrentOrder;
 					cue.processed = false;	// We don't know the base offset in the file here. It has to be added in the main conversion loop.
 					m_PatternCuePoints.push_back(cue);
 				}
 			} else 
 			{
 #ifdef MODPLUG_TRACKER
-				if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition))
+				if ((m_nMaxOrderPosition) && (m_nCurrentOrder >= m_nMaxOrderPosition))
 				{
 					m_dwSongFlags |= SONG_ENDREACHED;
 					break;
@@ -681,28 +681,28 @@ BOOL CSoundFile::ProcessRow()
 		m_nTickCount = 0;
 		m_nRow = m_nNextRow;
 		// Reset Pattern Loop Effect
-		if (m_nCurrentPattern != m_nNextPattern) 
-			m_nCurrentPattern = m_nNextPattern;
+		if (m_nCurrentOrder != m_nNextOrder) 
+			m_nCurrentOrder = m_nNextOrder;
 		// Check if pattern is valid
 		if (!(m_dwSongFlags & SONG_PATTERNLOOP))
 		{
-			m_nPattern = (m_nCurrentPattern < Order.size()) ? Order[m_nCurrentPattern] : Order.GetInvalidPatIndex();
+			m_nPattern = (m_nCurrentOrder < Order.size()) ? Order[m_nCurrentOrder] : Order.GetInvalidPatIndex();
 			if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) m_nPattern = Order.GetIgnoreIndex();
 			while (m_nPattern >= Patterns.Size())
 			{
 				// End of song?
-				if ((m_nPattern == Order.GetInvalidPatIndex()) || (m_nCurrentPattern >= Order.size()))
+				if ((m_nPattern == Order.GetInvalidPatIndex()) || (m_nCurrentOrder >= Order.size()))
 				{
 
 					//if (!m_nRepeatCount) return FALSE;
 
 					ORDERINDEX nRestartPosOverride = m_nRestartPos;
-					if(!m_nRestartPos && m_nCurrentPattern <= Order.size() && m_nCurrentPattern > 0)
+					if(!m_nRestartPos && m_nCurrentOrder <= Order.size() && m_nCurrentOrder > 0)
 					{
 						/* Subtune detection. Subtunes are separated by "---" order items, so if we're in a
 						   subtune and there's no restart position, we go to the first order of the subtune
 						   (i.e. the first order after the previous "---" item) */
-						for(ORDERINDEX iOrd = m_nCurrentPattern - 1; iOrd > 0; iOrd--)
+						for(ORDERINDEX iOrd = m_nCurrentOrder - 1; iOrd > 0; iOrd--)
 						{
 							if(Order[iOrd] == Order.GetInvalidPatIndex())
 							{
@@ -762,17 +762,17 @@ BOOL CSoundFile::ProcessRow()
 
 					//Handle Repeat position
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
-					m_nCurrentPattern = nRestartPosOverride;
+					m_nCurrentOrder = nRestartPosOverride;
 					m_dwSongFlags &= ~SONG_BREAKTOROW;
 					//If restart pos points to +++, move along
-					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex())
+					while (Order[m_nCurrentOrder] == Order.GetIgnoreIndex())
 					{
-						m_nCurrentPattern++;
+						m_nCurrentOrder++;
 					}
 					//Check for end of song or bad pattern
-					if (m_nCurrentPattern >= Order.size()
-						|| (Order[m_nCurrentPattern] >= Patterns.Size()) 
-						|| (!Patterns[Order[m_nCurrentPattern]]) )
+					if (m_nCurrentOrder >= Order.size()
+						|| (Order[m_nCurrentOrder] >= Patterns.Size()) 
+						|| (!Patterns[Order[m_nCurrentOrder]]) )
 					{
 						InitializeVisitedRows(true);
 						return FALSE;
@@ -780,21 +780,21 @@ BOOL CSoundFile::ProcessRow()
 
 				} else
 				{
-					m_nCurrentPattern++;
+					m_nCurrentOrder++;
 				}
 
-				if (m_nCurrentPattern < Order.size())
-					m_nPattern = Order[m_nCurrentPattern];
+				if (m_nCurrentOrder < Order.size())
+					m_nPattern = Order[m_nCurrentOrder];
 				else
 					m_nPattern = Order.GetInvalidPatIndex();
 
 				if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern]))
 					m_nPattern = Order.GetIgnoreIndex();
 			}
-			m_nNextPattern = m_nCurrentPattern;
+			m_nNextOrder = m_nCurrentOrder;
 
 #ifdef MODPLUG_TRACKER
-			if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
+			if ((m_nMaxOrderPosition) && (m_nCurrentOrder >= m_nMaxOrderPosition)) return FALSE;
 #endif // MODPLUG_TRACKER
 		}
 
@@ -808,7 +808,7 @@ BOOL CSoundFile::ProcessRow()
 		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
 		// flag is set - because in that case, the module would stop after the first pattern loop...
 		const bool overrideLoopCheck = (m_nRepeatCount != -1) && (m_dwSongFlags & SONG_PATTERNLOOP);
-		if(!overrideLoopCheck && IsRowVisited(m_nCurrentPattern, m_nRow, true))
+		if(!overrideLoopCheck && IsRowVisited(m_nCurrentOrder, m_nRow, true))
 		{
 			if(m_nRepeatCount)
 			{
@@ -819,7 +819,7 @@ BOOL CSoundFile::ProcessRow()
 				}
 				// Forget all but the current row.
 				InitializeVisitedRows(true);
-				SetRowVisited(m_nCurrentPattern, m_nRow);
+				SetRowVisited(m_nCurrentOrder, m_nRow);
 			} else
 			{
 #ifdef MODPLUG_TRACKER
@@ -827,7 +827,7 @@ BOOL CSoundFile::ProcessRow()
 				// The visited rows vector might have been screwed up while editing...
 				// This is of course not possible during rendering to WAV, so we ignore that case.
 				GetLengthType t = GetLength(eNoAdjust);
-				if((gdwSoundSetup & SNDMIX_DIRECTTODISK) || (t.lastOrder == m_nCurrentPattern && t.lastRow == m_nRow))
+				if((gdwSoundSetup & SNDMIX_DIRECTTODISK) || (t.lastOrder == m_nCurrentOrder && t.lastRow == m_nRow))
 #else
 				if(1)
 #endif // MODPLUG_TRACKER
@@ -838,7 +838,7 @@ BOOL CSoundFile::ProcessRow()
 				} else
 				{
 					// Ok, this is really dirty, but we have to update the visited rows vector...
-					GetLength(eAdjustOnSuccess, m_nCurrentPattern, m_nRow);
+					GetLength(eAdjustOnSuccess, m_nCurrentOrder, m_nRow);
 				}
 			}
 		}
@@ -846,7 +846,7 @@ BOOL CSoundFile::ProcessRow()
 		m_nNextRow = m_nRow + 1;
 		if (m_nNextRow >= Patterns[m_nPattern].GetNumRows())
 		{
-			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextPattern = m_nCurrentPattern + 1;
+			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextOrder = m_nCurrentOrder + 1;
 			m_bPatternTransitionOccurred = true;
 			m_nNextRow = 0;
 

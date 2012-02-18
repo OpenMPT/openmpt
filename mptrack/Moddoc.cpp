@@ -1692,7 +1692,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		{
 			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
 			m_SndFile.GetLength(eAdjust, wsdlg.m_nMinOrder, 0);	// adjust playback variables / visited rows vector
-			m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
+			m_SndFile.m_nCurrentOrder = wsdlg.m_nMinOrder;
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 		}
 		if(dwcdlg.DoModal() != IDOK) break;
@@ -1931,9 +1931,9 @@ void CModDoc::OnPlayerPause()
 			{
 				CriticalSection cs;
 
-				if ((m_SndFile.m_nCurrentPattern < m_SndFile.Order.size()) && (m_SndFile.Order[m_SndFile.m_nCurrentPattern] == nPat))
+				if ((m_SndFile.m_nCurrentOrder < m_SndFile.Order.size()) && (m_SndFile.Order[m_SndFile.m_nCurrentOrder] == nPat))
 				{
-					m_SndFile.m_nNextPattern = m_SndFile.m_nCurrentPattern;
+					m_SndFile.m_nNextOrder = m_SndFile.m_nCurrentOrder;
 					m_SndFile.m_nNextRow = nNextRow;
 					m_SndFile.m_nRow = nRow;
 				} else
@@ -1943,8 +1943,8 @@ void CModDoc::OnPlayerPause()
 						if (m_SndFile.Order[nOrd] == m_SndFile.Order.GetInvalidPatIndex()) break;
 						if (m_SndFile.Order[nOrd] == nPat)
 						{
-							m_SndFile.m_nCurrentPattern = nOrd;
-							m_SndFile.m_nNextPattern = nOrd;
+							m_SndFile.m_nCurrentOrder = nOrd;
+							m_SndFile.m_nNextOrder = nOrd;
 							m_SndFile.m_nNextRow = nNextRow;
 							m_SndFile.m_nRow = nRow;
 							break;
@@ -3261,7 +3261,7 @@ void CModDoc::OnPatternRestart()
 			pSndFile->Chn[i].nFadeOutVol = 0;
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
-		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
+		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentOrder = pSndFile->m_nNextOrder = nOrd;
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
@@ -3320,7 +3320,7 @@ void CModDoc::OnPatternPlay()
 		{
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
-		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
+		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentOrder = pSndFile->m_nNextOrder = nOrd;
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;

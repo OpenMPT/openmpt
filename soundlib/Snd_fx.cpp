@@ -2246,7 +2246,7 @@ BOOL CSoundFile::ProcessEffects()
 				//If song is set to loop and a pattern break occurs we should stay on the same pattern.
 				//Use nPosJump to force playback to "jump to this pattern" rather than move to next, as by default.
 				//rewbs.to
-				nPosJump = (int)m_nCurrentPattern;
+				nPosJump = (int)m_nCurrentOrder;
 			}
 			break;
 
@@ -2284,19 +2284,19 @@ BOOL CSoundFile::ProcessEffects()
 		// Pattern Loop
 		if (nPatLoopRow != ROWINDEX_INVALID)
 		{
-			m_nNextPattern = m_nCurrentPattern;
+			m_nNextOrder = m_nCurrentOrder;
 			m_nNextRow = nPatLoopRow;
 			if (m_nPatternDelay) m_nNextRow++;
 			// As long as the pattern loop is running, mark the looped rows as not visited yet
 			for(ROWINDEX nRow = nPatLoopRow; nRow <= m_nRow; nRow++)
 			{
-				SetRowVisited(m_nCurrentPattern, nRow, false);
+				SetRowVisited(m_nCurrentOrder, nRow, false);
 			}
 		} else
 		// Pattern Break / Position Jump only if no loop running
 		if ((nBreakRow != ROWINDEX_INVALID) || (nPosJump != ORDERINDEX_INVALID))
 		{
-			if (nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentPattern + 1;
+			if (nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentOrder + 1;
 			if (nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
 			m_dwSongFlags |= SONG_BREAKTOROW;
 
@@ -2310,14 +2310,14 @@ BOOL CSoundFile::ProcessEffects()
 			//if((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow))
 			{
 				// IT compatibility: don't reset loop count on pattern break
-				if (nPosJump != (int)m_nCurrentPattern && !IsCompatibleMode(TRK_IMPULSETRACKER))
+				if (nPosJump != (int)m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					for (CHANNELINDEX i = 0; i < m_nChannels; i++)
 					{
 						Chn[i].nPatternLoopCount = 0;
 					}
 				}
-				m_nNextPattern = nPosJump;
+				m_nNextOrder = nPosJump;
 				m_nNextRow = nBreakRow;
 				m_bPatternTransitionOccurred = true;
 			}
@@ -3957,7 +3957,7 @@ void CSoundFile::SetSpeed(UINT param)
 	// Big Hack!!!
 	if ((!param) || (param >= 0x80) || ((GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2)) && (param >= 0x1E)))
 	{
-		if ((!m_nRepeatCount) && (IsSongFinished(m_nCurrentPattern, m_nRow+1)))
+		if ((!m_nRepeatCount) && (IsSongFinished(m_nCurrentOrder, m_nRow+1)))
 		{
 			GlobalFadeSong(1000);
 		}
@@ -4375,7 +4375,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 		{
 			m_nPattern = Order[m_nSeqOverride - 1];
 		}
-		m_nNextPattern = m_nSeqOverride - 1;
+		m_nNextOrder = m_nSeqOverride - 1;
 		m_nSeqOverride = 0;
 	}
 
