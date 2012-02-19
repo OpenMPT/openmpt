@@ -797,8 +797,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	pChn->pSample = pSmp->pSample;
 	pChn->nTranspose = pSmp->RelativeTone;
 
+	// FT2 compatibility: Don't reset portamento target with new instrument numbers.
+	// Test case: Porta-Pickup.xm
+	if(!IsCompatibleMode(TRK_FASTTRACKER2))
+	{
+		pChn->nPortamentoDest = 0;
+	}
 	pChn->m_PortamentoFineSteps = 0;
-	pChn->nPortamentoDest = 0;
 
 	if (pChn->dwFlags & CHN_SUSTAINLOOP)
 	{
@@ -938,7 +943,16 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if (period)
 	{
 		if ((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
-		if(!newTuning) pChn->nPortamentoDest = period;
+		if(!newTuning)
+		{
+			// FT2 compatibility: Don't reset portamento target with new notes.
+			// Test case: Porta-Pickup.xm
+			if(bPorta || !IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				pChn->nPortamentoDest = period;
+			}
+		}
+
 		if ((!bPorta) || ((!pChn->nLength) && (!(GetType() & MOD_TYPE_S3M))))
 		{
 			pChn->pModSample = pSmp;
@@ -1009,7 +1023,9 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			}
 		}
 	}
+
 	pChn->dwFlags &= ~(CHN_EXTRALOUD|CHN_KEYOFF);
+
 	// Enable Ramping
 	if (!bPorta)
 	{
@@ -1025,6 +1041,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			if(!IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nRetrigCount = 0;
 			pChn->nTremorCount = 0;
 		}
+
 		if (bResetEnv)
 		{
 			pChn->nVolSwing = pChn->nPanSwing = 0;
@@ -2310,8 +2327,8 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Pattern Break / Position Jump only if no loop running
 		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		if ((!doPatternLoop || IsCompatibleMode(TRK_FASTTRACKER2))
-			&& (nBreakRow != ROWINDEX_INVALID || nPosJump != ORDERINDEX_INVALID))
+		if ((nBreakRow != ROWINDEX_INVALID || nPosJump != ORDERINDEX_INVALID)
+			&& (!doPatternLoop || IsCompatibleMode(TRK_FASTTRACKER2)))
 		{
 			if (nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentOrder + 1;
 			if (nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
@@ -2322,24 +2339,21 @@ BOOL CSoundFile::ProcessEffects()
 				nPosJump = 0;
 			}
 
-			// This checks whether we're jumping to the same row we're already on.
-			// Sounds pretty stupid and pointless to me. And noone else does this, either.
+			// IT / FT2 compatibility: don't reset loop count on pattern break.
+			// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm
+			if (nPosJump != m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{
-				// IT / FT2 compatibility: don't reset loop count on pattern break.
-				// Test case: PatLoop-Break.xm
-				if (nPosJump != m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+				for (CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 				{
-					for (CHANNELINDEX i = 0; i < m_nChannels; i++)
-					{
-						Chn[i].nPatternLoopCount = 0;
-					}
+					Chn[i].nPatternLoopCount = 0;
 				}
-				m_nNextOrder = nPosJump;
-				m_nNextRow = nBreakRow;
-				m_bPatternTransitionOccurred = true;
 			}
-		} //Ends condition (nBreakRow >= 0) || (nPosJump >= 0)
-		//SetRowVisited(m_nCurrentPattern, m_nRow);
+			m_nNextOrder = nPosJump;
+			m_nNextRow = nBreakRow;
+			m_bPatternTransitionOccurred = true;
+
+		}
+
 	}
 	return TRUE;
 }
@@ -4046,7 +4060,7 @@ ROWINDEX CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 		{
 			// This was the last loop
 
-			// IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
+			// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER | TRK_SCREAMTRACKER))
 			{
 				MODCHANNEL *p = Chn;
