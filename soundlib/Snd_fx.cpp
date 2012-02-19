@@ -1517,7 +1517,17 @@ BOOL CSoundFile::ProcessEffects()
 				{
 
 					ROWINDEX nloop = PatternLoop(pChn, param & 0x0F);
-					if (nloop != ROWINDEX_INVALID) nPatLoopRow = nloop;
+					if (nloop != ROWINDEX_INVALID)
+					{
+						// FT2 compatibility: E6x overwrites jump targets of Dxx effects that are located left of the E6x effect.
+						// Test cases: PatLoop-Jumps.xm, PatLoop-Various.xm
+						if(nBreakRow != ROWINDEX_INVALID && IsCompatibleMode(TRK_FASTTRACKER2))
+						{
+							nBreakRow = nloop;
+						}
+
+						nPatLoopRow = nloop;
+					}
 
 					if(GetType() == MOD_TYPE_S3M)
 					{
@@ -2214,7 +2224,7 @@ BOOL CSoundFile::ProcessEffects()
 				 //occurs also when pattern loop is enabled.
 			}
 			// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-			if(GetType() == MOD_TYPE_XM)
+			if(GetType() == MOD_TYPE_XM && nBreakRow != ROWINDEX_INVALID)
 			{
 				nBreakRow = 0;
 			}
@@ -2227,11 +2237,13 @@ BOOL CSoundFile::ProcessEffects()
 				// ST3 ignores invalid pattern breaks.
 				break;
 			}
+
 			m_nNextPatStartRow = 0; // FT2 E60 bug
+
 			m = NULL;
-			if (m_nRow < Patterns[m_nPattern].GetNumRows()-1)
+			if (m_nRow < Patterns[m_nPattern].GetNumRows() - 1)
 			{
-			  m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
+			  m = Patterns[m_nPattern].GetpModCommand(m_nRow + 1, nChn);
 			}
 			if (m && m->command == CMD_XPARAM)
 			{
@@ -2281,8 +2293,10 @@ BOOL CSoundFile::ProcessEffects()
 	// Navigation Effects
 	if(m_dwSongFlags & SONG_FIRSTTICK)
 	{
+		const bool doPatternLoop = (nPatLoopRow != ROWINDEX_INVALID);
+
 		// Pattern Loop
-		if (nPatLoopRow != ROWINDEX_INVALID)
+		if (doPatternLoop)
 		{
 			m_nNextOrder = m_nCurrentOrder;
 			m_nNextRow = nPatLoopRow;
@@ -2292,9 +2306,12 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				SetRowVisited(m_nCurrentOrder, nRow, false);
 			}
-		} else
+		}
+
 		// Pattern Break / Position Jump only if no loop running
-		if ((nBreakRow != ROWINDEX_INVALID) || (nPosJump != ORDERINDEX_INVALID))
+		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
+		if ((!doPatternLoop || IsCompatibleMode(TRK_FASTTRACKER2))
+			&& (nBreakRow != ROWINDEX_INVALID || nPosJump != ORDERINDEX_INVALID))
 		{
 			if (nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentOrder + 1;
 			if (nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
@@ -2307,10 +2324,10 @@ BOOL CSoundFile::ProcessEffects()
 
 			// This checks whether we're jumping to the same row we're already on.
 			// Sounds pretty stupid and pointless to me. And noone else does this, either.
-			//if((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow))
 			{
-				// IT compatibility: don't reset loop count on pattern break
-				if (nPosJump != (int)m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER))
+				// IT / FT2 compatibility: don't reset loop count on pattern break.
+				// Test case: PatLoop-Break.xm
+				if (nPosJump != m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 				{
 					for (CHANNELINDEX i = 0; i < m_nChannels; i++)
 					{
@@ -4295,22 +4312,22 @@ PLUGINDEX CSoundFile::GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, 
 PLUGINDEX __cdecl CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const
 //------------------------------------------------------------------------------------------------------
 {
-	const MODCHANNEL *pChn = &Chn[nChn];
+	const MODCHANNEL &channel = Chn[nChn];
 
-	// If it looks like this is an NNA channel, we need to find the master channel.
-	// This ensures we pick up the right ChnSettings. 
-	// NB: nMasterChn==0 means no master channel, so we need to -1 to get correct index.
-	if (nChn>=m_nChannels && pChn && pChn->nMasterChn > 0)
-	{ 
-		nChn = pChn->nMasterChn - 1;
-	}
-
-	UINT nPlugin;
-	if ( (respectMutes == RespectMutes && (pChn->dwFlags & CHN_MUTE)) || (pChn->dwFlags&CHN_NOFX) )
+	PLUGINDEX nPlugin;
+	if((respectMutes == RespectMutes && (channel.dwFlags & CHN_MUTE)) || (channel.dwFlags & CHN_NOFX))
 	{
 		nPlugin = 0;
 	} else
 	{
+		// If it looks like this is an NNA channel, we need to find the master channel.
+		// This ensures we pick up the right ChnSettings. 
+		// NB: nMasterChn == 0 means no master channel, so we need to -1 to get correct index.
+		if (nChn >= m_nChannels && channel.nMasterChn > 0)
+		{ 
+			nChn = channel.nMasterChn - 1;
+		}
+
 		nPlugin = ChnSettings[nChn].nMixPlugin;
 	}
 	return nPlugin;
