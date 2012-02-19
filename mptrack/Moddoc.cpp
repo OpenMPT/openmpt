@@ -893,9 +893,9 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CHANNELINDEX nChn = GetNumChannels();
 	
-	if ((!pMainFrm) || (!note)) return FALSE;
+	if (pMainFrm == nullptr || note == NOTE_NONE) return FALSE;
 	if (nVol > 256) nVol = 256;
-	if (MODCOMMAND::IsNoteOrEmpty(note))
+	if (MODCOMMAND::IsNote(MODCOMMAND::NOTE(note)))
 	{
 
 		//kill notes if required.
@@ -1018,8 +1018,8 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 				UINT nPlugin = 0;
 				if (pChn->pModInstrument) 
 					nPlugin = pChn->pModInstrument->nMixPlug;  					// first try instrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS) && (nCurrentChn != CHANNELINDEX_INVALID))
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
+				if ((!nPlugin || nPlugin > MAX_MIXPLUGINS) && nCurrentChn != CHANNELINDEX_INVALID)
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;	// Then try Channel VST
 				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
