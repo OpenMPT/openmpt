@@ -577,8 +577,9 @@ void CPatternPropertiesDlg::OnOK()
 			}
 		}
 
-		UINT n = GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
-		pSndFile->Patterns[m_nPattern].Resize(n);
+		const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
+		m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, newSize, pSndFile->Patterns[m_nPattern].GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows() - newSize);
+		pSndFile->Patterns[m_nPattern].Resize(newSize);
 	}
 	CDialog::OnOK();
 }

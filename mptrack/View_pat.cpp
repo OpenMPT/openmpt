@@ -28,14 +28,14 @@
 
 FindReplaceStruct CViewPattern::m_findReplace =
 {
-	{0,0,0,0,0,0}, {0,0,0,0,0,0},
+	MODCOMMAND::Empty(), MODCOMMAND::Empty(),
 	PATSEARCH_FULLSEARCH, PATSEARCH_REPLACEALL,
 	0, 0,
 	0,
 	0, 0,
 };
 
-MODCOMMAND CViewPattern::m_cmdOld = {0,0,0,0,0,0};
+MODCOMMAND CViewPattern::m_cmdOld = MODCOMMAND::Empty();
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -1942,7 +1942,7 @@ void CViewPattern::OnEditFindNext()
 	}
 	for (UINT nPat=nPatStart; nPat<nPatEnd; nPat++)
 	{
-		LPMODCOMMAND m = pSndFile->Patterns[nPat];
+		MODCOMMAND *m = pSndFile->Patterns[nPat];
 		DWORD len = pSndFile->GetNumChannels() * pSndFile->Patterns[nPat].GetNumRows();
 		if ((!m) || (!len)) continue;
 		UINT n = 0;
