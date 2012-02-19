@@ -327,7 +327,7 @@ LONG CViewSample::SampleToScreen(LONG n) const
 //--------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (m_nSample < MAX_SAMPLES))
+	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		UINT nLen = pSndFile->GetSample(m_nSample).nLength;
@@ -350,7 +350,7 @@ DWORD CViewSample::ScreenToSample(LONG x) const
 	CModDoc *pModDoc = GetDocument();
 	LONG n = 0;
 
-	if ((pModDoc) && (m_nSample < MAX_SAMPLES))
+	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		UINT nLen = pSndFile->GetSample(m_nSample).nLength;
@@ -775,7 +775,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
-		const MODSAMPLE &sample = pSndFile->GetSample((m_nSample < MAX_SAMPLES) ? m_nSample : 0);
+		const MODSAMPLE &sample = pSndFile->GetSample((m_nSample <= pSndFile->GetNumSamples()) ? m_nSample : 0);
 		int ymed = (rect.top + rect.bottom) / 2;
 		int yrange = (rect.bottom - rect.top) / 2;
 		
@@ -1289,7 +1289,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 
 		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
 		{
-			if(m_nSample > 0 && m_nSample < MAX_SAMPLES && x < pSndFile->GetSample(m_nSample).nLength)
+			if(m_nSample > 0 && m_nSample <= pSndFile->GetNumSamples() && x < pSndFile->GetSample(m_nSample).nLength)
 			{
 				const DWORD xLow = (x / 0x100) % 0x100;
 				const DWORD xHigh = x / 0x10000;
@@ -2032,7 +2032,7 @@ void CViewSample::On8BitConvert()
 {
 	CModDoc *pModDoc = GetDocument();
 	BeginWaitCursor();
-	if ((pModDoc) && (m_nSample < MAX_SAMPLES))
+	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
@@ -2070,7 +2070,7 @@ void CViewSample::OnMonoConvert()
 {
 	CModDoc *pModDoc = GetDocument();
 	BeginWaitCursor();
-	if ((pModDoc) && (m_nSample < MAX_SAMPLES))
+	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
@@ -2096,7 +2096,7 @@ void CViewSample::OnSampleTrim()
 {
 	CModDoc *pModDoc = GetDocument();
 	//nothing loaded or invalid sample slot.
-	if(!pModDoc || m_nSample >= MAX_SAMPLES) return;
+	if(!pModDoc || m_nSample > pModDoc->GetNumSamples()) return;
 
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
