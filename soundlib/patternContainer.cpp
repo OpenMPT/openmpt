@@ -52,17 +52,14 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 			m_Patterns.push_back(MODPATTERN(*this));
 		else 
 		{
+#ifdef MODPLUG_TRACKER
 			ErrorBox(IDS_ERR_TOOMANYPAT, CMainFrame::GetMainFrame());
+#endif // MODPLUG_TRACKER
 			return true;
 		}
 	}
 
-	if(m_Patterns[index].m_ModCommands != nullptr)
-	{
-		CPattern::FreePattern(m_Patterns[index].m_ModCommands);
-	}
-	m_Patterns[index].m_ModCommands = CPattern::AllocatePattern(rows, m_rSndFile.GetNumChannels());
-	m_Patterns[index].m_Rows = rows;
+	m_Patterns[index].AllocatePattern(rows);
 	m_Patterns[index].RemoveSignature();
 	m_Patterns[index].SetName("");
 

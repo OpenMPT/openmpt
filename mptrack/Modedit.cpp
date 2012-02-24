@@ -98,7 +98,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
 //--------------------------------------------------------
 {
-	UINT nRemainingChannels = 0;
+	CHANNELINDEX nRemainingChannels = 0;
 	//First calculating how many channels are to be left
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 	{
@@ -107,9 +107,11 @@ bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
 	if(nRemainingChannels == GetNumChannels() || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
 	{
 		CString str;	
-		if(nRemainingChannels == GetNumChannels()) str.Format("No channels chosen to be removed.");
-		else str.Format("No removal done - channel number is already at minimum.");
-		Reporting::Information(str, "Remove channel");
+		if(nRemainingChannels == GetNumChannels())
+			str = "No channels chosen to be removed.";
+		else
+			str = "No removal done - channel number is already at minimum.";
+		Reporting::Information(str, "Remove Channels");
 		return false;
 	}
 
@@ -151,7 +153,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 	if(nRemainingChannels > m_SndFile.GetModSpecifications().channelsMax || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin) 	
 	{
 		CString str;
-		str.Format(GetStrI18N(_TEXT("Can't apply change: Number of channels should be within [%u,%u]")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		str.Format(GetStrI18N(_TEXT("Can't apply change: Number of channels should be between %u and %u.")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 		Reporting::Error(str , "ReArrangeChannels");
 		return CHANNELINDEX_INVALID;
 	}
@@ -185,34 +187,34 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 				first = false;
 			}
 
-			MODCOMMAND *p = m_SndFile.Patterns[nPat];
-			MODCOMMAND *newp = CPattern::AllocatePattern(m_SndFile.Patterns[nPat].GetNumRows(), nRemainingChannels);
-			if(!newp)
+			MODCOMMAND *oldPatData = m_SndFile.Patterns[nPat];
+			MODCOMMAND *newPatData = CPattern::AllocatePattern(m_SndFile.Patterns[nPat].GetNumRows(), nRemainingChannels);
+			if(!newPatData)
 			{
 				cs.Leave();
-				Reporting::Error("ERROR: Pattern allocation failed in ReArrangechannels(...)");
+				Reporting::Error("ERROR: Pattern allocation failed in ReArrangeChannels(...)");
 				return CHANNELINDEX_INVALID;
 			}
-			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
+			MODCOMMAND *tmpdest = newPatData;
 			for(ROWINDEX nRow = 0; nRow < m_SndFile.Patterns[nPat].GetNumRows(); nRow++) //Scrolling rows
 			{
 				for(CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++, tmpdest++) //Scrolling channels.
 				{
 					if(newOrder[nChn] < GetNumChannels()) //Case: getting old channel to the new channel order.
-						*tmpdest = tmpsrc[nRow * GetNumChannels() + newOrder[nChn]];
+						*tmpdest = *m_SndFile.Patterns[nPat].GetpModCommand(nRow, newOrder[nChn]);
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
 						*tmpdest = MODCOMMAND::Empty();
 
 				}
 			}
-			m_SndFile.Patterns[nPat] = newp;
-			CPattern::FreePattern(p);
+			m_SndFile.Patterns[nPat] = newPatData;
+			CPattern::FreePattern(oldPatData);
 		}
 	}
 
 	MODCHANNEL chns[MAX_BASECHANNELS];		
 	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
-	vector<UINT> recordStates(GetNumChannels(), 0);
+	vector<BYTE> recordStates(GetNumChannels(), 0);
 	vector<bool> chnMutePendings(GetNumChannels(), false);
 
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
@@ -912,13 +914,15 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			const bool doITStyleMix = (pasteMode == pm_mixpaste_it);
 			const bool doMixPaste = ((pasteMode == pm_mixpaste) || doITStyleMix);
 
-			ORDERINDEX oCurrentOrder; //jojo.echopaste
-			ROWINDEX rTemp;
-			PATTERNINDEX pTemp;
-			GetEditPosition(rTemp, pTemp, oCurrentOrder);
+			ORDERINDEX currentOrder; //jojo.echopaste
+			{
+				ROWINDEX rTemp;
+				PATTERNINDEX pTemp;
+				GetEditPosition(rTemp, pTemp, currentOrder);
+			}
 
 			if ((nrow >= m_SndFile.Patterns[nPattern].GetNumRows()) || (ncol >= m_SndFile.GetNumChannels())) goto PasteDone;
-			m += nrow * m_SndFile.m_nChannels;
+			m += nrow * m_SndFile.GetNumChannels();
 
 			// Search for signature
 			for (pos = startPos; p[pos] != 0 && pos < dwMemSize; pos++)
@@ -937,7 +941,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			}
 
 			const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(origFormat);
-			const bool bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0;
+			const bool clipboardHasS3MCommands = (origFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) != 0;
 			pos = startPos;
 
 			while ((nrow < m_SndFile.Patterns[nPattern].GetNumRows()))
@@ -991,7 +995,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						{
 							for(ROWINDEX nPushRow = m_SndFile.Patterns[nPattern].GetNumRows() - 1 - nrow; nPushRow > 0; nPushRow--)
 							{
-								m[col + nPushRow * m_SndFile.m_nChannels] = m[col + (nPushRow - 1) * m_SndFile.m_nChannels];
+								m[col + nPushRow * m_SndFile.GetNumChannels()] = m[col + (nPushRow - 1) * m_SndFile.GetNumChannels()];
 							}
 							m[col].Clear();
 						}
@@ -1106,13 +1110,13 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 								}
 							}
 							// Checking command
-							if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+							if (m_SndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
 							{
 								switch (m[col].command)
 								{
 								case CMD_SPEED:
 								case CMD_TEMPO:
-									if (!bS3MCommands) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+									if (!clipboardHasS3MCommands) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
 									else
 									{
 										if ((m[col].command == CMD_SPEED) && (m[col].param > spdmax)) m[col].param = CMD_TEMPO; else
@@ -1126,7 +1130,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 								{
 								case CMD_SPEED:
 								case CMD_TEMPO:
-									if (!bS3MCommands) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+									if (!clipboardHasS3MCommands) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
 									break;
 								}
 							}
@@ -1136,7 +1140,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						// if the original modcommand was empty as otherwise the unchanged parts
 						// of the old modcommand would falsely be interpreted being of type
 						// origFormat and ConvertCommand could change them.
-						if (origFormat != m_SndFile.m_nType && (doMixPaste == false || origModCmd.IsEmpty(false)))
+						if (origFormat != m_SndFile.m_nType && (!doMixPaste || origModCmd.IsEmpty(false)))
 							m_SndFile.ConvertCommand(&(m[col]), origFormat, m_SndFile.m_nType);
 					}
 
@@ -1144,7 +1148,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 					col++;
 				}
 				// Next row
-				m += m_SndFile.m_nChannels;
+				m += m_SndFile.GetNumChannels();
 				nrow++;
 
 				// Overflow paste. Continue pasting in next pattern if enabled.
@@ -1154,12 +1158,12 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 					while(nrow >= m_SndFile.Patterns[nPattern].GetNumRows())
 					{
 						nrow = 0;
-						ORDERINDEX oNextOrder = m_SndFile.Order.GetNextOrderIgnoringSkips(oCurrentOrder);
-						if((oNextOrder == 0) || (oNextOrder >= m_SndFile.Order.size())) goto PasteDone;
-						nPattern = m_SndFile.Order[oNextOrder];
+						ORDERINDEX nextOrder = m_SndFile.Order.GetNextOrderIgnoringSkips(currentOrder);
+						if((nextOrder == 0) || (nextOrder >= m_SndFile.Order.size())) goto PasteDone;
+						nPattern = m_SndFile.Order[nextOrder];
 						if(m_SndFile.Patterns.IsValidPat(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
-						oCurrentOrder = oNextOrder;
+						currentOrder = nextOrder;
 						bPrepareUndo = true;
 					}
 				}
