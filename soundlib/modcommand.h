@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef MODCOMMAND_H
 #define MODCOMMAND_H
 
@@ -92,7 +90,6 @@ public:
 	BYTE param;
 };
 
-typedef MODCOMMAND* LPMODCOMMAND;
 typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 
 

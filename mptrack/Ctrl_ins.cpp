@@ -1644,9 +1644,8 @@ void CCtrlInstruments::OnInstrumentNew()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if ((pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-		 && (pSndFile->m_nInstruments > 0)
-		 && (CMainFrame::GetInputHandler()->ShiftPressed())) //rewbs.customKeys
+		if (pSndFile->m_nInstruments > 0
+			&& CMainFrame::GetInputHandler()->ShiftPressed()) //rewbs.customKeys
 		{
 			OnInstrumentDuplicate();
 			return;
