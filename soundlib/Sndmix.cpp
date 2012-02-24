@@ -1213,7 +1213,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
 		{
 			// Filter Envelope: controls cutoff frequency
 #ifndef NO_FILTER
-			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true, envpitch);
+			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER), envpitch);
 #endif // NO_FILTER
 		} else
 		{
@@ -1563,8 +1563,10 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 			if(m_nTickCount + 1 == m_nMusicSpeed)
 				pChn->m_ReCalculateFreqOnFirstTick = true;
 		}
-		else //Original behavior
+		else
 		{
+			// Original behaviour
+
 			UINT vdepth;
 			// IT compatibility: correct vibrato depth
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1572,11 +1574,13 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 				// Yes, vibrato goes backwards with old effects enabled!
 				if(m_dwSongFlags & SONG_ITOLDEFFECTS)
 				{
+					// Test case: vibrato-oldfx.it
 					vdepth = 5;
-					vdelta = -vdelta;
 				} else
 				{
+					// Test case: vibrato.it
 					vdepth = 6;
+					vdelta = -vdelta;
 				}
 			}
 			else
