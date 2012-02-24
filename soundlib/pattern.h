@@ -56,7 +56,9 @@ public:
 
 	bool Resize(const ROWINDEX newRowCount, const bool showDataLossWarning = true);
 
-	// Deallocates pattern data. 
+	// Allocate new pattern memory and replace old pattern data.
+	bool AllocatePattern(ROWINDEX rows);
+	// Deallocate pattern data.
 	void Deallocate();
 
 	// Removes all modcommands from the pattern.
@@ -94,7 +96,7 @@ public:
 	//Returns true on error.
 
 	// Static allocation / deallocation helpers
-	static MODCOMMAND* AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns);
+	static MODCOMMAND *AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns);
 	static void FreePattern(MODCOMMAND *pat);
 
 //END: INTERFACE METHODS

@@ -57,10 +57,10 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 
 	if (newRowCount > m_Rows)
 	{
-		MODCOMMAND *p = AllocatePattern(newRowCount, sndFile.m_nChannels);
+		MODCOMMAND *p = AllocatePattern(newRowCount, sndFile.GetNumChannels());
 		if (p)
 		{
-			memcpy(p, m_ModCommands, sndFile.m_nChannels*m_Rows*sizeof(MODCOMMAND));
+			memcpy(p, m_ModCommands, sndFile.GetNumChannels() * m_Rows * sizeof(MODCOMMAND));
 			FreePattern(m_ModCommands);
 			m_ModCommands = p;
 			m_Rows = newRowCount;
@@ -68,20 +68,21 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 	} else
 	{
 		bool bOk = true;
-		MODCOMMAND *p = m_ModCommands;
-		UINT ndif = (m_Rows - newRowCount) * sndFile.m_nChannels;
-		UINT npos = newRowCount * sndFile.m_nChannels;
+
 #ifdef MODPLUG_TRACKER
 		if(showDataLossWarning)
 		{
-			for (UINT i=0; i<ndif; i++)
+			// Check if any non-empty pattern cells would be lost when truncating rows at the bottom.
+			const MODCOMMAND *m = GetpModCommand(newRowCount, 0);
+			for(size_t numCommands = (m_Rows - newRowCount) * sndFile.GetNumChannels(); numCommands != 0; numCommands--, m++)
 			{
-				if (*((DWORD *)(p+i+npos)))
+				if(!m->IsEmpty())
 				{
 					bOk = false;
 					break;
 				}
 			}
+
 			if (!bOk)
 			{
 				cs.Leave();
@@ -92,12 +93,13 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 			}
 		}
 #endif // MODPLUG_TRACKER
+
 		if (bOk)
 		{
-			MODCOMMAND *pnew = AllocatePattern(newRowCount, sndFile.m_nChannels);
+			MODCOMMAND *pnew = AllocatePattern(newRowCount, sndFile.GetNumChannels());
 			if (pnew)
 			{
-				memcpy(pnew, m_ModCommands, sndFile.m_nChannels*newRowCount*sizeof(MODCOMMAND));
+				memcpy(pnew, m_ModCommands, sndFile.GetNumChannels() * newRowCount * sizeof(MODCOMMAND));
 				FreePattern(m_ModCommands);
 				m_ModCommands = pnew;
 				m_Rows = newRowCount;
@@ -122,10 +124,28 @@ void CPattern::ClearCommands()
 }
 
 
+bool CPattern::AllocatePattern(ROWINDEX rows)
+//-------------------------------------------
+{
+	MODCOMMAND *m = AllocatePattern(rows, GetNumChannels());
+	if(m != nullptr)
+	{
+		Deallocate();
+		m_ModCommands = m;
+		m_Rows = rows;
+		m_RowsPerBeat = m_RowsPerMeasure = 0;
+		return true;
+	} else
+	{
+		return false;
+	}
+
+}
+
 void CPattern::Deallocate()
 //-------------------------
 {
-	// Removed critical section as it can cause problems when destroying patterns in the CSoundFile constructor.
+	// Removed critical section as it can cause problems when destroying patterns in the CSoundFile destructor.
 	//BEGIN_CRITICAL();
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	FreePattern(m_ModCommands);
