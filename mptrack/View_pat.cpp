@@ -1918,7 +1918,10 @@ void CViewPattern::OnEditFindNext()
 		return;
 	}
 	BeginWaitCursor();
+
 	pSndFile = pModDoc->GetSoundFile();
+	EffectInfo effectInfo(*pSndFile);
+
 	nPatStart = m_nPattern;
 	nPatEnd = m_nPattern+1;
 	if (m_findReplace.dwFindFlags & PATSEARCH_FULLSEARCH)
@@ -1937,8 +1940,8 @@ void CViewPattern::OnEditFindNext()
 	bEffectEx = FALSE;
 	if (m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
 	{
-		UINT fxndx = pModDoc->GetIndexFromEffect(m_findReplace.cmdFind.command, m_findReplace.cmdFind.param);
-		bEffectEx = pModDoc->IsExtendedEffect(fxndx);
+		UINT fxndx = effectInfo.GetIndexFromEffect(m_findReplace.cmdFind.command, m_findReplace.cmdFind.param);
+		bEffectEx = effectInfo.IsExtendedEffect(fxndx);
 	}
 	for (UINT nPat=nPatStart; nPat<nPatEnd; nPat++)
 	{
@@ -2114,7 +2117,7 @@ void CViewPattern::OnEditFindNext()
 						// When there was a command "v24" and the user searched for v and replaced it by d.
 						// In that case, d24 wouldn't be a valid command.
 						DWORD minVal = 0, maxVal = 64;
-						if(GetDocument()->GetVolCmdInfo(GetDocument()->GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
+						if(effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
 						{
 							Limit(m->vol, (MODCOMMAND::VOL)minVal, (MODCOMMAND::VOL)maxVal);
 						}

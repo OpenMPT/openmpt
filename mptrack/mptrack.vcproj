@@ -241,6 +241,9 @@
 				RelativePath=".\draw_pat.cpp">
 			</File>
 			<File
+				RelativePath=".\EffectInfo.cpp">
+			</File>
+			<File
 				RelativePath=".\EffectVis.cpp">
 			</File>
 			<File
@@ -733,6 +736,9 @@
 			</File>
 			<File
 				RelativePath="..\Soundlib\Dlsbank.h">
+			</File>
+			<File
+				RelativePath=".\EffectInfo.h">
 			</File>
 			<File
 				RelativePath=".\EffectVis.h">

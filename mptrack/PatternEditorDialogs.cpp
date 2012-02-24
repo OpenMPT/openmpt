@@ -212,18 +212,18 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Volume Command
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL)
 	{
-		combo->InitStorage(m_pModDoc->GetNumVolCmds(), 15);
+		combo->InitStorage(effectInfo.GetNumVolCmds(), 15);
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		UINT count = m_pModDoc->GetNumVolCmds();
+		UINT count = effectInfo.GetNumVolCmds();
 		for (UINT n=0; n<count; n++)
 		{
-			if(m_pModDoc->GetVolCmdInfo(n, s) && s[0])
+			if(effectInfo.GetVolCmdInfo(n, s) && s[0])
 			{
 				combo->SetItemData(combo->AddString(s), n);
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = m_pModDoc->GetIndexFromVolCmd(m_nVolCmd);
+		UINT fxndx = effectInfo.GetIndexFromVolCmd(MODCOMMAND::VOLCMD(m_nVolCmd));
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -249,18 +249,18 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Command
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL)
 	{
-		combo->InitStorage(m_pModDoc->GetNumEffects(), 20);
+		combo->InitStorage(effectInfo.GetNumEffects(), 20);
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		UINT count = m_pModDoc->GetNumEffects();
+		UINT count = effectInfo.GetNumEffects();
 		for (UINT n=0; n<count; n++)
 		{
-			if(m_pModDoc->GetEffectInfo(n, s, true) && s[0])
+			if(effectInfo.GetEffectInfo(n, s, true) && s[0])
 			{
 				combo->SetItemData(combo->AddString(s), n);
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+		UINT fxndx = effectInfo.GetIndexFromEffect(MODCOMMAND::COMMAND(m_nCommand), MODCOMMAND::PARAM(m_nParam));
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -284,10 +284,10 @@ void CFindReplaceTab::ChangeEffect()
 		fxndx = combo->GetItemData(combo->GetCurSel());
 	}
 	// Update Param range
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL) && (m_pModDoc))
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL))
 	{
 		UINT oldcount = combo->GetCount();
-		UINT newcount = m_pModDoc->IsExtendedEffect(fxndx) ? 16 : 256;
+		UINT newcount = effectInfo.IsExtendedEffect(fxndx) ? 16 : 256;
 		if (oldcount != newcount)
 		{
 			CHAR s[16];
@@ -316,10 +316,10 @@ void CFindReplaceTab::ChangeVolCmd()
 		fxndx = combo->GetItemData(combo->GetCurSel());
 	}
 	// Update Param range
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL) && (m_pModDoc))
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL))
 	{
 		DWORD rangeMin, rangeMax;
-		if(!m_pModDoc->GetVolCmdInfo(fxndx, nullptr, &rangeMin, &rangeMax))
+		if(!effectInfo.GetVolCmdInfo(fxndx, nullptr, &rangeMin, &rangeMax))
 		{
 			rangeMin = 0;
 			rangeMax = 64;
@@ -402,9 +402,9 @@ void CFindReplaceTab::OnOK()
 		}
 	}
 	// Volume Command
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL) && (m_pModDoc))
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL))
 	{
-		m_nVolCmd = m_pModDoc->GetVolCmdFromIndex(combo->GetItemData(combo->GetCurSel()));
+		m_nVolCmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(combo->GetCurSel()));
 	}
 	// Volume
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL)
@@ -413,11 +413,11 @@ void CFindReplaceTab::OnOK()
 	}
 	// Effect
 	int effectIndex = -1;
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL) && (m_pModDoc))
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL))
 	{
 		int n = -1; // unused parameter adjustment
 		effectIndex = combo->GetItemData(combo->GetCurSel());
-		m_nCommand = m_pModDoc->GetEffectFromIndex(effectIndex, n);
+		m_nCommand = effectInfo.GetEffectFromIndex(effectIndex, n);
 	}
 	// Param
 	m_nParam = 0;
@@ -428,7 +428,7 @@ void CFindReplaceTab::OnOK()
 		// Apply parameter value mask if required (e.g. SDx has mask D0).
 		if (effectIndex > -1)
 		{
-			m_nParam |= m_pModDoc->GetEffectMaskFromIndex(effectIndex);
+			m_nParam |= effectInfo.GetEffectMaskFromIndex(effectIndex);
 		}
 	}
 	// Min/Max channels
@@ -981,14 +981,14 @@ void CPageEditVolume::UpdateDialog()
 		}
 		combo->EnableWindow(TRUE);
 		combo->ResetContent();
-		UINT count = m_pModDoc->GetNumVolCmds();
+		UINT count = effectInfo.GetNumVolCmds();
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
 		combo->SetCurSel(0);
-		UINT fxndx = m_pModDoc->GetIndexFromVolCmd(m_nVolCmd);
+		UINT fxndx = effectInfo.GetIndexFromVolCmd(m_nVolCmd);
 		for (UINT i=0; i<count; i++)
 		{
 			CHAR s[64];
-			if (m_pModDoc->GetVolCmdInfo(i, s))
+			if (effectInfo.GetVolCmdInfo(i, s))
 			{
 				int k = combo->AddString(s);
 				combo->SetItemData(k, i);
@@ -1003,11 +1003,11 @@ void CPageEditVolume::UpdateRanges()
 //----------------------------------
 {
 	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
-	if ((slider) && (m_pModDoc))
+	if (slider != nullptr)
 	{
 		DWORD rangeMin = 0, rangeMax = 0;
-		LONG fxndx = m_pModDoc->GetIndexFromVolCmd(m_nVolCmd);
-		BOOL bOk = m_pModDoc->GetVolCmdInfo(fxndx, NULL, &rangeMin, &rangeMax);
+		LONG fxndx = effectInfo.GetIndexFromVolCmd(m_nVolCmd);
+		BOOL bOk = effectInfo.GetVolCmdInfo(fxndx, NULL, &rangeMin, &rangeMax);
 		if ((bOk) && (rangeMax > rangeMin))
 		{
 			slider->EnableWindow(TRUE);
@@ -1029,12 +1029,12 @@ void CPageEditVolume::OnVolCmdChanged()
 {
 	CComboBox *combo;
 	CSliderCtrl *slider;
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL) && (m_pModDoc))
+	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		int n = combo->GetCurSel();
 		if (n >= 0)
 		{
-			MODCOMMAND::VOLCMD volcmd = m_pModDoc->GetVolCmdFromIndex(combo->GetItemData(n));
+			MODCOMMAND::VOLCMD volcmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(n));
 			if (volcmd != m_nVolCmd)
 			{
 				m_nVolCmd = volcmd;
@@ -1089,13 +1089,13 @@ void CPageEditEffect::UpdateDialog()
 		} else
 		{
 			// process as effect
-			UINT numfx = m_pModDoc->GetNumEffects();
-			UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+			UINT numfx = effectInfo.GetNumEffects();
+			UINT fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
 			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
 			if (!m_nCommand) combo->SetCurSel(0);
 			for (UINT i=0; i<numfx; i++)
 			{
-				if (m_pModDoc->GetEffectInfo(i, s, true))
+				if (effectInfo.GetEffectInfo(i, s, true))
 				{
 					int k = combo->AddString(s);
 					combo->SetItemData(k, i);
@@ -1115,14 +1115,14 @@ void CPageEditEffect::UpdateRange(BOOL bSet)
 	if ((slider) && (m_pModDoc))
 	{
 		DWORD rangeMin = 0, rangeMax = 0;
-		LONG fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-		bool bEnable = ((fxndx >= 0) && (m_pModDoc->GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
+		LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
+		bool bEnable = ((fxndx >= 0) && (effectInfo.GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
 		if (bEnable)
 		{
 			slider->EnableWindow(TRUE);
 			slider->SetPageSize(1);
 			slider->SetRange(rangeMin, rangeMax);
-			DWORD pos = m_pModDoc->MapValueToPos(fxndx, m_nParam);
+			DWORD pos = effectInfo.MapValueToPos(fxndx, m_nParam);
 			if (pos > rangeMax) pos = rangeMin | (pos & 0x0F);
 			if (pos < rangeMin) pos = rangeMin;
 			if (pos > rangeMax) pos = rangeMax;
@@ -1140,17 +1140,11 @@ void CPageEditEffect::UpdateRange(BOOL bSet)
 void CPageEditEffect::UpdateValue(BOOL bSet)
 //------------------------------------------
 {
-	if (m_pModDoc)
-	{
-		CHAR s[128] = "";
-		LONG fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-		// -> CODE#0010
-		// -> DESC="add extended parameter mechanism to pattern effects"
-		//		if (fxndx >= 0) m_pModDoc->GetEffectNameEx(s, fxndx, m_nParam);
-		if (fxndx >= 0) m_pModDoc->GetEffectNameEx(s, fxndx, m_nParam * m_nMultiplier + m_nXParam);
-		// -! NEW_FEATURE#0010
-		SetDlgItemText(IDC_TEXT1, s);
-	}
+	CHAR s[128] = "";
+	LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
+	if (fxndx >= 0) effectInfo.GetEffectNameEx(s, fxndx, m_nParam * m_nMultiplier + m_nXParam);
+	SetDlgItemText(IDC_TEXT1, s);
+
 	if ((m_pParent) && (bSet)) m_pParent->UpdateEffect(m_nCommand, m_nParam);
 }
 
@@ -1160,14 +1154,14 @@ void CPageEditEffect::OnCommandChanged()
 {
 	CComboBox *combo;
 
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL) && (m_pModDoc))
+	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		BOOL bSet = FALSE;
 		int n = combo->GetCurSel();
 		if (n >= 0)
 		{
 			int param = -1, ndx = combo->GetItemData(n);
-			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, param) : 0;
+			m_nCommand = (ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, param) : 0;
 			if (param >= 0) m_nParam = static_cast<MODCOMMAND::PARAM>(param);
 			bSet = TRUE;
 		}
@@ -1181,13 +1175,13 @@ void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
 //-------------------------------------------------------
 {
 	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
-	if ((slider) && (m_pModDoc))
+	if (slider != nullptr)
 	{
-		LONG fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+		LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
 		if (fxndx >= 0)
 		{
 			int pos = slider->GetPos();
-			UINT param = m_pModDoc->MapPosToValue(fxndx, pos);
+			UINT param = effectInfo.MapPosToValue(fxndx, pos);
 			if (param != m_nParam)
 			{
 				m_nParam = static_cast<MODCOMMAND::PARAM>(param);
