@@ -1,5 +1,6 @@
 #pragma once
 #include "afxwin.h"
+#include "EffectInfo.h"
 class CViewPattern;
 //class CModScrollView;
 
@@ -35,6 +36,8 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//CFastBitmap m_Dib;
+
+	EffectInfo effectInfo;
 
 	CBitmap m_bGrid, m_bNodes, m_bPlayPos;
 	CBitmap *m_pbOldGrid, *m_pbOldNodes, *m_pbOldPlayPos;

@@ -439,6 +439,9 @@
     <ClCompile Include="..\soundlib\MIDIMacros.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EffectInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -775,6 +778,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\PlugInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

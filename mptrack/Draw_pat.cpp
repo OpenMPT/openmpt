@@ -9,6 +9,7 @@
 #include "ChannelManagerDlg.h"
 #include "../soundlib/tuningbase.h"
 #include "../common/StringFixer.h"
+#include "EffectInfo.h"
 #include <string>
 
 using std::string;
@@ -1525,6 +1526,8 @@ void CViewPattern::UpdateIndicator()
 	if ((pMainFrm) && (pModDoc))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		EffectInfo effectInfo(*pSndFile);
+
 		CHAR s[128];
 		CHANNELINDEX nChn;
 		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel() + 1);
@@ -1611,7 +1614,7 @@ void CViewPattern::UpdateIndicator()
 					} else
 					{
 						// "normal" volume command
-						if (!pModDoc->GetVolCmdInfo(pModDoc->GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
+						if (!effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
 					}
 					break;
 
@@ -1620,7 +1623,7 @@ void CViewPattern::UpdateIndicator()
 					// display effect command
 					if(!m->IsPcNote())
 					{
-						if (!pModDoc->GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
+						if (!effectInfo.GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
 					}
 					break;
 				}

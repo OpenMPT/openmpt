@@ -217,24 +217,6 @@ public:
 
 	void ActivateWindow();
 
-	// Effects Description
-	bool GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, UINT param, bool bXX = false, CHANNELINDEX nChn = CHANNELINDEX_INVALID); // bXX: Nxx: ...
-	UINT GetNumEffects() const;
-	bool GetEffectInfo(UINT ndx, LPSTR s, bool bXX = false, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
-	LONG GetIndexFromEffect(UINT command, UINT param);
-	MODCOMMAND::COMMAND GetEffectFromIndex(UINT ndx, int &refParam);
-	MODCOMMAND::COMMAND GetEffectFromIndex(UINT ndx);
-	UINT GetEffectMaskFromIndex(UINT ndx);
-	bool GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
-	BOOL IsExtendedEffect(UINT ndx) const;
-	UINT MapValueToPos(UINT ndx, UINT param);
-	UINT MapPosToValue(UINT ndx, UINT pos);
-	// Volume column effects description
-	UINT GetNumVolCmds() const;
-	LONG GetIndexFromVolCmd(UINT volcmd);
-	MODCOMMAND::VOLCMD GetVolCmdFromIndex(UINT ndx);
-	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
-
 	void SongProperties();
 
 	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }

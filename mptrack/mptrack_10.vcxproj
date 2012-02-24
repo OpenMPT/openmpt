@@ -192,6 +192,7 @@
     <ClCompile Include="dlg_misc.cpp" />
     <ClCompile Include="..\soundlib\dlsbank.cpp" />
     <ClCompile Include="draw_pat.cpp" />
+    <ClCompile Include="EffectInfo.cpp" />
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
@@ -332,6 +333,7 @@
     <ClInclude Include="..\soundlib\PlugInterface.h" />
     <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="Autotune.h" />
+    <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="MIDIMacroDialog.h" />
     <ClInclude Include="PatternRandomizer.h" />

@@ -13,6 +13,7 @@
 
 #include "dlg_misc.h"	// for keyboard control
 #include "Moddoc.h"		// for SplitKeyboardSettings
+#include "EffectInfo.h"
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -37,6 +38,7 @@ class CFindReplaceTab: public CPropertyPage
 protected:
 	bool m_bReplace;	// is this the replace tab?
 	CModDoc *m_pModDoc;
+	EffectInfo effectInfo;
 
 public:
 	UINT m_nNote, m_nInstr, m_nVolCmd, m_nVol, m_nCommand, m_nParam;
@@ -70,7 +72,7 @@ protected:
 	void ChangeVolCmd();
 
 public:
-	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc):CPropertyPage(nIDD) { m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
+	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc) : CPropertyPage(nIDD), effectInfo(*pModDoc->GetSoundFile()) { ASSERT(pModDoc != nullptr); m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -105,10 +107,10 @@ class CPatternPropertiesDlg: public CDialog
 {
 protected:
 	CModDoc *m_pModDoc;
-	UINT m_nPattern;
+	PATTERNINDEX m_nPattern;
 
 public:
-	CPatternPropertiesDlg(CModDoc *pModDoc, UINT nPat, CWnd *parent=NULL):CDialog(IDD_PATTERN_PROPERTIES, parent) { m_pModDoc = pModDoc; m_nPattern = nPat; }
+	CPatternPropertiesDlg(CModDoc *pModDoc, PATTERNINDEX nPat, CWnd *parent=NULL):CDialog(IDD_PATTERN_PROPERTIES, parent) { m_pModDoc = pModDoc; m_nPattern = nPat; }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -132,11 +134,13 @@ class CPageEditCommand: public CPropertyPage
 {
 protected:
 	CModDoc *m_pModDoc;
+	EffectInfo effectInfo;
 	CEditCommand *m_pParent;
 	bool m_bInitialized;
 
 public:
-	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id):CPropertyPage(id) { m_pModDoc = pModDoc; m_pParent = parent; m_bInitialized = false; }
+	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id) : CPropertyPage(id), m_pModDoc(pModDoc), effectInfo(*pModDoc->GetSoundFile()), m_pParent(parent), m_bInitialized(false) {};
+
 	virtual ~CPageEditCommand() {}
 	virtual BOOL OnInitDialog();
 	virtual void Init(MODCOMMAND&)=0;
@@ -176,8 +180,8 @@ protected:
 	bool m_bIsParamControl;
 
 public:
-	CPageEditVolume(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITVOLUME) {}
-	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = (m.IsPcNote()) ? true : false;}
+	CPageEditVolume(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITVOLUME) {};
+	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = m.IsPcNote(); };
 	void UpdateDialog();
 	void UpdateRanges();
 
@@ -211,7 +215,7 @@ public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = (m.IsPcNote()) ? true : false; m_nPlugin = m.instr; m_nPluginParam = MODCOMMAND::GetValueVolCol(m.volcmd, m.vol);}
+	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = MODCOMMAND::GetValueVolCol(m.volcmd, m.vol);}
 	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
 	// -! NEW_FEATURE#0010
 	void UpdateDialog();

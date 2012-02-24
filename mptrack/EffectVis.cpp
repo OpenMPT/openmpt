@@ -24,7 +24,7 @@
 // EffectVis dialog
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
-CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, UINT nchn, CModDoc* pModDoc, UINT pat)
+CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, UINT nchn, CModDoc* pModDoc, UINT pat) : effectInfo(*pModDoc->GetSoundFile())
 {
 	m_pViewPattern = pViewPattern;
 	m_dwStatus = 0x00;
@@ -38,7 +38,7 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, U
 	m_nLastDrawnRow	= -1;
 	m_nLastDrawnY = -1;
 	m_nOldPlayPos = UINT_MAX;
-	m_nFillEffect = m_pModDoc->GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
+	m_nFillEffect = effectInfo.GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
 	m_nAction=kAction_OverwriteFX;
 	m_templatePCNote.Set(NOTE_PCS, 1, 0, 0);
 
@@ -138,7 +138,7 @@ void CEffectVis::SetParamFromY(UINT row, long y)
 	{		
 		int param = ScreenYToFXParam(y);
 		// Cap the parameter value as appropriate, based on effect type (e.g. Zxx gets capped to [0x00,0x7F])
-		m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(pcmd[offset].command, param), param);
+		effectInfo.GetEffectFromIndex(effectInfo.GetIndexFromEffect(pcmd[offset].command, MODCOMMAND::PARAM(param)), param);
 		CriticalSection cs;
 		pcmd[offset].param = static_cast<BYTE>(param);
 	}	
@@ -733,7 +733,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	else 
 	{
 		paramValue = ScreenYToFXParam(point.y);
-		m_pModDoc->GetEffectInfo(m_pModDoc->GetIndexFromEffect(GetCommand(row), GetParam(row)), effectName, true);
+		effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(GetCommand(row), MODCOMMAND::PARAM(GetParam(row))), effectName, true);
 	}
 
 	wsprintf(status, "Pat: %d\tChn: %d\tRow: %d\tVal: %02X (%03d) [%s]",
@@ -792,19 +792,19 @@ BOOL CEffectVis::OnInitDialog()
 		// Otherwise, default to FX overwrite and
 		// use effect of first selected row as default effect type
 		m_nAction = kAction_OverwriteFX;
-		m_nFillEffect = m_pModDoc->GetIndexFromEffect(GetCommand(m_startRow), GetParam(m_startRow));
-		if (m_nFillEffect<0 || m_nFillEffect>=MAX_EFFECTS)
-			m_nFillEffect = m_pModDoc->GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
+		m_nFillEffect = effectInfo.GetIndexFromEffect(GetCommand(m_startRow), MODCOMMAND::PARAM(GetParam(m_startRow)));
+		if (m_nFillEffect < 0 || m_nFillEffect >= MAX_EFFECTS)
+			m_nFillEffect = effectInfo.GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
 	}
 
 
 	CHAR s[128];
-	UINT numfx = m_pModDoc->GetNumEffects();
+	UINT numfx = effectInfo.GetNumEffects();
 	m_cmbEffectList.ResetContent();
 	int k;
 	for (UINT i=0; i<numfx; i++)
 	{
-		if (m_pModDoc->GetEffectInfo(i, s, true))
+		if (effectInfo.GetEffectInfo(i, s, true))
 		{
 			k =m_cmbEffectList.AddString(s);
 			m_cmbEffectList.SetItemData(k, i);
@@ -844,7 +844,7 @@ void CEffectVis::MakeChange(int row, long y)
 			// Only set command if there isn't a command already at this row and it's not a PC note
 			if (!GetCommand(row) && !IsPcNote(row))
 			{ 
-				SetCommand(row, m_pModDoc->GetEffectFromIndex(m_nFillEffect));
+				SetCommand(row, effectInfo.GetEffectFromIndex(m_nFillEffect));
 			}
 			// Always set param
 			SetParamFromY(row, y);
@@ -852,7 +852,7 @@ void CEffectVis::MakeChange(int row, long y)
 	
 		case kAction_OverwriteFX: 
 			// Always set command and param. Blows away any PC notes.
-			SetCommand(row, m_pModDoc->GetEffectFromIndex(m_nFillEffect));
+			SetCommand(row, effectInfo.GetEffectFromIndex(m_nFillEffect));
 			SetParamFromY(row, y);
 			break;
 
