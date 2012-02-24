@@ -9,7 +9,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: SoundTouchDLL.cpp 65 2009-02-23 08:33:13Z oparviai $
+// $Id: SoundTouchDLL.cpp 96 2010-12-12 19:12:12Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -35,6 +35,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <windows.h>
+#include <string.h>
 #include "SoundTouchDLL.h"
 #include "soundtouch.h"
 
@@ -106,6 +107,16 @@ SOUNDTOUCHDLL_API const char *__stdcall soundtouch_getVersionString()
 {
     return SoundTouch::getVersionString();
 }
+
+
+/// Get SoundTouch library version string - alternative function for 
+/// environments that can't properly handle character string as return value
+SOUNDTOUCHDLL_API void __stdcall soundtouch_getVersionString2(char* versionString, int bufferSize)
+{
+    strncpy(versionString, SoundTouch::getVersionString(), bufferSize - 1);
+    versionString[bufferSize - 1] = 0;
+}
+
 
 /// Get SoundTouch library version Id
 SOUNDTOUCHDLL_API uint __stdcall soundtouch_getVersionId()
