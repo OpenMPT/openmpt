@@ -1,12 +1,3 @@
-/***********************************************
- *
- *  -------------  NOTE  -------------
- * 
- *  This file is modified version of the original SoundTouch file.
- *  Search for "OpenMPT_change" to see the modifications.
- *
-*/
-
 //////////////////////////////////////////////////////////////////////////////
 ///
 /// SoundTouch DLL wrapper - wraps SoundTouch routines into a Dynamic Load 
@@ -17,6 +8,9 @@
 /// SoundTouch WWW: http://www.surina.net/soundtouch
 ///
 ////////////////////////////////////////////////////////////////////////////////
+//
+// $Id: SoundTouchDLL.h 94 2010-12-12 18:28:49Z oparviai $
+//
 ////////////////////////////////////////////////////////////////////////////////
 //
 // License :
@@ -63,6 +57,10 @@ SOUNDTOUCHDLL_API void __stdcall soundtouch_destroyInstance(HANDLE h);
 
 /// Get SoundTouch library version string
 SOUNDTOUCHDLL_API const char *__stdcall soundtouch_getVersionString();
+
+/// Get SoundTouch library version string - alternative function for 
+/// environments that can't properly handle character string as return value
+SOUNDTOUCHDLL_API void __stdcall soundtouch_getVersionString2(char* versionString, int bufferSize);
 
 /// Get SoundTouch library version Id
 SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_getVersionId();
@@ -115,7 +113,7 @@ SOUNDTOUCHDLL_API void __stdcall soundtouch_flush(HANDLE h);
 /// the input of the object. Notice that sample rate _has_to_ be set before
 /// calling this function, otherwise throws a runtime_error exception.
 SOUNDTOUCHDLL_API void __stdcall soundtouch_putSamples(HANDLE h, 
-		// OpenMPT_change: float -> short.
+	// OpenMPT_change: float -> short.
         const short *samples,       ///< Pointer to sample buffer.
         unsigned int numSamples     ///< Number of samples in buffer. Notice
                                     ///< that in case of stereo-sound a single sample
@@ -153,7 +151,7 @@ SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_numUnprocessedSamples(HANDLE
 /// Used to reduce the number of samples in the buffer when accessing the sample buffer directly
 /// with 'ptrBegin' function.
 SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_receiveSamples(HANDLE h, 
-			// OpenMPT_change: float -> short.
+	// OpenMPT_change: float -> short.
             short *outBuffer,           ///< Buffer where to copy output samples.
             unsigned int maxSamples     ///< How many samples to receive at max.
             );

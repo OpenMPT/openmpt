@@ -65,8 +65,8 @@ LANGUAGE LANG_FINNISH, SUBLANG_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,5,0,0
- PRODUCTVERSION 1,5,0,0
+ FILEVERSION 1,6,0,1
+ PRODUCTVERSION 1,6,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -81,14 +81,14 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "Comments", "This is a slightly customized build of SoundTouch DLL for OpenMPT using INTEGER_SAMPLES."
+            VALUE "Comments", "SoundTouch Library licensed for 3rd party applications subject to LGPL license v2.1. Visit http://www.surina.net/soundtouch for more information about the SoundTouch library."
             VALUE "FileDescription", "SoundTouch Dynamic Link Library"
-            VALUE "FileVersion", "1, 5, 0, 0"
+            VALUE "FileVersion", "1, 6, 0, 1"
             VALUE "InternalName", "SoundTouch"
-            VALUE "LegalCopyright", "Copyright (C) Olli Parviainen 1999-2009"
-            VALUE "OriginalFilename", "OpenMPT_SoundTouch_i16.dll"
+            VALUE "LegalCopyright", "Copyright (C) Olli Parviainen 1999-2011"
+            VALUE "OriginalFilename", "SoundTouch.dll"
             VALUE "ProductName", " SoundTouch Dynamic Link Library"
-            VALUE "ProductVersion", "1, 5, 0, 0"
+            VALUE "ProductVersion", "1, 6, 0, 1"
         END
     END
     BLOCK "VarFileInfo"

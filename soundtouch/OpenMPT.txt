@@ -1,0 +1,5 @@
+Note: The SoundTouch package has pretty much been left untouched (pardon the pun),
+except for a small change in SoundTouchDLL.h:
+
+The "samples" parameter type of soundtouch_putSamples (line 116) has been changed
+from float to short.  
