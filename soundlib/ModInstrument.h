@@ -33,6 +33,13 @@ struct InstrumentEnvelope
 		MemsetZero(Ticks);
 		MemsetZero(Values);
 	}
+
+	// Convert envelope data between various formats.
+	void Convert(MODTYPE fromType, MODTYPE toType);
+
+	// Get envelope value at a given tick. Returns value in range [0.0, 1.0].
+	float GetValueFromPosition(int position) const;
+
 };
 
 // Instrument Struct
@@ -120,7 +127,7 @@ struct ModInstrument
 	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
 
 	// Get a reference to a specific envelope of this instrument
-	InstrumentEnvelope &GetEnvelope(enmEnvelopeTypes envType)
+	const InstrumentEnvelope &GetEnvelope(enmEnvelopeTypes envType) const
 	{
 		switch(envType)
 		{
@@ -132,6 +139,11 @@ struct ModInstrument
 		case ENV_PITCH:
 			return PitchEnv;
 		}
+	}
+
+	InstrumentEnvelope &GetEnvelope(enmEnvelopeTypes envType)
+	{
+		return const_cast<InstrumentEnvelope &>(static_cast<const ModInstrument &>(*this).GetEnvelope(envType));
 	}
 
 	// Get a set of all samples referenced by this instrument
@@ -150,5 +162,8 @@ struct ModInstrument
 
 		return referencedSamples;
 	}
+
+	// Translate instrument properties between two given formats.
+	void Convert(MODTYPE fromType, MODTYPE toType);
 
 };

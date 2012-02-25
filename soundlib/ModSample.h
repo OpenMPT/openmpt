@@ -45,4 +45,7 @@ struct ModSample
 	// Returns sample rate of the sample. The argument is needed because 
 	// the sample rate is obtained differently for different module types.
 	uint32 GetSampleRate(const MODTYPE type) const;
+
+	// Translate sample properties between two given formats.
+	void Convert(MODTYPE fromType, MODTYPE toType);
 };

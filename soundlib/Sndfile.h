@@ -325,7 +325,7 @@ public:
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
-	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentOrder); }
+	ORDERINDEX GetCurrentOrder() const { return m_nCurrentOrder; }
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
@@ -348,7 +348,7 @@ public:
 
 public:
 	//Returns song length in seconds.
-	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(eNoAdjust).duration + 1.0 : GetLength(eNoAdjust).duration + 0.5); }
+	DWORD GetSongTime() { return static_cast<DWORD>(GetLength(eNoAdjust).duration + 0.5); }
 
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT tempo, UINT speed, UINT additionalTicks = 0) const;
@@ -356,7 +356,7 @@ public:
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
-	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) != 0; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
+	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED | SONG_STEP)) != 0; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
 
@@ -433,11 +433,6 @@ public:
 	static void MODExx2S3MSxx(ModCommand *m); // Convert Exx to Sxx
 	static void S3MSxx2MODExx(ModCommand *m); // Convert Sxx to Exx
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
-
-	// Translate sample properties between two given formats.
-	void ConvertSample(SAMPLEINDEX sample, MODTYPE fromType, MODTYPE toType = MOD_TYPE_NONE);
-	// Translate instrument properties between two given formats.
-	void ConvertInstrument(INSTRUMENTINDEX instr, MODTYPE fromType, MODTYPE toType = MOD_TYPE_NONE);
 
 public:
 	// Real-time sound functions
@@ -523,6 +518,7 @@ protected:
 	void ProcessTremolo(ModChannel *pChn, int &vol);
 	void ProcessTremor(ModChannel *pChn, int &vol);
 
+	bool IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes env) const;
 	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol);
 	void ProcessPanningEnvelope(ModChannel *pChn);
 	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period);

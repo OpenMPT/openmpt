@@ -1063,14 +1063,28 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 }
 
 
+bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes env) const
+//--------------------------------------------------------------------------------------
+{
+	if(pChn->pModInstrument == nullptr)
+	{
+		return false;
+	}
+	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(env);
+
+	// IT Compatibility: S77/S79/S7B do not disable the envelope, they just pause the counter
+	return (((pChn->GetEnvelope(env).flags & ENV_ENABLED) || ((insEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER)))
+		&& insEnv.nNodes != 0);
+}
+
+
 void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 //----------------------------------------------------------------
 {
-	const ModInstrument *pIns = pChn->pModInstrument;
-
-	// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
-	if (((pChn->VolEnv.flags & ENV_ENABLED) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
+	if(IsEnvelopeProcessed(pChn, ENV_VOLUME))
 	{
+		const ModInstrument *pIns = pChn->pModInstrument;
+
 		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
@@ -1107,11 +1121,10 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
 //-------------------------------------------------------
 {
-	const ModInstrument *pIns = pChn->pModInstrument;
-
-	// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
-	if (((pChn->PanEnv.flags & ENV_ENABLED) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
+	if(IsEnvelopeProcessed(pChn, ENV_PANNING))
 	{
+		const ModInstrument *pIns = pChn->pModInstrument;
+
 		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->PanEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
@@ -1166,11 +1179,10 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
 void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 //------------------------------------------------------------------------
 {
-	const ModInstrument *pIns = pChn->pModInstrument;
-
-	// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
-	if ((pIns) && ((pChn->PitchEnv.flags & ENV_ENABLED) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
+	if(IsEnvelopeProcessed(pChn, ENV_PITCH))
 	{
+		const ModInstrument *pIns = pChn->pModInstrument;
+
 		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->PitchEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
@@ -1351,8 +1363,7 @@ void CSoundFile::IncrementPitchFilterEnvelopePosition(ModChannel *pChn)
 		if (pIns->PitchEnv.dwFlags & ENV_LOOP)
 		{
 			UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
-			//IT compatibility 24. Short envelope loops
-			if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
+			if (GetType() != MOD_TYPE_XM) pitchloopend++;
 			if (position >= pitchloopend)
 				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
 		}

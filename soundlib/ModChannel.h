@@ -102,7 +102,8 @@ typedef struct __declspec(align(32)) ModChannel_
 
 	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
 
-	ModChannelEnvInfo &GetEnvelope(enmEnvelopeTypes envType)
+	// Get a reference to a specific envelope of this channel
+	const ModChannelEnvInfo &GetEnvelope(enmEnvelopeTypes envType) const
 	{
 		switch(envType)
 		{
@@ -114,6 +115,11 @@ typedef struct __declspec(align(32)) ModChannel_
 		case ENV_PITCH:
 			return PitchEnv;
 		}
+	}
+
+	ModChannelEnvInfo &GetEnvelope(enmEnvelopeTypes envType)
+	{
+		return const_cast<ModChannelEnvInfo &>(static_cast<const ModChannel &>(*this).GetEnvelope(envType));
 	}
 
 	typedef UINT VOLUME;
