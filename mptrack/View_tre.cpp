@@ -1,3 +1,14 @@
+/*
+ * view_tre.cpp
+ * ------------
+ * Purpose: Tree view for managing open songs, sound files, file browser, ...
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "moddoc.h"
@@ -1566,7 +1577,7 @@ void CModTree::FillInstrumentLibrary()
 		SetItemImage(m_hInsLib, IMAGE_FOLDERSONG, IMAGE_FOLDERSONG);
 		for (UINT iIns=1; iIns<=m_SongFile.m_nInstruments; iIns++)
 		{
-			MODINSTRUMENT *pIns = m_SongFile.Instruments[iIns];
+			ModInstrument *pIns = m_SongFile.Instruments[iIns];
 			if (pIns)
 			{
 				lstrcpyn(szPath, pIns->name, 32);
@@ -1577,7 +1588,7 @@ void CModTree::FillInstrumentLibrary()
 		}
 		for (UINT iSmp=1; iSmp<=m_SongFile.m_nSamples; iSmp++)
 		{
-			const MODSAMPLE &sample = m_SongFile.GetSample(iSmp);
+			const ModSample &sample = m_SongFile.GetSample(iSmp);
 			lstrcpyn(szPath, m_SongFile.m_szNames[iSmp], 32);
 			if (sample.pSample)
 			{

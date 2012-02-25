@@ -1,5 +1,12 @@
-// MainFrm.cpp : implementation of the CMainFrame class
-//
+/*
+ * MainFrm.cpp
+ * -----------
+ * Purpose: Implementation of OpenMPT's main window code.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -13,8 +20,7 @@
 #include "vstplug.h"
 #include "KeyConfigDlg.h"
 #include "AutoSaver.h"
-#include "performancecounter.h"
-#include ".\mainfrm.h"
+#include "MainFrm.h"
 // -> CODE#0015
 // -> DESC="channels management dlg"
 #include "globals.h"
@@ -1056,7 +1062,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 				SAMPLEINDEX nSmp = m_dwNotifyType & 0xFFFF;
 				for (CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 				{
-					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
+					ModChannel *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
 					if ((nSmp) && (nSmp <= m_pSndFile->GetNumSamples()) && (pChn->nLength)
 					 && (pChn->pSample) && (pChn->pSample == m_pSndFile->GetSample(nSmp).pSample)
@@ -1071,7 +1077,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 				UINT nIns = m_dwNotifyType & 0xFFFF;
 				for (CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 				{
-					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
+					ModChannel *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
 					if ((nIns) && (nIns <= m_pSndFile->m_nInstruments) && (pChn->nLength)
 					 && (pChn->pModInstrument) && (pChn->pModInstrument == m_pSndFile->Instruments[nIns])
@@ -1083,7 +1089,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 						else if (m_dwNotifyType & MPTNOTIFY_PANENV)
 							notifyEnv = ENV_PANNING;
 
-						const MODCHANNEL_ENVINFO &chnEnv = pChn->GetEnvelope(notifyEnv);
+						const ModChannelEnvInfo &chnEnv = pChn->GetEnvelope(notifyEnv);
 
 						if (chnEnv.flags & ENV_ENABLED)
 						{
@@ -1105,7 +1111,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			{
 				for (UINT k=0; k<MAX_CHANNELS; k++)
 				{
-					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
+					ModChannel *pChn = &m_pSndFile->Chn[k];
 					UINT vul = pChn->nLeftVU;
 					UINT vur = pChn->nRightVU;
 					p->dwPos[k] = (vul << 8) | (vur);
@@ -1524,7 +1530,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	if (m_WaveFile.Patterns[0])
 	{
 		if (!nNote) nNote = NOTE_MIDDLEC;
-		MODCOMMAND *m = m_WaveFile.Patterns[0];
+		ModCommand *m = m_WaveFile.Patterns[0];
 		m[0].note = (BYTE)nNote;
 		m[0].instr = 1;
 		m[1].note = (BYTE)nNote;
@@ -1545,14 +1551,14 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 			{
 				if ((m_WaveFile.m_nSamples > 1) || (m_WaveFile.GetSample(1).uFlags & CHN_LOOP))
 				{
-					MODCOMMAND *m = m_WaveFile.Patterns[0];
+					ModCommand *m = m_WaveFile.Patterns[0];
 					m[32*4].note = NOTE_KEYOFF;
 					m[32*4+1].note = NOTE_KEYOFF;
 					m[63*4].note = NOTE_NOTECUT;
 					m[63*4+1].note = NOTE_NOTECUT;
 				} else
 				{
-					MODCOMMAND *m = m_WaveFile.Patterns[1];
+					ModCommand *m = m_WaveFile.Patterns[1];
 					if (m)
 					{
 						m[63*4].command = CMD_POSITIONJUMP;
@@ -1598,7 +1604,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 	if (m_WaveFile.Patterns[0])
 	{
 		if (!nNote) nNote = 5*12+1;
-		MODCOMMAND *m = m_WaveFile.Patterns[0];
+		ModCommand *m = m_WaveFile.Patterns[0];
 		m[0].note = (BYTE)nNote;
 		m[0].instr = 1;
 		m[1].note = (BYTE)nNote;

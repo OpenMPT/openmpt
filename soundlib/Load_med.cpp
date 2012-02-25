@@ -1,11 +1,13 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_med.cpp
+ * ------------
+ * Purpose: OctaMed MED module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -17,9 +19,6 @@ extern void Log(LPCSTR s, ...);
 #endif
 
 #define MED_MAX_COMMENT_LENGTH 5*1024 //: Is 5 kB enough?
-
-//////////////////////////////////////////////////////////
-// OctaMed MED file support (import only)
 
 // flags
 #define	MMD_FLAG_FILTERON	0x1
@@ -61,7 +60,7 @@ extern void Log(LPCSTR s, ...);
 #define	MMDTAG_FX_GROUPNAME	(MMDTAG_PTR|5)	// the Global Effects group shouldn't have name saved!
 #define	MMDTAG_FX_GRPNAMELEN 6	// namelen includes zero term.
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct tagMEDMODULEHEADER
 {
@@ -262,16 +261,16 @@ typedef struct tagMMD0EXP
 	DWORD tag_end;
 } MMD0EXP;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 
-static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
+static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 //---------------------------------------------------------------
 {
 	const BYTE bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
 
-	MODCOMMAND::COMMAND command = p->command;
+	ModCommand::COMMAND command = p->command;
 	UINT param = p->param;
 	switch(command)
 	{
@@ -471,7 +470,7 @@ static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
 		param = 0;
 	}
 	p->command = command;
-	p->param = static_cast<MODCOMMAND::PARAM>(param);
+	p->param = static_cast<ModCommand::PARAM>(param);
 }
 
 
@@ -614,7 +613,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	// Reading Samples
 	for (UINT iSHdr=0; iSHdr<m_nSamples; iSHdr++)
 	{
-		MODSAMPLE *pSmp = &Samples[iSHdr+1];
+		ModSample *pSmp = &Samples[iSHdr+1];
 		pSmp->nLoopStart = BigEndianW(pmsh->sample[iSHdr].rep) << 1;
 		pSmp->nLoopEnd = pSmp->nLoopStart + (BigEndianW(pmsh->sample[iSHdr].replen) << 1);
 		pSmp->nVolume = (pmsh->sample[iSHdr].svol << 2);
@@ -819,7 +818,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			tracks = pmb->numtracks;
 			if (!tracks) tracks = m_nChannels;
 			if(Patterns.Insert(iBlk, lines)) continue;
-			MODCOMMAND *p = Patterns[iBlk];
+			ModCommand *p = Patterns[iBlk];
 			LPBYTE s = (LPBYTE)(lpStream + dwPos + 2);
 			UINT maxlen = tracks*lines*3;
 			if (maxlen + dwPos > dwMemLength - 2) break;
@@ -884,7 +883,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 					}
 				}
 			}
-			MODCOMMAND *p = Patterns[iBlk];
+			ModCommand *p = Patterns[iBlk];
 			LPBYTE s = (LPBYTE)(lpStream + dwPos + 8);
 			UINT maxlen = tracks*lines*4;
 			if (maxlen + dwPos > dwMemLength - 8) break;

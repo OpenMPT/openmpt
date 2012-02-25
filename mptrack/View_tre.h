@@ -1,5 +1,15 @@
-#ifndef _VIEW_MODTREE_H_
-#define _VIEW_MODTREE_H_
+/*
+ * view_tre.h
+ * ----------
+ * Purpose: Tree view for managing open songs, sound files, file browser, ...
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 class CModDoc;
 class CModTree;
@@ -231,6 +241,3 @@ public:
 	afx_msg void OnKillFocus(CWnd* pNewWnd);	//rewbs.customKeys
 	afx_msg void OnSetFocus(CWnd* pOldWnd);		//rewbs.customKeys
 };
-
-
-#endif

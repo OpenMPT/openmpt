@@ -1,12 +1,21 @@
-#ifndef _CONTROL_SAMPLES_H_
-#define _CONTROL_SAMPLES_H_
+/*
+ * ctrl_smp.h
+ * ----------
+ * Purpose: Sample tab, upper panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 
-struct SELECTIONPOINTS
+#pragma once
+
+struct SampleSelectionPoints
 {
 	UINT nStart;
 	UINT nEnd;
-	bool bSelected;	// does sample selection exist or not?
+	bool selectionActive;	// does sample selection exist or not?
 };
 
 //=======================================
@@ -45,7 +54,7 @@ protected:
 	// can be used to invert phase.
 	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
 
-	SELECTIONPOINTS GetSelectionPoints();
+	SampleSelectionPoints GetSelectionPoints();
 	void SetSelectionPoints(UINT nStart, UINT nEnd);
 
 	void PropagateAutoVibratoChanges() const;
@@ -122,6 +131,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-#endif

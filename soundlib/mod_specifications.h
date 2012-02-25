@@ -1,5 +1,14 @@
-#ifndef MOD_SPECIFICATIONS_H
-#define MOD_SPECIFICATIONS_H
+/*
+ * mod_specifications.h
+ * --------------------
+ * Purpose: Mod specifications characterise the features of every editable module format in OpenMPT, such as the number of supported channels, samples, effects, etc...
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "Snd_defs.h"
 #include "modcommand.h"						// 
@@ -15,18 +24,18 @@ struct CModSpecifications
 	static MODTYPE ExtensionToType(LPCTSTR pszExt);
 
 	// Return true if format supports given note.
-	bool HasNote(MODCOMMAND::NOTE note) const;
-	bool HasVolCommand(MODCOMMAND::VOLCMD volcmd) const;
-	bool HasCommand(MODCOMMAND::COMMAND cmd) const;
+	bool HasNote(ModCommand::NOTE note) const;
+	bool HasVolCommand(ModCommand::VOLCMD volcmd) const;
+	bool HasCommand(ModCommand::COMMAND cmd) const;
 	// Return corresponding effect letter for this format
-	char GetEffectLetter(MODCOMMAND::COMMAND cmd) const;
-	char GetVolEffectLetter(MODCOMMAND::VOLCMD cmd) const;
+	char GetEffectLetter(ModCommand::COMMAND cmd) const;
+	char GetVolEffectLetter(ModCommand::VOLCMD cmd) const;
 
 	// NOTE: If changing order, update all initializations below.
 	char fileExtension[6];	  // File extension without dot.
 	MODTYPE internalType;	  // Internal MODTYPE value
-	MODCOMMAND::NOTE noteMin; // Minimum note index (index starts from 1)
-	MODCOMMAND::NOTE noteMax; // Maximum note index (index starts from 1)
+	ModCommand::NOTE noteMin; // Minimum note index (index starts from 1)
+	ModCommand::NOTE noteMax; // Maximum note index (index starts from 1)
 	bool hasNoteCut;		  // True if format has notecut.
 	bool hasNoteOff;		  // True if format has noteoff.
 	bool hasNoteFade;		  // True if format has notefade.
@@ -406,7 +415,3 @@ const CModSpecifications itEx =
 static const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };
 
 } // namespace ModSpecs
-
-
-
-#endif

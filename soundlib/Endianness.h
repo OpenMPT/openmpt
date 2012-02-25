@@ -1,5 +1,14 @@
-#ifndef ENDIANNESS_H
-#define ENDIANNESS_H
+/*
+ * Endianness.h
+ * ------------
+ * Purpose: Code for deadling with endianness.
+ * Notes  : VC++ didn't like my compile-time endianness check - or rather, it didn't decide at compile time. ;_;
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 // Ending swaps:
 // BigEndian(x) may be used either to:
@@ -9,6 +18,7 @@
 // Similarly LittleEndian(x) converts known little endian format to format of current
 // endian architecture or value x in format of current architecture to little endian 
 // format.
+
 #ifdef PLATFORM_BIG_ENDIAN
 // PPC
 inline DWORD LittleEndian(DWORD x)	{ return ((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24); }
@@ -22,6 +32,3 @@ inline WORD BigEndianW(WORD x)	{ return (WORD)(((x >> 8) & 0xFF) | ((x << 8) & 0
 #define LittleEndian(x)			(x)
 #define LittleEndianW(x)		(x)
 #endif
-
-#endif // ENDIANNESS_H
-

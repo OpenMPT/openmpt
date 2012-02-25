@@ -4,14 +4,11 @@
  * Purpose: Headers for WAV reading / writing (WAV structs, FOURCCs, etc...)
  * Notes  : Some FOURCCs are also used by the MIDI/DLS routines.
  * Authors: OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef WAV_H
-#define WAV_H
-#pragma once
 
-#pragma pack(1)
+#pragma once
 
 // Standard IFF chunks IDs
 #define IFFID_FORM		0x4d524f46
@@ -42,6 +39,8 @@
 #define IFFID_xtra		0x61727478
 #define IFFID_cue		0x20657563
 
+
+#pragma pack(push, 1)
 
 typedef struct WAVEFILEHEADER
 {
@@ -149,6 +148,4 @@ typedef struct WAVCUEPOINT
 } WAVCUEPOINT;
 
 
-#pragma pack()
-
-#endif // WAV_H
+#pragma pack(pop)

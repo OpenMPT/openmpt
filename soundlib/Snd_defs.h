@@ -1,14 +1,15 @@
 /*
- * OpenMPT
- *
- * Snd_defs.h
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * Snd_Defs.h
+ * ----------
+ * Purpose: Basic definitions of data types, enums, etc. for the playback engine core.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-#ifndef SND_DEF_H
-#define SND_DEF_H
+
+#pragma once
 
 #include "../common/typedefs.h"
 
@@ -426,6 +427,3 @@ enum VibratoType
 	VIB_RAMP_DOWN,
 	VIB_RANDOM
 };
-
-
-#endif

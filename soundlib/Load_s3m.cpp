@@ -1,12 +1,14 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_s3m.cpp
+ * ------------
+ * Purpose: S3M (ScreamTracker 3) module loader / saver
+ * Notes  : This code is OLD and HORRIBLE!
+ * Authors: Olivier Lapicque
+ *          Adam Goode (endian and char fixes for PPC)
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -16,9 +18,6 @@
 #endif // MODPLUG_TRACKER
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
-//////////////////////////////////////////////////////
-// ScreamTracker S3M file support
 
 typedef struct tagS3MSAMPLESTRUCT
 {
@@ -74,7 +73,7 @@ enum
 	S3I_TYPE_ADMEL = 2,
 };
 
-void CSoundFile::S3MConvert(MODCOMMAND *m, bool bIT) const
+void CSoundFile::S3MConvert(ModCommand *m, bool bIT) const
 //--------------------------------------------------------
 {
 	UINT command = m->command;
@@ -220,7 +219,7 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 struct FixPixPlayPanning
 //======================
 {
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		if(m.command == CMD_MIDI)
 		{
@@ -464,7 +463,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 				UINT chn = b & 0x1F;
 				if (chn < m_nChannels)
 				{
-					MODCOMMAND *m = Patterns[iPat].GetpModCommand(row, chn);
+					ModCommand *m = Patterns[iPat].GetpModCommand(row, chn);
 					if (b & 0x20)
 					{
 						if(j + nInd + 2 >= dwMemLength) break;
@@ -672,13 +671,13 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		if (Patterns[i])
 		{
 			len = 2;
-			MODCOMMAND *p = Patterns[i];
+			ModCommand *p = Patterns[i];
 			for (UINT row=0; row<64; row++) if (row < Patterns[i].GetNumRows())
 			{
 				for (UINT j=0; j<m_nChannels; j++)
 				{
 					UINT b = j;
-					MODCOMMAND *m = &p[row*m_nChannels+j];
+					ModCommand *m = &p[row*m_nChannels+j];
 					UINT note = m->note;
 					UINT volcmd = m->volcmd;
 					UINT vol = m->vol;
@@ -745,7 +744,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	// Writing samples
 	for (i=1; i<=nbi; i++)
 	{
-		MODSAMPLE *pSmp = &Samples[i];
+		ModSample *pSmp = &Samples[i];
 		if (m_nInstruments)
 		{
 			pSmp = Samples;

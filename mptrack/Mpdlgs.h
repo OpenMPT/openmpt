@@ -1,5 +1,14 @@
-#ifndef _MODPLUGDLGS_
-#define _MODPLUGDLGS_
+/*
+ * MPDlgs.h
+ * --------
+ * Purpose: Implementation of various player setup dialogs.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #define NUMMIXRATE	16
 
@@ -168,5 +177,3 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif

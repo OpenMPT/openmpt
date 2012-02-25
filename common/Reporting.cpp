@@ -1,10 +1,10 @@
 /*
- *
  * Reporting.cpp
  * -------------
  * Purpose: A class for showing notifications, prompts, etc...
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 

@@ -1,14 +1,14 @@
 /*
- * Purpose: Load OKT (Oktalyzer) modules
- * Authors: Storlek (Original author - http://schismtracker.org/)
+ * Load_okt.cpp
+ * ------------
+ * Purpose: OKT (Oktalyzer) module loader
+ * Notes  : (currently none)
+ * Authors: Storlek (Original author - http://schismtracker.org/ - code ported with permission)
  *			Johannes Schultz (OpenMPT Port, tweaks)
- *
- * Thanks to Storlek for allowing me to use this code!
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-//////////////////////////////////////////////
-// Oktalyzer (OKT) module loader            //
-//////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
@@ -22,7 +22,7 @@
 #define OKTCHUNKID_PBOD 0x50424F44
 #define OKTCHUNKID_SBOD 0x53424F44
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 struct OKT_IFFCHUNK
 {
@@ -42,7 +42,7 @@ struct OKT_SAMPLE
 
 STATIC_ASSERT(sizeof(OKT_SAMPLE) == 32);
 
-#pragma pack()
+#pragma pack(pop)
 
 
 // just for keeping track of offsets and stuff...
@@ -62,7 +62,7 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 
 	for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+		ModSample &sample = pSndFile->GetSample(nSmp);
 		OKT_SAMPLE oktsmp;
 		memcpy(&oktsmp, lpStream + (nSmp - 1) * 32, sizeof(OKT_SAMPLE));
 
@@ -111,7 +111,7 @@ void Read_OKT_Pattern(const BYTE *lpStream, const DWORD dwMemLength, const PATTE
 		return;
 
 	const CHANNELINDEX nChns = pSndFile->GetNumChannels();
-	MODCOMMAND *mrow = pSndFile->Patterns[nPat], *m;
+	ModCommand *mrow = pSndFile->Patterns[nPat], *m;
 
 	for(ROWINDEX nRow = 0; nRow < nRows; nRow++, mrow += nChns)
 	{
@@ -409,7 +409,7 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, const DWORD dwMemLength)
 		if(nFileSmp >= samplePos.size())
 			break;
 
-		MODSAMPLE *pSmp = &Samples[nSmp];
+		ModSample *pSmp = &Samples[nSmp];
 		if(pSmp->nLength == 0)
 			continue;
 

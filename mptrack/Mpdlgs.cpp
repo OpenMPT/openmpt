@@ -1,3 +1,13 @@
+/*
+ * MPDlgs.cpp
+ * ----------
+ * Purpose: Implementation of various player setup dialogs.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "sndfile.h"
@@ -637,7 +647,7 @@ void COptionsPlayer::OnDefaultResampling()
 	
 }
 
-extern VOID SndMixInitializeTables();
+extern void SndMixInitializeTables();
 //end rewbs.resamplerConf
 void COptionsPlayer::OnOK()
 //-------------------------

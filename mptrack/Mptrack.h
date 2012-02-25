@@ -1,10 +1,14 @@
-// mptrack.h : main header file for the MPTRACK application
-//
+/*
+ * MPTrack.h
+ * ---------
+ * Purpose: OpenMPT core application class.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #pragma once
-#ifndef MPTRACK_H
-#define MPTRACK_H
-
 
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
@@ -348,7 +352,7 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray)
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
 
 // Append note names in range [noteStart, noteEnd] to given combobox. Index starts from 0.
-void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart, const MODCOMMAND::NOTE noteEnd);
+void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart, const ModCommand::NOTE noteEnd);
 
 // Append note names to combobox. If pSndFile != nullprt, appends only notes that are 
 // available in the module type. If nInstr is given, instrument specific note names are used instead of
@@ -356,7 +360,7 @@ void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart,
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile* const pSndFile = nullptr, const INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS);
 
 // Returns note name(such as "C-5") of given note. Regular notes are in range [1,MAX_NOTE].
-LPCTSTR GetNoteStr(const MODCOMMAND::NOTE);
+LPCTSTR GetNoteStr(const ModCommand::NOTE);
 
 ///////////////////////////////////////////////////
 // Tables
@@ -383,5 +387,3 @@ extern const LPCSTR szMidiGroupNames[17];		// 16 groups + Percussions
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // MPTRACK_H

@@ -1,5 +1,15 @@
-#ifndef _VIEW_INSTRUMENTS_H_
-#define _VIEW_INSTRUMENTS_H_
+/*
+ * view_ins.h
+ * ----------
+ * Purpose: Instrument tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #define INSSTATUS_DRAGGING		0x01
 #define INSSTATUS_NCLBTNDOWN	0x02
@@ -91,7 +101,7 @@ protected:
 	bool EnvToggleReleaseNode(int nPoint);
 
 	// Set envelope status
-	bool EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool enable, BYTE defaultValue, DWORD extraFlags = 0);
+	bool EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, DWORD extraFlags = 0);
 	bool EnvSetVolEnv(bool bEnable);
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);
@@ -119,8 +129,8 @@ protected:
 	void UpdateScrollSize();
 	void SetInstrumentModified();
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
-	MODINSTRUMENT *GetInstrumentPtr() const;
-	INSTRUMENTENVELOPE *GetEnvelopePtr() const;
+	ModInstrument *GetInstrumentPtr() const;
+	InstrumentEnvelope *GetEnvelopePtr() const;
 	UINT EnvInsertPoint(int nTick, int nValue);
 	bool EnvRemovePoint(UINT nPoint);
 	int TickToScreen(int nTick) const;
@@ -207,7 +217,3 @@ private:
 	WORD EnvGetReleaseNodeValue();
 	WORD EnvGetReleaseNodeTick();
 };
-
-
-#endif
-

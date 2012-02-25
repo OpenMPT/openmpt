@@ -1,15 +1,18 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
-*/
+ * Load_umx.cpp
+ * ------------
+ * Purpose: UMX (Unreal Music) module ripper
+ * Notes  : Obviously, this code only rips modules from older Unreal Engine games, such as Unreal 1, Unreal Tournament 1 and Deus Ex.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
 
-#define MODMAGIC_OFFSET	(20+31*30+130)
+#define MODMAGIC_OFFSET	(20 + 31 * 30 + 130)
 
 
 bool CSoundFile::ReadUMX(const BYTE *lpStream, const DWORD dwMemLength)

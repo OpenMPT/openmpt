@@ -1,5 +1,15 @@
-#ifndef _VIEW_PATTERNS_H_
-#define _VIEW_PATTERNS_H_
+/*
+ * view_pat.h
+ * ----------
+ * Purpose: Pattern tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "globals.h"
 
@@ -81,7 +91,7 @@ struct ModCommandPos
 // Find/Replace data
 struct FindReplaceStruct
 {
-	MODCOMMAND cmdFind, cmdReplace;			// Find/replace notes/instruments/effects
+	ModCommand cmdFind, cmdReplace;			// Find/replace notes/instruments/effects
 	DWORD dwFindFlags, dwReplaceFlags;		// PATSEARCH_XXX flags (=> PatternEditorDialogs.h)
 	CHANNELINDEX nFindMinChn, nFindMaxChn;	// Find in these channels (if PATSEARCH_CHANNEL is set)
 	signed char cInstrRelChange;			// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
@@ -126,8 +136,8 @@ protected:
 	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked;
 
-	MODCOMMAND m_PCNoteEditMemory;			// PC Note edit memory
-	static MODCOMMAND m_cmdOld;				// Quick cursor copy/paste data
+	ModCommand m_PCNoteEditMemory;			// PC Note edit memory
+	static ModCommand m_cmdOld;				// Quick cursor copy/paste data
 	static FindReplaceStruct m_findReplace;	// Find/replace data
 
 // -> CODE#0012
@@ -208,13 +218,13 @@ public:
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
 	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
-	void DrawVolumeCommand(int x, int y, const MODCOMMAND &mc, bool drawDefaultVolume);
+	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
 	void UpdateAllVUMeters(MPTNOTIFICATION *pnotify);
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
 	// True if default volume should be drawn for a given cell.
-	static bool DrawDefaultVolume(const MODCOMMAND *m) { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
+	static bool DrawDefaultVolume(const ModCommand *m) { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
 
 	//rewbs.customKeys
 	BOOL ExecuteCommand(CommandID command);
@@ -357,7 +367,7 @@ public:
 
 private:
 	void SetSplitKeyboardSettings();
-	bool HandleSplit(MODCOMMAND *p, int note);
+	bool HandleSplit(ModCommand *p, int note);
 	bool IsNoteSplit(int note) const;
 
 	CHANNELINDEX FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
@@ -414,7 +424,7 @@ private:
 
 	// Returns pointer to modcommand at given position. If the position is not valid, returns pointer
 	// to a dummy command.
-	MODCOMMAND* GetModCommand(CSoundFile &rSf, const ModCommandPos &pos);
+	ModCommand* GetModCommand(CSoundFile &rSf, const ModCommandPos &pos);
 
 	// Returns true if pattern editing is enabled.
 	bool IsEditingEnabled() const { return ((m_dwStatus & PATSTATUS_RECORD) != 0); }
@@ -439,9 +449,3 @@ private:
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
-
-
-#endif
-
-
-

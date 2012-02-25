@@ -1,5 +1,12 @@
-// MoveFXSlotDialog.cpp : implementation file
-//
+/*
+ * MoveFXSlotDialog.h
+ * ------------------
+ * Purpose: Implementationof OpenMPT's move plugin dialog.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -7,8 +14,6 @@
 #include "MoveFXSlotDialog.h"
 #include ".\movefxslotdialog.h"
 
-
-// CMoveFXSlotDialog dialog
 
 IMPLEMENT_DYNAMIC(CMoveFXSlotDialog, CDialog)
 CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd* pParent /*=NULL*/)

@@ -1,16 +1,17 @@
 /*
- * This source code is public domain.
+ * Load_gdm.cpp
+ * ------------
+ * Purpose: GDM (BWSB Soundsystem) module loader
+ * Notes  : This code is partly based on zilym's original code / specs (which are utterly wrong :P).
+ *          Thanks to the MenTaLguY for gdm.txt and ajs for gdm2s3m and some hints.
  *
- * Purpose: Load GDM (BWSB Soundsystem) modules
+ *          Hint 1: Most (all?) of the unsupported features were not supported in 2GDM / BWSB either.
+ *          Hint 2: Files will be played like their original formats would be played in MPT, so no
+ *          BWSB quirks including crashes and freezes are supported. :-P
  * Authors: Johannes Schultz
- *
- * This code is partly based on zilym's original code / specs (which are utterly wrong :P).
- * Thanks to the MenTaLguY for gdm.txt and ajs for gdm2s3m and some hints.
- *
- * Hint 1: Most (all?) of the unsupported features were not supported in 2GDM / BWSB either.
- * Hint 2: Files will be played like their original formats would be played in MPT, so no
- *         BWSB quirks including crashes and freezes are supported. :-P
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -18,7 +19,7 @@
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 struct GDMHEADER
 {
@@ -69,7 +70,7 @@ struct GDMSAMPLEHEADER
 	uint8  Pan;				// default pan
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 #define GDMHEAD_GDM_ 0xFE4D4447
 #define GDMHEAD_GMFS 0x53464D47
@@ -266,7 +267,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		for(ROWINDEX iRow = 0; iRow < 64; iRow++)
 		{
-			MODCOMMAND *p = Patterns[iPat].GetRow(iRow);
+			ModCommand *p = Patterns[iPat].GetRow(iRow);
 
 			while(true) // Zero byte = next row
 			{
@@ -279,7 +280,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				const UINT channel = bChannel & 0x1F;
 				if(channel >= m_nChannels) break; // Better safe than sorry!
 
-				MODCOMMAND *m = &p[channel];
+				ModCommand *m = &p[channel];
 
 				if(bChannel & 0x20)
 				{

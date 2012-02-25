@@ -1,14 +1,15 @@
 /*
  * load_j2b.cpp
  * ------------
- * Purpose: Load RIFF AM and RIFF AMFF modules (Galaxy Sound System).
+ * Purpose: RIFF AM and RIFF AMFF (Galaxy Sound System) module loader
  * Notes  : J2B is a compressed variant of RIFF AM and RIFF AMFF files used in Jazz Jackrabbit 2.
  *          It seems like no other game used the AM(FF) format.
- *          RIFF AM is the newer version of the format, generally following the RIFF standard closely.
+ *          RIFF AM is the newer version of the format, generally following the RIFF "standard" closely.
  * Authors: Johannes Schultz (OpenMPT port, reverse engineering + loader implementation of the instrument format)
  *          Chris Moeller (foo_dumb - this is almost a complete port of his code, thanks)
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -52,7 +53,7 @@
 // some flags are still missing... what is f.e. 0x8000?
 
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 // header for compressed j2b files
 struct J2BHEADER
@@ -185,7 +186,7 @@ struct AMCHUNK_SAMPLE
 	uint32 samplerate;
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 
 // And here are some nice lookup tables!
@@ -229,8 +230,8 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 	if(nChannels == 0)
 		return false;
 
-	MODCOMMAND *mrow = pSndFile->Patterns[nPat];
-	MODCOMMAND *m = mrow;
+	ModCommand *mrow = pSndFile->Patterns[nPat];
+	ModCommand *m = mrow;
 	ROWINDEX nRow = 0;
 
 	while((nRow < nRows) && (dwMemPos < dwMemLength))
@@ -351,7 +352,7 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 
 
 // Convert envelope data from a RIFF AMFF module (old format) to MPT envelope data.
-void Convert_RIFF_AMFF_Envelope(const uint8 flags, const uint8 numpoints, const uint8 sustainpoint, const uint8 loopstart, const uint8 loopend, const AMFFINST_ENVPOINT *envelope, INSTRUMENTENVELOPE *pMPTEnv)
+void Convert_RIFF_AMFF_Envelope(const uint8 flags, const uint8 numpoints, const uint8 sustainpoint, const uint8 loopstart, const uint8 loopend, const AMFFINST_ENVPOINT *envelope, InstrumentEnvelope *pMPTEnv)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(envelope == nullptr || pMPTEnv == nullptr)
@@ -387,7 +388,7 @@ void Convert_RIFF_AMFF_Envelope(const uint8 flags, const uint8 numpoints, const 
 
 
 // Convert envelope data from a RIFF AM module (new format) to MPT envelope data.
-void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, MODINSTRUMENT *instr, enmEnvelopeTypes env)
+void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, ModInstrument *instr, enmEnvelopeTypes env)
 //------------------------------------------------------------------------------------------------------
 {
 	if(pAMEnv == nullptr || instr == nullptr)
@@ -396,7 +397,7 @@ void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, MODINSTRUMENT *inst
 	if(pAMEnv->numpoints == 0xFF || pAMEnv->numpoints == 0x00)
 		return;
 
-	INSTRUMENTENVELOPE &mptEnv = instr->GetEnvelope(env);
+	InstrumentEnvelope &mptEnv = instr->GetEnvelope(env);
 
 	uint16 flags = LittleEndianW(pAMEnv->flags);
 	mptEnv.dwFlags = (flags & AMENV_ENABLED) ? ENV_ENABLED : 0;
@@ -553,12 +554,12 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				try
 				{
-					Instruments[nIns] = new MODINSTRUMENT();
+					Instruments[nIns] = new ModInstrument();
 				} catch(MPTMemoryException)
 				{
 					break;
 				}
-				MODINSTRUMENT *pIns = Instruments[nIns];
+				ModInstrument *pIns = Instruments[nIns];
 
 				m_nInstruments = max(m_nInstruments, nIns);
 
@@ -662,12 +663,12 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				try
 				{
-					Instruments[nIns] = new MODINSTRUMENT();
+					Instruments[nIns] = new ModInstrument();
 				} catch(MPTMemoryException)
 				{
 					break;
 				}
-				MODINSTRUMENT *pIns = Instruments[nIns];
+				ModInstrument *pIns = Instruments[nIns];
 
 				m_nInstruments = max(m_nInstruments, nIns);
 

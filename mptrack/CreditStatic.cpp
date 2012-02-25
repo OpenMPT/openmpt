@@ -1,5 +1,11 @@
-// CreditStatic.cpp : implementation file
-//
+/*
+ * CreditStatic.cpp
+ * ----------------
+ * Purpose: Implementation of scrolling credits control.
+ * Notes  : Ugly! :)
+ * Authors: Pel K. Txnder, http://www.codeguru.com/cpp/controls/staticctrl/article.php/c2903
+ */
+
 
 #include "stdafx.h"
 #include "CreditStatic.h"

@@ -4,11 +4,11 @@
  * Purpose: Interface class and helpers for plugin handling
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
-#ifndef PLUGINTERFACE_H
-#define PLUGINTERFACE_H
 
 // For VstInt32 and stuff - a stupid workaround.
 #ifndef NO_VST
@@ -134,5 +134,3 @@ typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
 
 class CSoundFile;
 typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CSoundFile*);
-
-#endif // PLUGINTERFACE_H

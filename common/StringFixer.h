@@ -5,13 +5,11 @@
  *          reading from module files, or for securing char arrays in general.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
-#ifndef STRINGFIXER_H
-#define STRINGFIXER_H
 #pragma once
-
 
 namespace StringFixer
 {
@@ -23,7 +21,7 @@ namespace StringFixer
 	//------------------------------------------
 	{
 		STATIC_ASSERT(size > 0);
-		buffer[size-1] = 0;
+		buffer[size - 1] = 0;
 	}
 
 
@@ -120,5 +118,3 @@ namespace StringFixer
 	}
 
 };
-
-#endif // STRINGFIXER_H

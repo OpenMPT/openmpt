@@ -83,7 +83,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib delayimp.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
@@ -189,7 +189,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib delayimp.lib wininet.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib"
 				OutputFile=".\Bin/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -421,6 +421,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\ModInstrument.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ModConvert.cpp"
 				>
 			</File>
@@ -469,18 +473,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OpenGLControl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\OpenGLDevice.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\OpenGLEditor.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\pattern.cpp"
 				>
 			</File>
@@ -494,10 +486,6 @@
 			</File>
 			<File
 				RelativePath=".\PatternGotoDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PerformanceCounter.cpp"
 				>
 			</File>
 			<File
@@ -1011,10 +999,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KeyboardSettings.h"
-				>
-			</File>
-			<File
 				RelativePath=".\KeyConfigDlg.h"
 				>
 			</File>
@@ -1059,7 +1043,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\ModChannel.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\modcommand.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ModInstrument.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ModSample.h"
 				>
 			</File>
 			<File
@@ -1095,18 +1091,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OpenGLControl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OpenGLDevice.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OpenGLEditor.h"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\pattern.h"
 				>
 			</File>
@@ -1120,10 +1104,6 @@
 			</File>
 			<File
 				RelativePath=".\PatternGotoDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PerformanceCounter.h"
 				>
 			</File>
 			<File

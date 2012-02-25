@@ -1,13 +1,13 @@
 /*
- *
  * SelectPluginDialog.cpp
  * ----------------------
- * Purpose: Implementation of the plugin selection dialog
+ * Purpose: Dialog for adding plugins to a song.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Mptrack.h"

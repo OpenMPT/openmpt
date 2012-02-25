@@ -1,7 +1,12 @@
 /*
- * Purpose: File tagging (ID3v2, RIFF + more in the future)
+ * tagging.cpp
+ * -----------
+ * Purpose: ID3v2.4 / RIFF tags tagging class (for mp3 / wav / etc. support)
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
-*/
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"

@@ -1,15 +1,15 @@
 /*
  * SampleEditorDialogs.h
  * ---------------------
- * Purpose: Header file for misc sample editor dialog functionality
+ * Purpose: Code for various dialogs that are used in the sample editor.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
-#ifndef SAMPLEEDITORDIALOGS_H
-#define SAMPLEEDITORDIALOGS_H
 
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
@@ -158,6 +158,3 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 };
-
-
-#endif

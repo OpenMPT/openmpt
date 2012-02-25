@@ -1,15 +1,13 @@
 /*
- * OpenMPT
- *
  * Tables.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
- *
- * Name              Date       Description:
- * Olivier Lapicque  --/--/--   Creator
- * Trevor Nunes      26/01/04   Removed __declspec directive, portability issue.
-*/
+ * ----------
+ * Purpose: Effect, interpolation, data and other pre-calculated tables.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include <math.h>
@@ -692,7 +690,7 @@ static void getdownsample2x(short int *psinc)
 
 
 
-VOID SndMixInitializeTables()
+void SndMixInitializeTables()
 {
 	CWindowedFIR::InitTable();
 	getsinc(gKaiserSinc, 9.6377, CMainFrame::GetSettings().gdWFIRCutoff);
@@ -706,4 +704,3 @@ VOID SndMixInitializeTables()
 
 
 #endif // not  FASTSOUNDLIB
-

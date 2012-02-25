@@ -1,3 +1,14 @@
+/*
+ * view_gen.cpp
+ * ------------
+ * Purpose: General tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -1351,14 +1362,14 @@ struct PlugIndexModifier
 {
 	PlugIndexModifier(PLUGINDEX nMin, PLUGINDEX nMax, int nDiff) :
 		m_nInstrMin(nMin), m_nInstrMax(nMax), m_nDiff(nDiff) {}
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		if (m.IsInstrPlug() && m.instr >= m_nInstrMin && m.instr <= m_nInstrMax)
-			m.instr = (MODCOMMAND::INSTR)((int)m.instr + m_nDiff);
+			m.instr = (ModCommand::INSTR)((int)m.instr + m_nDiff);
 	}
 	int m_nDiff;
-	MODCOMMAND::INSTR m_nInstrMin;
-	MODCOMMAND::INSTR m_nInstrMax;
+	ModCommand::INSTR m_nInstrMin;
+	ModCommand::INSTR m_nInstrMax;
 };
 
 

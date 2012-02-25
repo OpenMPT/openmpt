@@ -1,3 +1,13 @@
+/*
+ * vstplug.cpp
+ * -----------
+ * Purpose: Plugin handling (loading and processing plugins)
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include <uuids.h>
 #include <dmoreg.h>
@@ -3419,7 +3429,7 @@ void CBuzz2Vst::Process(float **inputs, float **outputs, long sampleframes)
 {
 	float *pinL = inputs[0], *pinR = inputs[1];
 	float *poutL = outputs[0], *poutR = outputs[1];
-	float Buffer[MIXBUFFERSIZE*2];		// Stereo interleaved
+	float Buffer[MIXBUFFERSIZE * 2];		// Stereo interleaved
 
 	// Re-interleave the stereo mix
 	X86_Interleave(pinL, pinR, Buffer, sampleframes);

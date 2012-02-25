@@ -1,14 +1,13 @@
 /*
  * ModConvert.h
  * ------------
- * Purpose: Headers for module conversion code.
+ * Purpose: Converting between various module formats.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef MODCONVERT_H
-#define MODCONVERT_H
+
 #pragma once
 
 // Warning types
@@ -38,5 +37,3 @@ enum enmWarnings
 	wPitchToTempoLock,
 	wNumWarnings
 };
-
-#endif // MODCONVERT_H

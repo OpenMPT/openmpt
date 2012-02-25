@@ -1,3 +1,13 @@
+/*
+ * ChannelManagerDlg.h
+ * -------------------
+ * Purpose: Dialog class for moving, removing, managing channels
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #define CM_BT_LEFT		1
@@ -83,6 +93,3 @@ public:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 };
-
-// -! NEW_FEATURE#0015
-

@@ -1,10 +1,13 @@
 /*
- * Purpose: Load IMF (Imago Orpheus) modules
- * Authors: Storlek (Original author - http://schismtracker.org/)
+ * Load_imf.cpp
+ * ------------
+ * Purpose: IMF (Imago Orpheus) module loader
+ * Notes  : Reverb and Chorus are not supported.
+ * Authors: Storlek (Original author - http://schismtracker.org/ - code ported with permission)
  *			Johannes Schultz (OpenMPT Port, tweaks)
- *
- * Thanks to Storlek for allowing me to use this code!
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -12,7 +15,7 @@
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 struct IMFCHANNEL
 {
@@ -93,7 +96,7 @@ struct IMFSAMPLE
 	uint32 dram;		// Reserved for internal usage
 	char is10[4];		// 'IS10'
 };
-#pragma pack()
+#pragma pack(pop)
 
 static BYTE imfEffects[] =
 {
@@ -145,7 +148,7 @@ static BYTE imfEffects[] =
 	CMD_NONE,			// 0x23 Zxx Reverb - XXX
 };
 
-static void ImportIMFEffect(MODCOMMAND *note)
+static void ImportIMFEffect(ModCommand *note)
 //-------------------------------------------
 {
 	uint8 n;
@@ -242,7 +245,7 @@ static void ImportIMFEffect(MODCOMMAND *note)
 	}
 }
 
-static void LoadIMFEnvelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfins, const int e)
+static void LoadIMFEnvelope(InstrumentEnvelope *env, const IMFINSTRUMENT *imfins, const int e)
 //--------------------------------------------------------------------------------------------
 {
 	UINT min = 0; // minimum tick value for next node
@@ -356,7 +359,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		uint8 mask, channel;
 		int row;
 		unsigned int lostfx = 0;
-		MODCOMMAND *note, junk_note;
+		ModCommand *note, junk_note;
 
 		ASSERT_CAN_READ(4);
 		length = LittleEndianW(*((uint16 *)(lpStream + dwMemPos)));
@@ -478,7 +481,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for(INSTRUMENTINDEX nIns = 0; nIns < hdr.insnum; nIns++)
 	{
 		IMFINSTRUMENT imfins;
-		MODINSTRUMENT *pIns;
+		ModInstrument *pIns;
 		ASSERT_CAN_READ(sizeof(IMFINSTRUMENT));
 		memcpy(&imfins, lpStream + dwMemPos, sizeof(IMFINSTRUMENT));
 		dwMemPos += sizeof(IMFINSTRUMENT);
@@ -493,7 +496,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		
 		try
 		{
-			pIns = new MODINSTRUMENT();
+			pIns = new ModInstrument();
 		} catch(MPTMemoryException)
 		{
 			continue;
@@ -537,7 +540,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(memcmp(imfsmp.is10, "IS10", 4) != 0)
 				return false;
 			
-			MODSAMPLE &sample = Samples[firstsample + nSmp];
+			ModSample &sample = Samples[firstsample + nSmp];
 
 			memcpy(sample.filename, imfsmp.filename, 12);
 			StringFixer::SpaceToNullStringFixed<12>(sample.filename);

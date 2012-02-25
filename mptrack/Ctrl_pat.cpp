@@ -1,3 +1,14 @@
+/*
+ * ctrl_pat.cpp
+ * ------------
+ * Purpose: Pattern tab, upper panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -282,7 +293,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CbnInstrument.ResetContent();
 			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(" No Instrument"), 0);
 			const INSTRUMENTINDEX nSplitIns = m_pModDoc->GetSplitKeyboardSettings().splitInstrument;
-			const MODCOMMAND::NOTE noteSplit = 1 + m_pModDoc->GetSplitKeyboardSettings().splitNote;
+			const ModCommand::NOTE noteSplit = 1 + m_pModDoc->GetSplitKeyboardSettings().splitNote;
 			const CString sSplitInsName = m_pModDoc->GetPatternViewInstrumentName(nSplitIns, true, false);
 			if (m_pSndFile->GetNumInstruments())
 			{
@@ -855,7 +866,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 					n *= pSndFile->GetNumChannels();
 					if(n)
 					{
-						memcpy(pSndFile->Patterns[nNewPat], pSndFile->Patterns[nCurPat], n * sizeof(MODCOMMAND));
+						memcpy(pSndFile->Patterns[nNewPat], pSndFile->Patterns[nCurPat], n * sizeof(ModCommand));
 					}
 					bSuccess = true;
 					// Mark as duplicated, so if this pattern is to be duplicated again, the same new pattern number is inserted into the order list.

@@ -1,18 +1,20 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *
-*/
+ * Load_stm.cpp
+ * ------------
+ * Purpose: STM (ScreamTracker 2) module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct tagSTMNOTE
 {
@@ -55,7 +57,7 @@ typedef struct tagSTMHEADER
 	BYTE patorder[128];		// Docs say 64 - actually 128
 } STMHEADER;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 
@@ -94,7 +96,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 	// Reading samples
 	for (UINT nIns=0; nIns<31; nIns++)
 	{
-		MODSAMPLE *pIns = &Samples[nIns+1];
+		ModSample *pIns = &Samples[nIns+1];
 		STMSAMPLE *pStm = &phdr->sample[nIns];  // STM sample data
 		memcpy(pIns->filename, pStm->filename, 13);
 		memcpy(m_szNames[nIns+1], pStm->filename, 12);
@@ -122,7 +124,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 		if (dwMemPos + 64*4*4 > dwMemLength) return true;
 		if(Patterns.Insert(nPat, 64))
 			return true;
-		MODCOMMAND *m = Patterns[nPat];
+		ModCommand *m = Patterns[nPat];
 		STMNOTE *p = (STMNOTE *)(lpStream + dwMemPos);
 		for (UINT n=0; n<64*4; n++, p++, m++)
 		{
@@ -179,7 +181,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 	// Reading Samples
 	for (UINT nSmp=1; nSmp<=31; nSmp++)
 	{
-		MODSAMPLE *pIns = &Samples[nSmp];
+		ModSample *pIns = &Samples[nSmp];
 		dwMemPos = (dwMemPos + 15) & (~15);
 		if (pIns->nLength)
 		{

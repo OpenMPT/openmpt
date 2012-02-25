@@ -2,21 +2,19 @@
  * MPTHacks.cpp
  * ------------
  * Purpose: Find out if MOD/XM/S3M/IT modules have MPT-specific hacks and fix them.
- * Notes  : This is not finished yet.
+ * Notes  : This is not finished yet. Still need to handle:
+ *          - Out-of-range sample pre-amp settings
+ *          - Comments in XM files
+ *          - Many auto-fix actions (so that the auto-fix mode can actually be used at some point!)
+ *          Maybe there should be two options if hacks are found: Convert the song to MPTM or remove hacks.
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Moddoc.h"
 #include "../soundlib/modsmp_ctrl.h"
-
-/* TODO:
-out-of range sample pre-amp
-comments in XM files
-AUTOFIX actions!
-
-maybe two options in program: convert to mptm / remove hacks from file!
-*/
 
 // Functor for fixing hacked patterns
 struct FixHackedPatterns
@@ -31,7 +29,7 @@ struct FixHackedPatterns
 		*foundHacks = false;
 	}
 
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		// definitely not perfect yet. :)
 		// Probably missing: Some extended effect parameters
@@ -84,7 +82,7 @@ struct FixHackedPatterns
 
 
 // Find and fix envelopes where two nodes are on the same tick.
-bool FindIncompatibleEnvelopes(INSTRUMENTENVELOPE &env, bool autofix)
+bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
 //-------------------------------------------------------------------
 {
 	bool found = false;
@@ -109,7 +107,7 @@ struct FixJumpCommands
 {
 	FixJumpCommands(const vector<PATTERNINDEX> &offsets) : jumpOffset(offsets) {};
 
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		if(m.command == CMD_POSITIONJUMP && m.param < jumpOffset.size())
 		{
@@ -335,7 +333,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	foundHere = false;
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
-		MODSAMPLE &smp = m_SndFile.GetSample(i);
+		ModSample &smp = m_SndFile.GetSample(i);
 		if(m_SndFile.GetType() == MOD_TYPE_XM && smp.GetNumChannels() > 1)
 		{
 			foundHere = foundHacks = true;
@@ -365,7 +363,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	bool foundEnvelopes = false;
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++)
 	{
-		MODINSTRUMENT *instr = m_SndFile.Instruments[i];
+		ModInstrument *instr = m_SndFile.Instruments[i];
 		if(instr == nullptr) continue;
 
 		// Extended instrument attributes

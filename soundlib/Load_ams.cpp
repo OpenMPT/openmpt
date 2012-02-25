@@ -1,27 +1,25 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *			OpenMPT dev(s)	(miscellaneous modifications)
+ * Load_ams.cpp
+ * ------------
+ * Purpose: AMS (Extreme's Tracker) module loader
  * Notes  : Extreme was renamed to Velvet Development at some point,
  *          and thus they also renamed their tracker from
  *          "Extreme's Tracker" to "Velvet Studio".
  *          While the two programs look rather similiar, the structure of both
  *          programs' "AMS" format is significantly different - Velvet Studio is a
  *          rather advanced tracker in comparison to Extreme's Tracker.
-*/
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-//////////////////////////////////////////////
-// AMS (Extreme's Tracker) module loader    //
-//////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct AMSFILEHEADER
 {
@@ -47,7 +45,7 @@ typedef struct AMSSAMPLEHEADER
 } AMSSAMPLEHEADER;
 
 
-#pragma pack()
+#pragma pack(pop)
 
 
 // Callback function for reading text
@@ -96,7 +94,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT nSmp=1; nSmp <= m_nSamples; nSmp++, dwMemPos += sizeof(AMSSAMPLEHEADER))
 	{
 		AMSSAMPLEHEADER *psh = (AMSSAMPLEHEADER *)(lpStream + dwMemPos);
-		MODSAMPLE *pSmp = &Samples[nSmp];
+		ModSample *pSmp = &Samples[nSmp];
 		pSmp->nLength = psh->length;
 		pSmp->nLoopStart = psh->loopstart;
 		pSmp->nLoopEnd = psh->loopend;
@@ -185,7 +183,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos += 4;
 		if ((len >= dwMemLength) || (dwMemPos + len > dwMemLength)) return true;
 		// Pattern has been inserted when reading pattern names
-		MODCOMMAND* m = Patterns[iPat];
+		ModCommand* m = Patterns[iPat];
 		if (!m) return true;
 		const BYTE *p = lpStream + dwMemPos;
 		UINT row = 0, i = 0;
@@ -292,7 +290,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 /////////////////////////////////////////////////////////////////////
 // AMS (Velvet Studio) 2.2 loader
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct AMS2FILEHEADER
 {
@@ -347,7 +345,7 @@ typedef struct AMS2SAMPLE
 } AMS2SAMPLE;
 
 
-#pragma pack()
+#pragma pack(pop)
 
 
 bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
@@ -395,10 +393,10 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 		dwMemPos += 5 + panenv->points*3;
 		pitchenv = (AMS2ENVELOPE *)(lpStream+dwMemPos);
 		dwMemPos += 5 + pitchenv->points*3;
-		MODINSTRUMENT *pIns;
+		ModInstrument *pIns;
 		try
 		{
-			pIns = new MODINSTRUMENT();
+			pIns = new ModInstrument();
 		} catch(MPTMemoryException)
 		{
 			return true;
@@ -448,7 +446,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 		// Read Samples
 		for (UINT ismp=0; ismp<pSmp->samples; ismp++)
 		{
-			MODSAMPLE *psmp = ((ismp < 16) && (smpmap[ismp])) ? &Samples[smpmap[ismp]] : NULL;
+			ModSample *psmp = ((ismp < 16) && (smpmap[ismp])) ? &Samples[smpmap[ismp]] : nullptr;
 			UINT smpnamelen = lpStream[dwMemPos];
 			if ((psmp) && (smpnamelen) && (smpnamelen <= 22))
 			{
@@ -537,7 +535,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 			UINT row = 0;
 			while ((pos < packedlen) && (row < numrows))
 			{
-				MODCOMMAND *m = Patterns[ipat] + row * m_nChannels;
+				ModCommand *m = Patterns[ipat] + row * m_nChannels;
 				UINT byte1 = psrc[pos++];
 				UINT ch = byte1 & 0x1F;
 				// Read Note + Instr

@@ -4,6 +4,7 @@
  * Purpose: Header file for .gz loader
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 #pragma once
@@ -14,7 +15,7 @@
 #include "../zlib/zlib.h"
 #include "../common/typedefs.h"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 struct GZheader
 {
@@ -33,7 +34,7 @@ struct GZtrailer
 	uint32 isize;	// Size of decompressed data
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 // magic bytes
 #define GZ_HMAGIC1		0x1F

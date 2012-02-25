@@ -1,5 +1,14 @@
-#ifndef CTUNING_H
-#define CTUNING_H
+/*
+ * tuning.h
+ * --------
+ * Purpose: Alternative sample tuning.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "tuningbase.h"
 
@@ -174,6 +183,3 @@ private:
 	
 
 }; //End: CTuningRTI declaration.
-
-
-#endif

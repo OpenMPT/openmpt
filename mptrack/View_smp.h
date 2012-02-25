@@ -1,5 +1,15 @@
-#ifndef _VIEW_SAMPLES_H_
-#define _VIEW_SAMPLES_H_
+/*
+ * view_smp.h
+ * ----------
+ * Purpose: Sample tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #define SMPSTATUS_MOUSEDRAG		0x01
 #define SMPSTATUS_KEYDOWN		0x02
@@ -64,7 +74,7 @@ protected:
 	// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
 	// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
 	// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
-	UINT GetAutoZoomLevel(const MODSAMPLE& smp);
+	UINT GetAutoZoomLevel(const ModSample& smp);
 
 	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
@@ -138,7 +148,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-#endif
-

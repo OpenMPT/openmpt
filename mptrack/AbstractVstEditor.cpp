@@ -1,4 +1,12 @@
-//rewbs.defaultPlugGUI
+/*
+ * AbstractVstEditor.cpp
+ * ---------------------
+ * Purpose: Common plugin editor interface class. This code is shared between custom and default plugin user interfaces.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -761,7 +769,7 @@ bool CAbstractVstEditor::CreateInstrument()
 		return false;
 	}
 
-	MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
+	ModInstrument *pIns = pSndFile->Instruments[nIns];
 	m_nInstrument = nIns;
 
 	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);

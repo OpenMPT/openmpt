@@ -5,11 +5,10 @@
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
-#ifndef TRACKERSETTINGS_H
-#define TRACKERSETTINGS_H
 #pragma once
 
 /////////////////////////////////////////////////////////////////////////
@@ -116,5 +115,3 @@ protected:
 	void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
 
 };
-
-#endif // TRACKERSETTINGS_H

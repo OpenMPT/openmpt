@@ -88,7 +88,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;opengl32.lib;glu32.lib;Rpcrt4.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/mptrack.exe</OutputFile>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -147,7 +147,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;opengl32.lib;glu32.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -170,6 +170,7 @@
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\Reporting.cpp" />
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="ACMConvert.cpp" />
     <ClCompile Include="ArrayUtils.cpp" />
@@ -225,14 +226,10 @@
     <ClCompile Include="mpt_midi.cpp" />
     <ClCompile Include="MPTHacks.cpp" />
     <ClCompile Include="mptrack.cpp" />
-    <ClCompile Include="OpenGLControl.cpp" />
-    <ClCompile Include="OpenGLDevice.cpp" />
-    <ClCompile Include="OpenGLEditor.cpp" />
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
-    <ClCompile Include="PerformanceCounter.cpp" />
     <ClCompile Include="..\soundlib\PlaybackEventer.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
     <ClCompile Include="SampleEditorDialogs.cpp" />
@@ -329,6 +326,9 @@
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\soundlib\ModChannel.h" />
+    <ClInclude Include="..\soundlib\ModInstrument.h" />
+    <ClInclude Include="..\soundlib\ModSample.h" />
     <ClInclude Include="..\soundlib\PluginMixBuffer.h" />
     <ClInclude Include="..\soundlib\PlugInterface.h" />
     <ClInclude Include="ACMConvert.h" />
@@ -376,7 +376,6 @@
     <ClInclude Include="globals.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="..\soundlib\IT_DEFS.H" />
-    <ClInclude Include="KeyboardSettings.h" />
     <ClInclude Include="KeyConfigDlg.h" />
     <ClInclude Include="mainbar.h" />
     <ClInclude Include="MainFrm.h" />
@@ -394,14 +393,10 @@
     <ClInclude Include="MoveFXSlotDialog.h" />
     <ClInclude Include="Mpdlgs.h" />
     <ClInclude Include="mptrack.h" />
-    <ClInclude Include="OpenGLControl.h" />
-    <ClInclude Include="OpenGLDevice.h" />
-    <ClInclude Include="OpenGLEditor.h" />
     <ClInclude Include="..\soundlib\pattern.h" />
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="PatternEditorDialogs.h" />
     <ClInclude Include="PatternGotoDialog.h" />
-    <ClInclude Include="PerformanceCounter.h" />
     <ClInclude Include="..\soundlib\PlaybackEventer.h" />
     <ClInclude Include="PSRatioCalc.h" />
     <ClInclude Include="Resource.h" />

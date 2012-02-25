@@ -1,3 +1,14 @@
+/*
+ * draw_pat.cpp
+ * ------------
+ * Purpose: Code for drawing the pattern data.
+ * Notes  : Also used for updating the status bar.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -436,14 +447,14 @@ void CViewPattern::DrawInstrument(int x, int y, UINT instr)
 }
 
 
-void CViewPattern::DrawVolumeCommand(int x, int y, const MODCOMMAND &mc, bool drawDefaultVolume)
+void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume)
 //----------------------------------------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 
 	if(mc.IsPcNote())
 	{	//If note is parameter control note, drawing volume command differently.
-		const int val = min(MODCOMMAND::maxColumnValue, mc.GetValueVolCol());
+		const int val = min(ModCommand::maxColumnValue, mc.GetValueVolCol());
 
 		m_Dib.TextBlt(x, y, 1, COLUMN_HEIGHT, pfnt->nClrX, pfnt->nClrY);
 		m_Dib.TextBlt(x + 1, y, pfnt->nVolCmdWidth, COLUMN_HEIGHT,
@@ -765,8 +776,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 {
 	BYTE bColSel[MAX_BASECHANNELS];
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
-	const MODCOMMAND m0 = MODCOMMAND::Empty();
-	const MODCOMMAND *pPattern = pSndFile->Patterns[nPattern];
+	const ModCommand m0 = ModCommand::Empty();
+	const ModCommand *pPattern = pSndFile->Patterns[nPattern];
 	CHAR s[256];
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
@@ -891,7 +902,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		{
 			int x, bk_col, tx_col, col_sel, fx_col;
 
-			const MODCOMMAND *m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
+			const ModCommand *m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
 			const bool drawDefaultVolume = DrawDefaultVolume(m);
@@ -899,7 +910,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			DWORD dwSpeedUpMask = 0;
 			if ((bSpeedUp) && (bColSel[col] & 0x40) && (pPattern) && (row))
 			{
-				const MODCOMMAND *mold = m - ncols;
+				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
 
 				if (m->note == mold->note) dwSpeedUpMask |= 0x01;
@@ -1017,7 +1028,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			{
 				const bool isPCnote = m->IsPcNote();
 				uint16 val = m->GetValueEffectCol();
-				if(val > MODCOMMAND::maxColumnValue) val = MODCOMMAND::maxColumnValue;
+				if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue;
 				fx_col = row_col;
 				if (!isPCnote && (m->command) && (m->command < MAX_EFFECTS) && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
@@ -1045,7 +1056,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					{
 						if (m->command)
 						{
-							MODCOMMAND::COMMAND command = m->command & 0x3F;
+							ModCommand::COMMAND command = m->command & 0x3F;
 							int n =	pSndFile->GetModSpecifications().GetEffectLetter(command);
 							ASSERT(n > ' ');
 							//if (n <= ' ') n = '?';
@@ -1540,7 +1551,7 @@ void CViewPattern::UpdateIndicator()
 			 && (m_dwBeginSel == m_dwEndSel) && (pSndFile->Patterns[m_nPattern])
 			 && (m_nRow < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
 			{
-				MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
+				ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 
 				switch (GetColTypeFromCursor(m_dwCursor))
 				{
@@ -1569,7 +1580,7 @@ void CViewPattern::UpdateIndicator()
 							{
 								if ((m->instr <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[m->instr]))
 								{
-									MODINSTRUMENT *pIns = pSndFile->Instruments[m->instr];
+									ModInstrument *pIns = pSndFile->Instruments[m->instr];
 									memcpy(sztmp, pIns->name, 32);
 									sztmp[32] = 0;
 									if ((m->note) && (m->note <= NOTE_MAX))

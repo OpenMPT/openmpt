@@ -136,9 +136,6 @@
     <ClCompile Include="..\soundlib\Fastmix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EffectVis.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -216,15 +213,6 @@
     </ClCompile>
     <ClCompile Include="Node.cpp">
       <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenGLControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenGLDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenGLEditor.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PatternRandomizerGUI.cpp">
       <Filter>Source Files\PatternRandomizer</Filter>
@@ -355,13 +343,7 @@
     <ClCompile Include="..\soundlib\PlaybackEventer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PerformanceCounter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\patternContainer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PSRatioCalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SampleEditorDialogs.cpp">
@@ -442,6 +424,15 @@
     <ClCompile Include="EffectInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\ModInstrument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectVis.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="PSRatioCalc.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -498,9 +489,6 @@
     <ClInclude Include="..\soundlib\Endianness.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EffectVis.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -526,9 +514,6 @@
       <Filter>Source Files\MixGraph</Filter>
     </ClInclude>
     <ClInclude Include="mainbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyboardSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainFrm.h">
@@ -563,15 +548,6 @@
     </ClInclude>
     <ClInclude Include="Node.h">
       <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLDevice.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PatternRandomizerGUIVolCmd.h">
       <Filter>Source Files\PatternRandomizer</Filter>
@@ -687,13 +663,7 @@
     <ClInclude Include="..\soundlib\pattern.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PerformanceCounter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\PlaybackEventer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PSRatioCalc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
@@ -782,6 +752,21 @@
     </ClInclude>
     <ClInclude Include="EffectInfo.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ModSample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ModInstrument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ModChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectVis.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="PSRatioCalc.h">
+      <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

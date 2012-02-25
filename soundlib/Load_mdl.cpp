@@ -1,14 +1,14 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
-*/
+ * Load_mdl.cpp
+ * ------------
+ * Purpose: DigiTracker (MDL) module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-//////////////////////////////////////////////
-// DigiTracker (MDL) module loader          //
-//////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
@@ -46,7 +46,7 @@ typedef struct MDLPATTERNDATA
 } MDLPATTERNDATA;
 
 
-void ConvertMDLCommand(MODCOMMAND *m, UINT eff, UINT data)
+void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
 //--------------------------------------------------------
 {
 	UINT command = 0, param = data;
@@ -123,7 +123,7 @@ void ConvertMDLCommand(MODCOMMAND *m, UINT eff, UINT data)
 
 
 // Convert MDL envelope data (env points and flags)
-void ConvertMDLEnvelope(const unsigned char *pMDLEnv, INSTRUMENTENVELOPE *pMPTEnv)
+void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEnv)
 //--------------------------------------------------------------------------------
 {
 	WORD nCurTick = 1;
@@ -146,10 +146,10 @@ void ConvertMDLEnvelope(const unsigned char *pMDLEnv, INSTRUMENTENVELOPE *pMPTEn
 }
 
 
-void UnpackMDLTrack(MODCOMMAND *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
+void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
 //-------------------------------------------------------------------------------------------------
 {
-	MODCOMMAND cmd, *m = pat;
+	ModCommand cmd, *m = pat;
 	UINT len = *((WORD *)lpTracks);
 	UINT pos = 0, row = 0, i;
 	lpTracks += 2;
@@ -377,12 +377,12 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 					UINT note = 12;
 					try
 					{
-						Instruments[nins] = new MODINSTRUMENT();
+						Instruments[nins] = new ModInstrument();
 					} catch(MPTMemoryException)
 					{
 						break;
 					}
-					MODINSTRUMENT *pIns = Instruments[nins];
+					ModInstrument *pIns = Instruments[nins];
 					memcpy(pIns->name, lpStream+dwPos+2, 32);
 					StringFixer::SpaceToNullStringFixed<31>(pIns->name);
 
@@ -430,7 +430,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			{
 				try
 				{
-					Instruments[j] = new MODINSTRUMENT();
+					Instruments[j] = new ModInstrument();
 				} catch(MPTMemoryException)
 				{
 				}
@@ -473,7 +473,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				UINT nins = lpStream[dwPos];
 				if ((nins >= MAX_SAMPLES) || (!nins)) continue;
 				if (m_nSamples < nins) m_nSamples = nins;
-				MODSAMPLE *pSmp = &Samples[nins];
+				ModSample *pSmp = &Samples[nins];
 				memcpy(m_szNames[nins], lpStream+dwPos+1, 31);
 				memcpy(pSmp->filename, lpStream+dwPos+33, 8);
 				StringFixer::SpaceToNullStringFixed<31>(m_szNames[nins]);
@@ -512,7 +512,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			dwPos = dwMemPos;
 			for (i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
 			{
-				MODSAMPLE *pSmp = &Samples[i];
+				ModSample *pSmp = &Samples[i];
 				UINT flags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 				if (!smpinfo[i])
 				{
@@ -548,7 +548,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			for (UINT chn=0; chn<m_nChannels; chn++) if ((patterntracks[ipat*32+chn]) && (patterntracks[ipat*32+chn] <= ntracks))
 			{
-				MODCOMMAND *m = Patterns[ipat] + chn;
+				ModCommand *m = Patterns[ipat] + chn;
 				UnpackMDLTrack(m, m_nChannels, Patterns[ipat].GetNumRows(), patterntracks[ipat*32+chn], lpStream+dwTrackPos);
 			}
 		}

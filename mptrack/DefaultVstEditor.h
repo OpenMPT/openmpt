@@ -1,4 +1,15 @@
+/*
+ * DefaultVstEditor.h
+ * ------------------
+ * Purpose: Implementation of the default plugin editor that is used if a plugin does not provide an own editor GUI.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
+
 #include "mptrack.h"
 #include "MainFrm.h"
 #include "VstPlug.h"

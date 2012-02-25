@@ -1,5 +1,15 @@
-#ifndef _MOD2WAVE_H_
-#define _MOD2WAVE_H_
+/*
+ * mod2wave.h
+ * ----------
+ * Purpose: Module to WAV conversion (dialog + conversion code).
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
+
 #include "tagging.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,5 +144,3 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 };
-
-#endif // _MOD2WAVE_H_

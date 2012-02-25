@@ -1,11 +1,13 @@
 /*
- * OpenMPT
- *
- * Snd_dsp.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * snd_dsp.cpp
+ * -----------
+ * Purpose: Mixing code for various DSPs (EQ, Mega-Bass, ...)
+ * Notes  : Ugh... This should really be removed at some point.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -69,8 +71,8 @@ static LONG SurroundBuffer[SURROUNDBUFFERSIZE];
 
 
 // Access the main temporary mix buffer directly: avoids an extra pointer
-extern int MixSoundBuffer[MIXBUFFERSIZE*4];
-extern int MixRearBuffer[MIXBUFFERSIZE*2];
+extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
+extern int MixRearBuffer[MIXBUFFERSIZE * 2];
 
 extern VOID InitializeReverb(BOOL bReset);
 extern VOID ProcessReverb(UINT nSamples);

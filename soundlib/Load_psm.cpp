@@ -1,22 +1,24 @@
 /*
- * Purpose: Load PSM16 and new PSM (ProTracker Studio) modules
+ * Load_psm.cpp
+ * ------------
+ * Purpose: PSM16 and new PSM (ProTracker Studio) module loader
+ * Notes  : This is partly based on http://www.shikadi.net/moddingwiki/ProTracker_Studio_Module
+ *          and partly reverse-engineered. Also thanks to the author of foo_dumb, the source code gave me a few clues. :)
+ *
+ *          What's playing?
+ *          - Epic Pinball - Perfect! (menu and order song are pitched up a bit in the PSM16 format for unknown reasons, but that shouldn't bother anyone)
+ *          - Extreme Pinball - Perfect! (subtunes included!)
+ *          - Jazz Jackrabbit - Perfect!
+ *          - One Must Fall! - Perfect! (it helped a lot to have the original MTM files...)
+ *          - Silverball - Seems to work (I don't have all tables so I can't compare)
+ *          - Sinaria - Seems to work (never played the game, so I can't really tell...)
+ *
+ *          Effect conversion should be about right...
+ *          If OpenMPT will ever support subtunes properly (with restart position, channel setup, etc. for each subtune), the subtune crap should be rewritten completely.
  * Authors: Johannes Schultz
- *
- * This is partly based on http://www.shikadi.net/moddingwiki/ProTracker_Studio_Module
- * and partly reverse-engineered. Also thanks to the author of foo_dumb, the source code
- * gave me a few clues. :)
- *
- * What's playing?
- *  - Epic Pinball - Perfect! (menu and order song are pitched up a bit in the PSM16 format for unknown reasons, but that shouldn't bother anyone)
- *  - Extreme Pinball - Perfect! (subtunes included!)
- *  - Jazz Jackrabbit - Perfect!
- *  - One Must Fall! - Perfect! (it helped a lot to have the original MTM files...)
- *  - Silverball - Seems to work (I don't have all tables so I can't compare)
- *  - Sinaria - Seems to work (never played the game, so I can't really tell...)
- *
- * Effect conversion should be about right...
- * If OpenMPT will ever support subtunes properly, the subtune crap should be rewritten completely.
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -24,7 +26,7 @@
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 ////////////////////////////////////////////////////////////
 //
@@ -100,7 +102,7 @@ struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 	uint16 C5Freq;
 	char   unknown5[16];	// 00 ... 00
 };
-#pragma pack()
+#pragma pack(pop)
 
 
 struct PSMSUBSONG // For internal use (pattern conversion)
@@ -301,7 +303,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 								case 0x04: // Restart position
 									{
-										uint16 nRestartChunk = LittleEndian(*(uint16 *)(lpStream + dwSettingsOffset + 1));
+										uint16 nRestartChunk = LittleEndianW(*(uint16 *)(lpStream + dwSettingsOffset + 1));
 										ORDERINDEX nRestartPosition = 0;
 										if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
 										subsong.restartPos += nRestartPosition;
@@ -529,7 +531,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 
 		// Read pattern.
-		MODCOMMAND *row_data;
+		ModCommand *row_data;
 		row_data = Patterns[nPat];
 
 		for(int nRow = 0; nRow < patternSize; nRow++)
@@ -544,7 +546,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(dwRowOffset + 1 > dwMemLength) return false;
 				BYTE mask = lpStream[dwRowOffset];
 				// Point to the correct channel
-				MODCOMMAND *m = row_data + min(m_nChannels - 1, lpStream[dwRowOffset + 1]);
+				ModCommand *m = row_data + min(m_nChannels - 1, lpStream[dwRowOffset + 1]);
 				dwRowOffset += 2;
 
 				if(mask & 0x80)
@@ -790,7 +792,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(subsongs[i].restartPos != ORDERINDEX_INVALID)
 			{
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
-				MODCOMMAND *row_data;
+				ModCommand *row_data;
 				row_data = Patterns[endPattern];
 				for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++, row_data++)
 				{
@@ -819,7 +821,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 #define PSM16_PSAH	0x48415350
 #define PSM16_PPAT	0x54415050
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 struct PSM16HEADER
 {
@@ -870,7 +872,7 @@ struct PSM16PATHEADER
 	uint8  numChans;	// 1 ... 32
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 
 bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
@@ -1026,7 +1028,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 					continue;
 				}
 
-				MODCOMMAND *rowData = Patterns[nPat].GetpModCommand(curRow, min(bChnFlag & 0x1F, m_nChannels - 1));
+				ModCommand *rowData = Patterns[nPat].GetpModCommand(curRow, min(bChnFlag & 0x1F, m_nChannels - 1));
 
 				if(bChnFlag & 0x80)
 				{

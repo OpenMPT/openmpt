@@ -1,3 +1,13 @@
+/*
+ * PatternContainer.cpp
+ * --------------------
+ * Purpose: Container class for managing patterns.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "patternContainer.h"
 #include "sndfile.h"
@@ -85,7 +95,7 @@ bool CPatternContainer::IsPatternEmpty(const PATTERNINDEX nPat) const
 	if(!IsValidPat(nPat))
 		return false;
 	
-	const MODCOMMAND *m = m_Patterns[nPat].m_ModCommands;
+	const ModCommand *m = m_Patterns[nPat].m_ModCommands;
 	for(size_t i = m_Patterns[nPat].GetNumChannels() * m_Patterns[nPat].GetNumRows(); i > 0; i--, m++)
 	{
 		if(!m->IsEmpty(true))

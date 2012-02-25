@@ -1,3 +1,14 @@
+/*
+ * ctrl_ins.cpp
+ * ------------
+ * Purpose: Instrument tab, upper panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -113,7 +124,7 @@ BOOL CNoteMapWnd::SetCurrentInstrument(CModDoc *pModDoc, UINT nIns)
 		{
 			try
 			{
-				pSndFile->Instruments[m_nInstrument] = new MODINSTRUMENT();
+				pSndFile->Instruments[m_nInstrument] = new ModInstrument();
 			} catch(MPTMemoryException)
 			{
 				return FALSE;
@@ -131,7 +142,7 @@ BOOL CNoteMapWnd::SetCurrentNote(UINT nNote)
 //------------------------------------------
 {
 	if (nNote == m_nNote) return TRUE;
-	if (!MODCOMMAND::IsNote(nNote + 1)) return FALSE;
+	if (!ModCommand::IsNote(nNote + 1)) return FALSE;
 	m_nNote = nNote;
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
@@ -168,7 +179,7 @@ void CNoteMapWnd::OnPaint()
 	{
 		bool bFocus = (::GetFocus() == m_hWnd);
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		CHAR s[64];
 		CRect rect;
 
@@ -195,7 +206,7 @@ void CNoteMapWnd::OnPaint()
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos] != NOTE_NONE))
 			{
 				UINT n = pIns->NoteMap[nPos];
-				if(MODCOMMAND::IsNote(n))
+				if(ModCommand::IsNote(n))
 				{
 					string temp = pSndFile->GetNoteName(n, m_nInstrument);
 					temp.resize(4);
@@ -306,7 +317,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 	{
 		CHAR s[64];
 		CSoundFile *pSndFile;
-		MODINSTRUMENT *pIns;
+		ModInstrument *pIns;
 		CInputHandler* ih = CMainFrame::GetInputHandler();
 		
 		pSndFile = m_pModDoc->GetSoundFile();
@@ -345,7 +356,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 				if(pSndFile->GetType() != MOD_TYPE_XM)
 				{
-					if(MODCOMMAND::IsNote(pIns->NoteMap[m_nNote]))
+					if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 					{
 						wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
 						AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
@@ -371,7 +382,7 @@ void CNoteMapWnd::OnMapCopyNote()
 {
 	if(m_pModDoc == nullptr) return;
 	CSoundFile *pSndFile;
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	
 	pSndFile = m_pModDoc->GetSoundFile();
 	pIns = pSndFile->Instruments[m_nInstrument];
@@ -397,7 +408,7 @@ void CNoteMapWnd::OnMapCopySample()
 {
 	if(m_pModDoc == nullptr) return;
 	CSoundFile *pSndFile;
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	
 	pSndFile = m_pModDoc->GetSoundFile();
 	pIns = pSndFile->Instruments[m_nInstrument];
@@ -424,7 +435,7 @@ void CNoteMapWnd::OnMapReset()
 {
 	if(m_pModDoc == nullptr) return;
 	CSoundFile *pSndFile;
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	
 	pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return;
@@ -465,7 +476,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 {
 	if(m_pModDoc == nullptr || nAmount == 0) return;
 	CSoundFile *pSndFile;
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 
 	pSndFile = m_pModDoc->GetSoundFile();
 	pIns = pSndFile->Instruments[m_nInstrument];
@@ -521,7 +532,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	MODINSTRUMENT *pIns = nullptr;
+	ModInstrument *pIns = nullptr;
 	if(pSndFile)
 	{
 		pIns = pSndFile->Instruments[m_nInstrument];
@@ -573,7 +584,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 //------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 	if ((pIns) && (m_nNote < NOTE_MAX))
 	{
 		if (!m_bIns && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
@@ -605,7 +616,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 //------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 	if ((pIns) && (m_nNote < NOTE_MAX))
 	{
 
@@ -709,7 +720,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	case VK_RETURN:
 		if (m_pModDoc && m_pModDoc->GetSoundFile())
 		{
-			MODINSTRUMENT *pIns = m_pModDoc->GetSoundFile()->Instruments[m_nInstrument];
+			ModInstrument *pIns = m_pModDoc->GetSoundFile()->Instruments[m_nInstrument];
 			if(pIns)
 			{
 				if (m_bIns)
@@ -1151,7 +1162,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 
 	if (dwHintMask & HINT_MODTYPE)
 	{
@@ -1381,7 +1392,7 @@ void CCtrlInstruments::UpdateFilterText()
 	if((m_nInstrument) && (m_pModDoc))
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		if(pIns)
 		{
 			CHAR s[32];
@@ -1457,7 +1468,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	EndWaitCursor();
 	if (bOk)
 	{
-		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
 			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
@@ -1733,7 +1744,7 @@ void CCtrlInstruments::OnInstrumentSave()
 //---------------------------------------
 {
 	TCHAR szFileName[_MAX_PATH] = "", drive[_MAX_DRIVE], path[_MAX_PATH], ext[_MAX_EXT];
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	
 	if (!pIns) return;
 	if (pIns->filename[0])
@@ -1816,7 +1827,7 @@ void CCtrlInstruments::OnNameChanged()
 		s[0] = 0;
 		m_EditName.GetWindowText(s, sizeof(s));
 		for (UINT i=strlen(s); i<=32; i++) s[i] = 0;
-		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 		if ((pIns) && (strncmp(s, pIns->name, 32)))
 		{
 			memcpy(pIns->name, s, 32);
@@ -1835,7 +1846,7 @@ void CCtrlInstruments::OnFileNameChanged()
 		s[0] = 0;
 		m_EditFileName.GetWindowText(s, sizeof(s));
 		for (UINT i=strlen(s); i<=12; i++) s[i] = 0;
-		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 		if ((pIns) && (strncmp(s, pIns->filename, 12)))
 		{
 			memcpy(pIns->filename, s, 12);
@@ -1848,7 +1859,7 @@ void CCtrlInstruments::OnFileNameChanged()
 void CCtrlInstruments::OnFadeOutVolChanged()
 //------------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int minval = 0, maxval = 32767;
@@ -1868,7 +1879,7 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 void CCtrlInstruments::OnGlobalVolChanged()
 //-----------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int nVol = GetDlgItemInt(IDC_EDIT8);
@@ -1885,7 +1896,7 @@ void CCtrlInstruments::OnGlobalVolChanged()
 void CCtrlInstruments::OnSetPanningChanged()
 //------------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		const BOOL b = m_CheckPanning.GetCheck();
@@ -1933,7 +1944,7 @@ void CCtrlInstruments::OnSetPanningChanged()
 void CCtrlInstruments::OnPanningChanged()
 //---------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int nPan = GetDlgItemInt(IDC_EDIT9);
@@ -1953,7 +1964,7 @@ void CCtrlInstruments::OnPanningChanged()
 void CCtrlInstruments::OnNNAChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		if (pIns->nNNA != m_ComboNNA.GetCurSel())
@@ -1968,7 +1979,7 @@ void CCtrlInstruments::OnNNAChanged()
 void CCtrlInstruments::OnDCTChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		if (pIns->nDCT != m_ComboDCT.GetCurSel())
@@ -1983,7 +1994,7 @@ void CCtrlInstruments::OnDCTChanged()
 void CCtrlInstruments::OnDCAChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		if (pIns->nDNA != m_ComboDCA.GetCurSel())
@@ -1998,7 +2009,7 @@ void CCtrlInstruments::OnDCAChanged()
 void CCtrlInstruments::OnMPRChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = GetDlgItemInt(IDC_EDIT10);
@@ -2025,7 +2036,7 @@ void CCtrlInstruments::OnMPRChanged()
 void CCtrlInstruments::OnMBKChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		WORD w = GetDlgItemInt(IDC_EDIT11);
@@ -2052,7 +2063,7 @@ void CCtrlInstruments::OnMBKChanged()
 void CCtrlInstruments::OnMCHChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = m_CbnMidiCh.GetItemData(m_CbnMidiCh.GetCurSel());
@@ -2067,7 +2078,7 @@ void CCtrlInstruments::OnMCHChanged()
 void CCtrlInstruments::OnResamplingChanged() 
 //------------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel());
@@ -2085,7 +2096,7 @@ void CCtrlInstruments::OnResamplingChanged()
 void CCtrlInstruments::OnMixPlugChanged()
 //---------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	PLUGINDEX nPlug = static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()));
 
 	if (pIns)
@@ -2158,7 +2169,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 void CCtrlInstruments::OnPPSChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = GetDlgItemInt(IDC_EDIT15);
@@ -2176,7 +2187,7 @@ void CCtrlInstruments::OnPPSChanged()
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 void CCtrlInstruments::OnAttackChanged()
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if(!IsLocked() && pIns){
 		int n = GetDlgItemInt(IDC_EDIT2);
 		if(n < 0) n = 0;
@@ -2202,7 +2213,7 @@ void CCtrlInstruments::OnAttackChanged()
 void CCtrlInstruments::OnPPCChanged()
 //-----------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = m_ComboPPC.GetCurSel();
@@ -2226,7 +2237,7 @@ void CCtrlInstruments::OnEnableCutOff()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
 			pIns->SetCutoff(pIns->GetCutoff(), bCutOff);
@@ -2259,7 +2270,7 @@ void CCtrlInstruments::OnEnableResonance()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
 			pIns->SetResonance(pIns->GetResonance(), bReso);
@@ -2286,7 +2297,7 @@ void CCtrlInstruments::OnEnableResonance()
 void CCtrlInstruments::OnFilterModeChanged() 
 //------------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		int instFiltermode = m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel());
@@ -2294,7 +2305,7 @@ void CCtrlInstruments::OnFilterModeChanged()
 			return;
 
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 
 		if (pIns)
 		{
@@ -2344,7 +2355,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 	if ((m_nInstrument) && (m_pModDoc) && (!IsLocked()) && (nCode != SB_ENDSCROLL))
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 
 		if (pIns)
 		{
@@ -2466,7 +2477,7 @@ void CCtrlInstruments::OnEditSampleMap()
 	if ((m_nInstrument) && (m_pModDoc))
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
 			CSampleMapDlg dlg(pSndFile, m_nInstrument, this);
@@ -2544,7 +2555,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 {
 	if (IsLocked() || m_pModDoc == NULL || m_pSndFile == NULL) return;
 
-	MODINSTRUMENT* pInstH = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument* pInstH = m_pSndFile->Instruments[m_nInstrument];
 	if(pInstH == 0)
 		return;
 
@@ -2622,7 +2633,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		|| m_nInstrument > m_pSndFile->GetNumInstruments()
 		|| m_pSndFile->Instruments[m_nInstrument] == nullptr) return;
 
-	MODINSTRUMENT* const pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument* const pIns = m_pSndFile->Instruments[m_nInstrument];
 	if(pIns->pTuning == nullptr)
 	{
 		m_ComboTuning.SetCurSel(0);
@@ -2691,7 +2702,7 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 void CCtrlInstruments::OnPluginVelocityHandlingChanged()
 //------------------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		BYTE n = static_cast<BYTE>(m_CbnPluginVelocityHandling.GetCurSel());
@@ -2707,7 +2718,7 @@ void CCtrlInstruments::OnPluginVelocityHandlingChanged()
 void CCtrlInstruments::OnPluginVolumeHandlingChanged()
 //----------------------------------------------
 {
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
 		BYTE n = static_cast<BYTE>(m_CbnPluginVolumeHandling.GetCurSel());
@@ -2729,7 +2740,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 	if(IsDlgButtonChecked(IDC_CHECK_PITCHTEMPOLOCK))
 	{
 		
-		MODINSTRUMENT* pIns = m_pSndFile->Instruments[m_nInstrument];
+		ModInstrument* pIns = m_pSndFile->Instruments[m_nInstrument];
 		if(!pIns)
 			return;
 
@@ -2842,6 +2853,6 @@ void CCtrlInstruments::UpdatePluginList()
 
 		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), nPlug);
 	}
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
 	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 }

@@ -1,12 +1,14 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_mod.cpp
+ * ------------
+ * Purpose: MOD / NST (ProTracker / NoiseTracker) module loader / saver
+ * Notes  : This code is OLD and HORRIBLE!
+ * Authors: Olivier Lapicque
+ *          Adam Goode (endian and char fixes for PPC)
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -15,10 +17,7 @@
 
 extern WORD ProTrackerPeriodTable[6*12];
 
-//////////////////////////////////////////////////////////
-// ProTracker / NoiseTracker MOD/NST file support
-
-void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
+void CSoundFile::ConvertModCommand(ModCommand *m) const
 //-----------------------------------------------------
 {
 	UINT command = m->command, param = m->param;
@@ -65,7 +64,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 }
 
 
-WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport) const
+WORD CSoundFile::ModSaveCommand(const ModCommand *m, const bool bXM, const bool bCompatibilityExport) const
 //---------------------------------------------------------------------------------------------------------
 {
 	UINT command = m->command, param = m->param;
@@ -197,7 +196,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 }
 
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct _MODSAMPLEHEADER
 {
@@ -217,7 +216,7 @@ typedef struct _MODMAGIC
     char Magic[4];
 } MODMAGIC, *PMODMAGIC;
 
-#pragma pack()
+#pragma pack(pop)
 
 bool IsMagic(const LPCSTR s1, const LPCSTR s2)
 {
@@ -234,7 +233,7 @@ struct FixMODPatterns
 		this->bPanning = bPanning;
 	}
 
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		// Fix VBlank MODs
 		if(m.command == CMD_TEMPO && this->bVBlank)
@@ -299,7 +298,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	for	(UINT i=1; i<=m_nSamples; i++)
 	{
 		PMODSAMPLEHEADER pms = (PMODSAMPLEHEADER)(lpStream+dwMemPos);
-		MODSAMPLE *psmp = &Samples[i];
+		ModSample *psmp = &Samples[i];
 		UINT loopstart, looplen;
 
 		memcpy(m_szNames[i], pms->name, 22);
@@ -436,7 +435,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			if (dwMemPos + nMaxChn * 256 > dwMemLength) break;
 
-			MODCOMMAND *m;
+			ModCommand *m;
 			if(isFLT8)
 			{
 				if((ipat & 1) == 0)
@@ -452,7 +451,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			}
 
 			size_t instrWithoutNoteCount = 0;	// For detecting PT1x mode
-			vector<MODCOMMAND::INSTR> lastInstrument(m_nChannels, 0);
+			vector<ModCommand::INSTR> lastInstrument(m_nChannels, 0);
 
 			const BYTE *p = lpStream + dwMemPos;
 
@@ -577,7 +576,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	// Writing instrument definition
 	for (UINT iins=1; iins<=31; iins++)
 	{
-		MODSAMPLE *pSmp = &Samples[insmap[iins]];
+		ModSample *pSmp = &Samples[insmap[iins]];
 		memcpy(bTab, m_szNames[iins],22);
 		inslen[iins] = pSmp->nLength;
 		// if the sample size is odd, we have to add a padding byte, as all sample sizes in MODs are even.
@@ -637,7 +636,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 		BYTE s[64*4];
 		if (Patterns[ipat])					//if pattern exists
 		{
-			MODCOMMAND *m = Patterns[ipat];
+			ModCommand *m = Patterns[ipat];
 			for (UINT i=0; i<64; i++) {				//for all rows 
 				if (i < Patterns[ipat].GetNumRows()) {			//if row exists
 					LPBYTE p=s;
@@ -699,7 +698,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	// Writing instruments
 	for (UINT ismpd = 1; ismpd <= 31; ismpd++) if (inslen[ismpd])
 	{
-		const MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
+		const ModSample *pSmp = &Samples[insmap[ismpd]];
 
 		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING

@@ -4,11 +4,11 @@
  * Purpose: Helper class for managing plugin audio input and output buffers.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
-#ifndef PLUGINMIXBUFFER_H
-#define PLUGINMIXBUFFER_H
 
 // At least this part of the code is ready for double-precision rendering... :>
 // buffer_t: Sample buffer type (float, double, ...)
@@ -145,5 +145,3 @@ public:
 	buffer_t **GetOutputBufferArray() const { return outputsArray; }
 
 };
-
-#endif // PLUGINMIXBUFFER_H

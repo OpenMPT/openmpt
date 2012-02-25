@@ -1,22 +1,31 @@
-#ifndef MODCOMMAND_H
-#define MODCOMMAND_H
+/*
+ * ModCommand.h
+ * ------------
+ * Purpose: Moduel Command (pattern content) header class and helpers. One Module Command corresponds to one pattern cell.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 // Note definitions
 #define NOTE_NONE			0
-#define NOTE_MIDDLEC		(5 * 12 + 1)
+#define NOTE_MIN			1
+#define NOTE_MAX			120  // Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
+#define NOTE_MIDDLEC		(5 * 12 + NOTE_MIN)
 #define NOTE_KEYOFF			0xFF // 255
 #define NOTE_NOTECUT		0xFE // 254
 #define NOTE_FADE			0xFD // 253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
 #define NOTE_PC				0xFC // 252, Param Control 'note'. Changes param value on first tick.
 #define NOTE_PCS			0xFB // 251, Param Control (Smooth) 'note'. Changes param value during the whole row.
-#define NOTE_MIN			1
-#define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
 #define NOTE_MIN_SPECIAL	NOTE_PCS
 
 
 //==============
-class MODCOMMAND
+class ModCommand
 //==============
 {
 public:
@@ -32,10 +41,10 @@ public:
 	enum { maxColumnValue = 999 };
 
 	// Returns empty modcommand.
-	static MODCOMMAND Empty() { MODCOMMAND m = {0,0,0,0,0,0}; return m; }
+	static ModCommand Empty() { ModCommand m = {0,0,0,0,0,0}; return m; }
 
-	bool operator==(const MODCOMMAND& mc) const { return (memcmp(this, &mc, sizeof(MODCOMMAND)) == 0); }
-	bool operator!=(const MODCOMMAND& mc) const { return !(*this == mc); }
+	bool operator==(const ModCommand& mc) const { return (memcmp(this, &mc, sizeof(ModCommand)) == 0); }
+	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
 
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
 
@@ -48,7 +57,7 @@ public:
 	void SetValueEffectCol(const uint16 val) { command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF); }
 
 	// Clears modcommand.
-	void Clear() { memset(this, 0, sizeof(MODCOMMAND)); }
+	void Clear() { memset(this, 0, sizeof(ModCommand)); }
 
 	// Returns true if modcommand is empty, false otherwise.
 	// If ignoreEffectValues is true (default), effect values are ignored are ignored if there is no effect command present.
@@ -90,7 +99,7 @@ public:
 	BYTE param;
 };
 
-typedef MODCOMMAND MODCOMMAND_ORIGINAL;
+typedef ModCommand MODCOMMAND_ORIGINAL;
 
 
 // Volume Column commands
@@ -152,6 +161,3 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define CMD_NOTESLIDEUP         35 // IMF Gxy
 #define CMD_NOTESLIDEDOWN       36 // IMF Hxy
 #define MAX_EFFECTS				37
-
-
-#endif

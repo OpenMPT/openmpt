@@ -1,10 +1,14 @@
 /*
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_xm.cpp
+ * -----------
+ * Purpose: XM (FastTracker II) module loader / saver
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          Adam Goode (endian and char fixes for PPC)
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -20,7 +24,7 @@
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
 
 
-#pragma pack(1)
+#pragma pack(push, 1)
 typedef struct tagXMFILEHEADER
 {
 	WORD xmversion;		// current: 0x0104
@@ -78,7 +82,7 @@ typedef struct tagXMSAMPLESTRUCT
 	BYTE res;
 	char name[22];
 } XMSAMPLESTRUCT;
-#pragma pack()
+#pragma pack(pop)
 
 
 
@@ -141,7 +145,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 		if (dwMemPos + dwSize + 4 > dwMemLength) return 0;
 		dwMemPos += dwSize;
 		if (dwMemPos + packsize > dwMemLength) return 0;
-		MODCOMMAND *p;
+		ModCommand *p;
 		if (ipatmap < MAX_PATTERNS)
 		{
 			if(pSndFile->Patterns.Insert(ipatmap, rows))
@@ -318,7 +322,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 
 		try
 		{
-			Instruments[iIns] = new MODINSTRUMENT();
+			Instruments[iIns] = new ModInstrument();
 		} catch(MPTMemoryException)
 		{
 			continue;
@@ -378,7 +382,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 						}
 						for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
 						{
-							MODINSTRUMENT *pks = Instruments[clrs];
+							ModInstrument *pks = Instruments[clrs];
 							for (size_t ks = 0; ks < CountOf(pks->Keyboard); ks++)
 							{
 								if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
@@ -412,7 +416,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 							}
 							for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
 							{
-								MODINSTRUMENT *pks = Instruments[clrs];
+								ModInstrument *pks = Instruments[clrs];
 								for (UINT ks=0; ks<128; ks++)
 								{
 									if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
@@ -430,7 +434,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 		m_nSamples = newsamples;
 		// Reading Volume Envelope
-		MODINSTRUMENT *pIns = Instruments[iIns];
+		ModInstrument *pIns = Instruments[iIns];
 		pIns->nMidiProgram = pih.type;
 		pIns->nFadeOut = xmsh.volfade;
 		if (xmsh.vtype & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
@@ -524,7 +528,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			UINT imapsmp = samplemap[ins];
 			memcpy(m_szNames[imapsmp], xmss.name, 22);
 			StringFixer::SpaceToNullStringFixed<22>(m_szNames[imapsmp]);
-			MODSAMPLE *pSmp = &Samples[imapsmp];
+			ModSample *pSmp = &Samples[imapsmp];
 			pSmp->nLength = (xmss.samplen > MAX_SAMPLE_LENGTH) ? MAX_SAMPLE_LENGTH : xmss.samplen;
 			pSmp->nLoopStart = xmss.loopstart;
 			pSmp->nLoopEnd = xmss.looplen;
@@ -813,7 +817,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	// Writing patterns
 	for (i = 0; i < nPatterns; i++) if (Patterns[i])
 	{
-		MODCOMMAND *p = Patterns[i];
+		ModCommand *p = Patterns[i];
 		UINT len = 0;
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPatNeedsFixing = (Patterns[i].GetNumRows() != 64);
@@ -941,7 +945,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmih.samples = 0;
 		if (m_nInstruments)
 		{
-			const MODINSTRUMENT *pIns = Instruments[i];
+			const ModInstrument *pIns = Instruments[i];
 			if (pIns)
 			{
 				memcpy(xmih.name, pIns->name, 22);
@@ -1002,7 +1006,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		fwrite(&xmih, 1, sizeof(xmih), f);
 		if (smptable[0])
 		{
-			const MODSAMPLE &sample = Samples[smptable[0]];
+			const ModSample &sample = Samples[smptable[0]];
 			xmsh.vibtype = sample.nVibType;
 			xmsh.vibsweep = min(sample.nVibSweep, 0xFF);
 			xmsh.vibdepth = min(sample.nVibDepth, 0x0F);
@@ -1017,7 +1021,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			XMSAMPLESTRUCT xmss;
 			MemsetZero(xmss);
 			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
-			const MODSAMPLE &sample = Samples[smptable[ins]];
+			const ModSample &sample = Samples[smptable[ins]];
 			xmss.samplen = sample.nLength;
 			xmss.loopstart = sample.nLoopStart;
 			xmss.looplen = sample.nLoopEnd - sample.nLoopStart;
@@ -1065,7 +1069,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		}
 		for (UINT ismpd=0; ismpd<xmih.samples; ismpd++)
 		{
-			const MODSAMPLE &sample = Samples[smptable[ismpd]];
+			const ModSample &sample = Samples[smptable[ismpd]];
 			if (sample.pSample)
 			{
 #ifndef NO_PACKING

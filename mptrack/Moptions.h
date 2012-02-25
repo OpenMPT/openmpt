@@ -1,5 +1,14 @@
-#ifndef MPTRACK_OPTIONS_H
-#define MPTRACK_OPTIONS_H
+/*
+ * Moptions.h
+ * ----------
+ * Purpose: Implementation of various setup dialogs.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once 
 
 class COptionsKeyboard;
 
@@ -86,7 +95,3 @@ protected:
 	afx_msg void OnPreviewChanged();
 	DECLARE_MESSAGE_MAP();
 };
-
-
-#endif
-

@@ -1,12 +1,11 @@
 /*
- *
  * TrackerSettings.cpp
  * -------------------
  * Purpose: Code for managing, loading and saving all applcation settings.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 

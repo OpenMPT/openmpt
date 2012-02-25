@@ -1,7 +1,7 @@
 /*
  * ModConvert.cpp
  * --------------
- * Purpose: Code for converting between various module formats.
+ * Purpose: Converting between various module formats.
  * Notes  : Incomplete list of MPTm-only features and extensions in the old formats:
  *          Features only available for MPTm:
  *           - User definable tunings.
@@ -30,10 +30,10 @@
  *           - Pattern names
  *           - Alternative tempo modes
  *           - For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
- *
  * Authors: OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "Stdafx.h"
 #include "Moddoc.h"
@@ -47,7 +47,7 @@
 
 
 // Trim envelopes and remove release nodes.
-void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, CSoundFile *pSndFile, std::bitset<wNumWarnings> &warnings)
+void UpdateEnvelopes(InstrumentEnvelope *mptEnv, CSoundFile *pSndFile, std::bitset<wNumWarnings> &warnings)
 //---------------------------------------------------------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
@@ -169,10 +169,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 	{
-		MODCOMMAND *m = m_SndFile.Patterns[nPat];
+		ModCommand *m = m_SndFile.Patterns[nPat];
 
 		// This is used for -> MOD/XM conversion
-		vector<vector<MODCOMMAND::PARAM> > cEffectMemory(GetNumChannels());
+		vector<vector<ModCommand::PARAM> > cEffectMemory(GetNumChannels());
 		for(size_t i = 0; i < GetNumChannels(); i++)
 		{
 			cEffectMemory[i].resize(MAX_EFFECTS, 0);
@@ -255,7 +255,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Do some sample conversion
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
 	{
-		MODSAMPLE &sample = m_SndFile.GetSample(nSmp);
+		ModSample &sample = m_SndFile.GetSample(nSmp);
 		GetSampleUndo().PrepareUndo(nSmp, sundo_none);
 
 		// Too many samples? Only 31 samples allowed in MOD format...
@@ -301,7 +301,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 	{
-		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
+		ModInstrument *pIns = m_SndFile.Instruments[nIns];
 		if(pIns == nullptr)
 		{
 			continue;

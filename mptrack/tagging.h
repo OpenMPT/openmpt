@@ -1,12 +1,21 @@
+/*
+ * tagging.h
+ * ---------
+ * Purpose: ID3v2.4 / RIFF tags tagging class (for mp3 / wav / etc. support)
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
-// ID3v2.4 / etc. tagging class (for mp3 / wav / etc. support)
 
 #include <string>
 #include "Wav.h"
 
 using std::string;
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v1 Genres
@@ -114,4 +123,4 @@ private:
 	uint32 totalID3v2Size;
 };
 
-#pragma pack()
+#pragma pack(pop)

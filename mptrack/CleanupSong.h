@@ -1,10 +1,12 @@
 /*
- *
  * CleanupSong.h
  * ---------------
- * Purpose: Header file for CleanupSong.cpp
- *
+ * Purpose: Dialog for cleaning up modules (rearranging, removing unused items).
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #pragma once
 

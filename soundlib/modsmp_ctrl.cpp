@@ -1,6 +1,12 @@
 /*
- * MODSAMPLE related functions.
+ * ModSmp_Ctrl.cpp
+ * ---------------
+ * Purpose: Basic sample editing code (resizing, adding silence, normalizing, ...).
+ * Notes  : Could be merged with ModSample.h / ModSample.cpp at some point.
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "modsmp_ctrl.h"
@@ -11,7 +17,7 @@
 namespace ctrlSmp
 {
 
-void ReplaceSample(MODSAMPLE &smp, const LPSTR pNewSample, const SmpLength nNewLength, CSoundFile* pSndFile)
+void ReplaceSample(ModSample &smp, const LPSTR pNewSample, const SmpLength nNewLength, CSoundFile* pSndFile)
 //----------------------------------------------------------------------------------------------------------
 {
 	LPSTR const pOldSmp = smp.pSample;
@@ -36,7 +42,7 @@ void ReplaceSample(MODSAMPLE &smp, const LPSTR pNewSample, const SmpLength nNewL
 }
 
 
-SmpLength InsertSilence(MODSAMPLE &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
+SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
 //-----------------------------------------------------------------------------------------------------------------------
 {
 	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
@@ -92,7 +98,7 @@ SmpLength InsertSilence(MODSAMPLE &smp, const SmpLength nSilenceLength, const Sm
 }
 
 
-SmpLength ResizeSample(MODSAMPLE &smp, const SmpLength nNewLength, CSoundFile* pSndFile)
+SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile* pSndFile)
 //--------------------------------------------------------------------------------------
 {
 	// Invalid sample size
@@ -140,10 +146,10 @@ namespace // Unnamed namespace for local implementation functions.
 
 
 template <class T>
-void AdjustEndOfSampleImpl(MODSAMPLE &smp)
+void AdjustEndOfSampleImpl(ModSample &smp)
 //----------------------------------------
 {
-	MODSAMPLE* const pSmp = &smp;
+	ModSample* const pSmp = &smp;
 	const UINT len = pSmp->nLength;
 	T* p = reinterpret_cast<T*>(pSmp->pSample);
 	if (pSmp->uFlags & CHN_STEREO)
@@ -169,7 +175,7 @@ void AdjustEndOfSampleImpl(MODSAMPLE &smp)
 } // unnamed namespace.
 
 
-bool AdjustEndOfSample(MODSAMPLE &smp, CSoundFile* pSndFile)
+bool AdjustEndOfSample(ModSample &smp, CSoundFile* pSndFile)
 //----------------------------------------------------------
 {
 	if ((!smp.nLength) || (!smp.pSample)) 
@@ -238,7 +244,7 @@ void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag, SAMPLEINDEX minSamp
 
 	for(SAMPLEINDEX i = minSample; i <= maxSample; i++)
 	{
-		MODSAMPLE &sample = rSndFile.GetSample(i);
+		ModSample &sample = rSndFile.GetSample(i);
 		switch(resetflag)
 		{
 		case SmpResetInit:
@@ -326,7 +332,7 @@ namespace
 
 
 // Remove DC offset
-float RemoveDCOffset(MODSAMPLE &smp,
+float RemoveDCOffset(ModSample &smp,
 					 SmpLength iStart,
 					 SmpLength iEnd,
 					 const MODTYPE modtype,
@@ -409,7 +415,7 @@ void ReverseSampleImpl(T* pStart, const SmpLength nLength)
 }
 
 // Reverse sample data
-bool ReverseSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
+bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
 //----------------------------------------------------------------------------------------
 {
 	if(smp.pSample == nullptr) return false;
@@ -449,7 +455,7 @@ void UnsignSampleImpl(T* pStart, const SmpLength nLength)
 }
 
 // Virtually unsign sample data
-bool UnsignSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
+bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
 //---------------------------------------------------------------------------------------
 {
 	if(smp.pSample == nullptr) return false;
@@ -483,7 +489,7 @@ void InvertSampleImpl(T* pStart, const SmpLength nLength)
 }
 
 // Invert sample data (flip by 180 degrees)
-bool InvertSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
+bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
 //---------------------------------------------------------------------------------------
 {
 	if(smp.pSample == nullptr) return false;
@@ -531,7 +537,7 @@ bool EnableSmartSampleRampingImpl(const T* pSample, const SmpLength smpCount)
 // Eventually, ramping will (hopefully) only be performed on "bad" samples.
 // The function returns true if ramping should be forced off, false if it can stay enabled.
 // TODO: It would be a lot nicer if this would pre-normalize samples.
-bool EnableSmartSampleRamping(const MODSAMPLE &smp, SmpLength sampleOffset, const CSoundFile *pSndFile)
+bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, const CSoundFile *pSndFile)
 //-----------------------------------------------------------------------------------------------------
 {
 	// First two sample points are supposed to be 0 for unlooped MOD samples, so don't take them into account.
@@ -563,7 +569,7 @@ void XFadeSampleImpl(T* pStart, const SmpLength nOffset, SmpLength nFadeLength)
 }
 
 // X-Fade sample data to create smooth loop transitions
-bool XFadeSample(MODSAMPLE &smp, SmpLength iFadeLength, CSoundFile *pSndFile)
+bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile *pSndFile)
 //---------------------------------------------------------------------------
 {
 	if(smp.pSample == nullptr) return false;
@@ -601,7 +607,7 @@ void ConvertStereoToMonoImpl(T* pDest, const SmpLength length)
 
 
 // Convert a multichannel sample to mono (currently only implemented for stereo)
-bool ConvertToMono(MODSAMPLE &smp, CSoundFile *pSndFile)
+bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile)
 //------------------------------------------------------
 {
 	if(smp.pSample == nullptr || smp.nLength == 0 || smp.GetNumChannels() != 2) return false;
@@ -636,7 +642,7 @@ bool ConvertToMono(MODSAMPLE &smp, CSoundFile *pSndFile)
 namespace ctrlChn
 {
 
-void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
+void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 					LPCSTR pOldSample,
 					LPSTR pNewSample,
 					const SmpLength nNewLength,

@@ -1,6 +1,15 @@
-#ifndef _CONTROL_INSTRUMENTS_H_
-#define _CONTROL_INSTRUMENTS_H_
+/*
+ * ctrl_ins.h
+ * ----------
+ * Purpose: Instrument tab, upper panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
+
+#pragma once
 
 class CNoteMapWnd;
 class CCtrlInstruments;
@@ -184,6 +193,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-#endif

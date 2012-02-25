@@ -1,10 +1,10 @@
 /*
- *
  * ExceptionHandler.cpp
  * --------------------
- * Purpose: Code for handling crashes in OpenMPT.
+ * Purpose: Code for handling crashes (unhandled exceptions) in OpenMPT.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 

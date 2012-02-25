@@ -1,6 +1,15 @@
-#ifndef _CONTROL_COMMENTS_H_
-#define _CONTROL_COMMENTS_H_
+/*
+ * ctrl_com.h
+ * ----------
+ * Purpose: Song comments tab, upper panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
+
+#pragma once
 
 //========================================
 class CCtrlComments: public CModControlDlg
@@ -34,5 +43,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif

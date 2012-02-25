@@ -1,11 +1,16 @@
 /*
- * OpenMPT
- *
  * Fastmix.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * -----------
+ * Purpose: Mixer core for rendering samples, mixing plugins, etc...
+ * Notes  : If this is Fastmix.cpp, where is Slowmix.cpp? :)
+ *          This code is ugly like hell and you are probably not going to understand it
+ *          unless you have worked with OpenMPT for a long time - at least I didn't. :)
+ *          I guess that a lot of this could be refactored using inline functions.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -22,16 +27,16 @@
 #pragma bss_seg(".modplug")
 
 // Front Mix Buffer (Also room for interleaved rear mix)
-int MixSoundBuffer[MIXBUFFERSIZE*4];
+int MixSoundBuffer[MIXBUFFERSIZE * 4];
 
 // Reverb Mix Buffer
 #ifndef NO_REVERB
-int MixReverbBuffer[MIXBUFFERSIZE*2];
+int MixReverbBuffer[MIXBUFFERSIZE * 2];
 #endif
 
 #ifndef FASTSOUNDLIB
-int MixRearBuffer[MIXBUFFERSIZE*2];
-float MixFloatBuffer[MIXBUFFERSIZE*2];
+int MixRearBuffer[MIXBUFFERSIZE * 2];
+float MixFloatBuffer[MIXBUFFERSIZE * 2];
 #endif
 
 #pragma bss_seg()
@@ -57,7 +62,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 // Mixing Macros
 
 #define SNDMIX_BEGINSAMPLELOOP8\
-	register MODCHANNEL * const pChn = pChannel;\
+	register ModChannel * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
 	const signed char *p = (signed char *)(pChn->pCurrentSample+pChn->nPos);\
 	if (pChn->dwFlags & CHN_STEREO) p += pChn->nPos;\
@@ -65,7 +70,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 	do {
 
 #define SNDMIX_BEGINSAMPLELOOP16\
-	register MODCHANNEL * const pChn = pChannel;\
+	register ModChannel * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
 	const signed short *p = (signed short *)(pChn->pCurrentSample+(pChn->nPos*2));\
 	if (pChn->dwFlags & CHN_STEREO) p += pChn->nPos;\
@@ -381,10 +386,10 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 //////////////////////////////////////////////////////////
 // Interfaces
 
-typedef VOID (MPPASMCALL * LPMIXINTERFACE)(MODCHANNEL *, int *, int *);
+typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, int *, int *);
 
 #define BEGIN_MIX_INTERFACE(func)\
-	VOID MPPASMCALL func(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)\
+	VOID MPPASMCALL func(ModChannel *pChannel, int *pbuffer, int *pbufmax)\
 	{\
 		LONG nPos;
 
@@ -480,7 +485,7 @@ extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const 
 extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
 void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
-void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples);
+void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
 void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 #ifdef ENABLE_MMX
@@ -1361,7 +1366,7 @@ const LPMIXINTERFACE gpFastMixFunctionTable[2*16] =
 
 /////////////////////////////////////////////////////////////////////////
 
-static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples, bool bITBidiMode)
+static LONG MPPFASTCALL GetSampleCount(ModChannel *pChn, LONG nSamples, bool bITBidiMode)
 //---------------------------------------------------------------------------------------
 {
 	LONG nLoopStart = (pChn->dwFlags & CHN_LOOP) ? pChn->nLoopStart : 0;
@@ -1499,7 +1504,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
 	{
 		const LPMIXINTERFACE *pMixFuncTable;
-		MODCHANNEL * const pChannel = &Chn[ChnMix[nChn]];
+		ModChannel * const pChannel = &Chn[ChnMix[nChn]];
 		UINT nFlags, nMasterCh;
 		LONG nSmpCount;
 		int nsamples;
@@ -1662,7 +1667,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 	return nchused;
 }
 
-UINT CSoundFile::GetResamplingFlag(const MODCHANNEL *pChannel)
+UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 //------------------------------------------------------------
 {
 	if (pChannel->pModInstrument) {
@@ -2302,15 +2307,15 @@ done:
 }
 
 
-void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples)
+void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
 //----------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pChannel
 	mov edi, pBuffer
 	mov ecx, nSamples
-	mov eax, dword ptr [esi+MODCHANNEL.nROfs]
-	mov edx, dword ptr [esi+MODCHANNEL.nLOfs]
+	mov eax, dword ptr [esi+ModChannel.nROfs]
+	mov edx, dword ptr [esi+ModChannel.nLOfs]
 	or ecx, ecx
 	jz brkloop
 ofsloop:
@@ -2338,8 +2343,8 @@ ofsloop:
 	jnz ofsloop
 brkloop:
 	mov esi, pChannel
-	mov dword ptr [esi+MODCHANNEL.nROfs], eax
-	mov dword ptr [esi+MODCHANNEL.nLOfs], edx
+	mov dword ptr [esi+ModChannel.nROfs], eax
+	mov dword ptr [esi+ModChannel.nLOfs], edx
 	}
 }
 

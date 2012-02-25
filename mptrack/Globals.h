@@ -1,11 +1,14 @@
-// globals.h : interface of the CViewModTree class
-//
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * globals.h
+ * ---------
+ * Purpose: Implementation of various views of the tracker interface.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #pragma once
-#ifndef _MODGLOBALS_H_
-#define _MODGLOBALS_H_
-
 
 #ifndef WM_HELPHITTEST
 #define WM_HELPHITTEST		0x366
@@ -230,5 +233,3 @@ protected:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif

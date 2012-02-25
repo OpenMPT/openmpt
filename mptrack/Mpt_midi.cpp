@@ -1,3 +1,13 @@
+/*
+ * MPT_MIDI.cpp
+ * ------------
+ * Purpose: MIDI Input handling code.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include <mmsystem.h>
 #include "mptrack.h"
@@ -332,4 +342,3 @@ bool CMIDIMapper::Swap(const size_t a, const size_t b)
 	}
 	else return true;
 }
-

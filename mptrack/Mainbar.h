@@ -1,5 +1,14 @@
-#ifndef _MAINBAR_H_
-#define _MAINBAR_H_
+/*
+ * mainbar.h
+ * ---------
+ * Purpose: Implementation of OpenMPT's window toolbar.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #define MIN_BASEOCTAVE		0
 #define MAX_BASEOCTAVE		8
@@ -138,6 +147,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-#endif

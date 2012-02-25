@@ -1,13 +1,13 @@
 /*
- *
  * SampleEditorDialogs.cpp
  * -----------------------
- * Purpose: Code for various dialogs that are used in the sample editor
+ * Purpose: Code for various dialogs that are used in the sample editor.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "mptrack.h"

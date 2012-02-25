@@ -1,15 +1,14 @@
 /*
  * Autotune.h
  * ----------
- * Purpose: Header file for sample auto tuning
+ * Purpose: Class for tuning a sample to a given base note automatically.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #pragma once
-#ifndef AUTOTUNE_H
-#define AUTOTUNE_H
 
 #include "../soundlib/Snd_defs.h"
 #include "resource.h"
@@ -19,7 +18,7 @@ class Autotune
 //============
 {
 protected:
-	MODSAMPLE &sample;
+	ModSample &sample;
 	MODTYPE modType;
 
 	SmpLength selectionStart, selectionEnd;
@@ -28,7 +27,7 @@ protected:
 	SmpLength sampleLength;
 
 public:
-	Autotune(MODSAMPLE &smp, MODTYPE type, SmpLength selStart, SmpLength selEnd) : sample(smp), modType(type), selectionStart(selStart), selectionEnd(selEnd)
+	Autotune(ModSample &smp, MODTYPE type, SmpLength selStart, SmpLength selEnd) : sample(smp), modType(type), selectionStart(selStart), selectionEnd(selEnd)
 	{
 		sampleData = nullptr;
 		sampleLength = 0;
@@ -79,5 +78,3 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 
 };
-
-#endif // AUTOTUNE_H

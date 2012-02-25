@@ -1,5 +1,13 @@
-#ifndef MISC_UTIL_H
-#define MISC_UTIL_H
+/*
+ * misc_util.h
+ * -----------
+ * Purpose: Various useful utility functions.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #include <sstream>
@@ -320,5 +328,3 @@ namespace Util { namespace sdOs
 	inline bool IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm) {return (_taccess(pszFilePath, fm) == 0);}
 
 } } // namespace Util::sdOs
-
-#endif

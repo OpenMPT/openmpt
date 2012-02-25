@@ -1,11 +1,17 @@
+/*
+ * PlaybackEventer.cpp
+ * -------------------
+ * Purpose: Class for scheduling playback events such as muting channels on pattern transitions.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "PlaybackEventer.h"
 #include "sndfile.h"
 
-CPlaybackEventer::~CPlaybackEventer()
-//---------------------------------
-{
-}
 
 void CPlaybackEventer::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
 //-------------------------------------------------------------------------

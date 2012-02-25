@@ -1,5 +1,15 @@
-#ifndef _SNDDEVX_H_
-#define _SNDDEVX_H_
+/*
+ * snddevx.h
+ * ---------
+ * Purpose: Actual sound device driver classes.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include <mmsystem.h>
 #include "snddev.h"
@@ -176,5 +186,3 @@ protected:
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-
-#endif // _SNDDEVX_H_

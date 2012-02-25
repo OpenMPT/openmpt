@@ -1,7 +1,13 @@
 /*
- * Miscellaneous (unit) tests.
- * 
+ * test.cpp
+ * --------
+ * Purpose: Unit tests for OpenMPT.
+ * Notes  : We need FAAAAAAAR more unit tests!
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "test.h"
@@ -209,9 +215,9 @@ void TestMisc()
 	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
 	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
 
-	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_MAX), false);
-	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_PC), true);
-	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_PCS), true);
+	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
+	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PC), true);
+	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PCS), true);
 
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T(".mod")), MOD_TYPE_MOD);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("mod")), MOD_TYPE_MOD);
@@ -297,7 +303,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 
 	// Samples
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 2);
-	const MODSAMPLE &sample = pSndFile->GetSample(1);
+	const ModSample &sample = pSndFile->GetSample(1);
 	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
@@ -319,7 +325,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 
 	// Instruments
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
-	const MODINSTRUMENT *pIns = pSndFile->Instruments[1];
+	const ModInstrument *pIns = pSndFile->Instruments[1];
 	VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
 	VERIFY_EQUAL_NONCONT(pIns->nPan, 128);
 	VERIFY_EQUAL_NONCONT(pIns->dwFlags, 0);
@@ -498,7 +504,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 
 	// Samples
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 1);
-	const MODSAMPLE &sample = pSndFile->GetSample(1);
+	const ModSample &sample = pSndFile->GetSample(1);
 	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
@@ -521,7 +527,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 
 	// Instruments
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
-	const MODINSTRUMENT *pIns = pSndFile->Instruments[1];
+	const ModInstrument *pIns = pSndFile->Instruments[1];
 	VERIFY_EQUAL_NONCONT(pIns->nGlobalVol, 32);
 	VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
 	VERIFY_EQUAL_NONCONT(pIns->nPan, 64);
@@ -737,8 +743,8 @@ void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc
 				i->note = NOTE_PC;
 
 			i->instr = Rand<BYTE>(0, MAX_MIXPLUGINS);
-			i->SetValueVolCol(Rand<uint16>(0, MODCOMMAND::maxColumnValue));
-			i->SetValueEffectCol(Rand<uint16>(0, MODCOMMAND::maxColumnValue));
+			i->SetValueVolCol(Rand<uint16>(0, ModCommand::maxColumnValue));
+			i->SetValueEffectCol(Rand<uint16>(0, ModCommand::maxColumnValue));
 		}
 		else
 			i->Clear();
@@ -773,7 +779,7 @@ void TestPCnoteSerialization()
 	GenerateCommands(pSndFile->Patterns[2], 0.5, 0.5);
 
 	//
-	vector<MODCOMMAND> pat[3];
+	vector<ModCommand> pat[3];
 	const size_t numCommands[] = {	pSndFile->GetNumChannels() * pSndFile->Patterns[0].GetNumRows(),
 									pSndFile->GetNumChannels() * pSndFile->Patterns[1].GetNumRows(),
 									pSndFile->GetNumChannels() * pSndFile->Patterns[2].GetNumRows()

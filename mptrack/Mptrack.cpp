@@ -1,5 +1,12 @@
-// mptrack.cpp : Defines the class behaviors for the application.
-//
+/*
+ * MPTrack.cpp
+ * -----------
+ * Purpose: OpenMPT core application class.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -847,7 +854,7 @@ BOOL CTrackApp::InitInstance()
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
 
-	ASSERT((sizeof(MODCHANNEL) & 7) == 0);
+	ASSERT((sizeof(ModChannel) & 7) == 0);
 
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;

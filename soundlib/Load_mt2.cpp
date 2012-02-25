@@ -1,9 +1,20 @@
+/*
+ * Load_mt2.cpp
+ * ------------
+ * Purpose: MT2 (MadTracker 2) module loader
+ * Notes  : Plugins are currently not imported.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "Loaders.h"
 
 //#define MT2DEBUG
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct _MT2FILEHEADER
 {
@@ -121,10 +132,10 @@ typedef struct _MT2GROUP
 	BYTE Reserved[5];
 } MT2GROUP;
 
-#pragma pack()
+#pragma pack(pop)
 
 
-static void ConvertMT2Command(CSoundFile *that, MODCOMMAND *m, MT2COMMAND *p)
+static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 //---------------------------------------------------------------------------
 {
 	// Note
@@ -283,7 +294,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	#endif
 			Patterns.Insert(iPat, nLines);
 			if (!Patterns[iPat]) return true;
-			MODCOMMAND *m = Patterns[iPat];
+			ModCommand *m = Patterns[iPat];
 			UINT len = wDataLen;
 			if (pfh->fulFlags & 1) // Packed Patterns
 			{
@@ -398,12 +409,12 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		if (dwMemPos+36 > dwMemLength) return true;
 		MT2INSTRUMENT *pmi = (MT2INSTRUMENT *)(lpStream+dwMemPos);
-		MODINSTRUMENT *pIns = NULL;
+		ModInstrument *pIns = NULL;
 		if (iIns <= m_nInstruments)
 		{
 			try
 			{
-				pIns = new MODINSTRUMENT();
+				pIns = new ModInstrument();
 				Instruments[iIns] = pIns;
 				memcpy(pIns->name, pmi->szName, 32);
 				StringFixer::SpaceToNullStringFixed<31>(pIns->name);
@@ -455,7 +466,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				for (UINT iEnv=0; iEnv<4; iEnv++) if (pehdr[iEnv])
 				{
 					MT2ENVELOPE *pme = pehdr[iEnv];
-					INSTRUMENTENVELOPE *pEnv;
+					InstrumentEnvelope *pEnv;
 				#ifdef MT2DEBUG
 					Log("  Env %d.%d @%04X: %d points\n", iIns, iEnv, (UINT)(((BYTE *)pme)-lpStream), pme->nPoints);
 				#endif
@@ -522,7 +533,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			SampleMap[iSmp-1] = pms;
 			if (iSmp < MAX_SAMPLES)
 			{
-				MODSAMPLE *psmp = &Samples[iSmp];
+				ModSample *psmp = &Samples[iSmp];
 				psmp->nGlobalVol = 64;
 				psmp->nVolume = (pms->wVolume >> 7);
 				psmp->nPan = (pms->nPan == 0x80) ? 128 : (pms->nPan^0x80);
@@ -551,7 +562,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		if (dwMemPos+8 > dwMemLength) return true;
 		MT2INSTRUMENT *pmi = InstrMap[iMap];
-		MODINSTRUMENT *pIns = NULL;
+		ModInstrument *pIns = NULL;
 		if (iMap<m_nInstruments) pIns = Instruments[iMap+1];
 		for (UINT iGrp=0; iGrp<pmi->wSamples; iGrp++)
 		{
@@ -583,7 +594,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT iData=0; iData<256; iData++) if ((iData < m_nSamples) && (SampleMap[iData]))
 	{
 		MT2SAMPLE *pms = SampleMap[iData];
-		MODSAMPLE *psmp = &Samples[iData+1];
+		ModSample *psmp = &Samples[iData+1];
 		if (!(pms->nFlags & 5))
 		{
 			if (psmp->nLength > 0) 

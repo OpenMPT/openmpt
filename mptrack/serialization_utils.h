@@ -1,5 +1,14 @@
-#ifndef SERIALIZATION_UTILS_H
-#define SERIALIZATION_UTILS_H
+/*
+ * serialization_utils.h
+ * ---------------------
+ * Purpose: Serializing data to and from MPTM files.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include <string>
 #include <strstream>
@@ -543,6 +552,3 @@ bool StringFromBinaryStream(std::istream& iStrm, std::string& str, const SIZETYP
 	if(iStrm.good()) return false;
 	else return true;
 }
-
-
-#endif

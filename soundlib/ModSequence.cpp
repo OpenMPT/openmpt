@@ -1,3 +1,13 @@
+/*
+ * ModSequence.cpp
+ * ---------------
+ * Purpose: Order and sequence handling.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "sndfile.h"
 #include "ModSequence.h"
@@ -473,7 +483,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 					// is this a valid pattern? adjust pattern jump commands, if necessary.
 					if(m_pSndFile->Patterns.IsValidPat(copyPat))
 					{
-						MODCOMMAND *m = m_pSndFile->Patterns[copyPat];
+						ModCommand *m = m_pSndFile->Patterns[copyPat];
 						for (UINT len = m_pSndFile->Patterns[copyPat].GetNumRows() * m_pSndFile->m_nChannels; len; m++, len--)
 						{
 							if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
@@ -537,7 +547,7 @@ bool ModSequenceSet::MergeSequences()
 			// Try to fix patterns (Bxx commands)
 			if(!m_pSndFile->Patterns.IsValidPat(nPat)) continue;
 
-			MODCOMMAND *m = m_pSndFile->Patterns[nPat];
+			ModCommand *m = m_pSndFile->Patterns[nPat];
 			for (UINT len = 0; len < m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels; m++, len++)
 			{
 				if(m->command == CMD_POSITIONJUMP)
@@ -550,9 +560,9 @@ bool ModSequenceSet::MergeSequences()
 						{
 							// could create new pattern - copy data over and continue from here.
 							At(nFirstOrder + nOrd) = nNewPat;
-							MODCOMMAND *pSrc = m_pSndFile->Patterns[nPat];
-							MODCOMMAND *pDest = m_pSndFile->Patterns[nNewPat];
-							memcpy(pDest, pSrc, m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels * sizeof(MODCOMMAND));
+							ModCommand *pSrc = m_pSndFile->Patterns[nPat];
+							ModCommand *pDest = m_pSndFile->Patterns[nNewPat];
+							memcpy(pDest, pSrc, m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels * sizeof(ModCommand));
 							m = pDest + len;
 							patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
 							nPat = nNewPat;

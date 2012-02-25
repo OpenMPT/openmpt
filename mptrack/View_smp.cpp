@@ -1,3 +1,14 @@
+/*
+ * view_smp.cpp
+ * ------------
+ * Purpose: Sample tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -151,7 +162,7 @@ void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 
 		if ((m_nSample > 0) && (m_nSample <= pSndFile->GetNumSamples()))
 		{
-			const MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+			const ModSample &sample = pSndFile->GetSample(m_nSample);
 			if (sample.pSample != nullptr) dwLen = sample.nLength;
 		}
 		if (m_nZoom)
@@ -775,7 +786,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
-		const MODSAMPLE &sample = pSndFile->GetSample((m_nSample <= pSndFile->GetNumSamples()) ? m_nSample : 0);
+		const ModSample &sample = pSndFile->GetSample((m_nSample <= pSndFile->GetNumSamples()) ? m_nSample : 0);
 		int ymed = (rect.top + rect.bottom) / 2;
 		int yrange = (rect.bottom - rect.top) / 2;
 		
@@ -1390,7 +1401,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 
 	if ((m_dwStatus & SMPSTATUS_MOUSEDRAG) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+	ModSample &sample = pSndFile->GetSample(m_nSample);
 
 	len = sample.nLength;
 	if (!len)
@@ -1469,7 +1480,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		const MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		const ModSample &sample = pSndFile->GetSample(m_nSample);
 		HMENU hMenu = ::CreatePopupMenu();
 		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler(); //rewbs.customKeys
 		if (!hMenu)	return;
@@ -1666,7 +1677,7 @@ void CViewSample::OnSetLoop()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwEndSel > m_dwBeginSel + 15) && (m_dwEndSel <= sample.nLength))
 		{
 			if ((sample.nLoopStart != m_dwBeginSel) || (sample.nLoopEnd != m_dwEndSel))
@@ -1690,7 +1701,7 @@ void CViewSample::OnSetSustainLoop()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwEndSel > m_dwBeginSel + 15) && (m_dwEndSel <= sample.nLength))
 		{
 			if ((sample.nSustainStart != m_dwBeginSel) || (sample.nSustainEnd != m_dwEndSel))
@@ -1765,7 +1776,7 @@ void CViewSample::OnEditDelete()
 
 	if (!pModDoc) return;
 	pSndFile = pModDoc->GetSoundFile();
-	MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+	ModSample &sample = pSndFile->GetSample(m_nSample);
 	len = sample.nLength;
 	if ((!sample.pSample) || (!len)) return;
 	if (m_dwEndSel > len) m_dwEndSel = len;
@@ -1851,7 +1862,7 @@ void CViewSample::OnEditCopy()
 
 	if ((!pMainFrm) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	const MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+	const ModSample &sample = pSndFile->GetSample(m_nSample);
 	if ((!sample.nLength) || (!sample.pSample)) return;
 	dwMemSize = sample.nLength;
 	dwSmpOffset = 0;
@@ -1986,7 +1997,7 @@ void CViewSample::OnEditPaste()
 			
 			CriticalSection cs;
 
-			MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+			ModSample &sample = pSndFile->GetSample(m_nSample);
 
 			memcpy(s, pSndFile->m_szNames[m_nSample], 32);
 			memcpy(s2, sample.filename, 22);
@@ -2035,7 +2046,7 @@ void CViewSample::On8BitConvert()
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((sample.uFlags & CHN_16BIT) && (sample.pSample) && (sample.nLength))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
@@ -2073,7 +2084,7 @@ void CViewSample::OnMonoConvert()
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((sample.uFlags & CHN_STEREO) && (sample.pSample) && (sample.nLength))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
@@ -2099,7 +2110,7 @@ void CViewSample::OnSampleTrim()
 	if(!pModDoc || m_nSample > pModDoc->GetNumSamples()) return;
 
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+	ModSample &sample = pSndFile->GetSample(m_nSample);
 
 	if(m_dwBeginSel == m_dwEndSel)
 	{
@@ -2405,7 +2416,7 @@ void CViewSample::OnSetLoopStart()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nLoopEnd) && (sample.nLoopStart != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
@@ -2426,7 +2437,7 @@ void CViewSample::OnSetLoopEnd()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nLoopStart+4) && (sample.nLoopEnd != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
@@ -2447,7 +2458,7 @@ void CViewSample::OnSetSustainStart()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nSustainEnd) && (sample.nSustainStart != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
@@ -2468,7 +2479,7 @@ void CViewSample::OnSetSustainEnd()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+		ModSample &sample = pSndFile->GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nSustainStart+4) && (sample.nSustainEnd != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
@@ -2513,7 +2524,7 @@ void CViewSample::OnAddSilence()
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if (!pSndFile) return;
 
-	MODSAMPLE &sample = pSndFile->GetSample(m_nSample);
+	ModSample &sample = pSndFile->GetSample(m_nSample);
 
 	CAddSilenceDlg dlg(this, 32, sample.nLength);
 	if (dlg.DoModal() != IDOK) return;
@@ -2703,7 +2714,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 // If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
 // return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
 // if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
-UINT CViewSample::GetAutoZoomLevel(const MODSAMPLE& smp)
+UINT CViewSample::GetAutoZoomLevel(const ModSample& smp)
 //-----------------------------------------------------
 {
 	m_rcClient.NormalizeRect();

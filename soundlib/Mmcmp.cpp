@@ -1,10 +1,13 @@
 /*
- * OpenMPT
- *
- * Mmcmp.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
-*/
+ * mmcmp.cpp
+ * ---------
+ * Purpose: Handling of compressed modules (XPK, PowerPack PP20)
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "sndfile.h"

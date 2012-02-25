@@ -1,10 +1,12 @@
 /*
- * This source code is public domain.
- *
- * Purpose: Load MO3-packed modules using unmo3.dll
+ * Load_mo3.cpp
+ * ------------
+ * Purpose: MO3 module loader.
+ * Notes  : This makes use of an external library (unmo3.dll).
  * Authors: Johannes Schultz
- *          OpenMPT devs
-*/
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"

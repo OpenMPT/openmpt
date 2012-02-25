@@ -1,11 +1,13 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_wav.cpp
+ * ------------
+ * Purpose: WAV importer
+ * Notes  : This loader converts each WAV channel into a separate mono sample.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -84,7 +86,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 		ChnSettings[iChn].dwFlags = 0;
 	}
 	// Setting up speed command
-	MODCOMMAND *pcmd = Patterns[0];
+	ModCommand *pcmd = Patterns[0];
 	pcmd[0].command = CMD_SPEED;
 	pcmd[0].param = (BYTE)m_nDefaultSpeed;
 	pcmd[0].note = 5*12+1;
@@ -95,7 +97,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 	// Support for Multichannel Wave
 	for (UINT nChn=0; nChn<m_nSamples; nChn++)
 	{
-		MODSAMPLE *pSmp = &Samples[nChn+1];
+		ModSample *pSmp = &Samples[nChn+1];
 		pcmd[nChn].note = pcmd[0].note;
 		pcmd[nChn].instr = (BYTE)(nChn+1);
 		pSmp->nLength = len;
@@ -160,7 +162,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 ////////////////////////////////////////////////////////////////////////
 // IMA ADPCM Support
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct IMAADPCMBLOCK
 {
@@ -169,7 +171,7 @@ typedef struct IMAADPCMBLOCK
 	BYTE Reserved;
 } DVI_ADPCMBLOCKHEADER;
 
-#pragma pack()
+#pragma pack(pop)
 
 static const int gIMAUnpackTable[90] = 
 {

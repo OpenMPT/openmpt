@@ -1,11 +1,13 @@
 /*
  * Undo.h
  * ------
- * Purpose: Header file for undo functionality
+ * Purpose: Editor undo buffer functionality.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #pragma once
 
@@ -17,7 +19,7 @@
 // Additional undo information, as required
 struct PATTERNUNDOINFO
 {
-	MODCHANNELSETTINGS *settings;
+	ModChannelSettings *settings;
 	CHANNELINDEX oldNumChannels;
 };
 
@@ -27,7 +29,7 @@ struct PATTERNUNDOBUFFER
 	ROWINDEX patternsize;
 	CHANNELINDEX firstChannel, numChannels;
 	ROWINDEX firstRow, numRows;
-	MODCOMMAND *pbuffer;
+	ModCommand *pbuffer;
 	PATTERNUNDOINFO *channelInfo;
 	bool linkToPrevious;
 };
@@ -89,7 +91,7 @@ enum sampleUndoTypes
 
 struct SAMPLEUNDOBUFFER
 {
-	MODSAMPLE OldSample;
+	ModSample OldSample;
 	CHAR szOldName[MAX_SAMPLENAME];
 	LPSTR SamplePtr;
 	UINT nChangeStart, nChangeEnd;

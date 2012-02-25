@@ -1,3 +1,13 @@
+/*
+ * EffectInfo.cpp
+ * --------------
+ * Purpose: Provide information about effect names, parameter interpretation to the tracker interface.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "EffectInfo.h"
 #include "mptrack.h"
@@ -10,7 +20,7 @@ extern WORD S3MFineTuneTable[16];
 
 struct MPTEFFECTINFO
 {
-	MODCOMMAND::COMMAND effect;		// CMD_XXXX
+	ModCommand::COMMAND effect;		// CMD_XXXX
 	DWORD paramMask;				// 0 = default
 	DWORD paramValue;				// 0 = default
 	DWORD paramLimit;				// Parameter Editor limit
@@ -124,7 +134,7 @@ bool EffectInfo::IsExtendedEffect(UINT ndx) const
 }
 
 
-bool EffectInfo::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command, UINT param, bool bXX, CHANNELINDEX nChn) const
+bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command, UINT param, bool bXX, CHANNELINDEX nChn) const
 //------------------------------------------------------------------------------------------------------------------------------
 {
 	bool bSupported;
@@ -204,7 +214,7 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, MODCOMMAND::COMMAND command
 }
 
 
-LONG EffectInfo::GetIndexFromEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM param) const
+LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PARAM param) const
 //---------------------------------------------------------------------------------------------
 {
 	UINT ndx = CountOf(gFXInfo);
@@ -223,7 +233,7 @@ LONG EffectInfo::GetIndexFromEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PAR
 
 
 //Returns command and corrects parameter refParam if necessary
-MODCOMMAND::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) const
+ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) const
 //-------------------------------------------------------------------------------
 {
 	//if (pParam) *pParam = -1;
@@ -254,7 +264,7 @@ MODCOMMAND::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) cons
 }
 
 
-MODCOMMAND::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx) const
+ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx) const
 //----------------------------------------------------------------
 {
 	if (ndx >= CountOf(gFXInfo))
@@ -882,7 +892,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 
 typedef struct MPTVOLCMDINFO
 {
-	MODCOMMAND::VOLCMD volCmd;		// VOLCMD_XXXX
+	ModCommand::VOLCMD volCmd;		// VOLCMD_XXXX
 	DWORD supportedFormats;			// MOD_TYPE_XXX combo
 	LPCSTR name;					// e.g. "Set Volume"
 } MPTVOLCMDINFO;
@@ -916,7 +926,7 @@ UINT EffectInfo::GetNumVolCmds() const
 }
 
 
-LONG EffectInfo::GetIndexFromVolCmd(MODCOMMAND::VOLCMD volcmd) const
+LONG EffectInfo::GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const
 //------------------------------------------------------------------
 {
 	for (UINT i = 0; i < CountOf(gVolCmdInfo); i++)
@@ -927,7 +937,7 @@ LONG EffectInfo::GetIndexFromVolCmd(MODCOMMAND::VOLCMD volcmd) const
 }
 
 
-MODCOMMAND::VOLCMD EffectInfo::GetVolCmdFromIndex(UINT ndx) const
+ModCommand::VOLCMD EffectInfo::GetVolCmdFromIndex(UINT ndx) const
 //---------------------------------------------------------------
 {
 	return (ndx < CountOf(gVolCmdInfo)) ? gVolCmdInfo[ndx].volCmd : 0;

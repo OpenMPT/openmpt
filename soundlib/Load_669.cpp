@@ -1,16 +1,14 @@
 /*
- * This source code is public domain. 
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_669.cpp
+ * ------------
+ * Purpose: 669 Composer / UNIS 669 module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          Adam Goode (endian and char fixes for PPC)
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-////////////////////////////////////////////////////////////
-// 669 Composer / UNIS 669 module loader
-////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -114,11 +112,11 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 		if(Patterns.Insert(npat, 64))
 			break;
 
-		MODCOMMAND *m = Patterns[npat];
+		ModCommand *m = Patterns[npat];
 		const BYTE *p = lpStream + dwMemPos;
 		for (UINT row=0; row<64; row++)
 		{
-			MODCOMMAND *mspeed = m;
+			ModCommand *mspeed = m;
 			if ((row == pfh->breaks[npat]) && (row != 63))
 			{
 				for (UINT i=0; i<8; i++)

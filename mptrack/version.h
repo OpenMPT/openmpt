@@ -1,10 +1,14 @@
 /*
- * Version related stuff.
- *
+ * version.h
+ * ---------
+ * Purpose: OpenMPT version handling.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef _VERSION_H
-#define _VERSION_H
+
+#pragma once
 
 //STRINGIZE makes a string of given argument. If used with #defined value,
 //the string is made of the contents of the defined value.
@@ -67,7 +71,3 @@ namespace MptVersion
 		return ((num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00) && num != MAKE_VERSION_NUMERIC(1,18,00,00)) || (num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num));
 	}
 }; //namespace MptVersion
-
-
-
-#endif // _VERSION_H

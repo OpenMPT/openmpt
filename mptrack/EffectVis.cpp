@@ -1,5 +1,12 @@
-// EffectVis.cpp : implementation file
-//
+/*
+ * EffectVis.cpp
+ * -------------
+ * Purpose: Implementation of parameter visualisation dialog.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -98,12 +105,12 @@ void CEffectVis::OnPaint()
 
 uint16 CEffectVis::GetParam(UINT row)
 {	
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	uint16 paramValue = 0;
 
 	if (pcmd)
 	{
-		MODCOMMAND cmd = pcmd[row*m_pSndFile->m_nChannels + m_nChan];
+		ModCommand cmd = pcmd[row*m_pSndFile->m_nChannels + m_nChan];
 		if (cmd.IsPcNote()) 
 		{
 			paramValue = cmd.GetValueEffectCol();
@@ -122,7 +129,7 @@ uint16 CEffectVis::GetParam(UINT row)
 // as appropriate, depending on contents of row.
 void CEffectVis::SetParamFromY(UINT row, long y)
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (!pcmd) {
 		return;
 	}
@@ -138,7 +145,7 @@ void CEffectVis::SetParamFromY(UINT row, long y)
 	{		
 		int param = ScreenYToFXParam(y);
 		// Cap the parameter value as appropriate, based on effect type (e.g. Zxx gets capped to [0x00,0x7F])
-		effectInfo.GetEffectFromIndex(effectInfo.GetIndexFromEffect(pcmd[offset].command, MODCOMMAND::PARAM(param)), param);
+		effectInfo.GetEffectFromIndex(effectInfo.GetIndexFromEffect(pcmd[offset].command, ModCommand::PARAM(param)), param);
 		CriticalSection cs;
 		pcmd[offset].param = static_cast<BYTE>(param);
 	}	
@@ -147,7 +154,7 @@ void CEffectVis::SetParamFromY(UINT row, long y)
 
 BYTE CEffectVis::GetCommand(UINT row)
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (pcmd)
 		return pcmd[row*m_pSndFile->m_nChannels + m_nChan].command;
 	else
@@ -156,7 +163,7 @@ BYTE CEffectVis::GetCommand(UINT row)
 
 void CEffectVis::SetCommand(UINT row, BYTE command)
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (pcmd)
 	{
 		CriticalSection cs;
@@ -182,12 +189,12 @@ int CEffectVis::RowToScreenX(UINT row)
 
 int CEffectVis::RowToScreenY(UINT row)
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	int screenY = -1;
 
 	if (pcmd)
 	{
-		MODCOMMAND cmd = pcmd[row*m_pSndFile->m_nChannels + m_nChan];
+		ModCommand cmd = pcmd[row*m_pSndFile->m_nChannels + m_nChan];
 		if (cmd.IsPcNote()) 
 		{
 			uint16 paramValue = cmd.GetValueEffectCol();
@@ -212,7 +219,7 @@ int CEffectVis::FXParamToScreenY(uint16 param)
 
 int CEffectVis::PCParamToScreenY(uint16 param)
 {
-	if ((param >= 0x00) || (param <= MODCOMMAND::maxColumnValue))
+	if ((param >= 0x00) || (param <= ModCommand::maxColumnValue))
 		return (int) (m_rcDraw.bottom - param*m_pixelsPerPCParam + 0.5);
 	return -1;
 }
@@ -230,8 +237,8 @@ BYTE CEffectVis::ScreenYToFXParam(int y)
 
 uint16 CEffectVis::ScreenYToPCParam(int y)
 {
-	if (y<=PCParamToScreenY(MODCOMMAND::maxColumnValue))
-		return MODCOMMAND::maxColumnValue;
+	if (y<=PCParamToScreenY(ModCommand::maxColumnValue))
+		return ModCommand::maxColumnValue;
 
 	if (y>=PCParamToScreenY(0x00))
 		return 0x00;
@@ -558,7 +565,7 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 
 	m_pixelsPerRow   = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER)/(float)m_nRows;
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
-	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)MODCOMMAND::maxColumnValue;
+	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)ModCommand::maxColumnValue;
 	m_boolForceRedraw = TRUE;
     InvalidateRect(NULL, FALSE);	 //redraw everything
 } 
@@ -606,7 +613,7 @@ void CEffectVis::UpdateSelection(UINT startRow, UINT endRow, UINT nchn, CModDoc*
 	}
 
 	//Check pattern, start row and channel exist
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (!pcmd ||  (m_startRow >= m_pSndFile->Patterns[m_nPattern].GetNumRows()) || (m_nChan >= m_pSndFile->m_nChannels))
 	{
 		DoClose();
@@ -733,7 +740,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	else 
 	{
 		paramValue = ScreenYToFXParam(point.y);
-		effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(GetCommand(row), MODCOMMAND::PARAM(GetParam(row))), effectName, true);
+		effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(GetCommand(row), ModCommand::PARAM(GetParam(row))), effectName, true);
 	}
 
 	wsprintf(status, "Pat: %d\tChn: %d\tRow: %d\tVal: %02X (%03d) [%s]",
@@ -780,7 +787,7 @@ BOOL CEffectVis::OnInitDialog()
 		// If first selected row is a PC Note, default to PC note overwrite mode
 		// and use it as a template for new PC notes that will be created via the visualiser.
 		m_nAction = kAction_OverwritePC;
-		MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+		ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 		if (pcmd) {
 			int offset = m_startRow*m_pSndFile->m_nChannels + m_nChan;
 			m_templatePCNote.Set(pcmd[offset].note, pcmd[offset].instr, pcmd[offset].GetValueVolCol(), 0);
@@ -792,7 +799,7 @@ BOOL CEffectVis::OnInitDialog()
 		// Otherwise, default to FX overwrite and
 		// use effect of first selected row as default effect type
 		m_nAction = kAction_OverwriteFX;
-		m_nFillEffect = effectInfo.GetIndexFromEffect(GetCommand(m_startRow), MODCOMMAND::PARAM(GetParam(m_startRow)));
+		m_nFillEffect = effectInfo.GetIndexFromEffect(GetCommand(m_startRow), ModCommand::PARAM(GetParam(m_startRow)));
 		if (m_nFillEffect < 0 || m_nFillEffect >= MAX_EFFECTS)
 			m_nFillEffect = effectInfo.GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
 	}
@@ -830,7 +837,7 @@ BOOL CEffectVis::OnInitDialog()
 void CEffectVis::MakeChange(int row, long y)
 //------------------------------------------
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (!pcmd)
 	{
 		return;
@@ -889,7 +896,7 @@ void CEffectVis::MakeChange(int row, long y)
 
 void CEffectVis::SetPcNote(int row)
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (!pcmd) {
 		return;
 	}
@@ -901,7 +908,7 @@ void CEffectVis::SetPcNote(int row)
 
 bool CEffectVis::IsPcNote(int row)
 {
-	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	ModCommand *pcmd = m_pSndFile->Patterns[m_nPattern];
 	if (pcmd)
 		return pcmd[row * m_pSndFile->GetNumChannels() + m_nChan].IsPcNote();
 	else

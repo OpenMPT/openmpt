@@ -1,3 +1,15 @@
+/*
+ * tuningbase.h
+ * ------------
+ * Purpose: Alternative sample tuning.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
+
 //#define BUILD_TUNINGBASE_AS_TEMPLATE
 
 #if defined(TUNINGBASE_CPP) && defined(BUILD_TUNINGBASE_AS_TEMPLATE)

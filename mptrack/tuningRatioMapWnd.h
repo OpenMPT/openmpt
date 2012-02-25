@@ -1,5 +1,14 @@
-#ifndef TUNINGRATIOMAPWND_H
-#define TUNINGRATIOMAPWND_H
+/*
+ * tuningRatioMapWnd.h
+ * -------------------
+ * Purpose: Alternative sample tuning configuration dialog - ratio map edit control.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "../soundlib/tuning.h"
 
@@ -49,5 +58,3 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif
