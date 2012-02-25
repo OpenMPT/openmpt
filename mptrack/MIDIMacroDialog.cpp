@@ -180,16 +180,12 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		const parameteredMacroType macroType = m_MidiCfg.GetParameteredMacroType(m);
 		switch (macroType)
 		{
-		case sfx_cc:
-			s.Format("MIDI CC %d", m_MidiCfg.MacroToMidiCC(m));
-			break;
-
 		case sfx_plug: 
 			s.Format("Control Plugin Param %d", m_MidiCfg.MacroToPlugParam(m));
 			break;
 
 		default:
-			s = m_MidiCfg.GetParameteredMacroName(macroType);
+			s = m_MidiCfg.GetParameteredMacroName(m, 0, m_SndFile);
 			break;
 		}
 		m_EditMacroType[m].SetWindowText(s);
@@ -350,6 +346,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
 			StringFixer::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiZXXExt[zxx], s, MACRO_LENGTH);
+			m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 		}
 	}
 }

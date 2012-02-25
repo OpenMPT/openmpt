@@ -47,22 +47,26 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 //-------------------------------------------------------
 {
 	// Compare with all possible preset patterns
-	for(size_t i = 1; i < zxx_max; i++)
+	for(size_t i = 0; i < zxx_max; i++)
 	{
-		// Prepare macro pattern to compare
-		char macros[128][MACRO_LENGTH];
-		CreateFixedMacro(macros, static_cast<fixedMacroType>(i));
-
-		bool bFound = true;
-		for(size_t j = 0; j < 128; j++)
+		fixedMacroType zxx = static_cast<fixedMacroType>(i);
+		if(zxx != zxx_custom)
 		{
-			if(strncmp(macros[j], szMidiZXXExt[j], MACRO_LENGTH))
+			// Prepare macro pattern to compare
+			char macros[128][MACRO_LENGTH];
+			CreateFixedMacro(macros, zxx);
+
+			bool found = true;
+			for(size_t j = 0; j < 128; j++)
 			{
-				bFound = false;
-				break;
+				if(strncmp(macros[j], szMidiZXXExt[j], MACRO_LENGTH))
+				{
+					found = false;
+					break;
+				}
 			}
+			if(found) return zxx;
 		}
-		if(bFound) return static_cast<fixedMacroType>(i);
 	}
 	return zxx_custom; // Custom setup
 }
@@ -112,6 +116,10 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 	{
 		switch(macroType)
 		{
+		case zxx_unused:
+			strcpy(fixedMacros[i], "");
+			break;
+
 		case zxx_reso4Bit:
 			// Type 1 - Z80 - Z8F controls resonance
 			if (i < 16) sprintf(fixedMacros[i], "F0F001%02X", i * 8);
@@ -242,6 +250,8 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 {
 	switch(macroType)
 	{
+	case zxx_unused:
+		return _T("Unused");
 	case zxx_reso4Bit:
 		return _T("Z80 - Z8F controls Resonant Filter Resonance");
 	case zxx_reso7Bit:

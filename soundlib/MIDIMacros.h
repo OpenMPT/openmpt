@@ -37,7 +37,7 @@ enum parameteredMacroType
 // Fixed macro presets
 enum fixedMacroType
 {
-	zxx_custom = 0,
+	zxx_unused = 0,
 	zxx_reso4Bit,		// Type 1 - Z80 - Z8F controls resonant filter resonance
 	zxx_reso7Bit,		// Type 2 - Z80 - ZFF controls resonant filter resonance
 	zxx_cutoff,			// Type 3 - Z80 - ZFF controls resonant filter cutoff
@@ -45,6 +45,7 @@ enum fixedMacroType
 	zxx_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
 	zxx_channelAT,		// Type 6 - Z80 - ZFF controls Channel Aftertouch
 	zxx_polyAT,			// Type 7 - Z80 - ZFF controls Poly Aftertouch
+	zxx_custom,
 
 	zxx_max
 };
@@ -88,7 +89,9 @@ public:
 	fixedMacroType GetFixedMacroType() const;
 
 	// Create a new macro
+protected:
 	void CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const;
+public:
 	void CreateParameteredMacro(size_t macroIndex, parameteredMacroType macroType, int subType = 0)
 	{
 		CreateParameteredMacro(szMidiSFXExt[macroIndex], macroType, subType);
@@ -100,7 +103,9 @@ public:
 		return std::string(parameteredMacro);
 	};
 
+protected:
 	void CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const;
+public:
 	void CreateFixedMacro(fixedMacroType macroType)
 	{
 		CreateFixedMacro(szMidiZXXExt, macroType);
