@@ -296,7 +296,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			CHANGEMODTYPE_WARNING(wMODSampleFrequency);
 		}
 
-		m_SndFile.ConvertSample(nSmp, nOldType, nNewType);
+		sample.Convert(nOldType, nNewType);
 	}
 
 	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
@@ -344,7 +344,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			}
 		}
 
-		m_SndFile.ConvertInstrument(nIns, nOldType, nNewType);
+		pIns->Convert(nOldType, nNewType);
 	}
 
 	if(newTypeIsMOD)

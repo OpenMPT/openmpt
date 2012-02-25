@@ -433,6 +433,9 @@
     <ClCompile Include="PSRatioCalc.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\ModSample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">

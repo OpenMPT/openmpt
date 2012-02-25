@@ -250,7 +250,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 		}
 	}
 
-	ConvertInstrument(targetInstr, pSrcSong->GetType());
+	pIns->Convert(pSrcSong->GetType(), GetType());
 
 	// Copy all referenced samples over
 	for(size_t i = 0; i < targetSample.size(); i++)
@@ -290,7 +290,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *
 		}
 	}
 
-	ConvertSample(targetSample, pSrcSong->GetType());
+	Samples[targetSample].Convert(pSrcSong->GetType(), GetType());
 
 	return true;
 }
@@ -544,7 +544,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 			}
 		}
 	}
-	ConvertSample(nSample, MOD_TYPE_IT);
+	pSmp->Convert(MOD_TYPE_IT, GetType());
 	return true;
 }
 
@@ -1036,7 +1036,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	pSmp->RelativeTone = 0;
 	pSmp->nFineTune = 0;
 
-	ConvertSample(nSample, MOD_TYPE_S3M);
+	pSmp->Convert(MOD_TYPE_S3M, GetType());
 
 	if (pss->flags & 0x01) pSmp->uFlags |= CHN_LOOP;
 	flags = (pss->flags & 0x04) ? RS_PCM16U : RS_PCM8U;
@@ -1262,7 +1262,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		memcpy(pSmp->filename, psh->name, 22);
 		pSmp->filename[21] = 0;
 
-		ConvertSample(samplemap[ismp], MOD_TYPE_XM);
+		pSmp->Convert(MOD_TYPE_XM, GetType());
 	}
 	// Reading sample data
 	for (UINT dsmp=0; dsmp<nsamples; dsmp++)
@@ -1273,7 +1273,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		dwMemPos += samplesize[dsmp];
 	}
 
-	ConvertInstrument(nInstr, MOD_TYPE_XM);
+	pIns->Convert(MOD_TYPE_XM, GetType());
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -1501,7 +1501,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFil
 		memcpy(pSmp->filename, psh->name, 22);
 		pSmp->filename[21] = 0;
 	}
-	ConvertSample(nSample, MOD_TYPE_XM);
+	pSmp->Convert(MOD_TYPE_XM, GetType());
 	if (dwMemPos >= dwFileLength) return true;
 	ReadSample(pSmp, sampleflags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
 	return true;
@@ -1707,7 +1707,7 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 		if (pis->flags & 8)	flags =	RS_IT2148;
 	}
 
-	ConvertSample(nSample, MOD_TYPE_IT);
+	pSmp->Convert(MOD_TYPE_IT, GetType());
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -1792,7 +1792,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return true;
 
-	ConvertInstrument(nInstr, MOD_TYPE_IT);
+	pIns->Convert(MOD_TYPE_IT, GetType());
 
 	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
@@ -2184,162 +2184,4 @@ bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 		dwMemPos += dwChunkLen + 8;
 	}
 	return (pSmp->pSample != nullptr);
-}
-
-
-// Translate sample properties between two given formats.
-void CSoundFile::ConvertSample(SAMPLEINDEX sample, MODTYPE fromType, MODTYPE toType)
-//----------------------------------------------------------------------------------
-{
-	if(toType == MOD_TYPE_NONE)
-	{
-		toType = GetType();
-	}
-
-	if(sample < 1 || sample > GetNumSamples())
-	{
-		return;
-	}
-
-	ModSample &smp = GetSample(sample);
-	// Convert between frequency and transpose values if necessary.
-	if ((!(toType & (MOD_TYPE_MOD | MOD_TYPE_XM))) && (fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))
-	{
-		smp.nC5Speed = TransposeToFrequency(smp.RelativeTone, smp.nFineTune);
-		smp.RelativeTone = 0;
-		smp.nFineTune = 0;
-	} else if((toType & (MOD_TYPE_MOD | MOD_TYPE_XM)) && (!(fromType & (MOD_TYPE_MOD | MOD_TYPE_XM))))
-	{
-		FrequencyToTranspose(&smp);
-		if(toType & MOD_TYPE_MOD)
-		{
-			smp.RelativeTone = 0;
-		}
-	}
-
-	// No ping-pong loop, panning and auto-vibrato for MOD / S3M samples
-	if(toType & (MOD_TYPE_MOD | MOD_TYPE_S3M))
-	{
-		smp.uFlags &= ~(CHN_PINGPONGLOOP | CHN_PANNING);
-
-		smp.nVibDepth = 0;
-		smp.nVibRate = 0;
-		smp.nVibSweep = 0;
-		smp.nVibType = VIB_SINE;
-	}
-
-	// No sustain loops for MOD/S3M/XM
-	if(toType & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_S3M))
-	{
-		// Sustain loops - convert to normal loops
-		if((smp.uFlags & CHN_SUSTAINLOOP) != 0)
-		{
-			// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
-			smp.nLoopStart = smp.nSustainStart;
-			smp.nLoopEnd = smp.nSustainEnd;
-			smp.uFlags |= CHN_LOOP;
-			if(smp.uFlags & CHN_PINGPONGSUSTAIN)
-			{
-				smp.uFlags |= CHN_PINGPONGLOOP;
-			} else
-			{
-				smp.uFlags &= ~CHN_PINGPONGLOOP;
-			}
-		}
-		smp.nSustainStart = smp.nSustainEnd = 0;
-		smp.uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-	}
-
-	// All XM samples have default panning, and XM's autovibrato settings are rather limited.
-	if(toType & MOD_TYPE_XM)
-	{
-		if(!(smp.uFlags & CHN_PANNING))
-		{
-			smp.uFlags |= CHN_PANNING;
-			smp.nPan = 128;
-		}
-
-		LimitMax(smp.nVibDepth, BYTE(15));
-		LimitMax(smp.nVibRate, BYTE(63));
-	}
-
-
-	// Autovibrato sweep setting is inverse in XM (0 = "no sweep") and IT (0 = "no vibrato")
-	if(((fromType & MOD_TYPE_XM) && (toType & (MOD_TYPE_IT | MOD_TYPE_MPT))) || ((toType & MOD_TYPE_XM) && (fromType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
-	{
-		if(smp.nVibRate != 0 && smp.nVibDepth != 0)
-		{
-			smp.nVibSweep = 255 - smp.nVibSweep;
-		}
-	}
-}
-
-
-// Translate instrument properties between two given formats.
-void CSoundFile::ConvertInstrument(INSTRUMENTINDEX instr, MODTYPE fromType, MODTYPE toType)
-//-----------------------------------------------------------------------------------------
-{
-	UNREFERENCED_PARAMETER(fromType);
-
-	if(toType == MOD_TYPE_NONE)
-	{
-		toType = GetType();
-	}
-
-	if(instr < 1 || instr > GetNumInstruments() || Instruments[instr] == nullptr)
-	{
-		return;
-	}
-
-	ModInstrument *pIns = Instruments[instr];
-
-	if(toType & MOD_TYPE_XM)
-	{
-		pIns->ResetNoteMap();
-
-		// Convert sustain loops to sustain "points"
-		pIns->VolEnv.nSustainEnd = pIns->VolEnv.nSustainStart;
-		pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
-
-		pIns->VolEnv.dwFlags &= ~ENV_CARRY;
-		pIns->PanEnv.dwFlags &= ~ENV_CARRY;
-		pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
-
-		pIns->dwFlags &= ~INS_SETPANNING;
-		pIns->SetCutoff(pIns->GetCutoff(), false);
-		pIns->SetResonance(pIns->GetResonance(), false);
-		pIns->nFilterMode = FLTMODE_UNCHANGED;
-
-		pIns->nCutSwing = pIns->nPanSwing = pIns->nResSwing = pIns->nVolSwing = 0;
-
-		pIns->nPPC = NOTE_MIDDLEC - 1;
-		pIns->nPPS = 0;
-
-		pIns->nNNA = NNA_NOTECUT;
-		pIns->nDCT = DCT_NONE;
-		pIns->nDNA = DNA_NOTECUT;
-
-		if(pIns->nMidiChannel == MidiMappedChannel)
-		{
-			pIns->nMidiChannel = 1;
-		}
-
-		pIns->nGlobalVol = 64;
-		pIns->nPan = 128;
-
-		LimitMax(pIns->nFadeOut, 32767u);
-	}
-
-	// Limit fadeout length for IT / MPT
-	if(toType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-	{
-		LimitMax(pIns->nFadeOut, 8192u);
-	}
-
-	// MPT-specific features - remove instrument tunings, Pitch/Tempo Lock for other formats
-	if(!(toType & MOD_TYPE_MPT))
-	{
-		pIns->SetTuning(nullptr);
-		pIns->wPitchToTempoLock = 0;
-	}
 }

@@ -425,6 +425,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\ModSample.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ModConvert.cpp"
 				>
 			</File>

@@ -2487,7 +2487,7 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
 			{
 				GetpModDoc()->GetSampleUndo().PrepareUndo(nSmp, sundo_replace);
 			}
-#endif //  MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER
 
 			if(DestroySample(nSmp))
 			{
@@ -2510,7 +2510,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	LPSTR pSample = pSmp->pSample;
 	pSmp->pSample = nullptr;
 	pSmp->nLength = 0;
-	pSmp->uFlags &= ~(CHN_16BIT);
+	pSmp->uFlags &= ~(CHN_16BIT | CHN_STEREO);
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
 		if (Chn[i].pSample == pSample)
@@ -2725,7 +2725,7 @@ bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
 {
 	if(strcmp(m_szNames[0], titleCandidate))
 	{
-		strncpy(m_szNames[0], titleCandidate, min(MAX_SAMPLENAME - 1, strSize));
+		strncpy(m_szNames[0], titleCandidate, min(CountOf(m_szNames[0]), strSize));
 		StringFixer::SetNullTerminator(m_szNames[0]);
 		return true;
 	}
@@ -2748,14 +2748,16 @@ void CSoundFile::RecalculateSamplesPerTick()
 {
 	switch(m_nTempoMode)
 	{
+	case tempo_mode_classic: default:
+		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+
+	case tempo_mode_modern: 
+		m_nSamplesPerTick = gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
+		break;
+
 	case tempo_mode_alternative: 
 		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
 		break;
-	case tempo_mode_modern: 
-		m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
-		break;
-	case tempo_mode_classic: default:
-		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 	}
 }
 
@@ -2881,7 +2883,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 //------------------------------------------------
 {
 	// Setup LRRL panning, max channel volume
-	if((m_nType & MOD_TYPE_MOD) == 0 && bForceSetup == false) return;
+	if((GetType() & MOD_TYPE_MOD) == 0 && bForceSetup == false) return;
 
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
@@ -2916,7 +2918,7 @@ void CSoundFile::UpgradeModFlags()
 			// If there are any plugins, enable volume bug emulation.
 			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 			{
-				if(m_MixPlugins[i].Info.dwPluginId1 | m_MixPlugins[i].Info.dwPluginId2)
+				if((m_MixPlugins[i].Info.dwPluginId1 | m_MixPlugins[i].Info.dwPluginId2))
 				{
 					SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 					break;
@@ -3032,6 +3034,14 @@ void CSoundFile::UpgradeSong()
 				// Previously, Pitch/Pan Separation was only half depth.
 				// This was corrected in compatible mode in OpenMPT 1.18, and in OpenMPT 1.20 it is corrected in normal mode as well.
 				Instruments[i]->nPPS = (Instruments[i]->nPPS + (Instruments[i]->nPPS >= 0 ? 1 : -1)) / 2;
+			}
+
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+			{
+				// IT compatibility 24. Short envelope loops
+				// Previously, the pitch / filter envelope loop handling was broken, the loop was shortened by a tick (like in XM).
+				// This was corrected in compatible mode in OpenMPT 1.17.03.02, and in OpenMPT 1.20 it is corrected in normal mode as well.
+				Instruments[i]->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
 			}
 		}
 
