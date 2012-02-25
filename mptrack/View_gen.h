@@ -1,5 +1,15 @@
-#ifndef _VIEW_GLOBALS_H_
-#define _VIEW_GLOBALS_H_
+/*
+ * view_gen.h
+ * ----------
+ * Purpose: General tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 //Note: Changing this won't increase the number of tabs in general view. Most
 //of the code use plain number 4.
@@ -155,5 +165,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif

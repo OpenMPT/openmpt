@@ -1,11 +1,13 @@
 /*
- * OpenMPT
- *
  * Waveform.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * ------------
+ * Purpose: Common audio buffer conversion and analysing functions.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -312,7 +314,7 @@ UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24,
 	int n = dwSize / 3;
 	while (n > 0)
 	{
-		int nbuf = (n > MIXBUFFERSIZE*2) ? MIXBUFFERSIZE*2 : n;
+		int nbuf = (n > MIXBUFFERSIZE * 2) ? MIXBUFFERSIZE * 2 : n;
 		X86_Normalize24BitBuffer(pbuffer, nbuf, lmax24, tempbuf);
 		X86_Dither(tempbuf, nbuf, 8 * dwByteInc);
 		switch(dwByteInc)

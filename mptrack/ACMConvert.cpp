@@ -1,12 +1,11 @@
 /*
- *
  * ACMConvert.cpp
  * --------------
- * Purpose: MPEG Layer-3 Functions through ACM - access to LAMEenc and BLADEenc is emulated through the ACM interface
- * Notes  : (currently none)
+ * Purpose: MPEG Layer-3 Functions through ACM.
+ * Notes  : Access to LAMEenc and BLADEenc is emulated through the ACM interface.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 

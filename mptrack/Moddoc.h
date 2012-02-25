@@ -1,9 +1,14 @@
-// moddoc.h : interface of the CModDoc class
-//
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * ModDoc.h
+ * --------
+ * Purpose: Converting between various module formats.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-#if !defined(AFX_MODDOC_H__AE144DCC_DD0B_11D1_AF24_444553540000__INCLUDED_)
-#define AFX_MODDOC_H__AE144DCC_DD0B_11D1_AF24_444553540000__INCLUDED_
+
+#pragma once
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -126,9 +131,9 @@ struct SplitKeyboardSettings
 //==========================
 {
 	bool IsSplitActive() const { return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0); }
-	MODCOMMAND::NOTE splitNote;
-	MODCOMMAND::INSTR splitInstrument;
-	MODCOMMAND::VOL splitVolume;
+	ModCommand::NOTE splitNote;
+	ModCommand::INSTR splitInstrument;
+	ModCommand::VOL splitVolume;
 	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
 	bool octaveLink;	// apply octaveModifier
 
@@ -243,8 +248,8 @@ public:
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
-	void InitializeInstrument(MODINSTRUMENT *pIns);
-	void InitializeSample(MODSAMPLE &sample);
+	void InitializeInstrument(ModInstrument *pIns);
+	void InitializeSample(ModSample &sample);
 	bool RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd);
 	bool RemovePattern(PATTERNINDEX nPat);
 	bool RemoveSample(SAMPLEINDEX nSmp);
@@ -319,7 +324,7 @@ public:
 
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder);
 
-	// Returns formatted MODINSTRUMENT name.
+	// Returns formatted ModInstrument name.
 	// [in] bEmptyInsteadOfNoName: In case of unnamed instrument string, "(no name)" is returned unless this 
 	//                             parameter is true is case which an empty name is returned.
 	// [in] bIncludeIndex: True to include instrument index in front of the instrument name, false otherwise.
@@ -356,7 +361,7 @@ protected:
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);
 	//}}AFX_VIRTUAL
 
-	UINT GetPlaybackMidiChannel(const MODINSTRUMENT *pIns, CHANNELINDEX nChn) const;
+	UINT GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
 
 // Implementation
@@ -414,5 +419,3 @@ private:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MODDOC_H__AE144DCC_DD0B_11D1_AF24_444553540000__INCLUDED_)

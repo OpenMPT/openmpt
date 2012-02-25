@@ -1,6 +1,14 @@
-#ifndef WAVCONVERTER_H
-#define WAVCONVERTER_H
-//Very rough wav converting functions used when loading some wav-files.
+/*
+ * wavConverter.h
+ * --------------
+ * Purpose: Very rough wav converting functions used when loading some wav-files.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 typedef void (*DATACONV)(const char* const, char*, const double);
 //srcBuffer, destBuffer, maximum value in srcBuffer.
@@ -120,7 +128,3 @@ bool CopyWavBuffer(const char* const readBuffer, const size_t rbSize, char* writ
 	}
 	return false;
 }
-
-
-
-#endif

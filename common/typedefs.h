@@ -1,7 +1,18 @@
-#ifndef TYPEDEFS_H
-#define TYPEDEFS_H
+/*
+ * typedefs.h
+ * ----------
+ * Purpose: Basic data type definitions.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
+
+#pragma once
+
+#ifndef nullptr
 #define nullptr		0
+#endif
 
 //  CountOf macro computes the number of elements in a statically-allocated array.
 #if _MSC_VER >= 1400
@@ -62,7 +73,4 @@ typedef float float32;
 			#undef SPECIALIZE_TRIVIAL_ASSIGN
 		};
 	};
-#endif
-
-
 #endif

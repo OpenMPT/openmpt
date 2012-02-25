@@ -1,7 +1,18 @@
-#ifndef _VIEW_COMMENTS_H_
-#define _VIEW_COMMENTS_H_
+/*
+ * view_com.h
+ * ----------
+ * Purpose: Song comments tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-enum { 
+
+#pragma once
+
+enum
+{ 
 	LINE_LENGTH = 128,	//was 81. must be larger than visible comment area.
 };
 
@@ -47,6 +58,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-#endif // _VIEW_COMMENTS_H_

@@ -1,10 +1,13 @@
 /*
- * Purpose: Load ULT (UltraTracker) modules
- * Authors: Storlek (Original author - http://schismtracker.org/)
+ * Load_ult.cpp
+ * ------------
+ * Purpose: ULT (UltraTracker) module loader
+ * Notes  : (currently none)
+ * Authors: Storlek (Original author - http://schismtracker.org/ - code ported with permission)
  *			Johannes Schultz (OpenMPT Port, tweaks)
- *
- * Thanks to Storlek for allowing me to use this code!
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -16,7 +19,7 @@ enum
 	ULT_PINGPONGLOOP = 16,
 };
 
-#pragma pack(1)
+#pragma pack(push, 1)
 struct ULT_SAMPLE
 {
 	char   name[32];
@@ -31,7 +34,7 @@ struct ULT_SAMPLE
 	int16  finetune;
 };
 STATIC_ASSERT(sizeof(ULT_SAMPLE) >= 64);
-#pragma pack()
+#pragma pack(pop)
 
 /* Unhandled effects:
 5x1 - do not loop sample (x is unused)
@@ -141,7 +144,7 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 	*pp = p;
 }
 
-static int ReadULTEvent(MODCOMMAND *note, const BYTE *lpStream, DWORD *dwMP, const DWORD dwMemLength)
+static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, const DWORD dwMemLength)
 //---------------------------------------------------------------------------------------------------
 {
 	#define ASSERT_CAN_READ_ULTENV(x) ASSERT_CAN_READ_PROTOTYPE(dwMemPos, dwMemLength, x, return 0);
@@ -211,7 +214,7 @@ static int ReadULTEvent(MODCOMMAND *note, const BYTE *lpStream, DWORD *dwMP, con
 	}
 	if (n < 5)
 	{
-		if (CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd1) > CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd2))
+		if (CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd1) > CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd2))
 		{
 			std::swap(cmd1, cmd2);
 			std::swap(param1, param2);
@@ -246,7 +249,7 @@ struct PostFixUltCommands
 		isPortaActive.resize(numChannels, false);
 	}
 
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		// Attempt to fix portamentos.
 		// UltraTracker will slide until the destination note is reached or 300 is encountered.
@@ -344,7 +347,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
 	{
 		ULT_SAMPLE ultSmp;
-		MODSAMPLE *pSmp = &(Samples[nSmp + 1]);
+		ModSample *pSmp = &(Samples[nSmp + 1]);
 		// annoying: v4 added a field before the end of the struct
 		if(ult_version >= 4)
 		{
@@ -435,8 +438,8 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 
 	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 	{
-		MODCOMMAND evnote;
-		MODCOMMAND *note;
+		ModCommand evnote;
+		ModCommand *note;
 		int repeat;
 		evnote.Clear();
 

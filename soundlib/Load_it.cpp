@@ -1,11 +1,13 @@
 /*
- * OpenMPT
- *
  * Load_it.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * -----------
+ * Purpose: IT (Impulse Tracker) module loader / saver
+ * Notes  : Also handles MPTM loading / saving, as the formats are almost identical.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -210,7 +212,7 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 		else //This 'else' happens probably only in case of corrupted file.
 		{
 			if(csf.Instruments[i])
-				csf.Instruments[i]->pTuning = MODINSTRUMENT::s_DefaultTuning;
+				csf.Instruments[i]->pTuning = ModInstrument::s_DefaultTuning;
 		}
 
 	}
@@ -233,7 +235,7 @@ BYTE autovibxm2it[8] =
 // Impulse Tracker IT file support
 
 
-UINT ConvertVolParam(const MODCOMMAND *m)
+UINT ConvertVolParam(const ModCommand *m)
 //---------------------------------------
 {
 	return min(m->vol, 9);
@@ -241,7 +243,7 @@ UINT ConvertVolParam(const MODCOMMAND *m)
 
 
 // Convert MPT's internal envelope format into an IT/MPTM envelope.
-void MPTEnvToIT(const INSTRUMENTENVELOPE *mptEnv, ITENVELOPE *itEnv, const BYTE envOffset, const BYTE envDefault)
+void MPTEnvToIT(const InstrumentEnvelope *mptEnv, ITENVELOPE *itEnv, const BYTE envOffset, const BYTE envDefault)
 //---------------------------------------------------------------------------------------------------------------
 {
 	if(mptEnv->dwFlags & ENV_ENABLED)	itEnv->flags |= 1;
@@ -275,7 +277,7 @@ void MPTEnvToIT(const INSTRUMENTENVELOPE *mptEnv, ITENVELOPE *itEnv, const BYTE 
 
 
 // Convert IT/MPTM envelope data into MPT's internal envelope format - To be used by ITInstrToMPT()
-void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE envOffset, const int iEnvMax)
+void ITEnvToMPT(const ITENVELOPE *itEnv, InstrumentEnvelope *mptEnv, const BYTE envOffset, const int iEnvMax)
 //-----------------------------------------------------------------------------------------------------------
 {
 	if(itEnv->flags & 1) mptEnv->dwFlags |= ENV_ENABLED;
@@ -312,8 +314,8 @@ void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE 
 }
 
 
-//BOOL CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers)
-long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) //rewbs.modularInstData
+//BOOL CSoundFile::ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers)
+long CSoundFile::ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers) //rewbs.modularInstData
 //-----------------------------------------------------------------------------
 {
 	// Envelope point count. Limited to 25 in IT format.
@@ -956,7 +958,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			try
 			{
-				Instruments[nins + 1] = new MODINSTRUMENT();
+				Instruments[nins + 1] = new ModInstrument();
 				ITInstrToMPT(lpStream + inspos[nins], Instruments[nins + 1], pifh->cmwt);
 			} catch(MPTMemoryException)
 			{
@@ -984,7 +986,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
 		if (pis->id == LittleEndian(IT_IMPS))
 		{
-			MODSAMPLE *pSmp = &Samples[nsmp+1];
+			ModSample *pSmp = &Samples[nsmp+1];
 			memcpy(pSmp->filename, pis->filename, 12);
 			StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
 			pSmp->uFlags = 0;
@@ -1098,9 +1100,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		CopyPatternName(Patterns[npat], &patNames, patNamesLen);
 
 		vector<BYTE> chnmask;
-		vector<MODCOMMAND> lastvalue;
+		vector<ModCommand> lastvalue;
 
-		MODCOMMAND *m = Patterns[npat];
+		ModCommand *m = Patterns[npat];
 		UINT i = 0;
 		const BYTE *p = lpStream+patpos[npat]+8;
 		UINT nrow = 0;
@@ -1123,7 +1125,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(ch >= chnmask.size())
 			{
 				chnmask.resize(ch + 1, 0);
-				lastvalue.resize(ch + 1, MODCOMMAND::Empty());
+				lastvalue.resize(ch + 1, ModCommand::Empty());
 				ASSERT(chnmask.size() <= GetNumChannels());
 			}
 
@@ -1589,7 +1591,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		iti.trkvers = (compatExport ? LittleEndianW(0x0214) : LittleEndianW(0x220));	//rewbs.itVersion
 		if (Instruments[nins])
 		{
-			MODINSTRUMENT *pIns = Instruments[nins];
+			ModInstrument *pIns = Instruments[nins];
 			memcpy(iti.filename, pIns->filename, 12);
 			memcpy(iti.name, pIns->name, 26);
 			StringFixer::SetNullTerminator(iti.name);
@@ -1674,7 +1676,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			{	//VST Slot chunk:
 				ID='PLUG';
 				fwrite(&ID, 1, sizeof(int), f);
-				MODINSTRUMENT *pIns = Instruments[nins];
+				ModInstrument *pIns = Instruments[nins];
 				fwrite(&(pIns->nMixPlug), 1, sizeof(BYTE), f);
 				modularInstSize += sizeof(int)+sizeof(BYTE);
 			}
@@ -1741,13 +1743,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 
 		const CHANNELINDEX maxChannels = min(specs.channelsMax, GetNumChannels());
 		vector<BYTE> chnmask(maxChannels, 0xFF);
-		vector<MODCOMMAND> lastvalue(maxChannels, MODCOMMAND::Empty());
+		vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
 
 		for (ROWINDEX row = 0; row<Patterns[npat].GetNumRows(); row++)
 		{
 			UINT len = 0;
 			BYTE buf[8 * MAX_BASECHANNELS];
-			const MODCOMMAND *m = Patterns[npat].GetRow(row);
+			const ModCommand *m = Patterns[npat].GetRow(row);
 
 			for (CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
 			{
@@ -1905,7 +1907,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	// Writing Sample Data
 	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
 	{
-		const MODSAMPLE &sample = Samples[nsmp];
+		const ModSample &sample = Samples[nsmp];
 		MemsetZero(itss);
 		memcpy(itss.filename, sample.filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
@@ -2469,24 +2471,24 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 	if (nInstruments == 0)
 		return;
 
-	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(MODINSTRUMENT().nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(MODINSTRUMENT().nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(MODINSTRUMENT().nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(MODINSTRUMENT().nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(MODINSTRUMENT().wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('P...', sizeof(MODINSTRUMENT().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(MODINSTRUMENT().nGlobalVol),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(MODINSTRUMENT().nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('R...', sizeof(MODINSTRUMENT().nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(MODINSTRUMENT().nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(MODINSTRUMENT().nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(MODINSTRUMENT().nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(MODINSTRUMENT().PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(MODINSTRUMENT().PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(MODINSTRUMENT().VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(MODINSTRUMENT().wPitchToTempoLock),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(MODINSTRUMENT().nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(MODINSTRUMENT().nPluginVolumeHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(ModInstrument().nMixPlug),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(ModInstrument().nMidiChannel),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(ModInstrument().nMidiProgram),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(ModInstrument().wMidiBank),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('P...', sizeof(ModInstrument().nPan),        f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(ModInstrument().nGlobalVol),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(ModInstrument().nFadeOut),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('R...', sizeof(ModInstrument().nResampling), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(ModInstrument().nCutSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(ModInstrument().nResSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(ModInstrument().nFilterMode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(ModInstrument().wPitchToTempoLock),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
 
 	if(GetType() & MOD_TYPE_MPT)
 	{
@@ -2500,17 +2502,17 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(MODINSTRUMENT().VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(MODINSTRUMENT().VolEnv.Ticks ), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(MODINSTRUMENT().VolEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(ModInstrument().VolEnv.Ticks ), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(MODINSTRUMENT().PanEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(MODINSTRUMENT().PanEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(MODINSTRUMENT().PanEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(MODINSTRUMENT().PitchEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(MODINSTRUMENT().PitchEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(MODINSTRUMENT().PitchEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
 		}
 	}
 
@@ -2530,7 +2532,7 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 
 			pField = GetInstrumentHeaderFieldPointer(Instruments[nins], code, size); //get ptr to field
 		} else
 		{
-			MODINSTRUMENT *emptyInstrument = new MODINSTRUMENT();
+			ModInstrument *emptyInstrument = new ModInstrument();
 			pField = GetInstrumentHeaderFieldPointer(emptyInstrument, code, size); //get ptr to field
 			delete emptyInstrument;
 		}

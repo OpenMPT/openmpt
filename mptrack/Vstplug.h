@@ -1,6 +1,14 @@
+/*
+ * vstplug.h
+ * ---------
+ * Purpose: Plugin handling (loading and processing plugins)
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
-#ifndef _VST_PLUGIN_MANAGER_H_
-#define _VST_PLUGIN_MANAGER_H_
 
 #ifndef NO_VST
 	#define VST_FORCE_DEPRECATED 0
@@ -83,7 +91,7 @@ protected:
 	VSTINSTCH m_MidiCh[16];
 	short m_nMidiPitchBendPos[16];
 
-	int m_MixBuffer[MIXBUFFERSIZE*2+2];					// Stereo interleaved
+	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
 
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
@@ -287,6 +295,3 @@ public:
 	void OnIdle() {}
 #endif // NO_VST
 };
-
-
-#endif // _VST_PLUGIN_MANAGER_H_

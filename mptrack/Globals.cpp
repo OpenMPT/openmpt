@@ -1,5 +1,12 @@
-// globals.cpp : implementation of the CViewModTree class
-//
+/*
+ * globals.cpp
+ * -----------
+ * Purpose: Implementation of various views of the tracker interface.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"

@@ -1,3 +1,14 @@
+/*
+ * view_ins.cpp
+ * ------------
+ * Purpose: Instrument tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -239,7 +250,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 UINT CViewInstrument::EnvGetTick(int nPoint) const
 //------------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	if((nPoint >= 0) && (nPoint < (int)envelope->nNodes))
 		return envelope->Ticks[nPoint];
@@ -251,7 +262,7 @@ UINT CViewInstrument::EnvGetTick(int nPoint) const
 UINT CViewInstrument::EnvGetValue(int nPoint) const
 //-------------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	if(nPoint >= 0 && nPoint < (int)envelope->nNodes)
 		return envelope->Values[nPoint];
@@ -265,7 +276,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 {
 	if(nPoint < 0) return false;
 
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 
 	bool bOK = false;
@@ -308,7 +319,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 UINT CViewInstrument::EnvGetNumPoints() const
 //-------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->nNodes;
 }
@@ -327,7 +338,7 @@ UINT CViewInstrument::EnvGetLastPoint() const
 bool CViewInstrument::EnvGetFlag(const DWORD dwFlag) const
 //--------------------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv != nullptr && pEnv->dwFlags & dwFlag) return true;
 	return false;
 }
@@ -336,7 +347,7 @@ bool CViewInstrument::EnvGetFlag(const DWORD dwFlag) const
 UINT CViewInstrument::EnvGetLoopStart() const
 //-------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->nLoopStart;
 }
@@ -345,7 +356,7 @@ UINT CViewInstrument::EnvGetLoopStart() const
 UINT CViewInstrument::EnvGetLoopEnd() const
 //-----------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->nLoopEnd;
 }
@@ -354,7 +365,7 @@ UINT CViewInstrument::EnvGetLoopEnd() const
 UINT CViewInstrument::EnvGetSustainStart() const
 //----------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->nSustainStart;
 }
@@ -363,7 +374,7 @@ UINT CViewInstrument::EnvGetSustainStart() const
 UINT CViewInstrument::EnvGetSustainEnd() const
 //--------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->nSustainEnd;
 }
@@ -372,7 +383,7 @@ UINT CViewInstrument::EnvGetSustainEnd() const
 bool CViewInstrument::EnvGetVolEnv() const
 //----------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns) return (pIns->VolEnv.dwFlags & ENV_ENABLED) != 0;
 	return false;
 }
@@ -381,7 +392,7 @@ bool CViewInstrument::EnvGetVolEnv() const
 bool CViewInstrument::EnvGetPanEnv() const
 //----------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns) return (pIns->PanEnv.dwFlags & ENV_ENABLED) != 0;
 	return false;
 }
@@ -390,7 +401,7 @@ bool CViewInstrument::EnvGetPanEnv() const
 bool CViewInstrument::EnvGetPitchEnv() const
 //------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == ENV_ENABLED);
 	return false;
 }
@@ -399,7 +410,7 @@ bool CViewInstrument::EnvGetPitchEnv() const
 bool CViewInstrument::EnvGetFilterEnv() const
 //-------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == (ENV_ENABLED|ENV_FILTER));
 	return false;
 }
@@ -408,7 +419,7 @@ bool CViewInstrument::EnvGetFilterEnv() const
 bool CViewInstrument::EnvSetLoopStart(int nPoint)
 //-----------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
@@ -427,7 +438,7 @@ bool CViewInstrument::EnvSetLoopStart(int nPoint)
 bool CViewInstrument::EnvSetLoopEnd(int nPoint)
 //---------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
@@ -446,7 +457,7 @@ bool CViewInstrument::EnvSetLoopEnd(int nPoint)
 bool CViewInstrument::EnvSetSustainStart(int nPoint)
 //--------------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
@@ -468,7 +479,7 @@ bool CViewInstrument::EnvSetSustainStart(int nPoint)
 bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 //------------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
@@ -490,7 +501,7 @@ bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 //----------------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 	if(nPoint < 1 || nPoint > (int)EnvGetLastPoint()) return false;
 
@@ -519,7 +530,7 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 bool CViewInstrument::EnvSetFlag(const DWORD dwFlag, const bool bEnable) const
 //----------------------------------------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
 	if(bEnable)
 	{
@@ -540,7 +551,7 @@ bool CViewInstrument::EnvSetFlag(const DWORD dwFlag, const bool bEnable) const
 }
 
 
-bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool enable, BYTE defaultValue, DWORD extraFlags)
+bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, DWORD extraFlags)
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(pIns == nullptr || pSndFile == nullptr)
@@ -548,7 +559,7 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 		return false;
 	}
 
-	INSTRUMENTENVELOPE &env = pIns->GetEnvelope(envelope);
+	InstrumentEnvelope &env = pIns->GetEnvelope(envelope);
 
 	const DWORD flags = (ENV_ENABLED | extraFlags);
 
@@ -575,7 +586,7 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 	{
 		if(pSndFile->Chn[nChn].pModInstrument == pIns)
 		{
-			MODCHANNEL_ENVINFO &chnEnv = pSndFile->Chn[nChn].GetEnvelope(envelope);
+			ModChannelEnvInfo &chnEnv = pSndFile->Chn[nChn].GetEnvelope(envelope);
 
 			if(enable)
 			{
@@ -594,7 +605,7 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 //----------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
@@ -605,7 +616,7 @@ bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 //----------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
@@ -616,7 +627,7 @@ bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 //------------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
@@ -628,7 +639,7 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 //-------------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
@@ -990,7 +1001,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 BYTE CViewInstrument::EnvGetReleaseNode()
 //---------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return ENV_RELEASE_NODE_UNSET;
 	return envelope->nReleaseNode;
 }
@@ -998,7 +1009,7 @@ BYTE CViewInstrument::EnvGetReleaseNode()
 WORD CViewInstrument::EnvGetReleaseNodeValue()
 //--------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->Values[EnvGetReleaseNode()];
 }
@@ -1006,7 +1017,7 @@ WORD CViewInstrument::EnvGetReleaseNodeValue()
 WORD CViewInstrument::EnvGetReleaseNodeTick()
 //-------------------------------------------
 {
-	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
 	return envelope->Ticks[EnvGetReleaseNode()];
 }
@@ -1018,10 +1029,10 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 	if ((pModDoc) && (nPoint <= EnvGetLastPoint()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			InstrumentEnvelope *envelope = GetEnvelopePtr();
 			if(envelope == nullptr || envelope->nNodes == 0) return false;
 
 			envelope->nNodes--;
@@ -1062,13 +1073,13 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
 			if(nTick < 0) return 0;
 			nValue = Clamp(nValue, 0, 64);
 
-			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			InstrumentEnvelope *envelope = GetEnvelopePtr();
 			if(envelope == nullptr) return 0;
 
 			if(std::binary_search(envelope->Ticks, envelope->Ticks + envelope->nNodes, nTick))
@@ -1434,8 +1445,8 @@ UINT CViewInstrument::OnNcHitTest(CPoint point)
 void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 //------------------------------------------------
 {
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	ModInstrument *pIns = GetInstrumentPtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if (pIns == nullptr || pEnv == nullptr) return;
 
 	bool bSplitCursor = false;
@@ -1779,7 +1790,7 @@ void CViewInstrument::OnEnvLoopChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
 	{
-		INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+		InstrumentEnvelope *pEnv = GetEnvelopePtr();
 		if(EnvGetLoop() && pEnv != nullptr && pEnv->nLoopEnd == 0)
 		{
 			// Enabled loop => set loop points if no loop has been specified yet.
@@ -1799,7 +1810,7 @@ void CViewInstrument::OnEnvSustainChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
 	{
-		INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+		InstrumentEnvelope *pEnv = GetEnvelopePtr();
 		if(EnvGetSustain() && pEnv != nullptr && pEnv->nSustainStart == pEnv->nSustainEnd && IsDragItemEnvPoint())
 		{
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
@@ -1946,7 +1957,7 @@ void CViewInstrument::PlayNote(UINT note)
 		/*	CSoundFile *pSoundFile = pModDoc->GetSoundFile();
 			if (pSoundFile && m_baPlayingNote>0 && m_nPlayingChannel>=0)
 			{
-				MODCHANNEL *pChn = &(pSoundFile->Chn[m_nPlayingChannel]); //Get pointer to channel playing last note.
+				ModChannel *pChn = &(pSoundFile->Chn[m_nPlayingChannel]); //Get pointer to channel playing last note.
 				if (pChn->pHeader)	//is it valid?
 				{
 					DWORD tempflags = pChn->dwFlags;
@@ -1956,7 +1967,7 @@ void CViewInstrument::PlayNote(UINT note)
 				}
 			}
 		*/
-			MODINSTRUMENT *pIns = pModDoc->GetSoundFile()->Instruments[m_nInstrument];
+			ModInstrument *pIns = pModDoc->GetSoundFile()->Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note-1] && !pIns->nMixPlug)) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel = pModDoc->PlayNote(note, m_nInstrument, 0, false); //rewbs.instViewNNA
@@ -2332,7 +2343,7 @@ void CViewInstrument::EnvSetZoom(float fNewZoom)
 void CViewInstrument::EnvKbdSelectPrevPoint()
 //-------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
 	if(m_nDragItem <= 1 || m_nDragItem > pEnv->nNodes)
 		m_nDragItem = pEnv->nNodes;
@@ -2345,7 +2356,7 @@ void CViewInstrument::EnvKbdSelectPrevPoint()
 void CViewInstrument::EnvKbdSelectNextPoint()
 //-------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
 	if(m_nDragItem >= pEnv->nNodes)
 		m_nDragItem = 1;
@@ -2358,7 +2369,7 @@ void CViewInstrument::EnvKbdSelectNextPoint()
 void CViewInstrument::EnvKbdMovePointLeft()
 //-----------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, -1))
 		return;
@@ -2372,7 +2383,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 void CViewInstrument::EnvKbdMovePointRight()
 //------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, 1))
 		return;
@@ -2386,7 +2397,7 @@ void CViewInstrument::EnvKbdMovePointRight()
 void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 //----------------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(pEnv->Values[m_nDragItem - 1] <= ENVELOPE_MAX - stepsize)
 		pEnv->Values[m_nDragItem - 1] += stepsize;
@@ -2401,7 +2412,7 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 //------------------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(pEnv->Values[m_nDragItem - 1] >= ENVELOPE_MIN + stepsize)
 		pEnv->Values[m_nDragItem - 1] -= stepsize;
@@ -2415,7 +2426,7 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 void CViewInstrument::EnvKbdInsertPoint()
 //---------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
 	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->nNodes;
 	WORD newTick = pEnv->Ticks[pEnv->nNodes - 1] + 4;	// if last point is selected: add point after last point
@@ -2435,7 +2446,7 @@ void CViewInstrument::EnvKbdInsertPoint()
 void CViewInstrument::EnvKbdRemovePoint()
 //---------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->nNodes == 0) return;
 	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
 	EnvRemovePoint(m_nDragItem - 1);
@@ -2445,7 +2456,7 @@ void CViewInstrument::EnvKbdRemovePoint()
 void CViewInstrument::EnvKbdSetLoopStart()
 //----------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
@@ -2457,7 +2468,7 @@ void CViewInstrument::EnvKbdSetLoopStart()
 void CViewInstrument::EnvKbdSetLoopEnd()
 //--------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetLoop())
 	{
@@ -2472,7 +2483,7 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 void CViewInstrument::EnvKbdSetSustainStart()
 //-------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
@@ -2484,7 +2495,7 @@ void CViewInstrument::EnvKbdSetSustainStart()
 void CViewInstrument::EnvKbdSetSustainEnd()
 //-----------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetSustain())
 	{
@@ -2499,7 +2510,7 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 void CViewInstrument::EnvKbdToggleReleaseNode()
 //---------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
@@ -2511,7 +2522,7 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 
 
 // Get a pointer to the currently active instrument.
-MODINSTRUMENT *CViewInstrument::GetInstrumentPtr() const
+ModInstrument *CViewInstrument::GetInstrumentPtr() const
 //------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -2523,11 +2534,11 @@ MODINSTRUMENT *CViewInstrument::GetInstrumentPtr() const
 
 // Get a pointer to the currently selected envelope.
 // This function also implicitely validates the moddoc and soundfile pointers.
-INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
+InstrumentEnvelope *CViewInstrument::GetEnvelopePtr() const
 //---------------------------------------------------------
 {
 	// First do some standard checks...
-	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return nullptr;
 			
 	return &pIns->GetEnvelope(m_nEnv);
@@ -2537,7 +2548,7 @@ INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
 bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
 //---------------------------------------------------------
 {
-	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return false;
 	
 	// Can't move first point

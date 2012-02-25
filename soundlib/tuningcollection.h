@@ -1,5 +1,14 @@
-#ifndef TUNINGCOLLECTION_H
-#define TUNINGCOLLECTION_H
+/*
+ * tuningCollection.h
+ * ------------------
+ * Purpose: Alternative sample tuning collection class.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "tuning.h"
 #include <vector>
@@ -139,6 +148,3 @@ private:
 
 //END PRIVATE METHODS.
 };
-
-
-#endif

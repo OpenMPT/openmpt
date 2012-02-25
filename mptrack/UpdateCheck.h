@@ -1,14 +1,14 @@
 /*
  * UpdateCheck.h
  * -------------
- * Purpose: Header for easy software update check.
+ * Purpose: Class for easy software update check.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
-#ifndef UPDATECHECK_H
-#define UPDATECHECK_H
 
 #include <WinInet.h>
 #include <time.h>
@@ -83,6 +83,3 @@ protected:
 	afx_msg void OnResetURL();
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif // UPDATECHECK_H
-

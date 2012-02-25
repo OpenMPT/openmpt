@@ -1,3 +1,13 @@
+/*
+ * InputHandler.h
+ * --------------
+ * Purpose: Implementation of keyboard input handling, keymap loading, ...
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #define END_VIEWPATTERNS     200
@@ -90,5 +100,3 @@ public:
 	bool SetXMEffects(void);
 	bool SetITEffects(void);
 };
-
-

@@ -1,9 +1,18 @@
+/*
+ * InputHandler.cpp
+ * ----------------
+ * Purpose: Implementation of keyboard input handling, keymap loading, ...
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "afxtempl.h"
 #include "CommandSet.h"
 #include "inputhandler.h"
 #include "Resource.h"
-//#include "KeyboardSettings.h"
 #include "mptrack.h"
 #include "mainfrm.h"
 #include <direct.h>

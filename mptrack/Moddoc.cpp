@@ -1,5 +1,12 @@
-// moddoc.cpp : implementation of the CModDoc class
-//
+/*
+ * ModDoc.cpp
+ * ----------
+ * Purpose: Module document handling in OpenMPT.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -129,8 +136,8 @@ CModDoc::CModDoc()
 	m_bsInstrumentModified.reset();
 
 #ifdef _DEBUG
-	MODCHANNEL *p = m_SndFile.Chn;
-	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
+	ModChannel *p = m_SndFile.Chn;
+	if (((DWORD)p) & 7) Log("ModChannel struct is not aligned (0x%08X)\n", p);
 #endif
 // Fix: save pattern scrollbar position when switching to other tab
 	m_szOldPatternScrollbarsPos = CSize(-10,-10);
@@ -243,7 +250,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		if (lpMidiLib) for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
 		{
 			LPCSTR pszMidiMapName;
-			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
+			ModInstrument *pIns = m_SndFile.Instruments[nIns];
 			UINT nMidiCode;
 			BOOL bEmbedded = FALSE;
 
@@ -737,7 +744,7 @@ BOOL CModDoc::InitializeMod()
 		{
 			try
 			{
-				m_SndFile.Instruments[1] = new MODINSTRUMENT(1);
+				m_SndFile.Instruments[1] = new ModInstrument(1);
 				m_SndFile.m_nInstruments = 1;
 				InitializeInstrument(m_SndFile.Instruments[1]);
 			} catch(MPTMemoryException)
@@ -868,7 +875,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 }
 
 
-UINT CModDoc::GetPlaybackMidiChannel(const MODINSTRUMENT *pIns, CHANNELINDEX nChn) const
+UINT CModDoc::GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const
 //--------------------------------------------------------------------------------------
 {
 	if(pIns->nMidiChannel == MidiMappedChannel)
@@ -893,7 +900,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 	
 	if (pMainFrm == nullptr || note == NOTE_NONE) return FALSE;
 	if (nVol > 256) nVol = 256;
-	if (MODCOMMAND::IsNote(MODCOMMAND::NOTE(note)))
+	if (ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
 
 		//kill notes if required.
@@ -930,7 +937,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 			nChn = FindAvailableChannel();
 		}
 
-		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
+		ModChannel *pChn = &m_SndFile.Chn[nChn];
 		
 		// reset channel properties; in theory the chan is completely unused anyway.
 		pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
@@ -954,7 +961,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 			pChn->nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
 		}  else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
 		{
-			MODSAMPLE &sample = m_SndFile.GetSample(nsmp);
+			ModSample &sample = m_SndFile.GetSample(nsmp);
 			pChn->pCurrentSample = sample.pSample;
 			pChn->pModInstrument = nullptr;
 			pChn->pModSample = &sample;
@@ -1008,7 +1015,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 		//rewbs.vstiLive
 		if (nins <= m_SndFile.GetNumInstruments())
 		{
-			const MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
+			const ModInstrument *pIns = m_SndFile.Instruments[nins];
 			if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
 			{
 				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
@@ -1051,7 +1058,7 @@ BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX n
 	if((nins != INSTRUMENTINDEX_INVALID) && (nins <= m_SndFile.GetNumInstruments()) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
 	{
 
-		MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
+		ModInstrument *pIns = m_SndFile.Instruments[nins];
 		if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
 		{
 
@@ -1073,7 +1080,7 @@ BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX n
 	//end rewbs.vstiLive
 
 	const DWORD mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
-	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
+	ModChannel *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
 	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 
@@ -1097,7 +1104,7 @@ BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX n
 bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
 //----------------------------------------------------------------------------
 {
-	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.GetNumChannels()];
+	ModChannel *pChn = &m_SndFile.Chn[m_SndFile.GetNumChannels()];
 	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 		if ((pChn->nLength) && (!(pChn->dwFlags & (CHN_NOTEFADE|CHN_KEYOFF|CHN_MUTE)))
@@ -1161,7 +1168,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 		{
 			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
-			MODINSTRUMENT* pIns = m_SndFile.Chn[nChn].pModInstrument;
+			ModInstrument* pIns = m_SndFile.Chn[nChn].pModInstrument;
 			if (pPlug && pIns)
 			{
 				pPlug->MidiCommand(m_SndFile.GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
@@ -1446,7 +1453,7 @@ UINT CModDoc::FindSampleParent(UINT nSmp) const
 	if ((!m_SndFile.m_nInstruments) || (!nSmp)) return 0;
 	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
 	{
-		MODINSTRUMENT *pIns = m_SndFile.Instruments[i];
+		ModInstrument *pIns = m_SndFile.Instruments[i];
 		if (pIns)
 		{
 			for (UINT j=0; j<NOTE_MAX; j++)
@@ -1462,7 +1469,7 @@ UINT CModDoc::FindSampleParent(UINT nSmp) const
 UINT CModDoc::FindInstrumentChild(UINT nIns) const
 //------------------------------------------------
 {
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	if ((!nIns) || (nIns > m_SndFile.GetNumInstruments())) return 0;
 	pIns = m_SndFile.Instruments[nIns];
 	if (pIns)
@@ -2577,7 +2584,7 @@ CHANNELINDEX CModDoc::FindAvailableChannel()
 	// Search for available channel
 	for (CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
 	{
-		MODCHANNEL *p = &m_SndFile.Chn[j];
+		ModChannel *p = &m_SndFile.Chn[j];
 		if (!p->nLength)
 			return j;
 		else if(p->dwFlags & CHN_NOTEFADE)

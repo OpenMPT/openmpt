@@ -1,3 +1,14 @@
+/*
+ * view_com.cpp
+ * ------------
+ * Purpose: Song comments tab, lower panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -246,7 +257,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
 				{
-					const MODSAMPLE &sample = pSndFile->GetSample(iSmp + 1);
+					const ModSample &sample = pSndFile->GetSample(iSmp + 1);
 					s[0] = 0;
 					switch(iCol)
 					{
@@ -346,7 +357,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<INSLIST_COLUMNS; iCol++)
 				{
-					MODINSTRUMENT *pIns = pSndFile->Instruments[iIns+1];
+					ModInstrument *pIns = pSndFile->Instruments[iIns+1];
 					s[0] = 0;
 					switch(iCol)
 					{
@@ -508,7 +519,7 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 		{
 			if ((iItem < pSndFile->m_nInstruments) && (pSndFile->Instruments[iItem + 1]))
 			{
-				MODINSTRUMENT *pIns = pSndFile->Instruments[iItem+1];
+				ModInstrument *pIns = pSndFile->Instruments[iItem+1];
 				memcpy(pIns->name, s, sizeof(pIns->name));
 				StringFixer::SetNullTerminator(pIns->name);
 				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);

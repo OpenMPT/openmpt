@@ -1,20 +1,14 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_dbm.cpp
+ * ------------
+ * Purpose: DigiBooster Pro module Loader (DBM)
+ * Notes  : This loader doesn't handle multiple songs.
+ * Authors: Olivier Lapicque
+ *          Adam Goode (endian and char fixes for PPC)
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-///////////////////////////////////////////////////////////////
-//
-// DigiBooster Pro Module Loader (*.dbm)
-//
-// Note: this loader doesn't handle multiple songs
-//
-///////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -30,7 +24,7 @@
 #define DBM_ID_PATT		0x54544150
 #define DBM_ID_SMPL		0x4c504d53
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct DBMFILEHEADER
 {
@@ -92,10 +86,10 @@ typedef struct DBMSAMPLE
 	BYTE sampledata[2];		// [samplesize]
 } DBMSAMPLE;
 
-#pragma pack()
+#pragma pack(pop)
 
 
-static MODCOMMAND::COMMAND dbm_efftrans[23] =
+static ModCommand::COMMAND dbm_efftrans[23] =
 {
 	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
@@ -225,8 +219,8 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 			if (nInstruments >= MAX_INSTRUMENTS) nInstruments = MAX_INSTRUMENTS-1;
 			for(INSTRUMENTINDEX iIns = 0; iIns < nInstruments; iIns++)
 			{
-				MODSAMPLE *psmp;
-				MODINSTRUMENT *pIns;
+				ModSample *psmp;
+				ModInstrument *pIns;
 				DBMINSTRUMENT *pih;
 				WORD nsmp;
 
@@ -238,7 +232,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 
 				try
 				{
-					pIns = new MODINSTRUMENT(nsmp);
+					pIns = new ModInstrument(nsmp);
 				} catch(MPTMemoryException)
 				{
 					break;
@@ -301,7 +295,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				nins = BigEndianW(peh->instrument);
 				if ((nins) && (nins < MAX_INSTRUMENTS) && (Instruments[nins]) && (peh->numpoints))
 				{
-					MODINSTRUMENT *pIns = Instruments[nins];
+					ModInstrument *pIns = Instruments[nins];
 
 					if (peh->flags & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
 					if (peh->flags & 2) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
@@ -338,7 +332,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				if ((nRows >= 4) && (nRows <= 256))
 				{
 					Patterns.Insert(iPat, nRows);
-					MODCOMMAND *m = Patterns[iPat];
+					ModCommand *m = Patterns[iPat];
 					if (m)
 					{
 						LPBYTE pkdata = (LPBYTE)&pph->patterndata;
@@ -398,7 +392,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 										}
 										if (n < 5)
 										{
-											if (CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd1) > CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd2))
+											if (CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd1) > CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd2))
 											{
 												std::swap(cmd1, cmd2);
 												std::swap(param1, param2);
@@ -443,7 +437,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 			m_nSamples = nSamples;
 			for (UINT iSmp=1; iSmp<=nSamples; iSmp++)
 			{
-				MODSAMPLE *pSmp;
+				ModSample *pSmp;
 				DBMSAMPLE *psh;
 				DWORD samplesize;
 				DWORD sampleflags;

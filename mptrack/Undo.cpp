@@ -1,10 +1,11 @@
 /*
  * Undo.cpp
  * --------
- * Purpose: Undo functions for pattern and sample editor
+ * Purpose: Editor undo buffer functionality.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
@@ -48,7 +49,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	if(pSndFile == nullptr) return false;
 
 	PATTERNUNDOBUFFER sUndo;
-	MODCOMMAND *pUndoData, *pPattern;
+	ModCommand *pUndoData, *pPattern;
 	ROWINDEX nRows;
 
 	if (!pSndFile->Patterns.IsValidPat(pattern)) return false;
@@ -80,7 +81,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	pPattern += firstChn + firstRow * pSndFile->GetNumChannels();
 	for(ROWINDEX iy = 0; iy < numRows; iy++)
 	{
-		memcpy(pUndoData, pPattern, numChns * sizeof(MODCOMMAND));
+		memcpy(pUndoData, pPattern, numChns * sizeof(ModCommand));
 		pUndoData += numChns;
 		pPattern += pSndFile->GetNumChannels();
 	}
@@ -89,8 +90,8 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	{
 		sUndo.channelInfo = new PATTERNUNDOINFO;
 		sUndo.channelInfo->oldNumChannels = pSndFile->GetNumChannels();
-		sUndo.channelInfo->settings = new MODCHANNELSETTINGS[pSndFile->GetNumChannels()];
-		memcpy(sUndo.channelInfo->settings, pSndFile->ChnSettings, sizeof(MODCHANNELSETTINGS) * pSndFile->GetNumChannels());
+		sUndo.channelInfo->settings = new ModChannelSettings[pSndFile->GetNumChannels()];
+		memcpy(sUndo.channelInfo->settings, pSndFile->ChnSettings, sizeof(ModChannelSettings) * pSndFile->GetNumChannels());
 	} else
 	{
 		sUndo.channelInfo = nullptr;
@@ -120,7 +121,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return PATTERNINDEX_INVALID;
 
-	MODCOMMAND *pUndoData, *pPattern;
+	ModCommand *pUndoData, *pPattern;
 	PATTERNINDEX nPattern;
 	ROWINDEX nRows;
 	bool linkToPrevious = false;
@@ -160,7 +161,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 			}
 			m_pModDoc->ReArrangeChannels(channels, false);
 		}
-		memcpy(pSndFile->ChnSettings, pUndo->channelInfo->settings, sizeof(MODCHANNELSETTINGS) * pUndo->channelInfo->oldNumChannels);
+		memcpy(pSndFile->ChnSettings, pUndo->channelInfo->settings, sizeof(ModChannelSettings) * pUndo->channelInfo->oldNumChannels);
 
 		// Channel mute status might have changed...
 		for(CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
@@ -192,7 +193,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 		pPattern += pUndo->firstChannel + (pUndo->firstRow * pSndFile->GetNumChannels());
 		for(ROWINDEX iy = 0; iy < pUndo->numRows; iy++)
 		{
-			memcpy(pPattern, pUndoData, pUndo->numChannels * sizeof(MODCOMMAND));
+			memcpy(pPattern, pUndoData, pUndo->numChannels * sizeof(ModCommand));
 			pPattern += pSndFile->GetNumChannels();
 			pUndoData += pUndo->numChannels;
 		}
@@ -295,7 +296,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX nSmp, sampleUndoTypes nChangeTyp
 	// Create new undo slot
 	SAMPLEUNDOBUFFER sUndo;
 
-	const MODSAMPLE &oldsample = pSndFile->GetSample(nSmp);
+	const ModSample &oldsample = pSndFile->GetSample(nSmp);
 
 	// Save old sample header
 	MemCopy(sUndo.OldSample, oldsample);
@@ -372,7 +373,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX nSmp)
 	// Select most recent undo slot
 	SAMPLEUNDOBUFFER *pUndo = &UndoBuffer[nSmp - 1].back();
 
-	MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+	ModSample &sample = pSndFile->GetSample(nSmp);
 	LPSTR pCurrentSample = sample.pSample;
 	LPSTR pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
 

@@ -1,7 +1,7 @@
 /*
  * Load_itp.cpp
  * ------------
- * Purpose: Load and save Impulse Tracker Project (ITP) files.
+ * Purpose: Impulse Tracker Project (ITP) module loader / saver
  * Notes  : Despite its name, ITP is not a format supported by Impulse Tracker.
  *          In fact, it's a format invented by the OpenMPT team to allow people to work
  *          with the IT format, but keeping the instrument files with big samples separate
@@ -9,8 +9,9 @@
  *          The current design of the format is quite flawed, though, so expect this to
  *          change in the (far?) future.
  * Authors: OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -334,7 +335,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		// Copy sample struct data (ut-oh... this code looks very familiar!)
 		if(pis.id == LittleEndian(IT_IMPS))
 		{
-			MODSAMPLE *pSmp = &Samples[nsmp];
+			ModSample *pSmp = &Samples[nsmp];
 			memcpy(pSmp->filename, pis.filename, 12);
 			pSmp->uFlags = 0;
 			pSmp->nLength = 0;
@@ -631,7 +632,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	{
 		if(Instruments[i + 1] != nullptr)
 		{
-			MODINSTRUMENT *p = Instruments[i + 1];
+			ModInstrument *p = Instruments[i + 1];
 			for(j = 0; j < 128; j++)
 			{
 				if(p->Keyboard[j] > 0 && p->Keyboard[j] <= m_nSamples)
@@ -655,7 +656,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		if(!sampleUsed[nsmp - 1] && Samples[nsmp].pSample)
 		{
 
-			MODSAMPLE *psmp = &Samples[nsmp];
+			ModSample *psmp = &Samples[nsmp];
 			memset(&itss, 0, sizeof(itss));
 			memcpy(itss.filename, psmp->filename, 12);
 			memcpy(itss.name, m_szNames[nsmp], 26);

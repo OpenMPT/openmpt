@@ -1,32 +1,25 @@
 /*
- * OpenMPT
+ * MMX_Mix.cpp
+ * -----------
+ * Purpose: Accelerated mixer code for rendering samples.
+ * Notes  : 
+ *          x86 ( AMD/INTEL ) based low level based mixing functions:
+ *          This file contains critical code. The basic X86 functions are
+ *          defined at the bottom of the file. #define's are used to isolate
+ *          the different flavours of functionality:
+ *          ENABLE_MMX, ENABLE_AMDNOW, ENABLE_SSE flags must be set to
+ *          to compile the optimized sections of the code. In both cases the 
+ *          X86_xxxxxx functions will compile.
  *
- * Mmx_mix.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
- *
- * Name                 Date             Description
- * Olivier Lapicque     --/--/--         Creation
- * Trevor Nunes         26/01/04         encapsulated MMX,AMD,SSE with #define flags
- *                                       moved X86_xxx functions to end of file.
-*/
+ *          NOTE: Resonant filter mixing has been changed to use floating point
+ *          precision. The MMX code hasn't been updated for this, so the filtered
+ *          MMX functions mustn't be used anymore!
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-////////////////////////////////////////////////////////////////////////
-//
-// x86 ( AMD/INTEL ) based low level based mixing functions:
-// This file contains critical code. The basic X86 functions are
-// defined at the bottom of the file. #define's are used to isolate
-// the different flavours of functionality:
-// ENABLE_MMX, ENABLE_AMDNOW, ENABLE_SSE flags must be set to
-// to compile the optimized sections of the code. In both cases the 
-// X86_xxxxxx functions will compile.
-//
-// NOTE: Resonant filter mixing has been changed to use floating point
-// precision. The MMX code hasn't been updated for this, so the filtered
-// MMX functions mustn't be used anymore!
-//
-////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "sndfile.h"
 #include "../common/Reporting.h"
@@ -42,15 +35,15 @@ extern short int gDownsample2x[];
 #define PROCSUPPORT_3DNOW	0x08
 #define PROCSUPPORT_SSE		0x10
 
-// Byte offsets into the MODCHANNEL structure
-#define CHNOFS_PCURRENTSAMPLE	MODCHANNEL.pCurrentSample	// 0
-#define CHNOFS_NPOS				MODCHANNEL.nPos				// 4
-#define CHNOFS_NPOSLO			MODCHANNEL.nPosLo			// 8
-#define CHNOFS_NINC				MODCHANNEL.nInc				// 12
-#define CHNOFS_NRIGHTVOL		MODCHANNEL.nRightVol		// 16
-#define CHNOFS_NLEFTVOL			MODCHANNEL.nLeftVol			// 20
-#define CHNOFS_NRIGHTRAMP		MODCHANNEL.nRightRamp		// 24
-#define CHNOFS_NLEFTRAMP		MODCHANNEL.nLeftRamp		// 28
+// Byte offsets into the ModChannel structure
+#define CHNOFS_PCURRENTSAMPLE	ModChannel.pCurrentSample	// 0
+#define CHNOFS_NPOS				ModChannel.nPos				// 4
+#define CHNOFS_NPOSLO			ModChannel.nPosLo			// 8
+#define CHNOFS_NINC				ModChannel.nInc				// 12
+#define CHNOFS_NRIGHTVOL		ModChannel.nRightVol		// 16
+#define CHNOFS_NLEFTVOL			ModChannel.nLeftVol			// 20
+#define CHNOFS_NRIGHTRAMP		ModChannel.nRightRamp		// 24
+#define CHNOFS_NLEFTRAMP		ModChannel.nLeftRamp		// 28
 
 
 #ifdef ENABLE_MMX
@@ -162,10 +155,10 @@ DWORD CSoundFile::InitSysInfo()
 
 #ifdef _DEBUG
 	// Must be aligned on 32 bytes for best performance
-	if (sizeof(MODCHANNEL) & 0x1F)
+	if (sizeof(ModChannel) & 0x1F)
 	{
 		CHAR s[64];
-		wsprintf(s, "MODCHANNEL not aligned: sizeof(MODCHANNEL) = %d", sizeof(MODCHANNEL));
+		wsprintf(s, "ModChannel struct not aligned: sizeof(ModChannel) = %d", sizeof(ModChannel));
 		Reporting::Warning(s);
 	}
 	DWORD dwFastSinc = (DWORD)(LPVOID)gFastSinc;
@@ -226,7 +219,7 @@ VOID MMX_EndMix()
 //////////////////////////////////////////////////////////////////////////
 // Stereo MMX mixing - no interpolation
 
-_declspec(naked) VOID __cdecl MMX_Mono8BitMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono8BitMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -296,7 +289,7 @@ done:
 }
 
 
-_declspec(naked) VOID __cdecl MMX_Mono16BitMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono16BitMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -368,7 +361,7 @@ done:
 // Linear interpolation
 
 
-_declspec(naked) VOID __cdecl MMX_Mono8BitLinearMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono8BitLinearMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -414,7 +407,7 @@ mixloop:
 }
 
 
-_declspec(naked) VOID __cdecl MMX_Mono16BitLinearMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono16BitLinearMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -464,7 +457,7 @@ mixloop:
 ////////////////////////////////////////////////////////////////////////////////
 // 4-taps polyphase FIR resampling filter
 
-_declspec(naked) VOID __cdecl MMX_Mono8BitHQMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono8BitHQMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -513,7 +506,7 @@ mixloop:
 }
 
 
-_declspec(naked) VOID __cdecl MMX_Mono16BitHQMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono16BitHQMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -561,7 +554,7 @@ mixloop:
 ////////////////////////////////////////////////////////////////////////////////
 // 8-taps polyphase FIR resampling filter
 
-_declspec(naked) VOID __cdecl MMX_Mono8BitKaiserMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono8BitKaiserMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -683,7 +676,7 @@ done:
 }
 
 
-_declspec(naked) VOID __cdecl MMX_Mono8BitKaiserRampMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono8BitKaiserRampMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -695,8 +688,8 @@ _declspec(naked) VOID __cdecl MMX_Mono8BitKaiserRampMix(MODCHANNEL *pChannel, in
 	movzx ebx, word ptr [ecx+CHNOFS_NPOSLO]
 	sub esi, 3
 	mov ebp, [ecx+CHNOFS_NINC]
-	movq mm4, qword ptr [ecx+MODCHANNEL.nRampRightVol]	// mm4 = [ leftvol  | rightvol  ]
-	movq mm3, qword ptr [ecx+MODCHANNEL.nRightRamp]		// mm3 = [ leftramp | rightramp ]
+	movq mm4, qword ptr [ecx+ModChannel.nRampRightVol]	// mm4 = [ leftvol  | rightvol  ]
+	movq mm3, qword ptr [ecx+ModChannel.nRightRamp]		// mm3 = [ leftramp | rightramp ]
 	cmp ebp, 0x18000
 	jg mixloop2x
 	cmp ebp, -0x18000
@@ -814,15 +807,15 @@ done:
 	mov word ptr [ecx+CHNOFS_NPOSLO], bx
 	sar ebx, 16
 	add dword ptr [ecx+CHNOFS_NPOS], ebx
-	movq qword ptr [ecx+MODCHANNEL.nRampRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nRampRightVol], mm4
 	psrad mm4, VOLUMERAMPPRECISION
-	movq qword ptr [ecx+MODCHANNEL.nRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nRightVol], mm4
 	MMX_LEAVE
 	}
 }
 
 
-_declspec(naked) VOID __cdecl MMX_Mono16BitKaiserMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono16BitKaiserMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -934,7 +927,7 @@ done:
 }
 
 
-_declspec(naked) VOID __cdecl MMX_Mono16BitKaiserRampMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_Mono16BitKaiserRampMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -946,8 +939,8 @@ _declspec(naked) VOID __cdecl MMX_Mono16BitKaiserRampMix(MODCHANNEL *pChannel, i
 	lea esi, [esi+eax*2-6]
 	movzx ebx, word ptr [ecx+CHNOFS_NPOSLO]
 	mov ebp, [ecx+CHNOFS_NINC]
-	movq mm4, qword ptr [ecx+MODCHANNEL.nRampRightVol]	// mm4 = [ leftvol  | rightvol  ]
-	movq mm3, qword ptr [ecx+MODCHANNEL.nRightRamp]		// mm3 = [ leftramp | rightramp ]
+	movq mm4, qword ptr [ecx+ModChannel.nRampRightVol]	// mm4 = [ leftvol  | rightvol  ]
+	movq mm3, qword ptr [ecx+ModChannel.nRightRamp]		// mm3 = [ leftramp | rightramp ]
 	cmp ebp, 0x18000
 	jg mixloop2x
 	cmp ebp, -0x18000
@@ -1056,9 +1049,9 @@ done:
 	mov word ptr [ecx+CHNOFS_NPOSLO], bx
 	sar ebx, 16
 	add dword ptr [ecx+CHNOFS_NPOS], ebx
-	movq qword ptr [ecx+MODCHANNEL.nRampRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nRampRightVol], mm4
 	psrad mm4, VOLUMERAMPPRECISION
-	movq qword ptr [ecx+MODCHANNEL.nRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nRightVol], mm4
 	MMX_LEAVE
 	}
 }
@@ -1067,7 +1060,7 @@ done:
 ////////////////////////////////////////////////////////////////////////////////
 // Filtered + linear interpolation + ramping
 
-_declspec(naked) VOID __cdecl MMX_FilterMono8BitLinearRampMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_FilterMono8BitLinearRampMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -1077,22 +1070,22 @@ _declspec(naked) VOID __cdecl MMX_FilterMono8BitLinearRampMix(MODCHANNEL *pChann
 	mov eax, [ecx+CHNOFS_NPOS]
 	movzx ebx, word ptr [ecx+CHNOFS_NPOSLO]
 	mov ebp, [ecx+CHNOFS_NINC]
-	mov edx, [ecx+MODCHANNEL.nRampLength]
+	mov edx, [ecx+ModChannel.nRampLength]
 	add esi, eax
 	or edx, edx
-	movq mm4, qword ptr [ecx+MODCHANNEL.nRampRightVol]	// mm4 = [ leftvol | rightvol ]
-	movq mm3, qword ptr [ecx+MODCHANNEL.nRightRamp]		// mm3 = [ leftramp | rightramp ]
+	movq mm4, qword ptr [ecx+ModChannel.nRampRightVol]	// mm4 = [ leftvol | rightvol ]
+	movq mm3, qword ptr [ecx+ModChannel.nRightRamp]		// mm3 = [ leftramp | rightramp ]
 	jnz noramp
-	movq mm4, qword ptr [ecx+MODCHANNEL.nRightVol]
+	movq mm4, qword ptr [ecx+ModChannel.nRightVol]
 	pxor mm3, mm3
 	pslld mm4, VOLUMERAMPPRECISION
 noramp:
-	movq mm6, qword ptr [ecx+MODCHANNEL.nFilter_Y1]		// mm6 = [ y2 | y1 ]
-	movd mm0, dword ptr [ecx+MODCHANNEL.nFilter_B0]
-	movd mm1, dword ptr [ecx+MODCHANNEL.nFilter_B1]
+	movq mm6, qword ptr [ecx+ModChannel.nFilter_Y1]		// mm6 = [ y2 | y1 ]
+	movd mm0, dword ptr [ecx+ModChannel.nFilter_B0]
+	movd mm1, dword ptr [ecx+ModChannel.nFilter_B1]
 	punpckldq mm0, mm1									// mm0 = [ b1 | b0 ]
-	movd mm7, dword ptr [ecx+MODCHANNEL.nFilter_HP]
-	movd mm2, dword ptr [ecx+MODCHANNEL.nFilter_A0]
+	movd mm7, dword ptr [ecx+ModChannel.nFilter_HP]
+	movd mm2, dword ptr [ecx+ModChannel.nFilter_A0]
 	punpckldq mm7, mm2									// mm7 = [ a0 | hp ]
 	packssdw mm7, mm0									// mm7 = [ b1 | b0 | a0 | hp ]
 	mov ecx, MMX_PBUFMAX
@@ -1146,16 +1139,16 @@ mixloop:
 	mov word ptr [ecx+CHNOFS_NPOSLO], bx
 	sar ebx, 16
 	add dword ptr [ecx+CHNOFS_NPOS], ebx
-	movq qword ptr [ecx+MODCHANNEL.nRampRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nRampRightVol], mm4
 	psrad mm4, VOLUMERAMPPRECISION
-	movq qword ptr [ecx+MODCHANNEL.nRightVol], mm4
-	movq qword ptr [ecx+MODCHANNEL.nFilter_Y1], mm6
+	movq qword ptr [ecx+ModChannel.nRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nFilter_Y1], mm6
 	MMX_LEAVE
 	}
 }
 
 
-_declspec(naked) VOID __cdecl MMX_FilterMono16BitLinearRampMix(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)
+_declspec(naked) VOID __cdecl MMX_FilterMono16BitLinearRampMix(ModChannel *pChannel, int *pbuffer, int *pbufmax)
 {
 	_asm {
 	MMX_ENTER
@@ -1165,22 +1158,22 @@ _declspec(naked) VOID __cdecl MMX_FilterMono16BitLinearRampMix(MODCHANNEL *pChan
 	mov eax, [ecx+CHNOFS_NPOS]
 	movzx ebx, word ptr [ecx+CHNOFS_NPOSLO]
 	mov ebp, [ecx+CHNOFS_NINC]
-	mov edx, [ecx+MODCHANNEL.nRampLength]
+	mov edx, [ecx+ModChannel.nRampLength]
 	lea esi, [esi+eax*2]
 	or edx, edx
-	movq mm4, qword ptr [ecx+MODCHANNEL.nRampRightVol]	// mm4 = [ leftvol | rightvol ]
-	movq mm3, qword ptr [ecx+MODCHANNEL.nRightRamp]		// mm3 = [ leftramp | rightramp ]
+	movq mm4, qword ptr [ecx+ModChannel.nRampRightVol]	// mm4 = [ leftvol | rightvol ]
+	movq mm3, qword ptr [ecx+ModChannel.nRightRamp]		// mm3 = [ leftramp | rightramp ]
 	jnz noramp
-	movq mm4, qword ptr [ecx+MODCHANNEL.nRightVol]
+	movq mm4, qword ptr [ecx+ModChannel.nRightVol]
 	pxor mm3, mm3
 	pslld mm4, VOLUMERAMPPRECISION
 noramp:
-	movq mm6, qword ptr [ecx+MODCHANNEL.nFilter_Y1]		// mm6 = [ y2 | y1 ]
-	movd mm0, dword ptr [ecx+MODCHANNEL.nFilter_B0]
-	movd mm1, dword ptr [ecx+MODCHANNEL.nFilter_B1]
+	movq mm6, qword ptr [ecx+ModChannel.nFilter_Y1]		// mm6 = [ y2 | y1 ]
+	movd mm0, dword ptr [ecx+ModChannel.nFilter_B0]
+	movd mm1, dword ptr [ecx+ModChannel.nFilter_B1]
 	punpckldq mm0, mm1									// mm0 = [ b1 | b0 ]
-	movd mm7, dword ptr [ecx+MODCHANNEL.nFilter_HP]
-	movd mm2, dword ptr [ecx+MODCHANNEL.nFilter_A0]
+	movd mm7, dword ptr [ecx+ModChannel.nFilter_HP]
+	movd mm2, dword ptr [ecx+ModChannel.nFilter_A0]
 	punpckldq mm7, mm2									// mm7 = [ a0 | hp ]
 	packssdw mm7, mm0									// mm7 = [ b1 | b0 | a0 | hp ]
 	mov ecx, MMX_PBUFMAX
@@ -1233,10 +1226,10 @@ mixloop:
 	mov word ptr [ecx+CHNOFS_NPOSLO], bx
 	sar ebx, 16
 	add dword ptr [ecx+CHNOFS_NPOS], ebx
-	movq qword ptr [ecx+MODCHANNEL.nRampRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nRampRightVol], mm4
 	psrad mm4, VOLUMERAMPPRECISION
-	movq qword ptr [ecx+MODCHANNEL.nRightVol], mm4
-	movq qword ptr [ecx+MODCHANNEL.nFilter_Y1], mm6
+	movq qword ptr [ecx+ModChannel.nRightVol], mm4
+	movq qword ptr [ecx+ModChannel.nFilter_Y1], mm6
 	MMX_LEAVE
 	}
 }

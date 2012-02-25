@@ -1,22 +1,21 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_ptm.cpp
+ * ------------
+ * Purpose: PTM (PolyTracker) module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          Adam Goode (endian and char fixes for PPC)
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-//////////////////////////////////////////////
-// PTM PolyTracker module loader            //
-//////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct PTMFILEHEADER
 {
@@ -55,7 +54,7 @@ typedef struct PTMSAMPLE
 	DWORD ptms_id;			// sample identification, 'PTMS' or 0x534d5450
 } PTMSAMPLE;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
@@ -103,7 +102,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += sizeof(PTMSAMPLE))
 	{
-		MODSAMPLE *pSmp = &Samples[ismp+1];
+		ModSample *pSmp = &Samples[ismp+1];
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);
 
 		lstrcpyn(m_szNames[ismp+1], psmp->samplename, 28);
@@ -148,7 +147,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 		if(Patterns.Insert(ipat, 64))
 			break;
 		//
-		MODCOMMAND *m = Patterns[ipat];
+		ModCommand *m = Patterns[ipat];
 		for (UINT row=0; ((row < 64) && (dwMemPos < dwMemLength)); )
 		{
 			UINT b = lpStream[dwMemPos++];

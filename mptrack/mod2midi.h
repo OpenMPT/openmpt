@@ -1,11 +1,20 @@
-#ifndef _MOD2MIDI_H_
-#define _MOD2MIDI_H_
+/*
+ * mod2midi.h
+ * ----------
+ * Purpose: Module to MIDI conversion (dialog + conversion code).
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-typedef struct _MOD2MIDIINSTR
+
+#pragma once
+
+struct MOD2MIDIINSTR
 {
 	UINT nChannel;
 	uint8 nProgram;
-} MOD2MIDIINSTR, *PMOD2MIDIINSTR;
+};
 
 
 //==============================
@@ -37,6 +46,3 @@ protected:
 	afx_msg VOID OnProgramChanged();
 	DECLARE_MESSAGE_MAP();
 };
-
-
-#endif // _MOD2MIDI_H_

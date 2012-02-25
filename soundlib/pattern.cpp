@@ -1,3 +1,13 @@
+/*
+ * Pattern.cpp
+ * -----------
+ * Purpose: Module Pattern header class
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "pattern.h"
 #include "patternContainer.h"
@@ -57,10 +67,10 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 
 	if (newRowCount > m_Rows)
 	{
-		MODCOMMAND *p = AllocatePattern(newRowCount, sndFile.GetNumChannels());
+		ModCommand *p = AllocatePattern(newRowCount, sndFile.GetNumChannels());
 		if (p)
 		{
-			memcpy(p, m_ModCommands, sndFile.GetNumChannels() * m_Rows * sizeof(MODCOMMAND));
+			memcpy(p, m_ModCommands, sndFile.GetNumChannels() * m_Rows * sizeof(ModCommand));
 			FreePattern(m_ModCommands);
 			m_ModCommands = p;
 			m_Rows = newRowCount;
@@ -73,7 +83,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 		if(showDataLossWarning)
 		{
 			// Check if any non-empty pattern cells would be lost when truncating rows at the bottom.
-			const MODCOMMAND *m = GetpModCommand(newRowCount, 0);
+			const ModCommand *m = GetpModCommand(newRowCount, 0);
 			for(size_t numCommands = (m_Rows - newRowCount) * sndFile.GetNumChannels(); numCommands != 0; numCommands--, m++)
 			{
 				if(!m->IsEmpty())
@@ -96,10 +106,10 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 
 		if (bOk)
 		{
-			MODCOMMAND *pnew = AllocatePattern(newRowCount, sndFile.GetNumChannels());
+			ModCommand *pnew = AllocatePattern(newRowCount, sndFile.GetNumChannels());
 			if (pnew)
 			{
-				memcpy(pnew, m_ModCommands, sndFile.GetNumChannels() * newRowCount * sizeof(MODCOMMAND));
+				memcpy(pnew, m_ModCommands, sndFile.GetNumChannels() * newRowCount * sizeof(ModCommand));
 				FreePattern(m_ModCommands);
 				m_ModCommands = pnew;
 				m_Rows = newRowCount;
@@ -120,14 +130,14 @@ void CPattern::ClearCommands()
 //----------------------------
 {
 	if (m_ModCommands != nullptr)
-		memset(m_ModCommands, 0, GetNumRows() * GetNumChannels() * sizeof(MODCOMMAND));
+		memset(m_ModCommands, 0, GetNumRows() * GetNumChannels() * sizeof(ModCommand));
 }
 
 
 bool CPattern::AllocatePattern(ROWINDEX rows)
 //-------------------------------------------
 {
-	MODCOMMAND *m = AllocatePattern(rows, GetNumChannels());
+	ModCommand *m = AllocatePattern(rows, GetNumChannels());
 	if(m != nullptr)
 	{
 		Deallocate();
@@ -157,7 +167,7 @@ void CPattern::Deallocate()
 bool CPattern::Expand()
 //---------------------
 {
-	MODCOMMAND *newPattern, *oldPattern;
+	ModCommand *newPattern, *oldPattern;
 
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
 	if(sndFile.m_pModDoc == nullptr) return true;
@@ -177,7 +187,7 @@ bool CPattern::Expand()
 	oldPattern = m_ModCommands;
 	for (ROWINDEX y = 0; y < nRows; y++)
 	{
-		memcpy(newPattern + y * 2 * nChns, oldPattern + y * nChns, nChns * sizeof(MODCOMMAND));
+		memcpy(newPattern + y * 2 * nChns, oldPattern + y * nChns, nChns * sizeof(ModCommand));
 	}
 	m_ModCommands = newPattern;
 	m_Rows = nRows * 2;
@@ -206,8 +216,8 @@ bool CPattern::Shrink()
 	nRows /= 2;
 	for (ROWINDEX y = 0; y < nRows; y++)
 	{
-		MODCOMMAND *psrc = sndFile.Patterns[nPattern] + (y * 2 * nChns);
-		MODCOMMAND *pdest = sndFile.Patterns[nPattern] + (y * nChns);
+		ModCommand *psrc = sndFile.Patterns[nPattern] + (y * 2 * nChns);
+		ModCommand *pdest = sndFile.Patterns[nPattern] + (y * nChns);
 		for (CHANNELINDEX x = 0; x < nChns; x++)
 		{
 			pdest[x] = psrc[x];
@@ -268,13 +278,13 @@ bool CPattern::GetName(char *buffer, size_t maxChars) const
 ////////////////////////////////////////////////////////////////////////
 
 
-MODCOMMAND *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
+ModCommand *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 //----------------------------------------------------------------------
 {
 	try
 	{
-		MODCOMMAND *p = new MODCOMMAND[rows * nchns];
-		memset(p, 0, rows * nchns * sizeof(MODCOMMAND));
+		ModCommand *p = new ModCommand[rows * nchns];
+		memset(p, 0, rows * nchns * sizeof(ModCommand));
 		return p;
 	} catch(MPTMemoryException)
 	{
@@ -283,7 +293,7 @@ MODCOMMAND *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 }
 
 
-void CPattern::FreePattern(MODCOMMAND *pat)
+void CPattern::FreePattern(ModCommand *pat)
 //-----------------------------------------
 {
 	if (pat) delete[] pat;
@@ -304,8 +314,8 @@ bool CPattern::WriteITPdata(FILE* f) const
 	{
 		for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 		{
-			MODCOMMAND mc = GetModCommand(r,c);
-			fwrite(&mc, sizeof(MODCOMMAND), 1, f);
+			ModCommand mc = GetModCommand(r,c);
+			fwrite(&mc, sizeof(ModCommand), 1, f);
 		}
 	}
     return false;
@@ -323,7 +333,7 @@ bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const D
 	{
 		MODCOMMAND_ORIGINAL temp;
 		memcpy(&temp, lpStream + streamPos, sizeof(MODCOMMAND_ORIGINAL));
-		MODCOMMAND& mc = GetModCommand(counter);
+		ModCommand& mc = GetModCommand(counter);
 		mc.command = temp.command;
 		mc.instr = temp.instr;
 		mc.note = temp.note;
@@ -398,7 +408,7 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 }
 
 
-uint8 CreateDiffMask(MODCOMMAND chnMC, MODCOMMAND newMC)
+uint8 CreateDiffMask(ModCommand chnMC, ModCommand newMC)
 //------------------------------------------------------
 {
 	uint8 mask = 0;
@@ -429,13 +439,13 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 
 	const ROWINDEX rows = pat.GetNumRows();
 	const CHANNELINDEX chns = pat.GetNumChannels();
-	vector<MODCOMMAND> lastChnMC(chns);
+	vector<ModCommand> lastChnMC(chns);
 
 	for(ROWINDEX r = 0; r<rows; r++)
 	{
 		for(CHANNELINDEX c = 0; c<chns; c++)
 		{
-			const MODCOMMAND m = *pat.GetpModCommand(r, c);
+			const ModCommand m = *pat.GetpModCommand(r, c);
 			// Writing only commands not written in IT-pattern writing:
 			// For now this means only NOTE_PC and NOTE_PCS.
 			if(!m.IsPcNote())
@@ -484,7 +494,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 	const CHANNELINDEX chns = pat.GetNumChannels();
 	const ROWINDEX rows = pat.GetNumRows();
 
-	vector<MODCOMMAND> lastChnMC(chns);
+	vector<ModCommand> lastChnMC(chns);
 
 	ROWINDEX row = 0;
 	while(row < rows && iStrm.good())
@@ -506,8 +516,8 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 			Binaryread<uint8>(iStrm, diffmask);
 		uint8 temp = 0;
 
-		MODCOMMAND dummy;
-		MODCOMMAND& m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
+		ModCommand dummy;
+		ModCommand& m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
 
 		READITEM(noteBit, note);
 		READITEM(instrBit, instr);

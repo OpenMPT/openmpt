@@ -1,5 +1,14 @@
-#ifndef MIDI_H
-#define MIDI_H
+/*
+ * midi.h
+ * ------
+ * Purpose: Basic MIDI handling, MIDI event lists, ...
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include <vector>
 #include <algorithm>
@@ -350,7 +359,3 @@ const char* const MidiCCNames[MIDICC_end+1] ={
 "MonoOperation",				//126
 "PolyOperation",				//127
 };
-
-
-
-#endif

@@ -1,13 +1,13 @@
 /*
- *
  * CleanupSong.cpp
  * ---------------
- * Purpose: Interface for cleaning up modules (rearranging, removing unused items)
- *
+ * Purpose: Dialog for cleaning up modules (rearranging, removing unused items).
+ * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "moddoc.h"
@@ -345,7 +345,7 @@ struct OrigPatSettings
 	bool isPatUsed;				// Is pattern used in sequence?
 	PATTERNINDEX newIndex;		// map old pattern index <-> new pattern index
 	// This stuff is needed for copying the old pattern properties to the new pattern number
-	MODCOMMAND *data;			// original pattern data
+	ModCommand *data;			// original pattern data
 	ROWINDEX numRows;			// original pattern sizes
 	ROWINDEX rowsPerBeat;		// original pattern highlight
 	ROWINDEX rowsPerMeasure;	// original pattern highlight
@@ -574,7 +574,7 @@ bool CModCleanupDlg::OptimizeSamples()
 	
 	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		const MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+		const ModSample &sample = pSndFile->GetSample(nSmp);
 
 		// Determine how much of the sample will be played
 		UINT loopLength = sample.nLength;
@@ -598,7 +598,7 @@ bool CModCleanupDlg::OptimizeSamples()
 	{
 		for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 		{
-			MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+			ModSample &sample = pSndFile->GetSample(nSmp);
 
 			// Determine how much of the sample will be played
 			UINT loopLength = sample.nLength;
@@ -679,7 +679,7 @@ bool CModCleanupDlg::RearrangeSamples()
 			// Also update instrument mapping (if module is in instrument mode)
 			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
 			{
-				MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
+				ModInstrument *pIns = pSndFile->Instruments[nIns];
 				if(pIns)
 				{
 					for(size_t iNote = 0; iNote < 128; iNote++)
@@ -694,7 +694,7 @@ bool CModCleanupDlg::RearrangeSamples()
 	{
 		for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
 		{
-			MODCOMMAND *m = pSndFile->Patterns[nPat];
+			ModCommand *m = pSndFile->Patterns[nPat];
 			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels(); len; m++, len--)
 			{
 				if(!m->IsPcNote() &&  m->instr <= pSndFile->GetNumSamples()) m->instr = (BYTE)nSampleMap[m->instr];
@@ -796,7 +796,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		{
 			for (PATTERNINDEX iPat = 0; iPat < pSndFile->Patterns.Size(); iPat++) if (pSndFile->Patterns[iPat])
 			{
-				MODCOMMAND *p = pSndFile->Patterns[iPat];
+				ModCommand *p = pSndFile->Patterns[iPat];
 				UINT nLen = pSndFile->m_nChannels * pSndFile->Patterns[iPat].GetNumRows();
 				while (nLen--)
 				{
@@ -804,7 +804,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 					{
 						for (UINT k=0; k<nSwap; k++)
 						{
-							if (p->instr == swapmap[k]) p->instr = (MODCOMMAND::INSTR)swapdest[k];
+							if (p->instr == swapmap[k]) p->instr = (ModCommand::INSTR)swapdest[k];
 						}
 					}
 					p++;

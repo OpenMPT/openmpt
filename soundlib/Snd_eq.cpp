@@ -1,17 +1,13 @@
 /*
- * OpenMPT
- *
- * Snd_eq.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
- *
- * Name                Date             Description
- * 
- * Olivier Lapicque    --/--/--         Creation
- * Trevor Nunes        26/01/04         conditional compilation for AMD,MMX calls
- *
-*/
+ * snd_eq.cpp
+ * ----------
+ * Purpose: Mixing code for equalizer.
+ * Notes  : Ugh... This should really be removed at some point.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -38,7 +34,7 @@ extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const f
 
 
 
-#pragma pack(4)
+#pragma pack(push, 4)
 typedef struct _EQBANDSTRUCT
 {
 	REAL a0, a1, a2, b1, b2;
@@ -46,7 +42,7 @@ typedef struct _EQBANDSTRUCT
 	REAL Gain, CenterFrequency;
 	BOOL bEnable;
 } EQBANDSTRUCT, *PEQBANDSTRUCT;
-#pragma pack()
+#pragma pack(pop)
 
 UINT gEqLinearToDB[33] =
 {

@@ -1,7 +1,7 @@
 /*
  * load_dmf.cpp
  * ------------
- * Purpose: Load DMF modules (X-Tracker by D-LUSiON).
+ * Purpose: DMF module loader (X-Tracker by D-LUSiON).
  * Notes  : If it wasn't already outdated when the tracker was released, this would be a rather interesting
  *          and in some parts even sophisticated format - effect columns are separated by effect type, an easy to
  *          understand BPM tempo mode, effect durations are always divided into a 256th row, vibrato effects are
@@ -9,7 +9,7 @@
  *          Unluckily, this format does not offer any envelopes or multi-sample instruments, and bidi sample loops
  *          are missing as well, so it was already well behind FT2 and IT back then.
  * Authors: Johannes Schultz (mostly based on DMF.TXT, DMF_EFFC.TXT, trial and error and some invaluable hints by Zatzen)
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
@@ -51,7 +51,7 @@
 #define DMFSMP_COMP3	0x0C	// Compression type 3 (dito)
 #define DMFSMP_LIBRARY	0x80	// Sample is stored in a library
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 // DMF header
 struct DMFHEADER
@@ -115,7 +115,7 @@ struct DMFCHUNK_SAMPLEHEADERTAIL
 	uint32 crc32;
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 // Pattern translation memory
 struct DMF_PATTERNSETTINGS
@@ -126,8 +126,8 @@ struct DMF_PATTERNSETTINGS
 	bool realBPMmode;						// true = BPM mode
 	uint8 internalTicks;					// Ticks per row in final pattern
 	vector<bool> playDir;					// Sample play direction of each channel... false = forward (default)
-	vector<MODCOMMAND::NOTE> noteBuffer;	// Note buffer
-	vector<MODCOMMAND::NOTE> lastNote;		// Last played note on channel
+	vector<ModCommand::NOTE> noteBuffer;	// Note buffer
+	vector<ModCommand::NOTE> lastNote;		// Last played note on channel
 };
 
 
@@ -213,7 +213,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 		return nPat;
 	}
 
-	MODCOMMAND *m = pSndFile->Patterns[nPat];
+	ModCommand *m = pSndFile->Patterns[nPat];
 	const CHANNELINDEX numChannels = min(pSndFile->GetNumChannels(), patHead->numTracks);
 
 	// When breaking to a pattern with less channels that the previous pattern,
@@ -679,7 +679,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				}
 				if (n < 5)
 				{
-					if (CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)effect2) > CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)effect3))
+					if (CSoundFile::GetEffectWeight((ModCommand::COMMAND)effect2) > CSoundFile::GetEffectWeight((ModCommand::COMMAND)effect3))
 					{
 						std::swap(effect2, effect3);
 						std::swap(effectParam2, effectParam3);
@@ -760,7 +760,7 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 	DMFCHUNK_SAMPLEHEADER *smpHead = (DMFCHUNK_SAMPLEHEADER *)(lpStream + dwMemPos);
 	dwMemPos += sizeof(DMFCHUNK_SAMPLEHEADER);
 
-	MODSAMPLE &sample = pSndFile->GetSample(nSmp);
+	ModSample &sample = pSndFile->GetSample(nSmp);
 	MemsetZero(sample);
 	sample.nLength = min(MAX_SAMPLE_LENGTH, LittleEndian(smpHead->length));
 	sample.nSustainEnd = min(sample.nLength, LittleEndian(smpHead->loopEnd));

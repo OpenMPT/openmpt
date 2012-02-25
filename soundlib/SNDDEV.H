@@ -1,5 +1,15 @@
-#ifndef _SNDDEV_H_
-#define _SNDDEV_H_
+/*
+ * snddev.h
+ * --------
+ * Purpose: Sound device interface class.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include <vector>
 using std::vector;
@@ -104,6 +114,3 @@ BOOL CreateSoundDevice(UINT nType, ISoundDevice **ppsd);
 extern BOOL SoundDeviceCallback(DWORD dwUser);
 
 ////////////////////////////////////////////////////////////////////////////////////
-
-#endif // _SNDDEV_H_
-

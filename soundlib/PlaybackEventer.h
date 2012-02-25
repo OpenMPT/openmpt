@@ -1,5 +1,14 @@
-#ifndef PLAYBACKEVENTER_H
-#define PLAYBACKEVENTER_H
+/*
+ * PlaybackEventer.h
+ * -----------------
+ * Purpose: Class for scheduling playback events such as muting channels on pattern transitions.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "pattern.h"
 
@@ -11,9 +20,6 @@ class CPlaybackEventer
 {
 public:
 	CPlaybackEventer(CSoundFile& sndf) : m_rSndFile(sndf) {}
-	~CPlaybackEventer();
-
-	//SetPatternEvent(const PATTERNINDEX pattern, const ROWINDEX row, const CHANNELINDEX column);
 
 	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
 	void PatternTransitionChnUnmuteAll();
@@ -21,5 +27,3 @@ public:
 private:
 	CSoundFile& m_rSndFile;
 };
-
-#endif

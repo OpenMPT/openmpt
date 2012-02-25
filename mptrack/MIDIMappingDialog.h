@@ -1,3 +1,13 @@
+/*
+ * MIDIMappingDialog.h
+ * -------------------
+ * Purpose: Implementation of OpenMPT's MIDI mapping dialog, for mapping incoming MIDI messages to plugin parameters.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 #include "moddoc.h"
 #include "midi.h"

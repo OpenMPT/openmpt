@@ -1,11 +1,14 @@
-// MainFrm.h : interface of the CMainFrame class
-//
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * MainFrm.h
+ * ---------
+ * Purpose: Implementation of OpenMPT's main window code.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #pragma once
-#ifndef MAINFRM_H
-#define MAINFRM_H
-
 
 #include "sndfile.h"
 #include "CommandSet.h"
@@ -18,7 +21,6 @@ class CModDoc;
 class CAutoSaver;
 class ISoundDevice;
 class ISoundSource;
-class CPerformanceCounter;
 
 #define NUM_AUDIO_BUFFERS			3
 #define MIN_AUDIO_BUFFERSIZE		1024
@@ -688,5 +690,3 @@ const CHAR gszBuildDate[] = __DATE__ " " __TIME__;
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // MAINFRM_H

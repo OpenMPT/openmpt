@@ -1,13 +1,13 @@
 /*
- *
  * PatternEditorDialogs.cpp
  * ------------------------
- * Purpose: Code for various dialogs that are used in the pattern editor
+ * Purpose: Code for various dialogs that are used in the pattern editor.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -33,7 +33,7 @@ void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nCha
 		// Try to find previous command parameter to be extended
 		while(nCmdRow >= 0)
 		{
-			const MODCOMMAND *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
+			const ModCommand *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
 			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_PATTERNBREAK)
 				break;
 			if(m->command != CMD_XPARAM)
@@ -52,7 +52,7 @@ void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nCha
 	if(nCmdRow >= 0)
 	{
 		// An 'extendable' command parameter has been found
-		const MODCOMMAND *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
+		const ModCommand *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
 
 		// Find extension resolution (8 to 24 bits)
 		ROWINDEX n = 1;
@@ -223,7 +223,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromVolCmd(MODCOMMAND::VOLCMD(m_nVolCmd));
+		UINT fxndx = effectInfo.GetIndexFromVolCmd(ModCommand::VOLCMD(m_nVolCmd));
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -260,7 +260,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromEffect(MODCOMMAND::COMMAND(m_nCommand), MODCOMMAND::PARAM(m_nParam));
+		UINT fxndx = effectInfo.GetIndexFromEffect(ModCommand::COMMAND(m_nCommand), ModCommand::PARAM(m_nParam));
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -477,7 +477,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 			m_nPattern,
 			pSndFile->Patterns[m_nPattern].GetNumRows(),
 			(pSndFile->Patterns[m_nPattern].GetNumRows() == 1) ? "" : "s",
-			(pSndFile->Patterns[m_nPattern].GetNumRows() * pSndFile->GetNumChannels() * sizeof(MODCOMMAND)) / 1024);
+			(pSndFile->Patterns[m_nPattern].GetNumRows() * pSndFile->GetNumChannels() * sizeof(ModCommand)) / 1024);
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title
@@ -715,7 +715,7 @@ BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor)
 }
 
 
-void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
+void CEditCommand::UpdateNote(ModCommand::NOTE note, ModCommand::INSTR instr)
 //---------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -723,7 +723,7 @@ void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		|| (m_nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[m_nPattern])) return;
-	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
+	ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 	if ((m->note != note) || (m->instr != instr))
 	{
 		if(!m_bModified)	// let's create just one undo step.
@@ -744,7 +744,7 @@ void CEditCommand::UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr)
 }
 
 
-void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
+void CEditCommand::UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol)
 //-----------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -752,7 +752,7 @@ void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		|| (m_nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[m_nPattern])) return;
-	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
+	ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 	if ((m->volcmd != volcmd) || (m->vol != vol))
 	{
 		if(!m_bModified)	// let's create just one undo step.
@@ -772,7 +772,7 @@ void CEditCommand::UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol)
 }
 
 
-void CEditCommand::UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM param)
+void CEditCommand::UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM param)
 //-----------------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -780,7 +780,7 @@ void CEditCommand::UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM p
 		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		|| (m_nChannel >= pSndFile->GetNumChannels())
 		|| (!pSndFile->Patterns[m_nPattern])) return;
-	MODCOMMAND *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
+	ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
@@ -858,10 +858,10 @@ void CPageEditNote::UpdateDialog()
 		combo->SetItemData(combo->AddString("No note"), 0);
 		AppendNotesToControlEx(*combo, pSndFile, m_nInstr);
 
-		if (MODCOMMAND::IsNoteOrEmpty(m_nNote))
+		if (ModCommand::IsNoteOrEmpty(m_nNote))
 		{
 			// Normal note / no note
-			const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
+			const ModCommand::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
 			combo->SetCurSel(m_nNote - (noteStart - 1));
 		}
 		else
@@ -883,7 +883,7 @@ void CPageEditNote::UpdateDialog()
 	{
 		combo->ResetContent();
 
-		if(MODCOMMAND::IsPcNote(m_nNote))
+		if(ModCommand::IsPcNote(m_nNote))
 		{
 			// control plugin param note
 			combo->SetItemData(combo->AddString("No Effect"), 0);
@@ -916,31 +916,31 @@ void CPageEditNote::UpdateDialog()
 void CPageEditNote::OnNoteChanged()
 //---------------------------------
 {
-	const bool bWasParamControl = MODCOMMAND::IsPcNote(m_nNote);
+	const bool bWasParamControl = ModCommand::IsPcNote(m_nNote);
 
 	CComboBox *combo;
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		int n = combo->GetCurSel();
-		if (n >= 0) m_nNote = static_cast<MODCOMMAND::NOTE>(combo->GetItemData(n));
+		if (n >= 0) m_nNote = static_cast<ModCommand::NOTE>(combo->GetItemData(n));
 	}
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
 		int n = combo->GetCurSel();
 		if(n >= 0)
 		{
-			const MODCOMMAND::INSTR oldInstr = m_nInstr;
+			const ModCommand::INSTR oldInstr = m_nInstr;
 			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
-			m_nInstr = static_cast<MODCOMMAND::INSTR>(combo->GetItemData(n));
+			m_nInstr = static_cast<ModCommand::INSTR>(combo->GetItemData(n));
 			//Checking whether note names should be recreated.
-			if(!MODCOMMAND::IsPcNote(m_nNote) && pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
+			if(!ModCommand::IsPcNote(m_nNote) && pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
 			{
 				if(pSndFile->Instruments[m_nInstr]->pTuning != pSndFile->Instruments[oldInstr]->pTuning)
 					UpdateDialog();
 			}
 		}
 	}
-	const bool bIsNowParamControl = MODCOMMAND::IsPcNote(m_nNote);
+	const bool bIsNowParamControl = ModCommand::IsPcNote(m_nNote);
 	if(bWasParamControl != bIsNowParamControl)
 		UpdateDialog();
 
@@ -1034,7 +1034,7 @@ void CPageEditVolume::OnVolCmdChanged()
 		int n = combo->GetCurSel();
 		if (n >= 0)
 		{
-			MODCOMMAND::VOLCMD volcmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(n));
+			ModCommand::VOLCMD volcmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(n));
 			if (volcmd != m_nVolCmd)
 			{
 				m_nVolCmd = volcmd;
@@ -1044,7 +1044,7 @@ void CPageEditVolume::OnVolCmdChanged()
 	}
 	if ((slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1)) != NULL)
 	{
-		m_nVolume = static_cast<MODCOMMAND::VOL>(slider->GetPos());
+		m_nVolume = static_cast<ModCommand::VOL>(slider->GetPos());
 	}
 	if (m_pParent) m_pParent->UpdateVolume(m_nVolCmd, m_nVolume);
 }
@@ -1162,7 +1162,7 @@ void CPageEditEffect::OnCommandChanged()
 		{
 			int param = -1, ndx = combo->GetItemData(n);
 			m_nCommand = (ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, param) : 0;
-			if (param >= 0) m_nParam = static_cast<MODCOMMAND::PARAM>(param);
+			if (param >= 0) m_nParam = static_cast<ModCommand::PARAM>(param);
 			bSet = TRUE;
 		}
 		UpdateRange(bSet);
@@ -1184,7 +1184,7 @@ void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
 			UINT param = effectInfo.MapPosToValue(fxndx, pos);
 			if (param != m_nParam)
 			{
-				m_nParam = static_cast<MODCOMMAND::PARAM>(param);
+				m_nParam = static_cast<ModCommand::PARAM>(param);
 				UpdateValue(TRUE);
 			}
 		}
@@ -1512,11 +1512,11 @@ void CSplitKeyboadSettings::OnOK()
 {
 	CDialog::OnOK();
 
-	m_Settings.splitNote = static_cast<MODCOMMAND::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
+	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
 	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
 	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE);
-	m_Settings.splitVolume = static_cast<MODCOMMAND::VOL>(m_CbnSplitVolume.GetCurSel());
-	m_Settings.splitInstrument = static_cast<MODCOMMAND::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));
+	m_Settings.splitVolume = static_cast<ModCommand::VOL>(m_CbnSplitVolume.GetCurSel());
+	m_Settings.splitInstrument = static_cast<ModCommand::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));
 }
 
 

@@ -1,4 +1,13 @@
-//rewbs.defaultPlugGUI
+/*
+ * AbstractVstEditor.h
+ * -------------------
+ * Purpose: Common plugin editor interface class. This code is shared between custom and default plugin user interfaces.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #ifndef NO_VST

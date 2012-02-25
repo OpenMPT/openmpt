@@ -1,18 +1,15 @@
 /*
- *
  * ACMConvert.h
  * ------------
- * Purpose: Header for ACM and MPEG Layer-3 conversion
- * Notes  : (currently none)
+ * Purpose: MPEG Layer-3 Functions through ACM.
+ * Notes  : Access to LAMEenc and BLADEenc is emulated through the ACM interface.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #pragma once
-#ifndef ACMCONVERT_H
-#define ACMCONVERT_H
 
 /////////////////////////////////////////////////////////////////////////////
 // ACM Functions (for dynamic linking)
@@ -65,5 +62,3 @@ protected:
 	static BOOL CALLBACK AcmFormatEnumCB(HACMDRIVERID, LPACMFORMATDETAILS, DWORD, DWORD);
 
 };
-
-#endif // ACMCONVERT_H

@@ -1,7 +1,7 @@
 /*
  * Message.cpp
  * -----------
- * Purpose: Various functions concerning song messages (allocating, reading from file...)
+ * Purpose: Various functions for processing song messages (allocating, reading from file...)
  * Notes  : Those functions should offer a rather high level of abstraction compared to
  *          previous ways of reading the song messages. There are still many things to do,
  *          though. Future versions of ReadMessage() could f.e. offer charset conversion
@@ -9,12 +9,12 @@
  *          Some functions for preparing the message text to be written to a file would
  *          also be handy.
  * Authors: OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Sndfile.h"
-
 
 // Allocate memory for song message.
 // [in]  length: text length in characters, without possible trailing null terminator.

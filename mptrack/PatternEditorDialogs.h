@@ -1,14 +1,13 @@
 /*
  * PatternEditorDialogs.h
  * ----------------------
- * Purpose: Header file for misc pattern editor dialog functionality
+ * Purpose: Code for various dialogs that are used in the pattern editor.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef PATTERNEDITORDIALOGS_H
-#define PATTERNEDITORDIALOGS_H
 #pragma once
 
 #include "dlg_misc.h"	// for keyboard control
@@ -143,7 +142,7 @@ public:
 
 	virtual ~CPageEditCommand() {}
 	virtual BOOL OnInitDialog();
-	virtual void Init(MODCOMMAND&)=0;
+	virtual void Init(ModCommand&)=0;
 	virtual void UpdateDialog() {}
 };
 
@@ -153,12 +152,12 @@ class CPageEditNote: public CPageEditCommand
 //==========================================
 {
 protected:
-	MODCOMMAND::NOTE m_nNote;
-	MODCOMMAND::INSTR m_nInstr;
+	ModCommand::NOTE m_nNote;
+	ModCommand::INSTR m_nInstr;
 
 public:
 	CPageEditNote(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITNOTE) {}
-	void Init(MODCOMMAND &m) { m_nNote = m.note; m_nInstr = m.instr; }
+	void Init(ModCommand &m) { m_nNote = m.note; m_nInstr = m.instr; }
 	void UpdateDialog();
 
 protected:
@@ -175,13 +174,13 @@ class CPageEditVolume: public CPageEditCommand
 //============================================
 {
 protected:
-	MODCOMMAND::VOLCMD m_nVolCmd;
-	MODCOMMAND::VOL m_nVolume;
+	ModCommand::VOLCMD m_nVolCmd;
+	ModCommand::VOL m_nVolume;
 	bool m_bIsParamControl;
 
 public:
 	CPageEditVolume(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITVOLUME) {};
-	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = m.IsPcNote(); };
+	void Init(ModCommand &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = m.IsPcNote(); };
 	void UpdateDialog();
 	void UpdateRanges();
 
@@ -199,8 +198,8 @@ class CPageEditEffect: public CPageEditCommand
 //============================================
 {
 protected:
-	MODCOMMAND::COMMAND m_nCommand;
-	MODCOMMAND::PARAM m_nParam;
+	ModCommand::COMMAND m_nCommand;
+	ModCommand::PARAM m_nParam;
 	PLUGINDEX m_nPlugin;
 	UINT m_nPluginParam;
 	bool m_bIsParamControl;
@@ -209,13 +208,13 @@ protected:
 	UINT m_nXParam, m_nMultiplier;
 	// -! NEW_FEATURE#0010
 
-	MODCOMMAND* m_pModcommand;
+	ModCommand* m_pModcommand;
 
 public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = MODCOMMAND::GetValueVolCol(m.volcmd, m.vol);}
+	void Init(ModCommand &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = ModCommand::GetValueVolCol(m.volcmd, m.vol);}
 	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
 	// -! NEW_FEATURE#0010
 	void UpdateDialog();
@@ -245,7 +244,7 @@ protected:
 	ROWINDEX m_nRow;
 	PATTERNINDEX m_nPattern;
 	CHANNELINDEX m_nChannel;
-	MODCOMMAND m_Command;
+	ModCommand m_Command;
 	bool m_bModified;
 
 public:
@@ -258,9 +257,9 @@ public:
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	void OnSelListChange();
 	// -! NEW_FEATURE#0010
-	void UpdateNote(MODCOMMAND::NOTE note, MODCOMMAND::INSTR instr);
-	void UpdateVolume(MODCOMMAND::VOLCMD volcmd, MODCOMMAND::VOL vol);
-	void UpdateEffect(MODCOMMAND::COMMAND command, MODCOMMAND::PARAM param);
+	void UpdateNote(ModCommand::NOTE note, ModCommand::INSTR instr);
+	void UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol);
+	void UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM param);
 
 protected:
 	//{{AFX_VIRTUAL(CEditCommand)
@@ -362,5 +361,3 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 };
-
-#endif

@@ -1,16 +1,14 @@
 /*
- *
  * ExceptionHandler.h
  * ------------------
- * Purpose: Header file for crash handler.
+ * Purpose: Code for handling crashes (unhandled exceptions) in OpenMPT.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #pragma once
-#ifndef EXCEPTIONHANDLER_H
-#define EXCEPTIONHANDLER_H
 
 //====================
 class ExceptionHandler
@@ -33,5 +31,3 @@ protected:
 	static LONG UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo, const CString threadName);
 
 };
-
-#endif // EXCEPTIONHANDLER_H

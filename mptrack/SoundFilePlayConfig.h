@@ -1,18 +1,32 @@
+/*
+ * SoundFilePlayConfig.h
+ * ---------------------
+ * Purpose: Configuration of sound levels, pan laws, etc... for various mix configurations.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
-enum {
+enum
+{
 	NO_ATTENUATION = 1,
 	MIXING_CLIPMIN = -0x07FFFFFF,
 	MIXING_CLIPMAX = 0x07FFFFFF,
 };
 
-enum {
+enum
+{
 	tempo_mode_classic      = 0,
 	tempo_mode_alternative  = 1,
 	tempo_mode_modern       = 2,
 };
 
-enum {
+enum
+{
 	mixLevels_original		= 0,
 	mixLevels_117RC1		= 1,
 	mixLevels_117RC2		= 2,

@@ -1,14 +1,15 @@
 /*
  * MIDIMacroDialog.h
  * -----------------
- * Purpose: Header file for MIDI macro configuration dialog implementation
+ * Purpose: MIDI Macro Configuration Dialog
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
-#ifndef MIDIMACRODIALOG_H
-#define MIDIMACRODIALOG_H
+
 //class CColourEdit;
 #include "ColourEdit.h"
 #include "../soundlib/MIDIMacros.h"
@@ -60,5 +61,3 @@ protected:
 	afx_msg void OnSetSFx(UINT id);
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif // MIDIMACRODIALOG_H

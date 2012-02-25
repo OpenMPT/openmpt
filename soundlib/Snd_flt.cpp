@@ -1,11 +1,13 @@
 /*
- * OpenMPT
- *
- * Snd_flt.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * snd_flt.cpp
+ * -----------
+ * Purpose: Calculation of resonant filter coefficients.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -38,7 +40,7 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 
 
 // Simple 2-poles resonant filter
-void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier) const
+void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier) const
 //----------------------------------------------------------------------------------------
 {
 	int cutoff = (int)pChn->nCutOff + (int)pChn->nCutSwing;

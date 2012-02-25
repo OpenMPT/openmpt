@@ -1,20 +1,18 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *                  OpenMPT Devs
- *
-*/
+ * Load_mtm.cpp
+ * ------------
+ * Purpose: MTM (MultiTracker) module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "Loaders.h"
 
-//////////////////////////////////////////////////////////
-// MTM file support (import only)
-
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct tagMTMSAMPLE
 {
@@ -45,7 +43,7 @@ typedef struct tagMTMHEADER
 } MTMHEADER;
 
 
-#pragma pack()
+#pragma pack(pop)
 
 
 bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
@@ -118,7 +116,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		for (UINT n=0; n<32; n++) if ((pSeq[n]) && (pSeq[n] <= pmh->numtracks) && (n < m_nChannels))
 		{
 			LPCBYTE p = pTracks + 192 * (pSeq[n]-1);
-			MODCOMMAND *m = Patterns[pat] + n;
+			ModCommand *m = Patterns[pat] + n;
 			for (UINT i = 0; i < nPatRows; i++, m += m_nChannels, p += 3)
 			{
 				if (p[0] & 0xFC) m->note = (p[0] >> 2) + 37;

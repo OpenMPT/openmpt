@@ -1,11 +1,13 @@
 /*
- * OpenMPT
- *
  * Sndmix.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * -----------
+ * Purpose: Pattern playback, effect processing
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 
@@ -63,7 +65,7 @@ extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
-extern VOID SndMixInitializeTables();
+extern void SndMixInitializeTables();
 
 extern short int ModSinusTable[64];
 extern short int ModRampDownTable[64];
@@ -77,8 +79,8 @@ extern DWORD LinearSlideDownTable[256];
 extern DWORD FineLinearSlideUpTable[16];
 extern DWORD FineLinearSlideDownTable[16];
 extern signed char ft2VibratoTable[256];	// -64 .. +64
-extern int MixSoundBuffer[MIXBUFFERSIZE*4];
-extern int MixRearBuffer[MIXBUFFERSIZE*2];
+extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
+extern int MixRearBuffer[MIXBUFFERSIZE * 2];
 
 #ifndef NO_REVERB
 extern UINT gnReverbSend;
@@ -256,7 +258,7 @@ BOOL CSoundFile::FadeSong(UINT msec)
 	// Ramp everything down
 	for (UINT noff=0; noff < m_nMixChannels; noff++)
 	{
-		MODCHANNEL *pramp = &Chn[ChnMix[noff]];
+		ModChannel *pramp = &Chn[ChnMix[noff]];
 		if (!pramp) continue;
 		pramp->nNewLeftVol = pramp->nNewRightVol = 0;
 		pramp->nRightRamp = (-pramp->nRightVol << VOLUMERAMPPRECISION) / nRampLength;
@@ -859,8 +861,8 @@ BOOL CSoundFile::ProcessRow()
 			}
 		}
 		// Reset channel values
-		MODCHANNEL *pChn = Chn;
-		MODCOMMAND *m = Patterns[m_nPattern].GetRow(m_nRow);
+		ModChannel *pChn = Chn;
+		ModCommand *m = Patterns[m_nPattern].GetRow(m_nRow);
 		for (CHANNELINDEX nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
 		{
 			pChn->rowCommand = *m;
@@ -940,7 +942,7 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 }
 
 
-void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
+void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol)
 //-------------------------------------------------------------
 {
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -961,7 +963,7 @@ void CSoundFile::ProcessVolumeSwing(MODCHANNEL *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
+void CSoundFile::ProcessPanningSwing(ModChannel *pChn)
 //----------------------------------------------------
 {
 	if(IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING))
@@ -978,7 +980,7 @@ void CSoundFile::ProcessPanningSwing(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::ProcessTremolo(MODCHANNEL *pChn, int &vol)
+void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol)
 //---------------------------------------------------------
 {
 	if (pChn->dwFlags & CHN_TREMOLO)
@@ -1004,7 +1006,7 @@ void CSoundFile::ProcessTremolo(MODCHANNEL *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessTremor(MODCHANNEL *pChn, int &vol)
+void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 //--------------------------------------------------------
 {
 	if(pChn->nCommand == CMD_TREMOR)
@@ -1061,10 +1063,10 @@ void CSoundFile::ProcessTremor(MODCHANNEL *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
+void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 //----------------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
 	if (((pChn->VolEnv.flags & ENV_ENABLED) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
@@ -1102,10 +1104,10 @@ void CSoundFile::ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessPanningEnvelope(MODCHANNEL *pChn)
+void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
 //-------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
 	if (((pChn->PanEnv.flags & ENV_ENABLED) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
@@ -1161,10 +1163,10 @@ void CSoundFile::ProcessPanningEnvelope(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
+void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 //------------------------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
 	if ((pIns) && ((pChn->PitchEnv.flags & ENV_ENABLED) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
@@ -1248,10 +1250,10 @@ void CSoundFile::ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period)
 }
 
 
-void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
+void CSoundFile::IncrementVolumeEnvelopePosition(ModChannel *pChn)
 //----------------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	if (pChn->VolEnv.flags & ENV_ENABLED)
 	{
@@ -1300,10 +1302,10 @@ void CSoundFile::IncrementVolumeEnvelopePosition(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::IncrementPanningEnvelopePosition(MODCHANNEL *pChn)
+void CSoundFile::IncrementPanningEnvelopePosition(ModChannel *pChn)
 //-----------------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	if (pChn->PanEnv.flags & ENV_ENABLED)
 	{
@@ -1335,10 +1337,10 @@ void CSoundFile::IncrementPanningEnvelopePosition(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn)
+void CSoundFile::IncrementPitchFilterEnvelopePosition(ModChannel *pChn)
 //---------------------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	if (pChn->PitchEnv.flags & ENV_ENABLED)
 	{
@@ -1370,13 +1372,13 @@ void CSoundFile::IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::ProcessInstrumentFade(MODCHANNEL *pChn, int &vol)
+void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol)
 //----------------------------------------------------------------
 {
 	// FadeOut volume
 	if (pChn->dwFlags & CHN_NOTEFADE)
 	{
-		const MODINSTRUMENT *pIns = pChn->pModInstrument;
+		const ModInstrument *pIns = pChn->pModInstrument;
 
 		UINT fadeout = pIns->nFadeOut;
 		if (fadeout)
@@ -1392,10 +1394,10 @@ void CSoundFile::ProcessInstrumentFade(MODCHANNEL *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessPitchPanSeparation(MODCHANNEL *pChn)
+void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn)
 //----------------------------------------------------------
 {
-	const MODINSTRUMENT *pIns = pChn->pModInstrument;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	if ((pIns->nPPS) && (pChn->nRealPan) && (pChn->nNote))
 	{
@@ -1407,7 +1409,7 @@ void CSoundFile::ProcessPitchPanSeparation(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::ProcessPanbrello(MODCHANNEL *pChn)
+void CSoundFile::ProcessPanbrello(ModChannel *pChn)
 //-------------------------------------------------
 {
 	if (pChn->dwFlags & CHN_PANBRELLO)
@@ -1431,7 +1433,7 @@ void CSoundFile::ProcessPanbrello(MODCHANNEL *pChn)
 }
 
 
-void CSoundFile::ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps)
+void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps)
 //----------------------------------------------------------------------------------------------------
 {
 	if (pChn->nCommand == CMD_ARPEGGIO)
@@ -1441,7 +1443,7 @@ void CSoundFile::ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEIND
 		// EXPERIMENTAL VSTi arpeggio. Far from perfect!
 		if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug && !(m_dwSongFlags & SONG_FIRSTTICK))
 		{
-			const MODINSTRUMENT *pIns = pChn->pModInstrument;
+			const ModInstrument *pIns = pChn->pModInstrument;
 			IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
 			if(pPlugin)
 			{
@@ -1543,7 +1545,7 @@ void CSoundFile::ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEIND
 }
 
 
-void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
+void CSoundFile::ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
 //-----------------------------------------------------------------------------------------------
 {
 	if (pChn->dwFlags & CHN_VIBRATO)
@@ -1616,13 +1618,13 @@ void CSoundFile::ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYP
 }
 
 
-void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac)
+void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac)
 //---------------------------------------------------------------------------------------------------------------------------
 {
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
 	{
-		const MODSAMPLE *pSmp = pChn->pModSample;
+		const ModSample *pSmp = pChn->pModSample;
 		const bool alternativeTuning = pChn->pModInstrument && pChn->pModInstrument->pTuning;
 
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
@@ -1779,7 +1781,7 @@ void CSoundFile::ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning
 }
 
 
-void CSoundFile::ProcessRamping(MODCHANNEL *pChn)
+void CSoundFile::ProcessRamping(ModChannel *pChn)
 //-----------------------------------------------
 {
 	pChn->nRightRamp = pChn->nLeftRamp = 0;
@@ -1949,7 +1951,7 @@ BOOL CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data
 	m_nMixChannels = 0;
-	MODCHANNEL *pChn = Chn;
+	ModChannel *pChn = Chn;
 	for (CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
 	{
 		// XM Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
@@ -1987,7 +1989,7 @@ BOOL CSoundFile::ReadNote()
 		CTuning::RATIOTYPE vibratoFactor = 1;
 		CTuning::NOTEINDEXTYPE arpeggioSteps = 0;
 
-		MODINSTRUMENT *pIns = pChn->pModInstrument;
+		ModInstrument *pIns = pChn->pModInstrument;
 
 		// Calc Frequency
 		int period;
@@ -2400,7 +2402,7 @@ BOOL CSoundFile::ReadNote()
 void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 //-------------------------------------------------------
 {
-	MODCHANNEL *pChn = &Chn[nChn];
+	ModChannel *pChn = &Chn[nChn];
 	if(nChn < m_nChannels)
 	{
 		// TODO evaluate per-plugin macros here
@@ -2424,7 +2426,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 //------------------------------------------------
 {
-	MODCHANNEL *pChn = &Chn[nChn];
+	ModChannel *pChn = &Chn[nChn];
 
 	// Do we need to process midi?
 	// For now there is no difference between mute and sync mute with VSTis.
@@ -2432,12 +2434,12 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	if ((!m_nInstruments) || (m_nPattern >= Patterns.Size())
 		 || (m_nRow >= Patterns[m_nPattern].GetNumRows()) || (!Patterns[m_nPattern])) return;
 
-	const MODCOMMAND::NOTE note = pChn->rowCommand.note;
-	const MODCOMMAND::VOL vol = pChn->rowCommand.vol;
-	const MODCOMMAND::VOLCMD volcmd = pChn->rowCommand.volcmd;
+	const ModCommand::NOTE note = pChn->rowCommand.note;
+	const ModCommand::VOL vol = pChn->rowCommand.vol;
+	const ModCommand::VOLCMD volcmd = pChn->rowCommand.volcmd;
 
 	// Get instrument info and plugin reference
-	MODINSTRUMENT *pIns = pChn->pModInstrument;
+	ModInstrument *pIns = pChn->pModInstrument;
 	PLUGINDEX nPlugin = 0;
 	IMixPlugin *pPlugin = nullptr;
 
@@ -2464,8 +2466,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	{
 		if(note != NOTE_NONE)
 		{
-			MODCOMMAND::NOTE realNote = note;
-			if(MODCOMMAND::IsNote(note))
+			ModCommand::NOTE realNote = note;
+			if(ModCommand::IsNote(note))
 				realNote = pIns->NoteMap[note - 1];
 			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
@@ -2491,8 +2493,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			break;
 		}
 
-		MODCOMMAND::NOTE realNote = note;
-		if(MODCOMMAND::IsNote(note))
+		ModCommand::NOTE realNote = note;
+		if(ModCommand::IsNote(note))
 			realNote = pIns->NoteMap[note - 1];
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN], 0, nPlugin);
@@ -2521,7 +2523,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 }
 
 
-int CSoundFile::GetVolEnvValueFromPosition(int position, const INSTRUMENTENVELOPE &env) const
+int CSoundFile::GetVolEnvValueFromPosition(int position, const InstrumentEnvelope &env) const
 //-------------------------------------------------------------------------------------------
 {
 	UINT pt = env.nNodes - 1;

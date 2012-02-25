@@ -1,21 +1,14 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_amf.cpp
+ * ------------
+ * Purpose: AMF module loader
+ * Notes  : There are two types of AMF files, the ASYLUM Music Format and Advanced Music Format (DSM). Both module types are handled here.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-///////////////////////////////////////////////////
-//
-// AMF module loader
-//
-// There is 2 types of AMF files:
-// - ASYLUM Music Format
-// - Advanced Music Format(DSM)
-//
-///////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
@@ -23,7 +16,7 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct _AMFFILEHEADER
 {
@@ -47,14 +40,14 @@ typedef struct _AMFSAMPLE
 	UCHAR volume;
 } AMFSAMPLE;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 #ifdef AMFLOG
 extern void Log(LPCSTR, ...);
 #endif
 
-void AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels)
+void AMF_Unpack(ModCommand *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels)
 //-------------------------------------------------------------------------------
 {
 	UINT lastinstr = 0;
@@ -67,7 +60,7 @@ void AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 		UINT cmd = pTrack[1];
 		UINT arg = pTrack[2];
 		if (row >= nRows) break;
-		MODCOMMAND *m = pPat + row * nChannels;
+		ModCommand *m = pPat + row * nChannels;
 		if (cmd < 0x7F) // note+vol
 		{
 			m->note = cmd+1;
@@ -199,7 +192,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos = 294; // ???
 		for (UINT iSmp=0; iSmp<numsamples; iSmp++)
 		{
-			MODSAMPLE *psmp = &Samples[iSmp+1];
+			ModSample *psmp = &Samples[iSmp+1];
 			memcpy(m_szNames[iSmp + 1], lpStream+dwMemPos, 22);
 			StringFixer::SpaceToNullStringFixed<22>(m_szNames[iSmp + 1]);
 			psmp->nGlobalVol = 64;
@@ -225,7 +218,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		for (UINT iPat=0; iPat<numpats; iPat++)
 		{
 			Patterns.Insert(iPat, 64);
-			MODCOMMAND* p = Patterns[iPat];
+			ModCommand* p = Patterns[iPat];
 			if (!p) break;
 			const UCHAR *pin = lpStream + dwMemPos;
 			for (UINT i=0; i<8*64; i++)
@@ -254,7 +247,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		// Read samples
 		for (UINT iData=0; iData<m_nSamples; iData++)
 		{
-			MODSAMPLE *psmp = &Samples[iData+1];
+			ModSample *psmp = &Samples[iData+1];
 			if (psmp->nLength)
 			{
 				if(dwMemPos > dwMemLength) return false;
@@ -330,7 +323,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	UINT maxsampleseekpos = 0;
 	for (UINT iIns=0; iIns<m_nSamples; iIns++)
 	{
-		MODSAMPLE *pSmp = &Samples[iIns+1];
+		ModSample *pSmp = &Samples[iIns+1];
 		AMFSAMPLE *psh = (AMFSAMPLE *)(lpStream + dwMemPos);
 
 		dwMemPos += sizeof(AMFSAMPLE);
@@ -414,7 +407,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (dwMemPos >= dwMemLength) break;
 		for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (iSeek == sampleseekpos[iSmp])
 		{
-			MODSAMPLE *pSmp = &Samples[iSmp+1];
+			ModSample *pSmp = &Samples[iSmp+1];
 			dwMemPos += ReadSample(pSmp, RS_PCM8U, (LPCSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 			break;
 		}

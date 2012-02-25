@@ -1,14 +1,14 @@
 /*
  * MIDIMacros.h
  * ------------
- * Purpose: Header file for MIDI macro helper functions / classes
+ * Purpose: Helper functions / classes for MIDI Macro functionality.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
-#ifndef MIDIMACROS_H
-#define MIDIMACROS_H
 
 #ifdef MODPLUG_TRACKER
 class CSoundFile;
@@ -145,5 +145,3 @@ protected:
 };
 
 STATIC_ASSERT(sizeof(MIDIMacroConfig) == 4896); // this is directly written to files, so the size must be correct!
-
-#endif // MIDIMACROS_H

@@ -1,14 +1,15 @@
 /*
- * OpenMPT
- *
  * Sndfile.h
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * ---------
+ * Purpose: Core class of the playback engine. Every song is represented by a CSoundFile object.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-#ifndef __SNDFILE_H
-#define __SNDFILE_H
+
+#pragma once
 
 #include "../mptrack/SoundFilePlayConfig.h"
 #include "../common/misc_util.h"
@@ -22,402 +23,20 @@
 #include "tuning.h"
 #include "MIDIMacros.h"
 
-
-//class CTuningBase;
-//typedef CTuningBase CTuning;
-
-
-// Sample Struct
-struct MODSAMPLE
-{
-	UINT nLength, nLoopStart, nLoopEnd;	// In samples, not bytes
-	UINT nSustainStart, nSustainEnd;	// Dito
-	LPSTR pSample;						// Pointer to sample data
-	UINT nC5Speed;						// Frequency of middle c, in Hz (for IT/S3M/MPTM)
-	WORD nPan;							// Default sample panning (if pan flag is set)
-	WORD nVolume;						// Default volume
-	WORD nGlobalVol;					// Global volume (sample volume is multiplied by this)
-	WORD uFlags;						// Sample flags
-	signed char RelativeTone;			// Relative note to middle c (for MOD/XM)
-	signed char nFineTune;				// Finetune period (for MOD/XM)
-	BYTE nVibType;						// Auto vibrato type
-	BYTE nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
-	BYTE nVibDepth;						// Auto vibrato depth
-	BYTE nVibRate;						// Auto vibrato rate (speed)
-	//CHAR name[MAX_SAMPLENAME];		// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
-	CHAR filename[MAX_SAMPLEFILENAME];
-
-	// Return the size of one (elementary) sample in bytes.
-	uint8 GetElementarySampleSize() const {return (uFlags & CHN_16BIT) ? 2 : 1;}
-
-	// Return the number of channels in the sample.
-	uint8 GetNumChannels() const {return (uFlags & CHN_STEREO) ? 2 : 1;}
-
-	// Return the number of bytes per sampling point. (Channels * Elementary Sample Size)
-	uint8 GetBytesPerSample() const {return GetElementarySampleSize() * GetNumChannels();}
-
-	// Return the size which pSample is at least.
-	DWORD GetSampleSizeInBytes() const {return nLength * GetBytesPerSample();}
-
-	// Returns sample rate of the sample. The argument is needed because 
-	// the sample rate is obtained differently for different module types.
-	uint32 GetSampleRate(const MODTYPE type) const;
-};
-
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-
-/*---------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
-MODULAR STRUCT DECLARATIONS :
------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------*/
-
-// Instrument Envelopes
-struct INSTRUMENTENVELOPE
-{
-	DWORD dwFlags;				// envelope flags
-	UINT nNodes;				// amount of nodes used
-	BYTE nLoopStart;			// loop start node
-	BYTE nLoopEnd;				// loop end node
-	BYTE nSustainStart;			// sustain start node
-	BYTE nSustainEnd;			// sustain end node
-	BYTE nReleaseNode;			// release node
-	WORD Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
-	BYTE Values[MAX_ENVPOINTS];	// envelope point value (y axis)
-
-	INSTRUMENTENVELOPE()
-	{
-		dwFlags = 0;
-		nNodes = 0;
-		nLoopStart = nLoopEnd = 0;
-		nSustainStart = nSustainEnd = 0;
-		nReleaseNode = ENV_RELEASE_NODE_UNSET;
-		MemsetZero(Ticks);
-		MemsetZero(Values);
-	}
-};
-
-// Instrument Struct
-struct MODINSTRUMENT
-{
-	UINT nFadeOut;		// Instrument fadeout speed
-	DWORD dwFlags;		// Instrument flags
-	UINT nGlobalVol;	// Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
-	UINT nPan;			// Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
-
-	uint8 nNNA;			// New note action
-	uint8 nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
-	uint8 nDNA;			// Duplicate note action
-	uint8 nPanSwing;	// Random panning factor (0...64)
-	uint8 nVolSwing;	// Random volume factor (0...100)
-	uint8 nIFC;			// Default filter cutoff (0...127). Used if the high bit is set
-	uint8 nIFR;			// Default filter resonance (0...127). Used if the high bit is set
-
-	uint16 wMidiBank;	// MIDI Bank (1...16384). 0 = Don't send.
-	uint8 nMidiProgram;	// MIDI Program (1...128). 0 = Don't send.
-	uint8 nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send. 17 = Mapped (Send to tracker channel modulo 16).
-	uint8 nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
-
-	int8 nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
-	uint8 nPPC;	//Pitch/Pan centre
-
-	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
-	uint16 nVolRampUp;				// Default sample ramping up
-	UINT nResampling;				// Resampling mode
-	uint8 nCutSwing;				// Random cutoff factor (0...64)
-	uint8 nResSwing;				// Random resonance factor (0...64)
-	uint8 nFilterMode;				// Default filter mode
-	uint16 wPitchToTempoLock;		// BPM at which the samples assigned to this instrument loop correctly
-	uint8 nPluginVelocityHandling;	// How to deal with plugin velocity
-	uint8 nPluginVolumeHandling;	// How to deal with plugin volume
-	CTuning *pTuning;				// sample tuning assigned to this instrument
-	static CTuning *s_DefaultTuning;
-
-	INSTRUMENTENVELOPE VolEnv;		// Volume envelope data
-	INSTRUMENTENVELOPE PanEnv;		// Panning envelope data
-	INSTRUMENTENVELOPE PitchEnv;	// Pitch / filter envelope data
-
-	BYTE NoteMap[128];			// Note mapping, f.e. C-5 => D-5.
-	SAMPLEINDEX Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
-
-	CHAR name[MAX_INSTRUMENTNAME];		// Note: not guaranteed to be null-terminated.
-	CHAR filename[MAX_INSTRUMENTFILENAME];
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	void SetTuning(CTuning* pT)
-	{
-		pTuning = pT;
-	}
-
-	MODINSTRUMENT(SAMPLEINDEX sample = 0)
-	{
-		nFadeOut = 256;
-		dwFlags = 0;
-		nGlobalVol = 64;
-		nPan = 32 * 4;
-
-		nNNA = NNA_NOTECUT;
-		nDCT = DCT_NONE;
-		nDNA = DNA_NOTECUT;
-
-		nPanSwing = 0;
-		nVolSwing = 0;
-		SetCutoff(0, false);
-		SetResonance(0, false);
-
-		wMidiBank = 0;
-		nMidiProgram = 0;
-		nMidiChannel = 0;
-		nMidiDrumKey = 0;
-
-		nPPC = NOTE_MIDDLEC - 1;
-		nPPS = 0;
-
-		nMixPlug = 0;
-		nVolRampUp = 0;
-		nResampling = SRCMODE_DEFAULT;
-		nCutSwing = 0;
-		nResSwing = 0;
-		nFilterMode = FLTMODE_UNCHANGED;
-		wPitchToTempoLock = 0;
-		nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
-
-		pTuning = s_DefaultTuning;
-
-		AssignSample(sample);
-		ResetNoteMap();
-
-		MemsetZero(name);
-		MemsetZero(filename);
-	}
-
-	// Assign all notes to a given sample.
-	void AssignSample(SAMPLEINDEX sample)
-	{
-		for(size_t n = 0; n < CountOf(Keyboard); n++)
-		{
-			Keyboard[n] = sample;
-		}
-	}
-
-	// Reset note mapping (i.e. every note is mapped to itself)
-	void ResetNoteMap()
-	{
-		for(size_t n = 0; n < CountOf(NoteMap); n++)
-		{
-			NoteMap[n] = static_cast<BYTE>(n + 1);
-		}
-	}
-
-	bool IsCutoffEnabled() const { return (nIFC & 0x80) != 0; }
-	bool IsResonanceEnabled() const { return (nIFR & 0x80) != 0; }
-	uint8 GetCutoff() const { return (nIFC & 0x7F); }
-	uint8 GetResonance() const { return (nIFR & 0x7F); }
-	void SetCutoff(uint8 cutoff, bool enable) { nIFC = min(cutoff, 0x7F) | (enable ? 0x80 : 0x00); }
-	void SetResonance(uint8 resonance, bool enable) { nIFR = min(resonance, 0x7F) | (enable ? 0x80 : 0x00); }
-
-	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
-
-	// Get a reference to a specific envelope of this instrument
-	INSTRUMENTENVELOPE &GetEnvelope(enmEnvelopeTypes envType)
-	{
-		switch(envType)
-		{
-		case ENV_VOLUME:
-		default:
-			return VolEnv;
-		case ENV_PANNING:
-			return PanEnv;
-		case ENV_PITCH:
-			return PitchEnv;
-		}
-	}
-
-	// Get a set of all samples referenced by this instrument
-	std::set<SAMPLEINDEX> GetSamples() const
-	{
-		std::set<SAMPLEINDEX> referencedSamples;
-
-		for(size_t i = 0; i < CountOf(Keyboard); i++)
-		{
-			// 0 isn't a sample.
-			if(Keyboard[i] != 0)
-			{
-				referencedSamples.insert(Keyboard[i]);
-			}
-		}
-
-		return referencedSamples;
-	}
-
-};
-
-//MODINSTRUMENT;
-
-// -----------------------------------------------------------------------------------------
-// MODULAR MODINSTRUMENT FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
-// -----------------------------------------------------------------------------------------
-extern void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file);
-extern BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT * input, __int32 fcode, __int16 fsize);
-
-// -! NEW_FEATURE#0027
-
-// --------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------
-
-
-// Envelope playback info for each MODCHANNEL
-struct  MODCHANNEL_ENVINFO
-{
-	DWORD nEnvPosition;
-	DWORD flags;
-	LONG nEnvValueAtReleaseJump;
-};
-
-
-#pragma warning(disable : 4324) //structure was padded due to __declspec(align())
-
-// Channel Struct
-typedef struct __declspec(align(32)) _MODCHANNEL
-{
-	// First 32-bytes: Most used mixing information: don't change it
-	// These fields are accessed directly by the MMX mixing code (look out for CHNOFS_PCURRENTSAMPLE), so the order is crucial
-	// In the meantime, MMX mixing has been removed because it interfered with the new resonant filter code, and the byte offsets are also no longer hardcoded...
-	LPSTR pCurrentSample;		// Currently playing sample (nullptr if no sample is playing)
-	DWORD nPos;
-	DWORD nPosLo;	// actually 16-bit (fractional part)
-	LONG nInc;		// 16.16 fixed point
-	LONG nRightVol;
-	LONG nLeftVol;
-	LONG nRightRamp;
-	LONG nLeftRamp;
-	// 2nd cache line
-	DWORD nLength;
-	DWORD dwFlags;
-	DWORD nLoopStart;
-	DWORD nLoopEnd;
-	LONG nRampRightVol;
-	LONG nRampLeftVol;
-	float nFilter_Y1, nFilter_Y2, nFilter_Y3, nFilter_Y4;
-	float nFilter_A0, nFilter_B0, nFilter_B1;
-	int nFilter_HP;
-	LONG nROfs, nLOfs;
-	LONG nRampLength;
-	// Information not used in the mixer
-	LPSTR pSample;			// Currently playing sample, or previously played sample if no sample is playing.
-	LONG nNewRightVol, nNewLeftVol;
-	LONG nRealVolume, nRealPan;
-	LONG nVolume, nPan, nFadeOutVol;
-	LONG nPeriod, nC5Speed, nPortamentoDest;
-	int nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
-	MODINSTRUMENT *pModInstrument;					// Currently assigned instrument slot
-	MODCHANNEL_ENVINFO VolEnv, PanEnv, PitchEnv;	// Envelope playback info
-	MODSAMPLE *pModSample;							// Currently assigned sample slot
-	CHANNELINDEX nMasterChn;
-	DWORD nVUMeter;
-	LONG nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
-	LONG nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
-	LONG nFineTune, nTranspose;
-	LONG nPortamentoSlide, nAutoVibDepth;
-	UINT nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
-	LONG nVolSwing, nPanSwing;
-	LONG nCutSwing, nResSwing;
-	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
-	UINT nOldGlobalVolSlide;
-	DWORD nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
-	int nRetrigCount, nRetrigParam;
-	ROWINDEX nPatternLoop;
-	UINT nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;
-	// 8-bit members
-	BYTE nRestoreResonanceOnNewNote; //Like above
-	BYTE nRestoreCutoffOnNewNote; //Like above
-	BYTE nNote, nNNA;
-	BYTE nLastNote;				// Last note, ignoring note offs and cuts - for MIDI macros
-	BYTE nNewNote, nNewIns, nCommand, nArpeggio;
-	BYTE nOldVolumeSlide, nOldFineVolUpDown;
-	BYTE nOldPortaUpDown, nOldFinePortaUpDown;
-	BYTE nOldPanSlide, nOldChnVolSlide;
-	BYTE nVibratoType, nVibratoSpeed, nVibratoDepth;
-	BYTE nTremoloType, nTremoloSpeed, nTremoloDepth;
-	BYTE nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
-	BYTE nOldCmdEx, nOldVolParam, nOldTempo;
-	BYTE nOldOffset, nOldHiOffset;
-	BYTE nCutOff, nResonance;
-	BYTE nTremorCount, nTremorParam;
-	BYTE nPatternLoopCount;
-	BYTE nLeftVU, nRightVU;
-	BYTE nActiveMacro, nFilterMode;
-	BYTE nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
-
-	MODCOMMAND rowCommand;
-
-	//NOTE_PCs memory.
-	uint16 m_RowPlugParam;
-	float m_plugParamValueStep, m_plugParamTargetValue;
-	PLUGINDEX m_RowPlug;
-	
-	void ClearRowCmd() { rowCommand = MODCOMMAND::Empty(); }
-
-	MODCHANNEL_ENVINFO &GetEnvelope(enmEnvelopeTypes envType)
-	{
-		switch(envType)
-		{
-		case ENV_VOLUME:
-		default:
-			return VolEnv;
-		case ENV_PANNING:
-			return PanEnv;
-		case ENV_PITCH:
-			return PitchEnv;
-		}
-	}
-
-	typedef UINT VOLUME;
-	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume;}
-
-	//-->Variables used to make user-definable tuning modes work with pattern effects.
-		bool m_ReCalculateFreqOnFirstTick;
-		//If true, freq should be recalculated in ReadNote() on first tick.
-		//Currently used only for vibrato things - using in other context might be 
-		//problematic.
-
-		bool m_CalculateFreq;
-		//To tell whether to calculate frequency.
-
-		int32 m_PortamentoFineSteps;
-		long m_PortamentoTickSlide;
-
-		UINT m_Freq;
-		float m_VibratoDepth;
-	//<----
-} MODCHANNEL;
-
-#define CHNRESET_CHNSETTINGS	1 //  1 b 
-#define CHNRESET_SETPOS_BASIC	2 // 10 b
-#define	CHNRESET_SETPOS_FULL	7 //111 b
-#define CHNRESET_TOTAL			255 //11111111b
-
-
-struct MODCHANNELSETTINGS
-{
-	UINT nPan;
-	UINT nVolume;
-	DWORD dwFlags;
-	PLUGINDEX nMixPlugin;
-	CHAR szName[MAX_CHANNELNAME];
-};
-
+#include "ModSample.h"
+#include "ModInstrument.h"
+#include "ModChannel.h"
 #include "modcommand.h"
-
 #include "PlugInterface.h"
+
+// -----------------------------------------------------------------------------------------
+// MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
+// -----------------------------------------------------------------------------------------
+extern void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file);
+extern BYTE * GetInstrumentHeaderFieldPointer(const ModInstrument * input, __int32 fcode, __int16 fsize);
+// --------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------
+
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
@@ -588,8 +207,8 @@ public: //Get 'controllers'
 	const CMIDIMapper& GetMIDIMapper() const {return m_MIDIMapper;}
 
 private: //Effect functions
-	void PortamentoMPT(MODCHANNEL*, int);
-	void PortamentoFineMPT(MODCHANNEL*, int);
+	void PortamentoMPT(ModChannel*, int);
+	void PortamentoFineMPT(ModChannel*, int);
 
 private: //Misc private methods.
 	static void SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type);
@@ -659,14 +278,14 @@ public:	// for Editing
 	UINT m_nMaxOrderPosition;
 	LPSTR m_lpszSongComments;
 	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
-	MODCHANNEL Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
-	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
+	ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
+	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
 	CPatternContainer Patterns;							// Patterns
 	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.
 protected:
-	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
+	ModSample Samples[MAX_SAMPLES];						// Sample Headers
 public:
-	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
+	ModInstrument *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
@@ -785,7 +404,7 @@ public:
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
-	UINT WriteSample(FILE *f, const MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0) const;
+	UINT WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT nMaxLen=0) const;
 	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
@@ -805,14 +424,14 @@ public:
 
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
-	void ConvertModCommand(MODCOMMAND *) const;
-	void S3MConvert(MODCOMMAND *m, bool bIT) const;
+	void ConvertModCommand(ModCommand *) const;
+	void S3MConvert(ModCommand *m, bool bIT) const;
 	void S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport = false) const;
-	WORD ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport = false) const;
+	WORD ModSaveCommand(const ModCommand *m, const bool bXM, const bool bCompatibilityExport = false) const;
 	
-	static void ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete MODCOMMAND item from one format to another
-	static void MODExx2S3MSxx(MODCOMMAND *m); // Convert Exx to Sxx
-	static void S3MSxx2MODExx(MODCOMMAND *m); // Convert Sxx to Exx
+	static void ConvertCommand(ModCommand *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete ModCommand item from one format to another
+	static void MODExx2S3MSxx(ModCommand *m); // Convert Exx to Sxx
+	static void S3MSxx2MODExx(ModCommand *m); // Convert Sxx to Exx
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 
 	// Translate sample properties between two given formats.
@@ -830,7 +449,7 @@ public:
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT ReadMix(LPVOID lpBuffer, UINT cbBuffer, CSoundFile *, DWORD *, LPBYTE ps=NULL);
 	UINT CreateStereoMix(int count);
-	UINT GetResamplingFlag(const MODCHANNEL *pChannel);
+	UINT GetResamplingFlag(const ModChannel *pChannel);
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	UINT GetTotalTickCount() const { return m_nTotalCount; }
@@ -887,7 +506,7 @@ public:
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
 	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCut);
 	void NoteChange(CHANNELINDEX nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
-	void InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true);
+	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true);
 
 	// Channel Effects
 	void KeyOff(CHANNELINDEX nChn);
@@ -899,68 +518,68 @@ protected:
 	// Channel effect processing
 	int GetVibratoDelta(int type, int position) const;
 
-	void ProcessVolumeSwing(MODCHANNEL *pChn, int &vol);
-	void ProcessPanningSwing(MODCHANNEL *pChn);
-	void ProcessTremolo(MODCHANNEL *pChn, int &vol);
-	void ProcessTremor(MODCHANNEL *pChn, int &vol);
+	void ProcessVolumeSwing(ModChannel *pChn, int &vol);
+	void ProcessPanningSwing(ModChannel *pChn);
+	void ProcessTremolo(ModChannel *pChn, int &vol);
+	void ProcessTremor(ModChannel *pChn, int &vol);
 
-	void ProcessVolumeEnvelope(MODCHANNEL *pChn, int &vol);
-	void ProcessPanningEnvelope(MODCHANNEL *pChn);
-	void ProcessPitchFilterEnvelope(MODCHANNEL *pChn, int &period);
+	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol);
+	void ProcessPanningEnvelope(ModChannel *pChn);
+	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period);
 
-	void IncrementVolumeEnvelopePosition(MODCHANNEL *pChn);
-	void IncrementPanningEnvelopePosition(MODCHANNEL *pChn);
-	void IncrementPitchFilterEnvelopePosition(MODCHANNEL *pChn);
+	void IncrementVolumeEnvelopePosition(ModChannel *pChn);
+	void IncrementPanningEnvelopePosition(ModChannel *pChn);
+	void IncrementPitchFilterEnvelopePosition(ModChannel *pChn);
 
-	void ProcessInstrumentFade(MODCHANNEL *pChn, int &vol);
+	void ProcessInstrumentFade(ModChannel *pChn, int &vol);
 
-	void ProcessPitchPanSeparation(MODCHANNEL *pChn);
-	void ProcessPanbrello(MODCHANNEL *pChn);
+	void ProcessPitchPanSeparation(ModChannel *pChn);
+	void ProcessPanbrello(ModChannel *pChn);
 
-	void ProcessArpeggio(MODCHANNEL *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps);
-	void ProcessVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
-	void ProcessSampleAutoVibrato(MODCHANNEL *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac);
+	void ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps);
+	void ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
+	void ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac);
 
-	void ProcessRamping(MODCHANNEL *pChn);
+	void ProcessRamping(ModChannel *pChn);
 
 protected:
 	// Channel Effects
-	void UpdateS3MEffectMemory(MODCHANNEL *pChn, UINT param) const;
+	void UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const;
 	void PortamentoUp(CHANNELINDEX nChn, UINT param, const bool fineAsRegular = false);
 	void PortamentoDown(CHANNELINDEX nChn, UINT param, const bool fineAsRegular = false);
 	void MidiPortamento(CHANNELINDEX nChn, int param);
-	void FinePortamentoUp(MODCHANNEL *pChn, UINT param);
-	void FinePortamentoDown(MODCHANNEL *pChn, UINT param);
-	void ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param);
-	void ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param);
-	void NoteSlide(MODCHANNEL *pChn, UINT param, bool slideUp);
-	void TonePortamento(MODCHANNEL *pChn, UINT param);
-	void Vibrato(MODCHANNEL *pChn, UINT param);
-	void FineVibrato(MODCHANNEL *pChn, UINT param);
-	void VolumeSlide(MODCHANNEL *pChn, UINT param);
-	void PanningSlide(MODCHANNEL *pChn, UINT param);
-	void ChannelVolSlide(MODCHANNEL *pChn, UINT param);
-	void FineVolumeUp(MODCHANNEL *pChn, UINT param);
-	void FineVolumeDown(MODCHANNEL *pChn, UINT param);
-	void Tremolo(MODCHANNEL *pChn, UINT param);
-	void Panbrello(MODCHANNEL *pChn, UINT param);
+	void FinePortamentoUp(ModChannel *pChn, UINT param);
+	void FinePortamentoDown(ModChannel *pChn, UINT param);
+	void ExtraFinePortamentoUp(ModChannel *pChn, UINT param);
+	void ExtraFinePortamentoDown(ModChannel *pChn, UINT param);
+	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp);
+	void TonePortamento(ModChannel *pChn, UINT param);
+	void Vibrato(ModChannel *pChn, UINT param);
+	void FineVibrato(ModChannel *pChn, UINT param);
+	void VolumeSlide(ModChannel *pChn, UINT param);
+	void PanningSlide(ModChannel *pChn, UINT param);
+	void ChannelVolSlide(ModChannel *pChn, UINT param);
+	void FineVolumeUp(ModChannel *pChn, UINT param);
+	void FineVolumeDown(ModChannel *pChn, UINT param);
+	void Tremolo(ModChannel *pChn, UINT param);
+	void Panbrello(ModChannel *pChn, UINT param);
 	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
 	void SampleOffset(CHANNELINDEX nChn, UINT param);
 	void NoteCut(CHANNELINDEX nChn, UINT nTick);
-	ROWINDEX PatternLoop(MODCHANNEL *, UINT param);
+	ROWINDEX PatternLoop(ModChannel *, UINT param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, UINT param);
-	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
-	void InvertLoop(MODCHANNEL* pChn);
+	void ExtendedChannelEffect(ModChannel *, UINT param);
+	void InvertLoop(ModChannel* pChn);
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
 	float CalculateSmoothParamChange(float currentValue, float param) const;
 	size_t SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin);
 
-	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
+	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
-	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
+	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide);
 	void GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	void UpdateTimeSignature();
@@ -974,7 +593,7 @@ public:
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
 	UINT PackSample(int &sample, int next);
 	bool CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result=NULL);
-	UINT ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
+	UINT ReadSample(ModSample *pSmp, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
 	bool DestroySample(SAMPLEINDEX nSample);
 
 // -> CODE#0020
@@ -997,7 +616,7 @@ public:
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);
 	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed) const;
 	SAMPLEINDEX RemoveSelectedSamples(const vector<bool> &keepSamples);
-	void AdjustSampleLoop(MODSAMPLE *pSmp);
+	void AdjustSampleLoop(ModSample *pSmp);
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
@@ -1031,11 +650,11 @@ public:
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
 	UINT GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac=0) const;
 	// Misc functions
-	MODSAMPLE &GetSample(SAMPLEINDEX sample) { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
-	const MODSAMPLE &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
+	ModSample &GetSample(SAMPLEINDEX sample) { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
+	const ModSample &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
-	long ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
+	long ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
 //	PSNDMIXPLUGIN GetSndPlugMixPlug(IMixPlugin *pPlugin); //rewbs.plugDocAware
 #ifndef NO_FILTER
@@ -1050,7 +669,7 @@ public:
 public:
 	static DWORD TransposeToFrequency(int transp, int ftune=0);
 	static int FrequencyToTranspose(DWORD freq);
-	static void FrequencyToTranspose(MODSAMPLE *psmp);
+	static void FrequencyToTranspose(ModSample *psmp);
 
 	// System-Dependant functions
 public:
@@ -1093,9 +712,9 @@ protected:
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 
 public:
-	int GetVolEnvValueFromPosition(int position, const INSTRUMENTENVELOPE &env) const;
-    void ResetChannelEnvelopes(MODCHANNEL *pChn) const;
-	void ResetChannelEnvelope(MODCHANNEL_ENVINFO &env) const;
+	int GetVolEnvValueFromPosition(int position, const InstrumentEnvelope &env) const;
+    void ResetChannelEnvelopes(ModChannel *pChn) const;
+	void ResetChannelEnvelope(ModChannelEnvInfo &env) const;
 
 private:
 	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
@@ -1120,7 +739,7 @@ private:
 public:
 	// "importance" of every FX command. Table is used for importing from formats with multiple effect columns
 	// and is approximately the same as in SchismTracker.
-	static size_t GetEffectWeight(MODCOMMAND::COMMAND cmd);
+	static size_t GetEffectWeight(ModCommand::COMMAND cmd);
 	// try to convert a an effect into a volume column effect.
 	static bool ConvertVolEffect(uint8 *e, uint8 *p, bool bForce);
 };
@@ -1128,7 +747,7 @@ public:
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())
 
 
-inline uint32 MODSAMPLE::GetSampleRate(const MODTYPE type) const
+inline uint32 ModSample::GetSampleRate(const MODTYPE type) const
 //--------------------------------------------------------------
 {
 	uint32 nRate;
@@ -1200,16 +819,13 @@ bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size)
 
 // Read instrument property with 'code' and 'size' from 'ptr' to instrument 'pIns'.
 // Note: (ptr, size) pair must be valid (e.g. can read 'size' bytes from 'ptr')
-void ReadInstrumentExtensionField(MODINSTRUMENT* pIns, LPCBYTE& ptr, const int32 code, const int16 size);
+void ReadInstrumentExtensionField(ModInstrument* pIns, LPCBYTE& ptr, const int32 code, const int16 size);
 
 // Read instrument property with 'code' from 'pData' to instrument 'pIns'.
-void ReadExtendedInstrumentProperty(MODINSTRUMENT* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
+void ReadExtendedInstrumentProperty(ModInstrument* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
 
 // Read extended instrument properties from 'pDataStart' to instrument 'pIns'.
-void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataStart, const size_t nMemLength);
+void ReadExtendedInstrumentProperties(ModInstrument* pIns, const LPCBYTE pDataStart, const size_t nMemLength);
 
 // Convert instrument flags which were read from 'dF..' extension to proper internal representation.
-void ConvertReadExtendedFlags(MODINSTRUMENT* pIns);
-
-
-#endif
+void ConvertReadExtendedFlags(ModInstrument* pIns);

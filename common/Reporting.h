@@ -1,16 +1,14 @@
 /*
- *
  * Reporting.h
  * -----------
- * Purpose: Header file for reporting class.
+ * Purpose: A class for showing notifications, prompts, etc...
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #pragma once
-#ifndef REPORTING_H
-#define REPORTING_H
 
 enum ConfirmAnswer
 {
@@ -66,5 +64,3 @@ public:
 	static RetryAnswer RetryCancel(const char *text, const char *caption, const CWnd *parent = nullptr);
 
 };
-
-#endif // REPORTING_H

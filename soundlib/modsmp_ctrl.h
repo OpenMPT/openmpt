@@ -1,9 +1,14 @@
 /*
- * MODINSTRUMENT related functions.
+ * ModSmp_Ctrl.h
+ * -------------
+ * Purpose: Basic sample editing code (resizing, adding silence, normalizing, ...).
+ * Notes  : Could be merged with ModSample.h / ModSample.cpp at some point.
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef MODSMP_CTRL_H
-#define MODSMP_CTRL_H
+
+#pragma once
 
 #include "Sndfile.h"
 
@@ -20,30 +25,30 @@ enum ResetFlag
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
-SmpLength InsertSilence(MODSAMPLE &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile);
+SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile);
 
 // Change sample size. 
 // Note: If resized sample is bigger, silence will be added to the sample's tail.
 // Return: Length of the new sample.
-SmpLength ResizeSample(MODSAMPLE &smp, const SmpLength nNewLength, CSoundFile* pSndFile);
+SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile* pSndFile);
 
 // Replaces sample in 'smp' with given sample and frees the old sample.
 // If valid CSoundFile pointer is given, the sample will be replaced also from the sounds channels.
-void ReplaceSample(MODSAMPLE &smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile* pSndFile);
+void ReplaceSample(ModSample &smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile* pSndFile);
 
-bool AdjustEndOfSample(MODSAMPLE &smp, CSoundFile *pSndFile = nullptr);
+bool AdjustEndOfSample(ModSample &smp, CSoundFile *pSndFile = nullptr);
 
 // Returns the number of bytes allocated(at least) for sample data.
 // Note: Currently the return value is based on the sample length and the actual 
 //       allocation may be more than what this function returns.
-inline SmpLength GetSampleCapacity(MODSAMPLE &smp) {return smp.GetSampleSizeInBytes();}
+inline SmpLength GetSampleCapacity(ModSample &smp) {return smp.GetSampleSizeInBytes();}
 
 // Resets samples.
 void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag, SAMPLEINDEX minSample = SAMPLEINDEX_INVALID, SAMPLEINDEX maxSample = SAMPLEINDEX_INVALID);
 
 // Remove DC offset and normalize.
 // Return: If DC offset was removed, returns original offset value, zero otherwise.
-float RemoveDCOffset(MODSAMPLE &smp,
+float RemoveDCOffset(ModSample &smp,
 					 SmpLength iStart,		// Start position (for partial DC offset removal).
 					 SmpLength iEnd,		// End position (for partial DC offset removal).
 					 const MODTYPE modtype,	// Used to determine whether to adjust global or default volume
@@ -52,25 +57,25 @@ float RemoveDCOffset(MODSAMPLE &smp,
 					 CSoundFile* const pSndFile); // Passed to AdjustEndOfSample.
 
 // Amplify / fade  sample data
-bool AmplifySample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile, double amplifyStart, double amplifyEnd);
+bool AmplifySample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile, double amplifyStart, double amplifyEnd);
 
 // Reverse sample data
-bool ReverseSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
 
 // Virtually unsign sample data
-bool UnsignSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
 
 // Invert sample data (flip by 180 degrees)
-bool InvertSample(MODSAMPLE &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
 
 // Detect whether to enable smart sample ramping.
-bool EnableSmartSampleRamping(const MODSAMPLE &smp, SmpLength sampleOffset, const CSoundFile *pSndFile);
+bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, const CSoundFile *pSndFile);
 
 // Crossfade sample data to create smooth loops
-bool XFadeSample(MODSAMPLE &smp, SmpLength iFadeLength, CSoundFile *pSndFile);
+bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile *pSndFile);
 
 // Convert a sample with any number of channels to mono
-bool ConvertToMono(MODSAMPLE &smp, CSoundFile *pSndFile);
+bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile);
 
 } // Namespace ctrlSmp
 
@@ -78,7 +83,7 @@ namespace ctrlChn
 {
 
 // Replaces sample from sound channels by given sample.
-void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
+void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 					LPCSTR pOldSample,
 					LPSTR pNewSample,
 					const SmpLength nNewLength,
@@ -86,5 +91,3 @@ void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
 					DWORD andFlags = MAXDWORD);
 
 } // namespace ctrlChn
-
-#endif

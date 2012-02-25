@@ -1,15 +1,14 @@
 /*
- * This source code is public domain. 
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *			OpenMPT dev(s)	(miscellaneous modifications)
-*/
+ * Load_far.cpp
+ * ------------
+ * Purpose: Farandole (FAR) module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-////////////////////////////////////////
-// Farandole (FAR) module loader	  //
-////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
@@ -17,7 +16,7 @@
 
 #define FARFILEMAGIC	0xFE524146	// "FAR"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct FARHEADER1
 {
@@ -55,7 +54,7 @@ typedef struct FARSAMPLE
 	BYTE loop;
 } FARSAMPLE;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
@@ -145,7 +144,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 		if (rows > 256) rows = 256;
 		if (rows < 16) rows = 16;
 		if(Patterns.Insert(ipat, rows)) return true;
-		MODCOMMAND *m = Patterns[ipat];
+		ModCommand *m = Patterns[ipat];
 		UINT patbrk = lpStream[dwMemPos];
 		const BYTE *p = lpStream + dwMemPos + 2;
 		UINT max = rows*16*4;
@@ -238,7 +237,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	if (dwMemPos + 8 >= dwMemLength) return true;
 	memcpy(samplemap, lpStream+dwMemPos, 8);
 	dwMemPos += 8;
-	MODSAMPLE *pSmp = &Samples[1];
+	ModSample *pSmp = &Samples[1];
 	for (UINT ismp=0; ismp<64; ismp++, pSmp++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
 	{
 		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return true;

@@ -1,5 +1,14 @@
-#ifndef PATTERNCONTAINER_H
-#define PATTERNCONTAINER_H
+/*
+ * PatternContainer.h
+ * ------------------
+ * Purpose: Container class for managing patterns.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "pattern.h"
 #include "Snd_defs.h"
@@ -19,7 +28,7 @@ public:
 
 //BEGIN: OPERATORS
 public:
-	//To mimic old pattern == MODCOMMAND* behavior.
+	//To mimic old pattern == ModCommand* behavior.
 	MODPATTERN& operator[](const int pat) {return m_Patterns[pat];}
 	const MODPATTERN& operator[](const int pat) const {return m_Patterns[pat];}
 //END: OPERATORS
@@ -110,6 +119,3 @@ const char FileIdPatterns[] = "mptPc";
 
 void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t nSize = 0);
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc);
-
-#endif
-

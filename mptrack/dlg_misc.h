@@ -1,5 +1,14 @@
-#ifndef _MPT_DLG_MISC_H_
-#define _MPT_DLG_MISC_H_
+/*
+ * dlg_misc.h
+ * ----------
+ * Purpose: Implementation for various OpenMPT dialogs.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 class CSoundFile;
 class CModDoc;
@@ -227,5 +236,3 @@ enum enMsgBoxHidableMessage
 };
 
 void MsgBoxHidable(enMsgBoxHidableMessage enMsg);
-
-#endif

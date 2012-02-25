@@ -1,10 +1,12 @@
 /*
- * modcommand.cpp
+ * ModCommand.cpp
  * --------------
- * Purpose: Various functions for writing effects to patterns, converting MODCOMMANDs, etc.
+ * Purpose: Various functions for writing effects to patterns, converting ModCommands, etc.
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
- *
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "Sndfile.h"
@@ -13,7 +15,7 @@ extern BYTE ImpulseTrackerPortaVolCmd[16];
 
 
 // Convert an Exx command (MOD) to Sxx command (S3M)
-void CSoundFile::MODExx2S3MSxx(MODCOMMAND *m)
+void CSoundFile::MODExx2S3MSxx(ModCommand *m)
 //-------------------------------------------
 {
 	if(m->command != CMD_MODCMDEX) return;
@@ -38,7 +40,7 @@ void CSoundFile::MODExx2S3MSxx(MODCOMMAND *m)
 
 
 // Convert an Sxx command (S3M) to Exx command (MOD)
-void CSoundFile::S3MSxx2MODExx(MODCOMMAND *m)
+void CSoundFile::S3MSxx2MODExx(ModCommand *m)
 //-------------------------------------------
 {
 	if(m->command != CMD_S3MCMDEX) return;
@@ -61,7 +63,7 @@ void CSoundFile::S3MSxx2MODExx(MODCOMMAND *m)
 
 
 // Convert a mod command from one format to another. 
-void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType)
+void CSoundFile::ConvertCommand(ModCommand *m, MODTYPE nOldType, MODTYPE nNewType)
 //--------------------------------------------------------------------------------
 {
 	// helper variables
@@ -112,7 +114,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 	{
 		if(m->IsPcNote())
 		{
-			MODCOMMAND::COMMAND newcommand = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI;
+			ModCommand::COMMAND newcommand = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI;
 			if(!GetModSpecifications(nNewType).HasCommand(newcommand))
 			{
 				newcommand = CMD_MIDI;	// assuming that this was CMD_SMOOTHMIDI
@@ -122,7 +124,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				newcommand = CMD_NONE;
 			}
 
-			m->param = (BYTE)(min(MODCOMMAND::maxColumnValue, m->GetValueEffectCol()) * 0x7F / MODCOMMAND::maxColumnValue);
+			m->param = (BYTE)(min(ModCommand::maxColumnValue, m->GetValueEffectCol()) * 0x7F / ModCommand::maxColumnValue);
 			m->command = newcommand; // might be removed later
 			m->volcmd = VOLCMD_NONE;
 			m->note = NOTE_NONE;
@@ -731,11 +733,11 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 
 // "importance" of every FX command. Table is used for importing from formats with multiple effect colums
 // and is approximately the same as in SchismTracker.
-size_t CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
+size_t CSoundFile::GetEffectWeight(ModCommand::COMMAND cmd)
 //---------------------------------------------------------
 {
 	// Effect weights, sorted from lowest to highest weight.
-	static const MODCOMMAND::COMMAND weights[] =
+	static const ModCommand::COMMAND weights[] =
 	{
 		CMD_NONE,
 		CMD_XPARAM,
@@ -819,8 +821,8 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 		nScanChnMax = GetNumChannels() - 1;
 	}
 
-	MODCOMMAND  * const p = Patterns[nPat].GetpModCommand(nRow, nScanChnMin);
-	MODCOMMAND *m;
+	ModCommand  * const p = Patterns[nPat].GetpModCommand(nRow, nScanChnMin);
+	ModCommand *m;
 
 	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
 	if(!bAllowMultipleEffects)

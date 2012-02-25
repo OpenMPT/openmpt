@@ -1,9 +1,13 @@
-#pragma once
-#ifndef CREDITSTATIC_H
-#define CREDITSTATIC_H
+/*
+ * CreditStatic.h
+ * --------------
+ * Purpose: Implementation of scrolling credits control.
+ * Notes  : Ugly! :)
+ * Authors: Pel K. Txnder, http://www.codeguru.com/cpp/controls/staticctrl/article.php/c2903
+ */
 
-// CreditStatic.h : header file
-//
+
+#pragma once
 
 #define DISPLAY_SLOW		0
 #define DISPLAY_MEDIUM		1
@@ -114,5 +118,3 @@ protected:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // CREDITSTATIC_H

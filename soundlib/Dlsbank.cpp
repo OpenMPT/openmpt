@@ -1,16 +1,13 @@
 /*
- * OpenMPT
- *
- * Dlsbank.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * DLSBank.cpp
+ * -----------
+ * Purpose: Sound bank loading.
+ * Notes  : Supported sound bank types: DLS (including embedded DLS in MSS & RMI), SF2
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-///////////////////////////////////////////////////////////////////////////
-// Sound Bank support
-// DLS (including embedded DLS in MSS & RMI)
-// SF2
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -110,7 +107,7 @@
 #define ART_DEFAULTPAN		MAKE_ART	(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_PAN)
 
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 //////////////////////////////////////////////////////////
 // DLS IFF Chunk IDs
@@ -360,7 +357,7 @@ typedef struct SF2LOADERINFO
 // End of structures definitions
 /////////////////////////////////////////////////////////////////////
 
-#pragma pack()
+#pragma pack(pop)
 
 /////////////////////////////////////////////////////////////////////
 // Unit conversion
@@ -1489,7 +1486,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	{
 		pSndFile->DestroySample(nSample);
 		UINT nWaveLink = pDlsIns->Regions[nRgn].nWaveLink;
-		MODSAMPLE &sample = pSndFile->GetSample(nSample);
+		ModSample &sample = pSndFile->GetSample(nSample);
 		if (pSndFile->m_nSamples < nSample) pSndFile->m_nSamples = nSample;
 		if ((nWaveLink < m_nSamplesEx) && (m_pSamplesEx))
 		{
@@ -1516,7 +1513,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	}
 	if (bWaveForm)
 	{
-		MODSAMPLE &sample = pSndFile->GetSample(nSample);
+		ModSample &sample = pSndFile->GetSample(nSample);
 		DLSREGION *pRgn = &pDlsIns->Regions[nRgn];
 		sample.uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) sample.uFlags |= CHN_LOOP;
@@ -1610,7 +1607,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 {
 	BYTE RgnToSmp[DLSMAXREGIONS];
 	DLSINSTRUMENT *pDlsIns;
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	UINT nRgnMin, nRgnMax, nEnv;
 	SAMPLEINDEX nSample;
 	
@@ -1646,7 +1643,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	
 	try
 	{
-		pIns = new MODINSTRUMENT();
+		pIns = new ModInstrument();
 	} catch(MPTMemoryException)
 	{
 		return FALSE;

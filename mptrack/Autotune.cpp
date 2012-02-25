@@ -1,9 +1,10 @@
 /*
  * Autotune.cpp
- * -------------
- * Purpose: Class for tuning a sample to the next C automatically.
+ * ------------
+ * Purpose: Class for tuning a sample to a given base note automatically.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 

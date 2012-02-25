@@ -1,3 +1,13 @@
+/*
+ * mod_specifications.cpp
+ * ----------------------
+ * Purpose: Mod specifications characterise the features of every editable module format in OpenMPT, such as the number of supported channels, samples, effects, etc...
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include <stdafx.h>
 #include "mod_specifications.h"
 #include "../common/misc_util.h"
@@ -36,7 +46,7 @@ MODTYPE CModSpecifications::ExtensionToType(LPCTSTR pszExt)
 }
 
 
-bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
+bool CModSpecifications::HasNote(ModCommand::NOTE note) const
 //------------------------------------------------------------
 {
 	if(note >= noteMin && note <= noteMax)
@@ -57,7 +67,7 @@ bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 }
 
 
-bool CModSpecifications::HasVolCommand(MODCOMMAND::VOLCMD volcmd) const
+bool CModSpecifications::HasVolCommand(ModCommand::VOLCMD volcmd) const
 //---------------------------------------------------------------------
 {
 	if(volcmd >= MAX_VOLCMDS) return false;
@@ -66,7 +76,7 @@ bool CModSpecifications::HasVolCommand(MODCOMMAND::VOLCMD volcmd) const
 }
 
 
-bool CModSpecifications::HasCommand(MODCOMMAND::COMMAND cmd) const
+bool CModSpecifications::HasCommand(ModCommand::COMMAND cmd) const
 //----------------------------------------------------------------
 {
 	if(cmd >= MAX_EFFECTS) return false;
@@ -75,7 +85,7 @@ bool CModSpecifications::HasCommand(MODCOMMAND::COMMAND cmd) const
 }
 
 
-char CModSpecifications::GetVolEffectLetter(MODCOMMAND::VOLCMD volcmd) const
+char CModSpecifications::GetVolEffectLetter(ModCommand::VOLCMD volcmd) const
 //--------------------------------------------------------------------------
 {
 	if(volcmd >= MAX_VOLCMDS) return '?';
@@ -83,7 +93,7 @@ char CModSpecifications::GetVolEffectLetter(MODCOMMAND::VOLCMD volcmd) const
 }
 
 
-char CModSpecifications::GetEffectLetter(MODCOMMAND::COMMAND cmd) const
+char CModSpecifications::GetEffectLetter(ModCommand::COMMAND cmd) const
 //---------------------------------------------------------------------
 {
 	if(cmd >= MAX_EFFECTS) return '?';

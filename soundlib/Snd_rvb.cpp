@@ -1,3 +1,14 @@
+/*
+ * Snd_rvb.cpp
+ * -----------
+ * Purpose: Mixing code for reverb.
+ * Notes  : Ugh... This should really be removed at some point.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "sndfile.h"
 #include "snd_rvb.h"
@@ -5,8 +16,8 @@
 #pragma warning(disable:4725)	// Pentium fdiv bug
 #pragma warning(disable:4731)	// ebp modified
 
-extern int MixReverbBuffer[MIXBUFFERSIZE*2];
-extern int MixSoundBuffer[MIXBUFFERSIZE*4];
+extern int MixReverbBuffer[MIXBUFFERSIZE * 2];
+extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
 
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 

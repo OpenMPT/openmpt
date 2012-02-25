@@ -1,10 +1,20 @@
-#ifndef _DLS_BANK_H_
-#define _DLS_BANK_H_
+/*
+ * DLSBank.h
+ * ---------
+ * Purpose: Sound bank loading.
+ * Notes  : Supported sound bank types: DLS (including embedded DLS in MSS & RMI), SF2
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 class CSoundFile;
 #include "Snd_defs.h"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 #define DLSMAXREGIONS		128
 #define DLSMAXENVELOPES		2048
@@ -67,7 +77,7 @@ typedef struct DLSSAMPLEEX
 	CHAR chPitchCorrection;
 } DLSSAMPLEEX;
 
-#pragma pack()
+#pragma pack(pop)
 
 #define SOUNDBANK_TYPE_INVALID	0
 #define SOUNDBANK_TYPE_DLS		0x01
@@ -139,6 +149,3 @@ public:
 	static LONG __cdecl DLS32BitRelativeLinearToGain(LONG lGain);		// 0dB = 0x10000
 	static LONG __cdecl DLSMidiVolumeToLinear(UINT nMidiVolume);		// [0-127] -> [0-0x10000]
 };
-
-
-#endif

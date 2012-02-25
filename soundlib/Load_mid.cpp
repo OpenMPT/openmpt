@@ -1,15 +1,14 @@
 /*
- * OpenMPT
- *
- * Load_mid.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * Load_med.cpp
+ * ------------
+ * Purpose: MIDI file loader
+ * Notes  : MIDI import is pretty crappy.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-//////////////////////////////////////////////
-// MIDI loader                              //
-//////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 #include "dlsbank.h"
@@ -32,7 +31,7 @@ extern void Log(LPCSTR, ...);
 //UINT gnMidiImportSpeed = 3;
 //UINT gnMidiPatternLen = 128;
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct MIDIFILEHEADER
 {
@@ -89,7 +88,7 @@ typedef struct MIDITRACK
 	LONG nexteventtime;
 } MIDITRACK;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 
@@ -374,7 +373,7 @@ static int ConvertMidiTempo(int tempo_us, int &tickMultiplier, int importSpeed)
 UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNote)
 //--------------------------------------------------------------------------------
 {
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	UINT nProgram = dwBankProgram & 0x7F;
 	UINT nBank = dwBankProgram >> 7;
 
@@ -382,7 +381,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	if (nNote >= NOTE_MAX) return 0;
 	for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
 	{
-		MODINSTRUMENT *p = Instruments[i];
+		ModInstrument *p = Instruments[i];
 		// Drum Kit ?
 		if (nChannel == MIDI_DRUMCHANNEL)
 		{
@@ -397,7 +396,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	
 	try
 	{
-		pIns = new MODINSTRUMENT();
+		pIns = new ModInstrument();
 	} catch(MPTMemoryException)
 	{
 		return 0;
@@ -626,7 +625,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 			break;
 		}
 		dwGlobalFlags |= MIDIGLOBAL_SONGENDED;
-		MODCOMMAND *m = Patterns[pat] + row * m_nChannels;
+		ModCommand *m = Patterns[pat] + row * m_nChannels;
 		// Parse Tracks
 		for (UINT trk=0; trk<tracks; trk++) if (miditracks[trk].ptracks)
 		{

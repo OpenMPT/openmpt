@@ -1,7 +1,16 @@
-#ifndef _ITDEFS_H_
-#define _ITDEFS_H_
+/*
+ * IT_DEFS.H
+ * ---------
+ * Purpose: IT file structures
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-#pragma pack(1)
+
+#pragma once
+
+#pragma pack(push, 1)
 
 struct ITFILEHEADER
 {
@@ -144,7 +153,7 @@ struct ITHISTORYSTRUCT
 	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 extern BYTE autovibit2xm[8];
 extern BYTE autovibxm2it[8];
@@ -175,5 +184,3 @@ enum IT_ReaderBitMasks
 	IT_bitmask_patternChanUsed_c    = 0x0f
 
 };
-
-#endif

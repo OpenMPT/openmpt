@@ -1,3 +1,13 @@
+/*
+ * serialization_utils.cpp
+ * -----------------------
+ * Purpose: Serializing data to and from MPTM files.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "serialization_utils.h"
 #include <algorithm>

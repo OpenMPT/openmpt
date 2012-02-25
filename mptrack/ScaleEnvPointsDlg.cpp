@@ -1,17 +1,19 @@
 /*
  * ScaleEnvPointsDlg.cpp
  * ---------------------
- * Purpose: Scale instrument envelope points on x and y axis.
+ * Purpose: Dialog for scaling instrument envelope points on x and y axis.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
 #include "ScaleEnvPointsDlg.h"
 
-float CScaleEnvPointsDlg::m_fFactorX = 1;
-float CScaleEnvPointsDlg::m_fFactorY = 1;
+float CScaleEnvPointsDlg::m_fFactorX = 1.0f;
+float CScaleEnvPointsDlg::m_fFactorY = 1.0f;
 
 
 BOOL CScaleEnvPointsDlg::OnInitDialog()

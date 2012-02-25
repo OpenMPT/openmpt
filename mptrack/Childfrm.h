@@ -1,11 +1,14 @@
-// ChildFrm.h : interface of the CChildFrame class
-//
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * ChildFrm.h
+ * ----------
+ * Purpose: Implementation of tab interface class.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #pragma once
-#ifndef CHILDFRM_H
-#define CHILDFRM_H
-
 
 class CModControlDlg;
 class CChildFrame;
@@ -151,5 +154,3 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // CHILDFRM_H

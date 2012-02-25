@@ -1,9 +1,19 @@
+/*
+ * mod2midi.cpp
+ * ------------
+ * Purpose: Module to MIDI conversion (dialog + conversion code).
+ * Notes  : MIDI export is pretty crappy.
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mod2midi.h"
 #include "Wav.h"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct _RMIDDATACHUNK
 {
@@ -44,7 +54,7 @@ typedef struct _DYNMIDITRACK
 	void WriteLen(unsigned long len);
 } DYNMIDITRACK, *PDYNMIDITRACK;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 void DYNMIDITRACK::Write(const void *pBuffer, unsigned long nBytes)
@@ -139,7 +149,7 @@ CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParen
 	MemsetZero(m_InstrMap);
 	for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 	{
-		MODINSTRUMENT *pIns = m_pSndFile->Instruments[nIns];
+		ModInstrument *pIns = m_pSndFile->Instruments[nIns];
 		if ((pIns) && (pIns->nMidiChannel <= 16))
 		{
 			m_InstrMap[nIns].nChannel = pIns->nMidiChannel;
@@ -172,7 +182,7 @@ BOOL CModToMidi::OnInitDialog()
 	{
 		for(INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->GetNumInstruments(); nIns++)
 		{
-			MODINSTRUMENT *pIns = m_pSndFile->Instruments[nIns];
+			ModInstrument *pIns = m_pSndFile->Instruments[nIns];
 			if ((pIns) && (m_pSndFile->IsInstrumentUsed(nIns)))
 			{
 				wsprintf(s, "%02d: %s", nIns, pIns->name);
@@ -323,7 +333,7 @@ VOID CModToMidi::OnOK()
 {
 	for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++)
 	{
-		MODINSTRUMENT *pIns = m_pSndFile->Instruments[i];
+		ModInstrument *pIns = m_pSndFile->Instruments[i];
 		if (pIns)
 		{
 			pIns->nMidiProgram = m_InstrMap[i].nProgram;
@@ -429,8 +439,8 @@ BOOL CModToMidi::DoConvert()
 		for (CHANNELINDEX nChn = 0; nChn < m_pSndFile->GetNumChannels(); nChn++)
 		{
 			PDYNMIDITRACK pTrk = &Tracks[nChn];
-			//MODCOMMAND *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
-			const MODCOMMAND *m = &patternRow[nChn];
+			//ModCommand *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+			const ModCommand *m = &patternRow[nChn];
 			UINT delta_time = nClock - pTrk->nLastEventClock;
 			UINT len = 0;
 
@@ -483,7 +493,7 @@ BOOL CModToMidi::DoConvert()
 						{
 							if ((nsmp <= m_pSndFile->GetNumInstruments()) && (m_pSndFile->Instruments[nsmp]))
 							{
-								MODINSTRUMENT *pIns = m_pSndFile->Instruments[nsmp];
+								ModInstrument *pIns = m_pSndFile->Instruments[nsmp];
 								nsmp = pIns->Keyboard[note];
 							} else nsmp = 0;
 						}

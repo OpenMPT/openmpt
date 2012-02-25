@@ -1,5 +1,15 @@
-#ifndef _CONTROL_GENERAL_H_
-#define _CONTROL_GENERAL_H_
+/*
+ * ctrl_gen.h
+ * ----------
+ * Purpose: General tab, upper panel.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 //=========================
 class CVuMeter: public CWnd
@@ -93,6 +103,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-#endif

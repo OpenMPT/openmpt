@@ -1,4 +1,15 @@
+/*
+ * EffectVis.h
+ * -----------
+ * Purpose: Implementation of parameter visualisation dialog.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
+
 #include "afxwin.h"
 #include "EffectInfo.h"
 class CViewPattern;
@@ -57,7 +68,7 @@ protected:
 	int m_nParamToErase;
 
 	UINT m_nOldPlayPos;
-	MODCOMMAND m_templatePCNote;
+	ModCommand m_templatePCNote;
 
 	CBrush m_brushBlack;
 

@@ -1,10 +1,10 @@
 /*
- *
  * CloseMainDialog.cpp
  * -------------------
- * Purpose: Code for displaying a dialog with a list of unsaved documents, and the ability to choose which documents should be saved or not.
+ * Purpose: Class for displaying a dialog with a list of unsaved documents, and the ability to choose which documents should be saved or not.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 

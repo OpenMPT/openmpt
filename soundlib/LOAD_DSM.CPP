@@ -1,19 +1,18 @@
 /*
- * This source code is public domain.
- *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *
-*/
+ * Load_dsm.cpp
+ * ------------
+ * Purpose: DSIK Internal Format (DSM) module loader
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-//////////////////////////////////////////////
-// DSIK Internal Format (DSM) module loader //
-//////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "Loaders.h"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 #define DSMID_RIFF	0x46464952	// "RIFF"
 #define DSMID_DSMF	0x464d5344	// "DSMF"
@@ -82,7 +81,7 @@ typedef struct DSMPATT
 	BYTE dummy2;
 } DSMPATT;
 
-#pragma pack()
+#pragma pack(pop)
 
 
 bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
@@ -139,7 +138,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(Patterns.Insert(nPat, 64))
 				break;
 
-			MODCOMMAND *m = Patterns[nPat];
+			ModCommand *m = Patterns[nPat];
 			UINT row = 0;
 			while ((row < 64) && (dwPos + 2 <= dwMemPos))
 			{
@@ -217,7 +216,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos += 8 + pSmp->inst_len;
 			memcpy(m_szNames[nSmp], pSmp->samplename, 28);
 			StringFixer::SpaceToNullStringFixed<28>(m_szNames[nSmp]);
-			MODSAMPLE *psmp = &Samples[nSmp];
+			ModSample *psmp = &Samples[nSmp];
 			memcpy(psmp->filename, pSmp->filename, 13);
 			StringFixer::SpaceToNullStringFixed<13>(psmp->filename);
 			psmp->nGlobalVol = 64;

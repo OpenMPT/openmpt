@@ -1,3 +1,14 @@
+/*
+ * SoundFilePlayConfig.cpp
+ * -----------------------
+ * Purpose: Configuration of sound levels, pan laws, etc... for various mix configurations.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "Sndfile.h"
 #include ".\soundfileplayconfig.h"

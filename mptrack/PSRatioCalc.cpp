@@ -1,5 +1,12 @@
-// PSRatioCalc.cpp : implementation file
-//
+/*
+ * PSRatioCalc.cpp
+ * ---------------
+ * Purpose: Dialog for calculating sample pitch shift ratios in the sample editor.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -16,7 +23,7 @@ CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double
 	, sndFile(sndFile), sampleIndex(sample), m_dRatio(ratio)
 {
 	// Calculate/verify samplerate at C5.
-	const MODSAMPLE &smp = sndFile.GetSample(sampleIndex);
+	const ModSample &smp = sndFile.GetSample(sampleIndex);
 	uint32 sampleRate = smp.GetSampleRate(sndFile.GetType());
 	if(sampleRate <= 0) 
 		sampleRate = 8363;

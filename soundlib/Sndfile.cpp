@@ -1,11 +1,13 @@
 /*
- * OpenMPT
- *
  * Sndfile.cpp
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *          OpenMPT devs
-*/
+ * -----------
+ * Purpose: Core class of the playback engine. Every song is represented by a CSoundFile object.
+ * Notes  : (currently none)
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "../mptrack/mptrack.h"
@@ -94,16 +96,16 @@ static char UnpackTable[MAX_PACK_TABLES][16] =
 
 /*---------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------
-MODULAR (in/out) MODINSTRUMENT :
+MODULAR (in/out) ModInstrument :
 -----------------------------------------------------------------------------------------------
 
 * to update:
 ------------
 
-- both following functions need to be updated when adding a new member in MODINSTRUMENT :
+- both following functions need to be updated when adding a new member in ModInstrument :
 
-void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file);
-BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __int16 fsize);
+void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file);
+BYTE * GetInstrumentHeaderFieldPointer(ModInstrument * input, __int32 fcode, __int16 fsize);
 
 - see below for body declaration.
 
@@ -140,7 +142,7 @@ Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOI
 						!!! SECTION TO BE UPDATED !!!
 						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-		[EXT]	means external (not related) to MODINSTRUMENT content
+		[EXT]	means external (not related) to ModInstrument content
 
 C...	[EXT]	nChannels
 ChnS	[EXT]	IT/MPTM: Channel settings for channels 65-127 if needed (doesn't fit to IT header).
@@ -245,7 +247,7 @@ fwrite(&input-> name , 1 , fsize , file);
 
 namespace {
 // Create 'dF..' entry.
-DWORD CreateExtensionFlags(const MODINSTRUMENT& ins)
+DWORD CreateExtensionFlags(const ModInstrument& ins)
 //--------------------------------------------------
 {
 	DWORD dwFlags = 0;
@@ -268,8 +270,8 @@ DWORD CreateExtensionFlags(const MODINSTRUMENT& ins)
 }
 } // unnamed namespace.
 
-// Write (in 'file') 'input' MODINSTRUMENT with 'code' & 'size' extra field infos for each member
-void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file)
+// Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
+void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file)
 {
 __int32 fcode;
 __int16 fsize;
@@ -358,8 +360,8 @@ case( #@code ):\
 if( fsize <= sizeof( type ) * arraysize ) pointer = (BYTE *)&input-> name ;\
 break;
 
-// Return a pointer on the wanted field in 'input' MODINSTRUMENT given field code & size
-BYTE * GetInstrumentHeaderFieldPointer(const MODINSTRUMENT *input, __int32 fcode, __int16 fsize)
+// Return a pointer on the wanted field in 'input' ModInstrument given field code & size
+BYTE * GetInstrumentHeaderFieldPointer(const ModInstrument *input, __int32 fcode, __int16 fsize)
 {
 if(input == NULL) return NULL;
 BYTE * pointer = NULL;
@@ -430,7 +432,7 @@ return pointer;
 // -! NEW_FEATURE#0027
 
 
-CTuning* MODINSTRUMENT::s_DefaultTuning = 0;
+CTuning* ModInstrument::s_DefaultTuning = 0;
 
 
 //////////////////////////////////////////////////////////
@@ -690,7 +692,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		}
 	}
 	// Checking samples
-	MODSAMPLE *pSmp = Samples;
+	ModSample *pSmp = Samples;
 	for(SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
 	{
 		if(pSmp->pSample)
@@ -843,7 +845,7 @@ BOOL CSoundFile::Destroy()
 
 	for (i=1; i<MAX_SAMPLES; i++)
 	{
-		MODSAMPLE *pSmp = &Samples[i];
+		ModSample *pSmp = &Samples[i];
 		if (pSmp->pSample)
 		{
 			FreeSample(pSmp->pSample);
@@ -1056,7 +1058,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	UINT nRow = nPos;
 	if ((nRow) && (Order[nPattern] < Patterns.Size()))
 	{
-		MODCOMMAND *p = Patterns[Order[nPattern]];
+		ModCommand *p = Patterns[Order[nPattern]];
 		if ((p) && (nRow < Patterns[Order[nPattern]].GetNumRows()))
 		{
 			bool bOk = false;
@@ -1473,7 +1475,7 @@ bool CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *re
 
 #ifndef MODPLUG_NO_FILESAVE
 
-UINT CSoundFile::WriteSample(FILE *f, const MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen) const
+UINT CSoundFile::WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT nMaxLen) const
 //-------------------------------------------------------------------------------------------
 {
 	UINT len = 0, bufcount;
@@ -1705,7 +1707,7 @@ UINT CSoundFile::WriteSample(FILE *f, const MODSAMPLE *pSmp, UINT nFlags, UINT n
 //	5 = signed 16-bit PCM data
 //	6 = unsigned 16-bit PCM data
 
-UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
+UINT CSoundFile::ReadSample(ModSample *pSmp, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
 //---------------------------------------------------------------------------------------------------------------
 {
 	if ((!pSmp) || (pSmp->nLength < 2) || (!lpMemFile)) return 0;
@@ -2185,7 +2187,7 @@ UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWOR
 }
 
 
-void CSoundFile::AdjustSampleLoop(MODSAMPLE *pSmp)
+void CSoundFile::AdjustSampleLoop(ModSample *pSmp)
 //------------------------------------------------
 {
 	if ((!pSmp->pSample) || (!pSmp->nLength)) return;
@@ -2310,7 +2312,7 @@ int CSoundFile::FrequencyToTranspose(DWORD freq)
 }
 
 
-void CSoundFile::FrequencyToTranspose(MODSAMPLE *psmp)
+void CSoundFile::FrequencyToTranspose(ModSample *psmp)
 //----------------------------------------------------
 {
 	int f2t = FrequencyToTranspose(psmp->nC5Speed);
@@ -2379,7 +2381,7 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample) const
 	{
 		for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns[i])
 		{
-			const MODCOMMAND *m = Patterns[i];
+			const ModCommand *m = Patterns[i];
 			for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
 			{
 				if (m->instr == nSample && !m->IsPcNote()) return true;
@@ -2396,7 +2398,7 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
 	if ((!nInstr) || (nInstr > GetNumInstruments()) || (!Instruments[nInstr])) return false;
 	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
-		const MODCOMMAND *m = Patterns[i];
+		const ModCommand *m = Patterns[i];
 		for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
 		{
 			if (m->instr == nInstr && !m->IsPcNote()) return true;
@@ -2421,7 +2423,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 
 	for (PATTERNINDEX nPat = 0; nPat < Patterns.GetNumPatterns(); nPat++)
 	{
-		const MODCOMMAND *p = Patterns[nPat];
+		const ModCommand *p = Patterns[nPat];
 		if(p == nullptr)
 		{
 			continue;
@@ -2434,7 +2436,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 			{
 				if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 				{
-					MODINSTRUMENT *pIns = Instruments[p->instr];
+					ModInstrument *pIns = Instruments[p->instr];
 					if (pIns)
 					{
 						SAMPLEINDEX n = pIns->Keyboard[p->note-1];
@@ -2444,7 +2446,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 				{
 					for (INSTRUMENTINDEX k = GetNumInstruments(); k >= 1; k--)
 					{
-						MODINSTRUMENT *pIns = Instruments[k];
+						ModInstrument *pIns = Instruments[k];
 						if (pIns)
 						{
 							SAMPLEINDEX n = pIns->Keyboard[p->note-1];
@@ -2504,7 +2506,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 {
 	if ((!nSample) || (nSample >= MAX_SAMPLES)) return false;
 	if (!Samples[nSample].pSample) return true;
-	MODSAMPLE *pSmp = &Samples[nSample];
+	ModSample *pSmp = &Samples[nSample];
 	LPSTR pSample = pSmp->pSample;
 	pSmp->pSample = nullptr;
 	pSmp->nLength = 0;
@@ -2627,7 +2629,7 @@ bool CSoundFile::LoadStaticTunings()
 		s_pTuningsSharedBuiltIn->SetConstStatus(CTuningCollection::EM_CONST);
 	#endif
 
-	MODINSTRUMENT::s_DefaultTuning = NULL;
+	ModInstrument::s_DefaultTuning = NULL;
 
 	return false;
 }
@@ -2855,7 +2857,7 @@ INSTRUMENTINDEX CSoundFile::GetNextFreeInstrument(INSTRUMENTINDEX start) const
 bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX instr) const
 //----------------------------------------------------------------------------------------------
 {
-	MODINSTRUMENT *targetIns = nullptr;
+	ModInstrument *targetIns = nullptr;
 	if(instr > 0 && instr <= GetNumInstruments())
 	{
 		targetIns = Instruments[instr];
@@ -2943,7 +2945,7 @@ struct UpgradePatternData
 		this->pSndFile = pSndFile;
 	}
 
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
 			(!pSndFile->IsCompatibleMode(TRK_ALLTRACKERS) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))

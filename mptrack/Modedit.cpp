@@ -1,5 +1,12 @@
-// modedit.cpp : CModDoc operations
-//
+/*
+ * ModEdit.cpp
+ * -----------
+ * Purpose: Song (pattern, samples, instruments) editing functions
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 
 #include "stdafx.h"
 #include "mptrack.h"
@@ -187,15 +194,15 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 				first = false;
 			}
 
-			MODCOMMAND *oldPatData = m_SndFile.Patterns[nPat];
-			MODCOMMAND *newPatData = CPattern::AllocatePattern(m_SndFile.Patterns[nPat].GetNumRows(), nRemainingChannels);
+			ModCommand *oldPatData = m_SndFile.Patterns[nPat];
+			ModCommand *newPatData = CPattern::AllocatePattern(m_SndFile.Patterns[nPat].GetNumRows(), nRemainingChannels);
 			if(!newPatData)
 			{
 				cs.Leave();
 				Reporting::Error("ERROR: Pattern allocation failed in ReArrangeChannels(...)");
 				return CHANNELINDEX_INVALID;
 			}
-			MODCOMMAND *tmpdest = newPatData;
+			ModCommand *tmpdest = newPatData;
 			for(ROWINDEX nRow = 0; nRow < m_SndFile.Patterns[nPat].GetNumRows(); nRow++) //Scrolling rows
 			{
 				for(CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++, tmpdest++) //Scrolling channels.
@@ -203,7 +210,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 					if(newOrder[nChn] < GetNumChannels()) //Case: getting old channel to the new channel order.
 						*tmpdest = *m_SndFile.Patterns[nPat].GetpModCommand(nRow, newOrder[nChn]);
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
-						*tmpdest = MODCOMMAND::Empty();
+						*tmpdest = ModCommand::Empty();
 
 				}
 			}
@@ -212,8 +219,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 		}
 	}
 
-	MODCHANNEL chns[MAX_BASECHANNELS];		
-	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
+	ModChannel chns[MAX_BASECHANNELS];		
+	ModChannelSettings settings[MAX_BASECHANNELS];
 	vector<BYTE> recordStates(GetNumChannels(), 0);
 	vector<bool> chnMutePendings(GetNumChannels(), false);
 
@@ -267,20 +274,20 @@ struct ConvertInstrumentsToSamplesInPatterns
 		this->pSndFile = pSndFile;
 	}
 
-	void operator()(MODCOMMAND& m)
+	void operator()(ModCommand& m)
 	{
 		if(m.instr && !m.IsPcNote())
 		{
-			MODCOMMAND::INSTR instr = m.instr, newinstr = 0;
-			MODCOMMAND::NOTE note = m.note, newnote = note;
-			if(MODCOMMAND::IsNote(note))
+			ModCommand::INSTR instr = m.instr, newinstr = 0;
+			ModCommand::NOTE note = m.note, newnote = note;
+			if(ModCommand::IsNote(note))
 				note = note - NOTE_MIN;
 			else
 				note = NOTE_MIDDLEC - NOTE_MIN;
 
 			if((instr < MAX_INSTRUMENTS) && (pSndFile->Instruments[instr]))
 			{
-				const MODINSTRUMENT *pIns = pSndFile->Instruments[instr];
+				const ModInstrument *pIns = pSndFile->Instruments[instr];
 				newinstr = pIns->Keyboard[note];
 				newnote = pIns->NoteMap[note];
 				if(newinstr >= MAX_SAMPLES) newinstr = 0;
@@ -327,7 +334,7 @@ bool CModDoc::ConvertSamplesToInstruments()
 
 		try
 		{
-			m_SndFile.Instruments[smp] = new MODINSTRUMENT(smp);
+			m_SndFile.Instruments[smp] = new ModInstrument(smp);
 		} catch(MPTMemoryException)
 		{
 			ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
@@ -392,7 +399,7 @@ BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 //-------------------------------------------
 {
 	if (nSample >= MAX_SAMPLES) return FALSE;
-	MODSAMPLE &sample = m_SndFile.GetSample(nSample);
+	ModSample &sample = m_SndFile.GetSample(nSample);
 	if ((!sample.nLength) || (!sample.pSample)) return FALSE;
 
 	ctrlSmp::AdjustEndOfSample(sample, &m_SndFile);
@@ -466,7 +473,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 {
 	if (m_SndFile.GetModSpecifications().instrumentsMax == 0) return INSTRUMENTINDEX_INVALID;
 
-	MODINSTRUMENT *pDup = nullptr;
+	ModInstrument *pDup = nullptr;
 
 	if ((nDuplicate > 0) && (nDuplicate <= m_SndFile.m_nInstruments))
 	{
@@ -528,10 +535,10 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		}
 	}
 
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	try
 	{
-		pIns = new MODINSTRUMENT(newsmp);
+		pIns = new ModInstrument(newsmp);
 	} catch(MPTMemoryException)
 	{
 		ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
@@ -559,7 +566,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 }
 
 
-void CModDoc::InitializeSample(MODSAMPLE &sample)
+void CModDoc::InitializeSample(ModSample &sample)
 //-----------------------------------------------
 {
 	sample.nVolume = 256;
@@ -581,7 +588,7 @@ void CModDoc::InitializeSample(MODSAMPLE &sample)
 
 
 // Load default instrument values for inserting new instrument during editing
-void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns)
+void CModDoc::InitializeInstrument(ModInstrument *pIns)
 //-----------------------------------------------------
 {
 	pIns->nPluginVolumeHandling = CSoundFile::s_DefaultPlugVolumeHandling;
@@ -775,7 +782,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 			p += strlen(p);
 			for (UINT row=0; row<nrows; row++)
 			{
-				MODCOMMAND *m = m_SndFile.Patterns[nPattern];
+				ModCommand *m = m_SndFile.Patterns[nPattern];
 				if ((row + (dwBeginSel >> 16)) >= m_SndFile.Patterns[nPattern].GetNumRows()) break;
 				m += (row+(dwBeginSel >> 16))*m_SndFile.m_nChannels;
 				m += (colmin >> 3);
@@ -908,7 +915,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			bool bFirstUndo = true;		// for chaining undos (see overflow paste)
 			MODTYPE origFormat = MOD_TYPE_IT;	// paste format
 			size_t pos, startPos = 0;
-			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
+			ModCommand *m = m_SndFile.Patterns[nPattern];
 
 			const bool doOverflowPaste = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
 			const bool doITStyleMix = (pasteMode == pm_mixpaste_it);
@@ -988,7 +995,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						
 						// ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
 						// so that we can refer back to check if there was anything in e.g. the note column before we pasted.
-						const MODCOMMAND origModCmd = m[col];
+						const ModCommand origModCmd = m[col];
 
 						// push channel data below paste point first.
 						if(pasteMode == pm_pushforwardpaste)
@@ -1196,7 +1203,7 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HANDLE hCpy;
 	CHAR s[4096];
-	MODINSTRUMENT *pIns;
+	ModInstrument *pIns;
 	DWORD dwMemSize;
 
 	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
@@ -1204,7 +1211,7 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	pIns = m_SndFile.Instruments[nIns];
 	if(pIns == nullptr) return false;
 	
-	const INSTRUMENTENVELOPE &env = pIns->GetEnvelope(nEnv);
+	const InstrumentEnvelope &env = pIns->GetEnvelope(nEnv);
 
 	// We don't want to copy empty envelopes
 	if(env.nNodes == 0)
@@ -1255,7 +1262,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	LPCSTR p;
 	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 	{
-		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
+		ModInstrument *pIns = m_SndFile.Instruments[nIns];
 
 		UINT susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
@@ -1270,7 +1277,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			if (loopEnd >= nPoints) loopEnd = 0;
 			if (loopBegin > loopEnd) loopBegin = loopEnd;
 
-			INSTRUMENTENVELOPE &env = pIns->GetEnvelope(nEnv);
+			InstrumentEnvelope &env = pIns->GetEnvelope(nEnv);
 
 			env.nNodes = nPoints;
 			env.nSustainStart = susBegin;
@@ -1349,7 +1356,7 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 	{
 		if(m_SndFile.Patterns.IsValidPat(nPat))
 		{
-			const MODCOMMAND *p = m_SndFile.Patterns[nPat] + nChn;
+			const ModCommand *p = m_SndFile.Patterns[nPat] + nChn;
 			for(ROWINDEX nRow = m_SndFile.Patterns[nPat].GetNumRows(); nRow > 0; nRow--, p += nChannels)
 			{
 				if(!p->IsEmpty())

@@ -1,5 +1,14 @@
-#ifndef TUNINGDIALOG_H
-#define TUNINGDIALOG_H
+/*
+ * tuningDialog.h
+ * --------------
+ * Purpose: Alternative sample tuning configuration dialog.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
 
 #include "tuningratiomapwnd.h"
 #include "tuningcollection.h"
@@ -377,5 +386,3 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-#endif

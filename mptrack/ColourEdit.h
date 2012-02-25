@@ -1,4 +1,15 @@
+/*
+ * ColourEdit.h
+ * ------------
+ * Purpose: Implementation of a coloured edit UI item.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
+
 #include "afxwin.h"
 
 class CColourEdit :
