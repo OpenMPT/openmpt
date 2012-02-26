@@ -925,6 +925,7 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 
 	case 1:
 		// IT compatibility: IT has its own, more precise tables
+		// XXX ModRampDownTable should be negated for XM *Vibrato* (not for Tremolo, though!)
 		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[position] : ModRampDownTable[position];
 
 	case 2:
@@ -1238,6 +1239,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 				if(envType == ENV_VOLUME && insEnv.nLoopStart == insEnv.nLoopEnd && insEnv.Values[insEnv.nLoopEnd] == 0
 					&& (!(GetType() & MOD_TYPE_XM) || (insEnv.nLoopEnd + 1u == insEnv.nNodes)))
 				{
+					// Stop channel if the envelope loop only covers the last silent envelope point.
 					pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nFadeOutVol = 0;
 				}
@@ -1304,6 +1306,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 
 		if(insEnv.Values[insEnv.nNodes - 1] == 0 && (pChn->nMasterChn > 0 || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 		{
+			// Stop channel if the last envelope node is silent anyway.
 			pChn->dwFlags |= CHN_NOTEFADE;
 			pChn->nFadeOutVol = 0;
 			pChn->nRealVolume = 0;
@@ -1394,6 +1397,7 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 #ifndef NO_VST
 #if 0
 		// EXPERIMENTAL VSTi arpeggio. Far from perfect!
+		// Note: We could use pChn->nLastNote here to simplify things.
 		if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug && !(m_dwSongFlags & SONG_FIRSTTICK))
 		{
 			const ModInstrument *pIns = pChn->pModInstrument;
@@ -1430,7 +1434,7 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 #endif // 0
 #endif // NO_VST
 
-		if((m_nType & MOD_TYPE_MPT) && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+		if((GetType() & MOD_TYPE_MPT) && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 		{
 			switch(m_nTickCount % 3)
 			{
@@ -1478,8 +1482,8 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 					}
 				}
 
-				if (note > 109 && arpPos != 0)
-					note = 109; // FT2's note limit
+				if (note > 108 + NOTE_MIN && arpPos != 0)
+					note = 108 + NOTE_MIN; // FT2's note limit
 
 				period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 
@@ -2023,7 +2027,7 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			period = pChn->nPeriod;
 			// TODO Glissando effect is reset after portamento! What would this sound like without the CHN_PORTAMENTO flag?
-			if ((pChn->dwFlags & (CHN_GLISSANDO|CHN_PORTAMENTO)) ==	(CHN_GLISSANDO|CHN_PORTAMENTO))
+			if ((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO))
 			{
 				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
 			}
@@ -2031,9 +2035,11 @@ BOOL CSoundFile::ReadNote()
 			ProcessArpeggio(pChn, period, arpeggioSteps);
 
 			// Preserve Amiga freq limits
-			if (m_dwSongFlags & (SONG_AMIGALIMITS|SONG_PT1XMODE))
+			// Test case: AmigaLimits.s3m
+			if (m_dwSongFlags & (SONG_AMIGALIMITS | SONG_PT1XMODE))
 			{
 				Limit(period, 113 * 4, 856 * 4);
+				Limit(pChn->nPeriod, 113 * 4, 856 * 4);
 			}
 
 			ProcessPanbrello(pChn);
@@ -2062,6 +2068,8 @@ BOOL CSoundFile::ReadNote()
 			// Final Period
 			if (period <= m_nMinPeriod)
 			{
+				// ST3 simply stops playback if frequency is too high.
+				// Test case: FreqLimits.s3m
 				if (GetType() & MOD_TYPE_S3M) pChn->nLength = 0;
 				period = m_nMinPeriod;
 			}

@@ -708,7 +708,6 @@ protected:
 
 public:
     void ResetChannelEnvelopes(ModChannel *pChn) const;
-	void ResetChannelEnvelope(ModChannelEnvInfo &env) const;
 
 private:
 	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;

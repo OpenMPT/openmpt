@@ -16,6 +16,12 @@ struct ModChannelEnvInfo
 	DWORD nEnvPosition;
 	DWORD flags;
 	LONG nEnvValueAtReleaseJump;
+
+	void Reset()
+	{
+		nEnvPosition = 0;
+		nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+	}
 };
 
 
