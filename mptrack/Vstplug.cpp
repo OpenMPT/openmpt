@@ -2408,21 +2408,21 @@ short CVstPlugin::getMIDI14bitValueFromShort(short value)
 	// similarly, 16383 (0x7F 0x7F) is to "bend as high as possible."
 	// The exact range of the pitch bend is specific to the synthesizer.
 
-	// pre: 0 <= value <= 16383
+	ASSERT(0 <= value && value <= 16383);
 
-	BYTE byte1 = static_cast<BYTE>(value >> 7);		// get last   7 bytes only
-	BYTE byte2 = static_cast<BYTE>(value & 0x7F);	// get first  7 bytes only
-	short converted = byte1<<8 | byte2; // merge
+	BYTE byte1 = static_cast<BYTE>(value >> 7);		// get last   7 bits only
+	BYTE byte2 = static_cast<BYTE>(value & 0x7F);	// get first  7 bits only
+	short converted = (byte1 << 8) | byte2; // merge
 
 	return converted;
 
 }
 
-//Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
+// Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
 void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 //-----------------------------------------------------------------------------
 {
-	const int16 increment = static_cast<int16>(nParam * 0x2000/0xFF);
+	const int16 increment = static_cast<int16>(nParam * 0x2000 / 0xFF);
 	int16 newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
 	Limit(newPitchBendPos, int16(MIDI_PitchBend_Min), int16(MIDI_PitchBend_Max));
 

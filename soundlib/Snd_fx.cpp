@@ -703,7 +703,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && instrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
-			if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!instrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
+			if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!instrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
@@ -960,7 +960,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			}
 		}
 
-		if ((!bPorta) || ((!pChn->nLength) && (!(GetType() & MOD_TYPE_S3M))))
+		if (!bPorta || (!pChn->nLength && !(GetType() & MOD_TYPE_S3M)))
 		{
 			pChn->pModSample = pSmp;
 			pChn->pSample = pSmp->pSample;
@@ -1057,9 +1057,11 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			{
 				// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes spx-farspacedance.it).
 				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
-				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->VolEnv.nEnvPosition = 0;
-				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->PanEnv.nEnvPosition = 0;
-				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->PitchEnv.nEnvPosition = 0;
+
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PitchEnv);
+
 				if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					// Volume Swing
@@ -1186,8 +1188,10 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 	ModChannel *pChn = &Chn[nChn];
 	ModInstrument* pHeader = 0;
 	LPSTR pSample;
-	if (note > 0x80) note = NOTE_NONE;
-	if (note < 1) return;
+	if(!ModCommand::IsNote(note))
+	{
+		return;
+	}
 	// Always NNA cut - using
 	if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2))) || (!m_nInstruments) || (bForceCut))
 	{
@@ -3946,7 +3950,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			if (pSmp->uFlags & CHN_PINGPONGLOOP)
 				pChn->dwFlags |= CHN_PINGPONGLOOP;
 			else
-				pChn->dwFlags &= ~(CHN_PINGPONGLOOP|CHN_PINGPONGFLAG);
+				pChn->dwFlags &= ~(CHN_PINGPONGLOOP | CHN_PINGPONGFLAG);
 			pChn->dwFlags |= CHN_LOOP;
 			pChn->nLength = pSmp->nLength;
 			pChn->nLoopStart = pSmp->nLoopStart;
@@ -3959,7 +3963,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			}
 		} else
 		{
-			pChn->dwFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_PINGPONGFLAG);
+			pChn->dwFlags &= ~(CHN_LOOP | CHN_PINGPONGLOOP | CHN_PINGPONGFLAG);
 			pChn->nLength = pSmp->nLength;
 		}
 	}
@@ -3967,14 +3971,14 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 	if (pChn->pModInstrument)
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
-		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut))
+		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))) && (pIns->nFadeOut))
 		{
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
 	
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
-			pChn->VolEnv.nEnvValueAtReleaseJump = GetVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns->VolEnv);
+			pChn->VolEnv.nEnvValueAtReleaseJump = Util::Round<LONG>(pIns->VolEnv.GetValueFromPosition(pChn->VolEnv.nEnvPosition) * 256.0f);
 			pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 

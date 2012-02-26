@@ -1983,7 +1983,7 @@ void CViewPattern::OnEditFindNext()
 				if ((ch < GetChanFromCursor(m_findReplace.dwBeginSel)) || (ch > GetChanFromCursor(m_findReplace.dwEndSel))) bFound = false;
 				if ((row < GetRowFromCursor(m_findReplace.dwBeginSel)) || (row > GetRowFromCursor(m_findReplace.dwEndSel))) bFound = false;
 			}
-			if (((m_findReplace.dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_findReplace.cmdFind.note) && ((m_findReplace.cmdFind.note != CFindReplaceTab::findAny) || (!m->note) || (m->note & 0x80))))
+			if (((m_findReplace.dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_findReplace.cmdFind.note) && ((m_findReplace.cmdFind.note != CFindReplaceTab::findAny) || !m->IsNote())))
 			 || ((m_findReplace.dwFindFlags & PATSEARCH_INSTR) && (m->instr != m_findReplace.cmdFind.instr))
 			 || ((m_findReplace.dwFindFlags & PATSEARCH_VOLCMD) && (m->volcmd != m_findReplace.cmdFind.volcmd))
 			 || ((m_findReplace.dwFindFlags & PATSEARCH_VOLUME) && (m->vol != m_findReplace.cmdFind.vol))
