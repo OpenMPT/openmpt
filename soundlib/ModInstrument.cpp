@@ -49,18 +49,17 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 						Ticks[node + 1] = Ticks[node];
 						Values[node + 1] = Values[node];
 					}
+
+					nNodes++;
 				}
 
 				Ticks[nLoopEnd]--;
-				Values[nLoopEnd] = (BYTE)interpolatedValue;
-
-				nNodes++;
+				Values[nLoopEnd] = interpolatedValue;
 			} else
 			{
-				// There is already a point before the loop point: Use it as loop end.
+				// There is already a point before the loop point: Use it as new loop end.
 				nLoopEnd--;
 			}
-
 		}
 	}
 };
@@ -104,7 +103,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 		if(x2 > x1 && position > x1)
 		{
 			// Linear approximation between the points;
-			// f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1) / (x2-x1)
+			// f(x + d) ~ f(x) + f'(x) * d, where f'(x) = (y2 - y1) / (x2 - x1)
 			value += ((position - x1) * (static_cast<float>(Values[pt]) / 64.0f - value)) / (x2 - x1);
 		}
 	}

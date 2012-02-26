@@ -705,9 +705,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!instrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
-				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
-				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
-				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PitchEnv);
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->VolEnv.Reset();
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->PanEnv.Reset();
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->PitchEnv.Reset();
 			} else
 			{
 				ResetChannelEnvelopes(pChn);
@@ -722,7 +722,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		{
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				ResetChannelEnvelope(pChn->VolEnv);
+				pChn->VolEnv.Reset();
 			} else
 			{
 				ResetChannelEnvelopes(pChn);
@@ -1058,9 +1058,9 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes spx-farspacedance.it).
 				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
 
-				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->VolEnv);
-				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PanEnv);
-				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) ResetChannelEnvelope(pChn->PitchEnv);
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->VolEnv.Reset();
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->PanEnv.Reset();
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->PitchEnv.Reset();
 
 				if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
@@ -2373,17 +2373,9 @@ BOOL CSoundFile::ProcessEffects()
 void CSoundFile::ResetChannelEnvelopes(ModChannel *pChn) const
 //------------------------------------------------------------
 {
-	ResetChannelEnvelope(pChn->VolEnv);
-	ResetChannelEnvelope(pChn->PanEnv);
-	ResetChannelEnvelope(pChn->PitchEnv);
-}
-
-
-void CSoundFile::ResetChannelEnvelope(ModChannelEnvInfo &env) const
-//------------------------------------------------------------------
-{
-	env.nEnvPosition = 0;
-	env.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+	pChn->VolEnv.Reset();
+	pChn->PanEnv.Reset();
+	pChn->PitchEnv.Reset();
 }
 
 
