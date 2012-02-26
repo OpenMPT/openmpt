@@ -1091,7 +1091,8 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 			return;
 		}
 		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
-		int envvol = GetVolEnvValueFromPosition(envpos, pIns->VolEnv);
+		// Get values in [0, 256]
+		int envval = Util::Round<int>(pIns->VolEnv.GetValueFromPosition(envpos) * 256.0f);
 
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
@@ -1101,18 +1102,18 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 		&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 		{
 			int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
-			int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] << 2;
+			int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] * 4;
 
 			//If we have just hit the release node, force the current env value
 			//to be that of the release node. This works around the case where 
 			// we have another node at the same position as the release node.
 			if (envpos == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
-				envvol = envValueAtReleaseNode;
+				envval = envValueAtReleaseNode;
 
-			int relativeVolumeChange = (envvol - envValueAtReleaseNode) * 2;
-			envvol = envValueAtReleaseJump + relativeVolumeChange;
+			int relativeVolumeChange = (envval - envValueAtReleaseNode) * 2;
+			envval = envValueAtReleaseJump + relativeVolumeChange;
 		}
-		vol = (vol * Clamp(envvol, 0, 512)) >> 8;
+		vol = (vol * Clamp(envval, 0, 512)) >> 8;
 	}
 
 }
@@ -1130,48 +1131,21 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
+
 		const int envpos = pChn->PanEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		// Get values in [-32, 32]
+		const int envval = Util::Round<int>((pIns->PanEnv.GetValueFromPosition(envpos) - 0.5f) * 64.0f);
 
-		UINT pt = pIns->PanEnv.nNodes - 1;
-		for (UINT i = 0; i < (UINT)(pIns->PanEnv.nNodes - 1); i++)
-		{
-			if (envpos <= pIns->PanEnv.Ticks[i])
-			{
-				pt = i;
-				break;
-			}
-		}
-		int x2 = pIns->PanEnv.Ticks[pt], y2 = pIns->PanEnv.Values[pt];
-		int x1, envpan;
-		if (envpos >= x2)
-		{
-			envpan = y2;
-			x1 = x2;
-		} else if (pt)
-		{
-			envpan = pIns->PanEnv.Values[pt - 1];
-			x1 = pIns->PanEnv.Ticks[pt - 1];
-		} else
-		{
-			envpan = 128;
-			x1 = 0;
-		}
-		if ((x2 > x1) && (envpos > x1))
-		{
-			envpan += ((envpos - x1) * (y2 - envpan)) / (x2 - x1);
-		}
-
-		envpan = Clamp(envpan, 0, 64);
 		int pan = pChn->nPan;
-		if (pan >= 128)
+		if(pan >= 128)
 		{
-			pan += ((envpan - 32) * (256 - pan)) / 32;
+			pan += (envval * (256 - pan)) / 32;
 		} else
 		{
-			pan += ((envpan - 32) * (pan)) / 32;
+			pan += (envval * (pan)) / 32;
 		}
-
 		pChn->nRealPan = Clamp(pan, 0, 256);
+
 	}
 }
 
@@ -1188,55 +1162,25 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
-		int envpos = pChn->PitchEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 
-		UINT pt = pIns->PitchEnv.nNodes - 1;
-		for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
-		{
-			if (envpos <= pIns->PitchEnv.Ticks[i])
-			{
-				pt = i;
-				break;
-			}
-		}
-		int x2 = pIns->PitchEnv.Ticks[pt];
-		int x1, envpitch;
-		if (envpos >= x2)
-		{
-			envpitch = (((int)pIns->PitchEnv.Values[pt]) - ENVELOPE_MID) * 8;
-			x1 = x2;
-		} else if (pt)
-		{
-			envpitch = (((int)pIns->PitchEnv.Values[pt-1]) - ENVELOPE_MID) * 8;
-			x1 = pIns->PitchEnv.Ticks[pt-1];
-		} else
-		{
-			envpitch = 0;
-			x1 = 0;
-		}
-		if (envpos > x2) envpos = x2;
-		if ((x2 > x1) && (envpos > x1))
-		{
-			int envpitchdest = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
-			envpitch += ((envpos - x1) * (envpitchdest - envpitch)) / (x2 - x1);
-		}
-		Limit(envpitch, -256, 256);
+		const int envpos = pChn->PitchEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		// Get values in [-256, 256]
+		const int envval = Util::Round<int>((pIns->PitchEnv.GetValueFromPosition(envpos) - 0.5f) * 512.0f);
 
-		//if (pIns->PitchEnv.dwFlags & ENV_FILTER)
-		if (pChn->PitchEnv.flags & ENV_FILTER)
+		if(pChn->PitchEnv.flags & ENV_FILTER)
 		{
 			// Filter Envelope: controls cutoff frequency
 #ifndef NO_FILTER
-			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER), envpitch);
+			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER), envval);
 #endif // NO_FILTER
 		} else
 		{
 			// Pitch Envelope
-			if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+			if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 			{
-				if(pChn->nFineTune != envpitch)
+				if(pChn->nFineTune != envval)
 				{
-					pChn->nFineTune = envpitch;
+					pChn->nFineTune = envval;
 					pChn->m_CalculateFreq = true;
 					//Preliminary tests indicated that this behavior
 					//is very close to original(with 12TET) when finestep count
@@ -1245,15 +1189,15 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 			}
 			else //Original behavior
 			{
-				int l = envpitch;
-				if (l < 0)
+				int l = envval;
+				if(l < 0)
 				{
 					l = -l;
-					if (l > 255) l = 255;
+					LimitMax(l, 255);
 					period = _muldiv(period, LinearSlideUpTable[l], 0x10000);
 				} else
 				{
-					if (l > 255) l = 255;
+					LimitMax(l, 255);
 					period = _muldiv(period, LinearSlideDownTable[l], 0x10000);
 				}
 			} //End: Original behavior.
@@ -1262,124 +1206,122 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 }
 
 
-void CSoundFile::IncrementVolumeEnvelopePosition(ModChannel *pChn)
-//----------------------------------------------------------------
+void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType)
+//------------------------------------------------------------------------------------
 {
-	const ModInstrument *pIns = pChn->pModInstrument;
+	ModChannelEnvInfo &chnEnv = pChn->GetEnvelope(envType);
 
-	if (pChn->VolEnv.flags & ENV_ENABLED)
+	if(pChn->pModInstrument == nullptr || !(chnEnv.flags & ENV_ENABLED))
 	{
-		// Increase position
-		UINT position = pChn->VolEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
-		// Volume Loop ?
-		if (pIns->VolEnv.dwFlags & ENV_LOOP)
+		return;
+	}
+
+	// Increase position
+	UINT position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
+
+	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(envType);
+
+	bool endReached = false;
+
+	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		// FT2-style envelope processing.
+		if(insEnv.dwFlags & ENV_LOOP)
 		{
-			UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
-			if (GetType() != MOD_TYPE_XM) volloopend++;
-			if (position == volloopend)
+			// Normal loop active
+			UINT end = insEnv.Ticks[insEnv.nLoopEnd];
+			if(GetType() != MOD_TYPE_XM) end++;
+			if(position == end)
 			{
-				position = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
-				if ((pIns->VolEnv.nLoopEnd == pIns->VolEnv.nLoopStart) && (!pIns->VolEnv.Values[pIns->VolEnv.nLoopStart])
-					&& ((!(GetType() & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
+				position = insEnv.Ticks[insEnv.nLoopStart];
+
+				if(envType == ENV_VOLUME && insEnv.nLoopStart == insEnv.nLoopEnd && insEnv.Values[insEnv.nLoopEnd] == 0
+					&& (!(GetType() & MOD_TYPE_XM) || (insEnv.nLoopEnd + 1u == insEnv.nNodes)))
 				{
 					pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nFadeOutVol = 0;
 				}
 			}
 		}
-		// Volume Sustain ?
-		if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
+
+		if((insEnv.dwFlags & ENV_SUSTAIN) && !(pChn->dwFlags & CHN_KEYOFF))
 		{
-			if (position == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
-				position = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
+			// Envelope sustained
+			if(position == insEnv.Ticks[insEnv.nSustainEnd] + 1u)
+			{
+				position = insEnv.Ticks[insEnv.nSustainStart];
+			}
 		} else
 		{
-			// End of Envelope ?
-			if (position > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
+			// Limit to last envelope point
+			if(position > insEnv.Ticks[insEnv.nNodes - 1])
 			{
-				if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
-				position = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
-				if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes - 1]) && ((pChn->nMasterChn > 0) || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
-				{
-					pChn->dwFlags |= CHN_NOTEFADE;
-					pChn->nFadeOutVol = 0;
-					pChn->nRealVolume = 0;
-					pChn->nCalcVolume = 0;
-				}
+				// Env of envelope
+				position = insEnv.Ticks[insEnv.nNodes - 1];
+				endReached = true;
+			}
+		}
+	} else
+	{
+		// IT envelope processing.
+		// Test case: EnvLoops.it
+		UINT start, end;
+
+		if((insEnv.dwFlags & ENV_SUSTAIN) && !(pChn->dwFlags & CHN_KEYOFF))
+		{
+			// Envelope sustained
+			start = insEnv.Ticks[insEnv.nSustainStart];
+			end = insEnv.Ticks[insEnv.nSustainEnd] + 1;
+		} else if((insEnv.dwFlags & ENV_LOOP))
+		{
+			// Normal loop active
+			start = insEnv.Ticks[insEnv.nLoopStart];
+			end = insEnv.Ticks[insEnv.nLoopEnd] + 1;
+		} else
+		{
+			// Limit to last envelope point
+			start = end = insEnv.Ticks[insEnv.nNodes - 1];
+			if (position > end)
+			{
+				// Env of envelope
+				endReached = true;
 			}
 		}
 
-		pChn->VolEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		if(position >= end)
+		{
+			position = start;
+		}
 	}
+
+	if(envType == ENV_VOLUME && endReached)
+	{
+		// Special handling for volume envelopes at end of envelope
+		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF))
+		{
+			pChn->dwFlags |= CHN_NOTEFADE;
+		}
+
+		if(insEnv.Values[insEnv.nNodes - 1] == 0 && (pChn->nMasterChn > 0 || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
+		{
+			pChn->dwFlags |= CHN_NOTEFADE;
+			pChn->nFadeOutVol = 0;
+			pChn->nRealVolume = 0;
+			pChn->nCalcVolume = 0;
+		}
+	}
+
+	chnEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+
 }
 
 
-void CSoundFile::IncrementPanningEnvelopePosition(ModChannel *pChn)
-//-----------------------------------------------------------------
+void CSoundFile::IncrementEnvelopePositions(ModChannel *pChn)
+//-----------------------------------------------------------
 {
-	const ModInstrument *pIns = pChn->pModInstrument;
-
-	if (pChn->PanEnv.flags & ENV_ENABLED)
-	{
-		// Increase position
-		UINT position = pChn->PanEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
-
-		if (pIns->PanEnv.dwFlags & ENV_LOOP)
-		{
-			UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
-			if (GetType() != MOD_TYPE_XM) panloopend++;
-			if (position == panloopend)
-				position = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
-		}
-
-		// Panning Sustain ?
-		if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (position == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd] + 1)
-			&& (!(pChn->dwFlags & CHN_KEYOFF)))
-		{
-			// Panning sustained
-			position = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
-		} else
-		{
-			if (position > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
-				position = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
-		}
-
-		pChn->PanEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
-	}
-}
-
-
-void CSoundFile::IncrementPitchFilterEnvelopePosition(ModChannel *pChn)
-//---------------------------------------------------------------------
-{
-	const ModInstrument *pIns = pChn->pModInstrument;
-
-	if (pChn->PitchEnv.flags & ENV_ENABLED)
-	{
-		// Increase position
-		UINT position = pChn->PitchEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
-
-		// Pitch Loop ?
-		if (pIns->PitchEnv.dwFlags & ENV_LOOP)
-		{
-			UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
-			if (GetType() != MOD_TYPE_XM) pitchloopend++;
-			if (position >= pitchloopend)
-				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
-		}
-		// Pitch Sustain ?
-		if ((pIns->PitchEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
-		{
-			if (position == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
-				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
-		} else
-		{
-			if (position > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
-				position = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
-		}
-
-		pChn->PitchEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
-	}
+	IncrementEnvelopePosition(pChn, ENV_VOLUME);
+	IncrementEnvelopePosition(pChn, ENV_PANNING);
+	IncrementEnvelopePosition(pChn, ENV_PITCH);
 }
 
 
@@ -2035,9 +1977,7 @@ BOOL CSoundFile::ReadNote()
 					// When using MPT behaviour, we get the envelope position for the next tick while we are still calculating the current tick,
 					// which then results in wrong position information when the envelope is paused on the next row.
 					// Test case: s77.it
-					IncrementVolumeEnvelopePosition(pChn);
-					IncrementPanningEnvelopePosition(pChn);
-					IncrementPitchFilterEnvelopePosition(pChn);
+					IncrementEnvelopePositions(pChn);
 				}
 				ProcessVolumeEnvelope(pChn, vol);
 				ProcessInstrumentFade(pChn, vol);
@@ -2188,9 +2128,7 @@ BOOL CSoundFile::ReadNote()
 		{
 			// In IT compatible mode, envelope positions are updated above.
 			// Test case: s77.it
-			IncrementVolumeEnvelopePosition(pChn);
-			IncrementPanningEnvelopePosition(pChn);
-			IncrementPitchFilterEnvelopePosition(pChn);
+			IncrementEnvelopePositions(pChn);
 		}
 
 #ifdef MODPLUG_PLAYER
@@ -2533,51 +2471,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	}
 }
 
-
-int CSoundFile::GetVolEnvValueFromPosition(int position, const InstrumentEnvelope &env) const
-//-------------------------------------------------------------------------------------------
-{
-	UINT pt = env.nNodes - 1;
-
-	// Checking where current 'tick' is relative to the 
-	// envelope points.
-	for (UINT i = 0; i < (UINT)(env.nNodes-1); i++)
-	{
-		if (position <= env.Ticks[i])
-		{
-			pt = i;
-			break;
-		}
-	}
-
-	int x2 = env.Ticks[pt];
-	int x1, envvol;
-	if (position >= x2) // Case: current 'tick' is on a envelope point.
-	{
-		envvol = env.Values[pt] * 4;
-	} else // Case: current 'tick' is between two envelope points.
-	{
-		if (pt)
-		{
-			envvol = env.Values[pt - 1] * 4;
-			x1 = env.Ticks[pt - 1];
-		} else
-		{
-			envvol = 0;
-			x1 = 0;
-		}
-
-		if(x2 > x1 && position > x1)
-		{
-			// Linear approximation between the points;
-			// f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1)/(x2-x1)
-			envvol += ((position - x1) * (((int)env.Values[pt] * 4) - envvol)) / (x2 - x1);
-		}
-	}
-	return envvol;
-}
-
-#endif
+#endif // MODPLUG_TRACKER
 
 
 void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount)

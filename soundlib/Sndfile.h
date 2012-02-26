@@ -523,9 +523,8 @@ protected:
 	void ProcessPanningEnvelope(ModChannel *pChn);
 	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period);
 
-	void IncrementVolumeEnvelopePosition(ModChannel *pChn);
-	void IncrementPanningEnvelopePosition(ModChannel *pChn);
-	void IncrementPitchFilterEnvelopePosition(ModChannel *pChn);
+	void IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType);
+	void IncrementEnvelopePositions(ModChannel *pChn);
 
 	void ProcessInstrumentFade(ModChannel *pChn, int &vol);
 
@@ -708,7 +707,6 @@ protected:
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 
 public:
-	int GetVolEnvValueFromPosition(int position, const InstrumentEnvelope &env) const;
     void ResetChannelEnvelopes(ModChannel *pChn) const;
 	void ResetChannelEnvelope(ModChannelEnvInfo &env) const;
 

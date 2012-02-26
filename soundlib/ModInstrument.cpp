@@ -96,6 +96,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 
 		if (pt)
 		{
+			// Get previous node's value and tick.
 			value = static_cast<float>(Values[pt - 1]) / 64.0f;
 			x1 = Ticks[pt - 1];
 		}
@@ -107,7 +108,8 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 			value += ((position - x1) * (static_cast<float>(Values[pt]) / 64.0f - value)) / (x2 - x1);
 		}
 	}
-	return value;
+
+	return Clamp(value, 0.0f, 1.0f);
 };
 
 

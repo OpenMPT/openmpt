@@ -297,6 +297,7 @@ namespace Util
 
 	/// Returns value rounded to nearest integer.
 	inline double Round(const double& val) {return std::floor(val + 0.5);}
+	inline float Round(const float& val) {return std::floor(val + 0.5f);}
 
 	/// Rounds given double value to nearest integer value of type T.
 	template <class T> inline T Round(const double& val)
@@ -309,6 +310,15 @@ namespace Util
 		return intval;
 	}
 
+	template <class T> inline T Round(const float& val)
+	{
+		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
+		static_assert(sizeof(T) <= 4, "Revise the implementation for integers > 32-bits.");
+		const float valRounded = Round(val);
+		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
+		const T intval = static_cast<T>(valRounded);
+		return intval;
+	}
 	
 };
 
