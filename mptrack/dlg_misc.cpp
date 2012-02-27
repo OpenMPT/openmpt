@@ -172,25 +172,24 @@ void CModTypeDlg::UpdateChannelCBox()
 	CHANNELINDEX currChanSel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
 	const CHANNELINDEX minChans = CSoundFile::GetModSpecifications(type).channelsMin;
 	const CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
+	
 	if(m_ChannelsBox.GetCount() < 1 
-		||
-	   m_ChannelsBox.GetItemData(0) != minChans
-		|| 
-	   m_ChannelsBox.GetItemData(m_ChannelsBox.GetCount()-1) != maxChans
-	  )
+		|| m_ChannelsBox.GetItemData(0) != minChans
+		|| m_ChannelsBox.GetItemData(m_ChannelsBox.GetCount() - 1) != maxChans)
 	{
+		// Update channel list if number of supported channels has changed.
 		if(m_ChannelsBox.GetCount() < 1) currChanSel = m_nChannels;
-		char s[256];
 		m_ChannelsBox.ResetContent();
-		for (CHANNELINDEX i=minChans; i<=maxChans; i++)
+
+		CString s;
+		for(CHANNELINDEX i = minChans; i <= maxChans; i++)
 		{
-			wsprintf(s, "%d Channel%s", i, (i != 1) ? "s" : "");
+			s.Format("%d Channel%s", i, (i != 1) ? "s" : "");
 			m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
 		}
-		if(currChanSel > maxChans)
-			m_ChannelsBox.SetCurSel(m_ChannelsBox.GetCount()-1);
-		else
-			m_ChannelsBox.SetCurSel(currChanSel-minChans);
+
+		Limit(currChanSel, minChans, maxChans);
+		m_ChannelsBox.SetCurSel(currChanSel - minChans);
 	}
 }
 
@@ -302,7 +301,7 @@ bool CModTypeDlg::VerifyData()
 	if (sel > maxChans)
 	{
 		CString error;
-		error.Format("Error: Max number of channels for this type is %d", maxChans);
+		error.Format("Error: Maximum number of channels for this module type is %d.", maxChans);
 		Reporting::Warning(error);
 		return FALSE;
 	}

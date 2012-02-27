@@ -66,8 +66,8 @@ and Low-level mixing routines in separate interface-based classes.
 - Get rid of globals (many globals creeped up over time, mostly because of the
 hack to allow simultaneous playback of 2 songs in Modplug Player -> ReadMix()).
 This is a major problem for writing a DShow source filter, or any other COM
-object (A DShow source would allow playback of MOD files in WMP, which would be much easier than
-rewriting a different player).
+object (A DShow source would allow playback of MOD files in WMP, which would be
+much easier than rewriting a different player).
 - The MPT UI code is MFC-based, and I would say is fairly clean (as a rough
 rule, the more recent the code is, the cleaner it is), though the UI code is
 tightly integrated with the implementation (this could make it somewhat more
