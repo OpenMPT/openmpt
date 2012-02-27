@@ -1557,6 +1557,8 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 	//Note2: If there's problems in getting tooltips showing for certain tools, 
 	//		 setting the tab order may have effect.
 	const bool hasInstrument = (m_pSndFile) && (m_pSndFile->Instruments[m_nInstrument]);
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
+
 	if(!hasInstrument) return FALSE;
 	if ((pszText) && (uId))
 	{
@@ -1581,7 +1583,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
 			// Plugin volume handling
-			if(m_pSndFile->Instruments[m_nInstrument]->nMixPlug < 1) return FALSE;
+			if(pIns->nMixPlug < 1) return FALSE;
 			if(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
 			{
 				m_CbnPluginVelocityHandling.EnableWindow(FALSE);
@@ -1595,6 +1597,22 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_COMBO5:
 			// MIDI Channel
 			strcpy(pszText, "Mapped: MIDI channel corresponds to pattern channel modulo 16");
+			return TRUE;
+
+		case IDC_SLIDER1:
+			wsprintf(pszText, "±%d%% volume variation", pIns->nVolSwing);
+			return TRUE;
+
+		case IDC_SLIDER2:
+			wsprintf(pszText, "±%d panning variation", pIns->nPanSwing);
+			return TRUE;
+
+		case IDC_SLIDER6:
+			wsprintf(pszText, "±%d cutoff variation", pIns->nCutSwing);
+			return TRUE;
+
+		case IDC_SLIDER7:
+			wsprintf(pszText, "±%d resonance variation", pIns->nResSwing);
 			return TRUE;
 
 		}
