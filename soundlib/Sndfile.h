@@ -651,10 +651,8 @@ public:
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	long ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
-//	PSNDMIXPLUGIN GetSndPlugMixPlug(IMixPlugin *pPlugin); //rewbs.plugDocAware
-#ifndef NO_FILTER
+
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
-#endif
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif

@@ -441,8 +441,8 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
 	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
-	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT), MIXPLUG_INPUTF_MASTEREFFECT);
-	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting >> 16), 11);
+	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
+	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
 
 }
 
@@ -652,8 +652,8 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
 	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
-	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT), MIXPLUG_INPUTF_MASTEREFFECT);
-	VERIFY_EQUAL_NONCONT((plug.Info.dwInputRouting >> 16), 11);
+	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
+	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
 
 	// MIDI Mapping
 	VERIFY_EQUAL_NONCONT(pSndFile->GetMIDIMapper().GetCount(), 1);

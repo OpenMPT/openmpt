@@ -182,7 +182,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	foundHere = false;
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr || m_SndFile.m_MixPlugins[i].Info.dwPluginId1 || m_SndFile.m_MixPlugins[i].Info.dwPluginId2)
+		if(m_SndFile.m_MixPlugins[i].IsValidPlugin())
 		{
 			foundHere = foundHacks = true;
 			break;

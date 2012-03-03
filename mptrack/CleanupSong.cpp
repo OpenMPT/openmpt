@@ -833,11 +833,11 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 
 	vector<bool> usedmap(MAX_MIXPLUGINS, false);
 	
-	for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
+	for(PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 	{
 
 		// Is the plugin assigned to a channel?
-		for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+		for(CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
 		{
 			if (pSndFile->ChnSettings[nChn].nMixPlugin == nPlug + 1)
 			{
@@ -847,7 +847,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 		}
 
 		// Is the plugin used by an instrument?
-		for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
+		for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
 		{
 			if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == nPlug + 1))
 			{
@@ -857,16 +857,19 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 		}
 
 		// Is the plugin assigned to master?
-		if (pSndFile->m_MixPlugins[nPlug].Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT)
+		if(pSndFile->m_MixPlugins[nPlug].IsMasterEffect())
 			usedmap[nPlug] = true;
 
 		// All outputs of used plugins count as used
-		if (usedmap[nPlug] != false)
+		if(usedmap[nPlug] != false)
 		{
-			if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80)
+			if(!pSndFile->m_MixPlugins[nPlug].IsOutputToMaster())
 			{
-				int output = pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f;
-				usedmap[output] = true;
+				PLUGINDEX output = pSndFile->m_MixPlugins[nPlug].GetOutputPlugin();
+				if(output < MAX_MIXPLUGINS)
+				{
+					usedmap[output] = true;
+				}
 			}
 		}
 

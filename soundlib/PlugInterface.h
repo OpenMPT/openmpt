@@ -19,12 +19,11 @@ typedef int32 VstInt32;
 typedef intptr_t VstIntPtr;
 #endif
 
+#include "Snd_defs.h"
 #include "../common/misc_util.h"
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
-
-#define MIXPLUG_MIXREADY			0x01	// Set when cleared
 
 typedef VstInt32 PlugParamIndex;
 typedef float PlugParamValue;
@@ -60,9 +59,9 @@ public:
 	virtual bool IsResumed() = 0;
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
-	virtual bool Bypass(bool = true) = 0;
+	virtual void Bypass(bool = true) = 0;
 	virtual bool IsBypassed() const = 0;
-	bool ToggleBypass() { return Bypass(!IsBypassed()); };
+	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
 	virtual bool isInstrument() = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
 	virtual void SetDryRatio(UINT param) = 0;
@@ -79,58 +78,108 @@ inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue di
 }
 
 
-///////////////////////////////////////////////////
-// !!! bits 8 -> 15 reserved for mixing mode !!! //
-///////////////////////////////////////////////////
-#define MIXPLUG_INPUTF_MASTEREFFECT				0x01	// Apply to master mix
-#define MIXPLUG_INPUTF_BYPASS					0x02	// Bypass effect
-#define MIXPLUG_INPUTF_WETMIX					0x04	// Wet Mix (dry added)
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
-#define MIXPLUG_INPUTF_MIXEXPAND				0x08	// [0%,100%] -> [-200%,200%]
-// -! BEHAVIOUR_CHANGE#0028
-
-
 struct SNDMIXPLUGINSTATE
 {
-	DWORD dwFlags;					// MIXPLUG_XXXX
+	// dwFlags flags
+	enum PluginStateFlags
+	{
+		psfMixReady = 0x01,			// Set when cleared
+	};
+
+	DWORD dwFlags;					// PluginStateFlags
 	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
 	int *pMixBuffer;				// Stereo effect send buffer
 	float *pOutBufferL;				// Temp storage for int -> float conversion
 	float *pOutBufferR;
 };
-typedef SNDMIXPLUGINSTATE* PSNDMIXPLUGINSTATE;
+
 
 struct SNDMIXPLUGININFO
 {
-	DWORD dwPluginId1;
-	DWORD dwPluginId2;
-	DWORD dwInputRouting;	// MIXPLUG_INPUTF_XXXX, bits 16-23 = gain
-	DWORD dwOutputRouting;	// 0=mix 0x80+=fx
-	DWORD dwReserved[4];	// Reserved for routing info
-	CHAR szName[32];
-	CHAR szLibraryName[64];	// original DLL name
-}; // Size should be 128 							
-typedef SNDMIXPLUGININFO* PSNDMIXPLUGININFO;
+	// dwInputRouting flags
+	enum RoutingFlags
+	{
+		irApplyToMaster	= 0x01,		// Apply to master mix
+		irBypass		= 0x02,		// Bypass effect
+		irWetMix		= 0x04,		// Wet Mix (dry added)
+		irExpandMix		= 0x08,		// [0%,100%] -> [-200%,200%]
+	};
+
+	DWORD dwPluginId1;				// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
+	DWORD dwPluginId2;				// Plugin unique ID
+	DWORD dwInputRouting;			// Bits 0 to 7 = RoutingFlags, bits 8 - 15 = mixing mode, bits 16-23 = gain
+	DWORD dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
+	DWORD dwReserved[4];			// Reserved for routing info
+	CHAR szName[32];				// User-chosen plugin name
+	CHAR szLibraryName[64];			// original DLL name
+
+	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
+	void SetBypass(bool bypass = true) { if(bypass) dwInputRouting |= irBypass; else dwInputRouting &= ~irBypass; };
+
+};
+
 STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to files, so the size must be correct!
 
 struct SNDMIXPLUGIN
 {
-	const char* GetName() const { return Info.szName; }
-	const char* GetLibraryName();
-	CString GetParamName(const UINT index) const;
-	bool Bypass(bool bypass);
-	bool IsBypassed() const { return (Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) != 0; };
-
 	IMixPlugin *pMixPlugin;
-	PSNDMIXPLUGINSTATE pMixState;
+	SNDMIXPLUGINSTATE *pMixState;
 	ULONG nPluginDataSize;
-	PVOID pPluginData;
+	void *pPluginData;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;		    // rewbs.dryRatio [20040123]
 	long defaultProgram;		// rewbs.plugDefaultProgram
+
+	const char *GetName() const
+		{ return Info.szName; }
+	const char *GetLibraryName() const
+		{ return Info.szLibraryName; };
+	CString GetParamName(PlugParamIndex index) const;
+
+	// Check if a plugin is loaded into this slot (also returns true if the plugin in this slot has not been found)
+	bool IsValidPlugin() const { return (Info.dwPluginId1 | Info.dwPluginId2) != 0; };
+
+	// Input routing getters
+	int GetGain() const
+		{ return (Info.dwInputRouting >> 16) & 0xFF; };
+	int GetMixMode() const
+		{ return (Info.dwInputRouting >> 8) & 0xFF; };
+	bool IsMasterEffect() const
+		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irApplyToMaster) != 0; };
+	bool IsWetMix() const
+		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irWetMix) != 0; };
+	bool IsExpandedMix() const
+		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irExpandMix) != 0; };
+	bool IsBypassed() const
+		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irBypass) != 0; };
+
+	// Input routing setters
+	void SetGain(int gain)
+		{ Info.dwInputRouting = (Info.dwInputRouting & 0xFF00FFFF) | ((gain & 0xFF) << 16); if(pMixPlugin != nullptr) pMixPlugin->RecalculateGain(); };
+	void SetMixMode(int mixMode)
+		{ Info.dwInputRouting = (Info.dwInputRouting & 0xFFFF00FF) | ((mixMode & 0xFF) << 8); };
+	void SetMasterEffect(bool master = true)
+		{ if(master) Info.dwInputRouting |= SNDMIXPLUGININFO::irApplyToMaster; else Info.dwInputRouting &= ~SNDMIXPLUGININFO::irApplyToMaster; };
+	void SetWetMix(bool wetMix = true)
+		{ if(wetMix) Info.dwInputRouting |= SNDMIXPLUGININFO::irWetMix; else Info.dwInputRouting &= ~SNDMIXPLUGININFO::irWetMix; };
+	void SetExpandedMix(bool expanded = true)
+		{ if(expanded) Info.dwInputRouting |= SNDMIXPLUGININFO::irExpandMix; else Info.dwInputRouting &= ~SNDMIXPLUGININFO::irExpandMix; };
+	void SetBypass(bool bypass = true)
+		{ if(pMixPlugin != nullptr) pMixPlugin->Bypass(bypass); else Info.SetBypass(bypass); };
+
+	// Output routing getters
+	bool IsOutputToMaster() const
+		{ return Info.dwOutputRouting == 0; };
+	PLUGINDEX GetOutputPlugin() const
+		{ return Info.dwOutputRouting >= 0x80 ? static_cast<PLUGINDEX>(Info.dwOutputRouting - 0x80) : MAX_MIXPLUGINS; };
+
+	// Output routing setters
+	void SetOutputToMaster()
+		{ Info.dwOutputRouting = 0; };
+	void SetOutputPlugin(PLUGINDEX plugin)
+		{ if(plugin < MAX_MIXPLUGINS) Info.dwOutputRouting = plugin + 0x80; else Info.dwOutputRouting = 0; };
+
 }; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
-typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
 
 class CSoundFile;
-typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CSoundFile*);
+typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN *, CSoundFile *);

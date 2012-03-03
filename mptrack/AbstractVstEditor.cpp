@@ -291,13 +291,12 @@ void CAbstractVstEditor::SetTitle()
 	if (m_pVstPlugin && m_pVstPlugin->m_pMixStruct)
 	{
 		CString Title; 
-		Title.Format("FX %02d:  ", m_pVstPlugin->m_nSlot+1);
+		Title.Format("FX %02d: ", m_pVstPlugin->m_nSlot + 1);
 
-		if (m_pVstPlugin->m_pMixStruct->Info.szName[0]) {
-			Title.Append(m_pVstPlugin->m_pMixStruct->Info.szName);
-		} else {
-			Title.Append(m_pVstPlugin->m_pMixStruct->Info.szLibraryName);
-		}
+		if (strcmp(m_pVstPlugin->m_pMixStruct->GetName(), ""))
+			Title.Append(m_pVstPlugin->m_pMixStruct->GetName());
+		else
+			Title.Append(m_pVstPlugin->m_pMixStruct->GetLibraryName());
 
 		SetWindowText(Title);
 	}
@@ -495,8 +494,8 @@ void CAbstractVstEditor::UpdateInputMenu()
 	m_pVstPlugin->GetInputPlugList(inputPlugs);
 	for (int nPlug=0; nPlug<inputPlugs.GetSize(); nPlug++)
 	{
-		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot+1, inputPlugs[nPlug]->m_pMixStruct->Info.szName);
-		m_pInputMenu->AppendMenu(MF_STRING, ID_PLUGSELECT+inputPlugs[nPlug]->m_nSlot, name);
+		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot + 1, inputPlugs[nPlug]->m_pMixStruct->GetName());
+		m_pInputMenu->AppendMenu(MF_STRING, ID_PLUGSELECT + inputPlugs[nPlug]->m_nSlot, name);
 	}
 
 	CArray<UINT, UINT> inputChannels;
@@ -555,12 +554,13 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	m_pVstPlugin->GetOutputPlugList(outputPlugs);
 	CString name;
 
-	for (int nPlug = 0; nPlug < outputPlugs.GetSize(); nPlug++
-		) {
-		if (outputPlugs[nPlug] != NULL) {
-			name.Format("FX%02d: %s", outputPlugs[nPlug]->m_nSlot+1,
-									outputPlugs[nPlug]->m_pMixStruct->Info.szName);
-			m_pOutputMenu->AppendMenu(MF_STRING, ID_PLUGSELECT+outputPlugs[nPlug]->m_nSlot, name);
+	for (int nPlug = 0; nPlug < outputPlugs.GetSize(); nPlug++)
+	{
+		if (outputPlugs[nPlug] != nullptr)
+		{
+			name.Format("FX%02d: %s", outputPlugs[nPlug]->m_nSlot + 1,
+									outputPlugs[nPlug]->m_pMixStruct->GetName());
+			m_pOutputMenu->AppendMenu(MF_STRING, ID_PLUGSELECT + outputPlugs[nPlug]->m_nSlot, name);
 		} else
 		{
 			name = "Master Output";
@@ -772,8 +772,8 @@ bool CAbstractVstEditor::CreateInstrument()
 	ModInstrument *pIns = pSndFile->Instruments[nIns];
 	m_nInstrument = nIns;
 
-	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
-	strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szLibraryName, CountOf(pIns->filename) - 1);
+	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].GetName());
+	strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].GetLibraryName(), CountOf(pIns->filename) - 1);
 	pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
 	pIns->nMidiChannel = 1;
 	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.

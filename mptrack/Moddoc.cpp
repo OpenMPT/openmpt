@@ -2511,12 +2511,11 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 //-----------------------------------------------------
 {
-	PSNDMIXPLUGIN pPlugin;
+	SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[m_nCurrentPlugin];
 
-	pPlugin = &m_SndFile.m_MixPlugins[m_nCurrentPlugin];
-	if (m_nCurrentPlugin<MAX_MIXPLUGINS && pPlugin && pPlugin->pMixPlugin)
+	if (m_nCurrentPlugin < MAX_MIXPLUGINS && plugin.pMixPlugin)
 	{
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		pVstPlugin->ToggleEditor();
 	}
 

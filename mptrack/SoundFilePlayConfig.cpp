@@ -113,23 +113,6 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setExtraSampleAttenuation(1);
 			break;
 
-		// FOR TEST PURPOSES ONLY:
-		/*
-		case mixLevels_Test:
-			setVSTiAttenuation(1.0f);
-			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
-			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
-			setGlobalVolumeAppliesToMaster(true);
-			setUseGlobalPreAmp(false);
-			setForceSoftPanning(true);
-			setDisplayDBValues(true);
-			setNormalSamplePreAmp(128.0);
-			setNormalVSTiVol(128.0);
-			setNormalGlobalVol(256.0);
-			setExtraAttenuation(0);
-			break;
-		*/
-
 	}
 	
 	return;

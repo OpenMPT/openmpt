@@ -1560,16 +1560,16 @@ UINT CSoundFile::CreateStereoMix(int count)
 		//end rewbs.instroVSTi		
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
-			PSNDMIXPLUGINSTATE pPlugin = m_MixPlugins[nMixPlugin-1].pMixState;
+			SNDMIXPLUGINSTATE *pPlugin = m_MixPlugins[nMixPlugin - 1].pMixState;
 			if ((pPlugin) && (pPlugin->pMixBuffer))
 			{
 				pbuffer = pPlugin->pMixBuffer;
 				pOfsR = &pPlugin->nVolDecayR;
 				pOfsL = &pPlugin->nVolDecayL;
-				if (!(pPlugin->dwFlags & MIXPLUG_MIXREADY))
+				if (!(pPlugin->dwFlags & SNDMIXPLUGINSTATE::psfMixReady))
 				{
 					X86_StereoFill(pbuffer, count, pOfsR, pOfsL);
-					pPlugin->dwFlags |= MIXPLUG_MIXREADY;
+					pPlugin->dwFlags |= SNDMIXPLUGINSTATE::psfMixReady;
 				}
 			}
 		}
@@ -1703,13 +1703,13 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 	// Setup float inputs
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
-		PSNDMIXPLUGIN pPlugin = &m_MixPlugins[iPlug];
-		if ((pPlugin->pMixPlugin) && (pPlugin->pMixState)
-		 && (pPlugin->pMixState->pMixBuffer)
-		 && (pPlugin->pMixState->pOutBufferL)
-		 && (pPlugin->pMixState->pOutBufferR))
+		SNDMIXPLUGIN &plugin = m_MixPlugins[iPlug];
+		if (plugin.pMixPlugin != nullptr && plugin.pMixState != nullptr
+			&& plugin.pMixState->pMixBuffer != nullptr
+			&& plugin.pMixState->pOutBufferL != nullptr
+			&& plugin.pMixState->pOutBufferR != nullptr)
 		{
-			PSNDMIXPLUGINSTATE pState = pPlugin->pMixState;
+			SNDMIXPLUGINSTATE *pState = plugin.pMixState;
 			// Init plugins ?
 			/*if (gbInitPlugins)
 			{   //ToDo: do this in resume.
@@ -1717,17 +1717,17 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			}*/
 
 			//We should only ever reach this point if the song is playing.
-			if (!pPlugin->pMixPlugin->IsSongPlaying())
+			if (!plugin.pMixPlugin->IsSongPlaying())
 			{
 				//Plugin doesn't know it is in a song that is playing;
 				//we must have added it during playback. Initialise it!
-				pPlugin->pMixPlugin->NotifySongPlaying(true);
-				pPlugin->pMixPlugin->Resume();
+				plugin.pMixPlugin->NotifySongPlaying(true);
+				plugin.pMixPlugin->Resume();
 			}
 
 
 			// Setup float input
-			if (pState->dwFlags & MIXPLUG_MIXREADY)
+			if (pState->dwFlags & SNDMIXPLUGINSTATE::psfMixReady)
 			{
 				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount);
 			} else
@@ -1740,44 +1740,44 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				memset(pState->pOutBufferL, 0, nCount * sizeof(float));
 				memset(pState->pOutBufferR, 0, nCount * sizeof(float));
 			}
-			pState->dwFlags &= ~MIXPLUG_MIXREADY;
+			pState->dwFlags &= ~SNDMIXPLUGINSTATE::psfMixReady;
 		}
 	}
 	// Convert mix buffer
-	StereoMixToFloat(MixSoundBuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
+	StereoMixToFloat(MixSoundBuffer, MixFloatBuffer, MixFloatBuffer + MIXBUFFERSIZE, nCount);
 	FLOAT *pMixL = MixFloatBuffer;
 	FLOAT *pMixR = MixFloatBuffer + MIXBUFFERSIZE;
 
 	// Process Plugins
 	for (UINT iDoPlug=0; iDoPlug<MAX_MIXPLUGINS; iDoPlug++)
 	{
-		PSNDMIXPLUGIN pPlugin = &m_MixPlugins[iDoPlug];
-		if ((pPlugin->pMixPlugin) && (pPlugin->pMixState)
-		 && (pPlugin->pMixState->pMixBuffer)
-		 && (pPlugin->pMixState->pOutBufferL)
-		 && (pPlugin->pMixState->pOutBufferR))
+		SNDMIXPLUGIN &plugin = m_MixPlugins[iDoPlug];
+		if (plugin.pMixPlugin != nullptr && plugin.pMixState != nullptr
+			&& plugin.pMixState->pMixBuffer != nullptr
+			&& plugin.pMixState->pOutBufferL != nullptr
+			&& plugin.pMixState->pOutBufferR != nullptr)
 		{
 			BOOL bMasterMix = FALSE;
-			if (pMixL == pPlugin->pMixState->pOutBufferL)
+			if (pMixL == plugin.pMixState->pOutBufferL)
 			{
 				bMasterMix = TRUE;
 				pMixL = MixFloatBuffer;
 				pMixR = MixFloatBuffer + MIXBUFFERSIZE;
 			}
-			IMixPlugin *pObject = pPlugin->pMixPlugin;
-			PSNDMIXPLUGINSTATE pState = pPlugin->pMixState;
+			IMixPlugin *pObject = plugin.pMixPlugin;
+			SNDMIXPLUGINSTATE *pState = plugin.pMixState;
 			FLOAT *pOutL = pMixL;
 			FLOAT *pOutR = pMixR;
 
-			if (pPlugin->Info.dwOutputRouting & 0x80)
+			if (!plugin.IsOutputToMaster())
 			{
-				UINT nOutput = pPlugin->Info.dwOutputRouting & 0x7f;
+				PLUGINDEX nOutput = plugin.GetOutputPlugin();
 				if ((nOutput > iDoPlug) && (nOutput < MAX_MIXPLUGINS)
-				 && (m_MixPlugins[nOutput].pMixState))
+					&& (m_MixPlugins[nOutput].pMixState))
 				{
-					PSNDMIXPLUGINSTATE pOutState = m_MixPlugins[nOutput].pMixState;
+					SNDMIXPLUGINSTATE *pOutState = m_MixPlugins[nOutput].pMixState;
 
-					if( (pOutState->pOutBufferL) && (pOutState->pOutBufferR) )
+					if(pOutState->pOutBufferL != nullptr && pOutState->pOutBufferR != nullptr)
 					{
 						pOutL = pOutState->pOutBufferL;
 						pOutR = pOutState->pOutBufferR;
@@ -1786,19 +1786,19 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			}
 
 			/*
-			if (pPlugin->multiRouting) {
+			if (plugin.multiRouting) {
 				int nOutput=0;
-				for (int nOutput=0; nOutput<pPlugin->nOutputs/2; nOutput++) {
-					destinationPlug = pPlugin->multiRoutingDestinations[nOutput];
+				for (int nOutput=0; nOutput < plugin.nOutputs / 2; nOutput++) {
+					destinationPlug = plugin.multiRoutingDestinations[nOutput];
 					pOutState = m_MixPlugins[destinationPlug].pMixState;
-					pOutputs[2*nOutput] = pOutState->pOutBufferL;
-					pOutputs[2*(nOutput+1)] = pOutState->pOutBufferR;
+					pOutputs[2 * nOutput] = pOutState->pOutBufferL;
+					pOutputs[2 * (nOutput + 1)] = pOutState->pOutBufferR;
 				}
 				
 			}
 */
 
-			if (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT)
+			if (plugin.IsMasterEffect())
 			{
 				if (!bMasterMix)
 				{
@@ -1816,7 +1816,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				pMixR = pOutR;
 			}
 
-			if (pPlugin->IsBypassed())
+			if (plugin.IsBypassed())
 			{
 				const FLOAT * const pInL = pState->pOutBufferL;
 				const FLOAT * const pInR = pState->pOutBufferR;

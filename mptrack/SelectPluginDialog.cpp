@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "SelectPluginDialog.h"
+#include "../common/StringFixer.h"
 
 
 #ifndef NO_VST
@@ -139,12 +140,14 @@ void CSelectPluginDlg::OnOK()
 			{
 				// Enable drymix by default for these known plugins
 			case CCONST('S', 'c', 'o', 'p'):
-				m_pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_WETMIX;
+				m_pPlugin->SetWetMix();
 				break;
 			}
 
 			lstrcpyn(m_pPlugin->Info.szName, pFactory->szLibraryName, 32);
 			lstrcpyn(m_pPlugin->Info.szLibraryName, pFactory->szLibraryName, 64);
+			StringFixer::SetNullTerminator(m_pPlugin->Info.szName);
+			StringFixer::SetNullTerminator(m_pPlugin->Info.szLibraryName);
 
 			cs.Leave();
 

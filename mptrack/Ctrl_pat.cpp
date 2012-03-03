@@ -1232,15 +1232,16 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 void CCtrlPatterns::TogglePluginEditor()
 //--------------------------------------
 {
-	if(m_nInstrument && m_pModDoc && m_pSndFile && m_pSndFile->Instruments[m_nInstrument])
+	if(m_nInstrument && m_pModDoc && m_pSndFile && m_pSndFile->Instruments[m_nInstrument] != nullptr)
 	{
-		UINT nPlug = m_pSndFile->Instruments[m_nInstrument]->nMixPlug;
-		if (nPlug) //if not no plugin
+		PLUGINDEX nPlug = m_pSndFile->Instruments[m_nInstrument]->nMixPlug;
+		if(nPlug)
 		{
-			PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);
-			if (pPlug && pPlug->pMixPlugin) //if has valid plugin
+			// Has a plugin assigned
+			if(m_pSndFile->m_MixPlugins[nPlug - 1].pMixPlugin != nullptr)
 			{
-				m_pModDoc->TogglePluginEditor(nPlug-1);
+				// Has a valid plugin assigned
+				m_pModDoc->TogglePluginEditor(nPlug - 1);
 			}
 		}
 	}
@@ -1250,16 +1251,13 @@ void CCtrlPatterns::TogglePluginEditor()
 bool CCtrlPatterns::HasValidPlug(UINT instr)
 //------------------------------------------
 {
-	if ((instr) && (instr<MAX_INSTRUMENTS) && (m_pSndFile) && m_pSndFile->Instruments[instr])
+	if ((instr) && (instr < MAX_INSTRUMENTS) && (m_pSndFile) && m_pSndFile->Instruments[instr] != nullptr)
 	{
-		UINT nPlug = m_pSndFile->Instruments[instr]->nMixPlug;
-		if (nPlug) //if not no plugin
+		PLUGINDEX nPlug = m_pSndFile->Instruments[instr]->nMixPlug;
+		if(nPlug)
 		{
-			PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);
-			if (pPlug && pPlug->pMixPlugin) //if has valid plugin
-			{
-				return true ;
-			}
+			// Has a plugin assigned
+			return (m_pSndFile->m_MixPlugins[nPlug - 1].pMixPlugin != nullptr);
 		}
 	}
 	return false;

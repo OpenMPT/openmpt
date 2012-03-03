@@ -77,8 +77,8 @@ protected:
 	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
-	PVSTPLUGINLIB m_pFactory;
-	PSNDMIXPLUGIN m_pMixStruct;
+	VSTPLUGINLIB *m_pFactory;
+	SNDMIXPLUGIN *m_pMixStruct;
 	AEffect *m_pEffect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
@@ -112,7 +112,7 @@ protected:
 	int m_nEditorX, m_nEditorY;
 
 public:
-	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
+	CVstPlugin(HINSTANCE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
 	virtual ~CVstPlugin();
 	void Initialize(CSoundFile* pSndFile);
 
@@ -123,21 +123,20 @@ public:
 	PlugParamIndex GetNumParameters();
 	long GetCurrentProgram();
 	long GetNumProgramCategories();	//rewbs.VSTpresets
-	bool GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
 	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false);
 	bool LoadProgram(CString fileName);
 	bool SaveProgram(CString fileName);
 	VstInt32 GetUID();			//rewbs.VSTpresets
 	VstInt32 GetVersion();		//rewbs.VSTpresets
 	bool GetParams(float* param, VstInt32 min, VstInt32 max); 	//rewbs.VSTpresets
-	bool RandomizeParams(VstInt32 minParam = 0, VstInt32 maxParam = 0); 	//rewbs.VSTpresets
+	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0); 	//rewbs.VSTpresets
 	bool isModified() {return m_bModified;}
 	inline CModDoc* GetModDoc() {return m_pModDoc;}
 	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
 	PLUGINDEX FindSlot();
 	void SetSlot(PLUGINDEX slot);
 	PLUGINDEX GetSlot();
-	void UpdateMixStructPtr(PSNDMIXPLUGIN);
+	void UpdateMixStructPtr(SNDMIXPLUGIN *);
 
 	void SetEditorPos(int x, int y) { m_nEditorX = x; m_nEditorY = y; }
 	void GetEditorPos(int &x, int &y) const { x = m_nEditorX; y = m_nEditorY; }
@@ -162,8 +161,8 @@ public:
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	bool GetSpeakerArrangement(); //rewbs.VSTCompliance
 
-	bool Bypass(bool bypass = true);  //rewbs.defaultPlugGUI
-	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); }; //rewbs.defaultPlugGUI
+	void Bypass(bool bypass = true);
+	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); };
 
 	bool isInstrument(); // ericus 18/02/2005
 	bool CanRecieveMidiEvents();
@@ -211,6 +210,8 @@ private:
 	short getMIDI14bitValueFromShort(short value); 
 	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
 
+	bool GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text);	//rewbs.VSTpresets
+
 	// Helper function for retreiving parameter name / label / display
 	CString GetParamPropertyString(VstInt32 param, VstInt32 opcode);
 
@@ -244,8 +245,7 @@ public:
 	BOOL ExecuteCommand(UINT) {return FALSE;}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}
-
-	bool Bypass(bool) { return false; }
+	void Bypass(bool = true) { }
 	bool IsBypassed() const { return false; }
 
 #endif // NO_VST
@@ -269,7 +269,7 @@ public:
 	BOOL IsValidPlugin(const VSTPLUGINLIB *pLib);
 	PVSTPLUGINLIB AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
 	bool RemovePlugin(PVSTPLUGINLIB);
-	BOOL CreateMixPlugin(PSNDMIXPLUGIN, CSoundFile*);
+	BOOL CreateMixPlugin(SNDMIXPLUGIN *, CSoundFile *);
 	void OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
 
@@ -280,7 +280,7 @@ protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	VstIntPtr VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect);
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CSoundFile*);
+	static BOOL __cdecl CreateMixPluginProc(SNDMIXPLUGIN *, CSoundFile *);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 
 public:

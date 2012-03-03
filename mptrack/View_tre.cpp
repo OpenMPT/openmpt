@@ -693,16 +693,16 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		}
 		for (UINT iFx=0; iFx<MAX_MIXPLUGINS; iFx++)
 		{
-			PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[iFx];
-			if (pPlugin->Info.dwPluginId1)
+			const SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[iFx];
+			if (plugin.IsValidPlugin())
 			{
 				if (!pInfo->hEffects)
 				{
 					pInfo->hEffects = InsertItem("Plugins", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 				}
-				wsprintf(s, "FX%d: %s", iFx+1, pPlugin->Info.szName);
+				wsprintf(s, "FX%d: %s", iFx + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
-				if(pPlugin->pMixPlugin != nullptr) nImage = (pPlugin->pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
+				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
 				pInfo->tiEffects[iFx] = InsertItem(s, nImage, nImage, pInfo->hEffects, TVI_LAST);
 				nFx++;
 			}
@@ -2508,12 +2508,9 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
 					CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
-					if (pSndFile) {
-						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[modItemID];
-						if (pPlugin)
-						{
-							AppendMenu(hMenu, (pPlugin->IsBypassed() ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, "&Bypass");
-						}
+					if (pSndFile)
+					{
+						AppendMenu(hMenu, (pSndFile->m_MixPlugins[modItemID].IsBypassed() ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, "&Bypass");
 					}
 				}
 				break;
@@ -2880,10 +2877,7 @@ void CModTree::OnMuteTreeItem()
 			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
 			if (pSndFile == nullptr)
 				return;
-			PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[modItemID];
-			if(pPlugin == nullptr)
-				return;
-			CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+			CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[modItemID].pMixPlugin);
 			if(pVstPlugin == nullptr)
 				return;
 			pVstPlugin->ToggleBypass();
