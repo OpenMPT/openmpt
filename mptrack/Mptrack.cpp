@@ -250,7 +250,7 @@ vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 	{
 		POSITION pos = pDocTmpl->GetFirstDocPosition();
 		CDocument *pDoc;
-		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
+		while((pos != nullptr) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != nullptr))
 		{
 			documents.push_back(dynamic_cast<CModDoc *>(pDoc));
 		}
@@ -485,11 +485,11 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
 
 	szFileName[0] = 0;
-	GetSystemDirectory(szFileName, sizeof(szFileName));
+	GetSystemDirectory(szFileName, CountOf(szFileName));
 	lstrcat(szFileName, "\\GM.DLS");
 	if (!AddDLSBank(szFileName))
 	{
-		GetWindowsDirectory(szFileName, sizeof(szFileName));
+		GetWindowsDirectory(szFileName, CountOf(szFileName));
 		lstrcat(szFileName, "\\SYSTEM32\\DRIVERS\\GM.DLS");
 		if (!AddDLSBank(szFileName))
 		{

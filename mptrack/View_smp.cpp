@@ -1797,22 +1797,12 @@ void CViewSample::OnEditDelete()
 
 		CriticalSection cs;
 
-		UINT cutlen = m_dwEndSel - m_dwBeginSel;
-		UINT istart = m_dwBeginSel;
-		UINT iend = len;
+		UINT cutlen = (m_dwEndSel - m_dwBeginSel);
+		UINT istart = m_dwBeginSel * sample.GetBytesPerSample();
+		UINT iend = len * sample.GetBytesPerSample();
 		sample.nLength -= cutlen;
-		if (sample.uFlags & CHN_16BIT)
-		{
-			cutlen <<= 1;
-			istart <<= 1;
-			iend <<= 1;
-		}
-		if (sample.uFlags & CHN_STEREO)
-		{
-			cutlen <<= 1;
-			istart <<= 1;
-			iend <<= 1;
-		}
+		cutlen *= sample.GetBytesPerSample();
+
 		LPSTR p = sample.pSample;
 		for (UINT i=istart; i<iend; i++)
 		{
