@@ -850,7 +850,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 
 	if ((pIns) && (note <= 0x80))
 	{
-		UINT n = pIns->Keyboard[note - 1];
+		UINT n = pIns->Keyboard[note - NOTE_MIN];
 		if ((n) && (n < MAX_SAMPLES)) pSmp = &Samples[n];
 		note = pIns->NoteMap[note-1];
 	}
@@ -1130,12 +1130,10 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nVolSwing = pChn->nPanSwing = 0;
 			pChn->nCutSwing = pChn->nResSwing = 0;
 		}
-#ifndef NO_FILTER
 		if ((pChn->nCutOff < 0x7F || IsCompatibleMode(TRK_IMPULSETRACKER)) && (bFlt))
 		{
 			SetupChannelFilter(pChn, true);
 		}
-#endif // NO_FILTER
 	}
 	// Special case for MPT
 	if (bManual) pChn->dwFlags &= ~CHN_MUTE;
@@ -3499,13 +3497,12 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				}
 				pChn->nRestoreCutoffOnNewNote = 0;
 			}
-#ifndef NO_FILTER
+
 			oldcutoff -= pChn->nCutOff;
 			if(oldcutoff < 0) oldcutoff = -oldcutoff;
 			if((pChn->nVolume > 0) || (oldcutoff < 0x10)
-				|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
+				|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol | pChn->nRightVol)))
 				SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER));
-#endif // NO_FILTER
 
 			return 4;
 
@@ -3524,9 +3521,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				}
 			}
 
-#ifndef NO_FILTER
 			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER));
-#endif // NO_FILTER
 
 			return 4;
 
@@ -3536,9 +3531,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			if(param < 0x20)
 			{
 				pChn->nFilterMode = (param >> 4);
-#ifndef NO_FILTER
 				SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER));
-#endif // NO_FILTER
 			}
 
 			return 4;

@@ -761,9 +761,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	// Load plugins only when m_pModDoc is valid.  (can be invalid for example when examining module samples in treeview.
 	if (gpMixPluginCreateProc && GetpModDoc() != nullptr)
 	{
-		for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+		for(PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
-			if (m_MixPlugins[iPlug].Info.dwPluginId1 | m_MixPlugins[iPlug].Info.dwPluginId2)
+			if(m_MixPlugins[iPlug].IsValidPlugin())
 			{
 				gpMixPluginCreateProc(&m_MixPlugins[iPlug], this);
 				if (m_MixPlugins[iPlug].pMixPlugin)
@@ -786,7 +786,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 					if(!found)
 					{
-						notFoundText.append(m_MixPlugins[iPlug].Info.szLibraryName);
+						notFoundText.append(m_MixPlugins[iPlug].GetLibraryName());
 						notFoundText.append("\n");
 						notFoundIDs.push_back(iPlug); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
 					}
@@ -812,7 +812,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			CString sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
-				sUrl.AppendFormat("%08X%s%%0a", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2), m_MixPlugins[*i].Info.szLibraryName);
+				sUrl.AppendFormat("%08X%s%%0a", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2), m_MixPlugins[*i].GetLibraryName());
 			}
 			CTrackApp::OpenURL(sUrl);
 		}
@@ -2523,8 +2523,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	return true;
 }
 
-// -> CODE#0020
-// -> DESC="rearrange sample list"
+
 bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 //-----------------------------------------------------------
 {
@@ -2539,21 +2538,7 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 
 	return true;
 }
-// -! NEW_FEATURE#0020
 #endif // FASTSOUNDLIB
-
-//rewbs.plugDocAware
-/*PSNDMIXPLUGIN CSoundFile::GetSndPlugMixPlug(IMixPlugin *pPlugin) 
-{
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
-	{
-		if (m_MixPlugins[iPlug].pMixPlugin == pPlugin)
-			return &(m_MixPlugins[iPlug]);
-	}
-	
-	return NULL;
-}*/
-//end rewbs.plugDocAware
 
 
 void CSoundFile::DeleteStaticdata()
@@ -2686,6 +2671,7 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 	}
 }
 
+
 uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) const
 //-----------------------------------------------------------------------------------
 {
@@ -2701,6 +2687,7 @@ uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) 
 
 	return (1 << MSF_COMPATIBLE_PLAY);
 }
+
 
 void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 //------------------------------------------------------
@@ -2918,7 +2905,7 @@ void CSoundFile::UpgradeModFlags()
 			// If there are any plugins, enable volume bug emulation.
 			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 			{
-				if((m_MixPlugins[i].Info.dwPluginId1 | m_MixPlugins[i].Info.dwPluginId2))
+				if(m_MixPlugins[i].IsValidPlugin())
 				{
 					SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 					break;

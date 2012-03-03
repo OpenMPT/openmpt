@@ -238,7 +238,7 @@ void CViewGlobals::OnInitialUpdate()
 }
 
 
-VOID CViewGlobals::OnDestroy()
+void CViewGlobals::OnDestroy()
 //----------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
@@ -391,12 +391,11 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				int fxsel = 0;
 				for (UINT ifx=0; ifx<MAX_MIXPLUGINS; ifx++)
 				{
-					if ((pSndFile->m_MixPlugins[ifx].Info.dwPluginId1)
-					|| (pSndFile->m_MixPlugins[ifx].Info.dwPluginId2)
-					|| (pSndFile->m_MixPlugins[ifx].Info.szName[0]
-					|| (pSndFile->ChnSettings[nChn].nMixPlugin == ifx+1)))
+					if (pSndFile->m_MixPlugins[ifx].IsValidPlugin()
+						|| (strcmp(pSndFile->m_MixPlugins[ifx].GetName(), "")
+						|| (pSndFile->ChnSettings[nChn].nMixPlugin == ifx + 1)))
 					{
-						wsprintf(s, "FX%d: %s", ifx+1, pSndFile->m_MixPlugins[ifx].Info.szName);
+						wsprintf(s, "FX%d: %s", ifx + 1, pSndFile->m_MixPlugins[ifx].GetName());
 						int n = m_CbnEffects[ichn].AddString(s);
 						m_CbnEffects[ichn].SetItemData(n, ifx+1);
 						if (pSndFile->ChnSettings[nChn].nMixPlugin == ifx+1) fxsel = n;
@@ -434,16 +433,16 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_CbnPlugin.SetRedraw(TRUE);
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-		PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
-		SetDlgItemText(IDC_EDIT13, pPlugin->Info.szName);
-		CheckDlgButton(IDC_CHECK9, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK10, (pPlugin->IsBypassed()) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK11, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) ? TRUE : FALSE);
+		SNDMIXPLUGIN *pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
+		SetDlgItemText(IDC_EDIT13, pPlugin->GetName());
+		CheckDlgButton(IDC_CHECK9, pPlugin->IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK10, pPlugin->IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK11, pPlugin->IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
 		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
 		m_BtnEdit.EnableWindow(((pVstPlugin) && ((pVstPlugin->HasEditor()) || (pVstPlugin->GetNumCommands()))) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin)?TRUE:FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin)?TRUE:FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin)?TRUE:FALSE);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin) ? TRUE : FALSE);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin) ? TRUE : FALSE);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin) ? TRUE : FALSE);
 		//rewbs.DryRatio
 		int n = static_cast<int>(pPlugin->fDryRatio*100);
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
@@ -462,14 +461,14 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		else{
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), TRUE);
-			m_CbnSpecialMixProcessing.SetCurSel( (pPlugin->Info.dwInputRouting>>8) & 0xff ); // update#02 (fix)
-			CheckDlgButton(IDC_CHECK12, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND) ? TRUE : FALSE);
+			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode()); // update#02 (fix)
+			CheckDlgButton(IDC_CHECK12, pPlugin->IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
 		}
 		// update#02
-		DWORD gain = (pPlugin->Info.dwInputRouting>>16) & 0xff;
+		int gain = pPlugin->GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
-		sprintf(s,"Gain: x %1.1f",value);
+		sprintf(s,"Gain: x %1.1f", value);
 		SetDlgItemText(IDC_STATIC2, s);
 		m_SpinMixGain.SetPos(gain);
 // -! BEHAVIOUR_CHANGE#0028
@@ -537,21 +536,21 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_CbnOutput.SetItemData(m_CbnOutput.AddString("Default"), 0);
 		for (PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
 		{
-			PSNDMIXPLUGIN p = &pSndFile->m_MixPlugins[iOut];
-			if (p->Info.dwPluginId1)
+			const SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[iOut];
+			if(plugin.IsValidPlugin())
 			{
-				if(!strcmp(p->Info.szLibraryName, p->Info.szName) || strlen(p->Info.szName) == 0)
+				if(!strcmp(plugin.GetLibraryName(), plugin.GetName()) || !strcmp(plugin.GetName(), ""))
 				{
-					wsprintf(s, "FX%d: %s", iOut + 1, p->Info.szLibraryName);
+					wsprintf(s, "FX%d: %s", iOut + 1, plugin.GetLibraryName());
 				} else
 				{
-					wsprintf(s, "FX%d: %s (%s)", iOut + 1, p->Info.szLibraryName, p->Info.szName);
+					wsprintf(s, "FX%d: %s (%s)", iOut + 1, plugin.GetLibraryName(), plugin.GetName());
 				}
 
 				int n = m_CbnOutput.AddString(s);
-				m_CbnOutput.SetItemData(n, 0x80|iOut);
-				if ((pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.dwOutputRouting & 0x80)
-				 && ((pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.dwOutputRouting & 0x7f) == iOut))
+				m_CbnOutput.SetItemData(n, 0x80 + iOut);
+				if (!pSndFile->m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster()
+				 && (pSndFile->m_MixPlugins[m_nCurrentPlugin].GetOutputPlugin() == iOut))
 				{
 					outputsel = n;
 				}
@@ -708,14 +707,13 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 			{				
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
-				PSNDMIXPLUGIN pPlugin;
+				SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
-				pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-				if (pPlugin->pMixPlugin)
+				if (plugin.pMixPlugin)
 				{	
-					wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
+					wsprintf(s, "(%d%% wet, %d%% dry)", 100 - n, n);
 					SetDlgItemText(IDC_STATIC8, s);
-					pPlugin->fDryRatio = static_cast<float>(n)/100.0f;
+					plugin.fDryRatio = static_cast<float>(n) / 100.0f;
 					if(pSndFile->GetModSpecifications().supportsPlugins)
 						pModDoc->SetModified();
 				}
@@ -732,12 +730,11 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
-				PSNDMIXPLUGIN pPlugin;
+				SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
-				pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-				if (pPlugin->pMixPlugin)
+				if (plugin.pMixPlugin)
 				{
-					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+					CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 					const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 					if (m_nCurrentParam < nParams)
 					{
@@ -765,24 +762,22 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 // -> CODE#0028	update#02
 // -> DESC="effect plugin mixing mode combo"
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
-	CSoundFile *pSndFile;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	CHAR s[32];
 
 	if((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 
-	if(nSBCode != SB_ENDSCROLL && pScrollBar && pScrollBar == (CScrollBar*)&m_SpinMixGain){
+	if(nSBCode != SB_ENDSCROLL && pScrollBar && pScrollBar == (CScrollBar*)&m_SpinMixGain)
+	{
 
-		pSndFile = pModDoc->GetSoundFile();
-		pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
+		SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
-		if(pPlugin->pMixPlugin)
+		if(plugin.pMixPlugin)
 		{
 			DWORD gain = nPos;
 			if(gain == 0) gain = 1;
 
-			pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xff00ffff) | (gain<<16);
-			pPlugin->pMixPlugin->RecalculateGain();
+			plugin.SetGain(gain);
 			
 			float fValue = 0.1f * (float)gain;
 			sprintf(s,"Gain: x %1.1f",fValue);
@@ -858,18 +853,18 @@ void CViewGlobals::OnFx4Changed() {OnFxChanged(3);}
 void CViewGlobals::OnPluginNameChanged()
 //--------------------------------------
 {
-	CHAR s[64];
+	CHAR s[32];
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		memset(s, 0, 32);
+
 		GetDlgItemText(IDC_EDIT13, s, 32);
-		s[31] = 0;
-		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName))
+		StringFixer::SetNullTerminator(s);
+		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].GetName()))
 		{
-			memcpy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s, 32);
+			lstrcpyn(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s, 32);
 			if(pSndFile->GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
@@ -965,15 +960,15 @@ void CViewGlobals::OnParamChanged()
 	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
 	CModDoc *pModDoc = GetDocument();
 	CHAR s[256];
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin && cursel != CB_ERR)
+	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+
+	if (plugin.pMixPlugin && cursel != CB_ERR)
 	{
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 		if ((cursel >= 0) && (cursel < nParams)) m_nCurrentParam = cursel;
 		if (m_nCurrentParam < nParams)
@@ -1000,15 +995,15 @@ void CViewGlobals::OnProgramChanged()
 {
 	int cursel = m_CbnPreset.GetCurSel();
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin)
+	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+
+	if (plugin.pMixPlugin)
 	{
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		UINT nParams = pVstPlugin->GetNumPrograms();
 		if ((cursel > 0) && (cursel <= (int)nParams)) m_nCurrentPreset = cursel;
 		if (m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams)
@@ -1026,12 +1021,18 @@ void CViewGlobals::OnLoadParam()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
-	PSNDMIXPLUGIN pPlugin = pSndFile ? &pSndFile->m_MixPlugins[m_nCurrentPlugin] : NULL;
-	CVstPlugin *pVstPlugin = pPlugin ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
+	if(pSndFile == nullptr)
+	{
+		return;
+	}
 
-	//rewbs.fxpPresets: changed Eric's code to use fxp load/save
-	if(pVstPlugin == NULL) return;
+	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
+
+	if(pVstPlugin == nullptr)
+	{
+		return;
+	}
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
 		"VST FX Program (*.fxp)|*.fxp||",
@@ -1055,13 +1056,18 @@ void CViewGlobals::OnSaveParam()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
-	PSNDMIXPLUGIN pPlugin = pSndFile ? &pSndFile->m_MixPlugins[m_nCurrentPlugin] : NULL;
-	CVstPlugin *pVstPlugin = pPlugin ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
+	if(pSndFile == nullptr)
+	{
+		return;
+	}
 
-	if(pVstPlugin == NULL) return;
+	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
 
-	//rewbs.fxpPresets: changed Eric's code to use fxp load/save
+	if(pVstPlugin == nullptr)
+	{
+		return;
+	}
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
 		"VST Program (*.fxp)|*.fxp||",
 		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
@@ -1076,19 +1082,19 @@ void CViewGlobals::OnSaveParam()
 // -! NEW_FEATURE#0002
 
 
-VOID CViewGlobals::OnSetParameter()
+void CViewGlobals::OnSetParameter()
 //---------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin)
+	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+
+	if (plugin.pMixPlugin != nullptr)
 	{
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 		CHAR s[32];
 		GetDlgItemText(IDC_EDIT14, s, sizeof(s));
@@ -1106,88 +1112,54 @@ VOID CViewGlobals::OnSetParameter()
 
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
-VOID CViewGlobals::OnSetWetDry()
+void CViewGlobals::OnSetWetDry()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin){
+	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+
+	if (plugin.pMixPlugin != nullptr)
+	{
 		//CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT value = GetDlgItemIntEx(IDC_EDIT15);
-		pPlugin->fDryRatio = (float)value / 100.0f;
+		plugin.fDryRatio = (float)value / 100.0f;
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
 		//OnWetDryChanged();
 	}
 }
 
-/*
-void CViewGlobals::OnWetDryChanged()
-{
-	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
-	CSoundFile *pSndFile;
-	CHAR s[32];
-	
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 
-	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-
-	if (pPlugin->pMixPlugin){
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-		UINT value = (UINT)(pPlugin->fDryRatio * 100.0f);
-		wsprintf(s, "%d", value);
-		SetDlgItemText(IDC_EDIT15, s);
-		m_sbWetDry.SetPos(value);
-		return;
-	}
-
-	SetDlgItemText(IDC_EDIT15, "");
-	m_sbWetDry.SetPos(0);
-}
-// -! NEW_FEATURE#0014
-*/
-
-VOID CViewGlobals::OnMixModeChanged()
+void CViewGlobals::OnMixModeChanged()
 //-----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (IsDlgButtonChecked(IDC_CHECK9))
-	{
-		pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_MASTEREFFECT;
-	} else
-	{
-		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MASTEREFFECT;
-	}
+
+	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetMasterEffect(IsDlgButtonChecked(IDC_CHECK9) != BST_UNCHECKED);
 	
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
 
 
-VOID CViewGlobals::OnBypassChanged()
+void CViewGlobals::OnBypassChanged()
 //----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	pPlugin->Bypass(IsDlgButtonChecked(IDC_CHECK10) != FALSE);
+
+	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetBypass(IsDlgButtonChecked(IDC_CHECK10) != BST_UNCHECKED);
 
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
@@ -1200,63 +1172,51 @@ void CViewGlobals::OnWetDryExpandChanged()
 //----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (IsDlgButtonChecked(IDC_CHECK12))
-	{
-		pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_MIXEXPAND;
-	} else
-	{
-		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MIXEXPAND;
-	}
+	
+	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetExpandedMix(IsDlgButtonChecked(IDC_CHECK12) != BST_UNCHECKED);
 	
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
 
-VOID CViewGlobals::OnSpecialMixProcessingChanged()
+
+void CViewGlobals::OnSpecialMixProcessingChanged()
 //------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
-	PSNDMIXPLUGIN pPlugin = m_nCurrentPlugin < MAX_MIXPLUGINS && pSndFile ? &pSndFile->m_MixPlugins[m_nCurrentPlugin] : NULL;
+	CSoundFile *pSndFile;
 
-	if(!pPlugin) return;
-	pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xffff00ff) | (m_CbnSpecialMixProcessing.GetCurSel()<<8);	// update#02 (fix)
+	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
+	pSndFile = pModDoc->GetSoundFile();
+
+	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetMixMode(m_CbnSpecialMixProcessing.GetCurSel());	// update#02 (fix)
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
 // -! BEHAVIOUR_CHANGE#0028
 
 
-VOID CViewGlobals::OnDryMixChanged()
+void CViewGlobals::OnDryMixChanged()
 //----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (IsDlgButtonChecked(IDC_CHECK11))
-	{
-		pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_WETMIX;
-	} else
-	{
-		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_WETMIX;
-	}
+
+	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetWetMix(IsDlgButtonChecked(IDC_CHECK11) != BST_UNCHECKED);
 
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
 
 
-VOID CViewGlobals::OnEditPlugin()
+void CViewGlobals::OnEditPlugin()
 //-------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -1266,20 +1226,20 @@ VOID CViewGlobals::OnEditPlugin()
 }
 
 
-VOID CViewGlobals::OnFxCommands(UINT id)
+void CViewGlobals::OnFxCommands(UINT id)
 //--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	UINT nIndex = id - ID_FXCOMMANDS_BASE;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin)
+	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+
+	if (plugin.pMixPlugin != nullptr)
 	{
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		pVstPlugin->ExecuteCommand(nIndex);
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
@@ -1287,19 +1247,23 @@ VOID CViewGlobals::OnFxCommands(UINT id)
 }
 
 
-VOID CViewGlobals::OnOutputRoutingChanged()
+void CViewGlobals::OnOutputRoutingChanged()
 //-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
 	CSoundFile *pSndFile;
 	int nroute;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
+	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 	nroute = m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel());
-	pPlugin->Info.dwOutputRouting = nroute;
+
+	if(!nroute)
+		plugin.SetOutputToMaster();
+	else
+		plugin.SetOutputPlugin(static_cast<PLUGINDEX>(nroute - 0x80));
+
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
@@ -1335,8 +1299,7 @@ void CViewGlobals::OnMovePlugToSlot()
 	{
 		for(PLUGINDEX i = 0; i < m_nCurrentPlugin; i++)
 		{
-			const DWORD toPlug = pSndFile->m_MixPlugins[i].Info.dwOutputRouting;
-			if((toPlug & 0x80) && (toPlug & 0x7F) == m_nCurrentPlugin)
+			if(pSndFile->m_MixPlugins[i].GetOutputPlugin() == m_nCurrentPlugin)
 			{
 				defaultIndex = i + 1;
 			}
@@ -1386,42 +1349,52 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	CriticalSection cs;
 		
 	// Move plug data
-	memcpy(&(pSndFile->m_MixPlugins[dest]), &(pSndFile->m_MixPlugins[src]), sizeof(SNDMIXPLUGIN));
+	MemCopy(pSndFile->m_MixPlugins[dest], pSndFile->m_MixPlugins[src]);
 	MemsetZero(pSndFile->m_MixPlugins[src]);
 	
 	//Prevent plug from pointing backwards.
-	if (pSndFile->m_MixPlugins[dest].Info.dwOutputRouting & 0x80) {
-		UINT nOutput = pSndFile->m_MixPlugins[dest].Info.dwOutputRouting & 0x7f;
-		if (nOutput<=dest) {
-			pSndFile->m_MixPlugins[dest].Info.dwOutputRouting = 0;
+	if(!pSndFile->m_MixPlugins[dest].IsOutputToMaster())
+	{
+		PLUGINDEX nOutput = pSndFile->m_MixPlugins[dest].GetOutputPlugin();
+		if (nOutput <= dest)
+		{
+			pSndFile->m_MixPlugins[dest].SetOutputToMaster();
 		}
 	}
 	
 	// Update current plug
-	if (pSndFile->m_MixPlugins[dest].pMixPlugin) {
+	if(pSndFile->m_MixPlugins[dest].pMixPlugin)
+	{
 		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->SetSlot(dest);
 		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
 	}
 	
 	// Update all other plugs' outputs
-	for (PLUGINDEX nPlug=0; nPlug<src; nPlug++) {
-		if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80) {
-			if ((pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f) == src) {
-				pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting = ((BYTE)dest)|0x80;
+	for (PLUGINDEX nPlug = 0; nPlug < src; nPlug++) 
+	{
+		if(!pSndFile->m_MixPlugins[nPlug].IsOutputToMaster())
+		{
+			if(pSndFile->m_MixPlugins[nPlug].GetOutputPlugin() == src)
+			{
+				pSndFile->m_MixPlugins[nPlug].SetOutputPlugin(dest);
 			}
 		}
 	}
 	// Update channels
-	for (CHANNELINDEX nChn=0; nChn<pSndFile->m_nChannels; nChn++) {
-		if (pSndFile->ChnSettings[nChn].nMixPlugin == src+1) {
-			pSndFile->ChnSettings[nChn].nMixPlugin = dest+1;
+	for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+	{
+		if (pSndFile->ChnSettings[nChn].nMixPlugin == src + 1u)
+		{
+			pSndFile->ChnSettings[nChn].nMixPlugin = dest + 1u;
 		}
 	}
 
 	// Update instruments
-	for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->m_nInstruments; nIns++) {
-		if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == src+1)) {
-			pSndFile->Instruments[nIns]->nMixPlug = static_cast<BYTE>(dest+1);
+	for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
+	{
+		if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == src + 1))
+		{
+			pSndFile->Instruments[nIns]->nMixPlug = dest + 1u;
 		}
 	}
 
@@ -1522,8 +1495,7 @@ void CViewGlobals::OnFillParamCombo()
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
 	if(pSndFile == nullptr) return;
 	if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-	PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
-	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
+	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
 	if(pVstPlugin == nullptr) return;
 
 	const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
@@ -1553,8 +1525,7 @@ void CViewGlobals::OnFillProgramCombo()
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
 	if(pSndFile == nullptr) return;
 	if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-	PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
-	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
+	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
 	if(pVstPlugin == nullptr) return;
 
 	UINT nProg = pVstPlugin->GetNumPrograms(); 

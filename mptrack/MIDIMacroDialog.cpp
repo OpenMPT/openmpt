@@ -126,14 +126,14 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	UpdateMacroList();
 
-	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
+	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		PSNDMIXPLUGIN p = &(m_SndFile.m_MixPlugins[plug]);
-		StringFixer::SetNullTerminator(p->Info.szLibraryName);
-		if (p->Info.szLibraryName[0])
+		const SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[i];
+
+		if(plugin.IsValidPlugin())
 		{
-			wsprintf(s, "FX%d: %s", plug + 1, p->Info.szName);
-			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), plug);
+			wsprintf(s, "FX%d: %s", i + 1, plugin.GetName());
+			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), i);
 		}
 	}
 	m_CbnMacroPlug.SetCurSel(0);
@@ -369,7 +369,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
-		plugName = m_SndFile.m_MixPlugins[plug].Info.szName;
+		plugName = m_SndFile.m_MixPlugins[plug].GetName();
 		if(m_SndFile.m_MixPlugins[plug].Info.dwPluginId1 != 0)
 		{
 			pVstPlugin = (CVstPlugin*) m_SndFile.m_MixPlugins[plug].pMixPlugin;
@@ -392,10 +392,9 @@ void CMidiMacroSetup::OnPlugChanged()
 	if (plug < 0 || plug > MAX_MIXPLUGINS)
 		return;
 
-	PSNDMIXPLUGIN pPlugin = &m_SndFile.m_MixPlugins[plug];
-	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
+	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(m_SndFile.m_MixPlugins[plug].pMixPlugin);
 
-	if (pVstPlugin)
+	if (pVstPlugin != nullptr)
 	{
 		m_CbnMacroParam.SetRedraw(FALSE);
 		m_CbnMacroParam.Clear();

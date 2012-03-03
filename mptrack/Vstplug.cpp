@@ -76,7 +76,7 @@ VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt3
 }
 
 
-BOOL CVstPluginManager::CreateMixPluginProc(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
+BOOL CVstPluginManager::CreateMixPluginProc(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pSndFile)
 //-----------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
@@ -501,11 +501,11 @@ bool CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 }
 
 
-BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
+BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pSndFile)
 //-------------------------------------------------------------------------------------
 {
 	UINT nMatch = 0;
-	PVSTPLUGINLIB pFound = NULL;
+	PVSTPLUGINLIB pFound = nullptr;
 
 	if (pMixPlugin)
 	{
@@ -521,7 +521,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 				{
 					b1 = true;
 				}
-				if (!_strnicmp(p->szLibraryName, pMixPlugin->Info.szLibraryName, 64))
+				if (!_strnicmp(p->szLibraryName, pMixPlugin->GetLibraryName(), 64))
 				{
 					b2 = true;
 				}
@@ -563,22 +563,22 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 			return bOk;
 		}
 	}
-	if ((!pFound) && (pMixPlugin->Info.szLibraryName[0]))
+	if ((!pFound) && strcmp(pMixPlugin->GetLibraryName(), ""))
 	{
 		CHAR s[_MAX_PATH], dir[_MAX_PATH];
 		_splitpath(theApp.GetConfigFileName(), s, dir, NULL, NULL);
 		strcat(s, dir);
 		int len = strlen(s);
-		if ((len > 0) && (s[len-1] != '\\')) strcat(s, "\\");
-		strncat(s, "plugins\\", _MAX_PATH-1);
-		strncat(s, pMixPlugin->Info.szLibraryName, _MAX_PATH-1);
+		if ((len > 0) && (s[len - 1] != '\\')) strcat(s, "\\");
+		strncat(s, "plugins\\", _MAX_PATH - 1);
+		strncat(s, pMixPlugin->GetLibraryName(), _MAX_PATH - 1);
 		strncat(s, ".dll", _MAX_PATH-1);
 		pFound = AddPlugin(s);
 		if (!pFound)
 		{
 			CString cacheSection = "PluginCache";
 			CString cacheFile = theApp.GetPluginCacheFileName();
-			CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, pMixPlugin->Info.szLibraryName, "", cacheFile);
+			CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, pMixPlugin->GetLibraryName(), "", cacheFile);
 			if (IDs.GetLength() >= 16)
 			{
 				CString strFullPath = CMainFrame::GetPrivateProfileCString(cacheSection, IDs, "", cacheFile);
@@ -1329,7 +1329,7 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 // CVstPlugin
 //
 
-CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixStruct, AEffect *pEffect)
+CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixStruct, AEffect *pEffect)
 //----------------------------------------------------------------------------------------------------------
 {
 	m_hLibrary = hLibrary;
@@ -1490,7 +1490,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	//rewbs.VSTcompliance
 	m_bIsInstrument = isInstrument();
 	RecalculateGain();
-	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
+	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ? m_pEffect->processReplacing : m_pEffect->process;
 
  // issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
 	Dispatch(effSetSampleRate, 0, 0, NULL, static_cast<float>(CSoundFile::gdwMixingFreq));
@@ -1664,8 +1664,8 @@ bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
 }
 
 
-bool CVstPlugin::RandomizeParams(VstInt32 minParam, VstInt32 maxParam)
-//--------------------------------------------------------------------
+bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxParam)
+//--------------------------------------------------------------------------------
 {
 	if (!(m_pEffect))
 		return false;
@@ -1675,10 +1675,10 @@ bool CVstPlugin::RandomizeParams(VstInt32 minParam, VstInt32 maxParam)
 		maxParam = m_pEffect->numParams;
 
 	}
-	LimitMax(maxParam, m_pEffect->numParams);
+	LimitMax(maxParam, PlugParamIndex(m_pEffect->numParams));
 
-	for (VstInt32 p = minParam; p < maxParam; p++)
-		SetParameter(p, (rand() / float(RAND_MAX)));
+	for(PlugParamIndex p = minParam; p < maxParam; p++)
+		SetParameter(p, (float(rand()) / float(RAND_MAX)));
 
 	return true;
 }
@@ -1691,26 +1691,26 @@ bool CVstPlugin::SaveProgram(CString fileName)
 		return false;
 
 	bool success;
-	//Collect required data
+	// Collect required data
 	long ID = GetUID();
 	long plugVersion = GetVersion();
 
 	Cfxp* fxp = nullptr;
 
-	//Construct & save fxp
+	// Construct & save fxp
 
 	// try chunk-based preset:
-	if(m_pEffect->flags & effFlagsProgramChunks)
+	if((m_pEffect->flags & effFlagsProgramChunks) != 0)
 	{
 		void *chunk = NULL;
 		long chunkSize = Dispatch(effGetChunk, 1,0, &chunk, 0);
-		if (chunkSize && chunk)
+		if(chunkSize && chunk)
 			fxp = new Cfxp(ID, plugVersion, 1, chunkSize, chunk);
 	}
 	// fall back on parameter based preset:
-	if (fxp == nullptr)
+	if(fxp == nullptr)
 	{
-		//Collect required data
+		// Collect required data
 		PlugParamIndex numParams = GetNumParameters();
 		float *params = new float[numParams];
 		GetParams(params, 0, numParams);
@@ -1721,7 +1721,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
 	}
 
 	success = fxp->Save(fileName);
-	if (fxp)
+	if(fxp)
 		delete fxp;
 
 	return success;
@@ -1735,20 +1735,19 @@ bool CVstPlugin::LoadProgram(CString fileName)
 	if (!(m_pEffect))
 		return false;
 
-	Cfxp fxp(fileName);	//load from file
+	Cfxp fxp(fileName);	// load from file
 
-	//Verify
+	// Verify
 	if (m_pEffect->uniqueID != fxp.fxID)
 		return false;
 
-	if (fxp.fxMagic == fMagic) //Load preset based fxp
+	if (fxp.fxMagic == fMagic) // Load preset based fxp
 	{
 		if (m_pEffect->numParams != fxp.numParams)
 			return false;
 		for (int p=0; p<fxp.numParams; p++)
 			SetParameter(p, fxp.params[p]);
-	}
-	else if (fxp.fxMagic == chunkPresetMagic)
+	} else if (fxp.fxMagic == chunkPresetMagic)
 	{
 		Dispatch(effSetChunk, 1, fxp.chunkSize, (BYTE*)fxp.chunk, 0);
 	}
@@ -1792,8 +1791,8 @@ long CVstPlugin::GetCurrentProgram()
 }
 
 
-bool CVstPlugin::GetProgramNameIndexed(long index, long category, char *text)
-//---------------------------------------------------------------------------
+bool CVstPlugin::GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text)
+//------------------------------------------------------------------------------------
 {
 	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
 	{
@@ -1806,7 +1805,7 @@ bool CVstPlugin::GetProgramNameIndexed(long index, long category, char *text)
 CString CVstPlugin::GetFormattedProgramName(VstInt32 index, bool allowFallback)
 //-----------------------------------------------------------------------------
 {
-	char rawname[256];	// kVstMaxProgNameLen is 24...
+	char rawname[max(kVstMaxProgNameLen, 256)];	// kVstMaxProgNameLen is 24...
 	if(!GetProgramNameIndexed(index, -1, rawname))
 	{
 		// Fallback: Try to get current program name.
@@ -2040,7 +2039,7 @@ void CVstPlugin::ClearVSTEvents()
 void CVstPlugin::RecalculateGain()
 //--------------------------------
 {
-	float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
+	float gain = 0.1f * static_cast<float>(m_pMixStruct ? m_pMixStruct->GetGain() : 10);
 	if(gain < 0.1f) gain = 1.0f;
 
 	if (m_bIsInstrument && m_pSndFile)
@@ -2093,7 +2092,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		{
 			Bypass();
 			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
-			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod);
+			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->GetName(), processMethod);
 			ClearVSTEvents();
 //			SetEvent(processCalled);
 		}
@@ -2134,7 +2133,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 
 		// If dry mix is ticked, we add the unprocessed buffer,
 		// except if this is an instrument since this it has already been done:
-		if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument)
+		if(m_pMixStruct->IsWetMix() && !m_bIsInstrument)
 		{
 			for(size_t i = 0; i < nSamples; i++)
 			{
@@ -2178,19 +2177,20 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 	//				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
 
 	int mixop;
-	if(m_bIsInstrument)
+	if(m_bIsInstrument || m_pMixStruct == nullptr)
 	{
-		mixop = 0; // Force normal mix mode for instruments
+		// Force normal mix mode for instruments
+		mixop = 0;
 	} else
 	{
-		mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting >> 8) & 0xFF : 0;
+		mixop = m_pMixStruct->GetMixMode();
 	}
 
 	float wetRatio = 1 - m_pMixStruct->fDryRatio;
 	float dryRatio = m_bIsInstrument ? 1 : m_pMixStruct->fDryRatio; // Always mix full dry if this is an instrument
 
 	// Wet / Dry range expansion [0,1] -> [-1,1]
-	if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND)
+	if(m_pEffect->numInputs > 0 && m_pMixStruct->IsExpandedMix())
 	{
 		wetRatio = 2.0f * wetRatio - 1.0f;
 		dryRatio = -wetRatio;
@@ -2252,7 +2252,7 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 
 	// Left / Right balance
 	case 5:
-		if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND)
+		if(m_pMixStruct->IsExpandedMix())
 		{
 			wetRatio /= 2.0f;
 			dryRatio /= 2.0f;
@@ -2861,13 +2861,10 @@ CAbstractVstEditor* CVstPlugin::GetEditor()
 }
 
 
-bool CVstPlugin::Bypass(bool bypass)
-//-----------------------------------
+void CVstPlugin::Bypass(bool bypass)
+//----------------------------------
 {
-	if (bypass)
-		m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
-	else
-		m_pMixStruct->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
+	m_pMixStruct->Info.SetBypass(bypass);
 
 	Dispatch(effSetBypass, bypass ? 1 : 0, nullptr, nullptr, 0.0f);
 
@@ -2875,8 +2872,6 @@ bool CVstPlugin::Bypass(bool bypass)
 	if (m_pModDoc)
 		m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
 #endif // MODPLUG_TRACKER
-
-	return bypass;
 }
 
 
@@ -2936,7 +2931,7 @@ PLUGINDEX CVstPlugin::GetSlot()
 }
 
 
-void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
+void CVstPlugin::UpdateMixStructPtr(SNDMIXPLUGIN *p)
 //--------------------------------------------------
 {
 	m_pMixStruct = p;
@@ -2967,9 +2962,9 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 	list.RemoveAll();
 
 	CVstPlugin *pOutputPlug = NULL;
-	if (m_pMixStruct->Info.dwOutputRouting & 0x80)
+	if (!m_pMixStruct->IsOutputToMaster())
 	{
-		UINT nOutput = m_pMixStruct->Info.dwOutputRouting & 0x7f;
+		PLUGINDEX nOutput = m_pMixStruct->GetOutputPlugin();
 		if (m_pSndFile && (nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS))
 		{
 			pOutputPlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
@@ -3667,6 +3662,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 							}
 							break;
 
+						case MPT_INT:
 						default:
 							wsprintf(pszName, "%d", (int)md);
 							break;
@@ -3695,7 +3691,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 			mt.bFixedSizeSamples = TRUE;
 			mt.bTemporalCompression = FALSE;
 			mt.formattype = FORMAT_WaveFormatEx;
-			mt.pUnk = NULL;
+			mt.pUnk = nullptr;
 			mt.pbFormat = (LPBYTE)&wfx;
 			mt.cbFormat = sizeof(WAVEFORMATEX);
 			mt.lSampleSize = 2 * sizeof(float);
@@ -3706,8 +3702,8 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 			wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample >> 3);
 			wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 			wfx.cbSize = 0;
-			if ((FAILED(m_pMediaObject->SetInputType(0, &mt, 0)))
-			 || (FAILED(m_pMediaObject->SetOutputType(0, &mt, 0))))
+			if (FAILED(m_pMediaObject->SetInputType(0, &mt, 0))
+				|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
 			{
 			#ifdef DMO_LOG
 				Log("DMO: Failed to set I/O media type\n");
@@ -3717,8 +3713,8 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		} else
 		{
 			m_pMediaObject->Flush();
-			m_pMediaObject->SetInputType(0, NULL, DMO_SET_TYPEF_CLEAR);
-			m_pMediaObject->SetOutputType(0, NULL, DMO_SET_TYPEF_CLEAR);
+			m_pMediaObject->SetInputType(0, nullptr, DMO_SET_TYPEF_CLEAR);
+			m_pMediaObject->SetOutputType(0, nullptr, DMO_SET_TYPEF_CLEAR);
 			m_DataTime = 0;
 		}
 		break;
@@ -3767,8 +3763,8 @@ float CDmo2Vst::GetParameter(VstInt32 index)
 
 		MemsetZero(mpi);
 		md = 0;
-		if ((m_pParamInfo->GetParamInfo(index, &mpi) == S_OK)
-		 && (m_pMediaParams->GetParam(index, &md) == S_OK))
+		if (m_pParamInfo->GetParamInfo(index, &mpi) == S_OK
+			&& m_pMediaParams->GetParam(index, &md) == S_OK)
 		{
 			float fValue, fMin, fMax, fDefault;
 
@@ -3871,45 +3867,15 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 
 #endif // NO_VST
 
-const char* SNDMIXPLUGIN::GetLibraryName()
-//----------------------------------------
-{
-	StringFixer::SetNullTerminator(Info.szLibraryName);
-	if(Info.szLibraryName[0]) return Info.szLibraryName;
-	else return 0;
-}
 
-
-CString SNDMIXPLUGIN::GetParamName(const UINT index) const
-//--------------------------------------------------------
+CString SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
+//------------------------------------------------------------
 {
 	if(pMixPlugin)
 	{
 		return reinterpret_cast<CVstPlugin *>(pMixPlugin)->GetParamName(index);
-	}
-	else
-	{
-		return CString();
-	}
-}
-
-
-bool SNDMIXPLUGIN::Bypass(bool bypass)
-//------------------------------------
-{
-	if(pMixPlugin)
-	{
-		return pMixPlugin->Bypass(bypass);
 	} else
 	{
-		// No plugin loaded, just toggle the flags.
-		if(bypass)
-		{
-			Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
-		} else
-		{
-			Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
-		}
-		return bypass;
+		return CString();
 	}
 }

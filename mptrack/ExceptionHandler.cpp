@@ -53,8 +53,13 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	// Shut down audio device...
 	if(pMainFrame)
 	{
-		if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-		pMainFrame->audioCloseDevice();
+		try
+		{
+			if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+			pMainFrame->audioCloseDevice();
+		} catch(...)
+		{
+		}
 	}
 
 	CString errorMessage;
@@ -106,41 +111,34 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	}
 
 	// Rescue modified files...
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
-	if(pDocTmpl)
+	int numFiles = 0;
+	vector<CModDoc *> documents = theApp.GetOpenDocuments();
+	for(vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
 	{
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CDocument *pDoc;
-
-		int numFiles = 0;
-
-		while((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
+		CModDoc *pModDoc = *doc;
+		if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
 		{
-			CModDoc *pModDoc = (CModDoc *)pDoc;
-			if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
+			if(numFiles == 0)
 			{
-				if(numFiles == 0)
-				{
-					// Show the rescue directory in Explorer...
-					CTrackApp::OpenDirectory(baseRescuePath);
-				}
-				CString filename;
-				filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+				// Show the rescue directory in Explorer...
+				CTrackApp::OpenDirectory(baseRescuePath);
+			}
+			CString filename;
+			filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 
-				try
-				{
-					pModDoc->OnSaveDocument(filename);
-				} catch(...)
-				{
-					continue;
-				}
+			try
+			{
+				pModDoc->OnSaveDocument(filename);
+			} catch(...)
+			{
+				continue;
 			}
 		}
+	}
 
-		if(numFiles > 0)
-		{
-			errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), (numFiles == 1 ? "it is" : "they are"));
-		}
+	if(numFiles > 0)
+	{
+		errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), (numFiles == 1 ? "it is" : "they are"));
 	}
 	
 	Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);

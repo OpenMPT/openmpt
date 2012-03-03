@@ -2256,19 +2256,19 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 	UINT nTotalSize = 0;
 	UINT nChInfo = 0;
 
-	for (UINT i=0; i<MAX_MIXPLUGINS; i++)
+	for(UINT i=0; i<MAX_MIXPLUGINS; i++)
 	{
-		PSNDMIXPLUGIN p = &m_MixPlugins[i];
-		if ((p->Info.dwPluginId1) || (p->Info.dwPluginId2))
+		const SNDMIXPLUGIN &plugin = m_MixPlugins[i];
+		if(plugin.IsValidPlugin())
 		{
-			nPluginSize = sizeof(SNDMIXPLUGININFO)+4; // plugininfo+4 (datalen)
-			if ((p->pMixPlugin) && (bUpdate))
+			nPluginSize = sizeof(SNDMIXPLUGININFO) + 4; // plugininfo+4 (datalen)
+			if((plugin.pMixPlugin) && (bUpdate))
 			{
-				p->pMixPlugin->SaveAllParameters();
+				plugin.pMixPlugin->SaveAllParameters();
 			}
-			if (p->pPluginData)
+			if(plugin.pPluginData)
 			{
-				nPluginSize += p->nPluginDataSize;
+				nPluginSize += plugin.nPluginDataSize;
 			}
 
 			// rewbs.modularPlugData
@@ -2276,7 +2276,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 									 4 + (sizeof(m_MixPlugins[i].defaultProgram)); //rewbs.plugDefaultProgram
 			 					// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
 
-			nPluginSize += MPTxPlugDataSize+4; //+4 is for size itself: sizeof(DWORD) is 4
+			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(DWORD) is 4
 			// rewbs.modularPlugData
 			if (f)
 			{
@@ -2289,9 +2289,10 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 
 				// write plugin size:
 				fwrite(&nPluginSize, 1, 4, f);
-				fwrite(&p->Info, 1, sizeof(SNDMIXPLUGININFO), f);
+				fwrite(&plugin.Info, 1, sizeof(SNDMIXPLUGININFO), f);
 				fwrite(&m_MixPlugins[i].nPluginDataSize, 1, 4, f);
-				if (m_MixPlugins[i].pPluginData) {
+				if (m_MixPlugins[i].pPluginData)
+				{
 					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
 				}
 
@@ -2379,8 +2380,10 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 
 			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO)+4))
 			{
-				//MPT's standard plugin data. Size not specified in file.. grrr..
-				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)(p+nPos+8);
+				// MPT's standard plugin data. Size not specified in file.. grrr..
+				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)( p +nPos + 8);
+				StringFixer::SetNullTerminator(m_MixPlugins[nPlugin].Info.szName);
+				StringFixer::SetNullTerminator(m_MixPlugins[nPlugin].Info.szLibraryName);
 
 				//data for VST setchunk? size lies just after standard plugin data.
 				DWORD dwExtra = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO));
@@ -2397,7 +2400,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 				}
 
 				//rewbs.modularPlugData
-				DWORD dwXPlugData = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO)+dwExtra+4); //read next DWORD into dwMPTExtra
+				DWORD dwXPlugData = *(DWORD *)(p + nPos + 8 + sizeof(SNDMIXPLUGININFO) + dwExtra + 4); //read next DWORD into dwMPTExtra
 
 				//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
 				if ((dwXPlugData) && ((int)dwXPlugData <= (int)nPluginSize-(int)(sizeof(SNDMIXPLUGININFO)+dwExtra+8)))

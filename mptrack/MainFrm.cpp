@@ -1895,16 +1895,16 @@ void CMainFrame::OnPluginManager()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		//Find empty plugin slot
-		for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
+		for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 		{
-			PSNDMIXPLUGIN pCandidatePlugin = &pSndFile->m_MixPlugins[nPlug];
-			if (pCandidatePlugin->pMixPlugin == NULL)
+			if (pSndFile->m_MixPlugins[nPlug].pMixPlugin == NULL)
 			{
-				nPlugslot=nPlug;
+				nPlugslot = nPlug;
 				break;
 			}
 		}
 	}
+
 	CSelectPluginDlg dlg(GetActiveDoc(), nPlugslot, this);
 	if(dlg.DoModal() == IDOK && pModDoc)
 	{
@@ -2681,12 +2681,12 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 {
 	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
-		PSNDMIXPLUGIN p = &plugarray[iPlug];
+		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
 		CString str;
 		str.Preallocate(80);
 		str.Format(_T("FX%d: "), iPlug + 1);
 		const int size0 = str.GetLength();
-		str += (librarynames) ? p->GetLibraryName() : p->GetName();
+		str += (librarynames) ? plugin.GetLibraryName() : plugin.GetName();
 		if(str.GetLength() <= size0) str += _T("undefined");
 
 		CBox.SetItemData(CBox.AddString(str), iPlug + 1);

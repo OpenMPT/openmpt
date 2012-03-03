@@ -25,14 +25,13 @@ enum
 	tempo_mode_modern       = 2,
 };
 
-enum
+enum mixLevels
 {
 	mixLevels_original		= 0,
 	mixLevels_117RC1		= 1,
 	mixLevels_117RC2		= 2,
 	mixLevels_117RC3		= 3,
 	mixLevels_compatible	= 4,
-	mixLevels_Test			= 5,
 };
 
 enum forcePanningMode

@@ -5138,23 +5138,23 @@ bool CViewPattern::IsNoteSplit(int note) const
 bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const
 //---------------------------------------------------------------------------------------
 {
-	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)
+	for(PLUGINDEX plug = 0; plug <= MAX_MIXPLUGINS; plug++)
 	{
 
 		bool itemFound = false;
 
 		CHAR s[64];
 
-		if (!plug)
+		if(!plug)
 		{
 			strcpy(s, "No plugin");
 			itemFound = true;
 		} else
 		{
-			PSNDMIXPLUGIN p = &(pSndFile->m_MixPlugins[plug - 1]);
-			if (p->Info.szLibraryName[0])
+			const SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[plug - 1];
+			if(plugin.IsValidPlugin())
 			{
-				wsprintf(s, "FX%d: %s", plug, p->Info.szName);
+				wsprintf(s, "FX%d: %s", plug, plugin.GetName());
 				itemFound = true;
 			}
 		}

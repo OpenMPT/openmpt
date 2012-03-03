@@ -1229,7 +1229,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// MIDI Channel
 		// XM has no "mapped" MIDI channels.
 		m_CbnMidiCh.ResetContent();
-		for (UINT ich = MidiNoChannel; ich <= (bITandMPT ? MidiMappedChannel : MidiLastChannel); ich++)
+		for(int ich = MidiNoChannel; ich <= (bITandMPT ? MidiMappedChannel : MidiLastChannel); ich++)
 		{
 			CString s;
 			if (ich == MidiNoChannel)
@@ -2141,12 +2141,13 @@ void CCtrlInstruments::OnMixPlugChanged()
 			m_CbnPluginVelocityHandling.SetCurSel(pIns->nPluginVelocityHandling);
 			m_CbnPluginVolumeHandling.SetCurSel(pIns->nPluginVolumeHandling);
 
-			if (pIns->nMixPlug)	//if we have not just set to no plugin
+			if (pIns->nMixPlug)
 			{
-				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[pIns->nMixPlug - 1]);
-				if ((pPlug == nullptr || pPlug->pMixPlugin == nullptr) && !IsLocked())
+				// we have selected a plugin that's not "no plugin"
+				const SNDMIXPLUGIN &plugin = m_pSndFile->m_MixPlugins[pIns->nMixPlug - 1];
+				if(!plugin.IsValidPlugin() && !IsLocked())
 				{
-					// No plugin in this slot: Ask user to add one.
+					// No plugin in this slot yet: Ask user to add one.
 #ifndef NO_VST
 					CSelectPluginDlg dlg(m_pModDoc, nPlug - 1, this); 
 					if (dlg.DoModal() == IDOK)
@@ -2161,13 +2162,13 @@ void CCtrlInstruments::OnMixPlugChanged()
 #endif // NO_VST
 				}
 
-				if (pPlug && pPlug->pMixPlugin)
+				if(plugin.pMixPlugin)
 				{
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
 					
 					// if this plug can recieve MIDI events and we have no MIDI channel
 					// selected for this instrument, automatically select MIDI channel 1.
-					if (pPlug->pMixPlugin->isInstrument() && pIns->nMidiChannel == 0)
+					if(plugin.pMixPlugin->isInstrument() && pIns->nMidiChannel == 0)
 					{
 						pIns->nMidiChannel = 1;
 						UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, NULL);
@@ -2855,16 +2856,15 @@ void CCtrlInstruments::UpdatePluginList()
 	CHAR s[64];
 	for (PLUGINDEX nPlug = 0; nPlug <= MAX_MIXPLUGINS; nPlug++)
 	{
-		if (!nPlug) 
+		if(!nPlug) 
 		{ 
 			strcpy(s, "No plugin");
 		} 
 		else
 		{
-			PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[nPlug - 1]);
-			p->Info.szLibraryName[63] = 0;
-			if (p->Info.szLibraryName[0])
-				wsprintf(s, "FX%d: %s", nPlug, p->Info.szName);
+			const SNDMIXPLUGIN &plugin = m_pSndFile->m_MixPlugins[nPlug - 1];
+			if(plugin.IsValidPlugin())
+				wsprintf(s, "FX%d: %s", nPlug, plugin.GetName());
 			else
 				wsprintf(s, "FX%d: undefined", nPlug);
 		}

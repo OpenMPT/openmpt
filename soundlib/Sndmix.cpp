@@ -1171,9 +1171,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 		if(pChn->PitchEnv.flags & ENV_FILTER)
 		{
 			// Filter Envelope: controls cutoff frequency
-#ifndef NO_FILTER
 			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER), envval);
-#endif // NO_FILTER
 		} else
 		{
 			// Pitch Envelope

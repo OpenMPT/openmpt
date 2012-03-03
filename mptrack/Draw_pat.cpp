@@ -631,7 +631,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					rect.bottom+=PLUGNAME_HEIGHT;
 					mixPlug=pSndFile->ChnSettings[ncolhdr].nMixPlugin;
 					if (mixPlug) {
-						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).pMixPlugin?(pSndFile->m_MixPlugins[mixPlug-1]).Info.szName:"[empty]");
+						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug - 1]).pMixPlugin ? (pSndFile->m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
 					} else {
 						wsprintf(s, "---");
 					}

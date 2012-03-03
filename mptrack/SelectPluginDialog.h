@@ -21,7 +21,7 @@ class CSelectPluginDlg: public CDialog
 {
 protected:
 	int m_nPlugSlot;
-	PSNDMIXPLUGIN m_pPlugin;
+	SNDMIXPLUGIN *m_pPlugin;
 	CModDoc *m_pModDoc;
 	CTreeCtrl m_treePlugins;
 	CString m_sNameFilter;
