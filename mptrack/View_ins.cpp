@@ -1968,7 +1968,7 @@ void CViewInstrument::PlayNote(UINT note)
 			}
 		*/
 			ModInstrument *pIns = pModDoc->GetSoundFile()->Instruments[m_nInstrument];
-			if ((!pIns) || (!pIns->Keyboard[note-1] && !pIns->nMixPlug)) return;
+			if ((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug)) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel = pModDoc->PlayNote(note, m_nInstrument, 0, false); //rewbs.instViewNNA
 			s[0] = 0;
