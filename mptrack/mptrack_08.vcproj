@@ -999,10 +999,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\IT_DEFS.H"
-				>
-			</File>
-			<File
 				RelativePath=".\KeyConfigDlg.h"
 				>
 			</File>
@@ -1290,6 +1286,14 @@
 		<Filter
 			Name="Module Loaders"
 			>
+			<File
+				RelativePath="..\soundlib\ITTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ITTools.cpp"
+				>
+			</File>
 			<File
 				RelativePath="..\soundlib\Load_669.cpp"
 				>

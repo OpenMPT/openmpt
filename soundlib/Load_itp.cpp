@@ -14,10 +14,10 @@
 
 
 #include "stdafx.h"
-#include "Loaders.h"
-#include "IT_DEFS.H"
 #include "../mptrack/mptrack.h"
 #include "../mptrack/version.h"
+#include "Loaders.h"
+#include "ITTools.h"
 
 
 #define ITP_VERSION 0x00000102	// v1.02
@@ -293,12 +293,10 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Load embeded samples
 
-	ITSAMPLESTRUCT pis;
-
 	// Read original number of samples
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	if(id > MAX_SAMPLES) return false;
+	if(id >= MAX_SAMPLES) return false;
 	m_nSamples = (SAMPLEINDEX)id;
 	dwMemPos += sizeof(DWORD);
 
@@ -310,9 +308,10 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	dwMemPos += sizeof(DWORD);
 
 	// Read samples
-	for(i=0; i<n; i++){
+	for(i=0; i<n; i++)
+	{
 
-		ASSERT_CAN_READ(4 + sizeof(ITSAMPLESTRUCT) + 4);
+		ASSERT_CAN_READ(4 + sizeof(ITSample) + 4);
 
 		// Sample id number
 		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
@@ -323,8 +322,9 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 			return false;
 
 		// Sample struct
-		memcpy(&pis,lpStream+dwMemPos,sizeof(ITSAMPLESTRUCT));
-		dwMemPos += sizeof(ITSAMPLESTRUCT);
+		ITSample pis;
+		memcpy(&pis, lpStream + dwMemPos, sizeof(ITSample));
+		dwMemPos += sizeof(ITSample);
 
 		// Sample length
 		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
@@ -332,52 +332,16 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos += sizeof(DWORD);
 		if(dwMemPos >= dwMemLength || len > dwMemLength - dwMemPos) return false;
 
-		// Copy sample struct data (ut-oh... this code looks very familiar!)
-		if(pis.id == LittleEndian(IT_IMPS))
+		if(pis.id == LittleEndian(ITSample::magic))
 		{
-			ModSample *pSmp = &Samples[nsmp];
-			memcpy(pSmp->filename, pis.filename, 12);
-			pSmp->uFlags = 0;
-			pSmp->nLength = 0;
-			pSmp->nLoopStart = pis.loopbegin;
-			pSmp->nLoopEnd = pis.loopend;
-			pSmp->nSustainStart = pis.susloopbegin;
-			pSmp->nSustainEnd = pis.susloopend;
-			pSmp->nC5Speed = pis.C5Speed;
-			if(!pSmp->nC5Speed) pSmp->nC5Speed = 8363;
-			if(pis.C5Speed < 256) pSmp->nC5Speed = 256;
-			pSmp->nVolume = pis.vol << 2;
-			if(pSmp->nVolume > 256) pSmp->nVolume = 256;
-			pSmp->nGlobalVol = pis.gvl;
-			if(pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
-			if(pis.flags & 0x10) pSmp->uFlags |= CHN_LOOP;
-			if(pis.flags & 0x20) pSmp->uFlags |= CHN_SUSTAINLOOP;
-			if(pis.flags & 0x40) pSmp->uFlags |= CHN_PINGPONGLOOP;
-			if(pis.flags & 0x80) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
-			pSmp->nPan = (pis.dfp & 0x7F) << 2;
-			if(pSmp->nPan > 256) pSmp->nPan = 256;
-			if(pis.dfp & 0x80) pSmp->uFlags |= CHN_PANNING;
-			pSmp->nVibType = autovibit2xm[pis.vit & 7];
-			pSmp->nVibRate = pis.vis;
-			pSmp->nVibDepth = pis.vid & 0x7F;
-			pSmp->nVibSweep = pis.vir;
-			if(pis.length){
-				pSmp->nLength = pis.length;
-				if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
-				UINT flags = (pis.cvt & 1) ? RS_PCM8S : RS_PCM8U;
-				if (pis.flags & 2){
-					flags += 5;
-					if (pis.flags & 4) flags |= RSF_STEREO;
-					pSmp->uFlags |= CHN_16BIT;
-				} 
-				else{
-					if (pis.flags & 4) flags |= RSF_STEREO;
-				}
-				// Read sample data
-				ReadSample(&Samples[nsmp], flags, (LPSTR)(lpStream+dwMemPos), len);
-				dwMemPos += len;
-				memcpy(m_szNames[nsmp], pis.name, 26);
-			}
+			pis.ConvertToMPT(Samples[nsmp]);
+
+			memcpy(m_szNames[nsmp], pis.name, 26);
+			StringFixer::SpaceToNullStringFixed<25>(m_szNames[nsmp]);
+
+			// Read sample data
+			ReadSample(&Samples[nsmp], pis.GetSampleFormat(), (LPSTR)(lpStream + dwMemPos), len);
+			dwMemPos += len;
 		}
 	}
 
@@ -610,7 +574,8 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// patterns data content
-	for(UINT npat=0; npat<MAX_PATTERNS; npat++){
+	for(UINT npat=0; npat<MAX_PATTERNS; npat++)
+	{
 		// pattern size (number of rows)
 		id = Patterns[npat] ? Patterns[npat].GetNumRows() : 0;
 		fwrite(&id, 1, sizeof(id), f);
@@ -650,62 +615,26 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// Write samples not used in any instrument (help, this looks like duplicate code!)
-	ITSAMPLESTRUCT itss;
 	for(UINT nsmp=1; nsmp<=m_nSamples; nsmp++)
 	{
 		if(!sampleUsed[nsmp - 1] && Samples[nsmp].pSample)
 		{
+			ITSample itss;
+			itss.ConvertToIT(Samples[nsmp], GetType());
 
-			ModSample *psmp = &Samples[nsmp];
-			memset(&itss, 0, sizeof(itss));
-			memcpy(itss.filename, psmp->filename, 12);
 			memcpy(itss.name, m_szNames[nsmp], 26);
-
-			itss.id = LittleEndian(IT_IMPS);
-			itss.gvl = (BYTE)psmp->nGlobalVol;
-			itss.flags = 0x00;
-
-			if(psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
-			if(psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-			if(psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-			if(psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-			itss.C5Speed = psmp->nC5Speed;
-			if (!itss.C5Speed) itss.C5Speed = 8363;
-			itss.length = psmp->nLength;
-			itss.loopbegin = psmp->nLoopStart;
-			itss.loopend = psmp->nLoopEnd;
-			itss.susloopbegin = psmp->nSustainStart;
-			itss.susloopend = psmp->nSustainEnd;
-			itss.vol = (BYTE)(psmp->nVolume >> 2);
-			itss.dfp = (BYTE)(psmp->nPan >> 2);
-			itss.vit = autovibxm2it[psmp->nVibType & 7];
-			itss.vis = min(psmp->nVibRate, 64);
-			itss.vid = min(psmp->nVibDepth, 32);
-			itss.vir = min(psmp->nVibSweep, 255); //(psmp->nVibSweep < 64) ? psmp->nVibSweep * 4 : 255;
-			if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
-			if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
-			UINT flags = RS_PCM8S;
-
-			if(psmp->uFlags & CHN_STEREO)
-			{
-				flags = RS_STPCM8S;
-				itss.flags |= 0x04;
-			}
-			if(psmp->uFlags & CHN_16BIT)
-			{
-				itss.flags |= 0x02;
-				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
-			}
+			StringFixer::FixNullString(itss.name);
 
 			id = nsmp;
 			fwrite(&id, 1, sizeof(id), f);
 
-			itss.samplepointer = NULL;
-			fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
+			itss.samplepointer = 0;
+			fwrite(&itss, 1, sizeof(itss), f);
 
-			id = WriteSample(NULL, psmp, flags);
+			UINT flags = itss.GetSampleFormat();
+			id = WriteSample(nullptr, &Samples[nsmp], flags);
 			fwrite(&id, 1, sizeof(id), f);
-			WriteSample(f, psmp, flags);
+			WriteSample(f, &Samples[nsmp], flags);
 		}
 	}
 

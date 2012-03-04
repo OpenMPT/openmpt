@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "IT_DEFS.H"
 #include "tuningcollection.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/serialization_utils.h"
@@ -19,6 +18,7 @@
 #include <strstream>
 #include <list>
 #include "../mptrack/version.h"
+#include "ITTools.h"
 
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
@@ -223,14 +223,6 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
-// IT Vibrato -> VibratoType
-BYTE autovibit2xm[8] =
-{ VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_RANDOM, VIB_RAMP_UP, 0, 0, 0 };
-
-// VibratoType -> Vibrato
-BYTE autovibxm2it[8] =
-{ 0, 2, 4, 1, 3, 0, 0, 0 };
-
 //////////////////////////////////////////////////////////
 // Impulse Tracker IT file support
 
@@ -242,235 +234,35 @@ UINT ConvertVolParam(const ModCommand *m)
 }
 
 
-// Convert MPT's internal envelope format into an IT/MPTM envelope.
-void MPTEnvToIT(const InstrumentEnvelope *mptEnv, ITENVELOPE *itEnv, const BYTE envOffset, const BYTE envDefault)
-//---------------------------------------------------------------------------------------------------------------
+size_t CSoundFile::ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers, size_t memLength)
+//-------------------------------------------------------------------------------------------------
 {
-	if(mptEnv->dwFlags & ENV_ENABLED)	itEnv->flags |= 1;
-	if(mptEnv->dwFlags & ENV_LOOP)		itEnv->flags |= 2;
-	if(mptEnv->dwFlags & ENV_SUSTAIN)	itEnv->flags |= 4;
-	if(mptEnv->dwFlags & ENV_CARRY)		itEnv->flags |= 8;
-	itEnv->num = (BYTE)min(mptEnv->nNodes, 25);
-	itEnv->lpb = (BYTE)mptEnv->nLoopStart;
-	itEnv->lpe = (BYTE)mptEnv->nLoopEnd;
-	itEnv->slb = (BYTE)mptEnv->nSustainStart;
-	itEnv->sle = (BYTE)mptEnv->nSustainEnd;
-
-	if(mptEnv->nNodes > 0)
+	if(trkvers < 0x0200)
 	{
-		// Attention: Full MPTM envelope is stored in extended instrument properties
-		for(size_t ev = 0; ev < 25; ev++)
-		{
-			itEnv->data[ev * 3] = mptEnv->Values[ev] - envOffset;
-			itEnv->data[ev * 3 + 1] = mptEnv->Ticks[ev] & 0xFF;
-			itEnv->data[ev * 3 + 2] = mptEnv->Ticks[ev] >> 8;
-		}
+		// Load old format (IT 1.xx) instrument
+		const ITOldInstrument *itIns = reinterpret_cast<const ITOldInstrument *>(p);
+		itIns->ConvertToMPT(*pIns);
+		return sizeof(ITOldInstrument);
 	} else
 	{
-		// Fix non-existing envelopes so that they can still be edited in Impulse Tracker.
-		itEnv->num = 2;
-		MemsetZero(itEnv->data);
-		itEnv->data[0] = itEnv->data[3] = envDefault - envOffset;
-		itEnv->data[4] = 10;
+		size_t instSize = 0;
+		if(memLength >= sizeof(ITInstrumentEx))
+		{
+			// Try loading extended instrument
+			const ITInstrumentEx *itIns = reinterpret_cast<const ITInstrumentEx *>(p);
+			instSize = itIns->ConvertToMPT(*pIns, GetType());
+		} else
+		{
+			// Load normal instrument
+			const ITInstrument *itIns = reinterpret_cast<const ITInstrument *>(p);
+			instSize = itIns->ConvertToMPT(*pIns, GetType());
+		}
+
+		// Try reading modular instrument data
+		instSize += LoadModularInstrumentData(LPCBYTE(p) + instSize, memLength - instSize, pIns);
+
+		return instSize;
 	}
-}
-
-
-// Convert IT/MPTM envelope data into MPT's internal envelope format - To be used by ITInstrToMPT()
-void ITEnvToMPT(const ITENVELOPE *itEnv, InstrumentEnvelope *mptEnv, const BYTE envOffset, const int iEnvMax)
-//-----------------------------------------------------------------------------------------------------------
-{
-	if(itEnv->flags & 1) mptEnv->dwFlags |= ENV_ENABLED;
-	if(itEnv->flags & 2) mptEnv->dwFlags |= ENV_LOOP;
-	if(itEnv->flags & 4) mptEnv->dwFlags |= ENV_SUSTAIN;
-	if(itEnv->flags & 8) mptEnv->dwFlags |= ENV_CARRY;
-	mptEnv->nNodes = min(itEnv->num, iEnvMax);
-	mptEnv->nLoopStart = itEnv->lpb;
-	mptEnv->nLoopEnd = itEnv->lpe;
-	mptEnv->nSustainStart = itEnv->slb;
-	mptEnv->nSustainEnd = itEnv->sle;
-
-	// Attention: Full MPTM envelope is stored in extended instrument properties
-	for (UINT ev = 0; ev < 25; ev++)
-	{
-		mptEnv->Values[ev] = itEnv->data[ev * 3] + envOffset;
-		mptEnv->Ticks[ev] = (itEnv->data[ev * 3 + 2] << 8) | (itEnv->data[ev * 3 + 1]);
-		if(ev > 0 && ev < itEnv->num && mptEnv->Ticks[ev] < mptEnv->Ticks[ev - 1])
-		{
-			// Fix broken envelopes... Instruments 2 and 3 in NoGap.it by Werewolf have envelope points where the high byte of envelope nodes is missing.
-			// NoGap.it was saved with MPT 1.07 or MPT 1.09, which *normally* doesn't do this in IT files.
-			// However... It turns out that MPT 1.07 omitted the high byte of envelope nodes when saving an XI instrument file, and it looks like
-			// Instrument 2 and 3 in NoGap.it were loaded from XI files.
-			mptEnv->Ticks[ev] &= 0xFF;
-			mptEnv->Ticks[ev] |= (mptEnv->Ticks[ev] & ~0xFF);
-			if(mptEnv->Ticks[ev] < mptEnv->Ticks[ev - 1])
-			{
-				mptEnv->Ticks[ev] += 0x100;
-			}
-		}
-	}
-	// Sanitize envelope
-	mptEnv->Ticks[0] = 0;
-}
-
-
-//BOOL CSoundFile::ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers)
-long CSoundFile::ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers) //rewbs.modularInstData
-//-----------------------------------------------------------------------------
-{
-	// Envelope point count. Limited to 25 in IT format.
-	const int iEnvMax = (m_nType & MOD_TYPE_MPT) ? MAX_ENVPOINTS : 25;
-
-	long returnVal=0;
-	if (trkvers < 0x0200)
-	{
-		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
-		memcpy(pIns->name, pis->name, 26);
-		memcpy(pIns->filename, pis->filename, 12);
-		StringFixer::SpaceToNullStringFixed<26>(pIns->name);
-		StringFixer::SpaceToNullStringFixed<12>(pIns->filename);
-		pIns->nFadeOut = pis->fadeout << 6;
-		pIns->nGlobalVol = 64;
-		for (UINT j = 0; j < 120; j++)
-		{
-			UINT note = pis->keyboard[j*2];
-			UINT ins = pis->keyboard[j*2+1];
-			if (ins < MAX_SAMPLES) pIns->Keyboard[j] = ins;
-			if (note < 120) pIns->NoteMap[j] = note + 1;
-			else pIns->NoteMap[j] = j + 1;
-		}
-		if (pis->flags & 0x01) pIns->VolEnv.dwFlags |= ENV_ENABLED;
-		if (pis->flags & 0x02) pIns->VolEnv.dwFlags |= ENV_LOOP;
-		if (pis->flags & 0x04) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
-		pIns->VolEnv.nLoopStart = pis->vls;
-		pIns->VolEnv.nLoopEnd = pis->vle;
-		pIns->VolEnv.nSustainStart = pis->sls;
-		pIns->VolEnv.nSustainEnd = pis->sle;
-		pIns->VolEnv.nNodes = 25;
-		for (UINT ev=0; ev<25; ev++)
-		{
-			if ((pIns->VolEnv.Ticks[ev] = pis->nodes[ev*2]) == 0xFF)
-			{
-				pIns->VolEnv.nNodes = ev;
-				break;
-			}
-			pIns->VolEnv.Values[ev] = pis->nodes[ev*2+1];
-		}
-
-		pIns->nNNA = pis->nna;
-		pIns->nDCT = pis->dnc;
-		pIns->nPan = 0x80;
-	} else
-	{
-		const ITINSTRUMENT *pis = (const ITINSTRUMENT *)p;
-		memcpy(pIns->name, pis->name, 26);
-		memcpy(pIns->filename, pis->filename, 12);
-		StringFixer::SpaceToNullStringFixed<26>(pIns->name);
-		StringFixer::SpaceToNullStringFixed<12>(pIns->filename);
-		if (pis->mpr<=128)
-			pIns->nMidiProgram = pis->mpr;
-		pIns->nMidiChannel = pis->mch;
-		if (pIns->nMidiChannel >= 128)	//rewbs.instroVSTi
-		{								//(handle old format where midichan
-										// and mixplug are 1 value)
-			pIns->nMixPlug = pIns->nMidiChannel - 128;
-			pIns->nMidiChannel = 0;
-		}
-		if (pis->mbank<=128)
-			pIns->wMidiBank = pis->mbank;
-		pIns->nFadeOut = pis->fadeout << 5;
-		pIns->nGlobalVol = pis->gbv >> 1;
-		if (pIns->nGlobalVol > 64) pIns->nGlobalVol = 64;
-		for (UINT j = 0; j < 120; j++)
-		{
-			UINT note = pis->keyboard[j*2];
-			UINT ins = pis->keyboard[j*2+1];
-			if (ins < MAX_SAMPLES) pIns->Keyboard[j] = ins;
-			if (note < 120) pIns->NoteMap[j] = note + 1;
-			else pIns->NoteMap[j] = j + 1;
-		}
-		// Olivier's MPT Instrument Extension
-		if (*((int *)pis->dummy) == 'MPTX')
-		{
-			const ITINSTRUMENTEX *pisex = (const ITINSTRUMENTEX *)pis;
-			for (UINT k = 0; k < 120; k++)
-			{
-				pIns->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
-			}
-		}
-		//rewbs.modularInstData
-		//find end of standard header
-		BYTE* pEndInstHeader;
-		if (*((int *)pis->dummy) == 'MPTX')
-			pEndInstHeader=(BYTE*)pis+sizeof(ITINSTRUMENTEX);
-		else
-			pEndInstHeader=(BYTE*)pis+sizeof(ITINSTRUMENT);
-
-		//If the next piece of data is 'INSM' we have modular extensions to our instrument...
-		if ( *( (UINT*)pEndInstHeader ) == 'INSM' )
-		{
-			//...the next piece of data must be the total size of the modular data
-			long modularInstSize = *((long *)(pEndInstHeader+4));
-
-			//handle chunks
-			BYTE* pModularInst = (BYTE*)(pEndInstHeader+4+sizeof(modularInstSize)); //4 is for 'INSM'
-			pEndInstHeader+=4+sizeof(modularInstSize)+modularInstSize;
-			while  (pModularInst<pEndInstHeader) //4 is for 'INSM'
-			{
-				UINT chunkID = *((int *)pModularInst);
-				pModularInst+=4;
-				switch (chunkID)
-				{
-					/*case 'DMMY':
-						MessageBox(NULL, "Dummy chunk identified", NULL, MB_OK|MB_ICONEXCLAMATION);
-						pModularInst+=1024;
-						break;*/
-					case 'PLUG':
-						pIns->nMixPlug = *(pModularInst);
-						pModularInst+=sizeof(pIns->nMixPlug);
-						break;
-					/*How to load more chunks?  -- see also how to save chunks
-					case: 'MYID':
-						// handle chunk data, as pointed to by pModularInst
-						// move pModularInst as appropriate
-						break;
-					*/
-
-					default: pModularInst++; //move forward one byte and try to recognize again.
-
-				}
-			}
-			returnVal = 4+sizeof(modularInstSize)+modularInstSize;
-		}
-		//end rewbs.modularInstData
-
-
-		// Volume Envelope
-		ITEnvToMPT(&pis->volenv, &pIns->VolEnv, 0, iEnvMax);
-		// Panning Envelope
-		ITEnvToMPT(&pis->panenv, &pIns->PanEnv, 32, iEnvMax);
-		// Pitch Envelope
-		ITEnvToMPT(&pis->pitchenv, &pIns->PitchEnv, 32, iEnvMax);
-		if (pis->pitchenv.flags & 0x80) pIns->PitchEnv.dwFlags |= ENV_FILTER;
-
-		pIns->nNNA = pis->nna;
-		pIns->nDCT = pis->dct;
-		pIns->nDNA = pis->dca;
-		pIns->nPPS = pis->pps;
-		pIns->nPPC = pis->ppc;
-		pIns->SetCutoff(pis->ifc & 0x7F, (pis->ifc & 0x80) != 0);
-		pIns->SetResonance(pis->ifr & 0x7F, (pis->ifr & 0x80) != 0);
-		pIns->nVolSwing = min(pis->rv, 100);
-		pIns->nPanSwing = min(pis->rp, 64);
-		pIns->nPan = (pis->dfp & 0x7F) << 2;
-		if (pIns->nPan > 256) pIns->nPan = 128;
-		if (pis->dfp < 0x80) pIns->dwFlags |= INS_SETPANNING;
-	}
-
-	if ((pIns->VolEnv.nLoopStart >= iEnvMax) || (pIns->VolEnv.nLoopEnd >= iEnvMax)) pIns->VolEnv.dwFlags &= ~ENV_LOOP;
-	if ((pIns->VolEnv.nSustainStart >= iEnvMax) || (pIns->VolEnv.nSustainEnd >= iEnvMax)) pIns->VolEnv.dwFlags &= ~ENV_SUSTAIN;
-
-	return returnVal; //return offset
 }
 
 
@@ -489,9 +281,12 @@ void CopyPatternName(CPattern &pattern, const char **patNames, UINT &patNamesLen
 bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 //----------------------------------------------------------------------
 {
-	ITFILEHEADER *pifh = (ITFILEHEADER *)lpStream;
+	if(!lpStream || dwMemLength < sizeof(ITFileHeader)) return false;
 
-	DWORD dwMemPos = sizeof(ITFILEHEADER);
+	ITFileHeader itHeader = *reinterpret_cast<const ITFileHeader *>(lpStream);
+	itHeader.ConvertEndianness();
+
+	DWORD dwMemPos = sizeof(ITFileHeader);
 	vector<DWORD> inspos;
 	vector<DWORD> smppos;
 	vector<DWORD> patpos;
@@ -499,25 +294,24 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	bool interpretModPlugMade = false;
 	bool hasModPlugExtensions = false;
 
-	if ((!lpStream) || (dwMemLength < 0xC0)) return false;
-	if ((pifh->id != LittleEndian(IT_IMPM) && pifh->id != LittleEndian(IT_MPTM)) || (pifh->insnum > 0xFF)
-	 || (pifh->smpnum >= MAX_SAMPLES)) return false;
-	if (dwMemPos + pifh->ordnum + pifh->insnum*4
-	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return false;
-
+	if((itHeader.id != ITFileHeader::itMagic && itHeader.id != ITFileHeader::mptmMagic) || itHeader.insnum > 0xFF
+		|| itHeader.smpnum >= MAX_SAMPLES) return false;
+	// Check if we can actually read all parapointers
+	if(dwMemPos + itHeader.ordnum + itHeader.insnum * 4
+		+ itHeader.smpnum * 4 + itHeader.patnum * 4 > dwMemLength) return false;
 
 	DWORD mptStartPos = dwMemLength;
 	memcpy(&mptStartPos, lpStream + (dwMemLength - sizeof(DWORD)), sizeof(DWORD));
 	if(mptStartPos >= dwMemLength || mptStartPos < 0x100)
 		mptStartPos = dwMemLength;
 
-	if(pifh->id == LittleEndian(IT_MPTM))
+	if(itHeader.id == ITFileHeader::mptmMagic)
 	{
 		ChangeModTypeTo(MOD_TYPE_MPT);
 	}
 	else
 	{
-		if(mptStartPos <= dwMemLength - 3 && pifh->cwtv > 0x888)
+		if(mptStartPos <= dwMemLength - 3 && itHeader.cwtv > 0x888)
 		{
 			char temp[3];
 			const char ID[3] = {'2','2','8'};
@@ -530,22 +324,22 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(GetType() == MOD_TYPE_IT)
 		{
 			// Which tracker was used to made this?
-			if((pifh->cwtv & 0xF000) == 0x5000)
+			if((itHeader.cwtv & 0xF000) == 0x5000)
 			{
 				// OpenMPT Version number (Major.Minor)
 				// This will only be interpreted as "made with ModPlug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
-				m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
-				if(pifh->reserved == LittleEndian(IT_OMPT))
+				m_dwLastSavedWithVersion = (itHeader.cwtv & 0x0FFF) << 16;
+				if(itHeader.reserved == ITFileHeader::omptMagic)
 					interpretModPlugMade = true;
-			} else if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888)
+			} else if(itHeader.cmwt == 0x888 || itHeader.cwtv == 0x888)
 			{
 				// OpenMPT 1.17 and 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-			} else if(pifh->cwtv == 0x0217 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
+			} else if(itHeader.cwtv == 0x0217 && itHeader.cmwt == 0x0200 && itHeader.reserved == 0)
 			{
-				if(memchr(pifh->chnpan, 0xFF, sizeof(pifh->chnpan)) != NULL)
+				if(memchr(itHeader.chnpan, 0xFF, sizeof(itHeader.chnpan)) != NULL)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
@@ -556,13 +350,13 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 				}
 				interpretModPlugMade = true;
-			} else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0202 && pifh->reserved == 0)
+			} else if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0202 && itHeader.reserved == 0)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				interpretModPlugMade = true;
 			}
-			else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
+			else if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0200 && itHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
@@ -571,13 +365,13 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		else // case: type == MOD_TYPE_MPT
 		{
-			if (pifh->cwtv >= verMptFileVerLoadLimit)
+			if (itHeader.cwtv >= verMptFileVerLoadLimit)
 			{
 				if (GetpModDoc())
 					GetpModDoc()->AddToLog(str_LoadingIncompatibleVersion);
 				return false;
 			}
-			else if (pifh->cwtv > verMptFileVer)
+			else if (itHeader.cwtv > verMptFileVer)
 			{
 				if (GetpModDoc())
 					GetpModDoc()->AddToLog(str_LoadingMoreRecentVersion);
@@ -588,67 +382,59 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(GetType() == MOD_TYPE_IT) mptStartPos = dwMemLength;
 
 	// Read row highlights
-	if((pifh->special & 0x04))
+	if((itHeader.special & ITFileHeader::embedPatternHighlights))
 	{
 		// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank (0/0), but have the "special" flag set.
 		// Newer versions of MPT and OpenMPT 1.17 *always* write 4/16 here.
 		// Thus, we will just ignore those old versions.
 		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
 		{
-			m_nDefaultRowsPerBeat = pifh->highlight_minor;
-			m_nDefaultRowsPerMeasure = pifh->highlight_major;
+			m_nDefaultRowsPerBeat = itHeader.highlight_minor;
+			m_nDefaultRowsPerMeasure = itHeader.highlight_major;
 		}
 #ifdef DEBUG
-		if((pifh->highlight_minor | pifh->highlight_major) == 0)
+		if((itHeader.highlight_minor | itHeader.highlight_major) == 0)
 		{
 			Log("IT Header: Row highlight is 0");
 		}
 #endif
 	}
 
-	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
-	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
-	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATGXX;
-	if ((pifh->flags & 0x80) || (pifh->special & 0x08)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
-	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
+	if (itHeader.flags & ITFileHeader::linearSlides) m_dwSongFlags |= SONG_LINEARSLIDES;
+	if (itHeader.flags & ITFileHeader::itOldEffects) m_dwSongFlags |= SONG_ITOLDEFFECTS;
+	if (itHeader.flags & ITFileHeader::itCompatGxx) m_dwSongFlags |= SONG_ITCOMPATGXX;
+	if ((itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (itHeader.special & ITFileHeader::embedMIDIConfiguration)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	if (itHeader.flags & ITFileHeader::extendedFilterRange) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
-	memcpy(m_szNames[0], pifh->songname, 26);
+	memcpy(m_szNames[0], itHeader.songname, 26);
 	StringFixer::SpaceToNullStringFixed<26>(m_szNames[0]);
 
 	// Global Volume
-	m_nDefaultGlobalVolume = pifh->globalvol << 1;
+	m_nDefaultGlobalVolume = itHeader.globalvol << 1;
 	if (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
-	m_nDefaultTempo = max(32, pifh->tempo); // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
-	m_nSamplePreAmp = min(pifh->mv, 128);
+	if (itHeader.speed) m_nDefaultSpeed = itHeader.speed;
+	m_nDefaultTempo = max(32, itHeader.tempo); // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
+	m_nSamplePreAmp = min(itHeader.mv, 128);
 
 	// Reading Channels Pan Positions
-	for (int ipan=0; ipan< 64; ipan++) if (pifh->chnpan[ipan] != 0xFF)
+	for (int ipan=0; ipan< 64; ipan++) if (itHeader.chnpan[ipan] != 0xFF)
 	{
-		ChnSettings[ipan].nVolume = pifh->chnvol[ipan];
+		ChnSettings[ipan].nVolume = itHeader.chnvol[ipan];
 		ChnSettings[ipan].nPan = 128;
-		if (pifh->chnpan[ipan] & 0x80) ChnSettings[ipan].dwFlags |= CHN_MUTE;
-		UINT n = pifh->chnpan[ipan] & 0x7F;
+		if (itHeader.chnpan[ipan] & 0x80) ChnSettings[ipan].dwFlags |= CHN_MUTE;
+		UINT n = itHeader.chnpan[ipan] & 0x7F;
 		if (n <= 64) ChnSettings[ipan].nPan = n << 2;
 		if (n == 100) ChnSettings[ipan].dwFlags |= CHN_SURROUND;
 	}
 	if (m_nChannels < GetModSpecifications().channelsMin) m_nChannels = GetModSpecifications().channelsMin;
 
-	// Reading Song Message
-	if ((pifh->special & 0x01) && (pifh->msglength) && (pifh->msglength <= dwMemLength) && (pifh->msgoffset < dwMemLength - pifh->msglength))
-	{
-		// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
-		// if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && pifh->reserved == LittleEndian(IT_CHBI)) --> Chibi detected.
-		// But we'll just use autodetection here:
-		ReadMessage(lpStream + pifh->msgoffset, pifh->msglength, leAutodetect);
-	}
 	// Reading orders
-	UINT nordsize = pifh->ordnum;
+	UINT nordsize = itHeader.ordnum;
 	if(GetType() == MOD_TYPE_IT)
 	{
 		if(nordsize > MAX_ORDERS) nordsize = MAX_ORDERS;
 		Order.ReadAsByte(lpStream + dwMemPos, nordsize, dwMemLength-dwMemPos);
-		dwMemPos += pifh->ordnum;
+		dwMemPos += itHeader.ordnum;
 	}
 	else
 	{
@@ -662,12 +448,12 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			nordsize = GetModSpecifications().ordersMax;
 		}
 
-		if(pifh->cwtv > 0x88A && pifh->cwtv <= 0x88D)
+		if(itHeader.cwtv > 0x88A && itHeader.cwtv <= 0x88D)
 			dwMemPos += Order.Deserialize(lpStream+dwMemPos, dwMemLength-dwMemPos);
 		else
 		{
 			Order.ReadAsByte(lpStream + dwMemPos, nordsize, dwMemLength - dwMemPos);
-			dwMemPos += pifh->ordnum;
+			dwMemPos += itHeader.ordnum;
 			//Replacing 0xFF and 0xFE with new corresponding indexes
 			Order.Replace(0xFE, Order.GetIgnoreIndex());
 			Order.Replace(0xFF, Order.GetInvalidPatIndex());
@@ -681,8 +467,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	DWORD minptr = dwMemLength;
 
 	// Reading Instrument Offsets
-	inspos.resize(pifh->insnum);
-	for(size_t n = 0; n < pifh->insnum; n++)
+	inspos.resize(itHeader.insnum);
+	for(size_t n = 0; n < itHeader.insnum; n++)
 	{
 		if(4 > dwMemLength - dwMemPos)
 			return false;
@@ -696,8 +482,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading Sample Offsets
-	smppos.resize(pifh->smpnum);
-	for(size_t n = 0; n < pifh->smpnum; n++)
+	smppos.resize(itHeader.smpnum);
+	for(size_t n = 0; n < itHeader.smpnum; n++)
 	{
 		if(4 > dwMemLength - dwMemPos)
 			return false;
@@ -711,8 +497,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading Pattern Offsets
-	patpos.resize(pifh->patnum);
-	for(size_t n = 0; n < pifh->patnum; n++)
+	patpos.resize(itHeader.patnum);
+	for(size_t n = 0; n < itHeader.patnum; n++)
 	{
 		if(4 > dwMemLength - dwMemPos)
 			return false;
@@ -739,9 +525,17 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 	}
 
-	if(pifh->special & 0x01)
+	// Reading Song Message
+	if(itHeader.special & ITFileHeader::embedSongMessage)
 	{
-		minptr = min(minptr, pifh->msgoffset);
+		if(itHeader.msglength > 0 && itHeader.msglength <= dwMemLength && itHeader.msgoffset < (dwMemLength - itHeader.msglength))
+		{
+			// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
+			// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
+			// But we'll just use autodetection here:
+			ReadMessage(lpStream + itHeader.msgoffset, itHeader.msglength, leAutodetect);
+		}
+		minptr = min(minptr, itHeader.msgoffset);
 	}
 
 	// Reading IT Edit History Info
@@ -750,49 +544,30 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// even if they don't write the edit history count. So we have to filter this out...
 	// This is done by looking at the parapointers. If the history data end after
 	// the first parapointer, we assume that it's actually no history data.
-	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02))
+	if(dwMemPos + 2 < dwMemLength && (itHeader.special & ITFileHeader::embedEditHistory))
 	{
 		const size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
 		dwMemPos += 2;
 
-		if (nflt * 8 <= dwMemLength - dwMemPos && dwMemPos + nflt * 8 <= minptr)
+		if(nflt * sizeof(ITHistoryStruct) <= dwMemLength - dwMemPos && dwMemPos + nflt * 8 <= minptr)
 		{
 #ifdef MODPLUG_TRACKER
 			if(GetpModDoc() != nullptr)
 			{
-				GetpModDoc()->GetFileHistory().resize(nflt);
+				GetpModDoc()->GetFileHistory().reserve(nflt);
 				for(size_t n = 0; n < nflt; n++)
 				{
-					ITHISTORYSTRUCT itHistory = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
-					itHistory.fatdate = LittleEndianW(itHistory.fatdate);
-					itHistory.fattime = LittleEndianW(itHistory.fattime);
-					itHistory.runtime = LittleEndian(itHistory.runtime);
-
 					FileHistory mptHistory;
-					MemsetZero(mptHistory);
-					// Decode FAT date and time
-					mptHistory.loadDate.tm_year = ((itHistory.fatdate >> 9) & 0x7F) + 80;
-					mptHistory.loadDate.tm_mon = CLAMP((itHistory.fatdate >> 5) & 0x0F, 1, 12) - 1;
-					mptHistory.loadDate.tm_mday = CLAMP(itHistory.fatdate & 0x1F, 1, 31);
-					mptHistory.loadDate.tm_hour = CLAMP((itHistory.fattime >> 11) & 0x1F, 0, 23);
-					mptHistory.loadDate.tm_min = CLAMP((itHistory.fattime >> 5) & 0x3F, 0, 59);
-					mptHistory.loadDate.tm_sec = CLAMP((itHistory.fattime & 0x1F) * 2, 0, 59);
-					mptHistory.openTime = itHistory.runtime * (HISTORY_TIMER_PRECISION / 18.2f);
-					GetpModDoc()->GetFileHistory().at(n) = mptHistory;
+					const ITHistoryStruct *itHistory = reinterpret_cast<const ITHistoryStruct *>(lpStream + dwMemPos);
+					itHistory->ConvertToMPT(mptHistory);
+					GetpModDoc()->GetFileHistory().push_back(mptHistory);
 
-#ifdef DEBUG
-					const uint32 seconds = (uint32)(((double)itHistory.runtime) / 18.2f);
-					CHAR stime[128];
-					wsprintf(stime, "IT Edit History: Loaded %04u-%02u-%02u %02u:%02u:%02u, open for %u:%02u:%02u (%u ticks)\n", ((itHistory.fatdate >> 9) & 0x7F) + 1980, (itHistory.fatdate >> 5) & 0x0F, itHistory.fatdate & 0x1F, (itHistory.fattime >> 11) & 0x1F, (itHistory.fattime >> 5) & 0x3F, (itHistory.fattime & 0x1F) * 2, seconds / 3600, (seconds / 60) % 60, seconds % 60, itHistory.runtime);
-					Log(stime);
-#endif // DEBUG
-
-					dwMemPos += 8;
+					dwMemPos += sizeof(ITHistoryStruct);
 				}
 			} else
 #endif // MODPLUG_TRACKER
 			{
-				dwMemPos += nflt * 8;
+				dwMemPos += nflt * sizeof(ITHistoryStruct);
 			}
 		} else
 		{
@@ -802,7 +577,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	// Another non-conforming application is unmo3 < v2.4.0.1, which doesn't set the special bit
 	// at all, but still writes the two edit history length bytes (zeroes)...
-	else if(dwMemPos + 2 < dwMemLength && pifh->highlight_major == 0 && pifh->highlight_minor == 0 && pifh->cmwt == 0x0214 && pifh->cwtv == 0x0214 && pifh->reserved == 0 && (pifh->special & (0x02|0x04)) == 0)
+	else if(dwMemPos + 2 < dwMemLength && itHeader.highlight_major == 0 && itHeader.highlight_minor == 0 && itHeader.cmwt == 0x0214 && itHeader.cwtv == 0x0214 && itHeader.reserved == 0 && (itHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
 	{
 		const size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
 		if(nflt == 0)
@@ -822,7 +597,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
-	if (pifh->cwtv < 0x0214)
+	if (itHeader.cwtv < 0x0214)
 	{
 		MemsetZero(m_MidiCfg.szMidiSFXExt);
 		MemsetZero(m_MidiCfg.szMidiZXXExt);
@@ -832,7 +607,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read pattern names: "PNAM"
 	const char *patNames = nullptr;
 	UINT patNamesLen = 0;
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(IT_PNAM)))
+	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(magicPatternNames)))
 	{
 		patNamesLen = *((DWORD *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
@@ -845,9 +620,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	m_nChannels = GetModSpecifications().channelsMin;
 	// Read channel names: "CNAM"
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(IT_CNAM)))
+	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == LittleEndian(magicChannelNames)))
 	{
-		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
+		UINT len = *((DWORD *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
 		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_BASECHANNELS * MAX_CHANNELNAME))
 		{
@@ -950,16 +725,16 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Reading Instruments
 	m_nInstruments = 0;
-	if (pifh->flags & 0x04) m_nInstruments = pifh->insnum;
+	if (itHeader.flags & ITFileHeader::instrumentMode) m_nInstruments = itHeader.insnum;
 	if (m_nInstruments >= MAX_INSTRUMENTS) m_nInstruments = MAX_INSTRUMENTS-1;
 	for (UINT nins=0; nins<m_nInstruments; nins++)
 	{
-		if ((inspos[nins] > 0) && (inspos[nins] <= dwMemLength - (pifh->cmwt < 0x200 ? sizeof(ITOLDINSTRUMENT) : sizeof(ITINSTRUMENT))))
+		if ((inspos[nins] > 0) && (inspos[nins] <= dwMemLength - (itHeader.cmwt < 0x200 ? sizeof(ITOldInstrument) : sizeof(ITInstrument))))
 		{
 			try
 			{
 				Instruments[nins + 1] = new ModInstrument();
-				ITInstrToMPT(lpStream + inspos[nins], Instruments[nins + 1], pifh->cmwt);
+				ITInstrToMPT(lpStream + inspos[nins], Instruments[nins + 1], itHeader.cmwt, dwMemLength - inspos[nins]);
 			} catch(MPTMemoryException)
 			{
 				continue;
@@ -973,77 +748,26 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
 	UINT lastSampleOffset = 0;
-	if(pifh->smpnum > 0)
+	if(itHeader.smpnum > 0)
 	{
-		lastSampleOffset = smppos[pifh->smpnum - 1] + sizeof(ITSAMPLESTRUCT);
+		lastSampleOffset = smppos[itHeader.smpnum - 1] + sizeof(ITSample);
 	}
 // -! NEW_FEATURE#0027
 
 	// Reading Samples
-	m_nSamples = min(pifh->smpnum, MAX_SAMPLES - 1);
-	for (UINT nsmp = 0; nsmp < m_nSamples; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
+	m_nSamples = min(itHeader.smpnum, MAX_SAMPLES - 1);
+	for (UINT nsmp = 0; nsmp < m_nSamples; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSample)))
 	{
-		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
-		if (pis->id == LittleEndian(IT_IMPS))
+		ITSample *pis = (ITSample *)(lpStream+smppos[nsmp]);
+		if (pis->id == LittleEndian(ITSample::magic))
 		{
-			ModSample *pSmp = &Samples[nsmp+1];
-			memcpy(pSmp->filename, pis->filename, 12);
-			StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
-			pSmp->uFlags = 0;
-			pSmp->nLength = 0;
-			pSmp->nLoopStart = pis->loopbegin;
-			pSmp->nLoopEnd = pis->loopend;
-			pSmp->nSustainStart = pis->susloopbegin;
-			pSmp->nSustainEnd = pis->susloopend;
-			pSmp->nC5Speed = pis->C5Speed;
-			if (!pSmp->nC5Speed) pSmp->nC5Speed = 8363;
-			if (pis->C5Speed < 256) pSmp->nC5Speed = 256;
-			pSmp->nVolume = pis->vol << 2;
-			if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-			pSmp->nGlobalVol = pis->gvl;
-			if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
-			if (pis->flags & 0x10) pSmp->uFlags |= CHN_LOOP;
-			if (pis->flags & 0x20) pSmp->uFlags |= CHN_SUSTAINLOOP;
-			if (pis->flags & 0x40) pSmp->uFlags |= CHN_PINGPONGLOOP;
-			if (pis->flags & 0x80) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
-			pSmp->nPan = (pis->dfp & 0x7F) << 2;
-			if (pSmp->nPan > 256) pSmp->nPan = 256;
-			if (pis->dfp & 0x80) pSmp->uFlags |= CHN_PANNING;
-			pSmp->nVibType = autovibit2xm[pis->vit & 7];
-			pSmp->nVibRate = pis->vis;
-			pSmp->nVibDepth = pis->vid & 0x7F;
-			pSmp->nVibSweep = pis->vir; //(pis->vir + 3) / 4;
+			size_t sampleOffset = pis->ConvertToMPT(Samples[nsmp + 1]);
 
-			if(pis->samplepointer) lastSampleOffset = pis->samplepointer; // MPTX hack
+			memcpy(m_szNames[nsmp + 1], pis->name, 26);
+			StringFixer::SpaceToNullStringFixed<25>(m_szNames[nsmp + 1]);
 
-			if ((pis->samplepointer) && (pis->samplepointer < dwMemLength) && (pis->length))
-			{
-				pSmp->nLength = pis->length;
-				if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
-				UINT flags = (pis->cvt & 1) ? RS_PCM8S : RS_PCM8U;
-				if (pis->flags & 2)	// 16-bit
-				{
-					flags += 5;
-					if (pis->flags & 4 && pifh->cwtv >= 0x214) flags |= RSF_STEREO;	// some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
-					pSmp->uFlags |= CHN_16BIT;
-					// IT 2.14 16-bit packed sample?
-					if (pis->flags & 8) flags = ((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT21516 : RS_IT21416;
-				} else	// 8-bit
-				{
-					if (pis->flags & 4 && pifh->cwtv >= 0x214) flags |= RSF_STEREO;	// some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
-					if (pis->cvt == 0xFF) flags = RS_ADPCM4; else
-					// IT 2.14 8-bit packed sample?
-					if (pis->flags & 8)	flags =	((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT2158 : RS_IT2148;
-				}
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-//				ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
-				lastSampleOffset = pis->samplepointer + ReadSample(&Samples[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
-// -! NEW_FEATURE#0027
-			}
+			lastSampleOffset = sampleOffset + ReadSample(&Samples[nsmp + 1], pis->GetSampleFormat(itHeader.cwtv), (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset);
 		}
-		memcpy(m_szNames[nsmp + 1], pis->name, 26);
-		StringFixer::SpaceToNullStringFixed<26>(m_szNames[nsmp + 1]);
 	}
 	m_nSamples = max(1, m_nSamples);
 
@@ -1258,7 +982,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		//START - mpt specific:
 		//Using member cwtv on pifh as the version number.
-		const uint16 version = pifh->cwtv;
+		const uint16 version = itHeader.cwtv;
 		if(version > 0x889)
 		{
 			const char* const cpcMPTStart = reinterpret_cast<const char*>(lpStream + mptStartPos);
@@ -1329,40 +1053,32 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	const size_t start = (num > uint16_max) ? num - uint16_max : 0;
 	for(size_t n = start; n < num; n++)
 	{
-		tm loadDate;
-		MemsetZero(loadDate);
-		uint32 openTime;
+		FileHistory mptHistory;
 
 		if(n < num - 1)
 		{
 			// Previous timestamps
-			const FileHistory *mptHistory = &(pModDoc->GetFileHistory().at(n));
-			loadDate = mptHistory->loadDate;
-			openTime = mptHistory->openTime * (18.2f / HISTORY_TIMER_PRECISION);
+			mptHistory = pModDoc->GetFileHistory().at(n);
 		} else
 		{
 			// Current ("new") timestamp
 			const time_t creationTime = pModDoc->GetCreationTime();
+
+			MemsetZero(mptHistory.loadDate);
 			//localtime_s(&loadDate, &creationTime);
 			const tm* const p = localtime(&creationTime);
 			if (p != nullptr)
-				loadDate = *p;
+				mptHistory.loadDate = *p;
 			else if (pSndFile->GetpModDoc() != nullptr)
 				pSndFile->GetpModDoc()->AddLogEvent(LogEventUnexpectedError,
 													  __FUNCTION__,
 													  _T("localtime() returned nullptr."));
-			openTime = (uint32)((double)difftime(time(nullptr), creationTime) * 18.2f);
+
+			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * (double)HISTORY_TIMER_PRECISION);
 		}
 
-		ITHISTORYSTRUCT itHistory;
-		// Create FAT file dates
-		itHistory.fatdate = loadDate.tm_mday | ((loadDate.tm_mon + 1) << 5) | ((loadDate.tm_year - 80) << 9);
-		itHistory.fattime = (loadDate.tm_sec / 2) | (loadDate.tm_min << 5) | (loadDate.tm_hour << 11);
-		itHistory.runtime = openTime;
-
-		itHistory.fatdate = LittleEndianW(itHistory.fatdate);
-		itHistory.fattime = LittleEndianW(itHistory.fattime);
-		itHistory.runtime = LittleEndian(itHistory.runtime);
+		ITHistoryStruct itHistory;
+		itHistory.ConvertToIT(mptHistory);
 
 		fwrite(&itHistory, 1, sizeof(itHistory), f);
 	}
@@ -1380,66 +1096,62 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatExport ? ModSpecs::it : ModSpecs::itEx));
 
 	DWORD dwChnNamLen;
-	ITFILEHEADER header;
-	ITINSTRUMENT iti;
-	ITSAMPLESTRUCT itss;
-	vector<bool>smpcount(GetNumSamples(), false);
+	ITFileHeader itHeader;
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
 	FILE *f;
-
 
 	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
 
 	// Writing Header
-	MemsetZero(header);
+	MemsetZero(itHeader);
 	dwChnNamLen = 0;
-	header.id = LittleEndian(IT_IMPM);
-	lstrcpyn(header.songname, m_szNames[0], 26);
+	itHeader.id = ITFileHeader::itMagic;
+	lstrcpyn(itHeader.songname, m_szNames[0], 26);
 
-	header.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
-	header.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
+	itHeader.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
+	itHeader.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
-		if(!Order.NeedsExtraDatafield()) header.ordnum = Order.size();
-		else header.ordnum = min(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
+		if(!Order.NeedsExtraDatafield()) itHeader.ordnum = Order.size();
+		else itHeader.ordnum = min(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
 
 		//Crop unused orders from the end.
-		while(header.ordnum > 1 && Order[header.ordnum - 1] == Order.GetInvalidPatIndex()) header.ordnum--;
+		while(itHeader.ordnum > 1 && Order[itHeader.ordnum - 1] == Order.GetInvalidPatIndex()) itHeader.ordnum--;
 	} else
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
-		header.ordnum = min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
-		if(header.ordnum < 2) header.ordnum = 2;
+		itHeader.ordnum = min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
+		if(itHeader.ordnum < 2) itHeader.ordnum = 2;
 	}
 
-	header.insnum = min(m_nInstruments, specs.instrumentsMax);
-	header.smpnum = min(m_nSamples, specs.samplesMax);
-	header.patnum = min(Patterns.GetNumPatterns(), specs.patternsMax);
+	itHeader.insnum = min(m_nInstruments, specs.instrumentsMax);
+	itHeader.smpnum = min(m_nSamples, specs.samplesMax);
+	itHeader.patnum = min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
-	vector<DWORD> patpos(header.patnum, 0);
-	vector<DWORD> smppos(header.smpnum, 0);
-	vector<DWORD> inspos(header.insnum, 0);
+	vector<DWORD> patpos(itHeader.patnum, 0);
+	vector<DWORD> smppos(itHeader.smpnum, 0);
+	vector<DWORD> inspos(itHeader.insnum, 0);
 
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
 	{
-		header.cwtv = verMptFileVer;	// Used in OMPT-hack versioning.
-		header.cmwt = 0x888;
+		itHeader.cwtv = verMptFileVer;	// Used in OMPT-hack versioning.
+		itHeader.cmwt = 0x888;
 	}
 	else //IT
 	{
 		MptVersion::VersionNum vVersion = MptVersion::num;
-		header.cwtv = LittleEndianW(0x5000 | (WORD)((vVersion >> 16) & 0x0FFF)); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
-		header.cmwt = LittleEndianW(0x0214);	// Common compatible tracker :)
+		itHeader.cwtv = 0x5000 | (uint16)((vVersion >> 16) & 0x0FFF); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
+		itHeader.cmwt = 0x0214;	// Common compatible tracker :)
 		// Hack from schism tracker:
 		for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
 		{
 			if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
 			{
-				header.cmwt = LittleEndianW(0x0216);
+				itHeader.cmwt = 0x0216;
 				break;
 			}
 		}
@@ -1447,33 +1159,33 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		if(!compatExport)
 		{
 			// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
-			header.reserved = LittleEndian(IT_OMPT);
+			itHeader.reserved = ITFileHeader::omptMagic;
 		}
 	}
 
-	header.flags = 0x0001;
-	header.special = 0x02 | 0x04 ;	// 0x02: embed file edit history, 0x04: store row highlight in the header
-	if (m_nInstruments) header.flags |= 0x04;
-	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
-	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
-	if (m_dwSongFlags & SONG_ITCOMPATGXX) header.flags |= 0x20;
-	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatExport) header.flags |= 0x1000;
-	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = min(m_nSamplePreAmp, 128);
-	header.speed = m_nDefaultSpeed;
- 	header.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
-	header.sep = 128; // pan separation
-	dwHdrPos = sizeof(header) + header.ordnum;
+	itHeader.flags = ITFileHeader::useStereoPlayback;
+	itHeader.special = ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights;
+	if (m_nInstruments) itHeader.flags |= ITFileHeader::instrumentMode;
+	if (m_dwSongFlags & SONG_LINEARSLIDES) itHeader.flags |= ITFileHeader::linearSlides;
+	if (m_dwSongFlags & SONG_ITOLDEFFECTS) itHeader.flags |= ITFileHeader::itOldEffects;
+	if (m_dwSongFlags & SONG_ITCOMPATGXX) itHeader.flags |= ITFileHeader::itCompatGxx;
+	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
+	itHeader.globalvol = m_nDefaultGlobalVolume >> 1;
+	itHeader.mv = min(m_nSamplePreAmp, 128);
+	itHeader.speed = m_nDefaultSpeed;
+ 	itHeader.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
+	itHeader.sep = 128; // pan separation
+	dwHdrPos = sizeof(itHeader) + itHeader.ordnum;
 	// Channel Pan and Volume
-	memset(header.chnpan, 0xA0, 64);
-	memset(header.chnvol, 64, 64);
+	memset(itHeader.chnpan, 0xA0, 64);
+	memset(itHeader.chnvol, 64, 64);
 
 	for (CHANNELINDEX ich = 0; ich < min(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
 	{
-		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
-		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;
-		header.chnvol[ich] = ChnSettings[ich].nVolume;
-		if (ChnSettings[ich].dwFlags & CHN_MUTE) header.chnpan[ich] |= 0x80;
+		itHeader.chnpan[ich] = ChnSettings[ich].nPan >> 2;
+		if (ChnSettings[ich].dwFlags & CHN_SURROUND) itHeader.chnpan[ich] = 100;
+		itHeader.chnvol[ich] = ChnSettings[ich].nVolume;
+		if (ChnSettings[ich].dwFlags & CHN_MUTE) itHeader.chnpan[ich] |= 0x80;
 	}
 
 	// Channel names
@@ -1491,14 +1203,14 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
-		header.flags |= 0x80;
-		header.special |= 0x08;
+		itHeader.flags |= ITFileHeader::reqEmbeddedMIDIConfig;
+		itHeader.special |= ITFileHeader::embedMIDIConfiguration;
 		dwExtra += sizeof(MIDIMacroConfig);
 	}
 
 	// Pattern Names
-	const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
-	if(numNamedPats > 0 && !compatExport)
+	const PATTERNINDEX numNamedPats = compatExport ? 0 : Patterns.GetNumNamedPatterns();
+	if(numNamedPats > 0)
 	{
 		dwExtra += (numNamedPats * MAX_PATTERNNAME) + 8;
 	}
@@ -1513,33 +1225,37 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	dwExtra += SaveITEditHistory(this, nullptr);
 
 	// Comments
-	if (m_lpszSongComments)
+	if(m_lpszSongComments)
 	{
-		header.special |= 1;
-		header.msglength = strlen(m_lpszSongComments) + 1;
-		header.msgoffset = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
+		itHeader.special |= ITFileHeader::embedSongMessage;
+		itHeader.msglength = min(strlen(m_lpszSongComments) + 1, uint16_max);
+		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
 	// Write file header
-	fwrite(&header, 1, sizeof(header), f);
-	Order.WriteAsByte(f, header.ordnum);
-	if (header.insnum) fwrite(&inspos[0], 4, header.insnum, f);
-	if (header.smpnum) fwrite(&smppos[0], 4, header.smpnum, f);
-	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
+	itHeader.ConvertEndianness();
+	fwrite(&itHeader, 1, sizeof(itHeader), f);
+	// Convert endianness again as we access some of the header variables with native endianness here.
+	itHeader.ConvertEndianness();
+
+	Order.WriteAsByte(f, itHeader.ordnum);
+	if(itHeader.insnum) fwrite(&inspos[0], 4, itHeader.insnum, f);
+	if(itHeader.smpnum) fwrite(&smppos[0], 4, itHeader.smpnum, f);
+	if(itHeader.patnum) fwrite(&patpos[0], 4, itHeader.patnum, f);
 
 	// Writing edit history information
 	SaveITEditHistory(this, f);
 
 	// Writing midi cfg
-	if (header.flags & 0x80)
+	if(itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig)
 	{
 		fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
 	}
 
 	// Writing pattern names
-	if (numNamedPats && !compatExport)
+	if(numNamedPats)
 	{
-		DWORD d = LittleEndian(IT_PNAM); // "PNAM"
+		DWORD d = LittleEndian(magicPatternNames); // "PNAM"
 		fwrite(&d, 1, 4, f);
 		d = numNamedPats * MAX_PATTERNNAME;
 		fwrite(&d, 1, 4, f);
@@ -1554,13 +1270,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	// Writing channel names
-	if (dwChnNamLen && !compatExport)
+	if(dwChnNamLen && !compatExport)
 	{
-		DWORD d = LittleEndian(IT_CNAM); // "CNAM"
+		DWORD d = LittleEndian(magicChannelNames); // "CNAM"
 		fwrite(&d, 1, 4, f);
 		fwrite(&dwChnNamLen, 1, 4, f);
 		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
-		for (UINT inam=0; inam<nChnNames; inam++)
+		for(UINT inam = 0; inam < nChnNames; inam++)
 		{
 			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
 		}
@@ -1573,148 +1289,55 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	// Writing song message
-	dwPos = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
-	if (header.special & 1)
+	dwPos = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
+	if(itHeader.special & ITFileHeader::embedSongMessage)
 	{
-		dwPos += strlen(m_lpszSongComments) + 1;
-		fwrite(m_lpszSongComments, 1, strlen(m_lpszSongComments)+1, f);
+		dwPos += itHeader.msglength;
+		fwrite(m_lpszSongComments, 1, itHeader.msglength, f);
 	}
 
 	// Writing instruments
-	for (UINT nins=1; nins<=header.insnum; nins++)
+	for(UINT nins = 1; nins <= itHeader.insnum; nins++)
 	{
-		bool bKbdEx = false;	// extended sample map (for samples > 255)
-		BYTE keyboardex[NOTE_MAX];
+		ITInstrumentEx iti;
+		size_t instSize;
 
-		MemsetZero(iti);
-		iti.id = LittleEndian(IT_IMPI);	// "IMPI"
-		iti.trkvers = (compatExport ? LittleEndianW(0x0214) : LittleEndianW(0x220));	//rewbs.itVersion
-		if (Instruments[nins])
+		if(Instruments[nins])
 		{
-			ModInstrument *pIns = Instruments[nins];
-			memcpy(iti.filename, pIns->filename, 12);
-			memcpy(iti.name, pIns->name, 26);
-			StringFixer::SetNullTerminator(iti.name);
-
-			iti.mbank = pIns->wMidiBank;
-			iti.mpr = pIns->nMidiProgram;
-			if(pIns->nMidiChannel || pIns->nMixPlug == 0 || compatExport)
-			{
-				// Default. Prefer MIDI channel over mixplug to keep the semantics intact.
-				iti.mch = pIns->nMidiChannel;
-			} else
-			{
-				// Keep compatibility with MPT 1.16's instrument format if possible, as XMPlay / BASS also uses this.
-				iti.mch = pIns->nMixPlug + 128;
-			}
-			iti.nna = pIns->nNNA;
-			iti.dct = (pIns->nDCT < DCT_PLUGIN || !compatExport) ? pIns->nDCT : 0;
-			iti.dca = pIns->nDNA;
-			iti.fadeout = min(pIns->nFadeOut >> 5, 256);
-			iti.pps = pIns->nPPS;
-			iti.ppc = pIns->nPPC;
-			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
-			iti.dfp = (BYTE)(pIns->nPan >> 2);
-			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
-			iti.rv = min(pIns->nVolSwing, 100);
-			iti.rp = min(pIns->nPanSwing, 64);
-			iti.ifc = pIns->GetCutoff() | (pIns->IsCutoffEnabled() ? 0x80 : 0x00);
-			iti.ifr = pIns->GetResonance() | (pIns->IsResonanceEnabled() ? 0x80 : 0x00);
-			iti.nos = 0;
-			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
-			{
-				const UINT smp = pIns->Keyboard[i];
-				if (smp && smp <= GetNumSamples() && !smpcount[smp - 1])
-				{
-					smpcount[smp - 1] = true;
-					iti.nos++;
-				}
-				iti.keyboard[i*2] = (pIns->NoteMap[i] >= NOTE_MIN && pIns->NoteMap[i] <= NOTE_MAX) ? (pIns->NoteMap[i] - 1) : i;
-				iti.keyboard[i*2+1] = smp;
-				if (smp > 0xff && !compatExport) bKbdEx = true;
-				keyboardex[i] = (smp>>8);
-			} else keyboardex[i] = 0;
-			// Writing Volume envelope
-			MPTEnvToIT(&pIns->VolEnv, &iti.volenv, 0, 64);
-			// Writing Panning envelope
-			MPTEnvToIT(&pIns->PanEnv, &iti.panenv, 32, 32);
-			// Writing Pitch Envelope
-			MPTEnvToIT(&pIns->PitchEnv, &iti.pitchenv, 32, 32);
-			if (pIns->PitchEnv.dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
+			instSize = iti.ConvertToIT(*Instruments[nins], compatExport, *this);
 		} else
 		// Save Empty Instrument
 		{
-			for (UINT i=0; i<NOTE_MAX; i++) iti.keyboard[i*2] = i;
-			iti.ppc = 5*12;
-			iti.gbv = 128;
-			iti.dfp = 0x20;
-			iti.ifc = 0xFF;
+			ModInstrument dummy;
+			instSize = iti.ConvertToIT(dummy, compatExport, *this);
 		}
-		if (!iti.nos) iti.trkvers = 0;
+
 		// Writing instrument
-		if (bKbdEx) *((int *)iti.dummy) = 'MPTX';
-		inspos[nins-1] = dwPos;
-		dwPos += sizeof(ITINSTRUMENT);
-		fwrite(&iti, 1, sizeof(ITINSTRUMENT), f);
-		if (bKbdEx)
-		{
-			dwPos += NOTE_MAX;
-			fwrite(keyboardex, 1, NOTE_MAX, f);
-		}
+		inspos[nins - 1] = dwPos;
+		dwPos += instSize;
+		fwrite(&iti, 1, instSize, f);
 
 		//------------ rewbs.modularInstData
 		if (Instruments[nins] && !compatExport)
 		{
-			long modularInstSize = 0;
-			UINT ModInstID = 'INSM';
-			fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
-			long sizePos = ftell(f);				// we will want to write the modular data's total size here
-			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
-
-			//Write chunks
-			UINT ID;
-			{	//VST Slot chunk:
-				ID='PLUG';
-				fwrite(&ID, 1, sizeof(int), f);
-				ModInstrument *pIns = Instruments[nins];
-				fwrite(&(pIns->nMixPlug), 1, sizeof(BYTE), f);
-				modularInstSize += sizeof(int)+sizeof(BYTE);
-			}
-			//How to save your own modular instrument chunk:
-	/*		{
-				ID='MYID';
-				fwrite(&ID, 1, sizeof(int), f);
-				instModularDataSize+=sizeof(int);
-
-				//You can save your chunk size somwhere here if you need variable chunk size.
-				fwrite(myData, 1, myDataSize, f);
-				instModularDataSize+=myDataSize;
-			}
-	*/
-			//write modular data's total size
-			long curPos = ftell(f);			// remember current pos
-			fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
-			fseek(f, curPos, SEEK_SET);		// go back to where we were.
-
-			//move forward
-			dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
+			dwPos += SaveModularInstrumentData(f, Instruments[nins]);
 		}
 		//------------ end rewbs.modularInstData
 	}
 
 	// Writing sample headers
+	ITSample itss;
 	MemsetZero(itss);
-	for (UINT hsmp=0; hsmp<header.smpnum; hsmp++)
+	for(UINT hsmp=0; hsmp<itHeader.smpnum; hsmp++)
 	{
 		smppos[hsmp] = dwPos;
-		dwPos += sizeof(ITSAMPLESTRUCT);
-		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
+		dwPos += sizeof(ITSample);
+		fwrite(&itss, 1, sizeof(ITSample), f);
 	}
 
 	// Writing Patterns
 	bool bNeedsMptPatSave = false;
-	for (UINT npat=0; npat<header.patnum; npat++)
+	for (UINT npat=0; npat<itHeader.patnum; npat++)
 	{
 		DWORD dwPatPos = dwPos;
 		if (!Patterns[npat]) continue;
@@ -1905,92 +1528,35 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		fseek(f, dwPos, SEEK_SET);
 	}
 	// Writing Sample Data
-	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
+	for (UINT nsmp=1; nsmp<=itHeader.smpnum; nsmp++)
 	{
-		const ModSample &sample = Samples[nsmp];
-		MemsetZero(itss);
-		memcpy(itss.filename, sample.filename, 12);
+		itss.ConvertToIT(Samples[nsmp], GetType());
+
 		memcpy(itss.name, m_szNames[nsmp], 26);
-		StringFixer::SetNullTerminator(itss.name);
-
-		itss.id = LittleEndian(IT_IMPS);
-		itss.gvl = (BYTE)sample.nGlobalVol;
-
-		UINT flags = RS_PCM8S;
-		if(sample.nLength && sample.pSample)
-		{
-			itss.flags = 0x01;
-			if (sample.uFlags & CHN_LOOP) itss.flags |= 0x10;
-			if (sample.uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-			if (sample.uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-			if (sample.uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-#ifndef NO_PACKING
-			if (nPacking && !compatExport)
-			{
-				if ((!(sample.uFlags & (CHN_16BIT|CHN_STEREO)))
-					&& (CanPackSample(sample.pSample, sample.nLength, nPacking)))
-				{
-					flags = RS_ADPCM4;
-					itss.cvt = 0xFF;
-				}
-			} else
-#endif // NO_PACKING
-			{
-				if (sample.uFlags & CHN_STEREO)
-				{
-					flags = RS_STPCM8S;
-					itss.flags |= 0x04;
-				}
-				if (sample.uFlags & CHN_16BIT)
-				{
-					itss.flags |= 0x02;
-					flags = (sample.uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
-				}
-			}
-			itss.cvt = 0x01;
-		}
-		else
-		{
-			itss.flags = 0x00;
-		}
-
-		itss.C5Speed = sample.nC5Speed;
-		if (!itss.C5Speed) itss.C5Speed = 8363;
-		itss.length = sample.nLength;
-		itss.loopbegin = sample.nLoopStart;
-		itss.loopend = sample.nLoopEnd;
-		itss.susloopbegin = sample.nSustainStart;
-		itss.susloopend = sample.nSustainEnd;
-		itss.vol = sample.nVolume >> 2;
-		itss.dfp = sample.nPan >> 2;
-		itss.vit = autovibxm2it[sample.nVibType & 7];
-		itss.vis = min(sample.nVibRate, 64);
-		itss.vid = min(sample.nVibDepth, 32);
-		itss.vir = min(sample.nVibSweep, 255); //(sample.nVibSweep < 64) ? sample.nVibSweep * 4 : 255;
-		if (sample.uFlags & CHN_PANNING) itss.dfp |= 0x80;
+		StringFixer::FixNullString(itss.name);
 
 		itss.samplepointer = dwPos;
-		fseek(f, smppos[nsmp-1], SEEK_SET);
-		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
+		fseek(f, smppos[nsmp - 1], SEEK_SET);
+		fwrite(&itss, 1, sizeof(ITSample), f);
 		fseek(f, dwPos, SEEK_SET);
-		if ((sample.pSample) && (sample.nLength))
+		if ((Samples[nsmp].pSample) && (Samples[nsmp].nLength))
 		{
-			dwPos += WriteSample(f, &sample, flags);
+			dwPos += WriteSample(f, &Samples[nsmp], itss.GetSampleFormat());
 		}
 	}
 
 	//Save hacked-on extra info
 	if(!compatExport)
 	{
-		SaveExtendedInstrumentProperties(header.insnum, f);
+		SaveExtendedInstrumentProperties(itHeader.insnum, f);
 		SaveExtendedSongProperties(f);
 	}
 
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
-	if (header.insnum) fwrite(&inspos[0], 4, header.insnum, f);
-	if (header.smpnum) fwrite(&smppos[0], 4, header.smpnum, f);
-	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
+	if (itHeader.insnum) fwrite(&inspos[0], 4, itHeader.insnum, f);
+	if (itHeader.smpnum) fwrite(&smppos[0], 4, itHeader.smpnum, f);
+	if (itHeader.patnum) fwrite(&patpos[0], 4, itHeader.patnum, f);
 
 	if(GetType() == MOD_TYPE_IT)
 	{
@@ -2506,7 +2072,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		if(maxNodes > 25)
 		{
 			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(ModInstrument().VolEnv.Ticks ), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
 
 			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
@@ -2833,4 +2399,115 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 
 	#undef CASE
 	#undef CASE_NOTXM
+}
+
+
+size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const
+//------------------------------------------------------------------------------------
+{
+	// As the only stuff that is actually written here is the plugin ID,
+	// we can actually chicken out if there's no plugin.
+	if(!pIns->nMixPlug)
+	{
+		return 0;
+	}
+
+	long modularInstSize = 0;
+	UINT ModInstID = 'INSM';
+	fwrite(&ModInstID, 1, sizeof(ModInstID), f);				// mark this as an instrument with modular extensions
+	long sizePos = ftell(f);									// we will want to write the modular data's total size here
+	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
+
+	// Write chunks
+	UINT ID;
+	{	//VST Slot chunk:
+		ID='PLUG';
+		fwrite(&ID, 1, sizeof(int), f);
+		fwrite(&(pIns->nMixPlug), 1, sizeof(BYTE), f);
+		modularInstSize += sizeof(int)+sizeof(BYTE);
+	}
+	//How to save your own modular instrument chunk:
+/*	{
+		ID='MYID';
+		fwrite(&ID, 1, sizeof(int), f);
+		instModularDataSize+=sizeof(int);
+
+		//You can save your chunk size somwhere here if you need variable chunk size.
+		fwrite(myData, 1, myDataSize, f);
+		instModularDataSize+=myDataSize;
+	}
+*/
+	//write modular data's total size
+	long curPos = ftell(f);			// remember current pos
+	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
+	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+	fseek(f, curPos, SEEK_SET);		// go back to where we were.
+
+	// Compute the size that we just wasted.
+	return sizeof(ModInstID) + sizeof(modularInstSize) + modularInstSize;
+}
+
+
+size_t CSoundFile::LoadModularInstrumentData(const LPCBYTE lpStream, const DWORD dwMemLength, ModInstrument *pIns) const
+//----------------------------------------------------------------------------------------------------------------------
+{
+	#define ASSERT_CAN_READ_INSTR(x) ASSERT_CAN_READ_PROTOTYPE(memPos, dwMemLength, x, return modularInstSize);
+
+	size_t memPos = 0;
+	size_t modularInstSize = 0;
+
+	//rewbs.modularInstData
+	// find end of standard header
+	ASSERT_CAN_READ_INSTR(8);
+
+	//If the next piece of data is 'INSM' we have modular extensions to our instrument...
+	if(memcmp(lpStream, "MSNI", 4))
+	{
+		return 0;
+	}
+	//...the next piece of data must be the total size of the modular data
+	modularInstSize = *(reinterpret_cast<const uint32 *>(lpStream + 4)) + 8;
+
+	ASSERT_CAN_READ_INSTR(modularInstSize);
+
+	// Handle chunks
+	memPos += 8;
+	const unsigned char *modularData = lpStream + memPos;
+
+	while(memPos < modularInstSize)
+	{
+		ASSERT_CAN_READ_INSTR(4);
+		uint32 chunkID = *reinterpret_cast<const uint32 *>(modularData);
+		memPos += 4;
+		modularData += 4;
+
+		switch (chunkID)
+		{
+		case 'PLUG':
+			// Chunks don't tell us their length - stupid!
+			ASSERT_CAN_READ_INSTR(1);
+			pIns->nMixPlug = *reinterpret_cast<const uint8*>(modularData);
+			memPos++;
+			modularData++;
+			break;
+
+		/*How to load more chunks?  -- see also how to save chunks
+		case: 'MYID':
+			// handle chunk data, as pointed to by pModularInst
+			// move pModularInst as appropriate
+			break;
+		*/
+
+		default:
+			// move forward one byte and try to recognize again.
+			memPos++;
+			modularData++;
+			
+		}
+	}
+	//end rewbs.modularInstData
+
+	return modularInstSize;
+
+	#undef ASSERT_CAN_READ_INSTR
 }

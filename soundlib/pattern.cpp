@@ -11,11 +11,11 @@
 #include "stdafx.h"
 #include "pattern.h"
 #include "patternContainer.h"
-#include "it_defs.h"
 #include "../mptrack/mainfrm.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/serialization_utils.h"
 #include "../mptrack/version.h"
+#include "ITTools.h"
 
 CSoundFile& CPattern::GetSoundFile() {return m_rPatternContainer.GetSoundFile();}
 const CSoundFile& CPattern::GetSoundFile() const {return m_rPatternContainer.GetSoundFile();}

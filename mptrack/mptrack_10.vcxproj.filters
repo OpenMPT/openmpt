@@ -436,6 +436,9 @@
     <ClCompile Include="..\soundlib\ModSample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\ITTools.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -476,9 +479,6 @@
     </ClInclude>
     <ClInclude Include="DefaultVstEditor.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\soundlib\IT_DEFS.H">
-      <Filter>Module Loaders</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\Loaders.h">
       <Filter>Module Loaders</Filter>
@@ -770,6 +770,9 @@
     </ClInclude>
     <ClInclude Include="PSRatioCalc.h">
       <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ITTools.h">
+      <Filter>Module Loaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,13 +11,13 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
-#include "it_defs.h"
 #include "wavConverter.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #endif //MODPLUG_TRACKER
 #include "../mptrack/Mainfrm.h" // For CriticalSection
 #include "Wav.h"
+#include "ITTools.h"
 #include "../common/StringFixer.h"
 #include "../common/Reporting.h"
 
@@ -63,7 +63,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 	 || (psig[76/4] == LittleEndian(0x53524353))											// S3I signature
 	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x46464941)))	// AIFF signature
 	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x58565338)))	// 8SVX signature
-	 || (psig[0] == LittleEndian(IT_IMPS))													// ITS signature
+	 || (psig[0] == LittleEndian(ITSample::magic))											// ITS signature
 	)
 	{
 		// Loading Instrument
@@ -1639,94 +1639,38 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
 //-------------------------------------------------------------------------------------------------------
 {
-	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)lpMemFile;
-	ModSample *pSmp = &Samples[nSample];
+	ITSample *pis = (ITSample *)lpMemFile;
 	DWORD dwMemPos;
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-//	if ((!lpMemFile) || (dwFileLength < sizeof(ITSAMPLESTRUCT))
-//	 || (pis->id != LittleEndian(IT_IMPS)) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return FALSE;
-	if ((!lpMemFile) || (dwFileLength < sizeof(ITSAMPLESTRUCT))
-	 || (pis->id != LittleEndian(IT_IMPS)) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return 0;
-// -! NEW_FEATURE#0027
+	if ((!lpMemFile) || (dwFileLength < sizeof(ITSample))
+		|| (pis->id != LittleEndian(ITSample::magic))) return 0;
+
 	DestroySample(nSample);
-	dwMemPos = pis->samplepointer - dwOffset;
-	memcpy(pSmp->filename, pis->filename, 12);
-	StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
+
+	dwMemPos = pis->ConvertToMPT(Samples[nSample]) - dwOffset;
+
 	memcpy(m_szNames[nSample], pis->name, 26);
-	StringFixer::SpaceToNullStringFixed<26>(m_szNames[nSample]);
-	pSmp->nLength = pis->length;
-	if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
-	pSmp->nLoopStart = pis->loopbegin;
-	pSmp->nLoopEnd = pis->loopend;
-	pSmp->nSustainStart = pis->susloopbegin;
-	pSmp->nSustainEnd = pis->susloopend;
-	pSmp->nC5Speed = pis->C5Speed;
-	if (!pSmp->nC5Speed) pSmp->nC5Speed = 8363;
-	if (pis->C5Speed < 256) pSmp->nC5Speed = 256;
-	pSmp->RelativeTone = 0;
-	pSmp->nFineTune = 0;
-	pSmp->nVolume = pis->vol << 2;
-	if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-	pSmp->nGlobalVol = pis->gvl;
-	if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
-	pSmp->uFlags = 0;
-	if (pis->flags & 0x10) pSmp->uFlags |= CHN_LOOP;
-	if (pis->flags & 0x20) pSmp->uFlags |= CHN_SUSTAINLOOP;
-	if (pis->flags & 0x40) pSmp->uFlags |= CHN_PINGPONGLOOP;
-	if (pis->flags & 0x80) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
-	pSmp->nPan = (pis->dfp & 0x7F) << 2;
-	if (pSmp->nPan > 256) pSmp->nPan = 256;
-	if (pis->dfp & 0x80) pSmp->uFlags |= CHN_PANNING;
-	pSmp->nVibType = autovibit2xm[pis->vit & 7];
-	pSmp->nVibSweep = pis->vir;
-	pSmp->nVibDepth = pis->vid;
-	pSmp->nVibRate = pis->vis;
-	UINT flags = (pis->cvt & 1) ? RS_PCM8S : RS_PCM8U;
-	if (pis->flags & 2)
+	StringFixer::SpaceToNullStringFixed<25>(m_szNames[nSample]);
+
+	if(dwMemPos > dwFileLength)
 	{
-		flags += 5;
-		if (pis->flags & 4)
-		{
-			flags |= RSF_STEREO;
-// -> CODE#0001
-// -> DESC="enable saving stereo ITI"
-			pSmp->uFlags |= CHN_STEREO;
-// -! BUG_FIX#0001
-		}
-		pSmp->uFlags |= CHN_16BIT;
-		// IT 2.14 16-bit packed sample ?
-		if (pis->flags & 8) flags = RS_IT21416;
-	} else
-	{
-		if (pis->flags & 4) flags |= RSF_STEREO;
-		if (pis->cvt == 0xFF) flags = RS_ADPCM4; else
-		// IT 2.14 8-bit packed sample ?
-		if (pis->flags & 8)	flags =	RS_IT2148;
+		return 0;
 	}
 
-	pSmp->Convert(MOD_TYPE_IT, GetType());
+	Samples[nSample].Convert(MOD_TYPE_IT, GetType());
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-//	ReadSample(pSmp, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
-//	return TRUE;
-
-	return ReadSample(pSmp, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
-// -! NEW_FEATURE#0027
+	return ReadSample(&Samples[nSample], pis->GetSampleFormat(), (LPSTR)(lpMemFile + dwMemPos), dwFileLength + dwOffset - dwMemPos);
 }
 
 
 bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
 //----------------------------------------------------------------------------------------------
 {
-	ITINSTRUMENT *pinstr = (ITINSTRUMENT *)lpMemFile;
-	DWORD dwMemPos;
+	ITInstrument *pinstr = (ITInstrument *)lpMemFile;
 	UINT nsmp = 0, nsamples;
 
-	if ((!lpMemFile) || (dwFileLength < sizeof(ITINSTRUMENT))
-	 || (pinstr->id != LittleEndian(IT_IMPI))) return false;
+	if ((!lpMemFile) || (dwFileLength < sizeof(ITInstrument))
+		|| (pinstr->id != LittleEndian(ITInstrument::magic))) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 
 	ModInstrument *pIns;
@@ -1742,8 +1686,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 
 	Instruments[nInstr] = pIns;
-	dwMemPos = 554;
-	dwMemPos += ITInstrToMPT(pinstr, pIns, pinstr->trkvers);
+	DWORD dwMemPos = ITInstrToMPT(pinstr, pIns, pinstr->trkvers, dwFileLength);
 	nsamples = pinstr->nos;
 
 // -> CODE#0027
@@ -1766,7 +1709,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 //		ReadITSSample(nsmp, lpMemFile+dwMemPos, dwFileLength-dwMemPos, dwMemPos);
 		lastSampleSize = ReadITSSample(nsmp, lpMemFile + dwMemPos, dwFileLength - dwMemPos, dwMemPos);
 // -! NEW_FEATURE#0027
-		dwMemPos += sizeof(ITSAMPLESTRUCT);
+		dwMemPos += sizeof(ITSample);
 	}
 	if (m_nSamples < nsmp) m_nSamples = nsmp;
 
@@ -1782,11 +1725,11 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Rewind file pointer offset (dwMemPos) to last sample header position
-	dwMemPos -= sizeof(ITSAMPLESTRUCT);
-	BYTE * ptr = (BYTE *)(lpMemFile+dwMemPos);
+	dwMemPos -= sizeof(ITSample);
+	BYTE *ptr = (BYTE *)(lpMemFile + dwMemPos);
 
 	// Update file pointer offset (dwMemPos) to match the end of the sample datas
-	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)ptr;
+	ITSample *pis = (ITSample *)ptr;
 	dwMemPos += pis->samplepointer - dwMemPos + lastSampleSize;
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return true;
@@ -1804,175 +1747,67 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const
 //-----------------------------------------------------------------------------------
 {
-	BYTE buffer[554];
-	ITINSTRUMENT *iti = (ITINSTRUMENT *)buffer;
-	ITSAMPLESTRUCT itss;
+	ITInstrumentEx iti;
 	ModInstrument *pIns = Instruments[nInstr];
-	vector<bool> smpcount(GetNumSamples(), false);
-	vector<SAMPLEINDEX> smptable;
-	vector<SAMPLEINDEX> smpmap(GetNumSamples() + 1, 0);
 	DWORD dwPos;
 	FILE *f;
 
-	if ((!pIns) || (!lpszFileName)) return false;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	MemsetZero(buffer);
-	iti->id = LittleEndian(IT_IMPI);	// "IMPI"
-	memcpy(iti->filename, pIns->filename, 12);
-	StringFixer::FixNullString(iti->filename);
-	memcpy(iti->name, pIns->name, 26);
-	StringFixer::FixNullString(iti->name);
-	iti->mpr = pIns->nMidiProgram;
-	iti->mch = pIns->nMidiChannel;
-	iti->mbank = pIns->wMidiBank; //rewbs.MidiBank
-	iti->nna = pIns->nNNA;
-	iti->dct = pIns->nDCT;
-	iti->dca = pIns->nDNA;
-	iti->fadeout = pIns->nFadeOut >> 5;
-	iti->pps = pIns->nPPS;
-	iti->ppc = pIns->nPPC;
-	iti->gbv = (BYTE)(pIns->nGlobalVol << 1);
-	iti->dfp = (BYTE)pIns->nPan >> 2;
-	if (!(pIns->dwFlags & INS_SETPANNING)) iti->dfp |= 0x80;
-	iti->rv = pIns->nVolSwing;
-	iti->rp = pIns->nPanSwing;
-	iti->ifc = pIns->GetCutoff() | (pIns->IsCutoffEnabled() ? 0x80 : 0x00);
-	iti->ifr = pIns->GetResonance() | (pIns->IsResonanceEnabled() ? 0x80 : 0x00);
-	//iti->trkvers = 0x202;
-	iti->trkvers =	0x220;	 //rewbs.ITVersion (was 0x202)
-	iti->nos = 0;
-	for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
+	if((!pIns) || (!lpszFileName)) return false;
+	if((f = fopen(lpszFileName, "wb")) == NULL) return false;
+	
+	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
+
+	// Create sample assignment table
+	vector<SAMPLEINDEX> smptable;
+	vector<SAMPLEINDEX> smpmap(GetNumSamples(), 0);
+	for(size_t i = 0; i < NOTE_MAX; i++)
 	{
 		const SAMPLEINDEX smp = pIns->Keyboard[i];
-		if (smp && smp <= GetNumSamples() && !smpcount[smp - 1])
+		if(smp && smp <= GetNumSamples())
 		{
-			smpcount[smp - 1] = true;
-			smptable.push_back(smp);
-			smpmap[smp] = iti->nos++;
+			if(!smpmap[smp - 1])
+			{
+				// We haven't considered this sample yet.
+				smptable.push_back(smp);
+				smpmap[smp - 1] = smptable.size();
+			}
+			iti.iti.keyboard[i * 2 + 1] = smpmap[smp - 1];
+		} else
+		{
+			iti.iti.keyboard[i * 2 + 1] = 0;
 		}
-		iti->keyboard[i * 2] = pIns->NoteMap[i] - 1;
-		iti->keyboard[i * 2 + 1] = smp ? smpmap[smp] + 1 : 0;
 	}
-	// Writing Volume envelope
-	if (pIns->VolEnv.dwFlags & ENV_ENABLED) iti->volenv.flags |= 0x01;
-	if (pIns->VolEnv.dwFlags & ENV_LOOP) iti->volenv.flags |= 0x02;
-	if (pIns->VolEnv.dwFlags & ENV_SUSTAIN) iti->volenv.flags |= 0x04;
-	if (pIns->VolEnv.dwFlags & ENV_CARRY) iti->volenv.flags |= 0x08;
-	iti->volenv.num = (BYTE)pIns->VolEnv.nNodes;
-	iti->volenv.lpb = (BYTE)pIns->VolEnv.nLoopStart;
-	iti->volenv.lpe = (BYTE)pIns->VolEnv.nLoopEnd;
-	iti->volenv.slb = pIns->VolEnv.nSustainStart;
-	iti->volenv.sle = pIns->VolEnv.nSustainEnd;
-	// Writing Panning envelope
-	if (pIns->PanEnv.dwFlags & ENV_ENABLED) iti->panenv.flags |= 0x01;
-	if (pIns->PanEnv.dwFlags & ENV_LOOP) iti->panenv.flags |= 0x02;
-	if (pIns->PanEnv.dwFlags & ENV_SUSTAIN) iti->panenv.flags |= 0x04;
-	if (pIns->PanEnv.dwFlags & ENV_CARRY) iti->panenv.flags |= 0x08;
-	iti->panenv.num = (BYTE)pIns->PanEnv.nNodes;
-	iti->panenv.lpb = (BYTE)pIns->PanEnv.nLoopStart;
-	iti->panenv.lpe = (BYTE)pIns->PanEnv.nLoopEnd;
-	iti->panenv.slb = pIns->PanEnv.nSustainStart;
-	iti->panenv.sle = pIns->PanEnv.nSustainEnd;
-	// Writing Pitch Envelope
-	if (pIns->PitchEnv.dwFlags & ENV_ENABLED) iti->pitchenv.flags |= 0x01;
-	if (pIns->PitchEnv.dwFlags & ENV_LOOP) iti->pitchenv.flags |= 0x02;
-	if (pIns->PitchEnv.dwFlags & ENV_SUSTAIN) iti->pitchenv.flags |= 0x04;
-	if (pIns->PitchEnv.dwFlags & ENV_CARRY) iti->pitchenv.flags |= 0x08;
-	if (pIns->PitchEnv.dwFlags & ENV_FILTER) iti->pitchenv.flags |= 0x80;
-	iti->pitchenv.num = (BYTE)pIns->PitchEnv.nNodes;
-	iti->pitchenv.lpb = (BYTE)pIns->PitchEnv.nLoopStart;
-	iti->pitchenv.lpe = (BYTE)pIns->PitchEnv.nLoopEnd;
-	iti->pitchenv.slb = (BYTE)pIns->PitchEnv.nSustainStart;
-	iti->pitchenv.sle = (BYTE)pIns->PitchEnv.nSustainEnd;
-	// Writing Envelopes data
-	for (UINT ev = 0; ev < 25; ev++)
-	{
-		iti->volenv.data[ev*3] = pIns->VolEnv.Values[ev];
-		iti->volenv.data[ev*3+1] = pIns->VolEnv.Ticks[ev] & 0xFF;
-		iti->volenv.data[ev*3+2] = pIns->VolEnv.Ticks[ev] >> 8;
-		iti->panenv.data[ev*3] = pIns->PanEnv.Values[ev] - 32;
-		iti->panenv.data[ev*3+1] = pIns->PanEnv.Ticks[ev] & 0xFF;
-		iti->panenv.data[ev*3+2] = pIns->PanEnv.Ticks[ev] >> 8;
-		iti->pitchenv.data[ev*3] = pIns->PitchEnv.Values[ev] - 32;
-		iti->pitchenv.data[ev*3+1] = pIns->PitchEnv.Ticks[ev] & 0xFF;
-		iti->pitchenv.data[ev*3+2] = pIns->PitchEnv.Ticks[ev] >> 8;
-	}
-	dwPos = 554;
-	fwrite(buffer, 1, dwPos, f);
-	dwPos += iti->nos * sizeof(ITSAMPLESTRUCT);
+	smpmap.clear();
+
+	dwPos = instSize;
+	fwrite(&iti, 1, instSize, f);
+
+	dwPos += smptable.size() * sizeof(ITSample);
 
 	// Writing sample headers
-	for (UINT j=0; j<iti->nos; j++) if (smptable[j])
+	for(vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
 	{
-		UINT smpsize = 0;
-		UINT nsmp = smptable[j];
-		MemsetZero(itss);
-		const ModSample &sample = Samples[nsmp];
-		itss.id = LittleEndian(IT_IMPS);
-		memcpy(itss.filename, sample.filename, 12);
-		StringFixer::FixNullString(itss.filename);
-		memcpy(itss.name, m_szNames[nsmp], 26);
+		ITSample itss;
+		itss.ConvertToIT(Samples[*iter], GetType());
+
+		memcpy(itss.name, m_szNames[*iter], 26);
 		StringFixer::FixNullString(itss.name);
-		itss.gvl = (BYTE)sample.nGlobalVol;
-		itss.flags = 0x01;
-		if (sample.uFlags & CHN_LOOP) itss.flags |= 0x10;
-		if (sample.uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-		if (sample.uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-		if (sample.uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-		itss.C5Speed = sample.nC5Speed;
-		if (!itss.C5Speed) itss.C5Speed = 8363;
-		itss.length = sample.nLength;
-		itss.loopbegin = sample.nLoopStart;
-		itss.loopend = sample.nLoopEnd;
-		itss.susloopbegin = sample.nSustainStart;
-		itss.susloopend = sample.nSustainEnd;
-		itss.vol = sample.nVolume >> 2;
-		itss.dfp = sample.nPan >> 2;
-		itss.vit = autovibxm2it[sample.nVibType & 7];
-		itss.vir = min(sample.nVibSweep, 255);
-		if((itss.vid | itss.vis) && (GetType() & MOD_TYPE_XM))
-		{
-			// Sweep is upside down in XM
-			itss.vir = 255 - itss.vir;
-		}
-		itss.vid = min(sample.nVibDepth, 32);
-		itss.vis = min(sample.nVibRate, 64);
-		if (sample.uFlags & CHN_PANNING) itss.dfp |= 0x80;
-		itss.cvt = 0x01;
-		smpsize = sample.nLength;
-		if (sample.uFlags & CHN_16BIT)
-		{
-			itss.flags |= 0x02; 
-			smpsize <<= 1;
-		} else
-		{
-			itss.flags &= ~(0x02);
-		}
-		//rewbs.enableStereoITI
-		if (sample.uFlags & CHN_STEREO)
-		{
-			itss.flags |= 0x04;
-			smpsize <<= 1; 
-		} else
-		{
-			itss.flags &= ~(0x04);
-		}
-		//end rewbs.enableStereoITI
-		itss.samplepointer = dwPos;
-		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
-		dwPos += smpsize;
+
+		itss.samplepointer = LittleEndian(dwPos);
+
+		fwrite(&itss, 1, sizeof(itss), f);
+		dwPos += Samples[*iter].GetSampleSizeInBytes();
 	}
+
 	// Writing Sample Data
-	//rewbs.enableStereoITI
-	WORD sampleType=0;
-	if (itss.flags | 0x02) sampleType=RS_PCM16S; else sampleType=RS_PCM8S;	//8 or 16 bit signed
-	if (itss.flags | 0x04) sampleType |= RSF_STEREO;						//mono or stereo
-	for (UINT k = 0; k < iti->nos; k++)
+
+	for(vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
 	{
-		const ModSample *pSmp = &Samples[smptable[k]];
-		UINT smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
-		if (pSmp->uFlags & CHN_STEREO) smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16S : RS_STPCM8S;
-		WriteSample(f, pSmp, smpflags);
+		const ModSample &sample = Samples[*iter];
+		// TODO we should actually use ITSample::GetSampleFormat() instead of re-computing the flags here.
+		UINT smpflags = (sample.uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+		if (sample.uFlags & CHN_STEREO) smpflags = (sample.uFlags & CHN_16BIT) ? RS_STPCM16S : RS_STPCM8S;
+		WriteSample(f, &sample, smpflags);
 	}
 
 	int32 code = 'MPTX';

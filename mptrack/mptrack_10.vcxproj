@@ -169,6 +169,7 @@
   <ItemGroup>
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\Reporting.cpp" />
+    <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
     <ClCompile Include="..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="..\soundlib\ModSample.cpp" />
@@ -326,6 +327,7 @@
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
+    <ClInclude Include="..\soundlib\ITTools.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
     <ClInclude Include="..\soundlib\ModChannel.h" />
     <ClInclude Include="..\soundlib\ModInstrument.h" />
@@ -376,7 +378,6 @@
     <ClInclude Include="fxp.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="InputHandler.h" />
-    <ClInclude Include="..\soundlib\IT_DEFS.H" />
     <ClInclude Include="KeyConfigDlg.h" />
     <ClInclude Include="mainbar.h" />
     <ClInclude Include="MainFrm.h" />
