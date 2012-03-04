@@ -326,12 +326,13 @@ void CCtrlSamples::RecalcLayout()
 bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 //-----------------------------------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	if (!pModDoc) return false;
-	pSndFile = pModDoc->GetSoundFile();
-	if (pSndFile->m_nSamples < 1) pSndFile->m_nSamples = 1;
-	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
+	if (m_pSndFile == nullptr)
+	{
+		return false;
+	}
+	
+	if (m_pSndFile->GetNumSamples() < 1) m_pSndFile->m_nSamples = 1;
+	if ((nSmp < 1) || (nSmp > m_pSndFile->GetNumSamples())) return FALSE;
 
 	LockControls();
 	if (m_nSample != nSmp)
@@ -342,7 +343,7 @@ bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 	if (bUpdNum)
 	{
 		SetDlgItemInt(IDC_EDIT_SAMPLE, m_nSample);
-		m_SpinSample.SetRange(1, pSndFile->m_nSamples);
+		m_SpinSample.SetRange(1, m_pSndFile->GetNumSamples());
 	}
 	if (lZoom < 0)
 		lZoom = m_ComboZoom.GetCurSel();
@@ -655,6 +656,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		const ModSample &sample = m_pSndFile->GetSample(m_nSample);
 		CHAR s[128];
 		DWORD d;
+
+		m_SpinSample.SetRange(1, m_pSndFile->GetNumSamples());
 		
 		// Length / Type
 		wsprintf(s, "%d-bit %s, len: %d", sample.GetElementarySampleSize() * 8, (sample.uFlags & CHN_STEREO) ? "stereo" : "mono", sample.nLength);
