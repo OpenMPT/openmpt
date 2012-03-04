@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "../common/misc_util.h"
+
 // Instrument Envelopes
 struct InstrumentEnvelope
 {

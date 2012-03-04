@@ -414,8 +414,10 @@ public:
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, UINT nInstruments) const;
 	void SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
-	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
+	size_t SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const;
 #endif // MODPLUG_NO_FILESAVE
+	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
+	size_t LoadModularInstrumentData(const LPCBYTE lpStream, const DWORD dwMemLength, ModInstrument *pIns) const;
 
 	// Reads extended instrument properties(XM/IT/MPTM). 
 	// If no errors occur and song extension tag is found, returns pointer to the beginning
@@ -649,7 +651,7 @@ public:
 	const ModSample &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
-	long ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
+	size_t ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers, size_t memLength);
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
 
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
