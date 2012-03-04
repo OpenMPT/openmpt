@@ -1069,12 +1069,12 @@ END_MESSAGE_MAP()
 void CPageEditEffect::UpdateDialog()
 //----------------------------------
 {
-	CHAR s[128];
 	CComboBox *combo;
 	CSoundFile *pSndFile;
 
 	if ((!m_pModDoc) || (!m_bInitialized)) return;
 	pSndFile = m_pModDoc->GetSoundFile();
+
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		combo->ResetContent();
@@ -1083,6 +1083,7 @@ void CPageEditEffect::UpdateDialog()
 			// plugin param control note
 			if(m_nPlugin > 0 && m_nPlugin <= MAX_MIXPLUGINS)
 			{
+				combo->ModifyStyle(CBS_SORT, 0);	// Y U NO WORK?
 				AddPluginParameternamesToCombobox(*combo, pSndFile->m_MixPlugins[m_nPlugin - 1]);
 				combo->SetCurSel(m_nPluginParam);
 			}
@@ -1091,8 +1092,11 @@ void CPageEditEffect::UpdateDialog()
 			// process as effect
 			UINT numfx = effectInfo.GetNumEffects();
 			UINT fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
+			combo->ModifyStyle(0, CBS_SORT);
 			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-			if (!m_nCommand) combo->SetCurSel(0);
+			if (m_nCommand == CMD_NONE) combo->SetCurSel(0);
+
+			CHAR s[128];
 			for (UINT i=0; i<numfx; i++)
 			{
 				if (effectInfo.GetEffectInfo(i, s, true))
@@ -1102,6 +1106,7 @@ void CPageEditEffect::UpdateDialog()
 					if (i == fxndx) combo->SetCurSel(k);
 				}
 			}
+			combo->ModifyStyle(CBS_SORT, 0);
 		}
 	}
 	UpdateRange(FALSE);
@@ -1114,22 +1119,35 @@ void CPageEditEffect::UpdateRange(BOOL bSet)
 	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
 	if ((slider) && (m_pModDoc))
 	{
-		DWORD rangeMin = 0, rangeMax = 0;
-		LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-		bool bEnable = ((fxndx >= 0) && (effectInfo.GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
-		if (bEnable)
+		DWORD rangeMin = 0, rangeMax = 0, pos;
+		bool enable = true;
+
+		if(m_bIsParamControl)
+		{
+			// plugin param control note
+			rangeMax = ModCommand::maxColumnValue;
+			pos = ModCommand::GetValueEffectCol(m_nCommand, m_nParam);
+		} else
+		{
+			// process as effect
+			LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
+			enable = ((fxndx >= 0) && (effectInfo.GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
+
+			pos = effectInfo.MapValueToPos(fxndx, m_nParam);
+			if (pos > rangeMax) pos = rangeMin | (pos & 0x0F);
+			if (pos < rangeMin) pos = rangeMin;
+			if (pos > rangeMax) pos = rangeMax;
+		}
+
+		if (enable)
 		{
 			slider->EnableWindow(TRUE);
 			slider->SetPageSize(1);
 			slider->SetRange(rangeMin, rangeMax);
-			DWORD pos = effectInfo.MapValueToPos(fxndx, m_nParam);
-			if (pos > rangeMax) pos = rangeMin | (pos & 0x0F);
-			if (pos < rangeMin) pos = rangeMin;
-			if (pos > rangeMax) pos = rangeMax;
 			slider->SetPos(pos);
 		} else
 		{
-			slider->SetRange(0,0);
+			slider->SetRange(0, 0);
 			slider->EnableWindow(FALSE);
 		}
 		UpdateValue(bSet);
@@ -1141,8 +1159,17 @@ void CPageEditEffect::UpdateValue(BOOL bSet)
 //------------------------------------------
 {
 	CHAR s[128] = "";
-	LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-	if (fxndx >= 0) effectInfo.GetEffectNameEx(s, fxndx, m_nParam * m_nMultiplier + m_nXParam);
+
+	if(m_bIsParamControl)
+	{
+		// plugin param control note
+		wsprintf(s, "Value: %u", ModCommand::GetValueEffectCol(m_nCommand, m_nParam));
+	} else
+	{
+		// process as effect
+		LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
+		if (fxndx >= 0) effectInfo.GetEffectNameEx(s, fxndx, m_nParam * m_nMultiplier + m_nXParam);
+	}
 	SetDlgItemText(IDC_TEXT1, s);
 
 	if ((m_pParent) && (bSet)) m_pParent->UpdateEffect(m_nCommand, m_nParam);
@@ -1156,16 +1183,29 @@ void CPageEditEffect::OnCommandChanged()
 
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
-		BOOL bSet = FALSE;
 		int n = combo->GetCurSel();
-		if (n >= 0)
+
+		if(m_bIsParamControl)
 		{
-			int param = -1, ndx = combo->GetItemData(n);
-			m_nCommand = (ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, param) : 0;
-			if (param >= 0) m_nParam = static_cast<ModCommand::PARAM>(param);
-			bSet = TRUE;
+			// plugin param control note
+			if(n >= 0)
+			{
+				// TODO update in pattern
+				m_nPluginParam = n;
+			}
+		} else
+		{
+			// process as effect
+			BOOL bSet = FALSE;
+			if (n >= 0)
+			{
+				int param = -1, ndx = combo->GetItemData(n);
+				m_nCommand = (ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, param) : 0;
+				if (param >= 0) m_nParam = static_cast<ModCommand::PARAM>(param);
+				bSet = TRUE;
+			}
+			UpdateRange(bSet);
 		}
-		UpdateRange(bSet);
 	}
 }
 
@@ -1177,15 +1217,28 @@ void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
 	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
 	if (slider != nullptr)
 	{
-		LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-		if (fxndx >= 0)
+		if(m_bIsParamControl)
 		{
-			int pos = slider->GetPos();
-			UINT param = effectInfo.MapPosToValue(fxndx, pos);
-			if (param != m_nParam)
+			// plugin param control note
+			// HACK
+			ModCommand m;
+			m.SetValueEffectCol(static_cast<int16>(slider->GetPos()));
+			m_nCommand = m.command;
+			m_nParam = m.param;
+			UpdateValue(TRUE);
+		} else
+		{
+			// process as effect
+			LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
+			if (fxndx >= 0)
 			{
-				m_nParam = static_cast<ModCommand::PARAM>(param);
-				UpdateValue(TRUE);
+				int pos = slider->GetPos();
+				UINT param = effectInfo.MapPosToValue(fxndx, pos);
+				if (param != m_nParam)
+				{
+					m_nParam = static_cast<ModCommand::PARAM>(param);
+					UpdateValue(TRUE);
+				}
 			}
 		}
 	}

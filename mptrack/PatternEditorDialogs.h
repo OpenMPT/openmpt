@@ -214,7 +214,7 @@ public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(ModCommand &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = ModCommand::GetValueVolCol(m.volcmd, m.vol);}
+	void Init(ModCommand &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = m.GetValueVolCol();}
 	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
 	// -! NEW_FEATURE#0010
 	void UpdateDialog();

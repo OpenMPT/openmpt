@@ -63,17 +63,6 @@ inline void MemsetZero(T &a)
 
 // Copy given object to other location.
 template <class T>
-inline void MemCopy(T &destination, T &source)
-//--------------------------------------------
-{
-#if _HAS_TR1
-	static_assert(std::tr1::is_pointer<T>::value == false, "Won't copy pointers.");
-	static_assert(std::tr1::is_pod<T>::value == true, "Won't copy non-pods.");
-#endif
-	memcpy(&destination, &source, sizeof(T));
-}
-
-template <class T>
 inline void MemCopy(T &destination, const T &source)
 //--------------------------------------------------
 {

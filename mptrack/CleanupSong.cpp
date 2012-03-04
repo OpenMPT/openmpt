@@ -160,7 +160,7 @@ void CModCleanupDlg::OnOK()
 	if(m_bCheckBoxes[CU_RESET_VARIABLES]) bModified |= ResetVariables();
 
 	if(bModified) m_pModDoc->SetModified();
-	m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE|HINT_MODSEQUENCE|HINT_MODGENERAL);
+	m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODSEQUENCE | HINT_MODGENERAL | HINT_SMPNAMES | HINT_INSNAMES);
 	m_pModDoc->ShowLog("Cleanup", this);
 	CDialog::OnOK();
 }
