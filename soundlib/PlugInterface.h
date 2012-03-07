@@ -171,7 +171,7 @@ struct SNDMIXPLUGIN
 	bool IsOutputToMaster() const
 		{ return Info.dwOutputRouting == 0; };
 	PLUGINDEX GetOutputPlugin() const
-		{ return Info.dwOutputRouting >= 0x80 ? static_cast<PLUGINDEX>(Info.dwOutputRouting - 0x80) : MAX_MIXPLUGINS; };
+		{ return Info.dwOutputRouting >= 0x80 ? static_cast<PLUGINDEX>(Info.dwOutputRouting - 0x80) : PLUGINDEX_INVALID; };
 
 	// Output routing setters
 	void SetOutputToMaster()

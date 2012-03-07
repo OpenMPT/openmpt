@@ -1772,8 +1772,8 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			if (!plugin.IsOutputToMaster())
 			{
 				PLUGINDEX nOutput = plugin.GetOutputPlugin();
-				if ((nOutput > iDoPlug) && (nOutput < MAX_MIXPLUGINS)
-					&& (m_MixPlugins[nOutput].pMixState))
+				if(nOutput > iDoPlug && nOutput != PLUGINDEX_INVALID
+					&& m_MixPlugins[nOutput].pMixState != nullptr)
 				{
 					SNDMIXPLUGINSTATE *pOutState = m_MixPlugins[nOutput].pMixState;
 

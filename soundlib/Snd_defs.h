@@ -30,6 +30,7 @@ typedef uint16 PATTERNINDEX;
 	const PATTERNINDEX PATTERNINDEX_MAX	= uint16_max;
 	const PATTERNINDEX PATTERNINDEX_INVALID	= PATTERNINDEX_MAX;
 typedef uint8  PLUGINDEX;
+	const PLUGINDEX PLUGINDEX_INVALID = uint8_max;
 typedef uint16 TEMPO;
 typedef uint16 SAMPLEINDEX;
 	const SAMPLEINDEX SAMPLEINDEX_MAX	= uint16_max;
@@ -293,31 +294,34 @@ enum enmEnvelopeTypes
 #define SYSMIX_SSE			0x20		// Processor supports SSE instructions
 
 // Module flags
-#define SONG_EMBEDMIDICFG	0x0001		// Embed macros in file
-#define SONG_FASTVOLSLIDES	0x0002		// Old Scream Tracker 3.0 volume slides
-#define SONG_ITOLDEFFECTS	0x0004		// Old Impulse Tracker effect implementations
-#define SONG_ITCOMPATGXX	0x0008		// IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
-#define SONG_LINEARSLIDES	0x0010		// Linear slides vs. Amiga slides
-#define SONG_PATTERNLOOP	0x0020		// Loop current pattern (pattern editor)
-#define SONG_STEP			0x0040		// Song is in "step" mode (pattern editor)
-#define SONG_PAUSED			0x0080		// Song is paused
-#define SONG_FADINGSONG		0x0100		// Song is fading out
-#define SONG_ENDREACHED		0x0200		// Song is finished
-#define SONG_GLOBALFADE		0x0400		// Song is fading out
-#define SONG_CPUVERYHIGH	0x0800		// High CPU usage
-#define SONG_FIRSTTICK		0x1000		// Is set when the current tick is the first tick of the row
-#define SONG_MPTFILTERMODE	0x2000		// Local filter mode (reset filter on each note)
-#define SONG_SURROUNDPAN	0x4000		// Pan in the rear channels
-#define SONG_EXFILTERRANGE	0x8000		// Cutoff Filter has double frequency range (up to ~10Khz)
-#define SONG_AMIGALIMITS	0x10000		// Enforce amiga frequency limits
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-#define SONG_ITPROJECT		0x20000		// Is a project file
-#define SONG_ITPEMBEDIH		0x40000		// Embed instrument headers in project file
-// -! NEW_FEATURE#0023
-#define SONG_BREAKTOROW		0x80000		// Break to row command encountered (internal flag, do not touch)
-#define SONG_POSJUMP		0x100000	// Position jump encountered (internal flag, do not touch)
-#define SONG_PT1XMODE		0x200000	// ProTracker 1.x playback mode
+enum SongFlags
+{
+	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
+	SONG_FASTVOLSLIDES	= 0x0002,		// Old Scream Tracker 3.0 volume slides
+	SONG_ITOLDEFFECTS	= 0x0004,		// Old Impulse Tracker effect implementations
+	SONG_ITCOMPATGXX	= 0x0008,		// IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
+	SONG_LINEARSLIDES	= 0x0010,		// Linear slides vs. Amiga slides
+	SONG_PATTERNLOOP	= 0x0020,		// Loop current pattern (pattern editor)
+	SONG_STEP			= 0x0040,		// Song is in "step" mode (pattern editor)
+	SONG_PAUSED			= 0x0080,		// Song is paused
+	SONG_FADINGSONG		= 0x0100,		// Song is fading out
+	SONG_ENDREACHED		= 0x0200,		// Song is finished
+	SONG_GLOBALFADE		= 0x0400,		// Song is fading out
+	SONG_CPUVERYHIGH	= 0x0800,		// High CPU usage
+	SONG_FIRSTTICK		= 0x1000,		// Is set when the current tick is the first tick of the row
+	SONG_MPTFILTERMODE	= 0x2000,		// Local filter mode (reset filter on each note)
+	SONG_SURROUNDPAN	= 0x4000,		// Pan in the rear channels
+	SONG_EXFILTERRANGE	= 0x8000,		// Cutoff Filter has double frequency range (up to ~10Khz)
+	SONG_AMIGALIMITS	= 0x10000,		// Enforce amiga frequency limits
+	// -> CODE#0023
+	// -> DESC="IT project files (.itp)"
+	SONG_ITPROJECT		= 0x20000,		// Is a project file
+	SONG_ITPEMBEDIH		= 0x40000,		// Embed instrument headers in project file
+	// -! NEW_FEATURE#0023
+	SONG_BREAKTOROW		= 0x80000,		// Break to row command encountered (internal flag, do not touch)
+	SONG_POSJUMP		= 0x100000,	// Position jump encountered (internal flag, do not touch)
+	SONG_PT1XMODE		= 0x200000,	// ProTracker 1.x playback mode
+};
 
 #define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_ITPROJECT|SONG_ITPEMBEDIH|SONG_PT1XMODE)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)

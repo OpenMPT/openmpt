@@ -64,6 +64,11 @@ typedef struct _VSTINSTCH
 } VSTINSTCH, *PVSTINSTCH;
 
 
+#ifndef NO_VST
+#include "../soundlib/PluginEventQueue.h"
+#endif // NO_VST
+
+
 //=================================
 class CVstPlugin: public IMixPlugin
 //=================================
@@ -72,7 +77,11 @@ class CVstPlugin: public IMixPlugin
 	friend class CVstPluginManager;
 #ifndef NO_VST
 protected:
-	enum {VSTEVENT_QUEUE_LEN=256}; 
+
+	enum
+	{
+		VstEventQueueLength = 256,
+	}; 
 
 	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
@@ -87,14 +96,9 @@ protected:
 	bool m_bIsVst2;
 	SNDMIXPLUGINSTATE m_MixState;
 	UINT m_nInputs, m_nOutputs;
-	VstEvents *m_pEvList;
 	VSTINSTCH m_MidiCh[16];
 	short m_nMidiPitchBendPos[16];
 
-	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
-	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
-
-	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
 	CSoundFile* m_pSndFile;			 //rewbs.plugDocAware
 //	PSNDMIXPLUGIN m_pSndMixPlugin;	 //rewbs.plugDocAware
@@ -110,6 +114,10 @@ protected:
 	bool m_bIsInstrument;
 
 	int m_nEditorX, m_nEditorY;
+
+	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
+	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
+	VSTEventBlock<VstEventQueueLength> vstEvents;		// MIDI events that should be sent to the plugin
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
@@ -177,8 +185,6 @@ public:
 	int Release();
 	void SaveAllParameters();
 	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param 
-	void ProcessVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
-	void ClearVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
 	void Init(unsigned long nFreq, int bReset);
@@ -217,6 +223,10 @@ private:
 
 	// Set up input / output buffers.
 	bool InitializeIOBuffers();
+
+	// Process incoming and outgoing VST events.
+	void ProcessVSTEvents();
+	void ReceiveVSTEvents(const VstEvents *events) const;
 
 	void ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples);
 

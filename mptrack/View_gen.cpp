@@ -550,7 +550,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				int n = m_CbnOutput.AddString(s);
 				m_CbnOutput.SetItemData(n, 0x80 + iOut);
 				if (!pSndFile->m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster()
-				 && (pSndFile->m_MixPlugins[m_nCurrentPlugin].GetOutputPlugin() == iOut))
+					&& (pSndFile->m_MixPlugins[m_nCurrentPlugin].GetOutputPlugin() == iOut))
 				{
 					outputsel = n;
 				}
@@ -1356,7 +1356,7 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	if(!pSndFile->m_MixPlugins[dest].IsOutputToMaster())
 	{
 		PLUGINDEX nOutput = pSndFile->m_MixPlugins[dest].GetOutputPlugin();
-		if (nOutput <= dest)
+		if (nOutput <= dest && nOutput != PLUGINDEX_INVALID)
 		{
 			pSndFile->m_MixPlugins[dest].SetOutputToMaster();
 		}
