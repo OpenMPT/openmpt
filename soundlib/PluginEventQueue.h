@@ -2,7 +2,7 @@
  * PluginEventQueue.h
  * ------------------
  * Purpose: Alternative, easy to use implementation of the VST event queue mechanism.
- * Notes  : (currently none)
+ * Notes  : Modelled after an idea from http://www.kvraudio.com/forum/viewtopic.php?p=3043807#3043807
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -30,7 +30,7 @@
 
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
-struct VSTEventBlock
+struct PluginEventQueue
 {
 	typedef VstMidiEvent BiggestVstEvent;
 	static_assert(sizeof(BiggestVstEvent) >= sizeof(VstEvent)
@@ -43,7 +43,7 @@ struct VSTEventBlock
 	VstEvent* events[N];	///< event pointer array
 	std::deque<BiggestVstEvent> eventQueue;	// Here we store our events.
 
-	VSTEventBlock()
+	PluginEventQueue()
 	{
 		numEvents = 0;
 		reserved = nullptr;
@@ -55,6 +55,7 @@ struct VSTEventBlock
 	{
 		VstMidiEvent midiEvent;
 		memcpy(&midiEvent, &event, sizeof(event));
+		ASSERT(event.byteSize == sizeof(event));
 		return Enqueue(midiEvent, insertFront);
 	}
 	bool Enqueue(const VstMidiEvent &event, bool insertFront = false)
@@ -73,6 +74,7 @@ struct VSTEventBlock
 	{
 		VstMidiEvent midiEvent;
 		memcpy(&midiEvent, &event, sizeof(event));
+		ASSERT(event.byteSize == sizeof(event));
 		return Enqueue(midiEvent, insertFront);
 	}
 

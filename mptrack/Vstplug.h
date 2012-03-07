@@ -117,7 +117,7 @@ protected:
 
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
 	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
-	VSTEventBlock<VstEventQueueLength> vstEvents;		// MIDI events that should be sent to the plugin
+	PluginEventQueue<VstEventQueueLength> vstEvents;		// MIDI events that should be sent to the plugin
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
