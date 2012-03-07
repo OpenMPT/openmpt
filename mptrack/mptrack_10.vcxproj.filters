@@ -439,6 +439,9 @@
     <ClCompile Include="..\soundlib\ITTools.cpp">
       <Filter>Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="PatternClipboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -773,6 +776,12 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\ITTools.h">
       <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternClipboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternCursor.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

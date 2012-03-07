@@ -230,6 +230,7 @@
     <ClCompile Include="mptrack.cpp" />
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
+    <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
     <ClCompile Include="..\soundlib\PlaybackEventer.cpp" />
@@ -339,6 +340,8 @@
     <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="MIDIMacroDialog.h" />
+    <ClInclude Include="PatternClipboard.h" />
+    <ClInclude Include="PatternCursor.h" />
     <ClInclude Include="PatternRandomizer.h" />
     <ClInclude Include="PatternRandomizerGUI.h" />
     <ClInclude Include="PatternRandomizerGUIEffect.h" />

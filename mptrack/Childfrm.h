@@ -13,6 +13,7 @@
 class CModControlDlg;
 class CChildFrame;
 
+#include "PatternCursor.h"
 
 typedef struct _GENERALVIEWSTATE
 {
@@ -27,11 +28,9 @@ typedef struct PATTERNVIEWSTATE
 {
 	DWORD cbStruct;
 	PATTERNINDEX nPattern;
-	ROWINDEX nRow;
-	UINT nCursor;
-	DWORD dwBeginSel;
-	DWORD dwEndSel;
-	UINT nDetailLevel;
+	PatternCursor cursor;
+	PatternRect selection;
+	PatternCursor::Columns nDetailLevel;
 	ORDERINDEX nOrder;		//rewbs.playSongFromCursor
 } PATTERNVIEWSTATE;
 

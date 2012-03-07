@@ -12,6 +12,8 @@
 #pragma once
 
 #include "globals.h"
+#include "PatternCursor.h"
+#include "PatternClipboard.h"
 
 class CModDoc;
 class CEditCommand;
@@ -27,59 +29,53 @@ class COpenGLEditor;
 #define DRAGITEM_PATTERNHEADER	0x020000
 #define DRAGITEM_PLUGNAME		0x040000	//rewbs.patPlugName
 
-#define PATSTATUS_MOUSEDRAGSEL			0x01	// Creating a selection using the mouse
-#define PATSTATUS_KEYDRAGSEL			0x02	// Creating a selection using shortcuts
-#define PATSTATUS_FOCUS					0x04	// Is the pattern editor focussed
-#define PATSTATUS_FOLLOWSONG			0x08	// Does the cursor follow playback
-#define PATSTATUS_RECORD				0x10	// Recording enabled
-#define PATSTATUS_DRAGHSCROLL			0x20	// Some weird dragging stuff (?)
-#define PATSTATUS_DRAGVSCROLL			0x40	// Some weird dragging stuff (?)
-#define PATSTATUS_VUMETERS				0x80	// Display channel VU meters?
-#define PATSTATUS_CHORDPLAYING			0x100	// Is a chord playing? (pretty much unused)
-#define PATSTATUS_DRAGNDROPEDIT			0x200	// Drag & Drop editing (?)
-#define PATSTATUS_DRAGNDROPPING			0x400	// Dragging a selection around
-#define PATSTATUS_MIDISPACINGPENDING	0x800	// Unused (?)
-#define PATSTATUS_CTRLDRAGSEL			0x1000	// Creating a selection using Ctrl
-#define PATSTATUS_PLUGNAMESINHEADERS	0x2000	// Show plugin names in channel headers //rewbs.patPlugName
-#define PATSTATUS_SELECTROW				0x4000	// Selecting a whole pattern row by clicking the row numbers
-
 
 // Row Spacing
-#define MAX_SPACING		64 // MAX_PATTERN_ROWS
+const ROWINDEX MAX_SPACING = 64; // MAX_PATTERN_ROWS
 
 
-// Selection - bit masks
-// ---------------------
-// A selection point (m_dwStartSel and the like) is stored in a 32-Bit variable. The structure is as follows (MSB to LSB):
-// | 16 bits - row | 13 bits - channel | 3 bits - channel component |
-// As you can see, the highest 16 bits contain a row index.
-// It is followed by a channel index, which is 13 bits wide.
-// The lowest 3 bits are used for addressing the components of a channel. They are *not* used as a bit set, but treated as one of the following integer numbers:
-
-enum PatternColumns
-{
-	NOTE_COLUMN=0,
-    INST_COLUMN,
-	VOL_COLUMN,
-	EFFECT_COLUMN,
-	PARAM_COLUMN,
-	LAST_COLUMN = PARAM_COLUMN
-};
-
-static_assert(MAX_BASECHANNELS <= 0x1FFF, "Check: Channel index in pattern editor is only 13 bits wide!");
-
-
-//Struct for controlling selection clearing. This is used to define which data fields
-//should be cleared.
+// Struct for controlling selection clearing. This is used to define which data fields should be cleared.
 struct RowMask
 {
-      bool note;
-      bool instrument;
-      bool volume;
-      bool command;
-      bool parameter;
+	bool note;
+	bool instrument;
+	bool volume;
+	bool command;
+	bool parameter;
+
+	// Default row mask (all rows are selected)
+	RowMask()
+	{
+		note = instrument = volume = command = parameter = true;
+	};
+
+	// Construct mask from list
+	RowMask(bool n, bool i, bool v, bool c, bool p)
+	{
+		note = n;
+		instrument = i;
+		volume = v;
+		command = c;
+		parameter = p;
+	}
+
+	// Construct mask from column index
+	RowMask(const PatternCursor &cursor)
+	{
+		const PatternCursor::Columns column = cursor.GetColumnType();
+
+		note = (column == PatternCursor::noteColumn);
+		instrument = (column == PatternCursor::instrColumn);
+		volume = (column == PatternCursor::volumeColumn);
+		command = (column == PatternCursor::effectColumn);
+		parameter = (column == PatternCursor::paramColumn);
+	}
+
+	void Clear()
+	{
+		note = instrument = volume = command = parameter = false;
+	}
 };
-const RowMask DefaultRowMask = {true, true, true, true, true};
 
 struct ModCommandPos
 {
@@ -95,7 +91,7 @@ struct FindReplaceStruct
 	DWORD dwFindFlags, dwReplaceFlags;		// PATSEARCH_XXX flags (=> PatternEditorDialogs.h)
 	CHANNELINDEX nFindMinChn, nFindMaxChn;	// Find in these channels (if PATSEARCH_CHANNEL is set)
 	signed char cInstrRelChange;			// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
-	DWORD dwBeginSel, dwEndSel;				// Find in this selection (if PATSEARCH_PATSELECTION is set)
+	PatternRect selection;					// Find in this selection (if PATSEARCH_PATSELECTION is set)
 };
 
 
@@ -108,17 +104,45 @@ class CViewPattern: public CModScrollView
 //=======================================
 {
 protected:
+
+	enum PatternStatus
+	{
+		psMouseDragSelect =		0x01,	// Creating a selection using the mouse
+		psKeyboardDragSelect =	0x02,	// Creating a selection using shortcuts
+		psFocussed =			0x04,	// Is the pattern editor focussed
+		psFollowSong =			0x08,	// Does the cursor follow playback
+		psRecordingEnabled =	0x10,	// Recording enabled
+		psDragHScroll =			0x20,	// Some weird dragging stuff (?)
+		psDragVScroll =			0x40,	// Some weird dragging stuff (?)
+		psShowVUMeters =		0x80,	// Display channel VU meters?
+		psChordPlaying =		0x100,	// Is a chord playing? (pretty much unused)
+		psDragnDropEdit =		0x200,	// Drag & Drop editing (?)
+		psDragnDropping =		0x400,	// Dragging a selection around
+		psMIDISpacingPending =	0x800,	// Unused (?)
+		psCtrlDragSelect =		0x1000,	// Creating a selection using Ctrl
+		psShowPluginNames =		0x2000,	// Show plugin names in channel headers //rewbs.patPlugName
+		psRowSelection =		0x4000,	// Selecting a whole pattern row by clicking the row numbers
+	};
+
 	CFastBitmap m_Dib;
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
 	PATTERNINDEX m_nPattern;
-	ROWINDEX m_nRow;
-	UINT m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
+	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
+	PATTERNINDEX m_nPlayPat;
+	ROWINDEX m_nPlayRow;
 
 	int m_nXScroll, m_nYScroll;
-	DWORD m_nMenuParam, m_nDetailLevel;
+	PatternCursor::Columns m_nDetailLevel;		// Visible Columns
 
+	// Cursor and selection positions
+	PatternCursor m_Cursor;					// Current cursor position in pattern.
+	PatternCursor m_StartSel, m_DragPos;	// Point where selection was started.
+	PatternCursor m_MenuCursor;				// Position at which context menu was opened.
+	PatternRect m_Selection;				// Upper-left / Lower-right corners of selection.
+
+	// Drag&Drop
 	DWORD m_nDragItem;	// Currently dragged item
 	DWORD m_nDropItem;	// Currently hovered item during dragondrop
 	bool m_bDragging, m_bInItemRect, m_bShiftDragging;
@@ -126,9 +150,6 @@ protected:
 
 	bool m_bContinueSearch, m_bWholePatternFitsOnScreen;
 	DWORD m_dwStatus;
-	DWORD m_dwCursor;					// Current cursor position, without row number.
-	DWORD m_dwBeginSel, m_dwEndSel;		// Upper-left / Lower-right corners of selection
-	DWORD m_dwStartSel, m_dwDragPos;	// Point where selection was started
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 	UINT m_nFoundInstrument;
@@ -147,22 +168,21 @@ protected:
 	int oldrow, oldchn, oldsplitchn;
 // -! NEW_FEATURE#0012
 
-// -> CODE#0018
-// -> DESC="route PC keyboard inputs to midi in mechanism"
-	int ignorekey;
-// -! BEHAVIOUR_CHANGE#0018
 	CPatternRandomizer *m_pRandomizer;	//rewbs.fxVis
 public:
-	CEffectVis    *m_pEffectVis;	//rewbs.fxVis
-	//COpenGLEditor *m_pOpenGLEditor;	//rewbs.fxVis
-
+	CEffectVis *m_pEffectVis;	//rewbs.fxVis
 
 	CViewPattern();
 	DECLARE_SERIAL(CViewPattern)
 
 public:
 
-	BOOL UpdateSizes();
+	const CSoundFile *GetSoundFile() const { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
+	CSoundFile *GetSoundFile() { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
+
+	void SetModified(bool updateAllViews = true);
+
+	bool UpdateSizes();
 	void UpdateScrollSize();
 	void UpdateScrollPos();
 	void UpdateIndicator();
@@ -173,43 +193,55 @@ public:
 	int GetYScrollPos() const { return m_nYScroll; }
 	int GetColumnWidth() const { return m_szCell.cx; }
 	int GetColumnHeight() const { return m_szCell.cy; }
+
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
-	ROWINDEX GetCurrentRow() const { return m_nRow; }
-	UINT GetCurrentColumn() const { return m_dwCursor; }
-	UINT GetCurrentChannel() const { return (m_dwCursor >> 3); }
-	UINT GetColumnOffset(DWORD dwPos) const;
-	POINT GetPointFromPosition(DWORD dwPos);
-	DWORD GetPositionFromPoint(POINT pt);
+	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
+	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
+
+	UINT GetColumnOffset(PatternCursor::Columns column) const;
+	POINT GetPointFromPosition(PatternCursor cursor);
+	PatternCursor GetPositionFromPoint(POINT pt);
+
 	DWORD GetDragItem(CPoint point, LPRECT lpRect);
+
 	ROWINDEX GetRowsPerBeat() const;
 	ROWINDEX GetRowsPerMeasure() const;
 
-	void InvalidatePattern(BOOL bHdr=FALSE);
+	// Invalidate functions (for redrawing areas of the pattern)
+	void InvalidatePattern(bool invalidateHeader = false);
 	void InvalidateRow(ROWINDEX n = ROWINDEX_INVALID);
-	void InvalidateArea(DWORD dwBegin, DWORD dwEnd);
-	void InvalidateSelection() { InvalidateArea(m_dwBeginSel, m_dwEndSel); }
+	void InvalidateArea(const PatternRect &rect) { InvalidateArea(rect.GetUpperLeft(), rect.GetLowerRight()); };
+	void InvalidateArea(PatternCursor begin, PatternCursor end);
+	void InvalidateSelection() { InvalidateArea(m_Selection); }
+	void InvalidateCell(PatternCursor cursor);
 	void InvalidateChannelsHeaders();
-	void SetCurSel(DWORD dwBegin, DWORD dwEnd);
-	BOOL SetCurrentPattern(PATTERNINDEX npat, ROWINDEX nrow = ROWINDEX_INVALID);
-	BOOL SetCurrentRow(UINT nrow, BOOL bWrap=FALSE, BOOL bUpdateHorizontalScrollbar=TRUE );
-	BOOL SetCurrentColumn(UINT ncol);
+
+	// Selection functions
+	void SetCurSel(const PatternRect &rect) { SetCurSel(rect.GetUpperLeft(), rect.GetLowerRight()); };
+	void SetCurSel(const PatternCursor &point) { SetCurSel(point, point); };
+	void SetCurSel(const PatternCursor &beginSel, const PatternCursor &endSel);
+	void SetSelToCursor() { SetCurSel(m_Cursor); };
+
+	bool SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row = ROWINDEX_INVALID);
+	bool SetCurrentRow(ROWINDEX row, bool wrap = false, bool updateHorizontalScrollbar = true);
+	bool SetCurrentColumn(const PatternCursor &cursor) { return SetCurrentColumn(cursor.GetChannel(), cursor.GetColumnType()); };
+	bool SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns column = PatternCursor::firstColumn);
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
-	BOOL SetCursorPosition(UINT nrow, UINT ncol, BOOL bWrap=FALSE );
-	BOOL DragToSel(DWORD dwPos, BOOL bScroll, BOOL bNoMove=FALSE);
-	BOOL SetPlayCursor(UINT nPat, UINT nRow);
-	BOOL UpdateScrollbarPositions( BOOL bUpdateHorizontalScrollbar=TRUE );
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//	BOOL EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
+	bool SetCursorPosition(const PatternCursor &cursor, bool wrap = false);
+	bool DragToSel(const PatternCursor &cursor, bool scrollHorizontal, bool scrollVertical, bool noMove = false);
+	bool SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow);
+	bool UpdateScrollbarPositions(bool updateHorizontalScrollbar = true);
 	BYTE EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
-// -! NEW_FEATURE#0014// -> CODE#0012
-	BOOL ShowEditWindow();
+	bool ShowEditWindow();
 	UINT GetCurrentInstrument() const;
 	void SelectBeatOrMeasure(bool selectBeat);
 
-	BOOL TransposeSelection(int transp);
-	bool PrepareUndo(DWORD dwBegin, DWORD dwEnd);
-	void DeleteRows(UINT colmin, UINT colmax, UINT nrows);
+	bool TransposeSelection(int transp);
+
+	bool PrepareUndo(const PatternRect &selection) { return PrepareUndo(selection.GetUpperLeft(), selection.GetLowerRight()); };
+	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel);
+
+	void DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX nrows);
 	void OnDropSelection();
 	void ProcessChar(UINT nChar, UINT nFlags);
 
@@ -227,7 +259,6 @@ public:
 	static bool DrawDefaultVolume(const ModCommand *m) { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
 
 	//rewbs.customKeys
-	BOOL ExecuteCommand(CommandID command);
 	void CursorJump(DWORD distance, bool upwards, bool snap);
 
 	void TempEnterNote(int n, bool oldStyle = false, int vol = -1);
@@ -240,14 +271,14 @@ public:
 	void TempEnterFX(int c, int v = -1);
 	void TempEnterFXparam(int v);
 	void SetSpacing(int n);
-	void OnClearField(int, bool, bool=false);
-	void InsertRows(UINT colmin, UINT colmax);
+	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
+	void InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax);
 	void SetSelectionInstrument(const INSTRUMENTINDEX nIns);
 	//end rewbs.customKeys
 
 	void TogglePluginEditor(int chan); //rewbs.patPlugName
 
-	void ExecutePaste(enmPatternPasteModes pasteMode);
+	void ExecutePaste(PatternClipboard::PasteModes mode);
 
 public:
 	//{{AFX_VIRTUAL(CViewPattern)
@@ -276,13 +307,13 @@ protected:
 	afx_msg void OnEditCut();
 	afx_msg void OnEditCopy();
 
-	afx_msg void OnEditPaste() {ExecutePaste(pm_overwrite);};
-	afx_msg void OnEditMixPaste() {ExecutePaste(pm_mixpaste);};
-	afx_msg void OnEditMixPasteITStyle() {ExecutePaste(pm_mixpaste_it);};
-	afx_msg void OnEditPasteFlood() {ExecutePaste(pm_pasteflood);};
-	afx_msg void OnEditPushForwardPaste() {ExecutePaste(pm_pushforwardpaste);};
+	afx_msg void OnEditPaste() { ExecutePaste(PatternClipboard::pmOverwrite); };
+	afx_msg void OnEditMixPaste() { ExecutePaste(PatternClipboard::pmMixPaste); };
+	afx_msg void OnEditMixPasteITStyle() { ExecutePaste(PatternClipboard::pmMixPasteIT); };
+	afx_msg void OnEditPasteFlood() { ExecutePaste(PatternClipboard::pmPasteFlood); };
+	afx_msg void OnEditPushForwardPaste() { ExecutePaste(PatternClipboard::pmPushForward); };
 
-	afx_msg void OnClearSelection(bool ITStyle=false, RowMask sb = DefaultRowMask); //rewbs.customKeys
+	afx_msg void OnClearSelection(bool ITStyle = false, RowMask sb = RowMask()); //rewbs.customKeys
 	afx_msg void OnGrowSelection();   //rewbs.customKeys
 	afx_msg void OnShrinkSelection(); //rewbs.customKeys
 	afx_msg void OnEditSelectAll();
@@ -331,8 +362,8 @@ protected:
 	afx_msg void OnTransposeOctUp();
 	afx_msg void OnTransposeOctDown();
 	afx_msg void OnSetSelInstrument();
-	afx_msg void OnAddChannelFront() { AddChannelBefore(GetChanFromCursor(m_nMenuParam)); }
-	afx_msg void OnAddChannelAfter() { AddChannelBefore(GetChanFromCursor(m_nMenuParam) + 1); };
+	afx_msg void OnAddChannelFront() { AddChannelBefore(m_MenuCursor.GetChannel()); }
+	afx_msg void OnAddChannelAfter() { AddChannelBefore(m_MenuCursor.GetChannel() + 1); };
 	afx_msg void OnDuplicateChannel();
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
@@ -360,12 +391,12 @@ protected:
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
 
-	static ROWINDEX GetRowFromCursor(DWORD cursor) { return (cursor >> 16); };
-	static CHANNELINDEX GetChanFromCursor(DWORD cursor) { return static_cast<CHANNELINDEX>((cursor & 0xFFFF) >> 3); };
-	static PatternColumns GetColTypeFromCursor(DWORD cursor) { return static_cast<PatternColumns>((cursor & 0x07)); };
-	static DWORD CreateCursor(ROWINDEX row, CHANNELINDEX channel = 0, UINT column = 0) { return (row << 16) | ((channel << 3) & 0x1FFF) | (column & 0x07); };
-
 private:
+
+	// Copy&Paste
+	bool CopyPattern(PATTERNINDEX nPattern, const PatternRect &selection);
+	bool PastePattern(PATTERNINDEX nPattern, const PatternCursor &pastePos, PatternClipboard::PasteModes mode);
+
 	void SetSplitKeyboardSettings();
 	bool HandleSplit(ModCommand *p, int note);
 	bool IsNoteSplit(int note) const;
@@ -392,14 +423,10 @@ private:
 	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile *pSndFile) const;
 	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
 
-	ROWINDEX GetSelectionStartRow() const;
-	ROWINDEX GetSelectionEndRow() const;
-	CHANNELINDEX GetSelectionStartChan() const;
-	CHANNELINDEX GetSelectionEndChan() const;
-	UINT ListChansWhereColSelected(PatternColumns colType, CArray<UINT, UINT> &chans) const;
+	UINT ListChansWhereColSelected(PatternCursor::Columns colType, CArray<UINT, UINT> &chans) const;
 
-	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternColumns colType, CSoundFile *pSndFile) const;
-	void Interpolate(PatternColumns type);
+	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternCursor::Columns colType, CSoundFile *pSndFile) const;
+	void Interpolate(PatternCursor::Columns type);
 
 	// Return true if recording live (i.e. editing while following playback).
 	// rSndFile must be the CSoundFile object of given rModDoc.
@@ -410,7 +437,7 @@ private:
 	bool IsLiveRecord(const CMainFrame &rMainFrm, const CModDoc &rModDoc, const CSoundFile &rSndFile) const
 	{
 		//             (following song)             &&        (following in correct document)        &&    (playback is on)
-		return ((m_dwStatus & PATSTATUS_FOLLOWSONG) &&	(rMainFrm.GetFollowSong(&rModDoc) == m_hWnd) && !(rSndFile.IsPaused()));
+		return ((m_dwStatus & psFollowSong) &&	(rMainFrm.GetFollowSong(&rModDoc) == m_hWnd) && !(rSndFile.IsPaused()));
 	};
 
 	// If given edit positions are valid, sets them to iRow and iPat.
@@ -427,7 +454,7 @@ private:
 	ModCommand* GetModCommand(CSoundFile &rSf, const ModCommandPos &pos);
 
 	// Returns true if pattern editing is enabled.
-	bool IsEditingEnabled() const { return ((m_dwStatus & PATSTATUS_RECORD) != 0); }
+	bool IsEditingEnabled() const { return ((m_dwStatus & psRecordingEnabled) != 0); }
 
 	// Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
@@ -442,8 +469,8 @@ public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 private:
 
-	void TogglePendingMute(UINT nChn);
-	void PendingSoloChn(const CHANNELINDEX nChn);
+	void TogglePendingMute(CHANNELINDEX nChn);
+	void PendingSoloChn(CHANNELINDEX nChn);
 	void PendingUnmuteAllChn();
 
 public:

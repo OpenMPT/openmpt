@@ -481,6 +481,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PatternClipboard.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\patternContainer.cpp"
 				>
 			</File>
@@ -1095,7 +1099,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PatternClipboard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\patternContainer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PatternCursor.h"
 				>
 			</File>
 			<File

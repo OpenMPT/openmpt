@@ -158,7 +158,7 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 		{
 			m_ViewPatterns.nPattern=pModDoc->GetSoundFile()->Order[0];
 			m_ViewPatterns.nOrder=0; //just in case (should already be 0)
-			m_ViewPatterns.nRow=0;   //just in case
+			m_ViewPatterns.cursor.SetRow(0);   //just in case
 			m_bInitialActivation=false;
 		}
 	}

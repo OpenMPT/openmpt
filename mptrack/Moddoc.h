@@ -17,6 +17,7 @@
 #include "sndfile.h"
 #include "../common/misc_util.h"
 #include "Undo.h"
+#include "PatternClipboard.h"
 #include <time.h>
 
 
@@ -126,6 +127,8 @@ struct FileHistory
 
 #define SPLIT_OCTAVE_RANGE 9
 
+class PatternClipboard;
+
 //==========================
 struct SplitKeyboardSettings
 //==========================
@@ -183,6 +186,8 @@ protected:
 	vector<FileHistory> m_FileHistory;	// File edit history
 	time_t m_creationTime;
 
+	PatternClipboard patternClipboard;
+
 public:
 	std::bitset<MAX_INSTRUMENTS> m_bsInstrumentModified;	// which instruments have been modified? (for ITP functionality)
 
@@ -231,6 +236,8 @@ public:
 	vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
 	const vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
+
+	PatternClipboard &GetPatternClipboard() { return patternClipboard; }
 	
 // operations
 public:
@@ -294,10 +301,6 @@ public:
 	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
-
-	// Copy&Paste
-	bool CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
-	bool PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPasteModes pasteMode);
 
 	bool CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
 	bool PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
