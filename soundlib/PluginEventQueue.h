@@ -30,8 +30,10 @@
 
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
-struct PluginEventQueue
+class PluginEventQueue
 {
+protected:
+
 	typedef VstMidiEvent BiggestVstEvent;
 	static_assert(sizeof(BiggestVstEvent) >= sizeof(VstEvent)
 		&& sizeof(BiggestVstEvent) >= sizeof(VstMidiEvent)
@@ -40,27 +42,43 @@ struct PluginEventQueue
 
 	VstInt32 numEvents;		///< number of Events in array
 	VstIntPtr reserved;		///< zero (Reserved for future use)
-	VstEvent* events[N];	///< event pointer array
+	VstEvent *events[N];	///< event pointer array
 	std::deque<BiggestVstEvent> eventQueue;	// Here we store our events.
+	CRITICAL_SECTION criticalSection;
+
+public:
 
 	PluginEventQueue()
 	{
 		numEvents = 0;
 		reserved = nullptr;
 		MemsetZero(events);
+		MemsetZero(criticalSection);
+		InitializeCriticalSection(&criticalSection);
+	}
+
+	~PluginEventQueue()
+	{
+		DeleteCriticalSection(&criticalSection);
+	}
+
+	size_t GetNumEvents()
+	{
+		return numEvents;
 	}
 
 	// Add a VST event to the queue. Returns true on success.
 	bool Enqueue(const VstEvent &event, bool insertFront = false)
 	{
 		VstMidiEvent midiEvent;
-		memcpy(&midiEvent, &event, sizeof(event));
+		memcpy(&midiEvent, &event, min(event.byteSize, sizeof(event)));
 		ASSERT(event.byteSize == sizeof(event));
 		return Enqueue(midiEvent, insertFront);
 	}
 	bool Enqueue(const VstMidiEvent &event, bool insertFront = false)
 	{
 		static_assert(sizeof(BiggestVstEvent) <= sizeof(VstMidiEvent), "Also check implementation here.");
+		EnterCriticalSection(&criticalSection);
 		if(insertFront)
 		{
 			eventQueue.push_front(event);
@@ -68,12 +86,13 @@ struct PluginEventQueue
 		{
 			eventQueue.push_back(event);
 		}
+		LeaveCriticalSection(&criticalSection);
 		return true;
 	}
 	bool Enqueue(const VstMidiSysexEvent &event, bool insertFront = false)
 	{
 		VstMidiEvent midiEvent;
-		memcpy(&midiEvent, &event, sizeof(event));
+		memcpy(&midiEvent, &event, min(event.byteSize, sizeof(event)));
 		ASSERT(event.byteSize == sizeof(event));
 		return Enqueue(midiEvent, insertFront);
 	}
@@ -81,22 +100,26 @@ struct PluginEventQueue
 	// Set up the queue for transmitting to the plugin. Returns number of elements that are going to be transmitted.
 	VstInt32 Finalise()
 	{
+		EnterCriticalSection(&criticalSection);
 		numEvents = min(eventQueue.size(), N);
 		for(VstInt32 i = 0; i < numEvents; i++)
 		{
 			events[i] = reinterpret_cast<VstEvent *>(&eventQueue[i]);
 		}
+		LeaveCriticalSection(&criticalSection);
 		return numEvents;
 	}
 
 	// Remove transmitted events from the queue
 	void Clear()
 	{
+		EnterCriticalSection(&criticalSection);
 		if(numEvents)
 		{
 			eventQueue.erase(eventQueue.begin(), eventQueue.begin() + numEvents);
 			numEvents = 0;
 		}
+		LeaveCriticalSection(&criticalSection);
 	}
 
 };

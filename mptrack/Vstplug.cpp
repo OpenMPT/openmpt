@@ -2006,12 +2006,8 @@ void CVstPlugin::ProcessVSTEvents()
 			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, &vstEvents, 0);
 		} catch (...)
 		{
-			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, numEvents:%d, MidicodeCh:%d, MidicodeEv:%d, MidicodeNote:%d, MidiCodeVel:%d)\n",
-				m_pFactory->szLibraryName, vstEvents.numEvents,
-				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[0]) & 0x0f,
-				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[0]) & 0xf0,
-				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[1]) & 0xff,
-				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[2]) & 0xff);
+			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, numEvents:%d)\n",
+				m_pFactory->szLibraryName, vstEvents.GetNumEvents());
 		}
 	}
 }
@@ -2299,9 +2295,8 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 	bool insertAtFront = ((dwMidiCode & 0xF0) == 0x80);
 
 	VstMidiEvent event;
-	MemsetZero(event);
 	event.type = kVstMidiType;
-	event.byteSize = 24;
+	event.byteSize = sizeof(VstMidiEvent);
 	event.deltaFrames = 0;
 	event.flags = 0;
 	event.noteLength = 0;
