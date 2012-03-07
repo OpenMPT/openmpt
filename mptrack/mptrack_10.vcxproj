@@ -333,6 +333,7 @@
     <ClInclude Include="..\soundlib\ModChannel.h" />
     <ClInclude Include="..\soundlib\ModInstrument.h" />
     <ClInclude Include="..\soundlib\ModSample.h" />
+    <ClInclude Include="..\soundlib\PluginEventQueue.h" />
     <ClInclude Include="..\soundlib\PluginMixBuffer.h" />
     <ClInclude Include="..\soundlib\PlugInterface.h" />
     <ClInclude Include="ACMConvert.h" />

@@ -849,6 +849,9 @@
 				RelativePath=".\PSRatioCalc.h">
 			</File>
 			<File
+				RelativePath=".\soundlib\PluginEventQueue.h">
+			</File>
+			<File
 				RelativePath=".\soundlib\PluginMixBuffer.h">
 			</File>
 			<File

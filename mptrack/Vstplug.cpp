@@ -836,10 +836,13 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return ToVstPtr(&timeInfo);
 	}
 
-	// VstEvents* in <ptr>
-	// We don't support plugs that send VSTEvents to the host
+	// Receive MIDI events from plugin
 	case audioMasterProcessEvents:
-		Log("VST plugin to host: Process Events\n");
+		if(pVstPlugin != nullptr && ptr != nullptr)
+		{
+			pVstPlugin->ReceiveVSTEvents(reinterpret_cast<VstEvents *>(ptr));
+			return 1;
+		}
 		break;
 
 	// DEPRECATED in VST 2.4
@@ -1011,8 +1014,6 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// string in ptr, see below
 	case audioMasterCanDo:
 		//Other possible Can Do strings are:
-		//"receiveVstEvents",
-		//"receiveVstMidiEvent",
 		//"receiveVstTimeInfo",
 		//"asyncProcessing",
 		//"offline",
@@ -1025,6 +1026,8 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		if ((strcmp((char*)ptr,"sendVstEvents") == 0 ||
 				strcmp((char*)ptr,"sendVstMidiEvent") == 0 ||
 				strcmp((char*)ptr,"sendVstTimeInfo") == 0 ||
+				strcmp((char*)ptr,"receiveVstEvents") == 0 ||
+				strcmp((char*)ptr,"receiveVstMidiEvent") == 0 ||
 				strcmp((char*)ptr,"supplyIdle") == 0 ||
 				strcmp((char*)ptr,"sizeWindow") == 0 ||
 				strcmp((char*)ptr,"openFileSelector") == 0 ||
@@ -1342,7 +1345,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *p
 	m_pEditor = nullptr;
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
-	m_pEvList = nullptr;
 	m_pModDoc = nullptr; //rewbs.plugDocAware
 	m_nPreviousMidiChan = nInvalidMidiChan; //rewbs.VSTCompliance
 	m_pProcessFP = nullptr;
@@ -1383,15 +1385,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *p
 void CVstPlugin::Initialize(CSoundFile* pSndFile)
 //-----------------------------------------------
 {
-	if (!m_pEvList)
-	{
-		m_pEvList = (VstEvents *)new char[sizeof(VstEvents)+sizeof(VstEvent*)*VSTEVENT_QUEUE_LEN];
-	}
-	if (m_pEvList)
-	{
-		m_pEvList->numEvents = 0;
-		m_pEvList->reserved = 0;
-	}
 	m_bNeedIdle=false;
 	m_bRecordAutomation=false;
 	m_bPassKeypressesToPlug=false;
@@ -1552,9 +1545,6 @@ CVstPlugin::~CVstPlugin()
 		FreeLibrary(m_hLibrary);
 		m_hLibrary = NULL;
 	}
-
-	delete[] (char *)m_pEvList;
-	m_pEvList = nullptr;
 
 	CloseHandle(processCalled);
 }
@@ -2004,37 +1994,56 @@ void CVstPlugin::Suspend()
 }
 
 
+// Send events to plugin
 void CVstPlugin::ProcessVSTEvents()
 //---------------------------------
 {
 	// Process VST events
-	if ((m_pEffect) && (m_pEffect->dispatcher) && (m_pEvList) && (m_pEvList->numEvents > 0))
+	if(m_pEffect != nullptr && m_pEffect->dispatcher != nullptr && vstEvents.Finalise() > 0)
 	{
 		try
 		{
-			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, m_pEvList, 0);
+			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, &vstEvents, 0);
 		} catch (...)
 		{
-			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, pEventList:%p, numEvents:%d, MidicodeCh:%d, MidicodeEv:%d, MidicodeNote:%d, MidiCodeVel:%d)\n",
-				m_pFactory->szLibraryName, m_pEvList, m_pEvList->numEvents,
-				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0x0f,
-				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0xf0,
-				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[1])&0xff,
-				(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[2])&0xff);
+			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, numEvents:%d, MidicodeCh:%d, MidicodeEv:%d, MidicodeNote:%d, MidiCodeVel:%d)\n",
+				m_pFactory->szLibraryName, vstEvents.numEvents,
+				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[0]) & 0x0f,
+				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[0]) & 0xf0,
+				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[1]) & 0xff,
+				(((VstMidiEvent *)(vstEvents.events[0]))->midiData[2]) & 0xff);
 		}
 	}
-
 }
 
-void CVstPlugin::ClearVSTEvents()
-//-------------------------------
+
+// Receive events from plugin and send them to the next plugin in the chain.
+void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
+//--------------------------------------------------------------
 {
-	// Clear VST events
-	if ((m_pEvList) && (m_pEvList->numEvents > 0))
+	if(m_pSndFile == nullptr || m_pMixStruct == nullptr)
 	{
-		m_pEvList->numEvents = 0;
+		return;
+	}
+
+	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
+	PLUGINDEX receiver = m_pMixStruct->GetOutputPlugin();
+	
+	if(receiver != PLUGINDEX_INVALID)
+	{
+		SNDMIXPLUGIN &mixPlug = m_pSndFile->m_MixPlugins[receiver];
+		CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(mixPlug.pMixPlugin);
+		if(vstPlugin != nullptr)
+		{
+			// Add all events to the plugin's queue.
+			for(VstInt32 i = 0; i < events->numEvents; i++)
+			{
+				vstPlugin->vstEvents.Enqueue(*events->events[i]);
+			}
+		}
 	}
 }
+
 
 void CVstPlugin::RecalculateGain()
 //--------------------------------
@@ -2093,7 +2102,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			Bypass();
 			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->GetName(), processMethod);
-			ClearVSTEvents();
+			vstEvents.Clear();
 //			SetEvent(processCalled);
 		}
 
@@ -2143,7 +2152,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		}
 	}
 
-	ClearVSTEvents();
+	vstEvents.Clear();
 	//SetEvent(processCalled);
 }
 
@@ -2271,52 +2280,28 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 //-----------------------------------------
 {
-	if ((m_pEvList) && (m_pEvList->numEvents < VSTEVENT_QUEUE_LEN-1))
-	{
-		int insertPos;
-		if ((dwMidiCode & 0xF0) == 0x80)
-		{
-			// noteoffs go at the start of the queue.
-			if (m_pEvList->numEvents)
-			{
-				for (int i=m_pEvList->numEvents; i>=1; i--)
-				{
-					m_pEvList->events[i] = m_pEvList->events[i-1];
-				}
-			}
-			insertPos=0;
-		} else
-		{
-			insertPos=m_pEvList->numEvents;
-		}
+	// Note-Offs go at the start of the queue.
+	bool insertAtFront = ((dwMidiCode & 0xF0) == 0x80);
 
-		VstMidiEvent *pev = &m_ev_queue[m_pEvList->numEvents];
-		m_pEvList->events[insertPos] = (VstEvent *)pev;
-		pev->type = kVstMidiType;
-		pev->byteSize = 24;
-		pev->deltaFrames = 0;
-		pev->flags = 0;
-		pev->noteLength = 0;
-		pev->noteOffset = 0;
-		pev->detune = 0;
-		pev->noteOffVelocity = 0;
-		pev->reserved1 = 0;
-		pev->reserved2 = 0;
-		*(DWORD *)pev->midiData = dwMidiCode;
-		m_pEvList->numEvents++;
+	VstMidiEvent event;
+	MemsetZero(event);
+	event.type = kVstMidiType;
+	event.byteSize = 24;
+	event.deltaFrames = 0;
+	event.flags = 0;
+	event.noteLength = 0;
+	event.noteOffset = 0;
+	event.detune = 0;
+	event.noteOffVelocity = 0;
+	event.reserved1 = 0;
+	event.reserved2 = 0;
+	*(DWORD *)event.midiData = dwMidiCode;
+
 	#ifdef VST_LOG
-		Log("Sending Midi %02X.%02X.%02X\n", pev->midiData[0]&0xff, pev->midiData[1]&0xff, pev->midiData[2]&0xff);
+		Log("Sending Midi %02X.%02X.%02X\n", event.midiData[0]&0xff, event.midiData[1]&0xff, event.midiData[2]&0xff);
 	#endif
 
-		return true; //rewbs.instroVST
-	}
-	else
-	{
-		Log("VST Event queue overflow!\n");
-		m_pEvList->numEvents = VSTEVENT_QUEUE_LEN-1;
-
-		return false; //rewbs.instroVST
-	}
+	return vstEvents.Enqueue(event, insertAtFront);
 }
 
 //rewbs.VSTiNoteHoldonStopFix
@@ -2523,7 +2508,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 				} else
 				{
 					// VST event queue overflow, no point in submitting more note offs.
-                    break; //todo: secondary buffer?
+					break; //todo: secondary buffer?
 				}
 			}
 		}
@@ -2962,10 +2947,10 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 	list.RemoveAll();
 
 	CVstPlugin *pOutputPlug = NULL;
-	if (!m_pMixStruct->IsOutputToMaster())
+	if(!m_pMixStruct->IsOutputToMaster())
 	{
 		PLUGINDEX nOutput = m_pMixStruct->GetOutputPlugin();
-		if (m_pSndFile && (nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS))
+		if(m_pSndFile && nOutput > m_nSlot && nOutput != PLUGINDEX_INVALID)
 		{
 			pOutputPlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
 		}

@@ -866,7 +866,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 			if(!pSndFile->m_MixPlugins[nPlug].IsOutputToMaster())
 			{
 				PLUGINDEX output = pSndFile->m_MixPlugins[nPlug].GetOutputPlugin();
-				if(output < MAX_MIXPLUGINS)
+				if(output != PLUGINDEX_INVALID)
 				{
 					usedmap[output] = true;
 				}
