@@ -2027,6 +2027,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 	}
 
 	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
+	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
 	PLUGINDEX receiver = m_pMixStruct->GetOutputPlugin();
 	
 	if(receiver != PLUGINDEX_INVALID)
@@ -2038,7 +2039,21 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 			// Add all events to the plugin's queue.
 			for(VstInt32 i = 0; i < events->numEvents; i++)
 			{
-				vstPlugin->vstEvents.Enqueue(*events->events[i]);
+				// Let's do some dispatching, because the VST SDK doesn't do it for us. :-(
+				switch(events->events[i]->type)
+				{
+				case kVstMidiType:
+					vstPlugin->vstEvents.Enqueue(*reinterpret_cast<VstMidiEvent *>(events->events[i]));
+					break;
+
+				case kVstSysExType:
+					vstPlugin->vstEvents.Enqueue(*reinterpret_cast<VstMidiSysexEvent *>(events->events[i]));
+					break;
+
+				default:
+					vstPlugin->vstEvents.Enqueue(*events->events[i]);
+					break;
+				}
 			}
 		}
 	}
@@ -2508,7 +2523,8 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 				} else
 				{
 					// VST event queue overflow, no point in submitting more note offs.
-					break; //todo: secondary buffer?
+					// Note: This shouldn't happen anymore, since PluginEventQueue uses a secondary queue.
+					break;
 				}
 			}
 		}
