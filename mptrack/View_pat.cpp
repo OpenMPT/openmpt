@@ -1980,7 +1980,6 @@ void CViewPattern::OnEditFindNext()
 {
 	CSoundFile *pSndFile = GetSoundFile();
 
-	CHAR s[512], szFind[64];
 	UINT nFound = 0;
 
 	if (pSndFile == nullptr)
@@ -2023,6 +2022,23 @@ void CViewPattern::OnEditFindNext()
 		isExtendedEffect = effectInfo.IsExtendedEffect(fxndx);
 	}
 
+	CHANNELINDEX firstChannel = 0;
+	CHANNELINDEX lastChannel = pSndFile->GetNumChannels() - 1;
+
+	if(m_findReplace.dwFindFlags & PATSEARCH_CHANNEL)
+	{
+		// Limit search to given channels
+		firstChannel = min(m_findReplace.nFindMinChn, lastChannel);
+		lastChannel = min(m_findReplace.nFindMaxChn, lastChannel);
+	}
+
+	if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
+	{
+		// Limit search to pattern selection
+		firstChannel = min(m_findReplace.selection.GetStartChannel(), lastChannel);
+		lastChannel = min(m_findReplace.selection.GetEndChannel(), lastChannel);
+	}
+
 	for(PATTERNINDEX pat = nPatStart; pat < nPatEnd; pat++)
 	{
 		if(!pSndFile->Patterns.IsValidPat(pat))
@@ -2031,15 +2047,19 @@ void CViewPattern::OnEditFindNext()
 		}
 
 		ROWINDEX row = 0;
-		CHANNELINDEX chn = 0;
+		CHANNELINDEX chn = firstChannel;
 		if(m_bContinueSearch && pat == nPatStart && pat == m_nPattern)
 		{
+			// Continue search from cursor position
 			row = GetCurrentRow();
 			chn = GetCurrentChannel() + 1;
-			if(chn >= pSndFile->GetNumChannels())
+			if(chn > lastChannel)
 			{
 				row++;
-				chn = 0;
+				chn = firstChannel;
+			} else if(chn < firstChannel)
+			{
+				chn = firstChannel;
 			}
 		}
 
@@ -2047,23 +2067,13 @@ void CViewPattern::OnEditFindNext()
 		{
 			ModCommand *m = pSndFile->Patterns[pat].GetpModCommand(row, chn);
 
-			for(; chn < pSndFile->GetNumChannels(); chn++, m++)
+			for(; chn <= lastChannel; chn++, m++)
 			{
 				RowMask findWhere;
 
-				if (m_findReplace.dwFindFlags & PATSEARCH_CHANNEL)
+				if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
 				{
-					// Limit to given channels
-					if(chn < m_findReplace.nFindMinChn || chn > m_findReplace.nFindMaxChn)
-					{
-						findWhere.Clear();
-					}
-				}
-
-				if (m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
-				{
-					// Limit to pattern selection
-
+					// Limit search to pattern selection
 					if((chn == m_findReplace.selection.GetStartChannel() || chn == m_findReplace.selection.GetEndChannel())
 						&& row >= m_findReplace.selection.GetStartRow() && row <= m_findReplace.selection.GetEndRow())
 					{
@@ -2086,7 +2096,7 @@ void CViewPattern::OnEditFindNext()
 						}
 					} else
 					{
-						// For channels inside or outside the selection, we have an easier job to solve.
+						// For channels inside the selection, we have an easier job to solve.
 						if(!m_findReplace.selection.Contains(PatternCursor(row, chn)))
 						{
 							findWhere.Clear();
@@ -2261,67 +2271,113 @@ void CViewPattern::OnEditFindNext()
 					}
 				}
 			}
-			chn = 0;
+			chn = firstChannel;
 		}
 
 	}
 EndSearch:
-	if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
-	{
-		// Restore original selection
-		//m_Selection = m_findReplace.selection;
-		InvalidatePattern();
-	} else if(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL)
+
+	if(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL)
 	{
 		InvalidatePattern();
 	}
-	m_bContinueSearch = true;
-	EndWaitCursor();
-	// Display search results
-	//m_findReplace.dwReplaceFlags &= ~PATSEARCH_REPLACEALL;
-	if (!nFound)
+
+	if((m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION) && (nFound == 0 || (m_findReplace.dwReplaceFlags & (PATSEARCH_REPLACE | PATSEARCH_REPLACEALL)) == PATSEARCH_REPLACE))
 	{
-		if (m_findReplace.dwFindFlags & PATSEARCH_NOTE)
+		// Restore original selection if we didn't find anything or just replaced stuff manually.
+		m_Selection = m_findReplace.selection;
+		InvalidatePattern();
+	}
+
+	m_bContinueSearch = true;
+
+	EndWaitCursor();
+
+	// Display search results
+	if(nFound == 0)
+	{
+		CString result;
+		result.Preallocate(14 + 16);
+		result = "Cannot find \"";
+
+		// Note
+		if(m_findReplace.dwFindFlags & PATSEARCH_NOTE)
 		{
-			wsprintf(szFind, "%s", GetNoteStr(m_findReplace.cmdFind.note));
-		} else strcpy(szFind, "???");
-		strcat(szFind, " ");
-		if (m_findReplace.dwFindFlags & PATSEARCH_INSTR)
+			result.Append(GetNoteStr(m_findReplace.cmdFind.note));
+		} else
+		{
+			result.Append("???");
+		}
+		result.AppendChar(' ');
+
+		// Instrument
+		if(m_findReplace.dwFindFlags & PATSEARCH_INSTR)
 		{
 			if (m_findReplace.cmdFind.instr)
-				wsprintf(&szFind[strlen(szFind)], "%03d", m_findReplace.cmdFind.instr);
-			else
-				strcat(szFind, " ..");
-		} else strcat(szFind, " ??");
-		strcat(szFind, " ");
-		if (m_findReplace.dwFindFlags & PATSEARCH_VOLCMD)
-		{
-			if (m_findReplace.cmdFind.volcmd)
-				wsprintf(&szFind[strlen(szFind)], "%c", pSndFile->GetModSpecifications().GetVolEffectLetter(m_findReplace.cmdFind.volcmd));
-			else
-				strcat(szFind, ".");
-		} else strcat(szFind, "?");
-		if (m_findReplace.dwFindFlags & PATSEARCH_VOLUME)
-		{
-			wsprintf(&szFind[strlen(szFind)], "%02d", m_findReplace.cmdFind.vol);
-		} else strcat(szFind, "??");
-		strcat(szFind, " ");
-		if (m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
-		{
-			if (m_findReplace.cmdFind.command)
 			{
-				wsprintf(&szFind[strlen(szFind)], "%c", pSndFile->GetModSpecifications().GetEffectLetter(m_findReplace.cmdFind.command));
+				result.AppendFormat("%03d", m_findReplace.cmdFind.instr);
 			} else
 			{
-				strcat(szFind, ".");
+				result.Append(" ..");
 			}
-		} else strcat(szFind, "?");
-		if (m_findReplace.dwFindFlags & PATSEARCH_PARAM)
+		} else
 		{
-			wsprintf(&szFind[strlen(szFind)], "%02X", m_findReplace.cmdFind.param);
-		} else strcat(szFind, "??");
-		wsprintf(s, "Cannot find \"%s\"", szFind);
-		Reporting::Information(s, "Find/Replace");
+			result.Append(" ??");
+		}
+		result.AppendChar(' ');
+
+		// Volume Command
+		if(m_findReplace.dwFindFlags & PATSEARCH_VOLCMD)
+		{
+			if(m_findReplace.cmdFind.volcmd)
+			{
+				result.AppendChar(pSndFile->GetModSpecifications().GetVolEffectLetter(m_findReplace.cmdFind.volcmd));
+			} else
+			{
+				result.AppendChar('.');
+			}
+		} else
+		{
+			result.AppendChar('?');
+		}
+
+		// Volume Parameter
+		if(m_findReplace.dwFindFlags & PATSEARCH_VOLUME)
+		{
+			result.AppendFormat("%02d", m_findReplace.cmdFind.vol);
+		} else
+		{
+			result.AppendFormat("??");
+		}
+		result.AppendChar(' ');
+
+		// Effect Command
+		if(m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
+		{
+			if(m_findReplace.cmdFind.command)
+			{
+				result.AppendChar(pSndFile->GetModSpecifications().GetEffectLetter(m_findReplace.cmdFind.command));
+			} else
+			{
+				result.AppendChar('.');
+			}
+		} else
+		{
+			result.AppendChar('?');
+		}
+
+		// Effect Parameter
+		if(m_findReplace.dwFindFlags & PATSEARCH_PARAM)
+		{
+			result.AppendFormat("%02X", m_findReplace.cmdFind.param);
+		} else
+		{
+			result.AppendFormat("??");
+		}
+
+		result.AppendChar('"');
+
+		Reporting::Information(result, "Find/Replace");
 	}
 }
 
