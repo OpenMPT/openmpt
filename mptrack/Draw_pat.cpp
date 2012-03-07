@@ -193,33 +193,32 @@ void CViewPattern::UpdateColors()
 }
 
 
-BOOL CViewPattern::UpdateSizes()
+bool CViewPattern::UpdateSizes()
 //------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 	int oldx = m_szCell.cx;
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
-	if (m_dwStatus & PATSTATUS_VUMETERS) m_szHeader.cy += VUMETERS_HEIGHT;
-	if (m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS) m_szHeader.cy += PLUGNAME_HEIGHT;
+	if (m_dwStatus & psShowVUMeters) m_szHeader.cy += VUMETERS_HEIGHT;
+	if (m_dwStatus & psShowPluginNames) m_szHeader.cy += PLUGNAME_HEIGHT;
 	m_szCell.cx = 4 + pfnt->nEltWidths[0];
-	if (m_nDetailLevel > 0) m_szCell.cx += pfnt->nEltWidths[1];
-	if (m_nDetailLevel > 1) m_szCell.cx += pfnt->nEltWidths[2];
-	if (m_nDetailLevel > 2) m_szCell.cx += pfnt->nEltWidths[3] + pfnt->nEltWidths[4];
+	if (m_nDetailLevel >= PatternCursor::instrColumn) m_szCell.cx += pfnt->nEltWidths[1];
+	if (m_nDetailLevel >= PatternCursor::volumeColumn) m_szCell.cx += pfnt->nEltWidths[2];
+	if (m_nDetailLevel >= PatternCursor::effectColumn) m_szCell.cx += pfnt->nEltWidths[3] + pfnt->nEltWidths[4];
 	m_szCell.cy = pfnt->nHeight;
 	return (oldx != m_szCell.cx);
 }
 
 
-UINT CViewPattern::GetColumnOffset(DWORD dwPos) const
-//---------------------------------------------------
+UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
+//---------------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
-	UINT n = 0;
-	dwPos &= 7;
-	if (dwPos > 4) dwPos = 4;
-	for (UINT i=0; i<dwPos; i++) n += pfnt->nEltWidths[i];
-	return n;
+	LimitMax(column, PatternCursor::lastColumn);
+	UINT offset = 0;
+	for(int i = PatternCursor::firstColumn; i < column; i++) offset += pfnt->nEltWidths[i];
+	return offset;
 }
 
 
@@ -231,7 +230,7 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 		UpdateColors();
 		UpdateSizes();
 		UpdateScrollSize();
-		InvalidatePattern(TRUE);
+		InvalidatePattern(true);
 		return;
 	}
 	if(dwHintMask & HINT_MODCHANNELS)
@@ -244,7 +243,7 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 
 	if(dwHintMask & (HINT_MODTYPE|HINT_PATTERNDATA))
 	{
-		InvalidatePattern(FALSE);
+		InvalidatePattern(false);
 	} else
 	if(dwHintMask & HINT_PATTERNROW)
 	{
@@ -254,32 +253,37 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 }
 
 
-POINT CViewPattern::GetPointFromPosition(DWORD dwPos) 
-//---------------------------------------------------
+POINT CViewPattern::GetPointFromPosition(PatternCursor cursor) 
+//------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 	POINT pt;
 	int xofs = GetXScrollPos();
 	int yofs = GetYScrollPos();
-	pt.x = (GetChanFromCursor(dwPos) - xofs) * GetColumnWidth();
-	UINT imax = GetColTypeFromCursor(dwPos);
-	if (imax > LAST_COLUMN + 1) imax = LAST_COLUMN + 1;
-	if (imax > m_nDetailLevel + 1) imax = m_nDetailLevel + 1;
-	for (UINT i=0; i<imax; i++)
+	pt.x = (cursor.GetChannel() - xofs) * GetColumnWidth();
+
+	PatternCursor::Columns imax = cursor.GetColumnType();
+	LimitMax(imax, PatternCursor::lastColumn);
+	LimitMax(imax, static_cast<PatternCursor::Columns>(m_nDetailLevel));
+
+	for(int i = 0; i < imax; i++)
 	{
 		pt.x += pfnt->nEltWidths[i];
 	}
+
 	if (pt.x < 0) pt.x = 0;
 	pt.x += ROWHDR_WIDTH;
-	pt.y = ((dwPos >> 16) - yofs + m_nMidRow) * m_szCell.cy;
+	pt.y = (cursor.GetRow() - yofs + m_nMidRow) * m_szCell.cy;
+
 	if (pt.y < 0) pt.y = 0;
 	pt.y += m_szHeader.cy;
+
 	return pt;
 }
 
 
-DWORD CViewPattern::GetPositionFromPoint(POINT pt)
-//------------------------------------------------
+PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
+//--------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 	int xofs = GetXScrollPos();
@@ -290,14 +294,14 @@ DWORD CViewPattern::GetPositionFromPoint(POINT pt)
 	if (y < 0) y = 0;
 	int xx = (pt.x - m_szHeader.cx) % GetColumnWidth(), dx = 0;
 	int imax = 4;
-	if (imax > (int)m_nDetailLevel+1) imax = m_nDetailLevel+1;
+	if (imax > (int)m_nDetailLevel + 1) imax = m_nDetailLevel + 1;
 	int i = 0;
 	for (i=0; i<imax; i++)
 	{
 		dx += pfnt->nEltWidths[i];
 		if (xx < dx) break;
 	}
-	return (y << 16) | (x << 3) | i;
+	return PatternCursor(static_cast<ROWINDEX>(y), static_cast<CHANNELINDEX>(x), static_cast<PatternCursor::Columns>(i));
 }
 
 
@@ -559,11 +563,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
 //				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
 // -! NEW_FEATURE#0012
-				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= ' '))
-					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"%d: [%s]":"%d: %s";
-				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Ch%d]":"Ch%d";
-				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Chn %d]":"Chn %d";
-				wsprintf(s, pszfmt, ncolhdr+1, pSndFile->ChnSettings[ncolhdr].szName);
+				if ((pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= ' '))
+					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr] ? "%d: [%s]" : "%d: %s";
+				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%d]" : "Ch%d";
+				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %d]" : "Chn %d";
+				wsprintf(s, pszfmt, ncolhdr + 1, pSndFile->ChnSettings[ncolhdr].szName);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 //				DrawButtonRect(hdc, &rect, s,
@@ -618,14 +622,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 				}
 // -! NEW_FEATURE#0012
 
-				if (m_dwStatus & PATSTATUS_VUMETERS)
+				if (m_dwStatus & psShowVUMeters)
 				{
 					OldVUMeters[ncolhdr] = 0;
 					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
 					rect.top+=VUMETERS_HEIGHT;
 					rect.bottom+=VUMETERS_HEIGHT;
 				}
-				if (m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS)
+				if (m_dwStatus & psShowPluginNames)
 				{
 					rect.top+=PLUGNAME_HEIGHT;
 					rect.bottom+=PLUGNAME_HEIGHT;
@@ -662,8 +666,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 				if(startOrder > 0)
 				{
-					ORDERINDEX prevOrder;
-					prevOrder = pSndFile->Order.GetPreviousOrderIgnoringSkips(startOrder);
+					ORDERINDEX prevOrder = pSndFile->Order.GetPreviousOrderIgnoringSkips(startOrder);
 					//Skip +++ items
 
 					if(startOrder < pSndFile->Order.size() && pSndFile->Order[startOrder] == m_nPattern)
@@ -675,7 +678,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			}
 			if ((bPrevPatFound) && (nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat]))
 			{
-				UINT nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
+				ROWINDEX nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
 				UINT n = min(nSkip, nPrevRows);
 
 				ypaint += (nSkip-n)*m_szCell.cy;
@@ -707,11 +710,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
-			UINT nNextPat = m_nPattern;
+			PATTERNINDEX nNextPat = m_nPattern;
 			bool bNextPatFound = false;
 			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
-			ORDERINDEX nNextOrder;
-			nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
+
+			ORDERINDEX nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
 			if(nNextOrder == startOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
 			const ORDERINDEX ordCount = pSndFile->Order.GetLength();
@@ -723,7 +726,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			}
 			if ((bNextPatFound) && (nNextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNextPat]))
 			{
-				UINT nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
+				ROWINDEX nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
 				UINT n = min((UINT)nVisRows, nNextRows);
 
 				m_Dib.SetBlendMode(0x80);
@@ -746,7 +749,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		DrawButtonRect(hdc, &rc, "");
 	}
 	// Drawing pattern selection
-	if (m_dwStatus & PATSTATUS_DRAGNDROPPING)
+	if (m_dwStatus & psDragnDropping)
 	{
 		DrawDragSel(hdc);
 	}
@@ -775,6 +778,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 //-----------------------------------------------------------------------------------------------------
 {
 	BYTE bColSel[MAX_BASECHANNELS];
+	static_assert(PatternCursor::lastColumn <= 7, "Columns are used as bitmasks here.");
+
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 	const ModCommand m0 = ModCommand::Empty();
 	const ModCommand *pPattern = pSndFile->Patterns[nPattern];
@@ -782,20 +787,22 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
 	int row_col, row_bkcol;
-	UINT bRowSel, bSpeedUp, nColumnWidth, ncols, maxcol;
+	UINT bSpeedUp, nColumnWidth, ncols, maxcol;
 	
 	ncols = pSndFile->GetNumChannels();
 	nColumnWidth = m_szCell.cx;
 	rect.SetRect(m_szHeader.cx, rcClient.top, m_szHeader.cx+nColumnWidth, rcClient.bottom);
-	for (UINT cmk=xofs; cmk<ncols; cmk++)
+	for(UINT cmk=xofs; cmk<ncols; cmk++)
 	{
-		UINT c = cmk << 3;
 		bColSel[cmk] = 0;
 		if (bSelEnable)
 		{
-			for (UINT n=0; n<5; n++)
+			for(int n = PatternCursor::firstColumn; n <= PatternCursor::lastColumn; n++)
 			{
-				if ((c+n >= (m_dwBeginSel & 0xFFFF)) && (c+n <= (m_dwEndSel & 0xFFFF))) bColSel[cmk] |= 1 << n;
+				if(m_Selection.ContainsHorizontal(PatternCursor(0, static_cast<CHANNELINDEX>(cmk), static_cast<PatternCursor::Columns>(n))))
+				{
+					bColSel[cmk] |= 1 << n;
+				}
 			}
 		}
 		if (!::RectVisible(hdc, &rect)) bColSel[cmk] |= 0x80;
@@ -816,7 +823,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			m_Dib.TextBlt(ibmp-4, 0, 4, m_szCell.cy, pfnt->nClrX+pfnt->nWidth-4, pfnt->nClrY);
 		} while (ibmp + nColumnWidth <= maxndx);
 	}
-	bRowSel = FALSE;
+	
+	bool bRowSel = false;
 	row_col = row_bkcol = -1;
 	for (UINT row=yofs; row<nrows; row++)
 	{
@@ -835,8 +843,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		}
 		rect.right = rect.left + m_szHeader.cx;
 		DrawButtonRect(hdc, &rect, s, !bSelEnable);
-		oldrowcolor = (row_bkcol << 16) | (row_col << 8) | (bRowSel);
-		bRowSel = ((row >= (m_dwBeginSel >> 16)) && (row <= (m_dwEndSel >> 16))) ? TRUE : FALSE;
+		oldrowcolor = (row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0);
+		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;
 		row_bkcol = MODCOLOR_BACKNORMAL;
 
@@ -872,14 +880,14 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				row_col = MODCOLOR_TEXTPLAYCURSOR;
 				row_bkcol = MODCOLOR_BACKPLAYCURSOR;
 			}
-			if (row == m_nRow)
+			if (row == GetCurrentRow())
 			{
-				if (m_dwStatus & PATSTATUS_FOCUS)
+				if (m_dwStatus & psFocussed)
 				{
 					row_col = MODCOLOR_TEXTCURROW;
 					row_bkcol = MODCOLOR_BACKCURROW;
 				} else
-				if ((m_dwStatus & PATSTATUS_FOLLOWSONG) && (bPlaying))
+				if ((m_dwStatus & psFollowSong) && (bPlaying))
 				{
 					row_col = MODCOLOR_TEXTPLAYCURSOR;
 					row_bkcol = MODCOLOR_BACKPLAYCURSOR;
@@ -896,7 +904,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			xpaint += nColumnWidth;
 		}
 		// Optimization: same row color ?
-		bSpeedUp = (oldrowcolor == (UINT)((row_bkcol << 16) | (row_col << 8) | bRowSel)) ? TRUE : FALSE;
+		bSpeedUp = (oldrowcolor == (UINT)((row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0))) ? TRUE : FALSE;
 		xbmp = nbmp = 0;
 		do
 		{
@@ -914,19 +922,19 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
 
 				if (m->note == mold->note) dwSpeedUpMask |= 0x01;
-				if ((m->instr == mold->instr) || (m_nDetailLevel < 1)) dwSpeedUpMask |= 0x02;
+				if ((m->instr == mold->instr) || (m_nDetailLevel < PatternCursor::instrColumn)) dwSpeedUpMask |= 0x02;
 				if ( m->IsPcNote() || mold->IsPcNote() )
 				{   // Handle speedup mask for PC notes.
 					if(m->note == mold->note)
 					{
-						if(m->GetValueVolCol() == mold->GetValueVolCol() || (m_nDetailLevel < 2)) dwSpeedUpMask |= 0x04;
-						if(m->GetValueEffectCol() == mold->GetValueEffectCol() || (m_nDetailLevel < 3)) dwSpeedUpMask |= 0x18;
+						if(m->GetValueVolCol() == mold->GetValueVolCol() || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= 0x04;
+						if(m->GetValueEffectCol() == mold->GetValueEffectCol() || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= 0x18;
 					}		
 				}
 				else
 				{
-					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || (m_nDetailLevel < 2)) dwSpeedUpMask |= 0x04;
-					if ((m->command == mold->command) || (m_nDetailLevel < 3)) dwSpeedUpMask |= (m->command != CMD_NONE) ? 0x08 : 0x18;
+					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= 0x04;
+					if ((m->command == mold->command) || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= (m->command != CMD_NONE) ? 0x08 : 0x18;
 				}
 				if (dwSpeedUpMask == 0x1F) goto DoBlit;
 			}
@@ -975,7 +983,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			}
 			x += pfnt->nEltWidths[0];
 			// Instrument
-			if (m_nDetailLevel > 0)
+			if (m_nDetailLevel >= PatternCursor::instrColumn)
 			{
 				if (!(dwSpeedUpMask & 0x02))
 				{
@@ -997,7 +1005,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				x += pfnt->nEltWidths[1];
 			}
 			// Volume
-			if (m_nDetailLevel > 1)
+			if (m_nDetailLevel >= PatternCursor::volumeColumn)
 			{
 				if (!(dwSpeedUpMask & 0x04))
 				{
@@ -1024,7 +1032,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				x += pfnt->nEltWidths[2];
 			}
 			// Command & param
-			if (m_nDetailLevel > 2)
+			if (m_nDetailLevel >= PatternCursor::effectColumn)
 			{
 				const bool isPCnote = m->IsPcNote();
 				uint16 val = m->GetValueEffectCol();
@@ -1128,14 +1136,14 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 		if (vul > 8) vul = 8;
 		if (vur > 8) vur = 8;
 		x += (m_szCell.cx / 2);
-		if (m_nDetailLevel <= 1)
+		if (m_nDetailLevel <= PatternCursor::instrColumn)
 		{
 			DibBlt(hdc, x-VUMETERS_LOWIDTH-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
 				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2, vul * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
 			DibBlt(hdc, x-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
 				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2+VUMETERS_LOWIDTH, vur * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
 		} else
-		if (m_nDetailLevel <= 2)
+		if (m_nDetailLevel <= PatternCursor::volumeColumn)
 		{
 			DibBlt(hdc, x - VUMETERS_MEDWIDTH-1, y, VUMETERS_MEDWIDTH, VUMETERS_BMPHEIGHT,
 				VUMETERS_BMPWIDTH*2, vul * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
@@ -1153,81 +1161,111 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 }
 
 
+// Draw an inverted border around the dragged selection.
 void CViewPattern::DrawDragSel(HDC hdc)
 //-------------------------------------
 {
+	// Ugly!
+	// XXX broken!
 	CModDoc *pModDoc;
 	CSoundFile *pSndFile;
 	CRect rect;
-	POINT ptTopLeft, ptBottomRight;
-	DWORD dwTopLeft, dwBottomRight;
-	bool bLeft, bTop, bRight, bBottom;
-	int x1, y1, x2, y2, dx, dy, c1, c2;
+	int x1, y1, x2, y2;
 	int nChannels, nRows;
 
 	if ((pModDoc = GetDocument()) == nullptr) return;
 	pSndFile = pModDoc->GetSoundFile();
-	bLeft = bTop = bRight = bBottom = true;
-	x1 = (m_dwBeginSel & 0xFFF8) >> 3;
-	y1 = (m_dwBeginSel) >> 16;
-	x2 = (m_dwEndSel & 0xFFF8) >> 3;
-	y2 = (m_dwEndSel) >> 16;
-	c1 = (m_dwBeginSel&7);
-	c2 = (m_dwEndSel&7);
-	dx = (int)((m_dwDragPos & 0xFFF8) >> 3) - (int)((m_dwStartSel & 0xFFF8) >> 3);
-	dy = (int)(m_dwDragPos >> 16) - (int)(m_dwStartSel >> 16);
+
+	// Compute relative movement
+	int dx = (int)m_DragPos.GetChannel() - (int)m_StartSel.GetChannel();
+	int dy = (int)m_DragPos.GetRow() - (int)m_StartSel.GetRow();
+
+	// Compute destination rect
+	PatternCursor begin(m_Selection.GetUpperLeft()), end(m_Selection.GetLowerRight());
+
+	// Check which selection lines need to be drawn.
+	bool drawLeft = ((int)begin.GetChannel() + dx >= GetXScrollPos());
+	bool drawRight = ((int)end.GetChannel() + dx < (int)pSndFile->GetNumChannels());
+	bool drawTop = ((int)begin.GetRow() + dy >= GetYScrollPos() - (int)m_nMidRow);
+	bool drawBottom = ((int)end.GetRow() + dy < (int)pSndFile->Patterns[m_nPattern].GetNumRows());
+
+	begin.Move(dy, dx, 0);
+	if(begin.GetChannel() >= pSndFile->GetNumChannels())
+	{
+		// Moved outside pattern range.
+		return;
+	}
+	end.Move(dy, dx, 0);
+	begin.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+	end.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+	// We need to know the first pixel that's not part of our rect anymore, so we extend the selection.
+	end.Move(1, 0, 1);
+	PatternRect destination(begin, end);
+
+	x1 = m_Selection.GetStartChannel();
+	y1 = m_Selection.GetStartRow();
+	x2 = m_Selection.GetEndChannel();
+	y2 = m_Selection.GetEndRow();
+	PatternCursor::Columns c1 = m_Selection.GetStartColumn();
+	PatternCursor::Columns c2 = m_Selection.GetEndColumn();
 	x1 += dx;
 	x2 += dx;
 	y1 += dy;
 	y2 += dy;
 	nChannels = pSndFile->m_nChannels;
 	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
-	if (x1 < GetXScrollPos()) bLeft = false;
+	if (x1 < GetXScrollPos()) drawLeft = false;
 	if (x1 >= nChannels) x1 = nChannels - 1;
-	if (x1 < 0) { x1 = 0; c1 = 0; bLeft = false; }
-	if (x2 >= nChannels) { x2 = nChannels-1; c2 = 4; bRight = false; }
+	if (x1 < 0) { x1 = 0; c1 = PatternCursor::firstColumn; drawLeft = false; }
+	if (x2 >= nChannels) { x2 = nChannels - 1; c2 = PatternCursor::lastColumn; drawRight = false; }
 	if (x2 < 0) x2 = 0;
-	if (y1 < GetYScrollPos() - (int)m_nMidRow) bTop = false;
+	if (y1 < GetYScrollPos() - (int)m_nMidRow) drawTop = false;
 	if (y1 >= nRows) y1 = nRows-1;
-	if (y1 < 0) { y1 = 0; bTop = false; }
-	if (y2 >= nRows) { y2 = nRows-1; bBottom = false; }
+	if (y1 < 0) { y1 = 0; drawTop = false; }
+	if (y2 >= nRows) { y2 = nRows-1; drawBottom = false; }
 	if (y2 < 0) y2 = 0;
-	dwTopLeft = (y1<<16)|(x1<<3)|c1;
-	dwBottomRight = ((y2+1)<<16)|(x2<<3)|(c2+1);
-	ptTopLeft = GetPointFromPosition(dwTopLeft);
-	ptBottomRight = GetPointFromPosition(dwBottomRight);
+
+	POINT ptTopLeft = GetPointFromPosition(begin);
+	POINT ptBottomRight = GetPointFromPosition(end);
 	if ((ptTopLeft.x >= ptBottomRight.x) || (ptTopLeft.y >= ptBottomRight.y)) return;
+
+	if(end.GetColumnType() == PatternCursor::firstColumn)
+	{
+		// Special case: If selection ends on the last column of a channel, subtract the channel separator width.
+		ptBottomRight.x -= 4;
+	}
+
 	// invert the brush pattern (looks just like frame window sizing)
 	CBrush* pBrush = CDC::GetHalftoneBrush();
 	if (pBrush != NULL)
 	{
 		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, pBrush->m_hObject);
 		// Top
-		if (bTop)
+		if (drawTop)
 		{
-			rect.SetRect(ptTopLeft.x+4, ptTopLeft.y, ptBottomRight.x, ptTopLeft.y+4);
-			if (!bLeft) rect.left -= 4;
+			rect.SetRect(ptTopLeft.x + 4, ptTopLeft.y, ptBottomRight.x, ptTopLeft.y + 4);
+			if (!drawLeft) rect.left -= 4;
 			PatBlt(hdc, rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
 		}
 		// Bottom
-		if (bBottom)
+		if (drawBottom)
 		{
-			rect.SetRect(ptTopLeft.x, ptBottomRight.y-4, ptBottomRight.x-4, ptBottomRight.y);
-			if (!bRight) rect.right += 4;
+			rect.SetRect(ptTopLeft.x, ptBottomRight.y - 4, ptBottomRight.x - 4, ptBottomRight.y);
+			if (!drawRight) rect.right += 4;
 			PatBlt(hdc, rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
 		}
 		// Left
-		if (bLeft)
+		if (drawLeft)
 		{
-			rect.SetRect(ptTopLeft.x, ptTopLeft.y, ptTopLeft.x+4, ptBottomRight.y-4);
-			if (!bBottom) rect.bottom += 4;
+			rect.SetRect(ptTopLeft.x, ptTopLeft.y, ptTopLeft.x + 4, ptBottomRight.y - 4);
+			if (!drawBottom) rect.bottom += 4;
 			PatBlt(hdc, rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
 		}
 		// Right
-		if (bRight)
+		if (drawRight)
 		{
-			rect.SetRect(ptBottomRight.x-4, ptTopLeft.y+4, ptBottomRight.x, ptBottomRight.y);
-			if (!bTop) rect.top -= 4;
+			rect.SetRect(ptBottomRight.x - 4, ptTopLeft.y + 4, ptBottomRight.x, ptBottomRight.y);
+			if (!drawTop) rect.top -= 4;
 			PatBlt(hdc, rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
 		}
 		if (hOldBrush != NULL) SelectObject(hdc, hOldBrush);
@@ -1388,76 +1426,61 @@ void CViewPattern::OnSize(UINT nType, int cx, int cy)
 void CViewPattern::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
-	if (nSBCode == (SB_THUMBTRACK|SB_THUMBPOSITION)) m_dwStatus |= PATSTATUS_DRAGVSCROLL;
+	if (nSBCode == (SB_THUMBTRACK|SB_THUMBPOSITION)) m_dwStatus |= psDragVScroll;
 	CModScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
-	if (nSBCode == SB_ENDSCROLL) m_dwStatus &= ~PATSTATUS_DRAGVSCROLL;
+	if (nSBCode == SB_ENDSCROLL) m_dwStatus &= ~psDragVScroll;
 }
 
 
-void CViewPattern::SetCurSel(DWORD dwBegin, DWORD dwEnd)
-//------------------------------------------------------
+void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor &endSel)
+//--------------------------------------------------------------------------------------
 {
 	RECT rect1, rect2, rect, rcInt, rcUni;
 	POINT pt;
-	int x1, y1, x2, y2;
-	
-	x1 = dwBegin & 0xFFFF;
-	y1 = dwBegin >> 16;
-	x2 = dwEnd & 0xFFFF;
-	y2 = dwEnd >> 16;
-	if (x1 > x2)
+
+	PatternRect oldSel = m_Selection;
+	m_Selection = PatternRect(beginSel, endSel);
+	const CModDoc *pModDoc = GetDocument();
+	if(pModDoc != nullptr)
 	{
-		int x = x2;
-		x2 = x1;
-		x1 = x;
-	}
-	if (y1 > y2)
-	{
-		int y = y2;
-		y2 = y1;
-		y1 = y;
-	}
-	// rewbs.fix3417: adding error checking
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile)
+		const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		if(pSndFile != nullptr)
 		{
-			y1 = max(y1, 0);
-			y2 = min(y2, (int)pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
-			x1 = max(x1, 0);
-			x2 = min(x2, pSndFile->GetNumChannels() * 8 - (8 - LAST_COLUMN));
+			m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 		}
 	}
-	// end rewbs.fix3417
-
 
 	// Get current selection area
-	pt = GetPointFromPosition(m_dwBeginSel);
+	PatternCursor endSel2(oldSel.GetLowerRight());
+	endSel2.Move(1, 0, 1);
+
+	pt = GetPointFromPosition(oldSel.GetUpperLeft());
 	rect1.left = pt.x;
 	rect1.top = pt.y;
-	pt = GetPointFromPosition(m_dwEndSel + 0x10001);
+	pt = GetPointFromPosition(endSel2);
 	rect1.right = pt.x;
 	rect1.bottom = pt.y;
-	if (rect1.left < m_szHeader.cx) rect1.left = m_szHeader.cx;
-	if (rect1.top < m_szHeader.cy) rect1.top = m_szHeader.cy;
+	if(rect1.left < m_szHeader.cx) rect1.left = m_szHeader.cx;
+	if(rect1.top < m_szHeader.cy) rect1.top = m_szHeader.cy;
+
 	// Get new selection area
-	m_dwBeginSel = (y1 << 16) | (x1);
-	m_dwEndSel = (y2 << 16) | (x2);
-	pt = GetPointFromPosition(m_dwBeginSel);
+	pt = GetPointFromPosition(m_Selection.GetUpperLeft());
 	rect2.left = pt.x;
 	rect2.top = pt.y;
-	pt = GetPointFromPosition(m_dwEndSel + 0x10001);
+	endSel2.Set(m_Selection.GetLowerRight());
+	endSel2.Move(1, 0, 1);
+	pt = GetPointFromPosition(endSel2);
 	rect2.right = pt.x;
 	rect2.bottom = pt.y;
 	if (rect2.left < m_szHeader.cx) rect2.left = m_szHeader.cx;
 	if (rect2.top < m_szHeader.cy) rect2.top = m_szHeader.cy;
+
+	// Compute area for invalidation
 	IntersectRect(&rcInt, &rect1, &rect2);
 	UnionRect(&rcUni, &rect1, &rect2);
 	SubtractRect(&rect, &rcUni, &rcInt);
 	if ((rect.left == rcUni.left) && (rect.top == rcUni.top)
-	 && (rect.right == rcUni.right) && (rect.bottom == rcUni.bottom))
+		&& (rect.right == rcUni.right) && (rect.bottom == rcUni.bottom))
 	{
 		InvalidateRect(&rect1, FALSE);
 		InvalidateRect(&rect2, FALSE);
@@ -1468,12 +1491,12 @@ void CViewPattern::SetCurSel(DWORD dwBegin, DWORD dwEnd)
 }
 
 
-void CViewPattern::InvalidatePattern(BOOL bHdr)
-//---------------------------------------------
+void CViewPattern::InvalidatePattern(bool invalidateHeader)
+//---------------------------------------------------------
 {
 	CRect rect;
 	GetClientRect(&rect);
-	if (!bHdr)
+	if(!invalidateHeader)
 	{
 		rect.left += m_szHeader.cx;
 		rect.top += m_szHeader.cy;
@@ -1490,7 +1513,7 @@ void CViewPattern::InvalidateRow(ROWINDEX n)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		int yofs = GetYScrollPos() - m_nMidRow;
-		if (n == ROWINDEX_INVALID) n = m_nRow;
+		if (n == ROWINDEX_INVALID) n = GetCurrentRow();
 		if (((int)n < yofs) || (n >= pSndFile->Patterns[m_nPattern].GetNumRows())) return;
 		CRect rect;
 		GetClientRect(&rect);
@@ -1504,18 +1527,27 @@ void CViewPattern::InvalidateRow(ROWINDEX n)
 }
 
 
-void CViewPattern::InvalidateArea(DWORD dwBegin, DWORD dwEnd)
-//-----------------------------------------------------------
+void CViewPattern::InvalidateArea(PatternCursor begin, PatternCursor end)
+//-----------------------------------------------------------------------
 {
 	RECT rect;
 	POINT pt;
-	pt = GetPointFromPosition(dwBegin);
+	pt = GetPointFromPosition(begin);
 	rect.left = pt.x;
 	rect.top = pt.y;
-	pt = GetPointFromPosition(dwEnd + 0x10001);
+	end.Move(1, 0, 1);
+	pt = GetPointFromPosition(end);
 	rect.right = pt.x;
 	rect.bottom = pt.y;
 	InvalidateRect(&rect, FALSE);
+}
+
+
+void CViewPattern::InvalidateCell(PatternCursor cursor)
+//-----------------------------------------------------
+{
+	cursor.RemoveColType();
+	InvalidateArea(cursor, PatternCursor(cursor.GetRow(), cursor.GetChannel(), PatternCursor::lastColumn));
 }
 
 
@@ -1545,23 +1577,23 @@ void CViewPattern::UpdateIndicator()
 		pMainFrm->SetUserText(s);
 		if (::GetFocus() == m_hWnd)
 		{
-			nChn = GetChanFromCursor(m_dwCursor);
+			nChn = m_Cursor.GetChannel();
 			s[0] = 0;
-			if ((!(m_dwStatus & (PATSTATUS_KEYDRAGSEL/*|PATSTATUS_MOUSEDRAGSEL*/))) //rewbs.xinfo: update indicator even when dragging
-			 && (m_dwBeginSel == m_dwEndSel) && (pSndFile->Patterns[m_nPattern])
-			 && (m_nRow < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
+			if ((!(m_dwStatus & (psKeyboardDragSelect/*|PATSTATUS_MOUSEDRAGSEL*/))) //rewbs.xinfo: update indicator even when dragging
+			 && (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && (pSndFile->Patterns[m_nPattern])
+			 && (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
 			{
-				ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
+				ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
 
-				switch (GetColTypeFromCursor(m_dwCursor))
+				switch(m_Cursor.GetColumnType())
 				{
-				case NOTE_COLUMN:
+				case PatternCursor::noteColumn:
 					// display note
 					if(m->note >= NOTE_MIN_SPECIAL)
 						strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
 					break;
 
-				case INST_COLUMN:
+				case PatternCursor::instrColumn:
 					// display instrument
 					if (m->instr)
 					{
@@ -1610,7 +1642,7 @@ void CViewPattern::UpdateIndicator()
 					}
 					break;
 
-				case VOL_COLUMN:
+				case PatternCursor::volumeColumn:
 					// display volume command
 					if(m->IsPcNote())
 					{
@@ -1629,8 +1661,8 @@ void CViewPattern::UpdateIndicator()
 					}
 					break;
 
-				case EFFECT_COLUMN:
-				case PARAM_COLUMN:
+				case PatternCursor::effectColumn:
+				case PatternCursor::paramColumn:
 					// display effect command
 					if(!m->IsPcNote())
 					{

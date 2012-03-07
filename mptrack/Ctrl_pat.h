@@ -181,7 +181,7 @@ protected:
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins, m_SpinSequence;
 	CModControlBar m_ToolBar;
 	INSTRUMENTINDEX m_nInstrument;
-	UINT m_nDetailLevel;
+	PatternCursor::Columns m_nDetailLevel;			// Visible Columns
 	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
 
 public:

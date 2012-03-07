@@ -108,7 +108,7 @@ CCtrlPatterns::CCtrlPatterns()
 	m_bVUMeters = CMainFrame::GetSettings().gbPatternVUMeters;
 	m_bPluginNames = CMainFrame::GetSettings().gbPatternPluginNames;	 	//rewbs.patPlugNames
 	m_bRecord = CMainFrame::GetSettings().gbPatternRecord;
-	m_nDetailLevel = 4;
+	m_nDetailLevel = PatternCursor::lastColumn;
 }
 
 
@@ -1180,9 +1180,9 @@ void CCtrlPatterns::OnDetailLo()
 //------------------------------
 {
 	m_ToolBar.SetState(ID_PATTERNDETAIL_LO, TBSTATE_CHECKED|TBSTATE_ENABLED);
-	if (m_nDetailLevel != 1)
+	if (m_nDetailLevel != PatternCursor::instrColumn)
 	{
-		m_nDetailLevel = 1;
+		m_nDetailLevel = PatternCursor::instrColumn;
 		m_ToolBar.SetState(ID_PATTERNDETAIL_MED, TBSTATE_ENABLED);
 		m_ToolBar.SetState(ID_PATTERNDETAIL_HI, TBSTATE_ENABLED);
 		SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
@@ -1195,9 +1195,9 @@ void CCtrlPatterns::OnDetailMed()
 //-------------------------------
 {
 	m_ToolBar.SetState(ID_PATTERNDETAIL_MED, TBSTATE_CHECKED|TBSTATE_ENABLED);
-	if (m_nDetailLevel != 2)
+	if (m_nDetailLevel != PatternCursor::volumeColumn)
 	{
-		m_nDetailLevel = 2;
+		m_nDetailLevel = PatternCursor::volumeColumn;
 		m_ToolBar.SetState(ID_PATTERNDETAIL_LO, TBSTATE_ENABLED);
 		m_ToolBar.SetState(ID_PATTERNDETAIL_HI, TBSTATE_ENABLED);
 		SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
@@ -1210,9 +1210,9 @@ void CCtrlPatterns::OnDetailHi()
 //------------------------------
 {
 	m_ToolBar.SetState(ID_PATTERNDETAIL_HI, TBSTATE_CHECKED|TBSTATE_ENABLED);
-	if (m_nDetailLevel != 4)
+	if (m_nDetailLevel != PatternCursor::lastColumn)
 	{
-		m_nDetailLevel = 4;
+		m_nDetailLevel = PatternCursor::lastColumn;
 		m_ToolBar.SetState(ID_PATTERNDETAIL_LO, TBSTATE_ENABLED);
 		m_ToolBar.SetState(ID_PATTERNDETAIL_MED, TBSTATE_ENABLED);
 		SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);

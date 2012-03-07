@@ -118,8 +118,8 @@ void CModDoc::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc construction/destruction
 
-CModDoc::CModDoc()
-//----------------
+CModDoc::CModDoc() : patternClipboard(m_SndFile)
+//----------------------------------------------
 {
 	m_bHasValidPath = false;
 	m_bPaused = TRUE;
@@ -806,7 +806,9 @@ void CModDoc::ViewInstrument(UINT nIns)
 	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS, nIns);
 }
 
+
 void CModDoc::AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...)
+//--------------------------------------------------------------------------------------------
 {
 	CString strMsg;
 	va_list args;
@@ -819,6 +821,7 @@ void CModDoc::AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR p
 				<< _T("Function: ") << pszFuncName << std::endl
 				<< _T("Message: ") << strMsg << std::endl << std::endl;
 }
+
 
 BOOL CModDoc::AddToLog(LPCSTR lpszLog)
 //------------------------------------
@@ -2216,7 +2219,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)(&patternViewState));
 		
 		pat = patternViewState.nPattern;
-		row = patternViewState.nRow;
+		row = patternViewState.cursor.GetRow();
 		ord = patternViewState.nOrder;	
 	}
 	else	//patern editor object does not exist (i.e. is not active)  - use saved state.
@@ -2225,7 +2228,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		patternViewState = pChildFrm->GetPatternViewState();
 
 		pat = patternViewState->nPattern;
-		row = patternViewState->nRow;
+		row = patternViewState->cursor.GetRow();
 		ord = patternViewState->nOrder;
 	}
 	//rewbs.fix3185: if position is invalid, go to start of song.

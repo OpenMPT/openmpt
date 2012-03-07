@@ -665,13 +665,13 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 }
 
 
-BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor)
-//----------------------------------------------------------
+BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor)
+//-------------------------------------------------------------------------------
 {
 	CHAR s[64];
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	const ROWINDEX nRow = CViewPattern::GetRowFromCursor(dwCursor);
-	const CHANNELINDEX nChannel = CViewPattern::GetChanFromCursor(dwCursor);
+	const ROWINDEX nRow = cursor.GetRow();
+	const CHANNELINDEX nChannel = cursor.GetChannel();
 
 	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 		|| (nRow >= pSndFile->Patterns[nPat].GetNumRows()) || (nChannel >= pSndFile->GetNumChannels())
@@ -702,9 +702,8 @@ BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor)
 	SetTitle(s);
 	// Activate Page
 	UINT nPage = 2;
-	dwCursor &= 7;
-	if (dwCursor < 2) nPage = 0;
-	else if (dwCursor < 3) nPage = 1;
+	if(cursor.GetColumnType() < PatternCursor::volumeColumn) nPage = 0;
+	else if (cursor.GetColumnType() < PatternCursor::effectColumn) nPage = 1;
 	SetActivePage(nPage);
 	if (m_pageNote) m_pageNote->UpdateDialog();
 	if (m_pageVolume) m_pageVolume->UpdateDialog();

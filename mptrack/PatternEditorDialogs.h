@@ -252,7 +252,7 @@ public:
 
 public:
 	BOOL SetParent(CWnd *parent, CModDoc *pModDoc);
-	BOOL ShowEditWindow(PATTERNINDEX nPat, DWORD dwCursor);
+	BOOL ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor);
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	void OnSelListChange();
