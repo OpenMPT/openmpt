@@ -429,15 +429,15 @@ private:
 	void Interpolate(PatternCursor::Columns type);
 
 	// Return true if recording live (i.e. editing while following playback).
-	// rSndFile must be the CSoundFile object of given rModDoc.
-	bool IsLiveRecord(const CModDoc &rModDoc, const CSoundFile &rSndFile) const
+	bool IsLiveRecord() const
 	{
-		return IsLiveRecord(*CMainFrame::GetMainFrame(), rModDoc, rSndFile);
-	};
-	bool IsLiveRecord(const CMainFrame &rMainFrm, const CModDoc &rModDoc, const CSoundFile &rSndFile) const
-	{
-		//             (following song)             &&        (following in correct document)        &&    (playback is on)
-		return ((m_dwStatus & psFollowSong) &&	(rMainFrm.GetFollowSong(&rModDoc) == m_hWnd) && !(rSndFile.IsPaused()));
+		CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+		if(mainFrm == nullptr || GetDocument() == nullptr || GetSoundFile() == nullptr)
+		{
+			return false;
+		}
+		//           (following song)      &&       (following in correct document)           &&    (playback is on)
+		return (m_dwStatus & psFollowSong) && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !GetSoundFile()->IsPaused();
 	};
 
 	// If given edit positions are valid, sets them to iRow and iPat.
