@@ -563,11 +563,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Effects
 
+// Change sample or instrument number.
 void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv)
 //--------------------------------------------------------------------------------------------------------
 {
 	if (instr >= MAX_INSTRUMENTS) return;
-	ModInstrument *pIns = Instruments[instr];
+	ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
 	ModSample *pSmp = &Samples[instr];
 	UINT note = pChn->nNewNote;
 
@@ -615,8 +616,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	const bool bNewTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
-	//Playback behavior change for MPT: With portamento don't change sample if it is in
-	//the same instrument as previous sample.
+	// Playback behavior change for MPT: With portamento don't change sample if it is in
+	// the same instrument as previous sample.
 	if(bPorta && bNewTuning && pIns == pChn->pModInstrument)
 		return;
 
@@ -738,7 +739,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Tone-Portamento doesn't reset the pingpong direction flag
-	if ((bPorta) && (pSmp == pChn->pModSample))
+	if (bPorta && pSmp == pChn->pModSample)
 	{
 		// If channel length is 0, we cut a previous sample using SCx. In that case, we have to update sample length, loop points, etc...
 		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && pChn->nLength != 0) return;
@@ -748,8 +749,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	{
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE);
 
-		//IT compatibility tentative fix: Don't change bidi loop direction when 
-		//no sample nor instrument is changed.
+		// IT compatibility tentative fix: Don't change bidi loop direction when 
+		// no sample nor instrument is changed.
 		if(IsCompatibleMode(TRK_ALLTRACKERS) && pSmp == pChn->pModSample && !instrumentChanged)
 			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 		else
@@ -1002,8 +1003,10 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
 	} 
-	else 
+	else
+	{
 		bPorta = false;
+	}
 
 	if ((!bPorta) || (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 	 || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
@@ -2483,7 +2486,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param)
 //-----------------------------------------------------------
 {
-	if((Chn[nChn].dwFlags & CHN_MUTE) != 0)
+	if((Chn[nChn].dwFlags & (CHN_MUTE | CHN_SYNCMUTE)) != 0)
 	{
 		// Don't process portamento on muted channels. Note that this might have a side-effect
 		// on other channels which trigger notes on the same MIDI channel of the same plugin,
