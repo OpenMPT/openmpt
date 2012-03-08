@@ -111,6 +111,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_EFFECTLETTERSIT,			OnSetITEffects)
 	ON_COMMAND(IDC_CLEARLOG,				OnClearLog)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,			OnRestoreDefaultKeymap)
+	ON_EN_CHANGE(IDC_FIND,					OnSearchTermChanged)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -127,6 +128,7 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_CHECKKEYDOWN,	m_bKeyDown);
 	DDX_Control(pDX, IDC_CHECKKEYHOLD,	m_bKeyHold);
 	DDX_Control(pDX, IDC_CHECKKEYUP,	m_bKeyUp);
+	DDX_Control(pDX, IDC_FIND,			m_eFind);
 }
 
 
@@ -177,7 +179,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 // Filter commands: We only need user to see a select set off commands
 // for each category
 void COptionsKeyboard::DefineCommandCategories()
-
+//----------------------------------------------
 {
 	CommandCategory *newCat;
 
@@ -359,35 +361,89 @@ void COptionsKeyboard::OnKeyboardChanged()
 }
 
 
-// Fills command list and automatically selects first command.
 void COptionsKeyboard::OnCategorySelChanged()
 //-------------------------------------------
 {
-	//CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
-	int nCat = m_cmbCategory.GetItemData( m_cmbCategory.GetCurSel() );
+	int cat = m_cmbCategory.GetItemData(m_cmbCategory.GetCurSel());
 
-	//Fill Command list
-	if ((nCat >= 0) && (nCat != m_nCurCategory))	//have we changed category?
+	if(cat >= 0 && cat != m_nCurCategory)
 	{
-		CommandID com;
-		m_nCurCategory = nCat;
-		m_lbnCommandKeys.ResetContent();		
-		for (int c=0; c<commandCategories[nCat].commands.GetSize(); c++)
+		// Changed category
+		UpdateShortcutList(cat);
+	}
+}
+
+
+void COptionsKeyboard::OnSearchTermChanged()
+//------------------------------------------
+{
+	UpdateShortcutList();
+}
+
+
+// Fills command list and automatically selects first command.
+void COptionsKeyboard::UpdateShortcutList(int category)
+//-----------------------------------------------------
+{
+	CString findString;
+	m_eFind.GetWindowText(findString);
+	findString.MakeLower();
+
+	const bool doSearch = !findString.IsEmpty();
+
+	m_nCurCategory = category;
+
+	int firstCat = category, lastCat = category;
+	if(category == -1)
+	{
+		// We will search in all categories
+		firstCat = 0;
+		lastCat = commandCategories.GetSize() - 1;
+	}
+
+	m_lbnCommandKeys.ResetContent();
+
+	for(int cat = firstCat; cat <= lastCat; cat++)
+	{
+		// When searching, we also add the category names to the list.
+		bool addCategoryName = (firstCat != lastCat);
+
+		for(int cmd = 0; cmd < commandCategories[cat].commands.GetSize(); cmd++)
 		{
-			com = (CommandID)commandCategories[nCat].commands[c];
-			if (plocalCmdSet->GetCommandText(com))
+			CommandID com = (CommandID)commandCategories[cat].commands[cmd];
+
+			CString cmdText = plocalCmdSet->GetCommandText(com);
+			bool addString = true;
+			if(doSearch)
 			{
-				if (!plocalCmdSet->isHidden(com))
+				addString = (cmdText.MakeLower().Find(findString) >= 0);
+			}
+
+			if(addString)
+			{
+				if(!plocalCmdSet->isHidden(com))
+				{
+					if(doSearch && addCategoryName)
+					{
+						const CString catName = "------ " + commandCategories[cat].name.Trim() + " ------";
+						m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(catName), DWORD_PTR(-1));
+						addCategoryName = false;
+					}
+
 					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(plocalCmdSet->GetCommandText(com)), com);
-				
-				if (commandCategories[nCat].separatorAt(com))
+				}
+
+				if(commandCategories[cat].separatorAt(com))
 					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString("------------------------------------------------------"), DWORD_PTR(-1));
 			}
 		}
-		m_lbnCommandKeys.SetCurSel(0);
-		OnCommandKeySelChanged();
+
 	}
+
+	m_lbnCommandKeys.SetCurSel(0);
+	OnCommandKeySelChanged();
 }
+
 
 // Fills  key choice list and automatically selects first key choice
 void COptionsKeyboard::OnCommandKeySelChanged()
@@ -424,12 +480,13 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		m_bKeyUp.EnableWindow(TRUE);
 		
 		m_nCurHotKey = nCmd;
+		m_nCurCategory = GetCategoryFromCommandID(nCmd);
 		char s[20];
 			
 		m_cmbKeyChoice.ResetContent();
 		int numChoices=plocalCmdSet->GetKeyListSize(nCmd);
 		if ((nCmd<kcNumCommands) && (numChoices>0))
-        {
+		{
 			for (int i=0; i<numChoices; i++)
 			{
 				wsprintf(s, "Choice %d (of %d)", i+1, numChoices);
@@ -482,6 +539,7 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 
 //rewbs.autochord
 void COptionsKeyboard::OnChordWaitTimeChanged()
+//---------------------------------------------
 {
 	CString s;
 	UINT val;
@@ -530,6 +588,7 @@ void COptionsKeyboard::OnHotKeyChanged()
 
 
 void COptionsKeyboard::OnRestoreKeyChoice()
+//-----------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd = (CommandID)m_nCurHotKey;
@@ -555,6 +614,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 }
 
 void COptionsKeyboard::OnDeleteKeyChoice()
+//----------------------------------------
 {
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
@@ -576,6 +636,7 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 
 
 void COptionsKeyboard::OnSetKeyChoice()
+//-------------------------------------
 {
 	CString report, reportHistory;
 	KeyCombination kc;
@@ -591,9 +652,9 @@ void COptionsKeyboard::OnSetKeyChoice()
 	kc.mod  = m_eCustHotKey.mod;
 	kc.code = m_eCustHotKey.code;
 	kc.ctx  = (commandCategories[m_nCurCategory]).id;
-	temp |= m_bKeyDown.GetCheck()?kKeyEventDown:0;
-	temp |= m_bKeyHold.GetCheck()?kKeyEventRepeat:0;
-	temp |= m_bKeyUp.GetCheck()?kKeyEventUp:0;
+	temp |= m_bKeyDown.GetCheck() ? kKeyEventDown : 0;
+	temp |= m_bKeyHold.GetCheck() ? kKeyEventRepeat : 0;
+	temp |= m_bKeyUp.GetCheck() ? kKeyEventUp : 0;
 	kc.event =(KeyEventType)temp;
 	//kc.event =(KeyEventType)((UINT)kKeyEventDown|(UINT)kKeyEventRepeat);
 	//detect invalid input	
@@ -627,6 +688,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	return;
 }
 
+
 void COptionsKeyboard::OnOK()
 //---------------------------
 {
@@ -641,12 +703,15 @@ void COptionsKeyboard::OnOK()
 
 
 void COptionsKeyboard::OnDestroy()
+//--------------------------------
 {
 	CPropertyPage::OnDestroy();
 	delete plocalCmdSet;
 }
 
+
 void COptionsKeyboard::OnLoad()
+//-----------------------------
 { 
 	std::string filename = m_sFullPathName;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mkb", filename,
@@ -660,7 +725,9 @@ void COptionsKeyboard::OnLoad()
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
+
 void COptionsKeyboard::OnSave()
+//-----------------------------
 {	
 	std::string filename = m_sFullPathName;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mkb", filename,
@@ -673,31 +740,41 @@ void COptionsKeyboard::OnSave()
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
+
 void COptionsKeyboard::OnNotesRepeat()
+//------------------------------------
 {
 	plocalCmdSet->QuickChange_NotesRepeat();
 	ForceUpdateGUI();
 }
 
+
 void COptionsKeyboard::OnNoNotesRepeat()
+//--------------------------------------
 {
 	plocalCmdSet->QuickChange_NoNotesRepeat();
 	ForceUpdateGUI();
 }
 
+
 void COptionsKeyboard::OnSetITEffects()
+//-------------------------------------
 {
 	plocalCmdSet->QuickChange_SetEffectsIT();
 	ForceUpdateGUI();
 }
 
+
 void COptionsKeyboard::OnSetXMEffects()
+//-------------------------------------
 {
 	plocalCmdSet->QuickChange_SetEffectsXM();
 	ForceUpdateGUI();
 }
 
+
 void COptionsKeyboard::ForceUpdateGUI()
+//-------------------------------------
 {
 	//update gui
 	m_bForceUpdate=true; // m_nCurKeyChoice and m_nCurHotKey haven't changed, yet we still want to update.
@@ -708,7 +785,9 @@ void COptionsKeyboard::ForceUpdateGUI()
 	OnSettingsChanged();						// Enable "apply" button
 }
 
+
 void COptionsKeyboard::OnClearLog()
+//---------------------------------
 {
 	m_eReport.SetWindowText("");
 	ForceUpdateGUI();
@@ -723,4 +802,21 @@ void COptionsKeyboard::OnRestoreDefaultKeymap()
 		plocalCmdSet->LoadDefaultKeymap();
 		ForceUpdateGUI();
 	}
+}
+
+
+int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
+//---------------------------------------------------------------------
+{
+	for(int cat = 0; cat < commandCategories.GetSize(); cat++)
+	{
+		for(int cmd = 0; cmd < commandCategories[cat].commands.GetSize(); cmd++)
+		{
+			if(commandCategories[cat].commands[cmd] == command)
+			{
+				return cat;
+			}
+		}
+	}
+	return -1;
 }
