@@ -49,7 +49,7 @@ public:
 		for (int p=0; p<separators.GetSize(); p++)
 		{
 			if (separators[p]==c)
-                return true;
+				return true;
 		}
 		return false;
 	}
@@ -100,6 +100,7 @@ protected:
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
 	CCustEdit m_eCustHotKey;
+	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
 	UINT m_nKeyboardCfg;
 	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
@@ -110,6 +111,8 @@ protected:
 	bool m_bChoiceModified;
 
 	void ForceUpdateGUI();
+	void UpdateShortcutList(int category = -1);
+	int GetCategoryFromCommandID(CommandID command) const;
 
 public:
 	COptionsKeyboard():CPropertyPage(IDD_OPTIONS_KEYBOARD) { m_nKeyboardCfg = 0; }
@@ -131,6 +134,7 @@ protected:
 	afx_msg void OnKeyChoiceSelect();
 	afx_msg void OnCommandKeySelChanged();
 	afx_msg void OnCategorySelChanged();
+	afx_msg void OnSearchTermChanged();
 	afx_msg void OnChordWaitTimeChanged(); //rewbs.autochord
 	afx_msg void OnHotKeyChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
