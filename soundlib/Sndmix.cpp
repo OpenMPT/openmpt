@@ -1074,7 +1074,8 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes en
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(env);
 
 	// IT Compatibility: S77/S79/S7B do not disable the envelope, they just pause the counter
-	return (((pChn->GetEnvelope(env).flags & ENV_ENABLED) || ((insEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER)))
+	// Test cases: s77.it, EnvLoops.xm
+	return (((pChn->GetEnvelope(env).flags & ENV_ENABLED) || ((insEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2)))
 		&& insEnv.nNodes != 0);
 }
 
@@ -1086,12 +1087,12 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition == 0)
+		if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) && pChn->VolEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
-		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) ? 1 : 0);
 		// Get values in [0, 256]
 		int envval = Util::Round<int>(pIns->VolEnv.GetValueFromPosition(envpos) * 256.0f);
 
@@ -1216,7 +1217,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 	}
 
 	// Increase position
-	UINT position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
+	UINT position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) ? 0 : 1);
 
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(envType);
 
@@ -1230,7 +1231,12 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 			// Normal loop active
 			UINT end = insEnv.Ticks[insEnv.nLoopEnd];
 			if(GetType() != MOD_TYPE_XM) end++;
-			if(position == end)
+
+			// FT2 compatibility: If the sustain point is at the loop end and the sustain loop has been released, don't loop anymore.
+			// Test case: EnvLoops.xm
+			const bool escapeLoop = (insEnv.nLoopEnd == insEnv.nSustainEnd && (pChn->dwFlags & CHN_KEYOFF) && IsCompatibleMode(TRK_FASTTRACKER2));
+
+			if(position == end && !escapeLoop)
 			{
 				position = insEnv.Ticks[insEnv.nLoopStart];
 
@@ -1312,7 +1318,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		}
 	}
 
-	chnEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+	chnEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) ? 1 : 0);
 
 }
 
@@ -1909,7 +1915,7 @@ BOOL CSoundFile::ReadNote()
 	ModChannel *pChn = Chn;
 	for (CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
 	{
-		// XM Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
+		// FT2 Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
 		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
 		if ((pChn->dwFlags & CHN_NOTEFADE) && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
@@ -1972,13 +1978,13 @@ BOOL CSoundFile::ReadNote()
 			// Process Envelopes
 			if (pIns)
 			{
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 				{
-					// In IT compatible mode, envelope position indices are shifted by one for proper envelope pausing,
+					// In IT and FT2 compatible mode, envelope position indices are shifted by one for proper envelope pausing,
 					// so we have to update the position before we actually process the envelopes.
 					// When using MPT behaviour, we get the envelope position for the next tick while we are still calculating the current tick,
 					// which then results in wrong position information when the envelope is paused on the next row.
-					// Test case: s77.it
+					// Test cases: s77.it, EnvLoops.xm
 					IncrementEnvelopePositions(pChn);
 				}
 				ProcessVolumeEnvelope(pChn, vol);
@@ -2130,10 +2136,10 @@ BOOL CSoundFile::ReadNote()
 		}
 
 		// Increment envelope positions
-		if (pIns != nullptr && !IsCompatibleMode(TRK_IMPULSETRACKER))
+		if (pIns != nullptr && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 		{
-			// In IT compatible mode, envelope positions are updated above.
-			// Test case: s77.it
+			// In IT and FT2 compatible mode, envelope positions are updated above.
+			// Test cases: s77.it, EnvLoops.xm
 			IncrementEnvelopePositions(pChn);
 		}
 
