@@ -181,162 +181,194 @@ BOOL COptionsKeyboard::OnInitDialog()
 void COptionsKeyboard::DefineCommandCategories()
 //----------------------------------------------
 {
-	CommandCategory *newCat;
+	{
+		CommandCategory newCat("Global keys", kCtxAllContexts);
 
-	newCat = new CommandCategory("Global keys", kCtxAllContexts);
-	for (int c=kcStartFile; c<=kcEndFile; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndFile);			//--------------------------------------
-	for (int c=kcStartPlayCommands; c<=kcEndPlayCommands; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndPlayCommands);	//--------------------------------------
-	for (int c=kcStartEditCommands; c<=kcEndEditCommands; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndEditCommands);	//--------------------------------------
-	for (int c=kcStartView; c<=kcEndView; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndView);			//--------------------------------------
-	for (int c=kcStartMisc; c<=kcEndMisc; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndMisc);			//--------------------------------------
+		for(int c = kcStartFile; c <= kcEndFile; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndFile);			//--------------------------------------
+		for(int c = kcStartPlayCommands; c <= kcEndPlayCommands; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndPlayCommands);	//--------------------------------------
+		for(int c = kcStartEditCommands; c <= kcEndEditCommands; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndEditCommands);	//--------------------------------------
+		for(int c = kcStartView; c <= kcEndView; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndView);			//--------------------------------------
+		for(int c = kcStartMisc; c <= kcEndMisc; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndMisc);			//--------------------------------------
 
-	commandCategories.Add(*newCat);
-	delete newCat;
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("  General [Top]", kCtxCtrlGeneral);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("  General [Top]", kCtxCtrlGeneral);
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("  General [Bottom]", kCtxViewGeneral);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("  General [Bottom]", kCtxViewGeneral);
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("  Pattern Editor [Top]", kCtxCtrlPatterns);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("  Pattern Editor [Top]", kCtxCtrlPatterns);
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("  Pattern Editor - Order List", kCtxCtrlOrderlist);
+	{
+		CommandCategory newCat("  Pattern Editor - Order List", kCtxCtrlOrderlist);
 
-	for (int c=kcStartOrderlistCommands; c<=kcEndOrderlistCommands; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndOrderlistNavigation);			//--------------------------------------
-	newCat->separators.Add(kcEndOrderlistEdit);			//--------------------------------------
+		for(int c = kcStartOrderlistCommands; c <= kcEndOrderlistCommands; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndOrderlistNavigation);			//--------------------------------------
+		newCat.separators.Add(kcEndOrderlistEdit);					//--------------------------------------
 
-	commandCategories.Add(*newCat);
-	delete newCat;
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("    Pattern Editor - General", kCtxViewPatterns);
-	
-	for (int c=kcStartPlainNavigate; c<=kcEndPlainNavigate; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndPlainNavigate);			//--------------------------------------
-	for (int c=kcStartJumpSnap; c<=kcEndJumpSnap; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndJumpSnap);			//--------------------------------------
-	for (int c=kcStartHomeEnd; c<=kcEndHomeEnd; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndHomeEnd);			//--------------------------------------
-	for (int c=kcPrevPattern; c<=kcNextPattern; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcNextPattern);			//--------------------------------------
-	for (int c=kcStartSelect; c<=kcEndSelect; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndSelect);			//--------------------------------------
-	newCat->commands.Add(kcCopyAndLoseSelection);
-	for (int c=kcClearRow; c<=kcInsertAllRows; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcInsertAllRows);			//--------------------------------------
-	for (int c=kcChannelMute; c<=kcChannelReset; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcChannelReset);			//--------------------------------------
-	for (int c=kcTransposeUp; c<=kcTransposeOctDown; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcTransposeOctDown);			//--------------------------------------
-	for (int c=kcPatternAmplify; c<=kcPatternShrinkSelection; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcPatternShrinkSelection);			//--------------------------------------
-	for (int c=kcStartPatternEditMisc; c<=kcEndPatternEditMisc; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndPatternEditMisc);			//--------------------------------------
+	{
+		CommandCategory newCat("    Pattern Editor - General", kCtxViewPatterns);
 
-	commandCategories.Add(*newCat);
-	delete newCat;
+		for(int c = kcStartPlainNavigate; c <= kcEndPlainNavigate; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndPlainNavigate);					//--------------------------------------
+		for(int c = kcStartJumpSnap; c <= kcEndJumpSnap; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndJumpSnap);						//--------------------------------------
+		for(int c = kcStartHomeEnd; c <= kcEndHomeEnd; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndHomeEnd);						//--------------------------------------
+		for(int c = kcPrevPattern; c <= kcNextPattern; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcNextPattern);						//--------------------------------------
+		for(int c = kcStartSelect; c <= kcEndSelect; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndSelect);							//--------------------------------------
+		newCat.commands.Add(kcCopyAndLoseSelection);
+		for(int c = kcClearRow; c <= kcInsertAllRows; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcInsertAllRows);						//--------------------------------------
+		for(int c = kcChannelMute; c <= kcChannelReset; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcChannelReset);						//--------------------------------------
+		for(int c = kcTransposeUp; c <= kcTransposeOctDown; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcTransposeOctDown);					//--------------------------------------
+		for(int c = kcPatternAmplify; c <= kcPatternShrinkSelection; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcPatternShrinkSelection);			//--------------------------------------
+		for(int c = kcStartPatternEditMisc; c <= kcEndPatternEditMisc; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndPatternEditMisc);				//--------------------------------------
 
-	newCat = new CommandCategory("        Pattern Editor - Note Column", kCtxViewPatternsNote);
-	for (int c=kcVPStartNotes; c<=kcVPEndNotes; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
-	for (int c=kcSetOctave0; c<=kcSetOctave9; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
-	for (int c=kcStartNoteMisc; c<=kcEndNoteMisc; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("        Pattern Editor - Instrument Column", kCtxViewPatternsIns);
-	for (int c=kcSetIns0; c<=kcSetIns9; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("        Pattern Editor - Note Column", kCtxViewPatternsNote);
 
-	newCat = new CommandCategory("        Pattern Editor - Volume Column", kCtxViewPatternsVol);
-	for (int c=kcSetVolumeStart; c<=kcSetVolumeEnd; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		for(int c = kcVPStartNotes; c <= kcVPEndNotes; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcVPEndNotes);			//--------------------------------------
+		for(int c = kcSetOctave0; c <= kcSetOctave9; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcVPEndNotes);			//--------------------------------------
+		for(int c = kcStartNoteMisc; c <= kcEndNoteMisc; c++)
+			newCat.commands.Add(c);
 
-	newCat = new CommandCategory("        Pattern Editor - Effect Column", kCtxViewPatternsFX);
-	for (int c=kcSetFXStart; c<=kcSetFXEnd; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("        Pattern Editor - Effect Parameter Column", kCtxViewPatternsFXparam);
-	for (int c=kcSetFXParam0; c<=kcSetFXParamF; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("        Pattern Editor - Instrument Column", kCtxViewPatternsIns);
 
-	newCat = new CommandCategory("  Sample [Top]", kCtxCtrlSamples);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		for(int c = kcSetIns0; c <= kcSetIns9; c++)
+			newCat.commands.Add(c);
 
-	newCat = new CommandCategory("    Sample Editor", kCtxViewSamples);
-	for (int c=kcStartSampleEditing; c<=kcEndSampleEditing; c++)
-		newCat->commands.Add(c);
-	newCat->separators.Add(kcEndSampleEditing);			//--------------------------------------
-	for (int c=kcStartSampleMisc; c<=kcEndSampleMisc; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("  Instrument Editor", kCtxCtrlInstruments);
-	for (int c=kcStartInstrumentCtrlMisc; c<=kcEndInstrumentCtrlMisc; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("        Pattern Editor - Volume Column", kCtxViewPatternsVol);
 
-	newCat = new CommandCategory("    Envelope Editor", kCtxViewInstruments);
-	for (int c=kcStartInstrumentMisc; c<=kcEndInstrumentMisc; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		for(int c = kcSetVolumeStart; c <= kcSetVolumeEnd; c++)
+			newCat.commands.Add(c);
 
-	newCat = new CommandCategory("  Comments [Top]", kCtxCtrlComments);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		commandCategories.Add(newCat);
+	}
 
-	newCat = new CommandCategory("  Comments [Bottom]", kCtxViewComments);
-	commandCategories.Add(*newCat);
-	delete newCat;
+	{
+		CommandCategory newCat("        Pattern Editor - Effect Column", kCtxViewPatternsFX);
 
-	newCat = new CommandCategory("  Plugin Editor", kCtxVSTGUI);
-	for (int c=kcStartVSTGUICommands; c<=kcEndVSTGUICommands; c++)
-		newCat->commands.Add(c);
-	commandCategories.Add(*newCat);
-	delete newCat;
+		for(int c = kcSetFXStart; c <= kcSetFXEnd; c++)
+			newCat.commands.Add(c);
 
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("        Pattern Editor - Effect Parameter Column", kCtxViewPatternsFXparam);
+		for(int c = kcSetFXParam0; c <= kcSetFXParamF; c++)
+			newCat.commands.Add(c);
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("  Sample [Top]", kCtxCtrlSamples);
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("    Sample Editor", kCtxViewSamples);
+
+		for(int c = kcStartSampleEditing; c <= kcEndSampleEditing; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndSampleEditing);			//--------------------------------------
+		for(int c = kcStartSampleMisc; c <= kcEndSampleMisc; c++)
+			newCat.commands.Add(c);
+
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("  Instrument Editor", kCtxCtrlInstruments);
+
+		for(int c = kcStartInstrumentCtrlMisc; c <= kcEndInstrumentCtrlMisc; c++)
+			newCat.commands.Add(c);
+
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("    Envelope Editor", kCtxViewInstruments);
+
+		for(int c = kcStartInstrumentMisc; c <= kcEndInstrumentMisc; c++)
+			newCat.commands.Add(c);
+
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("  Comments [Top]", kCtxCtrlComments);
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("  Comments [Bottom]", kCtxViewComments);
+		commandCategories.Add(newCat);
+	}
+
+	{
+		CommandCategory newCat("  Plugin Editor", kCtxVSTGUI);
+
+		for(int c = kcStartVSTGUICommands; c <= kcEndVSTGUICommands; c++)
+			newCat.commands.Add(c);
+
+		commandCategories.Add(newCat);
+	}
 
 }
 
@@ -377,7 +409,22 @@ void COptionsKeyboard::OnCategorySelChanged()
 void COptionsKeyboard::OnSearchTermChanged()
 //------------------------------------------
 {
-	UpdateShortcutList();
+	CString findString;
+	m_eFind.GetWindowText(findString);
+
+	if(findString.IsEmpty())
+	{
+		// Go back to last found category
+		for(int i = 0; i < m_cmbCategory.GetCount(); i++)
+		{
+			if((int)m_cmbCategory.GetItemData(i) == m_nCurCategory)
+			{
+				m_cmbCategory.SetCurSel(i);
+				break;
+			}
+		}
+	}
+	UpdateShortcutList(findString.IsEmpty() ? m_nCurCategory : -1);
 }
 
 
@@ -391,8 +438,6 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 
 	const bool doSearch = !findString.IsEmpty();
 
-	m_nCurCategory = category;
-
 	int firstCat = category, lastCat = category;
 	if(category == -1)
 	{
@@ -401,6 +446,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 		lastCat = commandCategories.GetSize() - 1;
 	}
 
+	CommandID curCommand  = static_cast<CommandID>(m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel()));
 	m_lbnCommandKeys.ResetContent();
 
 	for(int cat = firstCat; cat <= lastCat; cat++)
@@ -421,6 +467,8 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 
 			if(addString)
 			{
+				m_nCurCategory = cat;
+
 				if(!plocalCmdSet->isHidden(com))
 				{
 					if(doSearch && addCategoryName)
@@ -430,7 +478,14 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 						addCategoryName = false;
 					}
 
-					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(plocalCmdSet->GetCommandText(com)), com);
+					int item = m_lbnCommandKeys.AddString(plocalCmdSet->GetCommandText(com));
+					m_lbnCommandKeys.SetItemData(item, com);
+
+					if(curCommand == com)
+					{
+						// Keep selection on previously selected string
+						m_lbnCommandKeys.SetCurSel(item);
+					}
 				}
 
 				if(commandCategories[cat].separatorAt(com))
@@ -440,7 +495,10 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 
 	}
 
-	m_lbnCommandKeys.SetCurSel(0);
+	if(m_lbnCommandKeys.GetCurSel() == -1)
+	{
+		m_lbnCommandKeys.SetCurSel(0);
+	}
 	OnCommandKeySelChanged();
 }
 
@@ -449,7 +507,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 void COptionsKeyboard::OnCommandKeySelChanged()
 //---------------------------------------------
 {
-	CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
+	CommandID nCmd  = static_cast<CommandID>(m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel()));
 	CString str;
 
 	//Separator

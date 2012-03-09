@@ -1607,6 +1607,14 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			wsprintf(pszText, "±%d panning variation", pIns->nPanSwing);
 			return TRUE;
 
+		case IDC_SLIDER3:
+			wsprintf(pszText, "%d", pIns->GetCutoff());
+			return TRUE;
+
+		case IDC_SLIDER4:
+			wsprintf(pszText, "%d", pIns->GetResonance());
+			return TRUE;
+
 		case IDC_SLIDER6:
 			wsprintf(pszText, "±%d cutoff variation", pIns->nCutSwing);
 			return TRUE;
