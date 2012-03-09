@@ -50,7 +50,7 @@ TrackerSettings::TrackerSettings()
 	gcsInstallGUID = "";
 	// Audio Setup
 	//rewbs.resamplerConf
-	glVolumeRampUpSamples = 42;
+	glVolumeRampUpSamples = 16;
 	glVolumeRampDownSamples = 42;
 	gdWFIRCutoff = 0.97;
 	gbWFIRType = 7; //WFIR_KAISER4T;

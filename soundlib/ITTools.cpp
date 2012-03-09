@@ -546,7 +546,7 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.nVibDepth = vid & 0x7F;
 	mptSmp.nVibSweep = vir;
 
-	return mptSmp.nLength ? LittleEndian(samplepointer) : 0;
+	return LittleEndian(samplepointer);
 }
 
 

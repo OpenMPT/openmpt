@@ -323,6 +323,16 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(sample.nVibRate, 4);
 	VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
 
+	// Sample Data
+	for(size_t i = 0; i < 6; i++)
+	{
+		VERIFY_EQUAL_NONCONT(sample.pSample[i], 18);
+	}
+	for(size_t i = 6; i < 16; i++)
+	{
+		VERIFY_EQUAL_NONCONT(sample.pSample[i], 0);
+	}
+
 	// Instruments
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
 	const ModInstrument *pIns = pSndFile->Instruments[1];
@@ -364,14 +374,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 
 	for(size_t i = pSndFile->GetModSpecifications().noteMin; i < pSndFile->GetModSpecifications().noteMax; i++)
 	{
-		if(i == NOTE_MIDDLEC - 1)
-		{
-			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 2);
-		}
-		else
-		{
-			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 1);
-		}
+		VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], (i == NOTE_MIDDLEC - 1) ? 2 : 1);
 	}
 
 	VERIFY_EQUAL_NONCONT(pIns->VolEnv.dwFlags, ENV_ENABLED | ENV_SUSTAIN);
@@ -486,6 +489,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	// Macros
 	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(2), sfx_polyAT);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetFixedMacroType(), zxx_resomode);
 
 	// Channels
@@ -503,27 +507,56 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nMixPlugin, 1);
 
 	// Samples
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 1);
-	const ModSample &sample = pSndFile->GetSample(1);
-	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
-	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
-	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
-	VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16);
-	VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 9001);
-	VERIFY_EQUAL_NONCONT(sample.nVolume, 32 * 4);
-	VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 16);
-	VERIFY_EQUAL_NONCONT(sample.nPan, 160);
-	VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_PANNING | CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 3);
+	{
+		const ModSample &sample = pSndFile->GetSample(1);
+		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 9001);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 32 * 4);
+		VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 16);
+		VERIFY_EQUAL_NONCONT(sample.nPan, 160);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_PANNING | CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
-	VERIFY_EQUAL_NONCONT(sample.nLoopStart, 1);
-	VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 8);
-	VERIFY_EQUAL_NONCONT(sample.nSustainStart, 1);
-	VERIFY_EQUAL_NONCONT(sample.nSustainEnd, 7);
+		VERIFY_EQUAL_NONCONT(sample.nLoopStart, 1);
+		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 8);
+		VERIFY_EQUAL_NONCONT(sample.nSustainStart, 1);
+		VERIFY_EQUAL_NONCONT(sample.nSustainEnd, 7);
 
-	VERIFY_EQUAL_NONCONT(sample.nVibType, VIB_SQUARE);
-	VERIFY_EQUAL_NONCONT(sample.nVibSweep, 3);
-	VERIFY_EQUAL_NONCONT(sample.nVibRate, 4);
-	VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
+		VERIFY_EQUAL_NONCONT(sample.nVibType, VIB_SQUARE);
+		VERIFY_EQUAL_NONCONT(sample.nVibSweep, 3);
+		VERIFY_EQUAL_NONCONT(sample.nVibRate, 4);
+		VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
+
+		// Sample Data
+		for(size_t i = 0; i < 6; i++)
+		{
+			VERIFY_EQUAL_NONCONT(sample.pSample[i], 18);
+		}
+		for(size_t i = 6; i < 16; i++)
+		{
+			VERIFY_EQUAL_NONCONT(sample.pSample[i], 0);
+		}
+	}
+
+	{
+		const ModSample &sample = pSndFile->GetSample(2);
+		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[2], "Stereo / 16-Bit"), 0);
+		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
+		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
+		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 2);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16 * 4);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 16000);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_16BIT | CHN_STEREO | CHN_LOOP);
+		
+		// Sample Data (Stereo Interleaved)
+		for(size_t i = 0; i < 7; i++)
+		{
+			VERIFY_EQUAL_NONCONT(reinterpret_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
+		}
+	}
 
 	// Instruments
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
@@ -534,7 +567,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->dwFlags, INS_SETPANNING);
 
 	VERIFY_EQUAL_NONCONT(pIns->nPPS, 16);
-	VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - 1) + 6);	// F#5
+	VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - NOTE_MIN) + 6);	// F#5
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
 	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
@@ -568,16 +601,8 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 
 	for(size_t i = 0; i < NOTE_MAX; i++)
 	{
-		if(i == NOTE_MIDDLEC - 1)
-		{
-			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 99);
-			VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], i + 13);
-		}
-		else
-		{
-			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], 1);
-			VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], i + 1);
-		}
+		VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], (i == NOTE_MIDDLEC - 1) ? 99 : 1);
+		VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], (i == NOTE_MIDDLEC - 1) ? (i + 13) : (i + 1));
 	}
 
 	VERIFY_EQUAL_NONCONT(pIns->VolEnv.dwFlags, ENV_ENABLED | ENV_CARRY);
@@ -788,7 +813,7 @@ void TestPCnoteSerialization()
 	pat[1].resize(numCommands[1]);
 	pat[2].resize(numCommands[2]);
 
-	for(size_t i = 0; i<3; i++) // Copy pattern data for comparison.
+	for(size_t i = 0; i < 3; i++) // Copy pattern data for comparison.
 	{
 		CPattern::const_iterator iter = pSndFile->Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;

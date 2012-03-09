@@ -766,7 +766,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			memcpy(m_szNames[nsmp + 1], pis->name, 26);
 			StringFixer::SpaceToNullStringFixed<25>(m_szNames[nsmp + 1]);
 
-			lastSampleOffset = sampleOffset + ReadSample(&Samples[nsmp + 1], pis->GetSampleFormat(itHeader.cwtv), (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset);
+			lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + ReadSample(&Samples[nsmp + 1], pis->GetSampleFormat(itHeader.cwtv), (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset));
 		}
 	}
 	m_nSamples = max(1, m_nSamples);
@@ -1822,7 +1822,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 	UINT nTotalSize = 0;
 	UINT nChInfo = 0;
 
-	for(UINT i=0; i<MAX_MIXPLUGINS; i++)
+	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
 		const SNDMIXPLUGIN &plugin = m_MixPlugins[i];
 		if(plugin.IsValidPlugin())
@@ -1944,7 +1944,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 
 			nPlugin = (p[nPos + 2] - '0') * 10 + (p[nPos + 3] - '0');			//calculate plug-in number.
 
-			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO)+4))
+			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO) + 4))
 			{
 				// MPT's standard plugin data. Size not specified in file.. grrr..
 				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)( p +nPos + 8);
