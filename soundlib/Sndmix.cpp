@@ -925,7 +925,6 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 
 	case 1:
 		// IT compatibility: IT has its own, more precise tables
-		// XXX ModRampDownTable should be negated for XM *Vibrato* (not for Tremolo, though!)
 		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[position] : ModRampDownTable[position];
 
 	case 2:
@@ -1381,7 +1380,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn)
 		else
 			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
 
-		LONG pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
+		int pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
 
 		pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
 		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
@@ -1513,7 +1512,13 @@ void CSoundFile::ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYP
 	{
 		UINT vibpos = pChn->nVibratoPos;
 
-		LONG vdelta = GetVibratoDelta(pChn->nVibratoType, vibpos);
+		int vdelta = GetVibratoDelta(pChn->nVibratoType, vibpos);
+		if((GetType() & MOD_TYPE_XM) && (pChn->nVibratoType & 0x03) == 1)
+		{
+			// FT2 compatibility: Vibrato ramp down table is upside down.
+			// Test case: VibratoWaveforms.xm
+			vdelta = -vdelta;
+		}
 
 		if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 		{
@@ -1553,7 +1558,7 @@ void CSoundFile::ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYP
 			vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
-				LONG l = vdelta;
+				int l = vdelta;
 				if (l < 0)
 				{
 					l = -l;
