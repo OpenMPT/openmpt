@@ -183,7 +183,7 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 			m->command = p->fxparam2;
 			m->param = p->fxparam1;
 			that->ConvertModCommand(m);
-			that->MODExx2S3MSxx(m);
+			m->ExtendedMODtoS3MEffect();
 		} else
 		{
 			// TODO: MT2 Effects

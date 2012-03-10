@@ -515,7 +515,7 @@ bool PatternClipboard::HandlePaste(PATTERNINDEX pattern, const PatternCursor &pa
 				// of the old modcommand would falsely be interpreted being of type
 				// origFormat and ConvertCommand could change them.
 				if (pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty(false)))
-					sndFile.ConvertCommand(&m[col], pasteFormat, sndFile.GetType());
+					m[col].Convert(pasteFormat, sndFile.GetType());
 			}
 
 			pos += 11;

@@ -1631,7 +1631,7 @@ void CViewPattern::OnChannelReset()
 
 	const bool bIsMuted = pModDoc->IsChannelMuted(nChn);
 	if(!bIsMuted) pModDoc->MuteChannel(nChn, true);
-	pSndFile->ResetChannelState(nChn, CHNRESET_TOTAL);
+	pSndFile->Chn[nChn].Reset(ModChannel::resetTotal, *pSndFile, nChn);
 	if(!bIsMuted) pModDoc->MuteChannel(nChn, false);
 }
 

@@ -669,7 +669,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				int n;
 				for (n = 0; n < 4; n++)
 				{
-					if(CSoundFile::ConvertVolEffect(&effect2, &effectParam2, (n >> 1) != 0))
+					if(ModCommand::ConvertVolEffect(effect2, effectParam2, (n >> 1) != 0))
 					{
 						n = 5;
 						break;
@@ -679,7 +679,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 				}
 				if (n < 5)
 				{
-					if (CSoundFile::GetEffectWeight((ModCommand::COMMAND)effect2) > CSoundFile::GetEffectWeight((ModCommand::COMMAND)effect3))
+					if (ModCommand::GetEffectWeight((ModCommand::COMMAND)effect2) > ModCommand::GetEffectWeight((ModCommand::COMMAND)effect3))
 					{
 						std::swap(effect2, effect3);
 						std::swap(effectParam2, effectParam3);

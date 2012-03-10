@@ -292,7 +292,7 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 						m->param = ((m->param >> 4) * 10) + (m->param & 0x0F);
 						break;
 					case CMD_MODCMDEX:
-						CSoundFile::MODExx2S3MSxx(m);
+						m->ExtendedMODtoS3MEffect();
 						break;
 					case CMD_TEMPO:
 						if(m->param <= 0x1F) m->command = CMD_SPEED;

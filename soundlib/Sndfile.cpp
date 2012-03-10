@@ -448,7 +448,8 @@ CSoundFile::CSoundFile() :
 	Order(*this),
 	m_PlaybackEventer(*this),
 	m_pModSpecs(&ModSpecs::itEx),
-	m_MIDIMapper(*this)
+	m_MIDIMapper(*this),
+	visitedSongRows(*this)
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
 //----------------------
 {
@@ -742,8 +743,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nNextRow = 0;
 	m_nRow = 0;
 
-	InitializeVisitedRows(true);
-
 	RecalculateSamplesPerTick();
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
@@ -1023,10 +1022,10 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 //---------------------------------------
 {
 	ORDERINDEX nPattern;
-	BYTE resetMask = (!nPos) ? CHNRESET_SETPOS_FULL : CHNRESET_SETPOS_BASIC;
+	ModChannel::ResetFlags resetMask = (!nPos) ? ModChannel::resetSetPosFull : ModChannel::resetSetPosBasic;
 
-	for (CHANNELINDEX i=0; i<MAX_CHANNELS; i++)
-		ResetChannelState(i, resetMask);
+	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		Chn[i].Reset(resetMask, *this, i);
 	
 	if (!nPos)
 	{
@@ -1324,7 +1323,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 	ChnSettings[nChn].nMixPlugin = 0;
 	strcpy(ChnSettings[nChn].szName, "");
 
-	ResetChannelState(nChn, CHNRESET_TOTAL);
+	Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
 
 	if(m_pModDoc)
 	{
@@ -1334,82 +1333,6 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 	m_bChannelMuteTogglePending[nChn] = false;
 
 	return false;
-}
-
-void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
-//----------------------------------------------------------------
-{
-	if(i >= MAX_CHANNELS) return;
-
-	if(resetMask & 2)
-	{
-		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
-		Chn[i].pModSample = nullptr;
-		Chn[i].pModInstrument = nullptr;
-		Chn[i].nPortamentoDest = 0;
-		Chn[i].nCommand = 0;
-		Chn[i].nPatternLoopCount = 0;
-		Chn[i].nPatternLoop = 0;
-		Chn[i].nFadeOutVol = 0;
-		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
-		//IT compatibility 15. Retrigger
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
-		{
-			Chn[i].nRetrigParam = 1;
-			Chn[i].nRetrigCount = 0;
-		}
-		Chn[i].nTremorCount = 0;
-		Chn[i].nEFxSpeed = 0;
-	}
-
-	if(resetMask & 4)
-	{
-		Chn[i].nPeriod = 0;
-		Chn[i].nPos = Chn[i].nLength = 0;
-		Chn[i].nLoopStart = 0;
-		Chn[i].nLoopEnd = 0;
-		Chn[i].nROfs = Chn[i].nLOfs = 0;
-		Chn[i].pSample = nullptr;
-		Chn[i].pModSample = nullptr;
-		Chn[i].pModInstrument = nullptr;
-		Chn[i].nCutOff = 0x7F;
-		Chn[i].nResonance = 0;
-		Chn[i].nFilterMode = 0;
-		Chn[i].nLeftVol = Chn[i].nRightVol = 0;
-		Chn[i].nNewLeftVol = Chn[i].nNewRightVol = 0;
-		Chn[i].nLeftRamp = Chn[i].nRightRamp = 0;
-		Chn[i].nVolume = 256;
-		Chn[i].nVibratoPos = Chn[i].nTremoloPos = Chn[i].nPanbrelloPos = 0;
-
-		//-->Custom tuning related
-		Chn[i].m_ReCalculateFreqOnFirstTick = false;
-		Chn[i].m_CalculateFreq = false;
-		Chn[i].m_PortamentoFineSteps = 0;
-		Chn[i].m_PortamentoTickSlide = 0;
-		Chn[i].m_Freq = 0;
-		Chn[i].m_VibratoDepth = 0;
-		//<--Custom tuning related.
-	}
-
-	if(resetMask & 1)
-	{
-		if(i < MAX_BASECHANNELS)
-		{
-			Chn[i].dwFlags = ChnSettings[i].dwFlags;
-			Chn[i].nPan = ChnSettings[i].nPan;
-			Chn[i].nGlobalVol = ChnSettings[i].nVolume;
-		}
-		else
-		{
-			Chn[i].dwFlags = 0;
-			Chn[i].nPan = 128;
-			Chn[i].nGlobalVol = 64;
-		}
-		Chn[i].nRestorePanOnNewNote = 0;
-		Chn[i].nRestoreCutoffOnNewNote = 0;
-		Chn[i].nRestoreResonanceOnNewNote = 0;
-		
-	}
 }
 
 

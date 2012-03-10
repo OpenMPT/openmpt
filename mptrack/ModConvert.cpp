@@ -185,7 +185,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			nChannel = (nChannel + 1) % GetNumChannels(); // 0...Channels - 1
 
-			m_SndFile.ConvertCommand(m, nOldType, nNewType);
+			m->Convert(nOldType, nNewType);
 
 			// Deal with effect memory for MOD/XM arpeggio
 			if (oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)

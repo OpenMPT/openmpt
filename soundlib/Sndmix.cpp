@@ -776,7 +776,7 @@ BOOL CSoundFile::ProcessRow()
 						|| (Order[m_nCurrentOrder] >= Patterns.Size()) 
 						|| (!Patterns[Order[m_nCurrentOrder]]) )
 					{
-						InitializeVisitedRows(true);
+						visitedSongRows.Initialize(true);
 						return FALSE;
 					}
 
@@ -810,7 +810,7 @@ BOOL CSoundFile::ProcessRow()
 		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
 		// flag is set - because in that case, the module would stop after the first pattern loop...
 		const bool overrideLoopCheck = (m_nRepeatCount != -1) && (m_dwSongFlags & SONG_PATTERNLOOP);
-		if(!overrideLoopCheck && IsRowVisited(m_nCurrentOrder, m_nRow, true))
+		if(!overrideLoopCheck && visitedSongRows.IsVisited(m_nCurrentOrder, m_nRow, true))
 		{
 			if(m_nRepeatCount)
 			{
@@ -820,8 +820,8 @@ BOOL CSoundFile::ProcessRow()
 					m_nRepeatCount--;
 				}
 				// Forget all but the current row.
-				InitializeVisitedRows(true);
-				SetRowVisited(m_nCurrentOrder, m_nRow);
+				visitedSongRows.Initialize(true);
+				visitedSongRows.Visit(m_nCurrentOrder, m_nRow);
 			} else
 			{
 #ifdef MODPLUG_TRACKER
@@ -835,7 +835,7 @@ BOOL CSoundFile::ProcessRow()
 #endif // MODPLUG_TRACKER
 				{
 					// This is really the song's end!
-					InitializeVisitedRows(true);
+					visitedSongRows.Initialize(true);
 					return FALSE;
 				} else
 				{

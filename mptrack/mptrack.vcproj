@@ -310,6 +310,9 @@
 				RelativePath="..\soundlib\mod_specifications.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\ModChannel.cpp">
+			</File>
+			<File
 				RelativePath="..\soundlib\modcommand.cpp">
 			</File>
 			<File
@@ -377,6 +380,9 @@
 			</File>
 			<File
 				RelativePath="..\common\Reporting.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\RowVisitor.cpp">
 			</File>
 			<File
 				RelativePath=".\SampleEditorDialogs.cpp">
@@ -856,6 +862,9 @@
 			</File>
 			<File
 				RelativePath=".\soundlib\PlugInterface.h">
+			</File>
+			<File
+				RelativePath=".\soundlib\RowVisitor.h">
 			</File>
 			<File
 				RelativePath="..\common\Reporting.h">

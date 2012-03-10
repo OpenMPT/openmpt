@@ -36,43 +36,43 @@ typedef struct __declspec(align(32)) ModChannel_
 	LPSTR pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
 	DWORD nPos;
 	DWORD nPosLo;			// actually 16-bit (fractional part)
-	LONG nInc;				// 16.16 fixed point
-	LONG nRightVol;
-	LONG nLeftVol;
-	LONG nRightRamp;
-	LONG nLeftRamp;
+	int32 nInc;				// 16.16 fixed point
+	int nRightVol;
+	int nLeftVol;
+	int nRightRamp;
+	int nLeftRamp;
 	// 2nd cache line
 	DWORD nLength;
 	DWORD dwFlags;
 	DWORD nLoopStart;
 	DWORD nLoopEnd;
-	LONG nRampRightVol;
-	LONG nRampLeftVol;
+	int nRampRightVol;
+	int nRampLeftVol;
 	float nFilter_Y1, nFilter_Y2, nFilter_Y3, nFilter_Y4;
 	float nFilter_A0, nFilter_B0, nFilter_B1;
 	int nFilter_HP;
-	LONG nROfs, nLOfs;
-	LONG nRampLength;
+	int nROfs, nLOfs;
+	int nRampLength;
 	// Information not used in the mixer
 	LPSTR pSample;			// Currently playing sample, or previously played sample if no sample is playing.
-	LONG nNewRightVol, nNewLeftVol;
-	LONG nRealVolume, nRealPan;
-	LONG nVolume, nPan, nFadeOutVol;
-	LONG nPeriod, nC5Speed, nPortamentoDest;
+	int nNewRightVol, nNewLeftVol;
+	int nRealVolume, nRealPan;
+	int nVolume, nPan, nFadeOutVol;
+	int nPeriod, nC5Speed, nPortamentoDest;
 	int nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	ModInstrument *pModInstrument;					// Currently assigned instrument slot
 	ModChannelEnvInfo VolEnv, PanEnv, PitchEnv;	// Envelope playback info
 	ModSample *pModSample;							// Currently assigned sample slot
 	CHANNELINDEX nMasterChn;
 	DWORD nVUMeter;
-	LONG nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
-	LONG nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
-	LONG nFineTune, nTranspose;
-	LONG nPortamentoSlide, nAutoVibDepth;
+	int nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
+	int nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
+	int nFineTune, nTranspose;
+	int nPortamentoSlide, nAutoVibDepth;
 	UINT nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
-	LONG nVolSwing, nPanSwing;
-	LONG nCutSwing, nResSwing;
-	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
+	int nVolSwing, nPanSwing;
+	int nCutSwing, nResSwing;
+	int nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
 	UINT nOldGlobalVolSlide;
 	DWORD nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
 	int nRetrigCount, nRetrigParam;
@@ -128,6 +128,25 @@ typedef struct __declspec(align(32)) ModChannel_
 		return const_cast<ModChannelEnvInfo &>(static_cast<const ModChannel &>(*this).GetEnvelope(envType));
 	}
 
+	void ResetEnvelopes()
+	{
+		VolEnv.Reset();
+		PanEnv.Reset();
+		PitchEnv.Reset();
+	}
+
+	enum ResetFlags
+	{
+		resetChannelSettings =	1,		// Reload initial channel settings
+		resetSetPosBasic =		2,		// Reset basic runtime channel attributes
+		resetSetPosAdvanced =	4,		// Reset more runtime channel attributes
+		resetSetPosFull = 		resetSetPosBasic | resetSetPosAdvanced | resetChannelSettings,		// Reset all runtime channel attributes
+		resetTotal =			resetSetPosFull,
+
+	};
+
+	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
+
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume;}
 
@@ -147,11 +166,6 @@ typedef struct __declspec(align(32)) ModChannel_
 	float m_VibratoDepth;
 	//<----
 } ModChannel;
-
-#define CHNRESET_CHNSETTINGS	1	//       1 b 
-#define CHNRESET_SETPOS_BASIC	2	//      10 b
-#define	CHNRESET_SETPOS_FULL	7	//     111 b
-#define CHNRESET_TOTAL			255 // 11111111b
 
 
 // Default pattern channel settings

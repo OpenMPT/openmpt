@@ -158,9 +158,8 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	PATTERNINDEX nPattern = Order[0];
 
 	GetLengthMemory memory(*this);
-	VisitedRowsType visitedRows;	// temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
-
-	InitializeVisitedRows(true, &visitedRows);
+	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
+	RowVisitor visitedRows(*this);
 
 	for (;;)
 	{
@@ -191,9 +190,9 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			}
 			nPattern = (nCurrentOrder < Order.size()) ? Order[nCurrentOrder] : Order.GetInvalidPatIndex();
 			nNextOrder = nCurrentOrder;
-			if((!Patterns.IsValidPat(nPattern)) && IsRowVisited(nCurrentOrder, 0, true, &visitedRows))
+			if((!Patterns.IsValidPat(nPattern)) && visitedRows.IsVisited(nCurrentOrder, 0, true))
 			{
-				if(!hasSearchTarget || !GetFirstUnvisitedRow(nNextOrder, nNextRow, true, &visitedRows))
+				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(nNextOrder, nNextRow, true))
 				{
 					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 					break;
@@ -211,7 +210,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			// If there isn't even a tune, we should probably stop here.
 			if(nCurrentOrder == m_nRestartPos)
 			{
-				if(!hasSearchTarget || !GetFirstUnvisitedRow(nNextOrder, nNextRow, true, &visitedRows))
+				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(nNextOrder, nNextRow, true))
 				{
 					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 					break;
@@ -236,9 +235,9 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			break;
 		}
 
-		if(IsRowVisited(nCurrentOrder, nRow, true, &visitedRows))
+		if(visitedRows.IsVisited(nCurrentOrder, nRow, true))
 		{
-			if(!hasSearchTarget || !GetFirstUnvisitedRow(nNextOrder, nNextRow, true, &visitedRows))
+			if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(nNextOrder, nNextRow, true))
 			{
 				// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 				break;
@@ -552,7 +551,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			m_nGlobalVolume = m_nDefaultGlobalVolume;
 		}
 		// When adjusting the playback status, we will also want to update the visited rows vector according to the current position.
-		m_VisitedRows = visitedRows;
+		visitedSongRows.Set(visitedRows);
 	}
 
 	return retval;
@@ -711,7 +710,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->PitchEnv.Reset();
 			} else
 			{
-				ResetChannelEnvelopes(pChn);
+				pChn->ResetEnvelopes();
 			}
 			// IT Compatibility: Autovibrato reset
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -726,7 +725,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 				pChn->VolEnv.Reset();
 			} else
 			{
-				ResetChannelEnvelopes(pChn);
+				pChn->ResetEnvelopes();
 			}
 		}
 	}
@@ -1014,7 +1013,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	{
 		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
-			ResetChannelEnvelopes(pChn);
+			pChn->ResetEnvelopes();
 			// IT Compatibility: Autovibrato reset
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
@@ -1698,7 +1697,7 @@ BOOL CSoundFile::ProcessEffects()
 				if (GetNumInstruments() && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
-					ResetChannelEnvelopes(pChn);
+					pChn->ResetEnvelopes();
 					pChn->nAutoVibDepth = 0;
 					pChn->nAutoVibPos = 0;
 					pChn->dwFlags &= ~CHN_NOTEFADE;
@@ -1768,7 +1767,7 @@ BOOL CSoundFile::ProcessEffects()
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
-					ResetChannelEnvelopes(pChn);
+					pChn->ResetEnvelopes();
 					pChn->nAutoVibDepth = 0;
 					pChn->nAutoVibPos = 0;
 				}
@@ -2333,7 +2332,7 @@ BOOL CSoundFile::ProcessEffects()
 			// As long as the pattern loop is running, mark the looped rows as not visited yet
 			for(ROWINDEX nRow = nPatLoopRow; nRow <= m_nRow; nRow++)
 			{
-				SetRowVisited(m_nCurrentOrder, nRow, false);
+				visitedSongRows.Unvisit(m_nCurrentOrder, nRow);
 			}
 		}
 
@@ -2368,15 +2367,6 @@ BOOL CSoundFile::ProcessEffects()
 
 	}
 	return TRUE;
-}
-
-
-void CSoundFile::ResetChannelEnvelopes(ModChannel *pChn) const
-//------------------------------------------------------------
-{
-	pChn->VolEnv.Reset();
-	pChn->PanEnv.Reset();
-	pChn->PitchEnv.Reset();
 }
 
 
@@ -4469,179 +4459,4 @@ void CSoundFile::PortamentoFineMPT(ModChannel* pChn, int param)
 		pChn->nOldFinePortaUpDown = abs(tickParam);
 
 	pChn->m_CalculateFreq = true;
-}
-
-
-/* Now, some fun code begins: This will determine if a specific row in a pattern (orderlist item)
-   has been visited before. This way, we can tell when the module starts to loop, i.e. when we have determined
-   the song length (or found out that a given point of the module cannot be reached).
-   The concept is actually very simple: Store a boolean value for every row for every possible orderlist item.
-
-   Specific implementations:
-
-   Length detection code:
-   As the ModPlug engine already deals with pattern loops sufficiently (though not always correctly),
-   there's no problem with (infinite) pattern loops in this code.
-   
-   Normal player code:
-   Bare in mind that rows inside pattern loops should only be evaluated once, or else the algorithm will cancel too early!
-   So in that case, the pattern loop rows have to be reset when looping back.
-*/
-
-
-// Resize / Clear the row vector.
-// If bReset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
-// If pRowVector is specified, an alternative row vector instead of the module's global one will be used (f.e. when using GetLength()).
-void CSoundFile::InitializeVisitedRows(bool bReset, VisitedRowsType *pRowVector)
-//------------------------------------------------------------------------------
-{
-	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
-	if(pRowVector == nullptr)
-	{
-		pRowVector = &m_VisitedRows;
-	}
-	pRowVector->resize(nMaxOrd);
-
-	for(ORDERINDEX nOrd = 0; nOrd < nMaxOrd; nOrd++)
-	{
-		VisitedRowsBaseType &row = pRowVector->at(nOrd);
-		// If we want to reset the vectors completely, we overwrite existing items with false.
-		if(bReset)
-		{
-			row.assign(row.size(), false);
-		}
-		row.resize(GetVisitedRowsVectorSize(Order[nOrd]), false);
-	}
-}
-
-
-// (Un)sets a given row as visited.
-// nOrd, nRow - which row should be (un)set
-// If bVisited is true, the row will be set as visited.
-// If pRowVector is specified, an alternative row vector instead of the module's global one will be used (f.e. when using GetLength()).
-void CSoundFile::SetRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bVisited, VisitedRowsType *pRowVector)
-//--------------------------------------------------------------------------------------------------------
-{
-	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
-	if(nOrd >= nMaxOrd || nRow >= GetVisitedRowsVectorSize(Order[nOrd]))
-	{
-		return;
-	}
-
-	if(pRowVector == nullptr)
-	{
-		pRowVector = &m_VisitedRows;
-	}
-
-	// The module might have been edited in the meantime - so we have to extend this a bit.
-	if(nOrd >= pRowVector->size() || nRow >= pRowVector->at(nOrd).size())
-	{
-		InitializeVisitedRows(false, pRowVector);
-	}
-
-	pRowVector->at(nOrd).at(nRow) = bVisited;
-}
-
-
-// Returns if a given row has been visited yet.
-// If bAutoSet is true, the queried row will automatically be marked as visited.
-// Use this parameter instead of consecutive IsRowVisited/SetRowVisited calls.
-// If pRowVector is specified, an alternative row vector instead of the module's global one will be used (f.e. when using GetLength()).
-bool CSoundFile::IsRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bAutoSet, VisitedRowsType *pRowVector)
-//-------------------------------------------------------------------------------------------------------
-{
-	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
-	if(nOrd >= nMaxOrd)
-	{
-		return false;
-	}
-
-	if(pRowVector == nullptr)
-	{
-		pRowVector = &m_VisitedRows;
-	}
-
-	// The row slot for this row has not been assigned yet - Just return false, as this means that the program has not played the row yet.
-	if(nOrd >= pRowVector->size() || nRow >= pRowVector->at(nOrd).size())
-	{
-		if(bAutoSet)
-		{
-			SetRowVisited(nOrd, nRow, true, pRowVector);
-		}
-		return false;
-	}
-
-	if(pRowVector->at(nOrd).at(nRow))
-	{
-		// we visited this row already - this module must be looping.
-		return true;
-	}
-
-	if(bAutoSet)
-	{
-		pRowVector->at(nOrd).at(nRow) = true;
-	}
-
-	return false;
-}
-
-
-// Get the needed vector size for pattern nPat.
-size_t CSoundFile::GetVisitedRowsVectorSize(PATTERNINDEX nPat) const
-//------------------------------------------------------------------
-{
-	if(Patterns.IsValidPat(nPat))
-	{
-		return (size_t)(Patterns[nPat].GetNumRows());
-	}
-	else
-	{
-		// invalid patterns consist of a "fake" row.
-		return 1;
-	}
-}
-
-
-// Find the first row that has not been played yet.
-// The order and row is stored in the order and row variables on success, on failure they contain invalid values.
-// If fastSearch is true (default), only the first row of each pattern is looked at, otherwise every row is examined.
-// Function returns true on success.
-bool CSoundFile::GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fastSearch, const VisitedRowsType *pRowVector) const
-//-------------------------------------------------------------------------------------------------------------------------------
-{
-	if(pRowVector == nullptr)
-	{
-		pRowVector = &m_VisitedRows;
-	}
-
-	const ORDERINDEX endOrder = Order.GetLengthTailTrimmed();
-	for(order = 0; order < endOrder; order++)
-	{
-		const PATTERNINDEX pattern = Order[order];
-		if(!Patterns.IsValidPat(pattern))
-		{
-			continue;
-		}
-
-		if(order >= pRowVector->size())
-		{
-			// Not yet initialized => unvisited
-			return true;
-		}
-
-		const ROWINDEX endRow = (fastSearch ? 1 : Patterns[pattern].GetNumRows());
-		for(row = 0; row < endRow; row++)
-		{
-			if(row >= pRowVector->at(order).size() || pRowVector->at(order).at(row) == false)
-			{
-				// Not yet initialized, or unvisited
-				return true;
-			}
-		}
-	}
-
-	// Didn't find anything :(
-	order = ORDERINDEX_INVALID;
-	row = ROWINDEX_INVALID;
-	return false;
 }
