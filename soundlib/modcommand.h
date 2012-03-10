@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "Snd_defs.h"
+
 // Note definitions
 #define NOTE_NONE			0
 #define NOTE_MIN			1
@@ -41,7 +43,7 @@ public:
 	enum { maxColumnValue = 999 };
 
 	// Returns empty modcommand.
-	static ModCommand Empty() { ModCommand m = {0,0,0,0,0,0}; return m; }
+	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
 
 	bool operator==(const ModCommand& mc) const { return (memcmp(this, &mc, sizeof(ModCommand)) == 0); }
 	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
@@ -82,6 +84,19 @@ public:
 	// Returns true if and only if note is a valid musical note or the note entry is empty.
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
+
+	// Convert a complete ModCommand item from one format to another
+	void Convert(MODTYPE fromType, MODTYPE toType);
+	// Convert MOD/XM Exx to S3M/IT Sxx
+	void ExtendedMODtoS3MEffect();
+	// Convert S3M/IT Sxx to MOD/XM Exx
+	void ExtendedS3MtoMODEffect();
+
+	// "Importance" of every FX command. Table is used for importing from formats with multiple effect columns
+	// and is approximately the same as in SchismTracker.
+	static size_t GetEffectWeight(COMMAND cmd);
+	// try to convert a an effect into a volume column effect.
+	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
 
 	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
 	void SwapEffects()

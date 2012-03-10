@@ -382,7 +382,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 										int n;
 										for (n = 0; n < 4; n++)
 										{
-											if(CSoundFile::ConvertVolEffect(&cmd1, &param1, (n >> 1) != 0))
+											if(ModCommand::ConvertVolEffect(cmd1, param1, (n >> 1) != 0))
 											{
 												n = 5;
 												break;
@@ -392,7 +392,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 										}
 										if (n < 5)
 										{
-											if (CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd1) > CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd2))
+											if (ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd2))
 											{
 												std::swap(cmd1, cmd2);
 												std::swap(param1, param2);
@@ -408,7 +408,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 										m[ch].vol = param1;
 										m[ch].command = cmd2;
 										m[ch].param = param2;
-										MODExx2S3MSxx(&m[ch]);
+										m[ch].ExtendedMODtoS3MEffect();
 									}
 								} else
 								{

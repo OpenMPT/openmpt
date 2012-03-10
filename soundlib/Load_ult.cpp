@@ -204,7 +204,7 @@ static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, con
 	int n;
 	for (n = 0; n < 4; n++)
 	{
-		if(CSoundFile::ConvertVolEffect(&cmd1, &param1, (n >> 1) != 0))
+		if(ModCommand::ConvertVolEffect(cmd1, param1, (n >> 1) != 0))
 		{
 			n = 5;
 			break;
@@ -214,7 +214,7 @@ static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, con
 	}
 	if (n < 5)
 	{
-		if (CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd1) > CSoundFile::GetEffectWeight((ModCommand::COMMAND)cmd2))
+		if (ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd2))
 		{
 			std::swap(cmd1, cmd2);
 			std::swap(param1, param2);

@@ -28,6 +28,7 @@
 #include "ModChannel.h"
 #include "modcommand.h"
 #include "PlugInterface.h"
+#include "RowVisitor.h"
 
 // -----------------------------------------------------------------------------------------
 // MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
@@ -93,10 +94,6 @@ struct PatternCuePoint
 	ORDERINDEX	order;			// which order is this?
 };
 
-// Data type for the visited rows routines.
-typedef vector<bool> VisitedRowsBaseType;
-typedef vector<VisitedRowsBaseType> VisitedRowsType;
-
 
 // Return values for GetLength()
 struct GetLengthType
@@ -108,6 +105,7 @@ struct GetLengthType
 	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
 	ROWINDEX endRow;		// last row before module loops (dito)
 };
+
 
 // Reset mode for GetLength()
 enum enmGetLengthResetMode
@@ -223,10 +221,6 @@ private: //Misc data
 	const CModSpecifications* m_pModSpecs;
 	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
-	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-	VisitedRowsType m_VisitedRows;
-
-
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
 	static UINT m_nReverbDepth, gnReverbType;
@@ -262,7 +256,7 @@ public:	// for Editing
 	ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
 	BYTE m_nTempoMode;			// rewbs.betterBPM
 	BYTE m_nMixLevels;
-    UINT m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
+	UINT m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
 	ROWINDEX m_nNextRow, m_nRow;
 	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
 	PATTERNINDEX m_nPattern;
@@ -297,6 +291,9 @@ public:
 	DWORD m_dwLastSavedWithVersion;
 
 	vector<PatternCuePoint> m_PatternCuePoints;			// For WAV export (writing pattern positions to file)
+
+	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
+	RowVisitor visitedSongRows;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -363,7 +360,6 @@ public:
 	void SetupITBidiMode();
 
 	bool InitChannel(CHANNELINDEX nChn);
-	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);
 
 	// Module Loaders
 	bool ReadXM(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -431,9 +427,6 @@ public:
 	void S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport = false) const;
 	WORD ModSaveCommand(const ModCommand *m, const bool bXM, const bool bCompatibilityExport = false) const;
 	
-	static void ConvertCommand(ModCommand *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete ModCommand item from one format to another
-	static void MODExx2S3MSxx(ModCommand *m); // Convert Exx to Sxx
-	static void S3MSxx2MODExx(ModCommand *m); // Convert Sxx to Exx
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 
 public:
@@ -706,9 +699,6 @@ protected:
 	// [out] returns true on success.
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 
-public:
-    void ResetChannelEnvelopes(ModChannel *pChn) const;
-
 private:
 	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
 	PLUGINDEX __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
@@ -720,21 +710,6 @@ public:
 	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 	UINT GetBestMidiChannel(CHANNELINDEX nChn) const;
 
-// A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-public:
-	void InitializeVisitedRows(const bool bReset = true, VisitedRowsType *pRowVector = nullptr);
-private:
-	void SetRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bVisited = true, VisitedRowsType *pRowVector = nullptr);
-	bool IsRowVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool bAutoSet = true, VisitedRowsType *pRowVector = nullptr);
-	size_t GetVisitedRowsVectorSize(PATTERNINDEX nPat) const;
-	bool GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fastSearch = true, const VisitedRowsType *pRowVector = nullptr) const;
-
-public:
-	// "importance" of every FX command. Table is used for importing from formats with multiple effect columns
-	// and is approximately the same as in SchismTracker.
-	static size_t GetEffectWeight(ModCommand::COMMAND cmd);
-	// try to convert a an effect into a volume column effect.
-	static bool ConvertVolEffect(uint8 *e, uint8 *p, bool bForce);
 };
 
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())

@@ -959,7 +959,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 
 		if (nins)									// Set instrument
 		{
-			m_SndFile.ResetChannelEnvelopes(pChn);
+			pChn->ResetEnvelopes();
 			m_SndFile.InstrumentChange(pChn, nins);
 			pChn->nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
 		}  else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
@@ -1693,7 +1693,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		}
 
 		// Render song (or current channel, or current sample/instrument)
-		m_SndFile.InitializeVisitedRows(true);
+		m_SndFile.visitedSongRows.Initialize(true);
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
 		if (wsdlg.m_bSelectPlay)
@@ -1998,7 +1998,7 @@ void CModDoc::OnPlayerPlayFromStart()
 		//m_SndFile.m_dwSongFlags &= ~SONG_STEP;
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
-		m_SndFile.InitializeVisitedRows(true);
+		m_SndFile.visitedSongRows.Initialize(true);
 		pMainFrm->ResetElapsedTime();
 
 		CriticalSection cs;

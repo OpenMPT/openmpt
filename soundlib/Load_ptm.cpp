@@ -171,7 +171,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 					if (m[nChn].command < 0x10)
 					{
 						ConvertModCommand(&m[nChn]);
-						MODExx2S3MSxx(&m[nChn]);
+						m[nChn].ExtendedMODtoS3MEffect();
 						// Note cut does just mute the sample, not cut it. We have to fix that, if possible.
 						if(m[nChn].command == CMD_S3MCMDEX && (m[nChn].param & 0xF0) == 0xC0 && m[nChn].volcmd == VOLCMD_NONE)
 						{

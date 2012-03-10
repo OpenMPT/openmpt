@@ -171,8 +171,10 @@
     <ClCompile Include="..\common\Reporting.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\soundlib\ModChannel.cpp" />
     <ClCompile Include="..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="..\soundlib\ModSample.cpp" />
+    <ClCompile Include="..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="ACMConvert.cpp" />
     <ClCompile Include="ArrayUtils.cpp" />
@@ -336,6 +338,7 @@
     <ClInclude Include="..\soundlib\PluginEventQueue.h" />
     <ClInclude Include="..\soundlib\PluginMixBuffer.h" />
     <ClInclude Include="..\soundlib\PlugInterface.h" />
+    <ClInclude Include="..\soundlib\RowVisitor.h" />
     <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="Autotune.h" />
     <ClInclude Include="EffectInfo.h" />
