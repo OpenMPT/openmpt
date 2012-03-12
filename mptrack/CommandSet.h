@@ -10,6 +10,7 @@
 
 #pragma once
 #include "afxtempl.h"
+#include "../soundlib/mod_specifications.h"
 #include <string>
 
 //#define VK_ALT 0x12
@@ -1077,7 +1078,6 @@ enum Modifiers
 };
 
 #define MAINKEYS 256
-#define KeyMapSize kCtxMaxInputContexts*MaxMod*MAINKEYS*kNumKeyEvents
 typedef CommandID KeyMap[kCtxMaxInputContexts][MaxMod][MAINKEYS][kNumKeyEvents];
 //typedef CMap<long, long, CommandID, CommandID> KeyMap;
 
@@ -1119,8 +1119,7 @@ struct Rule
 {
 	UINT ID;
 	CString desc;
-    bool enforce;
-
+	bool enforce;
 };
 
 enum RuleID
@@ -1190,9 +1189,7 @@ public:
 	CString Remove(int pos, CommandID cmd);
 
 	//Tranformation
-	bool QuickChange_SetEffectsXM();
-	bool QuickChange_SetEffectsIT();
-	bool QuickChange_SetEffects(char comList[kcSetFXEnd-kcSetFXStart]);
+	bool QuickChange_SetEffects(const CModSpecifications &modSpecs);
 	bool QuickChange_NotesRepeat();
 	bool QuickChange_NoNotesRepeat();
 

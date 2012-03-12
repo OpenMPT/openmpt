@@ -2502,8 +2502,8 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 
 //rewbs.customKeys
 // We have swicthed focus to a new module - might need to update effect keys to reflect module type
-bool CMainFrame::UpdateEffectKeys(void)
-//-------------------------------------
+bool CMainFrame::UpdateEffectKeys()
+//---------------------------------
 {
 	CModDoc* pModDoc = GetActiveDoc();
 	if (pModDoc)
@@ -2511,10 +2511,7 @@ bool CMainFrame::UpdateEffectKeys(void)
 		CSoundFile* pSndFile = pModDoc->GetSoundFile();
 		if (pSndFile)
 		{
-			if	(pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) 
-				return m_InputHandler->SetXMEffects();
-			else
-				return m_InputHandler->SetITEffects();
+			return m_InputHandler->SetEffectLetters(pSndFile->GetModSpecifications());
 		}
 	}
 	
