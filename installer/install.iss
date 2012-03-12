@@ -66,8 +66,8 @@ Source: ..\mptrack\bin\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignore
 Source: ..\mptrack\bin\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
 
-; VST2MID Plugin
-Source: ..\packageTemplate\Plugins\VST2MID.dll; DestDir: {app}\Plugins\; Flags: ignoreversion
+; Plugins
+Source: ..\packageTemplate\Plugins\*.*; DestDir: {app}\Plugins\; Flags: ignoreversion recursesubdirs createallsubdirs
 
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
 
@@ -139,7 +139,7 @@ Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
 
 #include "utilities.iss"
 #include "vst_scan.iss"
-#include "VST2MID.iss"
+#include "plugins.iss"
 
 [Code]
 
@@ -200,7 +200,7 @@ begin
             VerifyUNMO3Checksum();
 #endif
 
-            RegisterVST2MID();
+            RegisterPlugin('MIDI\MIDI Input Output.dll');
 
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();

@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.19  *
+*  OpenMPT 1.20  *
 ******************
 
 
@@ -7,7 +7,7 @@ Migrating from OpenMPT 1.17
 ---------------------------
 
 Unless you install OpenMPT in portable mode, all settings are now stored in
-%appdata%\OpenMPT. The installer will automatically try to move all settings
+%APPDATA%\OpenMPT. The installer will automatically try to move all settings
 to the new folder - Migration is done automatically.
 
 
@@ -39,6 +39,8 @@ extraKeymaps (folder): Additional key bindings for the keyboard manager,
     Impulse Tracker) and country-specific layouts.
 SoundTouch (folder): SoundTouch readme and license
 ReleaseNotesImages (folder): Files used in the release notes document.
+Plugins (folder): Contains standard audio and MIDI processing plugins that ship
+    with OpenMPT.
 ExampleSongs (folder): A set of module files which should give an impression of
     what can be done in OpenMPT with only a few kilobytes.
 History.txt: Version history.
@@ -54,7 +56,7 @@ Misc:
 
 OpenMPT is partially under the following license:
 
-> Copyright (c) 2004-2011, OpenMPT contributors
+> Copyright (c) 2004-2012, OpenMPT contributors
 > Copyright (c) 1997-2003, Olivier Lapicque
 > All rights reserved.
 >
@@ -85,6 +87,10 @@ ASIO is a trademark and software of Steinberg Media Technologies GmbH
 VST is a trademark of Steinberg Media Technologies GmbH
 
 For more information about SoundTouch, see folder SoundTouch.
+
+OpenMPT's MIDI plugins make use of the PortMidi library, which is released under
+the MIT license.
+Visit https://sourceforge.net/projects/portmedia/ for more information.
 
 unmo3.dll
 ---------

@@ -13,7 +13,7 @@
 // For VstInt32 and stuff - a stupid workaround.
 #ifndef NO_VST
 #define VST_FORCE_DEPRECATED 0
-#include <aeffect.h>			// VST
+#include <pluginterfaces/vst2.x/aeffect.h>			// VST
 #else
 typedef int32 VstInt32;
 typedef intptr_t VstIntPtr;

@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "bladedll.h"
+#include <bladeenc/bladedll.h>
 #include "Mptrack.h"
 #include "ACMConvert.h"
 

@@ -62,7 +62,7 @@
     <ClCompile>
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;ENABLE_EQ;MODPLUG_TRACKER;NO_PACKING;HAVE_DOT_NET;ENABLE_AMD;ENABLE_SSE;ENABLE_AMDNOW;ENABLE_MMX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -119,7 +119,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;ENABLE_MMX;ENABLE_EQ;MODPLUG_TRACKER;NO_PACKING;HAVE_DOT_NET;ENABLE_AMD;ENABLE_SSE;ENABLE_AMDNOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
