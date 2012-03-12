@@ -23,8 +23,8 @@
 #define TRANSITIONBIT 0x8000
 #define REPEATBIT 0x4000
 
-//--------------------------------------------------------------
 CInputHandler::CInputHandler(CWnd *mainframe)
+//-------------------------------------------
 {
 	m_pMainFrm = mainframe;
 		
@@ -79,15 +79,17 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	m_bNoAltMenu = true;
 
 }
-CInputHandler::~CInputHandler(void)
+
+
+CInputHandler::~CInputHandler()
+//-----------------------------
 {
 	delete activeCommandSet;
 }
 
 
-
-//--------------------------------------------------------------
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
+//-----------------------------------------------------------------------------------------------------------
 {
 	CommandID executeCommand = kcNull;	
 	KeyEventType keyEventType;
@@ -126,7 +128,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 
 
 CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &/*nFlags*/, KeyEventType keyEventType, CWnd* pSourceWnd)
-//-------------------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
 
@@ -144,8 +146,10 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 	return executeCommand;
 }
 
+
 // Feature: use Windows keys as modifier keys, intercept special keys
-bool CInputHandler::InterceptSpecialKeys( UINT nChar , UINT nFlags )
+bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags)
+//---------------------------------------------------------------
 {
 	KeyEventType keyEventType = GetKeyEventType( HIWORD(nFlags) );
 	enum { VK_NonExistentKey = VK_F24+1 };
@@ -188,7 +192,9 @@ bool CInputHandler::InterceptSpecialKeys( UINT nChar , UINT nFlags )
 	return false;
 };
 
+
 void CInputHandler::SetupSpecialKeyInterception()
+//-----------------------------------------------
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
 	for( int context=0; context < CountOf(keyMap); context++ )
@@ -269,8 +275,10 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 	return false;
 }
 
+
 //--------------------------------------------------------------
 DWORD CInputHandler::GetKey(CommandID /*c*/)
+//------------------------------------------
 {
 	return 0;// command[c].kc.code command[c].kc.mod;
 }
@@ -281,6 +289,7 @@ DWORD CInputHandler::GetKey(CommandID /*c*/)
 
 
 int CInputHandler::SetCommand(InputTargetContext context, CommandID cmd, UINT modifierMask, UINT actionKey, UINT keyEventType)
+//----------------------------------------------------------------------------------------------------------------------------
 {
 	int deletedCommand = -1;
 	
@@ -295,18 +304,23 @@ int CInputHandler::SetCommand(InputTargetContext context, CommandID cmd, UINT mo
 	return deletedCommand;
 }
 
+
 KeyCombination CInputHandler::GetKey(CommandID cmd, UINT key)
+//-----------------------------------------------------------
 {
 	return activeCommandSet->GetKey(cmd, key);	
 }
 
 
 int CInputHandler::GetKeyListSize(CommandID cmd)
+//----------------------------------------------
 {
 	return activeCommandSet->GetKeyListSize(cmd);
 }
 
+
 CString CInputHandler::GetCommandText(CommandID cmd)
+//--------------------------------------------------
 {
 	return activeCommandSet->GetCommandText(cmd);
 }
@@ -326,6 +340,7 @@ void CInputHandler::GenCommandList(const KeyMap &km, CommandStruct coms[], )
 */
 
 void CInputHandler::LogModifiers(UINT mask)
+//-----------------------------------------
 {
 	Log("----------------------------------\n");
 	if (mask & HOTKEYF_CONTROL) Log("Ctrl On"); else Log("Ctrl --");
@@ -334,26 +349,41 @@ void CInputHandler::LogModifiers(UINT mask)
 	if (mask & HOTKEYF_EXT)     Log("\tWin  On\n"); else Log("\tWin  --\n"); // Feature: use Windows keys as modifier keys
 }
 
+
 KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
+//------------------------------------------------------
 {	
-	if (nFlags & TRANSITIONBIT)		//Key released
+	if (nFlags & TRANSITIONBIT)
+	{
+		// Key released
 		return kKeyEventUp;
-	else						
-		if (nFlags & REPEATBIT)		//key repeated
+	} else
+	{
+		if (nFlags & REPEATBIT)
+		{
+			// Key repeated
 			return kKeyEventRepeat;
-		else						//new key down
-			return kKeyEventDown;		
+		} else
+		{
+			// New key down
+			return kKeyEventDown;
+		}
+	}
 }
 
-bool CInputHandler::SelectionPressed(void)
+
+bool CInputHandler::SelectionPressed()
+//------------------------------------
 {
 	bool result=false;
 	int nSelectionKeys = activeCommandSet->GetKeyListSize(kcSelect);
 	KeyCombination key;
 
-	for (int k=0; k<nSelectionKeys; k++) { 
+	for (int k=0; k<nSelectionKeys; k++)
+	{ 
 		key = activeCommandSet->GetKey(kcSelect, k);
-		if (modifierMask & key.mod) {
+		if (modifierMask & key.mod)
+		{
 			result=true;
 			break;
 		}
@@ -362,55 +392,74 @@ bool CInputHandler::SelectionPressed(void)
 }
 
 
-bool CInputHandler::ShiftPressed(void)
+bool CInputHandler::ShiftPressed()
+//--------------------------------
 {
 	return (modifierMask & HOTKEYF_SHIFT);
 }
 
-bool CInputHandler::CtrlPressed(void)
+
+bool CInputHandler::CtrlPressed()
+//-------------------------------
 {
 	return ((modifierMask & HOTKEYF_CONTROL) != 0);
 }
 
-bool CInputHandler::AltPressed(void)
+
+bool CInputHandler::AltPressed()
+//------------------------------
 {
 	return ((modifierMask & HOTKEYF_ALT) != 0);
 }
 
+
 void CInputHandler::Bypass(bool b)
+//--------------------------------
 {
 	m_bBypass=b;
 }
 
+
 bool CInputHandler::Bypass()
+//--------------------------
 {
 	return m_bBypass;
 }
 
+
 WORD CInputHandler::GetModifierMask()
+//-----------------------------------
 {
 	return (WORD)modifierMask;
 }
 
+
 void CInputHandler::SetModifierMask(WORD mask)
+//--------------------------------------------
 {
 	modifierMask=mask;
 }
 
+
 CString CInputHandler::GetCurModifierText()
+//-----------------------------------------
 {
 	return activeCommandSet->GetModifierText(modifierMask);
 }
 
+
 CString CInputHandler::GetKeyTextFromCommand(CommandID c)
+//-------------------------------------------------------
 {
 	return activeCommandSet->GetKeyTextFromCommand(c, 0);
 }
+
 
 #define FILENEW 1
 #define MAINVIEW 59392
 
 CString CInputHandler::GetMenuText(UINT id)
+//-----------------------------------------
 {
 	CString s;
 	CommandID c = kcNull;
@@ -488,7 +537,9 @@ CString CInputHandler::GetMenuText(UINT id)
 	return s;
 }
 
+
 void CInputHandler::UpdateMainMenu()
+//----------------------------------
 {	
 	CMenu *pMenu = (CMainFrame::GetMainFrame())->GetMenu();
 	if (!pMenu) return;
@@ -553,6 +604,7 @@ void CInputHandler::UpdateMainMenu()
 
 
 void CInputHandler::SetNewCommandSet(CCommandSet *newSet)
+//-------------------------------------------------------
 {
 	activeCommandSet->Copy(newSet);
 	activeCommandSet->GenKeyMap(keyMap);
@@ -560,48 +612,35 @@ void CInputHandler::SetNewCommandSet(CCommandSet *newSet)
 	UpdateMainMenu();
 }
 
-bool CInputHandler::noAltMenu()
+
+bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
+//----------------------------------------------------------------------
 {
-	return m_bNoAltMenu;
-}
-
-
-
-bool CInputHandler::SetITEffects(void)
-{
-	Log("Setting command set to IT.\n");
-	bool retval = activeCommandSet->QuickChange_SetEffectsIT();
-	activeCommandSet->GenKeyMap(keyMap);
-	return retval;
-}
-
-
-bool CInputHandler::SetXMEffects(void)
-{
-	Log("Setting command set to XM.\n");
-	bool retval = activeCommandSet->QuickChange_SetEffectsXM();
+	Log("Changing command set.\n");
+	bool retval = activeCommandSet->QuickChange_SetEffects(modSpecs);
 	activeCommandSet->GenKeyMap(keyMap);
 	return retval;
 }
 
 
 bool CInputHandler::isKeyPressHandledByTextBox(DWORD key) 
+//-------------------------------------------------------
 {
 
 	//Alpha-numerics (only shift or no modifier):
-	if (!CtrlPressed() &&  !AltPressed() && 
-        ((key>='A'&&key<='Z') || (key>='0'&&key<='9') || 
+	if(!CtrlPressed() &&  !AltPressed()
+		&&  ((key>='A'&&key<='Z') || (key>='0'&&key<='9') || 
 		 key==VK_DIVIDE  || key==VK_MULTIPLY || key==VK_SPACE || key==VK_RETURN ||
 		 key==VK_CAPITAL || (key>=VK_OEM_1 && key<=VK_OEM_3) || (key>=VK_OEM_4 && key<=VK_OEM_8)))
 		return true;
 	
 	//navigation (any modifier):
-	if (key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN || 
+	if(key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN || 
 		key == VK_HOME || key == VK_END || key == VK_DELETE || key == VK_INSERT || key == VK_BACK)
 		return true;
 	
 	//Copy paste etc..
-	if (CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL && 
+	if(CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL && 
 		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A'))
 		return true;
 

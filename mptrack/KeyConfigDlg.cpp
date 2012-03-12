@@ -818,7 +818,7 @@ void COptionsKeyboard::OnNoNotesRepeat()
 void COptionsKeyboard::OnSetITEffects()
 //-------------------------------------
 {
-	plocalCmdSet->QuickChange_SetEffectsIT();
+	plocalCmdSet->QuickChange_SetEffects(ModSpecs::itEx);
 	ForceUpdateGUI();
 }
 
@@ -826,7 +826,7 @@ void COptionsKeyboard::OnSetITEffects()
 void COptionsKeyboard::OnSetXMEffects()
 //-------------------------------------
 {
-	plocalCmdSet->QuickChange_SetEffectsXM();
+	plocalCmdSet->QuickChange_SetEffects(ModSpecs::xmEx);
 	ForceUpdateGUI();
 }
 

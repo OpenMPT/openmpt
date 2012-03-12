@@ -501,10 +501,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	//rewbs.customKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if(newTypeIsMOD_XM)
-		ih->SetXMEffects();
-	else
-		ih->SetITEffects();
+	ih->SetEffectLetters(m_SndFile.GetModSpecifications());
 	//end rewbs.customKeys
 
 	return true;

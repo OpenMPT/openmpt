@@ -72,6 +72,7 @@ void CCommandSet::DefineKeyCommand(CommandID kc, UINT uid, CString message, enmK
 	commands[kc].Message = message;
 }
 
+
 //Get command descriptions etc.. loaded up.
 void CCommandSet::SetupCommands()
 //-------------------------------
@@ -636,17 +637,21 @@ void CCommandSet::SetupCommands()
 #endif //_DEBUG
 
 }
-//-----------------------------------------
+
 
 //-------------------------------------------------------
 // Command Manipulation
 //-------------------------------------------------------
 
 CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite)
+//------------------------------------------------------------------------
 {
 	return Add(kc, cmd, overwrite, -1);
 }
+
+
 CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos)
+//---------------------------------------------------------------------------------
 {
 	CString report= "";
 	
@@ -706,14 +711,18 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 	return report;
 }
 
+
 bool CCommandSet::IsDummyCommand(CommandID cmd)
-{	// e.g. Chord modifier is a dummy command, which serves only to automatically 
-    // generate a set of keycombinations for chords (I'm not proud of this design).
+//---------------------------------------------
+{
+	// e.g. Chord modifier is a dummy command, which serves only to automatically 
+	// generate a set of keycombinations for chords (I'm not proud of this design).
 	return commands[cmd].isDummy;
 }
 
 
 CString CCommandSet::Remove(int pos, CommandID cmd)
+//-------------------------------------------------
 {
 	if (pos>=0 && pos<commands[cmd].kcList.GetSize())
 	{
@@ -724,7 +733,9 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 	return "";
 }
 
+
 CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
+//-----------------------------------------------------------
 {
 	//find kc in commands[cmd].kcList
 	int index=-1;
@@ -749,6 +760,7 @@ CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 
 
 CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool adding)
+//--------------------------------------------------------------------------------
 {
 	//World's biggest, most confusing method. :)
 	//Needs refactoring. Maybe make lots of Rule subclasses, each with their own Enforce() method?
@@ -758,7 +770,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	CString report="";
 
 	if (enforceRule[krAllowNavigationWithSelection])
-	{//------------------------------------------------------------
+	{
 		// When we get a new navigation command key, we need to 
 		// make sure this navigation will work when any selection key is pressed
 		if (inCmd>=kcStartPatNavigation && inCmd<=kcEndPatNavigation)
@@ -805,11 +817,14 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		// When we get a new selection key, we need to make sure that 
 		// all navigation commands will work with this selection key pressed
 		else if (inCmd==kcSelect)
-		{// check that is is a selection
+		{
+			// check that is is a selection
 			for (int curCmd=kcStartPatNavigation; curCmd<=kcEndPatNavigation; curCmd++)
-			{// for all nav commands
+			{
+				// for all nav commands
 				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
-				{// for all keys for this command
+				{
+					// for all keys for this command
 					CommandID cmdNavSelection = (CommandID)(kcStartPatNavigationSelect + (curCmd-kcStartPatNavigation));
 					newKc=commands[curCmd].kcList[k]; // get all properties from the current nav cmd key
 					newKc.mod|=inKc.mod;			  // and the new selection modifier
@@ -848,7 +863,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	} // end krAllowNavigationWithSelection
 
 	if (enforceRule[krAllowSelectionWithNavigation])
-	{//-----------------------------------------------------------
+	{
 		KeyCombination newKcSel;
 		
 		// When we get a new navigation command key, we need to ensure
@@ -926,7 +941,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 	}
 	
-	//if we add a selector or a copy selector, we need it to switch off when we release the key.
+	// if we add a selector or a copy selector, we need it to switch off when we release the key.
 	if (enforceRule[krAutoSelectOff])
 	{
 		KeyCombination newKcDeSel;
@@ -958,14 +973,14 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	
 	}
 
-
 	// Allow combinations of copyselect and select
 	if (enforceRule[krAllowSelectCopySelectCombos])
 	{
 		KeyCombination newKcSel, newKcCopySel;
 		if (inCmd==kcSelect)
-		{  //On getting a new selection key, make this selection key work with all copy selects' modifiers
-   		   //On getting a new selection key, make all copyselects work with this key's modifiers
+		{
+			// On getting a new selection key, make this selection key work with all copy selects' modifiers
+			// On getting a new selection key, make all copyselects work with this key's modifiers
 			for (int k=0; k<commands[kcCopySelect].kcList.GetSize(); k++)
 			{
 				newKcSel=inKc;
@@ -973,7 +988,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcCopySel=commands[kcCopySelect].kcList[k];
 				newKcCopySel.mod|=inKc.mod;
 				Log("Enforcing rule krAllowSelectCopySelectCombos\n"); 
-                if (adding)
+				if (adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
 					Add(newKcCopySel, kcCopySelectWithSelect, false);
@@ -986,8 +1001,9 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 		}
 		if (inCmd==kcCopySelect)
-		{  //On getting a new copyselection key, make this copyselection key work with all selects' modifiers
-   		   //On getting a new copyselection key, make all selects work with this key's modifiers
+		{ 
+			// On getting a new copyselection key, make this copyselection key work with all selects' modifiers
+			// On getting a new copyselection key, make all selects work with this key's modifiers
 			for (int k=0; k<commands[kcSelect].kcList.GetSize(); k++)
 			{
 				newKcSel=commands[kcSelect].kcList[k];
@@ -995,7 +1011,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcCopySel=inKc;
 				newKcCopySel.mod|=commands[kcSelect].kcList[k].mod;
 				Log("Enforcing rule krAllowSelectCopySelectCombos\n"); 
-                if (adding)
+				if (adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
 					Add(newKcCopySel, kcCopySelectWithSelect, false);
@@ -1297,7 +1313,9 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	return report;
 }
 
+
 UINT CCommandSet::CodeToModifier(UINT code)
+//-----------------------------------------
 {
 	switch(code)
 	{
@@ -1310,18 +1328,20 @@ UINT CCommandSet::CodeToModifier(UINT code)
 	
 }
 
+
 //-------------------------------------------------------
 // Export
 //-------------------------------------------------------
 //Generate a keymap from a command set
 void CCommandSet::GenKeyMap(KeyMap &km)
+//-------------------------------------
 {
 	KeyCombination curKc;
 	CArray<KeyEventType, KeyEventType> eventTypes;
 	CArray<InputTargetContext, InputTargetContext> contexts;
 	
 	//Clear map
-	memset(km, -1, sizeof(kcNull)*KeyMapSize);
+	memset(km, -1, sizeof(KeyMap));
 
     //Copy commandlist content into map:
 	for (UINT cmd=0; cmd<kcNumCommands; cmd++)
@@ -1372,10 +1392,10 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 	}
 }
-//-------------------------------------
 
 
 DWORD CCommandSet::GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke)
+//---------------------------------------------------------------------------------------------
 { //Unused
 	ASSERT((long)ctx<0xFF);
 	ASSERT((long)mod<0xFF);
@@ -1392,31 +1412,39 @@ DWORD CCommandSet::GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, K
 	return label;
 }
 
+
 void CCommandSet::Copy(CCommandSet *source)
+//-----------------------------------------
 {
 	// copy constructors should take care of complexity (I hope)
-	for (int cmd=0; cmd<commands.GetSize(); cmd++)
+	for (int cmd = 0; cmd < commands.GetSize(); cmd++)
 		commands[cmd] = source->commands[cmd];
 }
 
+
 KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
+//---------------------------------------------------------
 {
 	return commands[cmd].kcList[key];
 }
 
 
-
 int CCommandSet::GetKeyListSize(CommandID cmd)
+//--------------------------------------------
 {
 	return  commands[cmd].kcList.GetSize();
 }
 
+
 CString CCommandSet::GetCommandText(CommandID cmd)
+//------------------------------------------------
 {
 	return commands[cmd].Message;
 }
 
+
 bool CCommandSet::SaveFile(CString fileName)
+//------------------------------------------
 { //TODO: Make C++
 
 /* Layout:
@@ -1473,6 +1501,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 
 bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
+//-----------------------------------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd=kcNumCommands;
@@ -1746,6 +1775,7 @@ void CCommandSet::UpgradeKeymap(CCommandSet *pCommands, int oldVersion)
 
 //Could do better search algo but this is not perf critical.
 int CCommandSet::FindCmd(int uid)
+//-------------------------------
 {
 	for (int i=0; i<kcNumCommands; i++)
 	{
@@ -1756,7 +1786,9 @@ int CCommandSet::FindCmd(int uid)
 	return -1;
 }
 
+
 CString CCommandSet::GetContextText(InputTargetContext ctx)
+//---------------------------------------------------------
 {
 	switch(ctx)
 	{
@@ -1783,7 +1815,10 @@ CString CCommandSet::GetContextText(InputTargetContext ctx)
 		default:						return "Unknown Context";
 	}
 };
+
+
 CString CCommandSet::GetKeyEventText(KeyEventType ke)
+//---------------------------------------------------
 {
 	CString text="";
 
@@ -1808,7 +1843,9 @@ CString CCommandSet::GetKeyEventText(KeyEventType ke)
 	return text;
 }
 
+
 CString CCommandSet::GetModifierText(UINT mod)
+//--------------------------------------------
 {
 	CString text = "";
 	if (mod & HOTKEYF_SHIFT) text.Append("Shift+");
@@ -1818,7 +1855,9 @@ CString CCommandSet::GetModifierText(UINT mod)
 	return text;
 }
 
+
 CString CCommandSet::GetKeyText(UINT mod, UINT code)
+//--------------------------------------------------
 {
 	CString keyText;
 	keyText=GetModifierText(mod);
@@ -1831,7 +1870,9 @@ CString CCommandSet::GetKeyText(UINT mod, UINT code)
 	return keyText;
 }
 
+
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
+//---------------------------------------------------------------
 {
 	if ( static_cast<INT_PTR>(key) < commands[c].kcList.GetSize())
 		return GetKeyText(commands[c].kcList[0].mod, commands[c].kcList[0].code);
@@ -1839,12 +1880,12 @@ CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 		return "";
 }
 
+
 bool CCommandSet::isHidden(UINT c)
+//--------------------------------
 {
 	return commands[c].isHidden;
 }
-
-
 
 
 
@@ -1871,8 +1912,9 @@ bool CCommandSet::QuickChange_NotesRepeat()
 	return true;
 }
 
+
 bool CCommandSet::QuickChange_NoNotesRepeat()
-//-----------------------------------------
+//-------------------------------------------
 {
 	KeyCombination kc;
 	int choices;
@@ -1890,36 +1932,38 @@ bool CCommandSet::QuickChange_NoNotesRepeat()
 	return true;
 }
 
-bool CCommandSet::QuickChange_SetEffectsXM()
-//-----------------------------------------
-{
-	return QuickChange_SetEffects("0123456789abcdr?fte???ghk?yxplz");
-}
 
-bool CCommandSet::QuickChange_SetEffectsIT()
-//-----------------------------------------
-{
-	return QuickChange_SetEffects("jfeghlkrxodb?cqati?smnvw?uy?p?z");
-
-}
-
-bool CCommandSet::QuickChange_SetEffects(char comList[kcSetFXEnd-kcSetFXStart])
-//-----------------------------------------
+bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
+//--------------------------------------------------------------------------
 {
 	int choices=0;
 	KeyCombination kc;
 	kc.ctx = kCtxViewPatternsFX;
 	kc.event = kKeyEventDown;
 	
-	for (CommandID cmd=kcFixedFXStart; cmd<=kcFixedFXend; cmd=(CommandID)(cmd+1))
+	for(CommandID cmd = kcFixedFXStart; cmd <= kcFixedFXend; cmd = static_cast<CommandID>(cmd + 1))
 	{
-		choices = GetKeyListSize(cmd);				//Remove all old choices
-		for (int p=choices; p>=0; --p)
-			Remove(p, cmd);
-		
-		if (comList[cmd-kcSetFXStart] != '?')	//? is used an non existant command.
+		//Remove all old choices
+		choices = GetKeyListSize(cmd);
+		for(int p = choices; p >= 0; --p)
 		{
-			SHORT codeNmod = VkKeyScanEx(comList[cmd-kcFixedFXStart], GetKeyboardLayout(0));
+			Remove(p, cmd);
+		}
+		
+		char effect = modSpecs.GetEffectLetter(static_cast<ModCommand::COMMAND>(cmd - kcSetFXStart + 1));
+		if(effect >= 'A' && effect <= 'Z')
+		{
+			// VkKeyScanEx needs lowercase letters
+			effect = effect - 'A' + 'a';
+		} else if(effect < '0' || effect > '9')
+		{
+			// Don't map effects that use "weird" effect letters (such as # or \)
+			effect = '?';
+		}
+
+		if(effect != '?')
+		{
+			SHORT codeNmod = VkKeyScanEx(effect, GetKeyboardLayout(0));
 			kc.code = LOBYTE(codeNmod);			
 			kc.mod = HIBYTE(codeNmod) & 0x07;	//We're only interest in the bottom 3 bits.
 			Add(kc, cmd, true);

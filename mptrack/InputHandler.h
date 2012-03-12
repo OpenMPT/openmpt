@@ -54,7 +54,7 @@ class CInputHandler
 
 public:
 	CInputHandler(CWnd *mainframe);
-	~CInputHandler(void);
+	~CInputHandler();
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
 	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd=NULL);
 	int SetCommand(InputTargetContext context, CommandID command, UINT modifierMask, UINT actionKey, UINT keyEventType);
@@ -83,10 +83,10 @@ protected:
 
 public:
 	CCommandSet *activeCommandSet;
-	bool ShiftPressed(void);
-	bool SelectionPressed(void);
-	bool CtrlPressed(void);
-	bool AltPressed(void);
+	bool ShiftPressed();
+	bool SelectionPressed();
+	bool CtrlPressed();
+	bool AltPressed();
 	bool Bypass();
 	void Bypass(bool);
 	WORD GetModifierMask();
@@ -96,7 +96,6 @@ public:
 	CString GetMenuText(UINT id);
 	void UpdateMainMenu();
 	void SetNewCommandSet(CCommandSet * newSet);
-	bool noAltMenu();
-	bool SetXMEffects(void);
-	bool SetITEffects(void);
+	bool noAltMenu() { return m_bNoAltMenu; };
+	bool SetEffectLetters(const CModSpecifications &modSpecs);
 };
