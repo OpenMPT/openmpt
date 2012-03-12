@@ -13,7 +13,6 @@
 #ifndef NO_VST
 	#define VST_FORCE_DEPRECATED 0
 	#include <pluginterfaces/vst2.x/aeffectx.h>			// VST
-	#include <pluginterfaces/vst2.x/vstfxstore.h>
 #endif
 
 #include "../soundlib/Snd_defs.h"
@@ -117,7 +116,7 @@ protected:
 
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
 	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
-	PluginEventQueue<VstEventQueueLength> vstEvents;		// MIDI events that should be sent to the plugin
+	PluginEventQueue<VstEventQueueLength> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);

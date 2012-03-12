@@ -1528,13 +1528,14 @@ void CViewGlobals::OnFillProgramCombo()
 	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
 	if(pVstPlugin == nullptr) return;
 
-	UINT nProg = pVstPlugin->GetNumPrograms(); 
+	UINT nProg = pVstPlugin->GetNumPrograms();
+	UINT curProg = pVstPlugin->GetCurrentProgram();
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
 	m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
 	for (UINT i = 0; i < nProg; i++)
 	{
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i + 1);
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i, i == curProg)), i + 1);
 	}
 	m_nCurrentPreset = 0;
 	m_CbnPreset.SetRedraw(TRUE);

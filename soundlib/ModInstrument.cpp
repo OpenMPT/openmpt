@@ -32,6 +32,14 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 		}
 	} else if((fromType & MOD_TYPE_XM) && !(toType & MOD_TYPE_XM))
 	{
+		if(nSustainStart > nLoopEnd && (dwFlags & ENV_LOOP))
+		{
+			// In the IT format, the sustain loop is always considered before the envelope loop.
+			// In the XM format, whichever of the two is encountered first is considered.
+			// So we have to disable the sustain loop if it was behind the normal loop.
+			dwFlags &= ~ENV_SUSTAIN;
+		}
+
 		// XM -> IT / MPTM: Shorten loop by one tick by inserting bogus point
 		if(nLoopEnd > nLoopStart && (dwFlags & ENV_LOOP))
 		{
