@@ -15,6 +15,7 @@
 #include <medparam.h>
 #include "mainfrm.h"
 #include "vstplug.h"
+#include <pluginterfaces/vst2.x/vstfxstore.h>	// VST Presets
 #include "moddoc.h"
 #include "sndfile.h"
 #include "fxp.h"					//rewbs.VSTpresets
@@ -1512,6 +1513,8 @@ CVstPlugin::~CVstPlugin()
 #ifdef VST_LOG
 	Log("~CVstPlugin: m_nRefCount=%d\n", m_nRefCount);
 #endif
+	CriticalSection cs;
+
 	// First thing to do, if we don't want to hang in a loop
 	if ((m_pFactory) && (m_pFactory->pPluginsList == this)) m_pFactory->pPluginsList = m_pNext;
 	if (m_pMixStruct)
@@ -1799,9 +1802,10 @@ CString CVstPlugin::GetFormattedProgramName(VstInt32 index, bool allowFallback)
 	if(!GetProgramNameIndexed(index, -1, rawname))
 	{
 		// Fallback: Try to get current program name.
-		if(!allowFallback || Dispatch(effGetProgramName, 0, 0, rawname, 0) != 1)
+		strcpy(rawname, "");
+		if(allowFallback)
 		{
-			strcpy(rawname, "");
+			Dispatch(effGetProgramName, 0, 0, rawname, 0);
 		}
 	}
 	StringFixer::SetNullTerminator(rawname);

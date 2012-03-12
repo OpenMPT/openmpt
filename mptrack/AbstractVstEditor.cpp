@@ -444,7 +444,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 
 	for (long p = 0; p < numProgs; p++)
 	{
-		CString programName = m_pVstPlugin->GetFormattedProgramName(p);
+		CString programName = m_pVstPlugin->GetFormattedProgramName(p, p == curProg);
 		UINT splitMenuFlag = 0;
 
 		if(entryInThisMenu++ == PRESETS_PER_GROUP)
