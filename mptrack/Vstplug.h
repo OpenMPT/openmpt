@@ -12,8 +12,8 @@
 
 #ifndef NO_VST
 	#define VST_FORCE_DEPRECATED 0
-	#include <aeffectx.h>			// VST
-	#include <vstfxstore.h>
+	#include <pluginterfaces/vst2.x/aeffectx.h>			// VST
+	#include <pluginterfaces/vst2.x/vstfxstore.h>
 #endif
 
 #include "../soundlib/Snd_defs.h"

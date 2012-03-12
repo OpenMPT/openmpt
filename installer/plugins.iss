@@ -1,9 +1,9 @@
 [Code]
 
-// Helper code for installing the VST2MID plugin.
+// Helper code for installing the plugins that are shipped with OpenMPT.
 
-// Register VST2MID in OpenMPT's plugin settings
-procedure RegisterVST2MID();
+// Register plugins in OpenMPT's plugin settings
+procedure RegisterPlugin(plugName : String);
 var
     totalNum : Integer;
     i : Integer;
@@ -18,7 +18,7 @@ begin
     for i := 0 to totalNum - 1 do
     begin
         plugPath := GetIniString('VST Plugins', Format('Plugin%d', [i]), '', INIFile);
-        if CompareFilename(plugPath, 'vst2mid.dll') then
+        if(CompareFilename(plugPath, plugName)) then
         begin
             // The plugin is already registered, so don't add it again.
             Exit;
@@ -33,7 +33,7 @@ begin
     begin
         plugPath := ExpandConstant('{app}');
     end;
-    SetIniString('VST Plugins', Format('Plugin%d', [totalNum]), plugPath + '\Plugins\VST2MID.dll', INIFile);
+    SetIniString('VST Plugins', Format('Plugin%d', [totalNum]), plugPath + '\Plugins\' + plugName, INIFile);
 
     SetIniInt('VST Plugins', 'NumPlugins', totalNum + 1, INIFile);
 
