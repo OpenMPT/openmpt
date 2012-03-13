@@ -1624,15 +1624,22 @@ void CViewPattern::OnSelectCurrentColumn()
 void CViewPattern::OnChannelReset()
 //---------------------------------
 {
-	const CHANNELINDEX nChn = m_MenuCursor.GetChannel();
+	ResetChannel(m_MenuCursor.GetChannel());
+}
+
+
+// Reset all channel variables
+void CViewPattern::ResetChannel(CHANNELINDEX chn)
+//-----------------------------------------------
+{
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	if(pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return;
 
-	const bool bIsMuted = pModDoc->IsChannelMuted(nChn);
-	if(!bIsMuted) pModDoc->MuteChannel(nChn, true);
-	pSndFile->Chn[nChn].Reset(ModChannel::resetTotal, *pSndFile, nChn);
-	if(!bIsMuted) pModDoc->MuteChannel(nChn, false);
+	const bool isMuted = pModDoc->IsChannelMuted(chn);
+	if(!isMuted) pModDoc->MuteChannel(chn, true);
+	pSndFile->Chn[chn].Reset(ModChannel::resetTotal, *pSndFile, chn);
+	if(!isMuted) pModDoc->MuteChannel(chn, false);
 }
 
 
@@ -3958,7 +3965,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetCurrentChannel()); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
-		case kcChannelReset:				OnChannelReset(); return wParam;
+		case kcChannelReset:				ResetChannel(m_Cursor.GetChannel()); return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;

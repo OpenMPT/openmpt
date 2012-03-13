@@ -125,7 +125,7 @@ public:
 
 public:
 	PVSTPLUGINLIB GetPluginFactory() const { return m_pFactory; }
-	BOOL HasEditor();
+	bool HasEditor();
 	long GetNumPrograms();
 	PlugParamIndex GetNumParameters();
 	long GetCurrentProgram();
@@ -206,6 +206,9 @@ public:
 	void SetDryRatio(UINT param);
 	void AutomateParameter(PlugParamIndex param);
 
+	// Check whether a VST parameter can be automated
+	bool CanAutomateParameter(PlugParamIndex index);
+
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 
@@ -231,15 +234,17 @@ private:
 
 #else // case: NO_VST
 public:
-	PlugParamIndex GetNumParameters() {return 0;}
+	PlugParamIndex GetNumParameters() { return 0; }
 	void ToggleEditor() {}
-	BOOL HasEditor() {return FALSE;}
-	UINT GetNumCommands() {return 0;}
+	bool HasEditor() { return false; }
+	UINT GetNumCommands() { return 0; }
 	void GetPluginType(LPSTR) {}
-	PlugParamIndex GetNumPrograms() {return 0;}
+	PlugParamIndex GetNumPrograms() { return 0; }
 	bool GetProgramNameIndexed(long, long, char*) { return false; }
-	CString GetFormattedProgramName(VstInt32, bool = false) { return ""; };
+	CString GetFormattedProgramName(VstInt32, bool = false) { return ""; }
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
+	
+	bool CanAutomateParameter(PlugParamIndex index) { return false; }
 
 	CString GetFormattedParamName(PlugParamIndex) { return ""; };
 	CString GetFormattedParamValue(PlugParamIndex){ return ""; };

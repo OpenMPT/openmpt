@@ -728,7 +728,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	{
 	// Called when plugin param is changed via gui
 	case audioMasterAutomate:
-		if (pVstPlugin != nullptr && pVstPlugin->Dispatch(effCanBeAutomated, index, nullptr, nullptr, 0.0f) != 0)
+		if (pVstPlugin != nullptr && pVstPlugin->CanAutomateParameter(index))
 		{
 			// This parameter can be automated. Ugo Motion constantly sends automation callback events for parameters that cannot be automated...
 			pVstPlugin->AutomateParameter((PlugParamIndex)index);
@@ -927,12 +927,24 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	
 	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetPreviousPlug:
-		Log("VST plugin to host: Get Previous Plug\n");
+		if(pVstPlugin != nullptr)
+		{
+			CArray<CVstPlugin *, CVstPlugin *> list;
+			pVstPlugin->GetInputPlugList(list);
+			// We don't assign plugins to pins...
+			return ToVstPtr(list[0]);
+		}
 		break;
 	
 	// output pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetNextPlug:
-		Log("VST plugin to host: Get Next Plug\n");
+		if(pVstPlugin != nullptr)
+		{
+			CArray<CVstPlugin *, CVstPlugin *> list;
+			pVstPlugin->GetOutputPlugList(list);
+			// We don't assign plugins to pins...
+			return ToVstPtr(list[0]);
+		}
 		break;
 	
 	// realtime info
@@ -1589,14 +1601,10 @@ void CVstPlugin::GetPluginType(LPSTR pszType)
 }
 
 
-BOOL CVstPlugin::HasEditor()
+bool CVstPlugin::HasEditor()
 //--------------------------
 {
-	if ((m_pEffect) && (m_pEffect->flags & effFlagsHasEditor))
-	{
-		return TRUE;
-	}
-	return FALSE;
+	return (m_pEffect != nullptr) && (m_pEffect->flags & effFlagsHasEditor);
 }
 
 //rewbs.VSTcompliance: changed from BOOL to long
@@ -1619,6 +1627,14 @@ PlugParamIndex CVstPlugin::GetNumParameters()
 		return m_pEffect->numParams;
 	}
 	return 0;
+}
+
+
+// Check whether a VST parameter can be automated
+bool CVstPlugin::CanAutomateParameter(PlugParamIndex index)
+//---------------------------------------------------------
+{
+	return (Dispatch(effCanBeAutomated, index, nullptr, nullptr, 0.0f) != 0);
 }
 
 
@@ -1671,7 +1687,12 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 	LimitMax(maxParam, PlugParamIndex(m_pEffect->numParams));
 
 	for(PlugParamIndex p = minParam; p < maxParam; p++)
-		SetParameter(p, (float(rand()) / float(RAND_MAX)));
+	{
+		if(CanAutomateParameter(p))
+		{
+			SetParameter(p, (float(rand()) / float(RAND_MAX)));
+		}
+	}
 
 	return true;
 }
@@ -1798,7 +1819,7 @@ bool CVstPlugin::GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char 
 CString CVstPlugin::GetFormattedProgramName(VstInt32 index, bool allowFallback)
 //-----------------------------------------------------------------------------
 {
-	char rawname[max(kVstMaxProgNameLen, 256)];	// kVstMaxProgNameLen is 24...
+	char rawname[max(kVstMaxProgNameLen + 1, 256)];	// kVstMaxProgNameLen is 24...
 	if(!GetProgramNameIndexed(index, -1, rawname))
 	{
 		// Fallback: Try to get current program name.
@@ -1886,7 +1907,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 //-------------------------------------------------------------------------
 {
-	CHAR s[max(kVstMaxParamStrLen, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
+	CHAR s[max(kVstMaxParamStrLen + 1, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
 	s[0] = '\0';
 
 	if(m_pEffect != nullptr && m_pEffect->numParams > 0 && param < m_pEffect->numParams)
@@ -1933,13 +1954,14 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 //--------------------------------------------------
 {
 	pszName[0] = 0;
-	if (m_bIsVst2)
+	if(m_bIsVst2)
 	{
 		Dispatch(effGetEffectName, 0, 0, pszName, 0);
 		return TRUE;
 	}
 	return FALSE;
 }
+
 
 void CVstPlugin::Init(unsigned long /*nFreq*/, int /*bReset*/)
 //------------------------------------------------------------
@@ -2967,7 +2989,7 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 		PLUGINDEX nOutput = m_pMixStruct->GetOutputPlugin();
 		if(m_pSndFile && nOutput > m_nSlot && nOutput != PLUGINDEX_INVALID)
 		{
-			pOutputPlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
+			pOutputPlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
 		}
 	}
 	list.Add(pOutputPlug);
@@ -2986,7 +3008,7 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 
 	for (int nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 	{
-		pCandidatePlug = reinterpret_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nPlug].pMixPlugin);
+		pCandidatePlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nPlug].pMixPlugin);
 		if (pCandidatePlug)
 		{
 			pCandidatePlug->GetOutputPlugList(candidatePlugOutputs);
@@ -3316,6 +3338,9 @@ VstIntPtr CBuzz2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value
 			}
 		}
 		break;
+
+	case effCanBeAutomated:
+		return (index < m_pMachineInfo->numGlobalParameters);
 
 	// Buzz extensions
 	case effBuzzGetNumCommands:
@@ -3676,6 +3701,9 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		}
 		break;
 
+	case effCanBeAutomated:
+		return (index < m_Effect.numParams);
+
 	case effSetSampleRate:
 		m_nSamplesPerSec = (int)opt;
 		break;
@@ -3871,9 +3899,10 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 CString SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 //------------------------------------------------------------
 {
-	if(pMixPlugin)
+	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pMixPlugin);
+	if(vstPlug != nullptr)
 	{
-		return reinterpret_cast<CVstPlugin *>(pMixPlugin)->GetParamName(index);
+		return vstPlug->GetParamName(index);
 	} else
 	{
 		return CString();
