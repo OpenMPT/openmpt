@@ -2,8 +2,8 @@
  * MidiInOut.cpp
  * -------------
  * Purpose: A VST plugin for sending and receiving MIDI data.
- * Notes  : First compile the static PortMidi library. PortMidi comes with a Visual Studio solution so this should be simple.
- *          The PortMidi directory should be played in the include folder (./include/portmidi)
+ * Notes  : Compile the static PortMidi library first. PortMidi comes with a Visual Studio solution so this should be simple.
+ *          The PortMidi directory should be played in OpenMPT's include folder (./include/portmidi)
  * Authors: Johannes Schultz (OpenMPT Devs)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -28,11 +28,13 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 
 	setNumInputs(0);		// No Input
 	setNumOutputs(0);		// No Output
-	setUniqueID('MMID');	// Effect ID (ModPlug MIDI :)
-	canProcessReplacing();	// Supports replacing output
-	isSynth(true);			// Not stritcly a synth, but an instrument plugin in the broadest sense
+	setUniqueID(CCONST('M', 'M', 'I', 'D'));	// Effect ID (ModPlug MIDI :)
+	canProcessReplacing();	// Supports replacing output (default)
+	isSynth(true);			// Not strictly a synth, but an instrument plugin in the broadest sense
 	setEditor(editor);
 
+	isProcessing = false;
+	isBypassed = false;
 	OpenDevice(inputDevice.index, true);
 	OpenDevice(outputDevice.index, true);
 
@@ -43,8 +45,7 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 MidiInOut::~MidiInOut()
 //---------------------
 {
-	CloseDevice(inputDevice);
-	CloseDevice(outputDevice);
+	suspend();
 }
 
 
@@ -85,6 +86,7 @@ float MidiInOut::getParameter(VstInt32 index)
 }
 
 
+// Parameter name
 void MidiInOut::getParameterName(VstInt32 index, char *label)
 //-----------------------------------------------------------
 {
@@ -98,6 +100,7 @@ void MidiInOut::getParameterName(VstInt32 index, char *label)
 }
 
 
+// Parameter value as text
 void MidiInOut::getParameterDisplay(VstInt32 index, char *text)
 //-------------------------------------------------------------
 {
@@ -106,6 +109,7 @@ void MidiInOut::getParameterDisplay(VstInt32 index, char *text)
 }
 
 
+// Unit label for parameters
 void MidiInOut::getParameterLabel(VstInt32 index, char *label)
 //------------------------------------------------------------
 {
@@ -113,6 +117,7 @@ void MidiInOut::getParameterLabel(VstInt32 index, char *label)
 }
 
 
+// Plugin name
 bool MidiInOut::getEffectName(char *name)
 //---------------------------------------
 {
@@ -121,6 +126,7 @@ bool MidiInOut::getEffectName(char *name)
 }
 
 
+// Plugin name
 bool MidiInOut::getProductString(char *text)
 //------------------------------------------
 {
@@ -129,6 +135,7 @@ bool MidiInOut::getProductString(char *text)
 }
 
 
+// Plugin developer
 bool MidiInOut::getVendorString(char *text)
 //-----------------------------------------
 {
@@ -137,6 +144,7 @@ bool MidiInOut::getVendorString(char *text)
 }
 
 
+// Plugin version
 VstInt32 MidiInOut::getVendorVersion()
 //------------------------------------
 { 
@@ -175,6 +183,12 @@ void MidiInOut::processReplacing(float **inputs, float **outputs, VstInt32 sampl
 		PmEvent buffer;
 		Pm_Read(inputDevice.stream, &buffer, 1);
 
+		if(isBypassed)
+		{
+			// Discard events if bypassed
+			continue;
+		}
+
 		VstMidiEvent midiEvent;
 		midiEvent.type = kVstMidiType;
 		midiEvent.byteSize = sizeof(VstMidiEvent);
@@ -201,6 +215,7 @@ void MidiInOut::resume()
 //----------------------
 {
 	// Resume MIDI I/O
+	isProcessing = true;
 	OpenDevice(inputDevice.index, true);
 	OpenDevice(outputDevice.index, false);
 }
@@ -213,6 +228,7 @@ void MidiInOut::suspend()
 	// Suspend MIDI I/O
 	CloseDevice(inputDevice);
 	CloseDevice(outputDevice);
+	isProcessing = false;
 }
 
 
@@ -220,7 +236,7 @@ void MidiInOut::suspend()
 VstInt32 MidiInOut::processEvents(VstEvents *events)
 //--------------------------------------------------
 {
-	if(outputDevice.stream == nullptr)
+	if(outputDevice.stream == nullptr || isBypassed)
 	{
 		// We need an output device to send MIDI messages to.
 		return 1;
@@ -291,13 +307,19 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 		return;
 	}
 
-	PmError result;
-	if(asInputDevice)
+	PmError result = pmNoError;
+	if(isProcessing)
 	{
-		result = Pm_OpenInput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr);
-	} else
-	{
-		result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
+		// Don't open MIDI devices if we're not processing.
+		// This has to be done since we receive MIDI events in processReplacing(),
+		// so if no processing is happening, some irrelevant events might be queued until the next processing happens...
+		if(asInputDevice)
+		{
+			result = Pm_OpenInput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr);
+		} else
+		{
+			result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
+		}
 	}
 
 	// Update current device name

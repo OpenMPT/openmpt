@@ -55,6 +55,8 @@ protected:
 	// I/O device settings
 	MidiDevice inputDevice;
 	MidiDevice outputDevice;
+	bool isProcessing;
+	bool isBypassed;
 
 	char programName[kVstMaxProgNameLen + 1];
 
@@ -86,6 +88,17 @@ public:
 		return (index < numParams);
 	}
 
+	// MIDI channels
+	virtual VstInt32 getNumMidiInputChannels()
+	{
+		return (inputDevice.index != noDevice) ? 16 : 0;
+	}
+
+	virtual VstInt32 getNumMidiOutputChannels()
+	{
+		return (outputDevice.index != noDevice) ? 16 : 0;
+	}
+
 	// Effect name + version stuff
 	virtual bool getEffectName(char *name);
 	virtual bool getVendorString(char *text);
@@ -94,6 +107,13 @@ public:
 
 	// Check plugin capabilities
 	virtual VstInt32 canDo(char *text);
+
+	// Soft bypass
+	virtual bool setBypass(bool onOff)
+	{
+		isBypassed = onOff;
+		return true;
+	}
 
 	// Translate a VST parameter to a PortMidi device ID
 	PmDeviceID ParameterToDeviceID(float value) const
