@@ -280,6 +280,9 @@ public:
 
 	void ExecutePaste(PatternClipboard::PasteModes mode);
 
+	// Reset all channel variables
+	void ResetChannel(CHANNELINDEX chn);
+
 public:
 	//{{AFX_VIRTUAL(CViewPattern)
 	virtual void OnDraw(CDC *);

@@ -36,7 +36,9 @@ class PluginEventQueue
 {
 protected:
 
-	typedef VstMidiEvent BiggestVstEvent;
+	// Although originally all event types were apparently supposed to be of the same size, this is not the case on 64-Bit systems.
+	// VstMidiSysexEvent contains 3 pointers, so the struct size differs between 32-Bit and 64-Bit systems.
+	typedef VstMidiSysexEvent BiggestVstEvent;
 	static_assert(sizeof(BiggestVstEvent) >= sizeof(VstEvent)
 		&& sizeof(BiggestVstEvent) >= sizeof(VstMidiEvent)
 		&& sizeof(BiggestVstEvent) >= sizeof(VstMidiSysexEvent),
@@ -79,14 +81,39 @@ public:
 	// Set insertFront to true to prioritise this event (i.e. add it at the front of the queue instead of the back)
 	bool Enqueue(const VstEvent &event, bool insertFront = false)
 	{
-		VstMidiEvent midiEvent;
-		memcpy(&midiEvent, &event, min(event.byteSize, sizeof(event)));
 		ASSERT(event.byteSize == sizeof(event));
-		return Enqueue(midiEvent, insertFront);
+#if 1
+		// True on 32-Bit hosts: No copying is necessary
+		static_assert(sizeof(VstEvent) == sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
+		return Enqueue(reinterpret_cast<const VstMidiSysexEvent &>(event), insertFront);
+#else
+		// True on 64-Bit hosts: VstMidiSysexEvent is bigger, so copy smaller event into bigger event.
+		static_assert(sizeof(VstEvent) <= sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
+		VstMidiSysexEvent copyEvent;
+		memcpy(&copyEvent, &event, min(event.byteSize, sizeof(event)));
+		return Enqueue(copyEvent, insertFront);
+#endif
 	}
+
 	bool Enqueue(const VstMidiEvent &event, bool insertFront = false)
 	{
-		static_assert(sizeof(BiggestVstEvent) <= sizeof(VstMidiEvent), "Also check implementation here.");
+		ASSERT(event.byteSize == sizeof(event));
+#if 1
+		// True on 32-Bit hosts: No copying is necessary
+		static_assert(sizeof(VstMidiEvent) == sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
+		return Enqueue(reinterpret_cast<const VstMidiSysexEvent &>(event), insertFront);
+#else
+		// True on 64-Bit hosts: VstMidiSysexEvent is bigger, so copy smaller event into bigger event.
+		static_assert(sizeof(VstMidiEvent) <= sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
+		VstMidiSysexEvent copyEvent;
+		memcpy(&copyEvent, &event, min(event.byteSize, sizeof(event)));
+		return Enqueue(copyEvent, insertFront);
+#endif
+	}
+
+	bool Enqueue(const VstMidiSysexEvent &event, bool insertFront = false)
+	{
+		static_assert(sizeof(BiggestVstEvent) <= sizeof(VstMidiSysexEvent), "Also check implementation here.");
 		EnterCriticalSection(&criticalSection);
 		if(insertFront)
 		{
@@ -97,13 +124,6 @@ public:
 		}
 		LeaveCriticalSection(&criticalSection);
 		return true;
-	}
-	bool Enqueue(const VstMidiSysexEvent &event, bool insertFront = false)
-	{
-		VstMidiEvent midiEvent;
-		memcpy(&midiEvent, &event, min(event.byteSize, sizeof(event)));
-		ASSERT(event.byteSize == sizeof(event));
-		return Enqueue(midiEvent, insertFront);
 	}
 
 	// Set up the queue for transmitting to the plugin. Returns number of elements that are going to be transmitted.
