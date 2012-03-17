@@ -260,11 +260,17 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 	POINT pt;
 	int xofs = GetXScrollPos();
 	int yofs = GetYScrollPos();
-	pt.x = (cursor.GetChannel() - xofs) * GetColumnWidth();
 
 	PatternCursor::Columns imax = cursor.GetColumnType();
 	LimitMax(imax, PatternCursor::lastColumn);
-	LimitMax(imax, static_cast<PatternCursor::Columns>(m_nDetailLevel));
+// 	if(imax > m_nDetailLevel)
+// 	{
+// 		// Extend to next channel
+// 		imax = PatternCursor::firstColumn;
+// 		cursor.Move(0, 1, 0);
+// 	}
+
+	pt.x = (cursor.GetChannel() - xofs) * GetColumnWidth();
 
 	for(int i = 0; i < imax; i++)
 	{

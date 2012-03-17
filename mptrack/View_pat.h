@@ -235,6 +235,8 @@ public:
 	bool ShowEditWindow();
 	UINT GetCurrentInstrument() const;
 	void SelectBeatOrMeasure(bool selectBeat);
+	// Move pattern cursor to left or right, respecting invisible columns.
+	void MoveCursor(bool moveRight);
 
 	bool TransposeSelection(int transp);
 

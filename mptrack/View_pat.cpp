@@ -4013,23 +4013,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNavigateUpBySpacing:		SetCurrentRow(GetCurrentRow() - m_nSpacing, TRUE); return wParam;
 
 		case kcNavigateLeftSelect:
-		case kcNavigateLeft:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && m_Cursor.IsInFirstColumn())
-									SetCurrentColumn(pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn);
-								else
-								{
-									m_Cursor.Move(0, 0, -1);
-									SetCurrentColumn(m_Cursor);
-								}
-								return wParam;
+		case kcNavigateLeft:
+			MoveCursor(false);
+			break;
 		case kcNavigateRightSelect:
-		case kcNavigateRight:	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn)) >= 0))
-									SetCurrentColumn(0);
-								else
-								{
-									m_Cursor.Move(0, 0, 1);
-									SetCurrentColumn(m_Cursor);
-								}
-								return wParam;
+		case kcNavigateRight:
+			MoveCursor(true);
+			break;
+
 		case kcNavigateNextChanSelect:
 		case kcNavigateNextChan: SetCurrentColumn((GetCurrentChannel() + 1) % pSndFile->GetNumChannels(), m_Cursor.GetColumnType()); return wParam;
 		case kcNavigatePrevChanSelect:
@@ -4054,20 +4045,20 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								return wParam;
 
 		case kcEndHorizontalSelect:
-		case kcEndHorizontal:	if (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn)) < 0) SetCurrentColumn(pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn);
+		case kcEndHorizontal:	if (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_nDetailLevel);
 								else if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 		case kcEndVerticalSelect:
 		case kcEndVertical:		if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								else if (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn)) < 0) SetCurrentColumn(pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn);
+								else if (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_nDetailLevel);
 								return wParam;
 		case kcEndAbsoluteSelect:
-		case kcEndAbsolute:		SetCurrentColumn(pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn);
+		case kcEndAbsolute:		SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_nDetailLevel);
 								if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 
 		case kcNextPattern:	{	PATTERNINDEX n = m_nPattern + 1;
-            					while ((n < pSndFile->Patterns.Size()) && !pSndFile->Patterns.IsValidPat(n)) n++;
+								while ((n < pSndFile->Patterns.Size()) && !pSndFile->Patterns.IsValidPat(n)) n++;
 								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
 								ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 								ORDERINDEX newOrder = pSndFile->Order.FindOrder(m_nPattern, currentOrder, true);
@@ -4228,6 +4219,41 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 
 	return NULL;
+}
+
+
+// Move pattern cursor to left or right, respecting invisible columns.
+void CViewPattern::MoveCursor(bool moveRight)
+//-------------------------------------------
+{
+	if(!moveRight)
+	{
+		// Move cursor one column to the left
+		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && m_Cursor.IsInFirstColumn())
+		{
+			// Wrap around to last channel
+			SetCurrentColumn(GetDocument()->GetNumChannels() - 1, m_nDetailLevel);
+		} else if(!m_Cursor.IsInFirstColumn())
+		{
+			m_Cursor.Move(0, 0, -1);
+			SetCurrentColumn(m_Cursor);
+		}
+	} else
+	{
+		// Move cursor one column to the right
+		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_Cursor.CompareColumn(PatternCursor(0, GetDocument()->GetNumChannels() - 1, m_nDetailLevel)) >= 0))
+		{
+			// Wrap around to first channel.
+			SetCurrentColumn(0);
+		} else
+		{
+			do
+			{
+				m_Cursor.Move(0, 0, 1);
+			} while(m_Cursor.GetColumnType() > m_nDetailLevel);
+			SetCurrentColumn(m_Cursor);
+		}
+	}
 }
 
 #define ENTER_PCNOTE_VALUE(v, method) \
