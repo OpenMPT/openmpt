@@ -318,11 +318,11 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	}
 	if ((hLib) && (hLib != INVALID_HANDLE_VALUE))
 	{
-		BOOL bOk = FALSE;
-		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "main");
-		if(pMainProc == NULL)
+		bool validPlug = false;
+		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "VSTPluginMain");
+		if(pMainProc == nullptr)
 		{
-			pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "VSTPluginMain");
+			pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "main");
 		}
 	#ifdef ENABLE_BUZZ
 		GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLib, "GetInfo");
@@ -340,22 +340,22 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			p->dwPluginId1 = 0;
 			p->dwPluginId2 = 0;
 			p->bIsInstrument = FALSE;
-			p->pPluginsList = NULL;
+			p->pPluginsList = nullptr;
 			lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
-			_splitpath(pszDllPath, NULL, NULL, p->szLibraryName, NULL);
+			_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
 			p->szLibraryName[63] = 0;
 			p->pNext = m_pVstHead;
-			p->pPrev = NULL;
+			p->pPrev = nullptr;
 			if (m_pVstHead) m_pVstHead->pPrev = p;
 			m_pVstHead = p;
 
 			try
 			{
 				AEffect *pEffect = pMainProc(MasterCallBack);
-				if ((pEffect) && (pEffect->magic == kEffectMagic)
-				 && (pEffect->dispatcher))
+				if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
 				{
 					pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
+
 				#ifdef VST_USE_ALTERNATIVE_MAGIC
 					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure
 				#else
@@ -363,6 +363,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				#endif // VST_USE_ALTERNATIVE_MAGIC
 					p->dwPluginId2 = pEffect->uniqueID;
 					if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs)) p->bIsInstrument = TRUE;
+
 				#ifdef VST_LOG
 					int nver = pEffect->dispatcher(pEffect, effGetVstVersion, 0,0, NULL, 0);
 					if (!nver) nver = pEffect->version;
@@ -373,7 +374,9 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 						pEffect->flags, pEffect->realQualities, pEffect->offQualities);
 				#endif // VST_LOG
 
-					bOk = TRUE;
+					pEffect->dispatcher(pEffect, effClose, 0, 0, 0, 0);
+
+					validPlug = true;
 				}
 			} catch(...)
 			{
@@ -381,7 +384,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			}
 
 			// If OK, write the information in PluginCache
-			if (bOk)
+			if(validPlug)
 			{
 				const CString cacheSection = "PluginCache";
 				const CString cacheFile = theApp.GetPluginCacheFileName();
@@ -434,7 +437,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 					{
 						lstrcpyn(p->szLibraryName, pInfo->Name, CountOf(p->szLibraryName));
 					}
-					bOk = TRUE;
+					validPlug = true;
 				}
 			} catch (...)
 			{
@@ -453,7 +456,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		// Now it should be safe to assume that this plugin loaded properly. :)
 		WritePrivateProfileString("VST Plugins", "FailedPlugin", NULL, theApp.GetConfigFileName());
 
-		return (bOk) ? m_pVstHead : nullptr;
+		return (validPlug ? m_pVstHead : nullptr);
 	} else
 	{
 	#ifdef VST_LOG
@@ -1306,6 +1309,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 				}
 			}
 			delete[] pFileSel->returnMultiplePaths;
+			pFileSel->returnMultiplePaths = nullptr;
 		} else
 		{
 			if(pFileSel->reserved == 1 && pFileSel->returnPath != nullptr)

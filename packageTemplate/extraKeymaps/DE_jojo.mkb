@@ -24,7 +24,6 @@ version:1
 0:1359:2:90:5		//Undo: Ctrl+Z (KeyDown|KeyHold)
 0:1360:2:88:1		//Cut: Ctrl+X (KeyDown)
 0:1361:2:67:1		//Copy: Ctrl+C (KeyDown)
-0:1361:2:45:1		//Copy: Ctrl+EINFG (KeyDown)
 0:1362:2:86:1		//Paste: Ctrl+V (KeyDown)
 0:1363:3:86:1		//Mix Paste: Shift+Ctrl+V (KeyDown)
 0:1793:1:86:1		//Paste Flood: Shift+V (KeyDown)
@@ -116,8 +115,8 @@ version:1
 2:1665:0:46:1		//Clear field and step (IT Style): ENTF (KeyDown)
 2:1061:0:8:5		//Delete rows: RÜCK (KeyDown|KeyHold)
 2:1377:2:8:5		//Delete all rows: Ctrl+RÜCK (KeyDown|KeyHold)
-2:1378:0:45:1		//Insert Row: EINFG (KeyDown)
-2:1379:2:45:1		//Insert All Rows: Ctrl+EINFG (KeyDown)
+2:1378:0:45:5		//Insert Row: EINFG (KeyDown|KeyHold)
+2:1379:2:45:5		//Insert All Rows: Ctrl+EINFG (KeyDown|KeyHold)
 2:1055:0:109:5		//Previous pattern: - (ZEHNERTASTATUR) (KeyDown|KeyHold)
 2:1054:0:107:5		//Next pattern: + (ZEHNERTASTATUR) (KeyDown|KeyHold)
 
