@@ -2658,14 +2658,16 @@ void CSoundFile::RecalculateSamplesPerTick()
 {
 	switch(m_nTempoMode)
 	{
-	case tempo_mode_classic: default:
+	case tempo_mode_classic:
+	default:
 		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+		break;
 
-	case tempo_mode_modern: 
+	case tempo_mode_modern:
 		m_nSamplesPerTick = gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
 		break;
 
-	case tempo_mode_alternative: 
+	case tempo_mode_alternative:
 		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
 		break;
 	}
@@ -2673,25 +2675,29 @@ void CSoundFile::RecalculateSamplesPerTick()
 
 
 // Get the duration of a row in milliseconds, based on the current rows per beat and given speed and tempo settings.
-// "additionalTicks" are ticks that are derived from Row Delay effects.
-double CSoundFile::GetRowDuration(UINT tempo, UINT speed, UINT additionalTicks) const
-//-----------------------------------------------------------------------------------
+// "speedIncludingPatternDelays" is the total row length, including the ticks from Row Delay effects.
+// It is required because modern tempo mode normally doesn't consider  "speed", so "speedIncludingPatternDelays" is
+// used as a ratio.
+double CSoundFile::GetRowDuration(UINT tempo, UINT speed, UINT speedIncludingPatternDelays) const
+//-----------------------------------------------------------------------------------------------
 {
+	speedIncludingPatternDelays = Util::Max(speedIncludingPatternDelays, speed);
+
 	switch(m_nTempoMode)
 	{
 	case tempo_mode_classic:
 	default:
-		return static_cast<double>(2500 * (speed + additionalTicks)) / static_cast<double>(tempo);
+		return static_cast<double>(2500 * speedIncludingPatternDelays) / static_cast<double>(tempo);
 
 	case tempo_mode_modern:
 		{
 			// If there are any row delay effects, the row length factor compensates for those.
-			const double rowLength = static_cast<double>(speed + additionalTicks) / static_cast<double>(speed);
+			const double rowLength = static_cast<double>(speedIncludingPatternDelays) / static_cast<double>(speed);
 			return 60000.0 * rowLength / static_cast<double>(tempo) / static_cast<double>(m_nCurrentRowsPerBeat);
 		}
 
 	case tempo_mode_alternative:
-		return static_cast<double>(1000 * (speed + additionalTicks)) / static_cast<double>(tempo);
+		return static_cast<double>(1000 * speedIncludingPatternDelays) / static_cast<double>(tempo);
 	}
 }
 
@@ -2855,6 +2861,7 @@ struct UpgradePatternData
 	UpgradePatternData(CSoundFile *pSndFile)
 	{
 		this->pSndFile = pSndFile;
+		chn = 0;
 	}
 
 	void operator()(ModCommand& m)
@@ -2909,6 +2916,46 @@ struct UpgradePatternData
 			}
 		}
 
+		if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+		{
+			// Pattern Delay fixes
+
+			const bool fixS6x = (m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0x60);
+			// We also fix X6x commands in hacked XM files, since they are treated identically to the S6x command in IT/S3M files.
+			// We don't treat them in files made with OpenMPT 1.18+ that have compatible play enabled, though, since they are ignored there anyway.
+			const bool fixX6x = (m.command == CMD_XFINEPORTAUPDOWN && (m.param & 0xF0) == 0x60
+				&& (!pSndFile->IsCompatibleMode(TRK_FASTTRACKER2) || pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
+
+			if(fixS6x || fixX6x)
+			{
+				// OpenMPT 1.20 fixes multiple fine pattern delays on the same row. Previously, only the last command was considered,
+				// but all commands should be added up. Since Scream Tracker 3 itself doesn't support S6x, we also use Impulse Tracker's behaviour here,
+				// since we can assume that most S3Ms that make use of S6x were composed with Impulse Tracker.
+				ModCommand *fixCmd = (&m) - chn;
+				for(CHANNELINDEX i = 0; i < chn; i++, fixCmd++)
+				{
+					if(fixCmd->command == CMD_S3MCMDEX && (fixCmd->param & 0xF0) == 0x60)
+					{
+						fixCmd->command = CMD_NONE;
+					}
+				}
+			}
+
+			if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xE0)
+			{
+				// OpenMPT 1.20 fixes multiple pattern delays on the same row. Previously, only the *last* command was considered,
+				// but Scream Tracker 3 and Impulse Tracker only consider the *first* command.
+				ModCommand *fixCmd = (&m) - chn;
+				for(CHANNELINDEX i = 0; i < chn; i++, fixCmd++)
+				{
+					if(fixCmd->command == CMD_S3MCMDEX && (fixCmd->param & 0xF0) == 0xE0)
+					{
+						fixCmd->command = CMD_NONE;
+					}
+				}
+			}
+		}
+
 		if(pSndFile->GetType() == MOD_TYPE_XM)
 		{
 			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00) ||
@@ -2923,9 +2970,16 @@ struct UpgradePatternData
 			}
 		}
 
+		chn++;
+		if(chn >= pSndFile->GetNumChannels())
+		{
+			chn = 0;
+		}
+
 	}
 
 	CSoundFile *pSndFile;
+	CHANNELINDEX chn;
 };
 
 
