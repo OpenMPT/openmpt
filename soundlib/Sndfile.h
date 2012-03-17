@@ -348,7 +348,7 @@ public:
 	DWORD GetSongTime() { return static_cast<DWORD>(GetLength(eNoAdjust).duration + 0.5); }
 
 	void RecalculateSamplesPerTick();
-	double GetRowDuration(UINT tempo, UINT speed, UINT additionalTicks = 0) const;
+	double GetRowDuration(UINT tempo, UINT speed, UINT speedIncludingPatternDelays = 0) const;
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
@@ -574,7 +574,11 @@ protected:
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	void UpdateTimeSignature();
 
-	UINT GetNumTicksOnCurrentRow() const { return m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay; };
+	UINT GetNumTicksOnCurrentRow() const
+	{
+		return (m_nMusicSpeed  + m_nFrameDelay) * (m_nPatternDelay + 1);
+	}
+
 public:
 	// Write pattern effect functions
 	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, writeEffectAllowRowChange allowRowChange = weIgnore, bool bRetry = true);

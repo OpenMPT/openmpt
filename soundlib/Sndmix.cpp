@@ -897,9 +897,14 @@ BOOL CSoundFile::ProcessRow()
 	if (m_nTickCount)
 	{
 		m_dwSongFlags &= ~SONG_FIRSTTICK;
-		if ((!(m_nType & MOD_TYPE_XM)) && (m_nTickCount < GetNumTicksOnCurrentRow()))
+		if(!(GetType() & MOD_TYPE_XM) && m_nTickCount < GetNumTicksOnCurrentRow())
 		{
-			if (!(m_nTickCount % m_nMusicSpeed)) m_dwSongFlags |= SONG_FIRSTTICK;
+			// Emulate first tick behaviour if Row Delay is set.
+			// Test cases: PatternDelaysRetrig.it, PatternDelaysRetrig.s3m, PatternDelaysRetrig.xm
+			if(!(m_nTickCount % (m_nMusicSpeed + m_nFrameDelay)))
+			{
+				m_dwSongFlags |= SONG_FIRSTTICK;
+			}
 		}
 	}
 

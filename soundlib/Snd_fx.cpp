@@ -163,7 +163,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 
 	for (;;)
 	{
-		UINT nSpeedCount = 0;
+		UINT rowDelay = 0, tickDelay = 0;
 		nRow = nNextRow;
 		nCurrentOrder = nNextOrder;
 
@@ -356,15 +356,42 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 					memory.musicTempo = CLAMP(memory.musicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 // -! NEW_FEATURE#0010
 				break;
-			// Pattern Delay
+
 			case CMD_S3MCMDEX:	
-				if ((param & 0xF0) == 0x60) { nSpeedCount = param & 0x0F; break; } else
-				if ((param & 0xF0) == 0xA0) { pChn->nOldHiOffset = param & 0x0F; break; } else
-				if ((param & 0xF0) == 0xB0) { param &= 0x0F; param |= 0x60; }
-			case CMD_MODCMDEX:
-				if ((param & 0xF0) == 0xE0) nSpeedCount = (param & 0x0F) * memory.musicSpeed; else
-				if ((param & 0xF0) == 0x60)
+				if((param & 0xF0) == 0x60)
 				{
+					// Fine Pattern Delay
+					tickDelay += (param & 0x0F);
+				} else if((param & 0xF0) == 0xE0 && !rowDelay)
+				{
+					// Pattern Delay
+					rowDelay = (param & 0x0F);
+				} else if((param & 0xF0) == 0xA0)
+				{
+					// High sample offset
+					pChn->nOldHiOffset = param & 0x0F;
+				} else if((param & 0xF0) == 0xB0)
+				{
+					// Pattern Loop
+					if (param & 0x0F)
+					{
+						memory.elapsedTime += (memory.elapsedTime - memory.patLoop[nChn]) * (double)(param & 0x0F);
+					} else
+					{
+						memory.patLoop[nChn] = memory.elapsedTime;
+						memory.patLoopStart[nChn] = nRow;
+					}
+				}
+				break;
+
+			case CMD_MODCMDEX:
+				if((param & 0xF0) == 0xE0)
+				{
+					// Pattern Delay
+					rowDelay = (param & 0x0F);
+				} else if ((param & 0xF0) == 0x60)
+				{
+					// Pattern Loop
 					if (param & 0x0F)
 					{
 						memory.elapsedTime += (memory.elapsedTime - memory.patLoop[nChn]) * (double)(param & 0x0F);
@@ -376,6 +403,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 					}
 				}
 				break;
+
 			case CMD_XFINEPORTAUPDOWN:
 				// ignore high offset in compatible mode
 				if (((param & 0xF0) == 0xA0) && !IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nOldHiOffset = param & 0x0F;
@@ -428,11 +456,9 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				{
 					//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
 					if (param) memory.oldGlbVolSlide[nChn] = param; else param = memory.oldGlbVolSlide[nChn];
-				}
-				else
+				} else
 				{
 					if (param) memory.oldGlbVolSlide[0] = param; else param = memory.oldGlbVolSlide[0];
-
 				}
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
@@ -495,7 +521,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		}
 
 		// XXX this does not take per-pattern time signatures into consideration!
-		memory.elapsedTime += GetRowDuration(memory.musicTempo, memory.musicSpeed, nSpeedCount);
+		memory.elapsedTime += GetRowDuration(memory.musicTempo, memory.musicSpeed, (memory.musicSpeed + tickDelay) * (1 + rowDelay));
 	}
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
@@ -926,7 +952,8 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
 	{
 		note += pChn->nTranspose;
-		Limit(note, NOTE_MIN + 11, NOTE_MIN + 130);	// why 131? 120+11, how does this make sense?
+		// RealNote = PatternNote + RelativeTone; (0..118, 0 = C-0, 118 = A#9)
+		Limit(note, NOTE_MIN + 11, NOTE_MIN + 130);	// 119 possible notes
 	} else
 	{
 		Limit(note, NOTE_MIN, NOTE_MAX);
@@ -1415,12 +1442,13 @@ BOOL CSoundFile::ProcessEffects()
 //-------------------------------
 {
 	ModChannel *pChn = Chn;
-	ROWINDEX nBreakRow = ROWINDEX_INVALID, nPatLoopRow = ROWINDEX_INVALID;
+	ROWINDEX nBreakRow = ROWINDEX_INVALID;		// Is changed if a break to row command is encountere.d
+	ROWINDEX nPatLoopRow = ROWINDEX_INVALID;	// Is changed if a pattern loop jump-back is executed
 	ORDERINDEX nPosJump = ORDERINDEX_INVALID;
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	ModCommand* m = nullptr;
+	ModCommand *m = nullptr;
 // -! NEW_FEATURE#0010
 	for (CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++, pChn++)
 	{
@@ -1502,8 +1530,7 @@ BOOL CSoundFile::ProcessEffects()
 			nStartTick = (param & 0xF0) >> 4;
 			const UINT cutAtTick = nStartTick + (param & 0x0F);
 			NoteCut(nChn, cutAtTick);
-		} else
-		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
+		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
 			if ((!param) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
 			// Note Delay ?
@@ -1536,8 +1563,7 @@ BOOL CSoundFile::ProcessEffects()
 					}
 					continue;
 				}
-			} else
-			if(m_dwSongFlags & SONG_FIRSTTICK)
+			} else if(m_dwSongFlags & SONG_FIRSTTICK)
 			{
 				// Pattern Loop ?
 				if ((((param & 0xF0) == 0x60) && (cmd == CMD_MODCMDEX))
@@ -1566,11 +1592,16 @@ BOOL CSoundFile::ProcessEffects()
 							Chn[i].nPatternLoopCount = pChn->nPatternLoopCount;
 						}
 					}
-				} else
-				// Pattern Delay
-				if ((param & 0xF0) == 0xE0)
+				} else if ((param & 0xF0) == 0xE0)
 				{
-					m_nPatternDelay = param & 0x0F;
+					// Pattern Delay
+					// In Scream Tracker 3 / Impulse Tracker, only the first delay command on this row is considered.
+					// Test cases: PatternDelays.it, PatternDelays.s3m, PatternDelays.xm
+					// XXX In Scream Tracker 3, the "left" channels are evaluated before the "right" channels, which is not emulated here!
+					if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) || !m_nPatternDelay)
+					{
+						m_nPatternDelay = param & 0x0F;
+					}
 				}
 			}
 		}
@@ -1657,7 +1688,7 @@ BOOL CSoundFile::ProcessEffects()
 				const ModSample *oldSample = nullptr;
 				// Reset default volume when retriggering envelopes
 
-				if (GetNumInstruments())
+				if(GetNumInstruments())
 				{
 					oldSample = pChn->pModSample;
 				} else if (instr <= GetNumSamples())
@@ -1682,13 +1713,14 @@ BOOL CSoundFile::ProcessEffects()
 				//IT compatibility: Instrument with no note.
 				if(IsCompatibleMode(TRK_IMPULSETRACKER) || (m_dwSongFlags & SONG_PT1XMODE))
 				{
-					if(m_nInstruments)
+					if(GetNumInstruments())
 					{
+						// Instrument mode
 						if(instr < MAX_INSTRUMENTS && pChn->pModInstrument != Instruments[instr])
 							note = pChn->nNote;
-					}
-					else //Case: Only samples used
+					} else
 					{
+						// Sample mode
 						if(instr < MAX_SAMPLES && pChn->pSample != Samples[instr].pSample)
 							note = pChn->nNote;
 					}
@@ -1809,7 +1841,7 @@ BOOL CSoundFile::ProcessEffects()
 			so... hxx = (hx | (oldhxx & 0xf0))  ???
 			TODO is this done correctly?
 		*/
-      	if ((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
+		if ((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
@@ -1977,7 +2009,7 @@ BOOL CSoundFile::ProcessEffects()
 				{ 
 					if ((GetType() & MOD_TYPE_XM))
 					{
-                        param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
+						param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
 					}
 					param = (param << 8) + m->param;
 				}
@@ -2324,11 +2356,15 @@ BOOL CSoundFile::ProcessEffects()
 		const bool doPatternLoop = (nPatLoopRow != ROWINDEX_INVALID);
 
 		// Pattern Loop
-		if (doPatternLoop)
+		if(doPatternLoop)
 		{
 			m_nNextOrder = m_nCurrentOrder;
 			m_nNextRow = nPatLoopRow;
-			if (m_nPatternDelay) m_nNextRow++;
+			if(m_nPatternDelay)
+			{
+				m_nNextRow++;
+			}
+
 			// As long as the pattern loop is running, mark the looped rows as not visited yet
 			for(ROWINDEX nRow = nPatLoopRow; nRow <= m_nRow; nRow++)
 			{
@@ -2338,23 +2374,23 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Pattern Break / Position Jump only if no loop running
 		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		if ((nBreakRow != ROWINDEX_INVALID || nPosJump != ORDERINDEX_INVALID)
+		if((nBreakRow != ROWINDEX_INVALID || nPosJump != ORDERINDEX_INVALID)
 			&& (!doPatternLoop || IsCompatibleMode(TRK_FASTTRACKER2)))
 		{
-			if (nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentOrder + 1;
-			if (nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
+			if(nPosJump == ORDERINDEX_INVALID) nPosJump = m_nCurrentOrder + 1;
+			if(nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
 			m_dwSongFlags |= SONG_BREAKTOROW;
 
-			if (nPosJump >= Order.size()) 
+			if(nPosJump >= Order.size()) 
 			{
 				nPosJump = 0;
 			}
 
 			// IT / FT2 compatibility: don't reset loop count on pattern break.
 			// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm
-			if (nPosJump != m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+			if(nPosJump != m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{
-				for (CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 				{
 					Chn[i].nPatternLoopCount = 0;
 				}
@@ -3068,14 +3104,16 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 				break;
 	// S6x: Pattern Delay for x frames
 	case 0x60:
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				if((m_dwSongFlags & SONG_FIRSTTICK) && m_nTickCount == 0)
 				{
-					if(!(m_dwSongFlags & SONG_FIRSTTICK) || m_nTickCount > 0) break;
+					// Tick delays are added up.
+					// Scream Tracker 3 does actually not support this command.
+					// We'll use the same behaviour as for Impulse Tracker, as we can assume that
+					// most S3Ms that make use of this command were made with Impulse Tracker.
+					// MPT added this command to the XM format through the X6x effect, so we will use
+					// the same behaviour here as well.
+					// Test cases: PatternDelays.it, PatternDelays.s3m, PatternDelays.xm
 					m_nFrameDelay += param;
-				}
-				else
-				{
-					m_nFrameDelay = param;
 				}
 				break;
 	// S7x: Envelope Control / Instrument Control
@@ -4101,7 +4139,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 	}
 	if (nGlbSlide)
 	{
-		if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) nGlbSlide *= 2;
+		if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) nGlbSlide *= 2;
 		nGlbSlide += m_nGlobalVolume;
 		Limit(nGlbSlide, 0, 256);
 		m_nGlobalVolume = nGlbSlide;
