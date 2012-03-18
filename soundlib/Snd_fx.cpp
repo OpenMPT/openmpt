@@ -365,7 +365,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				} else if((param & 0xF0) == 0xE0 && !rowDelay)
 				{
 					// Pattern Delay
-					rowDelay = (param & 0x0F);
+					if(!(GetType() & MOD_TYPE_S3M) || (param & 0x0F) != 0)
+					{
+						// While Impulse Tracker *does* count S60 as a valid row delay (and thus ignores any other row delay commands on the right),
+						// Scream Tracker 3 simply ignores such commands.
+						rowDelay = 1 + (param & 0x0F);
+					}
 				} else if((param & 0xF0) == 0xA0)
 				{
 					// High sample offset
@@ -388,7 +393,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				if((param & 0xF0) == 0xE0)
 				{
 					// Pattern Delay
-					rowDelay = (param & 0x0F);
+					rowDelay = 1 + (param & 0x0F);
 				} else if ((param & 0xF0) == 0x60)
 				{
 					// Pattern Loop
@@ -521,7 +526,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		}
 
 		// XXX this does not take per-pattern time signatures into consideration!
-		memory.elapsedTime += GetRowDuration(memory.musicTempo, memory.musicSpeed, (memory.musicSpeed + tickDelay) * (1 + rowDelay));
+		memory.elapsedTime += GetRowDuration(memory.musicTempo, memory.musicSpeed, (memory.musicSpeed + tickDelay) * max(rowDelay, 1));
 	}
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
@@ -1600,7 +1605,12 @@ BOOL CSoundFile::ProcessEffects()
 					// XXX In Scream Tracker 3, the "left" channels are evaluated before the "right" channels, which is not emulated here!
 					if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) || !m_nPatternDelay)
 					{
-						m_nPatternDelay = param & 0x0F;
+						if(!(GetType() & (MOD_TYPE_S3M)) || (param & 0x0F) != 0)
+						{
+							// While Impulse Tracker *does* count S60 as a valid row delay (and thus ignores any other row delay commands on the right),
+							// Scream Tracker 3 simply ignores such commands.
+							m_nPatternDelay = 1 + (param & 0x0F);
+						}
 					}
 				}
 			}
