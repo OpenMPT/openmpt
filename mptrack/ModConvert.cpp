@@ -179,11 +179,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
-		CHANNELINDEX nChannel = GetNumChannels() - 1;
+		CHANNELINDEX channel = 0;
 
-		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.m_nChannels; len; m++, len--)
+		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.GetNumChannels(); len; m++, len--, channel++)
 		{
-			nChannel = (nChannel + 1) % GetNumChannels(); // 0...Channels - 1
+			if(channel >= GetNumChannels())
+			{
+				channel = 0;
+			}
 
 			m->Convert(nOldType, nNewType);
 
@@ -197,9 +200,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				case CMD_MODCMDEX:
 					// No effect memory in XM / MOD
 					if(m->param == 0)
-						m->param = cEffectMemory[nChannel][m->command];
+						m->param = cEffectMemory[channel][m->command];
 					else
-						cEffectMemory[nChannel][m->command] = m->param;
+						cEffectMemory[channel][m->command] = m->param;
 					break;
 				}
 			}
@@ -216,9 +219,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				case CMD_VOLUMESLIDE:
 					// ProTracker doesn't have effect memory for these commands, so let's try to fix them
 					if(m->param == 0)
-						m->param = cEffectMemory[nChannel][m->command];
+						m->param = cEffectMemory[channel][m->command];
 					else
-						cEffectMemory[nChannel][m->command] = m->param;
+						cEffectMemory[channel][m->command] = m->param;
 					break;				
 
 				}
@@ -241,6 +244,40 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 					break;
 				}
 			}
+
+			// Fix Row Delay commands when converting between MOD/XM and S3M/IT.
+			// FT2 only considers the rightmost command, ST3/IT only the leftmost...
+			if((nOldType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && (nNewType & (MOD_TYPE_MOD | MOD_TYPE_XM))
+				&& m->command == CMD_MODCMDEX && (m->param & 0xF0) == 0xE0)
+			{
+				if(oldTypeIsIT_MPT || m->param != 0xE0)
+				{
+					// If the leftmost row delay command is SE0, ST3 ignores it, IT doesn't.
+
+					// Delete all commands right of the first command
+					ModCommand *p = m + 1;
+					for(CHANNELINDEX c = channel + 1; c < m_SndFile.GetNumChannels(); c++, p++)
+					{
+						if(p->command == CMD_S3MCMDEX && (p->param & 0xF0) == 0xE0)
+						{
+							p->command = CMD_NONE;
+						}
+					}
+				}
+			} else if((nOldType & (MOD_TYPE_MOD | MOD_TYPE_XM)) && (nNewType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
+				&& m->command == CMD_S3MCMDEX && (m->param & 0xF0) == 0xE0)
+			{
+				// Delete all commands left of the last command
+				ModCommand *p = m - 1;
+				for(CHANNELINDEX c = 0; c < channel; c++, p--)
+				{
+					if(p->command == CMD_S3MCMDEX && (p->param & 0xF0) == 0xE0)
+					{
+						p->command = CMD_NONE;
+					}
+				}
+			}
+
 		}
 		if(addBreak)
 		{

@@ -576,7 +576,7 @@ protected:
 
 	UINT GetNumTicksOnCurrentRow() const
 	{
-		return (m_nMusicSpeed  + m_nFrameDelay) * (m_nPatternDelay + 1);
+		return (m_nMusicSpeed  + m_nFrameDelay) * max(m_nPatternDelay, 1);
 	}
 
 public:
