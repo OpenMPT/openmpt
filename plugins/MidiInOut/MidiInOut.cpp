@@ -33,6 +33,8 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 	isSynth(true);			// Not strictly a synth, but an instrument plugin in the broadest sense
 	setEditor(editor);
 
+	Pm_Initialize();
+
 	isProcessing = false;
 	isBypassed = false;
 	OpenDevice(inputDevice.index, true);
@@ -46,6 +48,7 @@ MidiInOut::~MidiInOut()
 //---------------------
 {
 	suspend();
+	Pm_Terminate();
 }
 
 
@@ -252,7 +255,7 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 				
 				// Create and send PortMidi event
 				PmEvent event;
-				memcpy(&event.message, midiEvent->midiData, 3);
+				memcpy(&event.message, midiEvent->midiData, 4);
 				event.timestamp = 0;
 				Pm_Write(outputDevice.stream, &event, 3);
 			}
@@ -262,19 +265,8 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 			{
 				VstMidiSysexEvent *midiEvent = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
 
-				// Create as many PortMidi events as necessary for the dump.
-				VstInt32 sentBytes = 0;
-				while(sentBytes < midiEvent->dumpBytes)
-				{
-					VstInt32 writeBytes = std::min(midiEvent->dumpBytes - sentBytes, 4);
-
-					PmEvent event;
-					memcpy(&event.message, midiEvent->sysexDump + sentBytes, writeBytes);
-					event.timestamp = 0;
-					Pm_Write(outputDevice.stream, &event, writeBytes);
-
-					sentBytes += writeBytes;
-				}
+				// Send a PortMidi sysex event
+				Pm_WriteSysEx(outputDevice.stream, 0, reinterpret_cast<unsigned char*>(midiEvent->sysexDump));
 			}
 			break;
 		}
