@@ -721,7 +721,10 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		{
 			pChn->nInsVol = pSmp->nGlobalVol;
 		}
-		if (pSmp->uFlags & CHN_PANNING) pChn->nPan = pSmp->nPan;
+		if((pSmp->uFlags & CHN_PANNING) || (GetType() & MOD_TYPE_XM))
+		{
+			pChn->nPan = pSmp->nPan;
+		}
 	}
 
 
@@ -1622,11 +1625,35 @@ BOOL CSoundFile::ProcessEffects()
 			UINT note = pChn->rowCommand.note;
 			if (instr) pChn->nNewIns = instr;
 
-			// Notes that exceed FT2's limit are completely ignored.
-			// Test case: note-limit.xm
 			if(ModCommand::IsNote(note) && IsCompatibleMode(TRK_FASTTRACKER2))
 			{
-				const int computedNote = note + pChn->nTranspose;
+				// Notes that exceed FT2's limit are completely ignored.
+				// Test case: note-limit.xm
+				int transpose = pChn->nTranspose;
+				if(instr && !bPorta)
+				{
+					// Refresh transpose
+					// Test case: note-limit 2.xm
+					SAMPLEINDEX sample = SAMPLEINDEX_INVALID;
+					if(GetNumInstruments())
+					{
+						// Instrument mode
+						if(instr <= GetNumInstruments() && Instruments[instr] != nullptr)
+						{
+							sample = Instruments[instr]->Keyboard[note];
+						}
+					} else
+					{
+						// Sample mode
+						sample = instr;
+					}
+					if(sample <= GetNumSamples())
+					{
+						transpose = GetSample(instr).RelativeTone;
+					}
+				}
+
+				const int computedNote = note + transpose;
 				if((computedNote < NOTE_MIN + 11 || computedNote > NOTE_MIN + 130))
 				{
 					note = NOTE_NONE;
