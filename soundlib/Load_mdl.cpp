@@ -1,7 +1,7 @@
 /*
  * Load_mdl.cpp
  * ------------
- * Purpose: DigiTracker (MDL) module loader
+ * Purpose: DigiTrakker (MDL) module loader
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -16,34 +16,75 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-typedef struct MDLSONGHEADER
+#pragma pack(push, 1)
+
+struct MDLFileHeader
 {
 	DWORD id;	// "DMDL" = 0x4C444D44
 	BYTE version;
-} MDLSONGHEADER;
+};
 
 
-typedef struct MDLINFOBLOCK
+struct MDLInfoBlock
 {
-	CHAR songname[32];
-	CHAR composer[20];
-	WORD norders;
-	WORD repeatpos;
-	BYTE globalvol;
-	BYTE speed;
-	BYTE tempo;
-	BYTE channelinfo[32];
-	BYTE seq[256];
-} MDLINFOBLOCK;
+	char   songname[32];
+	char   composer[20];
+	uint16 norders;
+	uint16 repeatpos;
+	uint8  globalvol;
+	uint8  speed;
+	uint8  tempo;
+	uint8  channelinfo[32];
+	uint8  seq[256];
+};
 
 
-typedef struct MDLPATTERNDATA
+struct MDLPatternHeader
 {
-	BYTE channels;
-	BYTE lastrow;	// nrows = lastrow+1
-	CHAR name[16];
-	WORD data[1];
-} MDLPATTERNDATA;
+	uint8  channels;
+	uint8  lastrow;	// nrows = lastrow+1
+	char   name[16];
+	uint16 data[1];
+};
+
+
+struct MDLSampleHeaderCommon
+{
+	uint8 sampleIndex;
+	char  name[32];
+	char  filename[8];
+};
+
+
+struct MDLSampleHeader
+{
+	MDLSampleHeaderCommon info;
+	uint32 c4Speed;
+	uint32 length;
+	uint32 loopStart;
+	uint32 loopLength;
+	uint8  unused; // was volume in v0.0, why it was changed I have no idea
+	uint8  flags;
+};
+
+STATIC_ASSERT(sizeof(MDLSampleHeader) == 59);
+
+
+struct MDLSampleHeaderv0
+{
+	MDLSampleHeaderCommon info;
+	uint16 c4Speed;
+	uint32 length;
+	uint32 loopStart;
+	uint32 loopLength;
+	uint8  volume;
+	uint8  flags;
+};
+
+STATIC_ASSERT(sizeof(MDLSampleHeaderv0) == 57);
+
+
+#pragma pack(pop)
 
 
 void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
@@ -235,8 +276,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 //---------------------------------------------------------------------
 {
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
-	const MDLSONGHEADER *pmsh = (const MDLSONGHEADER *)lpStream;
-	MDLINFOBLOCK *pmib;
+	const MDLFileHeader *pmsh = (const MDLFileHeader *)lpStream;
+	MDLInfoBlock *pmib;
 	UINT i,j, norders = 0, npatterns = 0, ntracks = 0;
 	UINT ninstruments = 0, nsamples = 0;
 	WORD block;
@@ -253,10 +294,10 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 #ifdef MDL_LOG
 	Log("MDL v%d.%d\n", pmsh->version>>4, pmsh->version&0x0f);
 #endif
-	memset(patterntracks, 0, sizeof(patterntracks));
-	memset(smpinfo, 0, sizeof(smpinfo));
-	memset(insvolenv, 0, sizeof(insvolenv));
-	memset(inspanenv, 0, sizeof(inspanenv));
+	MemsetZero(patterntracks);
+	MemsetZero(smpinfo);
+	MemsetZero(insvolenv);
+	MemsetZero(inspanenv);
 	dwMemPos = 5;
 	dwTrackPos = 0;
 	pvolenv = ppanenv = ppitchenv = NULL;
@@ -279,9 +320,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 		#ifdef MDL_LOG
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
-			pmib = (MDLINFOBLOCK *)(lpStream+dwMemPos);
-			memcpy(m_szNames[0], pmib->songname, 31);
-			StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+			pmib = (MDLInfoBlock *)(lpStream+dwMemPos);
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pmib->songname);
 
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
@@ -330,7 +370,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				if (dwPos+18 >= dwMemLength) break;
 				if (pmsh->version > 0)
 				{
-					const MDLPATTERNDATA *pmpd = (const MDLPATTERNDATA *)(lpStream + dwPos);
+					const MDLPatternHeader *pmpd = (const MDLPatternHeader *)(lpStream + dwPos);
 					if (pmpd->channels > 32) break;
 					patternLength[i] = pmpd->lastrow + 1;
 					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
@@ -383,8 +423,9 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 						break;
 					}
 					ModInstrument *pIns = Instruments[nins];
-					memcpy(pIns->name, lpStream+dwPos+2, 32);
-					StringFixer::SpaceToNullStringFixed<31>(pIns->name);
+
+					// I give up. better rewrite this crap (or take SchismTracker's MDL loader).
+					StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, reinterpret_cast<const char *>(lpStream + dwPos + 2), 32);
 
 					for (j=0; j<lpStream[dwPos+1]; j++)
 					{
@@ -467,41 +508,77 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			Log("sample infoblock: %d bytes\n", blocklen);
 		#endif
 			nsamples = lpStream[dwMemPos];
-			dwPos = dwMemPos+1;
-			for (i=0; i<nsamples; i++, dwPos += (pmsh->version > 0) ? 59 : 57)
+			dwPos = dwMemPos + 1;
+			for (i = 0; i < nsamples; i++, dwPos += (pmsh->version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
 			{
-				UINT nins = lpStream[dwPos];
-				if ((nins >= MAX_SAMPLES) || (!nins)) continue;
-				if (m_nSamples < nins) m_nSamples = nins;
-				ModSample *pSmp = &Samples[nins];
-				memcpy(m_szNames[nins], lpStream+dwPos+1, 31);
-				memcpy(pSmp->filename, lpStream+dwPos+33, 8);
-				StringFixer::SpaceToNullStringFixed<31>(m_szNames[nins]);
-				StringFixer::SpaceToNullStringFixed<8>(pSmp->filename);
-				const BYTE *p = lpStream+dwPos+41;
-				if (pmsh->version > 0)
+				const MDLSampleHeaderCommon *info = reinterpret_cast<const MDLSampleHeaderCommon *>(lpStream + dwPos);
+				if(info->sampleIndex >= MAX_SAMPLES || info->sampleIndex == 0)
 				{
-					pSmp->nC5Speed = *((DWORD *)p);
-					p += 4;
+					continue;
+				}
+
+				ModSample &sample = Samples[info->sampleIndex];
+
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[info->sampleIndex], info->name);
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(sample.filename, info->filename);
+
+				if(pmsh->version > 0)
+				{
+					const MDLSampleHeader *sampleHeader = reinterpret_cast<const MDLSampleHeader *>(lpStream + dwPos);
+
+					sample.nC5Speed = LittleEndian(sampleHeader->c4Speed);
+					sample.nLength = LittleEndian(sampleHeader->length);
+					sample.nLoopStart = LittleEndian(sampleHeader->loopStart);
+					sample.nLoopEnd = sample.nLoopStart + LittleEndian(sampleHeader->loopLength);
+					if(sample.nLoopEnd > sample.nLoopStart)
+					{
+						sample.uFlags |= CHN_LOOP;
+						if((sampleHeader->flags & 0x02))
+						{
+							sample.uFlags |= CHN_PINGPONGLOOP;
+						}
+					}
+					sample.nGlobalVol = 64;
+					sample.nVolume = 256;
+
+					if((sampleHeader->flags & 0x01))
+					{
+						sample.uFlags |= CHN_16BIT;
+						sample.nLength /= 2;
+						sample.nLoopStart /= 2;
+						sample.nLoopEnd /= 2;
+					}
+
+					smpinfo[info->sampleIndex] = (sampleHeader->flags >> 2) & 3;
 				} else
 				{
-					pSmp->nC5Speed = *((WORD *)p);
-					p += 2;
+					const MDLSampleHeaderv0 *sampleHeader = reinterpret_cast<const MDLSampleHeaderv0 *>(lpStream + dwPos);
+
+					sample.nC5Speed = LittleEndianW(sampleHeader->c4Speed);
+					sample.nLength = LittleEndian(sampleHeader->length);
+					sample.nLoopStart = LittleEndian(sampleHeader->loopStart);
+					sample.nLoopEnd = sample.nLoopStart + LittleEndian(sampleHeader->loopLength);
+					if(sample.nLoopEnd > sample.nLoopStart)
+					{
+						sample.uFlags |= CHN_LOOP;
+						if((sampleHeader->flags & 0x02))
+						{
+							sample.uFlags |= CHN_PINGPONGLOOP;
+						}
+					}
+					sample.nGlobalVol = 64;
+					sample.nVolume = sampleHeader->volume;
+
+					if((sampleHeader->flags & 0x01))
+					{
+						sample.uFlags |= CHN_16BIT;
+						sample.nLength /= 2;
+						sample.nLoopStart /= 2;
+						sample.nLoopEnd /= 2;
+					}
+
+					smpinfo[info->sampleIndex] = (sampleHeader->flags >> 2) & 3;
 				}
-				pSmp->nLength = *((DWORD *)(p));
-				pSmp->nLoopStart = *((DWORD *)(p+4));
-				pSmp->nLoopEnd = pSmp->nLoopStart + *((DWORD *)(p+8));
-				if (pSmp->nLoopEnd > pSmp->nLoopStart) pSmp->uFlags |= CHN_LOOP;
-				pSmp->nGlobalVol = 64;
-				if (p[13] & 0x01)
-				{
-					pSmp->uFlags |= CHN_16BIT;
-					pSmp->nLength >>= 1;
-					pSmp->nLoopStart >>= 1;
-					pSmp->nLoopEnd >>= 1;
-				}
-				if (p[13] & 0x02) pSmp->uFlags |= CHN_PINGPONGLOOP;
-				smpinfo[nins] = (p[13] >> 2) & 3;
 			}
 			break;
 		// SA: Sample Data

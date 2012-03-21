@@ -406,8 +406,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if ((itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (itHeader.special & ITFileHeader::embedMIDIConfiguration)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (itHeader.flags & ITFileHeader::extendedFilterRange) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
-	memcpy(m_szNames[0], itHeader.songname, 26);
-	StringFixer::SpaceToNullStringFixed<26>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[0], itHeader.songname);
 
 	// Global Volume
 	m_nDefaultGlobalVolume = itHeader.globalvol << 1;
@@ -763,8 +762,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			size_t sampleOffset = pis->ConvertToMPT(Samples[nsmp + 1]);
 
-			memcpy(m_szNames[nsmp + 1], pis->name, 26);
-			StringFixer::SpaceToNullStringFixed<25>(m_szNames[nsmp + 1]);
+			StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[nsmp + 1], pis->name);
 
 			lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + ReadSample(&Samples[nsmp + 1], pis->GetSampleFormat(itHeader.cwtv), (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset));
 		}
@@ -1090,10 +1088,10 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 #pragma warning(disable:4100)
 
 
-bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExport)
-//----------------------------------------------------------------------------------
+bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
+//--------------------------------------------------------------------
 {
-	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatExport ? ModSpecs::it : ModSpecs::itEx));
+	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatibilityExport ? ModSpecs::it : ModSpecs::itEx));
 
 	DWORD dwChnNamLen;
 	ITFileHeader itHeader;
@@ -1106,7 +1104,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	MemsetZero(itHeader);
 	dwChnNamLen = 0;
 	itHeader.id = ITFileHeader::itMagic;
-	lstrcpyn(itHeader.songname, m_szNames[0], 26);
+	StringFixer::WriteString<StringFixer::nullTerminated>(itHeader.songname, m_szNames[0]);
 
 	itHeader.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
 	itHeader.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
@@ -1156,7 +1154,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 			}
 		}
 
-		if(!compatExport)
+		if(!compatibilityExport)
 		{
 			// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
 			itHeader.reserved = ITFileHeader::omptMagic;
@@ -1169,7 +1167,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	if (m_dwSongFlags & SONG_LINEARSLIDES) itHeader.flags |= ITFileHeader::linearSlides;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) itHeader.flags |= ITFileHeader::itOldEffects;
 	if (m_dwSongFlags & SONG_ITCOMPATGXX) itHeader.flags |= ITFileHeader::itCompatGxx;
-	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
+	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatibilityExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
 	itHeader.globalvol = m_nDefaultGlobalVolume >> 1;
 	itHeader.mv = min(m_nSamplePreAmp, 128);
 	itHeader.speed = m_nDefaultSpeed;
@@ -1189,7 +1187,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	// Channel names
-	if(!compatExport)
+	if(!compatibilityExport)
 	{
 		for (UINT ich=0; ich<m_nChannels; ich++)
 		{
@@ -1209,14 +1207,14 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	// Pattern Names
-	const PATTERNINDEX numNamedPats = compatExport ? 0 : Patterns.GetNumNamedPatterns();
+	const PATTERNINDEX numNamedPats = compatibilityExport ? 0 : Patterns.GetNumNamedPatterns();
 	if(numNamedPats > 0)
 	{
 		dwExtra += (numNamedPats * MAX_PATTERNNAME) + 8;
 	}
 
 	// Mix Plugins. Just calculate the size of this extra block for now.
-	if(!compatExport)
+	if(!compatibilityExport)
 	{
 		dwExtra += SaveMixPlugins(NULL, TRUE);
 	}
@@ -1270,7 +1268,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	// Writing channel names
-	if(dwChnNamLen && !compatExport)
+	if(dwChnNamLen && !compatibilityExport)
 	{
 		DWORD d = LittleEndian(magicChannelNames); // "CNAM"
 		fwrite(&d, 1, 4, f);
@@ -1283,7 +1281,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	// Writing mix plugins info
-	if(!compatExport)
+	if(!compatibilityExport)
 	{
 		SaveMixPlugins(f, FALSE);
 	}
@@ -1304,12 +1302,12 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 
 		if(Instruments[nins])
 		{
-			instSize = iti.ConvertToIT(*Instruments[nins], compatExport, *this);
+			instSize = iti.ConvertToIT(*Instruments[nins], compatibilityExport, *this);
 		} else
 		// Save Empty Instrument
 		{
 			ModInstrument dummy;
-			instSize = iti.ConvertToIT(dummy, compatExport, *this);
+			instSize = iti.ConvertToIT(dummy, compatibilityExport, *this);
 		}
 
 		// Writing instrument
@@ -1318,7 +1316,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 		fwrite(&iti, 1, instSize, f);
 
 		//------------ rewbs.modularInstData
-		if (Instruments[nins] && !compatExport)
+		if (Instruments[nins] && !compatibilityExport)
 		{
 			dwPos += SaveModularInstrumentData(f, Instruments[nins]);
 		}
@@ -1417,7 +1415,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m); break;
-					case VOLCMD_OFFSET:			if(!compatExport) vol = 223 + ConvertVolParam(m); //rewbs.volOff
+					case VOLCMD_OFFSET:			if(!compatibilityExport) vol = 223 + ConvertVolParam(m); //rewbs.volOff
 												break;
 					default:					vol = 0xFF;
 					}
@@ -1425,7 +1423,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 				if (vol != 0xFF) b |= 4;
 				if (command)
 				{
-					S3MSaveConvert(&command, &param, true, compatExport);
+					S3MSaveConvert(&command, &param, true, compatibilityExport);
 					if (command) b |= 8;
 				}
 				// Packing information
@@ -1532,8 +1530,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	{
 		itss.ConvertToIT(Samples[nsmp], GetType());
 
-		memcpy(itss.name, m_szNames[nsmp], 26);
-		StringFixer::FixNullString(itss.name);
+		StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[nsmp]);
 
 		itss.samplepointer = dwPos;
 		fseek(f, smppos[nsmp - 1], SEEK_SET);
@@ -1546,7 +1543,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking, const bool compatExp
 	}
 
 	//Save hacked-on extra info
-	if(!compatExport)
+	if(!compatibilityExport)
 	{
 		SaveExtendedInstrumentProperties(itHeader.insnum, f);
 		SaveExtendedSongProperties(f);

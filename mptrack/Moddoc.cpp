@@ -432,7 +432,6 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 //--------------------------------------------------------------------------
 {
 	static int greccount = 0;
-	UINT dwPacking = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
 	if (!lpszPathName) 
@@ -444,18 +443,18 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 		greccount++;
 		bOk = DoSave(NULL, TRUE);
 		greccount--;
-        return bOk;
+		return bOk;
 	}
 	BeginWaitCursor();
 	ClearLog();
 	FixNullStrings();
 	switch(type)
 	{
-	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
-	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
-	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
-	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
-	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName); break;
+	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName); break;
+	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName); break;
+	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName); break;
+	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(lpszPathName); break;
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -649,10 +648,6 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		return TRUE;
 	} else
 	{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());	// done in OnSaveDocument()
-// -! NEW_FEATURE#0023
 		return FALSE;
 	}
 }
@@ -1871,10 +1866,10 @@ void CModDoc::OnFileCompatibilitySave()
 	switch (type)
 	{
 		case MOD_TYPE_XM:
-			m_SndFile.SaveXM(files.first_file.c_str(), 0, true);
+			m_SndFile.SaveXM(files.first_file.c_str(), true);
 			break;
 		case MOD_TYPE_IT:
-			m_SndFile.SaveIT(files.first_file.c_str(), 0, true);
+			m_SndFile.SaveIT(files.first_file.c_str(), true);
 			break;
 	}
 	ShowLog();

@@ -710,9 +710,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		UINT songnamelen = BigEndian(pmex->songnamelen);
 		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
-			if (songnamelen > 31) songnamelen = 31;
-			memcpy(m_szNames[0], lpStream+songname, songnamelen);
-			StringFixer::SpaceToNullStringFixed(m_szNames[0], songnamelen);
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + songname), songnamelen);
 		}
 		// Sample Names
 		DWORD smpinfoex = BigEndian(pmex->iinfo);
@@ -725,12 +723,9 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			if ((iinfoptr) && (ientrysz < 256) && (ientries*ientrysz < dwMemLength) && (iinfoptr < dwMemLength - ientries*ientrysz))
 			{
 				LPCSTR psznames = (LPCSTR)(lpStream + iinfoptr);
-				UINT maxnamelen = ientrysz;
-				if (maxnamelen > 31) maxnamelen = 31;
 				for (UINT i=0; i<ientries; i++) if (i < m_nSamples)
 				{
-					memcpy(m_szNames[i+1], psznames + i*ientrysz, maxnamelen);
-					StringFixer::SpaceToNullStringFixed(m_szNames[i + 1], maxnamelen);
+					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[i + 1], reinterpret_cast<const char *>(psznames + i * ientrysz), ientrysz);
 				}
 			}
 		}
@@ -757,11 +752,9 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 						}
 						trktagofs += 8;
 					}
-					if (trknamelen > MAX_CHANNELNAME) trknamelen = MAX_CHANNELNAME;
 					if ((trknameofs) && (trknameofs < dwMemLength - trknamelen))
 					{
-						memcpy(ChnSettings[i].szName, (LPCSTR)(lpStream+trknameofs), trknamelen);
-						StringFixer::SpaceToNullStringFixed(ChnSettings[i].szName, trknamelen);
+						StringFixer::ReadString<StringFixer::maybeNullTerminated>(ChnSettings[i].szName, reinterpret_cast<const char *>(lpStream + trknameofs), trknamelen);
 					}
 				}
 			}

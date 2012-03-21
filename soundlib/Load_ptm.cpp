@@ -85,8 +85,8 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (!pfh.nsamples) || (pfh.nsamples > 255)
 	 || (!pfh.npatterns) || (pfh.npatterns > 128)
 	 || (sizeof(PTMFILEHEADER) + pfh.nsamples * sizeof(PTMSAMPLE) >= dwMemLength)) return false;
-	memcpy(m_szNames[0], pfh.songname, 28);
-	StringFixer::SpaceToNullStringFixed<28>(m_szNames[0]);
+
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh.songname);
 
 	m_nType = MOD_TYPE_PTM;
 	m_nChannels = pfh.nchannels;
@@ -105,10 +105,8 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 		ModSample *pSmp = &Samples[ismp+1];
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);
 
-		lstrcpyn(m_szNames[ismp+1], psmp->samplename, 28);
-		memcpy(pSmp->filename, psmp->filename, 12);
-		StringFixer::SpaceToNullStringFixed<28>(m_szNames[ismp + 1]);
-		StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[ismp + 1], psmp->samplename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(pSmp->filename, psmp->filename);
 
 		pSmp->nGlobalVol = 64;
 		pSmp->nPan = 128;

@@ -14,6 +14,8 @@
 #include "Loaders.h"
 #include "../mptrack/version.h"
 #include "../common/misc_util.h"
+#include "XMTools.h"
+#include <algorithm>
 
 ////////////////////////////////////////////////////////
 // FastTracker II XM file support
@@ -24,81 +26,114 @@
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
 
 
-#pragma pack(push, 1)
-typedef struct tagXMFILEHEADER
+// Allocate samples for an instrument
+vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
+//--------------------------------------------------------------------------------
 {
-	WORD xmversion;		// current: 0x0104
-	DWORD size;			// header size
-	WORD orders;		// number of orders
-	WORD restartpos;	// restart position
-	WORD channels;		// number of channels
-	WORD patterns;		// number of patterns
-	WORD instruments;	// number of instruments
-	WORD flags;			// song flags
-	WORD speed;			// default speed
-	WORD tempo;			// default tempo
-} XMFILEHEADER;
+	LimitMax(numSamples, SAMPLEINDEX(32));
 
+	vector<SAMPLEINDEX> foundSlots;
 
-typedef struct tagXMINSTRUMENTHEADER
-{
-	DWORD size; // size of XMINSTRUMENTHEADER + XMSAMPLEHEADER
-	CHAR name[22];
-	BYTE type; // should always be 0
-	WORD samples;
-} XMINSTRUMENTHEADER;
+	for(SAMPLEINDEX i = 0; i < numSamples; i++)
+	{
+		SAMPLEINDEX candidateSlot = sndFile.GetNumSamples() + 1;
 
+		if(candidateSlot >= MAX_SAMPLES)
+		{
+			// If too many sample slots are needed, try to fill some empty slots first.
+			for(SAMPLEINDEX j = 1; j <= sndFile.GetNumSamples(); j++)
+			{
+				if(sndFile.GetSample(j).pSample != nullptr)
+				{
+					continue;
+				}
 
-typedef struct tagXMSAMPLEHEADER
-{
-	DWORD shsize; // size of XMSAMPLESTRUCT
-	BYTE snum[96];
-	WORD venv[24];
-	WORD penv[24];
-	BYTE vnum, pnum;
-	BYTE vsustain, vloops, vloope, psustain, ploops, ploope;
-	BYTE vtype, ptype;
-	BYTE vibtype, vibsweep, vibdepth, vibrate;
-	WORD volfade;
-	// midi extensions (not read by MPT)
-	BYTE midienabled;		// 0/1
-	BYTE midichannel;		// 0...15
-	WORD midiprogram;		// 0...127
-	WORD pitchwheelrange;	// 0...36 (halftones)
-	BYTE mutecomputer;		// 0/1
-	BYTE reserved1[15];
-} XMSAMPLEHEADER;
+				if(std::find(foundSlots.begin(), foundSlots.end(), j) == foundSlots.end())
+				{
+					// Empty sample slot that is not occupied by the current instrument. Yay!
+					candidateSlot = j;
 
-typedef struct tagXMSAMPLESTRUCT
-{
-	DWORD samplen;
-	DWORD loopstart;
-	DWORD looplen;
-	BYTE vol;
-	signed char finetune;
-	BYTE type;
-	BYTE pan;
-	signed char relnote;
-	BYTE res;
-	char name[22];
-} XMSAMPLESTRUCT;
-#pragma pack(pop)
+					// Remove unused sample from instrument sample assignments
+					for(INSTRUMENTINDEX ins = 1; ins <= sndFile.GetNumInstruments(); ins++)
+					{
+						if(sndFile.Instruments[ins] == nullptr)
+						{
+							continue;
+						}
+						for(size_t k = 0; k < CountOf(sndFile.Instruments[ins]->Keyboard); k++)
+						{
+							if(sndFile.Instruments[ins]->Keyboard[k] == candidateSlot)
+							{
+								sndFile.Instruments[ins]->Keyboard[k] = 0;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
 
+		if(candidateSlot >= MAX_SAMPLES)
+		{
+			// Still couldn't find any empty sample slots, so look out for existing but unused samples.
+			vector<bool> usedSamples;
+			SAMPLEINDEX unusedSampleCount = sndFile.DetectUnusedSamples(usedSamples);
+
+			if(unusedSampleCount > 0)
+			{
+				sndFile.RemoveSelectedSamples(usedSamples);
+				// Remove unused samples from instrument sample assignments
+				for(INSTRUMENTINDEX ins = 1; ins <= sndFile.GetNumInstruments(); ins++)
+				{
+					if(sndFile.Instruments[ins] == nullptr)
+					{
+						continue;
+					}
+					for(size_t k = 0; k < CountOf(sndFile.Instruments[ins]->Keyboard); k++)
+					{
+						if(sndFile.Instruments[ins]->Keyboard[k] < usedSamples.size() && !usedSamples[sndFile.Instruments[ins]->Keyboard[k]])
+						{
+							sndFile.Instruments[ins]->Keyboard[k] = 0;
+						}
+					}
+				}
+
+				// New candidate slot is first unused sample slot.
+				candidateSlot = std::find(usedSamples.begin() + 1, usedSamples.end(), false) - usedSamples.begin();
+			} else
+			{
+				// No unused sampel slots: Give up :(
+				break;
+			}
+		}
+
+		if(candidateSlot < MAX_SAMPLES)
+		{
+			foundSlots.push_back(candidateSlot);
+			if(candidateSlot > sndFile.GetNumSamples())
+			{
+				sndFile.m_nSamples = candidateSlot;
+			}
+		}
+	}
+
+	return foundSlots;
+}
 
 
 // Read .XM patterns
-DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XMFILEHEADER *xmheader, CSoundFile *pSndFile)
+DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XMFileHeader *xmheader, CSoundFile &sndFile)
 //-------------------------------------------------------------------------------------------------------------------------
 {
 	vector<BYTE> patterns_used(256, 0);
 	vector<BYTE> pattern_map(256, 0);
 
-	if (xmheader->patterns > MAX_PATTERNS)
+	if(xmheader->patterns > MAX_PATTERNS)
 	{
 		UINT i, j;
 		for (i = 0; i < xmheader->orders; i++)
 		{
-			if (pSndFile->Order[i] < xmheader->patterns) patterns_used[pSndFile->Order[i]] = true;
+			if (sndFile.Order[i] < xmheader->patterns) patterns_used[sndFile.Order[i]] = true;
 		}
 		j = 0;
 		for (i = 0; i < 256; i++)
@@ -109,28 +144,28 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 		{
 			if (!patterns_used[i])
 			{
-				pattern_map[i] = (j < MAX_PATTERNS) ? j : pSndFile->Order.GetIgnoreIndex();
+				pattern_map[i] = (j < MAX_PATTERNS) ? j : sndFile.Order.GetIgnoreIndex();
 				j++;
 			}
 		}
 		for (i = 0; i < xmheader->orders; i++)
 		{
-			pSndFile->Order[i] = pattern_map[pSndFile->Order[i]];
+			sndFile.Order[i] = pattern_map[sndFile.Order[i]];
 		}
 	} else
 	{
 		for (UINT i = 0; i < 256; i++) pattern_map[i] = i;
 	}
-	if (dwMemPos + 8 >= dwMemLength) return dwMemPos;
+	if(dwMemPos + 8 >= dwMemLength) return dwMemPos;
 	// Reading patterns
-	for (UINT ipat = 0; ipat < xmheader->patterns; ipat++)
+	for(UINT ipat = 0; ipat < xmheader->patterns; ipat++)
 	{
 		UINT ipatmap = pattern_map[ipat];
 		DWORD dwSize = 0;
 		WORD rows = 64, packsize = 0;
 		dwSize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
 
-		if(xmheader->xmversion == 0x0102)
+		if(xmheader->version == 0x0102)
 		{
 			rows = *((BYTE *)(lpStream + dwMemPos + 5)) + 1;
 			packsize = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 6)));
@@ -148,11 +183,11 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 		ModCommand *p;
 		if (ipatmap < MAX_PATTERNS)
 		{
-			if(pSndFile->Patterns.Insert(ipatmap, rows))
+			if(sndFile.Patterns.Insert(ipatmap, rows))
 				return true;
 
 			if (!packsize) continue;
-			p = pSndFile->Patterns[ipatmap];
+			p = sndFile.Patterns[ipatmap];
 		} else p = NULL;
 		const BYTE *src = lpStream+dwMemPos;
 		UINT j=0;
@@ -181,7 +216,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 					}
 					if (p->note == 97) p->note = NOTE_KEYOFF;
 					else if ((p->note) && (p->note < 97)) p->note += 12;
-					if (p->command | p->param) pSndFile->ConvertModCommand(p);
+					if (p->command | p->param) sndFile.ConvertModCommand(p);
 					if (p->instr == 0xff) p->instr = 0;
 					if ((vol >= 0x10) && (vol <= 0x50))
 					{
@@ -241,42 +276,44 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 //--------------------------------------------------------------------
 {
-	XMFILEHEADER xmheader;
-	XMSAMPLEHEADER xmsh;
-	XMSAMPLESTRUCT xmss;
+	if(lpStream == nullptr || dwMemLength < sizeof(XMFileHeader))
+	{
+		return false;
+	}
+
+	XMFileHeader xmheader;
 	DWORD dwMemPos;
+	bool madeWithModPlug = false, probablyMadeWithModPlug = false, probablyMPT109 = false, isFT2 = false;
 
-	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false, bProbablyMPT109 = false, bIsFT2 = false;
+	// Load and convert header
+	memcpy(&xmheader, lpStream, sizeof(XMFileHeader));
+	xmheader.ConvertEndianness();
 
-	m_nChannels = 0;
-	if ((!lpStream) || (dwMemLength < 0xAA)) return false; // the smallest XM I know is 174 Bytes
-	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return false;
+	if(xmheader.channels == 0
+		|| xmheader.channels > MAX_BASECHANNELS
+		|| _strnicmp(xmheader.signature, "Extended Module: ", 17))
+	{
+		return false;
+	}
 
-	memcpy(m_szNames[0], lpStream + 17, 20);
-	// look for null-terminated song name - that's most likely a tune made with modplug
-	for(int i = 0; i < 20; i++)
-		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
-	StringFixer::SpaceToNullStringFixed<20>(m_szNames[0]);
+	if(xmheader.channels > 32)
+	{
+		// Not entirely true, some other trackers also allow more channels.
+		madeWithModPlug = true;
+	}
 
-	// load and convert header
-	memcpy(&xmheader, lpStream + 58, sizeof(XMFILEHEADER));
-	xmheader.size = LittleEndian(xmheader.size);
-	xmheader.xmversion = LittleEndianW(xmheader.xmversion);
-	xmheader.orders = LittleEndianW(xmheader.orders);
-	xmheader.restartpos = LittleEndianW(xmheader.restartpos);
-	xmheader.channels = LittleEndianW(xmheader.channels);
-	xmheader.patterns = LittleEndianW(xmheader.patterns);
-	xmheader.instruments = LittleEndianW(xmheader.instruments);
-	xmheader.flags = LittleEndianW(xmheader.flags);
-	xmheader.speed = LittleEndianW(xmheader.speed);
-	xmheader.tempo = LittleEndianW(xmheader.tempo);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], xmheader.songName);
+
+	// Look for null-terminated song name - that's most likely a tune made with modplug
+	if(memchr(xmheader.songName, '\0', sizeof(xmheader.songName)) != nullptr)
+	{
+		probablyMadeWithModPlug = true;
+	}
 
 	m_nType = MOD_TYPE_XM;
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
 
-	if ((!xmheader.channels) || (xmheader.channels > MAX_BASECHANNELS)) return false;
-	if (xmheader.channels > 32) bMadeWithModPlug = true;
 	m_nRestartPos = xmheader.restartpos;
 	m_nChannels = xmheader.channels;
 	m_nInstruments = min(xmheader.instruments, MAX_INSTRUMENTS - 1);
@@ -284,8 +321,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nDefaultSpeed = CLAMP(xmheader.speed, 1, 31);
 	m_nDefaultTempo = CLAMP(xmheader.tempo, 32, 512);
 
-	if(xmheader.flags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
-	if(xmheader.flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
+	if(xmheader.flags & XMFileHeader::linearSlides) m_dwSongFlags |= SONG_LINEARSLIDES;
+	if(xmheader.flags & XMFileHeader::extendedFilterRange) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
 	Order.ReadAsByte(lpStream + 80, min(xmheader.orders, MAX_ORDERS), dwMemLength - 80);
 
@@ -294,305 +331,140 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
-	if(xmheader.xmversion >= 0x0104)
+	if(xmheader.version >= 0x0104)
 	{
 		if (dwMemPos + 8 >= dwMemLength) return true;
-		dwMemPos = ReadXMPatterns(lpStream, dwMemLength, dwMemPos, &xmheader, this);
+		dwMemPos = ReadXMPatterns(lpStream, dwMemLength, dwMemPos, &xmheader, *this);
 		if(dwMemPos == 0) return true;
 	}
 
-	vector<bool> samples_used; // for removing unused samples
-	SAMPLEINDEX unused_samples = 0; // dito
+	// In case of XM versions < 1.04, we need to memorize the sample flags for all samples, as they are not stored immediately after the sample headers.
+	vector<UINT> sampleFlags;
 
 	// Reading instruments
-	for (INSTRUMENTINDEX iIns = 1; iIns <= m_nInstruments; iIns++)
+	for(INSTRUMENTINDEX instr = 1; instr <= m_nInstruments; instr++)
 	{
-		XMINSTRUMENTHEADER pih;
-		BYTE flags[32];
-		DWORD samplesize[32];
-		vector<SAMPLEINDEX>samplemap(32, 0);
-		WORD nsamples;
-				
-		if (dwMemPos + sizeof(DWORD) >= dwMemLength) return true;
-		DWORD ihsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
-		if (dwMemPos + ihsize > dwMemLength) return true;
+		XMInstrumentHeader insHeader;
+		MemsetZero(insHeader);
 
-		MemsetZero(pih);
-		memcpy(&pih, lpStream + dwMemPos, min(sizeof(pih), ihsize));
+		// First, try to read instrument header length...
+		if(dwMemPos > dwMemLength || sizeof(uint32) > dwMemLength - dwMemPos)
+		{
+			return true;
+		}
+		size_t insHeaderSize = LittleEndian(*reinterpret_cast<const uint32 *>(lpStream + dwMemPos));
+		if(insHeaderSize == 0)
+		{
+			insHeaderSize = sizeof(XMInstrumentHeader);
+		}
+		LimitMax(insHeaderSize, size_t(dwMemLength - dwMemPos));
+
+		memcpy(&insHeader, lpStream + dwMemPos, min(sizeof(XMInstrumentHeader), insHeaderSize));
+		dwMemPos += insHeaderSize;
 
 		try
 		{
-			Instruments[iIns] = new ModInstrument();
+			Instruments[instr] = new ModInstrument();
 		} catch(MPTMemoryException)
 		{
 			continue;
 		}
 
-		memcpy(Instruments[iIns]->name, pih.name, 22);
-		StringFixer::SpaceToNullStringFixed<22>(Instruments[iIns]->name);
+		insHeader.ConvertEndianness();
+		insHeader.ConvertToMPT(*Instruments[instr]);
 
-		memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
-
-		if ((nsamples = pih.samples) > 0)
+		if(insHeader.numSamples > 0)
 		{
-			/* we have samples, so let's read the rest of this instrument
-			   the header that is being read here is not the sample header, though,
-			   it's rather the instrument settings. */
-
-			if (dwMemPos + ihsize >= dwMemLength)
-				return true;
-
-			memcpy(&xmsh,
-				lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER),
-				min(ihsize - sizeof(XMINSTRUMENTHEADER), sizeof(XMSAMPLEHEADER)));
-
-			xmsh.shsize = LittleEndian(xmsh.shsize);
-			if(xmsh.shsize == 0 && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
-
-			xmsh.volfade = LittleEndianW(xmsh.volfade);
-			xmsh.midiprogram = LittleEndianW(xmsh.midiprogram);
-			xmsh.pitchwheelrange = LittleEndianW(xmsh.pitchwheelrange);
-
-			if(xmsh.midichannel != 0 || xmsh.midienabled != 0 || xmsh.midiprogram != 0 || xmsh.mutecomputer != 0 || xmsh.pitchwheelrange != 0)
-				bIsFT2 = true; // definitely not MPT. (or any other tracker)
-
-		}
-
-		if (LittleEndian(pih.size))
-			dwMemPos += LittleEndian(pih.size);
-		else
-			dwMemPos += sizeof(XMINSTRUMENTHEADER);
-
-		if (nsamples > 32) return true;
-		UINT newsamples = m_nSamples;
-
-		for (UINT nmap = 0; nmap < nsamples; nmap++)
-		{
-			UINT n = m_nSamples + nmap + 1;
-			if (n >= MAX_SAMPLES)
+			// Yep, there are some samples associated with this instrument.
+			if((insHeader.instrument.midiChannel | insHeader.instrument.midiEnabled | insHeader.instrument.midiProgram | insHeader.instrument.muteComputer | insHeader.instrument.pitchWheelRange) != 0)
 			{
-				n = m_nSamples;
-				while (n > 0)
+				// Definitely not MPT. (or any other tracker)
+				isFT2 = true;
+			}
+
+			// Read sample headers
+			vector<SAMPLEINDEX> sampleSlots = AllocateXMSamples(*this, insHeader.numSamples);
+
+			// Update sample assignment map
+			for(size_t k = 0 + 12; k < 96 + 12; k++)
+			{
+				if(Instruments[instr]->Keyboard[k] < sampleSlots.size())
 				{
-					if (!Samples[n].pSample)
-					{
-						for (UINT xmapchk=0; xmapchk < nmap; xmapchk++)
-						{
-							if (samplemap[xmapchk] == n) goto alreadymapped;
-						}
-						for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
-						{
-							ModInstrument *pks = Instruments[clrs];
-							for (size_t ks = 0; ks < CountOf(pks->Keyboard); ks++)
-							{
-								if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
-							}
-						}
-						break;
-					}
-				alreadymapped:
-					n--;
+					Instruments[instr]->Keyboard[k] = sampleSlots[Instruments[instr]->Keyboard[k]];
 				}
-#ifndef FASTSOUNDLIB
-				// Damn! Too many samples: look for duplicates
-				if (!n)
+			}
+
+			if(xmheader.version >= 0x0104)
+			{
+				sampleFlags.clear();
+			}
+			// Need to memorize those if we're going to skip any samples...
+			vector<uint32> sampleSize(insHeader.numSamples);
+
+			XMSample xmSample;
+			MemsetZero(xmSample);
+
+			for(SAMPLEINDEX sample = 0; sample < insHeader.numSamples; sample++)
+			{
+				// Early versions of Sk@le Tracker didn't set sampleHeaderSize (this fixes IFULOVE.XM)
+				const size_t copyBytes = (insHeader.sampleHeaderSize > 0) ? insHeader.sampleHeaderSize : sizeof(XMSample);
+
+				if(dwMemPos > dwMemLength || copyBytes > dwMemLength - dwMemPos)
 				{
-					if (!unused_samples)
+					return true;
+				}
+
+				memcpy(&xmSample, lpStream + dwMemPos, min(copyBytes, sizeof(XMSample)));
+				dwMemPos += copyBytes;
+
+				sampleFlags.push_back(xmSample.GetSampleFormat());
+				sampleSize[sample] = xmSample.length;
+
+				if(sample < sampleSlots.size())
+				{
+					SAMPLEINDEX mptSample = sampleSlots[sample];
+
+					xmSample.ConvertToMPT(Samples[mptSample]);
+					insHeader.instrument.ApplyAutoVibratoToMPT(Samples[mptSample]);
+
+					StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[mptSample], xmSample.name);
+
+					if((xmSample.flags & 3) == 3)
 					{
-						unused_samples = DetectUnusedSamples(samples_used);
-						if (!unused_samples) unused_samples = SAMPLEINDEX_INVALID;
-					}
-					if ((unused_samples) && (unused_samples != SAMPLEINDEX_INVALID))
-					{
-						for (UINT iext=m_nSamples; iext>=1; iext--) if (!samples_used[iext])
-						{
-							unused_samples--;
-							samples_used[iext] = true;
-							DestroySample(iext);
-							n = iext;
-							for (UINT mapchk=0; mapchk<nmap; mapchk++)
-							{
-								if (samplemap[mapchk] == n) samplemap[mapchk] = 0;
-							}
-							for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
-							{
-								ModInstrument *pks = Instruments[clrs];
-								for (UINT ks=0; ks<128; ks++)
-								{
-									if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
-								}
-							}
-							MemsetZero(Samples[n]);
-							break;
-						}
+						// MPT 1.09 and maybe newer / older versions set both flags for bidi loops
+						probablyMPT109 = true;
 					}
 				}
-#endif // FASTSOUNDLIB
 			}
-			if (newsamples < n) newsamples = n;
-			samplemap[nmap] = n;
-		}
-		m_nSamples = newsamples;
-		// Reading Volume Envelope
-		ModInstrument *pIns = Instruments[iIns];
-		pIns->nMidiProgram = pih.type;
-		pIns->nFadeOut = xmsh.volfade;
-		if (xmsh.vtype & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
-		if (xmsh.vtype & 2) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
-		if (xmsh.vtype & 4) pIns->VolEnv.dwFlags |= ENV_LOOP;
-		if (xmsh.ptype & 1) pIns->PanEnv.dwFlags |= ENV_ENABLED;
-		if (xmsh.ptype & 2) pIns->PanEnv.dwFlags |= ENV_SUSTAIN;
-		if (xmsh.ptype & 4) pIns->PanEnv.dwFlags |= ENV_LOOP;
-		if (xmsh.vnum > 12) xmsh.vnum = 12;
-		if (xmsh.pnum > 12) xmsh.pnum = 12;
-		pIns->VolEnv.nNodes = xmsh.vnum;
-		if (!xmsh.vnum) pIns->VolEnv.dwFlags &= ~ENV_ENABLED;
-		if (!xmsh.pnum) pIns->PanEnv.dwFlags &= ~ENV_ENABLED;
-		pIns->PanEnv.nNodes = xmsh.pnum;
-		pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = xmsh.vsustain;
-		if (xmsh.vsustain >= 12) pIns->VolEnv.dwFlags &= ~ENV_SUSTAIN;
-		pIns->VolEnv.nLoopStart = xmsh.vloops;
-		pIns->VolEnv.nLoopEnd = xmsh.vloope;
-		if (pIns->VolEnv.nLoopEnd >= 12) pIns->VolEnv.nLoopEnd = 0;
-		if (pIns->VolEnv.nLoopStart >= pIns->VolEnv.nLoopEnd) pIns->VolEnv.dwFlags &= ~ENV_LOOP;
-		pIns->PanEnv.nSustainStart = pIns->PanEnv.nSustainEnd = xmsh.psustain;
-		if (xmsh.psustain >= 12) pIns->PanEnv.dwFlags &= ~ENV_SUSTAIN;
-		pIns->PanEnv.nLoopStart = xmsh.ploops;
-		pIns->PanEnv.nLoopEnd = xmsh.ploope;
-		if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
-		if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
-		for (UINT ienv = 0; ienv < 12; ienv++)
-		{
-			pIns->VolEnv.Ticks[ienv] = (WORD)LittleEndianW(xmsh.venv[ienv * 2]);
-			pIns->VolEnv.Values[ienv] = (BYTE)LittleEndianW(xmsh.venv[ienv * 2 + 1]);
-			pIns->PanEnv.Ticks[ienv] = (WORD)LittleEndianW(xmsh.penv[ienv * 2]);
-			pIns->PanEnv.Values[ienv] = (BYTE)LittleEndianW(xmsh.penv[ienv * 2 + 1]);
-			if (ienv > 0)
-			{
-				// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
-				// value. Try to compensate by adding the missing high byte" - I guess that's what this code is for.
-				// Note: It appears that MPT 1.07's XI instrument saver omitted the high byte of envelope nodes.
-				// This might be the source for some broken envelopes in IT and XM files.
-				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1])
-				{
-					pIns->VolEnv.Ticks[ienv] &= 0xFF;
-					pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv - 1] & 0xFF00;
-					if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1]) pIns->VolEnv.Ticks[ienv] += 0x100;
-				}
-				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1])
-				{
-					pIns->PanEnv.Ticks[ienv] &= 0xFF;
-					pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv - 1] & 0xFF00;
-					if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1]) pIns->PanEnv.Ticks[ienv] += 0x100;
-				}
-			}
-		}
-		for (size_t j = 0; j < CountOf(xmsh.snum); j++)
-		{
-			if (xmsh.snum[j] < nsamples)
-				pIns->Keyboard[j + 12] = samplemap[xmsh.snum[j]];
-		}
-		// Reading samples
-		for (UINT ins = 0; ins < nsamples; ins++)
-		{
-			if (dwMemPos + max(xmsh.shsize, sizeof(xmss)) > dwMemLength)
-				return true;
-			memcpy(&xmss, lpStream + dwMemPos, sizeof(xmss));
-			xmss.samplen = LittleEndian(xmss.samplen);
-			xmss.loopstart = LittleEndian(xmss.loopstart);
-			xmss.looplen = LittleEndian(xmss.looplen);
-			dwMemPos += sizeof(XMSAMPLESTRUCT);	// was: dwMemPos += xmsh.shsize; (this fixes IFULOVE.XM)
-			flags[ins] = (xmss.type & 0x10) ? RS_PCM16D : RS_PCM8D;
-			if (xmss.type & 0x20) flags[ins] = (xmss.type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
-			samplesize[ins] = xmss.samplen;
-			if (!samplemap[ins]) continue;
-			if (xmss.type & 0x10)
-			{
-				// 16-Bit
-				xmss.looplen >>= 1;
-				xmss.loopstart >>= 1;
-				xmss.samplen >>= 1;
-			}
-			if (xmss.type & 0x20)
-			{
-				// Stereo
-				xmss.looplen >>= 1;
-				xmss.loopstart >>= 1;
-				xmss.samplen >>= 1;
-			}
-			if (xmss.samplen > MAX_SAMPLE_LENGTH) xmss.samplen = MAX_SAMPLE_LENGTH;
-			if (xmss.loopstart >= xmss.samplen) xmss.type &= ~3;
-			xmss.looplen += xmss.loopstart;
-			if (xmss.looplen > xmss.samplen) xmss.looplen = xmss.samplen;
-			if (!xmss.looplen) xmss.type &= ~3;
-			UINT imapsmp = samplemap[ins];
-			memcpy(m_szNames[imapsmp], xmss.name, 22);
-			StringFixer::SpaceToNullStringFixed<22>(m_szNames[imapsmp]);
-			ModSample *pSmp = &Samples[imapsmp];
-			pSmp->nLength = (xmss.samplen > MAX_SAMPLE_LENGTH) ? MAX_SAMPLE_LENGTH : xmss.samplen;
-			pSmp->nLoopStart = xmss.loopstart;
-			pSmp->nLoopEnd = xmss.looplen;
-			if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
-			if (pSmp->nLoopStart >= pSmp->nLoopEnd)
-			{
-				pSmp->nLoopStart = pSmp->nLoopEnd = 0;
-			}
-			if (xmss.type & 3) pSmp->uFlags |= CHN_LOOP;
-			if (xmss.type & 2) pSmp->uFlags |= CHN_PINGPONGLOOP;
-			pSmp->nVolume = xmss.vol << 2;
-			if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-			pSmp->nGlobalVol = 64;
-			if ((xmss.res == 0xAD) && (!(xmss.type & 0x30)))
-			{
-				flags[ins] = RS_ADPCM4;
-				samplesize[ins] = (samplesize[ins]+1)/2 + 16;
-			}
-			pSmp->nFineTune = xmss.finetune;
-			pSmp->RelativeTone = (int)xmss.relnote;
-			pSmp->nPan = xmss.pan;
-			pSmp->uFlags |= CHN_PANNING;
-			pSmp->nVibType = xmsh.vibtype;
-			pSmp->nVibSweep = xmsh.vibsweep;
-			pSmp->nVibDepth = xmsh.vibdepth;
-			pSmp->nVibRate = xmsh.vibrate;
-			memcpy(pSmp->filename, xmss.name, 22);
-			StringFixer::SpaceToNullStringFixed<21>(pSmp->filename);
 
-			if ((xmss.type & 3) == 3)	// MPT 1.09 and maybe newer / older versions set both flags for bidi loops
-				bProbablyMPT109 = true;
-		}
-#if 0
-		if ((xmsh.reserved2 > nsamples) && (xmsh.reserved2 <= 16))
-		{
-			dwMemPos += (((UINT)xmsh.reserved2) - nsamples) * xmsh.shsize;
-		}
-#endif
-		if(xmheader.xmversion >= 0x0104)
-		{
-			for (UINT ismpd = 0; ismpd < nsamples; ismpd++)
+			// Read samples
+			if(xmheader.version >= 0x0104)
 			{
-				if ((samplemap[ismpd]) && (samplesize[ismpd]) && (dwMemPos < dwMemLength))
+				for(SAMPLEINDEX sample = 0; sample < insHeader.numSamples; sample++)
 				{
-					ReadSample(&Samples[samplemap[ismpd]], flags[ismpd], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+					if(sample < sampleSlots.size() && dwMemPos < dwMemLength)
+					{
+						ReadSample(&Samples[sampleSlots[sample]], sampleFlags[sample], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+					}
+					dwMemPos += sampleSize[sample];
 				}
-				dwMemPos += samplesize[ismpd];
-				if (dwMemPos >= dwMemLength) break;
 			}
 		}
 	}
 
-	if(xmheader.xmversion < 0x0104)
+	if(xmheader.version < 0x0104)
 	{
 		// Load Patterns and Samples (Version 1.02 and 1.03)
 		if (dwMemPos + 8 >= dwMemLength) return true;
-		dwMemPos = ReadXMPatterns(lpStream, dwMemLength, dwMemPos, &xmheader, this);
+		dwMemPos = ReadXMPatterns(lpStream, dwMemLength, dwMemPos, &xmheader, *this);
 		if(dwMemPos == 0) return true;
 
-		for(SAMPLEINDEX iSmp = 1; iSmp <= m_nSamples; iSmp++)
+		for(SAMPLEINDEX sample = 1; sample <= GetNumSamples(); sample++)
 		{
-			ReadSample(&Samples[iSmp], (Samples[iSmp].uFlags & CHN_16BIT) ? RS_PCM16D : RS_PCM8D, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
-			dwMemPos += Samples[iSmp].GetSampleSizeInBytes();
-			if (dwMemPos >= dwMemLength) break;
+			if(dwMemPos < dwMemLength)
+			{
+				dwMemPos += ReadSample(&Samples[sample], sampleFlags[sample - 1], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+			}
 		}
 	}
 
@@ -606,7 +478,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			ReadMessage(lpStream + dwMemPos, len, leCR);
 			dwMemPos += len;
 		}
-		bMadeWithModPlug = true;
+		madeWithModPlug = true;
 	}
 	// Read midi config: "MIDI"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream + dwMemPos))) == 0x4944494D))
@@ -620,7 +492,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			m_dwSongFlags |= SONG_EMBEDMIDICFG;
 			dwMemPos += len;	//rewbs.fix36946
 		}
-		bMadeWithModPlug = true;
+		madeWithModPlug = true;
 	}
 	// Read pattern names: "PNAM"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream + dwMemPos))) == 0x4d414e50))
@@ -637,7 +509,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			dwMemPos += len;
 		}
-		bMadeWithModPlug = true;
+		madeWithModPlug = true;
 	}
 	// Read channel names: "CNAM"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream + dwMemPos))) == 0x4d414e43))
@@ -654,7 +526,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			dwMemPos += len;
 		}
-		bMadeWithModPlug = true;
+		madeWithModPlug = true;
 	}
 	// Read mix plugins information
 	if (dwMemPos + 8 < dwMemLength) 
@@ -662,17 +534,17 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		DWORD dwOldPos = dwMemPos;
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
 		if(dwMemPos != dwOldPos)
-			bMadeWithModPlug = true;
+			madeWithModPlug = true;
 	}
 
 	// Check various things to find out whether this has been made with MPT.
 	// Null chars in names -> most likely made with MPT, which disguises as FT2
-	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug && !bIsFT2) bMadeWithModPlug = true;
-	if (memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20)) bMadeWithModPlug = false;	// this could happen f.e. with (early?) versions of Sk@le
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && probablyMadeWithModPlug && !isFT2) madeWithModPlug = true;
+	if (memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20)) madeWithModPlug = false;	// this could happen f.e. with (early?) versions of Sk@le
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
 	{
 		// Early MPT 1.0 alpha/beta versions
-		bMadeWithModPlug = true;
+		madeWithModPlug = true;
 		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
 	}
 
@@ -684,13 +556,13 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		m_dwLastSavedWithVersion = MptVersion::ToNum(sVersion);
 	}
 
-	if(bMadeWithModPlug)
+	if(madeWithModPlug)
 	{
 		m_nMixLevels = mixLevels_original;
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 		if(!m_dwLastSavedWithVersion)
 		{
-			if(bProbablyMPT109)
+			if(probablyMPT109)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 			else
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
@@ -725,8 +597,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 #ifndef MODPLUG_NO_FILESAVE
 #include "../mptrack/Moddoc.h"	// for logging errors
 
-bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
-//------------------------------------------------------------------------------------------
+bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
+//--------------------------------------------------------------------
 {
 	#define ASSERT_CAN_WRITE(x) \
 	if(len > s.size() - x) /*Buffer running out? Make it larger.*/ \
@@ -739,36 +611,37 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		break; \
 	}
 
+	FILE *f;
+	if(lpszFileName == nullptr || (f = fopen(lpszFileName, "wb")) == nullptr)
+	{
+		return false;
+	}
+
 	//BYTE s[64*64*5];
 	vector<BYTE> s(64*64*5, 0);
-	XMFILEHEADER xmheader;
 	BYTE xmph[9];
-	FILE *f;
 	int i;
-	bool bAddChannel = false; // avoid odd channel count for FT2 compatibility 
+	bool addChannel = false; // avoid odd channel count for FT2 compatibility 
 
-	if(bCompatibilityExport) nPacking = false;
+	XMFileHeader xmheader;
+	MemsetZero(xmheader);
 
-	if ((!m_nChannels) || (!lpszFileName)) return false;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	fwrite("Extended Module: ", 17, 1, f);
-	fwrite(m_szNames[0], 20, 1, f);
-	s[0] = 0x1A;
-	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "OpenMPT " MPT_VERSION_STR "  ");
-	fwrite(&s[0], 21, 1, f);
+	memcpy(xmheader.signature, "Extended Module: ", 17);
+	StringFixer::WriteString<StringFixer::spacePadded>(xmheader.songName, m_szNames[0]);
+	xmheader.eof = 0x1A;
+	memcpy(xmheader.trackerName, "OpenMPT " MPT_VERSION_STR "  ", 20);
 
 	// Writing song header
-	MemsetZero(xmheader);
-	xmheader.xmversion = LittleEndianW(0x0104); // XM Format v1.04
-	xmheader.size = sizeof(XMFILEHEADER) - 2; // minus the version field
-	xmheader.restartpos = LittleEndianW(m_nRestartPos);
+	xmheader.version = 0x0104;					// XM Format v1.04
+	xmheader.size = sizeof(XMFileHeader) - 60; // minus everything before this field
+	xmheader.restartpos = m_nRestartPos;
 
 	xmheader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
-	if((m_nChannels & 1) && m_nChannels < MAX_BASECHANNELS) bAddChannel = true;
-	if(bCompatibilityExport && xmheader.channels > 32)
+	if((m_nChannels & 1) && m_nChannels < MAX_BASECHANNELS) addChannel = true;
+	if(compatibilityExport && xmheader.channels > 32)
 		xmheader.channels = 32;
 	if(xmheader.channels > MAX_BASECHANNELS) xmheader.channels = MAX_BASECHANNELS;
-	xmheader.channels = LittleEndianW(xmheader.channels);
+	xmheader.channels = xmheader.channels;
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
@@ -782,32 +655,35 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			if(Order[nOrd] >= nPatterns) nPatterns = Order[nOrd] + 1;
 		}
 	}
-	if(!bCompatibilityExport) nMaxOrds = Order.GetLengthTailTrimmed(); // should really be removed at some point
+	if(!compatibilityExport) nMaxOrds = Order.GetLengthTailTrimmed(); // should really be removed at some point
 
-	xmheader.orders = LittleEndianW((WORD)nMaxOrds);
-	xmheader.patterns = LittleEndianW((WORD)nPatterns);
-	xmheader.size = LittleEndian((DWORD)(xmheader.size + nMaxOrds));
+	xmheader.orders = nMaxOrds;
+	xmheader.patterns = nPatterns;
+	xmheader.size = xmheader.size + nMaxOrds;
 
+	uint16 writeInstruments;
 	if(m_nInstruments > 0)
-		xmheader.instruments = LittleEndianW(m_nInstruments);
+		xmheader.instruments = writeInstruments = m_nInstruments;
 	else
-		xmheader.instruments = LittleEndianW(m_nSamples);
+		xmheader.instruments = writeInstruments = m_nSamples;
 
-	xmheader.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
-	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !bCompatibilityExport) xmheader.flags |= 0x1000;
-	xmheader.flags = LittleEndianW(xmheader.flags);
+	if((m_dwSongFlags & SONG_LINEARSLIDES)) xmheader.flags |= XMFileHeader::linearSlides;
+	if((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatibilityExport) xmheader.flags |= XMFileHeader::extendedFilterRange;
+	xmheader.flags = xmheader.flags;
 
-	if(bCompatibilityExport)
-		xmheader.tempo = LittleEndianW(CLAMP(m_nDefaultTempo, 32, 255));
+	if(compatibilityExport)
+		xmheader.tempo = CLAMP(m_nDefaultTempo, 32, 255);
 	else
-		xmheader.tempo = LittleEndianW(CLAMP(m_nDefaultTempo, 32, 512));
-	xmheader.speed = LittleEndianW(CLAMP(m_nDefaultSpeed, 1, 31));
+		xmheader.tempo = CLAMP(m_nDefaultTempo, 32, 512);
+	xmheader.speed = CLAMP(m_nDefaultSpeed, 1, 31);
+
+	xmheader.ConvertEndianness();
 
 	fwrite(&xmheader, 1, sizeof(xmheader), f);
 	// write order list (wihout +++ and ---, explained above)
 	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
 	{
-		if(Patterns.IsValidIndex(Order[nOrd]) || !bCompatibilityExport) 
+		if(Patterns.IsValidIndex(Order[nOrd]) || !compatibilityExport) 
 		{
 			BYTE nOrdval = static_cast<BYTE>(Order[nOrd]);
 			fwrite(&nOrdval, 1, sizeof(BYTE), f);
@@ -826,13 +702,14 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmph[0] = 9;
 		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
 		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
+
 		for (UINT j = m_nChannels * Patterns[i].GetNumRows(); j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
-			if(bCompatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
+			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
 
 			UINT note = p->note;
-			UINT param = ModSaveCommand(p, true, bCompatibilityExport);
+			UINT param = ModSaveCommand(p, true, compatibilityExport);
 			UINT command = param >> 8;
 			param &= 0xFF;
 			if (note >= NOTE_MIN_SPECIAL) note = 97; else
@@ -856,7 +733,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				case VOLCMD_TONEPORTAMENTO:	vol = 0xF0 + (p->vol & 0x0F); break;
 				}
 				// Those values are ignored in FT2. Don't save them, also to avoid possible problems with other trackers (or MPT itself)
-				if(bCompatibilityExport && p->vol == 0)
+				if(compatibilityExport && p->vol == 0)
 				{
 					switch(p->volcmd)
 					{
@@ -907,7 +784,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				if (b & 16) s[len++] = param;
 			}
 
-			if(bAddChannel && (j % m_nChannels == 1 || m_nChannels == 1))
+			if(addChannel && (j % m_nChannels == 1 || m_nChannels == 1))
 			{
 				ASSERT_CAN_WRITE(1);
 				s[len++] = 0x80;
@@ -928,159 +805,77 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
 		fwrite(xmph, 1, 9, f);
 	}
+
 	// Writing instruments
-	for (i = 1; i <= xmheader.instruments; i++)
+	for(i = 1; i <= writeInstruments; i++)
 	{
-		XMINSTRUMENTHEADER xmih;
-		XMSAMPLEHEADER xmsh;
-		WORD smptable[32];
-		BYTE flags[32];
+		XMInstrumentHeader insHeader;
+		vector<SAMPLEINDEX> samples;
 
-		MemsetZero(smptable);
-		MemsetZero(xmih);
-		MemsetZero(xmsh);
-		xmih.size = LittleEndian(sizeof(xmih) + sizeof(xmsh));
-		memcpy(xmih.name, m_szNames[i], 22);
-		xmih.type = 0;
-		xmih.samples = 0;
-		if (m_nInstruments)
+		if(GetNumInstruments())
 		{
-			const ModInstrument *pIns = Instruments[i];
-			if (pIns)
+			if(Instruments[i] != nullptr)
 			{
-				memcpy(xmih.name, pIns->name, 22);
-				xmih.type = pIns->nMidiProgram;
-				xmsh.volfade = LittleEndianW(min(pIns->nFadeOut, 0x7FFF)); // FFF is maximum in the FT2 GUI, but it can also accept other values. MilkyTracker just allows 0...4095 and 32767 ("cut")
-				xmsh.vnum = (BYTE)pIns->VolEnv.nNodes;
-				xmsh.pnum = (BYTE)pIns->PanEnv.nNodes;
-				if (xmsh.vnum > 12) xmsh.vnum = 12;
-				if (xmsh.pnum > 12) xmsh.pnum = 12;
-				for (UINT ienv = 0; ienv < 12; ienv++)
-				{
-					xmsh.venv[ienv * 2] = LittleEndianW(pIns->VolEnv.Ticks[ienv]);
-					xmsh.venv[ienv * 2 + 1] = LittleEndianW(pIns->VolEnv.Values[ienv]);
-					xmsh.penv[ienv * 2] = LittleEndianW(pIns->PanEnv.Ticks[ienv]);
-					xmsh.penv[ienv * 2 + 1] = LittleEndianW(pIns->PanEnv.Values[ienv]);
-				}
-				if (pIns->VolEnv.dwFlags & ENV_ENABLED) xmsh.vtype |= 1;
-				if (pIns->VolEnv.dwFlags & ENV_SUSTAIN) xmsh.vtype |= 2;
-				if (pIns->VolEnv.dwFlags & ENV_LOOP) xmsh.vtype |= 4;
-				if (pIns->PanEnv.dwFlags & ENV_ENABLED) xmsh.ptype |= 1;
-				if (pIns->PanEnv.dwFlags & ENV_SUSTAIN) xmsh.ptype |= 2;
-				if (pIns->PanEnv.dwFlags & ENV_LOOP) xmsh.ptype |= 4;
-				xmsh.vsustain = (BYTE)pIns->VolEnv.nSustainStart;
-				xmsh.vloops = (BYTE)pIns->VolEnv.nLoopStart;
-				xmsh.vloope = (BYTE)pIns->VolEnv.nLoopEnd;
-				xmsh.psustain = (BYTE)pIns->PanEnv.nSustainStart;
-				xmsh.ploops = (BYTE)pIns->PanEnv.nLoopStart;
-				xmsh.ploope = (BYTE)pIns->PanEnv.nLoopEnd;
-				for (UINT j = 0; j < 96; j++) if (pIns->Keyboard[j + 12]) // for all notes
-				{
-					UINT k;
-					UINT sample = pIns->Keyboard[j + 12];
+				// Convert instrument
+				insHeader.ConvertToXM(*Instruments[i], compatibilityExport);
 
-					// Check to see if sample mapped to this note is already accounted for in this instrument
-					for (k = 0; k < xmih.samples; k++)
-					{
-						if (smptable[k] == sample)
-						{
-							break;
-						}
-					}
-				    
-					if (k == xmih.samples) //we got to the end of the loop: sample unnaccounted for.
-					{
-						smptable[xmih.samples++] = sample; //record in instrument's sample table
-					}
-					
-					if ((xmih.samples >= 32) || (xmih.samples >= 16 && bCompatibilityExport)) break;
-					xmsh.snum[j] = k;	//record sample table offset in instrument's note map
+				samples = insHeader.instrument.GetSampleList(*Instruments[i], compatibilityExport);
+				if(samples.size() > 0 && samples[0] <= GetNumSamples())
+				{
+					// Copy over auto-vibrato settings of first sample
+					insHeader.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 				}
+
+				// XXX Try to save "instrument-less" samples as well.
+			} else
+			{
+				MemsetZero(insHeader);
 			}
 		} else
 		{
-			xmih.samples = 1;
-			smptable[0] = i;
+			// Convert samples to instruments
+			MemsetZero(insHeader);
+			insHeader.numSamples = 1;
+			insHeader.instrument.ApplyAutoVibratoToXM(Samples[i], GetType());
+			samples.push_back(i);
 		}
-		xmsh.shsize = LittleEndianW((xmih.samples) ? 40 : 0);
-		fwrite(&xmih, 1, sizeof(xmih), f);
-		if (smptable[0])
+
+		insHeader.Finalise();
+		size_t insHeaderSize = insHeader.size;
+		insHeader.ConvertEndianness();
+		fwrite(&insHeader, 1, insHeaderSize, f);
+
+		vector<UINT> sampleFlags(samples.size());
+
+		// Write Sample Headers
+		for(SAMPLEINDEX i = 0; i < samples.size(); i++)
 		{
-			const ModSample &sample = Samples[smptable[0]];
-			xmsh.vibtype = sample.nVibType;
-			xmsh.vibsweep = min(sample.nVibSweep, 0xFF);
-			xmsh.vibdepth = min(sample.nVibDepth, 0x0F);
-			xmsh.vibrate = min(sample.nVibRate, 0x3F);
-		}
-		WORD samples = xmih.samples;
-		xmih.samples = LittleEndianW(xmih.samples);
-		fwrite(&xmsh, 1, sizeof(xmsh), f);
-		if (!xmih.samples) continue;
-		for (UINT ins = 0; ins < samples; ins++)
-		{
-			XMSAMPLESTRUCT xmss;
-			MemsetZero(xmss);
-			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
-			const ModSample &sample = Samples[smptable[ins]];
-			xmss.samplen = sample.nLength;
-			xmss.loopstart = sample.nLoopStart;
-			xmss.looplen = sample.nLoopEnd - sample.nLoopStart;
-			xmss.vol = sample.nVolume / 4;
-			xmss.finetune = (char)sample.nFineTune;
-			xmss.type = 0;
-			if (sample.uFlags & CHN_LOOP) xmss.type = (sample.uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
-			flags[ins] = RS_PCM8D;
-#ifndef NO_PACKING
-			if (nPacking && !bCompatibilityExport)
+			XMSample xmSample;
+			if(samples[i] <= GetNumSamples())
 			{
-				if ((!(sample.uFlags & (CHN_16BIT|CHN_STEREO)))
-				 && (CanPackSample(sample.pSample, sample.nLength, nPacking)))
-				{
-					flags[ins] = RS_ADPCM4;
-					xmss.res = 0xAD;
-				}
+				xmSample.ConvertToXM(Samples[samples[i]], GetType(), compatibilityExport);
 			} else
-#endif
 			{
-				if (sample.uFlags & CHN_16BIT)
-				{
-					flags[ins] = RS_PCM16D;
-					xmss.type |= 0x10;
-					xmss.looplen *= 2;
-					xmss.loopstart *= 2;
-					xmss.samplen *= 2;
-				}
-				if (sample.uFlags & CHN_STEREO && !bCompatibilityExport)
-				{
-					flags[ins] = (sample.uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
-					xmss.type |= 0x20;
-					xmss.looplen *= 2;
-					xmss.loopstart *= 2;
-					xmss.samplen *= 2;
-				}
+				MemsetZero(xmSample);
 			}
-			xmss.pan = 255;
-			if (sample.nPan < 256) xmss.pan = (BYTE)sample.nPan;
-			xmss.relnote = (signed char)sample.RelativeTone;
-			xmss.samplen = LittleEndianW(xmss.samplen);
-			xmss.loopstart = LittleEndianW(xmss.loopstart);
-			xmss.looplen = LittleEndianW(xmss.looplen);
-			fwrite(&xmss, 1, xmsh.shsize, f);
+			sampleFlags[i] = xmSample.GetSampleFormat();
+
+			StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[i]]);
+
+			fwrite(&xmSample, 1, sizeof(xmSample), f);
 		}
-		for (UINT ismpd=0; ismpd<xmih.samples; ismpd++)
+
+		// Write Sample Data
+		for(SAMPLEINDEX i = 0; i < samples.size(); i++)
 		{
-			const ModSample &sample = Samples[smptable[ismpd]];
-			if (sample.pSample)
+			if(samples[i] <= GetNumSamples())
 			{
-#ifndef NO_PACKING
-				if ((flags[ismpd] == RS_ADPCM4) && (xmih.samples > 1)) CanPackSample(sample.pSample, sample.nLength, nPacking);
-#endif // NO_PACKING
-				WriteSample(f, &sample, flags[ismpd]);
+				WriteSample(f, &Samples[samples[i]], sampleFlags[i]);
 			}
 		}
 	}
 
-	if(!bCompatibilityExport)
+	if(!compatibilityExport)
 	{
 		// Writing song comments
 		if ((m_lpszSongComments) && (m_lpszSongComments[0]))
@@ -1140,7 +935,10 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 		//Save hacked-on extra info
 		SaveMixPlugins(f);
-		SaveExtendedInstrumentProperties(min(GetNumInstruments(), xmheader.instruments), f);
+		if(m_nInstruments)
+		{
+			SaveExtendedInstrumentProperties(min(GetNumInstruments(), writeInstruments), f);
+		}
 		SaveExtendedSongProperties(f);
 	}
 

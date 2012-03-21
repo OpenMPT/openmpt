@@ -194,8 +194,16 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 	nPatterns = BigEndianW(pfh->patterns);
 	m_nType = MOD_TYPE_DBM;
 	m_nChannels = CLAMP(BigEndianW(pfh->channels), 1, MAX_BASECHANNELS);	// note: MAX_BASECHANNELS is currently 127, but DBM supports up to 128 channels.
-	memcpy(m_szNames[0], (pfh->songname[0]) ? pfh->songname : pfh->songname2, 32);
-	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+
+	if(pfh->songname[0])
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh->songname);
+	} else
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh->songname2);
+
+	}
+
 	Order.resize(nOrders, Order.GetInvalidPatIndex());
 	for (UINT iOrd=0; iOrd < nOrders; iOrd++)
 	{
@@ -240,12 +248,10 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 
 				Instruments[iIns + 1] = pIns;
 
-				memcpy(pIns->name, pih->name, 30);
-				StringFixer::SpaceToNullStringFixed<30>(pIns->name);
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, pih->name);
 				if (psmp)
 				{
-					memcpy(m_szNames[nsmp], pih->name, 30);
-					StringFixer::SpaceToNullStringFixed<30>(m_szNames[nsmp]);
+					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nsmp], pih->name);
 				}
 
 				pIns->nFadeOut = 1024;	// ???

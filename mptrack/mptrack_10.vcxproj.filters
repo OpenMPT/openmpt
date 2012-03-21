@@ -448,6 +448,9 @@
     <ClCompile Include="..\soundlib\ModChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\XMTools.cpp">
+      <Filter>Module Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -794,6 +797,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\RowVisitor.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\XMTools.h">
+      <Filter>Module Loaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

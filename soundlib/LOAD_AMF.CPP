@@ -193,8 +193,8 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		for (UINT iSmp=0; iSmp<numsamples; iSmp++)
 		{
 			ModSample *psmp = &Samples[iSmp+1];
-			memcpy(m_szNames[iSmp + 1], lpStream+dwMemPos, 22);
-			StringFixer::SpaceToNullStringFixed<22>(m_szNames[iSmp + 1]);
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[iSmp + 1], reinterpret_cast<const char *>(lpStream + dwMemPos), 22);
+
 			psmp->nGlobalVol = 64;
 			psmp->nFineTune = MOD2XMFineTune(lpStream[dwMemPos+22]);
 			psmp->nVolume = lpStream[dwMemPos+23];
@@ -267,8 +267,9 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	 || (!pfh->numsamples) || (pfh->numsamples > MAX_SAMPLES)
 	 || (pfh->numchannels < 1) || (pfh->numchannels > 32))
 		return false;
-	memcpy(m_szNames[0], pfh->title, 31);
-	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh->title);
+
 	dwMemPos = sizeof(AMFFILEHEADER);
 	m_nType = MOD_TYPE_AMF;
 	m_nChannels = pfh->numchannels;
@@ -327,10 +328,9 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		AMFSAMPLE *psh = (AMFSAMPLE *)(lpStream + dwMemPos);
 
 		dwMemPos += sizeof(AMFSAMPLE);
-		memcpy(m_szNames[iIns+1], psh->samplename, 31);
-		memcpy(pSmp->filename, psh->filename, 13);
-		StringFixer::SpaceToNullStringFixed<31>(m_szNames[iIns + 1]);
-		StringFixer::SpaceToNullStringFixed<13>(pSmp->filename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[iIns + 1], psh->samplename);
+		StringFixer::ReadString<StringFixer::nullTerminated>(pSmp->filename, psh->filename);
+
 		pSmp->nLength = LittleEndian(psh->length);
 		pSmp->nC5Speed = LittleEndianW(psh->c2spd);
 		pSmp->nGlobalVol = 64;

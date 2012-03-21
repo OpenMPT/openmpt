@@ -1475,17 +1475,20 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
 			CMainFrame::GetSettings().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
 	
-			if (!pIns->name[0])
+			if (!pIns->name[0] && m_pSndFile->GetModSpecifications().instrNameLengthMax > 0)
 			{
-				szName[m_pSndFile->GetModSpecifications().instrNameLengthMax - 1] = 0;
-				strcpy(pIns->name, szName);
+				strncpy(pIns->name, szName, CountOf(pIns->name) - 1);
+				ASSERT(m_pSndFile->GetModSpecifications().instrNameLengthMax < CountOf(pIns->name));
+				pIns->name[m_pSndFile->GetModSpecifications().instrNameLengthMax] = '\0';
 			}
-			if (!pIns->filename[0])
+			if (!pIns->filename[0] && m_pSndFile->GetModSpecifications().instrFilenameLengthMax > 0)
 			{
 				strcat(szName, szExt);
-				szName[m_pSndFile->GetModSpecifications().instrFilenameLengthMax - 1] = 0;
-				strcpy(pIns->filename, szName);
+				strncpy(pIns->filename, szName, CountOf(pIns->filename) - 1);
+				ASSERT(m_pSndFile->GetModSpecifications().instrFilenameLengthMax < CountOf(pIns->filename));
+				pIns->filename[m_pSndFile->GetModSpecifications().instrFilenameLengthMax] = '\0';
 			}
+
 			SetCurrentInstrument(m_nInstrument);
 			if (m_pModDoc)
 			{
@@ -1707,7 +1710,7 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if ((pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (pSndFile->m_nInstruments > 0))
+		if(pSndFile->m_nInstruments > 0)
 		{
 			BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
 			LONG ins = m_pModDoc->InsertInstrument(INSTRUMENTINDEX_INVALID, m_nInstrument);
@@ -1753,7 +1756,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 			else
 				m_nInstrument++;
 
-            if(m_nInstrument > m_pSndFile->GetNumInstruments())
+			if(m_nInstrument > m_pSndFile->GetNumInstruments())
 				OnInstrumentNew();
 		}
 

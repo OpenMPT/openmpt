@@ -18,13 +18,14 @@
 #include "../mptrack/Mainfrm.h" // For CriticalSection
 #include "Wav.h"
 #include "ITTools.h"
+#include "XMTools.h"
 #include "../common/StringFixer.h"
 #include "../common/Reporting.h"
 
 #pragma warning(disable:4244)
 
-bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//--------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
+//--------------------------------------------------------------------------------------------------
 {
 	if ((!nSample) || (nSample >= MAX_SAMPLES)) return false;
 	if ((!ReadWAVSample(nSample, lpMemFile, dwFileLength))
@@ -39,8 +40,8 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD
 }
 
 
-bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
 	if ((!ReadXIInstrument(nInstr, lpMemFile, dwFileLength))
@@ -53,10 +54,10 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 }
 
 
-bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------------------
 {
-	uint32 *psig = reinterpret_cast<uint32 *>(lpMemFile);
+	const uint32 *psig = reinterpret_cast<const uint32 *>(lpMemFile);
 	if ((!lpMemFile) || (dwFileLength < 80)) return false;
 	if (((psig[0] == LittleEndian(0x46464952)) && (psig[2] == LittleEndian(0x45564157)))	// RIFF....WAVE signature
 	 || ((psig[0] == LittleEndian(0x5453494C)) && (psig[2] == LittleEndian(0x65766177)))	// LIST....wave
@@ -303,8 +304,8 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *
 
 extern BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes, UINT pkBlkAlign);
 
-bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset)
-//-------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset)
+//-------------------------------------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0, dwDataPos;
 	WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)lpMemFile;
@@ -551,8 +552,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 ///////////////////////////////////////////////////////////////
 // Save WAV
 
-bool CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName) const
-//---------------------------------------------------------------------
+bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
+//---------------------------------------------------------------------------
 {
 	LPCSTR lpszMPT = "Modplug Tracker\0";
 	WAVEFILEHEADER header;
@@ -665,8 +666,8 @@ bool CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName) const
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
-bool CSoundFile::SaveRAWSample(UINT nSample, LPCSTR lpszFileName) const
-//---------------------------------------------------------------------
+bool CSoundFile::SaveRAWSample(UINT nSample, const LPCSTR lpszFileName) const
+//---------------------------------------------------------------------------
 {
 	const ModSample *pSmp = &Samples[nSample];
 	FILE *f;
@@ -1008,8 +1009,8 @@ typedef struct S3ISAMPLESTRUCT
 	DWORD scrs;
 } S3ISAMPLESTRUCT;
 
-bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------
+bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------
 {
 	S3ISAMPLESTRUCT *pss = (S3ISAMPLESTRUCT *)lpMemFile;
 	ModSample *pSmp = &Samples[nSample];
@@ -1048,65 +1049,27 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 /////////////////////////////////////////////////////////////
 // XI Instruments
 
-typedef struct XIFILEHEADER
+
+bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------------
 {
-	CHAR extxi[21];		// Extended Instrument:
-	CHAR name[23];		// Name, 1Ah
-	CHAR trkname[20];	// FastTracker v2.00
-	WORD shsize;		// 0x0102
-} XIFILEHEADER;
+	if(dwFileLength < sizeof(XIInstrumentHeader))
+	{
+		return false;
+	}
 
+	XIInstrumentHeader header = *reinterpret_cast<const XIInstrumentHeader *>(lpMemFile);
+	header.ConvertEndianness();
 
-typedef struct XIINSTRUMENTHEADER
-{
-	BYTE snum[96];
-	WORD venv[24];
-	WORD pIns[24];
-	BYTE vnum, pnum;
-	BYTE vsustain, vloops, vloope, psustain, ploops, ploope;
-	BYTE vtype, ptype;
-	BYTE vibtype, vibsweep, vibdepth, vibrate;
-	WORD volfade;
-	WORD res;
-	BYTE reserved1[20];
-	WORD reserved2;
-} XIINSTRUMENTHEADER;
-
-
-typedef struct XISAMPLEHEADER
-{
-	DWORD samplen;
-	DWORD loopstart;
-	DWORD looplen;
-	BYTE vol;
-	signed char finetune;
-	BYTE type;
-	BYTE pan;
-	signed char relnote;
-	BYTE res;
-	char name[22];
-} XISAMPLEHEADER;
-
-
-
-
-bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------
-{
-	XIFILEHEADER *pxh = (XIFILEHEADER *)lpMemFile;
-	XIINSTRUMENTHEADER *pih = (XIINSTRUMENTHEADER *)(lpMemFile+sizeof(XIFILEHEADER));
-	UINT samplemap[32];
-	UINT sampleflags[32];
-	DWORD samplesize[32];
-	DWORD dwMemPos = sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER);
-	UINT nsamples;
-
-	if ((!lpMemFile) || (dwFileLength < sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER))) return false;
-	if (dwMemPos + pxh->shsize - 0x102 >= dwFileLength) return false;
-	if (memcmp(pxh->extxi, "Extended Instrument", 19)) return false;
-	dwMemPos += pxh->shsize - 0x102;
-	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return false;
-	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
+	DWORD dwMemPos = sizeof(XIInstrumentHeader);
+	
+	if(memcmp(header.signature, "Extended Instrument: ", 21)
+		|| header.version != 0x102
+		|| header.eof != 0x1A
+		|| header.numSamples > 32)
+	{
+		return false;
+	}
 
 	ModInstrument *pIns;
 
@@ -1119,390 +1082,215 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 	}
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
-	
+	if(nInstr > m_nInstruments) m_nInstruments = nInstr;
 	Instruments[nInstr] = pIns;
-	memcpy(pIns->name, pxh->name, 22);
-	nsamples = 0;
-	for (UINT i=0; i<96; i++)
-	{
-		if (pih->snum[i] > nsamples) nsamples = pih->snum[i];
-	}
-	nsamples++;
-	if (nsamples > 32) nsamples = 32;
-	// Allocate samples
-	MemsetZero(samplemap);
-	SAMPLEINDEX nsmp = 0;
-	for (UINT j=0; j<nsamples; j++)
-	{
-		nsmp = GetNextFreeSample(nInstr, nsmp + 1);
-		if (nsmp == SAMPLEINDEX_INVALID) break;
-		samplemap[j] = nsmp;
-	}
-	if (m_nSamples < nsmp) m_nSamples = nsmp;
 
-	// Setting up instrument header
-	for (size_t k = 0; k < 96; k++)
-	{
-		UINT n = pih->snum[k];
-		if (n < nsamples) pIns->Keyboard[k+12] = samplemap[n];
-	}
-	pIns->nFadeOut = pih->volfade;
-	if (pih->vtype & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
-	if (pih->vtype & 2) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
-	if (pih->vtype & 4) pIns->VolEnv.dwFlags |= ENV_LOOP;
-	if (pih->ptype & 1) pIns->PanEnv.dwFlags |= ENV_ENABLED;
-	if (pih->ptype & 2) pIns->PanEnv.dwFlags |= ENV_SUSTAIN;
-	if (pih->ptype & 4) pIns->PanEnv.dwFlags |= ENV_LOOP;
-	pIns->VolEnv.nNodes = pih->vnum;
-	pIns->PanEnv.nNodes = pih->pnum;
-	if (pIns->VolEnv.nNodes > 12) pIns->VolEnv.nNodes = 12;
-	if (pIns->PanEnv.nNodes > 12) pIns->PanEnv.nNodes = 12;
-	if (!pIns->VolEnv.nNodes) pIns->VolEnv.dwFlags &= ~ENV_ENABLED;
-	if (!pIns->PanEnv.nNodes) pIns->PanEnv.dwFlags &= ~ENV_ENABLED;
-	pIns->VolEnv.nSustainStart = pih->vsustain;
-	pIns->VolEnv.nSustainEnd = pih->vsustain;
-	if (pih->vsustain >= 12) pIns->VolEnv.dwFlags &= ~ENV_SUSTAIN;
-	pIns->VolEnv.nLoopStart = pih->vloops;
-	pIns->VolEnv.nLoopEnd = pih->vloope;
-	if (pIns->VolEnv.nLoopEnd >= 12) pIns->VolEnv.nLoopEnd = 0;
-	if (pIns->VolEnv.nLoopStart >= pIns->VolEnv.nLoopEnd) pIns->VolEnv.dwFlags &= ~ENV_LOOP;
-	pIns->PanEnv.nSustainStart = pih->psustain;
-	pIns->PanEnv.nSustainEnd = pih->psustain;
-	if (pih->psustain >= 12) pIns->PanEnv.dwFlags &= ~ENV_SUSTAIN;
-	pIns->PanEnv.nLoopStart = pih->ploops;
-	pIns->PanEnv.nLoopEnd = pih->ploope;
-	if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
-	if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
+	header.ConvertToMPT(*pIns);
 
-	for (UINT ienv=0; ienv<12; ienv++)
+	// Translate sample map and find available sample slots
+	vector<SAMPLEINDEX> sampleMap(header.numSamples);
+	SAMPLEINDEX maxSmp = 0;
+
+	for(size_t i = 0 + 12; i < 96 + 12; i++)
 	{
-		pIns->VolEnv.Ticks[ienv] = (WORD)pih->venv[ienv*2];
-		pIns->VolEnv.Values[ienv] = (BYTE)pih->venv[ienv*2+1];
-		pIns->PanEnv.Ticks[ienv] = (WORD)pih->pIns[ienv*2];
-		pIns->PanEnv.Values[ienv] = (BYTE)pih->pIns[ienv*2+1];
-		if (ienv)
+		if(pIns->Keyboard[i] >= header.numSamples)
 		{
-			if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1])
+			continue;
+		}
+
+		if(sampleMap[pIns->Keyboard[i]] == 0)
+		{
+			// Find slot for this sample
+			maxSmp = GetNextFreeSample(nInstr, maxSmp + 1);
+			if(maxSmp != SAMPLEINDEX_INVALID)
 			{
-				pIns->VolEnv.Ticks[ienv] &= 0xFF;
-				pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv - 1] & 0xFF00;
-				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv - 1]) pIns->VolEnv.Ticks[ienv] += 0x100;
-			}
-			if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1])
-			{
-				pIns->PanEnv.Ticks[ienv] &= 0xFF;
-				pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv - 1] & 0xFF00;
-				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv - 1]) pIns->PanEnv.Ticks[ienv] += 0x100;
+				sampleMap[pIns->Keyboard[i]] = maxSmp;
 			}
 		}
+		pIns->Keyboard[i] = sampleMap[pIns->Keyboard[i]];
 	}
-	// Reading samples
-	MemsetZero(sampleflags);
-	MemsetZero(samplesize);
-	UINT maxsmp = nsamples;
-	if ((pih->reserved2 > maxsmp) && (pih->reserved2 <= 32)) maxsmp = pih->reserved2;
-	for (UINT ismp=0; ismp<maxsmp; ismp++)
-	{
-		if (dwMemPos + sizeof(XISAMPLEHEADER) > dwFileLength) break;
-		XISAMPLEHEADER *psh = (XISAMPLEHEADER *)(lpMemFile+dwMemPos);
-		dwMemPos += sizeof(XISAMPLEHEADER);
-		if (ismp >= nsamples) continue;
-		sampleflags[ismp] = RS_PCM8S;
-		samplesize[ismp] = psh->samplen;
-		if (!samplemap[ismp]) continue;
-		ModSample *pSmp = &Samples[samplemap[ismp]];
-		pSmp->uFlags = 0;
-		pSmp->nLength = psh->samplen;
-		pSmp->nLoopStart = psh->loopstart;
-		pSmp->nLoopEnd = psh->loopstart + psh->looplen;
-		if (psh->type & 0x10)
-		{
-			pSmp->nLength /= 2;
-			pSmp->nLoopStart /= 2;
-			pSmp->nLoopEnd /= 2;
-		}
-		if (psh->type & 0x20)
-		{
-			pSmp->nLength /= 2;
-			pSmp->nLoopStart /= 2;
-			pSmp->nLoopEnd /= 2;
-		}
-		if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
-		if (psh->type & 3) pSmp->uFlags |= CHN_LOOP;
-		if (psh->type & 2) pSmp->uFlags |= CHN_PINGPONGLOOP;
-		if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
-		if (pSmp->nLoopStart >= pSmp->nLoopEnd)
-		{
-			pSmp->uFlags &= ~CHN_LOOP;
-			pSmp->nLoopStart = 0;
-		}
-		pSmp->nVolume = psh->vol << 2;
-		if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-		pSmp->nGlobalVol = 64;
-		sampleflags[ismp] = (psh->type & 0x10) ? RS_PCM16D : RS_PCM8D;
-		if (psh->type & 0x20) sampleflags[ismp] = (psh->type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
-		pSmp->nFineTune = psh->finetune;
-		pSmp->nC5Speed = 8363;
-		pSmp->RelativeTone = (int)psh->relnote;
-		if (GetType() != MOD_TYPE_XM)
-		{
-			pSmp->nC5Speed = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
-			pSmp->RelativeTone = 0;
-			pSmp->nFineTune = 0;
-		}
-		pSmp->nPan = psh->pan;
-		pSmp->uFlags |= CHN_PANNING;
-		pSmp->nVibType = pih->vibtype;
-		pSmp->nVibSweep = pih->vibsweep;
-		pSmp->nVibDepth = pih->vibdepth;
-		pSmp->nVibRate = pih->vibrate;
-		MemsetZero(m_szNames[samplemap[ismp]]);
-		memcpy(m_szNames[samplemap[ismp]], psh->name, 22);
-		memcpy(pSmp->filename, psh->name, 22);
-		pSmp->filename[21] = 0;
 
-		pSmp->Convert(MOD_TYPE_XM, GetType());
-	}
-	// Reading sample data
-	for (UINT dsmp=0; dsmp<nsamples; dsmp++)
+	if(m_nSamples < maxSmp)
 	{
-		if (dwMemPos >= dwFileLength) break;
-		if (samplemap[dsmp])
-			ReadSample(&Samples[samplemap[dsmp]], sampleflags[dsmp], (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
-		dwMemPos += samplesize[dsmp];
+		m_nSamples = maxSmp;
+	}
+
+	vector<UINT> sampleFlags(header.numSamples);
+
+	// Read sample headers
+	for(SAMPLEINDEX i = 0; i < header.numSamples; i++)
+	{
+		if (dwMemPos + sizeof(XMSample) > dwFileLength)
+		{
+			break;
+		}
+
+		const XMSample *xmSample= reinterpret_cast<const XMSample *>(lpMemFile + dwMemPos);
+		dwMemPos += sizeof(XMSample);
+
+		if(!sampleMap[i])
+		{
+			continue;
+		}
+
+		ModSample &mptSample = Samples[sampleMap[i]];
+		xmSample->ConvertToMPT(mptSample);
+		header.instrument.ApplyAutoVibratoToMPT(mptSample);
+		mptSample.Convert(MOD_TYPE_XM, GetType());
+
+		StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, xmSample->name);
+		StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[sampleMap[i]], xmSample->name);
+
+		sampleFlags[i] = xmSample->GetSampleFormat();
+	}
+
+	// Read sample data
+	for(SAMPLEINDEX i = 0; i < header.numSamples; i++)
+	{
+		if(dwMemPos < dwFileLength && sampleMap[i])
+		{
+			dwMemPos += ReadSample(&Samples[sampleMap[i]], sampleFlags[i], (LPSTR)(lpMemFile + dwMemPos), dwFileLength - dwMemPos);
+		}
 	}
 
 	pIns->Convert(MOD_TYPE_XM, GetType());
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	// -> CODE#0027
+	// -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Leave if no extra instrument settings are available (end of file reached)
-	if(dwMemPos >= dwFileLength) return true;
-
-	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
-
-// -! NEW_FEATURE#0027
+	if(dwMemPos < dwFileLength)
+	{
+		ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
+	}
+	// -! NEW_FEATURE#0027
 
 	return true;
 }
 
 
-bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const
-//----------------------------------------------------------------------------------
+bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const
+//----------------------------------------------------------------------------------------
 {
-	XIFILEHEADER xfh;
-	XIINSTRUMENTHEADER xih;
-	XISAMPLEHEADER xsh;
 	ModInstrument *pIns = Instruments[nInstr];
-	UINT smptable[32];
-	UINT nsamples;
-	FILE *f;
+	if(pIns == nullptr || lpszFileName == nullptr)
+	{
+		return false;
+	}
 
-	if ((!pIns) || (!lpszFileName)) return false;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	// XI File Header
-	MemsetZero(xfh);
-	MemsetZero(xih);
-	memcpy(xfh.extxi, "Extended Instrument: ", 21);
-	memcpy(xfh.name, pIns->name, 22);
-	StringFixer::FixNullString(xfh.name);
-	xfh.name[22] = 0x1A;
-	memcpy(xfh.trkname, "Created by OpenMPT  ", 20);
-	xfh.shsize = 0x102;
-	fwrite(&xfh, 1, sizeof(xfh), f);
-	// XI Instrument Header
-	xih.volfade = pIns->nFadeOut;
-	xih.vnum = pIns->VolEnv.nNodes;
-	xih.pnum = pIns->PanEnv.nNodes;
-	if (xih.vnum > 12) xih.vnum = 12;
-	if (xih.pnum > 12) xih.pnum = 12;
-	for (UINT ienv=0; ienv<12; ienv++)
+	FILE *f;
+	if((f = fopen(lpszFileName, "wb")) == nullptr)
 	{
-		xih.venv[ienv*2] = (BYTE)pIns->VolEnv.Ticks[ienv];
-		xih.venv[ienv*2+1] = pIns->VolEnv.Values[ienv];
-		xih.pIns[ienv*2] = (BYTE)pIns->PanEnv.Ticks[ienv];
-		xih.pIns[ienv*2+1] = pIns->PanEnv.Values[ienv];
+		return false;
 	}
-	if (pIns->VolEnv.dwFlags & ENV_ENABLED) xih.vtype |= 1;
-	if (pIns->VolEnv.dwFlags & ENV_SUSTAIN) xih.vtype |= 2;
-	if (pIns->VolEnv.dwFlags & ENV_LOOP) xih.vtype |= 4;
-	if (pIns->PanEnv.dwFlags & ENV_ENABLED) xih.ptype |= 1;
-	if (pIns->PanEnv.dwFlags & ENV_SUSTAIN) xih.ptype |= 2;
-	if (pIns->PanEnv.dwFlags & ENV_LOOP) xih.ptype |= 4;
-	xih.vsustain = (BYTE)pIns->VolEnv.nSustainStart;
-	xih.vloops = (BYTE)pIns->VolEnv.nLoopStart;
-	xih.vloope = (BYTE)pIns->VolEnv.nLoopEnd;
-	xih.psustain = (BYTE)pIns->PanEnv.nSustainStart;
-	xih.ploops = (BYTE)pIns->PanEnv.nLoopStart;
-	xih.ploope = (BYTE)pIns->PanEnv.nLoopEnd;
-	nsamples = 0;
-	for (UINT j=0; j<96; j++) if (pIns->Keyboard[j+12])
+
+	// Create file header
+	XIInstrumentHeader header;
+	header.ConvertToXM(*pIns, false);
+
+	const vector<SAMPLEINDEX> samples = header.instrument.GetSampleList(*pIns, false);
+	if(samples.size() > 0 && samples[0] <= GetNumSamples())
 	{
-		UINT n = pIns->Keyboard[j+12];
-		UINT k = 0;
-		for (k=0; k<nsamples; k++)	if (smptable[k] == n) break;
-		if (k == nsamples)
-		{
-			if (!k)
-			{
-				xih.vibtype = Samples[n].nVibType;
-				xih.vibsweep = min(Samples[n].nVibSweep, 255);
-				xih.vibdepth = min(Samples[n].nVibDepth, 15);
-				xih.vibrate = min(Samples[n].nVibRate, 63);
-				if((xih.vibdepth | xih.vibrate) != 0 && !(GetType() & MOD_TYPE_XM))
-				{
-					// Sweep is upside down in XM
-					xih.vibsweep = 255 - xih.vibsweep;
-				}
-			}
-			if (nsamples < 32) smptable[nsamples++] = n;
-			k = nsamples - 1;
-		}
-		xih.snum[j] = k;
+		// Copy over auto-vibrato settings of first sample
+		header.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 	}
-	xih.reserved2 = nsamples;
-	fwrite(&xih, 1, sizeof(xih), f);
+
+	fwrite(&header, 1, sizeof(XIInstrumentHeader), f);
+
+	vector<UINT> sampleFlags(samples.size());
+
 	// XI Sample Headers
-	for (UINT ismp=0; ismp<nsamples; ismp++)
+	for(SAMPLEINDEX i = 0; i < samples.size(); i++)
 	{
-		const ModSample &sample = Samples[smptable[ismp]];
-		xsh.samplen = sample.nLength;
-		xsh.loopstart = sample.nLoopStart;
-		xsh.looplen = sample.nLoopEnd - sample.nLoopStart;
-		xsh.vol = sample.nVolume >> 2;
-		xsh.finetune = (signed char)sample.nFineTune;
-		xsh.type = 0;
-		if (sample.uFlags & CHN_16BIT)
+		XMSample xmSample;
+		if(samples[i] <= GetNumSamples())
 		{
-			xsh.type |= 0x10;
-			xsh.samplen *= 2;
-			xsh.loopstart *= 2;
-			xsh.looplen *= 2;
-		}
-		if (sample.uFlags & CHN_STEREO)
+			xmSample.ConvertToXM(Samples[samples[i]], GetType(), false);
+		} else
 		{
-			xsh.type |= 0x20;
-			xsh.samplen *= 2;
-			xsh.loopstart *= 2;
-			xsh.looplen *= 2;
+			MemsetZero(xmSample);
 		}
-		if (sample.uFlags & CHN_LOOP)
-		{
-			xsh.type |= (sample.uFlags & CHN_PINGPONGLOOP) ? 0x02 : 0x01;
-		}
-		xsh.pan = (BYTE)sample.nPan;
-		if (sample.nPan > 0xFF) xsh.pan = 0xFF;
-		if ((GetType() & MOD_TYPE_XM) || (!sample.nC5Speed))
-			xsh.relnote = (signed char) sample.RelativeTone;
-		else
-		{
-			int f2t = FrequencyToTranspose(sample.nC5Speed);
-			xsh.relnote = (signed char)(f2t >> 7);
-			xsh.finetune = (signed char)(f2t & 0x7F);
-		}
-		xsh.res = 0;
-		memcpy(xsh.name, m_szNames[smptable[ismp]], 22);
-		StringFixer::FixNullString(xsh.name);
-		fwrite(&xsh, 1, sizeof(xsh), f);
+		sampleFlags[i] = xmSample.GetSampleFormat();
+
+		StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[i]]);
+
+		fwrite(&xmSample, 1, sizeof(xmSample), f);
 	}
+
 	// XI Sample Data
-	for (UINT dsmp=0; dsmp<nsamples; dsmp++)
+	for(SAMPLEINDEX i = 0; i < samples.size(); i++)
 	{
-		const ModSample *pSmp = &Samples[smptable[dsmp]];
-		UINT smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16D : RS_PCM8D;
-		if (pSmp->uFlags & CHN_STEREO) smpflags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
-		WriteSample(f, pSmp, smpflags);
+		if(samples[i] <= GetNumSamples())
+		{
+			WriteSample(f, &Samples[samples[i]], sampleFlags[i]);
+		}
 	}
 
 	int32 code = 'MPTX';
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
 	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
 
-
 	fclose(f);
 	return true;
 }
 
 
-bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//--------------------------------------------------------------------------------------
+// Read first sample from XI file into a sample slot
+bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
+//--------------------------------------------------------------------------------------------
 {
-	XIFILEHEADER *pxh = (XIFILEHEADER *)lpMemFile;
-	XIINSTRUMENTHEADER *pih = (XIINSTRUMENTHEADER *)(lpMemFile+sizeof(XIFILEHEADER));
-	UINT sampleflags = 0;
-	DWORD dwMemPos = sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER);
-	ModSample *pSmp = &Samples[nSample];
-	UINT nsamples;
+	if(dwFileLength < sizeof(XIInstrumentHeader))
+	{
+		return false;
+	}
 
-	if ((!lpMemFile) || (dwFileLength < sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER))) return false;
-	if (memcmp(pxh->extxi, "Extended Instrument", 19)) return false;
-	dwMemPos += pxh->shsize - 0x102;
-	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return false;
-	DestroySample(nSample);
-	nsamples = 0;
-	for (UINT i=0; i<96; i++)
+	XIInstrumentHeader header = *reinterpret_cast<const XIInstrumentHeader *>(lpMemFile);
+	header.ConvertEndianness();
+
+	DWORD dwMemPos = sizeof(XIInstrumentHeader);
+
+	if(memcmp(header.signature, "Extended Instrument: ", 21)
+		|| header.version != 0x102
+		|| header.eof != 0x1A
+		|| header.numSamples > 32)
 	{
-		if (pih->snum[i] > nsamples) nsamples = pih->snum[i];
+		return false;
 	}
-	nsamples++;
-	memcpy(m_szNames[nSample], pxh->name, 22);
-	pSmp->uFlags = 0;
-	pSmp->nGlobalVol = 64;
-	// Reading sample
-	UINT maxsmp = nsamples;
-	if ((pih->reserved2 <= 16) && (pih->reserved2 > maxsmp)) maxsmp = pih->reserved2;
-	for (UINT ismp=0; ismp<maxsmp; ismp++)
+
+	if(m_nSamples < nSample)
 	{
-		if (dwMemPos + sizeof(XISAMPLEHEADER) > dwFileLength) break;
-		XISAMPLEHEADER *psh = (XISAMPLEHEADER *)(lpMemFile+dwMemPos);
-		dwMemPos += sizeof(XISAMPLEHEADER);
-		if (ismp) continue;
-		sampleflags = RS_PCM8S;
-		pSmp->nLength = psh->samplen;
-		pSmp->nLoopStart = psh->loopstart;
-		pSmp->nLoopEnd = psh->loopstart + psh->looplen;
-		if (psh->type & 0x10)
-		{
-			pSmp->nLength /= 2;
-			pSmp->nLoopStart /= 2;
-			pSmp->nLoopEnd /= 2;
-		}
-		if (psh->type & 0x20)
-		{
-			pSmp->nLength /= 2;
-			pSmp->nLoopStart /= 2;
-			pSmp->nLoopEnd /= 2;
-		}
-		if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
-		if (psh->type & 3) pSmp->uFlags |= CHN_LOOP;
-		if (psh->type & 2) pSmp->uFlags |= CHN_PINGPONGLOOP;
-		if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
-		if (pSmp->nLoopStart >= pSmp->nLoopEnd)
-		{
-			pSmp->uFlags &= ~CHN_LOOP;
-			pSmp->nLoopStart = 0;
-		}
-		pSmp->nVolume = psh->vol << 2;
-		if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-		pSmp->nGlobalVol = 64;
-		sampleflags = (psh->type & 0x10) ? RS_PCM16D : RS_PCM8D;
-		if (psh->type & 0x20) sampleflags = (psh->type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
-		pSmp->nFineTune = psh->finetune;
-		pSmp->nC5Speed = 8363;
-		pSmp->RelativeTone = (int)psh->relnote;
-		pSmp->nPan = psh->pan;
-		pSmp->uFlags |= CHN_PANNING;
-		pSmp->nVibType = pih->vibtype;
-		pSmp->nVibSweep = pih->vibsweep;
-		pSmp->nVibDepth = pih->vibdepth;
-		pSmp->nVibRate = pih->vibrate;
-		memcpy(pSmp->filename, psh->name, 22);
-		pSmp->filename[21] = 0;
+		m_nSamples = nSample;
 	}
-	pSmp->Convert(MOD_TYPE_XM, GetType());
-	if (dwMemPos >= dwFileLength) return true;
-	ReadSample(pSmp, sampleflags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
+
+	// Read sample header
+	if (dwMemPos + sizeof(XMSample) > dwFileLength)
+	{
+		return false;
+	}
+
+	const XMSample *xmSample= reinterpret_cast<const XMSample *>(lpMemFile + dwMemPos);
+	// Gotta skip 'em all!
+	dwMemPos += sizeof(XMSample) * header.numSamples;
+
+	ModSample &mptSample = Samples[nSample];
+	xmSample->ConvertToMPT(mptSample);
+	if(GetType() != MOD_TYPE_XM)
+	{
+		// No need to pan that single sample, thank you...
+		mptSample.uFlags &= ~CHN_PANNING;
+	}
+	header.instrument.ApplyAutoVibratoToMPT(mptSample);
+	mptSample.Convert(MOD_TYPE_XM, GetType());
+
+	StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, xmSample->name);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[nSample], xmSample->name);
+
+	// Read sample data
+	if(dwMemPos < dwFileLength)
+	{
+		ReadSample(&Samples[nSample], xmSample->GetSampleFormat(), (LPSTR)(lpMemFile + dwMemPos), dwFileLength - dwMemPos);
+	}
+
 	return true;
 }
 
@@ -1643,14 +1431,16 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	DWORD dwMemPos;
 
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITSample))
-		|| (pis->id != LittleEndian(ITSample::magic))) return 0;
+		|| (pis->id != LittleEndian(ITSample::magic)))
+	{
+		return 0;
+	}
 
 	DestroySample(nSample);
 
 	dwMemPos = pis->ConvertToMPT(Samples[nSample]) - dwOffset;
 
-	memcpy(m_szNames[nSample], pis->name, 26);
-	StringFixer::SpaceToNullStringFixed<25>(m_szNames[nSample]);
+	StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[nSample], pis->name);
 
 	if(dwMemPos > dwFileLength)
 	{
@@ -1744,8 +1534,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 }
 
 
-bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const
-//-----------------------------------------------------------------------------------
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const
+//-----------------------------------------------------------------------------------------
 {
 	ITInstrumentEx iti;
 	ModInstrument *pIns = Instruments[nInstr];
@@ -1790,8 +1580,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) 
 		ITSample itss;
 		itss.ConvertToIT(Samples[*iter], GetType());
 
-		memcpy(itss.name, m_szNames[*iter], 26);
-		StringFixer::FixNullString(itss.name);
+		StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[*iter]);
 
 		itss.samplepointer = LittleEndian(dwPos);
 

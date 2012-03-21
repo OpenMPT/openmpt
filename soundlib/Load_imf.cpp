@@ -293,8 +293,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// song name
 	MemsetZero(m_szNames);
-	memcpy(m_szNames[0], hdr.title, 31);
-	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[0], hdr.title);
 
 	if(hdr.flags & 1)
 		m_dwSongFlags |= SONG_LINEARSLIDES;
@@ -312,8 +311,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		ChnSettings[nChn].nPan = hdr.channels[nChn].panning * 64 / 255;
 		ChnSettings[nChn].nPan *= 4;
 
-		memcpy(ChnSettings[nChn].szName, hdr.channels[nChn].name, 12);
-		StringFixer::SpaceToNullStringFixed<12>(ChnSettings[nChn].szName);
+		StringFixer::ReadString<StringFixer::nullTerminated>(ChnSettings[nChn].szName, hdr.channels[nChn].name);
 
 		// TODO: reverb/chorus?
 		switch(hdr.channels[nChn].status)
@@ -504,8 +502,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		Instruments[nIns + 1] = pIns;
 
-		memcpy(pIns->name, imfins.name, 31);
-		StringFixer::SpaceToNullStringFixed<31>(pIns->name);
+		StringFixer::ReadString<StringFixer::nullTerminated>(pIns->name, imfins.name);
 
 		if(imfins.smpnum)
 		{
@@ -542,8 +539,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			
 			ModSample &sample = Samples[firstsample + nSmp];
 
-			memcpy(sample.filename, imfsmp.filename, 12);
-			StringFixer::SpaceToNullStringFixed<12>(sample.filename);
+			StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, imfsmp.filename);
 			strcpy(m_szNames[m_nSamples], sample.filename);
 
 			uint32 byteLen = sample.nLength = LittleEndian(imfsmp.length);

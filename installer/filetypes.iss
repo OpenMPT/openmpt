@@ -29,7 +29,7 @@ Name: "associate_exotic\far"; Description: "Farandole Composer (FAR)";
 Name: "associate_exotic\gdm"; Description: "General Digital Music (GDM)";
 Name: "associate_exotic\imf"; Description: "Imago Orpheus (IMF)";
 Name: "associate_exotic\j2b"; Description: "Jazz Jackrabbit 2 Music (J2B)";
-Name: "associate_exotic\mdl"; Description: "DigiTracker (MDL)";
+Name: "associate_exotic\mdl"; Description: "DigiTrakker (MDL)";
 Name: "associate_exotic\med"; Description: "OctaMED (MED)";
 Name: "associate_exotic\mo3"; Description: "MO3 compressed modules (MO3)";
 Name: "associate_exotic\mt2"; Description: "MadTracker 2 (MT2)";

@@ -124,10 +124,8 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		return;
 	}
 
-	memcpy(mptIns.name, name, 26);
-	StringFixer::SpaceToNullStringFixed<25>(mptIns.name);
-	memcpy(mptIns.filename, filename, 13);
-	StringFixer::SpaceToNullStringFixed<12>(mptIns.filename);
+	StringFixer::ReadString<StringFixer::spacePaddedNull>(mptIns.name, name);
+	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
 	mptIns.nFadeOut = LittleEndianW(fadeout) << 6;
@@ -195,10 +193,8 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	id = LittleEndian(ITInstrument::magic);
 	trkvers = LittleEndianW(0x0214);
 
-	memcpy(filename, mptIns.filename, 13);
-	StringFixer::FixNullString(filename);
-	memcpy(name, mptIns.name, 26);
-	StringFixer::FixNullString(name);
+	StringFixer::WriteString<StringFixer::nullTerminated>(filename, mptIns.filename);
+	StringFixer::WriteString<StringFixer::nullTerminated>(name, mptIns.name);
 
 	// Volume / Panning
 	fadeout = LittleEndianW(static_cast<uint16>(min(mptIns.nFadeOut >> 5, 256)));
@@ -278,10 +274,8 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		return 0;
 	}
 
-	memcpy(mptIns.name, name, 26);
-	StringFixer::SpaceToNullStringFixed<25>(mptIns.name);
-	memcpy(mptIns.filename, filename, 13);
-	StringFixer::SpaceToNullStringFixed<12>(mptIns.filename);
+	StringFixer::ReadString<StringFixer::spacePaddedNull>(mptIns.name, name);
+	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
 	mptIns.nFadeOut = LittleEndianW(fadeout) << 5;
@@ -438,10 +432,8 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 	// Header
 	id = LittleEndian(ITSample::magic);
 
-	memcpy(filename, mptSmp.filename, 13);
-	StringFixer::FixNullString(filename);
-	//memcpy(name, m_szNames[nsmp], 26);
-	//StringFixer::FixNullString(name);
+	StringFixer::WriteString<StringFixer::nullTerminated>(filename, mptSmp.filename);
+	//StringFixer::WriteString<StringFixer::nullTerminated>(name, m_szNames[nsmp]);
 
 	// Volume / Panning
 	gvl = static_cast<BYTE>(mptSmp.nGlobalVol);
@@ -507,8 +499,7 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 		return 0;
 	}
 
-	memcpy(mptSmp.filename, filename, 13);
-	StringFixer::SpaceToNullStringFixed<12>(mptSmp.filename);
+	StringFixer::ReadString<StringFixer::nullTerminated>(mptSmp.filename, filename);
 
 	mptSmp.uFlags = 0;
 

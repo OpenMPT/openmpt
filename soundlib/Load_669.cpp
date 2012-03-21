@@ -30,10 +30,10 @@ typedef struct tagFILEHEADER669
 
 typedef struct tagSAMPLE669
 {
-	BYTE filename[13];
-	BYTE length[4];	// when will somebody think about DWORD align ???
-	BYTE loopstart[4];
-	BYTE loopend[4];
+	char filename[13];
+	uint32 length;	// when will somebody think about DWORD align ???
+	uint32 loopStart;
+	uint32 loopEnd;
 } SAMPLE669;
 
 
@@ -54,7 +54,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 	if (dontfuckwithme > dwMemLength) return false;
 	for (UINT ichk=0; ichk<pfh->samples; ichk++)
 	{
-		DWORD len = LittleEndian(*((DWORD *)(&psmp[ichk].length)));
+		DWORD len = LittleEndian(psmp[ichk].length);
 		dontfuckwithme += len;
 	}
 	if (dontfuckwithme  - 0x1F1 > dwMemLength) return false;
@@ -67,15 +67,15 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nDefaultSpeed = 6;
 	m_nChannels = 8;
 
-	memcpy(m_szNames[0], pfh->songmessage, min(MAX_SAMPLENAME - 1, 36));
-	StringFixer::SpaceToNullStringFixed<min(MAX_SAMPLENAME - 1, 36)>(m_szNames[0]);
+	// Copy first song message line into song title
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], reinterpret_cast<const char *>(pfh->songmessage), 36);
 
 	m_nSamples = pfh->samples;
 	for (SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++, psmp++)
 	{
-		DWORD len = LittleEndian(*((DWORD *)(&psmp->length)));
-		DWORD loopstart = LittleEndian(*((DWORD *)(&psmp->loopstart)));
-		DWORD loopend = LittleEndian(*((DWORD *)(&psmp->loopend)));
+		DWORD len = LittleEndian(psmp->length);
+		DWORD loopstart = LittleEndian(psmp->loopStart);
+		DWORD loopend = LittleEndian(psmp->loopEnd);
 		if (len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
 		if ((loopend > len) && (!loopstart)) loopend = 0;
 		if (loopend > len) loopend = len;
@@ -84,8 +84,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 		Samples[nSmp].nLoopStart = loopstart;
 		Samples[nSmp].nLoopEnd = loopend;
 		if (loopend) Samples[nSmp].uFlags |= CHN_LOOP;
-		memcpy(m_szNames[nSmp], psmp->filename, 13);
-		StringFixer::SpaceToNullStringFixed<13>(m_szNames[nSmp]);
+		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSmp], psmp->filename);
 		Samples[nSmp].nVolume = 256;
 		Samples[nSmp].nGlobalVol = 64;
 		Samples[nSmp].nPan = 128;

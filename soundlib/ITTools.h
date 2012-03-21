@@ -47,7 +47,7 @@ struct ITFileHeader
 	};
 
 	uint32 id;				// Magic Bytes (IMPM)
-	char   songname[26];	// Song Name (duh)
+	char   songname[26];	// Song Name, null-terminated (but may also contain nulls)
 	uint8  highlight_minor;	// Rows per Beat highlight
 	uint8  highlight_major;	// Rows per Measure highlight
 	uint16 ordnum;			// Number of Orders
@@ -65,7 +65,7 @@ struct ITFileHeader
 	uint8  sep;				// Pan Separation (0...128)
 	uint8  pwd;				// Pitch Wheel Depth
 	uint16 msglength;		// Length of Song Message
-	uint32 msgoffset;		// Offset of Song Message in File
+	uint32 msgoffset;		// Offset of Song Message in File (IT crops message after first null)
 	uint32 reserved;		// ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
 	uint8  chnpan[64];		// Initial Channel Panning
 	uint8  chnvol[64];		// Initial Channel Volume
@@ -124,7 +124,7 @@ struct ITOldInstrument
 	};
 
 	uint32 id;				// Magic Bytes (IMPI)
-	char   filename[13];	// DOS Filename
+	char   filename[13];	// DOS Filename, null-terminated
 	uint8  flags;			// Volume Envelope Flags
 	uint8  vls;				// Envelope Loop Start
 	uint8  vle;				// Envelope Loop End
@@ -137,7 +137,7 @@ struct ITOldInstrument
 	uint16 trkvers;			// Tracker ID
 	uint8  nos;				// Number of embedded samples
 	char   reserved2;		// Reserved
-	char   name[26];		// Instrument Name
+	char   name[26];		// Instrument Name, null-terminated (but may also contain nulls)
 	char   reserved3[6];	// Even more reserved bytes
 	uint8  keyboard[240];	// Sample / Transpose map
 	uint8  volenv[200];		// This appears to be a pre-computed (interpolated) version of the volume envelope data found below.
@@ -167,7 +167,7 @@ struct ITInstrument
 	};
 
 	uint32 id;				// Magic Bytes (IMPI)
-	char   filename[13];	// DOS Filename
+	char   filename[13];	// DOS Filename, null-terminated
 	uint8  nna;				// New Note Action
 	uint8  dct;				// Duplicate Note Check Type
 	uint8  dca;				// Duplicate Note Check Action
@@ -181,7 +181,7 @@ struct ITInstrument
 	uint16 trkvers;			// Tracker ID
 	uint8  nos;				// Number of embedded samples
 	char   reserved1;		// Reserved
-	char   name[26];		// Instrument Name
+	char   name[26];		// Instrument Name, null-terminated (but may also contain nulls)
 	uint8  ifc;				// Filter Cutoff
 	uint8  ifr;				// Filter Resonance
 	uint8  mch;				// MIDI Channel
@@ -246,15 +246,15 @@ struct ITSample
 
 		cvtSignedSample		= 0x01,
 		cvtIT215Compression	= 0x04,
-		cvtADPCMSample		= 0xFF
+		cvtADPCMSample		= 0xFF,		// MODPlugin :(
 	};
 
 	uint32 id;				// Magic Bytes (IMPS)
-	char   filename[13];	// DOS Filename
+	char   filename[13];	// DOS Filename, null-terminated
 	uint8  gvl;				// Global Volume
 	uint8  flags;			// Sample Flags
 	uint8  vol;				// Default Volume
-	char   name[26];		// Sample Name
+	char   name[26];		// Sample Name, null-terminated (but may also contain nulls)
 	uint8  cvt;				// Sample Import Format
 	uint8  dfp;				// Sample Panning
 	uint32 length;			// Sample Length (in samples)

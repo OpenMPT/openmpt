@@ -517,6 +517,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\XMTools.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SampleEditorDialogs.cpp"
 				>
 			</File>
@@ -1148,6 +1152,10 @@
 			</File>
 			<File
 				RelativePath=".\soundlib\RowVisitor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\soundlib\XMTools.h"
 				>
 			</File>
 			<File
