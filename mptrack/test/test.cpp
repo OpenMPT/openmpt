@@ -17,6 +17,7 @@
 #include "../version.h"
 #include "../../soundlib/MIDIMacros.h"
 #include "../../common/misc_util.h"
+#include "../../common/StringFixer.h"
 #include "../serialization_utils.h"
 #include <limits>
 #include <fstream>
@@ -74,6 +75,7 @@ void TestTypes();
 void TestLoadSaveFile();
 void TestPCnoteSerialization();
 void TestMisc();
+void TestStringIO();
 
 
 
@@ -83,9 +85,10 @@ void DoTests()
 {
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
-	//DO_TEST(TestPCnoteSerialization);
+	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestMisc);
-	DO_TEST(TestLoadSaveFile)
+	DO_TEST(TestLoadSaveFile);
+	DO_TEST(TestStringIO);
 
 	Log(TEXT("Tests were run\n"));
 }
@@ -854,6 +857,125 @@ void TestPCnoteSerialization()
 	pModDoc->OnCloseDocument();
 }
 
+
+// Test String I/O functionality
+void TestStringIO()
+//-----------------
+{
+	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
+	char src2[4] = { 'X', 'Y', 'Z', ' ' };		// Full buffer, last character space
+	char src3[4] = { 'X', 'Y', 'Z', '!' };		// Full buffer, last character non-space
+	char dst1[6];	// Destination buffer, larger than source buffer
+	char dst2[3];	// Destination buffer, smaller than source buffer
+
+#define ReadTest(mode, dst, src, expectedResult) \
+	StringFixer::ReadString<StringFixer::##mode>(dst, src); \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);
+
+#define WriteTest(mode, dst, src, expectedResult) \
+	StringFixer::WriteString<StringFixer::##mode>(dst, src); \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);
+
+	// Check reading of null-terminated string into larger buffer
+	ReadTest(nullTerminated, dst1, src1, "X ");
+	ReadTest(nullTerminated, dst1, src2, "XYZ");
+	ReadTest(nullTerminated, dst1, src3, "XYZ");
+
+	// Check reading of string that should be null-terminated, but is maybe too long to still hold the null character.
+	ReadTest(maybeNullTerminated, dst1, src1, "X ");
+	ReadTest(maybeNullTerminated, dst1, src2, "XYZ ");
+	ReadTest(maybeNullTerminated, dst1, src3, "XYZ!");
+
+	// Check reading of space-padded strings with ignored last character
+	ReadTest(spacePaddedNull, dst1, src1, "X");
+	ReadTest(spacePaddedNull, dst1, src2, "XYZ");
+	ReadTest(spacePaddedNull, dst1, src3, "XYZ");
+
+	// Check reading of space-padded strings
+	ReadTest(spacePadded, dst1, src1, "X  X");
+	ReadTest(spacePadded, dst1, src2, "XYZ");
+	ReadTest(spacePadded, dst1, src3, "XYZ!");
+
+	///////////////////////////////
+
+	// Check reading of null-terminated string into smaller buffer
+	ReadTest(nullTerminated, dst2, src1, "X ");
+	ReadTest(nullTerminated, dst2, src2, "XY");
+	ReadTest(nullTerminated, dst2, src3, "XY");
+
+	// Check reading of string that should be null-terminated, but is maybe too long to still hold the null character.
+	ReadTest(maybeNullTerminated, dst2, src1, "X ");
+	ReadTest(maybeNullTerminated, dst2, src2, "XY");
+	ReadTest(maybeNullTerminated, dst2, src3, "XY");
+
+	// Check reading of space-padded strings with ignored last character
+	ReadTest(spacePaddedNull, dst2, src1, "X");
+	ReadTest(spacePaddedNull, dst2, src2, "XY");
+	ReadTest(spacePaddedNull, dst2, src3, "XY");
+
+	// Check reading of space-padded strings
+	ReadTest(spacePadded, dst2, src1, "X");
+	ReadTest(spacePadded, dst2, src2, "XY");
+	ReadTest(spacePadded, dst2, src3, "XY");
+
+	///////////////////////////////
+
+	// Check writing of null-terminated string into larger buffer
+	WriteTest(nullTerminated, dst1, src1, "X ");
+	WriteTest(nullTerminated, dst1, src2, "XYZ ");
+	WriteTest(nullTerminated, dst1, src3, "XYZ!");
+
+	// Check writing of string that should be null-terminated, but is maybe too long to still hold the null character.
+	WriteTest(maybeNullTerminated, dst1, src1, "X ");
+	WriteTest(maybeNullTerminated, dst1, src2, "XYZ ");
+	WriteTest(maybeNullTerminated, dst1, src3, "XYZ!");
+
+	// Check writing of space-padded strings with last character set to null
+	WriteTest(spacePaddedNull, dst1, src1, "X    ");
+	WriteTest(spacePaddedNull, dst1, src2, "XYZ  ");
+	WriteTest(spacePaddedNull, dst1, src3, "XYZ! ");
+
+	// Check writing of space-padded strings
+	WriteTest(spacePadded, dst1, src1, "X     ");
+	WriteTest(spacePadded, dst1, src2, "XYZ   ");
+	WriteTest(spacePadded, dst1, src3, "XYZ!  ");
+
+	///////////////////////////////
+
+	// Check writing of null-terminated string into smaller buffer
+	WriteTest(nullTerminated, dst2, src1, "X ");
+	WriteTest(nullTerminated, dst2, src2, "XY");
+	WriteTest(nullTerminated, dst2, src3, "XY");
+
+	// Check writing of string that should be null-terminated, but is maybe too long to still hold the null character.
+	WriteTest(maybeNullTerminated, dst2, src1, "X ");
+	WriteTest(maybeNullTerminated, dst2, src2, "XYZ");
+	WriteTest(maybeNullTerminated, dst2, src3, "XYZ");
+
+	// Check writing of space-padded strings with last character set to null
+	WriteTest(spacePaddedNull, dst2, src1, "X ");
+	WriteTest(spacePaddedNull, dst2, src2, "XY");
+	WriteTest(spacePaddedNull, dst2, src3, "XY");
+
+	// Check writing of space-padded strings
+	WriteTest(spacePadded, dst2, src1, "X  ");
+	WriteTest(spacePadded, dst2, src2, "XYZ");
+	WriteTest(spacePadded, dst2, src3, "XYZ");
+
+	///////////////////////////////
+
+	// Test FixNullString()
+	StringFixer::FixNullString(src1);
+	StringFixer::FixNullString(src2);
+	StringFixer::FixNullString(src3);
+	VERIFY_EQUAL_NONCONT(strncmp(src1, "X ", CountOf(src1)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(src2, "XYZ", CountOf(src2)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(src3, "XYZ", CountOf(src3)), 0);
+
+#undef ReadTest
+#undef WriteTest
+
+}
 
 }; //Namespace MptTest
 

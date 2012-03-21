@@ -1336,66 +1336,6 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 }
 
 
-#ifndef NO_PACKING
-UINT CSoundFile::PackSample(int &sample, int next)
-//------------------------------------------------
-{
-	UINT i = 0;
-	int delta = next - sample;
-	if (delta >= 0)
-	{
-		for (i=0; i<7; i++) if (delta <= (int)CompressionTable[i+1]) break;
-	} else
-	{
-		for (i=8; i<15; i++) if (delta >= (int)CompressionTable[i+1]) break;
-	}
-	sample += (int)CompressionTable[i];
-	return i;
-}
-
-
-bool CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result/*=NULL*/)
-//--------------------------------------------------------------------------------------------
-{
-	int pos, old, oldpos, besttable = 0;
-	DWORD dwErr, dwTotal, dwResult;
-	int i,j;
-	
-	if (result) *result = 0;
-	if ((!pSample) || (nLen < 1024)) return false;
-	// Try packing with different tables
-	dwResult = 0;
-	for (j=1; j<MAX_PACK_TABLES; j++)
-	{
-		memcpy(CompressionTable, UnpackTable[j], 16);
-		dwErr = 0;
-		dwTotal = 1;
-		old = pos = oldpos = 0;
-		for (i=0; i<(int)nLen; i++)
-		{
-			int s = (int)pSample[i];
-			PackSample(pos, s);
-			dwErr += abs(pos - oldpos);
-			dwTotal += abs(s - old);
-			old = s;
-			oldpos = pos;
-		}
-		dwErr = _muldiv(dwErr, 100, dwTotal);
-		if (dwErr >= dwResult)
-		{
-			dwResult = dwErr;
-			besttable = j;
-		}
-	}
-	memcpy(CompressionTable, UnpackTable[besttable], 16);
-	if (result)
-	{
-		if (dwResult > 100) *result	= 100; else *result = (BYTE)dwResult;
-	}
-	return (dwResult >= nPacking);
-}
-#endif // NO_PACKING
-
 #ifndef MODPLUG_NO_FILESAVE
 
 UINT CSoundFile::WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT nMaxLen) const
@@ -1415,35 +1355,6 @@ UINT CSoundFile::WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT n
 // -! NEW_FEATURE#0023
 	switch(nFlags)
 	{
-#ifndef NO_PACKING
-	// 3: 4-bit ADPCM data
-	case RS_ADPCM4:
-		{
-			int pos; 
-			len = (nLen + 1) / 2;
-			if(f) fwrite(CompressionTable, 16, 1, f);
-			bufcount = 0;
-			pos = 0;
-			for (UINT j=0; j<len; j++)
-			{
-				BYTE b;
-				// Sample #1
-				b = PackSample(pos, (int)pSample[j*2]);
-				// Sample #2
-				b |= PackSample(pos, (int)pSample[j*2+1]) << 4;
-				buffer[bufcount++] = (char)b;
-				if (bufcount >= sizeof(buffer))
-				{
-					if(f) fwrite(buffer, 1, bufcount, f);
-					bufcount = 0;
-				}
-			}
-			if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
-			len += 16;
-		}
-		break;
-#endif // NO_PACKING
-
 	// 16-bit samples
 	case RS_PCM16U:
 	case RS_PCM16D:
@@ -2355,7 +2266,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 		UINT jmax = Patterns[nPat].GetNumRows() * GetNumChannels();
 		for (UINT j=0; j<jmax; j++, p++)
 		{
-			if ((p->note) && (p->note <= NOTE_MAX) && (!p->IsPcNote()))
+			if(p->IsNote())
 			{
 				if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 				{

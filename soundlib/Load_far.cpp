@@ -21,8 +21,9 @@
 typedef struct FARHEADER1
 {
 	DWORD id;				// file magic FAR=
-	CHAR songname[40];		// songname
-	CHAR magic2[3];			// 13,10,26
+	char songname[32];		// songname
+	uint8 reserved[8];
+	char eofMagic[3];		// 13,10,26
 	WORD headerlen;			// remaining length of header in bytes
 	BYTE version;			// 0xD1
 	BYTE onoff[16];
@@ -71,8 +72,12 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	UINT headerlen;
 	BYTE samplemap[8];
 
-	if ((!lpStream) || (dwMemLength < 1024) || (LittleEndian(pmh1->id) != FARFILEMAGIC)
-	 || (pmh1->magic2[0] != 13) || (pmh1->magic2[1] != 10) || (pmh1->magic2[2] != 26)) return false;
+	if ((!lpStream) || (dwMemLength < 1024) || (pmh1->id != LittleEndian(FARFILEMAGIC))
+	 || (pmh1->eofMagic[0] != 13) || (pmh1->eofMagic[1] != 10) || (pmh1->eofMagic[2] != 26))
+	{
+		return false;
+	}
+
 	headerlen = LittleEndianW(pmh1->headerlen);
 	pmh1->stlen = LittleEndianW( pmh1->stlen ); /* inplace byteswap -- Toad */
 	if ((headerlen >= dwMemLength) || (dwMemPos + pmh1->stlen + sizeof(FARHEADER2) >= dwMemLength)) return false;
@@ -86,8 +91,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 
-	memcpy(m_szNames[0], pmh1->songname, 31);
-	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pmh1->songname);
 
 	// Channel Setting
 	for (UINT nchpan=0; nchpan<16; nchpan++)
@@ -244,9 +248,10 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
 		dwMemPos += sizeof(FARSAMPLE);
 		m_nSamples = ismp + 1;
-		memcpy(m_szNames[ismp+1], pfs->samplename, 31);
-		StringFixer::SpaceToNullStringFixed<31>(m_szNames[ismp + 1]);
-		const DWORD length = LittleEndian( pfs->length );
+
+		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[ismp+1], pfs->samplename);
+
+		const DWORD length = LittleEndian(pfs->length);
 		pSmp->nLength = length;
 		pSmp->nLoopStart = LittleEndian(pfs->reppos) ;
 		pSmp->nLoopEnd = LittleEndian(pfs->repend) ;

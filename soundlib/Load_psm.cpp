@@ -187,8 +187,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		switch(chunkID)
 		{
 		case PSMCHUNKID_TITL: // "TITL" - Song Title
-			memcpy(m_szNames[0], lpStream + dwMemPos, (chunkSize < 31) ? chunkSize : 31);
-			StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + dwMemPos), chunkSize);
 			break;
 
 		case PSMCHUNKID_SDFT: // "SDFT" - Format info (song data starts here)
@@ -221,8 +220,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				PSMSUBSONG subsong;
 				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
-				memcpy(subsong.songName, &pSong->songType, 9); // subsong name
-				StringFixer::SpaceToNullStringFixed<9>(subsong.songName);
+				StringFixer::ReadString<StringFixer::nullTerminated>(subsong.songName, pSong->songType); // subsong name
 
 				DWORD dwChunkPos = dwMemPos + sizeof(PSMSONGHEADER);
 
@@ -446,10 +444,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				PSMOLDSAMPLEHEADER *pSample = (PSMOLDSAMPLEHEADER *)(lpStream + dwMemPos);
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
-				memcpy(m_szNames[smp], pSample->sampleName, 31);
-				StringFixer::SpaceToNullStringFixed<31>(m_szNames[smp]);
-				memcpy(Samples[smp].filename, pSample->fileName, 8);
-				StringFixer::SpaceToNullStringFixed<8>(Samples[smp].filename);
+				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], pSample->sampleName);
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[smp].filename, pSample->fileName);
 
 				Samples[smp].nGlobalVol = 0x40;
 				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
@@ -470,10 +466,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				PSMNEWSAMPLEHEADER *pSample = (PSMNEWSAMPLEHEADER *)(lpStream + dwMemPos);
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
-				memcpy(m_szNames[smp], pSample->sampleName, 31);
-				StringFixer::SpaceToNullStringFixed<31>(m_szNames[smp]);
-				memcpy(Samples[smp].filename, pSample->fileName, 8);
-				StringFixer::SpaceToNullStringFixed<8>(Samples[smp].filename);
+				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], pSample->sampleName);
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[smp].filename, pSample->fileName);
 
 				Samples[smp].nGlobalVol = 0x40;
 				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
@@ -851,18 +845,18 @@ struct PSM16HEADER
 
 struct PSM16SMPHEADER
 {
-	uint8 filename[13];	// null-terminated
-	uint8 name[24];		// dito
-	uint32 offset;		// in file
-	uint32 memoffset;	// not used
-	uint16 sampleNumber;// 1 ... 255
-	uint8  flags;		// sample flag bitfield
-	uint32 length;		// in bytes
-	uint32 loopStart;	// in samples?
-	uint32 loopEnd;		// in samples?
-	int8   finetune;	// Low nibble = MOD finetune, high nibble = transpose (7 = center)
-	uint8  volume;		// default volume
-	uint16 c2freq;		// Middle-C frequency, which has to be combined with the finetune and transpose.
+	char   filename[13];	// null-terminated
+	char   name[24];		// dito
+	uint32 offset;			// in file
+	uint32 memoffset;		// not used
+	uint16 sampleNumber;	// 1 ... 255
+	uint8  flags;			// sample flag bitfield
+	uint32 length;			// in bytes
+	uint32 loopStart;		// in samples?
+	uint32 loopEnd;			// in samples?
+	int8   finetune;		// Low nibble = MOD finetune, high nibble = transpose (7 = center)
+	uint8  volume;			// default volume
+	uint16 c2freq;			// Middle-C frequency, which has to be combined with the finetune and transpose.
 };
 
 struct PSM16PATHEADER
@@ -902,8 +896,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nDefaultTempo = shdr->songTempo;
 
 	MemsetZero(m_szNames);
-	memcpy(m_szNames[0], shdr->songName, 31);
-	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], shdr->songName);
 
 	// Read orders
 	dwMemPos = LittleEndian(shdr->orderOffset);
@@ -942,10 +935,8 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			SAMPLEINDEX iSmp = LittleEndianW(smphdr->sampleNumber);
 			m_nSamples = max(m_nSamples, iSmp);
 
-			memcpy(m_szNames[iSmp], smphdr->name, 24);
-			StringFixer::SpaceToNullStringFixed<24>(m_szNames[iSmp]);
-			memcpy(Samples[iSmp].filename, smphdr->filename, 13);
-			StringFixer::SpaceToNullStringFixed<13>(Samples[iSmp].filename);
+			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[iSmp], smphdr->name);
+			StringFixer::ReadString<StringFixer::nullTerminated>(Samples[iSmp].filename, smphdr->filename);
 
 			Samples[iSmp].nLength = LittleEndian(smphdr->length);
 			Samples[iSmp].nLoopStart = LittleEndian(smphdr->loopStart);

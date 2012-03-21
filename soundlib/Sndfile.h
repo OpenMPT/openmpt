@@ -401,10 +401,10 @@ public:
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
 	UINT WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT nMaxLen=0) const;
-	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
-	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
-	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
-	bool SaveIT(LPCSTR lpszFileName, UINT nPacking=0, const bool compatExport = false);
+	bool SaveXM(LPCSTR lpszFileName, bool compatibilityExport = false);
+	bool SaveS3M(LPCSTR lpszFileName);
+	bool SaveMod(LPCSTR lpszFileName);
+	bool SaveIT(LPCSTR lpszFileName, bool compatibilityExport = false);
 	bool SaveITProject(LPCSTR lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, UINT nInstruments) const;
@@ -585,8 +585,6 @@ public:
 	
 	// Read/Write sample functions
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
-	UINT PackSample(int &sample, int next);
-	bool CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result=NULL);
 	UINT ReadSample(ModSample *pSmp, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
 	bool DestroySample(SAMPLEINDEX nSample);
 
@@ -611,34 +609,32 @@ public:
 	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed) const;
 	SAMPLEINDEX RemoveSelectedSamples(const vector<bool> &keepSamples);
 	void AdjustSampleLoop(ModSample *pSmp);
+
 	// Samples file I/O
-	bool ReadSampleFromFile(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
-	bool ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadS3ISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadAIFFSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadXISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
+	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadAIFFSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	UINT ReadITSSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
+	bool Read8SVXSample(UINT nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const;
+	bool SaveRAWSample(UINT nSample, const LPCSTR lpszFileName) const;
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-//	BOOL ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
-	UINT ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
-// -! NEW_FEATURE#0027
-
-	bool Read8SVXSample(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool SaveWAVSample(UINT nSample, LPCSTR lpszFileName) const;
-	bool SaveRAWSample(UINT nSample, LPCSTR lpszFileName) const;
 	// Instrument file I/O
-	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
-	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const;
-	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName) const;
+	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const;
+	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const;
+
 	// I/O from another sound file
 	bool ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile *pSrcSong, INSTRUMENTINDEX sourceInstr);
 	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *pSrcSong, SAMPLEINDEX sourceSample);
+
 	// Period/Note functions
 	UINT GetNoteFromPeriod(UINT period) const;
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;

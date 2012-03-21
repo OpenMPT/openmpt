@@ -198,29 +198,30 @@ WORD CSoundFile::ModSaveCommand(const ModCommand *m, const bool bXM, const bool 
 
 #pragma pack(push, 1)
 
-typedef struct _MODSAMPLEHEADER
+struct MODSampleHeader
 {
-	CHAR name[22];
-	WORD length;
-	BYTE finetune;
-	BYTE volume;
-	WORD loopstart;
-	WORD looplen;
-} MODSAMPLEHEADER, *PMODSAMPLEHEADER;
+	char   name[22];
+	uint16 length;
+	uint8  finetune;
+	uint8  volume;
+	uint16 loopstart;
+	uint16 looplen;
+};
 
-typedef struct _MODMAGIC
+
+struct MODHeader
 {
-	BYTE nOrders;
-	BYTE nRestartPos;
-	BYTE Orders[128];
-    char Magic[4];
-} MODMAGIC, *PMODMAGIC;
+	uint8 nOrders;
+	uint8 nRestartPos;
+	uint8 Orders[128];
+	char  Magic[4];
+};
 
 #pragma pack(pop)
 
-bool IsMagic(const LPCSTR s1, const LPCSTR s2)
+bool IsMagic(const char *s1, const char *s2)
 {
-	return ((*(DWORD *)s1) == (*(DWORD *)s2));
+	return (*reinterpret_cast<const uint32 *>(s1) == *reinterpret_cast<const uint32 *>(s2));
 }
 
 // Functor for fixing VBlank MODs and MODs with 7-bit panning
@@ -261,9 +262,9 @@ struct FixMODPatterns
 bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-    char s[1024];
+	char s[1024];
 	DWORD dwMemPos, dwTotalSampleLen;
-	PMODMAGIC pMagic;
+	const MODHeader *header;
 	UINT nErr;
 
 	if ((!lpStream) || (dwMemLength < 0x600)) return false;
@@ -271,10 +272,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	m_nSamples = 31;
 	m_nChannels = 4;
 
-	pMagic = (PMODMAGIC)(lpStream + dwMemPos + sizeof(MODSAMPLEHEADER) * 31);
+	header = reinterpret_cast<const MODHeader *>(lpStream + dwMemPos + sizeof(MODSampleHeader) * 31);
 
 	// Check Mod Magic
-	memcpy(s, pMagic->Magic, 4);
+	memcpy(s, header->Magic, 4);
 	if ((IsMagic(s, "M.K.")) || (IsMagic(s, "M!K!"))
 		|| (IsMagic(s, "M&K!")) || (IsMagic(s, "N.T.")) || (IsMagic(s, "FEST"))) m_nChannels = 4;
 	else if ((IsMagic(s, "CD81")) || (IsMagic(s, "OKTA"))) m_nChannels = 8;
@@ -297,12 +298,12 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	dwTotalSampleLen = 0;
 	for	(UINT i=1; i<=m_nSamples; i++)
 	{
-		PMODSAMPLEHEADER pms = (PMODSAMPLEHEADER)(lpStream+dwMemPos);
+		const MODSampleHeader *pms = reinterpret_cast<const MODSampleHeader *>(lpStream + dwMemPos);
 		ModSample *psmp = &Samples[i];
 		UINT loopstart, looplen;
 
-		memcpy(m_szNames[i], pms->name, 22);
-		StringFixer::SpaceToNullStringFixed<22>(m_szNames[i]);
+		StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[i], pms->name);
+
 		psmp->uFlags = 0;
 		psmp->nLength = BigEndianW(pms->length)*2;
 		dwTotalSampleLen += psmp->nLength;
@@ -344,17 +345,20 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 				psmp->uFlags |= CHN_LOOP;
 			}
 		}
-		dwMemPos += sizeof(MODSAMPLEHEADER);
+		dwMemPos += sizeof(MODSampleHeader);
 	}
+
 	if ((m_nSamples == 15) && (dwTotalSampleLen > dwMemLength * 4)) return false;
-	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
-	dwMemPos += sizeof(MODMAGIC);
+
+	header = reinterpret_cast<const MODHeader *>(lpStream + dwMemPos);
+	dwMemPos += sizeof(MODHeader);
+
 	if (m_nSamples == 15) dwMemPos -= 4;
-	Order.ReadAsByte(pMagic->Orders, 128, 128);
+	Order.ReadAsByte(header->Orders, 128, 128);
 
 	UINT nbp, nbpbuggy, nbpbuggy2, norders;
 
-	norders = pMagic->nOrders;
+	norders = header->nOrders;
 	if ((!norders) || (norders > 0x80))
 	{
 		norders = 0x80;
@@ -395,12 +399,12 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	for(UINT iend = norders; iend < 0x80; iend++) Order[iend] = Order.GetInvalidPatIndex();
 
 	norders--;
-	m_nRestartPos = pMagic->nRestartPos;
+	m_nRestartPos = header->nRestartPos;
 	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;
 	if (m_nRestartPos + 1u >= norders) m_nRestartPos = 0;
 	if (!nbp) return false;
 	DWORD dwWowTest = dwTotalSampleLen+dwMemPos;
-	if ((IsMagic(pMagic->Magic, "M.K.")) && (dwWowTest + nbp*8*256 == dwMemLength)) m_nChannels = 8;
+	if ((IsMagic(header->Magic, "M.K.")) && (dwWowTest + nbp*8*256 == dwMemLength)) m_nChannels = 8;
 	if ((nbp != nbpbuggy) && (dwWowTest + nbp*m_nChannels*256 != dwMemLength))
 	{
 		if (dwWowTest + nbpbuggy*m_nChannels*256 == dwMemLength) nbp = nbpbuggy;
@@ -418,8 +422,9 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultTempo = 125;
 	m_nMinPeriod = 14 << 2;
 	m_nMaxPeriod = 3424 << 2;
-	memcpy(m_szNames[0], lpStream, 20);
-	StringFixer::SpaceToNullStringFixed<20>(m_szNames[0]);
+
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], reinterpret_cast<const char *>(lpStream), 20);
+
 	// Setup channel pan positions and volume
 	SetupMODPanning();
 
@@ -508,6 +513,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			if (!_strnicmp((LPSTR)(lpStream + dwMemPos), "ADPCM", 5))
 			{
+				// MODPlugin :(
 				flags = RS_ADPCM4;
 				dwMemPos += 5;
 			}
@@ -543,8 +549,8 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 #include "../mptrack/moddoc.h"
 #endif	// MODPLUG_TRACKER
 
-bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
-//----------------------------------------------------------
+bool CSoundFile::SaveMod(LPCSTR lpszFileName)
+//-------------------------------------------
 {
 	BYTE insmap[32];
 	UINT inslen[32];
@@ -700,20 +706,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	{
 		const ModSample *pSmp = &Samples[insmap[ismpd]];
 
-		UINT flags = RS_PCM8S;
-#ifndef NO_PACKING
-		if (!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
-		{
-			if ((nPacking) && (CanPackSample(pSmp->pSample, inslen[ismpd], nPacking)))
-			{
-				fwrite("ADPCM", 1, 5, f);
-				flags = RS_ADPCM4;
-			}
-		}
-#endif
 		const long sampleStart = ftell(f);
-
-		const UINT writtenBytes = WriteSample(f, pSmp, flags, inslen[ismpd]);
+		const UINT writtenBytes = WriteSample(f, pSmp, RS_PCM8S, inslen[ismpd]);
 
 		if((pSmp->uFlags & CHN_LOOP) == 0)
 		{
@@ -726,7 +720,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 		}
 
 		// write padding byte if the sample size is odd.
-		if((pSmp->nLength & 1) && !nPacking)
+		if((pSmp->nLength % 2) != 0)
 		{
 			int8 padding = 0;
 			fwrite(&padding, 1, 1, f);

@@ -120,8 +120,9 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			ChnSettings[iPan].nPan = psong->panpos[iPan] << 1;
 		}
 	}
-	memcpy(m_szNames[0], psong->songname, 28);
-	StringFixer::SpaceToNullStringFixed<28>(m_szNames[0]);
+
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], psong->songname);
+
 	nPat = 0;
 	nSmp = 1;
 	while (dwMemPos < dwMemLength - 8)
@@ -214,11 +215,12 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if (dwMemPos + pSmp->inst_len >= dwMemLength - 8) break;
 			DWORD dwPos = dwMemPos + sizeof(DSMSAMPLE);
 			dwMemPos += 8 + pSmp->inst_len;
-			memcpy(m_szNames[nSmp], pSmp->samplename, 28);
-			StringFixer::SpaceToNullStringFixed<28>(m_szNames[nSmp]);
+
 			ModSample *psmp = &Samples[nSmp];
-			memcpy(psmp->filename, pSmp->filename, 13);
-			StringFixer::SpaceToNullStringFixed<13>(psmp->filename);
+
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp], pSmp->samplename);
+			StringFixer::ReadString<StringFixer::nullTerminated>(psmp->filename, pSmp->filename);
+
 			psmp->nGlobalVol = 64;
 			psmp->nC5Speed = pSmp->c2spd;
 			psmp->uFlags = (WORD)((pSmp->flags & 1) ? CHN_LOOP : 0);

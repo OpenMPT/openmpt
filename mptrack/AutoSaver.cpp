@@ -277,22 +277,26 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 		switch (pModDoc->GetModType())
 		{
 		case MOD_TYPE_MOD:
-			success = pSndFile->SaveMod(fileName, 0); 
+			success = pSndFile->SaveMod(fileName); 
 			break;
+
 		case MOD_TYPE_S3M:
-			success = pSndFile->SaveS3M(fileName, 0); 
+			success = pSndFile->SaveS3M(fileName); 
 			break;
+
 		case MOD_TYPE_XM:
-			success = pSndFile->SaveXM(fileName, 0); 
+			success = pSndFile->SaveXM(fileName); 
 			break;
+
 		case MOD_TYPE_IT:
 			success = (pSndFile->m_dwSongFlags & SONG_ITPROJECT) ? 
-				pSndFile->SaveITProject(fileName) : 
-			pSndFile->SaveIT(fileName, 0); 
+				pSndFile->SaveITProject(fileName) :
+				pSndFile->SaveIT(fileName); 
 			break;
+
 		case MOD_TYPE_MPT:
 			//Using IT save function also for MPT.
-			success = pSndFile->SaveIT(fileName, 0);
+			success = pSndFile->SaveIT(fileName);
 			break;
 			//default:
 			//Do nothing

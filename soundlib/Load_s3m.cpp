@@ -285,8 +285,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	dwMemPos = sizeof(S3MFILEHEADER);
 	m_nType = MOD_TYPE_S3M;
 	MemsetZero(m_szNames);
-	memcpy(m_szNames[0], psfh.name, 28);
-	StringFixer::SpaceToNullStringFixed<28>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[0], psfh.name);
 
 	// Speed
 	m_nDefaultSpeed = psfh.speed;
@@ -387,14 +386,12 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		if(nInd > dwMemLength || 0x50 > dwMemLength - nInd) continue;
 
 		memcpy(s, lpStream + nInd, 0x50);
-		memcpy(Samples[iSmp].filename, s+1, 12);
-		StringFixer::SpaceToNullStringFixed<12>(Samples[iSmp].filename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[iSmp].filename, reinterpret_cast<const char *>(s + 1), 12);
 
 		insflags[iSmp - 1] = s[0x1F];
 		inspack[iSmp - 1] = s[0x1E];
 		s[0x4C] = 0;
-		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
-		StringFixer::SpaceToNullStringFixed<28>(m_szNames[iSmp]);
+		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[iSmp], reinterpret_cast<const char*>(s + 0x30), 28);
 
 		if ((s[0] == S3I_TYPE_PCM) && (s[0x4E] == 'R') && (s[0x4F] == 'S'))
 		{
@@ -529,7 +526,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;
 		if (insflags[iRaw-1] & 2) flags |= RSF_STEREO;
-		if (inspack[iRaw-1] == 4) flags = RS_ADPCM4;
+		if (inspack[iRaw-1] == 4) flags = RS_ADPCM4;		// MODPlugin :(
 		if(smpdatapos[iRaw - 1] < dwMemLength)
 		{
 			dwMemPos = smpdatapos[iRaw - 1];
@@ -564,8 +561,8 @@ static const BYTE S3MFiller[16] =
 };
 
 
-bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
-//----------------------------------------------------------
+bool CSoundFile::SaveS3M(LPCSTR lpszFileName)
+//-------------------------------------------
 {
 	FILE *f;
 	BYTE header[0x60];
@@ -761,9 +758,12 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 				}
 			}
 		}
-		memcpy(insex[i-1].dosname, pSmp->filename, 12);
-		memcpy(insex[i-1].name, m_szNames[i], 28);
+
+		StringFixer::WriteString<StringFixer::maybeNullTerminated>(insex[i - 1].dosname, pSmp->filename);
+		StringFixer::WriteString<StringFixer::nullTerminated>(insex[i-1].name, m_szNames[i]);
+
 		memcpy(insex[i-1].scrs, "SCRS", 4);
+
 		insex[i-1].hmem = (BYTE)((DWORD)ofs >> 20);
 		insex[i-1].memseg = (WORD)((DWORD)ofs >> 4);
 		if (pSmp->pSample)
@@ -778,30 +778,19 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 				insex[i-1].finetune = min(pSmp->nC5Speed, 0xFFFF);
 			else
 				insex[i-1].finetune = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
+
 			UINT flags = RS_PCM8U;
-#ifndef NO_PACKING
-			if (nPacking)
+			if (pSmp->uFlags & CHN_16BIT)
 			{
-				if ((!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
-				 && (CanPackSample(pSmp->pSample, pSmp->nLength, nPacking)))
-				{
-					insex[i-1].pack = 4;
-					flags = RS_ADPCM4;
-				}
-			} else
-#endif // NO_PACKING
-			{
-				if (pSmp->uFlags & CHN_16BIT)
-				{
-					insex[i-1].flags |= 4;
-					flags = RS_PCM16U;
-				}
-				if (pSmp->uFlags & CHN_STEREO)
-				{
-					insex[i-1].flags |= 2;
-					flags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16U : RS_STPCM8U;
-				}
+				insex[i-1].flags |= 4;
+				flags = RS_PCM16U;
 			}
+			if (pSmp->uFlags & CHN_STEREO)
+			{
+				insex[i-1].flags |= 2;
+				flags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16U : RS_STPCM8U;
+			}
+
 			DWORD len = WriteSample(f, pSmp, flags);
 			if (len & 0x0F)
 			{

@@ -73,8 +73,7 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 		oktsmp.type = BigEndianW(oktsmp.type);
 
 		MemsetZero(sample);
-		strncpy(pSndFile->m_szNames[nSmp], oktsmp.name, 20);
-		StringFixer::SpaceToNullStringFixed<20>(pSndFile->m_szNames[nSmp]);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(pSndFile->m_szNames[nSmp], oktsmp.name);
 
 		sample.nC5Speed = 8287;
 		sample.nGlobalVol = 64;

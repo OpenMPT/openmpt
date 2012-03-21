@@ -105,8 +105,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Song name
 	MemsetZero(m_szNames);
-	memcpy(m_szNames[0], pHeader->SongTitle, 32);
-	StringFixer::SpaceToNullStringFixed<31>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pHeader->SongTitle);
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
@@ -166,10 +165,8 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		// Sample header
 
-		memcpy(m_szNames[iSmp], pSample->SamName, 32);
-		StringFixer::SpaceToNullStringFixed<31>(m_szNames[iSmp]);
-		memcpy(Samples[iSmp].filename, pSample->FileName, 12);
-		StringFixer::SpaceToNullStringFixed<12>(Samples[iSmp].filename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[iSmp], pSample->SamName);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[iSmp].filename, pSample->FileName);
 
 		Samples[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
 		Samples[iSmp].nGlobalVol = 256; // not supported in this format

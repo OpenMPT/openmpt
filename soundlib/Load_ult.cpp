@@ -20,7 +20,19 @@ enum
 };
 
 #pragma pack(push, 1)
-struct ULT_SAMPLE
+
+struct UltFileHeader
+{
+	char  signature[14];		// "MAS_UTrack_V00"
+	uint8 version;				// '1'...'4'
+	char  songName[32];			// Song Name, not guaranteed to be null-terminated
+	uint8 messageLength;		// Number of Lines
+};
+
+STATIC_ASSERT(sizeof(UltFileHeader) == 48);
+
+
+struct UltSample
 {
 	char   name[32];
 	char   filename[12];
@@ -33,7 +45,9 @@ struct ULT_SAMPLE
 	uint16 speed;		// only exists for 1.4+
 	int16  finetune;
 };
-STATIC_ASSERT(sizeof(ULT_SAMPLE) >= 64);
+
+STATIC_ASSERT(sizeof(UltSample) == 66);
+
 #pragma pack(pop)
 
 /* Unhandled effects:
@@ -311,33 +325,30 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 //---------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0;
-	uint8 ult_version;
+
+	ASSERT_CAN_READ(sizeof(UltFileHeader));
+	const UltFileHeader *fileHeader = reinterpret_cast<const UltFileHeader *>(lpStream);
 
 	// Tracker ID
-	ASSERT_CAN_READ(15);
-	if (memcmp(lpStream, "MAS_UTrack_V00", 14) != 0)
+	if(fileHeader->version < '1'
+		|| fileHeader->version > '4'
+		|| memcmp(fileHeader->signature, "MAS_UTrack_V00", sizeof(fileHeader->signature)) != 0)
+	{
 		return false;
-	dwMemPos += 14;
-	ult_version = lpStream[dwMemPos++];
-	if (ult_version < '1' || ult_version > '4')
-		return false;
-	ult_version -= '0';
+	}
 
-	ASSERT_CAN_READ(32);
-	memcpy(m_szNames[0], lpStream + dwMemPos, 32);
-	StringFixer::SetNullTerminator(m_szNames[0]);
-	dwMemPos += 32;
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader->songName);
+
+	dwMemPos += sizeof(UltFileHeader);
 
 	m_nType = MOD_TYPE_ULT;
 	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
-	ASSERT_CAN_READ(1);
-	uint8 nNumLines = (uint8)lpStream[dwMemPos++];
-	ASSERT_CAN_READ((DWORD)(nNumLines * 32));
+	ASSERT_CAN_READ((DWORD)(fileHeader->messageLength) * 32);
 	// read "nNumLines" lines, each containing 32 characters.
-	ReadFixedLineLengthMessage(lpStream + dwMemPos, nNumLines * 32, 32, 0);
-	dwMemPos += nNumLines * 32;
+	ReadFixedLineLengthMessage(lpStream + dwMemPos, fileHeader->messageLength * 32, 32, 0);
+	dwMemPos += fileHeader->messageLength * 32;
 
 	ASSERT_CAN_READ(1);
 	m_nSamples = (SAMPLEINDEX)lpStream[dwMemPos++];
@@ -346,14 +357,14 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 
 	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
 	{
-		ULT_SAMPLE ultSmp;
+		UltSample ultSmp;
 		ModSample *pSmp = &(Samples[nSmp + 1]);
 		// annoying: v4 added a field before the end of the struct
-		if(ult_version >= 4)
+		if(fileHeader->version >= '4')
 		{
-			ASSERT_CAN_READ(sizeof(ULT_SAMPLE));
-			memcpy(&ultSmp, lpStream + dwMemPos, sizeof(ULT_SAMPLE));
-			dwMemPos += sizeof(ULT_SAMPLE);
+			ASSERT_CAN_READ(sizeof(UltSample));
+			memcpy(&ultSmp, lpStream + dwMemPos, sizeof(UltSample));
+			dwMemPos += sizeof(UltSample);
 
 			ultSmp.speed = LittleEndianW(ultSmp.speed);
 		} else
@@ -371,10 +382,8 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 		ultSmp.size_start = LittleEndian(ultSmp.size_start);
 		ultSmp.size_end = LittleEndian(ultSmp.size_end);
 
-		memcpy(m_szNames[nSmp + 1], ultSmp.name, 32);
-		StringFixer::SetNullTerminator(m_szNames[nSmp + 1]);
-		memcpy(pSmp->filename, ultSmp.filename, 12);
-		StringFixer::SpaceToNullStringFixed<12>(pSmp->filename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp + 1], ultSmp.name);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(pSmp->filename, ultSmp.filename);
 
 		if(ultSmp.size_end <= ultSmp.size_start)
 			continue;
@@ -414,7 +423,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 	if(m_nChannels > MAX_BASECHANNELS || nNumPats > MAX_PATTERNS)
 		return false;
 
-	if(ult_version >= 3)
+	if(fileHeader->version >= '3')
 	{
 		ASSERT_CAN_READ(m_nChannels);
 		for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)

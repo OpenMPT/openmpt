@@ -749,11 +749,8 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 
 	ASSERT_CAN_READ_SAMPLE(1);
 	const size_t lenName = lpStream[dwMemPos++];
-	STATIC_ASSERT(MAX_SAMPLENAME > 30);
-	const size_t lenNameImport = min(30, lenName);
 	ASSERT_CAN_READ_SAMPLE(lenName);
-	memcpy(pSndFile->m_szNames[nSmp], lpStream + dwMemPos, lenNameImport);
-	StringFixer::SpaceToNullStringFixed(pSndFile->m_szNames[nSmp], lenNameImport);
+	StringFixer::ReadString<StringFixer::spacePadded>(pSndFile->m_szNames[nSmp], reinterpret_cast<const char *>(lpStream + dwMemPos), lenName);
 	dwMemPos += lenName;
 
 	ASSERT_CAN_READ_SAMPLE(sizeof(DMFCHUNK_SAMPLEHEADER));
@@ -797,8 +794,7 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 	{
 		// Read library name in version 8 files
 		ASSERT_CAN_READ_SAMPLE(8);
-		memcpy(sample.filename, lpStream + dwMemPos, 8);
-		StringFixer::SpaceToNullStringFixed<8>(sample.filename);
+		StringFixer::ReadString<StringFixer::spacePadded>(sample.filename, reinterpret_cast<const char *>(lpStream + dwMemPos), 8);
 		dwMemPos += 8;
 	}
 
@@ -828,8 +824,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	dwMemPos += sizeof(DMFHEADER);
 
-	memcpy(m_szNames[0], pHeader->songname, 30);
-	StringFixer::SpaceToNullStringFixed<30>(m_szNames[0]);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], pHeader->songname);
 	m_nChannels = 0;
 
 #ifdef MODPLUG_TRACKER

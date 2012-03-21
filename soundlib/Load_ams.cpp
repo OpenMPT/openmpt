@@ -112,34 +112,28 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read Song Name
 	if (dwMemPos + 1 >= dwMemLength) return true;
 	tmp = lpStream[dwMemPos++];
-	if (dwMemPos + tmp + 1 >= dwMemLength) return true;
-	tmp2 = (tmp < 32) ? tmp : 31;
-	if (tmp2) memcpy(m_szNames[0], lpStream + dwMemPos, tmp2);
-	StringFixer::SpaceToNullStringFixed(m_szNames[0], tmp2);
-	m_szNames[0][tmp2] = 0;
+	if (dwMemPos + tmp >= dwMemLength) return true;
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
+
 	dwMemPos += tmp;
 
 	// Read sample names
 	for (UINT sNam=1; sNam<=m_nSamples; sNam++)
 	{
-		if (dwMemPos + 32 >= dwMemLength) return true;
+		if (dwMemPos + 1 >= dwMemLength) return true;
 		tmp = lpStream[dwMemPos++];
-		tmp2 = (tmp < 32) ? tmp : 31;
-		if (tmp2) memcpy(m_szNames[sNam], lpStream+dwMemPos, tmp2);
-		StringFixer::SpaceToNullStringFixed(m_szNames[sNam], tmp2);
+		if (dwMemPos + tmp >= dwMemLength) return true;
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[sNam], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
 		dwMemPos += tmp;
 	}
 
 	// Read Channel names
 	for (UINT cNam=0; cNam<m_nChannels; cNam++)
 	{
-		if (dwMemPos + 32 >= dwMemLength) return true;
-		BYTE chnnamlen = lpStream[dwMemPos++];
-		if ((chnnamlen) && (chnnamlen < MAX_CHANNELNAME))
-		{
-			memcpy(ChnSettings[cNam].szName, lpStream + dwMemPos, chnnamlen);
-			StringFixer::SpaceToNullStringFixed(ChnSettings[cNam].szName, chnnamlen);
-		}
+		if (dwMemPos + 1 >= dwMemLength) return true;
+		uint8 chnnamlen = lpStream[dwMemPos++];
+		if (dwMemPos + tmp >= dwMemLength) return true;
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(ChnSettings[cNam].szName, reinterpret_cast<const char *>(lpStream + dwMemPos), chnnamlen);
 		dwMemPos += chnnamlen;
 	}
 

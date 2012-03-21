@@ -336,8 +336,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			pis.ConvertToMPT(Samples[nsmp]);
 
-			memcpy(m_szNames[nsmp], pis.name, 26);
-			StringFixer::SpaceToNullStringFixed<25>(m_szNames[nsmp]);
+			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nsmp], pis.name);
 
 			// Read sample data
 			ReadSample(&Samples[nsmp], pis.GetSampleFormat(), (LPSTR)(lpStream + dwMemPos), len);
@@ -622,8 +621,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			ITSample itss;
 			itss.ConvertToIT(Samples[nsmp], GetType());
 
-			memcpy(itss.name, m_szNames[nsmp], 26);
-			StringFixer::FixNullString(itss.name);
+			StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[nsmp]);
 
 			id = nsmp;
 			fwrite(&id, 1, sizeof(id), f);
