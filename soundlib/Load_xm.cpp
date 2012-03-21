@@ -606,7 +606,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	\
 	if((len > uint16_max - (UINT)x) && GetpModDoc()) /*Reaching the limits of file format?*/ \
 	{ \
- 		CString str; str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, i); \
+ 		CString str; str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, pat); \
 		GetpModDoc()->AddToLog(str); \
 		break; \
 	}
@@ -620,7 +620,6 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	//BYTE s[64*64*5];
 	vector<BYTE> s(64*64*5, 0);
 	BYTE xmph[9];
-	int i;
 	bool addChannel = false; // avoid odd channel count for FT2 compatibility 
 
 	XMFileHeader xmheader;
@@ -691,19 +690,19 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	}
 
 	// Writing patterns
-	for (i = 0; i < nPatterns; i++) if (Patterns[i])
+	for(PATTERNINDEX pat = 0; pat < nPatterns; pat++) if (Patterns[pat])
 	{
-		ModCommand *p = Patterns[i];
+		ModCommand *p = Patterns[pat];
 		UINT len = 0;
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
-		bool emptyPatNeedsFixing = (Patterns[i].GetNumRows() != 64);
+		bool emptyPatNeedsFixing = (Patterns[pat].GetNumRows() != 64);
 
 		MemsetZero(xmph);
 		xmph[0] = 9;
-		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
-		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
+		xmph[5] = (BYTE)(Patterns[pat].GetNumRows() & 0xFF);
+		xmph[6] = (BYTE)(Patterns[pat].GetNumRows() >> 8);
 
-		for (UINT j = m_nChannels * Patterns[i].GetNumRows(); j > 0; j--, p++)
+		for (UINT j = m_nChannels * Patterns[pat].GetNumRows(); j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
 			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
@@ -801,32 +800,70 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	{
 		MemsetZero(xmph);
 		xmph[0] = 9;
-		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
-		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
+		xmph[5] = (BYTE)(Patterns[pat].GetNumRows() & 0xFF);
+		xmph[6] = (BYTE)(Patterns[pat].GetNumRows() >> 8);
 		fwrite(xmph, 1, 9, f);
 	}
 
+	// Check which samples are referenced by which instruments (for assigning unreferenced samples to instruments)
+	vector<bool> sampleAssigned(GetNumSamples(), false);
+	for(INSTRUMENTINDEX ins = 1; ins <= GetNumInstruments(); ins++)
+	{
+		if(Instruments[ins] == nullptr)
+		{
+			continue;
+		}
+		const std::set<SAMPLEINDEX> referencedSamples = Instruments[ins]->GetSamples();
+		for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+		{
+			if(*sample <= GetNumSamples())
+			{
+				sampleAssigned[*sample - 1] = true;
+			}
+		}
+	}
+
 	// Writing instruments
-	for(i = 1; i <= writeInstruments; i++)
+	for(INSTRUMENTINDEX ins = 1; ins <= writeInstruments; ins++)
 	{
 		XMInstrumentHeader insHeader;
 		vector<SAMPLEINDEX> samples;
 
 		if(GetNumInstruments())
 		{
-			if(Instruments[i] != nullptr)
+			if(Instruments[ins] != nullptr)
 			{
 				// Convert instrument
-				insHeader.ConvertToXM(*Instruments[i], compatibilityExport);
+				insHeader.ConvertToXM(*Instruments[ins], compatibilityExport);
 
-				samples = insHeader.instrument.GetSampleList(*Instruments[i], compatibilityExport);
+				samples = insHeader.instrument.GetSampleList(*Instruments[ins], compatibilityExport);
 				if(samples.size() > 0 && samples[0] <= GetNumSamples())
 				{
 					// Copy over auto-vibrato settings of first sample
 					insHeader.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 				}
 
-				// XXX Try to save "instrument-less" samples as well.
+				vector<SAMPLEINDEX> additionalSamples;
+
+				// Try to save "instrument-less" samples as well by adding those after the "normal" samples of our sample.
+				// We look for unassigned samples directly after the samples assigned to our current instrument, so if
+				// f.e. sample 1 is assigned to instrument 1 and samples 2 to 10 aren't assigned to any instrument,
+				// we will assign those to sample 1. Any samples before the first referenced sample are going to be lost,
+				// but hey, I wrote this mostly for preserving instrument texts in existing modules, where we shouldn't encounter this situation...
+				for(vector<SAMPLEINDEX>::const_iterator sample = samples.begin(); sample != samples.end(); sample++)
+				{
+					SAMPLEINDEX smp = *sample;
+					while(smp < GetNumSamples()
+						&& !sampleAssigned[smp]		// zero-based
+						&& insHeader.numSamples < (compatibilityExport ? 16 : 32))
+					{
+						sampleAssigned[smp++] = true;		// Don't want to add this sample again.
+						additionalSamples.push_back(smp);	// Not zero-based :)
+						insHeader.numSamples++;
+					}
+				}
+
+				samples.insert(samples.end(), additionalSamples.begin(), additionalSamples.end());
 			} else
 			{
 				MemsetZero(insHeader);
@@ -836,8 +873,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			// Convert samples to instruments
 			MemsetZero(insHeader);
 			insHeader.numSamples = 1;
-			insHeader.instrument.ApplyAutoVibratoToXM(Samples[i], GetType());
-			samples.push_back(i);
+			insHeader.instrument.ApplyAutoVibratoToXM(Samples[ins], GetType());
+			samples.push_back(ins);
 		}
 
 		insHeader.Finalise();
@@ -848,29 +885,29 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		vector<UINT> sampleFlags(samples.size());
 
 		// Write Sample Headers
-		for(SAMPLEINDEX i = 0; i < samples.size(); i++)
+		for(SAMPLEINDEX smp = 0; smp < samples.size(); smp++)
 		{
 			XMSample xmSample;
-			if(samples[i] <= GetNumSamples())
+			if(samples[smp] <= GetNumSamples())
 			{
-				xmSample.ConvertToXM(Samples[samples[i]], GetType(), compatibilityExport);
+				xmSample.ConvertToXM(Samples[samples[smp]], GetType(), compatibilityExport);
 			} else
 			{
 				MemsetZero(xmSample);
 			}
-			sampleFlags[i] = xmSample.GetSampleFormat();
+			sampleFlags[smp] = xmSample.GetSampleFormat();
 
-			StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[i]]);
+			StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[smp]]);
 
 			fwrite(&xmSample, 1, sizeof(xmSample), f);
 		}
 
 		// Write Sample Data
-		for(SAMPLEINDEX i = 0; i < samples.size(); i++)
+		for(SAMPLEINDEX smp = 0; smp < samples.size(); smp++)
 		{
-			if(samples[i] <= GetNumSamples())
+			if(samples[smp] <= GetNumSamples())
 			{
-				WriteSample(f, &Samples[samples[i]], sampleFlags[i]);
+				WriteSample(f, &Samples[samples[smp]], sampleFlags[smp]);
 			}
 		}
 	}
