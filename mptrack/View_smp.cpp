@@ -1240,8 +1240,8 @@ void CViewSample::ScrollToPosition(int x)    // logical coordinates
 
 
 template<class T, class uT>
-T CViewSample::GetSampleValueFromPoint(const CPoint& point)
-//------------------------------------------------------------
+T CViewSample::GetSampleValueFromPoint(const CPoint &point)
+//---------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
 	int value = (std::numeric_limits<T>::max)() - (std::numeric_limits<uT>::max)() * point.y / (m_rcClient.bottom - m_rcClient.top);
@@ -1251,7 +1251,7 @@ T CViewSample::GetSampleValueFromPoint(const CPoint& point)
 
 
 template<class T, class uT>
-void CViewSample::SetInitialDrawPoint(void* pSample, const CPoint& point)
+void CViewSample::SetInitialDrawPoint(void *pSample, const CPoint &point)
 //-----------------------------------------------------------------------
 {
 	T* data = reinterpret_cast<T*>(pSample);
@@ -1260,8 +1260,8 @@ void CViewSample::SetInitialDrawPoint(void* pSample, const CPoint& point)
 
 
 template<class T, class uT>
-void CViewSample::SetSampleData(void* pSample, const CPoint& point, const DWORD old )
-//-----------------------------------------------------------------------------------
+void CViewSample::SetSampleData(void *pSample, const CPoint &point, const DWORD old)
+//----------------------------------------------------------------------------------
 {
 	T* data = reinterpret_cast<T*>(pSample);
 	const int oldvalue = data[old];
@@ -1300,6 +1300,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 
 		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
 		{
+			// Show cursor position as offset effect if no selection is made.
 			if(m_nSample > 0 && m_nSample <= pSndFile->GetNumSamples() && x < pSndFile->GetSample(m_nSample).nLength)
 			{
 				const DWORD xLow = (x / 0x100) % 0x100;

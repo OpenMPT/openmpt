@@ -68,34 +68,41 @@ void CPatternGotoDialog::OnOK()
 	bool validated=true;
 	
 	//is pattern number sensible?
-	if (m_nPattern>=m_pSndFile->Patterns.Size()) {
+	if(m_nPattern>=m_pSndFile->Patterns.Size())
+	{
 		validated=false;
 	}
 
 	//Does pattern exist?
-	if (validated && !(m_pSndFile->Patterns[m_nPattern])) {
+	if(validated && !(m_pSndFile->Patterns[m_nPattern]))
+	{
 		validated=false;
 	}
 	
 	//Does order match pattern?
-	if (validated && m_pSndFile->Order[m_nOrder] != m_nPattern) {
+	if(validated && m_pSndFile->Order[m_nOrder] != m_nPattern)
+	{
 		validated=false;
 	}
 
 	//Does pattern have enough rows?
-	if (validated && m_pSndFile->Patterns[m_nPattern].GetNumRows() <= m_nRow) {
+	if(validated && m_pSndFile->Patterns[m_nPattern].GetNumRows() <= m_nRow)
+	{
 		validated=false;
 	}
 	
 	//Does track have enough channels?
-	if (validated && m_pSndFile->m_nChannels < m_nChannel) {
+	if(validated && m_pSndFile->m_nChannels < m_nChannel)
+	{
 		validated=false;
 	}
 
 
-	if (validated) {
+	if (validated)
+	{
 		CDialog::OnOK();
-	} else {
+	} else
+	{
 		CDialog::OnCancel();
 	}
 
@@ -105,14 +112,16 @@ void CPatternGotoDialog::OnOK()
 void CPatternGotoDialog::OnEnChangeGotoPat()
 //------------------------------------------
 {
-	if (ControlsLocked()) {
+	if(ControlsLocked())
+	{
 		return;				//the change to textbox did not come from user.
 	}
 		
 	UpdateData();
 	m_nOrder = m_pSndFile->Order.FindOrder(static_cast<PATTERNINDEX>(m_nPattern), m_nActiveOrder);
 
-	if (m_nOrder >= m_pSndFile->Order.size()) {
+	if(m_nOrder == ORDERINDEX_INVALID)
+	{
 		m_nOrder=0;
 	}
 
@@ -123,15 +132,18 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 
 void CPatternGotoDialog::OnEnChangeGotoOrd()
 {
-	if (ControlsLocked()) {
+	if(ControlsLocked())
+	{
 		return;				//the change to textbox did not come from user.
 	}
 
 	UpdateData();
 
-	if (m_nOrder<m_pSndFile->Order.size()) {
+	if(m_nOrder<m_pSndFile->Order.size())
+	{
 		UINT candidatePattern = m_pSndFile->Order[m_nOrder];
-		if (candidatePattern<m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern]) {
+		if(candidatePattern<m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern])
+		{
 			m_nPattern = candidatePattern;
 		} 
 	}

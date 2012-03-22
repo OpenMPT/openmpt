@@ -102,7 +102,8 @@ public:
 	void SelectSequence(const SEQUENCEINDEX nSeq);
 
 	// Little helper function to avoid copypasta
-	bool IsSelectionKeyPressed() {return CMainFrame::GetInputHandler()->SelectionPressed();}
+	bool IsSelectionKeyPressed() const { return CMainFrame::GetInputHandler()->SelectionPressed(); }
+	bool IsCtrlKeyPressed() const { return CMainFrame::GetInputHandler()->CtrlPressed(); }
 
 	// Clipboard.
 	void OnEditCopy();

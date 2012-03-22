@@ -818,9 +818,9 @@ void COrderList::OnPaint()
 				LineTo(dc.m_hDC, rect.right-4, rect.bottom-4);
 			}
 
-            CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
-            //Drawing 'playing'-indicator.
+			//Drawing 'playing'-indicator.
 			if(nIndex == pSndFile->GetCurrentOrder() && pMainFrm->IsPlaying() )
 			{
 				MoveToEx(dc.m_hDC, rect.left+4, rect.top+2, NULL);
@@ -872,9 +872,8 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 	if (pt.y < rect.bottom)
 	{
 		SetFocus();
-		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
-		if (ih->CtrlPressed())
+		if(IsCtrlKeyPressed())
 		{
 			// queue pattern
 			QueuePattern(pt);
@@ -884,15 +883,15 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 			const int oldXScroll = m_nXScroll;
 
 			ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
-			ORD_SELECTION selection = GetCurSel(false);					
+			ORD_SELECTION selection = GetCurSel(false);
 
 			// check if cursor is in selection - if it is, only react on MouseUp as the user might want to drag those orders
 			if(m_nScrollPos2nd == ORDERINDEX_INVALID || nOrder < selection.nOrdLo || nOrder > selection.nOrdHi)
 			{
 				m_nScrollPos2nd = ORDERINDEX_INVALID;
-				SetCurSel(nOrder, true, ih->ShiftPressed());
+				SetCurSel(nOrder, true, IsSelectionKeyPressed());
 			}
-			m_bDragging = IsOrderInMargins(m_nScrollPos, oldXScroll) ? false : true;
+			m_bDragging = !IsOrderInMargins(m_nScrollPos, oldXScroll);
 
 			if(m_bDragging == true)
 			{

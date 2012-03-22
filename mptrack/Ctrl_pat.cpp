@@ -803,7 +803,7 @@ void CCtrlPatterns::OnPatternNew()
 		{
 			nCurOrd++;	// only if the current oder is already occupied, create a new pattern at the next position.
 			rows = pSndFile->Patterns[nCurPat].GetNumRows();
-			rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
+			rows = Clamp(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 		}
 		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd, rows);
 		if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()))

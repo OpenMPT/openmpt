@@ -1148,7 +1148,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	else if ((point.x >= m_szHeader.cx) && (point.y > m_szHeader.cy))
 	{
-		if(CMainFrame::GetInputHandler()->ShiftPressed() && m_StartSel == m_Selection.GetLowerRight())
+		if(CMainFrame::GetInputHandler()->SelectionPressed() && m_StartSel == m_Selection.GetLowerRight())
 		{
 			// Shift pressed -> set 2nd selection point
 			DragToSel(GetPositionFromPoint(point), true, true);
@@ -1621,6 +1621,7 @@ void CViewPattern::OnSelectCurrentColumn()
 	}
 }
 
+
 void CViewPattern::OnChannelReset()
 //---------------------------------
 {
@@ -1649,6 +1650,7 @@ void CViewPattern::OnMuteFromClick()
 	OnMuteChannel(false);
 }
 
+
 void CViewPattern::OnMuteChannel(bool current)
 //--------------------------------------------
 {
@@ -1672,7 +1674,9 @@ void CViewPattern::OnMuteChannel(bool current)
 	}
 }
 
+
 void CViewPattern::OnSoloFromClick()
+//----------------------------------
 {
 	OnSoloChannel(false);
 }
@@ -2529,13 +2533,6 @@ void CViewPattern::OnCursorPaste()
 }
 
 
-void CViewPattern::OnInterpolateVolume()
-//--------------------------------------
-{
-	Interpolate(PatternCursor::volumeColumn);
-}
-
-
 void CViewPattern::OnOpenRandomizer()
 //-----------------------------------
 {
@@ -2597,21 +2594,6 @@ void CViewPattern::OnVisualizeEffect()
 }
 //end rewbs.fxvis
 
-
-void CViewPattern::OnInterpolateEffect()
-//--------------------------------------
-{
-	Interpolate(PatternCursor::effectColumn);
-}
-
-void CViewPattern::OnInterpolateNote()
-//--------------------------------------
-{
-	Interpolate(PatternCursor::noteColumn);
-}
-
-
-//static void CArrayUtils<UINT>::Merge(CArray<UINT,UINT>& Dest, CArray<UINT,UINT>& Src);
 
 void CViewPattern::Interpolate(PatternCursor::Columns type)
 //---------------------------------------------------------
@@ -3070,33 +3052,6 @@ void CViewPattern::OnRunScript()
 	;
 }
 
-
-void CViewPattern::OnTransposeUp()
-//--------------------------------
-{
-	TransposeSelection(1);
-}
-
-
-void CViewPattern::OnTransposeDown()
-//----------------------------------
-{
-	TransposeSelection(-1);
-}
-
-
-void CViewPattern::OnTransposeOctUp()
-//-----------------------------------
-{
-	TransposeSelection(12);
-}
-
-
-void CViewPattern::OnTransposeOctDown()
-//-------------------------------------
-{
-	TransposeSelection(-12);
-}
 
 
 void CViewPattern::OnSwitchToOrderList()
