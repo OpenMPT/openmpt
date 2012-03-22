@@ -4,6 +4,7 @@
  * Purpose: Generate samples from math formulas using muParser
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
@@ -99,8 +100,8 @@ bool CSampleGenerator::TestExpression()
 
 
 // Check if sample parameters are valid.
-bool CSampleGenerator::CanRenderSample()
-//--------------------------------------
+bool CSampleGenerator::CanRenderSample() const
+//--------------------------------------------
 {
 	if(sample_frequency < SMPGEN_MINFREQ || sample_frequency > SMPGEN_MAXFREQ || sample_length < SMPGEN_MINLENGTH || sample_length > SMPGEN_MAXLENGTH) return false;
 	return true;

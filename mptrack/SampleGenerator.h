@@ -1,12 +1,15 @@
 /*
  * SampleGenerator.h
  * -----------------
- * Purpose: Header file for sample generator
+ * Purpose: Generate samples from math formulas using muParser
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
 #pragma once
+
 #include "mptrack.h"
 #include "Mainfrm.h"
 #include "Sndfile.h"
@@ -52,9 +55,9 @@ protected:
 
 	// Rendering callback functions
 	// functions
-	static mu::value_type ClipCallback(mu::value_type val, mu::value_type min, mu::value_type max) { return CLAMP(val, min, max); };
+	static mu::value_type ClipCallback(mu::value_type val, mu::value_type min, mu::value_type max) { return Clamp(val, min, max); };
 	static mu::value_type PWMCallback(mu::value_type pos, mu::value_type duty, mu::value_type width) { if(width == 0) return 0; else return (fmod(pos, width) < ((duty / 100) * width)) ? 1 : -1; };
-	static mu::value_type RndCallback(mu::value_type v) { return v*std::rand()/(mu::value_type)(RAND_MAX+1.0); };
+	static mu::value_type RndCallback(mu::value_type v) { return v * std::rand() / (mu::value_type)(RAND_MAX + 1.0); };
 	static mu::value_type SampleDataCallback(mu::value_type v);
 	static mu::value_type TriangleCallback(mu::value_type pos, mu::value_type width) { if((int)width == 0) return 0; else return abs(((int)pos % (int)(width)) - width / 2) / (width / 4) - 1; };
 
@@ -67,7 +70,7 @@ public:
 
 	bool ShowDialog();
 	bool TestExpression();
-	bool CanRenderSample();
+	bool CanRenderSample() const;
 	bool RenderSample(CSoundFile *pSndFile, SAMPLEINDEX nSample);
 
 	CSampleGenerator();

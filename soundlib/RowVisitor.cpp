@@ -93,9 +93,7 @@ bool RowVisitor::IsVisited(ORDERINDEX order, ROWINDEX row, bool autoSet)
 	{
 		// We visited this row already - this module must be looping.
 		return true;
-	}
-
-	if(autoSet)
+	} else if(autoSet)
 	{
 		visitedRows[order][row] = true;
 	}
@@ -111,8 +109,7 @@ size_t RowVisitor::GetVisitedRowsVectorSize(PATTERNINDEX pattern) const
 	if(sndFile.Patterns.IsValidPat(pattern))
 	{
 		return static_cast<size_t>(sndFile.Patterns[pattern].GetNumRows());
-	}
-	else
+	} else
 	{
 		// Invalid patterns consist of a "fake" row.
 		return 1;

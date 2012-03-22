@@ -357,15 +357,15 @@ protected:
 	afx_msg void OnPatternPlayNoLoop()	{} */
 //end rewbs.customKeys
 	afx_msg void OnPatternRecord()	{ PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
-	afx_msg void OnInterpolateVolume();
-	afx_msg void OnInterpolateEffect();
-	afx_msg void OnInterpolateNote();
+	afx_msg void OnInterpolateVolume() { Interpolate(PatternCursor::volumeColumn); }
+	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
+	afx_msg void OnInterpolateNote() { Interpolate(PatternCursor::noteColumn); }
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnOpenRandomizer();		//rewbs.fxvis
-	afx_msg void OnTransposeUp();
-	afx_msg void OnTransposeDown();
-	afx_msg void OnTransposeOctUp();
-	afx_msg void OnTransposeOctDown();
+	afx_msg void OnTransposeUp() { TransposeSelection(1); }
+	afx_msg void OnTransposeDown() { TransposeSelection(-1); }
+	afx_msg void OnTransposeOctUp() { TransposeSelection(12); }
+	afx_msg void OnTransposeOctDown() { TransposeSelection(-12); }
 	afx_msg void OnSetSelInstrument();
 	afx_msg void OnAddChannelFront() { AddChannelBefore(m_MenuCursor.GetChannel()); }
 	afx_msg void OnAddChannelAfter() { AddChannelBefore(m_MenuCursor.GetChannel() + 1); };

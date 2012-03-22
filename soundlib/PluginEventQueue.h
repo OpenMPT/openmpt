@@ -88,7 +88,7 @@ public:
 		return Enqueue(reinterpret_cast<const VstMidiSysexEvent &>(event), insertFront);
 #else
 		// True on 64-Bit hosts: VstMidiSysexEvent is bigger, so copy smaller event into bigger event.
-		static_assert(sizeof(VstEvent) <= sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
+		static_assert(sizeof(VstEvent) <= sizeof(VstMidiSysexEvent), "This is no 64-Bit host!");
 		VstMidiSysexEvent copyEvent;
 		memcpy(&copyEvent, &event, min(event.byteSize, sizeof(event)));
 		return Enqueue(copyEvent, insertFront);
@@ -104,7 +104,7 @@ public:
 		return Enqueue(reinterpret_cast<const VstMidiSysexEvent &>(event), insertFront);
 #else
 		// True on 64-Bit hosts: VstMidiSysexEvent is bigger, so copy smaller event into bigger event.
-		static_assert(sizeof(VstMidiEvent) <= sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
+		static_assert(sizeof(VstMidiEvent) <= sizeof(VstMidiSysexEvent), "This is no 64-Bit host!");
 		VstMidiSysexEvent copyEvent;
 		memcpy(&copyEvent, &event, min(event.byteSize, sizeof(event)));
 		return Enqueue(copyEvent, insertFront);
