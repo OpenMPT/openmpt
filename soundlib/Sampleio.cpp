@@ -21,6 +21,7 @@
 #include "XMTools.h"
 #include "../common/StringFixer.h"
 #include "../common/Reporting.h"
+#include "../mptrack/version.h"
 
 #pragma warning(disable:4244)
 
@@ -315,9 +316,12 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 	WAVEEXTRAHEADER *pxh;
 	DWORD dwInfoList, dwFact, dwSamplesPerBlock;
 	
-	if ((!nSample) || (!lpMemFile) || (dwFileLength < (DWORD)(sizeof(WAVEFILEHEADER)+sizeof(WAVEFORMATHEADER)))) return false;
-	if (((phdr->id_RIFF != IFFID_RIFF) && (phdr->id_RIFF != IFFID_LIST))
-	 || ((phdr->id_WAVE != IFFID_WAVE) && (phdr->id_WAVE != IFFID_wave))) return false;
+	if (!nSample || !lpMemFile || (dwFileLength < sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER)))
+		return false;
+	if ((phdr->id_RIFF != LittleEndian(IFFID_RIFF) && phdr->id_RIFF != LittleEndian(IFFID_LIST))
+		|| (phdr->id_WAVE != LittleEndian(IFFID_WAVE) && phdr->id_WAVE != LittleEndian(IFFID_wave)))
+		return false;
+
 	dwMemPos = sizeof(WAVEFILEHEADER);
 	dwDataPos = 0;
 	pfmt = NULL;
@@ -328,22 +332,25 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 	dwSamplesPerBlock = 0;
 	dwInfoList = 0;
 	dwFact = 0;
+
 	while ((dwMemPos + 8 < dwFileLength) && (dwMemPos < phdr->filesize))
 	{
-		DWORD dwLen = *((LPDWORD)(lpMemFile+dwMemPos+4));
-		DWORD dwIFFID = *((LPDWORD)(lpMemFile+dwMemPos));
-		if ((dwLen > dwFileLength) || (dwMemPos+8+dwLen > dwFileLength)) break;
+		uint32 dwIFFID = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos));
+		uint32 dwLen = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos + 4));
+		if ((dwLen > dwFileLength) || (dwMemPos + 8 + dwLen > dwFileLength))
+			break;
+
 		switch(dwIFFID)
 		{
 		// "fmt "
 		case IFFID_fmt:
 			if (pfmt) break;
-			if (dwLen+8 >= sizeof(WAVEFORMATHEADER))
+			if (dwLen + 8 >= sizeof(WAVEFORMATHEADER))
 			{
 				pfmt = (WAVEFORMATHEADER *)(lpMemFile + dwMemPos);
-				if (dwLen+8 >= sizeof(WAVEFORMATHEADER)+4)
+				if (dwLen + 8 >= sizeof(WAVEFORMATHEADER)+4)
 				{
-					dwSamplesPerBlock = *((WORD *)(lpMemFile+dwMemPos+sizeof(WAVEFORMATHEADER)+2));
+					dwSamplesPerBlock = LittleEndianW(*reinterpret_cast<uint16 *>(lpMemFile + dwMemPos + sizeof(WAVEFORMATHEADER) + 2));
 				}
 			}
 			break;
@@ -354,11 +361,11 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 			break;
 		// "fact"
 		case IFFID_fact:
-			if (!dwFact) dwFact = *((LPDWORD)(lpMemFile+dwMemPos+8));
+			if (!dwFact) dwFact = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos + 8));
 			break;
 		// "data"
 		case IFFID_data:
-			if ((dwLen+8 >= sizeof(WAVEDATAHEADER)) && (!pdata))
+			if(dwLen + 8 >= sizeof(WAVEDATAHEADER) && !pdata)
 			{
 				pdata = (WAVEDATAHEADER *)(lpMemFile + dwMemPos);
 				dwDataPos = dwMemPos + 8;
@@ -366,15 +373,23 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 			break;
 		// "xtra"
 		case 0x61727478:
-			if (dwLen+8 >= sizeof(WAVEEXTRAHEADER)) pxh = (WAVEEXTRAHEADER *)(lpMemFile + dwMemPos);
+			if(dwLen + 8 >= sizeof(WAVEEXTRAHEADER))
+			{
+				pxh = (WAVEEXTRAHEADER *)(lpMemFile + dwMemPos);
+				if(LittleEndian(pxh->xtra_len) + 8 > dwFileLength - dwMemPos)
+				{
+					pxh = nullptr;
+				}
+			}
 			break;
 		// "smpl"
 		case 0x6C706D73:
-			if (dwLen+8 >= sizeof(WAVESMPLHEADER)) psh = (WAVESMPLHEADER *)(lpMemFile + dwMemPos);
+			if(dwLen + 8 >= sizeof(WAVESMPLHEADER))
+				psh = (WAVESMPLHEADER *)(lpMemFile + dwMemPos);
 			break;
 		// "LIST"."info"
 		case IFFID_LIST:
-			if (*((LPDWORD)(lpMemFile+dwMemPos+8)) == 0x4F464E49)	// "INFO"
+			if(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos + 8) == LittleEndian(IFFID_INFO))	// "INFO"
 				dwInfoList = dwMemPos;
 			break;
 		// "wsmp":
@@ -384,7 +399,9 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 		}
 		dwMemPos += dwLen + 8;
 	}
-	if ((!pdata) || (!pfmt) || (pdata->length < 4)) return false;
+	if (!pdata || !pfmt || pdata->length < 4)
+		return false;
+
 	if ((pfmtpk) && (pfmt))
 	{
 		if (pfmt->format != 1)
@@ -392,34 +409,52 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 			WAVEFORMATHEADER *tmp = pfmt;
 			pfmt = pfmtpk;
 			pfmtpk = tmp;
-			if ((pfmtpk->format != 0x11) || (pfmtpk->bitspersample != 4)
-			 || (pfmtpk->channels != 1)) return false;
+			if(pfmtpk->format != 0x11 || pfmtpk->bitspersample != 4
+				|| pfmtpk->channels != 1)
+				return false;
 		} else pfmtpk = NULL;
 	}
+
+	uint16 format = LittleEndianW(pfmt->format);
+	uint16 channels = LittleEndianW(pfmt->channels);
+	uint16 bitsPerSmp = LittleEndianW(pfmt->bitspersample);
+
 	// WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT, WAVE_FORMAT_EXTENSIBLE
-	if ((((pfmt->format != 1) && (pfmt->format != 0xFFFE))
-	 && (pfmt->format != 3 || pfmt->bitspersample != 32)) //Microsoft IEEE FLOAT
-	 || (pfmt->channels > 2)
-	 || (!pfmt->channels)
-	 || (pfmt->bitspersample & 7)
-	 || (!pfmt->bitspersample)
-	 || (pfmt->bitspersample > 32)
+	if (((format != 1 && format != 0xFFFE)
+	 && (format != 3 || bitsPerSmp != 32)) //Microsoft IEEE FLOAT
+	 || channels > 2
+	 || channels == 0
+	 || (bitsPerSmp & 7) != 0
+	 || bitsPerSmp == 0
+	 || bitsPerSmp > 32
 	) return false;
 
 	DestroySample(nSample);
 	UINT nType = RS_PCM8U;
-	if (pfmt->channels == 1)
+	if(channels == 1)
 	{
-		if (pfmt->bitspersample == 24) nType = RS_PCM24S; 
-		else if (pfmt->bitspersample == 32) nType = RS_PCM32S; 
-			else nType = (pfmt->bitspersample == 16) ? RS_PCM16S : RS_PCM8U;
+		if(bitsPerSmp == 24)
+			nType = RS_PCM24S; 
+		else if(bitsPerSmp == 32)
+			nType = RS_PCM32S; 
+		else if(bitsPerSmp == 16)
+			nType = RS_PCM16S;
+		else
+			nType = RS_PCM8U;
 	} else
 	{
-		if (pfmt->bitspersample == 24) nType = RS_STIPCM24S; 
-		else if (pfmt->bitspersample == 32) nType = RS_STIPCM32S; 
-			else nType = (pfmt->bitspersample == 16) ? RS_STIPCM16S : RS_STIPCM8U;
+		if(bitsPerSmp == 24)
+			nType = RS_STIPCM24S; 
+		else if(bitsPerSmp == 32)
+			nType = RS_STIPCM32S; 
+		else if(bitsPerSmp == 16)
+			nType = RS_STIPCM16S;
+		else
+			nType = RS_STIPCM8U;
 	}
-	UINT samplesize = pfmt->channels * (pfmt->bitspersample >> 3);
+
+	UINT samplesize = channels * (bitsPerSmp / 8);
+
 	ModSample *pSmp = &Samples[nSample];
 	if (pSmp->pSample)
 	{
@@ -427,120 +462,146 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 		pSmp->pSample = nullptr;
 		pSmp->nLength = 0;
 	}
-	pSmp->nLength = pdata->length / samplesize;
+	pSmp->nLength = LittleEndian(pdata->length) / samplesize;
 	pSmp->nLoopStart = pSmp->nLoopEnd = 0;
 	pSmp->nSustainStart = pSmp->nSustainEnd = 0;
-	pSmp->nC5Speed = pfmt->freqHz;
+	pSmp->nC5Speed = LittleEndian(pfmt->freqHz);
 	pSmp->nPan = 128;
 	pSmp->nVolume = 256;
 	pSmp->nGlobalVol = 64;
-	pSmp->uFlags = (pfmt->bitspersample > 8) ? CHN_16BIT : 0;
+	pSmp->uFlags = (bitsPerSmp > 8) ? CHN_16BIT : 0;
 	pSmp->RelativeTone = 0;
 	pSmp->nFineTune = 0;
 	pSmp->nVibType = pSmp->nVibSweep = pSmp->nVibDepth = pSmp->nVibRate = 0;
 	pSmp->filename[0] = 0;
 	MemsetZero(m_szNames[nSample]);
 	if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
+
 	// IMA ADPCM 4:1
 	if (pfmtpk)
 	{
-		if (dwFact < 4) dwFact = pdata->length * 2;
+		if (dwFact < 4) dwFact = LittleEndian(pdata->length) * 2;
 		pSmp->nLength = dwFact;
-		pSmp->pSample = AllocateSample(pSmp->nLength*2+16);
+		pSmp->pSample = AllocateSample(pSmp->nLength * 2 + 16);
 		IMAADPCMUnpack16((signed short *)pSmp->pSample, pSmp->nLength,
-						 (LPBYTE)(lpMemFile+dwDataPos), dwFileLength-dwDataPos, pfmtpk->samplesize);
+						 (LPBYTE)(lpMemFile + dwDataPos), dwFileLength - dwDataPos, LittleEndianW(pfmtpk->samplesize));
 		AdjustSampleLoop(pSmp);
 	} else
 	{
-		ReadSample(pSmp, nType, (LPSTR)(lpMemFile+dwDataPos), dwFileLength-dwDataPos, pfmt->format);
+		ReadSample(pSmp, nType, (LPSTR)(lpMemFile + dwDataPos), dwFileLength - dwDataPos, format);
 	}
-	// smpl field
-	if (psh)
-	{
-		pSmp->nLoopStart = pSmp->nLoopEnd = 0;
-		if ((psh->dwSampleLoops) && (sizeof(WAVESMPLHEADER) + psh->dwSampleLoops * sizeof(SAMPLELOOPSTRUCT) <= psh->smpl_len + 8))
-		{
-			SAMPLELOOPSTRUCT *psl = (SAMPLELOOPSTRUCT *)(&psh[1]);
-			if (psh->dwSampleLoops > 1)
-			{
-				pSmp->uFlags |= CHN_LOOP | CHN_SUSTAINLOOP;
-				if (psl[0].dwLoopType) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
-				if (psl[1].dwLoopType) pSmp->uFlags |= CHN_PINGPONGLOOP;
-				pSmp->nSustainStart = psl[0].dwLoopStart;
-				pSmp->nSustainEnd = psl[0].dwLoopEnd;
-				pSmp->nLoopStart = psl[1].dwLoopStart;
-				pSmp->nLoopEnd = psl[1].dwLoopEnd;
-			} else
-			{
-				pSmp->uFlags |= CHN_LOOP;
-				if (psl->dwLoopType) pSmp->uFlags |= CHN_PINGPONGLOOP;
-				pSmp->nLoopStart = psl->dwLoopStart;
-				pSmp->nLoopEnd = psl->dwLoopEnd;
-			}
-			if (pSmp->nLoopStart >= pSmp->nLoopEnd) pSmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
-			if (pSmp->nSustainStart >= pSmp->nSustainEnd) pSmp->uFlags &= ~(CHN_PINGPONGLOOP|CHN_PINGPONGSUSTAIN);
-		}
-	}
+	
+	bool fixSampleLoops = false;
+
 	// LIST field
 	if (dwInfoList)
 	{
-		DWORD dwLSize = *((DWORD *)(lpMemFile+dwInfoList+4)) + 8;
-		DWORD d = 12;
-		while (d+8 < dwLSize)
+		uint32 dwLSize = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwInfoList + 4)) + 8;
+		uint32 d = 12;
+		while (d + 8 < dwLSize)
 		{
-			if (!lpMemFile[dwInfoList+d]) d++;
-			DWORD id = *((DWORD *)(lpMemFile+dwInfoList+d));
-			DWORD len = *((DWORD *)(lpMemFile+dwInfoList+d+4));
-			if (id == 0x4D414E49) // "INAM"
+			if (!lpMemFile[dwInfoList + d]) d++;
+			uint32 id = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwInfoList + d));
+			uint32 len = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwInfoList + d + 4));
+
+			if ((dwInfoList + d + 8 + len <= dwFileLength) && (len))
 			{
-				if ((dwInfoList+d+8+len <= dwFileLength) && (len))
+				switch(id)
 				{
-					DWORD dwNameLen = len;
-					if (dwNameLen > 31) dwNameLen = 31;
-					memcpy(m_szNames[nSample], lpMemFile+dwInfoList+d+8, dwNameLen);
-					if (phdr->id_RIFF != 0x46464952)
+				case IFFID_INAM:
+					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSample], reinterpret_cast<const char *>(lpMemFile + dwInfoList + d + 8), len);
+					if (phdr->id_RIFF != LittleEndian(IFFID_RIFF))
 					{
 						// DLS sample -> sample filename
-						if (dwNameLen > 21) dwNameLen = 21;
-						memcpy(pSmp->filename, lpMemFile+dwInfoList+d+8, dwNameLen);
+						StringFixer::ReadString<StringFixer::nullTerminated>(pSmp->filename, reinterpret_cast<const char *>(lpMemFile + dwInfoList + d + 8), len);
 					}
+					break;
+
+				case IFFID_ISFT:
+					{
+						// MPT / old versions of OpenMPT stored the sample loop information incorrectly:
+						// In the RIFF standard, the loop end point is *inclusive*, in OpenMPT it's *exclusive*.
+						char *softwareId = reinterpret_cast<char *>(lpMemFile + dwInfoList + d + 8);
+						fixSampleLoops = !strncmp(softwareId, "Modplug Tracker", min(len, 16));
+					}
+					break;
 				}
-				break;
 			}
 			d += 8 + len;
 		}
 	}
+
+	// smpl field
+	if (psh)
+	{
+		pSmp->nLoopStart = pSmp->nLoopEnd = 0;
+		int numLoops = LittleEndian(psh->dwSampleLoops);
+		if(numLoops && (sizeof(WAVESMPLHEADER) + numLoops * sizeof(SAMPLELOOPSTRUCT) <= LittleEndian(psh->smpl_len) + 8))
+		{
+			SAMPLELOOPSTRUCT *psl = (SAMPLELOOPSTRUCT *)(&psh[1]);
+			if(numLoops > 1)
+			{
+				pSmp->uFlags |= (CHN_LOOP | CHN_SUSTAINLOOP);
+				if(LittleEndian(psl[0].dwLoopType)) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
+				if(LittleEndian(psl[1].dwLoopType)) pSmp->uFlags |= CHN_PINGPONGLOOP;
+				pSmp->nSustainStart = LittleEndian(psl[0].dwLoopStart);
+				pSmp->nSustainEnd = LittleEndian(psl[0].dwLoopEnd);
+				pSmp->nLoopStart = LittleEndian(psl[1].dwLoopStart);
+				pSmp->nLoopEnd = LittleEndian(psl[1].dwLoopEnd);
+			} else
+			{
+				pSmp->uFlags |= CHN_LOOP;
+				if(LittleEndian(psl->dwLoopType)) pSmp->uFlags |= CHN_PINGPONGLOOP;
+				pSmp->nLoopStart = LittleEndian(psl->dwLoopStart);
+				pSmp->nLoopEnd = LittleEndian(psl->dwLoopEnd);
+			}
+
+			if(!fixSampleLoops)
+			{
+				// RIFF loop end points are inclusive
+				if(pSmp->nLoopEnd < pSmp->nLength && (pSmp->uFlags & CHN_LOOP))
+				{
+					pSmp->nLoopEnd++;
+				}
+
+				if(pSmp->nSustainEnd < pSmp->nLength && (pSmp->uFlags & CHN_SUSTAINLOOP))
+				{
+					pSmp->nSustainEnd++;
+				}
+			}
+
+			if (pSmp->nLoopStart >= pSmp->nLoopEnd) pSmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
+			if (pSmp->nSustainStart >= pSmp->nSustainEnd) pSmp->uFlags &= ~(CHN_PINGPONGLOOP|CHN_PINGPONGSUSTAIN);
+		}
+	}
+
 	// xtra field
 	if (pxh)
 	{
-		if (!(GetType() & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
-		{
-			if (pxh->dwFlags & CHN_PINGPONGLOOP) pSmp->uFlags |= CHN_PINGPONGLOOP;
-			if (pxh->dwFlags & CHN_SUSTAINLOOP) pSmp->uFlags |= CHN_SUSTAINLOOP;
-			if (pxh->dwFlags & CHN_PINGPONGSUSTAIN) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
-			if (pxh->dwFlags & CHN_PANNING) pSmp->uFlags |= CHN_PANNING;
-		}
-		pSmp->nPan = pxh->wPan;
-		pSmp->nVolume = pxh->wVolume;
-		pSmp->nGlobalVol = pxh->wGlobalVol;
+		DWORD extFlags = LittleEndian(pxh->dwFlags);
+		if (extFlags & CHN_PINGPONGLOOP) pSmp->uFlags |= CHN_PINGPONGLOOP;
+		if (extFlags & CHN_SUSTAINLOOP) pSmp->uFlags |= CHN_SUSTAINLOOP;
+		if (extFlags & CHN_PINGPONGSUSTAIN) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
+		if (extFlags & CHN_PANNING) pSmp->uFlags |= CHN_PANNING;
+
+		pSmp->nPan = LittleEndianW(pxh->wPan);
+		pSmp->nVolume = LittleEndianW(pxh->wVolume);
+		pSmp->nGlobalVol = LittleEndianW(pxh->wGlobalVol);
 		pSmp->nVibType = pxh->nVibType;
 		pSmp->nVibSweep = pxh->nVibSweep;
 		pSmp->nVibDepth = pxh->nVibDepth;
 		pSmp->nVibRate = pxh->nVibRate;
 		// Name present (clipboard only)
-		UINT xtrabytes = pxh->xtra_len + 8 - sizeof(WAVEEXTRAHEADER);
-		LPSTR pszTextEx = (LPSTR)(pxh+1); 
+		UINT xtrabytes = LittleEndian(pxh->xtra_len) - (sizeof(WAVEEXTRAHEADER) - 8);
+		LPSTR pszTextEx = (LPSTR)(pxh + 1); 
 		if (xtrabytes >= MAX_SAMPLENAME)
 		{
-			memcpy(m_szNames[nSample], pszTextEx, MAX_SAMPLENAME);
-			StringFixer::SetNullTerminator(m_szNames[nSample]);
+			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSample], pszTextEx, MAX_SAMPLENAME);
 			pszTextEx += MAX_SAMPLENAME;
 			xtrabytes -= MAX_SAMPLENAME;
-			if (xtrabytes >= MAX_SAMPLEFILENAME)
+			if(xtrabytes > 0)
 			{
-				memcpy(pSmp->filename, pszTextEx, MAX_SAMPLEFILENAME);
-				StringFixer::SetNullTerminator(pSmp->filename);
-				xtrabytes -= MAX_SAMPLEFILENAME;
+				StringFixer::ReadString<StringFixer::nullTerminated>(pSmp->filename, pszTextEx, xtrabytes);
 			}
 		}
 	}
@@ -552,10 +613,27 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 ///////////////////////////////////////////////////////////////
 // Save WAV
 
+void SetLoop(SAMPLELOOPSTRUCT &loopData, DWORD loopStart, DWORD loopEnd, bool bidi)
+//---------------------------------------------------------------------------------
+{
+	loopData.dwLoopType = LittleEndian(bidi ? 1 : 0);
+	loopData.dwLoopStart = LittleEndian(loopStart);
+	// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
+	if(loopEnd > loopStart)
+	{
+		loopData.dwLoopEnd = LittleEndian(loopEnd - 1);
+	} else
+	{
+		loopData.dwLoopEnd = LittleEndian(loopStart);
+	}
+}
+
 bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 //---------------------------------------------------------------------------
 {
-	LPCSTR lpszMPT = "Modplug Tracker\0";
+	char *softwareId = "OpenMPT " MPT_VERSION_STR;
+	size_t softwareIdLength = strlen(softwareId) + 1;
+
 	WAVEFILEHEADER header;
 	WAVEFORMATHEADER format;
 	WAVEDATAHEADER data;
@@ -568,22 +646,25 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	MemsetZero(extra);
 	MemsetZero(smpl);
-	header.id_RIFF = IFFID_RIFF;
-	header.filesize = sizeof(header) + sizeof(format) + sizeof(data) + sizeof(smpl) + sizeof(extra) - 8;
-	header.filesize += sizeof(list) + 8 + 16 + 8 + 32; // LIST(INAM, ISFT)
-	header.id_WAVE = IFFID_WAVE;
-	format.id_fmt = IFFID_fmt;
-	format.hdrlen = 16;
-	format.format = 1;
-	format.freqHz = pSmp->nC5Speed;
-	if (GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM)) format.freqHz = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
-	format.channels = pSmp->GetNumChannels();
-	format.bitspersample = pSmp->GetElementarySampleSize() * 8;
-	format.samplesize = pSmp->GetBytesPerSample() * 8;
-	format.bytessec = format.freqHz*format.samplesize;
-	data.id_data = IFFID_data;
+	header.id_RIFF = LittleEndian(IFFID_RIFF);
+	header.filesize = sizeof(header) + sizeof(format) + sizeof(data) + sizeof(smpl) + sizeof(extra) - 8
+		+ sizeof(list) + 8 + 16 + 8 + 32; // LIST(INAM, ISFT)
+	header.id_WAVE = LittleEndian(IFFID_WAVE);
+	format.id_fmt = LittleEndian(IFFID_fmt);
+	format.hdrlen = LittleEndian(16);
+	format.format = LittleEndianW(1);
+	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
+		format.freqHz = LittleEndian(pSmp->nC5Speed);
+	else
+		format.freqHz = LittleEndian(TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune));
+	format.channels = LittleEndianW(pSmp->GetNumChannels());
+	format.bitspersample = LittleEndianW(pSmp->GetElementarySampleSize() * 8);
+	format.samplesize = LittleEndianW(pSmp->GetBytesPerSample() * 8);
+	format.bytessec = LittleEndian(format.freqHz * format.samplesize);
+
+	data.id_data = LittleEndian(IFFID_data);
 	UINT nType;
-	data.length = pSmp->GetSampleSizeInBytes();
+	data.length = LittleEndian(pSmp->GetSampleSizeInBytes());
 	if (pSmp->uFlags & CHN_STEREO)
 	{
 		nType = (pSmp->uFlags & CHN_16BIT) ? RS_STIPCM16S : RS_STIPCM8U;
@@ -591,61 +672,65 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	{
 		nType = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8U;
 	}
+
 	header.filesize += data.length;
+	header.filesize = LittleEndian(header.filesize);
 	fwrite(&header, 1, sizeof(header), f);
 	fwrite(&format, 1, sizeof(format), f);
 	fwrite(&data, 1, sizeof(data), f);
 	WriteSample(f, pSmp, nType);
+
 	// "smpl" field
-	smpl.wsiHdr.smpl_id = 0x6C706D73;
+	smpl.wsiHdr.smpl_id = LittleEndian(IFFID_smpl);
 	smpl.wsiHdr.smpl_len = sizeof(WAVESMPLHEADER) - 8;
-	smpl.wsiHdr.dwSamplePeriod = 22675;
-	if (pSmp->nC5Speed >= 256) smpl.wsiHdr.dwSamplePeriod = 1000000000 / pSmp->nC5Speed;
-	smpl.wsiHdr.dwBaseNote = 60;
-	if (pSmp->uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
+	if (pSmp->nC5Speed >= 256)
+		smpl.wsiHdr.dwSamplePeriod = LittleEndian(1000000000 / pSmp->nC5Speed);
+	else
+		smpl.wsiHdr.dwSamplePeriod = LittleEndian(22675);
+
+	smpl.wsiHdr.dwBaseNote = LittleEndian(60);
+
+	// Write loops
+	if((pSmp->uFlags & CHN_SUSTAINLOOP) != 0)
 	{
-		if (pSmp->uFlags & CHN_SUSTAINLOOP)
-		{
-			smpl.wsiHdr.dwSampleLoops = 2;
-			smpl.wsiLoops[0].dwLoopType = (pSmp->uFlags & CHN_PINGPONGSUSTAIN) ? 1 : 0;
-			smpl.wsiLoops[0].dwLoopStart = pSmp->nSustainStart;
-			smpl.wsiLoops[0].dwLoopEnd = pSmp->nSustainEnd;
-			smpl.wsiLoops[1].dwLoopType = (pSmp->uFlags & CHN_PINGPONGLOOP) ? 1 : 0;
-			smpl.wsiLoops[1].dwLoopStart = pSmp->nLoopStart;
-			smpl.wsiLoops[1].dwLoopEnd = pSmp->nLoopEnd;
-		} else
-		{
-			smpl.wsiHdr.dwSampleLoops = 1;
-			smpl.wsiLoops[0].dwLoopType = (pSmp->uFlags & CHN_PINGPONGLOOP) ? 1 : 0;
-			smpl.wsiLoops[0].dwLoopStart = pSmp->nLoopStart;
-			smpl.wsiLoops[0].dwLoopEnd = pSmp->nLoopEnd;
-		}
-		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT) * smpl.wsiHdr.dwSampleLoops;
+		SetLoop(smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++], pSmp->nSustainStart, pSmp->nSustainEnd, (pSmp->uFlags & CHN_PINGPONGSUSTAIN) != 0);
+		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 	}
+	if((pSmp->uFlags & CHN_LOOP) != 0)
+	{
+		SetLoop(smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++], pSmp->nLoopStart, pSmp->nLoopEnd, (pSmp->uFlags & CHN_PINGPONGLOOP) != 0);
+		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
+	}
+	smpl.wsiHdr.smpl_len = LittleEndian(smpl.wsiHdr.smpl_len);
+
 	fwrite(&smpl, 1, smpl.wsiHdr.smpl_len + 8, f);
+
 	// "LIST" field
-	list.list_id = IFFID_LIST;
-	list.list_len = sizeof(list) - 8	// LIST
-					+ 8 + 32			// "INAM".dwLen.szSampleName
-					+ 8 + 16;			// "ISFT".dwLen."ModPlug Tracker".0
-	list.info = IFFID_INFO;
+	list.list_id = LittleEndian(IFFID_LIST);
+	list.list_len = LittleEndian(sizeof(list) - 8	// LIST
+					+ 8 + 32						// "INAM".dwLen.szSampleName
+					+ 8 + softwareIdLength);		// "ISFT".dwLen.softwareId.0
+	list.info = LittleEndian(IFFID_INFO);
 	fwrite(&list, 1, sizeof(list), f);
-	list.list_id = IFFID_INAM;			// "INAM"
-	list.list_len = 32;
+
+	list.list_id = LittleEndian(IFFID_INAM);		// "INAM"
+	list.list_len = LittleEndian(32);
 	fwrite(&list, 1, 8, f);
 	fwrite(m_szNames[nSample], 1, 32, f);
-	list.list_id = IFFID_ISFT;			// "ISFT"
-	list.list_len = 16;
+
+	list.list_id = LittleEndian(IFFID_ISFT);		// "ISFT"
+	list.list_len = LittleEndian(softwareIdLength);
 	fwrite(&list, 1, 8, f);
-	fwrite(lpszMPT, 1, list.list_len, f);
+	fwrite(softwareId, 1, list.list_len, f);
+
 	// "xtra" field
 	extra.xtra_id = IFFID_xtra;
-	extra.xtra_len = sizeof(extra) - 8;
+	extra.xtra_len = LittleEndian(sizeof(extra) - 8);
 
-	extra.dwFlags = pSmp->uFlags;
-	extra.wPan = pSmp->nPan;
-	extra.wVolume = pSmp->nVolume;
-	extra.wGlobalVol = pSmp->nGlobalVol;
+	extra.dwFlags = LittleEndian(pSmp->uFlags);
+	extra.wPan = LittleEndianW(pSmp->nPan);
+	extra.wVolume = LittleEndianW(pSmp->nVolume);
+	extra.wGlobalVol = LittleEndianW(pSmp->nGlobalVol);
 	extra.wReserved = 0;
 
 	extra.nVibType = pSmp->nVibType;
