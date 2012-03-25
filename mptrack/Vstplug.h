@@ -79,7 +79,8 @@ protected:
 
 	enum
 	{
-		VstEventQueueLength = 256,
+		// Number of MIDI events that can be sent to a plugin at once (the internal queue is not affected by this number, it can hold any number of events)
+		vstNumProcessEvents = 256,
 	}; 
 
 	ULONG m_nRefCount;
@@ -105,9 +106,7 @@ protected:
 	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
 	bool m_bSongPlaying; //rewbs.VSTCompliance
 	bool m_bPlugResumed; //rewbs.VSTCompliance
-	DWORD m_dwTimeAtStartOfProcess;
 	bool m_bModified;
-	HANDLE processCalled;
 	PLUGINDEX m_nSlot;
 	float m_fGain;
 	bool m_bIsInstrument;
@@ -116,7 +115,7 @@ protected:
 
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
 	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
-	PluginEventQueue<VstEventQueueLength> vstEvents;	// MIDI events that should be sent to the plugin
+	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
@@ -202,7 +201,6 @@ public:
 	bool IsResumed() {return m_bPlugResumed;}
 	void Resume();
 	void Suspend();
-	DWORD GetTimeAtStartOfProcess() {return m_dwTimeAtStartOfProcess;}
 	void SetDryRatio(UINT param);
 	void AutomateParameter(PlugParamIndex param);
 
