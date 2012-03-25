@@ -955,7 +955,6 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				bk_col = MODCOLOR_BACKSELECTED;
 			}
 			// Speedup: Empty command which is either not or fully selected
-			//if ((!*((LPDWORD)m)) && (!*(((LPWORD)m)+2)) && ((!col_sel) || (col_sel == 0x1F)))
 			if (m->IsEmpty() && ((!col_sel) || (col_sel == 0x1F)))
 			{
 				m_Dib.SetTextColor(tx_col, bk_col);
@@ -968,12 +967,23 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
-				if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= NOTE_MAX))
+				if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && m->IsNote())
 				{
 					tx_col = MODCOLOR_NOTE;
-					// Highlight notes that are not supported by the Amiga (for S3M this is not always correct)
-					if((pSndFile->m_dwSongFlags & (SONG_PT1XMODE|SONG_AMIGALIMITS)) && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
+
+					if((pSndFile->m_dwSongFlags & SONG_PT1XMODE) && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
+					{
+						// MOD "ProTracker 1.x" flag: Highlight notes that are not supported by Amiga trackers.
 						tx_col = MODCOLOR_DODGY_COMMANDS;
+					} else if((pSndFile->m_dwSongFlags & SONG_AMIGALIMITS) && m->instr != 0 && m->instr <= pSndFile->GetNumSamples())
+					{
+						// S3M "Force Amiga Limits": Highlight notes that exceed the Amiga's frequency range.
+						UINT period = pSndFile->GetPeriodFromNote(m->note, 0, pSndFile->GetSample(m->instr).nC5Speed);
+						if(period < 113 * 4 || period > 856 * 4)
+						{
+							tx_col = MODCOLOR_DODGY_COMMANDS;
+						}
+					}
 				}
 				if (col_sel & 0x01)
 				{
@@ -999,7 +1009,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
-					if (col_sel & 0x02 /*|| col_sel & 0x01*/) //LP Style select
+					if (col_sel & 0x02)
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
@@ -1073,7 +1083,6 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 							ModCommand::COMMAND command = m->command & 0x3F;
 							int n =	pSndFile->GetModSpecifications().GetEffectLetter(command);
 							ASSERT(n > ' ');
-							//if (n <= ' ') n = '?';
 							DrawLetter(xbmp+x, 0, (char)n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
 						{
@@ -1171,8 +1180,6 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 void CViewPattern::DrawDragSel(HDC hdc)
 //-------------------------------------
 {
-	// Ugly!
-	// XXX broken!
 	CModDoc *pModDoc;
 	CSoundFile *pSndFile;
 	CRect rect;
