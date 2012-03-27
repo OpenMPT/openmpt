@@ -870,11 +870,15 @@ void TestStringIO()
 
 #define ReadTest(mode, dst, src, expectedResult) \
 	StringFixer::ReadString<StringFixer::##mode>(dst, src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0); /* Ensure that the strings are identical */ \
+	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
 
 #define WriteTest(mode, dst, src, expectedResult) \
 	StringFixer::WriteString<StringFixer::##mode>(dst, src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
+	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
 
 	// Check reading of null-terminated string into larger buffer
 	ReadTest(nullTerminated, dst1, src1, "X ");

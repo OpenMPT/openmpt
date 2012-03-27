@@ -3461,8 +3461,8 @@ protected:
 	ULONG m_nSamplesPerSec;
 	AEffect m_Effect;
 	REFERENCE_TIME m_DataTime;
-	float *m_pMixBuffer;
-	float m_MixBuffer[MIXBUFFERSIZE * 2 + 16];		// 16-bit Stereo interleaved
+	int16 *m_pMixBuffer;
+	int16 m_MixBuffer[MIXBUFFERSIZE * 2 + 16];		// 16-bit Stereo interleaved
 
 public:
 	CDmo2Vst(IMediaObject *pMO, IMediaObjectInPlace *pMOIP, DWORD uid);
@@ -3471,7 +3471,7 @@ public:
 	VstIntPtr Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	void SetParameter(VstInt32 index, float parameter);
 	float GetParameter(VstInt32 index);
-	void Process(float * const *inputs, float **outputs, long sampleframes);
+	void Process(float * const *inputs, float **outputs, int samples);
 
 public:
 	static VstIntPtr VSTCALLBACK DmoDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
@@ -3480,8 +3480,13 @@ public:
 	static void VSTCALLBACK DmoProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes);
 
 protected:
-	void Interleave(const float *pinL, const float *pinR, int nsamples);
-	void Deinterleave(float *poutL, float *poutR, int nsamples);
+	// Stream conversion functions
+	void InterleaveFloatToInt16(const float *inLeft, const float *inRight, int nsamples);
+	void DeinterleaveInt16ToFloat(float *outLeft, float *outRight, int nsamples) const;
+#ifdef ENABLE_SSE
+	void SSEInterleaveFloatToInt16(const float *inLeft, const float *inRight, int nsamples);
+	void SSEDeinterleaveInt16ToFloat(float *outLeft, float *outRight, int nsamples) const;
+#endif // ENABLE_SSE
 };
 
 
@@ -3513,7 +3518,7 @@ CDmo2Vst::CDmo2Vst(IMediaObject *pMO, IMediaObjectInPlace *pMOIP, DWORD uid)
 		m_Effect.numParams = dwParamCount;
 	}
 	if (FAILED(m_pMediaObject->QueryInterface(IID_IMediaParams, (void **)&m_pMediaParams))) m_pMediaParams = nullptr;
-	m_pMixBuffer = (float *)((((int)m_MixBuffer)+15)&~15);
+	m_pMixBuffer = (int16 *)((((int)m_MixBuffer) + 15) & ~15);
 	// Callbacks
 	m_Effect.dispatcher = DmoDispatcher;
 	m_Effect.setParameter = DmoSetParameter;
@@ -3693,12 +3698,12 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 			mt.pUnk = nullptr;
 			mt.pbFormat = (LPBYTE)&wfx;
 			mt.cbFormat = sizeof(WAVEFORMATEX);
-			mt.lSampleSize = 2 * sizeof(float);
-			wfx.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+			mt.lSampleSize = 2 * sizeof(int16);
+			wfx.wFormatTag = WAVE_FORMAT_PCM;
 			wfx.nChannels = 2;
 			wfx.nSamplesPerSec = m_nSamplesPerSec;
-			wfx.wBitsPerSample = sizeof(float) * 8;
-			wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample >> 3);
+			wfx.wBitsPerSample = sizeof(int16) * 8;
+			wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample / 8);
 			wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 			wfx.cbSize = 0;
 			if (FAILED(m_pMediaObject->SetInputType(0, &mt, 0))
@@ -3785,41 +3790,146 @@ float CDmo2Vst::GetParameter(VstInt32 index)
 }
 
 
-void CDmo2Vst::Interleave(const float *pinL, const float *pinR, int nsamples)
-//---------------------------------------------------------------------------
+static const float _f2si = 32768.0f;
+static const float _si2f = 1.0f / 32768.0f;
+
+// Interleave two float streams into one int16 stereo stream.
+void CDmo2Vst::InterleaveFloatToInt16(const float *inLeft, const float *inRight, int samples)
+//-------------------------------------------------------------------------------------------
 {
-	float *pout = m_pMixBuffer;
-	for(int i = nsamples; i != 0; i--)
+	int16 *outBuf = m_pMixBuffer;
+	for(int i = samples; i != 0; i--)
 	{
-		*(pout++) = *(pinL++);
-		*(pout++) = *(pinR++);
+		*(outBuf++) = static_cast<int16>(Clamp(*(inLeft++) * _f2si, static_cast<float>(int16_min), static_cast<float>(int16_max)));
+		*(outBuf++) = static_cast<int16>(Clamp(*(inRight++) * _f2si, static_cast<float>(int16_min), static_cast<float>(int16_max)));
 	}
 }
 
 
-void CDmo2Vst::Deinterleave(float *poutL, float *poutR, int nsamples)
-//-------------------------------------------------------------------
+// Deinterleave an int16 stereo stream into two float streams.
+void CDmo2Vst::DeinterleaveInt16ToFloat(float *outLeft, float *outRight, int samples) const
+//-----------------------------------------------------------------------------------------
 {
-	const float *pin = m_pMixBuffer;
-	for(int i = nsamples; i != 0; i--)
+	const int16 *inBuf = m_pMixBuffer;
+	for(int i = samples; i != 0; i--)
 	{
-		*(poutL++) += Clamp(*(pin++), -1.0f, 1.0f);
-		*(poutR++) += Clamp(*(pin++), -1.0f, 1.0f);
+		*outLeft++ += _si2f * static_cast<float>(*inBuf++);
+		*outRight++ += _si2f * static_cast<float>(*inBuf++);
 	}
 }
 
 
-void CDmo2Vst::Process(float * const *inputs, float **outputs, long sampleframes)
-//-------------------------------------------------------------------------------
+#ifdef ENABLE_SSE
+// Interleave two float streams into one int16 stereo stream using SSE magic.
+void CDmo2Vst::SSEInterleaveFloatToInt16(const float *inLeft, const float *inRight, int samples)
+//----------------------------------------------------------------------------------------------
 {
-	if ((!m_pMixBuffer) || (sampleframes <= 0))
+	int16 *outBuf = m_pMixBuffer;
+	_asm
+	{
+		mov eax, inLeft
+		mov edx, inRight
+		mov ebx, outBuf
+		mov ecx, samples
+		movss xmm2, _f2si
+		xorps xmm0, xmm0
+		xorps xmm1, xmm1
+		shufps xmm2, xmm2, 0x00
+		pxor mm0, mm0
+		inc ecx
+		shr ecx, 1
+mainloop:
+		movlps xmm0, [eax]
+		movlps xmm1, [edx]
+		mulps xmm0, xmm2
+		mulps xmm1, xmm2
+		add ebx, 8
+		cvtps2pi mm0, xmm0	// mm0 = [ x2l | x1l ]
+		add eax, 8
+		cvtps2pi mm1, xmm1	// mm1 = [ x2r | x1r ]
+		add edx, 8
+		packssdw mm0, mm1	// mm0 = [x2r|x1r|x2l|x1l]
+		pshufw mm0, mm0, 0xD8
+		dec ecx
+		movq [ebx-8], mm0
+		jnz mainloop
+		emms
+	}
+}
+
+
+// Deinterleave an int16 stereo stream into two float streams using SSE magic.
+void CDmo2Vst::SSEDeinterleaveInt16ToFloat(float *outLeft, float *outRight, int samples) const
+//--------------------------------------------------------------------------------------------
+{
+	const int16 *inBuf = m_pMixBuffer;
+	_asm {
+		mov ebx, inBuf
+		mov eax, outLeft
+		mov edx, outRight
+		mov ecx, samples
+		movss xmm7, _si2f
+		inc ecx
+		shr ecx, 1
+		shufps xmm7, xmm7, 0x00
+		xorps xmm0, xmm0
+		xorps xmm1, xmm1
+		xorps xmm2, xmm2
+mainloop:
+		movq mm0, [ebx]		// mm0 = [x2r|x2l|x1r|x1l]
+		add ebx, 8
+		pxor mm1, mm1
+		pxor mm2, mm2
+		punpcklwd mm1, mm0	// mm1 = [x1r|0|x1l|0]
+		punpckhwd mm2, mm0	// mm2 = [x2r|0|x2l|0]
+		psrad mm1, 16		// mm1 = [x1r|x1l]
+		movlps xmm2, [eax]
+		psrad mm2, 16		// mm2 = [x2r|x2l]
+		cvtpi2ps xmm0, mm1	// xmm0 = [ ? | ? |x1r|x1l]
+		dec ecx
+		cvtpi2ps xmm1, mm2	// xmm1 = [ ? | ? |x2r|x2l]
+		movhps xmm2, [edx]	// xmm2 = [y2r|y1r|y2l|y1l]
+		movlhps xmm0, xmm1	// xmm0 = [x2r|x2l|x1r|x1l]
+		shufps xmm0, xmm0, 0xD8
+		lea eax, [eax+8]
+		mulps xmm0, xmm7
+		addps xmm0, xmm2
+		lea edx, [edx+8]
+		movlps [eax-8], xmm0
+		movhps [edx-8], xmm0
+		jnz mainloop
+		emms
+	}
+}
+
+#endif // ENABLE_SSE
+
+
+void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
+//-------------------------------------------------------------------------
+{
+	if(m_pMixBuffer == nullptr || samples <= 0)
+	{
 		return;
+	}
 
-	Interleave(inputs[0], inputs[1], sampleframes);
-	m_pMediaProcess->Process(sampleframes * 2 * sizeof(float), (LPBYTE)m_pMixBuffer, m_DataTime, DMO_INPLACE_NORMAL);
-	Deinterleave(outputs[0], outputs[1], sampleframes);
+#ifdef ENABLE_MMX
+#ifdef ENABLE_SSE
+	if((CSoundFile::gdwSysInfo & SYSMIX_SSE) && (CSoundFile::gdwSoundSetup & SNDMIX_ENABLEMMX))
+	{
+		SSEInterleaveFloatToInt16(inputs[0], inputs[1], samples);
+		m_pMediaProcess->Process(samples * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
+		SSEDeinterleaveInt16ToFloat(outputs[0], outputs[1], samples);
+	} else
+#endif // ENABLE_SSE
+#endif // ENABLE_MMX
+	{
+		InterleaveFloatToInt16(inputs[0], inputs[1], samples);
+		m_pMediaProcess->Process(samples * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
+		DeinterleaveInt16ToFloat(outputs[0], outputs[1], samples);
+	}
 
-	m_DataTime += _muldiv(sampleframes, 10000000, m_nSamplesPerSec);
+	m_DataTime += _muldiv(samples, 10000000, m_nSamplesPerSec);
 }
 
 
