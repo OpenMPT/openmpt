@@ -19,16 +19,16 @@
 void XMFileHeader::ConvertEndianness()
 //------------------------------------
 {
-	version = LittleEndianW(version);
-	size = LittleEndian(size);
-	orders = LittleEndianW(orders);
-	restartpos = LittleEndianW(restartpos);
-	channels = LittleEndianW(channels);
-	patterns = LittleEndianW(patterns);
-	instruments = LittleEndianW(instruments);
-	flags = LittleEndianW(flags);
-	speed = LittleEndianW(speed);
-	tempo = LittleEndianW(tempo);
+	SwapBytesLE(version);
+	SwapBytesLE(size);
+	SwapBytesLE(orders);
+	SwapBytesLE(restartpos);
+	SwapBytesLE(channels);
+	SwapBytesLE(patterns);
+	SwapBytesLE(instruments);
+	SwapBytesLE(flags);
+	SwapBytesLE(speed);
+	SwapBytesLE(tempo);
 }
 
 
@@ -222,9 +222,9 @@ void XMInstrument::ApplyAutoVibratoToMPT(ModSample &mptSmp) const
 void XMInstrumentHeader::ConvertEndianness()
 //------------------------------------------
 {
-	size = LittleEndian(size);
-	sampleHeaderSize = LittleEndian(sampleHeaderSize);
-	numSamples = LittleEndianW(numSamples);
+	SwapBytesLE(size);
+	SwapBytesLE(sampleHeaderSize);
+	SwapBytesLE(numSamples);
 }
 
 
@@ -286,8 +286,8 @@ void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 void XIInstrumentHeader::ConvertEndianness()
 //------------------------------------------
 {
-	version = LittleEndianW(version);
-	numSamples = LittleEndianW(numSamples);
+	SwapBytesLE(version);
+	SwapBytesLE(numSamples);
 }
 
 
@@ -377,9 +377,9 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 		loopLength *= 2;
 	}
 
-	length = LittleEndian(length);
-	loopStart = LittleEndian(loopStart);
-	loopLength = LittleEndian(loopLength);
+	SwapBytesLE(length);
+	SwapBytesLE(loopStart);
+	SwapBytesLE(loopLength);
 }
 
 

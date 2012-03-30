@@ -15,494 +15,501 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
-#endif // MODPLUG_TRACKER
 
 #pragma pack(push, 1)
 
-struct GDMHEADER
+// GDM File Header
+struct GDMFileHeader
 {
-	uint32 ID;						// ID: 'GDMþ'
-	char   SongTitle[32];			// Music's title
-	char   SongMusician[32];		// Name of music's composer
-	char   DOSEOF[3];				// 13, 10, 26
-	uint32 ID2;						// ID: 'GMFS'
-	uint8  FormMajorVer;			// Format major version
-	uint8  FormMinorVer;			// Format minor version
-	uint16 TrackID;					// Composing Tracker ID code (00 = 2GDM)
-	uint8  TrackMajorVer;			// Tracker's major version
-	uint8  TrackMinorVer;			// Tracker's minor version
-	uint8  PanMap[32];				// 0-Left to 15-Right, 255-N/U
-	uint8  MastVol;					// Range: 0...64
-	uint8  Tempo;					// Initial music tempo (6)
-	uint8  BPM;						// Initial music BPM (125)
-	uint16 FormOrigin;				// Original format ID:
+	// Header magic bytes
+	enum HeaderMagic
+	{
+		magicGDM_ = 0xFE4D4447,
+		magicGMFS = 0x53464D47,
+	};
+
+	uint32 magic;					// ID: 'GDMþ'
+	char   songTitle[32];			// Music's title
+	char   songMusician[32];		// Name of music's composer
+	char   dosEOF[3];				// 13, 10, 26
+	uint32 magic2;					// ID: 'GMFS'
+	uint8  formatMajorVer;			// Format major version
+	uint8  formatMinorVer;			// Format minor version
+	uint16 trackerID;				// Composing Tracker ID code (00 = 2GDM)
+	uint8  trackerMajorVer;			// Tracker's major version
+	uint8  trackerMinorVer;			// Tracker's minor version
+	uint8  panMap[32];				// 0-Left to 15-Right, 255-N/U
+	uint8  masterVol;				// Range: 0...64
+	uint8  tempo;					// Initial music tempo (6)
+	uint8  bpm;						// Initial music BPM (125)
+	uint16 originalFormat;			// Original format ID:
 		// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
 		// (versions of 2GDM prior to v1.15 won't set this correctly)
 
-	uint32 OrdOffset;
-	uint8  NOO;						// Number of orders in module - 1
-	uint32 PatOffset;
-	uint8  NOP;						// Number of patterns in module - 1
-	uint32 SamHeadOffset;
-	uint32 SamOffset;
-	uint8  NOS;						// Number of samples in module - 1
-	uint32 MTOffset;				// Offset of song message
-	uint32 MTLength;
-	uint32 SSOffset;				// Offset of scrolly script (huh?)
-	uint16 SSLength;
-	uint32 TGOffset;				// Offset of text graphic (huh?)
-	uint16 TGLength;
+	uint32 orderOffset;
+	uint8  lastOrder;				// Number of orders in module - 1
+	uint32 patternOffset;
+	uint8  lastPattern;				// Number of patterns in module - 1
+	uint32 sampleHeaderOffset;
+	uint32 sampleDataOffset;
+	uint8  lastSample;				// Number of samples in module - 1
+	uint32 messageTextOffset;		// Offset of song message
+	uint32 messageTextLength;
+	uint32 scrollyScriptOffset;		// Offset of scrolly script (huh?)
+	uint16 scrollyScriptLength;
+	uint32 textGraphicOffset;		// Offset of text graphic (huh?)
+	uint16 textGraphicLength;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(magic);
+		SwapBytesLE(magic2);
+		SwapBytesLE(trackerID);
+		SwapBytesLE(originalFormat);
+		SwapBytesLE(orderOffset);
+		SwapBytesLE(patternOffset);
+		SwapBytesLE(sampleHeaderOffset);
+		SwapBytesLE(sampleDataOffset);
+		SwapBytesLE(messageTextOffset);
+		SwapBytesLE(messageTextLength);
+		SwapBytesLE(messageTextOffset);
+		SwapBytesLE(messageTextLength);
+		SwapBytesLE(scrollyScriptOffset);
+		SwapBytesLE(scrollyScriptLength);
+		SwapBytesLE(textGraphicOffset);
+		SwapBytesLE(textGraphicLength);
+	}
 };
 
-struct GDMSAMPLEHEADER
+// GDM Sample Header
+struct GDMSampleHeader
 {
-	char   SamName[32];		// sample's name
-	char   FileName[12];	// sample's filename
-	uint8  EmsHandle;		// useless
-	uint32 Length;			// length in bytes
-	uint32 LoopBegin;		// loop start in samples
-	uint32 LoopEnd;			// loop end in samples
-	uint8  Flags;			// misc. flags
-	uint16 C4Hertz;			// frequency
-	uint8  Volume;			// default volume
-	uint8  Pan;				// default pan
+	enum SampleFlags
+	{
+		smpLoop		= 0x01,
+		smp16Bit	= 0x02,		// 16-Bit samples are not handled correctly by 2GDM (not implemented)
+		smpVolume	= 0x04,
+		smpPanning	= 0x08,
+		smpLZW		= 0x10,		// LZW-compressed samples are not implemented in 2GDM
+		smpStereo	= 0x20,		// Stereo samples are not handled correctly by 2GDM (not implemented)
+	};
+
+	char   name[32];		// sample's name
+	char   fileName[12];	// sample's filename
+	uint8  emsHandle;		// useless
+	uint32 length;			// length in bytes
+	uint32 loopBegin;		// loop start in samples
+	uint32 loopEnd;			// loop end in samples
+	uint8  flags;			// misc. flags
+	uint16 c4Hertz;			// frequency
+	uint8  volume;			// default volume
+	uint8  panning;			// default pan
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopBegin);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(c4Hertz);
+	}
 };
 
 #pragma pack(pop)
 
-#define GDMHEAD_GDM_ 0xFE4D4447
-#define GDMHEAD_GMFS 0x53464D47
-
-static const MODTYPE GDMHeader_Origin[] =
+bool CSoundFile::ReadGDM(FileReader &file)
+//----------------------------------------
 {
-	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
-};
-
-bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
-{
-	if ((!lpStream) || (dwMemLength < sizeof(GDMHEADER))) return false;
-
-	const GDMHEADER *pHeader = (GDMHEADER *)lpStream;
+	file.Rewind();
+	GDMFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader))
+	{
+		return false;
+	}
 
 	// Is it a valid GDM file?
-	if(	(pHeader->ID != LittleEndian(GDMHEAD_GDM_)) || //GDMþ
-		(pHeader->DOSEOF[0] != 13 || pHeader->DOSEOF[1] != 10 || pHeader->DOSEOF[2] != 26) || //CR+LF+EOF
-		(pHeader->ID2 != LittleEndian(GDMHEAD_GMFS))) return false; //GMFS
-
-	// There are no other format versions...
-	if(pHeader->FormMajorVer != 1 || pHeader->FormMinorVer != 0)
+	if(fileHeader.magic != GDMFileHeader::magicGDM_
+		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
+		|| fileHeader.magic2 != GDMFileHeader::magicGMFS
+		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0)
+	{
 		return false;
+	}
 
 	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
-	m_nType = GDMHeader_Origin[pHeader->FormOrigin % CountOf(GDMHeader_Origin)];
-	if(m_nType == MOD_TYPE_NONE)
-		return false;
+	static const MODTYPE gdmFormatOrigin[] =
+	{
+		MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
+	};
 
-	// Interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
+	m_nType = gdmFormatOrigin[fileHeader.originalFormat % CountOf(gdmFormatOrigin)];
+	if(m_nType == MOD_TYPE_NONE)
+	{
+		return false;
+	}
 
 	// Song name
 	MemsetZero(m_szNames);
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pHeader->SongTitle);
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songTitle);
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
 	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
-		if(pHeader->PanMap[i] < 16)
+		if(fileHeader.panMap[i] < 16)
 		{		
-			ChnSettings[i].nPan = min((pHeader->PanMap[i] * 16) + 8, 256);
+			ChnSettings[i].nPan = min((fileHeader.panMap[i] * 16) + 8, 256);
 		}
-		else if(pHeader->PanMap[i] == 16)
+		else if(fileHeader.panMap[i] == 16)
 		{
 			ChnSettings[i].nPan = 128;
 			ChnSettings[i].dwFlags |= CHN_SURROUND;
 		}
-		else if(pHeader->PanMap[i] == 0xFF)
+		else if(fileHeader.panMap[i] == 0xFF)
 		{
 			m_nChannels = i;
 			break;
 		}
 	}
 
-	m_nDefaultGlobalVolume = min(pHeader->MastVol * 4, 256);
-	m_nDefaultSpeed = pHeader->Tempo;
-	m_nDefaultTempo = pHeader->BPM;
+	m_nDefaultGlobalVolume = min(fileHeader.masterVol * 4, 256);
+	m_nDefaultSpeed = fileHeader.tempo;
+	m_nDefaultTempo = fileHeader.bpm;
 	m_nRestartPos = 0; // Not supported in this format, so use the default value
 	m_nSamplePreAmp = 48; // Dito
 	m_nVSTiVolume = 48; // Dito
 
-	uint32 iSampleOffset  = LittleEndian(pHeader->SamOffset),
-		   iPatternsOffset = LittleEndian(pHeader->PatOffset);
-
-	const uint32 iOrdOffset = LittleEndian(pHeader->OrdOffset), iSamHeadOffset = LittleEndian(pHeader->SamHeadOffset), 
-				 iMTOffset = LittleEndian(pHeader->MTOffset), iMTLength = LittleEndian(pHeader->MTLength),
-				 iSSOffset = LittleEndian(pHeader->SSOffset), iSSLength = LittleEndianW(pHeader->SSLength),
-				 iTGOffset = LittleEndian(pHeader->TGOffset), iTGLength = LittleEndianW(pHeader->TGLength);
-	
-
-	// Check if offsets are valid. we won't read the scrolly text or text graphics, but invalid pointers would probably indicate a broken file...
-	if(	   dwMemLength < iOrdOffset || dwMemLength - iOrdOffset < pHeader->NOO
-		|| dwMemLength < iPatternsOffset
-		|| dwMemLength < iSamHeadOffset || dwMemLength - iSamHeadOffset < (pHeader->NOS + 1) * sizeof(GDMSAMPLEHEADER)
-		|| dwMemLength < iSampleOffset
-		|| dwMemLength < iMTOffset || dwMemLength - iMTOffset < iMTLength
-		|| dwMemLength < iSSOffset || dwMemLength - iSSOffset < iSSLength
-		|| dwMemLength < iTGOffset || dwMemLength - iTGOffset < iTGLength)
-		return false;
-
 	// Read orders
-	Order.ReadAsByte(lpStream + iOrdOffset, pHeader->NOO + 1, dwMemLength - iOrdOffset);
+	if(file.Seek(fileHeader.orderOffset))
+	{
+		Order.ReadAsByte(file, fileHeader.lastOrder + 1);
+	}
 
 	// Read samples
-	m_nSamples = pHeader->NOS + 1;
-	
-	for(SAMPLEINDEX iSmp = 1; iSmp <= m_nSamples; iSmp++)
+	if(!file.Seek(fileHeader.sampleHeaderOffset))
 	{
-		const GDMSAMPLEHEADER *pSample = (GDMSAMPLEHEADER *)(lpStream + iSamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
+		return false;
+	}
 
-		// Sample header
+	m_nSamples = fileHeader.lastSample + 1;
 
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[iSmp], pSample->SamName);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[iSmp].filename, pSample->FileName);
+	// Sample headers
+	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
+	{
+		GDMSampleHeader gdmSample;
+		if(!file.ReadConvertEndianness(gdmSample))
+		{
+			break;
+		}
 
-		Samples[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
-		Samples[iSmp].nGlobalVol = 256; // not supported in this format
-		Samples[iSmp].nLength = min(LittleEndian(pSample->Length), MAX_SAMPLE_LENGTH); // in bytes
-		Samples[iSmp].nLoopStart = min(LittleEndian(pSample->LoopBegin), Samples[iSmp].nLength); // in samples
-		Samples[iSmp].nLoopEnd = min(LittleEndian(pSample->LoopEnd) - 1, Samples[iSmp].nLength); // dito
-		FrequencyToTranspose(&Samples[iSmp]); // set transpose + finetune for mod files
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], gdmSample.name);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[smp].filename, gdmSample.fileName);
+
+		Samples[smp].nC5Speed = gdmSample.c4Hertz;
+		Samples[smp].nGlobalVol = 256;	// Not supported in this format
+
+		Samples[smp].nLength = min(gdmSample.length, MAX_SAMPLE_LENGTH); // in bytes
+
+		// Sample format
+		if(gdmSample.flags & GDMSampleHeader::smp16Bit)
+		{
+			Samples[smp].uFlags |= CHN_16BIT;
+			Samples[smp].nLength /= 2;
+		}
+
+		Samples[smp].nLoopStart = min(gdmSample.loopBegin, Samples[smp].nLength);	// in samples
+		Samples[smp].nLoopEnd = min(gdmSample.loopEnd - 1, Samples[smp].nLength);	// dito
+		FrequencyToTranspose(&Samples[smp]);	// set transpose + finetune for mod files
 
 		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
 		if(m_nType == MOD_TYPE_MOD)
 		{
-			while(Samples[iSmp].RelativeTone != 0)
+			while(Samples[smp].RelativeTone != 0)
 			{
-				if(Samples[iSmp].RelativeTone > 0)
+				if(Samples[smp].RelativeTone > 0)
 				{
-					Samples[iSmp].RelativeTone -= 1;
-					Samples[iSmp].nFineTune += 128;
+					Samples[smp].RelativeTone -= 1;
+					Samples[smp].nFineTune += 128;
 				}
 				else
 				{
-					Samples[iSmp].RelativeTone += 1;
-					Samples[iSmp].nFineTune -= 128;
+					Samples[smp].RelativeTone += 1;
+					Samples[smp].nFineTune -= 128;
 				}
 			}
 		}
 
-		if(pSample->Flags & 0x01) Samples[iSmp].uFlags |= CHN_LOOP; // Loop sample
+		Samples[smp].uFlags = 0;
+		if(gdmSample.flags & GDMSampleHeader::smpLoop) Samples[smp].uFlags |= CHN_LOOP; // Loop sample
 
-		if(pSample->Flags & 0x04)
+		if(gdmSample.flags & GDMSampleHeader::smpVolume)
 		{
-			Samples[iSmp].nVolume = min(pSample->Volume, 64) * 4; // 0...64, 255 = no default volume
-		}
-		else
+			// Default volume is used... 0...64, 255 = no default volume
+			Samples[smp].nVolume = min(gdmSample.volume, 64) * 4;
+		} else
 		{
-			Samples[iSmp].nVolume = 256; // Default volume
-		}
-
-		if(pSample->Flags & 0x08) // Default panning is used
-		{
-			Samples[iSmp].uFlags |= CHN_PANNING;
-			Samples[iSmp].nPan = (pSample->Pan > 15) ? 128 : min((pSample->Pan * 16) + 8, 256); // 0...15, 16 = surround (not supported), 255 = no default panning
-		}
-		else
-		{
-			Samples[iSmp].nPan = 128;
+			Samples[smp].nVolume = 256;
 		}
 
-		// Note: apparently (and according to zilym), 2GDM doesn't handle 16 bit or stereo samples properly.
-		// so those flags are pretty much meaningless and we will ignore them... in fact, samples won't load as expected if we don't!
-		
-		UINT iSampleFormat;
-		if(pSample->Flags & 0x02) // 16 bit
+		if(gdmSample.flags & GDMSampleHeader::smpPanning)
 		{
-			if(pSample->Flags & 0x20) // stereo
-				iSampleFormat = RS_PCM16U; // should be RS_STPCM16U but that breaks the sample reader
-			else
-				iSampleFormat = RS_PCM16U;
-		}
-		else // 8 bit
+			// Default panning is used
+			Samples[smp].uFlags |= CHN_PANNING;
+			// 0...15, 16 = surround (not supported), 255 = no default panning
+			Samples[smp].nPan = (gdmSample.panning > 15) ? 128 : min((gdmSample.panning * 16) + 8, 256);
+		} else
 		{
-			if(pSample->Flags & 0x20) // stereo
-				iSampleFormat = RS_PCM8U; // should be RS_STPCM8U - dito
-			else
-				iSampleFormat = RS_PCM8U;
+			Samples[smp].nPan = 128;
 		}
+	}
 
-		// According to zilym, LZW support has never been finished, so this is also practically useless. Just ignore the flag.
-		// if(pSample->Flags & 0x10) {...}
-
-		// Read sample data
-		ReadSample(&Samples[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + iSampleOffset), dwMemLength - iSampleOffset);
-			
-		iSampleOffset += min(LittleEndian(pSample->Length), dwMemLength - iSampleOffset);
-
+	// Read sample data
+	if(file.Seek(fileHeader.sampleDataOffset))
+	{
+		for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
+		{
+			ReadSample(&Samples[smp], (Samples[smp].uFlags & CHN_16BIT) ? RS_PCM16U : RS_PCM8U, file);
+		}
 	}
 
 	// Read patterns
-	Patterns.ResizeArray(max(MAX_PATTERNS, pHeader->NOP + 1));
+	Patterns.ResizeArray(max(MAX_PATTERNS, fileHeader.lastPattern + 1));
 
-	const bool bS3MCommandSet = (GetBestSaveFormat() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
+	const CModSpecifications &modSpecs = GetModSpecifications(GetBestSaveFormat());
 
-	// We'll start at position iPatternsOffset and decode all patterns
-	for(PATTERNINDEX iPat = 0; iPat < pHeader->NOP + 1; iPat++)
+	// We'll start at position patternsOffset and decode all patterns
+	file.Seek(fileHeader.patternOffset);
+	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
-		
-		if(iPatternsOffset + 2 > dwMemLength) break;
-		uint16 iPatternLength = LittleEndianW(*(uint16 *)(lpStream + iPatternsOffset)); // Pattern length including the two "length" bytes
-		if(iPatternLength > dwMemLength || iPatternsOffset > dwMemLength - iPatternLength) break;
-
-		if(Patterns.Insert(iPat, 64)) 
-			break;
-
-		// Position in THIS pattern
-		DWORD iPatternPos = iPatternsOffset + 2;
-
-		for(ROWINDEX iRow = 0; iRow < 64; iRow++)
+		if(!file.CanRead(2))
 		{
-			ModCommand *p = Patterns[iPat].GetRow(iRow);
+			break;
+		}
 
-			while(true) // Zero byte = next row
+		// Read pattern length *including* the two "length" bytes
+		uint16 patternLength = file.ReadUint16LE();
+
+		if(patternLength <= 2)
+		{
+			// Huh, no pattern data present?
+			continue;
+		}
+		FileReader chunk = file.GetChunk(patternLength - 2);
+
+		if(!chunk.IsValid() || Patterns.Insert(pat, 64))
+		{
+			break;
+		}
+
+		enum
+		{
+			rowDone		= 0,		// Advance to next row
+			channelMask	= 0x1F,		// Mask for retrieving channel information
+			noteFlag	= 0x20,		// Note / instrument information present
+			effectFlag	= 0x40,		// Effect information present
+			effectMask	= 0x1F,		// Mask for retrieving effect command
+			effectDone	= 0x20,		// Last effect in this channel
+		};
+
+		for(ROWINDEX row = 0; row < 64; row++)
+		{
+			PatternRow rowBase = Patterns[pat].GetRow(row);
+
+			uint8 channelByte;
+			// If channel byte is zero, advance to next row.
+			while((channelByte = chunk.ReadUint8()) != rowDone)
 			{
-				if(iPatternPos + 1 > dwMemLength) break;
-
-				BYTE bChannel = lpStream[iPatternPos++];
-
-				if(bChannel == 0) break; // Next row, please!
-
-				const UINT channel = bChannel & 0x1F;
+				CHANNELINDEX channel = channelByte & channelMask;
 				if(channel >= m_nChannels) break; // Better safe than sorry!
 
-				ModCommand *m = &p[channel];
+				ModCommand &m = rowBase[channel];
 
-				if(bChannel & 0x20)
+				if(channelByte & noteFlag)
 				{
 					// Note and sample follows
-					if(iPatternPos + 2 > dwMemLength) break;
-					BYTE bNote = lpStream[iPatternPos++];
-					BYTE bSample = lpStream[iPatternPos++];
+					uint8 noteByte = chunk.ReadUint8();
+					uint8 noteSample = chunk.ReadUint8();
 
-					bNote = (bNote & 0x7F) - 1; // This format doesn't have note cuts
-					if(bNote < 0xF0) bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
-					if(bNote == 0xFF) bNote = NOTE_NONE;
-					m->note = bNote;
-					m->instr = bSample;
-
+					if(noteByte)
+					{
+						noteByte = (noteByte & 0x7F) - 1; // This format doesn't have note cuts
+						if(noteByte < 0xF0) noteByte = (noteByte & 0x0F) + 12 * (noteByte >> 4) + 13;
+						m.note = noteByte;
+					}
+					m.instr = noteSample;
 				}
 
-				if(bChannel & 0x40)
+				if(channelByte & effectFlag)
 				{
 					// Effect(s) follow(s)
+					m.command = CMD_NONE;
+					m.volcmd = VOLCMD_NONE;
 
-					m->command = CMD_NONE;
-					m->volcmd = CMD_NONE;
-
-					while(true)
+					while(chunk.BytesLeft())
 					{
-						if(iPatternPos + 2 > dwMemLength) break;
-						BYTE bEffect = lpStream[iPatternPos++];
-						BYTE bEffectData = lpStream[iPatternPos++];
+						uint8 effByte = chunk.ReadUint8();
+						uint8 paramByte = chunk.ReadUint8();
 
-						BYTE command = bEffect & 0x1F, param = bEffectData;
-						BYTE volcommand = CMD_NONE, volparam = param;
+						// We may want to restore the old command in some cases.
+						const ModCommand oldCmd = m;
+						m.command = effByte & effectMask;
+						m.param = paramByte;
 
-						switch(command)
+						// Effect translation LUT
+						static const uint8 gdmEffTrans[] =
 						{
-						case 0x01: command = CMD_PORTAMENTOUP; if(param >= 0xE0) param = 0xDF; break;
-						case 0x02: command = CMD_PORTAMENTODOWN; if(param >= 0xE0) param = 0xDF; break;
-						case 0x03: command = CMD_TONEPORTAMENTO; break;
-						case 0x04: command = CMD_VIBRATO; break;
-						case 0x05: command = CMD_TONEPORTAVOL; if (param & 0xF0) param &= 0xF0; break;
-						case 0x06: command = CMD_VIBRATOVOL; if (param & 0xF0) param &= 0xF0; break;
-						case 0x07: command = CMD_TREMOLO; break;
-						case 0x08: command = CMD_TREMOR; break;
-						case 0x09: command = CMD_OFFSET; break;
-						case 0x0A: command = CMD_VOLUMESLIDE; break;
-						case 0x0B: command = CMD_POSITIONJUMP; break;
-						case 0x0C: 
-							if(bS3MCommandSet)
+							CMD_NONE, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
+							CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
+							CMD_TREMOR, CMD_OFFSET, CMD_VOLUMESLIDE, CMD_POSITIONJUMP,
+							CMD_VOLUME, CMD_PATTERNBREAK, CMD_MODCMDEX, CMD_SPEED,
+							CMD_ARPEGGIO, CMD_NONE /* set internal flag */, CMD_RETRIG, CMD_GLOBALVOLUME,
+							CMD_FINEVIBRATO, CMD_NONE, CMD_NONE, CMD_NONE,
+							CMD_NONE, CMD_NONE, CMD_NONE, CMD_NONE,
+							CMD_NONE, CMD_NONE, CMD_S3MCMDEX, CMD_TEMPO,
+						};
+						STATIC_ASSERT(CountOf(gdmEffTrans) == 0x20);
+
+						// Translate effect
+						if(m.command < CountOf(gdmEffTrans))
+						{
+							m.command = gdmEffTrans[m.command];
+						} else
+						{
+							m.command = CMD_NONE;
+						}
+
+						// Fix some effects
+						switch(m.command)
+						{
+						case CMD_PORTAMENTOUP:
+							if(m.param >= 0xE0)
+								m.param = 0xDF;
+							break;
+
+						case CMD_PORTAMENTODOWN:
+							if(m.param >= 0xE0)
+								m.param = 0xDF;
+							break;
+
+						case CMD_TONEPORTAVOL:
+							if(m.param & 0xF0)
+								m.param &= 0xF0;
+							break;
+
+						case CMD_VIBRATOVOL:
+							if(m.param & 0xF0)
+								m.param &= 0xF0;
+							break;
+
+						case CMD_VOLUME: 
+							m.param = min(m.param, 64);
+							if(modSpecs.HasVolCommand(VOLCMD_VOLUME))
 							{
-								command = CMD_NONE;
-								volcommand = VOLCMD_VOLUME;
-								volparam = min(param, 64);
-							}
-							else
-							{
-								command = CMD_VOLUME;
-								param = min(param, 64);
+								m.volcmd = VOLCMD_VOLUME;
+								m.vol = m.param;
+								// Don't destroy old command, if there was one.
+								m.command = oldCmd.command;
+								m.param = oldCmd.param;
 							}
 							break;
-						case 0x0D: command = CMD_PATTERNBREAK; break;
-						case 0x0E:
-							if(bS3MCommandSet)
+
+						case CMD_MODCMDEX:
+							if(!modSpecs.HasVolCommand(CMD_MODCMDEX))
 							{
-								command = CMD_S3MCMDEX;
-								// Need to do some remapping
-								switch(param >> 4)
-								{
-								case 0x0:
-									// set filter
-									break;
-								case 0x1:
-									// fine porta up
-									command = CMD_PORTAMENTOUP;
-									param = 0xF0 | (param & 0x0F);
-									break;
-								case 0x2:
-									// fine porta down
-									command = CMD_PORTAMENTODOWN;
-									param = 0xF0 | (param & 0x0F);
-									break;
-								case 0x3:
-									// glissando control
-									param = 0x10 | (param & 0x0F);
-									break;
-								case 0x4:
-									// vibrato waveform
-									param = 0x30 | (param & 0x0F);
-									break;
-								case 0x5:
-									// set finetune
-									param = 0x20 | (param & 0x0F);
-									break;
-								case 0x6:
-									// pattern loop
-									param = 0xB0 | (param & 0x0F);
-									break;
-								case 0x7:
-									// tremolo waveform
-									param = 0x40 | (param & 0x0F);
-									break;
-								case 0x8:
-									// extra fine porta up
-									command = CMD_PORTAMENTOUP;
-									param = 0xE0 | (param & 0x0F);
-									break;
-								case 0x9:
-									// extra fine porta down
-									command = CMD_PORTAMENTODOWN;
-									param = 0xE0 | (param & 0x0F);
-									break;
-								case 0xA:
-									// fine volume up
-									command = CMD_VOLUMESLIDE;
-									param = ((param & 0x0F) << 4) | 0x0F;
-									break;
-								case 0xB:
-									// fine volume down
-									command = CMD_VOLUMESLIDE;
-									param = 0xF0 | (param & 0x0F);
-									break;
-								case 0xC:
-									// note cut
-									break;
-								case 0xD:
-									// note delay
-									break;
-								case 0xE:
-									// pattern delay
-									break;
-								case 0xF:
-									command = CMD_MODCMDEX;
-									// invert loop / funk repeat
-									break;
-								}
-							}
-							else
-							{
-								command = CMD_MODCMDEX;
+								m.ExtendedMODtoS3MEffect();
 							}
 							break;
-						case 0x0F: command = CMD_SPEED; break;
-						case 0x10: command = CMD_ARPEGGIO; break;
-						case 0x11: command = CMD_NONE /* set internal flag */; break;
-						case 0x12:
-							if((!bS3MCommandSet) && ((param & 0xF0) == 0))
+
+						case CMD_RETRIG:
+							if(!modSpecs.HasCommand(CMD_RETRIG) && modSpecs.HasCommand(CMD_MODCMDEX))
 							{
-								// retrig in "mod style"
-								command = CMD_MODCMDEX;
-								param = 0x90 | (param & 0x0F);
-							}
-							else
-							{
-								// either "s3m style" is required or this format is like s3m anyway
-								command = CMD_RETRIG;
+								// Retrig in "MOD style"
+								m.command = CMD_MODCMDEX;
+								m.param = 0x90 | (m.param & 0x0F);
 							}
 							break;
-						case 0x13: command = CMD_GLOBALVOLUME; break;
-						case 0x14: command = CMD_FINEVIBRATO; break;
-						case 0x1E:
-							switch(param >> 4)
+
+						case CMD_S3MCMDEX:
+							// Some really special commands
+							switch(m.param >> 4)
 							{
 							case 0x0:
-								switch(param & 0x0F)
+								switch(m.param & 0x0F)
 								{
-								case 0x0: command = CMD_S3MCMDEX; param = 0x90; break;
-								case 0x1: command = CMD_PANNING8; param = 0xA4; break;
-								case 0x2: command = CMD_NONE /* set normal loop - not implemented in 2GDM */; break;
-								case 0x3: command = CMD_NONE /* set bidi loop - dito */; break;
-								case 0x4: command = CMD_S3MCMDEX; param = 0x9E; break;
-								case 0x5: command = CMD_S3MCMDEX; param = 0x9F; break;
-								case 0x6: command = CMD_NONE /* monaural sample - dito */; break;
-								case 0x7: command = CMD_NONE /* stereo sample - dito */; break;
-								case 0x8: command = CMD_NONE /* stop sample on end - dito */; break;
-								case 0x9: command = CMD_NONE /* loop sample on end - dito */; break;
-								default: command = CMD_NONE; break;
+								case 0x0:	// Surround Off
+									m.command = CMD_S3MCMDEX;
+									m.param = 0x90;
+									break;
+								case 0x1:	// Surround On
+									m.command = CMD_PANNING8;
+									m.param = 0xA4;
+									break;
+								case 0x2:	// Set normal loop - not implemented in BWSB or 2GDM.
+								case 0x3:	// Set bidi loop - dito
+									m.command = CMD_NONE;
+									break;
+								case 0x4:	// Play sample forwards
+									m.command = CMD_S3MCMDEX;
+									m.param = 0x9E;
+									break;
+								case 0x5:	// Play sample backwards
+									m.command = CMD_S3MCMDEX;
+									m.param = 0x9F;
+									break;
+								case 0x6:	// Monaural sample - also not implemented.
+								case 0x7:	// Stereo sample - dito
+								case 0x8:	// Stop sample on end - dito
+								case 0x9:	// Loop sample on end - dito
+								default:
+									m.command = CMD_NONE;
+									break;
 								}
 								break;
-							case 0x8:
-								command = (bS3MCommandSet) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+
+							case 0x8:		// 4-Bit Panning
+								if(!modSpecs.HasCommand(CMD_S3MCMDEX))
+								{
+									m.command = CMD_MODCMDEX;
+								}
 								break;
-							case 0xD:
-								// adjust frequency (increment in hz) - not implemented in 2GDM
-								command = CMD_NONE;
+
+							case 0xD:	// Adjust frequency (increment in hz) - also not implemented.
+							default:
+								m.command = CMD_NONE;
 								break;
-							default: command = CMD_NONE; break;
 							}
 							break;
-						case 0x1F: command = CMD_TEMPO; break;
-						default: command = CMD_NONE; break;
+
+						case 0x1F:
+							m.command = CMD_TEMPO;
+							break;
 						}
 
-						if(command != CMD_NONE)
+						// Move pannings to volume column - should never happen
+						if(m.command == CMD_S3MCMDEX && ((m.param >> 4) == 0x8) && m.volcmd == VOLCMD_NONE)
 						{
-							// move pannings to volume column - should never happen
-							if(m->command == CMD_S3MCMDEX && ((m->param >> 4) == 0x8) && volcommand == CMD_NONE)
-							{
-								volcommand = VOLCMD_PANNING;
-								volparam = ((param & 0x0F) * 4) + 2;
-							}
-
-							m->command = command;
-							m->param = param;
-						}
-						if(volcommand != CMD_NONE)
-						{
-							m->volcmd = volcommand;
-							m->vol = volparam;
+							m.volcmd = VOLCMD_PANNING;
+							m.vol = ((m.param & 0x0F) * 64 + 8) / 15;
+							m.command = oldCmd.command;
+							m.param = oldCmd.param;
 						}
 
-						if(!(bEffect & 0x20)) break; // no other effect follows
+						if(!(effByte & effectDone)) break; // no other effect follows
 					}
 
 				}
 				
 			}
 		}
-
-		iPatternsOffset += iPatternLength;
 	}
 
-	// read song comments	
-	if(iMTLength > 0)
+	// Read song comments	
+	if(fileHeader.messageTextLength > 0 && file.Seek(fileHeader.messageTextOffset))
 	{
-		ReadMessage(lpStream + iMTOffset, iMTLength, leAutodetect);
+		ReadMessage(file, fileHeader.messageTextLength, leAutodetect);
 	}
-	
+
 	return true;
 
 }
