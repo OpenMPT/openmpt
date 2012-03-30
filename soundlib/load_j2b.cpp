@@ -18,65 +18,87 @@
 #endif // ZLIB_WINAPI
 #include "../zlib/zlib.h"
 
-// 32-Bit J2B header identifiers
-#define J2BHEAD_MUSE     0x4553554D
-#define J2BHEAD_DEADBEAF 0xAFBEADDE
-#define J2BHEAD_DEADBABE 0xBEBAADDE
 
-// 32-Bit chunk identifiers
-#define AMCHUNKID_RIFF 0x46464952
-#define AMCHUNKID_AMFF 0x46464D41
-#define AMCHUNKID_AM__ 0x20204D41
-#define AMCHUNKID_MAIN 0x4E49414D
-#define AMCHUNKID_INIT 0x54494E49
-#define AMCHUNKID_ORDR 0x5244524F
-#define AMCHUNKID_PATT 0x54544150
-#define AMCHUNKID_INST 0x54534E49
-#define AMCHUNKID_SAMP 0x504D4153
-#define AMCHUNKID_AI__ 0x20204941
-#define AMCHUNKID_AS__ 0x20205341
-
-// Header flags
-#define AMHEAD_LINEAR	0x01
-
-// Envelope flags
-#define AMENV_ENABLED	0x01
-#define AMENV_SUSTAIN	0x02
-#define AMENV_LOOP		0x04
-
-// Sample flags
-#define AMSMP_16BIT		0x04
-#define AMSMP_LOOP		0x08
-#define AMSMP_PINGPONG	0x10
-#define AMSMP_PANNING	0x20
-#define AMSMP_EXISTS	0x80
-// some flags are still missing... what is f.e. 0x8000?
-
+// First off, a nice vibrato translation LUT.
+static const uint8 j2bAutoVibratoTrans[] = 
+{
+	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
+};
 
 #pragma pack(push, 1)
 
 // header for compressed j2b files
-struct J2BHEADER
+struct J2BFileHeader
 {
+	// Magic Bytes
+	enum J2BMagic
+	{
+		// 32-Bit J2B header identifiers
+		magicMUSE		= 0x4553554D,
+		magicDEADBEAF	= 0xAFBEADDE,
+		magicDEADBABE	= 0xBEBAADDE,
+	};
+
 	uint32 signature;		// MUSE
 	uint32 deadbeaf;		// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
-	uint32 j2blength;		// complete filesize
+	uint32 fileLength;		// complete filesize
 	uint32 crc32;			// checksum of the compressed data block
-	uint32 packed_length;	// length of the compressed data block
-	uint32 unpacked_length;	// length of the decompressed module
+	uint32 packedLength;	// length of the compressed data block
+	uint32 unpackedLength;	// length of the decompressed module
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(signature);
+		SwapBytesLE(deadbeaf);
+		SwapBytesLE(fileLength);
+		SwapBytesLE(crc32);
+		SwapBytesLE(packedLength);
+		SwapBytesLE(unpackedLength);
+	}
 };
 
-// am(ff) stuff
+// AM(FF) stuff
 
-struct AMFF_RIFFCHUNK
+struct AMFFRiffChunk
 {
-	uint32 signature;	// "RIFF"
-	uint32 chunksize;	// chunk size without header
+	// 32-Bit chunk identifiers
+	enum ChunkIdentifiers
+	{
+		idRIFF	= 0x46464952,
+		idAMFF	= 0x46464D41,
+		idAM__	= 0x20204D41,
+		idMAIN	= 0x4E49414D,
+		idINIT	= 0x54494E49,
+		idORDR	= 0x5244524F,
+		idPATT	= 0x54544150,
+		idINST	= 0x54534E49,
+		idSAMP	= 0x504D4153,
+		idAI__	= 0x20204941,
+		idAS__	= 0x20205341,
+	};
+
+	uint32 id;		// See ChunkIdentifiers
+	uint32 length;	// Chunk size without header
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(length);
+	}
 };
 
-// this header is used for both AM's "INIT" as well as AMFF's "MAIN" chunk
-struct AMFFCHUNK_MAIN
+
+// This header is used for both AM's "INIT" as well as AMFF's "MAIN" chunk
+struct AMFFMainChunk
 {
+	// Main Chunk flags
+	enum MainFlags
+	{
+		amigaSlides = 0x01,
+	};
+
 	char   songname[64];
 	uint8  flags;
 	uint8  channels;
@@ -86,421 +108,642 @@ struct AMFFCHUNK_MAIN
 	uint8  globalvolume;
 };
 
-// AMFF instrument envelope point
-struct AMFFINST_ENVPOINT
+
+// AMFF instrument envelope point (old format)
+struct AMFFEnvelopePoint
 {
 	uint16 tick;
-	uint8  pointval;	// 0...64
+	uint8  value;	// 0...64
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(tick);
+	}
 };
 
-// AMFF instrument header
-struct AMFFCHUNK_INSTRUMENT
+
+// AMFF instrument envelope (old format)
+struct AMFFEnvelope
+{
+	// Envelope flags (also used for RIFF AM)
+	enum EnvelopeFlags
+	{
+		envEnabled	= 0x01,
+		envSustain	= 0x02,
+		envLoop		= 0x04,
+	};
+
+	uint8  envFlags;			// high nibble = pan env flags, low nibble = vol env flags (both nibbles work the same way)
+	uint8  envNumPoints;		// high nibble = pan env length, low nibble = vol env length
+	uint8  envSustainPoints;	// you guessed it... high nibble = pan env sustain point, low nibble = vol env sustain point
+	uint8  envLoopStarts;		// i guess you know the pattern now.
+	uint8  envLoopEnds;			// same here.
+	AMFFEnvelopePoint volEnv[10];
+	AMFFEnvelopePoint panEnv[10];
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		for(size_t i = 0; i < CountOf(volEnv); i++)
+		{
+			volEnv[i].ConvertEndianness();
+			panEnv[i].ConvertEndianness();
+		}
+	}
+
+	// Convert weird envelope data to OpenMPT's internal format.
+	void ConvertEnvelope(uint8 flags, uint8 numPoints, uint8 sustainPoint, uint8 loopStart, uint8 loopEnd, const AMFFEnvelopePoint *points, InstrumentEnvelope &mptEnv) const
+	{
+		mptEnv.dwFlags = (flags & AMFFEnvelope::envEnabled) ? ENV_ENABLED : 0;
+		if(flags & AMFFEnvelope::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
+		if(flags & AMFFEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
+
+		// The buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
+		mptEnv.nNodes = min(numPoints, 10);
+
+		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
+		if(mptEnv.nSustainStart > mptEnv.nNodes)
+			mptEnv.dwFlags &= ~ENV_SUSTAIN;
+
+		mptEnv.nLoopStart = loopStart;
+		mptEnv.nLoopEnd = loopEnd;
+		if(mptEnv.nLoopStart > mptEnv.nLoopEnd || mptEnv.nLoopStart > mptEnv.nNodes)
+		{
+			mptEnv.dwFlags &= ~ENV_LOOP;
+		}
+
+		for(size_t i = 0; i < 10; i++)
+		{
+			mptEnv.Ticks[i] = points[i].tick >> 4;
+			if(i == 0)
+				mptEnv.Ticks[0] = 0;
+			else if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
+				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + 1;
+
+			mptEnv.Values[i] = Clamp(points[i].value, uint8(0), uint8(0x40));
+		}
+	}
+
+	void ConvertToMPT(ModInstrument &mptIns) const
+	{
+		// interleaved envelope data... meh. gotta split it up here and decode it separately.
+		// note: mod2j2b is BUGGY and always writes ($original_num_points & 0x0F) in the header,
+		// but just has room for 10 envelope points. That means that long (>= 16 points)
+		// envelopes are cut off, and envelopes have to be trimmed to 10 points, even if
+		// the header claims that they are longer.
+		ConvertEnvelope(envFlags & 0x0F, envNumPoints & 0x0F, envSustainPoints & 0x0F, envLoopStarts & 0x0F, envLoopEnds & 0x0F, volEnv, mptIns.VolEnv);
+		ConvertEnvelope(envFlags >> 4, envNumPoints >> 4, envSustainPoints >> 4, envLoopStarts >> 4, envLoopEnds >> 4, panEnv, mptIns.PanEnv);
+	}
+};
+
+
+// AMFF instrument header (old format)
+struct AMFFInstrumentHeader
 {
 	uint8  unknown;				// 0x00
 	uint8  index;				// actual instrument number
 	char   name[28];
-	uint8  numsamples;
-	uint8  samplemap[120];
-	uint8  autovib_type;
-	uint16 autovib_sweep;
-	uint16 autovib_depth;
-	uint16 autovib_rate;
-	uint8  envflags;			// high nibble = pan env flags, low nibble = vol env flags (both nibbles work the same way)
-	uint8  envnumpoints;		// high nibble = pan env length, low nibble = vol env length
-	uint8  envsustainpoints;	// you guessed it... high nibble = pan env sustain point, low nibble = vol env sustain point
-	uint8  envloopstarts;		// i guess you know the pattern now.
-	uint8  envloopends;			// same here.
-	AMFFINST_ENVPOINT volenv[10];
-	AMFFINST_ENVPOINT panenv[10];
+	uint8  numSamples;
+	uint8  sampleMap[120];
+	uint8  vibratoType;
+	uint16 vibratoSweep;
+	uint16 vibratoDepth;
+	uint16 vibratoRate;
+	AMFFEnvelope envelopes;
 	uint16 fadeout;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(vibratoSweep);
+		SwapBytesLE(vibratoDepth);
+		SwapBytesLE(vibratoRate);
+		envelopes.ConvertEndianness();
+		SwapBytesLE(fadeout);
+	}
+
+	// Convert instrument data to OpenMPT's internal format.
+	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX baseSample)
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptIns.name, name);
+
+		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
+		for(size_t i = 0; i < CountOf(sampleMap); i++)
+		{
+			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
+		}
+
+		mptIns.nFadeOut = fadeout << 5;
+		envelopes.ConvertToMPT(mptIns);
+	}
+
 };
 
-// AMFF sample header
-struct AMFFCHUNK_SAMPLE
+
+// AMFF sample header (old format)
+struct AMFFSampleHeader
 {
-	uint32 signature;	// "SAMP"
-	uint32 chunksize;	// header + sample size
+	// Sample flags (also used for RIFF AM)
+	enum SampleFlags
+	{
+		smp16Bit	= 0x04,
+		smpLoop		= 0x08,
+		smpPingPong	= 0x10,
+		smpPanning	= 0x20,
+		smpExists	= 0x80,
+		// some flags are still missing... what is f.e. 0x8000?
+	};
+
+	uint32 id;	// "SAMP"
+	uint32 chunkSize;	// header + sample size
 	char   name[28];
 	uint8  pan;
 	uint8  volume;
 	uint16 flags;
 	uint32 length;
-	uint32 loopstart;
-	uint32 loopend;
-	uint32 samplerate;
+	uint32 loopStart;
+	uint32 loopEnd;
+	uint32 sampleRate;
 	uint32 reserved1;
 	uint32 reserved2;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(chunkSize);
+		SwapBytesLE(flags);
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(sampleRate);
+	}
+
+	// Convert sample header to OpenMPT's internal format.
+	void ConvertToMPT(AMFFInstrumentHeader &instrHeader, ModSample &mptSmp) const
+	{
+		mptSmp.nPan = pan * 4;
+		mptSmp.nVolume = volume * 4;
+		mptSmp.nGlobalVol = 64;
+		mptSmp.nLength = min(length, MAX_SAMPLE_LENGTH);
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		mptSmp.nC5Speed = sampleRate;
+
+		if(instrHeader.vibratoType < CountOf(j2bAutoVibratoTrans))
+			mptSmp.nVibType = j2bAutoVibratoTrans[instrHeader.vibratoType];
+		mptSmp.nVibSweep = static_cast<BYTE>(instrHeader.vibratoSweep);
+		mptSmp.nVibRate = static_cast<BYTE>(instrHeader.vibratoRate / 16);
+		mptSmp.nVibDepth = static_cast<BYTE>(instrHeader.vibratoDepth / 4);
+		if((mptSmp.nVibRate | mptSmp.nVibDepth) != 0)
+		{
+			// Convert XM-style vibrato sweep to IT
+			mptSmp.nVibSweep = 255 - mptSmp.nVibSweep;
+		}
+
+		if(flags & AMFFSampleHeader::smp16Bit)
+			mptSmp.uFlags |= CHN_16BIT;
+		if(flags & AMFFSampleHeader::smpLoop)
+			mptSmp.uFlags |= CHN_LOOP;
+		if(flags & AMFFSampleHeader::smpPingPong)
+			mptSmp.uFlags |= CHN_PINGPONGLOOP;
+		if(flags & AMFFSampleHeader::smpPanning)
+			mptSmp.uFlags |= CHN_PANNING;
+	}
 };
 
-// AM instrument envelope point
-struct AMINST_ENVPOINT
+
+// AM instrument envelope point (new format)
+struct AMEnvelopePoint
 {
 	uint16 tick;
-	uint16 pointval;
+	uint16 value;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(tick);
+		SwapBytesLE(value);
+	}
 };
 
-// AM instrument envelope
-struct AMINST_ENVELOPE
+
+// AM instrument envelope (new format)
+struct AMEnvelope
 {
 	uint16 flags;
-	uint8  numpoints;	// actually, it's num. points - 1, and 0xFF if there is no envelope
-	uint8  suslooppoint;
-	uint8  loopstart;
-	uint8  loopend;
-	AMINST_ENVPOINT values[10];
+	uint8  numPoints;	// actually, it's num. points - 1, and 0xFF if there is no envelope
+	uint8  sustainPoint;
+	uint8  loopStart;
+	uint8  loopEnd;
+	AMEnvelopePoint values[10];
 	uint16 fadeout;		// why is this here? it's only needed for the volume envelope...
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(flags);
+		for(size_t i = 0; i < CountOf(values); i++)
+		{
+			values[i].ConvertEndianness();
+		}
+		SwapBytesLE(fadeout);
+	}
+
+	// Convert envelope data to OpenMPT's internal format.
+	void ConvertToMPT(InstrumentEnvelope &mptEnv, enmEnvelopeTypes envType) const
+	{
+		if(numPoints == 0xFF || numPoints == 0)
+			return;
+
+		mptEnv.dwFlags = (flags & AMFFEnvelope::envEnabled) ? ENV_ENABLED : 0;
+		if(flags & AMFFEnvelope::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
+		if(flags & AMFFEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
+
+		mptEnv.nNodes = min(numPoints + 1, 10);
+
+		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
+		if(mptEnv.nSustainStart > mptEnv.nNodes)
+			mptEnv.dwFlags &= ~ENV_SUSTAIN;
+
+		mptEnv.nLoopStart = loopStart;
+		mptEnv.nLoopEnd = loopEnd;
+		if(mptEnv.nLoopStart > mptEnv.nLoopEnd || mptEnv.nLoopStart > mptEnv.nNodes)
+			mptEnv.dwFlags &= ~ENV_LOOP;
+
+		for(size_t i = 0; i < 10; i++)
+		{
+			mptEnv.Ticks[i] = values[i].tick >> 4;
+			if(i == 0)
+				mptEnv.Ticks[i] = 0;
+			else if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
+				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + 1;
+
+			const uint16 val = values[i].value;
+			switch(envType)
+			{
+			case ENV_VOLUME:	// 0....32767
+				mptEnv.Values[i] = (BYTE)((val + 1) >> 9);
+				break;
+			case ENV_PITCH:		// -4096....4096
+				mptEnv.Values[i] = (BYTE)((((int16)val) + 0x1001) >> 7);
+				break;
+			case ENV_PANNING:	// -32768...32767
+				mptEnv.Values[i] = (BYTE)((((int16)val) + 0x8001) >> 10);
+				break;
+			}
+			Limit(mptEnv.Values[i], BYTE(ENVELOPE_MIN), BYTE(ENVELOPE_MAX));
+		}
+	}
 };
 
-// AM instrument header
-struct AMCHUNK_INSTRUMENT
+
+// AM instrument header (new format)
+struct AMInstrumentHeader
 {
+	uint32 headSize;	// Header size (i.e. the size of this struct)
 	uint8  unknown1;	// 0x00
-	uint8  index;		// actual instrument number
+	uint8  index;		// Actual instrument number
 	char   name[32];
-	uint8  samplemap[128];
-	uint8  autovib_type;
-	uint16 autovib_sweep;
-	uint16 autovib_depth;
-	uint16 autovib_rate;
+	uint8  sampleMap[128];
+	uint8  vibratoType;
+	uint16 vibratoSweep;
+	uint16 vibratoDepth;
+	uint16 vibratoRate;
 	uint8  unknown2[7];
-	AMINST_ENVELOPE volenv;
-	AMINST_ENVELOPE pitchenv;
-	AMINST_ENVELOPE panenv;
-	uint16 numsamples;
+	AMEnvelope volEnv;
+	AMEnvelope pitchEnv;
+	AMEnvelope panEnv;
+	uint16 numSamples;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(headSize);
+		SwapBytesLE(vibratoSweep);
+		SwapBytesLE(vibratoDepth);
+		SwapBytesLE(vibratoRate);
+		volEnv.ConvertEndianness();
+		pitchEnv.ConvertEndianness();
+		panEnv.ConvertEndianness();
+		SwapBytesLE(numSamples);
+	}
+
+	// Convert instrument data to OpenMPT's internal format.
+	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX baseSample)
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptIns.name, name);
+
+		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
+		for(BYTE i = 0; i < CountOf(sampleMap); i++)
+		{
+			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
+		}
+
+		mptIns.nFadeOut = volEnv.fadeout << 5;
+
+		volEnv.ConvertToMPT(mptIns.VolEnv, ENV_VOLUME);
+		pitchEnv.ConvertToMPT(mptIns.PitchEnv, ENV_PITCH);
+		panEnv.ConvertToMPT(mptIns.PanEnv, ENV_PANNING);
+
+		if(numSamples == 0)
+		{
+			MemsetZero(mptIns.Keyboard);
+		}
+	}
 };
 
-// AM sample header
-struct AMCHUNK_SAMPLE
+
+// AM sample header (new format)
+struct AMSampleHeader
 {
-	uint32 signature;	// "SAMP"
-	uint32 chunksize;	// header + sample size
-	uint32 headsize;	// header size
+	uint32 headSize;	// Header size (i.e. the size of this struct), apparently not including headSize.
 	char   name[32];
 	uint16 pan;
 	uint16 volume;
 	uint16 flags;
 	uint16 unkown;		// 0x0000 / 0x0080?
 	uint32 length;
-	uint32 loopstart;
-	uint32 loopend;
-	uint32 samplerate;
+	uint32 loopStart;
+	uint32 loopEnd;
+	uint32 sampleRate;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(headSize);
+		SwapBytesLE(pan);
+		SwapBytesLE(volume);
+		SwapBytesLE(flags);
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(sampleRate);
+	}
+
+	// Convert sample header to OpenMPT's internal format.
+	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
+	{
+		mptSmp.nPan = min(pan, 32767) * 256 / 32767;
+		mptSmp.nVolume = min(volume, 32767) * 256 / 32767;
+		mptSmp.nGlobalVol = 64;
+		mptSmp.nLength = min(length, MAX_SAMPLE_LENGTH);
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		mptSmp.nC5Speed = sampleRate;
+
+		if(instrHeader.vibratoType < CountOf(j2bAutoVibratoTrans))
+			mptSmp.nVibType = j2bAutoVibratoTrans[instrHeader.vibratoType];
+		mptSmp.nVibSweep = static_cast<BYTE>(instrHeader.vibratoSweep);
+		mptSmp.nVibRate = static_cast<BYTE>(instrHeader.vibratoRate / 16);
+		mptSmp.nVibDepth = static_cast<BYTE>(instrHeader.vibratoDepth / 4);
+		if((mptSmp.nVibRate | mptSmp.nVibDepth) != 0)
+		{
+			// Convert XM-style vibrato sweep to IT
+			mptSmp.nVibSweep = 255 - mptSmp.nVibSweep;
+		}
+
+		if(flags & AMFFSampleHeader::smp16Bit)
+			mptSmp.uFlags |= CHN_16BIT;
+		if(flags & AMFFSampleHeader::smpLoop)
+			mptSmp.uFlags |= CHN_LOOP;
+		if(flags & AMFFSampleHeader::smpPingPong)
+			mptSmp.uFlags |= CHN_PINGPONGLOOP;
+		if(flags & AMFFSampleHeader::smpPanning)
+			mptSmp.uFlags |= CHN_PANNING;
+	}
 };
 
 #pragma pack(pop)
 
 
-// And here are some nice lookup tables!
-
-static uint8 riffam_efftrans[] =
-{
-	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
-	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
-	CMD_PANNING8, CMD_OFFSET, CMD_VOLUMESLIDE, CMD_POSITIONJUMP,
-	CMD_VOLUME, CMD_PATTERNBREAK, CMD_MODCMDEX, CMD_TEMPO,
-	CMD_GLOBALVOLUME, CMD_GLOBALVOLSLIDE, CMD_KEYOFF, CMD_SETENVPOSITION,
-	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_PANNINGSLIDE, CMD_RETRIG,
-	CMD_TREMOR, CMD_XFINEPORTAUPDOWN,
-};
-
-
-static uint8 riffam_autovibtrans[] = 
-{
-	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
-};
-
-
 // Convert RIFF AM(FF) pattern data to MPT pattern data.
-bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, const DWORD dwMemLength, const bool bIsAM, CSoundFile *pSndFile)
-//--------------------------------------------------------------------------------------------------------------------------------------------
+bool ConvertAMPattern(FileReader &chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
+//----------------------------------------------------------------------------------------
 {
-	// version false = AMFF, true = AM
-	
-	DWORD dwMemPos = 0;
-
-	ASSERT_CAN_READ(1);
-
-	ROWINDEX nRows = CLAMP(lpStream[0] + 1, 1, MAX_PATTERN_ROWS);
-
-	if(pSndFile == nullptr || pSndFile->Patterns.Insert(nPat, nRows))
-		return false;
-
-	dwMemPos++;
-
-	const CHANNELINDEX nChannels = pSndFile->GetNumChannels();
-	if(nChannels == 0)
-		return false;
-
-	ModCommand *mrow = pSndFile->Patterns[nPat];
-	ModCommand *m = mrow;
-	ROWINDEX nRow = 0;
-
-	while((nRow < nRows) && (dwMemPos < dwMemLength))
+	// Effect translation LUT
+	static const uint8 amEffTrans[] =
 	{
-		ASSERT_CAN_READ(1);
-		const uint8 flags = lpStream[dwMemPos];
-		dwMemPos++;
-		if (flags == 0)
+		CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
+		CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
+		CMD_PANNING8, CMD_OFFSET, CMD_VOLUMESLIDE, CMD_POSITIONJUMP,
+		CMD_VOLUME, CMD_PATTERNBREAK, CMD_MODCMDEX, CMD_TEMPO,
+		CMD_GLOBALVOLUME, CMD_GLOBALVOLSLIDE, CMD_KEYOFF, CMD_SETENVPOSITION,
+		CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_PANNINGSLIDE, CMD_RETRIG,
+		CMD_TREMOR, CMD_XFINEPORTAUPDOWN,
+	};
+
+	enum
+	{
+		rowDone		= 0,		// Advance to next row
+		channelMask	= 0x1F,		// Mask for retrieving channel information
+		volFlag		= 0x20,		// Volume effect present
+		noteFlag	= 0x40,		// Note + instr present
+		effectFlag	= 0x80,		// Effect information present
+		dataFlag	= 0xE0,		// Channel data present
+	};
+
+	if(!chunk.BytesLeft())
+	{
+		return false;
+	}
+
+	ROWINDEX numRows = Clamp(static_cast<ROWINDEX>(chunk.ReadUint8()) + 1, ROWINDEX(1), MAX_PATTERN_ROWS);
+
+	if(sndFile.Patterns.Insert(pat, numRows))
+		return false;
+
+	const CHANNELINDEX channels = sndFile.GetNumChannels();
+	if(channels == 0)
+		return false;
+
+	PatternRow rowBase = sndFile.Patterns[pat].GetRow(0);
+	ROWINDEX row = 0;
+
+	while(row < numRows && chunk.BytesLeft())
+	{
+		const uint8 flags = chunk.ReadUint8();
+
+		if(flags == rowDone)
 		{
-			nRow++;
-			m = mrow = pSndFile->Patterns[nPat] + nRow * nChannels;
+			row++;
+			rowBase = sndFile.Patterns[pat].GetRow(row);
 			continue;
 		}
 
-		m = mrow + min((flags & 0x1F), nChannels - 1);
+		ModCommand &m = rowBase[min((flags & channelMask), channels - 1)];
 
-		if(flags & 0xE0)
+		if(flags & dataFlag)
 		{
-			if (flags & 0x80) // effect
+			if(flags & effectFlag) // effect
 			{
-				ASSERT_CAN_READ(2);
-				m->command = lpStream[dwMemPos + 1];
-				m->param = lpStream[dwMemPos];
-				dwMemPos += 2;
+				m.param = chunk.ReadUint8();
+				m.command = chunk.ReadUint8();
 
-				if(m->command < CountOf(riffam_efftrans))
+				if(m.command < CountOf(amEffTrans))
 				{
 					// command translation
-					m->command = riffam_efftrans[m->command];
-					
-					// handling special commands
-					switch(m->command)
-					{
-					case CMD_ARPEGGIO:
-						if(m->param == 0) m->command = CMD_NONE;
-						break;
-					case CMD_VOLUME:
-						if(m->volcmd == VOLCMD_NONE)
-						{
-							m->volcmd = VOLCMD_VOLUME;
-							m->vol = CLAMP(m->param, 0, 64);
-							m->command = CMD_NONE;
-							m->param = 0;
-						}
-						break;
-					case CMD_TONEPORTAVOL:
-					case CMD_VIBRATOVOL:
-					case CMD_VOLUMESLIDE:
-					case CMD_GLOBALVOLSLIDE:
-					case CMD_PANNINGSLIDE:
-						if (m->param & 0xF0) m->param &= 0xF0;
-						break;
-					case CMD_PANNING8:
-						if(m->param <= 0x80) m->param = min(m->param << 1, 0xFF);
-						else if(m->param == 0xA4) {m->command = CMD_S3MCMDEX; m->param = 0x91;}
-						break;
-					case CMD_PATTERNBREAK:
-						m->param = ((m->param >> 4) * 10) + (m->param & 0x0F);
-						break;
-					case CMD_MODCMDEX:
-						m->ExtendedMODtoS3MEffect();
-						break;
-					case CMD_TEMPO:
-						if(m->param <= 0x1F) m->command = CMD_SPEED;
-						break;
-					case CMD_XFINEPORTAUPDOWN:
-						switch(m->param & 0xF0)
-						{
-						case 0x10:
-							m->command = CMD_PORTAMENTOUP;
-							break;
-						case 0x20:
-							m->command = CMD_PORTAMENTODOWN;
-							break;
-						}
-						m->param = (m->param & 0x0F) | 0xE0;
-						break;
-					}
+					m.command = amEffTrans[m.command];
 				} else
 				{
 #ifdef DEBUG
-					{
-						CHAR s[64];
-						wsprintf(s, "J2B: Unknown command: 0x%X, param 0x%X", m->command, m->param);
-						Log(s);
-					}
+					CHAR s[64];
+					wsprintf(s, "J2B: Unknown command: 0x%X, param 0x%X", m.command, m.param);
+					Log(s);
 #endif // DEBUG
-					m->command = CMD_NONE;
+					m.command = CMD_NONE;
+				}
+					
+				// Handling special commands
+				switch(m.command)
+				{
+				case CMD_ARPEGGIO:
+					if(m.param == 0) m.command = CMD_NONE;
+					break;
+				case CMD_VOLUME:
+					if(m.volcmd == VOLCMD_NONE)
+					{
+						m.volcmd = VOLCMD_VOLUME;
+						m.vol = Clamp(m.param, BYTE(0), BYTE(64));
+						m.command = CMD_NONE;
+						m.param = 0;
+					}
+					break;
+				case CMD_TONEPORTAVOL:
+				case CMD_VIBRATOVOL:
+				case CMD_VOLUMESLIDE:
+				case CMD_GLOBALVOLSLIDE:
+				case CMD_PANNINGSLIDE:
+					if (m.param & 0xF0) m.param &= 0xF0;
+					break;
+				case CMD_PANNING8:
+					if(m.param <= 0x80) m.param = min(m.param << 1, 0xFF);
+					else if(m.param == 0xA4) {m.command = CMD_S3MCMDEX; m.param = 0x91;}
+					break;
+				case CMD_PATTERNBREAK:
+					m.param = ((m.param >> 4) * 10) + (m.param & 0x0F);
+					break;
+				case CMD_MODCMDEX:
+					m.ExtendedMODtoS3MEffect();
+					break;
+				case CMD_TEMPO:
+					if(m.param <= 0x1F) m.command = CMD_SPEED;
+					break;
+				case CMD_XFINEPORTAUPDOWN:
+					switch(m.param & 0xF0)
+					{
+					case 0x10:
+						m.command = CMD_PORTAMENTOUP;
+						break;
+					case 0x20:
+						m.command = CMD_PORTAMENTODOWN;
+						break;
+					}
+					m.param = (m.param & 0x0F) | 0xE0;
+					break;
 				}
 			}
 
-			if (flags & 0x40) // note + ins
+			if (flags & noteFlag) // note + ins
 			{
-				ASSERT_CAN_READ(2);
-				m->instr = lpStream[dwMemPos];
-				m->note = lpStream[dwMemPos + 1];
-				if(m->note == 0x80) m->note = NOTE_KEYOFF;
-				else if(m->note > 0x80) m->note = NOTE_FADE;	// I guess the support for IT "note fade" notes was not intended in mod2j2b, but hey, it works! :-D
-				dwMemPos += 2;
+				m.instr = chunk.ReadUint8();
+				m.note = chunk.ReadUint8();
+				if(m.note == 0x80) m.note = NOTE_KEYOFF;
+				else if(m.note > 0x80) m.note = NOTE_FADE;	// I guess the support for IT "note fade" notes was not intended in mod2j2b, but hey, it works! :-D
 			}
 
-			if (flags & 0x20) // volume
+			if (flags & volFlag) // volume
 			{
-				ASSERT_CAN_READ(1);
-				m->volcmd = VOLCMD_VOLUME;
-				if(!bIsAM)
-					m->vol = lpStream[dwMemPos];
-				else
-					m->vol = lpStream[dwMemPos] * 64 / 127;
-				dwMemPos++;
+				m.volcmd = VOLCMD_VOLUME;
+				m.vol = chunk.ReadUint8();
+				if(isAM)
+				{
+					m.vol = m.vol * 64 / 127;
+				}
 			}
 		}
 	}
 
 	return true;
-
 }
 
 
-// Convert envelope data from a RIFF AMFF module (old format) to MPT envelope data.
-void Convert_RIFF_AMFF_Envelope(const uint8 flags, const uint8 numpoints, const uint8 sustainpoint, const uint8 loopstart, const uint8 loopend, const AMFFINST_ENVPOINT *envelope, InstrumentEnvelope *pMPTEnv)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadAM(FileReader &file)
+//---------------------------------------
 {
-	if(envelope == nullptr || pMPTEnv == nullptr)
-		return;
-
-	pMPTEnv->dwFlags = (flags & AMENV_ENABLED) ? ENV_ENABLED : 0;
-	if(flags & AMENV_SUSTAIN) pMPTEnv->dwFlags |= ENV_SUSTAIN;
-	if(flags & AMENV_LOOP) pMPTEnv->dwFlags |= ENV_LOOP;
-
-	pMPTEnv->nNodes = min(numpoints, 10);	// the buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
-
-	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = sustainpoint;
-	if(pMPTEnv->nSustainStart > pMPTEnv->nNodes)
-		pMPTEnv->dwFlags &= ~ENV_SUSTAIN;
-
-	pMPTEnv->nLoopStart = loopstart;
-	pMPTEnv->nLoopEnd = loopend;
-	if(pMPTEnv->nLoopStart > pMPTEnv->nLoopEnd || pMPTEnv->nLoopStart > pMPTEnv->nNodes)
-		pMPTEnv->dwFlags &= ~ENV_LOOP;
-
-	for(size_t i = 0; i < 10; i++)
+	file.Rewind();
+	AMFFRiffChunk fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader))
 	{
-		pMPTEnv->Ticks[i] = LittleEndianW(envelope[i].tick) >> 4;
-		if(i == 0)
-			pMPTEnv->Ticks[0] = 0;
-		else if(pMPTEnv->Ticks[i] < pMPTEnv->Ticks[i - 1])
-			pMPTEnv->Ticks[i] = pMPTEnv->Ticks[i - 1] + 1;
-
-		pMPTEnv->Values[i] = CLAMP(envelope[i].pointval, 0, 0x40);
+		return false;
 	}
 
-}
-
-
-// Convert envelope data from a RIFF AM module (new format) to MPT envelope data.
-void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, ModInstrument *instr, enmEnvelopeTypes env)
-//------------------------------------------------------------------------------------------------------
-{
-	if(pAMEnv == nullptr || instr == nullptr)
-		return;
-
-	if(pAMEnv->numpoints == 0xFF || pAMEnv->numpoints == 0x00)
-		return;
-
-	InstrumentEnvelope &mptEnv = instr->GetEnvelope(env);
-
-	uint16 flags = LittleEndianW(pAMEnv->flags);
-	mptEnv.dwFlags = (flags & AMENV_ENABLED) ? ENV_ENABLED : 0;
-	if(flags & AMENV_SUSTAIN) mptEnv.dwFlags |= ENV_SUSTAIN;
-	if(flags & AMENV_LOOP) mptEnv.dwFlags |= ENV_LOOP;
-
-	mptEnv.nNodes = min(pAMEnv->numpoints + 1, 10);
-
-	mptEnv.nSustainStart = mptEnv.nSustainEnd = pAMEnv->suslooppoint;
-	if(mptEnv.nSustainStart > mptEnv.nNodes)
-		mptEnv.dwFlags &= ~ENV_SUSTAIN;
-
-	mptEnv.nLoopStart = pAMEnv->loopstart;
-	mptEnv.nLoopEnd = pAMEnv->loopend;
-	if(mptEnv.nLoopStart > mptEnv.nLoopEnd || mptEnv.nLoopStart > mptEnv.nNodes)
-		mptEnv.dwFlags &= ~ENV_LOOP;
-
-	for(size_t i = 0; i < 10; i++)
+	if(fileHeader.id != AMFFRiffChunk::idRIFF)
 	{
-		mptEnv.Ticks[i] = LittleEndianW(pAMEnv->values[i].tick >> 4);
-		if(i == 0)
-			mptEnv.Ticks[i] = 0;
-		else if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
-			mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + 1;
-
-		const uint16 val = LittleEndianW(pAMEnv->values[i].pointval);
-		switch(env)
-		{
-		case ENV_VOLUME:	// 0....32767
-			mptEnv.Values[i] = (BYTE)((val + 1) >> 9);
-			break;
-		case ENV_PITCH:		// -4096....4096
-			mptEnv.Values[i] = (BYTE)((((int16)val) + 0x1001) >> 7);
-			break;
-		case ENV_PANNING:	// -32768...32767
-			mptEnv.Values[i] = (BYTE)((((int16)val) + 0x8001) >> 10);
-			break;
-		}
-		mptEnv.Values[i] = CLAMP(mptEnv.Values[i], ENVELOPE_MIN, ENVELOPE_MAX);
+		return false;
 	}
-}
 
+	bool isAM; // false: AMFF, true: AM
 
-bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
-//----------------------------------------------------------------------
-{
-	#define ASSERT_CAN_READ_CHUNK(x) ASSERT_CAN_READ_PROTOTYPE(dwMemPos, dwChunkEnd, x, break);
+	uint32 format = file.ReadUint32LE();
+	if(format == AMFFRiffChunk::idAMFF)
+		isAM = false; // "AMFF"
+	else if(format == AMFFRiffChunk::idAM__)
+		isAM = true; // "AM  "
+	else
+		return false;
 
-	DWORD dwMemPos = 0;
-
-	ASSERT_CAN_READ(sizeof(AMFF_RIFFCHUNK));
-	AMFF_RIFFCHUNK *chunkheader = (AMFF_RIFFCHUNK *)lpStream;
-
-	if(LittleEndian(chunkheader->signature) != AMCHUNKID_RIFF // "RIFF"
-		|| LittleEndian(chunkheader->chunksize) != dwMemLength - sizeof(AMFF_RIFFCHUNK)
-		) return false;
-
-	dwMemPos += sizeof(AMFF_RIFFCHUNK);
-
-	bool bIsAM; // false: AMFF, true: AM
-
-	ASSERT_CAN_READ(4);
-	if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) == AMCHUNKID_AMFF) bIsAM = false; // "AMFF"
-	else if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) == AMCHUNKID_AM__) bIsAM = true; // "AM  "
-	else return false;
-	dwMemPos += 4;
 	m_nChannels = 0;
 	m_nSamples = 0;
 	m_nInstruments = 0;
 	
 	// go through all chunks now
-	while(dwMemPos < dwMemLength)
+	while(file.BytesLeft())
 	{
-		ASSERT_CAN_READ(sizeof(AMFF_RIFFCHUNK));
-		chunkheader = (AMFF_RIFFCHUNK *)(lpStream + dwMemPos);
-		dwMemPos += sizeof(AMFF_RIFFCHUNK);
-		ASSERT_CAN_READ(LittleEndian(chunkheader->chunksize));
-
-		const DWORD dwChunkEnd = dwMemPos + LittleEndian(chunkheader->chunksize);
-
-		switch(LittleEndian(chunkheader->signature))
+		AMFFRiffChunk chunkHeader;
+		if(!file.ReadConvertEndianness(chunkHeader))
 		{
-		case AMCHUNKID_MAIN: // "MAIN" - Song info (AMFF)
-		case AMCHUNKID_INIT: // "INIT" - Song info (AM)
-			if((LittleEndian(chunkheader->signature) == AMCHUNKID_MAIN && !bIsAM) || (LittleEndian(chunkheader->signature) == AMCHUNKID_INIT && bIsAM))
+			break;
+		}
+
+		FileReader chunk = file.GetChunk(chunkHeader.length);
+		if(!chunk.IsValid())
+		{
+			continue;
+		}
+
+		switch(chunkHeader.id)
+		{
+		case AMFFRiffChunk::idMAIN: // "MAIN" - Song info (AMFF)
+		case AMFFRiffChunk::idINIT: // "INIT" - Song info (AM)
+			if((chunkHeader.id == AMFFRiffChunk::idMAIN && !isAM) || (chunkHeader.id == AMFFRiffChunk::idINIT && isAM))
 			{
-				ASSERT_CAN_READ_CHUNK(sizeof(AMFFCHUNK_MAIN));
-				AMFFCHUNK_MAIN *mainchunk = (AMFFCHUNK_MAIN *)(lpStream + dwMemPos);
-				dwMemPos += sizeof(AMFFCHUNK_MAIN);
+				AMFFMainChunk mainChunk;
+				if(!chunk.Read(mainChunk))
+				{
+					break;
+				}
 
-				ASSERT_CAN_READ_CHUNK(mainchunk->channels);
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainchunk->songname);
 				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
-				if(!(mainchunk->flags & AMHEAD_LINEAR)) m_dwSongFlags |= SONG_LINEARSLIDES;
-				if(mainchunk->channels < 1) return false;
-				m_nChannels = min(mainchunk->channels, MAX_BASECHANNELS);
-				m_nDefaultSpeed = mainchunk->speed;
-				m_nDefaultTempo = mainchunk->tempo;
-				m_nDefaultGlobalVolume = mainchunk->globalvolume << 1;
+				if(!(mainChunk.flags & AMFFMainChunk::amigaSlides))
+				{
+					m_dwSongFlags |= SONG_LINEARSLIDES;
+				}
+				if(mainChunk.channels < 1 || !chunk.CanRead(mainChunk.channels))
+				{
+					return false;
+				}
+				m_nChannels = min(mainChunk.channels, MAX_BASECHANNELS);
+				m_nDefaultSpeed = mainChunk.speed;
+				m_nDefaultTempo = mainChunk.tempo;
+				m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 				m_nSamplePreAmp = m_nVSTiVolume = 48;
 				m_nType = MOD_TYPE_J2B;
-				ASSERT(LittleEndian(mainchunk->unknown) == 0xFF0001C5 || LittleEndian(mainchunk->unknown) == 0x35800716 || LittleEndian(mainchunk->unknown) == 0xFF00FFFF);
+
+				ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
 
 				// It seems like there's no way to differentiate between
 				// Muted and Surround channels (they're all 0xA0) - might
@@ -509,42 +752,52 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				{
 					ChnSettings[nChn].nVolume = 64;
 					ChnSettings[nChn].nPan = 128;
-					if(bIsAM)
+
+					uint8 pan = chunk.ReadUint8();
+
+					if(isAM)
 					{
-						if(lpStream[dwMemPos + nChn] > 128)
+						if(pan > 128)
 							ChnSettings[nChn].dwFlags = CHN_MUTE;
 						else
-							ChnSettings[nChn].nPan = lpStream[dwMemPos + nChn] << 1;
+							ChnSettings[nChn].nPan = pan * 2;
 					} else
 					{
-						if(lpStream[dwMemPos + nChn] >= 128)
+						if(pan >= 128)
 							ChnSettings[nChn].dwFlags = CHN_MUTE;
 						else
-							ChnSettings[nChn].nPan = lpStream[dwMemPos + nChn] << 2;
+							ChnSettings[nChn].nPan = pan * 4;
 					}
 				}
-				dwMemPos += mainchunk->channels;
 			}
 			break;
 
-		case AMCHUNKID_ORDR: // "ORDR" - Order list
-			ASSERT_CAN_READ_CHUNK(1);
-			Order.ReadAsByte(&lpStream[dwMemPos + 1], lpStream[dwMemPos] + 1, dwChunkEnd - (dwMemPos + 1));
-			break;
-
-		case AMCHUNKID_PATT: // "PATT" - Pattern data for one pattern
-			ASSERT_CAN_READ_CHUNK(5);
-			Convert_RIFF_AM_Pattern(lpStream[dwMemPos], (LPCBYTE)(lpStream + dwMemPos + 5), LittleEndian(*(DWORD *)(lpStream + dwMemPos + 1)), bIsAM, this);
-			break;
-
-		case AMCHUNKID_INST: // "INST" - Instrument (only in RIFF AMFF)
-			if(!bIsAM)
+		case AMFFRiffChunk::idORDR: // "ORDR" - Order list
 			{
-				ASSERT_CAN_READ_CHUNK(sizeof(AMFFCHUNK_INSTRUMENT));
-				AMFFCHUNK_INSTRUMENT *instheader = (AMFFCHUNK_INSTRUMENT *)(lpStream + dwMemPos);
-				dwMemPos += sizeof(AMFFCHUNK_INSTRUMENT);
+				uint8 numOrders = chunk.ReadUint8() + 1;
+				Order.ReadAsByte(chunk, numOrders);
+			}
+			break;
 
-				const INSTRUMENTINDEX nIns = instheader->index + 1;
+		case AMFFRiffChunk::idPATT: // "PATT" - Pattern data for one pattern
+			{
+				PATTERNINDEX pat = chunk.ReadUint8();
+				size_t patternSize = chunk.ReadUint32LE();
+				FileReader patternChunk = chunk.GetChunk(patternSize);
+				ConvertAMPattern(patternChunk, pat, isAM, *this);
+			}
+			break;
+
+		case AMFFRiffChunk::idINST: // "INST" - Instrument (only in RIFF AMFF)
+			if(!isAM)
+			{
+				AMFFInstrumentHeader instrHeader;
+				if(!chunk.ReadConvertEndianness(instrHeader))
+				{
+					break;
+				}
+
+				const INSTRUMENTINDEX nIns = instrHeader.index + 1;
 				if(nIns >= MAX_INSTRUMENTS)
 					break;
 
@@ -562,249 +815,177 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				m_nInstruments = max(m_nInstruments, nIns);
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, instheader->name);
-
-				for(BYTE i = 0; i < 128; i++)
-				{
-					pIns->Keyboard[i] = instheader->samplemap[i] + m_nSamples + 1;
-				}
-
-				pIns->nFadeOut = LittleEndianW(instheader->fadeout) << 5;
-
-				// interleaved envelope data... meh. gotta split it up here and decode it separately.
-				// note: mod2j2b is BUGGY and always writes ($original_num_points & 0x0F) in the header,
-				// but just has room for 10 envelope points. That means that long (>= 16 points)
-				// envelopes are cut off, and envelopes have to be trimmed to 10 points, even if
-				// the header claims that they are longer.
-				Convert_RIFF_AMFF_Envelope(instheader->envflags & 0x0F, instheader->envnumpoints & 0x0F, instheader->envsustainpoints & 0x0F, instheader->envloopstarts & 0x0F, instheader->envloopends & 0x0F, instheader->volenv, &pIns->VolEnv);
-				Convert_RIFF_AMFF_Envelope(instheader->envflags >> 4, instheader->envnumpoints >> 4, instheader->envsustainpoints >> 4, instheader->envloopstarts >> 4, instheader->envloopends >> 4, instheader->panenv, &pIns->PanEnv);
-
-				const size_t nTotalSmps = LittleEndianW(instheader->numsamples);
+				instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
 				// read sample sub-chunks - this is a rather "flat" format compared to RIFF AM and has no nested RIFF chunks.
-				for(size_t nSmpCnt = 0; nSmpCnt < nTotalSmps; nSmpCnt++)
+				for(size_t samples = 0; samples < instrHeader.numSamples; samples++)
 				{
+					AMFFSampleHeader sampleHeader;
 
-					if(m_nSamples + 1 >= MAX_SAMPLES)
+					if(m_nSamples + 1 >= MAX_SAMPLES || !chunk.ReadConvertEndianness(sampleHeader))
+					{
 						break;
+					}
 
-					const SAMPLEINDEX nSmp = ++m_nSamples;
+					const SAMPLEINDEX smp = ++m_nSamples;
 
-					MemsetZero(Samples[nSmp]);
+					MemsetZero(Samples[smp]);
 
-					ASSERT_CAN_READ_CHUNK(sizeof(AMFFCHUNK_SAMPLE));
-					AMFFCHUNK_SAMPLE *smpchunk = (AMFFCHUNK_SAMPLE *)(lpStream + dwMemPos);
-					dwMemPos += sizeof(AMFFCHUNK_SAMPLE);
+					if(sampleHeader.id != AMFFRiffChunk::idSAMP)
+					{
+						break;
+					}
 
-					if(smpchunk->signature != AMCHUNKID_SAMP) break; // SAMP
-
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp], smpchunk->name);
-
-					Samples[nSmp].nPan = smpchunk->pan << 2;
-					Samples[nSmp].nVolume = smpchunk->volume << 2;
-					Samples[nSmp].nGlobalVol = 64;
-					Samples[nSmp].nLength = min(LittleEndian(smpchunk->length), MAX_SAMPLE_LENGTH);
-					Samples[nSmp].nLoopStart = LittleEndian(smpchunk->loopstart);
-					Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
-					Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
-
-					if(instheader->autovib_type < CountOf(riffam_autovibtrans))
-						Samples[nSmp].nVibType = riffam_autovibtrans[instheader->autovib_type];
-					Samples[nSmp].nVibSweep = (BYTE)(LittleEndianW(instheader->autovib_sweep));
-					Samples[nSmp].nVibRate = (BYTE)(LittleEndianW(instheader->autovib_rate) >> 4);
-					Samples[nSmp].nVibDepth = (BYTE)(LittleEndianW(instheader->autovib_depth) >> 2);
-
-					const uint16 flags = LittleEndianW(smpchunk->flags);
-					if(flags & AMSMP_16BIT)
-						Samples[nSmp].uFlags |= CHN_16BIT;
-					if(flags & AMSMP_LOOP)
-						Samples[nSmp].uFlags |= CHN_LOOP;
-					if(flags & AMSMP_PINGPONG)
-						Samples[nSmp].uFlags |= CHN_PINGPONGLOOP;
-					if(flags & AMSMP_PANNING)
-						Samples[nSmp].uFlags |= CHN_PANNING;
-
-					dwMemPos += ReadSample(&Samples[nSmp], (flags & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+					sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
+					ReadSample(&Samples[smp], (sampleHeader.flags & AMFFSampleHeader::smp16Bit) ? RS_PCM16S : RS_PCM8S, chunk);
 				}
 			}
 			break;
 
-		case AMCHUNKID_RIFF: // "RIFF" - Instrument (only in RIFF AM)
-			if(bIsAM)
+		case AMFFRiffChunk::idRIFF: // "RIFF" - Instrument (only in RIFF AM)
+			if(isAM)
 			{
-				ASSERT_CAN_READ_CHUNK(4);
-				if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) != AMCHUNKID_AI__) break; // "AI  "
-				dwMemPos += 4;
+				if(chunk.ReadUint32LE() != AMFFRiffChunk::idAI__)
+				{
+					break;
+				}
 
-				ASSERT_CAN_READ_CHUNK(sizeof(AMFF_RIFFCHUNK));
-				const AMFF_RIFFCHUNK *instchunk = (AMFF_RIFFCHUNK *)(lpStream + dwMemPos);
-				dwMemPos += sizeof(AMFF_RIFFCHUNK);
-				ASSERT_CAN_READ_CHUNK(LittleEndian(instchunk->chunksize));
-				if(LittleEndian(instchunk->signature) != AMCHUNKID_INST) break; // "INST"
+				AMFFRiffChunk instChunk;
+				if(!chunk.ReadConvertEndianness(instChunk) || instChunk.id != AMFFRiffChunk::idINST)
+				{
+					break;
+				}
 
-				ASSERT_CAN_READ_CHUNK(4);
-				const DWORD dwHeadlen = LittleEndian(*(uint32 *)(lpStream + dwMemPos));
-				ASSERT(dwHeadlen == sizeof(AMCHUNK_INSTRUMENT));
-				dwMemPos += 4;
+				AMInstrumentHeader instrHeader;
+				if(!chunk.ReadConvertEndianness(instrHeader))
+				{
+					break;
+				}
+				ASSERT(instrHeader.headSize + 4 == sizeof(instrHeader));
 
-				ASSERT_CAN_READ_CHUNK(sizeof(AMCHUNK_INSTRUMENT));
-				const AMCHUNK_INSTRUMENT *instheader = (AMCHUNK_INSTRUMENT *)(lpStream + dwMemPos);
-				dwMemPos += sizeof(AMCHUNK_INSTRUMENT);
-
-				const INSTRUMENTINDEX nIns = instheader->index + 1;
-				if(nIns >= MAX_INSTRUMENTS)
+				const INSTRUMENTINDEX instr = instrHeader.index + 1;
+				if(instr >= MAX_INSTRUMENTS)
 					break;
 
-				if(Instruments[nIns] != nullptr)
-					delete Instruments[nIns];
+				if(Instruments[instr] != nullptr)
+					delete Instruments[instr];
 
 				try
 				{
-					Instruments[nIns] = new ModInstrument();
+					Instruments[instr] = new ModInstrument();
 				} catch(MPTMemoryException)
 				{
 					break;
 				}
-				ModInstrument *pIns = Instruments[nIns];
+				ModInstrument *pIns = Instruments[instr];
+				m_nInstruments = max(m_nInstruments, instr);
 
-				m_nInstruments = max(m_nInstruments, nIns);
+				instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, instheader->name);
-
-				for(BYTE i = 0; i < 128; i++)
+				// Read sample sub-chunks (RIFF nesting ftw)
+				for(size_t nSmpCnt = 0; nSmpCnt < instrHeader.numSamples; nSmpCnt++)
 				{
-					pIns->Keyboard[i] = instheader->samplemap[i] + m_nSamples + 1;
-				}
-
-				pIns->nFadeOut = LittleEndianW(instheader->volenv.fadeout) << 5;
-
-				Convert_RIFF_AM_Envelope(&instheader->volenv, pIns, ENV_VOLUME);
-				Convert_RIFF_AM_Envelope(&instheader->pitchenv, pIns, ENV_PITCH);
-				Convert_RIFF_AM_Envelope(&instheader->panenv, pIns, ENV_PANNING);
-
-				const size_t nTotalSmps = LittleEndianW(instheader->numsamples);
-
-				if(nTotalSmps == 0)
-				{
-					MemsetZero(pIns->Keyboard);
-				}
-
-				DWORD dwChunkPos;
-
-				// read sample sub-chunks (RIFF nesting ftw)
-				for(size_t nSmpCnt = 0; nSmpCnt < nTotalSmps; nSmpCnt++)
-				{
-					dwChunkPos = dwMemPos;
-
-					ASSERT_CAN_READ_CHUNK(sizeof(AMFF_RIFFCHUNK));
-					instchunk = (AMFF_RIFFCHUNK *)(lpStream + dwChunkPos);
-					dwChunkPos += sizeof(AMFF_RIFFCHUNK);
-					ASSERT_CAN_READ_CHUNK(LittleEndian(instchunk->chunksize));
-					if(LittleEndian(instchunk->signature) != AMCHUNKID_RIFF) break;
-
-					ASSERT_CAN_READ_CHUNK(4);
-					if(LittleEndian(*(uint32 *)(lpStream + dwChunkPos)) != AMCHUNKID_AS__) break;
-					dwChunkPos += 4;
-
-					// Moved this stuff here (was below the next ASSERT_CAN_READ_CHUNK) because of instrument 12 in Carrotus.j2b
-					if(m_nSamples + 1 >= MAX_SAMPLES)
+					AMFFRiffChunk sampleChunk;
+					if(!chunk.ReadConvertEndianness(sampleChunk) || sampleChunk.id != AMFFRiffChunk::idRIFF)
+					{
 						break;
-					const SAMPLEINDEX nSmp = ++m_nSamples;
+					}
 
-					ASSERT_CAN_READ_CHUNK(sizeof(AMCHUNK_SAMPLE));
-					const AMCHUNK_SAMPLE *smpchunk = (AMCHUNK_SAMPLE *)(lpStream + dwChunkPos);
-
-					if(smpchunk->signature != AMCHUNKID_SAMP) break; // SAMP
-
-					MemsetZero(Samples[nSmp]);
-
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp], smpchunk->name);
-
-					if(LittleEndianW(smpchunk->pan) > 0x7FFF || LittleEndianW(smpchunk->volume) > 0x7FFF)
+					if(chunk.ReadUint32LE() != AMFFRiffChunk::idAS__ || m_nSamples + 1 >= MAX_SAMPLES)
+					{
 						break;
+					}
 
-					Samples[nSmp].nPan = LittleEndianW(smpchunk->pan) * 256 / 32767;
-					Samples[nSmp].nVolume = LittleEndianW(smpchunk->volume) * 256 / 32767;
-					Samples[nSmp].nGlobalVol = 64;
-					Samples[nSmp].nLength = min(LittleEndian(smpchunk->length), MAX_SAMPLE_LENGTH);
-					Samples[nSmp].nLoopStart = LittleEndian(smpchunk->loopstart);
-					Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
-					Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
+					const SAMPLEINDEX smp = ++m_nSamples;
 
-					if(instheader->autovib_type < CountOf(riffam_autovibtrans))
-						Samples[nSmp].nVibType = riffam_autovibtrans[instheader->autovib_type];
-					Samples[nSmp].nVibSweep = (BYTE)(LittleEndianW(instheader->autovib_sweep));
-					Samples[nSmp].nVibRate = (BYTE)(LittleEndianW(instheader->autovib_rate) >> 4);
-					Samples[nSmp].nVibDepth = (BYTE)(LittleEndianW(instheader->autovib_depth) >> 2);
+					// Aaand even more nested chunks! Great, innit?
+					if(!chunk.ReadConvertEndianness(sampleChunk) || sampleChunk.id != AMFFRiffChunk::idSAMP)
+					{
+						break;
+					}
+					
+					FileReader sampleFileChunk = chunk.GetChunk(sampleChunk.length);
 
-					const uint16 flags = LittleEndianW(smpchunk->flags);
-					if(flags & AMSMP_16BIT)
-						Samples[nSmp].uFlags |= CHN_16BIT;
-					if(flags & AMSMP_LOOP)
-						Samples[nSmp].uFlags |= CHN_LOOP;
-					if(flags & AMSMP_PINGPONG)
-						Samples[nSmp].uFlags |= CHN_PINGPONGLOOP;
-					if(flags & AMSMP_PANNING)
-						Samples[nSmp].uFlags |= CHN_PANNING;
+					AMSampleHeader sampleHeader;
+					if(!sampleFileChunk.ReadConvertEndianness(sampleHeader))
+					{
+						break;
+					}
 
-					dwChunkPos += LittleEndian(smpchunk->headsize) + 12; // doesn't include the 3 first DWORDs
-					dwChunkPos += ReadSample(&Samples[nSmp], (flags & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwChunkPos), dwMemLength - dwChunkPos);
+					MemsetZero(Samples[smp]);
 
-					dwMemPos += LittleEndian(instchunk->chunksize) + sizeof(AMFF_RIFFCHUNK);
+					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+
+					sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
+
+					sampleFileChunk.Seek(sampleHeader.headSize + 4);
+					ReadSample(&Samples[smp], (sampleHeader.flags & AMFFSampleHeader::smp16Bit) ? RS_PCM16S : RS_PCM8S, sampleFileChunk);
+
 					// RIFF AM has a padding byte so that all chunks have an even size.
-					if(LittleEndian(instchunk->chunksize) & 1)
-						dwMemPos++;
-
+					if((sampleChunk.length % 2) != 0)
+					{
+						chunk.Skip(1);
+					}
 				}
 			}
 			break;
-
 		}
-		dwMemPos = dwChunkEnd;
+
 		// RIFF AM has a padding byte so that all chunks have an even size.
-		if(bIsAM && (LittleEndian(chunkheader->chunksize) & 1))
-			dwMemPos++;
+		if(isAM && (chunkHeader.length % 2) != 0)
+		{
+			file.Skip(1);
+		}
 	}
 
 	return true;
-
-	#undef ASSERT_CAN_READ_CHUNK
 }
 
-bool CSoundFile::ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
+bool CSoundFile::ReadJ2B(FileReader &file)
+//----------------------------------------
 {
-	DWORD dwMemPos = 0;
-
-	ASSERT_CAN_READ(sizeof(J2BHEADER));
-	J2BHEADER *header = (J2BHEADER *)lpStream;
-
-	if(LittleEndian(header->signature) != J2BHEAD_MUSE // "MUSE"
-		|| (LittleEndian(header->deadbeaf) != J2BHEAD_DEADBEAF // 0xDEADBEAF (RIFF AM)
-		&& LittleEndian(header->deadbeaf) != J2BHEAD_DEADBABE) // 0xDEADBABE (RIFF AMFF)
-		|| LittleEndian(header->j2blength) != dwMemLength
-		|| LittleEndian(header->packed_length) != dwMemLength - sizeof(J2BHEADER)
-		|| LittleEndian(header->packed_length) == 0
-		|| LittleEndian(header->crc32) != crc32(0, (lpStream + sizeof(J2BHEADER)), dwMemLength - sizeof(J2BHEADER))
-		) return false;
-
-	dwMemPos += sizeof(J2BHEADER);
-
-	// header is valid, now unpack the RIFF AM file using inflate
-	DWORD destSize = LittleEndian(header->unpacked_length);
-	Bytef *bOutput = new Bytef[destSize];
-	if(bOutput == nullptr)
+	file.Rewind();
+	J2BFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader))
+	{
 		return false;
-	int nRetVal = uncompress(bOutput, &destSize, &lpStream[dwMemPos], LittleEndian(header->packed_length));
+	}
 
-	bool bResult = false;
+	if(fileHeader.signature != J2BFileHeader::magicMUSE // "MUSE"
+		|| (fileHeader.deadbeaf != J2BFileHeader::magicDEADBEAF // 0xDEADBEAF (RIFF AM)
+			&& fileHeader.deadbeaf != J2BFileHeader::magicDEADBABE) // 0xDEADBABE (RIFF AMFF)
+		|| fileHeader.fileLength != file.GetLength()
+		|| fileHeader.packedLength != file.BytesLeft()
+		|| fileHeader.packedLength == 0
+		|| fileHeader.crc32 != crc32(0, reinterpret_cast<const Bytef *>(file.GetRawData()), file.BytesLeft())
+		)
+	{
+		return false;
+	}
 
-	if(destSize == LittleEndian(header->unpacked_length) && nRetVal == Z_OK)
+	// Header is valid, now unpack the RIFF AM file using inflate
+	Bytef *amFile;
+	uLongf destSize = fileHeader.unpackedLength;
+	try
+	{
+		amFile = new Bytef[destSize];
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
+
+	int retVal = uncompress(amFile, &destSize, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength);
+
+	bool result = false;
+
+	if(destSize == fileHeader.unpackedLength && retVal == Z_OK)
 	{
 		// Success, now load the RIFF AM(FF) module.
-		bResult = ReadAM(bOutput, destSize);
+		FileReader amFile(reinterpret_cast<const char *>(amFile), destSize);
+		result = ReadAM(amFile);
 	}
-	delete[] bOutput;
+	delete[] amFile;
 
-	return bResult;
+	return result;
 }

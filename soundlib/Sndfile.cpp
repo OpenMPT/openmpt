@@ -611,6 +611,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 #ifdef MMCMP_SUPPORT
 		BOOL bMMCmp = MMCMP_Unpack(&lpStream, &dwMemLength);
 #endif
+
+		FileReader file(reinterpret_cast<const char*>(lpStream), dwMemLength);
+
 		if ((!ReadXM(lpStream, dwMemLength))
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -627,10 +630,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		 && (!ReadMTM(lpStream, dwMemLength))
 		 && (!ReadMDL(lpStream, dwMemLength))
 		 && (!ReadDBM(lpStream, dwMemLength))
-		 && (!Read669(lpStream, dwMemLength))
+		 && (!Read669(file))
 		 && (!ReadFAR(lpStream, dwMemLength))
 		 && (!ReadAMS(lpStream, dwMemLength))
-		 && (!ReadOKT(lpStream, dwMemLength))
+		 && (!ReadOKT(file))
 		 && (!ReadPTM(lpStream, dwMemLength))
 		 && (!ReadUlt(lpStream, dwMemLength))
 		 && (!ReadDMF(lpStream, dwMemLength))
@@ -644,10 +647,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 #endif
 #endif // MODPLUG_BASIC_SUPPORT
-		 && (!ReadGDM(lpStream, dwMemLength))
+		 && (!ReadGDM(file))
 		 && (!ReadIMF(lpStream, dwMemLength))
-		 && (!ReadAM(lpStream, dwMemLength))
-		 && (!ReadJ2B(lpStream, dwMemLength))
+		 && (!ReadAM(file))
+		 && (!ReadJ2B(file))
 		 && (!ReadMO3(lpStream, dwMemLength))
 		 && (!ReadMod(lpStream, dwMemLength))) m_nType = MOD_TYPE_NONE;
 #ifdef ZIPPED_MOD_SUPPORT

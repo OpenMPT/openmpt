@@ -18,18 +18,18 @@
 void ITFileHeader::ConvertEndianness()
 //------------------------------------
 {
-	id = LittleEndian(id);
-	ordnum = LittleEndianW(ordnum);
-	insnum = LittleEndianW(insnum);
-	smpnum = LittleEndianW(smpnum);
-	patnum = LittleEndianW(patnum);
-	cwtv = LittleEndianW(cwtv);
-	cmwt = LittleEndianW(cmwt);
-	flags = LittleEndianW(flags);
-	special = LittleEndianW(special);
-	msglength = LittleEndianW(msglength);
-	msgoffset = LittleEndian(msgoffset);
-	reserved = LittleEndian(reserved);
+	SwapBytesLE(id);
+	SwapBytesLE(ordnum);
+	SwapBytesLE(insnum);
+	SwapBytesLE(smpnum);
+	SwapBytesLE(patnum);
+	SwapBytesLE(cwtv);
+	SwapBytesLE(cmwt);
+	SwapBytesLE(flags);
+	SwapBytesLE(special);
+	SwapBytesLE(msglength);
+	SwapBytesLE(msgoffset);
+	SwapBytesLE(reserved);
 }
 
 
@@ -617,9 +617,9 @@ void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
 	fattime = static_cast<uint16>((mptHistory.loadDate.tm_sec / 2) | (mptHistory.loadDate.tm_min << 5) | (mptHistory.loadDate.tm_hour << 11));
 	runtime = static_cast<uint32>(mptHistory.openTime * (18.2f / HISTORY_TIMER_PRECISION));
 
-	fatdate = LittleEndianW(fatdate);
-	fattime = LittleEndianW(fattime);
-	runtime = LittleEndian(runtime);
+	SwapBytesLE(fatdate);
+	SwapBytesLE(fattime);
+	SwapBytesLE(runtime);
 }
 
 #endif // MODPLUG_TRACKER

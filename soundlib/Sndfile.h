@@ -371,7 +371,7 @@ public:
 	bool ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength);
 	//bool ReadMPT(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadITProject(const LPCBYTE lpStream, const DWORD dwMemLength); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
-	bool Read669(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool Read669(FileReader &file);
 	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadWav(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -379,7 +379,7 @@ public:
 	bool ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadAMS2(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadOKT(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadOKT(FileReader &file);
 	bool ReadDMF(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -389,10 +389,10 @@ public:
 	bool ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadUMX(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMO3(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadGDM(FileReader &file);
 	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAM(FileReader &file);
+	bool ReadJ2B(FileReader &file);
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
 	void UpgradeModFlags();
@@ -586,6 +586,12 @@ public:
 	// Read/Write sample functions
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
 	UINT ReadSample(ModSample *pSmp, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
+	UINT ReadSample(ModSample *pSmp, UINT nFlags, FileReader &file, const WORD format = 1)
+	{
+		UINT bytesRead = ReadSample(pSmp, nFlags, file.GetRawData(), file.BytesLeft(), format);
+		file.Skip(bytesRead);
+		return bytesRead;
+	}
 	bool DestroySample(SAMPLEINDEX nSample);
 
 // -> CODE#0020
@@ -689,6 +695,14 @@ protected:
 	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
 	bool ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
+	bool ReadMessage(FileReader &file, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
+	{
+		if(!file.CanRead(length))
+		{
+			return false;
+		}
+		return ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), length, lineEnding, pTextConverter);
+	}
 
 	// Read comments with fixed line length from a mapped file.
 	// [in]  data: pointer to the data in memory that is going to be read
@@ -698,6 +712,14 @@ protected:
 	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
+	bool ReadFixedLineLengthMessage(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr)
+	{
+		if(!file.CanRead(length))
+		{
+			return false;
+		}
+		return ReadFixedLineLengthMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), length, lineLength, lineEndingLength, pTextConverter);
+	}
 
 private:
 	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
