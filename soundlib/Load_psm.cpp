@@ -33,31 +33,60 @@
 //  New PSM support starts here. PSM16 structs are below.
 //
 
-// 32-Bit PSM header identifiers
-#define PSM16HEAD_PSM_ 0xFE4D5350
-#define PSMHEAD_PSM_   0x204D5350
-#define PSMHEAD_FILE   0x454C4946
-
-// 32-Bit chunk identifiers
-#define PSMCHUNKID_TITL 0x4C544954
-#define PSMCHUNKID_SDFT 0x54464453
-#define PSMCHUNKID_PBOD 0x444F4250
-#define PSMCHUNKID_SONG 0x474E4F53
-#define PSMCHUNKID_DATE 0x45544144
-#define PSMCHUNKID_OPLH 0x484C504F
-#define PSMCHUNKID_PPAN 0x4E415050
-#define PSMCHUNKID_PATT 0x54544150
-#define PSMCHUNKID_DSAM 0x4D415344
-#define PSMCHUNKID_DSMP 0x504D5344
-
-struct PSMNEWHEADER
+// PSM File Header
+struct PSMFileHeader
 {
+	// Magic Bytes
+	enum PSMMagic
+	{
+		magicPSM_	= 0x204D5350,
+		magicFILE	= 0x454C4946,
+	};
+
 	uint32 formatID;		// "PSM " (new format)
 	uint32 fileSize;		// Filesize - 12
 	uint32 fileInfoID;		// "FILE" Start of file info
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(formatID);
+		SwapBytesLE(fileSize);
+		SwapBytesLE(fileInfoID);
+	}
 };
 
-struct PSMSONGHEADER
+// RIFF-style Chunk
+struct PSMChunk
+{
+	// 32-Bit chunk identifiers
+	enum ChunkIdentifiers
+	{
+		idTITL	= 0x4C544954,
+		idSDFT	= 0x54464453,
+		idPBOD	= 0x444F4250,
+		idSONG	= 0x474E4F53,
+		idDATE	= 0x45544144,
+		idOPLH	= 0x484C504F,
+		idPPAN	= 0x4E415050,
+		idPATT	= 0x54544150,
+		idDSAM	= 0x4D415344,
+		idDSMP	= 0x504D5344,
+	};
+
+	uint32 id;
+	uint32 length;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(length);
+	}
+};
+
+// Song Information
+struct PSMSongHeader
 {
 	char  songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
 	uint8 compression;		// 1 - uncompressed
@@ -65,11 +94,12 @@ struct PSMSONGHEADER
 
 };
 
-struct PSMOLDSAMPLEHEADER // Regular sample header
+// Regular sample header
+struct PSMOldSampleHeader
 {
 	uint8  flags;
 	char   fileName[8];		// Filename of the original module (without extension)
-	uint32 sampleID;		// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
+	char   sampleID[4];		// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
 	char   sampleName[33];
 	uint8  unknown1[6];		// 00 00 00 00 00 FF
 	uint16 sampleNumber;
@@ -80,11 +110,40 @@ struct PSMOLDSAMPLEHEADER // Regular sample header
 	uint8  defaulPan;		// unused?
 	uint8  defaultVolume;
 	uint32 unknown4;
-	uint16 C5Freq;
+	uint16 c5Freq;
 	uint8  unknown5[21];	// 00 ... 00
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(sampleNumber);
+		SwapBytesLE(sampleLength);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(c5Freq);
+	}
+
+	// Convert header data to OpenMPT's internal format
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, fileName);
+
+		mptSmp.nGlobalVol = 64;
+		mptSmp.nC5Speed = c5Freq;
+		mptSmp.nLength = sampleLength;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;	// Hmm... apparently we should add +1 for Extreme Pinball tunes here? See sample 8 in the medieval table music.
+		mptSmp.nPan = 128;
+		mptSmp.nVolume = (defaultVolume + 1) * 2;
+		mptSmp.uFlags = (flags & 0x80) ? CHN_LOOP : 0;
+		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
+		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
+	}
 };
 
-struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
+
+// Sinaria sample header (and possibly other games)
+struct PSMNewSampleHeader
 {
 	uint8  flags;
 	char   fileName[8];		// Filename of the original module (without extension)
@@ -99,13 +158,40 @@ struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 	uint8  defaultPan;		// unused?
 	uint8  defaultVolume;
 	uint32 unknown4;
-	uint16 C5Freq;
+	uint16 c5Freq;
 	char   unknown5[16];	// 00 ... 00
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(sampleNumber);
+		SwapBytesLE(sampleLength);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(c5Freq);
+	}
+
+	// Convert header data to OpenMPT's internal format
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, fileName);
+
+		mptSmp.nGlobalVol = 64;
+		mptSmp.nC5Speed = c5Freq;
+		mptSmp.nLength = sampleLength;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		mptSmp.nPan = 128;
+		mptSmp.nVolume = (defaultVolume + 1) * 2;
+		mptSmp.uFlags = (flags & 0x80) ? CHN_LOOP : 0;
+		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
+		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
+	}
 };
 #pragma pack(pop)
 
 
-struct PSMSUBSONG // For internal use (pattern conversion)
+struct PSMSubSong // For internal use (pattern conversion)
 {
 	vector<uint8> channelPanning, channelVolume;
 	vector<bool> channelSurround;
@@ -113,7 +199,7 @@ struct PSMSUBSONG // For internal use (pattern conversion)
 	char  songName[10];
 	ORDERINDEX startOrder, endOrder, restartPos;
 
-	PSMSUBSONG()
+	PSMSubSong()
 	{
 		channelPanning.assign(MAX_BASECHANNELS, 128);
 		channelVolume.assign(MAX_BASECHANNELS, 64);
@@ -127,30 +213,36 @@ struct PSMSUBSONG // For internal use (pattern conversion)
 
 
 // Portamento effect conversion (depending on format version)
-inline BYTE ConvertPSMPorta(BYTE param, bool bNewFormat)
-//------------------------------------------------------
+uint8 ConvertPSMPorta(uint8 param, bool newFormat)
+//------------------------------------------------
 {
-	return ((bNewFormat) ? (param) : ((param < 4) ? (param | 0xF0) : (param >> 2)));
+	return (newFormat
+		? param
+		: ((param < 4)
+			? (param | 0xF0)
+			: (param >> 2)));
 }
 
 
-bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
+bool CSoundFile::ReadPSM(FileReader &file)
+//----------------------------------------
 {
-	DWORD dwMemPos = 0;
-	bool bNewFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
+	file.Rewind();
+	PSMFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader))
+	{
+		return false;
+	}
 
-	ASSERT_CAN_READ(sizeof(PSMNEWHEADER));
-	PSMNEWHEADER *shdr = (PSMNEWHEADER *)lpStream;
-
-	if(LittleEndian(shdr->formatID) == PSM16HEAD_PSM_) // "PSMþ" - PSM16 format
-		return ReadPSM16(lpStream, dwMemLength);
+	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
 	// Check header
-	if(LittleEndian(shdr->formatID) != PSMHEAD_PSM_ // "PSM "
-		|| LittleEndian(shdr->fileSize) != dwMemLength - 12
-		|| LittleEndian(shdr->fileInfoID) != PSMHEAD_FILE // "FILE"
-		) return false;
+	if(fileHeader.formatID != PSMFileHeader::magicPSM_ // "PSM "
+		|| fileHeader.fileSize != file.BytesLeft()
+		|| fileHeader.fileInfoID != PSMFileHeader::magicFILE) // "FILE"
+	{
+		return false;
+	}
 
 	// Yep, this seems to be a valid file.
 	m_nType = MOD_TYPE_PSM;
@@ -158,229 +250,252 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = 0;
 
-	dwMemPos += 12;
-
 	MemsetZero(m_szNames);
 
 	m_nVSTiVolume = m_nSamplePreAmp = 48; // not supported in this format, so use a good default value
 
 	// pattern offset and identifier
-	PATTERNINDEX numPatterns = 0;	// used for setting up the orderlist - final pattern count
-	vector<uint32> patternOffsets;	// pattern offsets (sorted as they occour in the file)
-	vector<uint32> patternIDs;		// pattern IDs (sorted as they occour in the file)
-	vector<uint32> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
+	PATTERNINDEX numPatterns = 0;		// used for setting up the orderlist - final pattern count
+	vector<FileReader> patternChunks;	// pattern offsets (sorted as they occour in the file)
+	vector<uint32> patternIDs;			// pattern IDs (sorted as they occour in the file)
+	vector<FileReader *> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
 	Order.clear();
 	// subsong setup
-	vector<PSMSUBSONG> subsongs;
-	bool bSubsongPanningDiffers = false; // do we have subsongs with different panning positions?
+	vector<PSMSubSong> subsongs;
+	bool subsongPanningDiffers = false; // do we have subsongs with different panning positions?
 
-	while(dwMemPos + 8 < dwMemLength)
+	while(file.BytesLeft())
 	{
-		// Skip through the chunks
-		ASSERT_CAN_READ(8);
-		uint32 chunkID = LittleEndian(*(uint32 *)(lpStream + dwMemPos));
-		uint32 chunkSize = LittleEndian(*(uint32 *)(lpStream + dwMemPos + 4));
-		dwMemPos += 8;
-
-		ASSERT_CAN_READ(chunkSize);
-
-		switch(chunkID)
+		// Go through the chunks
+		PSMChunk chunkHead;
+		if(!file.ReadConvertEndianness(chunkHead))
 		{
-		case PSMCHUNKID_TITL: // "TITL" - Song Title
-			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + dwMemPos), chunkSize);
+			break;
+		}
+
+		FileReader chunk = file.GetChunk(chunkHead.length);
+
+		switch(chunkHead.id)
+		{
+		case PSMChunk::idTITL: // "TITL" - Song Title
+			chunk.ReadString<StringFixer::spacePadded>(m_szNames[0], chunk.GetLength());
 			break;
 
-		case PSMCHUNKID_SDFT: // "SDFT" - Format info (song data starts here)
-			if(chunkSize != 8 || memcmp(lpStream + dwMemPos, "MAINSONG", 8)) return false;
+		case PSMChunk::idSDFT: // "SDFT" - Format info (song data starts here)
+			if(chunk.GetLength() != 8 || !chunk.ReadMagic("MAINSONG"))
+			{
+				return false;
+			}
 			break;
 
-		case PSMCHUNKID_PBOD: // "PBOD" - Pattern data of a single pattern
-			if(chunkSize < 8 || chunkSize != LittleEndian(*(uint32 *)(lpStream + dwMemPos))) return false; // same value twice
+		case PSMChunk::idPBOD: // "PBOD" - Pattern data of a single pattern
+			if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice
+				|| chunk.GetLength() < 8)
+			{
+				break;
+			}
 
 			// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
-			if(memcmp(lpStream + dwMemPos + 4, "P", 1)) return false;
-			if(!memcmp(lpStream + dwMemPos + 4, "PATT", 4)) bNewFormat = true;
-			if(bNewFormat && chunkSize < 12) return false; // 4 additional bytes
-
-			char patternID[4];
-			memcpy(patternID, lpStream + dwMemPos + 5 + (bNewFormat ? 3 : 0), 3);
-			patternID[3] = 0;
-			patternIDs.push_back(atoi(patternID));
-			patternOffsets.push_back(dwMemPos + 8 + (bNewFormat ? 4 : 0));
+			char patternID[5];
+			if(!chunk.ReadString<StringFixer::spacePadded>(patternID, 4) || patternID[0] != 'P')
+			{
+				break;
+			}
+			if(!memcmp(patternID, "PATT", 4))
+			{
+				// New format has four additional bytes - read patternID again.
+				newFormat = true;
+				chunk.ReadString<StringFixer::spacePadded>(patternID, 4);
+			}
+			patternIDs.push_back(atoi(&patternID[newFormat ? 0 : 1]));
+			// We're going to read the rest of the pattern data later.
+			patternChunks.push_back(chunk.GetChunk(chunk.BytesLeft()));
 
 			// Convert later as we have to know how many channels there are.
 			break;
 
-		case PSMCHUNKID_SONG: // "SONG" - Subsong information (channel count etc)
+		case PSMChunk::idSONG: // "SONG" - Subsong information (channel count etc)
 			{
-				if(chunkSize < sizeof(PSMSONGHEADER)) return false;
-				PSMSONGHEADER *pSong = (PSMSONGHEADER *)(lpStream + dwMemPos);
-				if(pSong->compression != 0x01) return false; // no compression for PSM files
-				m_nChannels = Clamp(CHANNELINDEX(pSong->numChannels), m_nChannels, MAX_BASECHANNELS); // subsongs *might* have different channel count
-
-				PSMSUBSONG subsong;
-				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
-				StringFixer::ReadString<StringFixer::nullTerminated>(subsong.songName, pSong->songType); // subsong name
-
-				DWORD dwChunkPos = dwMemPos + sizeof(PSMSONGHEADER);
-
-				// "Sub sub chunks"
-				while(dwChunkPos + 8 < dwMemPos + chunkSize)
+				PSMSongHeader songHeader;
+				if(!chunk.Read(songHeader))
 				{
-					uint32 subChunkID = LittleEndian(*(uint32 *)(lpStream + dwChunkPos));
-					uint32 subChunkSize = LittleEndian(*(uint32 *)(lpStream + dwChunkPos + 4));
-					dwChunkPos += 8;
+					break;
+				}
+				if(songHeader.compression != 0x01)
+				{
+					// No compression for PSM files
+					return false;
+				}
+				// Subsongs *might* have different channel count
+				m_nChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), m_nChannels, MAX_BASECHANNELS);
 
-					switch(subChunkID)
+				PSMSubSong subsong;
+				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
+				StringFixer::ReadString<StringFixer::nullTerminated>(subsong.songName, songHeader.songType); // subsong name
+
+				// Read "Sub sub chunks"
+				FileReader subChunk = chunk.GetChunk(chunk.BytesLeft());
+				while(subChunk.BytesLeft())
+				{
+					PSMChunk subChunkHead;
+					if(!subChunk.ReadConvertEndianness(subChunkHead))
 					{
-					case PSMCHUNKID_DATE: // "DATE" - Conversion date (YYMMDD)
-						if(subChunkSize != 6) break;
+						break;
+					}
 
+					switch(subChunkHead.id)
+					{
+					case PSMChunk::idDATE: // "DATE" - Conversion date (YYMMDD)
+						if(subChunkHead.length == 6)
 						{
 							char cversion[7];
-							memcpy(cversion, lpStream + dwChunkPos, 6);
-							cversion[6] = 0;
+							subChunk.ReadString<StringFixer::maybeNullTerminated>(cversion, 6);
 							int version = atoi(cversion);
 							// Sinaria song dates (just to go sure...)
 							if(version == 800211 || version == 940902 || version == 940903 ||
 								version == 940906 || version == 940914 || version == 941213)
-								bNewFormat = true;
+								newFormat = true;
 						}
 						break;
 
-					case PSMCHUNKID_OPLH: // "OPLH" - Order list, channel + module settings
+					case PSMChunk::idOPLH: // "OPLH" - Order list, channel + module settings
+						if(subChunkHead.length >= 9)
 						{
-							if(subChunkSize < 9) return false;
 							// First two bytes = Number of chunks that follow
-							//uint16 nTotalChunks = LittleEndian(*(uint16 *)(lpStream + dwChunkPos));
+							//uint16 totalChunks = subChunk.ReadUint16LE();
+							subChunk.Skip(2);
 
 							// Now, the interesting part begins!
-							DWORD dwSettingsOffset = dwChunkPos + 2;
-							uint16 nChunkCount = 0, nFirstOrderChunk = uint16_max;
+							uint16 chunkCount = 0, firstOrderChunk = uint16_max;
 
 							// "Sub sub sub chunks" (grrrr, silly format)
-							while(dwSettingsOffset - dwChunkPos + 1 < subChunkSize)
+							while(subChunk.BytesLeft())
 							{
-								switch(lpStream[dwSettingsOffset])
+								uint8 subChunkID = subChunk.ReadUint8();
+								if(!subChunkID)
 								{
-								case 0x00: // End
-									dwSettingsOffset += 1;
+									// Last chunk was reached.
 									break;
+								}
 
+								switch(subChunkID)
+								{
 								case 0x01: // Order list item
-									if(dwSettingsOffset - dwChunkPos + 5 > subChunkSize) return false;
 									// Pattern name follows - find pattern (this is the orderlist)
 									{
-										char patternID[4]; // temporary
-										memcpy(patternID, lpStream + dwSettingsOffset + 2 + (bNewFormat ? 3 : 0), 3);
-										patternID[3] = 0;
-										uint32 nPattern = atoi(patternID);
+										char patternID[5]; // temporary
+										if(newFormat)
+										{
+											subChunk.Skip(4);
+											subChunk.ReadString<StringFixer::spacePadded>(patternID, 4);
+										} else
+										{
+											subChunk.Skip(1);
+											subChunk.ReadString<StringFixer::spacePadded>(patternID, 3);
+										}
+										uint32 pat = atoi(patternID);
 
 										// seek which pattern has this ID
-										for(uint32 i = 0; i < patternIDs.size(); i++)
+										for(size_t i = 0; i < patternIDs.size(); i++)
 										{
-											if(patternIDs[i] == nPattern)
+											if(patternIDs[i] == pat)
 											{
 												// found the right pattern, copy offset + start / end positions.
 												if(subsong.startOrder == ORDERINDEX_INVALID)
-													subsong.startOrder = (ORDERINDEX)orderOffsets.size();
-												subsong.endOrder = (ORDERINDEX)orderOffsets.size();
+													subsong.startOrder = static_cast<ORDERINDEX>(orderOffsets.size());
+												subsong.endOrder = static_cast<ORDERINDEX>(orderOffsets.size());
 
 												// every pattern in the order will be unique, so store the pointer + pattern ID
-												orderOffsets.push_back(patternOffsets[i]);
+												orderOffsets.push_back(&patternChunks[i]);
 												Order.Append(numPatterns);
 												numPatterns++;
 												break;
 											}
 										}
 									}
-									// decide whether this is the first order chunk or not (for finding out the correct restart position)
-									if(nFirstOrderChunk == uint16_max) nFirstOrderChunk = nChunkCount;
-									dwSettingsOffset += 5 + (bNewFormat ? 4 : 0);
+									// Decide whether this is the first order chunk or not (for finding out the correct restart position)
+									if(firstOrderChunk == uint16_max) firstOrderChunk = chunkCount;
 									break;
 
 								case 0x04: // Restart position
 									{
-										uint16 nRestartChunk = LittleEndianW(*(uint16 *)(lpStream + dwSettingsOffset + 1));
-										ORDERINDEX nRestartPosition = 0;
-										if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
-										subsong.restartPos += nRestartPosition;
+										uint16 restartChunk = subChunk.ReadUint16LE();
+										ORDERINDEX restartPosition = 0;
+										if(restartChunk >= firstOrderChunk) restartPosition = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);
+										subsong.restartPos += restartPosition;
 									}
-									dwSettingsOffset += 3;
 									break;
 
 								case 0x07: // Default Speed
-									if(dwSettingsOffset - dwChunkPos + 2 > subChunkSize) break;
-									subsong.defaultSpeed = lpStream[dwSettingsOffset + 1];
-									dwSettingsOffset += 2;
+									subsong.defaultSpeed = subChunk.ReadUint8();
 									break;
 
 								case 0x08: // Default Tempo
-									if(dwSettingsOffset - dwChunkPos + 2 > subChunkSize) break;
-									subsong.defaultTempo =  lpStream[dwSettingsOffset + 1];
-									dwSettingsOffset += 2;
+									subsong.defaultTempo =  subChunk.ReadUint8();
 									break;
 
 								case 0x0C: // Sample map table (???)
-									if(dwSettingsOffset - dwChunkPos + 7 > subChunkSize) break;
-
 									// Never seems to be different, so...
-									if (lpStream[dwSettingsOffset + 1] != 0x00 || lpStream[dwSettingsOffset + 2] != 0xFF ||
-										lpStream[dwSettingsOffset + 3] != 0x00 || lpStream[dwSettingsOffset + 4] != 0x00 ||
-										lpStream[dwSettingsOffset + 5] != 0x01 || lpStream[dwSettingsOffset + 6] != 0x00)
+									if (subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0xFF ||
+										subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0x00 ||
+										subChunk.ReadUint8() != 0x01 || subChunk.ReadUint8() != 0x00)
+									{
 										return false;
-									dwSettingsOffset += 7;
+									}
 									break;
 
 								case 0x0D: // Channel panning table
-									if(dwSettingsOffset - dwChunkPos + 4 > subChunkSize) break;
-
-									if(lpStream[dwSettingsOffset + 1] < MAX_BASECHANNELS)
 									{
-										CHANNELINDEX nChn = lpStream[dwSettingsOffset + 1];
-										switch(lpStream[dwSettingsOffset + 3])
+										uint8 chn = subChunk.ReadUint8();
+										uint8 pan = subChunk.ReadUint8();
+										uint8 type = subChunk.ReadUint8();
+										if(chn < subsong.channelPanning.size())
 										{
-										case 0: // use panning
-											subsong.channelPanning[nChn] = lpStream[dwSettingsOffset + 2] ^ 128;
-											subsong.channelSurround[nChn] = false;
-											break;
+											switch(type)
+											{
+											case 0: // use panning
+												subsong.channelPanning[chn] = pan ^ 128;
+												subsong.channelSurround[chn] = false;
+												break;
 
-										case 2: // surround
-											subsong.channelPanning[nChn] = 128;
-											subsong.channelSurround[nChn] = true;
-											break;
+											case 2: // surround
+												subsong.channelPanning[chn] = 128;
+												subsong.channelSurround[chn] = true;
+												break;
 
-										case 4: // center
-											subsong.channelPanning[nChn] = 128;
-											subsong.channelSurround[nChn] = false;
-											break;
+											case 4: // center
+												subsong.channelPanning[chn] = 128;
+												subsong.channelSurround[chn] = false;
+												break;
 
-										}
-										if(bSubsongPanningDiffers == false && subsongs.size() > 0)
-										{
-											if(subsongs.back().channelPanning[nChn] != subsong.channelPanning[nChn]
-												|| subsongs.back().channelSurround[nChn] != subsong.channelSurround[nChn])
-												bSubsongPanningDiffers = true;
+											}
+											if(subsongPanningDiffers == false && subsongs.size() > 0)
+											{
+												if(subsongs.back().channelPanning[chn] != subsong.channelPanning[chn]
+												|| subsongs.back().channelSurround[chn] != subsong.channelSurround[chn])
+													subsongPanningDiffers = true;
+											}
 										}
 									}
-									dwSettingsOffset += 4;
 									break;
 
 								case 0x0E: // Channel volume table (0...255) - apparently always 255
-									if(dwSettingsOffset - dwChunkPos + 3 > subChunkSize) break;
-									if(lpStream[dwSettingsOffset + 1] < MAX_BASECHANNELS)
-										subsong.channelVolume[lpStream[dwSettingsOffset + 1]] = (lpStream[dwSettingsOffset + 2] >> 2) + 1;
-
-									dwSettingsOffset += 3;
+									{
+										uint8 chn = subChunk.ReadUint8();
+										uint8 vol = subChunk.ReadUint8();
+										if(chn < subsong.channelVolume.size())
+										{
+											subsong.channelVolume[chn] = (vol / 4) + 1;
+										}
+									}
 									break;
 								
 								default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
 									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
 									return false;
-									break;
 
 								}
-								nChunkCount++;
+								chunkCount++;
 							}
 							// separate subsongs by "---" patterns
 							orderOffsets.push_back(nullptr);
@@ -388,37 +503,44 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						}
 						break;
 
-					case PSMCHUNKID_PPAN: // PPAN - Channel panning table (used in Sinaria)
-						if(subChunkSize & 1) return false;
-						for(uint32 i = 0; i < subChunkSize; i += 2)
+					case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
+						// In some Sinaria tunes, this is actually longer than 2 * channels...
+						ASSERT(subChunkHead.length >= m_nChannels * 2u);
+						for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 						{
-							CHANNELINDEX nChn = (CHANNELINDEX)(i >> 1);
-							if(nChn >= m_nChannels) break;
-							switch(lpStream[dwChunkPos + i])
+							if(subChunk.BytesLeft() < 2)
+							{
+								break;
+							}
+
+							uint8 type = subChunk.ReadUint8();
+							uint8 pan = subChunk.ReadUint8();
+
+							switch(type)
 							{
 							case 0: // use panning
-								subsong.channelPanning[nChn] = lpStream[dwChunkPos + i + 1] ^ 128;
-								subsong.channelSurround[nChn] = false;
+								subsong.channelPanning[chn] = pan ^ 128;
+								subsong.channelSurround[chn] = false;
 								break;
 
 							case 2: // surround
-								subsong.channelPanning[nChn] = 128;
-								subsong.channelSurround[nChn] = true;
+								subsong.channelPanning[chn] = 128;
+								subsong.channelSurround[chn] = true;
 								break;
 
 							case 4: // center
-								subsong.channelPanning[nChn] = 128;
-								subsong.channelSurround[nChn] = false;
+								subsong.channelPanning[chn] = 128;
+								subsong.channelSurround[chn] = false;
 								break;
 							}
 						}
 						break;
 					
-					case PSMCHUNKID_PATT: // PATT - Pattern list
+					case PSMChunk::idPATT: // PATT - Pattern list
 						// We don't really need this.
 						break;
 
-					case PSMCHUNKID_DSAM: // DSAM - Sample list
+					case PSMChunk::idDSAM: // DSAM - Sample list
 						// We don't need this either.
 						break;
 
@@ -426,8 +548,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						break;
 
 					}
-
-					dwChunkPos += subChunkSize;
 				}
 
 				// attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
@@ -436,51 +556,47 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			break;
 
-		case PSMCHUNKID_DSMP: // DSMP - Samples
-			if(!bNewFormat)
+		case PSMChunk::idDSMP: // DSMP - Samples
+			if(!newFormat)
 			{
-				// original header
-				if(chunkSize < sizeof(PSMOLDSAMPLEHEADER)) return false;
-				PSMOLDSAMPLEHEADER *pSample = (PSMOLDSAMPLEHEADER *)(lpStream + dwMemPos);
-				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
-				m_nSamples = max(m_nSamples, smp);
-				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], pSample->sampleName);
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[smp].filename, pSample->fileName);
+				// Original header
+				PSMOldSampleHeader sampleHeader;
+				if(!chunk.ReadConvertEndianness(sampleHeader))
+				{
+					break;
+				}
 
-				Samples[smp].nGlobalVol = 0x40;
-				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
-				Samples[smp].nLength = LittleEndian(pSample->sampleLength);
-				Samples[smp].nLoopStart = LittleEndian(pSample->loopStart);
-				Samples[smp].nLoopEnd = LittleEndian(pSample->loopEnd);	// Hmm... apparently we should add +1 for Extreme Pinball tunes here? See sample 8 in the medieval table music.
-				Samples[smp].nPan = 128;
-				Samples[smp].nVolume = (pSample->defaultVolume + 1) << 1;
-				Samples[smp].uFlags = (pSample->flags & 0x80) ? CHN_LOOP : 0;
-				if(Samples[smp].nLoopEnd == 0xFFFFFF) Samples[smp].nLoopEnd = Samples[smp].nLength;
+				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+				if(smp < MAX_SAMPLES)
+				{
+					m_nSamples = max(m_nSamples, smp);
+					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
-				// Delta-encoded samples
-				ReadSample(&Samples[smp], RS_PCM8D, (LPCSTR)(lpStream + dwMemPos + sizeof(PSMOLDSAMPLEHEADER)), Samples[smp].nLength);
+					sampleHeader.ConvertToMPT(Samples[smp]);
+
+					// Delta-encoded samples
+					ReadSample(&Samples[smp], RS_PCM8D, chunk);
+				}
 			} else
 			{
 				// Sinaria uses a slightly different sample header
-				if(chunkSize < sizeof(PSMNEWSAMPLEHEADER)) return false;
-				PSMNEWSAMPLEHEADER *pSample = (PSMNEWSAMPLEHEADER *)(lpStream + dwMemPos);
-				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
-				m_nSamples = max(m_nSamples, smp);
-				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], pSample->sampleName);
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[smp].filename, pSample->fileName);
+				PSMNewSampleHeader sampleHeader;
+				if(!chunk.ReadConvertEndianness(sampleHeader))
+				{
+					break;
+				}
 
-				Samples[smp].nGlobalVol = 0x40;
-				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
-				Samples[smp].nLength = LittleEndian(pSample->sampleLength);
-				Samples[smp].nLoopStart = LittleEndian(pSample->loopStart);
-				Samples[smp].nLoopEnd = LittleEndian(pSample->loopEnd);
-				Samples[smp].nPan = 128;
-				Samples[smp].nVolume = (pSample->defaultVolume + 1) << 1;
-				Samples[smp].uFlags = (pSample->flags & 0x80) ? CHN_LOOP : 0;
-				if(Samples[smp].nLoopEnd == 0xFFFFFF) Samples[smp].nLoopEnd = Samples[smp].nLength;
+				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+				if(smp < MAX_SAMPLES)
+				{
+					m_nSamples = max(m_nSamples, smp);
+					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
-				// Delta-encoded samples
-				ReadSample(&Samples[smp], RS_PCM8D, (LPCSTR)(lpStream + dwMemPos + sizeof(PSMNEWSAMPLEHEADER)), Samples[smp].nLength);
+					sampleHeader.ConvertToMPT(Samples[smp]);
+
+					// Delta-encoded samples
+					ReadSample(&Samples[smp], RS_PCM8D, chunk);
+				}
 			}
 
 			break;
@@ -489,291 +605,292 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 
 		}
-
-		dwMemPos += chunkSize;
 	}
 
 	if(m_nChannels == 0 || subsongs.size() == 0)
+	{
 		return false;
+	}
 
 	// Make the default variables of the first subsong global
 	m_nDefaultSpeed = subsongs[0].defaultSpeed;
 	m_nDefaultTempo = subsongs[0].defaultTempo;
 	m_nRestartPos = subsongs[0].restartPos;
-	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[nChn].nVolume = subsongs[0].channelVolume[nChn];
-		ChnSettings[nChn].nPan = subsongs[0].channelPanning[nChn];
-		if(subsongs[0].channelSurround[nChn])
-			ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+		ChnSettings[chn].nVolume = subsongs[0].channelVolume[chn];
+		ChnSettings[chn].nPan = subsongs[0].channelPanning[chn];
+		if(subsongs[0].channelSurround[chn])
+			ChnSettings[chn].dwFlags |= CHN_SURROUND;
 		else
-			ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+			ChnSettings[chn].dwFlags &= ~CHN_SURROUND;
 	}
 
 	// Now that we know the number of channels, we can go through all the patterns.
 	// This is a bit stupid since we will even read duplicate patterns twice, but hey, we do this just once... so who cares?
-	PATTERNINDEX nPat = 0;
-	for(ORDERINDEX nOrd = 0; nOrd < Order.size(); nOrd++)
+	PATTERNINDEX pat = 0;
+	for(ORDERINDEX ord = 0; ord < Order.size(); ord++)
 	{
-		if(orderOffsets[nOrd] == nullptr) continue;
-		uint32 dwPatternOffset = orderOffsets[nOrd];
-		if(dwPatternOffset + 2 > dwMemLength) return false;
-		uint16 patternSize = LittleEndianW(*(uint16 *)(lpStream + dwPatternOffset));
-		dwPatternOffset += 2;
+		if(orderOffsets[ord] == nullptr)
+		{
+			// Separator pattern
+			continue;
+		}
 
-		if(Patterns.Insert(nPat, patternSize))
+		FileReader patternChunk = *orderOffsets[ord];
+
+		uint16 numRows = patternChunk.ReadUint16LE();
+
+		if(Patterns.Insert(pat, numRows))
+		{
 			break;
+		}
+
+		enum
+		{
+			noteFlag	= 0x80,
+			instrFlag	= 0x40,
+			volFlag		= 0x20,
+			effectFlag	= 0x10,
+		};
 
 		// Read pattern.
-		ModCommand *row_data;
-		row_data = Patterns[nPat];
-
-		for(int nRow = 0; nRow < patternSize; nRow++)
+		for(int row = 0; row < numRows; row++)
 		{
-			if(dwPatternOffset + 2 > dwMemLength) return false;
-			uint16 rowSize = LittleEndianW(*(uint16 *)(lpStream + dwPatternOffset));
-			
-			uint32 dwRowOffset = dwPatternOffset + 2;
-
-			while(dwRowOffset < dwPatternOffset + rowSize)
+			PatternRow rowBase = Patterns[pat].GetRow(row);
+			uint16 rowSize = patternChunk.ReadUint16LE();
+			if(rowSize < 2)
 			{
-				if(dwRowOffset + 1 > dwMemLength) return false;
-				BYTE mask = lpStream[dwRowOffset];
-				// Point to the correct channel
-				ModCommand *m = row_data + min(m_nChannels - 1, lpStream[dwRowOffset + 1]);
-				dwRowOffset += 2;
+				continue;
+			}
 
-				if(mask & 0x80)
+			FileReader rowChunk = patternChunk.GetChunk(rowSize - 2);
+			
+			while(rowChunk.BytesLeft())
+			{
+				uint8 flags = rowChunk.ReadUint8();
+				uint8 channel = rowChunk.ReadUint8();
+				// Point to the correct channel
+				ModCommand &m = rowBase[min(m_nChannels - 1, channel)];
+
+				if(flags & noteFlag)
 				{
-					if(dwRowOffset + 1 > dwMemLength) return false;
 					// Note present
-					BYTE bNote = lpStream[dwRowOffset];
-					if(!bNewFormat)
+					uint8 note = rowChunk.ReadUint8();
+					if(!newFormat)
 					{
-						if(bNote == 0xFF)
-							bNote = NOTE_NOTECUT;
+						if(note == 0xFF)
+							note = NOTE_NOTECUT;
 						else
-							if(bNote < 129) bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
+							if(note < 129) note = (note & 0x0F) + 12 * (note >> 4) + 13;
 					} else
 					{
-						if(bNote < 85) bNote += 36;
+						if(note < 85) note += 36;
 					}
-					m->note = bNote;
-					dwRowOffset++;
+					m.note = note;
 				}
 
-				if(mask & 0x40)
+				if(flags & instrFlag)
 				{
-					if(dwRowOffset + 1 > dwMemLength) return false;
 					// Instrument present
-					m->instr = lpStream[dwRowOffset] + 1;
-					dwRowOffset++;
+					m.instr = rowChunk.ReadUint8() + 1;
 				}
 
-				if(mask & 0x20)
+				if(flags & volFlag)
 				{
-					if(dwRowOffset + 1 > dwMemLength) return false;
 					// Volume present
-					m->volcmd = VOLCMD_VOLUME;
-					m->vol = (min(lpStream[dwRowOffset], 127) + 1) >> 1;
-					dwRowOffset++;
+					uint8 vol = rowChunk.ReadUint8();
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = (min(vol, 127) + 1) / 2;
 				}
 
-				if(mask & 0x10)
+				if(flags & effectFlag)
 				{
 					// Effect present - convert
-					if(dwRowOffset + 2 > dwMemLength) return false;
-					uint8 command = lpStream[dwRowOffset], param = lpStream[dwRowOffset + 1];
+					m.command = rowChunk.ReadUint8();
+					m.param = rowChunk.ReadUint8();
 
-					switch(command)
+					switch(m.command)
 					{
 					// Volslides
 					case 0x01: // fine volslide up
-						command = CMD_VOLUMESLIDE;
-						if (bNewFormat) param = (param << 4) | 0x0F;
-						else param = ((param & 0x1E) << 3) | 0x0F;
+						m.command = CMD_VOLUMESLIDE;
+						if (newFormat) m.param = (m.param << 4) | 0x0F;
+						else m.param = ((m.param & 0x1E) << 3) | 0x0F;
 						break;
 					case 0x02: // volslide up
-						command = CMD_VOLUMESLIDE;
-						if (bNewFormat) param = 0xF0 & (param << 4);
-						else param = 0xF0 & (param << 3);
+						m.command = CMD_VOLUMESLIDE;
+						if (newFormat) m.param = 0xF0 & (m.param << 4);
+						else m.param = 0xF0 & (m.param << 3);
 						break;
 					case 0x03: // fine volslide down
-						command = CMD_VOLUMESLIDE;
-						if (bNewFormat) param |= 0xF0;
-						else param = 0xF0 | (param >> 1);
+						m.command = CMD_VOLUMESLIDE;
+						if (newFormat) m.param |= 0xF0;
+						else m.param = 0xF0 | (m.param >> 1);
 						break;
 					case 0x04: // volslide down
-						command = CMD_VOLUMESLIDE;
-						if (bNewFormat) param &= 0x0F;
-						else if(param < 2) param |= 0xF0; else param = (param >> 1) & 0x0F;
+						m.command = CMD_VOLUMESLIDE;
+						if (newFormat) m.param &= 0x0F;
+						else if(m.param < 2) m.param |= 0xF0; else m.param = (m.param >> 1) & 0x0F;
 						break;
 
 					// Portamento
 					case 0x0B: // fine portamento up
-						command = CMD_PORTAMENTOUP;
-						param = 0xF0 | ConvertPSMPorta(param, bNewFormat);
+						m.command = CMD_PORTAMENTOUP;
+						m.param = 0xF0 | ConvertPSMPorta(m.param, newFormat);
 						break;
 					case 0x0C: // portamento up
-						command = CMD_PORTAMENTOUP;
-						param = ConvertPSMPorta(param, bNewFormat);
+						m.command = CMD_PORTAMENTOUP;
+						m.param = ConvertPSMPorta(m.param, newFormat);
 						break;
 					case 0x0D: // fine portamento down
-						command = CMD_PORTAMENTODOWN;
-						param = 0xF0 | ConvertPSMPorta(param, bNewFormat);
+						m.command = CMD_PORTAMENTODOWN;
+						m.param = 0xF0 | ConvertPSMPorta(m.param, newFormat);
 						break;
 					case 0x0E: // portamento down
-						command = CMD_PORTAMENTODOWN;
-						param = ConvertPSMPorta(param, bNewFormat);
+						m.command = CMD_PORTAMENTODOWN;
+						m.param = ConvertPSMPorta(m.param, newFormat);
 						break;					
 					case 0x0F: // tone portamento
-						command = CMD_TONEPORTAMENTO;
-						if(!bNewFormat) param >>= 2;
+						m.command = CMD_TONEPORTAMENTO;
+						if(!newFormat) m.param >>= 2;
 						break;
 					case 0x11: // glissando control
-						command = CMD_S3MCMDEX;
-						param = 0x10 | (param & 0x01);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x10 | (m.param & 0x01);
 						break;
 					case 0x10: // tone portamento + volslide up
-						command = CMD_TONEPORTAVOL;
-						param = param & 0xF0;
+						m.command = CMD_TONEPORTAVOL;
+						m.param = m.param & 0xF0;
 						break;
 					case 0x12: // tone portamento + volslide down
-						command = CMD_TONEPORTAVOL;
-						param = (param >> 4) & 0x0F;
+						m.command = CMD_TONEPORTAVOL;
+						m.param = (m.param >> 4) & 0x0F;
 						break;						
 
 					// Vibrato
 					case 0x15: // vibrato
-						command = CMD_VIBRATO;
+						m.command = CMD_VIBRATO;
 						break;
 					case 0x16: // vibrato waveform
-						command = CMD_S3MCMDEX;
-						param = 0x30 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x30 | (m.param & 0x0F);
 						break;
 					case 0x17: // vibrato + volslide up
-						command = CMD_VIBRATOVOL;
-						param = 0xF0 | param;
+						m.command = CMD_VIBRATOVOL;
+						m.param = 0xF0 | m.param;
 						break;
 					case 0x18: // vibrato + volslide down
-						command = CMD_VIBRATOVOL;
+						m.command = CMD_VIBRATOVOL;
 						break;					
 
 					// Tremolo
 					case 0x1F: // tremolo
-						command = CMD_TREMOLO;
+						m.command = CMD_TREMOLO;
 						break;
 					case 0x20: // tremolo waveform
-						command = CMD_S3MCMDEX;
-						param = 0x40 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x40 | (m.param & 0x0F);
 						break;
 
 					// Sample commands
 					case 0x29: // 3-byte offset - we only support the middle byte.
-						if(dwRowOffset + 4 > dwMemLength) return false;
-						command = CMD_OFFSET;
-						param = lpStream[dwRowOffset + 2];
-						dwRowOffset += 2;
+						m.command = CMD_OFFSET;
+						m.param = rowChunk.ReadUint8();
+						rowChunk.Skip(1);
 						break;
 					case 0x2A: // retrigger
-						command = CMD_RETRIG;
+						m.command = CMD_RETRIG;
 						break;
 					case 0x2B: // note cut
-						command = CMD_S3MCMDEX;
-						param = 0xC0 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0xC0 | (m.param & 0x0F);
 						break;
 					case 0x2C: // note delay
-						command = CMD_S3MCMDEX;
-						param = 0xD0 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0xD0 | (m.param & 0x0F);
 						break;
 
 					// Position change
 					case 0x33: // position jump
-						command = CMD_POSITIONJUMP;
-						param >>= 1;
-						dwRowOffset += 1;
+						m.command = CMD_POSITIONJUMP;
+						m.param >>= 1;
+						rowChunk.Skip(1);
 						break;
 					case 0x34: // pattern break
-						command = CMD_PATTERNBREAK;
-						param >>= 1;
+						m.command = CMD_PATTERNBREAK;
+						m.param >>= 1;
 						break;
 					case 0x35: // loop pattern
-						command = CMD_S3MCMDEX;
-						param = 0xB0 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0xB0 | (m.param & 0x0F);
 						break;
 					case 0x36: // pattern delay
-						command = CMD_S3MCMDEX;
-						param = 0xE0 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0xE0 | (m.param & 0x0F);
 						break;
 
 					// speed change
 					case 0x3D: // set speed
-						command = CMD_SPEED;
+						m.command = CMD_SPEED;
 						break;
 					case 0x3E: // set tempo
-						command = CMD_TEMPO;
+						m.command = CMD_TEMPO;
 						break;
 
 					// misc commands
 					case 0x47: // arpeggio
-						command = CMD_ARPEGGIO;
+						m.command = CMD_ARPEGGIO;
 						break;
 					case 0x48: // set finetune
-						command = CMD_S3MCMDEX;
-						param = 0x20 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x20 | (m.param & 0x0F);
 						break;
 					case 0x49: // set balance
-						command = CMD_S3MCMDEX;
-						param = 0x80 | (param & 0x0F);
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x80 | (m.param & 0x0F);
 						break;
 
 					case CMD_MODCMDEX:
 						// for some strange home-made tunes
-						command = CMD_S3MCMDEX;
+						m.command = CMD_S3MCMDEX;
 						break;
 
 					default:
-						command = CMD_NONE;
+						m.command = CMD_NONE;
 						break;
 
 					}
-
-					m->command = command;
-					m->param = param;
-
-					dwRowOffset += 2;
 				}
 			}
-
-			row_data += m_nChannels;
-			dwPatternOffset += rowSize;
 		}
-		nPat++;
+
+		pat++;
 	}
 
 	if(subsongs.size() > 1)
 	{
 		// write subsong "configuration" to patterns (only if there are multiple subsongs)
-		for(uint32 i = 0; i < subsongs.size(); i++)
+		for(size_t i = 0; i < subsongs.size(); i++)
 		{
 			PATTERNINDEX startPattern = Order[subsongs[i].startOrder], endPattern = Order[subsongs[i].endOrder];
 			if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
 
 			// set the subsong name to all pattern names
-			for(PATTERNINDEX nPat = startPattern; nPat <= endPattern; nPat++)
+			for(PATTERNINDEX pat = startPattern; pat <= endPattern; pat++)
 			{
-				Patterns[nPat].SetName(subsongs[i].songName);
+				Patterns[pat].SetName(subsongs[i].songName);
 			}
 
 			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
-			if(bSubsongPanningDiffers)
+			if(subsongPanningDiffers)
 			{
-				for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
-					if(subsongs[i].channelSurround[nChn] == true)
-						TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, nChn, false, weTryNextRow);
+					if(subsongs[i].channelSurround[chn] == true)
+						TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, chn, false, weTryNextRow);
 					else
-						TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[nChn], false, nChn, false, weTryNextRow);
+						TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[chn], false, chn, false, weTryNextRow);
 				}
 			}
 			// write default tempo/speed to pattern
@@ -786,13 +903,13 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(subsongs[i].restartPos != ORDERINDEX_INVALID)
 			{
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
-				ModCommand *row_data;
-				row_data = Patterns[endPattern];
-				for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++, row_data++)
+				ModCommand *m;
+				m = Patterns[endPattern];
+				for(uint32 cell = 0; cell < m_nChannels * Patterns[endPattern].GetNumRows(); cell++, m++)
 				{
-					if(row_data->command == CMD_PATTERNBREAK || row_data->command == CMD_POSITIONJUMP)
+					if(m->command == CMD_PATTERNBREAK || m->command == CMD_POSITIONJUMP)
 					{
-						lastRow = nCell / m_nChannels;
+						lastRow = cell / m_nChannels;
 						break;
 					}
 				}
@@ -809,16 +926,21 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //  PSM16 support starts here.
 //
 
-// 32-Bit chunk identifiers
-#define PSM16_PORD	0x44524f50
-#define PSM16_PPAN	0x4E415050
-#define PSM16_PSAH	0x48415350
-#define PSM16_PPAT	0x54415050
-
 #pragma pack(push, 1)
 
-struct PSM16HEADER
+struct PSM16FileHeader
 {
+	// 32-Bit chunk identifiers
+	enum PSM16Magic
+	{
+		magicPSM_	= 0xFE4D5350,
+	
+		idPORD	= 0x44524f50,
+		idPPAN	= 0x4E415050,
+		idPSAH	= 0x48415350,
+		idPPAT	= 0x54415050,
+	};
+
 	uint32 formatID;		// "PSMþ" (PSM16)
 	char   songName[59];	// Song title, padded with nulls
 	uint8  lineEnd;			// $1A
@@ -841,10 +963,38 @@ struct PSM16HEADER
 	uint32 commentsOffset;	// Pointer to song comment
 	uint32 patSize;			// Size of all patterns
 	uint8  filler[40];
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(formatID);
+		SwapBytesLE(songLength);
+		SwapBytesLE(songOrders);
+		SwapBytesLE(numPatterns);
+		SwapBytesLE(numSamples);
+		SwapBytesLE(numChannelsPlay);
+		SwapBytesLE(numChannelsReal);
+		SwapBytesLE(orderOffset);
+		SwapBytesLE(panOffset);
+		SwapBytesLE(patOffset);
+		SwapBytesLE(smpOffset);
+		SwapBytesLE(commentsOffset);
+		SwapBytesLE(patSize);
+	}
 };
 
-struct PSM16SMPHEADER
+struct PSM16SampleHeader
 {
+	enum SampleFlags
+	{
+		smpMask		= 0x7F,
+		smp16Bit	= 0x04,
+		smpUnsigned	= 0x08,
+		smpDelta	= 0x10,
+		smpPingPong	= 0x20,
+		smpLoop		= 0x80,
+	};
+
 	char   filename[13];	// null-terminated
 	char   name[24];		// dito
 	uint32 offset;			// in file
@@ -857,350 +1007,385 @@ struct PSM16SMPHEADER
 	int8   finetune;		// Low nibble = MOD finetune, high nibble = transpose (7 = center)
 	uint8  volume;			// default volume
 	uint16 c2freq;			// Middle-C frequency, which has to be combined with the finetune and transpose.
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(offset);
+		SwapBytesLE(memoffset);
+		SwapBytesLE(sampleNumber);
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(c2freq);
+	}
+
+	// Convert sample header to OpenMPT's internal format
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		StringFixer::ReadString<StringFixer::nullTerminated>(mptSmp.filename, filename);
+
+		mptSmp.nLength = length;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		mptSmp.nC5Speed = c2freq;
+
+		// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF!
+		// Why on earth would you want to use both systems at the same time?
+		CSoundFile::FrequencyToTranspose(&mptSmp);
+		mptSmp.nC5Speed = CSoundFile::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
+
+		mptSmp.nVolume = volume << 2;
+		mptSmp.nGlobalVol = 256;
+
+		mptSmp.uFlags = 0;
+		if(flags & PSM16SampleHeader::smp16Bit)
+		{
+			mptSmp.uFlags |= CHN_16BIT;
+			mptSmp.nLength /= 2;
+		}
+		if(flags & PSM16SampleHeader::smpPingPong)
+		{
+			mptSmp.uFlags |= CHN_PINGPONGLOOP;
+		}
+		if(flags & PSM16SampleHeader::smpLoop)
+		{
+			mptSmp.uFlags |= CHN_LOOP;
+		}
+	}
+	
+	// Retrieve the internal sample format flags for this sample.
+	UINT GetSampleFormat()
+	{
+		UINT sampleFormat = (flags & PSM16SampleHeader::smp16Bit) ? RS_PCM16S : RS_PCM8S;
+
+		if(flags & PSM16SampleHeader::smpUnsigned)
+		{
+			if(sampleFormat == RS_PCM16S)
+				sampleFormat = RS_PCM16U;
+			else
+				sampleFormat = RS_PCM8U;
+		} else if(flags & PSM16SampleHeader::smpDelta)
+		{
+			if(sampleFormat == RS_PCM16S)
+				sampleFormat = RS_PCM16D;
+			else
+				sampleFormat = RS_PCM8D;
+		} else if((flags & PSM16SampleHeader::smpMask) == 0)
+		{
+			sampleFormat = RS_PCM8D;
+		}
+		return sampleFormat;
+	}
 };
 
-struct PSM16PATHEADER
+struct PSM16PatternHeader
 {
 	uint16 size;		// includes header bytes
 	uint8  numRows;		// 1 ... 64
 	uint8  numChans;	// 1 ... 32
+
+	void ConvertEndianness()
+	{
+		SwapBytesLE(size);
+	}
 };
 
 #pragma pack(pop)
 
 
-bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-------------------------------------------------------------------------
+bool CSoundFile::ReadPSM16(FileReader &file)
+//------------------------------------------
 {
-	DWORD dwMemPos = 0;
-
-	ASSERT_CAN_READ(sizeof(PSM16HEADER));
-	const PSM16HEADER *shdr = (PSM16HEADER *)lpStream;
+	file.Rewind();
+	PSM16FileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader))
+	{
+		return false;
+	}
 
 	// Check header
-	if((shdr->formatID != LittleEndian(PSM16HEAD_PSM_)) // "PSMþ"
-		|| (shdr->lineEnd != 0x1A)
-		|| (shdr->formatVersion != 0x10 && shdr->formatVersion != 0x01) // why is this sometimes 0x01?
-		|| (shdr->patternVersion != 0) // 255ch pattern version not supported (did anyone use this?)
-		|| ((shdr->songType & 3) != 0)
-		|| (min(shdr->numChannelsPlay, shdr->numChannelsReal) == 0)
-		) return false;
+	if(fileHeader.formatID != PSM16FileHeader::magicPSM_ // "PSMþ"
+		|| fileHeader.lineEnd != 0x1A
+		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
+		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
+		|| (fileHeader.songType & 3) != 0
+		|| max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
+	{
+		return false;
+	}
 
 	// Seems to be valid!
 
 	m_nType = MOD_TYPE_S3M;
-	m_nChannels = min(max(shdr->numChannelsPlay, shdr->numChannelsReal), MAX_BASECHANNELS);
-	m_nMasterVolume = shdr->masterVolume;
+	m_nChannels = min(max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal), MAX_BASECHANNELS);
+	m_nMasterVolume = fileHeader.masterVolume;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_nDefaultSpeed = shdr->songSpeed;
-	m_nDefaultTempo = shdr->songTempo;
+	m_nDefaultSpeed = fileHeader.songSpeed;
+	m_nDefaultTempo = fileHeader.songTempo;
 
 	MemsetZero(m_szNames);
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], shdr->songName);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
 
 	// Read orders
-	dwMemPos = LittleEndian(shdr->orderOffset);
-	ASSERT_CAN_READ((DWORD)LittleEndianW(shdr->songOrders) + 2);
-	if(LittleEndian(shdr->orderOffset) > 4 && *(uint32 *)(lpStream + dwMemPos - 4) == LittleEndian(PSM16_PORD)) // PORD
+	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPORD)
 	{
-		Order.ReadAsByte(lpStream + dwMemPos, LittleEndianW(shdr->songOrders), dwMemLength - dwMemPos);
+		Order.ReadAsByte(file, fileHeader.songOrders);
 	}
 
 	// Read pan positions
-	dwMemPos = LittleEndian(shdr->panOffset);
-	ASSERT_CAN_READ(32);
-	if(LittleEndian(shdr->panOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == PSM16_PPAN) // PPAN
+	if(fileHeader.panOffset > 4 && file.Seek(fileHeader.panOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPPAN)
 	{
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
-			ChnSettings[i].nPan = ((15 - (lpStream[dwMemPos + i] & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
+			ChnSettings[i].nPan = ((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
 			ChnSettings[i].nVolume = 64;
-			ChnSettings[i].dwFlags = 0; // (i >= shdr->numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
+			ChnSettings[i].dwFlags = 0; // (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}
 	}
 
 	// Read samples
-	dwMemPos = LittleEndian(shdr->smpOffset);
-	ASSERT_CAN_READ(0);
-	if(LittleEndian(shdr->smpOffset) > 4 && *(uint32 *)(lpStream + dwMemPos - 4) == LittleEndian(PSM16_PSAH)) // PSAH
+	if(fileHeader.smpOffset > 4 && file.Seek(fileHeader.smpOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPSAH)
 	{
-		SAMPLEINDEX iSmpCount = 0;
-		m_nSamples = LittleEndianW(shdr->numSamples);
-		while(iSmpCount < LittleEndianW(shdr->numSamples))
+		FileReader sampleChunk = file.GetChunk(file.BytesLeft());
+
+		for(SAMPLEINDEX fileSample = 0; fileSample < fileHeader.numSamples; fileSample++)
 		{
-			ASSERT_CAN_READ(sizeof(PSM16SMPHEADER));
-			const PSM16SMPHEADER *smphdr = (PSM16SMPHEADER *)(lpStream + dwMemPos);
-			dwMemPos += sizeof(PSM16SMPHEADER);
-
-			SAMPLEINDEX iSmp = LittleEndianW(smphdr->sampleNumber);
-			m_nSamples = max(m_nSamples, iSmp);
-
-			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[iSmp], smphdr->name);
-			StringFixer::ReadString<StringFixer::nullTerminated>(Samples[iSmp].filename, smphdr->filename);
-
-			Samples[iSmp].nLength = LittleEndian(smphdr->length);
-			Samples[iSmp].nLoopStart = LittleEndian(smphdr->loopStart);
-			Samples[iSmp].nLoopEnd = LittleEndian(smphdr->loopEnd);
-			Samples[iSmp].nC5Speed = LittleEndianW(smphdr->c2freq);
+			PSM16SampleHeader sampleHeader;
+			if(!sampleChunk.ReadConvertEndianness(sampleHeader))
+			{
+				break;
+			}
 			
-			// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF! Why on earth would you want to use both systems at the same time?
-			FrequencyToTranspose(&Samples[iSmp]);
-			Samples[iSmp].nC5Speed = TransposeToFrequency(Samples[iSmp].RelativeTone + (smphdr->finetune >> 4) - 7, MOD2XMFineTune(smphdr->finetune & 0x0F));
+			SAMPLEINDEX smp = sampleHeader.sampleNumber;
+			m_nSamples = max(m_nSamples, smp);
 
-			Samples[iSmp].nVolume = smphdr->volume << 2;
-			Samples[iSmp].nGlobalVol = 256;
-
-			UINT sampleFormat = RS_PCM8S;
-			if(smphdr->flags & 0x04) // 16-Bit
-			{
-				Samples[iSmp].uFlags |= CHN_16BIT;
-				Samples[iSmp].nLength >>= 1;
-				sampleFormat = RS_PCM16S;
-			}
-			if(smphdr->flags & 0x08) // Signed/Unsigned
-			{
-				if(Samples[iSmp].uFlags & CHN_16BIT)
-					sampleFormat = RS_PCM16U;
-				else
-					sampleFormat = RS_PCM8U;
-			}
-			if(smphdr->flags & 0x10) // Delta/Raw
-			{
-				if(Samples[iSmp].uFlags & CHN_16BIT)
-					sampleFormat = RS_PCM16D;
-				else
-					sampleFormat = RS_PCM8D;
-			}
-			if(smphdr->flags & 0x20) // Bidi Loop
-			{
-				Samples[iSmp].uFlags |= CHN_PINGPONGLOOP;
-			}
-			if(smphdr->flags & 0x80) // Loop
-			{
-				Samples[iSmp].uFlags |= CHN_LOOP;
-			}
-			if((smphdr->flags & 0x7F) == 0)
-				sampleFormat = RS_PCM8D;
-
-			ReadSample(&Samples[iSmp], sampleFormat, reinterpret_cast<LPCSTR>(lpStream + LittleEndianW(smphdr->offset)), dwMemLength - LittleEndianW(smphdr->offset));
-
-			iSmpCount++;
+			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.name);
+			sampleHeader.ConvertToMPT(Samples[smp]);
+			
+			file.Seek(sampleHeader.offset);
+			ReadSample(&Samples[smp], sampleHeader.GetSampleFormat(), file);
 		}
 	}
 
 	// Read patterns
-	dwMemPos = LittleEndian(shdr->patOffset);
-	ASSERT_CAN_READ(LittleEndian(shdr->patSize));
-	if(LittleEndian(shdr->patOffset) > 4 && *(uint32 *)(lpStream + dwMemPos - 4) == LittleEndian(PSM16_PPAT)) // PPAT
+	if(fileHeader.patOffset > 4 && file.Seek(fileHeader.patOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPPAT)
 	{
-		DWORD dwPatEndPos = LittleEndian(shdr->patOffset) + LittleEndian(shdr->patSize);
-
-		for(PATTERNINDEX nPat = 0; nPat < LittleEndianW(shdr->numPatterns); nPat++)
+		for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 		{
-			ASSERT_CAN_READ(sizeof(PSM16PATHEADER));
-			PSM16PATHEADER *phdr = (PSM16PATHEADER *)(lpStream + dwMemPos);
-			ASSERT_CAN_READ(LittleEndianW(phdr->size));
-
-			DWORD dwNextPattern = dwMemPos + ((LittleEndianW(phdr->size) + 15) & ~15);
-			dwMemPos += sizeof(PSM16PATHEADER);
-
-			if(Patterns.Insert(nPat, phdr->numRows))
+			PSM16PatternHeader patternHeader;
+			if(!file.ReadConvertEndianness(patternHeader))
+			{
 				break;
+			}
+
+			if(patternHeader.size < sizeof(PSM16PatternHeader))
+			{
+				continue;
+			}
+
+			// Patterns are padded to 16 Bytes
+			FileReader patternChunk = file.GetChunk(((patternHeader.size + 15) & ~15) - sizeof(PSM16PatternHeader));
+
+			if(Patterns.Insert(pat, patternHeader.numRows))
+			{
+				continue;
+			}
+
+			enum
+			{
+				channelMask	= 0x1F,
+				noteFlag	= 0x80,
+				volFlag		= 0x40,
+				effectFlag	= 0x20,
+			};
 
 			ROWINDEX curRow = 0;
 
-			while(dwMemPos < dwNextPattern && curRow < phdr->numRows)
+			while(patternChunk.BytesLeft() && curRow < patternHeader.numRows)
 			{
-				ASSERT_CAN_READ(1);
-				uint8 bChnFlag = lpStream[dwMemPos++];
-				if(bChnFlag == 0)
+				uint8 chnFlag = patternChunk.ReadUint8();
+				if(chnFlag == 0)
 				{
 					curRow++;
 					continue;
 				}
 
-				ModCommand *rowData = Patterns[nPat].GetpModCommand(curRow, min(bChnFlag & 0x1F, m_nChannels - 1));
+				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, min(chnFlag & channelMask, m_nChannels - 1));
 
-				if(bChnFlag & 0x80)
+				if(chnFlag & noteFlag)
 				{
 					// note + instr present
-					ASSERT_CAN_READ(2);
-					rowData->note = lpStream[dwMemPos++] + 36;
-					rowData->instr = lpStream[dwMemPos++];
+					m.note = patternChunk.ReadUint8() + 36;
+					m.instr = patternChunk.ReadUint8();
 				}
-				if(bChnFlag & 0x40)
+				if(chnFlag & volFlag)
 				{
 					// volume present
-					ASSERT_CAN_READ(1);
-					rowData->volcmd = VOLCMD_VOLUME;
-					rowData->vol = lpStream[dwMemPos++];
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = patternChunk.ReadUint8();
 				}
-				if(bChnFlag & 0x20)
+				if(chnFlag & effectFlag)
 				{
 					// effect present - convert
-					ASSERT_CAN_READ(2);
-					BYTE command = lpStream[dwMemPos++], param = lpStream[dwMemPos++];
+					m.command = patternChunk.ReadUint8();
+					m.param = patternChunk.ReadUint8();
 
-					switch(command)
+					switch(m.command)
 					{
 					// Volslides
 					case 0x01: // fine volslide up
-						command = CMD_VOLUMESLIDE;
-						param = (param << 4) | 0x0F;
+						m.command = CMD_VOLUMESLIDE;
+						m.param = (m.param << 4) | 0x0F;
 						break;
 					case 0x02: // volslide up
-						command = CMD_VOLUMESLIDE;
-						param = (param << 4) & 0xF0;
+						m.command = CMD_VOLUMESLIDE;
+						m.param = (m.param << 4) & 0xF0;
 						break;
 					case 0x03: // fine voslide down
-						command = CMD_VOLUMESLIDE;
-						param = 0xF0 | param;
+						m.command = CMD_VOLUMESLIDE;
+						m.param = 0xF0 | m.param;
 						break;
 					case 0x04: // volslide down
-						command = CMD_VOLUMESLIDE;
-						param = param & 0x0F;
+						m.command = CMD_VOLUMESLIDE;
+						m.param = m.param & 0x0F;
 						break;
 
 					// Portamento
 					case 0x0A: // fine portamento up
-						command = CMD_PORTAMENTOUP;
-						param |= 0xF0;
+						m.command = CMD_PORTAMENTOUP;
+						m.param |= 0xF0;
 						break;
 					case 0x0B: // portamento down
-						command = CMD_PORTAMENTOUP;
+						m.command = CMD_PORTAMENTOUP;
 						break;
 					case 0x0C: // fine portamento down
-						command = CMD_PORTAMENTODOWN;
-						param |= 0xF0;
+						m.command = CMD_PORTAMENTODOWN;
+						m.param |= 0xF0;
 						break;
 					case 0x0D: // portamento down
-						command = CMD_PORTAMENTODOWN;
+						m.command = CMD_PORTAMENTODOWN;
 						break;
 					case 0x0E: // tone portamento
-						command = CMD_TONEPORTAMENTO;
+						m.command = CMD_TONEPORTAMENTO;
 						break;
 					case 0x0F: // glissando control
-						command = CMD_S3MCMDEX;
-						param |= 0x10;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0x10;
 						break;
 					case 0x10: // tone portamento + volslide up
-						command = CMD_TONEPORTAVOL;
-						param <<= 4;
+						m.command = CMD_TONEPORTAVOL;
+						m.param <<= 4;
 						break;
 					case 0x11: // tone portamento + volslide down
-						command = CMD_TONEPORTAVOL;
-						param &= 0x0F;
+						m.command = CMD_TONEPORTAVOL;
+						m.param &= 0x0F;
 						break;
 
 					// Vibrato
 					case 0x14: // vibrato
-						command = CMD_VIBRATO;
+						m.command = CMD_VIBRATO;
 						break;
 					case 0x15: // vibrato waveform
-						command = CMD_S3MCMDEX;
-						param |= 0x30;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0x30;
 						break;
 					case 0x16: // vibrato + volslide up
-						command = CMD_VIBRATOVOL;
-						param <<= 4;
+						m.command = CMD_VIBRATOVOL;
+						m.param <<= 4;
 						break;
 					case 0x17: // vibrato + volslide down
-						command = CMD_VIBRATOVOL;
-						param &= 0x0F;
+						m.command = CMD_VIBRATOVOL;
+						m.param &= 0x0F;
 						break;
 
 					// Tremolo
 					case 0x1E: // tremolo
-						command = CMD_TREMOLO;
+						m.command = CMD_TREMOLO;
 						break;
 					case 0x1F: // tremolo waveform
-						command = CMD_S3MCMDEX;
-						param |= 0x40;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0x40;
 						break;
 
 					// Sample commands
 					case 0x28: // 3-byte offset - we only support the middle byte.
-						ASSERT_CAN_READ(2);
-						command = CMD_OFFSET;
-						param = lpStream[dwMemPos++];
-						dwMemPos++;
+						m.command = CMD_OFFSET;
+						m.param = patternChunk.ReadUint8();
+						patternChunk.Skip(1);
 						break;
 					case 0x29: // retrigger
-						command = CMD_RETRIG;
-						param &= 0x0F;
+						m.command = CMD_RETRIG;
+						m.param &= 0x0F;
 						break;
 					case 0x2A: // note cut
-						command = CMD_S3MCMDEX;
-						if(param == 0)	// in S3M mode, SC0 is ignored, so we convert it to a note cut.
+						m.command = CMD_S3MCMDEX;
+						if(m.param == 0)	// in S3M mode, SC0 is ignored, so we convert it to a note cut.
 						{
-							if(rowData->note == NOTE_NONE)
+							if(m.note == NOTE_NONE)
 							{
-								rowData->note = NOTE_NOTECUT;
-								command = CMD_NONE;
+								m.note = NOTE_NOTECUT;
+								m.command = CMD_NONE;
 							} else
 							{
-								param = 1;
+								m.param = 1;
 							}
 						}
-						param |= 0xC0;
+						m.param |= 0xC0;
 						break;
 					case 0x2B: // note delay
-						command = CMD_S3MCMDEX;
-						param |= 0xD0;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0xD0;
 						break;
 
 					// Position change
 					case 0x32: // position jump
-						command = CMD_POSITIONJUMP;
+						m.command = CMD_POSITIONJUMP;
 						break;
 					case 0x33: // pattern break
-						command = CMD_PATTERNBREAK;
+						m.command = CMD_PATTERNBREAK;
 						break;
 					case 0x34: // loop pattern
-						command = CMD_S3MCMDEX;
-						param |= 0xB0;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0xB0;
 						break;
 					case 0x35: // pattern delay
-						command = CMD_S3MCMDEX;
-						param |= 0xE0;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0xE0;
 						break;
 
 					// speed change
 					case 0x3C: // set speed
-						command = CMD_SPEED;
+						m.command = CMD_SPEED;
 						break;
 					case 0x3D: // set tempo
-						command = CMD_TEMPO;
+						m.command = CMD_TEMPO;
 						break;
 
 					// misc commands
 					case 0x46: // arpeggio
-						command = CMD_ARPEGGIO;
+						m.command = CMD_ARPEGGIO;
 						break;
 					case 0x47: // set finetune
-						command = CMD_S3MCMDEX;
-						param |= 0x20;
+						m.command = CMD_S3MCMDEX;
+						m.param |= 0x20;
 						break;
 					case 0x48: // set balance (panning?)
-						command = CMD_PANNING8;
-						param = (param << 4) + 8;
+						m.command = CMD_PANNING8;
+						m.param = (m.param << 4) + 8;
 						break;
 
 					default:
-						command = CMD_NONE;
+						m.command = CMD_NONE;
 						break;
 					}
-
-					rowData->command = command;
-					rowData->param = param;
 				}
 			}
 			// Pattern break for short patterns (so saving the modules as S3M won't break it)
-			if(phdr->numRows != 64)
-				TryWriteEffect(nPat, phdr->numRows - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
-
-			dwMemPos = dwNextPattern;
-			if(dwMemPos > dwPatEndPos) break;
+			if(patternHeader.numRows != 64)
+			{
+				TryWriteEffect(pat, patternHeader.numRows - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+			}
 		}
 	}
 
