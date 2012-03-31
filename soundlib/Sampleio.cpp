@@ -724,7 +724,7 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	fwrite(softwareId, 1, list.list_len, f);
 
 	// "xtra" field
-	extra.xtra_id = IFFID_xtra;
+	extra.xtra_id = LittleEndian(IFFID_xtra);
 	extra.xtra_len = LittleEndian(sizeof(extra) - 8);
 
 	extra.dwFlags = LittleEndian(pSmp->uFlags);

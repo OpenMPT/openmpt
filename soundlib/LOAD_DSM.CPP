@@ -110,7 +110,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nDefaultGlobalVolume = psong->globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME)) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = psong->mastervol & 0x7F;
-	Order.ReadAsByte(psong->orders, psong->numord, sizeof(psong->orders));
+	Order.ReadFromArray(psong->orders, psong->numord);
 
 	for (UINT iPan=0; iPan<16; iPan++)
 	{
@@ -199,7 +199,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						}
 						m[ch].command = (BYTE)command;
 						m[ch].param = (BYTE)param;
-						if (command) ConvertModCommand(&m[ch]);
+						if (command) ConvertModCommand(m[ch]);
 					}
 				} else
 				{

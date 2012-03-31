@@ -15,26 +15,38 @@
 #include "../mptrack/Mptrack.h"
 #endif // MODPLUG_TRACKER
 
-// decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
+#ifndef NO_MO3_SUPPORT
+
+// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
 // IN: data/len = MO3 data/len
 // OUT: data/len = decoded data/len (if successful)
-typedef int (WINAPI * UNMO3_DECODE)(void **data, int *len);
-// free the data returned by UNMO3_Decode
-typedef void (WINAPI * UNMO3_FREE)(void *data);
+typedef int (WINAPI * UNMO3_DECODE)(const void **data, int *len);
+// Free the data returned by UNMO3_Decode
+typedef void (WINAPI * UNMO3_FREE)(const void *data);
 
+#endif // NO_MO3_SUPPORT
 
-bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------
+bool CSoundFile::ReadMO3(FileReader &file)
+//----------------------------------------
 {
-	// no valid MO3 file (magic bytes: "MO3")
-	if(dwMemLength < 4 || lpStream[0] != 'M' || lpStream[1] != 'O' || lpStream[2] != '3')
+	file.Rewind();
+	const void *stream = file.GetRawData();
+	int length = file.GetLength();
+
+	// No valid MO3 file (magic bytes: "MO3")
+	if(file.GetLength() < 8 || !file.ReadMagic("MO3"))
+	{
 		return false;
+	}
 
 #ifdef NO_MO3_SUPPORT
-	/* As of August 2010, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
-	so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
-	(avoid log entry with .MOD files that have a song name starting with "MO3" */
-	if(lpStream[3] > 31) return false;
+	// As of April 2012, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
+	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
+	// (avoid log entry with .MOD files that have a song name starting with "MO3".
+	if(file.ReadUint8() > 31)
+	{
+		return false;
+	}
 
 #ifdef MODPLUG_TRACKER
 	if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(_TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
@@ -42,10 +54,8 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 	return false;
 
 #else
-	bool bResult = false; // result of trying to load the module, false == fail.
 
-	int iLen = static_cast<int>(dwMemLength);
-	void **mo3Stream = (void **)&lpStream;
+	bool result = false;	// Result of trying to load the module, false == fail.
 
 	// try to load unmo3.dll dynamically.
 #ifdef MODPLUG_TRACKER
@@ -56,7 +66,7 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 #else
 	HMODULE unmo3 = LoadLibrary(_TEXT("unmo3.dll"));
 #endif // MODPLUG_TRACKER
-	if(unmo3 == NULL) // Didn't succeed.
+	if(unmo3 == nullptr) // Didn't succeed.
 	{
 #ifdef MODPLUG_TRACKER
 		if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")));
@@ -67,30 +77,28 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)GetProcAddress(unmo3, "UNMO3_Decode");
 		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, "UNMO3_Free");
 
-		if(UNMO3_Decode != NULL && UNMO3_Free != NULL)
+		if(UNMO3_Decode != nullptr && UNMO3_Free != nullptr)
 		{
-			if(UNMO3_Decode(mo3Stream, &iLen) == 0)
+			if(UNMO3_Decode(&stream, &length) == 0)
 			{
-				/* if decoding was successful, mo3Stream and iLen will keep the new
-				   pointers now. */
+				// If decoding was successful, stream and length will keep the new pointers now.
 				
-				if(iLen > 0)
+				if(length > 0)
 				{
-					bResult = true;
-					if ((!ReadXM((const BYTE *)*mo3Stream, (DWORD)iLen))
-						&& (!ReadIT((const BYTE *)*mo3Stream, (DWORD)iLen))
-						&& (!ReadS3M((const BYTE *)*mo3Stream, (DWORD)iLen))
-#ifndef FASTSOUNDLIB
-						&& (!ReadMTM((const BYTE *)*mo3Stream, (DWORD)iLen))
-#endif // FASTSOUNDLIB
-						&& (!ReadMod((const BYTE *)*mo3Stream, (DWORD)iLen))) bResult = false;
+					FileReader unpackedFile(static_cast<const char*>(stream), length);
+
+					result = ReadXM(static_cast<const LPCBYTE>(stream), length)
+						|| ReadIT(static_cast<const LPCBYTE>(stream), length)
+						|| ReadS3M(static_cast<const LPCBYTE>(stream), length)
+						|| ReadMTM(static_cast<const LPCBYTE>(stream), length)
+						|| ReadMod(unpackedFile);
 				}
 				
-				UNMO3_Free(*mo3Stream);
+				UNMO3_Free(stream);
 			}
 		}
 		FreeLibrary(unmo3);
 	}
-	return bResult;
+	return result;
 #endif // NO_MO3_SUPPORT
 }

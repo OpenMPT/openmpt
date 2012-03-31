@@ -216,7 +216,7 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 					}
 					if (p->note == 97) p->note = NOTE_KEYOFF;
 					else if ((p->note) && (p->note < 97)) p->note += 12;
-					if (p->command | p->param) sndFile.ConvertModCommand(p);
+					if (p->command | p->param) sndFile.ConvertModCommand(*p);
 					if (p->instr == 0xff) p->instr = 0;
 					if ((vol >= 0x10) && (vol <= 0x50))
 					{
@@ -707,14 +707,14 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			// Don't write more than 32 channels
 			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
 
-			UINT note = p->note;
-			UINT param = ModSaveCommand(p, true, compatibilityExport);
-			UINT command = param >> 8;
-			param &= 0xFF;
+			uint8 note = p->note;
+			uint8 command = p->command, param = p->param;
+			ModSaveCommand(command, param, true, compatibilityExport);
+
 			if (note >= NOTE_MIN_SPECIAL) note = 97; else
 			if ((note <= 12) || (note > 96+12)) note = 0; else
 			note -= 12;
-			UINT vol = 0;
+			uint8 vol = 0;
 			if (p->volcmd)
 			{
 				switch(p->volcmd)

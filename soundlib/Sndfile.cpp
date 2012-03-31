@@ -614,46 +614,50 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 		FileReader file(reinterpret_cast<const char*>(lpStream), dwMemLength);
 
-		if ((!ReadXM(lpStream, dwMemLength))
+		if(!ReadXM(lpStream, dwMemLength)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		 && (!ReadITProject(lpStream, dwMemLength))
+		 && !ReadITProject(lpStream, dwMemLength)
 // -! NEW_FEATURE#0023
-		 && (!ReadIT(lpStream, dwMemLength))
-		 /*&& (!ReadMPT(lpStream, dwMemLength))*/
-		 && (!ReadS3M(lpStream, dwMemLength))
-		 && (!ReadWav(lpStream, dwMemLength))
+		 && !ReadIT(lpStream, dwMemLength)
+		 /*&& !ReadMPT(lpStream, dwMemLength)*/
+		 && !ReadS3M(lpStream, dwMemLength)
+		 && !ReadWav(lpStream, dwMemLength)
 #ifndef MODPLUG_BASIC_SUPPORT
-		 && (!ReadSTM(lpStream, dwMemLength))
-		 && (!ReadMed(lpStream, dwMemLength))
+		 && !ReadSTM(lpStream, dwMemLength)
+		 && !ReadMed(lpStream, dwMemLength)
 #ifndef FASTSOUNDLIB
-		 && (!ReadMTM(lpStream, dwMemLength))
-		 && (!ReadMDL(lpStream, dwMemLength))
-		 && (!ReadDBM(lpStream, dwMemLength))
-		 && (!Read669(file))
-		 && (!ReadFAR(lpStream, dwMemLength))
-		 && (!ReadAMS(lpStream, dwMemLength))
-		 && (!ReadOKT(file))
-		 && (!ReadPTM(lpStream, dwMemLength))
-		 && (!ReadUlt(lpStream, dwMemLength))
-		 && (!ReadDMF(lpStream, dwMemLength))
-		 && (!ReadDSM(lpStream, dwMemLength))
-		 && (!ReadUMX(file))
-		 && (!ReadAMF(lpStream, dwMemLength))
-		 && (!ReadPSM(file))
-		 && (!ReadPSM16(file))
-		 && (!ReadMT2(lpStream, dwMemLength))
+		 && !ReadMTM(lpStream, dwMemLength)
+		 && !ReadMDL(lpStream, dwMemLength)
+		 && !ReadDBM(lpStream, dwMemLength)
+		 && !Read669(file)
+		 && !ReadFAR(lpStream, dwMemLength)
+		 && !ReadAMS(lpStream, dwMemLength)
+		 && !ReadOKT(file)
+		 && !ReadPTM(lpStream, dwMemLength)
+		 && !ReadUlt(lpStream, dwMemLength)
+		 && !ReadDMF(lpStream, dwMemLength)
+		 && !ReadDSM(lpStream, dwMemLength)
+		 && !ReadUMX(file)
+		 && !ReadAMF(lpStream, dwMemLength)
+		 && !ReadPSM(file)
+		 && !ReadPSM16(file)
+		 && !ReadMT2(lpStream, dwMemLength)
 #ifdef MODPLUG_TRACKER
-		 && (!ReadMID(lpStream, dwMemLength))
+		 && !ReadMID(lpStream, dwMemLength)
 #endif // MODPLUG_TRACKER
 #endif
 #endif // MODPLUG_BASIC_SUPPORT
-		 && (!ReadGDM(file))
-		 && (!ReadIMF(lpStream, dwMemLength))
-		 && (!ReadAM(file))
-		 && (!ReadJ2B(file))
-		 && (!ReadMO3(lpStream, dwMemLength))
-		 && (!ReadMod(lpStream, dwMemLength))) m_nType = MOD_TYPE_NONE;
+		 && !ReadGDM(file)
+		 && !ReadIMF(lpStream, dwMemLength)
+		 && !ReadAM(file)
+		 && !ReadJ2B(file)
+		 && !ReadMO3(file)
+		 && !ReadMod(file))
+		{
+			m_nType = MOD_TYPE_NONE;
+		}
+
 #ifdef ZIPPED_MOD_SUPPORT
 		if ((!m_lpszSongComments) && (archive.GetComments(FALSE)))
 		{

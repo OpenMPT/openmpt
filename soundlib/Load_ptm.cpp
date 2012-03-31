@@ -93,7 +93,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nSamples = min(pfh.nsamples, MAX_SAMPLES - 1);
 	dwMemPos = sizeof(PTMFILEHEADER);
 	nOrders = (pfh.norders < MAX_ORDERS) ? pfh.norders : MAX_ORDERS-1;
-	Order.ReadAsByte(pfh.orders, nOrders, nOrders);
+	Order.ReadFromArray(pfh.orders, nOrders);
 
 	for (CHANNELINDEX ipan = 0; ipan < m_nChannels; ipan++)
 	{
@@ -168,7 +168,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 					m[nChn].param = lpStream[dwMemPos++];
 					if (m[nChn].command < 0x10)
 					{
-						ConvertModCommand(&m[nChn]);
+						ConvertModCommand(m[nChn]);
 						m[nChn].ExtendedMODtoS3MEffect();
 						// Note cut does just mute the sample, not cut it. We have to fix that, if possible.
 						if(m[nChn].command == CMD_S3MCMDEX && (m[nChn].param & 0xF0) == 0xC0 && m[nChn].volcmd == VOLCMD_NONE)

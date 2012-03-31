@@ -125,7 +125,7 @@ bool CSoundFile::Read669(FileReader &file)
 	ReadFixedLineLengthMessage(reinterpret_cast<const BYTE *>(fileHeader.songmessage), 108, 36, 0);
 
 	// Reading Orders
-	Order.ReadAsByte(fileHeader.orders, 128, 128);
+	Order.ReadFromArray(fileHeader.orders);
 	m_nRestartPos = fileHeader.restartpos;
 	if(Order[m_nRestartPos] >= fileHeader.patterns) m_nRestartPos = 0;
 

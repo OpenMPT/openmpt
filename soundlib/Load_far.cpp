@@ -116,7 +116,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	dwMemPos += sizeof(FARHEADER2);
 	if (dwMemPos >= dwMemLength) return true;
 
-	Order.ReadAsByte(pmh2->orders, pmh2->snglen, sizeof(pmh2->orders));
+	Order.ReadFromArray(pmh2->orders, pmh2->snglen);
 	m_nRestartPos = pmh2->loopto;
 	// Reading Patterns	
 	dwMemPos += headerlen - (869 + pmh1->stlen);

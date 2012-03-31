@@ -698,7 +698,7 @@ bool ModSequence::ReadAsByte(FileReader &file, size_t howMany)
 	{
 		return false;
 	}
-	ORDERINDEX readEntries = howMany;
+	ORDERINDEX readEntries = static_cast<ORDERINDEX>(howMany);
 	if(!(m_pSndFile->GetType() & MOD_TYPE_MPT))
 	{
 		LimitMax(readEntries, MAX_ORDERS);

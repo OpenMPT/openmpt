@@ -73,60 +73,54 @@ enum
 	S3I_TYPE_ADMEL = 2,
 };
 
-void CSoundFile::S3MConvert(ModCommand *m, bool bIT) const
+void CSoundFile::S3MConvert(ModCommand &m, bool fromIT) const
 //--------------------------------------------------------
 {
-	UINT command = m->command;
-	UINT param = m->param;
-	switch (command | 0x40)
+	switch (m.command | 0x40)
 	{
-	case 'A':	command = CMD_SPEED; break;
-	case 'B':	command = CMD_POSITIONJUMP; break;
-	case 'C':	command = CMD_PATTERNBREAK; if (!bIT) param = (param >> 4) * 10 + (param & 0x0F); break;
-	case 'D':	command = CMD_VOLUMESLIDE; break;
-	case 'E':	command = CMD_PORTAMENTODOWN; break;
-	case 'F':	command = CMD_PORTAMENTOUP; break;
-	case 'G':	command = CMD_TONEPORTAMENTO; break;
-	case 'H':	command = CMD_VIBRATO; break;
-	case 'I':	command = CMD_TREMOR; break;
-	case 'J':	command = CMD_ARPEGGIO; break;
-	case 'K':	command = CMD_VIBRATOVOL; break;
-	case 'L':	command = CMD_TONEPORTAVOL; break;
-	case 'M':	command = CMD_CHANNELVOLUME; break;
-	case 'N':	command = CMD_CHANNELVOLSLIDE; break;
-	case 'O':	command = CMD_OFFSET; break;
-	case 'P':	command = CMD_PANNINGSLIDE; break;
-	case 'Q':	command = CMD_RETRIG; break;
-	case 'R':	command = CMD_TREMOLO; break;
-	case 'S':	command = CMD_S3MCMDEX; break;
-	case 'T':	command = CMD_TEMPO; break;
-	case 'U':	command = CMD_FINEVIBRATO; break;
-	case 'V':	command = CMD_GLOBALVOLUME; break;
-	case 'W':	command = CMD_GLOBALVOLSLIDE; break;
-	case 'X':	command = CMD_PANNING8; break;
-	case 'Y':	command = CMD_PANBRELLO; break;
-	case 'Z':	command = CMD_MIDI; break;
-	case '\\':	command = bIT ? CMD_SMOOTHMIDI : CMD_MIDI; break; //rewbs.smoothVST
+	case 'A':	m.command = CMD_SPEED; break;
+	case 'B':	m.command = CMD_POSITIONJUMP; break;
+	case 'C':	m.command = CMD_PATTERNBREAK; if (!fromIT) m.param = (m.param >> 4) * 10 + (m.param & 0x0F); break;
+	case 'D':	m.command = CMD_VOLUMESLIDE; break;
+	case 'E':	m.command = CMD_PORTAMENTODOWN; break;
+	case 'F':	m.command = CMD_PORTAMENTOUP; break;
+	case 'G':	m.command = CMD_TONEPORTAMENTO; break;
+	case 'H':	m.command = CMD_VIBRATO; break;
+	case 'I':	m.command = CMD_TREMOR; break;
+	case 'J':	m.command = CMD_ARPEGGIO; break;
+	case 'K':	m.command = CMD_VIBRATOVOL; break;
+	case 'L':	m.command = CMD_TONEPORTAVOL; break;
+	case 'M':	m.command = CMD_CHANNELVOLUME; break;
+	case 'N':	m.command = CMD_CHANNELVOLSLIDE; break;
+	case 'O':	m.command = CMD_OFFSET; break;
+	case 'P':	m.command = CMD_PANNINGSLIDE; break;
+	case 'Q':	m.command = CMD_RETRIG; break;
+	case 'R':	m.command = CMD_TREMOLO; break;
+	case 'S':	m.command = CMD_S3MCMDEX; break;
+	case 'T':	m.command = CMD_TEMPO; break;
+	case 'U':	m.command = CMD_FINEVIBRATO; break;
+	case 'V':	m.command = CMD_GLOBALVOLUME; break;
+	case 'W':	m.command = CMD_GLOBALVOLSLIDE; break;
+	case 'X':	m.command = CMD_PANNING8; break;
+	case 'Y':	m.command = CMD_PANBRELLO; break;
+	case 'Z':	m.command = CMD_MIDI; break;
+	case '\\':	m.command = fromIT ? CMD_SMOOTHMIDI : CMD_MIDI; break; //rewbs.smoothVST
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
-	case ']':	command = CMD_DELAYCUT; break;
-	case '[':	command = CMD_XPARAM; break;
-	default:	command = 0;
+	case ']':	m.command = CMD_DELAYCUT; break;
+	case '[':	m.command = CMD_XPARAM; break;
+	default:	m.command = 0;
 	}
-	m->command = command;
-	m->param = param;
 }
 
 
-void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport) const
-//------------------------------------------------------------------------------------------------
+void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport) const
+//------------------------------------------------------------------------------------------------------
 {
-	UINT command = *pcmd;
-	UINT param = *pprm;
 	switch(command)
 	{
 	case CMD_SPEED:				command = 'A'; break;
 	case CMD_POSITIONJUMP:		command = 'B'; break;
-	case CMD_PATTERNBREAK:		command = 'C'; if (!bIT) param = ((param / 10) << 4) + (param % 10); break;
+	case CMD_PATTERNBREAK:		command = 'C'; if (!toIT) param = ((param / 10) << 4) + (param % 10); break;
 	case CMD_VOLUMESLIDE:		command = 'D'; break;
 	case CMD_PORTAMENTODOWN:	command = 'E'; if ((param >= 0xE0) && (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))) param = 0xDF; break;
 	case CMD_PORTAMENTOUP:		command = 'F'; if ((param >= 0xE0) && (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))) param = 0xDF; break;
@@ -149,13 +143,13 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 	case CMD_GLOBALVOLSLIDE:	command = 'W'; break;
 	case CMD_PANNING8:			
 		command = 'X';
-		if (bIT && !(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+		if (toIT && !(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
 		{
 			if (param == 0xA4) { command = 'S'; param = 0x91; }	else
 			if (param <= 0x80) { param <<= 1; if (param > 255) param = 255; } else
 			command = param = 0;
 		} else
-		if (!bIT && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+		if (!toIT && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
 		{
 			param >>= 1;
 		}
@@ -163,7 +157,7 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 	case CMD_PANBRELLO:			command = 'Y'; break;
 	case CMD_MIDI:				command = 'Z'; break;
 	case CMD_SMOOTHMIDI:  //rewbs.smoothVST
-		if(bCompatibilityExport || !bIT)
+		if(compatibilityExport || !toIT)
 			command = 'Z';
 		else
 			command = '\\';
@@ -196,22 +190,22 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 		break;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.	
 	case CMD_DELAYCUT: 
-		if(bCompatibilityExport || !bIT)
+		if(compatibilityExport || !toIT)
 			command = param = 0;
 		else
 			command = ']';
 		break;
 	case CMD_XPARAM:
-		if(bCompatibilityExport || !bIT)
+		if(compatibilityExport || !toIT)
 			command = param = 0;
 		else
 			command = '[';
 		break;
-	default:	command = param = 0;
+	default:
+		command = param = 0;
 	}
+
 	command &= ~0x40;
-	*pcmd = command;
-	*pprm = param;
 }
 
 
@@ -489,7 +483,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 						if(j + nInd + 2 >= dwMemLength) break;
 						m->command = src[j++];
 						m->param = src[j++];
-						if (m->command) S3MConvert(m, false);
+						if (m->command) S3MConvert(*m, false);
 						if(m->command == CMD_MIDI)
 						{
 							if(m->param > 0x0F)
@@ -675,11 +669,11 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName)
 				{
 					UINT b = j;
 					ModCommand *m = &p[row*m_nChannels+j];
-					UINT note = m->note;
-					UINT volcmd = m->volcmd;
-					UINT vol = m->vol;
-					UINT command = m->command;
-					UINT param = m->param;
+					uint8 note = m->note;
+					ModCommand::VOLCMD volcmd = m->volcmd;
+					uint8 vol = m->vol;
+					uint8 command = m->command;
+					uint8 param = m->param;
 
 					if ((note) || (m->instr)) b |= 0x20;
 
@@ -699,7 +693,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName)
 					if (volcmd == VOLCMD_PANNING) { vol |= 0x80; b |= 0x40; }
 					if (command)
 					{
-						S3MSaveConvert(&command, &param, false, true);
+						S3MSaveConvert(command, param, false, true);
 						if (command) b |= 0x80;
 					}
 					if (b & 0xE0)
