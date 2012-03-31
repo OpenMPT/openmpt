@@ -50,6 +50,7 @@ PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
 bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 //---------------------------------------------------------------------------
 {
+	ASSERT(rows != 0);
 	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
 	if(index >= specs.patternsMax || index > m_Patterns.size() || rows > specs.patternRowsMax)
 		return true;

@@ -632,7 +632,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		UINT nbo = BigEndianW(pmsh->songlen);
 		if (nbo >= MAX_ORDERS) nbo = MAX_ORDERS-1;
 		if (!nbo) nbo = 1;
-		Order.ReadAsByte(pmsh->playseq, nbo, nbo);
+		Order.ReadFromArray(pmsh->playseq, nbo);
 		playtransp = pmsh->playtransp;
 	} else
 	{

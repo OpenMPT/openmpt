@@ -364,7 +364,7 @@ public:
 	// Module Loaders
 	bool ReadXM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadS3M(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadMod(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMod(FileReader &file);
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadSTM(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -388,7 +388,7 @@ public:
 	bool ReadPSM(FileReader &file);
 	bool ReadPSM16(FileReader &file);
 	bool ReadUMX(FileReader &file);
-	bool ReadMO3(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMO3(FileReader &file);
 	bool ReadGDM(FileReader &file);
 	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadAM(FileReader &file);
@@ -422,10 +422,10 @@ public:
 
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
-	void ConvertModCommand(ModCommand *) const;
-	void S3MConvert(ModCommand *m, bool bIT) const;
-	void S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport = false) const;
-	WORD ModSaveCommand(const ModCommand *m, const bool bXM, const bool bCompatibilityExport = false) const;
+	void ConvertModCommand(ModCommand &m) const;
+	void S3MConvert(ModCommand &m, bool fromIT) const;
+	void S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport = false) const;
+	void ModSaveCommand(uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
 	
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 

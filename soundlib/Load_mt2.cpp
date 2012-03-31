@@ -2,7 +2,7 @@
  * Load_mt2.cpp
  * ------------
  * Purpose: MT2 (MadTracker 2) module loader
- * Notes  : Plugins are currently not imported.
+ * Notes  : Plugins are currently not imported. Better rewrite this crap.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -182,7 +182,7 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 		{
 			m->command = p->fxparam2;
 			m->param = p->fxparam1;
-			that->ConvertModCommand(m);
+			that->ConvertModCommand(*m);
 			m->ExtendedMODtoS3MEffect();
 		} else
 		{
@@ -212,7 +212,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nRestartPos = pfh->wRestart;
 	m_nDefaultSpeed = pfh->bTicksPerLine;
 	m_nDefaultTempo = 125;
-	m_dwSongFlags = SONG_ITCOMPATGXX;
+	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_EXFILTERRANGE;
 	m_nDefaultRowsPerBeat = pfh->bLinesPerBeat;
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
 	if ((pfh->wSamplesPerTick > 100) && (pfh->wSamplesPerTick < 5000))
@@ -424,7 +424,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	#ifdef MT2DEBUG
 		if (iIns <= pfh->wInstruments) Log("  Instrument #%d at offset %04X: %d bytes\n", iIns, dwMemPos, pmi->dwDataLen);
 	#endif
-		if (((LONG)pmi->dwDataLen > 0) && (dwMemPos <= dwMemLength - 40) && (pmi->dwDataLen <= dwMemLength - (dwMemPos + 40)))
+		if (((int)pmi->dwDataLen > 0) && (dwMemPos <= dwMemLength - 40) && (pmi->dwDataLen <= dwMemLength - (dwMemPos + 40)))
 		{
 			InstrMap[iIns-1] = pmi;
 			if (pIns)
@@ -435,6 +435,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				pIns->nDNA = (pmi->wNNA>>12) & 3;
 				MT2ENVELOPE *pehdr[4];
 				WORD *pedata[4];
+
 				if (pfh->wVersion <= 0x201)
 				{
 					DWORD dwEnvPos = dwMemPos + sizeof(MT2INSTRUMENT) - 4;

@@ -238,7 +238,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				#endif
 					p->command = 0;
 				}
-				ConvertModCommand(p);
+				ConvertModCommand(*p);
 				pin += 4;
 				p++;
 			}

@@ -251,7 +251,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 						{
 							m[ch].command = cmd;
 							m[ch].param = b2;
-							ConvertModCommand(&m[ch]);
+							ConvertModCommand(m[ch]);
 						}
 					}
 				}

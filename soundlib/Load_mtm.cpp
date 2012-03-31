@@ -129,7 +129,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 				m->param = param;
 				if ((cmd) || (param))
 				{
-					ConvertModCommand(m);
+					ConvertModCommand(*m);
 					m->Convert(MOD_TYPE_MOD, MOD_TYPE_S3M);
 				}
 			}

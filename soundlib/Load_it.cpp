@@ -955,7 +955,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					{
 						m[ch].command = cmd;
 						m[ch].param = param;
-						S3MConvert(&m[ch], true);
+						S3MConvert(m[ch], true);
 						lastvalue[ch].command = m[ch].command;
 						lastvalue[ch].param = m[ch].param;
 					}
@@ -1382,17 +1382,17 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 				}
 
 				BYTE b = 0;
-				UINT command = m->command;
-				UINT param = m->param;
-				UINT vol = 0xFF;
-				UINT note = m->note;
-				if (note) b |= 1;
-				if ((note) && (note < NOTE_MIN_SPECIAL)) note--;
+				uint8 command = m->command;
+				uint8 param = m->param;
+				uint8 vol = 0xFF;
+				uint8 note = m->note;
+				if (note != NOTE_NONE) b |= 1;
+				if (m->IsNote()) note--;
 				if (note == NOTE_FADE && GetType() != MOD_TYPE_MPT) note = 0xF6;
 				if (m->instr) b |= 2;
 				if (m->volcmd)
 				{
-					UINT volcmd = m->volcmd;
+					uint8 volcmd = m->volcmd;
 					switch(volcmd)
 					{
 					case VOLCMD_VOLUME:			vol = m->vol; if (vol > 64) vol = 64; break;
@@ -1423,7 +1423,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 				if (vol != 0xFF) b |= 4;
 				if (command)
 				{
-					S3MSaveConvert(&command, &param, true, compatibilityExport);
+					S3MSaveConvert(command, param, true, compatibilityExport);
 					if (command) b |= 8;
 				}
 				// Packing information
