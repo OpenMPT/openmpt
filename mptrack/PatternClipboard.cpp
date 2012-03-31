@@ -13,7 +13,8 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 
-size_t PatternClipboard::clipboardSize = 0;
+// Currently just one slot for fall-back pasting.
+PatternClipboard::clipindex_t PatternClipboard::clipboardSize = 1;
 
 
 // Clipboard format:
@@ -22,8 +23,6 @@ size_t PatternClipboard::clipboardSize = 0;
 // Reset: '|...........'
 // Empty: '|           '
 // End of row: '\n'
-
-static LPCSTR lpszClipboardPatternHdr = "ModPlug Tracker %3s\r\n";
 
 CString PatternClipboard::GetFileExtension(const char *ext) const
 //---------------------------------------------------------------
@@ -43,8 +42,8 @@ CString PatternClipboard::GetFileExtension(const char *ext) const
 
 
 // Copy a pattern selection to both the system clipboard and the internal clipboard.
-bool PatternClipboard::Copy(PATTERNINDEX pattern, PatternRect selection)
-//----------------------------------------------------------------------
+bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
+//-------------------------------------------------------------------------------------------
 {
 	if(!sndFile.Patterns.IsValidPat(pattern))
 	{
@@ -202,34 +201,34 @@ bool PatternClipboard::Copy(PATTERNINDEX pattern, PatternRect selection)
 
 
 // Try pasting a pattern selection from the system clipboard.
-bool PatternClipboard::Paste(PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode)
-//------------------------------------------------------------------------------------------------
+bool PatternClipboard::Paste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode)
+//---------------------------------------------------------------------------------------------------------------------
 {
 	CString data;
-	if(!FromSystemClipboard(data))
+	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pattern, pastePos, mode, data))
 	{
-		return false;
+		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
+		return Paste(sndFile, pattern, pastePos, mode, 0);
 	}
-
-	return HandlePaste(pattern, pastePos, mode, data);
+	return true;
 }
 
 
 // Try pasting a pattern selection from an internal clipboard.
-bool PatternClipboard::Paste(PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, size_t internalClipboard)
-//--------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::Paste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, clipindex_t internalClipboard)
+//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(internalClipboard >= clipboards.size())
 	{
 		return false;
 	}
-	return HandlePaste(pattern, pastePos, mode, clipboards[internalClipboard].content);
+	return HandlePaste(sndFile, pattern, pastePos, mode, clipboards[internalClipboard].content);
 }
 
 
 // Perform the pasting operation.
-bool PatternClipboard::HandlePaste(PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, const CString &data)
-//---------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, const CString &data)
+//------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!sndFile.Patterns.IsValidPat(pattern) || sndFile.GetpModDoc() == nullptr)
 	{
@@ -349,7 +348,7 @@ bool PatternClipboard::HandlePaste(PATTERNINDEX pattern, const PatternCursor &pa
 				const ModCommand origModCmd = m[col];
 
 				// push channel data below paste point first.
-				if(mode == pm_pushforwardpaste)
+				if(mode == pmPushForward)
 				{
 					for(ROWINDEX nPushRow = sndFile.Patterns[pattern].GetNumRows() - 1 - curRow; nPushRow > 0; nPushRow--)
 					{
@@ -551,8 +550,8 @@ bool PatternClipboard::HandlePaste(PATTERNINDEX pattern, const PatternCursor &pa
 
 
 // Copy one of the internal clipboards to the system clipboard.
-bool PatternClipboard::SelectClipboard(size_t which)
-//--------------------------------------------------
+bool PatternClipboard::SelectClipboard(clipindex_t which)
+//-------------------------------------------------------
 {
 	activeClipboard = which;
 	return ToSystemClipboard(clipboards[activeClipboard]);
@@ -589,8 +588,8 @@ bool PatternClipboard::CycleBackward()
 
 
 // Set the maximum number of internal clipboards.
-void PatternClipboard::SetClipboardSize(size_t maxEntries)
-//--------------------------------------------------------
+void PatternClipboard::SetClipboardSize(clipindex_t maxEntries)
+//-------------------------------------------------------------
 {
 	clipboardSize = maxEntries;
 	RestrictClipboardSize();

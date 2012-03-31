@@ -13,6 +13,7 @@
 #include "dlg_misc.h"	// for keyboard control
 #include "Moddoc.h"		// for SplitKeyboardSettings
 #include "EffectInfo.h"
+#include "PatternCursor.h"
 
 
 /////////////////////////////////////////////////////////////////////////

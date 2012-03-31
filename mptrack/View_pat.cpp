@@ -45,7 +45,9 @@ FindReplaceStruct CViewPattern::m_findReplace =
 	PatternRect()
 };
 
+// Static initializers
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
+PatternClipboard CViewPattern::patternClipboard;
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -6214,7 +6216,7 @@ bool CViewPattern::CopyPattern(PATTERNINDEX nPattern, const PatternRect &selecti
 //---------------------------------------------------------------------------------
 {
 	BeginWaitCursor();
-	bool result = GetDocument()->GetPatternClipboard().Copy(nPattern, selection);
+	bool result = GetPatternClipboard().Copy(*GetSoundFile(), nPattern, selection);
 	EndWaitCursor();
 	return result;
 }
@@ -6225,7 +6227,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 //----------------------------------------------------------------------------------------------------------------------
 {
 	BeginWaitCursor();
-	bool result = GetDocument()->GetPatternClipboard().Paste(nPattern, pastePos, mode);
+	bool result = GetPatternClipboard().Paste(*GetSoundFile(), nPattern, pastePos, mode);
 	EndWaitCursor();
 
 	if(result)
