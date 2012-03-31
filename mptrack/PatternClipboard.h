@@ -44,34 +44,38 @@ public:
 		pmPushForward,
 	};
 
+	// Clipboard index type
+	typedef size_t clipindex_t;
+
 protected:
 
-	CSoundFile &sndFile;
-
-	static size_t clipboardSize;
-	size_t activeClipboard;
+	// Maximum number of internal clipboard entries
+	static clipindex_t clipboardSize;
+	// Active internal clipboard index
+	clipindex_t activeClipboard;
+	// Internal clipboard collection
 	std::deque<PatternClipboardElement> clipboards;
 
 public:
 
-	PatternClipboard(CSoundFile &owner) : sndFile(owner), activeClipboard(0) { };
+	PatternClipboard() : activeClipboard(0) { };
 
 	// Copy a pattern selection to both the system clipboard and the internal clipboard.
-	bool Copy(PATTERNINDEX pattern, PatternRect selection);
+	bool Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 	// Try pasting a pattern selection from the system clipboard.
-	bool Paste(PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode);
+	bool Paste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode);
 	// Try pasting a pattern selection from an internal clipboard.
-	bool Paste(PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, size_t internalClipboard);
+	bool Paste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, clipindex_t internalClipboard);
 	// Copy one of the internal clipboards to the system clipboard.
-	bool SelectClipboard(size_t which);
+	bool SelectClipboard(clipindex_t which);
 	// Switch to the next internal clipboard.
 	bool CycleForward();
 	// Switch to the previous internal clipboard.
 	bool CycleBackward();
 	// Set the maximum number of internal clipboards.
-	void SetClipboardSize(size_t maxEntries);
+	void SetClipboardSize(clipindex_t maxEntries);
 	// Return the current number of clipboards.
-	size_t GetClipboardSize() const { return clipboards.size(); };
+	clipindex_t GetClipboardSize() const { return clipboards.size(); };
 	// Remove all clipboard contents.
 	void Clear();
 
@@ -79,7 +83,7 @@ protected:
 
 	CString GetFileExtension(const char *ext) const;
 	// Perform the pasting operation.
-	bool HandlePaste(PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, const CString &data);
+	bool HandlePaste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, const CString &data);
 
 	// Keep the number of clipboards consistent with the maximum number of allowed clipboards.
 	void RestrictClipboardSize();

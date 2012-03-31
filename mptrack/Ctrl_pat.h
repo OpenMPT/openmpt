@@ -12,6 +12,7 @@
 #pragma once
 
 #include "globals.h"
+#include "PatternCursor.h"
 
 class COrderList;
 class CCtrlPatterns;

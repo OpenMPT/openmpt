@@ -161,6 +161,9 @@ protected:
 	static ModCommand m_cmdOld;				// Quick cursor copy/paste data
 	static FindReplaceStruct m_findReplace;	// Find/replace data
 
+	// Internal pattern clipboard
+	static PatternClipboard patternClipboard;
+
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 	BYTE activeNoteChannel[NOTE_MAX + 1];
@@ -181,6 +184,8 @@ public:
 	CSoundFile *GetSoundFile() { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
 
 	void SetModified(bool updateAllViews = true);
+
+	static PatternClipboard &GetPatternClipboard() { return patternClipboard; }
 
 	bool UpdateSizes();
 	void UpdateScrollSize();

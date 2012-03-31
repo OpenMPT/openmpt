@@ -17,7 +17,6 @@
 #include "sndfile.h"
 #include "../common/misc_util.h"
 #include "Undo.h"
-#include "PatternClipboard.h"
 #include <time.h>
 
 
@@ -96,17 +95,6 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT
 STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SEQUENCE) ); 
 
 
-// pattern paste modes
-enum enmPatternPasteModes
-{
-	pm_overwrite = 0,
-	pm_mixpaste,
-	pm_mixpaste_it,
-	pm_pasteflood,
-	pm_pushforwardpaste,
-};
-
-
 /////////////////////////////////////////////////////////////////////////
 // File edit history
 
@@ -126,8 +114,6 @@ struct FileHistory
 // Split Keyboard Settings (pattern editor)
 
 #define SPLIT_OCTAVE_RANGE 9
-
-class PatternClipboard;
 
 //==========================
 struct SplitKeyboardSettings
@@ -186,8 +172,6 @@ protected:
 	vector<FileHistory> m_FileHistory;	// File edit history
 	time_t m_creationTime;
 
-	PatternClipboard patternClipboard;
-
 public:
 	std::bitset<MAX_INSTRUMENTS> m_bsInstrumentModified;	// which instruments have been modified? (for ITP functionality)
 
@@ -236,8 +220,6 @@ public:
 	vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
 	const vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
-
-	PatternClipboard &GetPatternClipboard() { return patternClipboard; }
 	
 // operations
 public:

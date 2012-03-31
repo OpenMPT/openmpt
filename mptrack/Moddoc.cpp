@@ -118,8 +118,8 @@ void CModDoc::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc construction/destruction
 
-CModDoc::CModDoc() : patternClipboard(m_SndFile)
-//----------------------------------------------
+CModDoc::CModDoc()
+//----------------
 {
 	m_bHasValidPath = false;
 	m_bPaused = TRUE;
