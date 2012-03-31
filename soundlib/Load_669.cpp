@@ -17,6 +17,12 @@
 
 struct _669FileHeader
 {
+	enum MagicBytes
+	{
+		magic669	= 0x6669,	// 'if'
+		magic669Ext	= 0x4E4A	// 'JN'
+	};
+
 	uint16 sig;					// 'if' or 'JN'
 	char   songmessage[108];	// Song Message
 	uint8  samples;				// number of samples (1-64)
@@ -25,6 +31,12 @@ struct _669FileHeader
 	uint8  orders[128];
 	uint8  tempolist[128];
 	uint8  breaks[128];
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(sig);
+	}
 };
 
 STATIC_ASSERT(sizeof(_669FileHeader) == 497);
@@ -32,9 +44,17 @@ STATIC_ASSERT(sizeof(_669FileHeader) == 497);
 struct _669Sample
 {
 	char   filename[13];
-	uint32 length;	// when will somebody think about DWORD align ???
+	uint32 length;
 	uint32 loopStart;
 	uint32 loopEnd;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+	}
 };
 
 STATIC_ASSERT(sizeof(_669Sample) == 25);
@@ -45,21 +65,20 @@ STATIC_ASSERT(sizeof(_669Sample) == 25);
 bool CSoundFile::Read669(FileReader &file)
 //----------------------------------------
 {
-	bool has669Ext;
 	_669FileHeader fileHeader;
 	
 	file.Rewind();
-	if(!file.Read(fileHeader))
+	if(!file.ReadConvertEndianness(fileHeader))
 	{
 		return false;
 	}
 
-	if(fileHeader.sig != LittleEndianW(0x6669) && fileHeader.sig != LittleEndianW(0x4E4A))
+	if(fileHeader.sig != _669FileHeader::magic669 && fileHeader.sig != _669FileHeader::magic669Ext)
 	{
 		return false;
 	}
 
-	has669Ext = fileHeader.sig == LittleEndianW(0x4E4A);
+	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
 	if(fileHeader.samples > 64 || fileHeader.restartpos >= 128
 		|| fileHeader.patterns > 128)
 	{
@@ -74,81 +93,76 @@ bool CSoundFile::Read669(FileReader &file)
 	m_nDefaultSpeed = 6;
 	m_nChannels = 8;
 
-	// Copy first song message line into song title
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songmessage, 36);
-
 	m_nSamples = fileHeader.samples;
-	for(SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++)
+	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		_669Sample sample;
-		if(!file.Read(sample))
+		if(!file.ReadConvertEndianness(sample))
 		{
 			return false;
 		}
 
-		DWORD len = LittleEndian(sample.length);
-		DWORD loopstart = LittleEndian(sample.loopStart);
-		DWORD loopend = LittleEndian(sample.loopEnd);
-		if (len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
-		if ((loopend > len) && (!loopstart)) loopend = 0;
-		if (loopend > len) loopend = len;
-		if (loopstart + 4 >= loopend) loopstart = loopend = 0;
-		Samples[nSmp].nLength = len;
-		Samples[nSmp].nLoopStart = loopstart;
-		Samples[nSmp].nLoopEnd = loopend;
-		if (loopend) Samples[nSmp].uFlags |= CHN_LOOP;
-		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSmp], sample.filename);
-		Samples[nSmp].nVolume = 256;
-		Samples[nSmp].nGlobalVol = 64;
-		Samples[nSmp].nPan = 128;
+		SmpLength len = sample.length;
+		SmpLength loopstart = sample.loopStart;
+		SmpLength loopend = sample.loopEnd;
+		if(len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
+		if((loopend > len) && (!loopstart)) loopend = 0;
+		if(loopend > len) loopend = len;
+		if(loopstart + 4 >= loopend) loopstart = loopend = 0;
+		Samples[smp].nLength = len;
+		Samples[smp].nLoopStart = loopstart;
+		Samples[smp].nLoopEnd = loopend;
+		if(loopend) Samples[smp].uFlags |= CHN_LOOP;
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sample.filename);
+		Samples[smp].nVolume = 256;
+		Samples[smp].nGlobalVol = 64;
+		Samples[smp].nPan = 128;
 	}
 
+	// Copy first song message line into song title
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songmessage, 36);
 	// Song Message
-	ReadFixedLineLengthMessage(file, 108, 36, 0);
+	ReadFixedLineLengthMessage(reinterpret_cast<const BYTE *>(fileHeader.songmessage), 108, 36, 0);
 
 	// Reading Orders
 	Order.ReadAsByte(fileHeader.orders, 128, 128);
 	m_nRestartPos = fileHeader.restartpos;
 	if(Order[m_nRestartPos] >= fileHeader.patterns) m_nRestartPos = 0;
-	// Reading Pattern Break Locations
-	for (UINT npan=0; npan<8; npan++)
+
+	// Set up panning
+	for(CHANNELINDEX chn = 0; chn < 8; chn++)
 	{
-		ChnSettings[npan].nPan = (npan & 1) ? 0x30 : 0xD0;
-		ChnSettings[npan].nVolume = 64;
+		ChnSettings[chn].nPan = (chn & 1) ? 0x30 : 0xD0;
+		ChnSettings[chn].nVolume = 64;
 	}
 
 	// Reading Patterns
-	for (UINT npat = 0; npat < fileHeader.patterns; npat++)
+	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
-		if(Patterns.Insert(npat, 64))
-			break;
+		if(Patterns.Insert(pat, 64))
+		{
+			continue;
+		}
 
-		ModCommand *m = Patterns[npat];
-		for (UINT row=0; row<64; row++)
+		ModCommand *m = Patterns[pat];
+		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			ModCommand *mspeed = m;
-			if ((row == fileHeader.breaks[npat]) && (row != 63))
+
+			for(CHANNELINDEX n = 0; n < 8; n++, m++)
 			{
-				for (UINT i=0; i<8; i++)
-				{
-					m[i].command = CMD_PATTERNBREAK;
-					m[i].param = 0;
-				}
-			}
-			for(UINT n = 0; n < 8; n++, m++)
-			{
-				char data[3];
+				uint8 data[3];
 				if(!file.ReadArray(data))
 				{
 					break;
 				}
 
-				UINT note = data[0] >> 2;
-				UINT instr = ((data[0] & 0x03) << 4) | (data[1] >> 4);
-				UINT vol = data[1] & 0x0F;
+				uint8 note = data[0] >> 2;
+				uint8 instr = ((data[0] & 0x03) << 4) | (data[1] >> 4);
+				uint8 vol = data[1] & 0x0F;
 				if (data[0] < 0xFE)
 				{
-					m->note = note + 37;
+					m->note = note + 36 + NOTE_MIN;
 					m->instr = instr + 1;
 				}
 				if (data[0] <= 0xFE)
@@ -158,8 +172,8 @@ bool CSoundFile::Read669(FileReader &file)
 				}
 				if (data[2] != 0xFF)
 				{
-					UINT command = data[2] >> 4;
-					UINT param = data[2] & 0x0F;
+					uint8 command = data[2] >> 4;
+					uint8 param = data[2] & 0x0F;
 					switch(command)
 					{
 					case 0x00:	command = CMD_PORTAMENTOUP; break;
@@ -187,9 +201,15 @@ bool CSoundFile::Read669(FileReader &file)
 				for (UINT i=0; i<8; i++) if (!mspeed[i].command)
 				{
 					mspeed[i].command = CMD_SPEED;
-					mspeed[i].param = fileHeader.tempolist[npat] + 2;
+					mspeed[i].param = fileHeader.tempolist[pat] + 2;
 					break;
 				}
+			}
+
+			// Write pattern break
+			if(fileHeader.breaks[pat] < 63)
+			{
+				TryWriteEffect(pat, fileHeader.breaks[pat], CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryPreviousRow);
 			}
 		}
 	}

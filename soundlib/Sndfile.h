@@ -387,7 +387,7 @@ public:
 	bool ReadMT2(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadPSM(FileReader &file);
 	bool ReadPSM16(FileReader &file);
-	bool ReadUMX(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadUMX(FileReader &file);
 	bool ReadMO3(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadGDM(FileReader &file);
 	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
