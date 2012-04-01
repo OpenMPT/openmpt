@@ -2248,8 +2248,8 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	TCHAR s[_MAX_PATH], tmp[32];
 	VSTPluginLib *pPlug;
 
-	PLUGINDEX pPlug = m_pPluginManager->GetFirstPlugin();
-	iPlug = 0;
+	pPlug = m_pPluginManager->GetFirstPlugin();
+	PLUGINDEX iPlug = 0;
 	while (pPlug)
 	{
 		if (pPlug->dwPluginId1 != kDmoMagic)
