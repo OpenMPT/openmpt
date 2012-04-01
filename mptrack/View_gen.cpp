@@ -106,7 +106,6 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_CBN_SELCHANGE(IDC_COMBO9, OnSpecialMixProcessingChanged)
 // -! BEHAVIOUR_CHANGE#0028
 
-	ON_COMMAND_RANGE(ID_FXCOMMANDS_BASE, ID_FXCOMMANDS_BASE+10, OnFxCommands)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
 	ON_MESSAGE(WM_MOD_VIEWMSG,	OnModViewMsg)
@@ -439,7 +438,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		CheckDlgButton(IDC_CHECK10, pPlugin->IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, pPlugin->IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
 		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
-		m_BtnEdit.EnableWindow((pVstPlugin != nullptr && (pVstPlugin->HasEditor() || pVstPlugin->GetNumCommands())) ? TRUE : FALSE);
+		m_BtnEdit.EnableWindow((pVstPlugin != nullptr && (pVstPlugin->HasEditor() || pVstPlugin->GetNumParameters())) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin) ? TRUE : FALSE);
@@ -1223,27 +1222,6 @@ void CViewGlobals::OnEditPlugin()
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pModDoc->TogglePluginEditor(m_nCurrentPlugin);
 	return;	
-}
-
-
-void CViewGlobals::OnFxCommands(UINT id)
-//--------------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	UINT nIndex = id - ID_FXCOMMANDS_BASE;
-
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
-
-	if (plugin.pMixPlugin != nullptr)
-	{
-		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
-		pVstPlugin->ExecuteCommand(nIndex);
-		if(pSndFile->GetModSpecifications().supportsPlugins)
-			pModDoc->SetModified();
-	}
 }
 
 

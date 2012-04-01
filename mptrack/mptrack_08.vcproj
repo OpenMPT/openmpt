@@ -521,6 +521,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\plugins\JBridge.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SampleEditorDialogs.cpp"
 				>
 			</File>
@@ -1139,15 +1143,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\soundlib\PluginEventQueue.h"
+				RelativePath=".\soundlib\plugins\PluginEventQueue.h"
 				>
 			</File>
 			<File
-				RelativePath=".\soundlib\PluginMixBuffer.h"
+				RelativePath=".\soundlib\plugins\PluginMixBuffer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\soundlib\PlugInterface.h"
+				RelativePath=".\soundlib\plugins\PlugInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\soundlib\plugins\JBridge.h"
 				>
 			</File>
 			<File

@@ -2242,14 +2242,13 @@ BOOL CTrackApp::InitializeDXPlugins()
 BOOL CTrackApp::UninitializeDXPlugins()
 //-------------------------------------
 {
-	TCHAR s[_MAX_PATH], tmp[32];
-	PVSTPLUGINLIB pPlug;
-	UINT iPlug;
-
 	if (!m_pPluginManager) return FALSE;
 
 #ifndef NO_VST
-	pPlug = m_pPluginManager->GetFirstPlugin();
+	TCHAR s[_MAX_PATH], tmp[32];
+	VSTPluginLib *pPlug;
+
+	PLUGINDEX pPlug = m_pPluginManager->GetFirstPlugin();
 	iPlug = 0;
 	while (pPlug)
 	{

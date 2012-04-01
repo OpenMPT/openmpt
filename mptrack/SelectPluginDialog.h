@@ -33,7 +33,7 @@ public:
 	~CSelectPluginDlg();
 	void DoClose();
 	void UpdatePluginsList(DWORD forceSelect = 0);
-	bool VerifyPlug(PVSTPLUGINLIB plug);
+	bool VerifyPlug(VSTPluginLib *plug);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();

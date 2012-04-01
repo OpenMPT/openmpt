@@ -16,9 +16,9 @@
 #endif
 
 #include "../soundlib/Snd_defs.h"
-#include "../soundlib/PluginMixBuffer.h"
+#include "../soundlib/plugins/PluginMixBuffer.h"
 
-#define kBuzzMagic	'Buzz'
+//#define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
 
 
@@ -29,42 +29,35 @@ class Cfxp;				//rewbs.VSTpresets
 class CModDoc;
 class CSoundFile;
 
-enum
+
+#ifndef NO_VST
+	typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
+#endif // NO_VST
+
+
+struct VSTPluginLib
 {
-	effBuzzGetNumCommands=0x1000,
-	effBuzzGetCommandName,
-	effBuzzExecuteCommand,
+	VSTPluginLib *pPrev, *pNext;
+	VstInt32 dwPluginId1;
+	VstInt32 dwPluginId2;
+	bool isInstrument;
+	CVstPlugin *pPluginsList;
+	CHAR szLibraryName[_MAX_FNAME];
+	CHAR szDllPath[_MAX_PATH];
+};
+
+
+struct VSTInstrChannel
+{
+	//BYTE uNoteOnMap[128/8];			rewbs.deMystifyMidiNoteMap
+	uint8 uNoteOnMap[128][MAX_CHANNELS];
+	uint32 nProgram;
+	uint16 wMidiBank; //rewbs.MidiBank
 };
 
 
 #ifndef NO_VST
-	typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
-#endif
-
-
-typedef struct _VSTPLUGINLIB
-{
-	struct _VSTPLUGINLIB *pPrev, *pNext;
-	DWORD dwPluginId1;
-	DWORD dwPluginId2;
-	BOOL bIsInstrument;
-	CVstPlugin *pPluginsList;
-	CHAR szLibraryName[_MAX_FNAME];
-	CHAR szDllPath[_MAX_PATH];
-} VSTPLUGINLIB, *PVSTPLUGINLIB;
-
-
-typedef struct _VSTINSTCH
-{
-	//BYTE uNoteOnMap[128/8];			rewbs.deMystifyMidiNoteMap
-	BYTE uNoteOnMap[128][MAX_CHANNELS];
-	UINT nProgram;
-	WORD wMidiBank; //rewbs.MidiBank
-} VSTINSTCH, *PVSTINSTCH;
-
-
-#ifndef NO_VST
-#include "../soundlib/PluginEventQueue.h"
+#include "../soundlib/plugins/PluginEventQueue.h"
 #endif // NO_VST
 
 
@@ -86,7 +79,7 @@ protected:
 	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
-	VSTPLUGINLIB *m_pFactory;
+	VSTPluginLib *m_pFactory;
 	SNDMIXPLUGIN *m_pMixStruct;
 	AEffect *m_pEffect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
@@ -96,7 +89,7 @@ protected:
 	bool m_bIsVst2;
 	SNDMIXPLUGINSTATE m_MixState;
 	UINT m_nInputs, m_nOutputs;
-	VSTINSTCH m_MidiCh[16];
+	VSTInstrChannel m_MidiCh[16];
 	short m_nMidiPitchBendPos[16];
 
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
@@ -118,17 +111,17 @@ protected:
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:
-	CVstPlugin(HINSTANCE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
+	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
 	virtual ~CVstPlugin();
 	void Initialize(CSoundFile* pSndFile);
 
 public:
-	PVSTPLUGINLIB GetPluginFactory() const { return m_pFactory; }
+	VSTPluginLib *GetPluginFactory() const { return m_pFactory; }
 	bool HasEditor();
-	long GetNumPrograms();
+	VstInt32 GetNumPrograms();
 	PlugParamIndex GetNumParameters();
-	long GetCurrentProgram();
-	long GetNumProgramCategories();	//rewbs.VSTpresets
+	VstInt32 GetCurrentProgram();
+	VstInt32 GetNumProgramCategories();	//rewbs.VSTpresets
 	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false);
 	bool LoadProgram(CString fileName);
 	bool SaveProgram(CString fileName);
@@ -161,9 +154,7 @@ public:
 	void ToggleEditor();
 	void GetPluginType(LPSTR pszType);
 	BOOL GetDefaultEffectName(LPSTR pszName);
-	UINT GetNumCommands();
 	BOOL GetCommandName(UINT index, LPSTR pszName);
-	BOOL ExecuteCommand(UINT nIndex);
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	bool GetSpeakerArrangement(); //rewbs.VSTCompliance
 
@@ -235,9 +226,9 @@ public:
 	PlugParamIndex GetNumParameters() { return 0; }
 	void ToggleEditor() {}
 	bool HasEditor() { return false; }
-	UINT GetNumCommands() { return 0; }
 	void GetPluginType(LPSTR) {}
-	PlugParamIndex GetNumPrograms() { return 0; }
+	VstInt32 GetNumPrograms() { return 0; }
+	VstInt32 GetCurrentProgram() { return 0; }
 	bool GetProgramNameIndexed(long, long, char*) { return false; }
 	CString GetFormattedProgramName(VstInt32, bool = false) { return ""; }
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
@@ -254,7 +245,6 @@ public:
 	bool LoadProgram(CString) {return false;}
 	bool SaveProgram(CString) {return false;}
 	void SetCurrentProgram(UINT) {}
-	BOOL ExecuteCommand(UINT) {return FALSE;}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}
 	void Bypass(bool = true) { }
@@ -270,23 +260,24 @@ class CVstPluginManager
 {
 #ifndef NO_VST
 protected:
-	PVSTPLUGINLIB m_pVstHead;
+	VSTPluginLib *m_pVstHead;
 
 public:
 	CVstPluginManager();
 	~CVstPluginManager();
 
 public:
-	PVSTPLUGINLIB GetFirstPlugin() const { return m_pVstHead; }
-	BOOL IsValidPlugin(const VSTPLUGINLIB *pLib);
-	PVSTPLUGINLIB AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
-	bool RemovePlugin(PVSTPLUGINLIB);
+	VSTPluginLib *GetFirstPlugin() const { return m_pVstHead; }
+	BOOL IsValidPlugin(const VSTPluginLib *pLib);
+	VSTPluginLib *AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
+	bool RemovePlugin(VSTPluginLib *);
 	BOOL CreateMixPlugin(SNDMIXPLUGIN *, CSoundFile *);
 	void OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
 
 protected:
 	void EnumerateDirectXDMOs();
+	void LoadPlugin(const char *pluginPath, AEffect *&effect, HINSTANCE &library);
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
@@ -302,8 +293,8 @@ public:
 
 #else // NO_VST
 public:
-	PVSTPLUGINLIB AddPlugin(LPCSTR, BOOL =TRUE, const bool = false, CString* const = 0) {return 0;}
-	PVSTPLUGINLIB GetFirstPlugin() const { return 0; }
+	VSTPluginLib *AddPlugin(LPCSTR, BOOL =TRUE, const bool = false, CString* const = 0) {return 0;}
+	VSTPluginLib *GetFirstPlugin() const { return 0; }
 	void OnIdle() {}
 #endif // NO_VST
 };
