@@ -2509,15 +2509,15 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 //-----------------------------------------------------
 {
-	SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[m_nCurrentPlugin];
-
-	if (m_nCurrentPlugin < MAX_MIXPLUGINS && plugin.pMixPlugin)
+	if(m_nCurrentPlugin < MAX_MIXPLUGINS)
 	{
+		SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[m_nCurrentPlugin];
 		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
-		pVstPlugin->ToggleEditor();
+		if(pVstPlugin != nullptr)
+		{
+			pVstPlugin->ToggleEditor();
+		}
 	}
-
-	return;
 }
 
 void CModDoc::ChangeFileExtension(MODTYPE nNewType)

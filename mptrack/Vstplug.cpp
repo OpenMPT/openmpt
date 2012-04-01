@@ -26,6 +26,7 @@
 #include "version.h"
 #include "midimappingdialog.h"
 #include "../common/StringFixer.h"
+#include "../soundlib/plugins/JBridge.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #define ZLIB_WINAPI
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
@@ -40,16 +41,9 @@ char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
 VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
 
 //#define VST_LOG
-//#define ENABLE_BUZZ
 #define DMO_LOG
 
-#ifdef ENABLE_BUZZ
-#define STATIC_BUILD
-#include <machineinterface.h>	// Buzz
-AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo);
-#endif // ENABLE_BUZZ
-
-AEffect *DmoToVst(PVSTPLUGINLIB pLib);
+AEffect *DmoToVst(VSTPluginLib *pLib);
 
 #ifdef VST_USE_ALTERNATIVE_MAGIC
 UINT32 CalculateCRC32fromFilename(const char *s)
@@ -105,7 +99,7 @@ CVstPluginManager::~CVstPluginManager()
 	CSoundFile::gpMixPluginCreateProc = nullptr;
 	while (m_pVstHead)
 	{
-		PVSTPLUGINLIB p = m_pVstHead;
+		VSTPluginLib *p = m_pVstHead;
 		m_pVstHead = m_pVstHead->pNext;
 		if (m_pVstHead) m_pVstHead->pPrev = nullptr;
 		p->pPrev = p->pNext = nullptr;
@@ -118,10 +112,10 @@ CVstPluginManager::~CVstPluginManager()
 }
 
 
-BOOL CVstPluginManager::IsValidPlugin(const VSTPLUGINLIB *pLib)
+BOOL CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib)
 //-------------------------------------------------------------
 {
-	PVSTPLUGINLIB p = m_pVstHead;
+	VSTPluginLib *p = m_pVstHead;
 	while (p)
 	{
 		if (p == pLib) return TRUE;
@@ -163,14 +157,14 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 					if (ERROR_SUCCESS == RegQueryValueEx(hksub, nullptr, 0, &datatype, (LPBYTE)s, &datasize))
 					{
-						PVSTPLUGINLIB p = new VSTPLUGINLIB;
+						VSTPluginLib *p = new VSTPluginLib();
 
 						p->pPrev = nullptr;
 						p->pNext = m_pVstHead;
 						p->dwPluginId1 = kDmoMagic;
 						p->dwPluginId2 = clsid.Data1;
 						p->pPluginsList = nullptr;
-						p->bIsInstrument = FALSE;
+						p->isInstrument = false;
 						lstrcpyn(p->szLibraryName, s, sizeof(p->szLibraryName));
 						StringFromGUID2(clsid, w, 100);
 						WideCharToMultiByte(CP_ACP, 0, w, -1, p->szDllPath, sizeof(p->szDllPath), nullptr, nullptr);
@@ -189,15 +183,63 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 	if (hkEnum) RegCloseKey(hkEnum);
 }
 
+
+void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HINSTANCE &library)
+//----------------------------------------------------------------------------------------------
+{
+	library = nullptr;
+	effect = nullptr;
+
+	try
+	{
+		library = LoadLibrary(pluginPath);
+
+#ifdef _DEBUG
+		DWORD dw = GetLastError();
+		if(library == nullptr && dw != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
+		{
+			TCHAR szBuf[256];
+			wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, (LPCTSTR)GetErrorMessage(dw));
+			Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
+		}
+#endif //_DEBUG
+	} catch(...)
+	{
+		CVstPluginManager::ReportPlugException("Exception caught in LoadLibrary (%s)", pluginPath);
+	}
+
+	if(library != nullptr && library != INVALID_HANDLE_VALUE)
+	{
+		// Try loading the VST plugin.
+		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "VSTPluginMain");
+		if(pMainProc == nullptr)
+		{
+			pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "main");
+		}
+
+		if(pMainProc != nullptr)
+		{
+			effect = pMainProc(MasterCallBack);
+		} else
+		{
+#ifdef VST_LOG
+			Log("Entry point not found! (handle=%08X)\n", library);
+#endif // VST_LOG
+		}
+	} else
+	{
+		// Try loading the plugin using JBridge instead.
+		effect = JBridge::LoadBridgedPlugin(MasterCallBack, pluginPath);
+	}
+}
+
 //
 // PluginCache format:
 // LibraryName = ID100000ID200000
 // ID100000ID200000 = FullDllPath
 // ID100000ID200000.Flags = Plugin Flags (for now, just isInstrument).
-
-
-
-PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
+			
+VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
 //------------------------------------------------------------------------------------------------------------------------------
 {
 	TCHAR szPath[_MAX_PATH];
@@ -211,8 +253,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		}
 	}
 
-	PVSTPLUGINLIB pDup = m_pVstHead;
-	while (pDup)
+	VSTPluginLib *pDup = m_pVstHead;
+	while(pDup != nullptr)
 	{
 		if (!lstrcmpi(pszDllPath, pDup->szDllPath)) return pDup;
 		pDup = pDup->pNext;
@@ -236,21 +278,17 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 
 			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
 			{
-				PVSTPLUGINLIB p;
+				VSTPluginLib *p;
 				try
 				{
-					p = new VSTPLUGINLIB;
+					p = new VSTPluginLib();
 				} catch(MPTMemoryException)
 				{
 					return nullptr;
 				}
-				p->dwPluginId1 = 0;
-				p->dwPluginId2 = 0;
-				p->bIsInstrument = FALSE;
-				p->pPluginsList = nullptr;
 				lstrcpyn(p->szDllPath, pszDllPath, sizeof(p->szDllPath));
 				_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
-				p->szLibraryName[63] = 0;
+				p->szLibraryName[63] = '\0';
 				p->pNext = m_pVstHead;
 				p->pPrev = nullptr;
 				if (m_pVstHead) m_pVstHead->pPrev = p;
@@ -272,7 +310,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				CString flagKey;
 				flagKey.Format("%s.Flags", IDs);
 				int infoex = CMainFrame::GetPrivateProfileLong(cacheSection, flagKey, 0, cacheFile);
-				if (infoex&1) p->bIsInstrument = TRUE;
+				if (infoex & 1) p->isInstrument = true;
 			#ifdef VST_USE_ALTERNATIVE_MAGIC
 				if( p->dwPluginId1 == kEffectMagic )
 				{
@@ -292,187 +330,101 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		}
 	}
 
-	HINSTANCE hLib = nullptr;
-
-
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
 	WritePrivateProfileString("VST Plugins", "FailedPlugin", pszDllPath, theApp.GetConfigFileName());
 
+	AEffect *pEffect;
+	HINSTANCE hLib;
+	bool validPlug = false;
+
+	VSTPluginLib *p = nullptr;
 	try
 	{
-		hLib = LoadLibrary(pszDllPath);
-
-#ifdef _DEBUG
-		DWORD dw = GetLastError();
-		if (!hLib && dw != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
-		{
-			TCHAR szBuf[256];
-			wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, (LPCTSTR)GetErrorMessage(dw));
-			Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
-		}
-#endif //_DEBUG
-
-	} catch(...)
+		p = new VSTPluginLib();
+	} catch(MPTMemoryException)
 	{
-		CVstPluginManager::ReportPlugException("Exception caught in LoadLibrary (%s)", pszDllPath);
+		return nullptr;
 	}
-	if ((hLib) && (hLib != INVALID_HANDLE_VALUE))
+	p->pPluginsList = nullptr;
+	lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
+	_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
+	p->szLibraryName[63] = 0;
+	p->pNext = m_pVstHead;
+	p->pPrev = nullptr;
+
+	try
 	{
-		bool validPlug = false;
-		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "VSTPluginMain");
-		if(pMainProc == nullptr)
+		LoadPlugin(pszDllPath, pEffect, hLib);
+
+		if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
 		{
-			pMainProc = (PVSTPLUGENTRY)GetProcAddress(hLib, "main");
-		}
-	#ifdef ENABLE_BUZZ
-		GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLib, "GetInfo");
-	#endif // ENABLE_BUZZ
-		if (pMainProc)
-		{
-			PVSTPLUGINLIB p;
-			try
-			{
-				p = new VSTPLUGINLIB;
-			} catch(MPTMemoryException)
-			{
-				return nullptr;
-			}
-			p->dwPluginId1 = 0;
-			p->dwPluginId2 = 0;
-			p->bIsInstrument = FALSE;
-			p->pPluginsList = nullptr;
-			lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
-			_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
-			p->szLibraryName[63] = 0;
-			p->pNext = m_pVstHead;
-			p->pPrev = nullptr;
+			pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
+
 			if (m_pVstHead) m_pVstHead->pPrev = p;
 			m_pVstHead = p;
 
-			try
-			{
-				AEffect *pEffect = pMainProc(MasterCallBack);
-				if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
-				{
-					pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
+#ifdef VST_USE_ALTERNATIVE_MAGIC
+			p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure
+#else
+			p->dwPluginId1 = pEffect->magic;
+#endif // VST_USE_ALTERNATIVE_MAGIC
+			p->dwPluginId2 = pEffect->uniqueID;
+			p->isInstrument = ((pEffect->flags & effFlagsIsSynth) || !pEffect->numInputs);
 
-				#ifdef VST_USE_ALTERNATIVE_MAGIC
-					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure
-				#else
-					p->dwPluginId1 = pEffect->magic;
-				#endif // VST_USE_ALTERNATIVE_MAGIC
-					p->dwPluginId2 = pEffect->uniqueID;
-					if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs)) p->bIsInstrument = TRUE;
+#ifdef VST_LOG
+			int nver = pEffect->dispatcher(pEffect, effGetVstVersion, 0,0, nullptr, 0);
+			if (!nver) nver = pEffect->version;
+			Log("%-20s: v%d.0, %d in, %d out, %2d programs, %2d params, flags=0x%04X realQ=%d offQ=%d\n",
+				p->szLibraryName, nver,
+				pEffect->numInputs, pEffect->numOutputs,
+				pEffect->numPrograms, pEffect->numParams,
+				pEffect->flags, pEffect->realQualities, pEffect->offQualities);
+#endif // VST_LOG
 
-				#ifdef VST_LOG
-					int nver = pEffect->dispatcher(pEffect, effGetVstVersion, 0,0, nullptr, 0);
-					if (!nver) nver = pEffect->version;
-					Log("%-20s: v%d.0, %d in, %d out, %2d programs, %2d params, flags=0x%04X realQ=%d offQ=%d\n",
-						p->szLibraryName, nver,
-						pEffect->numInputs, pEffect->numOutputs,
-						pEffect->numPrograms, pEffect->numParams,
-						pEffect->flags, pEffect->realQualities, pEffect->offQualities);
-				#endif // VST_LOG
+			pEffect->dispatcher(pEffect, effClose, 0, 0, 0, 0);
 
-					pEffect->dispatcher(pEffect, effClose, 0, 0, 0, 0);
-
-					validPlug = true;
-				}
-			} catch(...)
-			{
-				CVstPluginManager::ReportPlugException("Exception while trying to load plugin \"%s\"!\n", p->szLibraryName);
-			}
-
-			// If OK, write the information in PluginCache
-			if(validPlug)
-			{
-				const CString cacheSection = "PluginCache";
-				const CString cacheFile = theApp.GetPluginCacheFileName();
-				CString IDs, flagsKey;
-				IDs.Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
-				flagsKey.Format("%s.Flags", IDs);
-
-				_tcsncpy(szPath, pszDllPath, CountOf(szPath) - 1);
-				if(theApp.IsPortableMode())
-				{
-					theApp.AbsolutePathToRelative(szPath);
-				}
-				StringFixer::SetNullTerminator(szPath);
-
-				WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
-				CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
-				CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
-				CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->bIsInstrument, cacheFile);
-			}
-		} else
-	#ifdef ENABLE_BUZZ
-		if (pBuzzGetInfo)
-		{
-			PVSTPLUGINLIB p
-			try
-			{
-				p = new VSTPLUGINLIB;
-			} catch(MPTMemoryException)
-			{
-				return nullptr;
-			}
-			
-			p->dwPluginId1 = kBuzzMagic;
-			p->dwPluginId2 = 0;
-			p->pPluginsList = nullptr;
-			lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
-			_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
-			p->szLibraryName[63] = 0;
-			p->pNext = m_pVstHead;
-			p->pPrev = nullptr;
-			if (m_pVstHead) m_pVstHead->pPrev = p;
-			m_pVstHead = p;
-			try
-			{
-				const CMachineInfo *pInfo = pBuzzGetInfo();
-				if (pInfo)
-				{
-					p->dwPluginId2 = pInfo->Version;
-					if (pInfo->Name)
-					{
-						lstrcpyn(p->szLibraryName, pInfo->Name, CountOf(p->szLibraryName));
-					}
-					validPlug = true;
-				}
-			} catch (...)
-			{
-				CVstPluginManager::ReportPlugException("Exception while trying to load buzz plugin \"%s\"!\n", p->szLibraryName);
-			}
-		} else
-	#endif // ENABLE_BUZZ
-		{
-		#ifdef VST_LOG
-			Log("Entry point not found!\n");
-		#endif // VST_LOG
+			validPlug = true;
 		}
 
 		FreeLibrary(hLib);
-
-		// Now it should be safe to assume that this plugin loaded properly. :)
-		WritePrivateProfileString("VST Plugins", "FailedPlugin", nullptr, theApp.GetConfigFileName());
-
-		return (validPlug ? m_pVstHead : nullptr);
-	} else
+	} catch(...)
 	{
-	#ifdef VST_LOG
-		Log("LoadLibrary(%s) failed!\n", pszDllPath);
-	#endif // VST_LOG
-
-		WritePrivateProfileString("VST Plugins", "FailedPlugin", nullptr, theApp.GetConfigFileName());
+		CVstPluginManager::ReportPlugException("Exception while trying to load plugin \"%s\"!\n", p->szLibraryName);
 	}
-	return nullptr;
+
+	// Now it should be safe to assume that this plugin loaded properly. :)
+	WritePrivateProfileString("VST Plugins", "FailedPlugin", nullptr, theApp.GetConfigFileName());
+
+	// If OK, write the information in PluginCache
+	if(validPlug)
+	{
+		const CString cacheSection = "PluginCache";
+		const CString cacheFile = theApp.GetPluginCacheFileName();
+		CString IDs, flagsKey;
+		IDs.Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
+		flagsKey.Format("%s.Flags", IDs);
+
+		_tcsncpy(szPath, pszDllPath, CountOf(szPath) - 1);
+		if(theApp.IsPortableMode())
+		{
+			theApp.AbsolutePathToRelative(szPath);
+		}
+		StringFixer::SetNullTerminator(szPath);
+
+		WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
+		CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
+		CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
+		CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->isInstrument, cacheFile);
+	}
+	
+	return (validPlug ? m_pVstHead : nullptr);
 }
 
 
-bool CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
+bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 //----------------------------------------------------------
 {
-	PVSTPLUGINLIB p = m_pVstHead;
+	VSTPluginLib *p = m_pVstHead;
 
 	while (p)
 	{
@@ -509,11 +461,11 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 //-------------------------------------------------------------------------------------
 {
 	UINT nMatch = 0;
-	PVSTPLUGINLIB pFound = nullptr;
+	VSTPluginLib *pFound = nullptr;
 
 	if (pMixPlugin)
 	{
-		PVSTPLUGINLIB p = m_pVstHead;
+		VSTPluginLib *p = m_pVstHead;
 
 		while (p)
 		{
@@ -567,6 +519,7 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 			return bOk;
 		}
 	}
+
 	if ((!pFound) && strcmp(pMixPlugin->GetLibraryName(), ""))
 	{
 		CHAR s[_MAX_PATH], dir[_MAX_PATH];
@@ -590,81 +543,52 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 			}
 		}
 	}
+
 	if (pFound)
 	{
-		HINSTANCE hLibrary = NULL;
-		BOOL bOk = FALSE;
+
+		AEffect *pEffect = nullptr;
+		HINSTANCE hLibrary = nullptr;
+		bool validPlugin = false;
 
 		try
 		{
 			CriticalSection cs;
 
-			hLibrary = LoadLibrary(pFound->szDllPath);
-			if (hLibrary != NULL)
+			LoadPlugin(pFound->szDllPath, pEffect, hLibrary);
+
+			if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
 			{
-				AEffect *pEffect = NULL;
-				PVSTPLUGENTRY pEntryPoint = (PVSTPLUGENTRY)GetProcAddress(hLibrary, "main");
-				if(pEntryPoint == NULL)
+				validPlugin = true;
+
+				if(pEffect->flags & effFlagsIsSynth || !pEffect->numInputs)
 				{
-					pEntryPoint = (PVSTPLUGENTRY)GetProcAddress(hLibrary, "VSTPluginMain");
-				}
-			#ifdef ENABLE_BUZZ
-				GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLibrary, "GetInfo");
-				CREATE_MACHINE pBuzzCreateMachine = (CREATE_MACHINE)GetProcAddress(hLibrary, "CreateMachine");
-			#endif
-				if (pEntryPoint)
-				{
-					pEffect = pEntryPoint(MasterCallBack);
-				} else
-			#ifdef ENABLE_BUZZ
-				if ((pBuzzCreateMachine) && (pBuzzGetInfo))
-				{
-					CMachineInterface *pBuzzMachine = pBuzzCreateMachine();
-					const CMachineInfo *pBuzzInfo = pBuzzGetInfo();
-					if ((pBuzzMachine) && (pBuzzInfo) && (pBuzzInfo->Type == MT_EFFECT))
+					// Flag as instrument plugin
+					if (!pFound->isInstrument)
 					{
-						pEffect = Buzz2Vst(pBuzzMachine, pBuzzInfo);
+						CString cacheSection = "PluginCache";
+						CString cacheFile = theApp.GetPluginCacheFileName();
+						//LPCSTR pszSection = "PluginCache";
+						pFound->isInstrument = true;
+						CString flagsKey;
+						flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
+						CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, 1, cacheFile);
 					}
-				} else
-			#endif
-				{
-				#ifdef VST_LOG
-					Log("Entry point not found! (handle=%08X)\n", hLibrary);
-				#endif
 				}
-				if ((pEffect) && (pEffect->dispatcher)
-					&& ((pEffect->magic == kEffectMagic) || (pEffect->magic == kBuzzMagic)))
-				{
-					bOk = TRUE;
-					if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs))
-					{
-						if (!pFound->bIsInstrument)
-						{
-							CString cacheSection = "PluginCache";
-							CString cacheFile = theApp.GetPluginCacheFileName();
-							//LPCSTR pszSection = "PluginCache";
-							pFound->bIsInstrument = TRUE;
-							CString flagsKey;
-							flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
-							CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, 1, cacheFile);
-						}
-					}
-					CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
-					if (pVstPlug) pVstPlug->Initialize(pSndFile);
-				}
-			} else
-			{
-			#ifdef VST_LOG
-				Log("LoadLibrary(\"%s\") failed!\n", pFound->szDllPath);
-			#endif
+				CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
+				if (pVstPlug) pVstPlug->Initialize(pSndFile);
 			}
-			if ((!bOk) && (hLibrary)) FreeLibrary(hLibrary);
+
+			if(!validPlugin)
+			{
+				FreeLibrary(hLibrary);
+			}
 		} catch(...)
 		{
 			CVstPluginManager::ReportPlugException("Exception while trying to create plugin \"%s\"!\n", pFound->szLibraryName);
 		}
 
-		return bOk;
+		return validPlugin;
 	} else
 	{
 		// "plug not found" notification code MOVED to CSoundFile::Create
@@ -679,7 +603,7 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 void CVstPluginManager::OnIdle()
 //------------------------------
 {
-	PVSTPLUGINLIB pFactory = m_pVstHead;
+	VSTPluginLib *pFactory = m_pVstHead;
 
 	while (pFactory)
 	{
@@ -1335,7 +1259,7 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 // CVstPlugin
 //
 
-CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPLUGINLIB *pFactory, SNDMIXPLUGIN *pMixStruct, AEffect *pEffect)
+CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *pMixStruct, AEffect *pEffect)
 //----------------------------------------------------------------------------------------------------------
 {
 	m_hLibrary = hLibrary;
@@ -1538,7 +1462,7 @@ CVstPlugin::~CVstPlugin()
 		Dispatch(effConnectOutput, 0, 0, nullptr, 0);
 		if (m_pEffect->numOutputs > 1) Dispatch(effConnectOutput, 1, 0, nullptr, 0);
 	}
-	CVstPlugin::Dispatch(effMainsChanged, 0,0, nullptr, 0);
+	Suspend();
 	CVstPlugin::Dispatch(effClose, 0, 0, nullptr, 0);
 	m_pFactory = nullptr;
 	if (m_hLibrary)
@@ -1593,8 +1517,8 @@ bool CVstPlugin::HasEditor()
 }
 
 //rewbs.VSTcompliance: changed from BOOL to long
-long CVstPlugin::GetNumPrograms()
-//-------------------------------
+VstInt32 CVstPlugin::GetNumPrograms()
+//-----------------------------------
 {
 	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
 	{
@@ -1759,7 +1683,7 @@ bool CVstPlugin::LoadProgram(CString fileName)
 VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------
 {
-	long lresult = 0;
+	VstIntPtr lresult = 0;
 
 	try
 	{
@@ -1990,17 +1914,17 @@ void CVstPlugin::Resume()
 void CVstPlugin::Suspend()
 //------------------------
 {
-	try
+	if(m_bPlugResumed)
 	{
-		if(m_bPlugResumed)
+		try
 		{
 			Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
 			Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f); // calls plugin's suspend (theoretically, plugins should clean their buffers here, but oh well, the number of plugins which don't do this is surprisingly high.)
 			m_bPlugResumed = false;
+		} catch (...)
+		{
+			CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
 		}
-	} catch (...)
-	{
-		CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }
 
@@ -2342,21 +2266,21 @@ void CVstPlugin::HardAllNotesOff()
 		for (int mc=0; mc<16; mc++)		//all midi chans
 		{
 			DWORD dwMidiCode = 0x80 | (mc & 0x0f); //command|channel|velocity
-			PVSTINSTCH pCh = &m_MidiCh[mc];
+			VSTInstrChannel &channel = m_MidiCh[mc];
 
 			MidiPitchBend(mc, MIDI_PitchBend_Centre); // centre pitch bend
 			MidiSend(0xB0|mc|(0x79<<8));			  // reset all controllers
 			MidiSend(0xB0|mc|(0x7b<<8));			  // all notes off
 			MidiSend(0xB0|mc|(0x78<<8));			  // all sounds off
 
-			for (size_t i = 0; i < CountOf(pCh->uNoteOnMap); i++)	//all notes
+			for (size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
 			{
-				for (CHANNELINDEX c = 0; c < CountOf(pCh->uNoteOnMap[i]); c++)
+				for (CHANNELINDEX c = 0; c < CountOf(channel.uNoteOnMap[i]); c++)
 				{
-					while (pCh->uNoteOnMap[i][c] && !overflow)
+					while (channel.uNoteOnMap[i][c] && !overflow)
 					{
 						overflow=!(MidiSend(dwMidiCode | (i << 8)));
-						pCh->uNoteOnMap[i][c]--;
+						channel.uNoteOnMap[i][c]--;
 					}
 					if (overflow) break;	//yuck
 				}
@@ -2436,10 +2360,10 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
 void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChannel)
 //----------------------------------------------------------------------------------------------------------------
 {
-	PVSTINSTCH pCh = &m_MidiCh[nMidiCh];
+	VSTInstrChannel &channel = m_MidiCh[nMidiCh];
 	DWORD dwMidiCode = 0;
-	bool bankChanged = (pCh->wMidiBank != --wMidiBank) && (wMidiBank < 0x80);
-	bool progChanged = (pCh->nProgram != --nMidiProg) && (nMidiProg < 0x80);
+	bool bankChanged = (channel.wMidiBank != --wMidiBank) && (wMidiBank < 0x80);
+	bool progChanged = (channel.nProgram != --nMidiProg) && (nMidiProg < 0x80);
 	//bool chanChanged = nCh != m_nPreviousMidiChan;
 	//get vol in [0,128[
 	vol = min(vol / 2, 127);
@@ -2452,7 +2376,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// Bank change
 	if ((wMidiBank < 0x80) && ( bankChanged /*|| chanChanged */))
 	{
-		pCh->wMidiBank = wMidiBank;
+		channel.wMidiBank = wMidiBank;
 		MidiSend(((wMidiBank<<16)|(0x20<<8))|(0xB0|nMidiCh));
 	}
 	// Program change
@@ -2460,7 +2384,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// need to force it by sending prog change too.
 	if ((nMidiProg < 0x80) && (progChanged || bankChanged /*|| chanChanged */ ))
 	{
-		pCh->nProgram = nMidiProg;
+		channel.nProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
 		MidiSend((nMidiProg<<8)|(0xC0|nMidiCh));
 	}
@@ -2473,9 +2397,9 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 
 		note--;
 		UINT i = note - NOTE_KEYOFF;
-		if (pCh->uNoteOnMap[i][trackChannel])
+		if (channel.uNoteOnMap[i][trackChannel])
 		{
-			pCh->uNoteOnMap[i][trackChannel]--;
+			channel.uNoteOnMap[i][trackChannel]--;
 			MidiSend(dwMidiCode|(i<<8));
 		}
 	}
@@ -2492,7 +2416,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		dwMidiCode = 0x80|nMidiCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
 		for (UINT i=0; i<128; i++)	//all notes
 		{
-			pCh->uNoteOnMap[i][trackChannel]=0;
+			channel.uNoteOnMap[i][trackChannel]=0;
 			MidiSend(dwMidiCode|(i<<8));
 		}
 
@@ -2508,11 +2432,11 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		{
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
 			// But this can cause a VST event overflow if we have many active notes...
-			while (pCh->uNoteOnMap[i][trackChannel])
+			while (channel.uNoteOnMap[i][trackChannel])
 			{
 				if (MidiSend(dwMidiCode|(i<<8)))
 				{
-					pCh->uNoteOnMap[i][trackChannel]--;
+					channel.uNoteOnMap[i][trackChannel]--;
 				} else
 				{
 					// VST event queue overflow, no point in submitting more note offs.
@@ -2541,8 +2465,8 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		// Problem: if a note dies out naturally and we never send a note off, this counter
 		// will block at max until note off. Is this a problem?
 		// Safe to assume we won't need more than 16 note offs max on a given note?
-		if (pCh->uNoteOnMap[note][trackChannel]<17)
-			pCh->uNoteOnMap[note][trackChannel]++;
+		if (channel.uNoteOnMap[note][trackChannel] < 17)
+			channel.uNoteOnMap[note][trackChannel]++;
 
 
 
@@ -2558,8 +2482,7 @@ bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 //------------------------------------------------------------------
 {
 	note--;
-	PVSTINSTCH pMidiCh = &m_MidiCh[midiChn];
-	return (pMidiCh->uNoteOnMap[note][trackerChn] != 0);
+	return (m_MidiCh[midiChn].uNoteOnMap[note][trackerChn] != 0);
 }
 
 
@@ -2567,7 +2490,7 @@ bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT d
 //---------------------------------------------------------------------------------------------
 {
 	note--;
-	PVSTINSTCH pMidiCh = &m_MidiCh[midiChn & 0x0f];
+	VSTInstrChannel *pMidiCh = &m_MidiCh[midiChn & 0x0f];
 
 	if (!(pMidiCh->uNoteOnMap[note][sourceTrackerChn]))
 		return false;
@@ -2806,42 +2729,12 @@ void CVstPlugin::ToggleEditor()
 }
 
 
-UINT CVstPlugin::GetNumCommands()
-//-------------------------------
-{
-	if ((m_pEffect) && (m_pEffect->magic == kBuzzMagic))
-	{
-		return Dispatch(effBuzzGetNumCommands, 0, nullptr, nullptr, 0.0f);
-	}
-	else if (m_pEffect)
-	{
-		return m_pEffect->numParams;
-	}
-	return 0;
-}
-
-
 BOOL CVstPlugin::GetCommandName(UINT nIndex, LPSTR pszName)
 //---------------------------------------------------------
 {
-	if ((m_pEffect) && (m_pEffect->magic == kBuzzMagic))
-	{
-		return Dispatch(effBuzzGetCommandName, nIndex, nullptr, pszName, 0.0f);
-	}
-	else if (m_pEffect)
+	if (m_pEffect)
 	{
 		return Dispatch(effGetParamName, nIndex, nullptr, pszName, 0.0f);
-	}
-	return 0;
-}
-
-
-BOOL CVstPlugin::ExecuteCommand(UINT nIndex)
-//------------------------------------------
-{
-	if ((m_pEffect) && (m_pEffect->magic == kBuzzMagic))
-	{
-		return Dispatch(effBuzzExecuteCommand, nIndex, nullptr, nullptr, 0.0f);
 	}
 	return 0;
 }
@@ -3036,412 +2929,6 @@ void CVstPlugin::GetInputChannelList(CArray<UINT, UINT> &list)
 	return;
 
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-//
-// BUZZ -> VST converter
-//
-
-#ifdef ENABLE_BUZZ
-
-class CBuzz2Vst;
-
-//===========================================
-class CVSTDataInput: public CMachineDataInput
-//===========================================
-{
-protected:
-	CBuzz2Vst *m_pParent;
-
-public:
-	CVSTDataInput(CBuzz2Vst *p) { m_pParent = p; }
-	virtual void Read(void *pbuf, int const numbytes) { Log("Read(%08X, %d)\n", pbuf, numbytes);}
-};
-
-
-//==================================
-class CBuzz2Vst: public CMICallbacks
-//==================================
-{
-protected:
-	AEffect m_Effect;
-	const CMachineInfo *m_pMachineInfo;
-	CMachineInterface *m_pMachineInterface;
-	CVSTDataInput *m_pDataInput;
-	CMasterInfo m_MasterInfo;
-	CWaveLevel m_WaveLevel;
-	short m_Waveform[32];
-
-public:
-	CBuzz2Vst(CMachineInterface *, const CMachineInfo *);
-	~CBuzz2Vst();
-	AEffect *GetEffect() { return &m_Effect; }
-	VstIntPtr Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	void SetParameter(VstInt32 index, float parameter);
-	float GetParameter(VstInt32 index);
-	void Process(float **inputs, float **outputs, long sampleframes);
-
-public:
-	static VstIntPtr VSTCALLBACK BuzzDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	static void VSTCALLBACK BuzzSetParameter(AEffect *effect, VstInt32 index, float parameter);
-	static float VSTCALLBACK BuzzGetParameter(AEffect *effect, VstInt32 index);
-	static void VSTCALLBACK BuzzProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes);
-
-	// CMICallbacks interface
-public:
-	virtual CWaveInfo const *GetWave(int const) { Log("GetWave\n"); return nullptr; }
-	virtual CWaveLevel const *GetWaveLevel(int const i, int const level) { Log("GetWaveLevel\n"); return nullptr; }
-	virtual void MessageBox(char const *txt) { Reporting::Notification(txt, m_pMachineInfo->Name); }
-	virtual void Lock() { Log("Lock\n"); }
-	virtual void Unlock() { Log("Unlock\n"); }
-	virtual int GetWritePos() { Log("GetWritePos\n"); return 0; }
-	virtual int GetPlayPos() { Log("GetPlayPos\n"); return 0; }
-	virtual float *GetAuxBuffer() { Log("GetAuxBuffer\n"); return nullptr; }
-	virtual void ClearAuxBuffer() { Log("ClearAuxBuffer\n"); }
-	virtual int GetFreeWave() { Log("GetFreeWave\n"); return 0; }
-	virtual bool AllocateWave(int const i, int const size, char const *name) { Log("AllocateWave\n"); return false; }
-	virtual void ScheduleEvent(int const time, dword const data) { Log("ScheduleEvent\n"); }
-	virtual void MidiOut(int const dev, dword const data) { Log("MidiOut\n"); }
-	virtual short const *GetOscillatorTable(int const waveform) { Log("GetOscillatorTable\n"); return nullptr; }
-
-	// envelopes
-	virtual int GetEnvSize(int const wave, int const env) { Log("GetEnvSize\n"); return 0; }
-	virtual bool GetEnvPoint(int const wave, int const env, int const i, word &x, word &y, int &flags) { Log("GetEnvPoint\n"); return false; }
-	virtual CWaveLevel const *GetNearestWaveLevel(int const i, int const note) { Log("GetNearestWaveLevel(%d, %d)\n", i, note); return &m_WaveLevel; }
-
-	// pattern editing
-	virtual void SetNumberOfTracks(int const n) { Log("SetNumberOfTracks\n"); }
-	virtual CPattern *CreatePattern(char const *name, int const length) { Log("CreatePattern\n"); return nullptr; }
-	virtual CPattern *GetPattern(int const index) { Log("GetPattern\n"); return nullptr; }
-	virtual char const *GetPatternName(CPattern *ppat) { Log("GetPatternName\n"); return ""; }
-	virtual void RenamePattern(char const *oldname, char const *newname) { Log("RenamePattern\n"); }
-	virtual void DeletePattern(CPattern *ppat) { Log("DeletePattern\n"); }
-	virtual int GetPatternData(CPattern *ppat, int const row, int const group, int const track, int const field) { Log("GetPatternData\n"); return 0; }
-	virtual void SetPatternData(CPattern *ppat, int const row, int const group, int const track, int const field, int const value) { Log("SetPatternData\n"); }
-
-	// sequence editing
-	virtual CSequence *CreateSequence() { Log("CreateSequence\n"); return nullptr; }
-	virtual void DeleteSequence(CSequence *pseq) { Log("DeleteSequence\n"); }
-
-	// special ppat values for GetSequenceData and SetSequenceData
-	// empty = nullptr
-	// <break> = (CPattern *)1
-	// <mute> = (CPattern *)2
-	// <thru> = (CPattern *)3
-	virtual CPattern *GetSequenceData(int const row) { Log("GetSequenceData\n"); return nullptr; }
-	virtual void SetSequenceData(int const row, CPattern *ppat) { Log("SetSequenceData\n"); }
-
-	// buzz v1.2 (MI_VERSION 15) additions start here
-	virtual void SetMachineInterfaceEx(CMachineInterfaceEx *pex) { Log("SetMachineInterfaceEx\n"); }
-	// group 1=global, 2=track
-	virtual void ControlChange__obsolete__(int group, int track, int param, int value) { Log("ControlChange__obsolete__\n"); }
-
-	// direct calls to audiodriver, used by WaveInput and WaveOutput
-	// shouldn't be used for anything else
-	virtual int ADGetnumChannels(bool input) { Log("ADGetNumChannels\n"); return 2; }
-	virtual void ADWrite(int channel, float *psamples, int numsamples) { Log("ADWrite\n"); }
-	virtual void ADRead(int channel, float *psamples, int numsamples) { Log("ADRead\n"); }
-
-	virtual CMachine *GetThisMachine() { Log("GetThisMachine\n"); return nullptr; }
-	virtual void ControlChange(CMachine *pmac, int group, int track, int param, int value) { Log("ControlChange\n"); }		// set value of parameter (group & 16 == don't record)
-
-	// returns pointer to the sequence if there is a pattern playing
-	virtual CSequence *GetPlayingSequence(CMachine *pmac) { Log("GetPlayingSequence\n"); return nullptr; }
-
-	// gets ptr to raw pattern data for row of a track of a currently playing pattern (or something like that)
-	virtual void *GetPlayingRow(CSequence *pseq, int group, int track) { Log("GetPlayingRow\n"); return nullptr; }
-	virtual int GetStateFlags() { Log("GetStateFlags\n"); return 0; }
-	virtual void SetnumOutputChannels(CMachine *pmac, int n) { Log("SetNumOutputChannels\n"); }	// if n=1 Work(), n=2 WorkMonoToStereo()
-	virtual void SetEventHandler(CMachine *pmac, BEventType et, EVENT_HANDLER_PTR p, void *param) { Log("SetEventHandler\n"); }
-	virtual char const *GetWaveName(int const i) { Log("GetWavename\n"); return ""; }
-	virtual void SetInternalWaveName(CMachine *pmac, int const i, char const *name) { Log("SetInternalWaveName\n"); }	// i >= 1, nullptr name to clear
-	virtual void GetMachineNames(CMachineDataOutput *pout) { Log("GetMachineNames\n"); }		// *pout will get one name per Write()
-	virtual CMachine *GetMachine(char const *name) { Log("GetMachine\n"); return nullptr; }
-	virtual CMachineInfo const *GetMachineInfo(CMachine *pmac) { Log("GetMachineInfo\n"); return nullptr; }
-	virtual char const *GetMachineName(CMachine *pmac) { Log("GetMachineName\n"); return ""; }
-	virtual bool GetInput(int index, float *psamples, int numsamples, bool stereo, float *extrabuffer) { Log("GetInput\n"); return false; }
-};
-
-
-CBuzz2Vst::CBuzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo)
-//----------------------------------------------------------------------------------
-{
-	m_pMachineInfo = pBuzzInfo;
-	m_pMachineInterface = pBuzzMachine;
-	m_pDataInput = new CVSTDataInput(this);
-
-	MemsetZero(m_Effect);
-	m_Effect.magic = kBuzzMagic;
-	m_Effect.numPrograms = 1;
-	m_Effect.numParams = pBuzzInfo->numGlobalParameters;
-	m_Effect.numInputs = 2;
-	m_Effect.numOutputs = 2;
-	m_Effect.flags = 0;		// see constants
-	m_Effect.ioRatio = 1.0f;
-	m_Effect.object = this;
-	m_Effect.uniqueID = pBuzzInfo->Version;
-	m_Effect.version = 2;
-	// Callbacks
-	m_Effect.dispatcher = BuzzDispatcher;
-	m_Effect.setParameter = BuzzSetParameter;
-	m_Effect.getParameter = BuzzGetParameter;
-	m_Effect.process = BuzzProcess;
-	m_Effect.processReplacing = nullptr;
-	// Buzz Info
-	m_pMachineInterface->pMasterInfo = &m_MasterInfo;
-	m_pMachineInterface->pCB = this;
-	m_MasterInfo.BeatsPerMin = 125;
-	m_MasterInfo.TicksPerBeat = 6;
-	m_MasterInfo.SamplesPerSec = CSoundFile::gdwMixingFreq;
-	m_MasterInfo.SamplesPerTick = (int)((60*m_MasterInfo.SamplesPerSec) / (125*6));
-	m_MasterInfo.PosInTick = 0;
-	m_MasterInfo.TicksPerSec = (float)m_MasterInfo.SamplesPerSec / (float)m_MasterInfo.SamplesPerTick;
-	// Dummy Wave Level
-	MemsetZero(m_Waveform);
-	m_WaveLevel.numSamples = 16;
-	m_WaveLevel.pSamples = m_Waveform;
-	m_WaveLevel.RootNote = 60;
-	m_WaveLevel.SamplesPerSec = 44100;
-	m_WaveLevel.LoopStart = 0;
-	m_WaveLevel.LoopEnd = 0;
-}
-
-
-CBuzz2Vst::~CBuzz2Vst()
-//---------------------
-{
-	m_Effect.object = nullptr;
-	if (m_pMachineInfo)
-	{
-		m_pMachineInfo = nullptr;
-	}
-	if (m_pMachineInterface)
-	{
-		delete m_pMachineInterface;
-		m_pMachineInterface = nullptr;
-	}
-	if (m_pDataInput)
-	{
-		delete m_pDataInput;
-		m_pDataInput = nullptr;
-	}
-}
-
-
-VstIntPtr CBuzz2Vst::BuzzDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
-//--------------------------------------------------------------------------------------------------------------------------
-{
-	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
-	if (pBuzz2Vst) return pBuzz2Vst->Dispatcher(opCode, index, value, ptr, opt);
-	return 0;
-}
-
-
-void CBuzz2Vst::BuzzSetParameter(AEffect *effect, VstInt32 index, float parameter)
-//--------------------------------------------------------------------------------
-{
-	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
-	if (pBuzz2Vst) pBuzz2Vst->SetParameter(index, parameter);
-}
-
-
-float CBuzz2Vst::BuzzGetParameter(AEffect *effect, VstInt32 index)
-//----------------------------------------------------------------
-{
-	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
-	if (pBuzz2Vst) return pBuzz2Vst->GetParameter(index);
-	return 0;
-}
-
-
-void CBuzz2Vst::BuzzProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes)
-//--------------------------------------------------------------------------------------------------
-{
-	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
-	if (pBuzz2Vst) pBuzz2Vst->Process(inputs, outputs, sampleframes);
-}
-
-
-VstIntPtr CBuzz2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
-//-----------------------------------------------------------------------------------------------------
-{
-	if (!m_pMachineInterface) return 0;
-	switch(opCode)
-	{
-	case effOpen:
-		Log("Initializing machine...\n");
-		m_pMachineInterface->Init(m_pDataInput);
-		Log("Done.\n");
-		break;
-
-	case effClose:
-		m_Effect.object = nullptr;
-		delete this;
-		return 0;
-
-	case effIdentify:
-		return 'NvEf';
-
-	case effGetParamName:
-		if (index < m_pMachineInfo->numGlobalParameters)
-		{
-			const CMachineParameter *p = m_pMachineInfo->Parameters[index];
-			if ((p) && (ptr) && (p->Name))
-			{
-				lstrcpyn((char *)ptr, p->Name, 9);
-			}
-		}
-		break;
-
-	case effGetParamDisplay:
-		if (index < m_pMachineInfo->numGlobalParameters)
-		{
-			const CMachineParameter *p = m_pMachineInfo->Parameters[index];
-			if (p)
-			{
-				int value = p->DefValue;
-				const char *s = m_pMachineInterface->DescribeValue(index, value);
-				if ((s) && (ptr))
-				{
-					lstrcpyn((char *)ptr, s, 9);
-				}
-			}
-		}
-		break;
-
-	case effCanBeAutomated:
-		return (index < m_pMachineInfo->numGlobalParameters);
-
-	// Buzz extensions
-	case effBuzzGetNumCommands:
-		{
-			const char *p = m_pMachineInfo->Commands;
-			UINT n = 0;
-			while (p)
-			{
-				if (!*p)
-				{
-					n++;
-					break;
-				}
-				if (*p == '\n') n++;
-				p++;
-			}
-			return n;
-		}
-
-	case effBuzzGetCommandName:
-		if (ptr)
-		{
-			const char *p = m_pMachineInfo->Commands;
-			char *s = (char *)ptr;
-			UINT n = 0, len = 0;
-			while ((p) && (n <= (UINT)index))
-			{
-				if (!*p)
-				{
-					n++;
-					break;
-				}
-				if (*p == '\n') n++;
-				if ((n == (UINT)index) && (len < 10))
-				{
-					*s++ = *p;
-					len++;
-				}
-				p++;
-			}
-			*s = 0;
-			return 0;
-		}
-
-	case effBuzzExecuteCommand:
-		{
-			m_pMachineInterface->Command(index);
-		}
-	}
-	return 0;
-}
-
-
-void CBuzz2Vst::SetParameter(VstInt32 index, float parameter)
-//-----------------------------------------------------------
-{
-
-}
-
-
-float CBuzz2Vst::GetParameter(VstInt32 index)
-//-------------------------------------------
-{
-	if (index < m_pMachineInfo->numGlobalParameters)
-	{
-		const CMachineParameter *p = m_pMachineInfo->Parameters[index];
-		if (p)
-		{
-			float fmin = (float)p->MinValue;
-			float fmax = (float)p->MaxValue;
-			float f = (float)p->DefValue;
-			if (p->MinValue < p->MaxValue)
-			{
-				return (f - fmin) / (fmax - fmin);
-			}
-		}
-	}
-	return 0;
-}
-
-
-void X86_Interleave(const float *pinL, const float *pinR, float *pout, int nsamples)
-//----------------------------------------------------------------------------------
-{
-	for (int i=0; i<nsamples; i++)
-	{
-		pout[i*2] = pinL[i];
-		pout[i*2+1] = pinR[i];
-	}
-}
-
-
-void X86_AddAndDeinterleave(const float *pin, float *poutL, float *poutR, int nsamples)
-//-------------------------------------------------------------------------------------
-{
-	for (int i=0; i<nsamples; i++)
-	{
-		poutL[i] += pin[i*2];
-		poutR[i] += pin[i*2+1];
-	}
-}
-
-
-void CBuzz2Vst::Process(float **inputs, float **outputs, long sampleframes)
-//-------------------------------------------------------------------------
-{
-	float *pinL = inputs[0], *pinR = inputs[1];
-	float *poutL = outputs[0], *poutR = outputs[1];
-	float Buffer[MIXBUFFERSIZE * 2];		// Stereo interleaved
-
-	// Re-interleave the stereo mix
-	X86_Interleave(pinL, pinR, Buffer, sampleframes);
-	// Process
-	m_pMachineInterface->Work(Buffer, sampleframes, WM_READWRITE);
-	// De-interleave and add the result
-	X86_AddAndDeinterleave(Buffer, poutL, poutR, sampleframes);
-}
-
-
-AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo)
-//-------------------------------------------------------------------------------
-{
-	CBuzz2Vst *p;
-
-	if ((!pBuzzMachine) || (!pBuzzInfo)) return nullptr;
-	p = new CBuzz2Vst(pBuzzMachine, pBuzzInfo);
-	return (p) ? p->GetEffect() : nullptr;
-}
-
-#endif // ENABLE_BUZZ
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3933,7 +3420,7 @@ void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
 }
 
 
-AEffect *DmoToVst(PVSTPLUGINLIB pLib)
+AEffect *DmoToVst(VSTPluginLib *pLib)
 //-----------------------------------
 {
 	WCHAR w[100];

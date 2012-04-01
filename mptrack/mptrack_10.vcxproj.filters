@@ -451,6 +451,9 @@
     <ClCompile Include="..\soundlib\XMTools.cpp">
       <Filter>Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\JBridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -759,10 +762,10 @@
     <ClInclude Include="..\soundlib\MIDIMacros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\PluginMixBuffer.h">
+    <ClInclude Include="..\soundlib\plugins\PluginMixBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\PlugInterface.h">
+    <ClInclude Include="..\soundlib\plugins\PlugInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EffectInfo.h">
@@ -792,7 +795,7 @@
     <ClInclude Include="PatternCursor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\PluginEventQueue.h">
+    <ClInclude Include="..\soundlib\plugins\PluginEventQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\RowVisitor.h">
@@ -800,6 +803,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\XMTools.h">
       <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\JBridge.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

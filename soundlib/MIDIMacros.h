@@ -12,7 +12,7 @@
 
 #ifdef MODPLUG_TRACKER
 class CSoundFile;
-#include "PlugInterface.h"
+#include "plugins/PlugInterface.h"
 #include "Snd_defs.h"
 #endif // MODPLUG_TRACKER
 

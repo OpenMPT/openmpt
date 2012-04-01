@@ -107,30 +107,38 @@ void CSelectPluginDlg::OnOK()
 {
 	// -> CODE#0002
 	// -> DESC="list box to choose VST plugin presets (programs)"
-	if(m_pPlugin==NULL) { CDialog::OnOK(); return; }
+	if(m_pPlugin==nullptr) { CDialog::OnOK(); return; }
 	// -! NEW_FEATURE#0002
 
-	BOOL bChanged = FALSE;
+	bool changed = false;
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	PVSTPLUGINLIB pNewPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
-	PVSTPLUGINLIB pFactory = NULL;
-	CVstPlugin *pCurrentPlugin = NULL;
-	if (m_pPlugin) pCurrentPlugin = (CVstPlugin *)m_pPlugin->pMixPlugin;
+	VSTPluginLib *pNewPlug = (VSTPluginLib *)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
+	VSTPluginLib *pFactory = nullptr;
+	CVstPlugin *pCurrentPlugin = nullptr;
+	if (m_pPlugin) pCurrentPlugin = dynamic_cast<CVstPlugin *>(m_pPlugin->pMixPlugin);
 	if ((pManager) && (pManager->IsValidPlugin(pNewPlug))) pFactory = pNewPlug;
-	// Plugin selected
+
 	if (pFactory)
 	{
+		// Plugin selected
 		if ((!pCurrentPlugin) || (pCurrentPlugin->GetPluginFactory() != pFactory))
 		{
 			CriticalSection cs;
-			if (pCurrentPlugin) pCurrentPlugin->Release();
+
+			if (pCurrentPlugin != nullptr)
+			{
+				pCurrentPlugin->Release();
+			}
+
 			// Just in case...
-			m_pPlugin->pMixPlugin = NULL;
-			m_pPlugin->pMixState = NULL;
+			m_pPlugin->pMixPlugin = nullptr;
+			m_pPlugin->pMixState = nullptr;
+
 			// Remove old state
 			m_pPlugin->nPluginDataSize = 0;
 			if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
-			m_pPlugin->pPluginData = NULL;
+			m_pPlugin->pPluginData = nullptr;
+
 			// Initialize plugin info
 			MemsetZero(m_pPlugin->Info);
 			m_pPlugin->Info.dwPluginId1 = pFactory->dwPluginId1;
@@ -167,24 +175,27 @@ void CSelectPluginDlg::OnOK()
 					}
 				}
 			}
-			bChanged = TRUE;
+			changed = true;
 		}
 	} else
-		// No effect
 	{
+		// No effect
 		CriticalSection cs;
 		if (pCurrentPlugin)
 		{
 			pCurrentPlugin->Release();
-			bChanged = TRUE;
+			changed = true;
 		}
+
 		// Just in case...
-		m_pPlugin->pMixPlugin = NULL;
-		m_pPlugin->pMixState = NULL;
+		m_pPlugin->pMixPlugin = nullptr;
+		m_pPlugin->pMixState = nullptr;
+
 		// Remove old state
 		m_pPlugin->nPluginDataSize = 0;
 		if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
-		m_pPlugin->pPluginData = NULL;
+		m_pPlugin->pPluginData = nullptr;
+
 		// Clear plugin info
 		MemsetZero(m_pPlugin->Info);
 	}
@@ -197,7 +208,7 @@ void CSelectPluginDlg::OnOK()
 	CMainFrame::GetSettings().gnPlugWindowWidth  = rect.right - rect.left;
 	CMainFrame::GetSettings().gnPlugWindowHeight = rect.bottom - rect.top;
 
-	if (bChanged)
+	if (changed)
 	{
 		CMainFrame::GetSettings().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
@@ -249,8 +260,8 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect /* = 0*/)
 
 	if (pManager)
 	{
-		PVSTPLUGINLIB pCurrent = NULL;
-		PVSTPLUGINLIB p = pManager->GetFirstPlugin();
+		VSTPluginLib *pCurrent = NULL;
+		VSTPluginLib *p = pManager->GetFirstPlugin();
 		while (p)
 		{
 			// Apply name filter
@@ -270,10 +281,10 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect /* = 0*/)
 				hParent = hDmo;
 			} else
 			{
-				hParent = (p->bIsInstrument) ? hSynth : hVst;
+				hParent = (p->isInstrument) ? hSynth : hVst;
 			}
 
-			HTREEITEM h = AddTreeItem(p->szLibraryName, p->bIsInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, hParent, (LPARAM)p);
+			HTREEITEM h = AddTreeItem(p->szLibraryName, p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, hParent, (LPARAM)p);
 
 			//If filter is active, expand nodes.
 			if (m_sNameFilter != "") m_treePlugins.EnsureVisible(h);
@@ -367,7 +378,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 //-----------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	PVSTPLUGINLIB pPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
+	VSTPluginLib *pPlug = (VSTPluginLib *)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
 	if ((pManager) && (pManager->IsValidPlugin(pPlug)))
 	{
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, pPlug->szDllPath);
@@ -397,7 +408,7 @@ static const PROBLEMATIC_PLUG gProblemPlugs[] =
 	{ kEffectMagic, CCONST('f', 'r', 'V', '2'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
 };
 
-bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
+bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug) 
 //---------------------------------------------------
 {
 	CString s;
@@ -429,7 +440,7 @@ void CSelectPluginDlg::OnAddPlugin()
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	bool bOk = false;
 
-	PVSTPLUGINLIB plugLib = nullptr;
+	VSTPluginLib *plugLib = nullptr;
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
 
@@ -463,7 +474,7 @@ void CSelectPluginDlg::OnRemovePlugin()
 //-------------------------------------
 {
 	const HTREEITEM pluginToDelete = m_treePlugins.GetSelectedItem();
-	PVSTPLUGINLIB pPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(pluginToDelete);
+	VSTPluginLib *pPlug = (VSTPluginLib *)m_treePlugins.GetItemData(pluginToDelete);
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 
 	if ((pManager) && (pPlug))

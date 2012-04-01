@@ -27,7 +27,7 @@
 #include "ModInstrument.h"
 #include "ModChannel.h"
 #include "modcommand.h"
-#include "PlugInterface.h"
+#include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 
 // -----------------------------------------------------------------------------------------
