@@ -1703,8 +1703,8 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 }
 
 
-long CVstPlugin::GetCurrentProgram()
-//----------------------------------
+VstInt32 CVstPlugin::GetCurrentProgram()
+//--------------------------------------
 {
 	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
 	{
