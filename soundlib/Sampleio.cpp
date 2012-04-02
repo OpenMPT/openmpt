@@ -173,12 +173,7 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 	// Check if any of those samples are referenced by other instruments as well, in which case we want to keep them of course.
 	for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++) if (Instruments[nIns] != nullptr && nIns != nInstr)
 	{
-		referencedSamples = Instruments[nIns]->GetSamples();
-		for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
-		{
-			if((*sample) <= GetNumSamples())
-				keepSamples[*sample] = true;
-		}
+		Instruments[nIns]->GetSamples(keepSamples);
 	}
 
 	// Now nuke the selected samples.

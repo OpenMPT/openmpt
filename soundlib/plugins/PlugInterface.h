@@ -105,11 +105,11 @@ struct SNDMIXPLUGININFO
 		irExpandMix		= 0x08,		// [0%,100%] -> [-200%,200%]
 	};
 
-	DWORD dwPluginId1;				// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
-	DWORD dwPluginId2;				// Plugin unique ID
-	DWORD dwInputRouting;			// Bits 0 to 7 = RoutingFlags, bits 8 - 15 = mixing mode, bits 16-23 = gain
-	DWORD dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
-	DWORD dwReserved[4];			// Reserved for routing info
+	VstInt32 dwPluginId1;			// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
+	VstInt32 dwPluginId2;			// Plugin unique ID
+	uint32 dwInputRouting;			// Bits 0 to 7 = RoutingFlags, bits 8 - 15 = mixing mode, bits 16-23 = gain
+	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
+	uint32 dwReserved[4];			// Reserved for routing info
 	CHAR szName[32];				// User-chosen plugin name
 	CHAR szLibraryName[64];			// original DLL name
 

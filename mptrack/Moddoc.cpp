@@ -952,8 +952,9 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 		pChn->nMasterChn = 0;	// remove NNA association
 		pChn->nNewNote = static_cast<BYTE>(note);
 
-		if (nins)									// Set instrument
+		if (nins)
 		{
+			// Set instrument
 			pChn->ResetEnvelopes();
 			m_SndFile.InstrumentChange(pChn, nins);
 			pChn->nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
@@ -1321,6 +1322,7 @@ bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)
 	return true;
 }
 
+
 bool CModDoc::MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute)
 //--------------------------------------------------------------
 {
@@ -1445,22 +1447,30 @@ bool CModDoc::IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const
 }
 
 
-UINT CModDoc::FindSampleParent(UINT nSmp) const
-//---------------------------------------------
+// Find an instrument that references the given sample.
+// If no such instrument is found, INSTRUMENTINDEX_INVALID is returned.
+INSTRUMENTINDEX CModDoc::FindSampleParent(SAMPLEINDEX sample) const
+//-----------------------------------------------------------------
 {
-	if ((!m_SndFile.m_nInstruments) || (!nSmp)) return 0;
-	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
+	if(sample == 0)
 	{
-		ModInstrument *pIns = m_SndFile.Instruments[i];
-		if (pIns)
+		return INSTRUMENTINDEX_INVALID;
+	}
+	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++)
+	{
+		const ModInstrument *pIns = m_SndFile.Instruments[i];
+		if(pIns != nullptr)
 		{
-			for (UINT j=0; j<NOTE_MAX; j++)
+			for(size_t j = 0; j < NOTE_MAX; j++)
 			{
-				if (pIns->Keyboard[j] == nSmp) return i;
+				if(pIns->Keyboard[j] == sample)
+				{
+					return i;
+				}
 			}
 		}
 	}
-	return 0;
+	return INSTRUMENTINDEX_INVALID;
 }
 
 

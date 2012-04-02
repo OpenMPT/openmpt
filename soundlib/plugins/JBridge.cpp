@@ -11,17 +11,22 @@
 
 #include "stdafx.h"
 #include <pluginterfaces/vst2.x/aeffectx.h>
+#include "JBridge.h"
 
 namespace JBridge
 {
+
+#ifdef ENABLE_JBRIDGE
 
 // Name of the proxy DLL to load
 static const char *proxyRegKey = "Software\\JBridge";
 
 #ifdef _M_X64
 static const char *proxyRegVal = "Proxy64";	//use this for x64 builds
+static_assert(sizeof(void *) == 8, "Wrong platform!");
 #else
 static const char *proxyRegVal = "Proxy32";	//use this for x86 builds
+static_assert(sizeof(void *) == 4, "Wrong platform!");
 #endif
 
 // Typedef for BridgeMain proc
@@ -100,5 +105,7 @@ AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const char *pluginPa
 
 	return pfnBridgeMain(audioMaster, pluginPath);
 }
+
+#endif // ENABLE_JBRIDGE
 
 }

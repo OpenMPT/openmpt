@@ -10,7 +10,15 @@
 
 #pragma once
 
+#if !defined(NO_VST) && (defined(WIN32) || (defined(WINDOWS) && WINDOWS == 1))
+#define ENABLE_JBRIDGE
+#endif
+
 namespace JBridge
 {
+#ifdef ENABLE_JBRIDGE
 	AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const char *pluginPath);
+#else
+	void *LoadBridgedPlugin(void *, const char *) { return nullptr; }
+#endif // ENABLE_JBRIDGE
 }

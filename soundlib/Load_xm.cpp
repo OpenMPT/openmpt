@@ -806,20 +806,12 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	}
 
 	// Check which samples are referenced by which instruments (for assigning unreferenced samples to instruments)
-	vector<bool> sampleAssigned(GetNumSamples(), false);
+	vector<bool> sampleAssigned(GetNumSamples() + 1, false);
 	for(INSTRUMENTINDEX ins = 1; ins <= GetNumInstruments(); ins++)
 	{
-		if(Instruments[ins] == nullptr)
+		if(Instruments[ins] != nullptr)
 		{
-			continue;
-		}
-		const std::set<SAMPLEINDEX> referencedSamples = Instruments[ins]->GetSamples();
-		for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
-		{
-			if(*sample <= GetNumSamples())
-			{
-				sampleAssigned[*sample - 1] = true;
-			}
+			Instruments[ins]->GetSamples(sampleAssigned);
 		}
 	}
 
@@ -853,12 +845,12 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 				for(vector<SAMPLEINDEX>::const_iterator sample = samples.begin(); sample != samples.end(); sample++)
 				{
 					SAMPLEINDEX smp = *sample;
-					while(smp < GetNumSamples()
-						&& !sampleAssigned[smp]		// zero-based
+					while(++smp <= GetNumSamples()
+						&& !sampleAssigned[smp]
 						&& insHeader.numSamples < (compatibilityExport ? 16 : 32))
 					{
-						sampleAssigned[smp++] = true;		// Don't want to add this sample again.
-						additionalSamples.push_back(smp);	// Not zero-based :)
+						sampleAssigned[smp] = true;			// Don't want to add this sample again.
+						additionalSamples.push_back(smp);
 						insHeader.numSamples++;
 					}
 				}

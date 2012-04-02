@@ -44,6 +44,19 @@ struct VSTPluginLib
 	CVstPlugin *pPluginsList;
 	CHAR szLibraryName[_MAX_FNAME];
 	CHAR szDllPath[_MAX_PATH];
+
+	VSTPluginLib(const CHAR *dllPath = nullptr)
+	{
+		pPrev = pNext = nullptr;
+		dwPluginId1 = dwPluginId2 = 0;
+		isInstrument = false;
+		pPluginsList = nullptr;
+		if(dllPath != nullptr)
+		{
+			lstrcpyn(szDllPath, dllPath, CountOf(szDllPath));
+			StringFixer::SetNullTerminator(szDllPath);
+		}
+	}
 };
 
 
@@ -281,7 +294,7 @@ protected:
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	VstIntPtr VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect);
+	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect);
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(SNDMIXPLUGIN *, CSoundFile *);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance

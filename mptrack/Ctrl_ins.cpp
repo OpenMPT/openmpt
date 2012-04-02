@@ -1288,21 +1288,21 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			//end rewbs.instroVSTi
 			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++)
 			{
-                DWORD v = m_CbnResampling.GetItemData(nRes);
-		        if (pIns->nResampling == v)
+				DWORD v = m_CbnResampling.GetItemData(nRes);
+				if (pIns->nResampling == v)
 				{
 					m_CbnResampling.SetCurSel(nRes);
 					break;
-	             }
+				}
 			}
 			for(int nFltMode = 0; nFltMode<m_CbnFilterMode.GetCount(); nFltMode++)
 			{
-                DWORD v = m_CbnFilterMode.GetItemData(nFltMode);
-		        if (pIns->nFilterMode == v)
+				DWORD v = m_CbnFilterMode.GetItemData(nFltMode);
+				if (pIns->nFilterMode == v)
 				{
 					m_CbnFilterMode.SetCurSel(nFltMode);
 					break;
-	             }
+				}
 			}
 
 			// NNA, DCT, DCA
@@ -1313,7 +1313,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_ComboPPC.SetCurSel(pIns->nPPC);
 			SetDlgItemInt(IDC_EDIT15, pIns->nPPS);
 			// Filter
-			if (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+			if (m_pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 			{
 				m_CheckCutOff.SetCheck((pIns->IsCutoffEnabled()) ? TRUE : FALSE);
 				m_CheckResonance.SetCheck((pIns->IsResonanceEnabled()) ? TRUE : FALSE);
@@ -2168,6 +2168,28 @@ void CCtrlInstruments::OnMixPlugChanged()
 							m_pModDoc->SetModified();
 						}
 						UpdatePluginList();
+
+						if(plugin.pMixPlugin != nullptr && plugin.pMixPlugin->isInstrument())
+						{
+							// If we just added an instrument plugin, zap the sample assignments.
+							const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
+							bool hasSamples = false;
+							for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+							{
+								if(*sample > 0 && *sample <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(*sample).pSample != nullptr)
+								{
+									hasSamples = true;
+									break;
+								}
+							}
+
+							if(!hasSamples || Reporting::Confirm("Remove sample associations of this instrument?") == cnfYes)
+							{
+								pIns->AssignSample(0);
+								m_NoteMap.Invalidate();
+							}
+						}
+
 						m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
 					}
 #endif // NO_VST

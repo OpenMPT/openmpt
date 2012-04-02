@@ -278,7 +278,7 @@ public:
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
 	BOOL AdjustEndOfSample(UINT nSample);
 	bool IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const;
-	UINT FindSampleParent(UINT nSmp) const;
+	INSTRUMENTINDEX FindSampleParent(SAMPLEINDEX sample) const;
 	UINT FindInstrumentChild(UINT nIns) const;
 	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
