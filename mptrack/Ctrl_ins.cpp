@@ -2169,42 +2169,42 @@ void CCtrlInstruments::OnMixPlugChanged()
 						}
 						UpdatePluginList();
 
-						if(plugin.pMixPlugin != nullptr && plugin.pMixPlugin->isInstrument())
-						{
-							// If we just added an instrument plugin, zap the sample assignments.
-							const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
-							bool hasSamples = false;
-							for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
-							{
-								if(*sample > 0 && *sample <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(*sample).pSample != nullptr)
-								{
-									hasSamples = true;
-									break;
-								}
-							}
-
-							if(!hasSamples || Reporting::Confirm("Remove sample associations of this instrument?") == cnfYes)
-							{
-								pIns->AssignSample(0);
-								m_NoteMap.Invalidate();
-							}
-						}
-
 						m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
 					}
 #endif // NO_VST
 				}
 
-				if(plugin.pMixPlugin)
+				if(plugin.pMixPlugin != nullptr)
 				{
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
 					
-					// if this plug can recieve MIDI events and we have no MIDI channel
-					// selected for this instrument, automatically select MIDI channel 1.
-					if(plugin.pMixPlugin->isInstrument() && pIns->nMidiChannel == 0)
+					if(!IsLocked() && plugin.pMixPlugin->isInstrument())
 					{
-						pIns->nMidiChannel = 1;
-						UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, NULL);
+						if(pIns->nMidiChannel == MidiNoChannel)
+						{
+							// If this plugin can recieve MIDI events and we have no MIDI channel
+							// selected for this instrument, automatically select MIDI channel 1.
+							pIns->nMidiChannel = MidiFirstChannel;
+							UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, NULL);
+						}
+
+						// If we just dialled up an instrument plugin, zap the sample assignments.
+						const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
+						bool hasSamples = false;
+						for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+						{
+							if(*sample > 0 && *sample <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(*sample).pSample != nullptr)
+							{
+								hasSamples = true;
+								break;
+							}
+						}
+
+						if(!hasSamples || Reporting::Confirm("Remove sample associations of this instrument?") == cnfYes)
+						{
+							pIns->AssignSample(0);
+							m_NoteMap.Invalidate();
+						}
 					}
 					return;
 				}
