@@ -254,7 +254,7 @@ void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 
 	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too!
 
-	numSamples = static_cast<uint16>(min(mptIns.GetSamples().size(), size_t(compatibilityExport ? 16 : 32)));
+	numSamples = static_cast<uint16>(Util::Min(mptIns.GetSamples().size(), size_t(compatibilityExport ? 16 : 32)));
 }
 
 
@@ -305,7 +305,7 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 
 	version = LittleEndianW(0x102);
 
-	numSamples = static_cast<uint16>(LittleEndianW(min(mptIns.GetSamples().size(), size_t(compatibilityExport ? 16 : 32))));
+	numSamples = static_cast<uint16>(LittleEndianW(Util::Min(mptIns.GetSamples().size(), size_t(compatibilityExport ? 16 : 32))));
 }
 
 

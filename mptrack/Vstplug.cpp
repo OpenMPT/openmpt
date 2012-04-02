@@ -158,16 +158,15 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 					if (ERROR_SUCCESS == RegQueryValueEx(hksub, nullptr, 0, &datatype, (LPBYTE)s, &datasize))
 					{
 						VSTPluginLib *p = new VSTPluginLib();
-
-						p->pPrev = nullptr;
 						p->pNext = m_pVstHead;
 						p->dwPluginId1 = kDmoMagic;
 						p->dwPluginId2 = clsid.Data1;
-						p->pPluginsList = nullptr;
-						p->isInstrument = false;
 						lstrcpyn(p->szLibraryName, s, sizeof(p->szLibraryName));
+						StringFixer::SetNullTerminator(p->szLibraryName);
+
 						StringFromGUID2(clsid, w, 100);
 						WideCharToMultiByte(CP_ACP, 0, w, -1, p->szDllPath, sizeof(p->szDllPath), nullptr, nullptr);
+						StringFixer::SetNullTerminator(p->szDllPath);
 					#ifdef DMO_LOG
 						if (theApp.IsDebug()) Log("Found \"%s\" clsid=%s\n", p->szLibraryName, p->szDllPath);
 					#endif
@@ -194,15 +193,25 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 	{
 		library = LoadLibrary(pluginPath);
 
-#ifdef _DEBUG
-		DWORD dw = GetLastError();
-		if(library == nullptr && dw != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
+		if(library == nullptr)
 		{
-			TCHAR szBuf[256];
-			wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, (LPCTSTR)GetErrorMessage(dw));
-			Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
-		}
+			DWORD error = GetLastError();
+
+#ifdef _DEBUG
+			if(error != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
+			{
+				TCHAR szBuf[256];
+				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", error, (LPCTSTR)GetErrorMessage(error));
+				Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
+			}
 #endif //_DEBUG
+
+			if(error == ERROR_MOD_NOT_FOUND)
+			{
+				// No point in trying with JBride, either...
+				return;
+			}
+		}
 	} catch(...)
 	{
 		CVstPluginManager::ReportPlugException("Exception caught in LoadLibrary (%s)", pluginPath);
@@ -226,9 +235,13 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 			Log("Entry point not found! (handle=%08X)\n", library);
 #endif // VST_LOG
 		}
-	} else
+	}
+
+	if(effect == nullptr)
 	{
 		// Try loading the plugin using JBridge instead.
+		FreeLibrary(library);
+		library = nullptr;
 		effect = JBridge::LoadBridgedPlugin(MasterCallBack, pluginPath);
 	}
 }
@@ -238,8 +251,8 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 // LibraryName = ID100000ID200000
 // ID100000ID200000 = FullDllPath
 // ID100000ID200000.Flags = Plugin Flags (for now, just isInstrument).
-			
-VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
+
+VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString *const errStr)
 //------------------------------------------------------------------------------------------------------------------------------
 {
 	TCHAR szPath[_MAX_PATH];
@@ -281,18 +294,17 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				VSTPluginLib *p;
 				try
 				{
-					p = new VSTPluginLib();
+					p = new VSTPluginLib(pszDllPath);
 				} catch(MPTMemoryException)
 				{
 					return nullptr;
 				}
-				lstrcpyn(p->szDllPath, pszDllPath, sizeof(p->szDllPath));
 				_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
 				p->szLibraryName[63] = '\0';
 				p->pNext = m_pVstHead;
-				p->pPrev = nullptr;
 				if (m_pVstHead) m_pVstHead->pPrev = p;
 				m_pVstHead = p;
+
 				// Extract plugin Ids
 				for (UINT i=0; i<16; i++)
 				{
@@ -340,17 +352,14 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 	VSTPluginLib *p = nullptr;
 	try
 	{
-		p = new VSTPluginLib();
+		p = new VSTPluginLib(pszDllPath);
 	} catch(MPTMemoryException)
 	{
 		return nullptr;
 	}
-	p->pPluginsList = nullptr;
-	lstrcpyn(p->szDllPath, pszDllPath, CountOf(p->szDllPath));
 	_splitpath(pszDllPath, nullptr, nullptr, p->szLibraryName, nullptr);
 	p->szLibraryName[63] = 0;
 	p->pNext = m_pVstHead;
-	p->pPrev = nullptr;
 
 	try
 	{
@@ -522,14 +531,23 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 
 	if ((!pFound) && strcmp(pMixPlugin->GetLibraryName(), ""))
 	{
-		CHAR s[_MAX_PATH], dir[_MAX_PATH];
-		_splitpath(theApp.GetConfigFileName(), s, dir, nullptr, nullptr);
-		strcat(s, dir);
-		int len = strlen(s);
-		if ((len > 0) && (s[len - 1] != '\\')) strcat(s, "\\");
-		strncat(s, "plugins\\", _MAX_PATH - 1);
-		strncat(s, pMixPlugin->GetLibraryName(), _MAX_PATH - 1);
-		strncat(s, ".dll", _MAX_PATH-1);
+		// Try finding the plugin DLL in the plugin directory instead.
+		CHAR s[_MAX_PATH];
+		strncpy(s, CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINS), CountOf(s));
+		if(!strcmp(s, ""))
+		{
+			strncpy(s, theApp.GetAppDirPath(), CountOf(s));
+		}
+		size_t len = strlen(s);
+		if((len > 0) && (s[len - 1] != '\\') && (s[len - 1] != '/'))
+		{
+			strcat(s, "\\");
+		}
+		strncat(s, pMixPlugin->GetLibraryName(), CountOf(s));
+		strncat(s, ".dll", CountOf(s));
+
+		StringFixer::SetNullTerminator(s);
+		
 		pFound = AddPlugin(s);
 		if (!pFound)
 		{
@@ -949,21 +967,23 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//"startStopProcess"
 		//"sendVstMidiEventFlagIsRealtime"
 
-		if ((strcmp((char*)ptr,"sendVstEvents") == 0 ||
-				strcmp((char*)ptr,"sendVstMidiEvent") == 0 ||
-				strcmp((char*)ptr,"sendVstTimeInfo") == 0 ||
-				strcmp((char*)ptr,"receiveVstEvents") == 0 ||
-				strcmp((char*)ptr,"receiveVstMidiEvent") == 0 ||
-				strcmp((char*)ptr,"supplyIdle") == 0 ||
-				strcmp((char*)ptr,"sizeWindow") == 0 ||
-				strcmp((char*)ptr,"openFileSelector") == 0 ||
-				strcmp((char*)ptr,"closeFileSelector") == 0 ||
-				strcmp((char*)ptr,"acceptIOChanges") == 0 ||
-				strcmp((char*)ptr,"reportConnectionChanges") == 0
-			))
+		if(!strcmp((char*)ptr,"sendVstEvents")
+			|| !strcmp((char*)ptr,"sendVstMidiEvent")
+			|| !strcmp((char*)ptr,"sendVstTimeInfo")
+			|| !strcmp((char*)ptr,"receiveVstEvents")
+			|| !strcmp((char*)ptr,"receiveVstMidiEvent")
+			|| !strcmp((char*)ptr,"supplyIdle")
+			|| !strcmp((char*)ptr,"sizeWindow")
+			|| !strcmp((char*)ptr,"openFileSelector")
+			|| !strcmp((char*)ptr,"closeFileSelector")
+			|| !strcmp((char*)ptr,"acceptIOChanges")
+			|| !strcmp((char*)ptr,"reportConnectionChanges"))
+		{
 			return HostCanDo;
-		else
+		} else
+		{
 			return HostCanNotDo;
+		}
 
 	case audioMasterGetLanguage:
 		return kVstLangEnglish;
@@ -1015,7 +1035,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// close a fileselector operation with VstFileSelect* in <ptr>: Must be always called after an open !
 	case audioMasterCloseFileSelector:
-		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr, effect);
+		return VstFileSelector(opcode == audioMasterCloseFileSelector, static_cast<VstFileSelect *>(ptr), effect);
 
 	// open an editor for audio (defined by XML text in ptr) - DEPRECATED in VST 2.4
 	case audioMasterEditFile:
@@ -1051,26 +1071,26 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 
 // Helper function for file selection dialog stuff.
-VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect)
-//-----------------------------------------------------------------------------------------------------------------
+VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect)
+//----------------------------------------------------------------------------------------------------------
 {
-	if(pFileSel == nullptr)
+	if(fileSel == nullptr)
 	{
 		return 0;
 	}
 
 	if(!destructor)
 	{
-		pFileSel->nbReturnPath = 0;
-		pFileSel->reserved = 0;
+		fileSel->nbReturnPath = 0;
+		fileSel->reserved = 0;
 
-		if(pFileSel->command != kVstDirectorySelect)
+		if(fileSel->command != kVstDirectorySelect)
 		{
 			// Plugin wants to load or save a file.
 			std::string extensions, workingDir;
-			for(VstInt32 i = 0; i < pFileSel->nbFileTypes; i++)
+			for(VstInt32 i = 0; i < fileSel->nbFileTypes; i++)
 			{
-				VstFileType *pType = &(pFileSel->fileTypes[i]);
+				VstFileType *pType = &(fileSel->fileTypes[i]);
 				extensions += pType->name;
 				extensions += "|";
 #if (defined(WIN32) || (defined(WINDOWS) && WINDOWS == 1))
@@ -1088,9 +1108,9 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 				extensions += "|";
 			}
 
-			if(pFileSel->initialPath != nullptr)
+			if(fileSel->initialPath != nullptr)
 			{
-				workingDir = pFileSel->initialPath;
+				workingDir = fileSel->initialPath;
 			} else
 			{
 				// Plugins are probably looking for presets...?
@@ -1098,9 +1118,9 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			}
 
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
-				(pFileSel->command != kVstFileSave),
+				(fileSel->command != kVstFileSave),
 				"", "", extensions, workingDir,
-				(pFileSel->command == kVstMultipleFilesLoad)
+				(fileSel->command == kVstMultipleFilesLoad)
 				);
 
 			if(files.abort)
@@ -1108,16 +1128,16 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 				return 0;
 			}
 
-			if(pFileSel->command == kVstMultipleFilesLoad)
+			if(fileSel->command == kVstMultipleFilesLoad)
 			{
 				// Multiple paths
-				pFileSel->nbReturnPath = files.filenames.size();
-				pFileSel->returnMultiplePaths = new char *[pFileSel->nbReturnPath];
+				fileSel->nbReturnPath = files.filenames.size();
+				fileSel->returnMultiplePaths = new char *[fileSel->nbReturnPath];
 				for(size_t i = 0; i < files.filenames.size(); i++)
 				{
 					char *fname = new char[files.filenames[i].length() + 1];
 					strcpy(fname, files.filenames[i].c_str());
-					pFileSel->returnMultiplePaths[i] = fname;
+					fileSel->returnMultiplePaths[i] = fname;
 				}
 				return 1;
 			} else
@@ -1127,28 +1147,28 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 				// VOPM doesn't initialize required information properly (it doesn't memset the struct to 0)...
 				if(CCONST('V', 'O', 'P', 'M') == effect->uniqueID)
 				{
-					pFileSel->sizeReturnPath = _MAX_PATH;
+					fileSel->sizeReturnPath = _MAX_PATH;
 				}
 
-				if(pFileSel->returnPath == nullptr || pFileSel->sizeReturnPath == 0)
+				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
 
 					// Provide some memory for the return path.
-					pFileSel->sizeReturnPath = files.first_file.length() + 1;
-					pFileSel->returnPath = new char[pFileSel->sizeReturnPath];
-					if(pFileSel->returnPath == nullptr)
+					fileSel->sizeReturnPath = files.first_file.length() + 1;
+					fileSel->returnPath = new char[fileSel->sizeReturnPath];
+					if(fileSel->returnPath == nullptr)
 					{
 						return 0;
 					}
-					pFileSel->returnPath[pFileSel->sizeReturnPath - 1] = '\0';
-					pFileSel->reserved = 1;
+					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
+					fileSel->reserved = 1;
 				} else
 				{
-					pFileSel->reserved = 0;
+					fileSel->reserved = 0;
 				}
-				strncpy(pFileSel->returnPath, files.first_file.c_str(), pFileSel->sizeReturnPath - 1);
-				pFileSel->nbReturnPath = 1;
-				pFileSel->returnMultiplePaths = nullptr;
+				strncpy(fileSel->returnPath, files.first_file.c_str(), fileSel->sizeReturnPath - 1);
+				fileSel->nbReturnPath = 1;
+				fileSel->returnMultiplePaths = nullptr;
 			}
 			return 1;
 
@@ -1158,9 +1178,9 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 
 			char szInitPath[_MAX_PATH];
 			MemsetZero(szInitPath);
-			if(pFileSel->initialPath)
+			if(fileSel->initialPath)
 			{
-				strncpy(szInitPath, pFileSel->initialPath, _MAX_PATH - 1);
+				strncpy(szInitPath, fileSel->initialPath, _MAX_PATH - 1);
 			}
 
 			char szBuffer[_MAX_PATH];
@@ -1169,37 +1189,37 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 			BROWSEINFO bi;
 			MemsetZero(bi);
 			bi.hwndOwner = CMainFrame::GetMainFrame()->m_hWnd;
-			bi.lpszTitle = pFileSel->title;
+			bi.lpszTitle = fileSel->title;
 			bi.pszDisplayName = szInitPath;
 			bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 			LPITEMIDLIST pid = SHBrowseForFolder(&bi);
 			if(pid != nullptr && SHGetPathFromIDList(pid, szBuffer))
 			{
-				if(CCONST('V', 'S', 'T', 'r') == effect->uniqueID && pFileSel->returnPath != nullptr && pFileSel->sizeReturnPath == 0)
+				if(CCONST('V', 'S', 'T', 'r') == effect->uniqueID && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
 				{
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
 					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
-					pFileSel->sizeReturnPath = strlen(szBuffer) + 1;
-					pFileSel->returnPath[pFileSel->sizeReturnPath - 1] = '\0';
+					fileSel->sizeReturnPath = strlen(szBuffer) + 1;
+					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
 				}
-				if(pFileSel->returnPath == nullptr || pFileSel->sizeReturnPath == 0)
+				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					pFileSel->sizeReturnPath = strlen(szBuffer) + 1;
-					pFileSel->returnPath = new char[pFileSel->sizeReturnPath];
-					if(pFileSel->returnPath == nullptr)
+					fileSel->sizeReturnPath = strlen(szBuffer) + 1;
+					fileSel->returnPath = new char[fileSel->sizeReturnPath];
+					if(fileSel->returnPath == nullptr)
 					{
 						return 0;
 					}
-					pFileSel->returnPath[pFileSel->sizeReturnPath - 1] = '\0';
-					pFileSel->reserved = 1;
+					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
+					fileSel->reserved = 1;
 				} else
 				{
-					pFileSel->reserved = 0;
+					fileSel->reserved = 0;
 				}
-				strncpy(pFileSel->returnPath, szBuffer, pFileSel->sizeReturnPath - 1);
-				pFileSel->nbReturnPath = 1;
+				strncpy(fileSel->returnPath, szBuffer, fileSel->sizeReturnPath - 1);
+				fileSel->nbReturnPath = 1;
 				return 1;
 			} else
 			{
@@ -1209,23 +1229,23 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 	} else
 	{
 		// Close file selector - delete allocated strings.
-		if(pFileSel->command == kVstMultipleFilesLoad && pFileSel->returnMultiplePaths != nullptr)
+		if(fileSel->command == kVstMultipleFilesLoad && fileSel->returnMultiplePaths != nullptr)
 		{
-			for(VstInt32 i = 0; i < pFileSel->nbReturnPath; i++)
+			for(VstInt32 i = 0; i < fileSel->nbReturnPath; i++)
 			{
-				if(pFileSel->returnMultiplePaths[i] != nullptr)
+				if(fileSel->returnMultiplePaths[i] != nullptr)
 				{
-					delete[] pFileSel->returnMultiplePaths[i];
+					delete[] fileSel->returnMultiplePaths[i];
 				}
 			}
-			delete[] pFileSel->returnMultiplePaths;
-			pFileSel->returnMultiplePaths = nullptr;
+			delete[] fileSel->returnMultiplePaths;
+			fileSel->returnMultiplePaths = nullptr;
 		} else
 		{
-			if(pFileSel->reserved == 1 && pFileSel->returnPath != nullptr)
+			if(fileSel->reserved == 1 && fileSel->returnPath != nullptr)
 			{
-				delete[] pFileSel->returnPath;
-				pFileSel->returnPath = nullptr;
+				delete[] fileSel->returnPath;
+				fileSel->returnPath = nullptr;
 			}
 		}
 		return 1;

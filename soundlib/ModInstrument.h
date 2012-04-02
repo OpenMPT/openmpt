@@ -165,6 +165,20 @@ struct ModInstrument
 		return referencedSamples;
 	}
 
+	// Write sample references into a bool vector. If a sample is referenced by this instrument, true is written.
+	// The caller has to initialize the vector.
+	void GetSamples(std::vector<bool> &referencedSamples) const
+	{
+		for(size_t i = 0; i < CountOf(Keyboard); i++)
+		{
+			// 0 isn't a sample.
+			if(Keyboard[i] != 0 && Keyboard[i] < referencedSamples.size())
+			{
+				referencedSamples[Keyboard[i]] = true;
+			}
+		}
+	}
+
 	// Translate instrument properties between two given formats.
 	void Convert(MODTYPE fromType, MODTYPE toType);
 

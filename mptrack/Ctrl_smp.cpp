@@ -385,8 +385,11 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 				INSTRUMENTINDEX k = m_pParent->GetInstrumentChange();
 				if (!pModDoc->IsChildSample(k, lParam))
 				{
-					UINT nins = pModDoc->FindSampleParent(lParam);
-					if (nins) m_pParent->InstrumentChanged(nins);
+					INSTRUMENTINDEX nins = pModDoc->FindSampleParent(lParam);
+					if(nins != INSTRUMENTINDEX_INVALID)
+					{
+						m_pParent->InstrumentChanged(nins);
+					}
 				}
 			} else
 			{
@@ -920,8 +923,11 @@ void CCtrlSamples::OnSampleChanged()
 					UINT k = m_pParent->GetInstrumentChange();
 					if (!m_pModDoc->IsChildSample(k, m_nSample))
 					{
-						UINT nins = m_pModDoc->FindSampleParent(m_nSample);
-						if (nins) m_pParent->InstrumentChanged(nins);
+						INSTRUMENTINDEX nins = m_pModDoc->FindSampleParent(m_nSample);
+						if(nins != INSTRUMENTINDEX_INVALID)
+						{
+							m_pParent->InstrumentChanged(nins);
+						}
 					}
 				} else
 				{
@@ -970,9 +976,9 @@ void CCtrlSamples::OnSampleNew()
 		}
 
 		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
-		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
+		if(m_pModDoc->FindSampleParent(smp) == INSTRUMENTINDEX_INVALID)
 		{
-			if (Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
+			if(Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
 			{
 				INSTRUMENTINDEX nins = m_pModDoc->InsertInstrument(smp);
 				m_pModDoc->UpdateAllViews(NULL, (nins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
@@ -3241,7 +3247,7 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 		return;
 	}
 
-	for(INSTRUMENTINDEX i = 1; i < m_pSndFile->GetNumInstruments(); i++)
+	for(INSTRUMENTINDEX i = 1; i <= m_pSndFile->GetNumInstruments(); i++)
 	{
 		if(m_pSndFile->IsSampleReferencedByInstrument(m_nSample, i))
 		{

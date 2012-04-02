@@ -312,6 +312,10 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 		if ((!wParam) && (pSndFile->m_nInstruments > 0))
 		{
 			nIns = pModDoc->FindSampleParent(nIns);
+			if(nIns == INSTRUMENTINDEX_INVALID)
+			{
+				nIns = 0;
+			}
 		}
 		::SendMessage(m_hWndCtrl, WM_MOD_CTRLMSG, CTRLMSG_PAT_SETINSTRUMENT, nIns);
 	}

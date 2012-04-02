@@ -1620,8 +1620,16 @@ BOOL CSoundFile::ProcessEffects()
 			}
 		}
 		
+		bool triggerNote = (m_nTickCount == nStartTick);	// Can be delayed by a note delay effect
+		// IT Compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
+		// Test case: PatternDelay-NoteDelay.it
+		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && (m_nTickCount % (m_nMusicSpeed + m_nFrameDelay)) == nStartTick)
+		{
+			triggerNote = true;
+		}
+		
 		// Handles note/instrument/volume changes
-		if (m_nTickCount == nStartTick) // can be delayed by a note delay effect
+		if(triggerNote)
 		{
 			UINT note = pChn->rowCommand.note;
 			if (instr) pChn->nNewIns = instr;

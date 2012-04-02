@@ -305,7 +305,13 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nMixPlugin, 1);
 
 	// Samples
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 2);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 3);
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[1], "Pulse Sample"), 0);
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[2], "Empty Sample"), 0);
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[3], "Unassigned Sample"), 0);
+	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(1), 1);
+	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(2), 1);
+	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(3), INSTRUMENTINDEX_INVALID);
 	const ModSample &sample = pSndFile->GetSample(1);
 	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
