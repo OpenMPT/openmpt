@@ -976,7 +976,7 @@ void CCtrlSamples::OnSampleNew()
 		}
 
 		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
-		if(m_pModDoc->FindSampleParent(smp) == INSTRUMENTINDEX_INVALID)
+		if(m_pModDoc->GetNumInstruments() > 0 && m_pModDoc->FindSampleParent(smp) == INSTRUMENTINDEX_INVALID)
 		{
 			if(Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
 			{
