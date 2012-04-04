@@ -95,6 +95,25 @@ typedef struct SAMPLELOOPSTRUCT
 	DWORD dwLoopEnd;		// Byte offset ?
 	DWORD dwFraction;
 	DWORD dwPlayCount;		// Loop Count, 0=infinite
+
+	// Set up a loop struct.
+	void SetLoop(DWORD loopStart, DWORD loopEnd, bool bidi)
+	{
+		dwIdentifier = 0;
+		dwLoopType = LittleEndian(bidi ? 1 : 0);
+		dwLoopStart = LittleEndian(loopStart);
+		// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
+		if(loopEnd > loopStart)
+		{
+			dwLoopEnd = LittleEndian(loopEnd - 1);
+		} else
+		{
+			dwLoopEnd = LittleEndian(loopStart);
+		}
+		dwFraction = 0;
+		dwPlayCount = 0;
+	}
+
 } SAMPLELOOPSTRUCT;
 
 

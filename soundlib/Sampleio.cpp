@@ -608,20 +608,6 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 ///////////////////////////////////////////////////////////////
 // Save WAV
 
-void SetLoop(SAMPLELOOPSTRUCT &loopData, DWORD loopStart, DWORD loopEnd, bool bidi)
-//---------------------------------------------------------------------------------
-{
-	loopData.dwLoopType = LittleEndian(bidi ? 1 : 0);
-	loopData.dwLoopStart = LittleEndian(loopStart);
-	// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
-	if(loopEnd > loopStart)
-	{
-		loopData.dwLoopEnd = LittleEndian(loopEnd - 1);
-	} else
-	{
-		loopData.dwLoopEnd = LittleEndian(loopStart);
-	}
-}
 
 bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 //---------------------------------------------------------------------------
@@ -688,12 +674,12 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	// Write loops
 	if((pSmp->uFlags & CHN_SUSTAINLOOP) != 0)
 	{
-		SetLoop(smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++], pSmp->nSustainStart, pSmp->nSustainEnd, (pSmp->uFlags & CHN_PINGPONGSUSTAIN) != 0);
+		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(pSmp->nSustainStart, pSmp->nSustainEnd, (pSmp->uFlags & CHN_PINGPONGSUSTAIN) != 0);
 		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 	}
 	if((pSmp->uFlags & CHN_LOOP) != 0)
 	{
-		SetLoop(smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++], pSmp->nLoopStart, pSmp->nLoopEnd, (pSmp->uFlags & CHN_PINGPONGLOOP) != 0);
+		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(pSmp->nLoopStart, pSmp->nLoopEnd, (pSmp->uFlags & CHN_PINGPONGLOOP) != 0);
 		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 	}
 	smpl.wsiHdr.smpl_len = LittleEndian(smpl.wsiHdr.smpl_len);
