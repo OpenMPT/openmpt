@@ -1901,33 +1901,27 @@ void CViewSample::OnEditCopy()
 		if (bExtra)
 		{
 			WAVESMPLHEADER *psh = (WAVESMPLHEADER *)(psamples+dwSmpLen);
+			MemsetZero(*psh);
 			psh->smpl_id = 0x6C706D73;
 			psh->smpl_len = sizeof(WAVESMPLHEADER) - 8;
 			psh->dwSamplePeriod = 22675;
 			if (sample.nC5Speed > 256) psh->dwSamplePeriod = 1000000000 / sample.nC5Speed;
 			psh->dwBaseNote = 60;
-			if (sample.uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
+			
+			// Write loops
+			WAVESAMPLERINFO *psmpl = (WAVESAMPLERINFO *)psh;
+			MemsetZero(psmpl->wsiLoops);
+			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
 			{
-				WAVESAMPLERINFO *psmpl = (WAVESAMPLERINFO *)psh;
-				MemsetZero(psmpl->wsiLoops);
-				if (sample.uFlags & CHN_SUSTAINLOOP)
-				{
-					psmpl->wsiHdr.dwSampleLoops = 2;
-					psmpl->wsiLoops[0].dwLoopType = (sample.uFlags & CHN_PINGPONGSUSTAIN) ? 1 : 0;
-					psmpl->wsiLoops[0].dwLoopStart = sample.nSustainStart;
-					psmpl->wsiLoops[0].dwLoopEnd = sample.nSustainEnd;
-					psmpl->wsiLoops[1].dwLoopType = (sample.uFlags & CHN_PINGPONGLOOP) ? 1 : 0;
-					psmpl->wsiLoops[1].dwLoopStart = sample.nLoopStart;
-					psmpl->wsiLoops[1].dwLoopEnd = sample.nLoopEnd;
-				} else
-				{
-					psmpl->wsiHdr.dwSampleLoops = 1;
-					psmpl->wsiLoops[0].dwLoopType = (sample.uFlags & CHN_PINGPONGLOOP) ? 1 : 0;
-					psmpl->wsiLoops[0].dwLoopStart = sample.nLoopStart;
-					psmpl->wsiLoops[0].dwLoopEnd = sample.nLoopEnd;
-				}
-				psmpl->wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT) * psmpl->wsiHdr.dwSampleLoops;
+				psmpl->wsiLoops[psmpl->wsiHdr.dwSampleLoops++].SetLoop(sample.nSustainStart, sample.nSustainEnd, (sample.uFlags & CHN_PINGPONGSUSTAIN) != 0);
+				psmpl->wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 			}
+			if((sample.uFlags & CHN_LOOP) != 0)
+			{
+				psmpl->wsiLoops[psmpl->wsiHdr.dwSampleLoops++].SetLoop(sample.nLoopStart, sample.nLoopEnd, (sample.uFlags & CHN_PINGPONGLOOP) != 0);
+				psmpl->wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
+			}
+
 			WAVEEXTRAHEADER *pxh = (WAVEEXTRAHEADER *)(psamples+dwSmpLen+psh->smpl_len+8);
 			pxh->xtra_id = IFFID_xtra;
 			pxh->xtra_len = sizeof(WAVEEXTRAHEADER)-8;
