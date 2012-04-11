@@ -621,69 +621,73 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	WAVESAMPLERINFO smpl;
 	WAVELISTHEADER list;
 	WAVEEXTRAHEADER extra;
-	const ModSample *pSmp = &Samples[nSample];
+	const ModSample &sample = Samples[nSample];
 	FILE *f;
 
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	MemsetZero(extra);
 	MemsetZero(smpl);
 	header.id_RIFF = LittleEndian(IFFID_RIFF);
-	header.filesize = sizeof(header) + sizeof(format) + sizeof(data) + sizeof(smpl) + sizeof(extra) - 8
-		+ sizeof(list) + 8 + 16 + 8 + 32; // LIST(INAM, ISFT)
+	header.filesize = sizeof(header) - 8 + sizeof(format) + sizeof(data) + sizeof(extra)
+		+ sizeof(list) + 8 + softwareIdLength + 8 + 32; // LIST(INAM, ISFT)
 	header.id_WAVE = LittleEndian(IFFID_WAVE);
 	format.id_fmt = LittleEndian(IFFID_fmt);
 	format.hdrlen = LittleEndian(16);
 	format.format = LittleEndianW(1);
 	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
-		format.freqHz = LittleEndian(pSmp->nC5Speed);
+		format.freqHz = LittleEndian(sample.nC5Speed);
 	else
-		format.freqHz = LittleEndian(TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune));
-	format.channels = LittleEndianW(pSmp->GetNumChannels());
-	format.bitspersample = LittleEndianW(pSmp->GetElementarySampleSize() * 8);
-	format.samplesize = LittleEndianW(pSmp->GetBytesPerSample() * 8);
+		format.freqHz = LittleEndian(TransposeToFrequency(sample.RelativeTone, sample.nFineTune));
+	format.channels = LittleEndianW(sample.GetNumChannels());
+	format.bitspersample = LittleEndianW(sample.GetElementarySampleSize() * 8);
+	format.samplesize = LittleEndianW(sample.GetBytesPerSample());
 	format.bytessec = LittleEndian(format.freqHz * format.samplesize);
 
 	data.id_data = LittleEndian(IFFID_data);
 	UINT nType;
-	data.length = LittleEndian(pSmp->GetSampleSizeInBytes());
-	if (pSmp->uFlags & CHN_STEREO)
+	data.length = sample.GetSampleSizeInBytes();
+	if (sample.uFlags & CHN_STEREO)
 	{
-		nType = (pSmp->uFlags & CHN_16BIT) ? RS_STIPCM16S : RS_STIPCM8U;
+		nType = (sample.uFlags & CHN_16BIT) ? RS_STIPCM16S : RS_STIPCM8U;
 	} else
 	{
-		nType = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8U;
+		nType = (sample.uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8U;
 	}
 
 	header.filesize += data.length;
-	header.filesize = LittleEndian(header.filesize);
-	fwrite(&header, 1, sizeof(header), f);
-	fwrite(&format, 1, sizeof(format), f);
-	fwrite(&data, 1, sizeof(data), f);
-	WriteSample(f, pSmp, nType);
 
 	// "smpl" field
 	smpl.wsiHdr.smpl_id = LittleEndian(IFFID_smpl);
 	smpl.wsiHdr.smpl_len = sizeof(WAVESMPLHEADER) - 8;
-	if (pSmp->nC5Speed >= 256)
-		smpl.wsiHdr.dwSamplePeriod = LittleEndian(1000000000 / pSmp->nC5Speed);
+	if (sample.nC5Speed >= 256)
+		smpl.wsiHdr.dwSamplePeriod = LittleEndian(1000000000 / sample.nC5Speed);
 	else
-		smpl.wsiHdr.dwSamplePeriod = LittleEndian(22675);
+		smpl.wsiHdr.dwSamplePeriod = LittleEndian(22675);	// 44100 Hz
 
-	smpl.wsiHdr.dwBaseNote = LittleEndian(60);
+	smpl.wsiHdr.dwBaseNote = LittleEndian(NOTE_MIDDLEC - NOTE_MIN);
 
 	// Write loops
-	if((pSmp->uFlags & CHN_SUSTAINLOOP) != 0)
+	if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
 	{
-		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(pSmp->nSustainStart, pSmp->nSustainEnd, (pSmp->uFlags & CHN_PINGPONGSUSTAIN) != 0);
+		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(sample.nSustainStart, sample.nSustainEnd, (sample.uFlags & CHN_PINGPONGSUSTAIN) != 0);
 		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 	}
-	if((pSmp->uFlags & CHN_LOOP) != 0)
+	if((sample.uFlags & CHN_LOOP) != 0)
 	{
-		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(pSmp->nLoopStart, pSmp->nLoopEnd, (pSmp->uFlags & CHN_PINGPONGLOOP) != 0);
+		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(sample.nLoopStart, sample.nLoopEnd, (sample.uFlags & CHN_PINGPONGLOOP) != 0);
 		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 	}
-	smpl.wsiHdr.smpl_len = LittleEndian(smpl.wsiHdr.smpl_len);
 
+	// Update file length in header
+	header.filesize += smpl.wsiHdr.smpl_len + 8;
+
+	header.filesize = LittleEndian(header.filesize);
+	data.length = LittleEndian(data.length);
+	smpl.wsiHdr.smpl_len = LittleEndian(smpl.wsiHdr.smpl_len);
+	fwrite(&header, 1, sizeof(header), f);
+	fwrite(&format, 1, sizeof(format), f);
+	fwrite(&data, 1, sizeof(data), f);
+	WriteSample(f, &sample, nType);
 	fwrite(&smpl, 1, smpl.wsiHdr.smpl_len + 8, f);
 
 	// "LIST" field
@@ -708,16 +712,16 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	extra.xtra_id = LittleEndian(IFFID_xtra);
 	extra.xtra_len = LittleEndian(sizeof(extra) - 8);
 
-	extra.dwFlags = LittleEndian(pSmp->uFlags);
-	extra.wPan = LittleEndianW(pSmp->nPan);
-	extra.wVolume = LittleEndianW(pSmp->nVolume);
-	extra.wGlobalVol = LittleEndianW(pSmp->nGlobalVol);
+	extra.dwFlags = LittleEndian(sample.uFlags);
+	extra.wPan = LittleEndianW(sample.nPan);
+	extra.wVolume = LittleEndianW(sample.nVolume);
+	extra.wGlobalVol = LittleEndianW(sample.nGlobalVol);
 	extra.wReserved = 0;
 
-	extra.nVibType = pSmp->nVibType;
-	extra.nVibSweep = pSmp->nVibSweep;
-	extra.nVibDepth = pSmp->nVibDepth;
-	extra.nVibRate = pSmp->nVibRate;
+	extra.nVibType = sample.nVibType;
+	extra.nVibSweep = sample.nVibSweep;
+	extra.nVibDepth = sample.nVibDepth;
+	extra.nVibRate = sample.nVibRate;
 	if((GetType() & MOD_TYPE_XM) && (extra.nVibDepth | extra.nVibRate))
 	{
 		// XM vibrato is upside down

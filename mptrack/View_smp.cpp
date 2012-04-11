@@ -2005,7 +2005,7 @@ void CViewSample::OnEditPaste()
 			SetCurSel(0, 0);
 			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
+			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, NULL);
 		}
 		CloseClipboard();
 	}
