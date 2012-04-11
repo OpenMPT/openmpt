@@ -640,10 +640,10 @@ void CDoWaveConvert::OnButton1()
 	int oldVol = m_pSndFile->GetMasterVolume();
 	int nOldRepeat = m_pSndFile->GetRepeatCount();
 	CSoundFile::gdwSoundSetup |= SNDMIX_DIRECTTODISK;
-	if ((!m_dwFileLimit) && (!m_dwSongLimit)) CSoundFile::gdwSoundSetup |= SNDMIX_NOBACKWARDJUMPS;
 	CSoundFile::gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
 	CSoundFile::gnChannels = m_pWaveFormat->nChannels;
+	m_pSndFile->m_dwSongFlags &= ~(SONG_PAUSED | SONG_STEP);
 // -> CODE#0024
 // -> DESC="wav export update"
 //	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 16))
@@ -900,7 +900,7 @@ void CDoWaveConvert::OnButton1()
 	fseek(f, dwDataOffset-sizeof(datahdr), SEEK_SET);
 	fwrite(&datahdr, sizeof(datahdr), 1, f);
 	fclose(f);
-	CSoundFile::gdwSoundSetup &= ~(SNDMIX_DIRECTTODISK|SNDMIX_NOBACKWARDJUMPS);
+	CSoundFile::gdwSoundSetup &= ~SNDMIX_DIRECTTODISK;
 	m_pSndFile->SetRepeatCount(nOldRepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	if (m_bNormalize)
@@ -1059,7 +1059,7 @@ void CDoAcmConvert::OnButton1()
 	m_pSndFile->ResetChannels();
 	CSoundFile::InitPlayer(TRUE);
 	CSoundFile::gdwSoundSetup |= SNDMIX_DIRECTTODISK;
-	if ((!m_dwFileLimit) && (!m_dwSongLimit)) CSoundFile::gdwSoundSetup |= SNDMIX_NOBACKWARDJUMPS;
+	m_pSndFile->m_dwSongFlags &= ~(SONG_PAUSED | SONG_STEP);
 
 	m_pSndFile->visitedSongRows.Initialize(true);
 
@@ -1150,7 +1150,7 @@ void CDoAcmConvert::OnButton1()
 	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	// Done
 	CSoundFile::gdwSoundSetup = oldsndcfg;
-	CSoundFile::gdwSoundSetup &= ~(SNDMIX_DIRECTTODISK|SNDMIX_NOBACKWARDJUMPS);
+	CSoundFile::gdwSoundSetup &= ~SNDMIX_DIRECTTODISK;
 	m_pSndFile->SetRepeatCount(oldrepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	m_pSndFile->visitedSongRows.Initialize(true);
