@@ -29,7 +29,7 @@
 #include "View_gen.h"
 #include "MIDIMacros.h"
 #include "../common/misc_util.h"
-#include "midi.h"
+#include "../soundlib/MIDIEvents.h"
 #include <cmath>
 
 #define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
@@ -3535,7 +3535,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //     +---------------------------+---------------------------+-------------+-------------+
 //     |     Velocity (0-127)      |  Note (middle C is 60)    |   Event     |   Channel   |
 //     +---------------------------+---------------------------+-------------+-------------+
-//(http://www.borg.com/~jglatt/tech/midispec.htm)
+//(http://home.roadrunner.com/~jgglatt/tech/midispec.htm)
 
 	//Notes:
 	//. Initial midi data handling is done in MidiInCallBack().
@@ -3546,15 +3546,15 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	//  BYTE event  = (dwMidiData>>16) & 0x64;
 	//. Sample- and instrumentview handle midi mesages in their own methods.
 
-	const BYTE nByte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
-	const BYTE nByte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
+	const BYTE nByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
+	const BYTE nByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
 	const BYTE nNote = nByte1 + 1;				// +1 is for MPT, where middle C is 61
 	int nVol = nByte2;							// At this stage nVol is a non linear value in [0;127]
 												// Need to convert to linear in [0;64] - see below
-	BYTE event = GetFromMIDIMsg_Event(dwMidiData);
+	BYTE event = MIDIEvents::GetTypeFromEvent(dwMidiData);
 
-	if ((event == MIDIEVENT_NOTEON) && !nVol) event = MIDIEVENT_NOTEOFF;	//Convert event to note-off if req'd
+	if ((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
 
 	// Handle MIDI mapping.
@@ -3581,15 +3581,15 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	switch(event)
 	{
-		case MIDIEVENT_NOTEOFF: // Note Off
+		case MIDIEvents::evNoteOff: // Note Off
 			// The following method takes care of:
 			// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
 			// . Entering a note off in pattern if required
 			TempStopNote(nNote, ((CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
 		break;
 
-		case MIDIEVENT_NOTEON: // Note On
-			nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
+		case MIDIEvents::evNoteOn: // Note On
+			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
 			if(nVol < 0) nVol = -1;
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
 			TempEnterNote(nNote, true, nVol);
@@ -3600,14 +3600,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				
 		break;
 
-		case MIDIEVENT_POLYAFTERTOUCH:
-		case MIDIEVENT_CHANAFTERTOUCH:
+		case MIDIEvents::evPolyAftertouch:
+		case MIDIEvents::evChannelAftertouch:
 			break;
 
-		case MIDIEVENT_CONTROLLERCHANGE: //Controller change
+		case MIDIEvents::evControllerChange: //Controller change
 			switch(nByte1)
 			{
-				case MIDICC_Volume_Coarse: //Volume
+				case MIDIEvents::MIDICC_Volume_Coarse: //Volume
 					midivolume = nByte2;
 				break;
 			}
@@ -3666,7 +3666,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 					plug->MidiSend(dwMidiData);
 					// Sending midi may modify the plug. For now, if MIDI data
 					// is not active sensing, set modified.
-					if(dwMidiData != MIDISTATUS_ACTIVESENSING)
+					if(dwMidiData != MIDIEvents::BuildSystemEvent(MIDIEvents::sysActiveSense))
 						pMainFrm->ThreadSafeSetModified(pModDoc);
 				}
 				

@@ -20,8 +20,8 @@
 #include "dlsbank.h"
 #include "channelManagerDlg.h"
 #include "ScaleEnvPointsDlg.h"
-#include ".\view_ins.h"
-#include "midi.h"
+#include "view_ins.h"
+#include "../soundlib/MIDIEvents.h"
 
 #define ENV_ZOOM				4.0f
 #define ENV_MIN_ZOOM			2.0f
@@ -2152,15 +2152,15 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	static BYTE midivolume = 127;
 
 	CModDoc *pModDoc = GetDocument();
-	BYTE midiByte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
-	BYTE midiByte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
+	BYTE midiByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
+	BYTE midiByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
 	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
 	if (!pSndFile) return 0;
 
 	const BYTE nNote  = midiByte1 + 1;		// +1 is for MPT, where middle C is 61
 	int nVol   = midiByte2;					
-	BYTE event  = GetFromMIDIMsg_Event(dwMidiData);
+	BYTE event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
 	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
 
 	BYTE mappedIndex = 0, paramValue = 0;
@@ -2170,42 +2170,42 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	switch(event)
 	{
-		case MIDIEVENT_NOTEOFF: // Note Off
-			midiByte2 = 0;
+	case MIDIEvents::evNoteOff: // Note Off
+		midiByte2 = 0;
 
-		case MIDIEVENT_NOTEON: // Note On
-			pModDoc->NoteOff(nNote, false, m_nInstrument);
-			if (midiByte2 & 0x7F)
-			{
-				nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
-				pModDoc->PlayNote(nNote, m_nInstrument, 0, false, nVol);
-			}
+	case MIDIEvents::evNoteOn: // Note On
+		pModDoc->NoteOff(nNote, false, m_nInstrument);
+		if (midiByte2 & 0x7F)
+		{
+			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
+			pModDoc->PlayNote(nNote, m_nInstrument, 0, false, nVol);
+		}
 		break;
 
-		case MIDIEVENT_CONTROLLERCHANGE: //Controller change
-			switch(midiByte1)
-			{
-				case 0x7: //Volume
-					midivolume = midiByte2;
-				break;
-			}
+	case MIDIEvents::evControllerChange: //Controller change
+		switch(midiByte1)
+		{
+		case MIDIEvents::MIDICC_Volume_Coarse: //Volume
+			midivolume = midiByte2;
+			break;
+		}
 
-		default:
-			if((CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
+	default:
+		if((CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
+		{
+			const INSTRUMENTINDEX instr = m_nInstrument;
+			IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
+			if(plug)
 			{
-				const INSTRUMENTINDEX instr = m_nInstrument;
-				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
-				if(plug)
+				plug->MidiSend(dwMidiData);
+				// Sending midi may modify the plug. For now, if MIDI data
+				// is not active sensing or aftertouch messages, set modified.
+				if(dwMidiData != MIDIEvents::BuildSystemEvent(MIDIEvents::sysActiveSense) && event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch)
 				{
-					plug->MidiSend(dwMidiData);
-					// Sending midi may modify the plug. For now, if MIDI data
-					// is not active sensing or aftertouch messages, set modified.
-					if(dwMidiData != MIDISTATUS_ACTIVESENSING && event != MIDIEVENT_POLYAFTERTOUCH && event != MIDIEVENT_CHANAFTERTOUCH)
-					{
-						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
-					}
+					CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 				}
 			}
+		}
 		break;
 	}
 

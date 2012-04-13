@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "midi.h"
+#include "../soundlib/MIDIEvents.h"
 #include "MIDIMacros.h"
 #include "../common/StringFixer.h"
 
@@ -33,7 +33,7 @@ parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(size_t macroIndex)
 	}
 
 	// Special macros with additional "parameter":
-	if (macro.compare(CreateParameteredMacro(sfx_cc, MIDICC_start)) >= 0 && macro.compare(CreateParameteredMacro(sfx_cc, MIDICC_end)) <= 0 && macro.size() == 5)
+	if (macro.compare(CreateParameteredMacro(sfx_cc, MIDIEvents::MIDICC_start)) >= 0 && macro.compare(CreateParameteredMacro(sfx_cc, MIDIEvents::MIDICC_end)) <= 0 && macro.size() == 5)
 		return sfx_cc;
 	if (macro.compare(CreateParameteredMacro(sfx_plug, 0)) >= 0 && macro.compare(CreateParameteredMacro(sfx_plug, 0x17F)) <= 0 && macro.size() == 7)
 		return sfx_plug; 

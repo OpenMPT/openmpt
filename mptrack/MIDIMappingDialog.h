@@ -10,7 +10,6 @@
 
 #pragma once
 #include "moddoc.h"
-#include "midi.h"
 #include <vector>
 #include "afxwin.h"
 #include "afxcmn.h"

@@ -488,6 +488,8 @@ public:
 	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
 	HWND GetMidiRecordWnd() const { return m_hWndMidi; }
 
+	static int ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE midivolume);
+
 // static functions
 public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }

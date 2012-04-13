@@ -19,7 +19,7 @@
 #include "../common/misc_util.h"
 // -! NEW_FEATURE#0022
 #include "sndfile.h"
-#include "midi.h"
+#include "MIDIEvents.h"
 #include "tuning.h"
 
 #ifdef MODPLUG_TRACKER
@@ -2444,7 +2444,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
 		{
-			pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Fine, vol, nChn);
+			pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Fine, vol, nChn);
 		}
 		return;
 	}
@@ -2486,8 +2486,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 				break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2 * vol), nChn);
-				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDICC_Volume_Coarse, min(127, 2 * defaultVolume), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, min(127, 2 * vol), nChn);
+				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, min(127, 2 * defaultVolume), nChn);
 				break;
 
 		}

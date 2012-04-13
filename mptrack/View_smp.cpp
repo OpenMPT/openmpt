@@ -19,7 +19,7 @@
 #include "dlsbank.h"
 #include "channelManagerDlg.h"
 #include "view_smp.h"
-#include "midi.h"
+#include "../soundlib/MIDIEvents.h"
 #include "SampleEditorDialogs.h"
 #include "modsmp_ctrl.h"
 #include "Wav.h"
@@ -2568,39 +2568,39 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	static BYTE midivolume = 127;
 
 	CModDoc *pModDoc = GetDocument();
-	BYTE midibyte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
-	BYTE midibyte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
+	BYTE midibyte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
+	BYTE midibyte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
 	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
 	if (!pSndFile) return 0;
 
 	const BYTE nNote  = midibyte1 + 1;		// +1 is for MPT, where middle C is 61
 	int nVol   = midibyte2;					
-	BYTE event  = GetFromMIDIMsg_Event(dwMidiData);
-	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
+	BYTE event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
+	if ((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
 	switch(event)
 	{
-		case 0x8: // Note Off
-			midibyte2 = 0;
+	case MIDIEvents::evNoteOff: // Note Off
+		midibyte2 = 0;
 
-		case 0x9: // Note On
-			pModDoc->NoteOff(nNote, true);
-			if (midibyte2 & 0x7F)
-			{
-				nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
-				//pModDoc->PlayNote(nNote, 0, m_nSample, FALSE, nVol);
-				PlayNote(nNote);
-			}
+	case MIDIEvents::evNoteOn: // Note On
+		pModDoc->NoteOff(nNote, true);
+		if(midibyte2 & 0x7F)
+		{
+			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
+			//pModDoc->PlayNote(nNote, 0, m_nSample, FALSE, nVol);
+			PlayNote(nNote);
+		}
 		break;
 
-		case 0xB: //Controller change
-			switch(midibyte1)
-			{
-				case 0x7: //Volume
-					midivolume = midibyte2;
-				break;
-			}
+	case MIDIEvents::evControllerChange: //Controller change
+		switch(midibyte1)
+		{
+		case MIDIEvents::MIDICC_Volume_Coarse: //Volume
+			midivolume = midibyte2;
+			break;
+		}
 		break;
 	}
 
