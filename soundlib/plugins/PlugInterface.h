@@ -21,6 +21,7 @@ typedef intptr_t VstIntPtr;
 
 #include "Snd_defs.h"
 #include "../common/misc_util.h"
+#include "../soundlib/MIDIEvents.h"
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -40,9 +41,9 @@ public:
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
 	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
-	virtual void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) = 0;
-	virtual void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) = 0;
-	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan) = 0;
+	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
+	virtual void MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX trackChannel) = 0;
+	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
 	virtual void RecalculateGain() = 0;		
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
