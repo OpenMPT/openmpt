@@ -191,9 +191,9 @@ public:
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
 	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);
-	void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel);
-	void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel);
-	void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan);
+	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
+	void MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX trackChannel);
+	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
 	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
@@ -217,7 +217,7 @@ public:
 	VstSpeakerArrangement speakerArrangement;  //rewbs.VSTcompliance
 
 private:
-	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
+	void MidiPitchBend(uint8 nMidiCh, int16 pitchBendPos);
 
 	bool GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text);	//rewbs.VSTpresets
 

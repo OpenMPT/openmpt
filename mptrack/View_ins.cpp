@@ -2160,8 +2160,8 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	const BYTE nNote  = midiByte1 + 1;		// +1 is for MPT, where middle C is 61
 	int nVol   = midiByte2;					
-	BYTE event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
-	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
+	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
+	if((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
 	BYTE mappedIndex = 0, paramValue = 0;
 	uint32 paramIndex = 0;

@@ -2279,7 +2279,7 @@ void CVstPlugin::HardAllNotesOff()
 		Resume();
 	}
 
-	for(int mc = 0; mc < 16; mc++)		//all midi chans
+	for(uint8 mc = 0; mc < 16; mc++)		//all midi chans
 	{
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
@@ -2288,13 +2288,13 @@ void CVstPlugin::HardAllNotesOff()
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
-		for (size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
+		for(size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
 		{
-			for (CHANNELINDEX c = 0; c < CountOf(channel.uNoteOnMap[i]); c++)
+			for(CHANNELINDEX c = 0; c < CountOf(channel.uNoteOnMap[i]); c++)
 			{
 				while(channel.uNoteOnMap[i][c])
 				{
-					MidiSend(MIDIEvents::BuildNoteOffEvent(mc, i, 0));
+					MidiSend(MIDIEvents::BuildNoteOffEvent(mc, static_cast<uint8>(i), 0));
 					channel.uNoteOnMap[i][c]--;
 				}
 			}
@@ -2314,23 +2314,23 @@ void CVstPlugin::HardAllNotesOff()
 }
 //end rewbs.VSTiNoteHoldonStopFix
 
-void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trackChannel*/)
-//------------------------------------------------------------------------------------------
+void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX /*trackChannel*/)
+//-----------------------------------------------------------------------------------------------------------------
 {
 	//Error checking
-	LimitMax(nController, 127u);
-	LimitMax(nParam, 127u);
+	LimitMax(nController, MIDIEvents::MIDICC_end);
+	LimitMax(nParam, uint8(127));
 
 	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
-		MidiSend(MIDIEvents::BuildEvent(MIDIEvents::evControllerChange, nMidiCh, nParam, nController));	// param and controller are swapped (old broken implementation)
+		MidiSend(MIDIEvents::BuildEvent(MIDIEvents::evControllerChange, nMidiCh, nParam, static_cast<uint8>(nController)));	// param and controller are swapped (old broken implementation)
 	else
-		MidiSend(MIDIEvents::BuildCCEvent(static_cast<MIDIEvents::MidiCC>(nController), nMidiCh, nParam));
+		MidiSend(MIDIEvents::BuildCCEvent(nController, nMidiCh, nParam));
 }
 
 
 // Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
-void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
-//-----------------------------------------------------------------------------
+void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX /*trackChannel*/)
+//--------------------------------------------------------------------------------------
 {
 	const int16 increment = static_cast<int16>(nParam * 0x2000 / 0xFF);
 	int16 newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
@@ -2340,8 +2340,8 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 }
 
 //Set midi pitch for given midi channel using uncoverted midi value (0-16383)
-void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
-//-----------------------------------------------------------------
+void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int16 newPitchBendPos)
+//------------------------------------------------------------------
 {
 	ASSERT(MIDIEvents::pitchBendMin <= newPitchBendPos && newPitchBendPos <= MIDIEvents::pitchBendMax);
 	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos;
@@ -2350,21 +2350,21 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
 
 
 //rewbs.introVST - many changes to MidiCommand, still to be refined.
-void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChannel)
-//----------------------------------------------------------------------------------------------------------------
+void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
+//--------------------------------------------------------------------------------------------------------------------------------
 {
 	VSTInstrChannel &channel = m_MidiCh[nMidiCh];
 
 	bool bankChanged = (channel.wMidiBank != --wMidiBank) && (wMidiBank < 0x4000);
 	bool progChanged = (channel.nProgram != --nMidiProg) && (nMidiProg < 0x80);
 	//get vol in [0,128[
-	vol = min(vol / 2, 127);
+	uint8 volume = static_cast<uint8>(Util::Min(vol / 2, 127));
 
 	// Bank change
 	if(wMidiBank < 0x4000 && bankChanged)
 	{
-		uint8 high = (wMidiBank >> 7);
-		uint8 low = (wMidiBank & 0x7F);
+		uint8 high = static_cast<uint8>(wMidiBank >> 7);
+		uint8 low = static_cast<uint8>(wMidiBank & 0x7F);
 
 		if((channel.wMidiBank >> 7) != high)
 		{
@@ -2393,7 +2393,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
 	{
 		note--;
-		UINT i = note - NOTE_KEYOFF;
+		uint8 i = static_cast<uint8>(note - NOTE_KEYOFF);
 		if(channel.uNoteOnMap[i][trackChannel])
 		{
 			channel.uNoteOnMap[i][trackChannel]--;
@@ -2413,7 +2413,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		for(uint8 i = 0; i < 128; i++)
 		{
 			channel.uNoteOnMap[i][trackChannel] = 0;
-			MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, vol));
+			MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, volume));
 		}
 
 	}
@@ -2427,7 +2427,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
 			while(channel.uNoteOnMap[i][trackChannel])
 			{
-				if(MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, vol)))
+				if(MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, volume)))
 				{
 					channel.uNoteOnMap[i][trackChannel]--;
 				} else
@@ -2441,7 +2441,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	}
 
 	// Note On
-	else if(ModCommand::IsNote(note))
+	else if(ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)))
 	{
 		note -= NOTE_MIN;
 
@@ -2459,7 +2459,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		if(channel.uNoteOnMap[note][trackChannel] < 17)
 			channel.uNoteOnMap[note][trackChannel]++;
 
-		MidiSend(MIDIEvents::BuildNoteOnEvent(nMidiCh, note, vol));
+		MidiSend(MIDIEvents::BuildNoteOnEvent(nMidiCh, static_cast<uint8>(note), volume));
 	}
 
 	m_nPreviousMidiChan = nMidiCh;
