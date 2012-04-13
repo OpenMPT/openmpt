@@ -2372,7 +2372,7 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
 {
 	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos; //store pitch bend position
 	short converted = getMIDI14bitValueFromShort(newPitchBendPos);
-	MidiSend(converted<<8 | MIDI_PitchBend_Command|nMidiCh);
+	MidiSend(converted << 8 | MIDI_PitchBend_Command | nMidiCh);
 }
 
 
@@ -2382,45 +2382,51 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 {
 	VSTInstrChannel &channel = m_MidiCh[nMidiCh];
 	DWORD dwMidiCode = 0;
-	bool bankChanged = (channel.wMidiBank != --wMidiBank) && (wMidiBank < 0x80);
+	bool bankChanged = (channel.wMidiBank != --wMidiBank) && (wMidiBank < 0x4000);
 	bool progChanged = (channel.nProgram != --nMidiProg) && (nMidiProg < 0x80);
-	//bool chanChanged = nCh != m_nPreviousMidiChan;
 	//get vol in [0,128[
 	vol = min(vol / 2, 127);
 
-	// Note: Some VSTis update bank/prog on midi channel change, others don't.
-	//       For those that don't, we do it for them.
-	// Note 17/12/2005 - I have disabled that because it breaks Edirol Hypercanvas
-	// and I can't remember why it would be useful.
-
 	// Bank change
-	if ((wMidiBank < 0x80) && ( bankChanged /*|| chanChanged */))
+	if(wMidiBank < 0x4000 && bankChanged)
 	{
+		uint8 high = (wMidiBank >> 7);
+		uint8 low = (wMidiBank & 0x7F);
+
+		if((channel.wMidiBank >> 7) != high)
+		{
+			// High byte changed
+			MidiSend(((high << 16) | (MIDICC_BankSelect_Coarse << 8)) | ((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh));
+		}
+		// Low byte
+		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_BANKSEL], 0);
+		MidiSend((low << 16) | (MIDICC_BankSelect_Fine << 8) | ((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh));
+
 		channel.wMidiBank = wMidiBank;
-		MidiSend(((wMidiBank<<16)|(0x20<<8))|(0xB0|nMidiCh));
 	}
+
 	// Program change
-	// Note: Some plugs (Edirol Orchestral) don't update on bank change only -
-	// need to force it by sending prog change too.
-	if ((nMidiProg < 0x80) && (progChanged || bankChanged /*|| chanChanged */ ))
+	// According to the MIDI specs, a bank change alone doesn't have to change the active program - it will only change the bank of subsequent program changes.
+	// Thus we send program changes also if only the bank has changed.
+	if(nMidiProg < 0x80 && (progChanged || bankChanged))
 	{
 		channel.nProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
-		MidiSend((nMidiProg<<8)|(0xC0|nMidiCh));
+		MidiSend((nMidiProg << 8) | ((MIDIEVENT_PROGRAMCHANGE << 4) | nMidiCh));
 	}
 
 
 	// Specific Note Off
 	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
 	{
-		dwMidiCode = 0x80|nMidiCh; //note off, on chan nCh
+		dwMidiCode = (MIDIEVENT_NOTEOFF << 4) | nMidiCh; //note off, on chan nCh
 
 		note--;
 		UINT i = note - NOTE_KEYOFF;
 		if (channel.uNoteOnMap[i][trackChannel])
 		{
 			channel.uNoteOnMap[i][trackChannel]--;
-			MidiSend(dwMidiCode|(i<<8));
+			MidiSend(dwMidiCode | (i << 8));
 		}
 	}
 
@@ -2429,11 +2435,10 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// Also less likely to cause a VST event buffer overflow.
 	else if (note == NOTE_NOTECUT)	// ^^
 	{
-		//MidiSend(0xB0|nCh|(0x79<<8)); // reset all controllers
-		MidiSend(0xB0|nMidiCh|(0x7b<<8));   // all notes off
-		MidiSend(0xB0|nMidiCh|(0x78<<8));   // all sounds off
+		MidiSend((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh | (MIDICC_AllNotesOff << 8));   // all notes off
+		MidiSend((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh | (MIDICC_AllSoundOff << 8));   // all sounds off
 
-		dwMidiCode = 0x80|nMidiCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
+		dwMidiCode = (MIDIEVENT_NOTEOFF << 4) | nMidiCh | (vol << 16); //note off, on chan nCh; vol is note off velocity.
 		for (UINT i=0; i<128; i++)	//all notes
 		{
 			channel.uNoteOnMap[i][trackChannel]=0;
@@ -2444,17 +2449,17 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 
 	// All "active" notes off on this midi and tracker channel
 	// using note mask.
-	else if (note > 0x80) // ==
+	else if(note == NOTE_KEYOFF || note == NOTE_FADE) // ==, ~~
 	{
-		dwMidiCode = 0x80|nMidiCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
+		dwMidiCode = (MIDIEVENT_NOTEOFF << 4) | nMidiCh | (vol << 16); //note off, on chan nCh; vol is note off velocity.
 
-		for (UINT i=0; i<128; i++)
+		for(UINT i = 0; i < 128; i++)
 		{
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
 			// But this can cause a VST event overflow if we have many active notes...
-			while (channel.uNoteOnMap[i][trackChannel])
+			while(channel.uNoteOnMap[i][trackChannel])
 			{
-				if (MidiSend(dwMidiCode|(i<<8)))
+				if(MidiSend(dwMidiCode | (i << 8)))
 				{
 					channel.uNoteOnMap[i][trackChannel]--;
 				} else
@@ -2468,14 +2473,14 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	}
 
 	// Note On
-	else if (note > 0)
+	else if(ModCommand::IsNote(note))
 	{
-		dwMidiCode = 0x90|nMidiCh; //note on, on chan nCh
+		dwMidiCode = (MIDIEVENT_NOTEON << 4) | nMidiCh; //note on, on chan nCh
 
 		note--;
 
 		//reset pitch bend on each new note, tracker style.
-		if (m_nMidiPitchBendPos[nMidiCh] != MIDI_PitchBend_Centre)
+		if(m_nMidiPitchBendPos[nMidiCh] != MIDI_PitchBend_Centre)
 		{
 			MidiPitchBend(nMidiCh, MIDI_PitchBend_Centre);
 		}
@@ -2490,7 +2495,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 
 
 
-		MidiSend(dwMidiCode|(note<<8)|(vol<<16));
+		MidiSend(dwMidiCode | (note << 8) | (vol << 16));
 	}
 
 	m_nPreviousMidiChan = nMidiCh;
