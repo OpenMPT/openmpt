@@ -932,7 +932,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Midi Program
 	m_SpinMidiPR.SetRange(0, 128);
 	// rewbs.MidiBank
-	m_SpinMidiBK.SetRange(0, 128);
+	m_SpinMidiBK.SetRange(0, 16384);
 
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Default"), SRCMODE_DEFAULT);
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("None"), SRCMODE_NEAREST);
@@ -1265,7 +1265,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 				SetDlgItemInt(IDC_EDIT10, pIns->nMidiProgram);
 			else
 				SetDlgItemText(IDC_EDIT10, "---");
-			if (pIns->wMidiBank && pIns->wMidiBank<=128)
+			if (pIns->wMidiBank && pIns->wMidiBank <= 16384)
 				SetDlgItemInt(IDC_EDIT11, pIns->wMidiBank);
 			else
 				SetDlgItemText(IDC_EDIT11, "---");
@@ -2069,16 +2069,13 @@ void CCtrlInstruments::OnMBKChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		WORD w = GetDlgItemInt(IDC_EDIT11);
-		if ((w >= 0) && (w <= 255))
+		if(w >= 0 && w <= 16384 && pIns->wMidiBank != w)
 		{
-			if (pIns->wMidiBank != w)
-			{
-				pIns->wMidiBank = w;
-				SetInstrumentModified(true);
-			}
+			pIns->wMidiBank = w;
+			SetInstrumentModified(true);
 		}
 		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
-		if (w==0)
+		if(w == 0)
 		{	
 			LockControls();
 			SetDlgItemText(IDC_EDIT11, "---");
@@ -2093,12 +2090,12 @@ void CCtrlInstruments::OnMCHChanged()
 //-----------------------------------
 {
 	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
-	if ((!IsLocked()) && (pIns))
+	if(!IsLocked() && pIns)
 	{
-		int n = m_CbnMidiCh.GetItemData(m_CbnMidiCh.GetCurSel());
-		if (pIns->nMidiChannel != (BYTE)(n & 0xff))
+		uint8 ch = m_CbnMidiCh.GetItemData(m_CbnMidiCh.GetCurSel());
+		if(pIns->nMidiChannel != ch)
 		{
-			pIns->nMidiChannel = (BYTE)(n & 0xff);
+			pIns->nMidiChannel = ch;
 			SetInstrumentModified(true);
 		}
 	}
@@ -2134,8 +2131,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 		{
 			m_CbnPluginVelocityHandling.EnableWindow(FALSE);
 			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-		}
-		else
+		} else
 		{
 			m_CbnPluginVelocityHandling.EnableWindow();
 			m_CbnPluginVolumeHandling.EnableWindow();
@@ -2152,11 +2148,13 @@ void CCtrlInstruments::OnMixPlugChanged()
 			m_CbnPluginVelocityHandling.SetCurSel(pIns->nPluginVelocityHandling);
 			m_CbnPluginVolumeHandling.SetCurSel(pIns->nPluginVolumeHandling);
 
-			if (pIns->nMixPlug)
+			if(pIns->nMixPlug)
 			{
 				// we have selected a plugin that's not "no plugin"
 				const SNDMIXPLUGIN &plugin = m_pSndFile->m_MixPlugins[pIns->nMixPlug - 1];
-				if(!plugin.IsValidPlugin() && !IsLocked())
+				bool active = !IsLocked();
+
+				if(!plugin.IsValidPlugin() && active)
 				{
 					// No plugin in this slot yet: Ask user to add one.
 #ifndef NO_VST
@@ -2178,7 +2176,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 				{
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
 					
-					if(!IsLocked() && plugin.pMixPlugin->isInstrument())
+					if(active && plugin.pMixPlugin->isInstrument())
 					{
 						if(pIns->nMidiChannel == MidiNoChannel)
 						{
