@@ -77,6 +77,12 @@ public:
 		return numEvents;
 	}
 
+	// Get the number of events that are currently queued, but not in the output buffer.
+	size_t GetNumQueuedEvents()
+	{
+		return eventQueue.size() - numEvents;
+	}
+
 	// Add a VST event to the queue. Returns true on success.
 	// Set insertFront to true to prioritise this event (i.e. add it at the front of the queue instead of the back)
 	bool Enqueue(const VstEvent &event, bool insertFront = false)

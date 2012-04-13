@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "MIDIMappingDialog.h"
-#include "midi.h"
+#include "../soundlib/MIDIEvents.h"
 #include "mainfrm.h"
 
 
@@ -66,12 +66,12 @@ END_MESSAGE_MAP()
 LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //-------------------------------------------------------------------
 {
-	const BYTE event = GetFromMIDIMsg_Event(dwMidiDataParam);
+	const BYTE event = MIDIEvents::GetTypeFromEvent(dwMidiDataParam);
 	if(event == 0xB && IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
 	{
-		m_ChannelCBox.SetCurSel(1+GetFromMIDIMsg_Channel(dwMidiDataParam));
+		m_ChannelCBox.SetCurSel(1 + MIDIEvents::GetChannelFromEvent(dwMidiDataParam));
 		m_EventCBox.SetCurSel(0);
-		m_ControllerCBox.SetCurSel(GetFromMIDIMsg_DataByte1(dwMidiDataParam));
+		m_ControllerCBox.SetCurSel(MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
 		OnCbnSelchangeComboChannel();
 		OnCbnSelchangeComboEvent();
 		OnCbnSelchangeComboController();
@@ -89,10 +89,10 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	m_EventCBox.SetCurSel(0);
 	
 	//Add controller names.
-	for(size_t i = MIDICC_start; i<=MIDICC_end; i++)
+	for(size_t i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
 	{
 		CString temp;
-		temp.Format("%3d %s", i, MidiCCNames[i]);
+		temp.Format("%3d %s", i, MIDIEvents::MidiCCNames[i]);
 		m_ControllerCBox.AddString(temp);
 	}
 
@@ -147,7 +147,7 @@ void CMIDIMappingDialog::OnLbnSelchangeList1()
 	
 	m_ChannelCBox.SetCurSel(activeSetting.GetChannel());
 
-	if(m_Setting.GetEvent() == MIDIEVENT_CONTROLLERCHANGE)
+	if(m_Setting.GetEvent() == MIDIEvents::evControllerChange)
 		m_EventCBox.SetCurSel(0); 
 	else 
 		m_EventCBox.SetCurSel(-1);
@@ -328,10 +328,10 @@ CString CMIDIMappingDialog::CreateListString(const CMIDIMappingDirective& s)
 	str.AppendChar('.');
 
 	//Controller name
-	if(s.GetController() <= MIDICC_end)
+	if(s.GetController() <= MIDIEvents::MIDICC_end)
 	{
 		CString tstr;
-		tstr.Format("%d %s", s.GetController(), MidiCCNames[s.GetController()]);
+		tstr.Format("%d %s", s.GetController(), MIDIEvents::MidiCCNames[s.GetController()]);
 		str.Insert(20, tstr);
 	}
 

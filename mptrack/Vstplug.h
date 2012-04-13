@@ -217,7 +217,6 @@ public:
 	VstSpeakerArrangement speakerArrangement;  //rewbs.VSTcompliance
 
 private:
-	short getMIDI14bitValueFromShort(short value); 
 	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
 
 	bool GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text);	//rewbs.VSTpresets

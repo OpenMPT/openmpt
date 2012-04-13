@@ -1804,6 +1804,7 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 
 
 #ifndef MODPLUG_NO_FILESAVE
+
 UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 //----------------------------------------------------
 {
@@ -1910,7 +1911,8 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 	}
 	return nTotalSize;
 }
-#endif
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
@@ -1998,7 +2000,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 							}
 						}
 						//end rewbs.plugDefaultProgram
-                        //else if.. (add extra attempts to recognize chunks here)
+						//else if.. (add extra attempts to recognize chunks here)
 						else // otherwise move forward a byte.
 						{
 							currPos++;
@@ -2016,6 +2018,8 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 	return nPos;
 }
 
+
+#ifndef MODPLUG_NO_FILESAVE
 
 // Used only when saving IT, XM and MPTM.
 // ITI, ITP saves using Ericus' macros etc...
@@ -2207,7 +2211,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	//Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
-        code = 'MSF.';
+		code = 'MSF.';
 		fwrite(&code, 1, sizeof(__int32), f);
 		size = sizeof(m_ModFlags);
 		fwrite(&size, 1, sizeof(__int16), f);
@@ -2238,6 +2242,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 
 	return;
 }
+
+#endif // MODPLUG_NO_FILESAVE
+
 
 LPCBYTE CSoundFile::LoadExtendedInstrumentProperties(const LPCBYTE pStart,
 													 const LPCBYTE pEnd,
@@ -2399,6 +2406,8 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const
 //------------------------------------------------------------------------------------
 {
@@ -2443,6 +2452,8 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 	// Compute the size that we just wasted.
 	return sizeof(ModInstID) + sizeof(modularInstSize) + modularInstSize;
 }
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 size_t CSoundFile::LoadModularInstrumentData(const LPCBYTE lpStream, const DWORD dwMemLength, ModInstrument *pIns) const

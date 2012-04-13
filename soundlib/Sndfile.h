@@ -17,11 +17,13 @@
 #include <vector>
 #include <bitset>
 #include <set>
-#include "midi.h"
 #include "Snd_defs.h"
 #include "Endianness.h"
 #include "tuning.h"
 #include "MIDIMacros.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/MIDIMapping.h"
+#endif // MODPLUG_TRACKER
 
 #include "ModSample.h"
 #include "ModInstrument.h"
@@ -201,8 +203,10 @@ public: //Get 'controllers'
 	CPlaybackEventer& GetPlaybackEventer() {return m_PlaybackEventer;}
 	const CPlaybackEventer& GetPlaybackEventer() const {return m_PlaybackEventer;}
 
+#ifdef MODPLUG_TRACKER
 	CMIDIMapper& GetMIDIMapper() {return m_MIDIMapper;}
 	const CMIDIMapper& GetMIDIMapper() const {return m_MIDIMapper;}
+#endif // MODPLUG_TRACKER
 
 private: //Effect functions
 	void PortamentoMPT(ModChannel*, int);
@@ -214,7 +218,10 @@ private: //Misc private methods.
 
 private: //'Controllers'
 	CPlaybackEventer m_PlaybackEventer;
+
+#ifdef MODPLUG_TRACKER
 	CMIDIMapper m_MIDIMapper;
+#endif // MODPLUG_TRACKER
 
 private: //Misc data
 	uint16 m_ModFlags;

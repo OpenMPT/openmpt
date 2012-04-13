@@ -17,7 +17,6 @@
 #include "ChildFrm.h"
 #include "vstplug.h"
 #include "ChannelManagerDlg.h"
-#include "midi.h"
 #include "version.h"
 #include "../common/StringFixer.h"
 

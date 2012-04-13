@@ -16,6 +16,7 @@
 #include "Vstplug.h"
 #include "resource.h"
 #include "MIDIMacroDialog.h"
+#include "../soundlib/MIDIEvents.h"
 
 
 BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
@@ -80,9 +81,9 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	OnSFxChanged();
 
 	// MIDI CC selection box
-	for (int cc = MIDICC_start; cc <= MIDICC_end; cc++)
+	for (int cc = MIDIEvents::MIDICC_start; cc <= MIDIEvents::MIDICC_end; cc++)
 	{
-		wsprintf(s, "CC %02d %s", cc, MidiCCNames[cc]);
+		wsprintf(s, "CC %02d %s", cc, MIDIEvents::MidiCCNames[cc]);
 		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);	
 	}
 

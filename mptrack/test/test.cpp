@@ -15,6 +15,7 @@
 #include "../moddoc.h"
 #include "../MainFrm.h"
 #include "../version.h"
+#include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/MIDIMacros.h"
 #include "../../common/misc_util.h"
 #include "../../common/StringFixer.h"
@@ -75,6 +76,7 @@ void TestTypes();
 void TestLoadSaveFile();
 void TestPCnoteSerialization();
 void TestMisc();
+void TestMIDIEvents();
 void TestStringIO();
 
 
@@ -87,6 +89,7 @@ void DoTests()
 	DO_TEST(TestTypes);
 	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestMisc);
+	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestLoadSaveFile);
 	DO_TEST(TestStringIO);
 
@@ -263,6 +266,50 @@ void TestMisc()
 	// This should trigger assert in Round.
 	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );	
 
+}
+
+
+// Test MIDI Event generating / reading
+void TestMIDIEvents()
+//-------------------
+{
+	uint32 midiEvent;
+	
+	midiEvent = MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_Balance_Coarse, 13, 40);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evControllerChange);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 13);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), MIDIEvents::MIDICC_Balance_Coarse);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 40);
+
+	midiEvent = MIDIEvents::BuildNoteOnEvent(10, 50, 120);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evNoteOn);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 10);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 50);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 120);
+
+	midiEvent = MIDIEvents::BuildNoteOffEvent(15, 127, 42);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evNoteOff);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 15);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 127);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 42);
+
+	midiEvent = MIDIEvents::BuildProgramChangeEvent(1, 127);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evProgramChange);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 1);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 127);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 0);
+
+	midiEvent = MIDIEvents::BuildPitchBendEvent(2, MIDIEvents::pitchBendCentre);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evPitchBend);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 2);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 0x00);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 0x40);
+
+	midiEvent = MIDIEvents::BuildSystemEvent(MIDIEvents::sysStart);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evSystem);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), MIDIEvents::sysStart);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 0);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 0);
 }
 
 
@@ -699,8 +746,8 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(mapping.GetChannel(), 5);
 	VERIFY_EQUAL_NONCONT(mapping.GetPlugIndex(), 1);
 	VERIFY_EQUAL_NONCONT(mapping.GetParamIndex(), 0);
-	VERIFY_EQUAL_NONCONT(mapping.GetEvent(), MIDIEVENT_CONTROLLERCHANGE);
-	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDICC_ModulationWheel_Coarse);
+	VERIFY_EQUAL_NONCONT(mapping.GetEvent(), MIDIEvents::evControllerChange);
+	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDIEvents::MIDICC_ModulationWheel_Coarse);
 
 }
 

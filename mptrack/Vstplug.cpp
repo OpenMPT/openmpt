@@ -22,7 +22,7 @@
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
-#include "midi.h"
+#include "../soundlib/MIDIEvents.h"
 #include "version.h"
 #include "midimappingdialog.h"
 #include "../common/StringFixer.h"
@@ -1321,7 +1321,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 
 	for (int ch=0; ch<16; ch++)
 	{
-		m_nMidiPitchBendPos[ch]=MIDI_PitchBend_Centre; //centre pitch bend on all channels
+		m_nMidiPitchBendPos[ch] = MIDIEvents::pitchBendCentre; //centre pitch bend on all channels
 	}
 }
 
@@ -1949,7 +1949,7 @@ void CVstPlugin::Suspend()
 }
 
 
-// Send events to plugin
+// Send events to plugin. Returns true if there are events left to be processed.
 void CVstPlugin::ProcessVSTEvents()
 //---------------------------------
 {
@@ -2244,7 +2244,7 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 //-----------------------------------------
 {
 	// Note-Offs go at the start of the queue.
-	bool insertAtFront = ((dwMidiCode & 0xF0) == 0x80);
+	bool insertAtFront = (MIDIEvents::GetTypeFromEvent(dwMidiCode) == MIDIEvents::evNoteOff);
 
 	VstMidiEvent event;
 	event.type = kVstMidiType;
@@ -2270,7 +2270,6 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 void CVstPlugin::HardAllNotesOff()
 //--------------------------------
 {
-	bool overflow;
 	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	// The JUCE framework doesn't like processing while being suspended.
@@ -2280,39 +2279,32 @@ void CVstPlugin::HardAllNotesOff()
 		Resume();
 	}
 
-	do
+	for(int mc = 0; mc < 16; mc++)		//all midi chans
 	{
-		overflow=false;
-		for (int mc=0; mc<16; mc++)		//all midi chans
+		VSTInstrChannel &channel = m_MidiCh[mc];
+
+		MidiPitchBend(mc, MIDIEvents::pitchBendCentre); // centre pitch bend
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
+
+		for (size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
 		{
-			DWORD dwMidiCode = 0x80 | (mc & 0x0f); //command|channel|velocity
-			VSTInstrChannel &channel = m_MidiCh[mc];
-
-			MidiPitchBend(mc, MIDI_PitchBend_Centre); // centre pitch bend
-			MidiSend(0xB0|mc|(0x79<<8));			  // reset all controllers
-			MidiSend(0xB0|mc|(0x7b<<8));			  // all notes off
-			MidiSend(0xB0|mc|(0x78<<8));			  // all sounds off
-
-			for (size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
+			for (CHANNELINDEX c = 0; c < CountOf(channel.uNoteOnMap[i]); c++)
 			{
-				for (CHANNELINDEX c = 0; c < CountOf(channel.uNoteOnMap[i]); c++)
+				while(channel.uNoteOnMap[i][c])
 				{
-					while (channel.uNoteOnMap[i][c] && !overflow)
-					{
-						overflow=!(MidiSend(dwMidiCode | (i << 8)));
-						channel.uNoteOnMap[i][c]--;
-					}
-					if (overflow) break;	//yuck
+					MidiSend(MIDIEvents::BuildNoteOffEvent(mc, i, 0));
+					channel.uNoteOnMap[i][c]--;
 				}
-				if (overflow) break;	//yuck
 			}
-			if (overflow) break;	//yuck
 		}
-		// let plug process events
+	}
+	// let plug process events
+	while(vstEvents.GetNumQueuedEvents() > 0)
+	{
 		Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
-
-	// If we had hit an overflow, we need to loop around and start again.
-	} while (overflow);
+	}
 
 	if(wasSuspended)
 	{
@@ -2330,30 +2322,11 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trac
 	LimitMax(nParam, 127u);
 
 	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
-		MidiSend((nController << 16) | (nParam << 8) | (0xB0 | nMidiCh));
+		MidiSend(MIDIEvents::BuildEvent(MIDIEvents::evControllerChange, nMidiCh, nParam, nController));	// param and controller are swapped (old broken implementation)
 	else
-		MidiSend((nParam << 16) | (nController << 8) | (0xB0 | nMidiCh));
+		MidiSend(MIDIEvents::BuildCCEvent(static_cast<MIDIEvents::MidiCC>(nController), nMidiCh, nParam));
 }
 
-short CVstPlugin::getMIDI14bitValueFromShort(short value)
-//-------------------------------------------------------
-{
-	//http://www.srm.com/qtma/davidsmidispec.html:
-	// The two bytes of the pitch bend message form a 14 bit number, 0 to 16383.
-	// The value 8192 (sent, LSB first, as 0x00 0x40), is centered, or "no pitch bend."
-	// The value 0 (0x00 0x00) means, "bend as low as possible," and,
-	// similarly, 16383 (0x7F 0x7F) is to "bend as high as possible."
-	// The exact range of the pitch bend is specific to the synthesizer.
-
-	ASSERT(0 <= value && value <= 16383);
-
-	BYTE byte1 = static_cast<BYTE>(value >> 7);		// get last   7 bits only
-	BYTE byte2 = static_cast<BYTE>(value & 0x7F);	// get first  7 bits only
-	short converted = (byte1 << 8) | byte2; // merge
-
-	return converted;
-
-}
 
 // Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
 void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
@@ -2361,7 +2334,7 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 {
 	const int16 increment = static_cast<int16>(nParam * 0x2000 / 0xFF);
 	int16 newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
-	Limit(newPitchBendPos, int16(MIDI_PitchBend_Min), int16(MIDI_PitchBend_Max));
+	Limit(newPitchBendPos, int16(MIDIEvents::pitchBendMin), int16(MIDIEvents::pitchBendMax));
 
 	MidiPitchBend(nMidiCh, newPitchBendPos);
 }
@@ -2370,9 +2343,9 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/)
 void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos)
 //-----------------------------------------------------------------
 {
-	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos; //store pitch bend position
-	short converted = getMIDI14bitValueFromShort(newPitchBendPos);
-	MidiSend(converted << 8 | MIDI_PitchBend_Command | nMidiCh);
+	ASSERT(MIDIEvents::pitchBendMin <= newPitchBendPos && newPitchBendPos <= MIDIEvents::pitchBendMax);
+	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos;
+	MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, newPitchBendPos));
 }
 
 
@@ -2381,7 +2354,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 //----------------------------------------------------------------------------------------------------------------
 {
 	VSTInstrChannel &channel = m_MidiCh[nMidiCh];
-	DWORD dwMidiCode = 0;
+
 	bool bankChanged = (channel.wMidiBank != --wMidiBank) && (wMidiBank < 0x4000);
 	bool progChanged = (channel.nProgram != --nMidiProg) && (nMidiProg < 0x80);
 	//get vol in [0,128[
@@ -2396,11 +2369,11 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		if((channel.wMidiBank >> 7) != high)
 		{
 			// High byte changed
-			MidiSend(((high << 16) | (MIDICC_BankSelect_Coarse << 8)) | ((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh));
+			MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_BankSelect_Coarse, nMidiCh, high));
 		}
 		// Low byte
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_BANKSEL], 0);
-		MidiSend((low << 16) | (MIDICC_BankSelect_Fine << 8) | ((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh));
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_BankSelect_Fine, nMidiCh, low));
 
 		channel.wMidiBank = wMidiBank;
 	}
@@ -2412,21 +2385,19 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	{
 		channel.nProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
-		MidiSend((nMidiProg << 8) | ((MIDIEVENT_PROGRAMCHANGE << 4) | nMidiCh));
+		MidiSend(MIDIEvents::BuildProgramChangeEvent(nMidiCh, nMidiProg));
 	}
 
 
 	// Specific Note Off
 	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
 	{
-		dwMidiCode = (MIDIEVENT_NOTEOFF << 4) | nMidiCh; //note off, on chan nCh
-
 		note--;
 		UINT i = note - NOTE_KEYOFF;
-		if (channel.uNoteOnMap[i][trackChannel])
+		if(channel.uNoteOnMap[i][trackChannel])
 		{
 			channel.uNoteOnMap[i][trackChannel]--;
-			MidiSend(dwMidiCode | (i << 8));
+			MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, 0));
 		}
 	}
 
@@ -2435,14 +2406,14 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// Also less likely to cause a VST event buffer overflow.
 	else if (note == NOTE_NOTECUT)	// ^^
 	{
-		MidiSend((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh | (MIDICC_AllNotesOff << 8));   // all notes off
-		MidiSend((MIDIEVENT_CONTROLLERCHANGE << 4) | nMidiCh | (MIDICC_AllSoundOff << 8));   // all sounds off
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, nMidiCh, 0));
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, nMidiCh, 0));
 
-		dwMidiCode = (MIDIEVENT_NOTEOFF << 4) | nMidiCh | (vol << 16); //note off, on chan nCh; vol is note off velocity.
-		for (UINT i=0; i<128; i++)	//all notes
+		// Turn off all notes
+		for(uint8 i = 0; i < 128; i++)
 		{
-			channel.uNoteOnMap[i][trackChannel]=0;
-			MidiSend(dwMidiCode|(i<<8));
+			channel.uNoteOnMap[i][trackChannel] = 0;
+			MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, vol));
 		}
 
 	}
@@ -2451,15 +2422,12 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// using note mask.
 	else if(note == NOTE_KEYOFF || note == NOTE_FADE) // ==, ~~
 	{
-		dwMidiCode = (MIDIEVENT_NOTEOFF << 4) | nMidiCh | (vol << 16); //note off, on chan nCh; vol is note off velocity.
-
-		for(UINT i = 0; i < 128; i++)
+		for(uint8 i = 0; i < 128; i++)
 		{
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
-			// But this can cause a VST event overflow if we have many active notes...
 			while(channel.uNoteOnMap[i][trackChannel])
 			{
-				if(MidiSend(dwMidiCode | (i << 8)))
+				if(MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, vol)))
 				{
 					channel.uNoteOnMap[i][trackChannel]--;
 				} else
@@ -2475,14 +2443,12 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// Note On
 	else if(ModCommand::IsNote(note))
 	{
-		dwMidiCode = (MIDIEVENT_NOTEON << 4) | nMidiCh; //note on, on chan nCh
-
-		note--;
+		note -= NOTE_MIN;
 
 		//reset pitch bend on each new note, tracker style.
-		if(m_nMidiPitchBendPos[nMidiCh] != MIDI_PitchBend_Centre)
+		if(m_nMidiPitchBendPos[nMidiCh] != MIDIEvents::pitchBendCentre)
 		{
-			MidiPitchBend(nMidiCh, MIDI_PitchBend_Centre);
+			MidiPitchBend(nMidiCh, MIDIEvents::pitchBendCentre);
 		}
 
 		// count instances of active notes.
@@ -2490,12 +2456,10 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		// Problem: if a note dies out naturally and we never send a note off, this counter
 		// will block at max until note off. Is this a problem?
 		// Safe to assume we won't need more than 16 note offs max on a given note?
-		if (channel.uNoteOnMap[note][trackChannel] < 17)
+		if(channel.uNoteOnMap[note][trackChannel] < 17)
 			channel.uNoteOnMap[note][trackChannel]++;
 
-
-
-		MidiSend(dwMidiCode | (note << 8) | (vol << 16));
+		MidiSend(MIDIEvents::BuildNoteOnEvent(nMidiCh, note, vol));
 	}
 
 	m_nPreviousMidiChan = nMidiCh;

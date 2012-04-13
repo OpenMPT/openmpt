@@ -454,6 +454,12 @@
     <ClCompile Include="..\soundlib\plugins\JBridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MIDIMapping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\MIDIEvents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -535,9 +541,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainFrm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\soundlib\midi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mod2midi.h">
@@ -805,6 +808,12 @@
       <Filter>Module Loaders</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\JBridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MIDIMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MIDIEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
