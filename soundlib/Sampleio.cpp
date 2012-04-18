@@ -393,6 +393,19 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 			break;
 		}
 		dwMemPos += dwLen + 8;
+
+		if((dwLen % 2) != 0 && dwMemPos < dwFileLength)
+		{
+			// Ignore the padding byte. Problem: Old versions of OpenMPT didn't write padding. -_-
+			// We will just do a heuristic check here: As OpenMPT always writes the "smpl" chunk after the "data" chunk
+			// (which happens to be the only chunk that has to be padded in OpenMPT's case), we just check if we can read "smpl"
+			// without incrementing the position.
+			if((dwMemPos + 8 < dwFileLength) && LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos)) == 0x6C706D73)
+			{
+				continue;
+			}
+			dwMemPos++;
+		}
 	}
 	if (!pdata || !pfmt || pdata->length < 4)
 		return false;
@@ -655,6 +668,11 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	}
 
 	header.filesize += data.length;
+	if((data.length % 2) != 0)
+	{
+		// Write padding byte if sample size is odd.
+		header.filesize++;
+	}
 
 	// "smpl" field
 	smpl.wsiHdr.smpl_id = LittleEndian(IFFID_smpl);
@@ -688,6 +706,12 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	fwrite(&format, 1, sizeof(format), f);
 	fwrite(&data, 1, sizeof(data), f);
 	WriteSample(f, &sample, nType);
+	if((data.length % 2) != 0)
+	{
+		// Write padding byte if sample size is odd.
+		int8 padding = 0;
+		fwrite(&padding, 1, 1, f);
+	}
 	fwrite(&smpl, 1, smpl.wsiHdr.smpl_len + 8, f);
 
 	// "LIST" field

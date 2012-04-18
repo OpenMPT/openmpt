@@ -1157,6 +1157,15 @@ void CDoAcmConvert::OnButton1()
 	CMainFrame::UpdateAudioParameters(TRUE);
 
 	// Success
+
+	if((wdh.length % 2) != 0)
+	{
+		// Write padding byte if sample size is odd.
+		int8 padding = 0;
+		fwrite(&padding, 1, 1, f);
+		wfh.filesize++;
+	}
+
 	if (bSaveWave)
 	{
 		if (m_bSaveInfoField)
