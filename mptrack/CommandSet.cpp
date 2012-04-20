@@ -617,6 +617,16 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcDecreaseSpacing, 1862, _T("Decrease Row Spacing"));
 	DefineKeyCommand(kcSampleAutotune, 1863, _T("Tune Sample to given Note"));
 	DefineKeyCommand(kcFileCloseAll, 1864, _T("File/Close All"));
+	DefineKeyCommand(kcSetOctaveStop0, 1865, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop1, 1866, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop2, 1867, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop3, 1868, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop4, 1869, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop5, 1870, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop6, 1871, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop7, 1872, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop8, 1873, _T(""), kcHidden);
+	DefineKeyCommand(kcSetOctaveStop9, 1874, _T(""), kcHidden);
 	// Add new key commands here.
 
 #ifdef _DEBUG
@@ -1109,6 +1119,22 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKc, (CommandID)(kcVPStartChordStops+noteOffset));
 			}
 		}
+		if(inCmd >= kcSetOctave0 && inCmd <= kcSetOctave9)
+		{
+			int noteOffset = inCmd - kcSetOctave0;
+			newKc=inKc;
+			newKc.event=kKeyEventUp;
+			if (adding)
+			{
+				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n"); 
+				Add(newKc, (CommandID)(kcSetOctaveStop0+noteOffset), false);
+			}
+			else
+			{
+				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n"); 
+				Remove(newKc, (CommandID)(kcSetOctaveStop0+noteOffset));
+			}
+		}
 	}
 	
 	//# Reassign freed number keys to octaves
@@ -1119,10 +1145,10 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			 ( ('0'<=inKc.code && inKc.code<='9') || (VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9) ) ) {  //is number key 
 				newKc.ctx=kCtxViewPatternsNote;
 				newKc.mod=0;
-				newKc.event= (KeyEventType)1;
+				newKc.event= kKeyEventDown;
 				newKc.code=inKc.code;
 				int offset = ('0'<=inKc.code && inKc.code<='9') ? newKc.code-'0' : newKc.code-VK_NUMPAD0;
-				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-offset)), false);		
+				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-offset)), false);
 			 }
 	}
 	// Add spacing
@@ -1135,12 +1161,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.event= kKeyEventDown;
 			for (newKc.code='0'; newKc.code<='9'; newKc.code++)
 			{
-				Add(newKc, (CommandID)(kcSetSpacing0 + (newKc.code-'0')), false);		
+				Add(newKc, (CommandID)(kcSetSpacing0 + (newKc.code-'0')), false);
 			}
 			for (newKc.code=VK_NUMPAD0; newKc.code<=VK_NUMPAD9; newKc.code++)
 			{
-				Add(newKc, (CommandID)(kcSetSpacing0 + (newKc.code-VK_NUMPAD0)), false);		
-			}			
+				Add(newKc, (CommandID)(kcSetSpacing0 + (newKc.code-VK_NUMPAD0)), false);
+			}
 		}
 		else if (!adding && (inCmd<kcSetSpacing && kcSetSpacing9<inCmd))
 		{

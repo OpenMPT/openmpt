@@ -160,6 +160,8 @@ CViewPattern::CViewPattern()
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();
+
+	octaveKeyMemory.resize(10, NOTE_NONE);
 }
 
 
@@ -2464,7 +2466,7 @@ void CViewPattern::OnCursorCopy()
 		return;
 	}
 
-	const ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	const ModCommand *m = GetCursorCommand();
 	switch(m_Cursor.GetColumnType())
 	{
 	case PatternCursor::noteColumn:
@@ -2492,18 +2494,16 @@ void CViewPattern::OnCursorCopy()
 void CViewPattern::OnCursorPaste()
 //--------------------------------
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern) || !IsEditingEnabled_bmsg())
+	ModCommand *p = GetCursorCommand();
+	if(p == nullptr || !IsEditingEnabled_bmsg())
 	{
 		return;
 	}
 
-	PrepareUndo(m_Selection);
-	CHANNELINDEX nChn = GetCurrentChannel();
-	PatternCursor::Columns nCursor = m_Cursor.GetColumnType();
-	ModCommand *p = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
+	PrepareUndo(m_Cursor, m_Cursor);
+	PatternCursor::Columns column = m_Cursor.GetColumnType();
 
-	switch(nCursor)
+	switch(column)
 	{
 	case PatternCursor::noteColumn:
 		p->note = m_cmdOld.note;
@@ -2526,7 +2526,7 @@ void CViewPattern::OnCursorPaste()
 
 	SetModified(false);
 
-	if(pSndFile->IsPaused() || !(m_dwStatus & psFollowSong) || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
+	if(GetSoundFile()->IsPaused() || !(m_dwStatus & psFollowSong) || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
 	{
 		InvalidateCell(m_Cursor);
 		SetCurrentRow(GetCurrentRow() + m_nSpacing);
@@ -2801,18 +2801,18 @@ bool CViewPattern::TransposeSelection(int transp)
 
 	PrepareUndo(m_Selection);
 
-	for (UINT row=startRow; row <= endRow; row++)
+	for(ROWINDEX row = startRow; row <= endRow; row++)
 	{
-		ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(row, 0);
-		for (UINT col = startChan; col <= endChan; col++)
+		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
+		for(CHANNELINDEX chn = startChan; chn <= endChan; chn++)
 		{
-			if (m[col].IsNote())
+			if (m[chn].IsNote())
 			{
-				int note = m[col].note;
+				int note = m[chn].note;
 				note += transp;
 				if (note < noteMin) note = noteMin;
 				if (note > noteMax) note = noteMax;
-				m[col].note = (BYTE)note;
+				m[chn].note = (BYTE)note;
 			}
 		}
 	}
@@ -3171,27 +3171,27 @@ void CViewPattern::OnPatternAmplify()
 		// Volume memory for each channel.
 		vector<BYTE> chvol(lastChannel + 1, 64);
 
-		for (ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
+		for(ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 		{
 			ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, firstChannel);
-			for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
+			for(CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
 			{
-				if ((m->command == CMD_VOLUME) && (m->param <= 64))
+				if((m->command == CMD_VOLUME) && (m->param <= 64))
 				{
 					chvol[nChn] = m->param;
 					break;
 				}
-				if (m->volcmd == VOLCMD_VOLUME)
+				if(m->volcmd == VOLCMD_VOLUME)
 				{
 					chvol[nChn] = m->vol;
 					break;
 				}
-				if ((m->note) && (m->note <= NOTE_MAX) && (m->instr))
+				if(m->IsNote() && m->instr != 0)
 				{
 					UINT nSmp = m->instr;
-					if (pSndFile->GetNumInstruments())
+					if(pSndFile->GetNumInstruments())
 					{
-						if ((nSmp <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[nSmp]))
+						if((nSmp <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[nSmp]))
 						{
 							nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
 							if(!nSmp) chvol[nChn] = 64;	// hack for instruments without samples
@@ -3200,12 +3200,11 @@ void CViewPattern::OnPatternAmplify()
 							nSmp = 0;
 						}
 					}
-					if ((nSmp) && (nSmp <= pSndFile->GetNumSamples()))
+					if((nSmp) && (nSmp <= pSndFile->GetNumSamples()))
 					{
 						chvol[nChn] = (BYTE)(pSndFile->GetSample(nSmp).nVolume / 4);
 						break;
-					}
-					else
+					} else
 					{	//nonexistant sample and no volume present in patten? assume volume=64.
 						if(useVolCol)
 						{
@@ -3223,18 +3222,18 @@ void CViewPattern::OnPatternAmplify()
 			}
 		}
 
-		for (ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
+		for(ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 		{
 			ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, firstChannel);
 			const int cy = lastRow - firstRow + 1; // total rows (for fading)
-			for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
+			for(CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
 			{
-				if ((!m->volcmd) && (m->command != CMD_VOLUME)
-					&& (m->note) && (m->note <= NOTE_MAX) && (m->instr))
+				if(!m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME
+					&& m->IsNote() && m->instr)
 				{
 					UINT nSmp = m->instr;
 					bool overrideSampleVol = false;
-					if (pSndFile->m_nInstruments)
+					if(pSndFile->GetNumInstruments())
 					{
 						if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
 						{
@@ -3250,7 +3249,7 @@ void CViewPattern::OnPatternAmplify()
 							nSmp = 0;
 						}
 					}
-					if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
+					if((nSmp) && (nSmp <= pSndFile->GetNumSamples()))
 					{
 						if(useVolCol)
 						{
@@ -3264,9 +3263,9 @@ void CViewPattern::OnPatternAmplify()
 					}
 				}
 
-				if (m->volcmd == VOLCMD_VOLUME) chvol[nChn] = (BYTE)m->vol;
+				if(m->volcmd == VOLCMD_VOLUME) chvol[nChn] = (BYTE)m->vol;
 
-				if (((dlg.m_bFadeIn) || (dlg.m_bFadeOut)) && m->command != CMD_VOLUME && !m->volcmd == VOLCMD_NONE)
+				if((dlg.m_bFadeIn || dlg.m_bFadeOut) && m->command != CMD_VOLUME && m->volcmd == VOLCMD_NONE)
 				{
 					if(useVolCol)
 					{
@@ -3504,7 +3503,20 @@ ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) 
 }
 
 
-ModCommand* CViewPattern::GetModCommand(CSoundFile& rSf, const ModCommandPos& pos)
+// Get ModCommand at the pattern cursor position.
+ModCommand *CViewPattern ::GetCursorCommand()
+//-------------------------------------------
+{
+	CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()))
+	{
+		return pSndFile->Patterns[GetCurrentPattern()].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	}
+	return nullptr;
+}
+
+
+ModCommand *CViewPattern::GetModCommand(CSoundFile& rSf, const ModCommandPos& pos)
 //--------------------------------------------------------------------------------
 {
 	static ModCommand m;
@@ -4115,63 +4127,72 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	}
 	//Ranges:
-	if (wParam>=kcVPStartNotes && wParam<=kcVPEndNotes)
+	if(wParam >= kcVPStartNotes && wParam <= kcVPEndNotes)
 	{
-		TempEnterNote(wParam-kcVPStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		TempEnterNote(wParam - kcVPStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
 		return wParam;
 	}
-	if (wParam>=kcVPStartChords && wParam<=kcVPEndChords)
+	if(wParam >= kcVPStartChords && wParam <= kcVPEndChords)
 	{
-		TempEnterChord(wParam-kcVPStartChords+1+pMainFrm->GetBaseOctave()*12);
-		return wParam;
-	}
-
-	if (wParam>=kcVPStartNoteStops && wParam<=kcVPEndNoteStops)
-	{
-		TempStopNote(wParam-kcVPStartNoteStops+1+pMainFrm->GetBaseOctave()*12);
-		return wParam;
-	}
-	if (wParam>=kcVPStartChordStops && wParam<=kcVPEndChordStops)
-	{
-		TempStopChord(wParam-kcVPStartChordStops+1+pMainFrm->GetBaseOctave()*12);
+		TempEnterChord(wParam - kcVPStartChords + 1 + pMainFrm->GetBaseOctave() * 12);
 		return wParam;
 	}
 
-	if (wParam>=kcSetSpacing0 && wParam<kcSetSpacing9)
+	if(wParam >= kcVPStartNoteStops && wParam <= kcVPEndNoteStops)
+	{
+		TempStopNote(wParam - kcVPStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12);
+		return wParam;
+	}
+	if(wParam >= kcVPStartChordStops && wParam <= kcVPEndChordStops)
+	{
+		TempStopChord(wParam - kcVPStartChordStops + 1 + pMainFrm->GetBaseOctave() * 12);
+		return wParam;
+	}
+
+	if(wParam >= kcSetSpacing0 && wParam <= kcSetSpacing9)
 	{
 		SetSpacing(wParam - kcSetSpacing0);
 		return wParam;
 	}
 
-	if (wParam>=kcSetIns0 && wParam<=kcSetIns9)
+	if(wParam >= kcSetIns0 && wParam <= kcSetIns9)
 	{
-		if (IsEditingEnabled_bmsg())
-			TempEnterIns(wParam-kcSetIns0);
+		if(IsEditingEnabled_bmsg())
+			TempEnterIns(wParam - kcSetIns0);
 		return wParam;
 	}
 
-	if (wParam>=kcSetOctave0 && wParam<=kcSetOctave9)
+	if(wParam >= kcSetOctave0 && wParam <= kcSetOctave9)
 	{
-		if (IsEditingEnabled())
-			TempEnterOctave(wParam-kcSetOctave0);
+		if(IsEditingEnabled_bmsg())
+			TempEnterOctave(wParam - kcSetOctave0);
 		return wParam;
 	}
-	if (wParam>=kcSetVolumeStart && wParam<=kcSetVolumeEnd)
+
+	if(wParam >= kcSetOctaveStop0 && wParam <= kcSetOctaveStop9)
 	{
-		if (IsEditingEnabled_bmsg())
-			TempEnterVol(wParam-kcSetVolumeStart);
+		TempStopOctave(wParam - kcSetOctaveStop0);
 		return wParam;
 	}
-	if (wParam>=kcSetFXStart && wParam<=kcSetFXEnd)
+
+	if(wParam >= kcSetVolumeStart && wParam <= kcSetVolumeEnd)
 	{
-		if (IsEditingEnabled_bmsg())
-			TempEnterFX(wParam-kcSetFXStart+1);
+		if(IsEditingEnabled_bmsg())
+			TempEnterVol(wParam - kcSetVolumeStart);
 		return wParam;
 	}
-	if (wParam>=kcSetFXParam0 && wParam<=kcSetFXParamF)
+
+	if(wParam >= kcSetFXStart && wParam <= kcSetFXEnd)
 	{
-		if (IsEditingEnabled_bmsg())
-			TempEnterFXparam(wParam-kcSetFXParam0);
+		if(IsEditingEnabled_bmsg())
+			TempEnterFX(wParam - kcSetFXStart + 1);
+		return wParam;
+	}
+
+	if(wParam >= kcSetFXParam0 && wParam <= kcSetFXParamF)
+	{
+		if(IsEditingEnabled_bmsg())
+			TempEnterFXparam(wParam - kcSetFXParam0);
 		return wParam;
 	}
 
@@ -4239,9 +4260,9 @@ void CViewPattern::TempEnterVol(int v)
 		return;
 	}
 		
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Cursor, m_Cursor);
 
-	ModCommand* pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	ModCommand* pTarget = GetCursorCommand();
 	ModCommand oldcmd = *pTarget; // This is the command we are about to overwrite
 
 	if(pTarget->IsPcNote())
@@ -4323,10 +4344,10 @@ void CViewPattern::TempEnterFX(int c, int v)
 		return;
 	}
 
-	ModCommand *pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	ModCommand *pTarget = GetCursorCommand();
 	ModCommand oldcmd = *pTarget; // This is the command we are about to overwrite
 
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Cursor, m_Cursor);
 
 	if(pTarget->IsPcNote())
 	{
@@ -4377,10 +4398,10 @@ void CViewPattern::TempEnterFXparam(int v)
 		return;
 	}
 
-	ModCommand *pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	ModCommand *pTarget = GetCursorCommand();
 	ModCommand oldcmd = *pTarget; // This is the command we are about to overwrite
 
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Cursor, m_Cursor);
 
 	if(pTarget->IsPcNote())
 	{
@@ -4566,12 +4587,27 @@ void CViewPattern::TempEnterOctave(int val)
 		return;
 	}
 
-	PrepareUndo(m_Selection);
-
-	const ModCommand &target = *pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	const ModCommand &target = *GetCursorCommand();
 	if(target.IsNote())
 	{
-		TempEnterNote(((target.note - 1) % 12) + val * 12 + 1);
+		PrepareUndo(m_Cursor, m_Cursor);
+		TempEnterNote(((target.note - NOTE_MIN) % 12) + val * 12 + NOTE_MIN);
+		// Memorize note for key-up
+		ASSERT(val < octaveKeyMemory.size());
+		octaveKeyMemory[val] = target.note;
+	}
+}
+
+
+// Stop note that has been triggered by entering an octave in the pattern.
+void CViewPattern::TempStopOctave(int val)
+//----------------------------------------
+{
+	ASSERT(val < octaveKeyMemory.size());
+	if(octaveKeyMemory[val] != NOTE_NONE)
+	{
+		TempStopNote(octaveKeyMemory[val]);
+		octaveKeyMemory[val] = NOTE_NONE;
 	}
 }
 
@@ -4586,9 +4622,9 @@ void CViewPattern::TempEnterIns(int val)
 		return;
 	}
 
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Cursor, m_Cursor);
 
-	ModCommand *pTarget = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	ModCommand *pTarget = GetCursorCommand();
 	ModCommand oldcmd = *pTarget;		// This is the command we are about to overwrite
 
 	UINT instr = pTarget->instr, nTotalMax, nTempMax;
@@ -5140,7 +5176,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 
 	PrepareUndo(m_Cursor, m_Cursor);
 
-	ModCommand *p = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+	ModCommand *p = GetCursorCommand();
 	ModCommand oldcmd = *p;
 
 	if(mask.note)
