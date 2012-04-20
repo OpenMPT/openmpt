@@ -29,7 +29,7 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE mid
 	if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 	{
 		nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+255) >> 8;
-		if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
+		nVol *= CMainFrame::GetSettings().midiVelocityAmp / 100;
 		Limit(nVol, 1, 256);
 		if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = static_cast<int>((midivolume / 127.0) * nVol);

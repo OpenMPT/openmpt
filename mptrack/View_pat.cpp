@@ -2466,25 +2466,25 @@ void CViewPattern::OnCursorCopy()
 		return;
 	}
 
-	const ModCommand *m = GetCursorCommand();
+	const ModCommand &m = GetCursorCommand();
 	switch(m_Cursor.GetColumnType())
 	{
 	case PatternCursor::noteColumn:
 	case PatternCursor::instrColumn:
-		m_cmdOld.note = m->note;
-		m_cmdOld.instr = m->instr;
+		m_cmdOld.note = m.note;
+		m_cmdOld.instr = m.instr;
 		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m_cmdOld.instr);
 		break;
 
 	case PatternCursor::volumeColumn:
-		m_cmdOld.volcmd = m->volcmd;
-		m_cmdOld.vol = m->vol;
+		m_cmdOld.volcmd = m.volcmd;
+		m_cmdOld.vol = m.vol;
 		break;
 
 	case PatternCursor::effectColumn:
 	case PatternCursor::paramColumn:
-		m_cmdOld.command = m->command;
-		m_cmdOld.param = m->param;
+		m_cmdOld.command = m.command;
+		m_cmdOld.param = m.param;
 		break;
 	}
 }
@@ -2494,8 +2494,7 @@ void CViewPattern::OnCursorCopy()
 void CViewPattern::OnCursorPaste()
 //--------------------------------
 {
-	ModCommand *p = GetCursorCommand();
-	if(p == nullptr || !IsEditingEnabled_bmsg())
+	if(!IsEditingEnabled_bmsg())
 	{
 		return;
 	}
@@ -2503,24 +2502,26 @@ void CViewPattern::OnCursorPaste()
 	PrepareUndo(m_Cursor, m_Cursor);
 	PatternCursor::Columns column = m_Cursor.GetColumnType();
 
+	ModCommand &m = GetCursorCommand();
+
 	switch(column)
 	{
 	case PatternCursor::noteColumn:
-		p->note = m_cmdOld.note;
+		m.note = m_cmdOld.note;
 		// Intentional fall-through
 	case PatternCursor::instrColumn:
-		p->instr = m_cmdOld.instr;
+		m.instr = m_cmdOld.instr;
 		break;
 
 	case PatternCursor::volumeColumn:
-		p->vol = m_cmdOld.vol;
-		p->volcmd = m_cmdOld.volcmd;
+		m.vol = m_cmdOld.vol;
+		m.volcmd = m_cmdOld.volcmd;
 		break;
 
 	case PatternCursor::effectColumn:
 	case PatternCursor::paramColumn:
-		p->command = m_cmdOld.command;
-		p->param = m_cmdOld.param;
+		m.command = m_cmdOld.command;
+		m.param = m_cmdOld.param;
 		break;
 	}
 
@@ -3503,27 +3504,33 @@ ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) 
 }
 
 
-// Get ModCommand at the pattern cursor position.
-ModCommand *CViewPattern ::GetCursorCommand()
-//-------------------------------------------
+// Return ModCommand at the given cursor position of the current pattern.
+// If the position is not valid, a pointer to a dummy command is returned.
+ModCommand &CViewPattern::GetModCommand(PatternCursor cursor)
+//-----------------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()))
 	{
-		return pSndFile->Patterns[GetCurrentPattern()].GetpModCommand(GetCurrentRow(), GetCurrentChannel());
+		return *pSndFile->Patterns[GetCurrentPattern()].GetpModCommand(cursor.GetRow(), cursor.GetChannel());
 	}
-	return nullptr;
+	// Failed.
+	static ModCommand dummy;
+	return dummy;
 }
 
 
-ModCommand *CViewPattern::GetModCommand(CSoundFile& rSf, const ModCommandPos& pos)
-//--------------------------------------------------------------------------------
+
+// Returns pointer to modcommand at given position.
+// If the position is not valid, a pointer to a dummy command is returned.
+ModCommand &CViewPattern::GetModCommand(CSoundFile &sndFile, const ModCommandPos &pos)
+//------------------------------------------------------------------------------------
 {
-	static ModCommand m;
-	if (rSf.Patterns.IsValidPat(pos.nPat) && pos.nRow < rSf.Patterns[pos.nPat].GetNumRows() && pos.nChn < rSf.GetNumChannels())
-		return rSf.Patterns[pos.nPat].GetpModCommand(pos.nRow, pos.nChn);
+	static ModCommand dummy;
+	if(sndFile.Patterns.IsValidPat(pos.nPat) && pos.nRow < sndFile.Patterns[pos.nPat].GetNumRows() && pos.nChn < sndFile.GetNumChannels())
+		return *sndFile.Patterns[pos.nPat].GetpModCommand(pos.nRow, pos.nChn);
 	else
-		return &m;
+		return dummy;
 }
 
 
@@ -3580,9 +3587,9 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		const bool liveRecord = IsLiveRecord();
 
 		ModCommandPos editpos = GetEditPos(*pSndFile, liveRecord);
-		ModCommand* p = GetModCommand(*pSndFile, editpos);
+		ModCommand &m = GetModCommand(*pSndFile, editpos);
 		pModDoc->GetPatternUndo().PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
-		p->Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue)/127));
+		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue)/127));
 		if(!liveRecord)
 			InvalidateRow(editpos.nRow);
 		pMainFrm->ThreadSafeSetModified(pModDoc);
@@ -3612,8 +3619,12 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				
 		break;
 
-		case MIDIEvents::evPolyAftertouch:
-		case MIDIEvents::evChannelAftertouch:
+		case MIDIEvents::evPolyAftertouch:	// Polyphonic aftertouch
+			EnterAftertouch(nNote, nVol);
+			break;
+
+		case MIDIEvents::evChannelAftertouch:	// Channel aftertouch
+			EnterAftertouch(NOTE_NONE, nByte1);
 			break;
 
 		case MIDIEvents::evControllerChange: //Controller change
@@ -3631,13 +3642,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				const bool liveRecord = IsLiveRecord();
 
 				ModCommandPos editpos = GetEditPos(*pSndFile, liveRecord);
-				ModCommand* p = GetModCommand(*pSndFile, editpos);
+				ModCommand &m = GetModCommand(*pSndFile, editpos);
 
-				if(p->command == CMD_NONE || p->command == CMD_SMOOTHMIDI || p->command == CMD_MIDI)
-				{   // Write command only if there's no existing command or already a midi macro command.
+				if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
+				{
+					// Write command only if there's no existing command or already a midi macro command.
 					pModDoc->GetPatternUndo().PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
-					p->command = CMD_SMOOTHMIDI;
-					p->param = nByte2;
+					m.command = CMD_SMOOTHMIDI;
+					m.param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);
 
 					// Update GUI only if not recording live.
@@ -4238,13 +4250,13 @@ void CViewPattern::MoveCursor(bool moveRight)
 	{ \
 		if((v >= 0) && (v <= 9)) \
 		{	\
-			uint16 val = pTarget->Get##method##(); \
+			uint16 val = target.Get##method##(); \
 			/* Move existing digits to left, drop out leftmost digit and */ \
 			/* push new digit to the least meaning digit. */ \
 			val = (val % 100) * 10 + v; \
 			if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue; \
-			pTarget->Set##method##(val); \
-			m_PCNoteEditMemory = *pTarget; \
+			target.Set##method##(val); \
+			m_PCNoteEditMemory = target; \
 		} \
 	} 
 
@@ -4262,17 +4274,17 @@ void CViewPattern::TempEnterVol(int v)
 		
 	PrepareUndo(m_Cursor, m_Cursor);
 
-	ModCommand* pTarget = GetCursorCommand();
-	ModCommand oldcmd = *pTarget; // This is the command we are about to overwrite
+	ModCommand &target = GetCursorCommand();
+	ModCommand oldcmd = target; // This is the command we are about to overwrite
 
-	if(pTarget->IsPcNote())
+	if(target.IsPcNote())
 	{
 		ENTER_PCNOTE_VALUE(v, ValueVolCol);
 	}
 	else
 	{
-		UINT volcmd = pTarget->volcmd;
-		UINT vol = pTarget->vol;
+		ModCommand::VOLCMD volcmd = target.volcmd;
+		uint16 vol = target.vol;
 		if ((v >= 0) && (v <= 9))
 		{
 			vol = ((vol * 10) + v) % 100;
@@ -4287,33 +4299,33 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeVolSlideDown:	volcmd = VOLCMD_VOLSLIDEDOWN; break;
 			case kcSetVolumeFineVolUp:		volcmd = VOLCMD_FINEVOLUP; break;
 			case kcSetVolumeFineVolDown:	volcmd = VOLCMD_FINEVOLDOWN; break;
-			case kcSetVolumeVibratoSpd:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_VIBRATOSPEED; break;
+			case kcSetVolumeVibratoSpd:		if (pSndFile->GetType() & MOD_TYPE_XM) volcmd = VOLCMD_VIBRATOSPEED; break;
 			case kcSetVolumeVibrato:		volcmd = VOLCMD_VIBRATODEPTH; break;
-			case kcSetVolumeXMPanLeft:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
-			case kcSetVolumeXMPanRight:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
+			case kcSetVolumeXMPanLeft:		if (pSndFile->GetType() & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
+			case kcSetVolumeXMPanRight:		if (pSndFile->GetType() & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
 			case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
+			case kcSetVolumeITPortaUp:		if (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
+			case kcSetVolumeITPortaDown:	if (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
+			case kcSetVolumeITOffset:		if (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
 		}
 
 		UINT max = 64;
 		if (volcmd > VOLCMD_PANNING)
 		{
-			max = (pSndFile->m_nType == MOD_TYPE_XM) ? 0x0F : 9;
+			max = (pSndFile->GetType() == MOD_TYPE_XM) ? 0x0F : 9;
 		}
 
 		if (vol > max) vol %= 10;
 		if(pSndFile->GetModSpecifications().HasVolCommand(volcmd))
 		{
-			pTarget->volcmd = volcmd;
-			pTarget->vol = vol;
+			target.volcmd = volcmd;
+			target.vol = vol;
 		}
 	}
 
 	SetSelToCursor();
 
-	if(oldcmd != *pTarget)
+	if(oldcmd != target)
 	{
 		SetModified(false);
 		InvalidateCell(m_Cursor);
@@ -4344,12 +4356,12 @@ void CViewPattern::TempEnterFX(int c, int v)
 		return;
 	}
 
-	ModCommand *pTarget = GetCursorCommand();
-	ModCommand oldcmd = *pTarget; // This is the command we are about to overwrite
+	ModCommand &target = GetCursorCommand();
+	ModCommand oldcmd = target; // This is the command we are about to overwrite
 
 	PrepareUndo(m_Cursor, m_Cursor);
 
-	if(pTarget->IsPcNote())
+	if(target.IsPcNote())
 	{
 		ENTER_PCNOTE_VALUE(c, ValueEffectCol);
 	}
@@ -4358,27 +4370,32 @@ void CViewPattern::TempEnterFX(int c, int v)
 
 		if (c)
 		{
-			if ((c == m_cmdOld.command) && (!pTarget->param) && (!pTarget->command)) pTarget->param = m_cmdOld.param;
-			else m_cmdOld.param = 0;
+			if ((c == m_cmdOld.command) && (!target.param) && (target.command == CMD_NONE))
+			{
+				target.param = m_cmdOld.param;
+			} else
+			{
+				m_cmdOld.param = 0;
+			}
 			m_cmdOld.command = c;
 		}
-		pTarget->command = c;
+		target.command = c;
 		if(v >= 0)
 		{
-			pTarget->param = v;
+			target.param = v;
 		}
 
 		// Check for MOD/XM Speed/Tempo command
-		if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-			&& ((pTarget->command == CMD_SPEED) || (pTarget->command == CMD_TEMPO)))
+		if((pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
+			&& (target.command == CMD_SPEED || target.command == CMD_TEMPO))
 		{
-			pTarget->command = (pTarget->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
+			target.command = (target.param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
 		}
 	}
 
 	SetSelToCursor();
 
-	if(oldcmd != *pTarget)
+	if(oldcmd != target)
 	{
 		SetModified(false);
 		InvalidateCell(m_Cursor);
@@ -4398,31 +4415,34 @@ void CViewPattern::TempEnterFXparam(int v)
 		return;
 	}
 
-	ModCommand *pTarget = GetCursorCommand();
-	ModCommand oldcmd = *pTarget; // This is the command we are about to overwrite
+	ModCommand &target = GetCursorCommand();
+	ModCommand oldcmd = target; // This is the command we are about to overwrite
 
 	PrepareUndo(m_Cursor, m_Cursor);
 
-	if(pTarget->IsPcNote())
+	if(target.IsPcNote())
 	{
 		ENTER_PCNOTE_VALUE(v, ValueEffectCol);
 	} else
 	{
 
-		pTarget->param = (pTarget->param << 4) | v;
-		if (pTarget->command == m_cmdOld.command) m_cmdOld.param = pTarget->param;
+		target.param = (target.param << 4) | v;
+		if (target.command == m_cmdOld.command)
+		{
+			m_cmdOld.param = target.param;
+		}
 
 		// Check for MOD/XM Speed/Tempo command
-		if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-			&& ((pTarget->command == CMD_SPEED) || (pTarget->command == CMD_TEMPO)))
+		if((pSndFile->GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM))
+			&& (target.command == CMD_SPEED || target.command == CMD_TEMPO))
 		{
-			pTarget->command = (pTarget->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
+			target.command = (target.param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
 		}
 	}
 
 	SetSelToCursor();
 
-	if(*pTarget != oldcmd)
+	if(target != oldcmd)
 	{
 		SetModified(false);
 		InvalidateCell(m_Cursor);
@@ -4444,7 +4464,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	const UINT nTick = pSndFile->m_nTickCount;
 	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
-	const bool isSplit = (pModDoc->GetSplitKeyboardSettings().IsSplitActive()) && (note <= pModDoc->GetSplitKeyboardSettings().splitNote);
+	const bool isSplit = IsNoteSplit(note);
 	UINT ins = 0;
 	if(pModDoc)
 	{
@@ -4587,13 +4607,13 @@ void CViewPattern::TempEnterOctave(int val)
 		return;
 	}
 
-	const ModCommand &target = *GetCursorCommand();
+	const ModCommand &target = GetCursorCommand();
 	if(target.IsNote())
 	{
 		PrepareUndo(m_Cursor, m_Cursor);
 		TempEnterNote(((target.note - NOTE_MIN) % 12) + val * 12 + NOTE_MIN);
 		// Memorize note for key-up
-		ASSERT(val < octaveKeyMemory.size());
+		ASSERT(size_t(val) < octaveKeyMemory.size());
 		octaveKeyMemory[val] = target.note;
 	}
 }
@@ -4603,7 +4623,7 @@ void CViewPattern::TempEnterOctave(int val)
 void CViewPattern::TempStopOctave(int val)
 //----------------------------------------
 {
-	ASSERT(val < octaveKeyMemory.size());
+	ASSERT(size_t(val) < octaveKeyMemory.size());
 	if(octaveKeyMemory[val] != NOTE_NONE)
 	{
 		TempStopNote(octaveKeyMemory[val]);
@@ -4624,11 +4644,11 @@ void CViewPattern::TempEnterIns(int val)
 
 	PrepareUndo(m_Cursor, m_Cursor);
 
-	ModCommand *pTarget = GetCursorCommand();
-	ModCommand oldcmd = *pTarget;		// This is the command we are about to overwrite
+	ModCommand &target = GetCursorCommand();
+	ModCommand oldcmd = target;		// This is the command we are about to overwrite
 
-	UINT instr = pTarget->instr, nTotalMax, nTempMax;
-	if(pTarget->IsPcNote())	// this is a plugin index
+	UINT instr = target.instr, nTotalMax, nTempMax;
+	if(target.IsPcNote())	// this is a plugin index
 	{
 		nTotalMax = MAX_MIXPLUGINS + 1;
 		nTempMax = MAX_MIXPLUGINS + 1;
@@ -4647,20 +4667,20 @@ void CViewPattern::TempEnterIns(int val)
 	if (nTempMax < 100)			// if we're using samples & have less than 100 samples
 		instr = instr % 100;	// or if we're using instruments and have less than 100 instruments
 	// --> ensure the entered instrument value is less than 100.
-	pTarget->instr = instr;
+	target.instr = instr;
 
 	SetSelToCursor();
 
-	if(*pTarget != oldcmd)
+	if(target != oldcmd)
 	{
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
 	}
 
-	if(pTarget->IsPcNote())
+	if(target.IsPcNote())
 	{
-		m_PCNoteEditMemory = *pTarget;
+		m_PCNoteEditMemory = target;
 	}
 }
 
@@ -5107,6 +5127,91 @@ void CViewPattern::TempEnterChord(int note)
 }
 
 
+// Translate incoming MIDI aftertouch messages to pattern commands
+void CViewPattern::EnterAftertouch(int note, int atValue)
+//-------------------------------------------------------
+{
+	if(CMainFrame::GetSettings().aftertouchBehaviour == TrackerSettings::atDoNotRecord)
+	{
+		return;
+	}
+
+	PatternCursor cursor(m_Cursor);
+
+	if(ModCommand::IsNote(note))
+	{
+		// For polyphonic aftertouch, map the aftertouch note to the correct pattern channel.
+		BYTE *activeNoteMap = IsNoteSplit(note) ? splitActiveNoteChannel : activeNoteChannel;
+		if(activeNoteMap[note] < GetSoundFile()->GetNumChannels())
+		{
+			cursor.SetColumn(activeNoteMap[note], PatternCursor::firstColumn);
+		} else
+		{
+			// Couldn't find the channel that belongs to this note... Don't bother writing aftertouch messages.
+			// This is actually necessary, because it is possible that the last aftertouch message for a note
+			// is received after the key-off event, in which case OpenMPT won't know anymore on which channel
+			// that particular note was, so it will just put the message on some other channel. We don't want that!
+			return;
+		}
+	}
+
+	Limit(atValue, 0, 127);
+
+	ModCommand &target = GetModCommand(cursor);
+	ModCommand origCommand = target;
+	CSoundFile *pSndFile = GetSoundFile();
+
+	switch(CMainFrame::GetSettings().aftertouchBehaviour)
+	{
+	case TrackerSettings::atRecordAsVolume:
+		// Record aftertouch messages as volume commands
+		if(pSndFile->GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
+		{
+			if(target.volcmd == VOLCMD_NONE || target.volcmd == VOLCMD_VOLUME)
+			{
+				PrepareUndo(m_Cursor, m_Cursor);
+				target.volcmd = VOLCMD_VOLUME;
+				target.vol = static_cast<ModCommand::VOL>((atValue * 64 + 64) / 127);
+			}
+		} else if(pSndFile->GetModSpecifications().HasCommand(CMD_VOLUME))
+		{
+			if(target.command == CMD_NONE || target.command == CMD_VOLUME)
+			{
+				PrepareUndo(m_Cursor, m_Cursor);
+				target.command = CMD_VOLUME;
+				target.param = static_cast<ModCommand::PARAM>((atValue * 64 + 64) / 127);
+			}
+		}
+		break;
+
+	case TrackerSettings::atRecordAsMacro:
+		// Record aftertouch messages as MIDI Macros
+		if(target.command == CMD_NONE || target.command == CMD_SMOOTHMIDI || target.command == CMD_MIDI)
+		{
+			ModCommand::COMMAND cmd =
+				pSndFile->GetModSpecifications().HasCommand(CMD_SMOOTHMIDI) ? CMD_SMOOTHMIDI :
+				pSndFile->GetModSpecifications().HasCommand(CMD_MIDI) ? CMD_MIDI :
+				CMD_NONE;
+
+			if(cmd != CMD_NONE)
+			{
+				PrepareUndo(m_Cursor, m_Cursor);
+				target.command = cmd;
+				target.param = static_cast<ModCommand::PARAM>(atValue);
+			}
+		}
+		break;
+	}
+
+	if(target != origCommand)
+	{
+		SetModified(false);
+		InvalidateCell(cursor);
+		UpdateIndicator();
+	}
+}
+
+
 // Find a free channel for a record group, starting search from a given channel.
 // If forceFreeChannel is true and all channels in the specified record group are active, some channel is picked from the specified record group.
 CHANNELINDEX CViewPattern::FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel) const
@@ -5176,55 +5281,55 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 
 	PrepareUndo(m_Cursor, m_Cursor);
 
-	ModCommand *p = GetCursorCommand();
-	ModCommand oldcmd = *p;
+	ModCommand &target = GetCursorCommand();
+	ModCommand oldcmd = target;
 
 	if(mask.note)
 	{
 		// Clear note
-		if(p->IsPcNote())
+		if(target.IsPcNote())
 		{
 			// Need to clear entire field if this is a PC Event.
-			p->Clear();
+			target.Clear();
 		} else
 		{
-			p->note = NOTE_NONE;
+			target.note = NOTE_NONE;
 			if(ITStyle)
 			{
-				p->instr = 0;
+				target.instr = 0;
 			}
 		}
 	}
 	if(mask.instrument)
 	{
 		// Clear instrument
-		p->instr = 0;
+		target.instr = 0;
 	}
 	if(mask.volume)
 	{
 		// Clear volume effect
-		p->volcmd = VOLCMD_NONE;
-		p->vol = 0;
+		target.volcmd = VOLCMD_NONE;
+		target.vol = 0;
 	}
 	if(mask.command)
 	{
 		// Clear effect command
-		p->command = CMD_NONE;
+		target.command = CMD_NONE;
 	}
 	if(mask.parameter)
 	{
 		// Clear effect parameter
-		p->param = 0;
+		target.param = 0;
 	}
 
-	if((mask.command || mask.parameter) && (p->IsPcNote()))
+	if((mask.command || mask.parameter) && (target.IsPcNote()))
 	{
-		p->SetValueEffectCol(0);
+		target.SetValueEffectCol(0);
 	}
 
 	SetSelToCursor();
 
-	if(*p != oldcmd)
+	if(target != oldcmd)
 	{
 		SetModified(false);
 		InvalidateRow();

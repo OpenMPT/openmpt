@@ -35,6 +35,16 @@ class TrackerSettings
 
 public:
 
+	// MIDI recording
+	enum RecordAftertouchOptions
+	{
+		atDoNotRecord = 0,
+		atRecordAsVolume,
+		atRecordAsMacro,
+	};
+
+public:
+
 	BOOL gbMdiMaximize;
 	bool gbShowHackControls;
 	LONG glTreeWindowWidth, glTreeSplitRatio;
@@ -47,13 +57,19 @@ public:
 	// Audio Setup
 	DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
-	LONG m_nMidiDevice;
 	DWORD m_nBufferLength;
 	EQPRESET m_EqSettings;
+
+	// MIDI Setup
+	LONG m_nMidiDevice;
+	DWORD m_dwMidiSetup;
+	RecordAftertouchOptions aftertouchBehaviour;
+	uint16 midiVelocityAmp;
+
 	// Pattern Setup
 	UINT gnPatternSpacing;
 	BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
-	DWORD m_dwPatternSetup, m_dwMidiSetup, m_nKeyboardCfg;
+	DWORD m_dwPatternSetup, m_nKeyboardCfg;
 	DWORD m_nRowHighlightMeasures, m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
 	bool m_bHideUnavailableCtxMenuItems;
 	int orderlistMargins;

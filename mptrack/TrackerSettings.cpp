@@ -68,14 +68,17 @@ TrackerSettings::TrackerSettings()
 	m_nPreAmp = 128;
 	gbLoopSong = TRUE;
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
-	m_nMidiDevice = 0;
 	m_nBufferLength = 50;
 
 	// Default EQ settings
 	MemCopy(m_EqSettings, CEQSetupDlg::gEQPresets[0]);
 
 	// MIDI Setup
-	m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEOFF;
+	m_nMidiDevice = 0;
+	m_dwMidiSetup = MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG;
+	aftertouchBehaviour = atDoNotRecord;
+	midiVelocityAmp = 100;
+	
 	// MIDI Import
 	midiImportPatternLen = 128;
 	midiImportSpeed = 3;
@@ -351,21 +354,29 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 	m_dwMidiSetup = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
 	m_nMidiDevice = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
+	aftertouchBehaviour = static_cast<RecordAftertouchOptions>(CMainFrame::GetPrivateProfileDWord("MIDI Settings", "AftertouchBehaviour", aftertouchBehaviour, iniFile));
+	midiVelocityAmp = static_cast<uint16>(CMainFrame::GetPrivateProfileLong("MIDI Settings", "MidiVelocityAmp", midiVelocityAmp, iniFile));
 	midiImportSpeed = CMainFrame::GetPrivateProfileLong("MIDI Settings", "MidiImportSpeed", midiImportSpeed, iniFile);
 	midiImportPatternLen = CMainFrame::GetPrivateProfileLong("MIDI Settings", "MidiImportPatLen", midiImportPatternLen, iniFile);
+	if((m_dwMidiSetup & 0x40) != 0 && vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 86))
+	{
+		// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
+		midiVelocityAmp = 200;
+		m_dwMidiSetup &= ~0x40;
+	}
 
 	m_dwPatternSetup = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,17,02,50))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50))
 		m_dwPatternSetup |= PATTERN_NOTEFADE;
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,17,03,01))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 01))
 		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,19,00,07))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 07))
 		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,20,00,04))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 04))
 		m_dwPatternSetup &= ~0x200000;				// dito
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,20,00,07))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 07))
 		m_dwPatternSetup &= ~0x400000;				// dito
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,20,00,39))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 39))
 		m_dwPatternSetup &= ~0x10000000;			// dito
 
 	m_nRowHighlightMeasures = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RowSpacing", m_nRowHighlightMeasures, iniFile);
@@ -557,6 +568,12 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nMaxMixChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "WaveDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nWaveDevice, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
+		if((m_dwMidiSetup & 0x40) != 0)
+		{
+			// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
+			midiVelocityAmp = 200;
+			m_dwMidiSetup &= ~0x40;
+		}
 		RegQueryValueEx(key, "MidiDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nMidiDevice, &dwDWORDSize);
 		RegQueryValueEx(key, "PatternSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwPatternSetup, &dwDWORDSize);
 		m_dwPatternSetup &= ~(0x800|0x200000|0x400000);	// various deprecated old options
@@ -720,6 +737,8 @@ void TrackerSettings::SaveSettings()
 
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
+	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "AftertouchBehaviour", aftertouchBehaviour, iniFile);
+	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiVelocityAmp", midiVelocityAmp, iniFile);
 	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiImportSpeed", midiImportSpeed, iniFile);
 	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiImportPatLen", midiImportPatternLen, iniFile);
 

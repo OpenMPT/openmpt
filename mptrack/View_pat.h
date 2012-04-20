@@ -203,7 +203,8 @@ public:
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
 	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
-	ModCommand *GetCursorCommand();
+	// Get ModCommand at the pattern cursor position.
+	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
 
 	UINT GetColumnOffset(PatternCursor::Columns column) const;
 	POINT GetPointFromPosition(PatternCursor cursor);
@@ -280,6 +281,8 @@ public:
 	void TempEnterVol(int v);
 	void TempEnterFX(int c, int v = -1);
 	void TempEnterFXparam(int v);
+	void EnterAftertouch(int note, int atValue);
+
 	void SetSpacing(int n);
 	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
 	void InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax);
@@ -462,9 +465,10 @@ private:
 	// Returns edit position.
 	ModCommandPos GetEditPos(CSoundFile &rSf, const bool bLiveRecord) const;
 
-	// Returns pointer to modcommand at given position. If the position is not valid, returns pointer
-	// to a dummy command.
-	ModCommand* GetModCommand(CSoundFile &rSf, const ModCommandPos &pos);
+	// Returns pointer to modcommand at given position.
+	// If the position is not valid, a pointer to a dummy command is returned.
+	ModCommand &GetModCommand(PatternCursor cursor);
+	ModCommand &GetModCommand(CSoundFile &sndFile, const ModCommandPos &pos);
 
 	// Returns true if pattern editing is enabled.
 	bool IsEditingEnabled() const { return ((m_dwStatus & psRecordingEnabled) != 0); }

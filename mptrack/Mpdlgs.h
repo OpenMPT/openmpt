@@ -163,7 +163,8 @@ public:
 	LONG m_nMidiDevice;
 
 protected:
-	CSpinButtonCtrl m_SpinSpd, m_SpinPat;
+	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
+	CComboBox m_ATBehaviour;
 
 public:
 	CMidiSetupDlg(DWORD d, LONG n):CPropertyPage(IDD_OPTIONS_MIDI)

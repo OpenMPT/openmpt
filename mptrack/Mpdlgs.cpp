@@ -1001,7 +1001,7 @@ BOOL CEQSetupDlg::OnSetActive()
 	SetDlgItemText(IDC_EQ_WARNING, 
 		"Note: This EQ, when enabled from Player tab, is applied to "
 		"any and all of the modules "
-	    "that you load in OpenMPT; its settings are stored globally, "
+		"that you load in OpenMPT; its settings are stored globally, "
 		"rather than in each file. This means that you should avoid "
 		"using it as part of your production process, and instead only "
 		"use it to correct deficiencies in your audio hardware.");
@@ -1013,16 +1013,17 @@ BOOL CEQSetupDlg::OnSetActive()
 // CMidiSetupDlg
 
 BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,			OnSettingsChanged)
-	ON_COMMAND(IDC_MIDI_TO_PLUGIN,	OnSettingsChanged)
-	ON_COMMAND(IDC_MIDI_MACRO_CONTROL,	OnSettingsChanged)
-	ON_COMMAND(IDC_MIDIVOL_TO_NOTEVOL,	OnSettingsChanged)
-	ON_COMMAND(IDC_MIDIPLAYCONTROL,	OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,			OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,			OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,					OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,					OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,					OnSettingsChanged)
+	ON_COMMAND(IDC_MIDI_TO_PLUGIN,			OnSettingsChanged)
+	ON_COMMAND(IDC_MIDI_MACRO_CONTROL,		OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIVOL_TO_NOTEVOL,		OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIPLAYCONTROL,			OnSettingsChanged)
 	ON_COMMAND(IDC_MIDIPLAYPATTERNONMIDIIN,	OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT3,					OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -1033,6 +1034,8 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(COptionsSoundcard)
 	DDX_Control(pDX, IDC_SPIN1,		m_SpinSpd);
 	DDX_Control(pDX, IDC_SPIN2,		m_SpinPat);
+	DDX_Control(pDX, IDC_SPIN3,		m_SpinAmp);
+	DDX_Control(pDX, IDC_COMBO2,	m_ATBehaviour);
 	//}}AFX_DATA_MAP
 }
 	
@@ -1047,13 +1050,13 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	// Flags
 	if (m_dwMidiSetup & MIDISETUP_RECORDVELOCITY) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_MIDITOPLUG) CheckDlgButton(IDC_MIDI_TO_PLUGIN, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) CheckDlgButton(IDC_MIDI_MACRO_CONTROL, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL) CheckDlgButton(IDC_MIDIVOL_TO_NOTEVOL, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS) CheckDlgButton(IDC_MIDIPLAYCONTROL, MF_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN) CheckDlgButton(IDC_MIDIPLAYPATTERNONMIDIIN, MF_CHECKED);
+
 	// Midi In Device
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
@@ -1066,6 +1069,34 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		}
 		combo->SetCurSel((m_nMidiDevice == MIDI_MAPPER) ? 0 : m_nMidiDevice);
 	}
+
+	// Aftertouch behaviour
+	m_ATBehaviour.ResetContent();
+	static const struct
+	{
+		const char *text;
+		TrackerSettings::RecordAftertouchOptions option;
+	} aftertouchOptions[] =
+	{
+		{ "Do not record Aftertouch", TrackerSettings::atDoNotRecord },
+		{ "Record as Volume Commands", TrackerSettings::atRecordAsVolume },
+		{ "Record as MIDI Macros", TrackerSettings::atRecordAsMacro },
+	};
+
+	for(size_t i = 0; i < CountOf(aftertouchOptions); i++)
+	{
+		int item = m_ATBehaviour.AddString(aftertouchOptions[i].text);
+		m_ATBehaviour.SetItemData(item, aftertouchOptions[i].option);
+		if(aftertouchOptions[i].option == CMainFrame::GetSettings().aftertouchBehaviour)
+		{
+			m_ATBehaviour.SetCurSel(i);
+		}
+	}
+
+	// Note Velocity amp
+	SetDlgItemInt(IDC_EDIT3, CMainFrame::GetSettings().midiVelocityAmp);
+	m_SpinAmp.SetRange(1, 10000);
+
 	// Midi Import settings
 	SetDlgItemInt(IDC_EDIT1, CMainFrame::GetSettings().midiImportSpeed);
 	SetDlgItemInt(IDC_EDIT2, CMainFrame::GetSettings().midiImportPatternLen);
@@ -1084,7 +1115,6 @@ void CMidiSetupDlg::OnOK()
 	m_nMidiDevice = MIDI_MAPPER;
 	if (IsDlgButtonChecked(IDC_CHECK1)) m_dwMidiSetup |= MIDISETUP_RECORDVELOCITY;
 	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwMidiSetup |= MIDISETUP_RECORDNOTEOFF;
-	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwMidiSetup |= MIDISETUP_AMPLIFYVELOCITY;
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwMidiSetup |= MIDISETUP_TRANSPOSEKEYBOARD;
 	if (IsDlgButtonChecked(IDC_MIDI_TO_PLUGIN)) m_dwMidiSetup |= MIDISETUP_MIDITOPLUG;
 	if (IsDlgButtonChecked(IDC_MIDI_MACRO_CONTROL)) m_dwMidiSetup |= MIDISETUP_MIDIMACROCONTROL;
@@ -1097,8 +1127,12 @@ void CMidiSetupDlg::OnOK()
 		int n = combo->GetCurSel();
 		if (n >= 0) m_nMidiDevice = combo->GetItemData(n);
 	}
+
+	CMainFrame::GetSettings().aftertouchBehaviour = static_cast<TrackerSettings::RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
+
 	CMainFrame::GetSettings().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
 	CMainFrame::GetSettings().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
+	CMainFrame::GetSettings().midiVelocityAmp = static_cast<uint16>(Clamp(GetDlgItemInt(IDC_EDIT3), 1u, 10000u));
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();
 }
