@@ -136,7 +136,7 @@ enum CommandID
 	kcNextOctave,
 	kcPrevOrder,
 	kcNextOrder,
-    kcEndMisc=kcNextOrder,
+	kcEndMisc=kcNextOrder,
 	kcGlobalEnd=kcNextOrder,
 
 	//Pattern Navigation
@@ -450,6 +450,18 @@ enum CommandID
 	kcSetOctave8,
 	kcSetOctave9,
 	
+	// Release set octave key
+	kcSetOctaveStop0,
+	kcSetOctaveStop1,
+	kcSetOctaveStop2,
+	kcSetOctaveStop3,
+	kcSetOctaveStop4,
+	kcSetOctaveStop5,
+	kcSetOctaveStop6,
+	kcSetOctaveStop7,
+	kcSetOctaveStop8,
+	kcSetOctaveStop9,
+
 	//Note Misc
 	kcStartNoteMisc,
 	kcChordModifier=kcStartNoteMisc,

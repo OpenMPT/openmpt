@@ -19,7 +19,7 @@
 #define VER_MAJORMAJOR				1
 #define VER_MAJOR					20
 #define VER_MINOR					00
-#define VER_MINORMINOR				84
+#define VER_MINORMINOR				85
 
 //Creates version number from version parts that appears in version string.
 //For example MAKE_VERSION_NUMERIC(1,17,02,28) gives version number of 
@@ -51,9 +51,18 @@ namespace MptVersion
 	{
 		CString strVersion;
 		if(v == 0)
+		{
+			// Unknown version
 			strVersion = "Unknown";
-		else
+		} else if((v & 0xFFFF) == 0)
+		{
+			// Only parts of the version number are known (f.e. when reading the version from the IT or S3M file header)
+			strVersion.Format("%X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF);
+		} else
+		{
+			// Full version info available
 			strVersion.Format("%X.%02X.%02X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, (v) & 0xFF);
+		}
 		return strVersion;
 	};
 

@@ -168,6 +168,7 @@ protected:
 // -> DESC="midi keyboard split"
 	BYTE activeNoteChannel[NOTE_MAX + 1];
 	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
+	vector<ModCommand::NOTE> octaveKeyMemory;
 	int oldrow, oldchn, oldsplitchn;
 // -! NEW_FEATURE#0012
 
@@ -202,6 +203,7 @@ public:
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
 	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
+	ModCommand *GetCursorCommand();
 
 	UINT GetColumnOffset(PatternCursor::Columns column) const;
 	POINT GetPointFromPosition(PatternCursor cursor);
@@ -274,6 +276,7 @@ public:
 	void TempStopChord(int note) {TempStopNote(note, false, true);}
 	void TempEnterIns(int val);
 	void TempEnterOctave(int val);
+	void TempStopOctave(int val);
 	void TempEnterVol(int v);
 	void TempEnterFX(int c, int v = -1);
 	void TempEnterFXparam(int v);
