@@ -2314,7 +2314,6 @@ void CModDoc::OnPatternRestart()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
-		pSndFile->ResetTotalTickCount();
 		//rewbs.vstCompliance
 		if (pModPlaying == this)
 		{

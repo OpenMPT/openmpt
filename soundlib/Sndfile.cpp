@@ -1134,7 +1134,6 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_nPattern = 0;
 		m_nTickCount = m_nMusicSpeed;
 		m_nBufferCount = 0;
-		m_nTotalCount = 0;
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
 		m_nNextPatStartRow = 0;
