@@ -2843,8 +2843,20 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 	else
 		param = pChn->nOldVolumeSlide;
 
+	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2)))
+	{
+		// MOD / XM nibble priority
+		if((param & 0xF0) != 0)
+		{
+			param &= 0xF0;
+		} else
+		{
+			param &= 0x0F;
+		}
+	}
+
 	LONG newvolume = pChn->nVolume;
-	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
+	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
 	{
 		if ((param & 0x0F) == 0x0F) //Fine upslide or slide -15
 		{
@@ -2903,7 +2915,20 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param)
 		pChn->nOldPanSlide = param;
 	else
 		param = pChn->nOldPanSlide;
-	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM))
+
+	if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
+	{
+		// XM nibble priority
+		if((param & 0xF0) != 0)
+		{
+			param &= 0xF0;
+		} else
+		{
+			param &= 0x0F;
+		}
+	}
+
+	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM))
 	{
 		if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 		{
@@ -3000,6 +3025,7 @@ void CSoundFile::ChannelVolSlide(ModChannel *pChn, UINT param)
 {
 	LONG nChnSlide = 0;
 	if (param) pChn->nOldChnVolSlide = param; else param = pChn->nOldChnVolSlide;
+
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 	{
 		if (m_dwSongFlags & SONG_FIRSTTICK) nChnSlide = param >> 4;
@@ -4161,6 +4187,19 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 {
 	LONG nGlbSlide = 0;
 	if (param) nOldGlobalVolSlide = param; else param = nOldGlobalVolSlide;
+
+	if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
+	{
+		// XM nibble priority
+		if((param & 0xF0) != 0)
+		{
+			param &= 0xF0;
+		} else
+		{
+			param &= 0x0F;
+		}
+	}
+
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 	{
 		if (m_dwSongFlags & SONG_FIRSTTICK) nGlbSlide = (param >> 4) * 2;
@@ -4442,7 +4481,7 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 }
 
 
-UINT CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
+uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
 //----------------------------------------------------------
 {
 	if(nChn == CHANNELINDEX_INVALID)

@@ -255,7 +255,7 @@ public:	// for Editing
 	bool m_bIsRendering;
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
 	double m_dBufferDiff;
-	UINT m_nTickCount, m_nTotalCount;
+	UINT m_nTickCount;
 	UINT m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
 	UINT m_nSamplesPerTick;		// rewbs.betterBPM
@@ -449,8 +449,6 @@ public:
 	UINT GetResamplingFlag(const ModChannel *pChannel);
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
-	UINT GetTotalTickCount() const { return m_nTotalCount; }
-	void ResetTotalTickCount() { m_nTotalCount = 0;}
 	void ProcessPlugins(UINT nCount);
 
 public:
@@ -737,7 +735,7 @@ private:
 
 public:
 	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
-	UINT GetBestMidiChannel(CHANNELINDEX nChn) const;
+	uint8 GetBestMidiChannel(CHANNELINDEX nChn) const;
 
 };
 

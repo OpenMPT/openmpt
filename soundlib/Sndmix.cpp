@@ -1845,7 +1845,6 @@ BOOL CSoundFile::ReadNote()
 			return FALSE;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
-	m_nTotalCount++;
 	if (!m_nMusicTempo) return FALSE;
 
 	switch(m_nTempoMode)

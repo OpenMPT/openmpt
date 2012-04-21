@@ -22,12 +22,12 @@ void CSoundFile::ConvertModCommand(ModCommand &m) const
 	case 0x02:	m.command = CMD_PORTAMENTODOWN; break;
 	case 0x03:	m.command = CMD_TONEPORTAMENTO; break;
 	case 0x04:	m.command = CMD_VIBRATO; break;
-	case 0x05:	m.command = CMD_TONEPORTAVOL; if(m.param & 0xF0) m.param &= 0xF0; break;
-	case 0x06:	m.command = CMD_VIBRATOVOL; if(m.param & 0xF0) m.param &= 0xF0; break;
+	case 0x05:	m.command = CMD_TONEPORTAVOL; break;
+	case 0x06:	m.command = CMD_VIBRATOVOL; break;
 	case 0x07:	m.command = CMD_TREMOLO; break;
 	case 0x08:	m.command = CMD_PANNING8; break;
 	case 0x09:	m.command = CMD_OFFSET; break;
-	case 0x0A:	m.command = CMD_VOLUMESLIDE; if(m.param & 0xF0) m.param &= 0xF0; break;
+	case 0x0A:	m.command = CMD_VOLUMESLIDE; break;
 	case 0x0B:	m.command = CMD_POSITIONJUMP; break;
 	case 0x0C:	m.command = CMD_VOLUME; break;
 	case 0x0D:	m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
@@ -37,12 +37,12 @@ void CSoundFile::ConvertModCommand(ModCommand &m) const
 
 	// Extension for XM extended effects
 	case 'G' - 55:	m.command = CMD_GLOBALVOLUME; break;		//16
-	case 'H' - 55:	m.command = CMD_GLOBALVOLSLIDE; if (m.param & 0xF0) m.param &= 0xF0; break;
+	case 'H' - 55:	m.command = CMD_GLOBALVOLSLIDE; break;
 	case 'K' - 55:	m.command = CMD_KEYOFF; break;
 	case 'L' - 55:	m.command = CMD_SETENVPOSITION; break;
 	case 'M' - 55:	m.command = CMD_CHANNELVOLUME; break;
 	case 'N' - 55:	m.command = CMD_CHANNELVOLSLIDE; break;
-	case 'P' - 55:	m.command = CMD_PANNINGSLIDE; if (m.param & 0xF0) m.param &= 0xF0; break;
+	case 'P' - 55:	m.command = CMD_PANNINGSLIDE; break;
 	case 'R' - 55:	m.command = CMD_RETRIG; break;
 	case 'T' - 55:	m.command = CMD_TREMOR; break;
 	case 'X' - 55:	m.command = CMD_XFINEPORTAUPDOWN;	break;
