@@ -2153,6 +2153,14 @@ BOOL CSoundFile::ProcessEffects()
 // 				break;
 // 			}
 			
+			// FT2 compatibility: Global volume is applied *after* the first tick.
+			// This is not emulated quite correctly for speed 1 (because there is no second tick), but it should be close enough.
+			// Test case: GlobalVolume.xm
+			if(IsCompatibleMode(TRK_FASTTRACKER2) && (m_dwSongFlags & SONG_FIRSTTICK) && m_nMusicSpeed > 1)
+			{
+				break;
+			}
+			
 			if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param *= 2;
 
 			// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values.
