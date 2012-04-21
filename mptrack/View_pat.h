@@ -118,7 +118,7 @@ protected:
 		psChordPlaying =		0x100,	// Is a chord playing? (pretty much unused)
 		psDragnDropEdit =		0x200,	// Drag & Drop editing (?)
 		psDragnDropping =		0x400,	// Dragging a selection around
-		psMIDISpacingPending =	0x800,	// Unused (?)
+		//psMIDISpacingPending =	0x800,	// Unused (?)
 		psCtrlDragSelect =		0x1000,	// Creating a selection using Ctrl
 		psShowPluginNames =		0x2000,	// Show plugin names in channel headers //rewbs.patPlugName
 		psRowSelection =		0x4000,	// Selecting a whole pattern row by clicking the row numbers
