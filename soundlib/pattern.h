@@ -55,11 +55,12 @@ public:
 	bool GetOverrideSignature() const { return (m_RowsPerBeat + m_RowsPerMeasure > 0); }	// override song time signature?
 
 	// Return true if modcommand can be accessed from given row, false otherwise.
-	bool IsValidRow(const ROWINDEX iRow) const { return (iRow < GetNumRows()); }
+	bool IsValidRow(const ROWINDEX row) const { return (row < GetNumRows()); }
 
 	// Return PatternRow object which has operator[] defined so that ModCommand
 	// at (iRow, iChn) can be accessed with GetRow(iRow)[iChn].
-	PatternRow GetRow(const ROWINDEX iRow) { return GetpModCommand(iRow, 0); }
+	PatternRow GetRow(const ROWINDEX row) { return GetpModCommand(row, 0); }
+	const PatternRow GetRow(const ROWINDEX row) const { return const_cast<ModCommand *>(GetpModCommand(row, 0)); }
 
 	CHANNELINDEX GetNumChannels() const;
 

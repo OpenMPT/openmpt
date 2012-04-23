@@ -370,7 +370,7 @@ public:
 
 	// Module Loaders
 	bool ReadXM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadS3M(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadS3M(FileReader &file);
 	bool ReadMod(FileReader &file);
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -409,8 +409,8 @@ public:
 #ifndef MODPLUG_NO_FILESAVE
 	UINT WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT nMaxLen=0) const;
 	bool SaveXM(LPCSTR lpszFileName, bool compatibilityExport = false);
-	bool SaveS3M(LPCSTR lpszFileName);
-	bool SaveMod(LPCSTR lpszFileName);
+	bool SaveS3M(LPCSTR lpszFileName) const;
+	bool SaveMod(LPCSTR lpszFileName) const;
 	bool SaveIT(LPCSTR lpszFileName, bool compatibilityExport = false);
 	bool SaveITProject(LPCSTR lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);

@@ -621,7 +621,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 // -! NEW_FEATURE#0023
 		 && !ReadIT(lpStream, dwMemLength)
 		 /*&& !ReadMPT(lpStream, dwMemLength)*/
-		 && !ReadS3M(lpStream, dwMemLength)
+		 && !ReadS3M(file)
 		 && !ReadWav(lpStream, dwMemLength)
 #ifndef MODPLUG_BASIC_SUPPORT
 		 && !ReadSTM(lpStream, dwMemLength)
@@ -2852,7 +2852,7 @@ struct UpgradePatternData
 				ModCommand *fixCmd = (&m) - chn;
 				for(CHANNELINDEX i = 0; i < chn; i++, fixCmd++)
 				{
-					if(fixCmd->command == CMD_S3MCMDEX && (fixCmd->param & 0xF0) == 0x60)
+					if((fixCmd->command == CMD_S3MCMDEX || fixCmd->command == CMD_XFINEPORTAUPDOWN) && (fixCmd->param & 0xF0) == 0x60)
 					{
 						fixCmd->command = CMD_NONE;
 					}

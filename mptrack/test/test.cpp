@@ -752,6 +752,130 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 }
 
 
+// Check if our test file was loaded correctly.
+void TestLoadS3MFile(const CModDoc *pModDoc)
+//------------------------------------------
+{
+	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+
+	// Global Variables
+	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "S3M_Test__________________X"), 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 33);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 254);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 32 * 4);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 48);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 16);
+	VERIFY_EQUAL_NONCONT((pSndFile->m_dwSongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_classic);
+	VERIFY_EQUAL_NONCONT(pSndFile->m_dwLastSavedWithVersion, MAKE_VERSION_NUMERIC(1, 20, 00, 00));
+	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 0);
+
+	// Channels
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 4);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nPan, 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].dwFlags, 0);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nPan, 256);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].dwFlags, CHN_MUTE);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].nPan, 85);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].dwFlags, 0);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[3].nPan, 171);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[3].dwFlags, CHN_MUTE);
+
+	// Samples
+	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 3);
+	{
+		const ModSample &sample = pSndFile->GetSample(1);
+		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[1], "Sample_1__________________X"), 0);
+		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "Filename_1_X"), 0);
+		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 60);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 9001);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 32 * 4);
+		VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 64);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_LOOP);
+
+		VERIFY_EQUAL_NONCONT(sample.nLoopStart, 16);
+		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 60);
+
+		// Sample Data
+		for(size_t i = 0; i < 30; i++)
+		{
+			VERIFY_EQUAL_NONCONT(sample.pSample[i], 127);
+		}
+		for(size_t i = 31; i < 60; i++)
+		{
+			VERIFY_EQUAL_NONCONT(sample.pSample[i], -128);
+		}
+	}
+
+	{
+		const ModSample &sample = pSndFile->GetSample(2);
+		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[2], "Empty"), 0);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 16384);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 2 * 4);
+	}
+
+	{
+		const ModSample &sample = pSndFile->GetSample(3);
+		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[3], "Stereo / 16-Bit"), 0);
+		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "Filename_3_X"), 0);
+		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
+		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
+		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 2);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 64);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 16000);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 0);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_LOOP | CHN_16BIT | CHN_STEREO);
+
+		VERIFY_EQUAL_NONCONT(sample.nLoopStart, 0);
+		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 16);
+
+		// Sample Data (Stereo Interleaved)
+		for(size_t i = 0; i < 7; i++)
+		{
+			VERIFY_EQUAL_NONCONT(reinterpret_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
+		}
+	}
+
+	// Orders
+	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetLengthTailTrimmed(), 5);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[0], 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[1], pSndFile->Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[2], pSndFile->Order.GetInvalidPatIndex());
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[3], 1);
+	VERIFY_EQUAL_NONCONT(pSndFile->Order[4], 0);
+
+	// Patterns
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.GetNumPatterns(), 2);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumChannels(), 4);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 0)->note, NOTE_MIN + 12);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(1, 0)->note, NOTE_MIN + 107);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 1)->volcmd, VOLCMD_VOLUME);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 1)->vol, 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(1, 1)->volcmd, VOLCMD_VOLUME);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(1, 1)->vol, 64);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(2, 1)->volcmd, VOLCMD_PANNING);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(2, 1)->vol, 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(3, 1)->volcmd, VOLCMD_PANNING);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(3, 1)->vol, 64);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 3)->command, CMD_SPEED);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 3)->param, 0x11);
+
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(63, 3)->param, 0x04);
+}
+
+
 // Test file loading and saving
 void TestLoadSaveFile()
 //---------------------
@@ -797,6 +921,24 @@ void TestLoadSaveFile()
 		// Reload the saved file and test if everything is still working correctly.
 		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.xm", FALSE);
 		TestLoadXMFile(pModDoc);
+		pModDoc->OnCloseDocument();
+	}
+
+	// Test S3M file loading
+	{
+		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "s3m", FALSE);
+		TestLoadS3MFile(pModDoc);
+
+		// Test file saving
+		pModDoc->DoSave(theFile + "saved.s3m");
+		pModDoc->OnCloseDocument();
+
+		// Saving the file puts it in the MRU list...
+		theApp.RemoveMruItem(0);
+
+		// Reload the saved file and test if everything is still working correctly.
+		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.s3m", FALSE);
+		TestLoadS3MFile(pModDoc);
 		pModDoc->OnCloseDocument();
 	}
 }
