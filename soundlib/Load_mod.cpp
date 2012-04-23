@@ -224,6 +224,7 @@ struct MODSampleHeader
 		SwapBytesBE(loopLength);
 	}
 
+	// Convert an MOD sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.uFlags = 0;
@@ -278,7 +279,7 @@ struct MODSampleHeader
 		}
 	}
 
-	// Convert OpenMPT's internal sample header to a MOD sample header.
+	// Convert OpenMPT's internal sample header to an MOD sample header.
 	SmpLength ConvertToMOD(const ModSample &mptSmp)
 	{
 		SmpLength writeLength = mptSmp.nLength;
@@ -729,13 +730,13 @@ bool CSoundFile::ReadMod(FileReader &file)
 
 extern WORD ProTrackerPeriodTable[6*12];
 
-bool CSoundFile::SaveMod(LPCSTR lpszFileName)
-//-------------------------------------------
+bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
+//-------------------------------------------------
 {
 	FILE *f;
 
-	if ((!m_nChannels) || (!lpszFileName)) return false;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
+	if(m_nChannels == 0 || lpszFileName == nullptr) return false;
+	if((f = fopen(lpszFileName, "wb")) == nullptr) return false;
 
 	// Write song title
 	{
@@ -747,7 +748,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName)
 	vector<SmpLength> sampleLength(32, 0);
 	vector<SAMPLEINDEX> sampleSource(32, 0);
 
-	if(m_nInstruments)
+	if(GetNumInstruments())
 	{
 		for(INSTRUMENTINDEX ins = 1; ins < 32; ins++) if (Instruments[ins])
 		{
@@ -919,6 +920,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName)
 			fwrite(&padding, 1, 1, f);
 		}
 	}
+
 	fclose(f);
 	return true;
 }
