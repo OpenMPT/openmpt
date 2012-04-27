@@ -35,5 +35,6 @@ enum enmWarnings
 	wMixmode,
 	wCompatibilityMode,
 	wPitchToTempoLock,
+	wGlobalVolumeNotSupported,
 	wNumWarnings
 };

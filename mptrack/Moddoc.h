@@ -113,12 +113,15 @@ struct FileHistory
 /////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
 
-#define SPLIT_OCTAVE_RANGE 9
-
 //==========================
 struct SplitKeyboardSettings
 //==========================
 {
+	enum
+	{
+		splitOctaveRange = 9,
+	};
+
 	bool IsSplitActive() const { return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0); }
 	ModCommand::NOTE splitNote;
 	ModCommand::INSTR splitInstrument;
@@ -296,7 +299,9 @@ public:
 	void LearnMacro(int macro, long param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
 
+	// Global settings to pattern effect conversion
 	bool RestartPosToPattern();
+	bool GlobalVolumeToPattern();
 
 	bool HasMPTHacks(const bool autofix = false);
 
@@ -346,7 +351,7 @@ protected:
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);
 	//}}AFX_VIRTUAL
 
-	UINT GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
+	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
 
 // Implementation

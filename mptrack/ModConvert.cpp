@@ -85,7 +85,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	const MODTYPE nOldType = m_SndFile.GetType();
 	
-	if (nNewType == nOldType && nNewType == MOD_TYPE_IT)
+	if(nNewType == nOldType && nNewType == MOD_TYPE_IT)
 	{
 		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
 		// This is because ITP is a HACK and doesn't genuinely change m_nType,
@@ -222,7 +222,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 						m->param = cEffectMemory[channel][m->command];
 					else
 						cEffectMemory[channel][m->command] = m->param;
-					break;				
+					break;
 
 				}
 			}
@@ -498,6 +498,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		ConvertSamplesToInstruments();
 	}
+
+	// XM has no global volume
+	if(newTypeIsXM && m_SndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
+	{
+		if(!GlobalVolumeToPattern())
+		{
+			CHANGEMODTYPE_WARNING(wGlobalVolumeNotSupported);
+		}
+	}
 		
 	// Pattern warnings
 	CHAR s[64];
@@ -530,6 +539,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wEditHistory, "Edit history will not be saved in the new format.\n");
 	CHANGEMODTYPE_CHECK(wMixmode, "Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats.\n");
 	CHANGEMODTYPE_CHECK(wCompatibilityMode, "Consider enabling the \"compatible playback\" option in the song properties to increase compatiblity with other players.\n");
+	CHANGEMODTYPE_CHECK(wGlobalVolumeNotSupported, "Default global volume is not supported by the new format.\n");
 
 	SetModified();
 	GetPatternUndo().ClearUndo();

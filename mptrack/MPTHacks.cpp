@@ -64,7 +64,7 @@ struct FixHackedPatterns
 			}
 		} else if(type == MOD_TYPE_IT)		// ModPlug IT extensions
 		{
-			if((m.command == CMD_S3MCMDEX) && ((m.param >> 4) == 0x09) && (m.param != 0x91))
+			if((m.command == CMD_S3MCMDEX) && ((m.param & 0xF0) == 0x90) && (m.param != 0x91))
 			{
 				*foundHacks = true;
 				if(autofix)
@@ -217,6 +217,17 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		if(autofix)
 		{
 			RemoveFromOrder(m_SndFile, m_SndFile.Order.GetInvalidPatIndex());
+		}
+	}
+
+	// Global volume
+	if(m_SndFile.GetType() == MOD_TYPE_XM && m_SndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
+	{
+		foundHacks = true;
+		AddToLog("XM format does not support default global volume");
+		if(autofix)
+		{
+			GlobalVolumeToPattern();
 		}
 	}
 
