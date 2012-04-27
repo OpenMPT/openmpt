@@ -114,22 +114,16 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		} else command = 0;
 		break;
 	case CMD_MODCMDEX:
-		command = 'S';
-		switch(param & 0xF0)
 		{
-		case 0x00:	command = 0; break;
-		case 0x10:	command = 'F'; param |= 0xF0; break;
-		case 0x20:	command = 'E'; param |= 0xF0; break;
-		case 0x30:	param = (param & 0x0F) | 0x10; break;
-		case 0x40:	param = (param & 0x0F) | 0x30; break;
-		case 0x50:	param = (param & 0x0F) | 0x20; break;
-		case 0x60:	param = (param & 0x0F) | 0xB0; break;
-		case 0x70:	param = (param & 0x0F) | 0x40; break;
-		case 0x90:	command = 'Q'; param &= 0x0F; break;
-		case 0xA0:	if(param & 0x0F) { command = 'D'; param = (param << 4) | 0x0F; } else command = 0; break;
-		case 0xB0:	if(param & 0x0F) { command = 'D'; param |= 0xF0; } else command = 0; break;
+			ModCommand m;
+			m.command = CMD_MODCMDEX;
+			m.param = param;
+			m.ExtendedMODtoS3MEffect();
+			command = m.command;
+			param = m.param;
+			S3MSaveConvert(command, param, toIT, compatibilityExport);
 		}
-		break;
+		return;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
 	case CMD_DELAYCUT: 
 		if(compatibilityExport || !toIT)
@@ -279,7 +273,7 @@ struct S3MSampleHeader
 	uint32 c5speed;				// Middle-C frequency
 	char   reserved2[12];		// Reserved + Internal ST3 stuff
 	char   name[28];			// Sample name
-	uint32 magic;				// "SCRS" magic bytes
+	uint32 magic;				// "SCRS" magic bytes ("SCRI" for Adlib instruments)
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -518,11 +512,11 @@ bool CSoundFile::ReadS3M(FileReader &file)
 		} else
 		{
 			m_nChannels = i + 1;
-			ChnSettings[i].nPan = (fileHeader.channels[i] & 8) ? 192 : 64;
+			ChnSettings[i].nPan = (fileHeader.channels[i] & 8) ? 192 : 64;	// 200 : 56
 			if(fileHeader.channels[i] & 0x80)
 			{
 				ChnSettings[i].dwFlags = CHN_MUTE;
-				// Detect Adlib channels here:
+				// Detect Adlib channels here (except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32):
 				// c = channels[i] ^ 0x80;
 				// if(c >= 16 && c < 32) adlibChannel = true;
 			}
@@ -799,7 +793,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	// Version info following: ST3.20 = 0x1320
 	// Most significant nibble = Tracker ID, see S3MFileHeader::S3MTrackerVersions
 	// Following: One nibble = Major version, one byte = Minor version (hex)
-	fileHeader.cwtv = S3MFileHeader::trackerMask | static_cast<uint16>((MptVersion::num >> 16) & S3MFileHeader::versionMask);
+	fileHeader.cwtv = S3MFileHeader::trkOpenMPT | static_cast<uint16>((MptVersion::num >> 16) & S3MFileHeader::versionMask);
 	fileHeader.formatVersion = S3MFileHeader::newVersion;
 	fileHeader.magic = S3MFileHeader::idSCRM;
 
@@ -816,8 +810,9 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	{
 		if(chn < GetNumChannels())
 		{
-			uint8 ch = (chn & 0x0F) >> 1;
-			ch = (chn & 0x10) | ((chn & 1) ? 8 + ch : ch);
+			// ST3 only supports 16 PCM channels, so if channels 17-32 are used,
+			// they must be mapped to the same "internal channels" as channels 1-16.
+			uint8 ch = ((chn << 3) | (chn >> 1)) & 0x0F;
 			if((ChnSettings[chn].dwFlags & CHN_MUTE) != 0)
 			{
 				ch |= 0x80;

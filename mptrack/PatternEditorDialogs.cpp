@@ -1505,14 +1505,14 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	m_CbnSplitNote.SetCurSel(m_Settings.splitNote - (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
 
 	// Octave modifier
-	for(int i = -SPLIT_OCTAVE_RANGE; i < SPLIT_OCTAVE_RANGE + 1; i++)
+	for(int i = -SplitKeyboardSettings::splitOctaveRange; i < SplitKeyboardSettings::splitOctaveRange + 1; i++)
 	{
 		wsprintf(s, i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", abs(i));
 		int n = m_CbnOctaveModifier.AddString(s);
 		m_CbnOctaveModifier.SetItemData(n, i);
 	}
 
-	m_CbnOctaveModifier.SetCurSel(m_Settings.octaveModifier + SPLIT_OCTAVE_RANGE);
+	m_CbnOctaveModifier.SetCurSel(m_Settings.octaveModifier + SplitKeyboardSettings::splitOctaveRange);
 	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_Settings.octaveLink && m_Settings.octaveModifier != 0) ? MF_CHECKED : MF_UNCHECKED);
 
 	// Volume
@@ -1565,7 +1565,7 @@ void CSplitKeyboadSettings::OnOK()
 	CDialog::OnOK();
 
 	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
-	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
+	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SplitKeyboardSettings::splitOctaveRange;
 	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE);
 	m_Settings.splitVolume = static_cast<ModCommand::VOL>(m_CbnSplitVolume.GetCurSel());
 	m_Settings.splitInstrument = static_cast<ModCommand::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));

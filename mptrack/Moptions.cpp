@@ -20,15 +20,13 @@
 //////////////////////////////////////////////////////////////
 // COptionsColors
 
-typedef struct MPTCOLORDEF
+static const struct ColorDescriptions
 {
-	LPCSTR pszName;
-	int nPreview;
-	UINT nColNdx1, nColNdx2, nColNdx3;
-	LPCSTR pszTxt1, pszTxt2, pszTxt3;
-} MPTCOLORDEF;
-
-static MPTCOLORDEF gColorDefs[] =
+	char *name;
+	int previewImage;
+	uint32 colorIndex1, colorIndex2, colorIndex3;
+	char *descText1, *descText2, *descText3;
+} colorDefs[] =
 {
 	{"Pattern Editor",	0,	MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, "Background:", "Foreground:", "Highlighted:"},
 	{"Active Row",		0,	MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0, "Background:", "Foreground:", NULL},
@@ -92,9 +90,9 @@ BOOL COptionsColors::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
 	MemCopy(CustomColors, CMainFrame::GetSettings().rgbCustomColors);
-	for (UINT i = 0; i < CountOf(gColorDefs); i++)
+	for (UINT i = 0; i < CountOf(colorDefs); i++)
 	{
-		m_ComboItem.SetItemData(m_ComboItem.AddString(gColorDefs[i].pszName), i);
+		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
 	m_ComboItem.SetCurSel(0);
 	m_BtnPreview.SetWindowPos(NULL, 0,0, PREVIEWBMP_WIDTH*2+2, PREVIEWBMP_HEIGHT*2+2, SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
@@ -161,9 +159,9 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 	int nColor = -1;
 	switch(nIdCtl)
 	{
-	case IDC_BUTTON1:	nColor = gColorDefs[m_nColorItem].nColNdx1; break;
-	case IDC_BUTTON2:	nColor = gColorDefs[m_nColorItem].nColNdx2; break;
-	case IDC_BUTTON3:	nColor = gColorDefs[m_nColorItem].nColNdx3; break;
+	case IDC_BUTTON1:	nColor = colorDefs[m_nColorItem].colorIndex1; break;
+	case IDC_BUTTON2:	nColor = colorDefs[m_nColorItem].colorIndex2; break;
+	case IDC_BUTTON3:	nColor = colorDefs[m_nColorItem].colorIndex3; break;
 	}
 	if (!lpdis) return;
 	if (nColor >= 0)
@@ -193,7 +191,7 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 	} else
 	if ((nIdCtl == IDC_BUTTON4) && (m_pPreviewDib))
 	{
-		int y = gColorDefs[m_nColorItem].nPreview;
+		int y = colorDefs[m_nColorItem].previewImage;
 		RGBQUAD *p = m_pPreviewDib->bmiColors;
 		if (IsDlgButtonChecked(IDC_CHECK2))
 		{
@@ -302,21 +300,21 @@ void COptionsColors::SelectColor(COLORREF *lprgb)
 void COptionsColors::OnSelectColor1()
 //-----------------------------------
 {
-	SelectColor(&CustomColors[gColorDefs[m_nColorItem].nColNdx1]);
+	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex1]);
 }
 
 
 void COptionsColors::OnSelectColor2()
 //-----------------------------------
 {
-	SelectColor(&CustomColors[gColorDefs[m_nColorItem].nColNdx2]);
+	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex2]);
 }
 
 
 void COptionsColors::OnSelectColor3()
 //-----------------------------------
 {
-	SelectColor(&CustomColors[gColorDefs[m_nColorItem].nColNdx3]);
+	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex3]);
 }
 
 
@@ -340,11 +338,11 @@ void COptionsColors::OnSettingsChanged()
 void COptionsColors::OnUpdateDialog()
 //-----------------------------------
 {
-	MPTCOLORDEF *p = &gColorDefs[m_nColorItem];
-	if (p->pszTxt1) m_TxtColor1.SetWindowText(p->pszTxt1);
-	if (p->pszTxt2)
+	const ColorDescriptions *p = &colorDefs[m_nColorItem];
+	if (p->descText1) m_TxtColor1.SetWindowText(p->descText1);
+	if (p->descText2)
 	{
-		m_TxtColor2.SetWindowText(p->pszTxt2);
+		m_TxtColor2.SetWindowText(p->descText2);
 		m_TxtColor2.ShowWindow(SW_SHOW);
 		m_BtnColor2.ShowWindow(SW_SHOW);
 		m_BtnColor2.InvalidateRect(NULL, FALSE);
@@ -353,9 +351,9 @@ void COptionsColors::OnUpdateDialog()
 		m_TxtColor2.ShowWindow(SW_HIDE);
 		m_BtnColor2.ShowWindow(SW_HIDE);
 	}
-	if (p->pszTxt3)
+	if (p->descText3)
 	{
-		m_TxtColor3.SetWindowText(p->pszTxt3);
+		m_TxtColor3.SetWindowText(p->descText3);
 		m_TxtColor3.ShowWindow(SW_SHOW);
 		m_BtnColor3.ShowWindow(SW_SHOW);
 		m_BtnColor3.InvalidateRect(NULL, FALSE);
@@ -538,24 +536,22 @@ BEGIN_MESSAGE_MAP(COptionsGeneral, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-struct OPTGENDESC
+static const struct GeneralOptionsDescriptions
 {
-	DWORD dwFlagID;
-	LPCSTR pszListName, pszDescription;
-};
-
-static OPTGENDESC gOptGenDesc[] =
+	uint32 flag;
+	char *name, *description;
+} generalOptionsList[] =
 {
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
 	{PATTERN_PLAYEDITROW,	"Play whole row while recording",	"When this option is enabled, all notes on the current row are played when entering notes in the pattern editor."},
-	{PATTERN_CENTERROW,		"Always center active row",			"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
+	{PATTERN_CENTERROW,		"Always center active row",			"Turn on this option to have the active row always centered in the pattern editor."},
 	{PATTERN_LARGECOMMENTS,	"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
 	{PATTERN_HEXDISPLAY,	"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
 	{PATTERN_WRAP,			"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern row or channel will move the cursor to the beginning. When \"Continuous scroll\"-option is enabled, row wrap is disabled."},
 	{PATTERN_CREATEBACKUP,	"Create backup files (*.bak)",		"When this option is active, saving a file will create a backup copy of the original."},
-	{PATTERN_DRAGNDROPEDIT,	"Drag and Drop Editing",			"Enable moving a selection in the pattern editor (copying if pressing shift while dragging)\n"},
+	{PATTERN_DRAGNDROPEDIT,	"Drag and Drop Editing",			"Enable moving a selection in the pattern editor (copying if pressing shift while dragging)"},
 	{PATTERN_FLATBUTTONS,	"Flat Buttons",						"Use flat buttons in toolbars"},
-	{PATTERN_SINGLEEXPAND,	"Single click to expand tree",		"Single-clicking in the left tree view will expand a branch"},
+	{PATTERN_SINGLEEXPAND,	"Single click to expand tree",		"Single-clicking in the left tree view will expand a node."},
 	{PATTERN_MUTECHNMODE,	"Ignored muted channels",			"Notes will not be played on muted channels (unmuting will only start on a new note)."},
 	{PATTERN_NOEXTRALOUD,	"No loud sample preview",			"Disable loud playback of samples in the sample/instrument editor. Sample volume depends on the sample volume slider on the general tab when activated (if disabled, a sample volume of 256 is used)."},
 	{PATTERN_SHOWPREVIOUS,	"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor. Does not work if \"always center active row\" is disabled."},
@@ -563,10 +559,10 @@ static OPTGENDESC gOptGenDesc[] =
 	{PATTERN_KBDNOTEOFF,	"Record note off",					"Record note off when a key is released on the PC keyboard."},
 	{PATTERN_FOLLOWSONGOFF,	"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."},
 	{PATTERN_MIDIRECORD,	"MIDI record",						"Enable MIDI in record by default."},
-	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
+	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."},
 	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{PATTERN_AUTODELAY,		"Automatic delay commands",			"Automatically insert appropriate note-delay commands when recording notes during live playback."},
-	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade / stop notes on key up in pattern tab." },
+	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade / stop notes on key up in pattern tab."},
 	{PATTERN_OVERFLOWPASTE,	"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
 	{PATTERN_RESETCHANNELS,	"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands) and is recommended to be enabled."},
 	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a different icon in the treeview."},
@@ -592,15 +588,15 @@ BOOL COptionsGeneral::OnInitDialog()
 	CHAR sname[32], s[256];
 
 	CPropertyPage::OnInitDialog();
-	for (UINT i = 0; i < CountOf(gOptGenDesc); i++)
+	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
 	{
 		wsprintf(sname, "Setup.Gen.Opt%d.Name", i + 1);
 		if ((theApp.GetLocalizedString(sname, s, sizeof(s))) && (s[0]))
 			m_CheckList.AddString(s);
 		else
-			m_CheckList.AddString(gOptGenDesc[i].pszListName);
+			m_CheckList.AddString(generalOptionsList[i].name);
 
-		const int check = (CMainFrame::GetSettings().m_dwPatternSetup & gOptGenDesc[i].dwFlagID) != 0 ? BST_CHECKED : BST_UNCHECKED;
+		const int check = (CMainFrame::GetSettings().m_dwPatternSetup & generalOptionsList[i].flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
 		m_CheckList.SetCheck(i, check);
 	}
 	m_CheckList.SetCurSel(0);
@@ -628,12 +624,12 @@ void COptionsGeneral::OnOK()
 	GetDlgItemText(IDC_OPTIONS_DIR_VSTS,		szVstDir, _MAX_PATH);
 	GetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	szPresetDir, _MAX_PATH);
 
-	for (UINT i = 0; i < CountOf(gOptGenDesc); i++)
+	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
 	{
 		const bool check = (m_CheckList.GetCheck(i) != BST_UNCHECKED);
 
-		if(check) CMainFrame::GetSettings().m_dwPatternSetup |= gOptGenDesc[i].dwFlagID;
-		else CMainFrame::GetSettings().m_dwPatternSetup &= ~gOptGenDesc[i].dwFlagID;
+		if(check) CMainFrame::GetSettings().m_dwPatternSetup |= generalOptionsList[i].flag;
+		else CMainFrame::GetSettings().m_dwPatternSetup &= ~generalOptionsList[i].flag;
 	}
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -683,9 +679,9 @@ void COptionsGeneral::OnOptionSelChanged()
 	CHAR sname[32], s[256];
 	LPCSTR pszDesc = NULL;
 	const int sel = m_CheckList.GetCurSel();
-	if ((sel >= 0) && (sel < CountOf(gOptGenDesc)))
+	if ((sel >= 0) && (sel < CountOf(generalOptionsList)))
 	{
-		pszDesc = gOptGenDesc[sel].pszDescription;
+		pszDesc = generalOptionsList[sel].description;
 		wsprintf(sname, "Setup.Gen.Opt%d.Desc", sel+1);
 		if ((theApp.GetLocalizedString(sname, s, sizeof(s))) && (s[0])) pszDesc = s;
 	}

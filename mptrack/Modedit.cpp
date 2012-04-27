@@ -919,3 +919,25 @@ bool CModDoc::RestartPosToPattern()
 	m_SndFile.m_nRestartPos = 0;
 	return result;
 }
+
+
+// Convert module's default global volume to a pattern command.
+bool CModDoc::GlobalVolumeToPattern()
+//-----------------------------------
+{
+	bool result = false;
+	if(m_SndFile.GetModSpecifications().HasCommand(CMD_GLOBALVOLUME))
+	{
+		for(ORDERINDEX i = 0; i < m_SndFile.Order.GetLength(); i++)
+		{
+			if(m_SndFile.TryWriteEffect(m_SndFile.Order[i], 0, CMD_GLOBALVOLUME, m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME, false, CHANNELINDEX_INVALID, false, weTryNextRow))
+			{
+				result = true;
+				break;
+			}
+		}
+	}
+
+	m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+	return result;
+}

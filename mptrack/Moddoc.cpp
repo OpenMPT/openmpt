@@ -873,8 +873,8 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 }
 
 
-UINT CModDoc::GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const
-//--------------------------------------------------------------------------------------
+uint8 CModDoc::GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const
+//---------------------------------------------------------------------------------------
 {
 	if(pIns->nMidiChannel == MidiMappedChannel)
 	{
@@ -1025,7 +1025,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 				if ((!nPlugin || nPlugin > MAX_MIXPLUGINS) && nCurrentChn != CHANNELINDEX_INVALID)
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;	// Then try Channel VST
 				
-   				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
 

@@ -230,14 +230,15 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 
 		const BOOL bIsNotMOD = (m_pSndFile->GetType() != MOD_TYPE_MOD);
 		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_pSndFile->GetType() != MOD_TYPE_S3M));
+		const BOOL bIsNotMOD_XM = ((bIsNotMOD) && (m_pSndFile->GetType() != MOD_TYPE_XM));
 		m_EditTempo.EnableWindow(bIsNotMOD);
 		m_SpinTempo.EnableWindow(bIsNotMOD);
 		m_SliderTempo.EnableWindow(bIsNotMOD);
 		m_EditSpeed.EnableWindow(bIsNotMOD);
 		m_SpinSpeed.EnableWindow(bIsNotMOD);
-		m_SliderGlobalVol.EnableWindow(bIsNotMOD);
-		m_EditGlobalVol.EnableWindow(bIsNotMOD);
-		m_SpinGlobalVol.EnableWindow(bIsNotMOD);
+		m_SliderGlobalVol.EnableWindow(bIsNotMOD_XM);
+		m_EditGlobalVol.EnableWindow(bIsNotMOD_XM);
+		m_SpinGlobalVol.EnableWindow(bIsNotMOD_XM);
 		m_EditSamplePA.EnableWindow(bIsNotMOD);
 		m_SpinSamplePA.EnableWindow(bIsNotMOD);
 		//m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
