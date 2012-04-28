@@ -447,7 +447,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcViewMain, 1367, _T("Toggle Main View"));
 	DefineKeyCommand(kcViewTree, 1368, _T("Toggle Tree View"));
 	DefineKeyCommand(kcViewOptions, 1369, _T("View Options"));
-	DefineKeyCommand(kcHelp, 1370, _T("Help (to do)"));
+	DefineKeyCommand(kcHelp, 1370, _T("Help"));
 	/*
 	DefineKeyCommand(kcWindowNew, 1370, _T("New Window"));
 	DefineKeyCommand(kcWindowCascade, 1371, _T("Cascade Windows"));

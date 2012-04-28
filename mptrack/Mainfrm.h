@@ -651,6 +651,7 @@ protected:
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
+	afx_msg void OnHelp();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

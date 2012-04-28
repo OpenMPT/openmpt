@@ -166,9 +166,9 @@ public:
 	static BOOL SaveDefaultDLSBanks();
 	static BOOL RemoveDLSBank(UINT nBank);
 	static BOOL AddDLSBank(LPCSTR);
-	static BOOL OpenURL(const LPCSTR lpszURL);
-	static BOOL OpenFile(const LPCSTR file) { return OpenURL(file); };
-	static BOOL OpenDirectory(const LPCSTR directory) { return OpenURL(directory); };
+	static bool OpenURL(const LPCSTR lpszURL);
+	static bool OpenFile(const LPCSTR file) { return OpenURL(file); };
+	static bool OpenDirectory(const LPCSTR directory) { return OpenURL(directory); };
 
 	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
 
