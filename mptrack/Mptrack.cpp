@@ -2279,20 +2279,23 @@ BOOL CTrackApp::UninitializeDXPlugins()
 ///////////////////////////////////////////////////////////////////////////////////
 // Internet-related functions
 
-BOOL CTrackApp::OpenURL(const LPCSTR lpszURL)
+bool CTrackApp::OpenURL(const LPCSTR lpszURL)
 //-------------------------------------------
 {
-	if ((lpszURL) && (lpszURL[0]) && (theApp.m_pMainWnd))
+	if(lpszURL != nullptr && lpszURL[0] != '\0' && theApp.m_pMainWnd)
 	{
-		if (((ULONG)ShellExecute(
-					theApp.m_pMainWnd->m_hWnd,
-					"open",
-					lpszURL,
-					NULL,
-					NULL,
-					SW_SHOW)) >= 32) return TRUE;
+		if(reinterpret_cast<int>(ShellExecute(
+			theApp.m_pMainWnd->m_hWnd,
+			"open",
+			lpszURL,
+			NULL,
+			NULL,
+			SW_SHOW)) >= 32)
+		{
+			return true;
+		}
 	}
-	return FALSE;
+	return false;
 }
 
 

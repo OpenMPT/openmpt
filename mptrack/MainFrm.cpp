@@ -112,6 +112,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
+	ON_COMMAND(ID_HELP,						OnHelp)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
 	ON_WM_KILLFOCUS() //rewbs.fix3116
@@ -2311,14 +2312,17 @@ void CMainFrame::OnReportBug()
 BOOL CMainFrame::OnInternetLink(UINT nID)
 //---------------------------------------
 {
-	LPCSTR pszURL = NULL;
+	LPCSTR pszURL = nullptr;
 
 	switch(nID)
 	{
 	case ID_NETLINK_MODPLUG:	pszURL = "http://openmpt.org/"; break;
 	case ID_NETLINK_TOP_PICKS:	pszURL = "http://openmpt.org/top_picks"; break;
 	}
-	if (pszURL) return CTrackApp::OpenURL(pszURL);
+	if(pszURL != nullptr)
+	{
+		return CTrackApp::OpenURL(pszURL) ? TRUE : FALSE;
+	}
 	return FALSE;
 }
 
@@ -2535,16 +2539,16 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 //---------------------------------------------------------
 {
-    static bool firstShow = true;
-    if (bShow && !IsWindowVisible() && firstShow)
+	static bool firstShow = true;
+	if (bShow && !IsWindowVisible() && firstShow)
 	{
-        firstShow = false;
+		firstShow = false;
 		WINDOWPLACEMENT wpl;
 		if (GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName()))
 		{
 			SetWindowPlacement(&wpl);
 		}
-    }
+	}
 }
 
 
@@ -2585,6 +2589,19 @@ void CMainFrame::OnShowSettingsFolder()
 //-------------------------------------
 {
 	theApp.OpenDirectory(theApp.GetConfigPath());
+}
+
+
+void CMainFrame::OnHelp()
+//-----------------------
+{
+	CString helpFile = theApp.GetAppDirPath();
+	helpFile += "OpenMPT Manual.pdf";
+	if(!theApp.OpenFile(helpFile))
+	{
+		helpFile = "Could not find help file:\n" + helpFile;
+		Reporting::Error(helpFile);
+	}
 }
 
 
