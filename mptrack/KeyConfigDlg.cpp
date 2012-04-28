@@ -19,28 +19,40 @@
 BEGIN_MESSAGE_MAP(CCustEdit, CEdit)
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
+	ON_MESSAGE(WM_MOD_MIDIMSG,		OnMidiMsg)
 END_MESSAGE_MAP()
 
 
-BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
-//------------------------------------------------
+LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
+//----------------------------------------------------------
 {
-	if (pMsg)
+	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(dwMidiDataParam) != 0 && isFocussed)
 	{
-		if ((pMsg->message == WM_KEYDOWN)    || (pMsg->message == WM_SYSKEYDOWN))
+		SetKey(HOTKEYF_MIDI, MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
+		m_pOptKeyDlg->OnSetKeyChoice(); 
+	}
+	return 0;
+}
+
+
+BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
+//--------------------------------------------
+{
+	if(pMsg)
+	{
+		if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_SYSKEYDOWN)
 		{
 			//if (!(pMsg->lparam & 0x40000000)) { // only on first presss
 				SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), pMsg->wParam);
 			//}
 			return -1; // Keypress handled, don't pass on message.
-		}
-		else if ((pMsg->message == WM_KEYUP)    || (pMsg->message == WM_SYSKEYUP))
+		} else if(pMsg->message == WM_KEYUP || pMsg->message == WM_SYSKEYUP)
 		{
 			//if a key has been released but custom edit box is empty, we have probably just
 			//navigated into the box with TAB or SHIFT-TAB. No need to set keychoice.
-			if (code!=0)
-			  m_pOptKeyDlg->OnSetKeyChoice();         
-        }
+			if(code != 0)
+			  m_pOptKeyDlg->OnSetKeyChoice();
+		}
 	}
 	return CEdit::PreTranslateMessage(pMsg);
 }
@@ -65,7 +77,7 @@ void CCustEdit::SetKey(UINT inMod, UINT inCode)
 	mod = inMod;
 	code = inCode;
 	//Setup display
-    SetWindowText(CMainFrame::GetInputHandler()->activeCommandSet->GetKeyText(mod, code));
+	SetWindowText(CMainFrame::GetInputHandler()->activeCommandSet->GetKeyText(mod, code));
 }
 
 
@@ -74,12 +86,14 @@ void CCustEdit::OnSetFocus(CWnd* pOldWnd)
 	CEdit::OnSetFocus(pOldWnd);
 	//lock the input handler
 	CMainFrame::GetInputHandler()->Bypass(true);
+	isFocussed = true;
 }
 void CCustEdit::OnKillFocus(CWnd* pNewWnd)
 {
 	CEdit::OnKillFocus(pNewWnd);
 	//unlock the input handler
 	CMainFrame::GetInputHandler()->Bypass(false);
+	isFocussed = false;
 }
 
 
@@ -151,6 +165,8 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_bModified = false;
 	m_bChoiceModified = false;
 	m_sFullPathName = CMainFrame::GetSettings().m_szKbdFile;
+	
+	CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_eCustHotKey.m_hWnd);
 
 	plocalCmdSet = new CCommandSet();
 	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);

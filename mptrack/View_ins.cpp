@@ -2155,18 +2155,32 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	BYTE midiByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
 	BYTE midiByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
-	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
-	if (!pSndFile) return 0;
+	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+	if(!pSndFile) return 0;
 
-	const BYTE nNote  = midiByte1 + 1;		// +1 is for MPT, where middle C is 61
+	const BYTE nNote  = midiByte1 + NOTE_MIN;
 	int nVol   = midiByte2;					
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
 	if((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
 	BYTE mappedIndex = 0, paramValue = 0;
 	uint32 paramIndex = 0;
-	if(pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue)) 
+	bool captured = pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
+
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	if(ih->HandleMIDIMessage(kCtxViewInstruments, dwMidiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
+	{
+		// Mapped to a command, no need to pass message on.
+		captured = true;
+	}
+
+	if(captured)
+	{
+		// Event captured by MIDI mapping or shortcut, no need to pass message on.
 		return 0;
+	}
 
 	switch(event)
 	{

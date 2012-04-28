@@ -64,17 +64,18 @@ public:
 };
 
 
-//=====================================
+//===========================
 class CCustEdit: public CEdit
-//=====================================
+//===========================
 {
 protected:
-	COptionsKeyboard* m_pOptKeyDlg;
+	COptionsKeyboard *m_pOptKeyDlg;
 	HWND m_hParent;
 	UINT m_nCtrlId;
+	bool isFocussed;
 
 public:
-	CCustEdit() { m_hParent = NULL; }
+	CCustEdit() : m_hParent(nullptr), isFocussed(false) { }
 	UINT mod;
 	UINT code;
 	VOID SetParent(HWND h, UINT nID, COptionsKeyboard* pOKD) { m_hParent = h; m_nCtrlId = nID; m_pOptKeyDlg = pOKD;}
@@ -84,6 +85,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 };
 
 //==========================================
@@ -149,7 +151,7 @@ protected:
 	afx_msg void OnSave();
 	afx_msg void OnClearLog();
 	afx_msg void OnRestoreDefaultKeymap();
-    DECLARE_MESSAGE_MAP();
+	DECLARE_MESSAGE_MAP();
 public:
 	afx_msg void OnDestroy();
 };

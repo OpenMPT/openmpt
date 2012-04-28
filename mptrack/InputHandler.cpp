@@ -91,35 +91,46 @@ CInputHandler::~CInputHandler()
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
 //-----------------------------------------------------------------------------------------------------------
 {
-	CommandID executeCommand = kcNull;	
+	CommandID executeCommand = kcNull;
 	KeyEventType keyEventType;
 
-	if (code == HC_ACTION)	{
+	if(code == HC_ACTION)
+	{
 		//Get the KeyEventType (key up, key down, key repeat)
 		DWORD scancode = lParam >> 16;
-		if	((scancode & 0xC000) == 0xC000) {
+		if((scancode & 0xC000) == 0xC000)
+		{
 			keyEventType = kKeyEventUp;
-		} else if ((scancode & 0xC000) == 0x0000) {
+		} else if((scancode & 0xC000) == 0x0000)
+		{
 			keyEventType = kKeyEventDown;
-		} else {
+		} else
+		{
 			keyEventType = kKeyEventRepeat;
 		}
 
 		// Catch modifier change (ctrl, alt, shift) - Only check on keyDown or keyUp.
 		// NB: we want to catch modifiers even when the input handler is locked
-		if (keyEventType == kKeyEventUp || keyEventType == kKeyEventDown) {
+		if(keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
+		{
 			scancode =(lParam >> 16) & 0x1FF;
 			CatchModifierChange(wParam, keyEventType, scancode);
 		}
 
-		if (!InterceptSpecialKeys( wParam, lParam ) && !Bypass()) {
+		if(!InterceptSpecialKeys( wParam, lParam ) && !Bypass())
+		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
 			executeCommand = keyMap[context][modifierMask][wParam][keyEventType];
 		}
 	}
+	if(code == HC_MIDI)
+	{
+		executeCommand = keyMap[context][HOTKEYF_MIDI][wParam][kKeyEventDown];
+	}
 
-	if (m_pMainFrm && executeCommand != kcNull)	{
+	if(m_pMainFrm && executeCommand != kcNull)
+	{
 		m_pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
 	}
 
@@ -275,6 +286,19 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 	return false;
 }
 
+
+// Translate MIDI messages to shortcut commands
+CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
+//------------------------------------------------------------------------------------
+{
+	if(MIDIEvents::GetTypeFromEvent(message) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(message) != 0)
+	{
+		// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
+		// (f.e. the Roland D-50 sends CC123 whenenver releasing note keys), so we will ignore those.
+		return GeneralKeyEvent(context, HC_MIDI, MIDIEvents::GetDataByte1FromEvent(message), 0);
+	}
+	return kcNull;
+}
 
 //--------------------------------------------------------------
 DWORD CInputHandler::GetKey(CommandID /*c*/)

@@ -3543,10 +3543,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
-	if ((!pModDoc) || (!pMainFrm)) return 0;
+	if(pModDoc == nullptr || pMainFrm == nullptr) return 0;
 
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(!pSndFile) return 0;
+	CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile == nullptr) return 0;
 
 //Midi message from our perspective:
 //     +---------------------------+---------------------------+-------------+-------------+
@@ -3568,7 +3568,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	const uint8 nByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
 	const uint8 nByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
-	const uint8 nNote = nByte1 + NOTE_MIN;		// +1 is for MPT, where middle C is 61
+	const uint8 nNote = nByte1 + NOTE_MIN;
 	int nVol = nByte2;							// At this stage nVol is a non linear value in [0;127]
 												// Need to convert to linear in [0;64] - see below
 	uint8 event = MIDIEvents::GetTypeFromEvent(dwMidiData);
@@ -3580,10 +3580,20 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	// Handle MIDI mapping.
 	uint8 mappedIndex = uint8_max, paramValue = uint8_max;
 	uint32 paramIndex = 0;
-	const bool bCaptured = pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue); 
+	bool captured = pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue); 
+
+
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = pMainFrm->GetInputHandler();
+	if(ih->HandleMIDIMessage(static_cast<InputTargetContext>(kCtxViewPatterns + 1 + m_Cursor.GetColumnType()), dwMidiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
+	{
+		// Mapped to a command, no need to pass message on.
+		captured = true;
+	}
 
 	// Write parameter control commands if needed.
-	if (paramValue != uint8_max && IsEditingEnabled() && pSndFile->GetType() == MOD_TYPE_MPT)
+	if(paramValue != uint8_max && IsEditingEnabled() && pSndFile->GetType() == MOD_TYPE_MPT)
 	{
 		const bool liveRecord = IsLiveRecord();
 
@@ -3596,8 +3606,11 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		pMainFrm->ThreadSafeSetModified(pModDoc);
 	}
 
-	if (bCaptured)
+	if(captured)
+	{
+		// Event captured by MIDI mapping or shortcut, no need to pass message on.
 		return 0;
+	}
 
 	switch(event)
 	{
