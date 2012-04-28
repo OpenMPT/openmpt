@@ -3095,14 +3095,23 @@ void CViewPattern::OnEditUndo()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
-		PATTERNINDEX nPat = pModDoc->GetPatternUndo().Undo();
-		if (nPat < pModDoc->GetSoundFile()->Patterns.Size())
+		PATTERNINDEX pat = pModDoc->GetPatternUndo().Undo();
+		if(pat < pModDoc->GetSoundFile()->Patterns.Size())
 		{
 			pModDoc->SetModified();
-			if (nPat != m_nPattern)
-				SetCurrentPattern(nPat);
-			else
+			if(pat != m_nPattern)
+			{
+				// Find pattern in sequence.
+				ORDERINDEX matchingOrder = GetSoundFile()->Order.FindOrder(pat, static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER)));
+				if(matchingOrder != ORDERINDEX_INVALID)
+				{
+					SendCtrlMessage(CTRLMSG_SETCURRENTORDER, matchingOrder);
+				}
+				SetCurrentPattern(pat);
+			} else
+			{
 				InvalidatePattern(true);
+			}
 		}
 	}
 }
