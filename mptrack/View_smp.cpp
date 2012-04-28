@@ -2574,10 +2574,19 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
 	if (!pSndFile) return 0;
 
-	const BYTE nNote  = midibyte1 + 1;		// +1 is for MPT, where middle C is 61
+	const BYTE nNote  = midibyte1 + NOTE_MIN;
 	int nVol   = midibyte2;					
 	BYTE event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
 	if ((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
+
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	if(ih->HandleMIDIMessage(kCtxViewSamples, dwMidiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
+	{
+		// Mapped to a command, no need to pass message on.
+		return 0;
+	}
 
 	switch(event)
 	{

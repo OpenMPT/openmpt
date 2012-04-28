@@ -10,28 +10,11 @@
 
 #pragma once
 
-#define END_VIEWPATTERNS     200
-#define END_CTRLPATTERNS     400
-#define END_VIEWSAMPLES      600
-#define END_CTRLSAMPLES      800
-#define END_VIEWINSTRUMENTS 1000
-#define END_CTRLINSTRUMENTS 1200
-#define END_VIEWCOMMENTS    1400
-#define END_CTRLCOMMENTS    1800
-#define END_VIEWGENERAL     2000
-#define END_CTRLGENERAL     2200
-#define END_MODDOCUMENT     2400
-#define END_MAINFRAME       2600
-
 //not sure why I shoved message IDs here anymore. Might want to move em. -rewbs
-enum {
+enum
+{
 	WM_MOD_UPDATEPOSITION	=	(WM_USER+1973),
-	WM_MOD_DESTROYMODDOC,
-	WM_MOD_DESTROYPATEDIT,
-	WM_MOD_UPDATESOUNDBUFFER,
 	WM_MOD_INVALIDATEPATTERNS,
-	WM_MOD_DESTROYSAMPLE,
-	WM_MOD_DESTROYINSTRUMENT,
 	WM_MOD_ACTIVATEVIEW,
 	WM_MOD_CHANGEVIEWCLASS,
 	WM_MOD_UNLOCKCONTROLS,
@@ -48,6 +31,12 @@ enum {
 	WM_MOD_RECORDPARAM,
 };
 
+// Hook codes
+enum
+{
+	HC_MIDI = 0x8000,
+};
+
 
 class CInputHandler
 {
@@ -61,6 +50,7 @@ public:
 	KeyEventType GetKeyEventType(UINT nFlags);
 	DWORD GetKey(CommandID);
 	bool isKeyPressHandledByTextBox(DWORD wparam);
+	CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message);
 
 	KeyCombination GetKey(CommandID cmd, UINT key);
 	int GetKeyListSize(CommandID cmd);

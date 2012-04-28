@@ -1878,6 +1878,7 @@ CString CCommandSet::GetModifierText(UINT mod)
 	if (mod & HOTKEYF_CONTROL) text.Append("Ctrl+");
 	if (mod & HOTKEYF_ALT) text.Append("Alt+");
 	if (mod & HOTKEYF_EXT) text.Append("Win+"); // Feature: use Windows keys as modifier keys
+	if (mod & HOTKEYF_MIDI) text.Append("MidiCC:");
 	return text;
 }
 
@@ -1887,7 +1888,10 @@ CString CCommandSet::GetKeyText(UINT mod, UINT code)
 {
 	CString keyText;
 	keyText=GetModifierText(mod);
-	keyText.Append(CHotKeyCtrl::GetKeyName(code, IsExtended(code)));
+	if(mod & HOTKEYF_MIDI)
+		keyText.AppendFormat("%d",code);
+	else
+		keyText.Append(CHotKeyCtrl::GetKeyName(code, IsExtended(code)));
 	//HACK:
 	if (keyText == "Ctrl+CTRL")		keyText="Ctrl";
 	if (keyText == "Alt+ALT")		keyText="Alt";

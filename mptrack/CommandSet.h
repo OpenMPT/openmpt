@@ -17,6 +17,8 @@
 
 #define KEYMAP_VERSION 1	// Version of the .mkb format
 
+#define HOTKEYF_MIDI 0x10
+
 enum InputTargetContext
 {
 	kCtxUnknownContext = -1,	
@@ -198,7 +200,7 @@ enum CommandID
 
 	//Pattern Editing
 	kcStartPatternEditing,
-    kcStartSelect=kcStartPatternEditing,
+	kcStartSelect=kcStartPatternEditing,
 	kcSelect=kcStartSelect,
 	kcSelectWithNav,
 	kcSelectOff,
@@ -1086,8 +1088,9 @@ enum Modifiers
 	RAlt     = 1<<5,
 	MaxMod   = 1<<6,
 */
-	MaxMod = 15 // HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT
+	MaxMod = HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI,
 };
+
 
 #define MAINKEYS 256
 typedef CommandID KeyMap[kCtxMaxInputContexts][MaxMod][MAINKEYS][kNumKeyEvents];
