@@ -716,14 +716,32 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		if (pIns)
 		{
 			pChn->nInsVol = (pSmp->nGlobalVol * pIns->nGlobalVol) >> 6;
-			if (pIns->dwFlags & INS_SETPANNING) pChn->nPan = pIns->nPan;
+			// Default instrument panning
+			if (pIns->dwFlags & INS_SETPANNING)
+			{
+				pChn->nPan = pIns->nPan;
+				// IT compatibility: Sample and instrument panning overrides channel surround status.
+				// Test case: SmpInsPanSurround.it
+				if(IsCompatibleMode(TRK_IMPULSETRACKER) && !(m_dwSongFlags & SONG_SURROUNDPAN))
+				{
+					pChn->dwFlags &= ~CHN_SURROUND;
+				}
+			}
 		} else
 		{
 			pChn->nInsVol = pSmp->nGlobalVol;
 		}
+
+		// Default sample panning
 		if((pSmp->uFlags & CHN_PANNING) || (GetType() & MOD_TYPE_XM))
 		{
 			pChn->nPan = pSmp->nPan;
+			// IT compatibility: Sample and instrument panning overrides channel surround status.
+			// Test case: SmpInsPanSurround.it
+			if(IsCompatibleMode(TRK_IMPULSETRACKER) && !(m_dwSongFlags & SONG_SURROUNDPAN))
+			{
+				pChn->dwFlags &= ~CHN_SURROUND;
+			}
 		}
 	}
 
