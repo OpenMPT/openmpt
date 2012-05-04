@@ -47,11 +47,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHsc"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW,ENABLE_MMX"
 				StringPooling="true"
+				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="true"
@@ -154,12 +154,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHsc /O2"
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				AdditionalIncludeDirectories="..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
 				StringPooling="true"
+				ExceptionHandling="2"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="true"
 				EnableFunctionLevelLinking="false"
@@ -257,19 +257,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ChannelManagerDlg.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ChildFrm.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\CleanupSong.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CloseMainDialog.cpp"
 				>
 			</File>
 			<File
@@ -313,19 +305,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\dlg_misc.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\dlsbank.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\draw_pat.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\EffectInfo.cpp"
 				>
 			</File>
 			<File
@@ -365,7 +349,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KeyConfigDlg.cpp"
+				RelativePath="..\soundlib\plugins\JBridge.cpp"
 				>
 			</File>
 			<File
@@ -385,15 +369,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MIDIMacroDialog.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\MIDIMacros.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MIDIMappingDialog.cpp"
 				>
 			</File>
 			<File
@@ -433,14 +409,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\ModInstrument.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\ModSample.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ModConvert.cpp"
 				>
 			</File>
@@ -453,23 +421,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\ModInstrument.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ModSample.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\ModSequence.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\soundlib\modsmp_ctrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Moptions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MoveFXSlotDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Mpdlgs.cpp"
 				>
 			</File>
 			<File
@@ -501,19 +465,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PatternEditorDialogs.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PatternGotoDialog.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\PlaybackEventer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PSRatioCalc.cpp"
 				>
 			</File>
 			<File
@@ -525,27 +477,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\XMTools.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\plugins\JBridge.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SampleEditorDialogs.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\Sampleio.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ScaleEnvPointsDlg.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SelectPluginDialog.cpp"
 				>
 			</File>
 			<File
@@ -674,6 +606,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\WindowedFIR.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\XMTools.cpp"
 				>
 			</File>
 			<Filter
@@ -828,6 +764,74 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Dialogs"
+				>
+				<File
+					RelativePath=".\ChannelManagerDlg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CloseMainDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\dlg_misc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\EffectInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\KeyConfigDlg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MIDIMacroDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MIDIMappingDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Moptions.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MoveFXSlotDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Mpdlgs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PatternEditorDialogs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PatternGotoDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PSRatioCalc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SampleEditorDialogs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ScaleEnvPointsDlg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SelectPluginDialog.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -939,19 +943,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ChannelManagerDlg.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ChildFrm.h"
 				>
 			</File>
 			<File
 				RelativePath=".\CleanupSong.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CloseMainDialog.h"
 				>
 			</File>
 			<File
@@ -991,19 +987,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\dlg_misc.h"
-				>
-			</File>
-			<File
 				RelativePath="..\Soundlib\Dlsbank.h"
 				>
 			</File>
 			<File
 				RelativePath=".\EffectInfo.h"
-				>
-			</File>
-			<File
-				RelativePath=".\EffectVis.h"
 				>
 			</File>
 			<File
@@ -1027,7 +1015,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KeyConfigDlg.h"
+				RelativePath=".\soundlib\plugins\JBridge.h"
 				>
 			</File>
 			<File
@@ -1043,15 +1031,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MIDIMacroDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\soundlib\MIDIMacros.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MIDIMappingDialog.h"
 				>
 			</File>
 			<File
@@ -1083,14 +1063,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\ModInstrument.h"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\ModSample.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ModConvert.h"
 				>
 			</File>
@@ -1099,23 +1071,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\ModInstrument.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ModSample.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\ModSequence.h"
 				>
 			</File>
 			<File
 				RelativePath="..\soundlib\modsmp_ctrl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Moptions.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MoveFXSlotDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Mpdlgs.h"
 				>
 			</File>
 			<File
@@ -1139,19 +1107,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PatternEditorDialogs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PatternGotoDialog.h"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\PlaybackEventer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PSRatioCalc.h"
 				>
 			</File>
 			<File
@@ -1167,18 +1123,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\soundlib\plugins\JBridge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\soundlib\RowVisitor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\soundlib\XMTools.h"
-				>
-			</File>
-			<File
 				RelativePath="..\common\Reporting.h"
 				>
 			</File>
@@ -1187,19 +1131,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SampleEditorDialogs.h"
+				RelativePath=".\soundlib\RowVisitor.h"
 				>
 			</File>
 			<File
 				RelativePath=".\SampleGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ScaleEnvPointsDlg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SelectPluginDialog.h"
 				>
 			</File>
 			<File
@@ -1302,6 +1238,10 @@
 				RelativePath="..\soundlib\WindowedFIR.h"
 				>
 			</File>
+			<File
+				RelativePath=".\soundlib\XMTools.h"
+				>
+			</File>
 			<Filter
 				Name="tuning"
 				>
@@ -1326,6 +1266,74 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Dialogs"
+				>
+				<File
+					RelativePath=".\ChannelManagerDlg.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CloseMainDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\dlg_misc.h"
+					>
+				</File>
+				<File
+					RelativePath=".\EffectVis.h"
+					>
+				</File>
+				<File
+					RelativePath=".\KeyConfigDlg.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MIDIMacroDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MIDIMappingDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Moptions.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MoveFXSlotDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Mpdlgs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PatternEditorDialogs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PatternGotoDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PSRatioCalc.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SampleEditorDialogs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ScaleEnvPointsDlg.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SelectPluginDialog.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="test"
@@ -1343,11 +1351,11 @@
 			Name="Module Loaders"
 			>
 			<File
-				RelativePath="..\soundlib\ITTools.h"
+				RelativePath="..\soundlib\ITTools.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\ITTools.cpp"
+				RelativePath="..\soundlib\ITTools.h"
 				>
 			</File>
 			<File
