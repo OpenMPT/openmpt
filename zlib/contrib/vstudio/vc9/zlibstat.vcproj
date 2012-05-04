@@ -50,7 +50,7 @@
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				ExceptionHandling="0"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
 				PrecompiledHeaderFile="$(IntDir)/zlibstat.pch"
 				AssemblerListingLocation="$(IntDir)\"
