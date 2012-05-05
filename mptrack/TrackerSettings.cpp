@@ -348,7 +348,11 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(gdWFIRCutoff * 100.0), iniFile)) / 100.0;
 	
 	// Ramping... first try to read the old setting, then the new ones
-	glVolumeRampUpSamples = glVolumeRampDownSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", glVolumeRampUpSamples, iniFile);
+	const long volRamp = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", -1, iniFile);
+	if(volRamp != -1)
+	{
+		glVolumeRampUpSamples = glVolumeRampDownSamples = volRamp;
+	}
 	glVolumeRampUpSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampUpSamples", glVolumeRampUpSamples, iniFile);
 	glVolumeRampDownSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampDownSamples", glVolumeRampDownSamples, iniFile);
 

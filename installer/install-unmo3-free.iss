@@ -20,7 +20,7 @@ procedure VerifyUNMO3Checksum();
 begin
     if(IsTaskSelected('downloadmo3') And FileExists(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'))) then
     begin
-	    if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '79de7b1476bbde064951c6946cf315a2') then
+	    if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> 'd3dcfeed40204cfdc5fff505c8cd66d557d6ba7b') then
     	begin
     	   MsgBox('Warning: unmo3.dll has been downloaded, but its checksum is wrong! This means that the downloaded file might corrupted or manipulated. The file has thus not been installed. Please obtain unmo3.dll from http://openmpt.org/ and verify its checksum.', mbCriticalError, MB_OK)
     	end else
