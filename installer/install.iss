@@ -73,6 +73,7 @@ Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\OpenMPT Manual.pdf; DestDir: {app}; Flags: ignoreversion
 
 ; release notes
 Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
