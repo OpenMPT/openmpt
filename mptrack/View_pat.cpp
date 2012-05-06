@@ -1142,24 +1142,37 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	m_bInItemRect = true;
 	m_bShiftDragging = false;
 
+	PatternCursor pointCursor(GetPositionFromPoint(point));
+
 	SetCapture();
-	if ((point.x >= m_szHeader.cx) && (point.y <= m_szHeader.cy))
+	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy)
 	{
+		// Click on channel header
 		if (nFlags & MK_CONTROL)
 		{
-			TogglePendingMute(GetPositionFromPoint(point).GetChannel());
+			TogglePendingMute(pointCursor.GetChannel());
 		}
-	}
-	else if ((point.x >= m_szHeader.cx) && (point.y > m_szHeader.cy))
+	} else if(point.x >= m_szHeader.cx && point.y > m_szHeader.cy)
 	{
-		if(CMainFrame::GetInputHandler()->SelectionPressed() && m_StartSel == m_Selection.GetLowerRight())
+		// Click on pattern data
+
+		if(CMainFrame::GetInputHandler()->SelectionPressed()
+			&& ((m_dwStatus & psShiftSelect)
+				|| m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
+				|| !m_Selection.Contains(pointCursor)))
 		{
 			// Shift pressed -> set 2nd selection point
-			DragToSel(GetPositionFromPoint(point), true, true);
+			// This behaviour is only used if:
+			// * Shift-click has previously been used since the shift key has been pressed down (psShiftSelect flag is set),
+			// * No selection has been made yet, or
+			// * Shift-clicking outside the current selection.
+			// This is necessary so that selections can still be moved properly while the shift button is pressed (for copy-move).
+			DragToSel(pointCursor, true, true);
+			m_dwStatus |= psShiftSelect;
 		} else
 		{
 			// Set first selection point
-			m_StartSel = GetPositionFromPoint(point);
+			m_StartSel = pointCursor;
 			if(m_StartSel.GetChannel() < pSndFile->GetNumChannels())
 			{
 				m_dwStatus |= psMouseDragSelect;
@@ -1183,20 +1196,19 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 				}
 			}
 		}
-	} else if((point.x < m_szHeader.cx) && (point.y > m_szHeader.cy))
+	} else if(point.x < m_szHeader.cx && point.y > m_szHeader.cy)
 	{
 		// Mark row number => mark whole row (start)
 		InvalidateSelection();
-		PatternCursor cursor(GetPositionFromPoint(point));
-		if(cursor.GetRow() < pSndFile->Patterns[m_nPattern].GetNumRows())
+		if(pointCursor.GetRow() < pSndFile->Patterns[m_nPattern].GetNumRows())
 		{
-			m_StartSel.Set(cursor);
-			SetCurSel(cursor, PatternCursor(cursor.GetRow(), pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn));
+			m_StartSel.Set(pointCursor);
+			SetCurSel(pointCursor, PatternCursor(pointCursor.GetRow(), pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn));
 			m_dwStatus |= psRowSelection;
 		}
 	}
 
-	if (m_nDragItem)
+	if(m_nDragItem)
 	{
 		InvalidateRect(&m_rcDragItem, FALSE);
 		UpdateWindow();
@@ -1216,7 +1228,7 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 			return;
 		} else
 		{
-			if (ShowEditWindow()) return;
+			if(ShowEditWindow()) return;
 		}
 	}
 	OnLButtonDown(uFlags, point);
@@ -4075,13 +4087,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
 		case kcSelect:			if (!(m_dwStatus & (psDragnDropEdit|psRowSelection))) m_StartSel = m_Cursor;
-									m_dwStatus |= psKeyboardDragSelect;	return wParam;
+									m_dwStatus |= psKeyboardDragSelect;
+								return wParam;
 		case kcSelectOffWithCopySelect:
 		case kcSelectOffWithNav:
-		case kcSelectOff:		m_dwStatus &= ~psKeyboardDragSelect; return wParam;
+		case kcSelectOff:		m_dwStatus &= ~(psKeyboardDragSelect | psShiftSelect);
+								return wParam;
 		case kcCopySelectWithSelect:
 		case kcCopySelectWithNav:
-		case kcCopySelect:		if (!(m_dwStatus & (psDragnDropEdit|psRowSelection))) m_StartSel = m_Cursor;
+		case kcCopySelect:		if (!(m_dwStatus & (psDragnDropEdit | psRowSelection))) m_StartSel = m_Cursor;
 									m_dwStatus |= psCtrlDragSelect; return wParam;
 		case kcCopySelectOffWithSelect:
 		case kcCopySelectOffWithNav:
