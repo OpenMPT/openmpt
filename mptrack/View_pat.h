@@ -105,23 +105,24 @@ class CViewPattern: public CModScrollView
 {
 protected:
 
+	// Pattern status flags
 	enum PatternStatus
 	{
-		psMouseDragSelect =		0x01,	// Creating a selection using the mouse
-		psKeyboardDragSelect =	0x02,	// Creating a selection using shortcuts
-		psFocussed =			0x04,	// Is the pattern editor focussed
-		psFollowSong =			0x08,	// Does the cursor follow playback
-		psRecordingEnabled =	0x10,	// Recording enabled
-		psDragHScroll =			0x20,	// Some weird dragging stuff (?)
-		psDragVScroll =			0x40,	// Some weird dragging stuff (?)
-		psShowVUMeters =		0x80,	// Display channel VU meters?
-		psChordPlaying =		0x100,	// Is a chord playing? (pretty much unused)
-		psDragnDropEdit =		0x200,	// Drag & Drop editing (?)
-		psDragnDropping =		0x400,	// Dragging a selection around
-		//psMIDISpacingPending =	0x800,	// Unused (?)
-		psCtrlDragSelect =		0x1000,	// Creating a selection using Ctrl
-		psShowPluginNames =		0x2000,	// Show plugin names in channel headers //rewbs.patPlugName
-		psRowSelection =		0x4000,	// Selecting a whole pattern row by clicking the row numbers
+		psMouseDragSelect		= 0x01,		// Creating a selection using the mouse
+		psKeyboardDragSelect	= 0x02,		// Creating a selection using shortcuts
+		psFocussed				= 0x04,		// Is the pattern editor focussed
+		psFollowSong			= 0x08,		// Does the cursor follow playback
+		psRecordingEnabled		= 0x10,		// Recording enabled
+		psDragHScroll			= 0x20,		// Some weird dragging stuff (?) - unused
+		psDragVScroll			= 0x40,		// Some weird dragging stuff (?)
+		psShowVUMeters			= 0x80,		// Display channel VU meters
+		psChordPlaying			= 0x100,	// Is a chord playing? (pretty much unused)
+		psDragnDropEdit			= 0x200,	// Drag & Drop editing (?)
+		psDragnDropping			= 0x400,	// Dragging a selection around
+		psShiftSelect			= 0x800,	// User has made at least one selection using Shift-Click since the Shift key has been pressed.
+		psCtrlDragSelect		= 0x1000,	// Creating a selection using Ctrl
+		psShowPluginNames		= 0x2000,	// Show plugin names in channel headers
+		psRowSelection			= 0x4000,	// Selecting a whole pattern row by clicking the row numbers
 	};
 
 	CFastBitmap m_Dib;

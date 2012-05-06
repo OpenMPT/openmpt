@@ -91,5 +91,5 @@ Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: string; ValueNa
 
 [Files]
 ; icon file (should be moved into EXE)
-Source: "mpt.ico";            DestDir: "{app}"; Flags: ignoreversion
+Source: "..\packageTemplate\mpt.ico";            DestDir: "{app}"; Flags: ignoreversion
 
