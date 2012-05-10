@@ -123,6 +123,7 @@ protected:
 		psCtrlDragSelect		= 0x1000,	// Creating a selection using Ctrl
 		psShowPluginNames		= 0x2000,	// Show plugin names in channel headers
 		psRowSelection			= 0x4000,	// Selecting a whole pattern row by clicking the row numbers
+		psChannelSelection		= 0x8000,	// Double-clicked pattern to select a whole channel
 	};
 
 	CFastBitmap m_Dib;

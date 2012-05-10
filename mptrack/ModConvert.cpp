@@ -180,12 +180,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
 		CHANNELINDEX channel = 0;
+		ROWINDEX row = 0;
 
 		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.GetNumChannels(); len; m++, len--, channel++)
 		{
 			if(channel >= GetNumChannels())
 			{
 				channel = 0;
+				row++;
 			}
 
 			m->Convert(nOldType, nNewType);
@@ -233,7 +235,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				switch(m->command)
 				{
 				case CMD_MODCMDEX:
-					if((m->param & 0xF0) == 0x60)
+					if(m->param == 0x60 && row > 0)
 					{
 						addBreak = true;
 					}

@@ -2125,7 +2125,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&Help...",                    ID_HELP
+        MENUITEM "&Help...",                    ID_HELPSHOW
         MENUITEM "&Report a Bug",               ID_REPORT_BUG
         MENUITEM SEPARATOR
         MENUITEM "&Example Modules",            ID_EXAMPLE_MODULES

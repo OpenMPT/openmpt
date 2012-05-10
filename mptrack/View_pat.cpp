@@ -1225,6 +1225,8 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DBLCLICKSELECT))
 		{
 			OnSelectCurrentColumn();
+			m_dwStatus |= psChannelSelection;
+			m_bDragging = true;
 			return;
 		} else
 		{
@@ -1246,7 +1248,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	m_bDragging = false;
 	m_bInItemRect = false;
 	ReleaseCapture();
-	m_dwStatus &= ~(psMouseDragSelect|psRowSelection);
+	m_dwStatus &= ~(psMouseDragSelect | psRowSelection | psChannelSelection);
 	// Drag & Drop Editing
 	if (m_dwStatus & psDragnDropEdit)
 	{
@@ -1544,7 +1546,22 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 
-	if ((m_dwStatus & psRowSelection) /*&& (point.x < m_szHeader.cx)*/ && (point.y > m_szHeader.cy))
+	if((m_dwStatus & psChannelSelection))
+	{
+		// Double-clicked a pattern cell to select whole channel.
+		// Continue dragging to select more channels.
+		const CSoundFile *pSndFile = GetSoundFile();
+		const ROWINDEX lastRow = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
+
+		CHANNELINDEX startChannel = m_Cursor.GetChannel();
+		CHANNELINDEX endChannel = GetPositionFromPoint(point).GetChannel();
+		
+		m_StartSel = PatternCursor(0, startChannel, (startChannel <= endChannel ? PatternCursor::firstColumn : PatternCursor::lastColumn));
+		PatternCursor endSel = PatternCursor(lastRow, endChannel, (startChannel <= endChannel ? PatternCursor::lastColumn : PatternCursor::firstColumn));
+
+		DragToSel(endSel, true, false, false);
+
+	} else if((m_dwStatus & psRowSelection) && point.y > m_szHeader.cy)
 	{
 		// Mark row number => mark whole row (continue)
 		InvalidateSelection();
@@ -1552,7 +1569,8 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		PatternCursor cursor(GetPositionFromPoint(point));
 		cursor.SetColumn(GetDocument()->GetNumChannels() - 1, PatternCursor::lastColumn);
 		DragToSel(cursor, false, true, false);
-	} else if (m_dwStatus & psMouseDragSelect)
+
+	} else if(m_dwStatus & psMouseDragSelect)
 	{
 		PatternCursor cursor(GetPositionFromPoint(point));
 
