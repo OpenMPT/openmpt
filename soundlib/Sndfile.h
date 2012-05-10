@@ -742,18 +742,6 @@ public:
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())
 
 
-inline uint32 ModSample::GetSampleRate(const MODTYPE type) const
-//--------------------------------------------------------------
-{
-	uint32 nRate;
-	if(type & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		nRate = CSoundFile::TransposeToFrequency(RelativeTone, nFineTune);
-	else
-		nRate = nC5Speed;
-	return (nRate > 0) ? nRate : 8363;
-}
-
-
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 //-----------------------------------------------------------------------
 {

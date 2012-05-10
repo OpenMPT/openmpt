@@ -2392,7 +2392,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	// Specific Note Off
 	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
 	{
-		note--;
+		note -= NOTE_MIN;
 		uint8 i = static_cast<uint8>(note - NOTE_KEYOFF);
 		if(channel.uNoteOnMap[i][trackChannel])
 		{
@@ -2470,7 +2470,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 //------------------------------------------------------------------
 {
-	note--;
+	note -= NOTE_MIN;
 	return (m_MidiCh[midiChn].uNoteOnMap[note][trackerChn] != 0);
 }
 
@@ -2478,7 +2478,7 @@ bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn)
 //---------------------------------------------------------------------------------------------
 {
-	note--;
+	note -= NOTE_MIN;
 	VSTInstrChannel *pMidiCh = &m_MidiCh[midiChn & 0x0f];
 
 	if (!(pMidiCh->uNoteOnMap[note][sourceTrackerChn]))

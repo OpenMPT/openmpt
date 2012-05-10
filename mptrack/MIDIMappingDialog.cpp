@@ -66,8 +66,7 @@ END_MESSAGE_MAP()
 LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //-------------------------------------------------------------------
 {
-	const BYTE event = MIDIEvents::GetTypeFromEvent(dwMidiDataParam);
-	if(event == 0xB && IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
+	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
 	{
 		m_ChannelCBox.SetCurSel(1 + MIDIEvents::GetChannelFromEvent(dwMidiDataParam));
 		m_EventCBox.SetCurSel(0);

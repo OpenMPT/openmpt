@@ -88,3 +88,15 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 		}
 	}
 }
+
+
+uint32 ModSample::GetSampleRate(const MODTYPE type) const
+//-------------------------------------------------------
+{
+	uint32 rate;
+	if(type & (MOD_TYPE_MOD | MOD_TYPE_XM))
+		rate = CSoundFile::TransposeToFrequency(RelativeTone, nFineTune);
+	else
+		rate = nC5Speed;
+	return (rate > 0) ? rate : 8363;
+}

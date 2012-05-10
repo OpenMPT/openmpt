@@ -240,23 +240,23 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 {
 	CHAR s[256];
 	m_OrderList.UpdateView(dwHintMask, pObj);
-	if (!m_pSndFile) return;
+	if(!m_pSndFile) return;
 
-	if (dwHintMask & HINT_MODSEQUENCE)
+	if(dwHintMask & HINT_MODSEQUENCE)
 	{
 		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_pSndFile->Order.m_sName);
 	}
-	if (dwHintMask & (HINT_MODSEQUENCE|HINT_MODTYPE))
+	if(dwHintMask & (HINT_MODSEQUENCE|HINT_MODTYPE))
 	{
 		m_SpinSequence.SetRange(0, m_pSndFile->Order.GetNumSequences() - 1);
 		m_SpinSequence.SetPos(m_pSndFile->Order.GetCurrentSequenceIndex());
 	}
 
 	//rewbs.instroVST
-	if (dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
+	if(dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
 	{
 		if (HasValidPlug(m_nInstrument))
-            ::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
 		else
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 
@@ -273,7 +273,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		GetDlgItem(IDC_EDIT_PATTERNNAME)->EnableWindow(isPatNameAvail);
 	}
 	//end rewbs.instroVST
-	if (dwHintMask & HINT_MPTOPTIONS)
+	if(dwHintMask & HINT_MPTOPTIONS)
 	{
 		m_ToolBar.UpdateStyle();
 // -> CODE#0007
@@ -282,10 +282,10 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 // -! BEHAVIOUR_CHANGE#0007
 	}
-	if (dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
+	if(dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
 	{
 		LockControls();
-		if (dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES))
+		if(dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES))
 		{
 			static const TCHAR szSplitFormat[] = TEXT("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
@@ -295,12 +295,12 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			const INSTRUMENTINDEX nSplitIns = m_pModDoc->GetSplitKeyboardSettings().splitInstrument;
 			const ModCommand::NOTE noteSplit = 1 + m_pModDoc->GetSplitKeyboardSettings().splitNote;
 			const CString sSplitInsName = m_pModDoc->GetPatternViewInstrumentName(nSplitIns, true, false);
-			if (m_pSndFile->GetNumInstruments())
+			if(m_pSndFile->GetNumInstruments())
 			{
 				// Show instrument names
-				for (INSTRUMENTINDEX i = 1; i <= m_pSndFile->GetNumInstruments(); i++)
+				for(INSTRUMENTINDEX i = 1; i <= m_pSndFile->GetNumInstruments(); i++)
 				{
-					if (m_pSndFile->Instruments[i] == nullptr)
+					if(m_pSndFile->Instruments[i] == nullptr)
 						continue;
 
 					CString sDisplayName;
@@ -314,14 +314,14 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 						sDisplayName = m_pModDoc->GetPatternViewInstrumentName(i);
 
 					UINT n = m_CbnInstrument.AddString(sDisplayName);
-					if (n == m_nInstrument) nPos = n;
+					if(n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
 				}
 			} else
 			{
 				// Show sample names
 				SAMPLEINDEX nmax = m_pSndFile->GetNumSamples();
-				for (SAMPLEINDEX i = 1; i <= nmax; i++) if (m_pSndFile->GetSample(i).pSample)
+				for(SAMPLEINDEX i = 1; i <= nmax; i++) if (m_pSndFile->GetSample(i).pSample)
 				{
 					if (m_pModDoc->GetSplitKeyboardSettings().IsSplitActive())
 						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i, m_pSndFile->m_szNames[nSplitIns], m_pSndFile->m_szNames[i]);
@@ -329,23 +329,24 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 						wsprintf(s, "%02u: %s", i, m_pSndFile->m_szNames[i]);
 
 					UINT n = m_CbnInstrument.AddString(s);
-					if (n == m_nInstrument) nPos = n;
+					if(n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
 				}
 			}
 			m_CbnInstrument.SetCurSel(nPos);
 			m_CbnInstrument.SetRedraw(TRUE);
 		}
-		if (dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
+		if(dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
 			PATTERNINDEX nPat;
-			if (dwHintMask & HINT_PATNAMES)
+			if(dwHintMask & HINT_PATNAMES)
 				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			m_pSndFile->Patterns[nPat].GetName(s, CountOf(s));
 			m_EditPatName.SetWindowText(s);
-			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+
+			BOOL bXMIT = (m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 			m_ToolBar.EnableButton(ID_PATTERN_MIDIMACRO, bXMIT);
 			m_ToolBar.EnableButton(ID_PATTERN_PROPERTIES, bXMIT);
 			m_ToolBar.EnableButton(ID_PATTERN_EXPAND, bXMIT);
@@ -483,18 +484,22 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-		    bool setLoop = false;
-			if (lParam == -1) {
+			bool setLoop = false;
+			if (lParam == -1)
+			{
 				//Toggle loop state
 				setLoop = !(m_pSndFile->m_dwSongFlags&SONG_PATTERNLOOP);
-			} else {
+			} else
+			{
 				setLoop = (lParam != 0);
 			}
 				
-			if (setLoop) {
+			if (setLoop)
+			{
 				m_pSndFile->m_dwSongFlags |= SONG_PATTERNLOOP;
 				CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
-			} else {
+			} else
+			{
 				m_pSndFile->m_dwSongFlags &= ~SONG_PATTERNLOOP;
 				CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);	
 			}
@@ -746,7 +751,7 @@ void CCtrlPatterns::OnInstrumentChanged()
 		SwitchToView();
 		//rewbs.instroVST
 		if (HasValidPlug(m_nInstrument))
-            ::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
 		else
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 		//rewbs.instroVST

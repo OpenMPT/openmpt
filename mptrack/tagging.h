@@ -116,7 +116,7 @@ public:
 
 private:
 	// Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
-	uint32 intToSynchsafe(UINT32 in);
+	uint32 intToSynchsafe(uint32 in);
 	// Write a frame
 	void WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE *f);
 	// Size of our tag
