@@ -36,23 +36,23 @@ inline WORD BigEndianW(WORD x)	{ return (WORD)(((x >> 8) & 0xFF) | ((x << 8) & 0
 
 #ifdef PLATFORM_BIG_ENDIAN
 // PPC
-inline void SwapBytesBE(uint32 &value)	{ value; }
-inline void SwapBytesBE(uint16 &value)	{ value; }
-inline void SwapBytesLE(uint32 &value)	{ value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24); }
-inline void SwapBytesLE(uint16 &value)	{ value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00)); }
-inline void SwapBytesBE(int32 &value)	{ value; }
-inline void SwapBytesBE(int16 &value)	{ value; }
-inline void SwapBytesLE(int32 &value)	{ value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24); }
-inline void SwapBytesLE(int16 &value)	{ value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00)); }
+inline uint32 SwapBytesBE(uint32 &value)	{ return value; }
+inline uint16 SwapBytesBE(uint16 &value)	{ return value; }
+inline uint32 SwapBytesLE(uint32 &value)	{ return (value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24)); }
+inline uint16 SwapBytesLE(uint16 &value)	{ return (value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00)); }
+inline int32 SwapBytesBE(int32 &value)		{ return value; }
+inline int16 SwapBytesBE(int16 &value)		{ return value; }
+inline int32 SwapBytesLE(int32 &value)		{ return (value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24)); }
+inline int16 SwapBytesLE(int16 &value)		{ return (value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00))); }
 #else
 // x86
-inline void SwapBytesBE(uint32 &value)	{ value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24); }
-inline void SwapBytesBE(uint16 &value)	{ value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00)); }
-inline void SwapBytesLE(uint32 &value)	{ value; }
-inline void SwapBytesLE(uint16 &value)	{ value; }
-inline void SwapBytesBE(int32 &value)	{ value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24); }
-inline void SwapBytesBE(int16 &value)	{ value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00)); }
-inline void SwapBytesLE(int32 &value)	{ value; }
-inline void SwapBytesLE(int16 &value)	{ value; }
+inline uint32 SwapBytesBE(uint32 &value)	{ return (value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24)); }
+inline uint16 SwapBytesBE(uint16 &value)	{ return (value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00))); }
+inline uint32 SwapBytesLE(uint32 &value)	{ return value; }
+inline uint16 SwapBytesLE(uint16 &value)	{ return value; }
+inline int32 SwapBytesBE(int32 &value)		{ return (value = ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24)); }
+inline int16 SwapBytesBE(int16 &value)		{ return (value = (((value >> 8) & 0xFF) | ((value << 8) & 0xFF00))); }
+inline int32 SwapBytesLE(int32 &value)		{ return value; }
+inline int16 SwapBytesLE(int16 &value)		{ return value; }
 #endif
 

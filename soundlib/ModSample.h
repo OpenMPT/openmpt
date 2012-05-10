@@ -40,7 +40,7 @@ struct ModSample
 	uint8 GetBytesPerSample() const { return GetElementarySampleSize() * GetNumChannels(); }
 
 	// Return the size which pSample is at least.
-	DWORD GetSampleSizeInBytes() const { return nLength * GetBytesPerSample(); }
+	SmpLength GetSampleSizeInBytes() const { return nLength * GetBytesPerSample(); }
 
 	// Returns sample rate of the sample. The argument is needed because 
 	// the sample rate is obtained differently for different module types.

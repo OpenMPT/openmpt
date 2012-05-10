@@ -198,8 +198,8 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 	// Volume / Panning
 	fadeout = LittleEndianW(static_cast<uint16>(min(mptIns.nFadeOut >> 5, 256)));
-	gbv = static_cast<uint8>(mptIns.nGlobalVol * 2);
-	dfp = static_cast<uint8>(mptIns.nPan >> 2);
+	gbv = static_cast<uint8>(min(mptIns.nGlobalVol * 2, 128));
+	dfp = static_cast<uint8>(min(mptIns.nPan / 4, 64));
 	if(!(mptIns.dwFlags & INS_SETPANNING)) dfp |= ITInstrument::ignorePanning;
 
 	// Random Variation
@@ -281,7 +281,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.nFadeOut = LittleEndianW(fadeout) << 5;
 	mptIns.nGlobalVol = gbv / 2;
 	LimitMax(mptIns.nGlobalVol, 64u);
-	mptIns.nPan = (dfp & 0x7F) << 2;
+	mptIns.nPan = (dfp & 0x7F) * 4;
 	if(mptIns.nPan > 256) mptIns.nPan = 128;
 	if(!(dfp & ITInstrument::ignorePanning)) mptIns.dwFlags |= INS_SETPANNING;
 

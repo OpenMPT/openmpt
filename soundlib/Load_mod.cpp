@@ -896,19 +896,24 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 #endif
 
 	// Writing instruments
-	for(SAMPLEINDEX smp = 1; smp <= 31; smp++) if (sampleLength[smp])
+	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
+		if(sampleLength[smp] == 0)
+		{
+			continue;
+		}
 		const ModSample &sample = Samples[sampleSource[smp]];
 
 		const long sampleStart = ftell(f);
 		const UINT writtenBytes = WriteSample(f, &sample, RS_PCM8S, sampleLength[smp]);
+
+		static const int8 silence[] = {0, 0};
 
 		if((sample.uFlags & CHN_LOOP) == 0)
 		{
 			// First two bytes of oneshot samples have to be 0 due to PT's one-shot loop
 			const long sampleEnd = ftell(f);
 			fseek(f, sampleStart, SEEK_SET);
-			int8 silence[] = {0, 0};
 			fwrite(&silence, min(writtenBytes, 2), 1, f);
 			fseek(f, sampleEnd, SEEK_SET);
 		}
@@ -916,8 +921,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 		// Write padding byte if the sample size is odd.
 		if((sample.nLength % 2) != 0)
 		{
-			int8 padding = 0;
-			fwrite(&padding, 1, 1, f);
+			fwrite(&silence[0], 1, 1, f);
 		}
 	}
 

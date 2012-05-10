@@ -208,7 +208,6 @@ enum
 #define MIDISETUP_MIDIVOL_TO_NOTEVOL		0x08	// Combine MIDI volume to note velocity
 #define MIDISETUP_RECORDNOTEOFF				0x10	// Record MIDI Note Off to pattern
 #define MIDISETUP_RESPONDTOPLAYCONTROLMSGS	0x20	// Respond to Restart/Continue/Stop MIDI commands
-#define MIDISETUP_AMPLIFYVELOCITY			0x40	// Amplify velocity of recorded notes
 #define MIDISETUP_MIDIMACROCONTROL			0x80	// Record MIDI controller changes a MIDI macro changes in pattern
 #define MIDISETUP_PLAYPATTERNONMIDIIN       0x100	// Play pattern if MIDI Note is received and playback is paused
 
@@ -656,7 +655,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-	bool UpdateEffectKeys(void); 
+	bool UpdateEffectKeys(); 
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 

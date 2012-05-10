@@ -428,7 +428,7 @@ bool CSoundFile::ReadOKT(FileReader &file)
 			SmpLength i = mptSample.nLength; 
 			while(i--)
 			{
-				*data = Clamp(*data * 2, int8(-128), int8(127));
+				*data = static_cast<uint8>(Clamp(static_cast<int>(*data) * 2, int8(-128), int8(127)));
 				*data++;
 			}
 		}
