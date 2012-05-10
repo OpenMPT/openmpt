@@ -82,10 +82,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_VIEW_MIDIMAPPING,			OnViewMIDIMapping)
 	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
 	ON_COMMAND(ID_VIEW_SONGPROPERTIES,		OnSongProperties)
-	ON_COMMAND(ID_HELP_FINDER,				CMDIFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)	//rewbs.reportBug
-	ON_COMMAND(ID_CONTEXT_HELP,				CMDIFrameWnd::OnContextHelp)
-	ON_COMMAND(ID_DEFAULT_HELP,				CMDIFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_NEXTOCTAVE,				OnNextOctave)
 	ON_COMMAND(ID_PREVOCTAVE,				OnPrevOctave)
 	ON_COMMAND_RANGE(ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE, OnOpenTemplateModule)
@@ -112,7 +109,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
-	ON_COMMAND(ID_HELP,						OnHelp)
+	ON_COMMAND(ID_HELPSHOW,					OnHelp)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
 	ON_WM_KILLFOCUS() //rewbs.fix3116
@@ -203,7 +200,7 @@ CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
 
 static UINT indicators[] =
 {
-	ID_SEPARATOR,           // status line indicator
+	ID_SEPARATOR,			// status line indicator
 	ID_INDICATOR_XINFO,		//rewbs.xinfo
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
@@ -1357,12 +1354,6 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 		} else
 		{
 			pModDoc->SetPause(FALSE);
-			//rewbs.fix3185: removed this check so play position stays on last pattern if song ends and loop is off.
-			//Otherwise play from cursor screws up.
-			//if (pSndFile->GetCurrentPos() + 2 >= pSndFile->GetMaxPosition()) pSndFile->SetCurrentPos(0);
-
-			// Tentative fix for http://bugs.openmpt.org/view.php?id=11 - Moved following line out of any condition checks
-			//pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
 		}
 	}
 	pSndFile->SetRepeatCount((GetSettings().gbLoopSong) ? -1 : 0);
@@ -1826,7 +1817,7 @@ VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 	if (pModDoc == m_pModPlaying) PauseMod();
 
 	// Make sure that OnTimer() won't try to set the closed document modified anymore.
-	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = 0; 
+	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = nullptr; 
 
 	m_wndTree.OnDocumentClosed(pModDoc);
 }
@@ -2380,7 +2371,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcFileNew:		theApp.OnFileNew(); break;
 		case kcFileOpen:	theApp.OnFileOpen(); break;
 		case kcMidiRecord:	OnMidiRecord(); break;
-		case kcHelp: 		CMDIFrameWnd::OnHelp(); break;
+		case kcHelp: 		OnHelp(); break;
 		case kcViewAddPlugin: OnPluginManager(); break;
 		case kcViewChannelManager: OnChannelManager(); break;
 		case kcViewMIDImapping: OnViewMIDIMapping(); break;
