@@ -891,20 +891,30 @@ BOOL CSoundFile::Destroy()
 LPSTR CSoundFile::AllocateSample(UINT nbytes)
 //-------------------------------------------
 {
-	if (nbytes>0xFFFFFFD6)
-		return NULL;
-	LPSTR p = (LPSTR)GlobalAllocPtr(GHND, (nbytes+39) & ~7);
-	if (p) p += 16;
-	return p;
+	if (nbytes > 0xFFFFFFD6)
+		return nullptr;
+
+	// Allocate with some overhead (16 bytes before sample start, and at least 16 bytes after that)
+	const size_t allocSize = (nbytes + 39) & ~7;
+
+	try
+	{
+		LPSTR p = (LPSTR)new char[allocSize];
+		memset(p, 0, allocSize);
+		return (p + 16);
+	} catch(MPTMemoryException)
+	{
+		return nullptr;
+	}
 }
 
 
-void CSoundFile::FreeSample(LPVOID p)
-//-----------------------------------
+void CSoundFile::FreeSample(void *p)
+//----------------------------------
 {
 	if (p)
 	{
-		GlobalFreePtr(((LPSTR)p)-16);
+		delete[] (((char *)p) - 16);
 	}
 }
 
@@ -2800,8 +2810,7 @@ struct UpgradePatternData
 				if(m.param == 0xC0)
 				{
 					m.command = CMD_NONE;
-					m.volcmd = VOLCMD_VOLUME;
-					m.vol = 0;
+					m.note = NOTE_NOTECUT;
 				} else if(m.param == 0xD0)
 				{
 					m.command = CMD_NONE;

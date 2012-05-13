@@ -1341,7 +1341,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 					pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | HINT_MODTYPE);
 					SetCurrentPattern(m_nPattern);
 				}
-				InvalidatePattern();
+				InvalidatePattern(true);
 				pModDoc->SetModified();
 			}
 		}
