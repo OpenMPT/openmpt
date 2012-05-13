@@ -490,12 +490,12 @@ void CSampleUndo::RestrictBufferSize()
 	UINT nCapacity = GetUndoBufferCapacity();
 	while(nCapacity > CMainFrame::GetSettings().m_nSampleUndoMaxBuffer)
 	{
-		for(SAMPLEINDEX nSmp = 1; nSmp <= UndoBuffer.size(); nSmp++)
+		for(SAMPLEINDEX smp = 1; smp <= UndoBuffer.size(); smp++)
 		{
-			if(UndoBuffer[nSmp - 1][0].SamplePtr != nullptr)
+			if(UndoBuffer[smp - 1].size() != 0 && UndoBuffer[smp - 1][0].SamplePtr != nullptr)
 			{
-				nCapacity -= (UndoBuffer[nSmp - 1][0].nChangeEnd - UndoBuffer[nSmp - 1][0].nChangeStart) * UndoBuffer[nSmp - 1][0].OldSample.GetBytesPerSample();
-				DeleteUndoStep(nSmp, 0);
+				nCapacity -= (UndoBuffer[smp - 1][0].nChangeEnd - UndoBuffer[smp - 1][0].nChangeStart) * UndoBuffer[smp - 1][0].OldSample.GetBytesPerSample();
+				DeleteUndoStep(smp, 0);
 			}
 			if(nCapacity <= CMainFrame::GetSettings().m_nSampleUndoMaxBuffer) return;
 		}
