@@ -499,9 +499,8 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 		return 0;
 	}
 
+	mptSmp.Initialize(MOD_TYPE_IT);
 	StringFixer::ReadString<StringFixer::nullTerminated>(mptSmp.filename, filename);
-
-	mptSmp.uFlags = 0;
 
 	// Volume / Panning
 	mptSmp.nVolume = vol * 4;

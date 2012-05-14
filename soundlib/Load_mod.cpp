@@ -227,13 +227,10 @@ struct MODSampleHeader
 	// Convert an MOD sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
-		mptSmp.uFlags = 0;
+		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length * 2;
-		mptSmp.RelativeTone = 0;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune & 0x0F);
 		mptSmp.nVolume = 4 * min(volume, 64);
-		mptSmp.nGlobalVol = 64;
-		mptSmp.nPan = 128;
 
 		SmpLength lStart = loopStart * 2;
 		SmpLength lLength = loopLength * 2;

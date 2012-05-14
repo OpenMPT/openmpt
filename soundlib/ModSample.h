@@ -13,21 +13,22 @@
 // Sample Struct
 struct ModSample
 {
-	UINT nLength, nLoopStart, nLoopEnd;	// In samples, not bytes
-	UINT nSustainStart, nSustainEnd;	// Dito
-	LPSTR pSample;						// Pointer to sample data
-	UINT nC5Speed;						// Frequency of middle c, in Hz (for IT/S3M/MPTM)
-	WORD nPan;							// Default sample panning (if pan flag is set)
-	WORD nVolume;						// Default volume
-	WORD nGlobalVol;					// Global volume (sample volume is multiplied by this)
-	WORD uFlags;						// Sample flags
-	signed char RelativeTone;			// Relative note to middle c (for MOD/XM)
-	signed char nFineTune;				// Finetune period (for MOD/XM)
-	BYTE nVibType;						// Auto vibrato type
-	BYTE nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
-	BYTE nVibDepth;						// Auto vibrato depth
-	BYTE nVibRate;						// Auto vibrato rate (speed)
-	//CHAR name[MAX_SAMPLENAME];		// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
+	SmpLength nLength;						// In samples, not bytes
+	SmpLength nLoopStart, nLoopEnd;			// Dito
+	SmpLength nSustainStart, nSustainEnd;	// Dito
+	LPSTR pSample;							// Pointer to sample data
+	uint32 nC5Speed;						// Frequency of middle c, in Hz (for IT/S3M/MPTM)
+	uint16 nPan;							// Default sample panning (if pan flag is set)
+	uint16 nVolume;							// Default volume
+	uint16 nGlobalVol;						// Global volume (sample volume is multiplied by this)
+	uint16 uFlags;							// Sample flags
+	int8   RelativeTone;					// Relative note to middle c (for MOD/XM)
+	int8   nFineTune;						// Finetune period (for MOD/XM)
+	uint8  nVibType;						// Auto vibrato type
+	uint8  nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
+	uint8  nVibDepth;						// Auto vibrato depth
+	uint8  nVibRate;						// Auto vibrato rate (speed)
+	//CHAR name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
 	CHAR filename[MAX_SAMPLEFILENAME];
 
 	// Return the size of one (elementary) sample in bytes.
@@ -48,4 +49,7 @@ struct ModSample
 
 	// Translate sample properties between two given formats.
 	void Convert(MODTYPE fromType, MODTYPE toType);
+
+	// Initialize sample slot with default values.
+	void Initialize(MODTYPE type = MOD_TYPE_NONE);
 };

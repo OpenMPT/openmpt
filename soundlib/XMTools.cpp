@@ -387,17 +387,17 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 void XMSample::ConvertToMPT(ModSample &mptSmp) const
 //--------------------------------------------------
 {
+	mptSmp.Initialize(MOD_TYPE_XM);
+
 	// Volume
 	mptSmp.nVolume = vol * 4;
 	LimitMax(mptSmp.nVolume, WORD(256));
-	mptSmp.nGlobalVol = 64;
 
 	// Panning
 	mptSmp.nPan = pan;
 	mptSmp.uFlags = CHN_PANNING;
 
 	// Sample Frequency
-	mptSmp.nC5Speed = 0;
 	mptSmp.nFineTune = finetune;
 	mptSmp.RelativeTone = relnote;
 
@@ -405,7 +405,6 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.nLength = LittleEndian(length);
 	mptSmp.nLoopStart = LittleEndian(loopStart);
 	mptSmp.nLoopEnd = mptSmp.nLoopStart + LittleEndian(loopLength);
-	mptSmp.nSustainStart = mptSmp.nSustainEnd = 0;
 
 	if((flags & XMSample::sample16Bit))
 	{

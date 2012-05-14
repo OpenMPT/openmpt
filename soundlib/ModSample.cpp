@@ -90,6 +90,33 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 }
 
 
+// Initialize sample slot with default values.
+void ModSample::Initialize(MODTYPE type)
+//--------------------------------------
+{
+	nLength = 0;
+	nLoopStart = nLoopEnd = 0;
+	nSustainStart = nSustainEnd = 0;
+	nVolume = 256;
+	nGlobalVol = 64;
+	nPan = 128;
+	nC5Speed = 8363;
+	RelativeTone = 0;
+	nFineTune = 0;
+	nVibType = VIB_SINE;
+	nVibSweep = 0;
+	nVibDepth = 0;
+	nVibRate = 0;
+	uFlags &= ~(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP);
+	if(type == MOD_TYPE_XM)
+	{
+		uFlags |= CHN_PANNING;
+	}
+	filename[0] = '\0';
+}
+
+
+// Returns sample rate of the sample.
 uint32 ModSample::GetSampleRate(const MODTYPE type) const
 //-------------------------------------------------------
 {

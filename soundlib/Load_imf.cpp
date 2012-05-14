@@ -98,7 +98,7 @@ struct IMFSAMPLE
 };
 #pragma pack(pop)
 
-static BYTE imfEffects[] =
+static const uint8 imfEffects[] =
 {
 	CMD_NONE,
 	CMD_SPEED,			// 0x01 1xx Set Tempo
@@ -539,6 +539,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			
 			ModSample &sample = Samples[firstsample + nSmp];
 
+			sample.Initialize();
 			StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, imfsmp.filename);
 			strcpy(m_szNames[m_nSamples], sample.filename);
 
@@ -547,7 +548,6 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			sample.nLoopEnd = LittleEndian(imfsmp.loop_end);
 			sample.nC5Speed = LittleEndian(imfsmp.C5Speed);
 			sample.nVolume = imfsmp.volume * 4;
-			sample.nGlobalVol = 256;
 			sample.nPan = imfsmp.panning;
 			if(imfsmp.flags & 1)
 				sample.uFlags |= CHN_LOOP;
