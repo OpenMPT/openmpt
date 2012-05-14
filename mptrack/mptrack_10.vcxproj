@@ -334,6 +334,7 @@
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
+    <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\ITTools.h" />
     <ClInclude Include="..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />

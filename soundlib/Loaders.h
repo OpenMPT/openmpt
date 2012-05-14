@@ -33,6 +33,7 @@ private:
 	
 public:
 	FileReader(const char *data, size_t length) : streamData(data), streamLength(length), streamPos(0) { }
+	FileReader(const FileReader &other) : streamData(other.streamData), streamLength(other.streamLength), streamPos(other.streamPos) { }
 
 	// Returns true if the object points to a valid stream.
 	bool IsValid() const

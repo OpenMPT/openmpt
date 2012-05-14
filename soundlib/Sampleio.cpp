@@ -22,21 +22,25 @@
 #include "../common/StringFixer.h"
 #include "../common/Reporting.h"
 #include "../mptrack/version.h"
+#include "ChunkReader.h"
 
 #pragma warning(disable:4244)
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
 //--------------------------------------------------------------------------------------------------
 {
-	if ((!nSample) || (nSample >= MAX_SAMPLES)) return false;
-	if ((!ReadWAVSample(nSample, lpMemFile, dwFileLength))
-	 && (!ReadXISample(nSample, lpMemFile, dwFileLength))
-	 && (!ReadAIFFSample(nSample, lpMemFile, dwFileLength))
-	 && (!ReadITSSample(nSample, lpMemFile, dwFileLength))
-	 && (!ReadPATSample(nSample, lpMemFile, dwFileLength))
-	 && (!Read8SVXSample(nSample, lpMemFile, dwFileLength))
-	 && (!ReadS3ISample(nSample, lpMemFile, dwFileLength)))
+	FileReader file(reinterpret_cast<const char *>(lpMemFile), dwFileLength);
+	if(!nSample || nSample >= MAX_SAMPLES) return false;
+	if(!ReadWAVSample(nSample, lpMemFile, dwFileLength)
+		&& !ReadXISample(nSample, lpMemFile, dwFileLength)
+		&& !ReadAIFFSample(nSample, file)
+		&& !ReadITSSample(nSample, lpMemFile, dwFileLength)
+		&& !ReadPATSample(nSample, lpMemFile, dwFileLength)
+		&& !Read8SVXSample(nSample, lpMemFile, dwFileLength)
+		&& !ReadS3ISample(nSample, lpMemFile, dwFileLength))
+	{
 		return false;
+	}
 	return true;
 }
 
@@ -1392,122 +1396,361 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD
 /////////////////////////////////////////////////////////////////////////////////////////
 // AIFF File I/O
 
-typedef struct AIFFFILEHEADER
+
+#pragma pack(push, 1)
+
+// AIFF header
+struct AIFFHeader
 {
-	DWORD dwFORM;	// "FORM" -> 0x4D524F46
-	DWORD dwLen;
-	DWORD dwAIFF;	// "AIFF" -> 0x46464941
-} AIFFFILEHEADER;
-
-typedef struct AIFFCOMM
-{
-	DWORD dwCOMM;	// "COMM" -> 0x4D4D4F43
-	DWORD dwLen;
-	WORD wChannels;
-	WORD wFramesHi;	// Align!
-	WORD wFramesLo;
-	WORD wSampleSize;
-	BYTE xSampleRate[10];
-} AIFFCOMM;
-
-typedef struct AIFFSSND
-{
-	DWORD dwSSND;	// "SSND" -> 0x444E5353
-	DWORD dwLen;
-	DWORD dwOffset;
-	DWORD dwBlkSize;
-} AIFFSSND;
-
-
-static DWORD FetchLong(LPBYTE p)
-{
-	DWORD d = p[0];
-	d = (d << 8) | p[1];
-	d = (d << 8) | p[2];
-	d = (d << 8) | p[3];
-	return d;
-}
-
-
-static DWORD Ext2Long(LPBYTE p)
-{
-	DWORD mantissa, last=0;
-	BYTE exp;
-
-	mantissa = FetchLong(p+2);
-	exp = 30 - p[1];
-	while (exp--)
+	// 32-Bit chunk identifiers
+	enum AIFFMagic
 	{
-		last = mantissa;
-		mantissa >>= 1;
+		idFORM	= 0x464F524D,
+		idAIFF	= 0x41494646,
+		idAIFC	= 0x41494643,
+	};
+
+	uint32 magic;	// FORM
+	uint32 length;	// Size of the file, not including magic an length
+	uint32 type;	// AIFF or AIFC
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(magic);
+		SwapBytesBE(type);
 	}
-	if (last & 1) mantissa++;
-	return mantissa;
-}
+};
 
 
-
-bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//----------------------------------------------------------------------------------------
+// General IFF Chunk header
+struct AIFFChunk
 {
-	DWORD dwMemPos = sizeof(AIFFFILEHEADER);
-	DWORD dwFORMLen, dwCOMMLen, dwSSNDLen;
-	AIFFFILEHEADER *phdr = (AIFFFILEHEADER *)lpMemFile;
-	AIFFCOMM *pcomm;
-	AIFFSSND *psnd;
-	UINT nType;
-
-	if ((!lpMemFile) || (dwFileLength < (DWORD)sizeof(AIFFFILEHEADER))) return false;
-	dwFORMLen = BigEndian(phdr->dwLen);
-	if ((phdr->dwFORM != 0x4D524F46) || (phdr->dwAIFF != 0x46464941)
-	 || (dwFORMLen > dwFileLength) || (dwFORMLen < (DWORD)sizeof(AIFFCOMM))) return false;
-	pcomm = (AIFFCOMM *)(lpMemFile+dwMemPos);
-	dwCOMMLen = BigEndian(pcomm->dwLen);
-	if ((pcomm->dwCOMM != 0x4D4D4F43) || (dwCOMMLen < 0x12) || (dwCOMMLen >= dwFileLength)) return false;
-	if ((pcomm->wChannels != 0x0100) && (pcomm->wChannels != 0x0200)) return false;
-	if ((pcomm->wSampleSize != 0x0800) && (pcomm->wSampleSize != 0x1000)) return false;
-	dwMemPos += dwCOMMLen + 8;
-	if (dwMemPos + sizeof(AIFFSSND) >= dwFileLength) return false;
-	psnd = (AIFFSSND *)(lpMemFile+dwMemPos);
-	dwSSNDLen = BigEndian(psnd->dwLen);
-	if ((psnd->dwSSND != 0x444E5353) || (dwSSNDLen >= dwFileLength) || (dwSSNDLen < 8)) return false;
-	dwMemPos += sizeof(AIFFSSND);
-	if (dwMemPos >= dwFileLength) return false;
-	DestroySample(nSample);
-	if (pcomm->wChannels == 0x0100)
+	// 32-Bit chunk identifiers
+	enum ChunkIdentifiers
 	{
-		nType = (pcomm->wSampleSize == 0x1000) ? RS_PCM16M : RS_PCM8S;
+		idCOMM	= 0x434F4D4D,
+		idSSND	= 0x53534E44,
+		idINST	= 0x494E5354,
+		idMARK	= 0x4D41524B,
+		idNAME	= 0x4E414D45,
+	};
+
+	uint32 id;		// See ChunkIdentifiers
+	uint32 length;	// Chunk size without header
+
+	size_t GetLength() const
+	{
+		uint32 l = length;
+		return SwapBytesBE(l);
+	}
+
+	ChunkIdentifiers GetID() const
+	{
+		uint32 i = id;
+		return static_cast<ChunkIdentifiers>(SwapBytesBE(i));
+	}
+};
+
+
+// "Common" chunk (in AIFC, a compression ID and compression name follows this header, but apart from that it's identical)
+struct AIFFCommonChunk
+{
+	uint16 numChannels;
+	uint32 numSampleFrames;
+	uint16 sampleSize;
+	uint8  sampleRate[10];		// Sample rate in 80-Bit floating point
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(numChannels);
+		SwapBytesBE(numSampleFrames);
+		SwapBytesBE(sampleSize);
+	}
+
+	// Convert sample rate to integer
+	uint32 GetSampleRate() const
+	{
+		uint32 mantissa, last = 0;
+		uint8 exp;
+
+		mantissa = SwapBytesBE(static_cast<uint32 >(*reinterpret_cast<const uint32 *>(sampleRate + 2)));
+		exp = 30 - sampleRate[1];
+		while(exp--)
+		{
+			last = mantissa;
+			mantissa >>= 1;
+		}
+		if(last & 1) mantissa++;
+		return mantissa;
+	}
+};
+
+
+// Sound chunk
+struct AIFFSoundChunk
+{
+	uint32 offset;
+	uint32 blockSize;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(offset);
+		SwapBytesBE(blockSize);
+	}
+};
+
+
+// Marker
+struct AIFFMarker
+{
+	uint16 id;
+	uint32 position;		// Position in sample
+	uint8  nameLength;		// Not counting eventually existing padding byte in name string
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(id);
+		SwapBytesBE(position);
+	}};
+
+
+// Instrument loop
+struct AIFFInstrumentLoop
+{
+	enum PlayModes
+	{
+		noLoop		= 0,
+		loopNormal	= 1,
+		loopBidi	= 2,
+	};
+
+	uint16 playMode;
+	uint16 beginLoop;		// Marker index
+	uint16 endLoop;			// Marker index
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(playMode);
+		SwapBytesBE(beginLoop);
+		SwapBytesBE(endLoop);
+	}
+};
+
+
+struct AIFFInstrumentChunk
+{
+	uint8  baseNote;
+	uint8  detune;
+	uint8  lowNote;
+	uint8  highNote;
+	uint8  lowVelocity;
+	uint8  highVelocity;
+	uint16 gain;
+	AIFFInstrumentLoop sustainLoop;
+	AIFFInstrumentLoop releaseLoop;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		sustainLoop.ConvertEndianness();
+		releaseLoop.ConvertEndianness();
+	}
+};
+
+#pragma pack(pop)
+
+
+bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader file)
+//-------------------------------------------------------------------
+{
+	ChunkReader chunkFile(file);
+
+	// Verify header
+	AIFFHeader fileHeader;
+	if(!chunkFile.ReadConvertEndianness(fileHeader)
+		|| fileHeader.magic != AIFFHeader::idFORM
+		|| (fileHeader.type != AIFFHeader::idAIFF && fileHeader.type != AIFFHeader::idAIFC))
+	{
+		return false;
+	}
+
+	ChunkReader::ChunkList<AIFFChunk> chunks = chunkFile.ReadChunks<AIFFChunk>(2);
+
+	// Read COMM chunk
+	FileReader commChunk(chunks.GetChunk(AIFFChunk::idCOMM));
+	AIFFCommonChunk sampleInfo;
+	if(!commChunk.IsValid()
+		|| !commChunk.ReadConvertEndianness(sampleInfo))
+	{
+		return false;
+	}
+
+	// Is this a proper sample?
+	if(sampleInfo.numSampleFrames == 0
+		|| sampleInfo.numChannels < 1 || sampleInfo.numChannels > 2
+		|| sampleInfo.sampleSize < 1 || sampleInfo.sampleSize > 32)
+	{
+		return false;
+	}
+
+	// Read compression type in AIFF-C files.
+	char compression[4] = { 'N', 'O', 'N', 'E' };
+	bool littleEndian = false;
+	if(fileHeader.type == AIFFHeader::idAIFC)
+	{
+		if(!commChunk.ReadArray(compression))
+		{
+			return false;
+		}
+		littleEndian = !memcmp(compression, "twos", 4);
+	}
+
+	// Read SSND chunk
+	FileReader soundChunk(chunks.GetChunk(AIFFChunk::idSSND));
+	AIFFSoundChunk sampleHeader;
+	if(!soundChunk.IsValid()
+		|| !soundChunk.ReadConvertEndianness(sampleHeader)
+		|| soundChunk.BytesLeft() <= sampleHeader.offset)
+	{
+		return false;
+	}
+
+	UINT format, wavFormat = 1;
+	if(sampleInfo.numChannels == 1)
+	{
+		if(sampleInfo.sampleSize <= 8)
+		{
+			format = RS_PCM8S;
+		} else if(sampleInfo.sampleSize <= 16)
+		{
+			format = littleEndian ? RS_PCM16S : RS_PCM16M;
+		} else if(sampleInfo.sampleSize <= 24)
+		{
+			format = littleEndian ? RS_PCM24S : RS_PCM24S;	// FIXME: No big-endian support!
+		} else if(sampleInfo.sampleSize <= 32)
+		{
+			format = littleEndian ? RS_PCM32S : RS_PCM32S;	// FIXME: No big-endian support!
+		} else
+		{
+			return false;
+		}
 	} else
 	{
-		nType = (pcomm->wSampleSize == 0x1000) ? RS_STIPCM16M : RS_STIPCM8S;
+		if(sampleInfo.sampleSize <= 8)
+		{
+			format = RS_STIPCM8S;
+		} else if(sampleInfo.sampleSize <= 16)
+		{
+			format = littleEndian ? RS_STIPCM16S : RS_STIPCM16M;
+		} else if(sampleInfo.sampleSize <= 24)
+		{
+			format = littleEndian ? RS_STIPCM24S : RS_STIPCM24S;	// FIXME: No big-endian support!
+		} else if(sampleInfo.sampleSize <= 32)
+		{
+			format = littleEndian ? RS_STIPCM32S : RS_STIPCM32S;	// FIXME: No big-endian support!
+		} else
+		{
+			return false;
+		}
 	}
-	UINT samplesize = (pcomm->wSampleSize >> 11) * (pcomm->wChannels >> 8);
-	if (!samplesize) samplesize = 1;
-	ModSample *pSmp = &Samples[nSample];
-	if (pSmp->pSample)
+	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4))
 	{
-		FreeSample(pSmp->pSample);
-		pSmp->pSample = nullptr;
-		pSmp->nLength = 0;
+		// FIXME: No big-endian support!
+		wavFormat = 3;
 	}
-	pSmp->nLength = dwSSNDLen / samplesize;
-	pSmp->nLoopStart = pSmp->nLoopEnd = 0;
-	pSmp->nSustainStart = pSmp->nSustainEnd = 0;
-	pSmp->nC5Speed = Ext2Long(pcomm->xSampleRate);
-	pSmp->nPan = 128;
-	pSmp->nVolume = 256;
-	pSmp->nGlobalVol = 64;
-	pSmp->uFlags = (pcomm->wSampleSize > 0x0800) ? CHN_16BIT : 0;
-	if (pcomm->wChannels >= 0x0200) pSmp->uFlags |= CHN_STEREO;
-	if (GetType() & MOD_TYPE_XM) pSmp->uFlags |= CHN_PANNING;
-	pSmp->RelativeTone = 0;
-	pSmp->nFineTune = 0;
-	if (GetType() & MOD_TYPE_XM) FrequencyToTranspose(pSmp);
-	pSmp->nVibType = pSmp->nVibSweep = pSmp->nVibDepth = pSmp->nVibRate = 0;
-	pSmp->filename[0] = 0;
-	m_szNames[nSample][0] = 0;
-	if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
-	ReadSample(pSmp, nType, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
+
+	soundChunk.Skip(sampleHeader.offset);
+
+	ModSample &mptSample = Samples[nSample];
+	DestroySample(nSample);
+	mptSample.Initialize();
+	mptSample.nLength = sampleInfo.numSampleFrames;
+	mptSample.nC5Speed = sampleInfo.GetSampleRate();
+	LimitMax(mptSample.nLength, MAX_SAMPLE_LENGTH);
+
+	ReadSample(&mptSample, format, soundChunk, wavFormat);
+
+	// Read MARK and INST chunk to extract sample loops
+	FileReader markerChunk(chunks.GetChunk(AIFFChunk::idMARK));
+	FileReader instChunk(chunks.GetChunk(AIFFChunk::idINST));
+	AIFFInstrumentChunk instrHeader;
+	if(markerChunk.IsValid() && instChunk.IsValid() && instChunk.ReadConvertEndianness(instrHeader))
+	{
+		size_t numMarkers = markerChunk.ReadUint16BE();
+
+		vector<AIFFMarker> markers;
+		for(size_t i = 0; i < numMarkers; i++)
+		{
+			AIFFMarker marker;
+			if(!markerChunk.ReadConvertEndianness(marker))
+			{
+				break;
+			}
+			markers.push_back(marker);
+			markerChunk.Skip(marker.nameLength + ((marker.nameLength % 2) == 0 ? 1 : 0));
+		}
+
+		if(instrHeader.sustainLoop.playMode != AIFFInstrumentLoop::noLoop)
+		{
+			mptSample.uFlags |= CHN_SUSTAINLOOP | (instrHeader.sustainLoop.playMode == AIFFInstrumentLoop::loopBidi ? CHN_PINGPONGSUSTAIN : 0);
+		}
+
+		if(instrHeader.releaseLoop.playMode != AIFFInstrumentLoop::noLoop)
+		{
+			mptSample.uFlags |= CHN_LOOP | (instrHeader.releaseLoop.playMode == AIFFInstrumentLoop::loopBidi ? CHN_PINGPONGLOOP : 0);
+		}
+
+		// Read markers
+		for(vector<AIFFMarker>::iterator iter = markers.begin(); iter != markers.end(); iter++)
+		{
+			if(iter->id == instrHeader.sustainLoop.beginLoop)
+			{
+				mptSample.nSustainStart = iter->position;
+			}
+			if(iter->id == instrHeader.sustainLoop.endLoop)
+			{
+				mptSample.nSustainEnd = iter->position;
+			}
+			if(iter->id == instrHeader.releaseLoop.beginLoop)
+			{
+				mptSample.nLoopStart = iter->position;
+			}
+			if(iter->id == instrHeader.releaseLoop.endLoop)
+			{
+				mptSample.nLoopEnd = iter->position;
+			}
+		}
+		// Sanitize loops
+		LimitMax(mptSample.nSustainEnd, mptSample.nLength);
+		LimitMax(mptSample.nLoopEnd, mptSample.nLength);
+		if(mptSample.nSustainStart >= mptSample.nSustainEnd)
+		{
+			mptSample.nSustainStart = mptSample.nSustainEnd = 0;
+			mptSample.uFlags &= ~CHN_SUSTAINLOOP;
+		}
+		if(mptSample.nLoopStart >= mptSample.nLoopEnd)
+		{
+			mptSample.nLoopStart = mptSample.nLoopEnd = 0;
+			mptSample.uFlags &= ~CHN_LOOP;
+		}
+	}
+
+	// Extract sample name
+	FileReader nameChunk(chunks.GetChunk(AIFFChunk::idNAME));
+	if(nameChunk.IsValid())
+	{
+		nameChunk.ReadString<StringFixer::spacePadded>(m_szNames[nSample], nameChunk.GetLength());
+	} else
+	{
+		strcpy(m_szNames[nSample], "");
+	}
+
+	mptSample.Convert(MOD_TYPE_IT, GetType());
 	return true;
 }
 
@@ -1821,7 +2064,7 @@ typedef struct IFFVHDR
 			repeatHiSamples,		/* # samples in the high octave repeat part */
 			samplesPerHiCycle;		/* # samples/cycle in high octave, else 0 */
 	WORD samplesPerSec;				/* data sampling rate */
-    BYTE	ctOctave,				/* # octaves of waveforms */
+	BYTE	ctOctave,				/* # octaves of waveforms */
 			sCompression;			/* data compression technique used */
 	DWORD Volume;
 } IFFVHDR;

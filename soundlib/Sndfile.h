@@ -626,7 +626,7 @@ public:
 	bool ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
 	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadAIFFSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader file);
 	bool ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	UINT ReadITSSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
 	bool Read8SVXSample(UINT nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
