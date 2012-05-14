@@ -118,8 +118,10 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 			std::fill(iter, end(), GetInvalidPatIndex());
 			if(GetLengthTailTrimmed() > specs.ordersMax)
 			{
+#ifdef MODPLUG_TRACKER
 				if (m_pSndFile->GetpModDoc())
 					m_pSndFile->GetpModDoc()->AddToLog("WARNING: Order list has been trimmed!\n");
+#endif // MODPLUG_TRACKER
 			}
 		}
 		resize(specs.ordersMax);
@@ -532,9 +534,11 @@ bool ModSequenceSet::MergeSequences()
 		const ORDERINDEX nFirstOrder = GetLengthTailTrimmed() + 1; // +1 for separator item
 		if(nFirstOrder + GetSequence(1).GetLengthTailTrimmed() > m_pSndFile->GetModSpecifications().ordersMax)
 		{
+#ifdef MODPLUG_TRACKER
 			wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)\n", removedSequences);
 			if (m_pSndFile->GetpModDoc())
 				m_pSndFile->GetpModDoc()->AddToLog(s);
+#endif // MODPLUG_TRACKER
 			RemoveSequence(1);
 			continue;
 		}
@@ -569,9 +573,11 @@ bool ModSequenceSet::MergeSequences()
 						} else
 						{
 							// cannot create new pattern: notify the user
+#ifdef MODPLUG_TRACKER
 							wsprintf(s, "CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat);
 							if (m_pSndFile->GetpModDoc())
 								m_pSndFile->GetpModDoc()->AddToLog(s);
+#endif // MODPLUG_TRACKER
 						}
 					}
 					m->param  = static_cast<BYTE>(m->param + nFirstOrder);

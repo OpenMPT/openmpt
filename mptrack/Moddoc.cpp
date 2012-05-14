@@ -733,7 +733,7 @@ BOOL CModDoc::InitializeMod()
 
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
 
-		InitializeSample(m_SndFile.GetSample(1));
+		m_SndFile.GetSample(1).Initialize(m_SndFile.GetType());
 
 		if ((!m_SndFile.m_nInstruments) && (m_SndFile.GetType() & MOD_TYPE_XM))
 		{

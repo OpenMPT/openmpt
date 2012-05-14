@@ -174,6 +174,7 @@ struct S3MFileHeader
 		trkImpulseTracker	= 0x3000,
 		trkSchismTracker	= 0x4000,
 		trkOpenMPT			= 0x5000,
+		trkBeRoTracker		= 0x6000,	// Note: BeRoTracker also used version 0x4100 since 2004.
 
 		trkST3_20			= 0x1320,
 		trkIT2_14			= 0x3214,
@@ -288,6 +289,7 @@ struct S3MSampleHeader
 	// Convert an S3M sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
+		mptSmp.Initialize(MOD_TYPE_S3M);
 		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, filename);
 
 		if((sampleType == typePCM || sampleType == typeNone) && magic == idSCRS)
@@ -299,11 +301,6 @@ struct S3MSampleHeader
 				mptSmp.nLoopStart = min(loopStart, mptSmp.nLength - 1);
 				mptSmp.nLoopEnd = min(loopEnd, mptSmp.nLength);
 				mptSmp.uFlags = (flags & smpLoop) ? CHN_LOOP : 0;
-			} else
-			{
-				mptSmp.nLength = 0;
-				mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
-				mptSmp.uFlags = 0;
 			}
 
 			if(mptSmp.nLoopEnd < 2 || mptSmp.nLoopStart >= mptSmp.nLoopEnd || mptSmp.nLoopEnd - mptSmp.nLoopStart < 1)
@@ -314,8 +311,6 @@ struct S3MSampleHeader
 
 			// Volume / Panning
 			mptSmp.nVolume = min(defaultVolume, 64) * 4;
-			mptSmp.nGlobalVol = 64;
-			mptSmp.nPan = 128;
 
 			// C-5 frequency
 			mptSmp.nC5Speed = c5speed;
@@ -443,7 +438,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
 	{
-		// 2xyy - Imago Orpheus, 3xyy - IT, 4xyy - Schism, 5xyy - OpenMPT
+		// 2xyy - Imago Orpheus, 3xyy - IT, 4xyy - Schism, 5xyy - OpenMPT, 6xyy - BeRoTracker
 		if((fileHeader.cwtv & S3MFileHeader::trackerMask) != S3MFileHeader::trkImpulseTracker || fileHeader.cwtv >= S3MFileHeader::trkIT2_14)
 		{
 			// Keep MIDI macros if this is not an old IT version (BABYLON.S3M by Necros has Zxx commands and was saved with IT 2.05)

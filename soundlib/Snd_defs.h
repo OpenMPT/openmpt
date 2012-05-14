@@ -46,11 +46,11 @@ typedef uintptr_t SmpLength;
 
 
 
-#define MOD_AMIGAC2			0x1AB		// Period of Amiga middle-c
-#define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB).
-                                        // Note: Sample size in bytes can be more than 256 MB.
-										// The meaning of this constant is handled differently in various places; sometimes it's samples, sometimes it's bytes...
-#define MAX_SAMPLE_RATE		192000		// Max playback / render rate in Hz
+#define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
+const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// 0x04000000 (64MB -> now 256MB).
+													// Note: Sample size in bytes can be more than 256 MB.
+													// The meaning of this constant is handled differently in various places; sometimes it's samples, sometimes it's bytes...
+#define MAX_SAMPLE_RATE		192000					// Max playback / render rate in Hz
 
 const ROWINDEX MAX_PATTERN_ROWS			= 1024;	// -> CODE#0008 -> DESC="#define to set pattern size" -! BEHAVIOUR_CHANGE#0008
 const ORDERINDEX MAX_ORDERS				= 256;
@@ -352,7 +352,7 @@ enum SongFlags
 // Misc Flags (can safely be turned on or off)
 #define SNDMIX_DIRECTTODISK		0x10000		// WAV writer mode
 #define SNDMIX_ENABLEMMX		0x20000		// use MMX-accelerated code
-#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
+//#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
 

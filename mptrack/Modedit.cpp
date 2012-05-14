@@ -448,7 +448,7 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 	}
 	if (!m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
 	if (i > m_SndFile.GetNumSamples()) m_SndFile.m_nSamples = i;
-	InitializeSample(m_SndFile.GetSample(i));
+	m_SndFile.GetSample(i).Initialize(m_SndFile.GetType());
 	SetModified();
 	return i;
 }
@@ -551,27 +551,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	SetModified();
 
 	return newins;
-}
-
-
-void CModDoc::InitializeSample(ModSample &sample)
-//-----------------------------------------------
-{
-	sample.nVolume = 256;
-	sample.nGlobalVol = 64;
-	sample.nPan = 128;
-	sample.nC5Speed = 8363;
-	sample.RelativeTone = 0;
-	sample.nFineTune = 0;
-	sample.nVibType = VIB_SINE;
-	sample.nVibSweep = 0;
-	sample.nVibDepth = 0;
-	sample.nVibRate = 0;
-	sample.uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP|CHN_LOOP);
-	if(m_SndFile.GetType() == MOD_TYPE_XM)
-	{
-		sample.uFlags |= CHN_PANNING;
-	}
 }
 
 
