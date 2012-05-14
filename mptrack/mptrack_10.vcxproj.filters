@@ -816,6 +816,9 @@
     <ClInclude Include="..\soundlib\MIDIEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\ChunkReader.h">
+      <Filter>Module Loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
