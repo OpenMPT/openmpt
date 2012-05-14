@@ -2394,17 +2394,6 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			break;
 
-		// Midi Controller
-		case CMD_MIDI:			// MIDI Controller (on first tick only)
-		case CMD_SMOOTHMIDI:	// MIDI Controller (smooth, i.e. on every tick)
-			
-			/*if((cmd == CMD_MIDI) && !(m_dwSongFlags & SONG_FIRSTTICK)) break;
-			if (param < 0x80)
-				ProcessMIDIMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], param);
-			else
-				ProcessMIDIMacro(nChn, (cmd == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(param & 0x7F)], 0);*/
-			break;
-
 		// IMF Commands
 		case CMD_NOTESLIDEUP:
 			NoteSlide(pChn, param, true);
@@ -2612,7 +2601,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param)
 void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 //-------------------------------------------------------------
 {
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 	{
 		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
@@ -2622,7 +2611,12 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 		{
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
+				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = _muldivr(pChn->nPeriod, LinearSlideDownTable[param & 0x0F], 65536);
+				if(oldPeriod == pChn->nPeriod)
+				{
+					pChn->nPeriod--;
+				}
 			} else
 			{
 				pChn->nPeriod -= (int)(param * 4);
@@ -2636,7 +2630,7 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 //---------------------------------------------------------------
 {
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 	{
 		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
@@ -2646,7 +2640,12 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 		{
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
+				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = _muldivr(pChn->nPeriod, LinearSlideUpTable[param & 0x0F], 65536);
+				if(oldPeriod == pChn->nPeriod)
+				{
+					pChn->nPeriod++;
+				}
 			} else
 			{
 				pChn->nPeriod += (int)(param * 4);
@@ -2660,7 +2659,7 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 //------------------------------------------------------------------
 {
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 	{
 		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
@@ -2670,7 +2669,12 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 		{
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
+				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = _muldivr(pChn->nPeriod, FineLinearSlideDownTable[param & 0x0F], 65536);
+				if(oldPeriod == pChn->nPeriod)
+				{
+					pChn->nPeriod--;
+				}
 			} else
 			{
 				pChn->nPeriod -= (int)(param);
@@ -2684,7 +2688,7 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 //--------------------------------------------------------------------
 {
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 	{
 		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
@@ -2694,7 +2698,12 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 		{
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 			{
+				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = _muldivr(pChn->nPeriod, FineLinearSlideUpTable[param & 0x0F], 65536);
+				if(oldPeriod == pChn->nPeriod)
+				{
+					pChn->nPeriod++;
+				}
 			} else
 			{
 				pChn->nPeriod += (int)(param);
@@ -3139,8 +3148,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 		{
 			pChn->nEFxSpeed = param;
 			if(m_dwSongFlags & SONG_FIRSTTICK) InvertLoop(pChn);
-		}	
-		else // XM: Set Active Midi Macro
+		} else // XM: Set Active Midi Macro
 		{
 			pChn->nActiveMacro = param;
 		}
@@ -3306,7 +3314,12 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
 	// SFx: S3M: Not used, IT: Set Active Midi Macro
-	case 0xF0:	pChn->nActiveMacro = param; break;
+	case 0xF0:
+		if(GetType() != MOD_TYPE_S3M)
+		{
+			pChn->nActiveMacro = param; 
+		}
+		break;
 	}
 }
 
