@@ -1240,7 +1240,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 //--------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &Chn[nChn];
-	ModInstrument* pHeader = 0;
+	ModInstrument *pIns = nullptr;
 	LPSTR pSample;
 	if(!ModCommand::IsNote(note))
 	{
@@ -1269,20 +1269,20 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 		pChn->nLeftVol = pChn->nRightVol = 0;
 		return;
 	}
-	if (instr >= MAX_INSTRUMENTS) instr = 0;
+	if(instr >= MAX_INSTRUMENTS) instr = 0;
 	pSample = pChn->pSample;
-	pHeader = pChn->pModInstrument;
-	if ((instr) && (note))
+	pIns = pChn->pModInstrument;
+	if(instr && note)
 	{
-		pHeader = Instruments[instr];
-		if (pHeader)
+		pIns = Instruments[instr];
+		if (pIns)
 		{
 			UINT n = 0;
-			if (note <= 0x80)
+			if (note <= NOTE_MAX)
 			{
-				n = pHeader->Keyboard[note-1];
-				note = pHeader->NoteMap[note-1];
-				if ((n) && (n < MAX_SAMPLES)) pSample = Samples[n].pSample;
+				n = pIns->Keyboard[note - 1];
+				note = pIns->NoteMap[note - 1];
+				if(n > 0  && n < MAX_SAMPLES) pSample = Samples[n].pSample;
 			}
 		} else pSample = nullptr;
 	}
@@ -1291,11 +1291,12 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 	if (pChn->dwFlags & CHN_MUTE) return;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
-	for (CHANNELINDEX i=nChn; i<MAX_CHANNELS; p++, i++)
-	if ((i >= m_nChannels) || (p == pChn))
+
+	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; p++, i++)
+	if(i >= m_nChannels || p == pChn)
 	{
 		applyDNAtoPlug = false; //rewbs.VSTiNNA
-		if (((p->nMasterChn == nChn+1) || (p == pChn)) && (p->pModInstrument))
+		if((p->nMasterChn == nChn + 1 || p == pChn) && p->pModInstrument != nullptr)
 		{
 			bool bOk = false;
 			// Duplicate Check Type
@@ -1303,22 +1304,22 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 			{
 			// Note
 			case DCT_NOTE:
-				if ((note) && (p->nNote == note) && (pHeader == p->pModInstrument)) bOk = true;
-				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
+				if(note && p->nNote == note && pIns == p->pModInstrument) bOk = true;
+				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
 				break;
 			// Sample
 			case DCT_SAMPLE:
-				if ((pSample) && (pSample == p->pSample)) bOk = true;
+				if(pSample != nullptr && pSample == p->pSample) bOk = true;
 				break;
 			// Instrument
 			case DCT_INSTRUMENT:
-				if (pHeader == p->pModInstrument) bOk = true;
+				if(pIns == p->pModInstrument) bOk = true;
 				//rewbs.VSTiNNA
-				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true;
+				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Plugin
 			case DCT_PLUGIN:
-				if (pHeader && (pHeader->nMixPlug) && (pHeader->nMixPlug == p->pModInstrument->nMixPlug))
+				if(pIns && (pIns->nMixPlug) && (pIns->nMixPlug == p->pModInstrument->nMixPlug))
 				{
 					applyDNAtoPlug = true;
 					bOk = true;
@@ -1339,8 +1340,8 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 					case DNA_NOTEOFF:
 					case DNA_NOTEFADE:	
 						//switch off duplicated note played on this plugin 
-						IMixPlugin *pPlugin =  m_MixPlugins[pHeader->nMixPlug-1].pMixPlugin;
-						if (pPlugin && p->nNote)
+						IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug-1].pMixPlugin;
+						if(pPlugin && p->nNote != NOTE_NONE)
 							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_KEYOFF, 0, i);
 						break;
 					}
@@ -1363,7 +1364,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 					p->dwFlags |= CHN_NOTEFADE;
 					break;
 				}
-				if (!p->nVolume)
+				if(!p->nVolume)
 				{
 					p->nFadeOutVol = 0;
 					p->dwFlags |= (CHN_NOTEFADE|CHN_FASTVOLRAMP);
@@ -1376,19 +1377,14 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 	// Do we need to apply New/Duplicate Note Action to a VSTi?
 	bool applyNNAtoPlug = false;
 	IMixPlugin *pPlugin = NULL;
-	if (pChn->pModInstrument && pChn->pModInstrument->HasValidMIDIChannel() && pChn->nNote > 0 && pChn->nNote < 128) // instro sends to a midi chan
+	if (pChn->pModInstrument && pChn->pModInstrument->HasValidMIDIChannel() && ModCommand::IsNote(pChn->nNote)) // instro sends to a midi chan
 	{
 		PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
-		/*
-		UINT nPlugin = 0;
-		nPlugin = pChn->pModInstrument->nMixPlug;  		   // first try intrument VST
-		if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))  // Then try Channel VST
-			nPlugin = ChnSettings[nChn].nMixPlugin;			
-		*/
-		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+
+		if(nPlugin > 0 && nPlugin <= MAX_MIXPLUGINS)
 		{ 
 			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
-			if (pPlugin) 
+			if(pPlugin) 
 			{
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
@@ -1406,10 +1402,10 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 
 	// New Note Action
 	//if ((pChn->nVolume) && (pChn->nLength))
-	if (((pChn->nVolume) && (pChn->nLength)) || applyNNAtoPlug) //rewbs.VSTiNNA
+	if((pChn->nVolume != 0 && pChn->nLength != 0) || applyNNAtoPlug) //rewbs.VSTiNNA
 	{
 		CHANNELINDEX n = GetNNAChannel(nChn);
-		if (n)
+		if(n != 0)
 		{
 			ModChannel *p = &Chn[n];
 			// Copy Channel
@@ -1423,7 +1419,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 			p->nMasterChn = nChn + 1;
 			p->nCommand = 0;
 			//rewbs.VSTiNNA	
-			if (applyNNAtoPlug && pPlugin)
+			if(applyNNAtoPlug && pPlugin)
 			{
 				//Move note to the NNA channel (odd, but makes sense with DNA stuff).
 				//Actually a bad idea since it then become very hard to kill some notes.
@@ -1452,7 +1448,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 				p->dwFlags |= CHN_NOTEFADE;
 				break;
 			}
-			if (!p->nVolume)
+			if(!p->nVolume)
 			{
 				p->nFadeOutVol = 0;
 				p->dwFlags |= (CHN_NOTEFADE|CHN_FASTVOLRAMP);
@@ -3846,11 +3842,11 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 	//IT compatibility 15. Retrigger
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
-		if ((m_dwSongFlags & SONG_FIRSTTICK) && pChn->rowCommand.note)
+		if(m_nTickCount == 0 && pChn->rowCommand.note)
 		{
 			pChn->nRetrigCount = param & 0xf;
 		}
-		else if (!pChn->nRetrigCount || !--pChn->nRetrigCount)
+		else if(!pChn->nRetrigCount || !--pChn->nRetrigCount)
 		{
 			pChn->nRetrigCount = param & 0xf;
 			bDoRetrig = true;
