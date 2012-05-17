@@ -517,6 +517,10 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 					continue;
 				}
 
+				if(m_nSamples < info->sampleIndex)
+				{
+					m_nSamples = info->sampleIndex;
+				}
 				ModSample &sample = Samples[info->sampleIndex];
 
 				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[info->sampleIndex], info->name);
@@ -539,7 +543,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 						}
 					}
 					sample.nGlobalVol = 64;
-					sample.nVolume = 256;
+					//sample.nVolume = 256;
 
 					if((sampleHeader->flags & 0x01))
 					{
