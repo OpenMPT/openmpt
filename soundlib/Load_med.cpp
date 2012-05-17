@@ -300,7 +300,7 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 					} else command = 0;
 				}
 				break;
-	case 0x09:	command = (param < 0x20) ? CMD_SPEED : CMD_TEMPO; break;
+	case 0x09:	command = (param <= 0x20) ? CMD_SPEED : CMD_TEMPO; break;
 	case 0x0D:	if (param & 0xF0) param &= 0xF0; command = CMD_VOLUMESLIDE; if (!param) command = 0; break;
 	case 0x0F:	// Set Tempo / Special
 		// F.00 = Pattern Break
@@ -619,7 +619,9 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		pSmp->nVolume = (pmsh->sample[iSHdr].svol << 2);
 		pSmp->nGlobalVol = 64;
 		if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-		pSmp->RelativeTone = -12 * pmsh->sample[iSHdr].strans;
+		// Was: pSmp->RelativeTone = -12 * pmsh->sample[iSHdr].strans;
+		// But that breaks MMD1 modules (f.e. "94' summer.mmd1" from Modland)
+		pSmp->RelativeTone = pmsh->sample[iSHdr].strans;
 		pSmp->nPan = 128;
 		if (pSmp->nLoopEnd <= 2) pSmp->nLoopEnd = 0;
 		if (pSmp->nLoopEnd) pSmp->uFlags |= CHN_LOOP;
@@ -647,6 +649,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		DWORD sectiontable = BigEndian(pmsh2->sectiontable);
 		if ((!nSections) || (!sectiontable) || (sectiontable >= dwMemLength-2)) nSections = 1;
 		nOrders = 0;
+		Order.resize(0);
 		for (UINT iSection=0; iSection<nSections; iSection++)
 		{
 			UINT nplayseq = 0;
@@ -671,7 +674,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 				UINT n = BigEndianW(pmps->length);
 				if (pseq+n <= dwMemLength)
 				{
-					Order.resize(nOrders++);
+					Order.resize(nOrders + n);
 					for (UINT i=0; i<n; i++)
 					{
 						WORD seqval = BigEndianW(pmps->seq[i]);
@@ -684,7 +687,6 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		}
 		playtransp = pmsh2->playtransp;
-		while (nOrders < MAX_ORDERS) Order[nOrders++] = Order.GetInvalidPatIndex();
 	}
 	// Reading Expansion structure
 	if (pmex)
