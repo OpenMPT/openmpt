@@ -3391,7 +3391,8 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			m_pEffectVis->SetPlayCursor(nPat, nRow);
 		}
 
-		if ((m_dwStatus & (psFollowSong|psDragVScroll|psDragHScroll|psMouseDragSelect|psRowSelection)) == psFollowSong)
+		// Don't follow song if user drags selections or scrollbars.
+		if((m_dwStatus & (psFollowSong | psDragActive)) == psFollowSong)
 		{
 			if (nPat < pSndFile->Patterns.Size())
 			{

@@ -124,6 +124,9 @@ protected:
 		psShowPluginNames		= 0x2000,	// Show plugin names in channel headers
 		psRowSelection			= 0x4000,	// Selecting a whole pattern row by clicking the row numbers
 		psChannelSelection		= 0x8000,	// Double-clicked pattern to select a whole channel
+
+		// All possible drag flags, to test if user is dragging a selection or a scrollbar
+		psDragActive			= psDragVScroll | psDragHScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
 	};
 
 	CFastBitmap m_Dib;
