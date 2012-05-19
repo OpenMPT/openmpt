@@ -616,7 +616,8 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	const PATTERNINDEX readPatterns = min(fileHeader.patNum, MAX_PATTERNS);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{
-		if(!file.Seek(patternOffsets[pat] * 16) || Patterns.Insert(pat, 64))
+		// A zero parapointer indicates an empty pattern.
+		if(Patterns.Insert(pat, 64) || patternOffsets[pat] == 0 || !file.Seek(patternOffsets[pat] * 16))
 		{
 			continue;
 		}
@@ -887,6 +888,12 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	// Write patterns
 	for(PATTERNINDEX pat = 0; pat < writePatterns; pat++)
 	{
+		if(Patterns.IsPatternEmpty(pat))
+		{
+			patternOffsets[pat] = 0;
+			continue;
+		}
+
 		ASSERT((ftell(f) % 16) == 0);
 		patternOffsets[pat] = static_cast<uint16>(ftell(f) / 16);
 		SwapBytesLE(patternOffsets[pat]);
