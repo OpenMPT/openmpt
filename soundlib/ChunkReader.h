@@ -34,6 +34,12 @@ public:
 
 	public:
 		ChunkListItem(const T &header, const FileReader &data) : chunkHeader(header), chunkData(data) { }
+		// VC2008 needs operator=, VC2010 doesn't...
+		ChunkListItem<T>& operator= (const ChunkListItem<T> &other)
+		{ 
+			return MemCopy(*this, other);
+		}
+
 		const T &GetHeader() const { return chunkHeader; }
 		FileReader &GetData() { return chunkData; }
 
