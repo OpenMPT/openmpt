@@ -85,7 +85,7 @@ bool COrderList::IsOrderInMargins(int order, int startOrder)
 {
 	const BYTE nMargins = GetMargins();
 	return ((startOrder != 0 && order - startOrder < nMargins) || 
-		    order - startOrder >= GetLength() - nMargins);
+		order - startOrder >= GetLength() - nMargins);
 }
 
 
@@ -164,12 +164,12 @@ BOOL COrderList::UpdateScrollInfo()
 		UINT nPage;
 
 		int nMax = 0;
-		if(pSndFile->GetType() == MOD_TYPE_MOD)
-		{   // With MOD, cut shown sequence to first '---' item...
+		if(pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
+		{   // With MOD / XM, cut shown sequence to first '---' item...
 			nMax = pSndFile->Order.GetLengthFirstEmpty();
 		}
 		else
-		{   // ...for S3M/IT/MPT/XM, show sequence until the last used item.
+		{   // ...for S3M/IT/MPT, show sequence until the last used item.
 			nMax = pSndFile->Order.GetLengthTailTrimmed();
 		}
 
@@ -775,6 +775,7 @@ void COrderList::OnPaint()
 		m_cxFont = sz.cx;
 		m_cyFont = sz.cy;
 	}
+
 	if ((m_cxFont > 0) && (m_cyFont > 0) && (m_pModDoc))
 	{
 		CRect rcClient, rect;
@@ -788,6 +789,13 @@ void COrderList::OnPaint()
 		ORDERINDEX nIndex = m_nXScroll;
 		ORD_SELECTION selection = GetCurSel(false);
 
+		ORDERINDEX maxEntries = pSndFile->GetModSpecifications().ordersMax;
+		if(pSndFile->Order.GetLength() > maxEntries)
+		{
+			// Only computed if potentially needed.
+			maxEntries = Util::Max(maxEntries, pSndFile->Order.GetLengthTailTrimmed());
+		}
+
 		//Scrolling the shown orders(the showns rectangles)?
 		while (rect.left < rcClient.right)
 		{
@@ -800,8 +808,7 @@ void COrderList::OnPaint()
 			} else {
 				FillRect(dc.m_hDC, &rect, CMainFrame::brushWindow);
 			}
-			
-			
+
 			//Drawing the shown pattern-indicator or drag position.
 			if (nIndex == ((m_bDragging) ? m_nDropPos : m_nScrollPos))
 			{
@@ -811,23 +818,23 @@ void COrderList::OnPaint()
 			}
 			MoveToEx(dc.m_hDC, rect.right, rect.top, NULL);
 			LineTo(dc.m_hDC, rect.right, rect.bottom);
+
 			//Drawing the 'ctrl-transition' indicator
-			if (nIndex == pSndFile->m_nSeqOverride-1)
+			if(nIndex == pSndFile->m_nSeqOverride - 1)
 			{
 				MoveToEx(dc.m_hDC, rect.left+4, rect.bottom-4, NULL);
 				LineTo(dc.m_hDC, rect.right-4, rect.bottom-4);
 			}
 
-			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
 			//Drawing 'playing'-indicator.
-			if(nIndex == pSndFile->GetCurrentOrder() && pMainFrm->IsPlaying() )
+			if(nIndex == pSndFile->GetCurrentOrder() && CMainFrame::GetMainFrame()->IsPlaying())
 			{
 				MoveToEx(dc.m_hDC, rect.left+4, rect.top+2, NULL);
 				LineTo(dc.m_hDC, rect.right-4, rect.top+2);
 			}
-			s[0] = 0;
-			if ((nIndex < pSndFile->Order.GetLength()) && (rect.left + m_cxFont - 4 <= rcClient.right))
+
+			s[0] = '\0';
+			if(nIndex < maxEntries && (rect.left + m_cxFont - 4) <= rcClient.right)
 			{
 				if (nPat == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---");
 				else if (nPat == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
