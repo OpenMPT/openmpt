@@ -84,7 +84,7 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 	case CMD_FINEVIBRATO:		command = 'U'; break;
 	case CMD_GLOBALVOLUME:		command = 'V'; break;
 	case CMD_GLOBALVOLSLIDE:	command = 'W'; break;
-	case CMD_PANNING8:			
+	case CMD_PANNING8:
 		command = 'X';
 		if(toIT && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
@@ -125,7 +125,7 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		}
 		return;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
-	case CMD_DELAYCUT: 
+	case CMD_DELAYCUT:
 		if(compatibilityExport || !toIT)
 			command = 0;
 		else
@@ -297,7 +297,7 @@ struct S3MSampleHeader
 			// Sample Length and Loops
 			if(sampleType == typePCM)
 			{
-				mptSmp.nLength = min(length, MAX_SAMPLE_LENGTH);
+				mptSmp.nLength = length;
 				mptSmp.nLoopStart = min(loopStart, mptSmp.nLength - 1);
 				mptSmp.nLoopEnd = min(loopEnd, mptSmp.nLength);
 				mptSmp.uFlags = (flags & smpLoop) ? CHN_LOOP : 0;
@@ -366,6 +366,23 @@ struct S3MSampleHeader
 		return smpLength;
 	}
 
+	// Retrieve the internal sample format flags for this sample.
+	SampleIO GetSampleFormat(bool signedSamples) const
+	{
+		SampleIO format(
+			(flags & S3MSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			(flags & S3MSampleHeader::smpStereo) ?  SampleIO::stereoSplit : SampleIO::mono,
+			SampleIO::littleEndian,
+			signedSamples ? SampleIO::signedPCM : SampleIO::unsignedPCM);
+
+		// MODPlugin :(
+		if(!(flags & S3MSampleHeader::smp16Bit) && pack == S3MSampleHeader::pADPCM)
+		{
+			format |= SampleIO::ADPCM;
+		}
+
+		return format;
+	}
 };
 
 
@@ -421,7 +438,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	{
 		return false;
 	}
-	
+
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
@@ -484,7 +501,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 
 	// Global Volume
 	m_nDefaultGlobalVolume = min(fileHeader.globalVol, 64) * 4;
-	// The following check is probably not very reliable, but it fixes a few tunes, f.e.
+	// The following check is probably not very reliable, but it fixes a few tunes, e.g.
 	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
 	if(m_nDefaultGlobalVolume == 0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
 	{
@@ -577,21 +594,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 
 		if(sampleHeader.length != 0 && file.Seek(sampleOffset))
 		{
-			UINT flags = (fileHeader.formatVersion == S3MFileHeader::oldVersion) ? RS_PCM8S : RS_PCM8U;
-			if(sampleHeader.flags & S3MSampleHeader::smp16Bit)
-			{
-				flags += 5;
-			}
-			if(sampleHeader.flags & S3MSampleHeader::smpStereo)
-			{
-				flags |= RSF_STEREO;
-			}
-			if(sampleHeader.pack == S3MSampleHeader::pADPCM)
-			{
-				flags = RS_ADPCM4;	// MODPlugin :(
-			}
-
-			ReadSample(&Samples[smp + 1], flags, file);
+			sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
 		}
 	}
 
@@ -853,7 +856,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	size_t patternPointerOffset = ftell(f);
 	size_t firstPatternOffset = sampleHeaderOffset + writeSamples * sizeof(S3MSampleHeader);
 	vector<uint16> patternOffsets(writePatterns);
-	
+
 	// Need to calculate the real offsets later.
 	if(writePatterns != 0)
 	{
@@ -995,7 +998,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 						}
 					}
 				}
-				
+
 				buffer.push_back(s3mEndOfRow);
 			}
 		} else
@@ -1054,17 +1057,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 			sampleHeader[smp].dataPointer[2] = static_cast<uint8>((sampleDataOffset >> 12) & 0xFF);
 			sampleHeader[smp].dataPointer[0] = static_cast<uint8>((sampleDataOffset >> 20) & 0xFF);
 
-			UINT flags = RS_PCM8U;
-			if(Samples[realSmp].uFlags & CHN_16BIT)
-			{
-				flags = RS_PCM16U;
-			}
-			if(Samples[realSmp].uFlags & CHN_STEREO)
-			{
-				flags |= RSF_STEREO;
-			}
-
-			UINT writtenLength = WriteSample(f, &Samples[realSmp], flags, smpLength);
+			size_t writtenLength = sampleHeader[smp].GetSampleFormat(false).WriteSample(f, Samples[realSmp], smpLength);
 			sampleDataOffset += writtenLength;
 			if((writtenLength % 16) != 0)
 			{

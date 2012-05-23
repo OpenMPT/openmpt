@@ -435,7 +435,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX nSmp)
 	}
 
 	// Restore old sample header
-	MemCopy(sample, undo.OldSample);
+	sample = undo.OldSample;
 	sample.pSample = pCurrentSample; // select the "correct" old sample
 	MemCopy(pSndFile->m_szNames[nSmp], undo.szOldName);
 

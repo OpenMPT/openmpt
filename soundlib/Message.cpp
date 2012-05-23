@@ -4,7 +4,7 @@
  * Purpose: Various functions for processing song messages (allocating, reading from file...)
  * Notes  : Those functions should offer a rather high level of abstraction compared to
  *          previous ways of reading the song messages. There are still many things to do,
- *          though. Future versions of ReadMessage() could f.e. offer charset conversion
+ *          though. Future versions of ReadMessage() could e.g. offer charset conversion
  *          and the code is not yet ready for unicode.
  *          Some functions for preparing the message text to be written to a file would
  *          also be handy.
@@ -172,7 +172,7 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 				m_lpszSongComments[cpos + lpos] = ' ';
 				break;
 			}
-			
+
 		}
 	}
 	return true;

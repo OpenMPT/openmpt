@@ -2297,7 +2297,7 @@ void CViewPattern::OnEditFindNext()
 
 						if ((m_findReplace.dwReplaceFlags & (PATSEARCH_VOLCMD | PATSEARCH_VOLUME)) && m->volcmd != VOLCMD_NONE)
 						{
-							// Fix volume command parameters if necessary. This is necesary f.e.
+							// Fix volume command parameters if necessary. This is necesary e.g.
 							// When there was a command "v24" and the user searched for v and replaced it by d.
 							// In that case, d24 wouldn't be a valid command.
 							DWORD minVal = 0, maxVal = 64;

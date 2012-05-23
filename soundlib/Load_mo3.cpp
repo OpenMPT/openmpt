@@ -30,9 +30,6 @@ bool CSoundFile::ReadMO3(FileReader &file)
 //----------------------------------------
 {
 	file.Rewind();
-	const void *stream = file.GetRawData();
-	int length = file.GetLength();
-
 	// No valid MO3 file (magic bytes: "MO3")
 	if(file.GetLength() < 8 || !file.ReadMagic("MO3"))
 	{
@@ -79,13 +76,16 @@ bool CSoundFile::ReadMO3(FileReader &file)
 
 		if(UNMO3_Decode != nullptr && UNMO3_Free != nullptr)
 		{
+			const void *stream = file.GetRawData();
+			int length = file.GetLength();
+
 			if(UNMO3_Decode(&stream, &length) == 0)
 			{
 				// If decoding was successful, stream and length will keep the new pointers now.
-				
+
 				if(length > 0)
 				{
-					FileReader unpackedFile(static_cast<const char*>(stream), length);
+					FileReader unpackedFile(static_cast<const char *>(stream), length);
 
 					result = ReadXM(static_cast<const LPCBYTE>(stream), length)
 						|| ReadIT(static_cast<const LPCBYTE>(stream), length)
@@ -93,7 +93,7 @@ bool CSoundFile::ReadMO3(FileReader &file)
 						|| ReadMTM(static_cast<const LPCBYTE>(stream), length)
 						|| ReadMod(unpackedFile);
 				}
-				
+
 				UNMO3_Free(stream);
 			}
 		}

@@ -339,7 +339,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nsmp], pis.name);
 
 			// Read sample data
-			ReadSample(&Samples[nsmp], pis.GetSampleFormat(), (LPSTR)(lpStream + dwMemPos), len);
+			pis.GetSampleFormat().ReadSample(Samples[nsmp], (LPSTR)(lpStream + dwMemPos), len);
 			dwMemPos += len;
 		}
 	}
@@ -360,7 +360,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 		ReadInstrumentFromFile(i+1, lpFile, len);
 		f.Unlock();
-		f.Close();	
+		f.Close();
 	}
 
 	// Extra info data
@@ -389,7 +389,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 			switch( fcode )
 			{
-			case 'MPTS': goto mpts; //:)		// reached end of instrument headers 
+			case 'MPTS': goto mpts; //:)		// reached end of instrument headers
 			case 'SEP@': case 'MPTX':
 				ptr += sizeof(__int32);			// jump code
 				i++;							// switch to next instrument
@@ -629,10 +629,9 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			itss.samplepointer = 0;
 			fwrite(&itss, 1, sizeof(itss), f);
 
-			UINT flags = itss.GetSampleFormat();
-			id = WriteSample(nullptr, &Samples[nsmp], flags);
+			id = Samples[nsmp].GetSampleSizeInBytes();
 			fwrite(&id, 1, sizeof(id), f);
-			WriteSample(f, &Samples[nsmp], flags);
+			itss.GetSampleFormat().WriteSample(f, Samples[nsmp]);
 		}
 	}
 
@@ -662,4 +661,3 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 }
 
 #endif
-

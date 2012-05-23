@@ -11,7 +11,7 @@
 #pragma once
 
 #include "Snd_defs.h"
-#include "modcommand.h"						// 
+#include "modcommand.h"						//
 #include "../mptrack/SoundFilePlayConfig.h" // mixlevel constants.
 
 
@@ -19,7 +19,7 @@
 struct CModSpecifications
 //=======================
 {
-	/// Returns modtype corresponding to given file extension. The extension string 
+	/// Returns modtype corresponding to given file extension. The extension string
 	/// may begin with or without dot, e.g. both ".it" and "it" will be handled correctly.
 	static MODTYPE ExtensionToType(LPCTSTR pszExt);
 
@@ -96,7 +96,7 @@ const CModSpecifications mptm =
 	512,								// Max tempo
 	1,									// Min pattern rows
 	1024,								// Max pattern rows
-    25,									// Max mod name length
+	25,									// Max mod name length
 	25,									// Max sample name length
 	12,									// Max sample filename length
 	25,									// Max instrument name length
@@ -140,7 +140,7 @@ const CModSpecifications mod =
 	255,								// Max tempo
 	64,									// Min pattern rows
 	64,									// Max pattern rows
-    20,									// Max mod name length
+	20,									// Max mod name length
 	22,									// Max sample name length
 	0,									// Max sample filename length
 	0,									// Max instrument name length
@@ -182,7 +182,7 @@ const CModSpecifications xm =
 	255,								// Max tempo
 	1,									// Min pattern rows
 	256,								// Max pattern rows
-    20,									// Max mod name length
+	20,									// Max mod name length
 	22,									// Max sample name length
 	0,									// Max sample filename length
 	22,									// Max instrument name length
@@ -224,7 +224,7 @@ const CModSpecifications xmEx =
 	512,								// Max tempo
 	1,									// Min pattern rows
 	1024,								// Max pattern rows
-    20,									// Max mod name length
+	20,									// Max mod name length
 	22,									// Max sample name length
 	0,									// Max sample filename length
 	22,									// Max instrument name length
@@ -265,7 +265,7 @@ const CModSpecifications s3m =
 	255,								// Max tempo
 	64,									// Min pattern rows
 	64,									// Max pattern rows
-    27,									// Max mod name length
+	27,									// Max mod name length
 	27,									// Max sample name length
 	12,									// Max sample filename length
 	0,									// Max instrument name length
@@ -307,7 +307,7 @@ const CModSpecifications s3mEx =
 	255,								// Max tempo
 	64,									// Min pattern rows
 	64,									// Max pattern rows
-    27,									// Max mod name length
+	27,									// Max mod name length
 	27,									// Max sample name length
 	12,									// Max sample filename length
 	0,									// Max instrument name length
@@ -348,7 +348,7 @@ const CModSpecifications it =
 	255,								// Max tempo
 	1,									// Min pattern rows
 	200,								// Max pattern rows
-    25,									// Max mod name length
+	25,									// Max mod name length
 	25,									// Max sample name length
 	12,									// Max sample filename length
 	25,									// Max instrument name length
@@ -389,7 +389,7 @@ const CModSpecifications itEx =
 	512,								// Max tempo
 	1,									// Min pattern rows
 	1024,								// Max pattern rows
-    25,									// Max mod name length
+	25,									// Max mod name length
 	25,									// Max sample name length
 	12,									// Max sample filename length
 	25,									// Max instrument name length

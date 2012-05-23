@@ -66,7 +66,7 @@ bool CSoundFile::Read669(FileReader &file)
 //----------------------------------------
 {
 	_669FileHeader fileHeader;
-	
+
 	file.Rewind();
 	if(!file.ReadConvertEndianness(fileHeader))
 	{
@@ -105,7 +105,6 @@ bool CSoundFile::Read669(FileReader &file)
 		SmpLength len = sample.length;
 		SmpLength loopstart = sample.loopStart;
 		SmpLength loopend = sample.loopEnd;
-		if(len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
 		if((loopend > len) && (!loopstart)) loopend = 0;
 		if(loopend > len) loopend = len;
 		if(loopstart + 4 >= loopend) loopstart = loopend = 0;
@@ -215,9 +214,15 @@ bool CSoundFile::Read669(FileReader &file)
 	}
 
 	// Reading Samples
+	const SampleIO sampleIO(
+		SampleIO::_8bit,
+		SampleIO::mono,
+		SampleIO::littleEndian,
+		SampleIO::unsignedPCM);
+
 	for(SAMPLEINDEX n = 1; n <= m_nSamples; n++)
 	{
-		ReadSample(&Samples[n], RS_PCM8U, file);
+		sampleIO.ReadSample(Samples[n], file);
 	}
 	return true;
 }

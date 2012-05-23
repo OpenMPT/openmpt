@@ -169,7 +169,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 {
 	const AMFFILEHEADER *pfh = (AMFFILEHEADER *)lpStream;
 	DWORD dwMemPos;
-	
+
 	if ((!lpStream) || (dwMemLength < 2048)) return false;
 	if ((!strncmp((LPCSTR)lpStream, "ASYLUM Music Format V1.0", 25)) && (dwMemLength > 4096))
 	{
@@ -244,14 +244,21 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 			dwMemPos += 64*32;
 		}
+
 		// Read samples
+		const SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
+
 		for (UINT iData=0; iData<m_nSamples; iData++)
 		{
-			ModSample *psmp = &Samples[iData+1];
-			if (psmp->nLength)
+			ModSample &sample = Samples[iData + 1];
+			if(sample.nLength)
 			{
 				if(dwMemPos > dwMemLength) return false;
-				dwMemPos += ReadSample(psmp, RS_PCM8S, (LPCSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
+				dwMemPos += sampleIO.ReadSample(sample, (LPCSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 			}
 		}
 		return true;
@@ -350,7 +357,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if ((psh->type) && (LittleEndian(psh->offset) < dwMemLength-1))
 		{
 			sampleseekpos[iIns] = LittleEndian(psh->offset);
-			if (LittleEndian(psh->offset) > maxsampleseekpos) 
+			if (LittleEndian(psh->offset) > maxsampleseekpos)
 				maxsampleseekpos = LittleEndian(psh->offset);
 			if ((pSmp->nLoopEnd > pSmp->nLoopStart + 2)
 			 && (pSmp->nLoopEnd <= pSmp->nLength)) pSmp->uFlags |= CHN_LOOP;
@@ -402,17 +409,20 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Read Sample Data
+	const SampleIO sampleIO(
+		SampleIO::_8bit,
+		SampleIO::mono,
+		SampleIO::littleEndian,
+		SampleIO::unsignedPCM);
+
 	for (UINT iSeek=1; iSeek<=maxsampleseekpos; iSeek++)
 	{
 		if (dwMemPos >= dwMemLength) break;
 		for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (iSeek == sampleseekpos[iSmp])
 		{
-			ModSample *pSmp = &Samples[iSmp+1];
-			dwMemPos += ReadSample(pSmp, RS_PCM8U, (LPCSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+			dwMemPos += sampleIO.ReadSample(Samples[iSmp + 1], (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			break;
 		}
 	}
 	return true;
 }
-
-

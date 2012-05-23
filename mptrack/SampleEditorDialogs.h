@@ -144,7 +144,7 @@ class CSampleXFadeDlg: public CDialog
 //===================================
 {
 public:
-	UINT m_nSamples, m_nMaxSamples;
+	SmpLength m_nSamples, m_nMaxSamples;
 
 protected:
 	CEdit m_EditSamples;

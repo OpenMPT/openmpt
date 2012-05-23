@@ -16,7 +16,7 @@
 
 typedef struct tagMTMSAMPLE
 {
-    char   samplename[22];
+	char   samplename[22];
 	uint32 length;
 	uint32 reppos;
 	uint32 repend;
@@ -73,7 +73,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		Samples[i].nVolume = pms->volume << 2;
 		Samples[i].nGlobalVol = 64;
 		UINT len = pms->length;
-		if ((len > 2) && (len <= MAX_SAMPLE_LENGTH))
+		if(len > 2)
 		{
 			Samples[i].nLength = len;
 			Samples[i].nLoopStart = pms->reppos;
@@ -147,11 +147,15 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT ismp=1; ismp<=m_nSamples; ismp++)
 	{
 		if (dwMemPos >= dwMemLength) break;
-		dwMemPos += ReadSample(&Samples[ismp], (Samples[ismp].uFlags & CHN_16BIT) ? RS_PCM16U : RS_PCM8U,
-								(LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+
+		dwMemPos += SampleIO(
+			(Samples[ismp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::unsignedPCM)
+			.ReadSample(Samples[ismp], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 	}
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
 	return true;
 }
-

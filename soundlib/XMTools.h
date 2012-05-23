@@ -177,7 +177,7 @@ struct XMSample
 	// Convert an XMSample to OpenMPT's internal sample representation.
 	void ConvertToMPT(ModSample &mptSmp) const;
 	// Retrieve the internal sample format flags for this instrument.
-	UINT GetSampleFormat() const;
+	SampleIO GetSampleFormat() const;
 };
 
 STATIC_ASSERT(sizeof(XMSample) == 40);

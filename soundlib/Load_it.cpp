@@ -764,7 +764,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[nsmp + 1], pis->name);
 
-			lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + ReadSample(&Samples[nsmp + 1], pis->GetSampleFormat(itHeader.cwtv), (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset));
+			lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + pis->GetSampleFormat(itHeader.cwtv).ReadSample(Samples[nsmp + 1], (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset));
 		}
 	}
 	m_nSamples = max(1, m_nSamples);
@@ -1538,7 +1538,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		fseek(f, dwPos, SEEK_SET);
 		if ((Samples[nsmp].pSample) && (Samples[nsmp].nLength))
 		{
-			dwPos += WriteSample(f, &Samples[nsmp], itss.GetSampleFormat());
+			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[nsmp]);
 		}
 	}
 
@@ -1617,8 +1617,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 //////////////////////////////////////////////////////////////////////////////
 // IT 2.14 compression
 
-DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n)
-//-----------------------------------------------------------------
+DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, const uint8 *(&ibuf), CHAR n)
+//-------------------------------------------------------------------------
 {
 	DWORD retval = 0;
 	UINT i = n;
@@ -1643,11 +1643,12 @@ DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n)
 	return (retval >> (32-i));
 }
 
-void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215)
-//-------------------------------------------------------------------------------------------
+
+void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215)
+//--------------------------------------------------------------------------------------------------
 {
 	LPSTR pDst = pSample;
-	LPBYTE pSrc = lpMemFile;
+	const uint8 *pSrc = lpMemFile;
 	DWORD wHdr = 0;
 	DWORD wCount = 0;
 	DWORD bitbuf = 0;
@@ -1707,7 +1708,7 @@ void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLengt
 			wBits += bTemp;
 			bTemp = (BYTE)wBits;
 			bTemp2 += bTemp;
-			pDst[dwPos] = (b215) ? bTemp2 : bTemp;
+			pDst[dwPos] = (it215) ? bTemp2 : bTemp;
 
 		SkipByte:
 			dwPos++;
@@ -1722,11 +1723,11 @@ void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLengt
 }
 
 
-void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215)
-//--------------------------------------------------------------------------------------------
+void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215)
+//---------------------------------------------------------------------------------------------------
 {
 	signed short *pDst = (signed short *)pSample;
-	LPBYTE pSrc = lpMemFile;
+	const uint8 *pSrc = lpMemFile;
 	DWORD wHdr = 0;
 	DWORD wCount = 0;
 	DWORD bitbuf = 0;
@@ -1787,7 +1788,7 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 			dwBits += wTemp;
 			wTemp = (signed short)dwBits;
 			wTemp2 += wTemp;
-			pDst[dwPos] = (b215) ? wTemp2 : wTemp;
+			pDst[dwPos] = (it215) ? wTemp2 : wTemp;
 
 		SkipByte:
 			dwPos++;
@@ -2510,7 +2511,7 @@ size_t CSoundFile::LoadModularInstrumentData(const LPCBYTE lpStream, const DWORD
 			// move forward one byte and try to recognize again.
 			memPos++;
 			modularData++;
-			
+
 		}
 	}
 	//end rewbs.modularInstData

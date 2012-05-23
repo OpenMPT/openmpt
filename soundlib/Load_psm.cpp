@@ -139,6 +139,16 @@ struct PSMOldSampleHeader
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
 	}
+
+	// Retrieve the internal sample format flags for this sample.
+	static SampleIO GetSampleFormat()
+	{
+		return SampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::deltaPCM);
+	}
 };
 
 
@@ -186,6 +196,16 @@ struct PSMNewSampleHeader
 		mptSmp.uFlags = (flags & 0x80) ? CHN_LOOP : 0;
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
+	}
+
+	// Retrieve the internal sample format flags for this sample.
+	static SampleIO GetSampleFormat()
+	{
+		return SampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::deltaPCM);
 	}
 };
 #pragma pack(pop)
@@ -489,7 +509,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 										}
 									}
 									break;
-								
+
 								default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
 									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
 									return false;
@@ -535,7 +555,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 							}
 						}
 						break;
-					
+
 					case PSMChunk::idPATT: // PATT - Pattern list
 						// We don't really need this.
 						break;
@@ -573,9 +593,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
-
-					// Delta-encoded samples
-					ReadSample(&Samples[smp], RS_PCM8D, chunk);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
 				}
 			} else
 			{
@@ -593,9 +611,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
-
-					// Delta-encoded samples
-					ReadSample(&Samples[smp], RS_PCM8D, chunk);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
 				}
 			}
 
@@ -665,7 +681,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 			}
 
 			FileReader rowChunk = patternChunk.GetChunk(rowSize - 2);
-			
+
 			while(rowChunk.BytesLeft())
 			{
 				uint8 flags = rowChunk.ReadUint8();
@@ -750,7 +766,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 					case 0x0E: // portamento down
 						m.command = CMD_PORTAMENTODOWN;
 						m.param = ConvertPSMPorta(m.param, newFormat);
-						break;					
+						break;
 					case 0x0F: // tone portamento
 						m.command = CMD_TONEPORTAMENTO;
 						if(!newFormat) m.param >>= 2;
@@ -766,7 +782,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 					case 0x12: // tone portamento + volslide down
 						m.command = CMD_TONEPORTAVOL;
 						m.param = (m.param >> 4) & 0x0F;
-						break;						
+						break;
 
 					// Vibrato
 					case 0x15: // vibrato
@@ -782,7 +798,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 						break;
 					case 0x18: // vibrato + volslide down
 						m.command = CMD_VIBRATOVOL;
-						break;					
+						break;
 
 					// Tremolo
 					case 0x1F: // tremolo
@@ -934,7 +950,7 @@ struct PSM16FileHeader
 	enum PSM16Magic
 	{
 		magicPSM_	= 0xFE4D5350,
-	
+
 		idPORD	= 0x44524f50,
 		idPPAN	= 0x4E415050,
 		idPSAH	= 0x48415350,
@@ -1053,29 +1069,25 @@ struct PSM16SampleHeader
 			mptSmp.uFlags |= CHN_LOOP;
 		}
 	}
-	
+
 	// Retrieve the internal sample format flags for this sample.
-	UINT GetSampleFormat()
+	SampleIO GetSampleFormat() const
 	{
-		UINT sampleFormat = (flags & PSM16SampleHeader::smp16Bit) ? RS_PCM16S : RS_PCM8S;
+		SampleIO sampleIO(
+			(flags & PSM16SampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
 
 		if(flags & PSM16SampleHeader::smpUnsigned)
 		{
-			if(sampleFormat == RS_PCM16S)
-				sampleFormat = RS_PCM16U;
-			else
-				sampleFormat = RS_PCM8U;
-		} else if(flags & PSM16SampleHeader::smpDelta)
+			sampleIO |= SampleIO::unsignedPCM;
+		} else if((flags & PSM16SampleHeader::smpDelta) || (flags & PSM16SampleHeader::smpMask) == 0)
 		{
-			if(sampleFormat == RS_PCM16S)
-				sampleFormat = RS_PCM16D;
-			else
-				sampleFormat = RS_PCM8D;
-		} else if((flags & PSM16SampleHeader::smpMask) == 0)
-		{
-			sampleFormat = RS_PCM8D;
+			sampleIO |= SampleIO::deltaPCM;
 		}
-		return sampleFormat;
+
+		return sampleIO;
 	}
 };
 
@@ -1156,15 +1168,15 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 			{
 				break;
 			}
-			
+
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
 			m_nSamples = max(m_nSamples, smp);
 
 			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.name);
 			sampleHeader.ConvertToMPT(Samples[smp]);
-			
+
 			file.Seek(sampleHeader.offset);
-			ReadSample(&Samples[smp], sampleHeader.GetSampleFormat(), file);
+			sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
 		}
 	}
 

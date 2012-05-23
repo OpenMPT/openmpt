@@ -318,7 +318,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	{
 		mptIns.wMidiBank = LittleEndianW(mbank);
 	}
-	
+
 	// Envelope point count. Limited to 25 in IT format.
 	const int maxNodes = (modFormat & MOD_TYPE_MPT) ? MAX_ENVPOINTS : 25;
 
@@ -523,7 +523,7 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 	if(mptSmp.nC5Speed < 256) mptSmp.nC5Speed = 256;
 
 	// Size and loops
-	mptSmp.nLength = min(LittleEndian(length), MAX_SAMPLE_LENGTH);
+	mptSmp.nLength = LittleEndian(length);
 	mptSmp.nLoopStart = LittleEndian(loopbegin);
 	mptSmp.nLoopEnd = LittleEndian(loopend);
 	mptSmp.nSustainStart = LittleEndian(susloopbegin);
@@ -541,47 +541,50 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 
 
 // Retrieve the internal sample format flags for this instrument.
-UINT ITSample::GetSampleFormat(uint16 cwtv) const
-//-----------------------------------------------
+SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
+//---------------------------------------------------
 {
-	UINT mptFlags = (cvt & ITSample::cvtSignedSample) ? RS_PCM8S : RS_PCM8U;
+	SampleIO sampleIO(
+		(flags & ITSample::sample16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+		SampleIO::mono,
+		SampleIO::littleEndian,
+		(cvt & ITSample::cvtSignedSample) ? SampleIO::signedPCM: SampleIO::unsignedPCM);
 
-	if(flags & ITSample::sample16Bit)
+	// Some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
+	if((flags & ITSample::sampleStereo) && cwtv >= 0x214)
 	{
-		// 16-Bit sample
-		mptFlags += 5;
+		sampleIO |= SampleIO::stereoSplit;
+	}
 
-		// Some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
-		if((flags & ITSample::sampleStereo) && cwtv >= 0x214)
-		{
-			mptFlags |= RSF_STEREO;
-		}
-
-		if(flags & ITSample::sampleCompressed)
-		{
-			// IT 2.14 16-bit packed sample
-			mptFlags = (cvt & ITSample::cvtIT215Compression) ? RS_IT21516 : RS_IT21416;
-		}
+	if(flags & ITSample::sampleCompressed)
+	{
+		// IT 2.14 packed sample
+		sampleIO |= (cvt & ITSample::cvtIT215Compression) ? SampleIO::IT215 : SampleIO::IT214;
 	} else
 	{
-		// 8-Bit sample
-		// Some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
-		if((flags & ITSample::sampleStereo) && cwtv >= 0x214)
+		// MODPlugin :(
+		if(!(flags & ITSample::sample16Bit) && cvt == ITSample::cvtADPCMSample)
 		{
-			mptFlags |= RSF_STEREO;
-		}
-
-		if(cvt == ITSample::cvtADPCMSample)
+			sampleIO |= SampleIO::ADPCM;
+		} else
 		{
-			mptFlags = RS_ADPCM4;
-		} else if(flags & ITSample::sampleCompressed)
-		{
-			// IT 2.14 8-bit packed sample?
-			mptFlags = (cvt & ITSample::cvtIT215Compression) ? RS_IT2158 : RS_IT2148;
+			// ITTECH.TXT says these convert flags are "safe to ignore". IT doesn't ignore them, though, so why should we? :)
+			if(cvt & ITSample::cvtBigEndian)
+			{
+				sampleIO |= SampleIO::bigEndian;
+			}
+			if(cvt & ITSample::cvtDelta)
+			{
+				sampleIO |= SampleIO::deltaPCM;
+			}
+			if((cvt & ITSample::cvtPTM8to16) && (flags & ITSample::sample16Bit))
+			{
+				sampleIO |= SampleIO::PTM8Dto16;
+			}
 		}
 	}
 
-	return mptFlags;
+	return sampleIO;
 }
 
 

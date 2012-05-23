@@ -38,7 +38,7 @@ void ReplaceSample(ModSample &smp, const LPSTR pNewSample, const SmpLength nNewL
 		ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength, dwOrFlags, dwAndFlags);
 	smp.pSample = pNewSample;
 	smp.nLength = nNewLength;
-	CSoundFile::FreeSample(pOldSmp);	
+	CSoundFile::FreeSample(pOldSmp);
 }
 
 
@@ -54,6 +54,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	const SmpLength nNewLength = smp.nLength + nSilenceLength;
 
 	LPSTR pNewSmp = 0;
+#if 0
 	if( GetSampleCapacity(smp) >= nNewSmpBytes ) // If sample has room to expand.
 	{
 		Reporting::Notification("Not implemented: GetSampleCapacity(smp) >= nNewSmpBytes");
@@ -61,19 +62,18 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 		// even if there is unused space in the sample.
 	}
 	else // Have to allocate new sample.
+#endif
 	{
 		pNewSmp = CSoundFile::AllocateSample(nNewSmpBytes);
-		if(pNewSmp == 0) 
+		if(pNewSmp == 0)
 			return smp.nLength; //Sample allocation failed.
 		if(nStartFrom == 0)
 		{
-			memset(pNewSmp, 0, nSilenceBytes);
 			memcpy(pNewSmp + nSilenceBytes, smp.pSample, nOldBytes);
 		}
 		else if(nStartFrom == smp.nLength)
 		{
 			memcpy(pNewSmp, smp.pSample, nOldBytes);
-			memset(pNewSmp + nOldBytes, 0, nSilenceBytes);
 		}
 		else
 			Reporting::Notification(TEXT("Unsupported start position in InsertSilence."));
@@ -115,7 +115,7 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile* p
 
 	LPSTR pNewSmp = 0;
 	pNewSmp = CSoundFile::AllocateSample(nNewSmpBytes);
-	if(pNewSmp == 0) 
+	if(pNewSmp == 0)
 		return smp.nLength; //Sample allocation failed.
 
 	// Copy over old data and replace sample by the new one
@@ -178,7 +178,7 @@ void AdjustEndOfSampleImpl(ModSample &smp)
 bool AdjustEndOfSample(ModSample &smp, CSoundFile* pSndFile)
 //----------------------------------------------------------
 {
-	if ((!smp.nLength) || (!smp.pSample)) 
+	if ((!smp.nLength) || (!smp.pSample))
 		return false;
 
 	CriticalSection cs;
@@ -286,14 +286,14 @@ namespace
 	template <class T>
 	double GetMaxAmplitude() {return 1.0 + (std::numeric_limits<T>::max)();}
 
-	// Calculates DC offset and returns struct with DC offset, max and min values. 
+	// Calculates DC offset and returns struct with DC offset, max and min values.
 	// DC offset value is average of [-1.0, 1.0[-normalized offset values.
 	template<class T>
 	OffsetData CalculateOffset(const T* pStart, const SmpLength nLength)
 	//------------------------------------------------------------------
 	{
 		OffsetData offsetVals = {0,0,0};
-		
+
 		if(nLength < 1)
 			return offsetVals;
 
@@ -363,12 +363,12 @@ float RemoveDCOffset(ModSample &smp,
 		oData = CalculateOffset(reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart);
 
 	double dMin = oData.dMin, dMax = oData.dMax, dOffset = oData.dOffset;
-	
+
 	const float fReportOffset = (float)dOffset;
 
 	if((int)(dOffset * dMaxAmplitude) == 0)
 		return 0;
-	
+
 	// those will be changed...
 	dMax += dOffset;
 	dMin += dOffset;
@@ -382,7 +382,7 @@ float RemoveDCOffset(ModSample &smp,
 		RemoveOffsetAndNormalize( reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
 	else if(smp.GetElementarySampleSize() == 1)
 		RemoveOffsetAndNormalize( reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
-	
+
 	// step 3: adjust global vol (if available)
 	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == smp.nLength * smp.GetNumChannels()))
 	{
@@ -532,7 +532,7 @@ bool EnableSmartSampleRampingImpl(const T* pSample, const SmpLength smpCount)
 }
 
 // This function detects whether to enable smart sample ramping or not, based on the initial DC offset.
-// If the DC offset is very high (>= 50%), we can assume that it is somehow intentional (imagine f.e. a typical square waveform sample).
+// If the DC offset is very high (>= 50%), we can assume that it is somehow intentional (imagine e.g. a typical square waveform sample).
 // On the other side, if the initial DC offset is very low (<= 2.5%), we do not need to apply ramping, so we can retain the punch of properly aligned samples.
 // Eventually, ramping will (hopefully) only be performed on "bad" samples.
 // The function returns true if ramping should be forced off, false if it can stay enabled.
@@ -541,11 +541,11 @@ bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, cons
 //-----------------------------------------------------------------------------------------------------
 {
 	// First two sample points are supposed to be 0 for unlooped MOD samples, so don't take them into account.
-	if((smp.uFlags & CHN_LOOP) && (pSndFile->GetType() & MOD_TYPE_MOD) && sampleOffset == 0) sampleOffset = 2;
+	if(!(smp.uFlags & CHN_LOOP) && (pSndFile->GetType() & MOD_TYPE_MOD) && sampleOffset == 0) sampleOffset = 2;
 
 	// Just look at the first four samples, starting from the given offset.
-	sampleOffset = min(sampleOffset, smp.nLength);
-	const SmpLength smpCount = min(4, smp.nLength - sampleOffset) * smp.GetNumChannels();
+	sampleOffset = Util::Min(sampleOffset, smp.nLength);
+	const SmpLength smpCount = Util::Min(4u, smp.nLength - sampleOffset) * smp.GetNumChannels();
 
 	if(smp.pSample == nullptr || smpCount == 0) return false;
 	if(smp.GetElementarySampleSize() == 2)

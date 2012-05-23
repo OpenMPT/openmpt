@@ -99,7 +99,7 @@ typedef struct tagMMD0SAMPLE
 typedef struct tagMMDSAMPLEHEADER
 {
 	DWORD length;     // length of *one* *unpacked* channel in *bytes*
-	WORD type;   
+	WORD type;
 				// if non-negative
 					// bits 0-3 reserved for multi-octave instruments, not supported on the PC
 					// 0x10: 16 bit (otherwise 8 bit)
@@ -171,7 +171,7 @@ typedef struct tagMMD2SONGHEADER
 	BYTE numsamples;	// # of samples (max 63)
 } MMD2SONGHEADER;
 
-// For MMD0 the note information is held in 3 bytes, byte0, byte1, byte2.  For reference we 
+// For MMD0 the note information is held in 3 bytes, byte0, byte1, byte2.  For reference we
 // number the bits in each byte 0..7, where 0 is the low bit.
 // The note is held as bits 5..0 of byte0
 // The instrument is encoded in 6 bits,  bits 7 and 6 of byte0 and bits 7,6,5,4 of byte1
@@ -244,7 +244,7 @@ typedef struct tagMMD0EXP
 	DWORD annotxt;
 	DWORD annolen;
 	DWORD iinfo;			// Instrument names
-	WORD i_ext_entries;	
+	WORD i_ext_entries;
 	WORD i_ext_entrsz;
 	DWORD jumpmask;
 	DWORD rgbtable;
@@ -613,18 +613,18 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	// Reading Samples
 	for (UINT iSHdr=0; iSHdr<m_nSamples; iSHdr++)
 	{
-		ModSample *pSmp = &Samples[iSHdr+1];
-		pSmp->nLoopStart = BigEndianW(pmsh->sample[iSHdr].rep) << 1;
-		pSmp->nLoopEnd = pSmp->nLoopStart + (BigEndianW(pmsh->sample[iSHdr].replen) << 1);
-		pSmp->nVolume = (pmsh->sample[iSHdr].svol << 2);
-		pSmp->nGlobalVol = 64;
-		if (pSmp->nVolume > 256) pSmp->nVolume = 256;
-		// Was: pSmp->RelativeTone = -12 * pmsh->sample[iSHdr].strans;
-		// But that breaks MMD1 modules (f.e. "94' summer.mmd1" from Modland)
-		pSmp->RelativeTone = pmsh->sample[iSHdr].strans;
-		pSmp->nPan = 128;
-		if (pSmp->nLoopEnd <= 2) pSmp->nLoopEnd = 0;
-		if (pSmp->nLoopEnd) pSmp->uFlags |= CHN_LOOP;
+		ModSample &sample = Samples[iSHdr + 1];
+		sample.nLoopStart = BigEndianW(pmsh->sample[iSHdr].rep) << 1;
+		sample.nLoopEnd = sample.nLoopStart + (BigEndianW(pmsh->sample[iSHdr].replen) << 1);
+		sample.nVolume = (pmsh->sample[iSHdr].svol << 2);
+		sample.nGlobalVol = 64;
+		if (sample.nVolume > 256) sample.nVolume = 256;
+		// Was: sample.RelativeTone = -12 * pmsh->sample[iSHdr].strans;
+		// But that breaks MMD1 modules (e.g. "94' summer.mmd1" from Modland) - "automatic terminated to.mmd0" still sounds broken, probably "play transpose" is broken there.
+		sample.RelativeTone = pmsh->sample[iSHdr].strans;
+		sample.nPan = 128;
+		if (sample.nLoopEnd <= 2) sample.nLoopEnd = 0;
+		if (sample.nLoopEnd) sample.uFlags |= CHN_LOOP;
 	}
 	// Common Flags
 	if (!(pmsh->flags & 0x20)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
@@ -662,7 +662,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 				nSections = 0;
 			}
 			UINT pseq = 0;
-			
+
 			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq*4 < dwMemLength - playseqtable))
 			{
 				pseq = BigEndian(((LPDWORD)(lpStream+playseqtable))[nplayseq]);
@@ -704,7 +704,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		UINT annolen = BigEndian(pmex->annolen);
 		annolen = min(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
-		{ 
+		{
 			ReadMessage(lpStream + annotxt, annolen - 1, leAutodetect);
 		}
 		// Song Name
@@ -775,26 +775,33 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		Log("SampleData %d: stype=0x%02X len=%d\n", iSmp, BigEndianW(psdh->type), len);
 	#endif
 		if ((len > MAX_SAMPLE_LENGTH) || (dwPos + len + 6 > dwMemLength)) len = 0;
-		UINT flags = RS_PCM8S, stype = BigEndianW(psdh->type);
+		UINT stype = BigEndianW(psdh->type);
 		LPSTR psdata = (LPSTR)(lpStream + dwPos + 6);
+
+		SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::bigEndian,
+			SampleIO::signedPCM);
+
 		if (stype & 0x80)
 		{
 			psdata += (stype & 0x20) ? 14 : 6;
 		} else
 		{
-			if (stype & 0x10)
+			if(stype & 0x10)
 			{
-				Samples[iSmp+1].uFlags |= CHN_16BIT;
+				sampleIO |= SampleIO::_16bit;
 				len /= 2;
-				flags = (stype & 0x20) ? RS_STPCM16M : RS_PCM16M;
-			} else
-			{
-				flags = (stype & 0x20) ? RS_STPCM8S : RS_PCM8S;
 			}
-			if (stype & 0x20) len /= 2;
+			if(stype & 0x20)
+			{
+				sampleIO |= SampleIO::stereoSplit;
+				len /= 2;
+			}
 		}
-		Samples[iSmp+1].nLength = len;
-		ReadSample(&Samples[iSmp+1], flags, psdata, dwMemLength - dwPos - 6);
+		Samples[iSmp + 1].nLength = len;
+		sampleIO.ReadSample(Samples[iSmp + 1], psdata, dwMemLength - dwPos - 6);
 	}
 	// Reading patterns (blocks)
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
@@ -909,5 +916,4 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	SetupMODPanning(true);
 	return true;
 }
-
 

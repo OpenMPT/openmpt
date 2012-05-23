@@ -304,7 +304,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	m_nSamples = 0; // Will be incremented later
 	m_nInstruments = 0;
-	
+
 	m_nChannels = 0;
 	for(CHANNELINDEX nChn = 0; nChn < 32; nChn++)
 	{
@@ -349,7 +349,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	Order.resize(hdr.ordnum);
 	for(ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
 		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xFF) ? Order.GetIgnoreIndex() : (PATTERNINDEX)hdr.orderlist[nOrd]);
-	
+
 	// read patterns
 	for(PATTERNINDEX nPat = 0; nPat < hdr.patnum; nPat++)
 	{
@@ -491,7 +491,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		// Orpheus does not check this!
 		//if(memcmp(imfins.ii10, "II10", 4) != 0)
 		//	return false;
-		
+
 		try
 		{
 			pIns = new ModInstrument();
@@ -536,7 +536,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			if(memcmp(imfsmp.is10, "IS10", 4) != 0)
 				return false;
-			
+
 			ModSample &sample = Samples[firstsample + nSmp];
 
 			sample.Initialize();
@@ -562,17 +562,23 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 			if(imfsmp.flags & 8)
 				sample.uFlags |= CHN_PANNING;
-			
+
 			if(byteLen)
 			{
 				ASSERT_CAN_READ(byteLen);
-				ReadSample(&sample, (imfsmp.flags & 4) ? RS_PCM16S : RS_PCM8S, reinterpret_cast<LPCSTR>(lpStream + dwMemPos), byteLen);
+
+				SampleIO(
+					(imfsmp.flags & 4) ? SampleIO::_16bit : SampleIO::_8bit,
+					SampleIO::mono,
+					SampleIO::littleEndian,
+					SampleIO::signedPCM)
+					.ReadSample(sample, reinterpret_cast<LPCSTR>(lpStream + dwMemPos), byteLen);
 			}
 
 			dwMemPos += byteLen;
 		}
 		firstsample += imfins.smpnum;
 	}
-	
+
 	return true;
 }

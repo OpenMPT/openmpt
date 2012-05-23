@@ -385,9 +385,6 @@
     <ClCompile Include="MPTHacks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\Sampleio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Undo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -459,6 +456,12 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\MIDIEvents.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\SampleIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\SampleFormats.cpp">
+      <Filter>Module Loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -586,9 +589,6 @@
       <Filter>Source Files\PatternRandomizer</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\WindowedFIR.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\soundlib\wavConverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\Wav.h">
@@ -818,6 +818,12 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\ChunkReader.h">
       <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\SampleIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\SampleFormatConverters.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

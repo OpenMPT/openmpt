@@ -177,6 +177,8 @@
     <ClCompile Include="..\soundlib\ModSample.cpp" />
     <ClCompile Include="..\soundlib\plugins\JBridge.cpp" />
     <ClCompile Include="..\soundlib\RowVisitor.cpp" />
+    <ClCompile Include="..\soundlib\SampleFormats.cpp" />
+    <ClCompile Include="..\soundlib\SampleIO.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="ACMConvert.cpp" />
@@ -242,7 +244,6 @@
     <ClCompile Include="..\soundlib\PlaybackEventer.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
     <ClCompile Include="SampleEditorDialogs.cpp" />
-    <ClCompile Include="..\soundlib\Sampleio.cpp" />
     <ClCompile Include="ScaleEnvPointsDlg.cpp" />
     <ClCompile Include="SelectPluginDialog.cpp" />
     <ClCompile Include="serialization_utils.cpp" />
@@ -346,6 +347,8 @@
     <ClInclude Include="..\soundlib\plugins\PluginMixBuffer.h" />
     <ClInclude Include="..\soundlib\plugins\PlugInterface.h" />
     <ClInclude Include="..\soundlib\RowVisitor.h" />
+    <ClInclude Include="..\soundlib\SampleFormatConverters.h" />
+    <ClInclude Include="..\soundlib\SampleIO.h" />
     <ClInclude Include="..\soundlib\XMTools.h" />
     <ClInclude Include="ACMConvert.h" />
     <ClInclude Include="Autotune.h" />
@@ -440,7 +443,6 @@
     <ClInclude Include="VSTEditor.h" />
     <ClInclude Include="vstplug.h" />
     <ClInclude Include="..\soundlib\Wav.h" />
-    <ClInclude Include="..\soundlib\wavConverter.h" />
     <ClInclude Include="..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\soundlib\tuning.h" />
     <ClInclude Include="..\soundlib\tuningbase.h" />

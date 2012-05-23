@@ -294,7 +294,7 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 	if(MIDIEvents::GetTypeFromEvent(message) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(message) != 0)
 	{
 		// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
-		// (f.e. the Roland D-50 sends CC123 whenenver releasing note keys), so we will ignore those.
+		// (e.g. the Roland D-50 sends CC123 whenenver releasing note keys), so we will ignore those.
 		return GeneralKeyEvent(context, HC_MIDI, MIDIEvents::GetDataByte1FromEvent(message), 0);
 	}
 	return kcNull;

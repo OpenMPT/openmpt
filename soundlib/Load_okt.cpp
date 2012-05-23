@@ -77,7 +77,7 @@ void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSn
 		OktSample oktSmp;
 		chunk.ReadConvertEndianness(oktSmp);
 
-		oktSmp.length = min(oktSmp.length, MAX_SAMPLE_LENGTH);
+		oktSmp.length = oktSmp.length;
 		oktSmp.loopStart = oktSmp.loopStart * 2;
 		oktSmp.loopLength = oktSmp.loopLength * 2;
 		oktSmp.volume = oktSmp.volume;
@@ -419,19 +419,12 @@ bool CSoundFile::ReadOKT(FileReader &file)
 		// weird stuff?
 		mptSample.nLength = min(mptSample.nLength, sampleChunks[nFileSmp].GetLength());
 
-		ReadSample(&mptSample, RS_PCM8S, sampleChunks[nFileSmp]);
-
-		// 7-bit to 8-bit hack
-		if(sample7bit[nSmp - 1] && mptSample.pSample)
-		{
-			int8 *data = reinterpret_cast<int8 *>(mptSample.pSample);
-			SmpLength i = mptSample.nLength; 
-			while(i--)
-			{
-				*data = static_cast<uint8>(Clamp(static_cast<int>(*data) * 2, int8(-128), int8(127)));
-				*data++;
-			}
-		}
+		SampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::bigEndian,
+			sample7bit[nSmp - 1] ? SampleIO::PCM7to8 : SampleIO::signedPCM)
+			.ReadSample(mptSample, sampleChunks[nFileSmp]);
 
 		nFileSmp++;
 	}
