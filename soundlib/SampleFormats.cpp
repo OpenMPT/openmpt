@@ -1450,11 +1450,10 @@ struct AIFFCommonChunk
 	// Convert sample rate to integer
 	uint32 GetSampleRate() const
 	{
-		uint32 mantissa, last = 0;
-		uint8 exp;
+		uint32 mantissa = *reinterpret_cast<const uint32 *>(&sampleRate[2]), last = 0;
+		uint8 exp = 30 - sampleRate[1];
+		SwapBytesBE(mantissa);
 
-		mantissa = SwapBytesBE(static_cast<uint32 >(*reinterpret_cast<const uint32 *>(sampleRate + 2)));
-		exp = 30 - sampleRate[1];
 		while(exp--)
 		{
 			last = mantissa;
