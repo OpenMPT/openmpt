@@ -200,7 +200,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				{
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
 					memory.Reset();
-					continue;
+					nRow = nNextRow;
+					nCurrentOrder = nNextOrder;
+					nPattern = Order[nCurrentOrder];
+					break;
 				}
 			}
 		}
