@@ -160,7 +160,7 @@ public:
 
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
-	
+
 	// Returns value in seconds. If given position won't be played at all, returns -1.
 	// If updateVars is true, the state of various playback variables will be updated according to the playback position.
 	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars);
@@ -182,7 +182,7 @@ public: //Misc
 
 	// Check whether a filter algorithm closer to IT's should be used.
 	bool UseITFilterMode() const { return IsCompatibleMode(TRK_IMPULSETRACKER) && !(m_dwSongFlags & SONG_EXFILTERRANGE); }
-	
+
 	//Tuning-->
 public:
 	static bool LoadStaticTunings();
@@ -245,7 +245,7 @@ public:	// Static Members
 
 
 public:	// for Editing
-	CModDoc *m_pModDoc;		// Can be a null pointer f.e. when previewing samples from the treeview.
+	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
 	MODTYPE m_nType;
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
@@ -290,7 +290,6 @@ public:
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
-	CHAR CompressionTable[16];							// ADPCM compression LUT
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
 	CSoundFilePlayConfig* m_pConfig;
@@ -325,7 +324,7 @@ public:
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 
-	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; } 
+	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
@@ -345,8 +344,8 @@ public:
 	CString GetInstrumentName(UINT nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
-    
-	//Get modlength in various cases: total length, length to 
+
+	//Get modlength in various cases: total length, length to
 	//specific order&row etc. Return value is in seconds.
 	GetLengthType GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX ord = ORDERINDEX_INVALID, ROWINDEX row = ROWINDEX_INVALID);
 
@@ -407,7 +406,6 @@ public:
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
-	UINT WriteSample(FILE *f, const ModSample *pSmp, UINT nFlags, UINT nMaxLen=0) const;
 	bool SaveXM(LPCSTR lpszFileName, bool compatibilityExport = false);
 	bool SaveS3M(LPCSTR lpszFileName) const;
 	bool SaveMod(LPCSTR lpszFileName) const;
@@ -422,7 +420,7 @@ public:
 	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
 	size_t LoadModularInstrumentData(const LPCBYTE lpStream, const DWORD dwMemLength, ModInstrument *pIns) const;
 
-	// Reads extended instrument properties(XM/IT/MPTM). 
+	// Reads extended instrument properties(XM/IT/MPTM).
 	// If no errors occur and song extension tag is found, returns pointer to the beginning
 	// of the tag, else returns NULL.
 	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = nullptr);
@@ -433,7 +431,7 @@ public:
 	void S3MConvert(ModCommand &m, bool fromIT) const;
 	void S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport = false) const;
 	void ModSaveCommand(uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
-	
+
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 
 public:
@@ -587,16 +585,7 @@ protected:
 public:
 	// Write pattern effect functions
 	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, writeEffectAllowRowChange allowRowChange = weIgnore, bool bRetry = true);
-	
-	// Read/Write sample functions
-	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
-	UINT ReadSample(ModSample *pSmp, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
-	UINT ReadSample(ModSample *pSmp, UINT nFlags, FileReader &file, const WORD format = 1)
-	{
-		UINT bytesRead = ReadSample(pSmp, nFlags, file.GetRawData(), file.BytesLeft(), format);
-		file.Skip(bytesRead);
-		return bytesRead;
-	}
+
 	bool DestroySample(SAMPLEINDEX nSample);
 
 // -> CODE#0020
@@ -619,14 +608,14 @@ public:
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);
 	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed) const;
 	SAMPLEINDEX RemoveSelectedSamples(const vector<bool> &keepSamples);
-	void AdjustSampleLoop(ModSample *pSmp);
+	static void AdjustSampleLoop(ModSample &sample);
 
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
 	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader file);
+	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	UINT ReadITSSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
 	bool Read8SVXSample(UINT nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
@@ -674,6 +663,8 @@ public:
 public:
 	static LPSTR AllocateSample(UINT nbytes);
 	static void FreeSample(LPVOID p);
+
+	// WAV export
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 
 	// Song message helper functions
@@ -758,7 +749,7 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 #define MIXBUFFERSIZE		512
 #define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
-#define VOLUMERAMPPRECISION	12	
+#define VOLUMERAMPPRECISION	12
 #define FADESONGDELAY		100
 #define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
 #define AGC_PRECISION		10

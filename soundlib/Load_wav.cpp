@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "Wav.h"
+#include "SampleFormatConverters.h"
 
 #ifndef WAVE_FORMAT_EXTENSIBLE
 #define WAVE_FORMAT_EXTENSIBLE	0xFFFE
@@ -19,6 +20,28 @@
 
 /////////////////////////////////////////////////////////////
 // WAV file support
+
+
+template <typename SampleConverter>
+bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelIndex, size_t numChannels)
+//-----------------------------------------------------------------------------------------------------
+{
+	ASSERT(sample.GetNumChannels() == 1);
+	ASSERT(sample.GetElementarySampleSize() == sizeof(SampleConverter::output_t));
+
+	const size_t offset = channelIndex * sizeof(SampleConverter::input_t);
+
+	if(sample.AllocateSample() == 0 || file.BytesLeft() < offset)
+	{
+		return false;
+	}
+
+	const uint8 *inBuf = reinterpret_cast<const uint8 *>(file.GetRawData());
+	CopySample<SampleConverter>(sample.pSample, sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels);
+	CSoundFile::AdjustSampleLoop(sample);
+	return true;
+}
+
 
 bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 //---------------------------------------------------------------------
@@ -35,8 +58,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (pfmt->channels > 4)
 	 || (!pfmt->channels)
 	 || (!pfmt->freqHz)
-	 || (pfmt->bitspersample & 7)
-	 || (pfmt->bitspersample < 8)
+	 || (pfmt->bitspersample == 0)
 	 || (pfmt->bitspersample > 32))  return false;
 	WAVEDATAHEADER *pdata;
 	for (;;)
@@ -52,19 +74,17 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nChannels = 4;
 	m_nDefaultSpeed = 8;
 	m_nDefaultTempo = 125;
-	m_dwSongFlags |= SONG_LINEARSLIDES; // For no resampling
+	m_dwSongFlags = SONG_LINEARSLIDES; // For no resampling
 	Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order[0] = 0;
 	bool fail = Patterns.Insert(0, 64);
 	fail = Patterns.Insert(1, 64);
 	if(fail) return true;
-	UINT samplesize = (pfmt->channels * pfmt->bitspersample) >> 3;
-	UINT len = pdata->length, bytelen;
+	UINT samplesize = ((pfmt->channels * pfmt->bitspersample) + 7) / 8;
+	SmpLength len = pdata->length;
 	if (len > dwMemLength - 8 - dwMemPos) len = dwMemLength - dwMemPos - 8;
 	len /= samplesize;
-	bytelen = len;
-	if (pfmt->bitspersample >= 16) bytelen *= 2;
-	if (len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
+	LimitMax(len, MAX_SAMPLE_LENGTH);
 	if (!len) return true;
 	// Setting up module length
 	DWORD dwTime = ((len * 50) / pfmt->freqHz) + 1;
@@ -94,66 +114,54 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
 	pcmd[1].note = pcmd[0].note;
 	pcmd[1].instr = pcmd[0].instr;
 	m_nSamples = pfmt->channels;
+
 	// Support for Multichannel Wave
+	FileReader file((char*)(lpStream + dwMemPos + 8), dwMemLength - dwMemPos - 8);
 	for (UINT nChn=0; nChn<m_nSamples; nChn++)
 	{
-		ModSample *pSmp = &Samples[nChn+1];
+		ModSample &sample = Samples[nChn + 1];
 		pcmd[nChn].note = pcmd[0].note;
 		pcmd[nChn].instr = (BYTE)(nChn+1);
-		pSmp->nLength = len;
-		pSmp->nC5Speed = pfmt->freqHz;
-		pSmp->nVolume = 256;
-		pSmp->nPan = 128;
-		pSmp->nGlobalVol = 64;
-		pSmp->uFlags = (WORD)((pfmt->bitspersample >= 16) ? CHN_16BIT : 0);
-		pSmp->uFlags |= CHN_PANNING;
+		sample.Initialize();
+		sample.nLength = len;
+		sample.nC5Speed = pfmt->freqHz;
+		sample.uFlags = CHN_PANNING;
 		if (m_nSamples > 1)
 		{
 			switch(nChn)
 			{
-			case 0:	pSmp->nPan = 0; break;
-			case 1:	pSmp->nPan = 256; break;
-			case 2: pSmp->nPan = (WORD)((m_nSamples == 3) ? 128 : 64); pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
-			case 3: pSmp->nPan = 192; pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
-			default: pSmp->nPan = 128; break;
+			case 0:	sample.nPan = 0; break;
+			case 1:	sample.nPan = 256; break;
+			case 2: sample.nPan = (m_nSamples == 3 ? 128u : 64u); pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
+			case 3: sample.nPan = 192; pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
+			default: sample.nPan = 128; break;
 			}
 		}
-		if ((pSmp->pSample = AllocateSample(bytelen+8)) == NULL) return true;
-		if (pfmt->bitspersample == 32 && pfmt->format == WAVE_FORMAT_IEEE_FLOAT)
+
+		if(pfmt->format == WAVE_FORMAT_IEEE_FLOAT)
 		{
-			// Hack-ish 32-bit float support
-			signed short *p = (signed short *)pSmp->pSample;
-			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn*4);
-			for (UINT i=0; i<len; i++)
-			{
-				float v = *((float *)psrc);
-				Limit(v, -1.0f, 1.0f);
-				p[i] = (int16)(v * int16_max);
-				psrc += samplesize;
-			}
-			p[len+1] = p[len] = p[len-1];
-		} else if (pfmt->bitspersample >= 16)
-		{
-			int slsize = pfmt->bitspersample >> 3;
-			signed short *p = (signed short *)pSmp->pSample;
-			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn*slsize+slsize-2);
-			for (UINT i=0; i<len; i++)
-			{
-				p[i] = *((signed short *)psrc);
-				psrc += samplesize;
-			}
-			p[len+1] = p[len] = p[len-1];
+			sample.uFlags |= CHN_16BIT;
+			CopyWavChannel<ReadFloat32toInt16PCM<littleEndian32> >(sample, file, nChn, m_nSamples);
 		} else
 		{
-			signed char *p = (signed char *)pSmp->pSample;
-			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn);
-			for (UINT i=0; i<len; i++)
+			if(pfmt->bitspersample <= 8)
 			{
-				p[i] = (signed char)((*psrc) + 0x80);
-				psrc += samplesize;
+				CopyWavChannel<ReadInt8PCM<0x80u> >(sample, file, nChn, m_nSamples);
+			} else if(pfmt->bitspersample <= 16)
+			{
+				sample.uFlags |= CHN_16BIT;
+				CopyWavChannel<ReadInt16PCM<0, littleEndian16> >(sample, file, nChn, m_nSamples);
+			} else if(pfmt->bitspersample <= 24)
+			{
+				sample.uFlags |= CHN_16BIT;
+				CopyWavChannel<ReadBigIntTo16PCM<3, 1, 2> >(sample, file, nChn, m_nSamples);
+			} else if(pfmt->bitspersample <= 32)
+			{
+				sample.uFlags |= CHN_16BIT;
+				CopyWavChannel<ReadBigIntTo16PCM<4, 2, 3> >(sample, file, nChn, m_nSamples);
 			}
-			p[len+1] = p[len] = p[len-1];
 		}
+
 	}
 	return true;
 }
@@ -173,7 +181,7 @@ typedef struct IMAADPCMBLOCK
 
 #pragma pack(pop)
 
-static const int gIMAUnpackTable[90] = 
+static const int gIMAUnpackTable[90] =
 {
   7,     8,     9,    10,    11,    12,    13,    14,
   16,    17,    19,    21,    23,    25,    28,    31,
@@ -227,13 +235,11 @@ BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes
 			nIndex += gIMAIndexTab[delta & 7];
 			if (nIndex < 0) nIndex = 0; else
 			if (nIndex > 88) nIndex = 88;
-			if (value > 32767) value = 32767; else
-			if (value < -32768) value = -32768;
+			Limit(value, -32768, 32767);
 			pdest[nPos++] = (short int)value;
 		}
 	}
 	return true;
 }
-
 
 

@@ -118,7 +118,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 
 	Order.ReadFromArray(pmh2->orders, pmh2->snglen);
 	m_nRestartPos = pmh2->loopto;
-	// Reading Patterns	
+	// Reading Patterns
 	dwMemPos += headerlen - (869 + pmh1->stlen);
 	if (dwMemPos >= dwMemLength) return true;
 
@@ -241,40 +241,45 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	if (dwMemPos + 8 >= dwMemLength) return true;
 	memcpy(samplemap, lpStream+dwMemPos, 8);
 	dwMemPos += 8;
-	ModSample *pSmp = &Samples[1];
-	for (UINT ismp=0; ismp<64; ismp++, pSmp++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
+	for(UINT ismp=0; ismp<64; ismp++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
 	{
 		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return true;
 		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
 		dwMemPos += sizeof(FARSAMPLE);
 		m_nSamples = ismp + 1;
 
-		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[ismp+1], pfs->samplename);
+		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[ismp + 1], pfs->samplename);
+
+		ModSample &sample = Samples[ismp + 1];
+		sample.Initialize();
 
 		const DWORD length = LittleEndian(pfs->length);
-		pSmp->nLength = length;
-		pSmp->nLoopStart = LittleEndian(pfs->reppos) ;
-		pSmp->nLoopEnd = LittleEndian(pfs->repend) ;
-		pSmp->nFineTune = 0;
-		pSmp->nC5Speed = 8363*2;
-		pSmp->nGlobalVol = 64;
-		pSmp->nVolume = pfs->volume << 4;
-		pSmp->uFlags = 0;
-		if ((pSmp->nLength > 3) && (dwMemPos + 4 < dwMemLength))
+		sample.nLength = length;
+		sample.nLoopStart = LittleEndian(pfs->reppos);
+		sample.nLoopEnd = LittleEndian(pfs->repend);
+		sample.nC5Speed = 8363 * 2;
+		sample.nVolume = pfs->volume << 4;
+
+		if((sample.nLength > 3) && (dwMemPos + 4 < dwMemLength))
 		{
-			if (pfs->type & 1)
+			SampleIO sampleIO(
+				SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::signedPCM);
+
+			if(pfs->type & 1)
 			{
-				pSmp->uFlags |= CHN_16BIT;
-				pSmp->nLength >>= 1;
-				pSmp->nLoopStart >>= 1;
-				pSmp->nLoopEnd >>= 1;
+				sampleIO |= SampleIO::_16bit;
+				sample.nLength >>= 1;
+				sample.nLoopStart >>= 1;
+				sample.nLoopEnd >>= 1;
 			}
-			if ((pfs->loop & 8) && (pSmp->nLoopEnd > 4)) pSmp->uFlags |= CHN_LOOP;
-			ReadSample(pSmp, (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S,
-						(LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
+			if ((pfs->loop & 8) && (sample.nLoopEnd > 4)) sample.uFlags |= CHN_LOOP;
+
+			sampleIO.ReadSample(sample, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 		}
 		dwMemPos += length;
 	}
 	return true;
 }
-

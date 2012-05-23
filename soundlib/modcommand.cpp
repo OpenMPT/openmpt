@@ -55,8 +55,8 @@ void ModCommand::ExtendedS3MtoMODEffect()
 	case 0x20:	param = (param & 0x0F) | 0x50; break;
 	case 0x30:	param = (param & 0x0F) | 0x40; break;
 	case 0x40:	param = (param & 0x0F) | 0x70; break;
-	case 0x50:	
-	case 0x60:	
+	case 0x50:
+	case 0x60:
 	case 0x90:
 	case 0xA0:	command = CMD_XFINEPORTAUPDOWN; break;
 	case 0xB0:	param = (param & 0x0F) | 0x60; break;
@@ -66,7 +66,7 @@ void ModCommand::ExtendedS3MtoMODEffect()
 }
 
 
-// Convert a mod command from one format to another. 
+// Convert a mod command from one format to another.
 void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 //--------------------------------------------------------
 {
@@ -82,10 +82,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT),
 		oldTypeIsIT_MPT = (oldTypeIsIT || oldTypeIsMPT);
 
-	const bool newTypeIsMOD = (toType == MOD_TYPE_MOD), newTypeIsXM =  (toType == MOD_TYPE_XM), 
+	const bool newTypeIsMOD = (toType == MOD_TYPE_MOD), newTypeIsXM =  (toType == MOD_TYPE_XM),
 		newTypeIsS3M = (toType == MOD_TYPE_S3M), newTypeIsIT = (toType == MOD_TYPE_IT),
-		newTypeIsMPT = (toType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM), 
-		newTypeIsS3M_IT_MPT = (newTypeIsS3M || newTypeIsIT || newTypeIsMPT), 
+		newTypeIsMPT = (toType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM),
+		newTypeIsS3M_IT_MPT = (newTypeIsS3M || newTypeIsIT || newTypeIsMPT),
 		newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
 
 	//////////////////////////
@@ -808,11 +808,11 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
      nParam - Effect that should be written
      bIsVolumeEffect  - Indicates whether the given effect is a volume column effect or not
      nChn - Channel that should be modified - use CHANNELINDEX_INVALID to allow all channels of the given row
-     bAllowMultipleEffects - If false, No effect will be written if an effect of the same type is already present in the channel(s). Useful for f.e. tempo effects.
+     bAllowMultipleEffects - If false, No effect will be written if an effect of the same type is already present in the channel(s). Useful for e.g. tempo effects.
      allowRowChange - Indicates whether it is allowed to use the next or previous row if there's no space for the effect
      bRetry - For internal use only. Indicates whether an effect "rewrite" has already taken place (for recursive calls)
    NOTE: Effect remapping is only implemented for a few basic effects.
-*/ 
+*/
 bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn, bool bAllowMultipleEffects, writeEffectAllowRowChange allowRowChange, bool bRetry)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {

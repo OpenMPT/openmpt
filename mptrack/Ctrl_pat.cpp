@@ -909,7 +909,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			m_OrderList.SetCurSel(nInsertWhere);
 
-			// If the first duplicated order is f.e. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
+			// If the first duplicated order is e.g. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
 			ORDERINDEX showPattern = min(nInsertWhere, pSndFile->Order.GetLastIndex());
 			while(!pSndFile->Patterns.IsValidPat(pSndFile->Order[showPattern]) && showPattern < pSndFile->Order.GetLastIndex())
 			{

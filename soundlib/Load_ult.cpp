@@ -244,7 +244,7 @@ static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, con
 	note->vol = param1;
 	note->command = cmd2;
 	note->param = param2;
-	
+
 	*dwMP = dwMemPos;
 	return repeat;
 
@@ -477,7 +477,12 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 
 	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
 	{
-		dwMemPos += ReadSample(&Samples[nSmp + 1], (Samples[nSmp + 1].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+		dwMemPos += SampleIO(
+			(Samples[nSmp + 1].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM)
+			.ReadSample(Samples[nSmp + 1], (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 	}
 	return true;
 }

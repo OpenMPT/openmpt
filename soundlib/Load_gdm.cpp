@@ -158,7 +158,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
 		if(fileHeader.panMap[i] < 16)
-		{		
+		{
 			ChnSettings[i].nPan = min((fileHeader.panMap[i] * 16) + 8, 256);
 		}
 		else if(fileHeader.panMap[i] == 16)
@@ -209,7 +209,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 		Samples[smp].nC5Speed = gdmSample.c4Hertz;
 		Samples[smp].nGlobalVol = 256;	// Not supported in this format
 
-		Samples[smp].nLength = min(gdmSample.length, MAX_SAMPLE_LENGTH); // in bytes
+		Samples[smp].nLength = gdmSample.length; // in bytes
 
 		// Sample format
 		if(gdmSample.flags & GDMSampleHeader::smp16Bit)
@@ -267,9 +267,14 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	// Read sample data
 	if(file.Seek(fileHeader.sampleDataOffset))
 	{
-		for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 		{
-			ReadSample(&Samples[smp], (Samples[smp].uFlags & CHN_16BIT) ? RS_PCM16U : RS_PCM8U, file);
+			SampleIO(
+				(Samples[smp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::unsignedPCM)
+				.ReadSample(Samples[smp], file);
 		}
 	}
 
@@ -402,7 +407,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 								m.param &= 0xF0;
 							break;
 
-						case CMD_VOLUME: 
+						case CMD_VOLUME:
 							m.param = min(m.param, 64);
 							if(modSpecs.HasVolCommand(VOLCMD_VOLUME))
 							{
@@ -499,12 +504,12 @@ bool CSoundFile::ReadGDM(FileReader &file)
 					}
 
 				}
-				
+
 			}
 		}
 	}
 
-	// Read song comments	
+	// Read song comments
 	if(fileHeader.messageTextLength > 0 && file.Seek(fileHeader.messageTextOffset))
 	{
 		ReadMessage(file, fileHeader.messageTextLength, leAutodetect);

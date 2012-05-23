@@ -216,21 +216,27 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			DWORD dwPos = dwMemPos + sizeof(DSMSAMPLE);
 			dwMemPos += 8 + pSmp->inst_len;
 
-			ModSample *psmp = &Samples[nSmp];
+			ModSample &sample = Samples[nSmp];
+			sample.Initialize();
 
 			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp], pSmp->samplename);
-			StringFixer::ReadString<StringFixer::nullTerminated>(psmp->filename, pSmp->filename);
+			StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, pSmp->filename);
 
-			psmp->nGlobalVol = 64;
-			psmp->nC5Speed = pSmp->c2spd;
-			psmp->uFlags = (WORD)((pSmp->flags & 1) ? CHN_LOOP : 0);
-			psmp->nLength = pSmp->length;
-			psmp->nLoopStart = pSmp->loopstart;
-			psmp->nLoopEnd = pSmp->loopend;
-			psmp->nVolume = (WORD)(pSmp->volume << 2);
-			if (psmp->nVolume > 256) psmp->nVolume = 256;
-			UINT smptype = (pSmp->flags & 2) ? RS_PCM8S : RS_PCM8U;
-			ReadSample(psmp, smptype, (LPCSTR)(lpStream+dwPos), dwMemLength - dwPos);
+			sample.nC5Speed = pSmp->c2spd;
+			sample.uFlags = (WORD)((pSmp->flags & 1) ? CHN_LOOP : 0);
+			sample.nLength = pSmp->length;
+			sample.nLoopStart = pSmp->loopstart;
+			sample.nLoopEnd = pSmp->loopend;
+			sample.nVolume = (WORD)(pSmp->volume << 2);
+			if (sample.nVolume > 256) sample.nVolume = 256;
+
+			SampleIO(
+				SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				(pSmp->flags & 2) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
+				.ReadSample(sample, (LPCSTR)(lpStream + dwPos), dwMemLength - dwPos);
+
 			nSmp++;
 		} else
 		{
@@ -239,4 +245,3 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	return true;
 }
-

@@ -47,9 +47,8 @@ typedef uintptr_t SmpLength;
 
 
 #define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
-const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// 0x04000000 (64MB -> now 256MB).
-													// Note: Sample size in bytes can be more than 256 MB.
-													// The meaning of this constant is handled differently in various places; sometimes it's samples, sometimes it's bytes...
+const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
+													// Note: Sample size in bytes can be more than this (= 256 MB).
 #define MAX_SAMPLE_RATE		192000					// Max playback / render rate in Hz
 
 const ROWINDEX MAX_PATTERN_ROWS			= 1024;	// -> CODE#0008 -> DESC="#define to set pattern size" -! BEHAVIOUR_CHANGE#0008
@@ -218,55 +217,6 @@ enum enmEnvelopeTypes
 #define FLTMODE_HIGHPASS		1
 
 
-// Sample formats
-#define RSF_16BIT		0x04
-#define RSF_STEREO		0x08
-
-#define RS_PCM8S		0	// 8-bit signed
-#define RS_PCM8U		1	// 8-bit unsigned
-#define RS_PCM8D		2	// 8-bit delta values
-#define RS_ADPCM4		3	// 4-bit ADPCM-packed
-#define RS_PCM16D		4	// 16-bit delta values
-#define RS_PCM16S		5	// 16-bit signed
-#define RS_PCM16U		6	// 16-bit unsigned
-#define RS_PCM16M		7	// 16-bit motorola order
-#define RS_STPCM8S		(RS_PCM8S|RSF_STEREO)	// stereo 8-bit signed
-#define RS_STPCM8U		(RS_PCM8U|RSF_STEREO)	// stereo 8-bit unsigned
-#define RS_STPCM8D		(RS_PCM8D|RSF_STEREO)	// stereo 8-bit delta values
-#define RS_STPCM16S		(RS_PCM16S|RSF_STEREO)	// stereo 16-bit signed
-#define RS_STPCM16U		(RS_PCM16U|RSF_STEREO)	// stereo 16-bit unsigned
-#define RS_STPCM16D		(RS_PCM16D|RSF_STEREO)	// stereo 16-bit delta values
-#define RS_STPCM16M		(RS_PCM16M|RSF_STEREO)	// stereo 16-bit signed big endian
-// IT 2.14 compressed samples
-#define RS_IT2148		0x10
-#define RS_IT21416		0x14
-#define RS_IT2158		0x12
-#define RS_IT21516		0x16
-// AMS Packed Samples
-#define RS_AMS8			0x11
-#define RS_AMS16		0x15
-// DMF Huffman compression
-#define RS_DMF8			0x13
-#define RS_DMF16		0x17
-// MDL Huffman compression
-#define RS_MDL8			0x20
-#define RS_MDL16		0x24
-#define RS_PTM8DTO16	0x25
-// Stereo Interleaved Samples
-#define RS_STIPCM8S		(RS_PCM8S|0x40|RSF_STEREO)	// stereo 8-bit signed
-#define RS_STIPCM8U		(RS_PCM8U|0x40|RSF_STEREO)	// stereo 8-bit unsigned
-#define RS_STIPCM16S	(RS_PCM16S|0x40|RSF_STEREO)	// stereo 16-bit signed
-#define RS_STIPCM16U	(RS_PCM16U|0x40|RSF_STEREO)	// stereo 16-bit unsigned
-#define RS_STIPCM16M	(RS_PCM16M|0x40|RSF_STEREO)	// stereo 16-bit signed big endian
-// 24-bit signed
-#define RS_PCM24S		(RS_PCM16S|0x80)			// mono 24-bit signed
-#define RS_STIPCM24S	(RS_PCM16S|0x80|RSF_STEREO)	// stereo 24-bit signed
-// 32-bit
-#define RS_PCM32S		(RS_PCM16S|0xC0)			// mono 32-bit signed
-#define RS_STIPCM32S	(RS_PCM16S|0xC0|RSF_STEREO)	// stereo 32-bit signed
-
-
-
 // NNA types (New Note Action)
 #define NNA_NOTECUT		0
 #define NNA_CONTINUE	1
@@ -403,6 +353,7 @@ enum PLUGVOLUMEHANDLING
 	PLUGIN_VOLUMEHANDLING_MIDI = 0,
 	PLUGIN_VOLUMEHANDLING_DRYWET,
 	PLUGIN_VOLUMEHANDLING_IGNORE,
+	PLUGIN_VOLUMEHANDLING_CUSTOM,
 };
 
 // filtermodes
@@ -415,10 +366,10 @@ enum PLUGVOLUMEHANDLING
 
 enum MidiChannel
 {
-	MidiNoChannel = 0,
-	MidiFirstChannel = 1,
-	MidiLastChannel = 16,
-	MidiMappedChannel = 17,
+	MidiNoChannel		= 0,
+	MidiFirstChannel	= 1,
+	MidiLastChannel		= 16,
+	MidiMappedChannel	= 17,
 };
 
 

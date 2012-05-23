@@ -2178,7 +2178,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
 				CModDoc* pModDoc = static_cast<CModDoc*>(pDoc);
 				pModDoc->ClearFilePath(); // Clear path so that saving will not take place in templates/examples folder.
-				// Remove extension from title, so that saving the file will not suggest a filename like f.e. "template.mptm.mptm".
+				// Remove extension from title, so that saving the file will not suggest a filename like e.g. "template.mptm.mptm".
 				const CString title = pModDoc->GetTitle();
 				const int dotPos = title.ReverseFind('.');
 				if(dotPos >= 0)

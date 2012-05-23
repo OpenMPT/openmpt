@@ -281,6 +281,9 @@ namespace Util
 	// Like std::min, but avoids conflict with min-macro.
 	template <class T> inline const T& Min(const T& a, const T& b) {return (std::min)(a, b);}
 
+	// Minimum of 3 values
+	template <class T> inline const T& Min(const T& a, const T& b, const T& c) {return Min(Min(a, b), c);}
+
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 

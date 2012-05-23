@@ -102,38 +102,43 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += sizeof(PTMSAMPLE))
 	{
-		ModSample *pSmp = &Samples[ismp+1];
+		ModSample &sample = Samples[ismp + 1];
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);
 
+		sample.Initialize();
 		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[ismp + 1], psmp->samplename);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(pSmp->filename, psmp->filename);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(sample.filename, psmp->filename);
 
-		pSmp->nGlobalVol = 64;
-		pSmp->nPan = 128;
-		pSmp->nVolume = psmp->volume << 2;
-		pSmp->nC5Speed = LittleEndianW(psmp->nC4Spd) << 1;
-		pSmp->uFlags = 0;
-		if ((psmp->sampletype & 3) == 1)
+		sample.nVolume = psmp->volume * 4;
+		sample.nC5Speed = LittleEndianW(psmp->nC4Spd) * 2;
+
+		if((psmp->sampletype & 3) == 1)
 		{
-			UINT smpflg = RS_PCM8D;
+			SampleIO sampleIO(
+				SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::deltaPCM);
+
 			DWORD samplepos;
-			pSmp->nLength = LittleEndian(*(LPDWORD)(psmp->length));
-			pSmp->nLoopStart = LittleEndian(*(LPDWORD)(psmp->loopbeg));
-			pSmp->nLoopEnd = LittleEndian(*(LPDWORD)(psmp->loopend));
+			sample.nLength = LittleEndian(*(LPDWORD)(psmp->length));
+			sample.nLoopStart = LittleEndian(*(LPDWORD)(psmp->loopbeg));
+			sample.nLoopEnd = LittleEndian(*(LPDWORD)(psmp->loopend));
 			samplepos = LittleEndian(*(LPDWORD)(&psmp->fileofs));
-			if (psmp->sampletype & 4) pSmp->uFlags |= CHN_LOOP;
-			if (psmp->sampletype & 8) pSmp->uFlags |= CHN_PINGPONGLOOP;
+			if (psmp->sampletype & 4) sample.uFlags |= CHN_LOOP;
+			if (psmp->sampletype & 8) sample.uFlags |= CHN_PINGPONGLOOP;
 			if (psmp->sampletype & 16)
 			{
-				pSmp->uFlags |= CHN_16BIT;
-				pSmp->nLength >>= 1;
-				pSmp->nLoopStart >>= 1;
-				pSmp->nLoopEnd >>= 1;
-				smpflg = RS_PTM8DTO16;
+				sampleIO |= SampleIO::_16bit;
+				sampleIO |= SampleIO::PTM8Dto16;
+
+				sample.nLength /= 2;
+				sample.nLoopStart /= 2;
+				sample.nLoopEnd /= 2;
 			}
-			if ((pSmp->nLength) && (samplepos) && (samplepos < dwMemLength))
+			if(sample.nLength && samplepos && samplepos < dwMemLength)
 			{
-				ReadSample(pSmp, smpflg, (LPSTR)(lpStream+samplepos), dwMemLength-samplepos);
+				sampleIO.ReadSample(sample, (LPSTR)(lpStream + samplepos), dwMemLength - samplepos);
 			}
 		}
 	}
@@ -212,4 +217,3 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	return true;
 }
-

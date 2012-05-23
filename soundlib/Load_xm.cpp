@@ -339,7 +339,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 
 	// In case of XM versions < 1.04, we need to memorize the sample flags for all samples, as they are not stored immediately after the sample headers.
-	vector<UINT> sampleFlags;
+	vector<SampleIO> sampleFlags;
 
 	// Reading instruments
 	for(INSTRUMENTINDEX instr = 1; instr <= m_nInstruments; instr++)
@@ -444,7 +444,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 				{
 					if(sample < sampleSlots.size() && dwMemPos < dwMemLength)
 					{
-						ReadSample(&Samples[sampleSlots[sample]], sampleFlags[sample], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+						sampleFlags[sample].ReadSample(Samples[sampleSlots[sample]], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 					}
 					dwMemPos += sampleSize[sample];
 				}
@@ -463,7 +463,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		{
 			if(dwMemPos < dwMemLength)
 			{
-				dwMemPos += ReadSample(&Samples[sample], sampleFlags[sample - 1], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+				dwMemPos += sampleFlags[sample - 1].ReadSample(Samples[sample], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			}
 		}
 	}
@@ -529,7 +529,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		madeWithModPlug = true;
 	}
 	// Read mix plugins information
-	if (dwMemPos + 8 < dwMemLength) 
+	if (dwMemPos + 8 < dwMemLength)
 	{
 		DWORD dwOldPos = dwMemPos;
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
@@ -540,7 +540,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	// Check various things to find out whether this has been made with MPT.
 	// Null chars in names -> most likely made with MPT, which disguises as FT2
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && probablyMadeWithModPlug && !isFT2) madeWithModPlug = true;
-	if (memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20)) madeWithModPlug = false;	// this could happen f.e. with (early?) versions of Sk@le
+	if (memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20)) madeWithModPlug = false;	// this could happen e.g. with (early?) versions of Sk@le
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
 	{
 		// Early MPT 1.0 alpha/beta versions
@@ -620,7 +620,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	//BYTE s[64*64*5];
 	vector<BYTE> s(64*64*5, 0);
 	BYTE xmph[9];
-	bool addChannel = false; // avoid odd channel count for FT2 compatibility 
+	bool addChannel = false; // avoid odd channel count for FT2 compatibility
 
 	XMFileHeader xmheader;
 	MemsetZero(xmheader);
@@ -648,7 +648,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	PATTERNINDEX nPatterns = 0;
 	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
 	{
-		if(Patterns.IsValidIndex(Order[nOrd])) 
+		if(Patterns.IsValidIndex(Order[nOrd]))
 		{
 			nMaxOrds++;
 			if(Order[nOrd] >= nPatterns) nPatterns = Order[nOrd] + 1;
@@ -682,7 +682,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	// write order list (wihout +++ and ---, explained above)
 	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
 	{
-		if(Patterns.IsValidIndex(Order[nOrd]) || !compatibilityExport) 
+		if(Patterns.IsValidIndex(Order[nOrd]) || !compatibilityExport)
 		{
 			BYTE nOrdval = static_cast<BYTE>(Order[nOrd]);
 			fwrite(&nOrdval, 1, sizeof(BYTE), f);
@@ -839,7 +839,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 
 				// Try to save "instrument-less" samples as well by adding those after the "normal" samples of our sample.
 				// We look for unassigned samples directly after the samples assigned to our current instrument, so if
-				// f.e. sample 1 is assigned to instrument 1 and samples 2 to 10 aren't assigned to any instrument,
+				// e.g. sample 1 is assigned to instrument 1 and samples 2 to 10 aren't assigned to any instrument,
 				// we will assign those to sample 1. Any samples before the first referenced sample are going to be lost,
 				// but hey, I wrote this mostly for preserving instrument texts in existing modules, where we shouldn't encounter this situation...
 				for(vector<SAMPLEINDEX>::const_iterator sample = samples.begin(); sample != samples.end(); sample++)
@@ -874,7 +874,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		insHeader.ConvertEndianness();
 		fwrite(&insHeader, 1, insHeaderSize, f);
 
-		vector<UINT> sampleFlags(samples.size());
+		vector<SampleIO> sampleFlags(samples.size());
 
 		// Write Sample Headers
 		for(SAMPLEINDEX smp = 0; smp < samples.size(); smp++)
@@ -899,7 +899,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		{
 			if(samples[smp] <= GetNumSamples())
 			{
-				WriteSample(f, &Samples[samples[smp]], sampleFlags[smp]);
+				sampleFlags[smp].WriteSample(f, Samples[samples[smp]]);
 			}
 		}
 	}

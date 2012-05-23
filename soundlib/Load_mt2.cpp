@@ -418,7 +418,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				Instruments[iIns] = pIns;
 				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, pmi->szName);
 			} catch(MPTMemoryException)
-			{			
+			{
 			}
 		}
 	#ifdef MT2DEBUG
@@ -472,7 +472,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				#endif
 
 					switch(iEnv)
-					{					
+					{
 					case 0: // Volume Envelope
 						pEnv = &pIns->VolEnv;
 						break;
@@ -593,22 +593,21 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT iData=0; iData<256; iData++) if ((iData < m_nSamples) && (SampleMap[iData]))
 	{
 		MT2SAMPLE *pms = SampleMap[iData];
-		ModSample *psmp = &Samples[iData+1];
-		if (!(pms->nFlags & 5))
+		ModSample &sample = Samples[iData+1];
+		if(!(pms->nFlags & 5))
 		{
-			if (psmp->nLength > 0) 
+			if(sample.nLength > 0)
 			{
 			#ifdef MT2DEBUG
 				Log("  Reading sample #%d at offset 0x%04X (len=%d)\n", iData+1, dwMemPos, psmp->nLength);
 			#endif
-				UINT rsflags;
-				
-				if (pms->nChannels == 2)
-					rsflags = (psmp->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
-				else
-					rsflags = (psmp->uFlags & CHN_16BIT) ? RS_PCM16D : RS_PCM8D;
 
-				dwMemPos += ReadSample(psmp, rsflags, (LPCSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+				dwMemPos += SampleIO(
+					(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+					(pms->nChannels == 2) ? SampleIO::stereoSplit : SampleIO::mono,
+					SampleIO::littleEndian,
+					SampleIO::deltaPCM)
+					.ReadSample(sample, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			}
 		} else
 		if (dwMemPos+4 < dwMemLength)

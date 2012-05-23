@@ -246,7 +246,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 			}
 
 			globalInfo &= DMFPAT_GLOBMASK;
-			
+
 			uint8 globalData = 0;
 			if(globalInfo != 0)
 			{
@@ -759,7 +759,7 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 
 	ModSample &sample = pSndFile->GetSample(nSmp);
 	MemsetZero(sample);
-	sample.nLength = min(MAX_SAMPLE_LENGTH, LittleEndian(smpHead->length));
+	sample.nLength = LittleEndian(smpHead->length);
 	sample.nSustainEnd = min(sample.nLength, LittleEndian(smpHead->loopEnd));
 	sample.nSustainStart = min(sample.nSustainEnd, LittleEndian(smpHead->loopStart));
 	if(sample.nSustainEnd > 0)
@@ -950,12 +950,13 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 
 				if(length > 0)
 				{
-					UINT flags = (Samples[nSmp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
-					if((sampleFlags[nSmp - 1] & DMFSMP_COMPMASK) == DMFSMP_COMP1)
-					{
-						flags = (Samples[nSmp].uFlags & CHN_16BIT) ? RS_DMF16 : RS_DMF8;
-					}
-					ReadSample(&Samples[nSmp], flags, (LPCSTR)(lpStream + dwMemPos), length);
+					SampleIO(
+						(Samples[nSmp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+						SampleIO::mono,
+						SampleIO::littleEndian,
+						((sampleFlags[nSmp - 1] & DMFSMP_COMPMASK) == DMFSMP_COMP1) ? SampleIO::DMF : SampleIO::signedPCM)
+						.ReadSample(Samples[nSmp], (LPCSTR)(lpStream + dwMemPos), length);
+
 					dwMemPos += length;
 				}
 			}
@@ -1033,7 +1034,7 @@ typedef struct DMF_HNODE
 
 typedef struct DMF_HTREE
 {
-	uint8 *ibuf, *ibufmax;
+	const uint8 *ibuf, *ibufmax;
 	uint32 bitbuf;
 	int bitnum;
 	int lastnode, nodecount;
@@ -1102,13 +1103,13 @@ void DMFNewNode(DMF_HTREE *tree)
 }
 
 
-int DMFUnpack(LPBYTE psample, uint8 *ibuf, uint8 *ibufmax, UINT maxlen)
-//---------------------------------------------------------------------
+int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, UINT maxlen)
+//---------------------------------------------------------------------------------
 {
 	DMF_HTREE tree;
 	int actnode;
 	uint8 value, sign, delta = 0;
-	
+
 	MemsetZero(tree);
 	tree.ibuf = ibuf;
 	tree.ibufmax = ibufmax;
@@ -1138,5 +1139,4 @@ int DMFUnpack(LPBYTE psample, uint8 *ibuf, uint8 *ibufmax, UINT maxlen)
 #endif
 	return tree.ibuf - ibuf;
 }
-
 

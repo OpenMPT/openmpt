@@ -66,7 +66,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 {
 	STMHEADER *phdr = (STMHEADER *)lpStream;
 	DWORD dwMemPos = 0;
-	
+
 	if ((!lpStream) || (dwMemLength < sizeof(STMHEADER))) return false;
 	if ((phdr->filetype != 2) || (phdr->unused != 0x1A)
 	 || ((_strnicmp(phdr->trackername, "!SCREAM!", 8))
@@ -179,21 +179,27 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 		dwMemPos += 64*4*4;
 	}
+
 	// Reading Samples
+	const SampleIO sampleIO(
+		SampleIO::_8bit,
+		SampleIO::mono,
+		SampleIO::littleEndian,
+		SampleIO::signedPCM);
+
 	for (UINT nSmp=1; nSmp<=31; nSmp++)
 	{
-		ModSample *pIns = &Samples[nSmp];
+		ModSample &sample = Samples[nSmp];
 		dwMemPos = (dwMemPos + 15) & (~15);
-		if (pIns->nLength)
+		if(sample.nLength)
 		{
 			UINT nPos = ((UINT)phdr->sample[nSmp-1].reserved) << 4;
-			if ((nPos >= sizeof(STMHEADER)) && (nPos <= dwMemLength) && (pIns->nLength <= dwMemLength-nPos)) dwMemPos = nPos;
+			if ((nPos >= sizeof(STMHEADER)) && (nPos <= dwMemLength) && (sample.nLength <= dwMemLength-nPos)) dwMemPos = nPos;
 			if (dwMemPos < dwMemLength)
 			{
-				dwMemPos += ReadSample(pIns, RS_PCM8S, (LPSTR)(lpStream+dwMemPos),dwMemLength-dwMemPos);
+				dwMemPos += sampleIO.ReadSample(sample, (LPSTR)(lpStream + dwMemPos),dwMemLength - dwMemPos);
 			}
 		}
 	}
 	return true;
 }
-

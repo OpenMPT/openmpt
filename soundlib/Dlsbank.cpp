@@ -28,7 +28,7 @@
 #define F_RGN_OPTION_SELFNONEXCLUSIVE	0x0001
 
 ///////////////////////////////////////////////////////////////////////////
-// Articulation connection graph definitions 
+// Articulation connection graph definitions
 
 // Generic Sources
 #define CONN_SRC_NONE              0x0000
@@ -79,7 +79,7 @@
 
 #define MAKE_ART(src, ctl, dst)	( ((dst)<<16) | ((ctl)<<8) | (src) )
 
-// Vibrato / Tremolo 
+// Vibrato / Tremolo
 #define ART_LFO_FREQUENCY	MAKE_ART	(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_LFO_FREQUENCY)
 #define ART_LFO_STARTDELAY	MAKE_ART	(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_LFO_STARTDELAY)
 #define ART_LFO_ATTENUATION	MAKE_ART	(CONN_SRC_LFO,	CONN_SRC_NONE,	CONN_DST_ATTENUATION)
@@ -890,7 +890,7 @@ BOOL CDLSBank::UpdateSF2PresetData(LPVOID pvsf2, LPVOID pvchunk, DWORD dwMaxLen)
 			}
 		}
 		break;
-	
+
 	#ifdef DLSINSTR_LOG
 	default:
 		{
@@ -1117,7 +1117,7 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 
 	priff = (RIFFCHUNKID *)lpMemFile;
 	dwMemPos = 0;
-	
+
 	// Check DLS sections embedded in RMI midi files
 	if ((priff->id_RIFF == IFFID_RIFF) && (priff->id_DLS == IFFID_RMID))
 	{
@@ -1345,7 +1345,7 @@ UINT CDLSBank::GetRegionFromKey(UINT nIns, UINT nKey)
 //---------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
-	
+
 	if ((!m_pInstruments) || (nIns >= m_nInstruments)) return 0;
 	pDlsIns = &m_pInstruments[nIns];
 	for (UINT rgn=0; rgn<pDlsIns->nRegions; rgn++)
@@ -1450,7 +1450,7 @@ static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 	const float _factor = 128 * 12;
 	const float _fct_100 = 128.0f / 100.0f;
 	int result;
-	
+
 	if (!freq) return 0;
 	_asm {
 	fild nMidiFTune
@@ -1475,7 +1475,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	LPBYTE pWaveForm = NULL;
 	DWORD dwLen = 0, dwWSMPOffset = 0;
 	BOOL bOk, bWaveForm;
-	
+
 	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
 	pDlsIns = &m_pInstruments[nIns];
 	if (nRgn >= pDlsIns->nRegions) return FALSE;
@@ -1494,17 +1494,20 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 		#ifdef DLSINSTR_LOG
 			Log("  SF2 WaveLink #%3d: %5dHz\n", nWaveLink, p->dwSampleRate);
 		#endif
+			sample.Initialize();
 			sample.nLength = dwLen / 2;
-			sample.uFlags = CHN_16BIT;
 			sample.nLoopStart = pDlsIns->Regions[nRgn].ulLoopStart;
 			sample.nLoopEnd = pDlsIns->Regions[nRgn].ulLoopEnd;
 			sample.nC5Speed = p->dwSampleRate;
-			sample.nGlobalVol = 64;
-			sample.nVolume = 256;
-			sample.nPan = 128;
-			pSndFile->ReadSample(&sample, RS_PCM16S, (LPSTR)pWaveForm, dwLen);
 			sample.RelativeTone = p->byOriginalPitch;
 			sample.nFineTune = p->chPitchCorrection;
+
+			SampleIO(
+				SampleIO::_16bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::signedPCM)
+				.ReadSample(sample, (LPSTR)pWaveForm, dwLen);
 		}
 		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else
@@ -1610,7 +1613,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	ModInstrument *pIns;
 	UINT nRgnMin, nRgnMax, nEnv;
 	SAMPLEINDEX nSample;
-	
+
 	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
 	pDlsIns = &m_pInstruments[nIns];
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
@@ -1640,7 +1643,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 		Log("  usVolume = %3d, Unity Note = %d\n", prgn->usVolume, prgn->uUnityNote);
 	}
 #endif
-	
+
 	try
 	{
 		pIns = new ModInstrument();

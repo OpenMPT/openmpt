@@ -17,7 +17,7 @@ struct ITFileHeader
 	// Magic Bytes
 	enum Magic
 	{
-		itMagic = 0x4D504D49,		// "IMPM" IT Header Magic Bytes 
+		itMagic = 0x4D504D49,		// "IMPM" IT Header Magic Bytes
 		mptmMagic = 0x2E6D7074,		// "tpm." Old MPTM header magic bytes
 		omptMagic = 0x54504D4F,		// "OMPT" Magic Bytes for non-standard OpenMPT IT files
 		chibiMagic = 0x49424843,	// "CHBI" Magic Bytes in the IT header to identify ChibiTracker
@@ -247,6 +247,11 @@ struct ITSample
 		cvtSignedSample		= 0x01,
 		cvtIT215Compression	= 0x04,
 		cvtADPCMSample		= 0xFF,		// MODPlugin :(
+
+		// ITTECH.TXT says these convert flags are "safe to ignore". IT doesn't ignore them, though, so why should we? :)
+		cvtBigEndian		= 0x02,
+		cvtDelta			= 0x04,
+		cvtPTM8to16			= 0x08,
 	};
 
 	uint32 id;				// Magic Bytes (IMPS)
@@ -274,7 +279,7 @@ struct ITSample
 	// Convert an ITSample to OpenMPT's internal sample representation.
 	size_t ConvertToMPT(ModSample &mptSmp) const;
 	// Retrieve the internal sample format flags for this instrument.
-	UINT GetSampleFormat(uint16 cwtv = 0x214) const;
+	SampleIO GetSampleFormat(uint16 cwtv = 0x214) const;
 };
 
 STATIC_ASSERT(sizeof(ITSample) == 80);

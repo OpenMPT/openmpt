@@ -188,7 +188,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 	const DBMFileHeader *pfh = (DBMFileHeader *)lpStream;
 	DWORD dwMemPos;
 	uint16 nOrders, nSamples, nInstruments, nPatterns;
-	
+
 	if ((!lpStream) || (dwMemLength <= sizeof(DBMFileHeader)) || (!pfh->channels)
 	 || (pfh->dbm_id != DBM_FILE_MAGIC) || (!pfh->songs) || (pfh->song_id != DBM_ID_SONG)
 	 || (pfh->name_id != DBM_ID_NAME) || (pfh->name_len != DBM_NAMELEN)
@@ -223,7 +223,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 		uint32 chunk_id = LittleEndian(((uint32 *)(lpStream + dwMemPos))[0]);
 		uint32 chunk_size = BigEndian(((uint32 *)(lpStream + dwMemPos))[1]);
 		uint32 chunk_pos;
-		
+
 		dwMemPos += 8;
 		chunk_pos = dwMemPos;
 		if ((dwMemPos + chunk_size > dwMemLength) || (chunk_size > dwMemLength)) break;
@@ -294,13 +294,13 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 		if (chunk_id == DBM_ID_VENV)
 		{
 			UINT nEnvelopes = lpStream[chunk_pos+1];
-			
+
 			chunk_pos += 2;
 			for (UINT iEnv=0; iEnv<nEnvelopes; iEnv++)
 			{
 				DBMEnvelope *peh;
 				UINT nins;
-				
+
 				if (chunk_pos + sizeof(DBMEnvelope) > dwMemPos) break;
 				peh = (DBMEnvelope *)(lpStream+chunk_pos);
 				nins = BigEndianW(peh->instrument);
@@ -448,7 +448,6 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 			m_nSamples = nSamples;
 			for (UINT iSmp=1; iSmp<=nSamples; iSmp++)
 			{
-				ModSample *pSmp;
 				DBMSample *psh;
 				DWORD samplesize;
 				DWORD sampleflags;
@@ -458,18 +457,26 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				chunk_pos += 8;
 				samplesize = BigEndian(psh->samplesize);
 				sampleflags = BigEndian(psh->flags);
-				pSmp = &Samples[iSmp];
-				pSmp->nLength = samplesize;
-				if (sampleflags & 2)
+
+				ModSample &sample = Samples[iSmp];
+				sample.nLength = samplesize;
+				if(sampleflags & 2)
 				{
-					pSmp->uFlags |= CHN_16BIT;
-					samplesize <<= 1;
+					samplesize *= 2;
 				}
-				if ((chunk_pos+samplesize > dwMemPos) || (samplesize > dwMemLength)) break;
-				if (sampleflags & 3)
+				if(chunk_pos + samplesize > dwMemPos || samplesize > dwMemLength)
 				{
-					ReadSample(pSmp, (pSmp->uFlags & CHN_16BIT) ? RS_PCM16M : RS_PCM8S,
-								(LPSTR)(psh->sampledata), samplesize);
+					break;
+				}
+
+				if(sampleflags & 3)
+				{
+					SampleIO(
+						(sampleflags & 2) ? SampleIO::_16bit : SampleIO::_8bit,
+						SampleIO::mono,
+						SampleIO::bigEndian,
+						SampleIO::signedPCM)
+						.ReadSample(sample, (LPSTR)(psh->sampledata), samplesize);
 				}
 				chunk_pos += samplesize;
 			}
@@ -477,4 +484,3 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	return true;
 }
-

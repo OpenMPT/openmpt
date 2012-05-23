@@ -232,7 +232,6 @@ void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, co
 				cmd.instr = (xx & 0x02) ? lpTracks[pos++] : 0;
 				cmd.volcmd = cmd.vol = 0;
 				cmd.command = cmd.param = 0;
-				if ((cmd.note < NOTE_MAX-12) && (cmd.note)) cmd.note += 12;
 				UINT volume = (xx & 0x04) ? lpTracks[pos++] : 0;
 				UINT commands = (xx & 0x08) ? lpTracks[pos++] : 0;
 				UINT command1 = commands & 0x0F;
@@ -462,7 +461,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 
 						// taken from load_xm.cpp - seems to fix wakingup.mdl
 						if (!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
-							pIns->nFadeOut = 8192;		
+							pIns->nFadeOut = 8192;
 					}
 				}
 				dwPos += 34 + 14 * lpStream[dwPos + 1];
@@ -475,7 +474,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				} catch(MPTMemoryException)
 				{
 				}
-				
+
 			}
 			break;
 		// VE: Volume Envelope
@@ -530,7 +529,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				{
 					const MDLSampleHeader *sampleHeader = reinterpret_cast<const MDLSampleHeader *>(lpStream + dwPos);
 
-					sample.nC5Speed = LittleEndian(sampleHeader->c4Speed);
+					sample.nC5Speed = LittleEndian(sampleHeader->c4Speed) * 2;
 					sample.nLength = LittleEndian(sampleHeader->length);
 					sample.nLoopStart = LittleEndian(sampleHeader->loopStart);
 					sample.nLoopEnd = sample.nLoopStart + LittleEndian(sampleHeader->loopLength);
@@ -558,7 +557,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				{
 					const MDLSampleHeaderv0 *sampleHeader = reinterpret_cast<const MDLSampleHeaderv0 *>(lpStream + dwPos);
 
-					sample.nC5Speed = LittleEndianW(sampleHeader->c4Speed);
+					sample.nC5Speed = LittleEndianW(sampleHeader->c4Speed) * 2;
 					sample.nLength = LittleEndian(sampleHeader->length);
 					sample.nLoopStart = LittleEndian(sampleHeader->loopStart);
 					sample.nLoopEnd = sample.nLoopStart + LittleEndian(sampleHeader->loopLength);
@@ -593,19 +592,24 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			dwPos = dwMemPos;
 			for (i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
 			{
-				ModSample *pSmp = &Samples[i];
-				UINT flags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+				ModSample &sample = Samples[i];
+				SampleIO sampleIO(
+					(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+					SampleIO::mono,
+					SampleIO::littleEndian,
+					SampleIO::signedPCM);
+
 				if (!smpinfo[i])
 				{
-					dwPos += ReadSample(pSmp, flags, (LPSTR)(lpStream+dwPos), dwMemLength - dwPos);
+					dwPos += sampleIO.ReadSample(sample, (LPSTR)(lpStream+dwPos), dwMemLength - dwPos);
 				} else
 				{
 					DWORD dwLen = *((DWORD *)(lpStream+dwPos));
 					dwPos += 4;
 					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
 					{
-						flags = (pSmp->uFlags & CHN_16BIT) ? RS_MDL16 : RS_MDL8;
-						ReadSample(pSmp, flags, (LPSTR)(lpStream+dwPos), dwLen);
+						sampleIO |= SampleIO::MDL;
+						sampleIO.ReadSample(sample, (LPSTR)(lpStream+dwPos), dwLen);
 					}
 					dwPos += dwLen;
 				}
@@ -668,18 +672,17 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 // MDL Sample Unpacking
 
 // MDL Huffman ReadBits compression
-WORD MDLReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n)
-//-----------------------------------------------------------------
+uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n)
+//------------------------------------------------------------------------------
 {
-	WORD v = (WORD)(bitbuf & ((1 << n) - 1) );
+	uint16 v = (uint16)(bitbuf & ((1 << n) - 1) );
 	bitbuf >>= n;
 	bitnum -= n;
 	if (bitnum <= 24)
 	{
-		bitbuf |= (((DWORD)(*ibuf++)) << bitnum);
+		bitbuf |= (((uint32)(*ibuf++)) << bitnum);
 		bitnum += 8;
 	}
 	return v;
 }
-
 

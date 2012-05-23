@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Endianness.h"
+#include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 
 // Execute "action" if "request_bytes" bytes cannot be read from stream at position "position"
@@ -30,7 +31,7 @@ private:
 	const char *streamData;		// Pointer to memory-mapped file
 	size_t streamLength;		// Size of memory-mapped file in bytes
 	size_t streamPos;			// Cursor location in the file
-	
+
 public:
 	FileReader(const char *data, size_t length) : streamData(data), streamLength(length), streamPos(0) { }
 	FileReader(const FileReader &other) : streamData(other.streamData), streamLength(other.streamLength), streamPos(other.streamPos) { }
@@ -76,6 +77,21 @@ public:
 		}
 	}
 
+	// Decreases position by skipBytes.
+	// Returns true if skipBytes could be skipped or false if the file start was reached earlier.
+	bool SkipBack(size_t skipBytes)
+	{
+		if(streamPos >= skipBytes)
+		{
+			streamPos -= skipBytes;
+			return true;
+		} else
+		{
+			streamPos = 0;
+			return false;
+		}
+	}
+
 	// Returns cursor position in the mapped file.
 	size_t GetPosition() const
 	{
@@ -107,7 +123,7 @@ public:
 	{
 		if(position < streamLength)
 		{
-			return FileReader(streamData + position, min(length, streamLength - position));
+			return FileReader(streamData + position, Util::Min(length, streamLength - position));
 		} else
 		{
 			return FileReader(nullptr, 0);
@@ -316,7 +332,7 @@ public:
 	template <typename T>
 	bool ReadStructPartial(T &target, size_t partialSize = sizeof(target))
 	{
-		const size_t copyBytes = min(min(partialSize, sizeof(target)), BytesLeft());
+		const size_t copyBytes = Util::Min(partialSize, sizeof(target), BytesLeft());
 
 		memcpy(&target, streamData + streamPos, copyBytes);
 		memset(reinterpret_cast<const char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
@@ -431,3 +447,4 @@ public:
 };
 
 #include "Sndfile.h"
+#include "SampleIO.h"

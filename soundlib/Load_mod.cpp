@@ -84,7 +84,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_TONEPORTAVOL:		command = 0x05; break;
 	case CMD_VIBRATOVOL:		command = 0x06; break;
 	case CMD_TREMOLO:			command = 0x07; break;
-	case CMD_PANNING8:			
+	case CMD_PANNING8:
 		command = 0x08;
 		if(m_nType & MOD_TYPE_S3M)
 		{
@@ -135,7 +135,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 		else
 			command = 'Y' - 55;
 		break;
-	case CMD_MIDI:				
+	case CMD_MIDI:
 		if(compatibilityExport)
 			command = param = 0;
 		else
@@ -160,7 +160,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 		case 0x20:	command = 0x0E; param = (param & 0x0F) | 0x50; break;
 		case 0x30:	command = 0x0E; param = (param & 0x0F) | 0x40; break;
 		case 0x40:	command = 0x0E; param = (param & 0x0F) | 0x70; break;
-		case 0x90:  
+		case 0x90:
 			if(compatibilityExport)
 				command = param = 0;
 			else
@@ -251,7 +251,7 @@ struct MODSampleHeader
 		if (mptSmp.nLength)
 		{
 			if(mptSmp.nLoopStart >= mptSmp.nLength)
-			{ 
+			{
 				mptSmp.nLoopStart = mptSmp.nLength - 1;
 			}
 			if(mptSmp.nLoopEnd > mptSmp.nLength)
@@ -288,7 +288,7 @@ struct MODSampleHeader
 		LimitMax(writeLength, SmpLength(0x1FFF0));
 
 		length = static_cast<uint16>(writeLength / 2);
-		
+
 		if(mptSmp.RelativeTone < 0)
 		{
 			finetune = 0x08;
@@ -310,6 +310,17 @@ struct MODSampleHeader
 		}
 
 		return writeLength;
+	}
+
+
+	// Retrieve the internal sample format flags for this sample.
+	static SampleIO GetSampleFormat()
+	{
+		return SampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::bigEndian,
+			SampleIO::signedPCM);
 	}
 };
 
@@ -414,7 +425,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	// Load Samples
 	int m15Errors = 0;
 	size_t totalSampleLen = 0;
-	
+
 	file.Seek(20);
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
@@ -694,7 +705,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	// Reading samples
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		ReadSample(&Samples[smp], RS_PCM8S, file);
+		MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
 	}
 
 	// Fix VBlank MODs. Arbitrary threshold: 10 minutes.
@@ -702,7 +713,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	// for MODs which are supposed to have VBlank timing (instead of CIA timing).
 	// There is no perfect way to do this, since both MOD types look the same,
 	// but the most reliable way is to simply check for extremely long songs
-	// (as this would indicate that f.e. a F30 command was really meant to set
+	// (as this would indicate that e.g. a F30 command was really meant to set
 	// the ticks per row to 48, and not the tempo to 48 BPM).
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
@@ -876,7 +887,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 			fwrite(&events[0], eventByte, 1, f);
 		}
 	}
-	
+
 	//Check for unsaved patterns
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
@@ -892,7 +903,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	}
 #endif
 
-	// Writing instruments
+	// Writing samples
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		if(sampleLength[smp] == 0)
@@ -902,7 +913,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 		const ModSample &sample = Samples[sampleSource[smp]];
 
 		const long sampleStart = ftell(f);
-		const UINT writtenBytes = WriteSample(f, &sample, RS_PCM8S, sampleLength[smp]);
+		const size_t writtenBytes = MODSampleHeader::GetSampleFormat().WriteSample(f, sample, sampleLength[smp]);
 
 		static const int8 silence[] = {0, 0};
 

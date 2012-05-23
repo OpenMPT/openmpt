@@ -477,7 +477,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\Sampleio.cpp"
+				RelativePath="..\soundlib\SampleFormats.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\SampleIO.cpp"
 				>
 			</File>
 			<File
@@ -1135,7 +1139,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\SampleFormatConverters.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SampleGenerator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\SampleIO.h"
 				>
 			</File>
 			<File
@@ -1228,10 +1240,6 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Wav.h"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\wavConverter.h"
 				>
 			</File>
 			<File
@@ -1350,6 +1358,10 @@
 		<Filter
 			Name="Module Loaders"
 			>
+			<File
+				RelativePath="..\soundlib\ChunkReader.h"
+				>
+			</File>
 			<File
 				RelativePath="..\soundlib\ITTools.cpp"
 				>

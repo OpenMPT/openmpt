@@ -84,8 +84,8 @@ struct ModInstrument
 	InstrumentEnvelope PanEnv;		// Panning envelope data
 	InstrumentEnvelope PitchEnv;	// Pitch / filter envelope data
 
-	BYTE NoteMap[128];			// Note mapping, f.e. C-5 => D-5.
-	SAMPLEINDEX Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
+	BYTE NoteMap[128];			// Note mapping, e.g. C-5 => D-5.
+	SAMPLEINDEX Keyboard[128];	// Sample mapping, e.g. C-5 => Sample 1
 
 	CHAR name[MAX_INSTRUMENTNAME];		// Note: not guaranteed to be null-terminated.
 	CHAR filename[MAX_INSTRUMENTFILENAME];

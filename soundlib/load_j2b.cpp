@@ -20,7 +20,7 @@
 
 
 // First off, a nice vibrato translation LUT.
-static const uint8 j2bAutoVibratoTrans[] = 
+static const uint8 j2bAutoVibratoTrans[] =
 {
 	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
 };
@@ -160,7 +160,7 @@ struct AMFFEnvelope
 		if(flags & AMFFEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
 
 		// The buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
-		mptEnv.nNodes = min(numPoints, 10);
+		mptEnv.nNodes = Util::Min(numPoints, static_cast<uint8>(10));
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 		if(mptEnv.nSustainStart > mptEnv.nNodes)
@@ -252,7 +252,7 @@ struct AMFFSampleHeader
 		smpPingPong	= 0x10,
 		smpPanning	= 0x20,
 		smpExists	= 0x80,
-		// some flags are still missing... what is f.e. 0x8000?
+		// some flags are still missing... what is e.g. 0x8000?
 	};
 
 	uint32 id;	// "SAMP"
@@ -286,16 +286,16 @@ struct AMFFSampleHeader
 		mptSmp.nPan = pan * 4;
 		mptSmp.nVolume = volume * 4;
 		mptSmp.nGlobalVol = 64;
-		mptSmp.nLength = min(length, MAX_SAMPLE_LENGTH);
+		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
 		mptSmp.nC5Speed = sampleRate;
 
 		if(instrHeader.vibratoType < CountOf(j2bAutoVibratoTrans))
 			mptSmp.nVibType = j2bAutoVibratoTrans[instrHeader.vibratoType];
-		mptSmp.nVibSweep = static_cast<BYTE>(instrHeader.vibratoSweep);
-		mptSmp.nVibRate = static_cast<BYTE>(instrHeader.vibratoRate / 16);
-		mptSmp.nVibDepth = static_cast<BYTE>(instrHeader.vibratoDepth / 4);
+		mptSmp.nVibSweep = static_cast<uint8>(instrHeader.vibratoSweep);
+		mptSmp.nVibRate = static_cast<uint8>(instrHeader.vibratoRate / 16);
+		mptSmp.nVibDepth = static_cast<uint8>(instrHeader.vibratoDepth / 4);
 		if((mptSmp.nVibRate | mptSmp.nVibDepth) != 0)
 		{
 			// Convert XM-style vibrato sweep to IT
@@ -310,6 +310,16 @@ struct AMFFSampleHeader
 			mptSmp.uFlags |= CHN_PINGPONGLOOP;
 		if(flags & AMFFSampleHeader::smpPanning)
 			mptSmp.uFlags |= CHN_PANNING;
+	}
+
+	// Retrieve the internal sample format flags for this sample.
+	SampleIO GetSampleFormat() const
+	{
+		return SampleIO(
+			(flags & AMFFSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
 	}
 };
 
@@ -361,7 +371,7 @@ struct AMEnvelope
 		if(flags & AMFFEnvelope::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
 		if(flags & AMFFEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
 
-		mptEnv.nNodes = min(numPoints + 1, 10);
+		mptEnv.nNodes = Util::Min(numPoints + 1, 10);
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 		if(mptEnv.nSustainStart > mptEnv.nNodes)
@@ -485,19 +495,19 @@ struct AMSampleHeader
 	// Convert sample header to OpenMPT's internal format.
 	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
-		mptSmp.nPan = min(pan, 32767) * 256 / 32767;
-		mptSmp.nVolume = min(volume, 32767) * 256 / 32767;
+		mptSmp.nPan = Util::Min(pan, static_cast<uint16>(32767)) * 256 / 32767;
+		mptSmp.nVolume = Util::Min(volume, static_cast<uint16>(32767)) * 256 / 32767;
 		mptSmp.nGlobalVol = 64;
-		mptSmp.nLength = min(length, MAX_SAMPLE_LENGTH);
+		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
 		mptSmp.nC5Speed = sampleRate;
 
 		if(instrHeader.vibratoType < CountOf(j2bAutoVibratoTrans))
 			mptSmp.nVibType = j2bAutoVibratoTrans[instrHeader.vibratoType];
-		mptSmp.nVibSweep = static_cast<BYTE>(instrHeader.vibratoSweep);
-		mptSmp.nVibRate = static_cast<BYTE>(instrHeader.vibratoRate / 16);
-		mptSmp.nVibDepth = static_cast<BYTE>(instrHeader.vibratoDepth / 4);
+		mptSmp.nVibSweep = static_cast<uint8>(instrHeader.vibratoSweep);
+		mptSmp.nVibRate = static_cast<uint8>(instrHeader.vibratoRate / 16);
+		mptSmp.nVibDepth = static_cast<uint8>(instrHeader.vibratoDepth / 4);
 		if((mptSmp.nVibRate | mptSmp.nVibDepth) != 0)
 		{
 			// Convert XM-style vibrato sweep to IT
@@ -512,6 +522,16 @@ struct AMSampleHeader
 			mptSmp.uFlags |= CHN_PINGPONGLOOP;
 		if(flags & AMFFSampleHeader::smpPanning)
 			mptSmp.uFlags |= CHN_PANNING;
+	}
+
+	// Retrieve the internal sample format flags for this sample.
+	SampleIO GetSampleFormat() const
+	{
+		return SampleIO(
+			(flags & AMFFSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
 	}
 };
 
@@ -594,7 +614,7 @@ bool ConvertAMPattern(FileReader &chunk, PATTERNINDEX pat, bool isAM, CSoundFile
 #endif // DEBUG
 					m.command = CMD_NONE;
 				}
-					
+
 				// Handling special commands
 				switch(m.command)
 				{
@@ -697,7 +717,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 	m_nChannels = 0;
 	m_nSamples = 0;
 	m_nInstruments = 0;
-	
+
 	// go through all chunks now
 	while(file.BytesLeft())
 	{
@@ -736,7 +756,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 				{
 					return false;
 				}
-				m_nChannels = min(mainChunk.channels, MAX_BASECHANNELS);
+				m_nChannels = Util::Min(static_cast<CHANNELINDEX>(mainChunk.channels), MAX_BASECHANNELS);
 				m_nDefaultSpeed = mainChunk.speed;
 				m_nDefaultTempo = mainChunk.tempo;
 				m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
@@ -838,7 +858,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 
 					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 					sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
-					ReadSample(&Samples[smp], (sampleHeader.flags & AMFFSampleHeader::smp16Bit) ? RS_PCM16S : RS_PCM8S, chunk);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
 				}
 			}
 			break;
@@ -904,7 +924,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 					{
 						break;
 					}
-					
+
 					FileReader sampleFileChunk = chunk.GetChunk(sampleChunk.length);
 
 					AMSampleHeader sampleHeader;
@@ -920,7 +940,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 					sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
 
 					sampleFileChunk.Seek(sampleHeader.headSize + 4);
-					ReadSample(&Samples[smp], (sampleHeader.flags & AMFFSampleHeader::smp16Bit) ? RS_PCM16S : RS_PCM8S, sampleFileChunk);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], sampleFileChunk);
 
 					// RIFF AM has a padding byte so that all chunks have an even size.
 					if((sampleChunk.length % 2) != 0)

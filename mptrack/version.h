@@ -56,7 +56,7 @@ namespace MptVersion
 			strVersion = "Unknown";
 		} else if((v & 0xFFFF) == 0)
 		{
-			// Only parts of the version number are known (f.e. when reading the version from the IT or S3M file header)
+			// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
 			strVersion.Format("%X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF);
 		} else
 		{

@@ -127,3 +127,28 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 		rate = nC5Speed;
 	return (rate > 0) ? rate : 8363;
 }
+
+
+// Allocate sample based on a ModSample's properties.
+// Returns number of bytes allocated, 0 on failure.
+size_t ModSample::AllocateSample()
+//--------------------------------
+{
+	FreeSample();
+	size_t sampleSize = (nLength + 6) * GetBytesPerSample();
+	if((pSample = CSoundFile::AllocateSample(sampleSize)) == nullptr)
+	{
+		return 0;
+	} else
+	{
+		return sampleSize;
+	}
+}
+
+
+void ModSample::FreeSample()
+//--------------------------
+{
+	CSoundFile::FreeSample(pSample);
+	pSample = nullptr;
+}

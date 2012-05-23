@@ -77,7 +77,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	AMSFILEHEADER *pfh = (AMSFILEHEADER *)lpStream;
 	DWORD dwMemPos;
 	UINT tmp, tmp2;
-	
+
 	if ((!lpStream) || (dwMemLength < 126)) return false;
 	if ((pfh->verhi != 0x01) || (strncmp(pfh->szHeader, "Extreme", 7))
 	 || (!pfh->patterns) || (!pfh->orders) || (!pfh->samples) || (pfh->samples >= MAX_SAMPLES)
@@ -113,9 +113,12 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if (dwMemPos + 1 >= dwMemLength) return true;
 	tmp = lpStream[dwMemPos++];
 	if (dwMemPos + tmp >= dwMemLength) return true;
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
+	if(tmp)
+	{
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
+		dwMemPos += tmp;
+	}
 
-	dwMemPos += tmp;
 
 	// Read sample names
 	for (UINT sNam=1; sNam<=m_nSamples; sNam++)
@@ -123,8 +126,11 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (dwMemPos + 1 >= dwMemLength) return true;
 		tmp = lpStream[dwMemPos++];
 		if (dwMemPos + tmp >= dwMemLength) return true;
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[sNam], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
-		dwMemPos += tmp;
+		if(tmp)
+		{
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[sNam], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
+			dwMemPos += tmp;
+		}
 	}
 
 	// Read Channel names
@@ -133,8 +139,11 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (dwMemPos + 1 >= dwMemLength) return true;
 		uint8 chnnamlen = lpStream[dwMemPos++];
 		if (dwMemPos + tmp >= dwMemLength) return true;
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(ChnSettings[cNam].szName, reinterpret_cast<const char *>(lpStream + dwMemPos), chnnamlen);
-		dwMemPos += chnnamlen;
+		if(chnnamlen)
+		{
+			StringFixer::ReadString<StringFixer::maybeNullTerminated>(ChnSettings[cNam].szName, reinterpret_cast<const char *>(lpStream + dwMemPos), chnnamlen);
+			dwMemPos += chnnamlen;
+		}
 	}
 
 	// Read Pattern Names
@@ -151,7 +160,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		dwMemPos += tmp;
 	}
-	
+
 	// Read Song Comments
 	tmp = *((WORD *)(lpStream+dwMemPos));
 	dwMemPos += 2;
@@ -274,8 +283,12 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
 	{
 		if (dwMemPos >= dwMemLength - 9) return true;
-		UINT flags = (Samples[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
-		dwMemPos += ReadSample(&Samples[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+		dwMemPos += SampleIO(
+			(Samples[iSmp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::AMS)
+			.ReadSample(Samples[iSmp], (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
 	return true;
 }
@@ -395,7 +408,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 		{
 			return true;
 		}
-		
+
 		MemsetZero(smpmap);
 
 		for (UINT ismpmap=0; ismpmap<pSmp->samples; ismpmap++)
@@ -577,15 +590,13 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
 	{
 		if (dwMemPos >= dwMemLength - 9) return true;
-		UINT flags;
-		if (packedsamples[iSmp] & 0x03)
-		{
-			flags = (Samples[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
-		} else
-		{
-			flags = (Samples[iSmp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
-		}
-		dwMemPos += ReadSample(&Samples[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+
+		dwMemPos += SampleIO(
+			(Samples[iSmp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			(packedsamples[iSmp] & 0x03) ? SampleIO::AMS, SampleIO::signedPCM)
+			.ReadSample(Samples[iSmp], format, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
 	return true;
 #endif
@@ -600,7 +611,7 @@ void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char pac
 {
 	UINT tmplen = dmax;
 	signed char *amstmp = new signed char[tmplen];
-	
+
 	if (!amstmp) return;
 	// Unpack Loop
 	{
@@ -661,4 +672,3 @@ void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char pac
 	}
 	delete[] amstmp;
 }
-

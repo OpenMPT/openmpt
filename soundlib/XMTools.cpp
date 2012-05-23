@@ -429,7 +429,6 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 		}
 	}
 
-	LimitMax(mptSmp.nLength, UINT(MAX_SAMPLE_LENGTH));
 	LimitMax(mptSmp.nLoopStart, mptSmp.nLength);
 	Limit(mptSmp.nLoopEnd, mptSmp.nLoopStart, mptSmp.nLength);
 
@@ -443,19 +442,18 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 
 
 // Retrieve the internal sample format flags for this instrument.
-UINT XMSample::GetSampleFormat() const
-//------------------------------------
+SampleIO XMSample::GetSampleFormat() const
+//----------------------------------------
 {
 	if(reserved == sampleADPCM && !(flags & (XMSample::sample16Bit | XMSample::sampleStereo)))
 	{
-		return RS_ADPCM4;
+		// MODPlugin :(
+		return SampleIO(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::ADPCM);
 	}
 
-	if(flags & XMSample::sampleStereo)
-	{
-		return (flags & XMSample::sample16Bit) ? RS_STPCM16D : RS_STPCM8D;
-	} else
-	{
-		return (flags & XMSample::sample16Bit) ? RS_PCM16D : RS_PCM8D;
-	}
+	return SampleIO(
+		(flags & XMSample::sample16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+		(flags & XMSample::sampleStereo) ? SampleIO::stereoSplit : SampleIO::mono,
+		SampleIO::littleEndian,
+		SampleIO::deltaPCM);
 }
