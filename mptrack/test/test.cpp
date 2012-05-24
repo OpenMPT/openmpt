@@ -11,6 +11,15 @@
 
 #include "stdafx.h"
 #include "test.h"
+
+
+#ifdef _DEBUG
+	#define new DEBUG_NEW
+#endif
+
+#ifdef ENABLE_TESTS
+
+
 #include "../mptrack.h"
 #include "../moddoc.h"
 #include "../MainFrm.h"
@@ -20,16 +29,11 @@
 #include "../../common/misc_util.h"
 #include "../../common/StringFixer.h"
 #include "../serialization_utils.h"
+#include "../../soundlib/SampleFormatConverters.h"
 #include <limits>
 #include <fstream>
 #include <strstream>
 
-
-#ifdef _DEBUG
-	#define new DEBUG_NEW
-#endif
-
-#ifdef ENABLE_TESTS
 
 namespace MptTest
 {
@@ -78,6 +82,7 @@ void TestPCnoteSerialization();
 void TestMisc();
 void TestMIDIEvents();
 void TestStringIO();
+void TestSampleConversion();
 
 
 
@@ -92,6 +97,7 @@ void DoTests()
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestLoadSaveFile);
 	DO_TEST(TestStringIO);
+	DO_TEST(TestSampleConversion);
 
 	Log(TEXT("Tests were run\n"));
 }
@@ -1175,6 +1181,181 @@ void TestStringIO()
 #undef WriteTest
 
 }
+
+
+void TestSampleConversion()
+//-------------------------
+{
+	uint8 *sourceBuf = new uint8[65536 * 4];
+	void *targetBuf = new uint8[65536 * 6];
+
+
+	// Signed 8-Bit Integer PCM
+	// Unsigned 8-Bit Integer PCM
+	// Delta 8-Bit Integer PCM
+	{
+		uint8 *source8 = sourceBuf;
+		for(size_t i = 0; i < 256; i++)
+		{
+			source8[i] = static_cast<uint8>(i);
+		}
+
+		int8 *signed8 = static_cast<int8 *>(targetBuf);
+		uint8 *unsigned8 = static_cast<uint8 *>(targetBuf) + 256;
+		int8 *delta8 = static_cast<int8 *>(targetBuf) + 512;
+		int8 delta = 0;
+		CopySample<ReadInt8PCM<0> >(signed8, 256, 1, source8, 256, 1);
+		CopySample<ReadInt8PCM<0x80u> >(unsigned8, 256, 1, source8, 256, 1);
+		CopySample<ReadInt8DeltaPCM>(delta8, 256, 1, source8, 256, 1);
+
+		for(size_t i = 0; i < 256; i++)
+		{
+			delta += static_cast<int8>(i);
+			VERIFY_EQUAL_NONCONT(signed8[i], static_cast<int8>(i));
+			VERIFY_EQUAL_NONCONT(unsigned8[i], static_cast<uint8>(i + 0x80u));
+			VERIFY_EQUAL_NONCONT(delta8[i], static_cast<int8>(delta));
+		}
+	}
+
+	// Signed 16-Bit Integer PCM
+	// Unsigned 16-Bit Integer PCM
+	// Delta 16-Bit Integer PCM
+	{
+		// Little Endian
+
+		uint8 *source16 = sourceBuf;
+		for(size_t i = 0; i < 65536; i++)
+		{
+			source16[i * 2 + 0] = static_cast<uint8>(i & 0xFF);
+			source16[i * 2 + 1] = static_cast<uint8>(i >> 8);
+		}
+
+		int16 *signed16 = static_cast<int16 *>(targetBuf);
+		uint16 *unsigned16 = static_cast<uint16 *>(targetBuf) + 65536;
+		int16 *delta16 = static_cast<int16 *>(targetBuf) + 65536 * 2;
+		int16 delta = 0;
+		CopySample<ReadInt16PCM<0, littleEndian16> >(signed16, 65536, 1, source16, 65536 * 2, 1);
+		CopySample<ReadInt16PCM<0x8000u, littleEndian16> >(unsigned16, 65536, 1, source16, 65536 * 2, 1);
+		CopySample<ReadInt16DeltaPCM<littleEndian16> >(delta16, 65536, 1, source16, 65536 * 2, 1);
+
+		for(size_t i = 0; i < 65536; i++)
+		{
+			delta += static_cast<int16>(i);
+			VERIFY_EQUAL_NONCONT(signed16[i], static_cast<int16>(i));
+			VERIFY_EQUAL_NONCONT(unsigned16[i], static_cast<uint16>(i + 0x8000u));
+			VERIFY_EQUAL_NONCONT(delta16[i], static_cast<int16>(delta));
+		}
+
+		// Big Endian
+
+		for(size_t i = 0; i < 65536; i++)
+		{
+			source16[i * 2 + 0] = static_cast<uint8>(i >> 8);
+			source16[i * 2 + 1] = static_cast<uint8>(i & 0xFF);
+		}
+
+		CopySample<ReadInt16PCM<0, bigEndian16> >(signed16, 65536, 1, source16, 65536 * 2, 1);
+		CopySample<ReadInt16PCM<0x8000u, bigEndian16> >(unsigned16, 65536, 1, source16, 65536 * 2, 1);
+		CopySample<ReadInt16DeltaPCM<bigEndian16> >(delta16, 65536, 1, source16, 65536 * 2, 1);
+
+		delta = 0;
+		for(size_t i = 0; i < 65536; i++)
+		{
+			delta += static_cast<int16>(i);
+			VERIFY_EQUAL_NONCONT(signed16[i], static_cast<int16>(i));
+			VERIFY_EQUAL_NONCONT(unsigned16[i], static_cast<uint16>(i + 0x8000u));
+			VERIFY_EQUAL_NONCONT(delta16[i], static_cast<int16>(delta));
+		}
+
+	}
+
+	// Signed 24-Bit Integer PCM
+	{
+		uint8 *source24 = sourceBuf;
+		for(size_t i = 0; i < 65536; i++)
+		{
+			source24[i * 3 + 0] = 0;
+			source24[i * 3 + 1] = static_cast<uint8>(i & 0xFF);
+			source24[i * 3 + 2] = static_cast<uint8>(i >> 8);
+		}
+
+		int16 *truncated16 = static_cast<int16 *>(targetBuf);
+		ModSample sample;
+		sample.Initialize();
+		sample.nLength = 65536;
+		sample.uFlags |= CHN_16BIT;
+		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
+		CopyAndNormalizeSample<ReadBigIntToInt16PCMandNormalize<ReadInt24to32PCM<0, littleEndian24> > >(sample, reinterpret_cast<const uint8 *>(source24), sizeof(source24));
+		CopySample<ReadBigIntTo16PCM<3, 1, 2> >(truncated16, 65536, 1, source24, 65536 * 3, 1);
+
+		for(size_t i = 0; i < 65536; i++)
+		{
+			int16 normValue = reinterpret_cast<const int16 *>(sample.pSample)[i];
+			if(abs(normValue - static_cast<int16>(i - 0x8000u)) > 1)
+			{
+				VERIFY_EQUAL_NONCONT(true, false);
+			}
+			VERIFY_EQUAL_NONCONT(truncated16[i], static_cast<int16>(i));
+		}
+	}
+
+	// Float 32-Bit
+	{
+		uint8 *source32 = sourceBuf;
+		for(size_t i = 0; i < 65536; i++)
+		{
+			union
+			{
+				float f;
+				uint32 i;
+			} val;
+
+			val.f = (static_cast<float>(i) / 65536.0f) - 0.5f;
+			source32[i * 4 + 0] = static_cast<uint8>(val.i >> 24);
+			source32[i * 4 + 1] = static_cast<uint8>(val.i >> 16);
+			source32[i * 4 + 2] = static_cast<uint8>(val.i >> 8);
+			source32[i * 4 + 3] = static_cast<uint8>(val.i >> 0);
+		}
+
+		int16 *truncated16 = static_cast<int16 *>(targetBuf);
+		ModSample sample;
+		sample.Initialize();
+		sample.nLength = 65536;
+		sample.uFlags |= CHN_16BIT;
+		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
+		CopyAndNormalizeSample<ReadFloat32to16PCMandNormalize<bigEndian32> >(sample, reinterpret_cast<const uint8 *>(source32), sizeof(source32));
+		CopySample<ReadFloat32toInt16PCM<bigEndian32> >(truncated16, 65536, 1, source32, 65536 * 4, 1);
+
+		for(size_t i = 0; i < 65536; i++)
+		{
+			int16 normValue = reinterpret_cast<const int16 *>(sample.pSample)[i];
+			if(abs(normValue - static_cast<int16>(i- 0x8000u)) > 1)
+			{
+				VERIFY_EQUAL_NONCONT(true, false);
+			}
+			if(abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) > 1)
+			{
+				VERIFY_EQUAL_NONCONT(true, false);
+			}
+		}
+	}
+
+	// Range checks
+	{
+		int8 oneSample = 1;
+		int8 *signed8 = static_cast<int8 *>(targetBuf);
+		memset(signed8, 0, 4);
+		CopySample<ReadInt8PCM<0> >(targetBuf, 4, 1, &oneSample, sizeof(oneSample), 1);
+		VERIFY_EQUAL_NONCONT(signed8[0], 1);
+		VERIFY_EQUAL_NONCONT(signed8[1], 0);
+		VERIFY_EQUAL_NONCONT(signed8[2], 0);
+		VERIFY_EQUAL_NONCONT(signed8[3], 0);
+	}
+
+	delete[] sourceBuf;
+	delete[] targetBuf;
+}
+
 
 }; //Namespace MptTest
 

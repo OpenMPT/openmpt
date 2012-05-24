@@ -233,7 +233,8 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 	{
 		int32 val = sampleConv(sourceBuffer);
 		const double NC = (val < 0) ? 32768.0 : 32767.0;	// Normalization Constant
-		return static_cast<int16>(static_cast<double>(val) / maxVal * NC);
+		const double roundBias = (val < 0) ? -0.5 : 0.5;
+		return static_cast<int16>((static_cast<double>(val) / maxVal * NC) + roundBias);
 	}
 };
 
@@ -242,26 +243,32 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, conversionHasNoState>
 {
-	float maxVal;
+	union
+	{
+		float f;
+		uint32 i;
+	} maxVal;
 
-	ReadFloat32to16PCMandNormalize() : maxVal(0.0f) { }
+	ReadFloat32to16PCMandNormalize() { maxVal.i = 0; }
 
 	inline void FindMax(const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		uint32 in32 = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
-		in32 &= ~0x80000000;	// Remove sign for absolute value
+		uint32 val = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
+		val &= ~0x80000000;	// Remove sign for absolute value
 
-		float val = *reinterpret_cast<float *>(&in32);
-		if(val > maxVal)
+		// IEEE float values are lexicographically ordered and can be compared when interpreted as integers.
+		// So we won't bother with loading the float into a floating point register here if we already have it in an integer register.
+		if(val > maxVal.i)
 		{
-			maxVal = val;
+			ASSERT(*reinterpret_cast<float *>(&val) > maxVal.f);
+			maxVal.i = val;
 		}
 	}
 
 	bool IsSilent() const
 	{
-		return (maxVal == 0.0f);
+		return (maxVal.i == 0);
 	}
 
 	inline int16 operator() (const void *sourceBuffer)
@@ -270,9 +277,9 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 		const uint32 in32 = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
 		const bool negative = (in32 & 0x80000000) != 0;
 
-		const float &in = *reinterpret_cast<const float *>(&in32);
-		int16 result = static_cast<int16>((in / maxVal) * (negative ? 32768.0f : 32767.0f));
-		return result;
+		const float val = (*reinterpret_cast<const float *>(&in32) / maxVal.f) * (negative ? 32768.0f : 32767.0f);
+		ASSERT(val >= -32768.0f && val <= 32767.0f);
+		return static_cast<int16>(val);
 	}
 };
 
