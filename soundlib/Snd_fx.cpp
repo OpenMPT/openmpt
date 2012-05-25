@@ -2521,7 +2521,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 		return;
 	}
 	// Regular Slide
-	if (!(m_dwSongFlags & SONG_FIRSTTICK) || (m_nMusicSpeed == 1))  //rewbs.PortaA01fix
+	if (!(m_dwSongFlags & SONG_FIRSTTICK))
 	{
 		DoFreqSlide(pChn, -int(param) * 4);
 	}
@@ -2563,7 +2563,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 		}
 		return;
 	}
-	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1))	//rewbs.PortaA01fix
+	if (!(m_dwSongFlags & SONG_FIRSTTICK))
 	{
 		DoFreqSlide(pChn, int(param) * 4);
 	}
@@ -2799,12 +2799,12 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 	} //End candidate MPT behavior.
 
 	if (param) pChn->nPortamentoSlide = param * 4;
-	if ((pChn->nPeriod) && (pChn->nPortamentoDest) && ((m_nMusicSpeed == 1) || !(m_dwSongFlags & SONG_FIRSTTICK)))  //rewbs.PortaA01fix
+	if (pChn->nPeriod && pChn->nPortamentoDest && !(m_dwSongFlags & SONG_FIRSTTICK))
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
 		{
 			LONG delta = (int)pChn->nPortamentoSlide;
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))))
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))))
 			{
 				UINT n = pChn->nPortamentoSlide >> 2;
 				if (n > 255) n = 255;
@@ -2819,7 +2819,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 		if (pChn->nPeriod > pChn->nPortamentoDest)
 		{
 			LONG delta = - (int)pChn->nPortamentoSlide;
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))))
+			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))))
 			{
 				UINT n = pChn->nPortamentoSlide >> 2;
 				if (n > 255) n = 255;
