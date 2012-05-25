@@ -161,6 +161,8 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this);
 
+	samplecount_t renderedSamples = 0;
+
 	for (;;)
 	{
 		UINT rowDelay = 0, tickDelay = 0;
@@ -528,8 +530,17 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			nNextPatStartRow = 0;
 		}
 
-		// XXX this does not take per-pattern time signatures into consideration!
-		memory.elapsedTime += GetRowDuration(memory.musicTempo, memory.musicSpeed, (memory.musicSpeed + tickDelay) * max(rowDelay, 1));
+		ROWINDEX rowsPerBeat = m_nDefaultRowsPerBeat;
+		if(Patterns[nPattern].GetOverrideSignature())
+		{
+			rowsPerBeat = Patterns[nPattern].GetRowsPerBeat();
+		}
+
+		const UINT tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
+		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * max(rowDelay, 1);
+
+		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(gdwMixingFreq);
+		renderedSamples += rowDuration;
 	}
 
 	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
@@ -537,15 +548,17 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		retval.lastOrder = nCurrentOrder;
 		retval.lastRow = nRow;
 	}
-	retval.duration = memory.elapsedTime / 1000.0;
+	retval.duration = memory.elapsedTime;
 
 	// Store final variables
-	if ((adjustMode & eAdjust))
+	if((adjustMode & eAdjust))
 	{
-		if (retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
+		if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 		{
 			// Target found, or there is no target (i.e. play whole song)...
 			m_nGlobalVolume = memory.glbVol;
+			m_lTotalSampleCount = renderedSamples;
+			m_bPositionChanged = true;
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{
 				//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
@@ -559,10 +572,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			}
 			m_nMusicSpeed = memory.musicSpeed;
 			m_nMusicTempo = memory.musicTempo;
-			for (CHANNELINDEX n = 0; n < GetNumChannels(); n++)
+			for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
 				Chn[n].nGlobalVol = memory.chnVols[n];
-				if (memory.notes[n] != NOTE_NONE)
+				if(memory.notes[n] != NOTE_NONE)
 				{
 					Chn[n].nNewNote = memory.notes[n];
 					if(ModCommand::IsNote(memory.notes[n]))
@@ -570,10 +583,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 						Chn[n].nLastNote = memory.notes[n];
 					}
 				}
-				if (memory.instr[n]) Chn[n].nNewIns = memory.instr[n];
-				if (memory.vols[n] != 0xFF)
+				if(memory.instr[n]) Chn[n].nNewIns = memory.instr[n];
+				if(memory.vols[n] != 0xFF)
 				{
-					if (memory.vols[n] > 64) memory.vols[n] = 64;
+					if(memory.vols[n] > 64) memory.vols[n] = 64;
 					Chn[n].nVolume = memory.vols[n] * 4;
 				}
 			}

@@ -1898,7 +1898,7 @@ void CModDoc::OnPlayerPlay()
 			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
-                 
+
 		bool isPlaying = (pMainFrm->GetModPlaying() == this);
 		if ((isPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP/*|SONG_PATTERNLOOP*/))))
 		{
@@ -1908,11 +1908,14 @@ void CModDoc::OnPlayerPlay()
 
 		CriticalSection cs;
 
-		for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) if (!m_SndFile.Chn[i].nMasterChn)
+		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++) if (!m_SndFile.Chn[i].nMasterChn)
 		{
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
 			if (!isPlaying) m_SndFile.Chn[i].nLength = 0;
 		}
+
+		m_SndFile.m_bPositionChanged = true;
+
 		if (isPlaying)
 		{
 			m_SndFile.StopAllVsti();
@@ -2005,9 +2008,14 @@ void CModDoc::OnPlayerPlayFromStart()
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.visitedSongRows.Initialize(true);
 		pMainFrm->ResetElapsedTime();
+		m_SndFile.m_lTotalSampleCount = 0;
+		m_SndFile.m_bPositionChanged = true;
 
 		CriticalSection cs;
+
+		m_SndFile.m_bPositionChanged = true;
 		m_SndFile.ResumePlugins();
+
 		cs.Leave();
 
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
@@ -2285,7 +2293,7 @@ void CModDoc::OnPatternRestart()
 			//User has sent play pattern command: set loop pattern checkbox to true.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
 		}
-                   
+
 		CSoundFile *pSndFile = GetSoundFile();
 
 		ROWINDEX nRow;
@@ -2299,11 +2307,8 @@ void CModDoc::OnPatternRestart()
 		
 		CriticalSection cs;
 
-		// set playback timer in the status bar (and update channel status)
-		SetElapsedTime(nOrd, 0);
-
 		// Cut instruments/samples
-		for (UINT i=0; i<MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			pSndFile->Chn[i].nPatternLoopCount = 0;
 			pSndFile->Chn[i].nPatternLoop = 0;
@@ -2314,7 +2319,10 @@ void CModDoc::OnPatternRestart()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
-		//rewbs.vstCompliance
+
+		// set playback timer in the status bar (and update channel status)
+		SetElapsedTime(nOrd, 0);
+
 		if (pModPlaying == this)
 		{
 			pSndFile->StopAllVsti();
@@ -2322,7 +2330,7 @@ void CModDoc::OnPatternRestart()
 		{
 			pSndFile->ResumePlugins();
 		}
-		//end rewbs.vstCompliance
+
 		cs.Leave();
 		
 		if (pModPlaying != this)
@@ -2346,7 +2354,7 @@ void CModDoc::OnPatternPlay()
 			//User has sent play pattern command: set loop pattern checkbox to true.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
 		}
-                   
+
 		CSoundFile *pSndFile = GetSoundFile();
 
 		ROWINDEX nRow;
@@ -2360,11 +2368,8 @@ void CModDoc::OnPatternPlay()
 	
 		CriticalSection cs;
 
-		// set playback timer in the status bar (and update channel status)
-		SetElapsedTime(nOrd, nRow);
-
 		// Cut instruments/samples
-		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
@@ -2372,7 +2377,10 @@ void CModDoc::OnPatternPlay()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
-		//rewbs.VSTCompliance		
+		
+		// set playback timer in the status bar (and update channel status)
+		SetElapsedTime(nOrd, nRow);
+
 		if (pModPlaying == this)
 		{
 			pSndFile->StopAllVsti();
@@ -2380,7 +2388,7 @@ void CModDoc::OnPatternPlay()
 		{
 			pSndFile->ResumePlugins();
 		}
-		//end rewbs.VSTCompliance
+
 		cs.Leave();
 
 		if (pModPlaying != this)
@@ -2405,7 +2413,7 @@ void CModDoc::OnPatternPlayNoLoop()
 			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
-                   
+
 		CSoundFile *pSndFile = GetSoundFile();
 
 		ROWINDEX nRow;
@@ -2418,12 +2426,8 @@ void CModDoc::OnPatternPlayNoLoop()
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		CriticalSection cs;
-
-		// set playback timer in the status bar (and update channel status)
-		SetElapsedTime(nOrd, nRow);
-
 		// Cut instruments/samples
-		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
@@ -2434,13 +2438,18 @@ void CModDoc::OnPatternPlayNoLoop()
 		else
 			pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
-		//end rewbs.VSTCompliance
-		if (pModPlaying == this) {
-			pSndFile->StopAllVsti();	
-		} else {
+
+		// set playback timer in the status bar (and update channel status)
+		SetElapsedTime(nOrd, nRow);
+
+		if (pModPlaying == this)
+		{
+			pSndFile->StopAllVsti();
+		} else
+		{
 			pSndFile->ResumePlugins();
 		}
-		//rewbs.VSTCompliance
+
 		cs.Leave();
 
 		if (pModPlaying != this)
@@ -2689,12 +2698,12 @@ void CModDoc::SongProperties()
 void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 //----------------------------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm == NULL)
-		return;
-
 	const double dPatternPlaytime = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
-	pMainFrm->SetElapsedTime((DWORD) (max(0, dPatternPlaytime) * 1000));
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if(pMainFrm != nullptr)
+	{
+		pMainFrm->SetElapsedTime(static_cast<DWORD>(Util::Max(0.0, dPatternPlaytime) * 1000.0));
+	}
 }
 
 

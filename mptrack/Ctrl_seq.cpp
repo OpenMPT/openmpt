@@ -328,13 +328,13 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 
 				DWORD dwPaused = pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP|SONG_PATTERNLOOP);
 
-				//if (!(dwPaused & SONG_PATTERNLOOP))	// why?
 				// update channel parameters and play time
 				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 
 				pSndFile->m_nCurrentOrder = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
+
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
 			}
 			m_pParent->SetCurrentPattern(n);
