@@ -864,8 +864,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		pChn->nFineTune = 0;
 	} else
 	{
-		pChn->nC5Speed = pSmp->nC5Speed;
-		pChn->nFineTune = pSmp->nFineTune;
+		if((!bPorta && GetType() == MOD_TYPE_XM)
+			|| (pChn->rowCommand.instr != 0 && GetType() == MOD_TYPE_MOD)
+			|| !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
+		{
+			pChn->nC5Speed = pSmp->nC5Speed;
+			pChn->nFineTune = pSmp->nFineTune;
+		}
 	}
 
 
@@ -965,7 +970,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 
-	if ((!bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2)))
+	if (!bPorta && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MED | MOD_TYPE_MT2)))
 	{
 		if (pSmp)
 		{
@@ -3121,13 +3126,28 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 	// E4x: Set Vibrato WaveForm
 	case 0x40:	pChn->nVibratoType = param & 0x07; break;
 	// E5x: Set FineTune
-	case 0x50:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
-				pChn->nC5Speed = S3MFineTuneTable[param];
-				if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
-					pChn->nFineTune = param*2;
-				else
+	case 0x50:	if(!(m_dwSongFlags & SONG_FIRSTTICK))
+				{
+					break;
+				}
+				if(GetType() == MOD_TYPE_MOD)
+				{
 					pChn->nFineTune = MOD2XMFineTune(param);
-				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
+					if(pChn->nPeriod && pChn->rowCommand.IsNote()) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
+				} else if(pChn->rowCommand.IsNote())
+				{
+					pChn->nFineTune = MOD2XMFineTune(param - 8);
+					if(pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
+
+				}
+		
+		
+		/*if(!(m_dwSongFlags & SONG_FIRSTTICK) || !pChn->rowCommand.IsNote()) break;
+				if((GetType() & MOD_TYPE_MOD))
+					pChn->nFineTune = MOD2XMFineTune(param);
+				else
+					pChn->nFineTune = MOD2XMFineTune(param - 8);
+				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);*/
 				break;
 	// E6x: Pattern Loop
 	// E7x: Set Tremolo WaveForm
