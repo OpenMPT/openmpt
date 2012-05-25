@@ -243,6 +243,7 @@ public:	// Static Members
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 	static uint8 s_DefaultPlugVolumeHandling;
 
+	typedef uint32 samplecount_t;	// Number of rendered samples
 
 public:	// for Editing
 	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
@@ -253,11 +254,13 @@ public:	// for Editing
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
 	bool m_bIsRendering;
-	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
+	UINT m_nMixChannels, m_nMixStat;
+	samplecount_t m_nBufferCount;
 	double m_dBufferDiff;
 	UINT m_nTickCount;
 	UINT m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
-	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
+	samplecount_t m_lTotalSampleCount;	// rewbs.VSTTimeInfo
+	bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
 	UINT m_nSamplesPerTick;		// rewbs.betterBPM
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
 	ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
@@ -319,7 +322,13 @@ public:
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 	bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
 	bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
-	CModDoc* GetpModDoc() const { return m_pModDoc; }
+
+	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
+#ifdef MODPLUG_TRACKER
+	CModDoc *GetpModDoc() const { return m_pModDoc; }
+#else
+	void *GetpModDoc() const { return nullptr; }
+#endif // MODPLUG_TRACKER
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
@@ -354,7 +363,8 @@ public:
 	DWORD GetSongTime() { return static_cast<DWORD>(GetLength(eNoAdjust).duration + 0.5); }
 
 	void RecalculateSamplesPerTick();
-	double GetRowDuration(UINT tempo, UINT speed, UINT speedIncludingPatternDelays = 0) const;
+	double GetRowDuration(UINT tempo, UINT speed) const;
+	UINT GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat);
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
@@ -448,6 +458,8 @@ public:
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	void ProcessPlugins(UINT nCount);
+	size_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
+	bool HasPositionChanged() { bool b = m_bPositionChanged; m_bPositionChanged = false; return b; }
 
 public:
 	// Mixer Config
@@ -662,7 +674,7 @@ public:
 	// System-Dependant functions
 public:
 	static LPSTR AllocateSample(UINT nbytes);
-	static void FreeSample(LPVOID p);
+	static void FreeSample(void *p);
 
 	// WAV export
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
@@ -722,7 +734,6 @@ private:
 	PLUGINDEX __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
 
 	void HandlePatternTransitionEvents();
-	long GetSampleOffset();
 
 public:
 	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;

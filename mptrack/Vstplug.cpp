@@ -715,15 +715,14 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		MemsetZero(timeInfo);
 		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
-		if (pVstPlugin)
+		CSoundFile *pSndFile;
+		if(pVstPlugin && (pSndFile = pVstPlugin->GetSoundFile()) != nullptr)
 		{
-			CSoundFile* pSndFile = pVstPlugin->GetSoundFile();
-
-			if (pVstPlugin->IsSongPlaying())
+			if(pVstPlugin->IsSongPlaying())
 			{
 				timeInfo.flags |= kVstTransportPlaying;
-				timeInfo.samplePos = CMainFrame::GetMainFrame()->GetTotalSampleCount();
-				if (timeInfo.samplePos == 0) //samplePos=0 means we just started playing
+				timeInfo.samplePos = pSndFile->GetTotalSampleCount();
+				if(pSndFile->HasPositionChanged())
 				{
 					timeInfo.flags |= kVstTransportChanged;
 				}
@@ -732,12 +731,12 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 				timeInfo.flags |= kVstTransportChanged; //just stopped.
 				timeInfo.samplePos = 0;
 			}
-			if ((value & kVstNanosValid))
+			if((value & kVstNanosValid))
 			{
 				timeInfo.flags |= kVstNanosValid;
 				timeInfo.nanoSeconds = timeGetTime() * 1000000;
 			}
-			if ((value & kVstPpqPosValid) && pSndFile)
+			if((value & kVstPpqPosValid))
 			{
 				timeInfo.flags |= kVstPpqPosValid;
 				if (timeInfo.flags & kVstTransportPlaying)
@@ -748,7 +747,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 					timeInfo.ppqPos = 0;
 				}
 			}
-			if ((value & kVstTempoValid) && pSndFile)
+			if ((value & kVstTempoValid))
 			{
 				timeInfo.tempo = pSndFile->GetCurrentBPM();
 				if (timeInfo.tempo)
@@ -756,7 +755,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 					timeInfo.flags |= kVstTempoValid;
 				}
 			}
-			if ((value & kVstTimeSigValid) && pSndFile)
+			if ((value & kVstTimeSigValid))
 			{
 				timeInfo.flags |= kVstTimeSigValid;
 
@@ -2284,7 +2283,7 @@ void CVstPlugin::HardAllNotesOff()
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
 		MidiPitchBend(mc, MIDIEvents::pitchBendCentre); // centre pitch bend
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
+		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllControllersOff, mc, 0));	// reset all controllers
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 

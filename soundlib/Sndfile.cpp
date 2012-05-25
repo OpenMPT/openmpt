@@ -486,7 +486,8 @@ CSoundFile::CSoundFile() :
 	MemsetZero(m_MixPlugins);
 	Order.Init();
 	Patterns.ClearPatterns();
-	m_lTotalSampleCount=0;
+	m_lTotalSampleCount = 0;
+	m_bPositionChanged = true;
 
 	m_pConfig = new CSoundFilePlayConfig();
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
@@ -1153,7 +1154,6 @@ void CSoundFile::SuspendPlugins()
 			pPlugin->Suspend();
 		}
 	}
-	m_lTotalSampleCount=0;
 }
 
 void CSoundFile::ResumePlugins()
@@ -1171,8 +1171,6 @@ void CSoundFile::ResumePlugins()
 			pPlugin->Resume();
 		}
 	}
-	m_lTotalSampleCount=GetSampleOffset();
-
 }
 
 
@@ -1190,7 +1188,6 @@ void CSoundFile::StopAllVsti()
 			pPlugin->HardAllNotesOff();
 		}
 	}
-	m_lTotalSampleCount = GetSampleOffset();
 }
 
 
@@ -1768,16 +1765,6 @@ bool CSoundFile::LoadStaticTunings()
 }
 
 
-long CSoundFile::GetSampleOffset()
-//--------------------------------
-{
-	//TODO: This is where we could inform patterns of the exact song position when playback starts.
-	//order: m_nNextPattern
-	//long ticksFromStartOfPattern = m_nRow*m_nMusicSpeed;
-	//return ticksFromStartOfPattern*m_nSamplesPerTick;
-	return 0;
-}
-
 string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
 //--------------------------------------------------------------------------------------------------
 {
@@ -1899,30 +1886,60 @@ void CSoundFile::RecalculateSamplesPerTick()
 }
 
 
-// Get the duration of a row in milliseconds, based on the current rows per beat and given speed and tempo settings.
-// "speedIncludingPatternDelays" is the total row length, including the ticks from Row Delay effects.
-// It is required because modern tempo mode normally doesn't consider  "speed", so "speedIncludingPatternDelays" is
-// used as a ratio.
-double CSoundFile::GetRowDuration(UINT tempo, UINT speed, UINT speedIncludingPatternDelays) const
-//-----------------------------------------------------------------------------------------------
+// Get length of a tick in sample, with tick-to-tick tempo correction in modern tempo mode.
+UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
+//----------------------------------------------------------------------------
 {
-	speedIncludingPatternDelays = Util::Max(speedIncludingPatternDelays, speed);
-
 	switch(m_nTempoMode)
 	{
 	case tempo_mode_classic:
 	default:
-		return static_cast<double>(2500 * speedIncludingPatternDelays) / static_cast<double>(tempo);
+		return (gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
+
+	case tempo_mode_alternative: 
+		return gdwMixingFreq / tempo;
+
+	case tempo_mode_modern:
+		{
+			double accurateBufferCount = static_cast<double>(gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
+			UINT bufferCount = static_cast<int>(accurateBufferCount);
+			m_dBufferDiff += accurateBufferCount - bufferCount;
+
+			//tick-to-tick tempo correction:
+			if(m_dBufferDiff >= 1)
+			{ 
+				bufferCount++;
+				m_dBufferDiff--;
+			} else if(m_dBufferDiff <= -1)
+			{ 
+				bufferCount--;
+				m_dBufferDiff++;
+			}
+			ASSERT(abs(m_dBufferDiff) < 1);
+			return bufferCount;
+		}
+	}
+}
+
+
+// Get the duration of a row in milliseconds, based on the current rows per beat and given speed and tempo settings.
+double CSoundFile::GetRowDuration(UINT tempo, UINT speed) const
+//-------------------------------------------------------------
+{
+	switch(m_nTempoMode)
+	{
+	case tempo_mode_classic:
+	default:
+		return static_cast<double>(2500 * speed) / static_cast<double>(tempo);
 
 	case tempo_mode_modern:
 		{
 			// If there are any row delay effects, the row length factor compensates for those.
-			const double rowLength = static_cast<double>(speedIncludingPatternDelays) / static_cast<double>(speed);
-			return 60000.0 * rowLength / static_cast<double>(tempo) / static_cast<double>(m_nCurrentRowsPerBeat);
+			return 60000.0 / static_cast<double>(tempo) / static_cast<double>(m_nCurrentRowsPerBeat);
 		}
 
 	case tempo_mode_alternative:
-		return static_cast<double>(1000 * speedIncludingPatternDelays) / static_cast<double>(tempo);
+		return static_cast<double>(1000 * speed) / static_cast<double>(tempo);
 	}
 }
 

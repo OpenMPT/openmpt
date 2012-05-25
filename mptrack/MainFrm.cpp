@@ -2449,13 +2449,6 @@ long CMainFrame::GetSampleRate()
 	return CSoundFile::GetSampleRate();
 }
 
-long CMainFrame::GetTotalSampleCount()
-//------------------------------------
-{
-	if (GetModPlaying())
-		return GetModPlaying()->GetSoundFile()->m_lTotalSampleCount;
-	return 0;
-}
 
 double CMainFrame::GetApproxBPM()
 //-------------------------------

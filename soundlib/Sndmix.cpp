@@ -250,11 +250,11 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 BOOL CSoundFile::FadeSong(UINT msec)
 //----------------------------------
 {
-	LONG nsamples = _muldiv(msec, gdwMixingFreq, 1000);
+	samplecount_t nsamples = _muldiv(msec, gdwMixingFreq, 1000);
 	if (nsamples <= 0) return FALSE;
 	if (nsamples > 0x100000) nsamples = 0x100000;
 	m_nBufferCount = nsamples;
-	LONG nRampLength = m_nBufferCount;
+	samplecount_t nRampLength = m_nBufferCount;
 	// Ramp everything down
 	for (UINT noff=0; noff < m_nMixChannels; noff++)
 	{
@@ -289,7 +289,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 {
 	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
 	LPCONVERTPROC pCvt = X86_Convert32To8;
-	UINT lRead, lMax, lSampleSize, lCount, lSampleCount, nStat=0;
+	samplecount_t lMax, lCount, lSampleCount;
+	size_t lSampleSize;
+	UINT nStat = 0;
 	UINT nMaxPlugins;
 
 	nMaxPlugins = MAX_MIXPLUGINS;
@@ -305,7 +307,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 
 	lMax = cbBuffer / lSampleSize;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
-	lRead = lMax;
+	samplecount_t lRead = lMax;
 	if (m_dwSongFlags & SONG_ENDREACHED) 
 		goto MixDone;
 
@@ -1847,44 +1849,12 @@ BOOL CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	if (!m_nMusicTempo) return FALSE;
 
-	switch(m_nTempoMode)
-	{
-
-		case tempo_mode_alternative: 
-			m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
-			break;
-
-		case tempo_mode_modern:
-			{
-				double accurateBufferCount = (double)gdwMixingFreq * (60.0 / (double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nCurrentRowsPerBeat));
-				m_nBufferCount = static_cast<int>(accurateBufferCount);
-				m_dBufferDiff += accurateBufferCount-m_nBufferCount;
-				//tick-to-tick tempo correction:
-				if (m_dBufferDiff >= 1)
-				{ 
-					m_nBufferCount++;
-					m_dBufferDiff--;
-				} else if (m_dBufferDiff <= -1)
-				{ 
-					m_nBufferCount--;
-					m_dBufferDiff++;
-				}
-				ASSERT(abs(m_dBufferDiff) < 1);
-				break;
-			}
-
-		case tempo_mode_classic:
-		default:
-			m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
-	}
-	
-	m_nSamplesPerTick = m_nBufferCount; //rewbs.flu
-
+	m_nSamplesPerTick = m_nBufferCount = GetTickDuration(m_nMusicTempo, m_nMusicSpeed, m_nCurrentRowsPerBeat);
 
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
 	{
-		int nchn32 = CLAMP(m_nChannels, 1, 31);
+		CHANNELINDEX nchn32 = Clamp(m_nChannels, CHANNELINDEX(1), CHANNELINDEX(31));
 		
 		DWORD mastervol;
 
@@ -1894,7 +1864,7 @@ BOOL CSoundFile::ReadNote()
 			if (realmastervol > 0x80)
 			{
 				//Attenuate global pre-amp depending on num channels
-				realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
+				realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32 + 4)) / 16;
 			}
 			mastervol = (realmastervol * (m_nSamplePreAmp)) >> 6;
 		} else
@@ -1910,7 +1880,7 @@ BOOL CSoundFile::ReadNote()
 
 		if (m_pConfig->getUseGlobalPreAmp())
 		{
-			UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
+			UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32 >> 1] : PreAmpTable[nchn32 >> 1];
 			if(attenuation < 1) attenuation = 1;
 			nMasterVol = (mastervol << 7) / attenuation;
 		} else
@@ -2120,7 +2090,7 @@ BOOL CSoundFile::ReadNote()
 			}
 
 			// Applying Pitch/Tempo lock.
-            if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
+			if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
 			{
 				freq = _muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
 			}
@@ -2456,11 +2426,11 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	//If new note, determine notevelocity to use.
 	if(note != NOTE_NONE)
 	{
-		UINT velocity = 4 * defaultVolume;
+		uint16 velocity = static_cast<uint16>(4 * defaultVolume);
 		switch(pIns->nPluginVelocityHandling)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:
-				velocity = pChn->nVolume;
+				velocity = static_cast<uint16>(pChn->nVolume);
 			break;
 		}
 
@@ -2486,7 +2456,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
 				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, min(127, 2 * vol), nChn);
-				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, min(127, 2 * defaultVolume), nChn);
+				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(min(127, 2 * defaultVolume)), nChn);
 				break;
 
 		}
