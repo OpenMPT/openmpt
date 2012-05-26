@@ -1537,6 +1537,7 @@ void CCtrlSamples::OnUpsample()
 		if (sample.nSustainEnd >= dwEnd) sample.nSustainEnd += (dwEnd-dwStart); else
 		if (sample.nSustainEnd > dwStart) sample.nSustainEnd += (sample.nSustainEnd - dwStart);
 		
+		sample.uFlags |= CHN_16BIT;
 		ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, dwNewLen, m_pSndFile);
 		if(!selection.selectionActive)
 		{
@@ -1886,7 +1887,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 
 	// Allocate new sample. Returned sample may not be exactly the size what ratio would suggest
 	// so allocate a bit more(1.03*).
-	const SmpLength nNewSampleLength = static_cast<SmpLength>(1.03 * ratio * (double)sample.nLength);
+	const SmpLength nNewSampleLength = static_cast<SmpLength>(1.03 * ratio * static_cast<double>(sample.nLength));
 	//const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)sample.nLength);
 	void *pNewSample = nullptr;
 	if(nNewSampleLength <= MAX_SAMPLE_LENGTH)
