@@ -33,7 +33,11 @@ private:
 	size_t streamPos;			// Cursor location in the file
 
 public:
+	// Initialize invalid file reader object.
+	FileReader() : streamData(nullptr), streamLength(0), streamPos(0) { }
+	// Initialize file reader object with pointer to data and data length.
 	FileReader(const char *data, size_t length) : streamData(data), streamLength(length), streamPos(0) { }
+	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : streamData(other.streamData), streamLength(other.streamLength), streamPos(other.streamPos) { }
 
 	// Returns true if the object points to a valid stream.
@@ -126,7 +130,7 @@ public:
 			return FileReader(streamData + position, Util::Min(length, streamLength - position));
 		} else
 		{
-			return FileReader(nullptr, 0);
+			return FileReader();
 		}
 	}
 
@@ -330,12 +334,12 @@ public:
 	// Allow to read a struct partially (if there's less memory available than the struct's size, fill it up with zeros).
 	// The file cursor is advanced by "partialSize" bytes.
 	template <typename T>
-	bool ReadStructPartial(T &target, size_t partialSize = sizeof(target))
+	bool ReadStructPartial(T &target, size_t partialSize = sizeof(T))
 	{
 		const size_t copyBytes = Util::Min(partialSize, sizeof(target), BytesLeft());
 
 		memcpy(&target, streamData + streamPos, copyBytes);
-		memset(reinterpret_cast<const char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
+		memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
 
 		return true;
@@ -420,9 +424,25 @@ public:
 			&& std::numeric_limits<T>::is_signed == false,
 			"Target type is a not an unsigned integer");
 
-		target = 0;
+		if(!BytesLeft())
+		{
+			target = 0;
+			return false;
+		}
+
 		size_t writtenBits = 0;
-		uint8 b = 0x80;
+		uint8 b = ReadUint8();
+		target = (b & 0x7F);
+
+		// Count actual bits used in most significant byte (i.e. this one)
+		for(size_t bit = 0; bit < 7; bit++)
+		{
+			if((b & (1 << bit)) != 0)
+			{
+				writtenBits = bit + 1;
+			}
+		}
+
 		while(BytesLeft() && (b & 0x80) != 0)
 		{
 			b = ReadUint8();
@@ -434,7 +454,7 @@ public:
 		if(writtenBits > sizeof(target) * 8)
 		{
 			// Overflow
-			target = std::numeric_limits<T>::max;
+			target = Util::MaxValueOfType<T>(target);
 			return false;
 		} else if((b & 0x80) != 0)
 		{

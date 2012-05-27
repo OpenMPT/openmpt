@@ -18,19 +18,18 @@
 #include "Wav.h"
 #include "ITTools.h"
 #include "XMTools.h"
-#include "../common/StringFixer.h"
+#include "WAVTools.h"
 #include "../common/Reporting.h"
 #include "../mptrack/version.h"
 #include "ChunkReader.h"
 
-#pragma warning(disable:4244)
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
 //--------------------------------------------------------------------------------------------------
 {
 	FileReader file(reinterpret_cast<const char *>(lpMemFile), dwFileLength);
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
-	if(!ReadWAVSample(nSample, lpMemFile, dwFileLength)
+	if(!ReadWAVSample(nSample, file)
 		&& !ReadXISample(nSample, lpMemFile, dwFileLength)
 		&& !ReadAIFFSample(nSample, file)
 		&& !ReadITSSample(nSample, lpMemFile, dwFileLength)
@@ -297,307 +296,75 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *
 ////////////////////////////////////////////////////////////////////////////////
 // WAV Open
 
-#define IFFID_pcm	0x206d6370
-#define IFFID_fact	0x74636166
+extern bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, const void *source, size_t sourceSize, uint16 blockAlign);
 
-extern BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes, UINT pkBlkAlign);
-
-bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset)
-//-------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader *wsmpChunk)
+//------------------------------------------------------------------------------------------
 {
-	DWORD dwMemPos = 0, dwDataPos;
-	WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)lpMemFile;
-	WAVEFORMATHEADER *pfmt, *pfmtpk;
-	WAVEDATAHEADER *pdata;
-	WAVESMPLHEADER *psh;
-	WAVEEXTRAHEADER *pxh;
-	DWORD dwInfoList, dwFact, dwSamplesPerBlock;
-	
-	if (!nSample || !lpMemFile || (dwFileLength < sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER)))
-		return false;
-	if ((phdr->id_RIFF != LittleEndian(IFFID_RIFF) && phdr->id_RIFF != LittleEndian(IFFID_LIST))
-		|| (phdr->id_WAVE != LittleEndian(IFFID_WAVE) && phdr->id_WAVE != LittleEndian(IFFID_wave)))
-		return false;
+	WAVReader wavFile(file);
 
-	dwMemPos = sizeof(WAVEFILEHEADER);
-	dwDataPos = 0;
-	pfmt = NULL;
-	pfmtpk = NULL;
-	pdata = NULL;
-	psh = NULL;
-	pxh = NULL;
-	dwSamplesPerBlock = 0;
-	dwInfoList = 0;
-	dwFact = 0;
-
-	while ((dwMemPos + 8 < dwFileLength) && (dwMemPos < phdr->filesize))
+	if(!wavFile.IsValid()
+		|| wavFile.GetNumChannels() == 0
+		|| wavFile.GetNumChannels() > 2
+		|| wavFile.GetBitsPerSample() > 32
+		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat && wavFile.GetSampleFormat() != WAVFormatChunk::fmtIMA_ADPCM))
 	{
-		uint32 dwIFFID = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos));
-		uint32 dwLen = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos + 4));
-		if ((dwLen > dwFileLength) || (dwMemPos + 8 + dwLen > dwFileLength))
-			break;
-
-		switch(dwIFFID)
-		{
-		// "fmt "
-		case IFFID_fmt:
-			if (pfmt) break;
-			if (dwLen + 8 >= sizeof(WAVEFORMATHEADER))
-			{
-				pfmt = (WAVEFORMATHEADER *)(lpMemFile + dwMemPos);
-				if (dwLen + 8 >= sizeof(WAVEFORMATHEADER)+4)
-				{
-					dwSamplesPerBlock = LittleEndianW(*reinterpret_cast<uint16 *>(lpMemFile + dwMemPos + sizeof(WAVEFORMATHEADER) + 2));
-				}
-			}
-			break;
-		// "pcm "
-		case IFFID_pcm:
-			if (pfmtpk) break;
-			if (dwLen+8 >= sizeof(WAVEFORMATHEADER)) pfmtpk = (WAVEFORMATHEADER *)(lpMemFile + dwMemPos);
-			break;
-		// "fact"
-		case IFFID_fact:
-			if (!dwFact) dwFact = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos + 8));
-			break;
-		// "data"
-		case IFFID_data:
-			if(dwLen + 8 >= sizeof(WAVEDATAHEADER) && !pdata)
-			{
-				pdata = (WAVEDATAHEADER *)(lpMemFile + dwMemPos);
-				dwDataPos = dwMemPos + 8;
-			}
-			break;
-		// "xtra"
-		case 0x61727478:
-			if(dwLen + 8 >= sizeof(WAVEEXTRAHEADER))
-			{
-				pxh = (WAVEEXTRAHEADER *)(lpMemFile + dwMemPos);
-				if(LittleEndian(pxh->xtra_len) + 8 > dwFileLength - dwMemPos)
-				{
-					pxh = nullptr;
-				}
-			}
-			break;
-		// "smpl"
-		case 0x6C706D73:
-			if(dwLen + 8 >= sizeof(WAVESMPLHEADER))
-				psh = (WAVESMPLHEADER *)(lpMemFile + dwMemPos);
-			break;
-		// "LIST"."info"
-		case IFFID_LIST:
-			if(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos + 8) == LittleEndian(IFFID_INFO))	// "INFO"
-				dwInfoList = dwMemPos;
-			break;
-		// "wsmp":
-		case IFFID_wsmp:
-			if (pdwWSMPOffset) *pdwWSMPOffset = dwMemPos;
-			break;
-		}
-		dwMemPos += dwLen + 8;
-
-		if((dwLen % 2) != 0 && dwMemPos < dwFileLength)
-		{
-			// Ignore the padding byte. Problem: Old versions of OpenMPT didn't write padding. -_-
-			// We will just do a heuristic check here: As OpenMPT always writes the "smpl" chunk after the "data" chunk
-			// (which happens to be the only chunk that has to be padded in OpenMPT's case), we just check if we can read "smpl"
-			// without incrementing the position.
-			if((dwMemPos + 8 < dwFileLength) && LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwMemPos)) == 0x6C706D73)
-			{
-				continue;
-			}
-			dwMemPos++;
-		}
-	}
-	if (!pdata || !pfmt || pdata->length < 4)
 		return false;
-
-	if ((pfmtpk) && (pfmt))
-	{
-		if (pfmt->format != 1)
-		{
-			WAVEFORMATHEADER *tmp = pfmt;
-			pfmt = pfmtpk;
-			pfmtpk = tmp;
-			if(pfmtpk->format != 0x11 || pfmtpk->bitspersample != 4
-				|| pfmtpk->channels != 1)
-				return false;
-		} else pfmtpk = NULL;
 	}
-
-	uint16 wavFormat = LittleEndianW(pfmt->format);
-	uint16 channels = LittleEndianW(pfmt->channels);
-	uint16 bitsPerSmp = LittleEndianW(pfmt->bitspersample);
-
-	// WAVE_FORMAT_PCM (1), WAVE_FORMAT_IEEE_FLOAT (3), WAVE_FORMAT_EXTENSIBLE (0xFFFE)
-	if (((wavFormat != 1 && wavFormat != 0xFFFE)
-	 && (wavFormat != 3 || bitsPerSmp != 32)) //Microsoft IEEE FLOAT
-	 || channels > 2
-	 || channels == 0
-	 || bitsPerSmp == 0
-	 || bitsPerSmp > 32
-	) return false;
 
 	DestroySample(nSample);
-
 	ModSample &sample = Samples[nSample];
-	MemsetZero(m_szNames[nSample]);
 	sample.Initialize();
-	sample.nC5Speed = LittleEndian(pfmt->freqHz);
+	sample.nLength = wavFile.GetSampleLength();
+	sample.nC5Speed = wavFile.GetSampleRate();
+	wavFile.ApplySampleSettings(sample, m_szNames[nSample]);
+	sample.Convert(MOD_TYPE_IT, GetType());
 
-	// IMA ADPCM 4:1
-	if (pfmtpk)
+	FileReader sampleChunk = wavFile.GetSampleData();
+
+	if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtIMA_ADPCM)
 	{
-		if (dwFact < 4) dwFact = LittleEndian(pdata->length) * 2;
-		sample.nLength = dwFact;
+		// IMA ADPCM 4:1
 		LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
-		sample.pSample = AllocateSample(sample.nLength * 2 + 16);
-		IMAADPCMUnpack16((signed short *)sample.pSample, sample.nLength,
-						 (LPBYTE)(lpMemFile + dwDataPos), dwFileLength - dwDataPos, LittleEndianW(pfmtpk->samplesize));
+		sample.uFlags |= CHN_16BIT;
+		if(!sample.AllocateSample())
+		{
+			return false;
+		}
+		IMAADPCMUnpack16((int16 *)sample.pSample, sample.nLength, sampleChunk.GetRawData(), sampleChunk.BytesLeft(), wavFile.GetBlockAlign());
 		AdjustSampleLoop(sample);
 	} else
 	{
-		// Some samples have an incorrect blockAlign/sample size set (e.g. it's 8 in SQUARE.WAV while it should be 1), so let's better not trust this value.
-		sample.nLength = LittleEndian(pdata->length) / (((channels * bitsPerSmp) + 7) / 8);
-
+		// PCM / Float
 		SampleIO sampleIO(
 			SampleIO::_8bit,
-			(channels > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
+			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
 			SampleIO::littleEndian,
-			(bitsPerSmp > 8) ? SampleIO::signedPCM : SampleIO::unsignedPCM);
+			(wavFile.GetBitsPerSample() > 8) ? SampleIO::signedPCM : SampleIO::unsignedPCM);
 
-		if(bitsPerSmp <= 8)
+		if(wavFile.GetBitsPerSample() <= 8)
 			sampleIO |= SampleIO::_8bit;
-		else if(bitsPerSmp <= 16)
+		else if(wavFile.GetBitsPerSample() <= 16)
 			sampleIO |= SampleIO::_16bit;
-		else if(bitsPerSmp <= 24)
+		else if(wavFile.GetBitsPerSample() <= 24)
 			sampleIO |= SampleIO::_24bit;
-		else if(bitsPerSmp <= 32)
+		else if(wavFile.GetBitsPerSample() <= 32)
 			sampleIO |= SampleIO::_32bit;
 
-		if(wavFormat == 3 /*WAVE_FORMAT_IEEE_FLOAT*/)
+		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
 		{
 			sampleIO |= SampleIO::floatPCM;
 		}
 
-		sampleIO.ReadSample(sample, (LPSTR)(lpMemFile + dwDataPos), dwFileLength - dwDataPos);
+		sampleIO.ReadSample(sample, sampleChunk);
 	}
-	
-	bool fixSampleLoops = false;
 
-	// LIST field
-	if (dwInfoList)
+	if(wsmpChunk != nullptr)
 	{
-		uint32 dwLSize = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwInfoList + 4)) + 8;
-		uint32 d = 12;
-		while (d + 8 < dwLSize)
-		{
-			if (!lpMemFile[dwInfoList + d]) d++;
-			uint32 id = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwInfoList + d));
-			uint32 len = LittleEndian(*reinterpret_cast<uint32 *>(lpMemFile + dwInfoList + d + 4));
-
-			if ((dwInfoList + d + 8 + len <= dwFileLength) && (len))
-			{
-				switch(id)
-				{
-				case IFFID_INAM:
-					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSample], reinterpret_cast<const char *>(lpMemFile + dwInfoList + d + 8), len);
-					if (phdr->id_RIFF != LittleEndian(IFFID_RIFF))
-					{
-						// DLS sample -> sample filename
-						StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, reinterpret_cast<const char *>(lpMemFile + dwInfoList + d + 8), len);
-					}
-					break;
-
-				case IFFID_ISFT:
-					{
-						// MPT / old versions of OpenMPT stored the sample loop information incorrectly:
-						// In the RIFF standard, the loop end point is *inclusive*, in OpenMPT it's *exclusive*.
-						char *softwareId = reinterpret_cast<char *>(lpMemFile + dwInfoList + d + 8);
-						fixSampleLoops = !strncmp(softwareId, "Modplug Tracker", min(len, 16));
-					}
-					break;
-				}
-			}
-			d += 8 + len;
-		}
+		// DLS WSMP chunk
+		*wsmpChunk = wavFile.GetWsmpChunk();
 	}
 
-	// smpl field
-	if (psh)
-	{
-		sample.nLoopStart = sample.nLoopEnd = 0;
-		int numLoops = LittleEndian(psh->dwSampleLoops);
-		if(numLoops && (sizeof(WAVESMPLHEADER) + numLoops * sizeof(SAMPLELOOPSTRUCT) <= LittleEndian(psh->smpl_len) + 8))
-		{
-			SAMPLELOOPSTRUCT *psl = (SAMPLELOOPSTRUCT *)(&psh[1]);
-			if(numLoops > 1)
-			{
-				sample.uFlags |= (CHN_LOOP | CHN_SUSTAINLOOP);
-				if(LittleEndian(psl[0].dwLoopType)) sample.uFlags |= CHN_PINGPONGSUSTAIN;
-				if(LittleEndian(psl[1].dwLoopType)) sample.uFlags |= CHN_PINGPONGLOOP;
-				sample.nSustainStart = LittleEndian(psl[0].dwLoopStart);
-				sample.nSustainEnd = LittleEndian(psl[0].dwLoopEnd);
-				sample.nLoopStart = LittleEndian(psl[1].dwLoopStart);
-				sample.nLoopEnd = LittleEndian(psl[1].dwLoopEnd);
-			} else
-			{
-				sample.uFlags |= CHN_LOOP;
-				if(LittleEndian(psl->dwLoopType)) sample.uFlags |= CHN_PINGPONGLOOP;
-				sample.nLoopStart = LittleEndian(psl->dwLoopStart);
-				sample.nLoopEnd = LittleEndian(psl->dwLoopEnd);
-			}
-
-			if(!fixSampleLoops)
-			{
-				// RIFF loop end points are inclusive
-				if(sample.nLoopEnd < sample.nLength && (sample.uFlags & CHN_LOOP))
-				{
-					sample.nLoopEnd++;
-				}
-
-				if(sample.nSustainEnd < sample.nLength && (sample.uFlags & CHN_SUSTAINLOOP))
-				{
-					sample.nSustainEnd++;
-				}
-			}
-
-			if (sample.nLoopStart >= sample.nLoopEnd) sample.uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
-			if (sample.nSustainStart >= sample.nSustainEnd) sample.uFlags &= ~(CHN_PINGPONGLOOP|CHN_PINGPONGSUSTAIN);
-		}
-	}
-
-	// xtra field
-	if (pxh)
-	{
-		DWORD extFlags = LittleEndian(pxh->dwFlags);
-		if (extFlags & CHN_PINGPONGLOOP) sample.uFlags |= CHN_PINGPONGLOOP;
-		if (extFlags & CHN_SUSTAINLOOP) sample.uFlags |= CHN_SUSTAINLOOP;
-		if (extFlags & CHN_PINGPONGSUSTAIN) sample.uFlags |= CHN_PINGPONGSUSTAIN;
-		if (extFlags & CHN_PANNING) sample.uFlags |= CHN_PANNING;
-
-		sample.nPan = LittleEndianW(pxh->wPan);
-		sample.nVolume = LittleEndianW(pxh->wVolume);
-		sample.nGlobalVol = LittleEndianW(pxh->wGlobalVol);
-		sample.nVibType = pxh->nVibType;
-		sample.nVibSweep = pxh->nVibSweep;
-		sample.nVibDepth = pxh->nVibDepth;
-		sample.nVibRate = pxh->nVibRate;
-		// Name present (clipboard only)
-		UINT xtrabytes = LittleEndian(pxh->xtra_len) - (sizeof(WAVEEXTRAHEADER) - 8);
-		LPSTR pszTextEx = (LPSTR)(pxh + 1); 
-		if (xtrabytes >= MAX_SAMPLENAME)
-		{
-			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSample], pszTextEx, MAX_SAMPLENAME);
-			pszTextEx += MAX_SAMPLENAME;
-			xtrabytes -= MAX_SAMPLENAME;
-			if(xtrabytes > 0)
-			{
-				StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, pszTextEx, xtrabytes);
-			}
-		}
-	}
-	sample.Convert(MOD_TYPE_IT, GetType());
 	return true;
 }
 
@@ -606,8 +373,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 // Save WAV
 
 
-bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
-//---------------------------------------------------------------------------
+bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
+//----------------------------------------------------------------------------------
 {
 	char *softwareId = "OpenMPT " MPT_VERSION_STR;
 	size_t softwareIdLength = strlen(softwareId) + 1;
@@ -714,6 +481,11 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 	list.list_len = LittleEndian(softwareIdLength);
 	fwrite(&list, 1, 8, f);
 	fwrite(softwareId, 1, list.list_len, f);
+	if((softwareIdLength % 2) != 0)
+	{
+		int8 padding = 0;
+		fwrite(&padding, 1, 1, f);
+	}
 
 	// "xtra" field
 	extra.xtra_id = LittleEndian(IFFID_xtra);
@@ -743,8 +515,8 @@ bool CSoundFile::SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
-bool CSoundFile::SaveRAWSample(UINT nSample, const LPCSTR lpszFileName) const
-//---------------------------------------------------------------------------
+bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
+//----------------------------------------------------------------------------------
 {
 	FILE *f;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
@@ -875,8 +647,8 @@ LONG PatchFreqToNote(ULONG nFreq)
 }
 
 
-void PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
-//------------------------------------------------------------------------------------
+void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMemLength)
+//-------------------------------------------------------------------------------------------
 {
 	ModSample &sample = that->GetSample(nSample);
 	DWORD dwMemPos = sizeof(GF1SAMPLEHEADER);
@@ -901,8 +673,11 @@ void PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemL
 	sample.nVibDepth = psh->vibrato_depth;
 	sample.nVibRate = psh->vibrato_rate/4;
 	CSoundFile::FrequencyToTranspose(&sample);
-	sample.RelativeTone += 84 - PatchFreqToNote(psh->root_freq);
-	if (psh->scale_factor) sample.RelativeTone -= psh->scale_frequency - 60;
+	sample.RelativeTone += static_cast<uint8>(84 - PatchFreqToNote(psh->root_freq));
+	if(psh->scale_factor)
+	{
+		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - psh->scale_frequency - 60);
+	}
 	sample.nC5Speed = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
 
 	SampleIO sampleIO(
@@ -983,9 +758,9 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 		pIns->nNNA = NNA_NOTEOFF;
 		pIns->nDNA = DNA_NOTEFADE;
 	}
-	UINT nFreeSmp = 0;
+	SAMPLEINDEX nFreeSmp = 0;
 	UINT nMinSmpNote = 0xff;
-	UINT nMinSmp = 0;
+	SAMPLEINDEX nMinSmp = 0;
 	for (UINT iSmp=0; iSmp<nSamples; iSmp++)
 	{
 		// Find a free sample
@@ -1389,7 +1164,7 @@ struct AIFFHeader
 	};
 
 	uint32 magic;	// FORM
-	uint32 length;	// Size of the file, not including magic an length
+	uint32 length;	// Size of the file, not including magic and length
 	uint32 type;	// AIFF or AIFC
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
@@ -1413,6 +1188,8 @@ struct AIFFChunk
 		idMARK	= 0x4D41524B,
 		idNAME	= 0x4E414D45,
 	};
+
+	typedef ChunkIdentifiers id_type;
 
 	uint32 id;		// See ChunkIdentifiers
 	uint32 length;	// Chunk size without header
@@ -1562,8 +1339,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	// Read COMM chunk
 	FileReader commChunk(chunks.GetChunk(AIFFChunk::idCOMM));
 	AIFFCommonChunk sampleInfo;
-	if(!commChunk.IsValid()
-		|| !commChunk.ReadConvertEndianness(sampleInfo))
+	if(!commChunk.ReadConvertEndianness(sampleInfo))
 	{
 		return false;
 	}
@@ -1591,8 +1367,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	// Read SSND chunk
 	FileReader soundChunk(chunks.GetChunk(AIFFChunk::idSSND));
 	AIFFSoundChunk sampleHeader;
-	if(!soundChunk.IsValid()
-		|| !soundChunk.ReadConvertEndianness(sampleHeader)
+	if(!soundChunk.ReadConvertEndianness(sampleHeader)
 		|| soundChunk.BytesLeft() <= sampleHeader.offset)
 	{
 		return false;
@@ -1643,9 +1418,8 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	// Read MARK and INST chunk to extract sample loops
 	FileReader markerChunk(chunks.GetChunk(AIFFChunk::idMARK));
-	FileReader instChunk(chunks.GetChunk(AIFFChunk::idINST));
 	AIFFInstrumentChunk instrHeader;
-	if(markerChunk.IsValid() && instChunk.IsValid() && instChunk.ReadConvertEndianness(instrHeader))
+	if(markerChunk.IsValid() && chunks.GetChunk(AIFFChunk::idINST).ReadConvertEndianness(instrHeader))
 	{
 		size_t numMarkers = markerChunk.ReadUint16BE();
 
@@ -1760,7 +1534,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 //----------------------------------------------------------------------------------------------
 {
 	ITInstrument *pinstr = (ITInstrument *)lpMemFile;
-	UINT nsmp = 0, nsamples;
+	SAMPLEINDEX nsmp = 0, nsamples;
 
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITInstrument))
 		|| (pinstr->id != LittleEndian(ITInstrument::magic))) return false;
@@ -1862,9 +1636,9 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 			{
 				// We haven't considered this sample yet.
 				smptable.push_back(smp);
-				smpmap[smp - 1] = smptable.size();
+				smpmap[smp - 1] = static_cast<SAMPLEINDEX>(smptable.size());
 			}
-			iti.iti.keyboard[i * 2 + 1] = smpmap[smp - 1];
+			iti.iti.keyboard[i * 2 + 1] = static_cast<uint8>(smpmap[smp - 1]);
 		} else
 		{
 			iti.iti.keyboard[i * 2 + 1] = 0;
@@ -2049,8 +1823,8 @@ typedef struct IFFBODY
 
 
 
-bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------
+bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
+//----------------------------------------------------------------------------------------
 {
 	IFF8SVXFILEHEADER *pfh = (IFF8SVXFILEHEADER *)lpMemFile;
 	IFFVHDR *pvh = (IFFVHDR *)(lpMemFile + 12);

@@ -1469,11 +1469,11 @@ static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 
 
 BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose)
-//---------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
 	LPBYTE pWaveForm = NULL;
-	DWORD dwLen = 0, dwWSMPOffset = 0;
+	DWORD dwLen = 0;
 	BOOL bOk, bWaveForm;
 
 	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
@@ -1482,6 +1482,8 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	if (!ExtractWaveForm(nIns, nRgn, &pWaveForm, &dwLen)) return FALSE;
 	if ((!pWaveForm) || (dwLen < 16)) return FALSE;
 	bOk = FALSE;
+
+	FileReader wsmpChunk;
 	if (m_nType & SOUNDBANK_TYPE_SF2)
 	{
 		pSndFile->DestroySample(nSample);
@@ -1512,7 +1514,8 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else
 	{
-		bWaveForm = pSndFile->ReadWAVSample(nSample, pWaveForm, dwLen, &dwWSMPOffset);
+		FileReader file(reinterpret_cast<const char *>(pWaveForm), dwLen);
+		bWaveForm = pSndFile->ReadWAVSample(nSample, file, &wsmpChunk);
 	}
 	if (bWaveForm)
 	{
@@ -1545,21 +1548,24 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			UINT usUnityNote = pRgn->uUnityNote;
 			int sFineTune = pRgn->sFineTune;
 			int lVolume = pRgn->usVolume;
-			if ((dwWSMPOffset) && (!(pRgn->fuOptions & DLSREGION_OVERRIDEWSMP)))
+
+			WSMPCHUNK wsmp;
+			if(!(pRgn->fuOptions & DLSREGION_OVERRIDEWSMP) && wsmpChunk.ReadStructPartial(wsmp))
 			{
-				WSMPCHUNK *p = (WSMPCHUNK *)(pWaveForm + dwWSMPOffset);
-				usUnityNote = p->usUnityNote;
-				sFineTune = p->sFineTune;
-				lVolume = DLS32BitRelativeGainToLinear(p->lAttenuation) / 256;
-				if (p->cSampleLoops)
+				usUnityNote = wsmp.usUnityNote;
+				sFineTune = wsmp.sFineTune;
+				lVolume = DLS32BitRelativeGainToLinear(wsmp.lAttenuation) / 256;
+				if(wsmp.cSampleLoops)
 				{
-					WSMPSAMPLELOOP *ploop = (WSMPSAMPLELOOP *)(pWaveForm+dwWSMPOffset+8+p->cbSize);
-					if (ploop->ulLoopLength > 3)
+					WSMPSAMPLELOOP loop;
+					wsmpChunk.Skip(8 + wsmp.cbSize);
+					wsmpChunk.Read(loop);
+					if(loop.ulLoopLength > 3)
 					{
 						sample.uFlags |= CHN_LOOP;
-						//if (ploop->ulLoopType) sample.uFlags |= CHN_PINGPONGLOOP;
-						sample.nLoopStart = ploop->ulLoopStart;
-						sample.nLoopEnd = ploop->ulLoopStart + ploop->ulLoopLength;
+						//if (loop.ulLoopType) sample.uFlags |= CHN_PINGPONGLOOP;
+						sample.nLoopStart = loop.ulLoopStart;
+						sample.nLoopEnd = loop.ulLoopStart + loop.ulLoopLength;
 					}
 				}
 			} else

@@ -29,24 +29,21 @@ public:
 	//=================
 	{
 	private:
-		const T chunkHeader;
-		ChunkReader chunkData;
+		T chunkHeader;
+		FileReader chunkData;
 
 	public:
 		ChunkListItem(const T &header, const FileReader &data) : chunkHeader(header), chunkData(data) { }
-		// VC2008 needs operator=, VC2010 doesn't...
-		ChunkListItem<T>& operator= (const ChunkListItem<T> &other)
+
+		ChunkListItem<T> &operator= (const ChunkListItem<T> &other)
 		{ 
-			return MemCopy(*this, other);
+			chunkHeader = other.chunkHeader;
+			chunkData = other.chunkData;
+			return *this;
 		}
 
 		const T &GetHeader() const { return chunkHeader; }
-		FileReader &GetData() { return chunkData; }
-
-		bool operator== (const ChunkListItem<T> &other)
-		{
-			return (GetHeader().GetID() == other.GetHeader().GetID());
-		}
+		const FileReader &GetData() const { return chunkData; }
 	};
 
 	template<typename T>
@@ -57,8 +54,7 @@ public:
 	public:
 
 		// Check if the list contains a given chunk.
-		template<typename IdType>
-		bool ChunkExists(IdType id) const
+		bool ChunkExists(typename T::id_type id) const
 		{
 			for(const_iterator iter = begin(); iter != end(); iter++)
 			{
@@ -71,25 +67,23 @@ public:
 		}
 
 		// Retrieve the first chunk with a given ID.
-		template<typename IdType>
-		FileReader GetChunk(IdType id)
+		FileReader GetChunk(typename T::id_type id) const
 		{
-			for(iterator iter = begin(); iter != end(); iter++)
+			for(const_iterator iter = begin(); iter != end(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
 					return iter->GetData();
 				}
 			}
-			return FileReader(nullptr, 0);
+			return FileReader();
 		}
 
 		// Retrieve all chunks with a given ID.
-		template<typename IdType>
-		std::vector<FileReader> GetAllChunks(IdType id)
+		std::vector<FileReader> GetAllChunks(typename T::id_type id) const
 		{
 			std::vector<FileReader> result;
-			for(iterator iter = begin(); iter != end(); iter++)
+			for(const_iterator iter = begin(); iter != end(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
@@ -98,11 +92,13 @@ public:
 			}
 			return result;
 		}
-
 	};
 
 
 	// Read a series of "T" chunks until the end of file is reached.
+	// T is required to have the methods GetID() and GetLength(), as well as an id_type typedef.
+	// GetLength() should return the chunk size in bytes, and GetID() the chunk ID.
+	// id_type must reflect the type that is returned by GetID().
 	template<typename T>
 	ChunkList<T> ReadChunks(size_t padding)
 	{

@@ -612,10 +612,6 @@
 				RelativePath="..\soundlib\WindowedFIR.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\soundlib\XMTools.cpp"
-				>
-			</File>
 			<Filter
 				Name="PatternRandomizer"
 				>
@@ -1246,10 +1242,6 @@
 				RelativePath="..\soundlib\WindowedFIR.h"
 				>
 			</File>
-			<File
-				RelativePath=".\soundlib\XMTools.h"
-				>
-			</File>
 			<Filter
 				Name="tuning"
 				>
@@ -1484,6 +1476,22 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Loaders.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\WAVTools.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\WAVTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\XMTools.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\XMTools.h"
 				>
 			</File>
 		</Filter>

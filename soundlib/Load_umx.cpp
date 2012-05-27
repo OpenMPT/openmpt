@@ -274,7 +274,7 @@ bool CSoundFile::ReadUMX(FileReader &file)
 				if(ReadIT(data, fileChunk.GetLength())
 					|| ReadXM(data, fileChunk.GetLength())
 					|| ReadS3M(fileChunk)
-					|| ReadWav(data, fileChunk.GetLength())
+					|| ReadWav(fileChunk)
 					|| ReadMod(fileChunk))
 				{
 					return true;

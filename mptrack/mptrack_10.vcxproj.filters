@@ -463,6 +463,9 @@
     <ClCompile Include="..\soundlib\SampleFormats.cpp">
       <Filter>Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\WAVTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -823,6 +826,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\SampleFormatConverters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\WAVTools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
