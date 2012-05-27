@@ -28,8 +28,8 @@ struct ModSample
 	uint8  nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
 	uint8  nVibDepth;						// Auto vibrato depth
 	uint8  nVibRate;						// Auto vibrato rate (speed)
-	//CHAR name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
-	CHAR filename[MAX_SAMPLEFILENAME];
+	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
+	char filename [MAX_SAMPLEFILENAME];
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const { return (uFlags & CHN_16BIT) ? 2 : 1; }

@@ -18,7 +18,6 @@
 #include <bitset>
 #include <set>
 #include "Snd_defs.h"
-#include "Endianness.h"
 #include "tuning.h"
 #include "MIDIMacros.h"
 #ifdef MODPLUG_TRACKER
@@ -389,7 +388,7 @@ public:
 	bool ReadITProject(const LPCBYTE lpStream, const DWORD dwMemLength); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	bool Read669(FileReader &file);
 	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadWav(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadWav(FileReader &file);
 	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadFAR(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -624,15 +623,15 @@ public:
 
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadWAVSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
+	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader *wsmpChunk = nullptr);
 	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	UINT ReadITSSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
-	bool Read8SVXSample(UINT nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool SaveWAVSample(UINT nSample, const LPCSTR lpszFileName) const;
-	bool SaveRAWSample(UINT nSample, const LPCSTR lpszFileName) const;
+	bool Read8SVXSample(SAMPLEINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
+	bool SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
 
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);

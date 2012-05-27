@@ -83,7 +83,7 @@ namespace StringFixer
 	//----------------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
-		ASSERT(srcSize > 0);
+		//ASSERT(srcSize > 0);
 
 		const size_t maxSize = min(destSize, srcSize);
 		char *dst = destBuffer;
