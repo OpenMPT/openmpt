@@ -369,7 +369,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 
-		// Convert MPT to anything - remove instrument tunings, Pitch/Tempo Lock
+		// Convert MPT to anything - remove instrument tunings, Pitch/Tempo Lock, filter variation
 		if(oldTypeIsMPT)
 		{
 			if(pIns->pTuning != nullptr)
@@ -380,6 +380,11 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			if(pIns->wPitchToTempoLock != 0)
 			{
 				CHANGEMODTYPE_WARNING(wPitchToTempoLock);
+			}
+
+			if((pIns->nCutSwing | pIns->nResSwing) != 0)
+			{
+				CHANGEMODTYPE_WARNING(wFilterVariation);
 			}
 		}
 
@@ -534,6 +539,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wPitchToTempoLock, "Pitch / Tempo Lock instrument property is not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wBrokenNoteMap, "Instrument Note Mapping is not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wReleaseNode, "Instrument envelope release nodes are not supported by the new format.\n");
+	CHANGEMODTYPE_CHECK(wFilterVariation, "Random filter variation is not supported by the new format.\n");
 
 	// General warnings
 	CHANGEMODTYPE_CHECK(wMODGlobalVars, "Default speed, tempo and global volume will be lost.\n");
