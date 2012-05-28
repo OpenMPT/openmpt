@@ -217,5 +217,6 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		SetTuning(nullptr);
 		wPitchToTempoLock = 0;
+		nCutSwing = nResSwing = 0;
 	}
 }

@@ -36,5 +36,6 @@ enum enmWarnings
 	wCompatibilityMode,
 	wPitchToTempoLock,
 	wGlobalVolumeNotSupported,
+	wFilterVariation,
 	wNumWarnings
 };

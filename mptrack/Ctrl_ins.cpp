@@ -1172,10 +1172,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditName.SetLimitText(specs->instrNameLengthMax);
 		m_EditFileName.SetLimitText(specs->instrFilenameLengthMax);
 
-		const BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
+		const BOOL bITandMPT = ((m_pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
 		//rewbs.instroVSTi
-		const BOOL bITandXM = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
-		const BOOL bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
+		const BOOL bITandXM = ((m_pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
+		const BOOL bMPTOnly = ((m_pSndFile->GetType() == MOD_TYPE_MPT) && (m_pSndFile->GetNumInstruments())) ? TRUE : FALSE;
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
@@ -1189,13 +1189,13 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinMidiBK.EnableWindow(bITandXM);	//rewbs.MidiBank
 		//end rewbs.instroVSTi
 
-		const bool extendedFadeoutRange = (m_pSndFile->m_nType & MOD_TYPE_XM) != 0;
+		const bool extendedFadeoutRange = (m_pSndFile->GetType() & MOD_TYPE_XM) != 0;
 		m_SpinFadeOut.EnableWindow(bITandXM);
 		m_SpinFadeOut.SetRange(0, extendedFadeoutRange ? 32767 : 8192);
 		m_EditFadeOut.SetLimitText(extendedFadeoutRange ? 5 : 4);
 
 		// Panning ranges (0...64 for IT, 0...256 for MPTM)
-		m_SpinPanning.SetRange(0, (m_pModDoc->GetModType() & MOD_TYPE_IT) ? 64 : 256);
+		m_SpinPanning.SetRange(0, (m_pSndFile->GetType() & MOD_TYPE_IT) ? 64 : 256);
 
 		m_NoteMap.EnableWindow(bITandXM);
 		m_CbnResampling.EnableWindow(bITandXM);
@@ -1203,8 +1203,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ComboNNA.EnableWindow(bITandMPT);
 		m_SliderVolSwing.EnableWindow(bITandMPT);
 		m_SliderPanSwing.EnableWindow(bITandMPT);
-		m_SliderCutSwing.EnableWindow(bITandMPT);
-		m_SliderResSwing.EnableWindow(bITandMPT);
+		m_SliderCutSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0) ? TRUE : FALSE);
+		m_SliderResSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0) ? TRUE : FALSE);
 		m_CbnFilterMode.EnableWindow(bITandMPT);
 		m_ComboDCT.EnableWindow(bITandMPT);
 		m_ComboDCA.EnableWindow(bITandMPT);
@@ -1707,20 +1707,21 @@ void CCtrlInstruments::OnInstrumentNew()
 void CCtrlInstruments::OnInstrumentDuplicate()
 //--------------------------------------------
 {
-	if (m_pModDoc)
+	if(m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if(pSndFile->m_nInstruments > 0)
+		if(pSndFile->GetNumInstruments() > 0)
 		{
-			BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
-			LONG ins = m_pModDoc->InsertInstrument(INSTRUMENTINDEX_INVALID, m_nInstrument);
-			if (ins != INSTRUMENTINDEX_INVALID)
+			INSTRUMENTINDEX ins = m_pModDoc->InsertInstrument(INSTRUMENTINDEX_INVALID, m_nInstrument);
+			if(ins != INSTRUMENTINDEX_INVALID)
 			{
 				SetCurrentInstrument(ins);
 				m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
 			}
-			if (bFirst) m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES);
-			if (m_pParent) m_pParent->InstrumentChanged(m_nInstrument);
+			if(m_pParent)
+			{
+				m_pParent->InstrumentChanged(m_nInstrument);
+			}
 		}
 	}
 	SwitchToView();
@@ -1751,7 +1752,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 		//new instrument if necessary.
 		if(counter > 0)	
 		{
-			if(m_nInstrument >= MAX_INSTRUMENTS-1)
+			if(m_nInstrument >= MAX_INSTRUMENTS - 1)
 				break;
 			else
 				m_nInstrument++;
@@ -1998,7 +1999,7 @@ void CCtrlInstruments::OnNNAChanged()
 	{
 		if (pIns->nNNA != m_ComboNNA.GetCurSel())
 		{
-            pIns->nNNA = m_ComboNNA.GetCurSel();
+			pIns->nNNA = m_ComboNNA.GetCurSel();
 			SetInstrumentModified(true);
 		}		
 	}
@@ -2042,7 +2043,7 @@ void CCtrlInstruments::OnMPRChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = GetDlgItemInt(IDC_EDIT10);
-		if ((n >= 0) && (n <= 255))
+		if ((n >= 0) && (n <= 128))
 		{
 			if (pIns->nMidiProgram != n)
 			{
@@ -2267,7 +2268,7 @@ void CCtrlInstruments::OnPPCChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = m_ComboPPC.GetCurSel();
-		if ((n >= 0) && (n <= NOTE_MAX - 1))
+		if(n >= 0 && n <= NOTE_MAX - NOTE_MIN)
 		{
 			if (pIns->nPPC != n)
 			{
@@ -2291,7 +2292,7 @@ void CCtrlInstruments::OnEnableCutOff()
 		if (pIns)
 		{
 			pIns->SetCutoff(pIns->GetCutoff(), bCutOff);
-			for (UINT i=0; i<MAX_CHANNELS; i++)
+			for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
 				if (pSndFile->Chn[i].pModInstrument == pIns)
 				{
@@ -2324,7 +2325,7 @@ void CCtrlInstruments::OnEnableResonance()
 		if (pIns)
 		{
 			pIns->SetResonance(pIns->GetResonance(), bReso);
-			for (UINT i=0; i<MAX_CHANNELS; i++)
+			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
 				if (pSndFile->Chn[i].pModInstrument == pIns)
 				{
@@ -2363,21 +2364,10 @@ void CCtrlInstruments::OnFilterModeChanged()
 			pIns->nFilterMode = instFiltermode;
 			m_pModDoc->SetModified();
 
-			// Translate from mode as stored in instrument to mode as understood by player. 
-			// (The reason for the translation is that the player treats 0 as lowpass,
-			// but we need to keep 0 as "do not change", so that the instrument setting doesn't
-			// override the channel setting by default.)
-			/*int playerFilterMode=-1;
-			switch (instFilterMode) {
-				case INST_FILTERMODE_DEFAULT:  playerFilterMode = FLTMODE_UNCHANGED;break;
-				case INST_FILTERMODE_HIGHPASS: playerFilterMode = FLTMODE_HIGHPASS; break;
-				case INST_FILTERMODE_LOWPASS:  playerFilterMode = FLTMODE_LOWPASS;  break;
-			}*/
-
-            //Update channel settings where this instrument is active, if required.
+			//Update channel settings where this instrument is active, if required.
 			if(instFiltermode != FLTMODE_UNCHANGED)
 			{
-				for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+				for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 				{
 					if (pSndFile->Chn[i].pModInstrument == pIns)
 						pSndFile->Chn[i].nFilterMode = instFiltermode;
