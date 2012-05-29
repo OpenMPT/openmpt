@@ -430,5 +430,5 @@ size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size
 		}
 	}
 
-	return numSamples * sizeof(SampleConversion::input_t) * sample.GetNumChannels();
+	return numSamples * inSize;
 }

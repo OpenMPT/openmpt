@@ -247,7 +247,7 @@ void CAbstractVstEditor::OnInputInfo()
 //end rewbs.defaultPlugGUI
 
 BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
-//----------------------------------------------------
+//-----------------------------------------------------
 {
 	if (pMsg)
 	{
@@ -273,7 +273,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			}
 			
 			// Don't forward key repeats if plug does not listen for keypresses
-		    // (avoids system beeps on note hold)
+			// (avoids system beeps on note hold)
 			if (kT == kKeyEventRepeat)
 			{
 				return true;
@@ -285,7 +285,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 
 }
 
-void CAbstractVstEditor::SetTitle() 
+void CAbstractVstEditor::SetTitle()
 //---------------------------------
 {
 	if (m_pVstPlugin && m_pVstPlugin->m_pMixStruct)
@@ -355,7 +355,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 		m_nInstrument = GetBestInstrumentCandidate();
 
 	//only show messagebox if plug is able to process notes.
-	if(m_nInstrument < 0)
+	if(m_nInstrument == INSTRUMENTINDEX_INVALID)
 	{
 		if(m_pVstPlugin->CanRecieveMidiEvents())
 		{
@@ -512,16 +512,15 @@ void CAbstractVstEditor::UpdateInputMenu()
 
 	CArray<UINT, UINT> inputInstruments;
 	m_pVstPlugin->GetInputInstrumentList(inputInstruments);
-	bool checked;
-	for (int nIns=0; nIns<inputInstruments.GetSize(); nIns++)
+	for(int nIns = 0; nIns<inputInstruments.GetSize(); nIns++)
 	{
-		checked=false;
+		bool checked = false;
 		if (nIns==0 && (inputPlugs.GetSize() || inputChannels.GetSize()))
 		{ 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
 		name.Format("Ins%02d: %s", inputInstruments[nIns], (LPCTSTR)pSndFile->GetInstrumentName(inputInstruments[nIns]));
-		if (inputInstruments[nIns] == (UINT)m_nInstrument)	checked=true;
+		if (inputInstruments[nIns] == (UINT)m_nInstrument)	checked = true;
 		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
 	}
 
@@ -673,21 +672,21 @@ void CAbstractVstEditor::OnInitMenu(CMenu* /*pMenu*/)
 }
 
 
-bool CAbstractVstEditor::CheckInstrument(int instrument)
-//------------------------------------------------------
+bool CAbstractVstEditor::CheckInstrument(INSTRUMENTINDEX ins)
+//-----------------------------------------------------------
 {
 	CSoundFile* pSndFile = m_pVstPlugin->GetSoundFile();
 	
-	if (instrument >= 0 && instrument<MAX_INSTRUMENTS && pSndFile->Instruments[instrument])
+	if(ins != INSTRUMENTINDEX_INVALID && ins < MAX_INSTRUMENTS && pSndFile->Instruments[ins] != nullptr)
 	{
-		return (pSndFile->Instruments[instrument]->nMixPlug) == (m_pVstPlugin->m_nSlot + 1);
+		return (pSndFile->Instruments[ins]->nMixPlug) == (m_pVstPlugin->m_nSlot + 1);
 	}
 	return false;
 }
 
 
-int CAbstractVstEditor::GetBestInstrumentCandidate() 
-//--------------------------------------------------
+INSTRUMENTINDEX CAbstractVstEditor::GetBestInstrumentCandidate()
+//--------------------------------------------------------------
 {
 	//First try current instrument:
 /*	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
@@ -699,20 +698,20 @@ int CAbstractVstEditor::GetBestInstrumentCandidate()
 	//Then just take the first instrument that points to this plug..
 	CArray<UINT, UINT> plugInstrumentList;
 	m_pVstPlugin->GetInputInstrumentList(plugInstrumentList);
-	if (plugInstrumentList.GetSize())
+	if(plugInstrumentList.GetSize())
 	{
-		return plugInstrumentList[0];
+		return static_cast<INSTRUMENTINDEX>(plugInstrumentList[0]);
 	}
 
 	//No instrument in the entire track points to this plug.
-	return -1;
+	return INSTRUMENTINDEX_INVALID;
 }
 
 
 void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
 //-----------------------------------------------------
 {
-	m_nInstrument = (nID - ID_SELECTINST);
+	m_nInstrument = static_cast<INSTRUMENTINDEX>(nID - ID_SELECTINST);
 }
 
 

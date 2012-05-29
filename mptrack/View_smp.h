@@ -60,21 +60,25 @@ protected:
 
 	// Sets sample data on sample draw.
 	template<class T, class uT>
-	void SetSampleData(void* pSample, const CPoint& point, const DWORD old);
+	void SetSampleData(void *pSample, const CPoint &point, const DWORD old);
 
 	// Sets initial draw point on sample draw.
 	template<class T, class uT>
-	void SetInitialDrawPoint(void* pSample, const CPoint& point);
+	void SetInitialDrawPoint(void *pSample, const CPoint &point);
 
 	// Returns sample value corresponding given point in the sample view.
 	template<class T, class uT>
-	T GetSampleValueFromPoint(const CPoint& point);
+	T GetSampleValueFromPoint(const CPoint &point);
 
 	// Returns auto-zoom level compared to other zoom levels.
 	// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
 	// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
 	// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
-	UINT GetAutoZoomLevel(const ModSample& smp);
+	UINT GetAutoZoomLevel(const ModSample &smp);
+
+	// Calculate zoom level based on the current selection
+	UINT GetSelectionZoomLevel() const;
+	bool CanZoomSelection() const { return GetSelectionZoomLevel() != 0; }
 
 	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
