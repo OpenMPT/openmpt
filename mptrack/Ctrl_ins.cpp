@@ -1203,8 +1203,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ComboNNA.EnableWindow(bITandMPT);
 		m_SliderVolSwing.EnableWindow(bITandMPT);
 		m_SliderPanSwing.EnableWindow(bITandMPT);
-		m_SliderCutSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0) ? TRUE : FALSE);
-		m_SliderResSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0) ? TRUE : FALSE);
+		m_SliderCutSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || (pIns != nullptr && pIns->nCutSwing != 0)) ? TRUE : FALSE);
+		m_SliderResSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || (pIns != nullptr && pIns->nResSwing != 0)) ? TRUE : FALSE);
 		m_CbnFilterMode.EnableWindow(bITandMPT);
 		m_ComboDCT.EnableWindow(bITandMPT);
 		m_ComboDCA.EnableWindow(bITandMPT);
