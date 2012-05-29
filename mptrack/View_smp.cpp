@@ -1489,9 +1489,9 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
 			{
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_ZOOMONSEL, "Zoom");
+				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, "Zoom");
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, "Set As Loop");
-				if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
+				if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, "Set As Sustain Loop");
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			} else
@@ -1502,21 +1502,22 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				{
 					//Set loop points
 					wsprintf(s, "Set Loop Start to:\t%d", dwPos);
-					::AppendMenu(hMenu, MF_STRING|((dwPos+4<=sample.nLoopEnd)?0:MF_GRAYED), 
-								 ID_SAMPLE_SETLOOPSTART, s);
+					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nLoopEnd ? 0 : MF_GRAYED), 
+						ID_SAMPLE_SETLOOPSTART, s);
 					wsprintf(s, "Set Loop End to:\t%d", dwPos);
-					::AppendMenu(hMenu, MF_STRING|((dwPos>=sample.nLoopStart+4)?0:MF_GRAYED), 
-								 ID_SAMPLE_SETLOOPEND, s);
+					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED), 
+						ID_SAMPLE_SETLOOPEND, s);
 						
-					if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) {
+					if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
+					{
 						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 						wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING|((dwPos+4<=sample.nSustainEnd)?0:MF_GRAYED), 
-	  								 ID_SAMPLE_SETSUSTAINSTART, s);
+						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nSustainEnd ? 0 : MF_GRAYED), 
+	  						 ID_SAMPLE_SETSUSTAINSTART, s);
 						wsprintf(s, "Set Sustain End to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING|((dwPos>=sample.nSustainStart+4)?0:MF_GRAYED), 
-								     ID_SAMPLE_SETSUSTAINEND, s);
+						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED), 
+							ID_SAMPLE_SETSUSTAINEND, s);
 					}
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 					m_dwMenuParam = dwPos;
@@ -2363,15 +2364,28 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 }
 
 
+UINT CViewSample::GetSelectionZoomLevel() const
+//---------------------------------------------
+{
+	UINT zoom = 0;
+	while(((static_cast<UINT>(m_rcClient.right) << zoom) < m_dwEndSel - m_dwBeginSel) && (zoom < MAX_ZOOM - 1))
+	{
+		zoom++;
+	}
+	if(zoom++ < MAX_ZOOM)
+		return zoom;
+	else
+		return 0;
+}
+
+
 void CViewSample::OnZoomOnSel()
 //-----------------------------
 {
 	if ((m_dwEndSel > m_dwBeginSel) && (m_rcClient.right > 0))
 	{
-		DWORD dwZoom = 0;
-		
-		while ((((DWORD)m_rcClient.right << dwZoom) < (m_dwEndSel - m_dwBeginSel)) && (dwZoom < (MAX_ZOOM-1))) dwZoom++;
-		if (dwZoom < (MAX_ZOOM-1)) dwZoom++; else dwZoom = 0;
+		DWORD dwZoom = GetSelectionZoomLevel();
+
 		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, dwZoom);
 		if (dwZoom)
 		{
@@ -2575,9 +2589,12 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	if (!pSndFile) return 0;
 
 	const BYTE nNote  = midibyte1 + NOTE_MIN;
-	int nVol   = midibyte2;					
-	BYTE event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
-	if ((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
+	int nVol = midibyte2;
+	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
+	if(event == MIDIEvents::evNoteOn && !nVol)
+	{
+		event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
+	}
 
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
@@ -2709,7 +2726,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 // return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
 // if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
 UINT CViewSample::GetAutoZoomLevel(const ModSample& smp)
-//-----------------------------------------------------
+//------------------------------------------------------
 {
 	m_rcClient.NormalizeRect();
 	if (m_rcClient.Width() == 0 || smp.nLength <= 0)

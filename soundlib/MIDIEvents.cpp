@@ -1,6 +1,6 @@
 /*
- * MIDI.cpp
- * --------
+ * MIDIEvents.cpp
+ * --------------
  * Purpose: MIDI event handling, event lists, ...
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -26,7 +26,7 @@ uint32 BuildEvent(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8
 uint32 BuildCCEvent(MidiCC midiCC, uint8 midiChannel, uint8 param)
 //----------------------------------------------------------------
 {
-	return BuildEvent(evControllerChange, midiChannel, midiCC, param);
+	return BuildEvent(evControllerChange, midiChannel, static_cast<uint8>(midiCC), param);
 }
 
 
@@ -34,7 +34,7 @@ uint32 BuildCCEvent(MidiCC midiCC, uint8 midiChannel, uint8 param)
 uint32 BuildPitchBendEvent(uint8 midiChannel, uint16 bendAmount)
 //--------------------------------------------------------------
 {
-	return BuildEvent(evPitchBend, midiChannel, (bendAmount & 0x7F), (bendAmount >> 7));
+	return BuildEvent(evPitchBend, midiChannel, static_cast<uint8>(bendAmount & 0x7F), static_cast<uint8>(bendAmount >> 7));
 }
 
 
@@ -66,7 +66,7 @@ uint32 BuildNoteOnEvent(uint8 midiChannel, uint8 note, uint8 velocity)
 uint8 BuildSystemEvent(SystemEvent eventType)
 //-------------------------------------------
 {
-	return (evSystem << 4) | eventType;
+	return static_cast<uint8>((evSystem << 4) | eventType);
 }
 
 

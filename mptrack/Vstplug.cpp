@@ -1850,7 +1850,19 @@ CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 //-------------------------------------------------------------
 {
-	const CString paramName = GetParamName(param);
+	static VstParameterProperties properties;
+
+	CString paramName;
+
+	if(Dispatch(effGetParameterProperties, param, nullptr, &properties, 0.0f) == 1)
+	{
+		StringFixer::SetNullTerminator(properties.label);
+		paramName = properties.label;
+	} else
+	{
+		paramName = GetParamName(param);
+	}
+
 	CString name;
 	if(paramName.IsEmpty())
 	{

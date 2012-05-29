@@ -131,7 +131,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	// Read software name
 	const bool isOldMPT = infoChunk.GetChunk(RIFFChunk::idISFT).ReadMagic("Modplug Tracker");
 	
-	sample.uFlags &= ~(CHN_LOOP | CHN_SUSTAINLOOP);
+	sample.uFlags &= ~(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
 	// Convert loops
 	if(!sampleLoops.empty())
@@ -139,7 +139,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		size_t normalLoopIndex = 0;
 		if(sampleLoops.size() > 1)
 		{
-			sampleLoops[0].ApplyToSample(sample.nSustainStart, sample.nSustainStart, sample.nLength, sample.uFlags, CHN_SUSTAINLOOP, CHN_PINGPONGSUSTAIN, isOldMPT);
+			sampleLoops[0].ApplyToSample(sample.nSustainStart, sample.nSustainEnd, sample.nLength, sample.uFlags, CHN_SUSTAINLOOP, CHN_PINGPONGSUSTAIN, isOldMPT);
 			normalLoopIndex = 1;
 		}
 		sampleLoops[normalLoopIndex].ApplyToSample(sample.nLoopStart, sample.nLoopEnd, sample.nLength, sample.uFlags, CHN_LOOP, CHN_PINGPONGLOOP, isOldMPT);

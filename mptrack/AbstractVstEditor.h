@@ -77,10 +77,10 @@ private:
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();
 	void UpdateOptionsMenu();
-	int GetBestInstrumentCandidate();
-	bool CheckInstrument(int instrument);
+	INSTRUMENTINDEX GetBestInstrumentCandidate();
+	bool CheckInstrument(INSTRUMENTINDEX ins);
 	bool ValidateCurrentInstrument();
-	int m_nInstrument;
+	INSTRUMENTINDEX m_nInstrument;
 	int m_nLearnMacro;
 	
 	void OnToggleEditor(UINT nID);

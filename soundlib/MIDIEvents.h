@@ -1,6 +1,6 @@
 /*
- * MIDI.h
- * ------
+ * MIDIEvents.h
+ * ------------
  * Purpose: MIDI event handling, event lists, ...
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
