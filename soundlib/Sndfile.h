@@ -382,7 +382,7 @@ public:
 	bool ReadMod(FileReader &file);
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadSTM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadSTM(FileReader &file);
 	bool ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength);
 	//bool ReadMPT(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadITProject(const LPCBYTE lpStream, const DWORD dwMemLength); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
