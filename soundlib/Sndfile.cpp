@@ -613,7 +613,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		 && !ReadS3M(file)
 		 && !ReadWav(file)
 #ifndef MODPLUG_BASIC_SUPPORT
-		 && !ReadSTM(lpStream, dwMemLength)
+		 && !ReadSTM(file)
 		 && !ReadMed(lpStream, dwMemLength)
 #ifndef FASTSOUNDLIB
 		 && !ReadMTM(lpStream, dwMemLength)
