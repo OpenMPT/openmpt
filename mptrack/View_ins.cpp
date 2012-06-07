@@ -1014,6 +1014,7 @@ WORD CViewInstrument::EnvGetReleaseNodeValue()
 	return envelope->Values[EnvGetReleaseNode()];
 }
 
+
 WORD CViewInstrument::EnvGetReleaseNodeTick()
 //-------------------------------------------
 {
@@ -1021,6 +1022,7 @@ WORD CViewInstrument::EnvGetReleaseNodeTick()
 	if(envelope == nullptr) return 0;
 	return envelope->Ticks[EnvGetReleaseNode()];
 }
+
 
 bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 //---------------------------------------------
@@ -1914,7 +1916,13 @@ void CViewInstrument::OnEnvRemovePoint()
 void CViewInstrument::OnEnvInsertPoint()
 //--------------------------------------
 {
-	EnvInsertPoint(ScreenToTick(m_ptMenu.x), ScreenToValue(m_ptMenu.y));
+	const int tick = ScreenToTick(m_ptMenu.x), value = ScreenToValue(m_ptMenu.y);
+	if(!EnvInsertPoint(tick, value))
+	{
+		// Couldn't insert point, maybe because there's already a point at this tick
+		// => Try next tick
+		EnvInsertPoint(tick + 1, value);
+	}
 }
 
 
