@@ -16,36 +16,46 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // Pattern Undo
 
-// Additional undo information, as required
-struct PATTERNUNDOINFO
-{
-	ModChannelSettings *settings;
-	CHANNELINDEX oldNumChannels;
-};
-
-struct PATTERNUNDOBUFFER
-{
-	PATTERNINDEX pattern;
-	ROWINDEX patternsize;
-	CHANNELINDEX firstChannel, numChannels;
-	ROWINDEX firstRow, numRows;
-	ModCommand *pbuffer;
-	PATTERNUNDOINFO *channelInfo;
-	bool linkToPrevious;
-};
 
 //================
 class CPatternUndo
 //================
 {
-
 protected:
 
-	std::vector<PATTERNUNDOBUFFER> UndoBuffer;
+	// Additional undo information, as required
+	struct ChannelInfo
+	{
+		ModChannelSettings *settings;
+		CHANNELINDEX oldNumChannels;
+
+		ChannelInfo(CHANNELINDEX numChannels) : oldNumChannels(numChannels)
+		{
+			settings = new ModChannelSettings[numChannels];
+		}
+
+		~ChannelInfo()
+		{
+			delete[] settings;
+		}
+	};
+
+	struct UndoInfo
+	{
+		PATTERNINDEX pattern;
+		ROWINDEX patternsize;
+		CHANNELINDEX firstChannel, numChannels;
+		ROWINDEX firstRow, numRows;
+		ModCommand *pbuffer;
+		ChannelInfo *channelInfo;
+		bool linkToPrevious;
+	};
+
+	std::vector<UndoInfo> UndoBuffer;
 	CModDoc *m_pModDoc;
 
 	// Pattern undo helper functions
-	void DeleteUndoStep(const UINT nStep);
+	void DeleteUndoStep(size_t step);
 	PATTERNINDEX Undo(bool linkedFromPrevious);
 
 public:
@@ -57,13 +67,14 @@ public:
 	bool CanUndo();
 	void RemoveLastUndoStep();
 
-	void SetParent(CModDoc *pModDoc) {m_pModDoc = pModDoc;}
+	void SetParent(CModDoc *pModDoc) { m_pModDoc = pModDoc; }
 
 	CPatternUndo()
 	{
 		UndoBuffer.clear();
 		m_pModDoc = nullptr;
 	};
+
 	~CPatternUndo()
 	{
 		ClearUndo();
@@ -89,49 +100,50 @@ enum sampleUndoTypes
 	sundo_replace,	// replace complete sample (16->8Bit, up/downsample, downmix to mono, pitch shifting / time stretching, trimming, pasting)
 };
 
-struct SAMPLEUNDOBUFFER
-{
-	ModSample OldSample;
-	CHAR szOldName[MAX_SAMPLENAME];
-	LPSTR SamplePtr;
-	UINT nChangeStart, nChangeEnd;
-	sampleUndoTypes nChangeType;
-};
 
 //===============
 class CSampleUndo
 //===============
 {
-
 protected:
 
+	struct UndoInfo
+	{
+		ModSample OldSample;
+		char szOldName[MAX_SAMPLENAME];
+		LPSTR SamplePtr;
+		SmpLength nChangeStart, nChangeEnd;
+		sampleUndoTypes nChangeType;
+	};
+
 	// Undo buffer
-	std::vector<std::vector<SAMPLEUNDOBUFFER> > UndoBuffer;
+	std::vector<std::vector<UndoInfo> > UndoBuffer;
 	CModDoc *m_pModDoc;
 
 	// Sample undo helper functions
-	void DeleteUndoStep(const SAMPLEINDEX nSmp, const UINT nStep);
-	bool SampleBufferExists(const SAMPLEINDEX nSmp, bool bForceCreation = true);
+	void DeleteUndoStep(const SAMPLEINDEX smp, const size_t step);
+	bool SampleBufferExists(const SAMPLEINDEX smp, bool forceCreation = true);
 	void RestrictBufferSize();
-	UINT GetUndoBufferCapacity();
+	size_t GetUndoBufferCapacity();
 
 public:
 
 	// Sample undo functions
 	void ClearUndo();
-	void ClearUndo(const SAMPLEINDEX nSmp);
-	bool PrepareUndo(const SAMPLEINDEX nSmp, sampleUndoTypes nChangeType, UINT nChangeStart = 0, UINT nChangeEnd = 0);
-	bool Undo(const SAMPLEINDEX nSmp);
-	bool CanUndo(const SAMPLEINDEX nSmp);
-	void RemoveLastUndoStep(const SAMPLEINDEX nSmp);
+	void ClearUndo(const SAMPLEINDEX smp);
+	bool PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType, SmpLength changeStart = 0, SmpLength changeEnd = 0);
+	bool Undo(const SAMPLEINDEX smp);
+	bool CanUndo(const SAMPLEINDEX smp);
+	void RemoveLastUndoStep(const SAMPLEINDEX smp);
 
-	void SetParent(CModDoc *pModDoc) {m_pModDoc = pModDoc;}
+	void SetParent(CModDoc *pModDoc) { m_pModDoc = pModDoc; }
 
 	CSampleUndo()
 	{
 		UndoBuffer.clear();
 		m_pModDoc = nullptr;
 	};
+
 	~CSampleUndo()
 	{
 		ClearUndo();

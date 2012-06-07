@@ -1029,9 +1029,9 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 				{
 					IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
 
-					if (pPlugin)
+					if(pPlugin != nullptr)
 					{
-						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, MAX_BASECHANNELS);
+						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], static_cast<uint16>(pChn->nVolume), MAX_BASECHANNELS);
 					}
 				}
 			}

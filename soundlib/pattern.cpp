@@ -12,13 +12,13 @@
 #include "pattern.h"
 #include "patternContainer.h"
 #include "../mptrack/mainfrm.h"
-#include "../mptrack/moddoc.h"
 #include "../mptrack/serialization_utils.h"
 #include "../mptrack/version.h"
 #include "ITTools.h"
 
-CSoundFile& CPattern::GetSoundFile() {return m_rPatternContainer.GetSoundFile();}
-const CSoundFile& CPattern::GetSoundFile() const {return m_rPatternContainer.GetSoundFile();}
+
+CSoundFile& CPattern::GetSoundFile() { return m_rPatternContainer.GetSoundFile(); }
+const CSoundFile& CPattern::GetSoundFile() const { return m_rPatternContainer.GetSoundFile(); }
 
 
 CHANNELINDEX CPattern::GetNumChannels() const
@@ -28,101 +28,69 @@ CHANNELINDEX CPattern::GetNumChannels() const
 }
 
 
+// Check if there is any note data on a given row.
+bool CPattern::IsEmptyRow(ROWINDEX row) const
+//-------------------------------------------
+{
+	if(m_ModCommands == nullptr || IsValidRow(row))
+	{
+		return true;
+	}
+
+	PatternRow data = GetRow(row);
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, data++)
+	{
+		if(!data->IsEmpty())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
 bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure)
 //------------------------------------------------------------------------------------
 {
-	if(rowsPerBeat < GetSoundFile().GetModSpecifications().patternRowsMin || rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
-		|| rowsPerMeasure < rowsPerBeat || rowsPerMeasure > GetSoundFile().GetModSpecifications().patternRowsMax
-		/*|| rowsPerBeat > m_Rows || rowsPerMeasure > m_Rows*/)
+	if(rowsPerBeat < GetSoundFile().GetModSpecifications().patternRowsMin
+		|| rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
+		|| rowsPerMeasure < rowsPerBeat
+		|| rowsPerMeasure > GetSoundFile().GetModSpecifications().patternRowsMax)
+	{
 		return false;
+	}
 	m_RowsPerBeat = rowsPerBeat;
 	m_RowsPerMeasure = rowsPerMeasure;
 	return true;
 }
 
 
-bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning)
-//-------------------------------------------------------------------------------
+// Add or remove rows from the pattern.
+bool CPattern::Resize(const ROWINDEX newRowCount)
+//-----------------------------------------------
 {
-	if(m_ModCommands == nullptr)
+	CSoundFile &sndFile = GetSoundFile();
+	const CModSpecifications& specs = sndFile.GetModSpecifications();
+	ModCommand *newPattern;
+
+	if(m_ModCommands == nullptr
+		|| newRowCount == m_Rows
+		|| newRowCount > specs.patternRowsMax
+		|| newRowCount < specs.patternRowsMin
+		|| (newPattern = AllocatePattern(newRowCount, GetNumChannels())) == nullptr)
 	{
-		//For mimicing old behavior of setting patternsize before even having the
-		//actual pattern allocated.
-		m_Rows = newRowCount; 
 		return false;
 	}
 
-
-	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
-	const CModSpecifications& specs = sndFile.GetModSpecifications();
-	if(sndFile.m_pModDoc == nullptr) return true;
-	CModDoc& rModDoc = *sndFile.m_pModDoc;
-	if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin)
-		return true;
-
-	if (newRowCount == m_Rows) return false;
-	rModDoc.BeginWaitCursor();
+	// Copy over pattern data
+	memcpy(newPattern, m_ModCommands, GetNumChannels() * Util::Min(m_Rows, newRowCount) * sizeof(ModCommand));
 
 	CriticalSection cs;
+	FreePattern(m_ModCommands);
+	m_ModCommands = newPattern;
+	m_Rows = newRowCount;
 
-	if (newRowCount > m_Rows)
-	{
-		ModCommand *p = AllocatePattern(newRowCount, sndFile.GetNumChannels());
-		if (p)
-		{
-			memcpy(p, m_ModCommands, sndFile.GetNumChannels() * m_Rows * sizeof(ModCommand));
-			FreePattern(m_ModCommands);
-			m_ModCommands = p;
-			m_Rows = newRowCount;
-		}
-	} else
-	{
-		bool bOk = true;
-
-#ifdef MODPLUG_TRACKER
-		if(showDataLossWarning)
-		{
-			// Check if any non-empty pattern cells would be lost when truncating rows at the bottom.
-			const ModCommand *m = GetpModCommand(newRowCount, 0);
-			for(size_t numCommands = (m_Rows - newRowCount) * sndFile.GetNumChannels(); numCommands != 0; numCommands--, m++)
-			{
-				if(!m->IsEmpty())
-				{
-					bOk = false;
-					break;
-				}
-			}
-
-			if (!bOk)
-			{
-				cs.Leave();
-				rModDoc.EndWaitCursor();
-				bOk = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
-				rModDoc.BeginWaitCursor();
-				cs.Enter();
-			}
-		}
-#endif // MODPLUG_TRACKER
-
-		if (bOk)
-		{
-			ModCommand *pnew = AllocatePattern(newRowCount, sndFile.GetNumChannels());
-			if (pnew)
-			{
-				memcpy(pnew, m_ModCommands, sndFile.GetNumChannels() * newRowCount * sizeof(ModCommand));
-				FreePattern(m_ModCommands);
-				m_ModCommands = pnew;
-				m_Rows = newRowCount;
-			}
-		}
-	}
-
-	cs.Leave();
-
-	rModDoc.EndWaitCursor();
-	rModDoc.SetModified();
-
-	return (newRowCount == m_Rows) ? false : true;
+	return true;
 }
 
 
@@ -152,97 +120,90 @@ bool CPattern::AllocatePattern(ROWINDEX rows)
 
 }
 
+
 void CPattern::Deallocate()
 //-------------------------
 {
-	// Removed critical section as it can cause problems when destroying patterns in the CSoundFile destructor.
-	//BEGIN_CRITICAL();
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	FreePattern(m_ModCommands);
 	m_ModCommands = nullptr;
 	m_PatternName.Empty();
-	//END_CRITICAL();
 }
+
 
 bool CPattern::Expand()
 //---------------------
 {
-	ModCommand *newPattern, *oldPattern;
+	const ROWINDEX newRows = m_Rows * 2;
+	const CHANNELINDEX nChns = GetNumChannels();
+	ModCommand *newPattern;
 
-	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
-	if(sndFile.m_pModDoc == nullptr) return true;
-
-	CModDoc& rModDoc = *sndFile.m_pModDoc;
-
-	if ((!m_ModCommands) || (m_Rows > sndFile.GetModSpecifications().patternRowsMax / 2)) return true;
-
-	rModDoc.BeginWaitCursor();
-	const ROWINDEX nRows = m_Rows;
-	const CHANNELINDEX nChns = sndFile.m_nChannels;
-	newPattern = AllocatePattern(nRows * 2, nChns);
-	if (!newPattern) return true;
-
-	const PATTERNINDEX nPattern = m_rPatternContainer.GetIndex(this);
-	rModDoc.GetPatternUndo().PrepareUndo(nPattern, 0, 0, nChns, nRows);
-	oldPattern = m_ModCommands;
-	for (ROWINDEX y = 0; y < nRows; y++)
+	if(!m_ModCommands
+		|| newRows > GetSoundFile().GetModSpecifications().patternRowsMax
+		|| (newPattern = AllocatePattern(newRows, nChns)) == nullptr)
 	{
-		memcpy(newPattern + y * 2 * nChns, oldPattern + y * nChns, nChns * sizeof(ModCommand));
+		return false;
 	}
+
+	for(ROWINDEX y = 0; y < m_Rows; y++)
+	{
+		memcpy(newPattern + y * 2 * nChns, m_ModCommands + y * nChns, nChns * sizeof(ModCommand));
+	}
+
+	CriticalSection cs;
+	FreePattern(m_ModCommands);
 	m_ModCommands = newPattern;
-	m_Rows = nRows * 2;
-	FreePattern(oldPattern); oldPattern = nullptr;
-	rModDoc.SetModified();
-	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
-	rModDoc.EndWaitCursor();
-	return false;
+	m_Rows = newRows;
+
+	return true;
 }
+
 
 bool CPattern::Shrink()
 //---------------------
 {
-	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
-	if(sndFile.m_pModDoc == NULL) return true;
-
-	CModDoc& rModDoc = *sndFile.m_pModDoc;
-
-	if (!m_ModCommands || m_Rows < sndFile.GetModSpecifications().patternRowsMin * 2) return true;
-
-	rModDoc.BeginWaitCursor();
-	ROWINDEX nRows = m_Rows;
-	const CHANNELINDEX nChns = sndFile.m_nChannels;
-	const PATTERNINDEX nPattern = m_rPatternContainer.GetIndex(this);
-	rModDoc.GetPatternUndo().PrepareUndo(nPattern, 0, 0, nChns, nRows);
-	nRows /= 2;
-	for (ROWINDEX y = 0; y < nRows; y++)
+	if (!m_ModCommands
+		|| m_Rows < GetSoundFile().GetModSpecifications().patternRowsMin * 2)
 	{
-		ModCommand *psrc = sndFile.Patterns[nPattern] + (y * 2 * nChns);
-		ModCommand *pdest = sndFile.Patterns[nPattern] + (y * nChns);
-		for (CHANNELINDEX x = 0; x < nChns; x++)
+		return false;
+	}
+
+	m_Rows /= 2;
+	const CHANNELINDEX nChns = GetNumChannels();
+
+	for(ROWINDEX y = 0; y < m_Rows; y++)
+	{
+		const PatternRow srcRow = GetRow(y * 2);
+		const PatternRow nextSrcRow = GetRow(y * 2 + 1);
+		PatternRow destRow = GetRow(y);
+
+		for(CHANNELINDEX x = 0; x < nChns; x++)
 		{
-			pdest[x] = psrc[x];
-			if ((!pdest[x].note) && (!pdest[x].instr))
+			const ModCommand &src = srcRow[x];
+			const ModCommand &srcNext = nextSrcRow[x];
+			ModCommand &dest = destRow[x];
+			dest = src;
+
+			if(dest.note == NOTE_NONE && !dest.instr)
 			{
-				pdest[x].note = psrc[x+nChns].note;
-				pdest[x].instr = psrc[x+nChns].instr;
-				if (psrc[x+nChns].volcmd)
+				// Fill in data from next row if field is empty
+				dest.note = srcNext.note;
+				dest.instr = srcNext.instr;
+				if(srcNext.volcmd != VOLCMD_NONE)
 				{
-					pdest[x].volcmd = psrc[x+nChns].volcmd;
-					pdest[x].vol = psrc[x+nChns].vol;
+					dest.volcmd = srcNext.volcmd;
+					dest.vol = srcNext.vol;
 				}
-				if (!pdest[x].command)
+				if(dest.command == CMD_NONE)
 				{
-					pdest[x].command = psrc[x+nChns].command;
-					pdest[x].param = psrc[x+nChns].param;
+					dest.command = srcNext.command;
+					dest.param = srcNext.param;
 				}
 			}
 		}
 	}
-	m_Rows = nRows;
-	rModDoc.SetModified();
-	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
-	rModDoc.EndWaitCursor();
-	return false;
+
+	return true;
 }
 
 

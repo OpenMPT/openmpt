@@ -141,7 +141,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			{
 				m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
 			}
-			m_SndFile.Patterns[nPat].Resize(64, false);
+			m_SndFile.Patterns[nPat].Resize(64);
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
 		}
 

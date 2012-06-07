@@ -578,8 +578,31 @@ void CPatternPropertiesDlg::OnOK()
 		}
 
 		const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
-		m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, newSize, pSndFile->Patterns[m_nPattern].GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows() - newSize);
-		pSndFile->Patterns[m_nPattern].Resize(newSize);
+
+		// Check if any pattern data would be removed.
+		bool resize = true;
+		if(newSize < pSndFile->Patterns[m_nPattern].GetNumRows())
+		{
+			for(ROWINDEX row = newSize; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
+			{
+				if(!pSndFile->Patterns[m_nPattern].IsEmptyRow(row))
+				{
+					resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
+					break;
+				}
+			}
+		}
+
+		if(resize)
+		{
+			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, newSize, pSndFile->Patterns[m_nPattern].GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows() - newSize);
+			m_pModDoc->BeginWaitCursor();
+			if(pSndFile->Patterns[m_nPattern].Resize(newSize))
+			{
+				m_pModDoc->SetModified();
+			}
+			m_pModDoc->EndWaitCursor();
+		}
 	}
 	CDialog::OnOK();
 }
