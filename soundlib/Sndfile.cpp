@@ -62,22 +62,6 @@ LPCSTR glpszModExtensions = "mod|s3m|xm|it|itp|mptm|stm|nst|ult|669|wow|mtm|med|
 extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
 #endif
 
-#define MAX_PACK_TABLES		3
-
-
-// Compression table
-static char UnpackTable[MAX_PACK_TABLES][16] =
-//--------------------------------------------
-{
-	// CPU-generated dynamic table
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	// u-Law table
-	0, 1, 2, 4, 8, 16, 32, 64,
-	-1, -2, -4, -8, -16, -32, -48, -64,
-	// Linear table
-	0, 1, 2, 3, 5, 7, 12, 19,
-	-1, -2, -3, -5, -7, -12, -19, -31,
-};
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -463,7 +447,7 @@ CSoundFile::CSoundFile() :
 	m_ModFlags = 0;
 	m_bITBidiMode = false;
 
-	m_pModDoc = NULL;
+	m_pModDoc = nullptr;
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
 	m_bChannelMuteTogglePending.reset();
@@ -1323,10 +1307,10 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 
 	Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
 
-	if(m_pModDoc)
+	if(GetpModDoc() != nullptr)
 	{
-		m_pModDoc->Record1Channel(nChn, false);
-		m_pModDoc->Record2Channel(nChn, false);
+		GetpModDoc()->Record1Channel(nChn, false);
+		GetpModDoc()->Record2Channel(nChn, false);
 	}
 	m_bChannelMuteTogglePending[nChn] = false;
 

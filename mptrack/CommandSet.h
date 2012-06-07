@@ -17,7 +17,7 @@
 
 #define KEYMAP_VERSION 1	// Version of the .mkb format
 
-#define HOTKEYF_MIDI 0x10
+#define HOTKEYF_MIDI 0x10	// modifier mask for MIDI CCs
 
 enum InputTargetContext
 {

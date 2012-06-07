@@ -100,7 +100,7 @@ public:
 	bool ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength);
 	bool ReadAsByte(FileReader &file, size_t howMany);
 	template<typename T, size_t arraySize>
-	bool ReadFromArray(T (&orders)[arraySize], size_t howMany = arraySize);
+	bool ReadFromArray(const T (&orders)[arraySize], size_t howMany = arraySize);
 
 	// Deprecated function used for MPTm files created with OpenMPT 1.17.02.46 - 1.17.02.48.
 	DWORD Deserialize(const BYTE* const src, const DWORD memLength);
@@ -135,8 +135,8 @@ inline PATTERNINDEX ModSequence::GetIgnoreIndex(const MODTYPE type) {return type
 
 
 template<typename T, size_t arraySize>
-bool ModSequence::ReadFromArray(T (&orders)[arraySize], size_t howMany)
-//---------------------------------------------------------------------
+bool ModSequence::ReadFromArray(const T (&orders)[arraySize], size_t howMany)
+//---------------------------------------------------------------------------
 {
 	LimitMax(howMany, arraySize);
 

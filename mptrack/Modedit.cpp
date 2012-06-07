@@ -684,25 +684,56 @@ bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate
 BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 //------------------------------------------------
 {
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
+	ROWINDEX numRows;
 
-	if ((nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
-	if(m_SndFile.Patterns[nPattern].Expand())
-		return FALSE;
-	else
-		return TRUE;
+	if(!m_SndFile.Patterns.IsValidPat(nPattern)
+		|| (numRows = m_SndFile.Patterns[nPattern].GetNumRows()) > m_SndFile.GetModSpecifications().patternRowsMax / 2)
+	{
+		return false;
+	}
+
+	BeginWaitCursor();
+	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows);
+	bool success = m_SndFile.Patterns[nPattern].Expand();
+	EndWaitCursor();
+
+	if(success)
+	{
+		SetModified();
+		UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
+	} else
+	{
+		GetPatternUndo().RemoveLastUndoStep();
+	}
+	return success;
 }
 
 
 BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 //------------------------------------------------
 {
-	if ((nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
-	if(m_SndFile.Patterns[nPattern].Shrink())
-		return FALSE;
-	else
-		return TRUE;
+	ROWINDEX numRows;
+
+	if(!m_SndFile.Patterns.IsValidPat(nPattern)
+		|| (numRows = m_SndFile.Patterns[nPattern].GetNumRows()) < m_SndFile.GetModSpecifications().patternRowsMin * 2)
+	{
+		return false;
+	}
+
+	BeginWaitCursor();
+	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows);
+	bool success = m_SndFile.Patterns[nPattern].Shrink();
+	EndWaitCursor();
+
+	if(success)
+	{
+		SetModified();
+		UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
+	} else
+	{
+		GetPatternUndo().RemoveLastUndoStep();
+	}
+	return success;
 }
 
 

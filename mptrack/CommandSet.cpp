@@ -1266,14 +1266,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	}
 	if (enforceRule[krCheckModifiers])
 	{
-		const int nForcedModifiers = 4;
-		CommandID forcedModifiers[nForcedModifiers] = {kcSelect, kcCopySelect, kcChordModifier, kcSetSpacing};
-		CommandID curCmd;
+		static const CommandID forcedModifiers[] = { kcSelect, kcCopySelect, kcChordModifier, kcSetSpacing };
 
 		// for all commands that must be modifiers
-		for (int i=0; i<nForcedModifiers; i++)
+		for (int i = 0; i < CountOf(forcedModifiers); i++)
 		{
-			curCmd=forcedModifiers[i];
+			CommandID curCmd = forcedModifiers[i];
 			
 			//for all of this command's key combinations
 			for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
@@ -1282,7 +1280,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				if ((!curKc.mod) || (curKc.code!=VK_SHIFT && curKc.code!=VK_CONTROL && curKc.code!=VK_MENU && curKc.code!=0 &&
 					curKc.code!=VK_LWIN && curKc.code!=VK_RWIN )) // Feature: use Windows keys as modifier keys
 				{
-					report+="Error! " + GetCommandText((CommandID)curCmd) + " must be a modifier (shift/ctrl/alt), but is currently " + GetKeyText(inKc.mod, inKc.code) + "\r\n";
+					report += ("Error! " + GetCommandText((CommandID)curCmd) + " must be a modifier (shift/ctrl/alt), but is currently " + GetKeyText(inKc.mod, inKc.code) + "\r\n");
 					//replace with dummy
 					commands[curCmd].kcList[k].mod=1;
 					commands[curCmd].kcList[k].code=0;
@@ -1369,7 +1367,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	//Clear map
 	memset(km, -1, sizeof(KeyMap));
 
-    //Copy commandlist content into map:
+	//Copy commandlist content into map:
 	for (UINT cmd=0; cmd<kcNumCommands; cmd++)
 	{	
 		if (IsDummyCommand((CommandID)cmd))
@@ -1491,9 +1489,9 @@ ctx:UID:Description:Modifier:Key:EventMask
 		return false;
 	}
 	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 
-	fprintf(outStream, "//-Format is:                                                          -\n"); 	
-	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"); 
-	fprintf(outStream, "//----------------------------------------------------------------------\n"); 
+	fprintf(outStream, "//-Format is:                                                          -\n");
+	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n");
+	fprintf(outStream, "//----------------------------------------------------------------------\n");
 	fprintf(outStream, "version:%u\n", KEYMAP_VERSION);
 
 	for (int ctx=0; ctx<kCtxMaxInputContexts; ctx++)
@@ -1545,7 +1543,6 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 
 	while(iStrm.getline(s, sizeof(s)))
 	{
-		//Reporting::Notification(s, MB_ICONEXCLAMATION|MB_OK);
 		curLine = s;
 		
 		

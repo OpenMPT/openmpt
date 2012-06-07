@@ -62,9 +62,13 @@ public:
 	PatternRow GetRow(const ROWINDEX row) { return GetpModCommand(row, 0); }
 	const PatternRow GetRow(const ROWINDEX row) const { return const_cast<ModCommand *>(GetpModCommand(row, 0)); }
 
-	CHANNELINDEX GetNumChannels() const;
+	inline CHANNELINDEX GetNumChannels() const;
 
-	bool Resize(const ROWINDEX newRowCount, const bool showDataLossWarning = true);
+	// Add or remove rows from the pattern.
+	bool Resize(const ROWINDEX newRowCount);
+
+	// Check if there is any note data on a given row.
+	bool IsEmptyRow(ROWINDEX row) const;
 
 	// Allocate new pattern memory and replace old pattern data.
 	bool AllocatePattern(ROWINDEX rows);
@@ -126,8 +130,8 @@ protected:
 	ModCommand& GetModCommand(size_t i) { return m_ModCommands[i]; }
 	//Returns modcommand from (floor[i/channelCount], i%channelCount) 
 
-	ModCommand& GetModCommand(ROWINDEX r, CHANNELINDEX c) { return m_ModCommands[r*GetNumChannels()+c]; }
-	const ModCommand& GetModCommand(ROWINDEX r, CHANNELINDEX c) const { return m_ModCommands[r*GetNumChannels()+c]; }
+	ModCommand& GetModCommand(ROWINDEX r, CHANNELINDEX c) { return m_ModCommands[r * GetNumChannels() + c]; }
+	const ModCommand& GetModCommand(ROWINDEX r, CHANNELINDEX c) const { return m_ModCommands[r * GetNumChannels() + c]; }
 
 
 //BEGIN: DATA
