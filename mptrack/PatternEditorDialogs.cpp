@@ -581,15 +581,12 @@ void CPatternPropertiesDlg::OnOK()
 
 		// Check if any pattern data would be removed.
 		bool resize = true;
-		if(newSize < pSndFile->Patterns[m_nPattern].GetNumRows())
+		for(ROWINDEX row = newSize; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
 		{
-			for(ROWINDEX row = newSize; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
+			if(!pSndFile->Patterns[m_nPattern].IsEmptyRow(row))
 			{
-				if(!pSndFile->Patterns[m_nPattern].IsEmptyRow(row))
-				{
-					resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
-					break;
-				}
+				resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
+				break;
 			}
 		}
 

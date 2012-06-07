@@ -32,7 +32,7 @@ CHANNELINDEX CPattern::GetNumChannels() const
 bool CPattern::IsEmptyRow(ROWINDEX row) const
 //-------------------------------------------
 {
-	if(m_ModCommands == nullptr || IsValidRow(row))
+	if(m_ModCommands == nullptr || !IsValidRow(row))
 	{
 		return true;
 	}
