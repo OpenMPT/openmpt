@@ -48,7 +48,6 @@ MidiInOut::~MidiInOut()
 //---------------------
 {
 	suspend();
-	Pm_Terminate();
 }
 
 
