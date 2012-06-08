@@ -55,8 +55,6 @@ CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
 	m_pMacroMenu  = new CMenu();
 
 	m_pPresetMenu = new CMenu();
-	m_pPresetMenuGroup.SetSize(0);
-
 	m_pOptionsMenu  = new CMenu();
 
 	m_pMenu->LoadMenu(IDR_VSTMENU);
@@ -86,15 +84,15 @@ CAbstractVstEditor::~CAbstractVstEditor()
 		delete m_pMacroMenu;
 		delete m_pOptionsMenu;
 
-		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++)
+		for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
 		{
-			if (m_pPresetMenuGroup[i]->m_hMenu)
+			if(m_pPresetMenuGroup[i]->m_hMenu)
 			{
 				m_pPresetMenuGroup[i]->DestroyMenu();
 				delete m_pPresetMenuGroup[i];
 			}
 		}
-		m_pPresetMenuGroup.RemoveAll();
+		m_pPresetMenuGroup.clear();
 
 		m_pVstPlugin->m_pEditor = NULL;
 		m_pVstPlugin = NULL;
@@ -393,11 +391,11 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	long curProg  = m_pVstPlugin->GetCurrentProgram();
 
 	if (m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
-	{												// So remove any exiting menus...	
-		if (curProg == m_nCurProg)					//.. unless menu exists and is accurate,	
+	{												// So remove any exiting menus...
+		if (curProg == m_nCurProg)					//.. unless menu exists and is accurate,
 			return;									//in which case we are done.
 
-		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++)
+		for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
 		{
 			//Destroy any submenus
 			if (m_pPresetMenuGroup[i]->m_hMenu)
@@ -406,8 +404,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 				delete m_pPresetMenuGroup[i];
 			}
 		}
-		m_pPresetMenuGroup.RemoveAll();
-		m_pPresetMenuGroup.SetSize(0);
+		m_pPresetMenuGroup.clear();
 
 		m_pPresetMenu->DestroyMenu();							//Destroy Factory preset menu
 		m_pMenu->DeleteMenu(1, MF_BYPOSITION);
@@ -423,7 +420,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	if(numSubMenus > 1)
 	{
 		// Create sub menus if necessary
-		m_pPresetMenuGroup.SetSize(numSubMenus);
+		m_pPresetMenuGroup.resize(numSubMenus);
 		for(int bank = 0, prog = 1; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
 		{
 			m_pPresetMenuGroup[bank] = new CMenu();
@@ -490,19 +487,19 @@ void CAbstractVstEditor::UpdateInputMenu()
 
 	CString name;
 
-	CArray<CVstPlugin*, CVstPlugin*> inputPlugs;
+	vector<CVstPlugin *> inputPlugs;
 	m_pVstPlugin->GetInputPlugList(inputPlugs);
-	for (int nPlug=0; nPlug<inputPlugs.GetSize(); nPlug++)
+	for(size_t nPlug=0; nPlug < inputPlugs.size(); nPlug++)
 	{
 		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot + 1, inputPlugs[nPlug]->m_pMixStruct->GetName());
 		m_pInputMenu->AppendMenu(MF_STRING, ID_PLUGSELECT + inputPlugs[nPlug]->m_nSlot, name);
 	}
 
-	CArray<UINT, UINT> inputChannels;
+	vector<CHANNELINDEX> inputChannels;
 	m_pVstPlugin->GetInputChannelList(inputChannels);
-	for (int nChn=0; nChn<inputChannels.GetSize(); nChn++)
+	for (size_t nChn=0; nChn<inputChannels.size(); nChn++)
 	{
-		if (nChn==0 && inputPlugs.GetSize())
+		if (nChn==0 && inputPlugs.size())
 		{ 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
@@ -510,12 +507,12 @@ void CAbstractVstEditor::UpdateInputMenu()
 		m_pInputMenu->AppendMenu(MF_STRING, NULL, name);
 	}
 
-	CArray<UINT, UINT> inputInstruments;
+	vector<INSTRUMENTINDEX> inputInstruments;
 	m_pVstPlugin->GetInputInstrumentList(inputInstruments);
-	for(int nIns = 0; nIns<inputInstruments.GetSize(); nIns++)
+	for(size_t nIns = 0; nIns<inputInstruments.size(); nIns++)
 	{
 		bool checked = false;
-		if (nIns==0 && (inputPlugs.GetSize() || inputChannels.GetSize()))
+		if (nIns==0 && (inputPlugs.size() || inputChannels.size()))
 		{ 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
@@ -524,9 +521,9 @@ void CAbstractVstEditor::UpdateInputMenu()
 		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
 	}
 
-	if ((inputPlugs.GetSize() == 0) &&
-		(inputChannels.GetSize() == 0) &&
-		(inputInstruments.GetSize() == 0))
+	if ((inputPlugs.size() == 0) &&
+		(inputChannels.size() == 0) &&
+		(inputInstruments.size() == 0))
 	{
 		m_pInputMenu->AppendMenu(MF_STRING|MF_GRAYED, NULL, "None");
 	}
@@ -549,11 +546,11 @@ void CAbstractVstEditor::UpdateOutputMenu()
 		m_pOutputMenu->CreatePopupMenu();
 	}
 
-	CArray<CVstPlugin*, CVstPlugin*> outputPlugs;
+	vector<CVstPlugin *> outputPlugs;
 	m_pVstPlugin->GetOutputPlugList(outputPlugs);
 	CString name;
 
-	for (int nPlug = 0; nPlug < outputPlugs.GetSize(); nPlug++)
+	for (size_t nPlug = 0; nPlug < outputPlugs.size(); nPlug++)
 	{
 		if (outputPlugs[nPlug] != nullptr)
 		{
@@ -696,9 +693,9 @@ INSTRUMENTINDEX CAbstractVstEditor::GetBestInstrumentCandidate()
 	}
 */
 	//Then just take the first instrument that points to this plug..
-	CArray<UINT, UINT> plugInstrumentList;
+	vector<INSTRUMENTINDEX> plugInstrumentList;
 	m_pVstPlugin->GetInputInstrumentList(plugInstrumentList);
-	if(plugInstrumentList.GetSize())
+	if(plugInstrumentList.size())
 	{
 		return static_cast<INSTRUMENTINDEX>(plugInstrumentList[0]);
 	}

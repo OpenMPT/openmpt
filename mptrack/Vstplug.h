@@ -177,10 +177,10 @@ public:
 	bool isInstrument(); // ericus 18/02/2005
 	bool CanRecieveMidiEvents();
 
-	void GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);
-	void GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);
-	void GetInputInstrumentList(CArray<UINT,UINT> &list);
-	void GetInputChannelList(CArray<UINT,UINT> &list);
+	void GetOutputPlugList(vector<CVstPlugin *> &list);
+	void GetInputPlugList(vector<CVstPlugin *> &list);
+	void GetInputInstrumentList(vector<INSTRUMENTINDEX> &list);
+	void GetInputChannelList(vector<CHANNELINDEX> &list);
 
 public:
 	int AddRef() { return ++m_nRefCount; }

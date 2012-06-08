@@ -56,7 +56,7 @@ private:
 	bool m_bEnabled;
 	DWORD m_nLastSave;
 	DWORD m_nSaveInterval;
-	int m_nBackupHistory;
+	size_t m_nBackupHistory;
 	bool m_bUseOriginalPath;
 	CString m_csPath;
 	CString m_csFileNameTemplate;
@@ -94,7 +94,7 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedAutosaveEnable();
 	afx_msg void OnBnClickedAutosaveUseorigdir();
-    void OnSettingsChanged();
+	void OnSettingsChanged();
 	BOOL OnSetActive();
 	
 };

@@ -183,7 +183,6 @@
     <ClCompile Include="..\soundlib\XMTools.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="ACMConvert.cpp" />
-    <ClCompile Include="ArrayUtils.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Autotune.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />
@@ -377,7 +376,6 @@
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="view_graph.h" />
     <ClInclude Include="AbstractVstEditor.h" />
-    <ClInclude Include="ArrayUtils.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="ChannelManagerDlg.h" />
     <ClInclude Include="ChildFrm.h" />

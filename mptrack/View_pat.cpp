@@ -23,14 +23,12 @@
 
 #include "EffectVis.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
-#include "PatternRandomizer.h"
-#include "arrayutils.h"
 #include "view_pat.h"
 #include "View_gen.h"
 #include "MIDIMacros.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
-#include <cmath>
+#include <algorithm>
 
 #define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
 
@@ -116,7 +114,6 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_EFFECT,	OnInterpolateEffect)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_NOTE,		OnInterpolateNote)
 	ON_COMMAND(ID_PATTERN_VISUALIZE_EFFECT,		OnVisualizeEffect)		//rewbs.fxvis
-	ON_COMMAND(ID_PATTERN_OPEN_RANDOMIZER,		OnOpenRandomizer)
 	ON_COMMAND(ID_GROW_SELECTION,				OnGrowSelection)
 	ON_COMMAND(ID_SHRINK_SELECTION,				OnShrinkSelection)
 	ON_COMMAND(ID_PATTERN_SETINSTRUMENT,		OnSetSelInstrument)
@@ -150,7 +147,6 @@ CViewPattern::CViewPattern()
 //--------------------------
 {
 	m_pEffectVis = NULL; //rewbs.fxvis
-	m_pRandomizer = NULL;
 	m_bLastNoteEntryBlocked=false;
 
 	m_nPattern = 0;
@@ -752,12 +748,6 @@ void CViewPattern::OnDestroy()
 		m_pGotoWnd->DestroyWindow();
 		delete m_pGotoWnd;
 		m_pGotoWnd = NULL;
-	}
-
-	if (m_pRandomizer)
-	{
-		delete m_pRandomizer;
-		m_pRandomizer=NULL;
 	}
 
 	CModScrollView::OnDestroy();
@@ -1453,32 +1443,28 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
 				BuildChannelControlCtxMenu(hMenu);
-				BuildChannelMiscCtxMenu(hMenu, pSndFile);
+				BuildChannelMiscCtxMenu(hMenu);
 			}
 		}
 		
 		//------ Standard Menu ---------- :
 		else if ((pt.x >= m_szHeader.cx) && (pt.y >= m_szHeader.cy))
 		{
-			/*if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");*/
-			if (BuildSelectionCtxMenu(hMenu, ih))
+			// When combining menus, use bitwise ORs to avoid shortcuts
+			if(BuildSelectionCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildEditCtxMenu(hMenu, ih, pModDoc))
+			if(BuildEditCtxMenu(hMenu, ih, pModDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildNoteInterpolationCtxMenu(hMenu, ih, pSndFile) |	//Use bitwise ORs to avoid shortcuts
-				BuildVolColInterpolationCtxMenu(hMenu, ih, pSndFile) | 
-				BuildEffectInterpolationCtxMenu(hMenu, ih, pSndFile) )
+			if(BuildInterpolationCtxMenu(hMenu, ih)
+				| BuildTransposeCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildTransposeCtxMenu(hMenu, ih))
+			if(BuildVisFXCtxMenu(hMenu, ih)
+				| BuildAmplifyCtxMenu(hMenu, ih)
+				| BuildSetInstCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildVisFXCtxMenu(hMenu, ih)   | 	//Use bitwise ORs to avoid shortcuts
-				BuildAmplifyCtxMenu(hMenu, ih) |
-				BuildSetInstCtxMenu(hMenu, ih, pSndFile) )
+			if(BuildPCNoteCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildPCNoteCtxMenu(hMenu, ih, pSndFile))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildGrowShrinkCtxMenu(hMenu, ih))
+			if(BuildGrowShrinkCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if(BuildMiscCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -2566,34 +2552,6 @@ void CViewPattern::OnCursorPaste()
 }
 
 
-void CViewPattern::OnOpenRandomizer()
-//-----------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		if (m_pRandomizer)
-		{
-			if (m_pRandomizer->isGUIVisible())
-			{
-				//window already there, update data
-				//m_pRandomizer->UpdateSelection(rowStart, rowEnd, nchn, pModDoc, m_nPattern);
-			} else
-			{
-				m_pRandomizer->showGUI();
-			}
-		} else
-		{
-			//Open window & send data
-			m_pRandomizer = new CPatternRandomizer(this);
-			if (m_pRandomizer)
-			{
-				m_pRandomizer->showGUI();
-			}
-		}
-	}
-}
-
 //begin rewbs.fxvis
 void CViewPattern::OnVisualizeEffect()
 //------------------------------------
@@ -2631,37 +2589,37 @@ void CViewPattern::OnVisualizeEffect()
 void CViewPattern::Interpolate(PatternCursor::Columns type)
 //---------------------------------------------------------
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr)
 	{
 		return;
 	}
 
 	bool changed = false;
-	CArray<UINT,UINT> validChans;
+	vector<CHANNELINDEX> validChans;
 
 	if(type == PatternCursor::effectColumn || type == PatternCursor::paramColumn)
 	{
-		CArray<UINT,UINT> moreValidChans;
-		ListChansWhereColSelected(PatternCursor::effectColumn, validChans);
-		ListChansWhereColSelected(PatternCursor::paramColumn, moreValidChans);
-		//CArrayUtils<UINT>::Merge(validChans, moreValidChans); //Causes unresolved external, not sure why yet.
-		validChans.Append(moreValidChans);						//for now we'll just interpolate the same data several times. :)
+		vector<CHANNELINDEX> effectChans;
+		vector<CHANNELINDEX> paramChans;
+		ListChansWhereColSelected(PatternCursor::effectColumn, effectChans);
+		ListChansWhereColSelected(PatternCursor::paramColumn, paramChans);
+
+		validChans.resize(effectChans.size() + paramChans.size());
+		validChans.resize(std::set_union(effectChans.begin(), effectChans.end(), paramChans.begin(), paramChans.end(), validChans.begin()) - validChans.begin());
 	} else
 	{
 		ListChansWhereColSelected(type, validChans);
 	}
 	
-	int nValidChans = validChans.GetCount();
-
+	const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
+	
 	//for all channels where type is selected
-	for (int chnIdx=0; chnIdx<nValidChans; chnIdx++)
+	for(vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
 	{
-		UINT nchn = validChans[chnIdx];
-		ROWINDEX row0 = m_Selection.GetStartRow();
-		ROWINDEX row1 = m_Selection.GetEndRow();
+		CHANNELINDEX nchn = *iter;
 		
-		if (!IsInterpolationPossible(row0, row1, nchn, type, pSndFile))
+		if (!IsInterpolationPossible(row0, row1, nchn, type))
 			continue; //skip chans where interpolation isn't possible
 
 		if (!changed) //ensure we save undo buffer only before any channels are interpolated
@@ -2671,8 +2629,8 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 
 		int vsrc, vdest, vcmd = 0, verr = 0, distance = row1 - row0;
 
-		const ModCommand srcCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
-		const ModCommand destCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row1, nchn);
+		const ModCommand srcCmd = *sndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
+		const ModCommand destCmd = *sndFile->Patterns[m_nPattern].GetpModCommand(row1, nchn);
 
 		ModCommand::NOTE PCnote = 0;
 		uint16 PCinst = 0, PCparam = 0;
@@ -2746,9 +2704,9 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 
 		if (vdest < vsrc) verr = -verr;
 
-		ModCommand* pcmd = pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
+		ModCommand* pcmd = sndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
 
-		for (int i = 0; i <= distance; i++, pcmd += pSndFile->GetNumChannels())
+		for (int i = 0; i <= distance; i++, pcmd += sndFile->GetNumChannels())
 		{
 
 			switch(type)
@@ -2841,9 +2799,8 @@ bool CViewPattern::TransposeSelection(int transp)
 			{
 				int note = m[chn].note;
 				note += transp;
-				if (note < noteMin) note = noteMin;
-				if (note > noteMax) note = noteMax;
-				m[chn].note = (BYTE)note;
+				Limit(note, noteMin, noteMax);
+				m[chn].note = (ModCommand::NOTE)note;
 			}
 		}
 	}
@@ -3048,11 +3005,11 @@ void CViewPattern::OnDuplicateChannel()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc == nullptr) return;
 
-	if(Reporting::Confirm(GetStrI18N(_TEXT("This affects all patterns, proceed?"))) != cnfYes)
-		return;
-
 	const CHANNELINDEX nDupChn = m_MenuCursor.GetChannel();
 	if(nDupChn >= pModDoc->GetNumChannels())
+		return;
+
+	if(!pModDoc->IsChannelUnused(nDupChn) && Reporting::Confirm(GetStrI18N(_TEXT("This affects all patterns, proceed?"))) != cnfYes)
 		return;
 
 	BeginWaitCursor();
@@ -4009,7 +3966,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPatternInterpolateVol:		OnInterpolateVolume(); return wParam;
 		case kcPatternInterpolateEffect:	OnInterpolateEffect(); return wParam;
 		case kcPatternVisualizeEffect:		OnVisualizeEffect(); return wParam;
-		case kcPatternOpenRandomizer:		OnOpenRandomizer(); return wParam;
+		//case kcPatternOpenRandomizer:		OnOpenRandomizer(); return wParam;
 		case kcPatternGrowSelection:		OnGrowSelection(); return wParam;
 		case kcPatternShrinkSelection:		OnShrinkSelection(); return wParam;
 
@@ -5665,113 +5622,44 @@ bool CViewPattern::BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	return true;
 }
 
-bool CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const
-//----------------------------------------------------------------------------------------------------------
+
+bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) const
+//--------------------------------------------------------------------------------
 {
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = MF_GRAYED;
+	const CSoundFile *sndFile = GetSoundFile();
+	const bool isPCNote = sndFile->Patterns.IsValidPat(m_nPattern) && sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel())->IsPcNote();
 
-	UINT startRow = m_Selection.GetStartRow();
-	UINT endRow   = m_Selection.GetEndRow();
-	
-	if (ListChansWhereColSelected(PatternCursor::noteColumn, validChans) > 0)
+	HMENU subMenu = CreatePopupMenu();
+	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, CString("Note Column\t") + ih->GetKeyTextFromCommand(kcPatternInterpolateNote), ID_PATTERN_INTERPOLATE_NOTE)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, (isPCNote ? CString("Parameter Column\t") : CString("Volume Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateVol), ID_PATTERN_INTERPOLATE_VOLUME)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, (isPCNote ? CString("Value Column\t") : CString("Effect Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect), ID_PATTERN_INTERPOLATE_EFFECT);
+	if(possible || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++)
-		{
-			if (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], PatternCursor::noteColumn, pSndFile))
-			{
-				greyed = 0;	// Can do interpolation.
-				break;
-			}
-		}
-
-	}
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
-	{
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_INTERPOLATE_NOTE, "Interpolate Note\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateNote));
-		return true;
-	}
-	return false;
-}
-
-bool CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const
-//------------------------------------------------------------------------------------------------------------
-{
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = MF_GRAYED;
-
-	UINT startRow = m_Selection.GetStartRow();
-	UINT endRow   = m_Selection.GetEndRow();
-	
-	if (ListChansWhereColSelected(PatternCursor::volumeColumn, validChans) > 0)
-	{
-		for (int valChnIdx = 0; valChnIdx < validChans.GetCount(); valChnIdx++)
-		{
-			if (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], PatternCursor::volumeColumn, pSndFile))
-			{
-				greyed = 0;	// Can do interpolation.
-				break;
-			}
-		}
-	}
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
-	{
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_INTERPOLATE_VOLUME, "Interpolate Vol Col\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateVol));
+		AppendMenu(hMenu, MF_POPUP | (possible ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), "Interpolate...");
 		return true;
 	}
 	return false;
 }
 
 
-bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const
-//------------------------------------------------------------------------------------------------------------
+bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, PatternCursor::Columns colType, CString label, UINT command) const
+//--------------------------------------------------------------------------------------------------------------------------
 {
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = MF_GRAYED;
-
-	UINT startRow = m_Selection.GetStartRow();
-	UINT endRow   = m_Selection.GetEndRow();
-	
-	if (ListChansWhereColSelected(PatternCursor::effectColumn, validChans) > 0)
+	bool possible = IsInterpolationPossible(colType);
+	if(!possible && colType == PatternCursor::effectColumn)
 	{
-		for (int valChnIdx = 0; valChnIdx < validChans.GetCount(); valChnIdx++)
-		{
-			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], PatternCursor::effectColumn, pSndFile))
-			{
-				greyed = 0;	// Can do interpolation.
-				break;
-			}
-		}
+		// Extend search to param column
+		possible = IsInterpolationPossible(PatternCursor::paramColumn);
 	}
 
-	if (ListChansWhereColSelected(PatternCursor::paramColumn, validChans) > 0)
+	if(possible || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++)
-		{
-			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], PatternCursor::paramColumn, pSndFile))
-			{
-				greyed = 0;	// Can do interpolation.
-				break;
-			}
-		}
+		AppendMenu(hMenu, MF_STRING | (possible ? 0 : MF_GRAYED), command, label);
 	}
 
-
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
-	{
-		// Figure out what we want to interpolate
-		CString interpolateWhat = "Effect";
-		const CSoundFile *pSndFile = GetSoundFile();
-		if(pSndFile->Patterns.IsValidPat(m_nPattern) && pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel())->IsPcNote())
-		{
-			interpolateWhat = "Parameter";
-		}
-
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_INTERPOLATE_EFFECT, "Interpolate " + interpolateWhat + "\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect));
-		return true;
-	}
-	return false;
+	return possible;
 }
+
 
 bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pModDoc) const
 //-----------------------------------------------------------------------------------------
@@ -5780,7 +5668,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-	AppendMenu(hMenu, MF_POPUP, (UINT)pasteSpecialMenu, "Paste Special");
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(pasteSpecialMenu), "Paste Special");
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, "Mix Paste (IT Style)\t" + ih->GetKeyTextFromCommand(kcEditMixPasteITStyle));
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
@@ -5800,8 +5688,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 bool CViewPattern::BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //------------------------------------------------------------------------
 {
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = (ListChansWhereColSelected(PatternCursor::effectColumn, validChans) > 0) ? FALSE:MF_GRAYED;
+	DWORD greyed = IsColumnSelected(PatternCursor::effectColumn) ? FALSE : MF_GRAYED;
 
 	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
@@ -5821,15 +5708,18 @@ bool CViewPattern::BuildRandomCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //----------------------------------------------------------------------------
 {
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = (ListChansWhereColSelected(PatternCursor::noteColumn, validChans) > 0) ? FALSE:MF_GRAYED;
+	HMENU transMenu = CreatePopupMenu();
+
+	vector<CHANNELINDEX> validChans;
+	DWORD greyed = IsColumnSelected(PatternCursor::noteColumn) ? FALSE : MF_GRAYED;
 
 	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
-		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
-		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
-		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTDOWN, "Transpose -12\t" + ih->GetKeyTextFromCommand(kcTransposeOctDown));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTDOWN, "Transpose -12\t" + ih->GetKeyTextFromCommand(kcTransposeOctDown));
+		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(transMenu), "Transpose...");
 		return true;
 	}
 	return false;
@@ -5838,8 +5728,8 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //--------------------------------------------------------------------------
 {
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = (ListChansWhereColSelected(PatternCursor::volumeColumn, validChans) > 0) ? 0 : MF_GRAYED;
+	vector<CHANNELINDEX> validChans;
+	DWORD greyed = IsColumnSelected(PatternCursor::volumeColumn) ? 0 : MF_GRAYED;
 
 	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
@@ -5858,12 +5748,12 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu) const
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "Duplicate this channel");
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, (UINT)addChannelMenu, "Add channel\t");
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(addChannelMenu), "Add channel\t");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, "Before this channel");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, "After this channel");
 	
 	HMENU removeChannelMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, (UINT)removeChannelMenu, "Remove channel\t");
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(removeChannelMenu), "Remove channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, "Remove this channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNELDIALOG, "Choose channels to remove...\t");
 
@@ -5872,50 +5762,49 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu) const
 }
 
 
-bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const
-//------------------------------------------------------------------------------------------------
+bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
+//--------------------------------------------------------------------------
 {
-	CArray<UINT, UINT> validChans;
-	DWORD greyed = (ListChansWhereColSelected(PatternCursor::instrColumn, validChans) > 0) ? 0 : MF_GRAYED;
+	const CSoundFile *sndFile = GetSoundFile();
+	const CModDoc *modDoc;
+	if(sndFile == nullptr || (modDoc = sndFile->GetpModDoc()) == nullptr)
+	{
+		return false;
+	}
+
+
+	vector<CHANNELINDEX> validChans;
+	DWORD greyed = IsColumnSelected(PatternCursor::instrColumn) ? 0 : MF_GRAYED;
 
 	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		bool isPcNote = false;
-		ModCommand *mSelStart = nullptr;
-		if((pSndFile != nullptr) && (pSndFile->Patterns.IsValidPat(m_nPattern)))
+		if((sndFile->Patterns.IsValidPat(m_nPattern)))
 		{
-			mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
-			if(mSelStart != nullptr && mSelStart->IsPcNote())
+			if(sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel())->IsPcNote())
 			{
-				isPcNote = true;
+				// Don't build instrument menu for PC notes.
+				return false;
 			}
 		}
-		if(isPcNote)
-			return false;
 
 		// Create the new menu and add it to the existing menu.
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
-		AppendMenu(hMenu, MF_POPUP | greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
-
-		if(pSndFile == nullptr || pSndFile->GetpModDoc() == nullptr)
-			return false;
-
-		CModDoc* const pModDoc = pSndFile->GetpModDoc();
+		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(instrumentChangeMenu), "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
 	
 		if(!greyed)
 		{
 			bool addSeparator = false;
-			if (pSndFile->GetNumInstruments())
+			if (sndFile->GetNumInstruments())
 			{
-				for (UINT i = 1; i <= pSndFile->GetNumInstruments() ; i++)
+				for (UINT i = 1; i <= sndFile->GetNumInstruments() ; i++)
 				{
-					if (pSndFile->Instruments[i] == NULL)
+					if (sndFile->Instruments[i] == NULL)
 						continue;
 
-					CString instString = pModDoc->GetPatternViewInstrumentName(i, true);
+					CString instString = modDoc->GetPatternViewInstrumentName(i, true);
 					if(!instString.IsEmpty())
 					{
-						AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, pModDoc->GetPatternViewInstrumentName(i));
+						AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, modDoc->GetPatternViewInstrumentName(i));
 						addSeparator = true;
 					}
 				}
@@ -5923,9 +5812,9 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFil
 			} else
 			{
 				CHAR s[64];
-				for (UINT i = 1; i <= pSndFile->GetNumSamples(); i++) if (pSndFile->GetSample(i).pSample != nullptr)
+				for (UINT i = 1; i <= sndFile->GetNumSamples(); i++) if (sndFile->GetSample(i).pSample != nullptr)
 				{
-					wsprintf(s, "%02d: %s", i, pSndFile->m_szNames[i]);
+					wsprintf(s, "%02d: %s", i, sndFile->GetSampleName(i));
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, s);
 					addSeparator = true;
 				}
@@ -5945,74 +5834,80 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFil
 }
 
 
-bool CViewPattern::BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile *pSndFile) const
+bool CViewPattern::BuildChannelMiscCtxMenu(HMENU hMenu) const
 //---------------------------------------------------------------------------------
 {
-	if((pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) == 0) return false;
+	if((GetSoundFile()->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) == 0) return false;
 	AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
-	AppendMenu(hMenu, MF_STRING, ID_CHANNEL_RENAME, "Rename channel");
+	AppendMenu(hMenu, MF_STRING, ID_CHANNEL_RENAME, "Rename Channel");
 	return true;
 }
 
 
 // Context menu for Param Control notes
-bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const
-//-----------------------------------------------------------------------------------------------
+bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
+//-------------------------------------------------------------------------
 {
-	ModCommand *mSelStart = nullptr;
-	if((pSndFile == nullptr) || (!pSndFile->Patterns.IsValidPat(m_nPattern)))
+	const CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
+	{
 		return false;
-	mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
-	if((mSelStart == nullptr) || (!mSelStart->IsPcNote()))
+	}
+
+	const ModCommand &selStart = *sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
+	if(!selStart.IsPcNote())
+	{
 		return false;
+	}
 	
 	char s[72];
 
 	// Create sub menu for "change plugin"
 	HMENU pluginChangeMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, (UINT)pluginChangeMenu, "Change Plugin\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(pluginChangeMenu), "Change Plugin\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
 	for(PLUGINDEX nPlg = 0; nPlg < MAX_MIXPLUGINS; nPlg++)
 	{
-		if(pSndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
+		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
 		{
-			wsprintf(s, "%02d: %s", nPlg + 1, pSndFile->m_MixPlugins[nPlg].GetName());
-			AppendMenu(pluginChangeMenu, MF_STRING | ((nPlg + 1) == mSelStart->instr) ? MF_CHECKED : 0, ID_CHANGE_INSTRUMENT + nPlg + 1, s);
+			wsprintf(s, "%02d: %s", nPlg + 1, sndFile->m_MixPlugins[nPlg].GetName());
+			AppendMenu(pluginChangeMenu, MF_STRING | ((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0, ID_CHANGE_INSTRUMENT + nPlg + 1, s);
 		}
 	}
 
-	if(mSelStart->instr >= 1 && mSelStart->instr <= MAX_MIXPLUGINS)
+	if(selStart.instr >= 1 && selStart.instr <= MAX_MIXPLUGINS)
 	{
-		CVstPlugin *plug = (CVstPlugin *)(pSndFile->m_MixPlugins[mSelStart->instr - 1].pMixPlugin);
+		CVstPlugin *plug = (CVstPlugin *)(sndFile->m_MixPlugins[selStart.instr - 1].pMixPlugin);
 
 		if(plug != nullptr)
 		{
 
 			// Create sub menu for "change plugin param"
 			HMENU paramChangeMenu = ::CreatePopupMenu();
-			AppendMenu(hMenu, MF_POPUP, (UINT)paramChangeMenu, "Change Plugin Parameter\t");
+			AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(paramChangeMenu), "Change Plugin Parameter\t");
 
-			uint16 nThisParam = mSelStart->GetValueVolCol();
-			UINT nParams = plug->GetNumParameters();
-			for (UINT i = 0; i < nParams; i++)
+			const PlugParamIndex curParam = selStart.GetValueVolCol(), nParams = plug->GetNumParameters();
+
+			for(PlugParamIndex i = 0; i < nParams; i++)
 			{
-				AppendMenu(paramChangeMenu, MF_STRING | (i == nThisParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug->GetFormattedParamName(i));
+				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug->GetFormattedParamName(i));
 			}
 		}				
 
-		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle plugin editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle Plugin Editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
 	}
 
 	return true;
 }
 
 
-// List all channels in which a given column type is selected.
-UINT CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colType, CArray<UINT, UINT> &chans) const
-//-----------------------------------------------------------------------------------------------------------
+// Returns an ordered list of all channels in which a given column type is selected.
+CHANNELINDEX CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colType, vector<CHANNELINDEX> &chans) const
+//---------------------------------------------------------------------------------------------------------------------
 {
-	chans.RemoveAll();
 	CHANNELINDEX startChan = m_Selection.GetStartChannel();
 	CHANNELINDEX endChan   = m_Selection.GetEndChannel();
+	chans.clear();
+	chans.reserve(endChan - startChan);
 
 	// Check in which channels this column is selected.
 	// Actually this check is only important for the first and last channel, but to keep things clean and simple, all channels are checked in the same manner.
@@ -6020,25 +5915,54 @@ UINT CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colType, CAr
 	{
 		if(m_Selection.ContainsHorizontal(PatternCursor(0, i, colType)))
 		{
-			chans.Add(i);
+			chans.push_back(i);
 		}
 	}
 
-	return chans.GetCount();
+	return chans.size();
+}
+
+
+// Check if a column type is selected on any channel in the current selection.
+bool CViewPattern::IsColumnSelected(PatternCursor::Columns colType) const
+//-----------------------------------------------------------------------
+{
+	return m_Selection.ContainsHorizontal(PatternCursor(0, m_Selection.GetStartChannel(), colType))
+		|| m_Selection.ContainsHorizontal(PatternCursor(0, m_Selection.GetEndChannel(), colType));
+}
+
+
+// Check if the given interpolation type is actually possible in the current selection.
+bool CViewPattern::IsInterpolationPossible(PatternCursor::Columns colType) const
+//------------------------------------------------------------------------------
+{
+	vector<CHANNELINDEX> validChans;
+	ListChansWhereColSelected(colType, validChans);
+
+	ROWINDEX startRow = m_Selection.GetStartRow();
+	ROWINDEX endRow   = m_Selection.GetEndRow();
+	for(vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
+	{
+		if(IsInterpolationPossible(startRow, endRow, *iter, colType))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 
 // Check if the given interpolation type is actually possible in a given channel.
-bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan,
-										   PatternCursor::Columns colType, CSoundFile *pSndFile) const
-//----------------------------------------------------------------------------------------------------
+bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternCursor::Columns colType) const
+//-------------------------------------------------------------------------------------------------------------------------------------
 {
-	if (startRow == endRow)
+	const CSoundFile *sndFile = GetSoundFile();
+	if(startRow == endRow || sndFile == nullptr)
 		return false;
 
 	bool result = false;
-	const ModCommand startRowMC = *pSndFile->Patterns[m_nPattern].GetpModCommand(startRow, chan);
-	const ModCommand endRowMC = *pSndFile->Patterns[m_nPattern].GetpModCommand(endRow, chan);
+	const ModCommand startRowMC = *sndFile->Patterns[m_nPattern].GetpModCommand(startRow, chan);
+	const ModCommand endRowMC = *sndFile->Patterns[m_nPattern].GetpModCommand(endRow, chan);
 	UINT startRowCmd, endRowCmd;
 
 	if(colType == PatternCursor::effectColumn && (startRowMC.IsPcNote() || endRowMC.IsPcNote()))
@@ -6148,7 +6072,7 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 
 	HMENU hMenu;
 
-	if ( (hMenu = ::CreatePopupMenu()) == NULL) return false;
+	if((hMenu = ::CreatePopupMenu()) == nullptr) return false;
 	
 	CPoint pt = GetPointFromPosition(m_Cursor);
 

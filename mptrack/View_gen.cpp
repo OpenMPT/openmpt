@@ -1267,8 +1267,6 @@ void CViewGlobals::OnMovePlugToSlot()
 //-----------------------------------
 {
 	CMoveFXSlotDialog dlg((CWnd*)this);
-	CArray<UINT, UINT> emptySlots;
-	BuildEmptySlotList(emptySlots);
 
 	// If any plugin routes its output to the current plugin, we shouldn't try to move it before that plugin...
 	PLUGINDEX defaultIndex = 0;
@@ -1284,6 +1282,8 @@ void CViewGlobals::OnMovePlugToSlot()
 		}
 	}
 
+	vector<PLUGINDEX> emptySlots;
+	BuildEmptySlotList(emptySlots);
 	dlg.SetupMove(m_nCurrentPlugin, emptySlots, defaultIndex);
 
 	if (dlg.DoModal() == IDOK)
@@ -1391,19 +1391,19 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 }
 
 
-void CViewGlobals::BuildEmptySlotList(CArray<UINT, UINT> &emptySlots) 
-//-------------------------------------------------------------------
+void CViewGlobals::BuildEmptySlotList(vector<PLUGINDEX> &emptySlots) 
+//------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 	
-	emptySlots.RemoveAll();
+	emptySlots.clear();
 
-	for (UINT nSlot=0; nSlot<MAX_MIXPLUGINS; nSlot++)
+	for(PLUGINDEX nSlot = 0; nSlot < MAX_MIXPLUGINS; nSlot++)
 	{
-		if (pSndFile->m_MixPlugins[nSlot].pMixPlugin == nullptr)
+		if(pSndFile->m_MixPlugins[nSlot].pMixPlugin == nullptr)
 		{
-			emptySlots.Add(nSlot);	
+			emptySlots.push_back(nSlot);
 		}
 	}
 	return;
