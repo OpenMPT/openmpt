@@ -330,24 +330,24 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 
 	CFileFind finder;
 	BOOL bResult = finder.FindFile(searchPattern);
-	CArray<CString> foundfiles;
+	vector<CString> foundfiles;
 	
 	while(bResult)
 	{
 		bResult = finder.FindNextFile();
-		foundfiles.Add(path+finder.GetFileName());
+		foundfiles.push_back(path + finder.GetFileName());
 	}
 	finder.Close();
 	
-	std::sort(foundfiles.GetData(), foundfiles.GetData() + foundfiles.GetSize());
-	while (foundfiles.GetSize()>m_nBackupHistory)
+	std::sort(foundfiles.begin(), foundfiles.end());
+	while(foundfiles.size() > m_nBackupHistory)
 	{
 		try
 		{
-			CString toRemove=foundfiles[0];
+			CString toRemove = foundfiles[0];
 			CFile::Remove(toRemove);
 		} catch (CFileException* /*pEx*/){}
-		foundfiles.RemoveAt(0);
+		foundfiles.erase(foundfiles.begin());
 	}
 	
 }

@@ -859,7 +859,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetPreviousPlug:
 		if(pVstPlugin != nullptr)
 		{
-			CArray<CVstPlugin *, CVstPlugin *> list;
+			vector<CVstPlugin *> list;
 			pVstPlugin->GetInputPlugList(list);
 			// We don't assign plugins to pins...
 			return ToVstPtr(list[0]);
@@ -870,7 +870,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetNextPlug:
 		if(pVstPlugin != nullptr)
 		{
-			CArray<CVstPlugin *, CVstPlugin *> list;
+			vector<CVstPlugin *> list;
 			pVstPlugin->GetOutputPlugList(list);
 			// We don't assign plugins to pins...
 			return ToVstPtr(list[0]);
@@ -2840,12 +2840,12 @@ bool CVstPlugin::CanRecieveMidiEvents()
 }
 
 
-void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
-//------------------------------------------------------------------------
+void CVstPlugin::GetOutputPlugList(vector<CVstPlugin *> &list)
+//------------------------------------------------------------
 {
 	// At the moment we know there will only be 1 output.
 	// Returning nullptr means plugin outputs directly to master.
-	list.RemoveAll();
+	list.clear();
 
 	CVstPlugin *pOutputPlug = nullptr;
 	if(!m_pMixStruct->IsOutputToMaster())
@@ -2856,19 +2856,19 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 			pOutputPlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
 		}
 	}
-	list.Add(pOutputPlug);
+	list.push_back(pOutputPlug);
 
 	return;
 }
 
-void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
-//-----------------------------------------------------------------------
+void CVstPlugin::GetInputPlugList(vector<CVstPlugin *> &list)
+//-----------------------------------------------------------
 {
-	if(m_pSndFile == 0) return;
+	if(m_pSndFile == nullptr) return;
 
-	CArray<CVstPlugin*, CVstPlugin*> candidatePlugOutputs;
+	vector<CVstPlugin *> candidatePlugOutputs;
 	CVstPlugin* pCandidatePlug = nullptr;
-	list.RemoveAll();
+	list.clear();
 
 	for (int nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 	{
@@ -2877,24 +2877,22 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*, CVstPlugin*> &list)
 		{
 			pCandidatePlug->GetOutputPlugList(candidatePlugOutputs);
 
-			for(int nOutput=0; nOutput<candidatePlugOutputs.GetSize(); nOutput++)
+			for(vector<CVstPlugin *>::iterator plug = candidatePlugOutputs.begin(); plug != candidatePlugOutputs.end(); plug++)
 			{
-				if (candidatePlugOutputs[nOutput] == this)
+				if(*plug == this)
 				{
-					list.Add(pCandidatePlug);
+					list.push_back(pCandidatePlug);
 					break;
 				}
 			}
 		}
 	}
-
-	return;
 }
 
-void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
-//--------------------------------------------------------------
+void CVstPlugin::GetInputInstrumentList(vector<INSTRUMENTINDEX> &list)
+//--------------------------------------------------------------------
 {
-	list.RemoveAll();
+	list.clear();
 	if(m_pSndFile == nullptr) return;
 
 	const PLUGINDEX nThisMixPlug = m_nSlot + 1;		//m_nSlot is position in mixplug array.
@@ -2902,19 +2900,17 @@ void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
 	{
 		if (m_pSndFile->Instruments[nIns] != nullptr && (m_pSndFile->Instruments[nIns]->nMixPlug == nThisMixPlug))
 		{
-			list.Add(nIns);
+			list.push_back(nIns);
 		}
 	}
 
-	return;
-
 }
 
-void CVstPlugin::GetInputChannelList(CArray<UINT, UINT> &list)
-//------------------------------------------------------------
+void CVstPlugin::GetInputChannelList(vector<CHANNELINDEX> &list)
+//--------------------------------------------------------------
 {
-	if(m_pSndFile == 0) return;
-	list.RemoveAll();
+	if(m_pSndFile == nullptr) return;
+	list.clear();
 
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
 	const CHANNELINDEX chnCount = m_pSndFile->GetNumChannels();
@@ -2922,7 +2918,7 @@ void CVstPlugin::GetInputChannelList(CArray<UINT, UINT> &list)
 	{
 		if (m_pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug)
 		{
-			list.Add(nChn);
+			list.push_back(nChn);
 		}
 	}
 

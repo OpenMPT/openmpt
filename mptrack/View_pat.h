@@ -177,7 +177,6 @@ protected:
 	int oldrow, oldchn, oldsplitchn;
 // -! NEW_FEATURE#0012
 
-	CPatternRandomizer *m_pRandomizer;	//rewbs.fxVis
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
 
@@ -377,7 +376,6 @@ protected:
 	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
 	afx_msg void OnInterpolateNote() { Interpolate(PatternCursor::noteColumn); }
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
-	afx_msg void OnOpenRandomizer();		//rewbs.fxvis
 	afx_msg void OnTransposeUp() { TransposeSelection(1); }
 	afx_msg void OnTransposeDown() { TransposeSelection(-1); }
 	afx_msg void OnTransposeOctUp() { TransposeSelection(12); }
@@ -432,21 +430,24 @@ private:
 	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildSelectionCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler *ih) const;
-	bool BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
-	bool BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
-	bool BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildInterpolationCtxMenu(HMENU hMenu, PatternCursor::Columns colType, CString label, UINT command) const;
 	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih,  CModDoc* pModDoc) const;
 	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildRandomCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const;
-	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const;
-	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile *pSndFile) const;
-	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih, CSoundFile *pSndFile) const;
+	bool BuildChannelMiscCtxMenu(HMENU hMenu) const;
+	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 
-	UINT ListChansWhereColSelected(PatternCursor::Columns colType, CArray<UINT, UINT> &chans) const;
+	// Returns an ordered list of all channels in which a given column type is selected.
+	CHANNELINDEX ListChansWhereColSelected(PatternCursor::Columns colType, vector<CHANNELINDEX> &chans) const;
+	// Check if a column type is selected on any channel in the current selection.
+	bool IsColumnSelected(PatternCursor::Columns colType) const;
 
-	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternCursor::Columns colType, CSoundFile *pSndFile) const;
+	bool IsInterpolationPossible(PatternCursor::Columns colType) const;
+	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternCursor::Columns colType) const;
 	void Interpolate(PatternCursor::Columns type);
 
 	// Return true if recording live (i.e. editing while following playback).

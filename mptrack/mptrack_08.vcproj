@@ -245,10 +245,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ArrayUtils.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\AutoSaver.cpp"
 				>
 			</File>
@@ -928,10 +924,6 @@
 			</File>
 			<File
 				RelativePath=".\ACMConvert.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ArrayUtils.h"
 				>
 			</File>
 			<File

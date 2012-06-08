@@ -66,7 +66,7 @@ public:
 private:
 	CMenu *m_pMenu;
 	CMenu *m_pPresetMenu;
-	CArray<CMenu*,CMenu*> m_pPresetMenuGroup;
+	vector<CMenu *> m_pPresetMenuGroup;
 	CMenu *m_pInputMenu;
 	CMenu *m_pOutputMenu;
 	CMenu *m_pMacroMenu;
