@@ -21,6 +21,9 @@ AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 }
 
 
+int MidiInOut::numInstances = 0;
+
+
 MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster, maxPrograms, maxParams)
 //-------------------------------------------------------------------------------------------------------
 {
@@ -33,7 +36,10 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 	isSynth(true);			// Not strictly a synth, but an instrument plugin in the broadest sense
 	setEditor(editor);
 
-	Pm_Initialize();
+	if(!numInstances)
+	{
+		Pm_Initialize();
+	}
 
 	isProcessing = false;
 	isBypassed = false;
@@ -48,6 +54,12 @@ MidiInOut::~MidiInOut()
 //---------------------
 {
 	suspend();
+
+	if(--numInstances == 0)
+	{
+		// This terminates MIDI output for all instances of the plugin, so only ever do it if this was the only instance left.
+		Pm_Terminate();
+	}
 }
 
 
