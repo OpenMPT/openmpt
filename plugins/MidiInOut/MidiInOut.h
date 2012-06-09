@@ -59,6 +59,7 @@ protected:
 	bool isBypassed;
 
 	char programName[kVstMaxProgNameLen + 1];
+	static int numInstances;
 
 public:
 	MidiInOut(audioMasterCallback audioMaster);
