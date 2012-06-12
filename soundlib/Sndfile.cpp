@@ -1329,7 +1329,9 @@ void AdjustSampleLoopImpl(ModSample &sample)
 
 	// Fix bad loops
 	// Second condition is to fix some old S3M files which have very short loops just before some garbage data. Very dirty method (just like the rest of this "fixing")!
-	if((sample.nLoopEnd + 3 >= numSamples || sample.nLoopEnd == sample.nLoopStart + 1) && (sample.uFlags & (CHN_LOOP | CHN_PINGPONGLOOP | CHN_STEREO)) == CHN_LOOP)
+	if((sample.nLoopEnd + 3 >= numSamples || sample.nLoopEnd == sample.nLoopStart + 1)
+		&& sample.nLoopEnd <= sample.nLength && sample.nLoopStart < sample.nLoopEnd
+		&& (sample.uFlags & (CHN_LOOP | CHN_PINGPONGLOOP | CHN_STEREO)) == CHN_LOOP)
 	{
 		data[sample.nLoopEnd] = data[sample.nLoopStart];
 		data[sample.nLoopEnd + 1] = data[sample.nLoopStart + 1];
