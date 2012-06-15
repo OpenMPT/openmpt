@@ -746,10 +746,10 @@ void COrderList::UpdateInfoText()
 			PATTERNINDEX nPat = pSndFile->Order[m_nScrollPos];
 			if (nPat < pSndFile->Patterns.Size())
 			{
-				CHAR szpat[MAX_PATTERNNAME] = "";
-				if (pSndFile->Patterns[nPat].GetName(szpat, MAX_PATTERNNAME) && strlen(szpat))
+				char szpat[MAX_PATTERNNAME] = "";
+				if (pSndFile->Patterns[nPat].GetName(szpat) && strcmp(szpat, ""))
 				{
-					wsprintf(s+strlen(s), ": %s", szpat);
+					wsprintf(s + strlen(s), ": %s", szpat);
 				}
 			}
 		}

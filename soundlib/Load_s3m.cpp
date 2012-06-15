@@ -47,7 +47,7 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT) const
 	case 'X':	m.command = CMD_PANNING8; break;
 	case 'Y':	m.command = CMD_PANBRELLO; break;
 	case 'Z':	m.command = CMD_MIDI; break;
-	case '\\':	m.command = fromIT ? CMD_SMOOTHMIDI : CMD_MIDI; break; //rewbs.smoothVST
+	case '\\':	m.command = static_cast<ModCommand::COMMAND>(fromIT ? CMD_SMOOTHMIDI : CMD_MIDI); break; //rewbs.smoothVST
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
 	case ']':	m.command = CMD_DELAYCUT; break;
 	case '[':	m.command = CMD_XPARAM; break;

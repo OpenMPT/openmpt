@@ -18,8 +18,10 @@ using std::vector;
 
 class CPatternContainer;
 class CSoundFile;
+class EffectWriter;
 
 typedef ModCommand* PatternRow;
+
 
 //============
 class CPattern
@@ -91,7 +93,12 @@ public:
 	// Patter name functions (for both CString and char[] arrays) - bool functions return true on success.
 	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
 	bool SetName(const CString newName) { m_PatternName = newName; return true; };
-	bool GetName(char *buffer, size_t maxChars = MAX_PATTERNNAME) const;
+	template<size_t bufferSize>
+	bool GetName(char (&buffer)[bufferSize]) const
+	{
+		return GetName(buffer, bufferSize);
+	}
+	bool GetName(char *buffer, size_t maxChars) const;
 	CString GetName() const { return m_PatternName; };
 
 	// Double number of rows
@@ -99,6 +106,9 @@ public:
 
 	// Halve number of rows
 	bool Shrink();
+
+	// Write some kind of effect data to the pattern
+	bool WriteEffect(EffectWriter &settings);
 
 	bool WriteITPdata(FILE* f) const;
 	bool ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength);
@@ -150,3 +160,56 @@ const char FileIdPattern[] = "mptP";
 
 void ReadModPattern(std::istream& iStrm, CPattern& patc, const size_t nSize = 0);
 void WriteModPattern(std::ostream& oStrm, const CPattern& patc);
+
+
+// Class for conveniently writing an effect to the pattern.
+
+//================
+class EffectWriter
+//================
+{
+	friend class CPattern;
+	
+public:
+	// Row advance mode
+	enum RetryMode
+	{
+		rmIgnore,			// If effect can't be written, abort.
+		rmTryNextRow,		// If effect can't be written, try next row.
+		rmTryPreviousRow,	// If effect can't be written, try previous row.
+	};
+
+	// Constructors with effect commands
+	EffectWriter(EffectCommands cmd, ModCommand::PARAM value) : command(static_cast<uint8>(cmd)), param(value), isVolEffect(false) { Init(); }
+	EffectWriter(VolumeCommands cmd, ModCommand::VOL value) : command(static_cast<uint8>(cmd)), param(value), isVolEffect(true) { Init(); }
+
+	// Additional constructors:
+	// Set row in which writing should start
+	EffectWriter &Row(ROWINDEX row) { this->row = row; return *this; }
+	// Set channel to which writing should be restricted to
+	EffectWriter &Channel(CHANNELINDEX chn) { channel = chn; return *this; }
+	// Allow multiple effects of the same kind to be written in the same row.
+	EffectWriter &AllowMultiple() { allowMultiple = true; return *this; }
+	// Set retry mode.
+	EffectWriter &Retry(RetryMode retryMode) { this->retryMode = retryMode; return *this; }
+
+protected:
+	uint8 command, param;
+	bool isVolEffect;
+	
+	ROWINDEX row;
+	CHANNELINDEX channel;
+	bool allowMultiple;
+	RetryMode retryMode;
+	bool retry;
+
+	// Common data initialisation
+	void Init()
+	{
+		row = 0;
+		channel = CHANNELINDEX_INVALID;	// Any channel
+		allowMultiple = false;			// Stop if same type of effect is encountered
+		retryMode = rmIgnore;			// If effect couldn't be written, abort.
+		retry = true;
+	}
+};

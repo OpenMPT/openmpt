@@ -136,12 +136,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Resizing all patterns to 64 rows
 		for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if ((m_SndFile.Patterns[nPat]) && (m_SndFile.Patterns[nPat].GetNumRows() != 64))
 		{
-			// try to save short patterns by inserting a pattern break.
-			if(m_SndFile.Patterns[nPat].GetNumRows() < 64)
-			{
-				m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
-			}
+			ROWINDEX origRows = m_SndFile.Patterns[nPat].GetNumRows();
 			m_SndFile.Patterns[nPat].Resize(64);
+
+			if(origRows < 64)
+			{
+				// Try to save short patterns by inserting a pattern break.
+				m_SndFile.Patterns[nPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(m_SndFile.Patterns[nPat].GetNumRows() - 1).Retry(EffectWriter::rmTryNextRow));
+			}
+
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
 		}
 
@@ -283,7 +286,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 		if(addBreak)
 		{
-			m_SndFile.TryWriteEffect(nPat, m_SndFile.Patterns[nPat].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weIgnore);
+			m_SndFile.Patterns[nPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(m_SndFile.Patterns[nPat].GetNumRows() - 1));
 		}
 	}
 

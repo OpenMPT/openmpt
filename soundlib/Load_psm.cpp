@@ -903,15 +903,18 @@ bool CSoundFile::ReadPSM(FileReader &file)
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
-					if(subsongs[i].channelSurround[chn] == true)
-						TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, chn, false, weTryNextRow);
-					else
-						TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[chn], false, chn, false, weTryNextRow);
+					if(subsongs[i].channelSurround[chn])
+					{
+						Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
+					} else
+					{
+						Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsongs[i].channelPanning[chn]).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
+					}
 				}
 			}
 			// write default tempo/speed to pattern
-			TryWriteEffect(startPattern, 0, CMD_SPEED, subsongs[i].defaultSpeed, false, CHANNELINDEX_INVALID, false, weTryNextRow);
-			TryWriteEffect(startPattern, 0, CMD_TEMPO, subsongs[i].defaultTempo, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+			Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsongs[i].defaultSpeed).Row(0).Retry(EffectWriter::rmTryNextRow));
+			Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsongs[i].defaultTempo).Row(0).Retry(EffectWriter::rmTryNextRow));
 
 			// don't write channel volume for now, as it's always set to 100% anyway
 
@@ -929,7 +932,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 						break;
 					}
 				}
-				TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+				Patterns[endPattern].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(subsongs[i].restartPos)).Row(lastRow).Retry(EffectWriter::rmTryPreviousRow));
 			}
 		}
 	}
@@ -1396,7 +1399,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 			// Pattern break for short patterns (so saving the modules as S3M won't break it)
 			if(patternHeader.numRows != 64)
 			{
-				TryWriteEffect(pat, patternHeader.numRows - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+				Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(patternHeader.numRows - 1).Retry(EffectWriter::rmTryNextRow));
 			}
 		}
 	}

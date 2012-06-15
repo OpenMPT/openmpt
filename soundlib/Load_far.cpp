@@ -278,7 +278,7 @@ bool CSoundFile::ReadFAR(FileReader &file)
 			}
 		}
 
-		TryWriteEffect(pat, breakRow, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+		Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(breakRow).Retry(EffectWriter::rmTryNextRow));
 	}
 	
 	// Read samples
@@ -300,16 +300,9 @@ bool CSoundFile::ReadFAR(FileReader &file)
 
 		m_nSamples = smp + 1;
 		ModSample &sample = Samples[m_nSamples];
-
 		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[m_nSamples], sampleHeader.name);
-
-		
 		sampleHeader.ConvertToMPT(sample);
-
-		if(sample.nLength)
-		{
-			sampleHeader.GetSampleFormat().ReadSample(sample, file);
-		}
+		sampleHeader.GetSampleFormat().ReadSample(sample, file);
 	}
 	return true;
 }

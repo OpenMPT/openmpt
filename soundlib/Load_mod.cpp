@@ -32,7 +32,7 @@ void CSoundFile::ConvertModCommand(ModCommand &m) const
 	case 0x0C:	m.command = CMD_VOLUME; break;
 	case 0x0D:	m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
 	case 0x0E:	m.command = CMD_MODCMDEX; break;
-	case 0x0F:	m.command = (m.param <= ((GetType() & (MOD_TYPE_MOD)) ? 0x20u : 0x1Fu)) ? CMD_SPEED : CMD_TEMPO;
+	case 0x0F:	m.command = static_cast<ModCommand::COMMAND>((m.param <= ((GetType() & (MOD_TYPE_MOD)) ? 0x20u : 0x1Fu)) ? CMD_SPEED : CMD_TEMPO);
 		if ((m.param == 0xFF) && (GetNumSamples() == 15) && (GetType() & MOD_TYPE_MOD)) m.command = CMD_NONE; break; //<rewbs> what the hell is this?! :) //<jojo> it's the "stop tune" command! :-P
 
 	// Extension for XM extended effects

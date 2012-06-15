@@ -208,7 +208,7 @@ bool CSoundFile::Read669(FileReader &file)
 			// Write pattern break
 			if(fileHeader.breaks[pat] < 63)
 			{
-				TryWriteEffect(pat, fileHeader.breaks[pat], CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryPreviousRow);
+				Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(fileHeader.breaks[pat]).Retry(EffectWriter::rmTryNextRow));
 			}
 		}
 	}
