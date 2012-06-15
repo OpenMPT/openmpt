@@ -13,6 +13,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "ChunkReader.h"
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
 #endif // ZLIB_WINAPI
@@ -20,7 +21,7 @@
 
 
 // First off, a nice vibrato translation LUT.
-static const uint8 j2bAutoVibratoTrans[] =
+static const uint8 j2bAutoVibratoTrans[] = 
 {
 	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
 };
@@ -78,8 +79,22 @@ struct AMFFRiffChunk
 		idAS__	= 0x20205341,
 	};
 
+	typedef ChunkIdentifiers id_type;
+
 	uint32 id;		// See ChunkIdentifiers
 	uint32 length;	// Chunk size without header
+
+	size_t GetLength() const
+	{
+		uint32 l = length;
+		return SwapBytesLE(l);
+	}
+
+	id_type GetID() const
+	{
+		uint32 i = id;
+		return static_cast<id_type>(SwapBytesLE(i));
+	}
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -283,6 +298,7 @@ struct AMFFSampleHeader
 	// Convert sample header to OpenMPT's internal format.
 	void ConvertToMPT(AMFFInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
+		mptSmp.Initialize();
 		mptSmp.nPan = pan * 4;
 		mptSmp.nVolume = volume * 4;
 		mptSmp.nGlobalVol = 64;
@@ -495,6 +511,7 @@ struct AMSampleHeader
 	// Convert sample header to OpenMPT's internal format.
 	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
+		mptSmp.Initialize();
 		mptSmp.nPan = Util::Min(pan, static_cast<uint16>(32767)) * 256 / 32767;
 		mptSmp.nVolume = Util::Min(volume, static_cast<uint16>(32767)) * 256 / 32767;
 		mptSmp.nGlobalVol = 64;
@@ -539,8 +556,8 @@ struct AMSampleHeader
 
 
 // Convert RIFF AM(FF) pattern data to MPT pattern data.
-bool ConvertAMPattern(FileReader &chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------
+bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
+//---------------------------------------------------------------------------------------
 {
 	// Effect translation LUT
 	static const uint8 amEffTrans[] =
@@ -718,244 +735,226 @@ bool CSoundFile::ReadAM(FileReader &file)
 	m_nSamples = 0;
 	m_nInstruments = 0;
 
-	// go through all chunks now
-	while(file.BytesLeft())
+	ChunkReader chunkFile(file);
+	// RIFF AM has a padding byte so that all chunks have an even size.
+	ChunkReader::ChunkList<AMFFRiffChunk> chunks = chunkFile.ReadChunks<AMFFRiffChunk>(isAM ? 2 : 1);
+
+	// "MAIN" - Song info (AMFF)
+	// "INIT" - Song info (AM)
+	FileReader chunk(chunks.GetChunk(isAM ? AMFFRiffChunk::idINIT : AMFFRiffChunk::idMAIN));
+	AMFFMainChunk mainChunk;
+	if(!chunk.IsValid() || !chunk.Read(mainChunk))
 	{
-		AMFFRiffChunk chunkHeader;
-		if(!file.ReadConvertEndianness(chunkHeader))
+		return false;
+	}
+
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
+
+	m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
+	if(!(mainChunk.flags & AMFFMainChunk::amigaSlides))
+	{
+		m_dwSongFlags |= SONG_LINEARSLIDES;
+	}
+	if(mainChunk.channels < 1 || !chunk.CanRead(mainChunk.channels))
+	{
+		return false;
+	}
+	m_nChannels = min(mainChunk.channels, MAX_BASECHANNELS);
+	m_nDefaultSpeed = mainChunk.speed;
+	m_nDefaultTempo = mainChunk.tempo;
+	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
+	m_nSamplePreAmp = m_nVSTiVolume = 48;
+	m_nType = MOD_TYPE_J2B;
+
+	ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
+
+	// It seems like there's no way to differentiate between
+	// Muted and Surround channels (they're all 0xA0) - might
+	// be a limitation in mod2j2b.
+	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+	{
+		ChnSettings[nChn].nVolume = 64;
+		ChnSettings[nChn].nPan = 128;
+
+		uint8 pan = chunk.ReadUint8();
+
+		if(isAM)
 		{
-			break;
+			if(pan > 128)
+				ChnSettings[nChn].dwFlags = CHN_MUTE;
+			else
+				ChnSettings[nChn].nPan = pan * 2;
+		} else
+		{
+			if(pan >= 128)
+				ChnSettings[nChn].dwFlags = CHN_MUTE;
+			else
+				ChnSettings[nChn].nPan = pan * 4;
 		}
+	}
 
-		FileReader chunk = file.GetChunk(chunkHeader.length);
-		if(!chunk.IsValid())
+	if(chunks.ChunkExists(AMFFRiffChunk::idORDR))
+	{
+		// "ORDR" - Order list
+		FileReader chunk(chunks.GetChunk(AMFFRiffChunk::idORDR));
+		uint8 numOrders = chunk.ReadUint8() + 1;
+		Order.ReadAsByte(chunk, numOrders);
+	}
+
+	// "PATT" - Pattern data for one pattern
+	vector<FileReader> pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
+	for(vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+	{
+		FileReader chunk(*patternIter);
+		PATTERNINDEX pat = chunk.ReadUint8();
+		size_t patternSize = chunk.ReadUint32LE();
+		ConvertAMPattern(chunk.GetChunk(patternSize), pat, isAM, *this);
+	}
+
+	if(!isAM)
+	{
+		// "INST" - Instrument (only in RIFF AMFF)
+		vector<FileReader> instChunks = chunks.GetAllChunks(AMFFRiffChunk::idINST);
+		for(vector<FileReader>::iterator instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
 		{
-			continue;
+			FileReader chunk(*instIter);
+			AMFFInstrumentHeader instrHeader;
+			if(!chunk.ReadConvertEndianness(instrHeader))
+			{
+				continue;
+			}
+
+			const INSTRUMENTINDEX nIns = instrHeader.index + 1;
+			if(nIns >= MAX_INSTRUMENTS)
+				continue;
+
+			if(Instruments[nIns] != nullptr)
+				delete Instruments[nIns];
+
+			try
+			{
+				Instruments[nIns] = new ModInstrument();
+			} catch(MPTMemoryException)
+			{
+				continue;
+			}
+			ModInstrument *pIns = Instruments[nIns];
+
+			m_nInstruments = max(m_nInstruments, nIns);
+
+			instrHeader.ConvertToMPT(*pIns, m_nSamples);
+
+			// read sample sub-chunks - this is a rather "flat" format compared to RIFF AM and has no nested RIFF chunks.
+			for(size_t samples = 0; samples < instrHeader.numSamples; samples++)
+			{
+				AMFFSampleHeader sampleHeader;
+
+				if(m_nSamples + 1 >= MAX_SAMPLES || !chunk.ReadConvertEndianness(sampleHeader))
+				{
+					continue;
+				}
+
+				const SAMPLEINDEX smp = ++m_nSamples;
+
+				if(sampleHeader.id != AMFFRiffChunk::idSAMP)
+				{
+					continue;
+				}
+
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
+				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+			}
 		}
-
-		switch(chunkHeader.id)
+	} else
+	{
+		// "RIFF" - Instrument (only in RIFF AM)
+		vector<FileReader> instChunks = chunks.GetAllChunks(AMFFRiffChunk::idRIFF);
+		for(vector<FileReader>::iterator instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
 		{
-		case AMFFRiffChunk::idMAIN: // "MAIN" - Song info (AMFF)
-		case AMFFRiffChunk::idINIT: // "INIT" - Song info (AM)
-			if((chunkHeader.id == AMFFRiffChunk::idMAIN && !isAM) || (chunkHeader.id == AMFFRiffChunk::idINIT && isAM))
+			ChunkReader chunk(*instIter);
+			if(chunk.ReadUint32LE() != AMFFRiffChunk::idAI__)
 			{
-				AMFFMainChunk mainChunk;
-				if(!chunk.Read(mainChunk))
-				{
-					break;
-				}
-
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
-
-				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
-				if(!(mainChunk.flags & AMFFMainChunk::amigaSlides))
-				{
-					m_dwSongFlags |= SONG_LINEARSLIDES;
-				}
-				if(mainChunk.channels < 1 || !chunk.CanRead(mainChunk.channels))
-				{
-					return false;
-				}
-				m_nChannels = Util::Min(static_cast<CHANNELINDEX>(mainChunk.channels), MAX_BASECHANNELS);
-				m_nDefaultSpeed = mainChunk.speed;
-				m_nDefaultTempo = mainChunk.tempo;
-				m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
-				m_nSamplePreAmp = m_nVSTiVolume = 48;
-				m_nType = MOD_TYPE_J2B;
-
-				ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
-
-				// It seems like there's no way to differentiate between
-				// Muted and Surround channels (they're all 0xA0) - might
-				// be a limitation in mod2j2b.
-				for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
-				{
-					ChnSettings[nChn].nVolume = 64;
-					ChnSettings[nChn].nPan = 128;
-
-					uint8 pan = chunk.ReadUint8();
-
-					if(isAM)
-					{
-						if(pan > 128)
-							ChnSettings[nChn].dwFlags = CHN_MUTE;
-						else
-							ChnSettings[nChn].nPan = pan * 2;
-					} else
-					{
-						if(pan >= 128)
-							ChnSettings[nChn].dwFlags = CHN_MUTE;
-						else
-							ChnSettings[nChn].nPan = pan * 4;
-					}
-				}
+				continue;
 			}
-			break;
 
-		case AMFFRiffChunk::idORDR: // "ORDR" - Order list
+			AMFFRiffChunk instChunk;
+			if(!chunk.ReadConvertEndianness(instChunk) || instChunk.id != AMFFRiffChunk::idINST)
 			{
-				uint8 numOrders = chunk.ReadUint8() + 1;
-				Order.ReadAsByte(chunk, numOrders);
+				continue;
 			}
-			break;
 
-		case AMFFRiffChunk::idPATT: // "PATT" - Pattern data for one pattern
+			AMInstrumentHeader instrHeader;
+			if(!chunk.ReadConvertEndianness(instrHeader))
 			{
-				PATTERNINDEX pat = chunk.ReadUint8();
-				size_t patternSize = chunk.ReadUint32LE();
-				FileReader patternChunk = chunk.GetChunk(patternSize);
-				ConvertAMPattern(patternChunk, pat, isAM, *this);
+				continue;
 			}
-			break;
+			ASSERT(instrHeader.headSize + 4 == sizeof(instrHeader));
 
-		case AMFFRiffChunk::idINST: // "INST" - Instrument (only in RIFF AMFF)
-			if(!isAM)
+			const INSTRUMENTINDEX instr = instrHeader.index + 1;
+			if(instr >= MAX_INSTRUMENTS)
+				continue;
+
+			if(Instruments[instr] != nullptr)
+				delete Instruments[instr];
+
+			try
 			{
-				AMFFInstrumentHeader instrHeader;
-				if(!chunk.ReadConvertEndianness(instrHeader))
-				{
-					break;
-				}
-
-				const INSTRUMENTINDEX nIns = instrHeader.index + 1;
-				if(nIns >= MAX_INSTRUMENTS)
-					break;
-
-				if(Instruments[nIns] != nullptr)
-					delete Instruments[nIns];
-
-				try
-				{
-					Instruments[nIns] = new ModInstrument();
-				} catch(MPTMemoryException)
-				{
-					break;
-				}
-				ModInstrument *pIns = Instruments[nIns];
-
-				m_nInstruments = max(m_nInstruments, nIns);
-
-				instrHeader.ConvertToMPT(*pIns, m_nSamples);
-
-				// read sample sub-chunks - this is a rather "flat" format compared to RIFF AM and has no nested RIFF chunks.
-				for(size_t samples = 0; samples < instrHeader.numSamples; samples++)
-				{
-					AMFFSampleHeader sampleHeader;
-
-					if(m_nSamples + 1 >= MAX_SAMPLES || !chunk.ReadConvertEndianness(sampleHeader))
-					{
-						break;
-					}
-
-					const SAMPLEINDEX smp = ++m_nSamples;
-
-					MemsetZero(Samples[smp]);
-
-					if(sampleHeader.id != AMFFRiffChunk::idSAMP)
-					{
-						break;
-					}
-
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
-					sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
-					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
-				}
-			}
-			break;
-
-		case AMFFRiffChunk::idRIFF: // "RIFF" - Instrument (only in RIFF AM)
-			if(isAM)
+				Instruments[instr] = new ModInstrument();
+			} catch(MPTMemoryException)
 			{
-				if(chunk.ReadUint32LE() != AMFFRiffChunk::idAI__)
-				{
-					break;
-				}
-
-				AMFFRiffChunk instChunk;
-				if(!chunk.ReadConvertEndianness(instChunk) || instChunk.id != AMFFRiffChunk::idINST)
-				{
-					break;
-				}
-
-				AMInstrumentHeader instrHeader;
-				if(!chunk.ReadConvertEndianness(instrHeader))
-				{
-					break;
-				}
-				ASSERT(instrHeader.headSize + 4 == sizeof(instrHeader));
-
-				const INSTRUMENTINDEX instr = instrHeader.index + 1;
-				if(instr >= MAX_INSTRUMENTS)
-					break;
-
-				if(Instruments[instr] != nullptr)
-					delete Instruments[instr];
-
-				try
-				{
-					Instruments[instr] = new ModInstrument();
-				} catch(MPTMemoryException)
-				{
-					break;
-				}
-				ModInstrument *pIns = Instruments[instr];
-				m_nInstruments = max(m_nInstruments, instr);
-
-				instrHeader.ConvertToMPT(*pIns, m_nSamples);
-
-				// Read sample sub-chunks (RIFF nesting ftw)
-				for(size_t nSmpCnt = 0; nSmpCnt < instrHeader.numSamples; nSmpCnt++)
-				{
-					AMFFRiffChunk sampleChunk;
-					if(!chunk.ReadConvertEndianness(sampleChunk) || sampleChunk.id != AMFFRiffChunk::idRIFF)
-					{
-						break;
-					}
-
-					if(chunk.ReadUint32LE() != AMFFRiffChunk::idAS__ || m_nSamples + 1 >= MAX_SAMPLES)
-					{
-						break;
-					}
-
-					const SAMPLEINDEX smp = ++m_nSamples;
-
-					// Aaand even more nested chunks! Great, innit?
-					if(!chunk.ReadConvertEndianness(sampleChunk) || sampleChunk.id != AMFFRiffChunk::idSAMP)
-					{
-						break;
-					}
-
-					FileReader sampleFileChunk = chunk.GetChunk(sampleChunk.length);
-
-					AMSampleHeader sampleHeader;
-					if(!sampleFileChunk.ReadConvertEndianness(sampleHeader))
-					{
-						break;
-					}
-
-					MemsetZero(Samples[smp]);
-
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
-
-					sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
-
-					sampleFileChunk.Seek(sampleHeader.headSize + 4);
-					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], sampleFileChunk);
-
-					// RIFF AM has a padding byte so that all chunks have an even size.
-					if((sampleChunk.length % 2) != 0)
-					{
-						chunk.Skip(1);
-					}
-				}
+				continue;
 			}
-			break;
-		}
+			ModInstrument *pIns = Instruments[instr];
+			m_nInstruments = max(m_nInstruments, instr);
 
-		// RIFF AM has a padding byte so that all chunks have an even size.
-		if(isAM && (chunkHeader.length % 2) != 0)
-		{
-			file.Skip(1);
+			instrHeader.ConvertToMPT(*pIns, m_nSamples);
+
+			// Read sample sub-chunks (RIFF nesting ftw)
+			ChunkReader::ChunkList<AMFFRiffChunk> sampleChunkFile = chunk.ReadChunks<AMFFRiffChunk>(2);
+			vector<FileReader> sampleChunks = sampleChunkFile.GetAllChunks(AMFFRiffChunk::idRIFF);
+			ASSERT(sampleChunks.size() == instrHeader.numSamples);
+
+			for(vector<FileReader>::iterator smpIter = sampleChunks.begin(); smpIter != sampleChunks.end(); smpIter++)
+			{
+				ChunkReader sampleChunk(*smpIter);
+
+				if(sampleChunk.ReadUint32LE() != AMFFRiffChunk::idAS__ || m_nSamples + 1 >= MAX_SAMPLES)
+				{
+					continue;
+				}
+
+				// Don't read more samples than the instrument header claims to have.
+				if((instrHeader.numSamples--) == 0)
+				{
+					break;
+				}
+
+				const SAMPLEINDEX smp = ++m_nSamples;
+
+				// Aaand even more nested chunks! Great, innit?
+				AMFFRiffChunk sampleHeaderChunk;
+				if(!sampleChunk.ReadConvertEndianness(sampleHeaderChunk) || sampleHeaderChunk.id != AMFFRiffChunk::idSAMP)
+				{
+					break;
+				}
+
+				FileReader sampleFileChunk = sampleChunk.GetChunk(sampleHeaderChunk.length);
+
+				AMSampleHeader sampleHeader;
+				if(!sampleFileChunk.ReadConvertEndianness(sampleHeader))
+				{
+					break;
+				}
+
+				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+
+				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
+
+				sampleFileChunk.Seek(sampleHeader.headSize + 4);
+				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], sampleFileChunk);
+			}
+		
 		}
 	}
 

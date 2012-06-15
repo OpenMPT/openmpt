@@ -22,6 +22,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "ChunkReader.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
@@ -74,14 +75,21 @@ struct PSMChunk
 		idDSMP	= 0x504D5344,
 	};
 
+	typedef ChunkIdentifiers id_type;
+
 	uint32 id;
 	uint32 length;
 
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
+	size_t GetLength() const
 	{
-		SwapBytesLE(id);
-		SwapBytesLE(length);
+		uint32 l = length;
+		return SwapBytesLE(l);
+	}
+
+	id_type GetID() const
+	{
+		uint32 i = id;
+		return static_cast<id_type>(SwapBytesLE(i));
 	}
 };
 
@@ -284,348 +292,335 @@ bool CSoundFile::ReadPSM(FileReader &file)
 	vector<PSMSubSong> subsongs;
 	bool subsongPanningDiffers = false; // do we have subsongs with different panning positions?
 
-	while(file.BytesLeft())
-	{
-		// Go through the chunks
-		PSMChunk chunkHead;
-		if(!file.ReadConvertEndianness(chunkHead))
-		{
-			break;
-		}
+	ChunkReader chunkFile(file);
+	ChunkReader::ChunkList<PSMChunk> chunks = chunkFile.ReadChunks<PSMChunk>(1);
 
-		FileReader chunk = file.GetChunk(chunkHead.length);
+	// "TITL" - Song Title
+	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
+	titleChunk.ReadString<StringFixer::spacePadded>(m_szNames[0], titleChunk.GetLength());
 
-		switch(chunkHead.id)
-		{
-		case PSMChunk::idTITL: // "TITL" - Song Title
-			chunk.ReadString<StringFixer::spacePadded>(m_szNames[0], chunk.GetLength());
-			break;
-
-		case PSMChunk::idSDFT: // "SDFT" - Format info (song data starts here)
-			if(chunk.GetLength() != 8 || !chunk.ReadMagic("MAINSONG"))
-			{
-				return false;
-			}
-			break;
-
-		case PSMChunk::idPBOD: // "PBOD" - Pattern data of a single pattern
-			if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice
-				|| chunk.GetLength() < 8)
-			{
-				break;
-			}
-
-			// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
-			char patternID[5];
-			if(!chunk.ReadString<StringFixer::spacePadded>(patternID, 4) || patternID[0] != 'P')
-			{
-				break;
-			}
-			if(!memcmp(patternID, "PATT", 4))
-			{
-				// New format has four additional bytes - read patternID again.
-				newFormat = true;
-				chunk.ReadString<StringFixer::spacePadded>(patternID, 4);
-			}
-			patternIDs.push_back(atoi(&patternID[newFormat ? 0 : 1]));
-			// We're going to read the rest of the pattern data later.
-			patternChunks.push_back(chunk.GetChunk(chunk.BytesLeft()));
-
-			// Convert later as we have to know how many channels there are.
-			break;
-
-		case PSMChunk::idSONG: // "SONG" - Subsong information (channel count etc)
-			{
-				PSMSongHeader songHeader;
-				if(!chunk.Read(songHeader))
-				{
-					break;
-				}
-				if(songHeader.compression != 0x01)
-				{
-					// No compression for PSM files
-					return false;
-				}
-				// Subsongs *might* have different channel count
-				m_nChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), m_nChannels, MAX_BASECHANNELS);
-
-				PSMSubSong subsong;
-				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
-				StringFixer::ReadString<StringFixer::nullTerminated>(subsong.songName, songHeader.songType); // subsong name
-
-				// Read "Sub sub chunks"
-				FileReader subChunk = chunk.GetChunk(chunk.BytesLeft());
-				while(subChunk.BytesLeft())
-				{
-					PSMChunk subChunkHead;
-					if(!subChunk.ReadConvertEndianness(subChunkHead))
-					{
-						break;
-					}
-
-					switch(subChunkHead.id)
-					{
-					case PSMChunk::idDATE: // "DATE" - Conversion date (YYMMDD)
-						if(subChunkHead.length == 6)
-						{
-							char cversion[7];
-							subChunk.ReadString<StringFixer::maybeNullTerminated>(cversion, 6);
-							int version = atoi(cversion);
-							// Sinaria song dates (just to go sure...)
-							if(version == 800211 || version == 940902 || version == 940903 ||
-								version == 940906 || version == 940914 || version == 941213)
-								newFormat = true;
-						}
-						break;
-
-					case PSMChunk::idOPLH: // "OPLH" - Order list, channel + module settings
-						if(subChunkHead.length >= 9)
-						{
-							// First two bytes = Number of chunks that follow
-							//uint16 totalChunks = subChunk.ReadUint16LE();
-							subChunk.Skip(2);
-
-							// Now, the interesting part begins!
-							uint16 chunkCount = 0, firstOrderChunk = uint16_max;
-
-							// "Sub sub sub chunks" (grrrr, silly format)
-							while(subChunk.BytesLeft())
-							{
-								uint8 subChunkID = subChunk.ReadUint8();
-								if(!subChunkID)
-								{
-									// Last chunk was reached.
-									break;
-								}
-
-								switch(subChunkID)
-								{
-								case 0x01: // Order list item
-									// Pattern name follows - find pattern (this is the orderlist)
-									{
-										char patternID[5]; // temporary
-										if(newFormat)
-										{
-											subChunk.Skip(4);
-											subChunk.ReadString<StringFixer::spacePadded>(patternID, 4);
-										} else
-										{
-											subChunk.Skip(1);
-											subChunk.ReadString<StringFixer::spacePadded>(patternID, 3);
-										}
-										uint32 pat = atoi(patternID);
-
-										// seek which pattern has this ID
-										for(size_t i = 0; i < patternIDs.size(); i++)
-										{
-											if(patternIDs[i] == pat)
-											{
-												// found the right pattern, copy offset + start / end positions.
-												if(subsong.startOrder == ORDERINDEX_INVALID)
-													subsong.startOrder = static_cast<ORDERINDEX>(orderOffsets.size());
-												subsong.endOrder = static_cast<ORDERINDEX>(orderOffsets.size());
-
-												// every pattern in the order will be unique, so store the pointer + pattern ID
-												orderOffsets.push_back(&patternChunks[i]);
-												Order.Append(numPatterns);
-												numPatterns++;
-												break;
-											}
-										}
-									}
-									// Decide whether this is the first order chunk or not (for finding out the correct restart position)
-									if(firstOrderChunk == uint16_max) firstOrderChunk = chunkCount;
-									break;
-
-								case 0x04: // Restart position
-									{
-										uint16 restartChunk = subChunk.ReadUint16LE();
-										ORDERINDEX restartPosition = 0;
-										if(restartChunk >= firstOrderChunk) restartPosition = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);
-										subsong.restartPos += restartPosition;
-									}
-									break;
-
-								case 0x07: // Default Speed
-									subsong.defaultSpeed = subChunk.ReadUint8();
-									break;
-
-								case 0x08: // Default Tempo
-									subsong.defaultTempo =  subChunk.ReadUint8();
-									break;
-
-								case 0x0C: // Sample map table (???)
-									// Never seems to be different, so...
-									if (subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0xFF ||
-										subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0x00 ||
-										subChunk.ReadUint8() != 0x01 || subChunk.ReadUint8() != 0x00)
-									{
-										return false;
-									}
-									break;
-
-								case 0x0D: // Channel panning table
-									{
-										uint8 chn = subChunk.ReadUint8();
-										uint8 pan = subChunk.ReadUint8();
-										uint8 type = subChunk.ReadUint8();
-										if(chn < subsong.channelPanning.size())
-										{
-											switch(type)
-											{
-											case 0: // use panning
-												subsong.channelPanning[chn] = pan ^ 128;
-												subsong.channelSurround[chn] = false;
-												break;
-
-											case 2: // surround
-												subsong.channelPanning[chn] = 128;
-												subsong.channelSurround[chn] = true;
-												break;
-
-											case 4: // center
-												subsong.channelPanning[chn] = 128;
-												subsong.channelSurround[chn] = false;
-												break;
-
-											}
-											if(subsongPanningDiffers == false && subsongs.size() > 0)
-											{
-												if(subsongs.back().channelPanning[chn] != subsong.channelPanning[chn]
-												|| subsongs.back().channelSurround[chn] != subsong.channelSurround[chn])
-													subsongPanningDiffers = true;
-											}
-										}
-									}
-									break;
-
-								case 0x0E: // Channel volume table (0...255) - apparently always 255
-									{
-										uint8 chn = subChunk.ReadUint8();
-										uint8 vol = subChunk.ReadUint8();
-										if(chn < subsong.channelVolume.size())
-										{
-											subsong.channelVolume[chn] = (vol / 4) + 1;
-										}
-									}
-									break;
-
-								default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
-									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
-									return false;
-
-								}
-								chunkCount++;
-							}
-							// separate subsongs by "---" patterns
-							orderOffsets.push_back(nullptr);
-							Order.Append();
-						}
-						break;
-
-					case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
-						// In some Sinaria tunes, this is actually longer than 2 * channels...
-						ASSERT(subChunkHead.length >= m_nChannels * 2u);
-						for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
-						{
-							if(subChunk.BytesLeft() < 2)
-							{
-								break;
-							}
-
-							uint8 type = subChunk.ReadUint8();
-							uint8 pan = subChunk.ReadUint8();
-
-							switch(type)
-							{
-							case 0: // use panning
-								subsong.channelPanning[chn] = pan ^ 128;
-								subsong.channelSurround[chn] = false;
-								break;
-
-							case 2: // surround
-								subsong.channelPanning[chn] = 128;
-								subsong.channelSurround[chn] = true;
-								break;
-
-							case 4: // center
-								subsong.channelPanning[chn] = 128;
-								subsong.channelSurround[chn] = false;
-								break;
-							}
-						}
-						break;
-
-					case PSMChunk::idPATT: // PATT - Pattern list
-						// We don't really need this.
-						break;
-
-					case PSMChunk::idDSAM: // DSAM - Sample list
-						// We don't need this either.
-						break;
-
-					default:
-						break;
-
-					}
-				}
-
-				// attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
-				subsongs.push_back(subsong);
-			}
-
-			break;
-
-		case PSMChunk::idDSMP: // DSMP - Samples
-			if(!newFormat)
-			{
-				// Original header
-				PSMOldSampleHeader sampleHeader;
-				if(!chunk.ReadConvertEndianness(sampleHeader))
-				{
-					break;
-				}
-
-				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
-				if(smp < MAX_SAMPLES)
-				{
-					m_nSamples = max(m_nSamples, smp);
-					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
-
-					sampleHeader.ConvertToMPT(Samples[smp]);
-					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
-				}
-			} else
-			{
-				// Sinaria uses a slightly different sample header
-				PSMNewSampleHeader sampleHeader;
-				if(!chunk.ReadConvertEndianness(sampleHeader))
-				{
-					break;
-				}
-
-				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
-				if(smp < MAX_SAMPLES)
-				{
-					m_nSamples = max(m_nSamples, smp);
-					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
-
-					sampleHeader.ConvertToMPT(Samples[smp]);
-					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
-				}
-			}
-
-			break;
-
-		default:
-			break;
-
-		}
-	}
-
-	if(m_nChannels == 0 || subsongs.size() == 0)
+	// "SDFT" - Format info (song data starts here)
+	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
 	{
 		return false;
+	}
+
+	// "PBOD" - Pattern data of a single pattern
+	vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
+	for(vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+	{
+		ChunkReader chunk(*patternIter);
+		if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice
+			|| chunk.GetLength() < 8)
+		{
+			continue;
+		}
+
+		// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
+		char patternID[5];
+		if(!chunk.ReadString<StringFixer::spacePadded>(patternID, 4) || patternID[0] != 'P')
+		{
+			continue;
+		}
+		if(!memcmp(patternID, "PATT", 4))
+		{
+			// New format has four additional bytes - read patternID again.
+			newFormat = true;
+			chunk.ReadString<StringFixer::spacePadded>(patternID, 4);
+		}
+		patternIDs.push_back(atoi(&patternID[newFormat ? 0 : 1]));
+		// We're going to read the rest of the pattern data later.
+		patternChunks.push_back(chunk.GetChunk(chunk.BytesLeft()));
+
+		// Convert later as we have to know how many channels there are.
+	}
+
+	// "SONG" - Subsong information (channel count etc)
+	vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
+	if(songChunks.empty())
+	{
+		return false;
+	}
+
+	for(vector<FileReader>::iterator subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
+	{
+		ChunkReader chunk(*subsongIter);
+		PSMSongHeader songHeader;
+		if(!chunk.Read(songHeader))
+		{
+			return false;
+		}
+		if(songHeader.compression != 0x01)
+		{
+			// No compression for PSM files
+			return false;
+		}
+		// Subsongs *might* have different channel count
+		m_nChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), m_nChannels, MAX_BASECHANNELS);
+
+		PSMSubSong subsong;
+		subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
+		StringFixer::ReadString<StringFixer::nullTerminated>(subsong.songName, songHeader.songType); // subsong name
+
+		// Read "Sub sub chunks"
+		ChunkReader::ChunkList<PSMChunk> subChunks = chunk.ReadChunks<PSMChunk>(1);
+		
+		for(ChunkReader::ChunkList<PSMChunk>::iterator subChunkIter = subChunks.begin(); subChunkIter != subChunks.end(); subChunkIter++)
+		{
+			FileReader subChunk(subChunkIter->GetData());
+			PSMChunk subChunkHead = subChunkIter->GetHeader();
+			
+			switch(subChunkHead.id)
+			{
+			case PSMChunk::idDATE: // "DATE" - Conversion date (YYMMDD)
+				if(subChunkHead.length == 6)
+				{
+					char cversion[7];
+					subChunk.ReadString<StringFixer::maybeNullTerminated>(cversion, 6);
+					int version = atoi(cversion);
+					// Sinaria song dates (just to go sure...)
+					if(version == 800211 || version == 940902 || version == 940903 ||
+						version == 940906 || version == 940914 || version == 941213)
+						newFormat = true;
+				}
+				break;
+
+			case PSMChunk::idOPLH: // "OPLH" - Order list, channel + module settings
+				if(subChunkHead.length >= 9)
+				{
+					// First two bytes = Number of chunks that follow
+					//uint16 totalChunks = subChunk.ReadUint16LE();
+					subChunk.Skip(2);
+
+					// Now, the interesting part begins!
+					uint16 chunkCount = 0, firstOrderChunk = uint16_max;
+
+					// "Sub sub sub chunks" (grrrr, silly format)
+					while(subChunk.BytesLeft())
+					{
+						uint8 subChunkID = subChunk.ReadUint8();
+						if(!subChunkID)
+						{
+							// Last chunk was reached.
+							break;
+						}
+
+						switch(subChunkID)
+						{
+						case 0x01: // Order list item
+							// Pattern name follows - find pattern (this is the orderlist)
+							{
+								char patternID[5]; // temporary
+								if(newFormat)
+								{
+									subChunk.Skip(4);
+									subChunk.ReadString<StringFixer::spacePadded>(patternID, 4);
+								} else
+								{
+									subChunk.Skip(1);
+									subChunk.ReadString<StringFixer::spacePadded>(patternID, 3);
+								}
+								uint32 pat = atoi(patternID);
+
+								// seek which pattern has this ID
+								for(size_t i = 0; i < patternIDs.size(); i++)
+								{
+									if(patternIDs[i] == pat)
+									{
+										// found the right pattern, copy offset + start / end positions.
+										if(subsong.startOrder == ORDERINDEX_INVALID)
+											subsong.startOrder = static_cast<ORDERINDEX>(orderOffsets.size());
+										subsong.endOrder = static_cast<ORDERINDEX>(orderOffsets.size());
+
+										// every pattern in the order will be unique, so store the pointer + pattern ID
+										orderOffsets.push_back(&patternChunks[i]);
+										Order.Append(numPatterns);
+										numPatterns++;
+										break;
+									}
+								}
+							}
+							// Decide whether this is the first order chunk or not (for finding out the correct restart position)
+							if(firstOrderChunk == uint16_max) firstOrderChunk = chunkCount;
+							break;
+
+						case 0x04: // Restart position
+							{
+								uint16 restartChunk = subChunk.ReadUint16LE();
+								ORDERINDEX restartPosition = 0;
+								if(restartChunk >= firstOrderChunk) restartPosition = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);
+								subsong.restartPos += restartPosition;
+							}
+							break;
+
+						case 0x07: // Default Speed
+							subsong.defaultSpeed = subChunk.ReadUint8();
+							break;
+
+						case 0x08: // Default Tempo
+							subsong.defaultTempo =  subChunk.ReadUint8();
+							break;
+
+						case 0x0C: // Sample map table (???)
+							// Never seems to be different, so...
+							if (subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0xFF ||
+								subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0x00 ||
+								subChunk.ReadUint8() != 0x01 || subChunk.ReadUint8() != 0x00)
+							{
+								return false;
+							}
+							break;
+
+						case 0x0D: // Channel panning table
+							{
+								uint8 chn = subChunk.ReadUint8();
+								uint8 pan = subChunk.ReadUint8();
+								uint8 type = subChunk.ReadUint8();
+								if(chn < subsong.channelPanning.size())
+								{
+									switch(type)
+									{
+									case 0: // use panning
+										subsong.channelPanning[chn] = pan ^ 128;
+										subsong.channelSurround[chn] = false;
+										break;
+
+									case 2: // surround
+										subsong.channelPanning[chn] = 128;
+										subsong.channelSurround[chn] = true;
+										break;
+
+									case 4: // center
+										subsong.channelPanning[chn] = 128;
+										subsong.channelSurround[chn] = false;
+										break;
+
+									}
+									if(subsongPanningDiffers == false && subsongs.size() > 0)
+									{
+										if(subsongs.back().channelPanning[chn] != subsong.channelPanning[chn]
+										|| subsongs.back().channelSurround[chn] != subsong.channelSurround[chn])
+											subsongPanningDiffers = true;
+									}
+								}
+							}
+							break;
+
+						case 0x0E: // Channel volume table (0...255) - apparently always 255
+							{
+								uint8 chn = subChunk.ReadUint8();
+								uint8 vol = subChunk.ReadUint8();
+								if(chn < subsong.channelVolume.size())
+								{
+									subsong.channelVolume[chn] = (vol / 4) + 1;
+								}
+							}
+							break;
+
+						default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
+							// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
+							return false;
+
+						}
+						chunkCount++;
+					}
+					// separate subsongs by "---" patterns
+					orderOffsets.push_back(nullptr);
+					Order.Append();
+				}
+			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
+				// In some Sinaria tunes, this is actually longer than 2 * channels...
+				ASSERT(subChunkHead.length >= m_nChannels * 2u);
+				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				{
+					if(subChunk.BytesLeft() < 2)
+					{
+						break;
+					}
+
+					uint8 type = subChunk.ReadUint8();
+					uint8 pan = subChunk.ReadUint8();
+
+					switch(type)
+					{
+					case 0: // use panning
+						subsong.channelPanning[chn] = pan ^ 128;
+						subsong.channelSurround[chn] = false;
+						break;
+
+					case 2: // surround
+						subsong.channelPanning[chn] = 128;
+						subsong.channelSurround[chn] = true;
+						break;
+
+					case 4: // center
+						subsong.channelPanning[chn] = 128;
+						subsong.channelSurround[chn] = false;
+						break;
+					}
+				}
+				break;
+
+			case PSMChunk::idPATT: // PATT - Pattern list
+				// We don't really need this.
+				break;
+
+			case PSMChunk::idDSAM: // DSAM - Sample list
+				// We don't need this either.
+				break;
+
+			default:
+				break;
+
+			}
+		}
+
+		// attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
+		subsongs.push_back(subsong);
+	}
+
+	// // DSMP - Samples
+	vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
+	for(vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
+	{
+		FileReader chunk(*sampleIter);
+		if(!newFormat)
+		{
+			// Original header
+			PSMOldSampleHeader sampleHeader;
+			if(!chunk.ReadConvertEndianness(sampleHeader))
+			{
+				continue;
+			}
+
+			SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+			if(smp < MAX_SAMPLES)
+			{
+				m_nSamples = max(m_nSamples, smp);
+				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+
+				sampleHeader.ConvertToMPT(Samples[smp]);
+				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+			}
+		} else
+		{
+			// Sinaria uses a slightly different sample header
+			PSMNewSampleHeader sampleHeader;
+			if(!chunk.ReadConvertEndianness(sampleHeader))
+			{
+				continue;
+			}
+
+			SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+			if(smp < MAX_SAMPLES)
+			{
+				m_nSamples = max(m_nSamples, smp);
+				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+
+				sampleHeader.ConvertToMPT(Samples[smp]);
+				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+			}
+		}
 	}
 
 	// Make the default variables of the first subsong global
