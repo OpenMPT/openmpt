@@ -263,7 +263,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				if(autofix)
 				{
 					m_SndFile.Patterns[i].Resize(originalSpecs->patternRowsMin);
-					m_SndFile.TryWriteEffect(i, patSize - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+					m_SndFile.Patterns[i].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(patSize - 1).Retry(EffectWriter::rmTryNextRow));
 				} else
 				{
 					break;

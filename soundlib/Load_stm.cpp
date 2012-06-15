@@ -261,7 +261,7 @@ bool CSoundFile::ReadSTM(FileReader &file)
 
 		if(breakPos != ORDERINDEX_INVALID)
 		{
-			TryWriteEffect(pat, breakRow, CMD_POSITIONJUMP, breakPos, false, CHANNELINDEX_INVALID, false, weTryPreviousRow);
+			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, breakPos).Row(breakRow).Retry(EffectWriter::rmTryPreviousRow));
 		}
 	}
 

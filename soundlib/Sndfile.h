@@ -120,15 +120,6 @@ enum enmGetLengthResetMode
 };
 
 
-// Row advance mode for TryWriteEffect()
-enum writeEffectAllowRowChange
-{
-	weIgnore,			// If effect can't be written, abort.
-	weTryNextRow,		// If effect can't be written, try next row.
-	weTryPreviousRow,	// If effect can't be written, try previous row.
-};
-
-
 // Delete samples assigned to instrument
 enum deleteInstrumentSamples
 {
@@ -594,9 +585,6 @@ protected:
 	}
 
 public:
-	// Write pattern effect functions
-	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, writeEffectAllowRowChange allowRowChange = weIgnore, bool bRetry = true);
-
 	bool DestroySample(SAMPLEINDEX nSample);
 
 // -> CODE#0020

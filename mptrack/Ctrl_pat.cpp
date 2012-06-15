@@ -343,7 +343,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
-			m_pSndFile->Patterns[nPat].GetName(s, CountOf(s));
+			m_pSndFile->Patterns[nPat].GetName(s);
 			m_EditPatName.SetWindowText(s);
 
 			BOOL bXMIT = (m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;

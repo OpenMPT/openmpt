@@ -300,7 +300,7 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 					} else command = 0;
 				}
 				break;
-	case 0x09:	command = (param <= 0x20) ? CMD_SPEED : CMD_TEMPO; break;
+	case 0x09:	command = static_cast<ModCommand::COMMAND>((param <= 0x20) ? CMD_SPEED : CMD_TEMPO); break;
 	case 0x0D:	if (param & 0xF0) param &= 0xF0; command = CMD_VOLUMESLIDE; if (!param) command = 0; break;
 	case 0x0F:	// Set Tempo / Special
 		// F.00 = Pattern Break

@@ -232,6 +232,178 @@ bool CPattern::GetName(char *buffer, size_t maxChars) const
 }
 
 
+// Write some kind of effect data to the pattern. Exact data to be written and write behaviour can be found in the EffectWriter object.
+bool CPattern::WriteEffect(EffectWriter &settings)
+//------------------------------------------------
+{
+	// First, reject invalid parameters.
+	if(!m_ModCommands
+		|| settings.row >= GetNumRows()
+		|| (settings.channel >= GetNumChannels() && settings.channel != CHANNELINDEX_INVALID))
+	{
+		return false;
+	}
+
+	CHANNELINDEX scanChnMin = settings.channel, scanChnMax = settings.channel;
+
+	// Scan all channels
+	if(settings.channel == CHANNELINDEX_INVALID)
+	{
+		scanChnMin = 0;
+		scanChnMax = GetNumChannels() - 1;
+	}
+
+	ModCommand * const baseCommand = GetpModCommand(settings.row, scanChnMin);
+	ModCommand *m;
+
+	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
+	if(!settings.allowMultiple)
+	{
+		m = baseCommand;
+		for(CHANNELINDEX i = scanChnMin; i <= scanChnMax; i++, m++)
+		{
+			if(!settings.isVolEffect && m->command == settings.command)
+				return true;
+			if(settings.isVolEffect && m->volcmd == settings.command)
+				return true;
+		}
+	}
+
+	// Easy case: check if there's some space left to put the effect somewhere
+	m = baseCommand;
+	for(CHANNELINDEX i = scanChnMin; i <= scanChnMax; i++, m++)
+	{
+		if(!settings.isVolEffect && m->command == CMD_NONE)
+		{
+			m->command = settings.command;
+			m->param = settings.param;
+			return true;
+		}
+		if(settings.isVolEffect && m->volcmd == VOLCMD_NONE)
+		{
+			m->volcmd = settings.command;
+			m->vol = settings.param;
+			return true;
+		}
+	}
+
+	// Ok, apparently there's no space. If we haven't tried already, try to map it to the volume column or effect column instead.
+	if(settings.retry)
+	{
+		const bool isS3M = (GetSoundFile().GetType() & MOD_TYPE_S3M) != 0;
+
+		// Move some effects that also work in the volume column, so there's place for our new effect.
+		if(!settings.isVolEffect)
+		{
+			m = baseCommand;
+			for(CHANNELINDEX i = scanChnMin; i <= scanChnMax; i++, m++)
+			{
+				switch(m->command)
+				{
+				case CMD_VOLUME:
+					m->volcmd = VOLCMD_VOLUME;
+					m->vol = m->param;
+					m->command = settings.command;
+					m->param = settings.param;
+					return true;
+
+				case CMD_PANNING8:
+					if(isS3M && settings.param > 0x80)
+					{
+						break;
+					}
+
+					m->volcmd = VOLCMD_PANNING;
+					m->command = settings.command;
+
+					if(isS3M)
+					{
+						m->vol = m->param >> 1;
+					} else
+					{
+						m->vol = (m->param >> 2) + 1;
+					}
+
+					m->param = settings.param;
+					return true;
+				}
+			}
+		}
+
+		// Let's try it again by writing into the "other" effect column.
+		uint8 newCommand = CMD_NONE, newParam = settings.param;
+		if(settings.isVolEffect)
+		{
+			// Convert volume effect to normal effect
+			switch(settings.command)
+			{
+			case VOLCMD_PANNING:
+				newCommand = CMD_PANNING8;
+				if(isS3M)
+				{
+					newParam <<= 1;
+				} else
+				{
+					newParam = min(settings.param << 2, 0xFF);
+				}
+				break;
+			case VOLCMD_VOLUME:
+				newCommand = CMD_VOLUME;
+				break;
+			}
+		} else
+		{
+			// Convert normal effect to volume effect
+			if(settings.command == CMD_PANNING8 && isS3M)
+			{
+				// This needs some manual fixing.
+				if(settings.param <= 0x80)
+				{
+					// Can't have surround in volume column, only normal panning
+					newCommand = VOLCMD_PANNING;
+					newParam >>= 1;
+				}
+			} else
+			{
+				newCommand = settings.command;
+				if(!ModCommand::ConvertVolEffect(newCommand, newParam, true))
+				{
+					// No Success :(
+					newCommand = CMD_NONE;
+				}
+			}
+		}
+
+		if(newCommand != CMD_NONE)
+		{
+			settings.command = newCommand;
+			settings.param = newParam;
+			settings.retry = false;
+			settings.isVolEffect = !settings.isVolEffect;
+			if(WriteEffect(settings))
+			{
+				return true;
+			}
+		}
+	}
+
+	// Try in the next row if possible (this may also happen if we already retried)
+	if(settings.retryMode == EffectWriter::rmTryNextRow && settings.row + 1 < GetNumRows())
+	{
+		settings.row++;
+		settings.retry = true;
+		return WriteEffect(settings);
+	} else if(settings.retryMode == EffectWriter::rmTryPreviousRow && settings.row > 0)
+	{
+		settings.row--;
+		settings.retry = true;
+		return WriteEffect(settings);
+	}
+
+	return false;
+}
+
+
 ////////////////////////////////////////////////////////////////////////
 //
 //	Static allocation / deallocation methods
@@ -244,8 +416,9 @@ ModCommand *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 {
 	try
 	{
-		ModCommand *p = new ModCommand[rows * nchns];
-		memset(p, 0, rows * nchns * sizeof(ModCommand));
+		size_t patSize = rows * nchns;
+		ModCommand *p = new ModCommand[patSize];
+		memset(p, 0, patSize * sizeof(ModCommand));
 		return p;
 	} catch(MPTMemoryException)
 	{
@@ -257,7 +430,7 @@ ModCommand *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 void CPattern::FreePattern(ModCommand *pat)
 //-----------------------------------------
 {
-	if (pat) delete[] pat;
+	delete[] pat;
 }
 
 
@@ -279,7 +452,7 @@ bool CPattern::WriteITPdata(FILE* f) const
 			fwrite(&mc, sizeof(ModCommand), 1, f);
 		}
 	}
-    return false;
+	return false;
 }
 
 bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength)

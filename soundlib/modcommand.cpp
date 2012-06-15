@@ -101,7 +101,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			if(param == 0xA4)
 			{
 				// surround remap
-				command = (toType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN;
+				command = static_cast<ModCommand::COMMAND>((toType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN);
 				param = 0x91;
 			}
 			else
@@ -123,7 +123,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		if(IsPcNote())
 		{
-			ModCommand::COMMAND newcommand = (note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI;
+			ModCommand::COMMAND newcommand = static_cast<ModCommand::COMMAND>(note == NOTE_PC ? CMD_MIDI : CMD_SMOOTHMIDI);
 			if(!CSoundFile::GetModSpecifications(toType).HasCommand(newcommand))
 			{
 				newcommand = CMD_MIDI;	// assuming that this was CMD_SMOOTHMIDI
@@ -800,171 +800,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 }
 
 
-/* Try to write an (volume column) effect in a given channel or any channel of a pattern in a specific row.
-   Usage:
-     nPat - Pattern that should be modified
-     nRow - Row that should be modified
-     nEffect - (Volume) Effect that should be written
-     nParam - Effect that should be written
-     bIsVolumeEffect  - Indicates whether the given effect is a volume column effect or not
-     nChn - Channel that should be modified - use CHANNELINDEX_INVALID to allow all channels of the given row
-     bAllowMultipleEffects - If false, No effect will be written if an effect of the same type is already present in the channel(s). Useful for e.g. tempo effects.
-     allowRowChange - Indicates whether it is allowed to use the next or previous row if there's no space for the effect
-     bRetry - For internal use only. Indicates whether an effect "rewrite" has already taken place (for recursive calls)
-   NOTE: Effect remapping is only implemented for a few basic effects.
-*/
-bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn, bool bAllowMultipleEffects, writeEffectAllowRowChange allowRowChange, bool bRetry)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	// First, reject invalid parameters.
-	if(!Patterns.IsValidPat(nPat) || nRow >= Patterns[nPat].GetNumRows() || (nChn >= GetNumChannels() && nChn != CHANNELINDEX_INVALID))
-	{
-		return false;
-	}
-
-	CHANNELINDEX nScanChnMin = nChn, nScanChnMax = nChn;
-
-	// Scan all channels
-	if(nChn == CHANNELINDEX_INVALID)
-	{
-		nScanChnMin = 0;
-		nScanChnMax = GetNumChannels() - 1;
-	}
-
-	ModCommand  * const p = Patterns[nPat].GetpModCommand(nRow, nScanChnMin);
-	ModCommand *m;
-
-	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
-	if(!bAllowMultipleEffects)
-	{
-		m = p;
-		for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++, m++)
-		{
-			if(!bIsVolumeEffect && m->command == nEffect)
-				return true;
-			if(bIsVolumeEffect && m->volcmd == nEffect)
-				return true;
-		}
-	}
-
-	// Easy case: check if there's some space left to put the effect somewhere
-	m = p;
-	for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++, m++)
-	{
-		if(!bIsVolumeEffect && m->command == CMD_NONE)
-		{
-			m->command = nEffect;
-			m->param = nParam;
-			return true;
-		}
-		if(bIsVolumeEffect && m->volcmd == VOLCMD_NONE)
-		{
-			m->volcmd = nEffect;
-			m->vol = nParam;
-			return true;
-		}
-	}
-
-	// Ok, apparently there's no space. If we haven't tried already, try to map it to the volume column or effect column instead.
-	if(bRetry)
-	{
-		// Move some effects that also work in the volume column, so there's place for our new effect.
-		if(!bIsVolumeEffect)
-		{
-			m = p;
-			for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++, m++)
-			{
-				switch(m->command)
-				{
-				case CMD_VOLUME:
-					m->volcmd = VOLCMD_VOLUME;
-					m->vol = m->param;
-					m->command = nEffect;
-					m->param = nParam;
-					return true;
-
-				case CMD_PANNING8:
-					if(m_nType & MOD_TYPE_S3M && nParam > 0x80)
-						break;
-
-					m->volcmd = VOLCMD_PANNING;
-					m->command = nEffect;
-
-					if(m_nType & MOD_TYPE_S3M)
-					{
-						m->vol = m->param >> 1;
-					}
-					else
-					{
-						m->vol = (m->param >> 2) + 1;
-					}
-
-					m->param = nParam;
-					return true;
-				}
-			}
-		}
-
-		// Let's try it again by writing into the "other" effect column.
-		BYTE nNewEffect = CMD_NONE;
-		if(bIsVolumeEffect)
-		{
-			switch(nEffect)
-			{
-			case VOLCMD_PANNING:
-				nNewEffect = CMD_PANNING8;
-				if(m_nType & MOD_TYPE_S3M)
-					nParam <<= 1;
-				else
-					nParam = min(nParam << 2, 0xFF);
-				break;
-			case VOLCMD_VOLUME:
-				nNewEffect = CMD_VOLUME;
-				break;
-			}
-		} else
-		{
-			switch(nEffect)
-			{
-			case CMD_PANNING8:
-				nNewEffect = VOLCMD_PANNING;
-				if(m_nType & MOD_TYPE_S3M)
-				{
-					if(nParam <= 0x80)
-						nParam >>= 1;
-					else
-						nNewEffect = CMD_NONE;
-				}
-				else
-				{
-					nParam = (nParam >> 2) + 1;
-				}
-				break;
-			case CMD_VOLUME:
-				nNewEffect = CMD_VOLUME;
-				break;
-			}
-		}
-		if(nNewEffect != CMD_NONE)
-		{
-			if(TryWriteEffect(nPat, nRow, nNewEffect, nParam, !bIsVolumeEffect, nChn, bAllowMultipleEffects, allowRowChange, false) == true) return true;
-		}
-	}
-
-	// Try in the next row if possible (this may also happen if we already retried)
-	if(allowRowChange == weTryNextRow && (nRow + 1 < Patterns[nPat].GetNumRows()))
-	{
-		return TryWriteEffect(nPat, nRow + 1, nEffect, nParam, bIsVolumeEffect, nChn, bAllowMultipleEffects, allowRowChange, bRetry);
-	} else if(allowRowChange == weTryPreviousRow && (nRow > 0))
-	{
-		return TryWriteEffect(nPat, nRow - 1, nEffect, nParam, bIsVolumeEffect, nChn, bAllowMultipleEffects, allowRowChange, bRetry);
-	}
-
-	return false;
-}
-
-
-// Try to convert a fx column command (*e) into a volume column command.
+// Try to convert a fx column command (&effect) into a volume column command.
 // Returns true if successful.
 // Some commands can only be converted by losing some precision.
 // If moving the command into the volume column is more important than accuracy, use force = true.

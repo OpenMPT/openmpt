@@ -1262,7 +1262,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		{
 			char name[MAX_PATTERNNAME];
 			MemsetZero(name);
-			Patterns[nPat].GetName(name, MAX_PATTERNNAME);
+			Patterns[nPat].GetName(name);
 			fwrite(name, 1, MAX_PATTERNNAME, f);
 		}
 	}

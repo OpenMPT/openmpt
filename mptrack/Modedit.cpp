@@ -924,7 +924,7 @@ bool CModDoc::RestartPosToPattern()
 	GetLengthType length = m_SndFile.GetLength(eNoAdjust);
 	if(length.endOrder != ORDERINDEX_INVALID && length.endRow != ROWINDEX_INVALID)
 	{
-		result = m_SndFile.TryWriteEffect(m_SndFile.Order[length.endOrder], length.endRow, CMD_POSITIONJUMP, m_SndFile.m_nRestartPos, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+		result = m_SndFile.Patterns[m_SndFile.Order[length.endOrder]].WriteEffect(EffectWriter(CMD_POSITIONJUMP, m_SndFile.m_nRestartPos).Row(length.endRow).Retry(EffectWriter::rmTryNextRow));
 	}
 	m_SndFile.m_nRestartPos = 0;
 	return result;
@@ -940,7 +940,7 @@ bool CModDoc::GlobalVolumeToPattern()
 	{
 		for(ORDERINDEX i = 0; i < m_SndFile.Order.GetLength(); i++)
 		{
-			if(m_SndFile.TryWriteEffect(m_SndFile.Order[i], 0, CMD_GLOBALVOLUME, m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME, false, CHANNELINDEX_INVALID, false, weTryNextRow))
+			if(m_SndFile.Patterns[m_SndFile.Order[i]].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME).Retry(EffectWriter::rmTryNextRow)))
 			{
 				result = true;
 				break;

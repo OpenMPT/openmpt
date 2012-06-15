@@ -488,7 +488,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						// Put high offset on previous row
 						if(nRow > 0)
 						{
-							pSndFile->TryWriteEffect(nPat, nRow - 1, CMD_S3MCMDEX, (0xA0 | (effect1 - 6)), false, nChn, false, weTryPreviousRow);
+							pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0xA0 | (effect1 - 6))).Row(nRow - 1).Channel(nChn).Retry(EffectWriter::rmTryPreviousRow));
 						}
 						effect1 = CMD_OFFSET;
 						settings.playDir[nChn] = false;
@@ -518,7 +518,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					switch(effect2)
 					{
 					case 1:		// Note Finetune
-						effect2 = (effectParam2 < 128) ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN;
+						effect2 = static_cast<ModCommand::COMMAND>(effectParam2 < 128 ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
 						if(effectParam2 > 128) effectParam2 = 255 - effectParam2 + 1;
 						effectParam2 = 0xF0 | min(0x0F, effectParam2);	// Well, this is not too accurate...
 						break;
@@ -539,7 +539,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					case 4:		// Portamento Up
 					case 5:		// Portamento Down
 						effectParam2 = DMFporta2MPT(effectParam2, settings.internalTicks, true);
-						effect2 = (effect2 == 4) ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN;
+						effect2 = static_cast<ModCommand::COMMAND>(effect2 == 4 ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
 						break;
 					case 6:		// Portamento to Note
 						if(m->note == NOTE_NONE)
@@ -560,7 +560,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						// Put vibrato type on previous row
 						if(nRow > 0)
 						{
-							pSndFile->TryWriteEffect(nPat, nRow - 1, CMD_S3MCMDEX, (0x30 | (effect2 - 8)), false, nChn, false, weTryPreviousRow);
+							pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0x30 | (effect2 - 8))).Row(nRow - 1).Channel(nChn).Retry(EffectWriter::rmTryPreviousRow));
 						}
 						effect2 = CMD_VIBRATO;
 						effectParam2 = DMFvibrato2MPT(effectParam2, settings.internalTicks);
@@ -612,7 +612,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						// Put tremolo type on previous row
 						if(nRow > 0)
 						{
-							pSndFile->TryWriteEffect(nPat, nRow - 1, CMD_S3MCMDEX, (0x40 | (effect3 - 4)), false, nChn, false, weTryPreviousRow);
+							pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0x40 | (effect3 - 4))).Row(nRow - 1).Channel(nChn).Retry(EffectWriter::rmTryPreviousRow));
 						}
 						effect3 = CMD_TREMOLO;
 						effectParam3 = DMFvibrato2MPT(effectParam3, settings.internalTicks);
@@ -717,18 +717,19 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 		if(tempoChange)
 		{
 			tempoChange = false;
-			pSndFile->TryWriteEffect(nPat, nRow, CMD_TEMPO, (BYTE)tempo, false, 0, false, weTryNextRow);
-			pSndFile->TryWriteEffect(nPat, nRow, CMD_SPEED, (BYTE)speed, false, CHANNELINDEX_INVALID, false, weTryNextRow);
+			
+			pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_TEMPO, static_cast<ModCommand::PARAM>(tempo)).Row(nRow).Channel(0).Retry(EffectWriter::rmTryNextRow));
+			pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_SPEED, static_cast<ModCommand::PARAM>(speed)).Row(nRow).Retry(EffectWriter::rmTryNextRow));
 		}
 		// Try to put delay effects somewhere as well
 		if(writeDelay & 0xF0)
 		{
-			pSndFile->TryWriteEffect(nPat, nRow, CMD_S3MCMDEX, 0xE0 | (writeDelay >> 4), false, CHANNELINDEX_INVALID, true, weIgnore);
+			pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0xE0 | (writeDelay >> 4)).Row(nRow).AllowMultiple().Retry(EffectWriter::rmIgnore));
 		}
 		if(writeDelay & 0x0F)
 		{
 			const uint8 param = (writeDelay & 0x0F) * settings.internalTicks / 15;
-			pSndFile->TryWriteEffect(nPat, nRow, CMD_S3MCMDEX, 0x60 | CLAMP(param, 1, 15), false, CHANNELINDEX_INVALID, true, weIgnore);
+			pSndFile->Patterns[nPat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x60u | Clamp(param, uint8(1), uint8(15))).Row(nRow).AllowMultiple().Retry(EffectWriter::rmIgnore));
 		}
 		writeDelay = 0;
 	}	// End for all rows
@@ -1003,7 +1004,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 				// Loop end?
 				if(nPat != PATTERNINDEX_INVALID && nOrd == loopEnd && (loopStart > 0 || nOrd < Order.GetLength() - 1))
 				{
-					TryWriteEffect(nPat, Patterns[nPat].GetNumRows() - 1, CMD_POSITIONJUMP, (BYTE)loopStart, false, CHANNELINDEX_INVALID, false, weTryPreviousRow);
+					Patterns[nPat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(loopStart)).Row(Patterns[nPat].GetNumRows() - 1).Retry(EffectWriter::rmTryPreviousRow));
 				}
 			}
 		}
