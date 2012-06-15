@@ -3,8 +3,7 @@
  * ------------
  * Purpose: Farandole (FAR) module loader
  * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs (partly inspired by Storlek's FAR loader from Schism Tracker)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -12,274 +11,305 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
-#define FARFILEMAGIC	0xFE524146	// "FAR"
 
 #pragma pack(push, 1)
 
-typedef struct FARHEADER1
+// FAR File Header
+struct FARFileHeader
 {
-	DWORD id;				// file magic FAR=
-	char songname[32];		// songname
-	uint8 reserved[8];
-	char eofMagic[3];		// 13,10,26
-	WORD headerlen;			// remaining length of header in bytes
-	BYTE version;			// 0xD1
-	BYTE onoff[16];
-	BYTE edit1[9];
-	BYTE speed;
-	BYTE panning[16];
-	BYTE edit2[4];
-	WORD stlen;
-} FARHEADER1;
+	uint8  magic[4];
+	char   songName[40];
+	uint8  eof[3];
+	uint16 headerLength;
+	uint8  version;
+	uint8  onOff[16];
+	uint8  editingState[9];	// Stuff we don't care about
+	uint8  defaultSpeed;
+	uint8  chnPanning[16];
+	uint8  patternState[4];	// More stuff we don't care about
+	uint16 messageLength;
 
-typedef struct FARHEADER2
-{
-	BYTE orders[256];
-	BYTE numpat;
-	BYTE snglen;
-	BYTE loopto;
-	WORD patsiz[256];
-} FARHEADER2;
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(headerLength);
+		SwapBytesLE(messageLength);
+	}
+};
 
-typedef struct FARSAMPLE
+STATIC_ASSERT(sizeof(FARFileHeader) == 98);
+
+
+struct FAROrderHeader
 {
-	CHAR samplename[32];
-	DWORD length;
-	BYTE finetune;
-	BYTE volume;
-	DWORD reppos;
-	DWORD repend;
-	BYTE type;
-	BYTE loop;
-} FARSAMPLE;
+	uint8  orders[256];
+	uint8  numPatterns;	// supposed to be "number of patterns stored in the file"; apparently that's wrong
+	uint8  numOrders;
+	uint8  restartPos;
+	uint16 patternSize[256];
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		for(size_t i = 0; i < CountOf(patternSize); i++)
+		{
+			SwapBytesLE(patternSize[i]);
+		}
+	}
+};
+
+STATIC_ASSERT(sizeof(FAROrderHeader) == 771);
+
+
+// FAR Sample header
+struct FARSampleHeader
+{
+	// Sample flags
+	enum SampleFlags
+	{
+		smp16Bit	= 0x01,
+		smpLoop		= 0x08,
+	};
+
+	char   name[32];
+	uint32 length;
+	uint8  finetune;
+	uint8  volume;
+	uint32 loopStart;
+	uint32 loopEnd;
+	uint8  type;
+	uint8  loop;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+	}
+
+	// Convert sample header to OpenMPT's internal format.
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+
+		mptSmp.nLength = length;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		mptSmp.nC5Speed = 8363 * 2;
+		mptSmp.nVolume = volume * 16;
+
+		if(type & smp16Bit)
+		{
+			mptSmp.nLength /= 2;
+			mptSmp.nLoopStart /= 2;
+			mptSmp.nLoopEnd /= 2;
+		}
+
+		if((loop & 8) && mptSmp.nLoopEnd > mptSmp.nLoopStart)
+		{
+			mptSmp.uFlags |= CHN_LOOP;
+		}
+	}
+
+	// Retrieve the internal sample format flags for this sample.
+	SampleIO GetSampleFormat() const
+	{
+		return SampleIO(
+			(type & smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
+	}
+};
+
+STATIC_ASSERT(sizeof(FARSampleHeader) == 48);
 
 #pragma pack(pop)
 
 
-bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
-//---------------------------------------------------------------------
+bool CSoundFile::ReadFAR(FileReader &file)
+//----------------------------------------
 {
-	if(dwMemLength < sizeof(FARHEADER1))
-		return false;
+	file.Rewind();
 
-	FARHEADER1 farHeader;
-	memcpy(&farHeader, lpStream, sizeof(FARHEADER1));
-	FARHEADER1 *pmh1 = &farHeader;
-	FARHEADER2 *pmh2 = 0;
-	DWORD dwMemPos = sizeof(FARHEADER1);
-	UINT headerlen;
-	BYTE samplemap[8];
-
-	if ((!lpStream) || (dwMemLength < 1024) || (pmh1->id != LittleEndian(FARFILEMAGIC))
-	 || (pmh1->eofMagic[0] != 13) || (pmh1->eofMagic[1] != 10) || (pmh1->eofMagic[2] != 26))
+	FARFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.magic, "FAR\xFE", 4) != 0
+		|| memcmp(fileHeader.eof, "\x0D\x0A\x1A", 3)
+		|| file.GetLength() < static_cast<size_t>(fileHeader.headerLength))
 	{
 		return false;
 	}
 
-	headerlen = LittleEndianW(pmh1->headerlen);
-	pmh1->stlen = LittleEndianW( pmh1->stlen ); /* inplace byteswap -- Toad */
-	if ((headerlen >= dwMemLength) || (dwMemPos + pmh1->stlen + sizeof(FARHEADER2) >= dwMemLength)) return false;
 	// Globals
 	m_nType = MOD_TYPE_FAR;
 	m_nChannels = 16;
 	m_nInstruments = 0;
 	m_nSamples = 0;
-	m_nSamplePreAmp = 0x20;
-	m_nDefaultSpeed = pmh1->speed;
+	m_nSamplePreAmp = 32;
+	m_nDefaultSpeed = fileHeader.defaultSpeed;
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pmh1->songname);
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 
-	// Channel Setting
-	for (UINT nchpan=0; nchpan<16; nchpan++)
+	// Read channel settings
+	for(CHANNELINDEX chn = 0; chn < 16; chn++)
 	{
-		ChnSettings[nchpan].dwFlags = 0;
-		ChnSettings[nchpan].nPan = ((pmh1->panning[nchpan] & 0x0F) << 4) + 8;
-		ChnSettings[nchpan].nVolume = 64;
+		ChnSettings[chn].dwFlags = fileHeader.onOff[chn] ? 0 : CHN_MUTE;
+		ChnSettings[chn].nPan = ((fileHeader.chnPanning[chn] & 0x0F) << 4) + 8;
+		ChnSettings[chn].nVolume = 64;
 	}
-	// Reading comment
-	if (pmh1->stlen)
+
+	// Read song message
+	if(fileHeader.messageLength != 0)
 	{
-		UINT szLen = pmh1->stlen;
-		if (szLen > dwMemLength - dwMemPos) szLen = dwMemLength - dwMemPos;
-		ReadFixedLineLengthMessage(lpStream + dwMemPos, szLen, 132, 0);	// 132 characters per line... wow. :)
-		dwMemPos += pmh1->stlen;
+		ReadFixedLineLengthMessage(file, fileHeader.messageLength, 132, 0);	// 132 characters per line... wow. :)
 	}
-	// Reading orders
-	if (sizeof(FARHEADER2) > dwMemLength - dwMemPos) return true;
-	FARHEADER2 farHeader2;
-	memcpy(&farHeader2, lpStream + dwMemPos, sizeof(FARHEADER2));
-	pmh2 = &farHeader2;
-	dwMemPos += sizeof(FARHEADER2);
-	if (dwMemPos >= dwMemLength) return true;
 
-	Order.ReadFromArray(pmh2->orders, pmh2->snglen);
-	m_nRestartPos = pmh2->loopto;
-	// Reading Patterns
-	dwMemPos += headerlen - (869 + pmh1->stlen);
-	if (dwMemPos >= dwMemLength) return true;
-
-	// byteswap pattern data.
-	for(uint16 psfix = 0; psfix < 256; psfix++)
+	// Read orders
+	FAROrderHeader orderHeader;
+	if(!file.ReadConvertEndianness(orderHeader))
 	{
-		pmh2->patsiz[psfix] = LittleEndianW( pmh2->patsiz[psfix] ) ;
+		return false;
 	}
-	// end byteswap of pattern data
+	Order.ReadFromArray(orderHeader.orders, orderHeader.numOrders);
+	m_nRestartPos = orderHeader.restartPos;
 
-	WORD *patsiz = (WORD *)pmh2->patsiz;
-	for (UINT ipat=0; ipat<256; ipat++) if (patsiz[ipat])
+	file.Seek(fileHeader.headerLength);
+	
+	// Pattern effect LUT
+	static const uint8 farEffects[] =
 	{
-		UINT patlen = patsiz[ipat];
-		if ((ipat >= MAX_PATTERNS) || (patsiz[ipat] < 2))
+		CMD_NONE,
+		CMD_PORTAMENTOUP,
+		CMD_PORTAMENTODOWN,
+		CMD_TONEPORTAMENTO,
+		CMD_RETRIG,
+		CMD_VIBRATO,		// depth
+		CMD_VIBRATO,		// speed
+		CMD_VOLUMESLIDE,	// up
+		CMD_VOLUMESLIDE,	// down
+		CMD_VIBRATO,		// sustained (?)
+		CMD_NONE,			// actually slide-to-volume
+		CMD_PANNING8,
+		CMD_S3MCMDEX,		// note offset => note delay?
+		CMD_NONE,			// fine tempo down
+		CMD_NONE,			// fine tempo up
+		CMD_SPEED,
+	};
+	
+	// Read patterns
+	for(PATTERNINDEX pat = 0; pat < 256; pat++)
+	{
+		if(!orderHeader.patternSize[pat])
 		{
-			dwMemPos += patlen;
 			continue;
 		}
-		if (dwMemPos + patlen >= dwMemLength) return true;
-		UINT rows = (patlen - 2) >> 6;
-		if (!rows)
+
+		FileReader patternChunk = file.GetChunk(orderHeader.patternSize[pat]);
+
+		// Calculate pattern length in rows (every event is 4 bytes, and we have 16 channels)
+		ROWINDEX numRows = (orderHeader.patternSize[pat] - 2) / (16 * 4);
+		if(!numRows || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
 		{
-			dwMemPos += patlen;
 			continue;
 		}
-		if (rows > 256) rows = 256;
-		if (rows < 16) rows = 16;
-		if(Patterns.Insert(ipat, rows)) return true;
-		ModCommand *m = Patterns[ipat];
-		UINT patbrk = lpStream[dwMemPos];
-		const BYTE *p = lpStream + dwMemPos + 2;
-		UINT max = rows*16*4;
-		if (max > patlen-2) max = patlen-2;
-		for (UINT len=0; len<max; len += 4, m++)
+
+		// Read break row and unused value
+		ROWINDEX breakRow = patternChunk.ReadUint8();
+		patternChunk.Skip(1);
+		if(breakRow > 0 && breakRow < numRows - 2)
 		{
-			BYTE note = p[len];
-			BYTE ins = p[len+1];
-			BYTE vol = p[len+2];
-			BYTE eff = p[len+3];
-			if (note)
+			breakRow++;
+		} else
+		{
+			breakRow = ROWINDEX_INVALID;
+		}
+
+		// Read pattern data
+		for(ROWINDEX row = 0; row < numRows; row++)
+		{
+			PatternRow rowBase = Patterns[pat].GetRow(row);
+			for(CHANNELINDEX chn = 0; chn < 16; chn++)
 			{
-				m->instr = ins + 1;
-				m->note = note + 36;
-			}
-			if (vol & 0x0F)
-			{
-				m->volcmd = VOLCMD_VOLUME;
-				m->vol = (vol & 0x0F) << 2;
-				if (m->vol <= 4) m->vol = 0;
-			}
-			switch(eff & 0xF0)
-			{
-			// 1.x: Portamento Up
-			case 0x10:
-				m->command = CMD_PORTAMENTOUP;
-				m->param = eff & 0x0F;
-				break;
-			// 2.x: Portamento Down
-			case 0x20:
-				m->command = CMD_PORTAMENTODOWN;
-				m->param = eff & 0x0F;
-				break;
-			// 3.x: Tone-Portamento
-			case 0x30:
-				m->command = CMD_TONEPORTAMENTO;
-				m->param = (eff & 0x0F) << 2;
-				break;
-			// 4.x: Retrigger
-			case 0x40:
-				m->command = CMD_RETRIG;
-				m->param = 6 / (1+(eff&0x0F)) + 1;
-				break;
-			// 5.x: Set Vibrato Depth
-			case 0x50:
-				m->command = CMD_VIBRATO;
-				m->param = (eff & 0x0F);
-				break;
-			// 6.x: Set Vibrato Speed
-			case 0x60:
-				m->command = CMD_VIBRATO;
-				m->param = (eff & 0x0F) << 4;
-				break;
-			// 7.x: Vol Slide Up
-			case 0x70:
-				m->command = CMD_VOLUMESLIDE;
-				m->param = (eff & 0x0F) << 4;
-				break;
-			// 8.x: Vol Slide Down
-			case 0x80:
-				m->command = CMD_VOLUMESLIDE;
-				m->param = (eff & 0x0F);
-				break;
-			// A.x: Port to vol
-			case 0xA0:
-				m->volcmd = VOLCMD_VOLUME;
-				m->vol = ((eff & 0x0F) << 2) + 4;
-				break;
-			// B.x: Set Balance
-			case 0xB0:
-				m->command = CMD_PANNING8;
-				m->param = (eff & 0x0F) << 4;
-				break;
-			// F.x: Set Speed
-			case 0xF0:
-				m->command = CMD_SPEED;
-				m->param = eff & 0x0F;
-				break;
-			default:
-				if ((patbrk) &&	(patbrk+1 == (len >> 6)) && (patbrk+1 != rows-1))
+				ModCommand &m = rowBase[chn];
+
+				uint8 data[4];
+				patternChunk.ReadArray(data);
+
+				if(data[0] > 0 && data[0] < 85)
 				{
-					m->command = CMD_PATTERNBREAK;
-					patbrk = 0;
+					m.note = data[0] + 35 + NOTE_MIN;
+					m.instr = data[1] + 1;
 				}
+
+				if(data[2] & 0x0F)
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = (data[2] & 0x0F) << 2;
+				}
+				
+				m.param = data[3] & 0x0F;
+
+				switch(data[3] >> 4)
+				{
+				case 0x03:	// Porta to note
+					m.param <<= 2;
+					break;
+				case 0x04:	// Retrig
+					m.param = 6 / (1 + (m.param & 0xf)) + 1; // ugh?
+					break;
+				case 0x06:	// Vibrato speed
+				case 0x07:	// Volume slide up
+				case 0x0B:	// Panning
+					m.param *= 8;
+					break;
+				case 0x0A:	// Volume-portamento (what!)
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = (m.param << 2) + 4;
+					break;
+				case 0x0C:	// Note offset
+					m.param = 6 / (1 + (m.param & 0x0F)) + 1;
+					m.param |= 0x0D;
+				}
+				m.command = farEffects[data[3] >> 4];
 			}
 		}
-		dwMemPos += patlen;
+
+		TryWriteEffect(pat, breakRow, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, weTryNextRow);
 	}
-	// Reading samples
-	if (dwMemPos + 8 >= dwMemLength) return true;
-	memcpy(samplemap, lpStream+dwMemPos, 8);
-	dwMemPos += 8;
-	for(UINT ismp=0; ismp<64; ismp++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
+	
+	// Read samples
+	uint8 sampleMap[8];	// Sample usage bitset
+	file.ReadArray(sampleMap);
+
+	for(SAMPLEINDEX smp = 0; smp < 64; smp++)
 	{
-		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return true;
-		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
-		dwMemPos += sizeof(FARSAMPLE);
-		m_nSamples = ismp + 1;
-
-		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[ismp + 1], pfs->samplename);
-
-		ModSample &sample = Samples[ismp + 1];
-		sample.Initialize();
-
-		const DWORD length = LittleEndian(pfs->length);
-		sample.nLength = length;
-		sample.nLoopStart = LittleEndian(pfs->reppos);
-		sample.nLoopEnd = LittleEndian(pfs->repend);
-		sample.nC5Speed = 8363 * 2;
-		sample.nVolume = pfs->volume << 4;
-
-		if((sample.nLength > 3) && (dwMemPos + 4 < dwMemLength))
+		if(!(sampleMap[smp >> 3] & (1 << (smp & 7))))
 		{
-			SampleIO sampleIO(
-				SampleIO::_8bit,
-				SampleIO::mono,
-				SampleIO::littleEndian,
-				SampleIO::signedPCM);
-
-			if(pfs->type & 1)
-			{
-				sampleIO |= SampleIO::_16bit;
-				sample.nLength >>= 1;
-				sample.nLoopStart >>= 1;
-				sample.nLoopEnd >>= 1;
-			}
-			if ((pfs->loop & 8) && (sample.nLoopEnd > 4)) sample.uFlags |= CHN_LOOP;
-
-			sampleIO.ReadSample(sample, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+			continue;
 		}
-		dwMemPos += length;
+
+		FARSampleHeader sampleHeader;
+		if(!file.ReadConvertEndianness(sampleHeader))
+		{
+			return true;
+		}
+
+		m_nSamples = smp + 1;
+		ModSample &sample = Samples[m_nSamples];
+
+		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[m_nSamples], sampleHeader.name);
+
+		
+		sampleHeader.ConvertToMPT(sample);
+
+		if(sample.nLength)
+		{
+			sampleHeader.GetSampleFormat().ReadSample(sample, file);
+		}
 	}
 	return true;
 }
