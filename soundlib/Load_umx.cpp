@@ -253,7 +253,7 @@ bool CSoundFile::ReadUMX(FileReader &file)
 			} else if(fileHeader.packageVersion >= 62)
 			{
 				// UT Packages
-				// Mech8.umx and a few other UT tunes have packageVersion = 62. 
+				// Mech8.umx and a few other UT tunes have packageVersion = 62.
 				// In CUnSound.cpp, the condition above reads "packageVersion >= 63" but if that is used, those tunes won't load properly.
 				ReadUMXIndex(chunk);
 				chunk.Skip(4);
@@ -265,7 +265,6 @@ bool CSoundFile::ReadUMX(FileReader &file)
 			int32 size = ReadUMXIndex(chunk);
 
 			FileReader fileChunk = chunk.GetChunk(size);
-			// TODO: Use FileReader for those file types
 			const BYTE *data = reinterpret_cast<const BYTE *>(fileChunk.GetRawData());
 
 			if(isMusic)
@@ -275,11 +274,14 @@ bool CSoundFile::ReadUMX(FileReader &file)
 					|| ReadXM(data, fileChunk.GetLength())
 					|| ReadS3M(fileChunk)
 					|| ReadWav(fileChunk)
+					|| ReadSTM(fileChunk)
+					|| Read669(fileChunk)
+					|| ReadFAR(fileChunk)
 					|| ReadMod(fileChunk))
 				{
 					return true;
 				}
-			} else if(isSound && GetNumSamples()  + 1 < MAX_SAMPLES)
+			} else if(isSound && GetNumSamples() < MAX_SAMPLES - 1)
 			{
 				// Read as sample
 				if(ReadSampleFromFile(GetNumSamples() + 1, (LPBYTE)data, fileChunk.GetLength()))

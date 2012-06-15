@@ -28,7 +28,7 @@ extern void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DW
 size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 //--------------------------------------------------------------------
 {
-	if(sample.nLength < 2 || !file.IsValid())
+	if(sample.nLength < 1 || !file.IsValid())
 	{
 		return 0;
 	}

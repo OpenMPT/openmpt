@@ -390,7 +390,7 @@ public:
 	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadWav(FileReader &file);
 	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadFAR(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadFAR(FileReader &file);
 	bool ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadAMS2(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -704,11 +704,10 @@ protected:
 	bool ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
 	bool ReadMessage(FileReader &file, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
 	{
-		if(!file.CanRead(length))
-		{
-			return false;
-		}
-		return ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), length, lineEnding, pTextConverter);
+		size_t readLength = Util::Min(length, file.BytesLeft());
+		bool success = ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineEnding, pTextConverter);
+		file.Skip(readLength);
+		return success;
 	}
 
 	// Read comments with fixed line length from a mapped file.
@@ -721,11 +720,10 @@ protected:
 	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 	bool ReadFixedLineLengthMessage(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr)
 	{
-		if(!file.CanRead(length))
-		{
-			return false;
-		}
-		return ReadFixedLineLengthMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), length, lineLength, lineEndingLength, pTextConverter);
+		size_t readLength = Util::Min(length, file.BytesLeft());
+		bool success = ReadFixedLineLengthMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineLength, lineEndingLength, pTextConverter);
+		file.Skip(readLength);
+		return success;
 	}
 
 private:
