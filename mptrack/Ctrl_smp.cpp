@@ -530,7 +530,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
 			if ((m_pSndFile) && (m_pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) && (m_nSample))
 			{
 				const ModSample &sample = m_pSndFile->GetSample(m_nSample);
-				UINT nFreqHz = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+				UINT nFreqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
 				wsprintf(pszText, "%ldHz", nFreqHz);
 				return TRUE;
 			}
@@ -690,12 +690,12 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		}
 		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
-        int transp = 0;
+		int transp = 0;
 		if (m_pSndFile->GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
 		{
 			wsprintf(s, "%lu", sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
-			transp = CSoundFile::FrequencyToTranspose(sample.nC5Speed) >> 7;
+			transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
 		} else
 		{
 			int ftune = ((int)sample.nFineTune);
@@ -1047,7 +1047,7 @@ void CCtrlSamples::OnSampleSave()
 	else
 	{
 		// save all samples
-		CString sPath = m_pSndFile->m_pModDoc->GetPathName();
+		CString sPath = m_pSndFile->GetpModDoc()->GetPathName();
 		if(sPath.IsEmpty()) sPath = "untitled";
 
 		sPath += " - %sample_number% - ";
@@ -2476,7 +2476,7 @@ void CCtrlSamples::OnFineTuneChanged()
 		if ((n > 0) && (n <= (m_pSndFile->GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_pSndFile->GetSample(m_nSample).nC5Speed))
 		{
 			m_pSndFile->GetSample(m_nSample).nC5Speed = n;
-			int transp = CSoundFile::FrequencyToTranspose(n) >> 7;
+			int transp = ModSample::FrequencyToTranspose(n) >> 7;
 			int basenote = 60 - transp;
 			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
 			if (basenote >= BASENOTE_MAX) basenote = BASENOTE_MAX-1;
@@ -2513,8 +2513,8 @@ void CCtrlSamples::OnBaseNoteChanged()
 
 	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		LONG ft = CSoundFile::FrequencyToTranspose(sample.nC5Speed) & 0x7F;
-		n = CSoundFile::TransposeToFrequency(n, ft);
+		LONG ft = ModSample::FrequencyToTranspose(sample.nC5Speed) & 0x7F;
+		n = ModSample::TransposeToFrequency(n, ft);
 		if ((n > 0) && (n <= (m_pSndFile->GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)sample.nC5Speed))
 		{
 			CHAR s[32];
@@ -3006,7 +3006,7 @@ NoSample:
 			if(d < m_nFinetuneStep) d = m_nFinetuneStep;
 			d += (pos * m_nFinetuneStep);
 			sample.nC5Speed = Clamp(d, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
-			int transp = CSoundFile::FrequencyToTranspose(sample.nC5Speed) >> 7;
+			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
 			int basenote = 60 - transp;
 			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
 			if (basenote >= BASENOTE_MAX) basenote = BASENOTE_MAX-1;

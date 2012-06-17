@@ -92,7 +92,13 @@ public:
 
 	// Patter name functions (for both CString and char[] arrays) - bool functions return true on success.
 	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
+	template<size_t bufferSize>
+	bool SetName(const char (&buffer)[bufferSize])
+	{
+		return SetName(buffer, bufferSize);
+	}
 	bool SetName(const CString newName) { m_PatternName = newName; return true; };
+
 	template<size_t bufferSize>
 	bool GetName(char (&buffer)[bufferSize]) const
 	{

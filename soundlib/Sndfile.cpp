@@ -1373,85 +1373,6 @@ void CSoundFile::AdjustSampleLoop(ModSample &sample)
 }
 
 
-/////////////////////////////////////////////////////////////
-// Transpose <-> Frequency conversions
-
-// returns 8363*2^((transp*128+ftune)/(12*128))
-DWORD CSoundFile::TransposeToFrequency(int transp, int ftune)
-//-----------------------------------------------------------
-{
-	// return (unsigned int) (8363.0 * pow(2, (transp * 128.0 + ftune) / 1536.0));
-	const float _fbase = 8363;
-	const float _factor = 1.0f/(12.0f*128.0f);
-	int result;
-	DWORD freq;
-
-	transp = (transp << 7) + ftune;
-	_asm {
-	fild transp
-	fld _factor
-	fmulp st(1), st(0)
-	fist result
-	fisub result
-	f2xm1
-	fild result
-	fld _fbase
-	fscale
-	fstp st(1)
-	fmul st(1), st(0)
-	faddp st(1), st(0)
-	fistp freq
-	}
-	UINT derr = freq % 11025;
-	if (derr <= 8) freq -= derr;
-	if (derr >= 11015) freq += 11025-derr;
-	derr = freq % 1000;
-	if (derr <= 5) freq -= derr;
-	if (derr >= 995) freq += 1000-derr;
-	return freq;
-}
-
-
-// returns 12*128*log2(freq/8363)
-int CSoundFile::FrequencyToTranspose(DWORD freq)
-//----------------------------------------------
-{
-	// return (int) (1536.0 * (log(freq / 8363.0) / log(2)));
-
-	const float _f1_8363 = 1.0f / 8363.0f;
-	const float _factor = 128 * 12;
-	LONG result;
-
-	if (!freq) return 0;
-	_asm {
-	fld _factor
-	fild freq
-	fld _f1_8363
-	fmulp st(1), st(0)
-	fyl2x
-	fistp result
-	}
-	return result;
-}
-
-
-void CSoundFile::FrequencyToTranspose(ModSample *psmp)
-//----------------------------------------------------
-{
-	int f2t = FrequencyToTranspose(psmp->nC5Speed);
-	int transp = f2t >> 7;
-	int ftune = f2t & 0x7F; //0x7F == 111 1111
-	if (ftune > 80)			// XXX Why is this 80?
-	{
-		transp++;
-		ftune -= 128;
-	}
-	Limit(transp, -127, 127);
-	psmp->RelativeTone = static_cast<int8>(transp);
-	psmp->nFineTune = static_cast<int8>(ftune);
-}
-
-
 void CSoundFile::CheckCPUUsage(UINT nCPU)
 //---------------------------------------
 {
@@ -2019,6 +1940,26 @@ bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTIN
 		}
 	}
 	return false;
+}
+
+
+ModInstrument *CSoundFile::AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample)
+//----------------------------------------------------------------------------------------------
+{
+	if(instr == 0 || instr >= MAX_INSTRUMENTS)
+	{
+		return nullptr;
+	}
+
+	delete Instruments[instr];
+
+	try
+	{
+		return (Instruments[instr] = new ModInstrument(assignedSample));
+	} catch(MPTMemoryException)
+	{
+		return (Instruments[instr] = nullptr);
+	}
 }
 
 

@@ -90,7 +90,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 				Samples[i].nLoopEnd >>= 1;
 			}
 			Samples[i].nPan = 128;
-			Samples[i].nC5Speed = TransposeToFrequency(0, Samples[i].nFineTune);
+			Samples[i].nC5Speed = ModSample::TransposeToFrequency(0, Samples[i].nFineTune);
 		}
 		dwMemPos += 37;
 	}

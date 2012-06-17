@@ -345,7 +345,7 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 		relnote = mptSmp.RelativeTone;
 	} else
 	{
-		int f2t = CSoundFile::FrequencyToTranspose(mptSmp.nC5Speed);
+		int f2t = ModSample::FrequencyToTranspose(mptSmp.nC5Speed);
 		relnote = (int8)(f2t >> 7);
 		finetune = (int8)(f2t & 0x7F);
 	}

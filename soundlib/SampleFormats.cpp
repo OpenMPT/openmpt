@@ -401,7 +401,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 		format.freqHz = LittleEndian(sample.nC5Speed);
 	else
-		format.freqHz = LittleEndian(TransposeToFrequency(sample.RelativeTone, sample.nFineTune));
+		format.freqHz = LittleEndian(ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune));
 	format.channels = LittleEndianW(sample.GetNumChannels());
 	format.bitspersample = LittleEndianW(sample.GetElementarySampleSize() * 8);
 	format.samplesize = LittleEndianW(sample.GetBytesPerSample());
@@ -672,13 +672,13 @@ void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD
 	sample.nVibSweep = psh->vibrato_sweep;
 	sample.nVibDepth = psh->vibrato_depth;
 	sample.nVibRate = psh->vibrato_rate/4;
-	CSoundFile::FrequencyToTranspose(&sample);
+	sample.FrequencyToTranspose();
 	sample.RelativeTone += static_cast<uint8>(84 - PatchFreqToNote(psh->root_freq));
 	if(psh->scale_factor)
 	{
 		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - psh->scale_frequency - 60);
 	}
-	sample.nC5Speed = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+	sample.TransposeToFrequency();
 
 	SampleIO sampleIO(
 		SampleIO::_8bit,
@@ -1200,10 +1200,10 @@ struct AIFFChunk
 		return SwapBytesBE(l);
 	}
 
-	ChunkIdentifiers GetID() const
+	id_type GetID() const
 	{
 		uint32 i = id;
-		return static_cast<ChunkIdentifiers>(SwapBytesBE(i));
+		return static_cast<id_type>(SwapBytesBE(i));
 	}
 };
 

@@ -412,13 +412,10 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		ModInstrument *pIns = NULL;
 		if (iIns <= m_nInstruments)
 		{
-			try
+			pIns = AllocateInstrument(iIns);
+			if(pIns != nullptr)
 			{
-				pIns = new ModInstrument();
-				Instruments[iIns] = pIns;
 				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, pmi->szName);
-			} catch(MPTMemoryException)
-			{
 			}
 		}
 	#ifdef MT2DEBUG
@@ -540,9 +537,9 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				psmp->nC5Speed = pms->dwFrequency;
 				psmp->nLoopStart = pms->dwLoopStart;
 				psmp->nLoopEnd = pms->dwLoopEnd;
-				FrequencyToTranspose(psmp);
+				psmp->FrequencyToTranspose();
 				psmp->RelativeTone -= pms->nBaseNote - 49;
-				psmp->nC5Speed = TransposeToFrequency(psmp->RelativeTone, psmp->nFineTune);
+				psmp->TransposeToFrequency();
 				if (pms->nQuality == 2) { psmp->uFlags |= CHN_16BIT; psmp->nLength >>= 1; }
 				if (pms->nChannels == 2) { psmp->nLength >>= 1; }
 				if (pms->nLoop == 1) psmp->uFlags |= CHN_LOOP;

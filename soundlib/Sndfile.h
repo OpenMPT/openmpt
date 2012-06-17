@@ -649,19 +649,15 @@ public:
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn);
-#endif
+#endif // MODPLUG_TRACKER
 	void ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount);
-
-	// Static helper functions
-public:
-	static DWORD TransposeToFrequency(int transp, int ftune=0);
-	static int FrequencyToTranspose(DWORD freq);
-	static void FrequencyToTranspose(ModSample *psmp);
 
 	// System-Dependant functions
 public:
 	static LPSTR AllocateSample(UINT nbytes);
 	static void FreeSample(void *p);
+
+	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);
 
 	// WAV export
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);

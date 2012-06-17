@@ -319,7 +319,7 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 				LONG lSampleRate = pSndFile->GetSample(m_nSample).nC5Speed;
 				if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 				{
-					lSampleRate = CSoundFile::TransposeToFrequency(pSndFile->GetSample(m_nSample).RelativeTone, pSndFile->GetSample(m_nSample).nFineTune);
+					lSampleRate = ModSample::TransposeToFrequency(pSndFile->GetSample(m_nSample).RelativeTone, pSndFile->GetSample(m_nSample).nFineTune);
 				}
 				if (!lSampleRate) lSampleRate = 8363;
 				ULONG msec = ((ULONG)selLength * 1000) / lSampleRate;
@@ -1308,7 +1308,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 
 				const char cOffsetChar = pSndFile->GetModSpecifications().GetEffectLetter(CMD_OFFSET);
 				const bool bHasHighOffset = (pSndFile->TypeIsS3M_IT_MPT() || (pSndFile->GetType() == MOD_TYPE_XM));
-				const char cHighOffsetChar = pSndFile->GetModSpecifications().GetEffectLetter((pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN);
+				const char cHighOffsetChar = pSndFile->GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(pSndFile->TypeIsS3M_IT_MPT() ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
 				if(xHigh == 0)
 					wsprintf(s, "Offset: %c%02X", cOffsetChar, xLow);
@@ -1884,7 +1884,7 @@ void CViewSample::OnEditCopy()
 		pfmt->freqHz = sample.nC5Speed;
 		if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		{
-			pfmt->freqHz = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+			pfmt->freqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
 		}
 		pfmt->channels = (sample.uFlags & CHN_STEREO) ? (WORD)2 : (WORD)1;
 		pfmt->bitspersample = (sample.uFlags & CHN_16BIT) ? (WORD)16 : (WORD)8;

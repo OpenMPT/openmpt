@@ -730,13 +730,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		if ((inspos[nins] > 0) && (inspos[nins] <= dwMemLength - (itHeader.cmwt < 0x200 ? sizeof(ITOldInstrument) : sizeof(ITInstrument))))
 		{
-			try
+			ModInstrument *instrument = AllocateInstrument(nins + 1);
+			if(instrument != nullptr)
 			{
-				Instruments[nins + 1] = new ModInstrument();
-				ITInstrToMPT(lpStream + inspos[nins], Instruments[nins + 1], itHeader.cmwt, dwMemLength - inspos[nins]);
-			} catch(MPTMemoryException)
-			{
-				continue;
+				ITInstrToMPT(lpStream + inspos[nins], instrument, itHeader.cmwt, dwMemLength - inspos[nins]);
 			}
 		}
 	}

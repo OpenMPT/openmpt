@@ -1046,8 +1046,8 @@ struct PSM16SampleHeader
 
 		// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF!
 		// Why on earth would you want to use both systems at the same time?
-		CSoundFile::FrequencyToTranspose(&mptSmp);
-		mptSmp.nC5Speed = CSoundFile::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
+		mptSmp.FrequencyToTranspose();
+		mptSmp.nC5Speed = ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
 
 		mptSmp.nVolume = volume << 2;
 		mptSmp.nGlobalVol = 256;

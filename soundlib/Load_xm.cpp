@@ -362,10 +362,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		memcpy(&insHeader, lpStream + dwMemPos, min(sizeof(XMInstrumentHeader), insHeaderSize));
 		dwMemPos += insHeaderSize;
 
-		try
-		{
-			Instruments[instr] = new ModInstrument();
-		} catch(MPTMemoryException)
+		if(AllocateInstrument(instr) == nullptr)
 		{
 			continue;
 		}
