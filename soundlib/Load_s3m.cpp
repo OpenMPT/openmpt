@@ -359,7 +359,7 @@ struct S3MSampleHeader
 			c5speed = mptSmp.nC5Speed;
 		} else
 		{
-			c5speed = CSoundFile::TransposeToFrequency(mptSmp.RelativeTone, mptSmp.nFineTune);
+			c5speed = ModSample::TransposeToFrequency(mptSmp.RelativeTone, mptSmp.nFineTune);
 		}
 		magic = idSCRS;
 

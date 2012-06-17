@@ -492,15 +492,11 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		//if(memcmp(imfins.ii10, "II10", 4) != 0)
 		//	return false;
 
-		try
-		{
-			pIns = new ModInstrument();
-		} catch(MPTMemoryException)
+		pIns = AllocateInstrument(nIns + 1);
+		if(pIns == nullptr)
 		{
 			continue;
 		}
-
-		Instruments[nIns + 1] = pIns;
 
 		StringFixer::ReadString<StringFixer::nullTerminated>(pIns->name, imfins.name);
 

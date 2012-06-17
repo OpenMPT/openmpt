@@ -220,7 +220,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 
 		Samples[smp].nLoopStart = min(gdmSample.loopBegin, Samples[smp].nLength);	// in samples
 		Samples[smp].nLoopEnd = min(gdmSample.loopEnd - 1, Samples[smp].nLength);	// dito
-		FrequencyToTranspose(&Samples[smp]);	// set transpose + finetune for mod files
+		Samples[smp].FrequencyToTranspose();	// set transpose + finetune for mod files
 
 		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
 		if(m_nType == MOD_TYPE_MOD)

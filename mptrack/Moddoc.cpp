@@ -737,13 +737,10 @@ BOOL CModDoc::InitializeMod()
 
 		if ((!m_SndFile.m_nInstruments) && (m_SndFile.GetType() & MOD_TYPE_XM))
 		{
-			try
+			if(m_SndFile.AllocateInstrument(1, 1))
 			{
-				m_SndFile.Instruments[1] = new ModInstrument(1);
 				m_SndFile.m_nInstruments = 1;
 				InitializeInstrument(m_SndFile.Instruments[1]);
-			} catch(MPTMemoryException)
-			{
 			}
 		}
 		if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
@@ -1273,8 +1270,7 @@ void CModDoc::Record1Channel(CHANNELINDEX channel, bool select)
 	{
 		m_bsMultiRecordMask.reset(channel);
 		m_bsMultiSplitRecordMask.reset(channel);
-	}
-	else
+	} else
 	{
 		m_bsMultiRecordMask.flip(channel);
 		m_bsMultiSplitRecordMask.reset(channel);
@@ -1288,8 +1284,7 @@ void CModDoc::Record2Channel(CHANNELINDEX channel, bool select)
 	{
 		m_bsMultiRecordMask.reset(channel);
 		m_bsMultiSplitRecordMask.reset(channel);
-	}
-	else
+	} else
 	{
 		m_bsMultiSplitRecordMask.flip(channel);
 		m_bsMultiRecordMask.reset(channel);
@@ -1303,8 +1298,7 @@ void CModDoc::ReinitRecordState(bool unselect)
 	{
 		m_bsMultiRecordMask.reset();
 		m_bsMultiSplitRecordMask.reset();
-	}
-	else
+	} else
 	{
 		m_bsMultiRecordMask.set();
 		m_bsMultiSplitRecordMask.set();

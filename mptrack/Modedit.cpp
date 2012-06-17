@@ -320,17 +320,15 @@ bool CModDoc::ConvertSamplesToInstruments()
 		const bool muted = IsSampleMuted(smp);
 		MuteSample(smp, false);
 
-		try
-		{
-			m_SndFile.Instruments[smp] = new ModInstrument(smp);
-		} catch(MPTMemoryException)
+		ModInstrument *instrument = m_SndFile.AllocateInstrument(smp, smp);
+		if(instrument == nullptr)
 		{
 			ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
 			return false;
 		}
 
-		InitializeInstrument(m_SndFile.Instruments[smp]);
-		lstrcpyn(m_SndFile.Instruments[smp]->name, m_SndFile.m_szNames[smp], MAX_INSTRUMENTNAME);
+		InitializeInstrument(instrument);
+		lstrcpyn(instrument->name, m_SndFile.m_szNames[smp], MAX_INSTRUMENTNAME);
 		MuteInstrument(smp, muted);
 	}
 
@@ -523,18 +521,16 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		}
 	}
 
-	ModInstrument *pIns;
-	try
+	CriticalSection cs;
+
+	ModInstrument *pIns = m_SndFile.AllocateInstrument(newsmp);
+	if(pIns == nullptr)
 	{
-		pIns = new ModInstrument(newsmp);
-	} catch(MPTMemoryException)
-	{
+		cs.Leave();
 		ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
 		return INSTRUMENTINDEX_INVALID;
 	}
 	InitializeInstrument(pIns);
-
-	CriticalSection cs;
 
 	if (pDup)
 	{

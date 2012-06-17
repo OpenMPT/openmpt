@@ -824,23 +824,17 @@ bool CSoundFile::ReadAM(FileReader &file)
 				continue;
 			}
 
-			const INSTRUMENTINDEX nIns = instrHeader.index + 1;
-			if(nIns >= MAX_INSTRUMENTS)
+			const INSTRUMENTINDEX instr = instrHeader.index + 1;
+			if(instr >= MAX_INSTRUMENTS)
 				continue;
 
-			if(Instruments[nIns] != nullptr)
-				delete Instruments[nIns];
-
-			try
-			{
-				Instruments[nIns] = new ModInstrument();
-			} catch(MPTMemoryException)
+			ModInstrument *pIns = AllocateInstrument(instr);
+			if(pIns == nullptr)
 			{
 				continue;
 			}
-			ModInstrument *pIns = Instruments[nIns];
 
-			m_nInstruments = max(m_nInstruments, nIns);
+			m_nInstruments = max(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
@@ -895,17 +889,11 @@ bool CSoundFile::ReadAM(FileReader &file)
 			if(instr >= MAX_INSTRUMENTS)
 				continue;
 
-			if(Instruments[instr] != nullptr)
-				delete Instruments[instr];
-
-			try
-			{
-				Instruments[instr] = new ModInstrument();
-			} catch(MPTMemoryException)
+			ModInstrument *pIns = AllocateInstrument(instr);
+			if(pIns == nullptr)
 			{
 				continue;
 			}
-			ModInstrument *pIns = Instruments[instr];
 			m_nInstruments = max(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);

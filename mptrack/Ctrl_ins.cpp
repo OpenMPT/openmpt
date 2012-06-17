@@ -122,14 +122,12 @@ BOOL CNoteMapWnd::SetCurrentInstrument(CModDoc *pModDoc, UINT nIns)
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		if(m_nInstrument > 0 && pSndFile && m_nInstrument <= pSndFile->GetNumInstruments() && pSndFile->Instruments[m_nInstrument] == nullptr)
 		{
-			try
-			{
-				pSndFile->Instruments[m_nInstrument] = new ModInstrument();
-			} catch(MPTMemoryException)
+			ModInstrument *instrument = pSndFile->AllocateInstrument(m_nInstrument);
+			if(instrument == nullptr)
 			{
 				return FALSE;
 			}
-			m_pModDoc->InitializeInstrument(pSndFile->Instruments[m_nInstrument]);
+			m_pModDoc->InitializeInstrument(instrument);
 		}
 
 		InvalidateRect(NULL, FALSE);

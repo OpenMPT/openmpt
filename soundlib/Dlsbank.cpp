@@ -1583,7 +1583,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 								sFineTune+(60 + transpose - usUnityNote)*100);
 			sample.nFineTune = (CHAR)(nBaseTune & 0x7F);
 			sample.RelativeTone = (CHAR)(nBaseTune >> 7);
-			sample.nC5Speed = CSoundFile::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+			sample.TransposeToFrequency();
 			if (lVolume > 256) lVolume = 256;
 			if (lVolume < 16) lVolume = 16;
 			sample.nGlobalVol = (BYTE)(lVolume / 4);	// 0-64

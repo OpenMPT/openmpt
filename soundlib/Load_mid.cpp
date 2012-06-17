@@ -394,17 +394,14 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
 	
-	try
-	{
-		pIns = new ModInstrument();
-	} catch(MPTMemoryException)
+	pIns = AllocateInstrument(m_nInstruments + 1);
+	if(pIns == nullptr)
 	{
 		return 0;
 	}
 
 	m_nSamples++;
 	m_nInstruments++;
-	Instruments[m_nInstruments] = pIns;
 	pIns->wMidiBank = nBank;
 	pIns->nMidiProgram = nProgram;
 	pIns->nMidiChannel = nChannel;

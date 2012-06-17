@@ -414,14 +414,11 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				if (!Instruments[nins])
 				{
 					UINT note = 12;
-					try
-					{
-						Instruments[nins] = new ModInstrument();
-					} catch(MPTMemoryException)
+					ModInstrument *pIns = AllocateInstrument(nins);
+					if(pIns == nullptr)
 					{
 						break;
 					}
-					ModInstrument *pIns = Instruments[nins];
 
 					// I give up. better rewrite this crap (or take SchismTracker's MDL loader).
 					StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, reinterpret_cast<const char *>(lpStream + dwPos + 2), 32);
@@ -468,13 +465,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
 			{
-				try
-				{
-					Instruments[j] = new ModInstrument();
-				} catch(MPTMemoryException)
-				{
-				}
-
+				AllocateInstrument(j);
 			}
 			break;
 		// VE: Volume Envelope

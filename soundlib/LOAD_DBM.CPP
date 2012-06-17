@@ -245,15 +245,11 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : nullptr;
 
-				try
-				{
-					pIns = new ModInstrument(nsmp);
-				} catch(MPTMemoryException)
+				pIns = AllocateInstrument(iIns + 1, nsmp);
+				if(pIns == nullptr)
 				{
 					break;
 				}
-
-				Instruments[iIns + 1] = pIns;
 
 				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, pih->name);
 				if (psmp)

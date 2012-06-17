@@ -58,4 +58,10 @@ struct ModSample
 	size_t AllocateSample();
 
 	void FreeSample();
+
+	// Transpose <-> Frequency conversions
+	static uint32 TransposeToFrequency(int transpose, int finetune = 0);
+	void TransposeToFrequency();
+	static int FrequencyToTranspose(uint32 freq);
+	void FrequencyToTranspose();
 };

@@ -193,6 +193,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	vector<uint64> interpolatedHistogram(historyBins, 0);
 	for(int i = 0; i < historyBins; i++)
 	{
+		interpolatedHistogram[i] = autocorrHistogram[i];
 		const int kernelWidth = 4;
 		for(int ki = kernelWidth; ki >= 0; ki--)
 		{
@@ -238,7 +239,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	if((modType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0)
 	{
-		CSoundFile::FrequencyToTranspose(&sample);
+		sample.FrequencyToTranspose();
 		if((modType & MOD_TYPE_MOD) != 0)
 		{
 			sample.RelativeTone = 0;

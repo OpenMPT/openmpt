@@ -20,12 +20,12 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	// Convert between frequency and transpose values if necessary.
 	if ((!(toType & (MOD_TYPE_MOD | MOD_TYPE_XM))) && (fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 	{
-		nC5Speed = CSoundFile::TransposeToFrequency(RelativeTone, nFineTune);
+		TransposeToFrequency();
 		RelativeTone = 0;
 		nFineTune = 0;
 	} else if((toType & (MOD_TYPE_MOD | MOD_TYPE_XM)) && (!(fromType & (MOD_TYPE_MOD | MOD_TYPE_XM))))
 	{
-		CSoundFile::FrequencyToTranspose(this);
+		FrequencyToTranspose();
 		if(toType & MOD_TYPE_MOD)
 		{
 			RelativeTone = 0;
@@ -122,7 +122,7 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 {
 	uint32 rate;
 	if(type & (MOD_TYPE_MOD | MOD_TYPE_XM))
-		rate = CSoundFile::TransposeToFrequency(RelativeTone, nFineTune);
+		rate = TransposeToFrequency(RelativeTone, nFineTune);
 	else
 		rate = nC5Speed;
 	return (rate > 0) ? rate : 8363;
@@ -151,4 +151,96 @@ void ModSample::FreeSample()
 {
 	CSoundFile::FreeSample(pSample);
 	pSample = nullptr;
+}
+
+
+/////////////////////////////////////////////////////////////
+// Transpose <-> Frequency conversions
+
+// returns 8363*2^((transp*128+ftune)/(12*128))
+uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
+//-----------------------------------------------------------------
+{
+	// return (unsigned int) (8363.0 * pow(2, (transp * 128.0 + ftune) / 1536.0));
+	const float _fbase = 8363;
+	const float _factor = 1.0f / (12.0f * 128.0f);
+	int result;
+	uint32 freq;
+
+	transpose = (transpose << 7) + finetune;
+	_asm
+	{
+		fild transpose
+		fld _factor
+		fmulp st(1), st(0)
+		fist result
+		fisub result
+		f2xm1
+		fild result
+		fld _fbase
+		fscale
+		fstp st(1)
+		fmul st(1), st(0)
+		faddp st(1), st(0)
+		fistp freq
+	}
+	uint32 derr = freq % 11025;
+	if(derr <= 8) freq -= derr;
+	if(derr >= 11015) freq += 11025 - derr;
+	derr = freq % 1000;
+	if(derr <= 5) freq -= derr;
+	if(derr >= 995) freq += 1000 - derr;
+	return freq;
+}
+
+
+void ModSample::TransposeToFrequency()
+//------------------------------------
+{
+	nC5Speed = TransposeToFrequency(RelativeTone, nFineTune);
+}
+
+
+// returns 12*128*log2(freq/8363)
+int ModSample::FrequencyToTranspose(uint32 freq)
+//----------------------------------------------
+{
+	// return (int) (1536.0 * (log(freq / 8363.0) / log(2)));
+
+	const float _f1_8363 = 1.0f / 8363.0f;
+	const float _factor = 128 * 12;
+	int result;
+
+	if(!freq)
+	{
+		return 0;
+	}
+
+	_asm
+	{
+		fld _factor
+		fild freq
+		fld _f1_8363
+		fmulp st(1), st(0)
+		fyl2x
+		fistp result
+	}
+	return result;
+}
+
+
+void ModSample::FrequencyToTranspose()
+//------------------------------------
+{
+	int f2t = FrequencyToTranspose(nC5Speed);
+	int transpose = f2t >> 7;
+	int finetune = f2t & 0x7F;	//0x7F == 111 1111
+	if(finetune > 80)			// XXX Why is this 80?
+	{
+		transpose++;
+		finetune -= 128;
+	}
+	Limit(transpose, -127, 127);
+	RelativeTone = static_cast<int8>(transpose);
+	nFineTune = static_cast<int8>(finetune);
 }
