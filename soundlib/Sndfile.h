@@ -382,7 +382,7 @@ public:
 	bool ReadWav(FileReader &file);
 	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadFAR(FileReader &file);
-	bool ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAMS(FileReader &file);
 	bool ReadAMS2(FileReader &file);
 	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadOKT(FileReader &file);

@@ -95,8 +95,10 @@ public:
 	// "Importance" of every FX command. Table is used for importing from formats with multiple effect columns
 	// and is approximately the same as in SchismTracker.
 	static size_t GetEffectWeight(COMMAND cmd);
-	// try to convert a an effect into a volume column effect.
+	// Try to convert a an effect into a volume column effect. Returns true on success.
 	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
+	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
+	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
 
 	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
 	void SwapEffects()

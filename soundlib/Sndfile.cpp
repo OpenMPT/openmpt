@@ -605,7 +605,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		 && !ReadDBM(lpStream, dwMemLength)
 		 && !Read669(file)
 		 && !ReadFAR(file)
-		 && !ReadAMS(lpStream, dwMemLength)
+		 && !ReadAMS(file)
 		 && !ReadAMS2(file)
 		 && !ReadOKT(file)
 		 && !ReadPTM(lpStream, dwMemLength)
@@ -1954,13 +1954,7 @@ ModInstrument *CSoundFile::AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX
 
 	delete Instruments[instr];
 
-	try
-	{
-		return (Instruments[instr] = new ModInstrument(assignedSample));
-	} catch(MPTMemoryException)
-	{
-		return (Instruments[instr] = nullptr);
-	}
+	return (Instruments[instr] = new (std::nothrow) ModInstrument(assignedSample));
 }
 
 

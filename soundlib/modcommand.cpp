@@ -933,3 +933,37 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 	}
 	return true;
 }
+
+// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
+bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2)
+{
+	if(eff1 == CMD_VOLUMESLIDE && (eff2 == CMD_VIBRATO || eff2 == CMD_TONEPORTAVOL) && param2 == 0)
+	{
+		// Merge commands
+		if(eff2 == CMD_VIBRATO)
+		{
+			eff1 = CMD_VIBRATOVOL;
+		} else
+		{
+			eff1 = CMD_TONEPORTAVOL;
+		}
+		eff2 = CMD_NONE;
+		return true;
+	} else if(eff2 == CMD_VOLUMESLIDE && (eff1 == CMD_VIBRATO || eff1 == CMD_TONEPORTAVOL) && param1 == 0)
+	{
+		// Merge commands
+		if(eff1 == CMD_VIBRATO)
+		{
+			eff1 = CMD_VIBRATOVOL;
+		} else
+		{
+			eff1 = CMD_TONEPORTAVOL;
+		}
+		param1 = param2;
+		eff2 = CMD_NONE;
+		return true;
+	} else
+	{
+		return false;
+	}
+}

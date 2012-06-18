@@ -378,7 +378,6 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_MOD);
 		break;
 	case MOD_TYPE_MED:
-	case MOD_TYPE_AMS:
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
 		if ((m_SndFile.m_nDefaultTempo == 125) && (m_SndFile.m_nDefaultSpeed == 6) && (!m_SndFile.m_nInstruments))
 		{
