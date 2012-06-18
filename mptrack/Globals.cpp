@@ -19,7 +19,7 @@
 #include "ctrl_smp.h"
 #include "ctrl_ins.h"
 #include "ctrl_com.h"
-#include "ctrl_graph.h" //rewbs.graph
+//#include "ctrl_graph.h" //rewbs.graph
 #include "globals.h"
 
 #ifdef _DEBUG
@@ -361,7 +361,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 		{
 		//rewbs.graph
 		case IDD_CONTROL_GRAPH:
-			pDlg = new CCtrlGraph();
+			//pDlg = new CCtrlGraph();
 			break;
 		//end rewbs.graph
 		case IDD_CONTROL_COMMENTS:

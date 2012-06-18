@@ -6,10 +6,9 @@
  *          and thus they also renamed their tracker from
  *          "Extreme's Tracker" to "Velvet Studio".
  *          While the two programs look rather similiar, the structure of both
- *          programs' "AMS" format is significantly different - Velvet Studio is a
- *          rather advanced tracker in comparison to Extreme's Tracker.
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ *          programs' "AMS" format is significantly different in some places -
+ *          Velvet Studio is a rather advanced tracker in comparison to Extreme's Tracker.
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -17,36 +16,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-#pragma pack(push, 1)
-
-typedef struct AMSFILEHEADER
-{
-	char szHeader[7];	// "Extreme"
-	BYTE verlo, verhi;	// 0x??,0x01
-	BYTE chncfg;
-	BYTE samples;
-	WORD patterns;
-	WORD orders;
-	BYTE vmidi;
-	WORD extra;
-} AMSFILEHEADER;
-
-typedef struct AMSSAMPLEHEADER
-{
-	DWORD length;
-	DWORD loopstart;
-	DWORD loopend;
-	BYTE finetune_and_pan;
-	WORD samplerate;	// C-2 = 8363
-	BYTE volume;		// 0-127
-	BYTE infobyte;
-} AMSSAMPLEHEADER;
-
-
-#pragma pack(pop)
-
+/////////////////////////////////////////////////////////////////////
+// Common code for both AMS formats
 
 // Callback function for reading text
 void ConvertAMSTextChars(char &c)
@@ -54,241 +26,462 @@ void ConvertAMSTextChars(char &c)
 {
 	switch((unsigned char)c)
 	{
-	case 0x00:
-	case 0x81: c = ' '; break;
+	case 0x00: c = ' '; break;
 	case 0x14: c = 'ö'; break;
 	case 0x19: c = 'Ö'; break;
 	case 0x04: c = 'ä'; break;
 	case 0x0E: c = 'Ä'; break;
 	case 0x06: c = 'å'; break;
 	case 0x0F: c = 'Å'; break;
-	default:
-		if((unsigned char)c > 0x81)
-			c = '\r';
-		break;
 	}
 }
 
 
-bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
+// Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
+template<size_t destSize>
+bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
+//----------------------------------------------------------------
 {
-	BYTE pkinf[MAX_SAMPLES];
-	AMSFILEHEADER *pfh = (AMSFILEHEADER *)lpStream;
-	DWORD dwMemPos;
-	UINT tmp, tmp2;
+	const size_t length = file.ReadUint8();
+	return file.ReadString<StringFixer::spacePadded>(destBuffer, length);
+}
 
-	if ((!lpStream) || (dwMemLength < 126)) return false;
-	if ((pfh->verhi != 0x01) || (strncmp(pfh->szHeader, "Extreme", 7))
-	 || (!pfh->patterns) || (!pfh->orders) || (!pfh->samples) || (pfh->samples >= MAX_SAMPLES)
-	 || (pfh->patterns > MAX_PATTERNS) || (pfh->orders > MAX_ORDERS))
+
+// Read AMS or AMS2 (newVersion = true) pattern. At least this part of the format is more or less identical between the two trackers...
+void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk, CSoundFile &sndFile)
+//----------------------------------------------------------------------------------------------------
+{
+	enum
+	{
+		emptyRow		= 0xFF,	// No commands on row
+		endOfRowMask	= 0x80,	// If set, no more commands on this row
+		noteMask		= 0x40,	// If set, no note+instr in this command
+		channelMask		= 0x1F,	// Mask for extracting channel
+
+		// Note flags
+		readNextCmd		= 0x80,	// One more command follows
+		noteDataMask	= 0x7F,	// Extract note
+
+		// Command flags
+		volCommand		= 0x40,	// Effect is compressed volume command
+		commandMask		= 0x3F,	// Command or volume mask
+	};
+
+	// Effect translation table for extended (non-Protracker) effects
+	static const ModCommand::COMMAND effTrans[] =
+	{
+		CMD_S3MCMDEX,		// Forward / Backward
+		CMD_PORTAMENTOUP,	// Extra fine slide up
+		CMD_PORTAMENTODOWN,	// Extra fine slide up
+		CMD_RETRIG,			// Retrigger
+		CMD_NONE,
+		CMD_TONEPORTAVOL,	// Toneporta with fine volume slide
+		CMD_VIBRATOVOL,		// Vibrato with fine volume slide
+		CMD_NONE,
+		CMD_PANNINGSLIDE,
+		CMD_NONE,
+		CMD_VOLUMESLIDE,	// Two times finder volume slide than Axx
+		CMD_NONE,
+		CMD_CHANNELVOLUME,	// Channel volume (0...127)
+		CMD_PATTERNBREAK,	// Long pattern break (in hex)
+		CMD_S3MCMDEX,		// Fine slide commands
+		CMD_NONE,			// Fractional BPM
+		CMD_KEYOFF,			// Key off at tick xx
+		CMD_PORTAMENTOUP,	// Porta up, but uses all octaves (?)
+		CMD_PORTAMENTODOWN,	// Porta down, but uses all octaves (?)
+		CMD_NONE,
+		CMD_NONE,
+		CMD_NONE,
+		CMD_NONE,
+		CMD_NONE,
+		CMD_NONE,
+		CMD_NONE,
+		CMD_GLOBALVOLSLIDE,	// Global volume slide
+		CMD_NONE,
+		CMD_GLOBALVOLUME,	// Global volume (0... 127)
+	};
+
+	static ModCommand dummy;
+
+	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
+	{
+		PatternRow baseRow = pattern.GetRow(row);
+		while(patternChunk.BytesLeft())
+		{
+			const uint8 flags = patternChunk.ReadUint8();
+			if(flags == emptyRow)
+			{
+				break;
+			}
+
+			const CHANNELINDEX chn = (flags & channelMask);
+			ModCommand &m = chn < pattern.GetNumChannels() ? baseRow[chn] : dummy;
+			bool moreCommands = true;
+			if(!(flags & noteMask))
+			{
+				// Read note + instr
+				uint8 note = patternChunk.ReadUint8();
+				moreCommands = (note & readNextCmd) != 0;
+				note &= noteDataMask;
+
+				if(note == 1)
+				{
+					m.note = NOTE_KEYOFF;
+				} else if(note >= 2 && note <= 121 && newVersion)
+				{
+					m.note = note - 2 + NOTE_MIN;
+				} else if(note >= 12 && note <= 108 && !newVersion)
+				{
+					m.note = note + 12 + NOTE_MIN;
+				}
+				m.instr = patternChunk.ReadUint8();
+			}
+
+			while(moreCommands)
+			{
+				// Read one more effect command
+				ModCommand origCmd = m;
+				const uint8 command = patternChunk.ReadUint8(), effect = (command & commandMask);
+				moreCommands = (command & readNextCmd) != 0;
+
+				if(command & volCommand)
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = effect;
+				} else
+				{
+					m.param = patternChunk.ReadUint8();
+
+					if(effect < 0x10)
+					{
+						// PT commands
+						m.command = effect;
+						sndFile.ConvertModCommand(m);
+
+						// Post-fix some commands
+						switch(m.command)
+						{
+						case CMD_PANNING8:
+							// 4-Bit panning
+							m.command = CMD_PANNING8;
+							m.param = (m.param & 0x0F) * 0x11;
+							break;
+
+						case CMD_VOLUME:
+							m.command = CMD_NONE;
+							m.volcmd = VOLCMD_VOLUME;
+							m.vol = static_cast<ModCommand::VOL>(Util::Min((m.param + 1) / 2, 64));
+							break;
+
+						case CMD_MODCMDEX:
+							if(m.param == 0x80)
+							{
+								// Break sample loop (cut after loop)
+								m.command = CMD_NONE;
+							} else
+							{
+								m.ExtendedMODtoS3MEffect();
+							}
+							break;
+						}
+					} else if(effect - 0x10 < CountOf(effTrans))
+					{
+						// Extended commands
+						m.command = effTrans[effect - 0x10];
+
+						// Post-fix some commands
+						switch(effect)
+						{
+						case 0x10:
+							// Play sample forwards / backwards
+							if(m.param <= 0x01)
+							{
+								m.param |= 0x9E;
+							} else
+							{
+								m.command = CMD_NONE;
+							}
+							break;
+
+						case 0x11:
+						case 0x12:
+							// Extra fine slides
+							m.param = static_cast<ModCommand::PARAM>(Util::Min(uint8(0x0F), m.param) | 0xE0);
+							break;
+
+						case 0x15:
+						case 0x16:
+							// Fine slides
+							m.param = static_cast<ModCommand::PARAM>((Util::Min(0x10, m.param + 1) / 2) | 0xF0);
+							break;
+
+						case 0x1E:
+							// More fine slides
+							switch(m.param >> 4)
+							{
+							case 0x1:
+								// Fine porta up
+								m.command = CMD_PORTAMENTOUP;
+								m.param |= 0xF0;
+								break;
+							case 0x2:
+								// Fine porta down
+								m.command = CMD_PORTAMENTODOWN;
+								m.param |= 0xF0;
+								break;
+							case 0xA:
+								// Extra fine volume slide up
+								m.command = CMD_VOLUMESLIDE;
+								m.param = ((((m.param & 0x0F) + 1) / 2) << 4) | 0x0F;
+								break;
+							case 0xB:
+								// Extra fine volume slide down
+								m.command = CMD_VOLUMESLIDE;
+								m.param = (((m.param & 0x0F) + 1) / 2) | 0xF0;
+								break;
+							default:
+								m.command = CMD_NONE;
+								break;
+							}
+							break;
+
+						case 0x1C:
+							// Adjust channel volume range
+							m.param = static_cast<ModCommand::PARAM>(Util::Min((m.param + 1) / 2, 64));
+							break;
+						}
+					}
+
+					// Try merging commands first
+					ModCommand::CombineEffects(m.command, m.param, origCmd.command, origCmd.param);
+
+					if(ModCommand::GetEffectWeight(origCmd.command) > ModCommand::GetEffectWeight(m.command))
+					{
+						if(m.volcmd == VOLCMD_NONE && ModCommand::ConvertVolEffect(m.command, m.param, true))
+						{
+							// Volume column to the rescue!
+							m.volcmd = m.command;
+							m.vol = m.param;
+						}
+
+						m.command = origCmd.command;
+						m.param = origCmd.param;
+					}
+				}
+			}
+
+			if(flags & endOfRowMask)
+			{
+				// End of row
+				break;
+			}
+		}
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// AMS (Extreme's Tracker) 1.x loader
+
+#pragma pack(push, 1)
+
+// AMS File Header
+struct AMSFileHeader
+{
+	uint8  versionLow;
+	uint8  versionHigh;
+	uint8  channelConfig;
+	uint8  numSamps;
+	uint16 numPats;
+	uint16 numOrds;
+	uint8  midiChannels;
+	uint16 extraSize;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(numPats);
+		SwapBytesLE(numOrds);
+		SwapBytesLE(extraSize);
+	}
+};
+
+
+// AMS Sample Header
+struct AMSSampleHeader
+{
+	enum SampleFlags
+	{
+		smp16Bit	= 0x80,
+		smpPacked	= 0x03,
+	};
+
+	uint32 length;
+	uint32 loopStart;
+	uint32 loopEnd;
+	uint8  panFinetune;		// High nibble = pan position, low nibble = finetune value
+	uint16 sampleRate;
+	uint8  volume;			// 0...127
+	uint8  flags;			// See SampleFlags
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(sampleRate);
+	}
+
+	// Convert sample header to OpenMPT's internal format.
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+
+		mptSmp.nLength = length;
+		mptSmp.nLoopStart = Util::Min(loopStart, length);
+		mptSmp.nLoopEnd = Util::Min(loopEnd, length);
+
+		mptSmp.nVolume = (Util::Min(uint8(127), volume) * 256 + 64) / 127;
+		if(panFinetune & 0xF0)
+		{
+			mptSmp.nPan = (panFinetune & 0xF0);
+			mptSmp.uFlags = CHN_PANNING;
+		}
+
+		mptSmp.nC5Speed = 2 * sampleRate;
+		if(sampleRate == 0)
+		{
+			mptSmp.nC5Speed = 2 * 8363;
+		}
+
+		uint32 newC4speed = ModSample::TransposeToFrequency(0, MOD2XMFineTune(panFinetune & 0x0F));
+		mptSmp.nC5Speed = (mptSmp.nC5Speed * newC4speed) / 8363;
+
+		if(mptSmp.nLoopStart < mptSmp.nLoopEnd)
+		{
+			mptSmp.uFlags |= CHN_LOOP;
+		}
+	}
+};
+
+
+#pragma pack(pop)
+
+
+bool CSoundFile::ReadAMS(FileReader &file)
+//----------------------------------------
+{
+	file.Rewind();
+
+	AMSFileHeader fileHeader;
+	if(!file.ReadMagic("Extreme")
+		|| !file.ReadConvertEndianness(fileHeader)
+		|| !file.Skip(fileHeader.extraSize)
+		|| file.BytesLeft() < fileHeader.numSamps * sizeof(AMSSampleHeader)
+		|| fileHeader.versionHigh != 0x01)
 	{
 		return false;
 	}
-	dwMemPos = sizeof(AMSFILEHEADER) + pfh->extra;
-	if (dwMemPos + pfh->samples * sizeof(AMSSAMPLEHEADER) >= dwMemLength) return false;
+
 	m_nType = MOD_TYPE_AMS;
+	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nInstruments = 0;
-	m_nChannels = (pfh->chncfg & 0x1F) + 1;
-	m_nSamples = pfh->samples;
-	for (UINT nSmp=1; nSmp <= m_nSamples; nSmp++, dwMemPos += sizeof(AMSSAMPLEHEADER))
+	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
+	m_nSamples = fileHeader.numSamps;
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+	SetupMODPanning(true);
+
+	vector<bool> packSample(fileHeader.numSamps);
+
+	STATIC_ASSERT(MAX_SAMPLES > 255);
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		AMSSAMPLEHEADER *psh = (AMSSAMPLEHEADER *)(lpStream + dwMemPos);
-		ModSample *pSmp = &Samples[nSmp];
-		pSmp->nLength = psh->length;
-		pSmp->nLoopStart = psh->loopstart;
-		pSmp->nLoopEnd = psh->loopend;
-		pSmp->nGlobalVol = 64;
-		pSmp->nVolume = psh->volume << 1;
-		pSmp->nC5Speed = psh->samplerate;
-		pSmp->nPan = (psh->finetune_and_pan & 0xF0);
-		if (pSmp->nPan < 0x80) pSmp->nPan += 0x10;
-		pSmp->nFineTune = MOD2XMFineTune(psh->finetune_and_pan & 0x0F);
-		pSmp->uFlags = (psh->infobyte & 0x80) ? CHN_16BIT : 0;
-		if ((pSmp->nLoopEnd <= pSmp->nLength) && (pSmp->nLoopStart+4 <= pSmp->nLoopEnd)) pSmp->uFlags |= CHN_LOOP;
-		pkinf[nSmp] = psh->infobyte;
+		AMSSampleHeader sampleHeader;
+		file.ReadConvertEndianness(sampleHeader);
+		sampleHeader.ConvertToMPT(Samples[smp]);
+		packSample[smp - 1] = (sampleHeader.flags & AMSSampleHeader::smpPacked) != 0;
 	}
 
-	// Read Song Name
-	if (dwMemPos + 1 >= dwMemLength) return true;
-	tmp = lpStream[dwMemPos++];
-	if (dwMemPos + tmp >= dwMemLength) return true;
-	if(tmp)
-	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
-		dwMemPos += tmp;
-	}
-
+	// Texts
+	ReadAMSString(m_szNames[0], file);
 
 	// Read sample names
-	for (UINT sNam=1; sNam<=m_nSamples; sNam++)
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		if (dwMemPos + 1 >= dwMemLength) return true;
-		tmp = lpStream[dwMemPos++];
-		if (dwMemPos + tmp >= dwMemLength) return true;
-		if(tmp)
+		ReadAMSString(m_szNames[smp], file);
+	}
+
+	// Read channel names
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+	{
+		ReadAMSString(ChnSettings[chn].szName, file);
+	}
+
+	// Read pattern names
+	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
+	{
+		char name[11];
+		ReadAMSString(name, file);
+		// Create pattern now, so name won't be reset later.
+		if(!Patterns.Insert(pat, 64))
 		{
-			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[sNam], reinterpret_cast<const char *>(lpStream + dwMemPos), tmp);
-			dwMemPos += tmp;
+			Patterns[pat].SetName(name);
 		}
 	}
 
-	// Read Channel names
-	for (UINT cNam=0; cNam<m_nChannels; cNam++)
+	// Read packed song message
+	const uint16 packedLength = file.ReadUint16LE();
+	if(packedLength)
 	{
-		if (dwMemPos + 1 >= dwMemLength) return true;
-		uint8 chnnamlen = lpStream[dwMemPos++];
-		if (dwMemPos + tmp >= dwMemLength) return true;
-		if(chnnamlen)
-		{
-			StringFixer::ReadString<StringFixer::maybeNullTerminated>(ChnSettings[cNam].szName, reinterpret_cast<const char *>(lpStream + dwMemPos), chnnamlen);
-			dwMemPos += chnnamlen;
-		}
-	}
+		vector<uint8> textIn, textOut;
+		file.ReadVector(textIn, packedLength);
+		textOut.reserve(packedLength);
 
-	// Read Pattern Names
-	for (UINT pNam = 0; pNam < pfh->patterns; pNam++)
-	{
-		if (dwMemPos + 1 >= dwMemLength) return true;
-		tmp = lpStream[dwMemPos++];
-		tmp2 = min(tmp, MAX_PATTERNNAME - 1);		// not counting null char
-		if (dwMemPos + tmp >= dwMemLength) return true;
-		Patterns.Insert(pNam, 64);	// Create pattern now, so that the name won't be overwritten later.
-		if(tmp2)
+		for(vector<uint8>::iterator c = textIn.begin(); c != textIn.end(); c++)
 		{
-			Patterns[pNam].SetName((char *)(lpStream + dwMemPos), tmp2 + 1);
+			if(*c & 0x80)
+			{
+				textOut.insert(textOut.end(), (*c & 0x7F), ' ');
+			} else
+			{
+				textOut.push_back(*c);
+			}
 		}
-		dwMemPos += tmp;
-	}
 
-	// Read Song Comments
-	tmp = *((WORD *)(lpStream+dwMemPos));
-	dwMemPos += 2;
-	if (dwMemPos + tmp >= dwMemLength) return true;
-	if (tmp)
-	{
-		ReadMessage(lpStream + dwMemPos, tmp, leCR, &ConvertAMSTextChars);
+		// Packed text doesn't include any line breaks!
+		ReadFixedLineLengthMessage(&textOut[0], textOut.size(), 76, 0, ConvertAMSTextChars);
 	}
-	dwMemPos += tmp;
 
 	// Read Order List
-	Order.resize(pfh->orders, Order.GetInvalidPatIndex());
-	for (UINT iOrd=0; iOrd < pfh->orders; iOrd++, dwMemPos += 2)
+	vector<uint16> orders;
+	if(file.ReadVector(orders, fileHeader.numOrds))
 	{
-		Order[iOrd] = (PATTERNINDEX)*((WORD *)(lpStream + dwMemPos));
+		Order.resize(fileHeader.numOrds);
+		for(size_t i = 0; i < fileHeader.numOrds; i++)
+		{
+			Order[i] = SwapBytesLE(orders[i]);
+		}
 	}
 
-	// Read Patterns
-	for (UINT iPat=0; iPat<pfh->patterns; iPat++)
+	// Read patterns
+	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
 	{
-		if (dwMemPos + 4 >= dwMemLength) return true;
-		UINT len = *((DWORD *)(lpStream + dwMemPos));
-		dwMemPos += 4;
-		if ((len >= dwMemLength) || (dwMemPos + len > dwMemLength)) return true;
-		// Pattern has been inserted when reading pattern names
-		ModCommand* m = Patterns[iPat];
-		if (!m) return true;
-		const BYTE *p = lpStream + dwMemPos;
-		UINT row = 0, i = 0;
-		while ((row < Patterns[iPat].GetNumRows()) && (i+2 < len))
-		{
-			BYTE b0 = p[i++];
-			BYTE b1 = p[i++];
-			BYTE b2 = 0;
-			UINT ch = b0 & 0x3F;
-			// Note+Instr
-			if (!(b0 & 0x40))
-			{
-				b2 = p[i++];
-				if (ch < m_nChannels)
-				{
-					if (b1 & 0x7F) m[ch].note = (b1 & 0x7F) + 25;
-					m[ch].instr = b2;
-				}
-				if (b1 & 0x80)
-				{
-					b0 |= 0x40;
-					b1 = p[i++];
-				}
-			}
-			// Effect
-			if (b0 & 0x40)
-			{
-			anothercommand:
-				if (b1 & 0x40)
-				{
-					if (ch < m_nChannels)
-					{
-						m[ch].volcmd = VOLCMD_VOLUME;
-						m[ch].vol = b1 & 0x3F;
-					}
-				} else
-				{
-					b2 = p[i++];
-					if (ch < m_nChannels)
-					{
-						UINT cmd = b1 & 0x3F;
-						if (cmd == 0x0C)
-						{
-							m[ch].volcmd = VOLCMD_VOLUME;
-							m[ch].vol = b2 >> 1;
-						} else
-						if (cmd == 0x0E)
-						{
-							if (!m[ch].command)
-							{
-								UINT command = CMD_S3MCMDEX;
-								UINT param = b2;
-								switch(param & 0xF0)
-								{
-								case 0x00:	if (param & 0x08) { param &= 0x07; param |= 0x90; } else {command=param=0;} break;
-								case 0x10:	command = CMD_PORTAMENTOUP; param |= 0xF0; break;
-								case 0x20:	command = CMD_PORTAMENTODOWN; param |= 0xF0; break;
-								case 0x30:	param = (param & 0x0F) | 0x10; break;
-								case 0x40:	param = (param & 0x0F) | 0x30; break;
-								case 0x50:	param = (param & 0x0F) | 0x20; break;
-								case 0x60:	param = (param & 0x0F) | 0xB0; break;
-								case 0x70:	param = (param & 0x0F) | 0x40; break;
-								case 0x90:	command = CMD_RETRIG; param &= 0x0F; break;
-								case 0xA0:	if (param & 0x0F) { command = CMD_VOLUMESLIDE; param = (param << 4) | 0x0F; } else command=param=0; break;
-								case 0xB0:	if (param & 0x0F) { command = CMD_VOLUMESLIDE; param |= 0xF0; } else command=param=0; break;
-								}
-								m[ch].command = command;
-								m[ch].param = param;
-							}
-						} else
-						{
-							m[ch].command = cmd;
-							m[ch].param = b2;
-							ConvertModCommand(m[ch]);
-						}
-					}
-				}
-				if (b1 & 0x80)
-				{
-					b1 = p[i++];
-					if (i <= len) goto anothercommand;
-				}
-			}
-			if (b0 & 0x80)
-			{
-				row++;
-				m += m_nChannels;
-			}
-		}
-		dwMemPos += len;
+		uint32 patLength = file.ReadUint32LE();
+		FileReader patternChunk = file.GetChunk(patLength);
+
+		ReadAMSPattern(Patterns[pat], false, patternChunk, *this);
 	}
 
 	// Read Samples
-	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		if (dwMemPos >= dwMemLength - 9) return true;
-		dwMemPos += SampleIO(
-			(Samples[iSmp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+		SampleIO(
+			(Samples[smp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
 			SampleIO::mono,
 			SampleIO::littleEndian,
-			SampleIO::AMS)
-			.ReadSample(Samples[iSmp], (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+			packSample[smp - 1] ? SampleIO::AMS : SampleIO::signedPCM)
+			.ReadSample(Samples[smp], file);
 	}
 	return true;
 }
@@ -360,7 +553,7 @@ struct AMS2Envelope
 		{
 			if(i != 0)
 			{
-				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + Util::Max(1, env.data[i][0] | ((env.data[i][1] & 0x01) << 8));
+				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + static_cast<uint16>(Util::Max(1, env.data[i][0] | ((env.data[i][1] & 0x01) << 8)));
 			}
 			mptEnv.Values[i] = env.data[i][2];
 		}
@@ -400,7 +593,7 @@ struct AMS2Instrument
 
 	void ApplyFlags(InstrumentEnvelope &mptEnv, EnvelopeFlags shift) const
 	{
-		const uint8 flags = envFlags >> (shift * 3);
+		const int flags = envFlags >> (shift * 3);
 		if(flags & envEnabled) mptEnv.dwFlags |= ENV_ENABLED;
 		if(flags & envLoop) mptEnv.dwFlags |= ENV_LOOP;
 		if(flags & envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
@@ -459,7 +652,7 @@ struct AMS2SampleHeader
 		mptSmp.nLoopEnd = Util::Min(loopEnd, length);
 
 		mptSmp.nC5Speed = c4speed * 2;
-		if(!mptSmp.nC5Speed)
+		if(c4speed == 0)
 		{
 			mptSmp.nC5Speed = 8363 * 2;
 		}
@@ -511,16 +704,6 @@ struct AMS2Description
 #pragma pack()
 
 
-// Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
-template<size_t destSize>
-bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
-//----------------------------------------------------------------
-{
-	const size_t length = file.ReadUint8();
-	return file.ReadString<StringFixer::spacePadded>(destBuffer, length);
-}
-
-
 bool CSoundFile::ReadAMS2(FileReader &file)
 //-----------------------------------------
 {
@@ -557,6 +740,8 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+	SetupMODPanning(true);
 
 	// Instruments
 	vector<SAMPLEINDEX> firstSample;	// First sample of instrument
@@ -569,6 +754,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		packStatusMask		= 0x8000,	// If bit is set, sample is packed
 	};
 
+	STATIC_ASSERT(MAX_INSTRUMENTS > 255);
 	for(INSTRUMENTINDEX ins = 1; ins <= m_nInstruments; ins++)
 	{
 		ModInstrument *instrument = AllocateInstrument(ins);
@@ -636,7 +822,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		}
 
 		firstSample.push_back(firstSmp);
-		m_nSamples = Util::Min(MAX_SAMPLES - 1, GetNumSamples() + numSamples);
+		m_nSamples = static_cast<SAMPLEINDEX>(Util::Min(MAX_SAMPLES - 1, GetNumSamples() + numSamples));
 	}
 
 	// Text
@@ -717,234 +903,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		ReadAMSString(patternName, patternChunk);
 		Patterns[pat].SetName(patternName);
 
-		enum
-		{
-			emptyRow		= 0xFF,	// No commands on row
-			endOfRowMask	= 0x80,	// If set, no more commands on this row
-			noteMask		= 0x40,	// If set, no note+instr in this command
-			channelMask		= 0x1F,	// Mask for extracting channel
-
-			// Note flags
-			readNextCmd		= 0x80,	// One more command follows
-			noteDataMask	= 0x7F,	// Extract note
-
-			// Command flags
-			volCommand		= 0x40,	// Effect is compressed volume command
-			commandMask		= 0x3F,	// Command or volume mask
-		};
-
-		// Extended (non-Protracker) effects
-		static const uint8 effTrans[] =
-		{
-			CMD_S3MCMDEX,		// Forward / Backward
-			CMD_PORTAMENTOUP,	// Extra fine slide up
-			CMD_PORTAMENTODOWN,	// Extra fine slide up
-			CMD_RETRIG,			// Retrigger
-			CMD_NONE,
-			CMD_TONEPORTAVOL,	// Toneporta with fine volume slide
-			CMD_VIBRATOVOL,		// Vibrato with fine volume slide
-			CMD_NONE,
-			CMD_PANNINGSLIDE,
-			CMD_NONE,
-			CMD_VOLUMESLIDE,	// Two times finder volume slide than Axx
-			CMD_NONE,
-			CMD_CHANNELVOLUME,	// Channel volume (0...127)
-			CMD_PATTERNBREAK,	// Long pattern break (in hex)
-			CMD_S3MCMDEX,		// Fine slide commands
-			CMD_NONE,			// Fractional BPM
-			CMD_KEYOFF,			// Key off at tick xx
-			CMD_PORTAMENTOUP,	// Porta up, but uses all octaves (?)
-			CMD_PORTAMENTODOWN,	// Porta down, but uses all octaves (?)
-			CMD_NONE,
-			CMD_NONE,
-			CMD_NONE,
-			CMD_NONE,
-			CMD_NONE,
-			CMD_NONE,
-			CMD_NONE,
-			CMD_GLOBALVOLSLIDE,	// Global volume slide
-			CMD_NONE,
-			CMD_GLOBALVOLUME,	// Global volume (0... 127)
-		};
-
-		for(ROWINDEX row = 0; row < numRows; row++)
-		{
-			PatternRow baseRow = Patterns[pat].GetRow(row);
-			while(patternChunk.BytesLeft())
-			{
-				const uint8 flags = patternChunk.ReadUint8();
-				if(flags == emptyRow)
-				{
-					break;
-				}
-			
-				ModCommand &m = baseRow[flags & channelMask];
-				bool moreCommands = true;
-				if(!(flags & noteMask))
-				{
-					uint8 note = patternChunk.ReadUint8(), instr = patternChunk.ReadUint8();
-					moreCommands = (note & readNextCmd) != 0;
-					note &= noteDataMask;
-					
-					if(note == 1)
-					{
-						m.note = NOTE_KEYOFF;
-					} else if(note >= 2 && note <= 121)
-					{
-						m.note = note - 2 + NOTE_MIN;
-					}
-					m.instr = instr;
-				}
-
-				while(moreCommands)
-				{
-					ModCommand origCmd = m;
-					const uint8 command = patternChunk.ReadUint8(), effect = (command & commandMask);
-					moreCommands = (command & readNextCmd) != 0;
-
-					if(command & volCommand)
-					{
-						m.volcmd = VOLCMD_VOLUME;
-						m.vol = effect;
-					} else
-					{
-						m.param = patternChunk.ReadUint8();
-
-						if(effect < 0x10)
-						{
-							m.command = effect;
-							ConvertModCommand(m);
-
-							switch(m.command)
-							{
-							case CMD_PANNING8:
-								// 4-Bit panning
-								m.command = CMD_PANNING8;
-								m.param = (m.param & 0x0F) * 0x11;
-								break;
-
-							case CMD_VOLUME:
-								m.command = CMD_NONE;
-								m.volcmd = VOLCMD_VOLUME;
-								m.vol = Util::Min((m.param + 1) / 2, 64);
-								break;
-
-							case CMD_MODCMDEX:
-								if(m.param == 0x80)
-								{
-									// Break sample loop (cut after loop)
-									m.command = CMD_NONE;
-								} else
-								{
-									m.ExtendedMODtoS3MEffect();
-								}
-								break;
-							}
-						} else
-						{
-							if(effect - 0x10 < CountOf(effTrans))
-							{
-								m.command = effTrans[effect - 0x10];
-
-								switch(effect)
-								{
-								case 0x10:
-									// Play sample forwards / backwards
-									if(m.param <= 0x01)
-									{
-										m.param |= 0x9E;
-									} else
-									{
-										m.command = CMD_NONE;
-									}
-									break;
-
-								case 0x11:
-								case 0x12:
-									// Extra fine slides
-									m.param = Util::Min(uint8(0x0F), m.param) | 0xE0;
-									break;
-
-								case 0x15:
-								case 0x16:
-									// Fine slides
-									m.param = (Util::Min(0x10, m.param + 1) / 2) | 0xF0;
-									break;
-
-								case 0x1E:
-									// More fine slides
-									switch(m.param >> 4)
-									{
-									case 0x1:
-										// Fine porta up
-										m.command = CMD_PORTAMENTOUP;
-										m.param |= 0xF0;
-										break;
-									case 0x2:
-										// Fine porta down
-										m.command = CMD_PORTAMENTODOWN;
-										m.param |= 0xF0;
-										break;
-									case 0xA:
-										// Extra fine volume slide up
-										m.command = CMD_VOLUMESLIDE;
-										m.param = ((((m.param & 0x0F) + 1) / 2) << 4) | 0x0F;
-										break;
-									case 0xB:
-										// Extra fine volume slide down
-										m.command = CMD_VOLUMESLIDE;
-										m.param = (((m.param & 0x0F) + 1) / 2) | 0xF0;
-										break;
-									default:
-										m.command = CMD_NONE;
-										break;
-									}
-									break;
-
-								case 0x1C:
-									// Adjust channel volume range
-									m.param = Util::Min((m.param + 1) / 2, 64);
-									break;
-								}
-							}
-						}
-
-						if(origCmd.command == CMD_VOLUMESLIDE && (m.command == CMD_VIBRATO || m.command == CMD_TONEPORTAVOL) && m.param == 0)
-						{
-							// Merge commands
-							if(m.command == CMD_VIBRATO)
-							{
-								m.command = CMD_VIBRATOVOL;
-							} else
-							{
-								m.command = CMD_TONEPORTAVOL;
-							}
-							m.param = origCmd.param;
-							origCmd.command = CMD_NONE;
-						}
-
-						if(ModCommand::GetEffectWeight(origCmd.command) > ModCommand::GetEffectWeight(m.command))
-						{
-							if(ModCommand::ConvertVolEffect(m.command, m.param, true))
-							{
-								// Volume column to the rescue!
-								m.volcmd = m.command;
-								m.vol = m.param;
-							}
-
-							m.command = origCmd.command;
-							m.param = origCmd.param;
-						}
-					}
-				}
-
-				if(flags & endOfRowMask)
-				{
-					// End of row
-					break;
-				}
-			}
-		}
+		ReadAMSPattern(Patterns[pat], true, patternChunk, *this);
 	}
 
 	// Read Samples
@@ -1004,69 +963,90 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 /////////////////////////////////////////////////////////////////////
 // AMS Sample unpacking
 
-void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char packcharacter)
-//-----------------------------------------------------------------------------------------
+void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, const size_t destSize, char packCharacter)
+//------------------------------------------------------------------------------------------------------------------------
 {
-	UINT tmplen = dmax;
-	signed char *amstmp = new signed char[tmplen];
+	int8 *tempBuf = new (std::nothrow) int8[destSize];
+	if(tempBuf == nullptr)
+	{
+		return;
+	}
 
-	if (!amstmp) return;
 	// Unpack Loop
 	{
-		signed char *p = amstmp;
-		UINT i=0, j=0;
-		while ((i < inputlen) && (j < tmplen))
+		const int8 *in = source;
+		int8 *out = tempBuf;
+
+		size_t i = sourceSize, j = destSize;
+		while(i != 0 && j != 0)
 		{
-			signed char ch = psrc[i++];
-			if (ch == packcharacter)
+			int8 ch = *(in++);
+			if(--i != 0 && ch == packCharacter)
 			{
-				BYTE ch2 = psrc[i++];
-				if (ch2)
+				uint8 repCount = *(in++);
+				repCount = static_cast<uint8>(Util::Min(static_cast<size_t>(repCount), j));
+				if(--i != 0 && repCount)
 				{
-					ch = psrc[i++];
-					while (ch2--)
+					ch = *(in++);
+					i--;
+					while(repCount-- != 0)
 					{
-						p[j++] = ch;
-						if (j >= tmplen) break;
+						*(out++) = ch;
+						j--;
 					}
-				} else p[j++] = packcharacter;
-			} else p[j++] = ch;
+				} else
+				{
+					*(out++) = packCharacter;
+					j--;
+				}
+			} else
+			{
+				*(out++) = ch;
+				j--;
+			}
 		}
 	}
+
 	// Bit Unpack Loop
 	{
-		signed char *p = amstmp;
-		UINT bitcount = 0x80, dh;
-		UINT k=0;
-		for (UINT i=0; i<dmax; i++)
+		int8 *out = tempBuf;
+		uint16 bitcount = 0x80;
+		size_t k = 0;
+		for(size_t i = 0; i < destSize; i++)
 		{
-			BYTE al = *p++;
-			dh = 0;
-			for (UINT count=0; count<8; count++)
+			uint8 al = *out++;
+			uint16 dh = 0;
+			for(uint16 count = 0; count < 8; count++)
 			{
-				UINT bl = al & bitcount;
-				bl = ((bl|(bl<<8)) >> ((dh+8-count) & 7)) & 0xFF;
-				bitcount = ((bitcount|(bitcount<<8)) >> 1) & 0xFF;
-				pdest[k++] |= bl;
-				if (k >= dmax)
+				uint16 bl = al & bitcount;
+				bl = ((bl | (bl << 8)) >> ((dh + 8 - count) & 7)) & 0xFF;
+				bitcount = ((bitcount | (bitcount << 8)) >> 1) & 0xFF;
+				dest[k++] |= bl;
+				if(k >= destSize)
 				{
 					k = 0;
 					dh++;
 				}
 			}
-			bitcount = ((bitcount|(bitcount<<8)) >> dh) & 0xFF;
+			bitcount = ((bitcount | (bitcount << 8)) >> dh) & 0xFF;
 		}
 	}
+
 	// Delta Unpack
 	{
-		signed char old = 0;
-		for (UINT i=0; i<dmax; i++)
+		int8 old = 0;
+		int8 *out = dest;
+		for(size_t i = destSize; i != 0; i--)
 		{
-			int pos = ((LPBYTE)pdest)[i];
-			if ((pos != 128) && (pos & 0x80)) pos = -(pos & 0x7F);
-			old -= (signed char)pos;
-			pdest[i] = old;
+			int pos = *reinterpret_cast<uint8 *>(out);
+			if(pos != 128 && (pos & 0x80) != 0)
+			{
+				pos = -(pos & 0x7F);
+			}
+			old -= static_cast<int8>(pos);
+			*(out++) = old;
 		}
 	}
-	delete[] amstmp;
+
+	delete[] tempBuf;
 }
