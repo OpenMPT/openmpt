@@ -383,7 +383,7 @@ public:
 	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadFAR(FileReader &file);
 	bool ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadAMS2(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAMS2(FileReader &file);
 	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadOKT(FileReader &file);
 	bool ReadDMF(const LPCBYTE lpStream, const DWORD dwMemLength);

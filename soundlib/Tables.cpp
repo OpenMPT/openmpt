@@ -41,6 +41,7 @@ MODFORMATINFO gModFormatInfo[] =
 	{ MOD_TYPE_WAV,	"Wave", ".wav",					0 },
 	{ MOD_TYPE_MID, "Midi", ".mid",					0 },
 	{ MOD_TYPE_AMS, "Extreme's Tracker", ".ams",	0 },
+	{ MOD_TYPE_AMS2, "Velvet Studio", ".ams",		0 },
 	{ MOD_TYPE_AMF|MOD_TYPE_AMF0,"Asylum / DSMI", ".amf", 0 },
 	{ MOD_TYPE_DSM, "DSIK Format", ".dsm",			0 },
 	{ MOD_TYPE_DMF, "X-Tracker", ".dmf",			0 },

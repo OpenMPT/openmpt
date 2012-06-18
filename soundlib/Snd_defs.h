@@ -107,6 +107,7 @@ enum MODTYPE
 	MOD_TYPE_J2B	= 0x800000,
 	MOD_TYPE_MPT	= 0x1000000,
 	MOD_TYPE_IMF	= 0x2000000,
+	MOD_TYPE_AMS2	= 0x4000000,
 	MOD_TYPE_UMX	= 0x80000000, // Fake type
 };
 
@@ -145,7 +146,7 @@ inline MODTYPE operator & (MODTYPE a, MODTYPE b)
 #define CHN_KEYOFF			0x200		// exit sustain
 #define CHN_NOTEFADE		0x400		// fade note (instrument mode)
 #define CHN_SURROUND		0x800		// use surround channel
-#define CHN_NOIDO			0x1000		// Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
+#define CHN_NOIDO			0x1000		// (IDO = Interpolation Do?) Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
 #define CHN_HQSRC			0x2000		// High quality sample rate conversion (i.e. apply interpolation)
 #define CHN_FILTER			0x4000		// filtered output
 #define CHN_VOLUMERAMP		0x8000		// ramp volume
@@ -307,7 +308,7 @@ enum SongFlags
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
 
 
-#define MAX_GLOBAL_VOLUME 256
+#define MAX_GLOBAL_VOLUME 256u
 
 // Resampling modes
 enum {
