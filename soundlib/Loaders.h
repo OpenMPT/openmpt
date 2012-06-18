@@ -12,6 +12,7 @@
 #include "Endianness.h"
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
+#include <vector>
 
 // Execute "action" if "request_bytes" bytes cannot be read from stream at position "position"
 // DEPRECATED. Use FileReader instead.
@@ -177,8 +178,7 @@ protected:
 		T target;
 		if(Read(target))
 		{
-			SwapBytesLE(target);
-			return target;
+			return SwapBytesLE(target);
 		} else
 		{
 			return 0;
@@ -194,8 +194,7 @@ protected:
 		T target;
 		if(Read(target))
 		{
-			SwapBytesBE(target);
-			return target;
+			return SwapBytesBE(target);
 		} else
 		{
 			return 0;
@@ -383,7 +382,6 @@ public:
 	template<typename T, size_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
-		static_assert(sizeof(destArray) == sizeof(T) * destSize, "Huh?");
 		if(CanRead(sizeof(destArray)))
 		{
 			memcpy(destArray, streamData  + streamPos, sizeof(destArray));
@@ -396,20 +394,40 @@ public:
 		}
 	}
 
+	// Read destSize elements of type T into a vector.
+	// If successful, the file cursor is advanced by the size of the vector.
+	// Otherwise, the vector is cleared.
+	template<typename T>
+	bool ReadVector(std::vector<T> &destVector, size_t destSize)
+	{
+		const size_t readSize = sizeof(T) * destSize;
+		if(CanRead(readSize))
+		{
+			destVector.resize(destSize);
+			memcpy(&destVector[0], streamData  + streamPos, readSize);
+			streamPos += readSize;
+			return true;
+		} else
+		{
+			destVector.clear();
+			return false;
+		}
+	}
+
 	// Compare a magic string with the current stream position.
 	// Returns true if they are identical.
 	// The file cursor is advanced by the the length of the "magic" string.
 	bool ReadMagic(const char *magic)
 	{
 		const size_t magicLength = strlen(magic);
-		if(!CanRead(magicLength))
-		{
-			return false;
-		} else
+		if(CanRead(magicLength))
 		{
 			bool result = !memcmp(streamData + streamPos, magic, magicLength);
 			streamPos += magicLength;
 			return result;
+		} else
+		{
+			return false;
 		}
 	}
 

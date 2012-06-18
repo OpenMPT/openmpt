@@ -523,7 +523,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 
 	CriticalSection cs;
 
-	ModInstrument *pIns = m_SndFile.AllocateInstrument(newsmp);
+	ModInstrument *pIns = m_SndFile.AllocateInstrument(newins, newsmp);
 	if(pIns == nullptr)
 	{
 		cs.Leave();
@@ -541,8 +541,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 		m_bsInstrumentModified.reset(newins - 1);
 		// -! NEW_FEATURE#0023
 	}
-
-	m_SndFile.Instruments[newins] = pIns;
 
 	SetModified();
 
