@@ -244,29 +244,55 @@ void CSelectPluginDlg::OnNameFilterChanged()
 }
 
 
-void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect /* = 0*/)
-//------------------------------------------------------------------
+void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
+//---------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	HTREEITEM cursel, hDmo, hVst, hSynth;
+	HTREEITEM curSelection, categoryFolders[VSTPluginLib::numCategories];
+	vector<bool> categoryUsed(VSTPluginLib::numCategories, false);
 
 	m_treePlugins.SetRedraw(FALSE);
 	m_treePlugins.DeleteAllItems();
 
-	hSynth = AddTreeItem("VST Instruments", IMAGE_FOLDER, false);
-	hDmo = AddTreeItem("DirectX Media Audio Effects", IMAGE_FOLDER, false);
-	hVst = AddTreeItem("VST Audio Effects", IMAGE_FOLDER, false);
-	cursel = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
-
-	if (pManager)
+	static const struct
 	{
-		VSTPluginLib *pCurrent = NULL;
+		VSTPluginLib::PluginCategory category;
+		const char *description;
+	} categories[] =
+	{
+		{ VSTPluginLib::catEffect,			"Audio Effects" },
+		{ VSTPluginLib::catGenerator,		"Tone Generators" },
+		{ VSTPluginLib::catRestoration,		"Audio Restauration" },
+		{ VSTPluginLib::catSurroundFx,		"Surround Effects" },
+		{ VSTPluginLib::catRoomFx,			"Room Effects" },
+		{ VSTPluginLib::catSpacializer,		"Spacializers" },
+		{ VSTPluginLib::catMastering,		"Mastering Plugins" },
+		{ VSTPluginLib::catAnalysis,		"Analysis Plugins" },
+		{ VSTPluginLib::catOfflineProcess,	"Offline Processing" },
+		{ VSTPluginLib::catShell,			"Shell Plugins" },
+		{ VSTPluginLib::catUnknown,			"Unsorted" },
+		{ VSTPluginLib::catDMO,				"DirectX Media Audio Effects" },
+		{ VSTPluginLib::catSynth,			"Instrument Plugins" },
+	};
+	
+	for(size_t i = CountOf(categories); i != 0; )
+	{
+		i--;
+		categoryFolders[categories[i].category] = AddTreeItem(categories[i].description, IMAGE_FOLDER, false);
+	}
+	curSelection = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+
+	if(pManager)
+	{
+		const bool nameFilterActive = !m_sNameFilter.IsEmpty();
+
+		VSTPluginLib *pCurrent = nullptr;
 		VSTPluginLib *p = pManager->GetFirstPlugin();
-		while (p)
+		while(p)
 		{
-			// Apply name filter
-			if (m_sNameFilter != "")
+			if(nameFilterActive)
 			{
+				// Apply name filter
 				CString displayName = p->szLibraryName;
 				if (displayName.MakeLower().Find(m_sNameFilter) == -1)
 				{
@@ -275,95 +301,92 @@ void CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect /* = 0*/)
 				}
 			}
 
-			HTREEITEM hParent;
-			if (p->dwPluginId1 == kDmoMagic)
+			HTREEITEM h = AddTreeItem(p->szLibraryName, p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[p->category], reinterpret_cast<LPARAM>(p));
+			categoryUsed[p->category] = true;
+
+			if(nameFilterActive)
 			{
-				hParent = hDmo;
-			} else
-			{
-				hParent = (p->isInstrument) ? hSynth : hVst;
+				// If filter is active, expand nodes.
+				m_treePlugins.EnsureVisible(h);
 			}
 
-			HTREEITEM h = AddTreeItem(p->szLibraryName, p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, hParent, (LPARAM)p);
-
-			//If filter is active, expand nodes.
-			if (m_sNameFilter != "") m_treePlugins.EnsureVisible(h);
-
-			//Which plugin should be selected?
-			if (m_pPlugin)
+			if(m_pPlugin)
 			{
+				//Which plugin should be selected?
 
-				//forced selection (e.g. just after add plugin)
-				if (forceSelect != 0)
+				if(forceSelect != 0 && p->dwPluginId2 == forceSelect)
 				{
-					if (p->dwPluginId2 == forceSelect)
-					{
-						pCurrent = p;
-					}
-				}
-
-				//Current slot's plugin
-				else if (m_pPlugin->pMixPlugin)
+					//forced selection (e.g. just after add plugin)
+					pCurrent = p;
+				} else if(m_pPlugin->pMixPlugin)
 				{
+					//Current slot's plugin
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
 					if (pVstPlug->GetPluginFactory() == p) pCurrent = p;
-				} 
-
-				//Plugin with matching ID to current slot's plug
-				else if (/* (!pCurrent) && */ m_pPlugin->Info.dwPluginId1 !=0 || m_pPlugin->Info.dwPluginId2 != 0)
+				} else if(m_pPlugin->Info.dwPluginId1 != 0 || m_pPlugin->Info.dwPluginId2 != 0)
 				{
-					if ((p->dwPluginId1 == m_pPlugin->Info.dwPluginId1)
-						&& (p->dwPluginId2 == m_pPlugin->Info.dwPluginId2))
+					//Plugin with matching ID to current slot's plug
+					if(p->dwPluginId1 == m_pPlugin->Info.dwPluginId1
+						&& p->dwPluginId2 == m_pPlugin->Info.dwPluginId2)
 					{
 							pCurrent = p;
 					}
-				}
-
-				//Last selected plugin
-				else
+				} else
 				{
+					//Last selected plugin
 					if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
 					{
 						pCurrent = p;
 					}
 				}
 			}
-			if (pCurrent == p) cursel = h;
+
+			if(pCurrent == p)
+			{
+				curSelection = h;
+			}
+
 			p = p->pNext;
 		}
 	}
-	m_treePlugins.SetRedraw(TRUE);
-	if (cursel)
+
+	// Remove empty categories
+	for(size_t i = 0; i < CountOf(categoryFolders); i++)
 	{
-		m_treePlugins.SelectItem(cursel);
-		m_treePlugins.SetItemState(cursel, TVIS_BOLD, TVIS_BOLD);
-		m_treePlugins.EnsureVisible(cursel);
+		if(!categoryUsed[i])
+		{
+			m_treePlugins.DeleteItem(categoryFolders[i]);
+		}
+	}
+
+	m_treePlugins.SetRedraw(TRUE);
+	if(curSelection)
+	{
+		m_treePlugins.SelectItem(curSelection);
+		m_treePlugins.SetItemState(curSelection, TVIS_BOLD, TVIS_BOLD);
+		m_treePlugins.EnsureVisible(curSelection);
 	}
 }
 
-HTREEITEM CSelectPluginDlg::AddTreeItem(LPSTR szTitle, int iImage, bool bSort, HTREEITEM hParent, LPARAM lParam)
-//--------------------------------------------------------------------------------------------------------------
-{
-	TVINSERTSTRUCT tvis;
-	MemsetZero(tvis);
 
-	tvis.hParent = hParent;
-	tvis.hInsertAfter = (bSort) ? TVI_SORT : TVI_FIRST;
-	tvis.item.mask = TVIF_IMAGE | TVIF_PARAM | TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_TEXT;
-	tvis.item.pszText = szTitle;
-	tvis.item.iImage = tvis.item.iSelectedImage = iImage;
-	tvis.item.lParam = lParam;
-	return m_treePlugins.InsertItem(&tvis);
+HTREEITEM CSelectPluginDlg::AddTreeItem(const char *title, int image, bool sort, HTREEITEM hParent, LPARAM lParam)
+//----------------------------------------------------------------------------------------------------------------
+{
+	return m_treePlugins.InsertItem(
+		TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,
+		title,
+		image, image,
+		0, 0,
+		lParam,
+		hParent,
+		(sort ? TVI_SORT : TVI_FIRST));
 }
 
 
 void CSelectPluginDlg::OnSelDblClk(NMHDR *, LRESULT *result)
 //----------------------------------------------------------
 {
-	// -> CODE#0002
-	// -> DESC="list box to choose VST plugin presets (programs)"
-	if(m_pPlugin == NULL) return;
-	// -! NEW_FEATURE#0002
+	if(m_pPlugin == nullptr) return;
 
 	HTREEITEM hSel = m_treePlugins.GetSelectedItem();
 	int nImage, nSelectedImage;
@@ -390,34 +413,30 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 }
 
 
-struct PROBLEMATIC_PLUG
-{
-	DWORD id1;
-	DWORD id2;
-	DWORD version;
-	LPCSTR name;
-	LPCSTR problem;
-};
-
-//TODO: Check whether the list is still valid.
-static const PROBLEMATIC_PLUG gProblemPlugs[] =
-{
-	{ kEffectMagic, CCONST('N', 'i', '4', 'S'), 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
-	{ kEffectMagic, CCONST('m', 'd', 'a', 'C'), 1, "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
-	{ kEffectMagic, CCONST('f', 'V', '2', 's'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
-	{ kEffectMagic, CCONST('f', 'r', 'V', '2'), 1, "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
-};
-
 bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug) 
 //---------------------------------------------------
 {
-	CString s;
-	for (size_t p = 0; p < CountOf(gProblemPlugs); p++)
+	// TODO: Keep this list up-to-date.
+	static const struct
 	{
-		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2)
-			/*&& (gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
+		VstInt32 id1;
+		VstInt32 id2;
+		char *name;
+		char *problem;
+	} problemPlugs[] =
+	{
+		{ kEffectMagic, CCONST('N', 'i', '4', 'S'), "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
+		{ kEffectMagic, CCONST('m', 'd', 'a', 'C'), "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
+		{ kEffectMagic, CCONST('f', 'V', '2', 's'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
+		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
+	};
+
+	for(size_t p = 0; p < CountOf(problemPlugs); p++)
+	{
+		if(problemPlugs[p].id2 == plug->dwPluginId2 /*&& gProblemPlugs[p].id1 == plug->dwPluginId1*/)
 		{
-			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
+			CString s;
+			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
 			return (Reporting::Confirm(s) == cnfYes);
 		}
 	}
@@ -448,7 +467,7 @@ void CSelectPluginDlg::OnAddPlugin()
 
 		if (pManager)
 		{
-			plugLib = pManager->AddPlugin(sFilename, FALSE);
+			plugLib = pManager->AddPlugin(sFilename, false);
 			if (plugLib)
 			{
 				bOk = true;
