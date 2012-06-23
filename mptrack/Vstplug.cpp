@@ -1398,7 +1398,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	}
 
-	m_nSampleRate=CSoundFile::gdwMixingFreq;
+	m_nSampleRate = CSoundFile::gdwMixingFreq;
 	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(CSoundFile::gdwMixingFreq));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
 	if (m_pEffect->numPrograms > 0)
@@ -1427,9 +1427,17 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	RecalculateGain();
 	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ? m_pEffect->processReplacing : m_pEffect->process;
 
- // issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
+	// issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
 	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(CSoundFile::gdwMixingFreq));
 
+	// Korg Wavestation GUI won't work until plugin was resumed at least once.
+	// On the other hand, some other plugins (notably Synthedit plugins like Superwave P8 2.3 or Rez 3.0) don't like this
+	// and won't load their stored plugin data properly, so only do this for the Korg Wavestation...
+	if(GetUID() == CCONST('K', 'L', 'W', 'V'))
+	{
+		Resume();
+		Suspend();
+	}
 }
 
 
@@ -2840,76 +2848,84 @@ bool CVstPlugin::CanRecieveMidiEvents()
 }
 
 
-void CVstPlugin::GetOutputPlugList(vector<CVstPlugin *> &list)
-//------------------------------------------------------------
+// Get list of plugins to which output is sent. A nullptr indicates master output.
+size_t CVstPlugin::GetOutputPlugList(vector<CVstPlugin *> &list)
+//--------------------------------------------------------------
 {
 	// At the moment we know there will only be 1 output.
 	// Returning nullptr means plugin outputs directly to master.
 	list.clear();
 
-	CVstPlugin *pOutputPlug = nullptr;
+	CVstPlugin *outputPlug = nullptr;
 	if(!m_pMixStruct->IsOutputToMaster())
 	{
 		PLUGINDEX nOutput = m_pMixStruct->GetOutputPlugin();
 		if(m_pSndFile && nOutput > m_nSlot && nOutput != PLUGINDEX_INVALID)
 		{
-			pOutputPlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
+			outputPlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
 		}
 	}
-	list.push_back(pOutputPlug);
+	list.push_back(outputPlug);
 
-	return;
+	return 1;
 }
 
-void CVstPlugin::GetInputPlugList(vector<CVstPlugin *> &list)
-//-----------------------------------------------------------
+
+// Get a list of plugins that send data to this plugin.
+size_t CVstPlugin::GetInputPlugList(vector<CVstPlugin *> &list)
+//-------------------------------------------------------------
 {
-	if(m_pSndFile == nullptr) return;
+	if(m_pSndFile == nullptr) return 0;
 
 	vector<CVstPlugin *> candidatePlugOutputs;
-	CVstPlugin* pCandidatePlug = nullptr;
 	list.clear();
 
-	for (int nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
+	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
-		pCandidatePlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nPlug].pMixPlugin);
-		if (pCandidatePlug)
+		CVstPlugin *candidatePlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[plug].pMixPlugin);
+		if(candidatePlug)
 		{
-			pCandidatePlug->GetOutputPlugList(candidatePlugOutputs);
+			candidatePlug->GetOutputPlugList(candidatePlugOutputs);
 
-			for(vector<CVstPlugin *>::iterator plug = candidatePlugOutputs.begin(); plug != candidatePlugOutputs.end(); plug++)
+			for(vector<CVstPlugin *>::iterator iter = candidatePlugOutputs.begin(); iter != candidatePlugOutputs.end(); iter++)
 			{
-				if(*plug == this)
+				if(*iter == this)
 				{
-					list.push_back(pCandidatePlug);
+					list.push_back(candidatePlug);
 					break;
 				}
 			}
 		}
 	}
+
+	return list.size();
 }
 
-void CVstPlugin::GetInputInstrumentList(vector<INSTRUMENTINDEX> &list)
-//--------------------------------------------------------------------
+
+// Get a list of instruments that send data to this plugin.
+size_t CVstPlugin::GetInputInstrumentList(vector<INSTRUMENTINDEX> &list)
+//----------------------------------------------------------------------
 {
 	list.clear();
-	if(m_pSndFile == nullptr) return;
+	if(m_pSndFile == nullptr) return 0;
 
 	const PLUGINDEX nThisMixPlug = m_nSlot + 1;		//m_nSlot is position in mixplug array.
-	for (int nIns = 0; nIns <= m_pSndFile->GetNumInstruments(); nIns++)
+	for(INSTRUMENTINDEX ins = 0; ins <= m_pSndFile->GetNumInstruments(); ins++)
 	{
-		if (m_pSndFile->Instruments[nIns] != nullptr && (m_pSndFile->Instruments[nIns]->nMixPlug == nThisMixPlug))
+		if(m_pSndFile->Instruments[ins] != nullptr && (m_pSndFile->Instruments[ins]->nMixPlug == nThisMixPlug))
 		{
-			list.push_back(nIns);
+			list.push_back(ins);
 		}
 	}
 
+	return list.size();
 }
 
-void CVstPlugin::GetInputChannelList(vector<CHANNELINDEX> &list)
-//--------------------------------------------------------------
+
+size_t CVstPlugin::GetInputChannelList(vector<CHANNELINDEX> &list)
+//----------------------------------------------------------------
 {
-	if(m_pSndFile == nullptr) return;
+	if(m_pSndFile == nullptr) return 0;
 	list.clear();
 
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
@@ -2922,7 +2938,7 @@ void CVstPlugin::GetInputChannelList(vector<CHANNELINDEX> &list)
 		}
 	}
 
-	return;
+	return list.size();
 
 }
 
