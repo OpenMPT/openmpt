@@ -375,8 +375,7 @@ public:
 	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadSTM(FileReader &file);
 	bool ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength);
-	//bool ReadMPT(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadITProject(const LPCBYTE lpStream, const DWORD dwMemLength); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
+	bool ReadITProject(FileReader &file);
 	bool Read669(FileReader &file);
 	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadWav(FileReader &file);
@@ -685,8 +684,8 @@ protected:
 	// [in]  lineEnding: line ending formatting of the text in memory.
 	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
-	bool ReadMessage(FileReader &file, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
+	bool ReadMessage(const BYTE *data, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
+	bool ReadMessage(FileReader &file, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
 	{
 		size_t readLength = Util::Min(length, file.BytesLeft());
 		bool success = ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineEnding, pTextConverter);

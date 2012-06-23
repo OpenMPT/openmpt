@@ -21,400 +21,230 @@
 
 
 #define ITP_VERSION 0x00000102	// v1.02
-#define ITP_FILE_ID 0x2e697470	// .itp ASCII
+#define ITP_FILE_ID 0x2E697470	// .itp ASCII
 
 
-bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
+// Read variable-length ITP string.
+template<size_t destSize>
+bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
+//----------------------------------------------------------------
 {
-	UINT i,n,nsmp;
-	DWORD id,len,size;
-	DWORD dwMemPos = 0;
-	DWORD version;
+	return file.ReadString<StringFixer::maybeNullTerminated>(destBuffer, file.ReadUint32LE());
+}
 
-	ASSERT_CAN_READ(12);
+
+bool CSoundFile::ReadITProject(FileReader &file)
+//----------------------------------------------
+{
+	uint32 version;
+	size_t size;
+
+	file.Rewind();
 
 	// Check file ID
-
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	if(id != ITP_FILE_ID) return false;
-	dwMemPos += sizeof(DWORD);
-
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	version = id;
-	dwMemPos += sizeof(DWORD);
-
-	// max supported version
-	if(version > ITP_VERSION)
+	if(file.BytesLeft() < 12 + 4 + 24 + 4
+		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
+		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
+		|| !ReadITPString(m_szNames[0], file))				// Song name
 	{
 		return false;
 	}
 
-	m_nType = MOD_TYPE_IT;
-
-	// Song name
-
-	// name string length
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	len = id;
-	dwMemPos += sizeof(DWORD);
-
-	// name string
-	ASSERT_CAN_READ(len);
-	if (len<=sizeof(m_szNames[0]))
-	{
-		memcpy(m_szNames[0],lpStream+dwMemPos,len);
-		dwMemPos += len;
-		StringFixer::SetNullTerminator(m_szNames[0]);
-	}
-	else return false;
-
 	// Song comments
-
-	// comment string length
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	dwMemPos += sizeof(DWORD);
-	if(id > uint16_max) return false;
-
-	// allocate and copy comment string
-	ASSERT_CAN_READ(id);
-	if(id > 0)
-	{
-		ReadMessage(lpStream + dwMemPos, id - 1, leCR);
-	}
-	dwMemPos += id;
+	ReadMessage(file, file.ReadUint32LE(), leCR);
 
 	// Song global config
-	ASSERT_CAN_READ(5*4);
+	m_dwSongFlags = (file.ReadUint32LE() & SONG_FILE_FLAGS);
+	if(!(m_dwSongFlags & SONG_ITPROJECT))
+	{
+		return false;
+	}
 
-	// m_dwSongFlags
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_dwSongFlags = (id & SONG_FILE_FLAGS);
-	dwMemPos += sizeof(DWORD);
-
-	if(!(m_dwSongFlags & SONG_ITPROJECT)) return false;
-
-	// m_nDefaultGlobalVolume
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nDefaultGlobalVolume = id;
-	dwMemPos += sizeof(DWORD);
-
-	// m_nSamplePreAmp
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nSamplePreAmp = id;
-	dwMemPos += sizeof(DWORD);
-
-	// m_nDefaultSpeed
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nDefaultSpeed = id;
-	dwMemPos += sizeof(DWORD);
-
-	// m_nDefaultTempo
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nDefaultTempo = id;
-	dwMemPos += sizeof(DWORD);
-
-	// Song channels data
-	ASSERT_CAN_READ(2*4);
-
-	// m_nChannels
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nChannels = (CHANNELINDEX)id;
-	dwMemPos += sizeof(DWORD);
-	if(m_nChannels > 127) return false;
+	m_nDefaultGlobalVolume = file.ReadUint32LE();
+	m_nSamplePreAmp = file.ReadUint32LE();
+	m_nDefaultSpeed = file.ReadUint32LE();
+	m_nDefaultTempo = file.ReadUint32LE();
+	m_nChannels = static_cast<CHANNELINDEX>(file.ReadUint32LE());
+	if(m_nChannels == 0 || m_nChannels > MAX_BASECHANNELS)
+	{
+		return false;
+	}
 
 	// channel name string length (=MAX_CHANNELNAME)
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	len = id;
-	dwMemPos += sizeof(DWORD);
-	if(len > MAX_CHANNELNAME) return false;
+	size = file.ReadUint32LE();
 
 	// Channels' data
-	for(i=0; i<m_nChannels; i++){
-		ASSERT_CAN_READ(3*4 + len);
-
-		// ChnSettings[i].nPan
-		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-		ChnSettings[i].nPan = id;
-		dwMemPos += sizeof(DWORD);
-
-		// ChnSettings[i].dwFlags
-		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-		ChnSettings[i].dwFlags = id;
-		dwMemPos += sizeof(DWORD);
-
-		// ChnSettings[i].nVolume
-		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-		ChnSettings[i].nVolume = id;
-		dwMemPos += sizeof(DWORD);
-
-		// ChnSettings[i].szName
-		memcpy(&ChnSettings[i].szName[0],lpStream+dwMemPos,len);
-		StringFixer::SetNullTerminator(ChnSettings[i].szName);
-		dwMemPos += len;
+	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	{
+		ChnSettings[chn].nPan = static_cast<uint16>(file.ReadUint32LE());
+		ChnSettings[chn].dwFlags = file.ReadUint32LE();
+		ChnSettings[chn].nVolume = static_cast<uint16>(file.ReadUint32LE());
+		file.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[chn].szName, size);
 	}
 
 	// Song mix plugins
-	// size of mix plugins data
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	dwMemPos += sizeof(DWORD);
+	size = Util::Min(file.ReadUint32LE(), file.BytesLeft());
+	file.Skip(LoadMixPlugins(file.GetRawData(), size));
 
-	// mix plugins
-	ASSERT_CAN_READ(id);
-	dwMemPos += LoadMixPlugins(lpStream+dwMemPos, id);
-
-	// Song midi config
-
-	// midi cfg data length
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	dwMemPos += sizeof(DWORD);
-
-	// midi cfg
-	ASSERT_CAN_READ(id);
-	if (id <= sizeof(m_MidiCfg))
+	// MIDI Macro config
+	file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());
+	if(m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
-		memcpy(&m_MidiCfg, lpStream + dwMemPos, id);
 		m_MidiCfg.Sanitize();
-		dwMemPos += id;
+	} else
+	{
+		m_MidiCfg.Reset();
 	}
 
 	// Song Instruments
+	m_nInstruments = static_cast<INSTRUMENTINDEX>(file.ReadUint32LE());
+	if(m_nInstruments >= MAX_INSTRUMENTS)
+	{
+		return false;
+	}
 
-	// m_nInstruments
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_nInstruments = (INSTRUMENTINDEX)id;
-	if(m_nInstruments > MAX_INSTRUMENTS) return false;
-	dwMemPos += sizeof(DWORD);
-
-	// path string length (=_MAX_PATH)
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	len = id;
-	if(len > _MAX_PATH) return false;
-	dwMemPos += sizeof(DWORD);
-
-	// instruments' paths
-	for(i=0; i<m_nInstruments; i++){
-		ASSERT_CAN_READ(len);
-		memcpy(&m_szInstrumentPath[i][0],lpStream+dwMemPos,len);
-		StringFixer::SetNullTerminator(m_szInstrumentPath[i]);
-		dwMemPos += len;
+	// Instruments' paths
+	size = file.ReadUint32LE();	// path string length
+	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
+	{
+		file.ReadString<StringFixer::maybeNullTerminated>(m_szInstrumentPath[ins], size);
 	}
 
 	// Song Orders
-
-	// size of order array (=MAX_ORDERS)
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	size = id;
-	if(size > MAX_ORDERS) return false;
-	dwMemPos += sizeof(DWORD);
-
-	// order data
-	ASSERT_CAN_READ(size);
-	Order.ReadAsByte(lpStream+dwMemPos, size, dwMemLength-dwMemPos);
-	dwMemPos += size;
-
-
+	Order.ReadAsByte(file, file.ReadUint32LE());
 
 	// Song Patterns
+	const PATTERNINDEX numPats = static_cast<PATTERNINDEX>(file.ReadUint32LE());
+	const PATTERNINDEX numNamedPats = static_cast<PATTERNINDEX>(file.ReadUint32LE());
+	size_t patNameLen = file.ReadUint32LE();	// Size of each pattern name
+	FileReader pattNames = file.GetChunk(numNamedPats * patNameLen);
 
-	ASSERT_CAN_READ(3*4);
-	// number of patterns (=MAX_PATTERNS)
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	size = id;
-	dwMemPos += sizeof(DWORD);
-	if(size > MAX_PATTERNS) return false;
-
-	// m_nPatternNames
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	const PATTERNINDEX numNamedPats = static_cast<PATTERNINDEX>(id);
-	dwMemPos += sizeof(DWORD);
-
-	// pattern name string length (=MAX_PATTERNNAME)
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	const DWORD patNameLen = id;
-	dwMemPos += sizeof(DWORD);
-
-	// m_lpszPatternNames
-	ASSERT_CAN_READ(numNamedPats * patNameLen);
-	char *patNames = (char *)(lpStream + dwMemPos);
-	dwMemPos += numNamedPats * patNameLen;
 
 	// modcommand data length
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	n = id;
-	if(n != 6) return false;
-	dwMemPos += sizeof(DWORD);
+	size = file.ReadUint32LE();
+	if(size != 6)
+	{
+		return false;
+	}
 
-	for(PATTERNINDEX npat=0; npat<size; npat++)
+	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		// Patterns[npat].GetNumRows()
-		ASSERT_CAN_READ(4);
-		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-		if(id > MAX_PATTERN_ROWS) return false;
-		const ROWINDEX nRows = id;
-		dwMemPos += sizeof(DWORD);
+		const ROWINDEX numRows = file.ReadUint32LE();
+		FileReader patternChunk = file.GetChunk(numRows * size * GetNumChannels());
 
-		// Try to allocate & read only sized patterns
-		if(nRows)
+		// Allocate pattern
+		if(numRows == 0 || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
 		{
+			pattNames.Skip(patNameLen);
+			continue;
+		}
 
-			// Allocate pattern
-			if(Patterns.Insert(npat, nRows))
-			{
-				dwMemPos += m_nChannels * Patterns[npat].GetNumRows() * n;
-				continue;
-			}
-			if(npat < numNamedPats && patNameLen > 0)
-			{
-				Patterns[npat].SetName(patNames, patNameLen);
-				patNames += patNameLen;
-			}
+		if(pat < numNamedPats)
+		{
+			char patName[MAX_PATTERNNAME];
+			pattNames.ReadString<StringFixer::maybeNullTerminated>(patName, patNameLen);
+			Patterns[pat].SetName(patName);
+		}
 
-			// Pattern data
-			long datasize = m_nChannels * Patterns[npat].GetNumRows() * n;
-			//if (streamPos+datasize<=dwMemLength) {
-			if(Patterns[npat].ReadITPdata(lpStream, dwMemPos, datasize, dwMemLength))
+		// Pattern data
+		size_t numCommands = GetNumChannels() * numRows;
+
+		if(patternChunk.CanRead(sizeof(MODCOMMAND_ORIGINAL) * numCommands))
+		{
+			ModCommand *target = Patterns[pat].GetpModCommand(0, 0);
+			while(numCommands-- != 0)
 			{
-				ErrorBox(IDS_ERR_FILEOPEN, NULL);
-				return false;
+				MODCOMMAND_ORIGINAL data;
+				patternChunk.Read(data);
+				*(target++) = data;
 			}
-			//memcpy(Patterns[npat],lpStream+streamPos,datasize);
-			//streamPos += datasize;
-			//}
 		}
 	}
 
 	// Load embeded samples
 
 	// Read original number of samples
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	if(id >= MAX_SAMPLES) return false;
-	m_nSamples = (SAMPLEINDEX)id;
-	dwMemPos += sizeof(DWORD);
+	m_nSamples = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
+	LimitMax(m_nSamples, SAMPLEINDEX(MAX_SAMPLES - 1));
 
 	// Read number of embeded samples
-	ASSERT_CAN_READ(4);
-	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	if(id > MAX_SAMPLES) return false;
-	n = id;
-	dwMemPos += sizeof(DWORD);
+	uint32 embeddedSamples = file.ReadUint32LE();
 
 	// Read samples
-	for(i=0; i<n; i++)
+	for(uint32 smp = 0; smp < embeddedSamples; smp++)
 	{
+		SAMPLEINDEX realSample = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
+		ITSample sampleHeader;
+		file.Read(sampleHeader);
+		size = file.ReadUint32LE();
 
-		ASSERT_CAN_READ(4 + sizeof(ITSample) + 4);
-
-		// Sample id number
-		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-		nsmp = id;
-		dwMemPos += sizeof(DWORD);
-
-		if(nsmp < 1 || nsmp >= MAX_SAMPLES)
-			return false;
-
-		// Sample struct
-		ITSample pis;
-		memcpy(&pis, lpStream + dwMemPos, sizeof(ITSample));
-		dwMemPos += sizeof(ITSample);
-
-		// Sample length
-		memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-		len = id;
-		dwMemPos += sizeof(DWORD);
-		if(dwMemPos >= dwMemLength || len > dwMemLength - dwMemPos) return false;
-
-		if(pis.id == LittleEndian(ITSample::magic))
+		if(realSample >= 1 && realSample < MAX_SAMPLES && sampleHeader.id == LittleEndian(ITSample::magic))
 		{
-			pis.ConvertToMPT(Samples[nsmp]);
-
-			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nsmp], pis.name);
+			sampleHeader.ConvertToMPT(Samples[realSample]);
+			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[realSample], sampleHeader.name);
 
 			// Read sample data
-			pis.GetSampleFormat().ReadSample(Samples[nsmp], (LPSTR)(lpStream + dwMemPos), len);
-			dwMemPos += len;
+			sampleHeader.GetSampleFormat().ReadSample(Samples[realSample], file);
+		} else
+		{
+			file.Skip(size);
 		}
 	}
 
 	// Load instruments
-
 	CMappedFile f;
-	LPBYTE lpFile;
 
-	for(INSTRUMENTINDEX i = 0; i < m_nInstruments; i++)
+	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
+		if(m_szInstrumentPath[ins][0] == '\0' || !f.Open(m_szInstrumentPath[ins])) continue;
 
-		if(m_szInstrumentPath[i][0] == '\0' || !f.Open(m_szInstrumentPath[i])) continue;
-
-		len = f.GetLength();
-		lpFile = f.Lock(len);
+		size = f.GetLength();
+		LPBYTE lpFile = f.Lock(size);
 		if(!lpFile) { f.Close(); continue; }
 
-		ReadInstrumentFromFile(i+1, lpFile, len);
+		ReadInstrumentFromFile(ins + 1, lpFile, size);
 		f.Unlock();
 		f.Close();
 	}
 
 	// Extra info data
-
-	__int32 fcode = 0;
-	LPCBYTE ptr = lpStream + min(dwMemPos, dwMemLength);
-
-	if (dwMemPos <= dwMemLength - 4) {
-		fcode = (*((__int32 *)ptr));
-	}
+	uint32 code = file.ReadUint32LE();
 
 	// Embed instruments' header [v1.01]
-	if(version >= 0x00000101 && m_dwSongFlags & SONG_ITPEMBEDIH && fcode == 'EBIH')
+	if(version >= 0x00000101 && (m_dwSongFlags & SONG_ITPEMBEDIH) && code == 'EBIH')
 	{
-		// jump embeded instrument header tag
-		ptr += sizeof(__int32);
+		code = file.ReadUint32LE();
 
-		// set first instrument's header as current
-		i = 1;
-
-		// parse file
-		while( uintptr_t(ptr - lpStream) <= dwMemLength - 4 && i <= m_nInstruments )
+		INSTRUMENTINDEX ins = 1;
+		while(ins <= GetNumInstruments() && file.BytesLeft())
 		{
-
-			fcode = (*((__int32 *)ptr));			// read field code
-
-			switch( fcode )
+			if(code == 'MPTS')
 			{
-			case 'MPTS': goto mpts; //:)		// reached end of instrument headers
-			case 'SEP@': case 'MPTX':
-				ptr += sizeof(__int32);			// jump code
-				i++;							// switch to next instrument
 				break;
-
-			default:
-				ptr += sizeof(__int32);			// jump field code
-				ReadExtendedInstrumentProperty(Instruments[i], fcode, ptr, lpStream + dwMemLength);
-				break;
+			} else if(code == 'SEP@' || code == 'MPTX')
+			{
+				// jump code - switch to next instrument
+				ins++;
+			} else
+			{
+				const uint8 *pos = reinterpret_cast<const uint8 *>(file.GetRawData());
+				ReadExtendedInstrumentProperty(Instruments[ins], code, pos, pos + file.BytesLeft());
+				file.Skip(pos - reinterpret_cast<const uint8 *>(file.GetRawData()));
 			}
+
+			code = file.ReadUint32LE();
 		}
 	}
 
-	//HACK: if we fail on i <= m_nInstruments above, arrive here without having set fcode as appropriate,
-	//      hence the code duplication.
-	if ( (uintptr_t)(ptr - lpStream) <= dwMemLength - 4 )
+	// Song extensions
+	if(code == 'MPTS')
 	{
-		fcode = (*((__int32 *)ptr));
+		const uint8 *data = reinterpret_cast<const uint8 *>(file.GetRawData()) - 4;
+		LoadExtendedSongProperties(MOD_TYPE_IT, data, data, file.BytesLeft() + 4);
 	}
 
-	// Song extensions
-mpts:
-	if( fcode == 'MPTS' )
-		LoadExtendedSongProperties(MOD_TYPE_IT, ptr, lpStream, dwMemLength);
-
+	m_nType = MOD_TYPE_IT;
 	m_nMaxPeriod = 0xF000;
 	m_nMinPeriod = 8;
 
@@ -516,11 +346,11 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Song midi config
 
 	// midi cfg data length
-	id = sizeof(MIDIMacroConfig);
+	id = (m_dwSongFlags & SONG_EMBEDMIDICFG) ? sizeof(MIDIMacroConfig) : 0;
 	fwrite(&id, 1, sizeof(id), f);
 
 	// midi cfg
-	fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
+	fwrite(&m_MidiCfg, 1, id, f);
 
 	// Song Instruments
 
@@ -640,8 +470,8 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	if(m_dwSongFlags & SONG_ITPEMBEDIH)
 	{
 		// embeded instrument header tag
-		__int32 code = 'EBIH';
-		fwrite(&code, 1, sizeof(__int32), f);
+		uint32 code = 'EBIH';
+		fwrite(&code, 1, sizeof(uint32), f);
 
 		// instruments' header
 		for(i=0; i<m_nInstruments; i++)
@@ -649,7 +479,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			if(Instruments[i+1]) WriteInstrumentHeaderStruct(Instruments[i+1], f);
 			// write separator tag
 			code = 'SEP@';
-			fwrite(&code, 1, sizeof(__int32), f);
+			fwrite(&code, 1, sizeof(uint32), f);
 		}
 	}
 

@@ -455,39 +455,6 @@ bool CPattern::WriteITPdata(FILE* f) const
 	return false;
 }
 
-bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength)
-//-----------------------------------------------------------------------------------------------
-{
-	if(streamPos > dwMemLength || datasize >= dwMemLength - streamPos || datasize < sizeof(MODCOMMAND_ORIGINAL))
-		return true;
-
-	const DWORD startPos = streamPos;
-	size_t counter = 0;
-	while(streamPos - startPos + sizeof(MODCOMMAND_ORIGINAL) <= datasize)
-	{
-		MODCOMMAND_ORIGINAL temp;
-		memcpy(&temp, lpStream + streamPos, sizeof(MODCOMMAND_ORIGINAL));
-		ModCommand& mc = GetModCommand(counter);
-		mc.command = temp.command;
-		mc.instr = temp.instr;
-		mc.note = temp.note;
-		mc.param = temp.param;
-		mc.vol = temp.vol;
-		mc.volcmd = temp.volcmd;
-		streamPos += sizeof(MODCOMMAND_ORIGINAL);
-		counter++;
-	}
-	if(streamPos != startPos + datasize)
-	{
-		ASSERT(false);
-		return true;
-	}
-	else
-		return false;
-}
-
-
-
 
 ////////////////////////////////////////////////////////////////////////
 //

@@ -590,7 +590,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		if(!ReadXM(lpStream, dwMemLength)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		 && !ReadITProject(lpStream, dwMemLength)
+		 && !ReadITProject(file)
 // -! NEW_FEATURE#0023
 		 && !ReadIT(lpStream, dwMemLength)
 		 /*&& !ReadMPT(lpStream, dwMemLength)*/
