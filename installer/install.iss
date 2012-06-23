@@ -281,6 +281,13 @@ begin
                 DeleteFile(filepath + 'Keybindings.mkb');
                 DeleteFile(filepath + 'plugin.cache');
                 DeleteFile(filepath + 'tunings\local_tunings.tc');
+
+                filepath := GetTempDir();
+                if(filepath <> '') then
+                begin
+                  filepath := filepath + 'OpenMPT Crash Files\';
+                  DelTree(filepath, True, True, True);
+                end;
             end;
         end;
     end;

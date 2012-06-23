@@ -117,13 +117,6 @@ public:
 	bool WriteEffect(EffectWriter &settings);
 
 	bool WriteITPdata(FILE* f) const;
-	bool ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength);
-	//Parameters:
-	//1. Pointer to the beginning of the stream
-	//2. Tells where to start(lpStream+streamPos) and number of bytes read is added to it.
-	//3. How many bytes to read
-	//4. Length of the stream.
-	//Returns true on error.
 
 	// Static allocation / deallocation helpers
 	static ModCommand *AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns);

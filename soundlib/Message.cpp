@@ -51,9 +51,15 @@ void CSoundFile::FreeMessage()
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &))
-//----------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &))
+//----------------------------------------------------------------------------------------------------------------------
 {
+	if(length != 0 && data[length - 1] == '\0')
+	{
+		// Ignore trailing null character.
+		length--;
+	}
+
 	char c;
 
 	// Simple line-ending detection algorithm. VERY simple.
@@ -85,7 +91,7 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 			lineEnding = leMixed;
 	}
 
-	size_t final_length = 0;
+	size_t finalLength = 0;
 	// calculate the final amount of characters to be allocated.
 	for(size_t i = 0; i < length; i++)
 	{
@@ -94,10 +100,10 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 			pTextConverter(c);
 
 		if(c != '\n' || lineEnding != leCRLF)
-			final_length++;
+			finalLength++;
 	}
 
-	if(!AllocateMessage(final_length))
+	if(!AllocateMessage(finalLength))
 		return false;
 
 	size_t cpos = 0;
