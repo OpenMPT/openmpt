@@ -1591,8 +1591,8 @@ BOOL CSoundFile::ProcessEffects()
 						nStartTick = UINT_MAX;
 				}
 
-				//IT compatibility 08. Handling of out-of-range delay command.
-				if(nStartTick >= m_nMusicSpeed && IsCompatibleMode(TRK_IMPULSETRACKER))
+				// IT compatibility 08. Handling of out-of-range delay command.
+				if(nStartTick >= GetNumTicksOnCurrentRow() && IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					if(instr)
 					{
@@ -2907,7 +2907,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 		}
 	}
 
-	LONG newvolume = pChn->nVolume;
+	int newvolume = pChn->nVolume;
 	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
 	{
 		if ((param & 0x0F) == 0x0F) //Fine upslide or slide -15
@@ -2953,7 +2953,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 		}
 		if (m_nType == MOD_TYPE_MOD) pChn->dwFlags |= CHN_FASTVOLRAMP;
 	}
-	newvolume = CLAMP(newvolume, 0, 256);
+	newvolume = Clamp(newvolume, 0, 256);
 
 	pChn->nVolume = newvolume;
 }
@@ -3757,11 +3757,16 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 	} else
 	{
 		// Not an internal device. Pass on to appropriate plugin.
-		const CHANNELINDEX nMasterCh = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
-		if((nMasterCh) && (nMasterCh <= GetNumChannels()))
+		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
+		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this?
 		{
-			const PLUGINDEX nPlug = (pChn->dwFlags & CHN_NOFX) ? 0 : ((plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted));
-			if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+			PLUGINDEX nPlug = 0;
+			if(!(pChn->dwFlags & CHN_NOFX))
+			{
+				nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
+			}
+
+			if(nPlug > 0 && nPlug <= MAX_MIXPLUGINS)
 			{
 				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
 				if ((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState))
@@ -3796,29 +3801,28 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 // rewbs.NOTE: maybe move param calculation outside of method to cope with [ effect.
-			//if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
-			//param <<= 8;
-			//param |= (UINT)(pChn->nOldHiOffset) << 16;
-			ModCommand *m;
-			m = NULL;
+	//if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
+	//param <<= 8;
+	//param |= (UINT)(pChn->nOldHiOffset) << 16;
+	ModCommand *m =  nullptr;
 
-			if(m_nRow < Patterns[m_nPattern].GetNumRows() - 1) m = Patterns[m_nPattern].GetpModCommand(m_nRow + 1, nChn);
+	if(m_nRow < Patterns[m_nPattern].GetNumRows() - 1) m = Patterns[m_nPattern].GetpModCommand(m_nRow + 1, nChn);
 
-			if(m && m->command == CMD_XPARAM)
-			{
-				UINT tmp = m->param;
-				m = NULL;
-				if(m_nRow < Patterns[m_nPattern].GetNumRows() - 2) m = Patterns[m_nPattern].GetpModCommand(m_nRow + 2, nChn);
+	if(m && m->command == CMD_XPARAM)
+	{
+		UINT tmp = m->param;
+		m = nullptr;
+		if(m_nRow < Patterns[m_nPattern].GetNumRows() - 2) m = Patterns[m_nPattern].GetpModCommand(m_nRow + 2, nChn);
 
-				if(m && m->command == CMD_XPARAM) param = (param << 16) + (tmp << 8) + m->param;
-				else param = (param<<8) + tmp;
-			}
-			else
-			{
-				if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
-				param <<= 8;
-				param |= (UINT)(pChn->nOldHiOffset) << 16;
-			}
+		if(m && m->command == CMD_XPARAM) param = (param << 16) + (tmp << 8) + m->param;
+		else param = (param<<8) + tmp;
+	}
+	else
+	{
+		if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
+		param <<= 8;
+		param |= (UINT)(pChn->nOldHiOffset) << 16;
+	}
 // -! NEW_FEATURE#0010
 
 	if ((pChn->rowCommand.note >= NOTE_MIN) && (pChn->rowCommand.note <= NOTE_MAX))
@@ -4382,7 +4386,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 {
 	if ((!note) || (note >= NOTE_MIN_SPECIAL)) return 0;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV
-				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
+				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
 	{
 		note--;
 		if (m_dwSongFlags & SONG_LINEARSLIDES)
@@ -4598,8 +4602,10 @@ void CSoundFile::HandlePatternTransitionEvents()
 	{
 		if (m_bChannelMuteTogglePending[chan])
 		{
-			if(m_pModDoc)
-				m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
+			if(GetpModDoc())
+			{
+				GetpModDoc()->MuteChannel(chan, !GetpModDoc()->IsChannelMuted(chan));
+			}
 			m_bChannelMuteTogglePending[chan] = false;
 		}
 	}
