@@ -26,13 +26,13 @@ protected:
 	CTreeCtrl m_treePlugins;
 	CString m_sNameFilter;
 
-	HTREEITEM AddTreeItem(LPSTR szTitle, int iImage, bool bSort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+	HTREEITEM AddTreeItem(const char *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
 	~CSelectPluginDlg();
 	void DoClose();
-	void UpdatePluginsList(DWORD forceSelect = 0);
+	void UpdatePluginsList(VstInt32 forceSelect = 0);
 	bool VerifyPlug(VSTPluginLib *plug);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();

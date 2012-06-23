@@ -161,6 +161,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 						p->pNext = m_pVstHead;
 						p->dwPluginId1 = kDmoMagic;
 						p->dwPluginId2 = clsid.Data1;
+						p->category = VSTPluginLib::catDMO;
 						lstrcpyn(p->szLibraryName, s, sizeof(p->szLibraryName));
 						StringFixer::SetNullTerminator(p->szLibraryName);
 
@@ -246,14 +247,32 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 	}
 }
 
+
+// Extract instrument and category information from plugin.
+void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
+//---------------------------------------------------------------
+{
+	library.category = static_cast<VSTPluginLib::PluginCategory>(effect->dispatcher(effect, effGetPlugCategory, 0, nullptr, nullptr, 0.0f));
+	library.isInstrument = ((effect->flags & effFlagsIsSynth) || !effect->numInputs);
+
+	if(library.isInstrument)
+	{
+		library.category = VSTPluginLib::catSynth;
+	} else if(library.category >= VSTPluginLib::numCategories)
+	{
+		library.category = VSTPluginLib::catUnknown;
+	}
+}
+
+
 //
 // PluginCache format:
 // LibraryName = ID100000ID200000
 // ID100000ID200000 = FullDllPath
-// ID100000ID200000.Flags = Plugin Flags (for now, just isInstrument).
+// ID100000ID200000.Flags = Plugin Flags (isInstrument + category).
 
-VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString *const errStr)
-//------------------------------------------------------------------------------------------------------------------------------
+VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, const bool checkFileExistence, CString *const errStr)
+//---------------------------------------------------------------------------------------------------------------------------------
 {
 	TCHAR szPath[_MAX_PATH];
 
@@ -273,7 +292,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		pDup = pDup->pNext;
 	}
 	// Look if the plugin info is stored in the PluginCache
-	if (bCache)
+	if(fromCache)
 	{
 		const CString cacheSection = "PluginCache";
 		const CString cacheFile = theApp.GetPluginCacheFileName();
@@ -313,16 +332,17 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 					n &= 0x0f;
 					if (i < 8)
 					{
-						p->dwPluginId1 = (p->dwPluginId1<<4) | n;
+						p->dwPluginId1 = (p->dwPluginId1 << 4) | n;
 					} else
 					{
-						p->dwPluginId2 = (p->dwPluginId2<<4) | n;
+						p->dwPluginId2 = (p->dwPluginId2 << 4) | n;
 					}
 				}
+
 				CString flagKey;
 				flagKey.Format("%s.Flags", IDs);
-				int infoex = CMainFrame::GetPrivateProfileLong(cacheSection, flagKey, 0, cacheFile);
-				if (infoex & 1) p->isInstrument = true;
+				p->DecodeCacheFlags(CMainFrame::GetPrivateProfileLong(cacheSection, flagKey, 0, cacheFile));
+
 			#ifdef VST_USE_ALTERNATIVE_MAGIC
 				if( p->dwPluginId1 == kEffectMagic )
 				{
@@ -378,7 +398,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			p->dwPluginId1 = pEffect->magic;
 #endif // VST_USE_ALTERNATIVE_MAGIC
 			p->dwPluginId2 = pEffect->uniqueID;
-			p->isInstrument = ((pEffect->flags & effFlagsIsSynth) || !pEffect->numInputs);
+
+			GetPluginInformation(pEffect, *p);
 
 #ifdef VST_LOG
 			int nver = pEffect->dispatcher(pEffect, effGetVstVersion, 0,0, nullptr, 0);
@@ -423,7 +444,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 		WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
 		CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
 		CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
-		CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->isInstrument, cacheFile);
+		CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->EncodeCacheFlags(), cacheFile);
 	}
 	
 	return (validPlug ? m_pVstHead : nullptr);
@@ -579,20 +600,21 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 			{
 				validPlugin = true;
 
-				if(pEffect->flags & effFlagsIsSynth || !pEffect->numInputs)
+				const bool oldIsInstrument = pFound->isInstrument;
+				const VSTPluginLib::PluginCategory oldCategory = pFound->category;
+
+				GetPluginInformation(pEffect, *pFound);
+
+				if(oldIsInstrument != pFound->isInstrument || oldCategory != pFound->category)
 				{
-					// Flag as instrument plugin
-					if (!pFound->isInstrument)
-					{
-						CString cacheSection = "PluginCache";
-						CString cacheFile = theApp.GetPluginCacheFileName();
-						//LPCSTR pszSection = "PluginCache";
-						pFound->isInstrument = true;
-						CString flagsKey;
-						flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
-						CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, 1, cacheFile);
-					}
+					// Update cached information
+					CString cacheSection = "PluginCache";
+					CString cacheFile = theApp.GetPluginCacheFileName();
+					CString flagsKey;
+					flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
+					CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, pFound->EncodeCacheFlags(), cacheFile);
 				}
+
 				CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
 				if (pVstPlug) pVstPlug->Initialize(pSndFile);
 			}

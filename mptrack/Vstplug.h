@@ -37,10 +37,32 @@ class CSoundFile;
 
 struct VSTPluginLib
 {
+	enum PluginCategory
+	{
+		// Same plugin categories as defined in VST SDK
+		catUnknown = 0,
+		catEffect,			// Simple Effect
+		catSynth,			// VST Instrument (Synths, samplers,...)
+		catAnalysis,		// Scope, Tuner, ...
+		catMastering,		// Dynamics, ...
+		catSpacializer,		// Panners, ...
+		catRoomFx,			// Delays and Reverbs
+		catSurroundFx,		// Dedicated surround processor
+		catRestoration,		// Denoiser, ...
+		catOfflineProcess,	// Offline Process
+		catShell,			// Plug-in is container of other plug-ins
+		catGenerator,		// Tone Generator, ...
+		// Custom categories
+		catDMO,				// DirectX media object plugin
+
+		numCategories,
+	};
+
 	VSTPluginLib *pPrev, *pNext;
 	VstInt32 dwPluginId1;
 	VstInt32 dwPluginId2;
 	bool isInstrument;
+	PluginCategory category;
 	CVstPlugin *pPluginsList;
 	CHAR szLibraryName[_MAX_FNAME];
 	CHAR szDllPath[_MAX_PATH];
@@ -51,10 +73,30 @@ struct VSTPluginLib
 		dwPluginId1 = dwPluginId2 = 0;
 		isInstrument = false;
 		pPluginsList = nullptr;
+		category = catUnknown;
 		if(dllPath != nullptr)
 		{
 			lstrcpyn(szDllPath, dllPath, CountOf(szDllPath));
 			StringFixer::SetNullTerminator(szDllPath);
+		}
+	}
+
+	uint32 EncodeCacheFlags()
+	{
+		return (isInstrument ? 1 : 0) | (category << 1);
+	}
+
+	void DecodeCacheFlags(uint32 flags)
+	{
+		category = static_cast<PluginCategory>(flags >> 1);
+		if(category >= numCategories)
+		{
+			category = catUnknown;
+		}
+		if(flags & 1)
+		{
+			isInstrument = true;
+			category = catSynth;
 		}
 	}
 };
@@ -281,7 +323,7 @@ public:
 public:
 	VSTPluginLib *GetFirstPlugin() const { return m_pVstHead; }
 	BOOL IsValidPlugin(const VSTPluginLib *pLib);
-	VSTPluginLib *AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
+	VSTPluginLib *AddPlugin(LPCSTR pszDllPath, bool fromCache = true, const bool checkFileExistence = false, CString* const errStr = 0);
 	bool RemovePlugin(VSTPluginLib *);
 	BOOL CreateMixPlugin(SNDMIXPLUGIN *, CSoundFile *);
 	void OnIdle();
@@ -305,7 +347,7 @@ public:
 
 #else // NO_VST
 public:
-	VSTPluginLib *AddPlugin(LPCSTR, BOOL =TRUE, const bool = false, CString* const = 0) {return 0;}
+	VSTPluginLib *AddPlugin(LPCSTR, bool = true, const bool = false, CString* const = 0) {return 0;}
 	VSTPluginLib *GetFirstPlugin() const { return 0; }
 	void OnIdle() {}
 #endif // NO_VST
