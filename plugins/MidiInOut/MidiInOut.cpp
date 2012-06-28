@@ -36,7 +36,7 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 	isSynth(true);			// Not strictly a synth, but an instrument plugin in the broadest sense
 	setEditor(editor);
 
-	if(!numInstances)
+	if(!numInstances++)
 	{
 		Pm_Initialize();
 	}
@@ -268,7 +268,7 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 				PmEvent event;
 				memcpy(&event.message, midiEvent->midiData, 4);
 				event.timestamp = 0;
-				Pm_Write(outputDevice.stream, &event, 3);
+				Pm_Write(outputDevice.stream, &event, 1);
 			}
 			break;
 
