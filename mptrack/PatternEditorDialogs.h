@@ -338,27 +338,44 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////
-// Rename a channel from pattern editor
+// Show channel properties from pattern editor
 
-//=====================================
-class CChannelRenameDlg: public CDialog
-//=====================================
+//===========================================
+class QuickChannelProperties : public CDialog
+//===========================================
 {
 protected:
-	CHANNELINDEX m_nChannel;
+	CModDoc *document;
+	CHANNELINDEX channel;
+	PATTERNINDEX pattern;
+	bool visible;
+	bool settingsChanged;
+
+	CSliderCtrl volSlider, panSlider;
+	CSpinButtonCtrl volSpin, panSpin;
+	CEdit nameEdit;
 
 public:
-	CHAR m_sName[MAX_CHANNELNAME];
-	bool bChanged;
+	QuickChannelProperties();
+	~QuickChannelProperties();
 
-public:
-	CChannelRenameDlg(CWnd *parent, CHAR *sName, CHANNELINDEX nChannel) : CDialog(IDD_CHANNEL_NAME, parent)
-	{
-		strcpy(m_sName, sName);
-		m_nChannel = nChannel;
-		bChanged = false;
-	}
+	void Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position);
+	void Hide();
 
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+
+	void UpdateDisplay();
+	void PrepareUndo();
+
+	afx_msg void OnVolChanged();
+	afx_msg void OnPanChanged();
+	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnMuteChanged();
+	afx_msg void OnSurroundChanged();
+	afx_msg void OnNameChanged();
+	afx_msg void OnPrevChannel();
+	afx_msg void OnNextChannel();
+
+	DECLARE_MESSAGE_MAP();
 };

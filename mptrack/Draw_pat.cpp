@@ -532,7 +532,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 	CModDoc *pModDoc;
 	CSoundFile *pSndFile;
 	HDC hdc;
-	UINT xofs, yofs, nColumnWidth, ncols, nrows, ncolhdr;
+	CHANNELINDEX xofs;
+	ROWINDEX yofs;
+	UINT nColumnWidth, ncols, nrows, ncolhdr;
 	int xpaint, ypaint, mixPlug;
 
 	ASSERT(pDC);
@@ -541,8 +543,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
 	oldpen = ::SelectObject(hdc, CMainFrame::penDarkGray);
-	xofs = GetXScrollPos();
-	yofs = GetYScrollPos();
+	xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
+	yofs = static_cast<ROWINDEX>(GetYScrollPos());
 	pSndFile = pModDoc->GetSoundFile();
 	nColumnWidth = m_szCell.cx;
 	nrows = (pSndFile->Patterns[m_nPattern]) ? pSndFile->Patterns[m_nPattern].GetNumRows() : 0;
@@ -663,8 +665,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		} else
 		{
 			UINT nSkip = m_nMidRow - yofs;
-			UINT nPrevPat = m_nPattern;
-			bool bPrevPatFound = false;
+			PATTERNINDEX nPrevPat = PATTERNINDEX_INVALID;
 
 			// Display previous pattern
 			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
@@ -678,20 +679,19 @@ void CViewPattern::OnDraw(CDC *pDC)
 					if(startOrder < pSndFile->Order.size() && pSndFile->Order[startOrder] == m_nPattern)
 					{
 						nPrevPat = pSndFile->Order[prevOrder];
-						bPrevPatFound = true;
 					}
 				}
 			}
-			if ((bPrevPatFound) && (nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat]))
+			if(pSndFile->Patterns.IsValidPat(nPrevPat))
 			{
 				ROWINDEX nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
-				UINT n = min(nSkip, nPrevRows);
+				ROWINDEX n = min(static_cast<ROWINDEX>(nSkip), nPrevRows);
 
-				ypaint += (nSkip-n)*m_szCell.cy;
+				ypaint += (nSkip - n) * m_szCell.cy;
 				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
 				m_Dib.SetBlendMode(0x80);
-				DrawPatternData(hdc, pSndFile, nPrevPat, FALSE, FALSE,
-						nPrevRows-n, nPrevRows, xofs, rcClient, &ypaint);
+				DrawPatternData(hdc, pSndFile, nPrevPat, false, false,
+						nPrevRows - n, nPrevRows, xofs, rcClient, &ypaint);
 				m_Dib.SetBlendMode(0);
 			} else
 			{
@@ -708,7 +708,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		}
 	}
 	int ypatternend = ypaint + (nrows-yofs)*m_szCell.cy;
-	DrawPatternData(hdc, pSndFile, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc) ? TRUE : FALSE,
+	DrawPatternData(hdc, pSndFile, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc),
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
 	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
@@ -716,8 +716,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
-			PATTERNINDEX nNextPat = m_nPattern;
-			bool bNextPatFound = false;
+			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
 			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 
 			ORDERINDEX nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
@@ -725,18 +724,17 @@ void CViewPattern::OnDraw(CDC *pDC)
 			//Ignore skip items(+++) from sequence.
 			const ORDERINDEX ordCount = pSndFile->Order.GetLength();
 
-			if ((nNextOrder < ordCount) && (pSndFile->Order[startOrder] == m_nPattern))
+			if(nNextOrder < ordCount && pSndFile->Order[startOrder] == m_nPattern)
 			{
 				nNextPat = pSndFile->Order[nNextOrder];
-				bNextPatFound = true;
 			}
-			if ((bNextPatFound) && (nNextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNextPat]))
+			if(pSndFile->Patterns.IsValidPat(nNextPat))
 			{
 				ROWINDEX nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
-				UINT n = min((UINT)nVisRows, nNextRows);
+				ROWINDEX n = min(static_cast<ROWINDEX>(nVisRows), nNextRows);
 
 				m_Dib.SetBlendMode(0x80);
-				DrawPatternData(hdc, pSndFile, nNextPat, FALSE, FALSE,
+				DrawPatternData(hdc, pSndFile, nNextPat, false, false,
 						0, n, xofs, rcClient, &ypaint);
 				m_Dib.SetBlendMode(0);
 			}
@@ -779,11 +777,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 }
 
 
-void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern, BOOL bSelEnable,
-						BOOL bPlaying, UINT yofs, UINT nrows, UINT xofs, CRect &rcClient, int *pypaint)
-//-----------------------------------------------------------------------------------------------------
+void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable,
+						bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
+//---------------------------------------------------------------------------------------------------------------------------------
 {
-	BYTE bColSel[MAX_BASECHANNELS];
+	uint8 selectedCols[MAX_BASECHANNELS];	// Bit mask of selected channel components
 	static_assert(PatternCursor::lastColumn <= 7, "Columns are used as bitmasks here.");
 
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
@@ -793,31 +791,21 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
 	int row_col, row_bkcol;
-	UINT bSpeedUp, nColumnWidth, ncols, maxcol;
+	UINT bSpeedUp, nColumnWidth;
 	
-	ncols = pSndFile->GetNumChannels();
+	CHANNELINDEX ncols = pSndFile->GetNumChannels();
 	nColumnWidth = m_szCell.cx;
 	rect.SetRect(m_szHeader.cx, rcClient.top, m_szHeader.cx+nColumnWidth, rcClient.bottom);
-	for(UINT cmk=xofs; cmk<ncols; cmk++)
+	for(CHANNELINDEX cmk = startChan; cmk < ncols; cmk++)
 	{
-		bColSel[cmk] = 0;
-		if (bSelEnable)
-		{
-			for(int n = PatternCursor::firstColumn; n <= PatternCursor::lastColumn; n++)
-			{
-				if(m_Selection.ContainsHorizontal(PatternCursor(0, static_cast<CHANNELINDEX>(cmk), static_cast<PatternCursor::Columns>(n))))
-				{
-					bColSel[cmk] |= 1 << n;
-				}
-			}
-		}
-		if (!::RectVisible(hdc, &rect)) bColSel[cmk] |= 0x80;
+		selectedCols[cmk] = selEnable ? m_Selection.GetSelectionBits(cmk) : 0;
+		if (!::RectVisible(hdc, &rect)) selectedCols[cmk] |= 0x80;
 		rect.left += nColumnWidth;
 		rect.right += nColumnWidth;
 	}
 	// Max Visible Column
-	maxcol = ncols;
-	while ((maxcol > xofs) && (bColSel[maxcol-1] & 0x80)) maxcol--;
+	CHANNELINDEX maxcol = ncols;
+	while ((maxcol > startChan) && (selectedCols[maxcol-1] & 0x80)) maxcol--;
 	// Init bitmap border
 	{
 		UINT maxndx = pSndFile->GetNumChannels() * m_szCell.cx;
@@ -832,7 +820,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 	
 	bool bRowSel = false;
 	row_col = row_bkcol = -1;
-	for (UINT row=yofs; row<nrows; row++)
+	for (UINT row=startRow; row<numRows; row++)
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
 		
@@ -844,11 +832,11 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		if (!::RectVisible(hdc, &rect)) 
 		{
 			// No speedup for these columns next time
-			for (UINT iup=xofs; iup<maxcol; iup++) bColSel[iup] &= ~0x40;
+			for (UINT iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~0x40;
 			goto SkipRow;
 		}
 		rect.right = rect.left + m_szHeader.cx;
-		DrawButtonRect(hdc, &rect, s, !bSelEnable);
+		DrawButtonRect(hdc, &rect, s, !selEnable);
 		oldrowcolor = (row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;
@@ -863,7 +851,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		}
 		// secondary highlight (beats)
 		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
-		 && (nBeat) && (nBeat < nrows))
+		 && (nBeat) && (nBeat < numRows))
 		{
 			if (!(row % nBeat))
 			{
@@ -872,14 +860,14 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		}
 		// primary highlight (measures)
 		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
-		 && (nMeasure) && (nMeasure < nrows))
+		 && (nMeasure) && (nMeasure < numRows))
 		{
 			if (!(row % nMeasure))
 			{
 				row_bkcol = MODCOLOR_BACKHILIGHT;
 			}
 		}
-		if (bSelEnable)
+		if (selEnable)
 		{
 			if ((row == m_nPlayRow) && (nPattern == m_nPlayPat))
 			{
@@ -893,7 +881,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					row_col = MODCOLOR_TEXTCURROW;
 					row_bkcol = MODCOLOR_BACKCURROW;
 				} else
-				if ((m_dwStatus & psFollowSong) && (bPlaying))
+				if ((m_dwStatus & psFollowSong) && (isPlaying))
 				{
 					row_col = MODCOLOR_TEXTPLAYCURSOR;
 					row_bkcol = MODCOLOR_BACKPLAYCURSOR;
@@ -902,10 +890,10 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		}
 		// Eliminate non-visible column
 		xpaint = m_szHeader.cx;
-		col = xofs;
-		while ((bColSel[col] & 0x80) && (col < maxcol))
+		col = startChan;
+		while ((selectedCols[col] & 0x80) && (col < maxcol))
 		{
-			bColSel[col] &= ~0x40;
+			selectedCols[col] &= ~0x40;
 			col++;
 			xpaint += nColumnWidth;
 		}
@@ -922,7 +910,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			const bool drawDefaultVolume = DrawDefaultVolume(m);
 
 			DWORD dwSpeedUpMask = 0;
-			if ((bSpeedUp) && (bColSel[col] & 0x40) && (pPattern) && (row))
+			if ((bSpeedUp) && (selectedCols[col] & 0x40) && (pPattern) && (row))
 			{
 				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
@@ -944,9 +932,9 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				}
 				if (dwSpeedUpMask == 0x1F) goto DoBlit;
 			}
-			bColSel[col] |= 0x40;
+			selectedCols[col] |= 0x40;
 			col_sel = 0;
-			if (bRowSel) col_sel = bColSel[col] & 0x3F;
+			if (bRowSel) col_sel = selectedCols[col] & 0x3F;
 			tx_col = row_col;
 			bk_col = row_bkcol;
 			if (col_sel)

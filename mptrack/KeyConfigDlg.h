@@ -72,15 +72,15 @@ protected:
 	COptionsKeyboard *m_pOptKeyDlg;
 	HWND m_hParent;
 	UINT m_nCtrlId;
-	bool isFocussed;
+	bool isFocussed, isDummy;
 
 public:
-	CCustEdit() : m_hParent(nullptr), isFocussed(false) { }
 	UINT mod;
 	UINT code;
+
+	CCustEdit(bool dummyField) : m_hParent(nullptr), isFocussed(false), isDummy(dummyField), mod(0), code(0) { }
 	VOID SetParent(HWND h, UINT nID, COptionsKeyboard* pOKD) { m_hParent = h; m_nCtrlId = nID; m_pOptKeyDlg = pOKD;}
 	void SetKey(UINT mod, UINT code);
-	void SetKey(UINT mod, CString c);
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
@@ -93,15 +93,13 @@ class COptionsKeyboard: public CPropertyPage
 //==========================================
 {
 protected:
-//	CNotifyHotKey m_HotKey;
-	//CNotifyHotKey m_CommandHotKey;  //rewbs.keys
 	CListBox m_lbnHotKeys;
 	CListBox m_lbnCommandKeys;		//rewbs.keys
 	CComboBox m_cmbKeyChoice;		//rewbs.keys
 	CComboBox m_cmbCategory;
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
-	CCustEdit m_eCustHotKey;
+	CCustEdit m_eCustHotKey, m_eFindHotKey;
 	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
 	UINT m_nKeyboardCfg;
@@ -114,11 +112,11 @@ protected:
 
 	void ForceUpdateGUI();
 	void UpdateShortcutList(int category = -1);
+	void UpdateCategory();
 	int GetCategoryFromCommandID(CommandID command) const;
 
 public:
-	COptionsKeyboard():CPropertyPage(IDD_OPTIONS_KEYBOARD) { m_nKeyboardCfg = 0; }
-//	~COptionsKeyboard();
+	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true), m_nKeyboardCfg(0) { }
 	BOOL SetKey(UINT nId, UINT nChar, UINT nFlags);
 	CArray<CommandCategory, CommandCategory> commandCategories;
 	void DefineCommandCategories();
@@ -151,6 +149,8 @@ protected:
 	afx_msg void OnSave();
 	afx_msg void OnClearLog();
 	afx_msg void OnRestoreDefaultKeymap();
+	afx_msg void OnClearHotKey();
+	afx_msg void OnFindHotKey();
 	DECLARE_MESSAGE_MAP();
 public:
 	afx_msg void OnDestroy();
