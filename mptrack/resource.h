@@ -143,7 +143,7 @@
 #define IDR_DEFAULT_KEYBINDINGS         519
 #define IDR_BUILTIN_TUNINGS             520
 #define IDD_CLEANUP_SONG                521
-#define IDD_CHANNEL_NAME                522
+#define IDD_CHANNELSETTINGS             522
 #define IDD_KEYBOARD_SPLIT              523
 #define IDD_SAMPLE_GENERATOR            524
 #define IDD_SAMPLE_GENERATOR_PRESETS    525
@@ -915,7 +915,7 @@
 #define IDC_CHK_MERGE_SEQUENCES         2408
 #define IDC_CHECK_PT1X                  2409
 #define IDC_STATIC_CHANNEL_NAME         2410
-#define IDC_EDIT_CHANNEL_NAME           2411
+#define IDC_FINDHOTKEY                  2411
 #define IDC_STATIC_PATTERNNAME          2412
 #define IDC_EDIT_SAMPLE_LENGTH          2413
 #define IDC_EDIT_SAMPLE_FREQ            2414

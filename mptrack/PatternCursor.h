@@ -323,6 +323,32 @@ public:
 		return lowerRight.GetColumnType();
 	}
 
+	// Create a bitset of the selected columns of a channel. If a column is selected, the corresponding bit is set.
+	// Example: If the first and second column of the channel are selected, the bits 00000011 would be returned.
+	uint8 GetSelectionBits(CHANNELINDEX chn) const
+	{
+		const CHANNELINDEX startChn = GetStartChannel(), endChn = GetEndChannel();
+		uint8 bits = 0;
+
+		if(chn >= startChn && chn <= endChn)
+		{
+			// All columns could be selected (unless this is the first or last channel).
+			bits = uint8_max;
+
+			if(chn == startChn)
+			{
+				// First channel: Remove columns left of the start column type.
+				bits <<= GetUpperLeft().GetColumnType();
+			}
+			if(chn == endChn)
+			{
+				// Last channel: Remove columns right of the end column type.
+				bits &= (2 << GetLowerRight().GetColumnType()) - 1;
+			}
+		}
+		return (bits & 0x1F);
+	}
+
 	// Get number of rows in selection
 	ROWINDEX GetNumRows() const
 	{

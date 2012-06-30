@@ -14,7 +14,6 @@
 #include "mainfrm.h"
 #include "childfrm.h"
 #include "moddoc.h"
-#include "PatternEditorDialogs.h"
 #include "SampleEditorDialogs.h" // For amplification dialog (which is re-used from sample editor)
 #include "globals.h"
 #include "view_pat.h"
@@ -127,7 +126,6 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_AMPLIFY,				OnPatternAmplify)
 	ON_COMMAND(ID_CLEAR_SELECTION,				OnClearSelectionFromMenu)
 	ON_COMMAND(ID_SHOWTIMEATROW,				OnShowTimeAtRow)
-	ON_COMMAND(ID_CHANNEL_RENAME,				OnRenameChannel)
 	ON_COMMAND(ID_PATTERN_EDIT_PCNOTE_PLUGIN,	OnTogglePCNotePluginEditor)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_COMMAND_RANGE(ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + ModCommand::maxColumnValue, OnSelectPCNoteParam)
@@ -671,7 +669,6 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 {
 	if (pMsg)
 	{
-		//rewbs.customKeys
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
@@ -707,9 +704,21 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 				}
 			}
 			//end HACK.
+		} else if(pMsg->message == WM_MBUTTONDOWN)
+		{
+			// Open quick channel properties dialog if we're middle-clicking a channel header.
+			CPoint point(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam));
+			if(point.y < m_szHeader.cy - ((m_dwStatus & psShowPluginNames) ? PLUGNAME_HEIGHT : 0))
+			{
+				PatternCursor cursor = GetPositionFromPoint(point);
+				if(cursor.GetChannel() < GetDocument()->GetNumChannels())
+				{
+					ClientToScreen(&point);
+					quickChannelProperties.Show(GetDocument(), cursor.GetChannel(), m_nPattern, point);
+					return true;
+				}
+			}
 		}
-		//end rewbs.customKeys
-
 	}
 
 	return CModScrollView::PreTranslateMessage(pMsg);
@@ -760,6 +769,7 @@ void CViewPattern::OnSetFocus(CWnd *pOldWnd)
 	CScrollView::OnSetFocus(pOldWnd);
 	m_dwStatus |= psFocussed;
 	InvalidateRow();
+	quickChannelProperties.Hide();
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
@@ -1135,7 +1145,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	PatternCursor pointCursor(GetPositionFromPoint(point));
 
 	SetCapture();
-	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy)
+	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy - ((m_dwStatus & psShowPluginNames) ? PLUGNAME_HEIGHT : 0))
 	{
 		// Click on channel header
 		if (nFlags & MK_CONTROL)
@@ -1212,6 +1222,7 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 	PatternCursor cursor = GetPositionFromPoint(point);
 	if(cursor == m_Cursor && point.y >= m_szHeader.cy)
 	{
+		// Double-click pattern cell: Select whole column or show cell properties.
 		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DBLCLICKSELECT))
 		{
 			OnSelectCurrentColumn();
@@ -1223,6 +1234,7 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 			if(ShowEditWindow()) return;
 		}
 	}
+
 	OnLButtonDown(uFlags, point);
 }
 
@@ -1367,8 +1379,8 @@ void CViewPattern::OnPatternProperties()
 }
 
 
-void CViewPattern::OnRButtonDown(UINT, CPoint pt)
-//-----------------------------------------------
+void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
+//-----------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -1419,7 +1431,13 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		}
 	}
 	const CHANNELINDEX nChn = m_MenuCursor.GetChannel();
-	if ((nChn < pSndFile->GetNumChannels()) && (pSndFile->Patterns[m_nPattern]))
+
+	if((flags & MK_CONTROL) != 0 && nChn < pSndFile->GetNumChannels() && (pt.y < m_szHeader.cy))
+	{
+		// Ctrl+Right-Click: Open quick channel properties.
+		ClientToScreen(&pt);
+		quickChannelProperties.Show(GetDocument(), nChn, m_nPattern, pt);
+	} else if(nChn < pSndFile->GetNumChannels() && pSndFile->Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		CString MenuText;
 		CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
@@ -1443,7 +1461,6 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
 				BuildChannelControlCtxMenu(hMenu);
-				BuildChannelMiscCtxMenu(hMenu);
 			}
 		}
 		
@@ -1506,8 +1523,12 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 //-------------------------------------------------------
 {
-	if (!m_bDragging) return;
+	if(!m_bDragging)
+	{
+		return;
+	}
 
+	// Drag&Drop actions
 	if (m_nDragItem)
 	{
 		const CRect oldDropRect = m_rcDropItem;
@@ -5834,16 +5855,6 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 }
 
 
-bool CViewPattern::BuildChannelMiscCtxMenu(HMENU hMenu) const
-//---------------------------------------------------------------------------------
-{
-	if((GetSoundFile()->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) == 0) return false;
-	AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
-	AppendMenu(hMenu, MF_STRING, ID_CHANNEL_RENAME, "Rename Channel");
-	return true;
-}
-
-
 // Context menu for Param Control notes
 bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //-------------------------------------------------------------------------
@@ -6134,28 +6145,6 @@ void CViewPattern::SetEditPos(const CSoundFile& rSndFile,
 		iPat = m_nPattern;
 		iRow = GetCurrentRow();
 	}
-}
-
-
-// Set a channel's name
-void CViewPattern::OnRenameChannel()
-//----------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return;
-
-	const CHANNELINDEX nChn = m_MenuCursor.GetChannel();
-	CChannelRenameDlg dlg(this, pSndFile->ChnSettings[nChn].szName, nChn + 1);
-	if(dlg.DoModal() != IDOK || dlg.bChanged == false) return;
-
-	// Backup old name.
-	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, 1, 1, false, true);
-
-	strcpy(pSndFile->ChnSettings[nChn].szName, dlg.m_sName);
-	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 }
 
 

@@ -1606,37 +1606,279 @@ void CSplitKeyboadSettings::OnOctaveModifierChanged()
 }
 
 
-///////////////////////////////////////////////////////////
-// Rename a channel from pattern editor
+/////////////////////////////////////////////////////////////////////////
+// Show channel properties from pattern editor
 
-BOOL CChannelRenameDlg::OnInitDialog()
-//------------------------------------
+BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
+	ON_WM_HSCROLL()	// Sliders
+	ON_EN_UPDATE(IDC_EDIT1,	OnVolChanged)
+	ON_EN_UPDATE(IDC_EDIT2,	OnPanChanged)
+	ON_EN_UPDATE(IDC_EDIT3,	OnNameChanged)
+	ON_COMMAND(IDC_CHECK1,	OnMuteChanged)
+	ON_COMMAND(IDC_CHECK2,	OnSurroundChanged)
+	ON_COMMAND(IDC_BUTTON1,	OnPrevChannel)
+	ON_COMMAND(IDC_BUTTON2,	OnNextChannel)
+END_MESSAGE_MAP()
+
+
+void QuickChannelProperties::DoDataExchange(CDataExchange* pDX)
+//-------------------------------------------------------------
 {
-	CDialog::OnInitDialog();
-
-	CHAR s[32];
-	wsprintf(s, "Set name for channel %d:", m_nChannel);
-	SetDlgItemText(IDC_STATIC_CHANNEL_NAME, s);
-	SetDlgItemText(IDC_EDIT_CHANNEL_NAME, m_sName);
-	((CEdit*)(GetDlgItem(IDC_EDIT_CHANNEL_NAME)))->LimitText(MAX_CHANNELNAME - 1); 
-
-	return TRUE;
+	DDX_Control(pDX, IDC_SLIDER1,	volSlider);
+	DDX_Control(pDX, IDC_SLIDER2,	panSlider);
+	DDX_Control(pDX, IDC_SPIN1,		volSpin);
+	DDX_Control(pDX, IDC_SPIN2,		panSpin);
+	DDX_Control(pDX, IDC_EDIT3,		nameEdit);
 }
 
 
-void CChannelRenameDlg::OnOK()
-//----------------------------
+QuickChannelProperties::QuickChannelProperties()
+//----------------------------------------------
 {
-	CHAR sNewName[MAX_CHANNELNAME];
-	GetDlgItemText(IDC_EDIT_CHANNEL_NAME, sNewName, MAX_CHANNELNAME);
-	if(!strcmp(sNewName, m_sName))
+	visible = false;
+	Create(IDD_CHANNELSETTINGS, nullptr);
+
+	volSlider.SetRange(0, 64);
+	volSlider.SetTicFreq(8);
+	volSpin.SetRange(0, 64);
+
+	panSlider.SetRange(0, 64);
+	panSlider.SetTicFreq(8);
+	panSpin.SetRange(0, 256);
+};
+
+
+QuickChannelProperties::~QuickChannelProperties()
+//-----------------------------------------------
+{
+	CDialog::OnCancel();
+}
+
+
+// Show channel properties for a given channel at a given screen position.
+void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position)
+//-----------------------------------------------------------------------------------------------------
+{
+	document = modDoc;
+	channel = chn;
+	pattern = ptn;
+	
+	SetParent(nullptr);
+
+	// Center window around point where user clicked.
+	CRect rect, screenRect;
+	GetWindowRect(rect);
+	::GetWindowRect(::GetDesktopWindow(), &screenRect);
+	rect.MoveToXY(
+		Clamp(static_cast<int>(position.x) - rect.Width() / 2, 0, static_cast<int>(screenRect.right) - rect.Width()),
+		Clamp(static_cast<int>(position.y) - rect.Height() / 2, 0, static_cast<int>(screenRect.bottom) - rect.Height()));
+	MoveWindow(rect);
+
+	UpdateDisplay();
+
+	const BOOL enablePan = (document->GetModType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) ? FALSE : TRUE;
+	const BOOL itOnly = (document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE;
+
+	// Volume controls
+	volSlider.EnableWindow(itOnly);
+	volSpin.EnableWindow(itOnly);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), itOnly);
+
+	// Pan controls
+	panSlider.EnableWindow(enablePan);
+	panSpin.EnableWindow(enablePan);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), enablePan);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK2), itOnly);
+
+	// Channel name
+	nameEdit.EnableWindow((document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) ? TRUE : FALSE);
+
+	ShowWindow(SW_SHOW);
+	visible = true;
+}
+
+
+void QuickChannelProperties::UpdateDisplay()
+//------------------------------------------
+{
+	// Set up channel properties
+	settingsChanged = true;
+	const ModChannelSettings &settings = document->GetSoundFile()->ChnSettings[channel];
+	SetDlgItemInt(IDC_EDIT1, settings.nVolume, FALSE);
+	SetDlgItemInt(IDC_EDIT2, settings.nPan, FALSE);
+	volSlider.SetPos(settings.nVolume);
+	panSlider.SetPos(settings.nPan / 4u);
+	CheckDlgButton(IDC_CHECK1, (settings.dwFlags & CHN_MUTE) ? TRUE : FALSE);
+	CheckDlgButton(IDC_CHECK2, (settings.dwFlags & CHN_SURROUND) ? TRUE : FALSE);
+
+	char description[16];
+	sprintf(description, "Channel %d:", channel + 1);
+	SetDlgItemText(IDC_STATIC_CHANNEL_NAME, description);
+	nameEdit.LimitText(MAX_CHANNELNAME - 1);
+	nameEdit.SetWindowText(settings.szName);
+
+	settingsChanged = false;
+
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), channel > 0 ? TRUE : FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), channel < document->GetNumChannels() - 1 ? TRUE : FALSE);
+}
+
+void QuickChannelProperties::PrepareUndo()
+//----------------------------------------
+{
+	if(!settingsChanged)
 	{
-		bChanged = false;
-		CDialog::OnCancel();
-	} else
-	{
-		strcpy(m_sName, sNewName);
-		bChanged = true;
-		CDialog::OnOK();
+		// Backup old channel settings through pattern undo.
+		settingsChanged = true;
+		document->GetPatternUndo().PrepareUndo(pattern, 0, 0, 1, 1, false, true);
 	}
+}
+
+
+void QuickChannelProperties::Hide()
+//---------------------------------
+{
+	visible = false;
+	ShowWindow(SW_HIDE);
+}
+
+
+void QuickChannelProperties::OnVolChanged()
+//-----------------------------------------
+{
+	if(!visible)
+	{
+		return;
+	}
+	uint16 volume = static_cast<uint16>(GetDlgItemInt(IDC_EDIT1));
+	if(volume >= 0 && volume <= 64)
+	{
+		PrepareUndo();
+		document->SetChannelGlobalVolume(channel, volume);
+		volSlider.SetPos(volume);
+		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	}
+}
+
+
+void QuickChannelProperties::OnPanChanged()
+//-----------------------------------------
+{
+	if(!visible)
+	{
+		return;
+	}
+	uint16 panning = static_cast<uint16>(GetDlgItemInt(IDC_EDIT2));
+	if(panning >= 0 && panning <= 256)
+	{
+		PrepareUndo();
+		document->SetChannelDefaultPan(channel, panning);
+		panSlider.SetPos(panning / 4u);
+		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	}
+}
+
+
+void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *)
+//--------------------------------------------------------------
+{
+	if(!visible)
+	{
+		return;
+	}
+
+	bool update = false;
+
+	// Volume slider
+	uint16 pos = static_cast<uint16>(volSlider.GetPos());
+	if(pos >= 0 && pos <= 64)
+	{
+		PrepareUndo();
+		if(document->SetChannelGlobalVolume(channel, pos))
+		{
+			SetDlgItemInt(IDC_EDIT1, pos);
+			update = true;
+		}
+	}
+	// Pan slider
+	pos = static_cast<uint16>(panSlider.GetPos());
+	if(pos >= 0 && pos <= 64)
+	{
+		PrepareUndo();
+		if(document->SetChannelDefaultPan(channel, pos * 4u))
+		{
+			SetDlgItemInt(IDC_EDIT2, pos * 4u);
+			CheckDlgButton(IDC_CHECK2, BST_UNCHECKED);
+			update = true;
+		}
+	}
+
+	if(update)
+	{
+		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	}
+}
+
+
+void QuickChannelProperties::OnMuteChanged()
+//------------------------------------------
+{
+	if(!visible)
+	{
+		return;
+	}
+	document->MuteChannel(channel, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+}
+
+
+void QuickChannelProperties::OnSurroundChanged()
+//----------------------------------------------
+{
+	if(!visible)
+	{
+		return;
+	}
+	PrepareUndo();
+	document->SurroundChannel(channel, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
+	document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	UpdateDisplay();
+}
+
+
+void QuickChannelProperties::OnNameChanged()
+//------------------------------------------
+{
+	if(!visible)
+	{
+		return;
+	}
+	
+	ModChannelSettings &settings = document->GetSoundFile()->ChnSettings[channel];
+	char newName[MAX_CHANNELNAME];
+	nameEdit.GetWindowText(newName, MAX_CHANNELNAME);
+
+	if(strcmp(newName, settings.szName))
+	{
+		PrepareUndo();
+		strcpy(settings.szName, newName);
+		document->SetModified();
+		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	}
+}
+
+
+void QuickChannelProperties::OnPrevChannel()
+//------------------------------------------
+{
+	channel--;
+	UpdateDisplay();
+}
+
+
+void QuickChannelProperties::OnNextChannel()
+//------------------------------------------
+{
+	channel++;
+	UpdateDisplay();
 }

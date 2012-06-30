@@ -14,6 +14,7 @@
 #include "globals.h"
 #include "PatternCursor.h"
 #include "PatternClipboard.h"
+#include "PatternEditorDialogs.h"
 
 class CModDoc;
 class CEditCommand;
@@ -177,6 +178,8 @@ protected:
 	int oldrow, oldchn, oldsplitchn;
 // -! NEW_FEATURE#0012
 
+	QuickChannelProperties quickChannelProperties;
+
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
 
@@ -260,7 +263,7 @@ public:
 	void ProcessChar(UINT nChar, UINT nFlags);
 
 public:
-	void DrawPatternData(HDC, CSoundFile *, UINT, BOOL, BOOL, UINT, UINT, UINT, CRect&, int *);
+	void DrawPatternData(HDC hdc,	CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
 	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
@@ -401,7 +404,6 @@ protected:
 	afx_msg void OnSelectPCNoteParam(UINT nid);
 	afx_msg void OnRunScript();
 	afx_msg void OnShowTimeAtRow();
-	afx_msg void OnRenameChannel();
 	afx_msg void OnTogglePCNotePluginEditor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
@@ -438,7 +440,6 @@ private:
 	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const;
-	bool BuildChannelMiscCtxMenu(HMENU hMenu) const;
 	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 
 	// Returns an ordered list of all channels in which a given column type is selected.

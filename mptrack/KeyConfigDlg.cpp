@@ -50,27 +50,13 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 		{
 			//if a key has been released but custom edit box is empty, we have probably just
 			//navigated into the box with TAB or SHIFT-TAB. No need to set keychoice.
-			if(code != 0)
-			  m_pOptKeyDlg->OnSetKeyChoice();
+			if(code != 0 && !isDummy)
+				m_pOptKeyDlg->OnSetKeyChoice();
 		}
 	}
 	return CEdit::PreTranslateMessage(pMsg);
 }
 
-
-void CCustEdit::SetKey(UINT /*inMod*/, CString /*c*/)
-{
-/*
-	mod = inMod;
-	//Setup display
-	CString text = CMainFrame::GetInputHandler()->activeCommandSet->GetModifierText(mod);
-	text.Append(c);
-	if (text == "Ctrl+CNTRL") text="Ctrl";
-	if (text == "Alt+ALT") text="Alt";
-	if (text == "Shift+SHIFT") text="Shift";
-	SetWindowText(text);
-*/
-}
 
 void CCustEdit::SetKey(UINT inMod, UINT inCode)
 {
@@ -126,6 +112,8 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_CLEARLOG,				OnClearLog)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,			OnRestoreDefaultKeymap)
 	ON_EN_CHANGE(IDC_FIND,					OnSearchTermChanged)
+	ON_EN_CHANGE(IDC_FINDHOTKEY,			OnFindHotKey)
+	ON_EN_SETFOCUS(IDC_FINDHOTKEY,			OnClearHotKey)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -139,6 +127,7 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_CHORDDETECTWAITTIME, m_eChordWaitTime);//rewbs.autochord
 	DDX_Control(pDX, IDC_KEYREPORT,		m_eReport);
 	DDX_Control(pDX, IDC_CUSTHOTKEY,	m_eCustHotKey);
+	DDX_Control(pDX, IDC_FINDHOTKEY,	m_eFindHotKey);
 	DDX_Control(pDX, IDC_CHECKKEYDOWN,	m_bKeyDown);
 	DDX_Control(pDX, IDC_CHECKKEYHOLD,	m_bKeyHold);
 	DDX_Control(pDX, IDC_CHECKKEYUP,	m_bKeyUp);
@@ -182,6 +171,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	UpdateDialog();
 
 	m_eCustHotKey.SetParent(m_hWnd, IDC_CUSTHOTKEY, this);
+	m_eFindHotKey.SetParent(m_hWnd, IDC_FINDHOTKEY, this);
 	m_eReport.FmtLines(TRUE);
 	m_eReport.SetWindowText("");
 
@@ -422,6 +412,20 @@ void COptionsKeyboard::OnCategorySelChanged()
 }
 
 
+// Force last active category to be selected in dropdown menu.
+void COptionsKeyboard::UpdateCategory()
+//-------------------------------------
+{
+	for(int i = 0; i < m_cmbCategory.GetCount(); i++)
+	{
+		if((int)m_cmbCategory.GetItemData(i) == m_nCurCategory)
+		{
+			m_cmbCategory.SetCurSel(i);
+			break;
+		}
+	}
+}
+
 void COptionsKeyboard::OnSearchTermChanged()
 //------------------------------------------
 {
@@ -430,17 +434,28 @@ void COptionsKeyboard::OnSearchTermChanged()
 
 	if(findString.IsEmpty())
 	{
-		// Go back to last found category
-		for(int i = 0; i < m_cmbCategory.GetCount(); i++)
-		{
-			if((int)m_cmbCategory.GetItemData(i) == m_nCurCategory)
-			{
-				m_cmbCategory.SetCurSel(i);
-				break;
-			}
-		}
+		UpdateCategory();
 	}
 	UpdateShortcutList(findString.IsEmpty() ? m_nCurCategory : -1);
+}
+
+
+void COptionsKeyboard::OnFindHotKey()
+//-----------------------------------
+{
+	if(m_eFindHotKey.code == 0)
+	{
+		UpdateCategory();
+	}
+	UpdateShortcutList(m_eFindHotKey.code == 0 ? m_nCurCategory : -1);
+}
+
+
+void COptionsKeyboard::OnClearHotKey()
+//------------------------------------
+{
+	// Focus key search: Clear input
+	m_eFindHotKey.SetKey(0, 0);
 }
 
 
@@ -452,7 +467,8 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	m_eFind.GetWindowText(findString);
 	findString.MakeLower();
 
-	const bool doSearch = !findString.IsEmpty();
+	const bool searchByName = !findString.IsEmpty(), searchByKey = (m_eFindHotKey.code != 0);
+	const bool doSearch = (searchByName || searchByKey);
 
 	int firstCat = category, lastCat = category;
 	if(category == -1)
@@ -475,13 +491,28 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 			CommandID com = (CommandID)commandCategories[cat].commands[cmd];
 
 			CString cmdText = plocalCmdSet->GetCommandText(com);
-			bool addString = true;
-			if(doSearch)
+			bool addKey = true;
+
+			if(searchByKey)
 			{
-				addString = (cmdText.MakeLower().Find(findString) >= 0);
+				addKey = false;
+				size_t numChoices = plocalCmdSet->GetKeyListSize(com);
+				for(size_t choice = 0; choice < numChoices; choice++)
+				{
+					const KeyCombination &kc = plocalCmdSet->GetKey(com, choice);
+					if(kc.code == m_eFindHotKey.code && kc.mod == m_eFindHotKey.mod)
+					{
+						addKey = true;
+						break;
+					}
+				}
+			}
+			if(searchByName && addKey)
+			{
+				addKey = (cmdText.MakeLower().Find(findString) >= 0);
 			}
 
-			if(addString)
+			if(addKey)
 			{
 				m_nCurCategory = cat;
 
