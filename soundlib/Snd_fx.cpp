@@ -1926,10 +1926,23 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
-				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-					TonePortamento(pChn, ImpulseTrackerPortaVolCmd[vol & 0x0F]);
-				else if(vol != 0 || !IsCompatibleMode(TRK_FASTTRACKER2))
-					TonePortamento(pChn, vol * 16);
+				UINT param = 0;
+				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				{
+					param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
+				} else
+				{
+					if(cmd == CMD_TONEPORTAMENTO && GetType() == MOD_TYPE_XM)
+					{
+						// Yes, FT2 is *that* weird. If there is a Mx command in the volume column
+						// and a normal 3xx command, the 3xx command is ignored but the Mx command's
+						// effectiveness is doubled.
+						cmd = CMD_NONE;
+						vol *= 2;
+					}
+					param = vol << 4;
+				}
+				TonePortamento(pChn, param);
 			} else
 			{
 				// XM Compatibility: FT2 ignores some volume commands with parameter = 0.
