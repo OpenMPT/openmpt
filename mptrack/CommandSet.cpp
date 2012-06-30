@@ -931,17 +931,20 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					}
 				}
 			} // end all nav commands
+
 			for (int curCmd=kcStartOrderlistNavigation; curCmd<=kcEndOrderlistNavigation; curCmd++)
 			{//for all nav commands
 				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 				{// for all keys for this command
 					newKcSel=inKc; // get all properties from the selection key
-					newKcSel.mod|=commands[curCmd].kcList[k].mod; //add the nav keys' modifiers
-					if (adding)	{
+					newKcSel.mod |= commands[curCmd].kcList[k].mod; //add the nav keys' modifiers
+					if(adding)
+					{
 						Log("Enforcing rule krAllowSelectionWithNavigation - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);
 						Add(newKcSel, kcSelectWithNav, false);
 					}
-					else {	
+					else
+					{
 						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);				
 						Remove(newKcSel, kcSelectWithNav);
 					}
@@ -955,36 +958,42 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	if (enforceRule[krAutoSelectOff])
 	{
 		KeyCombination newKcDeSel;
-		bool ruleApplies=true;
+		bool ruleApplies = true;
 		CommandID cmdOff = kcNull;
 
 		switch (inCmd)
 		{
-			case kcSelect:				 cmdOff=kcSelectOff;	break;
-			case kcSelectWithNav:		 cmdOff=kcSelectOffWithNav;	break;	
-			case kcCopySelect:			 cmdOff=kcCopySelectOff;	break;	
-			case kcCopySelectWithNav:	 cmdOff=kcCopySelectOffWithNav;	break;	
-			case kcSelectWithCopySelect: cmdOff=kcSelectOffWithCopySelect; break;
-			case kcCopySelectWithSelect: cmdOff=kcCopySelectOffWithSelect; break;
-			default: ruleApplies=false;
+			case kcSelect:					cmdOff = kcSelectOff;				break;
+			case kcSelectWithNav:			cmdOff = kcSelectOffWithNav;		break;	
+			case kcCopySelect:				cmdOff = kcCopySelectOff;			break;	
+			case kcCopySelectWithNav:		cmdOff = kcCopySelectOffWithNav;	break;	
+			case kcSelectWithCopySelect:	cmdOff = kcSelectOffWithCopySelect; break;
+			case kcCopySelectWithSelect:	cmdOff = kcCopySelectOffWithSelect; break;
+			default: ruleApplies = false;
 		}
 	
-		if (ruleApplies)
+		if(ruleApplies)
 		{
-			newKcDeSel=inKc;
-			newKcDeSel.mod&=~CodeToModifier(inKc.code);		//<-- Need to get rid of right modifier!!
-			newKcDeSel.event=kKeyEventUp;
+			newKcDeSel = inKc;
+			newKcDeSel.event = kKeyEventUp;
 
-			if (adding)
-				Add(newKcDeSel, cmdOff, false);
-			else
-				Remove(newKcDeSel, cmdOff);
+			// Register key-up when releasing any of the modifiers.
+			// Otherwise, select key combos might get stuck. Example:
+			// [Ctrl Down] [Alt Down] [Alt Up] [Ctrl Up] After this action, copy select (Ctrl+Drag) would still be activated without.
+			for(newKcDeSel.mod = 0; newKcDeSel.mod <= (HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_SHIFT); newKcDeSel.mod++)
+			{
+				//newKcDeSel.mod&=~CodeToModifier(inKc.code);		//<-- Need to get rid of right modifier!!
+
+				if (adding)
+					Add(newKcDeSel, cmdOff, false);
+				else
+					Remove(newKcDeSel, cmdOff);
+			}
 		}
 	
 	}
-
 	// Allow combinations of copyselect and select
-	if (enforceRule[krAllowSelectCopySelectCombos])
+	if(enforceRule[krAllowSelectCopySelectCombos])
 	{
 		KeyCombination newKcSel, newKcCopySel;
 		if (inCmd==kcSelect)
