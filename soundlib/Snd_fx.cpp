@@ -691,7 +691,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		instrumentChanged = true;
 	}
 
-	// XM compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
+	// FT2 compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
 	// And this does *not* happen if volume column portamento is used together with note delay... (handled in ProcessEffects(), where all the other note delay stuff is.)
 	// Test case: porta-delay.xm
 	if(instrumentChanged && bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
@@ -985,7 +985,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	{
 		if(IsCompatibleMode(TRK_FASTTRACKER2))
 		{
-			// XM Compatibility: Ignore notes with portamento if there was no note playing.
+			// FT2 Compatibility: Ignore notes with portamento if there was no note playing.
 			// Test case: 3xx-no-old-samp.xm
 			pChn->nPeriod = 0;
 			return;
@@ -1121,7 +1121,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			// XM compatibility: FT2 also doesn't reset retrigger
+			// FT2 compatibility: FT2 also doesn't reset retrigger
 			if(!IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nRetrigCount = 0;
 			pChn->nTremorCount = 0;
 		}
@@ -1732,7 +1732,7 @@ BOOL CSoundFile::ProcessEffects()
 					retrigEnv = false;
 				} else if(IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
 				{
-					// XM Compatibility: Some special hacks for rogue note delays... (EDx with x > 0)
+					// FT2 Compatibility: Some special hacks for rogue note delays... (EDx with x > 0)
 					// Apparently anything that is next to a note delay behaves totally unpredictable in FT2. Swedish tracker logic. :)
 
 					retrigEnv = true;
@@ -1945,7 +1945,7 @@ BOOL CSoundFile::ProcessEffects()
 				TonePortamento(pChn, param);
 			} else
 			{
-				// XM Compatibility: FT2 ignores some volume commands with parameter = 0.
+				// FT2 Compatibility: FT2 ignores some volume commands with parameter = 0.
 				if(IsCompatibleMode(TRK_FASTTRACKER2) && vol == 0)
 				{
 					switch(volcmd)
@@ -1953,6 +1953,13 @@ BOOL CSoundFile::ProcessEffects()
 					case VOLCMD_VOLUME:
 					case VOLCMD_PANNING:
 					case VOLCMD_VIBRATODEPTH:
+						break;
+					case VOLCMD_PANSLIDELEFT:
+						// FT2 Compatibility: Pan slide left with zero parameter causes panning to be set to full left on every non-row tick.
+						if(!(m_dwSongFlags & SONG_FIRSTTICK))
+						{
+							pChn->nPan = 0;
+						}
 						break;
 					default:
 						// no memory here.
@@ -2119,7 +2126,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Set Offset
 		case CMD_OFFSET:
 			if (m_nTickCount) break;
-			// XM compatibility: Portamento + Offset = Ignore offset
+			// FT2 compatibility: Portamento + Offset = Ignore offset
 			if(bPorta && GetType() == MOD_TYPE_XM)
 			{
 				break;
@@ -2356,7 +2363,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->VolEnv.nEnvPosition = param;
 
-				// XM compatibility: FT2 only sets the position of the Volume envelope
+				// FT2 compatibility: FT2 only sets the position of the Volume envelope
 				if(!IsCompatibleMode(TRK_FASTTRACKER2))
 				{
 					pChn->PanEnv.nEnvPosition = param;
@@ -3035,7 +3042,7 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param)
 			{
 				nPanSlide = -(int)((param & 0x0F) << 2);
 			}
-			// XM compatibility: FT2's panning slide is like IT's fine panning slide (not as deep)
+			// FT2 compatibility: FT2's panning slide is like IT's fine panning slide (not as deep)
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 				nPanSlide >>= 2;
 		}
@@ -3866,7 +3873,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 				}
 			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
-				// XM Compatibility: Don't play note if offset is beyond sample length
+				// FT2 Compatibility: Don't play note if offset is beyond sample length
 				// Test case: 3xx-no-old-samp.xm
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 				pChn->nVolume = pChn->nPeriod = 0;
@@ -3962,7 +3969,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			int vol = pChn->nVolume;
 
-			// XM compatibility: Retrig + volume will not change volume of retrigged notes
+			// FT2 compatibility: Retrig + volume will not change volume of retrigged notes
 			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(pChn->rowCommand.volcmd == VOLCMD_VOLUME))
 			{
 				if (retrigTable1[dv])
