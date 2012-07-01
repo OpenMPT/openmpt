@@ -51,7 +51,6 @@ LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 LONG gnDryROfsVol = 0;
 LONG gnDryLOfsVol = 0;
-int gbInitPlugins = 0;
 bool gbInitTables = 0;
 
 typedef DWORD (MPPASMCALL * LPCONVERTPROC)(LPVOID, int *, DWORD);
@@ -242,7 +241,6 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 #ifdef ENABLE_EQ
 	InitializeEQ(bReset);
 #endif
-	gbInitPlugins = (bReset) ? 3 : 1;
 	return TRUE;
 }
 
@@ -254,7 +252,7 @@ BOOL CSoundFile::FadeSong(UINT msec)
 	if (nsamples <= 0) return FALSE;
 	if (nsamples > 0x100000) nsamples = 0x100000;
 	m_nBufferCount = nsamples;
-	samplecount_t nRampLength = m_nBufferCount;
+	int nRampLength = static_cast<int>(m_nBufferCount);
 	// Ramp everything down
 	for (UINT noff=0; noff < m_nMixChannels; noff++)
 	{
@@ -2410,7 +2408,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			ModCommand::NOTE realNote = note;
 			if(ModCommand::IsNote(note))
 				realNote = pIns->NoteMap[note - 1];
-			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
+			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, static_cast<uint16>(pChn->nVolume), nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
 		{
 			pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Fine, vol, nChn);

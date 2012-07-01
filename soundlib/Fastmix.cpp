@@ -1695,8 +1695,6 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 }
 
 
-extern int gbInitPlugins;
-
 void CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
@@ -1710,11 +1708,6 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			&& plugin.pMixState->pOutBufferR != nullptr)
 		{
 			SNDMIXPLUGINSTATE *pState = plugin.pMixState;
-			// Init plugins ?
-			/*if (gbInitPlugins)
-			{   //ToDo: do this in resume.
-				pPlugin->pMixPlugin->Init(gdwMixingFreq, (gbInitPlugins & 2) ? TRUE : FALSE);
-			}*/
 
 			//We should only ever reach this point if the song is playing.
 			if (!plugin.pMixPlugin->IsSongPlaying())
@@ -1832,7 +1825,6 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 		}
 	}
 	FloatToStereoMix(pMixL, pMixR, MixSoundBuffer, nCount);
-	gbInitPlugins = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
