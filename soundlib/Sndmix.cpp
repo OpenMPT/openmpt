@@ -1014,25 +1014,57 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol)
 void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 //--------------------------------------------------------
 {
-	if(pChn->nCommand == CMD_TREMOR)
+	if(IsCompatibleMode(TRK_FASTTRACKER2))
+	{
+		// Weird XM tremor. Not quite correct yet, but much better than non-compatible tremor.
+		if(pChn->nTremorCount & 0x80)
+		{
+			if(!(m_dwSongFlags & SONG_FIRSTTICK) && pChn->nCommand == CMD_TREMOR)
+			{
+				const uint8 onTime = (pChn->nTremorParam >> 4) + 1, totalTime = onTime + (pChn->nTremorParam & 0x0F) + 1;
+
+				if((pChn->nTremorCount & 0x3F) == totalTime)
+				{
+					// Reset tremor count after one full cycle
+					pChn->nTremorCount &= 0xC0;
+				}
+				
+				if((pChn->nTremorCount & 0x3F) >= onTime)
+				{
+					// Volume Off
+					pChn->nTremorCount |= 0x40;
+				} else
+				{
+					// Volume On
+					pChn->nTremorCount &= ~0x40;
+				}
+
+				pChn->nTremorCount = (pChn->nTremorCount & 0xC0) | ((pChn->nTremorCount + 1) & 0x3F);
+			}
+
+			if((pChn->nTremorCount & 0xC0) == 0xC0)
+			{
+				vol = 0;
+			}
+		}
+	} else if(pChn->nCommand == CMD_TREMOR)
 	{
 		// IT compatibility 12. / 13.: Tremor
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			if ((pChn->nTremorCount & 128) && pChn->nLength)
+			if((pChn->nTremorCount & 0x80) && pChn->nLength)
 			{
-				if (pChn->nTremorCount == 128)
-					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
-				else if (pChn->nTremorCount == 192)
-					pChn->nTremorCount = (pChn->nTremorParam & 0x0F) | 128;
+				if (pChn->nTremorCount == 0x80)
+					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 0xC0;
+				else if (pChn->nTremorCount == 0xC0)
+					pChn->nTremorCount = (pChn->nTremorParam & 0x0F) | 0x80;
 				else
 					pChn->nTremorCount--;
 			}
 
-			if ((pChn->nTremorCount & 192) == 128)
+			if((pChn->nTremorCount & 0xC0) == 0x80)
 				vol = 0;
-		}
-		else
+		} else
 		{
 			UINT ontime = pChn->nTremorParam >> 4;
 			UINT n = ontime + (pChn->nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)

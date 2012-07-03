@@ -464,7 +464,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			case CMD_GLOBALVOLSLIDE:
 				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 				{
-					//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
+					// IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
 					if (param) memory.oldGlbVolSlide[nChn] = param; else param = memory.oldGlbVolSlide[nChn];
 				} else
 				{
@@ -526,7 +526,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		{
 			nNextOrder = nCurrentOrder + 1;
 			nNextRow = 0;
-			if(IsCompatibleMode(TRK_FASTTRACKER2)) nNextRow = nNextPatStartRow;  // FT2 E60 bug
+			if(IsCompatibleMode(TRK_FASTTRACKER2)) nNextRow = nNextPatStartRow;		// FT2 E60 bug
 			nNextPatStartRow = 0;
 		}
 
@@ -561,7 +561,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			m_bPositionChanged = true;
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{
-				//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
+				// IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
 				for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 				{
 					Chn[n].nOldGlobalVolSlide = memory.oldGlbVolSlide[n];
@@ -767,7 +767,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	{
 		if ((!bPorta) || (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATGXX)
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
-		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
+		 // IT compatibility tentative fix: Reset envelopes when instrument changes.
 		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && instrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
@@ -950,7 +950,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nFadeOutVol = 0;
 		}
 
-		//IT compatibility tentative fix: Clear channel note memory.
+		// IT compatibility tentative fix: Clear channel note memory.
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			pChn->nNote = pChn->nNewNote = NOTE_NONE;
@@ -1118,7 +1118,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
 
-		//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
+		// IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			// FT2 compatibility: FT2 also doesn't reset retrigger
@@ -1431,11 +1431,11 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 			ModChannel *p = &Chn[n];
 			// Copy Channel
 			*p = *pChn;
-			p->dwFlags &= ~(CHN_VIBRATO|CHN_TREMOLO|CHN_PANBRELLO|CHN_MUTE|CHN_PORTAMENTO);
+			p->dwFlags &= ~(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
 
 			//rewbs: Copy mute and FX status from master chan.
 			//I'd like to copy other flags too, but this would change playback behaviour.
-			p->dwFlags |= (pChn->dwFlags & (CHN_MUTE|CHN_NOFX));
+			p->dwFlags |= (pChn->dwFlags & (CHN_MUTE | CHN_NOFX));
 
 			p->nMasterChn = nChn + 1;
 			p->nCommand = 0;
@@ -2181,17 +2181,17 @@ BOOL CSoundFile::ProcessEffects()
 			// IT compatibility 12. / 13. Tremor (using modified DUMB's Tremor logic here because of old effects - http://dumb.sf.net/)
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				if (param && !(m_dwSongFlags & SONG_ITOLDEFFECTS))
+				if(param && !(m_dwSongFlags & SONG_ITOLDEFFECTS))
 				{
 					// Old effects have different length interpretation (+1 for both on and off)
-					if (param & 0xf0) param -= 0x10;
-					if (param & 0x0f) param -= 0x01;
+					if(param & 0xF0) param -= 0x10;
+					if(param & 0x0F) param -= 0x01;
 				}
-				pChn->nTremorCount |= 128; // set on/off flag
-			}
-			else
+				pChn->nTremorCount |= 0x80; // set on/off flag
+			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				// XM Tremor. Logic is being processed in sndmix.cpp
+				pChn->nTremorCount |= 0x80; // set on/off flag
 			}
 
 			pChn->nCommand = CMD_TREMOR;
