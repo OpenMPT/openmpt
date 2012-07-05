@@ -1122,8 +1122,14 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			// FT2 compatibility: FT2 also doesn't reset retrigger
-			if(!IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nRetrigCount = 0;
-			pChn->nTremorCount = 0;
+			if(!IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				pChn->nRetrigCount = 0;
+				pChn->nTremorCount = 0;
+			} else
+			{
+				pChn->nTremorCount = 0x20;
+			}
 		}
 
 		if (bResetEnv)

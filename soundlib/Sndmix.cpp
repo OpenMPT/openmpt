@@ -1016,33 +1016,29 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 {
 	if(IsCompatibleMode(TRK_FASTTRACKER2))
 	{
-		// Weird XM tremor. Not quite correct yet, but much better than non-compatible tremor.
+		// Weird XM tremor.
 		if(pChn->nTremorCount & 0x80)
 		{
 			if(!(m_dwSongFlags & SONG_FIRSTTICK) && pChn->nCommand == CMD_TREMOR)
 			{
-				const uint8 onTime = (pChn->nTremorParam >> 4) + 1, totalTime = onTime + (pChn->nTremorParam & 0x0F) + 1;
-
-				if((pChn->nTremorCount & 0x3F) == totalTime)
+				pChn->nTremorCount &= ~0x20;
+				if(pChn->nTremorCount == 0x80)
 				{
-					// Reset tremor count after one full cycle
-					pChn->nTremorCount &= 0xC0;
-				}
-				
-				if((pChn->nTremorCount & 0x3F) >= onTime)
+					// Reached end of off-time
+					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 0xC0;
+				} else if(pChn->nTremorCount == 0xC0)
 				{
-					// Volume Off
-					pChn->nTremorCount |= 0x40;
+					// Reached end of on-time
+					pChn->nTremorCount = (pChn->nTremorParam & 0x0F) | 0x80;
 				} else
 				{
-					// Volume On
-					pChn->nTremorCount &= ~0x40;
+					pChn->nTremorCount--;
 				}
-
-				pChn->nTremorCount = (pChn->nTremorCount & 0xC0) | ((pChn->nTremorCount + 1) & 0x3F);
+				
+				pChn->dwFlags |= CHN_FASTVOLRAMP;
 			}
 
-			if((pChn->nTremorCount & 0xC0) == 0xC0)
+			if((pChn->nTremorCount & 0xE0) == 0x80)
 			{
 				vol = 0;
 			}
