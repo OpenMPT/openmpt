@@ -1076,12 +1076,6 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		Log("VST plugin to host: Get Input Speaker Arrangement\n");
 		break;
 
-	//---from here VST 2.4 extension opcodes------------------------------------------------------
-
-	// Floating point processing precision
-	case effSetProcessPrecision:
-		return (value == kVstProcessPrecision32 ? 1 : 0);
-
 	}
 
 	// Unknown codes:
@@ -1454,8 +1448,9 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	// Korg Wavestation GUI won't work until plugin was resumed at least once.
 	// On the other hand, some other plugins (notably Synthedit plugins like Superwave P8 2.3 or Rez 3.0) don't like this
-	// and won't load their stored plugin data properly, so only do this for the Korg Wavestation...
-	if(GetUID() == CCONST('K', 'L', 'W', 'V'))
+	// and won't load their stored plugin data instantly, so only do this for the Korg Wavestation...
+	// Tentatively also apply this fix for Korg's M1 plugin, maybe this will fix older versions of said plugin, newer versions don't require the fix.
+	if(GetUID() == CCONST('K', 'L', 'W', 'V') || GetUID() == CCONST('K', 'L', 'M', '1'))
 	{
 		Resume();
 		Suspend();
