@@ -83,6 +83,11 @@
         display: inline;
         color: #006;
     }
+    
+    tt
+    {
+        font-family: monospace;
+    }
 
   </style>
   </head>
@@ -106,24 +111,31 @@
     </div>
     <ul>
         <li>OpenMPT 1.20 introduces a <strong>template system</strong> that can be used to quickly access often used plugin, pattern, sample and instrument combinations.</li> 
-        <li>When closing OpenMPT, a single dialog with a <strong>list of unsaved files</strong> is now shown instead of one message boxes for each modified file.</li>
+        <li>When closing OpenMPT, a single dialog with a <strong>list of unsaved files</strong> is now shown instead of one message box for each modified file.</li>
         <li><strong>Crash recovery</strong>: When a crash is encountered, OpenMPT will try to save modified documents to a temporary location and close the audio device. The latter can especially help with ASIO drivers that become unusable after a program crash.</li>
         <li><strong>MIDI CCs</strong> that are being received from an external MIDI device can now be mapped to pattern / sample / instrument editor shortcuts.</li>
         <li>The <strong>treeview</strong> can now handle more than 32 open modules.</li>
+        <li>The keyboard settings dialog can now be used to <strong>search for shortcuts</strong> by name and by key combination.</li>
         <li>At last, OpenMPT comes with a <strong>manual</strong> again!</li>
     </ul>
     
     <h3>Pattern Editor</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.20/quick_channel_settings.png"><img src="ReleaseNotesImages/1.20/quick_channel_settings.png" width="240" height="84" alt="Quick Channel Settings dialog" title="Quick Channel Settings dialog (click to view big screenshot)" /></a>
+    </div>
     <ul>
         <li><strong>Adding and removing channels</strong> creates an undo point now instead of clearing the undo log.</li>
         <li>There is now an option to <strong>select a channel</strong> by double-clicking a pattern cell.</li>
         <li>Like in Impulse Tracker, it is now possible to show the <strong>default sample volume</strong> if there is no volume command next to a note.</li>
-        <li>OpenMPT can now recording incoming <strong>aftertouch MIDI messages</strong> to patterns as either volume commands or MIDI macros.</li>
+        <li>OpenMPT can now record incoming <strong>aftertouch MIDI messages</strong> to patterns as either volume commands or MIDI macros.</li>
+        <li>Middle-clicking or Ctrl-right-clicking a channel header opens the new <strong>quick channel settings</strong> dialog, which can be used to quickly adjust volumem, panning and channel names.</li>
     </ul>
     
     <h3>Sample Editor</h3>
     <ul>
         <li>The new <strong>sample tuner</strong> can be used to tune samples to a given note.</li>
+        <li>Improved support for <strong>AIFF samples</strong> (up to 32-Bit PCM and floating point audio as well as little-endian PCM samples) and WAV samples with abitrary bit resolutiosn up to 32-Bit (e.g. 20-Bit).
+        <li>Editing large samples will not crash the tracker anymore.</li>
     </ul>
     
     <h3>Macro System</h3>
@@ -138,7 +150,9 @@
         <li>Searching for multiple <strong>unknown plugins</strong> will now open only one browser window.</li>
         <li>Some <strong>multi-output plugins</strong> like Kontakt (64 channels version) won't crash anymore.</li>
         <li>Built-in support for <strong>jBridge</strong> to provide support for 64-Bit plugins and other plugins that won't load in OpenMPT.</li> 
-        <li>Exception handling for crashed plugins does finally work again, so the <strong>overall stability</strong> of OpenMPT as a VST host has increased. Note that a few plugins don't seem to like exception handling and might crash now.</li> 
+        <li>Exception handling for crashed plugins does finally work again, so the <strong>overall stability</strong> of OpenMPT as a VST host has increased. Note that a few plugins don't seem to like exception handling and might crash now.</li>
+        <li>The current <strong>playback position</strong> is now also reported correctly to plugins when jumping around in the order list. Previously, it was always reset to the song start. This enhances support for sequencer plugins like Maschine.</li> 
+        <li>Effect plugins are now sorted into <strong>plugin categories</strong> (as reported by the plugins) in the plugin selection dialog. Delete the <tt>plugin.cache</tt> file in OpenMPT's settings directory to rebuild the plugin cache with categories. Loading a plugin into a module will also update the cache.</li>
     </ul>
     
     <h3>There's more...</h3>
