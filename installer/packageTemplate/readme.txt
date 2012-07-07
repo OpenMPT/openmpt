@@ -49,7 +49,7 @@ OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
     stretching feature.
 readme.txt: this document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.19_ReleaseNotes.html: Release notes for this version.
+OMPT_1.20_ReleaseNotes.html: Release notes for this version.
 
 Misc:
 -----
