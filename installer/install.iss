@@ -102,7 +102,6 @@ Name: {app}\tunings; Tasks: portable
 Name: {group}\{cm:LaunchProgram,OpenMPT}; Filename: {app}\mptrack.exe
 Name: {group}\{cm:UninstallProgram,OpenMPT}; Filename: {uninstallexe}
 Name: {group}\ModPlug Central; Filename: {app}\ModPlug Central.url
-Name: {group}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
 
 ; app's directory and keymaps directory (for ease of use)
 Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
