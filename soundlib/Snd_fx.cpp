@@ -2624,33 +2624,17 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 	}
 }
 
+
 void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param)
 //-----------------------------------------------------------
 {
-	if((Chn[nChn].dwFlags & (CHN_MUTE | CHN_SYNCMUTE)) != 0)
+	IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
+	if(plugin != nullptr)
 	{
-		// Don't process portamento on muted channels. Note that this might have a side-effect
-		// on other channels which trigger notes on the same MIDI channel of the same plugin,
-		// as those won't be pitch-bent anymore.
-		return;
-	}
-
-	//Send midi pitch bend event if there's a plugin:
-	const ModInstrument *pIns = Chn[nChn].pModInstrument;
-	if (pIns && pIns->HasValidMIDIChannel())
-	{
-		// instro sends to a midi chan
-		UINT nPlug = pIns->nMixPlug;
-		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
-		{
-			IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
-			if (pPlug)
-			{
-				pPlug->MidiPitchBend(GetBestMidiChannel(nChn), param, 0);
-			}
-		}
+		plugin->MidiPitchBend(GetBestMidiChannel(nChn), param, 0);
 	}
 }
+
 
 void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 //-------------------------------------------------------------
@@ -4580,18 +4564,45 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
 	// so we don't need to worry about finding the master chan.
 
-	PLUGINDEX nPlugin = 0;
-	if (Chn[nChn].pModInstrument)
+	PLUGINDEX plug = 0;
+	if(Chn[nChn].pModInstrument != nullptr)
 	{
 		if (respectMutes == RespectMutes && Chn[nChn].pModSample && (Chn[nChn].pModSample->uFlags & CHN_MUTE))
 		{
-			nPlugin = 0;
+			plug = 0;
 		} else
 		{
-			nPlugin = Chn[nChn].pModInstrument->nMixPlug;
+			plug = Chn[nChn].pModInstrument->nMixPlug;
 		}
 	}
-	return nPlugin;
+	return plug;
+}
+
+
+// Retrieve the plugin that is associated with the channel's current instrument.
+// No plugin is returned if the channel is muted or if the instrument doesn't have a MIDI channel set up,
+// As this is meant to be used with instrument plugins.
+IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
+//------------------------------------------------------------------------
+{
+	if((Chn[chn].dwFlags & (CHN_MUTE | CHN_SYNCMUTE)) != 0)
+	{
+		// Don't process portamento on muted channels. Note that this might have a side-effect
+		// on other channels which trigger notes on the same MIDI channel of the same plugin,
+		// as those won't be pitch-bent anymore.
+		return nullptr;
+	}
+
+	const ModInstrument *pIns = Chn[chn].pModInstrument;
+	if(pIns != nullptr && pIns->HasValidMIDIChannel())
+	{
+		// Instrument sends to a MIDI channel
+		if(pIns->nMixPlug != 0 && pIns->nMixPlug <= MAX_MIXPLUGINS)
+		{
+			return m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
+		}
+	}
+	return nullptr;
 }
 
 

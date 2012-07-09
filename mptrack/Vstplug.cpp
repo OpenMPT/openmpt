@@ -2369,11 +2369,12 @@ void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX /*trackCh
 //--------------------------------------------------------------------------------------
 {
 	const int16 increment = static_cast<int16>(nParam * 0x2000 / 0xFF);
-	int16 newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
+	int16 newPitchBendPos = (m_nMidiPitchBendPos[nMidiCh] & vstPitchBendMask) + increment;
 	Limit(newPitchBendPos, int16(MIDIEvents::pitchBendMin), int16(MIDIEvents::pitchBendMax));
 
 	MidiPitchBend(nMidiCh, newPitchBendPos);
 }
+
 
 //Set midi pitch for given midi channel using uncoverted midi value (0-16383)
 void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int16 newPitchBendPos)
@@ -2382,6 +2383,28 @@ void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int16 newPitchBendPos)
 	ASSERT(MIDIEvents::pitchBendMin <= newPitchBendPos && newPitchBendPos <= MIDIEvents::pitchBendMax);
 	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos;
 	MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, newPitchBendPos));
+}
+
+
+void CVstPlugin::MidiVibrato(uint8 nMidiCh, int16 depth)
+//------------------------------------------------------
+{
+	if(depth != 0 || (m_nMidiPitchBendPos[nMidiCh] & vstVibratoFlag))
+	{
+		// Temporarily add vibrato offset to current pitch
+		int16 pitch = (m_nMidiPitchBendPos[nMidiCh] & vstPitchBendMask) + depth;
+		Limit(pitch, static_cast<int16>(MIDIEvents::pitchBendMin), static_cast<int16>(MIDIEvents::pitchBendMax));
+		MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, pitch));
+	}
+
+	// Update vibrato status
+	if(depth != 0)
+	{
+		m_nMidiPitchBendPos[nMidiCh] |= vstVibratoFlag;
+	} else
+	{
+		m_nMidiPitchBendPos[nMidiCh] &= ~vstVibratoFlag;
+	}
 }
 
 

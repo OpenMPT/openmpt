@@ -531,7 +531,7 @@ protected:
 	void ProcessPanbrello(ModChannel *pChn);
 
 	void ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps);
-	void ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
+	void ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
 	void ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac);
 
 	void ProcessRamping(ModChannel *pChn);
@@ -712,6 +712,7 @@ protected:
 private:
 	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
 	PLUGINDEX __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
+	IMixPlugin *__cdecl GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
 
 	void HandlePatternTransitionEvents();
 

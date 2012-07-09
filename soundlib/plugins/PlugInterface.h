@@ -43,6 +43,7 @@ public:
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
 	virtual void MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX trackChannel) = 0;
+	virtual void MidiVibrato(uint8 nMidiCh, int16 depth) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
 	virtual void RecalculateGain() = 0;		
