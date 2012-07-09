@@ -129,6 +129,9 @@ protected:
 	{
 		// Number of MIDI events that can be sent to a plugin at once (the internal queue is not affected by this number, it can hold any number of events)
 		vstNumProcessEvents = 256,
+
+		vstPitchBendMask	= 0x7FFF,
+		vstVibratoFlag		= 0x8000,
 	}; 
 
 	ULONG m_nRefCount;
@@ -145,7 +148,7 @@ protected:
 	SNDMIXPLUGINSTATE m_MixState;
 	UINT m_nInputs, m_nOutputs;
 	VSTInstrChannel m_MidiCh[16];
-	short m_nMidiPitchBendPos[16];
+	int16 m_nMidiPitchBendPos[16];		// Current pitch wheel depth. Highest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
 
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
 	CSoundFile* m_pSndFile;			 //rewbs.plugDocAware
@@ -235,6 +238,7 @@ public:
 	bool MidiSend(DWORD dwMidiCode);
 	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
 	void MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX trackChannel);
+	void MidiVibrato(uint8 nMidiCh, int16 depth);
 	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST

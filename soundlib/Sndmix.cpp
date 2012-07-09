@@ -1016,7 +1016,8 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 {
 	if(IsCompatibleMode(TRK_FASTTRACKER2))
 	{
-		// Weird XM tremor.
+		// FT2 Compatibility: Weird XM tremor.
+		// Test case: Tremor.xm
 		if(pChn->nTremorCount & 0x80)
 		{
 			if(!(m_dwSongFlags & SONG_FIRSTTICK) && pChn->nCommand == CMD_TREMOR)
@@ -1539,33 +1540,34 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 }
 
 
-void CSoundFile::ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
+void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
 //-----------------------------------------------------------------------------------------------
 {
-	if (pChn->dwFlags & CHN_VIBRATO)
-	{
-		UINT vibpos = pChn->nVibratoPos;
+	ModChannel &chn = Chn[nChn];
 
-		int vdelta = GetVibratoDelta(pChn->nVibratoType, vibpos);
-		if((GetType() & MOD_TYPE_XM) && (pChn->nVibratoType & 0x03) == 1)
+	if(chn.dwFlags & CHN_VIBRATO)
+	{
+		UINT vibpos = chn.nVibratoPos;
+
+		int vdelta = GetVibratoDelta(chn.nVibratoType, vibpos);
+		if((GetType() & MOD_TYPE_XM) && (chn.nVibratoType & 0x03) == 1)
 		{
 			// FT2 compatibility: Vibrato ramp down table is upside down.
 			// Test case: VibratoWaveforms.xm
 			vdelta = -vdelta;
 		}
 
-		if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+		if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
 		{
 			//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
 			//using figure from above tables and vibratodepth parameter
-			vibratoFactor += 0.05F * vdelta * pChn->m_VibratoDepth / 128.0F;
-			pChn->m_CalculateFreq = true;
-			pChn->m_ReCalculateFreqOnFirstTick = false;
+			vibratoFactor += 0.05F * vdelta * chn.m_VibratoDepth / 128.0F;
+			chn.m_CalculateFreq = true;
+			chn.m_ReCalculateFreqOnFirstTick = false;
 
 			if(m_nTickCount + 1 == m_nMusicSpeed)
-				pChn->m_ReCalculateFreqOnFirstTick = true;
-		}
-		else
+				chn.m_ReCalculateFreqOnFirstTick = true;
+		} else
 		{
 			// Original behaviour
 
@@ -1584,12 +1586,14 @@ void CSoundFile::ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYP
 					vdepth = 6;
 					vdelta = -vdelta;
 				}
-			}
-			else
+			} else
 			{
 				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
 			}
-			vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
+
+			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
+			int16 midiDelta = static_cast<int16>(-vdelta);	// Periods are upside down
+
 			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
 				int l = vdelta;
@@ -1605,14 +1609,32 @@ void CSoundFile::ProcessVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYP
 				}
 			}
 			period += vdelta;
+
+			// Process MIDI vibrato for plugins:
+			IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
+			if(plugin != nullptr)
+			{
+				midiDelta *= (MIDIEvents::pitchBendMax - MIDIEvents::pitchBendCentre) / 127;
+				plugin->MidiVibrato(GetBestMidiChannel(nChn), midiDelta);
+			}
 		}
-		if ((m_nTickCount) || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+
+		// Advance vibrato position
+		if(m_nTickCount || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
-				pChn->nVibratoPos = (vibpos + 4 * pChn->nVibratoSpeed) & 0xFF;
+				chn.nVibratoPos = (vibpos + 4 * chn.nVibratoSpeed) & 0xFF;
 			else
-				pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
+				chn.nVibratoPos = (vibpos + chn.nVibratoSpeed) & 0x3F;
+		}
+	} else if(chn.dwOldFlags & CHN_VIBRATO)
+	{
+		// Stop MIDI vibrato for plugins:
+		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
+		if(plugin != nullptr)
+		{
+			plugin->MidiVibrato(GetBestMidiChannel(nChn), 0);
 		}
 	}
 }
@@ -2067,12 +2089,17 @@ BOOL CSoundFile::ReadNote()
 		ProcessMacroOnChannel(nChn);
 
 		// After MIDI macros have been processed, we can also process the pitch / filter envelope and other pitch-related things.
-		if (samplePlaying)
+		if(samplePlaying)
+		{
+			ProcessPitchFilterEnvelope(pChn, period);
+		}
+
+		// Plugins may also receive vibrato
+		ProcessVibrato(nChn, period, vibratoFactor);
+		
+		if(samplePlaying)
 		{
 			int nPeriodFrac = 0;
-
-			ProcessPitchFilterEnvelope(pChn, period);
-			ProcessVibrato(pChn, period, vibratoFactor);
 			ProcessSampleAutoVibrato(pChn, period, vibratoFactor, nPeriodFrac);
 
 			// Final Period
@@ -2333,6 +2360,8 @@ BOOL CSoundFile::ReadNote()
 			pChn->nLeftVol = pChn->nRightVol = 0;
 			pChn->nLength = 0;
 		}
+
+		pChn->dwOldFlags = pChn->dwFlags;
 	}
 
 	// Checking Max Mix Channels reached: ordering by volume

@@ -44,6 +44,7 @@ typedef struct __declspec(align(32)) ModChannel_
 	// 2nd cache line
 	DWORD nLength;
 	DWORD dwFlags;
+	DWORD dwOldFlags;	// Flags from previous tick
 	DWORD nLoopStart;
 	DWORD nLoopEnd;
 	int nRampRightVol;
@@ -61,9 +62,8 @@ typedef struct __declspec(align(32)) ModChannel_
 	int nPeriod, nC5Speed, nPortamentoDest;
 	int nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	ModInstrument *pModInstrument;					// Currently assigned instrument slot
-	ModChannelEnvInfo VolEnv, PanEnv, PitchEnv;	// Envelope playback info
+	ModChannelEnvInfo VolEnv, PanEnv, PitchEnv;		// Envelope playback info
 	ModSample *pModSample;							// Currently assigned sample slot
-	CHANNELINDEX nMasterChn;
 	DWORD nVUMeter;
 	int nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
 	int nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
@@ -78,6 +78,7 @@ typedef struct __declspec(align(32)) ModChannel_
 	int nRetrigCount, nRetrigParam;
 	ROWINDEX nPatternLoop;
 	UINT nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;
+	CHANNELINDEX nMasterChn;
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
@@ -169,11 +170,11 @@ typedef struct __declspec(align(32)) ModChannel_
 
 
 // Default pattern channel settings
-struct ModChannelSettings
+struct __declspec(align(32)) ModChannelSettings
 {
-	UINT nPan;						// Initial pan
-	UINT nVolume;					// Initial channel volume
-	DWORD dwFlags;					// Channel flags
+	uint16 nPan;					// Initial pan
+	uint16 nVolume;					// Initial channel volume
+	uint32 dwFlags;					// Channel flags
 	PLUGINDEX nMixPlugin;			// Assigned plugin
 	CHAR szName[MAX_CHANNELNAME];	// Channel name
 };
