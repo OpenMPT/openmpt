@@ -2364,11 +2364,11 @@ void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nPa
 }
 
 
-// Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
+// Bend MIDI pitch for given MIDI channel using tracker param (0x00-0xFF)
 void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX /*trackChannel*/)
 //--------------------------------------------------------------------------------------
 {
-	const int16 increment = static_cast<int16>(nParam * 0x2000 / 0xFF);
+	const int16 increment = static_cast<int16>((nParam * 0x800) / 0xFF);
 	int16 newPitchBendPos = (m_nMidiPitchBendPos[nMidiCh] & vstPitchBendMask) + increment;
 	Limit(newPitchBendPos, int16(MIDIEvents::pitchBendMin), int16(MIDIEvents::pitchBendMax));
 
@@ -2376,7 +2376,7 @@ void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX /*trackCh
 }
 
 
-//Set midi pitch for given midi channel using uncoverted midi value (0-16383)
+//Set MIDI  pitch for given MIDI channel using uncoverted midi value (0-16383)
 void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int16 newPitchBendPos)
 //------------------------------------------------------------------
 {
@@ -2386,6 +2386,7 @@ void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int16 newPitchBendPos)
 }
 
 
+// Apply vibrato effect through pitch wheel commands on a given MIDI channel.
 void CVstPlugin::MidiVibrato(uint8 nMidiCh, int16 depth)
 //------------------------------------------------------
 {
@@ -2393,7 +2394,7 @@ void CVstPlugin::MidiVibrato(uint8 nMidiCh, int16 depth)
 	{
 		// Temporarily add vibrato offset to current pitch
 		int16 pitch = (m_nMidiPitchBendPos[nMidiCh] & vstPitchBendMask) + depth;
-		Limit(pitch, static_cast<int16>(MIDIEvents::pitchBendMin), static_cast<int16>(MIDIEvents::pitchBendMax));
+		Limit(pitch, int16(MIDIEvents::pitchBendMin), int16(MIDIEvents::pitchBendMax));
 		MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, pitch));
 	}
 
@@ -2504,7 +2505,8 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	{
 		note -= NOTE_MIN;
 
-		//reset pitch bend on each new note, tracker style.
+		// Reset pitch bend on each new note, tracker style.
+		// This is done if the pitch wheel has been moved or there was a vibrato on the previous row (in which case the highest bit of the pitch bend memory is set)
 		if(m_nMidiPitchBendPos[nMidiCh] != MIDIEvents::pitchBendCentre)
 		{
 			MidiPitchBend(nMidiCh, MIDIEvents::pitchBendCentre);
