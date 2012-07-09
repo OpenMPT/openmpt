@@ -2544,15 +2544,20 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 //------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &Chn[nChn];
-	MidiPortamento(nChn, param); //Send midi pitch bend event if there's a plugin
 
 	if(param)
 		pChn->nOldPortaUpDown = param;
 	else
 		param = pChn->nOldPortaUpDown;
 
+	const bool doFineSlides = !doFinePortamentoAsRegular && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_STM));
+
+	// Process MIDI pitch bend for instrument plugins
+	MidiPortamento(nChn, param, doFineSlides);
+
 	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
+		// Portamento for instruments with custom tuning
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, param - 0xF0);
 		else
@@ -2560,7 +2565,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 		return;
 	}
 
-	if (!doFinePortamentoAsRegular && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
+	if (doFineSlides && param >= 0xE0)
 	{
 		if (param & 0x0F)
 		{
@@ -2587,23 +2592,28 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 //--------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &Chn[nChn];
-	MidiPortamento(nChn, -(int)param); //Send midi pitch bend event if there's a plugin
 
 	if(param)
 		pChn->nOldPortaUpDown = param;
 	else
 		param = pChn->nOldPortaUpDown;
 
-	if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+	const bool doFineSlides = !doFinePortamentoAsRegular && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_STM));
+
+	// Process MIDI pitch bend for instrument plugins
+	MidiPortamento(nChn, -static_cast<int>(param), doFineSlides);
+
+	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
+		// Portamento for instruments with custom tuning
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
-			PortamentoFineMPT(pChn, -1*(param - 0xF0));
+			PortamentoFineMPT(pChn, -static_cast<int>(param - 0xF0));
 		else
-			PortamentoMPT(pChn, -1*param);
+			PortamentoMPT(pChn, -static_cast<int>(param));
 		return;
 	}
 
-	if (!doFinePortamentoAsRegular && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
+	if(doFineSlides && param >= 0xE0)
 	{
 		if (param & 0x0F)
 		{
@@ -2618,6 +2628,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 		}
 		return;
 	}
+
 	if (!(m_dwSongFlags & SONG_FIRSTTICK))
 	{
 		DoFreqSlide(pChn, int(param) * 4);
@@ -2625,13 +2636,38 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 }
 
 
-void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param)
-//-----------------------------------------------------------
+// Send portamento commands to plugins
+void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
+//------------------------------------------------------------------------------
 {
-	IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
-	if(plugin != nullptr)
+	int actualParam = abs(param);
+	int pitchBend = 0;
+
+	if(doFineSlides && actualParam >= 0xE0)
 	{
-		plugin->MidiPitchBend(GetBestMidiChannel(nChn), param, 0);
+		if(m_dwSongFlags & SONG_FIRSTTICK)
+		{
+			// Extra fine slide...
+			pitchBend = (actualParam & 0x0F) * sgn(param);
+			if(actualParam >= 0xF0)
+			{
+				// ... or just a fine slide!
+				pitchBend *= 4;
+			}
+		}
+	} else
+	{
+		// Regular slide
+		pitchBend = param * 4;
+	}
+
+	if(pitchBend)
+	{
+		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
+		if(plugin != nullptr)
+		{
+			plugin->MidiPitchBend(GetBestMidiChannel(nChn), pitchBend, 0);
+		}
 	}
 }
 
