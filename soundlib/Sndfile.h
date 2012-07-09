@@ -539,9 +539,9 @@ protected:
 protected:
 	// Channel Effects
 	void UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const;
-	void PortamentoUp(CHANNELINDEX nChn, UINT param, const bool fineAsRegular = false);
-	void PortamentoDown(CHANNELINDEX nChn, UINT param, const bool fineAsRegular = false);
-	void MidiPortamento(CHANNELINDEX nChn, int param);
+	void PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular = false);
+	void PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular = false);
+	void MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides);
 	void FinePortamentoUp(ModChannel *pChn, UINT param);
 	void FinePortamentoDown(ModChannel *pChn, UINT param);
 	void ExtraFinePortamentoUp(ModChannel *pChn, UINT param);
