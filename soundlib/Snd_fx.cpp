@@ -287,7 +287,8 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				nNextOrder = (ORDERINDEX)param;
 				nNextPatStartRow = 0;  // FT2 E60 bug
 				// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-				if(!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM))
+				// Test case: PatternJump.mod
+				if(!patternBreakOnThisRow || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 					nNextRow = 0;
 
 				if ((adjustMode & eAdjust))
@@ -979,6 +980,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified (fixes the guitars in spx-shuttledeparture.it)
+	// Test case: freqreset-noins.it
 	if(!bPorta && pSmp && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pSmp->nC5Speed;
 
 	if(bPorta && pChn->nInc == 0)
@@ -1128,6 +1130,8 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				pChn->nTremorCount = 0;
 			} else
 			{
+				// FT2 Compatibility: Weird XM tremor.
+				// Test case: Tremor.xm
 				pChn->nTremorCount = 0x20;
 			}
 		}
@@ -1598,6 +1602,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 
 				// IT compatibility 08. Handling of out-of-range delay command.
+				// Additional test case: tickdelay.it
 				if(nStartTick >= GetNumTicksOnCurrentRow() && IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					if(instr)
@@ -1678,12 +1683,12 @@ BOOL CSoundFile::ProcessEffects()
 			if(ModCommand::IsNote(note) && IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				// Notes that exceed FT2's limit are completely ignored.
-				// Test case: note-limit.xm
+				// Test case: NoteLimit.xm
 				int transpose = pChn->nTranspose;
 				if(instr && !bPorta)
 				{
 					// Refresh transpose
-					// Test case: note-limit 2.xm
+					// Test case: NoteLimit2.xm
 					SAMPLEINDEX sample = SAMPLEINDEX_INVALID;
 					if(GetNumInstruments())
 					{
@@ -1943,6 +1948,7 @@ BOOL CSoundFile::ProcessEffects()
 						// Yes, FT2 is *that* weird. If there is a Mx command in the volume column
 						// and a normal 3xx command, the 3xx command is ignored but the Mx command's
 						// effectiveness is doubled.
+						// Test case: TonePortamentoMemory.xm
 						cmd = CMD_NONE;
 						vol *= 2;
 					}
@@ -1962,6 +1968,7 @@ BOOL CSoundFile::ProcessEffects()
 						break;
 					case VOLCMD_PANSLIDELEFT:
 						// FT2 Compatibility: Pan slide left with zero parameter causes panning to be set to full left on every non-row tick.
+						// Test case: PanSlideZero.xm
 						if(!(m_dwSongFlags & SONG_FIRSTTICK))
 						{
 							pChn->nPan = 0;
@@ -2133,6 +2140,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_OFFSET:
 			if (m_nTickCount) break;
 			// FT2 compatibility: Portamento + Offset = Ignore offset
+			// Test case: porta-offset.xm
 			if(bPorta && GetType() == MOD_TYPE_XM)
 			{
 				break;
@@ -2398,8 +2406,10 @@ BOOL CSoundFile::ProcessEffects()
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
 			}
+
 			// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-			if(GetType() == MOD_TYPE_XM && nBreakRow != ROWINDEX_INVALID)
+			// Test case: PatternJump.mod
+			if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) && nBreakRow != ROWINDEX_INVALID)
 			{
 				nBreakRow = 0;
 			}
@@ -2515,6 +2525,7 @@ BOOL CSoundFile::ProcessEffects()
 
 
 // Update the effect memory of all S3M effects that use the last non-zero effect parameter ot show up (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy)
+// Test case: ParamMemory.s3m
 void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const
 //------------------------------------------------------------------------
 {
@@ -4003,6 +4014,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			if (param < 0x100) bResetEnv = true;
 		}
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
+		// Test case: retrig.it
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER), bResetEnv);
 		if (m_nInstruments)
 		{
@@ -4147,6 +4159,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 			if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 			if(pChn->nPos > pChn->nLength)
 			{
+				// Test case: SusAfterLoop.it
 				pChn->nPos = pChn->nPos - pChn->nLength + pChn->nLoopStart;
 				pChn->nPosLo = 0;
 			}
