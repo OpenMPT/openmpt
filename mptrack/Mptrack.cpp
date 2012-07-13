@@ -1576,7 +1576,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str + " (development build)");
+	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str);
 
 	m_heContact.SetWindowText(
 		"Contact / Discussion:\r\n"
@@ -1584,10 +1584,11 @@ BOOL CAboutDlg::OnInitDialog()
 		"\r\nUpdates:\r\n"
 		"http://openmpt.org/download");
 
-	const char* const pArrCredit = { 
+	static const char* const pArrCredit =
+	{ 
 		"OpenMPT / ModPlug Tracker|"
 		"Copyright © 2004-2012 Contributors|"
-		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
+		"Copyright © 1997-2003 Olivier Lapicque|"
 		"|"
 		"Contributors:|"
 		"Johannes Schultz (2008-2012)|"
@@ -1633,16 +1634,16 @@ BOOL CAboutDlg::OnInitDialog()
 		"||||||" 
 	};
 
-    m_static.SubclassDlgItem(IDC_CREDITS,this);
-    m_static.SetCredits(pArrCredit);
-    m_static.SetSpeed(DISPLAY_SLOW);
-    m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
-    m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
-    m_static.SetGradient(GRADIENT_LEFT_DARK);  // Background goes from blue to black from left to right
-    // m_static.SetBkImage(IDB_BITMAP1); // Background image
-    m_static.StartScrolling();
-    return TRUE;  // return TRUE unless you set the focus to a control
-                    // EXCEPTION: OCX Property Pages should return FALSE
+	m_static.SubclassDlgItem(IDC_CREDITS,this);
+	m_static.SetCredits(pArrCredit);
+	m_static.SetSpeed(DISPLAY_SLOW);
+	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
+	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
+	m_static.SetGradient(GRADIENT_LEFT_DARK);  // Background goes from blue to black from left to right
+	// m_static.SetBkImage(IDB_BITMAP1); // Background image
+	m_static.StartScrolling();
+	return TRUE;	// return TRUE unless you set the focus to a control
+					// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 
@@ -2176,11 +2177,10 @@ BOOL CTrackApp::InitializeDXPlugins()
 //-----------------------------------
 {
 	TCHAR s[_MAX_PATH], tmp[32];
-	LONG nPlugins;
 
 	m_pPluginManager = new CVstPluginManager;
-	if (!m_pPluginManager) return FALSE;
-	nPlugins = GetPrivateProfileInt("VST Plugins", "NumPlugins", 0, m_szConfigFileName);
+	if(!m_pPluginManager) return FALSE;
+	const size_t numPlugins = GetPrivateProfileInt("VST Plugins", "NumPlugins", 0, m_szConfigFileName);
 
 	#ifndef NO_VST
 		char buffer[64];
@@ -2210,10 +2210,10 @@ BOOL CTrackApp::InitializeDXPlugins()
 	CString nonFoundPlugs;
 	const CString failedPlugin = CMainFrame::GetPrivateProfileCString("VST Plugins", "FailedPlugin", "", m_szConfigFileName);
 
-	for (LONG iPlug=0; iPlug<nPlugins; iPlug++)
+	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
 		s[0] = 0;
-		wsprintf(tmp, "Plugin%d", iPlug);
+		wsprintf(tmp, "Plugin%d", plug);
 		GetPrivateProfileString("VST Plugins", tmp, "", s, sizeof(s), m_szConfigFileName);
 		if (s[0])
 		{
@@ -2227,7 +2227,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 					continue;
 				}
 			}
-			m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
+			m_pPluginManager->AddPlugin(s, true, true, &nonFoundPlugs);
 		}
 	}
 	if(nonFoundPlugs.GetLength() > 0)
@@ -2242,31 +2242,31 @@ BOOL CTrackApp::InitializeDXPlugins()
 BOOL CTrackApp::UninitializeDXPlugins()
 //-------------------------------------
 {
-	if (!m_pPluginManager) return FALSE;
+	if(!m_pPluginManager) return FALSE;
 
 #ifndef NO_VST
 	TCHAR s[_MAX_PATH], tmp[32];
 	VSTPluginLib *pPlug;
 
 	pPlug = m_pPluginManager->GetFirstPlugin();
-	PLUGINDEX iPlug = 0;
-	while (pPlug)
+	size_t plug = 0;
+	while(pPlug)
 	{
-		if (pPlug->dwPluginId1 != kDmoMagic)
+		if(pPlug->dwPluginId1 != kDmoMagic)
 		{
 			s[0] = 0;
-			wsprintf(tmp, "Plugin%d", iPlug);
+			wsprintf(tmp, "Plugin%d", plug);
 			strcpy(s, pPlug->szDllPath);
 			if(theApp.IsPortableMode())
 			{
 				AbsolutePathToRelative(s);
 			}
 			WritePrivateProfileString("VST Plugins", tmp, s, m_szConfigFileName);
-			iPlug++;
+			plug++;
 		}
 		pPlug = pPlug->pNext;
 	}
-	wsprintf(s, "%d", iPlug);
+	wsprintf(s, "%d", plug);
 	WritePrivateProfileString("VST Plugins", "NumPlugins", s, m_szConfigFileName);
 #endif // NO_VST
 

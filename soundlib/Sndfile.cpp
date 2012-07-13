@@ -2121,8 +2121,8 @@ struct UpgradePatternData
 
 		if(pSndFile->GetType() == MOD_TYPE_XM)
 		{
-			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00) ||
-				(!pSndFile->IsCompatibleMode(TRK_FASTTRACKER2) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
+				|| (!pSndFile->IsCompatibleMode(TRK_FASTTRACKER2) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
@@ -2130,6 +2130,18 @@ struct UpgradePatternData
 					// OpenMPT 1.19 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
 					m.command = CMD_NONE;
 				}
+			}
+
+			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
+				&& pSndFile->m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)	// Ignore compatibility export
+				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
+				&& (m.vol != 0 || pSndFile->IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
+			{
+				// Mx and 3xx on the same row does weird things in FT2: 3xx is completely ignored and the Mx parameter is doubled. Fixed in revision 1312 / OpenMPT 1.20.01.10
+				// Previously the values were just added up, so let's fix this!
+				m.volcmd = VOLCMD_NONE;
+				const uint16 param = static_cast<uint16>(m.param) + static_cast<uint16>(m.vol << 4);
+				m.param = static_cast<uint8>(Util::Min(param, uint16(0xFF)));
 			}
 		}
 
