@@ -15,19 +15,18 @@
 // Instrument Envelopes
 struct InstrumentEnvelope
 {
-	DWORD dwFlags;				// envelope flags
-	UINT nNodes;				// amount of nodes used
-	BYTE nLoopStart;			// loop start node
-	BYTE nLoopEnd;				// loop end node
-	BYTE nSustainStart;			// sustain start node
-	BYTE nSustainEnd;			// sustain end node
-	BYTE nReleaseNode;			// release node
-	WORD Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
-	BYTE Values[MAX_ENVPOINTS];	// envelope point value (y axis)
+	FlagSet<EnvelopeFlags> dwFlags;	// envelope flags
+	uint32 nNodes;					// amount of nodes used
+	uint8  nLoopStart;				// loop start node
+	uint8  nLoopEnd;				// loop end node
+	uint8  nSustainStart;			// sustain start node
+	uint8  nSustainEnd;				// sustain end node
+	uint8  nReleaseNode;			// release node
+	uint16 Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
+	uint8  Values[MAX_ENVPOINTS];	// envelope point value (y axis)
 
 	InstrumentEnvelope()
 	{
-		dwFlags = 0;
 		nNodes = 0;
 		nLoopStart = nLoopEnd = 0;
 		nSustainStart = nSustainEnd = 0;
@@ -47,48 +46,49 @@ struct InstrumentEnvelope
 // Instrument Struct
 struct ModInstrument
 {
-	UINT nFadeOut;		// Instrument fadeout speed
-	DWORD dwFlags;		// Instrument flags
-	UINT nGlobalVol;	// Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
-	UINT nPan;			// Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
+	FlagSet<InstrumentFlags> dwFlags;	// Instrument flags
+	uint32 nFadeOut;					// Instrument fadeout speed
+	uint32 nGlobalVol;					// Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
+	uint32 nPan;						// Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
 
-	uint8 nNNA;			// New note action
-	uint8 nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
-	uint8 nDNA;			// Duplicate note action
-	uint8 nPanSwing;	// Random panning factor (0...64)
-	uint8 nVolSwing;	// Random volume factor (0...100)
-	uint8 nIFC;			// Default filter cutoff (0...127). Used if the high bit is set
-	uint8 nIFR;			// Default filter resonance (0...127). Used if the high bit is set
+	uint16 nVolRampUp;					// Default sample ramping up
 
-	uint16 wMidiBank;	// MIDI Bank (1...16384). 0 = Don't send.
-	uint8 nMidiProgram;	// MIDI Program (1...128). 0 = Don't send.
-	uint8 nMidiChannel;	// MIDI Channel (1...16). 0 = Don't send. 17 = Mapped (Send to tracker channel modulo 16).
-	uint8 nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
+	uint16 wMidiBank;					// MIDI Bank (1...16384). 0 = Don't send.
+	uint8 nMidiProgram;					// MIDI Program (1...128). 0 = Don't send.
+	uint8 nMidiChannel;					// MIDI Channel (1...16). 0 = Don't send. 17 = Mapped (Send to tracker channel modulo 16).
+	uint8 nMidiDrumKey;					// Drum set note mapping (currently only used by the .MID loader)
 
-	int8 nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
-	uint8 nPPC;	//Pitch/Pan centre
+	uint8 nNNA;							// New note action
+	uint8 nDCT;							// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
+	uint8 nDNA;							// Duplicate note action
+	uint8 nPanSwing;					// Random panning factor (0...64)
+	uint8 nVolSwing;					// Random volume factor (0...100)
+	uint8 nIFC;							// Default filter cutoff (0...127). Used if the high bit is set
+	uint8 nIFR;							// Default filter resonance (0...127). Used if the high bit is set
 
-	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
-	uint16 nVolRampUp;				// Default sample ramping up
-	UINT nResampling;				// Resampling mode
-	uint8 nCutSwing;				// Random cutoff factor (0...64)
-	uint8 nResSwing;				// Random resonance factor (0...64)
-	uint8 nFilterMode;				// Default filter mode
-	uint16 wPitchToTempoLock;		// BPM at which the samples assigned to this instrument loop correctly
-	uint8 nPluginVelocityHandling;	// How to deal with plugin velocity
-	uint8 nPluginVolumeHandling;	// How to deal with plugin volume
-	CTuning *pTuning;				// sample tuning assigned to this instrument
+	int8 nPPS;							// Pitch/Pan separation (i.e. how wide the panning spreads, -32...32)
+	uint8 nPPC;							// Pitch/Pan centre
+
+	PLUGINDEX nMixPlug;					// Plugin assigned to this instrument
+	uint8 nCutSwing;					// Random cutoff factor (0...64)
+	uint8 nResSwing;					// Random resonance factor (0...64)
+	uint8 nFilterMode;					// Default filter mode
+	uint8 nPluginVelocityHandling;		// How to deal with plugin velocity
+	uint8 nPluginVolumeHandling;		// How to deal with plugin volume
+	uint32 nResampling;					// Resampling mode
+	uint16 wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
+	CTuning *pTuning;					// sample tuning assigned to this instrument
 	static CTuning *s_DefaultTuning;
 
-	InstrumentEnvelope VolEnv;		// Volume envelope data
-	InstrumentEnvelope PanEnv;		// Panning envelope data
-	InstrumentEnvelope PitchEnv;	// Pitch / filter envelope data
+	InstrumentEnvelope VolEnv;			// Volume envelope data
+	InstrumentEnvelope PanEnv;			// Panning envelope data
+	InstrumentEnvelope PitchEnv;		// Pitch / filter envelope data
 
-	BYTE NoteMap[128];			// Note mapping, e.g. C-5 => D-5.
-	SAMPLEINDEX Keyboard[128];	// Sample mapping, e.g. C-5 => Sample 1
+	uint8 NoteMap[128];					// Note mapping, e.g. C-5 => D-5.
+	SAMPLEINDEX Keyboard[128];			// Sample mapping, e.g. C-5 => Sample 1
 
-	CHAR name[MAX_INSTRUMENTNAME];		// Note: not guaranteed to be null-terminated.
-	CHAR filename[MAX_INSTRUMENTFILENAME];
+	char name[MAX_INSTRUMENTNAME];		// Note: not guaranteed to be null-terminated.
+	char filename[MAX_INSTRUMENTFILENAME];
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
@@ -115,7 +115,7 @@ struct ModInstrument
 	{
 		for(size_t n = 0; n < CountOf(NoteMap); n++)
 		{
-			NoteMap[n] = static_cast<BYTE>(n + 1);
+			NoteMap[n] = static_cast<uint8>(n + 1);
 		}
 	}
 

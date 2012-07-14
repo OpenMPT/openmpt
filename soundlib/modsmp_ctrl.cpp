@@ -17,32 +17,29 @@
 namespace ctrlSmp
 {
 
-void ReplaceSample(ModSample &smp, const LPSTR pNewSample, const SmpLength nNewLength, CSoundFile* pSndFile)
+void ReplaceSample(ModSample &smp, const LPSTR pNewSample, const SmpLength nNewLength, CSoundFile *pSndFile)
 //----------------------------------------------------------------------------------------------------------
 {
 	LPSTR const pOldSmp = smp.pSample;
-	DWORD dwOrFlags = 0;
-	DWORD dwAndFlags = MAXDWORD;
-	if(smp.uFlags & CHN_16BIT)
-		dwOrFlags |= CHN_16BIT;
-	else
-		dwAndFlags &= ~CHN_16BIT;
-	if(smp.uFlags & CHN_STEREO)
-		dwOrFlags |= CHN_STEREO;
-	else
-		dwAndFlags &= ~CHN_STEREO;
+	FlagSet<ChannelFlags> setFlags, resetFlags;
+
+	setFlags.set(CHN_16BIT, (smp.uFlags & CHN_16BIT) != 0);
+	resetFlags.set(CHN_16BIT, (smp.uFlags & CHN_16BIT) == 0);
+
+	setFlags.set(CHN_STEREO, (smp.uFlags & CHN_STEREO) != 0);
+	resetFlags.set(CHN_STEREO, (smp.uFlags & CHN_STEREO) == 0);
 
 	CriticalSection cs;
 
 	if (pSndFile != nullptr)
-		ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength, dwOrFlags, dwAndFlags);
+		ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength, setFlags, resetFlags);
 	smp.pSample = pNewSample;
 	smp.nLength = nNewLength;
 	CSoundFile::FreeSample(pOldSmp);
 }
 
 
-SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
+SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile *pSndFile)
 //-----------------------------------------------------------------------------------------------------------------------
 {
 	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
@@ -98,7 +95,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 }
 
 
-SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile* pSndFile)
+SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile *pSndFile)
 //--------------------------------------------------------------------------------------
 {
 	// Invalid sample size
@@ -175,7 +172,7 @@ void AdjustEndOfSampleImpl(ModSample &smp)
 } // unnamed namespace.
 
 
-bool AdjustEndOfSample(ModSample &smp, CSoundFile* pSndFile)
+bool AdjustEndOfSample(ModSample &smp, CSoundFile *pSndFile)
 //----------------------------------------------------------
 {
 	if ((!smp.nLength) || (!smp.pSample))
@@ -192,29 +189,25 @@ bool AdjustEndOfSample(ModSample &smp, CSoundFile* pSndFile)
 	if(pSndFile != nullptr)
 	{
 		CSoundFile& rSndFile = *pSndFile;
-		for (UINT i=0; i<MAX_CHANNELS; i++) if ((rSndFile.Chn[i].pModSample == &smp) && (rSndFile.Chn[i].nLength))
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if ((rSndFile.Chn[i].pModSample == &smp) && rSndFile.Chn[i].nLength != 0)
 		{
-			if ((smp.nLoopStart + 3 < smp.nLoopEnd) && (smp.nLoopEnd <= smp.nLength))
+			if((smp.nLoopStart + 3 < smp.nLoopEnd) && (smp.nLoopEnd <= smp.nLength))
 			{
 				rSndFile.Chn[i].nLoopStart = smp.nLoopStart;
 				rSndFile.Chn[i].nLoopEnd = smp.nLoopEnd;
 				rSndFile.Chn[i].nLength = smp.nLoopEnd;
-				if (rSndFile.Chn[i].nPos > rSndFile.Chn[i].nLength)
+				if(rSndFile.Chn[i].nPos > rSndFile.Chn[i].nLength)
 				{
 					rSndFile.Chn[i].nPos = rSndFile.Chn[i].nLoopStart;
-					rSndFile.Chn[i].dwFlags &= ~CHN_PINGPONGFLAG;
+					rSndFile.Chn[i].dwFlags.reset(CHN_PINGPONGFLAG);
 				}
-				DWORD d = rSndFile.Chn[i].dwFlags & ~(CHN_PINGPONGLOOP|CHN_LOOP);
-				if (smp.uFlags & CHN_LOOP)
-				{
-					d |= CHN_LOOP;
-					if (smp.uFlags & CHN_PINGPONGLOOP) d |= CHN_PINGPONGLOOP;
-				}
-				rSndFile.Chn[i].dwFlags = d;
-			} else
-			if (!(smp.uFlags & CHN_LOOP))
+
+				bool looped = (smp.uFlags & CHN_LOOP) != 0;
+				rSndFile.Chn[i].dwFlags.set(CHN_LOOP, looped);
+				rSndFile.Chn[i].dwFlags.set(CHN_PINGPONGLOOP, looped && (smp.uFlags & CHN_PINGPONGLOOP));
+			} else if (!(smp.uFlags & CHN_LOOP))
 			{
-				rSndFile.Chn[i].dwFlags &= ~(CHN_PINGPONGLOOP|CHN_LOOP);
+				rSndFile.Chn[i].dwFlags.reset(CHN_PINGPONGLOOP | CHN_LOOP);
 			}
 		}
 	}
@@ -626,7 +619,7 @@ bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile)
 	{
 		if(pSndFile->Chn[i].pSample == smp.pSample)
 		{
-			pSndFile->Chn[i].dwFlags &= ~CHN_STEREO;
+			pSndFile->Chn[i].dwFlags.reset(CHN_STEREO);
 		}
 	}
 
@@ -646,8 +639,8 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 					LPCSTR pOldSample,
 					LPSTR pNewSample,
 					const SmpLength nNewLength,
-					DWORD orFlags /* = 0*/,
-					DWORD andFlags /* = MAXDWORD*/)
+					FlagSet<ChannelFlags> setFlags,
+					FlagSet<ChannelFlags> resetFlags)
 {
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
@@ -660,8 +653,8 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 				Chn[i].nPos = 0;
 			if (Chn[i].nLength > 0)
 				Chn[i].nLength = nNewLength;
-			Chn[i].dwFlags |= orFlags;
-			Chn[i].dwFlags &= andFlags;
+			Chn[i].dwFlags.set(setFlags);
+			Chn[i].dwFlags.reset(resetFlags);
 		}
 	}
 }

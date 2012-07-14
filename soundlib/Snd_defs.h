@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../common/typedefs.h"
+#include "../common/FlagSet.h"
 
 #ifndef LPCBYTE
 typedef const BYTE * LPCBYTE;
@@ -78,7 +79,7 @@ const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing chann
 
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
 
-enum MODTYPE
+FLAGSET(MODTYPE)
 {
 	MOD_TYPE_NONE	= 0x00,
 	MOD_TYPE_MOD	= 0x01,
@@ -111,16 +112,6 @@ enum MODTYPE
 	MOD_TYPE_UMX	= 0x80000000, // Fake type
 };
 
-// Allow for type safe combinations of MODTYPEs.
-inline MODTYPE operator | (MODTYPE a, MODTYPE b)
-{
-	return static_cast<MODTYPE>(+a | +b);
-};
-
-inline MODTYPE operator & (MODTYPE a, MODTYPE b)
-{
-	return static_cast<MODTYPE>(+a & +b);
-};
 
 // For compatibility mode
 #define TRK_IMPULSETRACKER	(MOD_TYPE_IT | MOD_TYPE_MPT)
@@ -130,48 +121,56 @@ inline MODTYPE operator & (MODTYPE a, MODTYPE b)
 #define TRK_ALLTRACKERS		(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER | TRK_PROTRACKER)
 
 
-
 // Channel flags:
-// Bits 0-7:	Sample Flags
-#define CHN_16BIT			0x01		// 16-bit sample
-#define CHN_LOOP			0x02		// looped sample
-#define CHN_PINGPONGLOOP	0x04		// bidi-looped sample
-#define CHN_SUSTAINLOOP		0x08		// sample with sustain loop
-#define CHN_PINGPONGSUSTAIN	0x10		// sample with bidi sustain loop
-#define CHN_PANNING			0x20		// sample with forced panning
-#define CHN_STEREO			0x40		// stereo sample
-#define CHN_PINGPONGFLAG	0x80		// when flag is on, sample is processed backwards
-// Bits 8-31:	Channel Flags
-#define CHN_MUTE			0x100		// muted channel
-#define CHN_KEYOFF			0x200		// exit sustain
-#define CHN_NOTEFADE		0x400		// fade note (instrument mode)
-#define CHN_SURROUND		0x800		// use surround channel
-#define CHN_NOIDO			0x1000		// (IDO = Interpolation Do?) Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
-#define CHN_HQSRC			0x2000		// High quality sample rate conversion (i.e. apply interpolation)
-#define CHN_FILTER			0x4000		// filtered output
-#define CHN_VOLUMERAMP		0x8000		// ramp volume
-#define CHN_VIBRATO			0x10000		// apply vibrato
-#define CHN_TREMOLO			0x20000		// apply tremolo
-#define CHN_PANBRELLO		0x40000		// apply panbrello
-#define CHN_PORTAMENTO		0x80000		// apply portamento
-#define CHN_GLISSANDO		0x100000	// glissando mode
-#define CHN_FASTVOLRAMP		0x200000	// ramp volume very fast
-#define CHN_EXTRALOUD		0x400000	// force master volume to 0x100
-#define CHN_REVERB			0x800000	// apply reverb
-#define CHN_NOREVERB		0x1000000	// forbid reverb
-#define CHN_SOLO			0x2000000	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
-#define CHN_NOFX			0x4000000	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
-#define CHN_SYNCMUTE		0x8000000	// keep sample sync on mute
+FLAGSET(ChannelFlags)
+{
+	// Bits 0-7:	Sample Flags
+	CHN_16BIT			= 0x01,			// 16-bit sample
+	CHN_LOOP			= 0x02,			// looped sample
+	CHN_PINGPONGLOOP	= 0x04,			// bidi-looped sample
+	CHN_SUSTAINLOOP		= 0x08,			// sample with sustain loop
+	CHN_PINGPONGSUSTAIN	= 0x10,			// sample with bidi sustain loop
+	CHN_PANNING			= 0x20,			// sample with forced panning
+	CHN_STEREO			= 0x40,			// stereo sample
+	CHN_PINGPONGFLAG	= 0x80,			// when flag is on, sample is processed backwards
+	// Bits 8-31:	Channel Flags
+	CHN_MUTE			= 0x100,		// muted channel
+	CHN_KEYOFF			= 0x200,		// exit sustain
+	CHN_NOTEFADE		= 0x400,		// fade note (instrument mode)
+	CHN_SURROUND		= 0x800,		// use surround channel
+	CHN_NOIDO			= 0x1000,		// (IDO = Interpolation Do?) Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
+	CHN_HQSRC			= 0x2000,		// High quality sample rate conversion (i.e. apply interpolation)
+	CHN_FILTER			= 0x4000,		// filtered output
+	CHN_VOLUMERAMP		= 0x8000,		// ramp volume
+	CHN_VIBRATO			= 0x10000,		// apply vibrato
+	CHN_TREMOLO			= 0x20000,		// apply tremolo
+	CHN_PANBRELLO		= 0x40000,		// apply panbrello
+	CHN_PORTAMENTO		= 0x80000,		// apply portamento
+	CHN_GLISSANDO		= 0x100000,		// glissando mode
+	CHN_FASTVOLRAMP		= 0x200000,		// ramp volume very fast
+	CHN_EXTRALOUD		= 0x400000,		// force master volume to = 0x100
+	CHN_REVERB			= 0x800000,		// apply reverb
+	CHN_NOREVERB		= 0x1000000,	// forbid reverb
+	CHN_SOLO			= 0x2000000,	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
+	CHN_NOFX			= 0x4000000,	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
+	CHN_SYNCMUTE		= 0x8000000,	// keep sample sync on mute
+};
 
-#define CHN_SAMPLEFLAGS		(CHN_16BIT|CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN|CHN_PANNING|CHN_STEREO|CHN_PINGPONGFLAG)
-#define CHN_CHANNELFLAGS	(~CHN_SAMPLEFLAGS)
 
-// instrument envelope-specific flags
-#define ENV_ENABLED			0x01	// env is enabled
-#define ENV_LOOP			0x02	// env loop
-#define ENV_SUSTAIN			0x04	// env sustain
-#define ENV_CARRY			0x08	// env carry
-#define ENV_FILTER			0x10	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
+#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG)
+#define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
+
+
+// Instrument envelope-specific flags
+FLAGSET(EnvelopeFlags)
+{
+	ENV_ENABLED		= 0x01,	// env is enabled
+	ENV_LOOP		= 0x02,	// env loop
+	ENV_SUSTAIN		= 0x04,	// env sustain
+	ENV_CARRY		= 0x08,	// env carry
+	ENV_FILTER		= 0x10,	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
+};
+
 
 // Envelope value boundaries
 #define ENVELOPE_MIN		0		// vertical min value of a point
@@ -199,9 +198,12 @@ inline MODTYPE operator & (MODTYPE a, MODTYPE b)
 #define dFdd_MUTE 			0x4000
 
 
-// instrument-specific flags
-#define INS_SETPANNING		0x01	// panning enabled
-#define INS_MUTE			0x02	// instrument is muted
+// Instrument-specific flags
+FLAGSET(InstrumentFlags)
+{
+	INS_SETPANNING	= 0x01,	// Panning enabled
+	INS_MUTE		= 0x02,	// Instrument is muted
+};
 
 
 // envelope types in instrument editor
@@ -245,7 +247,7 @@ enum enmEnvelopeTypes
 #define SYSMIX_SSE			0x20		// Processor supports SSE instructions
 
 // Module flags
-enum SongFlags
+FLAGSET(SongFlags)
 {
 	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
 	SONG_FASTVOLSLIDES	= 0x0002,		// Old Scream Tracker 3.0 volume slides
@@ -311,7 +313,8 @@ enum SongFlags
 #define MAX_GLOBAL_VOLUME 256u
 
 // Resampling modes
-enum {
+enum ResamplingMode
+{
 	SRCMODE_NEAREST,
 	SRCMODE_LINEAR,
 	SRCMODE_SPLINE,

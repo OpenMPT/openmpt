@@ -264,9 +264,9 @@ BOOL CSoundFile::FadeSong(UINT msec)
 		pramp->nRampRightVol = pramp->nRightVol << VOLUMERAMPPRECISION;
 		pramp->nRampLeftVol = pramp->nLeftVol << VOLUMERAMPPRECISION;
 		pramp->nRampLength = nRampLength;
-		pramp->dwFlags |= CHN_VOLUMERAMP;
+		pramp->dwFlags.set(CHN_VOLUMERAMP);
 	}
-	m_dwSongFlags |= SONG_FADINGSONG;
+	m_SongFlags.set(SONG_FADINGSONG);
 	return TRUE;
 }
 
@@ -274,10 +274,10 @@ BOOL CSoundFile::FadeSong(UINT msec)
 BOOL CSoundFile::GlobalFadeSong(UINT msec)
 //----------------------------------------
 {
-	if (m_dwSongFlags & SONG_GLOBALFADE) return FALSE;
+	if(m_SongFlags[SONG_GLOBALFADE]) return FALSE;
 	m_nGlobalFadeMaxSamples = _muldiv(msec, gdwMixingFreq, 1000);
 	m_nGlobalFadeSamples = m_nGlobalFadeMaxSamples;
-	m_dwSongFlags |= SONG_GLOBALFADE;
+	m_SongFlags.set(SONG_GLOBALFADE);
 	return TRUE;
 }
 
@@ -306,7 +306,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 	lMax = cbBuffer / lSampleSize;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
 	samplecount_t lRead = lMax;
-	if (m_dwSongFlags & SONG_ENDREACHED) 
+	if(m_SongFlags[SONG_ENDREACHED])
 		goto MixDone;
 
 	while (lRead > 0)
@@ -316,9 +316,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		{
 
 #ifndef FASTSOUNDLIB
-			if (m_dwSongFlags & SONG_FADINGSONG)
+			if(m_SongFlags[SONG_FADINGSONG])
 			{
-				m_dwSongFlags |= SONG_ENDREACHED;
+				m_SongFlags.set(SONG_ENDREACHED);
 				m_nBufferCount = lRead;
 			} else
 #endif // FASTSOUNDLIB
@@ -339,7 +339,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 #ifdef MODPLUG_TRACKER
 				if ((m_nMaxOrderPosition) && (m_nCurrentOrder >= m_nMaxOrderPosition))
 				{
-					m_dwSongFlags |= SONG_ENDREACHED;
+					m_SongFlags.set(SONG_ENDREACHED);
 					break;
 				}
 #endif // MODPLUG_TRACKER
@@ -348,7 +348,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				if (!FadeSong(FADESONGDELAY) || m_bIsRendering)	//rewbs: disable song fade when rendering.
 #endif // FASTSOUNDLIB
 				{
-					m_dwSongFlags |= SONG_ENDREACHED;
+					m_SongFlags.set(SONG_ENDREACHED);
 					if (lRead == lMax || m_bIsRendering)		//rewbs: don't complete buffer when rendering
 						goto MixDone;
 					m_nBufferCount = lRead;
@@ -508,14 +508,14 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 		{
 			if (!m_nBufferCount)
 			{
-				if (m_dwSongFlags & SONG_ENDREACHED)
+				if(m_SongFlags[SONG_ENDREACHED])
 				{
 					m_nBufferCount = 0;
 					*pstatus &= ~1;
 				} else
-				if (m_dwSongFlags & SONG_FADINGSONG)
+				if(m_SongFlags[SONG_FADINGSONG])
 				{
-					m_dwSongFlags |= SONG_ENDREACHED;
+					m_SongFlags.set(SONG_ENDREACHED);
 					m_nBufferCount = lRead;
 					*pstatus &= ~1;
 				} else
@@ -523,7 +523,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 				{
 					if (!FadeSong(FADESONGDELAY))
 					{
-						m_dwSongFlags |= SONG_ENDREACHED;
+						m_SongFlags.set(SONG_ENDREACHED);
 						m_nBufferCount = lRead;
 						*pstatus &= ~1;
 					}
@@ -540,14 +540,14 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 		{
 			if (!pSndFile->m_nBufferCount)
 			{
-				if (pSndFile->m_dwSongFlags & SONG_ENDREACHED)
+				if(pSndFile->m_SongFlags[SONG_ENDREACHED])
 				{
 					pSndFile->m_nBufferCount = 0;
 					*pstatus &= ~2;
 				} else
-				if (pSndFile->m_dwSongFlags & SONG_FADINGSONG)
+				if(pSndFile->m_SongFlags[SONG_FADINGSONG])
 				{
-					pSndFile->m_dwSongFlags |= SONG_ENDREACHED;
+					pSndFile->m_SongFlags.set(SONG_ENDREACHED);
 					pSndFile->m_nBufferCount = lRead;
 					*pstatus &= ~2;
 				} else
@@ -555,7 +555,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 				{
 					if (!pSndFile->FadeSong(FADESONGDELAY))
 					{
-						pSndFile->m_dwSongFlags |= SONG_ENDREACHED;
+						pSndFile->m_SongFlags.set(SONG_ENDREACHED);
 						pSndFile->m_nBufferCount = lRead;
 						*pstatus &= ~2;
 					}
@@ -686,7 +686,7 @@ BOOL CSoundFile::ProcessRow()
 		if (m_nCurrentOrder != m_nNextOrder) 
 			m_nCurrentOrder = m_nNextOrder;
 		// Check if pattern is valid
-		if (!(m_dwSongFlags & SONG_PATTERNLOOP))
+		if(!m_SongFlags[SONG_PATTERNLOOP])
 		{
 			m_nPattern = (m_nCurrentOrder < Order.size()) ? Order[m_nCurrentOrder] : Order.GetInvalidPatIndex();
 			if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) m_nPattern = Order.GetIgnoreIndex();
@@ -720,10 +720,10 @@ BOOL CSoundFile::ProcessRow()
 					if(!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_RESETCHANNELS))
 #endif // MODPLUG_TRACKER
 					{
-						m_dwSongFlags |= SONG_BREAKTOROW;
+						m_SongFlags.set(SONG_BREAKTOROW);
 					}
 
-					if (!nRestartPosOverride && !(m_dwSongFlags & SONG_BREAKTOROW))
+					if (!nRestartPosOverride && !m_SongFlags[SONG_BREAKTOROW])
 					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
@@ -732,7 +732,7 @@ BOOL CSoundFile::ProcessRow()
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
 						for (UINT i=0; i<MAX_CHANNELS; i++)
 						{
-							Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
+							Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 							Chn[i].nFadeOutVol = 0;
 
 							if (i < m_nChannels)
@@ -765,7 +765,7 @@ BOOL CSoundFile::ProcessRow()
 					//Handle Repeat position
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentOrder = nRestartPosOverride;
-					m_dwSongFlags &= ~SONG_BREAKTOROW;
+					m_SongFlags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
 					while (Order[m_nCurrentOrder] == Order.GetIgnoreIndex())
 					{
@@ -809,7 +809,7 @@ BOOL CSoundFile::ProcessRow()
 		// But: We will not mark the row as modified if the song is not in loop mode but
 		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
 		// flag is set - because in that case, the module would stop after the first pattern loop...
-		const bool overrideLoopCheck = (m_nRepeatCount != -1) && (m_dwSongFlags & SONG_PATTERNLOOP);
+		const bool overrideLoopCheck = (m_nRepeatCount != -1) && m_SongFlags[SONG_PATTERNLOOP];
 		if(!overrideLoopCheck && visitedSongRows.IsVisited(m_nCurrentOrder, m_nRow, true))
 		{
 			if(m_nRepeatCount)
@@ -848,7 +848,7 @@ BOOL CSoundFile::ProcessRow()
 		m_nNextRow = m_nRow + 1;
 		if (m_nNextRow >= Patterns[m_nPattern].GetNumRows())
 		{
-			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextOrder = m_nCurrentOrder + 1;
+			if (!m_SongFlags[SONG_PATTERNLOOP]) m_nNextOrder = m_nCurrentOrder + 1;
 			m_bPatternTransitionOccurred = true;
 			m_nNextRow = 0;
 
@@ -869,7 +869,7 @@ BOOL CSoundFile::ProcessRow()
 
 			pChn->nLeftVol = pChn->nNewLeftVol;
 			pChn->nRightVol = pChn->nNewRightVol;
-			pChn->dwFlags &= ~(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
+			pChn->dwFlags.reset(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
 			pChn->nCommand = 0;
 			pChn->m_plugParamValueStep = 0;
 		}
@@ -880,30 +880,30 @@ BOOL CSoundFile::ProcessRow()
 	}
 	// Should we process tick0 effects?
 	if (!m_nMusicSpeed) m_nMusicSpeed = 1;
-	m_dwSongFlags |= SONG_FIRSTTICK;
+	m_SongFlags.set(SONG_FIRSTTICK);
 
 	//End of row? stop pattern step (aka "play row").
 #ifdef MODPLUG_TRACKER
 	if (m_nTickCount >= GetNumTicksOnCurrentRow() - 1)
 	{
-		if (m_dwSongFlags & SONG_STEP)
+		if(m_SongFlags[SONG_STEP])
 		{
-			m_dwSongFlags &= ~SONG_STEP;
-			m_dwSongFlags |= SONG_PAUSED;
+			m_SongFlags.reset(SONG_STEP);
+			m_SongFlags.set(SONG_PAUSED);
 		}
 	}
 #endif // MODPLUG_TRACKER
 
 	if (m_nTickCount)
 	{
-		m_dwSongFlags &= ~SONG_FIRSTTICK;
+		m_SongFlags.reset(SONG_FIRSTTICK);
 		if(!(GetType() & MOD_TYPE_XM) && m_nTickCount < GetNumTicksOnCurrentRow())
 		{
 			// Emulate first tick behaviour if Row Delay is set.
 			// Test cases: PatternDelaysRetrig.it, PatternDelaysRetrig.s3m, PatternDelaysRetrig.xm
 			if(!(m_nTickCount % (m_nMusicSpeed + m_nFrameDelay)))
 			{
-				m_dwSongFlags |= SONG_FIRSTTICK;
+				m_SongFlags.set(SONG_FIRSTTICK);
 			}
 		}
 	}
@@ -988,18 +988,18 @@ void CSoundFile::ProcessPanningSwing(ModChannel *pChn)
 void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol)
 //---------------------------------------------------------
 {
-	if (pChn->dwFlags & CHN_TREMOLO)
+	if (pChn->dwFlags[CHN_TREMOLO])
 	{
 		UINT trempos = pChn->nTremoloPos;
 		// IT compatibility: Why would you not want to execute tremolo at volume 0?
-		if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
 			const int tremattn = ((GetType() & MOD_TYPE_XM) || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
 
 			vol += (GetVibratoDelta(pChn->nTremoloType, trempos) * (int)pChn->nTremoloDepth) >> tremattn;
 		}
-		if (!(m_dwSongFlags & SONG_FIRSTTICK) || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1020,7 +1020,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 		// Test case: Tremor.xm
 		if(pChn->nTremorCount & 0x80)
 		{
-			if(!(m_dwSongFlags & SONG_FIRSTTICK) && pChn->nCommand == CMD_TREMOR)
+			if(!m_SongFlags[SONG_FIRSTTICK] && pChn->nCommand == CMD_TREMOR)
 			{
 				pChn->nTremorCount &= ~0x20;
 				if(pChn->nTremorCount == 0x80)
@@ -1036,7 +1036,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 					pChn->nTremorCount--;
 				}
 				
-				pChn->dwFlags |= CHN_FASTVOLRAMP;
+				pChn->dwFlags.set(CHN_FASTVOLRAMP);
 			}
 
 			if((pChn->nTremorCount & 0xE0) == 0x80)
@@ -1065,7 +1065,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 		{
 			UINT ontime = pChn->nTremorParam >> 4;
 			UINT n = ontime + (pChn->nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)
-			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS))
+			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS])
 			{
 				n += 2;
 				ontime++;
@@ -1078,7 +1078,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 				pChn->nTremorCount = (BYTE)(tremcount + 1);
 			} else
 			{
-				if(m_dwSongFlags & SONG_FIRSTTICK)
+				if(m_SongFlags[SONG_FIRSTTICK])
 				{
 					// tremcount is only 0 on the first tremor tick after triggering a note.
 					if(tremcount > 0)
@@ -1092,7 +1092,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 				if (tremcount % n >= ontime) vol = 0;
 			}
 		}
-		pChn->dwFlags |= CHN_FASTVOLRAMP;
+		pChn->dwFlags.set(CHN_FASTVOLRAMP);
 	}
 }
 
@@ -1108,7 +1108,7 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes en
 
 	// IT Compatibility: S77/S79/S7B do not disable the envelope, they just pause the counter
 	// Test cases: s77.it, EnvLoops.xm
-	return (((pChn->GetEnvelope(env).flags & ENV_ENABLED) || ((insEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2)))
+	return ((pChn->GetEnvelope(env).flags[ENV_ENABLED] || (insEnv.dwFlags[ENV_ENABLED] && IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2)))
 		&& insEnv.nNodes != 0);
 }
 
@@ -1202,10 +1202,10 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 		// Get values in [-256, 256]
 		const int envval = Util::Round<int>((pIns->PitchEnv.GetValueFromPosition(envpos) - 0.5f) * 512.0f);
 
-		if(pChn->PitchEnv.flags & ENV_FILTER)
+		if(pChn->PitchEnv.flags[ENV_FILTER])
 		{
 			// Filter Envelope: controls cutoff frequency
-			SetupChannelFilter(pChn, !(pChn->dwFlags & CHN_FILTER), envval);
+			SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER], envval);
 		} else
 		{
 			// Pitch Envelope
@@ -1244,7 +1244,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 {
 	ModChannelEnvInfo &chnEnv = pChn->GetEnvelope(envType);
 
-	if(pChn->pModInstrument == nullptr || !(chnEnv.flags & ENV_ENABLED))
+	if(pChn->pModInstrument == nullptr || !chnEnv.flags[ENV_ENABLED])
 	{
 		return;
 	}
@@ -1259,7 +1259,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
 		// FT2-style envelope processing.
-		if(insEnv.dwFlags & ENV_LOOP)
+		if(insEnv.dwFlags[ENV_LOOP])
 		{
 			// Normal loop active
 			UINT end = insEnv.Ticks[insEnv.nLoopEnd];
@@ -1267,7 +1267,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 
 			// FT2 compatibility: If the sustain point is at the loop end and the sustain loop has been released, don't loop anymore.
 			// Test case: EnvLoops.xm
-			const bool escapeLoop = (insEnv.nLoopEnd == insEnv.nSustainEnd && (insEnv.dwFlags & ENV_SUSTAIN) && (pChn->dwFlags & CHN_KEYOFF) && IsCompatibleMode(TRK_FASTTRACKER2));
+			const bool escapeLoop = (insEnv.nLoopEnd == insEnv.nSustainEnd && insEnv.dwFlags[ENV_SUSTAIN] && pChn->dwFlags[CHN_KEYOFF] && IsCompatibleMode(TRK_FASTTRACKER2));
 
 			if(position == end && !escapeLoop)
 			{
@@ -1284,7 +1284,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 			}
 		}
 
-		if((insEnv.dwFlags & ENV_SUSTAIN) && !(pChn->dwFlags & CHN_KEYOFF))
+		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwFlags[CHN_KEYOFF])
 		{
 			// Envelope sustained
 			if(position == insEnv.Ticks[insEnv.nSustainEnd] + 1u)
@@ -1307,12 +1307,12 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		// Test case: EnvLoops.it
 		UINT start, end;
 
-		if((insEnv.dwFlags & ENV_SUSTAIN) && !(pChn->dwFlags & CHN_KEYOFF))
+		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwFlags[CHN_KEYOFF])
 		{
 			// Envelope sustained
 			start = insEnv.Ticks[insEnv.nSustainStart];
 			end = insEnv.Ticks[insEnv.nSustainEnd] + 1;
-		} else if((insEnv.dwFlags & ENV_LOOP))
+		} else if(insEnv.dwFlags[ENV_LOOP])
 		{
 			// Normal loop active
 			start = insEnv.Ticks[insEnv.nLoopStart];
@@ -1337,15 +1337,15 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 	if(envType == ENV_VOLUME && endReached)
 	{
 		// Special handling for volume envelopes at end of envelope
-		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF))
+		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || pChn->dwFlags[CHN_KEYOFF])
 		{
-			pChn->dwFlags |= CHN_NOTEFADE;
+			pChn->dwFlags.set(CHN_NOTEFADE);
 		}
 
 		if(insEnv.Values[insEnv.nNodes - 1] == 0 && (pChn->nMasterChn > 0 || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 		{
 			// Stop channel if the last envelope node is silent anyway.
-			pChn->dwFlags |= CHN_NOTEFADE;
+			pChn->dwFlags.set(CHN_NOTEFADE);
 			pChn->nFadeOutVol = 0;
 			pChn->nRealVolume = 0;
 			pChn->nCalcVolume = 0;
@@ -1370,7 +1370,7 @@ void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol)
 //----------------------------------------------------------------
 {
 	// FadeOut volume
-	if (pChn->dwFlags & CHN_NOTEFADE)
+	if(pChn->dwFlags[CHN_NOTEFADE])
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
@@ -1406,7 +1406,7 @@ void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn)
 void CSoundFile::ProcessPanbrello(ModChannel *pChn)
 //-------------------------------------------------
 {
-	if (pChn->dwFlags & CHN_PANBRELLO)
+	if(pChn->dwFlags[CHN_PANBRELLO])
 	{
 		UINT panpos;
 		// IT compatibility: IT has its own, more precise tables
@@ -1436,7 +1436,7 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 #if 0
 		// EXPERIMENTAL VSTi arpeggio. Far from perfect!
 		// Note: We could use pChn->nLastNote here to simplify things.
-		if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug && !(m_dwSongFlags & SONG_FIRSTTICK))
+		if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug && !m_SongFlags[SONG_FIRSTTICK])
 		{
 			const ModInstrument *pIns = pChn->pModInstrument;
 			IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
@@ -1509,7 +1509,7 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 				BYTE note = pChn->nNote;
 				int arpPos = 0;
 
-				if (!(m_dwSongFlags & SONG_FIRSTTICK))
+				if(!m_SongFlags[SONG_FIRSTTICK])
 				{
 					arpPos = ((int)m_nMusicSpeed - (int)m_nTickCount) % 3;
 					if((m_nMusicSpeed > 18) && (m_nMusicSpeed - m_nTickCount > 16)) arpPos = 2; // swedish tracker logic, I love it
@@ -1545,7 +1545,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 {
 	ModChannel &chn = Chn[nChn];
 
-	if(chn.dwFlags & CHN_VIBRATO)
+	if(chn.dwFlags[CHN_VIBRATO])
 	{
 		UINT vibpos = chn.nVibratoPos;
 
@@ -1576,7 +1576,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
 				// Yes, vibrato goes backwards with old effects enabled!
-				if(m_dwSongFlags & SONG_ITOLDEFFECTS)
+				if(m_SongFlags[SONG_ITOLDEFFECTS])
 				{
 					// Test case: vibrato-oldfx.it
 					vdepth = 5;
@@ -1588,13 +1588,13 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				}
 			} else
 			{
-				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS]) ? 6 : 7;
 			}
 
 			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
 			int16 midiDelta = static_cast<int16>(-vdelta);	// Periods are upside down
 
-			if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+			if (m_SongFlags[SONG_LINEARSLIDES] && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
 				int l = vdelta;
 				if (l < 0)
@@ -1614,13 +1614,14 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 			if(plugin != nullptr)
 			{
+				// With a pitch wheel depth of +/- 2 semitones, this is identical to sample vibrato with linear slides on.
 				midiDelta *= (MIDIEvents::pitchBendMax - MIDIEvents::pitchBendCentre) / 127;
 				plugin->MidiVibrato(GetBestMidiChannel(nChn), midiDelta);
 			}
 		}
 
 		// Advance vibrato position
-		if(m_nTickCount || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+		if(m_nTickCount || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS])))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1727,7 +1728,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 					pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
 				} else
 				{
-					if (!(pChn->dwFlags & CHN_KEYOFF))
+					if(!pChn->dwFlags[CHN_KEYOFF])
 					{
 						pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
 					}
@@ -1807,7 +1808,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 //-----------------------------------------------
 {
 	pChn->nRightRamp = pChn->nLeftRamp = 0;
-	if((pChn->dwFlags & CHN_VOLUMERAMP) && ((pChn->nRightVol != pChn->nNewRightVol) || (pChn->nLeftVol != pChn->nNewLeftVol)))
+	if(pChn->dwFlags[CHN_VOLUMERAMP] && (pChn->nRightVol != pChn->nNewRightVol || pChn->nLeftVol != pChn->nNewLeftVol))
 	{
 		const bool rampUp = (pChn->nNewRightVol > pChn->nRightVol) || (pChn->nNewLeftVol > pChn->nLeftVol);
 		LONG rampLength, globalRampLength, instrRampLength = 0;
@@ -1835,7 +1836,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 		if((gdwSoundSetup & SNDMIX_DIRECTTODISK)
 			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX | SYSMIX_FASTCPU)) && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50) && !enableCustomRamp))
 		{
-			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && (!(pChn->dwFlags & CHN_FASTVOLRAMP)))
+			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
 				rampLength = m_nBufferCount;
 				if(rampLength > (1 << (VOLUMERAMPPRECISION-1)))
@@ -1860,13 +1861,13 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 			pChn->nRampLength = rampLength;
 		} else
 		{
-			pChn->dwFlags &= ~CHN_VOLUMERAMP;
+			pChn->dwFlags.reset(CHN_VOLUMERAMP);
 			pChn->nRightVol = pChn->nNewRightVol;
 			pChn->nLeftVol = pChn->nNewLeftVol;
 		}
 	} else
 	{
-		pChn->dwFlags &= ~CHN_VOLUMERAMP;
+		pChn->dwFlags.reset(CHN_VOLUMERAMP);
 		pChn->nRightVol = pChn->nNewRightVol;
 		pChn->nLeftVol = pChn->nNewLeftVol;
 	}
@@ -1883,7 +1884,7 @@ BOOL CSoundFile::ReadNote()
 {
 #ifdef MODPLUG_TRACKER
 	// Checking end of row ?
-	if (m_dwSongFlags & SONG_PAUSED)
+	if(m_SongFlags[SONG_PAUSED])
 	{
 		m_nTickCount = 0;
 		if (!m_nMusicSpeed) m_nMusicSpeed = 6;
@@ -1921,7 +1922,7 @@ BOOL CSoundFile::ReadNote()
 			mastervol = m_nSamplePreAmp;
 		}
 
-		if ((m_dwSongFlags & SONG_GLOBALFADE) && (m_nGlobalFadeMaxSamples))
+		if(m_SongFlags[SONG_GLOBALFADE] && m_nGlobalFadeMaxSamples != 0)
 		{
 			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
 		}
@@ -1946,13 +1947,13 @@ BOOL CSoundFile::ReadNote()
 		// FT2 Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
 		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
-		if ((pChn->dwFlags & CHN_NOTEFADE) && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
+		if(pChn->dwFlags[CHN_NOTEFADE] && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
 		{
 			pChn->nLength = 0;
 			pChn->nROfs = pChn->nLOfs = 0;
 		}
 		// Check for unused channel
-		if ((pChn->dwFlags & CHN_MUTE) || ((nChn >= m_nChannels) && (!pChn->nLength)))
+		if(pChn->dwFlags[CHN_MUTE] || (nChn >= m_nChannels && !pChn->nLength))
 		{
 			if(nChn < m_nChannels)
 			{
@@ -2022,7 +2023,7 @@ BOOL CSoundFile::ReadNote()
 			} else
 			{
 				// No Envelope: key off => note cut
-				if (pChn->dwFlags & CHN_NOTEFADE) // 1.41-: CHN_KEYOFF|CHN_NOTEFADE
+				if(pChn->dwFlags[CHN_NOTEFADE]) // 1.41-: CHN_KEYOFF|CHN_NOTEFADE
 				{
 					pChn->nFadeOutVol = 0;
 					vol = 0;
@@ -2042,7 +2043,7 @@ BOOL CSoundFile::ReadNote()
 				
 				// Don't let global volume affect level of sample if
 				// Global volume is going to be applied to master output anyway.
-				if (pChn->dwFlags & CHN_SYNCMUTE)
+				if(pChn->dwFlags[CHN_SYNCMUTE])
 				{
 					pChn->nRealVolume = 0;
 				} else if (m_pConfig->getGlobalVolumeAppliesToMaster())
@@ -2059,7 +2060,7 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			period = pChn->nPeriod;
 			// TODO Glissando effect is reset after portamento! What would this sound like without the CHN_PORTAMENTO flag?
-			if ((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO))
+			if((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO))
 			{
 				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
 			}
@@ -2068,7 +2069,7 @@ BOOL CSoundFile::ReadNote()
 
 			// Preserve Amiga freq limits
 			// Test case: AmigaLimits.s3m
-			if (m_dwSongFlags & (SONG_AMIGALIMITS | SONG_PT1XMODE))
+			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT1XMODE])
 			{
 				Limit(period, 113 * 4, 856 * 4);
 				Limit(pChn->nPeriod, 113 * 4, 856 * 4);
@@ -2080,7 +2081,7 @@ BOOL CSoundFile::ReadNote()
 
 		// IT Compatibility: Ensure that there is no pan swing, panbrello, panning envelopes, etc. applied on surround channels.
 		// Test case: surround-pan.it
-		if((pChn->dwFlags & CHN_SURROUND) && !(m_dwSongFlags & SONG_SURROUNDPAN) && IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(pChn->dwFlags[CHN_SURROUND] && !m_SongFlags[SONG_SURROUNDPAN] && IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			pChn->nRealPan = 128;
 		}
@@ -2151,7 +2152,7 @@ BOOL CSoundFile::ReadNote()
 			if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
 			{
 				pChn->nFadeOutVol = 0;
-				pChn->dwFlags |= CHN_NOTEFADE;
+				pChn->dwFlags.set(CHN_NOTEFADE);
 				pChn->nRealVolume = 0;
 				pChn->nCalcVolume = 0;
 			}
@@ -2185,9 +2186,7 @@ BOOL CSoundFile::ReadNote()
 #endif // MODPLUG_PLAYER
 
 		// Volume ramping
-		pChn->dwFlags &= ~CHN_VOLUMERAMP;
-		if ((pChn->nRealVolume) || (pChn->nLeftVol) || (pChn->nRightVol))
-			pChn->dwFlags |= CHN_VOLUMERAMP;
+		pChn->dwFlags.set(CHN_VOLUMERAMP, (pChn->nRealVolume | pChn->nLeftVol | pChn->nRightVol) != 0);
 
 #ifdef MODPLUG_PLAYER
 		// Decrease VU-Meter
@@ -2200,7 +2199,7 @@ BOOL CSoundFile::ReadNote()
 #endif
 
 		// Check for too big nInc
-		if (((pChn->nInc >> 16) + 1) >= (LONG)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags &= ~CHN_LOOP;
+		if (((pChn->nInc >> 16) + 1) >= (LONG)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags.reset(CHN_LOOP);
 		pChn->nNewRightVol = pChn->nNewLeftVol = 0;
 		pChn->pCurrentSample = ((pChn->pSample) && (pChn->nLength) && (pChn->nInc)) ? pChn->pSample : NULL;
 		if (pChn->pCurrentSample)
@@ -2228,7 +2227,7 @@ BOOL CSoundFile::ReadNote()
 #endif
 
 #ifdef MODPLUG_TRACKER
-			const UINT kChnMasterVol = (pChn->dwFlags & CHN_EXTRALOUD) ? 0x100 : nMasterVol;
+			const UINT kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? 0x100 : nMasterVol;
 #else
 #define		kChnMasterVol	nMasterVol
 #endif // MODPLUG_TRACKER
@@ -2284,14 +2283,14 @@ BOOL CSoundFile::ReadNote()
 			// Check IDO
 			if (gdwSoundSetup & SNDMIX_NORESAMPLING)
 			{
-				pChn->dwFlags |= CHN_NOIDO;
+				pChn->dwFlags.set(CHN_NOIDO);
 			} else
 			{
-				pChn->dwFlags &= ~(CHN_NOIDO|CHN_HQSRC);
+				pChn->dwFlags.reset(CHN_NOIDO | CHN_HQSRC);
 #ifndef FASTSOUNDLIB
 				if (pChn->nInc == 0x10000)
 				{
-					pChn->dwFlags |= CHN_NOIDO;
+					pChn->dwFlags.set(CHN_NOIDO);
 				} else
 				if ((gdwSoundSetup & SNDMIX_HQRESAMPLER) && ((gnCPUUsage < 80) || (gdwSoundSetup & SNDMIX_DIRECTTODISK) || (m_nMixChannels < 8)))
 				{
@@ -2309,14 +2308,14 @@ BOOL CSoundFile::ReadNote()
 						if ((pChn->nNewLeftVol < 0x80) && (pChn->nNewRightVol < 0x80)
 						 && (pChn->nLeftVol < 0x80) && (pChn->nRightVol < 0x80))
 						{
-							if (pChn->nInc >= 0xFF00) pChn->dwFlags |= CHN_NOIDO;
+							if (pChn->nInc >= 0xFF00) pChn->dwFlags.set(CHN_NOIDO);
 						} else
 						{
-							pChn->dwFlags |= (pChn->nInc >= fmax) ? CHN_NOIDO : CHN_HQSRC;
+							pChn->dwFlags.set((pChn->nInc >= fmax) ? CHN_NOIDO : CHN_HQSRC);
 						}
 					} else
 					{
-						pChn->dwFlags |= CHN_HQSRC;
+						pChn->dwFlags.set(CHN_HQSRC);
 					}
 					
 				} else
@@ -2324,10 +2323,10 @@ BOOL CSoundFile::ReadNote()
 					if ((pChn->nInc >= 0x14000)
 					|| ((pChn->nInc >= 0xFF00) && ((pChn->nInc < 0x10100) || (gdwSysInfo & SYSMIX_SLOWCPU)))
 					|| ((gnCPUUsage > 80) && (pChn->nNewLeftVol < 0x100) && (pChn->nNewRightVol < 0x100)))
-						pChn->dwFlags |= CHN_NOIDO;
+						pChn->dwFlags.set(CHN_NOIDO);
 				}
 #else
-				if (pChn->nInc >= 0xFE00) pChn->dwFlags |= CHN_NOIDO;
+				if (pChn->nInc >= 0xFE00) pChn->dwFlags.set(CHN_NOIDO);
 #endif // FASTSOUNDLIB
 			}
 
@@ -2341,9 +2340,11 @@ BOOL CSoundFile::ReadNote()
 			pChn->nNewLeftVol >>= extraAttenuation;
 
 			// Dolby Pro-Logic Surround
-			if ((pChn->dwFlags & CHN_SURROUND) && (gnChannels == 2)) pChn->nNewLeftVol = - pChn->nNewLeftVol;
+			if(pChn->dwFlags[CHN_SURROUND] && gnChannels == 2) pChn->nNewLeftVol = - pChn->nNewLeftVol;
+
 			// Checking Ping-Pong Loops
-			if (pChn->dwFlags & CHN_PINGPONGFLAG) pChn->nInc = -pChn->nInc;
+			if(pChn->dwFlags[CHN_PINGPONGFLAG]) pChn->nInc = -pChn->nInc;
+
 			// Setting up volume ramp
 			ProcessRamping(pChn);
 
@@ -2379,11 +2380,11 @@ BOOL CSoundFile::ReadNote()
 			}
 		}
 	}
-	if (m_dwSongFlags & SONG_GLOBALFADE)
+	if(m_SongFlags[SONG_GLOBALFADE])
 	{
 		if (!m_nGlobalFadeSamples)
 		{
-			m_dwSongFlags |= SONG_ENDREACHED;
+			m_SongFlags.set(SONG_ENDREACHED);
 			return FALSE;
 		}
 		if (m_nGlobalFadeSamples > m_nBufferCount)
@@ -2426,9 +2427,14 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 
 	// Do we need to process midi?
 	// For now there is no difference between mute and sync mute with VSTis.
-	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
-	if ((!m_nInstruments) || (m_nPattern >= Patterns.Size())
-		 || (m_nRow >= Patterns[m_nPattern].GetNumRows()) || (!Patterns[m_nPattern])) return;
+	if(pChn->dwFlags[CHN_MUTE | CHN_SYNCMUTE]) return;
+	if(!m_nInstruments
+		|| m_nPattern >= Patterns.Size()
+		|| m_nRow >= Patterns[m_nPattern].GetNumRows()
+		|| !Patterns[m_nPattern])
+	{
+		return;
+	}
 
 	const ModCommand::NOTE note = pChn->rowCommand.note;
 	const ModCommand::VOL vol = pChn->rowCommand.vol;
@@ -2452,7 +2458,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		}
 
 		// Muted instrument?
-		if (pIns && (pIns->dwFlags & INS_MUTE)) return;
+		if(pIns != nullptr && pIns->dwFlags[INS_MUTE]) return;
 	}
 
 	// Couldn't find a valid plugin

@@ -157,7 +157,7 @@ bool CSoundFile::ReadFAR(FileReader &file)
 	// Read channel settings
 	for(CHANNELINDEX chn = 0; chn < 16; chn++)
 	{
-		ChnSettings[chn].dwFlags = fileHeader.onOff[chn] ? 0 : CHN_MUTE;
+		ChnSettings[chn].dwFlags = fileHeader.onOff[chn] ? ChannelFlags(0) : CHN_MUTE;
 		ChnSettings[chn].nPan = ((fileHeader.chnPanning[chn] & 0x0F) << 4) + 8;
 		ChnSettings[chn].nVolume = 64;
 	}

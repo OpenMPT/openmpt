@@ -54,8 +54,8 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	ReadMessage(file, file.ReadUint32LE(), leCR);
 
 	// Song global config
-	m_dwSongFlags = (file.ReadUint32LE() & SONG_FILE_FLAGS);
-	if(!(m_dwSongFlags & SONG_ITPROJECT))
+	m_SongFlags = static_cast<SongFlags>(file.ReadUint32LE() & SONG_FILE_FLAGS);
+	if(!m_SongFlags[SONG_ITPROJECT])
 	{
 		return false;
 	}
@@ -77,7 +77,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ChnSettings[chn].nPan = static_cast<uint16>(file.ReadUint32LE());
-		ChnSettings[chn].dwFlags = file.ReadUint32LE();
+		ChnSettings[chn].dwFlags = static_cast<ChannelFlags>(file.ReadUint32LE());
 		ChnSettings[chn].nVolume = static_cast<uint16>(file.ReadUint32LE());
 		file.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[chn].szName, size);
 	}
@@ -88,7 +88,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 
 	// MIDI Macro config
 	file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());
-	if(m_dwSongFlags & SONG_EMBEDMIDICFG)
+	if(m_SongFlags[SONG_EMBEDMIDICFG])
 	{
 		m_MidiCfg.Sanitize();
 	} else
@@ -212,7 +212,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	uint32 code = file.ReadUint32LE();
 
 	// Embed instruments' header [v1.01]
-	if(version >= 0x00000101 && (m_dwSongFlags & SONG_ITPEMBEDIH) && code == 'EBIH')
+	if(version >= 0x00000101 && m_SongFlags[SONG_ITPEMBEDIH] && code == 'EBIH')
 	{
 		code = file.ReadUint32LE();
 
@@ -261,7 +261,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 {
 	// Check song type
 
-	if(!(m_dwSongFlags & SONG_ITPROJECT)) return false;
+	if(!m_SongFlags[SONG_ITPROJECT]) return false;
 
 	UINT i,j = 0;
 	for(i = 0 ; i < m_nInstruments ; i++) { if(m_szInstrumentPath[i][0] != '\0' || !Instruments[i+1]) j++; }
@@ -302,7 +302,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Song global config
 
-	id = (m_dwSongFlags & SONG_FILE_FLAGS);
+	id = m_SongFlags[SONG_FILE_FLAGS];
 	fwrite(&id, 1, sizeof(id), f);
 	id = m_nDefaultGlobalVolume;
 	fwrite(&id, 1, sizeof(id), f);
@@ -346,7 +346,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Song midi config
 
 	// midi cfg data length
-	id = (m_dwSongFlags & SONG_EMBEDMIDICFG) ? sizeof(MIDIMacroConfig) : 0;
+	id = m_SongFlags[SONG_EMBEDMIDICFG] ? sizeof(MIDIMacroConfig) : 0;
 	fwrite(&id, 1, sizeof(id), f);
 
 	// midi cfg
@@ -467,7 +467,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Embed instruments' header [v1.01]
 
-	if(m_dwSongFlags & SONG_ITPEMBEDIH)
+	if(m_SongFlags[SONG_ITPEMBEDIH])
 	{
 		// embeded instrument header tag
 		uint32 code = 'EBIH';

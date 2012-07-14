@@ -117,7 +117,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 			CatchModifierChange(wParam, keyEventType, scancode);
 		}
 
-		if(!InterceptSpecialKeys( wParam, lParam ) && !Bypass())
+		if(!InterceptSpecialKeys( wParam, lParam ) && !IsBypassed())
 		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
@@ -444,8 +444,8 @@ void CInputHandler::Bypass(bool b)
 }
 
 
-bool CInputHandler::Bypass()
-//--------------------------
+bool CInputHandler::IsBypassed()
+//------------------------------
 {
 	return m_bBypass;
 }
@@ -556,7 +556,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		default: return "Unknown Item.";
 	}
 
-	s += activeCommandSet->GetKeyTextFromCommand(c, 0);
+	s += GetKeyTextFromCommand(c);
 
 	return s;
 }

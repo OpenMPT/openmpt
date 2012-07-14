@@ -335,11 +335,11 @@ UINT CViewInstrument::EnvGetLastPoint() const
 
 
 // Return if an envelope flag is set.
-bool CViewInstrument::EnvGetFlag(const DWORD dwFlag) const
-//--------------------------------------------------------
+bool CViewInstrument::EnvGetFlag(const EnvelopeFlags dwFlag) const
+//----------------------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv != nullptr && pEnv->dwFlags & dwFlag) return true;
+	if(pEnv != nullptr && pEnv->dwFlags[dwFlag]) return true;
 	return false;
 }
 
@@ -384,7 +384,7 @@ bool CViewInstrument::EnvGetVolEnv() const
 //----------------------------------------
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return (pIns->VolEnv.dwFlags & ENV_ENABLED) != 0;
+	if (pIns) return pIns->VolEnv.dwFlags[ENV_ENABLED] != 0;
 	return false;
 }
 
@@ -393,7 +393,7 @@ bool CViewInstrument::EnvGetPanEnv() const
 //----------------------------------------
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return (pIns->PanEnv.dwFlags & ENV_ENABLED) != 0;
+	if (pIns) return pIns->PanEnv.dwFlags[ENV_ENABLED] != 0;
 	return false;
 }
 
@@ -402,7 +402,7 @@ bool CViewInstrument::EnvGetPitchEnv() const
 //------------------------------------------
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == ENV_ENABLED);
+	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED);
 	return false;
 }
 
@@ -411,7 +411,7 @@ bool CViewInstrument::EnvGetFilterEnv() const
 //-------------------------------------------
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == (ENV_ENABLED|ENV_FILTER));
+	if(pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == (ENV_ENABLED | ENV_FILTER));
 	return false;
 }
 
@@ -527,32 +527,20 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 }
 
 // Enable or disable a flag of the current envelope
-bool CViewInstrument::EnvSetFlag(const DWORD dwFlag, const bool bEnable) const
-//----------------------------------------------------------------------------
+bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable) const
+//---------------------------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
-	if(bEnable)
-	{
-		if(!(envelope->dwFlags & dwFlag))
-		{
-			envelope->dwFlags |= dwFlag;
-			return true;
-		}
-	} else
-	{	
-		if(envelope->dwFlags & dwFlag)
-		{
-			envelope->dwFlags &= ~dwFlag;
-			return true;
-		}
-	}
-	return false;
+
+	bool modified = envelope->dwFlags[flag] != enable;
+	envelope->dwFlags.set(flag, enable);
+	return modified;
 }
 
 
-bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, DWORD extraFlags)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(pIns == nullptr || pSndFile == nullptr)
 	{
@@ -561,22 +549,16 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 
 	InstrumentEnvelope &env = pIns->GetEnvelope(envelope);
 
-	const DWORD flags = (ENV_ENABLED | extraFlags);
+	const EnvelopeFlags flags = (ENV_ENABLED | extraFlags);
 
-	if (enable)
+	env.dwFlags.set(flags, enable);
+	if(enable && !env.nNodes)
 	{
-		env.dwFlags |= flags;
-		if(!env.nNodes)
-		{
-			env.Values[0] = env.Values[1] = defaultValue;
-			env.Ticks[0] = 0;
-			env.Ticks[1] = 10;
-			env.nNodes = 2;
-			InvalidateRect(NULL, FALSE);
-		}
-	} else
-	{
-		env.dwFlags &= ~flags;
+		env.Values[0] = env.Values[1] = defaultValue;
+		env.Ticks[0] = 0;
+		env.Ticks[1] = 10;
+		env.nNodes = 2;
+		InvalidateRect(NULL, FALSE);
 	}
 
 	CriticalSection cs;
@@ -586,15 +568,7 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 	{
 		if(pSndFile->Chn[nChn].pModInstrument == pIns)
 		{
-			ModChannelEnvInfo &chnEnv = pSndFile->Chn[nChn].GetEnvelope(envelope);
-
-			if(enable)
-			{
-				chnEnv.flags |= flags;
-			} else
-			{
-				chnEnv.flags &= ~flags;
-			}
+			pSndFile->Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
 		}
 	}
 
@@ -631,7 +605,7 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 	if(pIns == nullptr) return false;
 	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
-	pIns->PitchEnv.dwFlags &= ~ENV_FILTER;
+	pIns->PitchEnv.dwFlags.reset(ENV_FILTER);
 	return EnvToggleEnv(ENV_PITCH, pSndFile, pIns, bEnable, 32);
 }
 
@@ -1051,11 +1025,11 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
 			envelope->Ticks[0] = 0;
 
-			if(envelope->nNodes == 1)
+			if(envelope->nNodes <= 1)
 			{
 				// if only one node is left, just disable the envelope completely
 				envelope->nNodes = envelope->nLoopStart = envelope->nLoopEnd = envelope->nSustainStart = envelope->nSustainEnd = 0;
-				envelope->dwFlags = 0;
+				envelope->dwFlags.reset();
 				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 
@@ -1115,7 +1089,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 					envelope->Ticks[0] = 0;
 					envelope->Values[0] = cDefaultValue;
 					envelope->nNodes = 1;
-					envelope->dwFlags |= ENV_ENABLED;
+					envelope->dwFlags.set(ENV_ENABLED);
 				}
 				UINT i = 0;
 				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;
@@ -1190,7 +1164,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		BOOL bUpdate = FALSE;
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			//DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
+			//DWORD newpos = (pSndFile->dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
 			DWORD newpos = pnotify->dwPos[i];
 			if (m_dwNotifyPos[i] != newpos)
 			{
@@ -1204,7 +1178,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			DrawPositionMarks(hdc);
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
-				//DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[j] : 0;
+				//DWORD newpos = (pSndFile->m_SongFlags[SONG_PAUSED]) ? pnotify->dwPos[j] : 0;
 				DWORD newpos = pnotify->dwPos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
@@ -1469,7 +1443,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
 	{
 		// ticks before release node (or no release node)
-		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && (pIns->PitchEnv.dwFlags & ENV_FILTER))) ? nVal - 32 : nVal;
+		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && pIns->PitchEnv.dwFlags[ENV_FILTER])) ? nVal - 32 : nVal;
 		if(m_nEnv != ENV_PANNING)
 			wsprintf(s, "Tick %d, [%d]", nTick, displayVal);
 		else	// panning envelope: display right/center/left chars
@@ -1797,7 +1771,7 @@ void CViewInstrument::OnEnvLoopChanged()
 		{
 			// Enabled loop => set loop points if no loop has been specified yet.
 			pEnv->nLoopStart = 0;
-			pEnv->nLoopEnd = pEnv->nNodes - 1;
+			pEnv->nLoopEnd = static_cast<uint8>(pEnv->nNodes - 1);
 		}
 		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
@@ -1816,7 +1790,7 @@ void CViewInstrument::OnEnvSustainChanged()
 		if(EnvGetSustain() && pEnv != nullptr && pEnv->nSustainStart == pEnv->nSustainEnd && IsDragItemEnvPoint())
 		{
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
-			pEnv->nSustainStart = pEnv->nSustainEnd = m_nDragItem - 1;
+			pEnv->nSustainStart = pEnv->nSustainEnd = static_cast<uint8>(m_nDragItem - 1);
 		}
 		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
@@ -2330,11 +2304,11 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		return;
 
 	if(m_nInstrument >= 1 &&
-	   m_nInstrument <= pSndFile->GetNumInstruments() &&
-	   pSndFile->Instruments[m_nInstrument])
+		m_nInstrument <= pSndFile->GetNumInstruments() &&
+		pSndFile->Instruments[m_nInstrument])
 	{
 		// "Center" y value of the envelope. For panning and pitch, this is 32, for volume and filter it is 0 (minimum).
-		int nOffset = ((m_nEnv != ENV_VOLUME) && ((GetEnvelopePtr()->dwFlags & ENV_FILTER) == 0)) ? 32 : 0;
+		int nOffset = ((m_nEnv != ENV_VOLUME) && !GetEnvelopePtr()->dwFlags[ENV_FILTER]) ? 32 : 0;
 
 		CScaleEnvPointsDlg dlg(this, GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal())

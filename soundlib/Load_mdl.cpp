@@ -181,7 +181,8 @@ void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEn
 		}
 	}
 	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = pMDLEnv[31] & 0x0F;
-	pMPTEnv->dwFlags |= ((pMDLEnv[31] & 0x10) ? ENV_SUSTAIN : 0) | ((pMDLEnv[31] & 0x20) ? ENV_LOOP : 0);
+	pMPTEnv->dwFlags.set(ENV_SUSTAIN, (pMDLEnv[31] & 0x10) != 0);
+	pMPTEnv->dwFlags.set(ENV_LOOP, (pMDLEnv[31] & 0x20) != 0);
 	pMPTEnv->nLoopStart = pMDLEnv[32] & 0x0F;
 	pMPTEnv->nLoopEnd = pMDLEnv[32] >> 4;
 }
@@ -334,7 +335,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 				ChnSettings[i].nVolume = 64;
 				ChnSettings[i].nPan = (pmib->channelinfo[i] & 0x7F) << 1;
 				if (pmib->channelinfo[i] & 0x80)
-					ChnSettings[i].dwFlags |= CHN_MUTE;
+					ChnSettings[i].dwFlags.set(CHN_MUTE);
 				else
 					m_nChannels = i+1;
 			}
@@ -446,18 +447,18 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 						// Use volume envelope ?
 						if (ps[3] & 0x80)
 						{
-							pIns->VolEnv.dwFlags |= ENV_ENABLED;
+							pIns->VolEnv.dwFlags.set(ENV_ENABLED);
 							insvolenv[nins] = (ps[3] & 0x3F) + 1;
 						}
 						// Use panning envelope ?
 						if (ps[5] & 0x80)
 						{
-							pIns->PanEnv.dwFlags |= ENV_ENABLED;
+							pIns->PanEnv.dwFlags.set(ENV_ENABLED);
 							inspanenv[nins] = (ps[5] & 0x3F) + 1;
 						}
 
 						// taken from load_xm.cpp - seems to fix wakingup.mdl
-						if (!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
+						if(!pIns->VolEnv.dwFlags[ENV_ENABLED] && !pIns->nFadeOut)
 							pIns->nFadeOut = 8192;
 					}
 				}
@@ -653,7 +654,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		}
 	}
-	m_dwSongFlags |= SONG_LINEARSLIDES;
+	m_SongFlags = SONG_LINEARSLIDES;
 	m_nType = MOD_TYPE_MDL;
 	return true;
 }

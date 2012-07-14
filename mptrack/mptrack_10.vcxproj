@@ -331,6 +331,7 @@
     <ResourceCompile Include="mptrack.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />

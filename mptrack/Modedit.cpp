@@ -246,7 +246,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 	for(CHANNELINDEX nChn = GetNumChannels(); nChn < MAX_BASECHANNELS; nChn++)
 	{
 		m_SndFile.InitChannel(nChn);
-		m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
+		m_SndFile.Chn[nChn].dwFlags.set(CHN_MUTE);
 	}
 
 	return GetNumChannels();
@@ -760,7 +760,8 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	}
 
 	strcpy(s, pszEnvHdr);
-	wsprintf(s + strlen(s), pszEnvFmt, env.nNodes, env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd, (env.dwFlags & ENV_SUSTAIN) ? 1 : 0, (env.dwFlags & ENV_LOOP) ? 1 : 0, (env.dwFlags & ENV_CARRY) ? 1 : 0);
+	wsprintf(s + strlen(s), pszEnvFmt, env.nNodes, env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
+		env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
 	for (UINT i = 0; i < env.nNodes; i++)
 	{
 		if (strlen(s) >= sizeof(s)-32) break;
@@ -825,7 +826,10 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			env.nLoopStart = loopBegin;
 			env.nLoopEnd = loopEnd;
 			env.nReleaseNode = releaseNode;
-			env.dwFlags = (env.dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0) | (nPoints > 0 ? ENV_ENABLED : 0);
+			env.dwFlags.set(ENV_LOOP, bLoop != 0);
+			env.dwFlags.set(ENV_SUSTAIN, bSus != 0);
+			env.dwFlags.set(ENV_CARRY, bCarry != 0);
+			env.dwFlags.set(ENV_ENABLED, nPoints > 0);
 
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)

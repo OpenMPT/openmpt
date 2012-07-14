@@ -476,11 +476,11 @@ bool CSoundFile::ReadS3M(FileReader &file)
 
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
-	m_dwSongFlags = (fileHeader.flags & S3MFileHeader::amigaLimits) ? SONG_AMIGALIMITS : 0;
+	m_SongFlags = (fileHeader.flags & S3MFileHeader::amigaLimits) ? SONG_AMIGALIMITS : SongFlags(0);
 
 	if(fileHeader.cwtv < S3MFileHeader::trkST3_20 || (fileHeader.flags & S3MFileHeader::fastVolumeSlides) != 0)
 	{
-		m_dwSongFlags |= SONG_FASTVOLSLIDES;
+		m_SongFlags.set(SONG_FASTVOLSLIDES);
 	}
 
 	// Speed
@@ -780,11 +780,11 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	fileHeader.patNum = static_cast<uint16>(writePatterns);
 
 	// Flags
-	if(m_dwSongFlags & SONG_FASTVOLSLIDES)
+	if(m_SongFlags[SONG_FASTVOLSLIDES])
 	{
 		fileHeader.flags |= S3MFileHeader::fastVolumeSlides;
 	}
-	if(m_nMaxPeriod < 20000 || (m_dwSongFlags & SONG_AMIGALIMITS))
+	if(m_nMaxPeriod < 20000 || m_SongFlags[SONG_AMIGALIMITS])
 	{
 		fileHeader.flags |= S3MFileHeader::amigaLimits;
 	}

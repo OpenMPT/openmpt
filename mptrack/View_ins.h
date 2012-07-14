@@ -57,10 +57,10 @@ protected:
 	// Envelope get stuff
 
 	// Flags
-	bool EnvGetFlag(const DWORD dwFlag) const;
-	bool EnvGetLoop() const {return EnvGetFlag(ENV_LOOP);};
-	bool EnvGetSustain() const {return EnvGetFlag(ENV_SUSTAIN);};
-	bool EnvGetCarry() const {return EnvGetFlag(ENV_CARRY);};
+	bool EnvGetFlag(const EnvelopeFlags dwFlag) const;
+	bool EnvGetLoop() const { return EnvGetFlag(ENV_LOOP); };
+	bool EnvGetSustain() const { return EnvGetFlag(ENV_SUSTAIN); };
+	bool EnvGetCarry() const { return EnvGetFlag(ENV_CARRY); };
 
 	// Misc.
 	UINT EnvGetTick(int nPoint) const;
@@ -84,10 +84,10 @@ protected:
 	// Envelope set stuff
 
 	// Flags
-	bool EnvSetFlag(const DWORD dwFlag, const bool bEnable) const;
-	bool EnvSetLoop(bool bEnable) const {return EnvSetFlag(ENV_LOOP, bEnable);};
-	bool EnvSetSustain(bool bEnable) const {return EnvSetFlag(ENV_SUSTAIN, bEnable);};
-	bool EnvSetCarry(bool bEnable) const {return EnvSetFlag(ENV_CARRY, bEnable);};
+	bool EnvSetFlag(EnvelopeFlags flag, bool enable) const;
+	bool EnvSetLoop(bool enable) const {return EnvSetFlag(ENV_LOOP, enable);};
+	bool EnvSetSustain(bool enable) const {return EnvSetFlag(ENV_SUSTAIN, enable);};
+	bool EnvSetCarry(bool enable) const {return EnvSetFlag(ENV_CARRY, enable);};
 
 	// Misc.
 	bool EnvSetValue(int nPoint, int nTick=-1, int nValue=-1);
@@ -101,7 +101,7 @@ protected:
 	bool EnvToggleReleaseNode(int nPoint);
 
 	// Set envelope status
-	bool EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, DWORD extraFlags = 0);
+	bool EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags = EnvelopeFlags(0));
 	bool EnvSetVolEnv(bool bEnable);
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);

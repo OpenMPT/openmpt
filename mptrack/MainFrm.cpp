@@ -1089,9 +1089,9 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 
 						const ModChannelEnvInfo &chnEnv = pChn->GetEnvelope(notifyEnv);
 
-						if (chnEnv.flags & ENV_ENABLED)
+						if(chnEnv.flags[ENV_ENABLED])
 						{
-							DWORD pos = chnEnv.nEnvPosition;
+							uint32 pos = chnEnv.nEnvPosition;
 							if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 							{
 								// Impulse Tracker / Fasttracker 2 envelope handling (see SndMix.cpp for details)
@@ -1318,7 +1318,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
 	const bool bPaused = pSndFile->IsPaused();
-	const bool bPatLoop = (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP) != 0;
+	const bool bPatLoop = pSndFile->m_SongFlags[SONG_PATTERNLOOP];
 	pSndFile->ResetChannels();
 	// Select correct bidi loop mode when playing a module.
 	pSndFile->SetupITBidiMode();
@@ -1350,7 +1350,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	{
 		if (bPaused)
 		{
-			pSndFile->m_dwSongFlags |= SONG_PAUSED;
+			pSndFile->m_SongFlags.set(SONG_PAUSED);
 		} else
 		{
 			pModDoc->SetPause(FALSE);
@@ -1405,7 +1405,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		//m_pSndFile->LoopPattern(-1);
 		//Commented above line - why loop should be disabled when pausing?
 
-		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
+		m_pSndFile->m_SongFlags.reset(SONG_PAUSED);
 		if (m_pSndFile == &m_WaveFile)
 		{
 			m_pSndFile = NULL;

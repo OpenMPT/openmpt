@@ -445,7 +445,7 @@ BOOL CModToMidi::DoConvert()
 			UINT len = 0;
 
 			//Process note data only in non-muted channels.
-			if((m_pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) == 0)
+			if(!m_pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE])
 			{
 				// Instrument change
 				if ((m->instr) && (m->instr != pTrk->nInstrument) && (m->instr < MAX_SAMPLES))

@@ -400,11 +400,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #endif
 	}
 
-	if (itHeader.flags & ITFileHeader::linearSlides) m_dwSongFlags |= SONG_LINEARSLIDES;
-	if (itHeader.flags & ITFileHeader::itOldEffects) m_dwSongFlags |= SONG_ITOLDEFFECTS;
-	if (itHeader.flags & ITFileHeader::itCompatGxx) m_dwSongFlags |= SONG_ITCOMPATGXX;
-	if ((itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (itHeader.special & ITFileHeader::embedMIDIConfiguration)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
-	if (itHeader.flags & ITFileHeader::extendedFilterRange) m_dwSongFlags |= SONG_EXFILTERRANGE;
+	m_SongFlags.set(SONG_LINEARSLIDES, (itHeader.flags & ITFileHeader::linearSlides) != 0);
+	m_SongFlags.set(SONG_ITOLDEFFECTS, (itHeader.flags & ITFileHeader::itOldEffects) != 0);
+	m_SongFlags.set(SONG_ITCOMPATGXX, (itHeader.flags & ITFileHeader::itCompatGxx) != 0);
+	m_SongFlags.set(SONG_EMBEDMIDICFG, (itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (itHeader.special & ITFileHeader::embedMIDIConfiguration));
+	m_SongFlags.set(SONG_EXFILTERRANGE, (itHeader.flags & ITFileHeader::extendedFilterRange) != 0);
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], itHeader.songname);
 
@@ -420,10 +420,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		ChnSettings[ipan].nVolume = itHeader.chnvol[ipan];
 		ChnSettings[ipan].nPan = 128;
-		if (itHeader.chnpan[ipan] & 0x80) ChnSettings[ipan].dwFlags |= CHN_MUTE;
+		ChnSettings[ipan].dwFlags.reset();
+		if(itHeader.chnpan[ipan] & 0x80) ChnSettings[ipan].dwFlags.set(CHN_MUTE);
 		UINT n = itHeader.chnpan[ipan] & 0x7F;
 		if (n <= 64) ChnSettings[ipan].nPan = n << 2;
-		if (n == 100) ChnSettings[ipan].dwFlags |= CHN_SURROUND;
+		if (n == 100) ChnSettings[ipan].dwFlags.set(CHN_SURROUND);
 	}
 	if (m_nChannels < GetModSpecifications().channelsMin) m_nChannels = GetModSpecifications().channelsMin;
 
@@ -586,7 +587,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading MIDI Output & Macros
-	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
+	if (m_SongFlags[SONG_EMBEDMIDICFG])
 	{
 		if (dwMemPos + sizeof(MIDIMacroConfig) < dwMemLength)
 		{
@@ -600,7 +601,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		MemsetZero(m_MidiCfg.szMidiSFXExt);
 		MemsetZero(m_MidiCfg.szMidiZXXExt);
-		m_dwSongFlags |= SONG_EMBEDMIDICFG;
+		m_SongFlags.set(SONG_EMBEDMIDICFG);
 	}
 
 	// Read pattern names: "PNAM"
@@ -1144,7 +1145,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		// Hack from schism tracker:
 		for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
 		{
-			if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
+			if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags[ENV_FILTER])
 			{
 				itHeader.cmwt = 0x0216;
 				break;
@@ -1160,11 +1161,12 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	itHeader.flags = ITFileHeader::useStereoPlayback;
 	itHeader.special = ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights;
-	if (m_nInstruments) itHeader.flags |= ITFileHeader::instrumentMode;
-	if (m_dwSongFlags & SONG_LINEARSLIDES) itHeader.flags |= ITFileHeader::linearSlides;
-	if (m_dwSongFlags & SONG_ITOLDEFFECTS) itHeader.flags |= ITFileHeader::itOldEffects;
-	if (m_dwSongFlags & SONG_ITCOMPATGXX) itHeader.flags |= ITFileHeader::itCompatGxx;
-	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatibilityExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
+	if(m_nInstruments) itHeader.flags |= ITFileHeader::instrumentMode;
+	if(m_SongFlags[SONG_LINEARSLIDES]) itHeader.flags |= ITFileHeader::linearSlides;
+	if(m_SongFlags[SONG_ITOLDEFFECTS]) itHeader.flags |= ITFileHeader::itOldEffects;
+	if(m_SongFlags[SONG_ITCOMPATGXX]) itHeader.flags |= ITFileHeader::itCompatGxx;
+	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
+
 	itHeader.globalvol = m_nDefaultGlobalVolume >> 1;
 	itHeader.mv = min(m_nSamplePreAmp, 128);
 	itHeader.speed = m_nDefaultSpeed;
@@ -1178,9 +1180,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	for (CHANNELINDEX ich = 0; ich < min(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
 	{
 		itHeader.chnpan[ich] = ChnSettings[ich].nPan >> 2;
-		if (ChnSettings[ich].dwFlags & CHN_SURROUND) itHeader.chnpan[ich] = 100;
+		if (ChnSettings[ich].dwFlags[CHN_SURROUND]) itHeader.chnpan[ich] = 100;
 		itHeader.chnvol[ich] = ChnSettings[ich].nVolume;
-		if (ChnSettings[ich].dwFlags & CHN_MUTE) itHeader.chnpan[ich] |= 0x80;
+		if (ChnSettings[ich].dwFlags[CHN_MUTE]) itHeader.chnpan[ich] |= 0x80;
 	}
 
 	// Channel names
@@ -1196,7 +1198,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
 	}
 
-	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
+	if(m_SongFlags[SONG_EMBEDMIDICFG])
 	{
 		itHeader.flags |= ITFileHeader::reqEmbeddedMIDIConfig;
 		itHeader.special |= ITFileHeader::embedMIDIConfiguration;
@@ -2150,8 +2152,8 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		{
 			BYTE panvol[2];
 			panvol[0] = ChnSettings[ich].nPan >> 2;
-			if (ChnSettings[ich].dwFlags & CHN_SURROUND) panvol[0] = 100;
-			if (ChnSettings[ich].dwFlags & CHN_MUTE) panvol[0] |= 0x80;
+			if (ChnSettings[ich].dwFlags[CHN_SURROUND]) panvol[0] = 100;
+			if (ChnSettings[ich].dwFlags[CHN_MUTE]) panvol[0] |= 0x80;
 			panvol[1] = ChnSettings[ich].nVolume;
 			fwrite(&panvol, sizeof(panvol), 1, f);
 		}
@@ -2367,10 +2369,11 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 					{
 						ChnSettings[i+64].nVolume = pData[1];
 						ChnSettings[i+64].nPan = 128;
-						if (pData[0] & 0x80) ChnSettings[i+64].dwFlags |= CHN_MUTE;
+						ChnSettings[i+64].dwFlags.reset();
+						if (pData[0] & 0x80) ChnSettings[i+64].dwFlags.set(CHN_MUTE);
 						const UINT n = pData[0] & 0x7F;
 						if (n <= 64) ChnSettings[i+64].nPan = n << 2;
-						if (n == 100) ChnSettings[i+64].dwFlags |= CHN_SURROUND;
+						if (n == 100) ChnSettings[i+64].dwFlags.set(CHN_SURROUND);
 					}
 				}
 

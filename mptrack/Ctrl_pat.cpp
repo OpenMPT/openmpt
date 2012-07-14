@@ -424,7 +424,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		{
 			SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
 			if (m_pSndFile) {
-				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_dwSongFlags));
+				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_SongFlags));
 			}
 			OnSpacingChanged();
 			SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
@@ -488,7 +488,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			if (lParam == -1)
 			{
 				//Toggle loop state
-				setLoop = !(m_pSndFile->m_dwSongFlags&SONG_PATTERNLOOP);
+				setLoop = !m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
 			} else
 			{
 				setLoop = (lParam != 0);
@@ -496,11 +496,11 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				
 			if (setLoop)
 			{
-				m_pSndFile->m_dwSongFlags |= SONG_PATTERNLOOP;
+				m_pSndFile->m_SongFlags.set(SONG_PATTERNLOOP);
 				CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
 			} else
 			{
-				m_pSndFile->m_dwSongFlags &= ~SONG_PATTERNLOOP;
+				m_pSndFile->m_SongFlags.reset(SONG_PATTERNLOOP);
 				CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);	
 			}
 
@@ -1158,19 +1158,19 @@ void CCtrlPatterns::OnSetupZxxMacros()
 			m_pSndFile->m_MidiCfg = dlg.m_MidiCfg;
 			if (dlg.m_bEmbed)
 			{
-				m_pSndFile->m_dwSongFlags |= SONG_EMBEDMIDICFG;
+				m_pSndFile->m_SongFlags.set(SONG_EMBEDMIDICFG);
 				m_pModDoc->SetModified();
 			} else
 			{
-				if (m_pSndFile->m_dwSongFlags & SONG_EMBEDMIDICFG) m_pModDoc->SetModified();
-				m_pSndFile->m_dwSongFlags &= ~SONG_EMBEDMIDICFG;
+				if (m_pSndFile->m_SongFlags[SONG_EMBEDMIDICFG]) m_pModDoc->SetModified();
+				m_pSndFile->m_SongFlags.reset(SONG_EMBEDMIDICFG);
 
 				// If this macro is not the default IT macro, display a warning.
 				if(!m_pSndFile->m_MidiCfg.IsMacroDefaultSetupUsed())
 				{
 					if(Reporting::Confirm(_T("You have chosen not to embed MIDI macros. However, the current macro configuration differs from the default macro configuration that is assumed when loading a file that has no macros embedded. This can result in data loss and broken playback.\nWould you like to embed MIDI macros now?")) == cnfYes)
 					{
-						m_pSndFile->m_dwSongFlags |= SONG_EMBEDMIDICFG;
+						m_pSndFile->m_SongFlags.set(SONG_EMBEDMIDICFG);
 						m_pModDoc->SetModified();
 					}
 				}	

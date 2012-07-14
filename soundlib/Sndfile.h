@@ -171,7 +171,7 @@ public: //Misc
 	}
 
 	// Check whether a filter algorithm closer to IT's should be used.
-	bool UseITFilterMode() const { return IsCompatibleMode(TRK_IMPULSETRACKER) && !(m_dwSongFlags & SONG_EXFILTERRANGE); }
+	bool UseITFilterMode() const { return IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_EXFILTERRANGE]; }
 
 	//Tuning-->
 public:
@@ -237,12 +237,12 @@ public:	// Static Members
 
 public:	// for Editing
 	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
-	MODTYPE m_nType;
+	FlagSet<MODTYPE> m_nType;
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
 	INSTRUMENTINDEX m_nInstruments;
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
-	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
+	FlagSet<SongFlags> m_SongFlags;
 	bool m_bIsRendering;
 	UINT m_nMixChannels, m_nMixStat;
 	samplecount_t m_nBufferCount;
@@ -359,7 +359,7 @@ public:
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
-	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED | SONG_STEP)) != 0; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
+	bool IsPaused() const {	return m_SongFlags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
 

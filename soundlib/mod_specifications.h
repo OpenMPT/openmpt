@@ -67,7 +67,7 @@ struct CModSpecifications
 	bool hasRestartPos;
 	bool supportsPlugins;
 	bool hasPatternSignatures;		// Can patterns have a custom time signature?
-	DWORD songFlags;				// Supported song flags
+	SongFlags songFlags;			// Supported song flags
 };
 
 

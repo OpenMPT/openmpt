@@ -248,23 +248,26 @@ static void ImportIMFEffect(ModCommand *note)
 static void LoadIMFEnvelope(InstrumentEnvelope *env, const IMFINSTRUMENT *imfins, const int e)
 //--------------------------------------------------------------------------------------------
 {
-	UINT min = 0; // minimum tick value for next node
 	const int shift = (e == IMF_ENV_VOL) ? 0 : 2;
 
-	env->dwFlags = ((imfins->env[e].flags & 1) ? ENV_ENABLED : 0) | ((imfins->env[e].flags & 2) ? ENV_SUSTAIN : 0) | ((imfins->env[e].flags & 4) ? ENV_LOOP : 0);
+	env->dwFlags.set(ENV_ENABLED, (imfins->env[e].flags & 1) != 0);
+	env->dwFlags.set(ENV_SUSTAIN, (imfins->env[e].flags & 2) != 0);
+	env->dwFlags.set(ENV_LOOP, (imfins->env[e].flags & 4) != 0);
+
 	env->nNodes = imfins->env[e].points;
 	Limit(env->nNodes, 2u, 16u);
 	env->nLoopStart = imfins->env[e].loop_start;
 	env->nLoopEnd = imfins->env[e].loop_end;
 	env->nSustainStart = env->nSustainEnd = imfins->env[e].sustain;
 
-	for(UINT n = 0; n < env->nNodes; n++)
+	uint16 min = 0; // minimum tick value for next node
+	for(uint32 n = 0; n < env->nNodes; n++)
 	{
 		uint16 nTick, nValue;
 		nTick = LittleEndianW(imfins->nodes[e][n].tick);
 		nValue = LittleEndianW(imfins->nodes[e][n].value) >> shift;
-		env->Ticks[n] = (WORD)max(min, nTick);
-		env->Values[n] = (BYTE)min(nValue, ENVELOPE_MAX);
+		env->Ticks[n] = (uint16)max(min, nTick);
+		env->Values[n] = (uint8)min(nValue, ENVELOPE_MAX);
 		min = nTick + 1;
 	}
 }
@@ -295,8 +298,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	MemsetZero(m_szNames);
 	StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[0], hdr.title);
 
-	if(hdr.flags & 1)
-		m_dwSongFlags |= SONG_LINEARSLIDES;
+	m_SongFlags = (hdr.flags & 1) ? SONG_LINEARSLIDES : SongFlags(0);
 	m_nDefaultSpeed = hdr.tempo;
 	m_nDefaultTempo = hdr.bpm;
 	m_nDefaultGlobalVolume = CLAMP(hdr.master, 0, 64) << 2;
@@ -320,11 +322,11 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			m_nChannels = nChn + 1;
 			break;
 		case 1: // mute
-			ChnSettings[nChn].dwFlags |= CHN_MUTE;
+			ChnSettings[nChn].dwFlags = CHN_MUTE;
 			m_nChannels = nChn + 1;
 			break;
 		case 2: // disabled
-			ChnSettings[nChn].dwFlags |= CHN_MUTE;
+			ChnSettings[nChn].dwFlags = CHN_MUTE;
 			ignoreChannels[nChn] = true;
 			break;
 		default: // uhhhh.... freak out
@@ -343,7 +345,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				break;
 		if(nChn == 16)
 			for(nChn = 1; nChn < 16; nChn++)
-				ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
+				ChnSettings[nChn].dwFlags.reset(CHN_MUTE);
 	}
 
 	Order.resize(hdr.ordnum);
@@ -518,7 +520,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			pIns->PitchEnv.dwFlags |= ENV_FILTER;
 
 		// hack to get === to stop notes (from modplug's xm loader)
-		if(!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
+		if(!pIns->VolEnv.dwFlags[ENV_ENABLED] && !pIns->nFadeOut)
 			pIns->nFadeOut = 8192;
 
 		// read this instrument's samples

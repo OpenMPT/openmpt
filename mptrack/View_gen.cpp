@@ -363,11 +363,11 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				// Text
 				s[0] = 0;
 				if (bEnable) wsprintf(s, "Channel %d", nChn+1);
-				SetDlgItemText(IDC_TEXT1+ichn, s);
+				SetDlgItemText(IDC_TEXT1 + ichn, s);
 				// Mute
-				CheckDlgButton(IDC_CHECK1+ichn*2, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? TRUE : FALSE);
+				CheckDlgButton(IDC_CHECK1 + ichn * 2, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? TRUE : FALSE);
 				// Surround
-				CheckDlgButton(IDC_CHECK2+ichn*2, (pSndFile->ChnSettings[nChn].dwFlags & CHN_SURROUND) ? TRUE : FALSE);
+				CheckDlgButton(IDC_CHECK2 + ichn * 2, pSndFile->ChnSettings[nChn].dwFlags[CHN_SURROUND] ? TRUE : FALSE);
 				// Volume
 				int vol = pSndFile->ChnSettings[nChn].nVolume;
 				m_sbVolume[ichn].SetPos(vol);
@@ -616,7 +616,7 @@ void CViewGlobals::OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID)
 	const int vol = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
 	{
-		if (pModDoc->SetChannelGlobalVolume(nChn, vol))
+		if (pModDoc->SetChannelGlobalVolume(nChn, static_cast<uint16>(vol)))
 		{
 			m_sbVolume[chnMod4].SetPos(vol);
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
@@ -638,9 +638,9 @@ void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
 	const int pan = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
 	{
-		if (pModDoc->SetChannelDefaultPan(nChn, pan))
+		if (pModDoc->SetChannelDefaultPan(nChn, static_cast<uint16>(pan)))
 		{
-			m_sbPan[chnMod4].SetPos(pan/4);
+			m_sbPan[chnMod4].SetPos(pan / 4);
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 			// Surround is forced off when changing pan, so uncheck the checkbox.
 			CheckDlgButton(IDC_CHECK2 + chnMod4 * 2, BST_UNCHECKED);
@@ -681,17 +681,17 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			{
 				if (pModDoc->SetChannelGlobalVolume(nChn + iCh, pos))
 				{
-					SetDlgItemInt(IDC_EDIT1+iCh*2, pos);
+					SetDlgItemInt(IDC_EDIT1 + iCh * 2, pos);
 					bUpdate = TRUE;
 				}
 			}
 			// Pan sliders
 			pos = (short int)m_sbPan[iCh].GetPos();
-			if ((pos >= 0) && (pos <= 64) && ((UINT)pos != pModDoc->GetSoundFile()->ChnSettings[nChn+iCh].nPan/4))
+			if(pos >= 0 && pos <= 64 && (static_cast<uint16>(pos) != pModDoc->GetSoundFile()->ChnSettings[nChn+iCh].nPan / 4u))
 			{
-				if (pModDoc->SetChannelDefaultPan(nChn+iCh, pos*4))
+				if (pModDoc->SetChannelDefaultPan(nChn + iCh, pos * 4))
 				{
-					SetDlgItemInt(IDC_EDIT2+iCh*2, pos*4);
+					SetDlgItemInt(IDC_EDIT2 + iCh * 2, pos * 4);
 					CheckDlgButton(IDC_CHECK2 + iCh * 2, BST_UNCHECKED);
 					bUpdate = TRUE;
 				}

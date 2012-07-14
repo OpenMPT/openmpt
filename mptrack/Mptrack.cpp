@@ -1074,7 +1074,7 @@ void CTrackApp::OnFileNew()
 		if(pSndFile != nullptr)
 		{
 			nNewType = pSndFile->GetBestSaveFormat();
-			bIsProject = ((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0);
+			bIsProject = pSndFile->m_SongFlags[SONG_ITPROJECT];
 		}
 	}
 

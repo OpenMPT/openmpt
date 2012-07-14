@@ -87,7 +87,7 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 					LPCSTR pOldSample,
 					LPSTR pNewSample,
 					const SmpLength nNewLength,
-					DWORD orFlags = 0,
-					DWORD andFlags = MAXDWORD);
+					FlagSet<ChannelFlags> setFlags,
+					FlagSet<ChannelFlags> resetFlags);
 
 } // namespace ctrlChn

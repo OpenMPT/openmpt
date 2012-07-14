@@ -950,7 +950,7 @@ LRESULT CViewSample::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		BOOL bUpdate = FALSE;
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
-			DWORD newpos = /*(pSndFile->m_dwSongFlags & SONG_PAUSED) ?*/ pnotify->dwPos[i]/* : 0*/;
+			DWORD newpos = /*(pSndFile->m_SongFlags[SONG_PAUSED]) ?*/ pnotify->dwPos[i]/* : 0*/;
 			if (m_dwNotifyPos[i] != newpos)
 			{
 				bUpdate = TRUE;
@@ -963,7 +963,7 @@ LRESULT CViewSample::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			DrawPositionMarks(hdc);
 			for (UINT j=0; j<MAX_CHANNELS; j++)
 			{
-				DWORD newpos = /*(pSndFile->m_dwSongFlags & SONG_PAUSED) ?*/ pnotify->dwPos[j] /*: 0*/;
+				DWORD newpos = /*(pSndFile->m_SongFlags[SONG_PAUSED]) ?*/ pnotify->dwPos[j] /*: 0*/;
 				m_dwNotifyPos[j] = newpos;
 			}
 			DrawPositionMarks(hdc);
@@ -2048,7 +2048,7 @@ void CViewSample::On8BitConvert()
 			sample.uFlags &= ~(CHN_16BIT);
 			for (UINT j=0; j<MAX_CHANNELS; j++) if (pSndFile->Chn[j].pSample == sample.pSample)
 			{
-				pSndFile->Chn[j].dwFlags &= ~(CHN_16BIT);
+				pSndFile->Chn[j].dwFlags.reset(CHN_16BIT);
 			}
 
 			cs.Leave();

@@ -1030,7 +1030,11 @@
 				RelativePath=".\MIDIMapping.h"
 				>
 			</File>
-			<File
+            <File
+				RelativePath="..\common\FlagSet.h"
+				>
+			</File>
+            <File
 				RelativePath="..\common\misc_util.h"
 				>
 			</File>

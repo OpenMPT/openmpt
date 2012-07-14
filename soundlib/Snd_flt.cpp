@@ -26,7 +26,7 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 {
 	float Fc;
 	ASSERT(nCutOff < 128);
-	if (m_dwSongFlags & SONG_EXFILTERRANGE)
+	if(m_SongFlags[SONG_EXFILTERRANGE])
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (20.0f * 512.0f));
 	else
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (24.0f * 512.0f));
@@ -63,16 +63,16 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	// Filtering is only ever done in IT if either cutoff is not full or if resonance is set.
 	if(IsCompatibleMode(TRK_IMPULSETRACKER) && resonance == 0 && computedCutoff >= 254)
 	{
-		if(pChn->rowCommand.IsNote() && !(pChn->dwFlags & CHN_PORTAMENTO) && !pChn->nMasterChn && (m_dwSongFlags & SONG_FIRSTTICK) != 0)
+		if(pChn->rowCommand.IsNote() && !(pChn->dwFlags & CHN_PORTAMENTO) && !pChn->nMasterChn && m_SongFlags[SONG_FIRSTTICK])
 		{
 			// Z7F next to a note disables the filter, however in other cases this should not happen.
 			// Test cases: filter-reset.it, filter-reset-carry.it, filter-nna.it
-			pChn->dwFlags &= ~CHN_FILTER;
+			pChn->dwFlags.reset(CHN_FILTER);
 		}
 		return;
 	}
 
-	pChn->dwFlags |= CHN_FILTER;
+	pChn->dwFlags.set(CHN_FILTER);
 
 	if(UseITFilterMode())
 	{

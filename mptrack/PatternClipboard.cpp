@@ -489,11 +489,24 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PATTERNINDEX pattern, co
 						{
 						case CMD_SPEED:
 						case CMD_TEMPO:
-							if(!clipboardHasS3MCommands) m[col].command = (m[col].param < tempoMin) ? CMD_SPEED : CMD_TEMPO;
-							else
+							if(!clipboardHasS3MCommands)
 							{
-								if ((m[col].command == CMD_SPEED) && (m[col].param >= tempoMin)) m[col].param = CMD_TEMPO; else
-									if ((m[col].command == CMD_TEMPO) && (m[col].param < tempoMin)) m[col].param = CMD_SPEED;
+								if(m[col].param < tempoMin)
+								{
+									m[col].command = CMD_SPEED;
+								} else
+								{
+									m[col].command = CMD_TEMPO;
+								}
+							} else
+							{
+								if(m[col].command == CMD_SPEED && m[col].param >= tempoMin)
+								{
+									m[col].param = CMD_TEMPO;
+								} else if(m[col].command == CMD_TEMPO && m[col].param < tempoMin)
+								{
+									m[col].param = CMD_SPEED;
+								}
 							}
 							break;
 						}
@@ -503,7 +516,16 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PATTERNINDEX pattern, co
 						{
 						case CMD_SPEED:
 						case CMD_TEMPO:
-							if(!clipboardHasS3MCommands) m[col].command = (m[col].param  < tempoMin) ? CMD_SPEED : CMD_TEMPO;
+							if(!clipboardHasS3MCommands)
+							{
+								if(m[col].param  < tempoMin)
+								{
+									m[col].command = CMD_SPEED;
+								} else
+								{
+									m[col].command = CMD_TEMPO;
+								}
+							}
 							break;
 						}
 					}
@@ -545,7 +567,6 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PATTERNINDEX pattern, co
 	}
 
 	return success;
-
 }
 
 

@@ -160,13 +160,11 @@ bool CSoundFile::ReadGDM(FileReader &file)
 		if(fileHeader.panMap[i] < 16)
 		{
 			ChnSettings[i].nPan = min((fileHeader.panMap[i] * 16) + 8, 256);
-		}
-		else if(fileHeader.panMap[i] == 16)
+		} else if(fileHeader.panMap[i] == 16)
 		{
 			ChnSettings[i].nPan = 128;
-			ChnSettings[i].dwFlags |= CHN_SURROUND;
-		}
-		else if(fileHeader.panMap[i] == 0xFF)
+			ChnSettings[i].dwFlags = CHN_SURROUND;
+		} else if(fileHeader.panMap[i] == 0xFF)
 		{
 			m_nChannels = i;
 			break;

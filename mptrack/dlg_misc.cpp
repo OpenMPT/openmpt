@@ -85,7 +85,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	case MOD_TYPE_XM:	m_TypeBox.SetCurSel(2); break;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? 4 : 3); break;
+	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_SongFlags[SONG_ITPROJECT] ? 4 : 3); break;
 // -! NEW_FEATURE#0023
 	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 	default:			m_TypeBox.SetCurSel(0); break;
@@ -94,7 +94,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Tempo modes
 
 	// Don't show new tempo modes for XM/IT, unless they are currently used
-	const bool showNewTempoModes = (m_pSndFile->GetType() == MOD_TYPE_MPT || (m_pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0);
+	const bool showNewTempoModes = (m_pSndFile->GetType() == MOD_TYPE_MPT || (m_pSndFile->m_SongFlags[SONG_ITPROJECT] != 0));
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
 	if(showNewTempoModes || m_pSndFile->m_nTempoMode == tempo_mode_alternative)
@@ -200,16 +200,16 @@ void CModTypeDlg::UpdateDialog()
 
 	UpdateChannelCBox();
 
-	m_CheckBox1.SetCheck((m_pSndFile->m_dwSongFlags & SONG_LINEARSLIDES) ? MF_CHECKED : 0);
-	m_CheckBox2.SetCheck((m_pSndFile->m_dwSongFlags & SONG_FASTVOLSLIDES) ? MF_CHECKED : 0);
-	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
-	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATGXX) ? MF_CHECKED : 0);
-	m_CheckBox5.SetCheck((m_pSndFile->m_dwSongFlags & SONG_EXFILTERRANGE) ? MF_CHECKED : 0);
-	m_CheckBoxPT1x.SetCheck((m_pSndFile->m_dwSongFlags & SONG_PT1XMODE) ? MF_CHECKED : 0);
+	m_CheckBox1.SetCheck(m_pSndFile->m_SongFlags[SONG_LINEARSLIDES] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox2.SetCheck(m_pSndFile->m_SongFlags[SONG_FASTVOLSLIDES] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox3.SetCheck(m_pSndFile->m_SongFlags[SONG_ITOLDEFFECTS] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox4.SetCheck(m_pSndFile->m_SongFlags[SONG_ITCOMPATGXX] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox5.SetCheck(m_pSndFile->m_SongFlags[SONG_EXFILTERRANGE] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBoxPT1x.SetCheck(m_pSndFile->m_SongFlags[SONG_PT1XMODE] ? BST_CHECKED : BST_UNCHECKED);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_CheckBox6.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITPEMBEDIH) ? MF_CHECKED : 0);
+	m_CheckBox6.SetCheck(m_pSndFile->m_SongFlags[SONG_ITPEMBEDIH] ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
 	const DWORD allowedFlags = m_pSndFile->GetModSpecifications(type).songFlags;
@@ -326,44 +326,21 @@ void CModTypeDlg::OnOK()
 		m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(sel));
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4)
+		if(m_pSndFile->m_SongFlags[SONG_ITPROJECT] && sel != 4)
 		{
-			m_pSndFile->m_dwSongFlags &= ~SONG_ITPROJECT;
-			m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
+			m_pSndFile->m_SongFlags.reset(SONG_ITPROJECT | SONG_ITPEMBEDIH);
 		}
-		if(sel == 4) m_pSndFile->m_dwSongFlags |= SONG_ITPROJECT;
+		if(sel == 4) m_pSndFile->m_SongFlags.set(SONG_ITPROJECT);
 // -! NEW_FEATURE#0023
 	}
 
-	if (m_CheckBox1.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_LINEARSLIDES;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_LINEARSLIDES;
-	if (m_CheckBox2.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_FASTVOLSLIDES;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
-	if (m_CheckBox3.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITOLDEFFECTS;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITOLDEFFECTS;
-	if (m_CheckBox4.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITCOMPATGXX;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITCOMPATGXX;
-	if (m_CheckBox5.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_EXFILTERRANGE;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_EXFILTERRANGE;
-	if (m_CheckBox6.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITPEMBEDIH;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
-	if (m_CheckBoxPT1x.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_PT1XMODE;
-	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_PT1XMODE;
-
+	m_pSndFile->m_SongFlags.set(SONG_LINEARSLIDES, m_CheckBox1.GetCheck() != BST_UNCHECKED);
+	m_pSndFile->m_SongFlags.set(SONG_FASTVOLSLIDES, m_CheckBox2.GetCheck() != BST_UNCHECKED);
+	m_pSndFile->m_SongFlags.set(SONG_ITOLDEFFECTS, m_CheckBox3.GetCheck() != BST_UNCHECKED);
+	m_pSndFile->m_SongFlags.set(SONG_ITCOMPATGXX, m_CheckBox4.GetCheck() != BST_UNCHECKED);
+	m_pSndFile->m_SongFlags.set(SONG_EXFILTERRANGE, m_CheckBox5.GetCheck() != BST_UNCHECKED);
+	m_pSndFile->m_SongFlags.set(SONG_ITPEMBEDIH, m_CheckBox6.GetCheck() != BST_UNCHECKED);
+	m_pSndFile->m_SongFlags.set(SONG_PT1XMODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
 
 	sel = m_ChannelsBox.GetCurSel();
 	if (sel >= 0)
@@ -996,7 +973,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
 		const std::string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
-        if(temp.size() >= CountOf(s))
+		if(temp.size() >= CountOf(s))
 			wsprintf(s, "%s", "...");
 		else
 			wsprintf(s, "%s", temp.c_str());

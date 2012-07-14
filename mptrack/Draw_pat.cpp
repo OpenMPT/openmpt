@@ -583,7 +583,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 //					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 //				rect.bottom = rect.top + COLHDR_HEIGHT;
 				DrawButtonRect(hdc, &rect, s,
-					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
+					pSndFile->ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
 					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
 					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
 
@@ -959,11 +959,11 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, PATTERNINDEX n
 				{
 					tx_col = MODCOLOR_NOTE;
 
-					if((pSndFile->m_dwSongFlags & SONG_PT1XMODE) && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
+					if(pSndFile->m_SongFlags[SONG_PT1XMODE] && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
 					{
 						// MOD "ProTracker 1.x" flag: Highlight notes that are not supported by Amiga trackers.
 						tx_col = MODCOLOR_DODGY_COMMANDS;
-					} else if((pSndFile->m_dwSongFlags & SONG_AMIGALIMITS) && m->instr != 0 && m->instr <= pSndFile->GetNumSamples())
+					} else if(pSndFile->m_SongFlags[SONG_AMIGALIMITS] && m->instr != 0 && m->instr <= pSndFile->GetNumSamples())
 					{
 						// S3M "Force Amiga Limits": Highlight notes that exceed the Amiga's frequency range.
 						UINT period = pSndFile->GetPeriodFromNote(m->note, 0, pSndFile->GetSample(m->instr).nC5Speed);
@@ -1695,14 +1695,14 @@ void CViewPattern::UpdateXInfoText()
 		
 		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
 		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
-						nChn+1,
-						pSndFile->Chn[nChn].nGlobalVol,
-						pSndFile->Chn[nChn].nActiveMacro,
-                        pSndFile->Chn[nChn].nCutOff,
-						(pSndFile->Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? "-Hi" : "",
-                        pSndFile->Chn[nChn].nResonance,
-                        pSndFile->Chn[nChn].nPan,
-						(pSndFile->Chn[nChn].dwFlags & CHN_SURROUND) ? "-S" : "");
+			nChn + 1,
+			pSndFile->Chn[nChn].nGlobalVol,
+			pSndFile->Chn[nChn].nActiveMacro,
+			pSndFile->Chn[nChn].nCutOff,
+			(pSndFile->Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? "-Hi" : "",
+			pSndFile->Chn[nChn].nResonance,
+			pSndFile->Chn[nChn].nPan,
+			pSndFile->Chn[nChn].dwFlags[CHN_SURROUND] ? "-S" : "");
 
 		pMainFrm->SetXInfoText(xtraInfo);
 	}

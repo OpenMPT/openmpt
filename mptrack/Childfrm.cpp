@@ -311,7 +311,7 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 
 		if ((!wParam) && (pSndFile->m_nInstruments > 0))
 		{
-			nIns = pModDoc->FindSampleParent(nIns);
+			nIns = pModDoc->FindSampleParent(static_cast<SAMPLEINDEX>(nIns));
 			if(nIns == INSTRUMENTINDEX_INVALID)
 			{
 				nIns = 0;

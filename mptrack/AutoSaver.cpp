@@ -250,7 +250,7 @@ CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
 	name.Append(".AutoSave.");					//append backup tag
 	name.Append(timeStamp);						//append timestamp
 	name.Append(".");							//append extension
-	if((pModDoc->GetSoundFile()->m_dwSongFlags & SONG_ITPROJECT) != 0)
+	if(pModDoc->GetSoundFile()->m_SongFlags[SONG_ITPROJECT])
 	{
 		name.Append("itp");
 	} else
@@ -289,7 +289,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 			break;
 
 		case MOD_TYPE_IT:
-			success = (pSndFile->m_dwSongFlags & SONG_ITPROJECT) ? 
+			success = pSndFile->m_SongFlags[SONG_ITPROJECT] ? 
 				pSndFile->SaveITProject(fileName) :
 				pSndFile->SaveIT(fileName); 
 			break;

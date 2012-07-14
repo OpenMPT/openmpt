@@ -483,21 +483,24 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for extended filter range flag
-	if(m_SndFile.m_dwSongFlags & SONG_EXFILTERRANGE)
+	if(m_SndFile.m_SongFlags[SONG_EXFILTERRANGE])
 	{
 		AddToLog("Found extended filter range\n");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_dwSongFlags &= ~SONG_EXFILTERRANGE;
+			m_SndFile.m_SongFlags.reset(SONG_EXFILTERRANGE);
 	}
 
 	// Embedded MIDI configuration in XM files
-	if((m_SndFile.m_dwSongFlags & SONG_EMBEDMIDICFG) != 0 && m_SndFile.GetType() == MOD_TYPE_XM)
+	if(m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG] != 0 && m_SndFile.GetType() == MOD_TYPE_XM)
 	{
 		AddToLog("Found embedded MIDI macros\n");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_dwSongFlags &= ~SONG_EMBEDMIDICFG;
+		{
+			m_SndFile.m_MidiCfg.Reset();
+			m_SndFile.m_SongFlags.reset(SONG_EMBEDMIDICFG);
+		}
 	}
 
 	// Player flags

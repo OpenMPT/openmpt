@@ -333,7 +333,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 23);
-	VERIFY_EQUAL_NONCONT((pSndFile->m_dwSongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
+	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
@@ -400,7 +400,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	const ModInstrument *pIns = pSndFile->Instruments[1];
 	VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
 	VERIFY_EQUAL_NONCONT(pIns->nPan, 128);
-	VERIFY_EQUAL_NONCONT(pIns->dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(pIns->dwFlags, InstrumentFlags(0));
 
 	VERIFY_EQUAL_NONCONT(pIns->nPPS, 0);
 	VERIFY_EQUAL_NONCONT(pIns->nPPC, NOTE_MIDDLEC - 1);
@@ -455,7 +455,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Ticks[9], 46);
 	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Values[9], 23);
 
-	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, EnvelopeFlags(0));
 	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nNodes, 0);
 
 	// Sequences
@@ -526,7 +526,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 23);
-	VERIFY_EQUAL_NONCONT((pSndFile->m_dwSongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
+	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
@@ -771,7 +771,7 @@ void TestLoadS3MFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 32 * 4);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 48);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 16);
-	VERIFY_EQUAL_NONCONT((pSndFile->m_dwSongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
+	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_classic);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_dwLastSavedWithVersion, MAKE_VERSION_NUMERIC(1, 20, 00, 00));
@@ -780,13 +780,13 @@ void TestLoadS3MFile(const CModDoc *pModDoc)
 	// Channels
 	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 4);
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nPan, 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].dwFlags, ChannelFlags(0));
 
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nPan, 256);
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].dwFlags, CHN_MUTE);
 
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].nPan, 85);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].dwFlags, ChannelFlags(0));
 
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[3].nPan, 171);
 	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[3].dwFlags, CHN_MUTE);
