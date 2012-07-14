@@ -406,7 +406,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if ((itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (itHeader.special & ITFileHeader::embedMIDIConfiguration)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (itHeader.flags & ITFileHeader::extendedFilterRange) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
-	StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[0], itHeader.songname);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], itHeader.songname);
 
 	// Global Volume
 	m_nDefaultGlobalVolume = itHeader.globalvol << 1;
@@ -759,7 +759,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			size_t sampleOffset = pis->ConvertToMPT(Samples[nsmp + 1]);
 
-			StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[nsmp + 1], pis->name);
+			StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[nsmp + 1], pis->name);
 
 			lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + pis->GetSampleFormat(itHeader.cwtv).ReadSample(Samples[nsmp + 1], (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset));
 		}

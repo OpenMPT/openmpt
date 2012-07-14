@@ -124,7 +124,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		return;
 	}
 
-	StringFixer::ReadString<StringFixer::spacePaddedNull>(mptIns.name, name);
+	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
 	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
@@ -148,8 +148,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		if(note < 120)
 		{
 			mptIns.NoteMap[i] = note + 1u;
-		}
-		else
+		} else
 		{
 			mptIns.NoteMap[i] = static_cast<BYTE>(i + 1);
 		}
@@ -274,7 +273,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		return 0;
 	}
 
-	StringFixer::ReadString<StringFixer::spacePaddedNull>(mptIns.name, name);
+	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
 	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
@@ -342,8 +341,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		if(note < 120)
 		{
 			mptIns.NoteMap[i] = note + 1u;
-		}
-		else
+		} else
 		{
 			mptIns.NoteMap[i] = static_cast<BYTE>(i + 1);
 		}
@@ -353,7 +351,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 }
 
 
-// Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns true if instrument extension is actually necessary.
+// Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns amount of bytes that need to be written to file.
 size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
 //-----------------------------------------------------------------------------------------------------------
 {
@@ -459,8 +457,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 			flags |= ITSample::sample16Bit;
 		}
 		cvt = ITSample::cvtSignedSample;
-	}
-	else
+	} else
 	{
 		flags = 0x00;
 	}
