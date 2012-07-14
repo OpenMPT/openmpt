@@ -1,7 +1,7 @@
 /*
  * Load_ams.cpp
  * ------------
- * Purpose: AMS (Extreme's Tracker) module loader
+ * Purpose: AMS (Extreme's Tracker / Velvet Studio) module loader
  * Notes  : Extreme was renamed to Velvet Development at some point,
  *          and thus they also renamed their tracker from
  *          "Extreme's Tracker" to "Velvet Studio".
@@ -385,7 +385,7 @@ bool CSoundFile::ReadAMS(FileReader &file)
 	}
 
 	m_nType = MOD_TYPE_AMS;
-	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
+	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nInstruments = 0;
 	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
 	m_nSamples = fileHeader.numSamps;
@@ -594,17 +594,17 @@ struct AMS2Instrument
 	void ApplyFlags(InstrumentEnvelope &mptEnv, EnvelopeFlags shift) const
 	{
 		const int flags = envFlags >> (shift * 3);
-		if(flags & envEnabled) mptEnv.dwFlags |= ENV_ENABLED;
-		if(flags & envLoop) mptEnv.dwFlags |= ENV_LOOP;
-		if(flags & envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
+		mptEnv.dwFlags.set(ENV_ENABLED, (flags & envEnabled) != 0);
+		mptEnv.dwFlags.set(ENV_LOOP, (flags & envLoop) != 0);
+		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & envSustain) != 0);
 
 		// "Break envelope" should stop the envelope loop when encountering a note-off... We can only use the sustain loop to emulate this behaviour.
 		if(!(flags & envSustain) && (flags & envLoop) != 0 && (flags & (1 << (9 - shift * 2))) != 0)
 		{
 			mptEnv.nSustainStart = mptEnv.nLoopStart;
 			mptEnv.nSustainEnd = mptEnv.nLoopEnd;
-			mptEnv.dwFlags |= ENV_SUSTAIN;
-			mptEnv.dwFlags &= ~ENV_LOOP;
+			mptEnv.dwFlags.set(ENV_SUSTAIN);
+			mptEnv.dwFlags.reset(ENV_LOOP);
 		}
 	}
 
@@ -735,7 +735,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 	}
 
 	m_nType = MOD_TYPE_AMS2;
-	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS | ((headerFlags & AMS2FileHeader::linearSlides) ? SONG_LINEARSLIDES : 0);
+	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS | ((headerFlags & AMS2FileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0));
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nInstruments = fileHeader.numIns;
@@ -957,7 +957,6 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 
 	return true;
 }
-
 
 
 /////////////////////////////////////////////////////////////////////

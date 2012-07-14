@@ -291,7 +291,7 @@ bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			int pan = (panpos[i] + 64) * 2;
 			if (pan < 0) pan = 0;
-			if (pan > 256) { pan = 128; ChnSettings[i].dwFlags |= CHN_SURROUND; }
+			if (pan > 256) { pan = 128; ChnSettings[i].dwFlags = CHN_SURROUND; }
 			ChnSettings[i].nPan = pan;
 		}
 		dwMemPos += nchannels;

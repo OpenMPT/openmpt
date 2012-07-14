@@ -25,7 +25,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nPatternLoopCount = 0;
 		nPatternLoop = 0;
 		nFadeOutVol = 0;
-		dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
+		dwFlags.set(CHN_KEYOFF | CHN_NOTEFADE);
 		//IT compatibility 15. Retrigger
 		if(sndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -75,7 +75,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		}
 		else
 		{
-			dwFlags = 0;
+			dwFlags.reset();
 			nPan = 128;
 			nGlobalVol = 64;
 		}

@@ -831,8 +831,8 @@ void CChannelManagerDlg::OnPaint()
 		switch(currentTab)
 		{
 			case 0:
-				if(m_pSndFile->ChnSettings[nThisChn].dwFlags & CHN_MUTE) FillRect(pDC.hdc,&btn,red);
-				else if(m_pSndFile->ChnSettings[nThisChn].dwFlags & CHN_SOLO) FillRect(pDC.hdc,&btn,green);
+				if(m_pSndFile->ChnSettings[nThisChn].dwFlags[CHN_MUTE]) FillRect(pDC.hdc,&btn,red);
+				else if(m_pSndFile->ChnSettings[nThisChn].dwFlags[CHN_SOLO]) FillRect(pDC.hdc,&btn,green);
 				else FillRect(pDC.hdc,&btn,CMainFrame::brushHighLight);
 				break;
 			case 1:
@@ -844,7 +844,7 @@ void CChannelManagerDlg::OnPaint()
 				else FillRect(pDC.hdc,&btn,CMainFrame::brushHighLight);
 				break;
 			case 2:
-				if(m_pSndFile->ChnSettings[nThisChn].dwFlags & CHN_NOFX) FillRect(pDC.hdc,&btn,red);
+				if(m_pSndFile->ChnSettings[nThisChn].dwFlags[CHN_NOFX]) FillRect(pDC.hdc,&btn,red);
 				else FillRect(pDC.hdc,&btn,green);
 				break;
 			case 3:

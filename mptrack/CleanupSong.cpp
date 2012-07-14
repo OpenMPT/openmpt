@@ -542,7 +542,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	EndWaitCursor();
 
-	if(unusedInsSamples && !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
+	if(unusedInsSamples && !((pSndFile->GetType() == MOD_TYPE_IT) && pSndFile->m_SongFlags[SONG_ITPROJECT]))
 	{
 		// We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
@@ -722,7 +722,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	if (!pSndFile->GetNumInstruments()) return false;
 
 	deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples;
-	if (!((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT))) // Never remove an instrument's samples in ITP.
+	if(!pSndFile->m_SongFlags[SONG_ITPROJECT]) // Never remove an instrument's samples in ITP.
 	{
 		if(Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing unused instruments") == cnfYes)
 		{
@@ -902,7 +902,7 @@ bool CModCleanupDlg::ResetVariables()
 	m_pModDoc->ChangeModType(MOD_TYPE_IT);
 	pSndFile->m_nMixLevels = mixLevels_compatible;
 	pSndFile->m_nTempoMode = tempo_mode_classic;
-	pSndFile->m_dwSongFlags = SONG_LINEARSLIDES;
+	pSndFile->m_SongFlags = SONG_LINEARSLIDES;
 	pSndFile->m_MidiCfg.Reset();
 	
 	// Global vars
@@ -919,7 +919,7 @@ bool CModCleanupDlg::ResetVariables()
 		pSndFile->Instruments[i]->nFadeOut = 256;
 		pSndFile->Instruments[i]->nGlobalVol = 64;
 		pSndFile->Instruments[i]->nPan = 128;
-		pSndFile->Instruments[i]->dwFlags &= ~INS_SETPANNING;
+		pSndFile->Instruments[i]->dwFlags.reset(INS_SETPANNING);
 		pSndFile->Instruments[i]->nMixPlug = 0;
 
 		pSndFile->Instruments[i]->nVolSwing = 0;

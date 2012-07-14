@@ -46,9 +46,9 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &
 	}
 
 	// Envelope Flags
-	if(mptEnv.dwFlags & ENV_ENABLED) flags |= XMInstrument::envEnabled;
-	if(mptEnv.dwFlags & ENV_SUSTAIN) flags |= XMInstrument::envSustain;
-	if(mptEnv.dwFlags & ENV_LOOP) flags |= XMInstrument::envLoop;
+	if(mptEnv.dwFlags[ENV_ENABLED]) flags |= XMInstrument::envEnabled;
+	if(mptEnv.dwFlags[ENV_SUSTAIN]) flags |= XMInstrument::envSustain;
+	if(mptEnv.dwFlags[ENV_LOOP]) flags |= XMInstrument::envLoop;
 
 	// Envelope Loops
 	sustain = static_cast<uint8>(min(12, mptEnv.nSustainStart));
@@ -147,27 +147,21 @@ void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoi
 	mptEnv.Ticks[0] = 0;
 
 	// Envelope Flags
-	mptEnv.dwFlags = 0;
-	if(flags & XMInstrument::envEnabled && mptEnv.nNodes) mptEnv.dwFlags |= ENV_ENABLED;
-	if(flags & XMInstrument::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
-	if(flags & XMInstrument::envLoop) mptEnv.dwFlags |= ENV_LOOP;
+	mptEnv.dwFlags.reset();
+	mptEnv.dwFlags.set(ENV_ENABLED, (flags & XMInstrument::envEnabled && mptEnv.nNodes));
+	mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & XMInstrument::envSustain) && sustain < 12);
+	mptEnv.dwFlags.set(ENV_LOOP, (flags & XMInstrument::envLoop) && loopEnd < 12 && loopEnd >= loopStart);
 
 	// Envelope Loops
 	if(sustain < 12)
 	{
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustain;
-	} else
-	{
-		mptEnv.dwFlags &= ~ENV_SUSTAIN;
 	}
 
 	if(loopEnd < 12 && loopEnd >= loopStart)
 	{
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
-	} else
-	{
-		mptEnv.dwFlags &= ~ENV_LOOP;
 	}
 }
 

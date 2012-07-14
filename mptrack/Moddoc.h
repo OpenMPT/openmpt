@@ -260,8 +260,8 @@ public:
 	bool IsChannelSolo(CHANNELINDEX nChn) const;
 // -! NEW_FEATURE#0012
 	bool SurroundChannel(CHANNELINDEX nChn, bool bSurround);
-	bool SetChannelGlobalVolume(CHANNELINDEX nChn, UINT nVolume);
-	bool SetChannelDefaultPan(CHANNELINDEX nChn, UINT nPan);
+	bool SetChannelGlobalVolume(CHANNELINDEX nChn, uint16 nVolume);
+	bool SetChannelDefaultPan(CHANNELINDEX nChn, uint16 nPan);
 	bool IsChannelMuted(CHANNELINDEX nChn) const;
 	bool IsSampleMuted(SAMPLEINDEX nSample) const;
 	bool IsInstrumentMuted(INSTRUMENTINDEX nInstr) const;

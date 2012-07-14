@@ -38,10 +38,10 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, BYTE envOffset, B
 //---------------------------------------------------------------------------------------------
 {
 	// Envelope Flags
-	if(mptEnv.dwFlags & ENV_ENABLED) flags |= ITEnvelope::envEnabled;
-	if(mptEnv.dwFlags & ENV_LOOP) flags |= ITEnvelope::envLoop;
-	if(mptEnv.dwFlags & ENV_SUSTAIN) flags |= ITEnvelope::envSustain;
-	if(mptEnv.dwFlags & ENV_CARRY) flags |= ITEnvelope::envCarry;
+	if(mptEnv.dwFlags[ENV_ENABLED]) flags |= ITEnvelope::envEnabled;
+	if(mptEnv.dwFlags[ENV_LOOP]) flags |= ITEnvelope::envLoop;
+	if(mptEnv.dwFlags[ENV_SUSTAIN]) flags |= ITEnvelope::envSustain;
+	if(mptEnv.dwFlags[ENV_CARRY]) flags |= ITEnvelope::envCarry;
 
 	// Nodes and Loops
 	num = (uint8)min(mptEnv.nNodes, 25);
@@ -76,10 +76,10 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, BYTE envOffset, int ma
 //-------------------------------------------------------------------------------------------
 {
 	// Envelope Flags
-	if(flags & ITEnvelope::envEnabled) mptEnv.dwFlags |= ENV_ENABLED;
-	if(flags & ITEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
-	if(flags & ITEnvelope::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
-	if(flags & ITEnvelope::envCarry) mptEnv.dwFlags |= ENV_CARRY;
+	mptEnv.dwFlags.set(ENV_ENABLED, (flags & ITEnvelope::envEnabled) != 0);
+	mptEnv.dwFlags.set(ENV_LOOP, (flags & ITEnvelope::envLoop) != 0);
+	mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & ITEnvelope::envSustain) != 0);
+	mptEnv.dwFlags.set(ENV_CARRY, (flags & ITEnvelope::envCarry) != 0);
 
 	// Nodes and Loops
 	mptEnv.nNodes = min(num, maxNodes);
@@ -155,9 +155,9 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	}
 
 	// Volume Envelope Flags
-	if(flags & ITOldInstrument::envEnabled) mptIns.VolEnv.dwFlags |= ENV_ENABLED;
-	if(flags & ITOldInstrument::envLoop) mptIns.VolEnv.dwFlags |= ENV_LOOP;
-	if(flags & ITOldInstrument::envSustain) mptIns.VolEnv.dwFlags |= ENV_SUSTAIN;
+	mptIns.VolEnv.dwFlags.set(ENV_ENABLED, (flags & ITOldInstrument::envEnabled) != 0);
+	mptIns.VolEnv.dwFlags.set(ENV_LOOP, (flags & ITOldInstrument::envLoop) != 0);
+	mptIns.VolEnv.dwFlags.set(ENV_SUSTAIN, (flags & ITOldInstrument::envSustain) != 0);
 
 	// Volume Envelope Loops
 	mptIns.VolEnv.nLoopStart = vls;
@@ -177,8 +177,8 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		mptIns.VolEnv.Values[i] = nodes[i * 2 + 1];
 	}
 
-	if(max(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags &= ~ENV_LOOP;
-	if(max(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags &= ~ENV_SUSTAIN;
+	if(max(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_LOOP);
+	if(max(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_SUSTAIN);
 }
 
 
@@ -199,7 +199,7 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	fadeout = LittleEndianW(static_cast<uint16>(min(mptIns.nFadeOut >> 5, 256)));
 	gbv = static_cast<uint8>(min(mptIns.nGlobalVol * 2, 128));
 	dfp = static_cast<uint8>(min(mptIns.nPan / 4, 64));
-	if(!(mptIns.dwFlags & INS_SETPANNING)) dfp |= ITInstrument::ignorePanning;
+	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
 
 	// Random Variation
 	rv = min(mptIns.nVolSwing, 100);
@@ -258,7 +258,7 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	panenv.ConvertToIT(mptIns.PanEnv, 32, 32);
 	// Writing Pitch Envelope
 	pitchenv.ConvertToIT(mptIns.PitchEnv, 32, 32);
-	if(mptIns.PitchEnv.dwFlags & ENV_FILTER) pitchenv.flags |= ITEnvelope::envFilter;
+	if(mptIns.PitchEnv.dwFlags[ENV_FILTER]) pitchenv.flags |= ITEnvelope::envFilter;
 
 	return sizeof(ITInstrument);
 }
@@ -282,7 +282,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	LimitMax(mptIns.nGlobalVol, 64u);
 	mptIns.nPan = (dfp & 0x7F) * 4;
 	if(mptIns.nPan > 256) mptIns.nPan = 128;
-	if(!(dfp & ITInstrument::ignorePanning)) mptIns.dwFlags |= INS_SETPANNING;
+	mptIns.dwFlags.set(INS_SETPANNING, !(dfp & ITInstrument::ignorePanning));
 
 	// Random Variation
 	mptIns.nVolSwing = min(rv, 100);
@@ -327,7 +327,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	panenv.ConvertToMPT(mptIns.PanEnv, 32, maxNodes);
 	// Pitch Envelope
 	pitchenv.ConvertToMPT(mptIns.PitchEnv, 32, maxNodes);
-	if(pitchenv.flags & ITEnvelope::envFilter) mptIns.PitchEnv.dwFlags |= ENV_FILTER;
+	mptIns.PitchEnv.dwFlags.set(ENV_FILTER, (pitchenv.flags & ITEnvelope::envFilter) != 0);
 
 	// Sample Map
 	for(size_t i = 0; i < 120; i++)

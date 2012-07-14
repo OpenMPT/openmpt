@@ -648,13 +648,12 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 	case CMD_TREMOR:
 		if(param)
 		{
-			BYTE ontime = (BYTE)(param >> 4), offtime = (BYTE)(param & 0x0F);
-			if(sndFile.m_dwSongFlags & SONG_ITOLDEFFECTS)
+			uint8 ontime = (uint8)(param >> 4), offtime = (uint8)(param & 0x0F);
+			if(sndFile.m_SongFlags[SONG_ITOLDEFFECTS] || (sndFile.GetType() & MOD_TYPE_XM))
 			{
 				ontime++;
 				offtime++;
-			}
-			else
+			} else
 			{
 				if(ontime == 0) ontime = 1;
 				if(offtime == 0) offtime = 1;

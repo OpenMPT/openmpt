@@ -61,7 +61,7 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 	{
 		if(index < specs.patternsMax)
 			m_Patterns.push_back(MODPATTERN(*this));
-		else 
+		else
 		{
 #ifdef MODPLUG_TRACKER
 			ErrorBox(IDS_ERR_TOOMANYPAT, CMainFrame::GetMainFrame());

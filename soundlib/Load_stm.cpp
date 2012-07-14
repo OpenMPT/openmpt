@@ -121,7 +121,7 @@ bool CSoundFile::ReadSTM(FileReader &file)
 
 	// Read STM header
 	m_nType = MOD_TYPE_STM;
-	m_dwSongFlags = 0;
+	m_SongFlags.reset();
 	m_nSamples = 31;
 	m_nChannels = 4;
 	m_nInstruments = 0;
@@ -136,7 +136,7 @@ bool CSoundFile::ReadSTM(FileReader &file)
 	// Setting up channels
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)
 	{
-		ChnSettings[chn].dwFlags = 0;
+		ChnSettings[chn].dwFlags.reset();
 		ChnSettings[chn].nVolume = 64;
 		ChnSettings[chn].nPan = (chn & 1) ? 0x40 : 0xC0;
 	}

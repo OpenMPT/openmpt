@@ -643,7 +643,7 @@ void CDoWaveConvert::OnButton1()
 	CSoundFile::gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
 	CSoundFile::gnChannels = m_pWaveFormat->nChannels;
-	m_pSndFile->m_dwSongFlags &= ~(SONG_PAUSED | SONG_STEP);
+	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 // -> CODE#0024
 // -> DESC="wav export update"
 //	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 16))
@@ -949,7 +949,7 @@ CDoAcmConvert::CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pw
 
 
 BOOL CDoAcmConvert::OnInitDialog()
-//---------------------------------
+//--------------------------------
 {
 	CDialog::OnInitDialog();
 	SetWindowText("Encoding File...");
@@ -1059,7 +1059,7 @@ void CDoAcmConvert::OnButton1()
 	m_pSndFile->ResetChannels();
 	CSoundFile::InitPlayer(TRUE);
 	CSoundFile::gdwSoundSetup |= SNDMIX_DIRECTTODISK;
-	m_pSndFile->m_dwSongFlags &= ~(SONG_PAUSED | SONG_STEP);
+	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 
 	m_pSndFile->visitedSongRows.Initialize(true);
 
@@ -1194,37 +1194,3 @@ OnError:
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	EndDialog(retval);
 }
-
-
-/*
-
-TEXT("IARL"), TEXT("Archival Location"),  TEXT("Indicates where the subject of the file is archived."),
-TEXT("IART"), TEXT("Artist"),             TEXT("Lists the artist of the original subject of the file. For example, \"Michaelangelo.\""),
-TEXT("ICMS"), TEXT("Commissioned"),       TEXT("Lists the name of the person or organization that commissioned the subject of the file."
-											" For example, \"Pope Julian II.\""),
-TEXT("ICMT"), TEXT("Comments"),           TEXT("Provides general comments about the file or the subject of the file. If the comment is "
-											"several sentences long, end each sentence with a period. Do not include newline characters."),
-TEXT("ICOP"), TEXT("Copyright"),          TEXT("Records the copyright information for the file. For example, \"Copyright Encyclopedia "
-											"International 1991.\" If there are multiple copyrights, separate them by a semicolon followed "
-											"by a space."),
-TEXT("ICRD"), TEXT("Creation date"),      TEXT("Specifies the date the subject of the file was created. List dates in year-month-day "
-											"format, padding one-digit months and days with a zero on the left. For example, "
-											"'1553-05-03' for May 3, 1553."),
-TEXT("IENG"), TEXT("Engineer"),           TEXT("Stores the name of the engineer who worked on the file. If there are multiple engineers, "
-											"separate the names by a semicolon and a blank. For example, \"Smith, John; Adams, Joe.\""),
-TEXT("IGNR"), TEXT("Genre"),              TEXT("Describes the original work, such as, \"landscape,\" \"portrait,\" \"still life,\" etc."),
-TEXT("IKEY"), TEXT("Keywords"),           TEXT("Provides a list of keywords that refer to the file or subject of the file. Separate "
-											"multiple keywords with a semicolon and a blank. For example, \"Seattle; aerial view; scenery.\""),
-TEXT("IMED"), TEXT("Medium"),             TEXT("Describes the original subject of the file, such as, \"computer image,\" \"drawing,\""
-											"\"lithograph,\" and so forth."),
-TEXT("INAM"), TEXT("Name"),               TEXT("Stores the title of the subject of the file, such as, \"Seattle From Above.\""),
-TEXT("IPRD"), TEXT("Product"),            TEXT("Specifies the name of the title the file was originally intended for, such as \"Encyclopedia"
-											" of Pacific Northwest Geography.\""),
-TEXT("ISBJ"), TEXT("Subject"),            TEXT("Describes the contents of the file, such as \"Aerial view of Seattle.\""),
-TEXT("ISFT"), TEXT("Software"),           TEXT("Identifies the name of the software package used to create the file, such as "
-											"\"Microsoft WaveEdit.\""),
-TEXT("ISRC"), TEXT("Source"),             TEXT("Identifies the name of the person or organization who supplied the original subject of the file."
-											" For example, \"Trey Research.\""),
-TEXT("ITCH"), TEXT("Technician"),         TEXT("Identifies the technician who digitized the subject file. For example, \"Smith, John.\""),
-
-*/

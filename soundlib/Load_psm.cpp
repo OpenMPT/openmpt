@@ -274,7 +274,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 
 	// Yep, this seems to be a valid file.
 	m_nType = MOD_TYPE_PSM;
-	m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
+	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = 0;
 
@@ -631,10 +631,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 	{
 		ChnSettings[chn].nVolume = subsongs[0].channelVolume[chn];
 		ChnSettings[chn].nPan = subsongs[0].channelPanning[chn];
-		if(subsongs[0].channelSurround[chn])
-			ChnSettings[chn].dwFlags |= CHN_SURROUND;
-		else
-			ChnSettings[chn].dwFlags &= ~CHN_SURROUND;
+		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
 	// Now that we know the number of channels, we can go through all the patterns.
@@ -1150,7 +1147,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 		{
 			ChnSettings[i].nPan = ((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
 			ChnSettings[i].nVolume = 64;
-			ChnSettings[i].dwFlags = 0; // (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
+			ChnSettings[i].dwFlags.reset(); // (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}
 	}
 

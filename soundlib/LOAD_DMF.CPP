@@ -1011,7 +1011,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 
 	m_nType = MOD_TYPE_DMF;
-	m_dwSongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX;	// this will be converted to IT format by MPT. SONG_ITOLDEFFECTS is not set because of tremor.
+	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX;	// this will be converted to IT format by MPT. SONG_ITOLDEFFECTS is not set because of tremor.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 120;

@@ -48,6 +48,7 @@ bool CSoundFile::ReadWav(FileReader &file)
 	if(!wavFile.IsValid()
 		|| wavFile.GetNumChannels() == 0
 		|| wavFile.GetNumChannels() > MAX_BASECHANNELS
+		|| wavFile.GetBitsPerSample() == 0
 		|| wavFile.GetBitsPerSample() > 32
 		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat))
 	{
@@ -87,13 +88,13 @@ bool CSoundFile::ReadWav(FileReader &file)
 	m_nInstruments = 0;
 	m_nDefaultSpeed = ticksPerRow;
 	m_nDefaultTempo = 125;
-	m_dwSongFlags = SONG_LINEARSLIDES;
+	m_SongFlags = SONG_LINEARSLIDES;
 
 	for(CHANNELINDEX channel = 0; channel < wavFile.GetNumChannels(); channel++)
 	{
 		ChnSettings[channel].nPan = (channel % 2) ? 256 : 0;
 		ChnSettings[channel].nVolume = 64;
-		ChnSettings[channel].dwFlags = 0;
+		ChnSettings[channel].dwFlags.reset();
 	}
 
 	// Setting up pattern

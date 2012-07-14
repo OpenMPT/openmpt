@@ -423,8 +423,8 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 		pIns->Keyboard[j] = m_nSamples;
 		pIns->NoteMap[j] = (BYTE)mapnote;
 	}
-	pIns->VolEnv.dwFlags |= ENV_ENABLED;
-	if (nChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
+	pIns->VolEnv.dwFlags.set(ENV_ENABLED);
+	if (nChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
 	pIns->VolEnv.nNodes = 4;
 	pIns->VolEnv.Ticks[0] = 0;
 	pIns->VolEnv.Values[0] = ENVELOPE_MAX;
@@ -530,7 +530,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	m_nChannels = 32;
 	m_nSamples = 0;
 	m_nInstruments = 0;
-	m_dwSongFlags |= SONG_LINEARSLIDES;
+	m_SongFlags.set(SONG_LINEARSLIDES);
 	m_szNames[0][0] = 0;
 
 	// MIDI->MOD Tempo Conversion
@@ -567,7 +567,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 		// Channel settings
 		ChnSettings[ics].nPan = 128;
 		ChnSettings[ics].nVolume = 64;
-		ChnSettings[ics].dwFlags = 0;
+		ChnSettings[ics].dwFlags.reset();
 		// Channels state
 		chnstate[ics].pan = 128;
 		chnstate[ics].pitchsrc = 0x2000;

@@ -600,6 +600,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	m_nDefaultTempo = 125;
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
+	m_SongFlags.reset();
 
 	file.Seek(0);
 	file.ReadString<StringFixer::spacePadded>(m_szNames[0], 20);
@@ -695,7 +696,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 			// Arbitrary threshold for going into PT1x mode: 16 "sample swaps" in one pattern.
 			if(instrWithoutNoteCount > 16)
 			{
-				m_dwSongFlags |= SONG_PT1XMODE;
+				m_SongFlags.set(SONG_PT1XMODE);
 			}
 		}
 	}

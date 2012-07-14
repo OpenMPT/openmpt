@@ -1708,8 +1708,8 @@ void QuickChannelProperties::UpdateDisplay()
 	SetDlgItemInt(IDC_EDIT2, settings.nPan, FALSE);
 	volSlider.SetPos(settings.nVolume);
 	panSlider.SetPos(settings.nPan / 4u);
-	CheckDlgButton(IDC_CHECK1, (settings.dwFlags & CHN_MUTE) ? TRUE : FALSE);
-	CheckDlgButton(IDC_CHECK2, (settings.dwFlags & CHN_SURROUND) ? TRUE : FALSE);
+	CheckDlgButton(IDC_CHECK1, (settings.dwFlags[CHN_MUTE]) ? TRUE : FALSE);
+	CheckDlgButton(IDC_CHECK2, (settings.dwFlags[CHN_SURROUND]) ? TRUE : FALSE);
 
 	char description[16];
 	sprintf(description, "Channel %d:", channel + 1);

@@ -21,38 +21,38 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		// IT / MPTM -> XM: Expand loop by one tick, convert sustain loops to sustain points, remove carry flag.
 		nSustainStart = nSustainEnd;
-		dwFlags &= ~ENV_CARRY;
+		dwFlags.reset(ENV_CARRY);
 
-		if(nLoopEnd > nLoopStart && (dwFlags & ENV_LOOP))
+		if(nLoopEnd > nLoopStart && dwFlags[ENV_LOOP])
 		{
-			for(UINT node = nLoopEnd; node < nNodes; node++)
+			for(uint32 node = nLoopEnd; node < nNodes; node++)
 			{
 				Ticks[node]++;
 			}
 		}
 	} else if((fromType & MOD_TYPE_XM) && !(toType & MOD_TYPE_XM))
 	{
-		if(nSustainStart > nLoopEnd && (dwFlags & ENV_LOOP))
+		if(nSustainStart > nLoopEnd && dwFlags[ENV_LOOP])
 		{
 			// In the IT format, the sustain loop is always considered before the envelope loop.
 			// In the XM format, whichever of the two is encountered first is considered.
 			// So we have to disable the sustain loop if it was behind the normal loop.
-			dwFlags &= ~ENV_SUSTAIN;
+			dwFlags.reset(ENV_SUSTAIN);
 		}
 
 		// XM -> IT / MPTM: Shorten loop by one tick by inserting bogus point
-		if(nLoopEnd > nLoopStart && (dwFlags & ENV_LOOP))
+		if(nLoopEnd > nLoopStart && dwFlags[ENV_LOOP])
 		{
 			if(Ticks[nLoopEnd] - 1 > Ticks[nLoopEnd - 1])
 			{
 				// Insert an interpolated point just before the loop point.
-				BYTE interpolatedValue = Util::Round<BYTE>(GetValueFromPosition(Ticks[nLoopEnd] - 1) * 64.0f);
+				uint8 interpolatedValue = Util::Round<uint8>(GetValueFromPosition(Ticks[nLoopEnd] - 1) * 64.0f);
 				
 
 				if(nNodes +  1 < MAX_ENVPOINTS)
 				{
 					// Should always be possible, since XM only allows for 12 envelope points anyway.
-					for(UINT node = nNodes; node >= nLoopEnd; node--)
+					for(uint32 node = nNodes; node >= nLoopEnd; node--)
 					{
 						Ticks[node + 1] = Ticks[node];
 						Values[node + 1] = Values[node];
@@ -77,10 +77,10 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 float InstrumentEnvelope::GetValueFromPosition(int position) const
 //----------------------------------------------------------------
 {
-	UINT pt = nNodes - 1;
+	uint32 pt = nNodes - 1u;
 
 	// Checking where current 'tick' is relative to the envelope points.
-	for(UINT i = 0; i < nNodes - 1u; i++)
+	for(uint32 i = 0; i < nNodes - 1u; i++)
 	{
 		if (position <= Ticks[i])
 		{
@@ -101,7 +101,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 		// Case: current 'tick' is between two envelope points.
 		int x1 = 0;
 
-		if (pt)
+		if(pt)
 		{
 			// Get previous node's value and tick.
 			value = static_cast<float>(Values[pt - 1]) / 64.0f;
@@ -124,7 +124,7 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 //----------------------------------------------
 {
 	nFadeOut = 256;
-	dwFlags = 0;
+	dwFlags.reset();
 	nGlobalVol = 64;
 	nPan = 32 * 4;
 
@@ -175,9 +175,9 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		ResetNoteMap();
 
-		PitchEnv.dwFlags &= ~(ENV_ENABLED|ENV_FILTER);
+		PitchEnv.dwFlags.reset(ENV_ENABLED | ENV_FILTER);
 
-		dwFlags &= ~INS_SETPANNING;
+		dwFlags.reset(INS_SETPANNING);
 		SetCutoff(GetCutoff(), false);
 		SetResonance(GetResonance(), false);
 		nFilterMode = FLTMODE_UNCHANGED;

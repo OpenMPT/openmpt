@@ -321,8 +321,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nDefaultSpeed = CLAMP(xmheader.speed, 1, 31);
 	m_nDefaultTempo = CLAMP(xmheader.tempo, 32, 512);
 
-	if(xmheader.flags & XMFileHeader::linearSlides) m_dwSongFlags |= SONG_LINEARSLIDES;
-	if(xmheader.flags & XMFileHeader::extendedFilterRange) m_dwSongFlags |= SONG_EXFILTERRANGE;
+	m_SongFlags.set(SONG_LINEARSLIDES, (xmheader.flags & XMFileHeader::linearSlides) != 0);
+	m_SongFlags.set(SONG_EXFILTERRANGE, (xmheader.flags & XMFileHeader::extendedFilterRange) != 0);
 
 	Order.ReadAsByte(lpStream + 80, min(xmheader.orders, MAX_ORDERS), dwMemLength - 80);
 
@@ -486,7 +486,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		{
 			memcpy(&m_MidiCfg, lpStream + dwMemPos, len);
 			m_MidiCfg.Sanitize();
-			m_dwSongFlags |= SONG_EMBEDMIDICFG;
+			m_SongFlags.set(SONG_EMBEDMIDICFG);
 			dwMemPos += len;	//rewbs.fix36946
 		}
 		madeWithModPlug = true;
@@ -663,8 +663,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	else
 		xmheader.instruments = writeInstruments = m_nSamples;
 
-	if((m_dwSongFlags & SONG_LINEARSLIDES)) xmheader.flags |= XMFileHeader::linearSlides;
-	if((m_dwSongFlags & SONG_EXFILTERRANGE) && !compatibilityExport) xmheader.flags |= XMFileHeader::extendedFilterRange;
+	if(m_SongFlags[SONG_LINEARSLIDES]) xmheader.flags |= XMFileHeader::linearSlides;
+	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) xmheader.flags |= XMFileHeader::extendedFilterRange;
 	xmheader.flags = xmheader.flags;
 
 	if(compatibilityExport)
@@ -913,7 +913,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			fwrite(m_lpszSongComments, 1, d, f);
 		}
 		// Writing midi cfg
-		if (m_dwSongFlags & SONG_EMBEDMIDICFG)
+		if (m_SongFlags[SONG_EMBEDMIDICFG])
 		{
 			DWORD d = 0x4944494D;
 			fwrite(&d, 1, 4, f);

@@ -2467,12 +2467,12 @@ void CViewPattern::PatternStep(bool autoStep)
 		// Cut instruments/samples in virtual channels
 		for (CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
-			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
+			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		pSndFile->LoopPattern(m_nPattern);
 		pSndFile->m_nNextRow = GetCurrentRow();
-		pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
-		pSndFile->m_dwSongFlags |= SONG_STEP;
+		pSndFile->m_SongFlags.reset(SONG_PAUSED);
+		pSndFile->m_SongFlags.set(SONG_STEP);
 
 		cs.Leave();
 
@@ -3355,7 +3355,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		}
 		m_nLastPlayedRow = nRow;
 
-		if (pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) return 0;
+		if(pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP]) return 0;
 
 
 		if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat)
@@ -4752,7 +4752,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 	BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 	const bool liveRecord = IsLiveRecord();
-	const bool usePlaybackPosition = (liveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !(pSndFile->m_dwSongFlags & SONG_STEP));
+	const bool usePlaybackPosition = (liveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !pSndFile->m_SongFlags[SONG_STEP]);
 	const bool isSplit = IsNoteSplit(note);
 
 	if(pModDoc->GetSplitKeyboardSettings().IsSplitActive()
@@ -5561,26 +5561,25 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFi
 bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const
 //------------------------------------------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? 
-					   (MF_STRING|MF_CHECKED) : MF_STRING, ID_PATTERN_MUTE, 
-					   "Mute Channel\t" + ih->GetKeyTextFromCommand(kcChannelMute));
+	AppendMenu(hMenu, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? 
+						(MF_STRING|MF_CHECKED) : MF_STRING, ID_PATTERN_MUTE, 
+						"Mute Channel\t" + ih->GetKeyTextFromCommand(kcChannelMute));
 	bool bSolo = false, bUnmuteAll = false;
 	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
 	for (CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
 	{
-		if (i != nChn)
+		if(i != nChn)
 		{
-			if (!(pSndFile->ChnSettings[i].dwFlags & CHN_MUTE)) bSolo = bSoloPending = true;
-			if (!((~pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) && pSndFile->m_bChannelMuteTogglePending[i])) bSoloPending = true;
-		}
-		else
+			if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bSolo = bSoloPending = true;
+			if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bSoloPending = true;
+		} else
 		{
-			if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) bSolo = bSoloPending = true;
-			if ((~pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) && pSndFile->m_bChannelMuteTogglePending[i]) bSoloPending = true;
+			if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bSolo = bSoloPending = true;
+			if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bSoloPending = true;
 		}
-		if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) bUnmuteAll = bUnmuteAllPending = true;
-		if ((~pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) && pSndFile->m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
+		if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bUnmuteAll = bUnmuteAllPending = true;
+		if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
 	}
 	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
 	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
@@ -5588,7 +5587,7 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 	AppendMenu(hMenu, 
 			pSndFile->m_bChannelMuteTogglePending[nChn] ? (MF_STRING|MF_CHECKED) : MF_STRING,
 			 ID_PATTERN_TRANSITIONMUTE,
-			(pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ?
+			pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ?
 			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
 			"On transition: Mute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
 

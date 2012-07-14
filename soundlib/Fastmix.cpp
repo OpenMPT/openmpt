@@ -65,7 +65,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 	register ModChannel * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
 	const signed char *p = (signed char *)(pChn->pCurrentSample+pChn->nPos);\
-	if (pChn->dwFlags & CHN_STEREO) p += pChn->nPos;\
+	if (pChn->dwFlags[CHN_STEREO]) p += pChn->nPos;\
 	int *pvol = pbuffer;\
 	do {
 
@@ -73,7 +73,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 	register ModChannel * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
 	const signed short *p = (signed short *)(pChn->pCurrentSample+(pChn->nPos*2));\
-	if (pChn->dwFlags & CHN_STEREO) p += pChn->nPos;\
+	if (pChn->dwFlags[CHN_STEREO]) p += pChn->nPos;\
 	int *pvol = pbuffer;\
 	do {
 
@@ -1369,7 +1369,7 @@ const LPMIXINTERFACE gpFastMixFunctionTable[2*16] =
 static LONG MPPFASTCALL GetSampleCount(ModChannel *pChn, LONG nSamples, bool bITBidiMode)
 //---------------------------------------------------------------------------------------
 {
-	LONG nLoopStart = (pChn->dwFlags & CHN_LOOP) ? pChn->nLoopStart : 0;
+	LONG nLoopStart = pChn->dwFlags[CHN_LOOP] ? pChn->nLoopStart : 0;
 	LONG nInc = pChn->nInc;
 
 	if ((nSamples <= 0) || (!nInc) || (!pChn->nLength)) return 0;
@@ -1388,8 +1388,8 @@ static LONG MPPFASTCALL GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 			}
 			nInc = -nInc;
 			pChn->nInc = nInc;
-			pChn->dwFlags &= ~(CHN_PINGPONGFLAG); // go forward
-			if ((!(pChn->dwFlags & CHN_LOOP)) || (pChn->nPos >= pChn->nLength))
+			pChn->dwFlags.reset(CHN_PINGPONGFLAG); // go forward
+			if(!pChn->dwFlags[CHN_LOOP] || pChn->nPos >= pChn->nLength)
 			{
 				pChn->nPos = pChn->nLength;
 				pChn->nPosLo = 0;
@@ -1404,8 +1404,8 @@ static LONG MPPFASTCALL GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 	// Past the end
 	if (pChn->nPos >= pChn->nLength)
 	{
-		if (!(pChn->dwFlags & CHN_LOOP)) return 0; // not looping -> stop this channel
-		if (pChn->dwFlags & CHN_PINGPONGLOOP)
+		if(!pChn->dwFlags[CHN_LOOP]) return 0; // not looping -> stop this channel
+		if(pChn->dwFlags[CHN_PINGPONGLOOP])
 		{
 			// Invert loop
 			if (nInc > 0)
@@ -1413,7 +1413,7 @@ static LONG MPPFASTCALL GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 				nInc = -nInc;
 				pChn->nInc = nInc;
 			}
-			pChn->dwFlags |= CHN_PINGPONGFLAG;
+			pChn->dwFlags.set(CHN_PINGPONGFLAG);
 			// adjust loop position
 			LONG nDeltaHi = (pChn->nPos - pChn->nLength);
 			LONG nDeltaLo = 0x10000 - (pChn->nPosLo & 0xffff);
@@ -1515,10 +1515,10 @@ UINT CSoundFile::CreateStereoMix(int count)
 		pOfsR = &gnDryROfsVol;
 		pOfsL = &gnDryLOfsVol;
 		nFlags = 0;
-		if (pChannel->dwFlags & CHN_16BIT) nFlags |= MIXNDX_16BIT;
-		if (pChannel->dwFlags & CHN_STEREO) nFlags |= MIXNDX_STEREO;
+		if (pChannel->dwFlags[CHN_16BIT]) nFlags |= MIXNDX_16BIT;
+		if (pChannel->dwFlags[CHN_STEREO]) nFlags |= MIXNDX_STEREO;
 	#ifndef NO_FILTER
-		if (pChannel->dwFlags & CHN_FILTER) nFlags |= MIXNDX_FILTER;
+		if (pChannel->dwFlags[CHN_FILTER]) nFlags |= MIXNDX_FILTER;
 	#endif
 		//rewbs.resamplerConf
 		nFlags |= GetResamplingFlag(pChannel);
@@ -1534,11 +1534,11 @@ UINT CSoundFile::CreateStereoMix(int count)
 		nsamples = count;
 	#ifndef NO_REVERB
 		pbuffer = (gdwSoundSetup & SNDMIX_REVERB) ? MixReverbBuffer : MixSoundBuffer;
-		if ((pChannel->dwFlags & CHN_SURROUND) && (gnChannels > 2)) pbuffer = MixRearBuffer;
-		if (pChannel->dwFlags & CHN_NOREVERB) pbuffer = MixSoundBuffer;
+		if(pChannel->dwFlags[CHN_SURROUND] && gnChannels > 2) pbuffer = MixRearBuffer;
+		if(pChannel->dwFlags[CHN_NOREVERB]) pbuffer = MixSoundBuffer;
 
 	#ifdef ENABLE_MMX
-		if ((pChannel->dwFlags & CHN_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX))
+		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & SYSMIX_ENABLEMMX))
 			pbuffer = MixReverbBuffer;
 	#endif
 
@@ -1609,7 +1609,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			*pOfsR += pChannel->nROfs;
 			*pOfsL += pChannel->nLOfs;
 			pChannel->nROfs = pChannel->nLOfs = 0;
-			pChannel->dwFlags &= ~CHN_PINGPONGFLAG;
+			pChannel->dwFlags.reset(CHN_PINGPONGFLAG);
 			continue;
 		}
 		// Should we mix this channel ?
@@ -1648,10 +1648,10 @@ UINT CSoundFile::CreateStereoMix(int count)
 				pChannel->nRightVol = pChannel->nNewRightVol;
 				pChannel->nLeftVol = pChannel->nNewLeftVol;
 				pChannel->nRightRamp = pChannel->nLeftRamp = 0;
-				if ((pChannel->dwFlags & CHN_NOTEFADE) && (!(pChannel->nFadeOutVol)))
+				if(pChannel->dwFlags[CHN_NOTEFADE] && !pChannel->nFadeOutVol)
 				{
 					pChannel->nLength = 0;
-					pChannel->pCurrentSample = NULL;
+					pChannel->pCurrentSample = nullptr;
 				}
 			}
 		}
@@ -1682,12 +1682,13 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 	}
 	
 	//didn't manage to get flag from instrument header, use channel flags.
-	if (pChannel->dwFlags & CHN_HQSRC)
+	if(pChannel->dwFlags[CHN_HQSRC])
 	{
 		if (gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
 		if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
-		if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;				
-	} else if (!(pChannel->dwFlags & CHN_NOIDO)) {
+		if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;
+	} else if(!pChannel->dwFlags[CHN_NOIDO])
+	{
 		return MIXNDX_LINEARSRC;
 	}
 	

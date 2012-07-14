@@ -212,7 +212,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nRestartPos = pfh->wRestart;
 	m_nDefaultSpeed = pfh->bTicksPerLine;
 	m_nDefaultTempo = 125;
-	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_EXFILTERRANGE;
+	m_SongFlags = (SONG_ITCOMPATGXX | SONG_EXFILTERRANGE);
 	m_nDefaultRowsPerBeat = pfh->bLinesPerBeat;
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
 	if ((pfh->wSamplesPerTick > 100) && (pfh->wSamplesPerTick < 5000))
@@ -403,9 +403,9 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 #ifdef MT2DEBUG
 	Log("Loading instruments at offset 0x%08X\n", dwMemPos);
 #endif
-	memset(InstrMap, 0, sizeof(InstrMap));
+	MemsetZero(InstrMap);
 	m_nInstruments = (pfh->wInstruments < MAX_INSTRUMENTS) ? pfh->wInstruments : MAX_INSTRUMENTS-1;
-	for (UINT iIns=1; iIns<=255; iIns++)
+	for(INSTRUMENTINDEX iIns = 1; iIns <= 255; iIns++)
 	{
 		if (dwMemPos+36 > dwMemLength) return true;
 		MT2INSTRUMENT *pmi = (MT2INSTRUMENT *)(lpStream+dwMemPos);
@@ -478,12 +478,12 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 						break;
 					default: // Pitch/Filter envelope
 						pEnv = &pIns->PitchEnv;
-						if ((pme->nFlags & 1) && (iEnv == 3)) pIns->PitchEnv.dwFlags |= ENV_FILTER;
+						pIns->PitchEnv.dwFlags.set(ENV_FILTER, (pme->nFlags & 1) && iEnv == 3);
 					}
 
-					if (pme->nFlags & 1) pEnv->dwFlags |= ENV_ENABLED;
-					if (pme->nFlags & 2) pEnv->dwFlags |= ENV_SUSTAIN;
-					if (pme->nFlags & 4) pEnv->dwFlags |= ENV_LOOP;
+					pEnv->dwFlags.set(ENV_ENABLED, (pme->nFlags & 1) != 0);
+					pEnv->dwFlags.set(ENV_SUSTAIN, (pme->nFlags & 2) != 0);
+					pEnv->dwFlags.set(ENV_LOOP, (pme->nFlags & 4) != 0);
 					pEnv->nNodes = (pme->nPoints > 16) ? 16 : pme->nPoints;
 					pEnv->nSustainStart = pEnv->nSustainEnd = pme->nSustainPos;
 					pEnv->nLoopStart = pme->nLoopStart;

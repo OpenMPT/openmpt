@@ -223,21 +223,21 @@ DWORD CreateExtensionFlags(const ModInstrument& ins)
 //--------------------------------------------------
 {
 	DWORD dwFlags = 0;
-	if (ins.VolEnv.dwFlags & ENV_ENABLED)	dwFlags |= dFdd_VOLUME;
-	if (ins.VolEnv.dwFlags & ENV_SUSTAIN)	dwFlags |= dFdd_VOLSUSTAIN;
-	if (ins.VolEnv.dwFlags & ENV_LOOP)		dwFlags |= dFdd_VOLLOOP;
-	if (ins.PanEnv.dwFlags & ENV_ENABLED)	dwFlags |= dFdd_PANNING;
-	if (ins.PanEnv.dwFlags & ENV_SUSTAIN)	dwFlags |= dFdd_PANSUSTAIN;
-	if (ins.PanEnv.dwFlags & ENV_LOOP)		dwFlags |= dFdd_PANLOOP;
-	if (ins.PitchEnv.dwFlags & ENV_ENABLED)	dwFlags |= dFdd_PITCH;
-	if (ins.PitchEnv.dwFlags & ENV_SUSTAIN)	dwFlags |= dFdd_PITCHSUSTAIN;
-	if (ins.PitchEnv.dwFlags & ENV_LOOP)	dwFlags |= dFdd_PITCHLOOP;
-	if (ins.dwFlags & INS_SETPANNING)		dwFlags |= dFdd_SETPANNING;
-	if (ins.PitchEnv.dwFlags & ENV_FILTER)	dwFlags |= dFdd_FILTER;
-	if (ins.VolEnv.dwFlags & ENV_CARRY)		dwFlags |= dFdd_VOLCARRY;
-	if (ins.PanEnv.dwFlags & ENV_CARRY)		dwFlags |= dFdd_PANCARRY;
-	if (ins.PitchEnv.dwFlags & ENV_CARRY)	dwFlags |= dFdd_PITCHCARRY;
-	if (ins.dwFlags & INS_MUTE)				dwFlags |= dFdd_MUTE;
+	if(ins.VolEnv.dwFlags[ENV_ENABLED])		dwFlags |= dFdd_VOLUME;
+	if(ins.VolEnv.dwFlags[ENV_SUSTAIN])		dwFlags |= dFdd_VOLSUSTAIN;
+	if(ins.VolEnv.dwFlags[ENV_LOOP])		dwFlags |= dFdd_VOLLOOP;
+	if(ins.PanEnv.dwFlags[ENV_ENABLED])		dwFlags |= dFdd_PANNING;
+	if(ins.PanEnv.dwFlags[ENV_SUSTAIN])		dwFlags |= dFdd_PANSUSTAIN;
+	if(ins.PanEnv.dwFlags[ENV_LOOP])		dwFlags |= dFdd_PANLOOP;
+	if(ins.PitchEnv.dwFlags[ENV_ENABLED])	dwFlags |= dFdd_PITCH;
+	if(ins.PitchEnv.dwFlags[ENV_SUSTAIN])	dwFlags |= dFdd_PITCHSUSTAIN;
+	if(ins.PitchEnv.dwFlags[ENV_LOOP])		dwFlags |= dFdd_PITCHLOOP;
+	if(ins.dwFlags[INS_SETPANNING])			dwFlags |= dFdd_SETPANNING;
+	if(ins.PitchEnv.dwFlags[ENV_FILTER])	dwFlags |= dFdd_FILTER;
+	if(ins.VolEnv.dwFlags[ENV_CARRY])		dwFlags |= dFdd_VOLCARRY;
+	if(ins.PanEnv.dwFlags[ENV_CARRY])		dwFlags |= dFdd_PANCARRY;
+	if(ins.PitchEnv.dwFlags[ENV_CARRY])		dwFlags |= dFdd_PITCHCARRY;
+	if(ins.dwFlags[INS_MUTE])				dwFlags |= dFdd_MUTE;
 	return dwFlags;
 }
 } // unnamed namespace.
@@ -261,9 +261,9 @@ WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
 
 WRITE_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
 WRITE_MPTHEADER_sized_member(	nPan					, UINT			, P...							)
-WRITE_MPTHEADER_sized_member(	VolEnv.nNodes			, UINT			, VE..							)
-WRITE_MPTHEADER_sized_member(	PanEnv.nNodes			, UINT			, PE..							)
-WRITE_MPTHEADER_sized_member(	PitchEnv.nNodes			, UINT			, PiE.							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nNodes			, uint32		, VE..							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nNodes			, uint32		, PE..							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nNodes			, uint32		, PiE.							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nLoopStart		, uint8			, VLS.							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, uint8			, VLE.							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nSustainStart	, uint8			, VSB.							)
@@ -297,8 +297,8 @@ WRITE_MPTHEADER_array_member(	PanEnv.Values			, uint8			, PE[.		, ((input->PanEn
 WRITE_MPTHEADER_array_member(	PitchEnv.Values			, uint8			, PiE[		, ((input->PitchEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
 WRITE_MPTHEADER_array_member(	NoteMap					, uint8			, NM[.		, 128				)
 WRITE_MPTHEADER_array_member(	Keyboard				, uint16		, K[..		, 128				)
-WRITE_MPTHEADER_array_member(	name					, CHAR			, n[..		, 32				)
-WRITE_MPTHEADER_array_member(	filename				, CHAR			, fn[.		, 12				)
+WRITE_MPTHEADER_array_member(	name					, char			, n[..		, 32				)
+WRITE_MPTHEADER_array_member(	filename				, char			, fn[.		, 12				)
 WRITE_MPTHEADER_sized_member(	nMixPlug				, uint8			, MiP.							)
 WRITE_MPTHEADER_sized_member(	nVolRampUp				, uint16		, VR..							)
 WRITE_MPTHEADER_sized_member(	nResampling				, uint16		, R...							)
@@ -309,11 +309,11 @@ WRITE_MPTHEADER_sized_member(	nPluginVelocityHandling	, uint8			, PVEH							)
 WRITE_MPTHEADER_sized_member(	nPluginVolumeHandling	, uint8			, PVOH							)
 WRITE_MPTHEADER_sized_member(	wPitchToTempoLock		, uint16		, PTTL							)
 WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, uint8			, PERN							)
-WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8		    , AERN							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8			, AERN							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, VERN							)
-WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags		, DWORD			, PFLG							)
-WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags			, DWORD		    , AFLG							)
-WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, DWORD			, VFLG							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, PFLG							)
+WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, AFLG							)
+WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 }
 
 // --------------------------------------------------------------------------------------------
@@ -426,7 +426,6 @@ CSoundFile::CSoundFile() :
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
-	m_dwSongFlags = 0;
 	m_nChannels = 0;
 	m_nMixChannels = 0;
 	m_nSamples = 0;
@@ -461,10 +460,8 @@ CSoundFile::CSoundFile() :
 	}
 // -! NEW_FEATURE#0023
 
-	MemsetZero(Chn);
 	MemsetZero(ChnMix);
 	MemsetZero(Samples);
-	MemsetZero(ChnSettings);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
@@ -492,7 +489,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 {
 	m_pModDoc = pModDoc;
 	m_nType = MOD_TYPE_NONE;
-	m_dwSongFlags = 0;
+	m_SongFlags.reset();
 	m_nChannels = 0;
 	m_nMixChannels = 0;
 	m_nSamples = 0;
@@ -523,7 +520,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
 	MemsetZero(Samples);
 	MemsetZero(ChnMix);
-	MemsetZero(Chn);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
@@ -1021,8 +1017,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		m_nMusicSpeed = m_nDefaultSpeed;
 		m_nMusicTempo = m_nDefaultTempo;
 	}
-	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
-	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
 		UINT ord = Order[nPattern];
@@ -1118,8 +1113,8 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_nFrameDelay = 0;
 		m_nNextPatStartRow = 0;
 	}
-	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
-	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+
+	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 }
 
 //rewbs.VSTCompliance
@@ -1197,7 +1192,7 @@ void CSoundFile::RecalculateGainForAllPlugs()
 void CSoundFile::ResetChannels()
 //------------------------------
 {
-	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 	m_nBufferCount = 0;
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
@@ -1212,7 +1207,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 {
 	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat]))
 	{
-		m_dwSongFlags &= ~SONG_PATTERNLOOP;
+		m_SongFlags.reset(SONG_PATTERNLOOP);
 	} else
 	{
 		if ((nRow < 0) || (nRow >= (int)Patterns[nPat].GetNumRows())) nRow = 0;
@@ -1223,7 +1218,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_nFrameDelay = 0;
 		m_nBufferCount = 0;
 		m_nNextPatStartRow = 0;
-		m_dwSongFlags |= SONG_PATTERNLOOP;
+		m_SongFlags.set(SONG_PATTERNLOOP);
 	//	m_nSeqOverride = 0;
 	}
 }
@@ -1242,7 +1237,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_nFrameDelay = 0;
 	m_nBufferCount = 0;
 	m_nNextPatStartRow = 0;
-	m_dwSongFlags &= ~SONG_PATTERNLOOP;
+	m_SongFlags.reset(SONG_PATTERNLOOP);
 	//m_nSeqOverride = 0;
 }
 //end rewbs.playSongFromCursor
@@ -1302,7 +1297,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 
 	ChnSettings[nChn].nPan = 128;
 	ChnSettings[nChn].nVolume = 64;
-	ChnSettings[nChn].dwFlags = 0;
+	ChnSettings[nChn].dwFlags.reset();
 	ChnSettings[nChn].nMixPlugin = 0;
 	strcpy(ChnSettings[nChn].szName, "");
 
@@ -1381,9 +1376,9 @@ void CSoundFile::CheckCPUUsage(UINT nCPU)
 	gnCPUUsage = nCPU;
 	if (nCPU < 90)
 	{
-		m_dwSongFlags &= ~SONG_CPUVERYHIGH;
+		m_SongFlags.reset(SONG_CPUVERYHIGH);
 	} else
-	if ((m_dwSongFlags & SONG_CPUVERYHIGH) && (nCPU >= 94))
+	if(m_SongFlags[SONG_CPUVERYHIGH] && nCPU >= 94)
 	{
 		UINT i=MAX_CHANNELS;
 		while (i >= 8)
@@ -1399,7 +1394,7 @@ void CSoundFile::CheckCPUUsage(UINT nCPU)
 	} else
 	if (nCPU > 90)
 	{
-		m_dwSongFlags |= SONG_CPUVERYHIGH;
+		m_SongFlags.set(SONG_CPUVERYHIGH);
 	}
 }
 
@@ -1984,7 +1979,7 @@ void CSoundFile::SetupITBidiMode()
 }
 
 
-// For old files made with MPT that don't have m_dwSongFlags set yet, set the flags appropriately.
+// For old files made with MPT that don't have m_ModFlags set yet, set the flags appropriately.
 void CSoundFile::UpgradeModFlags()
 //--------------------------------
 {

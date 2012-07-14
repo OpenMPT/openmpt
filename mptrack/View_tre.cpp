@@ -821,7 +821,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				if (pSndFile->Order.GetSequence(nSeq)[iOrd] < pSndFile->Patterns.Size())
 				{
 					stmp[0] = 0;
-					pSndFile->Patterns[pSndFile->Order.GetSequence(nSeq)[iOrd]].GetName(stmp, CountOf(stmp));
+					pSndFile->Patterns[pSndFile->Order.GetSequence(nSeq)[iOrd]].GetName(stmp);
 					if (stmp[0])
 					{
 						wsprintf(s, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
@@ -882,7 +882,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 			if (pSndFile->Patterns[iPat])
 			{
 				stmp[0] = 0;
-				pSndFile->Patterns[iPat].GetName(stmp, CountOf(stmp));
+				pSndFile->Patterns[iPat].GetName(stmp);
 				if (stmp[0])
 				{
 					wsprintf(s, "%d: %s", iPat, stmp);
@@ -981,7 +981,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		{
 			if ((nIns <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[nIns]))
 			{
-				if((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0)
+				if(pSndFile->m_SongFlags[SONG_ITPROJECT])
 				{
 					// path info for ITP instruments
 					const bool pathOk = pSndFile->m_szInstrumentPath[nIns - 1][0] != '\0';
@@ -1260,7 +1260,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				} else
 				{
 					pModDoc->NoteOff(0, true); // cut previous playing samples
-					pModDoc->PlayNote(nParam & 0x7F, 0, modItemID, false);
+					pModDoc->PlayNote(nParam & 0x7F, 0, static_cast<SAMPLEINDEX>(modItemID), false);
 				}
 			}
 			return TRUE;
@@ -1275,7 +1275,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				} else
 				{
 					pModDoc->NoteOff(0, true);
-					pModDoc->PlayNote(nParam, modItemID, 0, false);
+					pModDoc->PlayNote(nParam, static_cast<INSTRUMENTINDEX>(modItemID), 0, false);
 				}
 			}
 			return TRUE;
@@ -1586,7 +1586,7 @@ void CModTree::FillInstrumentLibrary()
 				InsertItem(&tvis);
 			}
 		}
-		for (UINT iSmp=1; iSmp<=m_SongFile.m_nSamples; iSmp++)
+		for(SAMPLEINDEX iSmp = 1; iSmp <= m_SongFile.GetNumSamples(); iSmp++)
 		{
 			const ModSample &sample = m_SongFile.GetSample(iSmp);
 			lstrcpyn(szPath, m_SongFile.m_szNames[iSmp], 32);
@@ -2488,7 +2488,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-						if(pModDoc->GetSoundFile()->m_dwSongFlags & SONG_ITPROJECT)
+						if(pModDoc->GetSoundFile()->m_SongFlags[SONG_ITPROJECT])
 						{
 							AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 							AppendMenu(hMenu, MF_STRING, ID_MODTREE_SETPATH, "Set p&ath");

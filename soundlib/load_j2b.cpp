@@ -170,23 +170,17 @@ struct AMFFEnvelope
 	// Convert weird envelope data to OpenMPT's internal format.
 	void ConvertEnvelope(uint8 flags, uint8 numPoints, uint8 sustainPoint, uint8 loopStart, uint8 loopEnd, const AMFFEnvelopePoint *points, InstrumentEnvelope &mptEnv) const
 	{
-		mptEnv.dwFlags = (flags & AMFFEnvelope::envEnabled) ? ENV_ENABLED : 0;
-		if(flags & AMFFEnvelope::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
-		if(flags & AMFFEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
+		mptEnv.dwFlags.set(ENV_ENABLED, (flags & AMFFEnvelope::envEnabled) != 0);
+		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.nNodes);
+		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.nNodes);
 
 		// The buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
 		mptEnv.nNodes = Util::Min(numPoints, static_cast<uint8>(10));
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
-		if(mptEnv.nSustainStart > mptEnv.nNodes)
-			mptEnv.dwFlags &= ~ENV_SUSTAIN;
 
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
-		if(mptEnv.nLoopStart > mptEnv.nLoopEnd || mptEnv.nLoopStart > mptEnv.nNodes)
-		{
-			mptEnv.dwFlags &= ~ENV_LOOP;
-		}
 
 		for(size_t i = 0; i < 10; i++)
 		{
@@ -383,20 +377,16 @@ struct AMEnvelope
 		if(numPoints == 0xFF || numPoints == 0)
 			return;
 
-		mptEnv.dwFlags = (flags & AMFFEnvelope::envEnabled) ? ENV_ENABLED : 0;
-		if(flags & AMFFEnvelope::envSustain) mptEnv.dwFlags |= ENV_SUSTAIN;
-		if(flags & AMFFEnvelope::envLoop) mptEnv.dwFlags |= ENV_LOOP;
+		mptEnv.dwFlags.set(ENV_ENABLED, (flags & AMFFEnvelope::envEnabled) != 0);
+		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.nNodes);
+		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.nNodes);
 
 		mptEnv.nNodes = Util::Min(numPoints + 1, 10);
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
-		if(mptEnv.nSustainStart > mptEnv.nNodes)
-			mptEnv.dwFlags &= ~ENV_SUSTAIN;
 
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
-		if(mptEnv.nLoopStart > mptEnv.nLoopEnd || mptEnv.nLoopStart > mptEnv.nNodes)
-			mptEnv.dwFlags &= ~ENV_LOOP;
 
 		for(size_t i = 0; i < 10; i++)
 		{
@@ -750,15 +740,13 @@ bool CSoundFile::ReadAM(FileReader &file)
 
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
 
-	m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
-	if(!(mainChunk.flags & AMFFMainChunk::amigaSlides))
-	{
-		m_dwSongFlags |= SONG_LINEARSLIDES;
-	}
 	if(mainChunk.channels < 1 || !chunk.CanRead(mainChunk.channels))
 	{
 		return false;
 	}
+	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
+	m_SongFlags.set(SONG_LINEARSLIDES, !(mainChunk.flags & AMFFMainChunk::amigaSlides));
+
 	m_nChannels = min(mainChunk.channels, MAX_BASECHANNELS);
 	m_nDefaultSpeed = mainChunk.speed;
 	m_nDefaultTempo = mainChunk.tempo;

@@ -115,7 +115,7 @@ void COrderList::EnsureVisible(ORDERINDEX order)
 COrderList::COrderList()
 //----------------------
 {
-	m_hFont = NULL;
+	m_hFont = nullptr;
 	m_pParent = nullptr;
 	m_cxFont = m_cyFont = 0;
 	m_pModDoc = nullptr;
@@ -311,7 +311,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 		if ((n < pSndFile->Patterns.Size()) && (pSndFile->Patterns[n]) && !bShiftClick)
 		{
 			bool bIsPlaying = (pMainFrm->GetModPlaying() == m_pModDoc);
-			if ((bIsPlaying) && (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP))
+			if(bIsPlaying && pSndFile->m_SongFlags[SONG_PATTERNLOOP])
 			{
 				CriticalSection cs;
 				// update channel parameters and play time
@@ -326,14 +326,14 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 			{
 				CriticalSection cs;
 
-				DWORD dwPaused = pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP|SONG_PATTERNLOOP);
+				SongFlags pausedFlags = pSndFile->m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 
 				// update channel parameters and play time
 				m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 
 				pSndFile->m_nCurrentOrder = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
-				pSndFile->m_dwSongFlags |= dwPaused;
+				pSndFile->m_SongFlags.set(pausedFlags);
 
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
 			}

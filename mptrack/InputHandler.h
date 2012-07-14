@@ -77,7 +77,7 @@ public:
 	bool SelectionPressed();
 	bool CtrlPressed();
 	bool AltPressed();
-	bool Bypass();
+	bool IsBypassed();
 	void Bypass(bool);
 	WORD GetModifierMask();
 	void SetModifierMask(WORD mask);

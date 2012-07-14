@@ -421,10 +421,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		if(newTypeIsMOD_XM || newTypeIsS3M)
 		{
-			if(m_SndFile.ChnSettings[nChn].nVolume != 64 || (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SURROUND))
+			if(m_SndFile.ChnSettings[nChn].nVolume != 64 || m_SndFile.ChnSettings[nChn].dwFlags[CHN_SURROUND])
 			{
 				m_SndFile.ChnSettings[nChn].nVolume = 64;
-				m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+				m_SndFile.ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
 				CHANGEMODTYPE_WARNING(wChannelVolSurround);
 			}
 		}
@@ -461,12 +461,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	m_SndFile.ChangeModTypeTo(nNewType);
 
 	// Song flags
-	if(!(CSoundFile::GetModSpecifications(nNewType).songFlags & SONG_LINEARSLIDES) && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
+	if(!(CSoundFile::GetModSpecifications(nNewType).songFlags & SONG_LINEARSLIDES) && m_SndFile.m_SongFlags[SONG_LINEARSLIDES])
 	{
 		CHANGEMODTYPE_WARNING(wLinearSlides);
 	}
-	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATGXX;
-	m_SndFile.m_dwSongFlags &= SONG_PLAY_FLAGS | CSoundFile::GetModSpecifications(nNewType).songFlags;
+	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_SongFlags.set(SONG_ITCOMPATGXX);
+	m_SndFile.m_SongFlags &= (CSoundFile::GetModSpecifications(nNewType).songFlags | SONG_PLAY_FLAGS);
 
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)

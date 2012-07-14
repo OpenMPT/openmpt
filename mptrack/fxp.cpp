@@ -286,7 +286,7 @@ bool Cfxp::NeedSwap()
 		m_bNeedSwap = !!memcmp(szChnk, &lChnk, 4);
 	}
 
-	return m_bNeedSwap ? true : false;
+	return m_bNeedSwap != 0;
 }
 
 
