@@ -123,11 +123,9 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_PANNINGSLIDE:		command = 'P' - 55; break;
 	case CMD_RETRIG:			command = 'R' - 55; break;
 	case CMD_TREMOR:			command = 'T' - 55; break;
-	case CMD_XFINEPORTAUPDOWN:
-		if(compatibilityExport && (param & 0xF0) > 2)	// X1x and X2x are legit, everything above are MPT extensions, which don't belong here.
-			command = param = 0;
-		else
-			command = 'X' - 55;
+	case CMD_XFINEPORTAUPDOWN:	command = 'X' - 55;
+		if(compatibilityExport && param >= 0x30)	// X1x and X2x are legit, everything above are MPT extensions, which don't belong here.
+			param = 0;	// Don't set command to 0 to indicate that there *was* some X command here...
 		break;
 	case CMD_PANBRELLO:
 		if(compatibilityExport)
