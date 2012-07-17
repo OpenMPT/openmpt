@@ -14,7 +14,6 @@
 #include "Mainfrm.h"
 #include "PatternEditorDialogs.h"
 #include "view_pat.h"
-#include "../muParser/include/muParser.h"
 
 
 // -> CODE#0010
@@ -1610,7 +1609,8 @@ void CSplitKeyboadSettings::OnOctaveModifierChanged()
 // Show channel properties from pattern editor
 
 BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
-	ON_WM_HSCROLL()	// Sliders
+	ON_WM_HSCROLL()		// Sliders
+	ON_WM_ACTIVATE()	// Catch Window focus change
 	ON_EN_UPDATE(IDC_EDIT1,	OnVolChanged)
 	ON_EN_UPDATE(IDC_EDIT2,	OnPanChanged)
 	ON_EN_UPDATE(IDC_EDIT3,	OnNameChanged)
@@ -1645,6 +1645,8 @@ QuickChannelProperties::QuickChannelProperties()
 	panSlider.SetRange(0, 64);
 	panSlider.SetTicFreq(8);
 	panSpin.SetRange(0, 256);
+
+	nameEdit.SetFocus();
 };
 
 
@@ -1654,6 +1656,17 @@ QuickChannelProperties::~QuickChannelProperties()
 	CDialog::OnCancel();
 }
 
+
+void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
+//----------------------------------------------------------------
+{
+	if(nState == WA_INACTIVE)
+	{
+		// Hide window when changing focus to another window.
+		visible = false;
+		ShowWindow(SW_HIDE);
+	}
+}
 
 // Show channel properties for a given channel at a given screen position.
 void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position)
@@ -1732,14 +1745,6 @@ void QuickChannelProperties::PrepareUndo()
 		settingsChanged = true;
 		document->GetPatternUndo().PrepareUndo(pattern, 0, 0, 1, 1, false, true);
 	}
-}
-
-
-void QuickChannelProperties::Hide()
-//---------------------------------
-{
-	visible = false;
-	ShowWindow(SW_HIDE);
 }
 
 

@@ -769,7 +769,6 @@ void CViewPattern::OnSetFocus(CWnd *pOldWnd)
 	CScrollView::OnSetFocus(pOldWnd);
 	m_dwStatus |= psFocussed;
 	InvalidateRow();
-	quickChannelProperties.Hide();
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
@@ -795,9 +794,10 @@ void CViewPattern::OnKillFocus(CWnd *pNewWnd)
 	InvalidateRow();
 }
 
+
 //rewbs.customKeys
 void CViewPattern::OnGrowSelection()
-//-----------------------------------
+//----------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr)

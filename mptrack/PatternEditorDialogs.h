@@ -360,7 +360,6 @@ public:
 	~QuickChannelProperties();
 
 	void Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position);
-	void Hide();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -368,6 +367,7 @@ protected:
 	void UpdateDisplay();
 	void PrepareUndo();
 
+	afx_msg void OnActivate(UINT nState, CWnd *, BOOL);
 	afx_msg void OnVolChanged();
 	afx_msg void OnPanChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);

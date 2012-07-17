@@ -369,7 +369,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 	HINSTANCE hLib;
 	bool validPlug = false;
 
-	VSTPluginLib *p = nullptr;
+	VSTPluginLib *p;
 	try
 	{
 		p = new VSTPluginLib(pszDllPath);
@@ -445,6 +445,9 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 		CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
 		CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
 		CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->EncodeCacheFlags(), cacheFile);
+	} else
+	{
+		delete p;
 	}
 	
 	return (validPlug ? m_pVstHead : nullptr);
