@@ -136,21 +136,6 @@
     <ClCompile Include="globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChannelNode.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="ctrl_graph.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="EffectNode.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="FinalNode.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="Graph.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
     <ClCompile Include="HyperEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -162,9 +147,6 @@
     </ClCompile>
     <ClCompile Include="InputHandler.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InstrumentNode.cpp">
-      <Filter>Source Files\MixGraph</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Message.cpp">
       <Filter>Source Files</Filter>
@@ -207,24 +189,6 @@
     </ClCompile>
     <ClCompile Include="mod2midi.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Node.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="PatternRandomizerGUI.cpp">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClCompile>
-    <ClCompile Include="PatternRandomizerGUIEffect.cpp">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClCompile>
-    <ClCompile Include="PatternRandomizerGUIInstrument.cpp">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClCompile>
-    <ClCompile Include="PatternRandomizerGUINote.cpp">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClCompile>
-    <ClCompile Include="PatternRandomizerGUIVolCmd.cpp">
-      <Filter>Source Files\PatternRandomizer</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\pattern.cpp">
       <Filter>Source Files</Filter>
@@ -327,15 +291,6 @@
     </ClCompile>
     <ClCompile Include="PatternGotoDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="PatternRandomizer.cpp">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClCompile>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="view_graph.cpp">
-      <Filter>Source Files\MixGraph</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\PlaybackEventer.cpp">
       <Filter>Source Files</Filter>
@@ -516,26 +471,8 @@
     <ClInclude Include="globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ChannelNode.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="ctrl_graph.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="EffectNode.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="FinalNode.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="Graph.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
     <ClInclude Include="InputHandler.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstrumentNode.h">
-      <Filter>Source Files\MixGraph</Filter>
     </ClInclude>
     <ClInclude Include="mainbar.h">
       <Filter>Header Files</Filter>
@@ -566,24 +503,6 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\ModSequence.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="PatternRandomizerGUIVolCmd.h">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClInclude>
-    <ClInclude Include="PatternRandomizerGUI.h">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClInclude>
-    <ClInclude Include="PatternRandomizerGUIEffect.h">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClInclude>
-    <ClInclude Include="PatternRandomizerGUIInstrument.h">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClInclude>
-    <ClInclude Include="PatternRandomizerGUINote.h">
-      <Filter>Source Files\PatternRandomizer</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\WindowedFIR.h">
       <Filter>Header Files</Filter>
@@ -656,15 +575,6 @@
     </ClInclude>
     <ClInclude Include="PatternEditorDialogs.h">
       <Filter>Header Files\Dialogs</Filter>
-    </ClInclude>
-    <ClInclude Include="PatternRandomizer.h">
-      <Filter>Source Files\PatternRandomizer</Filter>
-    </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>Source Files\MixGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="view_graph.h">
-      <Filter>Source Files\MixGraph</Filter>
     </ClInclude>
     <ClInclude Include="ColourEdit.h">
       <Filter>Header Files</Filter>
@@ -917,12 +827,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{cd3e5871-5f13-4cdf-a869-f807737d2906}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
-    </Filter>
-    <Filter Include="Source Files\MixGraph">
-      <UniqueIdentifier>{f0af5cea-2ec1-45c0-abe8-b93aa90e1df2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\PatternRandomizer">
-      <UniqueIdentifier>{f0e1b59c-04c9-4620-8314-06fd4ea21616}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Tuning">
       <UniqueIdentifier>{86c7663b-6b61-4512-8a39-043d9b87ea1d}</UniqueIdentifier>
