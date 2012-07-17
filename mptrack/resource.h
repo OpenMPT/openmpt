@@ -125,11 +125,6 @@
 #define IDD_EDIT_GOTO                   444
 #define IDD_DIALOG1                     501
 #define IDD_MOVEFXSLOT                  501
-#define IDD_PATTERNRANDOMIZER           502
-#define IDD_PATTERNRANDOMIZER_NOTE      503
-#define IDD_PATTERNRANDOMIZER_INSTRUMENT 504
-#define IDD_PATTERNRANDOMIZER_VOLCMD    505
-#define IDD_PATTERNRANDOMIZER_EFFECT    506
 #define IDD_CONTROL_GRAPH               507
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
@@ -751,10 +746,6 @@
 #define IDC_CLONEPLUG                   2236
 #define IDC_INSERTFXSLOT                2237
 #define IDC_FILTERMODE                  2238
-#define IDC_RANDOMIZE_NOTE_ENABLE       2240
-#define IDC_LIST2                       2241
-#define IDC_APPLY                       2243
-#define IDC_RANDOM_PLACEHOLDER          2244
 #define IDC_AUTOSAVE_USECUSTOMDIR       2245
 #define IDC_BUTTON_MODTYPE2             2246
 #define IDC_BUTTON_PLAYERPROPS          2247
