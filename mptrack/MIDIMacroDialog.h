@@ -20,7 +20,7 @@ class CMidiMacroSetup: public CDialog
 //===================================
 {
 public:
-	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_MidiCfg(sndFile.m_MidiCfg), m_bEmbed(m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG]) { }
+	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_MidiCfg(sndFile.m_MidiCfg), m_bEmbed(sndFile.m_SongFlags[SONG_EMBEDMIDICFG]) { }
 
 	bool m_bEmbed;
 	MIDIMacroConfig m_MidiCfg;
