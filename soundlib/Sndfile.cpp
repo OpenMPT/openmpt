@@ -443,6 +443,10 @@ CSoundFile::CSoundFile() :
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
 
+#ifdef MODPLUG_TRACKER
+	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
+#endif // MODPLUG_TRACKER
+
 	m_ModFlags = 0;
 	m_bITBidiMode = false;
 
@@ -799,7 +803,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_pConfig->SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
-	if (m_nType)
+	if(m_nType != MOD_TYPE_NONE)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
 		const ORDERINDEX nMinLength = (std::min)(ModSequenceSet::s_nCacheSize, GetModSpecifications().ordersMax);

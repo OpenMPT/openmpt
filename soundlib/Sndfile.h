@@ -261,6 +261,12 @@ public:	// for Editing
 	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
 	PATTERNINDEX m_nPattern;
 	ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nRestartPos, m_nSeqOverride;
+
+#ifdef MODPLUG_TRACKER
+	// Lock playback between two orders
+	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
+#endif // MODPLUG_TRACKER
+
 	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;

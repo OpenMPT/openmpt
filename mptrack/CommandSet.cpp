@@ -523,7 +523,7 @@ void CCommandSet::SetupCommands()
 	//rewbs.graph
 	DefineKeyCommand(kcViewGraph, 1769, _T("View Graph"), kcHidden, kcNoDummy);  // while there's no graph yet, let's just disable it for now
 	//end rewbs.graph
-	DefineKeyCommand(kcToggleChanMuteOnPatTransition, 1770, _T("(Un)mute chan on pat transition"));
+	DefineKeyCommand(kcToggleChanMuteOnPatTransition, 1770, _T("(Un)mute channel on pattern transition"));
 	DefineKeyCommand(kcChannelUnmuteAll, 1771, _T("Unmute all channels"));
 	DefineKeyCommand(kcShowPatternProperties, 1772, _T("Show Pattern Properties"));
 	DefineKeyCommand(kcShowMacroConfig, 1773, _T("Show MIDI Macro Configuration"));
@@ -600,7 +600,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInsNoteMapTransposeOctUp, 1845, _T("Transpose +12 (Note Map)"));
 	DefineKeyCommand(kcInsNoteMapCopyCurrentNote, 1846, _T("Map all notes to selected note"));
 	DefineKeyCommand(kcInsNoteMapCopyCurrentSample, 1847, _T("Map all notes to selected sample"));
-	DefineKeyCommand(kcInsNoteMapReset, 1848, _T("Reset Note nMapping"));
+	DefineKeyCommand(kcInsNoteMapReset, 1848, _T("Reset Note Mapping"));
 	DefineKeyCommand(kcInsNoteMapEditSample, 1849, _T("Edit Current Sample"));
 	DefineKeyCommand(kcInsNoteMapEditSampleMap, 1850, _T("Edit Sample Map"));
 	DefineKeyCommand(kcInstrumentCtrlDuplicate, 1851, _T("Duplicate Instrument"));
@@ -627,6 +627,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSetOctaveStop7, 1872, _T(""), kcHidden);
 	DefineKeyCommand(kcSetOctaveStop8, 1873, _T(""), kcHidden);
 	DefineKeyCommand(kcSetOctaveStop9, 1874, _T(""), kcHidden);
+	DefineKeyCommand(kcOrderlistLockPlayback, 1875, _T("Lock Playback to Selection"));
+	DefineKeyCommand(kcOrderlistUnlockPlayback, 1876, _T("Unlock Playback"));
+	DefineKeyCommand(kcChannelSettings, 1877, _T("Quick Channel Settings"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

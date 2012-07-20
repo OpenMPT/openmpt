@@ -336,3 +336,5 @@ version:1
 19:1818:0:189:5		//Decrease pattern index: - (KeyDown|KeyHold)
 19:1853:0:73:1		//Ignore (+++) Index: I (KeyDown)
 19:1854:0:32:1		//Invalid (---) Index: Space (KeyDown)
+19:1875:2:76:1		//Lock Playback to Selection: Ctrl+L (KeyDown)
+19:1876:2:85:1		//Unlock Playback: Ctrl+U (KeyDown)
