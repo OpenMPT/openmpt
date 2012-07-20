@@ -375,3 +375,5 @@ version:1
 19:1817:0:187:5		//Increase pattern index : + (KeyDown|KeyHold)
 19:1818:0:109:5		//Decrease pattern index: TECLA DE SUSTRACCION (KeyDown|KeyHold)
 19:1818:0:189:5		//Decrease pattern index: - (KeyDown|KeyHold)
+19:1875:2:76:1		//Lock Playback to Selection: Ctrl+L (KeyDown)
+19:1876:2:85:1		//Unlock Playback: Ctrl+U (KeyDown)

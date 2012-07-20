@@ -72,6 +72,8 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_COPY,				OnDuplicatePattern)
 	ON_COMMAND(ID_PATTERNCOPY,					OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,					OnPatternPaste)
+	ON_COMMAND(ID_ORDERLIST_LOCKPLAYBACK,		OnLockPlayback)
+	ON_COMMAND(ID_ORDERLIST_UNLOCKPLAYBACK,		OnUnlockPlayback)
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, OnSelectSequence)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,			OnDragonDropping)
 	ON_MESSAGE(WM_HELPHITTEST,					OnHelpHitTest)
@@ -282,6 +284,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 	const BYTE nShownLength = GetLength();
 	InvalidateSelection();
 	*nOrder = sel;
+
 	if (!m_bScrolling)
 	{
 		const BYTE nMargins = GetMargins(GetMarginsMax(nShownLength));
@@ -322,7 +325,9 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				pMainFrm->ResetNotificationBuffer(); //rewbs.toCheck
 				pSndFile->m_nNextRow = 0;
 
-			} else if (m_pParent->GetFollowSong())
+				// Users wants to go somewhere else, so let him do that.
+				OnUnlockPlayback();
+			} else if(m_pParent->GetFollowSong())
 			{
 				CriticalSection cs;
 
@@ -336,6 +341,9 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				pSndFile->m_SongFlags.set(pausedFlags);
 
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
+
+				// Users wants to go somewhere else, so let him do that.
+				OnUnlockPlayback();
 			}
 			m_pParent->SetCurrentPattern(n);
 		}
@@ -474,6 +482,11 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcChannelUnmuteAll:
 	case kcUnmuteAllChnOnPatTransition:
 		::PostMessage(m_pParent->GetViewWnd(), WM_MOD_KEYCOMMAND, wParam, 0); return wParam;
+
+	case kcOrderlistLockPlayback:
+		OnLockPlayback(); return wParam;
+	case kcOrderlistUnlockPlayback:
+		OnUnlockPlayback(); return wParam;
 
 	case kcDuplicatePattern:
 		OnDuplicatePattern(); return wParam;
@@ -882,7 +895,7 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 
 		if(IsCtrlKeyPressed())
 		{
-			// queue pattern
+			// Queue pattern
 			QueuePattern(pt);
 		} else
 		{
@@ -1048,9 +1061,9 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
-	bool bMultiSelection = (m_nScrollPos2nd != ORDERINDEX_INVALID);
+	bool multiSelection = (m_nScrollPos2nd != ORDERINDEX_INVALID);
 
-	if(!bMultiSelection) SetCurSel(GetOrderFromPoint(rect, pt));
+	if(!multiSelection) SetCurSel(GetOrderFromPoint(rect, pt));
 	SetFocus();
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu) return;
@@ -1069,7 +1082,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 
 	CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
-	if(bMultiSelection)
+	if(multiSelection)
 	{
 		// several patterns are selected.
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
@@ -1121,13 +1134,17 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			}
 			if (pSndFile->Order.GetNumSequences() < MAX_SEQUENCES)
 			{
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("Duplicate current sequence"));
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("Create empty sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("&Duplicate current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("&Create empty sequence"));
 			}
 			if (pSndFile->Order.GetNumSequences() > 1)
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, TEXT("Delete current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, TEXT("D&elete current sequence"));
 		}
 	}
+	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+	AppendMenu(hMenu, ((selection.nOrdLo == pSndFile->m_lockOrderStart && selection.nOrdHi == pSndFile->m_lockOrderEnd) ? (MF_STRING | MF_CHECKED) : MF_STRING), ID_ORDERLIST_LOCKPLAYBACK, "&Lock Playback to Selection\t" + ih->GetKeyTextFromCommand(kcOrderlistLockPlayback));
+	AppendMenu(hMenu, (pSndFile->m_lockOrderStart == ORDERINDEX_INVALID ? (MF_STRING | MF_GRAYED) : MF_STRING), ID_ORDERLIST_UNLOCKPLAYBACK, "&Unlock Playback\t" + ih->GetKeyTextFromCommand(kcOrderlistUnlockPlayback));
+
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, "Render to &Wave");
 
@@ -1478,6 +1495,8 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 		m_pParent->SetCurrentPattern(rSf.Order[m_nScrollPos]);
 
 	UpdateScrollInfo();
+	// This won't make sense anymore in the new sequence.
+	OnUnlockPlayback();
 
 	cs.Leave();
 
@@ -1516,8 +1535,36 @@ void COrderList::QueuePattern(CPoint pt)
 			pSndFile->m_nSeqOverride = 0;
 		} else
 		{
+			// Users wants to go somewhere else, so let him do that.
+			OnUnlockPlayback();
+
 			pSndFile->m_nSeqOverride = nOrder + 1;
 		}
 		InvalidateRect(NULL, FALSE);
 	}
+}
+
+
+void COrderList::OnLockPlayback()
+//-------------------------------
+{
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+
+	ORD_SELECTION selection = GetCurSel(false);
+	if(selection.nOrdLo == pSndFile->m_lockOrderStart && selection.nOrdHi == pSndFile->m_lockOrderEnd)
+	{
+		OnUnlockPlayback();
+	} else
+	{
+		pSndFile->m_lockOrderStart = selection.nOrdLo;
+		pSndFile->m_lockOrderEnd = selection.nOrdHi;
+	}
+}
+
+
+void COrderList::OnUnlockPlayback()
+//----------------------------------
+{
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	pSndFile->m_lockOrderStart = pSndFile->m_lockOrderEnd = ORDERINDEX_INVALID;
 }

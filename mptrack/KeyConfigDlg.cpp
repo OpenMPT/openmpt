@@ -59,6 +59,7 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 
 
 void CCustEdit::SetKey(UINT inMod, UINT inCode)
+//---------------------------------------------
 {
 	mod = inMod;
 	code = inCode;
@@ -68,13 +69,20 @@ void CCustEdit::SetKey(UINT inMod, UINT inCode)
 
 
 void CCustEdit::OnSetFocus(CWnd* pOldWnd)
+//---------------------------------------
 {
 	CEdit::OnSetFocus(pOldWnd);
-	//lock the input handler
+	// Lock the input handler
 	CMainFrame::GetInputHandler()->Bypass(true);
+	// Accept MIDI input
+	CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWnd);
+
 	isFocussed = true;
 }
+
+
 void CCustEdit::OnKillFocus(CWnd* pNewWnd)
+//----------------------------------------
 {
 	CEdit::OnKillFocus(pNewWnd);
 	//unlock the input handler
@@ -155,8 +163,6 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_bChoiceModified = false;
 	m_sFullPathName = CMainFrame::GetSettings().m_szKbdFile;
 	
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_eCustHotKey.m_hWnd);
-
 	plocalCmdSet = new CCommandSet();
 	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);
 	
@@ -231,6 +237,7 @@ void COptionsKeyboard::DefineCommandCategories()
 			newCat.commands.Add(c);
 		newCat.separators.Add(kcEndOrderlistNavigation);			//--------------------------------------
 		newCat.separators.Add(kcEndOrderlistEdit);					//--------------------------------------
+		newCat.separators.Add(kcEndOrderlistNum);					//--------------------------------------
 
 		commandCategories.Add(newCat);
 	}
@@ -257,9 +264,9 @@ void COptionsKeyboard::DefineCommandCategories()
 		for(int c = kcClearRow; c <= kcInsertAllRows; c++)
 			newCat.commands.Add(c);
 		newCat.separators.Add(kcInsertAllRows);						//--------------------------------------
-		for(int c = kcChannelMute; c <= kcChannelReset; c++)
+		for(int c = kcStartChannelKeys; c <= kcEndChannelKeys; c++)
 			newCat.commands.Add(c);
-		newCat.separators.Add(kcChannelReset);						//--------------------------------------
+		newCat.separators.Add(kcEndChannelKeys);					//--------------------------------------
 		for(int c = kcTransposeUp; c <= kcTransposeOctDown; c++)
 			newCat.commands.Add(c);
 		newCat.separators.Add(kcTransposeOctDown);					//--------------------------------------

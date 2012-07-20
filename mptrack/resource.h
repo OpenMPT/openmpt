@@ -1203,6 +1203,8 @@
 #define ID_HELP_SHOWSETTINGSFOLDER      44600
 #define ID_FILE_CLOSEALL                44601
 #define ID_HELPSHOW                     44602
+#define ID_ORDERLIST_LOCKPLAYBACK       44603
+#define ID_ORDERLIST_UNLOCKPLAYBACK     44604
 
 // Next default values for new objects
 // 
@@ -1210,7 +1212,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        535
-#define _APS_NEXT_COMMAND_VALUE         44603
+#define _APS_NEXT_COMMAND_VALUE         44605
 #define _APS_NEXT_CONTROL_VALUE         2439
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

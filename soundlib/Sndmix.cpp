@@ -683,8 +683,17 @@ BOOL CSoundFile::ProcessRow()
 		m_nTickCount = 0;
 		m_nRow = m_nNextRow;
 		// Reset Pattern Loop Effect
-		if (m_nCurrentOrder != m_nNextOrder) 
+		if(m_nCurrentOrder != m_nNextOrder) 
 			m_nCurrentOrder = m_nNextOrder;
+
+#ifdef MODPLUG_TRACKER
+		// "Lock order" editing feature
+		if(m_lockOrderStart != ORDERINDEX_INVALID && (m_nCurrentOrder < m_lockOrderStart || m_nCurrentOrder > m_lockOrderEnd))
+		{
+			m_nCurrentOrder = m_lockOrderStart;
+		}
+#endif // MODPLUG_TRACKER
+
 		// Check if pattern is valid
 		if(!m_SongFlags[SONG_PATTERNLOOP])
 		{

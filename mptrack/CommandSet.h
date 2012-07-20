@@ -251,13 +251,16 @@ enum CommandID
 	kcTimeAtRow,
 	kcEndPatternEditMisc=kcTimeAtRow,
 
-	kcChannelMute,
+	kcStartChannelKeys,
+	kcChannelMute = kcStartChannelKeys,
 	kcChannelSolo,
 	kcChannelUnmuteAll,
 	kcToggleChanMuteOnPatTransition,
 	kcUnmuteAllChnOnPatTransition,
 	kcSoloChnOnPatTransition,
 	kcChannelReset,
+	kcChannelSettings,
+	kcEndChannelKeys = kcChannelSettings,
 	kcCopyAndLoseSelection,
 	kcTransposeUp,
 	kcTransposeDown,
@@ -1071,7 +1074,12 @@ enum CommandID
 	kcOrderlistPatIgnore,
 	kcOrderlistPatInvalid,
 	kcEndOrderlistNum=kcOrderlistPatInvalid,
-	kcEndOrderlistCommands=kcEndOrderlistNum,
+		// Playback lock
+	kcStartOrderlistLock,
+	kcOrderlistLockPlayback = kcStartOrderlistLock,
+	kcOrderlistUnlockPlayback,
+	kcEndOrderlistLock = kcOrderlistUnlockPlayback,
+	kcEndOrderlistCommands=kcEndOrderlistLock,
 
 	kcNumCommands,
 };

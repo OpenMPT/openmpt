@@ -151,6 +151,8 @@ protected:
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM lParam);
 	afx_msg void OnSelectSequence(UINT nid);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg void OnLockPlayback();
+	afx_msg void OnUnlockPlayback();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
