@@ -1590,7 +1590,7 @@ BOOL CSoundFile::ProcessEffects()
 			NoteCut(nChn, cutAtTick);
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
-			if ((!param) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
+			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
 			// Note Delay ?
 			if ((param & 0xF0) == 0xD0)
 			{
@@ -1602,13 +1602,11 @@ BOOL CSoundFile::ProcessEffects()
 						nStartTick = 1;
 					//ST3 ignores notes with SD0 completely
 					else if(GetType() == MOD_TYPE_S3M)
-						nStartTick = UINT_MAX;
-				}
-
-				// IT compatibility 08. Handling of out-of-range delay command.
-				// Additional test case: tickdelay.it
-				if(nStartTick >= GetNumTicksOnCurrentRow() && IsCompatibleMode(TRK_IMPULSETRACKER))
+						continue;
+				} else if(nStartTick >= GetNumTicksOnCurrentRow() && IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
+					// IT compatibility 08. Handling of out-of-range delay command.
+					// Additional test case: tickdelay.it
 					if(instr)
 					{
 						if(GetNumInstruments() < 1 && instr < MAX_SAMPLES)
@@ -1620,6 +1618,12 @@ BOOL CSoundFile::ProcessEffects()
 								pChn->pModInstrument = Instruments[instr];
 						}
 					}
+					continue;
+				} else if(nStartTick >= m_nMusicSpeed && IsCompatibleMode(TRK_FASTTRACKER2))
+				{
+					// FT2 compatibility: Note delays greater than the song speed should be ignored.
+					// However, EEx pattern delay is *not* considered at all.
+					// Test case: DelayCombination.xm
 					continue;
 				}
 			} else if(m_SongFlags[SONG_FIRSTTICK])
@@ -1738,9 +1742,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
-				if(note == NOTE_KEYOFF
-					&& ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2))
-					&& (pChn->pModInstrument == nullptr || !pChn->pModInstrument->VolEnv.dwFlags[ENV_ENABLED]))
+				if ((note == NOTE_KEYOFF) && ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED))))
 				{
 					pChn->dwFlags.set(CHN_FASTVOLRAMP);
 					pChn->nVolume = 0;
