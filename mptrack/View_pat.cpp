@@ -144,7 +144,7 @@ static_assert(ModCommand::maxColumnValue <= 999, "Command range for ID_CHANGE_PC
 CViewPattern::CViewPattern()
 //--------------------------
 {
-	m_pEffectVis = NULL; //rewbs.fxvis
+	m_pEffectVis = nullptr; //rewbs.fxvis
 	m_bLastNoteEntryBlocked=false;
 
 	m_nPattern = 0;
@@ -4158,6 +4158,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSwitchToOrderList: OnSwitchToOrderList();
 		case kcSwitchOverflowPaste:	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
+		case kcChannelSettings:
+			{
+				// Open centered Quick Channel Settings dialog.
+				CRect windowPos;
+				GetWindowRect(windowPos);
+				quickChannelProperties.Show(GetDocument(), m_Cursor.GetChannel(), m_nPattern, CPoint(windowPos.left + windowPos.Width() / 2, windowPos.top + windowPos.Height() / 2));
+				return wParam;
+			}
 
 		case kcDecreaseSpacing:
 			if(m_nSpacing > 0) SetSpacing(m_nSpacing - 1);
