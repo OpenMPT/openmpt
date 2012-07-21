@@ -590,11 +590,21 @@ bool ModSequenceSet::MergeSequences()
 	}
 	// Remove order name + fill up with empty patterns.
 	m_sName = "";
-	const ORDERINDEX nMinLength = (std::min)(ModSequenceSet::s_nCacheSize, m_pSndFile->GetModSpecifications().ordersMax);
-	if (GetLength() < nMinLength)
+	const ORDERINDEX nMinLength = Util::Min(ModSequenceSet::s_nCacheSize, m_pSndFile->GetModSpecifications().ordersMax);
+	if(GetLength() < nMinLength)
 		resize(nMinLength);
 	return true;
 }
+
+
+#ifdef MODPLUG_TRACKER
+// Check if a playback position is currently locked (inaccessible)
+bool ModSequence::IsPositionLocked(ORDERINDEX position)
+{
+	return(m_pSndFile->m_lockOrderStart != ORDERINDEX_INVALID
+		&& (position < m_pSndFile->m_lockOrderStart || position > m_pSndFile->m_lockOrderEnd));
+}
+#endif // MODPLUG_TRACKER
 
 
 /////////////////////////////////////

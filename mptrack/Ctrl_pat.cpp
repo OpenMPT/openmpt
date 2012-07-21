@@ -406,7 +406,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_GETCURRENTORDER:
-		return m_OrderList.GetCurSel(true).nOrdLo;
+		return m_OrderList.GetCurSel(true).firstOrd;
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
 	case CTRLMSG_PAT_SETINSTRUMENT:
@@ -457,11 +457,11 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_PREVORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo - 1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1, TRUE);
 		break;
 	
 	case CTRLMSG_NEXTORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo + 1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1, TRUE);
 		break;
 
 	//rewbs.customKeys
@@ -664,7 +664,7 @@ void CCtrlPatterns::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CCtrlPatterns::OnSequencePrev()
 //----------------------------------
 {
-	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo - 1);
+	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1);
 	m_OrderList.SetFocus();
 }
 
@@ -672,7 +672,7 @@ void CCtrlPatterns::OnSequencePrev()
 void CCtrlPatterns::OnSequenceNext()
 //----------------------------------
 {
-	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo + 1);
+	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1);
 	m_OrderList.SetFocus();
 }
 
@@ -801,7 +801,7 @@ void CCtrlPatterns::OnPatternNew()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		ORDERINDEX nCurOrd = m_OrderList.GetCurSel(true).nOrdLo;
+		ORDERINDEX nCurOrd = m_OrderList.GetCurSel(true).firstOrd;
 		PATTERNINDEX nCurPat = pSndFile->Order[nCurOrd];
 		ROWINDEX rows = 64;
 		if(pSndFile->Patterns.IsValidPat(nCurPat))
@@ -838,9 +838,9 @@ void CCtrlPatterns::OnPatternDuplicate()
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
-		ORD_SELECTION selection = m_OrderList.GetCurSel(false);
-		ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo;
-		ORDERINDEX nInsertWhere = selection.nOrdLo + nInsertCount + 1;
+		OrdSelection selection = m_OrderList.GetCurSel(false);
+		ORDERINDEX nInsertCount = selection.lastOrd - selection.firstOrd;
+		ORDERINDEX nInsertWhere = selection.firstOrd + nInsertCount + 1;
 		if (nInsertWhere >= pSndFile->GetModSpecifications().ordersMax)
 			return;
 		bool bSuccess = false;
@@ -849,7 +849,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
-			PATTERNINDEX nCurPat = pSndFile->Order[selection.nOrdLo + i];
+			PATTERNINDEX nCurPat = pSndFile->Order[selection.firstOrd + i];
 			if (pSndFile->Patterns.IsValidIndex(nCurPat) && patReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
 				ROWINDEX rows = pSndFile->Patterns[nCurPat].GetNumRows();
@@ -883,7 +883,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			} else
 			{
 				// Invalid pattern, or it has been duplicated before (multiselect)
-				for (int j = pSndFile->Order.size() - 1; j > selection.nOrdLo + i + nInsertCount + 1; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
+				for (int j = pSndFile->Order.size() - 1; j > selection.firstOrd + i + nInsertCount + 1; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
 
 				PATTERNINDEX nNewPat;
 				if(nCurPat < pSndFile->Patterns.Size() && patReplaceIndex[nCurPat] != PATTERNINDEX_INVALID)
@@ -892,12 +892,12 @@ void CCtrlPatterns::OnPatternDuplicate()
 					nNewPat = patReplaceIndex[nCurPat];
 				} else
 				{
-					nNewPat = pSndFile->Order[selection.nOrdLo + i];
+					nNewPat = pSndFile->Order[selection.firstOrd + i];
 				}
 
-				if (selection.nOrdLo + i + nInsertCount + 1 < pSndFile->Order.GetLength())
+				if (selection.firstOrd + i + nInsertCount + 1 < pSndFile->Order.GetLength())
 				{
-					pSndFile->Order[selection.nOrdLo + i + nInsertCount + 1] = nNewPat;
+					pSndFile->Order[selection.firstOrd + i + nInsertCount + 1] = nNewPat;
 				}
 
 				bSuccess = true;
@@ -919,7 +919,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 
 			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATNAMES, this);
-			if(selection.nOrdHi != selection.nOrdLo) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;
+			if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;
 		}
 	}
 	SwitchToView();

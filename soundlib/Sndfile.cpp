@@ -436,7 +436,7 @@ CSoundFile::CSoundFile() :
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
-	m_nSeqOverride = 0;
+	m_nSeqOverride = ORDERINDEX_INVALID;
 	m_bPatternTransitionOccurred = false;
 	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::GetSettings().m_nRowHighlightBeats) ? CMainFrame::GetSettings().m_nRowHighlightBeats : 4;
 	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::GetSettings().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? CMainFrame::GetSettings().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
@@ -513,7 +513,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nCurrentOrder = 0;
 	m_nNextOrder = 0;
 	m_nNextPatStartRow = 0;
-	m_nSeqOverride = 0;
+	m_nSeqOverride = ORDERINDEX_INVALID;
 	m_nRestartPos = 0;
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;

@@ -108,6 +108,13 @@ public:
 	// Returns true if the IT orderlist datafield is not sufficient to store orderlist information.
 	bool NeedsExtraDatafield() const;
 
+#ifdef MODPLUG_TRACKER
+	// Check if a playback position is currently locked (inaccessible)
+	bool IsPositionLocked(ORDERINDEX position);
+#endif // MODPLUG_TRACKER
+
+
+
 protected:
 	iterator begin() {return m_pArray;}
 	const_iterator begin() const {return m_pArray;}

@@ -1742,7 +1742,9 @@ BOOL CSoundFile::ProcessEffects()
 			{
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
-				if ((note == NOTE_KEYOFF) && ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED))))
+				if(note == NOTE_KEYOFF
+					&& ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2))
+					&& (pChn->pModInstrument == nullptr || !pChn->pModInstrument->VolEnv.dwFlags[ENV_ENABLED]))
 				{
 					pChn->dwFlags.set(CHN_FASTVOLRAMP);
 					pChn->nVolume = 0;
@@ -2417,9 +2419,9 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_POSITIONJUMP:
 			m_nNextPatStartRow = 0; // FT2 E60 bug
 			nPosJump = param;
-			if(m_SongFlags[SONG_PATTERNLOOP] && m_nSeqOverride == 0)
+			if(m_SongFlags[SONG_PATTERNLOOP] && m_nSeqOverride == ORDERINDEX_INVALID)
 			{
-				 m_nSeqOverride = param + 1;
+				 m_nSeqOverride = param;
 				 //Releasing pattern loop after position jump could cause
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
@@ -4678,14 +4680,14 @@ void CSoundFile::HandlePatternTransitionEvents()
 		return;
 
 	// MPT sequence override
-	if ((m_nSeqOverride > 0) && (m_nSeqOverride <= Order.size()))
+	if(m_nSeqOverride != ORDERINDEX_INVALID && m_nSeqOverride < Order.size())
 	{
 		if(m_SongFlags[SONG_PATTERNLOOP])
 		{
-			m_nPattern = Order[m_nSeqOverride - 1];
+			m_nPattern = Order[m_nSeqOverride];
 		}
-		m_nNextOrder = m_nSeqOverride - 1;
-		m_nSeqOverride = 0;
+		m_nNextOrder = m_nSeqOverride;
+		m_nSeqOverride = ORDERINDEX_INVALID;
 	}
 
 	// Channel mutes

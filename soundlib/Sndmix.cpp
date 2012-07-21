@@ -688,7 +688,7 @@ BOOL CSoundFile::ProcessRow()
 
 #ifdef MODPLUG_TRACKER
 		// "Lock order" editing feature
-		if(m_lockOrderStart != ORDERINDEX_INVALID && (m_nCurrentOrder < m_lockOrderStart || m_nCurrentOrder > m_lockOrderEnd))
+		if(Order.IsPositionLocked(m_nCurrentOrder) && !(gdwSoundSetup & SNDMIX_DIRECTTODISK))
 		{
 			m_nCurrentOrder = m_lockOrderStart;
 		}

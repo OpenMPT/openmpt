@@ -263,7 +263,7 @@ public:	// for Editing
 	ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nRestartPos, m_nSeqOverride;
 
 #ifdef MODPLUG_TRACKER
-	// Lock playback between two orders
+	// Lock playback between two orders. Lock is active if lock start != ORDERINDEX_INVALID).
 	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
 #endif // MODPLUG_TRACKER
 

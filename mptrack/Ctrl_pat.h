@@ -17,11 +17,11 @@
 class COrderList;
 class CCtrlPatterns;
 
-struct ORD_SELECTION
+struct OrdSelection
 {
-	ORDERINDEX nOrdLo;
-	ORDERINDEX nOrdHi;
-	ORDERINDEX GetSelCount() const {return nOrdHi - nOrdLo + 1;}
+	ORDERINDEX firstOrd;
+	ORDERINDEX lastOrd;
+	ORDERINDEX GetSelCount() const {return lastOrd - firstOrd + 1;}
 };
 
 //===========================
@@ -69,7 +69,7 @@ public:
 
 	// Get the currently selected pattern(s).
 	// Set bIgnoreSelection to true if only the first selected point is important.
-	ORD_SELECTION GetCurSel(bool bIgnoreSelection) const;
+	OrdSelection GetCurSel(bool bIgnoreSelection) const;
 
 	// Sets target margin value and returns the effective margin value.
 	BYTE SetMargins(int);
