@@ -376,6 +376,9 @@ protected:
 	afx_msg void OnNameChanged();
 	afx_msg void OnPrevChannel();
 	afx_msg void OnNextChannel();
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+
+	BOOL PreTranslateMessage(MSG *pMsg);
 
 	DECLARE_MESSAGE_MAP();
 };

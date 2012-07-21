@@ -809,20 +809,29 @@ void COrderList::OnPaint()
 			maxEntries = Util::Max(maxEntries, pSndFile->Order.GetLengthTailTrimmed());
 		}
 
-		//Scrolling the shown orders(the showns rectangles)?
+		// Scrolling the shown orders(the showns rectangles)?
 		while (rect.left < rcClient.right)
 		{
 			bool bHighLight = ((bFocus) && (nIndex >= selection.nOrdLo && nIndex <= selection.nOrdHi));
 			const PATTERNINDEX nPat = (nIndex < pSndFile->Order.GetLength()) ? pSndFile->Order[nIndex] : PATTERNINDEX_INVALID;
 			if ((rect.right = rect.left + m_cxFont) > rcClient.right) rect.right = rcClient.right;
 			rect.right--;
-			if (bHighLight) {
+
+			if(bHighLight)
+			{
+				// Currently selected order item
 				FillRect(dc.m_hDC, &rect, CMainFrame::brushHighLight);
-			} else {
+			} else if(nIndex >= pSndFile->m_lockOrderStart && nIndex <= pSndFile->m_lockOrderEnd)
+			{
+				// "Playback lock" indicator
+				FillRect(dc.m_hDC, &rect, CMainFrame::brushGray);
+			} else
+			{
+				// Normal, unselected item.
 				FillRect(dc.m_hDC, &rect, CMainFrame::brushWindow);
 			}
 
-			//Drawing the shown pattern-indicator or drag position.
+			// Drawing the shown pattern-indicator or drag position.
 			if (nIndex == ((m_bDragging) ? m_nDropPos : m_nScrollPos))
 			{
 				rect.InflateRect(-1, -1);
@@ -832,18 +841,18 @@ void COrderList::OnPaint()
 			MoveToEx(dc.m_hDC, rect.right, rect.top, NULL);
 			LineTo(dc.m_hDC, rect.right, rect.bottom);
 
-			//Drawing the 'ctrl-transition' indicator
+			// Drawing the 'ctrl-transition' indicator
 			if(nIndex == pSndFile->m_nSeqOverride - 1)
 			{
-				MoveToEx(dc.m_hDC, rect.left+4, rect.bottom-4, NULL);
-				LineTo(dc.m_hDC, rect.right-4, rect.bottom-4);
-			}
+				MoveToEx(dc.m_hDC, rect.left + 4, rect.bottom - 4, NULL);
+				LineTo(dc.m_hDC, rect.right - 4, rect.bottom - 4);
+			} 
 
-			//Drawing 'playing'-indicator.
+			// Drawing 'playing'-indicator.
 			if(nIndex == pSndFile->GetCurrentOrder() && CMainFrame::GetMainFrame()->IsPlaying())
 			{
-				MoveToEx(dc.m_hDC, rect.left+4, rect.top+2, NULL);
-				LineTo(dc.m_hDC, rect.right-4, rect.top+2);
+				MoveToEx(dc.m_hDC, rect.left + 4, rect.top + 2, NULL);
+				LineTo(dc.m_hDC, rect.right - 4, rect.top + 2);
 			}
 
 			s[0] = '\0';
@@ -1558,6 +1567,7 @@ void COrderList::OnLockPlayback()
 	{
 		pSndFile->m_lockOrderStart = selection.nOrdLo;
 		pSndFile->m_lockOrderEnd = selection.nOrdHi;
+		InvalidateRect(NULL, FALSE);
 	}
 }
 
@@ -1567,4 +1577,5 @@ void COrderList::OnUnlockPlayback()
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	pSndFile->m_lockOrderStart = pSndFile->m_lockOrderEnd = ORDERINDEX_INVALID;
+	InvalidateRect(NULL, FALSE);
 }

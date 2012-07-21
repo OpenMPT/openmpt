@@ -43,7 +43,8 @@ enum InputTargetContext
 	kCtxCtrlSamples,
 	kCtxCtrlInstruments,
 	kCtxCtrlComments,
-	kCtxCtrlOrderlist,	
+	kCtxCtrlOrderlist,
+	kCtxChannelSettings,
 	kCtxMaxInputContexts
 };
 
@@ -1080,6 +1081,12 @@ enum CommandID
 	kcOrderlistUnlockPlayback,
 	kcEndOrderlistLock = kcOrderlistUnlockPlayback,
 	kcEndOrderlistCommands=kcEndOrderlistLock,
+
+	kcStartChnSettingsCommands,
+	kcChnSettingsPrev = kcStartChnSettingsCommands,
+	kcChnSettingsNext,
+	kcChnSettingsClose,
+	kcEndChnSettingsCommands = kcChnSettingsClose,
 
 	kcNumCommands,
 };

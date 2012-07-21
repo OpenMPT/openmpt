@@ -243,6 +243,15 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
+		CommandCategory newCat("  Pattern Editor - Quick Channel Settings", kCtxChannelSettings);
+
+		for(int c = kcStartChnSettingsCommands; c <= kcEndChnSettingsCommands; c++)
+			newCat.commands.Add(c);
+
+		commandCategories.Add(newCat);
+	}
+
+	{
 		CommandCategory newCat("    Pattern Editor - General", kCtxViewPatterns);
 
 		for(int c = kcStartPlainNavigate; c <= kcEndPlainNavigate; c++)
