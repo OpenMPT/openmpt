@@ -821,9 +821,9 @@ void COrderList::OnPaint()
 			{
 				// Currently selected order item
 				FillRect(dc.m_hDC, &rect, CMainFrame::brushHighLight);
-			} else if(nIndex >= pSndFile->m_lockOrderStart && nIndex <= pSndFile->m_lockOrderEnd)
+			} else if(pSndFile->m_lockOrderStart != ORDERINDEX_INVALID && (nIndex < pSndFile->m_lockOrderStart || nIndex > pSndFile->m_lockOrderEnd))
 			{
-				// "Playback lock" indicator
+				// "Playback lock" indicator - grey out all order items which aren't played.
 				FillRect(dc.m_hDC, &rect, CMainFrame::brushGray);
 			} else
 			{
