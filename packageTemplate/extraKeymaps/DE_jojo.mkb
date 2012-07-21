@@ -385,3 +385,8 @@ version:1
 19:1854:0:32:1		//Stop (---) Index: LEER (KeyDown)
 19:1875:2:76:1		//Lock Playback to Selection: Ctrl+L (KeyDown)
 19:1876:2:85:1		//Unlock Playback: Ctrl+U (KeyDown)
+
+//----( Quick Channel Settings Context (20) )------------
+20:1878:2:8:5		//Previous Channel: Ctrl+RÜCK (KeyDown|KeyHold)
+20:1879:0:13:5		//Next Channel: EINGABE (KeyDown|KeyHold)
+20:1880:1:13:1		//Switch to Pattern Editor: Shift+EINGABE (KeyDown)

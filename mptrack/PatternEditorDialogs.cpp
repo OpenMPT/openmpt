@@ -1618,6 +1618,7 @@ BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
 	ON_COMMAND(IDC_CHECK2,	OnSurroundChanged)
 	ON_COMMAND(IDC_BUTTON1,	OnPrevChannel)
 	ON_COMMAND(IDC_BUTTON2,	OnNextChannel)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
 END_MESSAGE_MAP()
 
 
@@ -1876,14 +1877,72 @@ void QuickChannelProperties::OnNameChanged()
 void QuickChannelProperties::OnPrevChannel()
 //------------------------------------------
 {
-	channel--;
-	UpdateDisplay();
+	if(channel > 0)
+	{
+		channel--;
+		UpdateDisplay();
+	}
 }
 
 
 void QuickChannelProperties::OnNextChannel()
 //------------------------------------------
 {
-	channel++;
-	UpdateDisplay();
+	if(channel < document->GetNumChannels() - 1)
+	{
+		channel++;
+		UpdateDisplay();
+	}
+}
+
+
+BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
+//---------------------------------------------------------
+{
+	if(pMsg)
+	{
+		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+		if((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
+			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+		{
+			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+
+			//Translate message manually
+			UINT nChar = pMsg->wParam;
+			UINT nRepCnt = LOWORD(pMsg->lParam);
+			UINT nFlags = HIWORD(pMsg->lParam);
+			KeyEventType kT = ih->GetKeyEventType(nFlags);
+
+			if(ih->KeyEvent(kCtxChannelSettings, nChar, nRepCnt, nFlags, kT, this) != kcNull)
+			{
+				return true;	// Mapped to a command, no need to pass message on.
+			}
+		}
+
+	}
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+
+LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
+//-------------------------------------------------------------------
+{
+	if (wParam == kcNull)
+		return 0;
+
+	switch(wParam)
+	{
+	case kcChnSettingsPrev:
+		OnPrevChannel();
+		return wParam;
+	case kcChnSettingsNext:
+		OnNextChannel();
+		return wParam;
+	case kcChnSettingsClose:
+		OnActivate(WA_INACTIVE, nullptr, FALSE);
+		return wParam;
+	}
+
+	return 0;
 }

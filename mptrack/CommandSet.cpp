@@ -630,6 +630,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcOrderlistLockPlayback, 1875, _T("Lock Playback to Selection"));
 	DefineKeyCommand(kcOrderlistUnlockPlayback, 1876, _T("Unlock Playback"));
 	DefineKeyCommand(kcChannelSettings, 1877, _T("Quick Channel Settings"));
+	DefineKeyCommand(kcChnSettingsPrev, 1878, _T("Previous Channel"));
+	DefineKeyCommand(kcChnSettingsNext, 1879, _T("Next Channel"));
+	DefineKeyCommand(kcChnSettingsClose, 1880, _T("Switch to Pattern Editor"));
 	// Add new key commands here.
 
 #ifdef _DEBUG
@@ -1846,7 +1849,8 @@ CString CCommandSet::GetContextText(InputTargetContext ctx)
 		case kCtxCtrlComments:			return "Comments Context [top]";
 		case kCtxCtrlOrderlist:			return "Orderlist";
 		case kCtxVSTGUI:				return "Plugin GUI Context";
-	    case kCtxUnknownContext:
+		case kCtxChannelSettings:		return "Quick Channel Settings Context";
+		case kCtxUnknownContext:
 		default:						return "Unknown Context";
 	}
 };
@@ -2097,6 +2101,7 @@ void CCommandSet::SetupContextHierarchy()
 	m_isParentContext[kCtxCtrlComments][kCtxAllContexts] = true;
 	m_isParentContext[kCtxCtrlSamples][kCtxAllContexts] = true;
 	m_isParentContext[kCtxCtrlOrderlist][kCtxAllContexts] = true;
+	m_isParentContext[kCtxChannelSettings][kCtxAllContexts] = true;
 
 	m_isParentContext[kCtxViewPatternsNote][kCtxViewPatterns] = true;
 	m_isParentContext[kCtxViewPatternsIns][kCtxViewPatterns] = true;
