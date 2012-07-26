@@ -38,13 +38,13 @@ protected:
 	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
 	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
 	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos;
-	bool m_bScrolling, m_bDragging;
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
 	int m_nOrderlistMargins;
 	CModDoc *m_pModDoc;
 	CCtrlPatterns *m_pParent;
+	bool m_bScrolling, m_bDragging;
 
 public:
 	COrderList();
@@ -56,7 +56,8 @@ public:
 	UINT GetCurrentPattern() const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
 	inline void SetCurSelTo2ndSel(bool isSelectionKeyPressed)
-	{	if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
+	{
+		if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
 		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
 	};
 	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
@@ -72,24 +73,24 @@ public:
 	OrdSelection GetCurSel(bool bIgnoreSelection) const;
 
 	// Sets target margin value and returns the effective margin value.
-	BYTE SetMargins(int);
+	ORDERINDEX SetMargins(int);
 
 	// Returns the effective margin value.
-	BYTE GetMargins() { return GetMargins(GetMarginsMax()); }
+	ORDERINDEX GetMargins() { return GetMargins(GetMarginsMax()); }
 
 	// Returns the effective margin value.
-	BYTE GetMargins(const BYTE nMaxMargins) const { return Util::Min(nMaxMargins, static_cast<BYTE>(m_nOrderlistMargins)); }
+	ORDERINDEX GetMargins(const ORDERINDEX maxMargins) const { return Util::Min(maxMargins, static_cast<ORDERINDEX>(m_nOrderlistMargins)); }
 
 	// Returns maximum margin value given current window width.
-	BYTE GetMarginsMax() { return GetMarginsMax(GetLength()); }
+	ORDERINDEX GetMarginsMax() { return GetMarginsMax(GetLength()); }
 
 	// Returns maximum margin value when shown sequence has nLength orders.
 	// For example: If length is 4 orders -> maxMargins = 4/2 - 1 = 1;
 	// if maximum is 5 -> maxMargins = (int)5/2 = 2
-	BYTE GetMarginsMax(const BYTE nLength) const { return (nLength > 0 && nLength % 2 == 0) ? nLength / 2 - 1 : nLength / 2; }
+	ORDERINDEX GetMarginsMax(const ORDERINDEX length) const { return (length > 0 && length % 2 == 0) ? length / 2 - 1 : length / 2; }
 
 	// Returns the number of sequence items visible in the list.
-	BYTE GetLength();
+	ORDERINDEX GetLength();
 
 	// Return true if given order is in margins given that first shown order
 	// is 'startOrder'. Begin part of the whole sequence
@@ -158,6 +159,8 @@ protected:
 };
 
 
+// CPatEdit: Edit control that switches back to the pattern view if Tab key is pressed.
+
 //==========================
 class CPatEdit: public CEdit
 //==========================
@@ -166,7 +169,7 @@ protected:
 	CCtrlPatterns *m_pParent;
 
 public:
-	CPatEdit() { m_pParent = NULL; }
+	CPatEdit() { m_pParent = nullptr; }
 	void SetParent(CCtrlPatterns *parent) { m_pParent = parent; }
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
 };

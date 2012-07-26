@@ -110,7 +110,10 @@ void CloseMainDialog::OnCancel()
 void CloseMainDialog::OnSaveAll()
 //-------------------------------
 {
-	m_List.SelItemRange(TRUE, 0, m_List.GetCount() - 1);
+	if(m_List.GetCount() == 1)
+		m_List.SetSel(0, TRUE);	// SelItemRange can't select one item: http://support.microsoft.com/kb/129428/en-us
+	else
+		m_List.SelItemRange(TRUE, 0, m_List.GetCount() - 1);
 	OnOK();
 }
 
@@ -118,7 +121,10 @@ void CloseMainDialog::OnSaveAll()
 void CloseMainDialog::OnSaveNone()
 //--------------------------------
 {
-	m_List.SelItemRange(FALSE, 0, m_List.GetCount() - 1);
+	if(m_List.GetCount() == 1)
+		m_List.SetSel(0, FALSE);	// SelItemRange can't select one item: http://support.microsoft.com/kb/129428/en-us
+	else
+		m_List.SelItemRange(FALSE, 0, m_List.GetCount() - 1);
 	OnOK();
 }
 
