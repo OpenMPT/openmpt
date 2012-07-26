@@ -387,6 +387,8 @@ version:1
 19:1876:2:85:1		//Unlock Playback: Ctrl+U (KeyDown)
 
 //----( Quick Channel Settings Context (20) )------------
-20:1878:2:8:5		//Previous Channel: Ctrl+RÜCK (KeyDown|KeyHold)
-20:1879:0:13:5		//Next Channel: EINGABE (KeyDown|KeyHold)
-20:1880:1:13:1		//Switch to Pattern Editor: Shift+EINGABE (KeyDown)
+20:1878:1:37:5		//Previous Channel: Shift+NACH-LINKS (KeyDown|KeyHold)
+20:1878:1:8:5		//Previous Channel: Shift+RÜCK (KeyDown|KeyHold)
+20:1879:1:39:5		//Next Channel: Shift+NACH-RECHTS (KeyDown|KeyHold)
+20:1879:1:13:5		//Next Channel: Shift+EINGABE (KeyDown|KeyHold)
+20:1880:0:13:1		//Switch to Pattern Editor: EINGABE (KeyDown)

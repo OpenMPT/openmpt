@@ -756,13 +756,16 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT nsmp = 0; nsmp < m_nSamples; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSample)))
 	{
 		ITSample *pis = (ITSample *)(lpStream+smppos[nsmp]);
-		if (pis->id == LittleEndian(ITSample::magic))
+		if(pis->id == LittleEndian(ITSample::magic))
 		{
 			size_t sampleOffset = pis->ConvertToMPT(Samples[nsmp + 1]);
 
 			StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[nsmp + 1], pis->name);
 
-			lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + pis->GetSampleFormat(itHeader.cwtv).ReadSample(Samples[nsmp + 1], (LPSTR)(lpStream + sampleOffset), dwMemLength - sampleOffset));
+			if(sampleOffset < dwMemLength)
+			{
+				lastSampleOffset = Util::Max(lastSampleOffset, sampleOffset + pis->GetSampleFormat(itHeader.cwtv).ReadSample(Samples[nsmp + 1], lpStream + sampleOffset, dwMemLength - sampleOffset));
+			}
 		}
 	}
 	m_nSamples = max(1, m_nSamples);

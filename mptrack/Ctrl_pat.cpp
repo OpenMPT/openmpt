@@ -703,12 +703,11 @@ void CCtrlPatterns::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCtrlPatterns::OnOrderListMarginsChanged()
 //---------------------------------------------
 {
-	BYTE i;
+	ORDERINDEX i;
 	if((m_EditOrderListMargins.m_hWnd) && (m_EditOrderListMargins.IsWindowVisible()) && (m_EditOrderListMargins.GetWindowTextLength() > 0))
 	{
 		i = m_OrderList.SetMargins(GetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS));
-	}
-	else
+	} else
 	{
 		i = m_OrderList.GetMargins();
 	}
