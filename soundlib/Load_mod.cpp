@@ -453,6 +453,9 @@ bool CSoundFile::ReadMod(FileReader &file)
 		}
 	}
 
+	// Re-read file header, as it is found at another position in M15 files.
+	file.Read(fileHeader);
+
 	// Sanity checks...
 	if(GetNumSamples() == 15)
 	{
@@ -461,9 +464,6 @@ bool CSoundFile::ReadMod(FileReader &file)
 			return false;
 		}
 	}
-
-	// Re-read file header, as it is found at another position in M15 files.
-	file.Read(fileHeader);
 
 	Order.ReadFromArray(fileHeader.orderList);
 
