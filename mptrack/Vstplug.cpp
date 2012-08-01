@@ -1644,10 +1644,7 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 
 	for(PlugParamIndex p = minParam; p < maxParam; p++)
 	{
-		if(CanAutomateParameter(p))
-		{
-			SetParameter(p, (float(rand()) / float(RAND_MAX)));
-		}
+		SetParameter(p, (float(rand()) / float(RAND_MAX)));
 	}
 
 	return true;
@@ -2453,10 +2450,10 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 
 
 	// Specific Note Off
-	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
+	if (note > NOTE_MAX_SPECIAL)			//rewbs.vstiLive
 	{
 		note -= NOTE_MIN;
-		uint8 i = static_cast<uint8>(note - NOTE_KEYOFF);
+		uint8 i = static_cast<uint8>(note - NOTE_MAX_SPECIAL);
 		if(channel.uNoteOnMap[i][trackChannel])
 		{
 			channel.uNoteOnMap[i][trackChannel]--;
