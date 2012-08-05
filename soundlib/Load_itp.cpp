@@ -324,7 +324,8 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// channel config data
-	for(i=0; i<m_nChannels; i++){
+	for(i=0; i<m_nChannels; i++)
+	{
 		id = ChnSettings[i].nPan;
 		fwrite(&id, 1, sizeof(id), f);
 		id = ChnSettings[i].dwFlags;
