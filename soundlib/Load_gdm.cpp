@@ -238,7 +238,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 			}
 		}
 
-		Samples[smp].uFlags = 0;
+		Samples[smp].uFlags.reset();
 		if(gdmSample.flags & GDMSampleHeader::smpLoop) Samples[smp].uFlags |= CHN_LOOP; // Loop sample
 
 		if(gdmSample.flags & GDMSampleHeader::smpVolume)

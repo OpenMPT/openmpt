@@ -107,10 +107,10 @@ void ModSample::Initialize(MODTYPE type)
 	nVibSweep = 0;
 	nVibDepth = 0;
 	nVibRate = 0;
-	uFlags &= ~(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP);
+	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP);
 	if(type == MOD_TYPE_XM)
 	{
-		uFlags |= CHN_PANNING;
+		uFlags.set(CHN_PANNING);
 	}
 	filename[0] = '\0';
 }

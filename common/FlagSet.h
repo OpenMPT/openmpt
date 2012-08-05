@@ -10,18 +10,18 @@
 
 #include <string>
 
-template <typename enum_t>
+template <typename enum_t, typename store_t = enum_t>
 class FlagSet
 {
 public:
 	// Default constructor (no flags set)
-	FlagSet() : flags(enum_t(0))
+	FlagSet() : flags(store_t(0))
 	{
 
 	}
 
 	// Value constructor
-	explicit FlagSet(enum_t value) : flags(value)
+	explicit FlagSet(enum_t value) : flags(static_cast<store_t>(value))
 	{
 
 	}
@@ -29,7 +29,7 @@ public:
 	// Explicit conversion operator
 	operator enum_t() const
 	{
-		return flags;
+		return static_cast<enum_t>(flags);
 	}
 
 	operator std::string() const
@@ -56,38 +56,31 @@ public:
 		return str;
 	}
 	
-	// Set all flags.
-	FlagSet &set()
-	{
-		flags = ~enum_t(0);
-		return *this;
-	}
-
 	// Set one or more flags.
 	FlagSet &set(enum_t flag)
 	{
-		flags = (flags | flag);
+		flags = (flags | static_cast<store_t>(flag));
 		return *this;
 	}
 
 	// Set or clear one or more flags.
 	FlagSet &set(enum_t flag, bool val)
 	{
-		flags = (val ? (flags | flag) : (flags & ~flag));
+		flags = (val ? (flags | static_cast<store_t>(flag)) : (flags & ~static_cast<store_t>(flag)));
 		return *this;
 	}
 
 	// Clear or flags.
 	FlagSet &reset()
 	{
-		flags = enum_t(0);
+		flags = store_t(0);
 		return *this;
 	}
 
 	// Clear one or more flags.
 	FlagSet &reset(enum_t flag)
 	{
-		flags &= ~flag;
+		flags &= ~static_cast<store_t>(flag);
 		return *this;
 	}
 
@@ -101,7 +94,7 @@ public:
 	// Toggle one or more flags.
 	FlagSet &flip(enum_t flag)
 	{
-		flags ^= flag;
+		flags ^= static_cast<store_t>(flag);
 		return *this;
 	}
 
@@ -114,7 +107,7 @@ public:
 	// Test if one or more flags are set. Returns true if at least one of the given flags is set.
 	bool test(enum_t flag) const
 	{
-		return (flags & flag) > 0;
+		return (flags & static_cast<store_t>(flag)) > 0;
 	}
 
 	// Test if any flag is set.
@@ -129,26 +122,26 @@ public:
 		return flags == 0;
 	}
 
-	FlagSet<enum_t> &operator = (const enum_t other)
+	FlagSet<enum_t, store_t> &operator = (const enum_t other)
 	{
-		flags = other;
+		flags = static_cast<store_t>(other);
 		return *this;
 	}
 
-	FlagSet<enum_t> &operator &= (const enum_t other)
+	FlagSet<enum_t, store_t> &operator &= (const enum_t other)
 	{
-		flags &= other;
+		flags &= static_cast<store_t>(other);
 		return *this;
 	}
 
-	FlagSet<enum_t> &operator |= (const enum_t other)
+	FlagSet<enum_t, store_t> &operator |= (const enum_t other)
 	{
-		flags |= other;
+		flags |= static_cast<store_t>(other);
 		return *this;
 	}
 
 private:
-	enum_t flags;
+	store_t flags;
 
 };
 

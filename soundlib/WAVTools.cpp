@@ -12,6 +12,10 @@
 #include "WAVTools.h"
 
 
+///////////////////////////////////////////////////////////
+// WAV Reading
+
+
 WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 //-----------------------------------------------------------
 {
@@ -69,10 +73,10 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	// Read sample data
 	sampleData = chunks.GetChunk(RIFFChunk::iddata);
 
-	if(!sampleData.IsValid() && chunks.ChunkExists(RIFFChunk::idpcm_))
+	if(!sampleData.IsValid())
 	{
 		// The old IMA ADPCM loader code looked for the "pcm " chunk instead of the "data" chunk...
-		// Dunno why, but we will just look for both.
+		// Dunno why (Windows XP's audio recorder saves IMA ADPCM files with a "data" chunk), but we will just look for both.
 		sampleData = chunks.GetChunk(RIFFChunk::idpcm_);
 	}
 
@@ -86,19 +90,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	}
 
 	// Read sample loop points
-	FileReader smplChunk(chunks.GetChunk(RIFFChunk::idsmpl));
-	WAVSampleInfoChunk sampleInfo;
-	if(smplChunk.ReadConvertEndianness(sampleInfo))
-	{
-		for(size_t i = 0; i < sampleInfo.numLoops; i++)
-		{
-			WAVSampleLoop loopData;
-			if(smplChunk.ReadConvertEndianness(loopData))
-			{
-				sampleLoops.push_back(loopData);
-			}
-		}
-	}
+	smplChunk = chunks.GetChunk(RIFFChunk::idsmpl);
 	
 	// Read text chunks
 	ChunkReader listChunk = chunks.GetChunk(RIFFChunk::idLIST);
@@ -131,27 +123,31 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	// Read software name
 	const bool isOldMPT = infoChunk.GetChunk(RIFFChunk::idISFT).ReadMagic("Modplug Tracker");
 	
-	sample.uFlags &= ~(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
 	// Convert loops
-	if(!sampleLoops.empty())
+	WAVSampleInfoChunk sampleInfo;
+	smplChunk.Rewind();
+	if(smplChunk.ReadConvertEndianness(sampleInfo))
 	{
-		size_t normalLoopIndex = 0;
-		if(sampleLoops.size() > 1)
+		WAVSampleLoop loopData;
+		if(sampleInfo.numLoops > 1 && smplChunk.ReadConvertEndianness(loopData))
 		{
-			sampleLoops[0].ApplyToSample(sample.nSustainStart, sample.nSustainEnd, sample.nLength, sample.uFlags, CHN_SUSTAINLOOP, CHN_PINGPONGSUSTAIN, isOldMPT);
-			normalLoopIndex = 1;
+			// First loop: Sustain loop
+			loopData.ApplyToSample(sample.nSustainStart, sample.nSustainEnd, sample.nLength, sample.uFlags, CHN_SUSTAINLOOP, CHN_PINGPONGSUSTAIN, isOldMPT);
 		}
-		sampleLoops[normalLoopIndex].ApplyToSample(sample.nLoopStart, sample.nLoopEnd, sample.nLength, sample.uFlags, CHN_LOOP, CHN_PINGPONGLOOP, isOldMPT);
+		// First loop (if only one loop is present) or second loop (if more than one loop is present): Normal sample loop
+		if(smplChunk.ReadConvertEndianness(loopData))
+		{
+			loopData.ApplyToSample(sample.nLoopStart, sample.nLoopEnd, sample.nLength, sample.uFlags, CHN_LOOP, CHN_PINGPONGLOOP, isOldMPT);
+		}
 	}
 
+	// Read MPT extra info
 	WAVExtraChunk mptInfo;
 	xtraChunk.Rewind();
 	if(xtraChunk.ReadConvertEndianness(mptInfo))
 	{
-		if(mptInfo.flags & WAVExtraChunk::bidiLoop) sample.uFlags |= CHN_PINGPONGLOOP;
-		if(mptInfo.flags & WAVExtraChunk::sustainLoop) sample.uFlags |= CHN_SUSTAINLOOP;
-		if(mptInfo.flags & WAVExtraChunk::sustainBidi) sample.uFlags |= CHN_PINGPONGSUSTAIN;
 		if(mptInfo.flags & WAVExtraChunk::setPanning) sample.uFlags |= CHN_PANNING;
 
 		sample.nPan = Util::Min(mptInfo.defaultPan, uint16(256));
@@ -172,8 +168,8 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 }
 
 
-void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampleLength, uint16 &flags, uint16 enableFlag, uint16 bidiFlag, bool mptLoopFix) const
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampleLength, FlagSet<ChannelFlags, uint16> &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	start = Util::Min(static_cast<SmpLength>(loopStart), sampleLength);
 	end = Clamp(static_cast<SmpLength>(loopEnd), start, sampleLength);
@@ -183,9 +179,9 @@ void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampl
 		end++;
 	}
 
-	flags |= enableFlag;
+	flags.set(enableFlag);
 	if(loopType == loopBidi)
 	{
-		flags |= bidiFlag;
+		flags.set(bidiFlag);
 	}
 }

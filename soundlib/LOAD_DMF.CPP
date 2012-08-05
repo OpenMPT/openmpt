@@ -759,7 +759,7 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 	dwMemPos += sizeof(DMFCHUNK_SAMPLEHEADER);
 
 	ModSample &sample = pSndFile->GetSample(nSmp);
-	MemsetZero(sample);
+	sample.Initialize();
 	sample.nLength = LittleEndian(smpHead->length);
 	sample.nSustainEnd = min(sample.nLength, LittleEndian(smpHead->loopEnd));
 	sample.nSustainStart = min(sample.nSustainEnd, LittleEndian(smpHead->loopStart));
@@ -778,7 +778,6 @@ DWORD ConvertDMFSample(const SAMPLEINDEX nSmp, const LPCBYTE lpStream, const DWO
 		sample.nVolume = 256;
 	}
 	sampleFlags = smpHead->flags;
-	sample.uFlags = 0;
 	if((sampleFlags & DMFSMP_LOOP) != 0 && sample.nSustainEnd > sample.nSustainStart)
 	{
 		sample.uFlags |= CHN_SUSTAINLOOP;

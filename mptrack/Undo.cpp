@@ -211,8 +211,8 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 
 
 // Check if an undo buffer actually exists.
-bool CPatternUndo::CanUndo()
-//--------------------------
+bool CPatternUndo::CanUndo() const
+//--------------------------------
 {
 	return (UndoBuffer.size() > 0);
 }
@@ -236,7 +236,7 @@ void CPatternUndo::DeleteUndoStep(size_t step)
 void CPatternUndo::RemoveLastUndoStep()
 //-------------------------------------
 {
-	if(CanUndo() == false) return;
+	if(!CanUndo()) return;
 	DeleteUndoStep(UndoBuffer.size() - 1);
 }
 
@@ -296,7 +296,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 	const ModSample &oldsample = pSndFile->GetSample(smp);
 
 	// Save old sample header
-	MemCopy(sUndo.OldSample, oldsample);
+	sUndo.OldSample = oldsample;
 	MemCopy(sUndo.szOldName, pSndFile->m_szNames[smp]);
 	sUndo.nChangeType = changeType;
 

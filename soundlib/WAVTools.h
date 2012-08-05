@@ -73,10 +73,17 @@ struct RIFFChunk
 		return SwapBytesLE(l);
 	}
 
-	ChunkIdentifiers GetID() const
+	id_type GetID() const
 	{
 		uint32 i = id;
-		return static_cast<ChunkIdentifiers>(SwapBytesLE(i));
+		return static_cast<id_type>(SwapBytesLE(i));
+	}
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(length);
 	}
 };
 
@@ -120,6 +127,7 @@ struct WAVFormatChunkExtension
 	uint16 validBitsPerSample;
 	uint32 channelMask;
 	uint16 subFormat;
+	uint8  guid[14];
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -138,7 +146,7 @@ struct WAVSampleInfoChunk
 	uint32 manufacturer;
 	uint32 product;
 	uint32 samplePeriod;	// 1000000000 / sampleRate
-	uint32 baseNote;		// 3Ch = C-4 -> 60 + RelativeTone
+	uint32 baseNote;		// MIDI base note of sample
 	uint32 pitchFraction;
 	uint32 SMPTEFormat;
 	uint32 SMPTEOffset;
@@ -190,7 +198,25 @@ struct WAVSampleLoop
 		SwapBytesLE(playCount);
 	}
 
-	void ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampleLength, uint16 &flags, uint16 enableFlag, uint16 bidiFlag, bool mptLoopFix) const;
+	void ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampleLength, FlagSet<ChannelFlags, uint16> &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const;
+
+	// Set up a loop.
+	void ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
+	{
+		identifier = 0;
+		loopType = bidi ? loopBidi : loopForward;
+		loopStart = start;
+		// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
+		if(end> start)
+		{
+			loopEnd = end - 1;
+		} else
+		{
+			loopEnd = start;
+		}
+		fraction = 0;
+		playCount = 0;
+	}
 };
 
 
@@ -199,9 +225,6 @@ struct WAVExtraChunk
 {
 	enum Flags
 	{
-		bidiLoop	= 0x04,
-		sustainLoop	= 0x08,
-		sustainBidi	= 0x10,
 		setPanning	= 0x20,
 	};
 
@@ -226,20 +249,44 @@ struct WAVExtraChunk
 };
 
 
+// Sample cue point structure for the "cue " chunk
+struct WAVCuePoint
+{
+	uint32 id;			// Unique identification value
+	uint32 position;	// Play order position
+	uint32 riffChunkID;	// RIFF ID of corresponding data chunk
+	uint32 chunkStart;	// Byte Offset of Data Chunk
+	uint32 blockStart;	// Byte Offset to sample of First Channel
+	uint32 offset;		// Byte Offset to sample byte of First Channel
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(position);
+		SwapBytesLE(riffChunkID);
+		SwapBytesLE(chunkStart);
+		SwapBytesLE(blockStart);
+		SwapBytesLE(offset);
+	}
+};
+
+
 #pragma pack(pop)
 
 
+//=============
 class WAVReader
+//=============
 {
 protected:
 	ChunkReader file;
-	FileReader sampleData, xtraChunk, wsmpChunk;
+	FileReader sampleData, smplChunk, xtraChunk, wsmpChunk;
 	ChunkReader::ChunkList<RIFFChunk> infoChunk;
 
 	size_t sampleLength;
 	bool isDLS;
 	WAVFormatChunk formatInfo;
-	std::vector<WAVSampleLoop> sampleLoops;
 
 public:
 	WAVReader(FileReader &inputFile);
