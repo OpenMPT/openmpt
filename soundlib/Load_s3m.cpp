@@ -105,13 +105,13 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 			command = '\\';
 		break;
 	case CMD_XFINEPORTAUPDOWN:
-		if(param & 0x0F) switch(param & 0xF0)
+		switch(param & 0xF0)
 		{
 		case 0x10:	command = 'F'; param = (param & 0x0F) | 0xE0; break;
 		case 0x20:	command = 'E'; param = (param & 0x0F) | 0xE0; break;
 		case 0x90:	command = 'S'; break;
 		default:	command = 0;
-		} else command = 0;
+		}
 		break;
 	case CMD_MODCMDEX:
 		{
@@ -300,13 +300,13 @@ struct S3MSampleHeader
 				mptSmp.nLength = length;
 				mptSmp.nLoopStart = min(loopStart, mptSmp.nLength - 1);
 				mptSmp.nLoopEnd = min(loopEnd, mptSmp.nLength);
-				mptSmp.uFlags = (flags & smpLoop) ? CHN_LOOP : 0;
+				mptSmp.uFlags.set(CHN_LOOP, (flags & smpLoop) != 0);
 			}
 
 			if(mptSmp.nLoopEnd < 2 || mptSmp.nLoopStart >= mptSmp.nLoopEnd || mptSmp.nLoopEnd - mptSmp.nLoopStart < 1)
 			{
 				mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
-				mptSmp.uFlags = 0;
+				mptSmp.uFlags.reset();
 			}
 
 			// Volume / Panning
@@ -369,19 +369,18 @@ struct S3MSampleHeader
 	// Retrieve the internal sample format flags for this sample.
 	SampleIO GetSampleFormat(bool signedSamples) const
 	{
-		SampleIO format(
-			(flags & S3MSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
-			(flags & S3MSampleHeader::smpStereo) ?  SampleIO::stereoSplit : SampleIO::mono,
-			SampleIO::littleEndian,
-			signedSamples ? SampleIO::signedPCM : SampleIO::unsignedPCM);
-
-		// MODPlugin :(
-		if(!(flags & S3MSampleHeader::smp16Bit) && pack == S3MSampleHeader::pADPCM)
+		if(pack == S3MSampleHeader::pADPCM && !(flags & S3MSampleHeader::smp16Bit) && !(flags & S3MSampleHeader::smpStereo))
 		{
-			format |= SampleIO::ADPCM;
+			// MODPlugin :(
+			return SampleIO(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::ADPCM);
+		} else
+		{
+			return SampleIO(
+				(flags & S3MSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+				(flags & S3MSampleHeader::smpStereo) ?  SampleIO::stereoSplit : SampleIO::mono,
+				SampleIO::littleEndian,
+				signedSamples ? SampleIO::signedPCM : SampleIO::unsignedPCM);
 		}
-
-		return format;
 	}
 };
 

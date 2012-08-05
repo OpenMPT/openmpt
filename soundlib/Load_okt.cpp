@@ -83,7 +83,7 @@ void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSn
 		oktSmp.volume = oktSmp.volume;
 		oktSmp.type = oktSmp.type;
 
-		MemsetZero(mptSmp);
+		mptSmp.Initialize();
 		StringFixer::ReadString<StringFixer::maybeNullTerminated>(pSndFile->m_szNames[nSmp], oktSmp.name);
 
 		mptSmp.nC5Speed = 8287;
@@ -91,7 +91,7 @@ void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSn
 		mptSmp.nVolume = min(oktSmp.volume, 64) * 4;
 		mptSmp.nLength = oktSmp.length & ~1;	// round down
 		// parse loops
-		if (oktSmp.loopLength > 2 && ((UINT)oktSmp.loopStart) + ((UINT)oktSmp.loopLength) <= mptSmp.nLength)
+		if (oktSmp.loopLength > 2 && static_cast<SmpLength>(oktSmp.loopStart) + static_cast<SmpLength>(oktSmp.loopLength) <= mptSmp.nLength)
 		{
 			mptSmp.nSustainStart = oktSmp.loopStart;
 			mptSmp.nSustainEnd = oktSmp.loopStart + oktSmp.loopLength;

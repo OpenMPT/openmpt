@@ -465,7 +465,6 @@ CSoundFile::CSoundFile() :
 // -! NEW_FEATURE#0023
 
 	MemsetZero(ChnMix);
-	MemsetZero(Samples);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
@@ -522,7 +521,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMaxOrderPosition = 0;
 	m_lpszSongComments = nullptr;
 	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
-	MemsetZero(Samples);
 	MemsetZero(ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
@@ -1582,7 +1580,7 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
 	if (/*!Ins[from].pSample ||*/ Samples[to].pSample) return true;
 
-	MemCopy(Samples[to], Samples[from]);
+	Samples[to] = Samples[from];
 
 	Samples[from].pSample = nullptr;
 	Samples[from].nLength = 0;

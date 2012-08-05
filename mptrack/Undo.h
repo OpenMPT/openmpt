@@ -64,7 +64,7 @@ public:
 	void ClearUndo();
 	bool PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious = false, bool storeChannelInfo = false);
 	PATTERNINDEX Undo();
-	bool CanUndo();
+	bool CanUndo() const;
 	void RemoveLastUndoStep();
 
 	void SetParent(CModDoc *pModDoc) { m_pModDoc = pModDoc; }

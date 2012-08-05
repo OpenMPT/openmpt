@@ -42,6 +42,7 @@ begin
                         // Try not to call a function for every file
                         // as this could take a very long time.
                         // .
+                        MsgBox(FilePath, mbInformation, MB_OK);
                         SetIniString('VST Plugins', 'Plugin' + IntToStr(VSTPluginNumber), FilePath, INIFile);
                         VSTPluginNumber := VSTPluginNumber + 1;
                         // <-- End action.
@@ -76,7 +77,7 @@ begin
     OldVSTPluginNumber := VSTPluginNumber;
 
     // The folder to scan.
-    Dir := ExpandConstant('{pf}\Steinberg\VstPlugins');
+    Dir := ExpandConstant('E:\VST-Plugins\');
     RegQueryStringValue(HKEY_LOCAL_MACHINE, 'Software\VST', 'VSTPluginsPath', Dir); // won't touch Dir if registry path does not exist
     // The progress page.
     ProgressPage := CreateOutputProgressPage (CustomMessage ('ProgressTitle'),
@@ -87,6 +88,8 @@ begin
     // Make the Cancel button visible during the operation.
     ;WizardForm.CancelButton.Visible := TRUE;
     // Scan the folder.
+    MsgBox(Dir, mbInformation, MB_OK);
+    MsgBox(INIFile, mbInformation, MB_OK);
     ProcessDirectory (Dir, TRUE, INIFile);
     // Hide the progress page.
     try

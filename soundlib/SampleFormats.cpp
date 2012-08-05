@@ -65,19 +65,26 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	if (((psig[0] == LittleEndian(0x46464952)) && (psig[2] == LittleEndian(0x45564157)))	// RIFF....WAVE signature
 	 || ((psig[0] == LittleEndian(0x5453494C)) && (psig[2] == LittleEndian(0x65766177)))	// LIST....wave
 	 || (psig[76/4] == LittleEndian(0x53524353))											// S3I signature
-	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == BigEndian(0x46464941)))			// AIFF signature
-	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == BigEndian(0x41494643)))			// AIFF-C signature
+	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == LittleEndian(0x46464941)))		// AIFF signature
+	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == LittleEndian(0x43464941)))			// AIFF-C signature
 	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == LittleEndian(0x58565338)))		// 8SVX signature
 	 || (psig[0] == LittleEndian(ITSample::magic))											// ITS signature
 	)
 	{
+		// Scanning free sample
+		SAMPLEINDEX nSample = GetNextFreeSample(nInstr);
+		if(nSample == SAMPLEINDEX_INVALID)
+		{
+			return false;
+		}
+		
 		// Loading Instrument
 
 		ModInstrument *pIns;
 
 		try
 		{
-			pIns = new ModInstrument();
+			pIns = new ModInstrument(nSample);
 		} catch(MPTMemoryException)
 		{
 			return false;
@@ -86,19 +93,17 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 		DestroyInstrument(nInstr, deleteAssociatedSamples);
 		Instruments[nInstr] = pIns;
 
-		// Scanning free sample
-		SAMPLEINDEX nSample = GetNextFreeSample(nInstr);
-		if(nSample == SAMPLEINDEX_INVALID)
-		{
-			return false;
-		} else if(nSample > GetNumSamples())
+		ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
+
+		if(nSample > GetNumSamples())
 		{
 			m_nSamples = nSample;
 		}
+		if(nInstr > GetNumInstruments())
+		{
+			m_nInstruments = nInstr;
+		}
 
-		Instruments[nInstr]->AssignSample(nSample);
-
-		ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
 		return true;
 	}
 	return false;
@@ -306,6 +311,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 	if(!wavFile.IsValid()
 		|| wavFile.GetNumChannels() == 0
 		|| wavFile.GetNumChannels() > 2
+		|| wavFile.GetBitsPerSample() == 0
 		|| wavFile.GetBitsPerSample() > 32
 		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat && wavFile.GetSampleFormat() != WAVFormatChunk::fmtIMA_ADPCM))
 	{
@@ -336,20 +342,13 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 	} else
 	{
 		// PCM / Float
+		static const SampleIO::Bitdepth bitDepth[] = { SampleIO::_8bit, SampleIO::_16bit, SampleIO::_24bit, SampleIO::_32bit };
+
 		SampleIO sampleIO(
-			SampleIO::_8bit,
+			bitDepth[(wavFile.GetBitsPerSample() - 1) / 8],
 			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
 			SampleIO::littleEndian,
 			(wavFile.GetBitsPerSample() > 8) ? SampleIO::signedPCM : SampleIO::unsignedPCM);
-
-		if(wavFile.GetBitsPerSample() <= 8)
-			sampleIO |= SampleIO::_8bit;
-		else if(wavFile.GetBitsPerSample() <= 16)
-			sampleIO |= SampleIO::_16bit;
-		else if(wavFile.GetBitsPerSample() <= 24)
-			sampleIO |= SampleIO::_24bit;
-		else if(wavFile.GetBitsPerSample() <= 32)
-			sampleIO |= SampleIO::_32bit;
 
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
 		{
@@ -1346,22 +1345,25 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	// Is this a proper sample?
 	if(sampleInfo.numSampleFrames == 0
-		|| sampleInfo.numChannels < 1 || sampleInfo.numChannels > 2
-		|| sampleInfo.sampleSize < 1 || sampleInfo.sampleSize > 32)
+		|| sampleInfo.numChannels == 0 || sampleInfo.numChannels > 2
+		|| sampleInfo.sampleSize == 0 || sampleInfo.sampleSize > 32)
 	{
 		return false;
 	}
 
 	// Read compression type in AIFF-C files.
 	uint8 compression[4] = { 'N', 'O', 'N', 'E' };
-	bool littleEndian = false;
+	SampleIO::Endianness endian = SampleIO::bigEndian;
 	if(fileHeader.type == AIFFHeader::idAIFC)
 	{
 		if(!commChunk.ReadArray(compression))
 		{
 			return false;
 		}
-		littleEndian = !memcmp(compression, "twos", 4);
+		if(!memcmp(compression, "twos", 4))
+		{
+			endian = SampleIO::littleEndian;
+		}
 	}
 
 	// Read SSND chunk
@@ -1373,33 +1375,12 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		return false;
 	}
 
-	SampleIO sampleIO(SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM);
-	if(littleEndian)
-	{
-		sampleIO |= SampleIO::littleEndian;
-	}
+	static const SampleIO::Bitdepth bitDepth[] = { SampleIO::_8bit, SampleIO::_16bit, SampleIO::_24bit, SampleIO::_32bit };
 
-	if(sampleInfo.numChannels == 2)
-	{
-		sampleIO |= SampleIO::stereoInterleaved;
-	}
-
-	if(sampleInfo.sampleSize <= 8)
-	{
-		sampleIO |= SampleIO::_8bit;
-	} else if(sampleInfo.sampleSize <= 16)
-	{
-		sampleIO |= SampleIO::_16bit;
-	} else if(sampleInfo.sampleSize <= 24)
-	{
-		sampleIO |= SampleIO::_24bit;
-	} else if(sampleInfo.sampleSize <= 32)
-	{
-		sampleIO |= SampleIO::_32bit;
-	} else
-	{
-		return false;
-	}
+	SampleIO sampleIO(bitDepth[(sampleInfo.sampleSize - 1) / 8],
+		(sampleInfo.numChannels == 2) ? SampleIO::stereoInterleaved : SampleIO::mono,
+		endian,
+		SampleIO::signedPCM);
 
 	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4))
 	{
@@ -1437,12 +1418,14 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 		if(instrHeader.sustainLoop.playMode != AIFFInstrumentLoop::noLoop)
 		{
-			mptSample.uFlags |= CHN_SUSTAINLOOP | (instrHeader.sustainLoop.playMode == AIFFInstrumentLoop::loopBidi ? CHN_PINGPONGSUSTAIN : 0);
+			mptSample.uFlags.set(CHN_SUSTAINLOOP);
+			mptSample.uFlags.set(CHN_PINGPONGSUSTAIN, instrHeader.sustainLoop.playMode == AIFFInstrumentLoop::loopBidi);
 		}
 
 		if(instrHeader.releaseLoop.playMode != AIFFInstrumentLoop::noLoop)
 		{
-			mptSample.uFlags |= CHN_LOOP | (instrHeader.releaseLoop.playMode == AIFFInstrumentLoop::loopBidi ? CHN_PINGPONGLOOP : 0);
+			mptSample.uFlags.set(CHN_LOOP);
+			mptSample.uFlags.set(CHN_PINGPONGLOOP, instrHeader.releaseLoop.playMode == AIFFInstrumentLoop::loopBidi);
 		}
 
 		// Read markers
@@ -1471,12 +1454,12 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		if(mptSample.nSustainStart >= mptSample.nSustainEnd)
 		{
 			mptSample.nSustainStart = mptSample.nSustainEnd = 0;
-			mptSample.uFlags &= ~CHN_SUSTAINLOOP;
+			mptSample.uFlags.reset(CHN_SUSTAINLOOP);
 		}
 		if(mptSample.nLoopStart >= mptSample.nLoopEnd)
 		{
 			mptSample.nLoopStart = mptSample.nLoopEnd = 0;
-			mptSample.uFlags &= ~CHN_LOOP;
+			mptSample.uFlags.reset(CHN_LOOP);
 		}
 	}
 
@@ -1734,7 +1717,7 @@ void ReadExtendedInstrumentProperty(ModInstrument* pIns, const int32 code, LPCBY
 void ReadExtendedInstrumentProperties(ModInstrument* pIns, const LPCBYTE pDataStart, const size_t nMemLength)
 //-----------------------------------------------------------------------------------------------------------
 {
-	if(pIns == 0 || pDataStart == 0 || nMemLength < 4)
+	if(pIns == nullptr || pDataStart == nullptr || nMemLength < 4)
 		return;
 
 	LPCBYTE pData = pDataStart;

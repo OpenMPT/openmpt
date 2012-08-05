@@ -223,7 +223,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, pSmp->filename);
 
 			sample.nC5Speed = pSmp->c2spd;
-			sample.uFlags = (WORD)((pSmp->flags & 1) ? CHN_LOOP : 0);
+			sample.uFlags.set(CHN_LOOP, (pSmp->flags & 1) != 0);
 			sample.nLength = pSmp->length;
 			sample.nLoopStart = pSmp->loopstart;
 			sample.nLoopEnd = pSmp->loopend;

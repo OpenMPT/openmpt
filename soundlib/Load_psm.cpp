@@ -143,7 +143,7 @@ struct PSMOldSampleHeader
 		mptSmp.nLoopEnd = loopEnd;	// Hmm... apparently we should add +1 for Extreme Pinball tunes here? See sample 8 in the medieval table music.
 		mptSmp.nPan = 128;
 		mptSmp.nVolume = (defaultVolume + 1) * 2;
-		mptSmp.uFlags = (flags & 0x80) ? CHN_LOOP : 0;
+		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
 	}
@@ -201,7 +201,7 @@ struct PSMNewSampleHeader
 		mptSmp.nLoopEnd = loopEnd;
 		mptSmp.nPan = 128;
 		mptSmp.nVolume = (defaultVolume + 1) * 2;
-		mptSmp.uFlags = (flags & 0x80) ? CHN_LOOP : 0;
+		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
 	}
@@ -1049,7 +1049,7 @@ struct PSM16SampleHeader
 		mptSmp.nVolume = volume << 2;
 		mptSmp.nGlobalVol = 256;
 
-		mptSmp.uFlags = 0;
+		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)
 		{
 			mptSmp.uFlags |= CHN_16BIT;

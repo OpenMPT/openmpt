@@ -17,19 +17,25 @@ struct ModSample
 	SmpLength nLoopStart, nLoopEnd;			// Dito
 	SmpLength nSustainStart, nSustainEnd;	// Dito
 	LPSTR pSample;							// Pointer to sample data
-	uint32 nC5Speed;						// Frequency of middle c, in Hz (for IT/S3M/MPTM)
+	uint32 nC5Speed;						// Frequency of middle-C, in Hz (for IT/S3M/MPTM)
 	uint16 nPan;							// Default sample panning (if pan flag is set)
 	uint16 nVolume;							// Default volume
 	uint16 nGlobalVol;						// Global volume (sample volume is multiplied by this)
-	uint16 uFlags;							// Sample flags
+	FlagSet<ChannelFlags, uint16> uFlags;	// Sample flags
 	int8   RelativeTone;					// Relative note to middle c (for MOD/XM)
 	int8   nFineTune;						// Finetune period (for MOD/XM)
 	uint8  nVibType;						// Auto vibrato type
 	uint8  nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
 	uint8  nVibDepth;						// Auto vibrato depth
 	uint8  nVibRate;						// Auto vibrato rate (speed)
-	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
+	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, the current structure size is 64 Bytes - would adding the sample name here slow down the mixer (cache misses)?
 	char filename [MAX_SAMPLEFILENAME];
+
+	ModSample(MODTYPE type = MOD_TYPE_NONE)
+	{
+		pSample = nullptr;
+		Initialize(type);
+	}
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const { return (uFlags & CHN_16BIT) ? 2 : 1; }
