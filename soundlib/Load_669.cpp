@@ -2,9 +2,9 @@
  * Load_669.cpp
  * ------------
  * Purpose: 669 Composer / UNIS 669 module loader
- * Notes  : (currently none)
+ * Notes  : <opinion humble="false">This is better than Schism's 669 loader</opinion> :)
+ *          (some of this code is "heavily inspired" by Storlek's code from Schism Tracker, and improvements have been made where necessary.)
  * Authors: Olivier Lapicque
- *          Adam Goode (endian and char fixes for PPC)
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -24,12 +24,12 @@ struct _669FileHeader
 	};
 
 	uint16 sig;					// 'if' or 'JN'
-	char   songmessage[108];	// Song Message
+	char   songMessage[108];	// Song Message
 	uint8  samples;				// number of samples (1-64)
 	uint8  patterns;			// number of patterns (1-128)
-	uint8  restartpos;
+	uint8  restartPos;
 	uint8  orders[128];
-	uint8  tempolist[128];
+	uint8  tempoList[128];
 	uint8  breaks[128];
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
@@ -40,6 +40,7 @@ struct _669FileHeader
 };
 
 STATIC_ASSERT(sizeof(_669FileHeader) == 497);
+
 
 struct _669Sample
 {
@@ -54,6 +55,30 @@ struct _669Sample
 		SwapBytesLE(length);
 		SwapBytesLE(loopStart);
 		SwapBytesLE(loopEnd);
+	}
+
+	// Convert a 669 sample header to OpenMPT's internal sample header.
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+
+		mptSmp.nLength = length;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+
+		if(mptSmp.nLoopEnd > mptSmp.nLength && mptSmp.nLoopStart == 0)
+		{
+			mptSmp.nLoopEnd = 0;
+		}
+		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
+		if(mptSmp.nLoopStart >= mptSmp.nLoopEnd)
+		{
+			mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
+		}
+		if(mptSmp.nLoopEnd != 0)
+		{
+			mptSmp.uFlags = CHN_LOOP;
+		}
 	}
 };
 
@@ -79,7 +104,7 @@ bool CSoundFile::Read669(FileReader &file)
 	}
 
 	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
-	if(fileHeader.samples > 64 || fileHeader.restartpos >= 128
+	if(fileHeader.samples > 64 || fileHeader.restartPos >= 128
 		|| fileHeader.patterns > 128)
 	{
 		return false;
@@ -89,50 +114,38 @@ bool CSoundFile::Read669(FileReader &file)
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nMinPeriod = 28 << 2;
 	m_nMaxPeriod = 1712 << 3;
-	m_nDefaultTempo = 125;
-	m_nDefaultSpeed = 6;
+	m_nDefaultTempo = 78;
+	m_nDefaultSpeed = 4;
 	m_nChannels = 8;
 
 	m_nSamples = fileHeader.samples;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
-		_669Sample sample;
-		if(!file.ReadConvertEndianness(sample))
+		_669Sample sampleHeader;
+		if(!file.ReadConvertEndianness(sampleHeader))
 		{
 			return false;
 		}
-
-		SmpLength len = sample.length;
-		SmpLength loopstart = sample.loopStart;
-		SmpLength loopend = sample.loopEnd;
-		if((loopend > len) && (!loopstart)) loopend = 0;
-		if(loopend > len) loopend = len;
-		if(loopstart + 4 >= loopend) loopstart = loopend = 0;
-		Samples[smp].nLength = len;
-		Samples[smp].nLoopStart = loopstart;
-		Samples[smp].nLoopEnd = loopend;
-		if(loopend) Samples[smp].uFlags |= CHN_LOOP;
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sample.filename);
-		Samples[smp].nVolume = 256;
-		Samples[smp].nGlobalVol = 64;
-		Samples[smp].nPan = 128;
+		sampleHeader.ConvertToMPT(Samples[smp]);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.filename);
 	}
 
 	// Copy first song message line into song title
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songmessage, 36);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songMessage, 36);
 	// Song Message
-	ReadFixedLineLengthMessage(reinterpret_cast<const BYTE *>(fileHeader.songmessage), 108, 36, 0);
+	ReadFixedLineLengthMessage(reinterpret_cast<const BYTE *>(fileHeader.songMessage), 108, 36, 0);
 
 	// Reading Orders
 	Order.ReadFromArray(fileHeader.orders);
-	m_nRestartPos = fileHeader.restartpos;
+	m_nRestartPos = fileHeader.restartPos;
 	if(Order[m_nRestartPos] >= fileHeader.patterns) m_nRestartPos = 0;
 
 	// Set up panning
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)
 	{
-		ChnSettings[chn].nPan = (chn & 1) ? 0x30 : 0xD0;
+		ChnSettings[chn].nPan = (chn & 1) ? 0xD0 : 0x30;
 		ChnSettings[chn].nVolume = 64;
+		ChnSettings[chn].dwFlags.reset();
 	}
 
 	// Reading Patterns
@@ -140,77 +153,122 @@ bool CSoundFile::Read669(FileReader &file)
 	{
 		if(Patterns.Insert(pat, 64))
 		{
+			file.Skip(64 * 8 * 3);
 			continue;
 		}
 
-		ModCommand *m = Patterns[pat];
+		vector<uint8> effect(8, 0xFF);
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			ModCommand *mspeed = m;
+			PatternRow m = Patterns[pat].GetRow(row);
 
-			for(CHANNELINDEX n = 0; n < 8; n++, m++)
+			for(CHANNELINDEX chn = 0; chn < 8; chn++, m++)
 			{
 				uint8 data[3];
-				if(!file.ReadArray(data))
-				{
-					break;
-				}
+				file.ReadArray(data);
 
 				uint8 note = data[0] >> 2;
 				uint8 instr = ((data[0] & 0x03) << 4) | (data[1] >> 4);
 				uint8 vol = data[1] & 0x0F;
-				if (data[0] < 0xFE)
+				if(data[0] < 0xFE)
 				{
 					m->note = note + 36 + NOTE_MIN;
 					m->instr = instr + 1;
+					effect[chn] = 0xFF;
 				}
-				if (data[0] <= 0xFE)
+				if(data[0] <= 0xFE)
 				{
 					m->volcmd = VOLCMD_VOLUME;
-					m->vol = (vol << 2) + 2;
+					m->vol = ((vol * 64 + 8) / 15);
 				}
-				if (data[2] != 0xFF)
+
+				if(data[2] != 0xFF)
 				{
-					uint8 command = data[2] >> 4;
-					uint8 param = data[2] & 0x0F;
-					switch(command)
-					{
-					case 0x00:	command = CMD_PORTAMENTOUP; break;
-					case 0x01:	command = CMD_PORTAMENTODOWN; break;
-					case 0x02:	command = CMD_TONEPORTAMENTO; break;
-					case 0x03:	command = CMD_MODCMDEX; param |= 0x50; break;
-					case 0x04:	command = CMD_VIBRATO; param |= 0x40; break;
-					case 0x05:	if (param) command = CMD_SPEED; else command = 0; param += 2; break;
-					case 0x06:	if (param == 0) { command = CMD_PANNINGSLIDE; param = 0xFE; } else
-								if (param == 1) { command = CMD_PANNINGSLIDE; param = 0xEF; } else
-								command = 0;
-								break;
-					default:	command = 0;
-					}
-					if (command)
-					{
-						if (command == CMD_SPEED) mspeed = NULL;
-						m->command = command;
-						m->param = param;
-					}
+					effect[chn] = data[2];
 				}
-			}
-			if ((!row) && (mspeed))
-			{
-				for (UINT i=0; i<8; i++) if (!mspeed[i].command)
+				if((data[2] & 0x0F) == 0 && data[2] != 0x30)
 				{
-					mspeed[i].command = CMD_SPEED;
-					mspeed[i].param = fileHeader.tempolist[pat] + 2;
+					// A param value of 0 resets the effect.
+					effect[chn] = 0xFF;
+				}
+				if(effect[chn] == 0xFF)
+				{
+					continue;
+				}
+
+				m->param = effect[chn] & 0x0F;
+
+				static const ModCommand::COMMAND effTrans[] =
+				{
+					CMD_PORTAMENTOUP,	CMD_PORTAMENTODOWN,	CMD_TONEPORTAMENTO,	CMD_PORTAMENTOUP,
+					CMD_ARPEGGIO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
+				};
+
+				if((effect[chn] >> 4) < CountOf(effTrans))
+				{
+					m->command = effTrans[effect[chn] >> 4];
+				} else
+				{
+					m->command = CMD_NONE;
+					continue;
+				}
+
+				// Fix some commands
+				switch(effect[chn] >> 4)
+				{
+				case 3:
+					// D - frequency adjust
+					if(m->param)
+					{
+						m->param |= 0xF0;
+					} else
+					{
+						// Restore original note
+						m->command = CMD_TONEPORTAMENTO;
+						m->param = 0xFF;
+					}
+					effect[chn] = 0xFF;
+					break;
+
+				case 4:
+					// E - frequency vibrato - sounds like an arpeggio, sometimes goes up, sometimes goes down,
+					// depending on when you restart playback? weird!
+					m->param |= (m->param << 4);
+					break;
+
+				case 5:
+					// F - set tempo
+					// TODO: param 0 is a "super fast tempo" in extended mode (?) 
+					effect[chn] = 0xFF;
+					break;
+
+				case 6:
+					// G - subcommands (extended)
+					switch(m->param)
+					{
+					case 0:
+						// balance fine slide left
+						m->param = 0x8F;
+						break;
+					case 1:
+						// balance fine slide right
+						m->param = 0xF8;
+						break;
+					default:
+						m->command = CMD_NONE;
+					}
 					break;
 				}
 			}
-
-			// Write pattern break
-			if(fileHeader.breaks[pat] < 63)
-			{
-				Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(fileHeader.breaks[pat]).Retry(EffectWriter::rmTryNextRow));
-			}
 		}
+
+		// Write pattern break
+		if(fileHeader.breaks[pat] < 63)
+		{
+			Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(fileHeader.breaks[pat]).Retry(EffectWriter::rmTryNextRow));
+		}
+		// And of course the speed...
+		Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, fileHeader.tempoList[pat]).Retry(EffectWriter::rmTryNextRow));
 	}
 
 	// Reading Samples
