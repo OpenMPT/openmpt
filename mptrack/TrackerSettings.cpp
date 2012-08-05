@@ -301,11 +301,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		rgbCustomColors[ncol] = CMainFrame::GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
 
-#ifndef NO_DSOUND
-	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND); // first DirectSound device
-#else
 	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first WaveOut device
-#endif // NO_DSOUND
 #ifndef NO_ASIO
 	// If there's an ASIO device available, prefer it over DirectSound
 	if(EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0))

@@ -21,7 +21,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		pModSample = nullptr;
 		pModInstrument = nullptr;
 		nPortamentoDest = 0;
-		nCommand = 0;
+		nCommand = CMD_NONE;
 		nPatternLoopCount = 0;
 		nPatternLoop = 0;
 		nFadeOutVol = 0;

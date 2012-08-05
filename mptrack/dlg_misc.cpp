@@ -212,13 +212,13 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.SetCheck(m_pSndFile->m_SongFlags[SONG_ITPEMBEDIH] ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
-	const DWORD allowedFlags = m_pSndFile->GetModSpecifications(type).songFlags;
-	m_CheckBox1.EnableWindow((allowedFlags & SONG_LINEARSLIDES) != 0);
-	m_CheckBox2.EnableWindow((allowedFlags & SONG_FASTVOLSLIDES) != 0);
-	m_CheckBox3.EnableWindow((allowedFlags & SONG_ITOLDEFFECTS) != 0);
-	m_CheckBox4.EnableWindow((allowedFlags & SONG_ITCOMPATGXX) != 0);
-	m_CheckBox5.EnableWindow((allowedFlags & SONG_EXFILTERRANGE) != 0);
-	m_CheckBoxPT1x.EnableWindow((allowedFlags & SONG_PT1XMODE) != 0);
+	const FlagSet<SongFlags> allowedFlags(m_pSndFile->GetModSpecifications(type).songFlags);
+	m_CheckBox1.EnableWindow(allowedFlags[SONG_LINEARSLIDES]);
+	m_CheckBox2.EnableWindow(allowedFlags[SONG_FASTVOLSLIDES]);
+	m_CheckBox3.EnableWindow(allowedFlags[SONG_ITOLDEFFECTS]);
+	m_CheckBox4.EnableWindow(allowedFlags[SONG_ITCOMPATGXX]);
+	m_CheckBox5.EnableWindow(allowedFlags[SONG_EXFILTERRANGE]);
+	m_CheckBoxPT1x.EnableWindow(allowedFlags[SONG_PT1XMODE]);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

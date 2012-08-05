@@ -506,7 +506,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_ADD_SOUNDBANK:		s="Add Sound &Bank...\t"; c = kcFileAddSoundBank; break;
 
 		case ID_PLAYER_PLAY:		s="Pause / &Resume\t"; c = kcPlayPauseSong; break;
-		case ID_PLAYER_PLAYFROMSTART:	s="&Play from start\t"; c = kcPlaySongFromStart; break;
+		case ID_PLAYER_PLAYFROMSTART:	s="&Play from Start\t"; c = kcPlaySongFromStart; break;
 		case ID_PLAYER_STOP:		s="&Stop\t"; c = kcStopSong; break;
 		case ID_PLAYER_PAUSE:		s="P&ause\t"; c = kcPauseSong; break;
 		case ID_MIDI_RECORD:		s="&MIDI Record\t"; c = kcMidiRecord; break;

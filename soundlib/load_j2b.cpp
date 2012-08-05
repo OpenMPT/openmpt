@@ -550,7 +550,7 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 //---------------------------------------------------------------------------------------
 {
 	// Effect translation LUT
-	static const uint8 amEffTrans[] =
+	static const ModCommand::COMMAND amEffTrans[] =
 	{
 		CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 		CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
