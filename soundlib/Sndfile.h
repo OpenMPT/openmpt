@@ -394,7 +394,8 @@ public:
 	bool ReadDMF(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAMF_Asylum(FileReader &file);
+	bool ReadAMF_DSMI(FileReader &file);
 	bool ReadMT2(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadPSM(FileReader &file);
 	bool ReadPSM16(FileReader &file);

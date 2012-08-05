@@ -1001,7 +1001,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 
-	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED))
+	if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED|MOD_TYPE_MOD))
 	{
 		note += pChn->nTranspose;
 		// RealNote = PatternNote + RelativeTone; (0..118, 0 = C-0, 118 = A#9)
@@ -1290,8 +1290,8 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 		// Copy Channel
 		*p = *pChn;
 		p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
-		p->nMasterChn = nChn+1;
-		p->nCommand = 0;
+		p->nMasterChn = nChn + 1;
+		p->nCommand = CMD_NONE;
 		// Cut the note
 		p->nFadeOutVol = 0;
 		p->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
@@ -1449,7 +1449,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 			p->dwFlags.set(pChn->dwFlags & (CHN_MUTE | CHN_NOFX));
 
 			p->nMasterChn = nChn + 1;
-			p->nCommand = 0;
+			p->nCommand = CMD_NONE;
 			//rewbs.VSTiNNA
 			if(applyNNAtoPlug && pPlugin)
 			{
@@ -1462,8 +1462,8 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 				case NNA_NOTECUT:
 				case NNA_NOTEFADE:
 					//switch off note played on this plugin, on this tracker channel and midi channel
-					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote+0xFF, 0, n);
-					pPlugin->MidiCommand(GetBestMidiChannel(nChn), pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
+					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
+					pPlugin->MidiCommand(GetBestMidiChannel(nChn), pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, /*pChn->nNote+*/NOTE_MAX_SPECIAL, 0, nChn);
 					break;
 				}
 			}
@@ -1568,7 +1568,7 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			pChn->ClearRowCmd();
 			instr = 0;
-			volcmd = 0;
+			volcmd = VOLCMD_NONE;
 			vol = 0;
 			cmd = 0;
 			param = 0;
@@ -4149,7 +4149,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
 				if (pPlug)
 				{
-					pPlug->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
+					pPlug->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, /*pChn->nNote+*/NOTE_MAX_SPECIAL, 0, nChn);
 				}
 			}
 		}
