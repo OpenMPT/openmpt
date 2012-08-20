@@ -4268,10 +4268,17 @@ void CViewPattern::MoveCursor(bool moveRight)
 	} else
 	{
 		// Move cursor one column to the right
-		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && (m_Cursor.CompareColumn(PatternCursor(0, GetDocument()->GetNumChannels() - 1, m_nDetailLevel)) >= 0))
+		const PatternCursor rightmost(0, GetDocument()->GetNumChannels() - 1, m_nDetailLevel);
+		if(m_Cursor.CompareColumn(rightmost) >= 0)
 		{
-			// Wrap around to first channel.
-			SetCurrentColumn(0);
+			if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP))
+			{
+				// Wrap around to first channel.
+				SetCurrentColumn(0);
+			} else
+			{
+				SetCurrentColumn(rightmost);
+			}
 		} else
 		{
 			do
@@ -4612,8 +4619,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 			pTarget->param = 0;
 		}
 	}
-	pTarget->instr = (bChordMode) ? 0 : ins; //p->instr = 0; 
-	//Writing the instrument as well - probably someone finds this annoying :)
+	pTarget->instr = 0;	// Instrument numbers next to note-offs can do all kinds of weird things in XM files, and they are pointless anyway.
 	pTarget->volcmd	= VOLCMD_NONE;
 	pTarget->vol = 0;
 
