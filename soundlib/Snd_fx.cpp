@@ -16,12 +16,9 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-#include "../mptrack/mptrack.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
-#include "../common/misc_util.h"
-// -! NEW_FEATURE#0022
+#endif // MODPLUG_TRACKER
 #include "tuning.h"
 
 #pragma warning(disable:4244)
@@ -750,7 +747,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 
 		// Default sample panning
-		if((pSmp->uFlags & CHN_PANNING) || (GetType() & MOD_TYPE_XM))
+		if(pSmp->uFlags[CHN_PANNING] || (GetType() & MOD_TYPE_XM))
 		{
 			pChn->nPan = pSmp->nPan;
 			// IT compatibility: Sample and instrument panning overrides channel surround status.
@@ -766,10 +763,10 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	// Reset envelopes
 	if (bResetEnv)
 	{
-		if (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
-		 || !pChn->nLength || (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
-		 // IT compatibility tentative fix: Reset envelopes when instrument changes.
-		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && instrumentChanged))
+		if(!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
+			|| !pChn->nLength || (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
+			// IT compatibility tentative fix: Reset envelopes when instrument changes.
+			|| (IsCompatibleMode(TRK_IMPULSETRACKER) && instrumentChanged))
 		{
 			pChn->dwFlags.set(CHN_FASTVOLRAMP);
 
@@ -1110,7 +1107,12 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 
-	pChn->dwFlags.reset(CHN_EXTRALOUD | CHN_KEYOFF);
+	// IT compatibility: Don't reset key-off flag on porta notes
+	// Test case: Off-Porta.it
+	if(IsCompatibleMode(TRK_IMPULSETRACKER) && bPorta)
+		pChn->dwFlags.reset(CHN_EXTRALOUD);
+	else
+		pChn->dwFlags.reset(CHN_EXTRALOUD | CHN_KEYOFF);
 
 	// Enable Ramping
 	if (!bPorta)
@@ -1225,7 +1227,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	// Special case for MPT
 	if (bManual) pChn->dwFlags.reset(CHN_MUTE);
 	if((pChn->dwFlags[CHN_MUTE] && (gdwSoundSetup & SNDMIX_MUTECHNMODE))
-		|| (pChn->pModSample != nullptr && (pChn->pModSample->uFlags & CHN_MUTE) && !bManual)
+		|| (pChn->pModSample != nullptr && pChn->pModSample->uFlags[CHN_MUTE] && !bManual)
 		|| (pChn->pModInstrument != nullptr && pChn->pModInstrument->dwFlags[INS_MUTE] && !bManual))
 	{
 		if (!bManual) pChn->nPeriod = 0;
@@ -1374,7 +1376,9 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 						//switch off duplicated note played on this plugin
 						IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug-1].pMixPlugin;
 						if(pPlugin && p->nNote != NOTE_NONE)
-							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_KEYOFF, 0, i);
+						{
+							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nLastNote + NOTE_MAX_SPECIAL, 0, i);
+						}
 						break;
 					}
 				}
@@ -1525,7 +1529,7 @@ BOOL CSoundFile::ProcessEffects()
 			const PlugParamIndex plugparam = ModCommand::GetValueVolCol(pChn->rowCommand.volcmd, pChn->rowCommand.vol);
 			const PlugParamValue value = ModCommand::GetValueEffectCol(pChn->rowCommand.command, pChn->rowCommand.param) / PlugParamValue(ModCommand::maxColumnValue);
 
-			if(plug > 0 && plug <= MAX_MIXPLUGINS && m_MixPlugins[plug-1].pMixPlugin)
+			if(plug > 0 && plug <= MAX_MIXPLUGINS && m_MixPlugins[plug - 1].pMixPlugin)
 				m_MixPlugins[plug-1].pMixPlugin->SetParameter(plugparam, value);
 		}
 
@@ -3485,7 +3489,7 @@ void CSoundFile::InvertLoop(ModChannel *pChn)
 
 	// we obviously also need a sample for this
 	ModSample *pModSample = pChn->pModSample;
-	if(pModSample == nullptr || pModSample->pSample == nullptr || !(pModSample->uFlags & CHN_LOOP) || (pModSample->uFlags & CHN_16BIT)) return;
+	if(pModSample == nullptr || pModSample->pSample == nullptr || !pModSample->uFlags[CHN_LOOP] || pModSample->uFlags[CHN_16BIT]) return;
 
 	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
 	if((pChn->nEFxDelay & 0x80) == 0) return; // only applied if the "delay" reaches 128
@@ -4173,9 +4177,9 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 	if (pChn->dwFlags[CHN_SUSTAINLOOP] && pChn->pModSample && bKeyOn)
 	{
 		const ModSample *pSmp = pChn->pModSample;
-		if(pSmp->uFlags & CHN_LOOP)
+		if(pSmp->uFlags[CHN_LOOP])
 		{
-			if (pSmp->uFlags & CHN_PINGPONGLOOP)
+			if (pSmp->uFlags[CHN_PINGPONGLOOP])
 				pChn->dwFlags.set(CHN_PINGPONGLOOP);
 			else
 				pChn->dwFlags.reset(CHN_PINGPONGLOOP | CHN_PINGPONGFLAG);
@@ -4207,7 +4211,7 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
-			pChn->VolEnv.nEnvValueAtReleaseJump = Util::Round<LONG>(pIns->VolEnv.GetValueFromPosition(pChn->VolEnv.nEnvPosition) * 256.0f);
+			pChn->VolEnv.nEnvValueAtReleaseJump = Util::Round<int32>(pIns->VolEnv.GetValueFromPosition(pChn->VolEnv.nEnvPosition) * 256.0f);
 			pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
@@ -4304,7 +4308,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER | TRK_SCREAMTRACKER))
 			{
 				ModChannel *p = Chn;
-				for (CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++) if (p != pChn)
+				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++) if (p != pChn)
 				{
 					// Loop already done
 					if (p->nPatternLoopCount) return ROWINDEX_INVALID;
@@ -4610,7 +4614,7 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 	PLUGINDEX plug = 0;
 	if(Chn[nChn].pModInstrument != nullptr)
 	{
-		if (respectMutes == RespectMutes && Chn[nChn].pModSample && (Chn[nChn].pModSample->uFlags & CHN_MUTE))
+		if (respectMutes == RespectMutes && Chn[nChn].pModSample && Chn[nChn].pModSample->uFlags[CHN_MUTE])
 		{
 			plug = 0;
 		} else
@@ -4691,6 +4695,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 	}
 
 	// Channel mutes
+#ifdef MODPLUG_TRACKER
 	for (CHANNELINDEX chan = 0; chan < GetNumChannels(); chan++)
 	{
 		if (m_bChannelMuteTogglePending[chan])
@@ -4702,6 +4707,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 			m_bChannelMuteTogglePending[chan] = false;
 		}
 	}
+#endif // MODPLUG_TRACKER
 
 	m_bPatternTransitionOccurred = false;
 }
