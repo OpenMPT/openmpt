@@ -1107,9 +1107,9 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 
-	// IT compatibility: Don't reset key-off flag on porta notes
-	// Test case: Off-Porta.it
-	if(IsCompatibleMode(TRK_IMPULSETRACKER) && bPorta)
+	// IT compatibility: Don't reset key-off flag on porta notes unless Compat Gxx is enabled
+	// Test case: Off-Porta.it, Off-Porta-CompatGxx.it
+	if(IsCompatibleMode(TRK_IMPULSETRACKER) && bPorta && !m_SongFlags[SONG_ITCOMPATGXX])
 		pChn->dwFlags.reset(CHN_EXTRALOUD);
 	else
 		pChn->dwFlags.reset(CHN_EXTRALOUD | CHN_KEYOFF);
@@ -1157,13 +1157,13 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 					if (pIns->nVolSwing)
 					{
 						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-						pChn->nVolSwing = (LONG)std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0);
+						pChn->nVolSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
 					}
 					// Pan Swing
 					if (pIns->nPanSwing)
 					{
 						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-						pChn->nPanSwing = (LONG)std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing);
+						pChn->nPanSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing));
 						if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
 							pChn->nRestorePanOnNewNote = pChn->nPan + 1;
@@ -1172,15 +1172,15 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 					// Cutoff Swing
 					if (pIns->nCutSwing)
 					{
-						int d = ((LONG)pIns->nCutSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nCutSwing = (signed short)((d * pChn->nCutOff + 1) / 128);
+						int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+						pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
 						pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 					}
 					// Resonance Swing
 					if (pIns->nResSwing)
 					{
-						int d = ((LONG)pIns->nResSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1) / 128);
+						int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+						pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
 						pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 					}
 				}
@@ -2902,7 +2902,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
 		{
-			LONG delta = (int)pChn->nPortamentoSlide;
+			int32 delta = pChn->nPortamentoSlide;
 			if(m_SongFlags[SONG_LINEARSLIDES] && !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
 			{
 				UINT n = pChn->nPortamentoSlide >> 2;
@@ -2917,7 +2917,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 		} else
 		if (pChn->nPeriod > pChn->nPortamentoDest)
 		{
-			LONG delta = - (int)pChn->nPortamentoSlide;
+			int32 delta = -pChn->nPortamentoSlide;
 			if(m_SongFlags[SONG_LINEARSLIDES] && !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 			{
 				UINT n = pChn->nPortamentoSlide >> 2;
@@ -3043,7 +3043,6 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 void CSoundFile::PanningSlide(ModChannel *pChn, UINT param)
 //---------------------------------------------------------
 {
-	LONG nPanSlide = 0;
 	if (param)
 		pChn->nOldPanSlide = param;
 	else
@@ -3060,6 +3059,8 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param)
 			param &= 0x0F;
 		}
 	}
+
+	int32 nPanSlide = 0;
 
 	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM))
 	{
@@ -4032,7 +4033,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			pChn->dwFlags.set(CHN_FASTVOLRAMP);
 		}
 		UINT nNote = pChn->nNewNote;
-		LONG nOldPeriod = pChn->nPeriod;
+		int32 nOldPeriod = pChn->nPeriod;
 		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, TRUE);
 		bool bResetEnv = false;
 		if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
@@ -4080,7 +4081,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide)
 	if (!pChn->nPeriod) return;
 	if(m_SongFlags[SONG_LINEARSLIDES] && !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
 	{
-		LONG nOldPeriod = pChn->nPeriod;
+		int32 nOldPeriod = pChn->nPeriod;
 		if (nFreqSlide < 0)
 		{
 			UINT n = (- nFreqSlide) >> 2;
@@ -4518,7 +4519,7 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 //-----------------------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (m_nType & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
+	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
 	{
 		return (3546895L*4) / period;
 	} else
