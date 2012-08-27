@@ -1083,7 +1083,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 
 	if (!bPorta || (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		|| (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
-		|| (m_SongFlags[SONG_ITCOMPATGXX] && (pChn->rowCommand.instr)))
+		|| (m_SongFlags[SONG_ITCOMPATGXX] && pChn->rowCommand.instr != 0))
 	{
 		if((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
 		{
@@ -1109,7 +1109,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 
 	// IT compatibility: Don't reset key-off flag on porta notes unless Compat Gxx is enabled
 	// Test case: Off-Porta.it, Off-Porta-CompatGxx.it
-	if(IsCompatibleMode(TRK_IMPULSETRACKER) && bPorta && !m_SongFlags[SONG_ITCOMPATGXX])
+	if(IsCompatibleMode(TRK_IMPULSETRACKER) && bPorta && (!m_SongFlags[SONG_ITCOMPATGXX] || pChn->rowCommand.instr == 0))
 		pChn->dwFlags.reset(CHN_EXTRALOUD);
 	else
 		pChn->dwFlags.reset(CHN_EXTRALOUD | CHN_KEYOFF);
