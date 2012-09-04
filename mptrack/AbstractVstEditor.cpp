@@ -143,10 +143,9 @@ VOID CAbstractVstEditor::OnSavePreset()
 VOID CAbstractVstEditor::OnRandomizePreset()
 //-----------------------------------------
 {
-	if (m_pVstPlugin)
+	if(m_pVstPlugin && Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", false, false, this) == cnfYes)
 	{
-		if (Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.") == cnfYes)
-			m_pVstPlugin->RandomizeParams();
+		m_pVstPlugin->RandomizeParams();
 		UpdateParamDisplays();
 	}
 }
@@ -534,7 +533,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 void CAbstractVstEditor::UpdateOutputMenu()
 //-----------------------------------------
 {
- 	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
+	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(1, MF_BYPOSITION);
 
 	if (m_pOutputMenu->m_hMenu)
