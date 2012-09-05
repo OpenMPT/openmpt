@@ -144,6 +144,7 @@ BOOL COrderList::Init(const CRect &rect, CCtrlPatterns *pParent, CModDoc *pModDo
 	m_pModDoc = pModDoc;
 	m_hFont = hFont;
 	colorText = GetSysColor(COLOR_WINDOWTEXT);
+	colorInvalid = GetSysColor(COLOR_GRAYTEXT);
 	colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 	SetScrollPos(SB_HORZ, 0);
@@ -870,7 +871,14 @@ void COrderList::OnPaint()
 				else if (nPat < pSndFile->Patterns.Size()) wsprintf(s, "%u", nPat);
 				else strcpy(s, "???");
 			}
-			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
+
+			const COLORREF &textCol =
+				(bHighLight
+					? colorTextSel			// Highlighted pattern
+					: (pSndFile->Patterns.IsValidPat(nPat)
+						? colorText			// Normal pattern
+						: colorInvalid));	// Non-existent pattern
+			dc.SetTextColor(textCol);
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			rect.left += m_cxFont;
 			nIndex++;
