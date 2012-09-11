@@ -132,7 +132,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file)
 			file.ReadArray(data);
 
 			p->note = NOTE_NONE;
-			if(data[0])
+			if(data[0] && data[0] + 12 + NOTE_MIN <= NOTE_MAX)
 			{
 				p->note = data[0] + 12 + NOTE_MIN;
 			}

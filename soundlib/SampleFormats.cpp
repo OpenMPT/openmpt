@@ -1857,7 +1857,7 @@ bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 				if (len > 4)
 				{
 					sample.nLength = len;
-					if ((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd < sample.nLength)) sample.uFlags |= CHN_LOOP;
+					if ((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags |= CHN_LOOP;
 
 					SampleIO(
 						SampleIO::_8bit,
