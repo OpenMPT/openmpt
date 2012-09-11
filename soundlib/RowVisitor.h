@@ -55,7 +55,7 @@ public:
 	// Returns whether a given row has been visited yet.
 	// If autoSet is true, the queried row will automatically be marked as visited.
 	// Use this parameter instead of consecutive IsRowVisited / SetRowVisited calls.
-	bool IsVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool autoSet);
+	bool IsVisited(ORDERINDEX order, ROWINDEX row, bool autoSet);
 
 	// Get the needed vector size for a given pattern.
 	size_t GetVisitedRowsVectorSize(PATTERNINDEX pattern) const;
@@ -77,6 +77,6 @@ protected:
 	// (Un)sets a given row as visited.
 	// order, row - which row should be (un)set
 	// If visited is true, the row will be set as visited.
-	void SetVisited(ORDERINDEX nOrd, ROWINDEX nRow, bool visited);
+	void SetVisited(ORDERINDEX order, ROWINDEX row, bool visited);
 
 };

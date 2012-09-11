@@ -11,13 +11,7 @@
 
 #include "stdafx.h"
 
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-#include "../mptrack/mptrack.h"
-#include "../mptrack/moddoc.h"
-#include "../mptrack/MainFrm.h"
-#include "../common/misc_util.h"
-// -! NEW_FEATURE#0022
+#include "../mptrack/MainFrm.h"	// TODO: Mix Settings shouldn't require CMainFrame
 #include "sndfile.h"
 #include "MIDIEvents.h"
 #include "tuning.h"
@@ -879,7 +873,7 @@ BOOL CSoundFile::ProcessRow()
 			pChn->nLeftVol = pChn->nNewLeftVol;
 			pChn->nRightVol = pChn->nNewRightVol;
 			pChn->dwFlags.reset(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
-			pChn->nCommand = 0;
+			pChn->nCommand = CMD_NONE;
 			pChn->m_plugParamValueStep = 0;
 		}
 
@@ -1330,7 +1324,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		{
 			// Limit to last envelope point
 			start = end = insEnv.Ticks[insEnv.nNodes - 1];
-			if (position > end)
+			if(position > end)
 			{
 				// Env of envelope
 				endReached = true;

@@ -1068,7 +1068,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
 		// Time + stuff
 		uint32 duration = (uint32)((double)(hist->openTime) / HISTORY_TIMER_PRECISION);
-		s.AppendFormat(_T("Loaded %s, open in the editor for %luh %02lum %02lus\r\n"),
+		s.AppendFormat(_T("Loaded %s, open for %luh %02lum %02lus\r\n"),
 			szDate, duration / 3600, (duration / 60) % 60, duration % 60);
 	}
 	if(num == 0)
