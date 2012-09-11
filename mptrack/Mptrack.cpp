@@ -718,6 +718,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 {
 	if(GetModuleFileName(NULL, m_szExePath, CountOf(m_szExePath)))
 	{
+		StringFixer::SetNullTerminator(m_szExePath);
 		TCHAR szDrive[_MAX_DRIVE] = "", szDir[_MAX_PATH] = "";
 		_splitpath(m_szExePath, szDrive, szDir, NULL, NULL);
 		strcpy(m_szExePath, szDrive);
@@ -1576,7 +1577,11 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str);
+	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str
+#if (MPT_VERSION_NUMERIC & 0xFF) != 0
+		+ CString(" (Test Build)")
+#endif
+		);
 
 	m_heContact.SetWindowText(
 		"Contact / Discussion:\r\n"

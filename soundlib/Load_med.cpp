@@ -672,7 +672,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			{
 				MMD2PLAYSEQ *pmps = (MMD2PLAYSEQ *)(lpStream + pseq);
 				if (!m_szNames[0][0]) memcpy(m_szNames[0], pmps->name, 31);
-				UINT n = BigEndianW(pmps->length);
+				uint16 n = BigEndianW(pmps->length);
 				if (pseq+n <= dwMemLength)
 				{
 					Order.resize(nOrders + n);
@@ -775,7 +775,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	#ifdef MED_LOG
 		Log("SampleData %d: stype=0x%02X len=%d\n", iSmp, BigEndianW(psdh->type), len);
 	#endif
-		if ((len > MAX_SAMPLE_LENGTH) || (dwPos + len + 6 > dwMemLength)) len = 0;
+		if(dwPos + len + 6 > dwMemLength) len = 0;
 		UINT stype = BigEndianW(psdh->type);
 		LPSTR psdata = (LPSTR)(lpStream + dwPos + 6);
 

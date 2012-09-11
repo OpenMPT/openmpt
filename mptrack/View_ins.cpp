@@ -531,7 +531,7 @@ bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable) const
 //---------------------------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
+	if(envelope == nullptr || envelope->nNodes == 0) return false;
 
 	bool modified = envelope->dwFlags[flag] != enable;
 	envelope->dwFlags.set(flag, enable);
