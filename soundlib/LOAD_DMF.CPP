@@ -195,6 +195,70 @@ uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
 }
 
 
+// Try using effect memory (zero paramer) to give the effect swapper some optimization hints.
+void ApplyEffectMemory(const ModCommand *m, ROWINDEX row, CHANNELINDEX numChannels, uint8 effect, uint8 &param)
+//-------------------------------------------------------------------------------------------------------------
+{
+	if(effect == CMD_NONE || param == 0)
+	{
+		return;
+	}
+
+	const bool isTonePortaEffect = (effect == CMD_PORTAMENTOUP || effect == CMD_PORTAMENTODOWN || effect == CMD_TONEPORTAMENTO);
+	const bool isVolSlideEffect = (effect == CMD_VOLUMESLIDE || effect == CMD_TONEPORTAVOL || effect == CMD_VIBRATOVOL);
+
+	while(row > 0)
+	{
+		m -= numChannels;
+		row--;
+
+		// First, keep some extra rules in mind for portamento, where effect memory is shared between various commands.
+		bool isSame = (effect == m->command);
+		if(isTonePortaEffect && (m->command == CMD_PORTAMENTOUP || m->command == CMD_PORTAMENTODOWN || m->command == CMD_TONEPORTAMENTO))
+		{
+			if(m->param < 0xE0)
+			{
+				// Avoid effect param for fine slides, or else we could accidentally put this command in the volume column, where fine slides won't work!
+				isSame = true;
+			} else
+			{
+				return;
+			}
+		} else if(isVolSlideEffect && (m->command == CMD_VOLUMESLIDE || m->command == CMD_TONEPORTAVOL || m->command == CMD_VIBRATOVOL))
+		{
+			isSame = true;
+		}
+		if(isTonePortaEffect
+			&& (m->volcmd == VOLCMD_PORTAUP || m->volcmd == VOLCMD_PORTADOWN || m->volcmd == VOLCMD_TONEPORTAMENTO)
+			&& m->vol != 0)
+		{
+			// Uuh... Don't even try
+			return;
+		} else if(isVolSlideEffect
+			&& (m->volcmd == VOLCMD_FINEVOLUP || m->volcmd == VOLCMD_FINEVOLDOWN || m->volcmd == VOLCMD_VOLSLIDEUP || m->volcmd == VOLCMD_VOLSLIDEDOWN)
+			&& m->vol != 0)
+		{
+			// Same!
+			return;
+		}
+
+		if(isSame)
+		{
+			if(param != m->param && m->param != 0)
+			{
+				// No way to optimize this
+				return;
+			} else if(param == m->param)
+			{
+				// Yay!
+				param = 0;
+				return;
+			}
+		}
+	}
+}
+
+
 PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, DMF_PATTERNSETTINGS &settings, CSoundFile *pSndFile)
 //----------------------------------------------------------------------------------------------------------------------------------
 {
@@ -427,6 +491,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 
 				uint8 effect1 = CMD_NONE, effect2 = CMD_NONE, effect3 = CMD_NONE;
 				uint8 effectParam1 = 0, effectParam2 = 0, effectParam3 = 0;
+				bool useMem2 = false, useMem3 = false;	// Effect can use memory if necessary
 
 				////////////////////////////////////////////////////////////////
 				// 0x10: Volume
@@ -532,14 +597,17 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						{
 							effect2 = CMD_NONE;
 						}
+						useMem2 = true;
 						break;
 					case 3:		// Arpeggio
 						effect2 = CMD_ARPEGGIO;
+						useMem2 = true;
 						break;
 					case 4:		// Portamento Up
 					case 5:		// Portamento Down
 						effectParam2 = DMFporta2MPT(effectParam2, settings.internalTicks, true);
 						effect2 = static_cast<ModCommand::COMMAND>(effect2 == 4 ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
+						useMem2 = true;
 						break;
 					case 6:		// Portamento to Note
 						if(m->note == NOTE_NONE)
@@ -548,11 +616,13 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						}
 						effectParam2 = DMFporta2MPT(effectParam2, settings.internalTicks, false);
 						effect2 = CMD_TONEPORTAMENTO;
+						useMem2 = true;
 						break;
 					case 7:		// Scratch to Note (neat! but we don't have such an effect...)
 						m->note = CLAMP(effectParam2 + 25, NOTE_MIN, NOTE_MAX);
 						effect2 = CMD_TONEPORTAMENTO;
 						effectParam2 = 0xFF;
+						useMem2 = true;
 						break;
 					case 8:		// Vibrato Sine
 					case 9:		// Vibrato Triangle (ramp down should be close enough)
@@ -564,10 +634,12 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						}
 						effect2 = CMD_VIBRATO;
 						effectParam2 = DMFvibrato2MPT(effectParam2, settings.internalTicks);
+						useMem2 = true;
 						break;
 					case 11:	 // Note Tremolo
 						effectParam2 = DMFtremor2MPT(effectParam2, settings.internalTicks);
 						effect2 = CMD_TREMOR;
+						useMem2 = true;
 						break;
 					case 12:	// Note Cut
 						effectParam2 = DMFdelay2MPT(effectParam2, settings.internalTicks);
@@ -580,6 +652,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 							effect2 = CMD_NONE;
 							m->note = NOTE_NOTECUT;
 						}
+						useMem2 = true;
 						break;
 					default:
 						effect2 = CMD_NONE;
@@ -601,10 +674,12 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					case 2:		// Volume Slide Down
 						effectParam3 = DMFslide2MPT(effectParam3, settings.internalTicks, (effect3 == 1));
 						effect3 = CMD_VOLUMESLIDE;
+						useMem3 = true;
 						break;
 					case 3:		// Volume Tremolo (actually this is Tremor)
 						effectParam3 = DMFtremor2MPT(effectParam3, settings.internalTicks);
 						effect3 = CMD_TREMOR;
+						useMem3 = true;
 						break;
 					case 4:		// Tremolo Sine
 					case 5:		// Tremolo Triangle (ramp down should be close enough)
@@ -616,6 +691,7 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 						}
 						effect3 = CMD_TREMOLO;
 						effectParam3 = DMFvibrato2MPT(effectParam3, settings.internalTicks);
+						useMem3 = true;
 						break;
 					case 7:		// Set Balance
 						effect3 = CMD_PANNING8;
@@ -624,15 +700,27 @@ PATTERNINDEX ConvertDMFPattern(const LPCBYTE lpStream, const DWORD dwMemLength, 
 					case 9:		// Slide Balance Right
 						effectParam3 = DMFslide2MPT(effectParam3, settings.internalTicks, (effect3 == 8));
 						effect3 = CMD_PANNINGSLIDE;
+						useMem3 = true;
 						break;
 					case 10:	// Balance Vibrato Left/Right (always sine modulated)
 						effect3 = CMD_PANBRELLO;
 						effectParam3 = DMFvibrato2MPT(effectParam3, settings.internalTicks);
+						useMem3 = true;
 						break;
 					default:
 						effect3 = CMD_NONE;
 						break;
 					}
+				}
+
+				// Let's see if we can help the effect swapper by reducing some effect parameters to "continue" parameters.
+				if(useMem2)
+				{
+					ApplyEffectMemory(m, nRow, pSndFile->GetNumChannels(), effect2, effectParam2);
+				}
+				if(useMem3)
+				{
+					ApplyEffectMemory(m, nRow, pSndFile->GetNumChannels(), effect3, effectParam3);
 				}
 
 				// I guess this is close enough to "not retriggering the note"

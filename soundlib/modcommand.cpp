@@ -853,8 +853,9 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 	case CMD_VIBRATO:
 		if(force)
 			param = min(param & 0x0F, 9);
-		else if((param & 0x0F) > 9)
+		else if((param & 0x0F) > 9 || (param & 0xF0) != 0)
 			return false;
+		param &= 0x0F;
 		effect = VOLCMD_VIBRATODEPTH;
 		break;
 	case CMD_FINEVIBRATO:
