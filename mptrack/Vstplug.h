@@ -104,10 +104,10 @@ struct VSTPluginLib
 
 struct VSTInstrChannel
 {
-	//BYTE uNoteOnMap[128/8];			rewbs.deMystifyMidiNoteMap
+	int32 midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
+	uint16 currentProgram;
+	uint16 currentBank; //rewbs.MidiBank
 	uint8 uNoteOnMap[128][MAX_CHANNELS];
-	uint32 nProgram;
-	uint16 wMidiBank; //rewbs.MidiBank
 };
 
 
@@ -130,11 +130,12 @@ protected:
 		// Number of MIDI events that can be sent to a plugin at once (the internal queue is not affected by this number, it can hold any number of events)
 		vstNumProcessEvents = 256,
 
-		vstPitchBendMask	= 0x7FFF,
-		vstVibratoFlag		= 0x8000,
+		// Pitch wheel constants
+		vstPitchBendShift	= 12,		// Use lowest 12 bits for fractional part and vibrato flag => 16.11 fixed point precision
+		vstPitchBendMask	= (~1),
+		vstVibratoFlag		= 1,
 	}; 
 
-	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
 	VSTPluginLib *m_pFactory;
@@ -142,30 +143,26 @@ protected:
 	AEffect *m_pEffect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
-	static const UINT nInvalidSampleRate = UINT_MAX;
-	UINT m_nSampleRate;
-	bool m_bIsVst2;
-	SNDMIXPLUGINSTATE m_MixState;
-	UINT m_nInputs, m_nOutputs;
-	VSTInstrChannel m_MidiCh[16];
-	int16 m_nMidiPitchBendPos[16];		// Current pitch wheel depth. Highest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
+	CModDoc *m_pModDoc;			 //rewbs.plugDocAware
+	CSoundFile *m_pSndFile;			 //rewbs.plugDocAware
 
-	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
-	CSoundFile* m_pSndFile;			 //rewbs.plugDocAware
-//	PSNDMIXPLUGIN m_pSndMixPlugin;	 //rewbs.plugDocAware
-	static const UINT nInvalidMidiChan = UINT_MAX;
-	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
+	size_t m_nRefCount;
+	static const uint32 nInvalidSampleRate = UINT_MAX;
+	uint32 m_nSampleRate;
+	SNDMIXPLUGINSTATE m_MixState;
+	uint32 m_nInputs, m_nOutputs;
+	int32 m_nEditorX, m_nEditorY;
+
+	float m_fGain;
+	PLUGINDEX m_nSlot;
 	bool m_bSongPlaying; //rewbs.VSTCompliance
 	bool m_bPlugResumed; //rewbs.VSTCompliance
-	bool m_bModified;
-	PLUGINDEX m_nSlot;
-	float m_fGain;
+	bool m_bIsVst2;
 	bool m_bIsInstrument;
 
-	int m_nEditorX, m_nEditorY;
-
+	VSTInstrChannel m_MidiCh[16];						// MIDI channel state
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
-	int m_MixBuffer[MIXBUFFERSIZE * 2 + 2];				// Stereo interleaved
+	int32 m_MixBuffer[MIXBUFFERSIZE * 2 + 2];			// Stereo interleaved
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:
@@ -187,7 +184,6 @@ public:
 	VstInt32 GetVersion();		//rewbs.VSTpresets
 	bool GetParams(float* param, VstInt32 min, VstInt32 max); 	//rewbs.VSTpresets
 	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0); 	//rewbs.VSTpresets
-	bool isModified() {return m_bModified;}
 	inline CModDoc* GetModDoc() {return m_pModDoc;}
 	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
 	PLUGINDEX FindSlot();
@@ -214,12 +210,11 @@ public:
 	BOOL GetDefaultEffectName(LPSTR pszName);
 	BOOL GetCommandName(UINT index, LPSTR pszName);
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
-	bool GetSpeakerArrangement(); //rewbs.VSTCompliance
 
 	void Bypass(bool bypass = true);
 	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); };
 
-	bool isInstrument(); // ericus 18/02/2005
+	bool isInstrument();
 	bool CanRecieveMidiEvents();
 
 	size_t GetOutputPlugList(vector<CVstPlugin *> &list);
@@ -228,8 +223,8 @@ public:
 	size_t GetInputChannelList(vector<CHANNELINDEX> &list);
 
 public:
-	int AddRef() { return ++m_nRefCount; }
-	int Release();
+	size_t AddRef() { return ++m_nRefCount; }
+	size_t Release();
 	void SaveAllParameters();
 	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param 
 	void RecalculateGain();
@@ -237,8 +232,8 @@ public:
 	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);
 	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
-	void MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX trackChannel);
-	void MidiVibrato(uint8 nMidiCh, int16 depth);
+	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);
+	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);
 	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
@@ -260,10 +255,14 @@ public:
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 
-	VstSpeakerArrangement speakerArrangement;  //rewbs.VSTcompliance
-
 private:
-	void MidiPitchBend(uint8 nMidiCh, int16 pitchBendPos);
+	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
+	// Converts a 14-bit MIDI pitch bend position to a 16.11 fixed point pitch bend position
+	static int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
+	// Converts a 16.11 fixed point pitch bend position to a 14-bit MIDI pitch bend position
+	static int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
+	// Apply Pitch Wheel Depth (PWD) to some MIDI pitch bend value.
+	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
 
 	bool GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text);	//rewbs.VSTpresets
 

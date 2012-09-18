@@ -2667,7 +2667,13 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 	int actualParam = abs(param);
 	int pitchBend = 0;
 
-	if(doFineSlides && actualParam >= 0xE0)
+	// Old MIDI Pitch Bends:
+	// - Applied on every tick
+	// - No fine pitch slides (they are interpreted as normal slides)
+	// New MIDI Pitch Bends:
+	// - Behaviour identical to sample pitch bends if the instrument's PWD parameter corresponds to the actual VSTi setting.
+
+	if(doFineSlides && actualParam >= 0xE0 && !GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
 	{
 		if(m_SongFlags[SONG_FIRSTTICK])
 		{
@@ -2679,7 +2685,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 				pitchBend *= 4;
 			}
 		}
-	} else
+	} else if(!m_SongFlags[SONG_FIRSTTICK] || GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
 	{
 		// Regular slide
 		pitchBend = param * 4;
@@ -2690,7 +2696,12 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 		if(plugin != nullptr)
 		{
-			plugin->MidiPitchBend(GetBestMidiChannel(nChn), pitchBend, 0);
+			int8 pwd = 13;	// Early OpenMPT legacy... Actually it's not *exactly* 13, but close enough...
+			if(Chn[nChn].pModInstrument != nullptr)
+			{
+				pwd = Chn[nChn].pModInstrument->midiPWD;
+			}
+			plugin->MidiPitchBend(GetBestMidiChannel(nChn), pitchBend, pwd);
 		}
 	}
 }

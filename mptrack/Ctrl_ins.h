@@ -90,10 +90,10 @@ class CCtrlInstruments: public CModControlDlg
 protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
-	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK;
-	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug, m_CbnResampling, m_CbnFilterMode, m_CbnPluginVelocityHandling, m_CbnPluginVolumeHandling;
+	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK, pwdSpin;
+	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug, m_CbnResampling, m_CbnFilterMode, m_CbnPluginVolumeHandling;
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditPPS, m_EditFadeOut;
-	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance;
+	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance, velocityStyle;
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
 		        m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
@@ -174,6 +174,7 @@ protected:
 	afx_msg void OnFilterModeChanged();
 	afx_msg void OnPluginVelocityHandlingChanged();
 	afx_msg void OnPluginVolumeHandlingChanged();
+	afx_msg void OnPitchWheelDepthChanged();
 
 
 // -> CODE#0027

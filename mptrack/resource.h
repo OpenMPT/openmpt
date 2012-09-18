@@ -819,6 +819,7 @@
 #define IDC_CHK_MIDICCBUG               2322
 #define IDC_CHK_OLDRANDOM               2323
 #define IDC_CHECKCAPTURE                2324
+#define IDC_CHK_OLDPITCH                2324
 #define IDC_SPINMOVEMAPPING             2325
 #define IDC_BUTTON_HALF                 2326
 #define IDC_BUTTON_DOUBLE               2327
@@ -936,6 +937,7 @@
 #define IDC_RESTORE_KEYMAP              2436
 #define IDC_SAMPLE_AUTOTUNE             2437
 #define IDC_FIND                        2438
+#define IDC_PITCHWHEELDEPTH             2439
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1213,7 +1215,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        535
 #define _APS_NEXT_COMMAND_VALUE         44605
-#define _APS_NEXT_CONTROL_VALUE         2439
+#define _APS_NEXT_CONTROL_VALUE         2440
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

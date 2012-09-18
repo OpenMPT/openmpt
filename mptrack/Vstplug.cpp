@@ -1311,7 +1311,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
 	m_pModDoc = nullptr; //rewbs.plugDocAware
-	m_nPreviousMidiChan = nInvalidMidiChan; //rewbs.VSTCompliance
 	m_pProcessFP = nullptr;
 
 	// Insert ourselves in the beginning of the list
@@ -1333,13 +1332,12 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 
 	m_bSongPlaying = false; //rewbs.VSTCompliance
 	m_bPlugResumed = false;
-	m_bModified = false;
 	m_nSampleRate = nInvalidSampleRate; //rewbs.VSTCompliance: gets set on Resume()
 	MemsetZero(m_MidiCh);
 
-	for (int ch=0; ch<16; ch++)
+	for(int ch = 0; ch < 16; ch++)
 	{
-		m_nMidiPitchBendPos[ch] = MIDIEvents::pitchBendCentre; //centre pitch bend on all channels
+		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); //centre pitch bend on all channels
 	}
 }
 
@@ -1521,10 +1519,10 @@ CVstPlugin::~CVstPlugin()
 }
 
 
-int CVstPlugin::Release()
-//-----------------------
+size_t CVstPlugin::Release()
+//--------------------------
 {
-	if (!(--m_nRefCount))
+	if(!(--m_nRefCount))
 	{
 		try
 		{
@@ -2364,47 +2362,75 @@ void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nPa
 }
 
 
-// Bend MIDI pitch for given MIDI channel using tracker param (0x00-0xFF)
-void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX /*trackChannel*/)
-//--------------------------------------------------------------------------------------
+void CVstPlugin::ApplyPitchWheelDepth(int32 &value, int8 pwd)
+//-----------------------------------------------------------
 {
-	const int16 increment = static_cast<int16>((nParam * 0x800) / 0xFF);
-	int16 newPitchBendPos = (m_nMidiPitchBendPos[nMidiCh] & vstPitchBendMask) + increment;
-	Limit(newPitchBendPos, int16(MIDIEvents::pitchBendMin), int16(MIDIEvents::pitchBendMax));
+	if(pwd != 0)
+	{
+		// 16383 / 127 = 129
+		value = (value * ((MIDIEvents::pitchBendMax - MIDIEvents::pitchBendMin) / 127)) / pwd;
+	} else
+	{
+		value = 0;
+	}
+}
+
+
+// Bend MIDI pitch for given MIDI channel using fine tracker param (one unit = 1/64th of a note step)
+void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
+//----------------------------------------------------------------------
+{
+	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
+	{
+		// OpenMPT Legacy: Old pitch slides never were really accurate, but setting the PWD to 13 in plugins would give the closest results.
+		increment = (increment * 0x800 * 13) / (0xFF * pwd);
+		increment = EncodePitchBendParam(increment);
+	} else
+	{
+		increment = EncodePitchBendParam(increment);
+		ApplyPitchWheelDepth(increment, pwd);
+	}
+
+	int32 newPitchBendPos = (increment + m_MidiCh[nMidiCh].midiPitchBendPos) & vstPitchBendMask;
+	Limit(newPitchBendPos, EncodePitchBendParam(MIDIEvents::pitchBendMin), EncodePitchBendParam(MIDIEvents::pitchBendMax));
 
 	MidiPitchBend(nMidiCh, newPitchBendPos);
 }
 
 
-//Set MIDI  pitch for given MIDI channel using uncoverted midi value (0-16383)
-void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int16 newPitchBendPos)
+//Set MIDI pitch for given MIDI channel using fixed point pitch bend value (converted back to 0-16383 MIDI range)
+void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 newPitchBendPos)
 //------------------------------------------------------------------
 {
-	ASSERT(MIDIEvents::pitchBendMin <= newPitchBendPos && newPitchBendPos <= MIDIEvents::pitchBendMax);
-	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos;
-	MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, newPitchBendPos));
+	ASSERT(EncodePitchBendParam(MIDIEvents::pitchBendMin) <= newPitchBendPos && newPitchBendPos <= EncodePitchBendParam(MIDIEvents::pitchBendMax));
+	m_MidiCh[nMidiCh].midiPitchBendPos = newPitchBendPos;
+	MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
 }
 
 
 // Apply vibrato effect through pitch wheel commands on a given MIDI channel.
-void CVstPlugin::MidiVibrato(uint8 nMidiCh, int16 depth)
-//------------------------------------------------------
+void CVstPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
+//----------------------------------------------------------------
 {
-	if(depth != 0 || (m_nMidiPitchBendPos[nMidiCh] & vstVibratoFlag))
+	depth = EncodePitchBendParam(depth);
+	if(depth != 0 || (m_MidiCh[nMidiCh].midiPitchBendPos & vstVibratoFlag))
 	{
+		ApplyPitchWheelDepth(depth, pwd);
+
 		// Temporarily add vibrato offset to current pitch
-		int16 pitch = (m_nMidiPitchBendPos[nMidiCh] & vstPitchBendMask) + depth;
-		Limit(pitch, int16(MIDIEvents::pitchBendMin), int16(MIDIEvents::pitchBendMax));
-		MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, pitch));
+		int32 newPitchBendPos = (depth + m_MidiCh[nMidiCh].midiPitchBendPos) & vstPitchBendMask;
+		Limit(newPitchBendPos, EncodePitchBendParam(MIDIEvents::pitchBendMin), EncodePitchBendParam(MIDIEvents::pitchBendMax));
+
+		MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
 	}
 
 	// Update vibrato status
 	if(depth != 0)
 	{
-		m_nMidiPitchBendPos[nMidiCh] |= vstVibratoFlag;
+		m_MidiCh[nMidiCh].midiPitchBendPos |= vstVibratoFlag;
 	} else
 	{
-		m_nMidiPitchBendPos[nMidiCh] &= ~vstVibratoFlag;
+		m_MidiCh[nMidiCh].midiPitchBendPos &= ~vstVibratoFlag;
 	}
 }
 
@@ -2415,8 +2441,8 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 {
 	VSTInstrChannel &channel = m_MidiCh[nMidiCh];
 
-	bool bankChanged = (channel.wMidiBank != --wMidiBank) && (wMidiBank < 0x4000);
-	bool progChanged = (channel.nProgram != --nMidiProg) && (nMidiProg < 0x80);
+	bool bankChanged = (channel.currentBank != --wMidiBank) && (wMidiBank < 0x4000);
+	bool progChanged = (channel.currentProgram != --nMidiProg) && (nMidiProg < 0x80);
 	//get vol in [0,128[
 	uint8 volume = static_cast<uint8>(Util::Min(vol / 2, 127));
 
@@ -2426,7 +2452,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		uint8 high = static_cast<uint8>(wMidiBank >> 7);
 		uint8 low = static_cast<uint8>(wMidiBank & 0x7F);
 
-		if((channel.wMidiBank >> 7) != high)
+		if((channel.currentBank >> 7) != high)
 		{
 			// High byte changed
 			MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_BankSelect_Coarse, nMidiCh, high));
@@ -2435,7 +2461,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_BANKSEL], 0);
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_BankSelect_Fine, nMidiCh, low));
 
-		channel.wMidiBank = wMidiBank;
+		channel.currentBank = wMidiBank;
 	}
 
 	// Program change
@@ -2443,7 +2469,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	// Thus we send program changes also if only the bank has changed.
 	if(nMidiProg < 0x80 && (progChanged || bankChanged))
 	{
-		channel.nProgram = nMidiProg;
+		channel.currentProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
 		MidiSend(MIDIEvents::BuildProgramChangeEvent(nMidiCh, nMidiProg));
 	}
@@ -2507,9 +2533,9 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 
 		// Reset pitch bend on each new note, tracker style.
 		// This is done if the pitch wheel has been moved or there was a vibrato on the previous row (in which case the highest bit of the pitch bend memory is set)
-		if(m_nMidiPitchBendPos[nMidiCh] != MIDIEvents::pitchBendCentre)
+		if(m_MidiCh[nMidiCh].midiPitchBendPos != EncodePitchBendParam(MIDIEvents::pitchBendCentre))
 		{
-			MidiPitchBend(nMidiCh, MIDIEvents::pitchBendCentre);
+			MidiPitchBend(nMidiCh, EncodePitchBendParam(MIDIEvents::pitchBendCentre));
 		}
 
 		// count instances of active notes.
@@ -2522,9 +2548,6 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 
 		MidiSend(MIDIEvents::BuildNoteOnEvent(nMidiCh, static_cast<uint8>(note), volume));
 	}
-
-	m_nPreviousMidiChan = nMidiCh;
-
 }
 
 
@@ -2628,7 +2651,6 @@ void CVstPlugin::SaveAllParameters()
 	if ((m_pEffect) && (m_pMixStruct))
 	{
 		m_pMixStruct->defaultProgram = -1;
-		m_bModified = false;
 
 		if ((m_pEffect->flags & effFlagsProgramChunks)
 		 && (Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf'))
@@ -2814,21 +2836,6 @@ void CVstPlugin::Bypass(bool bypass)
 
 //end rewbs.defaultPlugGui
 //rewbs.defaultPlugGui: CVstEditor now COwnerVstEditor
-
-
-//rewbs.VSTcompliance
-bool CVstPlugin::GetSpeakerArrangement()
-//--------------------------------------
-{
-	VstSpeakerArrangement **pSA = nullptr;
-	Dispatch(effGetSpeakerArrangement, 0, 0, pSA, 0);
-	if (pSA)
-	{
-		MemCopy(speakerArrangement, **pSA);
-	}
-
-	return true;
-}
 
 
 void CVstPlugin::NotifySongPlaying(bool playing)

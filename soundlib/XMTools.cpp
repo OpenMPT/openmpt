@@ -85,6 +85,14 @@ void XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibilityEx
 			}
 		}
 	}
+
+	if(mptIns.nMidiChannel != MidiNoChannel)
+	{
+		midiEnabled = 1;
+		midiChannel = (mptIns.nMidiChannel != MidiMappedChannel ? (mptIns.nMidiChannel - MidiFirstChannel) : 0);
+	}
+	midiProgram = (mptIns.nMidiProgram != 0 ? mptIns.nMidiProgram - 1 : 0);
+	pitchWheelRange = Util::Min(mptIns.midiPWD, int8(36));
 }
 
 
@@ -148,18 +156,18 @@ void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoi
 
 	// Envelope Flags
 	mptEnv.dwFlags.reset();
-	mptEnv.dwFlags.set(ENV_ENABLED, (flags & XMInstrument::envEnabled && mptEnv.nNodes));
-	mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & XMInstrument::envSustain) && sustain < 12);
-	mptEnv.dwFlags.set(ENV_LOOP, (flags & XMInstrument::envLoop) && loopEnd < 12 && loopEnd >= loopStart);
+	if((flags & XMInstrument::envEnabled) != 0 && mptEnv.nNodes != 0) mptEnv.dwFlags.set(ENV_ENABLED);
 
 	// Envelope Loops
 	if(sustain < 12)
 	{
+		if((flags & XMInstrument::envSustain) != 0) mptEnv.dwFlags.set(ENV_SUSTAIN);
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustain;
 	}
 
 	if(loopEnd < 12 && loopEnd >= loopStart)
 	{
+		if((flags & XMInstrument::envLoop) != 0) mptEnv.dwFlags.set(ENV_LOOP);
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 	}
@@ -181,6 +189,14 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	{
 		mptIns.Keyboard[i + 12] = sampleMap[i];
 	}
+
+	if(midiEnabled)
+	{
+		mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
+		Limit(mptIns.nMidiChannel, uint8(MidiFirstChannel), uint8(MidiLastChannel));
+	}
+	//mptIns.nMidiProgram = midiProgram + 1;
+	mptIns.midiPWD = static_cast<int8>(pitchWheelRange);
 }
 
 

@@ -141,6 +141,7 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 	nMidiProgram = 0;
 	nMidiChannel = 0;
 	nMidiDrumKey = 0;
+	midiPWD = 2;
 
 	nPPC = NOTE_MIDDLEC - 1;
 	nPPS = 0;
@@ -195,6 +196,10 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		{
 			nMidiChannel = 1;
 		}
+
+		// FT2 only has signed Pitch Wheel Depth, and it's limited to 0...36 (in the GUI, at least. As you would expect it from FT2, this value is actually not sanitized on load).
+		midiPWD = abs(midiPWD);
+		Limit(midiPWD, int8(0), int8(36));
 
 		nGlobalVol = 64;
 		nPan = 128;

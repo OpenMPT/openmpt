@@ -34,16 +34,16 @@ class IMixPlugin
 //==============
 {
 public:
-	virtual int AddRef() = 0;
-	virtual int Release() = 0;
+	virtual size_t AddRef() = 0;
+	virtual size_t Release() = 0;
 	virtual void SaveAllParameters() = 0;
 	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
 	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
-	virtual void MidiPitchBend(uint8 nMidiCh, int nParam, CHANNELINDEX trackChannel) = 0;
-	virtual void MidiVibrato(uint8 nMidiCh, int16 depth) = 0;
+	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
+	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
 	virtual void RecalculateGain() = 0;		
@@ -88,11 +88,11 @@ struct SNDMIXPLUGINSTATE
 		psfMixReady = 0x01,			// Set when cleared
 	};
 
-	DWORD dwFlags;					// PluginStateFlags
-	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
 	int *pMixBuffer;				// Stereo effect send buffer
 	float *pOutBufferL;				// Temp storage for int -> float conversion
 	float *pOutBufferR;
+	uint32 dwFlags;					// PluginStateFlags
+	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
 };
 
 

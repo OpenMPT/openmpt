@@ -57,7 +57,7 @@ public:
 	// Returns false if position is invalid.
 	bool Seek(size_t position)
 	{
-		if(position < streamLength)
+		if(position <= streamLength)
 		{
 			streamPos = position;
 			return true;
@@ -292,7 +292,8 @@ public:
 		float target;
 		if(Read(target))
 		{
-			uint32 temp = LittleEndian(*reinterpret_cast<uint32 *>(&target));
+			uint32 temp = *reinterpret_cast<uint32 *>(&target);
+			SwapBytesLE(temp);
 			return *reinterpret_cast<float *>(&temp);
 		} else
 		{
@@ -307,7 +308,8 @@ public:
 		float target;
 		if(Read(target))
 		{
-			uint32 temp = BigEndian(*reinterpret_cast<uint32 *>(&target));
+			uint32 temp = *reinterpret_cast<uint32 *>(&target);
+			SwapBytesBE(temp);
 			return *reinterpret_cast<float *>(&temp);
 		} else
 		{

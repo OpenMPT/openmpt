@@ -10,17 +10,15 @@
 
 
 #include "stdafx.h"
-#include "../mptrack/mptrack.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/mainfrm.h"
 #include "../mptrack/moddoc.h"
+#endif // MODPLUG_TRACKER
 #include "../mptrack/version.h"
 #include "../mptrack/serialization_utils.h"
 #include "sndfile.h"
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
-#include <vector>
-#include <list>
-#include <algorithm>
 
 #ifndef NO_COPYRIGHT
 #ifndef NO_MMCMP_SUPPORT
@@ -192,6 +190,7 @@ VERN			VolEnv.nReleaseNode
 PFLG			PitchEnv.dwFlag
 AFLG			PanEnv.dwFlags
 VFLG			VolEnv.dwFlags
+MPWD			MIDI Pitch Wheel Depth
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
@@ -314,6 +313,7 @@ WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, VERN							)
 WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, PFLG							)
 WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, AFLG							)
 WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
+WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 }
 
 // --------------------------------------------------------------------------------------------
@@ -396,6 +396,7 @@ GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, VERN							)
 GET_MPTHEADER_sized_member(	PitchEnv.dwFlags     	, DWORD			, PFLG							)
 GET_MPTHEADER_sized_member(	PanEnv.dwFlags     		, DWORD		    , AFLG							)
 GET_MPTHEADER_sized_member(	VolEnv.dwFlags     		, DWORD			, VFLG							)
+GET_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 }
 
 return pointer;
@@ -438,19 +439,23 @@ CSoundFile::CSoundFile() :
 	m_nRepeatCount = 0;
 	m_nSeqOverride = ORDERINDEX_INVALID;
 	m_bPatternTransitionOccurred = false;
-	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::GetSettings().m_nRowHighlightBeats) ? CMainFrame::GetSettings().m_nRowHighlightBeats : 4;
-	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::GetSettings().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? CMainFrame::GetSettings().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
 
 #ifdef MODPLUG_TRACKER
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
+	m_pModDoc = nullptr;
+
+	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::GetSettings().m_nRowHighlightBeats) ? CMainFrame::GetSettings().m_nRowHighlightBeats : 4;
+	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::GetSettings().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? CMainFrame::GetSettings().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
+#else
+	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = 4;
+	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = 16;
 #endif // MODPLUG_TRACKER
 
-	m_ModFlags = 0;
+	m_ModFlags.reset();
 	m_bITBidiMode = false;
 
-	m_pModDoc = nullptr;
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
 	m_bChannelMuteTogglePending.reset();
@@ -487,10 +492,17 @@ CSoundFile::~CSoundFile()
 }
 
 
+#ifdef MODPLUG_TRACKER
 BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 //----------------------------------------------------------------------------
 {
 	m_pModDoc = pModDoc;
+#else
+BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
+//--------------------------------------------------------------------------
+{
+#endif // MODPLUG_TRACKER
+
 	m_nType = MOD_TYPE_NONE;
 	m_SongFlags.reset();
 	m_nChannels = 0;
@@ -738,6 +750,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	string notFoundText;
 	std::vector<PLUGINDEX> notFoundIDs;
 
+#ifndef NO_VST
 	// Load plugins only when m_pModDoc is valid.  (can be invalid for example when examining module samples in treeview.
 	if (gpMixPluginCreateProc && GetpModDoc() != nullptr)
 	{
@@ -797,12 +810,13 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			CTrackApp::OpenURL(sUrl);
 		}
 	}
+#endif // NO_VST
 
 	// Set up mix levels
 	m_pConfig->SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
-	if(m_nType != MOD_TYPE_NONE)
+	if(GetType() != MOD_TYPE_NONE)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
 		const ORDERINDEX nMinLength = (std::min)(ModSequenceSet::s_nCacheSize, GetModSpecifications().ordersMax);
@@ -1306,11 +1320,13 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 
 	Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
 
+#ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
 	{
 		GetpModDoc()->Record1Channel(nChn, false);
 		GetpModDoc()->Record2Channel(nChn, false);
 	}
+#endif // MODPLUG_TRACKER
 	m_bChannelMuteTogglePending[nChn] = false;
 
 	return false;
@@ -1713,20 +1729,20 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 }
 
 
-uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) const
-//-----------------------------------------------------------------------------------
+ModSpecificFlag CSoundFile::GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const
+//--------------------------------------------------------------------------------
 {
 	const MODTYPE combined = oldtype | newtype;
 
 	// XM <-> IT/MPT conversion.
 	if(combined == (MOD_TYPE_IT|MOD_TYPE_XM) || combined == (MOD_TYPE_MPT|MOD_TYPE_XM))
-		return (1 << MSF_COMPATIBLE_PLAY) | (1 << MSF_MIDICC_BUGEMULATION);
+		return MSF_COMPATIBLE_PLAY | MSF_MIDICC_BUGEMULATION | MSF_OLD_MIDI_PITCHBENDS;
 
 	// IT <-> MPT conversion.
 	if(combined == (MOD_TYPE_IT|MOD_TYPE_MPT))
-		return uint16_max;
+		return ModSpecificFlag(uint16_max);
 
-	return (1 << MSF_COMPATIBLE_PLAY);
+	return MSF_COMPATIBLE_PLAY;
 }
 
 
@@ -1748,7 +1764,7 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 }
 
 
-bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
+bool CSoundFile::SetTitle(const char *titleCandidate, size_t strSize)
 //-------------------------------------------------------------------
 {
 	if(strcmp(m_szNames[0], titleCandidate))
@@ -1966,6 +1982,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
 		ChnSettings[nChn].nVolume = 64;
+		ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
 		if(gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
 		else
@@ -2198,6 +2215,18 @@ void CSoundFile::UpgradeSong()
 
 		// Fix old nasty broken (non-standard) MIDI configs in files.
 		m_MidiCfg.UpgradeMacros();
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 02, 10)
+		&& m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)
+		&& (GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)))
+	{
+		// Old pitch wheel commands were closest to sample pitch bend commands if the PWD is 13.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		{
+			Instruments[i]->midiPWD = 13;
+		}
+		SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
 	}
 
 	Patterns.ForEachModCommand(UpgradePatternData(this));

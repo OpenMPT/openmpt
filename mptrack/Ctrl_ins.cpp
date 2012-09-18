@@ -795,6 +795,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT10,			OnMPRChanged)
 	ON_EN_CHANGE(IDC_EDIT11,			OnMBKChanged)	//rewbs.MidiBank
 	ON_EN_CHANGE(IDC_EDIT15,			OnPPSChanged)
+	ON_EN_CHANGE(IDC_PITCHWHEELDEPTH,	OnPitchWheelDepthChanged)
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -809,9 +810,9 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)		//rewbs.instroVSTi
 	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)
 	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
-	ON_CBN_SELCHANGE(IDC_PLUGIN_VELOCITYSTYLE, OnPluginVelocityHandlingChanged)
-	ON_CBN_SELCHANGE(IDC_PLUGIN_VOLUMESTYLE, OnPluginVolumeHandlingChanged)
-	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
+	ON_CBN_SELCHANGE(IDC_PLUGIN_VOLUMESTYLE,	OnPluginVolumeHandlingChanged)
+	ON_COMMAND(IDC_PLUGIN_VELOCITYSTYLE,		OnPluginVelocityHandlingChanged)
+	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,			OnEditSampleMap)
 	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_COMBOTUNING, OnCbnSelchangeCombotuning)
 	ON_EN_CHANGE(IDC_EDIT_PITCHTEMPOLOCK, OnEnChangeEditPitchtempolock)
@@ -864,8 +865,9 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBOTUNING,			m_ComboTuning);
 	DDX_Control(pDX, IDC_CHECK_PITCHTEMPOLOCK,	m_CheckPitchTempoLock);
 	DDX_Control(pDX, IDC_EDIT_PITCHTEMPOLOCK,	m_EditPitchTempoLock);
-	DDX_Control(pDX, IDC_PLUGIN_VELOCITYSTYLE,		m_CbnPluginVelocityHandling);
-	DDX_Control(pDX, IDC_PLUGIN_VOLUMESTYLE,		m_CbnPluginVolumeHandling);
+	DDX_Control(pDX, IDC_PLUGIN_VOLUMESTYLE,	m_CbnPluginVolumeHandling);
+	DDX_Control(pDX, IDC_PLUGIN_VELOCITYSTYLE,	velocityStyle);
+	DDX_Control(pDX, IDC_SPIN2,					pwdSpin);
 	//}}AFX_DATA_MAP
 }
 
@@ -945,8 +947,6 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force highpass"), FLTMODE_HIGHPASS);
 
 	//VST velocity/volume handling
-	m_CbnPluginVelocityHandling.AddString("Use note volume");
-	m_CbnPluginVelocityHandling.AddString("Process as volume");
 	m_CbnPluginVolumeHandling.AddString("MIDI volume");
 	m_CbnPluginVolumeHandling.AddString("Dry/Wet ratio");
 	m_CbnPluginVolumeHandling.AddString("None");
@@ -972,6 +972,8 @@ BOOL CCtrlInstruments::OnInitDialog()
 // -! NEW_FEATURE#0027
 
 	m_SpinInstrument.SetFocus();
+
+	GetDlgItem(IDC_PITCHWHEELDEPTH)->EnableWindow(FALSE);
 
 	BuildTuningComboBox();
 	
@@ -1195,6 +1197,14 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Panning ranges (0...64 for IT, 0...256 for MPTM)
 		m_SpinPanning.SetRange(0, (m_pSndFile->GetType() & MOD_TYPE_IT) ? 64 : 256);
 
+		// Pitch Wheel Depth
+		if(m_pSndFile->GetType() == MOD_TYPE_XM)
+			pwdSpin.SetRange(0, 36);
+		else
+			pwdSpin.SetRange(-128, 127);
+		GetDlgItem(IDC_PITCHWHEELDEPTH)->EnableWindow(bITandXM);
+		pwdSpin.EnableWindow(bITandXM);
+
 		m_NoteMap.EnableWindow(bITandXM);
 		m_CbnResampling.EnableWindow(bITandXM);
 		
@@ -1339,30 +1349,23 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CheckPitchTempoLock.EnableWindow(m_EditPitchTempoLock.IsWindowEnabled());
 			CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, (pIns->wPitchToTempoLock > 0 ? MF_CHECKED : MF_UNCHECKED));
 
+			// Pitch Wheel Depth
+			SetDlgItemInt(IDC_PITCHWHEELDEPTH, pIns->midiPWD, TRUE);
+
 			OnBnClickedCheckPitchtempolock();
 
 			if(m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 			{
-				if(m_CbnMixPlug.GetCurSel() > 0 && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION) == false)
-				{
-					m_CbnPluginVelocityHandling.EnableWindow(TRUE);
-					m_CbnPluginVolumeHandling.EnableWindow(TRUE);
-				}
-				else
-				{
-					m_CbnPluginVelocityHandling.EnableWindow(FALSE);
-					m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-				}
-
+				BOOL enableVol = (m_CbnMixPlug.GetCurSel() > 0 && !m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION)) ? TRUE : FALSE;
+				velocityStyle.EnableWindow(enableVol);
+				m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 			}
 		} else
 		{
 			m_EditName.SetWindowText("");
 			m_EditFileName.SetWindowText("");
-			m_CbnPluginVelocityHandling.EnableWindow(FALSE);
+			velocityStyle.EnableWindow(FALSE);
 			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-			m_CbnPluginVelocityHandling.SetCurSel(-1);
-			m_CbnPluginVolumeHandling.SetCurSel(-1);
 			if(m_nInstrument > m_pSndFile->GetNumInstruments())
 				SetCurrentInstrument(m_pSndFile->GetNumInstruments());
 
@@ -1587,13 +1590,19 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			if(pIns->nMixPlug < 1) return FALSE;
 			if(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
 			{
-				m_CbnPluginVelocityHandling.EnableWindow(FALSE);
+				velocityStyle.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
 				strcpy(pszText, "To enable, clear Plugin volume command bug emulation flag from Song Properties");
 				return TRUE;
-			}
-			else
+			} else
+			{
+				if(uId == IDC_PLUGIN_VELOCITYSTYLE)
+				{
+					strcpy(pszText, "Volume commands (vxx) next to a note are sent as note velocity instead.");
+					return TRUE;
+				}
 				return FALSE;
+			}
 
 		case IDC_COMBO5:
 			// MIDI Channel
@@ -1622,6 +1631,10 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 
 		case IDC_SLIDER7:
 			wsprintf(pszText, "±%d resonance variation", pIns->nResSwing);
+			return TRUE;
+
+		case IDC_PITCHWHEELDEPTH:
+			strcpy(pszText, "Set this to the actual Pitch Wheel Depth used in your plugin on this channel.");
 			return TRUE;
 
 		}
@@ -2125,17 +2138,11 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 	if (pIns)
 	{
-		if(nPlug < 1 || m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
-		{
-			m_CbnPluginVelocityHandling.EnableWindow(FALSE);
-			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-		} else
-		{
-			m_CbnPluginVelocityHandling.EnableWindow();
-			m_CbnPluginVolumeHandling.EnableWindow();
-		}
+		BOOL enableVol = (nPlug < 1 || m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION)) ? FALSE : TRUE;
+		velocityStyle.EnableWindow(enableVol);
+		m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 
-		if (nPlug>=0 && nPlug <= MAX_MIXPLUGINS)
+		if(nPlug >= 0 && nPlug <= MAX_MIXPLUGINS)
 		{
 			if ((!IsLocked()) && pIns->nMixPlug != nPlug)
 			{ 
@@ -2143,7 +2150,8 @@ void CCtrlInstruments::OnMixPlugChanged()
 				SetInstrumentModified(true);
 				m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
 			}
-			m_CbnPluginVelocityHandling.SetCurSel(pIns->nPluginVelocityHandling);
+
+			velocityStyle.SetCheck(pIns->nPluginVelocityHandling == PLUGIN_VELOCITYHANDLING_CHANNEL ? BST_CHECKED : BST_UNCHECKED);
 			m_CbnPluginVolumeHandling.SetCurSel(pIns->nPluginVolumeHandling);
 
 			if(pIns->nMixPlug)
@@ -2719,15 +2727,10 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 {
 	if(IsLocked() || !m_pModDoc || !m_pSndFile || !m_nInstrument || !m_pSndFile->Instruments[m_nInstrument]) return;
 
-	const TEMPO MINTEMPO = m_pSndFile->GetModSpecifications().tempoMin;
-	const TEMPO MAXTEMPO = m_pSndFile->GetModSpecifications().tempoMax;
 	char buffer[7];
 	m_EditPitchTempoLock.GetWindowText(buffer, 6);
-	int ptlTempo = atoi(buffer);
-	if(ptlTempo < MINTEMPO)
-		ptlTempo = MINTEMPO;
-	if(ptlTempo > MAXTEMPO)
-		ptlTempo = MAXTEMPO;
+	TEMPO ptlTempo = atoi(buffer);
+	Limit(ptlTempo, m_pSndFile->GetModSpecifications().tempoMin, m_pSndFile->GetModSpecifications().tempoMax);
 	
 	CriticalSection cs;
 	m_pSndFile->Instruments[m_nInstrument]->wPitchToTempoLock = ptlTempo;
@@ -2737,14 +2740,20 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 
 
 void CCtrlInstruments::OnPluginVelocityHandlingChanged()
-//------------------------------------------------
+//------------------------------------------------------
 {
 	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
-	if ((!IsLocked()) && (pIns))
+	if(!IsLocked() && pIns != nullptr)
 	{
-		BYTE n = static_cast<BYTE>(m_CbnPluginVelocityHandling.GetCurSel());
+		uint8 n = static_cast<uint8>(velocityStyle.GetCheck() != BST_UNCHECKED ? PLUGIN_VELOCITYHANDLING_CHANNEL : PLUGIN_VELOCITYHANDLING_VOLUME);
 		if(n != pIns->nPluginVelocityHandling)
 		{
+			if(n == PLUGIN_VELOCITYHANDLING_VOLUME && m_CbnPluginVolumeHandling.GetCurSel() == PLUGIN_VOLUMEHANDLING_IGNORE)
+			{
+				// This combination doesn't make sense.
+				m_CbnPluginVolumeHandling.SetCurSel(PLUGIN_VOLUMEHANDLING_MIDI);
+			}
+
 			pIns->nPluginVelocityHandling = n;
 			SetInstrumentModified(true);
 		}
@@ -2756,12 +2765,39 @@ void CCtrlInstruments::OnPluginVolumeHandlingChanged()
 //----------------------------------------------
 {
 	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
-	if ((!IsLocked()) && (pIns))
+	if(!IsLocked() && pIns != nullptr)
 	{
-		BYTE n = static_cast<BYTE>(m_CbnPluginVolumeHandling.GetCurSel());
+		uint8 n = static_cast<uint8>(m_CbnPluginVolumeHandling.GetCurSel());
 		if(n != pIns->nPluginVolumeHandling)
 		{
+
+			if(velocityStyle.GetCheck() == BST_UNCHECKED && n == PLUGIN_VOLUMEHANDLING_IGNORE)
+			{
+				// This combination doesn't make sense.
+				velocityStyle.SetCheck(BST_CHECKED);
+			}
+
 			pIns->nPluginVolumeHandling = n;
+			SetInstrumentModified(true);
+		}
+	}
+}
+
+
+void CCtrlInstruments::OnPitchWheelDepthChanged()
+//-----------------------------------------------
+{
+	ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
+	if(!IsLocked() && pIns != nullptr)
+	{
+		int pwd = GetDlgItemInt(IDC_PITCHWHEELDEPTH, NULL, TRUE);
+		if(m_pSndFile->GetType() == MOD_TYPE_XM)
+			Limit(pwd, 0, 36);
+		else
+			Limit(pwd, -128, 127);
+		if(pwd != pIns->midiPWD)
+		{
+			pIns->midiPWD = static_cast<int8>(pwd);
 			SetInstrumentModified(true);
 		}
 	}
@@ -2791,14 +2827,14 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 				char buffer[7];
 				m_EditPitchTempoLock.GetWindowText(buffer, 6);
 				ptl = atoi(buffer);
-			}
-			else
+			} else
+			{
 				ptl = m_pSndFile->m_nDefaultTempo;
+			}
 		}
 		m_EditPitchTempoLock.SetWindowText(Stringify(ptl).c_str());
 		//SetModified() comes with SetWindowText(.).
-	}
-	else
+	} else
 	{
 		m_EditPitchTempoLock.EnableWindow(FALSE);
 		if(m_pSndFile && m_nInstrument && m_pSndFile->Instruments[m_nInstrument] &&
