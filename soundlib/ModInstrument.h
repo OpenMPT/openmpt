@@ -57,6 +57,7 @@ struct ModInstrument
 	uint8 nMidiProgram;					// MIDI Program (1...128). 0 = Don't send.
 	uint8 nMidiChannel;					// MIDI Channel (1...16). 0 = Don't send. 17 = Mapped (Send to tracker channel modulo 16).
 	uint8 nMidiDrumKey;					// Drum set note mapping (currently only used by the .MID loader)
+	int8 midiPWD;						// MIDI Pitch Wheel Depth in semitones
 
 	uint8 nNNA;							// New note action
 	uint8 nDCT;							// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
@@ -75,8 +76,8 @@ struct ModInstrument
 	uint8 nFilterMode;					// Default filter mode
 	uint8 nPluginVelocityHandling;		// How to deal with plugin velocity
 	uint8 nPluginVolumeHandling;		// How to deal with plugin volume
-	uint32 nResampling;					// Resampling mode
 	uint16 wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
+	uint32 nResampling;					// Resampling mode
 	CTuning *pTuning;					// sample tuning assigned to this instrument
 	static CTuning *s_DefaultTuning;
 

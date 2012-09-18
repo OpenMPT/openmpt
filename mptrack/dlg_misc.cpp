@@ -136,6 +136,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	CheckDlgButton(IDC_CHK_COMPATPLAY, m_pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY));
 	CheckDlgButton(IDC_CHK_MIDICCBUG, m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION));
 	CheckDlgButton(IDC_CHK_OLDRANDOM, m_pSndFile->GetModFlag(MSF_OLDVOLSWING));
+	CheckDlgButton(IDC_CHK_OLDPITCH, m_pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS));
 
 	// Time signature information
 
@@ -239,11 +240,13 @@ void CModTypeDlg::UpdateDialog()
 
 	GetDlgItem(IDC_CHK_COMPATPLAY)->ShowWindow(XMorITorMPT);
 	GetDlgItem(IDC_CHK_MIDICCBUG)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(ITorMPT);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_CHK_OLDPITCH)->ShowWindow(XMorITorMPT);
 
 	// Deprecated flags are greyed out if they are not being used.
 	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
-	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow(m_pSndFile->GetModFlag(MSF_OLDVOLSWING) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && m_pSndFile->GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(m_pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
 
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
@@ -369,6 +372,7 @@ void CModTypeDlg::OnOK()
 		if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) m_pSndFile->SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) m_pSndFile->SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) m_pSndFile->SetModFlag(MSF_OLDVOLSWING, true);
+		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) m_pSndFile->SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
 	}
 
 	m_pSndFile->m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
@@ -393,7 +397,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
 	CStringA strTipText = "";
 	UINT_PTR nID = pNMHDR->idFrom;
-	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
+	if(pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
 		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
 	{
 		// idFrom is actually the HWND of the tool
@@ -435,16 +439,18 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	case IDC_CHK_OLDRANDOM:
 		strTipText = "Use old (buggy) random volume / panning variation algorithm (not recommended)";
 		break;
+	case IDC_CHK_OLDPITCH:
+		strTipText = "Use old (imprecise) portamento logic for instrument plugins (not recommended)";
+		break;
 	}
 
-	if (pNMHDR->code == TTN_NEEDTEXTA)
+	if(pNMHDR->code == TTN_NEEDTEXTA)
 	{
 		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
 		//	strTipText.GetLength() + 1);
 		// 80 chars max?!
 		strncpy(pTTTA->szText, strTipText, min(strTipText.GetLength() + 1, CountOf(pTTTA->szText) - 1));
-	}
-	else
+	} else
 	{
 		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
 			pTTTW->szText, CountOf(pTTTW->szText));

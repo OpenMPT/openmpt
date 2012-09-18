@@ -735,6 +735,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(instrument != nullptr)
 			{
 				ITInstrToMPT(lpStream + inspos[nins], instrument, itHeader.cmwt, dwMemLength - inspos[nins]);
+				instrument->midiPWD = itHeader.pwd;
 			}
 		}
 	}
@@ -1175,6 +1176,16 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	itHeader.speed = m_nDefaultSpeed;
  	itHeader.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
 	itHeader.sep = 128; // pan separation
+	// IT doesn't have a per-instrument Pitch Wheel Depth setting, so we just store the first non-zero PWD setting in the header.
+	for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)
+	{
+		if(Instruments[ins] != nullptr && Instruments[ins]->midiPWD != 0)
+		{
+			itHeader.pwd = abs(Instruments[ins]->midiPWD);
+			break;
+		}
+	}
+
 	dwHdrPos = sizeof(itHeader) + itHeader.ordnum;
 	// Channel Pan and Volume
 	memset(itHeader.chnpan, 0xA0, 64);
@@ -2063,6 +2074,12 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
 
+	if(!(GetType() & MOD_TYPE_XM))
+	{
+		// XM instrument headers already have support for this
+		WriteInstrumentPropertyForAllInstruments('MPWD', sizeof(ModInstrument().midiPWD), f, nInstruments);
+	}
+
 	if(GetType() & MOD_TYPE_MPT)
 	{
 		UINT maxNodes = 0;
@@ -2324,7 +2341,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 		*pInterpretMptMade = true;
 
 	// HACK: Reset mod flags to default values here, as they are not always written.
-	m_ModFlags = 0;
+	m_ModFlags.reset();
 
 	// Case macros.
 	#define CASE(id, data)	\

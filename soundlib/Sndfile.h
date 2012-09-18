@@ -133,12 +133,19 @@ enum deleteInstrumentSamples
 
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
-const BYTE MSF_COMPATIBLE_PLAY		= 0;		//IT/MPT/XM
-const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
-const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
+FLAGSET(ModSpecificFlag)
+{
+	MSF_COMPATIBLE_PLAY		= 1,		//IT/MPT/XM
+	MSF_OLDVOLSWING			= 2,		//IT/MPT
+	MSF_MIDICC_BUGEMULATION	= 4,		//IT/MPT/XM
+	MSF_OLD_MIDI_PITCHBENDS	= 8,		//IT/MPT/XM
+};
+
 
 class CTuningCollection;
+#ifdef MODPLUG_TRACKER
 class CModDoc;
+#endif // MODPLUG_TRACKER
 
 //==============
 class CSoundFile
@@ -155,10 +162,10 @@ public: //Misc
 	// If updateVars is true, the state of various playback variables will be updated according to the playback position.
 	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars);
 
-	uint16 GetModFlags() const {return m_ModFlags;}
-	void SetModFlags(const uint16 v) {m_ModFlags = v;}
-	bool GetModFlag(BYTE i) const {return ((m_ModFlags & (1<<i)) != 0);}
-	void SetModFlag(BYTE i, bool val) {if(i < 8*sizeof(m_ModFlags)) {m_ModFlags = (val) ? m_ModFlags |= (1 << i) : m_ModFlags &= ~(1 << i);}}
+	uint16 GetModFlags() const {return static_cast<uint16>(m_ModFlags);}
+	void SetModFlags(const uint16 v) {m_ModFlags = static_cast<ModSpecificFlag>(v);}
+	bool GetModFlag(ModSpecificFlag i) const { return m_ModFlags.test(i); }
+	void SetModFlag(ModSpecificFlag i, bool val) { m_ModFlags.set(i, val); }
 
 	// Is compatible mode for a specific tracker turned on?
 	// Hint 1: No need to poll for MOD_TYPE_MPT, as it will automatically be linked with MOD_TYPE_IT when using TRK_IMPULSETRACKER
@@ -204,7 +211,7 @@ private: //Effect functions
 
 private: //Misc private methods.
 	static void SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type);
-	uint16 GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) const;
+	ModSpecificFlag GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const;
 
 private: //'Controllers'
 	CPlaybackEventer m_PlaybackEventer;
@@ -214,7 +221,7 @@ private: //'Controllers'
 #endif // MODPLUG_TRACKER
 
 private: //Misc data
-	uint16 m_ModFlags;
+	FlagSet<ModSpecificFlag, uint16> m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
 	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
@@ -236,7 +243,9 @@ public:	// Static Members
 	typedef uint32 samplecount_t;	// Number of rendered samples
 
 public:	// for Editing
+#ifdef MODPLUG_TRACKER
 	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
+#endif // MODPLUG_TRACKER
 	FlagSet<MODTYPE> m_nType;
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
@@ -310,7 +319,15 @@ public:
 	~CSoundFile();
 
 public:
+
+#ifdef MODPLUG_TRACKER
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
+	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
+	CModDoc *GetpModDoc() const { return m_pModDoc; }
+#else
+	BOOL Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength=0);
+	void *GetpModDoc() const { return nullptr; }
+#endif // MODPLUG_TRACKER
 	BOOL Destroy();
 	MODTYPE GetType() const { return m_nType; }
 	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
@@ -318,13 +335,6 @@ public:
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 	bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
 	bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
-
-	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
-#ifdef MODPLUG_TRACKER
-	CModDoc *GetpModDoc() const { return m_pModDoc; }
-#else
-	void *GetpModDoc() const { return nullptr; }
-#endif // MODPLUG_TRACKER
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }

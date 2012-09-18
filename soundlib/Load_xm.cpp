@@ -99,7 +99,7 @@ vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSample
 				}
 
 				// New candidate slot is first unused sample slot.
-				candidateSlot = std::find(usedSamples.begin() + 1, usedSamples.end(), false) - usedSamples.begin();
+				candidateSlot = static_cast<SAMPLEINDEX>(std::find(usedSamples.begin() + 1, usedSamples.end(), false) - usedSamples.begin());
 			} else
 			{
 				// No unused sampel slots: Give up :(
@@ -376,7 +376,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			if((insHeader.instrument.midiChannel | insHeader.instrument.midiEnabled | insHeader.instrument.midiProgram | insHeader.instrument.muteComputer | insHeader.instrument.pitchWheelRange) != 0)
 			{
 				// Definitely not MPT. (or any other tracker)
-				isFT2 = true;
+				//isFT2 = true;
 			}
 
 			// Read sample headers
@@ -712,7 +712,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			if ((note <= 12) || (note > 96+12)) note = 0; else
 			note -= 12;
 			uint8 vol = 0;
-			if (p->volcmd)
+			if (p->volcmd != VOLCMD_NONE)
 			{
 				switch(p->volcmd)
 				{

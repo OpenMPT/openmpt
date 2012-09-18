@@ -1617,9 +1617,14 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 			if(plugin != nullptr)
 			{
-				// With a pitch wheel depth of +/- 2 semitones, this is identical to sample vibrato with linear slides on.
-				midiDelta *= (MIDIEvents::pitchBendMax - MIDIEvents::pitchBendCentre) / 127;
-				plugin->MidiVibrato(GetBestMidiChannel(nChn), midiDelta);
+				// If the Pitch Wheel Depth is configured correctly (so it's the same as the plugin's PWD),
+				// MIDI vibrato will sound identical to vibrato with linear slides enabled.
+				int8 pwd = 2;
+				if(chn.pModInstrument != nullptr)
+				{
+					pwd = chn.pModInstrument->midiPWD;
+				}
+				plugin->MidiVibrato(GetBestMidiChannel(nChn), midiDelta, pwd);
 			}
 		}
 
@@ -1638,7 +1643,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 		if(plugin != nullptr)
 		{
-			plugin->MidiVibrato(GetBestMidiChannel(nChn), 0);
+			plugin->MidiVibrato(GetBestMidiChannel(nChn), 0, 0);
 		}
 	}
 }
