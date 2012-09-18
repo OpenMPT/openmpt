@@ -1530,6 +1530,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
+	strcat_s(fname, CountOf(fname), ".wav");
 
 	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder);
 	if (wsdlg.DoModal() != IDOK) return;
@@ -1724,6 +1725,7 @@ void CModDoc::OnFileMP3Convert()
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 	_splitpath(GetPathName(), NULL, NULL, sFName, NULL);
+	strcat_s(sFName, CountOf(sFName), ".mp3");
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mp3", sFName,
 		"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||",
