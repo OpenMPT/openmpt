@@ -1333,11 +1333,11 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 	m_bSongPlaying = false; //rewbs.VSTCompliance
 	m_bPlugResumed = false;
 	m_nSampleRate = nInvalidSampleRate; //rewbs.VSTCompliance: gets set on Resume()
-	MemsetZero(m_MidiCh);
 
+	MemsetZero(m_MidiCh);
 	for(int ch = 0; ch < 16; ch++)
 	{
-		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); //centre pitch bend on all channels
+		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); // centre pitch bend on all channels
 	}
 }
 
@@ -1348,8 +1348,6 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_bNeedIdle=false;
 	m_bRecordAutomation=false;
 	m_bPassKeypressesToPlug=false;
-
-	MemsetZero(m_MidiCh);
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
@@ -2317,7 +2315,7 @@ void CVstPlugin::HardAllNotesOff()
 	{
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
-		MidiPitchBend(mc, MIDIEvents::pitchBendCentre); // centre pitch bend
+		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre)); // centre pitch bend
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllControllersOff, mc, 0));	// reset all controllers
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
 		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
