@@ -1617,7 +1617,7 @@ bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
 
 	LimitMax(max, m_pEffect->numParams);
 
-	for (VstInt32 p = min; p < max; p++)
+	for(VstInt32 p = min; p < max; p++)
 		param[p - min]=GetParameter(p);
 
 	return true;
@@ -2298,7 +2298,7 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 	return vstEvents.Enqueue(event, insertAtFront);
 }
 
-//rewbs.VSTiNoteHoldonStopFix
+
 void CVstPlugin::HardAllNotesOff()
 //--------------------------------
 {
@@ -2344,7 +2344,7 @@ void CVstPlugin::HardAllNotesOff()
 	}
 
 }
-//end rewbs.VSTiNoteHoldonStopFix
+
 
 void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX /*trackChannel*/)
 //-----------------------------------------------------------------------------------------------------------------
@@ -2365,8 +2365,7 @@ void CVstPlugin::ApplyPitchWheelDepth(int32 &value, int8 pwd)
 {
 	if(pwd != 0)
 	{
-		// 16383 / 127 = 129
-		value = (value * ((MIDIEvents::pitchBendMax - MIDIEvents::pitchBendMin) / 127)) / pwd;
+		value = (value * ((MIDIEvents::pitchBendMax - MIDIEvents::pitchBendCentre + 1) / 64)) / pwd;
 	} else
 	{
 		value = 0;
