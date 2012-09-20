@@ -2710,10 +2710,16 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 //-------------------------------------------------------------
 {
-	if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if(GetType() == MOD_TYPE_XM)
 	{
-		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
+		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
+		// Test case: Porta-LinkMem.xm
+		if(param) pChn->nOldFinePortaUpDown = (pChn->nOldFinePortaUpDown & 0x0F) | (param << 4); else param = (pChn->nOldFinePortaUpDown >> 4);
+	} else if(GetType() == MOD_TYPE_MT2)
+	{
+		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
+
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		if ((pChn->nPeriod) && (param))
@@ -2739,10 +2745,16 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 //---------------------------------------------------------------
 {
-	if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
+	if(GetType() == MOD_TYPE_XM)
 	{
-		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
+		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
+		// Test case: Porta-LinkMem.xm
+		if(param) pChn->nOldFinePortaUpDown = (pChn->nOldFinePortaUpDown & 0xF0) | (param & 0x0F); else param = (pChn->nOldFinePortaUpDown & 0x0F);
+	} else if(GetType() == MOD_TYPE_MT2)
+	{
+		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
+
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		if ((pChn->nPeriod) && (param))
@@ -2768,10 +2780,16 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 //------------------------------------------------------------------
 {
-	if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if(GetType() == MOD_TYPE_XM)
 	{
-		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
+		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
+		// Test case: Porta-LinkMem.xm
+		if(param) pChn->nOldExtraFinePortaUpDown = (pChn->nOldExtraFinePortaUpDown & 0x0F) | (param << 4); else param = (pChn->nOldExtraFinePortaUpDown >> 4);
+	} else if(GetType() == MOD_TYPE_MT2)
+	{
+		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
+
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		if ((pChn->nPeriod) && (param))
@@ -2797,10 +2815,16 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 //--------------------------------------------------------------------
 {
-	if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if(GetType() == MOD_TYPE_XM)
 	{
-		if (param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
+		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
+		// Test case: Porta-LinkMem.xm
+		if(param) pChn->nOldExtraFinePortaUpDown = (pChn->nOldExtraFinePortaUpDown & 0xF0) | (param & 0x0F); else param = (pChn->nOldExtraFinePortaUpDown & 0x0F);
+	} else if(GetType() == MOD_TYPE_MT2)
+	{
+		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
+
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		if ((pChn->nPeriod) && (param))
@@ -3133,7 +3157,16 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param)
 void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param)
 //---------------------------------------------------------
 {
-	if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
+	if(GetType() == MOD_TYPE_XM)
+	{
+		// FT2 compatibility: EAx / EBx memory is not linked
+		// Test case: FineVol-LinkMem.xm
+		if(param) pChn->nOldFineVolUpDown = (param << 4) | (pChn->nOldFineVolUpDown & 0x0F); else param = (pChn->nOldFineVolUpDown >> 4);
+	} else
+	{
+		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
+	}
+
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		pChn->nVolume += param * 4;
@@ -3146,7 +3179,16 @@ void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param)
 void CSoundFile::FineVolumeDown(ModChannel *pChn, UINT param)
 //-----------------------------------------------------------
 {
-	if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
+	if(GetType() == MOD_TYPE_XM)
+	{
+		// FT2 compatibility: EAx / EBx memory is not linked
+		// Test case: FineVol-LinkMem.xm
+		if(param) pChn->nOldFineVolUpDown = param | (pChn->nOldFineVolUpDown & 0xF0); else param = (pChn->nOldFineVolUpDown & 0x0F);
+	} else
+	{
+		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
+	}
+
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		pChn->nVolume -= param * 4;
@@ -4626,7 +4668,7 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 	PLUGINDEX plug = 0;
 	if(Chn[nChn].pModInstrument != nullptr)
 	{
-		if (respectMutes == RespectMutes && Chn[nChn].pModSample && Chn[nChn].pModSample->uFlags[CHN_MUTE])
+		if(respectMutes == RespectMutes && Chn[nChn].pModSample && Chn[nChn].pModSample->uFlags[CHN_MUTE])
 		{
 			plug = 0;
 		} else
@@ -4665,8 +4707,9 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 }
 
 
+// Get the MIDI channel currently associated with a given tracker channel
 uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
-//----------------------------------------------------------
+//-----------------------------------------------------------
 {
 	if(nChn == CHANNELINDEX_INVALID)
 	{
