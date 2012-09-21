@@ -2221,12 +2221,17 @@ void CSoundFile::UpgradeSong()
 		&& m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)
 		&& (GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)))
 	{
+		bool instrPlugs = false;
 		// Old pitch wheel commands were closest to sample pitch bend commands if the PWD is 13.
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr && Instruments[i]->nMidiChannel != MidiNoChannel)
 		{
 			Instruments[i]->midiPWD = 13;
+			instrPlugs = true;
 		}
-		SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
+		if(instrPlugs)
+		{
+			SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
+		}
 	}
 
 	Patterns.ForEachModCommand(UpgradePatternData(this));
