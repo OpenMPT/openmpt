@@ -1532,7 +1532,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
 	strcat_s(fname, CountOf(fname), ".wav");
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1);
 	if (wsdlg.DoModal() != IDOK) return;
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", fname,
@@ -1610,6 +1610,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	UINT pos = m_SndFile.GetCurrentPos();
 	pMainFrm->PauseMod();
+	int oldRepeat = m_SndFile.GetRepeatCount();
 
 	for(int i = 0 ; i < nRenderPasses ; i++)
 	{
@@ -1675,12 +1676,16 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		m_SndFile.visitedSongRows.Initialize(true);
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
-		if (wsdlg.m_bSelectPlay)
+		if(wsdlg.m_bSelectPlay)
 		{
 			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
 			m_SndFile.GetLength(eAdjust, wsdlg.m_nMinOrder, 0);	// adjust playback variables / visited rows vector
 			m_SndFile.m_nCurrentOrder = wsdlg.m_nMinOrder;
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
+			m_SndFile.SetRepeatCount(0);
+		} else
+		{
+			m_SndFile.SetRepeatCount(Util::Max(0, wsdlg.loopCount - 1));
 		}
 		if(dwcdlg.DoModal() != IDOK) break;
 	}
@@ -1711,6 +1716,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		}
 	}
 
+	m_SndFile.SetRepeatCount(oldRepeat);
 	m_SndFile.SetCurrentPos(pos);
 	CMainFrame::UpdateAudioParameters(TRUE);
 }

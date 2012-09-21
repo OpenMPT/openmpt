@@ -71,24 +71,26 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 END_MESSAGE_MAP()
 
 
-CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder):
-	CDialog(IDD_WAVECONVERT, parent)
-//-----------------------------------------------------------------------------------
+CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders) : CDialog(IDD_WAVECONVERT, parent)
+//-----------------------------------------------------------------------------------------------------------------------------------------
 {
 	m_bGivePlugsIdleTime = false;
 	m_bNormalize = false;
 	m_bHighQuality = false;
 	m_bSelectPlay = false;
-	if(nMinOrder != ORDERINDEX_INVALID && nMaxOrder != ORDERINDEX_INVALID)
+	if(minOrder != ORDERINDEX_INVALID && maxOrder != ORDERINDEX_INVALID)
 	{
 		// render selection
-		m_nMinOrder = nMinOrder;
-		m_nMaxOrder = nMaxOrder;
+		m_nMinOrder = minOrder;
+		m_nMaxOrder = maxOrder;
 		m_bSelectPlay = true;
 	} else
 	{
 		m_nMinOrder = m_nMaxOrder = 0;
 	}
+	loopCount = 1;
+	m_nNumOrders = numOrders;
+
 	m_dwFileLimit = 0;
 	m_dwSongLimit = 0;
 	MemsetZero(WaveFormat);
@@ -107,8 +109,9 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnSampleRate);
 	DDX_Control(pDX, IDC_COMBO2,	m_CbnSampleFormat);
-	DDX_Control(pDX, IDC_EDIT3,		m_EditMinOrder);
-	DDX_Control(pDX, IDC_EDIT4,		m_EditMaxOrder);
+	DDX_Control(pDX, IDC_SPIN3,		m_SpinMinOrder);
+	DDX_Control(pDX, IDC_SPIN4,		m_SpinMaxOrder);
+	DDX_Control(pDX, IDC_SPIN5,		m_SpinLoopCount);
 }
 
 
@@ -130,8 +133,13 @@ BOOL CWaveConvert::OnInitDialog()
 // -! NEW_FEATURE#0024
 
 	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
+	m_SpinMinOrder.SetRange(0, m_nNumOrders);
 	SetDlgItemInt(IDC_EDIT4, m_nMaxOrder);
-	
+	m_SpinMaxOrder.SetRange(0, m_nNumOrders);
+
+	SetDlgItemInt(IDC_EDIT5, loopCount, FALSE);
+	m_SpinLoopCount.SetRange(1, int16_max);
+
 
 	for (size_t i = 0; i < CountOf(nMixingRates); i++)
 	{
@@ -170,6 +178,7 @@ BOOL CWaveConvert::OnInitDialog()
 			}
 		}
 	}
+
 	UpdateDialog();
 	return TRUE;
 }
@@ -196,8 +205,10 @@ void CWaveConvert::UpdateDialog()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), (m_dwFileLimit) ? TRUE : FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
 	BOOL bSel = IsDlgButtonChecked(IDC_RADIO2) ? TRUE : FALSE;
-	m_EditMinOrder.EnableWindow(bSel);
-	m_EditMaxOrder.EnableWindow(bSel);
+	GetDlgItem(IDC_EDIT3)->EnableWindow(bSel);
+	GetDlgItem(IDC_EDIT4)->EnableWindow(bSel);
+	GetDlgItem(IDC_EDIT5)->EnableWindow(!bSel);
+	m_SpinLoopCount.EnableWindow(!bSel);
 }
 
 
@@ -263,8 +274,9 @@ void CWaveConvert::OnOK()
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
 	m_bSelectPlay = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
-	m_nMinOrder = (ORDERINDEX)GetDlgItemInt(IDC_EDIT3, NULL, FALSE);
-	m_nMaxOrder = (ORDERINDEX)GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
+	m_nMinOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT3, NULL, FALSE));
+	m_nMaxOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT4, NULL, FALSE));
+	loopCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = false;
 	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED; //rewbs.resamplerConf - we don't want this anymore.
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
@@ -638,7 +650,6 @@ void CDoWaveConvert::OnButton1()
 
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	int oldVol = m_pSndFile->GetMasterVolume();
-	int nOldRepeat = m_pSndFile->GetRepeatCount();
 	CSoundFile::gdwSoundSetup |= SNDMIX_DIRECTTODISK;
 	CSoundFile::gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
@@ -657,9 +668,9 @@ void CDoWaveConvert::OnButton1()
 	{
 		m_bNormalize = false;
 	}
+
 	m_pSndFile->ResetChannels();
 	CSoundFile::InitPlayer(TRUE);
-	m_pSndFile->SetRepeatCount(0);
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
 	// File Header
@@ -692,7 +703,7 @@ void CDoWaveConvert::OnButton1()
 
 	// calculate maximum samples
 	ULONGLONG max = ullMaxSamples;
-	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec;
+	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec * (ULONGLONG)Util::Max(1, 1 + m_pSndFile->GetRepeatCount());
 	if (m_nMaxPatterns > 0)
 	{
 		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
@@ -827,7 +838,9 @@ void CDoWaveConvert::OnButton1()
 			break;
 		}
 	}
+
 	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
+
 	if (m_bNormalize)
 	{
 		DWORD dwLength = datahdr.length;
@@ -901,7 +914,6 @@ void CDoWaveConvert::OnButton1()
 	fwrite(&datahdr, sizeof(datahdr), 1, f);
 	fclose(f);
 	CSoundFile::gdwSoundSetup &= ~SNDMIX_DIRECTTODISK;
-	m_pSndFile->SetRepeatCount(nOldRepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	if (m_bNormalize)
 	{
@@ -1030,7 +1042,7 @@ void CDoAcmConvert::OnButton1()
 	wdh.id_data = IFFID_data;
 	wdh.length = 0;
 	data_ofs = 0;
-	if (bSaveWave)
+	if(bSaveWave)
 	{
 		fwrite(&wfh, 1, sizeof(wfh), f);
 		chunk.id_data = IFFID_fmt;

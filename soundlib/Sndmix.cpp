@@ -766,7 +766,7 @@ BOOL CSoundFile::ProcessRow()
 					}
 
 					//Handle Repeat position
-					if (m_nRepeatCount > 0) m_nRepeatCount--;
+					//if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentOrder = nRestartPosOverride;
 					m_SongFlags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
@@ -818,7 +818,7 @@ BOOL CSoundFile::ProcessRow()
 			if(m_nRepeatCount)
 			{
 				// repeat count == -1 means repeat infinitely.
-				if (m_nRepeatCount > 0)
+				if(m_nRepeatCount > 0)
 				{
 					m_nRepeatCount--;
 				}
