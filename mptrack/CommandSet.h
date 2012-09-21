@@ -1213,8 +1213,7 @@ public:
 	~CCommandSet(void);
 	
 	//Population
-	CString Add(KeyCombination kc, CommandID cmd, bool overwrite);
-	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos);
+	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1);
 	CString Remove(KeyCombination kc, CommandID cmd);
 	CString Remove(int pos, CommandID cmd);
 

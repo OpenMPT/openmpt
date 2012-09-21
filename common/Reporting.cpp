@@ -10,12 +10,17 @@
 
 #include "Stdafx.h"
 #include "Reporting.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/Mainfrm.h"
+#else
+#include <iostream>
+#endif // MODPLUG_TRACKER
 
 
 UINT Reporting::ShowNotification(const char *text, const char *caption, UINT flags, const CWnd *parent)
 //-----------------------------------------------------------------------------------------------------
 {
+#ifdef MODPLUG_TRACKER
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
@@ -35,6 +40,10 @@ UINT Reporting::ShowNotification(const char *text, const char *caption, UINT fla
 	}
 
 	return result;
+#else
+	std::cout << caption << std::endl << text << std::endl;
+	return 0;
+#endif // MODPLUG_TRACKER
 }
 
 

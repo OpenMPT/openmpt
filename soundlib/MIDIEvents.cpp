@@ -15,56 +15,56 @@ namespace MIDIEvents
 {
 
 // Build a generic MIDI event
-uint32 BuildEvent(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2)
-//-----------------------------------------------------------------------------------------
+uint32 Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2)
+//------------------------------------------------------------------------------------
 {
 	return (eventType << 4) | (midiChannel & 0x0F) | (dataByte1 << 8) | (dataByte2 << 16);
 }
 
 
 // Build a MIDI CC event
-uint32 BuildCCEvent(MidiCC midiCC, uint8 midiChannel, uint8 param)
-//----------------------------------------------------------------
+uint32 CC(MidiCC midiCC, uint8 midiChannel, uint8 param)
+//------------------------------------------------------
 {
-	return BuildEvent(evControllerChange, midiChannel, static_cast<uint8>(midiCC), param);
+	return Event(evControllerChange, midiChannel, static_cast<uint8>(midiCC), param);
 }
 
 
 // Build a MIDI Pitchbend event
-uint32 BuildPitchBendEvent(uint8 midiChannel, uint16 bendAmount)
-//--------------------------------------------------------------
+uint32 PitchBend(uint8 midiChannel, uint16 bendAmount)
+//----------------------------------------------------
 {
-	return BuildEvent(evPitchBend, midiChannel, static_cast<uint8>(bendAmount & 0x7F), static_cast<uint8>(bendAmount >> 7));
+	return Event(evPitchBend, midiChannel, static_cast<uint8>(bendAmount & 0x7F), static_cast<uint8>(bendAmount >> 7));
 }
 
 
 // Build a MIDI Program Change event
-uint32 BuildProgramChangeEvent(uint8 midiChannel, uint8 program)
-//--------------------------------------------------------------
+uint32 ProgramChange(uint8 midiChannel, uint8 program)
+//----------------------------------------------------
 {
-	return BuildEvent(evProgramChange, midiChannel, program, 0);
+	return Event(evProgramChange, midiChannel, program, 0);
 }
 
 
 // Build a MIDI Note Off event
-uint32 BuildNoteOffEvent(uint8 midiChannel, uint8 note, uint8 velocity)
-//---------------------------------------------------------------------
+uint32 NoteOff(uint8 midiChannel, uint8 note, uint8 velocity)
+//-----------------------------------------------------------
 {
-	return BuildEvent(evNoteOff, midiChannel, note, velocity);
+	return Event(evNoteOff, midiChannel, note, velocity);
 }
 
 
 // Build a MIDI Note On event
-uint32 BuildNoteOnEvent(uint8 midiChannel, uint8 note, uint8 velocity)
-//--------------------------------------------------------------------
+uint32 NoteOn(uint8 midiChannel, uint8 note, uint8 velocity)
+//----------------------------------------------------------
 {
-	return BuildEvent(evNoteOn, midiChannel, note, velocity);
+	return Event(evNoteOn, midiChannel, note, velocity);
 }
 
 
 // Build a MIDI System Event
-uint8 BuildSystemEvent(SystemEvent eventType)
-//-------------------------------------------
+uint8 System(SystemEvent eventType)
+//---------------------------------
 {
 	return static_cast<uint8>((evSystem << 4) | eventType);
 }

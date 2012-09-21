@@ -2196,7 +2196,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				plug->MidiSend(dwMidiData);
 				// Sending midi may modify the plug. For now, if MIDI data
 				// is not active sensing or aftertouch messages, set modified.
-				if(dwMidiData != MIDIEvents::BuildSystemEvent(MIDIEvents::sysActiveSense) && event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch)
+				if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense) && event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch)
 				{
 					CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 				}

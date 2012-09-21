@@ -97,21 +97,21 @@ void ModSample::Initialize(MODTYPE type)
 	nLength = 0;
 	nLoopStart = nLoopEnd = 0;
 	nSustainStart = nSustainEnd = 0;
+	nC5Speed = 8363;
+	nPan = 128;
 	nVolume = 256;
 	nGlobalVol = 64;
-	nPan = 128;
-	nC5Speed = 8363;
+	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP);
+	if(type == MOD_TYPE_XM)
+	{
+		uFlags.set(CHN_PANNING);
+	}
 	RelativeTone = 0;
 	nFineTune = 0;
 	nVibType = VIB_SINE;
 	nVibSweep = 0;
 	nVibDepth = 0;
 	nVibRate = 0;
-	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP);
-	if(type == MOD_TYPE_XM)
-	{
-		uFlags.set(CHN_PANNING);
-	}
 	filename[0] = '\0';
 }
 

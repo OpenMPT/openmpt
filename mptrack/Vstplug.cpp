@@ -2316,9 +2316,9 @@ void CVstPlugin::HardAllNotesOff()
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre)); // centre pitch bend
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllControllersOff, mc, 0));	// reset all controllers
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));	// reset all controllers
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
 		for(size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
 		{
@@ -2326,7 +2326,7 @@ void CVstPlugin::HardAllNotesOff()
 			{
 				while(channel.uNoteOnMap[i][c])
 				{
-					MidiSend(MIDIEvents::BuildNoteOffEvent(mc, static_cast<uint8>(i), 0));
+					MidiSend(MIDIEvents::NoteOff(mc, static_cast<uint8>(i), 0));
 					channel.uNoteOnMap[i][c]--;
 				}
 			}
@@ -2354,9 +2354,9 @@ void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nPa
 	LimitMax(nParam, uint8(127));
 
 	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
-		MidiSend(MIDIEvents::BuildEvent(MIDIEvents::evControllerChange, nMidiCh, nParam, static_cast<uint8>(nController)));	// param and controller are swapped (old broken implementation)
+		MidiSend(MIDIEvents::Event(MIDIEvents::evControllerChange, nMidiCh, nParam, static_cast<uint8>(nController)));	// param and controller are swapped (old broken implementation)
 	else
-		MidiSend(MIDIEvents::BuildCCEvent(nController, nMidiCh, nParam));
+		MidiSend(MIDIEvents::CC(nController, nMidiCh, nParam));
 }
 
 
@@ -2401,7 +2401,7 @@ void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 newPitchBendPos)
 {
 	ASSERT(EncodePitchBendParam(MIDIEvents::pitchBendMin) <= newPitchBendPos && newPitchBendPos <= EncodePitchBendParam(MIDIEvents::pitchBendMax));
 	m_MidiCh[nMidiCh].midiPitchBendPos = newPitchBendPos;
-	MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
+	MidiSend(MIDIEvents::PitchBend(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
 }
 
 
@@ -2418,7 +2418,7 @@ void CVstPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
 		int32 newPitchBendPos = (depth + m_MidiCh[nMidiCh].midiPitchBendPos) & vstPitchBendMask;
 		Limit(newPitchBendPos, EncodePitchBendParam(MIDIEvents::pitchBendMin), EncodePitchBendParam(MIDIEvents::pitchBendMax));
 
-		MidiSend(MIDIEvents::BuildPitchBendEvent(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
+		MidiSend(MIDIEvents::PitchBend(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
 	}
 
 	// Update vibrato status
@@ -2452,11 +2452,11 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		if((channel.currentBank >> 7) != high)
 		{
 			// High byte changed
-			MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_BankSelect_Coarse, nMidiCh, high));
+			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_BankSelect_Coarse, nMidiCh, high));
 		}
 		// Low byte
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_BANKSEL], 0);
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_BankSelect_Fine, nMidiCh, low));
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_BankSelect_Fine, nMidiCh, low));
 
 		channel.currentBank = wMidiBank;
 	}
@@ -2468,7 +2468,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	{
 		channel.currentProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
-		MidiSend(MIDIEvents::BuildProgramChangeEvent(nMidiCh, nMidiProg));
+		MidiSend(MIDIEvents::ProgramChange(nMidiCh, nMidiProg));
 	}
 
 
@@ -2480,7 +2480,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		if(channel.uNoteOnMap[i][trackChannel])
 		{
 			channel.uNoteOnMap[i][trackChannel]--;
-			MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, 0));
+			MidiSend(MIDIEvents::NoteOff(nMidiCh, i, 0));
 		}
 	}
 
@@ -2489,14 +2489,14 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	// Also less likely to cause a VST event buffer overflow.
 	else if (note == NOTE_NOTECUT)	// ^^
 	{
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllNotesOff, nMidiCh, 0));
-		MidiSend(MIDIEvents::BuildCCEvent(MIDIEvents::MIDICC_AllSoundOff, nMidiCh, 0));
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, nMidiCh, 0));
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, nMidiCh, 0));
 
 		// Turn off all notes
 		for(uint8 i = 0; i < 128; i++)
 		{
 			channel.uNoteOnMap[i][trackChannel] = 0;
-			MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, volume));
+			MidiSend(MIDIEvents::NoteOff(nMidiCh, i, volume));
 		}
 
 	}
@@ -2510,7 +2510,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
 			while(channel.uNoteOnMap[i][trackChannel])
 			{
-				if(MidiSend(MIDIEvents::BuildNoteOffEvent(nMidiCh, i, volume)))
+				if(MidiSend(MIDIEvents::NoteOff(nMidiCh, i, volume)))
 				{
 					channel.uNoteOnMap[i][trackChannel]--;
 				} else
@@ -2543,7 +2543,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		if(channel.uNoteOnMap[note][trackChannel] < 17)
 			channel.uNoteOnMap[note][trackChannel]++;
 
-		MidiSend(MIDIEvents::BuildNoteOnEvent(nMidiCh, static_cast<uint8>(note), volume));
+		MidiSend(MIDIEvents::NoteOn(nMidiCh, static_cast<uint8>(note), volume));
 	}
 }
 

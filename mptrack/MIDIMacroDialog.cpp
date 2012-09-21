@@ -59,14 +59,14 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 BOOL CMidiMacroSetup::OnInitDialog()
 //----------------------------------
 {
-	CHAR s[128];
+	char s[128];
 	CDialog::OnInitDialog();
 	CheckDlgButton(IDC_CHECK1, m_bEmbed ? BST_CHECKED : BST_UNCHECKED);
 	m_EditSFx.SetLimitText(MACRO_LENGTH - 1);
 	m_EditZxx.SetLimitText(MACRO_LENGTH - 1);
 
 	// Parametered macro selection
-	for (UINT isfx=0; isfx<16; isfx++)
+	for(int isfx = 0; isfx < 16; isfx++)
 	{
 		wsprintf(s, "%d (SF%X)", isfx, isfx);
 		m_CbnSFx.AddString(s);
@@ -88,7 +88,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 
 	// Z80...ZFF box
-	for (int zxx = 0; zxx < 128; zxx++)
+	for(int zxx = 0; zxx < 128; zxx++)
 	{
 		wsprintf(s, "Z%02X", zxx | 0x80);
 		m_CbnZxx.AddString(s);
@@ -201,12 +201,12 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 void CMidiMacroSetup::UpdateDialog()
 //----------------------------------
 {
-	CHAR s[MACRO_LENGTH];
+	char s[MACRO_LENGTH];
 	UINT sfx, sfx_preset, zxx;
 
 	sfx = m_CbnSFx.GetCurSel();
 	sfx_preset = m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel());
-	if (sfx < 16)
+	if(sfx < 16)
 	{
 		ToggleBoxes(sfx_preset, sfx);
 		memcpy(s, m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
@@ -215,7 +215,7 @@ void CMidiMacroSetup::UpdateDialog()
 	}
 
 	zxx = m_CbnZxx.GetCurSel();
-	if (zxx < 0x80)
+	if(zxx < 0x80)
 	{
 		memcpy(s, m_MidiCfg.szMidiZXXExt[zxx], MACRO_LENGTH);
 		StringFixer::SetNullTerminator(s);
@@ -319,7 +319,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 	{
 		if(ValidateMacroString(m_EditSFx, m_MidiCfg.szMidiSFXExt[sfx], true))
 		{
-			CHAR s[MACRO_LENGTH];
+			char s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
 			StringFixer::SetNullTerminator(s);
@@ -342,7 +342,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 	{
 		if(ValidateMacroString(m_EditZxx, m_MidiCfg.szMidiZXXExt[zxx], false))
 		{
-			CHAR s[MACRO_LENGTH];
+			char s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
 			StringFixer::SetNullTerminator(s);
@@ -510,8 +510,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		wnd.SetSel(start - 1, end - 1, true);
 		MessageBeep(MB_OK);
 		return false;
-	}
-	else
+	} else
 	{
 		if(caseChange)
 		{
