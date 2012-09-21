@@ -659,12 +659,6 @@ void CCommandSet::SetupCommands()
 // Command Manipulation
 //-------------------------------------------------------
 
-CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite)
-//------------------------------------------------------------------------
-{
-	return Add(kc, cmd, overwrite, -1);
-}
-
 
 CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos)
 //---------------------------------------------------------------------------------
@@ -704,13 +698,15 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 				}
 				else
 				{
-					if (crossContext) { 
+					if (crossContext)
+					{ 
 						report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n   >" + GetCommandText((CommandID)cmd) + " in " + GetContextText(kc.ctx) + "\r\n\r\n";
-						Log("%s",report);
-					} else {
+						Log("%s", report);
+					} else
+					{
 						Remove(curKc, (CommandID)curCmd);
 						report += "Removed due to conflict in same context:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n\r\n";
-						Log("%s",report);
+						Log("%s", report);
 					}
 				}
 			}
@@ -780,37 +776,35 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 {
 	//World's biggest, most confusing method. :)
 	//Needs refactoring. Maybe make lots of Rule subclasses, each with their own Enforce() method?
-	//bool removing = !adding; //for attempt to salvage readability.. 
 	KeyCombination curKc;	// for looping through key combinations
 	KeyCombination newKc;	// for adding new key combinations
 	CString report="";
 
-	if (enforceRule[krAllowNavigationWithSelection])
+	if(enforceRule[krAllowNavigationWithSelection])
 	{
 		// When we get a new navigation command key, we need to 
 		// make sure this navigation will work when any selection key is pressed
-		if (inCmd>=kcStartPatNavigation && inCmd<=kcEndPatNavigation)
+		if(inCmd >= kcStartPatNavigation && inCmd <= kcEndPatNavigation)
 		{//Check that it is a nav cmd
 			CommandID cmdNavSelection = (CommandID)(kcStartPatNavigationSelect + (inCmd-kcStartPatNavigation));
-			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			for(int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
 			{//for all selection modifiers
 				curKc=commands[kcSelect].kcList[kSel];
 				newKc=inKc;
 				newKc.mod|=curKc.mod;	//Add selection modifier's modifiers to this command
-				if (adding)
+				if(adding)
 				{
 					Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection);
 					Add(newKc, cmdNavSelection, false);
-				}
-				else
-				{					
+				} else
+				{
 					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection); 
 					Remove(newKc, cmdNavSelection);
 				}
 			}
 		}
 		// Same applies for orderlist navigation
-		else if (inCmd>=kcStartOrderlistNavigation && inCmd<=kcEndOrderlistNavigation)
+		else if(inCmd >= kcStartOrderlistNavigation && inCmd <= kcEndOrderlistNavigation)
 		{//Check that it is a nav cmd
 			CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (inCmd-kcStartOrderlistNavigation));
 			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
@@ -818,13 +812,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				curKc=commands[kcSelect].kcList[kSel];
 				newKc=inKc;
 				newKc.mod|=curKc.mod;	//Add selection modifier's modifiers to this command
-				if (adding)
+				if(adding)
 				{
 					Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection);
 					Add(newKc, cmdNavSelection, false);
-				}
-				else
-				{					
+				} else
+				{
 					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection); 
 					Remove(newKc, cmdNavSelection);
 				}
@@ -832,44 +825,42 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 		// When we get a new selection key, we need to make sure that 
 		// all navigation commands will work with this selection key pressed
-		else if (inCmd==kcSelect)
+		else if(inCmd == kcSelect)
 		{
 			// check that is is a selection
-			for (int curCmd=kcStartPatNavigation; curCmd<=kcEndPatNavigation; curCmd++)
+			for(int curCmd=kcStartPatNavigation; curCmd<=kcEndPatNavigation; curCmd++)
 			{
 				// for all nav commands
-				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				for(int k = 0; k < commands[curCmd].kcList.GetSize(); k++)
 				{
 					// for all keys for this command
 					CommandID cmdNavSelection = (CommandID)(kcStartPatNavigationSelect + (curCmd-kcStartPatNavigation));
 					newKc=commands[curCmd].kcList[k]; // get all properties from the current nav cmd key
 					newKc.mod|=inKc.mod;			  // and the new selection modifier
-					if (adding)
+					if(adding)
 					{
 						Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);
 						Add(newKc, cmdNavSelection, false);
-					}
-					else
-					{	
+					} else
+					{
 						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);				
 						Remove(newKc, cmdNavSelection);
 					}
 				}
 			} // end all nav commands
-			for (int curCmd=kcStartOrderlistNavigation; curCmd<=kcEndOrderlistNavigation; curCmd++)
+			for(int curCmd = kcStartOrderlistNavigation; curCmd <= kcEndOrderlistNavigation; curCmd++)
 			{// for all nav commands
-				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				for(int k = 0; k < commands[curCmd].kcList.GetSize(); k++)
 				{// for all keys for this command
 					CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (curCmd-kcStartOrderlistNavigation));
 					newKc=commands[curCmd].kcList[k]; // get all properties from the current nav cmd key
 					newKc.mod|=inKc.mod;			  // and the new selection modifier
-					if (adding)
+					if(adding)
 					{
 						Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);
 						Add(newKc, cmdNavSelection, false);
-					}
-					else
-					{	
+					} else
+					{
 						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);				
 						Remove(newKc, cmdNavSelection);
 					}
@@ -878,40 +869,42 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 	} // end krAllowNavigationWithSelection
 
-	if (enforceRule[krAllowSelectionWithNavigation])
+	if(enforceRule[krAllowSelectionWithNavigation])
 	{
 		KeyCombination newKcSel;
 		
 		// When we get a new navigation command key, we need to ensure
 		// all selection keys will work even when this new selection key is pressed
-		if (inCmd>=kcStartPatNavigation && inCmd<=kcEndPatNavigation)
+		if(inCmd >= kcStartPatNavigation && inCmd <= kcEndPatNavigation)
 		{//if this is a navigation command
-			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			for(int kSel = 0; kSel < commands[kcSelect].kcList.GetSize(); kSel++)
 			{//for all deselection modifiers
-				newKcSel=commands[kcSelect].kcList[kSel];	// get all properties from the selection key
-				newKcSel.mod|=inKc.mod;						// add modifiers from the new nav command
-				if (adding)	{
+				newKcSel = commands[kcSelect].kcList[kSel];	// get all properties from the selection key
+				newKcSel.mod |= inKc.mod;					// add modifiers from the new nav command
+				if(adding)
+				{
 					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n"); 
 					Add(newKcSel, kcSelectWithNav, false);
-				}
-				else {	
+				} else
+				{
 					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n"); 				
 					Remove(newKcSel, kcSelectWithNav);
 				}
 			}
 		}
 		// Same for orderlist navigation
-		if (inCmd>=kcStartOrderlistNavigation&& inCmd<=kcEndOrderlistNavigation)
+		if(inCmd >= kcStartOrderlistNavigation && inCmd <= kcEndOrderlistNavigation)
 		{//if this is a navigation command
-			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			for(int kSel = 0; kSel < commands[kcSelect].kcList.GetSize(); kSel++)
 			{//for all deselection modifiers
 				newKcSel=commands[kcSelect].kcList[kSel];	// get all properties from the selection key
 				newKcSel.mod|=inKc.mod;						// add modifiers from the new nav command
-				if (adding)	{
+				if(adding)
+				{
 					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n"); 
 					Add(newKcSel, kcSelectWithNav, false);
-				}
-				else {	
+				} else
+				{
 					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n"); 				
 					Remove(newKcSel, kcSelectWithNav);
 				}
@@ -919,28 +912,29 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 		// When we get a new selection key, we need to ensure it will work even when
 		// any navigation key is pressed
-		else if (inCmd==kcSelect)
+		else if(inCmd == kcSelect)
 		{
-			for (int curCmd=kcStartPatNavigation; curCmd<=kcEndPatNavigation; curCmd++)
+			for(int curCmd = kcStartPatNavigation; curCmd <= kcEndPatNavigation; curCmd++)
 			{//for all nav commands
-				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				for(int k = 0; k < commands[curCmd].kcList.GetSize(); k++)
 				{// for all keys for this command
 					newKcSel=inKc; // get all properties from the selection key
 					newKcSel.mod|=commands[curCmd].kcList[k].mod; //add the nav keys' modifiers
-					if (adding)	{
+					if(adding)
+					{
 						Log("Enforcing rule krAllowSelectionWithNavigation - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);
 						Add(newKcSel, kcSelectWithNav, false);
-					}
-					else {	
+					} else
+					{
 						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);				
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
 			} // end all nav commands
 
-			for (int curCmd=kcStartOrderlistNavigation; curCmd<=kcEndOrderlistNavigation; curCmd++)
+			for(int curCmd = kcStartOrderlistNavigation; curCmd <= kcEndOrderlistNavigation; curCmd++)
 			{//for all nav commands
-				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				for(int k = 0; k <commands[curCmd].kcList.GetSize(); k++)
 				{// for all keys for this command
 					newKcSel=inKc; // get all properties from the selection key
 					newKcSel.mod |= commands[curCmd].kcList[k].mod; //add the nav keys' modifiers
@@ -948,8 +942,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					{
 						Log("Enforcing rule krAllowSelectionWithNavigation - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);
 						Add(newKcSel, kcSelectWithNav, false);
-					}
-					else
+					} else
 					{
 						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);				
 						Remove(newKcSel, kcSelectWithNav);
@@ -1002,7 +995,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	if(enforceRule[krAllowSelectCopySelectCombos])
 	{
 		KeyCombination newKcSel, newKcCopySel;
-		if (inCmd==kcSelect)
+		if(inCmd==kcSelect)
 		{
 			// On getting a new selection key, make this selection key work with all copy selects' modifiers
 			// On getting a new selection key, make all copyselects work with this key's modifiers
@@ -1013,35 +1006,33 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcCopySel=commands[kcCopySelect].kcList[k];
 				newKcCopySel.mod|=inKc.mod;
 				Log("Enforcing rule krAllowSelectCopySelectCombos\n"); 
-				if (adding)
+				if(adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
 					Add(newKcCopySel, kcCopySelectWithSelect, false);
-				}
-				else
+				} else
 				{
 					Remove(newKcSel, kcSelectWithCopySelect);
 					Remove(newKcCopySel, kcCopySelectWithSelect);
 				}
 			}
 		}
-		if (inCmd==kcCopySelect)
+		if(inCmd == kcCopySelect)
 		{ 
 			// On getting a new copyselection key, make this copyselection key work with all selects' modifiers
 			// On getting a new copyselection key, make all selects work with this key's modifiers
-			for (int k=0; k<commands[kcSelect].kcList.GetSize(); k++)
+			for(int k = 0; k < commands[kcSelect].kcList.GetSize(); k++)
 			{
 				newKcSel=commands[kcSelect].kcList[k];
-				newKcSel.mod|=inKc.mod;
+				newKcSel.mod |= inKc.mod;
 				newKcCopySel=inKc;
 				newKcCopySel.mod|=commands[kcSelect].kcList[k].mod;
 				Log("Enforcing rule krAllowSelectCopySelectCombos\n"); 
-				if (adding)
+				if(adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
 					Add(newKcCopySel, kcCopySelectWithSelect, false);
-				}
-				else
+				} else
 				{
 					Remove(newKcSel, kcSelectWithCopySelect);
 					Remove(newKcCopySel, kcCopySelectWithSelect);
@@ -1757,56 +1748,28 @@ void CCommandSet::UpgradeKeymap(CCommandSet *pCommands, int oldVersion)
 		kc.code = VK_OEM_MINUS;
 		pCommands->Add(kc, kcOrderlistPatMinus, false);
 
-		kc.code = '0';
-		pCommands->Add(kc, kcOrderlistPat0, false);
-		kc.code = VK_NUMPAD0;
-		pCommands->Add(kc, kcOrderlistPat0, false);
+		STATIC_ASSERT(VK_NUMPAD0 + 9 == VK_NUMPAD9);
+		STATIC_ASSERT(kcOrderlistPat0 + 9 == kcOrderlistPat9);
+		for(int i = 0; i <= 9; i++)
+		{
+			kc.code = '0' + i;
+			pCommands->Add(kc, static_cast<CommandID>(kcOrderlistPat0 + i), false);
+			kc.code = VK_NUMPAD0 + i;
+			pCommands->Add(kc, static_cast<CommandID>(kcOrderlistPat0 + i), false);
+		}
 
-		kc.code = '1';
-		pCommands->Add(kc, kcOrderlistPat1, false);
-		kc.code = VK_NUMPAD1;
-		pCommands->Add(kc, kcOrderlistPat1, false);
+		kc.code = 'I';
+		pCommands->Add(kc, kcOrderlistPatIgnore, false);
 
-		kc.code = '2';
-		pCommands->Add(kc, kcOrderlistPat2, false);
-		kc.code = VK_NUMPAD2;
-		pCommands->Add(kc, kcOrderlistPat2, false);
+		kc.code = VK_SPACE;
+		pCommands->Add(kc, kcOrderlistPatInvalid, false);
 
-		kc.code = '3';
-		pCommands->Add(kc, kcOrderlistPat3, false);
-		kc.code = VK_NUMPAD3;
-		pCommands->Add(kc, kcOrderlistPat3, false);
+		kc.code = 'L';
+		kc.mod = HOTKEYF_CONTROL;
+		pCommands->Add(kc, kcOrderlistLockPlayback, false);
 
-		kc.code = '4';
-		pCommands->Add(kc, kcOrderlistPat4, false);
-		kc.code = VK_NUMPAD4;
-		pCommands->Add(kc, kcOrderlistPat4, false);
-
-		kc.code = '5';
-		pCommands->Add(kc, kcOrderlistPat5, false);
-		kc.code = VK_NUMPAD5;
-		pCommands->Add(kc, kcOrderlistPat5, false);
-
-		kc.code = '6';
-		pCommands->Add(kc, kcOrderlistPat6, false);
-		kc.code = VK_NUMPAD6;
-		pCommands->Add(kc, kcOrderlistPat6, false);
-
-		kc.code = '7';
-		pCommands->Add(kc, kcOrderlistPat7, false);
-		kc.code = VK_NUMPAD7;
-		pCommands->Add(kc, kcOrderlistPat7, false);
-
-		kc.code = '8';
-		pCommands->Add(kc, kcOrderlistPat8, false);
-		kc.code = VK_NUMPAD8;
-		pCommands->Add(kc, kcOrderlistPat8, false);
-
-		kc.code = '9';
-		pCommands->Add(kc, kcOrderlistPat9, false);
-		kc.code = VK_NUMPAD9;
-		pCommands->Add(kc, kcOrderlistPat9, false);
-
+		kc.code = 'U';
+		pCommands->Add(kc, kcOrderlistUnlockPlayback, false);
 	}
 }
 

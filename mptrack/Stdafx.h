@@ -40,7 +40,6 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #include <afxcview.h>
 #include <afxole.h>
-#include <winreg.h>
 #include <windowsx.h>
 
 #pragma warning(disable:4201)

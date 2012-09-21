@@ -263,19 +263,19 @@ namespace MIDIEvents
 	};
 
 	// Build a generic MIDI event
-	uint32 BuildEvent(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2);
+	uint32 Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2);
 	// Build a MIDI CC event
-	uint32 BuildCCEvent(MidiCC midiCC, uint8 midiChannel, uint8 param);
+	uint32 CC(MidiCC midiCC, uint8 midiChannel, uint8 param);
 	// Build a MIDI Pitchbend event
-	uint32 BuildPitchBendEvent(uint8 midiChannel, uint16 bendAmount);
+	uint32 PitchBend(uint8 midiChannel, uint16 bendAmount);
 	// Build a MIDI Program Change event
-	uint32 BuildProgramChangeEvent(uint8 midiChannel, uint8 program);
+	uint32 ProgramChange(uint8 midiChannel, uint8 program);
 	// Build a MIDI Note Off event
-	uint32 BuildNoteOffEvent(uint8 midiChannel, uint8 note, uint8 velocity);
+	uint32 NoteOff(uint8 midiChannel, uint8 note, uint8 velocity);
 	// Build a MIDI Note On event
-	uint32 BuildNoteOnEvent(uint8 midiChannel, uint8 note, uint8 velocity);
+	uint32 NoteOn(uint8 midiChannel, uint8 note, uint8 velocity);
 	// Build a MIDI System Event
-	uint8 BuildSystemEvent(SystemEvent eventType);
+	uint8 System(SystemEvent eventType);
 
 	// Get MIDI channel from a MIDI event
 	uint8 GetChannelFromEvent(uint32 midiMsg);
