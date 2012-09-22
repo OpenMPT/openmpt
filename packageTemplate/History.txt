@@ -24,6 +24,73 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.20.03.00 (22 September 2012, revision 1359)
+----------------------------------------------
+Pattern tab
+   [New] <js> Playback can now be locked to an order range. The range can be specified from the context menu of an order selection. Locked orders are then shown with a different background colour.
+   [Imp] <js> For visual guidance during editing, non-existing pattern numbers are now greyed out.
+   [Imp] <js> Added a keyboard shortcut for opening the Quick Channel Settings dialog.
+   [Mod] <js> Entering note-offs via MIDI doesn't put an instrument number next to them anymore.
+   [Fix] <js> Cursor doesn't exceed the pattern anymore when moving it beyond the right border.
+   [Fix] <js> When opening the pattern tab for the first time, the order list should not be scrolled randomly anymore if not necessary.
+
+Pattern tab::Quick Channel Settings Dialog
+   [New] <js> Added freely assignable keyboard shortcuts for switching between channels and returning to the pattern editor.
+   [Imp] <js> The dialog is now always hidden when changing focus to another window, not only when switching back to the lower part of the pattern view.
+   [Fix] <js> Tab order is now correct.
+
+Sample tab
+   [Fix] <js> 8SVX Loader: Loops are now also loaded properly if the loop end is precisely at the sample end.
+
+Instrument tab
+   [New] <js> "Pitch Bend Range": For instrument plugins, enter the instrument's Pitch Wheel Depth into this box and OpenMPT will now automatically adjust portamento / vibrato commands for this instrument plugin so that they behave identical to sample portamento / vibrato.
+   [Imp] <js> Sustain / Loop points cannot be enabled anymore if there is no evelope.
+   [Mod] <js> Velocity handling option has been turned into a checkbox (should be easier to grasp).
+   [Fix] <js> Loading AIFF files as instruments (or previewing them from the tree view) works now.
+
+VST / DMO Plugins
+   [New] <js> Plugins can now also receive tracker portamento (Hxx / 4xx and the like). Vibrato is emulated through pitch wheel messages; the behaviour is identical to sample vibrato if the plugin's actual Pitch Wheel Depth is set up correctly in the instrument tab.
+   [Imp] <js> Portamento Up / Down effects are now implemented properly: Memory and fine slides do finally work. (Fine and extra fine slides are currently not supported in the XM format, but you should not use plugins in that format anyway!). The behaviour is now also identical to sample portamento if the plugin's actual Pitch Wheel Depth is set up correctly in the instrument tab. For existing songs, a new option has been added to the Song Properties to retain the old behaviour.
+   [Fix] <js> Randomize Parameters reset focus to main window instead of plugin window (http://bugs.openmpt.org/view.php?id=294)
+   [Fix] <js> Randomize Parameters doesn't ask the plugin if a parameter is automatable anymore, as some plugins do not seem to set this property at all.
+   [Fix] <js> OpenMPT didn't write more than 255 plugins to the settings file since version 1.20 (http://bugs.openmpt.org/view.php?id=267)
+   [Fix] <js> A memory leak that occoured when trying to register invalid or missing plugins (e.g. on startup) has been fixed.
+
+IT::Compatible Playback Mode
+   [Fix] <js> A channel's key-off status is kept with portamento notes if "Compatible Gxx" is disabled or there is no instrument number next to the new note. 
+
+IT::Loading
+   [Fix] <js> Overly long (26 characters) sample / instrument name strings found in IT files made with older versions of MPT are now read correctly again.
+   [Fix] <js> Silent samples were sometimes loaded into sample slots that were actually supposed to be empty.
+
+XM
+   [Fix] <js> All fine slide commands (E1x, E2x, EAx, EBx, X1x, X2x) are supposed to have their own memory. Previously, it was shared between some of the commands.
+
+XM::Compatible Playback Mode
+   [Fix] <js> Notes next to note delays are now ignored if the delay is greater than the current speed (*ignoring* any pattern delays). Previously this was only ignored if the delay was greater than the speed *including* pattern delays.
+
+XM::Loading and Saving
+   [Imp] <js> When loading an XM file made with an older version of OpenMPT, gxx / 3xx combinations in the same pattern cell are now tried to be upgraded to fit the new behaviour of OpenMPT 1.20.02.00.
+   [Fix] <js> Compatibility export broke X1x and X2x (extra-fine portamento) commands.
+
+MOD
+   [Fix] <js> Dxx effects that are to the left of a Bxx effect are now ignored (like in the XM format).
+   [Fix] <js> Loading 15-sample MODs only worked under lucky circumstances (most likely since OpenMPT 1.20.01.00).
+
+Other formats
+   [Imp] <js> 669 Loader: Effects are now imported more accurately.
+   [Imp] <js> DMF Loader: Improved effect import to fit more effects into a pattern cell.
+   [Fix] <js> AMF (DSMI) Loader: Fixed pattern effects (normal volume slides were always loaded as volume slide + vibrato) and some other bugs; More AMF format revision (8-14) are supported now.
+   [Fix] <js> AMF (ASYLUM) Loader: Transposed samples will now play correctly, default speed / tempo are not ignored anymore.
+
+Misc
+   [New] <js> Wave Export: Added option to loop a song a given number of times during export (http://bugs.openmpt.org/view.php?id=221).
+   [Imp] <js> Keyboard Settings: Searching for shortcuts does now also work with MIDI CCs.
+   [Mod] <js> Since the DirectSound driver seems to be buggy (see various reports on the issue tracker), OpenMPT defaults to WaveOut now if there's no ASIO driver present.
+   [Fix] <ks> Save All / Save None buttons in the Unsaved Files dialog didn't work if there was only one unsaved file (http://bugs.openmpt.org/view.php?id=206).
+   [Fix] <js> A known file extension shouldn't suggest a wrong file extension in the WAV / MP3 export dialog anymore (http://bugs.openmpt.org/view.php?id=298).
+
+
 v1.20.02.00 (7 July 2012, revision 1318)
 ----------------------------------------
 Pattern tab
@@ -39,7 +106,7 @@ Pattern tab
 
 Sample tab
    [Imp] <js> Improved AIFF support (added support for loop points, up to 32-Bit sample resolution, AIFF-C files and little-endian sample data).
-   [Imp] <js> Added support for arbitrary bit resolutions between 1 and 32 bits in WAV files (f.e. 20-Bit sample data).
+   [Imp] <js> Added support for arbitrary bit resolutions between 1 and 32 bits in WAV files (e.g. 20-Bit sample data).
    [Imp] <js> If zooming the current selection is impossible, the zoom context menu item is greyed out.
    [Fix] <js> Shouldn't crash anymore when cleaning up Undo memory (http://bugs.openmpt.org/view.php?id=232).
 
@@ -65,7 +132,7 @@ IT
 
 IT::Compatible Playback Mode
    [Fix] <js> Combinations of Qxy (retrigger) with a pattern delay at Speed y should now work as intended.
-   [Fix] <js> Combinations of SDx with x greater than the current spend and tick delay commands didn't work. 
+   [Fix] <js> Combinations of SDx with x greater than the current speed combined with tick delay commands didn't work. 
 
 IT::Loading
    [Fix] <js> Loading IT files made with older versions of OpenMPT replaces SC0 with ^^ instead of v00 now.
@@ -90,7 +157,7 @@ Other formats
    [Imp] <js> STM Loader imports some effects more correctly now.
    [Imp] <js> UMX Loader checks for a few more contained module formats that are also supported by Galaxy Sound System (STM, 669, FAR). 
    [Fix] <js> MDL Loader was severely broken in OpenMPT 1.20.01.00.
-   [Fix] <js> MED Loader: Sample transpose should work as intended (at least for MMD1 modules), MMD2 order list works again as well, Tempo vs Speed precence for value 32 should be correct now.
+   [Fix] <js> MED Loader: Sample transpose should work as intended (at least for MMD1 modules), MMD2 order list works again as well, Tempo vs Speed precedence for value 32 should be correct now.
 
 Misc
    [New] <js> Keyboard Settings: Shortcuts can now also be found by pressing the sought-after key combination. Click search field to reset filter.
@@ -100,6 +167,7 @@ Misc
 Bundled plugins
    [Fix] <js> When using more than one instance of the MIDI Input / Output plugin at a time, killing one plugin instance killed all other instances as well.
    [Fix] <ks> The MIDI Input / Output plugin could sometimes send garbage data.
+
 
 v1.20.01.00 (5 May 2012, revision 1263)
 ---------------------------------------
