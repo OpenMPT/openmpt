@@ -83,7 +83,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	// "fact" chunk should contain sample length of compressed samples.
 	sampleLength = chunks.GetChunk(RIFFChunk::idfact).ReadUint32LE();
 
-	if(formatInfo.format != WAVFormatChunk::fmtIMA_ADPCM || sampleLength == 0)
+	if((formatInfo.format != WAVFormatChunk::fmtIMA_ADPCM || sampleLength == 0) && GetSampleSize() != 0)
 	{
 		// Some samples have an incorrect blockAlign / sample size set (e.g. it's 8 in SQUARE.WAV while it should be 1), so let's better not trust this value.
 		sampleLength = sampleData.GetLength() / GetSampleSize();
