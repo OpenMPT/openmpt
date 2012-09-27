@@ -248,8 +248,6 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 //---------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	HTREEITEM curSelection, categoryFolders[VSTPluginLib::numCategories];
-	vector<bool> categoryUsed(VSTPluginLib::numCategories, false);
 
 	m_treePlugins.SetRedraw(FALSE);
 	m_treePlugins.DeleteAllItems();
@@ -275,18 +273,21 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 		{ VSTPluginLib::catSynth,			"Instrument Plugins" },
 	};
 	
+	vector<bool> categoryUsed(VSTPluginLib::numCategories, false);
+	HTREEITEM categoryFolders[VSTPluginLib::numCategories];
 	for(size_t i = CountOf(categories); i != 0; )
 	{
 		i--;
 		categoryFolders[categories[i].category] = AddTreeItem(categories[i].description, IMAGE_FOLDER, false);
 	}
-	curSelection = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+
+	HTREEITEM currentPlug = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+	bool foundCurrentPlug = false;
 
 	if(pManager)
 	{
 		const bool nameFilterActive = !m_sNameFilter.IsEmpty();
 
-		VSTPluginLib *pCurrent = nullptr;
 		VSTPluginLib *p = pManager->GetFirstPlugin();
 		while(p)
 		{
@@ -310,40 +311,40 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				m_treePlugins.EnsureVisible(h);
 			}
 
-			if(m_pPlugin)
+			if(m_pPlugin && !foundCurrentPlug)
 			{
 				//Which plugin should be selected?
 
 				if(forceSelect != 0 && p->dwPluginId2 == forceSelect)
 				{
 					//forced selection (e.g. just after add plugin)
-					pCurrent = p;
+					currentPlug = h;
 				} else if(m_pPlugin->pMixPlugin)
 				{
 					//Current slot's plugin
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
-					if (pVstPlug->GetPluginFactory() == p) pCurrent = p;
+					if (pVstPlug->GetPluginFactory() == p)
+					{
+						currentPlug = h;
+					}
 				} else if(m_pPlugin->Info.dwPluginId1 != 0 || m_pPlugin->Info.dwPluginId2 != 0)
 				{
 					//Plugin with matching ID to current slot's plug
 					if(p->dwPluginId1 == m_pPlugin->Info.dwPluginId1
 						&& p->dwPluginId2 == m_pPlugin->Info.dwPluginId2)
 					{
-							pCurrent = p;
+						currentPlug = h;
 					}
-				} else
+				} else if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
 				{
-					//Last selected plugin
-					if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
-					{
-						pCurrent = p;
-					}
+					// Previously selected plugin
+					currentPlug = h;
 				}
-			}
 
-			if(pCurrent == p)
-			{
-				curSelection = h;
+				if(currentPlug == h)
+				{
+					foundCurrentPlug = true;
+				}
 			}
 
 			p = p->pNext;
@@ -360,11 +361,11 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	}
 
 	m_treePlugins.SetRedraw(TRUE);
-	if(curSelection)
+	if(currentPlug)
 	{
-		m_treePlugins.SelectItem(curSelection);
-		m_treePlugins.SetItemState(curSelection, TVIS_BOLD, TVIS_BOLD);
-		m_treePlugins.EnsureVisible(curSelection);
+		m_treePlugins.SelectItem(currentPlug);
+		m_treePlugins.SetItemState(currentPlug, TVIS_BOLD, TVIS_BOLD);
+		m_treePlugins.EnsureVisible(currentPlug);
 	}
 }
 
