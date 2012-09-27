@@ -1223,6 +1223,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\FileReader.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\ITTools.cpp"
 				>
 			</File>
