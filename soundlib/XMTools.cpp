@@ -22,7 +22,7 @@ void XMFileHeader::ConvertEndianness()
 	SwapBytesLE(version);
 	SwapBytesLE(size);
 	SwapBytesLE(orders);
-	SwapBytesLE(restartpos);
+	SwapBytesLE(restartPos);
 	SwapBytesLE(channels);
 	SwapBytesLE(patterns);
 	SwapBytesLE(instruments);

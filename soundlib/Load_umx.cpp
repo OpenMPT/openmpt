@@ -271,7 +271,7 @@ bool CSoundFile::ReadUMX(FileReader &file)
 			{
 				// Read as module
 				if(ReadIT(data, fileChunk.GetLength())
-					|| ReadXM(data, fileChunk.GetLength())
+					|| ReadXM(fileChunk)
 					|| ReadS3M(fileChunk)
 					|| ReadWav(fileChunk)
 					|| ReadSTM(fileChunk)

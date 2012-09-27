@@ -83,7 +83,7 @@ bool CSoundFile::ReadMO3(FileReader &file)
 				{
 					FileReader unpackedFile(static_cast<const char *>(stream), length);
 
-					result = ReadXM(static_cast<const LPCBYTE>(stream), length)
+					result = ReadXM(unpackedFile)
 						|| ReadIT(static_cast<const LPCBYTE>(stream), length)
 						|| ReadS3M(unpackedFile)
 						|| ReadMTM(static_cast<const LPCBYTE>(stream), length)

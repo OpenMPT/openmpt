@@ -384,7 +384,7 @@ public:
 	bool InitChannel(CHANNELINDEX nChn);
 
 	// Module Loaders
-	bool ReadXM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadXM(FileReader &file);
 	bool ReadS3M(FileReader &file);
 	bool ReadMod(FileReader &file);
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -631,7 +631,7 @@ public:
 	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file);
-	bool ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
 	UINT ReadITSSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
 	bool Read8SVXSample(SAMPLEINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
@@ -639,7 +639,7 @@ public:
 
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
@@ -808,7 +808,7 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, LPCBYTE& ptr, const int32
 void ReadExtendedInstrumentProperty(ModInstrument* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
 
 // Read extended instrument properties from 'pDataStart' to instrument 'pIns'.
-void ReadExtendedInstrumentProperties(ModInstrument* pIns, const LPCBYTE pDataStart, const size_t nMemLength);
+void ReadExtendedInstrumentProperties(ModInstrument* pIns, const void *pDataStart, const size_t nMemLength);
 
 // Convert instrument flags which were read from 'dF..' extension to proper internal representation.
 void ConvertReadExtendedFlags(ModInstrument* pIns);

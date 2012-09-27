@@ -28,7 +28,7 @@ struct XMFileHeader
 	uint16 version;			// File version (1.02 - 1.04 are supported)
 	uint32 size;			// Header Size
 	uint16 orders;			// Number of Orders
-	uint16 restartpos;		// Restart Position
+	uint16 restartPos;		// Restart Position
 	uint16 channels;		// Number of Channels
 	uint16 patterns;		// Number of Patterns
 	uint16 instruments;		// Number of Unstruments
@@ -128,6 +128,11 @@ STATIC_ASSERT(sizeof(XMInstrumentHeader) == 263);
 // XI Instrument Header
 struct XIInstrumentHeader
 {
+	enum
+	{
+		fileVersion	= 0x102,
+	};
+
 	char   signature[21];		// "Extended Instrument: "
 	char   name[22];			// Instrument Name, not null-terminated (any nulls are treated as spaces)
 	uint8  eof;					// DOS EOF Character (0x1A)
@@ -169,7 +174,7 @@ struct XMSample
 	uint8  flags;			// Sample Flags
 	uint8  pan;				// Sample Panning
 	int8   relnote;			// Sample Transpose
-	uint8  reserved;		// Reserved (used for ModPlug's ADPCM compression)
+	uint8  reserved;		// Reserved (abused for ModPlug's ADPCM compression)
 	char   name[22];		// Sample Name, not null-terminated (any nulls are treated as spaces)
 
 	// Convert OpenMPT's internal sample representation to an XMSample.

@@ -30,7 +30,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 	FileReader file(reinterpret_cast<const char *>(lpMemFile), dwFileLength);
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file)
-		&& !ReadXISample(nSample, lpMemFile, dwFileLength)
+		&& !ReadXISample(nSample, file)
 		&& !ReadAIFFSample(nSample, file)
 		&& !ReadITSSample(nSample, lpMemFile, dwFileLength)
 		&& !ReadPATSample(nSample, lpMemFile, dwFileLength)
@@ -46,8 +46,9 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
 //---------------------------------------------------------------------------------------------------------
 {
+	FileReader file(reinterpret_cast<const char *>(lpMemFile), dwFileLength);
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
-	if ((!ReadXIInstrument(nInstr, lpMemFile, dwFileLength))
+	if ((!ReadXIInstrument(nInstr, file))
 	 && (!ReadPATInstrument(nInstr, lpMemFile, dwFileLength))
 	 && (!ReadITIInstrument(nInstr, lpMemFile, dwFileLength))
 	// Generic read
@@ -900,23 +901,16 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 // XI Instruments
 
 
-bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
+//-------------------------------------------------------------------------
 {
-	if(dwFileLength < sizeof(XIInstrumentHeader))
-	{
-		return false;
-	}
+	file.Rewind();
 
-	XIInstrumentHeader header = *reinterpret_cast<const XIInstrumentHeader *>(lpMemFile);
-	header.ConvertEndianness();
-
-	DWORD dwMemPos = sizeof(XIInstrumentHeader);
-	
-	if(memcmp(header.signature, "Extended Instrument: ", 21)
-		|| header.version != 0x102
-		|| header.eof != 0x1A
-		|| header.numSamples > 32)
+	XIInstrumentHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.signature, "Extended Instrument: ", 21)
+		|| fileHeader.version != XIInstrumentHeader::fileVersion
+		|| fileHeader.eof != 0x1A)
 	{
 		return false;
 	}
@@ -932,18 +926,21 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile
 	}
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
-	if(nInstr > m_nInstruments) m_nInstruments = nInstr;
+	if(nInstr > m_nInstruments)
+	{
+		m_nInstruments = nInstr;
+	}
 	Instruments[nInstr] = pIns;
 
-	header.ConvertToMPT(*pIns);
+	fileHeader.ConvertToMPT(*pIns);
 
 	// Translate sample map and find available sample slots
-	vector<SAMPLEINDEX> sampleMap(header.numSamples);
+	vector<SAMPLEINDEX> sampleMap(fileHeader.numSamples);
 	SAMPLEINDEX maxSmp = 0;
 
 	for(size_t i = 0 + 12; i < 96 + 12; i++)
 	{
-		if(pIns->Keyboard[i] >= header.numSamples)
+		if(pIns->Keyboard[i] >= fileHeader.numSamples)
 		{
 			continue;
 		}
@@ -965,41 +962,35 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile
 		m_nSamples = maxSmp;
 	}
 
-	vector<SampleIO> sampleFlags(header.numSamples);
+	vector<SampleIO> sampleFlags(fileHeader.numSamples);
 
 	// Read sample headers
-	for(SAMPLEINDEX i = 0; i < header.numSamples; i++)
+	for(SAMPLEINDEX i = 0; i < fileHeader.numSamples; i++)
 	{
-		if (dwMemPos + sizeof(XMSample) > dwFileLength)
-		{
-			break;
-		}
-
-		const XMSample *xmSample= reinterpret_cast<const XMSample *>(lpMemFile + dwMemPos);
-		dwMemPos += sizeof(XMSample);
-
-		if(!sampleMap[i])
+		XMSample sampleHeader;
+		if(!file.Read(sampleHeader)
+			|| !sampleMap[i])
 		{
 			continue;
 		}
 
 		ModSample &mptSample = Samples[sampleMap[i]];
-		xmSample->ConvertToMPT(mptSample);
-		header.instrument.ApplyAutoVibratoToMPT(mptSample);
+		sampleHeader.ConvertToMPT(mptSample);
+		fileHeader.instrument.ApplyAutoVibratoToMPT(mptSample);
 		mptSample.Convert(MOD_TYPE_XM, GetType());
 
-		StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, xmSample->name);
-		StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[sampleMap[i]], xmSample->name);
+		StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, sampleHeader.name);
+		StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[sampleMap[i]], sampleHeader.name);
 
-		sampleFlags[i] = xmSample->GetSampleFormat();
+		sampleFlags[i] = sampleHeader.GetSampleFormat();
 	}
 
 	// Read sample data
-	for(SAMPLEINDEX i = 0; i < header.numSamples; i++)
+	for(SAMPLEINDEX i = 0; i < fileHeader.numSamples; i++)
 	{
-		if(dwMemPos < dwFileLength && sampleMap[i])
+		if(sampleMap[i])
 		{
-			dwMemPos += sampleFlags[i].ReadSample(Samples[sampleMap[i]], (LPSTR)(lpMemFile + dwMemPos), dwFileLength - dwMemPos);
+			sampleFlags[i].ReadSample(Samples[sampleMap[i]], file);
 		}
 	}
 
@@ -1009,9 +1000,9 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile
 	// -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Leave if no extra instrument settings are available (end of file reached)
-	if(dwMemPos < dwFileLength)
+	if(file.BytesLeft())
 	{
-		ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
+		ReadExtendedInstrumentProperties(pIns, file.GetRawData(), file.BytesLeft());
 	}
 	// -! NEW_FEATURE#0027
 
@@ -1086,23 +1077,18 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 
 
 // Read first sample from XI file into a sample slot
-bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
-//--------------------------------------------------------------------------------------------
+bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
+//------------------------------------------------------------------
 {
-	if(dwFileLength < sizeof(XIInstrumentHeader))
-	{
-		return false;
-	}
+	file.Rewind();
 
-	XIInstrumentHeader header = *reinterpret_cast<const XIInstrumentHeader *>(lpMemFile);
-	header.ConvertEndianness();
-
-	DWORD dwMemPos = sizeof(XIInstrumentHeader);
-
-	if(memcmp(header.signature, "Extended Instrument: ", 21)
-		|| header.version != 0x102
-		|| header.eof != 0x1A
-		|| header.numSamples > 32)
+	XIInstrumentHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| !file.CanRead(sizeof(XMSample))
+		|| memcmp(fileHeader.signature, "Extended Instrument: ", 21)
+		|| fileHeader.version != XIInstrumentHeader::fileVersion
+		|| fileHeader.eof != 0x1A
+		|| fileHeader.numSamples == 0)
 	{
 		return false;
 	}
@@ -1112,34 +1098,27 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD
 		m_nSamples = nSample;
 	}
 
-	// Read sample header
-	if (dwMemPos + sizeof(XMSample) > dwFileLength)
-	{
-		return false;
-	}
-
-	const XMSample *xmSample= reinterpret_cast<const XMSample *>(lpMemFile + dwMemPos);
+	// Read first sample header
+	XMSample sampleHeader;
+	file.Read(sampleHeader);
 	// Gotta skip 'em all!
-	dwMemPos += sizeof(XMSample) * header.numSamples;
+	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
 
 	ModSample &mptSample = Samples[nSample];
-	xmSample->ConvertToMPT(mptSample);
+	sampleHeader.ConvertToMPT(mptSample);
 	if(GetType() != MOD_TYPE_XM)
 	{
 		// No need to pan that single sample, thank you...
 		mptSample.uFlags &= ~CHN_PANNING;
 	}
-	header.instrument.ApplyAutoVibratoToMPT(mptSample);
+	fileHeader.instrument.ApplyAutoVibratoToMPT(mptSample);
 	mptSample.Convert(MOD_TYPE_XM, GetType());
 
-	StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, xmSample->name);
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[nSample], xmSample->name);
+	StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, sampleHeader.name);
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[nSample], sampleHeader.name);
 
 	// Read sample data
-	if(dwMemPos < dwFileLength)
-	{
-		xmSample->GetSampleFormat().ReadSample(Samples[nSample], (LPSTR)(lpMemFile + dwMemPos), dwFileLength - dwMemPos);
-	}
+	sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
 
 	return true;
 }
@@ -1714,24 +1693,25 @@ void ReadExtendedInstrumentProperty(ModInstrument* pIns, const int32 code, LPCBY
 }
 
 
-void ReadExtendedInstrumentProperties(ModInstrument* pIns, const LPCBYTE pDataStart, const size_t nMemLength)
-//-----------------------------------------------------------------------------------------------------------
+void ReadExtendedInstrumentProperties(ModInstrument* pIns, const void *pDataStart, const size_t nMemLength)
+//---------------------------------------------------------------------------------------------------------
 {
 	if(pIns == nullptr || pDataStart == nullptr || nMemLength < 4)
 		return;
 
-	LPCBYTE pData = pDataStart;
-	const LPCBYTE pEnd = pDataStart + nMemLength;
+	const uint8 *pStart = static_cast<const uint8 *>(pDataStart);
+	const uint8 *pData = pStart;
+	const uint8 *pEnd = pStart + nMemLength;
 
 	int32 code;
 	memcpy(&code, pData, sizeof(code));
 
 	// Seek for supported extended settings header
-	if( code == 'MPTX' )
+	if(code == 'MPTX')
 	{
 		pData += sizeof(code); // jump extension header code
 
-		while( (uintptr_t)(pData - pDataStart) <= nMemLength - 4)
+		while(static_cast<size_t>(pData - pStart) <= nMemLength - 4u)
 		{
 			memcpy(&code, pData, sizeof(code)); // read field code
 			pData += sizeof(code);				 // jump field code
