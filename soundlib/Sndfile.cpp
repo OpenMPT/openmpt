@@ -597,7 +597,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 
 		FileReader file(reinterpret_cast<const char*>(lpStream), dwMemLength);
 
-		if(!ReadXM(lpStream, dwMemLength)
+		if(!ReadXM(file)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 		 && !ReadITProject(file)
