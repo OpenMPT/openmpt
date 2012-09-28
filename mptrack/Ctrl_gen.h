@@ -66,7 +66,6 @@ public:
 				    m_SpinSamplePA, m_SpinVSTiVol;
 
 	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
-	CComboBox m_ComboResampling;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
 	//}}AFX_DATA
 	//{{AFX_VIRTUAL(CCtrlGeneral)
@@ -92,13 +91,7 @@ protected:
 	afx_msg void OnRestartPosChanged();
 	afx_msg void OnSongProperties();
 	afx_msg void OnPlayerProperties();
-	afx_msg void OnResamplingChanged();
 	afx_msg void OnLoopSongChanged();
-	afx_msg void OnAGCChanged();
-	afx_msg void OnXBassChanged();
-	afx_msg void OnReverbChanged();
-	afx_msg void OnSurroundChanged();
-	afx_msg void OnEqualizerChanged();
 	afx_msg void OnEnSetfocusEditSongtitle();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
