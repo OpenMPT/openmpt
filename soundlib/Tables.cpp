@@ -23,7 +23,7 @@
 ///////////////////////////////////////////////////////////////////////
 #ifndef FASTSOUNDLIB
 
-MODFORMATINFO gModFormatInfo[] =
+/*MODFORMATINFO gModFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,	"ProTracker", ".mod",			0 },
 	{ MOD_TYPE_S3M,	"ScreamTracker III", ".s3m",	0 },
@@ -52,7 +52,7 @@ MODFORMATINFO gModFormatInfo[] =
 	{ MOD_TYPE_MPT, "OpenMPT", ".mptm",				0 },
 	{ MOD_TYPE_J2B, "Galaxy Sound System", ".j2b",	0 },
 	{ MOD_TYPE_IMF, "Imago Orpheus", ".imf",		0 },
-};
+};*/
 
 #endif
 

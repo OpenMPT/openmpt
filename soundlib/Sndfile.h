@@ -792,8 +792,6 @@ typedef struct MODFORMATINFO
 	DWORD   dwPadding;
 } MODFORMATINFO;
 
-extern MODFORMATINFO gModFormatInfo[];
-
 #endif
 
 

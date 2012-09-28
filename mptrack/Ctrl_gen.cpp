@@ -32,11 +32,6 @@ BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	ON_COMMAND(IDC_BUTTON_MODTYPE,			OnSongProperties)
 	ON_COMMAND(IDC_BUTTON_PLAYERPROPS,		OnPlayerProperties)
 	ON_COMMAND(IDC_CHECK_LOOPSONG,			OnLoopSongChanged)
-	ON_COMMAND(IDC_CHECK_BASS,				OnXBassChanged)
-	ON_COMMAND(IDC_CHECK_SURROUND,			OnSurroundChanged)
-	ON_COMMAND(IDC_CHECK_REVERB,			OnReverbChanged)
-	ON_COMMAND(IDC_CHECK_EQ,				OnEqualizerChanged)
-	ON_COMMAND(IDC_CHECK_AGC,				OnAGCChanged)
 	ON_EN_CHANGE(IDC_EDIT_SONGTITLE,		OnTitleChanged)
 	ON_EN_CHANGE(IDC_EDIT_TEMPO,			OnTempoChanged)
 	ON_EN_CHANGE(IDC_EDIT_SPEED,			OnSpeedChanged)
@@ -44,7 +39,6 @@ BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_RESTARTPOS,		OnRestartPosChanged)
 	ON_EN_CHANGE(IDC_EDIT_VSTIVOL,			OnVSTiVolChanged)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLEPA,			OnSamplePAChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_RESAMPLING,	OnResamplingChanged)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_EN_SETFOCUS(IDC_EDIT_SONGTITLE,		OnEnSetfocusEditSongtitle)
 	//}}AFX_MSG_MAP
@@ -76,7 +70,6 @@ void CCtrlGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER_SAMPLEPREAMP,	m_SliderSamplePreAmp);
 
 	DDX_Control(pDX, IDC_EDIT_MODTYPE,		m_EditModType);
-	DDX_Control(pDX, IDC_COMBO_RESAMPLING,	m_ComboResampling);
 	DDX_Control(pDX, IDC_VUMETER_LEFT,		m_VuMeterLeft);
 	DDX_Control(pDX, IDC_VUMETER_RIGHT,		m_VuMeterRight);
 	//}}AFX_DATA_MAP
@@ -126,15 +119,6 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SliderVSTiVol.SetRange(0, MAX_SLIDER_VSTI_VOL);
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 	
-
-	// -! BEHAVIOUR_CHANGE#0016
-	m_ComboResampling.AddString("None");
-	m_ComboResampling.AddString("Linear");
-	m_ComboResampling.AddString("Cubic spline");
-	//rewbs.resamplerConf
-	m_ComboResampling.AddString("Polyphase");
-	m_ComboResampling.AddString("XMMS-ModPlug");	
-	//end rewbs.resamplerConf
 	m_bEditsLocked=false;
 	UpdateView(HINT_MODGENERAL|HINT_MODTYPE|HINT_MODSEQUENCE|HINT_MPTSETUP, NULL);
 	OnActivatePage(0);
@@ -188,10 +172,8 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	if ((pHint == this) || (!m_pSndFile)) return;
 	if (dwHint & HINT_MODSEQUENCE)
 	{
-		// Detecting max valid restart position
-		ORDERINDEX i = 0;
-		for (i=0; i<m_pSndFile->Order.size(); i++) if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) break;
-		m_SpinRestartPos.SetRange32(0, i);
+		// Set max valid restart position
+		m_SpinRestartPos.SetRange32(0, m_pSndFile->Order.GetLengthTailTrimmed() - 1);
 	}
 	if (dwHint & HINT_MODGENERAL)
 	{
@@ -218,10 +200,8 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL-m_pSndFile->m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL-m_pSndFile->m_nSamplePreAmp);
 		m_SliderTempo.SetPos(m_pSndFile->GetModSpecifications().tempoMax - m_pSndFile->m_nDefaultTempo);
-
-
-
 	}
+
 	if (dwHint & HINT_MODTYPE)
 	{
 		CModSpecifications specs = m_pSndFile->GetModSpecifications();
@@ -245,7 +225,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
-		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_pSndFile->m_nRestartPos != 0) ? TRUE : FALSE);
+		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_pSndFile->m_nRestartPos != 0));
 		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
 		
 		//Note: Sample volume slider is not disabled for MOD
@@ -270,14 +250,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	}
 	if (dwHint & HINT_MPTSETUP)
 	{
-		DWORD dwSetup = CMainFrame::GetSettings().m_dwQuality;
-		m_ComboResampling.SetCurSel(CMainFrame::GetSettings().m_nSrcMode);
 		CheckDlgButton(IDC_CHECK_LOOPSONG,	(CMainFrame::GetSettings().gbLoopSong) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK_AGC,		(dwSetup & QUALITY_AGC) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK_BASS,		(dwSetup & QUALITY_MEGABASS) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK_REVERB,	(dwSetup & QUALITY_REVERB) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK_SURROUND,	(dwSetup & QUALITY_SURROUND) ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK_EQ,		(dwSetup & QUALITY_EQ) ? TRUE : FALSE);
 	}
 	if (dwHint & HINT_MPTOPTIONS)
 	{
@@ -536,18 +509,6 @@ void CCtrlGeneral::OnSongProperties()
 }
 
 
-void CCtrlGeneral::OnResamplingChanged()
-//--------------------------------------
-{
-	DWORD n = m_ComboResampling.GetCurSel();
-	if ((n < NUM_SRC_MODES) && (n != CMainFrame::GetSettings().m_nSrcMode))
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(CMainFrame::GetSettings().m_dwQuality, n);
-	}
-}
-
-
 void CCtrlGeneral::OnLoopSongChanged()
 //------------------------------------
 {
@@ -557,76 +518,6 @@ void CCtrlGeneral::OnLoopSongChanged()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		if (pSndFile) pSndFile->SetRepeatCount((CMainFrame::GetSettings().gbLoopSong) ? -1 : 0);
-	}
-}
-
-
-void CCtrlGeneral::OnAGCChanged()
-//-------------------------------
-{
-	BOOL b = IsDlgButtonChecked(IDC_CHECK_AGC);
-	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_AGC;
-	if (b) dwQuality |= QUALITY_AGC;
-	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
-	}
-}
-
-
-void CCtrlGeneral::OnXBassChanged()
-//---------------------------------
-{
-	BOOL b = IsDlgButtonChecked(IDC_CHECK_BASS);
-	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_MEGABASS;
-	if (b) dwQuality |= QUALITY_MEGABASS;
-	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
-	}
-}
-
-
-void CCtrlGeneral::OnReverbChanged()
-//----------------------------------
-{
-	BOOL b = IsDlgButtonChecked(IDC_CHECK_REVERB);
-	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_REVERB;
-	if (b) dwQuality |= QUALITY_REVERB;
-	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
-	}
-}
-
-
-void CCtrlGeneral::OnSurroundChanged()
-//------------------------------------
-{
-	BOOL b = IsDlgButtonChecked(IDC_CHECK_SURROUND);
-	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_SURROUND;
-	if (b) dwQuality |= QUALITY_SURROUND;
-	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
-	}
-}
-
-
-void CCtrlGeneral::OnEqualizerChanged()
-//-------------------------------------
-{
-	BOOL b = IsDlgButtonChecked(IDC_CHECK_EQ);
-	DWORD dwQuality = CMainFrame::GetSettings().m_dwQuality & ~QUALITY_EQ;
-	if (b) dwQuality |= QUALITY_EQ;
-	if (dwQuality != CMainFrame::GetSettings().m_dwQuality)
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetupPlayer(dwQuality, CMainFrame::GetSettings().m_nSrcMode);
 	}
 }
 
@@ -689,7 +580,7 @@ void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAt
 	}
 	
 	double changeFactor = value / valueAtZeroDB;
-    double dB = 10 * log(changeFactor);
+	double dB = 10 * log(changeFactor);
 
 	char sign = (dB>=0) ? '+' : ' ';
 	sprintf(stringToSet, "%c%.2f dB", sign, dB);
@@ -759,7 +650,7 @@ VOID CVuMeter::DrawVuMeter(HDC hdc)
 	for (int ry=rect.bottom-1; ry>rect.top; ry-=2)
 	{
 		int y0 = rect.bottom - ry;
-		int n = CLAMP((y0 * NUM_VUMETER_PENS) / cy, 0, NUM_VUMETER_PENS - 1);
+		int n = Clamp((y0 * NUM_VUMETER_PENS) / cy, 0, NUM_VUMETER_PENS - 1);
 		if (vu < y0)
 			n += NUM_VUMETER_PENS;
 
