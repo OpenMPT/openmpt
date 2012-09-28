@@ -81,6 +81,7 @@ version:1
 2:1008:4:65:5		//Transpose -1: Alt+A (KeyDown|KeyHold)
 2:1009:6:81:5		//Transpose +12: Ctrl+Alt+Q (KeyDown|KeyHold)
 2:1010:6:65:5		//Transpose -12: Ctrl+Alt+A (KeyDown|KeyHold)
+2:1881:2:84:1		//Transpose Custom: Ctrl+T (KeyDown)
 2:1012:4:74:1		//Amplify selection: Alt+J (KeyDown)
 2:1014:4:75:1		//Interpolate volume: Alt+K (KeyDown)
 2:1015:4:88:1		//Interpolate effect: Alt+X (KeyDown)

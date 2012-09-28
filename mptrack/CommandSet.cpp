@@ -633,6 +633,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcChnSettingsPrev, 1878, _T("Previous Channel"));
 	DefineKeyCommand(kcChnSettingsNext, 1879, _T("Next Channel"));
 	DefineKeyCommand(kcChnSettingsClose, 1880, _T("Switch to Pattern Editor"));
+	DefineKeyCommand(kcTransposeCustom, 1881, _T("Transpose Custom"));
 	// Add new key commands here.
 
 #ifdef _DEBUG
