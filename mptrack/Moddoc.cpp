@@ -1543,14 +1543,15 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	CMainFrame::GetSettings().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
-	TCHAR sFilename[_MAX_PATH];
-	strcpy(sFilename, files.first_file.c_str());
+	CString fileName, fileExt;
+	{
+		char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
+		_splitpath(files.first_file.c_str(), drive, dir, name, ext);
+		fileName = CString(drive) + CString(dir) + CString(name);
+		fileExt = CString(ext);
+	}
 
 	// Saving as wave file
-
-	// Keep position of the character just before ".wav" in path string
-	size_t p = strlen(sFilename) - 4;
-	TCHAR sFilenameAdd[_MAX_PATH] = _T("");
 
 	int nRenderPasses = 1;
 	// Channel mode
@@ -1601,19 +1602,14 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		}
 	}
 
-	CDoWaveConvert dwcdlg(&m_SndFile, sFilename, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
-	dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
-	dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
-	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
-	//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
-
 	UINT pos = m_SndFile.GetCurrentPos();
 	pMainFrm->PauseMod();
 	int oldRepeat = m_SndFile.GetRepeatCount();
 
 	for(int i = 0 ; i < nRenderPasses ; i++)
 	{
+		CString thisName = fileName;
+		char fileNameAdd[_MAX_FNAME];
 
 		// Channel mode
 		if(wsdlg.m_bChannelMode)
@@ -1625,10 +1621,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			if(usedChannels[i] == false)
 				continue;
 			// Add channel number & name (if available) to path string
-			if(strlen(m_SndFile.ChnSettings[i].szName) > 0)
-				wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.ChnSettings[i].szName);
+			if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
+				sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.ChnSettings[i].szName);
 			else
-				wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
+				sprintf(fileNameAdd, "-%03d", i + 1);
 			// Unmute channel to process
 			m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
 		}
@@ -1643,10 +1639,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
 					continue;
 				// Add sample number & name (if available) to path string
-				if(strlen(m_SndFile.m_szNames[i + 1]) > 0)
-					wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.m_szNames[i + 1]);
+				if(strcmp(m_SndFile.m_szNames[i + 1], ""))
+					sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.m_szNames[i + 1]);
 				else
-					wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
+					sprintf(fileNameAdd, "-%03d", i + 1);
 				// Unmute sample to process
 				MuteSample((SAMPLEINDEX)(i + 1), false);
 			} else
@@ -1656,21 +1652,21 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 				if(m_SndFile.Instruments[i + 1] == nullptr || !m_SndFile.IsInstrumentUsed((INSTRUMENTINDEX)(i + 1)))
 					continue;
-				if(strlen(m_SndFile.Instruments[i + 1]->name) > 0)
-					wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.Instruments[i + 1]->name);
+				if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
+					sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.Instruments[i + 1]->name);
 				else
-					wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
+					sprintf(fileNameAdd, "-%03d", i + 1);
 				// Unmute instrument to process
 				MuteInstrument((INSTRUMENTINDEX)(i + 1), false);
 			}
 		}
-		if(_tcslen(sFilenameAdd) > 0)
+		
+		if(strcmp(fileNameAdd, ""))
 		{
-			SanitizeFilename(sFilenameAdd);
-			sFilename[p] = 0;
-			_tcscat(sFilename, sFilenameAdd);
-			_tcscpy(sFilenameAdd, _T(""));
+			SanitizeFilename(fileNameAdd);
+			thisName += CString(fileNameAdd);
 		}
+		thisName += fileExt;
 
 		// Render song (or current channel, or current sample/instrument)
 		m_SndFile.visitedSongRows.Initialize(true);
@@ -1687,6 +1683,14 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		{
 			m_SndFile.SetRepeatCount(Util::Max(0, wsdlg.loopCount - 1));
 		}
+
+		CDoWaveConvert dwcdlg(&m_SndFile, thisName, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
+		dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
+		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
+		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
+		//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
+
 		if(dwcdlg.DoModal() != IDOK) break;
 	}
 

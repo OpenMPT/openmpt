@@ -165,11 +165,7 @@ void SanitizeFilename(char (&buffer)[size])
 			buffer[i] == '>'  ||
 			buffer[i] == '*')
 		{
-			for(size_t j = i + 1; j < size; j++)
-			{
-				buffer[j - 1] = buffer[j];
-			}
-			buffer[size - 1] = 0;
+			buffer[i] = '_';
 		}
 	}
 }

@@ -2810,7 +2810,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
 	LPSTR pSample = sample.pSample;
 	short int pos;
-	bool bRedraw = false;
+	bool redraw = false;
 	
 	LockControls();
 	if ((!sample.nLength) || (!pSample)) goto NoSample;
@@ -2860,7 +2860,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", sample.nLoopStart);
 			m_EditLoopStart.SetWindowText(s);
 			m_pModDoc->AdjustEndOfSample(m_nSample);
-			bRedraw = true;
+			redraw = true;
 		}
 		m_SpinLoopStart.SetPos(0);
 	}
@@ -2904,7 +2904,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", sample.nLoopEnd);
 			m_EditLoopEnd.SetWindowText(s);
 			m_pModDoc->AdjustEndOfSample(m_nSample);
-			bRedraw = true;
+			redraw = true;
 		}
 		m_SpinLoopEnd.SetPos(0);
 	}
@@ -2948,7 +2948,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			wsprintf(s, "%u", sample.nSustainStart);
 			m_EditSustainStart.SetWindowText(s);
-			bRedraw = true;
+			redraw = true;
 		}
 		m_SpinSustainStart.SetPos(0);
 	}
@@ -2991,7 +2991,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			wsprintf(s, "%u", sample.nSustainEnd);
 			m_EditSustainEnd.SetWindowText(s);
-			bRedraw = true;
+			redraw = true;
 		}
 		m_SpinSustainEnd.SetPos(0);
 	}
@@ -3030,11 +3030,11 @@ NoSample:
 			}
 			SetDlgItemInt(IDC_EDIT5, ftune, TRUE);
 		}
-		bRedraw = true;
+		redraw = true;
 		m_SpinFineTune.SetPos(0);
 	}
-	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION)) SwitchToView();
-	if (bRedraw)
+	if(nCode == SB_ENDSCROLL) SwitchToView();
+	if(redraw)
 	{
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
