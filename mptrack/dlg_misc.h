@@ -222,6 +222,37 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////
+// Generic input dialog
+
+//=============================
+class CInputDlg: public CDialog
+//=============================
+{
+protected:
+	CSpinButtonCtrl spin;
+	const char *description;
+	int32 minValue, maxValue;
+
+public:
+	CString resultString;
+	int32 resultNumber;
+
+public:
+	// Initialize text input box
+	CInputDlg(CWnd *parent, const char *desc, const char *defaultString) : CDialog(IDD_INPUT, parent),
+		description(desc), minValue(0), maxValue(0), resultString(defaultString) { }
+	// Initialize numeric input box
+	CInputDlg(CWnd *parent, const char *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : CDialog(IDD_INPUT, parent),
+		description(desc), minValue(minVal), maxValue(maxVal), resultNumber(defaultNumber) { }
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+};
+
+
+/////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 
 // Enums for message entries. See dlg_misc.cpp for the array of entries.

@@ -2311,7 +2311,7 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		int nOffset = ((m_nEnv != ENV_VOLUME) && !GetEnvelopePtr()->dwFlags[ENV_FILTER]) ? 32 : 0;
 
 		CScaleEnvPointsDlg dlg(this, GetEnvelopePtr(), nOffset);
-		if(dlg.DoModal())
+		if(dlg.DoModal() == IDOK)
 		{
 			SetInstrumentModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);

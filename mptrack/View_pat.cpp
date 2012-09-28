@@ -108,6 +108,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_TRANSPOSE_DOWN,				OnTransposeDown)
 	ON_COMMAND(ID_TRANSPOSE_OCTUP,				OnTransposeOctUp)
 	ON_COMMAND(ID_TRANSPOSE_OCTDOWN,			OnTransposeOctDown)
+	ON_COMMAND(ID_TRANSPOSE_CUSTOM,				OnTransposeCustom)
 	ON_COMMAND(ID_PATTERN_PROPERTIES,			OnPatternProperties)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_VOLUME,	OnInterpolateVolume)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_EFFECT,	OnInterpolateEffect)
@@ -1370,7 +1371,7 @@ void CViewPattern::OnPatternProperties()
 	if(pModDoc && pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->Patterns.IsValidPat(m_nPattern))
 	{
 		CPatternPropertiesDlg dlg(pModDoc, m_nPattern, this);
-		if (dlg.DoModal())
+		if(dlg.DoModal() == IDOK)
 		{
 			UpdateScrollSize();
 			InvalidatePattern(true);
@@ -2791,6 +2792,19 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 }
 
 
+void CViewPattern::OnTransposeCustom()
+//------------------------------------
+{
+	static int32 tranpose = 1;
+	CInputDlg dlg(this, "Enter transpose amount:", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), tranpose);
+	if(dlg.DoModal() == IDOK)
+	{
+		tranpose = dlg.resultNumber;
+		TransposeSelection(dlg.resultNumber);
+	}
+}
+
+
 bool CViewPattern::TransposeSelection(int transp)
 //-----------------------------------------------
 {
@@ -3980,6 +3994,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
 		case kcTransposeOctDown:			OnTransposeOctDown(); return wParam;
+		case kcTransposeCustom:				OnTransposeCustom(); return wParam;
 		case kcSelectColumn:				OnSelectCurrentColumn(); return wParam;
 		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
 		case kcPatternSetInstrument:		OnSetSelInstrument(); return wParam;
@@ -5747,12 +5762,13 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::noteColumn) ? FALSE : MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
 		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
 		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
 		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTDOWN, "Transpose -12\t" + ih->GetKeyTextFromCommand(kcTransposeOctDown));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_CUSTOM, "Custom...\t" + ih->GetKeyTextFromCommand(kcTransposeCustom));
 		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(transMenu), "Transpose...");
 		return true;
 	}
@@ -5765,7 +5781,7 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::volumeColumn) ? 0 : MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_AMPLIFY, "Amplify\t" + ih->GetKeyTextFromCommand(kcPatternAmplify));
 		return true;

@@ -1122,6 +1122,75 @@ void CEditHistoryDlg::OnOK()
 }
 
 
+/////////////////////////////////////////////////////////////////////////
+// Generic input dialog
+
+void CInputDlg::DoDataExchange(CDataExchange* pDX)
+//------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_SPIN1, spin);
+}
+
+
+BOOL CInputDlg::OnInitDialog()
+//----------------------------
+{
+	CDialog::OnInitDialog();
+	SetDlgItemText(IDC_PROMPT, description);
+
+	// Get all current control sizes and positions
+	CRect windowRect, labelRect, inputRect, okRect, cancelRect;
+	GetWindowRect(windowRect);
+	GetDlgItem(IDC_PROMPT)->GetWindowRect(labelRect);
+	GetDlgItem(IDC_EDIT1)->GetWindowRect(inputRect);
+	GetDlgItem(IDOK)->GetWindowRect(okRect);
+	GetDlgItem(IDCANCEL)->GetWindowRect(cancelRect);
+	ScreenToClient(labelRect);
+	ScreenToClient(inputRect);
+	ScreenToClient(okRect);
+	ScreenToClient(cancelRect);
+
+	// Find out how big our label shall be
+	CSize size;
+	GetTextExtentPoint32(GetDC()->GetSafeHdc(), description, strlen(description), &size);
+	if(size.cx < 320) size.cx = 320;
+	const int windowWidth = windowRect.Width() - labelRect.Width() + size.cx;
+	const int windowHeight = windowRect.Height() - labelRect.Height() + size.cy;
+
+	// Resize and move all controls
+	GetDlgItem(IDC_PROMPT)->SetWindowPos(nullptr, 0, 0, size.cx, size.cy, SWP_NOMOVE | SWP_NOZORDER);
+	GetDlgItem(IDC_EDIT1)->SetWindowPos(nullptr, inputRect.left, labelRect.top + size.cy + (inputRect.top - labelRect.bottom), size.cx, inputRect.Height(), SWP_NOZORDER);
+	GetDlgItem(IDOK)->SetWindowPos(nullptr, windowWidth - (windowRect.Width() - okRect.left), windowHeight - (windowRect.Height() - okRect.top), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	GetDlgItem(IDCANCEL)->SetWindowPos(nullptr, windowWidth - (windowRect.Width() - cancelRect.left), windowHeight - (windowRect.Height() - cancelRect.top), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	SetWindowPos(nullptr, 0, 0, windowWidth, windowHeight, SWP_NOMOVE | SWP_NOZORDER);
+
+	if(minValue != maxValue)
+	{
+		// Numeric
+		spin.SetRange(minValue, maxValue);
+		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
+		SetDlgItemInt(IDC_EDIT1, resultNumber);
+	} else
+	{
+		// Text
+		spin.ShowWindow(SW_HIDE);
+		SetDlgItemText(IDC_EDIT1, resultString);
+	}
+
+	return TRUE;
+}
+
+
+void CInputDlg::OnOK()
+//--------------------
+{
+	CDialog::OnOK();
+	GetDlgItemText(IDC_EDIT1, resultString);
+	resultNumber = static_cast<int32>(GetDlgItemInt(IDC_EDIT1));
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 

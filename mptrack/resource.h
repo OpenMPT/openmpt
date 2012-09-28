@@ -148,6 +148,7 @@
 #define IDD_OPTIONS_UPDATE              529
 #define IDD_CLOSEDOCUMENTS              530
 #define IDD_AUTOTUNE                    531
+#define IDD_INPUT                       532
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -938,6 +939,7 @@
 #define IDC_SAMPLE_AUTOTUNE             2437
 #define IDC_FIND                        2438
 #define IDC_PITCHWHEELDEPTH             2439
+#define IDC_PROMPT                      2440
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1207,15 +1209,16 @@
 #define ID_HELPSHOW                     44602
 #define ID_ORDERLIST_LOCKPLAYBACK       44603
 #define ID_ORDERLIST_UNLOCKPLAYBACK     44604
+#define ID_TRANSPOSE_CUSTOM             44605
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        535
-#define _APS_NEXT_COMMAND_VALUE         44605
-#define _APS_NEXT_CONTROL_VALUE         2440
+#define _APS_NEXT_RESOURCE_VALUE        536
+#define _APS_NEXT_COMMAND_VALUE         44606
+#define _APS_NEXT_CONTROL_VALUE         2441
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
