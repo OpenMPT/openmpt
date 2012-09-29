@@ -244,7 +244,8 @@ FLAGSET(TrackerVersions)
 	verOldModPlug	= 0x01,	// Made with MPT Alpha / Beta
 	verNewModPlug	= 0x02,	// Made with MPT (not Alpha / Beta)
 	verModPlug1_09	= 0x04,	// Made with MPT 1.09 or possibly other version
-	verConfirmed	= 0x08,	// We are very sure that we found the correct tracker version.
+	verOpenMPT		= 0x08,	// Made with OpenMPT
+	verConfirmed	= 0x10,	// We are very sure that we found the correct tracker version.
 };
 
 
@@ -328,7 +329,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
 			} else if(instrHeader.size == 263)
 			{
-				// ModPlug Tracker Beta
+				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
 			} else
 			{
@@ -511,6 +512,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 		}
 	}
+
 	if(!memcmp(fileHeader.trackerName, "OpenMPT ", 8))
 	{
 		// Hey, I know this tracker!
@@ -518,22 +520,20 @@ bool CSoundFile::ReadXM(FileReader &file)
 		memcpy(mptVersion, fileHeader.trackerName + 8, 12);
 		StringFixer::SetNullTerminator(mptVersion);
 		m_dwLastSavedWithVersion = MptVersion::ToNum(mptVersion);
+		madeWith = verOpenMPT | verConfirmed;
 	}
 
-	if(m_dwLastSavedWithVersion != 0)
+	if(m_dwLastSavedWithVersion != 0 && !madeWith[verOpenMPT])
 	{
 		m_nMixLevels = mixLevels_original;
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 	}
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(!file.BytesLeft()) return true;
 
 	bool interpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
-	if(m_nInstruments)
+	if(GetNumInstruments())
 	{
 		file.Skip(reinterpret_cast<const char *>(LoadExtendedInstrumentProperties(reinterpret_cast<LPCBYTE>(file.GetRawData()), reinterpret_cast<LPCBYTE>(file.GetRawData()) + file.BytesLeft(), &interpretOpenMPTMade)) - file.GetRawData());
 	}
@@ -543,10 +543,12 @@ bool CSoundFile::ReadXM(FileReader &file)
 	if(interpretOpenMPTMade)
 	{
 		UpgradeModFlags();
-	}
 
-	if(interpretOpenMPTMade && m_dwLastSavedWithVersion == 0)
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 01, 00);	// early versions of OpenMPT had no version indication.
+		if(m_dwLastSavedWithVersion == 0)
+		{
+			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);	// early versions of OpenMPT had no version indication.
+		}
+	}
 
 	return true;
 }
@@ -594,7 +596,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 
 	// Writing song header
 	xmheader.version = 0x0104;					// XM Format v1.04
-	xmheader.size = sizeof(XMFileHeader) - 60; // minus everything before this field
+	xmheader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
 	xmheader.restartPos = m_nRestartPos;
 
 	xmheader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility

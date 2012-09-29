@@ -1543,13 +1543,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	CMainFrame::GetSettings().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
-	CString fileName, fileExt;
-	{
-		char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
-		_splitpath(files.first_file.c_str(), drive, dir, name, ext);
-		fileName = CString(drive) + CString(dir) + CString(name);
-		fileExt = CString(ext);
-	}
+	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
+	_splitpath(files.first_file.c_str(), drive, dir, name, ext);
+	const CString fileName = CString(drive) + CString(dir) + CString(name);
+	const CString fileExt = CString(ext);
 
 	// Saving as wave file
 
@@ -1609,7 +1606,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	for(int i = 0 ; i < nRenderPasses ; i++)
 	{
 		CString thisName = fileName;
-		char fileNameAdd[_MAX_FNAME];
+		char fileNameAdd[_MAX_FNAME] = "";
 
 		// Channel mode
 		if(wsdlg.m_bChannelMode)
