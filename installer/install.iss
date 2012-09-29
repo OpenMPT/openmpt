@@ -233,10 +233,9 @@ begin
             end;
 
             // Found an alternative keybinding.
-            if((keyboardFilepath <> '') and (not IniKeyExists('Paths', 'Key_Config_File', INIFile))) then
+            if(keyboardFilepath <> '') then
             begin
-                keyboardFilepath := ExpandConstant('{app}\extraKeymaps\' + keyboardFilepath + '.mkb');
-                SetIniString('Paths', 'Key_Config_File', keyboardFilepath, INIFile);
+                FileCopy(ExpandConstant('{app}\extraKeymaps\') + keyboardFilepath + '.mkb', ExtractFilePath(INIFile) + 'Keybindings.mkb', true);
             end;
 
             // Update check
