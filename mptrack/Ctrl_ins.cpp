@@ -2389,7 +2389,7 @@ void CCtrlInstruments::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 //----------------------------------------------------------------------
 {
 	CModControlDlg::OnVScroll(nCode, nPos, pSB);
-	if (nCode == SB_ENDSCROLL) SwitchToView();
+	//if (nCode == SB_ENDSCROLL) SwitchToView();
 }
 
 
