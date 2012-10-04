@@ -195,11 +195,11 @@ BOOL COptionsSoundcard::OnInitDialog()
 		}
 		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
-		for (UINT nDevType=0; nDevType<SNDDEV_NUM_DEVTYPES; nDevType++)
+		for (UINT nDevType = 0; nDevType < SNDDEV_NUM_DEVTYPES; nDevType++)
 		{
 			UINT nDev = 0;
 
-			while (EnumerateSoundDevices(nDevType, nDev, s, sizeof(s)))
+			while (EnumerateSoundDevices(nDevType, nDev, s, CountOf(s)))
 			{
 				cbi.mask = CBEIF_IMAGE | CBEIF_LPARAM | CBEIF_TEXT | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
@@ -602,7 +602,7 @@ void COptionsPlayer::OnResamplerChanged()
 	char s[10] = "";
 	switch (dwSrcMode)
 	{
-		case SRCMODE_POLYPHASE:
+	case SRCMODE_POLYPHASE:
 		m_CbnWFIRType.AddString("Kaiser 8 Tap");
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
@@ -633,16 +633,15 @@ void COptionsPlayer::OnResamplerChanged()
 	OnSettingsChanged();
 }
 
+
 void COptionsPlayer::OnDefaultResampling()
+//----------------------------------------
 {
-	//CMainFrame::GetSettings().gbWFIRType = 7; //WFIR_KAISER4T
-	//CMainFrame::GetSettings().gdWFIRCutoff = 0.97;
-	//CMainFrame::GetSettings().m_nSrcMode = SRCMODE_POLYPHASE
-	//CMainFrame::glVolumeRampSamples = 42;
-	m_CbnResampling.SetCurSel(SRCMODE_POLYPHASE);
+	m_CbnResampling.SetCurSel(SRCMODE_FIRFILTER);
 	OnResamplerChanged();
+	m_CbnWFIRType.SetCurSel(7 /*WFIR_KAISER4T*/);
 	m_CEditWFIRCutoff.SetWindowText("97");
-	m_CEditRampUp.SetWindowText("42");
+	m_CEditRampUp.SetWindowText("16");
 	m_CEditRampDown.SetWindowText("42");
 	
 }

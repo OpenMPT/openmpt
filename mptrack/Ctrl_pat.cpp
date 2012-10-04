@@ -654,10 +654,10 @@ void CCtrlPatterns::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		m_CbnInstrument.SetCurSel(nins);
 		OnInstrumentChanged();
 	}
-	if ((nSBCode == SB_ENDSCROLL) && (m_hWndView))
-	{
-		SwitchToView();
-	}
+// 	if ((nSBCode == SB_ENDSCROLL) && (m_hWndView))
+// 	{
+// 		SwitchToView();
+// 	}
 }
 
 

@@ -63,7 +63,7 @@ TrackerSettings::TrackerSettings()
 	m_dwSoundSetup = SOUNDSETUP_SECONDARY;
 	m_nChannels = 2;
 	m_dwQuality = 0;
-	m_nSrcMode = SRCMODE_POLYPHASE;
+	m_nSrcMode = SRCMODE_FIRFILTER;
 	m_nBitsPerSample = 16;
 	m_nPreAmp = 128;
 	gbLoopSong = TRUE;
@@ -390,7 +390,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	orderlistMargins = GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", orderlistMargins, iniFile);
 	gbShowHackControls = (0 != CMainFrame::GetPrivateProfileDWord("Misc", "ShowHackControls", gbShowHackControls ? 1 : 0, iniFile));
 	CSoundFile::s_DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", CSoundFile::s_DefaultPlugVolumeHandling, iniFile));
-	if(CSoundFile::s_DefaultPlugVolumeHandling > 2) CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+	if(CSoundFile::s_DefaultPlugVolumeHandling >= PLUGIN_VOLUMEHANDLING_MAX) CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
