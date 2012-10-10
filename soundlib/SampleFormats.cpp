@@ -1104,6 +1104,9 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	// Gotta skip 'em all!
 	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
 
+	CriticalSection cs;
+	DestroySample(nSample);
+
 	ModSample &mptSample = Samples[nSample];
 	sampleHeader.ConvertToMPT(mptSample);
 	if(GetType() != MOD_TYPE_XM)
