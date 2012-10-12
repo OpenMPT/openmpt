@@ -862,15 +862,10 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		pChn->nC5Speed = pSmp->nC5Speed;
 		pChn->m_CalculateFreq = true;
 		pChn->nFineTune = 0;
-	} else
+	} else if(!bPorta || !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 	{
-		if((!bPorta && GetType() == MOD_TYPE_XM)
-			|| (pChn->rowCommand.instr != 0 && GetType() == MOD_TYPE_MOD)
-			|| !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
-		{
-			pChn->nC5Speed = pSmp->nC5Speed;
-			pChn->nFineTune = pSmp->nFineTune;
-		}
+		pChn->nC5Speed = pSmp->nC5Speed;
+		pChn->nFineTune = pSmp->nFineTune;
 	}
 
 
@@ -1810,6 +1805,13 @@ BOOL CSoundFile::ProcessEffects()
 					{
 						// Also reload panning
 						pChn->nPan = oldSample->nPan;
+						
+						// FT2 compatibility: Instrument number disables tremor effect
+						// Test case: TremorRecover.xm
+						if(IsCompatibleMode(TRK_FASTTRACKER2))
+						{
+							pChn->nTremorCount &= ~0x80;
+						}
 					}
 				}
 			}

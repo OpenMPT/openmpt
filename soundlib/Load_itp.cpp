@@ -302,7 +302,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Song global config
 
-	id = m_SongFlags[SONG_FILE_FLAGS];
+	id = (m_SongFlags & SONG_FILE_FLAGS);
 	fwrite(&id, 1, sizeof(id), f);
 	id = m_nDefaultGlobalVolume;
 	fwrite(&id, 1, sizeof(id), f);
