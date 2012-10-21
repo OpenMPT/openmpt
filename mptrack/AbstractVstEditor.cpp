@@ -31,8 +31,6 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_PLUG_PASSKEYS,		OnPassKeypressesToPlug)
 	ON_COMMAND(ID_PRESET_SAVE,			OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
-	ON_COMMAND(ID_VSTMACRO_INFO,		OnMacroInfo)
-	ON_COMMAND(ID_VSTINPUT_INFO,		OnInputInfo)
 	ON_COMMAND(ID_PREVIOUSVSTPRESET,	OnSetPreviousVSTPreset)
 	ON_COMMAND(ID_NEXTVSTPRESET,		OnSetNextVSTPreset)
 	ON_COMMAND(ID_VSTPRESETBACKWARDJUMP,OnVSTPresetBackwardJump)
@@ -193,7 +191,7 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 //--------------------------------------------
 {
 	int nIndex = nID - ID_PRESET_SET;
-	if (nIndex >= 0)
+	if(nIndex >= 0)
 	{
 		m_pVstPlugin->SetCurrentProgram(nIndex);
 		UpdatePresetField();
@@ -202,46 +200,40 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 	}
 }
 
+
 void CAbstractVstEditor::OnBypassPlug()
 //-------------------------------------
 {
-	if (m_pVstPlugin)
+	if(m_pVstPlugin)
 	{
 		m_pVstPlugin->ToggleBypass();
+		if(m_pVstPlugin->m_pSndFile->GetModSpecifications().supportsPlugins)
+		{
+			m_pVstPlugin->GetModDoc()->SetModified();
+		}
 	}
 }
+
 
 void CAbstractVstEditor::OnRecordAutomation()
 //-------------------------------------------
 {
-	if (m_pVstPlugin)
+	if(m_pVstPlugin)
 	{
 		m_pVstPlugin->m_bRecordAutomation = !m_pVstPlugin->m_bRecordAutomation;
 	}
 }
 
+
 void CAbstractVstEditor::OnPassKeypressesToPlug()
 //-----------------------------------------------
 {
-	if (m_pVstPlugin)
+	if(m_pVstPlugin)
 	{
 		m_pVstPlugin->m_bPassKeypressesToPlug  = !m_pVstPlugin->m_bPassKeypressesToPlug;
 	}
 }
 
-void CAbstractVstEditor::OnMacroInfo()
-{ //TODO	
-/*
-	for (UINT m=0; m<NUM_MACROS; m++)
-	{
-	}
-*/
-}
-
-void CAbstractVstEditor::OnInputInfo()
-{ //TODO
-}
-//end rewbs.defaultPlugGUI
 
 BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 //-----------------------------------------------------
@@ -466,6 +458,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	m_nCurProg=curProg;
 }
 
+
 void CAbstractVstEditor::UpdateInputMenu()
 //----------------------------------------
 {
@@ -530,6 +523,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	pInfoMenu->InsertMenu(0, MF_BYPOSITION|MF_POPUP, (UINT)m_pInputMenu->m_hMenu, "I&nputs");
 }
 
+
 void CAbstractVstEditor::UpdateOutputMenu()
 //-----------------------------------------
 {
@@ -566,6 +560,7 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	pInfoMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP, (UINT)m_pOutputMenu->m_hMenu, "Ou&tputs");
 }
 
+
 void CAbstractVstEditor::UpdateMacroMenu()
 //----------------------------------------
 {
@@ -598,7 +593,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 
 		const MIDIMacroConfig &midiCfg = pModDoc->GetSoundFile()->m_MidiCfg;
 
- 		const parameteredMacroType macroType = midiCfg.GetParameteredMacroType(nMacro);
+		const parameteredMacroType macroType = midiCfg.GetParameteredMacroType(nMacro);
 
 		if(macroType == sfx_unused)
 		{
