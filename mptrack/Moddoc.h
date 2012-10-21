@@ -216,6 +216,7 @@ public:
 
 	void SongProperties();
 
+	void PrepareUndoForAllPatterns(bool storeChannelInfo = false);
 	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }
 	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
@@ -232,6 +233,10 @@ public:
 	bool RemoveChannels(const vector<bool> &keepMask);
 	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
 	void CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
+
+	SAMPLEINDEX ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder);
+
+	INSTRUMENTINDEX ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder);
 
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();

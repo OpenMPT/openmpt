@@ -2771,7 +2771,7 @@ void CModDoc::FixNullStrings()
 	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 	{
 		if(m_SndFile.Instruments[nIns] != nullptr)
-		{		
+		{
 			StringFixer::FixNullString(m_SndFile.Instruments[nIns]->name);
 			StringFixer::FixNullString(m_SndFile.Instruments[nIns]->filename);
 		}
@@ -2830,4 +2830,21 @@ void CModDoc::OnSaveTemplateModule()
 	const CString sOldPath = m_strPathName;
 	OnSaveDocument(fdr.first_file.c_str(), true/*template file*/);
 	m_strPathName = sOldPath;
+}
+
+
+// Create an undo point that stores undo data for all existing patterns
+void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo)
+//------------------------------------------------------------
+{
+	bool linkUndo = false;
+	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++)
+	{
+		if(m_SndFile.Patterns.IsValidPat(pat))
+		{
+			GetPatternUndo().PrepareUndo(pat, 0, 0, GetNumChannels(), m_SndFile.Patterns[pat].GetNumRows(), linkUndo, storeChannelInfo);
+			linkUndo = true;
+			storeChannelInfo = false;
+		}
+	}
 }

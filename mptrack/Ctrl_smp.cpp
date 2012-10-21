@@ -554,7 +554,10 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar2.UpdateStyle();
 	}
 	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
-	if (((dwHintMask >> HINT_SHIFT_SMP) != m_nSample) && (!(dwHintMask & HINT_MODTYPE))) return;
+
+	const SAMPLEINDEX updateSmp = (dwHintMask >> HINT_SHIFT_SMP);
+
+	if(updateSmp != m_nSample && updateSmp != 0 && !(dwHintMask & HINT_MODTYPE)) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	// Updating Ranges
