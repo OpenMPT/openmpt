@@ -769,9 +769,10 @@ void CViewInstrument::UpdateNcButtonState()
 void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 //-----------------------------------------------------------
 {
-	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
-	 || ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == (dwHintMask >> HINT_SHIFT_INS)))
-	 || ((dwHintMask & HINT_SPEEDCHANGE))) //rewbs.envRowGrid
+	const INSTRUMENTINDEX updateIns = (dwHintMask >> HINT_SHIFT_INS);
+	if((dwHintMask & (HINT_MPTOPTIONS | HINT_MODTYPE))
+		|| ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0))
+		|| ((dwHintMask & HINT_SPEEDCHANGE))) //rewbs.envRowGrid
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();

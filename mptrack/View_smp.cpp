@@ -438,8 +438,9 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 //-------------------------------------------------------
 {
-	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
-		|| ((dwHintMask & HINT_SAMPLEDATA) && (m_nSample == (dwHintMask >> HINT_SHIFT_SMP))) )
+	const SAMPLEINDEX updateSmp = (dwHintMask >> HINT_SHIFT_SMP);
+	if((dwHintMask & (HINT_MPTOPTIONS | HINT_MODTYPE))
+		|| ((dwHintMask & HINT_SAMPLEDATA) && (m_nSample == updateSmp || updateSmp == 0)))
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();

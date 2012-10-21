@@ -82,10 +82,6 @@ struct ModTreeDocInfo
 		{
 			tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
 			tiOrders.resize(pSndFile->Order.GetNumSequences());
-			for(SEQUENCEINDEX i = 0; i < tiOrders.size(); i++)
-			{
-				//tiOrders[i].resize(pSndFile->Order.GetSequence(i)->GetLength(), NULL);
-			}
 			tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
 		}
 		MemsetZero(tiSamples);

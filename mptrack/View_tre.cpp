@@ -1298,6 +1298,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 		case MODITEM_INSLIB_INSTRUMENT:
 			if (m_szSongName[0])
 			{
+				// Preview sample / instrument in module
 				CHAR szName[64];
 				lstrcpyn(szName, GetItemText(hItem), sizeof(szName));
 				UINT n = 0;
@@ -1317,6 +1318,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				}
 			} else
 			{
+				// Preview sample / instrument file
 				CHAR szFullPath[_MAX_PATH] = "";
 				InsLibGetFullPath(hItem, szFullPath);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1923,7 +1925,7 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 		if (SetCurrentDirectory(lpszDir))
 		{
 			m_szSongName[0] = 0;
-			if (m_SongFile.m_nType) m_SongFile.Destroy();
+			if (m_SongFile.GetType() != MOD_TYPE_NONE) m_SongFile.Destroy();
 			GetCurrentDirectory(sizeof(m_szInstrLibPath), m_szInstrLibPath);
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 			bOk = TRUE;
@@ -2101,8 +2103,8 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					if(Reporting::Confirm(_T("Replace the current orderlist?"), _T("Sequence import")) == cnfNo)
 						return false;
 				}
-				pSndFile->Order.resize(min(pSndFile->GetModSpecifications().ordersMax, pOrigSeq->GetLength()), pSndFile->Order.GetInvalidPatIndex());
-				for(ORDERINDEX nOrd = 0; nOrd < min(pSndFile->GetModSpecifications().ordersMax,pOrigSeq->GetLengthTailTrimmed()); nOrd++)
+				pSndFile->Order.resize(Util::Min(pSndFile->GetModSpecifications().ordersMax, pOrigSeq->GetLength()), pSndFile->Order.GetInvalidPatIndex());
+				for(ORDERINDEX nOrd = 0; nOrd < Util::Min(pSndFile->GetModSpecifications().ordersMax, pOrigSeq->GetLengthTailTrimmed()); nOrd++)
 				{
 					PATTERNINDEX nOrigPat = pDragSndFile->Order.GetSequence(nOrigSeq)[nOrd];
 					// translate pattern index
@@ -2125,9 +2127,57 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 		break;
 
 	case MODITEM_SAMPLE:
+		// Reorder samples in a module
+		if(modItemDragType == MODITEM_SAMPLE && pInfoDrag != nullptr && pModDoc == pInfoDrag->pModDoc)
+		{
+			if(bDoDrop)
+			{
+				const SAMPLEINDEX from = static_cast<SAMPLEINDEX>(modItemDragID - 1), to = static_cast<SAMPLEINDEX>(modItemDropID - 1);
+
+				vector<SAMPLEINDEX> newOrder(pModDoc->GetNumSamples());
+				for(SAMPLEINDEX smp = 0; smp < pModDoc->GetNumSamples(); smp++)
+				{
+					newOrder[smp] = smp + 1;
+				}
+
+				newOrder.erase(newOrder.begin() + from);
+				newOrder.insert(newOrder.begin() + to, from + 1);
+
+				pModDoc->ReArrangeSamples(newOrder);
+
+				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
+				pModDoc->SetModified();
+				SelectItem(hItem);
+			}
+			return true;
+		}
 		break;
 
 	case MODITEM_INSTRUMENT:
+		// Reorder instruments in a module
+		if(modItemDragType == MODITEM_INSTRUMENT && pInfoDrag != nullptr && pModDoc == pInfoDrag->pModDoc)
+		{
+			if(bDoDrop)
+			{
+				const INSTRUMENTINDEX from = static_cast<INSTRUMENTINDEX>(modItemDragID - 1), to = static_cast<INSTRUMENTINDEX>(modItemDropID - 1);
+
+				vector<INSTRUMENTINDEX> newOrder(pModDoc->GetNumInstruments());
+				for(INSTRUMENTINDEX ins = 0; ins < pModDoc->GetNumInstruments(); ins++)
+				{
+					newOrder[ins] = ins + 1;
+				}
+
+				newOrder.erase(newOrder.begin() + from);
+				newOrder.insert(newOrder.begin() + to, from + 1);
+
+				pModDoc->ReArrangeInstruments(newOrder);
+
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE, NULL);
+				pModDoc->SetModified();
+				SelectItem(hItem);
+			}
+			return true;
+		}
 		break;
 
 	case MODITEM_MIDIINSTRUMENT:
@@ -2463,6 +2513,8 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					AppendMenu(hMenu, MF_STRING, nDefault, "&View Sample");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Sample");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sample");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sample");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "&Duplicate Sample");
 					if ((pModDoc) && (!pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
@@ -2480,6 +2532,8 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					AppendMenu(hMenu, MF_STRING, nDefault, "&View Instrument");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Instrument");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Instrument");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Instrument");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "&Duplicate Instrument");
 					if ((pModDoc) && (pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
@@ -2950,6 +3004,21 @@ void CModTree::OnUnmuteAllTreeItem()
 }
 
 
+// Helper function for generating an insert vector for samples/instruments
+template<typename T>
+vector<T> GenerateInsertVector(size_t howMany, size_t insertPos, T insertId)
+//--------------------------------------------------------------------------
+{
+	vector<T> newOrder(howMany);
+	for(T i = 0; i < howMany; i++)
+	{
+		newOrder[i] = i + 1;
+	}
+	newOrder.insert(newOrder.begin() + insertPos, insertId);
+	return newOrder;
+}
+
+
 void CModTree::OnDuplicateTreeItem()
 //----------------------------------
 {
@@ -2963,13 +3032,41 @@ void CModTree::OnDuplicateTreeItem()
 	pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 
-	if (pModDoc && pSndFile && ((modItemType == MODITEM_SEQUENCE) || (modItemType == MODITEM_HDR_ORDERS)))
+	if(pModDoc && pSndFile)
 	{
-		pSndFile->Order.SetSequence((SEQUENCEINDEX)modItemID);
-		pSndFile->Order.AddSequence(true);
-		pModDoc->SetModified();
-		UpdateView(GetDocumentInfoFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
-		pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+		if(modItemType == MODITEM_SEQUENCE || modItemType == MODITEM_HDR_ORDERS)
+		{
+			// Duplicate sequence
+			pSndFile->Order.SetSequence((SEQUENCEINDEX)modItemID);
+			pSndFile->Order.AddSequence(true);
+			pModDoc->SetModified();
+			UpdateView(GetDocumentInfoFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
+			pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+		} else if(modItemType == MODITEM_SAMPLE)
+		{
+			// Duplicate sample
+			vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, modItemID);
+			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
+			{
+				pModDoc->SetModified();
+				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
+			} else
+			{
+				Reporting::Error("Maximum number of samples reached.");
+			}
+		} else if(modItemType == MODITEM_INSTRUMENT)
+		{
+			// Duplicate instrument
+			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, modItemID);
+			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
+			{
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES| HINT_INSTRUMENT | HINT_ENVELOPE);
+				pModDoc->SetModified();
+			} else
+			{
+				Reporting::Error("Maximum number of samples reached.");
+			}
+		}
 	}
 }
 
@@ -2982,17 +3079,45 @@ void CModTree::OnInsertTreeItem()
 
 	const uint64 modItem = GetModItem(hItem);
 	const uint32 modItemType = GetModItemType(modItem);
-	//const uint32 modItemID = GetModItemID(modItem);
+	const uint32 modItemID = GetModItemID(modItem);
 
 	pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 
-	if (pModDoc && pSndFile && ((modItemType == MODITEM_SEQUENCE) || (modItemType == MODITEM_HDR_ORDERS)))
+	if(pModDoc && pSndFile)
 	{
-		pSndFile->Order.AddSequence(false);
-		pModDoc->SetModified();
-		UpdateView(GetDocumentInfoFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
-		pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+		if(modItemType == MODITEM_SEQUENCE || modItemType == MODITEM_HDR_ORDERS)
+		{
+			// Insert sequence
+			pSndFile->Order.AddSequence(false);
+			pModDoc->SetModified();
+			UpdateView(GetDocumentInfoFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
+			pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+		} else if(modItemType == MODITEM_SAMPLE)
+		{
+			// Insert sample
+			vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, 0);
+			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
+			{
+				pModDoc->SetModified();
+				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
+			} else
+			{
+				Reporting::Error("Maximum number of samples reached.");
+			}
+		} else if(modItemType == MODITEM_INSTRUMENT)
+		{
+			// Insert instrument
+			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, 0);
+			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
+			{
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES| HINT_INSTRUMENT | HINT_ENVELOPE);
+				pModDoc->SetModified();
+			} else
+			{
+				Reporting::Error("Maximum number of samples reached.");
+			}
+		}
 	}
 }
 

@@ -1157,8 +1157,11 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	LockControls();
 	if (dwHintMask & HINT_MIXPLUGINS) OnMixPlugChanged();
 	UnlockControls();
-	if (!(dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE|HINT_MODTYPE))) return;
-	if (((dwHintMask >> HINT_SHIFT_INS) != m_nInstrument) && (dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	if(!(dwHintMask & (HINT_INSTRUMENT | HINT_ENVELOPE| HINT_MODTYPE))) return;
+
+	const INSTRUMENTINDEX updateIns = (dwHintMask >> HINT_SHIFT_INS);
+
+	if(updateIns != m_nInstrument && updateIns != 0 && (dwHintMask & (HINT_INSTRUMENT | HINT_ENVELOPE)) && !(dwHintMask & HINT_MODTYPE)) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 
@@ -2191,6 +2194,10 @@ void CCtrlInstruments::OnMixPlugChanged()
 							pIns->nMidiChannel = MidiFirstChannel;
 							UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, NULL);
 						}
+						if(pIns->midiPWD == 0)
+						{
+							pIns->midiPWD = 2;
+						}
 
 						// If we just dialled up an instrument plugin, zap the sample assignments.
 						const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
@@ -2389,7 +2396,7 @@ void CCtrlInstruments::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 //----------------------------------------------------------------------
 {
 	CModControlDlg::OnVScroll(nCode, nPos, pSB);
-	//if (nCode == SB_ENDSCROLL) SwitchToView();
+	if (nCode == SB_ENDSCROLL) SwitchToView();
 }
 
 
