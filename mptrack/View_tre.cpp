@@ -2512,14 +2512,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					nDefault = ID_MODTREE_EXECUTE;
 					AppendMenu(hMenu, MF_STRING, nDefault, "&View Sample");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Sample");
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sample");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sample");
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "&Duplicate Sample");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Sample");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sample");
 					if ((pModDoc) && (!pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 						AppendMenu(hMenu, (pModDoc->IsSampleMuted((SAMPLEINDEX)modItemID) ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
-						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Sample");
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "S&olo Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 					}
 				}
@@ -2531,9 +2531,9 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					nDefault = ID_MODTREE_EXECUTE;
 					AppendMenu(hMenu, MF_STRING, nDefault, "&View Instrument");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Instrument");
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Instrument");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Instrument");
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "&Duplicate Instrument");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Instrument");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Instrument");
 					if ((pModDoc) && (pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
@@ -3023,14 +3023,13 @@ void CModTree::OnDuplicateTreeItem()
 //----------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	CModDoc *pModDoc;
-
+	
 	const uint64 modItem = GetModItem(hItem);
 	const uint32 modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
-	pModDoc = GetDocumentFromItem(hItem);
-	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+	CModDoc *pModDoc = GetDocumentFromItem(hItem);
+	CSoundFile *pSndFile = (pModDoc != nullptr) ? pModDoc->GetSoundFile() : nullptr;
 
 	if(pModDoc && pSndFile)
 	{
@@ -3060,11 +3059,11 @@ void CModTree::OnDuplicateTreeItem()
 			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, modItemID);
 			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
-				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES| HINT_INSTRUMENT | HINT_ENVELOPE);
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE);
 				pModDoc->SetModified();
 			} else
 			{
-				Reporting::Error("Maximum number of samples reached.");
+				Reporting::Error("Maximum number of instruments reached.");
 			}
 		}
 	}
@@ -3075,13 +3074,12 @@ void CModTree::OnInsertTreeItem()
 //-------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	CModDoc *pModDoc;
 
 	const uint64 modItem = GetModItem(hItem);
 	const uint32 modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
-	pModDoc = GetDocumentFromItem(hItem);
+	CModDoc *pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 
 	if(pModDoc && pSndFile)
@@ -3115,7 +3113,7 @@ void CModTree::OnInsertTreeItem()
 				pModDoc->SetModified();
 			} else
 			{
-				Reporting::Error("Maximum number of samples reached.");
+				Reporting::Error("Maximum number of instruments reached.");
 			}
 		}
 	}
