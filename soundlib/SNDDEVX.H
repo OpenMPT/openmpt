@@ -55,7 +55,7 @@ public:
 	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD);
 	VOID Reset();
 	VOID Start() {}
-	BOOL IsOpen() { return (m_hWaveOut != NULL) ? TRUE : FALSE; }
+	bool IsOpen() { return (m_hWaveOut != NULL); }
 	UINT GetCurrentLatency() { return m_nBuffersPending * m_nWaveBufferSize; }
 	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
@@ -94,7 +94,7 @@ public:
 	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD);
 	VOID Reset();
 	VOID Start() {}
-	BOOL IsOpen() { return (m_pMixBuffer != NULL) ? TRUE : FALSE; }
+	bool IsOpen() { return (m_pMixBuffer != NULL); }
 	UINT GetCurrentLatency() { return m_dwLatency; }
 	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
@@ -132,6 +132,8 @@ protected:
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
 	int m_FrameBuffer[ASIO_BLOCK_LEN];
+public:
+	static int baseChannel;
 
 public:
 	CASIODevice();
@@ -144,7 +146,7 @@ public:
 	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwUser);
 	VOID Reset();
 	VOID Start();
-	BOOL IsOpen() { return (m_pAsioDrv != NULL) ? TRUE : FALSE; }
+	bool IsOpen() { return (m_pAsioDrv != NULL); }
 	BOOL Directcallback() { return TRUE; }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
 	UINT GetCurrentLatency() { return m_nAsioBufferLen; }

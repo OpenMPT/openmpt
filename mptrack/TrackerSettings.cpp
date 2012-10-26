@@ -14,6 +14,7 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "snddev.h"
+#include "SNDDEVX.H"
 #include "version.h"
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
@@ -308,6 +309,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	{
 		defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_ASIO);
 	}
+	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
 	m_dwSoundSetup = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
