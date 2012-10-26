@@ -576,6 +576,7 @@ typedef struct _ASIODRIVERDESC
 
 CASIODevice *CASIODevice::gpCurrentAsio = NULL;
 LONG CASIODevice::gnFillBuffers = 0;
+int CASIODevice::baseChannel = 0;
 static UINT gnNumAsioDrivers = 0;
 static BOOL gbAsioEnumerated = FALSE;
 static ASIODRIVERDESC gAsioDrivers[ASIO_MAX_DRIVERS];
@@ -721,7 +722,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 				ich, m_ChannelInfo[ich].isActive, m_ChannelInfo[ich].channelGroup, m_ChannelInfo[ich].type, m_ChannelInfo[ich].name);
 		#endif
 			m_BufferInfo[ich].isInput = ASIOFalse;
-			m_BufferInfo[ich].channelNum = ich;		// map MPT channel i to ASIO channel i
+			m_BufferInfo[ich].channelNum = ich + CASIODevice::baseChannel;		// map MPT channel i to ASIO channel i
 			m_BufferInfo[ich].buffers[0] = NULL;
 			m_BufferInfo[ich].buffers[1] = NULL;
 			if ((m_ChannelInfo[ich].type & 0x0f) == ASIOSTInt16MSB)
@@ -825,9 +826,11 @@ VOID CASIODevice::Start()
 	if (IsOpen())
 	{
 		m_bMixRunning = TRUE;
-		try {
-		m_pAsioDrv->start();
-		} catch(...) {
+		try
+		{
+			m_pAsioDrv->start();
+		} catch(...)
+		{
 			CASIODevice::ReportASIOException("ASIO crash in start()\n");
 		}
 	}
@@ -842,15 +845,19 @@ BOOL CASIODevice::Close()
 		if (m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
-			try {
+			try
+			{
 				m_pAsioDrv->stop();
-			} catch(...) {
+			} catch(...)
+			{
 				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
 		}
-		try {
+		try
+		{
 			m_pAsioDrv->disposeBuffers();
-		} catch(...) {
+		} catch(...)
+		{
 			CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
 		}
 		CloseDevice();
@@ -869,9 +876,11 @@ VOID CASIODevice::Reset()
 	if (IsOpen())
 	{
 		m_bMixRunning = FALSE;
-		try {
+		try
+		{
 			m_pAsioDrv->stop();
-		} catch(...) {
+		} catch(...)
+		{
 			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 		}
 	}
