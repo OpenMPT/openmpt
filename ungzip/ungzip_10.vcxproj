@@ -65,6 +65,7 @@
       <DebugInformationFormat>
       </DebugInformationFormat>
       <OmitDefaultLibName>true</OmitDefaultLibName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
