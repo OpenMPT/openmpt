@@ -24,6 +24,48 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.20.04.00 (October 2012, revision 1398)
+-----------------------------------------
+General tab
+   [Fix] <js> Input boxes in general tab didn't allow for horizontal scrolling.
+
+Pattern tab
+   [New] <js> Can now also transpose by arbitrary amounts. Select from context menu or shortcut.
+
+Sample tab
+   [Fix] <js> Unsupported types of WAV files (e.g. MP3-compressed WAV) won't crash the program anymore.
+   [Fix] <js> Loading XI files as samples could lead to a crash (tx Lucas).
+   [Fix] <js> Mass sample export file names were sometimes not sanitized correctly (http://bugs.openmpt.org/view.php?id=300).
+
+VST / DMO Plugins
+   [Fix] <js> Plugin Selection Dialog: Adding new plugins didn't focus them as intended.
+   [Fix] <js> Plugin Editor: Bypassing a plugin from its editor didn't mark the module as modified.
+
+VST::Specific Plugin Fixes
+   [Fix] <js> EZDrummer didn't load its samples until playback was started since OpenMPT 1.20.01.00, for the same reason as the Korg plugins which stopped working (tx coda).
+
+XM::Compatible Playback Mode
+   [Fix] <js> Improved XM tremor effect compatibility.
+   
+XM::Loading and Saving
+   [Imp] <js> Full tempo range (32 - 512) is now also supported for the default tempo in compatibility export, as Fasttracker 2 actually "supports" this (not through the GUI, but it won't sanitize such values in files) and XMPlay also does.
+   [Imp] <js> Improved detection of files made with MPT.
+
+MOD
+   [Fix] <js> Partly undid Set Finetune changes from OpenMPT 1.20.02.00 (fixes The Wanderer II by Jogeir)
+
+Other formats
+   [Fix] <js> ITP Saver: ITP files saved with OpenMPT 1.20.03.00 were corrupted. Files saved with this version can be fixed by writing the byte sequence 10 00 02 (hex) at position $2B (instead of 01 00 00).
+
+Misc
+   [New] <js> Tree View: It is now possible to rearrange (drag and drop), insert and duplicate (through the context menu) samples and instruments.
+   [New] <js> Added hidden INI setting ASIOBaseChannel in [Sound Settings] category to specify the first ASIO channel to use for sound output (as a quick and dirty semi-solution for http://bugs.openmpt.org/view.php?id=128).
+   [Imp] <js> Using the mouse wheel to scroll edit controls with spin buttons works on all such controls now (http://bugs.openmpt.org/view.php?id=99).
+   [Mod] <js> Changed default resampling type to XMMS-ModPlug.
+   [Fix] <js> Wave Export file names were sometimes not sanitized correctly (http://bugs.openmpt.org/view.php?id=300).
+   [Fix] <js> Installer shouldn't overwrite key settings files anymore.
+
+
 v1.20.03.00 (22 September 2012, revision 1359)
 ----------------------------------------------
 Pattern tab
@@ -80,7 +122,7 @@ MOD
 Other formats
    [Imp] <js> 669 Loader: Effects are now imported more accurately.
    [Imp] <js> DMF Loader: Improved effect import to fit more effects into a pattern cell.
-   [Fix] <js> AMF (DSMI) Loader: Fixed pattern effects (normal volume slides were always loaded as volume slide + vibrato) and some other bugs; More AMF format revision (8-14) are supported now.
+   [Fix] <js> AMF (DSMI) Loader: Fixed pattern effects (normal volume slides were always loaded as volume slide + vibrato) and some other bugs; More AMF format revisions (8-14) are supported now.
    [Fix] <js> AMF (ASYLUM) Loader: Transposed samples will now play correctly, default speed / tempo are not ignored anymore.
 
 Misc
@@ -121,7 +163,7 @@ VST / DMO Plugins
    [Imp] <js> The current playback position is now also reported correctly to plugins when jumping around in the order list (Previously, it was always reset to the song start).
 
 VST::Specific Plugin Fixes
-   [Fix] <js> The Korg Wavestation GUI did not work until song was played for the first time since OpenMPT 1.20. This may also fix the GUI of older versions of the Korg M1 plugin.
+   [Fix] <js> The Korg Wavestation GUI did not work until song was played for the first time since OpenMPT 1.20. This also fixes the GUI of older versions of the Korg M1 plugin.
 
 Playback
    [Fix] <js> Fixed frequency slide inaccuracies (tx BeRo).
