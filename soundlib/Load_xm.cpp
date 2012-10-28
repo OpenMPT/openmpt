@@ -443,9 +443,6 @@ bool CSoundFile::ReadXM(FileReader &file)
 	{
 		ReadMessage(file, file.ReadUint32LE(), leCR);
 		madeWith |= verConfirmed;
-	} else
-	{
-		file.SkipBack(4);
 	}
 	
 	// Read midi config: "MIDI"
@@ -455,9 +452,6 @@ bool CSoundFile::ReadXM(FileReader &file)
 		m_MidiCfg.Sanitize();
 		m_SongFlags |= SONG_EMBEDMIDICFG;
 		madeWith |= verConfirmed;
-	} else
-	{
-		file.SkipBack(4);
 	}
 
 	// Read pattern names: "PNAM"
@@ -472,9 +466,6 @@ bool CSoundFile::ReadXM(FileReader &file)
 			Patterns[pat].SetName(patName);
 		}
 		madeWith |= verConfirmed;
-	} else
-	{
-		file.SkipBack(4);
 	}
 
 	// Read channel names: "CNAM"
@@ -486,9 +477,6 @@ bool CSoundFile::ReadXM(FileReader &file)
 			file.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
 		}
 		madeWith |= verConfirmed;
-	} else
-	{
-		file.SkipBack(4);
 	}
 
 	// Read mix plugins information
