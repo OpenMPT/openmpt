@@ -410,16 +410,15 @@ public:
 	}
 
 	// Compare a magic string with the current stream position.
-	// Returns true if they are identical.
-	// The file cursor is advanced by the the length of the "magic" string.
-	bool ReadMagic(const char *magic)
+	// Returns true if they are identical and advances the file cursor by the the length of the "magic" string.
+	// Returns false if the string could not be found. The file cursor is not advanced in this case.
+	bool ReadMagic(const char *const magic)
 	{
 		const size_t magicLength = strlen(magic);
-		if(CanRead(magicLength))
+		if(CanRead(magicLength) && !memcmp(streamData + streamPos, magic, magicLength))
 		{
-			bool result = !memcmp(streamData + streamPos, magic, magicLength);
 			streamPos += magicLength;
-			return result;
+			return true;
 		} else
 		{
 			return false;
