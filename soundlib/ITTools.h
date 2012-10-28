@@ -284,10 +284,13 @@ struct ITSample
 
 STATIC_ASSERT(sizeof(ITSample) == 80);
 
+#pragma pack(pop)
 
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #endif // MODPLUG_TRACKER
+
+#pragma pack(push, 1)
 
 // IT Header extension: Save history
 struct ITHistoryStruct
