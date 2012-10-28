@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+
 BOOL CModCleanupDlg::OnInitDialog()
 //---------------------------------
 {
@@ -226,6 +227,7 @@ void CModCleanupDlg::OnPresetCleanupSong()
 	CheckDlgButton(IDC_CHK_SAMPLEPACK, BST_UNCHECKED);
 }
 
+
 void CModCleanupDlg::OnPresetCompoCleanup()
 //-----------------------------------------
 {
@@ -250,6 +252,7 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 	// misc
 	CheckDlgButton(IDC_CHK_SAMPLEPACK, BST_CHECKED);
 }
+
 
 BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 //----------------------------------------------------------------------------
@@ -422,7 +425,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 		cs.Leave();
 		EndWaitCursor();
 		wsprintf(s, "%d pattern%s present in file, but not used in the song\nDo you want to reorder the sequence list and remove these patterns?", nWaste, (nWaste == 1) ? "" : "s");
-		if (Reporting::Confirm(s, "Pattern Cleanup") != cnfYes) return false;
+		if (Reporting::Confirm(s, "Pattern Cleanup", false, false, this) != cnfYes) return false;
 		BeginWaitCursor();
 		cs.Enter();
 	}
@@ -547,7 +550,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		// We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
 			"but not used in the song. Do you want to remove them?", unusedInsSamples, (unusedInsSamples == 1) ? "" : "s");
-		if(Reporting::Confirm(s, "Sample Cleanup") == cnfYes)
+		if(Reporting::Confirm(s, "Sample Cleanup", false, false, this) == cnfYes)
 		{
 			nRemoved += pSndFile->RemoveSelectedSamples(samplesUsed);
 		}
@@ -570,38 +573,38 @@ bool CModCleanupDlg::OptimizeSamples()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	UINT nLoopOpt = 0;
+	SAMPLEINDEX numLoopOpt = 0;
 	
 	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
 		const ModSample &sample = pSndFile->GetSample(nSmp);
 
 		// Determine how much of the sample will be played
-		UINT loopLength = sample.nLength;
+		SmpLength loopLength = sample.nLength;
 		if(sample.uFlags & CHN_LOOP)
 		{
 			loopLength = sample.nLoopEnd;
 		}
 		if(sample.uFlags & CHN_SUSTAINLOOP)
 		{
-			loopLength = max(sample.nLoopEnd, sample.nSustainEnd);
+			loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
 		}
 
-		if(sample.pSample && sample.nLength > loopLength + 2) nLoopOpt++;
+		if(sample.pSample && sample.nLength > loopLength + 2) numLoopOpt++;
 	}
-	if (nLoopOpt == 0) return false;
+	if (numLoopOpt == 0) return false;
 
-	CHAR s[512];
+	char s[512];
 	wsprintf(s, "%d sample%s unused data after the loop end point,\n"
-		"Do you want to optimize %s and remove this unused data?", nLoopOpt, (nLoopOpt == 1) ? " has" : "s have", (nLoopOpt == 1) ? "it" : "them");
-	if (Reporting::Confirm(s, "Sample Optimization") == cnfYes)
+		"Do you want to optimize %s and remove this unused data?", numLoopOpt, (numLoopOpt == 1) ? " has" : "s have", (numLoopOpt == 1) ? "it" : "them");
+	if(Reporting::Confirm(s, "Sample Optimization", false, false, this) == cnfYes)
 	{
-		for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
+		for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 		{
 			ModSample &sample = pSndFile->GetSample(nSmp);
 
 			// Determine how much of the sample will be played
-			UINT loopLength = sample.nLength;
+			SmpLength loopLength = sample.nLength;
 			if(sample.uFlags & CHN_LOOP)
 			{
 				loopLength = sample.nLoopEnd;
@@ -609,21 +612,21 @@ bool CModCleanupDlg::OptimizeSamples()
 				// Sustain loop is played before normal loop, and it can actually be located after the normal loop.
 				if(sample.uFlags & CHN_SUSTAINLOOP)
 				{
-					loopLength = max(sample.nLoopEnd, sample.nSustainEnd);
+					loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
 				}
 			}
 
-			if (sample.nLength > loopLength + 2)
+			if(sample.nLength > loopLength + 2)
 			{
-				UINT lmax = loopLength + 2;
-				if ((lmax < sample.nLength) && (lmax >= 2))
+				SmpLength lmax = loopLength + 2;
+				if(lmax < sample.nLength && lmax >= 2)
 				{
 					m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
 					ctrlSmp::ResizeSample(sample, lmax, pSndFile);
 				}
 			}
 		}
-		wsprintf(s, "%d sample loop%s optimized\n" ,nLoopOpt, (nLoopOpt == 1) ? "" : "s");
+		wsprintf(s, "%d sample loop%s optimized\n" ,numLoopOpt, (numLoopOpt == 1) ? "" : "s");
 		m_pModDoc->AddToLog(s);
 		return true;
 	}
@@ -636,79 +639,29 @@ bool CModCleanupDlg::RearrangeSamples()
 //-------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
 
-	if(pSndFile->m_nSamples < 2)
+	if(pSndFile == nullptr || pSndFile->GetNumSamples() < 2)
 		return false;
 
-	SAMPLEINDEX nRemap = 0; // remap count
-	std::vector<SAMPLEINDEX> nSampleMap(pSndFile->GetNumSamples() + 1);
-	for(SAMPLEINDEX i = 0; i <= pSndFile->GetNumSamples(); i++)
-	{
-		nSampleMap[i] = i;
-	}
+	std::vector<SAMPLEINDEX> sampleMap;
+	sampleMap.reserve(pSndFile->GetNumSamples());
 
-	// First, find out which sample slots are unused and create the new sample map
+	// First, find out which sample slots are unused and create the new sample map only with used samples
 	for(SAMPLEINDEX i = 1; i <= pSndFile->GetNumSamples(); i++)
 	{
-		if(pSndFile->GetSample(i).pSample == nullptr)
+		if(pSndFile->GetSample(i).pSample != nullptr)
 		{
-			// Move all following samples
-			nRemap++;
-			nSampleMap[i] = 0;
-			for(UINT j = i + 1; j <= pSndFile->GetNumSamples(); j++)
-				nSampleMap[j]--;
+			sampleMap.push_back(i);
 		}
 	}
 
-	if(!nRemap)
+	// Nothing found to remove...
+	if(pSndFile->GetNumSamples() == sampleMap.size())
+	{
 		return false;
-
-	// Now, move everything around
-	for(SAMPLEINDEX i = 1; i <= pSndFile->GetNumSamples(); i++)
-	{
-		if(nSampleMap[i] != i)
-		{
-			// This gotta be moved
-			CriticalSection cs;
-			pSndFile->MoveSample(i, nSampleMap[i]);
-			pSndFile->GetSample(i).pSample = nullptr;
-			if(nSampleMap[i] > 0) strcpy(pSndFile->m_szNames[nSampleMap[i]], pSndFile->m_szNames[i]);
-			MemsetZero(pSndFile->m_szNames[i]);
-
-			// Also update instrument mapping (if module is in instrument mode)
-			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
-			{
-				ModInstrument *pIns = pSndFile->Instruments[nIns];
-				if(pIns)
-				{
-					for(size_t iNote = 0; iNote < 128; iNote++)
-						if(pIns->Keyboard[iNote] == i) pIns->Keyboard[iNote] = nSampleMap[i];
-				}
-			}
-		}
 	}
 
-	// Go through the patterns and remap samples (if module is in sample mode)
-	if(!pSndFile->GetNumInstruments())
-	{
-		for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
-		{
-			ModCommand *m = pSndFile->Patterns[nPat];
-			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels(); len; m++, len--)
-			{
-				if(!m->IsPcNote() &&  m->instr <= pSndFile->GetNumSamples()) m->instr = (BYTE)nSampleMap[m->instr];
-			}
-		}
-	}
-
-	// Too lazy to fix sample undo...
-	m_pModDoc->GetSampleUndo().ClearUndo();
-
-	pSndFile->m_nSamples -= nRemap;
-
-	return true;
-
+	return (m_pModDoc->ReArrangeSamples(sampleMap) != SAMPLEINDEX_INVALID);
 }
 
 
@@ -717,106 +670,77 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 //--------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
 
-	if (!pSndFile->GetNumInstruments()) return false;
+	if(pSndFile == nullptr || !pSndFile->GetNumInstruments())
+		return false;
 
 	deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples;
 	if(!pSndFile->m_SongFlags[SONG_ITPROJECT]) // Never remove an instrument's samples in ITP.
 	{
-		if(Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing unused instruments") == cnfYes)
+		if(Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing unused instruments", false, false, this) == cnfYes)
 		{
 			removeSamples = deleteAssociatedSamples;
 		}
 	} else
 	{
-		Reporting::Information("This is an IT project file, so no samples associated with an used instrument will be removed.", "Removing unused instruments");
+		Reporting::Information("Samples associated with an used instrument won't be removed in IT Project files.", "Removing unused instruments", this);
 	}
 
 	BeginWaitCursor();
-	vector<bool> usedmap(pSndFile->GetNumInstruments() + 1, false);
-	vector<INSTRUMENTINDEX> swapmap(pSndFile->GetNumInstruments() + 1, 0);
-	vector<INSTRUMENTINDEX> swapdest(pSndFile->GetNumInstruments() + 1, 0);
-	INSTRUMENTINDEX nRemoved = 0;
-	INSTRUMENTINDEX nSwap, nIndex;
-	bool bReorg = false;
 
-	for(INSTRUMENTINDEX i = pSndFile->GetNumInstruments(); i >= 1; i--)
+	vector<bool> instrUsed(pSndFile->GetNumInstruments());
+	bool prevUsed = true, reorder = false;
+	INSTRUMENTINDEX numUsed = 0, lastUsed = 1;
+	for(INSTRUMENTINDEX i = 0; i < pSndFile->GetNumInstruments(); i++)
 	{
-		if (!pSndFile->IsInstrumentUsed(i))
+		instrUsed[i] = (pSndFile->IsInstrumentUsed(i + 1));
+		if(instrUsed[i])
 		{
-			CriticalSection cs;
-
-			if(pSndFile->DestroyInstrument(i, removeSamples))
+			numUsed++;
+			lastUsed = i;
+			if(!prevUsed)
 			{
-				if ((i == pSndFile->GetNumInstruments()) && (i > 1))
-					pSndFile->m_nInstruments--;
-				else
-					bReorg = true;
-				nRemoved++;
+				reorder = true;
 			}
-		} else
-		{
-			usedmap[i] = true;
 		}
+		prevUsed = instrUsed[i];
 	}
+
 	EndWaitCursor();
-	if ((bReorg) && (pSndFile->m_nInstruments > 1)
-		&& (Reporting::Confirm("Do you want to reorganize the remaining instruments?", "Removing unused instruments") == cnfYes))
+
+	if(reorder && numUsed > 1)
+	{
+		reorder = (Reporting::Confirm("Do you want to reorganize the remaining instruments?", "Removing unused instruments", false, false, this) == cnfYes);
+	} else
+	{
+		reorder = false;
+	}
+
+	const INSTRUMENTINDEX numRemoved = pSndFile->GetNumInstruments() - numUsed;
+
+	if(numRemoved != 0)
 	{
 		BeginWaitCursor();
-		CriticalSection cs;
-		nSwap = 0;
-		nIndex = 1;
-		for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
-		{
-			if (usedmap[nIns])
-			{
-				while (nIndex<nIns)
-				{
-					if ((!usedmap[nIndex]) && (!pSndFile->Instruments[nIndex]))
-					{
-						swapmap[nSwap] = nIns;
-						swapdest[nSwap] = nIndex;
-						pSndFile->Instruments[nIndex] = pSndFile->Instruments[nIns];
-						pSndFile->Instruments[nIns] = nullptr;
-						usedmap[nIndex] = true;
-						usedmap[nIns] = false;
-						nSwap++;
-						nIndex++;
-						break;
-					}
-					nIndex++;
-				}
-			}
-		}
-		while ((pSndFile->m_nInstruments > 1) && (!pSndFile->Instruments[pSndFile->m_nInstruments])) pSndFile->m_nInstruments--;
 
-		if (nSwap > 0)
+		vector<INSTRUMENTINDEX> instrMap;
+		instrMap.reserve(pSndFile->GetNumInstruments());
+		for(INSTRUMENTINDEX i = 0; i < pSndFile->GetNumInstruments(); i++)
 		{
-			for (PATTERNINDEX iPat = 0; iPat < pSndFile->Patterns.Size(); iPat++) if (pSndFile->Patterns[iPat])
+			if(instrUsed[i])
 			{
-				ModCommand *p = pSndFile->Patterns[iPat];
-				UINT nLen = pSndFile->m_nChannels * pSndFile->Patterns[iPat].GetNumRows();
-				while (nLen--)
-				{
-					if (p->instr && !p->IsPcNote())
-					{
-						for (UINT k=0; k<nSwap; k++)
-						{
-							if (p->instr == swapmap[k]) p->instr = (ModCommand::INSTR)swapdest[k];
-						}
-					}
-					p++;
-				}
+				instrMap.push_back(i + 1);
+			} else if(!reorder && i < lastUsed)
+			{
+				instrMap.push_back(INSTRUMENTINDEX_INVALID);
 			}
 		}
+
+		m_pModDoc->ReArrangeInstruments(instrMap, removeSamples);
+
 		EndWaitCursor();
-	}
-	if (nRemoved)
-	{
-		CHAR s[64];
-		wsprintf(s, "%d unused instrument%s removed\n", nRemoved, (nRemoved == 1) ? "" : "s");
+
+		char s[64];
+		wsprintf(s, "%d unused instrument%s removed\n", numRemoved, (numRemoved == 1) ? "" : "s");
 		m_pModDoc->AddToLog(s);
 		return true;
 	}
@@ -889,7 +813,7 @@ bool CModCleanupDlg::ResetVariables()
 	if(pSndFile == nullptr) return false;
 
 	//jojo.compocleanup
-	if(Reporting::Confirm(TEXT("WARNING: OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables")) == cnfNo)
+	if(Reporting::Confirm(TEXT("WARNING: OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables"), false, false, this) == cnfNo)
 		return false;
 
 	// Stop play.

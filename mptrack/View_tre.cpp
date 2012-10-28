@@ -2145,7 +2145,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 				pModDoc->ReArrangeSamples(newOrder);
 
-				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
+				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_PATTERNDATA, NULL);
 				pModDoc->SetModified();
 				SelectItem(hItem);
 			}
@@ -2172,7 +2172,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 				pModDoc->ReArrangeInstruments(newOrder);
 
-				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE, NULL);
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA, NULL);
 				pModDoc->SetModified();
 				SelectItem(hItem);
 			}
@@ -3048,7 +3048,7 @@ void CModTree::OnDuplicateTreeItem()
 			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
 			{
 				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
+				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_PATTERNDATA);
 			} else
 			{
 				Reporting::Error("Maximum number of samples reached.");
@@ -3059,7 +3059,7 @@ void CModTree::OnDuplicateTreeItem()
 			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, modItemID);
 			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
-				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE);
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA);
 				pModDoc->SetModified();
 			} else
 			{
@@ -3098,7 +3098,7 @@ void CModTree::OnInsertTreeItem()
 			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
 			{
 				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
+				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_PATTERNDATA);
 			} else
 			{
 				Reporting::Error("Maximum number of samples reached.");
@@ -3109,7 +3109,7 @@ void CModTree::OnInsertTreeItem()
 			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, 0);
 			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
-				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES| HINT_INSTRUMENT | HINT_ENVELOPE);
+				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES| HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA);
 				pModDoc->SetModified();
 			} else
 			{

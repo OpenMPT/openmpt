@@ -238,7 +238,9 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 		InvalidateChannelsHeaders();
 		UpdateScrollSize();
 	}
-	if((HintFlagPart(dwHintMask) == HINT_PATTERNDATA) && (m_nPattern != (dwHintMask >> HINT_SHIFT_PAT)))
+
+	const PATTERNINDEX updatePat = (dwHintMask >> HINT_SHIFT_PAT);
+	if(HintFlagPart(dwHintMask) == HINT_PATTERNDATA && m_nPattern != updatePat && updatePat != 0)
 		return;
 
 	if(dwHintMask & (HINT_MODTYPE|HINT_PATTERNDATA))

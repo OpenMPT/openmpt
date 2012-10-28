@@ -10,10 +10,6 @@
 
 #pragma once
 
-#if _MSC_VER >= 1000
-#pragma once
-#endif // _MSC_VER >= 1000
-
 #include "sndfile.h"
 #include "../common/misc_util.h"
 #include "Undo.h"
@@ -236,7 +232,7 @@ public:
 
 	SAMPLEINDEX ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder);
 
-	INSTRUMENTINDEX ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder);
+	INSTRUMENTINDEX ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples);
 
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();

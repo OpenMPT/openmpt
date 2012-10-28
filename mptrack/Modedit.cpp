@@ -273,10 +273,9 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 
 	CriticalSection cs;
 
-	const SAMPLEINDEX oldNumSamples = m_SndFile.GetNumSamples();
-	m_SndFile.m_nSamples = static_cast<SAMPLEINDEX>(newOrder.size());
+	const SAMPLEINDEX oldNumSamples = m_SndFile.GetNumSamples(), newNumSamples = static_cast<SAMPLEINDEX>(newOrder.size());
 
-	for(SAMPLEINDEX i = 0; i < Util::Min(GetNumSamples(), oldNumSamples); i++)
+	for(SAMPLEINDEX i = 0; i < Util::Min(newNumSamples, oldNumSamples); i++)
 	{
 		if(newOrder[i] != i + 1)
 		{
@@ -286,7 +285,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 
 	vector<int> sampleCount(oldNumSamples + 1, 0);
 	vector<ModSample> sampleHeaders(oldNumSamples + 1);
-	vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, SAMPLEINDEX_INVALID);	// One of the new indexes for the old sample
+	vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
 	vector<std::string> sampleNames(oldNumSamples + 1);
 
 	for(size_t i = 0; i < newOrder.size(); i++)
@@ -310,8 +309,15 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 		sampleNames[i] = m_SndFile.m_szNames[i];
 	}
 
+	// Remove sample data references from now unused slots.
+	for(SAMPLEINDEX i = newNumSamples + 1; i <= oldNumSamples; i++)
+	{
+		m_SndFile.GetSample(i).pSample = nullptr;
+	}
+
 	// Now, create new sample list.
-	for(SAMPLEINDEX i = 0; i < newOrder.size(); i++)
+	m_SndFile.m_nSamples = newNumSamples;
+	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
 	{
 		const SAMPLEINDEX origSlot = newOrder[i];
 		if(origSlot > 0 && origSlot <= oldNumSamples)
@@ -347,7 +353,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 			}
 			for(size_t note = 0; note < CountOf(ins->Keyboard); note++)
 			{
-				if(ins->Keyboard[note] > 0 && ins->Keyboard[note] <= oldNumSamples && newIndex[ins->Keyboard[note]] != SAMPLEINDEX_INVALID)
+				if(ins->Keyboard[note] > 0 && ins->Keyboard[note] <= oldNumSamples)
 				{
 					ins->Keyboard[note] = newIndex[ins->Keyboard[note]];
 				} else
@@ -360,10 +366,10 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 	{
 		PrepareUndoForAllPatterns();
 
-		vector<ModCommand::INSTR> indices(newOrder.size() + 1, 0);
-		for(size_t i = 0; i < newOrder.size(); i++)
+		vector<ModCommand::INSTR> indices(newIndex.size(), 0);
+		for(size_t i = 0; i < newIndex.size(); i++)
 		{
-			indices[i + 1] = newIndex[i];
+			indices[i] = newIndex[i];
 		}
 		m_SndFile.Patterns.ForEachModCommand(RewriteInstrumentReferencesInPatterns(indices));
 	}
@@ -375,8 +381,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 // Base code for adding, removing, moving and duplicating instruments. Returns new number of instruments on success, INSTRUMENTINDEX_INVALID otherwise.
 // The new instrument vector can contain INSTRUMENTINDEX_INVALID for adding new (empty) instruments.
 // newOrder indices are zero-based, i.e. newOrder[0] will define the contents of the first instrument slot.
-INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder)
-//------------------------------------------------------------------------------------
+INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples)
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	if(newOrder.size() > m_SndFile.GetModSpecifications().instrumentsMax || GetNumInstruments() == 0)
 	{
@@ -389,7 +395,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &new
 	m_SndFile.m_nInstruments = static_cast<INSTRUMENTINDEX>(newOrder.size());
 
 	vector<ModInstrument> instrumentHeaders(oldNumInstruments + 1);
-	vector<SAMPLEINDEX> newIndex(oldNumInstruments + 1, INSTRUMENTINDEX_INVALID);	// One of the new indexes for the old instrument
+	vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);	// One of the new indexes for the old instrument
 	for(size_t i = 0; i < newOrder.size(); i++)
 	{
 		const INSTRUMENTINDEX origSlot = newOrder[i];
@@ -401,38 +407,44 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &new
 		}
 	}
 
+	// Delete unused instruments first.
+	for(INSTRUMENTINDEX i = 1; i <= oldNumInstruments; i++)
+	{
+		if(newIndex[i] == 0)
+		{
+			m_SndFile.DestroyInstrument(i, removeSamples);
+		}
+	}
+
 	// Now, create new instrument list.
 	for(INSTRUMENTINDEX i = 0; i < newOrder.size(); i++)
 	{
-		if(m_SndFile.Instruments[i + 1] == nullptr)
+		ModInstrument *ins = m_SndFile.AllocateInstrument(i + 1);
+		if(ins == nullptr)
 		{
-			m_SndFile.Instruments[i + 1] = new ModInstrument();
+			continue;
 		}
 
 		const INSTRUMENTINDEX origSlot = newOrder[i];
 		if(origSlot > 0 && origSlot <= oldNumInstruments)
 		{
 			// Copy an original instrument.
-			*m_SndFile.Instruments[i + 1] = instrumentHeaders[origSlot];
-		} else
-		{
-			// Invalid sample instrument.
-			*m_SndFile.Instruments[i + 1] = ModInstrument();
+			*ins = instrumentHeaders[origSlot];
 		}
 	}
+
 	// Free unused instruments
-	for(INSTRUMENTINDEX i = newOrder.size(); i < oldNumInstruments; i++)
+	for(INSTRUMENTINDEX i = newOrder.size() + 1; i <= oldNumInstruments; i++)
 	{
-		delete m_SndFile.Instruments[i + 1];
-		m_SndFile.Instruments[i + 1] = nullptr;
+		m_SndFile.DestroyInstrument(i, doNoDeleteAssociatedSamples);
 	}
 
 	PrepareUndoForAllPatterns();
 
-	vector<ModCommand::INSTR> indices(newOrder.size() + 1, 0);
-	for(size_t i = 1; i < newOrder.size(); i++)
+	vector<ModCommand::INSTR> indices(newIndex.size(), 0);
+	for(size_t i = 0; i < newIndex.size(); i++)
 	{
-		indices[i + 1] = newIndex[i];
+		indices[i] = newIndex[i];
 	}
 	m_SndFile.Patterns.ForEachModCommand(RewriteInstrumentReferencesInPatterns(indices));
 
