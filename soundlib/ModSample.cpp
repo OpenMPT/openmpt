@@ -18,7 +18,7 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 //-------------------------------------------------------
 {
 	// Convert between frequency and transpose values if necessary.
-	if ((!(toType & (MOD_TYPE_MOD | MOD_TYPE_XM))) && (fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))
+	if((!(toType & (MOD_TYPE_MOD | MOD_TYPE_XM))) && (fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 	{
 		TransposeToFrequency();
 		RelativeTone = 0;
@@ -43,9 +43,10 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 		nVibType = VIB_SINE;
 	}
 
-	// No sustain loops for MOD/S3M/XM
+	// No global volume sustain loops for MOD/S3M/XM
 	if(toType & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_S3M))
 	{
+		nGlobalVol = 64;
 		// Sustain loops - convert to normal loops
 		if((uFlags & CHN_SUSTAINLOOP) != 0)
 		{

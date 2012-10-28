@@ -1503,6 +1503,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			sample.nC5Speed = p->dwSampleRate;
 			sample.RelativeTone = p->byOriginalPitch;
 			sample.nFineTune = p->chPitchCorrection;
+			sample.Convert(MOD_TYPE_IT, pSndFile->GetType());
 
 			SampleIO(
 				SampleIO::_16bit,
@@ -1604,6 +1605,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			}
 		}
 		if (pDlsIns->szName[0]) memcpy(pSndFile->m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
+		sample.Convert(MOD_TYPE_IT, pSndFile->GetType());
 		bOk = TRUE;
 	}
 	FreeWaveForm(pWaveForm);
