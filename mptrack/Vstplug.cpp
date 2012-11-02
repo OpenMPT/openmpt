@@ -772,7 +772,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 					timeInfo.ppqPos = 0;
 				}
 			}
-			if ((value & kVstTempoValid))
+			if((value & kVstTempoValid))
 			{
 				timeInfo.tempo = pSndFile->GetCurrentBPM();
 				if (timeInfo.tempo)
@@ -780,7 +780,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 					timeInfo.flags |= kVstTempoValid;
 				}
 			}
-			if ((value & kVstTimeSigValid))
+			if((value & kVstTimeSigValid))
 			{
 				timeInfo.flags |= kVstTimeSigValid;
 
@@ -1310,7 +1310,9 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 	m_pEditor = nullptr;
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
+#ifdef MODPLUG_TRACKER
 	m_pModDoc = nullptr; //rewbs.plugDocAware
+#endif // MODPLUG_TRACKER
 	m_pProcessFP = nullptr;
 
 	// Insert ourselves in the beginning of the list
@@ -1354,7 +1356,9 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_pEffect->resvd1 = ToVstPtr(this);
 	//rewbs.plugDocAware
 	m_pSndFile = pSndFile;
+#ifdef MODPLUG_TRACKER
 	m_pModDoc = pSndFile->GetpModDoc();
+#endif // MODPLUG_TRACKER
 	m_nSlot = FindSlot();
 	//end rewbs.plugDocAware
 
@@ -2052,7 +2056,7 @@ void CVstPlugin::RecalculateGain()
 	float gain = 0.1f * static_cast<float>(m_pMixStruct ? m_pMixStruct->GetGain() : 10);
 	if(gain < 0.1f) gain = 1.0f;
 
-	if (m_bIsInstrument && m_pSndFile)
+	if(m_bIsInstrument && m_pSndFile)
 	{
 		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
 		gain = static_cast<float>(gain * (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol()));
@@ -2181,7 +2185,7 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 	// -> mixop == 3 : MIX -= WET - DRY * wetRatio
 	// -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
 	// -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
-	//				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
+	//                 MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
 
 	int mixop;
 	if(m_bIsInstrument || m_pMixStruct == nullptr)
@@ -2314,7 +2318,7 @@ void CVstPlugin::HardAllNotesOff()
 		Resume();
 	}
 
-	for(uint8 mc = 0; mc < 16; mc++)		//all midi chans
+	for(uint8 mc = 0; mc < CountOf(m_MidiCh); mc++)		//all midi chans
 	{
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
@@ -2323,14 +2327,14 @@ void CVstPlugin::HardAllNotesOff()
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
-		for(size_t i = 0; i < CountOf(channel.uNoteOnMap); i++)	//all notes
+		for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)	//all notes
 		{
-			for(CHANNELINDEX c = 0; c < CountOf(channel.uNoteOnMap[i]); c++)
+			for(CHANNELINDEX c = 0; c < CountOf(channel.noteOnMap[i]); c++)
 			{
-				while(channel.uNoteOnMap[i][c])
+				while(channel.noteOnMap[i][c])
 				{
 					MidiSend(MIDIEvents::NoteOff(mc, static_cast<uint8>(i), 0));
-					channel.uNoteOnMap[i][c]--;
+					channel.noteOnMap[i][c]--;
 				}
 			}
 		}
@@ -2398,7 +2402,7 @@ void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
 }
 
 
-//Set MIDI pitch for given MIDI channel using fixed point pitch bend value (converted back to 0-16383 MIDI range)
+// Set MIDI pitch for given MIDI channel using fixed point pitch bend value (converted back to 0-16383 MIDI range)
 void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 newPitchBendPos)
 //------------------------------------------------------------------
 {
@@ -2476,13 +2480,12 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 
 
 	// Specific Note Off
-	if (note > NOTE_MAX_SPECIAL)			//rewbs.vstiLive
+	if(note > NOTE_MAX_SPECIAL)
 	{
-		note -= NOTE_MIN;
-		uint8 i = static_cast<uint8>(note - NOTE_MAX_SPECIAL);
-		if(channel.uNoteOnMap[i][trackChannel])
+		uint8 i = static_cast<uint8>(note - NOTE_MAX_SPECIAL - NOTE_MIN);
+		if(channel.noteOnMap[i][trackChannel])
 		{
-			channel.uNoteOnMap[i][trackChannel]--;
+			channel.noteOnMap[i][trackChannel]--;
 			MidiSend(MIDIEvents::NoteOff(nMidiCh, i, 0));
 		}
 	}
@@ -2490,15 +2493,15 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	// "Hard core" All Sounds Off on this midi and tracker channel
 	// This one doesn't check the note mask - just one note off per note.
 	// Also less likely to cause a VST event buffer overflow.
-	else if (note == NOTE_NOTECUT)	// ^^
+	else if(note == NOTE_NOTECUT)	// ^^
 	{
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, nMidiCh, 0));
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, nMidiCh, 0));
 
 		// Turn off all notes
-		for(uint8 i = 0; i < 128; i++)
+		for(uint8 i = 0; i < CountOf(channel.noteOnMap); i++)
 		{
-			channel.uNoteOnMap[i][trackChannel] = 0;
+			channel.noteOnMap[i][trackChannel] = 0;
 			MidiSend(MIDIEvents::NoteOff(nMidiCh, i, volume));
 		}
 
@@ -2508,14 +2511,14 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	// using note mask.
 	else if(note == NOTE_KEYOFF || note == NOTE_FADE) // ==, ~~
 	{
-		for(uint8 i = 0; i < 128; i++)
+		for(uint8 i = 0; i < CountOf(channel.noteOnMap); i++)
 		{
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
-			while(channel.uNoteOnMap[i][trackChannel])
+			while(channel.noteOnMap[i][trackChannel])
 			{
 				if(MidiSend(MIDIEvents::NoteOff(nMidiCh, i, volume)))
 				{
-					channel.uNoteOnMap[i][trackChannel]--;
+					channel.noteOnMap[i][trackChannel]--;
 				} else
 				{
 					// VST event queue overflow, no point in submitting more note offs.
@@ -2543,8 +2546,8 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		// Problem: if a note dies out naturally and we never send a note off, this counter
 		// will block at max until note off. Is this a problem?
 		// Safe to assume we won't need more than 16 note offs max on a given note?
-		if(channel.uNoteOnMap[note][trackChannel] < 17)
-			channel.uNoteOnMap[note][trackChannel]++;
+		if(channel.noteOnMap[note][trackChannel] < 17)
+			channel.noteOnMap[note][trackChannel]++;
 
 		MidiSend(MIDIEvents::NoteOn(nMidiCh, static_cast<uint8>(note), volume));
 	}
@@ -2555,7 +2558,7 @@ bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 //------------------------------------------------------------------
 {
 	note -= NOTE_MIN;
-	return (m_MidiCh[midiChn].uNoteOnMap[note][trackerChn] != 0);
+	return (m_MidiCh[midiChn].noteOnMap[note][trackerChn] != 0);
 }
 
 
@@ -2565,11 +2568,11 @@ bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT d
 	note -= NOTE_MIN;
 	VSTInstrChannel *pMidiCh = &m_MidiCh[midiChn & 0x0f];
 
-	if (!(pMidiCh->uNoteOnMap[note][sourceTrackerChn]))
+	if (!(pMidiCh->noteOnMap[note][sourceTrackerChn]))
 		return false;
 
-	pMidiCh->uNoteOnMap[note][sourceTrackerChn]--;
-	pMidiCh->uNoteOnMap[note][destTrackerChn]++;
+	pMidiCh->noteOnMap[note][sourceTrackerChn]--;
+	pMidiCh->noteOnMap[note][destTrackerChn]++;
 	return true;
 }
 //end rewbs.introVST
@@ -2595,6 +2598,7 @@ UINT CVstPlugin::GetZxxParameter(UINT nParam)
 void CVstPlugin::AutomateParameter(PlugParamIndex param)
 //------------------------------------------------------
 {
+#ifdef MODPLUG_TRACKER
 	CModDoc* pModDoc = GetModDoc();
 	if(pModDoc == nullptr)
 	{
@@ -2642,6 +2646,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			pVstEditor->SetLearnMacro(-1);
 		}
 	}
+#endif // MODPLUG_TRACKER
 }
 
 
@@ -2692,7 +2697,7 @@ void CVstPlugin::SaveAllParameters()
 			}
 		}
 		// This plug doesn't support chunks: save parameters
-		UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
+		PlugParamIndex nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
 		UINT nLen = nParams * sizeof(float);
 		if (!nLen) return;
 		nLen += 4;
@@ -2714,7 +2719,7 @@ void CVstPlugin::SaveAllParameters()
 			float *p = (float *)m_pMixStruct->pPluginData;
 			*(ULONG *)p = 0;
 			p++;
-			for (UINT i = 0; i < nParams; i++)
+			for(PlugParamIndex i = 0; i < nParams; i++)
 			{
 				p[i] = GetParameter(i);
 			}
@@ -2828,7 +2833,7 @@ void CVstPlugin::Bypass(bool bypass)
 	Dispatch(effSetBypass, bypass ? 1 : 0, nullptr, nullptr, 0.0f);
 
 #ifdef MODPLUG_TRACKER
-	if (m_pModDoc)
+	if(m_pModDoc)
 		m_pModDoc->UpdateAllViews(nullptr, HINT_MIXPLUGINS, nullptr);
 #endif // MODPLUG_TRACKER
 }
@@ -2849,9 +2854,9 @@ PLUGINDEX CVstPlugin::FindSlot()
 //------------------------------
 {
 	PLUGINDEX slot = 0;
-	if (m_pSndFile)
+	if(m_pSndFile)
 	{
-		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot < MAX_MIXPLUGINS - 1)
+		while(m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot]) && slot < MAX_MIXPLUGINS - 1)
 		{
 			slot++;
 		}

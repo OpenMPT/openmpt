@@ -104,10 +104,10 @@ struct VSTPluginLib
 
 struct VSTInstrChannel
 {
-	int32 midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
+	int32  midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
 	uint16 currentProgram;
-	uint16 currentBank; //rewbs.MidiBank
-	uint8 uNoteOnMap[128][MAX_CHANNELS];
+	uint16 currentBank;
+	uint8  noteOnMap[128][MAX_CHANNELS];
 };
 
 
@@ -142,9 +142,11 @@ protected:
 	SNDMIXPLUGIN *m_pMixStruct;
 	AEffect *m_pEffect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
-	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
-	CModDoc *m_pModDoc;			 //rewbs.plugDocAware
-	CSoundFile *m_pSndFile;			 //rewbs.plugDocAware
+	CAbstractVstEditor *m_pEditor;
+#ifdef MODPLUG_TRACKER
+	CModDoc *m_pModDoc;
+#endif // MODPLUG_TRACKER
+	CSoundFile *m_pSndFile;
 
 	size_t m_nRefCount;
 	static const uint32 nInvalidSampleRate = UINT_MAX;
@@ -176,16 +178,18 @@ public:
 	VstInt32 GetNumPrograms();
 	PlugParamIndex GetNumParameters();
 	VstInt32 GetCurrentProgram();
-	VstInt32 GetNumProgramCategories();	//rewbs.VSTpresets
+	VstInt32 GetNumProgramCategories();
 	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false);
 	bool LoadProgram(CString fileName);
 	bool SaveProgram(CString fileName);
-	VstInt32 GetUID();			//rewbs.VSTpresets
-	VstInt32 GetVersion();		//rewbs.VSTpresets
-	bool GetParams(float* param, VstInt32 min, VstInt32 max); 	//rewbs.VSTpresets
-	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0); 	//rewbs.VSTpresets
-	inline CModDoc* GetModDoc() {return m_pModDoc;}
-	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
+	VstInt32 GetUID();
+	VstInt32 GetVersion();
+	bool GetParams(float* param, VstInt32 min, VstInt32 max);
+	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
+#ifdef MODPLUG_TRACKER
+	inline CModDoc *GetModDoc() { return m_pModDoc; }
+#endif // MODPLUG_TRACKER
+	inline CSoundFile *GetSoundFile() { return m_pSndFile; }
 	PLUGINDEX FindSlot();
 	void SetSlot(PLUGINDEX slot);
 	PLUGINDEX GetSlot();
