@@ -92,8 +92,8 @@ CAbstractVstEditor::~CAbstractVstEditor()
 		}
 		m_pPresetMenuGroup.clear();
 
-		m_pVstPlugin->m_pEditor = NULL;
-		m_pVstPlugin = NULL;
+		m_pVstPlugin->m_pEditor = nullptr;
+		m_pVstPlugin = nullptr;
 	}
 }
 
@@ -241,29 +241,28 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 	if (pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if ( (!m_pVstPlugin->m_bPassKeypressesToPlug) &&  
-			((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
-			 (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN)) )
+		if(!m_pVstPlugin->m_bPassKeypressesToPlug &&  
+			(pMsg->message == WM_SYSKEYUP   || pMsg->message == WM_KEYUP || 
+			 pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN) )
 		{
 
-			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 			
 			//Translate message manually
 			UINT nChar = pMsg->wParam;
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
-			InputTargetContext ctx = (InputTargetContext)(kCtxVSTGUI);
 			
 			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull)
+			if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull)
 			{
 				return true; 
 			}
 			
 			// Don't forward key repeats if plug does not listen for keypresses
 			// (avoids system beeps on note hold)
-			if (kT == kKeyEventRepeat)
+			if(kT == kKeyEventRepeat)
 			{
 				return true;
 			}
@@ -277,12 +276,12 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 void CAbstractVstEditor::SetTitle()
 //---------------------------------
 {
-	if (m_pVstPlugin && m_pVstPlugin->m_pMixStruct)
+	if(m_pVstPlugin && m_pVstPlugin->m_pMixStruct)
 	{
 		CString Title; 
 		Title.Format("FX %02d: ", m_pVstPlugin->m_nSlot + 1);
 
-		if (strcmp(m_pVstPlugin->m_pMixStruct->GetName(), ""))
+		if(strcmp(m_pVstPlugin->m_pMixStruct->GetName(), ""))
 			Title.Append(m_pVstPlugin->m_pMixStruct->GetName());
 		else
 			Title.Append(m_pVstPlugin->m_pMixStruct->GetLibraryName());
@@ -294,7 +293,7 @@ void CAbstractVstEditor::SetTitle()
 LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //--------------------------------------------------------------------------
 {
-	if (wParam == kcNull)
+	if(wParam == kcNull)
 		return NULL;
 	
 //	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -340,7 +339,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 bool CAbstractVstEditor::ValidateCurrentInstrument()
 //--------------------------------------------------
 {
-	if (!CheckInstrument(m_nInstrument))
+	if(!CheckInstrument(m_nInstrument))
 		m_nInstrument = GetBestInstrumentCandidate();
 
 	//only show messagebox if plug is able to process notes.
@@ -375,20 +374,88 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128
 
+
+DWORD WINAPI CAbstractVstEditor::UpdatePresetMenuThread(LPVOID param)
+//-------------------------------------------------------------------
+{
+	CAbstractVstEditor *that = static_cast<CAbstractVstEditor *>(param);
+	CVstPlugin *pVstPlugin = that->m_pVstPlugin;
+
+	const VstInt32 numProgs = pVstPlugin->GetNumPrograms();
+	const VstInt32 curProg  = pVstPlugin->GetCurrentProgram();
+
+	// Prevent the menu from being accessed.
+	that->m_pMenu->EnableMenuItem(1, MF_BYPOSITION | MF_GRAYED);
+
+	const int numSubMenus = ((numProgs - 1) / PRESETS_PER_GROUP) + 1;
+	if(numSubMenus > 1)
+	{
+		// Create sub menus if necessary
+		that->m_pPresetMenuGroup.resize(numSubMenus);
+		for(int bank = 0, prog = 1; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
+		{
+			that->m_pPresetMenuGroup[bank] = new CMenu();
+			that->m_pPresetMenuGroup[bank]->CreatePopupMenu();
+
+			CString label;
+			label.Format("Bank %d (%d-%d)", bank + 1, prog, Util::Min(prog + PRESETS_PER_GROUP - 1, numProgs));
+			that->m_pPresetMenu->AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), reinterpret_cast<UINT_PTR>(that->m_pPresetMenuGroup[bank]->m_hMenu), label);
+		}
+	}
+
+	int subMenuIndex = 0;
+	int entryInThisMenu = 0;
+	int entryInThisColumn = 0;
+
+	// If there would be only one sub menu, we add directly to factory menu
+	CMenu *targetMenu = (numProgs > PRESETS_PER_GROUP) ? that->m_pPresetMenuGroup[subMenuIndex] : that->m_pPresetMenu;
+
+	for(VstInt32 p = 0; p < numProgs; p++)
+	{
+		CString programName = pVstPlugin->GetFormattedProgramName(p, p == curProg);
+		UINT splitMenuFlag = 0;
+
+		if(entryInThisMenu++ == PRESETS_PER_GROUP)
+		{
+			// Advance to next preset group (sub menu)
+			subMenuIndex++;
+			targetMenu = that->m_pPresetMenuGroup[subMenuIndex];
+			entryInThisMenu = 1;
+			entryInThisColumn = 1;
+		} else if(entryInThisColumn++ == PRESETS_PER_COLUMN)
+		{
+			// Advance to next menu column
+			entryInThisColumn = 1;
+			splitMenuFlag = MF_MENUBARBREAK;
+		}
+
+		targetMenu->AppendMenu(MF_STRING | (p == curProg ? MF_CHECKED : MF_UNCHECKED) | splitMenuFlag, ID_PRESET_SET + p, programName);
+	}
+
+	that->m_nCurProg = curProg;
+
+	// Enable the preset menu now that it's filled with entries.
+	that->m_pMenu->EnableMenuItem(1, MF_BYPOSITION | MF_ENABLED);
+	that->DrawMenuBar();
+
+	return 0;
+}
+
+
 void CAbstractVstEditor::UpdatePresetMenu()
 //-----------------------------------------
 {
-	long numProgs = m_pVstPlugin->GetNumPrograms();
-	long curProg  = m_pVstPlugin->GetCurrentProgram();
+	const VstInt32 numProgs = m_pVstPlugin->GetNumPrograms();
+	const VstInt32 curProg  = m_pVstPlugin->GetCurrentProgram();
 
-	if (m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
+	if(m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
 	{												// So remove any exiting menus...
-		if (curProg == m_nCurProg)					//.. unless menu exists and is accurate,
-			return;									//in which case we are done.
+		if(curProg == m_nCurProg)					// ... unless menu exists and is accurate,
+			return;									// in which case we are done.
 
 		for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
 		{
-			//Destroy any submenus
+			// Destroy any submenus
 			if (m_pPresetMenuGroup[i]->m_hMenu)
 			{
 				m_pPresetMenuGroup[i]->DestroyMenu();
@@ -401,78 +468,36 @@ void CAbstractVstEditor::UpdatePresetMenu()
 		m_pMenu->DeleteMenu(1, MF_BYPOSITION);
 
 	}
-	if (!m_pPresetMenu->m_hMenu)
+	if(!m_pPresetMenu->m_hMenu)
 	{
 		// Create Factory preset menu
 		m_pPresetMenu->CreatePopupMenu();
 	}
 
-	const int numSubMenus = ((numProgs - 1) / PRESETS_PER_GROUP) + 1;
-	if(numSubMenus > 1)
-	{
-		// Create sub menus if necessary
-		m_pPresetMenuGroup.resize(numSubMenus);
-		for(int bank = 0, prog = 1; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
-		{
-			m_pPresetMenuGroup[bank] = new CMenu();
-			m_pPresetMenuGroup[bank]->CreatePopupMenu();
-
-			CString label;
-			label.Format("Bank %d (%d-%d)", bank + 1, prog, min(prog + PRESETS_PER_GROUP - 1, numProgs));
-			m_pPresetMenu->AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), (UINT) m_pPresetMenuGroup[bank]->m_hMenu, label);
-		}
-	}
-
-	int subMenuIndex = 0;
-	int entryInThisMenu = 0;
-	int entryInThisColumn = 0;
-
-	// If there would be only one sub menu, we add directly to factory menu
-	CMenu *targetMenu = (numProgs > PRESETS_PER_GROUP) ? m_pPresetMenuGroup[subMenuIndex] : m_pPresetMenu;
-
-	for (long p = 0; p < numProgs; p++)
-	{
-		CString programName = m_pVstPlugin->GetFormattedProgramName(p, p == curProg);
-		UINT splitMenuFlag = 0;
-
-		if(entryInThisMenu++ == PRESETS_PER_GROUP)
-		{
-			// Advance to next preset group (sub menu)
-			subMenuIndex++;
-			targetMenu = m_pPresetMenuGroup[subMenuIndex];
-			entryInThisMenu = 1;
-			entryInThisColumn = 1;
-		} else if(entryInThisColumn++ == PRESETS_PER_COLUMN)
-		{
-			// Advance to next menu column
-			entryInThisColumn = 1;
-			splitMenuFlag = MF_MENUBARBREAK;
-		}
-		
-		targetMenu->AppendMenu(MF_STRING | (p == curProg ? MF_CHECKED : MF_UNCHECKED) | splitMenuFlag, ID_PRESET_SET + p, programName);
-	}
-
 	// Add Factory menu to main menu
-	m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Presets");
+	m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(m_pPresetMenu->m_hMenu), "&Presets");
 
-	m_nCurProg=curProg;
+	// Depending on the plugin and its number of presets, creating the menu entries can take quite a while (e.g. Synth1),
+	// so we fill the menu in a separate thread, so that the GUI remains responsive.
+	DWORD dummy;
+	CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(&CAbstractVstEditor::UpdatePresetMenuThread), static_cast<LPVOID>(this), 0, &dummy);
 }
 
 
 void CAbstractVstEditor::UpdateInputMenu()
 //----------------------------------------
 {
- 	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
+ 	CMenu *pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(0, MF_BYPOSITION);
 
 	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 
-	if (m_pInputMenu->m_hMenu)
+	if(m_pInputMenu->m_hMenu)
 	{
 		m_pInputMenu->DestroyMenu();
 	}
-	if (!m_pInputMenu->m_hMenu)
+	if(!m_pInputMenu->m_hMenu)
 	{
 		m_pInputMenu->CreatePopupMenu();
 	}
@@ -489,13 +514,13 @@ void CAbstractVstEditor::UpdateInputMenu()
 
 	vector<CHANNELINDEX> inputChannels;
 	m_pVstPlugin->GetInputChannelList(inputChannels);
-	for (size_t nChn=0; nChn<inputChannels.size(); nChn++)
+	for(size_t nChn=0; nChn<inputChannels.size(); nChn++)
 	{
-		if (nChn==0 && inputPlugs.size())
+		if(nChn == 0 && inputPlugs.size())
 		{ 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
-		name.Format("Chn%02d: %s", inputChannels[nChn]+1, pSndFile->ChnSettings[inputChannels[nChn]].szName);
+		name.Format("Chn%02d: %s", inputChannels[nChn] + 1, pSndFile->ChnSettings[inputChannels[nChn]].szName);
 		m_pInputMenu->AppendMenu(MF_STRING, NULL, name);
 	}
 
@@ -504,37 +529,37 @@ void CAbstractVstEditor::UpdateInputMenu()
 	for(size_t nIns = 0; nIns<inputInstruments.size(); nIns++)
 	{
 		bool checked = false;
-		if (nIns==0 && (inputPlugs.size() || inputChannels.size()))
+		if(nIns == 0 && (inputPlugs.size() || inputChannels.size()))
 		{ 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
-		name.Format("Ins%02d: %s", inputInstruments[nIns], (LPCTSTR)pSndFile->GetInstrumentName(inputInstruments[nIns]));
-		if (inputInstruments[nIns] == (UINT)m_nInstrument)	checked = true;
-		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
+		name.Format("Ins%02d: %s", inputInstruments[nIns], pSndFile->GetInstrumentName(inputInstruments[nIns]));
+		if(inputInstruments[nIns] == m_nInstrument)	checked = true;
+		m_pInputMenu->AppendMenu(MF_STRING | (checked ? MF_CHECKED : 0), ID_SELECTINST + inputInstruments[nIns], name);
 	}
 
-	if ((inputPlugs.size() == 0) &&
-		(inputChannels.size() == 0) &&
-		(inputInstruments.size() == 0))
+	if(inputPlugs.size() == 0 &&
+		inputChannels.size() == 0 &&
+		inputInstruments.size() == 0)
 	{
-		m_pInputMenu->AppendMenu(MF_STRING|MF_GRAYED, NULL, "None");
+		m_pInputMenu->AppendMenu(MF_STRING | MF_GRAYED, NULL, "None");
 	}
 
-	pInfoMenu->InsertMenu(0, MF_BYPOSITION|MF_POPUP, (UINT)m_pInputMenu->m_hMenu, "I&nputs");
+	pInfoMenu->InsertMenu(0, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_pInputMenu->m_hMenu), "I&nputs");
 }
 
 
 void CAbstractVstEditor::UpdateOutputMenu()
 //-----------------------------------------
 {
-	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
+	CMenu *pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(1, MF_BYPOSITION);
 
-	if (m_pOutputMenu->m_hMenu)
+	if(m_pOutputMenu->m_hMenu)
 	{
 		m_pOutputMenu->DestroyMenu();
 	}
-	if (!m_pOutputMenu->m_hMenu)
+	if(!m_pOutputMenu->m_hMenu)
 	{
 		m_pOutputMenu->CreatePopupMenu();
 	}
@@ -543,9 +568,9 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	m_pVstPlugin->GetOutputPlugList(outputPlugs);
 	CString name;
 
-	for (size_t nPlug = 0; nPlug < outputPlugs.size(); nPlug++)
+	for(size_t nPlug = 0; nPlug < outputPlugs.size(); nPlug++)
 	{
-		if (outputPlugs[nPlug] != nullptr)
+		if(outputPlugs[nPlug] != nullptr)
 		{
 			name.Format("FX%02d: %s", outputPlugs[nPlug]->m_nSlot + 1,
 									outputPlugs[nPlug]->m_pMixStruct->GetName());
@@ -553,11 +578,11 @@ void CAbstractVstEditor::UpdateOutputMenu()
 		} else
 		{
 			name = "Master Output";
-			m_pOutputMenu->AppendMenu(MF_STRING|MF_GRAYED, NULL, name);
+			m_pOutputMenu->AppendMenu(MF_STRING | MF_GRAYED, NULL, name);
 		}
 		
 	}
-	pInfoMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP, (UINT)m_pOutputMenu->m_hMenu, "Ou&tputs");
+	pInfoMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_pOutputMenu->m_hMenu), "Ou&tputs");
 }
 
 
@@ -568,25 +593,25 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	bool greyed;
 	int action;
 
-	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
-	if (!pModDoc)
+	CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+	if(!pModDoc)
 	{
 		return;
 	}
 
- 	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
+ 	CMenu *pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(2, MF_BYPOSITION);	
 
-	if (m_pMacroMenu->m_hMenu)
+	if(m_pMacroMenu->m_hMenu)
 	{
 		m_pMacroMenu->DestroyMenu();
 	}
-	if (!m_pMacroMenu->m_hMenu)
+	if(!m_pMacroMenu->m_hMenu)
 	{
 		m_pMacroMenu->CreatePopupMenu();
 	}
 
-	for (int nMacro = 0; nMacro < NUM_MACROS; nMacro++)
+	for(int nMacro = 0; nMacro < NUM_MACROS; nMacro++)
 	{
 		action = NULL;
 		greyed = true;
@@ -613,17 +638,17 @@ void CAbstractVstEditor::UpdateMacroMenu()
 		m_pMacroMenu->AppendMenu(MF_STRING | (greyed ? MF_GRAYED : 0), action, label);
 	}
 
-	pInfoMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, (UINT)m_pMacroMenu->m_hMenu, "&Macros");
+	pInfoMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_pMacroMenu->m_hMenu), "&Macros");
 }
 
 void CAbstractVstEditor::UpdateOptionsMenu()
 //------------------------------------------
 {
 
-	if (m_pOptionsMenu->m_hMenu)
-		m_pOptionsMenu->DestroyMenu();	
+	if(m_pOptionsMenu->m_hMenu)
+		m_pOptionsMenu->DestroyMenu();
 
-	CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+	CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 	m_pOptionsMenu->CreatePopupMenu();
 	
@@ -639,7 +664,7 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 
 
 	m_pMenu->DeleteMenu(3, MF_BYPOSITION);
-	m_pMenu->InsertMenu(3, MF_BYPOSITION|MF_POPUP, (UINT)m_pOptionsMenu->m_hMenu, "&Options");
+	m_pMenu->InsertMenu(3, MF_BYPOSITION|MF_POPUP, reinterpret_cast<UINT_PTR>(m_pOptionsMenu->m_hMenu), "&Options");
 
 }
 
@@ -647,11 +672,11 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 void CAbstractVstEditor::OnToggleEditor(UINT nID)
 //-----------------------------------------------
 {
-	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
+	CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
 
-	if (pModDoc)
+	if(pModDoc)
 	{
-		pModDoc->TogglePluginEditor(nID-ID_PLUGSELECT);
+		pModDoc->TogglePluginEditor(nID - ID_PLUGSELECT);
 	}
 }
 

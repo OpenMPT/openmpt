@@ -70,6 +70,7 @@ private:
 	CMenu *m_pMacroMenu;
 	CMenu *m_pOptionsMenu;
 
+	static DWORD WINAPI UpdatePresetMenuThread(LPVOID param);
 	void UpdatePresetMenu();
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
