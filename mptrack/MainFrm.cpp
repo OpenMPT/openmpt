@@ -688,10 +688,7 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
 	{
 		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
-	}/* else
-	{
-		CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
-	}*/
+	}
 	if (!bOk)
 	{
 		gbStopSent = TRUE;
@@ -761,7 +758,6 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 					if (nSleep > 40) nSleep = 40;
 				} else
 				{
-					//CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency);
 					gbStopSent = TRUE;
 					pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 				}
@@ -986,7 +982,7 @@ void CMainFrame::audioCloseDevice()
 
 		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
-    }
+	}
 }
 
 

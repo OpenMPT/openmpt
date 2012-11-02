@@ -57,7 +57,6 @@ public:
 	VOID Start() {}
 	bool IsOpen() { return (m_hWaveOut != NULL); }
 	UINT GetCurrentLatency() { return m_nBuffersPending * m_nWaveBufferSize; }
-	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
 public:
 	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD, DWORD dw1, DWORD dw2);
@@ -96,7 +95,6 @@ public:
 	VOID Start() {}
 	bool IsOpen() { return (m_pMixBuffer != NULL); }
 	UINT GetCurrentLatency() { return m_dwLatency; }
-	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
 protected:
 	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);
@@ -150,7 +148,6 @@ public:
 	BOOL Directcallback() { return TRUE; }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
 	UINT GetCurrentLatency() { return m_nAsioBufferLen; }
-	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
 	bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);
