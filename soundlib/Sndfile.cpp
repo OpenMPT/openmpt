@@ -1749,11 +1749,13 @@ ModSpecificFlag CSoundFile::GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) con
 void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 //------------------------------------------------------
 {
-	const MODTYPE oldtype = m_nType;
-	if (oldtype == newType)
-		return;
+	const MODTYPE oldtype = GetType();
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
+
+	if(oldtype == newType)
+		return;
+
 	SetupMODPanning(); // Setup LRRL panning scheme if needed
 	SetupITBidiMode(); // Setup IT bidi mode
 
