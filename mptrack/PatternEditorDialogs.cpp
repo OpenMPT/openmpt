@@ -579,7 +579,7 @@ void CPatternPropertiesDlg::OnOK()
 		const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
 
 		// Check if any pattern data would be removed.
-		bool resize = true;
+		bool resize = (newSize != pSndFile->Patterns[m_nPattern].GetNumRows());
 		for(ROWINDEX row = newSize; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
 		{
 			if(!pSndFile->Patterns[m_nPattern].IsEmptyRow(row))
@@ -591,7 +591,7 @@ void CPatternPropertiesDlg::OnOK()
 
 		if(resize)
 		{
-			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, newSize, pSndFile->Patterns[m_nPattern].GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows() - newSize);
+			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->Patterns[m_nPattern].GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
 			m_pModDoc->BeginWaitCursor();
 			if(pSndFile->Patterns[m_nPattern].Resize(newSize))
 			{
