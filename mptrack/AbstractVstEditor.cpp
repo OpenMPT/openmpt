@@ -25,6 +25,7 @@
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
+	ON_WM_MENUSELECT()
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
 	ON_COMMAND(ID_PLUG_BYPASS,			OnBypassPlug)
 	ON_COMMAND(ID_PLUG_RECORDAUTOMATION,OnRecordAutomation)
@@ -97,7 +98,8 @@ CAbstractVstEditor::~CAbstractVstEditor()
 	}
 }
 
-VOID CAbstractVstEditor::OnLoadPreset()
+
+void CAbstractVstEditor::OnLoadPreset()
 //-------------------------------------
 {
 	if(!m_pVstPlugin) return;
@@ -120,7 +122,8 @@ VOID CAbstractVstEditor::OnLoadPreset()
 	}
 }
 
-VOID CAbstractVstEditor::OnSavePreset()
+
+void CAbstractVstEditor::OnSavePreset()
 //-------------------------------------
 {
 	if(!m_pVstPlugin) return;
@@ -138,7 +141,8 @@ VOID CAbstractVstEditor::OnSavePreset()
 
 }
 
-VOID CAbstractVstEditor::OnRandomizePreset()
+
+void CAbstractVstEditor::OnRandomizePreset()
 //-----------------------------------------
 {
 	if(m_pVstPlugin && Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", false, false, this) == cnfYes)
@@ -148,7 +152,8 @@ VOID CAbstractVstEditor::OnRandomizePreset()
 	}
 }
 
-VOID CAbstractVstEditor::SetupMenu()
+
+void CAbstractVstEditor::SetupMenu()
 //----------------------------------
 {
 	//TODO: create menus on click so they are only updated when required
@@ -164,6 +169,7 @@ VOID CAbstractVstEditor::SetupMenu()
 	}
 	return;
 }
+
 
 void CAbstractVstEditor::UpdatePresetField()
 //------------------------------------------
@@ -313,7 +319,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(ValidateCurrentInstrument())
 		{
-			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
+			CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 			pModDoc->PlayNote(wParam - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0, false);
 		}
@@ -323,7 +329,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(ValidateCurrentInstrument())
 		{
-			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
+			CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 			pModDoc->NoteOff(wParam - kcVSTGUIStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12, false, m_nInstrument);
 		}
@@ -371,35 +377,47 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 	
 }
 
+
+void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu)
+//---------------------------------------------------------------------------
+{
+	if((nFlags & MF_POPUP) && nItemID == 1)
+	{
+		// Generate preset menu on click.
+		FillPresetMenu();
+	}
+}
+
+
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128
 
 
-DWORD WINAPI CAbstractVstEditor::UpdatePresetMenuThread(LPVOID param)
-//-------------------------------------------------------------------
+void CAbstractVstEditor::FillPresetMenu()
+//---------------------------------------
 {
-	CAbstractVstEditor *that = static_cast<CAbstractVstEditor *>(param);
-	CVstPlugin *pVstPlugin = that->m_pVstPlugin;
+	if(m_pPresetMenu->GetMenuItemCount() != 0)
+	{
+		// Already filled...
+		return;
+	}
 
-	const VstInt32 numProgs = pVstPlugin->GetNumPrograms();
-	const VstInt32 curProg  = pVstPlugin->GetCurrentProgram();
-
-	// Prevent the menu from being accessed.
-	that->m_pMenu->EnableMenuItem(1, MF_BYPOSITION | MF_GRAYED);
+	const VstInt32 numProgs = m_pVstPlugin->GetNumPrograms();
+	const VstInt32 curProg  = m_pVstPlugin->GetCurrentProgram();
 
 	const int numSubMenus = ((numProgs - 1) / PRESETS_PER_GROUP) + 1;
 	if(numSubMenus > 1)
 	{
 		// Create sub menus if necessary
-		that->m_pPresetMenuGroup.resize(numSubMenus);
+		m_pPresetMenuGroup.resize(numSubMenus);
 		for(int bank = 0, prog = 1; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
 		{
-			that->m_pPresetMenuGroup[bank] = new CMenu();
-			that->m_pPresetMenuGroup[bank]->CreatePopupMenu();
+			m_pPresetMenuGroup[bank] = new CMenu();
+			m_pPresetMenuGroup[bank]->CreatePopupMenu();
 
 			CString label;
 			label.Format("Bank %d (%d-%d)", bank + 1, prog, Util::Min(prog + PRESETS_PER_GROUP - 1, numProgs));
-			that->m_pPresetMenu->AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), reinterpret_cast<UINT_PTR>(that->m_pPresetMenuGroup[bank]->m_hMenu), label);
+			m_pPresetMenu->AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), reinterpret_cast<UINT_PTR>(m_pPresetMenuGroup[bank]->m_hMenu), label);
 		}
 	}
 
@@ -408,18 +426,18 @@ DWORD WINAPI CAbstractVstEditor::UpdatePresetMenuThread(LPVOID param)
 	int entryInThisColumn = 0;
 
 	// If there would be only one sub menu, we add directly to factory menu
-	CMenu *targetMenu = (numProgs > PRESETS_PER_GROUP) ? that->m_pPresetMenuGroup[subMenuIndex] : that->m_pPresetMenu;
+	CMenu *targetMenu = (numProgs > PRESETS_PER_GROUP) ? m_pPresetMenuGroup[subMenuIndex] : m_pPresetMenu;
 
 	for(VstInt32 p = 0; p < numProgs; p++)
 	{
-		CString programName = pVstPlugin->GetFormattedProgramName(p, p == curProg);
+		CString programName = m_pVstPlugin->GetFormattedProgramName(p, p == curProg);
 		UINT splitMenuFlag = 0;
 
 		if(entryInThisMenu++ == PRESETS_PER_GROUP)
 		{
 			// Advance to next preset group (sub menu)
 			subMenuIndex++;
-			targetMenu = that->m_pPresetMenuGroup[subMenuIndex];
+			targetMenu = m_pPresetMenuGroup[subMenuIndex];
 			entryInThisMenu = 1;
 			entryInThisColumn = 1;
 		} else if(entryInThisColumn++ == PRESETS_PER_COLUMN)
@@ -432,13 +450,7 @@ DWORD WINAPI CAbstractVstEditor::UpdatePresetMenuThread(LPVOID param)
 		targetMenu->AppendMenu(MF_STRING | (p == curProg ? MF_CHECKED : MF_UNCHECKED) | splitMenuFlag, ID_PRESET_SET + p, programName);
 	}
 
-	that->m_nCurProg = curProg;
-
-	// Enable the preset menu now that it's filled with entries.
-	that->m_pMenu->EnableMenuItem(1, MF_BYPOSITION | MF_ENABLED);
-	that->DrawMenuBar();
-
-	return 0;
+	m_nCurProg = curProg;
 }
 
 
@@ -464,7 +476,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 		}
 		m_pPresetMenuGroup.clear();
 
-		m_pPresetMenu->DestroyMenu();							//Destroy Factory preset menu
+		m_pPresetMenu->DestroyMenu();				// Destroy Factory preset menu
 		m_pMenu->DeleteMenu(1, MF_BYPOSITION);
 
 	}
@@ -478,9 +490,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	m_pMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(m_pPresetMenu->m_hMenu), "&Presets");
 
 	// Depending on the plugin and its number of presets, creating the menu entries can take quite a while (e.g. Synth1),
-	// so we fill the menu in a separate thread, so that the GUI remains responsive.
-	DWORD dummy;
-	CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(&CAbstractVstEditor::UpdatePresetMenuThread), static_cast<LPVOID>(this), 0, &dummy);
+	// so we fill the menu only on demand (when it is clicked), so that the editor GUI creation doesn't take forever.
 }
 
 
@@ -829,4 +839,3 @@ int CAbstractVstEditor::GetLearnMacro()
 }
 
 #endif // NO_VST
-

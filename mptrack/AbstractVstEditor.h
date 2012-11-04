@@ -46,6 +46,7 @@ public:
 	afx_msg void OnVSTPresetBackwardJump();
 	afx_msg void OnVSTPresetForwardJump();
 	afx_msg void OnCreateInstrument();
+	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
 	//Overridden methods:
@@ -70,7 +71,7 @@ private:
 	CMenu *m_pMacroMenu;
 	CMenu *m_pOptionsMenu;
 
-	static DWORD WINAPI UpdatePresetMenuThread(LPVOID param);
+	void FillPresetMenu();
 	void UpdatePresetMenu();
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
