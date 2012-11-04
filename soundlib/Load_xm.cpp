@@ -121,6 +121,7 @@ void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile
 //----------------------------------------------------------------------------------------
 {
 	// Reading patterns
+	sndFile.Patterns.ResizeArray(fileHeader.patterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
 		size_t curPos = file.GetPosition();
@@ -277,7 +278,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
 
-	m_nType = MOD_TYPE_XM;
+	ChangeModTypeTo(MOD_TYPE_XM);
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
 
