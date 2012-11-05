@@ -430,7 +430,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 	// Setup Order List
 	Order.resize(fileHeader.numOrders);
 	vector<ROWINDEX> patternLength(fileHeader.numOrders, 64);
-	const size_t trackStartPos = file.GetPosition() + (fileHeader.version >= 14 ? 2 : 0);
+	const FileReader::off_t trackStartPos = file.GetPosition() + (fileHeader.version >= 14 ? 2 : 0);
 
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)
 	{

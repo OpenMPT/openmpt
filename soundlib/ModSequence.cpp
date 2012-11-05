@@ -614,33 +614,27 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position)
 /////////////////////////////////////
 
 
-DWORD ModSequence::Deserialize(const BYTE* const src, const DWORD memLength)
-//--------------------------------------------------------------------------
+bool ModSequence::Deserialize(FileReader &file)
+//---------------------------------------------
 {
-	if(memLength < 2 + 4) return 0;
-	uint16 version = 0;
-	uint16 s = 0;
-	DWORD memPos = 0;
-	memcpy(&version, src, sizeof(version));
-	memPos += sizeof(version);
-	if(version != 0) return memPos;
-    memcpy(&s, src+memPos, sizeof(s));
-	memPos += 4;
-	if(s > 65000) return true;
-	if(memLength < memPos+s*4) return memPos;
+	if(file.BytesLeft() < 2 + 4) return false;
 
-	const uint16 nOriginalSize = s;
+	uint16 version = file.ReadUint16LE();
+	if(version != 0) return false;
+
+	uint32 s = file.ReadUint32LE();
+	if(s > 65000 || !file.CanRead(s * 4)) return false;
+
+	const FileReader::off_t endPos = file.GetPosition() + s * 4;
 	LimitMax(s, ModSpecs::mptm.ordersMax);
 
-	resize(max(s, MAX_ORDERS));
-	for(size_t i = 0; i<s; i++, memPos +=4 )
+	resize(static_cast<ORDERINDEX>(s));
+	for(size_t i = 0; i < s; i++)
 	{
-		uint32 temp;
-		memcpy(&temp, src+memPos, 4);
-		(*this)[i] = static_cast<PATTERNINDEX>(temp);
+		(*this)[i] = static_cast<PATTERNINDEX>(file.ReadUint32LE());
 	}
-	memPos += 4*(nOriginalSize - s);
-	return memPos;
+	file.Seek(endPos);
+	return true;
 }
 
 

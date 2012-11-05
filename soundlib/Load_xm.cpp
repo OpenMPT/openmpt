@@ -124,7 +124,7 @@ void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile
 	sndFile.Patterns.ResizeArray(fileHeader.patterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
-		size_t curPos = file.GetPosition();
+		FileReader::off_t curPos = file.GetPosition();
 		uint32 headerSize = file.ReadUint32LE();
 		file.Skip(1);	// Pack method (= 0)
 
@@ -483,7 +483,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 	// Read mix plugins information
 	if(file.BytesLeft() >= 8)
 	{
-		size_t oldPos = file.GetPosition();
+		FileReader::off_t oldPos = file.GetPosition();
 		file.Skip(LoadMixPlugins(file.GetRawData(), file.BytesLeft()));
 		if(file.GetPosition() != oldPos)
 		{
@@ -524,10 +524,10 @@ bool CSoundFile::ReadXM(FileReader &file)
 	bool interpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
 	if(GetNumInstruments())
 	{
-		file.Skip(reinterpret_cast<const char *>(LoadExtendedInstrumentProperties(reinterpret_cast<LPCBYTE>(file.GetRawData()), reinterpret_cast<LPCBYTE>(file.GetRawData()) + file.BytesLeft(), &interpretOpenMPTMade)) - file.GetRawData());
+		LoadExtendedInstrumentProperties(file, &interpretOpenMPTMade);
 	}
 
-	LoadExtendedSongProperties(GetType(), reinterpret_cast<LPCBYTE>(file.GetRawData()), reinterpret_cast<LPCBYTE>(file.GetRawData()), file.BytesLeft(), &interpretOpenMPTMade);
+	LoadExtendedSongProperties(GetType(), file, &interpretOpenMPTMade);
 
 	if(interpretOpenMPTMade)
 	{

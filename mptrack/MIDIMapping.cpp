@@ -76,11 +76,11 @@ void CMIDIMapper::Serialize(FILE* f) const
 }
 
 
-bool CMIDIMapper::Deserialize(const BYTE* ptr, const size_t size)
+bool CMIDIMapper::Deserialize(const char *ptr, const size_t size)
 //---------------------------------------------------------------
 {
 	m_Directives.clear();
-	const BYTE* endptr = ptr + size;
+	const char* endptr = ptr + size;
 	while(ptr + 5 <= endptr)
 	{
 		uint8 i8 = 0;

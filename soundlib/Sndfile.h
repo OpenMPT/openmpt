@@ -35,7 +35,7 @@
 // MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
 // -----------------------------------------------------------------------------------------
 extern void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file);
-extern BYTE * GetInstrumentHeaderFieldPointer(const ModInstrument * input, __int32 fcode, __int16 fsize);
+extern char *GetInstrumentHeaderFieldPointer(const ModInstrument * input, uint32 fcode, uint16 fsize);
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
@@ -390,7 +390,7 @@ public:
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadSTM(FileReader &file);
-	bool ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadIT(FileReader &file);
 	bool ReadITProject(FileReader &file);
 	bool Read669(FileReader &file);
 	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
@@ -433,13 +433,13 @@ public:
 	void SaveExtendedSongProperties(FILE* f) const;
 	size_t SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const;
 #endif // MODPLUG_NO_FILESAVE
-	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
-	size_t LoadModularInstrumentData(const LPCBYTE lpStream, const DWORD dwMemLength, ModInstrument *pIns) const;
+	void LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool* pInterpretMptMade = nullptr);
+	static size_t LoadModularInstrumentData(FileReader &file, ModInstrument &ins);
 
 	// Reads extended instrument properties(XM/IT/MPTM).
 	// If no errors occur and song extension tag is found, returns pointer to the beginning
 	// of the tag, else returns NULL.
-	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = nullptr);
+	void LoadExtendedInstrumentProperties(FileReader &file, bool *pInterpretMptMade = nullptr);
 
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
@@ -632,7 +632,7 @@ public:
 	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
-	UINT ReadITSSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
+	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
 	bool Read8SVXSample(SAMPLEINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
 	bool SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
@@ -640,7 +640,7 @@ public:
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
-	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const;
@@ -659,7 +659,7 @@ public:
 	const ModSample &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
-	size_t ITInstrToMPT(const void *p, ModInstrument *pIns, UINT trkvers, size_t memLength);
+	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
 
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
@@ -701,10 +701,10 @@ protected:
 	// [in]  lineEnding: line ending formatting of the text in memory.
 	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool ReadMessage(const BYTE *data, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
-	bool ReadMessage(FileReader &file, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
+	bool ReadMessage(const BYTE *data, FileReader::off_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
+	bool ReadMessage(FileReader &file, FileReader::off_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
 	{
-		size_t readLength = Util::Min(length, file.BytesLeft());
+		FileReader::off_t readLength = Util::Min(length, file.BytesLeft());
 		bool success = ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineEnding, pTextConverter);
 		file.Skip(readLength);
 		return success;
@@ -717,10 +717,10 @@ protected:
 	// [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
 	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
-	bool ReadFixedLineLengthMessage(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr)
+	bool ReadFixedLineLengthMessage(const BYTE *data, const FileReader::off_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
+	bool ReadFixedLineLengthMessage(FileReader &file, const FileReader::off_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr)
 	{
-		size_t readLength = Util::Min(length, file.BytesLeft());
+		FileReader::off_t readLength = Util::Min(length, file.BytesLeft());
 		bool success = ReadFixedLineLengthMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineLength, lineEndingLength, pTextConverter);
 		file.Skip(readLength);
 		return success;
@@ -795,18 +795,14 @@ typedef struct MODFORMATINFO
 #endif
 
 
-// Used in instrument/song extension reading to make sure the size field is valid.
-bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size);
+// Read instrument property with 'code' and 'size' from 'file' to instrument 'pIns'.
+void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file);
 
-// Read instrument property with 'code' and 'size' from 'ptr' to instrument 'pIns'.
-// Note: (ptr, size) pair must be valid (e.g. can read 'size' bytes from 'ptr')
-void ReadInstrumentExtensionField(ModInstrument* pIns, LPCBYTE& ptr, const int32 code, const int16 size);
+// Read instrument property with 'code' from 'file' to instrument 'pIns'.
+void ReadExtendedInstrumentProperty(ModInstrument* pIns, const uint32 code, FileReader &file);
 
-// Read instrument property with 'code' from 'pData' to instrument 'pIns'.
-void ReadExtendedInstrumentProperty(ModInstrument* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
-
-// Read extended instrument properties from 'pDataStart' to instrument 'pIns'.
-void ReadExtendedInstrumentProperties(ModInstrument* pIns, const void *pDataStart, const size_t nMemLength);
+// Read extended instrument properties from 'file' to instrument 'pIns'.
+void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file);
 
 // Convert instrument flags which were read from 'dF..' extension to proper internal representation.
 void ConvertReadExtendedFlags(ModInstrument* pIns);

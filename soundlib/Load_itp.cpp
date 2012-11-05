@@ -37,7 +37,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 //----------------------------------------------
 {
 	uint32 version;
-	size_t size;
+	FileReader::off_t size;
 
 	file.Rewind();
 
@@ -228,9 +228,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 				ins++;
 			} else
 			{
-				const uint8 *pos = reinterpret_cast<const uint8 *>(file.GetRawData());
-				ReadExtendedInstrumentProperty(Instruments[ins], code, pos, pos + file.BytesLeft());
-				file.Skip(pos - reinterpret_cast<const uint8 *>(file.GetRawData()));
+				ReadExtendedInstrumentProperty(Instruments[ins], code, file);
 			}
 
 			code = file.ReadUint32LE();
@@ -240,8 +238,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	// Song extensions
 	if(code == 'MPTS')
 	{
-		const uint8 *data = reinterpret_cast<const uint8 *>(file.GetRawData()) - 4;
-		LoadExtendedSongProperties(MOD_TYPE_IT, data, data, file.BytesLeft() + 4);
+		LoadExtendedSongProperties(MOD_TYPE_IT, file);
 	}
 
 	m_nType = MOD_TYPE_IT;

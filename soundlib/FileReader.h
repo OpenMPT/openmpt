@@ -21,16 +21,19 @@
 class FileReader
 //==============
 {
+public:
+	typedef size_t off_t;	// Type for file offsets and sizes
+
 private:
-	const char *streamData;		// Pointer to memory-mapped file
-	size_t streamLength;		// Size of memory-mapped file in bytes
-	size_t streamPos;			// Cursor location in the file
+	const char *streamData;	// Pointer to memory-mapped file
+	off_t streamLength;		// Size of memory-mapped file in bytes
+	off_t streamPos;		// Cursor location in the file
 
 public:
 	// Initialize invalid file reader object.
 	FileReader() : streamData(nullptr), streamLength(0), streamPos(0) { }
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const char *data, size_t length) : streamData(data), streamLength(length), streamPos(0) { }
+	FileReader(const char *data, off_t length) : streamData(data), streamLength(length), streamPos(0) { }
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : streamData(other.streamData), streamLength(other.streamLength), streamPos(other.streamPos) { }
 
@@ -48,7 +51,7 @@ public:
 
 	// Seek to a position in the mapped file.
 	// Returns false if position is invalid.
-	bool Seek(size_t position)
+	bool Seek(off_t position)
 	{
 		if(position <= streamLength)
 		{
@@ -62,7 +65,7 @@ public:
 
 	// Increases position by skipBytes.
 	// Returns true if skipBytes could be skipped or false if the file end was reached earlier.
-	bool Skip(size_t skipBytes)
+	bool Skip(off_t skipBytes)
 	{
 		if(BytesLeft() >= skipBytes)
 		{
@@ -77,7 +80,7 @@ public:
 
 	// Decreases position by skipBytes.
 	// Returns true if skipBytes could be skipped or false if the file start was reached earlier.
-	bool SkipBack(size_t skipBytes)
+	bool SkipBack(off_t skipBytes)
 	{
 		if(streamPos >= skipBytes)
 		{
@@ -91,33 +94,33 @@ public:
 	}
 
 	// Returns cursor position in the mapped file.
-	size_t GetPosition() const
+	off_t GetPosition() const
 	{
 		return streamPos;
 	}
 
 	// Returns size of the mapped file in bytes.
-	size_t GetLength() const
+	off_t GetLength() const
 	{
 		return streamLength;
 	}
 
 	// Return byte count between cursor position and end of file, i.e. how many bytes can still be read.
-	size_t BytesLeft() const
+	off_t BytesLeft() const
 	{
 		ASSERT(streamPos <= streamLength);
 		return streamLength - streamPos;
 	}
 
 	// Check if "amount" bytes can be read from the current position in the stream.
-	bool CanRead(size_t amount) const
+	bool CanRead(off_t amount) const
 	{
 		return (amount <= BytesLeft());
 	}
 
 	// Create a new FileReader object for parsing a sub chunk at a given position with a given length.
 	// The file cursor is not modified.
-	FileReader GetChunk(size_t position, size_t length) const
+	FileReader GetChunk(off_t position, off_t length) const
 	{
 		if(position < streamLength)
 		{
@@ -130,9 +133,9 @@ public:
 
 	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is advanced by "length" bytes.
-	FileReader GetChunk(size_t length)
+	FileReader GetChunk(off_t length)
 	{
-		size_t position = streamPos;
+		off_t position = streamPos;
 		Skip(length);
 		return GetChunk(position, length);
 	}
@@ -328,9 +331,9 @@ public:
 	// Allow to read a struct partially (if there's less memory available than the struct's size, fill it up with zeros).
 	// The file cursor is advanced by "partialSize" bytes.
 	template <typename T>
-	bool ReadStructPartial(T &target, size_t partialSize = sizeof(T))
+	bool ReadStructPartial(T &target, off_t partialSize = sizeof(T))
 	{
-		const size_t copyBytes = Util::Min(partialSize, sizeof(target), BytesLeft());
+		const off_t copyBytes = Util::Min(partialSize, sizeof(target), BytesLeft());
 
 		memcpy(&target, streamData + streamPos, copyBytes);
 		memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
@@ -357,8 +360,8 @@ public:
 
 	// Read a string of length srcSize into fixed-length char array destBuffer using a given read mode.
 	// The file cursor is advanced by "srcSize" bytes.
-	template<StringFixer::ReadWriteMode mode, size_t destSize>
-	bool ReadString(char (&destBuffer)[destSize], const size_t srcSize)
+	template<StringFixer::ReadWriteMode mode, off_t destSize>
+	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
 	{
 		if(CanRead(srcSize))
 		{
@@ -374,7 +377,7 @@ public:
 	// Read an array.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
-	template<typename T, size_t destSize>
+	template<typename T, off_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
 		if(CanRead(sizeof(destArray)))
@@ -395,12 +398,15 @@ public:
 	template<typename T>
 	bool ReadVector(std::vector<T> &destVector, size_t destSize)
 	{
-		const size_t readSize = sizeof(T) * destSize;
+		const off_t readSize = sizeof(T) * destSize;
 		if(CanRead(readSize))
 		{
 			destVector.resize(destSize);
-			memcpy(&destVector[0], streamData  + streamPos, readSize);
-			streamPos += readSize;
+			if(readSize)
+			{
+				memcpy(&destVector[0], streamData  + streamPos, readSize);
+				streamPos += readSize;
+			}
 			return true;
 		} else
 		{
@@ -414,7 +420,7 @@ public:
 	// Returns false if the string could not be found. The file cursor is not advanced in this case.
 	bool ReadMagic(const char *const magic)
 	{
-		const size_t magicLength = strlen(magic);
+		const off_t magicLength = strlen(magic);
 		if(CanRead(magicLength) && !memcmp(streamData + streamPos, magic, magicLength))
 		{
 			streamPos += magicLength;
@@ -442,12 +448,12 @@ public:
 			return false;
 		}
 
-		size_t writtenBits = 0;
+		off_t writtenBits = 0;
 		uint8 b = ReadUint8();
 		target = (b & 0x7F);
 
 		// Count actual bits used in most significant byte (i.e. this one)
-		for(size_t bit = 0; bit < 7; bit++)
+		for(off_t bit = 0; bit < 7; bit++)
 		{
 			if((b & (1 << bit)) != 0)
 			{
