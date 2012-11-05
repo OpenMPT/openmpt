@@ -321,7 +321,7 @@ WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_sized_member(name,type,code) \
 case( #@code ):\
-if( fsize <= sizeof( type ) ) pointer = (BYTE *)&input-> name ;\
+if( fsize <= sizeof( type ) ) pointer = (char *)(&input-> name);\
 break;
 
 // --------------------------------------------------------------------------------------------
@@ -329,14 +329,14 @@ break;
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_array_member(name,type,code,arraysize) \
 case( #@code ):\
-if( fsize <= sizeof( type ) * arraysize ) pointer = (BYTE *)&input-> name ;\
+if( fsize <= sizeof( type ) * arraysize ) pointer = (char *)(&input-> name);\
 break;
 
 // Return a pointer on the wanted field in 'input' ModInstrument given field code & size
-BYTE * GetInstrumentHeaderFieldPointer(const ModInstrument *input, __int32 fcode, __int16 fsize)
+char *GetInstrumentHeaderFieldPointer(const ModInstrument *input, uint32 fcode, uint16 fsize)
 {
-if(input == NULL) return NULL;
-BYTE * pointer = NULL;
+if(input == nullptr) return nullptr;
+char *pointer = nullptr;
 
 switch(fcode){
 GET_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
@@ -602,7 +602,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 // -> DESC="IT project files (.itp)"
 		 && !ReadITProject(file)
 // -! NEW_FEATURE#0023
-		 && !ReadIT(lpStream, dwMemLength)
+		 && !ReadIT(file)
 		 /*&& !ReadMPT(lpStream, dwMemLength)*/
 		 && !ReadS3M(file)
 		 && !ReadWav(file)
@@ -1535,7 +1535,7 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
 	}
 
 	SAMPLEINDEX nRemoved = 0;
-	for(SAMPLEINDEX nSmp = (SAMPLEINDEX)min(GetNumSamples(), keepSamples.size() - 1); nSmp >= 1; nSmp--)
+	for(SAMPLEINDEX nSmp = Util::Min(GetNumSamples(), static_cast<SAMPLEINDEX>(keepSamples.size() - 1)); nSmp >= 1; nSmp--)
 	{
 		if(!keepSamples[nSmp])
 		{
@@ -1968,9 +1968,17 @@ ModInstrument *CSoundFile::AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX
 		return nullptr;
 	}
 
-	delete Instruments[instr];
-
-	return (Instruments[instr] = new (std::nothrow) ModInstrument(assignedSample));
+	ModInstrument *ins = Instruments[instr];
+	if(ins != nullptr)
+	{
+		// Re-initialize instrument
+		*ins = ModInstrument(assignedSample);
+	} else
+	{
+		// Create new instrument
+		Instruments[instr] = ins = new (std::nothrow) ModInstrument(assignedSample);
+	}
+	return ins;
 }
 
 

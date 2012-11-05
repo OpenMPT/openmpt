@@ -36,9 +36,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 
 	const uint8 * const sourceBuf = reinterpret_cast<const uint8 *>(file.GetRawData());
-	const size_t fileSize = file.BytesLeft();
-	const size_t filePosition = file.GetPosition();
-	size_t bytesRead = 0;	// Amount of memory that has been read from file
+	const FileReader::off_t fileSize = file.BytesLeft(), filePosition = file.GetPosition();
+	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
 
 	sample.uFlags &= ~(CHN_16BIT | CHN_STEREO);
 	if(GetBitDepth() >= 16)

@@ -114,12 +114,22 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, BYTE envOffset, int ma
 }
 
 
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void ITOldInstrument::ConvertEndianness()
+//---------------------------------------
+{
+	SwapBytesLE(id);
+	SwapBytesLE(fadeout);
+	SwapBytesLE(trkvers);
+}
+
+
 // Convert an ITOldInstrument to OpenMPT's internal instrument representation.
 void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 //-------------------------------------------------------------
 {
 	// Header
-	if(id != LittleEndian(ITOldInstrument::magic))
+	if(id != ITOldInstrument::magic)
 	{
 		return;
 	}
@@ -128,7 +138,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
-	mptIns.nFadeOut = LittleEndianW(fadeout) << 6;
+	mptIns.nFadeOut = fadeout << 6;
 	mptIns.nGlobalVol = 64;
 	mptIns.nPan = 128;
 
@@ -182,6 +192,18 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 }
 
 
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void ITInstrument::ConvertEndianness()
+//------------------------------------
+{
+	SwapBytesLE(id);
+	SwapBytesLE(fadeout);
+	SwapBytesLE(trkvers);
+	SwapBytesLE(mbank);
+	SwapBytesLE(dummy);
+}
+
+
 // Convert OpenMPT's internal instrument representation to an ITInstrument.
 size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
 //---------------------------------------------------------------------------------------------------------
@@ -189,14 +211,14 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	MemsetZero(*this);
 
 	// Header
-	id = LittleEndian(ITInstrument::magic);
-	trkvers = LittleEndianW(0x0214);
+	id = ITInstrument::magic;
+	trkvers = 0x0214;
 
 	StringFixer::WriteString<StringFixer::nullTerminated>(filename, mptIns.filename);
 	StringFixer::WriteString<StringFixer::nullTerminated>(name, mptIns.name);
 
 	// Volume / Panning
-	fadeout = LittleEndianW(static_cast<uint16>(min(mptIns.nFadeOut >> 5, 256)));
+	fadeout = static_cast<uint16>(min(mptIns.nFadeOut >> 5, 256));
 	gbv = static_cast<uint8>(min(mptIns.nGlobalVol * 2, 128));
 	dfp = static_cast<uint8>(min(mptIns.nPan / 4, 64));
 	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
@@ -268,7 +290,7 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) const
 //-------------------------------------------------------------------------------
 {
-	if(id != LittleEndian(ITInstrument::magic))
+	if(id != ITInstrument::magic)
 	{
 		return 0;
 	}
@@ -277,7 +299,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
-	mptIns.nFadeOut = LittleEndianW(fadeout) << 5;
+	mptIns.nFadeOut = fadeout << 5;
 	mptIns.nGlobalVol = gbv / 2;
 	LimitMax(mptIns.nGlobalVol, 64u);
 	mptIns.nPan = (dfp & 0x7F) * 4;
@@ -315,7 +337,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	}
 	if(mbank <= 128)
 	{
-		mptIns.wMidiBank = LittleEndianW(mbank);
+		mptIns.wMidiBank = mbank;
 	}
 
 	// Envelope point count. Limited to 25 in IT format.
@@ -348,6 +370,14 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	}
 
 	return sizeof(ITInstrument);
+}
+
+
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void ITInstrumentEx::ConvertEndianness()
+//--------------------------------------
+{
+	iti.ConvertEndianness();
 }
 
 
@@ -391,7 +421,7 @@ size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 	if(usedExtension)
 	{
 		// If we actually had to extend the sample map, update the magic bytes and instrument size.
-		iti.dummy = LittleEndian(ITInstrumentEx::mptx);
+		iti.dummy = ITInstrumentEx::mptx;
 		instSize = sizeof(ITInstrumentEx);
 	}
 
@@ -406,7 +436,7 @@ size_t ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 	size_t insSize = iti.ConvertToMPT(mptIns, fromType);
 
 	// Is this actually an extended instrument?
-	if(insSize == 0 || iti.dummy != LittleEndian(ITInstrumentEx::mptx))
+	if(insSize == 0 || iti.dummy != ITInstrumentEx::mptx)
 	{
 		return insSize;
 	}
@@ -421,6 +451,21 @@ size_t ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 }
 
 
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void ITSample::ConvertEndianness()
+//--------------------------------
+{
+	SwapBytesLE(id);
+	SwapBytesLE(length);
+	SwapBytesLE(loopbegin);
+	SwapBytesLE(loopend);
+	SwapBytesLE(C5Speed);
+	SwapBytesLE(susloopbegin);
+	SwapBytesLE(susloopend);
+	SwapBytesLE(samplepointer);
+}
+
+
 // Convert OpenMPT's internal sample representation to an ITSample.
 void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 //-------------------------------------------------------------------
@@ -428,7 +473,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 	MemsetZero(*this);
 
 	// Header
-	id = LittleEndian(ITSample::magic);
+	id = ITSample::magic;
 
 	StringFixer::WriteString<StringFixer::nullTerminated>(filename, mptSmp.filename);
 	//StringFixer::WriteString<StringFixer::nullTerminated>(name, m_szNames[nsmp]);
@@ -463,14 +508,14 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 	}
 
 	// Frequency
-	C5Speed = LittleEndian(mptSmp.nC5Speed ? mptSmp.nC5Speed : 8363);
+	C5Speed = mptSmp.nC5Speed ? mptSmp.nC5Speed : 8363;
 
 	// Size and loops
-	length = LittleEndian(mptSmp.nLength);
-	loopbegin = LittleEndian(mptSmp.nLoopStart);
-	loopend = LittleEndian(mptSmp.nLoopEnd);
-	susloopbegin = LittleEndian(mptSmp.nSustainStart);
-	susloopend = LittleEndian(mptSmp.nSustainEnd);
+	length = mptSmp.nLength;
+	loopbegin = mptSmp.nLoopStart;
+	loopend = mptSmp.nLoopEnd;
+	susloopbegin = mptSmp.nSustainStart;
+	susloopend = mptSmp.nSustainEnd;
 
 	// Auto Vibrato settings
 	static const uint8 autovibxm2it[8] = { 0, 2, 4, 1, 3, 0, 0, 0 };	// OpenMPT VibratoType -> IT Vibrato
@@ -491,7 +536,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 //----------------------------------------------------
 {
-	if(id != LittleEndian(ITSample::magic))
+	if(id != ITSample::magic)
 	{
 		return 0;
 	}
@@ -515,16 +560,16 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 	if(flags & ITSample::sampleBidiSustain) mptSmp.uFlags |= CHN_PINGPONGSUSTAIN;
 
 	// Frequency
-	mptSmp.nC5Speed = LittleEndian(C5Speed);
+	mptSmp.nC5Speed = C5Speed;
 	if(!mptSmp.nC5Speed) mptSmp.nC5Speed = 8363;
 	if(mptSmp.nC5Speed < 256) mptSmp.nC5Speed = 256;
 
 	// Size and loops
-	mptSmp.nLength = LittleEndian(length);
-	mptSmp.nLoopStart = LittleEndian(loopbegin);
-	mptSmp.nLoopEnd = LittleEndian(loopend);
-	mptSmp.nSustainStart = LittleEndian(susloopbegin);
-	mptSmp.nSustainEnd = LittleEndian(susloopend);
+	mptSmp.nLength = length;
+	mptSmp.nLoopStart = loopbegin;
+	mptSmp.nLoopEnd = loopend;
+	mptSmp.nSustainStart = susloopbegin;
+	mptSmp.nSustainEnd = susloopend;
 
 	// Auto Vibrato settings
 	static const uint8 autovibit2xm[8] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_RANDOM, VIB_RAMP_UP, 0, 0, 0 };	// IT Vibrato -> OpenMPT VibratoType
@@ -533,7 +578,7 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.nVibDepth = vid & 0x7F;
 	mptSmp.nVibSweep = vir;
 
-	return LittleEndian(samplepointer);
+	return samplepointer;
 }
 
 
@@ -587,23 +632,29 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 
 #ifdef MODPLUG_TRACKER
 
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void ITHistoryStruct::ConvertEndianness()
+//---------------------------------------
+{
+	SwapBytesLE(fatdate);
+	SwapBytesLE(fattime);
+	SwapBytesLE(runtime);
+}
+
+
 // Convert an ITHistoryStruct to OpenMPT's internal edit history representation
 void ITHistoryStruct::ConvertToMPT(FileHistory &mptHistory) const
 //---------------------------------------------------------------
 {
-	uint16 date = LittleEndianW(fatdate);
-	uint16 time = LittleEndianW(fattime);
-	uint32 run = LittleEndian(runtime);
-
 	// Decode FAT date and time
 	MemsetZero(mptHistory.loadDate);
-	mptHistory.loadDate.tm_year = ((date >> 9) & 0x7F) + 80;
-	mptHistory.loadDate.tm_mon = Clamp((date >> 5) & 0x0F, 1, 12) - 1;
-	mptHistory.loadDate.tm_mday = Clamp(date & 0x1F, 1, 31);
-	mptHistory.loadDate.tm_hour = Clamp((time >> 11) & 0x1F, 0, 23);
-	mptHistory.loadDate.tm_min = Clamp((time >> 5) & 0x3F, 0, 59);
-	mptHistory.loadDate.tm_sec = Clamp((time & 0x1F) * 2, 0, 59);
-	mptHistory.openTime = static_cast<uint32>(run * (HISTORY_TIMER_PRECISION / 18.2f));
+	mptHistory.loadDate.tm_year = ((fatdate >> 9) & 0x7F) + 80;
+	mptHistory.loadDate.tm_mon = Clamp((fatdate >> 5) & 0x0F, 1, 12) - 1;
+	mptHistory.loadDate.tm_mday = Clamp(fatdate & 0x1F, 1, 31);
+	mptHistory.loadDate.tm_hour = Clamp((fattime >> 11) & 0x1F, 0, 23);
+	mptHistory.loadDate.tm_min = Clamp((fattime >> 5) & 0x3F, 0, 59);
+	mptHistory.loadDate.tm_sec = Clamp((fattime & 0x1F) * 2, 0, 59);
+	mptHistory.openTime = static_cast<uint32>(runtime * (HISTORY_TIMER_PRECISION / 18.2f));
 }
 
 
@@ -615,10 +666,6 @@ void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
 	fatdate = static_cast<uint16>(mptHistory.loadDate.tm_mday | ((mptHistory.loadDate.tm_mon + 1) << 5) | ((mptHistory.loadDate.tm_year - 80) << 9));
 	fattime = static_cast<uint16>((mptHistory.loadDate.tm_sec / 2) | (mptHistory.loadDate.tm_min << 5) | (mptHistory.loadDate.tm_hour << 11));
 	runtime = static_cast<uint32>(mptHistory.openTime * (18.2f / HISTORY_TIMER_PRECISION));
-
-	SwapBytesLE(fatdate);
-	SwapBytesLE(fattime);
-	SwapBytesLE(runtime);
 }
 
 #endif // MODPLUG_TRACKER

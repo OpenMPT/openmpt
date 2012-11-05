@@ -142,7 +142,7 @@ public:
 	// Read a sample from memory
 	size_t ReadSample(ModSample &sample, FileReader &file) const;
 	// Legacy implementation of above function
-	size_t ReadSample(ModSample &sample, const void *memFile, size_t memLength) const
+	/*__declspec(deprecated)*/ size_t ReadSample(ModSample &sample, const void *memFile, size_t memLength) const
 	{
 		FileReader file(static_cast<const char *>(memFile), memLength);
 		return ReadSample(sample, file);

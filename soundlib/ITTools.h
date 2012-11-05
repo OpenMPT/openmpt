@@ -143,6 +143,9 @@ struct ITOldInstrument
 	uint8  volenv[200];		// This appears to be a pre-computed (interpolated) version of the volume envelope data found below.
 	uint8  nodes[25 * 2];	// Volume Envelope Node Positions / Values
 
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness();
+
 	// Convert an ITOldInstrument to OpenMPT's internal instrument representation.
 	void ConvertToMPT(ModInstrument &mptIns) const;
 };
@@ -193,6 +196,9 @@ struct ITInstrument
 	ITEnvelope pitchenv;	// Pitch / Filter Envelope
 	uint32 dummy;			// IT saves some additional padding bytes to match the size of the old instrument format for simplified loading. We use them for some hacks.
 
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness();
+
 	// Convert OpenMPT's internal instrument representation to an ITInstrument. Returns amount of bytes that need to be written.
 	size_t ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
 	// Convert an ITInstrument to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
@@ -212,6 +218,9 @@ struct ITInstrumentEx
 
 	ITInstrument iti;		// Normal IT Instrument
 	uint8 keyboardhi[120];	// High Byte of Sample map
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness();
 
 	// Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns amount of bytes that need to be written.
 	size_t ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
@@ -274,6 +283,9 @@ struct ITSample
 	uint8  vir;				// Auto-Vibrato Sweep (called Rate in IT)
 	uint8  vit;				// Auto-Vibrato Type
 
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness();
+
 	// Convert OpenMPT's internal sample representation to an ITSample.
 	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType);
 	// Convert an ITSample to OpenMPT's internal sample representation.
@@ -300,6 +312,9 @@ struct ITHistoryStruct
 	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
 
 #ifdef MODPLUG_TRACKER
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness();
 
 	// Convert an ITHistoryStruct to OpenMPT's internal edit history representation
 	void ConvertToMPT(FileHistory &mptHistory) const;

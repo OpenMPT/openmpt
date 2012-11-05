@@ -1416,31 +1416,48 @@ void CViewGlobals::OnInsertSlot()
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin + 1);
-	if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin)
+
+	// If last plugin slot is occupied, move it so that the plugin is not lost.
+	// This could certainly be improved...
+	bool moveLastPlug = false;
+
+	if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
 	{
-		prompt.Append("\nWarning: plugin data in last slot will be lost."); 
+		if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 2].pMixPlugin == nullptr)
+		{
+			moveLastPlug = true;
+		} else
+		{
+			prompt.Append("\nWarning: plugin data in last slot will be lost."); 
+		}
 	}
-	if (Reporting::Confirm(prompt) == cnfYes)
+	if(Reporting::Confirm(prompt) == cnfYes)
 	{
 
-		//Delete last plug...
-		if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin)
+		// Delete last plug...
+		if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
 		{
-			pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin->Release();
-			memset(&(pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1]), 0, sizeof(SNDMIXPLUGIN));
-			//possible mem leak here...
+			if(moveLastPlug)
+			{
+				MovePlug(MAX_MIXPLUGINS - 1, MAX_MIXPLUGINS - 2, true);
+			} else
+			{
+				pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin->Release();
+				memset(&(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1]), 0, sizeof(SNDMIXPLUGIN));
+				//possible mem leak here...
+			}
 		}
 
 		// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
-		if (pSndFile->GetType() == MOD_TYPE_MPT)
+		if(pSndFile->GetType() == MOD_TYPE_MPT)
 			pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
 
 
-		for (PLUGINDEX nSlot = MAX_MIXPLUGINS-1; nSlot > m_nCurrentPlugin; nSlot--)
+		for(PLUGINDEX nSlot = MAX_MIXPLUGINS - 1; nSlot > m_nCurrentPlugin; nSlot--)
 		{
-			if (pSndFile->m_MixPlugins[nSlot-1].pMixPlugin)
+			if(pSndFile->m_MixPlugins[nSlot-1].pMixPlugin)
 			{
-				MovePlug(nSlot-1, nSlot, NoPatternAdjust);
+				MovePlug(nSlot - 1, nSlot, NoPatternAdjust);
 			}
 		}
 

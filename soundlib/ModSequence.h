@@ -103,7 +103,7 @@ public:
 	bool ReadFromArray(const T (&orders)[arraySize], size_t howMany = arraySize);
 
 	// Deprecated function used for MPTm files created with OpenMPT 1.17.02.46 - 1.17.02.48.
-	DWORD Deserialize(const BYTE* const src, const DWORD memLength);
+	bool Deserialize(FileReader &file);
 
 	// Returns true if the IT orderlist datafield is not sufficient to store orderlist information.
 	bool NeedsExtraDatafield() const;

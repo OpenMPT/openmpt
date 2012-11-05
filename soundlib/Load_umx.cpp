@@ -265,12 +265,11 @@ bool CSoundFile::ReadUMX(FileReader &file)
 			int32 size = ReadUMXIndex(chunk);
 
 			FileReader fileChunk = chunk.GetChunk(size);
-			const BYTE *data = reinterpret_cast<const BYTE *>(fileChunk.GetRawData());
 
 			if(isMusic)
 			{
 				// Read as module
-				if(ReadIT(data, fileChunk.GetLength())
+				if(ReadIT(fileChunk)
 					|| ReadXM(fileChunk)
 					|| ReadS3M(fileChunk)
 					|| ReadWav(fileChunk)
@@ -284,7 +283,7 @@ bool CSoundFile::ReadUMX(FileReader &file)
 			} else if(isSound && GetNumSamples() < MAX_SAMPLES - 1)
 			{
 				// Read as sample
-				if(ReadSampleFromFile(GetNumSamples() + 1, (LPBYTE)data, fileChunk.GetLength()))
+				if(ReadSampleFromFile(GetNumSamples() + 1, (LPBYTE)fileChunk.GetRawData(), fileChunk.GetLength()))
 				{
 					m_nSamples++;
 					if(static_cast<size_t>(objName) < names.size())
