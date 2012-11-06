@@ -484,7 +484,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 	if(file.BytesLeft() >= 8)
 	{
 		FileReader::off_t oldPos = file.GetPosition();
-		file.Skip(LoadMixPlugins(file.GetRawData(), file.BytesLeft()));
+		LoadMixPlugins(file);
 		if(file.GetPosition() != oldPos)
 		{
 			madeWith |= verConfirmed;

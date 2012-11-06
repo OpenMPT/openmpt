@@ -660,7 +660,7 @@ public:
 
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
-	UINT LoadMixPlugins(const void *pData, UINT nLen);
+	void LoadMixPlugins(FileReader &file);
 
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
 #ifdef MODPLUG_TRACKER
