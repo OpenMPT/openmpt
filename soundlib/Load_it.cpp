@@ -574,7 +574,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	// Read mix plugins information
 	if(file.BytesLeft() > 8)
 	{
-		file.Skip(LoadMixPlugins(file.GetRawData(), file.BytesLeft()));
+		LoadMixPlugins(file);
 	}
 
 	// Read Song Message
@@ -1869,107 +1869,97 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 #endif // MODPLUG_NO_FILESAVE
 
 
-UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
-//-----------------------------------------------------------
+void CSoundFile::LoadMixPlugins(FileReader &file)
+//-----------------------------------------------
 {
-	const BYTE *p = (const BYTE *)pData;
-	UINT nPos = 0;
-
-	while (nLen - nPos >= 8)	// read 4 magic bytes + size
+	while(file.BytesLeft() > 8)
 	{
-		DWORD nPluginSize;
-		UINT nPlugin;
-
-		nPluginSize = *(DWORD *)(p + nPos + 4);
-		if (nPluginSize > nLen - nPos - 8) break;
+		char code[4];
+		file.ReadArray(code);
+		const uint32 chunkSize = file.ReadUint32LE();
+		if(!file.CanRead(chunkSize))
+		{
+			file.SkipBack(8);
+			return;
+		}
+		FileReader chunk = file.GetChunk(chunkSize);
 
 		// Channel FX
-		if (!memcmp(p + nPos, "CHFX", 4))
+		if(!memcmp(code, "CHFX", 4))
 		{
-			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++) if (ch * 4 < nPluginSize)
+			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++)
 			{
-				ChnSettings[ch].nMixPlugin = *(DWORD *)(p + nPos + 8 + ch * 4);
+				ChnSettings[ch].nMixPlugin = chunk.ReadUint32LE();
 			}
 		}
 		// Plugin Data
-		else if (memcmp(p + nPos, "FX00", 4) >= 0 && memcmp(p + nPos, "FX99", 4) <= 0)
+		else if(memcmp(code, "FX00", 4) >= 0 && memcmp(code, "FX99", 4) <= 0)
 		{
+			PLUGINDEX plug = (code[2] - '0') * 10 + (code[3] - '0');	//calculate plug-in number.
 
-			nPlugin = (p[nPos + 2] - '0') * 10 + (p[nPos + 3] - '0');			//calculate plug-in number.
-
-			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO) + 4))
+			if(plug < MAX_MIXPLUGINS)
 			{
 				// MPT's standard plugin data. Size not specified in file.. grrr..
-				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)( p +nPos + 8);
-				StringFixer::SetNullTerminator(m_MixPlugins[nPlugin].Info.szName);
-				StringFixer::SetNullTerminator(m_MixPlugins[nPlugin].Info.szLibraryName);
+				chunk.Read(m_MixPlugins[plug].Info);
+				StringFixer::SetNullTerminator(m_MixPlugins[plug].Info.szName);
+				StringFixer::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
 
 				//data for VST setchunk? size lies just after standard plugin data.
-				DWORD dwExtra = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO));
+				FileReader pluginDataChunk = chunk.GetChunk(chunk.ReadUint32LE());
 
-				if ((dwExtra) && (dwExtra <= nPluginSize-sizeof(SNDMIXPLUGININFO)-4))
+				if(pluginDataChunk.IsValid())
 				{
-					m_MixPlugins[nPlugin].nPluginDataSize = 0;
-					m_MixPlugins[nPlugin].pPluginData = new char [dwExtra];
-					if (m_MixPlugins[nPlugin].pPluginData)
+					m_MixPlugins[plug].nPluginDataSize = 0;
+					m_MixPlugins[plug].pPluginData = new char [pluginDataChunk.BytesLeft()];
+					if(m_MixPlugins[plug].pPluginData)
 					{
-						m_MixPlugins[nPlugin].nPluginDataSize = dwExtra;
-						memcpy(m_MixPlugins[nPlugin].pPluginData, p+nPos+8+sizeof(SNDMIXPLUGININFO)+4, dwExtra);
+						m_MixPlugins[plug].nPluginDataSize = pluginDataChunk.BytesLeft();
+						memcpy(m_MixPlugins[plug].pPluginData, pluginDataChunk.GetRawData(), pluginDataChunk.BytesLeft());
 					}
 				}
 
 				//rewbs.modularPlugData
-				DWORD dwXPlugData = *(DWORD *)(p + nPos + 8 + sizeof(SNDMIXPLUGININFO) + dwExtra + 4); //read next DWORD into dwMPTExtra
+				FileReader modularData = chunk.GetChunk(chunk.ReadUint32LE());
 
 				//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
-				if ((dwXPlugData) && ((int)dwXPlugData <= (int)nPluginSize-(int)(sizeof(SNDMIXPLUGININFO)+dwExtra+8)))
+				if(modularData.IsValid())
 				{
-					DWORD startPos = nPos+8+sizeof(SNDMIXPLUGININFO)+dwExtra+8; // start of extra data for this plug
-					DWORD endPos = startPos + dwXPlugData;						// end of extra data for this plug
-					DWORD currPos = startPos;
-
-					while (endPos - currPos >= 4) //cycle through all the bytes
+					while(modularData.BytesLeft() > 4)
 					{
 						// do we recognize this chunk?
+						modularData.ReadArray(code);
 						//rewbs.dryRatio
 						//TODO: turn this into a switch statement like for modular instrument data
-						if (!memcmp(p + currPos, "DWRT", 4))
+						if(!memcmp(code, "DWRT", 4))
 						{
-							currPos += 4; // move past ID
-							if (endPos - currPos >= sizeof(float))
-							{
-								m_MixPlugins[nPlugin].fDryRatio = *(float*) (p+currPos);
-								currPos += sizeof(float); //move past data
-							}
+							m_MixPlugins[plug].fDryRatio = modularData.ReadFloatLE();
 						}
 						//end rewbs.dryRatio
 						//rewbs.plugDefaultProgram
-						else if (!memcmp(p + currPos, "PROG", 4))
+						else if(!memcmp(code, "PROG", 4))
 						{
-							currPos += 4; // move past ID
-							if (endPos - currPos >= sizeof(long))
-							{
-								m_MixPlugins[nPlugin].defaultProgram = *(long*) (p+currPos);
-								currPos += sizeof(long); //move past data
-							}
+							m_MixPlugins[plug].defaultProgram = modularData.ReadUint32LE();
 						}
 						//end rewbs.plugDefaultProgram
 						//else if.. (add extra attempts to recognize chunks here)
 						else // otherwise move forward a byte.
 						{
-							currPos++;
+							// Why on earth would you use a modular chunk structure, but not store the size of chunks in the file?!
+							modularData.Skip(1);
 						}
 
 					}
 
 				}
 				//end rewbs.modularPlugData
-
 			}
+		} else if(!memcmp(code, "XTPM", 4))
+		{
+			// Read too far, chicken out...
+			file.SkipBack(8);
+			return;
 		}
-		nPos += nPluginSize + 8;
 	}
-	return nPos;
 }
 
 
