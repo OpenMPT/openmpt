@@ -2633,6 +2633,51 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	{
 		ListChansWhereColSelected(type, validChans);
 	}
+
+	if(m_Selection.GetUpperLeft() == m_Selection.GetLowerRight() && !validChans.empty())
+	{
+		// No selection has been made: Interpolate between closest non-zero values in this column.
+		const ModCommand *mStart = sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel()), *mEnd = mStart;
+		const ROWINDEX maxRow = sndFile->Patterns[m_nPattern].GetNumRows() - 1;
+		ROWINDEX startRow = m_Selection.GetStartRow(), endRow = startRow;
+
+		// Shortcut macro for sweeping the pattern up and down to find suitable start and end points for interpolation.
+		// While startCond / endCond evaluates to true, sweeping is continued upwards / downwards.
+		#define SweepPattern(startCond, endCond) \
+			while(startRow >= 0 && startRow <= maxRow && (startCond)) \
+				{ startRow--; mStart -= sndFile->GetNumChannels(); } \
+			while(endRow <= maxRow && (endCond)) \
+				{ endRow++; mEnd += sndFile->GetNumChannels(); }
+
+		switch(type)
+		{
+		case PatternCursor::noteColumn:
+			// Allow note-to-note interpolation only.
+			SweepPattern(mStart->note == NOTE_NONE, !mStart->IsNote() || !mEnd->IsNote());
+			break;
+		case PatternCursor::instrColumn:
+			// Allow interpolation between same instrument, as long as it's not a PC note.
+			SweepPattern(mStart->instr == 0 || mStart->IsPcNote(), mEnd->instr != mStart->instr);
+			break;
+		case PatternCursor::volumeColumn:
+			// Allow interpolation between same volume effect, as long as it's not a PC note.
+			SweepPattern(mStart->volcmd == VOLCMD_NONE || mStart->IsPcNote(), mEnd->volcmd != mStart->volcmd);
+			break;
+		case PatternCursor::effectColumn:
+		case PatternCursor::paramColumn:
+			// Allow interpolation between same effect, or anything if it's a PC note.
+			SweepPattern(mStart->command == CMD_NONE && !mStart->IsPcNote(), (mEnd->command != mStart->command && !mStart->IsPcNote()) || (mStart->IsPcNote() && !mEnd->IsPcNote()));
+			break;
+		}
+		
+		#undef SweepPattern
+
+		if(startRow >= 0 && startRow < endRow && endRow <= maxRow)
+		{
+			// Found usable end and start commands: Extend selection.
+			SetCurSel(PatternCursor(startRow, m_Selection.GetUpperLeft()), PatternCursor(endRow, m_Selection.GetUpperLeft()));
+		}
+	}
 	
 	const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
 	
@@ -2780,7 +2825,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			}
 		}
 
-		changed=true;
+		changed = true;
 
 	} //end for all channels where type is selected
 
