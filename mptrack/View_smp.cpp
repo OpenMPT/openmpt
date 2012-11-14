@@ -1490,7 +1490,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
 			{
-				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, "Zoom");
+				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, "Zoom\t" + ih->GetKeyTextFromCommand(kcSampleZoomSelection));
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, "Set As Loop");
 				if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, "Set As Sustain Loop");
@@ -1503,10 +1503,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				{
 					//Set loop points
 					wsprintf(s, "Set Loop Start to:\t%d", dwPos);
-					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nLoopEnd ? 0 : MF_GRAYED), 
+					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nLoopEnd ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPSTART, s);
 					wsprintf(s, "Set Loop End to:\t%d", dwPos);
-					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED), 
+					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
 						
 					if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
@@ -1514,10 +1514,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 						wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nSustainEnd ? 0 : MF_GRAYED), 
-	  						 ID_SAMPLE_SETSUSTAINSTART, s);
+						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nSustainEnd ? 0 : MF_GRAYED),
+							ID_SAMPLE_SETSUSTAINSTART, s);
 						wsprintf(s, "Set Sustain End to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED), 
+						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
 					}
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -2678,6 +2678,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleTrim:		OnSampleTrim() ; return wParam;
 		case kcSampleZoomUp:	OnZoomUp(); return wParam;
 		case kcSampleZoomDown:	OnZoomDown(); return wParam;
+		case kcSampleZoomSelection: OnZoomOnSel(); return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
 		case kcNextInstrument:	OnNextInstrument(); return wParam;
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
