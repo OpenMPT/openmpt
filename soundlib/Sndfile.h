@@ -393,7 +393,7 @@ public:
 	bool ReadIT(FileReader &file);
 	bool ReadITProject(FileReader &file);
 	bool Read669(FileReader &file);
-	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadUlt(FileReader &file);
 	bool ReadWav(FileReader &file);
 	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadFAR(FileReader &file);
