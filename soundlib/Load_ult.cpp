@@ -12,13 +12,6 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
-enum
-{
-	ULT_16BIT = 4,
-	ULT_LOOP  = 8,
-	ULT_PINGPONGLOOP = 16,
-};
-
 #pragma pack(push, 1)
 
 struct UltFileHeader
@@ -34,16 +27,72 @@ STATIC_ASSERT(sizeof(UltFileHeader) == 48);
 
 struct UltSample
 {
+	enum UltSampleFlags
+	{
+		ULT_16BIT = 4,
+		ULT_LOOP  = 8,
+		ULT_PINGPONGLOOP = 16,
+	};
+
 	char   name[32];
 	char   filename[12];
-	uint32 loop_start;
-	uint32 loop_end;
-	uint32 size_start;
-	uint32 size_end;
+	uint32 loopStart;
+	uint32 loopEnd;
+	uint32 sizeStart;
+	uint32 sizeEnd;
 	uint8  volume;		// 0-255, apparently prior to 1.4 this was logarithmic?
 	uint8  flags;		// above
 	uint16 speed;		// only exists for 1.4+
 	int16  finetune;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(sizeStart);
+		SwapBytesLE(sizeEnd);
+		SwapBytesLE(speed);
+		SwapBytesLE(finetune);
+	}
+
+	// Convert an ULT sample header to OpenMPT's internal sample header.
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, filename);
+
+		if(sizeEnd <= sizeStart)
+		{
+			return;
+		}
+
+		mptSmp.nLength = sizeEnd - sizeStart;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = Util::Min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
+		mptSmp.nVolume = volume;
+		mptSmp.nGlobalVol = 64;
+
+		// mikmod does some weird integer math here, but it didn't really work for me
+		mptSmp.nC5Speed = speed;
+		if(finetune)
+		{
+			mptSmp.nC5Speed = static_cast<uint32>((static_cast<double>(mptSmp.nC5Speed)) * pow(2.0, ((static_cast<double>(finetune)) / (12.0 * 32768))));
+		}
+
+		if(flags & ULT_LOOP)
+			mptSmp.uFlags.set(CHN_LOOP);
+		if(flags & ULT_PINGPONGLOOP)
+			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+		if(flags & ULT_16BIT)
+		{
+			mptSmp.uFlags.set(CHN_16BIT);
+			mptSmp.nLoopStart /= 2;
+			mptSmp.nLoopEnd /= 2;
+		}
+		
+	}
 };
 
 STATIC_ASSERT(sizeof(UltSample) == 66);
@@ -61,38 +110,41 @@ The logarithmic volume scale used in older format versions here, or pretty
 much anywhere for that matter. I don't even think Ultra Tracker tries to
 convert them. */
 
-static const uint8 ult_efftrans[] =
-{
-	CMD_ARPEGGIO,
-	CMD_PORTAMENTOUP,
-	CMD_PORTAMENTODOWN,
-	CMD_TONEPORTAMENTO,
-	CMD_VIBRATO,
-	CMD_NONE,
-	CMD_NONE,
-	CMD_TREMOLO,
-	CMD_NONE,
-	CMD_OFFSET,
-	CMD_VOLUMESLIDE,
-	CMD_PANNING8,
-	CMD_VOLUME,
-	CMD_PATTERNBREAK,
-	CMD_NONE, // extended effects, processed separately
-	CMD_SPEED,
-};
 
 static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 //----------------------------------------------------
 {
+
+	static const uint8 ultEffTrans[] =
+	{
+		CMD_ARPEGGIO,
+		CMD_PORTAMENTOUP,
+		CMD_PORTAMENTODOWN,
+		CMD_TONEPORTAMENTO,
+		CMD_VIBRATO,
+		CMD_NONE,
+		CMD_NONE,
+		CMD_TREMOLO,
+		CMD_NONE,
+		CMD_OFFSET,
+		CMD_VOLUMESLIDE,
+		CMD_PANNING8,
+		CMD_VOLUME,
+		CMD_PATTERNBREAK,
+		CMD_NONE, // extended effects, processed separately
+		CMD_SPEED,
+	};
+
+
 	uint8 e = *pe & 0x0F;
 	uint8 p = *pp;
 
-	*pe = ult_efftrans[e];
+	*pe = ultEffTrans[e];
 
 	switch (e)
 	{
 	case 0x00:
-		if (!p)
+		if(!p)
 			*pe = CMD_NONE;
 		break;
 	case 0x05:
@@ -105,7 +157,7 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 		break;
 	case 0x0A:
 		// blah, this sucks
-		if (p & 0xF0)
+		if(p & 0xF0)
 			p &= 0xF0;
 		break;
 	case 0x0B:
@@ -118,7 +170,7 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 	case 0x0D: // pattern break
 		p = 10 * (p >> 4) + (p & 0x0F);
 	case 0x0E: // special
-		switch (p >> 4)
+		switch(p >> 4)
 		{
 		case 0x01:
 			*pe = CMD_PORTAMENTOUP;
@@ -150,7 +202,7 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 		}
 		break;
 	case 0x0F:
-		if (p > 0x2F)
+		if(p > 0x2F)
 			*pe = CMD_TEMPO;
 		break;
 	}
@@ -158,32 +210,28 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 	*pp = p;
 }
 
-static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, const DWORD dwMemLength)
-//---------------------------------------------------------------------------------------------------
-{
-	#define ASSERT_CAN_READ_ULTENV(x) ASSERT_CAN_READ_PROTOTYPE(dwMemPos, dwMemLength, x, return 0);
 
-	DWORD dwMemPos = *dwMP;
+static int ReadULTEvent(ModCommand &m, FileReader &file)
+//------------------------------------------------------
+{
 	uint8 b, repeat = 1;
 	uint8 cmd1, cmd2;	// 1 = vol col, 2 = fx col in the original schismtracker code
 	uint8 param1, param2;
 
-	ASSERT_CAN_READ_ULTENV(1)
-	b = lpStream[dwMemPos++];
+	b = file.ReadUint8();
 	if (b == 0xFC)	// repeat event
 	{
-		ASSERT_CAN_READ_ULTENV(2);
-		repeat = lpStream[dwMemPos++];
-		b = lpStream[dwMemPos++];
+		repeat = file.ReadUint8();
+		b = file.ReadUint8();
 	}
-	ASSERT_CAN_READ_ULTENV(4)
-	note->note = (b > 0 && b < 61) ? b + 36 : NOTE_NONE;
-	note->instr = lpStream[dwMemPos++];
-	b = lpStream[dwMemPos++];
+
+	m.note = (b > 0 && b < 61) ? b + 36 : NOTE_NONE;
+	m.instr = file.ReadUint8();
+	b = file.ReadUint8();
 	cmd1 = b & 0x0F;
 	cmd2 = b >> 4;
-	param1 = lpStream[dwMemPos++];
-	param2 = lpStream[dwMemPos++];
+	param1 = file.ReadUint8();
+	param2 = file.ReadUint8();
 	TranslateULTCommands(&cmd1, &param1);
 	TranslateULTCommands(&cmd2, &param2);
 
@@ -206,17 +254,20 @@ static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, con
 		// don't try to figure out how ultratracker does this, it's quite random
 		cmd2 = CMD_NONE;
 	}
-	if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
+	if(cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
 	{
 		// swap commands
 		std::swap(cmd1, cmd2);
 		std::swap(param1, param2);
 	}
 
+	// Combine slide commands, if possible
+	ModCommand::CombineEffects(cmd2, param2, cmd1, param1);
+
 	// Do that dance.
 	// Maybe I should quit rewriting this everywhere and make a generic version :P
 	int n;
-	for (n = 0; n < 4; n++)
+	for(n = 0; n < 4; n++)
 	{
 		if(ModCommand::ConvertVolEffect(cmd1, param1, (n >> 1) != 0))
 		{
@@ -226,7 +277,7 @@ static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, con
 		std::swap(cmd1, cmd2);
 		std::swap(param1, param2);
 	}
-	if (n < 5)
+	if(n < 5)
 	{
 		if (ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd2))
 		{
@@ -235,21 +286,19 @@ static int ReadULTEvent(ModCommand *note, const BYTE *lpStream, DWORD *dwMP, con
 		}
 		cmd1 = CMD_NONE;
 	}
-	if (!cmd1)
+	if(cmd1 == CMD_NONE)
 		param1 = 0;
-	if (!cmd2)
+	if(cmd2 == CMD_NONE)
 		param2 = 0;
 
-	note->volcmd = cmd1;
-	note->vol = param1;
-	note->command = cmd2;
-	note->param = param2;
+	m.volcmd = cmd1;
+	m.vol = param1;
+	m.command = cmd2;
+	m.param = param2;
 
-	*dwMP = dwMemPos;
 	return repeat;
-
-	#undef ASSERT_CAN_READ_ULTENV
 }
+
 
 // Functor for postfixing ULT patterns (this is easier than just remembering everything WHILE we're reading the pattern events)
 struct PostFixUltCommands
@@ -321,168 +370,121 @@ struct PostFixUltCommands
 };
 
 
-bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
-//---------------------------------------------------------------------
+bool CSoundFile::ReadUlt(FileReader &file)
+//----------------------------------------
 {
-	DWORD dwMemPos = 0;
-
-	ASSERT_CAN_READ(sizeof(UltFileHeader));
-	const UltFileHeader *fileHeader = reinterpret_cast<const UltFileHeader *>(lpStream);
+	file.Rewind();
+	UltFileHeader fileHeader;
 
 	// Tracker ID
-	if(fileHeader->version < '1'
-		|| fileHeader->version > '4'
-		|| memcmp(fileHeader->signature, "MAS_UTrack_V00", sizeof(fileHeader->signature)) != 0)
+	if(!file.Read(fileHeader)
+		|| fileHeader.version < '1'
+		|| fileHeader.version > '4'
+		|| memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature)) != 0)
 	{
 		return false;
 	}
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader->songName);
-
-	dwMemPos += sizeof(UltFileHeader);
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 
 	m_nType = MOD_TYPE_ULT;
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
-	ASSERT_CAN_READ((DWORD)(fileHeader->messageLength) * 32);
-	// read "nNumLines" lines, each containing 32 characters.
-	ReadFixedLineLengthMessage(lpStream + dwMemPos, fileHeader->messageLength * 32, 32, 0);
-	dwMemPos += fileHeader->messageLength * 32;
+	// read "messageLength" lines, each containing 32 characters.
+	ReadFixedLineLengthMessage(file, fileHeader.messageLength * 32, 32, 0);
 
-	ASSERT_CAN_READ(1);
-	m_nSamples = (SAMPLEINDEX)lpStream[dwMemPos++];
-	if(m_nSamples >= MAX_SAMPLES)
+	m_nSamples = static_cast<SAMPLEINDEX>(file.ReadUint8());
+	if(GetNumSamples() >= MAX_SAMPLES)
 		return false;
 
-	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		UltSample ultSmp;
-		ModSample *pSmp = &(Samples[nSmp + 1]);
-		// annoying: v4 added a field before the end of the struct
-		if(fileHeader->version >= '4')
-		{
-			ASSERT_CAN_READ(sizeof(UltSample));
-			memcpy(&ultSmp, lpStream + dwMemPos, sizeof(UltSample));
-			dwMemPos += sizeof(UltSample);
+		UltSample sampleHeader;
 
-			ultSmp.speed = LittleEndianW(ultSmp.speed);
+		// Annoying: v4 added a field before the end of the struct
+		if(fileHeader.version >= '4')
+		{
+			file.ReadConvertEndianness(sampleHeader);
 		} else
 		{
-			ASSERT_CAN_READ(sizeof(64));
-			memcpy(&ultSmp, lpStream + dwMemPos, 64);
-			dwMemPos += 64;
-
-			ultSmp.finetune = ultSmp.speed;
-			ultSmp.speed = 8363;
-		}
-		ultSmp.finetune = LittleEndianW(ultSmp.finetune);
-		ultSmp.loop_start = LittleEndian(ultSmp.loop_start);
-		ultSmp.loop_end = LittleEndian(ultSmp.loop_end);
-		ultSmp.size_start = LittleEndian(ultSmp.size_start);
-		ultSmp.size_end = LittleEndian(ultSmp.size_end);
-
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp + 1], ultSmp.name);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(pSmp->filename, ultSmp.filename);
-
-		if(ultSmp.size_end <= ultSmp.size_start)
-			continue;
-		pSmp->nLength = ultSmp.size_end - ultSmp.size_start;
-		pSmp->nLoopStart = ultSmp.loop_start;
-		pSmp->nLoopEnd = min(ultSmp.loop_end, pSmp->nLength);
-		pSmp->nVolume = ultSmp.volume;
-		pSmp->nGlobalVol = 64;
-
-		/* mikmod does some weird integer math here, but it didn't really work for me */
-		pSmp->nC5Speed = ultSmp.speed;
-		if(ultSmp.finetune)
-		{
-			pSmp->nC5Speed = (UINT)(((double)pSmp->nC5Speed) * pow(2.0, (((double)ultSmp.finetune) / (12.0 * 32768))));
+			file.ReadStructPartial(sampleHeader, 64);
+			sampleHeader.ConvertEndianness();
+			sampleHeader.finetune = sampleHeader.speed;
+			sampleHeader.speed = 8363;
 		}
 
-		if(ultSmp.flags & ULT_LOOP)
-			pSmp->uFlags |= CHN_LOOP;
-		if(ultSmp.flags & ULT_PINGPONGLOOP)
-			pSmp->uFlags |= CHN_PINGPONGLOOP;
-		if(ultSmp.flags & ULT_16BIT)
-		{
-			pSmp->uFlags |= CHN_16BIT;
-			pSmp->nLoopStart >>= 1;
-			pSmp->nLoopEnd >>= 1;
-		}
+		sampleHeader.ConvertToMPT(Samples[smp]);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
 
 	// ult just so happens to use 255 for its end mark, so there's no need to fiddle with this
-	Order.ReadAsByte(lpStream + dwMemPos, 256, dwMemLength - dwMemPos);
-	dwMemPos += 256;
+	Order.ReadAsByte(file, 256);
 
-	ASSERT_CAN_READ(2);
-	m_nChannels = lpStream[dwMemPos++] + 1;
-	PATTERNINDEX nNumPats = lpStream[dwMemPos++] + 1;
+	m_nChannels = file.ReadUint8() + 1;
+	PATTERNINDEX numPats = file.ReadUint8() + 1;
 
-	if(m_nChannels > MAX_BASECHANNELS || nNumPats > MAX_PATTERNS)
+	if(GetNumChannels() > MAX_BASECHANNELS || numPats > MAX_PATTERNS)
 		return false;
 
-	if(fileHeader->version >= '3')
+	if(fileHeader.version >= '3')
 	{
-		ASSERT_CAN_READ(m_nChannels);
-		for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
-			ChnSettings[nChn].nPan = ((lpStream[dwMemPos + nChn] & 0x0F) << 4) + 8;
+			ChnSettings[chn].nPan = ((file.ReadUint8() & 0x0F) << 4) + 8;
 		}
-		dwMemPos += m_nChannels;
 	} else
 	{
-		for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
-			ChnSettings[nChn].nPan = (nChn & 1) ? 192 : 64;
+			ChnSettings[chn].nPan = (chn & 1) ? 192 : 64;
 		}
 	}
 
-	for(PATTERNINDEX nPat = 0; nPat < nNumPats; nPat++)
+	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
-		if(Patterns.Insert(nPat, 64))
+		if(Patterns.Insert(pat, 64))
 			return false;
 	}
 
-	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ModCommand evnote;
 		ModCommand *note;
 		int repeat;
 		evnote.Clear();
 
-		for(PATTERNINDEX nPat = 0; nPat < nNumPats; nPat++)
+		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 		{
-			note = Patterns[nPat] + nChn;
-			ROWINDEX nRow = 0;
-			while(nRow < 64)
+			note = Patterns[pat] + chn;
+			ROWINDEX row = 0;
+			while(row < 64)
 			{
-				repeat = ReadULTEvent(&evnote, lpStream, &dwMemPos, dwMemLength);
-				if(repeat + nRow > 64)
-					repeat = 64 - nRow;
+				repeat = ReadULTEvent(evnote, file);
+				if(repeat + row > 64)
+					repeat = 64 - row;
 				if(repeat == 0) break;
 				while (repeat--)
 				{
 					*note = evnote;
-					note += m_nChannels;
-					nRow++;
+					note += GetNumChannels();
+					row++;
 				}
 			}
 		}
 	}
 
 	// Post-fix some effects.
-	Patterns.ForEachModCommand(PostFixUltCommands(m_nChannels));
+	Patterns.ForEachModCommand(PostFixUltCommands(GetNumChannels()));
 
-	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		dwMemPos += SampleIO(
-			(Samples[nSmp + 1].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+		SampleIO(
+			Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
 			SampleIO::mono,
 			SampleIO::littleEndian,
 			SampleIO::signedPCM)
-			.ReadSample(Samples[nSmp + 1], (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+			.ReadSample(Samples[smp], file);
 	}
 	return true;
 }
