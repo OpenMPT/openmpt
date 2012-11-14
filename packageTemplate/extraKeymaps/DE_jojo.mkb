@@ -286,6 +286,7 @@ version:1
 8:1382:0:46:1		//Delete Sample Selection: ENTF (KeyDown)
 8:1386:0:107:1		//Zoom Out: + (ZEHNERTASTATUR) (KeyDown)
 8:1387:0:109:1		//Zoom In: - (ZEHNERTASTATUR) (KeyDown)
+8:1882:0:32:1		//Zoom into Selection: LEER (KeyDown)
 8:1784:2:73:1		//Invert Sample Phase: Ctrl+I (KeyDown)
 8:1785:2:85:1		//Signed / Unsigned Conversion: Ctrl+U (KeyDown)
 8:1790:2:69:1		//Remove DC Offset: Ctrl+E (KeyDown)

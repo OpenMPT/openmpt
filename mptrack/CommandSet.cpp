@@ -634,6 +634,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcChnSettingsNext, 1879, _T("Next Channel"));
 	DefineKeyCommand(kcChnSettingsClose, 1880, _T("Switch to Pattern Editor"));
 	DefineKeyCommand(kcTransposeCustom, 1881, _T("Transpose Custom"));
+	DefineKeyCommand(kcSampleZoomSelection, 1882, _T("Zoom into Selection"));
 	// Add new key commands here.
 
 #ifdef _DEBUG
