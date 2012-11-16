@@ -1460,7 +1460,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			{
 				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
+				BuildRecordCtxMenu(hMenu, ih, nChn, pModDoc);
 				BuildChannelControlCtxMenu(hMenu);
 			}
 		}
@@ -5762,11 +5762,11 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 	return true;
 }
 
-bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc) const
-//-----------------------------------------------------------------------------------
+bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CModDoc* pModDoc) const
+//------------------------------------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, "Record select");
-	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, "Split Record select");
+	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, "Record select\t" + ih->GetKeyTextFromCommand(kcChannelRecordSelect));
+	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, "Split Record select\t" + ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect));
 	return true;
 }
 
