@@ -276,9 +276,9 @@ void COptionsKeyboard::DefineCommandCategories()
 		for(int c = kcStartChannelKeys; c <= kcEndChannelKeys; c++)
 			newCat.commands.Add(c);
 		newCat.separators.Add(kcEndChannelKeys);					//--------------------------------------
-		for(int c = kcTransposeUp; c <= kcTransposeCustom; c++)
+		for(int c = kcTransposeUp; c <= kcDataEntryDown; c++)
 			newCat.commands.Add(c);
-		newCat.separators.Add(kcTransposeCustom);					//--------------------------------------
+		newCat.separators.Add(kcDataEntryDown);					//--------------------------------------
 		for(int c = kcPatternAmplify; c <= kcPatternShrinkSelection; c++)
 			newCat.commands.Add(c);
 		newCat.separators.Add(kcPatternShrinkSelection);			//--------------------------------------
