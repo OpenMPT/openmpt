@@ -635,6 +635,10 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcChnSettingsClose, 1880, _T("Switch to Pattern Editor"));
 	DefineKeyCommand(kcTransposeCustom, 1881, _T("Transpose Custom"));
 	DefineKeyCommand(kcSampleZoomSelection, 1882, _T("Zoom into Selection"));
+	DefineKeyCommand(kcChannelRecordSelect, 1883, _T("Channel Record Select"));
+	DefineKeyCommand(kcChannelSplitRecordSelect, 1884, _T("Channel Split Record Select"));
+	DefineKeyCommand(kcDataEntryUp, 1885, _T("Data Entry +1"));
+	DefineKeyCommand(kcDataEntryDown, 1886, _T("Data Entry -1"));
 	// Add new key commands here.
 
 #ifdef _DEBUG
