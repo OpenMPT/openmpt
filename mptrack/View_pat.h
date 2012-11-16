@@ -428,7 +428,7 @@ private:
 
 	bool BuildChannelControlCtxMenu(HMENU hMenu) const;
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
-	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc *pModDoc) const;
+	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CModDoc *pModDoc) const;
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const;
 	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const;
