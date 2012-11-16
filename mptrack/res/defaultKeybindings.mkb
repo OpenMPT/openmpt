@@ -95,6 +95,8 @@ version:1
 2:1005:0:121:1		//Mute current Channel: F10 (KeyDown)
 2:1006:2:121:1		//Solo current Channel: Ctrl+F10 (KeyDown)
 2:1771:6:121:1		//Unmute all channels: Ctrl+Alt+F10 (KeyDown)
+2:1883:2:49:1		//Channel Record Select: Ctrl+1 (KeyDown)
+2:1884:2:50:1		//Channel Split Record Select: Ctrl+2 (KeyDown)
 2:1786:2:82:1		//Reset Channel: Ctrl+R (KeyDown)
 2:1007:2:81:5		//Transpose +1: Ctrl+Q (KeyDown|KeyHold)
 2:1008:2:65:5		//Transpose -1: Ctrl+A (KeyDown|KeyHold)

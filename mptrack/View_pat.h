@@ -254,6 +254,7 @@ public:
 	void MoveCursor(bool moveRight);
 
 	bool TransposeSelection(int transp);
+	bool DataEntry(int offset);
 
 	bool PrepareUndo(const PatternRect &selection) { return PrepareUndo(selection.GetUpperLeft(), selection.GetLowerRight()); };
 	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel);

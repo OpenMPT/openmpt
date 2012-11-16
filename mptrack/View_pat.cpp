@@ -2699,7 +2699,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 		const ModCommand srcCmd = *sndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
 		const ModCommand destCmd = *sndFile->Patterns[m_nPattern].GetpModCommand(row1, nchn);
 
-		ModCommand::NOTE PCnote = 0;
+		ModCommand::NOTE PCnote = NOTE_NONE;
 		uint16 PCinst = 0, PCparam = 0;
 
 		switch(type)
@@ -2877,8 +2877,7 @@ bool CViewPattern::TransposeSelection(int transp)
 		{
 			if (m[chn].IsNote())
 			{
-				int note = m[chn].note;
-				note += transp;
+				int note = m[chn].note + transp;
 				Limit(note, noteMin, noteMax);
 				m[chn].note = (ModCommand::NOTE)note;
 			}
@@ -2886,6 +2885,92 @@ bool CViewPattern::TransposeSelection(int transp)
 	}
 	SetModified(false);
 	InvalidateSelection();
+	return true;
+}
+
+
+bool CViewPattern::DataEntry(int offset)
+//--------------------------------------
+{
+	CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
+	{
+		return false;
+	}
+
+	m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+
+	const ROWINDEX startRow = m_Selection.GetStartRow(), endRow = m_Selection.GetEndRow();
+	const CHANNELINDEX startChan = m_Selection.GetStartChannel(), endChan = m_Selection.GetEndChannel();
+
+	// Don't allow notes outside our supported note range.
+	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
+	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
+	const int instrMax = Util::Min(static_cast<int>(Util::MaxValueOfType(ModCommand::INSTR())), static_cast<int>(pSndFile->GetNumInstruments() ? pSndFile->GetModSpecifications().instrumentsMax : pSndFile->GetModSpecifications().samplesMax));
+	const EffectInfo effectInfo(*pSndFile);
+
+	PrepareUndo(m_Selection);
+
+	for(ROWINDEX row = startRow; row <= endRow; row++)
+	{
+		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
+		for(CHANNELINDEX chn = startChan; chn <= endChan; chn++)
+		{
+			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)) && m[chn].IsNote())
+			{
+				int note = m[chn].note + offset;
+				Limit(note, noteMin, noteMax);
+				m[chn].note = (ModCommand::NOTE)note;
+			}
+			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)))
+			{
+				int instr = m[chn].instr + offset;
+				if(m[chn].IsInstrPlug())
+				{
+					Limit(instr, 0, int(MAX_MIXPLUGINS));
+				} else
+				{
+					Limit(instr, 0, instrMax);
+				}
+				m[chn].instr = (ModCommand::INSTR)instr;
+			}
+			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::volumeColumn)))
+			{
+				if(m[chn].IsPcNote())
+				{
+					int val = m[chn].GetValueVolCol() + offset;
+					Limit(val, 0, int(ModCommand::maxColumnValue));
+					m[chn].SetValueVolCol(val);
+				} else
+				{
+					int vol = m[chn].vol + offset;
+					DWORD minValue = 0, maxValue = 64;
+					effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m[chn].volcmd), nullptr, &minValue, &maxValue);
+					Limit(vol, (int)minValue, (int)maxValue);
+					m[chn].vol = (ModCommand::VOL)vol;
+				}
+			}
+			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
+			{
+				if(m[chn].IsPcNote())
+				{
+					int val = m[chn].GetValueEffectCol() + offset;
+					Limit(val, 0, int(ModCommand::maxColumnValue));
+					m[chn].SetValueEffectCol(val);
+				} else
+				{
+					int param = m[chn].param + offset;
+					DWORD minValue = 0, maxValue = 0xFF;
+					effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(m[chn].command, m[chn].param), nullptr, false, &minValue, &maxValue);
+					Limit(param, (int)minValue, (int)maxValue);
+					m[chn].param = (ModCommand::PARAM)param;
+				}
+			}
+		}
+	}
+
+	SetModified(false);
+	InvalidatePattern();
 	return true;
 }
 
@@ -4032,6 +4117,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetCurrentChannel()); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
+		case kcChannelRecordSelect:			pModDoc->Record1Channel(m_Cursor.GetChannel()); InvalidateChannelsHeaders(); return wParam;
+		case kcChannelSplitRecordSelect:	pModDoc->Record2Channel(m_Cursor.GetChannel()); InvalidateChannelsHeaders(); return wParam;
 		case kcChannelReset:				ResetChannel(m_Cursor.GetChannel()); return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
@@ -4040,6 +4127,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
 		case kcTransposeOctDown:			OnTransposeOctDown(); return wParam;
 		case kcTransposeCustom:				OnTransposeCustom(); return wParam;
+		case kcDataEntryUp:					DataEntry(1); return wParam;
+		case kcDataEntryDown:				DataEntry(-1); return wParam;
 		case kcSelectColumn:				OnSelectCurrentColumn(); return wParam;
 		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
 		case kcPatternSetInstrument:		OnSetSelInstrument(); return wParam;

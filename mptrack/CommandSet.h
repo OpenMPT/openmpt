@@ -259,6 +259,8 @@ enum CommandID
 	kcToggleChanMuteOnPatTransition,
 	kcUnmuteAllChnOnPatTransition,
 	kcSoloChnOnPatTransition,
+	kcChannelRecordSelect,
+	kcChannelSplitRecordSelect,
 	kcChannelReset,
 	kcChannelSettings,
 	kcEndChannelKeys = kcChannelSettings,
