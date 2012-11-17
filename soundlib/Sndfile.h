@@ -568,7 +568,7 @@ protected:
 	void Vibrato(ModChannel *pChn, UINT param);
 	void FineVibrato(ModChannel *pChn, UINT param);
 	void VolumeSlide(ModChannel *pChn, UINT param);
-	void PanningSlide(ModChannel *pChn, UINT param);
+	void PanningSlide(ModChannel *pChn, UINT param, bool memory = true);
 	void ChannelVolSlide(ModChannel *pChn, UINT param);
 	void FineVolumeUp(ModChannel *pChn, UINT param);
 	void FineVolumeDown(ModChannel *pChn, UINT param);
