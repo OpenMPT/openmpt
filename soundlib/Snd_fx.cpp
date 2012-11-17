@@ -2039,11 +2039,11 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PANSLIDELEFT:
-					PanningSlide(pChn, vol);
+					PanningSlide(pChn, vol, !IsCompatibleMode(TRK_FASTTRACKER2));
 					break;
 
 				case VOLCMD_PANSLIDERIGHT:
-					PanningSlide(pChn, vol << 4);
+					PanningSlide(pChn, vol << 4, !IsCompatibleMode(TRK_FASTTRACKER2));
 					break;
 
 				case VOLCMD_PORTAUP:
@@ -3074,13 +3074,18 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::PanningSlide(ModChannel *pChn, UINT param)
-//---------------------------------------------------------
+void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
+//----------------------------------------------------------------------
 {
-	if (param)
-		pChn->nOldPanSlide = param;
-	else
-		param = pChn->nOldPanSlide;
+	if(memory)
+	{
+		// FT2 compatibility: Use effect memory (lxx and rxx in XM shouldn't use effect memory).
+		// Test case: PanSlideMem.xm
+		if(param)
+			pChn->nOldPanSlide = param;
+		else
+			param = pChn->nOldPanSlide;
+	}
 
 	if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
 	{
