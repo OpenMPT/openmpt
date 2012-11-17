@@ -24,17 +24,21 @@ protected:
 	typedef std::vector<bool> VisitedRowsBaseType;
 	typedef std::vector<VisitedRowsBaseType> VisitedRowsType;
 
+	// Memory for every row in the module if it has been visited or not.
 	VisitedRowsType visitedRows;
+	// Memory of visited rows (including their order) to reset pattern loops.
+	std::vector<ROWINDEX> visitOrder;
 	const CSoundFile &sndFile;
+	ORDERINDEX currentOrder;
 
 public:
 
-	RowVisitor(const CSoundFile &sf) : sndFile(sf)
+	RowVisitor(const CSoundFile &sf) : sndFile(sf), currentOrder(0)
 	{
 		Initialize(true);
 	};
 
-	RowVisitor(const RowVisitor &other) : sndFile(other.sndFile), visitedRows(other.visitedRows) { };
+	RowVisitor(const RowVisitor &other) : sndFile(other.sndFile), visitedRows(other.visitedRows), visitOrder(other.visitOrder), currentOrder(other.currentOrder) { };
 
 	// Resize / Clear the row vector.
 	// If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
@@ -72,11 +76,17 @@ public:
 		visitedRows = other.visitedRows;
 	}
 
+	// Set all rows of a previous pattern loop as unvisited.
+	void ResetPatternLoop(ORDERINDEX order, ROWINDEX startRow);
+
 protected:
 
 	// (Un)sets a given row as visited.
 	// order, row - which row should be (un)set
 	// If visited is true, the row will be set as visited.
 	void SetVisited(ORDERINDEX order, ROWINDEX row, bool visited);
+
+	// Add a row to the visited row memory for this pattern.
+	void AddVisitedRow(ORDERINDEX order, ROWINDEX row);
 
 };

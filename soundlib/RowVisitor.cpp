@@ -31,6 +31,7 @@ void RowVisitor::Initialize(bool reset)
 {
 	const ORDERINDEX endOrder = sndFile.Order.GetLengthTailTrimmed();
 	visitedRows.resize(endOrder);
+	visitOrder.clear();
 
 	for(ORDERINDEX order = 0; order < endOrder; order++)
 	{
@@ -64,6 +65,10 @@ void RowVisitor::SetVisited(ORDERINDEX order, ROWINDEX row, bool visited)
 	}
 
 	visitedRows[order][row] = visited;
+	if(visited)
+	{
+		AddVisitedRow(order, row);
+	}
 }
 
 
@@ -96,6 +101,7 @@ bool RowVisitor::IsVisited(ORDERINDEX order, ROWINDEX row, bool autoSet)
 	} else if(autoSet)
 	{
 		visitedRows[order][row] = true;
+		AddVisitedRow(order, row);
 	}
 
 	return false;
@@ -154,4 +160,41 @@ bool RowVisitor::GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fas
 	order = ORDERINDEX_INVALID;
 	row = ROWINDEX_INVALID;
 	return false;
+}
+
+
+// Set all rows of a previous pattern loop as unvisited.
+void RowVisitor::ResetPatternLoop(ORDERINDEX order, ROWINDEX startRow)
+//--------------------------------------------------------------------
+{
+	ASSERT(order == currentOrder);	// Should never trigger.
+	
+	// Unvisit all rows that are in the visited row buffer, until we hit the start row for this pattern loop.
+	while(!visitOrder.empty())
+	{
+		ROWINDEX row = visitOrder.back();
+		visitOrder.pop_back();
+		Unvisit(order, row);
+		if(row == startRow)
+		{
+			break;
+		}
+	}
+	visitOrder.clear();
+}
+
+
+// Add a row to the visited row memory for this pattern.
+void RowVisitor::AddVisitedRow(ORDERINDEX order, ROWINDEX row)
+//------------------------------------------------------------
+{
+	// Update Pattern Loop memory
+	if(order != currentOrder)
+	{
+		// We're in a new pattern! Forget about which rows we previously visited...
+		visitOrder.clear();
+		visitOrder.reserve(GetVisitedRowsVectorSize(sndFile.Order[order]));
+		currentOrder = order;
+	}
+	visitOrder.push_back(row);
 }

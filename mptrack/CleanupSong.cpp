@@ -708,7 +708,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 	EndWaitCursor();
 
-	if(reorder && numUsed > 1)
+	if(reorder && numUsed >= 1)
 	{
 		reorder = (Reporting::Confirm("Do you want to reorganize the remaining instruments?", "Removing unused instruments", false, false, this) == cnfYes);
 	} else
@@ -922,11 +922,11 @@ bool CModCleanupDlg::RemoveAllInstruments()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	if (pSndFile->GetNumInstruments() == 0) return false;
+	if(pSndFile->GetNumInstruments() == 0) return false;
 
 	m_pModDoc->ConvertInstrumentsToSamples();
 
-	for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
+	for(INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
 	{
 		pSndFile->DestroyInstrument(i, doNoDeleteAssociatedSamples);
 	}

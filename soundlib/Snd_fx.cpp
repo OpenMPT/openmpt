@@ -1989,7 +1989,7 @@ BOOL CSoundFile::ProcessEffects()
 						{
 							pChn->nPan = 0;
 						}
-						break;
+						// Intentional fall-through
 					default:
 						// no memory here.
 						volcmd = VOLCMD_NONE;
@@ -2506,10 +2506,7 @@ BOOL CSoundFile::ProcessEffects()
 			}
 
 			// As long as the pattern loop is running, mark the looped rows as not visited yet
-			for(ROWINDEX nRow = nPatLoopRow; nRow <= m_nRow; nRow++)
-			{
-				visitedSongRows.Unvisit(m_nCurrentOrder, nRow);
-			}
+			visitedSongRows.ResetPatternLoop(m_nCurrentOrder, nPatLoopRow);
 		}
 
 		// Pattern Break / Position Jump only if no loop running
