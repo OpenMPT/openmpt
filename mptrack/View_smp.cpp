@@ -1525,7 +1525,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				}
 			}
 
-			if (m_dwBeginSel >= m_dwEndSel)
+			if(m_dwBeginSel >= m_dwEndSel)
 			{
 				if (sample.uFlags & CHN_16BIT) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to 8-bit");
 				if (sample.uFlags & CHN_STEREO) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "Convert to mono");
@@ -2068,11 +2068,11 @@ void CViewSample::OnMonoConvert()
 {
 	CModDoc *pModDoc = GetDocument();
 	BeginWaitCursor();
-	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
+	if(pModDoc != nullptr && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		ModSample &sample = pSndFile->GetSample(m_nSample);
-		if ((sample.uFlags & CHN_STEREO) && (sample.pSample) && (sample.nLength))
+		if(sample.GetNumChannels() > 1&& sample.pSample != nullptr && sample.nLength != 0)
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 			if(ctrlSmp::ConvertToMono(sample, pSndFile))
@@ -2188,7 +2188,14 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
-			if ((note) && (note <= NOTE_MAX)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
+			if(ModCommand::IsNote(note))
+			{
+				CSoundFile *pSndFile = pModDoc->GetSoundFile();
+				ModSample &sample = pSndFile->GetSample(m_nSample);
+				uint32 freq = pSndFile->GetFreqFromPeriod(pSndFile->GetPeriodFromNote(note + sample.RelativeTone, sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
+
+				wsprintf(s, "%s%d (%d Hz)", szNoteNames[(note - 1) % 12], (note - 1) / 12, freq);
+			}
 			pMainFrm->SetInfoText(s);
 		}
 	}
