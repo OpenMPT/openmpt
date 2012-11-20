@@ -590,18 +590,20 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 		bool handledByTextBox = false;
 
 		HWND hWnd = ::GetFocus();
-		if (hWnd != NULL) {
+		if(hWnd != NULL)
+		{
 			TCHAR activeWindowClassName[512];
 			GetClassName(hWnd, activeWindowClassName, 6);
 			textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
-			if (textboxHasFocus) {
+			if(textboxHasFocus)
+			{
 				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(wParam);
 			}
 		}
 
-		if (!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
+		if(!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
 		{
-			if (wParam != VK_ESCAPE)
+			if(wParam != VK_ESCAPE)
 				return -1;	// We've handled the keypress. No need to take it further.
 							// Unless it was esc, in which case we need it to close Windows
 							// (there might be other special cases, we'll see.. )
@@ -609,13 +611,13 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 	}
 
 	return CallNextHookEx(ghKbdHook, code, wParam, lParam);
-}	
+}
 
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 //---------------------------------------------
 {
-	if ((pMsg->message == WM_RBUTTONDOWN) || (pMsg->message == WM_NCRBUTTONDOWN))
+	if((pMsg->message == WM_RBUTTONDOWN) || (pMsg->message == WM_NCRBUTTONDOWN))
 	{
 		CWnd* pWnd = CWnd::FromHandlePermanent(pMsg->hwnd);
 		CControlBar* pBar = NULL;

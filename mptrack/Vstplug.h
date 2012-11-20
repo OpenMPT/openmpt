@@ -59,11 +59,11 @@ struct VSTPluginLib
 	};
 
 	VSTPluginLib *pPrev, *pNext;
+	CVstPlugin *pPluginsList;
 	VstInt32 dwPluginId1;
 	VstInt32 dwPluginId2;
-	bool isInstrument;
 	PluginCategory category;
-	CVstPlugin *pPluginsList;
+	bool isInstrument;
 	CHAR szLibraryName[_MAX_FNAME];
 	CHAR szDllPath[_MAX_PATH];
 
@@ -233,7 +233,6 @@ public:
 	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param 
 	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
-	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);
 	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
 	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);

@@ -297,7 +297,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 	if (s) GetEffectName(s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
 	if ((prangeMin) && (prangeMax))
 	{
-		UINT nmin = 0, nmax = 0xFF, nType = sndFile.GetType();
+		UINT nmin = 0, nmax = 0xFF;
 		if (gFXInfo[ndx].paramMask == 0xF0)
 		{
 			nmin = gFXInfo[ndx].paramValue;
@@ -306,7 +306,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 		switch(gFXInfo[ndx].effect)
 		{
 		case CMD_ARPEGGIO:
-			if (nType & (MOD_TYPE_MOD | MOD_TYPE_XM)) nmin = 1;
+			if (sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) nmin = 1;
 			break;
 		case CMD_VOLUME:
 		case CMD_CHANNELVOLUME:
@@ -315,16 +315,16 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 		case CMD_SPEED:
 			nmin = 1;
 			nmax = 0xFF;
-			if (nType & MOD_TYPE_MOD) nmax = 0x20; else
-				if (nType & MOD_TYPE_XM) nmax = 0x1F;
+			if (sndFile.GetType() & MOD_TYPE_MOD) nmax = 0x20; else
+				if (sndFile.GetType() & MOD_TYPE_XM) nmax = 0x1F;
 			break;
 		case CMD_TEMPO:
 			nmin = 0x20;
-			if (nType & MOD_TYPE_MOD) nmin = 0x21; else
+			if (sndFile.GetType() & MOD_TYPE_MOD) nmin = 0x21; else
 				// -> CODE#0010
 				// -> DESC="add extended parameter mechanism to pattern effects"
 				//			if (nType & MOD_TYPE_S3MIT) nmin = 1;
-				if (nType & MOD_TYPE_S3MITMPT) nmin = 0;
+				if (sndFile.GetType() & MOD_TYPE_S3MITMPT) nmin = 0;
 			// -! NEW_FEATURE#0010
 			break;
 		case CMD_VOLUMESLIDE:
@@ -333,14 +333,14 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 		case CMD_GLOBALVOLSLIDE:
 		case CMD_CHANNELVOLSLIDE:
 		case CMD_PANNINGSLIDE:
-			nmax = (nType & MOD_TYPE_S3MITMPT) ? 58 : 30;
+			nmax = (sndFile.GetType() & MOD_TYPE_S3MITMPT) ? 58 : 30;
 			break;
 		case CMD_PANNING8:
-			if (nType & (MOD_TYPE_S3M)) nmax = 0x81;
+			if (sndFile.GetType() & (MOD_TYPE_S3M)) nmax = 0x81;
 			else nmax = 0xFF;
 			break;
 		case CMD_GLOBALVOLUME:
-			nmax = (nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? 128 : 64;
+			nmax = (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? 128 : 64;
 			break;
 
 		case CMD_MODCMDEX:
@@ -353,7 +353,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 			break;
 		case CMD_PATTERNBREAK:
 			// no big patterns in MOD/S3M files
-			if(nType & (MOD_TYPE_MOD | MOD_TYPE_S3M))
+			if(sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M))
 				nmax = 63;	
 			break;
 		}

@@ -1900,7 +1900,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 			if(plug < MAX_MIXPLUGINS)
 			{
 				// MPT's standard plugin data. Size not specified in file.. grrr..
-				chunk.Read(m_MixPlugins[plug].Info);
+				chunk.ReadConvertEndianness(m_MixPlugins[plug].Info);
 				StringFixer::SetNullTerminator(m_MixPlugins[plug].Info.szName);
 				StringFixer::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
 

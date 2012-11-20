@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
-#include ".\soundfileplayconfig.h"
+#include "SoundFilePlayConfig.h"
 
 CSoundFilePlayConfig::CSoundFilePlayConfig()
 //------------------------------------------

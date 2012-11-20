@@ -22,17 +22,18 @@
 // Deprecated. Use "SwapBytesXX" versions below.
 #ifdef PLATFORM_BIG_ENDIAN
 // PPC
-inline DWORD LittleEndian(DWORD x)	{ return ((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24); }
-inline WORD LittleEndianW(WORD x)	{ return (WORD)(((x >> 8) & 0xFF) | ((x << 8) & 0xFF00)); }
-#define BigEndian(x)				(x)
-#define BigEndianW(x)				(x)
+inline uint32 LittleEndian(uint32 x)	{ return ((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24); }
+inline uint16 LittleEndianW(uint16 x)	{ return (uint16)(((x >> 8) & 0xFF) | ((x << 8) & 0xFF00)); }
+#define BigEndian(x)					(x)
+#define BigEndianW(x)					(x)
 #else
 // x86
-inline DWORD BigEndian(DWORD x)	{ return ((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24); }
-inline WORD BigEndianW(WORD x)	{ return (WORD)(((x >> 8) & 0xFF) | ((x << 8) & 0xFF00)); }
-#define LittleEndian(x)			(x)
-#define LittleEndianW(x)		(x)
+inline uint32 BigEndian(uint32 x)	{ return ((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24); }
+inline uint16 BigEndianW(uint16 x)	{ return (uint16)(((x >> 8) & 0xFF) | ((x << 8) & 0xFF00)); }
+#define LittleEndian(x)				(x)
+#define LittleEndianW(x)			(x)
 #endif
+//#pragma deprecated(BigEndian, BigEndianW, LittleEndian, LittleEndianW)
 
 #ifdef PLATFORM_BIG_ENDIAN
 // PPC

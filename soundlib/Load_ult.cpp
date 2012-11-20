@@ -451,7 +451,6 @@ bool CSoundFile::ReadUlt(FileReader &file)
 	{
 		ModCommand evnote;
 		ModCommand *note;
-		int repeat;
 		evnote.Clear();
 
 		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
@@ -460,11 +459,11 @@ bool CSoundFile::ReadUlt(FileReader &file)
 			ROWINDEX row = 0;
 			while(row < 64)
 			{
-				repeat = ReadULTEvent(evnote, file);
+				int repeat = ReadULTEvent(evnote, file);
 				if(repeat + row > 64)
 					repeat = 64 - row;
 				if(repeat == 0) break;
-				while (repeat--)
+				while(repeat--)
 				{
 					*note = evnote;
 					note += GetNumChannels();
