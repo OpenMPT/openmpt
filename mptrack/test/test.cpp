@@ -199,12 +199,6 @@ void TestTypes()
 	VERIFY_EQUAL(int64_min, (std::numeric_limits<int64>::min)());
 	VERIFY_EQUAL(int64_max, (std::numeric_limits<int64>::max)());
 	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
-
-	VERIFY_EQUAL(ROWINDEX_MAX, (std::numeric_limits<ROWINDEX>::max)());
-	VERIFY_EQUAL(ORDERINDEX_MAX, (std::numeric_limits<ORDERINDEX>::max)());
-	VERIFY_EQUAL(PATTERNINDEX_MAX, (std::numeric_limits<PATTERNINDEX>::max)());
-	VERIFY_EQUAL(SAMPLEINDEX_MAX, (std::numeric_limits<SAMPLEINDEX>::max)());
-	VERIFY_EQUAL(INSTRUMENTINDEX_MAX, (std::numeric_limits<INSTRUMENTINDEX>::max)());
 }
 
 

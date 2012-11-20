@@ -22,6 +22,7 @@ typedef intptr_t VstIntPtr;
 #include "Snd_defs.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../soundlib/Endianness.h"
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -39,7 +40,6 @@ public:
 	virtual void SaveAllParameters() = 0;
 	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
-	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
 	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
@@ -117,6 +117,19 @@ struct SNDMIXPLUGININFO
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
 	void SetBypass(bool bypass = true) { if(bypass) dwInputRouting |= irBypass; else dwInputRouting &= ~irBypass; };
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(dwPluginId1);
+		SwapBytesLE(dwPluginId2);
+		SwapBytesLE(dwInputRouting);
+		SwapBytesLE(dwOutputRouting);
+		SwapBytesLE(dwReserved[0]);
+		SwapBytesLE(dwReserved[1]);
+		SwapBytesLE(dwReserved[2]);
+		SwapBytesLE(dwReserved[3]);
+	}
 
 };
 

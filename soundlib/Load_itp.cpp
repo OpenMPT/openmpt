@@ -83,8 +83,10 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	}
 
 	// Song mix plugins
-	size = file.ReadUint32LE();
-	LoadMixPlugins(file.GetChunk(size));
+	{
+		FileReader plugChunk = file.GetChunk(file.ReadUint32LE());
+		LoadMixPlugins(plugChunk);
+	}
 
 	// MIDI Macro config
 	file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());

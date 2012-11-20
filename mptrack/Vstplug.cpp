@@ -1931,12 +1931,6 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 }
 
 
-void CVstPlugin::Init(unsigned long /*nFreq*/, int /*bReset*/)
-//------------------------------------------------------------
-{
-
-}
-
 void CVstPlugin::Resume()
 //-----------------------
 {
