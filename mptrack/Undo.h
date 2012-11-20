@@ -42,12 +42,12 @@ protected:
 
 	struct UndoInfo
 	{
-		PATTERNINDEX pattern;
-		ROWINDEX patternsize;
-		CHANNELINDEX firstChannel, numChannels;
-		ROWINDEX firstRow, numRows;
 		ModCommand *pbuffer;
 		ChannelInfo *channelInfo;
+		ROWINDEX patternsize;
+		ROWINDEX firstRow, numRows;
+		PATTERNINDEX pattern;
+		CHANNELINDEX firstChannel, numChannels;
 		bool linkToPrevious;
 	};
 
@@ -60,11 +60,15 @@ protected:
 
 public:
 
-	// Pattern undo functions
+	// Removes all undo steps from the buffer.
 	void ClearUndo();
+	// Adds a new action to the undo buffer.
 	bool PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious = false, bool storeChannelInfo = false);
+	// Undoes the most recent action.
 	PATTERNINDEX Undo();
+	// Returns true if any actions can currently be undone.
 	bool CanUndo() const;
+	// Remove the latest added undo step from the undo buffer
 	void RemoveLastUndoStep();
 
 	void SetParent(CModDoc *pModDoc) { m_pModDoc = pModDoc; }
@@ -110,10 +114,10 @@ protected:
 	struct UndoInfo
 	{
 		ModSample OldSample;
-		char szOldName[MAX_SAMPLENAME];
-		LPSTR SamplePtr;
-		SmpLength nChangeStart, nChangeEnd;
-		sampleUndoTypes nChangeType;
+		char oldName[MAX_SAMPLENAME];
+		LPSTR samplePtr;
+		SmpLength changeStart, changeEnd;
+		sampleUndoTypes changeType;
 	};
 
 	// Undo buffer
