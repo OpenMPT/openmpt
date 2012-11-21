@@ -17,6 +17,8 @@
 
 #define SMP_LEFTBAR_BUTTONS		8
 
+#include "modsmp_ctrl.h"
+
 //======================================
 class CViewSample: public CModScrollView
 //======================================
@@ -85,6 +87,8 @@ protected:
 
 	void AdjustLoopPoints(UINT &loopStart, UINT &loopEnd, UINT length) const;
 
+	void OnMonoConvert(ctrlSmp::StereoToMonoMode convert);
+
 public:
 	//{{AFX_VIRTUAL(CViewSample)
 	virtual void OnDraw(CDC *);
@@ -130,7 +134,10 @@ protected:
 	afx_msg void OnSetLoop();
 	afx_msg void OnSetSustainLoop();
 	afx_msg void On8BitConvert();
-	afx_msg void OnMonoConvert();
+	afx_msg void OnMonoConvertMix() { OnMonoConvert(ctrlSmp::mixChannels); }
+	afx_msg void OnMonoConvertLeft() { OnMonoConvert(ctrlSmp::onlyLeft); }
+	afx_msg void OnMonoConvertRight() { OnMonoConvert(ctrlSmp::onlyRight); }
+	afx_msg void OnMonoConvertSplit() { OnMonoConvert(ctrlSmp::splitSample); }
 	afx_msg void OnSampleTrim();
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();

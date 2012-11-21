@@ -588,8 +588,8 @@ bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile *pSndFile)
 
 
 template <class T>
-void ConvertStereoToMonoImpl(T* pDest, const SmpLength length)
-//------------------------------------------------------------
+void ConvertStereoToMonoMixImpl(T* pDest, const SmpLength length)
+//---------------------------------------------------------------
 {
 	const T* pEnd = pDest + length;
 	for(T* pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
@@ -599,19 +599,46 @@ void ConvertStereoToMonoImpl(T* pDest, const SmpLength length)
 }
 
 
+template <class T>
+void ConvertStereoToMonoOneChannelImpl(T* pDest, const SmpLength length)
+//----------------------------------------------------------------------
+{
+	const T* pEnd = pDest + length;
+	for(T* pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
+	{
+		*pDest = *pSource;
+	}
+}
+
+
 // Convert a multichannel sample to mono (currently only implemented for stereo)
-bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile)
-//------------------------------------------------------
+bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile, StereoToMonoMode conversionMode)
+//---------------------------------------------------------------------------------------
 {
 	if(smp.pSample == nullptr || smp.nLength == 0 || smp.GetNumChannels() != 2) return false;
 
 	// Note: Sample is overwritten in-place! Unused data is not deallocated!
-	if(smp.GetElementarySampleSize() == 2)
-		ConvertStereoToMonoImpl(reinterpret_cast<int16*>(smp.pSample), smp.nLength);
-	else if(smp.GetElementarySampleSize() == 1)
-		ConvertStereoToMonoImpl(reinterpret_cast<int8*>(smp.pSample), smp.nLength);
-	else
-		return false;
+	if(conversionMode == mixChannels)
+	{
+		if(smp.GetElementarySampleSize() == 2)
+			ConvertStereoToMonoMixImpl(reinterpret_cast<int16 *>(smp.pSample), smp.nLength);
+		else if(smp.GetElementarySampleSize() == 1)
+			ConvertStereoToMonoMixImpl(reinterpret_cast<int8 *>(smp.pSample), smp.nLength);
+		else
+			return false;
+	} else
+	{
+		if(conversionMode == splitSample)
+		{
+			conversionMode = onlyLeft;
+		}
+		if(smp.GetElementarySampleSize() == 2)
+			ConvertStereoToMonoOneChannelImpl(reinterpret_cast<int16 *>(smp.pSample) + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
+		else if(smp.GetElementarySampleSize() == 1)
+			ConvertStereoToMonoOneChannelImpl(reinterpret_cast<int8 *>(smp.pSample) + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
+		else
+			return false;
+	}
 
 	CriticalSection cs;
 	smp.uFlags &= ~(CHN_STEREO);

@@ -74,8 +74,16 @@ bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, cons
 // Crossfade sample data to create smooth loops
 bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile *pSndFile);
 
+enum StereoToMonoMode
+{
+	mixChannels,
+	onlyLeft,
+	onlyRight,
+	splitSample,
+};
+
 // Convert a sample with any number of channels to mono
-bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile);
+bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile, StereoToMonoMode conversionMode);
 
 } // Namespace ctrlSmp
 
