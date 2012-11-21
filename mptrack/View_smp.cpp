@@ -89,7 +89,10 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_SETLOOP,			OnSetLoop)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINLOOP,	OnSetSustainLoop)
 	ON_COMMAND(ID_SAMPLE_8BITCONVERT,		On8BitConvert)
-	ON_COMMAND(ID_SAMPLE_MONOCONVERT,		OnMonoConvert)
+	ON_COMMAND(ID_SAMPLE_MONOCONVERT,		OnMonoConvertMix)
+	ON_COMMAND(ID_SAMPLE_MONOCONVERT_LEFT,	OnMonoConvertLeft)
+	ON_COMMAND(ID_SAMPLE_MONOCONVERT_RIGHT,	OnMonoConvertRight)
+	ON_COMMAND(ID_SAMPLE_MONOCONVERT_SPLIT,	OnMonoConvertSplit)
 	ON_COMMAND(ID_SAMPLE_TRIM,				OnSampleTrim)
 	ON_COMMAND(ID_PREVINSTRUMENT,			OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,			OnNextInstrument)
@@ -1527,13 +1530,21 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 
 			if(m_dwBeginSel >= m_dwEndSel)
 			{
-				if (sample.uFlags & CHN_16BIT) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to 8-bit");
-				if (sample.uFlags & CHN_STEREO) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "Convert to mono");
+				if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to &8-bit");
+				if(sample.GetNumChannels() > 1)
+				{
+					HMENU hMonoMenu = ::CreatePopupMenu();
+					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "&Mix Channels");
+					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, "&Left Channel");
+					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, "&Right Channel");
+					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, "&Split Sample");
+					::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), "Convert to &Mono");
+				}
 			}
 
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
-			std::string sTrimMenuText = "Trim";
+			std::string sTrimMenuText = "T&rim";
 			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
 								|| (m_dwEndSel - m_dwBeginSel == sample.nLength)
 							  );
@@ -1554,13 +1565,13 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING|(bIsGrayed) ? MF_GRAYED : 0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
 			if((m_dwBeginSel == 0 && m_dwEndSel != 0) || (m_dwBeginSel < sample.nLength && m_dwEndSel == sample.nLength))
 			{
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, "Quick fade\t" + ih->GetKeyTextFromCommand(kcSampleQuickFade));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, "Quick &fade\t" + ih->GetKeyTextFromCommand(kcSampleQuickFade));
 			}
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cu&t\t" + ih->GetKeyTextFromCommand(kcEditCut));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "&Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
-		::AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+		::AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "&Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -2063,8 +2074,8 @@ void CViewSample::On8BitConvert()
 }
 
 
-void CViewSample::OnMonoConvert()
-//-------------------------------
+void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
+//----------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	BeginWaitCursor();
@@ -2072,11 +2083,58 @@ void CViewSample::OnMonoConvert()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		ModSample &sample = pSndFile->GetSample(m_nSample);
-		if(sample.GetNumChannels() > 1&& sample.pSample != nullptr && sample.nLength != 0)
+		if(sample.GetNumChannels() > 1 && sample.pSample != nullptr && sample.nLength != 0)
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-			if(ctrlSmp::ConvertToMono(sample, pSndFile))
+			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
+			if(convert == ctrlSmp::splitSample)
 			{
+				// Split sample into two slots
+				rightSmp = pModDoc->InsertSample(true);
+				if(rightSmp != SAMPLEINDEX_INVALID)
+				{
+					pSndFile->ReadSampleFromSong(rightSmp, pSndFile, m_nSample);
+				} else
+				{
+					return;
+				}
+			}
+
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+
+			if(ctrlSmp::ConvertToMono(sample, pSndFile, convert))
+			{
+				if(convert == ctrlSmp::splitSample)
+				{
+					// Split mode: We need to convert the right channel as well!
+					ModSample &right = pSndFile->GetSample(rightSmp);
+					ctrlSmp::ConvertToMono(right, pSndFile, ctrlSmp::onlyRight);
+
+					// Try to create a new instrument as well which maps to the right sample.
+					INSTRUMENTINDEX ins = pModDoc->FindSampleParent(m_nSample);
+					if(ins != INSTRUMENTINDEX_INVALID)
+					{
+						INSTRUMENTINDEX rightIns = pModDoc->InsertInstrument(0, ins);
+						if(rightIns != INSTRUMENTINDEX_INVALID)
+						{
+							for(size_t i = 0; i < CountOf(pSndFile->Instruments[rightIns]->Keyboard); i++)
+							{
+								if(pSndFile->Instruments[rightIns]->Keyboard[i] == m_nSample)
+								{
+									pSndFile->Instruments[rightIns]->Keyboard[i] = rightSmp;
+								}
+							}
+						}
+					}
+
+					// Finally, adjust sample panning
+					if(pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
+					{
+						sample.uFlags.set(CHN_PANNING);
+						sample.nPan = 0;
+						right.uFlags.set(CHN_PANNING);
+						right.nPan = 256;
+					}
+				}
 				pModDoc->SetModified();
 				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 			} else
