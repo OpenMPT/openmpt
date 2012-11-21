@@ -125,6 +125,7 @@
 #define IFFID_ptbl		0x6C627470
 #define IFFID_wvpl		0x6C707677
 #define IFFID_rgn		0x206E6772
+#define IFFID_rgn2		0x326E6772
 #define IFFID_rgnh		0x686E6772
 #define IFFID_wlnk		0x6B6E6C77
 #define IFFID_art1		0x31747261
@@ -567,7 +568,8 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pvchunk
 		}
 		switch(plist->listid)
 		{
-		case IFFID_rgn:
+		case IFFID_rgn:		// Level 1 region
+		case IFFID_rgn2:	// Level 2 region
 			if (pDlsIns->nRegions < DLSMAXREGIONS) pDlsIns->nRegions++;
 			break;
 		}
@@ -1572,7 +1574,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			} else
 			if (m_nType & SOUNDBANK_TYPE_SF2)
 			{
-				usUnityNote += sample.RelativeTone - 60;
+				usUnityNote = (usUnityNote < 0x80) ? usUnityNote : sample.RelativeTone;
 				sFineTune += sample.nFineTune;
 			}
 		#ifdef DLSINSTR_LOG
@@ -1614,7 +1616,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 
 
 BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn)
-//-------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
 {
 	BYTE RgnToSmp[DLSMAXREGIONS];
 	DLSINSTRUMENT *pDlsIns;
