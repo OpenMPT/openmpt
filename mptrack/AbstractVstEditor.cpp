@@ -202,7 +202,10 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 		m_pVstPlugin->SetCurrentProgram(nIndex);
 		UpdatePresetField();
 		
-		//SetupMenu();
+		if(m_pVstPlugin->m_pSndFile->GetModSpecifications().supportsPlugins)
+		{
+			m_pVstPlugin->GetModDoc()->SetModified();
+		}
 	}
 }
 

@@ -240,6 +240,6 @@ void CSampleXFadeDlg::OnOK()
 //--------------------------
 {
 	m_nSamples = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
+	LimitMax(m_nSamples, m_nMaxSamples);
 	CDialog::OnOK();
 }
-

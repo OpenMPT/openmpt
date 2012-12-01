@@ -291,29 +291,36 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 	RestrictBufferSize();
 
 	// Create new undo slot
-	UndoInfo sUndo;
+	UndoInfo undo;
 
-	const ModSample &oldsample = pSndFile->GetSample(smp);
+	const ModSample &oldSample = pSndFile->GetSample(smp);
 
 	// Save old sample header
-	sUndo.OldSample = oldsample;
-	MemCopy(sUndo.oldName, pSndFile->m_szNames[smp]);
-	sUndo.changeType = changeType;
+	undo.OldSample = oldSample;
+	MemCopy(undo.oldName, pSndFile->m_szNames[smp]);
+	undo.changeType = changeType;
 
 	if(changeType == sundo_replace)
 	{
 		// ensure that size information is correct here.
 		changeStart = 0;
-		changeEnd = oldsample.nLength;
+		changeEnd = oldSample.nLength;
 	} else if(changeType == sundo_none)
 	{
 		// we do nothing...
 		changeStart = changeEnd = 0;
 	}
 
-	sUndo.changeStart = changeStart;
-	sUndo.changeEnd = changeEnd;
-	sUndo.samplePtr = nullptr;
+	if(changeStart > oldSample.nLength || changeStart > changeEnd)
+	{
+		// Something is surely screwed up.
+		ASSERT(false);
+		return false;
+	}
+
+	undo.changeStart = changeStart;
+	undo.changeEnd = changeEnd;
+	undo.samplePtr = nullptr;
 
 	switch(changeType)
 	{
@@ -327,18 +334,18 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 	case sundo_update:
 	case sundo_delete:
 	case sundo_replace:
-		if(oldsample.pSample != nullptr)
+		if(oldSample.pSample != nullptr)
 		{
-			size_t nBytesPerSample = oldsample.GetBytesPerSample();
-			size_t nChangeLen = changeEnd - changeStart;
+			const size_t bytesPerSample = oldSample.GetBytesPerSample();
+			const size_t changeLen = changeEnd - changeStart;
 
-			sUndo.samplePtr = pSndFile->AllocateSample(nChangeLen * nBytesPerSample + 4 * nBytesPerSample);
-			if(sUndo.samplePtr == nullptr) return false;
-			memcpy(sUndo.samplePtr, oldsample.pSample + changeStart * nBytesPerSample, nChangeLen * nBytesPerSample);
+			undo.samplePtr = pSndFile->AllocateSample((changeLen + 4) * bytesPerSample);
+			if(undo.samplePtr == nullptr) return false;
+			memcpy(undo.samplePtr, oldSample.pSample + changeStart * bytesPerSample, changeLen * bytesPerSample);
 
 #ifdef _DEBUG
 			char s[64];
-			const size_t nSize = (GetUndoBufferCapacity() + nChangeLen * nBytesPerSample) >> 10;
+			const size_t nSize = (GetUndoBufferCapacity() + changeLen * bytesPerSample) >> 10;
 			wsprintf(s, "Sample undo buffer size is now %u.%u MB\n", nSize >> 10, (nSize & 1023) * 100 / 1024);
 			Log(s);
 #endif
@@ -351,7 +358,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 		return false;
 	}
 
-	UndoBuffer[smp - 1].push_back(sUndo);
+	UndoBuffer[smp - 1].push_back(undo);
 
 	m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
 
