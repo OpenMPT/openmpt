@@ -26,7 +26,7 @@ protected:
 	CImageList m_bmpEnvBar;
 	POINT m_ptMenu;
 	RECT m_rcClient;
-	bool m_baPlayingNote[128]; //rewbs.instViewNNA
+	vector<bool> m_baPlayingNote;
 	INSTRUMENTINDEX m_nInstrument;
 	enmEnvelopeTypes m_nEnv;
 	UINT m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
