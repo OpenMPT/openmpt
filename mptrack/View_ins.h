@@ -27,14 +27,14 @@ protected:
 	POINT m_ptMenu;
 	RECT m_rcClient;
 	vector<bool> m_baPlayingNote;
+	vector<DWORD> m_dwNotifyPos;
 	INSTRUMENTINDEX m_nInstrument;
 	enmEnvelopeTypes m_nEnv;
 	UINT m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
-	DWORD m_dwNotifyPos[MAX_CHANNELS];
 	//rewbs.envRowGrid
-	bool m_bGrid;			  
+	bool m_bGrid;
 	bool m_bGridForceRedraw;
 	CBitmap *m_pbmpOldGrid;
 	CBitmap m_bmpGrid;
@@ -90,7 +90,7 @@ protected:
 	bool EnvSetCarry(bool enable) const {return EnvSetFlag(ENV_CARRY, enable);};
 
 	// Misc.
-	bool EnvSetValue(int nPoint, int nTick=-1, int nValue=-1);
+	bool EnvSetValue(int nPoint, int nTick = -1, int nValue = -1, bool moveTail = false);
 	bool CanMovePoint(UINT envPoint, int step);
 
 	// Set loop points
@@ -122,7 +122,7 @@ protected:
 	void EnvKbdSetSustainEnd();
 	void EnvKbdToggleReleaseNode();
 
-	bool IsDragItemEnvPoint() const { return (m_nDragItem < 1 || m_nDragItem > EnvGetLastPoint() + 1) ? false : true; }
+	bool IsDragItemEnvPoint() const { return !(m_nDragItem < 1 || m_nDragItem > EnvGetLastPoint() + 1); }
 
 	////////////////////////
 	// Misc stuff
@@ -138,15 +138,15 @@ protected:
 	int ScreenToTick(int x) const;
 	int QuickScreenToTick(int x, int cachedScrollPos) const;
 	int ScreenToPoint(int x, int y) const;
-	int ValueToScreen(int val) const { return m_rcClient.bottom - 1 - (val * (m_rcClient.bottom-1)) / 64; }
+	int ValueToScreen(int val) const { return m_rcClient.bottom - 1 - (val * (m_rcClient.bottom - 1)) / 64; }
 	int ScreenToValue(int y) const;
 	void InvalidateEnvelope() { InvalidateRect(NULL, FALSE); }
 	void DrawPositionMarks(HDC hdc);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
-	void PlayNote(UINT note);				//rewbs.customKeys
-	void DrawGrid(CDC *memDC, UINT speed);	//rewbs.envRowGrid
+	void PlayNote(UINT note);
+	void DrawGrid(CDC *memDC, UINT speed);
 
 	void OnEnvZoomIn() { EnvSetZoom(m_fZoom + 1); };
 	void OnEnvZoomOut() { EnvSetZoom(m_fZoom - 1); };
@@ -213,7 +213,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	BYTE EnvGetReleaseNode();
-	WORD EnvGetReleaseNodeValue();
-	WORD EnvGetReleaseNodeTick();
+	uint8 EnvGetReleaseNode();
+	uint16 EnvGetReleaseNodeValue();
+	uint16 EnvGetReleaseNodeTick();
 };
