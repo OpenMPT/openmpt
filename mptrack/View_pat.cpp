@@ -2916,14 +2916,34 @@ bool CViewPattern::DataEntry(int offset)
 		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
 		for(CHANNELINDEX chn = startChan; chn <= endChan; chn++)
 		{
-			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)) && m[chn].IsNote())
+			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
 			{
-				int note = m[chn].note + offset;
-				Limit(note, noteMin, noteMax);
-				m[chn].note = (ModCommand::NOTE)note;
+				// Increase / decrease note
+				if(m[chn].IsNote())
+				{
+					int note = m[chn].note + offset;
+					Limit(note, noteMin, noteMax);
+					m[chn].note = (ModCommand::NOTE)note;
+				} else if(m[chn].note >= NOTE_MIN_SPECIAL)
+				{
+					int note = m[chn].note;
+					do
+					{
+						note += offset;
+						if(note < NOTE_MIN_SPECIAL || note > NOTE_MAX_SPECIAL)
+						{
+							break;
+						}
+					} while(!pSndFile->GetModSpecifications().HasNote((ModCommand::NOTE)note));
+					if(note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL)
+					{
+						m[chn].note = (ModCommand::NOTE)note;
+					}
+				}
 			}
 			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)))
 			{
+				// Increase / decrease instrument
 				int instr = m[chn].instr + offset;
 				if(m[chn].IsInstrPlug())
 				{
@@ -2936,6 +2956,7 @@ bool CViewPattern::DataEntry(int offset)
 			}
 			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::volumeColumn)))
 			{
+				// Increase / decrease volume parameter
 				if(m[chn].IsPcNote())
 				{
 					int val = m[chn].GetValueVolCol() + offset;
@@ -2952,6 +2973,7 @@ bool CViewPattern::DataEntry(int offset)
 			}
 			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
 			{
+				// Increase / decrease effect parameter
 				if(m[chn].IsPcNote())
 				{
 					int val = m[chn].GetValueEffectCol() + offset;
@@ -3023,6 +3045,8 @@ void CViewPattern::OnDropSelection()
 	end.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	PatternRect destination(begin, end);
 
+	const bool moveSelection = !(m_dwStatus & (psKeyboardDragSelect | psCtrlDragSelect));
+
 	BeginWaitCursor();
 	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
 
@@ -3044,7 +3068,7 @@ void CViewPattern::OnDropSelection()
 				} else if(m_Selection.Contains(cell))
 				{
 					// Current cell is from source rectangle (clear)
-					if(!(m_dwStatus & (psKeyboardDragSelect|psCtrlDragSelect)))
+					if(moveSelection)
 					{
 						xsrc = -1;
 					}
@@ -4096,10 +4120,10 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	if (wParam == kcNull)
 		return NULL;
 	
-	CModDoc *pModDoc = GetDocument();	
+	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return NULL;
 	
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
@@ -5081,7 +5105,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 	if(recordEnabled)
 	{
 		PatternCursor sel(nRow, nChn, m_Cursor.GetColumnType());
-		if(liveRecord == false)
+		if(!liveRecord)
 		{
 			// Update only when not recording live.
 			SetCurSel(sel);
@@ -5090,16 +5114,16 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		if(modified) // Has it really changed?
 		{
 			pModDoc->SetModified();
-			if(liveRecord == false)
+			InvalidateCell(sel);
+			if(!liveRecord)
 			{
 				// Update only when not recording live.
-				InvalidateCell(sel);
 				UpdateIndicator();
 			}
 		}
 
 		// Set new cursor position (row spacing)
-		if (!liveRecord)
+		if(!liveRecord)
 		{
 			if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 			{
@@ -5570,16 +5594,7 @@ void CViewPattern::TogglePluginEditor(int chan)
 void CViewPattern::OnSelectInstrument(UINT nID)
 //---------------------------------------------
 {
-	const UINT newIns = nID - ID_CHANGE_INSTRUMENT;
-
-	if (newIns == 0)
-	{
-		RowMask sp(false, true, false, false, false);	// Setup mask to only clear instrument data in OnClearSelection
-		OnClearSelection(false, sp);					// Clears instrument selection from pattern
-	} else
-	{
-		SetSelectionInstrument(newIns);
-	}
+	SetSelectionInstrument(nID - ID_CHANGE_INSTRUMENT);
 }
 
 
@@ -6391,7 +6406,7 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 //-------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
-	if(nIns == 0 || pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		return;
 	}
@@ -6407,15 +6422,15 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 	CHANNELINDEX startChan = m_Selection.GetStartChannel();
 	CHANNELINDEX endChan   = m_Selection.GetEndChannel();
 
-	for (ROWINDEX r = startRow; r <= endRow; r++)
+	for(ROWINDEX r = startRow; r <= endRow; r++)
 	{
 		ModCommand *p = pSndFile->Patterns[m_nPattern].GetpModCommand(r, startChan);
-		for (CHANNELINDEX c = startChan; c <= endChan; c++, p++)
+		for(CHANNELINDEX c = startChan; c <= endChan; c++, p++)
 		{
 			// If a note or an instr is present on the row, do the change, if required.
 			// Do not set instr if note and instr are both blank,
 			// but set instr if note is a PC note and instr is blank.
-			if ((p->IsNote() || p->IsPcNote() || p->instr) && (p->instr != nIns))
+			if((p->IsNote() || p->IsPcNote() || p->instr) && (p->instr != nIns))
 			{
 				p->instr = nIns;
 				modified = true;
@@ -6423,7 +6438,7 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 		}
 	}
 
-	if (modified)
+	if(modified)
 	{
 		SetModified();
 		InvalidatePattern();

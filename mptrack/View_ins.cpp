@@ -124,7 +124,7 @@ CViewInstrument::CViewInstrument()
 	m_rcClient.bottom = 2;
 	m_dwStatus = 0;
 	m_nBtnMouseOver = 0xFFFF;
-	MemsetZero(m_dwNotifyPos);
+	m_dwNotifyPos.assign(MAX_CHANNELS, 0);
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
 	m_baPlayingNote.assign(128, false);
@@ -271,48 +271,65 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 }
 
 
-bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
-//------------------------------------------------------------------
+bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTail)
+//---------------------------------------------------------------------------------
 {
-	if(nPoint < 0) return false;
-
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
+	if(envelope == nullptr || nPoint < 0) return false;
 
-	bool bOK = false;
-	if (!nPoint) nTick = 0;
-	if (nPoint < (int)envelope->nNodes)
+	if(nPoint == 0)
 	{
-		if (nTick >= 0)
+		nTick = 0;
+		moveTail = false;
+	}
+	int tickDiff = 0;
+
+	bool ok = false;
+	if(nPoint < (int)envelope->nNodes)
+	{
+		if(nTick >= 0)
 		{
+			tickDiff = envelope->Ticks[nPoint];
 			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
 			int maxtick = envelope->Ticks[nPoint + 1];
-			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
+			if(nPoint + 1 == (int)envelope->nNodes || moveTail) maxtick = ENVELOPE_MAX_LENGTH;
+
 			// Can't have multiple points on same tick
 			if(nPoint > 0 && mintick < maxtick - 1)
 			{
 				mintick++;
-				if (nPoint + 1 < (int)envelope->nNodes) maxtick--;
+				if(nPoint + 1 < (int)envelope->nNodes) maxtick--;
 			}
-			if (nTick < mintick) nTick = mintick;
-			if (nTick > maxtick) nTick = maxtick;
-			if (nTick != envelope->Ticks[nPoint])
+			if(nTick < mintick) nTick = mintick;
+			if(nTick > maxtick) nTick = maxtick;
+			if(nTick != envelope->Ticks[nPoint])
 			{
-				envelope->Ticks[nPoint] = (WORD)nTick;
-				bOK = true;
+				envelope->Ticks[nPoint] = (uint16)nTick;
+				ok = true;
 			}
 		}
-		if (nValue >= 0)
+		if(nValue >= 0)
 		{
-			if (nValue > 64) nValue = 64;
-			if (nValue != envelope->Values[nPoint])
+			if(nValue > 64) nValue = 64;
+			if(nValue != envelope->Values[nPoint])
 			{
-				envelope->Values[nPoint] = (BYTE)nValue;
-				bOK = true;
+				envelope->Values[nPoint] = (uint8)nValue;
+				ok = true;
 			}
 		}
 	}
-	return bOK;
+
+	if(ok && moveTail)
+	{
+		// Move all points after modified point as well.
+		tickDiff = envelope->Ticks[nPoint] - tickDiff;
+		for(uint32 i = nPoint + 1; i < envelope->nNodes; i++)
+		{
+			envelope->Ticks[i] = (uint16)(Util::Max(0, (int)envelope->Ticks[i] + tickDiff));
+		}
+	}
+
+	return ok;
 }
 
 
@@ -973,16 +990,18 @@ void CViewInstrument::OnDraw(CDC *pDC)
 // -! NEW_FEATURE#0015
 }
 
-BYTE CViewInstrument::EnvGetReleaseNode()
-//---------------------------------------
+
+uint8 CViewInstrument::EnvGetReleaseNode()
+//----------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return ENV_RELEASE_NODE_UNSET;
 	return envelope->nReleaseNode;
 }
 
-WORD CViewInstrument::EnvGetReleaseNodeValue()
-//--------------------------------------------
+
+uint16 CViewInstrument::EnvGetReleaseNodeValue()
+//----------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -990,8 +1009,8 @@ WORD CViewInstrument::EnvGetReleaseNodeValue()
 }
 
 
-WORD CViewInstrument::EnvGetReleaseNodeTick()
-//-------------------------------------------
+uint16 CViewInstrument::EnvGetReleaseNodeTick()
+//---------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -1042,6 +1061,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 	return false;
 }
 
+
 // Insert point. Returns 0 if error occured, else point ID + 1.
 UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 //---------------------------------------------------------
@@ -1066,18 +1086,18 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 			}
 
 
-			BYTE cDefaultValue;
+			uint8 defaultValue;
 
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				cDefaultValue = 64;
+				defaultValue = 64;
 				break;
 			case ENV_PANNING:
-				cDefaultValue = 32;
+				defaultValue = 32;
 				break;
 			case ENV_PITCH:
-				cDefaultValue = (pIns->PitchEnv.dwFlags & ENV_FILTER) ? 64 : 32;
+				defaultValue = (pIns->PitchEnv.dwFlags & ENV_FILTER) ? 64 : 32;
 				break;
 			default:
 				return 0;
@@ -1088,13 +1108,13 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				if (!envelope->nNodes)
 				{
 					envelope->Ticks[0] = 0;
-					envelope->Values[0] = cDefaultValue;
+					envelope->Values[0] = defaultValue;
 					envelope->nNodes = 1;
 					envelope->dwFlags.set(ENV_ENABLED);
 				}
-				UINT i = 0;
+				uint32 i = 0;
 				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;
-				for (UINT j = envelope->nNodes; j > i; j--)
+				for (uint32 j = envelope->nNodes; j > i; j--)
 				{
 					envelope->Ticks[j] = envelope->Ticks[j - 1];
 					envelope->Values[j] = envelope->Values[j - 1];
@@ -1123,7 +1143,7 @@ void CViewInstrument::DrawPositionMarks(HDC hdc)
 //----------------------------------------------
 {
 	CRect rect;
-	for (UINT i=0; i<MAX_CHANNELS; i++) if (m_dwNotifyPos[i] & MPTNOTIFY_POSVALID)
+	for(UINT i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] & MPTNOTIFY_POSVALID)
 	{
 		rect.top = -2;
 		rect.left = TickToScreen(m_dwNotifyPos[i] & 0xFFFF);
@@ -1150,9 +1170,9 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	{
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if (m_dwNotifyPos[i])
+			if(m_dwNotifyPos[i])
 			{
-				MemsetZero(m_dwNotifyPos);
+				m_dwNotifyPos.assign(MAX_CHANNELS, 0);
 				InvalidateEnvelope();
 				break;
 			}
@@ -1439,7 +1459,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	}
 	int nTick = ScreenToTick(pt.x);
 	int nVal = ScreenToValue(pt.y);
-	nVal = CLAMP(nVal, ENVELOPE_MIN, ENVELOPE_MAX);
+	nVal = Clamp(nVal, ENVELOPE_MIN, ENVELOPE_MAX);
 	if (nTick < 0) nTick = 0;
 	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
 	{
@@ -1464,18 +1484,8 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		if (pt.x >= m_rcClient.right - 2) nTick++;
 		if (IsDragItemEnvPoint())
 		{
-			int nRelTick = pEnv->Ticks[m_nDragItem - 1];
-			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal);
-
 			// Ctrl pressed -> move tail of envelope
-			if(m_nDragItem > 1 && CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
-			{
-				nRelTick = pEnv->Ticks[m_nDragItem - 1] - nRelTick;
-				for(size_t i = m_nDragItem; i < pEnv->nNodes; i++)
-				{
-					pEnv->Ticks[i] = (WORD)(max(0, (int)pEnv->Ticks[i] + nRelTick));
-				}
-			}
+			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal, CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed());
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
@@ -1691,10 +1701,10 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 		if (pSubMenu != NULL)
 		{
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
-			const UINT maxpoint = (pSndFile->m_nType == MOD_TYPE_XM) ? 11 : 24;
-			const UINT lastpoint = EnvGetLastPoint();
+			const uint32 maxPoint = (pSndFile->GetType() == MOD_TYPE_XM) ? 11 : 24;
+			const uint32 lastpoint = EnvGetLastPoint();
 			const bool forceRelease = !pSndFile->GetModSpecifications().hasReleaseNode && (EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxpoint) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxPoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 0)) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, ((pSndFile->GetModSpecifications().hasReleaseNode && m_nEnv == ENV_VOLUME) || forceRelease) ? MF_ENABLED : MF_GRAYED);
