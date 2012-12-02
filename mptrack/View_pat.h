@@ -78,12 +78,6 @@ struct RowMask
 	}
 };
 
-struct ModCommandPos
-{
-	PATTERNINDEX nPat;
-	ROWINDEX nRow;
-	CHANNELINDEX nChn;
-};
 
 // Find/Replace data
 struct FindReplaceStruct
@@ -130,6 +124,13 @@ protected:
 		psDragActive			= psDragVScroll | psDragHScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
 	};
 
+	struct ModCommandPos
+	{
+		PATTERNINDEX nPat;
+		ROWINDEX nRow;
+		CHANNELINDEX nChn;
+	};
+
 	CFastBitmap m_Dib;
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
@@ -138,6 +139,7 @@ protected:
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	PATTERNINDEX m_nPlayPat;
 	ROWINDEX m_nPlayRow;
+	ROWINDEX m_nQuantize;
 
 	int m_nXScroll, m_nYScroll;
 	PatternCursor::Columns m_nDetailLevel;		// Visible Columns
@@ -291,6 +293,9 @@ public:
 	void TempEnterFXparam(int v);
 	void EnterAftertouch(int note, int atValue);
 
+	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
+	PATTERNINDEX GetNextPattern() const;
+
 	void SetSpacing(int n);
 	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
 	void InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax);
@@ -407,6 +412,7 @@ protected:
 	afx_msg void OnRunScript();
 	afx_msg void OnShowTimeAtRow();
 	afx_msg void OnTogglePCNotePluginEditor();
+	afx_msg void OnSetQuantize();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -128,6 +128,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_CLEAR_SELECTION,				OnClearSelectionFromMenu)
 	ON_COMMAND(ID_SHOWTIMEATROW,				OnShowTimeAtRow)
 	ON_COMMAND(ID_PATTERN_EDIT_PCNOTE_PLUGIN,	OnTogglePCNotePluginEditor)
+	ON_COMMAND(ID_SETQUANTIZE,					OnSetQuantize)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_COMMAND_RANGE(ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + ModCommand::maxColumnValue, OnSelectPCNoteParam)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
@@ -175,6 +176,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nPlayPat = PATTERNINDEX_INVALID;
 	m_nPlayRow = 0;
 	m_nMidRow = 0;
+	m_nQuantize = 0;
 	m_nDragItem = 0;
 	m_bDragging = false;
 	m_bInItemRect = false;
@@ -298,16 +300,15 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 		} else //row >= 0
 		if (row >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		{
-			if (m_dwStatus & (psKeyboardDragSelect|psMouseDragSelect))
+			if(m_dwStatus & (psKeyboardDragSelect|psMouseDragSelect))
 			{
 				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
-			} else
-			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
+			} else if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
-				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-				if ((nCurOrder+1 < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
+				ORDERINDEX curOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+				if(curOrder + 1 < pSndFile->Order.size() && m_nPattern == pSndFile->Order[curOrder])
 				{
-					const ORDERINDEX nextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(nCurOrder);
+					const ORDERINDEX nextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(curOrder);
 					const PATTERNINDEX nextPat = pSndFile->Order[nextOrder];
 					if ((nextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nextPat].GetNumRows()))
 					{
@@ -318,8 +319,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 					}
 				}
 				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
-			} else
-			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP)
+			} else if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP)
 			{
 				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
 			}
@@ -1440,7 +1440,6 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		quickChannelProperties.Show(GetDocument(), nChn, m_nPattern, pt);
 	} else if(nChn < pSndFile->GetNumChannels() && pSndFile->Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
-		CString MenuText;
 		CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 		//------ Plugin Header Menu --------- :
@@ -1486,7 +1485,18 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if(BuildMiscCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildRowInsDelCtxMenu(hMenu, ih);
+			if(BuildRowInsDelCtxMenu(hMenu, ih))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+
+			CString s = "Quantize ";
+			if(m_nQuantize != 0)
+			{
+				s.AppendFormat("(Currently: %d Rows)", m_nQuantize);
+			} else
+			{
+				s.Append("Settings...");
+			}
+			AppendMenu(hMenu, MF_STRING | (m_nQuantize != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
 		}
 
 		ClientToScreen(&pt);
@@ -3655,8 +3665,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 			}
 		}
 
-		//Write the data, but we only overwrite if the command is a macro anyway.
-		if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)
+		// Write the data, but we only overwrite if the command is a macro anyway.
+		if(pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1);
 
@@ -3668,12 +3678,11 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	}
 
 	return 0;
-
 }
 
 
-ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
-//-----------------------------------------------------------------------------------
+CViewPattern::ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
+//-------------------------------------------------------------------------------------------------
 {
 	ModCommandPos editpos;
 	if(bLiveRecord)
@@ -4718,12 +4727,12 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	const CHANNELINDEX nChnCursor = GetCurrentChannel();
 
-	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+	BYTE *activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 	const CHANNELINDEX nChn = (activeNoteMap[note] < pSndFile->GetNumChannels()) ? activeNoteMap[note] : nChnCursor;
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
 
-	if (!((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi))
+	if(!((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi))
 	{
 		// We don't want to write the note-off into the pattern if this feature is disabled and we're not recording from MIDI.
 		return;
@@ -4739,33 +4748,39 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	if(usePlaybackPosition)
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
-	ModCommand* pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
-
-	//don't overwrite:
-	if (pTarget->note || pTarget->instr || pTarget->volcmd)
+	const bool quantize = usePlaybackPosition && (m_nQuantize != 0);
+	if(quantize)
 	{
-		//if there's a note in the current location and the song is playing and following,
-		//the user probably just tapped the key - let's try the next row down.
+		QuantizeRow(nPat, nRow);
+	}
+
+	ModCommand *pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+
+	// Don't overwrite:
+	if(pTarget->note != NOTE_NONE || pTarget->instr || pTarget->volcmd != VOLCMD_NONE)
+	{
+		// If there's a note in the current location and the song is playing and following,
+		// the user probably just tapped the key - let's try the next row down.
 		nRow++;
-		if (pTarget->note==note && liveRecord && pSndFile->Patterns[nPat].IsValidRow(nRow))
+		if(pTarget->note == note && liveRecord && pSndFile->Patterns[nPat].IsValidRow(nRow))
 		{
 			pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
-			if (pTarget->note || (!bChordMode && (pTarget->instr || pTarget->volcmd)) )
+			if(pTarget->note || (!bChordMode && (pTarget->instr || pTarget->volcmd)))
 				return;
-		}
-		else
+		} else
+		{
 			return;
+		}
 	}
 
 	// Create undo-point.
-	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, 1, 1);
+	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, 1, 1, "Note Stop Entry");
 
 	// -- write sdx if playing live
-	if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
-		if (pTarget->command == 0) {	//make sure we don't overwrite any existing commands.
-			pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-			pTarget->param   = 0xD0 | min(0xF, nTick);
-		}
+	if(usePlaybackPosition && nTick && pTarget->command == CMD_NONE && !quantize)
+	{
+		pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+		pTarget->param = 0xD0 | min(0xF, nTick);
 	}
 
 	//Enter note off
@@ -4781,7 +4796,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	} else
 	{
 		// we don't have anything to cut (MOD format) - use volume or ECx
-		if(usePlaybackPosition && nTick) // ECx
+		if(usePlaybackPosition && nTick && !quantize) // ECx
 		{
 			pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 			pTarget->param   = 0xC0 | min(0xF, nTick);
@@ -4798,11 +4813,18 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	pModDoc->SetModified();
 
-	// Update only if not recording live.
-	if(!liveRecord)
+	if(nPat == m_nPattern)
 	{
 		PatternCursor sel(nRow, nChn);
 		InvalidateCell(sel);
+	} else
+	{
+		InvalidatePattern();
+	}
+
+	// Update only if not recording live.
+	if(!liveRecord)
+	{
 		UpdateIndicator();
 	}
 
@@ -4974,6 +4996,13 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 	if(usePlaybackPosition)
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
+	// Quantize
+	const bool doQuantize = usePlaybackPosition && (m_nQuantize != 0);
+	if(doQuantize)
+	{
+		QuantizeRow(nPat, nRow);
+	}
+
 	// -- Work out where to put the new note
 	ModCommand *pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
 	ModCommand newcmd = *pTarget;
@@ -5038,9 +5067,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- write sdx if playing live
-		if (usePlaybackPosition && nTick)	// avoid SD0 which will be mis-interpreted
+		if(usePlaybackPosition && nTick && !doQuantize)	// avoid SD0 which will be mis-interpreted
 		{
-			if (newcmd.command == CMD_NONE)	//make sure we don't overwrite any existing commands.
+			if(newcmd.command == CMD_NONE)	//make sure we don't overwrite any existing commands.
 			{
 				newcmd.command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
@@ -5114,7 +5143,10 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		if(modified) // Has it really changed?
 		{
 			pModDoc->SetModified();
-			InvalidateCell(sel);
+			if(nPat == m_nPattern)
+				InvalidateCell(sel);
+			else
+				InvalidatePattern();
 			if(!liveRecord)
 			{
 				// Update only when not recording live.
@@ -5422,6 +5454,81 @@ void CViewPattern::EnterAftertouch(int note, int atValue)
 		SetModified(false);
 		InvalidateCell(cursor);
 		UpdateIndicator();
+	}
+}
+
+
+// Apply quantization factor to given row.
+void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
+//--------------------------------------------------------------------
+{
+	const CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || m_nQuantize == 0)
+	{
+		return;
+	}
+
+	const ROWINDEX currentTick = sndFile->m_nMusicSpeed * row + sndFile->m_nTickCount;
+	const ROWINDEX ticksPerNote = m_nQuantize * sndFile->m_nMusicSpeed;
+	
+	// Previous quantization step
+	const ROWINDEX quantLow = (currentTick / ticksPerNote) * ticksPerNote;
+	// Next quantization step
+	const ROWINDEX quantHigh = (1 + (currentTick / ticksPerNote)) * ticksPerNote;
+
+	if(currentTick - quantLow < quantHigh - currentTick)
+	{
+		row = quantLow / sndFile->m_nMusicSpeed;
+	} else
+	{
+		row = quantHigh / sndFile->m_nMusicSpeed;
+	}
+	
+	if(!sndFile->Patterns[pat].IsValidRow(row))
+	{
+		// Quantization exceeds current pattern, try stuffing note into next pattern instead.
+		PATTERNINDEX nextPat = GetNextPattern();
+		if(nextPat != PATTERNINDEX_INVALID)
+		{
+			pat = nextPat;
+			row = 0;
+		} else
+		{
+			row = sndFile->Patterns[pat].GetNumRows() - 1;
+		}
+	}
+}
+
+
+// Get follow-up pattern in order list
+PATTERNINDEX CViewPattern::GetNextPattern() const
+//-----------------------------------------------
+{
+	const CSoundFile *sndFile = GetSoundFile();
+	if(sndFile != nullptr)
+	{
+		const ORDERINDEX curOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+		if(curOrder + 1 < sndFile->Order.size() && m_nPattern == sndFile->Order[curOrder])
+		{
+			const ORDERINDEX nextOrder = sndFile->Order.GetNextOrderIgnoringSkips(curOrder);
+			const PATTERNINDEX nextPat = sndFile->Order[nextOrder];
+			if(sndFile->Patterns.IsValidPat(nextPat) && sndFile->Patterns[nextPat].GetNumRows())
+			{
+				return nextPat;
+			}
+		}
+	}
+	return PATTERNINDEX_INVALID;
+}
+
+
+void CViewPattern::OnSetQuantize()
+//--------------------------------
+{
+	CInputDlg dlg(this, "Quantize amount in rows for live recording (0 to disable):", 0, MAX_PATTERN_ROWS, m_nQuantize);
+	if(dlg.DoModal())
+	{
+		m_nQuantize = static_cast<ROWINDEX>(dlg.resultNumber);
 	}
 }
 
@@ -6480,8 +6587,7 @@ void CViewPattern::SelectBeatOrMeasure(bool selectBeat)
 			// Channel is only partly selected => expand to whole channel first.
 			endColumn = PatternCursor::lastColumn;	// Extend to param column
 		}
-	}
-	else
+	} else
 	{
 		// Some arbitrary selection: Remember start / end column
 		startColumn = m_Selection.GetStartColumn();
