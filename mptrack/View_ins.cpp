@@ -1168,7 +1168,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	}
 	if (pnotify->dwType & MPTNOTIFY_STOP)
 	{
-		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			if(m_dwNotifyPos[i])
 			{
@@ -1995,13 +1995,20 @@ void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 //------------------------------------------------
 {
-	UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
-	if (nFiles)
+	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	for(UINT f = 0; f < nFiles; f++)
 	{
 		TCHAR szFileName[_MAX_PATH] = "";
 		CMainFrame::GetMainFrame()->SetForegroundWindow();
-		::DragQueryFile(hDropInfo, 0, szFileName, _MAX_PATH);
-		if (szFileName[0]) SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)szFileName);
+		::DragQueryFile(hDropInfo, f, szFileName, _MAX_PATH);
+		if(szFileName[0])
+		{
+			if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)szFileName) && f < nFiles - 1)
+			{
+				// Insert more instrument slots
+				SendCtrlMessage(IDC_INSTRUMENT_NEW);
+			}
+		}
 	}
 	::DragFinish(hDropInfo);
 }

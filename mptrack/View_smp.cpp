@@ -2290,13 +2290,20 @@ void CViewSample::OnKeyUp(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/)
 void CViewSample::OnDropFiles(HDROP hDropInfo)
 //--------------------------------------------
 {
-	UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
-	if (nFiles)
+	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	for(UINT f = 0; f < nFiles; f++)
 	{
 		TCHAR szFileName[_MAX_PATH] = "";
 		CMainFrame::GetMainFrame()->SetForegroundWindow();
-		::DragQueryFile(hDropInfo, 0, szFileName, _MAX_PATH);
-		if (szFileName[0]) SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)szFileName);
+		::DragQueryFile(hDropInfo, f, szFileName, _MAX_PATH);
+		if(szFileName[0])
+		{
+			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)szFileName) && f < nFiles - 1)
+			{
+				// Insert more sample slots
+				SendCtrlMessage(IDC_SAMPLE_NEW);
+			}
+		}
 	}
 	::DragFinish(hDropInfo);
 }
