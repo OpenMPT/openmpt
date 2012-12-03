@@ -21,7 +21,7 @@
 
 enum InputTargetContext
 {
-	kCtxUnknownContext = -1,	
+	kCtxUnknownContext = -1,
 	kCtxAllContexts = 0,
 
 	kCtxViewGeneral,
@@ -250,7 +250,8 @@ enum CommandID
 	kcChangeLoopStatus,
 	kcShowEditMenu,
 	kcTimeAtRow,
-	kcEndPatternEditMisc=kcTimeAtRow,
+	kcQuantizeSettings,
+	kcEndPatternEditMisc=kcQuantizeSettings,
 
 	kcStartChannelKeys,
 	kcChannelMute = kcStartChannelKeys,
