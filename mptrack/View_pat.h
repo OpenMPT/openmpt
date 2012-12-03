@@ -139,7 +139,7 @@ protected:
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	PATTERNINDEX m_nPlayPat;
 	ROWINDEX m_nPlayRow;
-	ROWINDEX m_nQuantize;
+	static ROWINDEX m_nQuantize;
 
 	int m_nXScroll, m_nYScroll;
 	PatternCursor::Columns m_nDetailLevel;		// Visible Columns
@@ -281,8 +281,8 @@ public:
 	//rewbs.customKeys
 	void CursorJump(DWORD distance, bool upwards, bool snap);
 
-	void TempEnterNote(int n, bool oldStyle = false, int vol = -1);
-	void TempStopNote(int note, bool fromMidi=false, const bool bChordMode=false);
+	void TempEnterNote(int n, bool oldStyle = false, int vol = -1, bool fromMidi = false);
+	void TempStopNote(int note, bool fromMidi = false, const bool bChordMode = false);
 	void TempEnterChord(int n);
 	void TempStopChord(int note) {TempStopNote(note, false, true);}
 	void TempEnterIns(int val);
@@ -462,13 +462,14 @@ private:
 	// Return true if recording live (i.e. editing while following playback).
 	bool IsLiveRecord() const
 	{
-		CMainFrame *mainFrm = CMainFrame::GetMainFrame();
-		if(mainFrm == nullptr || GetDocument() == nullptr || GetSoundFile() == nullptr)
+		const CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+		const CSoundFile *sndFile = GetSoundFile();
+		if(mainFrm == nullptr || sndFile == nullptr)
 		{
 			return false;
 		}
 		//           (following song)      &&       (following in correct document)           &&    (playback is on)
-		return (m_dwStatus & psFollowSong) && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !GetSoundFile()->IsPaused();
+		return (m_dwStatus & psFollowSong) && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !sndFile->IsPaused();
 	};
 
 	// If given edit positions are valid, sets them to iRow and iPat.

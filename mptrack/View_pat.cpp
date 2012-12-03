@@ -43,6 +43,7 @@ FindReplaceStruct CViewPattern::m_findReplace =
 };
 
 // Static initializers
+ROWINDEX CViewPattern::m_nQuantize = 0;
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
 PatternClipboard CViewPattern::patternClipboard;
 
@@ -176,7 +177,6 @@ void CViewPattern::OnInitialUpdate()
 	m_nPlayPat = PATTERNINDEX_INVALID;
 	m_nPlayRow = 0;
 	m_nMidRow = 0;
-	m_nQuantize = 0;
 	m_nDragItem = 0;
 	m_bDragging = false;
 	m_bInItemRect = false;
@@ -1496,6 +1496,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			{
 				s.Append("Settings...");
 			}
+			s.Append("\t" + ih->GetKeyTextFromCommand(kcQuantizeSettings));
 			AppendMenu(hMenu, MF_STRING | (m_nQuantize != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
 		}
 
@@ -3820,12 +3821,12 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
 			if(nVol < 0) nVol = -1;
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
-			TempEnterNote(nNote, true, nVol);
-			
+			TempEnterNote(nNote, true, nVol, true);
+
 			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
 			if(pSndFile->IsPaused() && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 				pModDoc->OnPatternPlayNoLoop();
-				
+
 		break;
 
 		case MIDIEvents::evPolyAftertouch:	// Polyphonic aftertouch
@@ -4340,6 +4341,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSwitchToOrderList: OnSwitchToOrderList();
 		case kcSwitchOverflowPaste:	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
+		case kcQuantizeSettings: OnSetQuantize(); return wParam;
 		case kcChannelSettings:
 			{
 				// Open centered Quick Channel Settings dialog.
@@ -4748,8 +4750,8 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	if(usePlaybackPosition)
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
-	const bool quantize = usePlaybackPosition && (m_nQuantize != 0);
-	if(quantize)
+	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && m_nQuantize != 0;
+	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);
 	}
@@ -4777,7 +4779,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, 1, 1, "Note Stop Entry");
 
 	// -- write sdx if playing live
-	if(usePlaybackPosition && nTick && pTarget->command == CMD_NONE && !quantize)
+	if(usePlaybackPosition && nTick && pTarget->command == CMD_NONE && !doQuantize)
 	{
 		pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 		pTarget->param = 0xD0 | min(0xF, nTick);
@@ -4796,7 +4798,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	} else
 	{
 		// we don't have anything to cut (MOD format) - use volume or ECx
-		if(usePlaybackPosition && nTick && !quantize) // ECx
+		if(usePlaybackPosition && nTick && !doQuantize) // ECx
 		{
 			pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 			pTarget->param   = 0xC0 | min(0xF, nTick);
@@ -4922,8 +4924,8 @@ void CViewPattern::TempEnterIns(int val)
 
 
 // Enter a note in the pattern
-void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
-//----------------------------------------------------------------
+void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi)
+//-------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -4997,7 +4999,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
 	// Quantize
-	const bool doQuantize = usePlaybackPosition && (m_nQuantize != 0);
+	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && m_nQuantize != 0;
 	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);

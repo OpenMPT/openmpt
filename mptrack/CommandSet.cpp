@@ -644,6 +644,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleMonoLeft, 1889, _T("Convert to Mono (Left Channel)"));
 	DefineKeyCommand(kcSampleMonoRight, 1890, _T("Convert to Mono (Right Channel)"));
 	DefineKeyCommand(kcSampleMonoSplit, 1891, _T("Convert to Mono (Split Sample)"));
+	DefineKeyCommand(kcQuantizeSettings, 1892, _T("Quantize Settings"));
 
 	// Add new key commands here.
 
@@ -975,11 +976,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		switch (inCmd)
 		{
 			case kcSelect:					cmdOff = kcSelectOff;				break;
-			case kcSelectWithNav:			cmdOff = kcSelectOffWithNav;		break;	
-			case kcCopySelect:				cmdOff = kcCopySelectOff;			break;	
-			case kcCopySelectWithNav:		cmdOff = kcCopySelectOffWithNav;	break;	
+			case kcSelectWithNav:			cmdOff = kcSelectOffWithNav;		break;
+			case kcCopySelect:				cmdOff = kcCopySelectOff;			break;
+			case kcCopySelectWithNav:		cmdOff = kcCopySelectOffWithNav;	break;
 			case kcSelectWithCopySelect:	cmdOff = kcSelectOffWithCopySelect; break;
 			case kcCopySelectWithSelect:	cmdOff = kcCopySelectOffWithSelect; break;
+
 			default: ruleApplies = false;
 		}
 	
