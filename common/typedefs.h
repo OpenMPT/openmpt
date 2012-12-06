@@ -52,25 +52,3 @@ const uint32 uint32_max = 4294967295;
 const uint64 uint64_max = 18446744073709551615;
 
 typedef float float32;
-
-
-#if !_HAS_TR1
-	namespace std
-	{ 
-		namespace tr1
-		{
-			template <class T> struct has_trivial_assign {static const bool value = false;};
-
-			#define SPECIALIZE_TRIVIAL_ASSIGN(type) template <> struct has_trivial_assign<type> {static const bool value = true;}
-			SPECIALIZE_TRIVIAL_ASSIGN(int8);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint8);
-			SPECIALIZE_TRIVIAL_ASSIGN(int16);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint16);
-			SPECIALIZE_TRIVIAL_ASSIGN(int32);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint32);
-			SPECIALIZE_TRIVIAL_ASSIGN(int64);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint64);
-			#undef SPECIALIZE_TRIVIAL_ASSIGN
-		};
-	};
-#endif
