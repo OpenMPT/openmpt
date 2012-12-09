@@ -83,7 +83,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib;../include/flac/lib/libFLAC_staticd.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
@@ -189,7 +189,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib ../include/flac/lib/libFLAC_static.lib"
 				OutputFile=".\Bin/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -867,6 +867,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\FlagSet.h"
+				>
+			</File>
+			<File
 				RelativePath=".\fxp.h"
 				>
 			</File>
@@ -902,11 +906,7 @@
 				RelativePath=".\MIDIMapping.h"
 				>
 			</File>
-            <File
-				RelativePath="..\common\FlagSet.h"
-				>
-			</File>
-            <File
+			<File
 				RelativePath="..\common\misc_util.h"
 				>
 			</File>
