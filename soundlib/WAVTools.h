@@ -167,6 +167,20 @@ struct WAVSampleInfoChunk
 		SwapBytesLE(numLoops);
 		SwapBytesLE(samplerData);
 	}
+
+	// Set up information
+	void ConvertToWAV(uint32 freq)
+	{
+		manufacturer = 0;
+		product = 0;
+		samplePeriod = 1000000000 / freq;
+		baseNote = NOTE_MIDDLEC - NOTE_MIN;
+		pitchFraction = 0;
+		SMPTEFormat = 0;
+		SMPTEOffset = 0;
+		numLoops = 0;
+		samplerData = 0;
+	}
 };
 
 
@@ -208,7 +222,7 @@ struct WAVSampleLoop
 		loopType = bidi ? loopBidi : loopForward;
 		loopStart = start;
 		// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
-		if(end> start)
+		if(end > start)
 		{
 			loopEnd = end - 1;
 		} else
@@ -246,6 +260,32 @@ struct WAVExtraChunk
 		SwapBytesLE(defaultPan);
 		SwapBytesLE(defaultVolume);
 		SwapBytesLE(globalVolume);
+	}
+
+	// Set up sample information
+	void ConvertToWAV(const ModSample &sample, MODTYPE modType)
+	{
+		if(sample.uFlags[CHN_PANNING])
+		{
+			flags = WAVExtraChunk::setPanning;
+		} else
+		{
+			flags = 0;
+		}
+
+		defaultPan = sample.nPan;
+		defaultVolume = sample.nVolume;
+		globalVolume = sample.nGlobalVol;
+		vibratoType = sample.nVibType;
+		vibratoSweep = sample.nVibSweep;
+		vibratoDepth = sample.nVibDepth;
+		vibratoRate = sample.nVibRate;
+
+		if((modType & MOD_TYPE_XM) && (vibratoDepth | vibratoRate))
+		{
+			// XM vibrato is upside down
+			vibratoSweep = 255 - vibratoSweep;
+		}
 	}
 };
 
@@ -285,7 +325,7 @@ protected:
 	FileReader sampleData, smplChunk, xtraChunk, wsmpChunk;
 	ChunkReader::ChunkList<RIFFChunk> infoChunk;
 
-	size_t sampleLength;
+	FileReader::off_t sampleLength;
 	bool isDLS;
 	WAVFormatChunk formatInfo;
 
@@ -293,6 +333,8 @@ public:
 	WAVReader(FileReader &inputFile);
 
 	bool IsValid() const { return sampleData.IsValid(); }
+
+	void FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks);
 
 	// Self-explanatory getters.
 	WAVFormatChunk::SampleFormats GetSampleFormat() const { return static_cast<WAVFormatChunk::SampleFormats>(formatInfo.format); }

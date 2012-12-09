@@ -1524,10 +1524,11 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 //---------------------------------------------
 {
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
+		"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac|"
 		"FastTracker II Instruments (*.xi)|*.xi|"
 		"GF1 Patches (*.pat)|*.pat|"
 		"Wave Files (*.wav)|*.wav|"
+		"FLAC Files (*.flac)|*.flac|"
 		"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
 		"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
 		"DLS Sound Banks (*.dls)|*.dls|"
@@ -1749,6 +1750,7 @@ void CModTree::FillInstrumentLibrary()
 					} else
 					// Samples
 					if(!lstrcmpi(s, ".wav")
+						|| !lstrcmpi(s, ".flac")
 						|| !lstrcmpi(s, ".smp")
 						|| !lstrcmpi(s, ".raw")
 						|| !lstrcmpi(s, ".s3i")
@@ -1791,7 +1793,7 @@ void CModTree::FillInstrumentLibrary()
 	// Sort items
 	TV_SORTCB tvs;
 	tvs.hParent = (m_pDataTree) ? m_hInsLib : TVI_ROOT;
-    tvs.lpfnCompare = ModTreeInsLibCompareProc;
+	tvs.lpfnCompare = ModTreeInsLibCompareProc;
 	tvs.lParam = (LPARAM)this;
 	SortChildren(tvs.hParent);
 	SortChildrenCB(&tvs);

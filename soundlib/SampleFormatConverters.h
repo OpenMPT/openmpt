@@ -169,6 +169,17 @@ struct ReadBigIntTo16PCM : SampleConversionFunctor<char[inputTypeSize], int16, c
 };
 
 
+// 32-Bit signed integer PCM with padding to 16-Bit signed sample conversion with truncation (assuming sample data has same endianness as host)
+template <size_t shift>
+struct ReadBigIntToInt16PCMNative : SampleConversionFunctor<int32, int16, conversionHasNoState>
+{
+	inline int16 operator() (const void *sourceBuffer)
+	{
+		return static_cast<int16>((*static_cast<const int32 *>(sourceBuffer)) >> shift);
+	}
+};
+
+
 // 32-Bit floating point to 16-Bit signed PCM sample conversion with clipping (for both little and big endian, depending on template parameters)
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct ReadFloat32toInt16PCM : SampleConversionFunctor<float, int16, conversionHasNoState>
@@ -360,7 +371,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const uint8 *sourceBuffer,
 		return CopySample<SampleConversion>(sample.pSample + sizeof(SampleConversion::output_t), sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
 	} else
 	{
-		// This is quicker (and smaller), but only possible if the functor does't care about what it actually processes:
+		// This is quicker (and smaller), but only possible if the functor doesn't care about what it actually processes:
 		// Read both interleaved channels at once.
 		return CopySample<SampleConversion>(sample.pSample, sample.nLength * 2, 1, sourceBuffer, sourceSize, 1);
 	}

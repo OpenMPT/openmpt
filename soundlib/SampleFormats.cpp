@@ -35,7 +35,8 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 		&& !ReadITSSample(nSample, file)
 		&& !ReadPATSample(nSample, lpMemFile, dwFileLength)
 		&& !Read8SVXSample(nSample, lpMemFile, dwFileLength)
-		&& !ReadS3ISample(nSample, lpMemFile, dwFileLength))
+		&& !ReadS3ISample(nSample, lpMemFile, dwFileLength)
+		&& !ReadFLACSample(nSample, file))
 	{
 		return false;
 	}
@@ -63,13 +64,15 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 {
 	const uint32 *psig = reinterpret_cast<const uint32 *>(lpMemFile);
 	if((!lpMemFile) || (dwFileLength < 80)) return false;
-	if(((psig[0] == LittleEndian(0x46464952)) && (psig[2] == LittleEndian(0x45564157)))		// RIFF....WAVE signature
-	 || ((psig[0] == LittleEndian(0x5453494C)) && (psig[2] == LittleEndian(0x65766177)))	// LIST....wave
-	 || (psig[76/4] == LittleEndian(0x53524353))											// S3I signature
-	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == LittleEndian(0x46464941)))		// AIFF signature
-	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == LittleEndian(0x43464941)))		// AIFF-C signature
-	 || ((psig[0] == BigEndian(0x464F524D)) && (psig[2] == LittleEndian(0x58565338)))		// 8SVX signature
-	 || (psig[0] == LittleEndian(ITSample::magic))											// ITS signature
+	if((psig[0] == LittleEndian(0x46464952) && psig[2] == LittleEndian(0x45564157))		// RIFF....WAVE signature
+	 || (psig[0] == LittleEndian(0x5453494C) && psig[2] == LittleEndian(0x65766177))	// LIST....wave
+	 || psig[76/4] == LittleEndian(0x53524353)											// S3I signature
+	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x46464941))		// AIFF signature
+	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x43464941))		// AIFF-C signature
+	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x58565338))		// 8SVX signature
+	 || psig[0] == LittleEndian(ITSample::magic)										// ITS signature
+	 || psig[0] == LittleEndian('CaLf')													// FLAC signature
+	 || psig[0] == LittleEndian('SggO')													// OGG signature (for FLAC in OGG)
 	)
 	{
 		// Scanning free sample
@@ -275,6 +278,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *
 		return false;
 	}
 
+	CriticalSection cs;
 	DestroySample(targetSample);
 
 	const ModSample &sourceSmp = pSrcSong->GetSample(sourceSample);
@@ -319,7 +323,9 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 		return false;
 	}
 
+	CriticalSection cs;
 	DestroySample(nSample);
+	strcpy(m_szNames[nSample], "");
 	ModSample &sample = Samples[nSample];
 	sample.Initialize();
 	sample.nLength = wavFile.GetSampleLength();
@@ -708,6 +714,8 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMem
 	 || (phdr->gf1p != 0x50314647) || (phdr->atch != 0x48435441)
 	 || (phdr->version[3] != 0) || (phdr->id[9] != 0) || (phdr->instrum < 1)
 	 || (!phdr->samples) || (!pinshdr->layers)) return false;
+	
+	CriticalSection cs;
 	DestroySample(nSample);
 	PatchToSample(this, nSample, lpStream+dwMemPos, dwMemLength-dwMemPos);
 	if (pinshdr->name[0] > ' ')
@@ -870,6 +878,8 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 	if ((!lpMemFile) || (dwFileLength < sizeof(S3ISAMPLESTRUCT))
 	 || (pss->id != 0x01) || (((DWORD)pss->offset << 4) >= dwFileLength)
 	 || (pss->scrs != 0x53524353)) return false;
+
+	CriticalSection cs;
 	DestroySample(nSample);
 	dwMemPos = pss->offset << 4;
 
@@ -1368,6 +1378,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	soundChunk.Skip(sampleHeader.offset);
 
+	CriticalSection cs;
 	ModSample &mptSample = Samples[nSample];
 	DestroySample(nSample);
 	mptSample.Initialize();
@@ -1475,6 +1486,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	{
 		return false;
 	}
+	CriticalSection cs;
 	DestroySample(nSample);
 
 	file.Seek(sampleHeader.ConvertToMPT(Samples[nSample]));
@@ -1755,6 +1767,8 @@ bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 	if ((!lpMemFile) || (dwFileLength < sizeof(IFFVHDR)+12) || (pfh->dwFORM != IFFID_FORM)
 	 || (pfh->dw8SVX != IFFID_8SVX) || (BigEndian(pfh->dwSize) >= dwFileLength)
 	 || (pvh->dwVHDR != IFFID_VHDR) || (BigEndian(pvh->dwSize) >= dwFileLength)) return false;
+
+	CriticalSection cs;
 	DestroySample(nSample);
 	// Default values
 	sample.Initialize();
@@ -1807,4 +1821,375 @@ bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 		dwMemPos += dwChunkLen + 8;
 	}
 	return (sample.pSample != nullptr);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// FLAC Samples
+
+#ifndef NO_FLAC
+#define FLAC__NO_DLL
+#include <flac/include/FLAC/stream_decoder.h>
+#include <flac/include/FLAC/stream_encoder.h>
+#include <flac/include/FLAC/metadata.h>
+#include "SampleFormatConverters.h"
+
+struct FLACDecoder
+{
+	FileReader &file;
+	CSoundFile &sndFile;
+	SAMPLEINDEX sample;
+	bool ready;
+
+	FLACDecoder(FileReader &f, CSoundFile &sf, SAMPLEINDEX smp) : file(f), sndFile(sf), sample(smp), ready(false) { }
+
+	static FLAC__StreamDecoderReadStatus read_cb(const FLAC__StreamDecoder *, FLAC__byte buffer[], size_t *bytes, void *client_data)
+	{
+		FileReader &file = static_cast<FLACDecoder *>(client_data)->file;
+		if(*bytes > 0)
+		{
+			FileReader::off_t readBytes = *bytes;
+			LimitMax(readBytes, file.BytesLeft());
+			memcpy(buffer, file.GetRawData(), readBytes);
+			file.Skip(readBytes);
+			*bytes = readBytes;
+			if(*bytes == 0)
+				return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
+			else
+				return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
+		} else
+		{
+			return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
+		}
+	}
+
+	static FLAC__StreamDecoderSeekStatus seek_cb(const FLAC__StreamDecoder *, FLAC__uint64 absolute_byte_offset, void *client_data)
+	{
+		FileReader &file = static_cast<FLACDecoder *>(client_data)->file;
+		if(!file.Seek(static_cast<FileReader::off_t>(absolute_byte_offset)))
+			return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
+		else
+			return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
+	}
+
+	static FLAC__StreamDecoderTellStatus tell_cb(const FLAC__StreamDecoder *, FLAC__uint64 *absolute_byte_offset, void *client_data)
+	{
+		FileReader &file = static_cast<FLACDecoder *>(client_data)->file;
+		*absolute_byte_offset = file.GetPosition();
+		return FLAC__STREAM_DECODER_TELL_STATUS_OK;
+	}
+
+	static FLAC__StreamDecoderLengthStatus length_cb(const FLAC__StreamDecoder *, FLAC__uint64 *stream_length, void *client_data)
+	{
+		FileReader &file = static_cast<FLACDecoder *>(client_data)->file;
+		*stream_length = file.GetLength();
+		return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
+	}
+
+	static FLAC__bool eof_cb(const FLAC__StreamDecoder *, void *client_data)
+	{
+		FileReader &file = static_cast<FLACDecoder *>(client_data)->file;
+		return file.BytesLeft() == 0;
+	}
+
+	static FLAC__StreamDecoderWriteStatus write_cb(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 *const buffer[], void *client_data)
+	{
+		FLACDecoder &client = *static_cast<FLACDecoder *>(client_data);
+		ModSample &sample = client.sndFile.GetSample(client.sample);
+
+		if(frame->header.number.sample_number >= sample.nLength || !client.ready)
+		{
+			// We're reading beyond the sample size already, or we aren't even ready to decode yet!
+			return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+		}
+
+		// Number of samples to be copied in this call
+		const SmpLength copySamples = Util::Min(static_cast<SmpLength>(frame->header.blocksize), static_cast<SmpLength>(sample.nLength - frame->header.number.sample_number));
+		// Number of target channels
+		const uint8 modChannels = sample.GetNumChannels();
+		// Offset (in samples) into target data
+		const size_t offset = static_cast<size_t>(frame->header.number.sample_number) * modChannels;
+		// Source size in bytes
+		const size_t srcSize = frame->header.blocksize * 4;
+		// Source bit depth
+		const unsigned int bps = frame->header.bits_per_sample;
+
+		int8 *sampleData8 = reinterpret_cast<int8 *>(sample.pSample) + offset;
+		int16 *sampleData16 = reinterpret_cast<int16 *>(sample.pSample) + offset;
+
+		ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
+		ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
+		ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
+
+		// Do the sample conversion
+		for(uint8 chn = 0; chn < modChannels; chn++)
+		{
+			if(bps <= 8)
+			{
+				CopySample<ReadInt8PCM<0> >(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 4);
+			} else if(bps <= 16)
+			{
+				CopySample<ReadBigIntToInt16PCMNative<0> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+			} else if(bps <= 24)
+			{
+				CopySample<ReadBigIntToInt16PCMNative<8> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+			} else if(bps <= 32)
+			{
+				CopySample<ReadBigIntToInt16PCMNative<16> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+			}
+		}
+
+		return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
+	}
+
+	static void metadata_cb(const FLAC__StreamDecoder *, const FLAC__StreamMetadata *metadata, void *client_data)
+	{
+		FLACDecoder &client = *static_cast<FLACDecoder *>(client_data);
+		ModSample &sample = client.sndFile.GetSample(client.sample);
+
+		if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO && metadata->data.stream_info.total_samples != 0)
+		{
+			// Init sample information
+			client.ready = true;
+			CriticalSection cs;
+			client.sndFile.DestroySample(client.sample);
+			sample.Initialize();
+			sample.uFlags.set(CHN_16BIT, metadata->data.stream_info.bits_per_sample > 8);
+			sample.uFlags.set(CHN_STEREO, metadata->data.stream_info.channels > 1);
+			sample.nLength = static_cast<SmpLength>(metadata->data.stream_info.total_samples);
+			sample.nC5Speed = metadata->data.stream_info.sample_rate;
+			sample.AllocateSample();
+		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.ready)
+		{
+			// Try reading RIFF loop points and other sample information
+			ChunkReader data(reinterpret_cast<const char*>(metadata->data.application.data), metadata->length);
+			ChunkReader::ChunkList<RIFFChunk> chunks = data.ReadChunks<RIFFChunk>(2);
+
+			// We're not really going to read a WAV file here because there will be only one RIFF chunk per metadata event, but we can still re-use the code for parsing RIFF metadata...
+			WAVReader riffReader(data);
+			riffReader.FindMetadataChunks(chunks);
+			riffReader.ApplySampleSettings(sample, client.sndFile.m_szNames[client.sample]);
+		} else if(metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT && client.ready)
+		{
+			// Try reading Vorbis Comments for sample title
+			for(FLAC__uint32 i = 0; i < metadata->data.vorbis_comment.num_comments; i++)
+			{
+				const char *tag = reinterpret_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
+				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
+				if(length > 6 && !_strnicmp(tag, "TITLE=", 6))
+				{
+					StringFixer::ReadString<StringFixer::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
+					break;
+				}
+			}
+		}
+	}
+
+	static void error_cb(const FLAC__StreamDecoder *, FLAC__StreamDecoderErrorStatus, void *)
+	{
+	}
+};
+
+#endif // NO_FLAC
+
+
+bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
+//-------------------------------------------------------------------
+{
+#ifndef NO_FLAC
+	// Check if we're dealing with FLAC in an OGG container.
+	// We won't check for the "fLaC" signature but let libFLAC decide whether a file is valid or not, as some FLAC files might have e.g. leading ID3v2 data.
+	file.Rewind();
+	const bool isOgg = FLAC_API_SUPPORTS_OGG_FLAC && file.ReadMagic("OggS") && file.Seek(29) && file.ReadMagic("FLAC");
+	file.Rewind();
+
+	FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
+	if(decoder == nullptr)
+	{
+		return false;
+	}
+
+	// Give me all the metadata!
+	FLAC__stream_decoder_set_metadata_respond_all(decoder);
+
+	FLACDecoder client(file, *this, sample);
+
+	// Init decoder
+	FLAC__StreamDecoderInitStatus initStatus;
+	if(FLAC_API_SUPPORTS_OGG_FLAC && isOgg)
+		initStatus = FLAC__stream_decoder_init_ogg_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
+	else
+		initStatus = FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
+	if(initStatus != FLAC__STREAM_DECODER_INIT_STATUS_OK)
+	{
+		return false;
+	}
+
+	// Decode file
+	FLAC__stream_decoder_process_until_end_of_stream(decoder);
+	FLAC__stream_decoder_finish(decoder);
+	FLAC__stream_decoder_delete(decoder);
+
+	if(client.ready && Samples[sample].pSample != nullptr)
+	{
+		Samples[sample].Convert(MOD_TYPE_IT, GetType());
+		return true;
+	}
+#endif // NO_FLAC
+	return false;
+}
+
+
+// Helper function for copying OpenMPT's sampled data to FLAC's int32 buffer.
+template<typename T>
+inline void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSamples)
+{
+	const T *in = reinterpret_cast<const T *>(src);
+	for(SmpLength i = 0; i < numSamples; i++)
+	{
+		dst[i] = in[i];
+	}
+
+};
+
+
+bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
+//-----------------------------------------------------------------------------------
+{
+#ifndef NO_FLAC
+	FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();
+	if(encoder == nullptr)
+	{
+		return false;
+	}
+
+	const ModSample &sample = Samples[nSample];
+
+	// First off, set up all the metadata...
+	FLAC__StreamMetadata *metadata[] =
+	{
+		FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT),
+		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),
+		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),
+	};
+
+	const bool writeLoopData = sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP];
+	if(metadata[0])
+	{
+		// Store sample name
+		FLAC__StreamMetadata_VorbisComment_Entry entry;
+		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", m_szNames[nSample]);
+		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
+		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", "OpenMPT " MPT_VERSION_STR);
+		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
+	}
+	if(metadata[1])
+	{
+		// Write MPT sample information
+		memcpy(metadata[1]->data.application.id, "riff", 4);
+
+		struct
+		{
+			RIFFChunk header;
+			WAVExtraChunk mptInfo;
+		} chunk;
+
+		chunk.header.id = RIFFChunk::idxtra;
+		chunk.header.length = sizeof(WAVExtraChunk);
+
+		chunk.mptInfo.ConvertToWAV(sample, GetType());
+
+		const uint32 length = sizeof(RIFFChunk) + sizeof(WAVExtraChunk);
+		chunk.header.ConvertEndianness();
+		chunk.mptInfo.ConvertEndianness();
+
+		FLAC__metadata_object_application_set_data(metadata[1], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
+	}
+	if(metadata[2] && writeLoopData)
+	{
+		// Store loop points
+		memcpy(metadata[2]->data.application.id, "riff", 4);
+
+		struct
+		{
+			RIFFChunk header;
+			WAVSampleInfoChunk info;
+			WAVSampleLoop loops[2];
+		} chunk;
+
+		chunk.header.id = RIFFChunk::idsmpl;
+		chunk.header.length = sizeof(WAVSampleInfoChunk);
+
+		chunk.info.ConvertToWAV(sample.GetSampleRate(GetType()));
+
+		if(sample.uFlags[CHN_SUSTAINLOOP])
+		{
+			chunk.loops[chunk.info.numLoops++].ConvertToWAV(sample.nSustainStart, sample.nSustainEnd, sample.uFlags[CHN_PINGPONGSUSTAIN]);
+			chunk.header.length += sizeof(WAVSampleLoop);
+		}
+		if(sample.uFlags[CHN_LOOP])
+		{
+			chunk.loops[chunk.info.numLoops++].ConvertToWAV(sample.nLoopStart, sample.nLoopEnd, sample.uFlags[CHN_PINGPONGLOOP]);
+			chunk.header.length += sizeof(WAVSampleLoop);
+		}
+
+		const uint32 length = sizeof(RIFFChunk) + chunk.header.length;
+		chunk.header.ConvertEndianness();
+		chunk.info.ConvertEndianness();
+		chunk.loops[0].ConvertEndianness();
+		chunk.loops[1].ConvertEndianness();
+		
+		FLAC__metadata_object_application_set_data(metadata[2], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
+	}
+
+	FLAC__stream_encoder_set_channels(encoder, sample.GetNumChannels());
+	FLAC__stream_encoder_set_bits_per_sample(encoder, sample.GetElementarySampleSize() * 8);
+	FLAC__stream_encoder_set_sample_rate(encoder, sample.GetSampleRate(GetType()));
+	FLAC__stream_encoder_set_total_samples_estimate(encoder, sample.nLength);
+	FLAC__stream_encoder_set_metadata(encoder, metadata, writeLoopData ? 3 : 2);
+	// TODO custom compression level (0...8)
+	//FLAC__stream_encoder_set_compression_level(encoder, );
+
+	if(FLAC__stream_encoder_init_file(encoder, lpszFileName, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+	{
+		return false;
+	}
+
+	// Convert sample data to signed 32-Bit integer array.
+	const SmpLength numSamples = sample.nLength * sample.GetNumChannels();
+	FLAC__int32 *sampleData;
+	try
+	{
+		sampleData = new FLAC__int32[numSamples];
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
+
+	if(sample.GetElementarySampleSize() == 1)
+	{
+		SampleToFLAC32<int8>(sampleData, sample.pSample, numSamples);
+	} else if(sample.GetElementarySampleSize() == 2)
+	{
+		SampleToFLAC32<int16>(sampleData, sample.pSample, numSamples);
+	} else
+	{
+		ASSERT(false);
+	}
+
+	// Do the actual conversion.
+	FLAC__stream_encoder_process_interleaved(encoder, sampleData, sample.nLength);
+	FLAC__stream_encoder_finish(encoder);
+
+	delete[] sampleData;
+	for(size_t i = 0; i < CountOf(metadata); i++)
+	{
+		FLAC__metadata_object_delete(metadata[i]);
+	}
+
+	FLAC__stream_encoder_delete(encoder);
+	return true;
+#else
+	return false;
+#endif // NO_FLAC
 }

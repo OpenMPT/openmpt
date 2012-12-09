@@ -89,9 +89,20 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 		sampleLength = sampleData.GetLength() / GetSampleSize();
 	}
 
+	// Check for loop points, texts, etc...
+	FindMetadataChunks(chunks);
+
+	// DLS bank chunk
+	wsmpChunk = chunks.GetChunk(RIFFChunk::idwsmp);
+}
+
+
+void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
+//---------------------------------------------------------------------------
+{
 	// Read sample loop points
 	smplChunk = chunks.GetChunk(RIFFChunk::idsmpl);
-	
+
 	// Read text chunks
 	ChunkReader listChunk = chunks.GetChunk(RIFFChunk::idLIST);
 	if(listChunk.ReadMagic("INFO"))
@@ -101,9 +112,6 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	// Read MPT sample information
 	xtraChunk = chunks.GetChunk(RIFFChunk::idxtra);
-
-	// DLS bank chunk
-	wsmpChunk = chunks.GetChunk(RIFFChunk::idwsmp);
 }
 
 
@@ -112,7 +120,10 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 {
 	// Read sample name
 	FileReader textChunk = infoChunk.GetChunk(RIFFChunk::idINAM);
-	textChunk.ReadString<StringFixer::nullTerminated>(sampleName, textChunk.GetLength());
+	if(textChunk.IsValid())
+	{
+		textChunk.ReadString<StringFixer::nullTerminated>(sampleName, textChunk.GetLength());
+	}
 	if(isDLS)
 	{
 		// DLS sample -> sample filename
@@ -123,8 +134,6 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	// Read software name
 	const bool isOldMPT = infoChunk.GetChunk(RIFFChunk::idISFT).ReadMagic("Modplug Tracker");
 	
-	sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
-
 	// Convert loops
 	WAVSampleInfoChunk sampleInfo;
 	smplChunk.Rewind();
@@ -148,7 +157,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	xtraChunk.Rewind();
 	if(xtraChunk.ReadConvertEndianness(mptInfo))
 	{
-		if(mptInfo.flags & WAVExtraChunk::setPanning) sample.uFlags |= CHN_PANNING;
+		if(mptInfo.flags & WAVExtraChunk::setPanning) sample.uFlags.set(CHN_PANNING);
 
 		sample.nPan = Util::Min(mptInfo.defaultPan, uint16(256));
 		sample.nVolume = Util::Min(mptInfo.defaultVolume, uint16(256));
