@@ -95,11 +95,6 @@
     <ClInclude Include="include\private\md5.h" />
     <ClInclude Include="include\private\memory.h" />
     <ClInclude Include="include\private\metadata.h" />
-    <ClInclude Include="ia32\nasm.h" />
-    <ClInclude Include="include\private\ogg_decoder_aspect.h" />
-    <ClInclude Include="include\private\ogg_encoder_aspect.h" />
-    <ClInclude Include="include\private\ogg_helper.h" />
-    <ClInclude Include="include\private\ogg_mapping.h" />
     <ClInclude Include="include\protected\stream_decoder.h" />
     <ClInclude Include="include\protected\stream_encoder.h" />
     <ClInclude Include="include\private\stream_encoder_framing.h" />
