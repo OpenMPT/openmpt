@@ -422,6 +422,10 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 		// Write padding byte if sample size is odd.
 		header.filesize++;
 	}
+	if((softwareIdLength % 2) != 0)
+	{
+		header.filesize++;
+	}
 
 	// "smpl" field
 	smpl.wsiHdr.smpl_id = LittleEndian(IFFID_smpl);
@@ -1953,6 +1957,7 @@ struct FLACDecoder
 			client.ready = true;
 			CriticalSection cs;
 			client.sndFile.DestroySample(client.sample);
+			strcpy(client.sndFile.m_szNames[client.sample], "");
 			sample.Initialize();
 			sample.uFlags.set(CHN_16BIT, metadata->data.stream_info.bits_per_sample > 8);
 			sample.uFlags.set(CHN_STEREO, metadata->data.stream_info.channels > 1);
@@ -2016,7 +2021,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 
 	// Init decoder
 	FLAC__StreamDecoderInitStatus initStatus;
-	if(FLAC_API_SUPPORTS_OGG_FLAC && isOgg)
+	if(isOgg)
 		initStatus = FLAC__stream_decoder_init_ogg_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
 	else
 		initStatus = FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
@@ -2049,7 +2054,6 @@ inline void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSampl
 	{
 		dst[i] = in[i];
 	}
-
 };
 
 
