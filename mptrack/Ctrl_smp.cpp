@@ -1029,26 +1029,30 @@ void CCtrlSamples::OnSampleSave()
 	if(!m_pSndFile) return;
 
 	TCHAR szFileName[_MAX_PATH];
-	bool bBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
+	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
+	bool defaultFLAC = false;
 
-	if(!bBatchSave)
+	if(!doBatchSave)
 	{
 		// save this sample
-		if ((!m_nSample) || (m_pSndFile->GetSample(m_nSample).pSample == nullptr))
+		if((!m_nSample) || (m_pSndFile->GetSample(m_nSample).pSample == nullptr))
 		{
 			SwitchToView();
 			return;
 		}
-		if (m_pSndFile->GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if(m_pSndFile->GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			strncpy(szFileName, m_pSndFile->GetSample(m_nSample).filename, Util::Min(CountOf(m_pSndFile->GetSample(m_nSample).filename), CountOf(szFileName) - 1));
 		} else
 		{
 			strncpy(szFileName, m_pSndFile->m_szNames[m_nSample], Util::Min(CountOf(m_pSndFile->m_szNames[m_nSample]), CountOf(szFileName) - 1));
 		}
-		if (!szFileName[0]) strcpy(szFileName, "untitled");
-	}
-	else
+		if(!szFileName[0]) strcpy(szFileName, "untitled");
+		if(strlen(szFileName) >= 5 && !_strcmpi(szFileName + strlen(szFileName) - 5, ".flac"))
+		{
+			defaultFLAC = true;
+		}
+	} else
 	{
 		// save all samples
 		CString sPath = m_pSndFile->GetpModDoc()->GetPathName();
@@ -1065,11 +1069,12 @@ void CCtrlSamples::OnSampleSave()
 	StringFixer::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", szFileName,
+	int filter = defaultFLAC ? 2 : 1;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultFLAC ? "flac" : "wav", szFileName,
 		"Wave File (*.wav)|*.wav|"
 		"FLAC File (*.flac)|*.flac|"
 		"RAW Audio (*.raw)|*.raw||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_SAMPLES));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_SAMPLES), false, &filter);
 	if(files.abort) return;
 
 	BeginWaitCursor();
@@ -1080,7 +1085,7 @@ void CCtrlSamples::OnSampleSave()
 	bool bOk = false;
 	SAMPLEINDEX iMinSmp = m_nSample, iMaxSmp = m_nSample;
 	CString sFilename = files.first_file.c_str(), sNumberFormat;
-	if(bBatchSave)
+	if(doBatchSave)
 	{
 		iMinSmp = 1;
 		iMaxSmp = m_pSndFile->GetNumSamples();
@@ -1091,7 +1096,7 @@ void CCtrlSamples::OnSampleSave()
 	{
 		if (m_pSndFile->GetSample(iSmp).pSample)
 		{
-			if(bBatchSave)
+			if(doBatchSave)
 			{
 				CString sSampleNumber;
 				TCHAR sSampleName[64], sSampleFilename[64];
