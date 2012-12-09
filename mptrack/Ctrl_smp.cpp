@@ -991,8 +991,9 @@ void CCtrlSamples::OnSampleOpen()
 	static int nLastIndex = 0;
 	
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Samples|*.wav;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
+		"All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
 		"Wave Files (*.wav)|*.wav|"
+		"FLAC Files (*.flac)|*.flac|"
 		"XI Samples (*.xi)|*.xi|"
 		"Impulse Tracker Samples (*.its)|*.its|"
 		"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
@@ -1010,7 +1011,7 @@ void CCtrlSamples::OnSampleOpen()
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
 		// If loading multiple samples, create new slots for them
-		if(counter > 0)	
+		if(counter > 0)
 		{
 			OnSampleNew();
 		}
@@ -1066,6 +1067,7 @@ void CCtrlSamples::OnSampleSave()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", szFileName,
 		"Wave File (*.wav)|*.wav|"
+		"FLAC File (*.flac)|*.flac|"
 		"RAW Audio (*.raw)|*.raw||",
 		CMainFrame::GetSettings().GetWorkingDirectory(DIR_SAMPLES));
 	if(files.abort) return;
@@ -1105,8 +1107,10 @@ void CCtrlSamples::OnSampleSave()
 				sFilename.Replace("%sample_filename%", sSampleFilename);
 				sFilename.Replace("%sample_name%", sSampleName);
 			}
-			if (!lstrcmpi(ext, ".raw"))
+			if(!lstrcmpi(ext, ".raw"))
 				bOk = m_pSndFile->SaveRAWSample(iSmp, sFilename);
+			else if(!lstrcmpi(ext, ".flac"))
+				bOk = m_pSndFile->SaveFLACSample(iSmp, sFilename);
 			else
 				bOk = m_pSndFile->SaveWAVSample(iSmp, sFilename);
 		}
