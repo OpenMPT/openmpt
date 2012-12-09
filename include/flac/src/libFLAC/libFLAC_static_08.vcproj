@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".\include;..\..\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;FLAC__HAS_OGG;FLAC__CPU_IA32;FLAC__HAS_NASM;FLAC__USE_3DNOW;VERSION=\&quot;1.2.0\&quot;;FLAC__NO_DLL;DEBUG;FLAC__OVERFLOW_DETECT"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;FLAC__USE_3DNOW;VERSION=\&quot;1.2.0\&quot;;FLAC__NO_DLL;DEBUG;FLAC__OVERFLOW_DETECT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -211,26 +211,6 @@
 			</File>
 			<File
 				RelativePath=".\include\private\metadata.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ia32\nasm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\private\ogg_decoder_aspect.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\private\ogg_encoder_aspect.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\private\ogg_helper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\private\ogg_mapping.h"
 				>
 			</File>
 			<File

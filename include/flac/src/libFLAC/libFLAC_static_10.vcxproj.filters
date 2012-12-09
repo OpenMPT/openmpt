@@ -56,21 +56,6 @@
     <ClInclude Include="include\private\metadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ia32\nasm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\private\ogg_decoder_aspect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\private\ogg_encoder_aspect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\private\ogg_helper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\private\ogg_mapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\protected\stream_decoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
