@@ -988,9 +988,19 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
 		{
 			UINT iNote = nBaseOctave * 12 + lParam;
-			if (KeyboardMap[iNote] == nSample)
+
+			if(mouseAction == mouseUnknown)
 			{
-				KeyboardMap[iNote] = pIns->Keyboard[iNote];
+				// Mouse down -> decide if we are going to set or remove notes
+				mouseAction = (KeyboardMap[iNote] == nSample) ? mouseUnset : mouseSet;
+			}
+
+			if(mouseAction == mouseUnset)
+			{
+				if(KeyboardMap[iNote] == pIns->Keyboard[iNote])
+					KeyboardMap[iNote] = 0;
+				else
+					KeyboardMap[iNote] = pIns->Keyboard[iNote];
 			} else
 			{
 				KeyboardMap[iNote] = nSample;
@@ -1010,6 +1020,10 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 */
 			OnUpdateKeyboard();
 		}
+	}
+	if(wParam == KBDNOTIFY_LBUTTONUP)
+	{
+		mouseAction = mouseUnknown;
 	}
 	SetDlgItemText(IDC_TEXT2, s);
 	return 0;

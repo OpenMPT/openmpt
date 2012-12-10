@@ -174,15 +174,23 @@ class CSampleMapDlg: public CDialog
 //=================================
 {
 protected:
+	enum MouseAction
+	{
+		mouseUnknown,	// Didn't mouse-down yet
+		mouseSet,		// Set selected sample
+		mouseUnset,		// Unset (revert to original keymap)
+	};
+
 	CKeyboardControl m_Keyboard;
 	CComboBox m_CbnSample;
 	CSliderCtrl m_SbOctave;
 	CSoundFile *m_pSndFile;
 	UINT m_nInstrument;
 	SAMPLEINDEX KeyboardMap[NOTE_MAX];
+	MouseAction mouseAction;
 
 public:
-	CSampleMapDlg(CSoundFile *pSndFile, UINT nInstr, CWnd *parent=NULL):CDialog(IDD_EDITSAMPLEMAP, parent)
+	CSampleMapDlg(CSoundFile *pSndFile, UINT nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), mouseAction(mouseUnknown)
 		{ m_pSndFile = pSndFile; m_nInstrument = nInstr; }
 
 protected:
