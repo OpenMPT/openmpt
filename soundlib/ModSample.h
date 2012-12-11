@@ -65,6 +65,9 @@ struct ModSample
 
 	void FreeSample();
 
+	// Remove loop points if they're invalid.
+	void SanitizeLoops();
+
 	// Transpose <-> Frequency conversions
 	static uint32 TransposeToFrequency(int transpose, int finetune = 0);
 	void TransposeToFrequency();

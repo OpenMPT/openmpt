@@ -70,14 +70,10 @@ struct _669Sample
 		{
 			mptSmp.nLoopEnd = 0;
 		}
-		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
-		if(mptSmp.nLoopStart >= mptSmp.nLoopEnd)
-		{
-			mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
-		}
 		if(mptSmp.nLoopEnd != 0)
 		{
 			mptSmp.uFlags = CHN_LOOP;
+			mptSmp.SanitizeLoops();
 		}
 	}
 };

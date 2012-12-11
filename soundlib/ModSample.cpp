@@ -135,8 +135,14 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 size_t ModSample::AllocateSample()
 //--------------------------------
 {
+	// Prevent overflows...
+	if(nLength > SIZE_MAX - 6u || SIZE_MAX / GetBytesPerSample() < nLength + 6u)
+	{
+		return 0;
+	}
 	FreeSample();
-	size_t sampleSize = (nLength + 6) * GetBytesPerSample();
+
+	size_t sampleSize = (nLength + 6u) * GetBytesPerSample();
 	if((pSample = CSoundFile::AllocateSample(sampleSize)) == nullptr)
 	{
 		return 0;
@@ -152,6 +158,25 @@ void ModSample::FreeSample()
 {
 	CSoundFile::FreeSample(pSample);
 	pSample = nullptr;
+}
+
+
+// Remove loop points if they're invalid.
+void ModSample::SanitizeLoops()
+//-----------------------------
+{
+	LimitMax(nSustainEnd, nLength);
+	LimitMax(nLoopEnd, nLength);
+	if(nSustainStart >= nSustainEnd)
+	{
+		nSustainStart = nSustainEnd = 0;
+		uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	}
+	if(nLoopStart >= nLoopEnd)
+	{
+		nLoopStart = nLoopEnd = 0;
+		uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
+	}
 }
 
 

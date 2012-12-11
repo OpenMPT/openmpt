@@ -533,8 +533,8 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 
 	const ModSample &sample = Samples[nSample];
 	SampleIO(
-		(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
-		(sample.uFlags & CHN_STEREO) ? SampleIO::stereoInterleaved : SampleIO::mono,
+		sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
+		sample.uFlags[CHN_STEREO] ? SampleIO::stereoInterleaved : SampleIO::mono,
 		SampleIO::littleEndian,
 		SampleIO::signedPCM)
 		.WriteSample(f, sample);
@@ -1442,19 +1442,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 				mptSample.nLoopEnd = iter->position;
 			}
 		}
-		// Sanitize loops
-		LimitMax(mptSample.nSustainEnd, mptSample.nLength);
-		LimitMax(mptSample.nLoopEnd, mptSample.nLength);
-		if(mptSample.nSustainStart >= mptSample.nSustainEnd)
-		{
-			mptSample.nSustainStart = mptSample.nSustainEnd = 0;
-			mptSample.uFlags.reset(CHN_SUSTAINLOOP);
-		}
-		if(mptSample.nLoopStart >= mptSample.nLoopEnd)
-		{
-			mptSample.nLoopStart = mptSample.nLoopEnd = 0;
-			mptSample.uFlags.reset(CHN_LOOP);
-		}
+		mptSample.SanitizeLoops();
 	}
 
 	// Extract sample name
@@ -1954,7 +1942,6 @@ struct FLACDecoder
 		if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO && metadata->data.stream_info.total_samples != 0)
 		{
 			// Init sample information
-			client.ready = true;
 			CriticalSection cs;
 			client.sndFile.DestroySample(client.sample);
 			strcpy(client.sndFile.m_szNames[client.sample], "");
@@ -1963,7 +1950,7 @@ struct FLACDecoder
 			sample.uFlags.set(CHN_STEREO, metadata->data.stream_info.channels > 1);
 			sample.nLength = static_cast<SmpLength>(metadata->data.stream_info.total_samples);
 			sample.nC5Speed = metadata->data.stream_info.sample_rate;
-			sample.AllocateSample();
+			client.ready = (sample.AllocateSample() != 0);
 		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.ready)
 		{
 			// Try reading RIFF loop points and other sample information
@@ -2045,7 +2032,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 }
 
 
-// Helper function for copying OpenMPT's sampled data to FLAC's int32 buffer.
+// Helper function for copying OpenMPT's sample data to FLAC's int32 buffer.
 template<typename T>
 inline void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSamples)
 {

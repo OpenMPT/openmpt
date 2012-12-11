@@ -416,7 +416,7 @@
       <Filter>Module Loaders</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\WAVTools.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Module Loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -732,13 +732,13 @@
     <ClInclude Include="..\soundlib\SampleFormatConverters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\WAVTools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\FlagSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\FileReader.h">
+      <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\WAVTools.h">
       <Filter>Module Loaders</Filter>
     </ClInclude>
   </ItemGroup>

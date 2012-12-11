@@ -691,18 +691,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	{
 		if(pSmp->pSample)
 		{
-			if(pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
-			if(pSmp->nLoopStart >= pSmp->nLoopEnd)
-			{
-				pSmp->nLoopStart = 0;
-				pSmp->nLoopEnd = 0;
-			}
-			if(pSmp->nSustainEnd > pSmp->nLength) pSmp->nSustainEnd = pSmp->nLength;
-			if(pSmp->nSustainStart >= pSmp->nSustainEnd)
-			{
-				pSmp->nSustainStart = 0;
-				pSmp->nSustainEnd = 0;
-			}
+			pSmp->SanitizeLoops();
 		} else
 		{
 			pSmp->nLength = 0;
@@ -710,9 +699,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 			pSmp->nLoopEnd = 0;
 			pSmp->nSustainStart = 0;
 			pSmp->nSustainEnd = 0;
+			pSmp->uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 		}
-		if(!pSmp->nLoopEnd) pSmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
-		if(!pSmp->nSustainEnd) pSmp->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		if(pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
 	}
 	// Check invalid instruments
@@ -874,7 +862,7 @@ BOOL CSoundFile::Destroy()
 LPSTR CSoundFile::AllocateSample(UINT nbytes)
 //-------------------------------------------
 {
-	if (nbytes > 0xFFFFFFD6)
+	if(nbytes > SIZE_MAX - 0x29u)
 		return nullptr;
 
 	// Allocate with some overhead (16 bytes before sample start, and at least 16 bytes after that)
