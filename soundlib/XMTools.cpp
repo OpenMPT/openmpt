@@ -401,7 +401,7 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 
 	// Volume
 	mptSmp.nVolume = vol * 4;
-	LimitMax(mptSmp.nVolume, WORD(256));
+	LimitMax(mptSmp.nVolume, uint16(256));
 
 	// Panning
 	mptSmp.nPan = pan;
@@ -432,20 +432,14 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 
 	if((flags & (XMSample::sampleLoop | XMSample::sampleBidiLoop)) && mptSmp.nLoopStart < mptSmp.nLength && mptSmp.nLoopEnd > mptSmp.nLoopStart)
 	{
-		mptSmp.uFlags |= CHN_LOOP;
+		mptSmp.uFlags.set(CHN_LOOP);
 		if((flags & XMSample::sampleBidiLoop))
 		{
-			mptSmp.uFlags |= CHN_PINGPONGLOOP;
+			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
 		}
 	}
 
-	LimitMax(mptSmp.nLoopStart, mptSmp.nLength);
-	Limit(mptSmp.nLoopEnd, mptSmp.nLoopStart, mptSmp.nLength);
-
-	if(mptSmp.nLoopStart > mptSmp.nLoopEnd)
-	{
-		mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
-	}
+	mptSmp.SanitizeLoops();
 
 	strcpy(mptSmp.filename, "");
 }

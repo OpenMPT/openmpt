@@ -570,6 +570,7 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.nLoopEnd = loopend;
 	mptSmp.nSustainStart = susloopbegin;
 	mptSmp.nSustainEnd = susloopend;
+	mptSmp.SanitizeLoops();
 
 	// Auto Vibrato settings
 	static const uint8 autovibit2xm[8] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_RANDOM, VIB_RAMP_UP, 0, 0, 0 };	// IT Vibrato -> OpenMPT VibratoType
