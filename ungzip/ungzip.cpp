@@ -7,152 +7,125 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+#define static_assert	// DIRTY!
+#include "../soundlib/FileReader.h"
 #include "ungzip.h"
-#include "../soundlib/Endianness.h"
+
+#ifndef ZLIB_WINAPI
+#define ZLIB_WINAPI
+#endif // ZLIB_WINAPI
+#include <zlib/zlib.h>
 
 
-CGzipArchive::CGzipArchive(LPBYTE lpStream, DWORD dwMemLength)
-//------------------------------------------------------------
+CGzipArchive::CGzipArchive(FileReader &file) : inFile(file)
+//---------------------------------------------------------
 {
-	m_lpStream = lpStream;
-	m_dwStreamLen = dwMemLength;
-	m_pOutputFile = nullptr;
-	m_dwOutputLen = 0;
+	inFile.Rewind();
+	inFile.Read(header);
 }
 
 
 CGzipArchive::~CGzipArchive()
 //---------------------------
 {
-	if(m_pOutputFile != nullptr)
-	{
-		delete[] m_pOutputFile;
-	}
+	delete[] outFile.GetRawData();
 }
 
 
 bool CGzipArchive::IsArchive() const
 //----------------------------------
 {
-	if(m_lpStream == nullptr || m_dwStreamLen <= (sizeof(GZheader) + sizeof(GZtrailer)))
+	if(inFile.GetLength() <= (sizeof(GZheader) + sizeof(GZtrailer)))
+	{
 		return false;
+	}
 
 	// Check header data
-	GZheader *pHeader = (GZheader *)m_lpStream;
-	if(pHeader->magic1 != GZ_HMAGIC1 || pHeader->magic2 != GZ_HMAGIC2 || pHeader->method != GZ_HMDEFLATE || (pHeader->flags & GZ_FRESERVED) != 0)
-		return false;
-
-	// Seems to be OK...
-	return true;
+	return (header.magic1 == GZ_HMAGIC1 && header.magic2 == GZ_HMAGIC2 && header.method == GZ_HMDEFLATE && (header.flags & GZ_FRESERVED) == 0);
 }
 
 
 bool CGzipArchive::ExtractFile()
 //------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > m_dwStreamLen || x > m_dwStreamLen - dwMemPos ) return false;
-
 	if(!IsArchive())
-		return false;
-
-	DWORD dwMemPos = 0;
-	GZheader *pHeader = (GZheader *)m_lpStream;
-	GZtrailer *pTrailer = (GZtrailer *)(m_lpStream + m_dwStreamLen - sizeof(GZtrailer));
-
-	dwMemPos += sizeof(GZheader);
-
-	// Extra block present? (ignore)
-	if(pHeader->flags & GZ_FEXTRA)
 	{
-		ASSERT_CAN_READ(sizeof(uint16));
-		uint16 xlen = LittleEndianW(*((uint16 *)m_lpStream + dwMemPos));
-		dwMemPos += sizeof(uint16);
-		// We skip this.
-		ASSERT_CAN_READ(xlen);
-		dwMemPos += xlen;
+		return false;
+	}
+
+	// Read trailer
+	GZtrailer trailer;
+	inFile.Seek(inFile.GetLength() - sizeof(GZtrailer));
+	inFile.ReadConvertEndianness(trailer);
+
+	// Continue reading header
+	inFile.Seek(sizeof(GZheader));
+
+	// Extra block present? (skip the extra data)
+	if(header.flags & GZ_FEXTRA)
+	{
+		inFile.Skip(inFile.ReadUint16LE());
 	}
 
 	// Filename present? (ignore)
-	if(pHeader->flags & GZ_FNAME)
+	if(header.flags & GZ_FNAME)
 	{
-		do 
-		{
-			ASSERT_CAN_READ(1);
-		} while (m_lpStream[dwMemPos++] != 0);
+		while(inFile.ReadUint8() != 0);
 	}
 
 	// Comment present? (ignore)
-	if(pHeader->flags & GZ_FCOMMENT)
+	if(header.flags & GZ_FCOMMENT)
 	{
-		do 
-		{
-			ASSERT_CAN_READ(1);
-		} while (m_lpStream[dwMemPos++] != 0);
+		while(inFile.ReadUint8() != 0);
 	}
 
-	// CRC16 present?
-	if(pHeader->flags & GZ_FHCRC)
+	// CRC16 present? (ignore)
+	if(header.flags & GZ_FHCRC)
 	{
-		ASSERT_CAN_READ(sizeof(uint16));
-		uint16 crc16_h = LittleEndianW(*((uint16 *)m_lpStream + dwMemPos));
-		uint16 crc16_f = (uint16)(crc32(0, m_lpStream, dwMemPos) & 0xFFFF);
-		dwMemPos += sizeof(uint16);
-		if(crc16_h != crc16_f)
-			return false;
+		inFile.Skip(2);
 	}
 
-	// Well, this is a bit small when inflated.
-	if(pTrailer->isize == 0)
+	// Well, this is a bit small when inflated / deflated.
+	if(trailer.isize == 0 || inFile.BytesLeft() < sizeof(GZtrailer))
+	{
 		return false;
-
-	// Check if the deflated data is a bit small as well.
-	ASSERT_CAN_READ(sizeof(GZtrailer) + 1);
-
-	// Clear the output buffer, if necessary.
-	if(m_pOutputFile != nullptr)
-	{
-		delete[] m_pOutputFile;
 	}
 
-	DWORD destSize = LittleEndian(pTrailer->isize);
+	delete[] outFile.GetRawData();
 
-	m_pOutputFile = new Bytef[destSize];
-	if(m_pOutputFile == nullptr)
+	char *data = new (std::nothrow) char[trailer.isize];
+	if(data == nullptr)
+	{
 		return false;
+	}
 
 	// Inflate!
 	z_stream strm;
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
-	strm.avail_in = m_dwStreamLen - (dwMemPos + sizeof(GZtrailer));
-	strm.next_in = &m_lpStream[dwMemPos];
+	strm.avail_in = inFile.BytesLeft() - sizeof(GZtrailer);
+	strm.next_in = (Bytef *)(inFile.GetRawData());
 	if(inflateInit2(&strm, -15) != Z_OK)
+	{
 		return false;
-	strm.avail_out = destSize;
-	strm.next_out = m_pOutputFile;
+	}
+	strm.avail_out = trailer.isize;
+	strm.next_out = (Bytef *)data;
 
-	int nRetVal = inflate(&strm, Z_NO_FLUSH);
+	int retVal = inflate(&strm, Z_NO_FLUSH);
 	inflateEnd(&strm);
 
 	// Everything went OK? Check return code, number of written bytes and CRC32.
-	if(nRetVal == Z_STREAM_END && destSize == strm.total_out && LittleEndian(pTrailer->crc32) == crc32(0, m_pOutputFile, destSize))
+	if(retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32 == crc32(0, (Bytef *)data, trailer.isize))
 	{
 		// Success! :)
-		m_dwOutputLen = destSize;
+		outFile = FileReader(data, trailer.isize);
 		return true;
 	} else
 	{
 		// Fail :(
-		if(m_pOutputFile != nullptr)
-		{
-			delete[] m_pOutputFile;
-		}
-		m_pOutputFile = nullptr;
-		m_lpStream = nullptr;
+		delete[] outFile.GetRawData();
 		return false;
 	}
-
-	#undef ASSERT_CAN_READ
 }

@@ -23,7 +23,9 @@
 
 //Compile time assert. 
 #define STATIC_ASSERT(expr)			C_ASSERT(expr)
+#ifndef static_assert
 #define static_assert(expr, msg)	C_ASSERT(expr)
+#endif
 
 
 typedef __int8 int8;

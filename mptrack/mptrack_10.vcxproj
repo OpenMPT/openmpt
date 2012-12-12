@@ -63,7 +63,7 @@
     <ClCompile>
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;ENABLE_EQ;MODPLUG_TRACKER;NO_PACKING;HAVE_DOT_NET;ENABLE_AMD;ENABLE_SSE;ENABLE_AMDNOW;ENABLE_MMX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -88,7 +88,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;../include/flac/lib/libFLAC_staticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/mptrack.exe</OutputFile>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -119,7 +119,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;ENABLE_MMX;ENABLE_EQ;MODPLUG_TRACKER;NO_PACKING;HAVE_DOT_NET;ENABLE_AMD;ENABLE_SSE;ENABLE_AMDNOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -147,7 +147,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;../include/flac/lib/libFLAC_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -454,6 +454,12 @@
     <None Include="VTune\mptrack.vpj" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj">
+      <Project>{4cefbc84-c215-11db-8314-0800200c9a66}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
+      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\soundtouch\soundtouch_10.vcxproj">
       <Project>{cf3c2ca5-5d45-4635-bba4-c1f435e10896}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -471,11 +477,7 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\unzip\unzip_10.vcxproj">
-      <Project>{44316f22-904e-48aa-b841-5a3a6ac77319}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
-      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
+      <Project>{f23cc68d-1d58-4eb1-9425-a28f5058eb31}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
