@@ -21,12 +21,14 @@
 	#define CountOf(x) (sizeof(x)/sizeof(x[0]))
 #endif
 
-//Compile time assert. 
+//Compile time assert.
+#ifndef C_ASSERT
+#define C_ASSERT(expr)				typedef char __C_ASSERT__[(expr)?1:-1]
+#endif
 #define STATIC_ASSERT(expr)			C_ASSERT(expr)
 #ifndef static_assert
 #define static_assert(expr, msg)	C_ASSERT(expr)
 #endif
-
 
 typedef __int8 int8;
 typedef __int16 int16;

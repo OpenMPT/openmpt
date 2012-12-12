@@ -7,7 +7,6 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#define static_assert	// DIRTY!
 #include "../soundlib/FileReader.h"
 #include "unzip.h"
 #include "../common/misc_util.h"
@@ -21,22 +20,22 @@
 // Low-level file abstractions for in-memory file handling
 struct ZipFileAbstraction
 {
-	static voidpf ZCALLBACK fopen_mem(voidpf opaqe, const char *filename, int mode)
+	static voidpf ZCALLBACK fopen_mem(voidpf opaque, const char *, int mode)
 	{
-		FileReader &file = *static_cast<FileReader *>(opaqe);
+		FileReader &file = *static_cast<FileReader *>(opaque);
 		if((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_WRITE)
 		{
 			return nullptr;
 		} else
 		{
 			file.Rewind();
-			return opaqe;
+			return opaque;
 		}
 	}
 
-	static uLong ZCALLBACK fread_mem(voidpf opaqe, voidpf, void *buf, uLong size)
+	static uLong ZCALLBACK fread_mem(voidpf opaque, voidpf, void *buf, uLong size)
 	{
-		FileReader &file = *static_cast<FileReader *>(opaqe);
+		FileReader &file = *static_cast<FileReader *>(opaque);
 		if(size > file.BytesLeft())
 		{
 			size = file.BytesLeft();
@@ -51,15 +50,15 @@ struct ZipFileAbstraction
 		return 0;
 	}
 
-	static long ZCALLBACK ftell_mem(voidpf opaqe, voidpf)
+	static long ZCALLBACK ftell_mem(voidpf opaque, voidpf)
 	{
-		FileReader &file = *static_cast<FileReader *>(opaqe);
+		FileReader &file = *static_cast<FileReader *>(opaque);
 		return file.GetPosition();
 	}
 
-	static long ZCALLBACK fseek_mem(voidpf opaqe, voidpf, uLong offset, int origin)
+	static long ZCALLBACK fseek_mem(voidpf opaque, voidpf, uLong offset, int origin)
 	{
-		FileReader &file = *static_cast<FileReader *>(opaqe);
+		FileReader &file = *static_cast<FileReader *>(opaque);
 
 		switch(origin)
 		{
