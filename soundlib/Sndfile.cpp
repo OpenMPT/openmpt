@@ -609,7 +609,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		 && !ReadSTM(file)
 		 && !ReadMed(lpStream, dwMemLength)
 #ifndef FASTSOUNDLIB
-		 && !ReadMTM(lpStream, dwMemLength)
+		 && !ReadMTM(file)
 		 && !ReadMDL(lpStream, dwMemLength)
 		 && !ReadDBM(lpStream, dwMemLength)
 		 && !Read669(file)
@@ -1573,7 +1573,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 
 	sample.FreeSample();
 	sample.nLength = 0;
-	sample.uFlags &= ~(CHN_16BIT | CHN_STEREO);
+	sample.uFlags.reset(CHN_16BIT | CHN_STEREO);
 
 	return true;
 }
@@ -1589,7 +1589,7 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 
 	Samples[from].pSample = nullptr;
 	Samples[from].nLength = 0;
-	Samples[from].uFlags &= ~(CHN_16BIT);
+	Samples[from].uFlags.reset(CHN_16BIT | CHN_STEREO);
 
 	return true;
 }

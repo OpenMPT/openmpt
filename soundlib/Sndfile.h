@@ -388,7 +388,7 @@ public:
 	bool ReadS3M(FileReader &file);
 	bool ReadMod(FileReader &file);
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMTM(FileReader &file);
 	bool ReadSTM(FileReader &file);
 	bool ReadIT(FileReader &file);
 	bool ReadITProject(FileReader &file);
