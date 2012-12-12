@@ -1,7 +1,7 @@
 /*
  * unzip.cpp
  * ---------
- * Purpose: Implementation file for extracting modules from .zip archives
+ * Purpose: Implementation file for extracting modules from .zip archives, making use of MiniZip (from the zlib contrib package)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -174,7 +174,8 @@ bool CZipArchive::ExtractFile()
 
 		if(lstrcmpi(ext, "diz")
 			&& lstrcmpi(ext, "nfo")
-			&& lstrcmpi(ext, "txt"))
+			&& lstrcmpi(ext, "txt")
+			&& info.uncompressed_size > 16)
 		{
 			// If this isn't some kind of info file, we should maybe pick it.
 			unzGetFilePos(zipFile, &bestFile);
@@ -221,8 +222,8 @@ void *CZipArchive::GetComments(bool get)
 		{
 			info.size_comment++;
 		}
-		char *comment = new char[info.size_comment];
-		if(unzGetGlobalComment(zipFile, comment, info.size_comment) >= 0)
+		char *comment = new (std::nothrow) char[info.size_comment];
+		if(comment != nullptr && unzGetGlobalComment(zipFile, comment, info.size_comment) >= 0)
 		{
 			comment[info.size_comment - 1] = '\0';
 			return comment;

@@ -269,7 +269,7 @@ struct MODSampleHeader
 			}
 			if (mptSmp.nLoopEnd > mptSmp.nLoopStart)
 			{
-				mptSmp.uFlags |= CHN_LOOP;
+				mptSmp.uFlags.set(CHN_LOOP);
 			}
 		}
 	}
@@ -277,7 +277,7 @@ struct MODSampleHeader
 	// Convert OpenMPT's internal sample header to an MOD sample header.
 	SmpLength ConvertToMOD(const ModSample &mptSmp)
 	{
-		SmpLength writeLength = mptSmp.nLength;
+		SmpLength writeLength = mptSmp.pSample != nullptr ? mptSmp.nLength : 0;
 		// If the sample size is odd, we have to add a padding byte, as all sample sizes in MODs are even.
 		if((writeLength % 2) != 0)
 		{
@@ -301,7 +301,7 @@ struct MODSampleHeader
 
 		loopStart = 0;
 		loopLength = 1;
-		if(mptSmp.uFlags & CHN_LOOP)
+		if(mptSmp.uFlags[CHN_LOOP])
 		{
 			loopStart = static_cast<uint16>(mptSmp.nLoopStart / 2);
 			loopLength = static_cast<uint16>(max(1, (mptSmp.nLoopEnd - mptSmp.nLoopStart) / 2));
@@ -782,7 +782,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	{
 		MODSampleHeader sampleHeader;
 		StringFixer::WriteString<StringFixer::maybeNullTerminated>(sampleHeader.name, m_szNames[sampleSource[smp]]);
-		sampleLength[smp] = sampleHeader.ConvertToMOD(Samples[sampleSource[smp]]);
+		sampleLength[smp] = sampleHeader.ConvertToMOD(sampleSource[smp] <= GetNumSamples() ? GetSample(sampleSource[smp]) : ModSample(MOD_TYPE_MOD));
 		sampleHeader.ConvertEndianness();
 		fwrite(&sampleHeader, sizeof(sampleHeader), 1, f);
 	}
