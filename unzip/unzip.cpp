@@ -11,7 +11,6 @@
 #include "../soundlib/FileReader.h"
 #include "unzip.h"
 #include "../common/misc_util.h"
-#include <assert.h>
 
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
@@ -224,9 +223,14 @@ void *CZipArchive::GetComments(bool get)
 			info.size_comment++;
 		}
 		char *comment = new char[info.size_comment];
-		assert(unzGetGlobalComment(zipFile, comment, info.size_comment) >= 0);
-		comment[info.size_comment - 1] = '\0';
-		return comment;
+		if(unzGetGlobalComment(zipFile, comment, info.size_comment) >= 0)
+		{
+			comment[info.size_comment - 1] = '\0';
+			return comment;
+		} else
+		{
+			delete[] comment;
+		}
 	}
 	return nullptr;
 }

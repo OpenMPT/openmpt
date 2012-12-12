@@ -15,7 +15,6 @@
 #include "Endianness.h"
 #include <vector>
 #include <algorithm>
-#include <assert.h>
 
 
 //==============
@@ -109,7 +108,6 @@ public:
 	// Return byte count between cursor position and end of file, i.e. how many bytes can still be read.
 	off_t BytesLeft() const
 	{
-		assert(streamPos <= streamLength);
 		return streamLength - streamPos;
 	}
 
