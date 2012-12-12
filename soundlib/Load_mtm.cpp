@@ -14,147 +14,193 @@
 
 #pragma pack(push, 1)
 
-typedef struct tagMTMSAMPLE
-{
-	char   samplename[22];
-	uint32 length;
-	uint32 reppos;
-	uint32 repend;
-	int8   finetune;
-	uint8  volume;
-	uint8  attribute;
-} MTMSAMPLE;
-
-
-typedef struct tagMTMHEADER
+// File Header
+struct MTMFileHeader
 {
 	char   id[3];			// MTM file marker
 	uint8  version;			// Tracker version
-	char   songname[20];	// ASCIIZ songname
-	uint16 numtracks;		// number of tracks saved
-	uint8  lastpattern;		// last pattern number saved
-	uint8  lastorder;		// last order number to play (songlength-1)
-	uint16 commentsize;		// length of comment field
-	uint8  numsamples;		// number of samples saved
-	uint8  attribute;		// attribute byte (unused)
-	uint8  beatspertrack;	// numbers of rows in every pattern
-	uint8  numchannels;		// number of channels used
-	uint8  panpos[32];		// channel pan positions
-} MTMHEADER;
+	char   songName[20];	// ASCIIZ songname
+	uint16 numTracks;		// Number of tracks saved
+	uint8  lastPattern;		// Last pattern number saved
+	uint8  lastOrder;		// Last order number to play (songlength-1)
+	uint16 commentSize;		// Length of comment field
+	uint8  numSamples;		// Number of samples saved
+	uint8  attribute;		// Attribute byte (unused)
+	uint8  beatsPerTrack;	// Numbers of rows in every pattern (MultiTracker itself does not seem to support values != 64)
+	uint8  numChannels;		// Number of channels used
+	uint8  panPos[32];		// Channel pan positions
 
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(numTracks);
+		SwapBytesLE(commentSize);
+	}
+};
+
+STATIC_ASSERT(sizeof(MTMFileHeader) == 66);
+
+
+// Sample Header
+struct MTMSampleHeader
+{
+	char   samplename[22];
+	uint32 length;
+	uint32 loopStart;
+	uint32 loopEnd;
+	int8   finetune;
+	uint8  volume;
+	uint8  attribute;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+	}
+
+	// Convert an MTM sample header to OpenMPT's internal sample header.
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+		mptSmp.nVolume = Util::Min(uint16(volume * 4), uint16(256));
+		if(length > 2)
+		{
+			mptSmp.nLength = length;
+			mptSmp.nLoopStart = loopStart;
+			mptSmp.nLoopEnd = loopEnd;
+			LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
+			if(mptSmp.nLoopStart + 4 >= mptSmp.nLoopEnd) mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
+			if(mptSmp.nLoopEnd) mptSmp.uFlags.set(CHN_LOOP);
+			mptSmp.nFineTune = MOD2XMFineTune(finetune);
+			mptSmp.nC5Speed = ModSample::TransposeToFrequency(0, mptSmp.nFineTune);
+
+			if(attribute & 0x01)
+			{
+				mptSmp.uFlags.set(CHN_16BIT);
+				mptSmp.nLength /= 2;
+				mptSmp.nLoopStart /= 2;
+				mptSmp.nLoopEnd /= 2;
+			}
+		}
+	}
+};
+
+STATIC_ASSERT(sizeof(MTMSampleHeader) == 37);
 
 #pragma pack(pop)
 
 
-bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
-//-----------------------------------------------------------
+bool CSoundFile::ReadMTM(FileReader &file)
+//----------------------------------------
 {
-	DWORD dwMemPos = 66;
+	file.Rewind();
+	MTMFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.id, "MTM", 3)
+		|| fileHeader.lastOrder > 127
+		|| fileHeader.numChannels > 32
+		|| fileHeader.numChannels == 0
+		|| fileHeader.numSamples >= MAX_SAMPLES
+		|| fileHeader.lastPattern == 0
+		|| fileHeader.lastPattern > MAX_PATTERNS
+		|| fileHeader.beatsPerTrack == 0
+		|| file.BytesLeft() < sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize)
+	{
+		return false;
+	}
 
-	if ((!lpStream) || (dwMemLength < 0x100)) return false;
-
-	MTMHEADER *pmh = (MTMHEADER *)lpStream;
-	if ((memcmp(pmh->id, "MTM", 3)) || (pmh->numchannels > 32)
-	 || (pmh->numsamples >= MAX_SAMPLES) || (!pmh->numsamples)
-	 || (!pmh->numtracks) || (!pmh->numchannels)
-	 || (!pmh->lastpattern) || (pmh->lastpattern > MAX_PATTERNS)) return false;
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pmh->songname);
-
-	if (dwMemPos + 37 * pmh->numsamples + 128 + 192 * pmh->numtracks
-	 + 64 * (pmh->lastpattern+1) + pmh->commentsize >= dwMemLength) return false;
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 	m_nType = MOD_TYPE_MTM;
-	m_nSamples = pmh->numsamples;
-	m_nChannels = pmh->numchannels;
+	m_nSamples = fileHeader.numSamples;
+	m_nChannels = fileHeader.numChannels;
+
 	// Reading instruments
-	for	(SAMPLEINDEX i = 1; i <= m_nSamples; i++)
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		MTMSAMPLE *pms = (MTMSAMPLE *)(lpStream + dwMemPos);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[i], pms->samplename);
-		Samples[i].nVolume = pms->volume << 2;
-		Samples[i].nGlobalVol = 64;
-		UINT len = pms->length;
-		if(len > 2)
-		{
-			Samples[i].nLength = len;
-			Samples[i].nLoopStart = pms->reppos;
-			Samples[i].nLoopEnd = pms->repend;
-			if (Samples[i].nLoopEnd > Samples[i].nLength) Samples[i].nLoopEnd = Samples[i].nLength;
-			if (Samples[i].nLoopStart + 4 >= Samples[i].nLoopEnd) Samples[i].nLoopStart = Samples[i].nLoopEnd = 0;
-			if (Samples[i].nLoopEnd) Samples[i].uFlags |= CHN_LOOP;
-			Samples[i].nFineTune = MOD2XMFineTune(pms->finetune);
-			if (pms->attribute & 0x01)
-			{
-				Samples[i].uFlags |= CHN_16BIT;
-				Samples[i].nLength >>= 1;
-				Samples[i].nLoopStart >>= 1;
-				Samples[i].nLoopEnd >>= 1;
-			}
-			Samples[i].nPan = 128;
-			Samples[i].nC5Speed = ModSample::TransposeToFrequency(0, Samples[i].nFineTune);
-		}
-		dwMemPos += 37;
+		MTMSampleHeader sampleHeader;
+		file.ReadConvertEndianness(sampleHeader);
+		sampleHeader.ConvertToMPT(Samples[smp]);
+		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.samplename);
 	}
+
 	// Setting Channel Pan Position
-	for (CHANNELINDEX ich = 0; ich < m_nChannels; ich++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		ChnSettings[ich].nPan = ((pmh->panpos[ich] & 0x0F) << 4) + 8;
-		ChnSettings[ich].nVolume = 64;
+		ChnSettings[chn].nPan = ((fileHeader.panPos[chn] & 0x0F) << 4) + 8;
+		ChnSettings[chn].nVolume = 64;
 	}
+
 	// Reading pattern order
-	Order.ReadAsByte(lpStream + dwMemPos, pmh->lastorder + 1, dwMemLength - dwMemPos);
-	dwMemPos += 128;
+	const ORDERINDEX readOrders = fileHeader.lastOrder + 1;
+	Order.ReadAsByte(file, readOrders);
+	file.Skip(128 - readOrders);
+
 	// Reading Patterns
-	ROWINDEX nPatRows = CLAMP(pmh->beatspertrack, 1, MAX_PATTERN_ROWS);
-	LPCBYTE pTracks = lpStream + dwMemPos;
-	dwMemPos += 192 * pmh->numtracks;
-	LPWORD pSeq = (LPWORD)(lpStream + dwMemPos);
-	for (PATTERNINDEX pat = 0; pat <= pmh->lastpattern; pat++)
+	const ROWINDEX rowsPerPat = Util::Min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);
+	FileReader tracks = file.GetChunk(192 * fileHeader.numTracks);
+
+	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
-		if(Patterns.Insert(pat, nPatRows)) break;
-		for (UINT n=0; n<32; n++) if ((pSeq[n]) && (pSeq[n] <= pmh->numtracks) && (n < m_nChannels))
+		if(Patterns.Insert(pat, rowsPerPat))
 		{
-			LPCBYTE p = pTracks + 192 * (pSeq[n]-1);
-			ModCommand *m = Patterns[pat] + n;
-			for (UINT i = 0; i < nPatRows; i++, m += m_nChannels, p += 3)
+			break;
+		}
+
+		for(CHANNELINDEX chn = 0; chn < 32; chn++)
+		{
+			uint16 track = file.ReadUint16LE();
+			if(track == 0 || track > fileHeader.numTracks || chn >= GetNumChannels())
 			{
-				if (p[0] & 0xFC) m->note = (p[0] >> 2) + 37;
-				m->instr = ((p[0] & 0x03) << 4) | (p[1] >> 4);
-				uint8 cmd = p[1] & 0x0F;
-				uint8 param = p[2];
-				if (cmd == 0x0A)
+				continue;
+			}
+
+			tracks.Seek(192 * (track - 1));
+
+			ModCommand *m = Patterns[pat].GetpModCommand(0, chn);
+			for(ROWINDEX row = 0; row < rowsPerPat; row++, m += GetNumChannels())
+			{
+				uint8 data[3];
+				tracks.ReadArray(data);
+
+				if(data[0] & 0xFC) m->note = (data[0] >> 2) + 36 + NOTE_MIN;
+				m->instr = ((data[0] & 0x03) << 4) | (data[1] >> 4);
+				uint8 cmd = data[1] & 0x0F;
+				uint8 param = data[2];
+				if(cmd == 0x0A)
 				{
-					if (param & 0xF0) param &= 0xF0; else param &= 0x0F;
+					if(param & 0xF0) param &= 0xF0; else param &= 0x0F;
 				}
 				m->command = cmd;
 				m->param = param;
-				if ((cmd) || (param))
+				if(cmd != 0 || param != 0)
 				{
 					ConvertModCommand(*m);
 					m->Convert(MOD_TYPE_MOD, MOD_TYPE_S3M);
 				}
 			}
 		}
-		pSeq += 32;
 	}
-	dwMemPos += 64 * (pmh->lastpattern + 1);
-	if ((pmh->commentsize) && (dwMemPos + pmh->commentsize < dwMemLength))
-	{
-		UINT n = pmh->commentsize;
-		ReadFixedLineLengthMessage(lpStream + dwMemPos, n, 39, 1);
-	}
-	dwMemPos += pmh->commentsize;
-	// Reading Samples
-	for (UINT ismp=1; ismp<=m_nSamples; ismp++)
-	{
-		if (dwMemPos >= dwMemLength) break;
 
-		dwMemPos += SampleIO(
-			(Samples[ismp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+	if(fileHeader.commentSize != 0)
+	{
+		// Read message with a fixed line length of 40 characters
+		// (actually the last character is always null, so make that 39 + 1 padding byte)
+		ReadFixedLineLengthMessage(file, fileHeader.commentSize, 39, 1);
+	}
+
+	// Reading Samples
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	{
+		SampleIO(
+			Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
 			SampleIO::mono,
 			SampleIO::littleEndian,
 			SampleIO::unsignedPCM)
-			.ReadSample(Samples[ismp], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+			.ReadSample(Samples[smp], file);
 	}
+
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
 	return true;
