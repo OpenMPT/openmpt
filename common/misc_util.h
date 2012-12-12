@@ -31,21 +31,21 @@ inline std::string Stringify(const T& x)
 
 //Convert string to number.
 template<class T>
-inline T ConvertStrTo(LPCSTR psz)
-//-------------------------------
+inline T ConvertStrTo(const char *str)
+//------------------------------------
 {
 	#if _HAS_TR1
 		static_assert(std::tr1::is_const<T>::value == false && std::tr1::is_volatile<T>::value == false, "Const and volatile types are not handled correctly.");
 	#endif
 	if(std::numeric_limits<T>::is_integer)
-		return static_cast<T>(atoi(psz));
+		return static_cast<T>(atoi(str));
 	else
-		return static_cast<T>(atof(psz));
+		return static_cast<T>(atof(str));
 }
 
-template<> inline uint32 ConvertStrTo(LPCSTR psz) {return strtoul(psz, nullptr, 10);}
-template<> inline int64 ConvertStrTo(LPCSTR psz) {return _strtoi64(psz, nullptr, 10);}
-template<> inline uint64 ConvertStrTo(LPCSTR psz) {return _strtoui64(psz, nullptr, 10);}
+template<> inline uint32 ConvertStrTo(const char *str) {return strtoul(str, nullptr, 10);}
+template<> inline int64 ConvertStrTo(const char *str) {return _strtoi64(str, nullptr, 10);}
+template<> inline uint64 ConvertStrTo(const char *str) {return _strtoui64(str, nullptr, 10);}
 
 
 // Memset given object to zero.
@@ -114,8 +114,10 @@ inline void LimitMax(T& val, const C upperLimit)
 #endif
 
  
+#ifdef MODPLUG_TRACKER
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 CString GetErrorMessage(DWORD nErrorCode);
+#endif // MODPLUG_TRACKER
 
 namespace utilImpl
 {
@@ -310,6 +312,7 @@ namespace Util
 	
 };
 
+#ifdef MODPLUG_TRACKER
 namespace Util { namespace sdTime
 {
 	// Returns string containing date and time ended with newline.
@@ -326,3 +329,4 @@ namespace Util { namespace sdOs
 	inline bool IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm) {return (_taccess(pszFilePath, fm) == 0);}
 
 } } // namespace Util::sdOs
+#endif // MODPLUG_TRACKER

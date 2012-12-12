@@ -441,7 +441,6 @@
     <ClCompile Include="..\..\..\trees.c" />
     <ClCompile Include="..\..\..\uncompr.c" />
     <ClCompile Include="..\..\minizip\unzip.c" />
-    <ClCompile Include="..\..\minizip\zip.c" />
     <ClCompile Include="..\..\..\zutil.c" />
   </ItemGroup>
   <ItemGroup>

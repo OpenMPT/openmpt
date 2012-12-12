@@ -9,17 +9,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unlha", "..\unlha\unlha_10.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unrar", "..\unrar\unrar_10.vcxproj", "{FF541CE2-DAA1-4F84-9883-0A0F111BAA0B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unzip", "..\unzip\unzip_10.vcxproj", "{44316F22-904E-48AA-B841-5A3A6AC77319}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xsoundlib", "..\xsoundlib\xsoundlib_10.vcxproj", "{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoundTouch", "..\soundtouch\soundtouch_10.vcxproj", "{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ungzip", "..\ungzip\ungzip_10.vcxproj", "{94CD7910-649A-4075-9F33-7EBEE614FD45}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\zlib\contrib\vstudio\vc10\zlibstat.vcxproj", "{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj", "{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libFLAC_static", "..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj", "{4CEFBC84-C215-11DB-8314-0800200C9A66}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unzip", "..\unzip\unzip_10.vcxproj", "{F23CC68D-1D58-4EB1-9425-A28F5058EB31}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +39,6 @@ Global
 		{FF541CE2-DAA1-4F84-9883-0A0F111BAA0B}.Debug|Win32.Build.0 = Debug|Win32
 		{FF541CE2-DAA1-4F84-9883-0A0F111BAA0B}.Release|Win32.ActiveCfg = Release|Win32
 		{FF541CE2-DAA1-4F84-9883-0A0F111BAA0B}.Release|Win32.Build.0 = Release|Win32
-		{44316F22-904E-48AA-B841-5A3A6AC77319}.Debug|Win32.ActiveCfg = Debug|Win32
-		{44316F22-904E-48AA-B841-5A3A6AC77319}.Debug|Win32.Build.0 = Debug|Win32
-		{44316F22-904E-48AA-B841-5A3A6AC77319}.Release|Win32.ActiveCfg = Release|Win32
-		{44316F22-904E-48AA-B841-5A3A6AC77319}.Release|Win32.Build.0 = Release|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Debug|Win32.ActiveCfg = Debug|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Debug|Win32.Build.0 = Debug|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Release|Win32.ActiveCfg = Release|Win32
@@ -63,6 +59,10 @@ Global
 		{4CEFBC84-C215-11DB-8314-0800200C9A66}.Debug|Win32.Build.0 = Debug|Win32
 		{4CEFBC84-C215-11DB-8314-0800200C9A66}.Release|Win32.ActiveCfg = Release|Win32
 		{4CEFBC84-C215-11DB-8314-0800200C9A66}.Release|Win32.Build.0 = Release|Win32
+		{F23CC68D-1D58-4EB1-9425-A28F5058EB31}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F23CC68D-1D58-4EB1-9425-A28F5058EB31}.Debug|Win32.Build.0 = Debug|Win32
+		{F23CC68D-1D58-4EB1-9425-A28F5058EB31}.Release|Win32.ActiveCfg = Release|Win32
+		{F23CC68D-1D58-4EB1-9425-A28F5058EB31}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

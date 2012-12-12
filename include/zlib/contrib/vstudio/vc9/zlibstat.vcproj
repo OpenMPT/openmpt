@@ -813,10 +813,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\minizip\zip.c"
-				>
-			</File>
-			<File
 				RelativePath=".\zlib.rc"
 				>
 			</File>

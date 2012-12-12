@@ -9,37 +9,12 @@
 
 #pragma once
 
-#ifndef ZLIB_WINAPI
-#define ZLIB_WINAPI
-#endif // ZLIB_WINAPI
-#include "../zlib/zlib.h"
-#include "../common/typedefs.h"
-
-
-// magic bytes
-#define GZ_HMAGIC1		0x1F
-#define GZ_HMAGIC2		0x8B
-#define GZ_HMDEFLATE	0x08
-// header flags
-#define GZ_FTEXT		0x01	// File is probably ASCII text (who cares)
-#define GZ_FHCRC		0x02	// CRC16 present
-#define GZ_FEXTRA		0x04	// Extra fields present
-#define GZ_FNAME		0x08	// Original filename present
-#define GZ_FCOMMENT		0x10	// Comment is present
-#define GZ_FRESERVED	(~(GZ_FTEXT | GZ_FHCRC | GZ_FEXTRA | GZ_FNAME | GZ_FCOMMENT))
-
-
 //================
 class CGzipArchive
 //================
 {
 protected:
-	// in
-	LPBYTE m_lpStream;
-	DWORD m_dwStreamLen;
-	// out
-	Bytef *m_pOutputFile;
-	DWORD m_dwOutputLen;
+	FileReader inFile, outFile;
 
 #pragma pack(push, 1)
 
@@ -58,17 +33,41 @@ protected:
 	{
 		uint32 crc32;	// CRC32 of decompressed data
 		uint32 isize;	// Size of decompressed data
+
+		void ConvertEndianness()
+		{
+			SwapBytesLE(crc32);
+			SwapBytesLE(isize);
+		}
 	};
 
 #pragma pack(pop)
 
+	enum MagicBytes
+	{
+		GZ_HMAGIC1		= 0x1F,
+		GZ_HMAGIC2		= 0x8B,
+		GZ_HMDEFLATE	= 0x08,
+	};
+
+	enum HeaderFlags
+	{
+		GZ_FTEXT		= 0x01,	// File is probably ASCII text (who cares)
+		GZ_FHCRC		= 0x02,	// CRC16 present
+		GZ_FEXTRA		= 0x04,	// Extra fields present
+		GZ_FNAME		= 0x08,	// Original filename present
+		GZ_FCOMMENT		= 0x10,	// Comment is present
+		GZ_FRESERVED	= (~(GZ_FTEXT | GZ_FHCRC | GZ_FEXTRA | GZ_FNAME | GZ_FCOMMENT))
+	};
+
+	GZheader header;
+
 public:
 
-	LPBYTE GetOutputFile() const { return m_pOutputFile; }
-	DWORD GetOutputFileLength() const { return m_dwOutputLen; }
+	FileReader GetOutputFile() const { return outFile; }
 	bool IsArchive() const;
 	bool ExtractFile();
 
-	CGzipArchive(LPBYTE lpStream, DWORD dwMemLength);
+	CGzipArchive(FileReader &file);
 	~CGzipArchive();
 };

@@ -57,9 +57,6 @@
     <ClCompile Include="..\..\minizip\unzip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\minizip\zip.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\zutil.c">
       <Filter>Source Files</Filter>
     </ClCompile>

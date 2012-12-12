@@ -12,6 +12,8 @@
 #include "misc_util.h"
 #include <ctime>
 
+#ifdef MODPLUG_TRACKER
+
 /*
  * Loads resource.
  * [in] lpName and lpType: parameters passed to FindResource().
@@ -60,6 +62,7 @@ CString GetErrorMessage(DWORD nErrorCode)
 
 	return msg;
 }
+#endif // MODPLUG_TRACKER
 
 
 std::basic_string<TCHAR> Util::sdTime::GetDateTimeStr()
