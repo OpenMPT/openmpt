@@ -32,6 +32,22 @@ void XMFileHeader::ConvertEndianness()
 }
 
 
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void XMInstrument::ConvertEndianness()
+//------------------------------------
+{
+	for(size_t i = 0; i < CountOf(volEnv); i++)
+	{
+		SwapBytesLE(volEnv[i]);
+		SwapBytesLE(panEnv[i]);
+	}
+	SwapBytesLE(volFade);
+	SwapBytesLE(midiProgram);
+	SwapBytesLE(pitchWheelRange);
+}
+
+
+
 // Convert OpenMPT's internal envelope representation to XM envelope data.
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 (&envData)[24])
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,8 +57,8 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &
 	// Envelope Data
 	for(size_t i = 0; i < numPoints; i++)
 	{
-		envData[i * 2] = LittleEndianW(min(mptEnv.Ticks[i], uint16_max));
-		envData[i * 2 + 1] = LittleEndianW(mptEnv.Values[i]);
+		envData[i * 2] = Util::Min(mptEnv.Ticks[i], uint16_max);
+		envData[i * 2 + 1] = mptEnv.Values[i];
 	}
 
 	// Envelope Flags
@@ -59,13 +75,13 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &
 
 
 // Convert OpenMPT's internal sample representation to an XMInstrument.
-void XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
-//-----------------------------------------------------------------------------------
+uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
+//-------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
 	// FFF is maximum in the FT2 GUI, but it can also accept other values. MilkyTracker just allows 0...4095 and 32767 ("cut")
-	volFade = static_cast<uint16>(LittleEndianW(min(mptIns.nFadeOut, 32767)));
+	volFade = static_cast<uint16>(Util::Min(mptIns.nFadeOut, uint32(32767)));
 
 	// Convert envelopes
 	ConvertEnvelopeToXM(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, volEnv);
@@ -93,6 +109,8 @@ void XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibilityEx
 	}
 	midiProgram = (mptIns.nMidiProgram != 0 ? mptIns.nMidiProgram - 1 : 0);
 	pitchWheelRange = Util::Min(mptIns.midiPWD, int8(36));
+
+	return static_cast<uint16>(sampleList.size());
 }
 
 
@@ -136,8 +154,8 @@ void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoi
 	// Envelope Data
 	for(size_t i = 0; i < 12; i++)
 	{
-		mptEnv.Ticks[i] = static_cast<WORD>(LittleEndianW(envData[i * 2]));
-		mptEnv.Values[i] = static_cast<BYTE>(LittleEndianW(envData[i * 2 + 1]));
+		mptEnv.Ticks[i] = envData[i * 2];
+		mptEnv.Values[i] = static_cast<uint8>(envData[i * 2 + 1]);
 
 		if(i > 0 && mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
 		{
@@ -235,6 +253,7 @@ void XMInstrumentHeader::ConvertEndianness()
 	SwapBytesLE(size);
 	SwapBytesLE(sampleHeaderSize);
 	SwapBytesLE(numSamples);
+	instrument.ConvertEndianness();
 }
 
 
@@ -258,13 +277,10 @@ void XMInstrumentHeader::Finalise()
 void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
 //-----------------------------------------------------------------------------------------
 {
-	instrument.ConvertToXM(mptIns, compatibilityExport);
-
+	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 	StringFixer::WriteString<StringFixer::spacePadded>(name, mptIns.name);
 
-	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too!
-
-	numSamples = static_cast<uint16>(Util::Min(mptIns.GetSamples().size(), size_t(compatibilityExport ? 16 : 32)));
+	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too! (we probably shouldn't, though.)
 }
 
 
@@ -298,6 +314,7 @@ void XIInstrumentHeader::ConvertEndianness()
 {
 	SwapBytesLE(version);
 	SwapBytesLE(numSamples);
+	instrument.ConvertEndianness();
 }
 
 
@@ -305,7 +322,7 @@ void XIInstrumentHeader::ConvertEndianness()
 void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
 //-----------------------------------------------------------------------------------------
 {
-	instrument.ConvertToXM(mptIns, compatibilityExport);
+	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 
 	memcpy(signature, "Extended Instrument: ", 21);
 	StringFixer::WriteString<StringFixer::spacePadded>(name, mptIns.name);
@@ -313,9 +330,7 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 
 	memcpy(trackerName, "Created by OpenMPT  ", 20);
 
-	version = LittleEndianW(0x102);
-
-	numSamples = static_cast<uint16>(LittleEndianW(Util::Min(mptIns.GetSamples().size(), size_t(compatibilityExport ? 16 : 32))));
+	version = 0x102;
 }
 
 
@@ -335,6 +350,16 @@ void XIInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 	}
 
 	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
+}
+
+
+// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+void XMSample::ConvertEndianness()
+//--------------------------------
+{
+	SwapBytesLE(length);
+	SwapBytesLE(loopStart);
+	SwapBytesLE(loopLength);
 }
 
 
@@ -386,10 +411,6 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 		loopStart *= 2;
 		loopLength *= 2;
 	}
-
-	SwapBytesLE(length);
-	SwapBytesLE(loopStart);
-	SwapBytesLE(loopLength);
 }
 
 
@@ -412,9 +433,9 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.RelativeTone = relnote;
 
 	// Sample Length and Loops
-	mptSmp.nLength = LittleEndian(length);
-	mptSmp.nLoopStart = LittleEndian(loopStart);
-	mptSmp.nLoopEnd = mptSmp.nLoopStart + LittleEndian(loopLength);
+	mptSmp.nLength = length;
+	mptSmp.nLoopStart = loopStart;
+	mptSmp.nLoopEnd = mptSmp.nLoopStart + loopLength;
 
 	if((flags & XMSample::sample16Bit))
 	{
