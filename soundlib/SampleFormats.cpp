@@ -982,7 +982,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	for(SAMPLEINDEX i = 0; i < fileHeader.numSamples; i++)
 	{
 		XMSample sampleHeader;
-		if(!file.Read(sampleHeader)
+		if(!file.ReadConvertEndianness(sampleHeader)
 			|| !sampleMap[i])
 		{
 			continue;
@@ -1047,6 +1047,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 		header.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 	}
 
+	header.ConvertEndianness();
 	fwrite(&header, 1, sizeof(XIInstrumentHeader), f);
 
 	vector<SampleIO> sampleFlags(samples.size());
@@ -1066,6 +1067,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 
 		StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[i]]);
 
+		xmSample.ConvertEndianness();
 		fwrite(&xmSample, 1, sizeof(xmSample), f);
 	}
 
@@ -1111,7 +1113,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 
 	// Read first sample header
 	XMSample sampleHeader;
-	file.Read(sampleHeader);
+	file.ReadConvertEndianness(sampleHeader);
 	// Gotta skip 'em all!
 	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
 

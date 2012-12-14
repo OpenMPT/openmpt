@@ -17,9 +17,6 @@
 #include "XMTools.h"
 #include <algorithm>
 
-////////////////////////////////////////////////////////
-// FastTracker II XM file support
-
 
 // Allocate samples for an instrument
 vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
@@ -319,6 +316,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 		// Now, read the complete struct.
 		file.SkipBack(4);
 		file.ReadStructPartial(instrHeader, instrHeader.size);
+		instrHeader.ConvertEndianness();
 
 		// Time for some version detection stuff.
 		if(madeWith == verOldModPlug)
@@ -348,7 +346,6 @@ bool CSoundFile::ReadXM(FileReader &file)
 			continue;
 		}
 
-		instrHeader.ConvertEndianness();
 		instrHeader.ConvertToMPT(*Instruments[instr]);
 
 		if(instrHeader.numSamples > 0)
@@ -386,6 +383,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 			{
 				XMSample sampleHeader;
 				file.ReadStructPartial(sampleHeader, copyBytes);
+				sampleHeader.ConvertEndianness();
 
 				sampleFlags.push_back(sampleHeader.GetSampleFormat());
 				sampleSize[sample] = sampleHeader.length;
@@ -575,25 +573,25 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	BYTE xmph[9];
 	bool addChannel = false; // avoid odd channel count for FT2 compatibility
 
-	XMFileHeader xmheader;
-	MemsetZero(xmheader);
+	XMFileHeader fileHeader;
+	MemsetZero(fileHeader);
 
-	memcpy(xmheader.signature, "Extended Module: ", 17);
-	StringFixer::WriteString<StringFixer::spacePadded>(xmheader.songName, m_szNames[0]);
-	xmheader.eof = 0x1A;
-	memcpy(xmheader.trackerName, "OpenMPT " MPT_VERSION_STR "  ", 20);
+	memcpy(fileHeader.signature, "Extended Module: ", 17);
+	StringFixer::WriteString<StringFixer::spacePadded>(fileHeader.songName, m_szNames[0]);
+	fileHeader.eof = 0x1A;
+	memcpy(fileHeader.trackerName, "OpenMPT " MPT_VERSION_STR "  ", 20);
 
 	// Writing song header
-	xmheader.version = 0x0104;					// XM Format v1.04
-	xmheader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
-	xmheader.restartPos = m_nRestartPos;
+	fileHeader.version = 0x0104;					// XM Format v1.04
+	fileHeader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
+	fileHeader.restartPos = m_nRestartPos;
 
-	xmheader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
+	fileHeader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
 	if((m_nChannels & 1) && m_nChannels < MAX_BASECHANNELS) addChannel = true;
-	if(compatibilityExport && xmheader.channels > 32)
-		xmheader.channels = 32;
-	if(xmheader.channels > MAX_BASECHANNELS) xmheader.channels = MAX_BASECHANNELS;
-	xmheader.channels = xmheader.channels;
+	if(compatibilityExport && fileHeader.channels > 32)
+		fileHeader.channels = 32;
+	if(fileHeader.channels > MAX_BASECHANNELS) fileHeader.channels = MAX_BASECHANNELS;
+	fileHeader.channels = fileHeader.channels;
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
@@ -609,29 +607,29 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	}
 	if(!compatibilityExport) nMaxOrds = Order.GetLengthTailTrimmed(); // should really be removed at some point
 
-	xmheader.orders = nMaxOrds;
-	xmheader.patterns = nPatterns;
-	xmheader.size = xmheader.size + nMaxOrds;
+	fileHeader.orders = nMaxOrds;
+	fileHeader.patterns = nPatterns;
+	fileHeader.size = fileHeader.size + nMaxOrds;
 
 	uint16 writeInstruments;
 	if(m_nInstruments > 0)
-		xmheader.instruments = writeInstruments = m_nInstruments;
+		fileHeader.instruments = writeInstruments = m_nInstruments;
 	else
-		xmheader.instruments = writeInstruments = m_nSamples;
+		fileHeader.instruments = writeInstruments = m_nSamples;
 
-	if(m_SongFlags[SONG_LINEARSLIDES]) xmheader.flags |= XMFileHeader::linearSlides;
-	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) xmheader.flags |= XMFileHeader::extendedFilterRange;
-	xmheader.flags = xmheader.flags;
+	if(m_SongFlags[SONG_LINEARSLIDES]) fileHeader.flags |= XMFileHeader::linearSlides;
+	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) fileHeader.flags |= XMFileHeader::extendedFilterRange;
+	fileHeader.flags = fileHeader.flags;
 
 // 	if(compatibilityExport)
 // 		xmheader.tempo = static_cast<uint16>(Clamp(m_nDefaultTempo, 32u, 255u));
 // 	else
 	// Fasttracker 2 will happily accept any tempo faster than 255 BPM. XMPlay does also support this, great!
-	xmheader.tempo = static_cast<uint16>(Clamp(m_nDefaultTempo, 32u, 512u));
-	xmheader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
+	fileHeader.tempo = static_cast<uint16>(Clamp(m_nDefaultTempo, 32u, 512u));
+	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
 
-	xmheader.ConvertEndianness();
-	fwrite(&xmheader, 1, sizeof(xmheader), f);
+	fileHeader.ConvertEndianness();
+	fwrite(&fileHeader, 1, sizeof(fileHeader), f);
 
 	// write order list (wihout +++ and ---, explained above)
 	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
@@ -647,7 +645,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	for(PATTERNINDEX pat = 0; pat < nPatterns; pat++) if (Patterns[pat])
 	{
 		ModCommand *p = Patterns[pat];
-		UINT len = 0;
+		size_t len = 0;
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPattern = true;
 
@@ -656,7 +654,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		xmph[5] = (BYTE)(Patterns[pat].GetNumRows() & 0xFF);
 		xmph[6] = (BYTE)(Patterns[pat].GetNumRows() >> 8);
 
-		for (UINT j = m_nChannels * Patterns[pat].GetNumRows(); j > 0; j--, p++)
+		for (size_t j = m_nChannels * Patterns[pat].GetNumRows(); j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
 			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
@@ -852,6 +850,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 
 			StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[smp]]);
 
+			xmSample.ConvertEndianness();
 			fwrite(&xmSample, 1, sizeof(xmSample), f);
 		}
 
