@@ -115,6 +115,7 @@ bool CSoundFile::ReadWav(FileReader &file)
 		sample.uFlags = CHN_PANNING;
 		sample.nLength =  sampleLength;
 		sample.nC5Speed = wavFile.GetSampleRate();
+		strcpy(m_szNames[channel + 1], "");
 		wavFile.ApplySampleSettings(sample, m_szNames[channel + 1]);
 
 		if(wavFile.GetNumChannels() > 1)
