@@ -395,9 +395,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
 //----------------------------------------------------------------------------------------
 {
-	UINT len = 0, bufcount;
+	size_t len = 0, bufcount = 0;
 	char buffer[32768];
-	signed char *pSample = (signed char *)sample.pSample;
+	int8 *pSample = (int8 *)sample.pSample;
 	SmpLength numSamples = sample.nLength;
 
 	if(maxSamples && numSamples > maxSamples) numSamples = maxSamples;
@@ -406,22 +406,22 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	if(GetBitDepth() == 16 && GetChannelFormat() == mono && GetEndianness() == littleEndian &&
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
 	{
-		// 16-bit samples
+		// 16-bit mono samples
 		int16 *p = (int16 *)pSample;
 		int s_old = 0, s_ofs;
 		len = numSamples * 2;
-		bufcount = 0;
 		s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
-		for (UINT j=0; j<numSamples; j++)
+		for(SmpLength j = 0; j < numSamples; j++)
 		{
 			int s_new = *p;
 			p++;
-			if (sample.uFlags & CHN_STEREO)
+			if(sample.uFlags[CHN_STEREO])
 			{
+				// Downmix stereo
 				s_new = (s_new + (*p) + 1) >> 1;
 				p++;
 			}
-			if (GetEncoding() == deltaPCM)
+			if(GetEncoding() == deltaPCM)
 			{
 				*((int16 *)(&buffer[bufcount])) = (int16)(s_new - s_old);
 				s_old = s_new;
@@ -430,7 +430,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 				*((int16 *)(&buffer[bufcount])) = (int16)(s_new + s_ofs);
 			}
 			bufcount += 2;
-			if (bufcount >= sizeof(buffer) - 1)
+			if(bufcount >= sizeof(buffer) - 1)
 			{
 				if(f) fwrite(buffer, 1, bufcount, f);
 				bufcount = 0;
@@ -516,9 +516,8 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == unsignedPCM)
 	{
-		//	Stereo unsigned interleaved
+		// Stereo unsigned interleaved
 		len = numSamples * 2;
-		bufcount = 0;
 		for (UINT j=0; j<len; j++)
 		{
 			*((uint8 *)(&buffer[bufcount])) = *((uint8 *)(&pSample[j])) + 0x80;
@@ -536,7 +535,6 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	else
 	{
 		len = numSamples;
-		bufcount = 0;
 		int8 *p = (int8 *)pSample;
 		int sinc = (sample.uFlags & CHN_16BIT) ? 2 : 1;
 		int s_old = 0, s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;

@@ -867,9 +867,9 @@ void COrderList::OnPaint()
 			s[0] = '\0';
 			if(nIndex < maxEntries && (rect.left + m_cxFont - 4) <= rcClient.right)
 			{
-				if (nPat == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---");
-				else if (nPat == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
-				else if (nPat < pSndFile->Patterns.Size()) wsprintf(s, "%u", nPat);
+				if(nPat == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---");
+				else if(nPat == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
+				else if(nPat < Util::Max(pSndFile->Patterns.Size(), pSndFile->GetModSpecifications().patternsMax)) wsprintf(s, "%u", nPat);
 				else strcpy(s, "???");
 			}
 
@@ -1257,7 +1257,7 @@ void COrderList::OnInsertOrder()
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
-		const OrdSelection selection = GetCurSel(false);	
+		const OrdSelection selection = GetCurSel(false);
 		const ORDERINDEX nInsertCount = selection.lastOrd - selection.firstOrd, nInsertEnd = selection.lastOrd;
 
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)

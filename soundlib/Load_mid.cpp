@@ -482,15 +482,15 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 
 #ifdef MODPLUG_TRACKER
 	int importSpeed = CMainFrame::GetSettings().midiImportSpeed;
-	int importPatternLen = CMainFrame::GetSettings().midiImportPatternLen;
+	ROWINDEX importPatternLen = CMainFrame::GetSettings().midiImportPatternLen;
 #else
 	int importSpeed = 3;
-	int importPatternLen = 128;
+	ROWINDEX importPatternLen = 128;
 #endif // MODPLUG_TRACKER
 
 	// Fix import parameters
 	Limit(importSpeed, 2, 6);
-	Limit(importPatternLen, 64, 256);
+	Limit(importPatternLen, ROWINDEX(1), MAX_PATTERN_ROWS);
 
 	// Detect RMI files
 	if ((dwMemLength > 12)

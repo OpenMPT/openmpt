@@ -5489,7 +5489,7 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 	if(!sndFile->Patterns[pat].IsValidRow(row))
 	{
 		// Quantization exceeds current pattern, try stuffing note into next pattern instead.
-		PATTERNINDEX nextPat = GetNextPattern();
+		PATTERNINDEX nextPat = sndFile->m_SongFlags[SONG_PATTERNLOOP] ? m_nPattern : GetNextPattern();
 		if(nextPat != PATTERNINDEX_INVALID)
 		{
 			pat = nextPat;
