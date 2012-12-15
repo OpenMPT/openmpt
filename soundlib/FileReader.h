@@ -15,6 +15,7 @@
 #include "Endianness.h"
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 
 //==============

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="ungzip"
-	ProjectGUID="{94CD7910-649A-4075-9F33-7EBEE614FD45}"
+	Name="unzip"
+	ProjectGUID="{44316F22-904E-48AA-B841-5A3A6AC77319}"
 	RootNamespace="ungzip"
 	TargetFrameworkVersion="196613"
 	>
@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../include/zlib/"
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -103,6 +104,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="../include/zlib/"
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -149,7 +151,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\ungzip.cpp"
+				RelativePath=".\unzip.cpp"
 				>
 			</File>
 		</Filter>
@@ -159,7 +161,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\ungzip.h"
+				RelativePath=".\unzip.h"
 				>
 			</File>
 		</Filter>

@@ -14,10 +14,30 @@
 #include <string>
 #include <limits>
 #include "typedefs.h"
-#if _HAS_TR1
-	#include <type_traits>
-#endif
 #include <io.h> // for _taccess
+
+#if(_MSC_VER < 1600)
+	// has_trivial_assign for VS2008
+	namespace std
+	{
+		namespace tr1
+		{
+			template <class T> struct has_trivial_assign {static const bool value = false;};
+			#define SPECIALIZE_TRIVIAL_ASSIGN(type) template <> struct has_trivial_assign<type> {static const bool value = true;}
+			SPECIALIZE_TRIVIAL_ASSIGN(int8);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint8);
+			SPECIALIZE_TRIVIAL_ASSIGN(int16);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint16);
+			SPECIALIZE_TRIVIAL_ASSIGN(int32);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint32);
+			SPECIALIZE_TRIVIAL_ASSIGN(int64);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint64);
+			#undef SPECIALIZE_TRIVIAL_ASSIGN
+		};
+	};
+#else
+#include <type_traits>
+#endif
 
 //Convert object(typically number) to string
 template<class T>
