@@ -2900,8 +2900,8 @@ bool CViewPattern::TransposeSelection(int transp)
 }
 
 
-bool CViewPattern::DataEntry(int offset)
-//--------------------------------------
+bool CViewPattern::DataEntry(bool up, bool coarse)
+//------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
@@ -2919,6 +2919,7 @@ bool CViewPattern::DataEntry(int offset)
 	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
 	const int instrMax = Util::Min(static_cast<int>(Util::MaxValueOfType(ModCommand::INSTR())), static_cast<int>(pSndFile->GetNumInstruments() ? pSndFile->GetModSpecifications().instrumentsMax : pSndFile->GetModSpecifications().samplesMax));
 	const EffectInfo effectInfo(*pSndFile);
+	const int offset = up ? 1 : -1;
 
 	PrepareUndo(m_Selection);
 
@@ -2932,7 +2933,7 @@ bool CViewPattern::DataEntry(int offset)
 				// Increase / decrease note
 				if(m[chn].IsNote())
 				{
-					int note = m[chn].note + offset;
+					int note = m[chn].note + offset * (coarse ? 12 : 1);
 					Limit(note, noteMin, noteMax);
 					m[chn].note = (ModCommand::NOTE)note;
 				} else if(m[chn].note >= NOTE_MIN_SPECIAL)
@@ -2948,6 +2949,10 @@ bool CViewPattern::DataEntry(int offset)
 					} while(!pSndFile->GetModSpecifications().HasNote((ModCommand::NOTE)note));
 					if(note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL)
 					{
+						if(m[chn].IsPcNote() != ModCommand::IsPcNote((ModCommand::NOTE)note))
+						{
+							m[chn].Clear();
+						}
 						m[chn].note = (ModCommand::NOTE)note;
 					}
 				}
@@ -2955,7 +2960,7 @@ bool CViewPattern::DataEntry(int offset)
 			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)))
 			{
 				// Increase / decrease instrument
-				int instr = m[chn].instr + offset;
+				int instr = m[chn].instr + offset * (coarse ? 10 : 1);
 				if(m[chn].IsInstrPlug())
 				{
 					Limit(instr, 0, int(MAX_MIXPLUGINS));
@@ -2970,12 +2975,12 @@ bool CViewPattern::DataEntry(int offset)
 				// Increase / decrease volume parameter
 				if(m[chn].IsPcNote())
 				{
-					int val = m[chn].GetValueVolCol() + offset;
+					int val = m[chn].GetValueVolCol() + offset * (coarse ? 10 : 1);
 					Limit(val, 0, int(ModCommand::maxColumnValue));
 					m[chn].SetValueVolCol(val);
 				} else
 				{
-					int vol = m[chn].vol + offset;
+					int vol = m[chn].vol + offset * (coarse ? 10 : 1);
 					DWORD minValue = 0, maxValue = 64;
 					effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m[chn].volcmd), nullptr, &minValue, &maxValue);
 					Limit(vol, (int)minValue, (int)maxValue);
@@ -2987,12 +2992,12 @@ bool CViewPattern::DataEntry(int offset)
 				// Increase / decrease effect parameter
 				if(m[chn].IsPcNote())
 				{
-					int val = m[chn].GetValueEffectCol() + offset;
+					int val = m[chn].GetValueEffectCol() + offset * (coarse ? 10 : 1);
 					Limit(val, 0, int(ModCommand::maxColumnValue));
 					m[chn].SetValueEffectCol(val);
 				} else
 				{
-					int param = m[chn].param + offset;
+					int param = m[chn].param + offset * (coarse ? 16 : 1);
 					DWORD minValue = 0, maxValue = 0xFF;
 					effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(m[chn].command, m[chn].param), nullptr, false, &minValue, &maxValue);
 					Limit(param, (int)minValue, (int)maxValue);
@@ -4161,8 +4166,10 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
 		case kcTransposeOctDown:			OnTransposeOctDown(); return wParam;
 		case kcTransposeCustom:				OnTransposeCustom(); return wParam;
-		case kcDataEntryUp:					DataEntry(1); return wParam;
-		case kcDataEntryDown:				DataEntry(-1); return wParam;
+		case kcDataEntryUp:					DataEntry(true, false); return wParam;
+		case kcDataEntryDown:				DataEntry(false, false); return wParam;
+		case kcDataEntryUpCoarse:			DataEntry(true, true); return wParam;
+		case kcDataEntryDownCoarse:			DataEntry(false, true); return wParam;
 		case kcSelectColumn:				OnSelectCurrentColumn(); return wParam;
 		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
 		case kcPatternSetInstrument:		OnSetSelInstrument(); return wParam;

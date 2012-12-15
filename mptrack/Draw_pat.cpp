@@ -485,7 +485,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 		if(drawDefaultVolume)
 		{
 			// Displaying sample default volume if there is no volume command.
-			const CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+			const CSoundFile *pSndFile = GetSoundFile();
 			SAMPLEINDEX sample = mc.instr;
 			if(pSndFile->GetNumInstruments())
 			{
@@ -531,8 +531,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	CHAR s[256];
 	HGDIOBJ oldpen;
 	CRect rcClient, rect, rc;
-	CModDoc *pModDoc;
-	CSoundFile *pSndFile;
+	const CModDoc *pModDoc;
+	const CSoundFile *pSndFile;
 	HDC hdc;
 	CHANNELINDEX xofs;
 	ROWINDEX yofs;
@@ -779,9 +779,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 }
 
 
-void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable,
-						bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
-//---------------------------------------------------------------------------------------------------------------------------------
+void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable,
+	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
+//-------------------------------------------------------------------------------------------------------------
 {
 	uint8 selectedCols[MAX_BASECHANNELS];	// Bit mask of selected channel components
 	static_assert(PatternCursor::lastColumn <= 7, "Columns are used as bitmasks here.");
@@ -834,7 +834,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, PATTERNINDEX n
 		if (!::RectVisible(hdc, &rect)) 
 		{
 			// No speedup for these columns next time
-			for (UINT iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~0x40;
+			for (CHANNELINDEX iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~0x40;
 			goto SkipRow;
 		}
 		rect.right = rect.left + m_szHeader.cx;
@@ -1170,14 +1170,12 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 void CViewPattern::DrawDragSel(HDC hdc)
 //-------------------------------------
 {
-	CModDoc *pModDoc;
-	CSoundFile *pSndFile;
+	const CSoundFile *pSndFile = GetSoundFile();
 	CRect rect;
 	int x1, y1, x2, y2;
 	int nChannels, nRows;
 
-	if ((pModDoc = GetDocument()) == nullptr) return;
-	pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
 
 	// Compute relative movement
 	int dx = (int)m_DragPos.GetChannel() - (int)m_StartSel.GetChannel();
@@ -1296,13 +1294,12 @@ void CViewPattern::OnDrawDragSel()
 void CViewPattern::UpdateScrollSize()
 //-----------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	const CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile)
 	{
 		CRect rect;
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		SIZE sizeTotal, sizePage, sizeLine;
-		sizeTotal.cx = m_szHeader.cx + pSndFile->m_nChannels * m_szCell.cx;
+		sizeTotal.cx = m_szHeader.cx + pSndFile->GetNumChannels() * m_szCell.cx;
 		sizeTotal.cy = m_szHeader.cy + pSndFile->Patterns[m_nPattern].GetNumRows() * m_szCell.cy;
 		sizeLine.cx = m_szCell.cx;
 		sizeLine.cy = m_szCell.cy;
@@ -1443,14 +1440,10 @@ void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor 
 
 	PatternRect oldSel = m_Selection;
 	m_Selection = PatternRect(beginSel, endSel);
-	const CModDoc *pModDoc = GetDocument();
-	if(pModDoc != nullptr)
+	const CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile != nullptr)
 	{
-		const CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if(pSndFile != nullptr)
-		{
-			m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
-		}
+		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	}
 
 	// Get current selection area
@@ -1511,10 +1504,9 @@ void CViewPattern::InvalidatePattern(bool invalidateHeader)
 void CViewPattern::InvalidateRow(ROWINDEX n)
 //------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	const CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		int yofs = GetYScrollPos() - m_nMidRow;
 		if (n == ROWINDEX_INVALID) n = GetCurrentRow();
 		if (((int)n < yofs) || (n >= pSndFile->Patterns[m_nPattern].GetNumRows())) return;
@@ -1567,11 +1559,10 @@ void CViewPattern::InvalidateChannelsHeaders()
 void CViewPattern::UpdateIndicator()
 //----------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
+	const CSoundFile *pSndFile = GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc))
+	if(pMainFrm != nullptr && pSndFile != nullptr)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		EffectInfo effectInfo(*pSndFile);
 
 		CHAR s[128];
@@ -1586,7 +1577,7 @@ void CViewPattern::UpdateIndicator()
 			 && (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && (pSndFile->Patterns[m_nPattern])
 			 && (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
 			{
-				ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
+				const ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
 
 				switch(m_Cursor.GetColumnType())
 				{
@@ -1688,13 +1679,10 @@ void CViewPattern::UpdateXInfoText()
 	UINT nChn = GetCurrentChannel();
 	CString xtraInfo;
 
-	CModDoc *pModDoc = GetDocument();
+	const CSoundFile *pSndFile = GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc))
+	if(pMainFrm != nullptr && pSndFile != nullptr)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if (!pSndFile) return;
-		
 		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
 		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
 			nChn + 1,
@@ -1718,8 +1706,8 @@ void CViewPattern::UpdateAllVUMeters(MPTNOTIFICATION *pnotify)
 //------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
+	const CModDoc *pModDoc = GetDocument();
+	const CSoundFile *pSndFile;
 	CRect rcClient;
 	HDC hdc;
 	BOOL bPlaying;

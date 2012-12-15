@@ -645,6 +645,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleMonoRight, 1890, _T("Convert to Mono (Right Channel)"));
 	DefineKeyCommand(kcSampleMonoSplit, 1891, _T("Convert to Mono (Split Sample)"));
 	DefineKeyCommand(kcQuantizeSettings, 1892, _T("Quantize Settings"));
+	DefineKeyCommand(kcDataEntryUpCoarse, 1893, _T("Data Entry Up (Coarse)"));
+	DefineKeyCommand(kcDataEntryDownCoarse, 1894, _T("Data Entry Down (Coarse)"));
 
 	// Add new key commands here.
 
