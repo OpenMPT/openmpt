@@ -1999,11 +1999,9 @@ BOOL CSoundFile::ReadNote()
 		if (samplePlaying || plugAssigned)
 		{
 			int vol = pChn->nVolume;
+			int insVol = pChn->nInsVol;		// This is the "SV * IV" value in ITTECH.TXT
 
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-			{
-				ProcessVolumeSwing(pChn, vol);
-			}
+			ProcessVolumeSwing(pChn, IsCompatibleMode(TRK_IMPULSETRACKER) ? insVol : vol);
 			ProcessPanningSwing(pChn);
 			ProcessTremolo(pChn, vol);
 			ProcessTremor(pChn, vol);
@@ -2040,22 +2038,16 @@ BOOL CSoundFile::ReadNote()
 			// vol is 14-bits
 			if (vol)
 			{
-				int insVol = pChn->nInsVol;	// This is the "SV * IV" value in ITTECH.TXT
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
-				{
-					ProcessVolumeSwing(pChn, insVol);
-				}
-
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
-				// Don't let global volume affect level of sample if
-				// Global volume is going to be applied to master output anyway.
 				if(pChn->dwFlags[CHN_SYNCMUTE])
 				{
 					pChn->nRealVolume = 0;
 				} else if (m_pConfig->getGlobalVolumeAppliesToMaster())
 				{
+					// Don't let global volume affect level of sample if
+					// Global volume is going to be applied to master output anyway.
 					pChn->nRealVolume = _muldiv(vol * MAX_GLOBAL_VOLUME, pChn->nGlobalVol * insVol, 1 << 20);
 				} else
 				{
