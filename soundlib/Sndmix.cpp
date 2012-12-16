@@ -1900,7 +1900,7 @@ BOOL CSoundFile::ReadNote()
 	} else
 #endif // MODPLUG_TRACKER
 	{
-		if (!ProcessRow()) 
+		if(!ProcessRow())
 			return FALSE;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
@@ -2400,19 +2400,18 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 //-------------------------------------------------------
 {
 	ModChannel *pChn = &Chn[nChn];
-	if(nChn < m_nChannels)
+	if(nChn < GetNumChannels())
 	{
 		// TODO evaluate per-plugin macros here
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN]);
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_VOLUME]);
 
-		if(pChn->rowCommand.command == CMD_MIDI || pChn->rowCommand.command == CMD_SMOOTHMIDI)
+		if(pChn->rowCommand.command == CMD_SMOOTHMIDI)
 		{
-			// Also non-smooth MIDI Macros are processed on every row to update macros with volume or panning variables.
 			if(pChn->rowCommand.param < 0x80)
-				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->rowCommand.param);
+				ProcessMIDIMacro(nChn, true, m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->rowCommand.param);
 			else
-				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->rowCommand.param & 0x7F)], 0);
+				ProcessMIDIMacro(nChn, true, m_MidiCfg.szMidiZXXExt[(pChn->rowCommand.param & 0x7F)], 0);
 		}
 	}
 }

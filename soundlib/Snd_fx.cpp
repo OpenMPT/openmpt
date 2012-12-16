@@ -1517,7 +1517,7 @@ BOOL CSoundFile::ProcessEffects()
 // -> DESC="add extended parameter mechanism to pattern effects"
 	ModCommand *m = nullptr;
 // -! NEW_FEATURE#0010
-	for (CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++, pChn++)
+	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
 		UINT instr = pChn->rowCommand.instr;
 		UINT volcmd = pChn->rowCommand.volcmd;
@@ -1951,6 +1951,15 @@ BOOL CSoundFile::ProcessEffects()
 		if((GetType() == MOD_TYPE_S3M) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 			continue;
 
+		if(cmd == CMD_MIDI && m_SongFlags[SONG_FIRSTTICK])
+		{
+			// MIDI macro (Smooth MIDI macros are processed later, when we know all the volumes, panning, etc.)
+			if(param < 0x80)
+				ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], param);
+			else
+				ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiZXXExt[(param & 0x7F)], 0);
+		}
+
 		// Volume Column Effect (except volume & panning)
 		/*	A few notes, paraphrased from ITTECH.TXT by Storlek (creator of schismtracker):
 			Ex/Fx/Gx are shared with Exx/Fxx/Gxx; Ex/Fx are 4x the 'normal' slide value
@@ -1962,7 +1971,7 @@ BOOL CSoundFile::ProcessEffects()
 			so... hxx = (hx | (oldhxx & 0xf0))  ???
 			TODO is this done correctly?
 		*/
-		if ((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
+		if((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
@@ -2078,18 +2087,13 @@ BOOL CSoundFile::ProcessEffects()
 		}
 
 		// Effects
-		if (cmd) switch (cmd)
+		if(cmd != CMD_NONE) switch (cmd)
 		{
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
-		case CMD_XPARAM:
-			break;
-// -> NEW_FEATURE#0010
 		// Set Volume
 		case CMD_VOLUME:
 			if(m_SongFlags[SONG_FIRSTTICK])
 			{
-				pChn->nVolume = (param < 64) ? param*4 : 256;
+				pChn->nVolume = (param < 64) ? param * 4 : 256;
 				pChn->dwFlags.set(CHN_FASTVOLRAMP);
 			}
 			break;
@@ -2440,10 +2444,10 @@ BOOL CSoundFile::ProcessEffects()
 			nPosJump = param;
 			if(m_SongFlags[SONG_PATTERNLOOP] && m_nSeqOverride == ORDERINDEX_INVALID)
 			{
-				 m_nSeqOverride = param;
-				 //Releasing pattern loop after position jump could cause
-				 //instant jumps - modifying behavior so that now position jumps
-				 //occurs also when pattern loop is enabled.
+				m_nSeqOverride = param;
+				//Releasing pattern loop after position jump could cause
+				//instant jumps - modifying behavior so that now position jumps
+				//occurs also when pattern loop is enabled.
 			}
 
 			// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
@@ -3622,20 +3626,20 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			// This is "almost" how IT does it - apparently, IT seems to lag one row behind on global volume or channel volume changes.
 			const int swing = (IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING)) ? pChn->nVolSwing : 0;
 			const int vol = _muldiv((pChn->nVolume + swing) * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
-			data = (unsigned char)Util::Min(vol / 2, 127);
+			data = (unsigned char)Clamp(vol / 2, 1, 127);
 			//data = (unsigned char)min((pChn->nVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (1 + 6 + 8), 127);
 		} else if(macro[pos] == 'u')		// u: volume (calculated)
 		{
 			// Same note as with velocity applies here, but apparently also for instrument / sample volumes?
 			const int vol = _muldiv(pChn->nCalcVolume * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 26);
-			data = (unsigned char)Util::Min(vol / 2, 127);
+			data = (unsigned char)Clamp(vol / 2, 1, 127);
 			//data = (unsigned char)min((pChn->nCalcVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
 		} else if(macro[pos] == 'x')		// x: pan set
 		{
-			data = (unsigned char)min(pChn->nPan / 2, 127);
+			data = (unsigned char)Util::Min(pChn->nPan / 2, 127);
 		} else if(macro[pos] == 'y')		// y: calculated pan
 		{
-			data = (unsigned char)min(pChn->nRealPan / 2, 127);
+			data = (unsigned char)Util::Min(pChn->nRealPan / 2, 127);
 		} else if(macro[pos] == 'a')		// a: high byte of bank select
 		{
 			if(pIns && pIns->wMidiBank)
