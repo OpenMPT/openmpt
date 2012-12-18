@@ -25,8 +25,13 @@ bool CSoundFile::AllocateMessage(size_t length)
 	FreeMessage();
 	try
 	{
-		m_lpszSongComments = new char[length + 1];	// + 1 for trailing null
-		memset(m_lpszSongComments, 0, length + 1);
+		if(length == Util::MaxValueOfType(length))
+		{
+			return false;
+		}
+		length++;	// + 1 for trailing null
+		m_lpszSongComments = new char[length];
+		memset(m_lpszSongComments, 0, length);
 		return true;
 	} catch(MPTMemoryException)
 	{
@@ -54,7 +59,7 @@ void CSoundFile::FreeMessage()
 bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &))
 //----------------------------------------------------------------------------------------------------------------------
 {
-	if(length != 0 && data[length - 1] == '\0')
+	while(length != 0 && data[length - 1] == '\0')
 	{
 		// Ignore trailing null character.
 		length--;
@@ -154,14 +159,14 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 	if(lineLength == 0)
 		return false;
 
-	const size_t num_lines = (length / (lineLength + lineEndingLength));
-	const size_t final_length = num_lines * (lineLength + 1);
-	if(!AllocateMessage(final_length))
+	const size_t numLines = (length / (lineLength + lineEndingLength));
+	const size_t finalLength = numLines * (lineLength + 1);
+	if(!AllocateMessage(finalLength))
 		return false;
 
-	for(size_t line = 0, fpos = 0, cpos = 0; line < num_lines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
+	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
 	{
-		memcpy(m_lpszSongComments + cpos, data + fpos, min(lineLength, length - fpos));
+		memcpy(m_lpszSongComments + cpos, data + fpos, Util::Min(lineLength, length - fpos));
 		m_lpszSongComments[cpos + lineLength] = INTERNAL_LINEENDING;
 
 		// fix weird chars
