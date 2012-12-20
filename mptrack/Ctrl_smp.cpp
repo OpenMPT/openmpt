@@ -1028,7 +1028,7 @@ void CCtrlSamples::OnSampleSave()
 {
 	if(!m_pSndFile) return;
 
-	TCHAR szFileName[_MAX_PATH];
+	TCHAR szFileName[_MAX_PATH] = "";
 	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
 	bool defaultFLAC = false;
 
@@ -1043,7 +1043,8 @@ void CCtrlSamples::OnSampleSave()
 		if(m_pSndFile->GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			strncpy(szFileName, m_pSndFile->GetSample(m_nSample).filename, Util::Min(CountOf(m_pSndFile->GetSample(m_nSample).filename), CountOf(szFileName) - 1));
-		} else
+		}
+		if(!szFileName[0])
 		{
 			strncpy(szFileName, m_pSndFile->m_szNames[m_nSample], Util::Min(CountOf(m_pSndFile->m_szNames[m_nSample]), CountOf(szFileName) - 1));
 		}
