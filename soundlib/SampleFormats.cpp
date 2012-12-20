@@ -2140,8 +2140,11 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) 
 	FLAC__stream_encoder_set_sample_rate(encoder, sample.GetSampleRate(GetType()));
 	FLAC__stream_encoder_set_total_samples_estimate(encoder, sample.nLength);
 	FLAC__stream_encoder_set_metadata(encoder, metadata, writeLoopData ? 3 : 2);
-	// TODO custom compression level (0...8)
-	//FLAC__stream_encoder_set_compression_level(encoder, );
+#ifdef MODPLUG_TRACKER
+	// Custom compression level (0...8)
+	static const int compression = CMainFrame::GetPrivateProfileLong("Sample Editor", "FLACCompressionLevel", 5, theApp.GetConfigFileName());
+	FLAC__stream_encoder_set_compression_level(encoder, compression);
+#endif // MODPLUG_TRACKER
 
 	if(FLAC__stream_encoder_init_file(encoder, lpszFileName, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
