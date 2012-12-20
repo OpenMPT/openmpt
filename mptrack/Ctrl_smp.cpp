@@ -1069,8 +1069,14 @@ void CCtrlSamples::OnSampleSave()
 	StringFixer::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
-	int filter = defaultFLAC ? 2 : 1;
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultFLAC ? "flac" : "wav", szFileName,
+	CString format = CMainFrame::GetPrivateProfileCString("Sample Editor", "DefaultFormat", defaultFLAC ? "flac" : "wav", theApp.GetConfigFileName());
+	int filter = 1;
+	if(!format.CompareNoCase("flac"))
+		filter = 2;
+	else if(!format.CompareNoCase("raw"))
+		filter = 3;
+
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, std::string(format), szFileName,
 		"Wave File (*.wav)|*.wav|"
 		"FLAC File (*.flac)|*.flac|"
 		"RAW Audio (*.raw)|*.raw||",
