@@ -179,6 +179,7 @@ protected:
 		mouseUnknown,	// Didn't mouse-down yet
 		mouseSet,		// Set selected sample
 		mouseUnset,		// Unset (revert to original keymap)
+		mouseZero,		// Set to zero
 	};
 
 	CKeyboardControl m_Keyboard;

@@ -992,19 +992,29 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 			if(mouseAction == mouseUnknown)
 			{
 				// Mouse down -> decide if we are going to set or remove notes
-				mouseAction = (KeyboardMap[iNote] == nSample) ? mouseUnset : mouseSet;
+				mouseAction = mouseSet;
+				if(KeyboardMap[iNote] == nSample)
+				{
+					 mouseAction = (KeyboardMap[iNote] == pIns->Keyboard[iNote]) ? mouseZero : mouseUnset;
+				}
 			}
 
-			if(mouseAction == mouseUnset)
+			switch(mouseAction)
 			{
-				if(KeyboardMap[iNote] == pIns->Keyboard[iNote])
-					KeyboardMap[iNote] = 0;
-				else
-					KeyboardMap[iNote] = pIns->Keyboard[iNote];
-			} else
-			{
+			case mouseSet:
 				KeyboardMap[iNote] = nSample;
+				break;
+			case mouseUnset:
+				KeyboardMap[iNote] = pIns->Keyboard[iNote];
+				break;
+			case mouseZero:
+				if(KeyboardMap[iNote] == nSample)
+				{
+					KeyboardMap[iNote] = 0;
+				}
+				break;
 			}
+
 /* rewbs.note: I don't think we need this with cust keys.
 // -> CODE#0009
 // -> DESC="instrument editor note play & octave change"
