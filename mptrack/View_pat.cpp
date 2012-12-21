@@ -43,7 +43,6 @@ FindReplaceStruct CViewPattern::m_findReplace =
 };
 
 // Static initializers
-ROWINDEX CViewPattern::m_nQuantize = 0;
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
 PatternClipboard CViewPattern::patternClipboard;
 
@@ -1489,15 +1488,15 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
 			CString s = "Quantize ";
-			if(m_nQuantize != 0)
+			if(CMainFrame::GetSettings().recordQuantizeRows != 0)
 			{
-				s.AppendFormat("(Currently: %d Rows)", m_nQuantize);
+				s.AppendFormat("(Currently: %d Rows)", CMainFrame::GetSettings().recordQuantizeRows);
 			} else
 			{
 				s.Append("Settings...");
 			}
 			s.Append("\t" + ih->GetKeyTextFromCommand(kcQuantizeSettings));
-			AppendMenu(hMenu, MF_STRING | (m_nQuantize != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
+			AppendMenu(hMenu, MF_STRING | (CMainFrame::GetSettings().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
 		}
 
 		ClientToScreen(&pt);
@@ -4757,7 +4756,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	if(usePlaybackPosition)
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
-	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && m_nQuantize != 0;
+	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && CMainFrame::GetSettings().recordQuantizeRows != 0;
 	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);
@@ -5006,7 +5005,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
 	// Quantize
-	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && m_nQuantize != 0;
+	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && CMainFrame::GetSettings().recordQuantizeRows != 0;
 	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);
@@ -5472,13 +5471,13 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 //--------------------------------------------------------------------
 {
 	const CSoundFile *sndFile = GetSoundFile();
-	if(sndFile == nullptr || m_nQuantize == 0)
+	if(sndFile == nullptr || CMainFrame::GetSettings().recordQuantizeRows == 0)
 	{
 		return;
 	}
 
 	const ROWINDEX currentTick = sndFile->m_nMusicSpeed * row + sndFile->m_nTickCount;
-	const ROWINDEX ticksPerNote = m_nQuantize * sndFile->m_nMusicSpeed;
+	const ROWINDEX ticksPerNote = CMainFrame::GetSettings().recordQuantizeRows * sndFile->m_nMusicSpeed;
 	
 	// Previous quantization step
 	const ROWINDEX quantLow = (currentTick / ticksPerNote) * ticksPerNote;
@@ -5534,10 +5533,10 @@ PATTERNINDEX CViewPattern::GetNextPattern() const
 void CViewPattern::OnSetQuantize()
 //--------------------------------
 {
-	CInputDlg dlg(this, "Quantize amount in rows for live recording (0 to disable):", 0, MAX_PATTERN_ROWS, m_nQuantize);
+	CInputDlg dlg(this, "Quantize amount in rows for live recording (0 to disable):", 0, MAX_PATTERN_ROWS, CMainFrame::GetSettings().recordQuantizeRows);
 	if(dlg.DoModal())
 	{
-		m_nQuantize = static_cast<ROWINDEX>(dlg.resultNumber);
+		CMainFrame::GetSettings().recordQuantizeRows = static_cast<ROWINDEX>(dlg.resultNumber);
 	}
 }
 
