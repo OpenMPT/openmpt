@@ -594,6 +594,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 
 #ifdef MMCMP_SUPPORT
 		BOOL bMMCmp = MMCMP_Unpack(&lpStream, &dwMemLength);
+		if(bMMCmp)
+		{
+			file = FileReader(reinterpret_cast<const char*>(lpStream), dwMemLength);
+		}
 #endif
 
 		if(!ReadXM(file)

@@ -1641,10 +1641,10 @@ BOOL CSoundFile::ProcessEffects()
 			} else if(m_SongFlags[SONG_FIRSTTICK])
 			{
 				// Pattern Loop ?
-				if ((((param & 0xF0) == 0x60) && (cmd == CMD_MODCMDEX))
-				 || (((param & 0xF0) == 0xB0) && (cmd == CMD_S3MCMDEX)))
+				if((((param & 0xF0) == 0x60 && cmd == CMD_MODCMDEX)
+					|| ((param & 0xF0) == 0xB0 && cmd == CMD_S3MCMDEX))
+					&& !(GetType() == MOD_TYPE_S3M && ChnSettings[nChn].dwFlags[CHN_MUTE]))	// not even effects are processed on muted S3M channels
 				{
-
 					ROWINDEX nloop = PatternLoop(pChn, param & 0x0F);
 					if (nloop != ROWINDEX_INVALID)
 					{
@@ -4366,7 +4366,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 	if (param)
 	{
 		// Loop Repeat
-		if (pChn->nPatternLoopCount)
+		if(pChn->nPatternLoopCount)
 		{
 			// There's a loop left
 			pChn->nPatternLoopCount--;
@@ -4383,7 +4383,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 			}
 		} else
 		{
-			// This was the last loop
+			// First time we get into the loop => Set loop count.
 
 			// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER | TRK_SCREAMTRACKER))
@@ -4391,8 +4391,8 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 				ModChannel *p = Chn;
 				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++) if (p != pChn)
 				{
-					// Loop already done
-					if (p->nPatternLoopCount) return ROWINDEX_INVALID;
+					// Loop on other channel
+					if(p->nPatternLoopCount) return ROWINDEX_INVALID;
 				}
 			}
 			pChn->nPatternLoopCount = param;
