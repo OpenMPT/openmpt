@@ -139,7 +139,6 @@ protected:
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	PATTERNINDEX m_nPlayPat;
 	ROWINDEX m_nPlayRow;
-	static ROWINDEX m_nQuantize;
 
 	int m_nXScroll, m_nYScroll;
 	PatternCursor::Columns m_nDetailLevel;		// Visible Columns

@@ -71,6 +71,7 @@ public:
 	BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
 	DWORD m_dwPatternSetup, m_nKeyboardCfg;
 	DWORD m_nRowHighlightMeasures, m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
+	ROWINDEX recordQuantizeRows;
 	bool m_bHideUnavailableCtxMenuItems;
 	int orderlistMargins;
 

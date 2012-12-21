@@ -190,7 +190,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		// REQUIRES AUTOFIX
 	}
 	if(foundHere)
-		AddToLog("Found VST plugins\n");
+		AddToLog("Found plugins\n");
 
 	// Check for invalid order items
 	for(ORDERINDEX i = m_SndFile.Order.GetLengthTailTrimmed(); i > 0; i--)

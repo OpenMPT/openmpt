@@ -89,9 +89,11 @@ TrackerSettings::TrackerSettings()
 		| PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT
 		| PATTERN_FLATBUTTONS | PATTERN_NOEXTRALOUD | PATTERN_2NDHIGHLIGHT
 		| PATTERN_STDHIGHLIGHT | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL
-		| PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE;
+		| PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE
+		| PATTERN_LARGECOMMENTS | PATTERN_SHOWDEFAULTVOLUME;
 	m_nRowHighlightMeasures = 16;
 	m_nRowHighlightBeats = 4;
+	recordQuantizeRows = 0;
 
 	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
 
@@ -100,29 +102,29 @@ TrackerSettings::TrackerSettings()
 	// Directory Arrays (Default + Last)
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
-		if (i == DIR_TUNING) // Hack: Tuning folder is already set so don't reset it.
+		if(i == DIR_TUNING) // Hack: Tuning folder is already set so don't reset it.
 			continue;
-		MemsetZero(m_szDefaultDirectory[i]);
-		MemsetZero(m_szWorkingDirectory[i]);
+		m_szDefaultDirectory[i][0] = '\0';
+		m_szWorkingDirectory[i][0] = '\0';
 	}
-	MemsetZero(m_szKbdFile);			//rewbs.customKeys
+	m_szKbdFile[0] = '\0';
 
 	// Default chords
 	MemsetZero(Chords);
-	for (UINT ichord=0; ichord<3*12; ichord++)
+	for(UINT ichord = 0; ichord < 3 * 12; ichord++)
 	{
 		Chords[ichord].key = (BYTE)ichord;
 		Chords[ichord].notes[0] = 0;
 		Chords[ichord].notes[1] = 0;
 		Chords[ichord].notes[2] = 0;
 
-		if (ichord < 12)
+		if(ichord < 12)
 		{
 			// Major Chords
 			Chords[ichord].notes[0] = (BYTE)(ichord+5);
 			Chords[ichord].notes[1] = (BYTE)(ichord+8);
 			Chords[ichord].notes[2] = (BYTE)(ichord+11);
-		} else if (ichord < 24)
+		} else if(ichord < 24)
 		{
 			// Minor Chords
 			Chords[ichord].notes[0] = (BYTE)(ichord-8);
@@ -390,6 +392,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	gbPatternRecord = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);
 	gnAutoChordWaitTime = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
 	orderlistMargins = GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", orderlistMargins, iniFile);
+	recordQuantizeRows = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
 	gbShowHackControls = (0 != CMainFrame::GetPrivateProfileDWord("Misc", "ShowHackControls", gbShowHackControls ? 1 : 0, iniFile));
 	CSoundFile::s_DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", CSoundFile::s_DefaultPlugVolumeHandling, iniFile));
 	if(CSoundFile::s_DefaultPlugVolumeHandling >= PLUGIN_VOLUMEHANDLING_MAX) CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
@@ -753,6 +756,7 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "Plugin-Names", gbPatternPluginNames, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
 
 	// Write default paths
 	const bool bConvertPaths = theApp.IsPortableMode();
