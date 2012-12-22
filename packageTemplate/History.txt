@@ -18,14 +18,76 @@ Developers:
    <rf>    rewbs      / Robin Fernandes  [rewbs]
    <sp>    pelya      / Sergiy Pylypenko [pelya]
    <tn>    plastik_s  / Trevor Nunes     [plastik_s]
-Patch submitters:   
+Patch submitters:
    <cm>    kode54     / Chris Moeller
    <ih>    xaimus     / Imran Hameed
    <ks>    coda       / Ken Snyder
 
 
-v1.20.04.00 (October 2012, revision 1398)
------------------------------------------
+v1.21.01.00 (22 December 2012, revision 1472)
+---------------------------------------------
+Pattern tab
+   [New] <js> Added option to quantize notes that are recorded live (select from context menu or shortcut).
+   [New] <js> Added "Data Entry" shortcuts to increase or decrease the value of the currently selected pattern cells (note, instrument, effect parameters), either by +/- 1 or by a coarse value depending on the column.
+   [Imp] <js> If no selection has been made, interpolation shortcuts now interpolate between the nearest notes / instruments / commands above and below the cursor position.
+   [Imp] <js> Added shortcuts for Record Select / Split Record Select (tx DJBouche).
+   [Fix] <js> Resizing a pattern only created an undo point when the pattern was reduced.
+   [Fix] <js> Set Instrument also works if "No Instrument" is chosen (http://forum.openmpt.org/index.php?topic=4178.0).
+   [Fix] <js> Non-existing patterns above the highest existing pattern are not displayed as "???" in the order list anymore.
+
+Sample tab
+   [New] <js> Can now load and save FLAC samples.
+   [New] <js> Added new stereo to mono sample conversion modes: Keep only left / right channel, split stereo sample into two mono samples.
+   [Imp] <js> Added shortcuts for "Zoom into Selection" (http://forum.openmpt.org/index.php?topic=4877.0), 8-bit and mono conversion.
+   [Imp] <js> When triggering a note, the note frequency is displayed next to the note name in the status bar.
+   [Imp] <js> It is now possible to drag and drop multiple samples from explorer.
+   [Imp] <js> When saving a sample, the actual sample is now suggested if no sample filename is specified in IT / S3M / MPTM modules.
+   [Imp] <js> Added hidden INI setting "DefaultFormat" in the [Sample Editor] section to specify the default format to use when saving samples (possible values: wav, flac, raw).
+   [Imp] <js> Added hidden INI setting "FLACCompressionLevel" in the [Sample Editor] section to set the compression level (0...8) when saving FLAC samples.
+   [Fix] <js> Reducing the size of the sample undo buffer could sometimes lead to freezes (http://bugs.openmpt.org/view.php?id=314).
+   [Fix] <js> Fixed a possible crash when creating undo points (e.g. when using loop crossfade).
+   [Fix] <js> Saved WAV files should now finally have a file size in the header.
+
+Instrument tab
+   [Imp] <js> Moving the envelope tail (using Ctrl + Drag) also works properly if the distance between the moved point and the following point is small.
+   [Imp] <js> It is now possible to drag and drop multiple instruments from explorer.
+   [Imp] <js> Dragging the mouse over the sample map doesn't invert every note's assignment but applies the same action to all notes now (http://bugs.openmpt.org/view.php?id=244).
+   [Fix] <js> Importing DLS / SF2 samples into the sample editor does now properly remove sample attributes not supported by the current format.
+
+Tree view
+   [Fix] <js> Rearrange samples / instruments was really buggy.
+
+MIDI Macros
+   [Fix] <js> MIDI Macro letters u and v also take global / channel / instrument volume into account.
+   [Fix] <js> Zxx is now only applied on first tick (like in Impulse tracker), before any other effects, \xx remains "sane" and is applied on every tick.
+
+VST / DMO Plugins
+   [Imp] <js> The Preset menu in the plugin editor is now filled on demand (when clicking it for the first time) to keep the GUI responsive when opening the editor of plugins that have many presets.
+   [Fix] <js> Changing the preset from the plugin editor didn't mark the module as modified (http://bugs.openmpt.org/view.php?id=317).
+
+Playback
+   [Fix] <js> Reverse pattern loops that are obfuscated through pattern jump commands should now also work correctly when "Loop Song" is off and during Wave Export (http://bugs.openmpt.org/view.php?id=311).
+
+XM::Compatible Playback Mode
+   [Fix] <js> Volume column lxx / rxx doesn't overwrite the effect memory of Pxy anymore.
+
+XM::Loading and Saving
+   [Fix] <js> Importing patterns >= 240 didn't work in OpenMPT 1.20.04.00 (http://bugs.openmpt.org/view.php?id=308).
+   [Fix] <js> XM instrument saving failed in all versions of OpenMPT 1.20 if there were samples in the sample map that were only referenced below C-1 or above B-8 (http://bugs.openmpt.org/view.php?id=324).
+
+S3M
+   [Fix] <js> Pattern loops on muted S3M channels were still being processed.
+
+Misc
+   [Imp] <js> Added possible fix for some SF2 inaccuracies (tx BeRo).
+   [Imp] <js> Added basic support for DLS Level 2 regions (they are just treated like DLS Level 1 regions).
+   [Fix] <js> Fixed crash when loading some DLS samples.
+   [Fix] <js> Fixed possible integer overflow when reading song messages from files.
+   [Fix] <js> Song length detection won't affect actually stored high offset parameter anymore.
+
+
+v1.20.04.00 (27 October 2012, revision 1398)
+--------------------------------------------
 General tab
    [Fix] <js> Input boxes in general tab didn't allow for horizontal scrolling.
 
@@ -37,6 +99,9 @@ Sample tab
    [Fix] <js> Loading XI files as samples could lead to a crash (tx Lucas).
    [Fix] <js> Mass sample export file names were sometimes not sanitized correctly (http://bugs.openmpt.org/view.php?id=300).
 
+Treev iew
+   [New] <js> It is now possible to rearrange (drag and drop), insert and duplicate (through the context menu) samples and instruments.
+
 VST / DMO Plugins
    [Fix] <js> Plugin Selection Dialog: Adding new plugins didn't focus them as intended.
    [Fix] <js> Plugin Editor: Bypassing a plugin from its editor didn't mark the module as modified.
@@ -46,7 +111,7 @@ VST::Specific Plugin Fixes
 
 XM::Compatible Playback Mode
    [Fix] <js> Improved XM tremor effect compatibility.
-   
+
 XM::Loading and Saving
    [Imp] <js> Full tempo range (32 - 512) is now also supported for the default tempo in compatibility export, as Fasttracker 2 actually "supports" this (not through the GUI, but it won't sanitize such values in files) and XMPlay also does.
    [Imp] <js> Improved detection of files made with MPT.
@@ -58,7 +123,6 @@ Other formats
    [Fix] <js> ITP Saver: ITP files saved with OpenMPT 1.20.03.00 were corrupted. Files saved with this version can be fixed by writing the byte sequence 10 00 02 (hex) at position $2B (instead of 01 00 00).
 
 Misc
-   [New] <js> Tree View: It is now possible to rearrange (drag and drop), insert and duplicate (through the context menu) samples and instruments.
    [New] <js> Added hidden INI setting ASIOBaseChannel in [Sound Settings] category to specify the first ASIO channel to use for sound output (as a quick and dirty semi-solution for http://bugs.openmpt.org/view.php?id=128).
    [Imp] <js> Using the mouse wheel to scroll edit controls with spin buttons works on all such controls now (http://bugs.openmpt.org/view.php?id=99).
    [Mod] <js> Changed default resampling type to XMMS-ModPlug.
@@ -99,7 +163,7 @@ VST / DMO Plugins
    [Fix] <js> A memory leak that occoured when trying to register invalid or missing plugins (e.g. on startup) has been fixed.
 
 IT::Compatible Playback Mode
-   [Fix] <js> A channel's key-off status is kept with portamento notes if "Compatible Gxx" is disabled or there is no instrument number next to the new note. 
+   [Fix] <js> A channel's key-off status is kept with portamento notes if "Compatible Gxx" is disabled or there is no instrument number next to the new note.
 
 IT::Loading
    [Fix] <js> Overly long (26 characters) sample / instrument name strings found in IT files made with older versions of MPT are now read correctly again.
@@ -174,7 +238,7 @@ IT
 
 IT::Compatible Playback Mode
    [Fix] <js> Combinations of Qxy (retrigger) with a pattern delay at Speed y should now work as intended.
-   [Fix] <js> Combinations of SDx with x greater than the current speed combined with tick delay commands didn't work. 
+   [Fix] <js> Combinations of SDx with x greater than the current speed combined with tick delay commands didn't work.
 
 IT::Loading
    [Fix] <js> Loading IT files made with older versions of OpenMPT replaces SC0 with ^^ instead of v00 now.
@@ -197,7 +261,7 @@ Other formats
    [New] <js> AMS (Velvet Studio) support is finally back (not crashing the tracker this time :). AMS (Extreme's Tracker) support has been improved as well.
    [Imp] <js> WAV Loader also imports loop points when reading a WAV file as a module.
    [Imp] <js> STM Loader imports some effects more correctly now.
-   [Imp] <js> UMX Loader checks for a few more contained module formats that are also supported by Galaxy Sound System (STM, 669, FAR). 
+   [Imp] <js> UMX Loader checks for a few more contained module formats that are also supported by Galaxy Sound System (STM, 669, FAR).
    [Fix] <js> MDL Loader was severely broken in OpenMPT 1.20.01.00.
    [Fix] <js> MED Loader: Sample transpose should work as intended (at least for MMD1 modules), MMD2 order list works again as well, Tempo vs Speed precedence for value 32 should be correct now.
 
@@ -216,7 +280,7 @@ v1.20.01.00 (5 May 2012, revision 1263)
 General tab
    [Imp] <js> Like the plugin preset box, the plugin parameter selection box is now only populated when it is focussed, to avoid delays with plugins that have tons of parameters.
    [Imp] <js> Default global volume display is now limited to 0...64 (instead of 0...128) for S3M (http://forum.openmpt.org/index.php?topic=4658.0).
-   [Mod] <js> Default global volume is not available anymore in the XM format, since it is not supported by the original format. 
+   [Mod] <js> Default global volume is not available anymore in the XM format, since it is not supported by the original format.
    [Fix] <js> Switching between plugin presets didn't update the plugin parameter display.
    [Fix] <js> When enabling surround for a channel, panning was not reset properly for playing tracks.
 
@@ -296,7 +360,7 @@ Instrument tab
    [Fix] <js> Loading instruments from other modules is no longer limited to 32 samples.
    [Fix] <js> Fixed possible stack corruption when loading instruments into XM files.
 
-Treeview
+Tree view
    [Imp] <js> The limit of 32 displayed song items has been removed.
    [Imp] <js> If available, drum keys use key names provided by the soundfont instead of pre-defined drum key names.
    [Imp] <js> All supported module files are now shown in the directory browser by default, even if "Show All Files" is disabled.
@@ -319,7 +383,7 @@ MIDI Macros
 VST / DMO Plugins
    [New] <js> Plugins can now send MIDI events to chained plugins. Useful for e.g. LFO or arpeggiator plugins.
    [New] <js> Added "mappped" MIDI channels (like in Impulse Tracker). If a plugin's MIDI Channel is set to "mapped" in the instrument editor, note data is transmitted on a triggered note's pattern channel modulo 16.
-   [New] <js> Experimental built-in support for JBridge. If you run OpenMPT with admin privileges now, you can directly run 64-Bit VST plugins in OpenMPT. 
+   [New] <js> Experimental built-in support for JBridge. If you run OpenMPT with admin privileges now, you can directly run 64-Bit VST plugins in OpenMPT.
    [Imp] <js> Rewrote default plugin editor (the one that is used for plugins with no custom GUI). Multiple parameters are shown at the same time, with the same automation functionality as custom editors (record to pattern, automatic MIDI Mapping by pressing Shift, etc...), remembers window position, etc... (http://forum.openmpt.org/index.php?topic=1974.0)
    [Imp] <js> Searching for multiple unknown plugins will now open only one browser window.
    [Imp] <js> Named DMO parameter values are now displayed properly.
@@ -417,7 +481,7 @@ XM::Compatible Playback Mode
 XM::Loading and Saving
    [Imp] <js> Volume Column panning is now scaled better when loading or saving XM files, so it is translated to a 0...64 range instead of 2...62.
    [Imp] <js> Saving: Samples that are not associated to any instrument are now tried to be written to XM files anyway (http://bugs.openmpt.org/view.php?id=234).
-   [Mod] <js> Some compatibility settings are now always applied (not only in XM compatible mode) and files saved with older versions of OpenMPT are "fixed" automatically to still work with the new settings. Affected settings are: Out-of-range global volume handling, portamento vs. offset priority.   
+   [Mod] <js> Some compatibility settings are now always applied (not only in XM compatible mode) and files saved with older versions of OpenMPT are "fixed" automatically to still work with the new settings. Affected settings are: Out-of-range global volume handling, portamento vs. offset priority.
    [Fix] <js> Saving: When saving an XM with no instruments, garbage instrument settings were written.
 
 S3M
@@ -578,7 +642,7 @@ v1.19.02.00 (13 May 2011, revision 871)
 ---------------------------------------
 Pattern tab
    [New] <js> Channels can now be moved by dragging their channel header. Holding Shift while doing so duplicates the channel.
-   [Imp] <js> Moving channels through the channel manager creates an undo point now. 
+   [Imp] <js> Moving channels through the channel manager creates an undo point now.
    [Fix] <js> Order list info text now truncates list length after the first "---" pattern for MOD files in hex display mode as well.
 
 Pattern tab::Note properties
@@ -719,14 +783,14 @@ IT
    [Fix] <js> Various fixes to playback of multi-sample instruments. "Ultima Ratio" by Nebularia and "Shuttle Departure" by Sphenx sound better now.
 
 IT::Loading and Saving
-   [New] <js> Edit history information can now be read from and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information. 
+   [New] <js> Edit history information can now be read from and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information.
    [Imp] <js> Autovibrato sweep is now fixed when loading IT files made with old versions of (Open)MPT.
    [Imp] <js> IT files made with Modplug Tracker 1.00a5 are now also detected as such. Since long patterns can also be created in other trackers (e.g. Chibi), long patterns are not used to identify files made with MPT anymore.
-   [Mod] <js> MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
+   [Mod] <js> MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker).
    [Mod] <js> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
    [Fix] <js> Note mapping items that aren't notes (e.g. empty notes) are now ignored when loading and saving.
    [Fix] <js> When saving, non-existing envelopes are now replaced by a default (disabled) envelope, so that they can still be edited in Impulse Tracker.
-   [Fix] <js> The extended sample map is not saved anymore in the instrument headers when using compatibility export.    
+   [Fix] <js> The extended sample map is not saved anymore in the instrument headers when using compatibility export.
 
 MPTM
    [New] <js> Each pattern can now have a custom time signature (rows per beat and rows per measure) which can be set from the pattern properties dialog (http://forum.openmpt.org/index.php?topic=4022.0).
@@ -791,7 +855,7 @@ Misc
    [Fix] <js> Mod Cleanup: Various sample / instrument rearranging functions broke Parameter Control Events.
    [Fix] <js> The text length was calculated wrong in the message reader, leading to a possible buffer overflow when reading song messages with mixed line endings where CR or LF line endings were expected.
    [Fix] <js> When there was no INI file, the size of the upper pattern view was defaulting to a wrong value.
-   [Fix] <js> The ID3v2 "comments" field was not formatted properly when exporting to MP3. 
+   [Fix] <js> The ID3v2 "comments" field was not formatted properly when exporting to MP3.
    [Fix] <js> unmo3.dll and uxtheme.dll (for theming the general tab) are now loaded "safely", to avoid the currently spreading DLL exploits.
    [Fix] <js> Editing a sample / instrument name on the comments tab didn't mark the module as modified (tx djmakas)
    [Fix] <js> When changing the font size of the song message while the comments tab is open, the message editor is now resized instantly. Previously, only the font size was updated.
@@ -811,13 +875,13 @@ Sequence editor
 Pattern tab::pattern editing
    [Imp] <js> Just like in MPT 1.16, it is now possible again to interpolate between an effect and "nothing". In that case, the same value as the already existing one is repeated between the two rows.
    [Fix] <js> When the first column of a pattern selection (larger than one selection field) was the parameter column, Parameter Control Event values in this column were not reset properly.
-   [Fix] <js> Pattern Editor: Transposing notes up/down doesn't allow notes which are actually supported by the current module format (e.g. notes below C-1 in XMs) anymore.
+   [Fix] <js> Transposing notes up / down doesn't allow notes which are actually not supported by the current module format (e.g. notes below C-1 in XMs) anymore.
    [Fix] <js> Keyboard shortcut for toggling record state didn't save the change, so it was reset with every new module.
 
 Pattern tab::Note properties
    [Imp] <js> Effect info now shows the real finetune values for E5x in MOD/XM and E2x in S3M instead of just 0...15.
    [Imp] <js> Set envelope position effect (Lxx in XM) is now explained better.
-   [Fix] <js> Fixed a null pointer related crash when accessing the note properties of malicious and not-so-malicious modules (e.g. jt_pools.xm) which have more than 256 sample slots.
+   [Fix] <js> Fixed a crash when accessing the note properties of malicious and not-so-malicious modules (e.g. jt_pools.xm) which have more than 256 sample slots.
 
 Sample tab
    [New] <js> It's now also possible to create sample selections using Shift + click (this is still behaving a bit non-obvious if you don't know what you're doing :).
@@ -836,9 +900,9 @@ Instrument tab
    [Imp] <js> When pasting an envelope with a release node, it's now ignored in formats that don't support it.
    [Reg] <js> Envelope release nodes cannot be enabled for IT files anymore, but they are still played for compatibility (One has to start removing the crap from the old formats at some point...).
 
-Treeview
-   [Imp] <js> Treeview: Ask for confirmation when deleting patterns, samples, instruments, sequences.
-   [Fix] <js> Deleting a sample from the treeview and then applying undo for this sample in the sample editor crashed OpenMPT.
+Tree view
+   [Imp] <js> Ask for confirmation when deleting patterns, samples, instruments, sequences.
+   [Fix] <js> Deleting a sample from the tree view and then applying undo for this sample in the sample editor crashed OpenMPT.
 
 Mod conversion
    [Imp] <js> Some improvements with converting note cuts, ECx/SCx and EDx/SDx.
@@ -877,7 +941,7 @@ Other formats
    [Imp] <js> PSM Loader: Small improvements.
    [Fix] <js> MTM Loader: The "beats per track" (means lines per pattern) setting is now taken into account.
    [Fix] <js> PSM16 Loader: Since the control channels were muted, tempo commands were ignored, effectively slowing down some PSM16 tracks.
-   [Fix] <al> MPTM Saver: When deleting patterns using the treeview, it was possible that Parameter Control Notes were not saved properly anymore. 
+   [Fix] <al> MPTM Saver: When deleting patterns using the tree view, it was possible that Parameter Control Notes were not saved properly anymore.
 
 Misc
    [New] <js> Experimental "panic" button on the main toolbar. At the moment, it just kills all VSTi and sample voices.
@@ -904,7 +968,7 @@ Sequence editor
    [Imp] <js> The sequence menu also allows to insert empty sequences now.
    [Fix] <js> Jumping between patterns also stops VSTi notes now.
 
-Pattern tab::pattern editing
+Pattern tab::Pattern editing
    [New] <js> Extended context menu for Parameter Control Events.
    [New] <js> Key shortcut + context menu entry for toggling the plugin editor of the Parameter Control Event that's under the cursor.
    [Imp] <js> Overflow paste now only uses one undo step.
@@ -916,7 +980,7 @@ Pattern tab::pattern editing
    [Fix] <js> When pasting pattern data that exactly reached the pattern end with overflow paste enabled, a redundant undo point was created.
    [Fix] <js> Entered (volume) effects are now properly validated (makes a difference e.g. in MOD format where it was previously possible to enter effects like Hxx)
    [Fix] <js> Mix Paste: When in MPT behaviour mode, empty FX commands were not overwritten properly when there previously was an effect in that field but only the effect number (and not the param value) was reset.
-   [Fix] <js> When deleting all patterns via the treeview and then switching to the pattern editor, pattern 0 is not created automatically anymore, to avoid confusion.
+   [Fix] <js> When deleting all patterns via the tree view and then switching to the pattern editor, pattern 0 is not created automatically anymore, to avoid confusion.
    [Reg] <js> Creating a selection using the Shift key + Mouse click now only works if there was previously no selection made; This seems reasonable as the old shift - behaviour seems to be widely used.
 
 Pattern tab::GUI
@@ -963,11 +1027,11 @@ Comments tab
    [Fix] <js> Correct C-5 frequency is now also shown for XM modules.
    [Fix] <js> When editing sample / instrument names, they are limited properly in length now.
 
-Treeview
+Tree view
    [New] <js> Sequences can now be copied to other modules by simply dragging the sequence header into the the other module's sequence header. Does only work between two different modules, not within the same module, and it will not copy the pattern contents.
    [Imp] <js> Display sequence index next to sequence names.
    [Imp] <js> Improved order dragging; It is now also possible to drag an order into a non-MPTM module. In that case, the old orderlist will be replaced.
-   [Imp] <js> J2B files were not shown in the treeview.
+   [Imp] <js> J2B files were not shown in the tree view.
    [Fix] <js> Soundfont samples were not playing correctly anymore. Note that soundfont samples in the MIDI library still don't work.
    [Fix] <js> A crash could occour if the instrument library path was too long (e.g. because of malicious strings in the [Paths] section of the INI file)
    [Fix] <js> "Bypass" action for plugins didn't set the document as modified.
@@ -989,7 +1053,7 @@ Mod conversion
    [Fix] <js> When converting from MOD to S3M or IT, the Invert Loop effect was not removed.
    [Fix] <js> When converting from MPTM to another format, the first sequence name is removed and the sequence is now sized properly when merging multiple sequences (tx Skaven).
    [Fix] <js> When converting between XM and IT, the sample autovibrato "sweep" factor is now fixed a bit (since sweep = 0 equals "no sweep" in XM, and "no vibrato" in IT).
-   [Fix] <js> When removing instruments from the treeview and converting the module to a different format which also supports instruments, OpenMPT crashed.
+   [Fix] <js> When removing instruments from the tree view and converting the module to a different format which also supports instruments, OpenMPT crashed.
    [Fix] <js> When converting to MOD/S3M, the extended filter range flag was not deactivated.
    [Fix] <js> S00 (IT/S3M) does not equal E00 (MOD/XM), as Exx doesn't have effect memory. Trying to convert S00 to the last used value now.
    [Fix] <js> If necessary (S3M), the restart position attribute is reset.
@@ -1033,10 +1097,10 @@ MOD
 S3M
    [Imp] <js> Loading: Display a message if an S3M file contains Adlib instruments (rare).
    [Fix] <js> In ST3, muted channels are completely ignored, not even effects are interpreted. Let's try this in MPT, too.
-   [Fix] <js> S3M Compatibility: Slightly better handling of vibrato/tremolo waveform types (although the ST3 help screen says that continuous vibrato/tremolo is possible, it does actually not work.)
+   [Fix] <js> Slightly better handling of vibrato/tremolo waveform types (although the ST3 help screen says that continuous vibrato/tremolo is possible, it does actually not work.)
    [Reg] <js> Cannot create S3M files with more than 100 patterns anymore, because...
    [Fix] <js> ... it was possible to create S3M files where the 256 parapointers were not enough, resulting in incomplete/broken files.
-   [Fix] <js> S3M Compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
+   [Fix] <js> Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
 
 MPTM
    [New] <rf> Added combined note delay & note cut command for MPTM only (":xy" means delay until tick x and play for y ticks).
@@ -1120,7 +1184,7 @@ Pattern tab::Pattern editing
 
 Pattern tab::GUI
    [New] <js> Channel rename dialog in channel header context menu.
-   [Imp] <js> Tidied up the upper panel. It fits perfectly on a 1024x768 screen with treeview enabled and also works on 800x600 with treeview disabled. With the new layout, about 8 more pattern rows can be seen in comparison to the old, bloated 1.17.02.* interface.
+   [Imp] <js> Tidied up the upper panel. It fits perfectly on a 1024x768 screen with tree view enabled and also works on 800x600 with tree view disabled. With the new layout, about 8 more pattern rows can be seen in comparison to the old, bloated 1.17.02.* interface.
    [Mod] <js> Due to this cleanup, the "split keyboard" feature has been removed from the interface. The split keyboard settings dialog can now be accessed by using a shortcut, which should be even faster than the old method.
    [Imp] <al> If keyboard split is active, instrument drop list will show split instrument and split note.
    [Imp] <js> Grey out pattern name input field when in MOD/S3M mode.
@@ -1164,8 +1228,8 @@ Comments tab
    [Imp] <js> If sample size is < 1 KB, amount of bytes is shown instead of "0 KB".
    [Fix] <js> The lower part of the tab was receiving update messages that were not even meaningful to this tab (e.g. speed changes), so it was updating quite often modules that have alternating speed and the toolbar was "blinking"... Only letting in important update messages now.
 
-Treeview
-   [New] <js> Show sequences in song treeview. Sequences can be inserted, duplicated and deleted by right-clicking the sequence items.
+Tree view
+   [New] <js> Show sequences in song tree view. Sequences can be inserted, duplicated and deleted by right-clicking the sequence items.
    [New] <js> Clicking on a mod item (i.e. a filename node) switches to the corresponding window.
    [New] <js> Added right-click options for mod items.
    [New] <js> Display playing samples / instruments (only those that are assigned to a sample) using green triangles. Can be enabled from setup screen.
@@ -1212,7 +1276,7 @@ IT::Compatible Playback Mode
    [Fix] <js> Reset NNA actions on every note (tentative fix, fixes spx-farspacedance.it).
    [Fix] <js> Fixes from SchismTracker: Vol Swing, Pan Swing, Pitch / Pan Separation (PPS).
    [Fix] <js> Out of range offset command with Old FX on.
-   [Fix] <js> Impvored S3x / S4x / S5x handling.
+   [Fix] <js> Improved S3x / S4x / S5x handling.
 
 S3M
    [Fix] <js> ST3 compatibility: Only allow waveforms 0 to 3 for S3x / S4x / S5x.
@@ -1376,7 +1440,7 @@ Comments tab
    [Imp] <js> Default view mode is instruments instead of samples for XM files.
    [Imp] <js> Instrument / Sample list: Double click will switch to instrument / sample.
 
-Treeview
+Tree view
    [Fix] <js> Playing sounds from a soundfont was broken.
    [Fix] <js> Deleting patterns from a module will also reset their names.
 
@@ -1689,7 +1753,7 @@ v1.17.02.51 (29 Mar 2008, revision 208) internal test build
    [Fix] <al> Fix to crash when loading plugins with long (> 32 characters) parameter names.
    [Fix] <al, ma> Fix to possible memory corruption problem on handling VST plugins with more than 30 outputs.
          - Plugins with more than 32 outputs might still be handled poorly.
-   [Fix] <al> Fix to possible crash when browsing modules in treeview (http://forum.openmpt.org/index.php?topic=2222.0).
+   [Fix] <al> Fix to possible crash when browsing modules in tree view (http://forum.openmpt.org/index.php?topic=2222.0).
    [Fix] <al> Fix to severe memory leak in the same section as above.
    [Fix] <al> Fix to mptm not showing in tree view file browser.
    [Fix] <al> Fix to MIDI drum export (http://forum.openmpt.org/index.php?topic=2024.0).
@@ -1907,7 +1971,7 @@ v1.17.02.38
    [Fix] <rf> No longer issue MIDI bank & program message every time MIDI channel changes - this fixes HyperCanvas behaviour (tx ganja)
    [Fix] <rf> Fixed: new channel mute mode did not mute VSTis at all.
    [Fix] <rf> Fixed: changing mute mode while some channels were muted prevented them from being unmuted.
-   [Fix] <rf> Fixed: editing a pattern from treeview by double clicking it was broken
+   [Fix] <rf> Fixed: editing a pattern from tree view by double clicking it was broken
    [Fix] <rf> Editing of note column of sample map is disabled for XMs (XM doesn't save that data).
    [Fix] <rf> Fixed: If you agreed to reorganized instrument during an instrument cleanup, nothing at all would happen.
    [Fix] <rf> Fixed Pattern amplification had no effect on instruments mapped to "phantom samples" (tx lpchip)
@@ -2004,7 +2068,7 @@ v1.17.02.27
 -----------
    [Mod] <rf> Minor cosmetic changes.
    [Fix] <rf> XMs saved in OpenMPT should no longer have a bunch of blank patterns at the end when played in XMPlay.
-   [Fix] <rf> Some instrument properties were saved incorrectly if an instrument had been deleted (either from song cleanup or treeview).
+   [Fix] <rf> Some instrument properties were saved incorrectly if an instrument had been deleted (either from song cleanup or tree view).
 
 
 v1.17.02.26
@@ -2481,7 +2545,7 @@ v1.16.0210a
    [Fix] Fixed transpose octave down key (bug introduced 20040910)
    [Fix] Fixed note fade on key release in instrument view. (tx Ganja) bug introduced 20040910
    [Fix] Prevented multiple note playback in sample view, except on chord playback. (tx LPChip) (bug introduced 20040910)
-   [Fix] Finished custom note handling for instrument notemapper and treeview (tx Ganja) (bug introduced 20040910)
+   [Fix] Finished custom note handling for instrument notemapper and tree view (tx Ganja) (bug introduced 20040910)
    [Fix] This version shouldn't corrupt the custom key registry setting used by previous versions of MPT. (bug introduced 20040910)
    [New] Can now save orders past blank order, a la IT2. (tx Nofold)
    [New] Some pattern undo improvements (still far from perfect!)
