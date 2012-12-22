@@ -2406,12 +2406,12 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN]);
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_VOLUME]);
 
-		if(pChn->rowCommand.command == CMD_SMOOTHMIDI)
+		if((pChn->rowCommand.command == CMD_MIDI && m_SongFlags[SONG_FIRSTTICK]) || pChn->rowCommand.command == CMD_SMOOTHMIDI)
 		{
 			if(pChn->rowCommand.param < 0x80)
-				ProcessMIDIMacro(nChn, true, m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->rowCommand.param);
+				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], pChn->rowCommand.param);
 			else
-				ProcessMIDIMacro(nChn, true, m_MidiCfg.szMidiZXXExt[(pChn->rowCommand.param & 0x7F)], 0);
+				ProcessMIDIMacro(nChn, (pChn->rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.szMidiZXXExt[(pChn->rowCommand.param & 0x7F)], 0);
 		}
 	}
 }

@@ -1951,15 +1951,6 @@ BOOL CSoundFile::ProcessEffects()
 		if((GetType() == MOD_TYPE_S3M) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 			continue;
 
-		if(cmd == CMD_MIDI && m_SongFlags[SONG_FIRSTTICK])
-		{
-			// MIDI macro (Smooth MIDI macros are processed later, when we know all the volumes, panning, etc.)
-			if(param < 0x80)
-				ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro], param);
-			else
-				ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiZXXExt[(param & 0x7F)], 0);
-		}
-
 		// Volume Column Effect (except volume & panning)
 		/*	A few notes, paraphrased from ITTECH.TXT by Storlek (creator of schismtracker):
 			Ex/Fx/Gx are shared with Exx/Fxx/Gxx; Ex/Fx are 4x the 'normal' slide value
