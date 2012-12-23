@@ -1934,8 +1934,13 @@ BOOL CSoundFile::ProcessEffects()
 			} else
 			if (volcmd == VOLCMD_PANNING)
 			{
-				if (vol > 64) vol = 64;
-				pChn->nPan = vol << 2;
+				// IT Compatibility (and other trackers as well): panning disables surround (unless panning in rear channels is enabled, which is not supported by the original trackers anyway)
+				if(IsCompatibleMode(TRK_ALLTRACKERS) && !m_SongFlags[SONG_SURROUNDPAN])
+				{
+					pChn->dwFlags.reset(CHN_SURROUND);
+				}
+				if(vol > 64) vol = 64;
+				pChn->nPan = vol * 4;
 				pChn->dwFlags.set(CHN_FASTVOLRAMP);
 				pChn->nRestorePanOnNewNote = 0;
 				//IT compatibility 20. Set pan overrides random pan

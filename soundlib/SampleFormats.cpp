@@ -31,6 +31,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file)
 		&& !ReadXISample(nSample, file)
+		&& !ReadITISample(nSample, file)
 		&& !ReadAIFFSample(nSample, file)
 		&& !ReadITSSample(nSample, file)
 		&& !ReadPATSample(nSample, lpMemFile, dwFileLength)
@@ -1488,6 +1489,27 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	Samples[nSample].Convert(MOD_TYPE_IT, GetType());
 
 	sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
+	return true;
+}
+
+
+bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
+//-------------------------------------------------------------------
+{
+	ITInstrument instrumentHeader;
+
+	file.Rewind();
+	if(!file.ReadConvertEndianness(instrumentHeader)
+		|| instrumentHeader.id != ITInstrument::magic
+		|| instrumentHeader.nos == 0)
+	{
+		return false;
+	}
+	file.Rewind();
+	ModInstrument dummy;
+	ITInstrToMPT(file, dummy, instrumentHeader.trkvers);
+	ReadITSSample(nSample, file, false);
+
 	return true;
 }
 

@@ -633,6 +633,7 @@ public:
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
+	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);
 	bool Read8SVXSample(SAMPLEINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
