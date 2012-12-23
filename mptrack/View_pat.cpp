@@ -6619,20 +6619,40 @@ void CViewPattern::FindInstrument()
 //---------------------------------
 {
 	CSoundFile *sndFile = GetSoundFile();
-	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
+	if(sndFile == nullptr)
 	{
 		return;
 	}
+	ORDERINDEX ord = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+	PATTERNINDEX pat = m_nPattern;
 	ROWINDEX row = m_Cursor.GetRow();
-	do
+
+	while(sndFile->Patterns.IsValidPat(pat) && sndFile->Patterns[pat].GetNumRows() != 0)
 	{
-		ModCommand &m = *sndFile->Patterns[m_nPattern].GetpModCommand(row, m_Cursor.GetChannel());
-		if(!m.IsPcNote() && m.instr != 0)
+		// Seek upwards
+		do
 		{
-			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m.instr);
+			ModCommand &m = *sndFile->Patterns[pat].GetpModCommand(row, m_Cursor.GetChannel());
+			if(!m.IsPcNote() && m.instr != 0)
+			{
+				SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m.instr);
+				break;
+			}
+		} while(row-- != 0);
+
+		// Try previous pattern
+		if(ord == 0)
+		{
 			break;
 		}
-	} while(row-- != 0);
+		ord = sndFile->Order.GetPreviousOrderIgnoringSkips(ord);
+		pat = sndFile->Order[ord];
+		if(!sndFile->Patterns.IsValidPat(pat))
+		{
+			break;
+		}
+		row = sndFile->Patterns[pat].GetNumRows() - 1;
+	}
 }
 
 

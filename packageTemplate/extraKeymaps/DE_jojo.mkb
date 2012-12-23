@@ -84,6 +84,7 @@ version:1
 2:1663:2:3:1		//Toggle follow song: Ctrl+ROLLEN-FESTSTELL (KeyDown)
 2:1003:0:13:1		//Quick Copy: EINGABE (KeyDown)
 2:1004:0:32:5		//Quick Paste: LEER (KeyDown|KeyHold)
+2:1897:1:32:1		//Pick up nearest instrument number: Shift+LEER (KeyDown)
 2:1001:2:32:1		//Enable Recording: Ctrl+LEER (KeyDown)
 2:1002:2:13:5		//Play Row: Ctrl+EINGABE (KeyDown|KeyHold)
 2:1317:4:18:1		//Set row spacing on note entry: Alt (KeyDown)
