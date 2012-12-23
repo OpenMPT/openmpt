@@ -277,7 +277,6 @@ public:
 	// True if default volume should be drawn for a given cell.
 	static bool DrawDefaultVolume(const ModCommand *m) { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
 
-	//rewbs.customKeys
 	void CursorJump(DWORD distance, bool upwards, bool snap);
 
 	void TempEnterNote(int n, bool oldStyle = false, int vol = -1, bool fromMidi = false);
@@ -299,7 +298,8 @@ public:
 	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
 	void InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax);
 	void SetSelectionInstrument(const INSTRUMENTINDEX nIns);
-	//end rewbs.customKeys
+
+	void FindInstrument();
 
 	void TogglePluginEditor(int chan); //rewbs.patPlugName
 

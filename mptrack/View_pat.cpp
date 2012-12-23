@@ -4345,9 +4345,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
 		case kcDuplicatePattern: SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
 		case kcSwitchToOrderList: OnSwitchToOrderList();
-		case kcSwitchOverflowPaste:	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
+		case kcToggleOverflowPaste:	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
+		case kcToggleNoteOffRecordPC: CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
+		case kcToggleNoteOffRecordMIDI: CMainFrame::GetSettings().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
 		case kcQuantizeSettings: OnSetQuantize(); return wParam;
+		case kcFindInstrument: FindInstrument(); return wParam;
 		case kcChannelSettings:
 			{
 				// Open centered Quick Channel Settings dialog.
@@ -5009,6 +5012,11 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);
+		// "Grace notes" are stuffed into the next row, if possible
+		if(pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn)->IsNote() && nRow < pSndFile->Patterns[nPat].GetNumRows() - 1)
+		{
+			nRow++;
+		}
 	}
 
 	// -- Work out where to put the new note
@@ -6603,6 +6611,28 @@ void CViewPattern::SelectBeatOrMeasure(bool selectBeat)
 	}
 
 	SetCurSel(PatternCursor(startRow, startChannel, startColumn), PatternCursor(endRow, endChannel, endColumn));
+}
+
+
+// Sweep pattern channel to find instrument number to use
+void CViewPattern::FindInstrument()
+//---------------------------------
+{
+	CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
+	{
+		return;
+	}
+	ROWINDEX row = m_Cursor.GetRow();
+	do
+	{
+		ModCommand &m = *sndFile->Patterns[m_nPattern].GetpModCommand(row, m_Cursor.GetChannel());
+		if(!m.IsPcNote() && m.instr != 0)
+		{
+			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m.instr);
+			break;
+		}
+	} while(row-- != 0);
 }
 
 

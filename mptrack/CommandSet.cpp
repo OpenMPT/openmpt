@@ -539,7 +539,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleInvert, 1784, _T("Invert Sample Phase"));
 	DefineKeyCommand(kcSampleSignUnsign, 1785, _T("Signed / Unsigned Conversion"));
 	DefineKeyCommand(kcChannelReset, 1786, _T("Reset Channel"));
-	DefineKeyCommand(kcSwitchOverflowPaste, 1787, _T("Toggle overflow paste"));
+	DefineKeyCommand(kcToggleOverflowPaste, 1787, _T("Toggle overflow paste"));
 	DefineKeyCommand(kcNotePC, 1788, _T("Parameter control(MPTm only)"));
 	DefineKeyCommand(kcNotePCS, 1789, _T("Parameter control(smooth)(MPTm only)"));
 	DefineKeyCommand(kcSampleRemoveDCOffset, 1790, _T("Remove DC Offset"));
@@ -647,6 +647,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcQuantizeSettings, 1892, _T("Quantize Settings"));
 	DefineKeyCommand(kcDataEntryUpCoarse, 1893, _T("Data Entry Up (Coarse)"));
 	DefineKeyCommand(kcDataEntryDownCoarse, 1894, _T("Data Entry Down (Coarse)"));
+	DefineKeyCommand(kcToggleNoteOffRecordPC, 1895, _T("Toggle Note Off record (PC keyboard)"));
+	DefineKeyCommand(kcToggleNoteOffRecordMIDI, 1896, _T("Toggle Note Off record (MIDI)"));
+	DefineKeyCommand(kcFindInstrument, 1897, _T("Pick up nearest instrument number"));
 
 	// Add new key commands here.
 
