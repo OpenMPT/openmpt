@@ -1025,6 +1025,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		m_nGlobalVolume = m_nDefaultGlobalVolume;
 		m_nMusicSpeed = m_nDefaultSpeed;
 		m_nMusicTempo = m_nDefaultTempo;
+		visitedSongRows.Initialize(true);
 	}
 	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
@@ -1881,7 +1882,8 @@ SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMP
 		for(SAMPLEINDEX i = start; i <= GetModSpecifications().samplesMax; i++)
 		{
 			// When loading into an instrument, ignore non-empty sample names. Else, only use this slot if the sample name is empty or we're in second pass.
-			if(Samples[i].pSample == nullptr && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
+			if(i > GetNumSamples()
+				|| (Samples[i].pSample == nullptr && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID)))
 			{
 				// Empty slot, so it's a good candidate already.
 

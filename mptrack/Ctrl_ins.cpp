@@ -521,7 +521,7 @@ void CNoteMapWnd::OnInstrumentDuplicate()
 	if (m_pParent) m_pParent->PostMessage(WM_COMMAND, ID_INSTRUMENT_DUPLICATE);
 }
 
-//rewbs.customKeys
+
 LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------
 {
@@ -573,6 +573,8 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	// Parent shortcuts (also displayed in context menu of this control)
 	case kcInstrumentCtrlDuplicate:		OnInstrumentDuplicate(); return wParam;
+	case kcNextInstrument:				if(m_pParent) m_pParent->PostMessage(WM_COMMAND, ID_NEXTINSTRUMENT); return wParam;
+	case kcPrevInstrument:				if(m_pParent) m_pParent->PostMessage(WM_COMMAND, ID_PREVINSTRUMENT); return wParam;
 	}
 	
 	return NULL;
@@ -713,8 +715,8 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; bRedraw = true; } else
 		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
 		break;
-	case VK_TAB:
-		return true;
+// 	case VK_TAB:
+// 		return true;
 	case VK_RETURN:
 		if (m_pModDoc && m_pModDoc->GetSoundFile())
 		{
