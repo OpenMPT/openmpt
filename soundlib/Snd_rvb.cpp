@@ -35,7 +35,6 @@ LONG gnRvbROfsVol = 0;
 LONG gnRvbLOfsVol = 0;
 
 // Internal reverb state
-static BOOL g_bRvbDownsample2x = 0;
 static BOOL g_bLastInPresent = 0;
 static BOOL g_bLastOutPresent = 0;
 static int g_nLastRvbIn_xl = 0;
@@ -250,18 +249,8 @@ VOID InitializeReverb(BOOL bReset)
 	if ((pRvbPreset != spCurrentPreset) || (bReset))
 	{
 		// Reverb output frequency is half of the dry output rate
-		FLOAT flOutputFrequency;
+		FLOAT flOutputFrequency = (FLOAT)CSoundFile::gdwMixingFreq;
 		ENVIRONMENTREVERB rvb;
-
-		if (CSoundFile::gdwMixingFreq > 50000)
-		{
-			flOutputFrequency = (FLOAT)(CSoundFile::gdwMixingFreq>>1);
-			g_bRvbDownsample2x = TRUE;
-		} else
-		{
-			flOutputFrequency = (FLOAT)CSoundFile::gdwMixingFreq;
-			g_bRvbDownsample2x = FALSE;
-		}
 
 		// Reset reverb parameters
 		spCurrentPreset = pRvbPreset;
@@ -274,7 +263,7 @@ VOID InitializeReverb(BOOL bReset)
 							+ RVBDLY2L_LEN + RVBDLY2R_LEN) / 2);
 
 		// Store reverb decay time (in samples) for reverb auto-shutdown
-		gnReverbDecaySamples = (g_bRvbDownsample2x) ? rvb.ReverbDecaySamples * 2 : rvb.ReverbDecaySamples;
+		gnReverbDecaySamples = rvb.ReverbDecaySamples;
 
 		// Room attenuation at high frequencies
 		LONG nRoomLP;
@@ -392,17 +381,8 @@ VOID ProcessReverb(UINT nSamples)
 	lDryVol = 16 - (((16-lDryVol) * lMaxRvbGain) >> 15);
 	X86_ReverbDryMix(MixSoundBuffer, MixReverbBuffer, lDryVol, nSamples);
 	// Downsample 2x + 1st stage of lowpass filter
-	if (g_bRvbDownsample2x)
-	{
-		nIn = X86_ReverbProcessPreFiltering2x(MixReverbBuffer, nSamples);
-		nOut = nSamples;
-		if (g_bLastOutPresent) nOut--;
-		nOut = (nOut+1)>>1;
-	} else
-	{
-		nIn = X86_ReverbProcessPreFiltering1x(MixReverbBuffer, nSamples);
-		nOut = nIn;
-	}
+	nIn = X86_ReverbProcessPreFiltering1x(MixReverbBuffer, nSamples);
+	nOut = nIn;
 	// Main reverb processing: split into small chunks (needed for short reverb delays)
 	// Reverb Input + Low-Pass stage #2 + Pre-diffusion
 	if (nIn > 0) MMX_ProcessPreDelay(&g_RefDelay, MixReverbBuffer, nIn);
@@ -433,14 +413,7 @@ VOID ProcessReverb(UINT nSamples)
 	// Adjust nDelayPos, in case nIn != nOut
 	g_RefDelay.nDelayPos = (g_RefDelay.nDelayPos - nOut + nIn) & SNDMIX_REFLECTIONS_DELAY_MASK;
 	// Upsample 2x
-	if (g_bRvbDownsample2x)
-	{
-		MMX_ReverbDCRemoval(MixReverbBuffer, nOut);
-		X86_ReverbProcessPostFiltering2x(MixReverbBuffer, MixSoundBuffer, nSamples);
-	} else
-	{
-		MMX_ReverbProcessPostFiltering1x(MixReverbBuffer, MixSoundBuffer, nSamples);
-	}
+	MMX_ReverbProcessPostFiltering1x(MixReverbBuffer, MixSoundBuffer, nSamples);
 	// Automatically shut down if needed
 	if (gnReverbSend) gnReverbSamples = gnReverbDecaySamples;
 	else if (gnReverbSamples > nSamples) gnReverbSamples -= nSamples;
