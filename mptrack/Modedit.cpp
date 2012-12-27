@@ -308,6 +308,13 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 		sampleNames[i] = m_SndFile.m_szNames[i];
 	}
 
+	// Remove sample data references from now unused slots.
+	for(SAMPLEINDEX i = newNumSamples + 1; i <= oldNumSamples; i++)
+	{
+		m_SndFile.GetSample(i).pSample = nullptr;
+		m_SndFile.GetSample(i).nLength = 0;
+	}
+
 	// Now, create new sample list.
 	m_SndFile.m_nSamples = newNumSamples;
 	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
@@ -332,12 +339,6 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 			m_SndFile.GetSample(i + 1).pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[i + 1], "");
 		}
-	}
-
-	// Remove sample data references from now unused slots.
-	for(SAMPLEINDEX i = newNumSamples + 1; i <= oldNumSamples; i++)
-	{
-		m_SndFile.DestroySample(i);
 	}
 
 	if(m_SndFile.GetNumInstruments())

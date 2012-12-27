@@ -6636,20 +6636,20 @@ void CViewPattern::FindInstrument()
 			if(!m.IsPcNote() && m.instr != 0)
 			{
 				SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m.instr);
-				break;
+				return;
 			}
 		} while(row-- != 0);
 
 		// Try previous pattern
 		if(ord == 0)
 		{
-			break;
+			return;
 		}
 		ord = sndFile->Order.GetPreviousOrderIgnoringSkips(ord);
 		pat = sndFile->Order[ord];
 		if(!sndFile->Patterns.IsValidPat(pat))
 		{
-			break;
+			return;
 		}
 		row = sndFile->Patterns[pat].GetNumRows() - 1;
 	}
