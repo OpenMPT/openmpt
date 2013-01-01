@@ -641,10 +641,10 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 				if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL)
 				{
 					ASSERT(false);
-					return;
-				}
+			return;
+		}
 				UINT n = pIns->Keyboard[note-1];
-				pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
+		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
 				if(pSmp != pChn->pModSample)
 				{
 					ASSERT(false);
@@ -774,23 +774,48 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 
 
 	// Reset envelopes
-	if (bResetEnv)
+	if(bResetEnv)
 	{
-		if(!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
-			|| !pChn->nLength || (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
-			// IT compatibility tentative fix: Reset envelopes when instrument changes.
-			|| (IsCompatibleMode(TRK_IMPULSETRACKER) && instrumentChanged))
+		// Blurb by Storlek (from the SchismTracker code):
+		// Conditions experimentally determined to cause envelope reset in Impulse Tracker:
+		// - no note currently playing (of course)
+		// - note given, no portamento
+		// - instrument number given, portamento, compat gxx enabled
+		// - instrument number given, no portamento, after keyoff, old effects enabled
+		// If someone can enlighten me to what the logic really is here, I'd appreciate it.
+		// Seems like it's just a total mess though, probably to get XMs to play right.
+
+		bool reset, resetAlways;
+
+		// IT Compatibility: Envelope reset
+		// Test case: EnvReset.it
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			reset = (!pChn->nLength
+				|| (instrumentChanged && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
+				|| (instrumentChanged && !bPorta && pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
+			resetAlways = (instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
+		} else
+		{
+			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
+				|| !pChn->nLength || (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol));
+			resetAlways = !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || instrumentChanged || pIns == nullptr || pChn->dwFlags[CHN_KEYOFF | CHN_NOTEFADE];
+		}
+
+		if(reset)
 		{
 			pChn->dwFlags.set(CHN_FASTVOLRAMP);
-
-			if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!instrumentChanged) && (pIns) && !pChn->dwFlags[CHN_KEYOFF | CHN_NOTEFADE])
+			if(pIns != nullptr)
 			{
-				if(!pIns->VolEnv.dwFlags[ENV_CARRY]) pChn->VolEnv.Reset();
-				if(!pIns->PanEnv.dwFlags[ENV_CARRY]) pChn->PanEnv.Reset();
-				if(!pIns->PitchEnv.dwFlags[ENV_CARRY]) pChn->PitchEnv.Reset();
-			} else
-			{
-				pChn->ResetEnvelopes();
+				if(resetAlways)
+				{
+					pChn->ResetEnvelopes();
+				} else
+				{
+					if(!pIns->VolEnv.dwFlags[ENV_CARRY]) pChn->VolEnv.Reset();
+					if(!pIns->PanEnv.dwFlags[ENV_CARRY]) pChn->PanEnv.Reset();
+					if(!pIns->PitchEnv.dwFlags[ENV_CARRY]) pChn->PitchEnv.Reset();
+				}
 			}
 
 			// IT Compatibility: Autovibrato reset
@@ -1325,7 +1350,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 				n = pIns->Keyboard[note - 1];
 				note = pIns->NoteMap[note - 1];
 				if(n > 0  && n < MAX_SAMPLES) pSample = Samples[n].pSample;
-			}
+				}
 		} else pSample = nullptr;
 	}
 	ModChannel *p = pChn;
@@ -1864,7 +1889,7 @@ BOOL CSoundFile::ProcessEffects()
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL) instr = 0;
 
-			if (ModCommand::IsNote(note))
+			if(ModCommand::IsNote(note))
 			{
 				pChn->nNewNote = pChn->nLastNote = note;
 
@@ -1896,18 +1921,18 @@ BOOL CSoundFile::ProcessEffects()
 			}
 
 			// Instrument Change ?
-			if (instr)
+			if(instr)
 			{
 				ModSample *psmp = pChn->pModSample;
 				InstrumentChange(pChn, instr, bPorta, true);
 				pChn->nNewIns = 0;
-				// Special IT case: portamento+note causes sample change -> ignore portamento
-				if ((GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+					// Special IT case: portamento+note causes sample change -> ignore portamento
+					if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
 					&& (psmp != pChn->pModSample) && (note) && (note < 0x80))
-				{
-					bPorta = false;
+					{
+						bPorta = false;
+					}
 				}
-			}
 			// New Note ?
 			if (note)
 			{
