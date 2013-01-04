@@ -381,9 +381,10 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 	ModSample &sample = pSndFile->GetSample(smp);
 	LPSTR pCurrentSample = sample.pSample;
 	LPSTR pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
+	bool replace = false;
 
-	UINT nBytesPerSample = undo.OldSample.GetBytesPerSample();
-	UINT nChangeLen = undo.changeEnd - undo.changeStart;
+	uint8 bytesPerSample = undo.OldSample.GetBytesPerSample();
+	SmpLength changeLen = undo.changeEnd - undo.changeStart;
 
 	switch(undo.changeType)
 	{
@@ -407,31 +408,33 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 
 	case sundo_insert:
 		// delete inserted data
-		ASSERT(nChangeLen == sample.nLength - undo.OldSample.nLength);
-		memcpy(pCurrentSample + undo.changeStart * nBytesPerSample, pCurrentSample + undo.changeEnd * nBytesPerSample, (sample.nLength - undo.changeEnd) * nBytesPerSample);
+		ASSERT(changeLen == sample.nLength - undo.OldSample.nLength);
+		memcpy(pCurrentSample + undo.changeStart * bytesPerSample, pCurrentSample + undo.changeEnd * bytesPerSample, (sample.nLength - undo.changeEnd) * bytesPerSample);
 		// also clean the sample end
-		memset(pCurrentSample + undo.OldSample.nLength * nBytesPerSample, 0, (sample.nLength - undo.OldSample.nLength) * nBytesPerSample);
+		memset(pCurrentSample + undo.OldSample.nLength * bytesPerSample, 0, (sample.nLength - undo.OldSample.nLength) * bytesPerSample);
 		break;
 
 	case sundo_update:
 		// simply replace what has been updated.
 		if(sample.nLength < undo.changeEnd) return false;
-		memcpy(pCurrentSample + undo.changeStart * nBytesPerSample, undo.samplePtr, nChangeLen * nBytesPerSample);
+		memcpy(pCurrentSample + undo.changeStart * bytesPerSample, undo.samplePtr, changeLen * bytesPerSample);
 		break;
 
 	case sundo_delete:
 		// insert deleted data
-		pNewSample = pSndFile->AllocateSample(undo.OldSample.GetSampleSizeInBytes() + 4 * nBytesPerSample);
+		pNewSample = pSndFile->AllocateSample(undo.OldSample.GetSampleSizeInBytes() + 4 * bytesPerSample);
 		if(pNewSample == nullptr) return false;
-		memcpy(pNewSample, pCurrentSample, undo.changeStart * nBytesPerSample);
-		memcpy(pNewSample + undo.changeStart * nBytesPerSample, undo.samplePtr, nChangeLen * nBytesPerSample);
-		memcpy(pNewSample + undo.changeEnd * nBytesPerSample, pCurrentSample + undo.changeStart * nBytesPerSample, (undo.OldSample.nLength - undo.changeEnd) * nBytesPerSample);
+		replace = true;
+		memcpy(pNewSample, pCurrentSample, undo.changeStart * bytesPerSample);
+		memcpy(pNewSample + undo.changeStart * bytesPerSample, undo.samplePtr, changeLen * bytesPerSample);
+		memcpy(pNewSample + undo.changeEnd * bytesPerSample, pCurrentSample + undo.changeStart * bytesPerSample, (undo.OldSample.nLength - undo.changeEnd) * bytesPerSample);
 		break;
 
 	case sundo_replace:
 		// simply exchange sample pointer
 		pNewSample = undo.samplePtr;
 		undo.samplePtr = nullptr; // prevent sample from being deleted
+		replace = true;
 		break;
 
 	default:
@@ -444,7 +447,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 	sample.pSample = pCurrentSample; // select the "correct" old sample
 	MemCopy(pSndFile->m_szNames[smp], undo.oldName);
 
-	if(pNewSample != nullptr)
+	if(replace)
 	{
 		ctrlSmp::ReplaceSample(sample, pNewSample, undo.OldSample.nLength, pSndFile);
 	}
@@ -452,7 +455,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 
 	RemoveLastUndoStep(smp);
 
-	if (CanUndo(smp) == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
+	if(CanUndo(smp) == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
 	m_pModDoc->SetModified();
 
 	return true;
