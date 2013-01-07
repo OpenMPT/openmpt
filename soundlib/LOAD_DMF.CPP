@@ -5,7 +5,7 @@
  * Notes  : If it wasn't already outdated when the tracker was released, this would be a rather interesting
  *          and in some parts even sophisticated format - effect columns are separated by effect type, an easy to
  *          understand BPM tempo mode, effect durations are always divided into a 256th row, vibrato effects are
- *			specified by period length and the same 8-Bit granularity is used for both volume and panning.
+ *          specified by period length and the same 8-Bit granularity is used for both volume and panning.
  *          Unluckily, this format does not offer any envelopes or multi-sample instruments, and bidi sample loops
  *          are missing as well, so it was already well behind FT2 and IT back then.
  * Authors: Johannes Schultz (mostly based on DMF.TXT, DMF_EFFC.TXT, trial and error and some invaluable hints by Zatzen)
@@ -120,14 +120,14 @@ struct DMFCHUNK_SAMPLEHEADERTAIL
 // Pattern translation memory
 struct DMF_PATTERNSETTINGS
 {
+	vector<ModCommand::NOTE> noteBuffer;	// Note buffer
+	vector<ModCommand::NOTE> lastNote;		// Last played note on channel
+	vector<bool> playDir;					// Sample play direction of each channel... false = forward (default)
+	bool realBPMmode;						// true = BPM mode
 	uint8 beat;								// Rows per beat
 	uint8 tempoTicks;						// Tick mode param
 	uint8 tempoBPM;							// BPM mode param
-	bool realBPMmode;						// true = BPM mode
 	uint8 internalTicks;					// Ticks per row in final pattern
-	vector<bool> playDir;					// Sample play direction of each channel... false = forward (default)
-	vector<ModCommand::NOTE> noteBuffer;	// Note buffer
-	vector<ModCommand::NOTE> lastNote;		// Last played note on channel
 };
 
 
