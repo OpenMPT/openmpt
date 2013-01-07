@@ -1740,7 +1740,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 			}
 		}
 		// Create a new sample
-		if (pRgn->nWaveLink == 0) nSmp = 0; else
+		//if (pRgn->nWaveLink == 0) nSmp = 0; else
 		if (!bDupRgn)
 		{
 			UINT nmaxsmp = (m_nType & MOD_TYPE_XM) ? 16 : 32;

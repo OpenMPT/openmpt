@@ -212,12 +212,10 @@ bool CSoundFile::ReadSTM(FileReader &file)
 			switch(m->command)
 			{
 			case CMD_SPEED:
-				// I don't know how Axx really works, but I do know that this
-				// isn't it. It does all sorts of mindbogglingly screwy things:
-				//      01 - very fast,
-				//      0F - very slow.
-				//      10 - fast again!
-				// I don't get it.
+				// ST2 assumes that the tempo is 125 * 16 BPM, and effects are updated
+				// on every 16th tick of a row. This is pretty hard to handle, so we just
+				// assume the tempo is 125 and divide the speed by 16 instead.
+				// Parameters below 10 might behave weird.
 				m->param >>= 4;
 				break;
 

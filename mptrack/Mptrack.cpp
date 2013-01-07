@@ -1592,11 +1592,11 @@ BOOL CAboutDlg::OnInitDialog()
 	static const char* const pArrCredit =
 	{ 
 		"OpenMPT / ModPlug Tracker|"
-		"Copyright © 2004-2012 Contributors|"
+		"Copyright © 2004-2013 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque|"
 		"|"
 		"Contributors:|"
-		"Johannes Schultz (2008-2012)|"
+		"Johannes Schultz (2008-2013)|"
 		"Ahti Leppänen (2005-2011)|"
 		"Robin Fernandes (2004-2007)|"
 		"Sergiy Pylypenko (2007)|"
@@ -1639,7 +1639,7 @@ BOOL CAboutDlg::OnInitDialog()
 		"|||||||"
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH|"
 		"ASIO Technology by Steinberg Media Technologies GmbH|"
-		"||||||" 
+		"||||||"
 	};
 
 	m_static.SubclassDlgItem(IDC_CREDITS,this);
