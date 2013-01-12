@@ -791,10 +791,11 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		// Test case: EnvReset.it
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
+			const bool insNumber = (instr != 0);
 			reset = (!pChn->nLength
-				|| (instrumentChanged && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
-				|| (instrumentChanged && !bPorta && pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
-			resetAlways = (instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
+				|| (insNumber && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
+				|| (insNumber && !bPorta && pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
+			resetAlways = (insNumber || pChn->dwFlags[CHN_KEYOFF]);
 		} else
 		{
 			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
