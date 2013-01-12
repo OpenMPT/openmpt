@@ -641,8 +641,9 @@ bool CSoundFile::ReadMod(FileReader &file)
 				}
 			}
 
-			size_t instrWithoutNoteCount = 0;	// For detecting PT1x mode
-			vector<ModCommand::INSTR> lastInstrument(m_nChannels, 0);
+			// For detecting PT1x mode
+			vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
+			vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
 
 			for(ROWINDEX row = 0; row < 64; row++)
 			{
@@ -674,29 +675,31 @@ bool CSoundFile::ReadMod(FileReader &file)
 					}
 
 					// Perform some checks for our heuristics...
-					if (m.command == CMD_TEMPO && m.param < 100)
+					if(m.command == CMD_TEMPO && m.param < 100)
 						hasTempoCommands = true;
-					if (m.command == CMD_PANNING8 && m.param < 0x80)
+					if(m.command == CMD_PANNING8 && m.param < 0x80)
 						leftPanning = true;
-					if (m.command == CMD_PANNING8 && m.param > 0x80 && m.param != 0xA4)
+					if(m.command == CMD_PANNING8 && m.param > 0x80 && m.param != 0xA4)
 						extendedPanning = true;
-					if (m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
+					if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
 					{
 						if(lastInstrument[chn] > 0 && lastInstrument[chn] != m.instr)
 						{
-							instrWithoutNoteCount++;
+							// Arbitrary threshold for going into PT1x mode: 4 consecutive "sample swaps" in one pattern.
+							if(++instrWithoutNoteCount[chn] >= 4)
+							{
+								m_SongFlags.set(SONG_PT1XMODE);
+							}
 						}
+					} else if(m.note != NOTE_NONE)
+					{
+						instrWithoutNoteCount[chn] = 0;
 					}
-					if (m.instr != 0)
+					if(m.instr != 0)
 					{
 						lastInstrument[chn] = m.instr;
 					}
 				}
-			}
-			// Arbitrary threshold for going into PT1x mode: 16 "sample swaps" in one pattern.
-			if(instrWithoutNoteCount > 16)
-			{
-				m_SongFlags.set(SONG_PT1XMODE);
 			}
 		}
 	}
