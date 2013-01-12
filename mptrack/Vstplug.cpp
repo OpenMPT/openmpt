@@ -2109,12 +2109,12 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		if(m_nOutputs > 2)
 		{
 			// first, mix extra outputs on a stereo basis
-			UINT nOuts = m_nOutputs;
+			uint32 numOutputs = m_nOutputs;
 			// so if nOuts is not even, let process the last output later
-			if((nOuts % 2) == 1) nOuts--;
+			if((numOutputs % 2u) == 1) numOutputs--;
 
 			// mix extra stereo outputs
-			for(UINT iOut = 2; iOut < nOuts; iOut++)
+			for(uint32 iOut = 2; iOut < numOutputs; iOut++)
 			{
 				for(size_t i = 0; i < nSamples; i++)
 				{
@@ -2123,12 +2123,12 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			}
 
 			// if m_nOutputs is odd, mix half the signal of last output to each channel
-			if(nOuts != m_nOutputs)
+			if(numOutputs != m_nOutputs)
 			{
 				// trick : if we are here, nOuts = m_nOutputs - 1 !!!
 				for(size_t i = 0; i < nSamples; i++)
 				{
-					float v = 0.5f * outputBuffers[nOuts][i];
+					float v = 0.5f * outputBuffers[numOutputs][i];
 					outputBuffers[0][i] += v;
 					outputBuffers[1][i] += v;
 				}

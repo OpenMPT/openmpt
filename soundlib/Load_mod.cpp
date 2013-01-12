@@ -279,7 +279,7 @@ struct MODSampleHeader
 	{
 		SmpLength writeLength = mptSmp.pSample != nullptr ? mptSmp.nLength : 0;
 		// If the sample size is odd, we have to add a padding byte, as all sample sizes in MODs are even.
-		if((writeLength % 2) != 0)
+		if((writeLength % 2u) != 0)
 		{
 			writeLength++;
 		}
@@ -505,7 +505,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 		}
 
 		// From mikmod: if the file says FLT8, but the orderlist has odd numbers, it's probably really an FLT4
-		if(isFLT8 && (Order[ord] % 2) != 0)
+		if(isFLT8 && (Order[ord] % 2u) != 0)
 		{
 			m_nChannels = 4;
 			isFLT8 = false;
@@ -624,7 +624,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 
 			if(isFLT8)
 			{
-				if((pat % 2) == 0)
+				if((pat % 2u) == 0)
 				{
 					// Only create "even" patterns for FLT8 files
 					if(Patterns.Insert(pat / 2, 64))
@@ -648,7 +648,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 			for(ROWINDEX row = 0; row < 64; row++)
 			{
 				// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
-				ModCommand *rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2) == 0 || !isFLT8) ? 0: 4);
+				ModCommand *rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
 
 				for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 				{
@@ -929,7 +929,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 		}
 
 		// Write padding byte if the sample size is odd.
-		if((sample.nLength % 2) != 0)
+		if((sample.nLength % 2u) != 0)
 		{
 			fwrite(&silence[0], 1, 1, f);
 		}

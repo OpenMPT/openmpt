@@ -92,7 +92,7 @@ bool CSoundFile::ReadWav(FileReader &file)
 
 	for(CHANNELINDEX channel = 0; channel < wavFile.GetNumChannels(); channel++)
 	{
-		ChnSettings[channel].nPan = (channel % 2) ? 256 : 0;
+		ChnSettings[channel].nPan = (channel % 2u) ? 256 : 0;
 		ChnSettings[channel].nVolume = 64;
 		ChnSettings[channel].dwFlags.reset();
 	}

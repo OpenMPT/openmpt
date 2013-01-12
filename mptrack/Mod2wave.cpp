@@ -1170,7 +1170,7 @@ void CDoAcmConvert::OnButton1()
 
 	// Success
 
-	if((wdh.length % 2) != 0)
+	if((wdh.length % 2u) != 0)
 	{
 		// Write padding byte if sample size is odd.
 		int8 padding = 0;
