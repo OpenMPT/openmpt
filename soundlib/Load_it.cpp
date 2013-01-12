@@ -2284,7 +2284,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			CASE('MSF.', m_ModFlags);
 			case 'MIMA': GetMIDIMapper().Deserialize(chunk.GetRawData(), size); break;
 			case 'ChnS':
-				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2) == 0)
+				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
 					const uint16 loopLimit = Util::Min(size / 2, CountOf(ChnSettings) - 64);

@@ -757,7 +757,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	if(writeOrders < 2)
 	{
 		writeOrders = 2;
-	} else if((writeOrders % 2) != 0)
+	} else if((writeOrders % 2u) != 0)
 	{
 		// Number of orders should be even
 		writeOrders++;

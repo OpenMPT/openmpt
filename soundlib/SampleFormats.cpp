@@ -418,12 +418,12 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	data.length = sample.GetSampleSizeInBytes();
 
 	header.filesize += data.length;
-	if((data.length % 2) != 0)
+	if((data.length % 2u) != 0)
 	{
 		// Write padding byte if sample size is odd.
 		header.filesize++;
 	}
-	if((softwareIdLength % 2) != 0)
+	if((softwareIdLength % 2u) != 0)
 	{
 		header.filesize++;
 	}
@@ -467,7 +467,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 		(sample.uFlags & CHN_16BIT) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
 		.WriteSample(f, sample);
 
-	if((data.length % 2) != 0)
+	if((data.length % 2u) != 0)
 	{
 		// Write padding byte if sample size is odd.
 		int8 padding = 0;
@@ -492,7 +492,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	list.list_len = LittleEndian(softwareIdLength);
 	fwrite(&list, 1, 8, f);
 	fwrite(softwareId, 1, list.list_len, f);
-	if((softwareIdLength % 2) != 0)
+	if((softwareIdLength % 2u) != 0)
 	{
 		int8 padding = 0;
 		fwrite(&padding, 1, 1, f);
@@ -1410,7 +1410,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 				break;
 			}
 			markers.push_back(marker);
-			markerChunk.Skip(marker.nameLength + ((marker.nameLength % 2) == 0 ? 1 : 0));
+			markerChunk.Skip(marker.nameLength + ((marker.nameLength % 2u) == 0 ? 1 : 0));
 		}
 
 		if(instrHeader.sustainLoop.playMode != AIFFInstrumentLoop::noLoop)
