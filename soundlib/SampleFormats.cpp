@@ -687,7 +687,7 @@ void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD
 	sample.RelativeTone += static_cast<uint8>(84 - PatchFreqToNote(psh->root_freq));
 	if(psh->scale_factor)
 	{
-		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - psh->scale_frequency - 60);
+		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (psh->scale_frequency - 60));
 	}
 	sample.TransposeToFrequency();
 
