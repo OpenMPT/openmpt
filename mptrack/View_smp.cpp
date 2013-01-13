@@ -1897,7 +1897,7 @@ void CViewSample::OnEditCopy()
 		if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		{
 			pfmt->freqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
-		}
+	}
 		pfmt->channels = (sample.uFlags & CHN_STEREO) ? (WORD)2 : (WORD)1;
 		pfmt->bitspersample = (sample.uFlags & CHN_16BIT) ? (WORD)16 : (WORD)8;
 		pfmt->samplesize = pfmt->channels * pfmt->bitspersample / 8;
@@ -1908,9 +1908,9 @@ void CViewSample::OnEditCopy()
 		LPBYTE psamples = p + sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER);
 		memcpy(psamples, sample.pSample+dwSmpOffset, dwSmpLen);
 		if (pfmt->bitspersample == 8)
-		{
+	{
 			for (UINT i = 0; i < dwSmpLen; i++) psamples[i] += 0x80;
-		}
+	}
 		if (bExtra)
 		{
 			WAVESMPLHEADER *psh = (WAVESMPLHEADER *)(psamples+dwSmpLen);
@@ -1925,7 +1925,7 @@ void CViewSample::OnEditCopy()
 			WAVESAMPLERINFO *psmpl = (WAVESAMPLERINFO *)psh;
 			MemsetZero(psmpl->wsiLoops);
 			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
-			{
+	{
 				psmpl->wsiLoops[psmpl->wsiHdr.dwSampleLoops++].SetLoop(sample.nSustainStart, sample.nSustainEnd, (sample.uFlags & CHN_PINGPONGSUSTAIN) != 0);
 				psmpl->wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
 			}
@@ -1953,18 +1953,18 @@ void CViewSample::OnEditCopy()
 				// XM vibrato is upside down
 				pxh->nVibSweep = 255 - pxh->nVibSweep;
 			}
-
+		
 			if ((pSndFile->m_szNames[m_nSample][0]) || (sample.filename[0]))
-			{
+		{
 				LPSTR pszText = (LPSTR)(pxh+1);
 				memcpy(pszText, pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
 				pxh->xtra_len += MAX_SAMPLENAME;
 				if (sample.filename[0])
-				{
+			{
 					memcpy(pszText + MAX_SAMPLENAME, sample.filename, MAX_SAMPLEFILENAME);
 					pxh->xtra_len += MAX_SAMPLEFILENAME;
-				}
 			}
+		}
 			phdr->filesize += (psh->smpl_len + 8) + (pxh->xtra_len + 8);
 		}
 		GlobalUnlock(hCpy);
@@ -2004,9 +2004,9 @@ void CViewSample::OnEditPaste()
 			sample.pSample = 0;
 			pSndFile->ReadSampleFromFile(m_nSample, p, dwMemSize);
 			if (!pSndFile->m_szNames[m_nSample][0])
-			{
+{
 				memcpy(pSndFile->m_szNames[m_nSample], s, 32);
-			}
+}
 			if (!sample.filename[0])
 			{
 				memcpy(sample.filename, s2, 22);
@@ -2250,7 +2250,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
 				ModSample &sample = pSndFile->GetSample(m_nSample);
-				uint32 freq = pSndFile->GetFreqFromPeriod(pSndFile->GetPeriodFromNote(note + sample.RelativeTone, sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
+				uint32 freq = pSndFile->GetFreqFromPeriod(pSndFile->GetPeriodFromNote(note + (pSndFile->GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
 				wsprintf(s, "%s%d (%d Hz)", szNoteNames[(note - 1) % 12], (note - 1) / 12, freq);
 			}
@@ -2333,7 +2333,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 
 	case DRAGONDROP_DLS:
-		bCanDrop = ((lpDropInfo->dwDropItem < MAX_DLS_BANKS)
+		bCanDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
 				 && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
 		break;
 

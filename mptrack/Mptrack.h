@@ -22,6 +22,7 @@
 
 class CModDoc;
 class CVstPluginManager;
+class CDLSBank;
 
 /////////////////////////////////////////////////////////////////////////////
 // 16-colors DIB
@@ -40,14 +41,6 @@ typedef struct MIDILIBSTRUCT
 {
 	LPTSTR MidiMap[128*2];	// 128 instruments + 128 percussions
 } MIDILIBSTRUCT, *LPMIDILIBSTRUCT;
-
-
-/////////////////////////////////////////////////////////////////////////////
-// DLS Sound Banks
-
-#define MAX_DLS_BANKS	100 //rewbs.increaseMaxDLSBanks
-
-class CDLSBank;
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -115,7 +108,7 @@ protected:
 
 public:
 	static MEMORYSTATUS gMemStatus;
-	static CDLSBank *gpDLSBanks[MAX_DLS_BANKS];
+	static vector<CDLSBank *> gpDLSBanks;
 
 #if (_MSC_VER < MSVC_VER_2010)
 	virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)

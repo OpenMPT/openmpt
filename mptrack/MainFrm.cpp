@@ -1335,6 +1335,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	{
 		CSoundFile::gpSndMixHook = NULL;
 	}
+
 	if (!audioOpenDevice())
 	{
 		m_pSndFile = NULL;
@@ -1400,9 +1401,6 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	}
 	if (m_pSndFile)
 	{
-		//m_pSndFile->LoopPattern(-1);
-		//Commented above line - why loop should be disabled when pausing?
-
 		m_pSndFile->m_SongFlags.reset(SONG_PAUSED);
 		if (m_pSndFile == &m_WaveFile)
 		{
@@ -1410,16 +1408,16 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 			m_WaveFile.Destroy();
 		} else
 		{
-			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+			for(CHANNELINDEX i = m_pSndFile->m_nChannels; i < MAX_CHANNELS; i++)
 			{
-				if (!(m_pSndFile->Chn[i].nMasterChn))
+				if(!(m_pSndFile->Chn[i].nMasterChn))
 				{
 					m_pSndFile->Chn[i].nPos = m_pSndFile->Chn[i].nPosLo = m_pSndFile->Chn[i].nLength = 0;
 				}
 			}
 		}
-
 	}
+
 	m_pModPlaying = NULL;
 	m_pSndFile = NULL;
 	m_hFollowSong = NULL;
@@ -1466,7 +1464,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn)
 //---------------------------------------------------------------------
 {
-	if ((nDLSBank >= MAX_DLS_BANKS) || (!CTrackApp::gpDLSBanks[nDLSBank])) return FALSE;
+	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
 	BeginWaitCursor();
 	PlaySoundFile((LPCSTR)NULL);
 	m_WaveFile.m_nInstruments = 1;

@@ -127,9 +127,9 @@ protected:
 	HTREEITEM m_hItemDrag, m_hItemDrop;
 	HTREEITEM m_hInsLib, m_hMidiLib;
 	HTREEITEM m_tiMidiGrp[17];
-	HTREEITEM m_tiDLS[MAX_DLS_BANKS];
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
+	vector<HTREEITEM> m_tiDLS;
 	vector<ModTreeDocInfo *> DocInfo;
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 

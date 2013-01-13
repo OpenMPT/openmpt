@@ -2040,7 +2040,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 
 	case DRAGONDROP_DLS:
-		bCanDrop = ((lpDropInfo->dwDropItem < MAX_DLS_BANKS)
+		bCanDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
 				 && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
 		break;
 
