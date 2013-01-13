@@ -453,7 +453,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 // DLS Banks support
 
 #define MPTRACK_REG_DLS		"Software\\Olivier Lapicque\\ModPlug Tracker\\DLS Banks"
-CDLSBank *CTrackApp::gpDLSBanks[MAX_DLS_BANKS];
+vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 
 BOOL CTrackApp::LoadDefaultDLSBanks()
@@ -546,10 +546,10 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 	TCHAR s[64];
 	TCHAR szPath[_MAX_PATH];
 	DWORD nBanks = 0;
-	for (UINT i=0; i<MAX_DLS_BANKS; i++)
+	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
 		
-		if (!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
+		if(!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
 			continue;
 		
 		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), CountOf(szPath) - 1);
@@ -571,9 +571,10 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 BOOL CTrackApp::RemoveDLSBank(UINT nBank)
 //---------------------------------------
 {
-	if ((nBank >= MAX_DLS_BANKS) || (!gpDLSBanks[nBank])) return FALSE;
+	if(nBank >= gpDLSBanks.size() || !gpDLSBanks[nBank]) return FALSE;
 	delete gpDLSBanks[nBank];
-	gpDLSBanks[nBank] = NULL;
+	gpDLSBanks[nBank] = nullptr;
+	//gpDLSBanks.erase(gpDLSBanks.begin() + nBank);
 	return TRUE;
 }
 
@@ -581,18 +582,22 @@ BOOL CTrackApp::RemoveDLSBank(UINT nBank)
 BOOL CTrackApp::AddDLSBank(LPCSTR lpszFileName)
 //---------------------------------------------
 {
-	if ((!lpszFileName) || (!lpszFileName[0]) || (!CDLSBank::IsDLSBank(lpszFileName))) return FALSE;
-	for (UINT j=0; j<MAX_DLS_BANKS; j++) if (gpDLSBanks[j])
+	if(!lpszFileName || !lpszFileName[0] || !CDLSBank::IsDLSBank(lpszFileName)) return FALSE;
+	// Check for dupes
+	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
-		if (!lstrcmpi(lpszFileName, gpDLSBanks[j]->GetFileName())) return TRUE;
+		if(gpDLSBanks[i] && !lstrcmpi(lpszFileName, gpDLSBanks[i]->GetFileName())) return TRUE;
 	}
-	for (UINT i=0; i<MAX_DLS_BANKS; i++) if (!gpDLSBanks[i])
+	CDLSBank *bank = new CDLSBank;
+	if(bank->Open(lpszFileName))
 	{
-		gpDLSBanks[i] = new CDLSBank;
-		gpDLSBanks[i]->Open(lpszFileName);
+		gpDLSBanks.push_back(bank);
 		return TRUE;
+	} else
+	{
+		delete bank;
+		return FALSE;
 	}
-	return FALSE;
 }
 
 
@@ -649,7 +654,6 @@ CTrackApp::CTrackApp()
 	m_bDebugMode = FALSE;
 	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
-	for (size_t i = 0; i < MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -997,14 +1001,11 @@ int CTrackApp::ExitInstance()
 		glpMidiLibrary = NULL;
 	}
 	SaveDefaultDLSBanks();
-	for (UINT i=0; i<MAX_DLS_BANKS; i++)
+	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
-		if (gpDLSBanks[i])
-		{
-			delete gpDLSBanks[i];
-			gpDLSBanks[i] = NULL;
-		}
+		delete gpDLSBanks[i];
 	}
+	gpDLSBanks.clear();
 
 	// Uninitialize Plugins
 	UninitializeDXPlugins();

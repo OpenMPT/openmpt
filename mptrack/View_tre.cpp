@@ -127,7 +127,6 @@ CModTree::CModTree(CModTree *pDataTree)
 	MemsetZero(m_tiMidiGrp);
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
-	MemsetZero(m_tiDLS);
 	DocInfo.clear();
 }
 
@@ -463,11 +462,17 @@ void CModTree::RefreshDlsBanks()
 	HTREEITEM hDlsRoot = m_hMidiLib;
 
 	if (!m_pDataTree) return;
-	for (UINT iDls=0; iDls<MAX_DLS_BANKS; iDls++)
+
+	if(m_tiDLS.size() < CTrackApp::gpDLSBanks.size())
 	{
-		if (CTrackApp::gpDLSBanks[iDls])
+		m_tiDLS.resize(CTrackApp::gpDLSBanks.size(), nullptr);
+	}
+
+	for(size_t iDls=0; iDls < CTrackApp::gpDLSBanks.size(); iDls++)
+	{
+		if(CTrackApp::gpDLSBanks[iDls])
 		{
-			if (!m_tiDLS[iDls])
+			if(!m_tiDLS[iDls])
 			{
 				CHAR szName[_MAX_PATH] = "", szExt[_MAX_EXT] = ".dls";
 				TV_SORTCB tvs;
@@ -1150,7 +1155,7 @@ uint64 CModTree::GetModItem(HTREEITEM hItem)
 		}
 	}
 	// Dls Instruments
-	for (UINT iDls=0; iDls<MAX_DLS_BANKS; iDls++) if (m_tiDLS[iDls])
+	for (UINT iDls = 0; iDls < m_tiDLS.size(); iDls++) if (m_tiDLS[iDls])
 	{
 		if (hItem == m_tiDLS[iDls])	return (MODITEM_DLSBANK_FOLDER | (iDls << 16));
 		if (m_tiDLS[iDls] == hRootParent)
@@ -1344,7 +1349,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 			{
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				UINT bank = (modItem & 0x3F000000) >> 24;
-				if ((bank < MAX_DLS_BANKS) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
+				if ((bank < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
 				{
 					CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[bank];
 					UINT rgn = 0, instr = (modItem & 0x00007FFF);
@@ -1854,7 +1859,7 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 	if ((lParam1 & 0xFF00FFFF) == (lParam2 & 0xFF00FFFF))
 	{
 		UINT iDls = (lParam1 >> 24) & 0xFF;
-		if ((iDls < MAX_DLS_BANKS) && (CTrackApp::gpDLSBanks[iDls]))
+		if ((iDls < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[iDls]))
 		{
 			CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[iDls];
 			DLSINSTRUMENT *pDlsIns = pDLSBank->GetInstrument(lParam1 & 0xFFFF);
@@ -3384,7 +3389,7 @@ void CModTree::OnSoundBankProperties()
 	if ((modItemType & 0xFFFF) == MODITEM_DLSBANK_FOLDER)
 	{
 		UINT nBank = modItemID;
-		if ((nBank < MAX_DLS_BANKS) && (CTrackApp::gpDLSBanks[nBank]))
+		if ((nBank < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[nBank]))
 		{
 			CSoundBankProperties dlg(CTrackApp::gpDLSBanks[nBank], this);
 			dlg.DoModal();
