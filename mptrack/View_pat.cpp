@@ -2062,7 +2062,7 @@ void CViewPattern::OnEditFindNext()
 	PATTERNINDEX nPatStart = m_nPattern;
 	PATTERNINDEX nPatEnd = m_nPattern + 1;
 
-	if (m_findReplace.dwFindFlags & PATSEARCH_FULLSEARCH)
+	if(m_findReplace.dwFindFlags & PATSEARCH_FULLSEARCH)
 	{
 		nPatStart = 0;
 		nPatEnd = pSndFile->Patterns.Size();
@@ -2072,14 +2072,14 @@ void CViewPattern::OnEditFindNext()
 		nPatEnd = nPatStart + 1;
 	}
 
-	if (m_bContinueSearch)
+	if(m_bContinueSearch)
 	{
 		nPatStart = m_nPattern;
 	}
 
 	// Do we search for an extended effect?
 	bool isExtendedEffect = false;
-	if (m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
+	if(m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
 	{
 		UINT fxndx = effectInfo.GetIndexFromEffect(m_findReplace.cmdFind.command, m_findReplace.cmdFind.param);
 		isExtendedEffect = effectInfo.IsExtendedEffect(fxndx);
@@ -2126,7 +2126,10 @@ void CViewPattern::OnEditFindNext()
 			}
 		}
 
-		for(; row < pSndFile->Patterns[pat].GetNumRows(); row++)
+		bool firstInPat = true;
+		const ROWINDEX numRows = pSndFile->Patterns[pat].GetNumRows();
+
+		for(; row < numRows; row++)
 		{
 			ModCommand *m = pSndFile->Patterns[pat].GetpModCommand(row, chn);
 
@@ -2251,28 +2254,38 @@ void CViewPattern::OnEditFindNext()
 					}
 					if(replace)
 					{
-						// Just create one logic undo step when auto-replacing all occurences.
-						const bool linkUndoBuffer = (nFound > 1) && (m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL) != 0;
-						GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1, linkUndoBuffer);
+						if((m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL))
+						{
+							// Just create one logic undo step per pattern when auto-replacing all occurences.
+							if(firstInPat)
+							{
+								GetDocument()->GetPatternUndo().PrepareUndo(pat, firstChannel, row, lastChannel - firstChannel + 1, numRows - row + 1, (nFound > 1));
+								firstInPat = false;
+							}
+						} else
+						{
+							// Create separately undo-able items when replacing manually.
+							GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1);
+						}
 
 						if ((m_findReplace.dwReplaceFlags & PATSEARCH_NOTE))
 						{
 							if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOctave)
 							{
 								// -1 octave
-								if (m->note > (12 + NOTE_MIN - 1) && m->note <= NOTE_MAX) m->note -= 12;
+								if(m->note > (12 + NOTE_MIN - 1) && m->note <= NOTE_MAX) m->note -= 12;
 							} else if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNotePlusOctave)
 							{
 								// +1 octave
-								if (m->note <= NOTE_MAX - 12 && m->note >= NOTE_MIN) m->note += 12;
+								if(m->note <= NOTE_MAX - 12 && m->note >= NOTE_MIN) m->note += 12;
 							} else if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOne)
 							{
 								// Note--
-								if (m->note > NOTE_MIN && m->note <= NOTE_MAX) m->note--;
+								if(m->note > NOTE_MIN && m->note <= NOTE_MAX) m->note--;
 							} else if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNotePlusOne)
 							{
 								// Note++
-								if (m->note < NOTE_MAX && m->note >= NOTE_MIN) m->note++;
+								if(m->note < NOTE_MAX && m->note >= NOTE_MIN) m->note++;
 							} else
 							{
 								// Replace with another note
@@ -3800,7 +3813,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		ModCommandPos editpos = GetEditPos(*pSndFile, liveRecord);
 		ModCommand &m = GetModCommand(*pSndFile, editpos);
 		pModDoc->GetPatternUndo().PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
-		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue)/127));
+		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 127));
 		if(!liveRecord)
 			InvalidateRow(editpos.nRow);
 		pMainFrm->ThreadSafeSetModified(pModDoc);

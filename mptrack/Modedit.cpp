@@ -643,8 +643,9 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 		ErrorBox(IDS_ERR_TOOMANYSMP, CMainFrame::GetMainFrame());
 		return SAMPLEINDEX_INVALID;
 	}
-	if (!m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
-	if (i > m_SndFile.GetNumSamples()) m_SndFile.m_nSamples = i;
+	const bool newSlot = (i > m_SndFile.GetNumSamples());
+	if(newSlot || !m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
+	if(newSlot) m_SndFile.m_nSamples = i;
 	m_SndFile.GetSample(i).Initialize(m_SndFile.GetType());
 	SetModified();
 	return i;
