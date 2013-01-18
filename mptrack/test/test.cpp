@@ -502,7 +502,6 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
-
 }
 
 
@@ -760,8 +759,8 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadS3MFile(const CModDoc *pModDoc)
-//------------------------------------------
+void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
+//--------------------------------------------------------
 {
 	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
@@ -775,7 +774,7 @@ void TestLoadS3MFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_classic);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_dwLastSavedWithVersion, MAKE_VERSION_NUMERIC(1, 20, 00, 00));
+	VERIFY_EQUAL_NONCONT(pSndFile->m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 0);
 
 	// Channels
@@ -918,6 +917,14 @@ void TestLoadSaveFile()
 		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "xm", FALSE);
 		TestLoadXMFile(pModDoc);
 
+		// In OpenMPT 1.20 (up to revision 1459), there was a bug in the XM saver
+		// that would create broken XMs if the sample map contained samples that
+		// were only referenced below C-1 or above B-8 (such samples should not
+		// be written). Let's insert a sample there and check if re-loading the
+		// file still works.
+		pModDoc->GetSoundFile()->m_nSamples++;
+		pModDoc->GetSoundFile()->Instruments[1]->Keyboard[110] = pModDoc->GetSoundFile()->GetNumSamples();
+
 		// Test file saving
 		pModDoc->DoSave(theFile + "saved.xm");
 		pModDoc->OnCloseDocument();
@@ -934,7 +941,7 @@ void TestLoadSaveFile()
 	// Test S3M file loading
 	{
 		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "s3m", FALSE);
-		TestLoadS3MFile(pModDoc);
+		TestLoadS3MFile(pModDoc, false);
 
 		// Test file saving
 		pModDoc->DoSave(theFile + "saved.s3m");
@@ -945,7 +952,7 @@ void TestLoadSaveFile()
 
 		// Reload the saved file and test if everything is still working correctly.
 		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.s3m", FALSE);
-		TestLoadS3MFile(pModDoc);
+		TestLoadS3MFile(pModDoc, true);
 		pModDoc->OnCloseDocument();
 	}
 }

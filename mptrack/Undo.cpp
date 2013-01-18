@@ -140,20 +140,12 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 
 	if(pUndo->channelInfo != nullptr)
 	{
-		if(pUndo->channelInfo->oldNumChannels > pSndFile->GetNumChannels())
+		if(pUndo->channelInfo->oldNumChannels != pSndFile->GetNumChannels())
 		{
-			// First add some channels again...
+			// Add or remove channels
 			vector<CHANNELINDEX> channels(pUndo->channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
-			for(CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
-			{
-				channels[i] = i;
-			}
-			m_pModDoc->ReArrangeChannels(channels, false);
-		} else if(pUndo->channelInfo->oldNumChannels < pSndFile->GetNumChannels())
-		{
-			// ... or remove newly added channels
-			vector<CHANNELINDEX> channels(pUndo->channelInfo->oldNumChannels);
-			for(CHANNELINDEX i = 0; i < pUndo->channelInfo->oldNumChannels; i++)
+			const CHANNELINDEX copyCount = Util::Min(pSndFile->GetNumChannels(), pUndo->channelInfo->oldNumChannels);
+			for(CHANNELINDEX i = 0; i < copyCount; i++)
 			{
 				channels[i] = i;
 			}
