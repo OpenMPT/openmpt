@@ -63,7 +63,7 @@
     <ClCompile>
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;ENABLE_EQ;MODPLUG_TRACKER;NO_PACKING;HAVE_DOT_NET;ENABLE_AMD;ENABLE_SSE;ENABLE_AMDNOW;ENABLE_MMX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -119,7 +119,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;ENABLE_MMX;ENABLE_EQ;MODPLUG_TRACKER;NO_PACKING;HAVE_DOT_NET;ENABLE_AMD;ENABLE_SSE;ENABLE_AMDNOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -260,7 +260,7 @@
     <ClCompile Include="..\soundlib\Sndfile.cpp" />
     <ClCompile Include="..\soundlib\Sndmix.cpp" />
     <ClCompile Include="SoundFilePlayConfig.cpp" />
-    <ClCompile Include="StdAfx.cpp">
+    <ClCompile Include="..\common\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</MultiProcessorCompilation>
@@ -403,7 +403,7 @@
     <ClInclude Include="..\Soundlib\snddevx.h" />
     <ClInclude Include="..\Soundlib\Sndfile.h" />
     <ClInclude Include="SoundFilePlayConfig.h" />
-    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="tagging.h" />
     <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="Undo.h" />

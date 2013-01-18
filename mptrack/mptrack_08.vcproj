@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW,ENABLE_MMX"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -156,7 +156,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -529,7 +529,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StdAfx.cpp"
+				RelativePath="..\common\stdafx.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1039,7 +1039,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StdAfx.h"
+				RelativePath="..\common\stdafx.h"
 				>
 			</File>
 			<File
