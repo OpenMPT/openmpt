@@ -17,6 +17,10 @@
 #include <io.h> // for _taccess
 
 #if(_MSC_VER < 1600)
+#if defined(_HAS_TR1)
+// vs2008sp1 has tr1
+#include <type_traits>
+#else
 	// has_trivial_assign for VS2008
 	namespace std
 	{
@@ -35,6 +39,7 @@
 			#undef SPECIALIZE_TRIVIAL_ASSIGN
 		};
 	};
+#endif
 #else
 #include <type_traits>
 #endif
