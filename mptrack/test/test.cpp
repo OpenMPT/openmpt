@@ -13,10 +13,6 @@
 #include "test.h"
 
 
-#ifdef _DEBUG
-	#define new DEBUG_NEW
-#endif
-
 #ifdef ENABLE_TESTS
 
 
@@ -33,6 +29,10 @@
 #include <limits>
 #include <fstream>
 #include <strstream>
+
+#ifdef _DEBUG
+	#define new DEBUG_NEW
+#endif
 
 
 namespace MptTest
