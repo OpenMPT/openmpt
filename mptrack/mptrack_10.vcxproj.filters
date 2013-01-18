@@ -238,7 +238,7 @@
     <ClCompile Include="..\soundlib\Tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
+    <ClCompile Include="..\common\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SoundFilePlayConfig.cpp">
@@ -615,7 +615,7 @@
     <ClInclude Include="SoundFilePlayConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StdAfx.h">
+    <ClInclude Include="..\common\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tagging.h">
