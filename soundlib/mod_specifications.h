@@ -12,7 +12,7 @@
 
 #include "Snd_defs.h"
 #include "modcommand.h"						//
-#include "../mptrack/SoundFilePlayConfig.h" // mixlevel constants.
+#include "../soundlib/SoundFilePlayConfig.h" // mixlevel constants.
 
 
 

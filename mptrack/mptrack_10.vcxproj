@@ -259,7 +259,7 @@
     <ClCompile Include="..\Soundlib\snddev.cpp" />
     <ClCompile Include="..\soundlib\Sndfile.cpp" />
     <ClCompile Include="..\soundlib\Sndmix.cpp" />
-    <ClCompile Include="SoundFilePlayConfig.cpp" />
+    <ClCompile Include="..\soundlib\SoundFilePlayConfig.cpp" />
     <ClCompile Include="..\common\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -402,7 +402,7 @@
     <ClInclude Include="..\Soundlib\snddev.h" />
     <ClInclude Include="..\Soundlib\snddevx.h" />
     <ClInclude Include="..\Soundlib\Sndfile.h" />
-    <ClInclude Include="SoundFilePlayConfig.h" />
+    <ClInclude Include="..\soundlib\SoundFilePlayConfig.h" />
     <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="tagging.h" />
     <ClInclude Include="TrackerSettings.h" />

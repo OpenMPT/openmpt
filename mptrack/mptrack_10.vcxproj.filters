@@ -241,7 +241,7 @@
     <ClCompile Include="..\common\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SoundFilePlayConfig.cpp">
+    <ClCompile Include="..\soundlib\SoundFilePlayConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Sndmix.cpp">
@@ -612,7 +612,7 @@
     <ClInclude Include="..\Soundlib\Sndfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SoundFilePlayConfig.h">
+    <ClInclude Include="..\soundlib\SoundFilePlayConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\stdafx.h">
