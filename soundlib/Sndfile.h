@@ -505,9 +505,6 @@ public:
 	/*static*/ void EQStereo(int *pbuffer, UINT nCount);
 	/*static*/ void EQMono(int *pbuffer, UINT nCount);
 #endif
-	// Analyzer Functions
-	static UINT WaveConvert(LPBYTE lpSrc, signed char *lpDest, UINT nSamples);
-	static UINT WaveStereoConvert(LPBYTE lpSrc, signed char *lpDest, UINT nSamples);
 	static LONG SpectrumAnalyzer(signed char *pBuffer, UINT nSamples, UINT nInc, UINT nChannels);
 	// Float <-> Int conversion routines
 	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
