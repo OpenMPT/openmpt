@@ -119,8 +119,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples)
 //-----------------------------------------------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_nInstruments)) return false;
-	if (!Instruments[nInstr]) return true;
+	if(nInstr == 0 || nInstr >= MAX_INSTRUMENTS || !Instruments[nInstr]) return true;
 
 #ifdef MODPLUG_TRACKER
 	if(removeSamples == askDeleteAssociatedSamples)
@@ -475,7 +474,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 		fwrite(&padding, 1, 1, f);
 	}
 	fwrite(&smpl, 1, smpl.wsiHdr.smpl_len + 8, f);
-
+	
 	// "LIST" field
 	list.list_id = LittleEndian(IFFID_LIST);
 	list.list_len = LittleEndian(sizeof(list) - 8	// LIST
@@ -685,7 +684,7 @@ void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD
 	sample.nVibDepth = psh->vibrato_depth;
 	sample.nVibRate = psh->vibrato_rate/4;
 	sample.FrequencyToTranspose();
-	sample.RelativeTone += static_cast<uint8>(84 - PatchFreqToNote(psh->root_freq));
+	sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(psh->root_freq));
 	if(psh->scale_factor)
 	{
 		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (psh->scale_frequency - 60));
