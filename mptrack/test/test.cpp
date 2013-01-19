@@ -19,12 +19,12 @@
 #include "../mptrack.h"
 #include "../moddoc.h"
 #include "../MainFrm.h"
-#include "../version.h"
+#include "../../common/version.h"
 #include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/MIDIMacros.h"
 #include "../../common/misc_util.h"
 #include "../../common/StringFixer.h"
-#include "../serialization_utils.h"
+#include "../../common/serialization_utils.h"
 #include "../../soundlib/SampleFormatConverters.h"
 #include <limits>
 #include <fstream>

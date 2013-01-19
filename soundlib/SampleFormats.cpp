@@ -20,7 +20,7 @@
 #include "XMTools.h"
 #include "WAVTools.h"
 #include "../common/Reporting.h"
-#include "../mptrack/version.h"
+#include "../common/version.h"
 #include "ChunkReader.h"
 
 

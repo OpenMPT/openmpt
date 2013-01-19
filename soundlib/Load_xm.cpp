@@ -12,7 +12,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "../mptrack/version.h"
+#include "../common/version.h"
 #include "../common/misc_util.h"
 #include "XMTools.h"
 #include <algorithm>

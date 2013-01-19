@@ -28,7 +28,7 @@
 #include "MIDIMappingDialog.h"
 // -! NEW_FEATURE#0015
 #include <direct.h>
-#include "version.h"
+#include "../common/version.h"
 #include "ctrl_pat.h"
 #include "UpdateCheck.h"
 #include "CloseMainDialog.h"

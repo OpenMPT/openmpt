@@ -13,11 +13,11 @@
 #include "Loaders.h"
 #include "tuningcollection.h"
 #include "../mptrack/moddoc.h"
-#include "../mptrack/serialization_utils.h"
+#include "../common/serialization_utils.h"
 #include <fstream>
 #include <strstream>
 #include <list>
-#include "../mptrack/version.h"
+#include "../common/version.h"
 #include "ITTools.h"
 
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))

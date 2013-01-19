@@ -15,7 +15,7 @@
 #include "Mainfrm.h"
 #include "snddev.h"
 #include "SNDDEVX.H"
-#include "version.h"
+#include "../common/version.h"
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
 #include "AutoSaver.h"

@@ -14,8 +14,8 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
-#include "../mptrack/version.h"
-#include "../mptrack/serialization_utils.h"
+#include "../common/version.h"
+#include "../common/serialization_utils.h"
 #include "../common/Reporting.h"
 #include <functional>
 

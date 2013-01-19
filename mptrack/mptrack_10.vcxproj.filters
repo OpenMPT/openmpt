@@ -268,7 +268,7 @@
     <ClCompile Include="..\soundlib\snd_dsp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="serialization_utils.cpp">
+    <ClCompile Include="..\common\serialization_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ChannelManagerDlg.cpp">
@@ -534,7 +534,7 @@
     <ClInclude Include="view_com.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="version.h">
+    <ClInclude Include="..\common\version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Undo.h">
@@ -597,7 +597,7 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="serialization_utils.h">
+    <ClInclude Include="..\common\serialization_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\Snd_defs.h">

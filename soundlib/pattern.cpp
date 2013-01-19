@@ -12,8 +12,8 @@
 #include "pattern.h"
 #include "patternContainer.h"
 #include "../mptrack/mainfrm.h"
-#include "../mptrack/serialization_utils.h"
-#include "../mptrack/version.h"
+#include "../common/serialization_utils.h"
+#include "../common/version.h"
 #include "ITTools.h"
 
 

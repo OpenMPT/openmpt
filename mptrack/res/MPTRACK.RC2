@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Add manually edited resources here...
 
-#include "version.h"
+#include "../common/version.h"
 #include <winver.h>
 
 #define VER_FILEVERSION             VER_MAJORMAJOR,VER_MAJOR,VER_MINOR,VER_MINORMINOR

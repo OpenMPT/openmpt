@@ -23,7 +23,7 @@
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
 #include "../soundlib/MIDIEvents.h"
-#include "version.h"
+#include "../common/version.h"
 #include "midimappingdialog.h"
 #include "../common/StringFixer.h"
 #include "../soundlib/plugins/JBridge.h"
