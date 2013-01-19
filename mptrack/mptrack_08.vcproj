@@ -381,6 +381,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\MixerSettings.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\mmcmp.cpp"
 				>
 			</File>
@@ -916,6 +920,10 @@
 			</File>
 			<File
 				RelativePath="..\common\misc_util.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\MixerSettings.h"
 				>
 			</File>
 			<File

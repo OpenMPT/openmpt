@@ -421,6 +421,9 @@
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\MixerSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -745,6 +748,9 @@
       <Filter>Module Loaders</Filter>
     </ClInclude>
     <ClInclude Include="..\common\AudioCriticalSection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MixerSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

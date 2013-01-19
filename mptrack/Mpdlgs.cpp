@@ -551,10 +551,10 @@ BOOL COptionsPlayer::OnInitDialog()
 	OnResamplerChanged();
 
 	char s[16] = "";
-	_ltoa(CMainFrame::GetSettings().glVolumeRampUpSamples, s, 10);
+	_ltoa(CMainFrame::GetSettings().m_MixerSettings.glVolumeRampUpSamples, s, 10);
 	m_CEditRampUp.SetWindowText(s);
 
-	_ltoa(CMainFrame::GetSettings().glVolumeRampDownSamples, s, 10);
+	_ltoa(CMainFrame::GetSettings().m_MixerSettings.glVolumeRampDownSamples, s, 10);
 	m_CEditRampDown.SetWindowText(s);
 
 	//end rewbs.resamplerConf
@@ -590,7 +590,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	CMainFrame::GetSettings().gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
+	CMainFrame::GetSettings().m_MixerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -607,7 +607,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().gdWFIRCutoff * 100)));
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().m_MixerSettings.gdWFIRCutoff * 100)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -618,10 +618,10 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
 		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
 		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(CMainFrame::GetSettings().gbWFIRType);
+		m_CbnWFIRType.SetCurSel(CMainFrame::GetSettings().m_MixerSettings.gbWFIRType);
 		m_CbnWFIRType.EnableWindow(TRUE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().m_MixerSettings.gdWFIRCutoff*100)));
 		break;
 	default: 
 		m_CbnWFIRType.AddString("None");
@@ -646,7 +646,7 @@ void COptionsPlayer::OnDefaultResampling()
 	
 }
 
-extern void SndMixInitializeTables();
+extern void SndMixInitializeTables(const MixerSettings & mixersettings);
 //end rewbs.resamplerConf
 void COptionsPlayer::OnOK()
 //-------------------------
@@ -692,15 +692,15 @@ void COptionsPlayer::OnOK()
 	CString s;
 	m_CEditWFIRCutoff.GetWindowText(s);
 	if (s != "")
-		CMainFrame::GetSettings().gdWFIRCutoff = atoi(s)/100.0;
-	//CMainFrame::GetSettings().gbWFIRType set in OnWFIRTypeChange
+		CMainFrame::GetSettings().m_MixerSettings.gdWFIRCutoff = atoi(s)/100.0;
+	//CMainFrame::GetSettings().m_MixerSettings.gbWFIRType set in OnWFIRTypeChange
 
 	m_CEditRampUp.GetWindowText(s);
-	CMainFrame::GetSettings().glVolumeRampUpSamples = atol(s);
+	CMainFrame::GetSettings().m_MixerSettings.glVolumeRampUpSamples = atol(s);
 	m_CEditRampDown.GetWindowText(s);
-	CMainFrame::GetSettings().glVolumeRampDownSamples = atol(s);
+	CMainFrame::GetSettings().m_MixerSettings.glVolumeRampDownSamples = atol(s);
 
-	SndMixInitializeTables(); //regenerate resampling tables
+	SndMixInitializeTables(CMainFrame::GetSettings().m_MixerSettings); //regenerate resampling tables
 	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);
 	CPropertyPage::OnOK();

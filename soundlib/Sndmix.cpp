@@ -11,7 +11,9 @@
 
 #include "stdafx.h"
 
-#include "../mptrack/MainFrm.h"	// TODO: Mix Settings shouldn't require CMainFrame
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/MainFrm.h"
+#endif
 #include "sndfile.h"
 #include "MIDIEvents.h"
 #include "tuning.h"
@@ -38,7 +40,10 @@ DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
 UINT CSoundFile::gnAGC = AGC_UNITY;
+double CSoundFile::gdWFIRCutoff = 0.97; //default value
+BYTE CSoundFile::gbWFIRType = 7; //WFIR_KAISER4T; //default value
 UINT CSoundFile::gnVolumeRampUpSamples = 42;		//default value
+UINT CSoundFile::gnVolumeRampUpSamplesTarget = 42;		//default value
 UINT CSoundFile::gnVolumeRampDownSamples = 42;		//default value
 UINT CSoundFile::gnCPUUsage = 0;
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
@@ -58,7 +63,7 @@ extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
-extern void SndMixInitializeTables();
+extern void SndMixInitializeTables(const MixerSettings & mixersettings);
 
 extern short int ModSinusTable[64];
 extern short int ModRampDownTable[64];
@@ -209,23 +214,47 @@ rneg:
 }
 
 
+BOOL CSoundFile::SetMixerSettings(const MixerSettings & mixersettings)
+//--------------------------------------------------------------------
+{
+
+	// Start with ramping disabled to avoid clicks on first read.
+	// Ramping is now set after the first read in CSoundFile::Read();
+	gnVolumeRampUpSamples = 0;
+	gnVolumeRampUpSamplesTarget = mixersettings.glVolumeRampUpSamples;
+	gnVolumeRampDownSamples = mixersettings.glVolumeRampDownSamples;
+
+	gdWFIRCutoff = mixersettings.gdWFIRCutoff;
+	gbWFIRType =  mixersettings.gbWFIRType;
+
+	return TRUE;
+}
+
+MixerSettings CSoundFile::GetMixerSettings()
+//--------------------------------------------------------------------
+{
+	MixerSettings mixersettings;
+	mixersettings.glVolumeRampUpSamples = gnVolumeRampUpSamplesTarget;
+	mixersettings.glVolumeRampDownSamples = gnVolumeRampDownSamples;
+	mixersettings.gdWFIRCutoff = gdWFIRCutoff;
+	mixersettings.gbWFIRType = gbWFIRType;
+	return mixersettings;
+}
+
+
 BOOL CSoundFile::InitPlayer(BOOL bReset)
 //--------------------------------------
 {
 #ifndef FASTSOUNDLIB
 	if (!gbInitTables)
 	{
-		SndMixInitializeTables();
+		SndMixInitializeTables(GetMixerSettings());
 		gbInitTables = true;
 	}
 #endif
 	if (m_nMaxMixChannels > MAX_CHANNELS) m_nMaxMixChannels = MAX_CHANNELS;
 	if (gdwMixingFreq < 4000) gdwMixingFreq = 4000;
 	if (gdwMixingFreq > MAX_SAMPLE_RATE) gdwMixingFreq = MAX_SAMPLE_RATE;
-	// Start with ramping disabled to avoid clicks on first read.
-	// Ramping is now set after the first read in CSoundFile::Read();
-	gnVolumeRampUpSamples = 0; 
-	gnVolumeRampDownSamples = CMainFrame::GetSettings().glVolumeRampDownSamples;
 	gnDryROfsVol = gnDryLOfsVol = 0;
 #ifndef NO_REVERB
 	gnRvbROfsVol = gnRvbLOfsVol = 0;
@@ -458,7 +487,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
 		// Turn on ramping after first read (fix http://forum.openmpt.org/index.php?topic=523.0 )
-		gnVolumeRampUpSamples = CMainFrame::GetSettings().glVolumeRampUpSamples;
+		gnVolumeRampUpSamples = gnVolumeRampUpSamplesTarget;
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
