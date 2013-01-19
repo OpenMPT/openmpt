@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "tagging.h"
-#include "version.h"
+#include "../common/version.h"
 #include "sndfile.h"
 
 ///////////////////////////////////////////////////

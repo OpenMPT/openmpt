@@ -248,7 +248,7 @@
     <ClCompile Include="SampleEditorDialogs.cpp" />
     <ClCompile Include="ScaleEnvPointsDlg.cpp" />
     <ClCompile Include="SelectPluginDialog.cpp" />
-    <ClCompile Include="serialization_utils.cpp" />
+    <ClCompile Include="..\common\serialization_utils.cpp" />
     <ClCompile Include="..\soundlib\snd_dsp.cpp" />
     <ClCompile Include="..\soundlib\snd_eq.cpp" />
     <ClCompile Include="..\soundlib\snd_flt.cpp" />
@@ -397,7 +397,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SampleEditorDialogs.h" />
     <ClInclude Include="ScaleEnvPointsDlg.h" />
-    <ClInclude Include="serialization_utils.h" />
+    <ClInclude Include="..\common\serialization_utils.h" />
     <ClInclude Include="..\soundlib\Snd_defs.h" />
     <ClInclude Include="..\Soundlib\snddev.h" />
     <ClInclude Include="..\Soundlib\snddevx.h" />
@@ -408,7 +408,7 @@
     <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="Undo.h" />
     <ClInclude Include="UpdateCheck.h" />
-    <ClInclude Include="version.h" />
+    <ClInclude Include="..\common\version.h" />
     <ClInclude Include="view_com.h" />
     <ClInclude Include="view_gen.h" />
     <ClInclude Include="view_ins.h" />

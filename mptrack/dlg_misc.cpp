@@ -17,7 +17,7 @@
 #include "ChildFrm.h"
 #include "vstplug.h"
 #include "ChannelManagerDlg.h"
-#include "version.h"
+#include "../common/version.h"
 #include "../common/StringFixer.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"

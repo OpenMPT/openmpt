@@ -20,7 +20,7 @@
 #include "CreditStatic.h"
 #include "hyperEdit.h"
 #include "commctrl.h"
-#include "version.h"
+#include "../common/version.h"
 #include "test/test.h"
 #include <afxadv.h>
 #include <shlwapi.h>

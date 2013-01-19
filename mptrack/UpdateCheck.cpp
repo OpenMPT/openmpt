@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "UpdateCheck.h"
-#include "version.h"
+#include "../common/version.h"
 #include "../common/misc_util.h"
 #include "Mptrack.h"
 

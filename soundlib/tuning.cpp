@@ -11,7 +11,7 @@
 #include "stdafx.h"
 
 #include "tuning.h"
-#include "../mptrack/serialization_utils.h"
+#include "../common/serialization_utils.h"
 #include <string>
 
 typedef CTuningRTI::RATIOTYPE RATIOTYPE;

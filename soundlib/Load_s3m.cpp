@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "../mptrack/version.h"
+#include "../common/version.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"	// Logging
 #endif // MODPLUG_TRACKER

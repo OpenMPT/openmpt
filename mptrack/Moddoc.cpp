@@ -19,7 +19,7 @@
 #include "mod2wave.h"
 #include "mod2midi.h"
 #include "vstplug.h"
-#include "version.h"
+#include "../common/version.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"

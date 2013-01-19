@@ -481,7 +481,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\serialization_utils.cpp"
+				RelativePath="..\common\serialization_utils.cpp"
 				>
 			</File>
 			<File
@@ -1015,7 +1015,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\serialization_utils.h"
+				RelativePath="..\common\serialization_utils.h"
 				>
 			</File>
 			<File
@@ -1067,7 +1067,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\version.h"
+				RelativePath="..\common\version.h"
 				>
 			</File>
 			<File

@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #define TUNINGBASE_CPP
 #include "tuningbase.h"
-#include "../mptrack/serialization_utils.h"
+#include "../common/serialization_utils.h"
 
 #ifdef TUNINGBASE_H
 

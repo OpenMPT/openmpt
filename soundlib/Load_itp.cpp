@@ -15,7 +15,7 @@
 
 #include "stdafx.h"
 #include "../mptrack/mptrack.h"
-#include "../mptrack/version.h"
+#include "../common/version.h"
 #include "Loaders.h"
 #include "ITTools.h"
 
