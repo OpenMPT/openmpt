@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "../soundlib/FileReader.h"
+
 // Sample import / export formats
 //============
 class SampleIO

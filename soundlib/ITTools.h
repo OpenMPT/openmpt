@@ -10,6 +10,10 @@
 
 #pragma once
 
+#include "../soundlib/ModInstrument.h"
+#include "../soundlib/ModSample.h"
+#include "../soundlib/SampleIO.h"
+
 #pragma pack(push, 1)
 
 struct ITFileHeader

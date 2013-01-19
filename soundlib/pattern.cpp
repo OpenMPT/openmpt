@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "pattern.h"
 #include "patternContainer.h"
-#include "../mptrack/mainfrm.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
 #include "../common/AudioCriticalSection.h"

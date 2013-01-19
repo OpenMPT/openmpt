@@ -11,6 +11,8 @@
 #pragma once
 
 #include "../common/misc_util.h"
+#include "../soundlib/tuning.h"
+#include <set>
 
 // Instrument Envelopes
 struct InstrumentEnvelope
