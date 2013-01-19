@@ -175,6 +175,7 @@
     <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\MIDIEvents.cpp" />
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\soundlib\MixerSettings.cpp" />
     <ClCompile Include="..\soundlib\ModChannel.cpp" />
     <ClCompile Include="..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="..\soundlib\ModSample.cpp" />
@@ -331,6 +332,7 @@
     <ClInclude Include="..\soundlib\ITTools.h" />
     <ClInclude Include="..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\soundlib\MixerSettings.h" />
     <ClInclude Include="..\soundlib\ModChannel.h" />
     <ClInclude Include="..\soundlib\ModInstrument.h" />
     <ClInclude Include="..\soundlib\ModSample.h" />

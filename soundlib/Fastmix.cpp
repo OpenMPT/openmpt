@@ -20,7 +20,6 @@
 
 // rewbs.resamplerConf
 #include "../mptrack/mptrack.h"
-#include "../mptrack/MainFrm.h"
 #include "WindowedFIR.h"
 // end  rewbs.resamplerConf
 

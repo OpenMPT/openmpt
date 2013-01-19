@@ -50,12 +50,6 @@ TrackerSettings::TrackerSettings()
 	gcsPreviousVersion = "";
 	gcsInstallGUID = "";
 	// Audio Setup
-	//rewbs.resamplerConf
-	glVolumeRampUpSamples = 16;
-	glVolumeRampDownSamples = 42;
-	gdWFIRCutoff = 0.97;
-	gbWFIRType = 7; //WFIR_KAISER4T;
-	//end rewbs.resamplerConf
 	gnAutoChordWaitTime = 60;
 	gnMsgBoxVisiblityFlags = uint32_max;
 
@@ -343,18 +337,18 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_nPreAmp = CMainFrame::GetPrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
 	CSoundFile::m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
 	CSoundFile::m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
-	gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", gbWFIRType, iniFile));
+	m_MixerSettings.gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_MixerSettings.gbWFIRType, iniFile));
 	//gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
-	gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(gdWFIRCutoff * 100.0), iniFile)) / 100.0;
+	m_MixerSettings.gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(m_MixerSettings.gdWFIRCutoff * 100.0), iniFile)) / 100.0;
 	
 	// Ramping... first try to read the old setting, then the new ones
 	const long volRamp = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", -1, iniFile);
 	if(volRamp != -1)
 	{
-		glVolumeRampUpSamples = glVolumeRampDownSamples = volRamp;
+		m_MixerSettings.glVolumeRampUpSamples = m_MixerSettings.glVolumeRampDownSamples = volRamp;
 	}
-	glVolumeRampUpSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampUpSamples", glVolumeRampUpSamples, iniFile);
-	glVolumeRampDownSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampDownSamples", glVolumeRampDownSamples, iniFile);
+	m_MixerSettings.glVolumeRampUpSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
+	m_MixerSettings.glVolumeRampDownSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
 
 	m_dwMidiSetup = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
 	m_nMidiDevice = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
@@ -599,13 +593,13 @@ bool TrackerSettings::LoadRegistrySettings()
 		LoadRegistryEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
 
 		//rewbs.resamplerConf
-		dwDWORDSize = sizeof(gbWFIRType);
-		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&gbWFIRType, &dwDWORDSize);
-		dwDWORDSize = sizeof(gdWFIRCutoff);
-		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&gdWFIRCutoff, &dwDWORDSize);
-		dwDWORDSize = sizeof(glVolumeRampUpSamples);
-		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&glVolumeRampUpSamples, &dwDWORDSize);
-		glVolumeRampDownSamples = glVolumeRampUpSamples;
+		dwDWORDSize = sizeof(m_MixerSettings.gbWFIRType);
+		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gbWFIRType, &dwDWORDSize);
+		dwDWORDSize = sizeof(m_MixerSettings.gdWFIRCutoff);
+		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdWFIRCutoff, &dwDWORDSize);
+		dwDWORDSize = sizeof(m_MixerSettings.glVolumeRampUpSamples);
+		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.glVolumeRampUpSamples, &dwDWORDSize);
+		m_MixerSettings.glVolumeRampDownSamples = m_MixerSettings.glVolumeRampUpSamples;
 
 		//end rewbs.resamplerConf
 		//rewbs.autochord
@@ -734,11 +728,11 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", gbWFIRType, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(gdWFIRCutoff*100+0.5), iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_MixerSettings.gbWFIRType, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(m_MixerSettings.gdWFIRCutoff*100+0.5), iniFile);
 	WritePrivateProfileString("Sound Settings", "VolumeRampSamples", NULL, iniFile);	// deprecated
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampUpSamples", glVolumeRampUpSamples, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampDownSamples", glVolumeRampDownSamples, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
 
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);

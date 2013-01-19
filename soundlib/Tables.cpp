@@ -14,8 +14,6 @@
 #include "sndfile.h"
 
 // rewbs.resamplerConf
-#include "../mptrack/mptrack.h"
-#include "../mptrack/MainFrm.h"
 #include "WindowedFIR.h"
 // end  rewbs.resamplerConf
 
@@ -691,10 +689,10 @@ static void getdownsample2x(short int *psinc)
 
 
 
-void SndMixInitializeTables()
+void SndMixInitializeTables(const MixerSettings & mixersettings)
 {
-	CWindowedFIR::InitTable();
-	getsinc(gKaiserSinc, 9.6377, CMainFrame::GetSettings().gdWFIRCutoff);
+	CWindowedFIR::InitTable(mixersettings);
+	getsinc(gKaiserSinc, 9.6377, mixersettings.gdWFIRCutoff);
  	//ericus' downsampling improvement.
  	//getsinc(gDownsample13x, 8.5, 3.0/4.0);
 	//getdownsample2x(gDownsample2x);

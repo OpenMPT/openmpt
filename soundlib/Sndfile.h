@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../soundlib/SoundFilePlayConfig.h"
+#include "../soundlib/MixerSettings.h"
 #include "../common/misc_util.h"
 #include "mod_specifications.h"
 #include <vector>
@@ -234,7 +235,9 @@ public:	// Static Members
 	static LONG m_nStreamVolume;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
 	static UINT gnAGC;
-	static UINT gnVolumeRampUpSamples, gnVolumeRampDownSamples;
+	static double gdWFIRCutoff;
+	static BYTE gbWFIRType;
+	static UINT gnVolumeRampUpSamples, gnVolumeRampUpSamplesTarget, gnVolumeRampDownSamples;
 	static UINT gnCPUUsage;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
@@ -469,6 +472,8 @@ public:
 
 public:
 	// Mixer Config
+	static BOOL SetMixerSettings(const MixerSettings & mixersettings);
+	static MixerSettings GetMixerSettings();
 	static BOOL InitPlayer(BOOL bReset=FALSE);
 	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
 	static BOOL SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL xbass,BOOL dolbynr=FALSE,BOOL bEQ=FALSE);
