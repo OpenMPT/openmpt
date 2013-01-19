@@ -14,6 +14,7 @@
 #include "CommandSet.h"
 #include "inputhandler.h"
 #include "mptrack.h"
+#include "../common/AudioCriticalSection.h"
 
 class CInputHandler;
 class CMainFrame;
@@ -422,7 +423,6 @@ protected:
 public:
 
 	// Low-Level Audio
-	static CRITICAL_SECTION m_csAudio;
 	static ISoundDevice *gpSoundDevice;
 	static HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
 	static HANDLE m_hPlayThread, m_hNotifyThread;
@@ -666,22 +666,6 @@ public:
 	static std::vector<CString> s_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.
 	static std::vector<CString> s_TemplateModulePaths;
-};
-
-// Critical section handling done in (safe) RAII style.
-// Create a CriticalSection object whenever you need exclusive access to CSoundFile.
-// One object = one lock / critical section.
-// The critical section is automatically left when the object is destroyed, but
-// Enter() and Leave() can also be called manually if needed.
-class CriticalSection
-{
-protected:
-	bool inSection;
-public:
-	CriticalSection() { inSection = false; Enter(); };
-	~CriticalSection() { Leave(); };
-	void Enter() { if(!inSection) { inSection = true; EnterCriticalSection(&CMainFrame::m_csAudio); } };
-	void Leave() { if(inSection) { inSection = false; LeaveCriticalSection(&CMainFrame::m_csAudio); } };
 };
 
 const CHAR gszBuildDate[] = __DATE__ " " __TIME__;

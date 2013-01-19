@@ -13,8 +13,9 @@
 #include "sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
+#include "../mptrack/Mainfrm.h"
 #endif //MODPLUG_TRACKER
-#include "../mptrack/Mainfrm.h" // For CriticalSection
+#include "../common/AudioCriticalSection.h"
 #include "Wav.h"
 #include "ITTools.h"
 #include "XMTools.h"

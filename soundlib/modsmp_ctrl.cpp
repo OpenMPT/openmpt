@@ -10,7 +10,8 @@
 
 #include "stdafx.h"
 #include "modsmp_ctrl.h"
-#include "mptrack/MainFrm.h"
+#include "../common/AudioCriticalSection.h"
+#include "../common/Reporting.h"
 
 #define new DEBUG_NEW
 
