@@ -795,7 +795,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			reset = (!pChn->nLength
 				|| (insNumber && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
 				|| (insNumber && !bPorta && pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
-			resetAlways = (insNumber || pChn->dwFlags[CHN_KEYOFF]);
+			resetAlways = (instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
 		} else
 		{
 			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
