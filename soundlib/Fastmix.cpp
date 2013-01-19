@@ -18,10 +18,7 @@
 #include <math.h>
 #endif
 
-// rewbs.resamplerConf
-#include "../mptrack/mptrack.h"
 #include "WindowedFIR.h"
-// end  rewbs.resamplerConf
 
 #pragma bss_seg(".modplug")
 
