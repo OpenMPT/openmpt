@@ -35,60 +35,6 @@ extern short int gDownsample2x[];
 #define PROCSUPPORT_3DNOW	0x08
 #define PROCSUPPORT_SSE		0x10
 
-// Byte offsets into the ModChannel structure
-#define CHNOFS_PCURRENTSAMPLE	ModChannel.pCurrentSample	// 0
-#define CHNOFS_NPOS				ModChannel.nPos				// 4
-#define CHNOFS_NPOSLO			ModChannel.nPosLo			// 8
-#define CHNOFS_NINC				ModChannel.nInc				// 12
-#define CHNOFS_NRIGHTVOL		ModChannel.nRightVol		// 16
-#define CHNOFS_NLEFTVOL			ModChannel.nLeftVol			// 20
-#define CHNOFS_NRIGHTRAMP		ModChannel.nRightRamp		// 24
-#define CHNOFS_NLEFTRAMP		ModChannel.nLeftRamp		// 28
-
-
-#ifdef ENABLE_MMX
-
-#define MMX_PARAM1				20[esp]
-#define MMX_PARAM2				24[esp]
-#define MMX_PARAM3				28[esp]
-#define MMX_PARAM4				32[esp]
-#define MMX_PARAM5				36[esp]
-
-#define MMX_PCHANNEL			MMX_PARAM1
-#define MMX_PBUFFER				MMX_PARAM2
-#define MMX_PBUFMAX				MMX_PARAM3
-
-#define MMX_ENTER	\
-	__asm push ebx	\
-	__asm push esi	\
-	__asm push edi	\
-	__asm push ebp
-
-
-#define MMX_LEAVE	\
-	__asm pop ebp	\
-	__asm pop edi	\
-	__asm pop esi	\
-	__asm pop ebx	\
-	__asm ret
-
-
-#endif
-
-#pragma warning (disable:4100)
-#pragma warning (disable:4799) // function has no EMMS instruction
-
-
-// -> CODE#0024 UPDATE#04
-// -> DESC="wav export update"
-//const float _f2ic = (float)(1 << 28);
-//const float _i2fc = (float)(1.0 / (1 << 28));
-//const float _f2ic = (float)0x7fffffff;
-//const float _i2fc = (float)(1.0 / 0x7fffffff);
-//const float _f2ic = (float)MIXING_CLIPMAX;
-//const float _i2fc = (float)(1.0/MIXING_CLIPMAX);
-// -! NEW_FEATURE#0024
-
 static unsigned int QueryProcessorExtensions()
 {
 	static unsigned int fProcessorExtensions = 0;

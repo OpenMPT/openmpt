@@ -30,9 +30,6 @@ struct ModChannelEnvInfo
 // Mix Channel Struct
 typedef struct __declspec(align(32)) ModChannel_
 {
-	// First 32-bytes: Most used mixing information: don't change it
-	// These fields are accessed directly by the MMX mixing code (look out for CHNOFS_PCURRENTSAMPLE).
-	// In the meantime, MMX mixing has been removed because it interfered with the new resonant filter code, and the byte offsets are also no longer hardcoded...
 	LPSTR pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
 	uint32 nPos;
 	uint32 nPosLo;			// actually 16-bit (fractional part)
@@ -41,7 +38,7 @@ typedef struct __declspec(align(32)) ModChannel_
 	int32 nLeftVol;
 	int32 nRightRamp;
 	int32 nLeftRamp;
-	// 2nd cache line
+
 	SmpLength nLength;
 	SmpLength nLoopStart;
 	SmpLength nLoopEnd;
