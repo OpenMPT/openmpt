@@ -418,6 +418,9 @@
     <ClCompile Include="..\soundlib\WAVTools.cpp">
       <Filter>Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\AudioCriticalSection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -740,6 +743,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\WAVTools.h">
       <Filter>Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\AudioCriticalSection.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

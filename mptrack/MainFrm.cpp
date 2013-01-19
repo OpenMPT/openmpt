@@ -133,7 +133,6 @@ HHOOK CMainFrame::ghKbdHook = NULL;
 std::vector<CString> CMainFrame::s_ExampleModulePaths;
 std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
-CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
 DWORD CMainFrame::m_dwPlayThreadId = 0;
 HANDLE CMainFrame::m_hAudioWakeUp = NULL;
@@ -238,8 +237,8 @@ CMainFrame::CMainFrame()
 	MemsetZero(gpenVuMeter);
 	
 	// Create Audio Critical Section
-	MemsetZero(m_csAudio);
-	InitializeCriticalSection(&m_csAudio);
+	MemsetZero(g_csAudio);
+	InitializeCriticalSection(&g_csAudio);
 
 	m_Settings.LoadSettings();
 
@@ -310,7 +309,7 @@ VOID CMainFrame::Initialize()
 CMainFrame::~CMainFrame()
 //-----------------------
 {
-	DeleteCriticalSection(&m_csAudio);
+	DeleteCriticalSection(&g_csAudio);
 	delete m_InputHandler; 	//rewbs.customKeys
 	delete m_pAutoSaver; //rewbs.autosaver
 	//delete m_pPerfCounter;

@@ -14,6 +14,7 @@
 #include "../mptrack/mainfrm.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
+#include "../common/AudioCriticalSection.h"
 #include "ITTools.h"
 
 
