@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "../mptrack/SoundFilePlayConfig.h"
+#include "../soundlib/SoundFilePlayConfig.h"
 #include "../common/misc_util.h"
 #include "mod_specifications.h"
 #include <vector>

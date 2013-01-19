@@ -525,7 +525,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SoundFilePlayConfig.cpp"
+				RelativePath="..\soundlib\SoundFilePlayConfig.cpp"
 				>
 			</File>
 			<File
@@ -1035,7 +1035,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SoundFilePlayConfig.h"
+				RelativePath="..\soundlib\SoundFilePlayConfig.h"
 				>
 			</File>
 			<File
