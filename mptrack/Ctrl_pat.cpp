@@ -268,7 +268,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		GetDlgItem(IDC_SPIN_SEQNUM)->EnableWindow(isMultiSeqAvail);
 
 		// Enable/disable pattern names
-		BOOL isPatNameAvail = (m_pSndFile->GetType() & (MOD_TYPE_MPT|MOD_TYPE_IT|MOD_TYPE_XM)) ? TRUE : FALSE;
+		BOOL isPatNameAvail = m_pSndFile->GetModSpecifications().hasPatternNames ? TRUE : FALSE;
 		GetDlgItem(IDC_STATIC_PATTERNNAME)->EnableWindow(isPatNameAvail);
 		GetDlgItem(IDC_EDIT_PATTERNNAME)->EnableWindow(isPatNameAvail);
 	}
@@ -842,7 +842,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		ORDERINDEX nInsertWhere = selection.firstOrd + nInsertCount + 1;
 		if (nInsertWhere >= pSndFile->GetModSpecifications().ordersMax)
 			return;
-		bool bSuccess = false;
+		bool success = false;
 		// Has this pattern been duplicated already? (for multiselect)
 		vector<PATTERNINDEX> patReplaceIndex(pSndFile->Patterns.Size(), PATTERNINDEX_INVALID);
 
@@ -872,7 +872,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 					{
 						memcpy(pSndFile->Patterns[nNewPat], pSndFile->Patterns[nCurPat], n * sizeof(ModCommand));
 					}
-					bSuccess = true;
+					success = true;
 					// Mark as duplicated, so if this pattern is to be duplicated again, the same new pattern number is inserted into the order list.
 					patReplaceIndex[nCurPat] = nNewPat;
 				} else
@@ -899,11 +899,11 @@ void CCtrlPatterns::OnPatternDuplicate()
 					pSndFile->Order[selection.firstOrd + i + nInsertCount + 1] = nNewPat;
 				}
 
-				bSuccess = true;
+				success = true;
 
 			}
 		}
-		if(bSuccess)
+		if(success)
 		{
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			m_OrderList.SetCurSel(nInsertWhere);

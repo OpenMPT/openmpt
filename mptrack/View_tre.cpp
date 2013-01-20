@@ -18,10 +18,6 @@
 #include "dlg_misc.h"
 #include "vstplug.h"
 
-#ifndef TVS_SINGLEEXPAND
-#define TVS_SINGLEEXPAND	0x400
-#endif
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CModTreeDropTarget
@@ -75,6 +71,8 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED,	OnItemExpanded)
 	ON_NOTIFY_REFLECT(TVN_BEGINDRAG,	OnBeginLDrag)
 	ON_NOTIFY_REFLECT(TVN_BEGINRDRAG,	OnBeginRDrag)
+	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT,OnBeginLabelEdit)
+	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT,	OnEndLabelEdit)
 	ON_COMMAND(ID_MODTREE_REFRESH,		OnRefreshTree)
 	ON_COMMAND(ID_MODTREE_EXECUTE,		OnExecuteItem)
 	ON_COMMAND(ID_MODTREE_REMOVE,		OnDeleteTreeItem)
@@ -88,7 +86,6 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_INSERT,		OnInsertTreeItem)
 	ON_COMMAND(ID_MODTREE_SWITCHTO,		OnSwitchToTreeItem)
 	ON_COMMAND(ID_MODTREE_CLOSE,		OnCloseItem)
-
 	// -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(ID_MODTREE_SETPATH,		OnSetItemPath)
@@ -146,8 +143,8 @@ CModTree::~CModTree()
 void CModTree::Init()
 //-------------------
 {
-	DWORD dwRemove = TVS_EDITLABELS|TVS_SINGLEEXPAND;
-	DWORD dwAdd = TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
+	DWORD dwRemove = TVS_SINGLEEXPAND;
+	DWORD dwAdd = TVS_EDITLABELS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
 
 	if (!m_pDataTree)
 	{
@@ -480,7 +477,7 @@ void CModTree::RefreshDlsBanks()
 				// Add DLS file folder
 				_splitpath(pDlsBank->GetFileName(), NULL, NULL, szName, szExt);
 				strcat(szName, szExt);
-				m_tiDLS[iDls] = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
+				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
 								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
 				WORD wBanks[16];
@@ -1180,7 +1177,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 	if (hItem)
 	{
 		const uint64 modItem = GetModItem(hItem);
-		const uint32 modItemType = GetModItemType(modItem);
+		const ModItemType modItemType = GetModItemType(modItem);
 		uint32 modItemID = GetModItemID(modItem);
 		ModTreeDocInfo *pInfo = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 		CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
@@ -1249,7 +1246,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 	if (hItem)
 	{
 		const uint64 modItem = GetModItem(hItem);
-		const uint32 modItemType = GetModItemType(modItem);
+		const ModItemType modItemType = GetModItemType(modItem);
 		uint32 modItemID = GetModItemID(modItem);
 		ModTreeDocInfo *pInfo = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 		CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
@@ -1414,7 +1411,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 //--------------------------------------------
 {
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 	TCHAR s[64];
 
@@ -1508,7 +1505,7 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 //------------------------------------------
 {
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	//const uint32 modItemID = GetModItemID(modItem);
 
 	switch(modItemType)
@@ -2044,10 +2041,10 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 //---------------------------------------------------
 {
 	const uint64 modItemDrop = GetModItem(hItem);
-	const uint32 modItemDropType = GetModItemType(modItemDrop);
+	const ModItemType modItemDropType = GetModItemType(modItemDrop);
 	const uint32 modItemDropID = GetModItemID(modItemDrop);
 
-	const uint32 modItemDragType = GetModItemType(m_qwItemDrag);
+	const ModItemType modItemDragType = GetModItemType(m_qwItemDrag);
 	const uint32 modItemDragID = GetModItemID(m_qwItemDrag);
 
 	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
@@ -2196,9 +2193,9 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				CHAR szFullPath[_MAX_PATH] = "";
 				InsLibGetFullPath(m_hItemDrag, szFullPath);
 				if (modItemDropType == MODITEM_MIDIINSTRUMENT)
-					SetMidiInstrument((DWORD)modItemDropID, szFullPath);
+					SetMidiInstrument(modItemDropID, szFullPath);
 				else
-					SetMidiPercussion((DWORD)modItemDropID, szFullPath);
+					SetMidiPercussion(modItemDropID, szFullPath);
 			}
 			return true;
 		}
@@ -2450,7 +2447,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			BOOL bSep = FALSE;
 
 			const uint64 modItem = GetModItem(hItem);
-			const uint32 modItemType = GetModItemType(modItem);
+			const ModItemType modItemType = GetModItemType(modItem);
 			const uint32 modItemID = GetModItemID(modItem);
 
 			SelectItem(hItem);
@@ -2664,7 +2661,7 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 		if (hItem != NULL)
 		{
 			const uint64 modItem = GetModItem(hItem);
-			const uint32 modItemType = GetModItemType(modItem);
+			const ModItemType modItemType = GetModItemType(modItem);
 			const uint32 modItemID = GetModItemID(modItem);
 
 			switch(modItemType)
@@ -2914,7 +2911,7 @@ void CModTree::OnMuteTreeItem()
 	CModDoc *pModDoc;
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
 	pModDoc = GetDocumentFromItem(hItem);
@@ -2954,7 +2951,7 @@ void CModTree::OnSoloTreeItem()
 	CModDoc *pModDoc;
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
 	pModDoc = GetDocumentFromItem(hItem);
@@ -2988,7 +2985,7 @@ void CModTree::OnUnmuteAllTreeItem()
 	CModDoc *pModDoc;
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	//const uint32 modItemID = GetModItemID(modItem);
 
 	pModDoc = GetDocumentFromItem(hItem);
@@ -3032,7 +3029,7 @@ void CModTree::OnDuplicateTreeItem()
 	HTREEITEM hItem = GetSelectedItem();
 	
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
@@ -3051,7 +3048,7 @@ void CModTree::OnDuplicateTreeItem()
 		} else if(modItemType == MODITEM_SAMPLE)
 		{
 			// Duplicate sample
-			vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, modItemID);
+			vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, static_cast<SAMPLEINDEX>(modItemID));
 			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
 			{
 				pModDoc->SetModified();
@@ -3063,7 +3060,7 @@ void CModTree::OnDuplicateTreeItem()
 		} else if(modItemType == MODITEM_INSTRUMENT)
 		{
 			// Duplicate instrument
-			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, modItemID);
+			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, static_cast<INSTRUMENTINDEX>(modItemID));
 			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
 				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA);
@@ -3083,7 +3080,7 @@ void CModTree::OnInsertTreeItem()
 	HTREEITEM hItem = GetSelectedItem();
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
@@ -3133,7 +3130,7 @@ void CModTree::OnSwitchToTreeItem()
 	CModDoc *pModDoc;
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
 	pModDoc = GetDocumentFromItem(hItem);
@@ -3260,7 +3257,7 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
 	HTREEITEM hItem = HitTest(point, &flags);
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	//const uint32 modItemID = GetModItemID(modItem);
 
 	switch(modItemType)
@@ -3383,7 +3380,7 @@ void CModTree::OnSoundBankProperties()
 	HTREEITEM hItem = GetSelectedItem();
 
 	const uint64 modItem = GetModItem(hItem);
-	const uint32 modItemType = GetModItemType(modItem);
+	const ModItemType modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
 	if ((modItemType & 0xFFFF) == MODITEM_DLSBANK_FOLDER)
@@ -3463,4 +3460,146 @@ void CModTree::OnCloseItem()
 	if(pos == NULL) return;
 	CView* pView = pModDoc->GetNextView(pos);
 	if (pView) pView->PostMessage(WM_COMMAND, ID_FILE_CLOSE);
+}
+
+
+// Editing sample, instrument, order, pattern, etc. labels
+void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
+//------------------------------------------------------------
+{
+	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
+	CEdit *editCtrl = GetEditControl();
+	const uint64 modItem = GetModItem(info->item.hItem);
+	const ModItemType modItemType = GetModItemType(modItem);
+	const uint32 modItemID = GetModItemID(modItem);
+	const CModDoc *modDoc = GetDocumentFromItem(info->item.hItem);
+
+	if(editCtrl != nullptr && modDoc != nullptr)
+	{
+		const CSoundFile *sndFile = modDoc->GetSoundFile();
+		const CModSpecifications &modSpecs = sndFile->GetModSpecifications();
+		char const *text = nullptr;
+		CString tempText;
+
+		switch(modItemType)
+		{
+		case MODITEM_ORDER:
+			tempText.Format("%u", sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID >> 16)).At(static_cast<ORDERINDEX>(modItemID & 0xFFFF)));
+			text = tempText;
+			break;
+
+		case MODITEM_SEQUENCE:
+			if(modItemID < sndFile->Order.GetNumSequences())
+			{
+				text = sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID)).m_sName;
+			}
+			break;
+
+		case MODITEM_PATTERN:
+			if(modItemID < sndFile->Patterns.GetNumPatterns() && modSpecs.hasPatternNames)
+			{
+				text = sndFile->Patterns[modItemID].GetName();
+				editCtrl->SetLimitText(MAX_PATTERNNAME - 1);
+			}
+			break;
+
+		case MODITEM_SAMPLE:
+			if(modItemID <= sndFile->GetNumSamples())
+			{
+				text = sndFile->m_szNames[modItemID];
+				editCtrl->SetLimitText(modSpecs.sampleNameLengthMax);
+			}
+			break;
+
+		case MODITEM_INSTRUMENT:
+			if(modItemID <= sndFile->GetNumInstruments() && sndFile->Instruments[modItemID] != nullptr)
+			{
+				text = sndFile->Instruments[modItemID]->name;
+				editCtrl->SetLimitText(modSpecs.instrNameLengthMax);
+			}
+			break;
+		}
+		
+		if(text)
+		{
+			CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
+			editCtrl->SetWindowText(text);
+			*result = FALSE;
+			return;
+		}
+	}
+	*result = TRUE;
+}
+
+
+// End editing sample, instrument, order, pattern, etc. labels
+void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
+//----------------------------------------------------------
+{
+	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(false);
+
+	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
+	const uint64 modItem = GetModItem(info->item.hItem);
+	const ModItemType modItemType = GetModItemType(modItem);
+	const uint32 modItemID = GetModItemID(modItem);
+	CModDoc *modDoc = GetDocumentFromItem(info->item.hItem);
+
+	if(info->item.pszText != nullptr && modDoc != nullptr)
+	{
+		CSoundFile *sndFile = modDoc->GetSoundFile();
+		const CModSpecifications &modSpecs = sndFile->GetModSpecifications();
+
+		switch(modItemType)
+		{
+		case MODITEM_ORDER:
+			{
+				PATTERNINDEX pat = ConvertStrTo<PATTERNINDEX>(info->item.pszText);
+				PATTERNINDEX &target = sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID >> 16)).At(static_cast<ORDERINDEX>(modItemID & 0xFFFF));
+				if(pat < sndFile->Patterns.GetNumPatterns() && pat != target)
+				{
+					target = pat;
+					modDoc->SetModified();
+					modDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+				}
+			}
+			break;
+
+		case MODITEM_SEQUENCE:
+			if(modItemID < sndFile->Order.GetNumSequences() && sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID)).m_sName != info->item.pszText)
+			{
+				sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID)).m_sName = info->item.pszText;
+				modDoc->SetModified();
+				modDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+			}
+			break;
+
+		case MODITEM_PATTERN:
+			if(modItemID < sndFile->Patterns.GetNumPatterns() && modSpecs.hasPatternNames && sndFile->Patterns[modItemID].GetName() != info->item.pszText)
+			{
+				sndFile->Patterns[modItemID].SetName(info->item.pszText);
+				modDoc->SetModified();
+				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_PAT) | HINT_PATTERNDATA | HINT_PATNAMES);
+			}
+			break;
+
+		case MODITEM_SAMPLE:
+			if(modItemID <= sndFile->GetNumSamples() && strcmp(sndFile->m_szNames[modItemID], info->item.pszText))
+			{
+				strncpy(sndFile->m_szNames[modItemID], info->item.pszText, modSpecs.sampleNameLengthMax);
+				modDoc->SetModified();
+				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO);
+			}
+			break;
+
+		case MODITEM_INSTRUMENT:
+			if(modItemID <= sndFile->GetNumInstruments() && sndFile->Instruments[modItemID] != nullptr && strcmp(sndFile->Instruments[modItemID]->name, info->item.pszText))
+			{
+				strncpy(sndFile->Instruments[modItemID]->name, info->item.pszText, modSpecs.instrNameLengthMax);
+				modDoc->SetModified();
+				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_ENVELOPE | HINT_INSTRUMENT);
+			}
+			break;
+		}
+	}
+	*result = FALSE;
 }

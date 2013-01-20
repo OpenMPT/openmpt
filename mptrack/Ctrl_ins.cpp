@@ -1707,7 +1707,7 @@ void CCtrlInstruments::OnInstrumentNew()
 			return;
 		}
 		bool bFirst = (pSndFile->GetNumInstruments() == 0);
-		LONG ins = m_pModDoc->InsertInstrument();
+		INSTRUMENTINDEX ins = m_pModDoc->InsertInstrument();
 		if (ins != INSTRUMENTINDEX_INVALID)
 		{
 			SetCurrentInstrument(ins);

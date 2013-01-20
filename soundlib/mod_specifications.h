@@ -67,6 +67,7 @@ struct CModSpecifications
 	bool hasRestartPos;
 	bool supportsPlugins;
 	bool hasPatternSignatures;		// Can patterns have a custom time signature?
+	bool hasPatternNames;			// Cat patterns have a name?
 	SongFlags songFlags;			// Supported song flags
 };
 
@@ -116,6 +117,7 @@ const CModSpecifications mptm =
 	true,								// Has restart position (order)
 	true,								// Supports plugins
 	true,								// Custom pattern time signatures
+	true,								// Pattern names
 	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
@@ -160,6 +162,7 @@ const CModSpecifications mod =
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	false,								// No pattern names
 	SONG_PT1XMODE,						// Supported song flags
 };
 
@@ -179,7 +182,7 @@ const CModSpecifications xm =
 	1,									// Channel min
 	32,									// Channel max
 	32,									// Min tempo
-	255,								// Max tempo
+	10000,								// Max tempo
 	1,									// Min pattern rows
 	256,								// Max pattern rows
 	20,									// Max mod name length
@@ -202,6 +205,7 @@ const CModSpecifications xm =
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	false,								// No pattern names
 	SONG_LINEARSLIDES,					// Supported song flags
 };
 
@@ -221,7 +225,7 @@ const CModSpecifications xmEx =
 	1,									// Channel min
 	127,								// Channel max
 	32,									// Min tempo
-	512,								// Max tempo
+	10000,								// Max tempo
 	1,									// Min pattern rows
 	1024,								// Max pattern rows
 	20,									// Max mod name length
@@ -244,6 +248,7 @@ const CModSpecifications xmEx =
 	true,								// Has restart position (order)
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures
+	true,								// Pattern names
 	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
@@ -285,6 +290,7 @@ const CModSpecifications s3m =
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	false,								// No pattern names
 	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 };
 
@@ -327,6 +333,7 @@ const CModSpecifications s3mEx =
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	false,								// No pattern names
 	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 };
 
@@ -368,6 +375,7 @@ const CModSpecifications it =
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
 	false,								// No custom pattern time signatures
+	false,								// No pattern names
 	SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
@@ -409,6 +417,7 @@ const CModSpecifications itEx =
 	false,								// Doesn't have restart position (order)
 	true,								// Supports plugins
 	false,								// No custom pattern time signatures
+	true,								// Pattern names
 	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG | SONG_ITPROJECT | SONG_ITPEMBEDIH,	// Supported song flags
 };
 
