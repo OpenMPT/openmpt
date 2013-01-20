@@ -20,34 +20,6 @@ class CModTree;
 using std::vector;
 using std::bitset;
 
-enum
-{
-	MODITEM_NULL = 0,
-	MODITEM_ORDER,
-	MODITEM_PATTERN,
-	MODITEM_SAMPLE,
-	MODITEM_INSTRUMENT,
-	MODITEM_COMMENTS,
-	MODITEM_EFFECT,
-	MODITEM_HDR_SONG,
-	MODITEM_HDR_ORDERS,
-	MODITEM_HDR_PATTERNS,
-	MODITEM_HDR_SAMPLES,
-	MODITEM_HDR_INSTRUMENTS,
-	MODITEM_HDR_INSTRUMENTLIB,
-	MODITEM_HDR_MIDILIB,
-	MODITEM_HDR_MIDIGROUP,
-	MODITEM_MIDIINSTRUMENT,
-	MODITEM_MIDIPERCUSSION,
-	MODITEM_INSLIB_FOLDER,
-	MODITEM_INSLIB_SAMPLE,
-	MODITEM_INSLIB_INSTRUMENT,
-	MODITEM_INSLIB_SONG,
-	MODITEM_DLSBANK_FOLDER,
-	MODITEM_DLSBANK_INSTRUMENT,
-	MODITEM_SEQUENCE,
-};
-
 #define TREESTATUS_RDRAG			0x01
 #define TREESTATUS_LDRAG			0x02
 #define TREESTATUS_SINGLEEXPAND		0x04
@@ -116,6 +88,35 @@ class CModTree: public CTreeCtrl
 //==============================
 {
 protected:
+
+	enum ModItemType
+	{
+		MODITEM_NULL = 0,
+		MODITEM_ORDER,
+		MODITEM_PATTERN,
+		MODITEM_SAMPLE,
+		MODITEM_INSTRUMENT,
+		MODITEM_COMMENTS,
+		MODITEM_EFFECT,
+		MODITEM_HDR_SONG,
+		MODITEM_HDR_ORDERS,
+		MODITEM_HDR_PATTERNS,
+		MODITEM_HDR_SAMPLES,
+		MODITEM_HDR_INSTRUMENTS,
+		MODITEM_HDR_INSTRUMENTLIB,
+		MODITEM_HDR_MIDILIB,
+		MODITEM_HDR_MIDIGROUP,
+		MODITEM_MIDIINSTRUMENT,
+		MODITEM_MIDIPERCUSSION,
+		MODITEM_INSLIB_FOLDER,
+		MODITEM_INSLIB_SAMPLE,
+		MODITEM_INSLIB_INSTRUMENT,
+		MODITEM_INSLIB_SONG,
+		MODITEM_DLSBANK_FOLDER,
+		MODITEM_DLSBANK_INSTRUMENT,
+		MODITEM_SEQUENCE,
+	};
+
 	CSoundFile m_SongFile;
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;
@@ -148,7 +149,7 @@ public:
 	void EmptyInstrumentLibrary();
 	void FillInstrumentLibrary();
 	uint64 GetModItem(HTREEITEM hItem);
-	uint32 GetModItemType(const uint64 modItem) {return static_cast<uint32>(modItem & 0xFFFF);};	// return "item type" part of mod item variable ( & 0xFFFF )
+	ModItemType GetModItemType(const uint64 modItem) {return static_cast<ModItemType>(modItem & 0xFFFF);};	// return "item type" part of mod item variable ( & 0xFFFF )
 	uint32 GetModItemID(const uint64 modItem) {return static_cast<uint32>(modItem >> 16);};		// return "item ID" part of mod item variable ( >> 16 )
 	BOOL SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName);
 	BOOL SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName);
@@ -216,6 +217,8 @@ protected:
 	afx_msg void OnInsertTreeItem();
 	afx_msg void OnSwitchToTreeItem();	// hack for sequence items to avoid double-click action
 	afx_msg void OnCloseItem();
+	afx_msg void OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result);
+	afx_msg void OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

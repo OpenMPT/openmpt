@@ -86,7 +86,7 @@ bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
 //-------------------------------------------------------------------
 {
 	bool found = false;
-	for(UINT i = 1; i < env.nNodes; i++)
+	for(uint32 i = 1; i < env.nNodes; i++)
 	{
 		if(env.Ticks[i] <= env.Ticks[i - 1])	// "<=" so we can fix envelopes "on the fly"
 		{
@@ -287,7 +287,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for pattern names
-	if(m_SndFile.Patterns.GetNumNamedPatterns() > 0)
+	if(m_SndFile.Patterns.GetNumNamedPatterns() > 0 && !originalSpecs->hasPatternNames)
 	{
 		AddToLog("Found pattern names\n");
 		foundHacks = true;
