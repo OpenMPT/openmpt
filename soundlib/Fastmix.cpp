@@ -30,10 +30,8 @@ int MixSoundBuffer[MIXBUFFERSIZE * 4];
 int MixReverbBuffer[MIXBUFFERSIZE * 2];
 #endif
 
-#ifndef FASTSOUNDLIB
 int MixRearBuffer[MIXBUFFERSIZE * 2];
 float MixFloatBuffer[MIXBUFFERSIZE * 2];
-#endif
 
 #pragma bss_seg()
 
@@ -529,7 +527,6 @@ BEGIN_MIX_INTERFACE(Mono16BitLinearMix)
 	SNDMIX_STOREMONOVOL
 END_MIX_INTERFACE()
 
-#ifndef FASTSOUNDLIB
 BEGIN_MIX_INTERFACE(Mono8BitHQMix)
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETMONOVOL8HQSRC
@@ -541,10 +538,6 @@ BEGIN_MIX_INTERFACE(Mono16BitHQMix)
 	SNDMIX_GETMONOVOL16HQSRC
 	SNDMIX_STOREMONOVOL
 END_MIX_INTERFACE()
-#else
-#define Mono8BitHQMix	Mono8BitLinearMix
-#define Mono16BitHQMix	Mono16BitLinearMix
-#endif
 
 // Volume Ramps
 BEGIN_RAMPMIX_INTERFACE(Mono8BitRampMix)
@@ -571,7 +564,6 @@ BEGIN_RAMPMIX_INTERFACE(Mono16BitLinearRampMix)
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_INTERFACE()
 
-#ifndef FASTSOUNDLIB
 BEGIN_RAMPMIX_INTERFACE(Mono8BitHQRampMix)
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETMONOVOL8HQSRC
@@ -584,15 +576,8 @@ BEGIN_RAMPMIX_INTERFACE(Mono16BitHQRampMix)
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_INTERFACE()
 
-#else
-#define	Mono8BitHQRampMix	Mono8BitLinearRampMix
-#define	Mono16BitHQRampMix	Mono16BitLinearRampMix
-#endif
-
 //////////////////////////////////////////////////////
 // 8-taps polyphase resampling filter
-
-#ifndef FASTSOUNDLIB
 
 // Normal
 BEGIN_MIX_INTERFACE(Mono8BitKaiserMix)
@@ -624,21 +609,11 @@ BEGIN_RAMPMIX_INTERFACE(Mono16BitKaiserRampMix)
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_INTERFACE()
 
-
-#else
-#define Mono8BitKaiserMix		Mono8BitHQMix
-#define Mono16BitKaiserMix		Mono16BitHQMix
-#define Mono8BitKaiserRampMix	Mono8BitHQRampMix
-#define Mono16BitKaiserRampMix	Mono16BitHQRampMix
-#endif
-
 // -> BEHAVIOUR_CHANGE#0025
 // -> DESC="enable polyphase resampling on stereo samples"
 // rewbs.resamplerConf
 //////////////////////////////////////////////////////
 // FIR filter
-
-#ifndef FASTSOUNDLIB
 
 // Normal
 BEGIN_MIX_INTERFACE(Mono8BitFIRFilterMix)
@@ -670,13 +645,6 @@ BEGIN_RAMPMIX_INTERFACE(Mono16BitFIRFilterRampMix)
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_INTERFACE()
 
-
-#else
-#define Mono8BitFIRFilterMix		Mono8BitHQMix
-#define Mono16BitFIRFilterMix		Mono16BitHQMix
-#define Mono8BitFIRFilterRampMix	Mono8BitHQRampMix
-#define Mono16BitFIRFilterRampMix	Mono16BitHQRampMix
-#endif
 //end rewbs.resamplerConf
 // -! BEHAVIOUR_CHANGE#0025
 
@@ -1492,10 +1460,8 @@ UINT CSoundFile::CreateStereoMix(int count)
 	DWORD nchused, nchmixed;
 	
 	if (!count) return 0;
-#ifndef FASTSOUNDLIB
 	BOOL bSurround;
 	if (gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
-#endif
 	nchused = nchmixed = 0;
 	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
 	{
@@ -1579,9 +1545,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pOfsR = &gnRvbROfsVol;
 			pOfsL = &gnRvbLOfsVol;
 		}
-	#ifndef FASTSOUNDLIB
 		bSurround = (pbuffer == MixRearBuffer);
-	#endif
 	#else
 		pbuffer = MixSoundBuffer;
 	#endif
@@ -2114,8 +2078,6 @@ done:;
 //////////////////////////////////////////////////////////////////////////
 // Noise Shaping (Dither)
 
-#ifndef FASTSOUNDLIB
-
 #pragma warning(disable:4731) // ebp modified
 
 void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
@@ -2195,8 +2157,6 @@ interleaveloop:
 	pop ebp
 	}
 }
-
-#endif // FASTSOUNDLIB
 
 
 VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples)

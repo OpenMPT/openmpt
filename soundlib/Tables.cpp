@@ -19,7 +19,6 @@
 
 
 ///////////////////////////////////////////////////////////////////////
-#ifndef FASTSOUNDLIB
 
 /*MODFORMATINFO gModFormatInfo[] =
 {
@@ -52,13 +51,9 @@
 	{ MOD_TYPE_IMF, "Imago Orpheus", ".imf",		0 },
 };*/
 
-#endif
-
 ///////////////////////////////////////////////////////////////////////
-#ifndef FASTSOUNDLIB
 #pragma data_seg(".tables")
 #pragma bss_seg(".modplug")
-#endif
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -496,7 +491,6 @@ float ITResonanceTable[128] =
 };
 
 
-#ifndef FASTSOUNDLIB
 // Reversed sinc coefficients
 
 // we should avoid all compiler directives like this. It will cause errors in vanilla VC6.
@@ -663,5 +657,3 @@ void SndMixInitializeTables(const MixerSettings & mixersettings)
 	//end ericus' downsampling improvement.
 }
 
-
-#endif // not  FASTSOUNDLIB

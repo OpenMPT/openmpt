@@ -39,12 +39,15 @@ void RowVisitor::Initialize(bool reset)
 	for(ORDERINDEX order = 0; order < endOrder; order++)
 	{
 		VisitedRowsBaseType &row = visitedRows[order];
-		// If we want to reset the vectors completely, we overwrite existing items with false.
+		const size_t size = GetVisitedRowsVectorSize(sndFile.Order[order]);
 		if(reset)
 		{
-			row.assign(row.size(), false);
+			// If we want to reset the vectors completely, we overwrite existing items with false.
+			row.assign(size, false);
+		} else
+		{
+			row.resize(size, false);
 		}
-		row.resize(GetVisitedRowsVectorSize(sndFile.Order[order]), false);
 	}
 }
 
