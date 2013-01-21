@@ -472,7 +472,7 @@ public:
 
 public:
 	// Mixer Config
-	static BOOL SetMixerSettings(const MixerSettings & mixersettings);
+	static void SetMixerSettings(const MixerSettings &mixersettings);
 	static MixerSettings GetMixerSettings();
 	static BOOL InitPlayer(BOOL bReset=FALSE);
 	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
@@ -787,17 +787,13 @@ int _muldivr(long a, long b, long c);
 ///////////////////////////////////////////////////////////
 // File Formats Information (name, extension, etc)
 
-#ifndef FASTSOUNDLIB
-
-typedef struct MODFORMATINFO
+struct MODFORMATINFO
 {
 	MODTYPE mtFormatId;		// MOD_TYPE_XXXX
 	LPCSTR  lpszFormatName;	// "ProTracker"
 	LPCSTR  lpszExtension;	// ".xxx"
 	DWORD   dwPadding;
-} MODFORMATINFO;
-
-#endif
+};
 
 
 // Read instrument property with 'code' and 'size' from 'file' to instrument 'pIns'.

@@ -63,7 +63,7 @@ extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
-extern void SndMixInitializeTables(const MixerSettings & mixersettings);
+extern void SndMixInitializeTables(const MixerSettings &mixersettings);
 
 extern short int ModSinusTable[64];
 extern short int ModRampDownTable[64];
@@ -162,7 +162,7 @@ ok:
 	neg eax
 rneg:
 	mov result, eax
-	}
+}
 	return result;
 }
 
@@ -214,8 +214,8 @@ rneg:
 }
 
 
-BOOL CSoundFile::SetMixerSettings(const MixerSettings & mixersettings)
-//--------------------------------------------------------------------
+void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
+//-------------------------------------------------------------------
 {
 
 	// Start with ramping disabled to avoid clicks on first read.
@@ -226,12 +226,10 @@ BOOL CSoundFile::SetMixerSettings(const MixerSettings & mixersettings)
 
 	gdWFIRCutoff = mixersettings.gdWFIRCutoff;
 	gbWFIRType =  mixersettings.gbWFIRType;
-
-	return TRUE;
 }
 
 MixerSettings CSoundFile::GetMixerSettings()
-//--------------------------------------------------------------------
+//------------------------------------------
 {
 	MixerSettings mixersettings;
 	mixersettings.glVolumeRampUpSamples = gnVolumeRampUpSamplesTarget;
@@ -245,13 +243,12 @@ MixerSettings CSoundFile::GetMixerSettings()
 BOOL CSoundFile::InitPlayer(BOOL bReset)
 //--------------------------------------
 {
-#ifndef FASTSOUNDLIB
 	if (!gbInitTables)
 	{
 		SndMixInitializeTables(GetMixerSettings());
 		gbInitTables = true;
 	}
-#endif
+
 	if (m_nMaxMixChannels > MAX_CHANNELS) m_nMaxMixChannels = MAX_CHANNELS;
 	if (gdwMixingFreq < 4000) gdwMixingFreq = 4000;
 	if (gdwMixingFreq > MAX_SAMPLE_RATE) gdwMixingFreq = MAX_SAMPLE_RATE;
@@ -320,11 +317,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 	m_nMixStat = 0;
 
 	lSampleSize = gnChannels;
-	if (gnBitsPerSample == 16) { lSampleSize *= 2; pCvt = X86_Convert32To16; }
-#ifndef FASTSOUNDLIB
-	else if (gnBitsPerSample == 24) { lSampleSize *= 3; pCvt = X86_Convert32To24; } 
-	else if (gnBitsPerSample == 32) { lSampleSize *= 4; pCvt = X86_Convert32To32; } 
-#endif // FASTSOUNDLIB
+	if(gnBitsPerSample == 16) { lSampleSize *= 2; pCvt = X86_Convert32To16; }
+	else if(gnBitsPerSample == 24) { lSampleSize *= 3; pCvt = X86_Convert32To24; } 
+	else if(gnBitsPerSample == 32) { lSampleSize *= 4; pCvt = X86_Convert32To32; } 
 
 	lMax = cbBuffer / lSampleSize;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
@@ -338,13 +333,11 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		if (!m_nBufferCount)
 		{
 
-#ifndef FASTSOUNDLIB
 			if(m_SongFlags[SONG_FADINGSONG])
 			{
 				m_SongFlags.set(SONG_ENDREACHED);
 				m_nBufferCount = lRead;
 			} else
-#endif // FASTSOUNDLIB
 
 			if (ReadNote())
 			{
@@ -367,9 +360,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				}
 #endif // MODPLUG_TRACKER
 
-#ifndef FASTSOUNDLIB
 				if (!FadeSong(FADESONGDELAY) || m_bIsRendering)	//rewbs: disable song fade when rendering.
-#endif // FASTSOUNDLIB
 				{
 					m_SongFlags.set(SONG_ENDREACHED);
 					if (lRead == lMax || m_bIsRendering)		//rewbs: don't complete buffer when rendering
@@ -453,16 +444,13 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 
 		UINT lTotalSampleCount = lSampleCount;	// Including rear channels
 
-#ifndef FASTSOUNDLIB
 		// Multichannel
 		if (gnChannels > 2)
 		{
 			X86_InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lSampleCount);
 			lTotalSampleCount *= 2;
 		}
-#endif // FASTSOUNDLIB
 
-#ifndef FASTSOUNDLIB
 		// Noise Shaping
 		if (gnBitsPerSample <= 16)
 		{
@@ -477,7 +465,6 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			//Currently only used for VU Meter, so it's OK to do it after global Vol.
 			gpSndMixHook(MixSoundBuffer, lTotalSampleCount, gnChannels);
 		}
-#endif // FASTSOUNDLIB
 
 		// Perform clipping
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
@@ -689,7 +676,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 	if (nStat2) { pSndFile->m_nMixStat += nStat2 - 1; pSndFile->m_nMixStat /= nStat2; }
 	return lMax - lRead;
 }
-#endif // FASTSOUNDLIB
+#endif // MODPLUG_PLAYER
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1866,7 +1853,6 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 
 		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
 		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
-#ifndef FASTSOUNDLIB
 //		if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
 //			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
 //			&& (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))
@@ -1886,7 +1872,6 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 				}
 			}
 		}
-#endif // FASTSOUNDLIB
 
 		pChn->nRightRamp = nRightDelta / rampLength;
 		pChn->nLeftRamp = nLeftDelta / rampLength;
@@ -2269,9 +2254,7 @@ BOOL CSoundFile::ReadNote()
 				pan /= 128;
 				pan += 128;
 				Limit(pan, 0, 256);
-#ifndef FASTSOUNDLIB
 				if (gdwSoundSetup & SNDMIX_REVERSESTEREO) pan = 256 - pan;
-#endif
 
 				LONG realvol;
 				if (m_pConfig->getUseGlobalPreAmp())
@@ -2316,7 +2299,7 @@ BOOL CSoundFile::ReadNote()
 			} else
 			{
 				pChn->dwFlags.reset(CHN_NOIDO | CHN_HQSRC);
-#ifndef FASTSOUNDLIB
+
 				if (pChn->nInc == 0x10000)
 				{
 					pChn->dwFlags.set(CHN_NOIDO);
@@ -2354,9 +2337,6 @@ BOOL CSoundFile::ReadNote()
 					|| ((gnCPUUsage > 80) && (pChn->nNewLeftVol < 0x100) && (pChn->nNewRightVol < 0x100)))
 						pChn->dwFlags.set(CHN_NOIDO);
 				}
-#else
-				if (pChn->nInc >= 0xFE00) pChn->dwFlags.set(CHN_NOIDO);
-#endif // FASTSOUNDLIB
 			}
 
 			/*if (m_pConfig->getUseGlobalPreAmp())

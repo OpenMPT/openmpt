@@ -279,7 +279,6 @@ static void ProcessStereoSurround(int count)
 }
 
 
-#ifndef FASTSOUNDLIB
 // 4-channels surround
 static void ProcessQuadSurround(int count)
 //----------------------------------------
@@ -309,7 +308,6 @@ static void ProcessQuadSurround(int count)
 	}
 	nDolbyHP_Y1 = hy1;
 }
-#endif
 
 
 void CSoundFile::ProcessStereoDSP(int count)
@@ -318,9 +316,7 @@ void CSoundFile::ProcessStereoDSP(int count)
 	// Dolby Pro-Logic Surround
 	if (gdwSoundSetup & SNDMIX_SURROUND)
 	{
-#ifndef FASTSOUNDLIB
 		if (gnChannels > 2) ProcessQuadSurround(count); else
-#endif
 		ProcessStereoSurround(count);
 	}
 	// DC Removal
@@ -412,7 +408,6 @@ void CSoundFile::ProcessMonoDSP(int count)
 }
 
 
-#ifndef FASTSOUNDLIB
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -495,8 +490,6 @@ stereodcr:
 	mov nDCRFlt_Y1l, edi
 	}
 }
-
-#endif // FASTSOUNDLIB
 
 
 

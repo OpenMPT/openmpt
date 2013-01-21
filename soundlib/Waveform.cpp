@@ -12,8 +12,6 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#ifndef FASTSOUNDLIB
-
 #define ASM_NORMALIZE
 #ifdef ASM_NORMALIZE
 
@@ -102,6 +100,3 @@ UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24,
 	return i;
 #endif
 }
-
-
-#endif // FASTSOUNDLIB

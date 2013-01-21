@@ -34,7 +34,6 @@ LPCSTR glpszModExtensions = "mod|s3m|xm|it|itp|mptm|stm|nst|ult|669|wow|mtm|med|
 "|mo3"
 #endif
 ;
-//Should there be mptm?
 #endif // NO_ARCHIVE_SUPPORT
 #else // NO_COPYRIGHT: EarSaver only loads mod/s3m/xm/it/wav
 #define MODPLUG_BASIC_SUPPORT
@@ -171,7 +170,7 @@ RP..	[EXT]	nRestartPos;
 RPB.	[EXT]	nRowsPerBeat;
 RPM.	[EXT]	nRowsPerMeasure;
 RS..			nResSwing;
-SEP@	[EXT]									chunk SEPARATOR tag
+SEP@	[EXT]	chunk SEPARATOR tag
 SPA.	[EXT]	m_nSamplePreAmp;
 TM..	[EXT]	nTempoMode;
 VE..			VolEnv.nNodes;
@@ -258,8 +257,8 @@ WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
 	fwrite(&dwFlags, 1, fsize, file);
 }
 
-WRITE_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
-WRITE_MPTHEADER_sized_member(	nPan					, UINT			, P...							)
+WRITE_MPTHEADER_sized_member(	nGlobalVol				, uint32		, GV..							)
+WRITE_MPTHEADER_sized_member(	nPan					, uint32		, P...							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nNodes			, uint32		, VE..							)
 WRITE_MPTHEADER_sized_member(	PanEnv.nNodes			, uint32		, PE..							)
 WRITE_MPTHEADER_sized_member(	PitchEnv.nNodes			, uint32		, PiE.							)
@@ -391,11 +390,11 @@ GET_MPTHEADER_sized_member(	wPitchToTempoLock		, uint16		, PTTL							)
 GET_MPTHEADER_sized_member(	nPluginVelocityHandling	, uint8			, PVEH							)
 GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, uint8			, PVOH							)
 GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, uint8			, PERN							)
-GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8		    , AERN							)
+GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8			, AERN							)
 GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, VERN							)
-GET_MPTHEADER_sized_member(	PitchEnv.dwFlags     	, DWORD			, PFLG							)
-GET_MPTHEADER_sized_member(	PanEnv.dwFlags     		, DWORD		    , AFLG							)
-GET_MPTHEADER_sized_member(	VolEnv.dwFlags     		, DWORD			, VFLG							)
+GET_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, PFLG							)
+GET_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, AFLG							)
+GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 GET_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 }
 
@@ -612,7 +611,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #ifndef MODPLUG_BASIC_SUPPORT
 		 && !ReadSTM(file)
 		 && !ReadMed(lpStream, dwMemLength)
-#ifndef FASTSOUNDLIB
 		 && !ReadMTM(file)
 		 && !ReadMDL(lpStream, dwMemLength)
 		 && !ReadDBM(lpStream, dwMemLength)
@@ -634,7 +632,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 		 && !ReadMID(lpStream, dwMemLength)
 #endif // MODPLUG_TRACKER
-#endif
 #endif // MODPLUG_BASIC_SUPPORT
 		 && !ReadGDM(file)
 		 && !ReadIMF(lpStream, dwMemLength)
@@ -1411,8 +1408,6 @@ void CSoundFile::CheckCPUUsage(UINT nCPU)
 }
 
 
-#ifndef FASTSOUNDLIB
-
 // Check whether a sample is used.
 // In sample mode, the sample numbers in all patterns are checked.
 // In instrument mode, it is only checked if a sample is referenced by an instrument (but not if the sample is actually played anywhere)
@@ -1598,7 +1593,6 @@ bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
 
 	return true;
 }
-#endif // FASTSOUNDLIB
 
 
 void CSoundFile::DeleteStaticdata()

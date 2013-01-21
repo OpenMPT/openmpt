@@ -4330,8 +4330,7 @@ void CSoundFile::SetSpeed(UINT param)
 //-----------------------------------
 {
 	// ModPlug Tracker and Mod-Plugin don't do this check
-#ifndef MODPLUG_TRACKER
-#ifndef FASTSOUNDLIB
+#ifdef MODPLUG_PLAYER
 	// Big Hack!!!
 	if ((!param) || (param >= 0x80) || ((GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2)) && (param >= 0x1E)))
 	{
@@ -4340,8 +4339,7 @@ void CSoundFile::SetSpeed(UINT param)
 			GlobalFadeSong(1000);
 		}
 	}
-#endif // FASTSOUNDLIB
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_PLAYER
 	// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
 	if ((param) && (param <= GetModSpecifications().speedMax || (GetType() & MOD_TYPE_MOD))) m_nMusicSpeed = param;
 }
