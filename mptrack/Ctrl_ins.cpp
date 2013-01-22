@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_NOTEMAP_TRANS_UP,		OnMapTransposeUp)
 	ON_COMMAND(ID_NOTEMAP_TRANS_DOWN,	OnMapTransposeDown)
 	ON_COMMAND(ID_NOTEMAP_COPY_NOTE,	OnMapCopyNote)
@@ -372,6 +373,14 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 			}
 		}
 	}
+}
+
+
+BOOL CNoteMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//------------------------------------------------------------------
+{
+	SetCurrentNote(m_nNote - sgn(zDelta));
+	return CStatic::OnMouseWheel(nFlags, zDelta, pt);
 }
 
 
