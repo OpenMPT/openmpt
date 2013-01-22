@@ -24,11 +24,11 @@ void ReplaceSample(ModSample &smp, const LPSTR pNewSample, const SmpLength nNewL
 	LPSTR const pOldSmp = smp.pSample;
 	FlagSet<ChannelFlags> setFlags, resetFlags;
 
-	setFlags.set(CHN_16BIT, (smp.uFlags & CHN_16BIT) != 0);
-	resetFlags.set(CHN_16BIT, (smp.uFlags & CHN_16BIT) == 0);
+	setFlags.set(CHN_16BIT, smp.uFlags[CHN_16BIT]);
+	resetFlags.set(CHN_16BIT, !smp.uFlags[CHN_16BIT]);
 
-	setFlags.set(CHN_STEREO, (smp.uFlags & CHN_STEREO) != 0);
-	resetFlags.set(CHN_STEREO, (smp.uFlags & CHN_STEREO) == 0);
+	setFlags.set(CHN_STEREO, smp.uFlags[CHN_STEREO]);
+	resetFlags.set(CHN_STEREO, !smp.uFlags[CHN_STEREO]);
 
 	CriticalSection cs;
 
@@ -189,27 +189,56 @@ bool AdjustEndOfSample(ModSample &smp, CSoundFile *pSndFile)
 	// Update channels with new loop values
 	if(pSndFile != nullptr)
 	{
-		CSoundFile& rSndFile = *pSndFile;
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if ((rSndFile.Chn[i].pModSample == &smp) && rSndFile.Chn[i].nLength != 0)
-		{
-			if((smp.nLoopStart + 3 < smp.nLoopEnd) && (smp.nLoopEnd <= smp.nLength))
-			{
-				rSndFile.Chn[i].nLoopStart = smp.nLoopStart;
-				rSndFile.Chn[i].nLoopEnd = smp.nLoopEnd;
-				rSndFile.Chn[i].nLength = smp.nLoopEnd;
-				if(rSndFile.Chn[i].nPos > rSndFile.Chn[i].nLength)
-				{
-					rSndFile.Chn[i].nPos = rSndFile.Chn[i].nLoopStart;
-					rSndFile.Chn[i].dwFlags.reset(CHN_PINGPONGFLAG);
-				}
+		return UpdateLoopPoints(smp, *pSndFile);
+	}
 
-				bool looped = (smp.uFlags & CHN_LOOP) != 0;
-				rSndFile.Chn[i].dwFlags.set(CHN_LOOP, looped);
-				rSndFile.Chn[i].dwFlags.set(CHN_PINGPONGLOOP, looped && (smp.uFlags & CHN_PINGPONGLOOP));
-			} else if (!(smp.uFlags & CHN_LOOP))
-			{
-				rSndFile.Chn[i].dwFlags.reset(CHN_PINGPONGLOOP | CHN_LOOP);
-			}
+	return true;
+}
+
+
+// Propagate loop point changes to player
+bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sf)
+//---------------------------------------------------------
+{
+	if(!smp.nLength || !smp.pSample)
+		return false;
+
+	CriticalSection cs;
+
+	// Update channels with new loop values
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if((sf.Chn[i].pModSample == &smp) && sf.Chn[i].nLength != 0)
+	{
+		bool looped = false, bidi = false;
+
+		if(smp.nSustainStart < smp.nSustainEnd && smp.nSustainEnd <= smp.nLength && smp.uFlags[CHN_SUSTAINLOOP] && !sf.Chn[i].dwFlags[CHN_KEYOFF])
+		{
+			// Sustain loop is active
+			sf.Chn[i].nLoopStart = smp.nSustainStart;
+			sf.Chn[i].nLoopEnd = smp.nSustainEnd;
+			sf.Chn[i].nLength = smp.nSustainEnd;
+			looped = true;
+			bidi = smp.uFlags[CHN_PINGPONGSUSTAIN];
+		} else if(smp.nLoopStart < smp.nLoopEnd && smp.nLoopEnd <= smp.nLength && smp.uFlags[CHN_LOOP])
+		{
+			// Normal loop is active
+			sf.Chn[i].nLoopStart = smp.nLoopStart;
+			sf.Chn[i].nLoopEnd = smp.nLoopEnd;
+			sf.Chn[i].nLength = smp.nLoopEnd;
+			looped = true;
+			bidi = smp.uFlags[CHN_PINGPONGLOOP];
+		}
+		sf.Chn[i].dwFlags.set(CHN_LOOP, looped);
+		sf.Chn[i].dwFlags.set(CHN_PINGPONGLOOP, looped && bidi);
+
+		if(sf.Chn[i].nPos > sf.Chn[i].nLength)
+		{
+			sf.Chn[i].nPos = sf.Chn[i].nLoopStart;
+			sf.Chn[i].dwFlags.reset(CHN_PINGPONGFLAG);
+		}
+		
+		if(!looped)
+		{
+			sf.Chn[i].nLength = smp.nLength;
 		}
 	}
 

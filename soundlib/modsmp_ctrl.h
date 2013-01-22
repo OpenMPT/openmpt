@@ -38,6 +38,9 @@ void ReplaceSample(ModSample &smp, const LPSTR pNewSample,  const SmpLength nNew
 
 bool AdjustEndOfSample(ModSample &smp, CSoundFile *pSndFile = nullptr);
 
+// Propagate loop point changes to player
+bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sf);
+
 // Returns the number of bytes allocated(at least) for sample data.
 // Note: Currently the return value is based on the sample length and the actual 
 //       allocation may be more than what this function returns.
