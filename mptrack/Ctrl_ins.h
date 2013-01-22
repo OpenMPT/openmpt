@@ -65,6 +65,7 @@ protected:
 	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg BOOL OnEraseBkGnd(CDC *) { return TRUE; }
@@ -77,7 +78,7 @@ protected:
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();
 	afx_msg void OnInstrumentDuplicate();
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys 
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
