@@ -164,7 +164,7 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CCtrlSamples::CCtrlSamples() : 
+CCtrlSamples::CCtrlSamples() :
 //----------------------------
 	m_nStretchProcessStepLength(nDefaultStretchChunkSize),
 	m_nSequenceMs(DEFAULT_SEQUENCE_MS),
@@ -2665,14 +2665,14 @@ void CCtrlSamples::OnLoopStartChanged()
 {
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	LONG n = GetDlgItemInt(IDC_EDIT1);
-	if ((n >= 0) && (n < (LONG)sample.nLength) && ((n < (LONG)sample.nLoopEnd) || (!(sample.uFlags & CHN_LOOP))))
+	SmpLength n = GetDlgItemInt(IDC_EDIT1);
+	if ((n >= 0) && (n < sample.nLength) && ((n < sample.nLoopEnd) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.nLoopStart = n;
-		if(sample.uFlags & CHN_LOOP) 
+		if(sample.uFlags[CHN_LOOP])
 		{
-			/* only update sample buffer if the loop is actually enabled
-			  (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
+			// only update sample buffer if the loop is actually enabled
+			// (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
@@ -2686,14 +2686,14 @@ void CCtrlSamples::OnLoopEndChanged()
 {
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	LONG n = GetDlgItemInt(IDC_EDIT2);
-	if ((n >= 0) && (n <= (LONG)sample.nLength) && ((n > (LONG)sample.nLoopStart) || (!(sample.uFlags & CHN_LOOP))))
+	SmpLength n = GetDlgItemInt(IDC_EDIT2);
+	if ((n >= 0) && (n <= sample.nLength) && ((n > sample.nLoopStart) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.nLoopEnd = n;
-		if(sample.uFlags & CHN_LOOP)
+		if(sample.uFlags[CHN_LOOP])
 		{
-			/* only update sample buffer if the loop is actually enabled
-			  (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
+			// only update sample buffer if the loop is actually enabled
+			// (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
@@ -2745,11 +2745,12 @@ void CCtrlSamples::OnSustainStartChanged()
 {
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	LONG n = GetDlgItemInt(IDC_EDIT3);
-	if ((n >= 0) && (n <= (LONG)sample.nLength)
-	 && ((n < (LONG)sample.nSustainEnd) || (!(sample.uFlags & CHN_SUSTAINLOOP))))
+	SmpLength n = GetDlgItemInt(IDC_EDIT3);
+	if ((n >= 0) && (n <= sample.nLength)
+	 && ((n < sample.nSustainEnd) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
 		sample.nSustainStart = n;
+		ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2761,11 +2762,12 @@ void CCtrlSamples::OnSustainEndChanged()
 {
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	LONG n = GetDlgItemInt(IDC_EDIT4);
-	if ((n >= 0) && (n <= (LONG)sample.nLength)
-	 && ((n > (LONG)sample.nSustainStart) || (!(sample.uFlags & CHN_SUSTAINLOOP))))
+	SmpLength n = GetDlgItemInt(IDC_EDIT4);
+	if ((n >= 0) && (n <= sample.nLength)
+	 && ((n > sample.nSustainStart) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
 		sample.nSustainEnd = n;
+		ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
