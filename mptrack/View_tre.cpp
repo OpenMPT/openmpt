@@ -296,8 +296,7 @@ void CModTree::AddDocument(CModDoc *pModDoc)
 		}
 	}
 
-	ModTreeDocInfo *pInfo = new ModTreeDocInfo(pModDoc->GetSoundFile());
-	pInfo->pModDoc = pModDoc;
+	ModTreeDocInfo *pInfo = new ModTreeDocInfo(*pModDoc->GetSoundFile());
 	pInfo->nSeqSel = SEQUENCEINDEX_INVALID;
 	pInfo->nOrdSel = ORDERINDEX_INVALID;
 	DocInfo.push_back(pInfo);
@@ -969,7 +968,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 			 || ((!pSndFile->Instruments[smin]) && (pInfo->tiInstruments[smin] != NULL)))
 			{
 				smax = MAX_INSTRUMENTS-1;
-				for (UINT iRem=smin; iRem<smax; iRem++)
+				for (INSTRUMENTINDEX iRem=smin; iRem<smax; iRem++)
 				{
 					if (pInfo->tiInstruments[iRem])
 					{
@@ -1031,7 +1030,7 @@ uint64 CModTree::GetModItem(HTREEITEM hItem)
 	LPARAM lParam;
 	HTREEITEM hItemParent, hItemParentParent, hRootParent;
 
-	if (!hItem) return 0;
+	if (!hItem) return MODITEM_NULL;
 	// First, test root items
 	if (hItem == m_hInsLib) return MODITEM_HDR_INSTRUMENTLIB;
 	if (hItem == m_hMidiLib) return MODITEM_HDR_MIDILIB;
@@ -1301,21 +1300,18 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 			if (m_szSongName[0])
 			{
 				// Preview sample / instrument in module
-				CHAR szName[64];
+				char szName[16];
 				lstrcpyn(szName, GetItemText(hItem), sizeof(szName));
-				UINT n = 0;
-				if (szName[0] >= '0') n += (szName[0] - '0');
-				if ((szName[1] >= '0') && (szName[1] <= '9')) n = n*10 + (szName[1] - '0');
-				if ((szName[2] >= '0') && (szName[2] <= '9')) n = n*10 + (szName[2] - '0');
+				const size_t n = ConvertStrTo<size_t>(szName);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm)
 				{
 					if (modItemType == MODITEM_INSLIB_INSTRUMENT)
 					{
-						pMainFrm->PlaySoundFile(&m_SongFile, n, 0, nParam);
+						pMainFrm->PlaySoundFile(&m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
 					} else
 					{
-						pMainFrm->PlaySoundFile(&m_SongFile, 0, n, nParam);
+						pMainFrm->PlaySoundFile(&m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
 					}
 				}
 			} else
@@ -1881,7 +1877,7 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 	
 	if ((!lpszDir) || (!lpszDir[0])) return FALSE;
 	BeginWaitCursor();
-	if (!GetCurrentDirectory(sizeof(s), s)) s[0] = 0;
+	if (!GetCurrentDirectory(CountOf(s), s)) s[0] = 0;
 	if (!strcmp(lpszDir+1, ":\\"))
 	{
 		sdrive[0] = lpszDir[0];
@@ -3484,8 +3480,16 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		switch(modItemType)
 		{
 		case MODITEM_ORDER:
-			tempText.Format("%u", sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID >> 16)).At(static_cast<ORDERINDEX>(modItemID & 0xFFFF)));
-			text = tempText;
+			{
+				PATTERNINDEX pat = sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID >> 16)).At(static_cast<ORDERINDEX>(modItemID & 0xFFFF));
+				if(pat == sndFile->Order.GetInvalidPatIndex())
+					tempText = "---";
+				else if(pat == sndFile->Order.GetIgnoreIndex())
+					tempText = "+++";
+				else
+					tempText.Format("%u", pat);
+				text = tempText;
+			}
 			break;
 
 		case MODITEM_SEQUENCE:
@@ -3552,10 +3556,25 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		switch(modItemType)
 		{
 		case MODITEM_ORDER:
+			if(info->item.pszText[0])
 			{
 				PATTERNINDEX pat = ConvertStrTo<PATTERNINDEX>(info->item.pszText);
+				bool valid = true;
+				if(info->item.pszText[0] == '-')
+				{
+					pat = sndFile->Order.GetInvalidPatIndex();
+				} else if(info->item.pszText[0] == '+')
+				{
+					if(modSpecs.hasIgnoreIndex)
+						pat = sndFile->Order.GetIgnoreIndex();
+					else
+						valid = false;
+				} else
+				{
+					valid = (pat < sndFile->Patterns.GetNumPatterns());
+				}
 				PATTERNINDEX &target = sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID >> 16)).At(static_cast<ORDERINDEX>(modItemID & 0xFFFF));
-				if(pat < sndFile->Patterns.GetNumPatterns() && pat != target)
+				if(valid && pat != target)
 				{
 					target = pat;
 					modDoc->SetModified();
