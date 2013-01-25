@@ -25,8 +25,6 @@ using std::bitset;
 #define TREESTATUS_SINGLEEXPAND		0x04
 #define TREESTATUS_DRAGGING			(TREESTATUS_RDRAG|TREESTATUS_LDRAG)
 
-#define MODTREE_MAX_DOCUMENTS		32
-
 struct ModTreeDocInfo
 {
 	CModDoc *pModDoc;
@@ -44,18 +42,15 @@ struct ModTreeDocInfo
 	bitset<MAX_SAMPLES> samplesPlaying;
 	bitset<MAX_INSTRUMENTS> instrumentsPlaying;
 	
-	ModTreeDocInfo(const CSoundFile* const pSndFile)
+	ModTreeDocInfo(const CSoundFile &sndFile)
 	{
-		pModDoc = NULL;
+		pModDoc = sndFile.GetpModDoc();
 		nSeqSel = SEQUENCEINDEX_INVALID;
 		nOrdSel = ORDERINDEX_INVALID;
-		hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = NULL;
-		if(pSndFile != NULL)
-		{
-			tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
-			tiOrders.resize(pSndFile->Order.GetNumSequences());
-			tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
-		}
+		hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = nullptr;
+		tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
+		tiOrders.resize(sndFile.Order.GetNumSequences());
+		tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
 		MemsetZero(tiSamples);
 		MemsetZero(tiInstruments);
 		MemsetZero(tiEffects);
@@ -132,6 +127,7 @@ protected:
 	HTREEITEM m_tiPerc[128];
 	vector<HTREEITEM> m_tiDLS;
 	vector<ModTreeDocInfo *> DocInfo;
+	// Instrument library
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 
 public:

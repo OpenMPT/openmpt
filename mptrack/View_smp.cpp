@@ -1528,18 +1528,15 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				}
 			}
 
-			if(m_dwBeginSel >= m_dwEndSel)
+			if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to &8-bit\t" + ih->GetKeyTextFromCommand(kcSample8Bit));
+			if(sample.GetNumChannels() > 1)
 			{
-				if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to &8-bit\t" + ih->GetKeyTextFromCommand(kcSample8Bit));
-				if(sample.GetNumChannels() > 1)
-				{
-					HMENU hMonoMenu = ::CreatePopupMenu();
-					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "&Mix Channels\t" + ih->GetKeyTextFromCommand(kcSampleMonoMix));
-					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, "&Left Channel\t" + ih->GetKeyTextFromCommand(kcSampleMonoLeft));
-					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, "&Right Channel\t" + ih->GetKeyTextFromCommand(kcSampleMonoRight));
-					::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, "&Split Sample\t" + ih->GetKeyTextFromCommand(kcSampleMonoSplit));
-					::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), "Convert to &Mono");
-				}
+				HMENU hMonoMenu = ::CreatePopupMenu();
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "&Mix Channels\t" + ih->GetKeyTextFromCommand(kcSampleMonoMix));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, "&Left Channel\t" + ih->GetKeyTextFromCommand(kcSampleMonoLeft));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, "&Right Channel\t" + ih->GetKeyTextFromCommand(kcSampleMonoRight));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, "&Split Sample\t" + ih->GetKeyTextFromCommand(kcSampleMonoSplit));
+				::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), "Convert to &Mono");
 			}
 
 			// "Trim" menu item is responding differently if there's no selection,
