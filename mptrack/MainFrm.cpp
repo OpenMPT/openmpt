@@ -232,7 +232,6 @@ CMainFrame::CMainFrame()
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
 
-	m_dTotalCPU=0;
 	MemsetZero(gpenVuMeter);
 	
 	// Create Audio Critical Section
