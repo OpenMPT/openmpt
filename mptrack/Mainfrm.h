@@ -446,14 +446,14 @@ protected:
 	CModDoc *m_pModPlaying;
 	CSoundFile *m_pSndFile;
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType;
-	UINT m_nTimer, m_nAvgMixChn, m_nMixChn;
+	DWORD m_dwStatus, m_dwTimeSec, m_dwNotifyType;
+	UINT_PTR m_nTimer;
+	UINT m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
 	// Notification Buffer
 	MPTNOTIFICATION NotifyBuffer[MAX_UPDATE_HISTORY];
 	// Misc
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
-	double m_dTotalCPU;
 	CModDoc* m_pJustModifiedDoc;
 
 public:
