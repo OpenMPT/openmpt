@@ -399,9 +399,9 @@ public:
 	bool ReadVector(std::vector<T> &destVector, size_t destSize)
 	{
 		const off_t readSize = sizeof(T) * destSize;
+		destVector.resize(destSize);
 		if(CanRead(readSize))
 		{
-			destVector.resize(destSize);
 			if(readSize)
 			{
 				memcpy(&destVector[0], streamData  + streamPos, readSize);
@@ -410,7 +410,6 @@ public:
 			return true;
 		} else
 		{
-			destVector.clear();
 			return false;
 		}
 	}
