@@ -693,7 +693,7 @@ BOOL CModDoc::InitializeMod()
 		}
 
 		MemsetZero(m_SndFile.m_szNames);
-		strcpy(m_SndFile.m_szNames[0], "untitled");
+		//strcpy(m_SndFile.m_szNames[0], "untitled");
 
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
@@ -803,9 +803,9 @@ void CModDoc::AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR p
 {
 	CString strMsg;
 	va_list args;
-    va_start(args, pszFormat);
+	va_start(args, pszFormat);
 	strMsg.FormatV(pszFormat, args);
-    va_end(args);
+	va_end(args);
 
 	m_logEvents << Util::sdTime::GetDateTimeStr()
 				<< _T("Event type: ") << eventType << std::endl
@@ -902,8 +902,8 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 		{ 
 			CriticalSection cs;
 
-			//OnPlayerPause();				  // pause song - pausing VSTis is too slow
-			pMainFrm->SetLastMixActiveTime(); // mark activity
+			//OnPlayerPause();					// pause song - pausing VSTis is too slow
+			pMainFrm->SetLastMixActiveTime();	// mark activity
 
 			// All notes off
 			for (UINT i=0; i<MAX_CHANNELS; i++)
@@ -1987,7 +1987,6 @@ void CModDoc::OnPlayerPlayFromStart()
 		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.visitedSongRows.Initialize(true);
-		pMainFrm->ResetElapsedTime();
 		m_SndFile.m_lTotalSampleCount = 0;
 		m_SndFile.m_bPositionChanged = true;
 
@@ -2104,13 +2103,13 @@ void CModDoc::OnInsertPattern()
 //-----------------------------
 {
 	const PATTERNINDEX pat = InsertPattern();
-	if (pat >= 0)
+	if(pat != PATTERNINDEX_INVALID)
 	{
 		ORDERINDEX ord = 0;
-		for (ORDERINDEX i = 0; i < m_SndFile.Order.size(); i++)
+		for(ORDERINDEX i = 0; i < m_SndFile.Order.size(); i++)
 		{
-			if (m_SndFile.Order[i] == pat) ord = i;
-			if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
+			if(m_SndFile.Order[i] == pat) ord = i;
+			if(m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
 		}
 		ViewPattern(pat, ord);
 	}
@@ -2120,16 +2119,16 @@ void CModDoc::OnInsertPattern()
 void CModDoc::OnInsertSample()
 //----------------------------
 {
-	LONG smp = InsertSample();
-	if (smp != SAMPLEINDEX_INVALID) ViewSample(smp);
+	SAMPLEINDEX smp = InsertSample();
+	if(smp != SAMPLEINDEX_INVALID) ViewSample(smp);
 }
 
 
 void CModDoc::OnInsertInstrument()
 //--------------------------------
 {
-	LONG ins = InsertInstrument();
-	if (ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
+	INSTRUMENTINDEX ins = InsertInstrument();
+	if(ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
 }
 
 
@@ -2303,7 +2302,7 @@ void CModDoc::OnPatternRestart()
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, 0);
 
-		if (pModPlaying == this)
+		if(pModPlaying == this)
 		{
 			pSndFile->StopAllVsti();
 		} else
@@ -2313,7 +2312,7 @@ void CModDoc::OnPatternRestart()
 
 		cs.Leave();
 		
-		if (pModPlaying != this)
+		if(pModPlaying != this)
 		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 		}
@@ -2361,7 +2360,7 @@ void CModDoc::OnPatternPlay()
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow);
 
-		if (pModPlaying == this)
+		if(pModPlaying == this)
 		{
 			pSndFile->StopAllVsti();
 		} else
@@ -2371,7 +2370,7 @@ void CModDoc::OnPatternPlay()
 
 		cs.Leave();
 
-		if (pModPlaying != this)
+		if(pModPlaying != this)
 		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
@@ -2422,7 +2421,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow);
 
-		if (pModPlaying == this)
+		if(pModPlaying == this)
 		{
 			pSndFile->StopAllVsti();
 		} else
@@ -2432,7 +2431,7 @@ void CModDoc::OnPatternPlayNoLoop()
 
 		cs.Leave();
 
-		if (pModPlaying != this)
+		if(pModPlaying != this)
 		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
@@ -2678,12 +2677,7 @@ void CModDoc::SongProperties()
 void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 //----------------------------------------------------------
 {
-	const double dPatternPlaytime = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr)
-	{
-		pMainFrm->SetElapsedTime(static_cast<DWORD>(Util::Max(0.0, dPatternPlaytime) * 1000.0));
-	}
+	m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
 }
 
 

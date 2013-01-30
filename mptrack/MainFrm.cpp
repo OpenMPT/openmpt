@@ -224,7 +224,6 @@ CMainFrame::CMainFrame()
 	m_hWndMidi = NULL;
 	m_pSndFile = nullptr;
 	m_dwStatus = 0;
-	m_dwElapsedTime = 0;
 	m_dwTimeSec = 0;
 	m_dwNotifyType = 0;
 	m_nTimer = 0;
@@ -1021,7 +1020,6 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 //-------------------------------------------------------------------
 {
-	m_dwElapsedTime += (dwSamplesRead * 1000) / GetSettings().m_dwRate;
 	gsdwTotalSamples += dwSamplesRead;
 	if (!m_pSndFile) return FALSE;
 	if (m_nMixChn < m_pSndFile->m_nMixStat) m_nMixChn++;
@@ -1324,8 +1322,8 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	// Select correct bidi loop mode when playing a module.
 	pSndFile->SetupITBidiMode();
 
-	if ((m_pSndFile) || (m_dwStatus & MODSTATUS_PLAYING)) PauseMod();
-	if (((m_pSndFile) && (pSndFile != m_pSndFile)) || (!m_dwElapsedTime)) CSoundFile::ResetAGC();
+	if(m_pSndFile != nullptr || (m_dwStatus & MODSTATUS_PLAYING)) PauseMod();
+	if(m_pSndFile != nullptr && (pSndFile != m_pSndFile || !m_pSndFile->GetTotalSampleCount())) CSoundFile::ResetAGC();
 	m_pSndFile = pSndFile;
 	m_pModPlaying = pModDoc;
 	m_hFollowSong = hPat;
@@ -1439,7 +1437,6 @@ BOOL CMainFrame::StopMod(CModDoc *pModDoc)
 	PauseMod();
 	if (pPlay) pPlay->SetPause(FALSE);
 	if (pSndFile) pSndFile->SetCurrentPos(0);
-	m_dwElapsedTime = 0;
 	return TRUE;
 }
 
@@ -1981,10 +1978,15 @@ void CMainFrame::OnTimer(UINT)
 //----------------------------
 {
 	// Display Time in status bar
-	DWORD dwTime = m_dwElapsedTime / 1000;
-	if (dwTime != m_dwTimeSec)
+	size_t time = 0;
+	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)
 	{
-		m_dwTimeSec = dwTime;
+		time = m_pSndFile->GetTotalSampleCount() / m_pSndFile->GetSampleRate();
+	}
+
+	if (time != m_dwTimeSec)
+	{
+		m_dwTimeSec = time;
 		m_nAvgMixChn = m_nMixChn;
 		OnUpdateTime(NULL);
 	}
@@ -2096,20 +2098,18 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 {
 	CHAR s[64];
 	wsprintf(s, "%d:%02d:%02d",
-		m_dwTimeSec / 3600, (m_dwTimeSec / 60) % 60, (m_dwTimeSec % 60));
-	if ((m_pSndFile) && (!(m_pSndFile->IsPaused())))
+		m_dwTimeSec / 3600, (m_dwTimeSec / 60) % 60, m_dwTimeSec % 60);
+
+	if(m_pSndFile != nullptr && m_pSndFile != &m_WaveFile && !m_pSndFile->IsPaused())
 	{
-		if (m_pSndFile != &m_WaveFile)
+		PATTERNINDEX nPat = m_pSndFile->m_nPattern;
+		if(m_pSndFile->Patterns.IsValidIndex(nPat))
 		{
-			UINT nPat = m_pSndFile->m_nPattern;
-			if(nPat < m_pSndFile->Patterns.Size())
-			{
-				if (nPat < 10) strcat(s, " ");
-				if (nPat < 100) strcat(s, " ");
-				wsprintf(s+strlen(s), " [%d]", nPat);
-			}
+			if(nPat < 10) strcat(s, " ");
+			if(nPat < 100) strcat(s, " ");
+			wsprintf(s + strlen(s), " [%d]", nPat);
 		}
-		wsprintf(s+strlen(s), " %dch", m_nAvgMixChn);
+		wsprintf(s + strlen(s), " %dch", m_nAvgMixChn);
 	}
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_TIME), s, TRUE);
 }

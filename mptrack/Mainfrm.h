@@ -553,15 +553,12 @@ public:
 	BOOL StopMod(CModDoc *pDoc=NULL);
 	BOOL PauseMod(CModDoc *pDoc=NULL);
 	BOOL PlaySoundFile(CSoundFile *);
-	BOOL PlaySoundFile(LPCSTR lpszFileName, UINT nNote=0);
+	BOOL PlaySoundFile(LPCSTR lpszFileName, UINT nNote = 0);
 	BOOL PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote=0);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
 	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
 	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
-	DWORD GetElapsedTime() const { return m_dwElapsedTime; }
-	void ResetElapsedTime() { m_dwElapsedTime = 0; }
-	void SetElapsedTime(DWORD dwElapsedTime) { m_dwElapsedTime = dwElapsedTime; }
 	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
 	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
 	BOOL InitRenderer(CSoundFile*);  //rewbs.VSTTimeInfo

@@ -99,7 +99,8 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	ON_COMMAND(IDC_LIST_SAMPLES,		OnShowSamples)
 	ON_COMMAND(IDC_LIST_INSTRUMENTS,	OnShowInstruments)
 	ON_COMMAND(IDC_LIST_PATTERNS,		OnShowPatterns)
-	ON_NOTIFY(LVN_ENDLABELEDIT,	IDC_LIST_DETAILS,	OnEndLabelEdit)
+	ON_NOTIFY(LVN_ENDLABELEDIT,		IDC_LIST_DETAILS,	OnEndLabelEdit)
+	ON_NOTIFY(LVN_BEGINLABELEDIT,	IDC_LIST_DETAILS,	OnBeginLabelEdit)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST_DETAILS,	OnDblClickListItem)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -458,7 +459,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 }
 
 
-VOID CViewComments::RecalcLayout()
+void CViewComments::RecalcLayout()
 //--------------------------------
 {
 	CRect rect;
@@ -470,7 +471,7 @@ VOID CViewComments::RecalcLayout()
 }
 
 
-VOID CViewComments::UpdateButtonState()
+void CViewComments::UpdateButtonState()
 //-------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -485,51 +486,55 @@ VOID CViewComments::UpdateButtonState()
 }
 
 
-VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
+void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
+//------------------------------------------------------
+{
+	CEdit *editCtrl = m_ItemList.GetEditControl();
+	if(editCtrl)
+	{
+		const CModSpecifications &specs = GetDocument()->GetSoundFile()->GetModSpecifications();
+		const size_t maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? specs.sampleNameLengthMax : specs.instrNameLengthMax;
+		editCtrl->LimitText(maxStrLen);
+	}
+}
+
+
+void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 //-----------------------------------------------------------
 {
 	LV_DISPINFO *plvDispInfo = (LV_DISPINFO *)pnmhdr;
-	LV_ITEM *plvItem = &plvDispInfo->item;
+	LV_ITEM &lvItem = plvDispInfo->item;
 	CModDoc *pModDoc = GetDocument();
-	CHAR s[512]; //rewbs.fix3082
 
-	if ((plvItem->pszText != NULL) && (!plvItem->iSubItem) && (pModDoc))
+	if(lvItem.pszText != nullptr && !lvItem.iSubItem && pModDoc)
 	{
-		UINT iItem = plvItem->iItem;
+		UINT iItem = lvItem.iItem;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		lstrcpyn(s, plvItem->pszText, sizeof(s));
 
-		size_t maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? pSndFile->GetModSpecifications().sampleNameLengthMax : pSndFile->GetModSpecifications().instrNameLengthMax;
-		
-		for (size_t i = min(maxStrLen, strlen(s)); i < sizeof(s); i++)
-			s[i] = 0;
-
-		if (m_nListId == IDC_LIST_SAMPLES)
+		if(m_nListId == IDC_LIST_SAMPLES)
 		{
-			if (iItem < pSndFile->m_nSamples)
+			if(iItem < pSndFile->GetNumSamples())
 			{
-				memcpy(pSndFile->m_szNames[iItem + 1], s, sizeof(pSndFile->m_szNames[iItem + 1]));
+				strncpy(pSndFile->m_szNames[iItem + 1], lvItem.pszText, MAX_SAMPLENAME);
 				StringFixer::SetNullTerminator(pSndFile->m_szNames[iItem + 1]);
-				// 05/01/05 : ericus replaced "<< 24" by "<< 20" : 4000 samples -> 12bits [see Moddoc.h]
-				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES | HINT_SAMPLEINFO), this);
 				pModDoc->SetModified();
 			}
-		} else
-		if (m_nListId == IDC_LIST_INSTRUMENTS)
+		} else if(m_nListId == IDC_LIST_INSTRUMENTS)
 		{
-			if ((iItem < pSndFile->m_nInstruments) && (pSndFile->Instruments[iItem + 1]))
+			if((iItem < pSndFile->GetNumInstruments()) && (pSndFile->Instruments[iItem + 1]))
 			{
-				ModInstrument *pIns = pSndFile->Instruments[iItem+1];
-				memcpy(pIns->name, s, sizeof(pIns->name));
+				ModInstrument *pIns = pSndFile->Instruments[iItem + 1];
+				strncpy(pIns->name, lvItem.pszText, MAX_INSTRUMENTNAME);
 				StringFixer::SetNullTerminator(pIns->name);
-				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
+				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES | HINT_INSTRUMENT), this);
 				pModDoc->SetModified();
 			}
 		} else
 		{
 			return;
 		}
-		m_ItemList.SetItemText(iItem, plvItem->iSubItem, s);
+		m_ItemList.SetItemText(iItem, lvItem.iSubItem, lvItem.pszText);
 	}
 }
 
