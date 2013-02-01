@@ -126,19 +126,23 @@ bool CZipArchive::ExtractFile()
 {
 	unz_file_pos bestFile;
 	unz_file_info info;
+	uLong biggestFile = 0;
 
 	int status = unzGoToFirstFile(zipFile);
 	unzGetFilePos(zipFile, &bestFile);
 
 	while(status == UNZ_OK)
 	{
-		char name[256], *ext = name;
+		char name[256];
 		unzGetCurrentFileInfo(zipFile, &info, name, sizeof(name), nullptr, 0, nullptr, 0);
+
 		// Extract file extension
-		while(ext != '\0')
+		char *ext = name + info.size_filename;
+		while(ext > name)
 		{
-			if(*(ext++) == '.')
+			if(*(--ext) == '.')
 			{
+				ext++;
 				break;
 			}
 		}
@@ -175,10 +179,11 @@ bool CZipArchive::ExtractFile()
 		if(lstrcmpi(ext, "diz")
 			&& lstrcmpi(ext, "nfo")
 			&& lstrcmpi(ext, "txt")
-			&& info.uncompressed_size > 16)
+			&& info.uncompressed_size >= biggestFile)
 		{
 			// If this isn't some kind of info file, we should maybe pick it.
 			unzGetFilePos(zipFile, &bestFile);
+			biggestFile = info.uncompressed_size;
 		}
 
 		status = unzGoToNextFile(zipFile);
