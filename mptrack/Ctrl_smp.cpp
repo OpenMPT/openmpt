@@ -955,16 +955,16 @@ void CCtrlSamples::OnZoomChanged()
 void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
-	const bool bDuplicate = CMainFrame::GetInputHandler()->ShiftPressed();
+	const bool duplicate = CMainFrame::GetInputHandler()->ShiftPressed();
 
 	SAMPLEINDEX smp = m_pModDoc->InsertSample(true);
-	if (smp != SAMPLEINDEX_INVALID)
+	if(smp != SAMPLEINDEX_INVALID)
 	{
 		SAMPLEINDEX nOldSmp = m_nSample;
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
 
-		if(bDuplicate && nOldSmp >= 1 && nOldSmp <= pSndFile->GetNumSamples())
+		if(duplicate && nOldSmp >= 1 && nOldSmp <= pSndFile->GetNumSamples())
 		{
 			m_pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace);
 			pSndFile->ReadSampleFromSong(smp, pSndFile, nOldSmp);
@@ -2627,20 +2627,12 @@ void CCtrlSamples::OnLoopTypeChanged()
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	int n = m_ComboLoopType.GetCurSel();
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	bool wasDisabled = (sample.uFlags & CHN_LOOP) == 0;
-	switch(n)
-	{
-	case 0:	// Off
-		sample.uFlags &= ~(CHN_LOOP | CHN_PINGPONGLOOP);
-		break;
-	case 1:	// On
-		sample.uFlags &= ~CHN_PINGPONGLOOP;
-		sample.uFlags |= CHN_LOOP;
-		break;
-	case 2:	// PingPong
-		sample.uFlags |= CHN_LOOP | CHN_PINGPONGLOOP;
-		break;
-	}
+	bool wasDisabled = !sample.uFlags[CHN_LOOP];
+
+	// 0: Off, 1: On, 2: PingPong
+	sample.uFlags.set(CHN_LOOP, n > 0);
+	sample.uFlags.set(CHN_PINGPONGLOOP, n == 2);
+
 	// set loop points if theren't any
 	if(wasDisabled && ((sample.uFlags & CHN_LOOP) != 0) && (sample.nLoopStart == sample.nLoopEnd) && (sample.nLoopStart == 0))
 	{
@@ -2655,7 +2647,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
-	m_pModDoc->AdjustEndOfSample(m_nSample);
+	ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 	m_pModDoc->SetModified();
 }
 
@@ -2669,12 +2661,7 @@ void CCtrlSamples::OnLoopStartChanged()
 	if ((n >= 0) && (n < sample.nLength) && ((n < sample.nLoopEnd) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.nLoopStart = n;
-		if(sample.uFlags[CHN_LOOP])
-		{
-			// only update sample buffer if the loop is actually enabled
-			// (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0
-			m_pModDoc->AdjustEndOfSample(m_nSample);
-		}
+		ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2690,12 +2677,7 @@ void CCtrlSamples::OnLoopEndChanged()
 	if ((n >= 0) && (n <= sample.nLength) && ((n > sample.nLoopStart) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.nLoopEnd = n;
-		if(sample.uFlags[CHN_LOOP])
-		{
-			// only update sample buffer if the loop is actually enabled
-			// (resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0
-			m_pModDoc->AdjustEndOfSample(m_nSample);
-		}
+		ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2708,20 +2690,13 @@ void CCtrlSamples::OnSustainTypeChanged()
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	int n = m_ComboSustainType.GetCurSel();
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	bool wasDisabled = (sample.uFlags & CHN_SUSTAINLOOP) == 0;
-	switch(n)
-	{
-	case 0:	// Off
-		sample.uFlags &= ~(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
-		break;
-	case 1:	// On
-		sample.uFlags &= ~CHN_PINGPONGSUSTAIN;
-		sample.uFlags |= CHN_SUSTAINLOOP;
-		break;
-	case 2:	// PingPong
-		sample.uFlags |= CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN;
-		break;
-	}
+	bool wasDisabled = !sample.uFlags[CHN_SUSTAINLOOP];
+
+	// 0: Off, 1: On, 2: PingPong
+	sample.uFlags.set(CHN_SUSTAINLOOP, n > 0);
+	sample.uFlags.set(CHN_PINGPONGSUSTAIN, n == 2);
+
+
 	// set sustain loop points if theren't any
 	if(wasDisabled && ((sample.uFlags & CHN_SUSTAINLOOP) != 0) && (sample.nSustainStart == sample.nSustainEnd) && (sample.nSustainStart == 0))
 	{
@@ -2736,6 +2711,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
+	ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 	m_pModDoc->SetModified();
 }
 
@@ -2882,6 +2858,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			m_EditLoopStart.SetWindowText(s);
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 			redraw = true;
+			ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		}
 		m_SpinLoopStart.SetPos(0);
 	}
@@ -2926,6 +2903,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			m_EditLoopEnd.SetWindowText(s);
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 			redraw = true;
+			ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		}
 		m_SpinLoopEnd.SetPos(0);
 	}
@@ -2970,6 +2948,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", sample.nSustainStart);
 			m_EditSustainStart.SetWindowText(s);
 			redraw = true;
+			ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		}
 		m_SpinSustainStart.SetPos(0);
 	}
@@ -3013,6 +2992,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", sample.nSustainEnd);
 			m_EditSustainEnd.SetWindowText(s);
 			redraw = true;
+			ctrlSmp::UpdateLoopPoints(sample, *m_pSndFile);
 		}
 		m_SpinSustainEnd.SetPos(0);
 	}

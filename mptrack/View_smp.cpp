@@ -77,8 +77,6 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_CHAR()
-	ON_WM_KEYDOWN()
-	ON_WM_KEYUP()
 	ON_WM_DROPFILES()
 	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_EDIT_UNDO,				OnEditUndo)
@@ -108,7 +106,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_GRID,				OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			OnQuickFade)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -256,8 +254,8 @@ BOOL CViewSample::SetZoom(UINT nZoom)
 }
 
 
-void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
-//---------------------------------------------------
+void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
+//-----------------------------------------------------------
 {
 	CSoundFile *pSndFile = (GetDocument()) ? GetDocument()->GetSoundFile() : nullptr;
 	if(pSndFile == nullptr)
@@ -267,8 +265,8 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 	if(m_nGridSegments > 0)
 	{
 		const float sampsPerSegment = (float)(pSndFile->GetSample(m_nSample).nLength / m_nGridSegments);
-		nBegin = (DWORD)(floor((float)(nBegin / sampsPerSegment) + 0.5f) * sampsPerSegment);
-		nEnd = (DWORD)(floor((float)(nEnd / sampsPerSegment) + 0.5f) * sampsPerSegment);
+		nBegin = (SmpLength)(floor((float)(nBegin / sampsPerSegment) + 0.5f) * sampsPerSegment);
+		nEnd = (SmpLength)(floor((float)(nEnd / sampsPerSegment) + 0.5f) * sampsPerSegment);
 	}
 
 	if (nBegin > nEnd)
@@ -279,7 +277,7 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 	if ((nBegin != m_dwBeginSel) || (nEnd != m_dwEndSel))
 	{
 		RECT rect;
-		DWORD dMin = m_dwBeginSel, dMax = m_dwEndSel;
+		SmpLength dMin = m_dwBeginSel, dMax = m_dwEndSel;
 		if (m_dwBeginSel >= m_dwEndSel)
 		{
 			dMin = nBegin;
@@ -317,10 +315,10 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 			s[0] = 0;
 			if (m_dwEndSel > m_dwBeginSel)
 			{
-				const DWORD selLength = m_dwEndSel - m_dwBeginSel;
+				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 				wsprintf(s, "[%d,%d] (%d sample%s, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
-				LONG lSampleRate = pSndFile->GetSample(m_nSample).nC5Speed;
-				if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+				uint32 lSampleRate = pSndFile->GetSample(m_nSample).nC5Speed;
+				if (pSndFile->GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM))
 				{
 					lSampleRate = ModSample::TransposeToFrequency(pSndFile->GetSample(m_nSample).RelativeTone, pSndFile->GetSample(m_nSample).nFineTune);
 				}
@@ -2235,7 +2233,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 			else
 				pModDoc->NoteOff(0, true);
 
-			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
+			SmpLength loopstart = m_dwBeginSel, loopend = m_dwEndSel;
 			if (loopend - loopstart < (UINT)(4 << m_nZoom))
 				loopend = loopstart = 0; // selection is too small -> no loop
 
@@ -2243,44 +2241,18 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
-			if(ModCommand::IsNote(note))
+			if(ModCommand::IsNote((ModCommand::NOTE)note))
 			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
 				ModSample &sample = pSndFile->GetSample(m_nSample);
 				uint32 freq = pSndFile->GetFreqFromPeriod(pSndFile->GetPeriodFromNote(note + (pSndFile->GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-				wsprintf(s, "%s%d (%d Hz)", szNoteNames[(note - 1) % 12], (note - 1) / 12, freq);
+				wsprintf(s, "%s (%d Hz)", szDefaultNoteNames[note - 1], freq);
 			}
 			pMainFrm->SetInfoText(s);
 		}
 	}
 
-}
-
-
-void CViewSample::OnKeyDown(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/)
-//----------------------------------------------------------------
-{
-	/*
-	switch(nChar)
-	{
-	case VK_DELETE:
-		OnEditDelete();
-		break;
-	default:
-		CModScrollView::OnKeyDown(nChar, nRepCnt, nFlags);
-	}
-	*/
-}
-
-
-void CViewSample::OnKeyUp(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/)
-//--------------------------------------------------------------
-{
-	/*
-	m_dwStatus &= ~SMPSTATUS_KEYDOWN;
-	CModScrollView::OnKeyUp(nChar, nRepCnt, nFlags);
-	*/
 }
 
 
@@ -2492,7 +2464,7 @@ void CViewSample::OnSetLoopStart()
 			sample.nLoopStart = m_dwMenuParam;
 			sample.uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
+			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2513,7 +2485,7 @@ void CViewSample::OnSetLoopEnd()
 			sample.nLoopEnd = m_dwMenuParam;
 			sample.uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
+			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2534,7 +2506,7 @@ void CViewSample::OnSetSustainStart()
 			sample.nSustainStart = m_dwMenuParam;
 			sample.uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
+			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2555,7 +2527,7 @@ void CViewSample::OnSetSustainEnd()
 			sample.nSustainEnd = m_dwMenuParam;
 			sample.uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
+			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
