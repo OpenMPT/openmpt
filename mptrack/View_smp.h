@@ -29,7 +29,8 @@ protected:
 	SIZE m_sizeTotal;
 	SAMPLEINDEX m_nSample;
 	UINT m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
-	DWORD m_dwStatus, m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
+	DWORD m_dwStatus;
+	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
@@ -51,7 +52,7 @@ protected:
 	DWORD ScreenToSample(LONG x) const;
 	void PlayNote(UINT note, const uint32 nStartPos = 0); //rewbs.customKeys
 	void InvalidateSample();
-	void SetCurSel(DWORD nBegin, DWORD nEnd);
+	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
 	void DrawPositionMarks(HDC hdc);
 	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
@@ -113,8 +114,6 @@ protected:
 #endif 
 	afx_msg void OnNcPaint();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
 	afx_msg void OnNcLButtonDown(UINT, CPoint);
