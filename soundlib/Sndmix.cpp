@@ -1139,12 +1139,12 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
-		if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) && pChn->VolEnv.nEnvPosition == 0)
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
-		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) ? 1 : 0);
+		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 		// Get values in [0, 256]
 		int envval = Util::Round<int>(pIns->VolEnv.GetValueFromPosition(envpos) * 256.0f);
 
@@ -1269,7 +1269,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 	}
 
 	// Increase position
-	UINT position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) ? 0 : 1);
+	UINT position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
 
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(envType);
 
@@ -1371,7 +1371,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		}
 	}
 
-	chnEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) ? 1 : 0);
+	chnEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 
 }
 
@@ -2027,7 +2027,7 @@ BOOL CSoundFile::ReadNote()
 			// Process Envelopes
 			if (pIns)
 			{
-				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					// In IT and FT2 compatible mode, envelope position indices are shifted by one for proper envelope pausing,
 					// so we have to update the position before we actually process the envelopes.
@@ -2184,7 +2184,7 @@ BOOL CSoundFile::ReadNote()
 		}
 
 		// Increment envelope positions
-		if (pIns != nullptr && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+		if(pIns != nullptr && !IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			// In IT and FT2 compatible mode, envelope positions are updated above.
 			// Test cases: s77.it, EnvLoops.xm
