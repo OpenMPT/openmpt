@@ -575,19 +575,19 @@ bool CModCleanupDlg::OptimizeSamples()
 
 	SAMPLEINDEX numLoopOpt = 0;
 	
-	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
+	for(SAMPLEINDEX smp = 1; smp <= pSndFile->GetNumSamples(); smp++)
 	{
-		const ModSample &sample = pSndFile->GetSample(nSmp);
+		const ModSample &sample = pSndFile->GetSample(smp);
 
 		// Determine how much of the sample will be played
 		SmpLength loopLength = sample.nLength;
-		if(sample.uFlags & CHN_LOOP)
+		if(sample.uFlags[CHN_LOOP])
 		{
 			loopLength = sample.nLoopEnd;
-		}
-		if(sample.uFlags & CHN_SUSTAINLOOP)
-		{
-			loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
+			if(sample.uFlags[CHN_SUSTAINLOOP])
+			{
+				loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
+			}
 		}
 
 		if(sample.pSample && sample.nLength > loopLength + 2) numLoopOpt++;
@@ -605,12 +605,12 @@ bool CModCleanupDlg::OptimizeSamples()
 
 			// Determine how much of the sample will be played
 			SmpLength loopLength = sample.nLength;
-			if(sample.uFlags & CHN_LOOP)
+			if(sample.uFlags[CHN_LOOP])
 			{
 				loopLength = sample.nLoopEnd;
 
 				// Sustain loop is played before normal loop, and it can actually be located after the normal loop.
-				if(sample.uFlags & CHN_SUSTAINLOOP)
+				if(sample.uFlags[CHN_SUSTAINLOOP])
 				{
 					loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
 				}
@@ -631,7 +631,7 @@ bool CModCleanupDlg::OptimizeSamples()
 		return true;
 	}
 
-	return false;	
+	return false;
 }
 
 // Rearrange sample list
@@ -677,7 +677,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples;
 	if(!pSndFile->m_SongFlags[SONG_ITPROJECT]) // Never remove an instrument's samples in ITP.
 	{
-		if(Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing unused instruments", false, false, this) == cnfYes)
+		if(Reporting::Confirm("Remove samples associated with unused instruments?", "Removing unused instruments", false, false, this) == cnfYes)
 		{
 			removeSamples = deleteAssociatedSamples;
 		}
