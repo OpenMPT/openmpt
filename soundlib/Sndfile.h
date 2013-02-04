@@ -380,7 +380,6 @@ public:
 	int GetRepeatCount() const { return m_nRepeatCount; }
 	bool IsPaused() const {	return m_SongFlags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
-	void CheckCPUUsage(UINT nCPU);
 
 	void SetupITBidiMode();
 
@@ -517,7 +516,7 @@ public:
 	BOOL ProcessRow();
 	BOOL ProcessEffects();
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
-	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCut);
+	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
 	void NoteChange(CHANNELINDEX nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true);
 

@@ -182,7 +182,7 @@ const CModSpecifications xm =
 	1,									// Channel min
 	32,									// Channel max
 	32,									// Min tempo
-	10000,								// Max tempo
+	512,								// Max tempo
 	1,									// Min pattern rows
 	256,								// Max pattern rows
 	20,									// Max mod name length
@@ -225,7 +225,7 @@ const CModSpecifications xmEx =
 	1,									// Channel min
 	127,								// Channel max
 	32,									// Min tempo
-	10000,								// Max tempo
+	512,								// Max tempo
 	1,									// Min pattern rows
 	1024,								// Max pattern rows
 	20,									// Max mod name length

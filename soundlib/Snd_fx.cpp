@@ -1303,8 +1303,8 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 }
 
 
-void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCut)
-//--------------------------------------------------------------------------------
+void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut)
+//-------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &Chn[nChn];
 	ModInstrument *pIns = nullptr;
@@ -1314,23 +1314,24 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 		return;
 	}
 	// Always NNA cut - using
-	if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2))) || (!m_nInstruments) || (bForceCut))
+	if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut)
 	{
-		if (m_SongFlags[SONG_CPUVERYHIGH]
-			|| (!pChn->nLength) || pChn->dwFlags[CHN_MUTE]
-			| ((!pChn->nLeftVol) && (!pChn->nRightVol))) return;
+		if(!pChn->nLength || pChn->dwFlags[CHN_MUTE] || !(pChn->nLeftVol | pChn->nRightVol))
+		{
+			return;
+		}
 
-		UINT n = GetNNAChannel(nChn);
-		if (!n) return;
-		ModChannel *p = &Chn[n];
+		CHANNELINDEX n = GetNNAChannel(nChn);
+		if(!n) return;
+		ModChannel &chn = Chn[n];
 		// Copy Channel
-		*p = *pChn;
-		p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
-		p->nMasterChn = nChn + 1;
-		p->nCommand = CMD_NONE;
+		chn = *pChn;
+		chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
+		chn.nMasterChn = nChn + 1;
+		chn.nCommand = CMD_NONE;
 		// Cut the note
-		p->nFadeOutVol = 0;
-		p->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+		chn.nFadeOutVol = 0;
+		chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
 		// Stop this channel
 		pChn->nLength = pChn->nPos = pChn->nPosLo = 0;
 		pChn->nROfs = pChn->nLOfs = 0;
@@ -1351,7 +1352,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, BOOL bForceCu
 				n = pIns->Keyboard[note - 1];
 				note = pIns->NoteMap[note - 1];
 				if(n > 0  && n < MAX_SAMPLES) pSample = Samples[n].pSample;
-				}
+			}
 		} else pSample = nullptr;
 	}
 	ModChannel *p = pChn;
@@ -1895,9 +1896,9 @@ BOOL CSoundFile::ProcessEffects()
 				pChn->nNewNote = pChn->nLastNote = note;
 
 				// New Note Action ?
-				if (!bPorta)
+				if(!bPorta)
 				{
-					CheckNNA(nChn, instr, note, FALSE);
+					CheckNNA(nChn, instr, note, false);
 				}
 			}
 
@@ -4136,7 +4137,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		}
 		UINT nNote = pChn->nNewNote;
 		int32 nOldPeriod = pChn->nPeriod;
-		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, TRUE);
+		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, true);
 		bool bResetEnv = false;
 		if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
@@ -4172,7 +4173,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 
 	// Now we can also store the retrig value for IT...
 	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-		pChn->nRetrigCount = (BYTE)nRetrigCount;
+		pChn->nRetrigCount = nRetrigCount;
 }
 
 
