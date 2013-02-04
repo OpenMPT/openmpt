@@ -1024,7 +1024,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		m_nMusicTempo = m_nDefaultTempo;
 		visitedSongRows.Initialize(true);
 	}
-	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
 		UINT ord = Order[nPattern];
@@ -1121,7 +1121,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_nNextPatStartRow = 0;
 	}
 
-	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 }
 
 //rewbs.VSTCompliance
@@ -1199,7 +1199,7 @@ void CSoundFile::RecalculateGainForAllPlugs()
 void CSoundFile::ResetChannels()
 //------------------------------
 {
-	m_SongFlags.reset(SONG_CPUVERYHIGH | SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
 	m_nBufferCount = 0;
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
@@ -1374,36 +1374,6 @@ void CSoundFile::AdjustSampleLoop(ModSample &sample)
 	} else if(sample.GetBytesPerSample() == 1)
 	{
 		AdjustSampleLoopImpl<uint8>(sample);
-	}
-}
-
-
-void CSoundFile::CheckCPUUsage(UINT nCPU)
-//---------------------------------------
-{
-	if (nCPU > 100) nCPU = 100;
-	gnCPUUsage = nCPU;
-	if (nCPU < 90)
-	{
-		m_SongFlags.reset(SONG_CPUVERYHIGH);
-	} else
-	if(m_SongFlags[SONG_CPUVERYHIGH] && nCPU >= 94)
-	{
-		UINT i=MAX_CHANNELS;
-		while (i >= 8)
-		{
-			i--;
-			if (Chn[i].nLength)
-			{
-				Chn[i].nLength = Chn[i].nPos = 0;
-				nCPU -= 2;
-				if (nCPU < 94) break;
-			}
-		}
-	} else
-	if (nCPU > 90)
-	{
-		m_SongFlags.set(SONG_CPUVERYHIGH);
 	}
 }
 
