@@ -1031,11 +1031,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterUpdateDisplay:
 		if (pVstPlugin != nullptr)
 		{
-			// Note to self for testing: Electri-Q sends opcode.
+			// Note to self for testing: Electri-Q sends opcode. Korg M1 sends this when switchin between Combi and Multi mode to update the preset names.
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 			if (pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
 			{
-				pVstEditor->SetupMenu();
+				pVstEditor->SetupMenu(true);
 			}
 		}
 		return 0;

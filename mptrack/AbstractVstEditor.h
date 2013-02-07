@@ -26,7 +26,7 @@ public:
 	int m_nCurProg;
 	CAbstractVstEditor(CVstPlugin *pPlugin);
 	virtual ~CAbstractVstEditor();
-	void SetupMenu();
+	void SetupMenu(bool force = false);
 	void SetTitle();
 	void SetLearnMacro(int inMacro);
 	int GetLearnMacro();
@@ -72,7 +72,7 @@ private:
 	CMenu *m_pOptionsMenu;
 
 	void FillPresetMenu();
-	void UpdatePresetMenu();
+	void UpdatePresetMenu(bool force = false);
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();
