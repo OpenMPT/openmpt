@@ -153,13 +153,13 @@ void CAbstractVstEditor::OnRandomizePreset()
 }
 
 
-void CAbstractVstEditor::SetupMenu()
+void CAbstractVstEditor::SetupMenu(bool force)
 //----------------------------------
 {
 	//TODO: create menus on click so they are only updated when required
 	if (m_pVstPlugin)
 	{
-		UpdatePresetMenu();
+		UpdatePresetMenu(force);
 		UpdateInputMenu();
 		UpdateOutputMenu();
 		UpdateMacroMenu();
@@ -381,8 +381,8 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 }
 
 
-void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu)
-//---------------------------------------------------------------------------
+void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU)
+//---------------------------------------------------------------------
 {
 	if((nFlags & MF_POPUP) && nItemID == 1)
 	{
@@ -457,15 +457,15 @@ void CAbstractVstEditor::FillPresetMenu()
 }
 
 
-void CAbstractVstEditor::UpdatePresetMenu()
-//-----------------------------------------
+void CAbstractVstEditor::UpdatePresetMenu(bool force)
+//---------------------------------------------------
 {
 	const VstInt32 numProgs = m_pVstPlugin->GetNumPrograms();
 	const VstInt32 curProg  = m_pVstPlugin->GetCurrentProgram();
 
 	if(m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
 	{												// So remove any exiting menus...
-		if(curProg == m_nCurProg)					// ... unless menu exists and is accurate,
+		if(curProg == m_nCurProg && !force)			// ... unless menu exists and is accurate,
 			return;									// in which case we are done.
 
 		for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
