@@ -103,8 +103,7 @@ bool CSoundFile::ReadMTM(FileReader &file)
 		|| fileHeader.numChannels > 32
 		|| fileHeader.numChannels == 0
 		|| fileHeader.numSamples >= MAX_SAMPLES
-		|| fileHeader.lastPattern == 0
-		|| fileHeader.lastPattern > MAX_PATTERNS
+		|| fileHeader.lastPattern >= MAX_PATTERNS
 		|| fileHeader.beatsPerTrack == 0
 		|| file.BytesLeft() < sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize)
 	{
