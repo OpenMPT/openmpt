@@ -183,6 +183,11 @@ struct __declspec(align(32)) ModChannelSettings
 
 	ModChannelSettings()
 	{
+		Reset();
+	}
+
+	void Reset()
+	{
 		nPan = 128;
 		nVolume = 64;
 		nMixPlugin = 0;

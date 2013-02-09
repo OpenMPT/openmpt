@@ -87,7 +87,8 @@ bool CSoundFile::ReadMO3(FileReader &file)
 						|| ReadIT(unpackedFile)
 						|| ReadS3M(unpackedFile)
 						|| ReadMTM(unpackedFile)
-						|| ReadMod(unpackedFile);
+						|| ReadMod(unpackedFile)
+						|| ReadM15(unpackedFile);
 				}
 
 				UNMO3_Free(stream);

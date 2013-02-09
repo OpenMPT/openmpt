@@ -389,6 +389,7 @@ public:
 	bool ReadXM(FileReader &file);
 	bool ReadS3M(FileReader &file);
 	bool ReadMod(FileReader &file);
+	bool ReadM15(FileReader &file);
 	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMTM(FileReader &file);
 	bool ReadSTM(FileReader &file);
@@ -466,7 +467,7 @@ public:
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	void ProcessPlugins(UINT nCount);
-	size_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
+	samplecount_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
 	bool HasPositionChanged() { bool b = m_bPositionChanged; m_bPositionChanged = false; return b; }
 
 public:
@@ -603,11 +604,6 @@ protected:
 
 public:
 	bool DestroySample(SAMPLEINDEX nSample);
-
-// -> CODE#0020
-// -> DESC="rearrange sample list"
-	bool MoveSample(SAMPLEINDEX from, SAMPLEINDEX to);
-// -! NEW_FEATURE#0020
 
 	// Find an unused sample slot. If it is going to be assigned to an instrument, targetInstrument should be specified.
 	// SAMPLEINDEX_INVLAID is returned if no free sample slot could be found.

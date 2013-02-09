@@ -192,16 +192,9 @@ struct MODFileHeader
 	uint8 numOrders;
 	uint8 restartPos;
 	uint8 orderList[128];
-	char  magic[4];
-
-	// Check if header magic equals a given string.
-	bool IsMagic(const char *otherMagic) const
-	{
-		return (*reinterpret_cast<const uint32 *>(magic) == *reinterpret_cast<const uint32 *>(otherMagic));
-	}
 };
 
-STATIC_ASSERT(sizeof(MODFileHeader) == 134);
+STATIC_ASSERT(sizeof(MODFileHeader) == 130);
 
 
 // Sample Header
@@ -363,13 +356,92 @@ struct FixMODPatterns
 };
 
 
+// Check if header magic equals a given string.
+static bool IsMagic(const char *magic1, const char *magic2)
+//---------------------------------------------------------
+{
+	return (*reinterpret_cast<const uint32 *>(magic1) == *reinterpret_cast<const uint32 *>(magic2));
+}
+
+
+static void ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
+//----------------------------------------------------------------------------------------------------------------------------
+{
+	file.ReadConvertEndianness(sampleHeader);
+	sampleHeader.ConvertToMPT(sample);
+
+	StringFixer::ReadString<StringFixer::spacePadded>(sampleName, sampleHeader.name);
+}
+
+
+// Parse the order list to determine how many patterns are used in the file.
+static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, ORDERINDEX numOrders, size_t totalSampleLen, CHANNELINDEX &numChannels, bool checkForWOW)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	PATTERNINDEX numPatterns = 0;			// Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
+	PATTERNINDEX officialPatterns = 0;		// Number of patterns only found in the "official" part of the order list (i.e. order positions < claimed order length)
+	PATTERNINDEX numPatternsIllegal = 0;	// Total number of patterns in file, also counting in "invalid" pattern indexes >= 128
+
+	for(ORDERINDEX ord = 0; ord < 128; ord++)
+	{
+		PATTERNINDEX pat = Order[ord];
+		if(pat < 128 && numPatterns <= pat)
+		{
+			numPatterns = pat + 1;
+			if(ord < numOrders)
+			{
+				officialPatterns = numPatterns;
+			}
+		}
+		if(pat >= numPatternsIllegal)
+		{
+			numPatternsIllegal = pat + 1;
+		}
+	}
+
+	// Fill order tail with stop patterns, now that we don't need the garbage in there anymore.
+	for(ORDERINDEX ord = numOrders; ord < 128; ord++)
+	{
+		Order[ord] = Order.GetInvalidPatIndex();
+	}
+
+	const size_t patternStartOffset = 20 + 31 * sizeof(MODSampleHeader) + sizeof(MODFileHeader) + 4;
+	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
+
+	if(checkForWOW)
+	{
+		// Check if this is a Mod's Grave WOW file... Never seen one of those, but apparently they *do* exist.
+		// Basically, WOW files seem to use the M.K. extensions, but are actually 8CHN files.
+		if(sizeWithoutPatterns + numPatterns * 8 * 256 == file.GetLength())
+		{
+			numChannels = 8;
+		}
+	}
+
+	// Now we have to check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
+	if(numPatterns != officialPatterns && sizeWithoutPatterns + numPatterns * numChannels * 256 != file.GetLength())
+	{
+		// Ok, size does not match the number of patterns including "hidden" patterns. Does it match the number of "official" patterns?
+		if(sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
+		{
+			// It does! Forget about that crap.
+			numPatterns = officialPatterns;
+		}
+	} else if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
+	{
+		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
+		numPatterns = numPatternsIllegal;
+	}
+
+	return numPatterns;
+}
+
+
 bool CSoundFile::ReadMod(FileReader &file)
 //----------------------------------------
 {
-	file.Rewind();
-
-	MODFileHeader fileHeader;
-	if(!file.Seek(20 + sizeof(MODSampleHeader) * 31) || !file.Read(fileHeader))
+	char magic[4];
+	if(!file.Seek(1080) || !file.ReadArray(magic))
 	{
 		return false;
 	}
@@ -378,92 +450,66 @@ bool CSoundFile::ReadMod(FileReader &file)
 	m_nChannels = 4;
 
 	// Check MOD Magic
-	if(fileHeader.IsMagic("M.K.")		// ProTracker and compatible
-		|| fileHeader.IsMagic("M!K!")	// ProTracker (64+ patterns)
-		|| fileHeader.IsMagic("M&K!")	// NoiseTracker
-		|| fileHeader.IsMagic("N.T.")	// NoiseTracker
-		|| fileHeader.IsMagic("FEST"))	// jobbig.mod by Mahoney
+	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
+		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
+		|| IsMagic(magic, "M&K!")	// NoiseTracker
+		|| IsMagic(magic, "N.T.")	// NoiseTracker
+		|| IsMagic(magic, "FEST"))	// jobbig.mod by Mahoney
 	{
 		m_nChannels = 4;
-	} else if(fileHeader.IsMagic("CD81")	// Falcon
-		|| fileHeader.IsMagic("OKTA")		// Oktalyzer
-		|| fileHeader.IsMagic("OCTA"))		// Oktalyzer
+	} else if(IsMagic(magic, "CD81")	// Falcon
+		|| IsMagic(magic, "OKTA")		// Oktalyzer
+		|| IsMagic(magic, "OCTA"))		// Oktalyzer
 	{
 		m_nChannels = 8;
-	} else if((!memcmp(fileHeader.magic, "FLT", 3) || !memcmp(fileHeader.magic, "EXO", 3)) && fileHeader.magic[3] >= '4' && fileHeader.magic[3] <= '9')
+	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
-		m_nChannels = fileHeader.magic[3] - '0';
-	} else if(fileHeader.magic[0] >= '1' && fileHeader.magic[0] <= '9' && !memcmp(fileHeader.magic + 1, "CHN", 3))
+		m_nChannels = magic[3] - '0';
+	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
-		m_nChannels = fileHeader.magic[0] - '0';
-	} else if(fileHeader.magic[0] >= '1' && fileHeader.magic[0] <= '9' && fileHeader.magic[1]>='0' && fileHeader.magic[1] <= '9'
-		&& (!memcmp(fileHeader.magic + 2, "CH", 2) || !memcmp(fileHeader.magic + 2, "CN", 2)))
+		m_nChannels = magic[0] - '0';
+	} else if(magic[0] >= '1' && magic[0] <= '9' && magic[1]>='0' && magic[1] <= '9'
+		&& (!memcmp(magic + 2, "CH", 2) || !memcmp(magic + 2, "CN", 2)))
 	{
 		// xxCN / xxCH - Many trackers
-		m_nChannels = (fileHeader.magic[0] - '0') * 10 + fileHeader.magic[1] - '0';
-	} else if(!memcmp(fileHeader.magic, "TDZ", 3) && fileHeader.magic[3] >= '4' && fileHeader.magic[3] <= '9')
+		m_nChannels = (magic[0] - '0') * 10 + magic[1] - '0';
+	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// TDZx - TakeTracker
-		m_nChannels = fileHeader.magic[3] - '0';
+		m_nChannels = magic[3] - '0';
 	} else
 	{
-		// Ultimate SoundTracker MODs - no magic bytes
-		m_nSamples = 15;
+		return false;
 	}
 
 	LimitMax(m_nChannels, MAX_BASECHANNELS);
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	bool isFLT8 = fileHeader.IsMagic("FLT8");
+	bool isFLT8 = IsMagic(magic, "FLT8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
-	const bool isMdKd = fileHeader.IsMagic("M.K.");
+	const bool isMdKd = IsMagic(magic, "M.K.");
+
+	// Reading song title
+	file.Seek(0);
+	file.ReadString<StringFixer::spacePadded>(m_szNames[0], 20);
 
 	// Load Samples
-	int m15Errors = 0;
 	size_t totalSampleLen = 0;
 
-	file.Seek(20);
-	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		if(!file.ReadConvertEndianness(sampleHeader))
-		{
-			return false;
-		}
-		sampleHeader.ConvertToMPT(Samples[smp]);
-
-		StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[smp], sampleHeader.name);
+		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
 
 		totalSampleLen += Samples[smp].nLength;
-
-		// M15 Sanity checks
-		if(sampleHeader.volume > 256)
-		{
-			m15Errors++;
-		}
-		if(sampleHeader.length > 32768)
-		{
-			m15Errors++;
-		}
-		if(sampleHeader.finetune != 0)
-		{
-			m15Errors++;
-		}
 	}
 
-	// Re-read file header, as it is found at another position in M15 files.
+	// Read order information
+	MODFileHeader fileHeader;
 	file.Read(fileHeader);
-
-	// Sanity checks...
-	if(GetNumSamples() == 15)
-	{
-		if(totalSampleLen > file.GetLength() * 4 || fileHeader.numOrders > 128 || fileHeader.restartPos > 128)
-		{
-			return false;
-		}
-	}
+	file.Skip(4);	// Magic bytes (we already parsed these)
 
 	Order.ReadFromArray(fileHeader.orderList);
 
@@ -483,45 +529,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	}
 
 	// Do some order sanity checks
-
-	PATTERNINDEX numPatterns = 0;			// Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
-	PATTERNINDEX officialPatterns = 0;		// Number of patterns only found in the "official" part of the order list (i.e. order positions < claimed order length)
-	PATTERNINDEX numPatternsIllegal = 0;	// Total number of patterns in file, also counting in "invalid" pattern indexes >= 128
-
-	for(ORDERINDEX ord = 0; ord < 128; ord++)
-	{
-		PATTERNINDEX pat = Order[ord];
-		if(pat < 128 && numPatterns <= pat)
-		{
-			numPatterns = pat + 1;
-			if(ord < realOrders)
-			{
-				officialPatterns = numPatterns;
-			}
-		}
-		if(pat >= numPatternsIllegal)
-		{
-			numPatternsIllegal = pat + 1;
-		}
-
-		// From mikmod: if the file says FLT8, but the orderlist has odd numbers, it's probably really an FLT4
-		if(isFLT8 && (Order[ord] % 2u) != 0)
-		{
-			m_nChannels = 4;
-			isFLT8 = false;
-		}
-
-		// chances are very high that we're dealing with a non-MOD file here.
-		if(GetNumSamples() == 15 && pat >= 64)
-		{
-			return false;
-		}
-	}
-
-	if(!numPatterns)
-	{
-		return false;
-	}
+	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, realOrders, totalSampleLen, m_nChannels, isMdKd);
 
 	if(isFLT8)
 	{
@@ -531,13 +539,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 			Order[ord] /= 2;
 		}
 	}
-
-	// Fill order tail with stop patterns
-	for(ORDERINDEX ord = realOrders; ord < 128; ord++)
-	{
-		Order[ord] = Order.GetInvalidPatIndex();
-	}
-
+	
 	// Restart position sanity checks
 	realOrders--;
 	m_nRestartPos = fileHeader.restartPos;
@@ -551,59 +553,14 @@ bool CSoundFile::ReadMod(FileReader &file)
 		m_nRestartPos = 0;
 	}
 
-	const size_t patternStartOffset = 20 + GetNumSamples() * sizeof(MODSampleHeader) + sizeof(MODFileHeader) - (GetNumSamples() == 15 ? 4 : 0);
-	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
-
-	if(isMdKd)
-	{
-		// Check if this is a Mod's Grave WOW file... Never seen one of those, but apparently they *do* exist.
-		// Basically, WOW files seem to use the M.K. extensions, but are actually 8CHN files.
-		if(sizeWithoutPatterns + numPatterns * 8 * 256 == file.GetLength())
-		{
-			m_nChannels = 8;
-		}
-	}
-
-	// Now we have to check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
-	if(numPatterns != officialPatterns && sizeWithoutPatterns + numPatterns * m_nChannels * 256 != file.GetLength())
-	{
-		// Ok, size does not match the number of patterns including "hidden" patterns. Does it match the number of "official" patterns?
-		if(sizeWithoutPatterns + officialPatterns * m_nChannels * 256 == file.GetLength())
-		{
-			// It does! Forget about that crap.
-			numPatterns = officialPatterns;
-		} else
-		{
-			// Well... Neither fits... So this must be a broken file.
-			m15Errors += 8;
-		}
-	} else if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * m_nChannels * 256 == file.GetLength())
-	{
-		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
-		numPatterns = numPatternsIllegal;
-	}
-
-	// Some final M15 sanity checks...
-	if(sizeWithoutPatterns < 0x600 || sizeWithoutPatterns > file.GetLength())
-	{
-		m15Errors += 8;
-	}
-
-	if(GetNumSamples() == 15 && m15Errors >= 16)
-	{
-		return false;
-	}
-
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
 	m_nType = MOD_TYPE_MOD;
+	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 125;
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_SongFlags.reset();
-
-	file.Seek(0);
-	file.ReadString<StringFixer::spacePadded>(m_szNames[0], 20);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
@@ -612,8 +569,6 @@ bool CSoundFile::ReadMod(FileReader &file)
 	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
 	bool hasTempoCommands = false;	// for detecting VBlank MODs
 	bool leftPanning = false, extendedPanning = false;	// for detecting 800-880 panning
-
-	file.Seek(patternStartOffset);
 
 	// Reading patterns
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
@@ -705,7 +660,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	}
 
 	// Reading samples
-	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
 	}
@@ -720,12 +675,291 @@ bool CSoundFile::ReadMod(FileReader &file)
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
-	// The same check is also applied to original Ultimate Soundtracker 15 sample mods.
-	const bool fixVBlank = ((isMdKd && hasTempoCommands && GetSongTime() >= 10 * 60) || GetNumSamples()== 15);
+	const bool fixVBlank = isMdKd && hasTempoCommands && GetSongTime() >= 10 * 60;
 	const bool fix7BitPanning = leftPanning && !extendedPanning;
 	if(fixVBlank || fix7BitPanning)
 	{
 		Patterns.ForEachModCommand(FixMODPatterns(fixVBlank, fix7BitPanning));
+	}
+
+	return true;
+}
+
+
+// Check if a name string is valid (i.e. doesn't contain binary garbage data)
+static bool IsValidName(const char *s, size_t length, char minChar)
+//-----------------------------------------------------------------
+{
+	size_t i;
+	// Check for garbage characters
+	for(i = 0; i < length; i++)
+	{
+		if(s[i] && s[i] < minChar)
+		{
+			return false;
+		}
+	}
+	// Check for garbage after null terminator.
+	i = static_cast<const char *>(memchr(s, '\0', length)) - s;
+	for(; i < length; i++)
+	{
+		if(s[i])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+bool CSoundFile::ReadM15(FileReader &file)
+//----------------------------------------
+{
+	file.Rewind();
+
+	char songname[20];
+	file.ReadArray(songname);
+	if(!IsValidName(songname, sizeof(songname), 32)
+		|| file.BytesLeft() < sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader))
+	{
+		return false;
+	}
+
+	// We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
+	// or if it was made with the newer Soundtracker versions.
+	bool isUST = false, isConfirmed = false;
+
+	size_t totalSampleLen = 0;
+	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
+	{
+		MODSampleHeader sampleHeader;
+		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+
+		// Sanity checks
+		if(!IsValidName(sampleHeader.name, sizeof(sampleHeader.name), 14)
+			|| sampleHeader.volume > 64
+			|| (sampleHeader.finetune >> 4) != 0
+			|| sampleHeader.length > 32768)
+		{
+			return false;
+		}
+
+		totalSampleLen += Samples[smp].nLength;
+
+		if(isConfirmed)
+		{
+			continue;
+		}
+
+		// Soundtracker sample names should always start with "S", "ST-" or a number, but for UST mods, this is not the case.
+		if(sampleHeader.name[0] == 's'|| sampleHeader.name[0] == 'S')
+		{
+			if(sampleHeader.name[0]
+				&& memcmp(sampleHeader.name,"st-",3)
+				&& memcmp(sampleHeader.name,"ST-",3))
+			{
+				isUST = true;
+			}
+		} else if(sampleHeader.name[0] < '0' || sampleHeader.name[0] > '9')
+		{
+			isUST = true;
+		}
+
+		// UST only handles samples up to 9999 bytes.
+		if(sampleHeader.length > 4999 || sampleHeader.loopStart > 9999)
+		{
+			isUST = false;
+		}
+		// If loop information is incorrect as words, but correct as bytes, this is likely to be an UST-style module
+		if(sampleHeader.loopStart + sampleHeader.loopLength > sampleHeader.length
+			&& sampleHeader.loopStart + sampleHeader.loopLength < sampleHeader.length * 2)
+		{
+			isUST = true;
+			isConfirmed = true;
+			continue;
+		}
+
+		if(!isUST)
+		{
+			isConfirmed = true;
+		}
+	}
+
+	MODFileHeader fileHeader;
+	file.Read(fileHeader);
+
+	// Sanity check: No more than 128 positions, restart position is valid (although there are some weird values that we need to ignore).
+	if(fileHeader.numOrders > 128
+		|| ((fileHeader.restartPos & 0xF8) != 0x78 && fileHeader.restartPos != 0x6A && fileHeader.restartPos > fileHeader.numOrders))
+	{
+		return false;
+	}
+
+	for(ORDERINDEX ord = 0; ord < CountOf(fileHeader.orderList); ord++)
+	{
+		// Sanity check: 64 patterns max.
+		if(fileHeader.orderList[ord] > 63)
+		{
+			return false;
+		}
+	}
+
+	Order.ReadFromArray(fileHeader.orderList);
+	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, fileHeader.numOrders, totalSampleLen, m_nChannels, false);
+
+	// Let's see if the file is too small (including some overhead for broken files like sll7.mod)
+	if(file.BytesLeft() + 4096 < numPatterns * 64u * 4u + totalSampleLen)
+	{
+		return false;
+	}
+
+	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
+	m_nType = MOD_TYPE_MOD;
+	m_nChannels = 4;
+	m_nSamples = 15;
+	m_nInstruments = 0;
+	m_nDefaultSpeed = 6;
+	m_nDefaultTempo = 125;
+	m_nMinPeriod = 14 * 4;
+	m_nMaxPeriod = 3424 * 4;
+	m_SongFlags.reset();
+	m_nRestartPos = fileHeader.restartPos;
+	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], songname);
+
+	// Setup channel pan positions and volume
+	SetupMODPanning();
+
+	if(!isConfirmed)
+	{
+		FileReader::off_t patOffset = file.GetPosition();
+
+		// Scan patterns to identify Ultimate Soundtracker modules.
+		for(size_t i = 0; i < numPatterns * 64u * 4u; i++)
+		{
+			uint8 data[4];
+			file.ReadArray(data);
+
+			if((data[2] == 1 || data[2] == 2) && data[3] > 0x1F)
+			{
+				// If a 1xx effect has a parameter greater than 0x20, it is assumed to be UST.
+				isUST = true;
+				break;
+			} else if(data[2] == 1 && data[3] < 0x03)
+			{
+				// MikMod says so! Well, it makes sense, kind of... who would want an arpeggio like this?
+				isUST = false;
+				break;
+			} else if(data[2] == 3 && data[3] != 0)
+			{
+				// MikMod says so!
+				isUST = false;
+				break;
+			} else if((data[2] & 0x0F) > 3)
+			{
+				// Unknown effect
+				isUST = false;
+				break;
+			}
+		}
+		file.Seek(patOffset);
+	}
+
+	// Reading patterns
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+	{
+		if(Patterns.Insert(pat, 64))
+		{
+			break;
+		}
+
+		uint8 lastEff[4] = { 0, 0, 0, 0 }, lastParam[4] = { 0, 0, 0, 0 };
+
+		for(ROWINDEX row = 0; row < 64; row++)
+		{
+			ModCommand *rowBase = Patterns[pat].GetpModCommand(row, 0);
+			for(CHANNELINDEX chn = 0; chn < 4; chn++)
+			{
+				ModCommand &m = rowBase[chn];
+
+				uint8 data[4];
+				file.ReadArray(data);
+
+				// Read Period
+				uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
+				if(period > 0 && period != 0xFFF)
+				{
+					m.note = static_cast<ModCommand::NOTE>(GetNoteFromPeriod(period * 4));
+				}
+				// Read Instrument
+				m.instr = (data[2] >> 4) | (data[0] & 0x10);
+				// Read Effect
+				m.command = data[2] & 0x0F;
+				m.param = data[3];
+
+				if(m.command || m.param)
+				{
+					if(isUST)
+					{
+						// UST effects
+						switch(m.command)
+						{
+						case 0:
+						case 3:
+							m.command = CMD_NONE;
+							break;
+						case 1:
+							m.command = CMD_ARPEGGIO;
+							break;
+						case 2:
+							if(m.param & 0x0F)
+							{
+								m.command = CMD_PORTAMENTOUP;
+								m.param &= 0x0F;
+							} else if(m.param >> 2)
+							{
+								m.command = CMD_PORTAMENTODOWN;
+								m.param >>= 2;
+							}
+							break;
+						default:
+							ConvertModCommand(m);
+							break;
+						}
+					} else
+					{
+						// M15 effects
+						if((m.command == 1 || m.command == 2 || m.command == 3) && m.param == 0)
+						{
+							// An isolated 100, 200 or 300 effect should be ignored (no "standalone" porta memory in mod files).
+							// However, a sequence such as 1xx, 100, 100, 100 is fine.
+							if(m.command != lastEff[chn] || lastParam[chn] == 0)
+							{
+								m.command = m.param = 0;
+							} else
+							{
+								m.param = lastParam[chn];
+							}
+						}
+						lastEff[chn] = m.command;
+						lastParam[chn] = m.param;
+
+						ConvertModCommand(m);
+					}
+
+					if(m.command == CMD_TEMPO)
+					{
+						// No CIA timing!
+						m.command = CMD_SPEED;
+					}
+				}
+			}
+		}
+	}
+
+	// Reading samples
+	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
+	{
+		MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
 	}
 
 	return true;
@@ -812,27 +1046,28 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	{
 		fileHeader.restartPos = static_cast<uint8>(m_nRestartPos);
 	}
+	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
 
 	// Write magic bytes
+	char magic[4];
 	CHANNELINDEX writeChannels = min(99, GetNumChannels());
 	if(writeChannels == 4)
 	{
 		if(writePatterns < 64)
 		{
-			memcpy(fileHeader.magic, "M.K.", 4);
+			memcpy(magic, "M.K.", 4);
 		} else
 		{
 			// More than 64 patterns
-			memcpy(fileHeader.magic, "M!K!", 4);
+			memcpy(magic, "M!K!", 4);
 		}
 	} else
 	{
 		char magic[6];
 		sprintf(magic, "%luCHN", writeChannels);
-		memcpy(fileHeader.magic, magic, 4);
+		memcpy(magic, magic, 4);
 	}
-
-	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
+	fwrite(&magic, sizeof(magic), 1, f);
 
 	// Write patterns
 	vector<uint8> events;

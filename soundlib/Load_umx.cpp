@@ -276,7 +276,8 @@ bool CSoundFile::ReadUMX(FileReader &file)
 					|| ReadSTM(fileChunk)
 					|| Read669(fileChunk)
 					|| ReadFAR(fileChunk)
-					|| ReadMod(fileChunk))
+					|| ReadMod(fileChunk)
+					|| ReadM15(fileChunk))
 				{
 					return true;
 				}
