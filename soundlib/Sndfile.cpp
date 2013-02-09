@@ -638,7 +638,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		 && !ReadAM(file)
 		 && !ReadJ2B(file)
 		 && !ReadMO3(file)
-		 && !ReadMod(file))
+		 && !ReadMod(file)
+		 && !ReadM15(file))
 		{
 			m_nType = MOD_TYPE_NONE;
 		}
@@ -1544,22 +1545,6 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	sample.FreeSample();
 	sample.nLength = 0;
 	sample.uFlags.reset(CHN_16BIT | CHN_STEREO);
-
-	return true;
-}
-
-
-bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
-//-----------------------------------------------------------
-{
-	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
-	if (/*!Ins[from].pSample ||*/ Samples[to].pSample) return true;
-
-	Samples[to] = Samples[from];
-
-	Samples[from].pSample = nullptr;
-	Samples[from].nLength = 0;
-	Samples[from].uFlags.reset(CHN_16BIT | CHN_STEREO);
 
 	return true;
 }

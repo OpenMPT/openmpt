@@ -2058,7 +2058,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 
 // Helper function for copying OpenMPT's sample data to FLAC's int32 buffer.
 template<typename T>
-inline void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSamples)
+inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSamples)
 {
 	const T *in = reinterpret_cast<const T *>(src);
 	for(SmpLength i = 0; i < numSamples; i++)
