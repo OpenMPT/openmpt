@@ -109,21 +109,23 @@ struct SNDMIXPLUGININFO
 
 	VstInt32 dwPluginId1;			// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
 	VstInt32 dwPluginId2;			// Plugin unique ID
-	uint32 dwInputRouting;			// Bits 0 to 7 = RoutingFlags, bits 8 - 15 = mixing mode, bits 16-23 = gain
+	uint8 routingFlags;				// See RoutingFlags
+	uint8 mixMode;
+	uint8 gain;						// Divide by 10 to get real gain
+	uint8 reserved;
 	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
 	uint32 dwReserved[4];			// Reserved for routing info
 	CHAR szName[32];				// User-chosen plugin name
 	CHAR szLibraryName[64];			// original DLL name
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
-	void SetBypass(bool bypass = true) { if(bypass) dwInputRouting |= irBypass; else dwInputRouting &= ~irBypass; };
+	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= ~irBypass; }
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
 		SwapBytesLE(dwPluginId1);
 		SwapBytesLE(dwPluginId2);
-		SwapBytesLE(dwInputRouting);
 		SwapBytesLE(dwOutputRouting);
 		SwapBytesLE(dwReserved[0]);
 		SwapBytesLE(dwReserved[1]);
@@ -142,57 +144,57 @@ struct SNDMIXPLUGIN
 	ULONG nPluginDataSize;
 	void *pPluginData;
 	SNDMIXPLUGININFO Info;
-	float fDryRatio;		    // rewbs.dryRatio [20040123]
-	long defaultProgram;		// rewbs.plugDefaultProgram
+	float fDryRatio;
+	VstInt32 defaultProgram;
 
 	const char *GetName() const
 		{ return Info.szName; }
 	const char *GetLibraryName() const
-		{ return Info.szLibraryName; };
+		{ return Info.szLibraryName; }
 	CString GetParamName(PlugParamIndex index) const;
 
 	// Check if a plugin is loaded into this slot (also returns true if the plugin in this slot has not been found)
 	bool IsValidPlugin() const { return (Info.dwPluginId1 | Info.dwPluginId2) != 0; };
 
 	// Input routing getters
-	int GetGain() const
-		{ return (Info.dwInputRouting >> 16) & 0xFF; };
-	int GetMixMode() const
-		{ return (Info.dwInputRouting >> 8) & 0xFF; };
+	uint8 GetGain() const
+		{ return Info.gain; }
+	uint8 GetMixMode() const
+		{ return Info.mixMode; }
 	bool IsMasterEffect() const
-		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irApplyToMaster) != 0; };
+		{ return (Info.routingFlags & SNDMIXPLUGININFO::irApplyToMaster) != 0; }
 	bool IsWetMix() const
-		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irWetMix) != 0; };
+		{ return (Info.routingFlags & SNDMIXPLUGININFO::irWetMix) != 0; }
 	bool IsExpandedMix() const
-		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irExpandMix) != 0; };
+		{ return (Info.routingFlags & SNDMIXPLUGININFO::irExpandMix) != 0; }
 	bool IsBypassed() const
-		{ return (Info.dwInputRouting & SNDMIXPLUGININFO::irBypass) != 0; };
+		{ return (Info.routingFlags & SNDMIXPLUGININFO::irBypass) != 0; }
 
 	// Input routing setters
-	void SetGain(int gain)
-		{ Info.dwInputRouting = (Info.dwInputRouting & 0xFF00FFFF) | ((gain & 0xFF) << 16); if(pMixPlugin != nullptr) pMixPlugin->RecalculateGain(); };
-	void SetMixMode(int mixMode)
-		{ Info.dwInputRouting = (Info.dwInputRouting & 0xFFFF00FF) | ((mixMode & 0xFF) << 8); };
+	void SetGain(uint8 gain)
+		{ Info.gain = gain; if(pMixPlugin != nullptr) pMixPlugin->RecalculateGain(); }
+	void SetMixMode(uint8 mixMode)
+		{ Info.mixMode = mixMode; }
 	void SetMasterEffect(bool master = true)
-		{ if(master) Info.dwInputRouting |= SNDMIXPLUGININFO::irApplyToMaster; else Info.dwInputRouting &= ~SNDMIXPLUGININFO::irApplyToMaster; };
+		{ if(master) Info.routingFlags |= SNDMIXPLUGININFO::irApplyToMaster; else Info.routingFlags &= ~SNDMIXPLUGININFO::irApplyToMaster; }
 	void SetWetMix(bool wetMix = true)
-		{ if(wetMix) Info.dwInputRouting |= SNDMIXPLUGININFO::irWetMix; else Info.dwInputRouting &= ~SNDMIXPLUGININFO::irWetMix; };
+		{ if(wetMix) Info.routingFlags |= SNDMIXPLUGININFO::irWetMix; else Info.routingFlags &= ~SNDMIXPLUGININFO::irWetMix; }
 	void SetExpandedMix(bool expanded = true)
-		{ if(expanded) Info.dwInputRouting |= SNDMIXPLUGININFO::irExpandMix; else Info.dwInputRouting &= ~SNDMIXPLUGININFO::irExpandMix; };
+		{ if(expanded) Info.routingFlags |= SNDMIXPLUGININFO::irExpandMix; else Info.routingFlags &= ~SNDMIXPLUGININFO::irExpandMix; }
 	void SetBypass(bool bypass = true)
-		{ if(pMixPlugin != nullptr) pMixPlugin->Bypass(bypass); else Info.SetBypass(bypass); };
+		{ if(pMixPlugin != nullptr) pMixPlugin->Bypass(bypass); else Info.SetBypass(bypass); }
 
 	// Output routing getters
 	bool IsOutputToMaster() const
-		{ return Info.dwOutputRouting == 0; };
+		{ return Info.dwOutputRouting == 0; }
 	PLUGINDEX GetOutputPlugin() const
-		{ return Info.dwOutputRouting >= 0x80 ? static_cast<PLUGINDEX>(Info.dwOutputRouting - 0x80) : PLUGINDEX_INVALID; };
+		{ return Info.dwOutputRouting >= 0x80 ? static_cast<PLUGINDEX>(Info.dwOutputRouting - 0x80) : PLUGINDEX_INVALID; }
 
 	// Output routing setters
 	void SetOutputToMaster()
-		{ Info.dwOutputRouting = 0; };
+		{ Info.dwOutputRouting = 0; }
 	void SetOutputPlugin(PLUGINDEX plugin)
-		{ if(plugin < MAX_MIXPLUGINS) Info.dwOutputRouting = plugin + 0x80; else Info.dwOutputRouting = 0; };
+		{ if(plugin < MAX_MIXPLUGINS) Info.dwOutputRouting = plugin + 0x80; else Info.dwOutputRouting = 0; }
 
 }; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
 

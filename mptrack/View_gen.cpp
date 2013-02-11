@@ -773,7 +773,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 		if(plugin.pMixPlugin)
 		{
-			DWORD gain = nPos;
+			uint8 gain = (uint8)nPos;
 			if(gain == 0) gain = 1;
 
 			plugin.SetGain(gain);
@@ -1192,7 +1192,7 @@ void CViewGlobals::OnSpecialMixProcessingChanged()
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 
-	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetMixMode(m_CbnSpecialMixProcessing.GetCurSel());	// update#02 (fix)
+	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetMixMode((uint8)m_CbnSpecialMixProcessing.GetCurSel());
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
