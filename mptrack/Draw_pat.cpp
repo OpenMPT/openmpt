@@ -479,7 +479,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 	else
 	{
 		static_assert(MAX_VOLCMDS <= 16, "Pattern draw code assumes <= 16 volume commands");
-		int volcmd = (mc.volcmd & 0x0F);
+		ModCommand::VOLCMD volcmd = (mc.volcmd & 0x0F);
 		int vol  = (mc.vol & 0x7F);
 
 		if(drawDefaultVolume)
@@ -507,14 +507,14 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 			}
 		}
 
-		if (volcmd)
+		if(volcmd != VOLCMD_NONE)
 		{
 			m_Dib.TextBlt(x, y, pfnt->nVolCmdWidth, COLUMN_HEIGHT,
-							pfnt->nVolX, pfnt->nVolY+volcmd*COLUMN_HEIGHT);
+							pfnt->nVolX, pfnt->nVolY + volcmd * COLUMN_HEIGHT);
 			m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY+(vol / 10)*COLUMN_HEIGHT);
-			m_Dib.TextBlt(x+pfnt->nVolCmdWidth+pfnt->nVolHiWidth, y, pfnt->nEltWidths[2]-(pfnt->nVolCmdWidth+pfnt->nVolHiWidth), COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY+(vol % 10)*COLUMN_HEIGHT);
+							pfnt->nNumX, pfnt->nNumY + (vol / 10) * COLUMN_HEIGHT);
+			m_Dib.TextBlt(x+pfnt->nVolCmdWidth + pfnt->nVolHiWidth, y, pfnt->nEltWidths[2] - (pfnt->nVolCmdWidth + pfnt->nVolHiWidth), COLUMN_HEIGHT,
+							pfnt->nNumX, pfnt->nNumY + (vol % 10) * COLUMN_HEIGHT);
 		} else
 		{
 			int srcx = pfnt->nEltWidths[0] + pfnt->nEltWidths[1];
@@ -1044,7 +1044,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				uint16 val = m->GetValueEffectCol();
 				if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue;
 				fx_col = row_col;
-				if (!isPCnote && (m->command) && (m->command < MAX_EFFECTS) && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
 					if(effectColors[m->command] != 0)
 						fx_col = effectColors[m->command];
@@ -1065,15 +1065,13 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 					{
 						m_Dib.TextBlt(xbmp + x, 0, 2, COLUMN_HEIGHT, pfnt->nClrX+x, pfnt->nClrY);
 						m_Dib.TextBlt(xbmp + x + 2, 0, pfnt->nEltWidths[3], m_szCell.cy, pfnt->nNumX, pfnt->nNumY+(val / 100)*COLUMN_HEIGHT);
-					}
-					else
+					} else
 					{
-						if (m->command)
+						if(m->command != CMD_NONE)
 						{
-							ModCommand::COMMAND command = m->command & 0x3F;
-							int n =	pSndFile->GetModSpecifications().GetEffectLetter(command);
+							char n = pSndFile->GetModSpecifications().GetEffectLetter(m->command);
 							ASSERT(n > ' ');
-							DrawLetter(xbmp+x, 0, (char)n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
+							DrawLetter(xbmp+x, 0, n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
 						{
 							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[3], COLUMN_HEIGHT, pfnt->nClrX+x, pfnt->nClrY);

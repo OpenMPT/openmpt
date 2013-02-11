@@ -264,7 +264,14 @@ void TestMisc()
 	//Util::Round<uint64>(1.0);
 	
 	// This should trigger assert in Round.
-	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );	
+	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );
+
+	// Check for completeness of supported effect list in mod specifications
+	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
+	{
+		ASSERT(strlen(ModSpecs::Collection[i]->commands) == MAX_EFFECTS);
+		ASSERT(strlen(ModSpecs::Collection[i]->volcommands) == MAX_VOLCMDS);
+	}
 
 }
 
@@ -315,7 +322,7 @@ void TestMIDIEvents()
 
 // Check if our test file was loaded correctly.
 void TestLoadXMFile(const CModDoc *pModDoc)
-//---------------------------------------
+//-----------------------------------------
 {
 	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
 

@@ -13,7 +13,7 @@
  *          there's no problem with (infinite) pattern loops in this code.
  *
  *          Normal player code:
- *          Bare in mind that rows inside pattern loops should only be evaluated once, or else the algorithm will cancel too early!
+ *          Bear in mind that rows inside pattern loops should only be evaluated once, or else the algorithm will cancel too early!
  *          So in that case, the pattern loop rows have to be reset when looping back.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -177,10 +177,10 @@ void RowVisitor::ResetPatternLoop(ORDERINDEX order, ROWINDEX startRow)
 	
 	// Unvisit all rows that are in the visited row buffer, until we hit the start row for this pattern loop.
 	ROWINDEX row = ROWINDEX_INVALID;
-	while(!visitOrder.empty() && row != startRow)
+	vector<ROWINDEX>::reverse_iterator iter = visitOrder.rbegin();
+	while(iter != visitOrder.rend() && row != startRow)
 	{
-		row = visitOrder.back();
-		visitOrder.pop_back();
+		row = *(iter++);
 		Unvisit(order, row);
 	}
 	visitOrder.clear();
