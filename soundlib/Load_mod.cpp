@@ -1046,25 +1046,23 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
 
 	// Write magic bytes
-	char magic[4];
+	char modMagic[6];
 	CHANNELINDEX writeChannels = min(99, GetNumChannels());
 	if(writeChannels == 4)
 	{
 		if(writePatterns < 64)
 		{
-			memcpy(magic, "M.K.", 4);
+			memcpy(modMagic, "M.K.", 4);
 		} else
 		{
 			// More than 64 patterns
-			memcpy(magic, "M!K!", 4);
+			memcpy(modMagic, "M!K!", 4);
 		}
 	} else
 	{
-		char magic[6];
-		sprintf(magic, "%luCHN", writeChannels);
-		memcpy(magic, magic, 4);
+		sprintf(modMagic, "%luCHN", writeChannels);
 	}
-	fwrite(&magic, sizeof(magic), 1, f);
+	fwrite(&modMagic, 4, 1, f);
 
 	// Write patterns
 	vector<uint8> events;
