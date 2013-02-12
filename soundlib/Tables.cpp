@@ -18,38 +18,99 @@
 // end  rewbs.resamplerConf
 
 
-///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// File Formats Information (name, extension, etc)
 
-/*MODFORMATINFO gModFormatInfo[] =
+struct ModFormatInfo
 {
-	{ MOD_TYPE_MOD,	"ProTracker", ".mod",			0 },
-	{ MOD_TYPE_S3M,	"ScreamTracker III", ".s3m",	0 },
-	{ MOD_TYPE_XM,	"FastTracker II", ".xm",		0 },
-	{ MOD_TYPE_IT,	"Impulse Tracker", ".it",		0 },
-	{ MOD_TYPE_MDL, "DigiTracker", ".mdl",			0 },
-	{ MOD_TYPE_MTM,	"MultiTracker", ".mtm",			0 },
-	{ MOD_TYPE_STM,	"ScreamTracker II", ".stm",		0 },
-	{ MOD_TYPE_OKT, "Oktalyzer", ".okt",			0 },
-	{ MOD_TYPE_MED,	"OctaMed", ".med",				0 },
-	{ MOD_TYPE_669,	"UNIS 669", ".669",				0 },
-	{ MOD_TYPE_FAR,	"Farandole Composer", ".far",	0 },
-	{ MOD_TYPE_ULT,	"UltraTracker", ".ult",			0 },
-	{ MOD_TYPE_PTM, "PolyTracker", ".ptm",			0 },
-	{ MOD_TYPE_WAV,	"Wave", ".wav",					0 },
-	{ MOD_TYPE_MID, "Midi", ".mid",					0 },
-	{ MOD_TYPE_AMS, "Extreme's Tracker", ".ams",	0 },
-	{ MOD_TYPE_AMS2, "Velvet Studio", ".ams",		0 },
-	{ MOD_TYPE_AMF|MOD_TYPE_AMF0,"Asylum / DSMI", ".amf", 0 },
-	{ MOD_TYPE_DSM, "DSIK Format", ".dsm",			0 },
-	{ MOD_TYPE_DMF, "X-Tracker", ".dmf",			0 },
-	{ MOD_TYPE_DBM, "DigiBooster Pro", ".dbm",		0 },
-	{ MOD_TYPE_PSM, "Epic Megagames MASI", ".psm",	0 },
-	{ MOD_TYPE_UMX, "Unreal Music", ".umx",			0 },
-	{ MOD_TYPE_MT2, "MadTracker 2", ".mt2",			0 },
-	{ MOD_TYPE_MPT, "OpenMPT", ".mptm",				0 },
-	{ MOD_TYPE_J2B, "Galaxy Sound System", ".j2b",	0 },
-	{ MOD_TYPE_IMF, "Imago Orpheus", ".imf",		0 },
-};*/
+	MODTYPE format;		// MOD_TYPE_XXXX
+	char *name;			// "ProTracker"
+	char *extension;	// "mod"
+};
+
+const ModFormatInfo modFormatInfo[] =
+{
+	{ MOD_TYPE_MOD,		"ProTracker",				"mod" },
+	{ MOD_TYPE_S3M,		"ScreamTracker III",		"s3m" },
+	{ MOD_TYPE_XM,		"FastTracker II",			"xm" },
+	{ MOD_TYPE_IT,		"Impulse Tracker",			"it" },
+	{ MOD_TYPE_IT,		"Impulse Tracker Project",	"itp" },
+	{ MOD_TYPE_MPT,		"OpenMPT",					"mptm" },
+	{ MOD_TYPE_STM,		"ScreamTracker II",			"stm" },
+	{ MOD_TYPE_MOD,		"NoiseTracker",				"nst" },
+	{ MOD_TYPE_MOD,		"Soundtracker",				"m15" },
+	{ MOD_TYPE_MOD,		"Soundtracker",				"stk" },
+	{ MOD_TYPE_MOD,		"Mod's Grave",				"wow" },
+	{ MOD_TYPE_ULT,		"UltraTracker",				"ult" },
+	{ MOD_TYPE_669,		"Composer 669 / UNIS 669",	"669" },
+	{ MOD_TYPE_MTM,		"MultiTracker",				"mtm" },
+	{ MOD_TYPE_MED,		"OctaMed",					"med" },
+	{ MOD_TYPE_FAR,		"Farandole Composer",		"far" },
+	{ MOD_TYPE_MDL,		"DigiTracker",				"mdl" },
+	{ MOD_TYPE_AMS,		"Extreme's Tracker",		"ams" },
+	{ MOD_TYPE_AMS2,	"Velvet Studio",			"ams" },
+	{ MOD_TYPE_DSM,		"DSIK Format",				"dsm" },
+	{ MOD_TYPE_AMF,		"DSMI",						"amf" },
+	{ MOD_TYPE_AMF0,	"ASYLUM",					"amf" },
+	{ MOD_TYPE_OKT,		"Oktalyzer",				"okt" },
+	{ MOD_TYPE_DMF,		"X-Tracker",				"dmf" },
+	{ MOD_TYPE_PTM,		"PolyTracker",				"ptm" },
+	{ MOD_TYPE_PSM,		"Epic Megagames MASI",		"psm" },
+	{ MOD_TYPE_MT2,		"MadTracker 2",				"mt2" },
+	{ MOD_TYPE_DBM,		"DigiBooster Pro",			"dbm" },
+	{ MOD_TYPE_IMF,		"Imago Orpheus",			"imf" },
+	{ MOD_TYPE_J2B,		"Galaxy Sound System",		"j2b" },
+
+	// Container formats
+	{ MOD_TYPE_GDM,		"General Digital Music",	"gdm" },
+	{ MOD_TYPE_UMX,		"Unreal Music",				"umx" },
+	{ MOD_TYPE_UMX,		"Unreal Sounds",			"uax" },
+#ifndef NO_MO3
+	{ MOD_TYPE_MO3,		"MO3",						"mo3" },
+#endif // NO_MO3
+
+	// Compressed modules
+	{ MOD_TYPE_MOD,		"ProTracker",				"mdz" },
+	{ MOD_TYPE_MOD,		"ProTracker",				"mdr" },
+	{ MOD_TYPE_S3M,		"ScreamTracker III",		"s3z" },
+	{ MOD_TYPE_XM,		"FastTracker II",			"xmz" },
+	{ MOD_TYPE_IT,		"Impulse Tracker",			"itz" },
+	{ MOD_TYPE_MPT,		"OpenMPT",					"mptmz" },
+};
+
+const ModFormatInfo otherFormatInfo[] =
+{
+	// Other stuff
+	{ MOD_TYPE_WAV,		"Wave",						"wav" },
+	{ MOD_TYPE_MID,		"MIDI",						"mid" },
+	{ MOD_TYPE_MID,		"MIDI",						"rmi" },
+	{ MOD_TYPE_MID,		"MIDI",						"smf" },
+};
+
+
+std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
+//-----------------------------------------------------------------------------
+{
+	std::vector<const char *> exts;
+	exts.reserve(CountOf(modFormatInfo) + otherFormats ? CountOf(otherFormatInfo) : 0);
+	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
+	{
+		// Avoid dupes in list
+		if(i == 0 || strcmp(modFormatInfo[i].extension, modFormatInfo[i - 1].extension))
+		{
+			exts.push_back(modFormatInfo[i].extension);
+		}
+	}
+	if(otherFormats)
+	{
+		for(size_t i = 0; i < CountOf(otherFormatInfo); i++)
+		{
+			exts.push_back(otherFormatInfo[i].extension);
+		}
+	}
+	return exts;
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 #pragma data_seg(".tables")

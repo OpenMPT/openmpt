@@ -422,11 +422,11 @@ void CModTree::RefreshMidiLibrary()
 		{
 			_splitpath(lpMidiLib->MidiMap[iPerc|0x80], NULL, NULL, szName, szExt);
 			strncat(s, ": ", sizeof(s));
-			s[sizeof(s)-1] = 0;
+			StringFixer::SetNullTerminator(s);
 			strncat(s, szName, sizeof(s));
-			s[sizeof(s)-1] = 0;
+			StringFixer::SetNullTerminator(s);
 			strncat(s, szExt, sizeof(s));
-			s[sizeof(s)-1] = 0;
+			StringFixer::SetNullTerminator(s);
 			if (szName[0]) dwImage = IMAGE_SAMPLES;
 		}
 		if (!m_tiPerc[iPerc])
@@ -1562,6 +1562,18 @@ void CModTree::EmptyInstrumentLibrary()
 }
 
 
+struct find_str
+{
+	find_str(const char *str): s1(str) { }
+
+	bool operator() (const char *s2) const
+	{
+		return !strcmp(s1, s2);
+	}
+
+	const char *s1;
+};
+
 // Refresh Instrument Library
 void CModTree::FillInstrumentLibrary()
 //------------------------------------
@@ -1649,6 +1661,8 @@ void CModTree::FillInstrumentLibrary()
 		if(strlen(szPath) >= CountOf(szPath) - 1)
 			return;
 
+		std::vector<const char *> modExts = CSoundFile::GetSupportedExtensions(false);
+
 		// Enumerating Directories and samples/instruments
 		if (szPath[strlen(szPath) - 1] != '\\')
 			strcat(szPath, "\\");
@@ -1691,55 +1705,29 @@ void CModTree::FillInstrumentLibrary()
 					strcpy(szFileName, m_szInstrLibPath);
 					strncat(szFileName, wfd.cFileName, sizeof(szFileName));
 					_splitpath(szFileName, NULL, NULL, NULL, s);
-					// Instruments
-					if ((!lstrcmpi(s, ".xi"))
-					 || (!lstrcmpi(s, ".iti"))
-					 || (!lstrcmpi(s, ".pat")) )
+					
+					if(s[0])
+					{
+						const size_t len = strlen(s);
+						for(size_t i = 0; i < len; i++)
+						{
+							s[i] = tolower(s[i + 1]);
+						}
+					}
+
+						// Instruments
+					if ((!strcmp(s, "xi"))
+					 || (!strcmp(s, "iti"))
+					 || (!strcmp(s, "pat")) )
 					{
 						if (!m_pDataTree)
 						{
 							ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_INSTRUMENTS);
 							InsertItem(&tvis);
 						}
-					} else
-					// Songs
-					if(!lstrcmpi(s, ".mod")
-						|| !lstrcmpi(s, ".s3m")
-						|| !lstrcmpi(s, ".xm")
-						|| !lstrcmpi(s, ".it")
-						|| !lstrcmpi(s, ".mptm")
-						|| !lstrcmpi(s, ".itp")
-						|| !lstrcmpi(s, ".mdz")
-						|| !lstrcmpi(s, ".s3z")
-						|| !lstrcmpi(s, ".xmz")
-						|| !lstrcmpi(s, ".itz")
-						|| !lstrcmpi(s, ".669")
-						|| !lstrcmpi(s, ".ams")
-						|| !lstrcmpi(s, ".amf")
-						|| !lstrcmpi(s, ".mdz")
-						|| !lstrcmpi(s, ".dsm")
-						|| !lstrcmpi(s, ".far")
-						|| !lstrcmpi(s, ".mdl")
-						|| !lstrcmpi(s, ".mtm")
-						|| !lstrcmpi(s, ".nst")
-						|| !lstrcmpi(s, ".okt")
-						|| !lstrcmpi(s, ".stm")
-						|| !lstrcmpi(s, ".ult")
-						|| !lstrcmpi(s, ".psm")
-						|| !lstrcmpi(s, ".dmf")
-						|| !lstrcmpi(s, ".mt2")
-						|| !lstrcmpi(s, ".med")
-						|| !lstrcmpi(s, ".wow")
-						|| !lstrcmpi(s, ".gdm")
-						|| !lstrcmpi(s, ".imf")
-						|| !lstrcmpi(s, ".j2b")
-						|| !lstrcmpi(s, ".umx")
-						|| !lstrcmpi(s, ".uax")
-#ifndef NO_MO3_SUPPORT
-						|| !lstrcmpi(s, ".mo3")
-#endif // NO_MO3_SUPPORT
-						)
+					} else if(std::find_if(modExts.begin(), modExts.end(), find_str(s)) != modExts.end())
 					{
+						// Songs
 						if (m_pDataTree)
 						{
 							ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_FOLDERSONG);
@@ -1747,34 +1735,34 @@ void CModTree::FillInstrumentLibrary()
 						}
 					} else
 					// Samples
-					if(!lstrcmpi(s, ".wav")
-						|| !lstrcmpi(s, ".flac")
-						|| !lstrcmpi(s, ".smp")
-						|| !lstrcmpi(s, ".raw")
-						|| !lstrcmpi(s, ".s3i")
-						|| !lstrcmpi(s, ".its")
-						|| !lstrcmpi(s, ".aif")
-						|| !lstrcmpi(s, ".aiff")
-						|| !lstrcmpi(s, ".snd")
-						|| !lstrcmpi(s, ".svx")
-						|| !lstrcmpi(s, ".voc")
-						|| !lstrcmpi(s, ".8sv")
-						|| !lstrcmpi(s, ".8svx")
-						|| !lstrcmpi(s, ".16sv")
-						|| !lstrcmpi(s, ".16svx")
+					if(!strcmp(s, "wav")
+						|| !strcmp(s, "flac")
+						|| !strcmp(s, "smp")
+						|| !strcmp(s, "raw")
+						|| !strcmp(s, "s3i")
+						|| !strcmp(s, "its")
+						|| !strcmp(s, "aif")
+						|| !strcmp(s, "aiff")
+						|| !strcmp(s, "snd")
+						|| !strcmp(s, "svx")
+						|| !strcmp(s, "voc")
+						|| !strcmp(s, "8sv")
+						|| !strcmp(s, "8svx")
+						|| !strcmp(s, "16sv")
+						|| !strcmp(s, "16svx")
 						|| (m_bShowAllFiles // Exclude the extensions below
-							&& lstrcmpi(s, ".txt")
-							&& lstrcmpi(s, ".diz")
-							&& lstrcmpi(s, ".nfo")
-							&& lstrcmpi(s, ".doc")
-							&& lstrcmpi(s, ".ini")
-							&& lstrcmpi(s, ".pdf")
-							&& lstrcmpi(s, ".zip")
-							&& lstrcmpi(s, ".rar")
-							&& lstrcmpi(s, ".lha")
-							&& lstrcmpi(s, ".exe")
-							&& lstrcmpi(s, ".dll")
-							&& lstrcmpi(s, ".mol"))
+							&& strcmp(s, "txt")
+							&& strcmp(s, "diz")
+							&& strcmp(s, "nfo")
+							&& strcmp(s, "doc")
+							&& strcmp(s, "ini")
+							&& strcmp(s, "pdf")
+							&& strcmp(s, "zip")
+							&& strcmp(s, "rar")
+							&& strcmp(s, "lha")
+							&& strcmp(s, "exe")
+							&& strcmp(s, "dll")
+							&& strcmp(s, "mol"))
 						)
 					{
 						if (!m_pDataTree)

@@ -58,8 +58,8 @@ extern void Log(LPCSTR, ...);
 #include "shuf.cpp"
 #include "larc.cpp"
 
-CLhaArchive::CLhaArchive(LPBYTE lpStream, DWORD dwMemLength, LPCSTR lpszExtensions)
-//---------------------------------------------------------------------------------
+CLhaArchive::CLhaArchive(LPBYTE lpStream, DWORD dwMemLength)
+//----------------------------------------------------------
 {
 	// File Read
 	m_lpStream = lpStream;

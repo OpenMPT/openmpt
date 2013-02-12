@@ -1181,12 +1181,16 @@ void CTrackApp::OnFileNewITProject()
 void CTrackApp::OnFileOpen()
 //--------------------------
 {
+	std::vector<const char *> modExtensions = CSoundFile::GetSupportedExtensions(true);
+	std::string exts;
+	for(size_t i = 0; i < modExtensions.size(); i++)
+	{
+		exts += std::string("*.") + modExtensions[i] + std::string(";");
+	}
+
 	static int nFilterIndex = 0;
 	FileDlgResult files = ShowOpenSaveFileDialog(true, "", "",
-		"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b"
-#ifndef NO_MO3_SUPPORT
-		";*.mo3"
-#endif
+		"All Modules|" + exts +
 		"|"
 		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
 #ifndef NO_MO3_SUPPORT

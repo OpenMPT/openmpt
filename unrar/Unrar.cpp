@@ -58,8 +58,8 @@ static inline long abs(long x) { return (x<0)?-x:x; }
 
 
 
-CRarArchive::CRarArchive(LPBYTE lpStream, DWORD dwMemLength, LPCSTR lpszExtensions)
-//---------------------------------------------------------------------------------
+CRarArchive::CRarArchive(LPBYTE lpStream, DWORD dwMemLength)
+//----------------------------------------------------------
 {
 	// File Read
 	m_lpStream = lpStream;

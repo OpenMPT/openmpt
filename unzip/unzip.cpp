@@ -8,8 +8,10 @@
  */
 
 #include "../soundlib/FileReader.h"
+#include <vector>
 #include "unzip.h"
 #include "../common/misc_util.h"
+#include <algorithm>
 
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
@@ -88,8 +90,8 @@ struct ZipFileAbstraction
 };
 
 
-CZipArchive::CZipArchive(FileReader &file, const char *ext) : inFile(file), extensions(ext)
-//-----------------------------------------------------------------------------------------
+CZipArchive::CZipArchive(FileReader &file, const std::vector<const char *> &ext) : inFile(file), extensions(ext)
+//--------------------------------------------------------------------------------------------------------------
 {
 	zlib_filefunc_def functions =
 	{
@@ -121,6 +123,19 @@ bool CZipArchive::IsArchive() const
 }
 
 
+struct find_str
+{
+	find_str(const char *str): s1(str) { }
+
+	bool operator() (const char *s2) const
+	{
+		return !strcmp(s1, s2);
+	}
+
+	const char *s1;
+};
+
+
 bool CZipArchive::ExtractFile()
 //-----------------------------
 {
@@ -140,7 +155,9 @@ bool CZipArchive::ExtractFile()
 		char *ext = name + info.size_filename;
 		while(ext > name)
 		{
-			if(*(--ext) == '.')
+			ext--;
+			*ext = tolower(*ext);
+			if(*ext == '.')
 			{
 				ext++;
 				break;
@@ -148,37 +165,16 @@ bool CZipArchive::ExtractFile()
 		}
 
 		// Compare with list of preferred extensions
-		char extCmp[16];
-		size_t i = 0, j = 0;
-		bool foundPreferred = false;
-		while(extensions[i])
+		if(std::find_if(extensions.begin(), extensions.end(), find_str(ext)) != extensions.end())
 		{
-			char c = extensions[i++];
-			extCmp[j] = c;
-			if(c == '|')
-			{
-				extCmp[j] = 0;
-				j = 0;
-				if(!lstrcmpi(ext, extCmp))
-				{
-					// File has a preferred extension: use it.
-					unzGetFilePos(zipFile, &bestFile);
-					foundPreferred = true;
-					break;
-				}
-			} else
-			{
-				j++;
-			}
-		}
-		if(foundPreferred)
-		{
+			// File has a preferred extension: use it.
+			unzGetFilePos(zipFile, &bestFile);
 			break;
 		}
 
-		if(lstrcmpi(ext, "diz")
-			&& lstrcmpi(ext, "nfo")
-			&& lstrcmpi(ext, "txt")
+		if(strcmp(ext, "diz")
+			&& strcmp(ext, "nfo")
+			&& strcmp(ext, "txt")
 			&& info.uncompressed_size >= biggestFile)
 		{
 			// If this isn't some kind of info file, we should maybe pick it.

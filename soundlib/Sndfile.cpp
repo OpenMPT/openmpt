@@ -29,11 +29,6 @@
 #define UNLHA_SUPPORT
 #define UNGZIP_SUPPORT
 #define ZIPPED_MOD_SUPPORT
-LPCSTR glpszModExtensions = "mod|s3m|xm|it|itp|mptm|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx|uax|gdm|imf|j2b"
-#ifndef NO_UNMO3_SUPPORT
-"|mo3"
-#endif
-;
 #endif // NO_ARCHIVE_SUPPORT
 #else // NO_COPYRIGHT: EarSaver only loads mod/s3m/xm/it/wav
 #define MODPLUG_BASIC_SUPPORT
@@ -548,8 +543,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	{
 		FileReader file(reinterpret_cast<const char*>(lpStream), dwMemLength);
 
+		const std::vector<const char *> modExtensions = GetSupportedExtensions(true);
+
 #ifdef ZIPPED_MOD_SUPPORT
-		CZipArchive unzip(file, glpszModExtensions);
+		CZipArchive unzip(file, modExtensions);
 		if(unzip.IsArchive() && unzip.ExtractFile())
 		{
 			file = unzip.GetOutputFile();
@@ -558,7 +555,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		}
 #endif
 #ifdef UNRAR_SUPPORT
-		CRarArchive unrar((LPBYTE)lpStream, dwMemLength, glpszModExtensions);
+		CRarArchive unrar((LPBYTE)lpStream, dwMemLength);
 		if(unrar.IsArchive())
 		{
 			if(unrar.ExtrFile() && unrar.GetOutputFile())
@@ -570,7 +567,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		}
 #endif
 #ifdef UNLHA_SUPPORT
-		CLhaArchive unlha((LPBYTE)lpStream, dwMemLength, glpszModExtensions);
+		CLhaArchive unlha((LPBYTE)lpStream, dwMemLength);
 		if(unlha.IsArchive())
 		{
 			if(unlha.ExtractFile() && unlha.GetOutputFile())

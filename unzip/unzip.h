@@ -16,7 +16,7 @@ class CZipArchive
 protected:
 	FileReader inFile, outFile;
 	void *zipFile;
-	const char *extensions;
+	const std::vector<const char *> &extensions;
 	
 public:
 
@@ -25,6 +25,6 @@ public:
 	bool ExtractFile();
 	void *GetComments(bool get);
 
-	CZipArchive(FileReader &file, const char *ext);
+	CZipArchive(FileReader &file, const std::vector<const char *> &ext);
 	~CZipArchive();
 };

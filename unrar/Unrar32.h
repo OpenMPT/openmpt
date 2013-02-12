@@ -7,7 +7,7 @@ class CRarArchive
 //===============
 {
 public:
-	CRarArchive(LPBYTE lpStream, DWORD dwMemLength, LPCSTR lpszExtensions=NULL);
+	CRarArchive(LPBYTE lpStream, DWORD dwMemLength);
 	~CRarArchive();
 
 public:
