@@ -41,7 +41,7 @@ public:
 	enum { NC = 255 + MAXMATCH + 2 - THRESHOLD };
 	
 public:
-	CLhaArchive(LPBYTE lpStream, DWORD dwMemLength, LPCSTR lpszExtensions=NULL);
+	CLhaArchive(LPBYTE lpStream, DWORD dwMemLength);
 	~CLhaArchive();
 
 public:

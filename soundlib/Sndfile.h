@@ -420,6 +420,8 @@ public:
 	bool ReadJ2B(FileReader &file);
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
+	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
+
 	void UpgradeModFlags();
 	void UpgradeSong();
 
@@ -778,18 +780,6 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 
 int _muldiv(long a, long b, long c);
 int _muldivr(long a, long b, long c);
-
-///////////////////////////////////////////////////////////
-// File Formats Information (name, extension, etc)
-
-struct MODFORMATINFO
-{
-	MODTYPE mtFormatId;		// MOD_TYPE_XXXX
-	LPCSTR  lpszFormatName;	// "ProTracker"
-	LPCSTR  lpszExtension;	// ".xxx"
-	DWORD   dwPadding;
-};
-
 
 // Read instrument property with 'code' and 'size' from 'file' to instrument 'pIns'.
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file);
