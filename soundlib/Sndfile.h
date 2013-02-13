@@ -635,6 +635,7 @@ public:
 	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);
 	bool Read8SVXSample(SAMPLEINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
+	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file);
 	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
 	bool SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
 	bool SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;

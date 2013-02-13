@@ -91,6 +91,12 @@ typedef struct {
 // Define to build without DirectSound support.
 //#define NO_DSOUND
 
+// Define to build without FLAC support
+//#define NO_FLAC
+
+// Define to build without MP3 import support (via mpg123)
+//#define NO_MP3_SAMPLES
+
 
 void Log(LPCSTR format,...);
 

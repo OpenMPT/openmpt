@@ -1522,11 +1522,16 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 //---------------------------------------------
 {
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac|"
+		"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.mp1;*.mp2;*.mp3|"
 		"FastTracker II Instruments (*.xi)|*.xi|"
 		"GF1 Patches (*.pat)|*.pat|"
 		"Wave Files (*.wav)|*.wav|"
+#ifndef NO_FLAC
 		"FLAC Files (*.flac)|*.flac|"
+#endif // NO_FLAC
+#ifndef NO_MP3_SAMPLES
+		"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
+#endif // NO_MP3_SAMPLES
 		"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
 		"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
 		"DLS Sound Banks (*.dls)|*.dls|"
@@ -1737,6 +1742,9 @@ void CModTree::FillInstrumentLibrary()
 					// Samples
 					if(!strcmp(s, "wav")
 						|| !strcmp(s, "flac")
+						|| !strcmp(s, "mp1")
+						|| !strcmp(s, "mp2")
+						|| !strcmp(s, "mp3")
 						|| !strcmp(s, "smp")
 						|| !strcmp(s, "raw")
 						|| !strcmp(s, "s3i")

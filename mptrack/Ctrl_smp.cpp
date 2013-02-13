@@ -991,9 +991,14 @@ void CCtrlSamples::OnSampleOpen()
 	static int nLastIndex = 0;
 	
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
+		"All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
 		"Wave Files (*.wav)|*.wav|"
+#ifndef NO_FLAC
 		"FLAC Files (*.flac)|*.flac|"
+#endif // NO_FLAC
+#ifndef NO_MP3_SAMPLES
+		"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
+#endif // NO_MP3_SAMPLES
 		"XI Samples (*.xi)|*.xi|"
 		"Impulse Tracker Samples (*.its)|*.its|"
 		"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
