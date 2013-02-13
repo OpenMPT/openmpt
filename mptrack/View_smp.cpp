@@ -1795,9 +1795,7 @@ void CViewSample::OnEditDelete()
 		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
-		CriticalSection cs;
-		pSndFile->DestroySample(m_nSample);
-		cs.Leave();
+		pSndFile->DestroySampleThreadsafe(m_nSample);
 
 		dwUpdateFlags |= HINT_SMPNAMES;
 	} else
@@ -1988,15 +1986,10 @@ void CViewSample::OnEditPaste()
 			CSoundFile *pSndFile = pModDoc->GetSoundFile();
 			DWORD dwMemSize = GlobalSize(hCpy);
 
-			CriticalSection cs;
-
 			ModSample &sample = pSndFile->GetSample(m_nSample);
 
 			memcpy(s, pSndFile->m_szNames[m_nSample], 32);
 			memcpy(s2, sample.filename, 22);
-			pSndFile->DestroySample(m_nSample);
-			sample.nLength = 0;
-			sample.pSample = 0;
 			pSndFile->ReadSampleFromFile(m_nSample, p, dwMemSize);
 			if (!pSndFile->m_szNames[m_nSample][0])
 {
@@ -2006,8 +1999,6 @@ void CViewSample::OnEditPaste()
 			{
 				memcpy(sample.filename, s2, 22);
 			}
-
-			cs.Leave();
 
 			GlobalUnlock(hCpy);
 			SetCurSel(0, 0);
