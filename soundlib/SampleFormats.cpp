@@ -2271,7 +2271,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 //------------------------------------------------------------------
 {
 #ifndef NO_MP3_SAMPLES
-	HMODULE mp3lib = nullptr;
+	static HMODULE mp3lib = nullptr;
 
 	if(!mp3lib)
 	{
