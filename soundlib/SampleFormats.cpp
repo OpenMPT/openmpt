@@ -38,7 +38,8 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 		&& !ReadPATSample(nSample, lpMemFile, dwFileLength)
 		&& !Read8SVXSample(nSample, lpMemFile, dwFileLength)
 		&& !ReadS3ISample(nSample, lpMemFile, dwFileLength)
-		&& !ReadFLACSample(nSample, file))
+		&& !ReadFLACSample(nSample, file)
+		&& !ReadMP3Sample(nSample, file))
 	{
 		return false;
 	}
@@ -73,8 +74,13 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x43464941))		// AIFF-C signature
 	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x58565338))		// 8SVX signature
 	 || psig[0] == LittleEndian(ITSample::magic)										// ITS signature
+#ifndef NO_FLAC
 	 || psig[0] == LittleEndian('CaLf')													// FLAC signature
-	 || psig[0] == LittleEndian('SggO')													// OGG signature (for FLAC in OGG)
+#endif // NO_FLAC
+#ifndef NO_MP3_SAMPLES
+	 || (lpMemFile[0] == 0xFF && lpMemFile[1] == 0xFB)									// MP3 signature
+	 || (lpMemFile[0] == 'I' && lpMemFile[1] == 'D' && lpMemFile[2] == '3')				// MP3 signature
+#endif // NO_MP3_SAMPLES
 	)
 	{
 		// Scanning free sample
@@ -2210,4 +2216,130 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) 
 #else
 	return false;
 #endif // NO_FLAC
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// MP3 Samples
+
+#ifndef NO_MP3_SAMPLES
+
+namespace mpg123
+{
+	typedef struct {int foo;} mpg123_handle;
+	typedef int (*pfn_init )();
+	typedef mpg123_handle* (*pfn_new )(char*,int*);
+	typedef void (*pfn_delete )(mpg123_handle*);
+	typedef int (*pfn_open_handle )(mpg123_handle*, void*);
+	typedef int (*pfn_replace_reader_handle)(mpg123_handle*, 
+		size_t(*)(void *, void *, size_t),
+		off_t(*)(void *, off_t, int),
+		void(*)(void *));
+	typedef int (*pfn_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
+	typedef int (*pfn_getformat )(mpg123_handle*, long*, int*, int*);
+	typedef int (*pfn_scan )(mpg123_handle*);
+	typedef off_t (*pfn_length )(mpg123_handle*);
+
+	size_t FileReaderRead(void *fp, void *buf, size_t count)
+	{
+		FileReader &file = *static_cast<FileReader *>(fp);
+		size_t readBytes = Util::Min(count, static_cast<size_t>(file.BytesLeft()));
+		memcpy(buf, file.GetRawData(), readBytes);
+		file.Skip(readBytes);
+		return readBytes;
+	}
+
+	off_t FileReaderLSeek(void *fp, off_t offset, int whence)
+	{
+		FileReader &file = *static_cast<FileReader *>(fp);
+		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
+		else if(whence == SEEK_END) file.Seek(file.GetLength() + offset);
+		else file.Seek(offset);
+		return file.GetPosition();
+	}
+
+	enum mpg123_enc_enum
+	{
+		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
+	};
+};
+
+#endif // NO_MP3_SAMPLES
+
+
+bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
+//------------------------------------------------------------------
+{
+#ifndef NO_MP3_SAMPLES
+	HMODULE mp3lib = nullptr;
+
+	if(!mp3lib)
+	{
+#ifdef MODPLUG_TRACKER
+		const CString path = CString(theApp.GetAppDirPath()) + "libmpg123-0.dll";
+		mp3lib = LoadLibrary(path);
+#else
+		mp3lib = LoadLibrary(_TEXT("libmpg123-0.dll"));
+#endif // MODPLUG_TRACKER
+	}
+	if(!mp3lib) return false;
+
+	#define MP3_DYNAMICBIND(f) mpg123::pfn_ ## f mpg123_ ## f = (mpg123::pfn_ ## f)GetProcAddress(mp3lib, "mpg123_" #f); if(!mpg123_ ## f) return false
+
+	MP3_DYNAMICBIND(init);
+	MP3_DYNAMICBIND(new);
+	MP3_DYNAMICBIND(delete);
+	MP3_DYNAMICBIND(open_handle);
+	MP3_DYNAMICBIND(replace_reader_handle);
+	MP3_DYNAMICBIND(read);
+	MP3_DYNAMICBIND(getformat);
+	MP3_DYNAMICBIND(scan);
+	MP3_DYNAMICBIND(length);
+
+	#undef MP3_DYNAMICBIND
+
+	if(mpg123_init()) return false;
+
+	mpg123::mpg123_handle *mh;
+	int err;
+	if((mh = mpg123_new(0, &err)) == nullptr) return false;
+	file.Rewind();
+
+	long rate; int nchannels, encoding;
+	SmpLength length;
+
+	// Set up decoder...
+	if(mpg123_replace_reader_handle(mh, mpg123::FileReaderRead, mpg123::FileReaderLSeek, 0)
+		|| mpg123_open_handle(mh, &file)
+		|| mpg123_scan(mh)
+		|| mpg123_getformat(mh, &rate, &nchannels, &encoding)
+		|| !nchannels || nchannels > 2
+		|| (encoding & mpg123::MPG123_ENC_16 | mpg123::MPG123_ENC_SIGNED) == 0
+		|| (length = mpg123_length(mh)) == 0)
+	{
+		mpg123_delete(mh);
+		return false;
+	}
+
+	CriticalSection cs;
+	DestroySample(sample);
+	Samples[sample].Initialize();
+	Samples[sample].nLength = length;
+
+	Samples[sample].nC5Speed = rate;
+	Samples[sample].uFlags.set(CHN_16BIT);
+	Samples[sample].uFlags.set(CHN_STEREO, nchannels == 2);
+	Samples[sample].AllocateSample();
+
+	size_t ndecoded;
+	mpg123_read(mh, reinterpret_cast<unsigned char*>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+	mpg123_delete(mh);
+
+	if(Samples[sample].pSample != nullptr)
+	{
+		Samples[sample].Convert(MOD_TYPE_IT, GetType());
+		return true;
+	}
+#endif // NO_MP3_SAMPLES
+	return false;
 }

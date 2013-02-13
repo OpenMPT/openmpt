@@ -1534,6 +1534,11 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 			if (p)
 			{
 				bOk = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen);
+				if(!bOk)
+				{
+					bOk = m_WaveFile.ReadSampleFromFile(1, p, dwLen);
+					m_WaveFile.AllocateInstrument(1, 1);
+				}
 				f.Unlock();
 			}
 			if (bOk)
