@@ -606,6 +606,7 @@ protected:
 
 public:
 	bool DestroySample(SAMPLEINDEX nSample);
+	bool DestroySampleThreadsafe(SAMPLEINDEX nSample);
 
 	// Find an unused sample slot. If it is going to be assigned to an instrument, targetInstrument should be specified.
 	// SAMPLEINDEX_INVLAID is returned if no free sample slot could be found.

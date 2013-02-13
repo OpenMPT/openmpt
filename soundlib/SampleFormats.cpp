@@ -43,6 +43,11 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 	{
 		return false;
 	}
+
+	if(nSample > GetNumSamples())
+	{
+		m_nSamples = nSample;
+	}
 	return true;
 }
 
@@ -57,7 +62,8 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 && (!ReadITIInstrument(nInstr, file))
 	// Generic read
 	 && (!ReadSampleAsInstrument(nInstr, lpMemFile, dwFileLength))) return false;
-	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
+
+	if(nInstr > GetNumInstruments()) m_nInstruments = nInstr;
 	return true;
 }
 
@@ -106,16 +112,6 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 		Instruments[nInstr] = pIns;
 
 		ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
-
-		if(nSample > GetNumSamples())
-		{
-			m_nSamples = nSample;
-		}
-		if(nInstr > GetNumInstruments())
-		{
-			m_nInstruments = nInstr;
-		}
-
 		return true;
 	}
 	return false;
@@ -285,8 +281,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *
 		return false;
 	}
 
-	CriticalSection cs;
-	DestroySample(targetSample);
+	DestroySampleThreadsafe(targetSample);
 
 	const ModSample &sourceSmp = pSrcSong->GetSample(sourceSample);
 
@@ -330,8 +325,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 		return false;
 	}
 
-	CriticalSection cs;
-	DestroySample(nSample);
+	DestroySampleThreadsafe(nSample);
 	strcpy(m_szNames[nSample], "");
 	ModSample &sample = Samples[nSample];
 	sample.Initialize();
@@ -726,9 +720,8 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMem
 	 || (phdr->version[3] != 0) || (phdr->id[9] != 0) || (phdr->instrum < 1)
 	 || (!phdr->samples) || (!pinshdr->layers)) return false;
 	
-	CriticalSection cs;
-	DestroySample(nSample);
-	PatchToSample(this, nSample, lpStream+dwMemPos, dwMemLength-dwMemPos);
+	DestroySampleThreadsafe(nSample);
+	PatchToSample(this, nSample, lpStream + dwMemPos, dwMemLength - dwMemPos);
 	if (pinshdr->name[0] > ' ')
 	{
 		memcpy(m_szNames[nSample], pinshdr->name, 16);
@@ -890,8 +883,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 	 || (pss->id != 0x01) || (((DWORD)pss->offset << 4) >= dwFileLength)
 	 || (pss->scrs != 0x53524353)) return false;
 
-	CriticalSection cs;
-	DestroySample(nSample);
+	DestroySampleThreadsafe(nSample);
 	dwMemPos = pss->offset << 4;
 
 	sample.Initialize();
@@ -1124,8 +1116,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	// Gotta skip 'em all!
 	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
 
-	CriticalSection cs;
-	DestroySample(nSample);
+	DestroySampleThreadsafe(nSample);
 
 	ModSample &mptSample = Samples[nSample];
 	sampleHeader.ConvertToMPT(mptSample);
@@ -1391,9 +1382,8 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	soundChunk.Skip(sampleHeader.offset);
 
-	CriticalSection cs;
 	ModSample &mptSample = Samples[nSample];
-	DestroySample(nSample);
+	DestroySampleThreadsafe(nSample);
 	mptSample.Initialize();
 	mptSample.nLength = sampleInfo.numSampleFrames;
 	mptSample.nC5Speed = sampleInfo.GetSampleRate();
@@ -1487,8 +1477,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	{
 		return false;
 	}
-	CriticalSection cs;
-	DestroySample(nSample);
+	DestroySampleThreadsafe(nSample);
 
 	file.Seek(sampleHeader.ConvertToMPT(Samples[nSample]));
 	StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
@@ -1790,8 +1779,7 @@ bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 	 || (pfh->dw8SVX != IFFID_8SVX) || (BigEndian(pfh->dwSize) >= dwFileLength)
 	 || (pvh->dwVHDR != IFFID_VHDR) || (BigEndian(pvh->dwSize) >= dwFileLength)) return false;
 
-	CriticalSection cs;
-	DestroySample(nSample);
+	DestroySampleThreadsafe(nSample);
 	// Default values
 	sample.Initialize();
 	sample.nLoopStart = BigEndian(pvh->oneShotHiSamples);
@@ -1967,13 +1955,16 @@ struct FLACDecoder
 	static void metadata_cb(const FLAC__StreamDecoder *, const FLAC__StreamMetadata *metadata, void *client_data)
 	{
 		FLACDecoder &client = *static_cast<FLACDecoder *>(client_data);
+		if(client.sample > client.sndFile.GetNumSamples())
+		{
+			client.sndFile.m_nSamples = client.sample;
+		}
 		ModSample &sample = client.sndFile.GetSample(client.sample);
 
 		if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO && metadata->data.stream_info.total_samples != 0)
 		{
 			// Init sample information
-			CriticalSection cs;
-			client.sndFile.DestroySample(client.sample);
+			client.sndFile.DestroySampleThreadsafe(client.sample);
 			strcpy(client.sndFile.m_szNames[client.sample], "");
 			sample.Initialize();
 			sample.uFlags.set(CHN_16BIT, metadata->data.stream_info.bits_per_sample > 8);
@@ -2321,8 +2312,8 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
-	CriticalSection cs;
-	DestroySample(sample);
+	DestroySampleThreadsafe(sample);
+	strcpy(m_szNames[sample], "");
 	Samples[sample].Initialize();
 	Samples[sample].nLength = length;
 

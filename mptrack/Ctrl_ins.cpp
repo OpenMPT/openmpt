@@ -1454,8 +1454,6 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	bOk = FALSE;
 	if (lpFile)
 	{
-		CriticalSection cs;
-
 		if (!m_pSndFile->GetNumInstruments())
 		{
 			bFirst = TRUE;

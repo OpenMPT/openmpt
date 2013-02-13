@@ -765,7 +765,6 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	if (!lpFile) goto OpenError;
 	
 	{
-		CriticalSection cs;
 		m_pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 		bOk = m_pSndFile->ReadSampleFromFile(m_nSample, lpFile, len);
 	}
@@ -786,9 +785,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			BeginWaitCursor();
 			ModSample &sample = m_pSndFile->GetSample(m_nSample);
 			
-			CriticalSection cs;
-
-			m_pSndFile->DestroySample(m_nSample);
+			m_pSndFile->DestroySampleThreadsafe(m_nSample);
 			sample.nLength = len;
 
 			SampleIO sampleIO(
@@ -887,10 +884,7 @@ bool CCtrlSamples::OpenSample(const CSoundFile *pSndFile, SAMPLEINDEX nSample)
 
 	BeginWaitCursor();
 
-	CriticalSection cs;
-
 	m_pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-	m_pSndFile->DestroySample(m_nSample);
 	m_pSndFile->ReadSampleFromSong(m_nSample, pSndFile, nSample);
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
 	if ((m_pSndFile->GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
@@ -899,7 +893,6 @@ bool CCtrlSamples::OpenSample(const CSoundFile *pSndFile, SAMPLEINDEX nSample)
 		sample.uFlags |= CHN_PANNING;
 	}
 
-	cs.Leave();
 	EndWaitCursor();
 
 	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
