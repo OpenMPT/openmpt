@@ -22,6 +22,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	file.Rewind();
 
 	RIFFHeader fileHeader;
+	isDLS = false;
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| (fileHeader.magic != RIFFHeader::idRIFF && fileHeader.magic != RIFFHeader::idLIST)
 		|| (fileHeader.type != RIFFHeader::idWAVE && fileHeader.type != RIFFHeader::idwave))
@@ -35,7 +36,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	if(chunks.size() >= 4
 		&& chunks[1].GetHeader().GetID() == RIFFChunk::iddata
-		&& chunks[1].GetHeader().GetLength() % 2 != 0
+		&& chunks[1].GetHeader().GetLength() % 2u != 0
 		&& chunks[2].GetHeader().GetLength() == 0
 		&& chunks[3].GetHeader().GetID() == RIFFChunk::id____)
 	{

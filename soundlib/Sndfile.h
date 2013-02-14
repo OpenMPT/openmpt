@@ -91,9 +91,9 @@ enum enmLineEndings
 // For WAV export (writing pattern positions to file)
 struct PatternCuePoint
 {
-	bool		processed;		// has this point been processed by the main WAV render function yet?
 	ULONGLONG	offset;			// offset in the file (in samples)
 	ORDERINDEX	order;			// which order is this?
+	bool		processed;		// has this point been processed by the main WAV render function yet?
 };
 
 
@@ -101,11 +101,11 @@ struct PatternCuePoint
 struct GetLengthType
 {
 	double duration;		// total time in seconds
-	bool targetReached;		// true if the specified order/row combination has been reached while going through the module
-	ORDERINDEX lastOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
 	ROWINDEX lastRow;		// last parsed row (dito)
-	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
 	ROWINDEX endRow;		// last row before module loops (dito)
+	ORDERINDEX lastOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
+	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
+	bool targetReached;		// true if the specified order/row combination has been reached while going through the module
 };
 
 

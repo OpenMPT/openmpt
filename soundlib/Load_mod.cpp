@@ -1,7 +1,7 @@
 /*
  * Load_mod.cpp
  * ------------
- * Purpose: MOD / NST (ProTracker / NoiseTracker) module loader / saver
+ * Purpose: MOD / NST (ProTracker / NoiseTracker) and M15 / STK (Ultimate Soundtracker / Soundtracker) module loader / saver
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -33,8 +33,8 @@ void CSoundFile::ConvertModCommand(ModCommand &m) const
 	case 0x0D:	m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
 	case 0x0E:	m.command = CMD_MODCMDEX; break;
 	case 0x0F:
-		// Speed is 01...1F in XM, but 01...20 in MOD. 15-sample Soundtracker MODs always use VBlank timing, interpret all values as speed.
-		if(((GetType() & MOD_TYPE_MOD) && (GetNumSamples() == 15 || m.param <= 0x20u)) || (!(GetType() & MOD_TYPE_MOD) && m.param <= 0x1Fu))
+		// Speed is 01...1F in XM, but 01...20 in MOD. 15-sample Soundtracker MODs always ignore the high nibble anyway (this is fixed in ReadM15 already)
+		if(m.param <= ((GetType() & MOD_TYPE_MOD) ? 0x20u : 0x1Fu))
 			m.command = CMD_SPEED;
 		else
 			m.command = CMD_TEMPO;
@@ -236,8 +236,6 @@ struct MODSampleHeader
 		{
 			lStart /= 2;
 		}
-		mptSmp.nLoopStart = lStart;
-		mptSmp.nLoopEnd = lStart + lLength;
 
 		if(mptSmp.nLength == 2)
 		{
@@ -246,6 +244,9 @@ struct MODSampleHeader
 
 		if(mptSmp.nLength)
 		{
+			mptSmp.nLoopStart = lStart;
+			mptSmp.nLoopEnd = lStart + lLength;
+
 			if(mptSmp.nLoopStart >= mptSmp.nLength)
 			{
 				mptSmp.nLoopStart = mptSmp.nLength - 1;
@@ -265,7 +266,7 @@ struct MODSampleHeader
 			{
 				mptSmp.nLoopEnd = 0;
 			}
-			if (mptSmp.nLoopEnd > mptSmp.nLoopStart)
+			if(mptSmp.nLoopEnd > mptSmp.nLoopStart)
 			{
 				mptSmp.uFlags.set(CHN_LOOP);
 			}
@@ -374,6 +375,14 @@ static void ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSampl
 	file.ReadConvertEndianness(sampleHeader);
 	sampleHeader.ConvertToMPT(sample);
 
+	// Get rid of weird characters in sample names.
+	for(size_t i = 0; i < CountOf(sampleHeader.name); i++)
+	{
+		if(sampleHeader.name[i] && sampleHeader.name[i] < ' ')
+		{
+			sampleHeader.name[i] = ' ';
+		}
+	}
 	StringFixer::ReadString<StringFixer::spacePadded>(sampleName, sampleHeader.name);
 }
 
@@ -409,7 +418,7 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 		Order[ord] = Order.GetInvalidPatIndex();
 	}
 
-	const size_t patternStartOffset = 20 + 31 * sizeof(MODSampleHeader) + sizeof(MODFileHeader) + 4;
+	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
 
 	if(checkForWOW)
@@ -438,6 +447,26 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 	}
 
 	return numPatterns;
+}
+
+
+static void ReadPatternEntry(FileReader &file, ModCommand &m, const CSoundFile &sf)
+//---------------------------------------------------------------------------------
+{
+	uint8 data[4];
+	file.ReadArray(data);
+
+	// Read Period
+	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
+	if(period > 0 && period != 0xFFF)
+	{
+		m.note = static_cast<ModCommand::NOTE>(sf.GetNoteFromPeriod(period * 4));
+	}
+	// Read Instrument
+	m.instr = (data[2] >> 4) | (data[0] & 0x10);
+	// Read Effect
+	m.command = data[2] & 0x0F;
+	m.param = data[3];
 }
 
 
@@ -490,7 +519,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	LimitMax(m_nChannels, MAX_BASECHANNELS);
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	bool isFLT8 = IsMagic(magic, "FLT8");
+	const bool isFLT8 = IsMagic(magic, "FLT8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
 	const bool isMdKd = IsMagic(magic, "M.K.");
 
@@ -531,7 +560,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 		}
 	}
 
-	// Do some order sanity checks
+	// Get number of patterns (including some order list sanity checks)
 	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, realOrders, totalSampleLen, m_nChannels, isMdKd);
 
 	if(isFLT8)
@@ -547,9 +576,11 @@ bool CSoundFile::ReadMod(FileReader &file)
 	realOrders--;
 	m_nRestartPos = fileHeader.restartPos;
 
-	// About the weird 0x78 restart pos thing... I also have no idea where it comes from, XMP also has this check but doesn't comment on it, either.
-	// It is said that NoiseTracker writes 0x78, but I've also seen this in M15 files.
-	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), 3ddance.mod (M15), VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
+	// (Ultimate) Soundtracker didn't have a restart position, but instead stored a default tempo in this value.
+	// The default value for this is 0x78 (120 BPM). This is probably the reason why some M.K. modules
+	// have this weird restart position. I think I've read somewhere that NoiseTracker actually writes 0x78 there.
+	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), 3ddance.mod (M15, so handled by ReadM15),
+	// VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
 	ASSERT(m_nRestartPos != 0x78 || m_nRestartPos + 1u >= realOrders);
 	if(m_nRestartPos >= 128 || m_nRestartPos + 1u >= realOrders || m_nRestartPos == 0x78)
 	{
@@ -611,21 +642,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 				for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 				{
 					ModCommand &m = rowBase[chn];
-
-					uint8 data[4];
-					file.ReadArray(data);
-
-					// Read Period
-					uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
-					if(period > 0 && period != 0xFFF)
-					{
-						m.note = static_cast<ModCommand::NOTE>(GetNoteFromPeriod(period * 4));
-					}
-					// Read Instrument
-					m.instr = (data[2] >> 4) | (data[0] & 0x10);
-					// Read Effect
-					m.command = data[2] & 0x0F;
-					m.param = data[3];
+					ReadPatternEntry(file, m, *this);
 
 					if(m.command || m.param)
 					{
@@ -730,10 +747,23 @@ bool CSoundFile::ReadM15(FileReader &file)
 
 	// We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
 	// or if it was made with the newer Soundtracker versions.
-	bool isUST = false, isConfirmed = false;
+	// Thanks for Fraggie for this information! (http://www.un4seen.com/forum/?topic=14471.msg100829#msg100829)
+	enum STVersions
+	{
+		UST1_00,				// Ultimate Soundtracker 1.0-1.21 (K. Obarski)
+		UST1_80,				// Ultimate Soundtracker 1.8-2.0 (K. Obarski)
+		ST2_00_Exterminator,	// SoundTracker 2.0 (The Exterminator), D.O.C. Sountracker II (Unknown/D.O.C.)
+		ST_III,					// Defjam Soundtracker III (Il Scuro/Defjam), Alpha Flight SoundTracker IV (Alpha Flight), D.O.C. SoundTracker IV (Unknown/D.O.C.), D.O.C. SoundTracker VI (Unknown/D.O.C.)
+		ST_IX,					// D.O.C. SoundTracker IX (Unknown/D.O.C.)
+		MST1_00,				// Master Soundtracker 1.0 (Tip/The New Masters)
+		ST2_00,					// SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
+		ST2_00_with_Bxx,		// Bxx effect found, so definitely SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
+	} minVersion = UST1_00;
 
+	bool hasDiskNames = true;
 	size_t totalSampleLen = 0;
 	m_nSamples = 15;
+
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
 		MODSampleHeader sampleHeader;
@@ -747,38 +777,20 @@ bool CSoundFile::ReadM15(FileReader &file)
 		{
 			return false;
 		}
+		ASSERT(sampleHeader.finetune == 0);
 
 		totalSampleLen += Samples[smp].nLength;
 
-		if(isConfirmed)
+		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp], "st-", 3) && memcmp(m_szNames[smp], "ST-", 3)) || m_szNames[smp][0] < '0' || m_szNames[smp][0] > '9'))
 		{
-			continue;
+			// Ultimate Soundtracker 1.8 and D.O.C. SoundTracker IX always have sample names containing disk names.
+			hasDiskNames = false;
 		}
 
-		// Soundtracker sample names should always start with "S", "ST-" or a number, but for UST mods, this is not the case.
-		// sll17.3.mod from ModLand has Soundtracker pattern effects but no "st-" sample names. Is this a bad / modified rip?
-		if((memcmp(sampleHeader.name, "st-", 3) && memcmp(sampleHeader.name, "ST-", 3)) || sampleHeader.name[0] < '0' || sampleHeader.name[0] > '9')
-		{
-			isUST = true;
-		}
-
-		// UST only handles samples up to 9999 bytes.
+		// UST only handles samples up to 9999 bytes. Master Soundtracker 1.0 and SoundTracker 2.0 introduce 32KB samples.
 		if(sampleHeader.length > 4999 || sampleHeader.loopStart > 9999)
 		{
-			isUST = false;
-		}
-		// If loop information is incorrect as words, but correct as bytes, this is likely to be an UST-style module
-		if(sampleHeader.loopStart + sampleHeader.loopLength > sampleHeader.length
-			&& sampleHeader.loopStart + sampleHeader.loopLength < sampleHeader.length * 2)
-		{
-			isUST = true;
-			isConfirmed = true;
-			continue;
-		}
-
-		if(!isUST)
-		{
-			isConfirmed = true;
+			minVersion = Util::Max(minVersion, MST1_00);
 		}
 	}
 
@@ -814,11 +826,31 @@ bool CSoundFile::ReadM15(FileReader &file)
 	m_nChannels = 4;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
+	if(fileHeader.restartPos <= 0x40)
+	{
+		m_nDefaultTempo = 125;
+		m_nRestartPos = (fileHeader.restartPos < fileHeader.numOrders ? fileHeader.restartPos : 0);
+	} else
+	{
+		// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the tempo.
+		m_nDefaultTempo = fileHeader.restartPos * 25 / 24;
+		m_nRestartPos = 0;
+		if(fileHeader.restartPos != 0x78)
+		{
+			if(minVersion > UST1_80)
+			{
+				// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
+				minVersion = Util::Max(minVersion, hasDiskNames ? ST_IX : MST1_00);
+			} else
+			{
+				// Ultimate Soundtracker 1.8 adds variable tempo
+				minVersion = Util::Max(minVersion, hasDiskNames ? UST1_80 : ST2_00_Exterminator);
+			}
+		}
+	}
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_SongFlags.reset();
-	m_nRestartPos = (fileHeader.restartPos < fileHeader.numOrders ? fileHeader.restartPos : 0);
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], songname);
 
 	// Setup channel pan positions and volume
@@ -833,25 +865,35 @@ bool CSoundFile::ReadM15(FileReader &file)
 		file.ReadArray(data);
 		const uint8 eff = data[2] & 0x0F, param = data[3];
 
-		if((eff == 1 || eff == 2) && param > 0x1F)
+		switch(eff)
 		{
-			// If a 1xx effect has a parameter greater than 0x20, it is assumed to be UST.
-			isUST = true;
+		case 1:
+		case 2:
+			if(param > 0x1F && minVersion == UST1_80)
+			{
+				// If a 1xx / 2xx effect has a parameter greater than 0x20, it is assumed to be UST.
+				minVersion = hasDiskNames ? UST1_80 : UST1_00;
+			} else if(eff == 1 && param < 0x03)
+			{
+				// This doesn't look like an arpeggio.
+				minVersion = Util::Max(minVersion, ST2_00_Exterminator);
+			}
 			break;
-		} else if(eff == 1 && param < 0x03)
-		{
-			// MikMod says so! Well, it makes sense, kind of... who would want an arpeggio like this?
-			isUST = false;
+		case 0x0B:
+			minVersion = Util::Max(minVersion, ST2_00_with_Bxx);
 			break;
-		} else if(eff == 3 && param != 0)
-		{
-			// MikMod says so!
-			isUST = false;
+		case 0x0C:
+		case 0x0D:
+		case 0x0E:
+			minVersion = Util::Max(minVersion, ST2_00_Exterminator);
+			if(eff == 0x0D && param == 0)
+			{
+				// Assume this is a pattern break command.
+				minVersion = Util::Max(minVersion, ST2_00);
+			}
 			break;
-		} else if(eff > 3)
-		{
-			// Unknown effect
-			isUST = false;
+		case 0x0F:
+			minVersion = Util::Max(minVersion, ST_III);
 			break;
 		}
 	}
@@ -866,41 +908,51 @@ bool CSoundFile::ReadM15(FileReader &file)
 			break;
 		}
 
-		uint8 lastEff[4] = { 0, 0, 0, 0 }, lastParam[4] = { 0, 0, 0, 0 };
-
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			ModCommand *rowBase = Patterns[pat].GetpModCommand(row, 0);
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-
-				uint8 data[4];
-				file.ReadArray(data);
-
-				// Read Period
-				uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
-				if(period > 0 && period != 0xFFF)
-				{
-					m.note = static_cast<ModCommand::NOTE>(GetNoteFromPeriod(period * 4));
-				}
-				// Read Instrument
-				m.instr = (data[2] >> 4) | (data[0] & 0x10);
-				// Read Effect
-				m.command = data[2] & 0x0F;
-				m.param = data[3];
+				ReadPatternEntry(file, m, *this);
 
 				if(m.command || m.param)
 				{
-					if(isUST)
+					if(m.command == 0x0D)
+					{
+						if(m.param != 0 || minVersion < ST_IX)
+						{
+							// Dxy is volume slide in some Soundtracker versions, D00 is a pattern break in the latest versions.
+							m.command = 0x0A;
+						} else if(m.param == 0 && row == 0 && minVersion != ST2_00_with_Bxx)
+						{
+							// Fix a possible tracking mistake in Blood Money title - who wants to do a pattern break on the first row anyway?
+							m.command = m.param = 0;
+						} else
+						{
+							m.param = 0;
+						}
+					} else if(m.command == 0x0E && (m.param > 0x01 || minVersion < ST_IX))
+					{
+						// Import auto-slides as normal slides and ignore their extended behaviour.
+						m.command = 0x0A;
+					} else if(m.command == 0x0F)
+					{
+						// Only the low nibble is evaluated in Soundtracker.
+						m.param &= 0x0F;
+					}
+
+					if(minVersion <= UST1_80)
 					{
 						// UST effects
 						switch(m.command)
 						{
 						case 0:
-						case 3:
-							m.command = CMD_NONE;
-							break;
+							// jackdance.mod by Karsten Obarski has 0xy arpeggios...
+							if(m.param < 0x03)
+							{
+								break;
+							}
 						case 1:
 							m.command = CMD_ARPEGGIO;
 							break;
@@ -909,34 +961,18 @@ bool CSoundFile::ReadM15(FileReader &file)
 							{
 								m.command = CMD_PORTAMENTOUP;
 								m.param &= 0x0F;
-							} else if(m.param >> 2)
+							} else if(m.param >> 4)
 							{
 								m.command = CMD_PORTAMENTODOWN;
-								m.param >>= 2;
+								m.param >>= 4;
 							}
 							break;
 						default:
-							ConvertModCommand(m);
+							m.command = CMD_NONE;
 							break;
 						}
 					} else
 					{
-						// M15 effects
-						if((m.command == 1 || m.command == 2 || m.command == 3) && m.param == 0)
-						{
-							// An isolated 100, 200 or 300 effect should be ignored (no "standalone" porta memory in mod files).
-							// However, a sequence such as 1xx, 100, 100, 100 is fine.
-							if(m.command != lastEff[chn] || lastParam[chn] == 0)
-							{
-								m.command = m.param = 0;
-							} else
-							{
-								m.param = lastParam[chn];
-							}
-						}
-						lastEff[chn] = m.command;
-						lastParam[chn] = m.param;
-
 						ConvertModCommand(m);
 					}
 				}
@@ -947,15 +983,12 @@ bool CSoundFile::ReadM15(FileReader &file)
 	// Reading samples
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
-		if(isUST)
-		{
-			// Looped samples in Ultimate Soundtracker seem to ignore all sample data before the actual loop start.
-			// This avoids the clicks in the first sample of pretend.mod by Karsten Obarski.
-			file.Skip(Samples[smp].nLoopStart);
-			Samples[smp].nLength -= Samples[smp].nLoopStart;
-			Samples[smp].nLoopEnd -= Samples[smp].nLoopStart;
-			Samples[smp].nLoopStart = 0;
-		}
+		// Looped samples in (Ultimate) Soundtracker seem to ignore all sample data before the actual loop start.
+		// This avoids the clicks in the first sample of pretend.mod by Karsten Obarski.
+		file.Skip(Samples[smp].nLoopStart);
+		Samples[smp].nLength -= Samples[smp].nLoopStart;
+		Samples[smp].nLoopEnd -= Samples[smp].nLoopStart;
+		Samples[smp].nLoopStart = 0;
 		MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
 	}
 
@@ -1047,7 +1080,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 
 	// Write magic bytes
 	char modMagic[6];
-	CHANNELINDEX writeChannels = min(99, GetNumChannels());
+	CHANNELINDEX writeChannels = Util::Min(CHANNELINDEX(99), GetNumChannels());
 	if(writeChannels == 4)
 	{
 		if(writePatterns < 64)
@@ -1149,7 +1182,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 
 		static const int8 silence[] = {0, 0};
 
-		if((sample.uFlags & CHN_LOOP) == 0)
+		if(!sample.uFlags[CHN_LOOP])
 		{
 			// First two bytes of oneshot samples have to be 0 due to PT's one-shot loop
 			const long sampleEnd = ftell(f);
