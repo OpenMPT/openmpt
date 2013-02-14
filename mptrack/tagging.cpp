@@ -48,7 +48,7 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 {
 	if(!f) return;
 	
-	TAGID3v2HEADER tHeader;
+	ID3v2Header tHeader;
 	UINT fOffset = ftell(f);
 
 	totalID3v2Size = 0;
@@ -110,7 +110,7 @@ void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE 
 	sFramecontent = ID3v2_CHARSET + sFramecontent;
 	sFramecontent += ID3v2_TEXTENDING;
 
-	TAGID3v2FRAME tFrame;
+	ID3v2Frame tFrame;
 
 	memcpy(&tFrame.frameid, cFrameID, 4); // ID
 	tFrame.size = intToSynchsafe(sFramecontent.size()); // Text size
@@ -132,12 +132,12 @@ void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE 
 	
 	WAVEFILEHEADER list;
 	WAVEDATAHEADER chunk;
-	DWORD info_ofs, end_ofs;
+	off_t info_ofs, end_ofs;
 	const uint8 zero = 0;
 
 	struct
 	{
-		DWORD id;
+		uint32 id;
 		string *data;
 	} chunks[] =
 	{

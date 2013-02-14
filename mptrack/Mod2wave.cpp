@@ -21,6 +21,50 @@
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// ID3v1 Genres
+
+static const char *id3v1GenreNames[] =
+{
+	"Blues",                "Classic Rock",     "Country",          "Dance",
+	"Disco",                "Funk",             "Grunge",           "Hip-Hop",
+	"Jazz",                 "Metal",            "New Age",          "Oldies",
+	"Other",                "Pop",              "R&B",              "Rap",
+	"Reggae",               "Rock",             "Techno",           "Industrial",
+	"Alternative",          "Ska",              "Death Metal",      "Pranks",
+	"Soundtrack",           "Euro-Techno",      "Ambient",          "Trip-Hop",
+	"Vocal",                "Jazz+Funk",        "Fusion",           "Trance",
+	"Classical",            "Instrumental",     "Acid",             "House",
+	"Game",                 "Sound Clip",       "Gospel",           "Noise",
+	"Alt. Rock",            "Bass",             "Soul",             "Punk",
+	"Space",                "Meditative",       "Instrumental Pop", "Instrumental Rock",
+	"Ethnic",               "Gothic",           "Darkwave",         "Techno-Industrial",
+	"Electronic",           "Pop-Folk",         "Eurodance",        "Dream",
+	"Southern Rock",        "Comedy",           "Cult",             "Gangsta",
+	"Top 40",               "Christian Rap",    "Pop/Funk",         "Jungle",
+	"Native American",      "Cabaret",          "New Wave",         "Psychadelic",
+	"Rave",                 "Showtunes",        "Trailer",          "Lo-Fi",
+	"Tribal",               "Acid Punk",        "Acid Jazz",        "Polka",
+	"Retro",                "Musical",          "Rock & Roll",      "Hard Rock",
+	"Folk",                 "Folk-Rock",        "National Folk",    "Swing",
+	"Fast Fusion",          "Bebob",            "Latin",            "Revival",
+	"Celtic",               "Bluegrass",        "Avantgarde",       "Gothic Rock",
+	"Progressive Rock",     "Psychedelic Rock", "Symphonic Rock",   "Slow Rock",
+	"Big Band",             "Chorus",           "Easy Listening",   "Acoustic",
+	"Humour",               "Speech",           "Chanson",          "Opera",
+	"Chamber Music",        "Sonata",           "Symphony",         "Booty Bass",
+	"Primus",               "Porn Groove",      "Satire",           "Slow Jam",
+	"Club",                 "Tango",            "Samba",            "Folklore",
+	"Ballad",               "Power Ballad",     "Rhythmic Soul",    "Freestyle",
+	"Duet",                 "Punk Rock",        "Drum Solo",        "A Capella",
+	"Euro-House",           "Dance Hall",       "Goa",              "Drum & Bass",
+	"Club House",           "Hardcore",         "Terror",           "Indie",
+	"BritPop",              "Negerpunk",        "Polsk Punk",       "Beat",
+	"Christian Gangsta Rap","Heavy Metal",      "Black Metal",      "Crossover",
+	"Contemporary Christian", "Christian Rock", "Merengue",         "Salsa",
+	"Thrash Metal",         "Anime",            "JPop",             "Synthpop"
+};
+
 // this converts a buffer of 32-bit integer sample data to 32 bit floating point
 static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
 {
@@ -397,9 +441,9 @@ BOOL CLayer3Convert::OnInitDialog()
 	m_bDriversEnumerated = TRUE;
 	m_CbnDriver.SetCurSel(m_nDriverIndex);
 	if (m_bSaveInfoField) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
-	for (UINT iGnr=0; iGnr<NUM_GENRES; iGnr++)
+	for(size_t iGnr = 0; iGnr < CountOf(id3v1GenreNames); iGnr++)
 	{
-		m_CbnGenre.SetItemData(m_CbnGenre.AddString(gpszGenreNames[iGnr]), iGnr);
+		m_CbnGenre.SetItemData(m_CbnGenre.AddString(id3v1GenreNames[iGnr]), iGnr);
 	}
 
 	m_EditYear.SetLimitText(4);

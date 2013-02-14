@@ -15,73 +15,29 @@
 
 using std::string;
 
-#pragma pack(push, 1)
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// ID3v1 Genres
-
-#define NUM_GENRES		148
-
-static LPCSTR gpszGenreNames[NUM_GENRES] =
-{
-	"Blues",                "Classic Rock",     "Country",          "Dance",
-	"Disco",                "Funk",             "Grunge",           "Hip-Hop",
-	"Jazz",                 "Metal",            "New Age",          "Oldies",
-	"Other",                "Pop",              "R&B",              "Rap",
-	"Reggae",               "Rock",             "Techno",           "Industrial",
-	"Alternative",          "Ska",              "Death Metal",      "Pranks",
-	"Soundtrack",           "Euro-Techno",      "Ambient",          "Trip-Hop",
-	"Vocal",                "Jazz+Funk",        "Fusion",           "Trance",
-	"Classical",            "Instrumental",     "Acid",             "House",
-	"Game",                 "Sound Clip",       "Gospel",           "Noise",
-	"Alt. Rock",            "Bass",             "Soul",             "Punk",
-	"Space",                "Meditative",       "Instrumental Pop", "Instrumental Rock",
-	"Ethnic",               "Gothic",           "Darkwave",         "Techno-Industrial",
-	"Electronic",           "Pop-Folk",         "Eurodance",        "Dream",
-	"Southern Rock",        "Comedy",           "Cult",             "Gangsta",
-	"Top 40",               "Christian Rap",    "Pop/Funk",         "Jungle",
-	"Native American",      "Cabaret",          "New Wave",         "Psychadelic",
-	"Rave",                 "Showtunes",        "Trailer",          "Lo-Fi",
-	"Tribal",               "Acid Punk",        "Acid Jazz",        "Polka",
-	"Retro",                "Musical",          "Rock & Roll",      "Hard Rock",
-	"Folk",                 "Folk-Rock",        "National Folk",    "Swing",
-	"Fast Fusion",          "Bebob",            "Latin",            "Revival",
-	"Celtic",               "Bluegrass",        "Avantgarde",       "Gothic Rock",
-	"Progressive Rock",     "Psychedelic Rock", "Symphonic Rock",   "Slow Rock",
-	"Big Band",             "Chorus",           "Easy Listening",   "Acoustic",
-	"Humour",               "Speech",           "Chanson",          "Opera",
-	"Chamber Music",        "Sonata",           "Symphony",         "Booty Bass",
-	"Primus",               "Porn Groove",      "Satire",           "Slow Jam",
-	"Club",                 "Tango",            "Samba",            "Folklore",
-	"Ballad",               "Power Ballad",     "Rhythmic Soul",    "Freestyle",
-	"Duet",                 "Punk Rock",        "Drum Solo",        "A Capella",
-	"Euro-House",           "Dance Hall",       "Goa",              "Drum & Bass",
-	"Club House",           "Hardcore",         "Terror",           "Indie",
-	"BritPop",              "Negerpunk",        "Polsk Punk",       "Beat",
-	"Christian Gangsta Rap","Heavy Metal",      "Black Metal",      "Crossover",
-	"Contemporary Christian", "Christian Rock", "Merengue",         "Salsa",
-	"Thrash Metal",         "Anime",            "JPop",             "Synthpop"
-};
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v2.4 Tags
 
-typedef struct _TAGID3v2HEADER
+#pragma pack(push, 1)
+
+struct ID3v2Header
 {
 	uint8 signature[3];
 	uint8 version[2];
 	uint8 flags;
 	uint32 size;
 	// Total: 10 bytes
-} TAGID3v2HEADER;
+};
 
-typedef struct _TAGID3v2FRAME
+struct ID3v2Frame
 {
 	uint32 frameid;
 	uint32 size;
 	uint16 flags;
 	// Total: 10 bytes
-} TAGID3v2FRAME;
+};
+
+#pragma pack(pop)
 
 // we will add some padding bytes to our id3v2 tag (extending tags will be easier this way)
 #define ID3v2_PADDING 512
@@ -123,4 +79,3 @@ private:
 	uint32 totalID3v2Size;
 };
 
-#pragma pack(pop)
