@@ -180,10 +180,12 @@ public:
 	VstInt32 GetCurrentProgram();
 	VstInt32 GetNumProgramCategories();
 	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false);
-	bool LoadProgram(CString fileName);
-	bool SaveProgram(CString fileName);
-	VstInt32 GetUID();
-	VstInt32 GetVersion();
+	const char *LoadProgram(const char *filename);
+	bool SaveProgram(const char *filename);
+	VstInt32 GetUID() const;
+	VstInt32 GetVersion() const;
+	// Check if programs should be stored as chunks or parameters
+	bool ProgramsAreChunks() const { return m_pEffect && (m_pEffect->flags & effFlagsProgramChunks) != 0; }
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
 	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
 #ifdef MODPLUG_TRACKER
@@ -292,7 +294,9 @@ public:
 	bool GetProgramNameIndexed(long, long, char*) { return false; }
 	CString GetFormattedProgramName(VstInt32, bool = false) { return ""; }
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
-	
+	VstInt32 GetUID() const { return 0; }
+	VstInt32 GetVersion() const { return 0; }
+
 	bool CanAutomateParameter(PlugParamIndex index) { return false; }
 
 	CString GetFormattedParamName(PlugParamIndex) { return ""; };
@@ -302,8 +306,8 @@ public:
 	CString GetParamDisplay(PlugParamIndex) { return ""; };
 
 	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
-	bool LoadProgram(CString) {return false;}
-	bool SaveProgram(CString) {return false;}
+	const char *LoadProgram(const char *) { return false; }
+	bool SaveProgram(const char *) { return false; }
 	void SetCurrentProgram(UINT) {}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}
