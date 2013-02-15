@@ -178,10 +178,10 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	{
 		SAMPLEINDEX realSample = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
 		ITSample sampleHeader;
-		file.Read(sampleHeader);
+		file.ReadConvertEndianness(sampleHeader);
 		size = file.ReadUint32LE();
 
-		if(realSample >= 1 && realSample < MAX_SAMPLES && sampleHeader.id == LittleEndian(ITSample::magic))
+		if(realSample >= 1 && realSample < MAX_SAMPLES && sampleHeader.id == ITSample::magic)
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
 			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[realSample], sampleHeader.name);
@@ -457,6 +457,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			fwrite(&id, 1, sizeof(id), f);
 
 			itss.samplepointer = 0;
+			itss.ConvertEndianness();
 			fwrite(&itss, 1, sizeof(itss), f);
 
 			id = Samples[nsmp].GetSampleSizeInBytes();

@@ -148,23 +148,42 @@ typedef struct WAVEEXTRAHEADER
 } WAVEEXTRAHEADER;
 
 
-typedef struct WAVCUEHEADER
+struct WavCueHeader
 {
-	DWORD cue_id;	// "cue "	-> 0x20657563
-	DWORD cue_len;
-	DWORD cue_num;
-} WAVCUEHEADER;
+	uint32 id;	// "cue "	-> 0x20657563
+	uint32 length;
+	uint32 numPoints;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(length);
+		SwapBytesLE(numPoints);
+	}
+};
 
 
-typedef struct WAVCUEPOINT
+struct WavCuePoint
 {
-	DWORD cp_id;			// Unique identification value
-	DWORD cp_pos;			// Play order position
-	DWORD cp_chunkid;		// RIFF ID of corresponding data chunk
-	DWORD cp_chunkstart;	// Byte Offset of Data Chunk
-	DWORD cp_blockstart;	// Byte Offset to sample of First Channel
-	DWORD cp_offset;		// Byte Offset to sample byte of First Channel
-} WAVCUEPOINT;
+	uint32 id;			// Unique identification value
+	uint32 pos;			// Play order position
+	uint32 chunkID;		// RIFF ID of corresponding data chunk
+	uint32 chunkStart;	// Byte Offset of Data Chunk
+	uint32 blockStart;	// Byte Offset to sample of First Channel
+	uint32 offset;		// Byte Offset to sample byte of First Channel
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(pos);
+		SwapBytesLE(chunkID);
+		SwapBytesLE(chunkStart);
+		SwapBytesLE(blockStart);
+		SwapBytesLE(offset);
+	}
+};
 
 
 #pragma pack(pop)

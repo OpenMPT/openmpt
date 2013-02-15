@@ -926,28 +926,28 @@ void CDoWaveConvert::OnButton1()
 	if(m_pSndFile->m_PatternCuePoints.size() > 0)
 	{
 		// Cue point header
-		WAVCUEHEADER cuehdr;
-		cuehdr.cue_id = LittleEndian(IFFID_cue);
-		cuehdr.cue_num = m_pSndFile->m_PatternCuePoints.size();
-		cuehdr.cue_len = 4 + cuehdr.cue_num * sizeof(WAVCUEPOINT);
-		cuePointLength = 8 + cuehdr.cue_len;
-		cuehdr.cue_num = LittleEndian(cuehdr.cue_num);
-		cuehdr.cue_len = LittleEndian(cuehdr.cue_len);
-		fwrite(&cuehdr, 1, sizeof(WAVCUEHEADER), f);
+		WavCueHeader cuehdr;
+		cuehdr.id = IFFID_cue;
+		cuehdr.numPoints = m_pSndFile->m_PatternCuePoints.size();
+		cuehdr.length = 4 + cuehdr.numPoints * sizeof(WavCuePoint);
+		cuePointLength = 8 + cuehdr.length;
+		cuehdr.ConvertEndianness();
+		fwrite(&cuehdr, 1, sizeof(WavCueHeader), f);
 
 		// Write all cue points
 		vector<PatternCuePoint>::const_iterator iter;
 		DWORD num = 0;
 		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); ++iter, num++)
 		{
-			WAVCUEPOINT cuepoint;
-			cuepoint.cp_id = LittleEndian(num);
-			cuepoint.cp_pos = LittleEndian((DWORD)iter->offset);
-			cuepoint.cp_chunkid = LittleEndian(IFFID_data);
-			cuepoint.cp_chunkstart = 0;		// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
-			cuepoint.cp_blockstart = 0;		// dito
-			cuepoint.cp_offset = LittleEndian((DWORD)iter->offset);
-			fwrite(&cuepoint, 1, sizeof(WAVCUEPOINT), f);
+			WavCuePoint cuepoint;
+			cuepoint.id = num;
+			cuepoint.pos = (uint32)iter->offset;
+			cuepoint.chunkID = IFFID_data;
+			cuepoint.chunkStart = 0;		// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
+			cuepoint.blockStart = 0;		// dito
+			cuepoint.offset = (uint32)iter->offset;
+			cuepoint.ConvertEndianness();
+			fwrite(&cuepoint, 1, sizeof(WavCuePoint), f);
 		}
 		m_pSndFile->m_PatternCuePoints.clear();
 	}

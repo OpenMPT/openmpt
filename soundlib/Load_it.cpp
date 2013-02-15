@@ -1204,10 +1204,11 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	// Writing pattern names
 	if(numNamedPats)
 	{
-		DWORD d = LittleEndian(magicPatternNames); // "PNAM"
-		fwrite(&d, 1, 4, f);
-		d = numNamedPats * MAX_PATTERNNAME;
-		fwrite(&d, 1, 4, f);
+		char magic[4];
+		memcpy(magic, "PNAM", 4);
+		fwrite(magic, 4, 1, f);
+		uint32 d = numNamedPats * MAX_PATTERNNAME;
+		fwrite(&d, 4, 1, f);
 
 		for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
 		{
@@ -1221,8 +1222,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	// Writing channel names
 	if(dwChnNamLen && !compatibilityExport)
 	{
-		DWORD d = LittleEndian(magicChannelNames); // "CNAM"
-		fwrite(&d, 1, 4, f);
+		char magic[4];
+		memcpy(magic, "CNAM", 4);
+		fwrite(magic, 4, 1, f);
 		fwrite(&dwChnNamLen, 1, 4, f);
 		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
 		for(UINT inam = 0; inam < nChnNames; inam++)
