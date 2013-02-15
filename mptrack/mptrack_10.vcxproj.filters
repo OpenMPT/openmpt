@@ -127,9 +127,6 @@
     <ClCompile Include="draw_pat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="fxp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\Fastmix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -424,6 +421,9 @@
     <ClCompile Include="..\soundlib\MixerSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VstPresets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -466,9 +466,6 @@
       <Filter>Module Loaders</Filter>
     </ClInclude>
     <ClInclude Include="..\Soundlib\Dlsbank.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fxp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\Endianness.h">
@@ -751,6 +748,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\MixerSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VstPresets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

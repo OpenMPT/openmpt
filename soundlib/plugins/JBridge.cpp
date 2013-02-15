@@ -10,13 +10,14 @@
 
 
 #include "stdafx.h"
+
 #include <pluginterfaces/vst2.x/aeffectx.h>
 #include "JBridge.h"
 
+#ifdef ENABLE_JBRIDGE
+
 namespace JBridge
 {
-
-#ifdef ENABLE_JBRIDGE
 
 // Name of the proxy DLL to load
 static const char *proxyRegKey = "Software\\JBridge";
@@ -106,6 +107,6 @@ AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const char *pluginPa
 	return pfnBridgeMain(audioMaster, pluginPath);
 }
 
-#endif // ENABLE_JBRIDGE
-
 }
+
+#endif // ENABLE_JBRIDGE

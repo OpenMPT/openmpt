@@ -1034,21 +1034,22 @@ void CViewGlobals::OnLoadParam()
 	}
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST FX Program (*.fxp)|*.fxp||",
+		"VST Plugin Programs and Banks (*.fxp,*.fbx)|*.fxp;*.fxb|"
+		"VST Plugin Programs (*.fxp)|*.fxp|"
+		"VST Plugin Banks (*.fxb)|*.fxb|"
+		"All Files|*.*||",
 		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
-    
-	//TODO: exception handling
-	if (!(pVstPlugin->LoadProgram(files.first_file.c_str())))
-	{
-		Reporting::Error("Error loading preset. Are you sure it is for this plugin?");
-	} else 
+	
+	const char *retVal = pVstPlugin->LoadProgram(files.first_file.c_str());
+	if(retVal == nullptr)
 	{
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
+	} else 
+	{
+		Reporting::Error(retVal, "Plugin Preset");
 	}
-
-	//end rewbs.fxpPresets
 }
 
 void CViewGlobals::OnSaveParam()
@@ -1068,7 +1069,8 @@ void CViewGlobals::OnSaveParam()
 		return;
 	}
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
-		"VST Program (*.fxp)|*.fxp||",
+		"VST Plugin Programs (*.fxp)|*.fxp|"
+		"VST Plugin Banks (*.fxb)|*.fxb||",
 		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
 

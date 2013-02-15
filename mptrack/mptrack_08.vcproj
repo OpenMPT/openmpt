@@ -325,7 +325,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\fxp.cpp"
+				RelativePath=".\VstPresets.cpp"
 				>
 			</File>
 			<File
@@ -883,7 +883,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\fxp.h"
+				RelativePath=".\VstPresets.h"
 				>
 			</File>
 			<File

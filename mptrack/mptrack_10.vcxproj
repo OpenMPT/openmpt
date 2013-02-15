@@ -210,7 +210,6 @@
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
-    <ClCompile Include="fxp.cpp" />
     <ClCompile Include="globals.cpp" />
     <ClCompile Include="HyperEdit.cpp" />
     <ClCompile Include="HyperEdit2.cpp" />
@@ -316,6 +315,7 @@
     <ClCompile Include="..\Soundlib\Load_umx.cpp" />
     <ClCompile Include="..\soundlib\Load_wav.cpp" />
     <ClCompile Include="..\soundlib\Load_xm.cpp" />
+    <ClCompile Include="VstPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="mptrack.rc" />
@@ -373,7 +373,6 @@
     <ClInclude Include="..\Soundlib\Dlsbank.h" />
     <ClInclude Include="EffectVis.h" />
     <ClInclude Include="..\soundlib\Endianness.h" />
-    <ClInclude Include="fxp.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="KeyConfigDlg.h" />
@@ -430,6 +429,7 @@
     <ClInclude Include="tuningRatioMapWnd.h" />
     <ClInclude Include="test\test.h" />
     <ClInclude Include="..\soundlib\Loaders.h" />
+    <ClInclude Include="VstPresets.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp" />

@@ -14,7 +14,6 @@
 #include "mainfrm.h"
 #include "sndfile.h"
 #include "vstplug.h"
-#include "fxp.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
 #include "../common/StringFixer.h"
@@ -105,20 +104,24 @@ void CAbstractVstEditor::OnLoadPreset()
 	if(!m_pVstPlugin) return;
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST Program (*.fxp)|*.fxp||",
+		"VST Plugin Programs and Banks (*.fxp,*.fbx)|*.fxp;*.fxb|"
+		"VST Plugin Programs (*.fxp)|*.fxp|"
+		"VST Plugin Banks (*.fxb)|*.fxb|"
+		"All Files|*.*||",
 		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
 
 	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 
-	//TODO: exception handling to distinguish errors at this level.
-	if (m_pVstPlugin->LoadProgram(files.first_file.c_str()))
+	const char *retVal = m_pVstPlugin->LoadProgram(files.first_file.c_str());
+	if(retVal == nullptr)
 	{
 		if(m_pVstPlugin->GetModDoc() != nullptr)
 			m_pVstPlugin->GetModDoc()->SetModified();
+		UpdatePresetField();
 	} else
 	{
-		Reporting::Error("Error loading preset. Are you sure it is for this plugin?");
+		Reporting::Error(retVal, "Plugin Preset");
 	}
 }
 
@@ -129,7 +132,8 @@ void CAbstractVstEditor::OnSavePreset()
 	if(!m_pVstPlugin) return;
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
-		"VST Program (*.fxp)|*.fxp||",
+		"VST Plugin Programs (*.fxp)|*.fxp|"
+		"VST Plugin Banks (*.fxb)|*.fxb||",
 		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS));
 	if(files.abort) return;
 

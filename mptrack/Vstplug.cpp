@@ -15,10 +15,9 @@
 #include <medparam.h>
 #include "mainfrm.h"
 #include "vstplug.h"
-#include <pluginterfaces/vst2.x/vstfxstore.h>	// VST Presets
+#include "VstPresets.h"
 #include "moddoc.h"
 #include "sndfile.h"
-#include "fxp.h"					//rewbs.VSTpresets
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
@@ -1597,8 +1596,8 @@ bool CVstPlugin::CanAutomateParameter(PlugParamIndex index)
 }
 
 
-VstInt32 CVstPlugin::GetUID()
-//---------------------------
+VstInt32 CVstPlugin::GetUID() const
+//---------------------------------
 {
 	if (!(m_pEffect))
 		return 0;
@@ -1606,8 +1605,8 @@ VstInt32 CVstPlugin::GetUID()
 }
 
 
-VstInt32 CVstPlugin::GetVersion()
-//-------------------------------
+VstInt32 CVstPlugin::GetVersion() const
+//-------------------------------------
 {
 	if (!(m_pEffect))
 		return 0;
@@ -1654,77 +1653,45 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 }
 
 
-bool CVstPlugin::SaveProgram(CString fileName)
-//--------------------------------------------
+bool CVstPlugin::SaveProgram(const char *filename)
+//------------------------------------------------
 {
-	if (!(m_pEffect))
-		return false;
-
-	bool success;
-	// Collect required data
-	long ID = GetUID();
-	long plugVersion = GetVersion();
-
-	Cfxp* fxp = nullptr;
-
-	// Construct & save fxp
-
-	// try chunk-based preset:
-	if((m_pEffect->flags & effFlagsProgramChunks) != 0)
-	{
-		void *chunk = nullptr;
-		long chunkSize = Dispatch(effGetChunk, 1,0, &chunk, 0);
-		if(chunkSize && chunk)
-			fxp = new Cfxp(ID, plugVersion, 1, chunkSize, chunk);
-	}
-	// fall back on parameter based preset:
-	if(fxp == nullptr)
-	{
-		// Collect required data
-		PlugParamIndex numParams = GetNumParameters();
-		float *params = new float[numParams];
-		GetParams(params, 0, numParams);
-
-		fxp = new Cfxp(ID, plugVersion, numParams, params);
-
-		delete[] params;
-	}
-
-	success = fxp->Save(fileName);
-	if(fxp)
-		delete fxp;
-
-	return success;
-
+	char ext[_MAX_EXT];
+	_splitpath(filename, nullptr, nullptr, nullptr, ext);
+	return VSTPresets::SaveFile(filename, *this, !_strnicmp(ext, ".fxb", 4));
 }
 
 
-bool CVstPlugin::LoadProgram(CString fileName)
-//--------------------------------------------
+const char *CVstPlugin::LoadProgram(const char *filename)
+//-------------------------------------------------------
 {
-	if (!(m_pEffect))
-		return false;
-
-	Cfxp fxp(fileName);	// load from file
-
-	// Verify
-	if (m_pEffect->uniqueID != fxp.fxID)
-		return false;
-
-	if (fxp.fxMagic == fMagic) // Load preset based fxp
+	CMappedFile f;
+	if(!f.Open(filename))
 	{
-		if (m_pEffect->numParams != fxp.numParams)
-			return false;
-		for (int p=0; p<fxp.numParams; p++)
-			SetParameter(p, fxp.params[p]);
-	} else if (fxp.fxMagic == chunkPresetMagic)
-	{
-		Dispatch(effSetChunk, 1, fxp.chunkSize, (BYTE*)fxp.chunk, 0);
+		return "Can't open file.";
 	}
+	size_t len = f.GetLength();
+	const char *data = reinterpret_cast<const char *>(f.Lock(len));
+	FileReader file(data, len);
 
-	return true;
+	VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, *this);
+	f.Close();
+
+	switch(error)
+	{
+	case VSTPresets::noError:
+	default:
+		return nullptr;
+	case VSTPresets::invalidFile:
+		return "This does not appear to be a valid preset file.";
+	case VSTPresets::wrongPlugin:
+		return "This file appears to be for a different plugin.";
+	case VSTPresets::outdatedPlugin:
+		return "This file is for a newer version of this plugin.";
+	case VSTPresets::wrongParameters:
+		return "The number of parameters in this file is incompatible with the current plugin.";
+	}
 }
-//end rewbs.VSTpresets
 
 
 VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
@@ -2651,8 +2618,7 @@ void CVstPlugin::SaveAllParameters()
 	{
 		m_pMixStruct->defaultProgram = -1;
 
-		if ((m_pEffect->flags & effFlagsProgramChunks)
-		 && (Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf'))
+		if(ProgramsAreChunks() && Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf')
 		{
 			void *p = nullptr;
 			LONG nByteSize = 0;
