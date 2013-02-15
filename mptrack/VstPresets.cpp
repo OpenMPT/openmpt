@@ -140,7 +140,7 @@ bool VSTPresets::SaveFile(const char *filename, CVstPlugin &plugin, bool bank)
 		header.fxVersion = plugin.GetVersion();
 
 		// Write unfinished header... We need to update the size once we're done writing.
-		fwrite(&header, sizeof(header), 1, f);
+		Write(header, f);
 
 		uint32 numProgs = plugin.GetNumPrograms(), curProg = plugin.GetCurrentProgram();
 		WriteBE(numProgs, f);
@@ -173,7 +173,7 @@ bool VSTPresets::SaveFile(const char *filename, CVstPlugin &plugin, bool bank)
 		header.byteSize = end - 8;
 		header.ConvertEndianness();
 		fseek(f, 0, SEEK_SET);
-		fwrite(&header, sizeof(header), 1, f);
+		Write(header, f);
 	}
 
 	fclose(f);
@@ -194,7 +194,7 @@ void VSTPresets::SaveProgram(FILE *f, CVstPlugin &plugin)
 
 	// Write unfinished header... We need to update the size once we're done writing.
 	off_t start = ftell(f);
-	fwrite(&header, sizeof(header), 1, f);
+	Write(header, f);
 
 	const uint32 numParams = plugin.GetNumParameters();
 	WriteBE(numParams, f);
@@ -225,7 +225,7 @@ void VSTPresets::SaveProgram(FILE *f, CVstPlugin &plugin)
 	header.byteSize = end - start - 8;
 	header.ConvertEndianness();
 	fseek(f, start, SEEK_SET);
-	fwrite(&header, sizeof(header), 1, f);
+	Write(header, f);
 	fseek(f, end, SEEK_SET);
 }
 
