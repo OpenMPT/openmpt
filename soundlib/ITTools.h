@@ -333,13 +333,6 @@ STATIC_ASSERT(sizeof(ITHistoryStruct) == 8);
 
 #pragma pack(pop)
 
-// MPT stuff
-enum MPTHackMagic
-{
-	magicPatternNames = 0x4D414E50,		// "PNAM" pattern names
-	magicChannelNames = 0x4D414E43,		// "CNAM" channel names
-};
-
 enum IT_ReaderBitMasks
 {
 	// pattern row parsing, the channel data is read to obtain
