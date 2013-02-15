@@ -119,7 +119,6 @@
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
 #define IDD_SOUNDBANK_INFO1             441
-#define IDR_PLUGINMENU                  442
 #define IDD_PITCHSHIFT                  442
 #define IDD_OPTIONS_AUTOSAVE            443
 #define IDD_EDIT_GOTO                   444

@@ -37,12 +37,10 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	if(m_pVstPlugin)
 	{
 		// Set editor window size
-		ERect *pRect;
-
-		pRect = NULL;
-		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, (LPRECT)&pRect, 0);
-		m_pVstPlugin->Dispatch(effEditOpen, 0, 0, (void *)m_hWnd, 0);
-		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, (LPRECT)&pRect, 0);
+		ERect *pRect = nullptr;
+		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+		m_pVstPlugin->Dispatch(effEditOpen, 0, 0, m_hWnd, 0);
+		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, &pRect, 0);
 		if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
 		{
 			// Plugin provided valid window size.
