@@ -804,13 +804,24 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;
 
 	// Channel Table
+	const uint8 midCh = static_cast<uint8>(Util::Min(GetNumChannels() / 2, 8));
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
 		if(chn < GetNumChannels())
 		{
 			// ST3 only supports 16 PCM channels, so if channels 17-32 are used,
 			// they must be mapped to the same "internal channels" as channels 1-16.
-			uint8 ch = ((chn << 3) | (chn >> 1)) & 0x0F;
+			// The channel indices determine in which order channels are evaluated in ST3.
+			// First, the "left" channels (0...7) are evaluated, then the "right" channels (8...15).
+			// Previously, an alternating LRLR scheme was written, which would lead to a different
+			// effect processing in ST3 than LLL...RRR, but since OpenMPT doesn't care about the
+			// channel order and always parses them left to right as they appear in the pattern,
+			// we should just write in the LLL...RRR manner.
+			uint8 ch = chn & 0x0F;
+			if(ch >= midCh)
+			{
+				ch += 8 - midCh;
+			}
 			if((ChnSettings[chn].dwFlags & CHN_MUTE) != 0)
 			{
 				ch |= 0x80;
