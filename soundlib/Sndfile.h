@@ -404,7 +404,7 @@ public:
 	bool ReadAMS2(FileReader &file);
 	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadOKT(FileReader &file);
-	bool ReadDMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadDMF(FileReader &file);
 	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadAMF_Asylum(FileReader &file);

@@ -19,7 +19,7 @@
 // External decompressors
 extern void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, const size_t destSize, char packCharacter);
 extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
-extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, UINT maxlen);
+extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 extern void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215);
 extern void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215);
 

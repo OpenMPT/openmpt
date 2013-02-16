@@ -273,7 +273,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 		{ VSTPluginLib::catSynth,			"Instrument Plugins" },
 	};
 	
-	vector<bool> categoryUsed(VSTPluginLib::numCategories, false);
+	std::bitset<VSTPluginLib::numCategories> categoryUsed;
 	HTREEITEM categoryFolders[VSTPluginLib::numCategories];
 	for(size_t i = CountOf(categories); i != 0; )
 	{
