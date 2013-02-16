@@ -415,7 +415,7 @@ public:
 	bool ReadUMX(FileReader &file);
 	bool ReadMO3(FileReader &file);
 	bool ReadGDM(FileReader &file);
-	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadIMF(FileReader &file);
 	bool ReadAM(FileReader &file);
 	bool ReadJ2B(FileReader &file);
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
