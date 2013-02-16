@@ -631,7 +631,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 #endif // MODPLUG_BASIC_SUPPORT
 		 && !ReadGDM(file)
-		 && !ReadIMF(lpStream, dwMemLength)
+		 && !ReadIMF(file)
 		 && !ReadAM(file)
 		 && !ReadJ2B(file)
 		 && !ReadMO3(file)

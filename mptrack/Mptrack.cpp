@@ -1629,6 +1629,8 @@ BOOL CAboutDlg::OnInitDialog()
 		"http://zlib.net/|"
 		"Josh Coalson for libFLAC|"
 		"http://flac.sourceforge.net/|"
+		"The mpg123 project for libmpg123|"
+		"http://mpg123.de/|"
 		"Storlek for all the IT compatibility hints and testcases|"
 		"as well as the IMF, OKT and ULT loaders|"
 		"http://schismtracker.org/|"
@@ -2101,7 +2103,7 @@ CMappedFile::~CMappedFile()
 BOOL CMappedFile::Open(LPCSTR lpszFileName)
 //-----------------------------------------
 {
-	return m_File.Open(lpszFileName, CFile::modeRead|CFile::typeBinary);
+	return m_File.Open(lpszFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite);
 }
 
 

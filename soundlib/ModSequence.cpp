@@ -28,7 +28,7 @@ ModSequence::ModSequence(CSoundFile& rSf,
 						 PATTERNINDEX* pArray,
 						 ORDERINDEX nSize,
 						 ORDERINDEX nCapacity, 
-						 const bool bDeletableArray) : 
+						 const bool bDeletableArray) :
 		m_pSndFile(&rSf),
 		m_pArray(pArray),
 		m_nSize(nSize),
@@ -40,7 +40,7 @@ ModSequence::ModSequence(CSoundFile& rSf,
 {}
 
 
-ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) : 
+ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 	m_pSndFile(&rSf),
 	m_bDeletableArray(true),
 	m_nInvalidIndex(GetInvalidPatIndex(MOD_TYPE_MPT)),
@@ -121,7 +121,7 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 			if(GetLengthTailTrimmed() > specs.ordersMax)
 			{
 #ifdef MODPLUG_TRACKER
-				if (m_pSndFile->GetpModDoc())
+				if(m_pSndFile->GetpModDoc())
 					m_pSndFile->GetpModDoc()->AddToLog("WARNING: Order list has been trimmed!\n");
 #endif // MODPLUG_TRACKER
 			}
@@ -159,7 +159,7 @@ ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
 {
 	const ORDERINDEX nLength = GetLength();
 	if(nLength == 0) return 0;
-	ORDERINDEX next = min(nLength-1, start+1);
+	ORDERINDEX next = Util::Min(ORDERINDEX(nLength - 1), ORDERINDEX(start + 1));
 	while(next+1 < nLength && (*this)[next] == GetIgnoreIndex()) next++;
 	return next;
 }
@@ -170,7 +170,7 @@ ORDERINDEX ModSequence::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) co
 {
 	const ORDERINDEX nLength = GetLength();
 	if(start == 0 || nLength == 0) return 0;
-	ORDERINDEX prev = min(start-1, nLength-1);
+	ORDERINDEX prev = Util::Min(ORDERINDEX(start - 1), ORDERINDEX(nLength - 1));
 	while(prev > 0 && (*this)[prev] == GetIgnoreIndex()) prev--;
 	return prev;
 }
@@ -311,9 +311,9 @@ ORDERINDEX ModSequence::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, 
 
 
 ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
-	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, NoArrayDelete),
+	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, false),
 	  m_nCurrentSeq(0)
-//-------------------------------------------------------------------
+//--------------------------------------------------------------
 {
 	m_Sequences.push_back(ModSequence(sndFile, s_nCacheSize));
 }
@@ -322,7 +322,7 @@ ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
 const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq) const
 //----------------------------------------------------------------------
 {
-	if (nSeq == GetCurrentSequenceIndex())
+	if(nSeq == GetCurrentSequenceIndex())
 		return *this;
 	else
 		return m_Sequences[nSeq];
@@ -332,7 +332,7 @@ const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq) const
 ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq)
 //----------------------------------------------------------
 {
-	if (nSeq == GetCurrentSequenceIndex())
+	if(nSeq == GetCurrentSequenceIndex())
 		return *this;
 	else
 		return m_Sequences[nSeq];
@@ -350,7 +350,7 @@ void ModSequenceSet::CopyStorageToCache()
 //---------------------------------------
 {
 	const ModSequence& rSeq = m_Sequences[m_nCurrentSeq];
-	if (rSeq.GetLength() <= s_nCacheSize)
+	if(rSeq.GetLength() <= s_nCacheSize)
 	{
 		PATTERNINDEX* pOld = m_pArray;
 		m_pArray = m_Cache;
@@ -396,13 +396,13 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 //--------------------------------------------------
 {
 	// Do nothing if index is invalid or if there's only one sequence left.
-	if (i >= m_Sequences.size() || m_Sequences.size() <= 1) 
+	if(i >= m_Sequences.size() || m_Sequences.size() <= 1) 
 		return;
 	const bool bSequenceChanges = (i == m_nCurrentSeq);
 	m_Sequences.erase(m_Sequences.begin() + i);
-	if (i < m_nCurrentSeq || m_nCurrentSeq >= GetNumSequences())
+	if(i < m_nCurrentSeq || m_nCurrentSeq >= GetNumSequences())
 		m_nCurrentSeq--;
-	if (bSequenceChanges)
+	if(bSequenceChanges)
 		CopyStorageToCache();
 }
 
@@ -417,11 +417,11 @@ void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 		GetSequence(n).AdjustToNewModType(oldtype);
 	}
 	// Multisequences not suppported by other formats
-	if (oldtype != MOD_TYPE_NONE && newtype != MOD_TYPE_MPT)
+	if(oldtype != MOD_TYPE_NONE && newtype != MOD_TYPE_MPT)
 		MergeSequences();
 
 	// Convert sequence with separator patterns into multiple sequences?
-	if (oldtype != MOD_TYPE_NONE && newtype == MOD_TYPE_MPT && GetNumSequences() == 1)
+	if(oldtype != MOD_TYPE_NONE && newtype == MOD_TYPE_MPT && GetNumSequences() == 1)
 		ConvertSubsongsToMultipleSequences();
 }
 
@@ -430,7 +430,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 //-------------------------------------------------------
 {
 	// Allow conversion only if there's only one sequence.
-	if (GetNumSequences() != 1 || m_pSndFile->GetType() != MOD_TYPE_MPT)
+	if(GetNumSequences() != 1 || m_pSndFile->GetType() != MOD_TYPE_MPT)
 		return false;
 
 	bool hasSepPatterns = false;
@@ -447,7 +447,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 
 	if(hasSepPatterns &&
 		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
-		"Order list conversion") == cnfYes)
+		"Order list conversion", false, true) == cnfYes)
 	{
 
 		SetSequence(0);
@@ -488,7 +488,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 					if(m_pSndFile->Patterns.IsValidPat(copyPat))
 					{
 						ModCommand *m = m_pSndFile->Patterns[copyPat];
-						for (UINT len = m_pSndFile->Patterns[copyPat].GetNumRows() * m_pSndFile->m_nChannels; len; m++, len--)
+						for(size_t len = m_pSndFile->Patterns[copyPat].GetNumRows() * m_pSndFile->m_nChannels; len; m++, len--)
 						{
 							if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
 							{
@@ -554,7 +554,7 @@ bool ModSequenceSet::MergeSequences()
 			if(!m_pSndFile->Patterns.IsValidPat(nPat)) continue;
 
 			ModCommand *m = m_pSndFile->Patterns[nPat];
-			for (UINT len = 0; len < m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels; m++, len++)
+			for(size_t len = 0; len < m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels; m++, len++)
 			{
 				if(m->command == CMD_POSITIONJUMP)
 				{

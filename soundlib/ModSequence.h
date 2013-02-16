@@ -132,8 +132,6 @@ protected:
 	PATTERNINDEX m_nIgnoreIndex;	// Ignore pat index.
 	bool m_bDeletableArray;			// True if m_pArray points the deletable(with delete[]) array.
 	CSoundFile* m_pSndFile;			// Pointer to associated CSoundFile.
-
-	static const bool NoArrayDelete = false;
 };
 
 
