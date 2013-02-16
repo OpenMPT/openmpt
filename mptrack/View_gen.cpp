@@ -1034,7 +1034,7 @@ void CViewGlobals::OnLoadParam()
 	}
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST Plugin Programs and Banks (*.fxp,*.fbx)|*.fxp;*.fxb|"
+		"VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
 		"VST Plugin Programs (*.fxp)|*.fxp|"
 		"VST Plugin Banks (*.fxb)|*.fxb|"
 		"All Files|*.*||",
@@ -1046,7 +1046,7 @@ void CViewGlobals::OnLoadParam()
 	{
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
-	} else 
+	} else
 	{
 		Reporting::Error(retVal, "Plugin Preset");
 	}

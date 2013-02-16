@@ -724,6 +724,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	m_nRow = 0;
 
 	RecalculateSamplesPerTick();
+	visitedSongRows.Initialize(true);
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 

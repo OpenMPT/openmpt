@@ -104,7 +104,7 @@ void CAbstractVstEditor::OnLoadPreset()
 	if(!m_pVstPlugin) return;
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST Plugin Programs and Banks (*.fxp,*.fbx)|*.fxp;*.fxb|"
+		"VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
 		"VST Plugin Programs (*.fxp)|*.fxp|"
 		"VST Plugin Banks (*.fxb)|*.fxb|"
 		"All Files|*.*||",
@@ -118,6 +118,7 @@ void CAbstractVstEditor::OnLoadPreset()
 	{
 		if(m_pVstPlugin->GetModDoc() != nullptr)
 			m_pVstPlugin->GetModDoc()->SetModified();
+		UpdatePresetMenu(true);
 		UpdatePresetField();
 	} else
 	{
@@ -158,7 +159,7 @@ void CAbstractVstEditor::OnRandomizePreset()
 
 
 void CAbstractVstEditor::SetupMenu(bool force)
-//----------------------------------
+//--------------------------------------------
 {
 	//TODO: create menus on click so they are only updated when required
 	if (m_pVstPlugin)
