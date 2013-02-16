@@ -388,7 +388,7 @@ bool CSoundFile::ReadIMF(FileReader &file)
 	}
 
 	// Read channel configuration
-	vector<bool> ignoreChannels(32, false); // bit set for each channel that's completely disabled
+	std::bitset<32> ignoreChannels; // bit set for each channel that's completely disabled
 	m_nChannels = 0;
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
