@@ -1083,10 +1083,6 @@
 #define ID_REARRANGE_SAMPLES            33901
 #define ID_CHANNEL_MANAGER              33905
 #define ID_NEW_ITPROJECT                33906
-#define ID_FILE_OPEN32908               33908
-#define ID_FILE_SAVE32909               33909
-#define ID_FILE_SAVEPRESET              33912
-#define ID_FILE_OPENPRESET              33913
 #define ID_FACTORYPRESET                33914
 #define ID_FACTORYPRESET_DEFAULT        33915
 #define ID_MODTREE_SETPATH              33916

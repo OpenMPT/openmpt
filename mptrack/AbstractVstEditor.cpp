@@ -18,13 +18,18 @@
 #include "AbstractVstEditor.h"
 #include "../common/StringFixer.h"
 #include "MIDIMacros.h"
+#include "VstPresets.h"
 
 #ifndef NO_VST
+
+UINT CAbstractVstEditor::clipboardFormat = RegisterClipboardFormat("VST Preset Data");
 
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
 	ON_WM_MENUSELECT()
+	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
+	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
 	ON_COMMAND(ID_PLUG_BYPASS,			OnBypassPlug)
 	ON_COMMAND(ID_PLUG_RECORDAUTOMATION,OnRecordAutomation)
@@ -147,7 +152,70 @@ void CAbstractVstEditor::OnSavePreset()
 }
 
 
-void CAbstractVstEditor::OnRandomizePreset()
+void CAbstractVstEditor::OnCopyParameters()
+//-----------------------------------------
+{
+	if(m_pVstPlugin == nullptr || CMainFrame::GetMainFrame() == nullptr) return;
+
+	BeginWaitCursor();
+	std::ostringstream f;
+	if(VSTPresets::SaveFile(f, *m_pVstPlugin, false))
+	{
+		const std::string data = f.str();
+
+		HGLOBAL hCpy;
+		if(CMainFrame::GetMainFrame()->OpenClipboard() && (hCpy = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, data.length())) != nullptr)
+		{
+			EmptyClipboard();
+			LPSTR p = (LPSTR)GlobalLock(hCpy);
+			if(p)
+			{
+				memcpy(p, &data[0], data.length());
+			}
+			GlobalUnlock(hCpy);
+			SetClipboardData(clipboardFormat, (HANDLE) hCpy);
+			CloseClipboard();
+		}
+	}
+	EndWaitCursor();
+}
+
+
+void CAbstractVstEditor::OnPasteParameters()
+//------------------------------------------
+{
+	if(m_pVstPlugin == nullptr || CMainFrame::GetMainFrame() == nullptr) return;
+
+	BeginWaitCursor();
+	if (CMainFrame::GetMainFrame()->OpenClipboard())
+	{
+		HGLOBAL hCpy = ::GetClipboardData(clipboardFormat);
+		const char *p;
+
+		if(hCpy != nullptr && (p = static_cast<const char *>(GlobalLock(hCpy))) != nullptr)
+		{
+			FileReader file(p, GlobalSize(hCpy));
+			if(VSTPresets::LoadFile(file, *m_pVstPlugin) == VSTPresets::noError)
+			{
+				CSoundFile *pSndFile = m_pVstPlugin->m_pSndFile;
+				CModDoc *pModDoc;
+				if(pSndFile != nullptr && pSndFile->GetModSpecifications().supportsPlugins && (pModDoc = pSndFile->GetpModDoc()) != nullptr)
+				{
+					pModDoc->SetModified();
+				}
+			} else
+			{
+				Reporting::Error("Error loading preset from clipboard. Are you sure it is for this plugin?");
+			}
+			GlobalUnlock(hCpy);
+		}
+		CloseClipboard();
+	}
+	EndWaitCursor();
+}
+
+
+VOID CAbstractVstEditor::OnRandomizePreset()
 //-----------------------------------------
 {
 	if(m_pVstPlugin && Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", false, false, this) == cnfYes)

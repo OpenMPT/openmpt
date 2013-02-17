@@ -1658,7 +1658,10 @@ bool CVstPlugin::SaveProgram(const char *filename)
 {
 	char ext[_MAX_EXT];
 	_splitpath(filename, nullptr, nullptr, nullptr, ext);
-	return VSTPresets::SaveFile(filename, *this, !_strnicmp(ext, ".fxb", 4));
+
+	std::fstream f;
+	f.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+	return f.good() && VSTPresets::SaveFile(f, *this, !_strnicmp(ext, ".fxb", 4));
 }
 
 

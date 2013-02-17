@@ -117,15 +117,9 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 }
 
 
-bool VSTPresets::SaveFile(const char *filename, CVstPlugin &plugin, bool bank)
-//----------------------------------------------------------------------------
+bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
+//-----------------------------------------------------------------------
 {
-	FILE *f = fopen(filename, "wb");
-	if(f == nullptr)
-	{
-		return false;
-	}
-
 	if(!bank)
 	{
 		SaveProgram(f, plugin);
@@ -151,12 +145,12 @@ bool VSTPresets::SaveFile(const char *filename, CVstPlugin &plugin, bool bank)
 
 		if(writeChunk)
 		{
-			void *chunk = nullptr;
+			char *chunk = nullptr;
 			uint32 chunkSize = plugin.Dispatch(effGetChunk, 0, 0, &chunk, 0);
 			if(chunkSize && chunk)
 			{
 				WriteBE(chunkSize, f);
-				fwrite(chunk, chunkSize, 1, f);
+				f.write(chunk, chunkSize);
 			}
 		} else
 		{
@@ -169,20 +163,19 @@ bool VSTPresets::SaveFile(const char *filename, CVstPlugin &plugin, bool bank)
 		}
 
 		// Now we know the correct chunk size.
-		off_t end = ftell(f);
-		header.byteSize = end - 8;
+		std::streamoff end = f.tellp();
+		header.byteSize = static_cast<VstInt32>(end - 8);
 		header.ConvertEndianness();
-		fseek(f, 0, SEEK_SET);
+		f.seekp(0);
 		Write(header, f);
 	}
 
-	fclose(f);
 	return true;
 }
 
 
-void VSTPresets::SaveProgram(FILE *f, CVstPlugin &plugin)
-//-------------------------------------------------------
+void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
+//---------------------------------------------------------------
 {
 	const bool writeChunk = plugin.ProgramsAreChunks();
 	ChunkHeader header;
@@ -193,7 +186,7 @@ void VSTPresets::SaveProgram(FILE *f, CVstPlugin &plugin)
 	header.fxVersion = plugin.GetVersion();
 
 	// Write unfinished header... We need to update the size once we're done writing.
-	off_t start = ftell(f);
+	std::streamoff start = f.tellp();
 	Write(header, f);
 
 	const uint32 numParams = plugin.GetNumParameters();
@@ -201,16 +194,16 @@ void VSTPresets::SaveProgram(FILE *f, CVstPlugin &plugin)
 
 	char name[max(kVstMaxProgNameLen + 1, 256)];
 	plugin.Dispatch(effGetProgramName, 0, 0, name, 0);
-	fwrite(name, 28, 1, f);
+	f.write(name, 28);
 
 	if(writeChunk)
 	{
-		void *chunk = nullptr;
+		char *chunk = nullptr;
 		uint32 chunkSize = plugin.Dispatch(effGetChunk, 1, 0, &chunk, 0);
 		if(chunkSize && chunk)
 		{
 			WriteBE(chunkSize, f);
-			fwrite(chunk, chunkSize, 1, f);
+			f.write(chunk, chunkSize);
 		}
 	} else
 	{
@@ -221,25 +214,25 @@ void VSTPresets::SaveProgram(FILE *f, CVstPlugin &plugin)
 	}
 
 	// Now we know the correct chunk size.
-	off_t end = ftell(f);
-	header.byteSize = end - start - 8;
+	std::streamoff end = f.tellp();
+	header.byteSize = static_cast<VstInt32>(end - start - 8);
 	header.ConvertEndianness();
-	fseek(f, start, SEEK_SET);
+	f.seekp(start);
 	Write(header, f);
-	fseek(f, end, SEEK_SET);
+	f.seekp(end);
 }
 
 
-void VSTPresets::WriteBE(uint32 v, FILE *f)
-//-----------------------------------------
+void VSTPresets::WriteBE(uint32 v, std::ostream &f)
+//-------------------------------------------------
 {
 	SwapBytesBE(v);
 	Write(v, f);
 }
 
 
-void VSTPresets::WriteBE(float v, FILE *f)
-//----------------------------------------
+void VSTPresets::WriteBE(float v, std::ostream &f)
+//------------------------------------------------
 {
 	union
 	{
