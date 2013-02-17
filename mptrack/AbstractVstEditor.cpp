@@ -106,28 +106,10 @@ CAbstractVstEditor::~CAbstractVstEditor()
 void CAbstractVstEditor::OnLoadPreset()
 //-------------------------------------
 {
-	if(!m_pVstPlugin) return;
-
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
-		"VST Plugin Programs (*.fxp)|*.fxp|"
-		"VST Plugin Banks (*.fxb)|*.fxb|"
-		"All Files|*.*||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS));
-	if(files.abort) return;
-
-	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
-
-	const char *retVal = m_pVstPlugin->LoadProgram(files.first_file.c_str());
-	if(retVal == nullptr)
+	if(m_pVstPlugin && m_pVstPlugin->LoadProgram())
 	{
-		if(m_pVstPlugin->GetModDoc() != nullptr)
-			m_pVstPlugin->GetModDoc()->SetModified();
 		UpdatePresetMenu(true);
 		UpdatePresetField();
-	} else
-	{
-		Reporting::Error(retVal, "Plugin Preset");
 	}
 }
 
@@ -135,20 +117,10 @@ void CAbstractVstEditor::OnLoadPreset()
 void CAbstractVstEditor::OnSavePreset()
 //-------------------------------------
 {
-	if(!m_pVstPlugin) return;
-
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
-		"VST Plugin Programs (*.fxp)|*.fxp|"
-		"VST Plugin Banks (*.fxb)|*.fxb||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS));
-	if(files.abort) return;
-
-	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
-
-	//TODO: exception handling
-	if (!(m_pVstPlugin->SaveProgram(files.first_file.c_str())))
-		Reporting::Error("Error saving preset.");
-
+	if(m_pVstPlugin)
+	{
+		m_pVstPlugin->SaveProgram();
+	}
 }
 
 
@@ -187,7 +159,7 @@ void CAbstractVstEditor::OnPasteParameters()
 	if(m_pVstPlugin == nullptr || CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
-	if (CMainFrame::GetMainFrame()->OpenClipboard())
+	if(CMainFrame::GetMainFrame()->OpenClipboard())
 	{
 		HGLOBAL hCpy = ::GetClipboardData(clipboardFormat);
 		const char *p;
@@ -195,7 +167,8 @@ void CAbstractVstEditor::OnPasteParameters()
 		if(hCpy != nullptr && (p = static_cast<const char *>(GlobalLock(hCpy))) != nullptr)
 		{
 			FileReader file(p, GlobalSize(hCpy));
-			if(VSTPresets::LoadFile(file, *m_pVstPlugin) == VSTPresets::noError)
+			VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, *m_pVstPlugin);
+			if(error == VSTPresets::noError)
 			{
 				CSoundFile *pSndFile = m_pVstPlugin->m_pSndFile;
 				CModDoc *pModDoc;
@@ -205,7 +178,7 @@ void CAbstractVstEditor::OnPasteParameters()
 				}
 			} else
 			{
-				Reporting::Error("Error loading preset from clipboard. Are you sure it is for this plugin?");
+				Reporting::Error(VSTPresets::GetErrorMessage(error));
 			}
 			GlobalUnlock(hCpy);
 		}
@@ -258,7 +231,7 @@ void CAbstractVstEditor::UpdatePresetField()
 			m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
 		}
 
-		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, m_pVstPlugin->GetFormattedProgramName(m_pVstPlugin->GetCurrentProgram(), true));
+		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, m_pVstPlugin->GetFormattedProgramName(m_pVstPlugin->GetCurrentProgram()));
 	}
 	
 	DrawMenuBar();
@@ -434,7 +407,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 
 			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
-				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfNo)
+				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false) == cnfNo)
 			{
 				return false;
 			} else
@@ -457,10 +430,24 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU)
 //---------------------------------------------------------------------
 {
-	if((nFlags & MF_POPUP) && nItemID == 1)
+	if(!(nFlags & MF_POPUP))
 	{
+		return;
+	}
+	switch(nItemID)
+	{
+	case 0:
+		// Grey out paste menu item.
+		if(CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->OpenClipboard())
+		{
+			m_pMenu->EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (::GetClipboardData(clipboardFormat) != nullptr ? 0 : MF_GRAYED));
+			CloseClipboard();
+		}
+		break;
+	case 1:
 		// Generate preset menu on click.
 		FillPresetMenu();
+		break;
 	}
 }
 
@@ -506,7 +493,7 @@ void CAbstractVstEditor::FillPresetMenu()
 
 	for(VstInt32 p = 0; p < numProgs; p++)
 	{
-		CString programName = m_pVstPlugin->GetFormattedProgramName(p, p == curProg);
+		CString programName = m_pVstPlugin->GetFormattedProgramName(p);
 		UINT splitMenuFlag = 0;
 
 		if(entryInThisMenu++ == PRESETS_PER_GROUP)

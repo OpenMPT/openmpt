@@ -2761,8 +2761,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
         MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
-        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
         MENUITEM SEPARATOR
+        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
         MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
     END
     POPUP "&Info"
