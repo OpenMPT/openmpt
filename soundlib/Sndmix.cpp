@@ -22,9 +22,6 @@
 #define ENABLE_STEREOVU
 #endif
 
-// Volume ramp length, in 1/10 ms
-#define VOLUMERAMPLEN	0	// 1.46ms = 64 samples at 44.1kHz		//rewbs.soundQ exp - was 146
-
 // VU-Meter
 #define VUMETER_DECAY		4
 
@@ -1151,9 +1148,9 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
 		// and release envelope beginning.
-		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
+		if(pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
 			&& envpos >= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
-		&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
+			&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 		{
 			int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
 			int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] * 4;
@@ -1161,7 +1158,7 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 			//If we have just hit the release node, force the current env value
 			//to be that of the release node. This works around the case where 
 			// we have another node at the same position as the release node.
-			if (envpos == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
+			if(envpos == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
 				envval = envValueAtReleaseNode;
 
 			int relativeVolumeChange = (envval - envValueAtReleaseNode) * 2;
@@ -1238,8 +1235,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 					//is very close to original(with 12TET) when finestep count
 					//is 15.
 				}
-			}
-			else //Original behavior
+			} else //Original behavior
 			{
 				int l = envval;
 				if(l < 0)
@@ -1269,7 +1265,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 	}
 
 	// Increase position
-	UINT position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
+	uint32 position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
 
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(envType);
 
@@ -1281,7 +1277,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		if(insEnv.dwFlags[ENV_LOOP])
 		{
 			// Normal loop active
-			UINT end = insEnv.Ticks[insEnv.nLoopEnd];
+			uint32 end = insEnv.Ticks[insEnv.nLoopEnd];
 			if(GetType() != MOD_TYPE_XM) end++;
 
 			// FT2 compatibility: If the sustain point is at the loop end and the sustain loop has been released, don't loop anymore.
@@ -1324,7 +1320,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 	{
 		// IT envelope processing.
 		// Test case: EnvLoops.it
-		UINT start, end;
+		uint32 start, end;
 
 		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwFlags[CHN_KEYOFF])
 		{
@@ -1513,9 +1509,11 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 			//IT playback compatibility 01 & 02
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
+				// Pattern delay restarts tick counting. Not quite correct yet!
+				const UINT tick = m_nTickCount % (m_nMusicSpeed + m_nFrameDelay);
 				if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
 				{
-					switch(m_nTickCount % 3)
+					switch(tick % 3)
 					{
 					case 1:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
 					case 2:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
@@ -1548,10 +1546,21 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 			// Other trackers
 			else
 			{
+				int note = pChn->nNote;
 				switch(m_nTickCount % 3)
 				{
-				case 1:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC5Speed); break;
-				case 2:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC5Speed); break;
+				case 1: note += (pChn->nArpeggio >> 4); break;
+				case 2: note += (pChn->nArpeggio & 0x0F); break;
+				}
+				if(note != pChn->nNote)
+				{
+					if(m_SongFlags[SONG_PT1XMODE] && note >= NOTE_MIDDLEC + 24)
+					{
+						// Weird arpeggio wrap-around in ProTracker.
+						// Test case: ArpWraparound.mod, and the snare sound in "Jim is dead" by doh.
+						note -= 37;
+					}
+					period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 				}
 			}
 		}
