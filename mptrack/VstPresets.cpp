@@ -243,4 +243,23 @@ void VSTPresets::WriteBE(float v, std::ostream &f)
 	WriteBE(u.i, f);
 }
 
+
+// Translate error code to string. Returns nullptr if there was no error.
+const char *VSTPresets::GetErrorMessage(ErrorCode code)
+//-----------------------------------------------------
+{
+	switch(code)
+	{
+	case VSTPresets::invalidFile:
+		return "This does not appear to be a valid preset file.";
+	case VSTPresets::wrongPlugin:
+		return "This file appears to be for a different plugin.";
+	case VSTPresets::outdatedPlugin:
+		return "This file is for a newer version of this plugin.";
+	case VSTPresets::wrongParameters:
+		return "The number of parameters in this file is incompatible with the current plugin.";
+	}
+	return nullptr;
+}
+
 #endif // NO_VST

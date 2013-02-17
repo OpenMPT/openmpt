@@ -27,6 +27,7 @@ public:
 #ifndef NO_VST
 	static ErrorCode LoadFile(FileReader &file, CVstPlugin &plugin);
 	static bool SaveFile(std::ostream &, CVstPlugin &plugin, bool bank);
+	static const char *GetErrorMessage(ErrorCode code);
 
 protected:
 	static void SaveProgram(std::ostream &f, CVstPlugin &plugin);
@@ -43,5 +44,6 @@ protected:
 #else
 	static ErrorCode LoadFile(FileReader &, CVstPlugin &) { return invalidFile; }
 	static bool SaveFile(std::ostream &, CVstPlugin &, bool) { return false; }
+	static const char *GetErrorMessage(ErrorCode);
 #endif // NO_VST
 };

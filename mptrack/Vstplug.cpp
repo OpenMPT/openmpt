@@ -1653,46 +1653,94 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 }
 
 
-bool CVstPlugin::SaveProgram(const char *filename)
-//------------------------------------------------
+bool CVstPlugin::SaveProgram()
+//----------------------------
 {
-	char ext[_MAX_EXT];
-	_splitpath(filename, nullptr, nullptr, nullptr, ext);
+	std::string defaultDir = CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	bool useDefaultDir = !defaultDir.empty();
+	if(!useDefaultDir)
+	{
+		defaultDir = m_pFactory->szDllPath;
+		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
+	}
+
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
+		"VST Plugin Programs (*.fxp)|*.fxp|"
+		"VST Plugin Banks (*.fxb)|*.fxb||",
+		defaultDir);
+	if(files.abort) return false;
+
+	if(useDefaultDir)
+	{
+		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+	}
+	
+	bool bank = !_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
 
 	std::fstream f;
-	f.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
-	return f.good() && VSTPresets::SaveFile(f, *this, !_strnicmp(ext, ".fxb", 4));
+	f.open(files.first_file, std::ios::out | std::ios::trunc | std::ios::binary);
+	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
+	{
+		return true;
+	} else
+	{
+		Reporting::Error("Error saving preset.");
+		return false;
+	}
+
 }
 
 
-const char *CVstPlugin::LoadProgram(const char *filename)
-//-------------------------------------------------------
+bool CVstPlugin::LoadProgram()
+//----------------------------
 {
-	CMappedFile f;
-	if(!f.Open(filename))
+	std::string defaultDir = CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	bool useDefaultDir = !defaultDir.empty();
+	if(!useDefaultDir)
 	{
-		return "Can't open file.";
+		defaultDir = m_pFactory->szDllPath;
+		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
 	}
-	size_t len = f.GetLength();
-	const char *data = reinterpret_cast<const char *>(f.Lock(len));
-	FileReader file(data, len);
 
-	VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, *this);
-	f.Close();
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
+		"VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
+		"VST Plugin Programs (*.fxp)|*.fxp|"
+		"VST Plugin Banks (*.fxb)|*.fxb|"
+		"All Files|*.*||",
+		defaultDir);
+	if(files.abort) return false;
 
-	switch(error)
+	if(useDefaultDir)
 	{
-	case VSTPresets::noError:
-	default:
-		return nullptr;
-	case VSTPresets::invalidFile:
-		return "This does not appear to be a valid preset file.";
-	case VSTPresets::wrongPlugin:
-		return "This file appears to be for a different plugin.";
-	case VSTPresets::outdatedPlugin:
-		return "This file is for a newer version of this plugin.";
-	case VSTPresets::wrongParameters:
-		return "The number of parameters in this file is incompatible with the current plugin.";
+		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+	}
+
+	CMappedFile f;
+	const char *errorStr = nullptr;
+	if(f.Open(files.first_file.c_str()))
+	{
+		size_t len = f.GetLength();
+		const char *data = reinterpret_cast<const char *>(f.Lock(len));
+		FileReader file(data, len);
+
+		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
+		f.Close();
+	} else
+	{
+		errorStr = "Can't open file.";
+	}
+
+	if(errorStr == nullptr)
+	{
+		if(GetModDoc() != nullptr && GetSoundFile() != nullptr && GetSoundFile()->GetModSpecifications().supportsPlugins)
+		{
+			GetModDoc()->SetModified();
+		}
+		return true;
+	} else
+	{
+		Reporting::Error(errorStr);
+		return false;
 	}
 }
 
@@ -1742,17 +1790,23 @@ bool CVstPlugin::GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char 
 }
 
 
-CString CVstPlugin::GetFormattedProgramName(VstInt32 index, bool allowFallback)
-//-----------------------------------------------------------------------------
+CString CVstPlugin::GetFormattedProgramName(VstInt32 index)
+//---------------------------------------------------------
 {
 	char rawname[max(kVstMaxProgNameLen + 1, 256)];	// kVstMaxProgNameLen is 24...
 	if(!GetProgramNameIndexed(index, -1, rawname))
 	{
 		// Fallback: Try to get current program name.
 		strcpy(rawname, "");
-		if(allowFallback)
+		VstInt32 curProg = GetCurrentProgram();
+		if(index != curProg)
 		{
-			Dispatch(effGetProgramName, 0, 0, rawname, 0);
+			SetCurrentProgram(index);
+		}
+		Dispatch(effGetProgramName, 0, 0, rawname, 0);
+		if(index != curProg)
+		{
+			SetCurrentProgram(curProg);
 		}
 	}
 	StringFixer::SetNullTerminator(rawname);

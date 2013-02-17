@@ -179,9 +179,9 @@ public:
 	PlugParamIndex GetNumParameters();
 	VstInt32 GetCurrentProgram();
 	VstInt32 GetNumProgramCategories();
-	CString GetFormattedProgramName(VstInt32 index, bool allowFallback = false);
-	const char *LoadProgram(const char *filename);
-	bool SaveProgram(const char *filename);
+	CString GetFormattedProgramName(VstInt32 index);
+	bool LoadProgram();
+	bool SaveProgram();
 	VstInt32 GetUID() const;
 	VstInt32 GetVersion() const;
 	// Check if programs should be stored as chunks or parameters
@@ -292,7 +292,7 @@ public:
 	VstInt32 GetNumPrograms() { return 0; }
 	VstInt32 GetCurrentProgram() { return 0; }
 	bool GetProgramNameIndexed(long, long, char*) { return false; }
-	CString GetFormattedProgramName(VstInt32, bool = false) { return ""; }
+	CString GetFormattedProgramName(VstInt32) { return ""; }
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
 	VstInt32 GetUID() const { return 0; }
 	VstInt32 GetVersion() const { return 0; }
@@ -306,8 +306,8 @@ public:
 	CString GetParamDisplay(PlugParamIndex) { return ""; };
 
 	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
-	const char *LoadProgram(const char *) { return false; }
-	bool SaveProgram(const char *) { return false; }
+	bool LoadProgram() { return false; }
+	bool SaveProgram() { return false; }
 	void SetCurrentProgram(UINT) {}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}

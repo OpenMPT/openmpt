@@ -94,6 +94,8 @@ private:
 	void OnEditName(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnFxChanged(const CHANNELINDEX chnMod4);
 
+	CVstPlugin *GetCurrentPlugin() const;
+
 protected:
 	//{{AFX_MSG(CViewGlobals)
 	afx_msg void OnMute1();

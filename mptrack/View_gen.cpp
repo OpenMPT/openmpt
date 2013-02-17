@@ -561,12 +561,27 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 }
 
 
+CVstPlugin *CViewGlobals::GetCurrentPlugin() const
+//------------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
+	if(pSndFile == nullptr || m_nCurrentPlugin >= MAX_MIXPLUGINS)
+	{
+		return nullptr;
+	}
+
+	return dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
+}
+
+
 void CViewGlobals::OnTabSelchange(NMHDR*, LRESULT* pResult)
 //---------------------------------------------------------
 {
 	UpdateView(HINT_MODCHANNELS);
 	if (pResult) *pResult = 0;
 }
+
 
 void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
 //----------------------------------------------------------------------
@@ -708,7 +723,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
 				SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
-				if (plugin.pMixPlugin)
+				if(plugin.pMixPlugin)
 				{	
 					wsprintf(s, "(%d%% wet, %d%% dry)", 100 - n, n);
 					SetDlgItemText(IDC_STATIC8, s);
@@ -729,13 +744,12 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
-				SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+				CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
-				if (plugin.pMixPlugin)
+				if(pVstPlugin != nullptr)
 				{
-					CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 					const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
-					if (m_nCurrentParam < nParams)
+					if(m_nCurrentParam < nParams)
 					{
 						FLOAT fValue = 0.01f * n;
 						wsprintf(s, "%d.%02d", n/100, n%100);
@@ -957,20 +971,15 @@ void CViewGlobals::OnParamChanged()
 //---------------------------------
 {
 	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
-	CModDoc *pModDoc = GetDocument();
 	CHAR s[256];
-	CSoundFile *pSndFile;
 	
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
-	if (plugin.pMixPlugin && cursel != CB_ERR)
+	if(pVstPlugin != nullptr && cursel != CB_ERR)
 	{
-		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
-		if ((cursel >= 0) && (cursel < nParams)) m_nCurrentParam = cursel;
-		if (m_nCurrentParam < nParams)
+		if(cursel >= 0 && cursel < nParams) m_nCurrentParam = cursel;
+		if(m_nCurrentParam < nParams)
 		{
 			wsprintf(s, "Value: %s", pVstPlugin->GetFormattedParamValue(m_nCurrentParam));
 			SetDlgItemText(IDC_TEXT5, s);
@@ -998,14 +1007,13 @@ void CViewGlobals::OnProgramChanged()
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
-	if (plugin.pMixPlugin)
+	if(pVstPlugin != nullptr)
 	{
-		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		UINT nParams = pVstPlugin->GetNumPrograms();
-		if ((cursel > 0) && (cursel <= (int)nParams)) m_nCurrentPreset = cursel;
-		if (m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams)
+		if(cursel > 0 && cursel <= (int)nParams) m_nCurrentPreset = cursel;
+		if(m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams)
 		{
 			pVstPlugin->SetCurrentProgram(m_nCurrentPreset - 1);
 			// Update parameter display
@@ -1019,68 +1027,27 @@ void CViewGlobals::OnProgramChanged()
 void CViewGlobals::OnLoadParam()
 //------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
-	if(pSndFile == nullptr)
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+	if(pVstPlugin != nullptr && pVstPlugin->LoadProgram())
 	{
-		return;
-	}
-
-	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
-
-	if(pVstPlugin == nullptr)
-	{
-		return;
-	}
-
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
-		"VST Plugin Programs (*.fxp)|*.fxp|"
-		"VST Plugin Banks (*.fxb)|*.fxb|"
-		"All Files|*.*||",
-		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
-	if(files.abort) return;
-	
-	const char *retVal = pVstPlugin->LoadProgram(files.first_file.c_str());
-	if(retVal == nullptr)
-	{
-		if(pSndFile->GetModSpecifications().supportsPlugins)
-			pModDoc->SetModified();
-	} else
-	{
-		Reporting::Error(retVal, "Plugin Preset");
+		m_nCurrentPreset = 0;
+		m_CbnPreset.SetRedraw(FALSE);
+		m_CbnPreset.ResetContent();
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
+		m_CbnPreset.SetRedraw(TRUE);
+		m_CbnPreset.SetCurSel(0);
 	}
 }
 
 void CViewGlobals::OnSaveParam()
 //------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
-	if(pSndFile == nullptr)
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+	if(pVstPlugin != nullptr)
 	{
-		return;
+		pVstPlugin->SaveProgram();
 	}
-
-	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
-
-	if(pVstPlugin == nullptr)
-	{
-		return;
-	}
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
-		"VST Plugin Programs (*.fxp)|*.fxp|"
-		"VST Plugin Banks (*.fxb)|*.fxb||",
-		CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINPRESETS));
-	if(files.abort) return;
-
-	//TODO: exception handling
-	if (!(pVstPlugin->SaveProgram(files.first_file.c_str())))
-		Reporting::Error("Error saving preset.");
-	//end rewbs.fxpPresets
-
 }
-// -! NEW_FEATURE#0002
 
 
 void CViewGlobals::OnSetParameter()
@@ -1091,11 +1058,10 @@ void CViewGlobals::OnSetParameter()
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
-	if (plugin.pMixPlugin != nullptr)
+	if(pVstPlugin != nullptr)
 	{
-		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 		CHAR s[32];
 		GetDlgItemText(IDC_EDIT14, s, sizeof(s));
@@ -1103,7 +1069,7 @@ void CViewGlobals::OnSetParameter()
 		{
 			FLOAT fValue = (FLOAT)atof(s);
 			pVstPlugin->SetParameter(m_nCurrentParam, fValue);
-            OnParamChanged();
+			OnParamChanged();
 			if(pSndFile->GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 		}
@@ -1488,11 +1454,7 @@ void CViewGlobals::OnFillParamCombo()
 	if(m_CbnParam.GetCount() > 1)
 		return;
 
-	if(GetDocument() ==  nullptr) return;
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
-	if(pSndFile == nullptr) return;
-	if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 	if(pVstPlugin == nullptr) return;
 
 	const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
@@ -1518,21 +1480,16 @@ void CViewGlobals::OnFillProgramCombo()
 	if(m_CbnPreset.GetCount() > 1)
 		return;
 
-	if(GetDocument() ==  nullptr) return;
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
-	if(pSndFile == nullptr) return;
-	if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-	CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 	if(pVstPlugin == nullptr) return;
 
 	UINT nProg = pVstPlugin->GetNumPrograms();
-	UINT curProg = pVstPlugin->GetCurrentProgram();
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
 	m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
 	for (UINT i = 0; i < nProg; i++)
 	{
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i, i == curProg)), i + 1);
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i + 1);
 	}
 	m_nCurrentPreset = 0;
 	m_CbnPreset.SetRedraw(TRUE);
