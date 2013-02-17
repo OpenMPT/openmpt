@@ -36,6 +36,8 @@ public:
 
 	afx_msg void OnLoadPreset();
 	afx_msg void OnSavePreset();
+	afx_msg void OnCopyParameters();
+	afx_msg void OnPasteParameters();
 	afx_msg void OnRandomizePreset();
 	afx_msg void OnSetPreset(UINT nID);
 	afx_msg void OnBypassPlug();
@@ -70,6 +72,7 @@ private:
 	CMenu *m_pOutputMenu;
 	CMenu *m_pMacroMenu;
 	CMenu *m_pOptionsMenu;
+	static UINT clipboardFormat;
 
 	void FillPresetMenu();
 	void UpdatePresetMenu(bool force = false);
