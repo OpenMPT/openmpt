@@ -2756,11 +2756,12 @@ IDR_VSTMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Copy Parameters",            ID_EDIT_COPY
-        MENUITEM "&Paste Parameters",           ID_EDIT_PASTE
+        MENUITEM "&Copy Preset",                ID_EDIT_COPY
+        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
+        MENUITEM SEPARATOR
         MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
         MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
-        MENUITEM "&Create instrument from plugin", ID_PLUGINTOINSTRUMENT
+        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
         MENUITEM SEPARATOR
         MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
     END
