@@ -338,6 +338,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_modern);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerBeat, 6);
@@ -427,6 +428,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);
 	VERIFY_EQUAL_NONCONT(pIns->nMidiProgram, 64);
 	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
+	VERIFY_EQUAL_NONCONT(pIns->midiPWD, 8);
 
 	VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning);
 
@@ -530,6 +532,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
+	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_modern);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerBeat, 6);
@@ -660,6 +663,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);
 		VERIFY_EQUAL_NONCONT(pIns->nMidiProgram, 64);
 		VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
+		VERIFY_EQUAL_NONCONT(pIns->midiPWD, ins);
 
 		VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning);
 
@@ -1319,11 +1323,7 @@ void TestSampleConversion()
 		uint8 *source32 = sourceBuf;
 		for(size_t i = 0; i < 65536; i++)
 		{
-			union
-			{
-				float f;
-				uint32 i;
-			} val;
+			FloatInt32 val;
 
 			val.f = (static_cast<float>(i) / 65536.0f) - 0.5f;
 			source32[i * 4 + 0] = static_cast<uint8>(val.i >> 24);
