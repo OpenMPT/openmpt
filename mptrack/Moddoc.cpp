@@ -513,7 +513,7 @@ BOOL CModDoc::SaveModified()
 					const bool xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][len - 2],"xi") == 0;
 
 					if(iti || (!iti && !xi  && m_SndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
-						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
+						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i], false);
 					if(xi  || (!xi  && !iti && m_SndFile.m_nType == MOD_TYPE_XM))
 						m_SndFile.SaveXIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
 				}
@@ -2106,10 +2106,10 @@ void CModDoc::OnInsertPattern()
 	if(pat != PATTERNINDEX_INVALID)
 	{
 		ORDERINDEX ord = 0;
-		for(ORDERINDEX i = 0; i < m_SndFile.Order.size(); i++)
+		for (ORDERINDEX i = 0; i < m_SndFile.Order.size(); i++)
 		{
-			if(m_SndFile.Order[i] == pat) ord = i;
-			if(m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
+			if (m_SndFile.Order[i] == pat) ord = i;
+			if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
 		}
 		ViewPattern(pat, ord);
 	}
@@ -2120,7 +2120,7 @@ void CModDoc::OnInsertSample()
 //----------------------------
 {
 	SAMPLEINDEX smp = InsertSample();
-	if(smp != SAMPLEINDEX_INVALID) ViewSample(smp);
+	if (smp != SAMPLEINDEX_INVALID) ViewSample(smp);
 }
 
 
@@ -2128,7 +2128,7 @@ void CModDoc::OnInsertInstrument()
 //--------------------------------
 {
 	INSTRUMENTINDEX ins = InsertInstrument();
-	if(ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
+	if (ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
 }
 
 

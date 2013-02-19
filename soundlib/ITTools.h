@@ -291,7 +291,7 @@ struct ITSample
 	void ConvertEndianness();
 
 	// Convert OpenMPT's internal sample representation to an ITSample.
-	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType);
+	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215);
 	// Convert an ITSample to OpenMPT's internal sample representation.
 	size_t ConvertToMPT(ModSample &mptSmp) const;
 	// Retrieve the internal sample format flags for this instrument.

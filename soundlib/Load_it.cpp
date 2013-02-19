@@ -651,16 +651,12 @@ bool CSoundFile::ReadIT(FileReader &file)
 	}
 
 	// Load instrument and song extensions.
-	if(mptStartPos >= file.GetPosition())
+	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
+	if(interpretModPlugMade)
 	{
-		if(interpretModPlugMade)
-		{
-			m_nMixLevels = mixLevels_original;
-		}
-		FileReader chunk = file.GetChunk(mptStartPos - file.GetPosition());
-		LoadExtendedInstrumentProperties(chunk, &interpretModPlugMade);
-		LoadExtendedSongProperties(GetType(), chunk, &interpretModPlugMade);
+		m_nMixLevels = mixLevels_original;
 	}
+	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
 
 	const PATTERNINDEX numPats = Util::Min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
 
@@ -859,7 +855,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 					// 0-64: Set Volume
 					if(vol <= 64) { m[ch].volcmd = VOLCMD_VOLUME; m[ch].vol = vol; } else
 					// 128-192: Set Panning
-					if((vol >= 128) && (vol <= 192)) { m[ch].volcmd = VOLCMD_PANNING; m[ch].vol = vol - 128; } else
+					if(vol >= 128 && vol <= 192) { m[ch].volcmd = VOLCMD_PANNING; m[ch].vol = vol - 128; } else
 					// 65-74: Fine Volume Up
 					if(vol < 75) { m[ch].volcmd = VOLCMD_FINEVOLUP; m[ch].vol = vol - 65; } else
 					// 75-84: Fine Volume Down
@@ -873,18 +869,18 @@ bool CSoundFile::ReadIT(FileReader &file)
 					// 115-124: Pitch Slide Down
 					if(vol < 125) { m[ch].volcmd = VOLCMD_PORTAUP; m[ch].vol = vol - 115; } else
 					// 193-202: Portamento To
-					if((vol >= 193) && (vol <= 202)) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
+					if(vol >= 193 && vol <= 202) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
 					// 203-212: Vibrato depth
-					if((vol >= 203) && (vol <= 212))
+					if(vol >= 203 && vol <= 212)
 					{
 						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
-						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that
-						if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
+						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that.
+						if(m[ch].vol && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
 							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
 					} else
 					// 213-222: Unused (was velocity)
 					// 223-232: Offset
-					if((vol >= 223) && (vol <= 232)) { m[ch].volcmd = VOLCMD_OFFSET; m[ch].vol = vol - 223; }
+					if(vol >= 223 && vol <= 232) { m[ch].volcmd = VOLCMD_OFFSET; m[ch].vol = vol - 223; }
 					lastValue[ch].volcmd = m[ch].volcmd;
 					lastValue[ch].vol = m[ch].vol;
 				}
@@ -1027,6 +1023,9 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 
 #pragma warning(disable:4100)
 
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/Mptrack.h"	// For config filename
+#endif // MODPLUG_TRACKER
 
 bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 //--------------------------------------------------------------------
@@ -1069,9 +1068,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	itHeader.patnum = min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
-	vector<DWORD> patpos(itHeader.patnum, 0);
-	vector<DWORD> smppos(itHeader.smpnum, 0);
-	vector<DWORD> inspos(itHeader.insnum, 0);
+	vector<uint32> patpos(itHeader.patnum, 0);
+	vector<uint32> smppos(itHeader.smpnum, 0);
+	vector<uint32> inspos(itHeader.insnum, 0);
 
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
@@ -1482,7 +1481,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	// Writing Sample Data
 	for (UINT nsmp=1; nsmp<=itHeader.smpnum; nsmp++)
 	{
-		itss.ConvertToIT(Samples[nsmp], GetType());
+#ifdef MODPLUG_TRACKER
+		bool compress = ::GetPrivateProfileInt("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0, theApp.GetConfigFileName()) != 0;
+#else
+		bool compress = false;
+#endif
+		// Old MPT will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
+		itss.ConvertToIT(Samples[nsmp], GetType(), compress, itHeader.cmwt >= 0x215);
 
 		StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[nsmp]);
 
@@ -1567,196 +1572,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 #pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE
-
-
-//////////////////////////////////////////////////////////////////////////////
-// IT 2.14 compression
-
-DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, const uint8 *(&ibuf), CHAR n)
-//-------------------------------------------------------------------------
-{
-	DWORD retval = 0;
-	UINT i = n;
-
-	if (n > 0)
-	{
-		do
-		{
-			if (!bitnum)
-			{
-				bitbuf = *ibuf++;
-				bitnum = 8;
-			}
-			retval >>= 1;
-			retval |= bitbuf << 31;
-			bitbuf >>= 1;
-			bitnum--;
-			i--;
-		} while (i);
-		i = n;
-	}
-	return (retval >> (32-i));
-}
-
-
-void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215)
-//--------------------------------------------------------------------------------------------------
-{
-	LPSTR pDst = pSample;
-	const uint8 *pSrc = lpMemFile;
-	DWORD wHdr = 0;
-	DWORD wCount = 0;
-	DWORD bitbuf = 0;
-	UINT bitnum = 0;
-	BYTE bLeft = 0, bTemp = 0, bTemp2 = 0;
-
-	while (dwLen)
-	{
-		if (!wCount)
-		{
-			wCount = 0x8000;
-			wHdr = *((LPWORD)pSrc);
-			pSrc += 2;
-			bLeft = 9;
-			bTemp = bTemp2 = 0;
-			bitbuf = bitnum = 0;
-		}
-		DWORD d = wCount;
-		if (d > dwLen) d = dwLen;
-		// Unpacking
-		DWORD dwPos = 0;
-		do
-		{
-			WORD wBits = (WORD)ITReadBits(bitbuf, bitnum, pSrc, bLeft);
-			if (bLeft < 7)
-			{
-				DWORD i = 1 << (bLeft-1);
-				DWORD j = wBits & 0xFFFF;
-				if (i != j) goto UnpackByte;
-				wBits = (WORD)(ITReadBits(bitbuf, bitnum, pSrc, 3) + 1) & 0xFF;
-				bLeft = ((BYTE)wBits < bLeft) ? (BYTE)wBits : (BYTE)((wBits+1) & 0xFF);
-				goto Next;
-			}
-			if (bLeft < 9)
-			{
-				WORD i = (0xFF >> (9 - bLeft)) + 4;
-				WORD j = i - 8;
-				if ((wBits <= j) || (wBits > i)) goto UnpackByte;
-				wBits -= j;
-				bLeft = ((BYTE)(wBits & 0xFF) < bLeft) ? (BYTE)(wBits & 0xFF) : (BYTE)((wBits+1) & 0xFF);
-				goto Next;
-			}
-			if (bLeft >= 10) goto SkipByte;
-			if (wBits >= 256)
-			{
-				bLeft = (BYTE)(wBits + 1) & 0xFF;
-				goto Next;
-			}
-		UnpackByte:
-			if (bLeft < 8)
-			{
-				BYTE shift = 8 - bLeft;
-				char c = (char)(wBits << shift);
-				c >>= shift;
-				wBits = (WORD)c;
-			}
-			wBits += bTemp;
-			bTemp = (BYTE)wBits;
-			bTemp2 += bTemp;
-			pDst[dwPos] = (it215) ? bTemp2 : bTemp;
-
-		SkipByte:
-			dwPos++;
-		Next:
-			if (pSrc >= lpMemFile+dwMemLength+1) return;
-		} while (dwPos < d);
-		// Move On
-		wCount -= d;
-		dwLen -= d;
-		pDst += d;
-	}
-}
-
-
-void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215)
-//---------------------------------------------------------------------------------------------------
-{
-	signed short *pDst = (signed short *)pSample;
-	const uint8 *pSrc = lpMemFile;
-	DWORD wHdr = 0;
-	DWORD wCount = 0;
-	DWORD bitbuf = 0;
-	UINT bitnum = 0;
-	BYTE bLeft = 0;
-	signed short wTemp = 0, wTemp2 = 0;
-
-	while (dwLen)
-	{
-		if (!wCount)
-		{
-			wCount = 0x4000;
-			wHdr = *((LPWORD)pSrc);
-			pSrc += 2;
-			bLeft = 17;
-			wTemp = wTemp2 = 0;
-			bitbuf = bitnum = 0;
-		}
-		DWORD d = wCount;
-		if (d > dwLen) d = dwLen;
-		// Unpacking
-		DWORD dwPos = 0;
-		do
-		{
-			DWORD dwBits = ITReadBits(bitbuf, bitnum, pSrc, bLeft);
-			if (bLeft < 7)
-			{
-				DWORD i = 1 << (bLeft-1);
-				DWORD j = dwBits;
-				if (i != j) goto UnpackByte;
-				dwBits = ITReadBits(bitbuf, bitnum, pSrc, 4) + 1;
-				bLeft = ((BYTE)(dwBits & 0xFF) < bLeft) ? (BYTE)(dwBits & 0xFF) : (BYTE)((dwBits+1) & 0xFF);
-				goto Next;
-			}
-			if (bLeft < 17)
-			{
-				DWORD i = (0xFFFF >> (17 - bLeft)) + 8;
-				DWORD j = (i - 16) & 0xFFFF;
-				if ((dwBits <= j) || (dwBits > (i & 0xFFFF))) goto UnpackByte;
-				dwBits -= j;
-				bLeft = ((BYTE)(dwBits & 0xFF) < bLeft) ? (BYTE)(dwBits & 0xFF) : (BYTE)((dwBits+1) & 0xFF);
-				goto Next;
-			}
-			if (bLeft >= 18) goto SkipByte;
-			if (dwBits >= 0x10000)
-			{
-				bLeft = (BYTE)(dwBits + 1) & 0xFF;
-				goto Next;
-			}
-		UnpackByte:
-			if (bLeft < 16)
-			{
-				BYTE shift = 16 - bLeft;
-				signed short c = (signed short)(dwBits << shift);
-				c >>= shift;
-				dwBits = (DWORD)c;
-			}
-			dwBits += wTemp;
-			wTemp = (signed short)dwBits;
-			wTemp2 += wTemp;
-			pDst[dwPos] = (it215) ? wTemp2 : wTemp;
-
-		SkipByte:
-			dwPos++;
-		Next:
-			if (pSrc >= lpMemFile+dwMemLength+1) return;
-		} while (dwPos < d);
-		// Move On
-		wCount -= d;
-		dwLen -= d;
-		pDst += d;
-		if (pSrc >= lpMemFile+dwMemLength) break;
-	}
-}
 
 
 #ifndef MODPLUG_NO_FILESAVE

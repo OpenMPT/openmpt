@@ -467,8 +467,8 @@ void ITSample::ConvertEndianness()
 
 
 // Convert OpenMPT's internal sample representation to an ITSample.
-void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
-//-------------------------------------------------------------------
+void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215)
+//------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
@@ -502,6 +502,15 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType)
 			flags |= ITSample::sample16Bit;
 		}
 		cvt = ITSample::cvtSignedSample;
+
+		if(compress)
+		{
+			flags |= ITSample::sampleCompressed;
+			if(compressIT215)
+			{
+				cvt |= ITSample::cvtIT215Compression;
+			}
+		}
 	} else
 	{
 		flags = 0x00;

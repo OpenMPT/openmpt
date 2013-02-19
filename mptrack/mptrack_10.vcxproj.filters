@@ -424,6 +424,9 @@
     <ClCompile Include="VstPresets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\ITCompression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -751,6 +754,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VstPresets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ITCompression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

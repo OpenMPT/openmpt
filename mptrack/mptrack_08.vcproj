@@ -489,6 +489,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\ITCompression.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\serialization_utils.cpp"
 				>
 			</File>
@@ -1028,6 +1032,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\SampleIO.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ITCompression.h"
 				>
 			</File>
 			<File
