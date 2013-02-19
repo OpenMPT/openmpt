@@ -14,14 +14,13 @@
 #include "Loaders.h"
 #include "SampleIO.h"
 #include "SampleFormatConverters.h"
+#include "ITCompression.h"
 
 
 // External decompressors
 extern void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, const size_t destSize, char packCharacter);
 extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
 extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
-extern void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215);
-extern void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, const uint8 *lpMemFile, DWORD dwMemLength, bool it215);
 
 
 // Read a sample from memory
@@ -294,17 +293,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	} else if(GetEncoding() == IT214 || GetEncoding() == IT215)
 	{
 		// IT 2.14 / 2.15 compressed samples
-		if(fileSize > 4)
-		{
-			bytesRead = fileSize;
-			if(GetBitDepth() == 8)
-			{
-				ITUnpack8Bit(sample.pSample, sample.nLength, sourceBuf, fileSize, GetEncoding() == IT215);
-			} else if(GetBitDepth() == 16)
-			{
-				ITUnpack16Bit(sample.pSample, sample.nLength, sourceBuf, fileSize, GetEncoding() == IT215);
-			}
-		}
+		size_t startPos = file.GetPosition();
+		ITDecompression(file, sample, GetEncoding() == IT215);
+		bytesRead = file.GetPosition() - startPos;
 	} else if(GetEncoding() == AMS && GetChannelFormat() == mono)
 	{
 		// AMS compressed samples
@@ -529,6 +520,13 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 			}
 		}
 		if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+	}
+
+	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
+	{
+		// IT2.14-encoded samples
+		ITCompression its(sample, GetEncoding() == IT215, f);
+		len = its.GetCompressedSize();
 	}
 
 	// Default: assume 8-bit PCM data

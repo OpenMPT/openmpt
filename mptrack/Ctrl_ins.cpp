@@ -1811,13 +1811,16 @@ void CCtrlInstruments::OnInstrumentSave()
 	StringFixer::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
+	int index = 0;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (m_pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", szFileName,
 		(m_pSndFile->GetType() == MOD_TYPE_XM) ?
 			"FastTracker II Instruments (*.xi)|*.xi|"
-			"Impulse Tracker Instruments (*.iti)|*.iti||" :
 			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"Compressed Impulse Tracker Instruments (*.iti)|*.iti||" :
+			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
 			"FastTracker II Instruments (*.xi)|*.xi||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_INSTRUMENTS));
+		CMainFrame::GetSettings().GetWorkingDirectory(DIR_INSTRUMENTS), false, &index);
 	if(files.abort) return;
 	
 	BeginWaitCursor();
@@ -1825,7 +1828,7 @@ void CCtrlInstruments::OnInstrumentSave()
 	_splitpath(files.first_file.c_str(), drive, path, NULL, ext);
 	BOOL bOk = FALSE;
 	if (!lstrcmpi(ext, ".iti"))
-		bOk = m_pSndFile->SaveITIInstrument(m_nInstrument, files.first_file.c_str());
+		bOk = m_pSndFile->SaveITIInstrument(m_nInstrument, files.first_file.c_str(), index == (m_pSndFile->GetType() == MOD_TYPE_XM ? 3 : 2));
 	else
 		bOk = m_pSndFile->SaveXIInstrument(m_nInstrument, files.first_file.c_str());
 

@@ -449,7 +449,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		if(!sampleUsed[nsmp - 1] && Samples[nsmp].pSample)
 		{
 			ITSample itss;
-			itss.ConvertToIT(Samples[nsmp], GetType());
+			itss.ConvertToIT(Samples[nsmp], GetType(), false, false);
 
 			StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[nsmp]);
 

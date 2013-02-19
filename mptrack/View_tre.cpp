@@ -1584,7 +1584,7 @@ void CModTree::FillInstrumentLibrary()
 //------------------------------------
 {
 	TV_INSERTSTRUCT tvis;
-	CHAR s[_MAX_PATH+32], szPath[_MAX_PATH] = "";
+	char s[_MAX_PATH+32], szPath[_MAX_PATH] = "";
 	
 	if (!m_hInsLib) return;
 	SetRedraw(FALSE);
@@ -1716,7 +1716,7 @@ void CModTree::FillInstrumentLibrary()
 						const size_t len = strlen(s);
 						for(size_t i = 0; i < len; i++)
 						{
-							s[i] = tolower(s[i + 1]);
+							s[i] = (char)tolower(s[i + 1]);
 						}
 					}
 
@@ -3190,7 +3190,7 @@ void CModTree::OnSaveItem()
 			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[modItemID - 1][size-2],"xi") == 0;
 
 			if(iti || (!iti && !xi  && pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
-				pSndFile->SaveITIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1]);
+				pSndFile->SaveITIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1], false);
 			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
 				pSndFile->SaveXIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1]);
 

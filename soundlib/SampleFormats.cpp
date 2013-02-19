@@ -28,7 +28,7 @@
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
 //--------------------------------------------------------------------------------------------------
 {
-	FileReader file(reinterpret_cast<const char *>(lpMemFile), dwFileLength);
+	FileReader file(lpMemFile, dwFileLength);
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file)
 		&& !ReadXISample(nSample, file)
@@ -55,7 +55,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile,
 bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
 //---------------------------------------------------------------------------------------------------------
 {
-	FileReader file(reinterpret_cast<const char *>(lpMemFile), dwFileLength);
+	FileReader file(lpMemFile, dwFileLength);
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
 	if ((!ReadXIInstrument(nInstr, file))
 	 && (!ReadPATInstrument(nInstr, lpMemFile, dwFileLength))
@@ -84,6 +84,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 || psig[0] == LittleEndian('CaLf')													// FLAC signature
 #endif // NO_FLAC
 #ifndef NO_MP3_SAMPLES
+	 || (lpMemFile[0] == 0xFF && lpMemFile[1] == 0xFB)									// MP2 signature
 	 || (lpMemFile[0] == 0xFF && lpMemFile[1] == 0xFB)									// MP3 signature
 	 || (lpMemFile[0] == 'I' && lpMemFile[1] == 'D' && lpMemFile[2] == '3')				// MP3 signature
 #endif // NO_MP3_SAMPLES
@@ -318,9 +319,9 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 	if(!wavFile.IsValid()
 		|| wavFile.GetNumChannels() == 0
 		|| wavFile.GetNumChannels() > 2
-		|| wavFile.GetBitsPerSample() == 0
+		|| (wavFile.GetBitsPerSample() == 0 && wavFile.GetSampleFormat() != WAVFormatChunk::fmtMP3)
 		|| wavFile.GetBitsPerSample() > 32
-		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat && wavFile.GetSampleFormat() != WAVFormatChunk::fmtIMA_ADPCM))
+		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat && wavFile.GetSampleFormat() != WAVFormatChunk::fmtIMA_ADPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtMP3))
 	{
 		return false;
 	}
@@ -347,6 +348,10 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 		}
 		IMAADPCMUnpack16((int16 *)sample.pSample, sample.nLength, sampleChunk.GetRawData(), sampleChunk.BytesLeft(), wavFile.GetBlockAlign());
 		AdjustSampleLoop(sample);
+	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
+	{
+		// MP3 in WAV
+		return ReadMP3Sample(nSample, sampleChunk);
 	} else
 	{
 		// PCM / Float
@@ -1579,12 +1584,11 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 }
 
 
-bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const
-//-----------------------------------------------------------------------------------------
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const
+//--------------------------------------------------------------------------------------------------------
 {
 	ITInstrumentEx iti;
 	ModInstrument *pIns = Instruments[nInstr];
-	uint32 filePos;
 	FILE *f;
 
 	if((!pIns) || (!lpszFileName)) return false;
@@ -1614,39 +1618,33 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	}
 	smpmap.clear();
 
-	filePos = instSize;
+	uint32 filePos = instSize;
 	iti.ConvertEndianness();
 	fwrite(&iti, 1, instSize, f);
 
 	filePos += smptable.size() * sizeof(ITSample);
 
-	// Writing sample headers
+	// Writing sample headers + data
+	vector<SampleIO> sampleFlags;
 	for(vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
 	{
 		ITSample itss;
-		itss.ConvertToIT(Samples[*iter], GetType());
+		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress);
 
 		StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[*iter]);
 
 		itss.samplepointer = filePos;
 		itss.ConvertEndianness();
 		fwrite(&itss, 1, sizeof(itss), f);
-		filePos += Samples[*iter].GetSampleSizeInBytes();
+
+		// Write sample
+		off_t curPos = ftell(f);
+		fseek(f, filePos, SEEK_SET);
+		filePos += itss.GetSampleFormat(0x0214).WriteSample(f, Samples[*iter]);
+		fseek(f, curPos, SEEK_SET);
 	}
 
-	// Writing Sample Data
-	for(vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
-	{
-		const ModSample &sample = Samples[*iter];
-		// TODO we should actually use ITSample::GetSampleFormat() instead of re-computing the flags here.
-		SampleIO(
-			(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
-			(sample.uFlags & CHN_STEREO) ? SampleIO::stereoSplit : SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::signedPCM)
-			.WriteSample(f, sample);
-	}
-
+	fseek(f, 0, SEEK_END);
 	int32 code = 'MPTX';
 	SwapBytesLE(code);
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
