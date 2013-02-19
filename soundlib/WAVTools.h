@@ -98,6 +98,7 @@ struct WAVFormatChunk
 		fmtPCM			= 1,
 		fmtFloat		= 3,
 		fmtIMA_ADPCM	= 17,
+		fmtMP3			= 85,
 		fmtExtensible	= 0xFFFE,
 	};
 

@@ -81,7 +81,7 @@ bool CSoundFile::ReadMO3(FileReader &file)
 				// If decoding was successful, stream and length will keep the new pointers now.
 				if(length > 0)
 				{
-					FileReader unpackedFile(static_cast<const char *>(stream), length);
+					FileReader unpackedFile(stream, length);
 
 					result = ReadXM(unpackedFile)
 						|| ReadIT(unpackedFile)
