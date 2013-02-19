@@ -56,3 +56,9 @@ const uint32 uint32_max = 4294967295;
 const uint64 uint64_max = 18446744073709551615;
 
 typedef float float32;
+
+union FloatInt32
+{
+	float32 f;
+	uint32 i;
+};

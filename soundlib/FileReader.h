@@ -34,7 +34,7 @@ public:
 	// Initialize invalid file reader object.
 	FileReader() : streamData(nullptr), streamLength(0), streamPos(0) { }
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const char *data, off_t length) : streamData(data), streamLength(length), streamPos(0) { }
+	FileReader(const void *data, off_t length) : streamData(static_cast<const char *>(data)), streamLength(length), streamPos(0) { }
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : streamData(other.streamData), streamLength(other.streamLength), streamPos(other.streamPos) { }
 
@@ -285,12 +285,11 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatLE()
 	{
-		float target;
+		FloatInt32 target;
 		if(Read(target))
 		{
-			uint32 temp = *reinterpret_cast<uint32 *>(&target);
-			SwapBytesLE(temp);
-			return *reinterpret_cast<float *>(&temp);
+			SwapBytesLE(target.i);
+			return target.f;
 		} else
 		{
 			return 0.0f;
@@ -301,12 +300,11 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatBE()
 	{
-		float target;
+		FloatInt32 target;
 		if(Read(target))
 		{
-			uint32 temp = *reinterpret_cast<uint32 *>(&target);
-			SwapBytesBE(temp);
-			return *reinterpret_cast<float *>(&temp);
+			SwapBytesBE(target.i);
+			return target.f;
 		} else
 		{
 			return 0.0f;
@@ -394,7 +392,7 @@ public:
 
 	// Read destSize elements of type T into a vector.
 	// If successful, the file cursor is advanced by the size of the vector.
-	// Otherwise, the vector is cleared.
+	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
 	template<typename T>
 	bool ReadVector(std::vector<T> &destVector, size_t destSize)
 	{

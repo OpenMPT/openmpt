@@ -541,7 +541,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	}
 	if (lpStream)
 	{
-		FileReader file(reinterpret_cast<const char*>(lpStream), dwMemLength);
+		FileReader file(lpStream, dwMemLength);
 
 		const std::vector<const char *> modExtensions = GetSupportedExtensions(true);
 
@@ -562,7 +562,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 			{
 				lpStream = unrar.GetOutputFile();
 				dwMemLength = unrar.GetOutputFileLength();
-				file = FileReader((char *)lpStream, dwMemLength);
+				file = FileReader(lpStream, dwMemLength);
 			}
 		}
 #endif
@@ -574,7 +574,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 			{
 				lpStream = unlha.GetOutputFile();
 				dwMemLength = unlha.GetOutputFileLength();
-				file = FileReader((char *)lpStream, dwMemLength);
+				file = FileReader(lpStream, dwMemLength);
 			}
 		}
 #endif
@@ -592,7 +592,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		BOOL bMMCmp = MMCMP_Unpack(&lpStream, &dwMemLength);
 		if(bMMCmp)
 		{
-			file = FileReader(reinterpret_cast<const char*>(lpStream), dwMemLength);
+			file = FileReader(lpStream, dwMemLength);
 		}
 #endif
 

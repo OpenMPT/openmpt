@@ -254,11 +254,7 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, conversionHasNoState>
 {
-	union
-	{
-		float f;
-		uint32 i;
-	} maxVal;
+	FloatInt32 maxVal;
 
 	ReadFloat32to16PCMandNormalize() { maxVal.i = 0; }
 

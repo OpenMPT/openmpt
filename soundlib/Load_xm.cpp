@@ -568,9 +568,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		return false;
 	}
 
-	//BYTE s[64*64*5];
-	vector<BYTE> s(64*64*5, 0);
-	BYTE xmph[9];
+	vector<uint8> s(64 * 64 * 5, 0);
 	bool addChannel = false; // avoid odd channel count for FT2 compatibility
 
 	XMFileHeader fileHeader;
@@ -631,7 +629,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	fileHeader.ConvertEndianness();
 	fwrite(&fileHeader, 1, sizeof(fileHeader), f);
 
-	// write order list (wihout +++ and ---, explained above)
+	// write order list (without +++ and ---, explained above)
 	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
 	{
 		if(Patterns.IsValidIndex(Order[ord]) || !compatibilityExport)
@@ -642,19 +640,27 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	}
 
 	// Writing patterns
-	for(PATTERNINDEX pat = 0; pat < nPatterns; pat++) if (Patterns[pat])
+	for(PATTERNINDEX pat = 0; pat < nPatterns; pat++)
 	{
-		ModCommand *p = Patterns[pat];
+		uint8 patHead[9];
+		MemsetZero(patHead);
+		patHead[0] = 9;
+		patHead[5] = static_cast<uint8>(Patterns[pat].GetNumRows() & 0xFF);
+		patHead[6] = static_cast<uint8>(Patterns[pat].GetNumRows() >> 8);
+
+		if(!Patterns.IsValidPat(pat))
+		{
+			// There's nothing to write... chicken out.
+			fwrite(patHead, 1, 9, f);
+			continue;
+		}
+
+		const ModCommand *p = Patterns[pat];
 		size_t len = 0;
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPattern = true;
 
-		MemsetZero(xmph);
-		xmph[0] = 9;
-		xmph[5] = (BYTE)(Patterns[pat].GetNumRows() & 0xFF);
-		xmph[6] = (BYTE)(Patterns[pat].GetNumRows() >> 8);
-
-		for (size_t j = m_nChannels * Patterns[pat].GetNumRows(); j > 0; j--, p++)
+		for(size_t j = m_nChannels * Patterns[pat].GetNumRows(); j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
 			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
@@ -722,7 +728,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 				s[len++] = param;
 			} else
 			{
-				BYTE b = 0x80;
+				uint8 b = 0x80;
 				if (note) b |= 0x01;
 				if (p->instr) b |= 0x02;
 				if (vol >= 0x10) b |= 0x04;
@@ -751,17 +757,10 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			len = 0;
 		}
 
-		xmph[7] = (BYTE)(len & 0xFF);
-		xmph[8] = (BYTE)(len >> 8);
-		fwrite(xmph, 1, 9, f);
+		patHead[7] = static_cast<uint8>(len & 0xFF);
+		patHead[8] = static_cast<uint8>(len >> 8);
+		fwrite(patHead, 1, 9, f);
 		if(len) fwrite(&s[0], 1, len, f);
-	} else
-	{
-		MemsetZero(xmph);
-		xmph[0] = 9;
-		xmph[5] = (BYTE)(Patterns[pat].GetNumRows() & 0xFF);
-		xmph[6] = (BYTE)(Patterns[pat].GetNumRows() >> 8);
-		fwrite(xmph, 1, 9, f);
 	}
 
 	// Check which samples are referenced by which instruments (for assigning unreferenced samples to instruments)

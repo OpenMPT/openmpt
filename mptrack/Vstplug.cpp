@@ -1720,8 +1720,7 @@ bool CVstPlugin::LoadProgram()
 	if(f.Open(files.first_file.c_str()))
 	{
 		size_t len = f.GetLength();
-		const char *data = reinterpret_cast<const char *>(f.Lock(len));
-		FileReader file(data, len);
+		FileReader file(f.Lock(len), len);
 
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
 		f.Close();
