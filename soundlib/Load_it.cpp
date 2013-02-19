@@ -221,14 +221,12 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 
 
 
-#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
-
 //////////////////////////////////////////////////////////
 // Impulse Tracker IT file support
 
 
-UINT ConvertVolParam(const ModCommand *m)
-//---------------------------------------
+uint8 ConvertVolParam(const ModCommand *m)
+//----------------------------------------
 {
 	return min(m->vol, 9);
 }
@@ -972,7 +970,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	const size_t num = 0;
 #endif // MODPLUG_TRACKER
 
-	uint16 fnum = min(num, uint16_max);	// Number of entries that are actually going to be written
+	uint16 fnum = (uint16)min(num, uint16_max);	// Number of entries that are actually going to be written
 	const size_t bytes_written = 2 + fnum * 8;	// Number of bytes that are actually going to be written
 
 	if(f == nullptr)
@@ -1021,7 +1019,6 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	return bytes_written;
 }
 
-#pragma warning(disable:4100)
 
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Mptrack.h"	// For config filename
@@ -1075,11 +1072,12 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
 	{
+		// MPTM
 		itHeader.cwtv = verMptFileVer;	// Used in OMPT-hack versioning.
 		itHeader.cmwt = 0x888;
-	}
-	else //IT
+	} else
 	{
+		// IT
 		MptVersion::VersionNum vVersion = MptVersion::num;
 		itHeader.cwtv = 0x5000 | (uint16)((vVersion >> 16) & 0x0FFF); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
 		itHeader.cmwt = 0x0214;	// Common compatible tracker :)
@@ -1108,17 +1106,17 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	if(m_SongFlags[SONG_ITCOMPATGXX]) itHeader.flags |= ITFileHeader::itCompatGxx;
 	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
 
-	itHeader.globalvol = m_nDefaultGlobalVolume >> 1;
-	itHeader.mv = min(m_nSamplePreAmp, 128);
-	itHeader.speed = m_nDefaultSpeed;
- 	itHeader.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
+	itHeader.globalvol = (uint8)(m_nDefaultGlobalVolume >> 1);
+	itHeader.mv = (uint8)min(m_nSamplePreAmp, 128);
+	itHeader.speed = (uint8)min(m_nDefaultSpeed, 255);
+ 	itHeader.tempo = (uint8)min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
 	itHeader.sep = 128; // pan separation
 	// IT doesn't have a per-instrument Pitch Wheel Depth setting, so we just store the first non-zero PWD setting in the header.
 	for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)
 	{
 		if(Instruments[ins] != nullptr && Instruments[ins]->midiPWD != 0)
 		{
-			itHeader.pwd = abs(Instruments[ins]->midiPWD);
+			itHeader.pwd = (uint8)abs(Instruments[ins]->midiPWD);
 			break;
 		}
 	}
@@ -1130,9 +1128,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	for (CHANNELINDEX ich = 0; ich < min(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
 	{
-		itHeader.chnpan[ich] = ChnSettings[ich].nPan >> 2;
+		itHeader.chnpan[ich] = (uint8)(ChnSettings[ich].nPan >> 2);
 		if (ChnSettings[ich].dwFlags[CHN_SURROUND]) itHeader.chnpan[ich] = 100;
-		itHeader.chnvol[ich] = ChnSettings[ich].nVolume;
+		itHeader.chnvol[ich] = (uint8)(ChnSettings[ich].nVolume);
 		if (ChnSettings[ich].dwFlags[CHN_MUTE]) itHeader.chnpan[ich] |= 0x80;
 	}
 
@@ -1176,7 +1174,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	if(m_lpszSongComments)
 	{
 		itHeader.special |= ITFileHeader::embedSongMessage;
-		itHeader.msglength = min(strlen(m_lpszSongComments) + 1, uint16_max);
+		itHeader.msglength = (uint16)min(strlen(m_lpszSongComments) + 1, uint16_max);
 		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
@@ -1288,29 +1286,31 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	// Writing Patterns
 	bool bNeedsMptPatSave = false;
-	for (UINT npat=0; npat<itHeader.patnum; npat++)
+	for(PATTERNINDEX pat = 0; pat < itHeader.patnum; pat++)
 	{
-		DWORD dwPatPos = dwPos;
-		if (!Patterns[npat]) continue;
+		uint32 dwPatPos = dwPos;
+		if (!Patterns[pat]) continue;
 
-		if(Patterns[npat].GetOverrideSignature())
+		if(Patterns[pat].GetOverrideSignature())
 			bNeedsMptPatSave = true;
 
 		// Check for empty pattern
-		if (Patterns[npat].GetNumRows() == 64 && Patterns.IsPatternEmpty(npat))
+		if(Patterns[pat].GetNumRows() == 64 && Patterns.IsPatternEmpty(pat))
 		{
-			patpos[npat] = 0;
+			patpos[pat] = 0;
 			continue;
 		}
 
-		patpos[npat] = dwPos;
+		patpos[pat] = dwPos;
 
 		// Write pattern header
-		WORD patinfo[4];
+		ROWINDEX writeRows = Util::Min(Patterns[pat].GetNumRows(), ROWINDEX(uint16_max));
+		uint16 patinfo[4];
 		patinfo[0] = 0;
-		patinfo[1] = LittleEndianW(Patterns[npat].GetNumRows());
+		patinfo[1] = (uint16)writeRows;
 		patinfo[2] = 0;
 		patinfo[3] = 0;
+		SwapBytesLE(patinfo[1]);
 
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
@@ -1319,13 +1319,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		vector<BYTE> chnmask(maxChannels, 0xFF);
 		vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
 
-		for (ROWINDEX row = 0; row<Patterns[npat].GetNumRows(); row++)
+		for(ROWINDEX row = 0; row < writeRows; row++)
 		{
-			UINT len = 0;
-			BYTE buf[8 * MAX_BASECHANNELS];
-			const ModCommand *m = Patterns[npat].GetRow(row);
+			uint32 len = 0;
+			uint8 buf[8 * MAX_BASECHANNELS];
+			const ModCommand *m = Patterns[pat].GetRow(row);
 
-			for (CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
+			for(CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
 			{
 				// Skip mptm-specific notes.
 				if(m->IsPcNote())
@@ -1334,7 +1334,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 					continue;
 				}
 
-				BYTE b = 0;
+				uint8 b = 0;
 				uint8 command = m->command;
 				uint8 param = m->param;
 				uint8 vol = 0xFF;
@@ -1438,11 +1438,11 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 					if (b != chnmask[ch])
 					{
 						chnmask[ch] = b;
-						buf[len++] = (ch+1) | 0x80;
+						buf[len++] = uint8((ch + 1) | 0x80);
 						buf[len++] = b;
 					} else
 					{
-						buf[len++] = ch+1;
+						buf[len++] = uint8(ch + 1);
 					}
 					if (b & 1) buf[len++] = note;
 					if (b & 2) buf[len++] = m->instr;
@@ -1461,20 +1461,20 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 				if(GetpModDoc())
 				{
 					CString str;
-					str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, npat);
+					str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, pat);
 					GetpModDoc()->AddToLog(str);
 				}
 #endif // MODPLUG_TRACKER
 				break;
-			}
-			else
+			} else
 			{
 				dwPos += len;
-				patinfo[0] += len;
+				patinfo[0] += (uint16)len;
 				fwrite(buf, 1, len, f);
 			}
 		}
 		fseek(f, dwPatPos, SEEK_SET);
+		SwapBytesLE(patinfo[0]);
 		fwrite(patinfo, 8, 1, f);
 		fseek(f, dwPos, SEEK_SET);
 	}
@@ -1527,7 +1527,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	fseek(f, 0, SEEK_END);
 	std::ofstream fout(f);
-	const DWORD MPTStartPos = fout.tellp();
+	const uint32 MPTStartPos = (uint32)fout.tellp();
 
 	srlztn::Ssb ssb(fout);
 	ssb.BeginWrite("mptm", MptVersion::num);
@@ -1570,7 +1570,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 }
 
 
-#pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE
 
 
@@ -1581,15 +1580,11 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 {
 
 
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	DWORD chinfo[64];
-	DWORD chinfo[MAX_BASECHANNELS];
-// -! BEHAVIOUR_CHANGE#0006
+	uint32 chinfo[MAX_BASECHANNELS];
 	CHAR s[32];
-	DWORD nPluginSize;
-	UINT nTotalSize = 0;
-	UINT nChInfo = 0;
+	uint32 nPluginSize;
+	uint32 nTotalSize = 0;
+	uint32 nChInfo = 0;
 
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
@@ -1672,7 +1667,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 	{
 		if (f)
 		{
-			nPluginSize = 'XFHC';
+			memcpy(&nPluginSize, "CHFX", 4);
 			fwrite(&nPluginSize, 1, 4, f);
 			nPluginSize = nChInfo*4;
 			fwrite(&nPluginSize, 1, 4, f);
@@ -1706,7 +1701,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		{
 			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++)
 			{
-				ChnSettings[ch].nMixPlugin = chunk.ReadUint32LE();
+				ChnSettings[ch].nMixPlugin = (uint8)chunk.ReadUint32LE();
 			}
 		}
 		// Plugin Data
@@ -1915,13 +1910,13 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		fwrite(&code, 1, sizeof(__int32), f);
 		size = (GetNumChannels() - 64) * 2;
 		fwrite(&size, 1, sizeof(__int16), f);
-		for(UINT ich = 64; ich < m_nChannels; ich++)
+		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
-			BYTE panvol[2];
-			panvol[0] = ChnSettings[ich].nPan >> 2;
-			if (ChnSettings[ich].dwFlags[CHN_SURROUND]) panvol[0] = 100;
-			if (ChnSettings[ich].dwFlags[CHN_MUTE]) panvol[0] |= 0x80;
-			panvol[1] = ChnSettings[ich].nVolume;
+			uint8 panvol[2];
+			panvol[0] = (uint8)(ChnSettings[chn].nPan >> 2);
+			if (ChnSettings[chn].dwFlags[CHN_SURROUND]) panvol[0] = 100;
+			if (ChnSettings[chn].dwFlags[CHN_MUTE]) panvol[0] |= 0x80;
+			panvol[1] = (uint8)ChnSettings[chn].nVolume;
 			fwrite(&panvol, sizeof(panvol), 1, f);
 		}
 	}
@@ -2066,14 +2061,14 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 
 	// Case macros.
 	#define CASE(id, data)	\
-		case id: fadr = reinterpret_cast<char *>(&data); maxReadCount = Util::Min(size, sizeof(data)); break;
+		case id: fadr = reinterpret_cast<char *>(&data); maxReadCount = Util::Min(size_t(size), sizeof(data)); break;
 	#define CASE_NOTXM(id, data) \
-		case id: if(modtype != MOD_TYPE_XM) { fadr = reinterpret_cast<char *>(&data); maxReadCount = Util::Min(size, sizeof(data));} break;
+		case id: if(modtype != MOD_TYPE_XM) { fadr = reinterpret_cast<char *>(&data); maxReadCount = Util::Min(size_t(size), sizeof(data));} break;
 
 	while(file.BytesLeft() > 6)
 	{
 		const uint32 code = file.ReadUint32LE();
-		const size_t size = file.ReadUint16LE();
+		const uint16 size = file.ReadUint16LE();
 
 		if(!file.CanRead(size))
 		{
@@ -2104,7 +2099,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
-					const uint16 loopLimit = Util::Min(size / 2, CountOf(ChnSettings) - 64);
+					const CHANNELINDEX loopLimit = Util::Min(uint16(size / 2), uint16(CountOf(ChnSettings) - 64));
 
 					for(CHANNELINDEX i = 0; i < loopLimit; i++)
 					{

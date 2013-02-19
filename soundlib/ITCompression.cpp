@@ -48,8 +48,13 @@ static const int ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 
 ITCompression::ITCompression(const ModSample &sample, bool it215, FILE *f) : mptSample(sample), is215(it215), file(f)
 //-------------------------------------------------------------------------------------------------------------------
 {
-	packedData.resize(bufferSize);
+	packedData = new (std::nothrow) uint8[bufferSize];
+	sampleData = new (std::nothrow) uint8[blockSize];
 	packedTotalLength = 0;
+	if(packedData == nullptr || sampleData == nullptr)
+	{
+		return;
+	}
 
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
 	{
@@ -75,6 +80,9 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, FILE *f) : mpt
 			remain -= baseLength;
 		}
 	}
+
+	delete[] packedData;
+	delete[] sampleData;
 }
 
 
@@ -111,17 +119,12 @@ template<typename Properties>
 void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actualLength)
 //--------------------------------------------------------------------------------------
 {
-	baseLength = Util::Min(actualLength, SmpLength(0x8000 / sizeof(Properties::sample_t)));
-
-	sampleData = new (std::nothrow) Properties::sample_t[baseLength];
-	if(sampleData == nullptr)
-	{
-		return;
-	}
+	baseLength = Util::Min(actualLength, SmpLength(blockSize / sizeof(Properties::sample_t)));
 
 	CopySample<Properties::sample_t>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
 
-	for(int i = 0; i < (is215 ? 2 : 1); i++)
+	Deltafy<Properties::sample_t>();
+	if(is215)
 	{
 		Deltafy<Properties::sample_t>();
 	}
@@ -168,8 +171,6 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 	packedData[1] = uint8((packedLength - 2) >> 8);
 
 	Verify(data, sampleData, offset);
-
-	delete[] sampleData;
 }
 
 
@@ -185,6 +186,7 @@ void ITCompression::Verify(const void *data, void *sampleData, SmpLength offset)
 	if(::GetPrivateProfileInt("Misc", "ITCompressionVerification", 0, theApp.GetConfigFileName()) != 0)
 	{
 		int8 *newSampleData = new (std::nothrow) int8[baseLength * mptSample.GetElementarySampleSize()];
+		// Load original sample data for this block again
 		if(mptSample.GetElementarySampleSize() > 1)
 		{
 			CopySample<int16>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
@@ -372,7 +374,7 @@ void ITDecompression::Uncompress(void *target)
 	remBits = 8;
 	mem1 = mem2 = 0;
 
-	curLength = Util::Min(mptSample.nLength - writtenSamples, SmpLength(0x8000 / sizeof(Properties::sample_t)));
+	curLength = Util::Min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(Properties::sample_t)));
 
 	int width = Properties::defWidth;
 	while(curLength > 0)

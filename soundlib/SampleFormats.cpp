@@ -25,6 +25,15 @@
 #include "ChunkReader.h"
 
 
+// Check for valid MPEG header
+static bool IsMPEG(const void *data)
+//----------------------------------
+{
+	const uint8 *header = static_cast<const uint8  *>(data);
+	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0xF0) != 0xF0;
+}
+
+
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
 //--------------------------------------------------------------------------------------------------
 {
@@ -84,8 +93,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 || psig[0] == LittleEndian('CaLf')													// FLAC signature
 #endif // NO_FLAC
 #ifndef NO_MP3_SAMPLES
-	 || (lpMemFile[0] == 0xFF && lpMemFile[1] == 0xFB)									// MP2 signature
-	 || (lpMemFile[0] == 0xFF && lpMemFile[1] == 0xFB)									// MP3 signature
+	 || IsMPEG(lpMemFile)																// MPEG signature
 	 || (lpMemFile[0] == 'I' && lpMemFile[1] == 'D' && lpMemFile[2] == '3')				// MP3 signature
 #endif // NO_MP3_SAMPLES
 	)
@@ -2261,6 +2269,50 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 {
 #ifndef NO_MP3_SAMPLES
 	static HMODULE mp3lib = nullptr;
+
+	// Check file for validity, or else mpg123 will happily munch many files that start looking vaguely resemble an MPEG stream mid-file.
+	file.Rewind();
+	while(file.BytesLeft() > 3)
+	{
+		uint8 header[3];
+		file.ReadArray(header);
+
+		if(!memcmp(header, "ID3", 3))
+		{
+			// Skip ID3 tags
+			uint8 header[7];
+			file.ReadArray(header);
+
+			uint32 size = 0;
+			for(int i = 3; i < 7; i++)
+			{
+				if(header[i] & 0x80)
+					return false;
+				size = (size << 7) | header[i];
+			}
+			file.Skip(size);
+		} else if(!memcmp(header, "APE", 3) && file.ReadMagic("TAGEX"))
+		{
+			// Skip APE tags
+			uint32 size = file.ReadUint32LE();
+			file.Skip(16 + size);
+		} else if(!memcmp(header, "\x00\x00\x00", 3) || !memcmp(header, "\xFF\x00\x00", 3))
+		{
+			// Some MP3 files are padded with zeroes...
+		} else if(header[0] == 0)
+		{
+			// This might be some padding, followed by an MPEG header, so try again.
+			file.SkipBack(2);
+		} else if(IsMPEG(header))
+		{
+			// This is what we want!
+			break;
+		} else
+		{
+			// This, on the other hand, isn't.
+			return false;
+		}
+	}
 
 	if(!mp3lib)
 	{
