@@ -8,7 +8,7 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#pragma  once
+#pragma once
 
 #include "Snd_defs.h"
 #include <vector>
@@ -24,17 +24,18 @@ public:
 	ITCompression(const ModSample &sample, bool it215, FILE *f);
 	size_t GetCompressedSize() const { return packedTotalLength; }
 
-protected:
 	static const size_t bufferSize = 2 + 0xFFFF;	// Our output buffer can't be longer than this.
+	static const size_t blockSize = 0x8000;			// Block size (in bytes) in which samples are being processed
 
-	std::vector<int> bwt;							// Bit width table
-	std::vector<uint8> packedData;					// Compressed data for current sample block
-	FILE *file;
-	void *sampleData;								// Pre-processed sample data for currently compressed sample block
-	const ModSample &mptSample;
-	size_t packedLength;							// Size of currently compressed sample block
-	size_t packedTotalLength;						// Size of all compressed data so far
-	SmpLength baseLength;							// Length of the currently compressed sample block (in samples)
+protected:
+	std::vector<int> bwt;			// Bit width table
+	uint8 *packedData;				// Compressed data for current sample block
+	FILE *file;						// File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
+	void *sampleData;				// Pre-processed sample data for currently compressed sample block
+	const ModSample &mptSample;		// Sample that is being processed
+	size_t packedLength;			// Size of currently compressed sample block
+	size_t packedTotalLength;		// Size of all compressed data so far
+	SmpLength baseLength;			// Length of the currently compressed sample block (in samples)
 
 	// Bit writer
 	int bitPos;		// Current bit position in this byte
