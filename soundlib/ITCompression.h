@@ -1,6 +1,6 @@
 /*
- * ITCompression.cpp
- * -----------------
+ * ITCompression.h
+ * ---------------
  * Purpose: Code for IT sample compression and decompression.
  * Notes  : The original Python compression code was written by GreaseMonkey and has been released into the public domain.
  * Authors: OpenMPT Devs
@@ -74,15 +74,18 @@ public:
 	ITDecompression(FileReader &file, ModSample &sample, bool it215);
 
 protected:
-	FileReader chunk;
-	ModSample &mptSample;
+	FileReader chunk;			// Currnetly processed block
+	ModSample &mptSample;		// Sample that is being processed
+
+	SmpLength writtenSamples;	// Number of samples so far written on this channel
+	SmpLength writePos;			// Absolut write position in sample (for stereo samples)
+	SmpLength curLength;		// Length of currently processed block
+	FileReader::off_t dataPos;	// Position in input block
+	int mem1, mem2;				// Integrator memory
 
 	// Bit reader
-	SmpLength writtenSamples, writePos, curLength;
-	FileReader::off_t dataPos;
-	int mem1, mem2;
-	int bitPos;
-	int remBits;
+	int bitPos;		// Current bit position in this byte
+	int remBits;	// Remaining bits in this byte
 
 	bool is215;		// Use IT2.15 compression (double deltas)
 

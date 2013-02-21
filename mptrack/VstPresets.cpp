@@ -234,11 +234,7 @@ void VSTPresets::WriteBE(uint32 v, std::ostream &f)
 void VSTPresets::WriteBE(float v, std::ostream &f)
 //------------------------------------------------
 {
-	union
-	{
-		float f;
-		uint32 i;
-	} u;
+	FloatInt32 u;
 	u.f = v;
 	WriteBE(u.i, f);
 }

@@ -1664,7 +1664,11 @@ bool CVstPlugin::SaveProgram()
 		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
 	}
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
+	char rawname[max(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
+	Dispatch(effGetProgramName, 0, 0, rawname, 0);
+	SanitizeFilename(rawname);
+	StringFixer::SetNullTerminator(rawname);
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", rawname,
 		"VST Plugin Programs (*.fxp)|*.fxp|"
 		"VST Plugin Banks (*.fxb)|*.fxb||",
 		defaultDir);

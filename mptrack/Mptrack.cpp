@@ -1625,6 +1625,8 @@ BOOL CAboutDlg::OnInitDialog()
 		"http://www.hermannseib.com/english/vsthost.htm|"
 		"Ian Luck for UNMO3|"
 		"http://www.un4seen.com/mo3.html|"
+		"Ben \"GreaseMonkey\" Russell for IT sample compression code|"
+		"https://github.com/iamgreaser/it2everything/|"
 		"Jean-loup Gailly and Mark Adler for zlib|"
 		"http://zlib.net/|"
 		"Josh Coalson for libFLAC|"

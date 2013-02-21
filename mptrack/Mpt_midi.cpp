@@ -123,7 +123,7 @@ BOOL CMainFrame::midiOpenDevice()
 	if (shMidiIn) return TRUE;
 	try
 	{
-		if (midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		if (midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
 
@@ -131,7 +131,12 @@ BOOL CMainFrame::midiOpenDevice()
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
 			CMainFrame::GetMainFrame()->OnViewOptions();
 
-			return FALSE;
+			// Let's see if the user updated the settings.
+			if(midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+			{
+				shMidiIn = NULL;
+				return FALSE;
+			}
 		}
 		midiInStart(shMidiIn);
 	} catch (...) {}
