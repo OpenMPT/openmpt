@@ -1517,7 +1517,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else
 	{
-		FileReader file(reinterpret_cast<const char *>(pWaveForm), dwLen);
+		FileReader file(pWaveForm, dwLen);
 		bWaveForm = pSndFile->ReadWAVSample(nSample, file, &wsmpChunk);
 	}
 	if (bWaveForm)

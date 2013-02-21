@@ -144,18 +144,18 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 		{
 			if(width <= 6)
 			{
-				// Mode A
+				// Mode A: 1 to 6 bits
 				ASSERT(width);
 				WriteBits(width, (1 << (width - 1)));
 				WriteBits(Properties::fetchA, ConvertWidth(width, bwt[i]));
 			} else if(width < Properties::defWidth)
 			{
-				// Mode B
+				// Mode B: 7 to 8 / 16 bits
 				int xv = (1 << (width - 1)) + Properties::lowerB + ConvertWidth(width, bwt[i]);
 				WriteBits(width, xv);
 			} else
 			{
-				// Mode C
+				// Mode C: 9 / 17 bits
 				ASSERT((bwt[i] - 1) >= 0);
 				WriteBits(width, (1 << (width - 1)) + bwt[i] - 1);
 			}
@@ -355,6 +355,12 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 		{
 			chunk = file.GetChunk(file.ReadUint16LE());
 
+			// Initialise bit reader
+			dataPos = 0;
+			bitPos = 0;
+			remBits = 8;
+			mem1 = mem2 = 0;
+
 			if(mptSample.GetElementarySampleSize() > 1)
 				Uncompress<IT16BitParams>(mptSample.pSample + 2 * chn);
 			else
@@ -368,12 +374,6 @@ template<typename Properties>
 void ITDecompression::Uncompress(void *target)
 //--------------------------------------------
 {
-	// Initialise bit reader
-	dataPos = 0;
-	bitPos = 0;
-	remBits = 8;
-	mem1 = mem2 = 0;
-
 	curLength = Util::Min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(Properties::sample_t)));
 
 	int width = Properties::defWidth;
@@ -389,21 +389,21 @@ void ITDecompression::Uncompress(void *target)
 		const int topBit = (1 << (width - 1));
 		if(width <= 6)
 		{
-			// Mode A
+			// Mode A: 1 to 6 bits
 			if(v == topBit)
 				ChangeWidth(width, ReadBits(Properties::fetchA));
 			else
 				Write<Properties>(v, topBit, target);
 		} else if(width < Properties::defWidth)
 		{
-			// Mode B
+			// Mode B: 7 to 8 / 16 bits
 			if(v >= topBit + Properties::lowerB && v <= topBit + Properties::upperB)
 				ChangeWidth(width, v - (topBit + Properties::lowerB));
 			else
 				Write<Properties>(v, topBit, target);
 		} else
 		{
-			// Mode C
+			// Mode C: 9 / 17 bits
 			if(v & topBit)
 				width = (v & ~topBit) + 1;
 			else

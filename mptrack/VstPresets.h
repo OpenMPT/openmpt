@@ -44,6 +44,6 @@ protected:
 #else
 	static ErrorCode LoadFile(FileReader &, CVstPlugin &) { return invalidFile; }
 	static bool SaveFile(std::ostream &, CVstPlugin &, bool) { return false; }
-	static const char *GetErrorMessage(ErrorCode);
+	static const char *GetErrorMessage(ErrorCode) { return nullptr; }
 #endif // NO_VST
 };
