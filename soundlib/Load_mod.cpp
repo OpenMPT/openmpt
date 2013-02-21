@@ -230,7 +230,7 @@ struct MODSampleHeader
 
 		SmpLength lStart = loopStart * 2;
 		SmpLength lLength = loopLength * 2;
-		// Fix loops
+		// See if loop start is incorrect as words, but correct as bytes (like in Soundtracker modules)
 		if(lLength > 2 && (lStart + lLength > mptSmp.nLength)
 			&& (lStart / 2 + lLength <= mptSmp.nLength))
 		{
@@ -375,15 +375,15 @@ static void ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSampl
 	file.ReadConvertEndianness(sampleHeader);
 	sampleHeader.ConvertToMPT(sample);
 
+	StringFixer::ReadString<StringFixer::spacePadded>(sampleName, sampleHeader.name);
 	// Get rid of weird characters in sample names.
-	for(size_t i = 0; i < CountOf(sampleHeader.name); i++)
+	for(size_t i = 0; i < CountOf(sampleName); i++)
 	{
-		if(sampleHeader.name[i] && sampleHeader.name[i] < ' ')
+		if(sampleName[i] && sampleName[i] < ' ')
 		{
-			sampleHeader.name[i] = ' ';
+			sampleName[i] = ' ';
 		}
 	}
-	StringFixer::ReadString<StringFixer::spacePadded>(sampleName, sampleHeader.name);
 }
 
 
@@ -421,14 +421,11 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
 
-	if(checkForWOW)
+	// Check if this is a Mod's Grave WOW file... Never seen one of those, but apparently they *do* exist.
+	// Basically, WOW files seem to use the M.K. extensions, but are actually 8CHN files.
+	if(checkForWOW && sizeWithoutPatterns + numPatterns * 8 * 256 == file.GetLength())
 	{
-		// Check if this is a Mod's Grave WOW file... Never seen one of those, but apparently they *do* exist.
-		// Basically, WOW files seem to use the M.K. extensions, but are actually 8CHN files.
-		if(sizeWithoutPatterns + numPatterns * 8 * 256 == file.GetLength())
-		{
-			numChannels = 8;
-		}
+		numChannels = 8;
 	}
 
 	// Now we have to check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
@@ -637,7 +634,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 			for(ROWINDEX row = 0; row < 64; row++)
 			{
 				// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
-				ModCommand *rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
+				PatternRow rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
 
 				for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 				{
@@ -787,6 +784,11 @@ bool CSoundFile::ReadM15(FileReader &file)
 			hasDiskNames = false;
 		}
 
+		// Loop start is always in bytes, not words, so don't trust the auto-fix magic in the sample header conversion (fixes loop of "st-01:asia" in mod.drag 10)
+		Samples[smp].nLoopStart = sampleHeader.loopStart;
+		Samples[smp].nLoopEnd = sampleHeader.loopStart + sampleHeader.loopLength * 2;
+		Samples[smp].SanitizeLoops();
+
 		// UST only handles samples up to 9999 bytes. Master Soundtracker 1.0 and SoundTracker 2.0 introduce 32KB samples.
 		if(sampleHeader.length > 4999 || sampleHeader.loopStart > 9999)
 		{
@@ -859,11 +861,25 @@ bool CSoundFile::ReadM15(FileReader &file)
 	FileReader::off_t patOffset = file.GetPosition();
 
 	// Scan patterns to identify Ultimate Soundtracker modules.
+	uint8 emptyCmds = 0;
 	for(size_t i = 0; i < numPatterns * 64u * 4u; i++)
 	{
 		uint8 data[4];
 		file.ReadArray(data);
 		const uint8 eff = data[2] & 0x0F, param = data[3];
+		if(emptyCmds != 0 && !memcmp(data, "\0\0\0\0", 4))
+		{
+			emptyCmds++;
+			if(emptyCmds > 32)
+			{
+				// Since there is a lot of empty space after the last Dxx command,
+				// we assume it's supposed to be a pattern break effect.
+				minVersion = ST2_00_with_Bxx;
+			}
+		} else
+		{
+			emptyCmds = 0;
+		}
 
 		switch(eff)
 		{
@@ -880,7 +896,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 			}
 			break;
 		case 0x0B:
-			minVersion = Util::Max(minVersion, ST2_00_with_Bxx);
+			minVersion = ST2_00_with_Bxx;
 			break;
 		case 0x0C:
 		case 0x0D:
@@ -891,6 +907,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 				// Assume this is a pattern break command.
 				minVersion = Util::Max(minVersion, ST2_00);
 			}
+			emptyCmds = 1;
 			break;
 		case 0x0F:
 			minVersion = Util::Max(minVersion, ST_III);
@@ -910,7 +927,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			ModCommand *rowBase = Patterns[pat].GetpModCommand(row, 0);
+			PatternRow rowBase = Patterns[pat].GetpModCommand(row, 0);
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
@@ -920,7 +937,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 				{
 					if(m.command == 0x0D)
 					{
-						if(m.param != 0 || minVersion < ST_IX)
+						if((m.param != 0 && minVersion != ST2_00_with_Bxx) || minVersion < ST_IX)
 						{
 							// Dxy is volume slide in some Soundtracker versions, D00 is a pattern break in the latest versions.
 							m.command = 0x0A;
@@ -932,6 +949,10 @@ bool CSoundFile::ReadM15(FileReader &file)
 						{
 							m.param = 0;
 						}
+					} else if(m.command == 0x0C)
+					{
+						// Volume is sent as-is to the chip, which ignores the highest bit.
+						m.param &= 0x7F;
 					} else if(m.command == 0x0E && (m.param > 0x01 || minVersion < ST_IX))
 					{
 						// Import auto-slides as normal slides and ignore their extended behaviour.
