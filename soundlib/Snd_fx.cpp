@@ -795,6 +795,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			reset = (!pChn->nLength
 				|| (insNumber && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
 				|| (insNumber && !bPorta && pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
+			// NOTE: IT2.14 with SB/GUS/etc. output is different. We are going after IT's WAV writer here.
+			// For SB/GUS/etc. emulation, envelope carry should only apply when the NNA isn't set to "Note Cut".
+			// Test case: CarryNNA.it
 			resetAlways = (instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
 		} else
 		{
@@ -837,7 +840,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 	}
 	// Invalid sample ?
-	if (!pSmp)
+	if(!pSmp)
 	{
 		pChn->pModSample = nullptr;
 		pChn->nInsVol = 0;
@@ -845,12 +848,12 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Tone-Portamento doesn't reset the pingpong direction flag
-	if (bPorta && pSmp == pChn->pModSample)
+	if(bPorta && pSmp == pChn->pModSample)
 	{
 		// If channel length is 0, we cut a previous sample using SCx. In that case, we have to update sample length, loop points, etc...
 		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && pChn->nLength != 0) return;
 		pChn->dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
-		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
+		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 	} else
 	{
 		pChn->dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
@@ -858,12 +861,12 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		// IT compatibility tentative fix: Don't change bidi loop direction when
 		// no sample nor instrument is changed.
 		if(IsCompatibleMode(TRK_ALLTRACKERS) && pSmp == pChn->pModSample && !instrumentChanged)
-			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
+			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 		else
-			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 
 
-		if (pIns)
+		if(pIns)
 		{
 			// Copy envelope flags (we actually only need the "enabled" and "pitch" flag)
 			pChn->VolEnv.flags = pIns->VolEnv.dwFlags;
@@ -874,11 +877,11 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			// Test case: FilterEnvReset.it
 			if((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == (ENV_ENABLED | ENV_FILTER) && !IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
+				if(!pChn->nCutOff) pChn->nCutOff = 0x7F;
 			}
 
-			if (pIns->IsCutoffEnabled()) pChn->nCutOff = pIns->GetCutoff();
-			if (pIns->IsResonanceEnabled()) pChn->nResonance = pIns->GetResonance();
+			if(pIns->IsCutoffEnabled()) pChn->nCutOff = pIns->GetCutoff();
+			if(pIns->IsResonanceEnabled()) pChn->nResonance = pIns->GetResonance();
 		}
 		pChn->nVolSwing = pChn->nPanSwing = 0;
 		pChn->nResSwing = pChn->nCutSwing = 0;
@@ -956,17 +959,17 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
 	const int realnote = note;
 
-	if ((pIns) && (note <= 0x80))
+	if((pIns) && (note - NOTE_MIN < CountOf(pIns->Keyboard)))
 	{
 		UINT n = pIns->Keyboard[note - NOTE_MIN];
 		if ((n) && (n < MAX_SAMPLES)) pSmp = &Samples[n];
 		note = pIns->NoteMap[note-1];
 	}
 	// Key Off
-	if (note > NOTE_MAX)
+	if(note > NOTE_MAX)
 	{
 		// Key Off (+ Invalid Note for XM - TODO is this correct?)
-		if (note == NOTE_KEYOFF || !(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if(note == NOTE_KEYOFF || !(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			KeyOff(nChn);
 		}
@@ -1004,9 +1007,9 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		}
 	}
 
-	if (!bPorta && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MED | MOD_TYPE_MT2)))
+	if(!bPorta && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MED | MOD_TYPE_MT2)))
 	{
-		if (pSmp)
+		if(pSmp)
 		{
 			pChn->nTranspose = pSmp->RelativeTone;
 			pChn->nFineTune = pSmp->nFineTune;
@@ -1056,10 +1059,10 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 
-	if (!pSmp) return;
-	if (period)
+	if(!pSmp) return;
+	if(period)
 	{
-		if ((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
+		if((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
 		if(!newTuning)
 		{
 			// FT2 compatibility: Don't reset portamento target with new notes.
@@ -1070,7 +1073,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			}
 		}
 
-		if (!bPorta || (!pChn->nLength && !(GetType() & MOD_TYPE_S3M)))
+		if(!bPorta || (!pChn->nLength && !(GetType() & MOD_TYPE_S3M)))
 		{
 			pChn->pModSample = pSmp;
 			pChn->pSample = pSmp->pSample;
@@ -1078,14 +1081,14 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nLoopEnd = pSmp->nLength;
 			pChn->nLoopStart = 0;
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
-			if (pChn->dwFlags[CHN_SUSTAINLOOP])
+			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
 				pChn->nLoopStart = pSmp->nSustainStart;
 				pChn->nLoopEnd = pSmp->nSustainEnd;
 				pChn->dwFlags.set(CHN_PINGPONGLOOP, pChn->dwFlags[CHN_PINGPONGSUSTAIN]);
 				pChn->dwFlags.set(CHN_LOOP);
 				if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
-			} else if (pChn->dwFlags[CHN_LOOP])
+			} else if(pChn->dwFlags[CHN_LOOP])
 			{
 				pChn->nLoopStart = pSmp->nLoopStart;
 				pChn->nLoopEnd = pSmp->nLoopEnd;
@@ -1094,7 +1097,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nPos = 0;
 			pChn->nPosLo = 0;
 			// Handle "retrigger" waveform type
-			if (pChn->nVibratoType < 4)
+			if(pChn->nVibratoType < 4)
 			{
 				// IT Compatibilty: Slightly different waveform offsets (why does MPT have two different offsets here with IT old effects enabled and disabled?)
 				if(!IsCompatibleMode(TRK_IMPULSETRACKER) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS])
@@ -1108,9 +1111,8 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				pChn->nTremoloPos = 0;
 			}
 		}
-		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
-	}
-	else
+		if(pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
+	} else
 	{
 		bPorta = false;
 	}
@@ -1149,7 +1151,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		pChn->dwFlags.reset(CHN_EXTRALOUD | CHN_KEYOFF);
 
 	// Enable Ramping
-	if (!bPorta)
+	if(!bPorta)
 	{
 		pChn->nVUMeter = 0x100;
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
@@ -1172,11 +1174,11 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			}
 		}
 
-		if (bResetEnv)
+		if(bResetEnv)
 		{
 			pChn->nVolSwing = pChn->nPanSwing = 0;
 			pChn->nResSwing = pChn->nCutSwing = 0;
-			if (pIns)
+			if(pIns)
 			{
 				// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes spx-farspacedance.it).
 				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
@@ -1188,13 +1190,13 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					// Volume Swing
-					if (pIns->nVolSwing)
+					if(pIns->nVolSwing)
 					{
 						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
 						pChn->nVolSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
 					}
 					// Pan Swing
-					if (pIns->nPanSwing)
+					if(pIns->nPanSwing)
 					{
 						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
 						pChn->nPanSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing));
@@ -1204,14 +1206,14 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 						}
 					}
 					// Cutoff Swing
-					if (pIns->nCutSwing)
+					if(pIns->nCutSwing)
 					{
 						int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
 						pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 					}
 					// Resonance Swing
-					if (pIns->nResSwing)
+					if(pIns->nResSwing)
 					{
 						int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
@@ -1230,21 +1232,21 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			}
 		}
 		pChn->nLeftVol = pChn->nRightVol = 0;
-		bool bFlt = !m_SongFlags[SONG_MPTFILTERMODE];
+		bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
 		// Setup Initial Filter for this note
-		if (pIns)
+		if(pIns)
 		{
-			if (pIns->IsResonanceEnabled())
+			if(pIns->IsResonanceEnabled())
 			{
 				pChn->nResonance = pIns->GetResonance();
-				bFlt = true;
+				useFilter = true;
 			}
-			if (pIns->IsCutoffEnabled())
+			if(pIns->IsCutoffEnabled())
 			{
 				pChn->nCutOff = pIns->GetCutoff();
-				bFlt = true;
+				useFilter = true;
 			}
-			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED))
+			if(useFilter && (pIns->nFilterMode != FLTMODE_UNCHANGED))
 			{
 				pChn->nFilterMode = pIns->nFilterMode;
 			}
@@ -1253,7 +1255,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nVolSwing = pChn->nPanSwing = 0;
 			pChn->nCutSwing = pChn->nResSwing = 0;
 		}
-		if ((pChn->nCutOff < 0x7F || IsCompatibleMode(TRK_IMPULSETRACKER)) && (bFlt))
+		if((pChn->nCutOff < 0x7F || IsCompatibleMode(TRK_IMPULSETRACKER)) && useFilter)
 		{
 			SetupChannelFilter(pChn, true);
 		}
@@ -2040,35 +2042,41 @@ BOOL CSoundFile::ProcessEffects()
 						volcmd = VOLCMD_NONE;
 					}
 
-				} else
+				} else if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
+					// IT Compatibility: Effects in the volume column don't have an unified memory.
+					// Test case: VolColMemory.it
 					if(vol) pChn->nOldVolParam = vol; else vol = pChn->nOldVolParam;
 				}
 
 				switch(volcmd)
 				{
 				case VOLCMD_VOLSLIDEUP:
-					VolumeSlide(pChn, vol << 4);
-					break;
-
 				case VOLCMD_VOLSLIDEDOWN:
-					VolumeSlide(pChn, vol);
+					// IT Compatibility: Volume column volume slides have their own memory
+					// Test case: VolColMemory.it
+					if(vol == 0 && IsCompatibleMode(TRK_IMPULSETRACKER))
+					{
+						vol = pChn->nOldVolColSlide;
+						if(vol == 0)
+							break;
+					} else
+					{
+						pChn->nOldVolColSlide = vol;
+					}
+					VolumeSlide(pChn, volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol);
 					break;
 
 				case VOLCMD_FINEVOLUP:
-					if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-					{
-						if (m_nTickCount == nStartTick) VolumeSlide(pChn, (vol << 4) | 0x0F);
-					} else
-						FineVolumeUp(pChn, vol);
+					// IT Compatibility: Volume column volume slides have their own memory
+					// Test case: VolColMemory.it
+					FineVolumeUp(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 
 				case VOLCMD_FINEVOLDOWN:
-					if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-					{
-						if (m_nTickCount == nStartTick) VolumeSlide(pChn, 0xF0 | vol);
-					} else
-						FineVolumeDown(pChn, vol);
+					// IT Compatibility: Volume column volume slides have their own memory
+					// Test case: VolColMemory.it
+					FineVolumeDown(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 
 				case VOLCMD_VIBRATOSPEED:
@@ -3069,7 +3077,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 		{
 			if (param & 0xF0) //Fine upslide
 			{
-				FineVolumeUp(pChn, (param >> 4));
+				FineVolumeUp(pChn, (param >> 4), false);
 				return;
 			} else //Slide -15
 			{
@@ -3083,7 +3091,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 		{
 			if (param & 0x0F) //Fine downslide
 			{
-				FineVolumeDown(pChn, (param & 0x0F));
+				FineVolumeDown(pChn, (param & 0x0F), false);
 				return;
 			} else //Slide +15
 			{
@@ -3198,14 +3206,17 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
 }
 
 
-void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param)
-//---------------------------------------------------------
+void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param, bool volCol)
+//----------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
 		// FT2 compatibility: EAx / EBx memory is not linked
 		// Test case: FineVol-LinkMem.xm
 		if(param) pChn->nOldFineVolUpDown = (param << 4) | (pChn->nOldFineVolUpDown & 0x0F); else param = (pChn->nOldFineVolUpDown >> 4);
+	} else if(volCol)
+	{
+		if(param) pChn->nOldVolColSlide = param; else param = pChn->nOldVolColSlide;
 	} else
 	{
 		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
@@ -3220,14 +3231,17 @@ void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::FineVolumeDown(ModChannel *pChn, UINT param)
-//-----------------------------------------------------------
+void CSoundFile::FineVolumeDown(ModChannel *pChn, UINT param, bool volCol)
+//------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
 		// FT2 compatibility: EAx / EBx memory is not linked
 		// Test case: FineVol-LinkMem.xm
 		if(param) pChn->nOldFineVolUpDown = param | (pChn->nOldFineVolUpDown & 0xF0); else param = (pChn->nOldFineVolUpDown & 0x0F);
+	} else if(volCol)
+	{
+		if(param) pChn->nOldVolColSlide = param; else param = pChn->nOldVolColSlide;
 	} else
 	{
 		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
@@ -3339,9 +3353,9 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 	// E9x: Retrig
 	case 0x90:	RetrigNote(nChn, param); break;
 	// EAx: Fine Volume Up
-	case 0xA0:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeUp(pChn, param); break;
+	case 0xA0:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeUp(pChn, param, false); break;
 	// EBx: Fine Volume Down
-	case 0xB0:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param); break;
+	case 0xB0:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param, false); break;
 	// ECx: Note Cut
 	case 0xC0:	NoteCut(nChn, param); break;
 	// EDx: Note Delay
