@@ -574,8 +574,8 @@ protected:
 	void VolumeSlide(ModChannel *pChn, UINT param);
 	void PanningSlide(ModChannel *pChn, UINT param, bool memory = true);
 	void ChannelVolSlide(ModChannel *pChn, UINT param);
-	void FineVolumeUp(ModChannel *pChn, UINT param);
-	void FineVolumeDown(ModChannel *pChn, UINT param);
+	void FineVolumeUp(ModChannel *pChn, UINT param, bool volCol);
+	void FineVolumeDown(ModChannel *pChn, UINT param, bool volCol);
 	void Tremolo(ModChannel *pChn, UINT param);
 	void Panbrello(ModChannel *pChn, UINT param);
 	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param

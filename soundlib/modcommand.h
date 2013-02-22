@@ -62,11 +62,12 @@ public:
 	void Clear() { memset(this, 0, sizeof(ModCommand)); }
 
 	// Returns true if modcommand is empty, false otherwise.
-	// If ignoreEffectValues is true (default), effect values are ignored are ignored if there is no effect command present.
+	// If ignoreEffectValues is true (default), effect values are ignored if there is no effect command present.
 	bool IsEmpty(const bool ignoreEffectValues = true) const
 	{
 		if(ignoreEffectValues)
-			return (this->note == 0 && this->instr == 0 && this->volcmd == 0 && this->command == 0);
+			return *reinterpret_cast<const uint32 *>(this) == 0;	// First four bytes contain note, instr, volcmd and command
+			//return (this->note == 0 && this->instr == 0 && this->volcmd == VOLCMD_NONE && this->command == CMD_NONE);
 		else
 			return (*this == Empty());
 	}

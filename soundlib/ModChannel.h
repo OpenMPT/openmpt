@@ -84,7 +84,7 @@ typedef struct __declspec(align(32)) ModChannel_
 	uint8 nNewNote, nNewIns, nCommand, nArpeggio;
 	uint8 nOldVolumeSlide, nOldFineVolUpDown;
 	uint8 nOldPortaUpDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
-	uint8 nOldPanSlide, nOldChnVolSlide;
+	uint8 nOldPanSlide, nOldChnVolSlide, nOldVolColSlide;
 	uint8 nVibratoType, nVibratoSpeed, nVibratoDepth;
 	uint8 nTremoloType, nTremoloSpeed, nTremoloDepth;
 	uint8 nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
@@ -140,7 +140,6 @@ typedef struct __declspec(align(32)) ModChannel_
 		resetSetPosAdvanced =	4,		// Reset more runtime channel attributes
 		resetSetPosFull = 		resetSetPosBasic | resetSetPosAdvanced | resetChannelSettings,		// Reset all runtime channel attributes
 		resetTotal =			resetSetPosFull,
-
 	};
 
 	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
