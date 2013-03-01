@@ -1482,7 +1482,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	for (UINT nsmp=1; nsmp<=itHeader.smpnum; nsmp++)
 	{
 #ifdef MODPLUG_TRACKER
-		bool compress = ::GetPrivateProfileInt("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0, theApp.GetConfigFileName()) != 0;
+		int type = GetType() == MOD_TYPE_IT ? 1 : 4;
+		if(compatibilityExport) type = 2;
+		bool compress = (::GetPrivateProfileInt("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0, theApp.GetConfigFileName()) & type) != 0;
 #else
 		bool compress = false;
 #endif
