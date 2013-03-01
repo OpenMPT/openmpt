@@ -76,6 +76,7 @@ public:
 	ROWINDEX recordQuantizeRows;
 	bool m_bHideUnavailableCtxMenuItems;
 	int orderlistMargins;
+	int rowDisplayOffset;
 
 	// Sample Editor Setup
 	UINT m_nSampleUndoMaxBuffer;
