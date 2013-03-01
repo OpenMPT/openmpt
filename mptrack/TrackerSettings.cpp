@@ -88,6 +88,7 @@ TrackerSettings::TrackerSettings()
 	m_nRowHighlightMeasures = 16;
 	m_nRowHighlightBeats = 4;
 	recordQuantizeRows = 0;
+	rowDisplayOffset = 0;
 
 	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
 
@@ -386,6 +387,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	gbPatternRecord = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);
 	gnAutoChordWaitTime = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
 	orderlistMargins = GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", orderlistMargins, iniFile);
+	rowDisplayOffset = GetPrivateProfileInt("Pattern Editor", "RowDisplayOffset", rowDisplayOffset, iniFile);
 	recordQuantizeRows = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
 	gbShowHackControls = (0 != CMainFrame::GetPrivateProfileDWord("Misc", "ShowHackControls", gbShowHackControls ? 1 : 0, iniFile));
 	CSoundFile::s_DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", CSoundFile::s_DefaultPlugVolumeHandling, iniFile));

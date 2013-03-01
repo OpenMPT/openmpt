@@ -825,8 +825,13 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 	for (UINT row=startRow; row<numRows; row++)
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
-		
-		wsprintf(s, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "%02X" : "%d", row);
+		const int compRow = row + CMainFrame::GetSettings().rowDisplayOffset;
+
+		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY))
+			wsprintf(s, "%s%02X", compRow < 0 ? "-" : "", abs(compRow));
+		else
+			wsprintf(s, "%d", compRow);
+
 		rect.left = 0;
 		rect.top = ypaint;
 		rect.right = rcClient.right;
@@ -855,16 +860,16 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
 		 && (nBeat) && (nBeat < numRows))
 		{
-			if (!(row % nBeat))
+			if(!(compRow % nBeat))
 			{
 				row_bkcol = MODCOLOR_2NDHIGHLIGHT;
 			}
 		}
 		// primary highlight (measures)
-		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
-		 && (nMeasure) && (nMeasure < numRows))
+		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
+			&& (nMeasure) && (nMeasure < numRows))
 		{
-			if (!(row % nMeasure))
+			if(!(compRow % nMeasure))
 			{
 				row_bkcol = MODCOLOR_BACKHILIGHT;
 			}
