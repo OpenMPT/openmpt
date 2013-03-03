@@ -169,11 +169,12 @@ CCtrlSamples::CCtrlSamples() :
 	m_nStretchProcessStepLength(nDefaultStretchChunkSize),
 	m_nSequenceMs(DEFAULT_SEQUENCE_MS),
 	m_nSeekWindowMs(DEFAULT_SEEKWINDOW_MS),
-	m_nOverlapMs(DEFAULT_OVERLAP_MS)
+	m_nOverlapMs(DEFAULT_OVERLAP_MS),
+	m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
 {
 	m_nSample = 1;
 	m_nLockCount = 1;
-	m_nPreviousRawFormat = 0;
+	rememberRawFormat = false;
 }
 
 
@@ -772,15 +773,16 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	if (!bOk)
 	{
 		CRawSampleDlg dlg(this);
-		if(m_nPreviousRawFormat != 0)
+		if(rememberRawFormat)
 		{
 			dlg.SetSampleFormat(m_nPreviousRawFormat);
 			dlg.SetRememberFormat(true);
 		}
 		EndWaitCursor();
-		if ((m_nPreviousRawFormat != 0) || (dlg.DoModal() == IDOK))
+		if(rememberRawFormat || dlg.DoModal() == IDOK)
 		{
-			m_nPreviousRawFormat = (dlg.GetRemeberFormat() ? dlg.GetSampleFormat() : 0);
+			m_nPreviousRawFormat = dlg.GetSampleFormat();
+			rememberRawFormat = dlg.GetRemeberFormat();
 
 			BeginWaitCursor();
 			ModSample &sample = m_pSndFile->GetSample(m_nSample);
@@ -788,42 +790,30 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			m_pSndFile->DestroySampleThreadsafe(m_nSample);
 			sample.nLength = len;
 
-			SampleIO sampleIO(
-				SampleIO::_8bit,
-				SampleIO::mono,
-				SampleIO::littleEndian,
-				(dlg.GetSampleFormat() & ER_UNSIGNED) ? SampleIO::unsignedPCM : SampleIO::signedPCM);
+			SampleIO sampleIO = dlg.GetSampleFormat();
 
-			if(dlg.GetSampleFormat() & ER_16BIT)
+			if(sampleIO.GetBitDepth() != 8)
 			{
 				sample.nLength /= 2;
-				sampleIO |= SampleIO::_16bit;
 			}
 
 			// Interleaved Stereo Sample
-			if(dlg.GetSampleFormat() & ER_STEREO)
+			if(sampleIO.GetChannelFormat() != SampleIO::mono)
 			{
 				sample.nLength /= 2;
-				sampleIO |= SampleIO::stereoInterleaved;
 			}
 
-			LPSTR p16 = (LPSTR)lpFile;
-			DWORD l16 = len;
-			if ((sample.uFlags & CHN_16BIT) && (len & 1))
-			{
-				p16++;
-				l16--;
-			}
-
-			if (sampleIO.ReadSample(sample, p16, l16))
+			if (sampleIO.ReadSample(sample, lpFile, len))
 			{
 				bOk = true;
 
 				sample.nGlobalVol = 64;
 				sample.nVolume = 256;
 				sample.nPan = 128;
-				sample.filename[0] = 0;
-				if (!sample.nC5Speed) sample.nC5Speed = 22050;
+				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP);
+				sample.filename[0] = '\0';
+				m_pSndFile->m_szNames[m_nSample][0] = '\0';
+				if(!sample.nC5Speed) sample.nC5Speed = 22050;
 			} else
 			{
 				m_pModDoc->GetSampleUndo().Undo(m_nSample);

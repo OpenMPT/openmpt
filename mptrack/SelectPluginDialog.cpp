@@ -210,7 +210,8 @@ void CSelectPluginDlg::OnOK()
 
 	if (changed)
 	{
-		CMainFrame::GetSettings().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
+		if(m_pPlugin->Info.dwPluginId2)
+			CMainFrame::GetSettings().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
 	}
 	else
@@ -335,7 +336,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 					{
 						currentPlug = h;
 					}
-				} else if (p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
+				} else if(p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
 				{
 					// Previously selected plugin
 					currentPlug = h;

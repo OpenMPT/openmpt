@@ -59,7 +59,7 @@ void CAmpDlg::OnOK()
 //////////////////////////////////////////////////////////////
 // Sample import dialog
 
-UINT CRawSampleDlg::m_nFormat = ER_8BIT | ER_UNSIGNED | ER_MONO;
+SampleIO CRawSampleDlg::m_nFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM);
 
 BOOL CRawSampleDlg::OnInitDialog()
 //--------------------------------
@@ -73,13 +73,12 @@ BOOL CRawSampleDlg::OnInitDialog()
 void CRawSampleDlg::OnOK()
 //------------------------
 {
-	m_nFormat = 0;
-	if(IsDlgButtonChecked(IDC_RADIO1)) m_nFormat |= ER_8BIT;
-	if(IsDlgButtonChecked(IDC_RADIO2)) m_nFormat |= ER_16BIT;
-	if(IsDlgButtonChecked(IDC_RADIO3)) m_nFormat |= ER_UNSIGNED;
-	if(IsDlgButtonChecked(IDC_RADIO4)) m_nFormat |= ER_SIGNED;
-	if(IsDlgButtonChecked(IDC_RADIO5)) m_nFormat |= ER_MONO;
-	if(IsDlgButtonChecked(IDC_RADIO6)) m_nFormat |= ER_STEREO;
+	if(IsDlgButtonChecked(IDC_RADIO1)) m_nFormat |= SampleIO::_8bit;
+	if(IsDlgButtonChecked(IDC_RADIO2)) m_nFormat |= SampleIO::_16bit;
+	if(IsDlgButtonChecked(IDC_RADIO3)) m_nFormat |= SampleIO::unsignedPCM;
+	if(IsDlgButtonChecked(IDC_RADIO4)) m_nFormat |= SampleIO::signedPCM;
+	if(IsDlgButtonChecked(IDC_RADIO5)) m_nFormat |= SampleIO::mono;
+	if(IsDlgButtonChecked(IDC_RADIO6)) m_nFormat |= SampleIO::stereoInterleaved;
 	m_bRememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) != BST_UNCHECKED;
 	CDialog::OnOK();
 }
@@ -88,9 +87,9 @@ void CRawSampleDlg::OnOK()
 void CRawSampleDlg::UpdateDialog()
 //--------------------------------
 {
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat & ER_8BIT) ? IDC_RADIO1 : IDC_RADIO2 );
-	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat & ER_UNSIGNED) ? IDC_RADIO3 : IDC_RADIO4);
-	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat & ER_MONO) ? IDC_RADIO5 : IDC_RADIO6);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat.GetBitDepth() == 8) ? IDC_RADIO1 : IDC_RADIO2 );
+	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat.GetEncoding() == SampleIO::unsignedPCM) ? IDC_RADIO3 : IDC_RADIO4);
+	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat.GetChannelFormat() == SampleIO::mono) ? IDC_RADIO5 : IDC_RADIO6);
 	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat) ? MF_CHECKED : MF_UNCHECKED);
 }
 
