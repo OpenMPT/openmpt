@@ -51,9 +51,9 @@ void UpdateEnvelopes(InstrumentEnvelope *mptEnv, CSoundFile *pSndFile, std::bits
 //---------------------------------------------------------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
-	const uint8 iEnvMax = pSndFile->GetModSpecifications().envelopePointsMax;
+	const uint8 envMax = pSndFile->GetModSpecifications().envelopePointsMax;
 
-	#define TRIMENV(iEnvLen) if(iEnvLen > iEnvMax) { iEnvLen = iEnvMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
+	#define TRIMENV(envLen) if(envLen > envMax) { envLen = envMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
 
 	TRIMENV(mptEnv->nNodes);
 	TRIMENV(mptEnv->nLoopStart);
@@ -111,9 +111,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	const CModSpecifications& specs = m_SndFile.GetModSpecifications(nNewType);
 
 	// Check if conversion to 64 rows is necessary
-	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
+	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++)
 	{
-		if ((m_SndFile.Patterns[nPat]) && (m_SndFile.Patterns[nPat].GetNumRows() != 64))
+		if(m_SndFile.Patterns.IsValidPat(pat) && (m_SndFile.Patterns[pat].GetNumRows() != 64))
 			nResizedPatterns++;
 	}
 
@@ -134,15 +134,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 		// Resizing all patterns to 64 rows
-		for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if ((m_SndFile.Patterns[nPat]) && (m_SndFile.Patterns[nPat].GetNumRows() != 64))
+		for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) if(m_SndFile.Patterns.IsValidPat(pat) && m_SndFile.Patterns[pat].GetNumRows() != 64)
 		{
-			ROWINDEX origRows = m_SndFile.Patterns[nPat].GetNumRows();
-			m_SndFile.Patterns[nPat].Resize(64);
+			ROWINDEX origRows = m_SndFile.Patterns[pat].GetNumRows();
+			m_SndFile.Patterns[pat].Resize(64);
 
 			if(origRows < 64)
 			{
 				// Try to save short patterns by inserting a pattern break.
-				m_SndFile.Patterns[nPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(m_SndFile.Patterns[nPat].GetNumRows() - 1).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(origRows - 1).Retry(EffectWriter::rmTryNextRow));
 			}
 
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
@@ -170,33 +170,49 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	/////////////////////////////
 	// Converting pattern data
 
-	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) if (m_SndFile.Patterns[pat])
 	{
-		ModCommand *m = m_SndFile.Patterns[nPat];
+		ModCommand *m = m_SndFile.Patterns[pat];
 
 		// This is used for -> MOD/XM conversion
-		vector<vector<ModCommand::PARAM> > cEffectMemory(GetNumChannels());
+		vector<vector<ModCommand::PARAM> > effMemory(GetNumChannels());
+		vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
 		for(size_t i = 0; i < GetNumChannels(); i++)
 		{
-			cEffectMemory[i].resize(MAX_EFFECTS, 0);
+			effMemory[i].resize(MAX_EFFECTS, 0);
 		}
 
 		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
-		CHANNELINDEX channel = 0;
+		CHANNELINDEX chn = 0;
 		ROWINDEX row = 0;
 
-		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.GetNumChannels(); len; m++, len--, channel++)
+		for(size_t len = m_SndFile.Patterns[pat].GetNumRows() * m_SndFile.GetNumChannels(); len; m++, len--, chn++)
 		{
-			if(channel >= GetNumChannels())
+			if(chn >= GetNumChannels())
 			{
-				channel = 0;
+				chn = 0;
 				row++;
 			}
 
-			m->Convert(nOldType, nNewType);
+			// Deal with volume column slide memory (it's not shared with the effect column)
+			if(oldTypeIsIT_MPT && (newTypeIsMOD_XM || newTypeIsS3M))
+			{
+				switch(m->volcmd)
+				{
+				case VOLCMD_VOLSLIDEUP:
+				case VOLCMD_VOLSLIDEDOWN:
+				case VOLCMD_FINEVOLUP:
+				case VOLCMD_FINEVOLDOWN:
+					if(m->vol == 0)
+						m->vol = volMemory[chn];
+					else
+						volMemory[chn] = m->vol;
+					break;
+				}
+			}
 
 			// Deal with effect memory for MOD/XM arpeggio
-			if (oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
+			if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 			{
 				switch(m->command)
 				{
@@ -205,9 +221,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				case CMD_MODCMDEX:
 					// No effect memory in XM / MOD
 					if(m->param == 0)
-						m->param = cEffectMemory[channel][m->command];
+						m->param = effMemory[chn][m->command];
 					else
-						cEffectMemory[channel][m->command] = m->param;
+						effMemory[chn][m->command] = m->param;
 					break;
 				}
 			}
@@ -224,13 +240,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				case CMD_VOLUMESLIDE:
 					// ProTracker doesn't have effect memory for these commands, so let's try to fix them
 					if(m->param == 0)
-						m->param = cEffectMemory[channel][m->command];
+						m->param = effMemory[chn][m->command];
 					else
-						cEffectMemory[channel][m->command] = m->param;
+						effMemory[chn][m->command] = m->param;
 					break;
 
 				}
 			}
+
+			m->Convert(nOldType, nNewType);
 
 			// When converting to XM, avoid the E60 bug.
 			if(newTypeIsXM)
@@ -261,7 +279,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 					// Delete all commands right of the first command
 					ModCommand *p = m + 1;
-					for(CHANNELINDEX c = channel + 1; c < m_SndFile.GetNumChannels(); c++, p++)
+					for(CHANNELINDEX c = chn + 1; c < m_SndFile.GetNumChannels(); c++, p++)
 					{
 						if(p->command == CMD_S3MCMDEX && (p->param & 0xF0) == 0xE0)
 						{
@@ -274,7 +292,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			{
 				// Delete all commands left of the last command
 				ModCommand *p = m - 1;
-				for(CHANNELINDEX c = 0; c < channel; c++, p--)
+				for(CHANNELINDEX c = 0; c < chn; c++, p--)
 				{
 					if(p->command == CMD_S3MCMDEX && (p->param & 0xF0) == 0xE0)
 					{
@@ -286,7 +304,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 		if(addBreak)
 		{
-			m_SndFile.Patterns[nPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(m_SndFile.Patterns[nPat].GetNumRows() - 1));
+			m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(m_SndFile.Patterns[pat].GetNumRows() - 1));
 		}
 	}
 
@@ -295,13 +313,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 
 	// Do some sample conversion
-	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
+	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
 	{
-		ModSample &sample = m_SndFile.GetSample(nSmp);
-		GetSampleUndo().PrepareUndo(nSmp, sundo_none);
+		ModSample &sample = m_SndFile.GetSample(smp);
+		GetSampleUndo().PrepareUndo(smp, sundo_none);
 
 		// Too many samples? Only 31 samples allowed in MOD format...
-		if(newTypeIsMOD && nSmp > 31 && sample.nLength > 0)
+		if(newTypeIsMOD && smp > 31 && sample.nLength > 0)
 		{
 			CHANGEMODTYPE_WARNING(wMOD31Samples);
 		}
@@ -310,13 +328,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		if(newTypeIsMOD || newTypeIsS3M)
 		{
 			// Bidi loops
-			if((sample.uFlags & CHN_PINGPONGLOOP) != 0)
+			if((sample.uFlags[CHN_PINGPONGLOOP]) != 0)
 			{
 				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
 			}
 
 			// Autovibrato
-			if(sample.nVibDepth || sample.nVibRate || sample.nVibSweep)
+			if((sample.nVibDepth | sample.nVibRate | sample.nVibSweep) != 0)
 			{
 				CHANGEMODTYPE_WARNING(wSampleAutoVibrato);
 			}
@@ -326,7 +344,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		if(newTypeIsMOD_XM || newTypeIsS3M)
 		{
 			// Sustain loops - convert to normal loops
-			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
+			if((sample.uFlags[CHN_SUSTAINLOOP]) != 0)
 			{
 				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
 			}
@@ -341,9 +359,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		sample.Convert(nOldType, nNewType);
 	}
 
-	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
+	for(INSTRUMENTINDEX ins = 1; ins <= m_SndFile.GetNumInstruments(); ins++)
 	{
-		ModInstrument *pIns = m_SndFile.Instruments[nIns];
+		ModInstrument *pIns = m_SndFile.Instruments[ins];
 		if(pIns == nullptr)
 		{
 			continue;
@@ -352,9 +370,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Convert IT/MPT to XM (fix instruments)
 		if(oldTypeIsIT_MPT && newTypeIsXM)
 		{
-			for (size_t i = 0; i < CountOf(pIns->NoteMap); i++)
+			for(size_t i = 0; i < CountOf(pIns->NoteMap); i++)
 			{
-				if (pIns->NoteMap[i] && pIns->NoteMap[i] != static_cast<BYTE>(i + 1))
+				if (pIns->NoteMap[i] && pIns->NoteMap[i] != static_cast<uint8>(i + 1))
 				{
 					CHANGEMODTYPE_WARNING(wBrokenNoteMap);
 					break;
