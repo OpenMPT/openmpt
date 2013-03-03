@@ -41,7 +41,8 @@ protected:
 	uint32 m_nOverlapMs;
 	uint16 m_nFinetuneStep; // Increment finetune by x when using spin control. Default = 25
 	enum {nDefaultStretchChunkSize = 8192};
-	UINT m_nPreviousRawFormat;
+	SampleIO m_nPreviousRawFormat;
+	bool rememberRawFormat;
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
