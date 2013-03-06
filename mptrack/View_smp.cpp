@@ -309,25 +309,25 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 		if (rect.right > m_rcClient.right) rect.right = m_rcClient.right;
 		if (rect.right > rect.left) InvalidateRect(&rect, FALSE);
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm)
+		if(pMainFrm)
 		{
 			CHAR s[64];
 			s[0] = 0;
-			if (m_dwEndSel > m_dwBeginSel)
+			if(m_dwEndSel > m_dwBeginSel)
 			{
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
-				wsprintf(s, "[%d,%d] (%d sample%s, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
+				wsprintf(s, "[%u,%u] (%u sample%s, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
 				uint32 lSampleRate = pSndFile->GetSample(m_nSample).nC5Speed;
-				if (pSndFile->GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM))
+				if(pSndFile->GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM))
 				{
 					lSampleRate = ModSample::TransposeToFrequency(pSndFile->GetSample(m_nSample).RelativeTone, pSndFile->GetSample(m_nSample).nFineTune);
 				}
 				if (!lSampleRate) lSampleRate = 8363;
-				ULONG msec = ((ULONG)selLength * 1000) / lSampleRate;
-				if (msec < 1000)
-					wsprintf(s+strlen(s), "%lums)", msec);
+				uint64 msec = (uint64(selLength) * 1000) / lSampleRate;
+				if(msec < 1000)
+					wsprintf(s + strlen(s), "%lums)", msec);
 				else
-					wsprintf(s+strlen(s), "%lu.%lus)", msec/1000, (msec/100) % 10);
+					wsprintf(s + strlen(s), "%lu.%lus)", msec / 1000, (msec / 100) % 10);
 			}
 			pMainFrm->SetInfoText(s);
 		}

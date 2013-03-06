@@ -2259,8 +2259,8 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 // Playback
 
 
-void CModDoc::OnPatternRestart()
-//------------------------------
+void CModDoc::OnPatternRestart(bool loop)
+//---------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
@@ -2270,7 +2270,7 @@ void CModDoc::OnPatternRestart()
 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
 			//User has sent play pattern command: set loop pattern checkbox to true.
-			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, loop ? 1 : 0);
 		}
 
 		CSoundFile *pSndFile = GetSoundFile();
@@ -2296,7 +2296,10 @@ void CModDoc::OnPatternRestart()
 		}
 		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentOrder = pSndFile->m_nNextOrder = nOrd;
 		pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
-		pSndFile->LoopPattern(nPat);
+		if(loop)
+			pSndFile->LoopPattern(nPat);
+		else
+			pSndFile->LoopPattern(PATTERNINDEX_INVALID);
 		pSndFile->m_nNextRow = 0;
 
 		// set playback timer in the status bar (and update channel status)
@@ -2492,6 +2495,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromCursor: OnPatternPlayNoLoop(); break;
 		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
 		case kcPlayPauseSong: OnPlayerPlay(); break;
+		case kcPlaySongFromPattern: OnPatternRestart(false); break;
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;
 //		case kcPauseSong: OnPlayerPause(); break;
