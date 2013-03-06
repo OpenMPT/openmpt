@@ -88,6 +88,7 @@ enum CommandID
 	kcPlaySongFromCursor,
 	kcPlayPatternFromStart,
 	kcPlayPatternFromCursor,
+	kcPlaySongFromPattern,
 	kcPanic,
 	kcEstimateSongLength,
 	kcApproxRealBPM,
@@ -1260,8 +1261,6 @@ public:
 	bool LoadFile(std::istream& iStrm, LPCTSTR szFilename);
 	bool LoadDefaultKeymap();
 	void UpgradeKeymap(CCommandSet *pCommands, int oldVersion);
-
-	static DWORD GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke);
 	
 };
 //end rewbs.customKeys

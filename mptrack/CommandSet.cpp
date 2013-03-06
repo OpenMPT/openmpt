@@ -104,8 +104,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcViewSamples, 1023, _T("View Samples"));
 	DefineKeyCommand(kcViewInstruments, 1024, _T("View Instruments"));
 	DefineKeyCommand(kcViewComments, 1025, _T("View Comments"));
-	DefineKeyCommand(kcPlayPatternFromCursor, 1026, _T("Play pattern from cursor"));
-	DefineKeyCommand(kcPlayPatternFromStart, 1027, _T("Play pattern from start"));
+	DefineKeyCommand(kcPlayPatternFromCursor, 1026, _T("Play Pattern from Cursor"));
+	DefineKeyCommand(kcPlayPatternFromStart, 1027, _T("Play Pattern from Start"));
 	DefineKeyCommand(kcPlaySongFromCursor, 1028, _T("Play Song from Cursor"));
 	DefineKeyCommand(kcPlaySongFromStart, 1029, _T("Play Song from Start"));
 	DefineKeyCommand(kcPlayPauseSong, 1030, _T("Play Song / Pause song"));
@@ -650,6 +650,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcToggleNoteOffRecordPC, 1895, _T("Toggle Note Off record (PC keyboard)"));
 	DefineKeyCommand(kcToggleNoteOffRecordMIDI, 1896, _T("Toggle Note Off record (MIDI)"));
 	DefineKeyCommand(kcFindInstrument, 1897, _T("Pick up nearest instrument number"));
+	DefineKeyCommand(kcPlaySongFromPattern, 1898, _T("Play Song from Pattern Start"));
 
 	// Add new key commands here.
 
@@ -696,10 +697,10 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 		}
 	}
 	//Check that this keycombination isn't already assigned (in this context), except for dummy keys
-	for (int curCmd=0; curCmd<kcNumCommands; curCmd++)	
+	for (int curCmd=0; curCmd<kcNumCommands; curCmd++)
 	{ //search all commands
 		if (IsDummyCommand(cmd))    // no need to search if we are adding a dummy key
-			break;								 
+			break;
 		if (IsDummyCommand((CommandID)curCmd)) //no need to check against a dummy key
 			continue;
 		for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
@@ -1390,15 +1391,15 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	CArray<InputTargetContext, InputTargetContext> contexts;
 	
 	//Clear map
-	memset(km, -1, sizeof(KeyMap));
+	memset(km, kcNull, sizeof(KeyMap));
 
 	//Copy commandlist content into map:
-	for (UINT cmd=0; cmd<kcNumCommands; cmd++)
+	for(UINT cmd=0; cmd<kcNumCommands; cmd++)
 	{	
-		if (IsDummyCommand((CommandID)cmd))
+		if(IsDummyCommand((CommandID)cmd))
 			continue;
 
-		for (INT_PTR k=0; k<commands[cmd].kcList.GetSize(); k++)
+		for(INT_PTR k=0; k<commands[cmd].kcList.GetSize(); k++)
 		{
 			contexts.RemoveAll();
 			eventTypes.RemoveAll();
@@ -1432,33 +1433,16 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			}
 
 			//long label = 0;
-			for (int cx=0; cx<contexts.GetSize(); cx++)	{
-				for (int ke=0; ke<eventTypes.GetSize(); ke++) {
+			for (int cx=0; cx<contexts.GetSize(); cx++)
+			{
+				for (int ke=0; ke<eventTypes.GetSize(); ke++)
+				{
 					km[contexts[cx]][curKc.mod][curKc.code][eventTypes[ke]] = (CommandID)cmd;
 				}
 			}
 		}
 
 	}
-}
-
-
-DWORD CCommandSet::GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke)
-//---------------------------------------------------------------------------------------------
-{ //Unused
-	ASSERT((long)ctx<0xFF);
-	ASSERT((long)mod<0xFF);
-	ASSERT((long)code<0xFF);
-	ASSERT((long)ke<0xFF);
-
-	BYTE ctxCode  = (BYTE)ctx;
-	BYTE modCode  = (BYTE)mod;
-	BYTE codeCode = (BYTE)code;
-	//BYTE keCode   = (BYTE)ke;
-
-	DWORD label = ctxCode | (modCode<<8) | (codeCode<<16) | (ke<<24);
-
-	return label;
 }
 
 
