@@ -799,7 +799,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 	MODFileHeader fileHeader;
 	file.Read(fileHeader);
 
-	// Sanity check: No more than 128 positions. We won't check the restart pos since I've encountered so many invalid values (0x6A, 0x72, 0x78, ...) that it doesn't make sense to check for them all.
+	// Sanity check: No more than 128 positions.
 	if(fileHeader.numOrders > 128)
 	{
 		return false;
@@ -828,17 +828,19 @@ bool CSoundFile::ReadM15(FileReader &file)
 	m_nChannels = 4;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
-	if(fileHeader.restartPos <= 0x40)
+	if(fileHeader.restartPos <= 0x20)
 	{
 		m_nDefaultTempo = 125;
 		m_nRestartPos = (fileHeader.restartPos < fileHeader.numOrders ? fileHeader.restartPos : 0);
 	} else
 	{
-		// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the tempo.
+		// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
 		m_nDefaultTempo = fileHeader.restartPos * 25 / 24;
 		m_nRestartPos = 0;
 		if(fileHeader.restartPos != 0x78)
 		{
+			// Convert to CIA timing
+			m_nDefaultTempo = static_cast<TEMPO>(((709378.92f / 50.0f) * 125.0f) / ((240.0f - static_cast<float>(fileHeader.restartPos)) * 122.0f));
 			if(minVersion > UST1_80)
 			{
 				// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.

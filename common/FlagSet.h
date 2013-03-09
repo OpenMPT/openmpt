@@ -110,6 +110,12 @@ public:
 		return (flags & static_cast<store_t>(flag)) > 0;
 	}
 
+	// Test if all specified flags are set.
+	bool test_all(enum_t flag) const
+	{
+		return (flags & static_cast<store_t>(flag)) == static_cast<store_t>(flag);
+	}
+
 	// Test if any flag is set.
 	bool any() const
 	{
