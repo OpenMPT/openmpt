@@ -96,7 +96,6 @@ public:
 
 	// Read/write.
 	size_t WriteAsByte(FILE* f, const uint16 count) const;
-	size_t WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize) const;
 	bool ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength);
 	bool ReadAsByte(FileReader &file, size_t howMany);
 	template<typename T, size_t arraySize>
