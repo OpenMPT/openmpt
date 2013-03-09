@@ -1006,6 +1006,13 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol)
 {
 	if (pChn->dwFlags[CHN_TREMOLO])
 	{
+		if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE))
+		{
+			// ProTracker doesn't apply tremolo nor advance on the first tick.
+			// Test case: VibratoReset.mod
+			return;
+		}
+
 		UINT trempos = pChn->nTremoloPos;
 		// IT compatibility: Why would you not want to execute tremolo at volume 0?
 		if(vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
