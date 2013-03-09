@@ -2202,9 +2202,8 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	HWND followSonghWnd;
 	PATTERNVIEWSTATE *patternViewState;
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
-	CSoundFile *pSndFile = GetSoundFile();
 
-	if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
+	if(strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
 		followSonghWnd = pChildFrm->GetHwndView();
 		PATTERNVIEWSTATE patternViewState;
@@ -2213,9 +2212,9 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		pat = patternViewState.nPattern;
 		row = patternViewState.cursor.GetRow();
 		ord = patternViewState.nOrder;	
-	}
-	else	//patern editor object does not exist (i.e. is not active)  - use saved state.
+	} else
 	{
+		//patern editor object does not exist (i.e. is not active)  - use saved state.
 		followSonghWnd = NULL;
 		patternViewState = pChildFrm->GetPatternViewState();
 
@@ -2223,26 +2222,25 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		row = patternViewState->cursor.GetRow();
 		ord = patternViewState->nOrder;
 	}
-	//rewbs.fix3185: if position is invalid, go to start of song.
-	if (ord >= m_SndFile.Order.size())
+
+	if(ord >= m_SndFile.Order.size())
 	{
 		ord = 0;
-		pat = pSndFile->Order[ord];
+		pat = m_SndFile.Order[ord];
 	}
-	if (pat >= m_SndFile.Patterns.Size())
+	if(pat >= m_SndFile.Patterns.Size())
 	{
 		pat=0;
 	}
-	if (row >= pSndFile->Patterns[pat].GetNumRows())
+	if(row >= m_SndFile.Patterns[pat].GetNumRows())
 	{
 		row=0;
 	}
-	//end rewbs.fix3185
 
 	//ensure order correlates with pattern.
-	if (pSndFile->Order[ord] != pat)
+	if(m_SndFile.Order[ord] != pat)
 	{
-		ORDERINDEX tentativeOrder = pSndFile->Order.FindOrder(pat);
+		ORDERINDEX tentativeOrder = m_SndFile.Order.FindOrder(pat);
 		if (tentativeOrder != ORDERINDEX_INVALID)	//ensure a valid order exists.
 		{
 			ord = tentativeOrder;
@@ -2273,8 +2271,6 @@ void CModDoc::OnPatternRestart(bool loop)
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, loop ? 1 : 0);
 		}
 
-		CSoundFile *pSndFile = GetSoundFile();
-
 		ROWINDEX nRow;
 		PATTERNINDEX nPat;
 		ORDERINDEX nOrd;
@@ -2289,28 +2285,28 @@ void CModDoc::OnPatternRestart(bool loop)
 		// Cut instruments/samples
 		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			pSndFile->Chn[i].nPatternLoopCount = 0;
-			pSndFile->Chn[i].nPatternLoop = 0;
-			pSndFile->Chn[i].nFadeOutVol = 0;
-			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			m_SndFile.Chn[i].nPatternLoopCount = 0;
+			m_SndFile.Chn[i].nPatternLoop = 0;
+			m_SndFile.Chn[i].nFadeOutVol = 0;
+			m_SndFile.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentOrder = pSndFile->m_nNextOrder = nOrd;
-		pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+		if ((nOrd < m_SndFile.Order.size()) && (m_SndFile.Order[nOrd] == nPat)) m_SndFile.m_nCurrentOrder = m_SndFile.m_nNextOrder = nOrd;
+		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 		if(loop)
-			pSndFile->LoopPattern(nPat);
+			m_SndFile.LoopPattern(nPat);
 		else
-			pSndFile->LoopPattern(PATTERNINDEX_INVALID);
-		pSndFile->m_nNextRow = 0;
+			m_SndFile.LoopPattern(PATTERNINDEX_INVALID);
+		m_SndFile.m_nNextRow = 0;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, 0);
 
 		if(pModPlaying == this)
 		{
-			pSndFile->StopAllVsti();
+			m_SndFile.StopAllVsti();
 		} else
 		{
-			pSndFile->ResumePlugins();
+			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
@@ -2337,8 +2333,6 @@ void CModDoc::OnPatternPlay()
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
 		}
 
-		CSoundFile *pSndFile = GetSoundFile();
-
 		ROWINDEX nRow;
 		PATTERNINDEX nPat;
 		ORDERINDEX nOrd;
@@ -2351,24 +2345,24 @@ void CModDoc::OnPatternPlay()
 		CriticalSection cs;
 
 		// Cut instruments/samples
-		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
-			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			m_SndFile.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentOrder = pSndFile->m_nNextOrder = nOrd;
-		pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
-		pSndFile->LoopPattern(nPat);
-		pSndFile->m_nNextRow = nRow;
+		if ((nOrd < m_SndFile.Order.size()) && (m_SndFile.Order[nOrd] == nPat)) m_SndFile.m_nCurrentOrder = m_SndFile.m_nNextOrder = nOrd;
+		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+		m_SndFile.LoopPattern(nPat);
+		m_SndFile.m_nNextRow = nRow;
 		
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow);
 
 		if(pModPlaying == this)
 		{
-			pSndFile->StopAllVsti();
+			m_SndFile.StopAllVsti();
 		} else
 		{
-			pSndFile->ResumePlugins();
+			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
@@ -2396,8 +2390,6 @@ void CModDoc::OnPatternPlayNoLoop()
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
 
-		CSoundFile *pSndFile = GetSoundFile();
-
 		ROWINDEX nRow;
 		PATTERNINDEX nPat;
 		ORDERINDEX nOrd;
@@ -2409,27 +2401,27 @@ void CModDoc::OnPatternPlayNoLoop()
 
 		CriticalSection cs;
 		// Cut instruments/samples
-		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
-			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			m_SndFile.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
-		pSndFile->SetCurrentOrder(nOrd);
-		if (pSndFile->Order[nOrd] == nPat)
-			pSndFile->DontLoopPattern(nPat, nRow);
+		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+		m_SndFile.SetCurrentOrder(nOrd);
+		if (m_SndFile.Order[nOrd] == nPat)
+			m_SndFile.DontLoopPattern(nPat, nRow);
 		else
-			pSndFile->LoopPattern(nPat);
-		pSndFile->m_nNextRow = nRow;
+			m_SndFile.LoopPattern(nPat);
+		m_SndFile.m_nNextRow = nRow;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow);
 
 		if(pModPlaying == this)
 		{
-			pSndFile->StopAllVsti();
+			m_SndFile.StopAllVsti();
 		} else
 		{
-			pSndFile->ResumePlugins();
+			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
@@ -2614,9 +2606,9 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	//if macro already exists for this param, alert user and return
 	for (int checkMacro = 0; checkMacro < NUM_MACROS; checkMacro++)
 	{
-		int macroType = GetSoundFile()->m_MidiCfg.GetParameteredMacroType(checkMacro);
+		int macroType = m_SndFile.m_MidiCfg.GetParameteredMacroType(checkMacro);
 		
-		if (macroType == sfx_plug && GetSoundFile()->m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
+		if (macroType == sfx_plug && m_SndFile.m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
 		{
 			CString message;
 			message.Format("Parameter %02d can already be controlled with macro %X.", paramToUse, checkMacro);
@@ -2626,9 +2618,9 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	}
 
 	//set new macro
-	if (paramToUse < 384)
+	if(paramToUse < 384)
 	{
-		GetSoundFile()->m_MidiCfg.CreateParameteredMacro(macroToSet, sfx_plug, paramToUse);
+		m_SndFile.m_MidiCfg.CreateParameteredMacro(macroToSet, sfx_plug, paramToUse);
 	} else
 	{
 		CString message;

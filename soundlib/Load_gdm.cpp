@@ -441,7 +441,6 @@ bool CSoundFile::ReadGDM(FileReader &file)
 								switch(m.param & 0x0F)
 								{
 								case 0x0:	// Surround Off
-									m.command = CMD_S3MCMDEX;
 									m.param = 0x90;
 									break;
 								case 0x1:	// Surround On

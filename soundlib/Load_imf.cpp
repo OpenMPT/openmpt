@@ -30,7 +30,7 @@ struct IMFFileHeader
 {
 	enum SongFlags
 	{
-		lineSlides = 0x01,
+		linearSlides = 0x01,
 	};
 
 	char   title[32];			// Songname (ASCIIZ-String, max. 31 chars)
@@ -46,6 +46,7 @@ struct IMFFileHeader
 	uint8  unused2[8];
 	char   im10[4];				// 'IM10'
 	IMFChannel channels[32];	// Channel settings
+
 	uint8 orderlist[256];		// Order list (0xFF = +++; blank out anything beyond ordnum)
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
@@ -436,7 +437,7 @@ bool CSoundFile::ReadIMF(FileReader &file)
 	// Song Name
 	StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[0], fileHeader.title);
 
-	m_SongFlags = (fileHeader.flags & IMFFileHeader::lineSlides) ? SONG_LINEARSLIDES : SongFlags(0);
+	m_SongFlags = (fileHeader.flags & IMFFileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0);
 	m_nDefaultSpeed = fileHeader.tempo;
 	m_nDefaultTempo = fileHeader.bpm;
 	m_nDefaultGlobalVolume = Clamp(fileHeader.master, uint8(0), uint8(64)) * 4;

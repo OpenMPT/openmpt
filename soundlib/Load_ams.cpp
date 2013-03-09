@@ -531,11 +531,8 @@ struct AMS2Envelope
 		file.Read(*this);
 
 		// Read envelope points
-		struct
-		{
-			uint8 data[64][3];
-		} env;
-		file.ReadStructPartial(env, numPoints * 3);
+		uint8 data[64][3];
+		file.ReadStructPartial(data, numPoints * 3);
 
 		if(numPoints <= 1)
 		{
@@ -543,8 +540,8 @@ struct AMS2Envelope
 			return;
 		}
 
-		STATIC_ASSERT(MAX_ENVPOINTS >= CountOf(env.data));
-		mptEnv.nNodes = Util::Min(numPoints, uint8(CountOf(env.data)));
+		STATIC_ASSERT(MAX_ENVPOINTS >= CountOf(data));
+		mptEnv.nNodes = Util::Min(numPoints, uint8(CountOf(data)));
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
@@ -553,9 +550,9 @@ struct AMS2Envelope
 		{
 			if(i != 0)
 			{
-				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + static_cast<uint16>(Util::Max(1, env.data[i][0] | ((env.data[i][1] & 0x01) << 8)));
+				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + static_cast<uint16>(Util::Max(1, data[i][0] | ((data[i][1] & 0x01) << 8)));
 			}
-			mptEnv.Values[i] = env.data[i][2];
+			mptEnv.Values[i] = data[i][2];
 		}
 	}
 };

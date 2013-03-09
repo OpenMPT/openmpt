@@ -530,12 +530,12 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	// Check if any samples are not referenced in the patterns (sample mode) or by an instrument (instrument mode).
 	// This doesn't check yet if a sample is referenced by an instrument, but actually unused in the patterns.
-	for(SAMPLEINDEX nSmp = pSndFile->GetNumSamples(); nSmp >= 1; nSmp--) if (pSndFile->GetSample(nSmp).pSample)
+	for(SAMPLEINDEX smp = 1; smp <= pSndFile->GetNumSamples(); smp--) if (pSndFile->GetSample(smp).pSample)
 	{
-		if(!pSndFile->IsSampleUsed(nSmp))
+		if(!pSndFile->IsSampleUsed(smp))
 		{
-			samplesUsed[nSmp] = false;
-			m_pModDoc->GetSampleUndo().PrepareUndo(nSmp, sundo_delete);
+			samplesUsed[smp] = false;
+			m_pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_delete);
 		}
 	}
 
