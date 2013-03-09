@@ -1596,6 +1596,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE))
 			{
 				// ProTracker doesn't apply vibrato nor advance on the first tick.
+				// Test case: VibratoReset.mod
 				return;
 			} else if((GetType() & MOD_TYPE_XM) && (chn.nVibratoType & 0x03) == 1)
 			{
@@ -2095,12 +2096,15 @@ BOOL CSoundFile::ReadNote()
 
 			ProcessArpeggio(pChn, period, arpeggioSteps);
 
-			// Preserve Amiga freq limits
-			// Test case: AmigaLimits.s3m
+			// Preserve Amiga freq limits.
+			// In ST3, the frequency is always clamped to periods 113 to 856, while in ProTracker,
+			// the limit is variable, depending on the finetune of the sample.
+			// Test case: AmigaLimits.s3m, AmigaLimitsFinetune.mod
 			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT1XMODE])
 			{
-				Limit(period, 113 * 4, 856 * 4);
-				Limit(pChn->nPeriod, 113 * 4, 856 * 4);
+				ASSERT(pChn->nFineTune == 0 || GetType() != MOD_TYPE_S3M);
+				Limit(period, 113 * 4 - pChn->nFineTune, 856 * 4 - pChn->nFineTune);
+				Limit(pChn->nPeriod, 113 * 4 - pChn->nFineTune, 856 * 4 - pChn->nFineTune);
 			}
 
 			ProcessPanbrello(pChn);
