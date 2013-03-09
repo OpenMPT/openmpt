@@ -146,10 +146,10 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 /*		if (keyEventType == kKeyEventUp)
 			keyEventType=kKeyEventUp;
 */
-	if (pSourceWnd == NULL) {
+	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
-	}
-	if (pSourceWnd && (executeCommand != kcNull)) 
+
+	if(pSourceWnd && (executeCommand != kcNull))
 	{
 		pSourceWnd->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar);
 	}

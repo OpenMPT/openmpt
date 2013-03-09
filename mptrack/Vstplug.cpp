@@ -1682,7 +1682,7 @@ bool CVstPlugin::SaveProgram()
 	bool bank = !_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
 
 	std::fstream f;
-	f.open(files.first_file, std::ios::out | std::ios::trunc | std::ios::binary);
+	f.open(files.first_file.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
 	{
 		return true;

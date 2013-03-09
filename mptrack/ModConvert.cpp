@@ -47,27 +47,27 @@
 
 
 // Trim envelopes and remove release nodes.
-void UpdateEnvelopes(InstrumentEnvelope *mptEnv, CSoundFile *pSndFile, std::bitset<wNumWarnings> &warnings)
-//---------------------------------------------------------------------------------------------------------
+void UpdateEnvelopes(InstrumentEnvelope &mptEnv, CSoundFile &sndFile, std::bitset<wNumWarnings> &warnings)
+//--------------------------------------------------------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
-	const uint8 envMax = pSndFile->GetModSpecifications().envelopePointsMax;
+	const uint8 envMax = sndFile.GetModSpecifications().envelopePointsMax;
 
-	#define TRIMENV(envLen) if(envLen > envMax) { envLen = envMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
+#define TRIMENV(envLen) if(envLen > envMax) { envLen = envMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
 
-	TRIMENV(mptEnv->nNodes);
-	TRIMENV(mptEnv->nLoopStart);
-	TRIMENV(mptEnv->nLoopEnd);
-	TRIMENV(mptEnv->nSustainStart);
-	TRIMENV(mptEnv->nSustainEnd);
-	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET)
+	TRIMENV(mptEnv.nNodes);
+	TRIMENV(mptEnv.nLoopStart);
+	TRIMENV(mptEnv.nLoopEnd);
+	TRIMENV(mptEnv.nSustainStart);
+	TRIMENV(mptEnv.nSustainEnd);
+	if(mptEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 	{
-		if(pSndFile->GetModSpecifications().hasReleaseNode)
+		if(sndFile.GetModSpecifications().hasReleaseNode)
 		{
-			TRIMENV(mptEnv->nReleaseNode);
+			TRIMENV(mptEnv.nReleaseNode);
 		} else
 		{
-			mptEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+			mptEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			CHANGEMODTYPE_WARNING(wReleaseNode);
 		}
 	}
@@ -516,9 +516,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++) if(m_SndFile.Instruments[i] != nullptr)
 	{
-		UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv), &m_SndFile, warnings);
-		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv), &m_SndFile, warnings);
-		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv), &m_SndFile, warnings);
+		UpdateEnvelopes(m_SndFile.Instruments[i]->VolEnv, m_SndFile, warnings);
+		UpdateEnvelopes(m_SndFile.Instruments[i]->PanEnv, m_SndFile, warnings);
+		UpdateEnvelopes(m_SndFile.Instruments[i]->PitchEnv, m_SndFile, warnings);
 	}
 
 	// XM requires instruments, so we create them right away.

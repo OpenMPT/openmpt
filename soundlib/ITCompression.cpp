@@ -195,7 +195,7 @@ void ITCompression::Verify(const void *data, void *sampleData, SmpLength offset)
 			CopySample<int8>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
 		}
 
-		FileReader data(&packedData[0], packedLength + 2);
+		FileReader data(&packedData[0], packedLength);
 		ModSample sample = mptSample;
 		sample.uFlags.reset(CHN_STEREO);
 		sample.pSample = newSampleData;
