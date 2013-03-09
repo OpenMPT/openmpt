@@ -313,6 +313,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 	{
 		m_SndFile.GetSample(i).pSample = nullptr;
 		m_SndFile.GetSample(i).nLength = 0;
+		strcpy(m_SndFile.m_szNames[i], "");
 	}
 
 	// Now, create new sample list.
