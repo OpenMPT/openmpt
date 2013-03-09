@@ -2057,12 +2057,12 @@ BOOL CSoundFile::ProcessEffects()
 					// Test case: VolColMemory.it
 					if(vol == 0 && IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
-						vol = pChn->nOldVolColSlide;
+						vol = pChn->nOldVolParam;
 						if(vol == 0)
 							break;
 					} else
 					{
-						pChn->nOldVolColSlide = vol;
+						pChn->nOldVolParam = vol;
 					}
 					VolumeSlide(pChn, volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol);
 					break;
@@ -3216,7 +3216,7 @@ void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param, bool volCol)
 		if(param) pChn->nOldFineVolUpDown = (param << 4) | (pChn->nOldFineVolUpDown & 0x0F); else param = (pChn->nOldFineVolUpDown >> 4);
 	} else if(volCol)
 	{
-		if(param) pChn->nOldVolColSlide = param; else param = pChn->nOldVolColSlide;
+		if(param) pChn->nOldVolParam = param; else param = pChn->nOldVolParam;
 	} else
 	{
 		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
@@ -3241,7 +3241,7 @@ void CSoundFile::FineVolumeDown(ModChannel *pChn, UINT param, bool volCol)
 		if(param) pChn->nOldFineVolUpDown = param | (pChn->nOldFineVolUpDown & 0xF0); else param = (pChn->nOldFineVolUpDown & 0x0F);
 	} else if(volCol)
 	{
-		if(param) pChn->nOldVolColSlide = param; else param = pChn->nOldVolColSlide;
+		if(param) pChn->nOldVolParam = param; else param = pChn->nOldVolParam;
 	} else
 	{
 		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
@@ -4250,14 +4250,13 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 	if (m_nTickCount == nTick)
 	{
 		ModChannel *pChn = &Chn[nChn];
-		// if (m_nInstruments) KeyOff(pChn); ?
 		pChn->nVolume = 0;
 		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
 		// Test case: scx.it
 		if(IsCompatibleMode(TRK_IMPULSETRACKER|TRK_SCREAMTRACKER))
 		{
-			pChn->nLength = 0;
-			pChn->nPos = pChn->nPosLo = 0;
+			pChn->nFadeOutVol = 0;
+			pChn->dwFlags.set(CHN_NOTEFADE);
 		}
 		pChn->dwFlags.set(CHN_FASTVOLRAMP);
 

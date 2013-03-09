@@ -638,27 +638,6 @@ bool ModSequence::Deserialize(FileReader &file)
 }
 
 
-size_t ModSequence::WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize) const
-//------------------------------------------------------------------------------------------------
-{
-	if(numOfBytes > destSize || numOfBytes > MAX_ORDERS) return true;
-
-	const size_t limit = min(numOfBytes, GetLength());
-
-	size_t i = 0;
-	for(i = 0; i < limit; i++)
-	{
-		dest[i] = static_cast<BYTE>((*this)[i]);
-	}
-	// Fill non-existing order items with stop indices
-	for(i = limit; i < numOfBytes; i++)
-	{
-		dest[i] = 0xFF;
-	}
-	return i; //Returns the number of bytes written.
-}
-
-
 size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
 //----------------------------------------------------------------
 {
