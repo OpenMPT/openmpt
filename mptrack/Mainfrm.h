@@ -402,7 +402,7 @@ public:
 
 	// Globals
 	static UINT m_nLastOptionsPage;
-    static HHOOK ghKbdHook;
+	static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType;
 	
 	// GDI
@@ -446,7 +446,8 @@ protected:
 	CModDoc *m_pModPlaying;
 	CSoundFile *m_pSndFile;
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwStatus, m_dwTimeSec, m_dwNotifyType;
+	DWORD m_dwStatus, m_dwNotifyType;
+	CSoundFile::samplecount_t m_dwTimeSec;
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
@@ -458,7 +459,7 @@ protected:
 
 public:
 	CMainFrame(/*CString regKeyExtension*/);
-	VOID Initialize();
+	void Initialize();
 	
 
 // Low-Level Audio
@@ -469,7 +470,7 @@ public:
 	static DWORD WINAPI AudioThread(LPVOID);
 	static DWORD WINAPI NotifyThread(LPVOID);
 	ULONG AudioRead(PVOID pData, ULONG cbSize);
-	VOID AudioDone(ULONG nBytesWritten, ULONG nLatency);
+	void AudioDone(ULONG nBytesWritten, ULONG nLatency);
 	LONG audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	BOOL audioOpenDevice();
 	void audioCloseDevice();
@@ -493,7 +494,7 @@ public:
 public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
 	static TrackerSettings &GetSettings() { return m_Settings; }
-	static VOID UpdateColors();
+	static void UpdateColors();
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT GetFixedFont() { return m_hFixedFont; }
@@ -514,18 +515,18 @@ public:
 
 	// Misc functions
 public:
-	VOID SetUserText(LPCSTR lpszText);
-	VOID SetInfoText(LPCSTR lpszText);
-	VOID SetXInfoText(LPCSTR lpszText); //rewbs.xinfo
-	VOID SetHelpText(LPCSTR lpszText);
+	void SetUserText(LPCSTR lpszText);
+	void SetInfoText(LPCSTR lpszText);
+	void SetXInfoText(LPCSTR lpszText); //rewbs.xinfo
+	void SetHelpText(LPCSTR lpszText);
 	UINT GetBaseOctave();
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
 	CImageList *GetImageList() { return &m_ImageList; }
 	PMPTCHORD GetChords() { return GetSettings().Chords; }
-	VOID OnDocumentCreated(CModDoc *pModDoc);
-	VOID OnDocumentClosed(CModDoc *pModDoc);
-	VOID UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
+	void OnDocumentCreated(CModDoc *pModDoc);
+	void OnDocumentClosed(CModDoc *pModDoc);
+	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }  	//rewbs.customKeys
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
@@ -557,6 +558,7 @@ public:
 	BOOL PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote=0);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
+	void StopPreview();
 	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
 	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
 	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }

@@ -1494,8 +1494,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 			return FALSE;
 		}
 	}
-	StopSoundFile(&m_WaveFile);
-	m_WaveFile.Destroy();
+	StopPreview();
 	m_WaveFile.Create(NULL, 0);
 
 	//Avoid global volume ramping when trying samples in the treeview.
@@ -1572,8 +1571,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote)
 //-------------------------------------------------------------------------------------------
 {
-	StopSoundFile(&m_WaveFile);
-	m_WaveFile.Destroy();
+	StopPreview();
 	m_WaveFile.Create(NULL, 0);
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
@@ -1597,7 +1595,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 	m_WaveFile.Patterns.Insert(1, 64);
 	if (m_WaveFile.Patterns[0])
 	{
-		if (!nNote) nNote = 5*12+1;
+		if (!nNote) nNote = NOTE_MIDDLEC;
 		ModCommand *m = m_WaveFile.Patterns[0];
 		m[0].note = (BYTE)nNote;
 		m[0].instr = 1;
@@ -1626,6 +1624,14 @@ BOOL CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 	if ((pSndFile) && (pSndFile != m_pSndFile)) return FALSE;
 	PauseMod(NULL);
 	return TRUE;
+}
+
+
+void CMainFrame::StopPreview()
+//----------------------------
+{
+	StopSoundFile(&m_WaveFile);
+	m_WaveFile.Destroy();
 }
 
 
@@ -1982,7 +1988,7 @@ void CMainFrame::OnTimer(UINT)
 //----------------------------
 {
 	// Display Time in status bar
-	size_t time = 0;
+	CSoundFile::samplecount_t time = 0;
 	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)
 	{
 		time = m_pSndFile->GetTotalSampleCount() / m_pSndFile->GetSampleRate();
@@ -2404,10 +2410,11 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewGraph: //rewbs.graph
 		case kcViewSongProperties:
 		case kcPlayPatternFromCursor:
-		case kcPlayPatternFromStart: 
-		case kcPlaySongFromCursor: 
-		case kcPlaySongFromStart: 
+		case kcPlayPatternFromStart:
+		case kcPlaySongFromCursor:
+		case kcPlaySongFromStart:
 		case kcPlayPauseSong:
+		case kcPlaySongFromPattern:
 		case kcStopSong:
 		case kcEstimateSongLength:
 		case kcApproxRealBPM:
