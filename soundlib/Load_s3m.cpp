@@ -698,7 +698,11 @@ bool CSoundFile::ReadS3M(FileReader &file)
 					S3MConvert(m, false);
 				}
 
-				if(m.command == CMD_MIDI)
+				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv  < S3MFileHeader::trkST3_20)
+				{
+					// Convert old SAx panning to S8x (should only be found in PANIC.S3M by Purple Motion)
+					m.param = 0x80 | ((m.param & 0x0F) ^ 8);
+				} else if(m.command == CMD_MIDI)
 				{
 					// PixPlay panning test
 					if(m.param > 0x0F)

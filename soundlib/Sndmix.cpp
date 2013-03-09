@@ -1578,12 +1578,6 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		UINT vibpos = chn.nVibratoPos;
 
 		int vdelta = GetVibratoDelta(chn.nVibratoType, vibpos);
-		if((GetType() & MOD_TYPE_XM) && (chn.nVibratoType & 0x03) == 1)
-		{
-			// FT2 compatibility: Vibrato ramp down table is upside down.
-			// Test case: VibratoWaveforms.xm
-			vdelta = -vdelta;
-		}
 
 		if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
 		{
@@ -1598,6 +1592,17 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		} else
 		{
 			// Original behaviour
+
+			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE))
+			{
+				// ProTracker doesn't apply vibrato nor advance on the first tick.
+				return;
+			} else if((GetType() & MOD_TYPE_XM) && (chn.nVibratoType & 0x03) == 1)
+			{
+				// FT2 compatibility: Vibrato ramp down table is upside down.
+				// Test case: VibratoWaveforms.xm
+				vdelta = -vdelta;
+			}
 
 			UINT vdepth;
 			// IT compatibility: correct vibrato depth
@@ -1653,8 +1658,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			}
 		}
 
-		// Advance vibrato position
-		if(m_nTickCount || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS])))
+		// Advance vibrato position - IT updates on every tick, unless "old effects" are enabled (in this case it only updates on non-first ticks like other trackers)
+		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS])))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
