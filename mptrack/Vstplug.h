@@ -168,6 +168,12 @@ protected:
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:
+	bool m_bNeedIdle; //rewbs.VSTCompliance
+	bool m_bRecordAutomation;
+	bool m_bPassKeypressesToPlug;
+	bool m_bRecordMIDIOut;
+
+public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
 	virtual ~CVstPlugin();
 	void Initialize(CSoundFile* pSndFile);
@@ -190,8 +196,10 @@ public:
 	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
 #ifdef MODPLUG_TRACKER
 	inline CModDoc *GetModDoc() { return m_pModDoc; }
+	inline const CModDoc *GetModDoc() const { return m_pModDoc; }
 #endif // MODPLUG_TRACKER
 	inline CSoundFile *GetSoundFile() { return m_pSndFile; }
+	inline const CSoundFile *GetSoundFile() const { return m_pSndFile; }
 	PLUGINDEX FindSlot();
 	void SetSlot(PLUGINDEX slot);
 	PLUGINDEX GetSlot();
@@ -243,9 +251,6 @@ public:
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
 	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
-	bool m_bNeedIdle; //rewbs.VSTCompliance
-	bool m_bRecordAutomation;
-	bool m_bPassKeypressesToPlug;
 	void NotifySongPlaying(bool playing);	//rewbs.VSTCompliance
 	bool IsSongPlaying() {return m_bSongPlaying;}	//rewbs.VSTCompliance
 	bool IsResumed() {return m_bPlugResumed;}

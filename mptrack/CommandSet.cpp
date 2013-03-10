@@ -591,9 +591,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPatternEditPCNotePlugin, 1836, _T("Edit Plugin assigned to PC Event"));
 	DefineKeyCommand(kcInstrumentEnvelopeZoomIn, 1837, _T("Zoom In"));
 	DefineKeyCommand(kcInstrumentEnvelopeZoomOut, 1838, _T("Zoom Out"));
-	DefineKeyCommand(kcVSTGUIToggleRecordParams, 1839, _T("Toggle parameter recording"));
-	DefineKeyCommand(kcVSTGUIToggleSendKeysToPlug, 1840, _T("Pass key presses to plugin"));
-	DefineKeyCommand(kcVSTGUIBypassPlug, 1841, _T("Bypass plugin"));
+	DefineKeyCommand(kcVSTGUIToggleRecordParams, 1839, _T("Toggle Parameter Recording"));
+	DefineKeyCommand(kcVSTGUIToggleSendKeysToPlug, 1840, _T("Pass Key Presses to Plugin"));
+	DefineKeyCommand(kcVSTGUIBypassPlug, 1841, _T("Bypass Plugin"));
 	DefineKeyCommand(kcInsNoteMapTransposeDown, 1842, _T("Transpose -1 (Note Map)"));
 	DefineKeyCommand(kcInsNoteMapTransposeUp, 1843, _T("Transpose +1 (Note Map)"));
 	DefineKeyCommand(kcInsNoteMapTransposeOctDown, 1844, _T("Transpose -12 (Note Map)"));
@@ -651,6 +651,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcToggleNoteOffRecordMIDI, 1896, _T("Toggle Note Off record (MIDI)"));
 	DefineKeyCommand(kcFindInstrument, 1897, _T("Pick up nearest instrument number"));
 	DefineKeyCommand(kcPlaySongFromPattern, 1898, _T("Play Song from Pattern Start"));
+	DefineKeyCommand(kcVSTGUIToggleRecordMIDIOut, 1899, _T("Record MIDI Out to Pattern Editor"));
 
 	// Add new key commands here.
 

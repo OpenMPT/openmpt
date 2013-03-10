@@ -1209,6 +1209,7 @@
 #define ID_SAMPLE_MONOCONVERT_RIGHT     44607
 #define ID_SAMPLE_MONOCONVERT_SPLIT     44608
 #define ID_SETQUANTIZE                  44609
+#define ID_PLUG_RECORD_MIDIOUT          44610
 
 // Next default values for new objects
 // 
@@ -1216,7 +1217,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        536
-#define _APS_NEXT_COMMAND_VALUE         44610
+#define _APS_NEXT_COMMAND_VALUE         44611
 #define _APS_NEXT_CONTROL_VALUE         2441
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
