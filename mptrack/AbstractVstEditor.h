@@ -42,6 +42,7 @@ public:
 	afx_msg void OnSetPreset(UINT nID);
 	afx_msg void OnBypassPlug();
 	afx_msg void OnRecordAutomation();
+	afx_msg void OnRecordMIDIOut();
 	afx_msg void OnPassKeypressesToPlug();
 	afx_msg void OnSetPreviousVSTPreset();
 	afx_msg void OnSetNextVSTPreset();

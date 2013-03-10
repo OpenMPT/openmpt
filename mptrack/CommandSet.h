@@ -1052,6 +1052,7 @@ enum CommandID
 	kcVSTGUINextPresetJump,
 	kcVSTGUIRandParams,
 	kcVSTGUIToggleRecordParams,
+	kcVSTGUIToggleRecordMIDIOut,
 	kcVSTGUIToggleSendKeysToPlug,
 	kcVSTGUIBypassPlug,
 	kcEndVSTGUICommands=kcVSTGUIBypassPlug,

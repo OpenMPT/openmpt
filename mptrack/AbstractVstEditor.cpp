@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
 	ON_COMMAND(ID_PLUG_BYPASS,			OnBypassPlug)
 	ON_COMMAND(ID_PLUG_RECORDAUTOMATION,OnRecordAutomation)
+	ON_COMMAND(ID_PLUG_RECORD_MIDIOUT,  OnRecordMIDIOut)
 	ON_COMMAND(ID_PLUG_PASSKEYS,		OnPassKeypressesToPlug)
 	ON_COMMAND(ID_PRESET_SAVE,			OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
@@ -168,6 +169,8 @@ void CAbstractVstEditor::OnPasteParameters()
 		{
 			FileReader file(p, GlobalSize(hCpy));
 			VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, *m_pVstPlugin);
+			GlobalUnlock(hCpy);
+
 			if(error == VSTPresets::noError)
 			{
 				CSoundFile *pSndFile = m_pVstPlugin->m_pSndFile;
@@ -180,7 +183,6 @@ void CAbstractVstEditor::OnPasteParameters()
 			{
 				Reporting::Error(VSTPresets::GetErrorMessage(error));
 			}
-			GlobalUnlock(hCpy);
 		}
 		CloseClipboard();
 	}
@@ -280,6 +282,16 @@ void CAbstractVstEditor::OnRecordAutomation()
 }
 
 
+void CAbstractVstEditor::OnRecordMIDIOut()
+//----------------------------------------
+{
+	if(m_pVstPlugin)
+	{
+		m_pVstPlugin->m_bRecordMIDIOut = !m_pVstPlugin->m_bRecordMIDIOut;
+	}
+}
+
+
 void CAbstractVstEditor::OnPassKeypressesToPlug()
 //-----------------------------------------------
 {
@@ -312,7 +324,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
 			if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull)
 			{
-				return true; 
+				return true;
 			}
 			
 			// Don't forward key repeats if plug does not listen for keypresses
@@ -673,7 +685,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	}
 
  	CMenu *pInfoMenu = m_pMenu->GetSubMenu(2);
-	pInfoMenu->DeleteMenu(2, MF_BYPOSITION);	
+	pInfoMenu->DeleteMenu(2, MF_BYPOSITION);
 
 	if(m_pMacroMenu->m_hMenu)
 	{
@@ -731,6 +743,9 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 	//Record Params
 	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bRecordAutomation ? MF_CHECKED : 0,
 							   ID_PLUG_RECORDAUTOMATION, "Record &Parameter Changes\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
+	//Record MIDI Out
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bRecordMIDIOut ? MF_CHECKED : 0,
+							   ID_PLUG_RECORD_MIDIOUT, "Record &MIDI Out to Pattern Editor\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordMIDIOut));
 	//Pass on keypresses
 	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bPassKeypressesToPlug ? MF_CHECKED : 0,
 							   ID_PLUG_PASSKEYS, "Pass &Keys to Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));

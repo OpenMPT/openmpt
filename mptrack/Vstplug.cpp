@@ -1346,9 +1346,10 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 void CVstPlugin::Initialize(CSoundFile* pSndFile)
 //-----------------------------------------------
 {
-	m_bNeedIdle=false;
-	m_bRecordAutomation=false;
-	m_bPassKeypressesToPlug=false;
+	m_bNeedIdle = false;
+	m_bRecordAutomation = false;
+	m_bPassKeypressesToPlug = false;
+	m_bRecordMIDIOut = false;
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
@@ -2065,6 +2066,20 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 					vstPlugin->vstEvents.Enqueue(*events->events[i]);
 					break;
 				}
+			}
+		}
+	}
+
+	if(m_bRecordMIDIOut)
+	{
+		// Spam MIDI data to all views
+		for(VstInt32 i = 0; i < events->numEvents; i++)
+		{
+			// Let's do some dispatching, because the VST SDK doesn't do it for us. :-(
+			if(events->events[i]->type == kVstMidiType)
+			{
+				VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(events->events[i]);
+				::PostMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, *reinterpret_cast<uint32 *>(event->midiData), reinterpret_cast<LPARAM>(this));
 			}
 		}
 	}
