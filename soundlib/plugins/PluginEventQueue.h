@@ -85,48 +85,21 @@ public:
 
 	// Add a VST event to the queue. Returns true on success.
 	// Set insertFront to true to prioritise this event (i.e. add it at the front of the queue instead of the back)
-	bool Enqueue(const VstEvent &event, bool insertFront = false)
+	bool Enqueue(const VstEvent *event, bool insertFront = false)
 	{
-		ASSERT(event.byteSize == sizeof(event));
-#if 1
-		// True on 32-Bit hosts: No copying is necessary
-		static_assert(sizeof(VstEvent) == sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
-		return Enqueue(reinterpret_cast<const VstMidiSysexEvent &>(event), insertFront);
-#else
-		// True on 64-Bit hosts: VstMidiSysexEvent is bigger, so copy smaller event into bigger event.
-		static_assert(sizeof(VstEvent) <= sizeof(VstMidiSysexEvent), "This is no 64-Bit host!");
-		VstMidiSysexEvent copyEvent;
-		memcpy(&copyEvent, &event, min(event.byteSize, sizeof(event)));
-		return Enqueue(copyEvent, insertFront);
-#endif
-	}
+		ASSERT(event->type != kVstSysExType || event->byteSize == sizeof(VstMidiSysexEvent));
+		ASSERT(event->type != kVstMidiType || event->byteSize == sizeof(VstMidiEvent));
 
-	bool Enqueue(const VstMidiEvent &event, bool insertFront = false)
-	{
-		ASSERT(event.byteSize == sizeof(event));
-#if 1
-		// True on 32-Bit hosts: No copying is necessary
-		static_assert(sizeof(VstMidiEvent) == sizeof(VstMidiSysexEvent), "This is no 32-Bit host!");
-		return Enqueue(reinterpret_cast<const VstMidiSysexEvent &>(event), insertFront);
-#else
-		// True on 64-Bit hosts: VstMidiSysexEvent is bigger, so copy smaller event into bigger event.
-		static_assert(sizeof(VstMidiEvent) <= sizeof(VstMidiSysexEvent), "This is no 64-Bit host!");
-		VstMidiSysexEvent copyEvent;
-		memcpy(&copyEvent, &event, min(event.byteSize, sizeof(event)));
-		return Enqueue(copyEvent, insertFront);
-#endif
-	}
+		BiggestVstEvent copyEvent;
+		memcpy(&copyEvent, event, Util::Min(size_t(event->byteSize), sizeof(copyEvent)));
 
-	bool Enqueue(const VstMidiSysexEvent &event, bool insertFront = false)
-	{
-		static_assert(sizeof(BiggestVstEvent) <= sizeof(VstMidiSysexEvent), "Also check implementation here.");
 		EnterCriticalSection(&criticalSection);
 		if(insertFront)
 		{
-			eventQueue.push_front(event);
+			eventQueue.push_front(copyEvent);
 		} else
 		{
-			eventQueue.push_back(event);
+			eventQueue.push_back(copyEvent);
 		}
 		LeaveCriticalSection(&criticalSection);
 		return true;

@@ -2051,31 +2051,17 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 			// Add all events to the plugin's queue.
 			for(VstInt32 i = 0; i < events->numEvents; i++)
 			{
-				// Let's do some dispatching, because the VST SDK doesn't do it for us. :-(
-				switch(events->events[i]->type)
-				{
-				case kVstMidiType:
-					vstPlugin->vstEvents.Enqueue(*reinterpret_cast<VstMidiEvent *>(events->events[i]));
-					break;
-
-				case kVstSysExType:
-					vstPlugin->vstEvents.Enqueue(*reinterpret_cast<VstMidiSysexEvent *>(events->events[i]));
-					break;
-
-				default:
-					vstPlugin->vstEvents.Enqueue(*events->events[i]);
-					break;
-				}
+				vstPlugin->vstEvents.Enqueue(events->events[i]);
 			}
 		}
 	}
 
+#ifdef MODPLUG_TRACKER
 	if(m_bRecordMIDIOut)
 	{
 		// Spam MIDI data to all views
 		for(VstInt32 i = 0; i < events->numEvents; i++)
 		{
-			// Let's do some dispatching, because the VST SDK doesn't do it for us. :-(
 			if(events->events[i]->type == kVstMidiType)
 			{
 				VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(events->events[i]);
@@ -2083,6 +2069,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 			}
 		}
 	}
+#endif // MODPLUG_TRACKER
 }
 
 
@@ -2338,7 +2325,7 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 		Log("Sending Midi %02X.%02X.%02X\n", event.midiData[0]&0xff, event.midiData[1]&0xff, event.midiData[2]&0xff);
 	#endif
 
-	return vstEvents.Enqueue(event, insertAtFront);
+	return vstEvents.Enqueue(reinterpret_cast<VstEvent *>(&event), insertAtFront);
 }
 
 
@@ -2552,15 +2539,8 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
 			while(channel.noteOnMap[i][trackChannel])
 			{
-				if(MidiSend(MIDIEvents::NoteOff(nMidiCh, i, volume)))
-				{
-					channel.noteOnMap[i][trackChannel]--;
-				} else
-				{
-					// VST event queue overflow, no point in submitting more note offs.
-					// Note: This shouldn't happen anymore, since PluginEventQueue uses a secondary queue.
-					break;
-				}
+				MidiSend(MIDIEvents::NoteOff(nMidiCh, i, volume));
+				channel.noteOnMap[i][trackChannel]--;
 			}
 		}
 	}
