@@ -33,13 +33,13 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-FindReplaceStruct CViewPattern::m_findReplace =
+FindReplace CViewPattern::m_findReplace =
 {
 	ModCommand::Empty(), ModCommand::Empty(),
-	PATSEARCH_FULLSEARCH, PATSEARCH_REPLACEALL,
+	FlagSet<FindReplace::Flags>(FindReplace::FullSearch), FlagSet<FindReplace::Flags>(FindReplace::ReplaceAll),
+	PatternRect(),
 	0, 0,
-	0,
-	PatternRect()
+	0
 };
 
 // Static initializers
@@ -170,18 +170,13 @@ void CViewPattern::OnInitialUpdate()
 // -> DESC="midi keyboard split"
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
-	oldrow = -1;
-	oldchn = -1;
-	oldsplitchn = -1;
 	m_nPlayPat = PATTERNINDEX_INVALID;
 	m_nPlayRow = 0;
 	m_nMidRow = 0;
 	m_nDragItem = 0;
-	m_bDragging = false;
 	m_bInItemRect = false;
 	m_bContinueSearch = false;
-	//m_dwStatus = 0;
-	m_dwStatus = psShowPluginNames;
+	m_Status = psShowPluginNames;
 	m_nXScroll = m_nYScroll = 0;
 	m_nPattern = 0;
 	m_nSpacing = 0;
@@ -271,7 +266,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 	{
 		if ((int)row < 0)
 		{
-			if (m_dwStatus & (psKeyboardDragSelect|psMouseDragSelect))
+			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
 			{
 				row = 0;
 			} else
@@ -299,7 +294,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 		} else //row >= 0
 		if (row >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		{
-			if(m_dwStatus & (psKeyboardDragSelect|psMouseDragSelect))
+			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
 			{
 				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
 			} else if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
@@ -341,7 +336,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 	InvalidateRow();
 
 	PatternCursor selStart(m_Cursor);
-	if((m_dwStatus & (psKeyboardDragSelect | psMouseDragSelect)) && (!(m_dwStatus & psDragnDropEdit)))
+	if(m_Status[psKeyboardDragSelect | psMouseDragSelect] && !m_Status[psDragnDropEdit])
 	{
 		selStart.Set(m_StartSel);
 	}
@@ -371,7 +366,7 @@ bool CViewPattern::SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns
 
 	PatternCursor selStart(m_Cursor);
 
-	if((m_dwStatus & (psKeyboardDragSelect | psMouseDragSelect)) && (!(m_dwStatus & psDragnDropEdit)))
+	if(m_Status[psKeyboardDragSelect | psMouseDragSelect] && !m_Status[psDragnDropEdit])
 	{
 		selStart = m_StartSel;
 	}
@@ -500,7 +495,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 	const CHANNELINDEX nmax = pSndFile->GetNumChannels();
 	// Checking channel headers
 	//rewbs.patPlugNames
-	if (m_dwStatus & psShowPluginNames)
+	if (m_Status[psShowPluginNames])
 	{
 		n = xofs;
 		for(UINT ihdr=0; n<nmax; ihdr++, n++)
@@ -708,7 +703,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 		{
 			// Open quick channel properties dialog if we're middle-clicking a channel header.
 			CPoint point(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam));
-			if(point.y < m_szHeader.cy - ((m_dwStatus & psShowPluginNames) ? PLUGNAME_HEIGHT : 0))
+			if(point.y < m_szHeader.cy - (m_Status[psShowPluginNames] ? PLUGNAME_HEIGHT : 0))
 			{
 				PatternCursor cursor = GetPositionFromPoint(point);
 				if(cursor.GetChannel() < GetDocument()->GetNumChannels())
@@ -767,7 +762,7 @@ void CViewPattern::OnSetFocus(CWnd *pOldWnd)
 //------------------------------------------
 {
 	CScrollView::OnSetFocus(pOldWnd);
-	m_dwStatus |= psFocussed;
+	m_Status.set(psFocussed);
 	InvalidateRow();
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
@@ -783,14 +778,7 @@ void CViewPattern::OnKillFocus(CWnd *pNewWnd)
 {
 	CScrollView::OnKillFocus(pNewWnd);
 
-	//rewbs.customKeys
-	//Unset all selection
-	m_dwStatus &= ~psKeyboardDragSelect;
-	m_dwStatus &= ~psCtrlDragSelect;
-//	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
-	//end rewbs.customKeys
-
-	m_dwStatus &= ~psFocussed;
+	m_Status.reset(psKeyboardDragSelect | psCtrlDragSelect | psFocussed);
 	InvalidateRow();
 }
 
@@ -1138,14 +1126,14 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 
 	SetFocus();
 	m_nDropItem = m_nDragItem = GetDragItem(point, &m_rcDragItem);
-	m_bDragging = true;
+	m_Status.set(psDragging);
 	m_bInItemRect = true;
-	m_bShiftDragging = false;
+	m_Status.reset(psShiftDragging);
 
 	PatternCursor pointCursor(GetPositionFromPoint(point));
 
 	SetCapture();
-	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy - ((m_dwStatus & psShowPluginNames) ? PLUGNAME_HEIGHT : 0))
+	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy - (m_Status[psShowPluginNames] ? PLUGNAME_HEIGHT : 0))
 	{
 		// Click on channel header
 		if (nFlags & MK_CONTROL)
@@ -1157,7 +1145,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 		// Click on pattern data
 
 		if(CMainFrame::GetInputHandler()->SelectionPressed()
-			&& ((m_dwStatus & psShiftSelect)
+			&& (m_Status[psShiftSelect]
 				|| m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
 				|| !m_Selection.Contains(pointCursor)))
 		{
@@ -1168,24 +1156,24 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 			// * Shift-clicking outside the current selection.
 			// This is necessary so that selections can still be moved properly while the shift button is pressed (for copy-move).
 			DragToSel(pointCursor, true, true);
-			m_dwStatus |= psShiftSelect;
+			m_Status.set(psShiftSelect);
 		} else
 		{
 			// Set first selection point
 			m_StartSel = pointCursor;
 			if(m_StartSel.GetChannel() < pSndFile->GetNumChannels())
 			{
-				m_dwStatus |= psMouseDragSelect;
+				m_Status.set(psMouseDragSelect);
 
-				if (m_dwStatus & psCtrlDragSelect)
+				if(m_Status[psCtrlDragSelect])
 				{
 					SetCurSel(m_StartSel);
 				}
 				if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DRAGNDROPEDIT)
-					&& ((m_Selection.GetUpperLeft() != m_Selection.GetLowerRight()) || (m_dwStatus & psCtrlDragSelect))
+					&& ((m_Selection.GetUpperLeft() != m_Selection.GetLowerRight()) || m_Status[psCtrlDragSelect])
 					&& m_Selection.Contains(m_StartSel))
 				{
-					m_dwStatus |= psDragnDropEdit;
+					m_Status.set(psDragnDropEdit);
 				} else if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CENTERROW)
 				{
 					SetCurSel(m_StartSel);
@@ -1204,7 +1192,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			m_StartSel.Set(pointCursor);
 			SetCurSel(pointCursor, PatternCursor(pointCursor.GetRow(), pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn));
-			m_dwStatus |= psRowSelection;
+			m_Status.set(psRowSelection);
 		}
 	}
 
@@ -1226,8 +1214,7 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DBLCLICKSELECT))
 		{
 			OnSelectCurrentColumn();
-			m_dwStatus |= psChannelSelection;
-			m_bDragging = true;
+			m_Status.set(psChannelSelection |psDragging);
 			return;
 		} else
 		{
@@ -1247,17 +1234,16 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	const bool bItemSelected = m_bInItemRect || ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER);
 	if (/*(!m_bDragging) ||*/ (!pModDoc)) return;
 
-	m_bDragging = false;
 	m_bInItemRect = false;
 	ReleaseCapture();
-	m_dwStatus &= ~(psMouseDragSelect | psRowSelection | psChannelSelection);
+	m_Status.reset(psMouseDragSelect | psRowSelection | psChannelSelection | psDragging);
 	// Drag & Drop Editing
-	if (m_dwStatus & psDragnDropEdit)
+	if(m_Status[psDragnDropEdit])
 	{
-		if (m_dwStatus & psDragnDropping)
+		if(m_Status[psDragnDropping])
 		{
 			OnDrawDragSel();
-			m_dwStatus &= ~psDragnDropping;
+			m_Status.reset(psDragnDropping);
 			OnDropSelection();
 		}
 
@@ -1266,7 +1252,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			SetCurSel(m_StartSel);
 		}
 		SetCursor(CMainFrame::curArrow);
-		m_dwStatus &= ~psDragnDropEdit;
+		m_Status.reset(psDragnDropEdit);
 	}
 	if (((m_nDragItem & DRAGITEM_MASK) != DRAGITEM_CHNHEADER)
 	 && ((m_nDragItem & DRAGITEM_MASK) != DRAGITEM_PATTERNHEADER)
@@ -1393,17 +1379,17 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 	}
 
 	// Handle drag n drop
-	if (m_dwStatus & psDragnDropEdit)
+	if (m_Status[psDragnDropEdit])
 	{
-		if (m_dwStatus & psDragnDropping)
+		if (m_Status[psDragnDropping])
 		{
 			OnDrawDragSel();
-			m_dwStatus &= ~psDragnDropping;
+			m_Status.reset(psDragnDropping);
 		}
-		m_dwStatus &= ~(psDragnDropEdit|psMouseDragSelect);
-		if (m_bDragging)
+		m_Status.reset(psDragnDropEdit | psMouseDragSelect);
+		if(m_Status[psDragging])
 		{
-			m_bDragging = false;
+			m_Status.reset(psDragging);
 			m_bInItemRect = false;
 			ReleaseCapture();
 		}
@@ -1442,7 +1428,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 		//------ Plugin Header Menu --------- :
-		if ((m_dwStatus & psShowPluginNames) && 
+		if(m_Status[psShowPluginNames] &&
 			(pt.y > m_szHeader.cy-PLUGNAME_HEIGHT) && (pt.y < m_szHeader.cy))
 		{
 			BuildPluginCtxMenu(hMenu, nChn, pSndFile);
@@ -1534,7 +1520,7 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 //-------------------------------------------------------
 {
-	if(!m_bDragging)
+	if(!m_Status[psDragging])
 	{
 		return;
 	}
@@ -1545,7 +1531,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		const CRect oldDropRect = m_rcDropItem;
 		const DWORD oldDropItem = m_nDropItem;
 
-		m_bShiftDragging = (nFlags & MK_SHIFT) != 0;
+		m_Status.set(psShiftDragging, (nFlags & MK_SHIFT) != 0);
 		m_nDropItem = GetDragItem(point, &m_rcDropItem);
 
 		const bool b = (m_nDropItem == m_nDragItem);
@@ -1564,7 +1550,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 
-	if((m_dwStatus & psChannelSelection))
+	if(m_Status[psChannelSelection])
 	{
 		// Double-clicked a pattern cell to select whole channel.
 		// Continue dragging to select more channels.
@@ -1579,7 +1565,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 
 		DragToSel(endSel, true, false, false);
 
-	} else if((m_dwStatus & psRowSelection) && point.y > m_szHeader.cy)
+	} else if(m_Status[psRowSelection] && point.y > m_szHeader.cy)
 	{
 		// Mark row number => mark whole row (continue)
 		InvalidateSelection();
@@ -1588,7 +1574,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		cursor.SetColumn(GetDocument()->GetNumChannels() - 1, PatternCursor::lastColumn);
 		DragToSel(cursor, false, true, false);
 
-	} else if(m_dwStatus & psMouseDragSelect)
+	} else if(m_Status[psMouseDragSelect])
 	{
 		PatternCursor cursor(GetPositionFromPoint(point));
 
@@ -1602,21 +1588,21 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		}
 
 		// Drag & Drop editing
-		if (m_dwStatus & psDragnDropEdit)
+		if (m_Status[psDragnDropEdit])
 		{
 			const bool moved = m_DragPos.GetChannel() != cursor.GetChannel() || m_DragPos.GetRow() != cursor.GetRow();
 
-			if(!(m_dwStatus & psDragnDropping))
+			if(!m_Status[psDragnDropping])
 			{
 				SetCursor(CMainFrame::curDragging);
 			}
-			if(!(m_dwStatus & psDragnDropping) || moved)
+			if(!m_Status[psDragnDropping] || moved)
 			{
-				if(m_dwStatus & psDragnDropping) OnDrawDragSel();
-				m_dwStatus &= ~psDragnDropping;
+				if(m_Status[psDragnDropping]) OnDrawDragSel();
+				m_Status.reset(psDragnDropping);
 				DragToSel(cursor, true, true, true);
 				m_DragPos = cursor;
-				m_dwStatus |= psDragnDropping;
+				m_Status.set(psDragnDropping);
 				OnDrawDragSel();
 			}
 		} else
@@ -1948,9 +1934,9 @@ void CViewPattern::OnEditFind()
 		pageFind.m_nVol = m_findReplace.cmdFind.vol;
 		pageFind.m_nCommand = m_findReplace.cmdFind.command;
 		pageFind.m_nParam = m_findReplace.cmdFind.param;
-		pageFind.m_dwFlags = m_findReplace.dwFindFlags;
-		pageFind.m_nMinChannel = m_findReplace.nFindMinChn;
-		pageFind.m_nMaxChannel = m_findReplace.nFindMaxChn;
+		pageFind.m_Flags = m_findReplace.findFlags;
+		pageFind.m_nMinChannel = m_findReplace.findMinChn;
+		pageFind.m_nMaxChannel = m_findReplace.findMaxChn;
 		pageFind.m_bPatSel = (m_Selection.GetUpperLeft() != m_Selection.GetLowerRight());
 		pageReplace.m_nNote = m_findReplace.cmdReplace.note;
 		pageReplace.m_nInstr = m_findReplace.cmdReplace.instr;
@@ -1958,16 +1944,16 @@ void CViewPattern::OnEditFind()
 		pageReplace.m_nVol = m_findReplace.cmdReplace.vol;
 		pageReplace.m_nCommand = m_findReplace.cmdReplace.command;
 		pageReplace.m_nParam = m_findReplace.cmdReplace.param;
-		pageReplace.m_dwFlags = m_findReplace.dwReplaceFlags;
-		pageReplace.cInstrRelChange = m_findReplace.cInstrRelChange;
+		pageReplace.m_Flags = m_findReplace.replaceFlags;
+		pageReplace.cInstrRelChange = m_findReplace.instrRelChange;
 		if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
 		{
-			pageFind.m_dwFlags |= PATSEARCH_PATSELECTION;
-			pageFind.m_dwFlags &= ~PATSEARCH_FULLSEARCH;
+			pageFind.m_Flags.set(FindReplace::InPatSelection);
+			pageFind.m_Flags.reset(FindReplace::FullSearch);
 		}
 		dlg.AddPage(&pageFind);
 		dlg.AddPage(&pageReplace);
-		if (dlg.DoModal() == IDOK)
+		if(dlg.DoModal() == IDOK)
 		{
 			m_findReplace.cmdFind.note = pageFind.m_nNote;
 			m_findReplace.cmdFind.instr = pageFind.m_nInstr;
@@ -1975,17 +1961,17 @@ void CViewPattern::OnEditFind()
 			m_findReplace.cmdFind.vol = pageFind.m_nVol;
 			m_findReplace.cmdFind.command = pageFind.m_nCommand;
 			m_findReplace.cmdFind.param = pageFind.m_nParam;
-			m_findReplace.nFindMinChn = pageFind.m_nMinChannel;
-			m_findReplace.nFindMaxChn = pageFind.m_nMaxChannel;
-			m_findReplace.dwFindFlags = pageFind.m_dwFlags;
+			m_findReplace.findMinChn = pageFind.m_nMinChannel;
+			m_findReplace.findMaxChn = pageFind.m_nMaxChannel;
+			m_findReplace.findFlags = pageFind.m_Flags;
 			m_findReplace.cmdReplace.note = pageReplace.m_nNote;
 			m_findReplace.cmdReplace.instr = pageReplace.m_nInstr;
 			m_findReplace.cmdReplace.volcmd = pageReplace.m_nVolCmd;
 			m_findReplace.cmdReplace.vol = pageReplace.m_nVol;
 			m_findReplace.cmdReplace.command = pageReplace.m_nCommand;
 			m_findReplace.cmdReplace.param = pageReplace.m_nParam;
-			m_findReplace.dwReplaceFlags = pageReplace.m_dwFlags;
-			m_findReplace.cInstrRelChange = pageReplace.cInstrRelChange;
+			m_findReplace.replaceFlags = pageReplace.m_Flags;
+			m_findReplace.instrRelChange = pageReplace.cInstrRelChange;
 			m_findReplace.selection = m_Selection;
 			m_bContinueSearch = false;
 			OnEditFindNext();
@@ -2050,7 +2036,7 @@ void CViewPattern::OnEditFindNext()
 		return;
 	}
 
-	if(!(m_findReplace.dwFindFlags & ~PATSEARCH_FULLSEARCH))
+	if(!m_findReplace.findFlags[~FindReplace::FullSearch])
 	{
 		PostMessage(WM_COMMAND, ID_EDIT_FIND);
 		return;
@@ -2059,27 +2045,27 @@ void CViewPattern::OnEditFindNext()
 
 	EffectInfo effectInfo(*pSndFile);
 
-	PATTERNINDEX nPatStart = m_nPattern;
-	PATTERNINDEX nPatEnd = m_nPattern + 1;
+	PATTERNINDEX patStart = m_nPattern;
+	PATTERNINDEX patEnd = m_nPattern + 1;
 
-	if(m_findReplace.dwFindFlags & PATSEARCH_FULLSEARCH)
+	if(m_findReplace.findFlags[FindReplace::FullSearch])
 	{
-		nPatStart = 0;
-		nPatEnd = pSndFile->Patterns.Size();
-	} else if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
+		patStart = 0;
+		patEnd = pSndFile->Patterns.Size();
+	} else if(m_findReplace.findFlags[FindReplace::InPatSelection])
 	{
-		nPatStart = m_nPattern;
-		nPatEnd = nPatStart + 1;
+		patStart = m_nPattern;
+		patEnd = patStart + 1;
 	}
 
 	if(m_bContinueSearch)
 	{
-		nPatStart = m_nPattern;
+		patStart = m_nPattern;
 	}
 
 	// Do we search for an extended effect?
 	bool isExtendedEffect = false;
-	if(m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
+	if(m_findReplace.findFlags[FindReplace::Command])
 	{
 		UINT fxndx = effectInfo.GetIndexFromEffect(m_findReplace.cmdFind.command, m_findReplace.cmdFind.param);
 		isExtendedEffect = effectInfo.IsExtendedEffect(fxndx);
@@ -2088,21 +2074,21 @@ void CViewPattern::OnEditFindNext()
 	CHANNELINDEX firstChannel = 0;
 	CHANNELINDEX lastChannel = pSndFile->GetNumChannels() - 1;
 
-	if(m_findReplace.dwFindFlags & PATSEARCH_CHANNEL)
+	if(m_findReplace.findFlags[FindReplace::InChannels])
 	{
 		// Limit search to given channels
-		firstChannel = min(m_findReplace.nFindMinChn, lastChannel);
-		lastChannel = min(m_findReplace.nFindMaxChn, lastChannel);
+		firstChannel = min(m_findReplace.findMinChn, lastChannel);
+		lastChannel = min(m_findReplace.findMaxChn, lastChannel);
 	}
 
-	if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
+	if(m_findReplace.findFlags[FindReplace::InPatSelection])
 	{
 		// Limit search to pattern selection
 		firstChannel = min(m_findReplace.selection.GetStartChannel(), lastChannel);
 		lastChannel = min(m_findReplace.selection.GetEndChannel(), lastChannel);
 	}
 
-	for(PATTERNINDEX pat = nPatStart; pat < nPatEnd; pat++)
+	for(PATTERNINDEX pat = patStart; pat < patEnd; pat++)
 	{
 		if(!pSndFile->Patterns.IsValidPat(pat))
 		{
@@ -2111,7 +2097,7 @@ void CViewPattern::OnEditFindNext()
 
 		ROWINDEX row = 0;
 		CHANNELINDEX chn = firstChannel;
-		if(m_bContinueSearch && pat == nPatStart && pat == m_nPattern)
+		if(m_bContinueSearch && pat == patStart && pat == m_nPattern)
 		{
 			// Continue search from cursor position
 			row = GetCurrentRow();
@@ -2137,7 +2123,7 @@ void CViewPattern::OnEditFindNext()
 			{
 				RowMask findWhere;
 
-				if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
+				if(m_findReplace.findFlags[FindReplace::InPatSelection])
 				{
 					// Limit search to pattern selection
 					if((chn == m_findReplace.selection.GetStartChannel() || chn == m_findReplace.selection.GetEndChannel())
@@ -2172,23 +2158,23 @@ void CViewPattern::OnEditFindNext()
 
 				bool foundHere = true;
 
-				if(((m_findReplace.dwFindFlags & PATSEARCH_NOTE) && (!findWhere.note || (m->note != m_findReplace.cmdFind.note && (m_findReplace.cmdFind.note != CFindReplaceTab::findAny || !m->IsNote()))))
-					|| ((m_findReplace.dwFindFlags & PATSEARCH_INSTR) && (!findWhere.instrument || m->instr != m_findReplace.cmdFind.instr))
-					|| ((m_findReplace.dwFindFlags & PATSEARCH_VOLCMD) && (!findWhere.volume || m->volcmd != m_findReplace.cmdFind.volcmd))
-					|| ((m_findReplace.dwFindFlags & PATSEARCH_VOLUME) && (!findWhere.volume || m->vol != m_findReplace.cmdFind.vol))
-					|| ((m_findReplace.dwFindFlags & PATSEARCH_COMMAND) && (!findWhere.command || m->command != m_findReplace.cmdFind.command))
-					|| ((m_findReplace.dwFindFlags & PATSEARCH_PARAM) && (!findWhere.parameter || m->param != m_findReplace.cmdFind.param)))
+				if((m_findReplace.findFlags[FindReplace::Note] && (!findWhere.note || (m->note != m_findReplace.cmdFind.note && (m_findReplace.cmdFind.note != CFindReplaceTab::findAny || !m->IsNote()))))
+					|| (m_findReplace.findFlags[FindReplace::Instr] && (!findWhere.instrument || m->instr != m_findReplace.cmdFind.instr))
+					|| (m_findReplace.findFlags[FindReplace::VolCmd] && (!findWhere.volume || m->volcmd != m_findReplace.cmdFind.volcmd))
+					|| (m_findReplace.findFlags[FindReplace::Volume] && (!findWhere.volume || m->vol != m_findReplace.cmdFind.vol))
+					|| (m_findReplace.findFlags[FindReplace::Command] && (!findWhere.command || m->command != m_findReplace.cmdFind.command))
+					|| (m_findReplace.findFlags[FindReplace::Param] && (!findWhere.parameter || m->param != m_findReplace.cmdFind.param)))
 				{
 					foundHere = false;
 				} else
 				{
-					if((m_findReplace.dwFindFlags & (PATSEARCH_COMMAND | PATSEARCH_PARAM)) == PATSEARCH_COMMAND && isExtendedEffect)
+					if((m_findReplace.findFlags & (FindReplace::Command | FindReplace::Param)) == FindReplace::Command && isExtendedEffect)
 					{
 						if((m->param & 0xF0) != (m_findReplace.cmdFind.param & 0xF0)) foundHere = false;
 					}
 
 					// Ignore modcommands with PC/PCS notes when searching from volume or effect column.
-					if(m->IsPcNote() && m_findReplace.dwFindFlags & (PATSEARCH_VOLCMD | PATSEARCH_VOLUME | PATSEARCH_COMMAND | PATSEARCH_PARAM))
+					if(m->IsPcNote() && m_findReplace.findFlags[FindReplace::VolCmd | FindReplace::Volume | FindReplace::Command | FindReplace::Param])
 					{
 						foundHere = false;
 					}
@@ -2198,7 +2184,7 @@ void CViewPattern::OnEditFindNext()
 				if(foundHere)
 				{
 					// Do we want to jump to the finding in this pattern?
-					const bool updatePos = ((m_findReplace.dwReplaceFlags & (PATSEARCH_REPLACEALL | PATSEARCH_REPLACE)) != (PATSEARCH_REPLACEALL | PATSEARCH_REPLACE));
+					const bool updatePos = !m_findReplace.replaceFlags.test_all(FindReplace::ReplaceAll | FindReplace::Replace);
 					nFound++;
 
 					if(updatePos)
@@ -2206,7 +2192,7 @@ void CViewPattern::OnEditFindNext()
 						if(IsLiveRecord())
 						{
 							// turn off "follow song"
-							m_dwStatus &= ~psFollowSong;
+							m_Status.reset(psFollowSong);
 							SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
 						}
 						// This doesn't find the order if it's in another sequence :(
@@ -2220,15 +2206,15 @@ void CViewPattern::OnEditFindNext()
 					}
 
 					PatternCursor::Columns foundCol = PatternCursor::firstColumn;
-					if((m_findReplace.dwFindFlags & PATSEARCH_NOTE))
+					if(m_findReplace.findFlags[FindReplace::Note])
 						foundCol = PatternCursor::noteColumn;
-					else if((m_findReplace.dwFindFlags & PATSEARCH_INSTR))
+					else if(m_findReplace.findFlags[FindReplace::Instr])
 						foundCol = PatternCursor::instrColumn;
-					else if((m_findReplace.dwFindFlags & (PATSEARCH_VOLCMD | PATSEARCH_VOLUME)))
+					else if(m_findReplace.findFlags[FindReplace::VolCmd | FindReplace::Volume])
 						foundCol = PatternCursor::volumeColumn;
-					else if((m_findReplace.dwFindFlags & PATSEARCH_COMMAND))
+					else if(m_findReplace.findFlags[FindReplace::Command])
 						foundCol = PatternCursor::effectColumn;
-					else if((m_findReplace.dwFindFlags & PATSEARCH_PARAM))
+					else if(m_findReplace.findFlags[FindReplace::Param])
 						foundCol = PatternCursor::paramColumn;
 
 					if(updatePos)
@@ -2237,11 +2223,11 @@ void CViewPattern::OnEditFindNext()
 						SetCursorPosition(PatternCursor(row, chn, foundCol));
 					}
 
-					if(!(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACE)) goto EndSearch;
+					if(!m_findReplace.replaceFlags[FindReplace::Replace]) goto EndSearch;
 
 					bool replace = true;
 
-					if(!(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL))
+					if(!m_findReplace.replaceFlags[FindReplace::ReplaceAll])
 					{
 						ConfirmAnswer result = Reporting::Confirm("Replace this occurrence?", "Replace", true);
 						if(result == cnfCancel)
@@ -2254,7 +2240,7 @@ void CViewPattern::OnEditFindNext()
 					}
 					if(replace)
 					{
-						if((m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL))
+						if(m_findReplace.replaceFlags[FindReplace::ReplaceAll])
 						{
 							// Just create one logic undo step per pattern when auto-replacing all occurences.
 							if(firstInPat)
@@ -2268,7 +2254,7 @@ void CViewPattern::OnEditFindNext()
 							GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1);
 						}
 
-						if ((m_findReplace.dwReplaceFlags & PATSEARCH_NOTE))
+						if(m_findReplace.replaceFlags[FindReplace::Note])
 						{
 							if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOctave)
 							{
@@ -2298,14 +2284,14 @@ void CViewPattern::OnEditFindNext()
 							}
 						}
 
-						if ((m_findReplace.dwReplaceFlags & PATSEARCH_INSTR))
+						if(m_findReplace.replaceFlags[FindReplace::Instr])
 						{
-							if (m_findReplace.cInstrRelChange == -1)
+							if (m_findReplace.instrRelChange == -1)
 							{
 								// Instr--
 								if(m->instr > 1)
 									m->instr--;
-							} else if (m_findReplace.cInstrRelChange == 1)
+							} else if (m_findReplace.instrRelChange == 1)
 							{
 								// Instr++
 								if(m->instr > 0 && m->instr < (MAX_INSTRUMENTS - 1))
@@ -2316,17 +2302,17 @@ void CViewPattern::OnEditFindNext()
 							}
 						}
 
-						if ((m_findReplace.dwReplaceFlags & PATSEARCH_VOLCMD))
+						if(m_findReplace.replaceFlags[FindReplace::VolCmd])
 						{
 							m->volcmd = m_findReplace.cmdReplace.volcmd;
 						}
 
-						if ((m_findReplace.dwReplaceFlags & PATSEARCH_VOLUME))
+						if(m_findReplace.replaceFlags[FindReplace::Volume])
 						{
 							m->vol = m_findReplace.cmdReplace.vol;
 						}
 
-						if ((m_findReplace.dwReplaceFlags & (PATSEARCH_VOLCMD | PATSEARCH_VOLUME)) && m->volcmd != VOLCMD_NONE)
+						if(m_findReplace.replaceFlags[FindReplace::VolCmd | FindReplace::Volume] && m->volcmd != VOLCMD_NONE)
 						{
 							// Fix volume command parameters if necessary. This is necesary e.g.
 							// When there was a command "v24" and the user searched for v and replaced it by d.
@@ -2338,14 +2324,14 @@ void CViewPattern::OnEditFindNext()
 							}
 						}
 
-						if ((m_findReplace.dwReplaceFlags & PATSEARCH_COMMAND))
+						if(m_findReplace.replaceFlags[FindReplace::Command])
 						{
 							m->command = m_findReplace.cmdReplace.command;
 						}
 
-						if ((m_findReplace.dwReplaceFlags & PATSEARCH_PARAM))
+						if(m_findReplace.replaceFlags[FindReplace::Param])
 						{
-							if ((isExtendedEffect) && (!(m_findReplace.dwReplaceFlags & PATSEARCH_COMMAND)))
+							if ((isExtendedEffect) && !m_findReplace.replaceFlags[FindReplace::Command])
 								m->param = (BYTE)((m->param & 0xF0) | (m_findReplace.cmdReplace.param & 0x0F));
 							else
 								m->param = m_findReplace.cmdReplace.param;
@@ -2362,12 +2348,12 @@ void CViewPattern::OnEditFindNext()
 	}
 EndSearch:
 
-	if(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL)
+	if(m_findReplace.replaceFlags[FindReplace::ReplaceAll])
 	{
 		InvalidatePattern();
 	}
 
-	if((m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION) && (nFound == 0 || (m_findReplace.dwReplaceFlags & (PATSEARCH_REPLACE | PATSEARCH_REPLACEALL)) == PATSEARCH_REPLACE))
+	if(m_findReplace.findFlags[FindReplace::InPatSelection] && (nFound == 0 || (m_findReplace.replaceFlags & (FindReplace::Replace | FindReplace::ReplaceAll)) == FindReplace::Replace))
 	{
 		// Restore original selection if we didn't find anything or just replaced stuff manually.
 		m_Selection = m_findReplace.selection;
@@ -2386,7 +2372,7 @@ EndSearch:
 		result = "Cannot find \"";
 
 		// Note
-		if(m_findReplace.dwFindFlags & PATSEARCH_NOTE)
+		if(m_findReplace.findFlags[FindReplace::Note])
 		{
 			result.Append(GetNoteStr(m_findReplace.cmdFind.note));
 		} else
@@ -2396,7 +2382,7 @@ EndSearch:
 		result.AppendChar(' ');
 
 		// Instrument
-		if(m_findReplace.dwFindFlags & PATSEARCH_INSTR)
+		if(m_findReplace.findFlags[FindReplace::Instr])
 		{
 			if (m_findReplace.cmdFind.instr)
 			{
@@ -2412,7 +2398,7 @@ EndSearch:
 		result.AppendChar(' ');
 
 		// Volume Command
-		if(m_findReplace.dwFindFlags & PATSEARCH_VOLCMD)
+		if(m_findReplace.findFlags[FindReplace::VolCmd])
 		{
 			if(m_findReplace.cmdFind.volcmd)
 			{
@@ -2427,7 +2413,7 @@ EndSearch:
 		}
 
 		// Volume Parameter
-		if(m_findReplace.dwFindFlags & PATSEARCH_VOLUME)
+		if(m_findReplace.findFlags[FindReplace::Volume])
 		{
 			result.AppendFormat("%02d", m_findReplace.cmdFind.vol);
 		} else
@@ -2437,7 +2423,7 @@ EndSearch:
 		result.AppendChar(' ');
 
 		// Effect Command
-		if(m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
+		if(m_findReplace.findFlags[FindReplace::Command])
 		{
 			if(m_findReplace.cmdFind.command)
 			{
@@ -2452,7 +2438,7 @@ EndSearch:
 		}
 
 		// Effect Parameter
-		if(m_findReplace.dwFindFlags & PATSEARCH_PARAM)
+		if(m_findReplace.findFlags[FindReplace::Param])
 		{
 			result.AppendFormat("%02X", m_findReplace.cmdFind.param);
 		} else
@@ -2489,7 +2475,7 @@ void CViewPattern::PatternStep(bool autoStep)
 		CriticalSection cs;
 
 		// Cut instruments/samples in virtual channels
-		for (CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
 			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
@@ -2588,7 +2574,7 @@ void CViewPattern::OnCursorPaste()
 
 	SetModified(false);
 
-	if(GetSoundFile()->IsPaused() || !(m_dwStatus & psFollowSong) || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
+	if(GetSoundFile()->IsPaused() || !m_Status[psFollowSong] || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
 	{
 		InvalidateCell(m_Cursor);
 		SetCurrentRow(GetCurrentRow() + m_nSpacing);
@@ -3073,7 +3059,7 @@ void CViewPattern::OnDropSelection()
 	end.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	PatternRect destination(begin, end);
 
-	const bool moveSelection = !(m_dwStatus & (psKeyboardDragSelect | psCtrlDragSelect));
+	const bool moveSelection = !m_Status[psKeyboardDragSelect | psCtrlDragSelect];
 
 	BeginWaitCursor();
 	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
@@ -3566,7 +3552,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		}
 
 		// Don't follow song if user drags selections or scrollbars.
-		if((m_dwStatus & (psFollowSong | psDragActive)) == psFollowSong)
+		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 		{
 			if (nPat < pSndFile->Patterns.Size())
 			{
@@ -3596,7 +3582,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 
 	} //Ends condition "if(pnotify->dwType & MPTNOTIFY_POSITION)"
 
-	if((pnotify->dwType & (MPTNOTIFY_VUMETERS|MPTNOTIFY_STOP)) && (m_dwStatus & psShowVUMeters))
+	if((pnotify->dwType & (MPTNOTIFY_VUMETERS|MPTNOTIFY_STOP)) && m_Status[psShowVUMeters])
 	{
 		UpdateAllVUMeters(pnotify);
 	}
@@ -3699,19 +3685,19 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 }
 
 
-CViewPattern::ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
-//-------------------------------------------------------------------------------------------------
+ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
+//-----------------------------------------------------------------------------------
 {
 	ModCommandPos editpos;
 	if(bLiveRecord)
 	{
-		SetEditPos(rSf, editpos.nRow, editpos.nPat, rSf.m_nRow, rSf.m_nPattern);
+		SetEditPos(rSf, editpos.row, editpos.pattern, rSf.m_nRow, rSf.m_nPattern);
 	} else
 	{
-		editpos.nPat = m_nPattern;
-		editpos.nRow = GetCurrentRow();
+		editpos.pattern = m_nPattern;
+		editpos.row = GetCurrentRow();
 	}
-	editpos.nChn = GetCurrentChannel();
+	editpos.channel = GetCurrentChannel();
 
 	return editpos;
 }
@@ -3740,8 +3726,8 @@ ModCommand &CViewPattern::GetModCommand(CSoundFile &sndFile, const ModCommandPos
 //------------------------------------------------------------------------------------
 {
 	static ModCommand dummy;
-	if(sndFile.Patterns.IsValidPat(pos.nPat) && pos.nRow < sndFile.Patterns[pos.nPat].GetNumRows() && pos.nChn < sndFile.GetNumChannels())
-		return *sndFile.Patterns[pos.nPat].GetpModCommand(pos.nRow, pos.nChn);
+	if(sndFile.Patterns.IsValidPat(pos.pattern) && pos.row < sndFile.Patterns[pos.pattern].GetNumRows() && pos.channel < sndFile.GetNumChannels())
+		return *sndFile.Patterns[pos.pattern].GetpModCommand(pos.row, pos.channel);
 	else
 		return dummy;
 }
@@ -3812,10 +3798,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 		ModCommandPos editpos = GetEditPos(*pSndFile, liveRecord);
 		ModCommand &m = GetModCommand(*pSndFile, editpos);
-		pModDoc->GetPatternUndo().PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
+		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1);
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 127));
 		if(!liveRecord)
-			InvalidateRow(editpos.nRow);
+			InvalidateRow(editpos.row);
 		pMainFrm->ThreadSafeSetModified(pModDoc);
 	}
 
@@ -3874,14 +3860,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
 				{
 					// Write command only if there's no existing command or already a midi macro command.
-					pModDoc->GetPatternUndo().PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, 1, 1);
+					pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1);
 					m.command = CMD_SMOOTHMIDI;
 					m.param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);
 
 					// Update GUI only if not recording live.
 					if(!liveRecord)
-						InvalidateRow(editpos.nRow);
+						InvalidateRow(editpos.row);
 				}
 			}
 
@@ -3952,12 +3938,12 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		return (m_nPattern << 16) | GetCurrentRow();
 
 	case VIEWMSG_FOLLOWSONG:
-		m_dwStatus &= ~psFollowSong;
+		m_Status.reset(psFollowSong);
 		if (lParam)
 		{
 			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			CModDoc *pModDoc = GetDocument();
-			m_dwStatus |= psFollowSong;
+			m_Status.set(psFollowSong);
 			if (pModDoc) pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
 			if (pMainFrm) pMainFrm->SetFollowSong(pModDoc, m_hWnd, TRUE, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
 			SetFocus();
@@ -3972,7 +3958,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_SETRECORD:
-		if (lParam) m_dwStatus |= psRecordingEnabled; else m_dwStatus &= ~psRecordingEnabled;
+		m_Status.set(psRecordingEnabled, !!lParam);
 		break;
 
 	case VIEWMSG_SETSPACING:
@@ -3985,14 +3971,14 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_SETVUMETERS:
-		if (lParam) m_dwStatus |= psShowVUMeters; else m_dwStatus &= ~psShowVUMeters;
+		m_Status.set(psShowVUMeters, !!lParam);
 		UpdateSizes();
 		UpdateScrollSize();
 		InvalidatePattern(true);
 		break;
 
 	case VIEWMSG_SETPLUGINNAMES:
-		if (lParam) m_dwStatus |= psShowPluginNames; else m_dwStatus &= ~psShowPluginNames;
+		m_Status.set(psShowPluginNames, !!lParam);
 		UpdateSizes();
 		UpdateScrollSize();
 		InvalidatePattern(true);
@@ -4012,9 +3998,9 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			{
 				CModDoc *pModDoc = GetDocument();
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if ((!(m_dwStatus & psFollowSong))
-				 || (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
-				 || (pModDoc->GetSoundFile()->IsPaused()))
+				if(!m_Status[psFollowSong]
+					|| (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
+					|| (pModDoc->GetSoundFile()->IsPaused()))
 				{
 					SetCurrentRow(GetCurrentRow() + m_nSpacing);
 				}
@@ -4285,20 +4271,20 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 							}
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
-		case kcSelect:			if (!(m_dwStatus & (psDragnDropEdit|psRowSelection))) m_StartSel = m_Cursor;
-									m_dwStatus |= psKeyboardDragSelect;
+		case kcSelect:			if(!m_Status[psDragnDropEdit | psRowSelection]) m_StartSel = m_Cursor;
+									m_Status.set(psKeyboardDragSelect);
 								return wParam;
 		case kcSelectOffWithCopySelect:
 		case kcSelectOffWithNav:
-		case kcSelectOff:		m_dwStatus &= ~(psKeyboardDragSelect | psShiftSelect);
+		case kcSelectOff:		m_Status.reset(psKeyboardDragSelect | psShiftSelect);
 								return wParam;
 		case kcCopySelectWithSelect:
 		case kcCopySelectWithNav:
-		case kcCopySelect:		if (!(m_dwStatus & (psDragnDropEdit | psRowSelection))) m_StartSel = m_Cursor;
-									m_dwStatus |= psCtrlDragSelect; return wParam;
+		case kcCopySelect:		if(!m_Status[psDragnDropEdit | psRowSelection]) m_StartSel = m_Cursor;
+									m_Status.set(psCtrlDragSelect); return wParam;
 		case kcCopySelectOffWithSelect:
 		case kcCopySelectOffWithNav:
-		case kcCopySelectOff:	m_dwStatus &= ~psCtrlDragSelect; return wParam;
+		case kcCopySelectOff:	m_Status.reset(psCtrlDragSelect); return wParam;
 
 		case kcSelectBeat:
 		case kcSelectMeasure:
@@ -4730,7 +4716,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 		if(bChordMode == true)
 		{
-			m_dwStatus &= ~psChordPlaying;
+			m_Status.reset(psChordPlaying);
 			pModDoc->NoteOff(0, true, ins, GetCurrentChannel());	// XXX this doesn't stop VSTi notes!
 		}
 		else
@@ -5384,7 +5370,7 @@ void CViewPattern::TempEnterChord(int note)
 				if (chordplaylist[kplchrd])
 				{
 					pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, false, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
-					m_dwStatus |= psChordPlaying;
+					m_Status.set(psChordPlaying);
 				}
 			}
 		}
@@ -5686,7 +5672,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 		UpdateIndicator();
 	}
 
-	if(step && (pSndFile->IsPaused() || !(m_dwStatus & psFollowSong) ||
+	if(step && (pSndFile->IsPaused() || !m_Status[psFollowSong] ||
 		(CMainFrame::GetMainFrame() != nullptr && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd)))
 	{
 		if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
@@ -5702,13 +5688,6 @@ void CViewPattern::OnInitMenu(CMenu* pMenu)
 //-----------------------------------------
 {
 	CModScrollView::OnInitMenu(pMenu);
-
-	//rewbs: ensure modifiers are reset when we go into menu
-/*	m_dwStatus &= ~PATSTATUS_KEYDRAGSEL;	
-	m_dwStatus &= ~PATSTATUS_CTRLDRAGSEL;
-	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
-*/	//end rewbs
-
 }
 
 void CViewPattern::TogglePluginEditor(int chan)

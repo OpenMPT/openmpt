@@ -13,8 +13,6 @@
 
 #include "globals.h"
 #include "PatternCursor.h"
-#include "PatternClipboard.h"
-#include "PatternEditorDialogs.h"
 
 class CModDoc;
 class CEditCommand;
@@ -38,11 +36,11 @@ const ROWINDEX MAX_SPACING = 64; // MAX_PATTERN_ROWS
 // Struct for controlling selection clearing. This is used to define which data fields should be cleared.
 struct RowMask
 {
-	bool note;
-	bool instrument;
-	bool volume;
-	bool command;
-	bool parameter;
+	bool note : 1;
+	bool instrument : 1;
+	bool volume : 1;
+	bool command : 1;
+	bool parameter : 1;
 
 	// Default row mask (all rows are selected)
 	RowMask()
@@ -80,14 +78,43 @@ struct RowMask
 
 
 // Find/Replace data
-struct FindReplaceStruct
+struct FindReplace
 {
-	ModCommand cmdFind, cmdReplace;			// Find/replace notes/instruments/effects
-	DWORD dwFindFlags, dwReplaceFlags;		// PATSEARCH_XXX flags (=> PatternEditorDialogs.h)
-	CHANNELINDEX nFindMinChn, nFindMaxChn;	// Find in these channels (if PATSEARCH_CHANNEL is set)
-	signed char cInstrRelChange;			// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
-	PatternRect selection;					// Find in this selection (if PATSEARCH_PATSELECTION is set)
+	enum Flags
+	{
+		Note			= 0x01,		// Search for note
+		Instr			= 0x02,		// Search for instrument
+		VolCmd			= 0x04,		// Search for volume effect
+		Volume			= 0x08,		// Search for volume
+		Command			= 0x10,		// Search for effect
+		Param			= 0x20,		// Search for effect parameter
+		InChannels		= 0x40,		// Limit search to channels
+		FullSearch		= 0x100,	// Search whole song
+		InPatSelection	= 0x200,	// Search in current pattern selection
+		Replace			= 0x400,	// Replace
+		ReplaceAll		= 0x800,	// Replace all
+	};
+
+	ModCommand cmdFind, cmdReplace;				// Find/replace notes/instruments/effects
+	FlagSet<Flags> findFlags, replaceFlags;		// See Flags
+	PatternRect selection;						// Find in this selection (if FindReplace::InPatSelection is set)
+	CHANNELINDEX findMinChn, findMaxChn;		// Find in these channels (if FindReplace::InChannels is set)
+	signed char instrRelChange;					// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
 };
+
+DECLARE_FLAGSET(FindReplace::Flags);
+
+
+struct ModCommandPos
+{
+	ROWINDEX row;
+	PATTERNINDEX pattern;
+	CHANNELINDEX channel;
+};
+
+
+#include "PatternClipboard.h"
+#include "PatternEditorDialogs.h"
 
 
 //////////////////////////////////////////////////////////////////
@@ -98,7 +125,7 @@ struct FindReplaceStruct
 class CViewPattern: public CModScrollView
 //=======================================
 {
-protected:
+public:
 
 	// Pattern status flags
 	enum PatternStatus
@@ -119,29 +146,26 @@ protected:
 		psShowPluginNames		= 0x2000,	// Show plugin names in channel headers
 		psRowSelection			= 0x4000,	// Selecting a whole pattern row by clicking the row numbers
 		psChannelSelection		= 0x8000,	// Double-clicked pattern to select a whole channel
+		psDragging				= 0x10000,	// Drag&Drop: Dragging an item around
+		psShiftDragging			= 0x20000,	// Drag&Drop: Dragging an item around and holding shift
 
 		// All possible drag flags, to test if user is dragging a selection or a scrollbar
 		psDragActive			= psDragVScroll | psDragHScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
 	};
 
-	struct ModCommandPos
-	{
-		PATTERNINDEX nPat;
-		ROWINDEX nRow;
-		CHANNELINDEX nChn;
-	};
+protected:
 
 	CFastBitmap m_Dib;
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
-	PATTERNINDEX m_nPattern;
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
-	PATTERNINDEX m_nPlayPat;
+	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow;
+	PATTERNINDEX m_nPattern, m_nPlayPat;
 
 	int m_nXScroll, m_nYScroll;
-	PatternCursor::Columns m_nDetailLevel;		// Visible Columns
+	PatternCursor::Columns m_nDetailLevel;	// Visible Columns
 
 	// Cursor and selection positions
 	PatternCursor m_Cursor;					// Current cursor position in pattern.
@@ -152,34 +176,30 @@ protected:
 	// Drag&Drop
 	DWORD m_nDragItem;	// Currently dragged item
 	DWORD m_nDropItem;	// Currently hovered item during dragondrop
-	bool m_bDragging, m_bInItemRect, m_bShiftDragging;
 	RECT m_rcDragItem, m_rcDropItem;
+	bool m_bInItemRect;
 
-	bool m_bContinueSearch, m_bWholePatternFitsOnScreen;
-	DWORD m_dwStatus;
-	WORD ChnVUMeters[MAX_BASECHANNELS];
-	WORD OldVUMeters[MAX_BASECHANNELS];
 	UINT m_nFoundInstrument;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
-	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked;
+	bool m_bContinueSearch, m_bWholePatternFitsOnScreen;
 
-	ModCommand m_PCNoteEditMemory;			// PC Note edit memory
-	static ModCommand m_cmdOld;				// Quick cursor copy/paste data
-	static FindReplaceStruct m_findReplace;	// Find/replace data
+	ModCommand m_PCNoteEditMemory;		// PC Note edit memory
+	static ModCommand m_cmdOld;			// Quick cursor copy/paste data
+	static FindReplace m_findReplace;	// Find/replace data
 
 	// Internal pattern clipboard
 	static PatternClipboard patternClipboard;
 
-// -> CODE#0012
-// -> DESC="midi keyboard split"
+	QuickChannelProperties quickChannelProperties;
+
+	vector<ModCommand::NOTE> octaveKeyMemory;
+
+	WORD ChnVUMeters[MAX_BASECHANNELS];
+	WORD OldVUMeters[MAX_BASECHANNELS];
+
 	BYTE activeNoteChannel[NOTE_MAX + 1];
 	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
-	vector<ModCommand::NOTE> octaveKeyMemory;
-	int oldrow, oldchn, oldsplitchn;
-// -! NEW_FEATURE#0012
-
-	QuickChannelProperties quickChannelProperties;
 
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
@@ -361,10 +381,7 @@ protected:
 	afx_msg void OnMuteChannel(bool current); //rewbs.customKeys
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
-// -> CODE#0012
-// -> DESC="midi keyboard split"
 	afx_msg void OnSplitRecordSelect();
-// -! NEW_FEATURE#0012
 	afx_msg void OnDeleteRows();
 	afx_msg void OnDeleteRowsEx();
 	afx_msg void OnInsertRows();
@@ -374,11 +391,6 @@ protected:
 	afx_msg void OnNextOrder();
 	afx_msg void OnPrevInstrument() { PostCtrlMessage(CTRLMSG_PAT_PREVINSTRUMENT); }
 	afx_msg void OnNextInstrument() { PostCtrlMessage(CTRLMSG_PAT_NEXTINSTRUMENT); }
-//rewbs.customKeys - now implemented at ModDoc level
-/*	afx_msg void OnPatternRestart() {}
-	afx_msg void OnPatternPlay()	{}
-	afx_msg void OnPatternPlayNoLoop()	{} */
-//end rewbs.customKeys
 	afx_msg void OnPatternRecord()	{ PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
 	afx_msg void OnInterpolateVolume() { Interpolate(PatternCursor::volumeColumn); }
 	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
@@ -467,8 +479,8 @@ private:
 		{
 			return false;
 		}
-		//           (following song)      &&       (following in correct document)           &&    (playback is on)
-		return (m_dwStatus & psFollowSong) && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !sndFile->IsPaused();
+		//      (following song)      &&       (following in correct document)           &&    (playback is on)
+		return m_Status[psFollowSong] && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !sndFile->IsPaused();
 	};
 
 	// If given edit positions are valid, sets them to iRow and iPat.
@@ -486,7 +498,7 @@ private:
 	ModCommand &GetModCommand(CSoundFile &sndFile, const ModCommandPos &pos);
 
 	// Returns true if pattern editing is enabled.
-	bool IsEditingEnabled() const { return ((m_dwStatus & psRecordingEnabled) != 0); }
+	bool IsEditingEnabled() const { return m_Status[psRecordingEnabled]; }
 
 	// Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
@@ -508,3 +520,6 @@ private:
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
+
+DECLARE_FLAGSET(CViewPattern::PatternStatus);
+
