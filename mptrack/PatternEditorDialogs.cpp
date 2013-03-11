@@ -12,8 +12,9 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "Mainfrm.h"
-#include "PatternEditorDialogs.h"
+#include "Moddoc.h"
 #include "view_pat.h"
+#include "PatternEditorDialogs.h"
 
 
 // -> CODE#0010
@@ -125,27 +126,27 @@ BOOL CFindReplaceTab::OnInitDialog()
 	CSoundFile *pSndFile;
 
 	CPropertyPage::OnInitDialog();
-	if (!m_pModDoc) return TRUE;
+	if(!m_pModDoc) return TRUE;
 	pSndFile = m_pModDoc->GetSoundFile();
 	// Search flags
-	if (m_dwFlags & PATSEARCH_NOTE) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
-	if (m_dwFlags & PATSEARCH_INSTR) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if (m_dwFlags & PATSEARCH_VOLCMD) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
-	if (m_dwFlags & PATSEARCH_VOLUME) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if (m_dwFlags & PATSEARCH_COMMAND) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
-	if (m_dwFlags & PATSEARCH_PARAM) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
-	if (m_bReplace)
+	CheckDlgButton(IDC_CHECK1, m_Flags[FindReplace::Note] ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK2, m_Flags[FindReplace::Instr] ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK3, m_Flags[FindReplace::VolCmd] ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, m_Flags[FindReplace::Volume] ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK5, m_Flags[FindReplace::Command] ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK6, m_Flags[FindReplace::Param] ? MF_CHECKED : MF_UNCHECKED);
+	if(m_bReplace)
 	{
-		if (m_dwFlags & PATSEARCH_REPLACE) CheckDlgButton(IDC_CHECK7, MF_CHECKED);
-		if (m_dwFlags & PATSEARCH_REPLACEALL) CheckDlgButton(IDC_CHECK8, MF_CHECKED);
+		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::Replace] ? MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK8, m_Flags[FindReplace::ReplaceAll] ? MF_CHECKED : MF_UNCHECKED);
 	} else
 	{
-		if (m_dwFlags & PATSEARCH_CHANNEL) CheckDlgButton(IDC_CHECK7, MF_CHECKED);
+		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::InChannels] ? MF_CHECKED : MF_UNCHECKED);
 		int nButton = IDC_RADIO1;
-		if((m_dwFlags & PATSEARCH_FULLSEARCH))
+		if(m_Flags[FindReplace::FullSearch])
 		{
 			nButton = IDC_RADIO2;
-		} else if(/*(m_dwFlags & PATSEARCH_PATSELECTION) &&*/ m_bPatSel)
+		} else if(m_bPatSel)
 		{
 			nButton = IDC_RADIO3;
 		}
@@ -360,22 +361,22 @@ void CFindReplaceTab::OnOK()
 	CComboBox *combo;
 
 	// Search flags
-	m_dwFlags = 0;
-	if (IsDlgButtonChecked(IDC_CHECK1)) m_dwFlags |= PATSEARCH_NOTE;
-	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwFlags |= PATSEARCH_INSTR;
-	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwFlags |= PATSEARCH_VOLCMD;
-	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwFlags |= PATSEARCH_VOLUME;
-	if (IsDlgButtonChecked(IDC_CHECK5)) m_dwFlags |= PATSEARCH_COMMAND;
-	if (IsDlgButtonChecked(IDC_CHECK6)) m_dwFlags |= PATSEARCH_PARAM;
-	if (m_bReplace)
+	m_Flags.reset();
+	m_Flags.set(FindReplace::Note, !!IsDlgButtonChecked(IDC_CHECK1));
+	m_Flags.set(FindReplace::Instr, !!IsDlgButtonChecked(IDC_CHECK2));
+	m_Flags.set(FindReplace::VolCmd, !!IsDlgButtonChecked(IDC_CHECK3));
+	m_Flags.set(FindReplace::Volume, !!IsDlgButtonChecked(IDC_CHECK4));
+	m_Flags.set(FindReplace::Command, !!IsDlgButtonChecked(IDC_CHECK5));
+	m_Flags.set(FindReplace::Param, !!IsDlgButtonChecked(IDC_CHECK6));
+	if(m_bReplace)
 	{
-		if (IsDlgButtonChecked(IDC_CHECK7)) m_dwFlags |= PATSEARCH_REPLACE;
-		if (IsDlgButtonChecked(IDC_CHECK8)) m_dwFlags |= PATSEARCH_REPLACEALL;
+		m_Flags.set(FindReplace::Replace, !!IsDlgButtonChecked(IDC_CHECK7));
+		m_Flags.set(FindReplace::ReplaceAll, !!IsDlgButtonChecked(IDC_CHECK8));
 	} else
 	{
-		if (IsDlgButtonChecked(IDC_CHECK7)) m_dwFlags |= PATSEARCH_CHANNEL;
-		if (IsDlgButtonChecked(IDC_RADIO2)) m_dwFlags |= PATSEARCH_FULLSEARCH;
-		if (IsDlgButtonChecked(IDC_RADIO3)) m_dwFlags |= PATSEARCH_PATSELECTION;
+		m_Flags.set(FindReplace::InChannels, !!IsDlgButtonChecked(IDC_CHECK7));
+		m_Flags.set(FindReplace::FullSearch, !!IsDlgButtonChecked(IDC_RADIO2));
+		m_Flags.set(FindReplace::InPatSelection, !!IsDlgButtonChecked(IDC_RADIO3));
 	}
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)

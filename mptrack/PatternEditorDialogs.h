@@ -19,18 +19,6 @@
 /////////////////////////////////////////////////////////////////////////
 // Search/Replace
 
-#define PATSEARCH_NOTE			0x01	// Search for note
-#define PATSEARCH_INSTR			0x02	// Search for instrument
-#define PATSEARCH_VOLCMD		0x04	// Search for volume effect
-#define PATSEARCH_VOLUME		0x08	// Search for volume
-#define PATSEARCH_COMMAND		0x10	// Search for effect
-#define PATSEARCH_PARAM			0x20	// Search for effect parameter
-#define PATSEARCH_CHANNEL		0x40	// Limit search to channels
-#define PATSEARCH_FULLSEARCH	0x100	// Search whole song
-#define PATSEARCH_PATSELECTION	0x200	// Search in current pattern selection
-#define PATSEARCH_REPLACE		0x400	// Replace
-#define PATSEARCH_REPLACEALL	0x800	// Replace all
-
 //=========================================
 class CFindReplaceTab: public CPropertyPage
 //=========================================
@@ -41,11 +29,11 @@ protected:
 	EffectInfo effectInfo;
 
 public:
+	FlagSet<FindReplace::Flags> m_Flags;
 	UINT m_nNote, m_nInstr, m_nVolCmd, m_nVol, m_nCommand, m_nParam;
 	CHANNELINDEX m_nMinChannel, m_nMaxChannel;
 	signed char cInstrRelChange;
 	bool m_bPatSel;
-	DWORD m_dwFlags;
 
 	enum findItem
 	{

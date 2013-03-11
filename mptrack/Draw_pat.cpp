@@ -200,8 +200,8 @@ bool CViewPattern::UpdateSizes()
 	int oldx = m_szCell.cx;
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
-	if (m_dwStatus & psShowVUMeters) m_szHeader.cy += VUMETERS_HEIGHT;
-	if (m_dwStatus & psShowPluginNames) m_szHeader.cy += PLUGNAME_HEIGHT;
+	if(m_Status[psShowVUMeters]) m_szHeader.cy += VUMETERS_HEIGHT;
+	if(m_Status[psShowPluginNames]) m_szHeader.cy += PLUGNAME_HEIGHT;
 	m_szCell.cx = 4 + pfnt->nEltWidths[0];
 	if (m_nDetailLevel >= PatternCursor::instrColumn) m_szCell.cx += pfnt->nEltWidths[1];
 	if (m_nDetailLevel >= PatternCursor::volumeColumn) m_szCell.cx += pfnt->nEltWidths[2];
@@ -590,7 +590,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
 
 				// When dragging around channel headers, mark insertion position
-				if(m_bDragging && !m_bInItemRect
+				if(m_Status[psDragging] && !m_bInItemRect
 					&& (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
 					&& (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
 					&& (m_nDropItem & DRAGITEM_VALUEMASK) == ncolhdr)
@@ -599,7 +599,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					r.top = rect.top;
 					r.bottom = rect.bottom;
 					// Drop position depends on whether hovered channel is left or right of dragged item.
-					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_bShiftDragging) ? rect.left : rect.right - 2;
+					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_Status[psShiftDragging]) ? rect.left : rect.right - 2;
 					r.right = r.left + 2;
 					::FillRect(hdc, &r, CMainFrame::brushText);
 				}
@@ -632,14 +632,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 				}
 // -! NEW_FEATURE#0012
 
-				if (m_dwStatus & psShowVUMeters)
+				if(m_Status[psShowVUMeters])
 				{
 					OldVUMeters[ncolhdr] = 0;
 					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
 					rect.top+=VUMETERS_HEIGHT;
 					rect.bottom+=VUMETERS_HEIGHT;
 				}
-				if (m_dwStatus & psShowPluginNames)
+				if(m_Status[psShowPluginNames])
 				{
 					rect.top+=PLUGNAME_HEIGHT;
 					rect.bottom+=PLUGNAME_HEIGHT;
@@ -755,7 +755,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		DrawButtonRect(hdc, &rc, "");
 	}
 	// Drawing pattern selection
-	if (m_dwStatus & psDragnDropping)
+	if(m_Status[psDragnDropping])
 	{
 		DrawDragSel(hdc);
 	}
@@ -883,12 +883,12 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			}
 			if (row == GetCurrentRow())
 			{
-				if (m_dwStatus & psFocussed)
+				if(m_Status[psFocussed])
 				{
 					row_col = MODCOLOR_TEXTCURROW;
 					row_bkcol = MODCOLOR_BACKCURROW;
 				} else
-				if ((m_dwStatus & psFollowSong) && (isPlaying))
+				if(m_Status[psFollowSong] && isPlaying)
 				{
 					row_col = MODCOLOR_TEXTPLAYCURSOR;
 					row_bkcol = MODCOLOR_BACKPLAYCURSOR;
@@ -1429,9 +1429,9 @@ void CViewPattern::OnSize(UINT nType, int cx, int cy)
 void CViewPattern::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
-	if (nSBCode == (SB_THUMBTRACK|SB_THUMBPOSITION)) m_dwStatus |= psDragVScroll;
+	if (nSBCode == (SB_THUMBTRACK|SB_THUMBPOSITION)) m_Status.set(psDragVScroll);
 	CModScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
-	if (nSBCode == SB_ENDSCROLL) m_dwStatus &= ~psDragVScroll;
+	if (nSBCode == SB_ENDSCROLL) m_Status.reset(psDragVScroll);
 }
 
 
@@ -1576,9 +1576,9 @@ void CViewPattern::UpdateIndicator()
 		{
 			nChn = m_Cursor.GetChannel();
 			s[0] = 0;
-			if ((!(m_dwStatus & (psKeyboardDragSelect/*|PATSTATUS_MOUSEDRAGSEL*/))) //rewbs.xinfo: update indicator even when dragging
-			 && (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && (pSndFile->Patterns[m_nPattern])
-			 && (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
+			if(!m_Status[psKeyboardDragSelect]
+				&& (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && (pSndFile->Patterns[m_nPattern])
+				&& (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
 			{
 				const ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
 
