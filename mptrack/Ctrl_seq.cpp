@@ -60,8 +60,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_RENDER,				OnRenderOrder)
 	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,			OnEditCopy)
 	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,			OnEditCut)
-	ON_COMMAND(ID_ORDERLIST_EDIT_PASTE,			OnEditPaste)
-
+	
 	ON_COMMAND(ID_PATTERN_PROPERTIES,			OnPatternProperties)
 	ON_COMMAND(ID_PLAYER_PLAY,					OnPlayerPlay)
 	ON_COMMAND(ID_PLAYER_PAUSE,					OnPlayerPause)
@@ -421,7 +420,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcEditCut:
 		OnEditCut(); return wParam;
 	case kcEditPaste:
-		OnEditPaste(); return wParam;
+		OnPatternPaste(); return wParam;
 
 	// Orderlist navigation
 	case kcOrderlistNavigateLeftSelect:
@@ -573,11 +572,6 @@ void COrderList::EnterPatternNum(int enterNum)
 }
 
 
-static const char szClipboardOrdersHdr[] = "OpenMPT %3s\r\n";
-static const char szClipboardOrdCountFieldHdr[]	= "OrdNum: %u\r\n";
-static const char szClipboardOrdersFieldHdr[]	= "OrdLst: ";
-
-
 void COrderList::OnEditCut()
 //--------------------------
 {
@@ -586,138 +580,13 @@ void COrderList::OnEditCut()
 }
 
 
-void COrderList::OnEditPaste()
-//----------------------------
-{
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CSoundFile* pSf = m_pModDoc->GetSoundFile();
-	if (!pMainFrm)
-		return;
-	BeginWaitCursor();
-	if (pMainFrm->OpenClipboard())
-	{
-		HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
-		LPCSTR p;
-
-		if ((hCpy) && ((p = (LPCSTR)GlobalLock(hCpy)) != NULL))
-		{
-			const DWORD dwMemSize = GlobalSize(hCpy);
-
-			if (dwMemSize > sizeof(szClipboardOrdersHdr) &&
-				memcmp(p, "OpenMPT ", 8) == 0 &&
-				memcmp(p + 11, "\r\n", 2) == 0)
-			{
-				char buf[8];
-				p += sizeof(szClipboardOrdersHdr) - 1;
-				std::istrstream iStrm(p, dwMemSize - sizeof(szClipboardOrdersHdr) + 1);
-				ORDERINDEX nCount = 0;
-				std::vector<PATTERNINDEX> vecPat;
-				while (iStrm.get(buf, sizeof(buf), '\n'))
-				{
-					if (memcmp(buf, "OrdNum:", 8) == 0) // Read expected order count.
-						iStrm >> nCount;
-					else if (memcmp(buf, "OrdLst:", 8) != 0)
-					{	// Unrecognized data -> skip line.
-						iStrm.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
-						continue;
-					}
-					else // Read orders.
-					{
-						LimitMax(nCount, pSf->GetModSpecifications().ordersMax);
-						vecPat.reserve(nCount);
-						char bufItem[16];
-						while (iStrm.peek() >= 32 && iStrm.getline(bufItem, sizeof(bufItem), ' '))
-						{
-							if (vecPat.size() >= pSf->GetModSpecifications().ordersMax)
-								break;
-							if (!(isdigit(bufItem[0]) || bufItem[0] == '+' || bufItem[0] == '-'))
-								continue;
-							PATTERNINDEX nPat = pSf->Order.GetInvalidPatIndex();
-							if (bufItem[0] == '+')
-							{
-								nPat = pSf->Order.GetIgnoreIndex();
-								if(!pSf->GetModSpecifications().hasIgnoreIndex) continue;
-							}
-							else if (isdigit(bufItem[0]))
-							{
-								nPat = ConvertStrTo<PATTERNINDEX>(bufItem);
-								if (nPat >= pSf->GetModSpecifications().patternsMax)
-									nPat = pSf->Order.GetInvalidPatIndex();
-							}
-							vecPat.push_back(nPat);
-						}
-						nCount = pSf->Order.Insert(m_nScrollPos, (ORDERINDEX)vecPat.size());
-						for (ORDERINDEX nOrd = 0; nOrd < nCount; nOrd++)
-							pSf->Order[m_nScrollPos + nOrd] = vecPat[nOrd];
-					}
-					m_pModDoc->SetModified();
-					m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
-				}
-			}
-			GlobalUnlock(hCpy);
-		}
-		CloseClipboard();
-	}
-	EndWaitCursor();
-}
-
-
 void COrderList::OnEditCopy()
 //---------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((!pMainFrm)) return;
-	
 	const OrdSelection ordsel = GetCurSel(false);
-
-	DWORD dwMemSize;
-	HGLOBAL hCpy;
-	
 	BeginWaitCursor();
-	dwMemSize = sizeof(szClipboardOrdersHdr) + sizeof(szClipboardOrdersFieldHdr) + sizeof(szClipboardOrdCountFieldHdr);
-	dwMemSize += ordsel.GetSelCount() * 6 + 8;
-	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
-	{
-		LPCSTR pszFormatName;
-		EmptyClipboard();
-		switch(m_pModDoc->GetSoundFile()->GetType())
-		{
-			case MOD_TYPE_S3M:	pszFormatName = "S3M"; break;
-			case MOD_TYPE_XM:	pszFormatName = "XM"; break;
-			case MOD_TYPE_IT:	pszFormatName = "IT"; break;
-			case MOD_TYPE_MPT:	pszFormatName = "MPT"; break;
-			default:			pszFormatName = "MOD"; break;
-		}
-		LPSTR p = (LPSTR)GlobalLock(hCpy);
-		if (p)
-		{
-			const ModSequence& seq = m_pModDoc->GetSoundFile()->Order;
-			wsprintf(p, szClipboardOrdersHdr, pszFormatName);
-			p += strlen(p);
-			wsprintf(p, szClipboardOrdCountFieldHdr, ordsel.GetSelCount());
-			strcat(p, szClipboardOrdersFieldHdr);
-			p += strlen(p);
-			for(ORDERINDEX i = ordsel.firstOrd; i <= ordsel.lastOrd; i++)
-			{
-				std::string str;
-				if (seq[i] == seq.GetInvalidPatIndex()) 
-					str = "-";
-				else if (seq[i] == seq.GetIgnoreIndex())
-					str = "+";
-				else
-					str = Stringify(seq[i]);
-				memcpy(p, str.c_str(), str.size());
-				p += str.size();
-				*p++ = ' ';
-			}
-			*p++ = '\r';
-			*p++ = '\n';
-			*p = 0;
-		}
-		GlobalUnlock(hCpy);
-		SetClipboardData(CF_TEXT, (HANDLE) hCpy);
-		CloseClipboard();
-	}
+	CViewPattern::GetPatternClipboard().Copy(*m_pModDoc->GetSoundFile(), ordsel.firstOrd, ordsel.lastOrd);
+	CViewPattern::GetPatternClipboardDialog().UpdateList();
 	EndWaitCursor();
 }
 
@@ -725,7 +594,7 @@ void COrderList::OnEditCopy()
 void COrderList::UpdateView(DWORD dwHintMask, CObject *pObj)
 //----------------------------------------------------------
 {
-	if ((pObj != this) && (dwHintMask & HINT_MODSEQUENCE))
+	if(pObj != this && (dwHintMask & HINT_MODSEQUENCE))
 	{
 		InvalidateRect(NULL, FALSE);
 		UpdateInfoText();
@@ -1093,35 +962,32 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu) return;
 	
-	// check if at least one pattern in the current selection exists
-	bool bPatternExists = false;
+	// Check if at least one pattern in the current selection exists
+	bool patExists = false;
 	OrdSelection selection = GetCurSel(false);
-	for(ORDERINDEX nOrd = selection.firstOrd; nOrd <= selection.lastOrd; nOrd++)
+	for(ORDERINDEX ord = selection.firstOrd; ord <= selection.lastOrd && !patExists; ord++)
 	{
-		bPatternExists = ((pSndFile->Order[nOrd] < pSndFile->Patterns.Size())
-			&& (pSndFile->Patterns[pSndFile->Order[nOrd]] != nullptr));
-		if(bPatternExists) break;
+		patExists = pSndFile->Patterns.IsValidPat(pSndFile->Order[ord]);
 	}
 
-	const DWORD greyed = bPatternExists ? 0 : MF_GRAYED;
+	const DWORD greyed = patExists ? 0 : MF_GRAYED;
 
 	CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 	if(multiSelection)
 	{
-		// several patterns are selected.
+		// Several patterns are selected.
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, "&Copy Orders\t" + ih->GetKeyTextFromCommand(kcEditCopy));
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, "&C&ut Orders\t" + ih->GetKeyTextFromCommand(kcEditCut));
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_PASTE, "&Paste Orders\t" + ih->GetKeyTextFromCommand(kcEditPaste));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, "&Copy Patterns\t" + ih->GetKeyTextFromCommand(kcEditCopy));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, "&C&ut Patterns\t" + ih->GetKeyTextFromCommand(kcEditCut));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Patterns\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Patterns\t" + ih->GetKeyTextFromCommand(kcDuplicatePattern));
-	}
-	else
+	} else
 	{
-		// only one pattern is selected
+		// Only one pattern is selected
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
 		if(pSndFile->GetModSpecifications().hasIgnoreIndex)
 		{
@@ -1132,12 +998,11 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern\t" + ih->GetKeyTextFromCommand(kcNewPattern));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern\t" + ih->GetKeyTextFromCommand(kcDuplicatePattern));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, "&Copy Pattern");
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Pattern");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_PASTE, "&Paste Orders\t" + ih->GetKeyTextFromCommand(kcEditPaste));
+		AppendMenu(hMenu, MF_STRING, ID_PATTERNPASTE, "P&aste Pattern\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		if (pSndFile->TypeIsIT_MPT_XM())
 		{
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Pattern properties...");
+			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Pattern Properties...");
 		}
 		if (pSndFile->GetType() == MOD_TYPE_MPT)
 		{

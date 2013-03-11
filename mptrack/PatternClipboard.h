@@ -14,6 +14,8 @@
 #include "Sndfile.h"
 #include "PatternCursor.h"
 
+struct ModCommandPos;
+
 //===========================
 class PatternClipboardElement
 //===========================
@@ -21,11 +23,12 @@ class PatternClipboardElement
 public:
 	
 	CString content;
+	CString description;
 
 public:
 
 	PatternClipboardElement() { };
-	PatternClipboardElement(CString &data) : content(data) { };
+	PatternClipboardElement(const CString &data, const CString &desc) : content(data), description(desc) { };
 };
 
 
@@ -33,6 +36,8 @@ public:
 class PatternClipboard
 //====================
 {
+	friend class PatternClipboardDialog;
+
 public:
 
 	enum PasteModes
@@ -49,8 +54,6 @@ public:
 
 protected:
 
-	// Maximum number of internal clipboard entries
-	static clipindex_t clipboardSize;
 	// Active internal clipboard index
 	clipindex_t activeClipboard;
 	// Internal clipboard collection
@@ -58,14 +61,16 @@ protected:
 
 public:
 
-	PatternClipboard() : activeClipboard(0) { };
+	PatternClipboard() : activeClipboard(0) { SetClipboardSize(1); };
 
+	// Copy a range of patterns to both the system clipboard and the internal clipboard.
+	bool Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last);
 	// Copy a pattern selection to both the system clipboard and the internal clipboard.
 	bool Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 	// Try pasting a pattern selection from the system clipboard.
-	bool Paste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode);
+	bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder);
 	// Try pasting a pattern selection from an internal clipboard.
-	bool Paste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, clipindex_t internalClipboard);
+	bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, clipindex_t internalClipboard);
 	// Copy one of the internal clipboards to the system clipboard.
 	bool SelectClipboard(clipindex_t which);
 	// Switch to the next internal clipboard.
@@ -76,17 +81,15 @@ public:
 	void SetClipboardSize(clipindex_t maxEntries);
 	// Return the current number of clipboards.
 	clipindex_t GetClipboardSize() const { return clipboards.size(); };
-	// Remove all clipboard contents.
-	void Clear();
 
 protected:
 
-	CString GetFileExtension(const char *ext) const;
-	// Perform the pasting operation.
-	bool HandlePaste(CSoundFile &sndFile, PATTERNINDEX pattern, const PatternCursor &pastePos, PasteModes mode, const CString &data);
+	// Create the clipboard text for a pattern selection
+	CString CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 
-	// Keep the number of clipboards consistent with the maximum number of allowed clipboards.
-	void RestrictClipboardSize();
+	CString GetFileExtension(const char *ext) const;
+	// Parse clipboard string and perform the pasting operation.
+	bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder);
 
 	// System-specific clipboard functions
 	bool ToSystemClipboard(const PatternClipboardElement &clipboard) { return ToSystemClipboard(clipboard.content); };
@@ -95,15 +98,28 @@ protected:
 };
 
 
-//==========================
-class PatternClipboardDialog
-//==========================
+//===========================================
+class PatternClipboardDialog : public CDialog
+//===========================================
 {
 protected:
-
 	PatternClipboard &clipboards;
+	CSpinButtonCtrl numClipboardsSpin;
+	CListBox clipList;
+	int posX, posY;
+	bool isLocked, isCreated;
 
 public:
+	PatternClipboardDialog(PatternClipboard &c);
+	void UpdateList();
+	void Show();
+	void Toggle() { if(isCreated) OnCancel(); else Show(); }
 
-	PatternClipboardDialog(PatternClipboard &c) : clipboards(c) { };
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	DECLARE_MESSAGE_MAP();
+
+	afx_msg void OnCancel();
+	afx_msg void OnNumClipboardsChanged();
+	afx_msg void OnSelectClipboard();
 };

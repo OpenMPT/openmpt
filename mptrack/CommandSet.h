@@ -257,6 +257,12 @@ enum CommandID
 	kcToggleNoteOffRecordMIDI,
 	kcEndPatternEditMisc=kcToggleNoteOffRecordMIDI,
 
+	kcStartPatternClipboard,
+	kcToggleClipboardManager = kcStartPatternClipboard,
+	kcClipboardPrev,
+	kcClipboardNext,
+	kcEndPatternClipboard = kcClipboardNext,
+
 	kcStartChannelKeys,
 	kcChannelMute = kcStartChannelKeys,
 	kcChannelSolo,

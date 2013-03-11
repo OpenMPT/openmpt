@@ -285,6 +285,9 @@ void COptionsKeyboard::DefineCommandCategories()
 		for(int c = kcStartPatternEditMisc; c <= kcEndPatternEditMisc; c++)
 			newCat.commands.Add(c);
 		newCat.separators.Add(kcEndPatternEditMisc);				//--------------------------------------
+		for(int c = kcStartPatternClipboard; c <= kcEndPatternClipboard; c++)
+			newCat.commands.Add(c);
+		newCat.separators.Add(kcEndPatternClipboard);				//--------------------------------------
 
 		commandCategories.Add(newCat);
 	}

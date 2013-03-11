@@ -19,7 +19,7 @@
 #define VER_MAJORMAJOR				1
 #define VER_MAJOR					21
 #define VER_MINOR					01
-#define VER_MINORMINOR				18
+#define VER_MINORMINOR				19
 
 //Creates version number from version parts that appears in version string.
 //For example MAKE_VERSION_NUMERIC(1,17,02,28) gives version number of 

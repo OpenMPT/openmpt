@@ -45,6 +45,7 @@ FindReplace CViewPattern::m_findReplace =
 // Static initializers
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
 PatternClipboard CViewPattern::patternClipboard;
+PatternClipboardDialog CViewPattern::patternClipboardDialog(CViewPattern::patternClipboard);
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -272,7 +273,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 			} else
 			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
-				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+				ORDERINDEX nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
 					const ORDERINDEX prevOrd = pSndFile->Order.GetPreviousOrderIgnoringSkips(nCurOrder);
@@ -343,10 +344,10 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 	SetCurSel(selStart, m_Cursor);
 	UpdateIndicator();
 
-	Log("Row: %d; Chan: %d; ColType: %d;\n",
-		selStart.GetRow(),
-		selStart.GetChannel(),
-		selStart.GetColumnType());
+// 	Log("Row: %d; Chan: %d; ColType: %d;\n",
+// 		selStart.GetRow(),
+// 		selStart.GetChannel(),
+// 		selStart.GetColumnType());
 
 	return true;
 }
@@ -4077,7 +4078,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 	case VIEWMSG_PASTEPATTERN:
 		{
-			PastePattern(m_nPattern, 0, PatternClipboard::pmOverwrite);
+			PastePattern(m_nPattern, PatternCursor(0), PatternClipboard::pmOverwrite);
 			InvalidatePattern();
 		}
 		break;
@@ -4364,6 +4365,19 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			break;
 		case kcIncreaseSpacing:
 			if(m_nSpacing < MAX_SPACING) SetSpacing(m_nSpacing + 1);
+			break;
+
+		// Clipboard Manager
+		case kcToggleClipboardManager:
+			patternClipboardDialog.Toggle();
+			break;
+		case kcClipboardPrev:
+			patternClipboard.CycleBackward();
+			patternClipboardDialog.UpdateList();
+			break;
+		case kcClipboardNext:
+			patternClipboard.CycleForward();
+			patternClipboardDialog.UpdateList();
 			break;
 
 	}
@@ -4784,7 +4798,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	// Create undo-point.
-	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, 1, 1, "Note Stop Entry");
+	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, 1, 1);
 
 	// -- write sdx if playing live
 	if(usePlaybackPosition && nTick && pTarget->command == CMD_NONE && !doQuantize)
@@ -4937,41 +4951,41 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	if(pMainFrm == nullptr || pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr)
+	if(pMainFrm == nullptr || pModDoc == nullptr)
 	{
 		return;
 	}
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	ROWINDEX nRow = GetCurrentRow();
-	const ROWINDEX nRowPlayback = pSndFile->m_nRow;
-	const UINT nTick = pSndFile->m_nTickCount;
-	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
+	const ROWINDEX nRowPlayback = sndFile.m_nRow;
+	const UINT nTick = sndFile.m_nTickCount;
+	const PATTERNINDEX nPatPlayback = sndFile.m_nPattern;
 
 	const bool recordEnabled = IsEditingEnabled();
 	CHANNELINDEX nChn = GetCurrentChannel();
 
 	if(note < NOTE_MIN_SPECIAL)
 	{
-		Limit(note, pSndFile->GetModSpecifications().noteMin, pSndFile->GetModSpecifications().noteMax);
+		Limit(note, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
 	}
 
 	// Special case: Convert note off commands to C00 for MOD files
-	if((pSndFile->GetType() == MOD_TYPE_MOD) && (note == NOTE_NOTECUT || note == NOTE_FADE || note == NOTE_KEYOFF))
+	if((sndFile.GetType() == MOD_TYPE_MOD) && (note == NOTE_NOTECUT || note == NOTE_FADE || note == NOTE_KEYOFF))
 	{
 		TempEnterFX(CMD_VOLUME, 0);
 		return;
 	}
 
 	// Check whether the module format supports the note.
-	if(pSndFile->GetModSpecifications().HasNote(note) == false)
+	if(sndFile.GetModSpecifications().HasNote(note) == false)
 	{
 		return;
 	}
 
 	BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 	const bool liveRecord = IsLiveRecord();
-	const bool usePlaybackPosition = (liveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !pSndFile->m_SongFlags[SONG_STEP]);
+	const bool usePlaybackPosition = (liveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !sndFile.m_SongFlags[SONG_STEP]);
 	const bool isSplit = IsNoteSplit(note);
 
 	if(pModDoc->GetSplitKeyboardSettings().IsSplitActive()
@@ -5004,7 +5018,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 	PATTERNINDEX nPat = m_nPattern;
 	if(usePlaybackPosition)
-		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
+		SetEditPos(sndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
 	// Quantize
 	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && CMainFrame::GetSettings().recordQuantizeRows != 0;
@@ -5012,14 +5026,14 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 	{
 		QuantizeRow(nPat, nRow);
 		// "Grace notes" are stuffed into the next row, if possible
-		if(pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn)->IsNote() && nRow < pSndFile->Patterns[nPat].GetNumRows() - 1)
+		if(sndFile.Patterns[nPat].GetpModCommand(nRow, nChn)->IsNote() && nRow < sndFile.Patterns[nPat].GetNumRows() - 1)
 		{
 			nRow++;
 		}
 	}
 
 	// -- Work out where to put the new note
-	ModCommand *pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+	ModCommand *pTarget = sndFile.Patterns[nPat].GetpModCommand(nRow, nChn);
 	ModCommand newcmd = *pTarget;
 
 	// Param control 'note'
@@ -5070,7 +5084,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 		if(volWrite != -1)
 		{
-			if(pSndFile->GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
+			if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
 			{
 				newcmd.volcmd = VOLCMD_VOLUME;
 				newcmd.vol = (ModCommand::VOL)volWrite;
@@ -5086,9 +5100,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 		{
 			if(newcmd.command == CMD_NONE)	//make sure we don't overwrite any existing commands.
 			{
-				newcmd.command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+				newcmd.command = (sndFile.TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
-				if(pSndFile->m_nMusicSpeed > 0) maxSpeed = min(0x0F, pSndFile->m_nMusicSpeed - 1);
+				if(sndFile.m_nMusicSpeed > 0) maxSpeed = min(0x0F, sndFile.m_nMusicSpeed - 1);
 				newcmd.param = 0xD0 + min(maxSpeed, nTick);
 			}
 		}
@@ -5131,7 +5145,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 				ROWINDEX srow = nRow;
 				while(srow-- > 0)
 				{
-					search -= pSndFile->GetNumChannels();
+					search -= sndFile.GetNumChannels();
 					if (search->instr && !search->IsPcNote())
 					{
 						nPlayIns = search->instr;
@@ -5174,7 +5188,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 		{
 			if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 			{
-				if(nRow + m_nSpacing < pSndFile->Patterns[nPat].GetNumRows() || (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL))
+				if(nRow + m_nSpacing < sndFile.Patterns[nPat].GetNumRows() || (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL))
 				{
 					SetCurrentRow(nRow + m_nSpacing, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
 					m_bLastNoteEntryBlocked = false;
@@ -5217,11 +5231,11 @@ void CViewPattern::TempEnterChord(int note)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	if(pMainFrm == nullptr || pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr)
+	if(pMainFrm == nullptr || pModDoc == nullptr)
 	{
 		return;
 	}
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	UINT nPlayChord = 0;
 	BYTE chordplaylist[3];
@@ -5229,13 +5243,13 @@ void CViewPattern::TempEnterChord(int note)
 	const CHANNELINDEX nChn = GetCurrentChannel();
 	UINT nPlayIns = 0;
 	// Simply backup the whole row.
-	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, nChn, GetCurrentRow(), pSndFile->GetNumChannels(), 1);
+	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, nChn, GetCurrentRow(), sndFile.GetNumChannels(), 1);
 
-	const PatternRow rowBase = pSndFile->Patterns[m_nPattern].GetRow(GetCurrentRow());
+	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
 	ModCommand* pTarget = &rowBase[nChn];
 	// Save old row contents		
-	vector<ModCommand> newrow(pSndFile->GetNumChannels());
-	for(CHANNELINDEX n = 0; n < pSndFile->GetNumChannels(); n++)
+	vector<ModCommand> newrow(sndFile.GetNumChannels());
+	for(CHANNELINDEX n = 0; n < sndFile.GetNumChannels(); n++)
 	{
 		newrow[n] = rowBase[n];
 	}
@@ -5272,10 +5286,10 @@ void CViewPattern::TempEnterChord(int note)
 
 			recordGroup = pModDoc->IsChannelRecord(nChn);
 
-			for (UINT kchrd=1; kchrd<pSndFile->m_nChannels; kchrd++)
+			for (UINT kchrd=1; kchrd < sndFile.m_nChannels; kchrd++)
 			{
 				if ((nchno > 2) || (!pChords[nchord].notes[nchno])) break;
-				if (++nchordch >= pSndFile->m_nChannels) nchordch = 0;
+				if (++nchordch >= sndFile.m_nChannels) nchordch = 0;
 
 				currentRecordGroup = pModDoc->IsChannelRecord(nchordch);
 				if (!recordGroup)
@@ -5316,7 +5330,7 @@ void CViewPattern::TempEnterChord(int note)
 
 		if(modified)
 		{
-			for(CHANNELINDEX n = 0; n < pSndFile->GetNumChannels(); n++)
+			for(CHANNELINDEX n = 0; n < sndFile.GetNumChannels(); n++)
 			{
 				rowBase[n] = newrow[n];
 			}
@@ -5354,7 +5368,7 @@ void CViewPattern::TempEnterChord(int note)
 				ROWINDEX srow = GetCurrentRow();
 				while (srow-- > 0)
 				{
-					search -= pSndFile->GetNumChannels();
+					search -= sndFile.GetNumChannels();
 					if (search->instr)
 					{
 						nPlayIns = search->instr;
@@ -6655,6 +6669,7 @@ bool CViewPattern::CopyPattern(PATTERNINDEX nPattern, const PatternRect &selecti
 	BeginWaitCursor();
 	bool result = GetPatternClipboard().Copy(*GetSoundFile(), nPattern, selection);
 	EndWaitCursor();
+	patternClipboardDialog.UpdateList();
 	return result;
 }
 
@@ -6664,13 +6679,26 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 //----------------------------------------------------------------------------------------------------------------------
 {
 	BeginWaitCursor();
-	bool result = GetPatternClipboard().Paste(*GetSoundFile(), nPattern, pastePos, mode);
+	ModCommandPos pos;
+	pos.pattern = nPattern;
+	pos.row = pastePos.GetRow();
+	pos.channel = pastePos.GetChannel();
+	bool result = GetPatternClipboard().Paste(*GetSoundFile(), pos, mode, SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 	EndWaitCursor();
+
+	if(pos.pattern != nPattern)
+	{
+		// Multipaste: Switch to pasted pattern.
+		SetCurrentPattern(pos.pattern);
+		ORDERINDEX curOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+		curOrder = GetSoundFile()->Order.FindOrder(pos.pattern, curOrder);
+		SendCtrlMessage(CTRLMSG_SETCURRENTORDER, curOrder);
+	}
 
 	if(result)
 	{
 		GetDocument()->SetModified();
-		GetDocument()->UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
+		GetDocument()->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATTERNDATA | (pos.pattern << HINT_SHIFT_PAT), NULL);
 	}
 
 	return result;
