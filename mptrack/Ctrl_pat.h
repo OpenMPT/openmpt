@@ -110,7 +110,6 @@ public:
 	// Clipboard.
 	void OnEditCopy();
 	void OnEditCut();
-	void OnEditPaste();
 
 	// Helper function for entering pattern number
 	void EnterPatternNum(int enterNum);

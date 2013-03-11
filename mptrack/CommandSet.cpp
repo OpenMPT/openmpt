@@ -652,6 +652,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcFindInstrument, 1897, _T("Pick up nearest instrument number"));
 	DefineKeyCommand(kcPlaySongFromPattern, 1898, _T("Play Song from Pattern Start"));
 	DefineKeyCommand(kcVSTGUIToggleRecordMIDIOut, 1899, _T("Record MIDI Out to Pattern Editor"));
+	DefineKeyCommand(kcToggleClipboardManager, 1900, _T("Toggle Clipboard Manager"));
+	DefineKeyCommand(kcClipboardPrev, 1901, _T("Cycle to Previous Clipboard"));
+	DefineKeyCommand(kcClipboardNext, 1902, _T("Cycle to Next Clipboard"));
 
 	// Add new key commands here.
 

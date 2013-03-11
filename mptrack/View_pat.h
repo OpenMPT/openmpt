@@ -190,6 +190,7 @@ protected:
 
 	// Internal pattern clipboard
 	static PatternClipboard patternClipboard;
+	static PatternClipboardDialog patternClipboardDialog;
 
 	QuickChannelProperties quickChannelProperties;
 
@@ -215,6 +216,7 @@ public:
 	void SetModified(bool updateAllViews = true);
 
 	static PatternClipboard &GetPatternClipboard() { return patternClipboard; }
+	static PatternClipboardDialog &GetPatternClipboardDialog() { return patternClipboardDialog; }
 
 	bool UpdateSizes();
 	void UpdateScrollSize();

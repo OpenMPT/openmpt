@@ -182,6 +182,8 @@ protected: // create from serialization only
 public:
 	CSoundFile *GetSoundFile() { return &m_SndFile; }
 	const CSoundFile *GetSoundFile() const { return &m_SndFile; }
+	CSoundFile &GetrSoundFile() { return m_SndFile; }
+	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
 
 	void InitPlayer();
 	void SetPause(BOOL bPause) { m_bPaused = bPause; }

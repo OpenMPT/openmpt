@@ -22,6 +22,7 @@
 #include "../common/StringFixer.h"
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
+#include "View_pat.h"
 
 
 const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
@@ -396,6 +397,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
 
+	CViewPattern::GetPatternClipboard().SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", CViewPattern::GetPatternClipboard().GetClipboardSize(), iniFile));
 	
 	// Default Paths
 	TCHAR szPath[_MAX_PATH] = "";
@@ -753,6 +755,8 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
+
+	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", CViewPattern::GetPatternClipboard().GetClipboardSize(), iniFile);
 
 	// Write default paths
 	const bool bConvertPaths = theApp.IsPortableMode();
