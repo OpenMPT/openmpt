@@ -11,10 +11,11 @@
 #pragma once
 
 #include <deque>
-#include "Sndfile.h"
+#include "Snd_defs.h"
 #include "PatternCursor.h"
 
 struct ModCommandPos;
+class CSoundFile;
 
 //===========================
 class PatternClipboardElement

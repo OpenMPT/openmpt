@@ -231,11 +231,10 @@ void TrackerSettings::LoadSettings()
 void TrackerSettings::LoadINISettings(const CString &iniFile)
 //----------------------------------------------------------
 {
-	//CHAR collectedString[INIBUFFERSIZE];
 	MptVersion::VersionNum vIniVersion;
 
 	vIniVersion = gcsPreviousVersion = MptVersion::ToNum(CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile));
-	if(vIniVersion = 0)
+	if(vIniVersion == 0)
 		vIniVersion = MptVersion::num;
 
 	gcsInstallGUID = CMainFrame::GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
