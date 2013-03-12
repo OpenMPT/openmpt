@@ -251,7 +251,7 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 //---------------------------------------------------------------
 {
-	library.category = static_cast<VSTPluginLib::PluginCategory>(effect->dispatcher(effect, effGetPlugCategory, 0, nullptr, nullptr, 0.0f));
+	library.category = static_cast<VSTPluginLib::PluginCategory>(effect->dispatcher(effect, effGetPlugCategory, 0, 0, nullptr, 0.0f));
 	library.isInstrument = ((effect->flags & effFlagsIsSynth) || !effect->numInputs);
 
 	if(library.isInstrument)
@@ -1593,7 +1593,7 @@ PlugParamIndex CVstPlugin::GetNumParameters()
 bool CVstPlugin::CanAutomateParameter(PlugParamIndex index)
 //---------------------------------------------------------
 {
-	return (Dispatch(effCanBeAutomated, index, nullptr, nullptr, 0.0f) != 0);
+	return (Dispatch(effCanBeAutomated, index, 0, nullptr, 0.0f) != 0);
 }
 
 
@@ -1910,7 +1910,7 @@ CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 
 	CString paramName;
 
-	if(Dispatch(effGetParameterProperties, param, nullptr, &properties, 0.0f) == 1)
+	if(Dispatch(effGetParameterProperties, param, 0, &properties, 0.0f) == 1)
 	{
 		StringFixer::SetNullTerminator(properties.label);
 		paramName = properties.label;
@@ -2753,7 +2753,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 		UINT nLen = nParams * sizeof(float);
 		ULONG nType = *(ULONG *)m_pMixStruct->pPluginData;
 
-		if ((Dispatch(effIdentify, 0, nullptr, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
+		if ((Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
 		{
 			void *p = nullptr;
 			Dispatch(effGetChunk, 0,0, &p, 0); //init plug for chunk reception
@@ -2826,7 +2826,7 @@ BOOL CVstPlugin::GetCommandName(UINT nIndex, LPSTR pszName)
 {
 	if (m_pEffect)
 	{
-		return Dispatch(effGetParamName, nIndex, nullptr, pszName, 0.0f);
+		return Dispatch(effGetParamName, nIndex, 0, pszName, 0.0f);
 	}
 	return 0;
 }
@@ -2845,7 +2845,7 @@ void CVstPlugin::Bypass(bool bypass)
 {
 	m_pMixStruct->Info.SetBypass(bypass);
 
-	Dispatch(effSetBypass, bypass ? 1 : 0, nullptr, nullptr, 0.0f);
+	Dispatch(effSetBypass, bypass ? 1 : 0, 0, nullptr, 0.0f);
 
 #ifdef MODPLUG_TRACKER
 	if(m_pModDoc)
@@ -2913,7 +2913,7 @@ bool CVstPlugin::isInstrument() // ericus 18/02/2005
 bool CVstPlugin::CanRecieveMidiEvents()
 //-------------------------------------
 {
-	return (CVstPlugin::Dispatch(effCanDo, 0, nullptr, "receiveVstMidiEvent", 0.0f) != 0);
+	return (CVstPlugin::Dispatch(effCanDo, 0, 0, "receiveVstMidiEvent", 0.0f) != 0);
 }
 
 

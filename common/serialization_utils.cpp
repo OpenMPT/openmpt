@@ -441,7 +441,7 @@ void Ssb::ReleaseWriteSubEntry(const void* pId, const size_t nIdLength)
 		m_Status |= SNW_SUBENTRY_FAILURE;
 
 	delete m_pSubEntry; m_pSubEntry = nullptr;
-	WriteMapItem(pId, nIdLength, m_posSubEntryStart - m_posStart, m_pOstrm->tellp() - m_posSubEntryStart, "");
+	WriteMapItem(pId, nIdLength, static_cast<RposType>(m_posSubEntryStart - m_posStart), static_cast<DataSize>(m_pOstrm->tellp() - m_posSubEntryStart), "");
 	IncrementWriteCounter();
 }
 
@@ -533,8 +533,8 @@ Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const void* pId, const size_t 
 	else if (GetFlag(RwfRMapHasId) == false) // Not ID's in map.
 	{
 		ReadEntry e;
-		e.rposStart = posReadBegin - m_posStart;
-		e.nSize = m_pIstrm->tellg() - posReadBegin;
+		e.rposStart = static_cast<RposType>(posReadBegin - m_posStart);
+		e.nSize = static_cast<DataSize>(m_pIstrm->tellg() - posReadBegin);
 		AddReadNote(&e, m_nCounter);
 	}
 	else // Entry not found.
@@ -551,7 +551,12 @@ Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const void* pId, const size_t 
 void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posBeforeWrite)
 //-----------------------------------------------------------------------------------------
 {
-	RposType nEntrySize = m_pOstrm->tellp() - posBeforeWrite;
+	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
+
+	if (nRawEntrySize > DataSize_max)
+		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }	
+
+	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
 
 	if(GetFlag(RwfRMapHasSize) && nEntrySize > (uint64_max >> 2))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
@@ -569,10 +574,10 @@ void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posB
 			{ AddWriteNote(SNW_INSUFFICIENT_FIXEDSIZE); return; }
 	}
 	if (GetFlag(RwfRwHasMap))
-		WriteMapItem(pId, nIdSize, posBeforeWrite - m_posStart, nEntrySize, "");
+		WriteMapItem(pId, nIdSize, static_cast<RposType>(posBeforeWrite - m_posStart), nEntrySize, "");
 
 	if (m_fpLogFunc != nullptr)
-		AddWriteNote(pId, nIdSize, m_nCounter, nEntrySize, posBeforeWrite - m_posStart);
+		AddWriteNote(pId, nIdSize, m_nCounter, nEntrySize, static_cast<RposType>(posBeforeWrite - m_posStart));
 	IncrementWriteCounter();
 }
 
@@ -725,7 +730,13 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 		if(tempU64 > Offtype_max)
 			{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 	}
-	m_rposEndofHdrData = iStrm.tellg() - m_posStart;
+
+	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
+
+	if (rawEndOfHdrData < 0 || rawEndOfHdrData > RposType_max)
+		{ AddReadNote(SNR_INSUFFICIENT_RPOSTYPE); return; }
+
+	m_rposEndofHdrData = static_cast<RposType>(rawEndOfHdrData);
 	m_rposMapBegin = (GetFlag(RwfRwHasMap)) ? static_cast<RposType>(tempU64) : m_rposEndofHdrData;
 
 	if (GetFlag(RwfRwHasMap) == false)
@@ -822,8 +833,9 @@ void Ssb::CacheMap()
 	// startpos.
 	if (GetFlag(RwfRMapHasStartpos) == false && (GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0))
 	{
+		const RposType offset = static_cast<RposType>(m_posDataBegin - m_posStart);
 		for(size_t i = 0; i < m_nReadEntrycount; i++)
-			mapData[i].rposStart += (m_posDataBegin - m_posStart);
+			mapData[i].rposStart += offset;
 	}
 }
 

@@ -34,16 +34,19 @@ typedef OutStream::off_type Offtype;
 typedef Offtype Postype;
 typedef std::streamsize Streamsize;
 
-typedef UINT_PTR	DataSize;	// Data size type.
-typedef UINT_PTR	RposType;	// Relative position type.
-typedef UINT_PTR	NumType;	// Entry count type.
-const DataSize DataSize_max = MAXUINT_PTR;
-const RposType RposType_max = MAXUINT_PTR;
-const NumType NumType_max = MAXUINT_PTR;
+//typedef uintptr_t	DataSize;	// Data size type.
+//typedef uintptr_t	RposType;	// Relative position type.
+//typedef uintptr_t	NumType;	// Entry count type.
+typedef uintptr_t	DataSize;	// Data size type.
+typedef uintptr_t	RposType;	// Relative position type.
+typedef uintptr_t	NumType;	// Entry count type.
+const DataSize DataSize_max = Util::NumericTraits<DataSize>::maxValue;
+const RposType RposType_max = Util::NumericTraits<RposType>::maxValue;
+const NumType NumType_max	= Util::NumericTraits<NumType>::maxValue;
 
 const DataSize invalidDatasize = DataSize_max;
-const Offtype Offtype_min = (std::numeric_limits<Offtype>::min)();
-const Offtype Offtype_max = (std::numeric_limits<Offtype>::max)();
+const Offtype Offtype_min = Util::NumericTraits<Offtype>::minValue;
+const Offtype Offtype_max = Util::NumericTraits<Offtype>::maxValue;
 
 typedef std::basic_string<TCHAR> String;
 
@@ -66,6 +69,7 @@ enum
 	SNR_INSUFFICIENT_STREAM_OFFTYPE =					5	| SNT_FAILURE,
 	SNR_OBJECTCLASS_IDMISMATCH =						6	| SNT_FAILURE,
 	SNR_TOO_MANY_ENTRIES_TO_READ =						7	| SNT_FAILURE,
+	SNR_INSUFFICIENT_RPOSTYPE =							8	| SNT_FAILURE,
 
 	// Read notes and warnings.
 	SNR_ZEROENTRYCOUNT =								0x80	| SNT_NOTE, // 0x80 == 1 << 7
@@ -79,6 +83,7 @@ enum
 	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
 	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
 	SNW_SUBENTRY_FAILURE =								(0x15)	| SNT_FAILURE,
+	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE,
 };
 
 bool IsPrintableId(const void* pvId, const size_t nLength); // Return true if given id is printable, false otherwise. 
