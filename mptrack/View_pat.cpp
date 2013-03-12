@@ -4366,15 +4366,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		// Clipboard Manager
 		case kcToggleClipboardManager:
-			PatternClipboardDialog::Instance().Toggle();
+			PatternClipboardDialog::Toggle();
 			break;
 		case kcClipboardPrev:
-			PatternClipboard::Instance().CycleBackward();
-			PatternClipboardDialog::Instance().UpdateList();
+			PatternClipboard::CycleBackward();
+			PatternClipboardDialog::UpdateList();
 			break;
 		case kcClipboardNext:
-			PatternClipboard::Instance().CycleForward();
-			PatternClipboardDialog::Instance().UpdateList();
+			PatternClipboard::CycleForward();
+			PatternClipboardDialog::UpdateList();
 			break;
 
 	}
@@ -6664,9 +6664,9 @@ bool CViewPattern::CopyPattern(PATTERNINDEX nPattern, const PatternRect &selecti
 //---------------------------------------------------------------------------------
 {
 	BeginWaitCursor();
-	bool result = PatternClipboard::Instance().Copy(*GetSoundFile(), nPattern, selection);
+	bool result = PatternClipboard::Copy(*GetSoundFile(), nPattern, selection);
 	EndWaitCursor();
-	PatternClipboardDialog::Instance().UpdateList();
+	PatternClipboardDialog::UpdateList();
 	return result;
 }
 
@@ -6680,7 +6680,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	pos.pattern = nPattern;
 	pos.row = pastePos.GetRow();
 	pos.channel = pastePos.GetChannel();
-	bool result = PatternClipboard::Instance().Paste(*GetSoundFile(), pos, mode, SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
+	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 	EndWaitCursor();
 
 	if(pos.pattern != nPattern)

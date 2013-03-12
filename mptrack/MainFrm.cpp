@@ -1933,7 +1933,7 @@ void CMainFrame::OnChannelManager()
 void CMainFrame::OnClipboardManager()
 //-----------------------------------
 {
-	PatternClipboardDialog::Instance().Show();
+	PatternClipboardDialog::Show();
 }
 
 

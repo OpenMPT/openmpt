@@ -585,8 +585,8 @@ void COrderList::OnEditCopy()
 {
 	const OrdSelection ordsel = GetCurSel(false);
 	BeginWaitCursor();
-	PatternClipboard::Instance().Copy(*m_pModDoc->GetSoundFile(), ordsel.firstOrd, ordsel.lastOrd);
-	PatternClipboardDialog::Instance().UpdateList();
+	PatternClipboard::Copy(*m_pModDoc->GetSoundFile(), ordsel.firstOrd, ordsel.lastOrd);
+	PatternClipboardDialog::UpdateList();
 	EndWaitCursor();
 }
 

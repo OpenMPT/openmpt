@@ -395,7 +395,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
 
-	PatternClipboard::Instance().SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", PatternClipboard::Instance().GetClipboardSize(), iniFile));
+	PatternClipboard::SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize(), iniFile));
 	
 	// Default Paths
 	TCHAR szPath[_MAX_PATH] = "";
@@ -754,7 +754,7 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
 
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", PatternClipboard::Instance().GetClipboardSize(), iniFile);
+	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize(), iniFile);
 
 	// Write default paths
 	const bool bConvertPaths = theApp.IsPortableMode();
