@@ -455,9 +455,9 @@ public:
 	BOOL StopMod(CModDoc *pDoc=NULL);
 	BOOL PauseMod(CModDoc *pDoc=NULL);
 	BOOL PlaySoundFile(CSoundFile *);
-	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note = NOTE_MIDDLEC);
-	BOOL PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note = NOTE_MIDDLEC);
-	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
+	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note);
+	BOOL PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
+	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note);
 	BOOL StopSoundFile(CSoundFile *);
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note);
