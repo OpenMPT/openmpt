@@ -31,10 +31,10 @@
  * Pattern data...
  */
 
-PatternClipboard PatternClipboard::patternClipboard;
+PatternClipboard PatternClipboard::instance;
 
-CString PatternClipboard::GetFileExtension(const char *ext) const
-//---------------------------------------------------------------
+CString PatternClipboard::GetFileExtension(const char *ext)
+//---------------------------------------------------------
 {
 	CString format(ext);
 	if(format.GetLength() > 3)
@@ -105,12 +105,12 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 	}
 	data.Append("\r\n" + patternData);
 	
-	if(activeClipboard < clipboards.size())
+	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
 		CString desc;
 		desc.Format("%u Patterns (%u to %u)", last - first + 1, first, last);
-		clipboards[activeClipboard] = PatternClipboardElement(data, desc);
+		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
 
 	return ToSystemClipboard(data);
@@ -130,12 +130,12 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 	// Set up clipboard header.
 	data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension) + "\r\n" + data;
 
-	if(activeClipboard < clipboards.size())
+	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
 		CString desc;
 		desc.Format("%u rows, %u channels (pattern %u)", selection.GetNumRows(), selection.GetNumChannels(), pattern);
-		clipboards[activeClipboard] = PatternClipboardElement(data, desc);
+		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
 
 	return ToSystemClipboard(data);
@@ -288,7 +288,7 @@ bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, Paste
 	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder))
 	{
 		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
-		return Paste(sndFile, pastePos, mode, curOrder, activeClipboard);
+		return Paste(sndFile, pastePos, mode, curOrder, instance.activeClipboard);
 	}
 	return true;
 }
@@ -298,11 +298,11 @@ bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, Paste
 bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, clipindex_t internalClipboard)
 //---------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(internalClipboard >= clipboards.size())
+	if(internalClipboard >= instance.clipboards.size())
 	{
 		return false;
 	}
-	return HandlePaste(sndFile, pastePos, mode, clipboards[internalClipboard].content, curOrder);
+	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder);
 }
 
 
@@ -788,8 +788,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 bool PatternClipboard::SelectClipboard(clipindex_t which)
 //-------------------------------------------------------
 {
-	activeClipboard = which;
-	return ToSystemClipboard(clipboards[activeClipboard]);
+	instance.activeClipboard = which;
+	return ToSystemClipboard(instance.clipboards[instance.activeClipboard]);
 }
 
 
@@ -797,13 +797,13 @@ bool PatternClipboard::SelectClipboard(clipindex_t which)
 bool PatternClipboard::CycleForward()
 //-----------------------------------
 {
-	activeClipboard++;
-	if(activeClipboard >= clipboards.size())
+	instance.activeClipboard++;
+	if(instance.activeClipboard >= instance.clipboards.size())
 	{
-		activeClipboard = 0;
+		instance.activeClipboard = 0;
 	}
 
-	return SelectClipboard(activeClipboard);
+	return SelectClipboard(instance.activeClipboard);
 }
 
 
@@ -811,15 +811,15 @@ bool PatternClipboard::CycleForward()
 bool PatternClipboard::CycleBackward()
 //------------------------------------
 {
-	if(activeClipboard == 0)
+	if(instance.activeClipboard == 0)
 	{
-		activeClipboard = clipboards.size() - 1;
+		instance.activeClipboard = instance.clipboards.size() - 1;
 	} else
 	{
-		activeClipboard--;
+		instance.activeClipboard--;
 	}
 
-	return SelectClipboard(activeClipboard);
+	return SelectClipboard(instance.activeClipboard);
 }
 
 
@@ -827,8 +827,8 @@ bool PatternClipboard::CycleBackward()
 void PatternClipboard::SetClipboardSize(clipindex_t maxEntries)
 //-------------------------------------------------------------
 {
-	clipboards.resize(maxEntries, PatternClipboardElement("", "unused"));
-	LimitMax(activeClipboard, maxEntries - 1);
+	instance.clipboards.resize(maxEntries, PatternClipboardElement("", "unused"));
+	LimitMax(instance.activeClipboard, maxEntries - 1);
 }
 
 
@@ -894,7 +894,7 @@ BEGIN_MESSAGE_MAP(PatternClipboardDialog, CDialog)
 	ON_LBN_SELCHANGE(IDC_LIST1,	OnSelectClipboard)
 END_MESSAGE_MAP()
 
-PatternClipboardDialog PatternClipboardDialog::patternClipboardDialog(PatternClipboard::patternClipboard);
+PatternClipboardDialog PatternClipboardDialog::instance;
 
 void PatternClipboardDialog::DoDataExchange(CDataExchange* pDX)
 //-------------------------------------------------------------
@@ -904,8 +904,8 @@ void PatternClipboardDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
-PatternClipboardDialog::PatternClipboardDialog(PatternClipboard &c) : clipboards(c), isLocked(true), isCreated(false), posX(-1)
-//-----------------------------------------------------------------------------------------------------------------------------
+PatternClipboardDialog::PatternClipboardDialog() : isLocked(true), isCreated(false), posX(-1)
+//-------------------------------------------------------------------------------------------
 {
 }
 
@@ -913,18 +913,18 @@ PatternClipboardDialog::PatternClipboardDialog(PatternClipboard &c) : clipboards
 void PatternClipboardDialog::Show()
 //---------------------------------
 {
-	isLocked = true;
-	if(!isCreated)
+	instance.isLocked = true;
+	if(!instance.isCreated)
 	{
-		Create(IDD_CLIPBOARD, CMainFrame::GetMainFrame());
-		numClipboardsSpin.SetRange(0, int16_max);
+		instance.Create(IDD_CLIPBOARD, CMainFrame::GetMainFrame());
+		instance.numClipboardsSpin.SetRange(0, int16_max);
 	}
-	SetDlgItemInt(IDC_EDIT1, clipboards.GetClipboardSize(), FALSE);
-	isLocked = false;
-	isCreated = true;
-	UpdateList();
+	instance.SetDlgItemInt(IDC_EDIT1, PatternClipboard::GetClipboardSize(), FALSE);
+	instance.isLocked = false;
+	instance.isCreated = true;
+	instance.UpdateList();
 	
-	SetWindowPos(nullptr, posX, posY, 0, 0, SWP_SHOWWINDOW | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER | (posX == -1 ? SWP_NOMOVE : 0));
+	instance.SetWindowPos(nullptr, instance.posX, instance.posY, 0, 0, SWP_SHOWWINDOW | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER | (instance.posX == -1 ? SWP_NOMOVE : 0));
 }
 
 
@@ -935,7 +935,7 @@ void PatternClipboardDialog::OnNumClipboardsChanged()
 	{
 		return;
 	}
-	clipboards.SetClipboardSize(GetDlgItemInt(IDC_EDIT1, nullptr, FALSE));
+	PatternClipboard::SetClipboardSize(GetDlgItemInt(IDC_EDIT1, nullptr, FALSE));
 	UpdateList();
 }
 
@@ -943,19 +943,19 @@ void PatternClipboardDialog::OnNumClipboardsChanged()
 void PatternClipboardDialog::UpdateList()
 //---------------------------------------
 {
-	if(isLocked)
+	if(instance.isLocked)
 	{
 		return;
 	}
-	clipList.ResetContent();
+	instance.clipList.ResetContent();
 	PatternClipboard::clipindex_t i = 0;
-	for(std::deque<PatternClipboardElement>::const_iterator clip = clipboards.clipboards.cbegin(); clip != clipboards.clipboards.cend(); clip++, i++)
+	for(std::deque<PatternClipboardElement>::const_iterator clip = PatternClipboard::instance.clipboards.cbegin(); clip != PatternClipboard::instance.clipboards.cend(); clip++, i++)
 	{
-		const int item = clipList.AddString(clip->description);
-		clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));
-		if(clipboards.activeClipboard == i)
+		const int item = instance.clipList.AddString(clip->description);
+		instance.clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));
+		if(PatternClipboard::instance.activeClipboard == i)
 		{
-			clipList.SetCurSel(item);
+			instance.clipList.SetCurSel(item);
 		}
 	}
 }
@@ -969,7 +969,7 @@ void PatternClipboardDialog::OnSelectClipboard()
 		return;
 	}
 	PatternClipboard::clipindex_t item = reinterpret_cast<PatternClipboard::clipindex_t>(clipList.GetItemDataPtr(clipList.GetCurSel()));
-	clipboards.SelectClipboard(item);
+	PatternClipboard::SelectClipboard(item);
 }
 
 
