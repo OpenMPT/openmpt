@@ -820,21 +820,29 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 BOOL CSoundFile::Destroy()
 //------------------------
 {
-	size_t i;
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		Chn[i].pModInstrument = nullptr;
+		Chn[i].pModSample = nullptr;
+		Chn[i].pCurrentSample = nullptr;
+		Chn[i].pSample = nullptr;
+		Chn[i].nLength = 0;
+	}
+
 	Patterns.DestroyPatterns();
 
 	FreeMessage();
 
-	for (i=1; i<MAX_SAMPLES; i++)
+	for(SAMPLEINDEX i = 1; i < MAX_SAMPLES; i++)
 	{
 		Samples[i].FreeSample();
 	}
-	for (i = 0; i < MAX_INSTRUMENTS; i++)
+	for(INSTRUMENTINDEX i = 0; i < MAX_INSTRUMENTS; i++)
 	{
 		delete Instruments[i];
 		Instruments[i] = nullptr;
 	}
-	for (i=0; i<MAX_MIXPLUGINS; i++)
+	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
 		if ((m_MixPlugins[i].nPluginDataSize) && (m_MixPlugins[i].pPluginData))
 		{
@@ -849,6 +857,7 @@ BOOL CSoundFile::Destroy()
 			m_MixPlugins[i].pMixPlugin = NULL;
 		}
 	}
+
 	m_nType = MOD_TYPE_NONE;
 	m_nChannels = m_nSamples = m_nInstruments = 0;
 	return TRUE;
@@ -1768,7 +1777,7 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 	default:
 		return (gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
 
-	case tempo_mode_alternative: 
+	case tempo_mode_alternative:
 		return gdwMixingFreq / tempo;
 
 	case tempo_mode_modern:
@@ -1779,11 +1788,11 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 
 			//tick-to-tick tempo correction:
 			if(m_dBufferDiff >= 1)
-			{ 
+			{
 				bufferCount++;
 				m_dBufferDiff--;
 			} else if(m_dBufferDiff <= -1)
-			{ 
+			{
 				bufferCount--;
 				m_dBufferDiff++;
 			}

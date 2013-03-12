@@ -226,7 +226,7 @@ CMainFrame::CMainFrame()
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
 
 	MemsetZero(gpenVuMeter);
-	
+
 	// Create Audio Critical Section
 	MemsetZero(g_csAudio);
 	InitializeCriticalSection(&g_csAudio);
@@ -280,7 +280,7 @@ VOID CMainFrame::Initialize()
 	// Setup timer
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
-	
+
 //rewbs: reduce to normal priority during debug for easier hang debugging
 	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
@@ -291,7 +291,7 @@ VOID CMainFrame::Initialize()
 	UpdateAudioParameters(TRUE);
 	// Update the tree
 	m_wndTree.Init();
-	
+
 	CreateExampleModulesMenu();
 	CreateTemplateModulesMenu();
 }
@@ -347,9 +347,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
 	penBlack = (HPEN)::GetStockObject(BLACK_PEN);
 	penWhite = (HPEN)::GetStockObject(WHITE_PEN);
-	
-	
-	
+
+
+
 	// Cursors
 	curDragging = theApp.LoadCursor(IDC_DRAGGING);
 	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
@@ -554,7 +554,7 @@ DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString ke
 	return static_cast<DWORD>(atol(valueBuffer));
 }
 
-bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile) 
+bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile)
 {
 	return (WritePrivateProfileString(section, key, value, iniFile) != 0);
 }
@@ -612,7 +612,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 		CWnd* pWnd = CWnd::FromHandlePermanent(pMsg->hwnd);
 		CControlBar* pBar = NULL;
 		HWND hwnd = (pWnd) ? pWnd->m_hWnd : NULL;
-		
+
 		if ((hwnd) && (pMsg->message == WM_RBUTTONDOWN)) pBar = DYNAMIC_DOWNCAST(CControlBar, pWnd);
 		if ((pBar != NULL) || ((pMsg->message == WM_NCRBUTTONDOWN) && (pMsg->wParam == HTMENU)))
 		{
@@ -712,10 +712,10 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 //rewbs: reduce to normal priority during debug for easier hang debugging
 #ifdef NDEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
-#endif 
+#endif
 #ifdef _DEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-#endif 
+#endif
 //	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 // -! BEHAVIOUR_CHANGE#0021
 	for (;;)
@@ -867,7 +867,7 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 {
 	WAVEFORMATEXTENSIBLE WaveFormat;
 	UINT buflen = TrackerSettings::Instance().m_nBufferLength;
-	
+
 	if (!m_pSndFile) return -1;
 	slSampleSize = (bits/8) * channels;
 	sdwAudioBufferSize = ((samplespersec * buflen) / 1000) * slSampleSize;
@@ -1134,7 +1134,7 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 		CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
-	
+
 	// Soft panning
 	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
 		CSoundFile::gdwSoundSetup |= SNDMIX_SOFTPANNING;
@@ -1264,7 +1264,7 @@ void CMainFrame::UpdateColors()
 		brushYellow = CreateSolidBrush(RGB(0xFF,0xFF,0x00));
 
 		if (brushWindow) DeleteObject(brushWindow);
-        brushWindow = CreateSolidBrush(crBkgnd);
+		brushWindow = CreateSolidBrush(crBkgnd);
 		if (penSeparator) DeleteObject(penSeparator);
 		penSeparator = CreatePen(PS_SOLID, 0, RGB(GetRValue(crBkgnd)/2, GetGValue(crBkgnd)/2, GetBValue(crBkgnd)/2));
 	}
@@ -1436,8 +1436,8 @@ BOOL CMainFrame::StopMod(CModDoc *pModDoc)
 BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 //--------------------------------------------------
 {
-	if (m_pSndFile) PauseMod(NULL);
 	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
+	if (m_pSndFile && m_pSndFile != pSndFile) PauseMod(NULL);
 	m_pSndFile = pSndFile;
 	if (!audioOpenDevice())
 	{
@@ -1448,8 +1448,8 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 	m_pSndFile->InitPlayer(TRUE);
+	if(gpSoundDevice && !(m_dwStatus & MODSTATUS_PLAYING)) gpSoundDevice->Start();
 	m_dwStatus |= MODSTATUS_PLAYING;
-	if (gpSoundDevice) gpSoundDevice->Start();
 	SetEvent(m_hAudioWakeUp);
 	return TRUE;
 }
@@ -1460,71 +1460,47 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn)
 {
 	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
 	BeginWaitCursor();
-	PlaySoundFile((LPCSTR)NULL);
-	m_WaveFile.m_nInstruments = 1;
+	InitPreview();
 	if (CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
 	{
+		PreparePreview(NOTE_MIDDLEC);
 		PlaySoundFile(&m_WaveFile);
-		m_WaveFile.SetRepeatCount(-1);
 	}
 	EndWaitCursor();
 	return TRUE;
 }
 
 
-BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
-//-------------------------------------------------------------
+BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
+//------------------------------------------------------------------------
 {
-	CMappedFile f;
-	bool bOk = false;
+	static CString prevFile;
+	bool bOk = (prevFile == lpszFileName && m_pSndFile == &m_WaveFile);
 
-	if (lpszFileName)
+	CriticalSection cs;
+	if(!bOk && lpszFileName)
 	{
+		CMappedFile f;
+
 		BeginWaitCursor();
-		if (!f.Open(lpszFileName))
+		if(!f.Open(lpszFileName))
 		{
 			EndWaitCursor();
 			return FALSE;
 		}
-	}
-	StopPreview();
-	m_WaveFile.Create(NULL, 0);
 
-	//Avoid global volume ramping when trying samples in the treeview.
-	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
-	m_WaveFile.m_nDefaultGlobalVolume=64;
+		m_WaveFile.Destroy();
+		m_WaveFile.Create(NULL, 0);
+		InitPreview();
 
-	m_WaveFile.m_nDefaultTempo = 125;
-	m_WaveFile.m_nGlobalVolume=64;
-	m_WaveFile.m_nDefaultSpeed = 4;
-	m_WaveFile.SetRepeatCount(0);
-	m_WaveFile.m_nType = MOD_TYPE_IT;
-	m_WaveFile.m_nChannels = 4;
-	m_WaveFile.m_nInstruments = 1;
-	m_WaveFile.m_nSamples = 1;
-	m_WaveFile.Order.resize(3);
-	m_WaveFile.Order[0] = 0;
-	m_WaveFile.Order[1] = 1;
-	m_WaveFile.Order[2] = m_WaveFile.Order.GetInvalidPatIndex();
-	m_WaveFile.Patterns.Insert(0,64);
-	m_WaveFile.Patterns.Insert(1,64);
-	if (m_WaveFile.Patterns[0])
-	{
-		if (!nNote) nNote = NOTE_MIDDLEC;
-		ModCommand *m = m_WaveFile.Patterns[0];
-		m[0].note = (BYTE)nNote;
-		m[0].instr = 1;
-		m[1].note = (BYTE)nNote;
-		m[1].instr = 1;
-	}
-	if (lpszFileName)
-	{
 		DWORD dwLen = f.GetLength();
-		if (dwLen)
+		if(dwLen)
 		{
 			LPBYTE p = f.Lock();
-			if (p)
+			if(p)
 			{
+				m_WaveFile.m_SongFlags.set(SONG_PAUSED);
+				cs.Leave();	// Avoid hanging audio while reading file
 				bOk = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen);
 				if(!bOk)
 				{
@@ -1533,45 +1509,32 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 				}
 				f.Unlock();
 			}
-			if (bOk)
-			{
-				if ((m_WaveFile.m_nSamples > 1) || (m_WaveFile.GetSample(1).uFlags & CHN_LOOP))
-				{
-					ModCommand *m = m_WaveFile.Patterns[0];
-					m[32*4].note = NOTE_KEYOFF;
-					m[32*4+1].note = NOTE_KEYOFF;
-					m[63*4].note = NOTE_NOTECUT;
-					m[63*4+1].note = NOTE_NOTECUT;
-				} else
-				{
-					ModCommand *m = m_WaveFile.Patterns[1];
-					if (m)
-					{
-						m[63*4].command = CMD_POSITIONJUMP;
-						m[63*4].param = 1;
-					}
-				}
-				bOk = PlaySoundFile(&m_WaveFile) != FALSE;
-			}
 		}
 		f.Close();
 		EndWaitCursor();
+	}
+
+	if(bOk)
+	{
+		cs.Enter();
+		PreparePreview(note);
+		bOk = PlaySoundFile(&m_WaveFile) != FALSE;
+
+		prevFile = lpszFileName;
 	}
 	return bOk;
 }
 
 
-BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote)
-//-------------------------------------------------------------------------------------------
+BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note)
+//------------------------------------------------------------------------------------------------------------------------
 {
-	StopPreview();
+	CriticalSection cs;
+	m_WaveFile.Destroy();
 	m_WaveFile.Create(NULL, 0);
-	m_WaveFile.m_nDefaultTempo = 125;
-	m_WaveFile.m_nDefaultSpeed = 6;
-	m_WaveFile.SetRepeatCount(0);
+	InitPreview();
 	m_WaveFile.m_nType = pSong->m_nType;
-	m_WaveFile.m_nChannels = 4;
-	if ((nInstrument) && (nInstrument <= pSong->m_nInstruments))
+	if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
 	{
 		m_WaveFile.m_nInstruments = 1;
 		m_WaveFile.m_nSamples = 32;
@@ -1580,34 +1543,67 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 		m_WaveFile.m_nInstruments = 0;
 		m_WaveFile.m_nSamples = 1;
 	}
-	m_WaveFile.Order.resize(3);
-	m_WaveFile.Order[0] = 0;
-	m_WaveFile.Order[1] = 1;
-	m_WaveFile.Order[2] = m_WaveFile.Order.GetInvalidPatIndex();
-	m_WaveFile.Patterns.Insert(0, 64);
-	m_WaveFile.Patterns.Insert(1, 64);
-	if (m_WaveFile.Patterns[0])
-	{
-		if (!nNote) nNote = NOTE_MIDDLEC;
-		ModCommand *m = m_WaveFile.Patterns[0];
-		m[0].note = (BYTE)nNote;
-		m[0].instr = 1;
-		m[1].note = (BYTE)nNote;
-		m[1].instr = 1;
-		m = m_WaveFile.Patterns[1];
-		m[32*4].note = NOTE_FADE;
-		m[32*4+1].note = NOTE_FADE;
-		m[63*4].note = NOTE_KEYOFF;
-		m[63*4+1].note = NOTE_KEYOFF;
-	}
-	if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
+	if (nInstrument != INSTRUMENTINDEX_INVALID && nInstrument <= pSong->GetNumInstruments())
 	{
 		m_WaveFile.ReadInstrumentFromSong(1, pSong, nInstrument);
-	} else
+	} else if(nSample != SAMPLEINDEX_INVALID && nSample <= pSong->GetNumSamples())
 	{
 		m_WaveFile.ReadSampleFromSong(1, pSong, nSample);
 	}
+	PreparePreview(note);
 	return PlaySoundFile(&m_WaveFile);
+}
+
+
+void CMainFrame::InitPreview()
+//----------------------------
+{
+	// Avoid global volume ramping when trying samples in the treeview.
+	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
+	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_WaveFile.m_nDefaultTempo = 125;
+	m_WaveFile.m_nDefaultSpeed = 4;
+	m_WaveFile.m_nType = MOD_TYPE_IT;
+	m_WaveFile.m_nChannels = 4;
+	m_WaveFile.m_nInstruments = 1;
+	m_WaveFile.Order.resize(2);
+	m_WaveFile.Order[0] = 0;
+	m_WaveFile.Order[1] = 1;
+	m_WaveFile.Patterns.Insert(0, 64);
+	m_WaveFile.Patterns.Insert(1, 1);
+}
+
+
+void CMainFrame::PreparePreview(ModCommand::NOTE note)
+//----------------------------------------------------
+{
+	m_WaveFile.m_SongFlags.reset(SONG_PAUSED);
+	m_WaveFile.SetRepeatCount(-1);
+	m_WaveFile.SetCurrentPos(0);
+
+	ModCommand *m = m_WaveFile.Patterns[0];
+	if(m)
+	{
+		m[0].note = note;
+		m[0].instr = 1;
+		m[1].note = note;
+		m[1].instr = 1;
+
+		if(m_WaveFile.m_nSamples > 1 || m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
+		{
+			m[32 * 4].note = NOTE_KEYOFF;
+			m[32 * 4 + 1].note = NOTE_KEYOFF;
+			m[63 * 4].note = NOTE_NOTECUT;
+			m[63 * 4 + 1].note = NOTE_NOTECUT;
+		}
+	}
+
+	m = m_WaveFile.Patterns[1];
+	if(m)
+	{
+		m->command = CMD_POSITIONJUMP;
+		m->param = 1;
+	}
 }
 
 
@@ -1772,7 +1768,7 @@ VOID CMainFrame::SetUserText(LPCSTR lpszText)
 	if (lpszText[0] | m_szUserText[0])
 	{
 		strcpy(m_szUserText, lpszText);
-		OnUpdateUser(NULL); 
+		OnUpdateUser(NULL);
 	}
 }
 
@@ -1819,7 +1815,7 @@ VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 	if (pModDoc == m_pModPlaying) PauseMod();
 
 	// Make sure that OnTimer() won't try to set the closed document modified anymore.
-	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = nullptr; 
+	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = nullptr;
 
 	m_wndTree.OnDocumentClosed(pModDoc);
 }
@@ -1841,7 +1837,7 @@ void CMainFrame::OnViewOptions()
 {
 	if (m_bOptionsLocked)	//rewbs.customKeys
 		return;
-		
+
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
 	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_dwSoundSetup, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, TrackerSettings::Instance().m_nBufferLength, TrackerSettings::Instance().m_nWaveDevice);
@@ -2042,7 +2038,7 @@ void CMainFrame::OnTimer(UINT)
 			OnViewOptions();
 		}
 	}
-	
+
 	// Ensure the modified flag gets set in the WinMain thread, even if modification
 	// originated from Audio Thread (access to CWnd is not thread safe).
 	// Flaw: if 2 docs are modified in between Timer ticks (very rare), one mod will be lost.
@@ -2213,7 +2209,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 				AfxFormatString1(str, IDS_FILE_EXISTS_BUT_IS_NOT_READABLE, (LPCTSTR)sPath);
 			else
 				AfxFormatString1(str, IDS_FILE_DOES_NOT_EXIST, (LPCTSTR)sPath);
-			Reporting::Notification(str);	
+			Reporting::Notification(str);
 		}
 	}
 	else
@@ -2405,7 +2401,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewPattern:
 		case kcViewSamples:
 		case kcViewInstruments:
-		case kcViewComments: 
+		case kcViewComments:
 		case kcViewGraph: //rewbs.graph
 		case kcViewSongProperties:
 		case kcPlayPatternFromCursor:
@@ -2451,7 +2447,7 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 		return;
 
 	CMDIFrameWnd::OnInitMenu(pMenu);
-	
+
 }
 
 //end rewbs.VSTTimeInfo
@@ -2514,7 +2510,7 @@ bool CMainFrame::UpdateEffectKeys()
 			return m_InputHandler->SetEffectLetters(pSndFile->GetModSpecifications());
 		}
 	}
-	
+
 	return false;
 }
 //end rewbs.customKeys
@@ -2525,7 +2521,7 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 //-----------------------------------------
 {
 	CMDIFrameWnd::OnKillFocus(pNewWnd);
-	
+
 	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
 	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
 	//end rewbs

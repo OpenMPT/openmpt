@@ -311,7 +311,7 @@ public:
 	static UINT m_nLastOptionsPage;
 	static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType;
-	
+
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
@@ -362,7 +362,7 @@ protected:
 public:
 	CMainFrame(/*CString regKeyExtension*/);
 	void Initialize();
-	
+
 
 // Low-Level Audio
 public:
@@ -412,7 +412,7 @@ public:
 	static DWORD GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile);
 	static bool WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile);
 	static CString GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile);
-	
+
 
 	// Misc functions
 public:
@@ -455,17 +455,19 @@ public:
 	BOOL StopMod(CModDoc *pDoc=NULL);
 	BOOL PauseMod(CModDoc *pDoc=NULL);
 	BOOL PlaySoundFile(CSoundFile *);
-	BOOL PlaySoundFile(LPCSTR lpszFileName, UINT nNote = 0);
-	BOOL PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote=0);
+	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note = NOTE_MIDDLEC);
+	BOOL PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note = NOTE_MIDDLEC);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
+	void InitPreview();
+	void PreparePreview(ModCommand::NOTE note);
 	void StopPreview();
-	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
-	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
+	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); }
+	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); }
 	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
-	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
-	BOOL InitRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
-	BOOL StopRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
+	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }
+	BOOL InitRenderer(CSoundFile*);
+	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
 	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
@@ -518,7 +520,7 @@ protected:
 	afx_msg void OnPluginManager();
 // -! NEW_FEATURE#0002
 
-	
+
 
 	afx_msg void OnChannelManager();
 	afx_msg void OnClipboardManager();
@@ -552,13 +554,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-	bool UpdateEffectKeys(); 
+	bool UpdateEffectKeys();
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	// Defines maximum number of items in example modules menu.
-	static const size_t nMaxItemsInExampleModulesMenu = 50; 
-	static const size_t nMaxItemsInTemplateModulesMenu = 50; 
+	static const size_t nMaxItemsInExampleModulesMenu = 50;
+	static const size_t nMaxItemsInTemplateModulesMenu = 50;
 
 	/// Array of paths of example modules that are available from help menu.
 	static std::vector<CString> s_ExampleModulePaths;

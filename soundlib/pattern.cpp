@@ -97,7 +97,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount)
 void CPattern::ClearCommands()
 //----------------------------
 {
-	if (m_ModCommands != nullptr)
+	if(m_ModCommands != nullptr)
 		memset(m_ModCommands, 0, GetNumRows() * GetNumChannels() * sizeof(ModCommand));
 }
 
@@ -105,19 +105,24 @@ void CPattern::ClearCommands()
 bool CPattern::AllocatePattern(ROWINDEX rows)
 //-------------------------------------------
 {
-	ModCommand *m = AllocatePattern(rows, GetNumChannels());
-	if(m != nullptr)
+	ModCommand *m = m_ModCommands;
+	if(m != nullptr && rows == GetNumRows())
 	{
-		Deallocate();
-		m_ModCommands = m;
-		m_Rows = rows;
-		m_RowsPerBeat = m_RowsPerMeasure = 0;
-		return true;
+		// Re-use allocated memory
+		ClearCommands();
+		m_ModCommands = nullptr;
 	} else
 	{
-		return false;
+		m = AllocatePattern(rows, GetNumChannels());
+		if(m == nullptr)
+		{
+			return false;
+		}
 	}
-
+	Deallocate();
+	m_ModCommands = m;
+	m_Rows = rows;
+	return true;
 }
 
 
@@ -414,16 +419,13 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 ModCommand *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
 //----------------------------------------------------------------------
 {
-	try
+	size_t patSize = rows * nchns;
+	ModCommand *p = new (std::nothrow) ModCommand[patSize];
+	if(p != nullptr)
 	{
-		size_t patSize = rows * nchns;
-		ModCommand *p = new ModCommand[patSize];
 		memset(p, 0, patSize * sizeof(ModCommand));
-		return p;
-	} catch(MPTMemoryException)
-	{
-		return nullptr;
 	}
+	return p;
 }
 
 
@@ -557,7 +559,7 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 				chval |= IT_bitmask_patternChanEnabled_c;
 
 			Binarywrite<uint8>(oStrm, chval);
-				
+
 			if(diffmask)
 			{
 				lastChnMC[c] = m;
@@ -608,7 +610,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 			continue;
 		}
 
-		CHANNELINDEX ch = (t & IT_bitmask_patternChanField_c); 
+		CHANNELINDEX ch = (t & IT_bitmask_patternChanField_c);
 		if(ch > 0)
 			ch--;
 
