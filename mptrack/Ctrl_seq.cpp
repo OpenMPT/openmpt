@@ -15,7 +15,7 @@
 #include "moddoc.h"
 #include "globals.h"
 #include "ctrl_pat.h"
-#include "view_pat.h"
+#include "PatternClipboard.h"
 
 //////////////////////////////////////////////////////////////
 // CPatEdit
@@ -122,7 +122,7 @@ COrderList::COrderList()
 	m_pModDoc = nullptr;
 	m_nScrollPos = m_nXScroll = 0;
 	m_nScrollPos2nd = ORDERINDEX_INVALID;
-	m_nOrderlistMargins = CMainFrame::GetSettings().orderlistMargins;
+	m_nOrderlistMargins = TrackerSettings::Instance().orderlistMargins;
 	m_bScrolling = false;
 	m_bDragging = false;
 }
@@ -585,8 +585,8 @@ void COrderList::OnEditCopy()
 {
 	const OrdSelection ordsel = GetCurSel(false);
 	BeginWaitCursor();
-	CViewPattern::GetPatternClipboard().Copy(*m_pModDoc->GetSoundFile(), ordsel.firstOrd, ordsel.lastOrd);
-	CViewPattern::GetPatternClipboardDialog().UpdateList();
+	PatternClipboard::Instance().Copy(*m_pModDoc->GetSoundFile(), ordsel.firstOrd, ordsel.lastOrd);
+	PatternClipboardDialog::Instance().UpdateList();
 	EndWaitCursor();
 }
 
@@ -622,7 +622,7 @@ void COrderList::UpdateInfoText()
 		// MOD orderlist always ends after first empty pattern
 		const ORDERINDEX nLength = (pSndFile->GetType() & MOD_TYPE_MOD) ? pSndFile->Order.GetLengthFirstEmpty() : pSndFile->Order.GetLengthTailTrimmed();
 
-		if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY)
+		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
 			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, nLength);
 		}

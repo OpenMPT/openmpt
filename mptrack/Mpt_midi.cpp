@@ -26,17 +26,17 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE mid
 //--------------------------------------------------------------------------------------
 {
 	int nVol = MIDIEvents::GetDataByte2FromEvent(dwParam1);
-	if (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
+	if (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 	{
 		nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+255) >> 8;
-		nVol *= CMainFrame::GetSettings().midiVelocityAmp / 100;
+		nVol *= TrackerSettings::Instance().midiVelocityAmp / 100;
 		Limit(nVol, 1, 256);
-		if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
+		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = static_cast<int>((midivolume / 127.0) * nVol);
 	}
 	else //Case: No velocity record.
 	{	
-		if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
+		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = 4*((midivolume+1)/2);
 		else //Use default volume
 			nVol = -1;
@@ -48,7 +48,7 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE mid
 void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, DWORD &dwParam1)
 //-----------------------------------------------------------------------
 {
-	if ( (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
+	if ( (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
 		&& (MIDIEvents::GetChannelFromEvent(dwParam1) != 9) )
 	{
 		int nTranspose = rMainFrm.GetBaseOctave() - 4;
@@ -123,7 +123,7 @@ BOOL CMainFrame::midiOpenDevice()
 	if (shMidiIn) return TRUE;
 	try
 	{
-		if (midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
 
@@ -132,7 +132,7 @@ BOOL CMainFrame::midiOpenDevice()
 			CMainFrame::GetMainFrame()->OnViewOptions();
 
 			// Let's see if the user updated the settings.
-			if(midiInOpen(&shMidiIn, GetSettings().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+			if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 			{
 				shMidiIn = NULL;
 				return FALSE;

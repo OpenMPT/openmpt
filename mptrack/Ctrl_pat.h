@@ -192,7 +192,7 @@ protected:
 
 public:
 	CCtrlPatterns();
-	LONG* GetSplitPosRef() {return &CMainFrame::GetSettings().glPatternWindowHeight;} 	//rewbs.varWindowSize
+	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	void SetCurrentPattern(PATTERNINDEX nPat);

@@ -11,12 +11,12 @@
 
 #include "stdafx.h"
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/MainFrm.h"
-#endif
 #include "sndfile.h"
 #include "MIDIEvents.h"
 #include "tuning.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/TrackerSettings.h"
+#endif
 
 #ifdef MODPLUG_TRACKER
 #define ENABLE_STEREOVU
@@ -733,7 +733,7 @@ BOOL CSoundFile::ProcessRow()
 
 					// If channel resetting is disabled in MPT, we will emulate a pattern break (and we always do it if we're not in MPT)
 #ifdef MODPLUG_TRACKER
-					if(!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_RESETCHANNELS))
+					if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_RESETCHANNELS))
 #endif // MODPLUG_TRACKER
 					{
 						m_SongFlags.set(SONG_BREAKTOROW);

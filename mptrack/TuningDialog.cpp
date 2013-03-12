@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "TuningDialog.h"
-#include "MainFrm.h"
+#include "TrackerSettings.h"
 #include <algorithm>
 #include "../common/misc_util.h"
 #include "tuningdialog.h"
@@ -633,7 +633,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
 		filter,
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_TUNING));
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING));
 	if(files.abort) return;
 
 	BeginWaitCursor();
@@ -674,12 +674,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, TEXT(""), TEXT(""),
 		(LPCTSTR)sFilter,
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_TUNING),
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING),
 		true);
 	if(files.abort)
 		return;
 
-	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
+	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
 
 	CString sLoadReport;
 

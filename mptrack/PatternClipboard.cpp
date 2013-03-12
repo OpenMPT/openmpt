@@ -31,6 +31,8 @@
  * Pattern data...
  */
 
+PatternClipboard PatternClipboard::patternClipboard;
+
 CString PatternClipboard::GetFileExtension(const char *ext) const
 //---------------------------------------------------------------
 {
@@ -444,7 +446,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	}
 
 	const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(pasteFormat);
-	const bool overflowPaste = ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward) && !multiPaste;
+	const bool overflowPaste = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward) && !multiPaste;
 	const bool doITStyleMix = (mode == pmMixPasteIT);
 	const bool doMixPaste = (mode == pmMixPaste) || doITStyleMix;
 	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) != 0;
@@ -892,6 +894,7 @@ BEGIN_MESSAGE_MAP(PatternClipboardDialog, CDialog)
 	ON_LBN_SELCHANGE(IDC_LIST1,	OnSelectClipboard)
 END_MESSAGE_MAP()
 
+PatternClipboardDialog PatternClipboardDialog::patternClipboardDialog(PatternClipboard::patternClipboard);
 
 void PatternClipboardDialog::DoDataExchange(CDataExchange* pDX)
 //-------------------------------------------------------------

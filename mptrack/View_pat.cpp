@@ -22,7 +22,6 @@
 
 #include "EffectVis.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
-#include "view_pat.h"
 #include "View_gen.h"
 #include "MIDIMacros.h"
 #include "../common/misc_util.h"
@@ -44,8 +43,6 @@ FindReplace CViewPattern::m_findReplace =
 
 // Static initializers
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
-PatternClipboard CViewPattern::patternClipboard;
-PatternClipboardDialog CViewPattern::patternClipboardDialog(CViewPattern::patternClipboard);
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -271,7 +268,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 			{
 				row = 0;
 			} else
-			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
+			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
@@ -287,7 +284,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 				}
 				row = 0;
 			} else
-			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP)
+			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
 				if ((int)row < (int)0) row += pSndFile->Patterns[m_nPattern].GetNumRows();
 				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
@@ -298,7 +295,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
 			{
 				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
-			} else if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
+			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX curOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 				if(curOrder + 1 < pSndFile->Order.size() && m_nPattern == pSndFile->Order[curOrder])
@@ -314,7 +311,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 					}
 				}
 				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
-			} else if(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP)
+			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
 				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
 			}
@@ -322,9 +319,9 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 	}
 
 	//rewbs.fix3168
-	if(static_cast<int>(row) < 0 && !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL))
+	if(static_cast<int>(row) < 0 && !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		row = 0;
-	if(row >= pSndFile->Patterns[m_nPattern].GetNumRows() && !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL))
+	if(row >= pSndFile->Patterns[m_nPattern].GetNumRows() && !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
 	//end rewbs.fix3168
 
@@ -1170,12 +1167,12 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 				{
 					SetCurSel(m_StartSel);
 				}
-				if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DRAGNDROPEDIT)
+				if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_DRAGNDROPEDIT)
 					&& ((m_Selection.GetUpperLeft() != m_Selection.GetLowerRight()) || m_Status[psCtrlDragSelect])
 					&& m_Selection.Contains(m_StartSel))
 				{
 					m_Status.set(psDragnDropEdit);
-				} else if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CENTERROW)
+				} else if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CENTERROW)
 				{
 					SetCurSel(m_StartSel);
 				} else
@@ -1212,7 +1209,7 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 	if(cursor == m_Cursor && point.y >= m_szHeader.cy)
 	{
 		// Double-click pattern cell: Select whole column or show cell properties.
-		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_DBLCLICKSELECT))
+		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_DBLCLICKSELECT))
 		{
 			OnSelectCurrentColumn();
 			m_Status.set(psChannelSelection |psDragging);
@@ -1475,15 +1472,15 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
 			CString s = "Quantize ";
-			if(CMainFrame::GetSettings().recordQuantizeRows != 0)
+			if(TrackerSettings::Instance().recordQuantizeRows != 0)
 			{
-				s.AppendFormat("(Currently: %d Rows)", CMainFrame::GetSettings().recordQuantizeRows);
+				s.AppendFormat("(Currently: %d Rows)", TrackerSettings::Instance().recordQuantizeRows);
 			} else
 			{
 				s.Append("Settings...");
 			}
 			s.Append("\t" + ih->GetKeyTextFromCommand(kcQuantizeSettings));
-			AppendMenu(hMenu, MF_STRING | (CMainFrame::GetSettings().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
+			AppendMenu(hMenu, MF_STRING | (TrackerSettings::Instance().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
 		}
 
 		ClientToScreen(&pt);
@@ -1608,7 +1605,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 			}
 		} else
 		// Default: selection
-		if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CENTERROW)
+		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CENTERROW)
 		{
 			DragToSel(cursor, true, true);
 		} else
@@ -2494,7 +2491,7 @@ void CViewPattern::PatternStep(bool autoStep)
 		CMainFrame::EnableLowLatencyMode();
 		if(autoStep)
 		{
-			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL)
+			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 				SetCurrentRow(GetCurrentRow() + 1, TRUE);
 			else
 				SetCurrentRow((GetCurrentRow() + 1) % pSndFile->Patterns[m_nPattern].GetNumRows(), FALSE);
@@ -3818,7 +3815,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			// The following method takes care of:
 			// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
 			// . Entering a note off in pattern if required
-			TempStopNote(nNote, ((CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
+			TempStopNote(nNote, ((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
 		break;
 
 		case MIDIEvents::evNoteOn: // Note On
@@ -3828,7 +3825,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			TempEnterNote(nNote, true, nVol, true);
 
 			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
-			if(pSndFile->IsPaused() && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
+			if(pSndFile->IsPaused() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 				pModDoc->OnPatternPlayNoLoop();
 
 		break;
@@ -3851,7 +3848,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 			// Checking whether to record MIDI controller change as MIDI macro change.
 			// Don't write this if command was already written by MIDI mapping.
-			if((paramValue == uint8_max || pSndFile->GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
+			if((paramValue == uint8_max || pSndFile->GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
 			{
 				const bool liveRecord = IsLiveRecord();
 
@@ -3873,7 +3870,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			}
 
 		default:
-			if(event == MIDIEvents::evSystem && CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
+			if(event == MIDIEvents::evSystem && TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
 			{
 				// Respond to MIDI song messages
 				switch(channel)
@@ -3895,7 +3892,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				}
 			}
 
-			if(CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_MIDITOPLUG
+			if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG
 				&& pMainFrm->GetModPlaying() == pModDoc)
 			{
 				const UINT instr = GetCurrentInstrument();
@@ -4345,9 +4342,9 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
 		case kcDuplicatePattern: SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
 		case kcSwitchToOrderList: OnSwitchToOrderList();
-		case kcToggleOverflowPaste:	CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
-		case kcToggleNoteOffRecordPC: CMainFrame::GetSettings().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
-		case kcToggleNoteOffRecordMIDI: CMainFrame::GetSettings().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
+		case kcToggleOverflowPaste:	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
+		case kcToggleNoteOffRecordPC: TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
+		case kcToggleNoteOffRecordMIDI: TrackerSettings::Instance().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
 		case kcQuantizeSettings: OnSetQuantize(); return wParam;
 		case kcFindInstrument: FindInstrument(); return wParam;
@@ -4369,15 +4366,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		// Clipboard Manager
 		case kcToggleClipboardManager:
-			patternClipboardDialog.Toggle();
+			PatternClipboardDialog::Instance().Toggle();
 			break;
 		case kcClipboardPrev:
-			patternClipboard.CycleBackward();
-			patternClipboardDialog.UpdateList();
+			PatternClipboard::Instance().CycleBackward();
+			PatternClipboardDialog::Instance().UpdateList();
 			break;
 		case kcClipboardNext:
-			patternClipboard.CycleForward();
-			patternClipboardDialog.UpdateList();
+			PatternClipboard::Instance().CycleForward();
+			PatternClipboardDialog::Instance().UpdateList();
 			break;
 
 	}
@@ -4462,7 +4459,7 @@ void CViewPattern::MoveCursor(bool moveRight)
 	if(!moveRight)
 	{
 		// Move cursor one column to the left
-		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP) && m_Cursor.IsInFirstColumn())
+		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP) && m_Cursor.IsInFirstColumn())
 		{
 			// Wrap around to last channel
 			SetCurrentColumn(GetDocument()->GetNumChannels() - 1, m_nDetailLevel);
@@ -4477,7 +4474,7 @@ void CViewPattern::MoveCursor(bool moveRight)
 		const PatternCursor rightmost(0, GetDocument()->GetNumChannels() - 1, m_nDetailLevel);
 		if(m_Cursor.CompareColumn(rightmost) >= 0)
 		{
-			if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_WRAP))
+			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP))
 			{
 				// Wrap around to first channel.
 				SetCurrentColumn(0);
@@ -4735,7 +4732,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		}
 		else
 		{
-			pModDoc->NoteOff(note, ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOTEFADE) || pSndFile->GetNumInstruments() == 0), ins, GetCurrentChannel());
+			pModDoc->NoteOff(note, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOTEFADE) || pSndFile->GetNumInstruments() == 0), ins, GetCurrentChannel());
 		}
 	}
 
@@ -4756,14 +4753,14 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
 
-	if(!((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi))
+	if(!((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi))
 	{
 		// We don't want to write the note-off into the pattern if this feature is disabled and we're not recording from MIDI.
 		return;
 	}
 
 	// -- write sdx if playing live
-	const bool usePlaybackPosition = (!bChordMode) && (liveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY));
+	const bool usePlaybackPosition = (!bChordMode) && (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY));
 
 	//Work out where to put the note off
 	ROWINDEX nRow = GetCurrentRow();
@@ -4772,7 +4769,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	if(usePlaybackPosition)
 		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
-	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && CMainFrame::GetSettings().recordQuantizeRows != 0;
+	const bool doQuantize = (liveRecord || (fromMidi && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && TrackerSettings::Instance().recordQuantizeRows != 0;
 	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);
@@ -4985,7 +4982,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 	BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 	const bool liveRecord = IsLiveRecord();
-	const bool usePlaybackPosition = (liveRecord && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_AUTODELAY) && !sndFile.m_SongFlags[SONG_STEP]);
+	const bool usePlaybackPosition = (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY) && !sndFile.m_SongFlags[SONG_STEP]);
 	const bool isSplit = IsNoteSplit(note);
 
 	if(pModDoc->GetSplitKeyboardSettings().IsSplitActive()
@@ -5007,7 +5004,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 	{
 		if (m_nSpacing > 0 && m_nSpacing <= MAX_SPACING)
 		{
-			if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::GetSettings().gnAutoChordWaitTime)
+			if ((timeGetTime() - m_dwLastNoteEntryTime < TrackerSettings::Instance().gnAutoChordWaitTime)
 				&& (nRow >= m_nSpacing) && (!m_bLastNoteEntryBlocked))
 			{
 				nRow -= m_nSpacing;
@@ -5021,7 +5018,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 		SetEditPos(sndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
 	// Quantize
-	const bool doQuantize = (liveRecord || (fromMidi && (CMainFrame::GetSettings().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && CMainFrame::GetSettings().recordQuantizeRows != 0;
+	const bool doQuantize = (liveRecord || (fromMidi && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && TrackerSettings::Instance().recordQuantizeRows != 0;
 	if(doQuantize)
 	{
 		QuantizeRow(nPat, nRow);
@@ -5122,9 +5119,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 	}
 
 	// -- play note
-	if (((CMainFrame::GetSettings().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || !recordEnabled) && !newcmd.IsPcNote())
+	if (((TrackerSettings::Instance().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || !recordEnabled) && !newcmd.IsPcNote())
 	{
-		const bool playWholeRow = ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
+		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
 		if (playWholeRow)
 		{
 			// play the whole row in "step mode"
@@ -5188,9 +5185,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 		{
 			if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 			{
-				if(nRow + m_nSpacing < sndFile.Patterns[nPat].GetNumRows() || (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL))
+				if(nRow + m_nSpacing < sndFile.Patterns[nPat].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 				{
-					SetCurrentRow(nRow + m_nSpacing, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
+					SetCurrentRow(nRow + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
 					m_bLastNoteEntryBlocked = false;
 				} else
 				{
@@ -5263,14 +5260,14 @@ void CViewPattern::TempEnterChord(int note)
 	// -- establish note data
 	HandleSplit(p, note);
 
-	PMPTCHORD pChords = pMainFrm->GetChords();
+	MPTChords &chords = pMainFrm->GetChords();
 	UINT baseoctave = pMainFrm->GetBaseOctave();
 	UINT nchord = note - baseoctave * 12 - 1;
 	UINT nNote;
 	bool modified = false;
 	if (nchord < 3 * 12)
 	{
-		UINT nchordnote = pChords[nchord].key + baseoctave * 12 + 1;
+		UINT nchordnote = chords[nchord].key + baseoctave * 12 + 1;
 
 		if (nchordnote <= NOTE_MAX)
 		{
@@ -5288,14 +5285,14 @@ void CViewPattern::TempEnterChord(int note)
 
 			for (UINT kchrd=1; kchrd < sndFile.m_nChannels; kchrd++)
 			{
-				if ((nchno > 2) || (!pChords[nchord].notes[nchno])) break;
+				if ((nchno > 2) || (!chords[nchord].notes[nchno])) break;
 				if (++nchordch >= sndFile.m_nChannels) nchordch = 0;
 
 				currentRecordGroup = pModDoc->IsChannelRecord(nchordch);
 				if (!recordGroup)
 					recordGroup = currentRecordGroup;  //record group found
 
-				UINT n = ((nchordnote-1)/12) * 12 + pChords[nchord].notes[nchno];
+				UINT n = ((nchordnote-1)/12) * 12 + chords[nchord].notes[nchno];
 				if(recordEnabled)
 				{
 					if ((nchordch != nChn) && recordGroup && (currentRecordGroup == recordGroup) && (n <= NOTE_MAX))
@@ -5308,7 +5305,7 @@ void CViewPattern::TempEnterChord(int note)
 						}
 
 						nchno++;
-						if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_PLAYNEWNOTE)
+						if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNEWNOTE)
 						{
 							if ((n) && (n <= NOTE_MAX)) chordplaylist[nPlayChord++] = n;
 						}
@@ -5342,9 +5339,9 @@ void CViewPattern::TempEnterChord(int note)
 
 
 	// -- play note
-	if ((CMainFrame::GetSettings().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (!recordEnabled))
+	if ((TrackerSettings::Instance().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (!recordEnabled))
 	{
-		const bool playWholeRow = ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
+		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
 		if (playWholeRow)
 		{
 			// play the whole row in "step mode"
@@ -5406,7 +5403,7 @@ void CViewPattern::TempEnterChord(int note)
 void CViewPattern::EnterAftertouch(int note, int atValue)
 //-------------------------------------------------------
 {
-	if(CMainFrame::GetSettings().aftertouchBehaviour == TrackerSettings::atDoNotRecord || !IsEditingEnabled())
+	if(TrackerSettings::Instance().aftertouchBehaviour == TrackerSettings::atDoNotRecord || !IsEditingEnabled())
 	{
 		return;
 	}
@@ -5436,7 +5433,7 @@ void CViewPattern::EnterAftertouch(int note, int atValue)
 	ModCommand newCommand = target;
 	CSoundFile *pSndFile = GetSoundFile();
 
-	switch(CMainFrame::GetSettings().aftertouchBehaviour)
+	switch(TrackerSettings::Instance().aftertouchBehaviour)
 	{
 	case TrackerSettings::atRecordAsVolume:
 		// Record aftertouch messages as volume commands
@@ -5492,13 +5489,13 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 //--------------------------------------------------------------------
 {
 	const CSoundFile *sndFile = GetSoundFile();
-	if(sndFile == nullptr || CMainFrame::GetSettings().recordQuantizeRows == 0)
+	if(sndFile == nullptr || TrackerSettings::Instance().recordQuantizeRows == 0)
 	{
 		return;
 	}
 
 	const ROWINDEX currentTick = sndFile->m_nMusicSpeed * row + sndFile->m_nTickCount;
-	const ROWINDEX ticksPerNote = CMainFrame::GetSettings().recordQuantizeRows * sndFile->m_nMusicSpeed;
+	const ROWINDEX ticksPerNote = TrackerSettings::Instance().recordQuantizeRows * sndFile->m_nMusicSpeed;
 	
 	// Previous quantization step
 	const ROWINDEX quantLow = (currentTick / ticksPerNote) * ticksPerNote;
@@ -5554,10 +5551,10 @@ PATTERNINDEX CViewPattern::GetNextPattern() const
 void CViewPattern::OnSetQuantize()
 //--------------------------------
 {
-	CInputDlg dlg(this, "Quantize amount in rows for live recording (0 to disable):", 0, MAX_PATTERN_ROWS, CMainFrame::GetSettings().recordQuantizeRows);
+	CInputDlg dlg(this, "Quantize amount in rows for live recording (0 to disable):", 0, MAX_PATTERN_ROWS, TrackerSettings::Instance().recordQuantizeRows);
 	if(dlg.DoModal())
 	{
-		CMainFrame::GetSettings().recordQuantizeRows = static_cast<ROWINDEX>(dlg.resultNumber);
+		TrackerSettings::Instance().recordQuantizeRows = static_cast<ROWINDEX>(dlg.resultNumber);
 	}
 }
 
@@ -5960,7 +5957,7 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) con
 	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, CString("Note Column\t") + ih->GetKeyTextFromCommand(kcPatternInterpolateNote), ID_PATTERN_INTERPOLATE_NOTE)
 		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, (isPCNote ? CString("Parameter Column\t") : CString("Volume Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateVol), ID_PATTERN_INTERPOLATE_VOLUME)
 		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, (isPCNote ? CString("Value Column\t") : CString("Effect Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect), ID_PATTERN_INTERPOLATE_EFFECT);
-	if(possible || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_POPUP | (possible ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), "Interpolate...");
 		return true;
@@ -5979,7 +5976,7 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, PatternCursor::Columns
 		possible = IsInterpolationPossible(PatternCursor::paramColumn);
 	}
 
-	if(possible || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_STRING | (possible ? 0 : MF_GRAYED), command, label);
 	}
@@ -6002,7 +5999,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste (Insert)\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
 
 	DWORD greyed = pModDoc->GetPatternUndo().CanUndo() ? MF_ENABLED : MF_GRAYED;
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 	}
@@ -6017,7 +6014,7 @@ bool CViewPattern::BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
 	DWORD greyed = IsColumnSelected(PatternCursor::effectColumn) ? FALSE : MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_VISUALIZE_EFFECT, "Visualize Effect\t" + ih->GetKeyTextFromCommand(kcPatternVisualizeEffect));
 		return true;
@@ -6040,7 +6037,7 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::noteColumn) ? FALSE : MF_GRAYED;
 
-	if(!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
 		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
@@ -6059,7 +6056,7 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::volumeColumn) ? 0 : MF_GRAYED;
 
-	if(!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_AMPLIFY, "Amplify\t" + ih->GetKeyTextFromCommand(kcPatternAmplify));
 		return true;
@@ -6104,7 +6101,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::instrColumn) ? 0 : MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		if((sndFile->Patterns.IsValidPat(m_nPattern)))
 		{
@@ -6667,9 +6664,9 @@ bool CViewPattern::CopyPattern(PATTERNINDEX nPattern, const PatternRect &selecti
 //---------------------------------------------------------------------------------
 {
 	BeginWaitCursor();
-	bool result = GetPatternClipboard().Copy(*GetSoundFile(), nPattern, selection);
+	bool result = PatternClipboard::Instance().Copy(*GetSoundFile(), nPattern, selection);
 	EndWaitCursor();
-	patternClipboardDialog.UpdateList();
+	PatternClipboardDialog::Instance().UpdateList();
 	return result;
 }
 
@@ -6683,7 +6680,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	pos.pattern = nPattern;
 	pos.row = pastePos.GetRow();
 	pos.channel = pastePos.GetChannel();
-	bool result = GetPatternClipboard().Paste(*GetSoundFile(), pos, mode, SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
+	bool result = PatternClipboard::Instance().Paste(*GetSoundFile(), pos, mode, SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 	EndWaitCursor();
 
 	if(pos.pattern != nPattern)

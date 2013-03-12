@@ -35,7 +35,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	if (sDefaultPath.GetLength() > MAX_PATH - 1)
 		sDefaultPath = "";
 
-	const bool bNoExistingKbdFileSetting = (CMainFrame::GetSettings().m_szKbdFile[0] == 0);
+	const bool bNoExistingKbdFileSetting = (TrackerSettings::Instance().m_szKbdFile[0] == 0);
 
 	// 1. Try to load keybindings from the path saved in the settings.
 	// 2. If the setting doesn't exist or the loading fails, try to load from default location.
@@ -43,10 +43,10 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	// 4. If there were no keybinging setting already, create a keybinding file to default location
 	//    and set it's path to settings.
 
-	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(CMainFrame::GetSettings().m_szKbdFile)))
+	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile)))
 	{
 		if (bNoExistingKbdFileSetting)
-			_tcscpy(CMainFrame::GetSettings().m_szKbdFile, sDefaultPath);
+			_tcscpy(TrackerSettings::Instance().m_szKbdFile, sDefaultPath);
 		bool bSuccess = false;
 		if (PathFileExists(sDefaultPath) == TRUE)
 			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
@@ -57,14 +57,14 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 			bSuccess = activeCommandSet->LoadDefaultKeymap();
 			if (bSuccess && bNoExistingKbdFileSetting)
 			{
-				activeCommandSet->SaveFile(CMainFrame::GetSettings().m_szKbdFile);
+				activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 			}
 		}
 		if (bSuccess == false)
 			ErrorBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS);
 	}
 	// We will only overwrite the default Keybindings.mkb file from now on.
-	_tcscpy(CMainFrame::GetSettings().m_szKbdFile, sDefaultPath);
+	_tcscpy(TrackerSettings::Instance().m_szKbdFile, sDefaultPath);
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);
@@ -541,6 +541,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_HELP:				s="&Help"; c = kcHelp; break;
 		case ID_PLUGIN_SETUP:		s="Pl&ugin Manager...\t"; c = kcViewAddPlugin; break;
 		case ID_CHANNEL_MANAGER:	s="Ch&annel Manager...\t"; c = kcViewChannelManager; break;
+		case ID_CLIPBOARD_MANAGER:	s="C&lipboard Manager...\t"; c = kcToggleClipboardManager; break;
 		case ID_VIEW_SONGPROPERTIES:s="Song P&roperties...\t"; c = kcViewSongProperties; break; //rewbs.graph
 		case ID_VIEW_MIDIMAPPING:	s="&MIDI Mapping...\t"; c = kcViewMIDImapping; break;
 		case ID_VIEW_EDITHISTORY:	s="Edit &History...\t"; c = kcViewEditHistory; break;
@@ -613,6 +614,7 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(ID_VIEW_OPTIONS, MF_BYCOMMAND | MF_STRING, ID_VIEW_OPTIONS, GetMenuText(ID_VIEW_OPTIONS));
 	pMenu->ModifyMenu(ID_PLUGIN_SETUP, MF_BYCOMMAND | MF_STRING, ID_PLUGIN_SETUP, GetMenuText(ID_PLUGIN_SETUP));
 	pMenu->ModifyMenu(ID_CHANNEL_MANAGER, MF_BYCOMMAND | MF_STRING, ID_CHANNEL_MANAGER, GetMenuText(ID_CHANNEL_MANAGER));
+	pMenu->ModifyMenu(ID_CLIPBOARD_MANAGER, MF_BYCOMMAND | MF_STRING, ID_CLIPBOARD_MANAGER, GetMenuText(ID_CLIPBOARD_MANAGER));
 	pMenu->ModifyMenu(ID_VIEW_SONGPROPERTIES, MF_BYCOMMAND | MF_STRING, ID_VIEW_SONGPROPERTIES, GetMenuText(ID_VIEW_SONGPROPERTIES));
 	pMenu->ModifyMenu(ID_VIEW_MIDIMAPPING, MF_BYCOMMAND | MF_STRING, ID_VIEW_MIDIMAPPING, GetMenuText(ID_VIEW_MIDIMAPPING));
 	pMenu->ModifyMenu(ID_HELP, MF_BYCOMMAND | MF_STRING, ID_HELP, GetMenuText(ID_HELP));

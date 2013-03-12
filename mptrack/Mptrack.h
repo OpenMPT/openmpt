@@ -10,10 +10,6 @@
 
 #pragma once
 
-#ifndef __AFXWIN_H__
-	#error include 'stdafx.h' before including this file for PCH
-#endif
-
 #include "resource.h"       // main symbols
 #include "../soundlib/Sndfile.h"
 #include "ACMConvert.h"
@@ -41,16 +37,6 @@ typedef struct MIDILIBSTRUCT
 {
 	LPTSTR MidiMap[128*2];	// 128 instruments + 128 percussions
 } MIDILIBSTRUCT, *LPMIDILIBSTRUCT;
-
-
-/////////////////////////////////////////////////////////////////////////
-// Chords
-
-typedef struct MPTCHORD
-{
-	BYTE key;
-	BYTE notes[3];
-} MPTCHORD, *PMPTCHORD;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -173,8 +159,6 @@ public:
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig *pcfg) const { *pcfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig *pcfg) { m_MidiCfg = *pcfg; }
-	void LoadChords(PMPTCHORD pChords);
-	void SaveChords(PMPTCHORD pChords);
 	BOOL CanEncodeLayer3() const { return acmConvert.IsLayer3Present(); }
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }

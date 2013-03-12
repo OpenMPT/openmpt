@@ -250,7 +250,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	}
 	if (dwHint & HINT_MPTSETUP)
 	{
-		CheckDlgButton(IDC_CHECK_LOOPSONG,	(CMainFrame::GetSettings().gbLoopSong) ? TRUE : FALSE);
+		CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
 	}
 	if (dwHint & HINT_MPTOPTIONS)
 	{
@@ -512,12 +512,12 @@ void CCtrlGeneral::OnSongProperties()
 void CCtrlGeneral::OnLoopSongChanged()
 //------------------------------------
 {
-	CMainFrame::GetSettings().gbLoopSong = IsDlgButtonChecked(IDC_CHECK_LOOPSONG);
+	TrackerSettings::Instance().gbLoopSong = IsDlgButtonChecked(IDC_CHECK_LOOPSONG);
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile) pSndFile->SetRepeatCount((CMainFrame::GetSettings().gbLoopSong) ? -1 : 0);
+		if (pSndFile) pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 	}
 }
 

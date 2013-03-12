@@ -214,7 +214,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 void CTrackApp::OnFileCloseAll()
 //------------------------------
 {
-	if(!(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
+	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
 	{
 		// Show modified documents window
 		CloseMainDialog dlg;
@@ -776,11 +776,11 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Create tunings dir
 	CString sTuningPath;
 	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
-	CMainFrame::GetSettings().SetDefaultDirectory(sTuningPath, DIR_TUNING);
+	TrackerSettings::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectory(CMainFrame::GetSettings().GetDefaultDirectory(DIR_TUNING)) == 0)
+	if(PathIsDirectory(TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING)) == 0)
 	{
-		CreateDirectory(CMainFrame::GetSettings().GetDefaultDirectory(DIR_TUNING), 0);
+		CreateDirectory(TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), 0);
 	}
 
 	if(!bIsAppDir)
@@ -823,7 +823,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	TCHAR szTemplatePath[MAX_PATH];
 	_tcscpy(szTemplatePath, m_szConfigDirectory);
 	_tcscat(szTemplatePath, _T("TemplateModules\\"));
-	CMainFrame::GetSettings().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
+	TrackerSettings::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
 
 	m_bPortableMode = bIsAppDir;
 }
@@ -853,8 +853,8 @@ BOOL CTrackApp::InitInstance()
 	// Allow allocations of at least 16MB
 	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
 
-	CMainFrame::GetSettings().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
-	if(CMainFrame::GetSettings().m_nSampleUndoMaxBuffer < (1 << 20)) CMainFrame::GetSettings().m_nSampleUndoMaxBuffer = (1 << 20);
+	TrackerSettings::Instance().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
+	if(TrackerSettings::Instance().m_nSampleUndoMaxBuffer < (1 << 20)) TrackerSettings::Instance().m_nSampleUndoMaxBuffer = (1 << 20);
 
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
@@ -893,12 +893,12 @@ BOOL CTrackApp::InitInstance()
 	CSoundFile::InitSysInfo();
 	if (CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX)
 	{
-		CMainFrame::GetSettings().m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
-		CMainFrame::GetSettings().m_nSrcMode = SRCMODE_SPLINE;
+		TrackerSettings::Instance().m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
+		TrackerSettings::Instance().m_nSrcMode = SRCMODE_SPLINE;
 	}
 	if (CSoundFile::gdwSysInfo & SYSMIX_MMXEX)
 	{
-		CMainFrame::GetSettings().m_nSrcMode = SRCMODE_POLYPHASE;
+		TrackerSettings::Instance().m_nSrcMode = SRCMODE_POLYPHASE;
 	}
 	// Load Midi Library
 	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);
@@ -967,7 +967,7 @@ BOOL CTrackApp::InitInstance()
 	}
 
 	// Open settings if the previous execution was with an earlier version.
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::GetSettings().gcsPreviousVersion) < MptVersion::num)
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
 	{
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
@@ -1018,44 +1018,6 @@ int CTrackApp::ExitInstance()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Chords
-
-void CTrackApp::LoadChords(PMPTCHORD pChords)
-//-------------------------------------------
-{	
-	if (!m_szConfigFileName[0]) return;
-	for (UINT i=0; i<3*12; i++)
-	{
-		LONG chord;
-		if ((chord = GetPrivateProfileInt("Chords", szDefaultNoteNames[i], -1, m_szConfigFileName)) >= 0)
-		{
-			if ((chord & 0xFFFFFFC0) || (!pChords[i].notes[0]))
-			{
-				pChords[i].key = (BYTE)(chord & 0x3F);
-				pChords[i].notes[0] = (BYTE)((chord >> 6) & 0x3F);
-				pChords[i].notes[1] = (BYTE)((chord >> 12) & 0x3F);
-				pChords[i].notes[2] = (BYTE)((chord >> 18) & 0x3F);
-			}
-		}
-	}
-}
-
-
-void CTrackApp::SaveChords(PMPTCHORD pChords)
-//-------------------------------------------
-{
-	CHAR s[64];
-	
-	if (!m_szConfigFileName[0]) return;
-	for (UINT i=0; i<3*12; i++)
-	{
-		wsprintf(s, "%d", (pChords[i].key) | (pChords[i].notes[0] << 6) | (pChords[i].notes[1] << 12) | (pChords[i].notes[2] << 18));
-		if (!WritePrivateProfileString("Chords", szDefaultNoteNames[i], s, m_szConfigFileName)) break;
-	}
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
 // App Messages
 
 
@@ -1065,7 +1027,7 @@ void CTrackApp::OnFileNew()
 	if (!m_bInitialized) return;
 
 	// Default module type
-	MODTYPE nNewType = CMainFrame::GetSettings().defaultModType;
+	MODTYPE nNewType = TrackerSettings::Instance().defaultModType;
 	bool bIsProject = false;
 
 	// Get active document to make the new module of the same type
@@ -1214,12 +1176,12 @@ void CTrackApp::OnFileOpen()
 		"Wave Files (*.wav)|*.wav|"
 		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS),
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS),
 		true,
 		&nFilterIndex);
 	if(files.abort) return;
 
-	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
 
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
@@ -2205,10 +2167,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
 		// such OpenMPT version, clear the related settings to get a clean start.
-		const CString sPreviousVer = CMainFrame::GetSettings().gcsPreviousVersion;
-		if (!sPreviousVer.IsEmpty() && 
-			MptVersion::ToNum(sPreviousVer) < MAKE_VERSION_NUMERIC(1, 19, 03, 01) &&
-			strcmp(buffer, "OpenMPT") == 0)
+		if(TrackerSettings::Instance().gcsPreviousVersion != 0 && TrackerSettings::Instance().gcsPreviousVersion < MAKE_VERSION_NUMERIC(1, 19, 03, 01) && !strcmp(buffer, "OpenMPT"))
 		{
 			// Remove keys by calling write with nullptr.
 			WritePrivateProfileString(_T("VST Plugins"), _T("HostProductString"), nullptr, m_szConfigFileName);

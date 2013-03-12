@@ -161,7 +161,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_nCurKeyChoice = -1;
 	m_bModified = false;
 	m_bChoiceModified = false;
-	m_sFullPathName = CMainFrame::GetSettings().m_szKbdFile;
+	m_sFullPathName = TrackerSettings::Instance().m_szKbdFile;
 	
 	plocalCmdSet = new CCommandSet();
 	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);
@@ -182,7 +182,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eReport.SetWindowText("");
 
 	CString s;
-	s.Format("%d", CMainFrame::GetSettings().gnAutoChordWaitTime);
+	s.Format("%d", TrackerSettings::Instance().gnAutoChordWaitTime);
 	m_eChordWaitTime.SetWindowText(s);
 	return TRUE;
 }
@@ -820,7 +820,7 @@ void COptionsKeyboard::OnOK()
 
 	CString cs;
 	m_eChordWaitTime.GetWindowText(cs);
-	CMainFrame::GetSettings().gnAutoChordWaitTime = atoi(cs);
+	TrackerSettings::Instance().gnAutoChordWaitTime = atoi(cs);
 
 	CPropertyPage::OnOK();
 }
@@ -840,7 +840,7 @@ void COptionsKeyboard::OnLoad()
 	std::string filename = m_sFullPathName;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mkb", filename,
 		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
-		CMainFrame::GetSettings().m_szKbdFile);
+		TrackerSettings::Instance().m_szKbdFile);
 	if(files.abort)	return;
 
 	m_sFullPathName = files.first_file.c_str();
@@ -856,7 +856,7 @@ void COptionsKeyboard::OnSave()
 	std::string filename = m_sFullPathName;
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mkb", filename,
 		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
-		CMainFrame::GetSettings().m_szKbdFile);
+		TrackerSettings::Instance().m_szKbdFile);
 	if(files.abort)	return;
 
 	m_sFullPathName = files.first_file.c_str();

@@ -723,7 +723,7 @@ void CModControlBar::UpdateStyle()
 	if (m_hWnd)
 	{
 		LONG lStyleOld = GetWindowLong(m_hWnd, GWL_STYLE);
-		if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS)
+		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS)
 			lStyleOld |= TBSTYLE_FLAT;
 		else
 			lStyleOld &= ~TBSTYLE_FLAT;
