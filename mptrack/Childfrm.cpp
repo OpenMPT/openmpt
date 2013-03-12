@@ -92,7 +92,7 @@ CChildFrame::~CChildFrame()
 {
 	if ((--glMdiOpenCount) == 0)
 	{
-		CMainFrame::GetSettings().gbMdiMaximize = m_bMaxWhenClosed;
+		TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
 	}
 }
 
@@ -104,7 +104,7 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	if (!m_wndSplitter.CreateStatic(this, 2, 1)) return FALSE;
 
 	// add the first splitter pane - the default view in row 0
-	int cy = CMainFrame::GetSettings().glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
+	int cy = TrackerSettings::Instance().glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
 	
@@ -140,7 +140,7 @@ BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 void CChildFrame::ActivateFrame(int nCmdShow)
 //-------------------------------------------
 {
-	if ((glMdiOpenCount == 1) && (CMainFrame::GetSettings().gbMdiMaximize) && (nCmdShow == -1))
+	if ((glMdiOpenCount == 1) && (TrackerSettings::Instance().gbMdiMaximize) && (nCmdShow == -1))
 	{
 		nCmdShow = SW_SHOWMAXIMIZED;
 	}
@@ -245,7 +245,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 		CRect rect;
 		
 		m_bMaxWhenClosed = IsZoomed();
-		if (bForce) CMainFrame::GetSettings().gbMdiMaximize = m_bMaxWhenClosed;
+		if (bForce) TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
 		if (!IsIconic())
 		{
 			CWnd *pWnd = m_wndSplitter.GetPane(0, 0);
@@ -255,18 +255,18 @@ void CChildFrame::SavePosition(BOOL bForce)
 				LONG l = rect.Height();
 				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
 				if (strcmp("CViewGlobals",m_szCurrentViewClassName) == 0)
-					CMainFrame::GetSettings().glGeneralWindowHeight = l;
+					TrackerSettings::Instance().glGeneralWindowHeight = l;
 				else if (strcmp("CViewPattern", m_szCurrentViewClassName) == 0)
-					CMainFrame::GetSettings().glPatternWindowHeight = l;
+					TrackerSettings::Instance().glPatternWindowHeight = l;
 				else if (strcmp("CViewSample", m_szCurrentViewClassName) == 0)
-					CMainFrame::GetSettings().glSampleWindowHeight = l;
+					TrackerSettings::Instance().glSampleWindowHeight = l;
 				else if (strcmp("CViewInstrument", m_szCurrentViewClassName) == 0)
-					CMainFrame::GetSettings().glInstrumentWindowHeight = l;
+					TrackerSettings::Instance().glInstrumentWindowHeight = l;
 				else if (strcmp("CViewComments", m_szCurrentViewClassName) == 0)
-					CMainFrame::GetSettings().glCommentsWindowHeight = l;
+					TrackerSettings::Instance().glCommentsWindowHeight = l;
 				//rewbs.graph
 				else if (strcmp("CViewGraph", m_szCurrentViewClassName) == 0)
-					CMainFrame::GetSettings().glGraphWindowHeight = l;
+					TrackerSettings::Instance().glGraphWindowHeight = l;
 				//end rewbs.graph
 
 			}

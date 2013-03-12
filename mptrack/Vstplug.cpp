@@ -556,7 +556,7 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 	{
 		// Try finding the plugin DLL in the plugin directory instead.
 		CHAR s[_MAX_PATH];
-		strncpy(s, CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINS), CountOf(s));
+		strncpy(s, TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS), CountOf(s));
 		if(!strcmp(s, ""))
 		{
 			strncpy(s, theApp.GetAppDirPath(), CountOf(s));
@@ -875,7 +875,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	
 	case audioMasterGetOutputLatency:
 		{
-			VstIntPtr latency = CMainFrame::GetSettings().m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate() / 1000L);
+			VstIntPtr latency = TrackerSettings::Instance().m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate() / 1000L);
 			return latency;
 		}
 	
@@ -1024,7 +1024,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// get plug directory, FSSpec on MAC, else char*
 	case audioMasterGetDirectory:
 		//Log("VST plugin to host: Get Directory\n");
-		return ToVstPtr(CMainFrame::GetSettings().GetDefaultDirectory(DIR_PLUGINS));
+		return ToVstPtr(TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
 	
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
@@ -1131,7 +1131,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			} else
 			{
 				// Plugins are probably looking for presets...?
-				workingDir = ""; //CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS);
+				workingDir = ""; //TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
 			}
 
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
@@ -1657,7 +1657,7 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 bool CVstPlugin::SaveProgram()
 //----------------------------
 {
-	std::string defaultDir = CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	std::string defaultDir = TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
@@ -1677,7 +1677,7 @@ bool CVstPlugin::SaveProgram()
 
 	if(useDefaultDir)
 	{
-		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 	}
 	
 	bool bank = !_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
@@ -1699,7 +1699,7 @@ bool CVstPlugin::SaveProgram()
 bool CVstPlugin::LoadProgram()
 //----------------------------
 {
-	std::string defaultDir = CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	std::string defaultDir = TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
@@ -1717,7 +1717,7 @@ bool CVstPlugin::LoadProgram()
 
 	if(useDefaultDir)
 	{
-		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 	}
 
 	CMappedFile f;

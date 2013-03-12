@@ -1487,7 +1487,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 		{
 			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
-			CMainFrame::GetSettings().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
+			TrackerSettings::Instance().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
 	
 			if (!pIns->name[0] && m_pSndFile->GetModSpecifications().instrNameLengthMax > 0)
 			{
@@ -1763,12 +1763,12 @@ void CCtrlInstruments::OnInstrumentOpen()
 		"GF1 Patches (*.pat)|*.pat|"
 		"Impulse Tracker Instruments (*.iti)|*.iti|"
 		"All Files (*.*)|*.*||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_INSTRUMENTS),
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS),
 		true,
 		&nLastIndex);
 	if(files.abort) return;
 
-	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS, true);
+	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS, true);
 
 	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
@@ -1820,7 +1820,7 @@ void CCtrlInstruments::OnInstrumentSave()
 			"Impulse Tracker Instruments (*.iti)|*.iti|"
 			"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
 			"FastTracker II Instruments (*.xi)|*.xi||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_INSTRUMENTS), false, &index);
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS), false, &index);
 	if(files.abort) return;
 	
 	BeginWaitCursor();
@@ -1846,7 +1846,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		strcpy(szFileName, drive);
 		strcat(szFileName, path);
 		
-		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS);
+		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

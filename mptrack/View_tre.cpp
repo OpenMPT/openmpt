@@ -151,14 +151,14 @@ void CModTree::Init()
 		dwRemove |= (TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_SHOWSELALWAYS);
 		dwAdd &= ~(TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_SHOWSELALWAYS);
 	}
-	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
+	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
 	{
 		dwRemove &= ~TVS_SINGLEEXPAND;
 		dwAdd |= TVS_SINGLEEXPAND;
 		m_dwStatus |= TREESTATUS_SINGLEEXPAND;
 	}
 	ModifyStyle(dwRemove, dwAdd);
-	strcpy(m_szInstrLibPath, CMainFrame::GetSettings().GetDefaultDirectory(DIR_SAMPLES));
+	strcpy(m_szInstrLibPath, TrackerSettings::Instance().GetDefaultDirectory(DIR_SAMPLES));
 	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
 	if (m_pDataTree)
 	{
@@ -273,7 +273,7 @@ void CModTree::OnOptionsChanged()
 {
 	DWORD dwRemove = TVS_SINGLEEXPAND, dwAdd = 0;
 	m_dwStatus &= ~TREESTATUS_SINGLEEXPAND;
-	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
+	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
 	{
 		dwRemove = 0;
 		dwAdd = TVS_SINGLEEXPAND;
@@ -825,11 +825,11 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					pSndFile->Patterns[pSndFile->Order.GetSequence(nSeq)[iOrd]].GetName(stmp);
 					if (stmp[0])
 					{
-						wsprintf(s, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
+						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
 							iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd], stmp);
 					} else
 					{
-						wsprintf(s, (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
+						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
 							iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd]);
 					}
 				} else
@@ -2214,7 +2214,7 @@ void CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
 
-	if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0) return;
+	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0) return;
 	// TODO: Is there a way to find out if the treeview is actually visible?
 	/*static int nUpdateCount = 0;
 	nUpdateCount++;

@@ -105,17 +105,17 @@ class CEQSetupDlg: public CPropertyPage
 {
 protected:
 	CEQSlider m_Sliders[MAX_EQ_BANDS];
-	EQPRESET *m_pEqPreset;
+	EQPreset *m_pEqPreset;
 	UINT m_nSliderMenu;
 
 public:
-	CEQSetupDlg(EQPRESET *pEq):CPropertyPage(IDD_SETUP_EQ) { m_pEqPreset = pEq; }
+	CEQSetupDlg(EQPreset *pEq):CPropertyPage(IDD_SETUP_EQ) { m_pEqPreset = pEq; }
 	void UpdateDialog();
 	void UpdateEQ(BOOL bReset);
 
 public:
-	static const EQPRESET gEQPresets[];
-	static EQPRESET gUserPresets[];
+	static const EQPreset gEQPresets[];
+	static EQPreset gUserPresets[];
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -150,7 +150,7 @@ protected:
 	afx_msg void OnSliderFreq(UINT);
 	DECLARE_MESSAGE_MAP()
 
-	void LoadEQPreset(const EQPRESET &preset);
+	void LoadEQPreset(const EQPreset &preset);
 };
 
 

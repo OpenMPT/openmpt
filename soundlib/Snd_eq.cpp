@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#include "../mptrack/TrackerSettings.h"
 
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001

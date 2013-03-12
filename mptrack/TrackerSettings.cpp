@@ -22,9 +22,10 @@
 #include "../common/StringFixer.h"
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
-#include "View_pat.h"
+#include "PatternClipboard.h"
 
 
+TrackerSettings TrackerSettings::settings;
 const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
 
 
@@ -48,7 +49,7 @@ TrackerSettings::TrackerSettings()
 	glTreeWindowWidth = 160;
 	glTreeSplitRatio = 128;
 
-	gcsPreviousVersion = "";
+	gcsPreviousVersion = 0;
 	gcsInstallGUID = "";
 	// Audio Setup
 	gnAutoChordWaitTime = 60;
@@ -109,7 +110,7 @@ TrackerSettings::TrackerSettings()
 	MemsetZero(Chords);
 	for(UINT ichord = 0; ichord < 3 * 12; ichord++)
 	{
-		Chords[ichord].key = (BYTE)ichord;
+		Chords[ichord].key = (uint8)ichord;
 		Chords[ichord].notes[0] = 0;
 		Chords[ichord].notes[1] = 0;
 		Chords[ichord].notes[2] = 0;
@@ -117,15 +118,15 @@ TrackerSettings::TrackerSettings()
 		if(ichord < 12)
 		{
 			// Major Chords
-			Chords[ichord].notes[0] = (BYTE)(ichord+5);
-			Chords[ichord].notes[1] = (BYTE)(ichord+8);
-			Chords[ichord].notes[2] = (BYTE)(ichord+11);
+			Chords[ichord].notes[0] = (uint8)(ichord+5);
+			Chords[ichord].notes[1] = (uint8)(ichord+8);
+			Chords[ichord].notes[2] = (uint8)(ichord+11);
 		} else if(ichord < 24)
 		{
 			// Minor Chords
-			Chords[ichord].notes[0] = (BYTE)(ichord-8);
-			Chords[ichord].notes[1] = (BYTE)(ichord-4);
-			Chords[ichord].notes[2] = (BYTE)(ichord-1);
+			Chords[ichord].notes[0] = (uint8)(ichord-8);
+			Chords[ichord].notes[1] = (uint8)(ichord-4);
+			Chords[ichord].notes[2] = (uint8)(ichord-1);
 		}
 	}
 
@@ -192,7 +193,7 @@ void TrackerSettings::LoadSettings()
 	// The following stuff was also stored in mptrack.ini while the registry was still being used...
 
 	// Load Chords
-	theApp.LoadChords(Chords);
+	LoadChords(Chords);
 
 	// Load default macro configuration
 	MIDIMacroConfig macros;
@@ -233,11 +234,9 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	//CHAR collectedString[INIBUFFERSIZE];
 	MptVersion::VersionNum vIniVersion;
 
-	gcsPreviousVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile);
-	if(gcsPreviousVersion == "")
+	vIniVersion = gcsPreviousVersion = MptVersion::ToNum(CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile));
+	if(vIniVersion = 0)
 		vIniVersion = MptVersion::num;
-	else
-		vIniVersion = MptVersion::ToNum(gcsPreviousVersion);
 
 	gcsInstallGUID = CMainFrame::GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
 	if(gcsInstallGUID == "")
@@ -397,7 +396,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
 
-	CViewPattern::GetPatternClipboard().SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", CViewPattern::GetPatternClipboard().GetClipboardSize(), iniFile));
+	PatternClipboard::Instance().SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", PatternClipboard::Instance().GetClipboardSize(), iniFile));
 	
 	// Default Paths
 	TCHAR szPath[_MAX_PATH] = "";
@@ -425,11 +424,11 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 
 	// EQ Settings
-	GetPrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPRESET), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPRESET), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPRESET), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPRESET), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPRESET), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPreset), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPreset), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPreset), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPreset), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPreset), iniFile);
 	StringFixer::SetNullTerminator(m_EqSettings.szName);
 	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[0].szName);
 	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[1].szName);
@@ -470,11 +469,11 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 #define SETTINGS_REGEXT_WINDOW		"\\Window"
 #define SETTINGS_REGEXT_SETTINGS	"\\Settings"
 
-void TrackerSettings::LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPRESET *pEqSettings)
+void TrackerSettings::LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPreset *pEqSettings)
 //-----------------------------------------------------------------------------------
 {
 	DWORD dwType = REG_BINARY;
-	DWORD dwSize = sizeof(EQPRESET);
+	DWORD dwSize = sizeof(EQPreset);
 	RegQueryValueEx(key, pszName, NULL, &dwType, (LPBYTE)pEqSettings, &dwSize);
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
@@ -655,7 +654,7 @@ bool TrackerSettings::LoadRegistrySettings()
 		dwDWORDSize = sizeof(DWORD);
 		DWORD dwPreviousVersion;
 		RegQueryValueEx(key, "Version", NULL, &dwREG_DWORD, (LPBYTE)&dwPreviousVersion, &dwDWORDSize);
-		gcsPreviousVersion = MptVersion::ToStr(dwPreviousVersion);
+		gcsPreviousVersion = dwPreviousVersion;
 		RegCloseKey(key);
 	}
 	CMainFrame::m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, asUseOriginalPath, asPath, asFileNameTemplate);
@@ -756,7 +755,7 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
 
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", CViewPattern::GetPatternClipboard().GetClipboardSize(), iniFile);
+	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", PatternClipboard::Instance().GetClipboardSize(), iniFile);
 
 	// Write default paths
 	const bool bConvertPaths = theApp.IsPortableMode();
@@ -785,11 +784,11 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_nProLogicDepth, iniFile);
 	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_nProLogicDelay, iniFile);
 
-	WritePrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPRESET), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPRESET), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPRESET), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPRESET), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPRESET), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPreset), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPreset), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPreset), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPreset), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPreset), iniFile);
 
 	if(CMainFrame::m_pAutoSaver != nullptr)
 	{
@@ -806,7 +805,7 @@ void TrackerSettings::SaveSettings()
 		WritePrivateProfileString("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate(), iniFile);
 	}
 
-	theApp.SaveChords(Chords);
+	SaveChords(Chords);
 
 	// Save default macro configuration
 	MIDIMacroConfig macros;
@@ -827,6 +826,41 @@ void TrackerSettings::SaveSettings()
 	WritePrivateProfileString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile);
 
 	CMainFrame::GetMainFrame()->SaveBarState("Toolbars");
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Chords
+
+void TrackerSettings::LoadChords(MPTChords &chords)
+//-------------------------------------------------
+{	
+	for(size_t i = 0; i < CountOf(chords); i++)
+	{
+		uint32 chord;
+		if((chord = GetPrivateProfileInt("Chords", szDefaultNoteNames[i], -1, theApp.GetConfigFileName())) >= 0)
+		{
+			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
+			{
+				chords[i].key = (uint8)(chord & 0x3F);
+				chords[i].notes[0] = (uint8)((chord >> 6) & 0x3F);
+				chords[i].notes[1] = (uint8)((chord >> 12) & 0x3F);
+				chords[i].notes[2] = (uint8)((chord >> 18) & 0x3F);
+			}
+		}
+	}
+}
+
+
+void TrackerSettings::SaveChords(MPTChords &chords)
+//-------------------------------------------------
+{
+	CHAR s[64];
+	for(size_t i = 0; i < CountOf(chords); i++)
+	{
+		wsprintf(s, "%d", (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18));
+		if (!WritePrivateProfileString("Chords", szDefaultNoteNames[i], s, theApp.GetConfigFileName())) break;
+	}
 }
 
 

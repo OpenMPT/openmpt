@@ -1164,6 +1164,7 @@
 #define ID_EDIT_CLEANUP                 43225
 #define ID_ORDERLIST_EDIT_COPY          43226
 #define ID_ORDERLIST_EDIT_CUT           43227
+#define ID_CLIPBOARD_MANAGER            43228
 #define ID_CHANNEL_RENAME               43229
 #define ID_EDIT_PASTEFLOOD              43230
 #define ID_MODTREE_DUPLICATE            43231
@@ -1216,9 +1217,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        537
+#define _APS_NEXT_RESOURCE_VALUE        539
 #define _APS_NEXT_COMMAND_VALUE         44611
-#define _APS_NEXT_CONTROL_VALUE         2441
+#define _APS_NEXT_CONTROL_VALUE         2454
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -14,7 +14,7 @@
 #include "dlsbank.h"
 #include "Wav.h"
 #ifdef MODPLUG_TRACKER
-#include "..\mptrack\Mainfrm.h"
+#include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 
 
@@ -481,8 +481,8 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	int midi_clock, nTempoUsec, nPPQN, nTickMultiplier;
 
 #ifdef MODPLUG_TRACKER
-	int importSpeed = CMainFrame::GetSettings().midiImportSpeed;
-	ROWINDEX importPatternLen = CMainFrame::GetSettings().midiImportPatternLen;
+	int importSpeed = TrackerSettings::Instance().midiImportSpeed;
+	ROWINDEX importPatternLen = TrackerSettings::Instance().midiImportPatternLen;
 #else
 	int importSpeed = 3;
 	ROWINDEX importPatternLen = 128;

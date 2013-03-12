@@ -440,8 +440,8 @@ CSoundFile::CSoundFile() :
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
 	m_pModDoc = nullptr;
 
-	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::GetSettings().m_nRowHighlightBeats) ? CMainFrame::GetSettings().m_nRowHighlightBeats : 4;
-	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::GetSettings().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? CMainFrame::GetSettings().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
+	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
+	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (TrackerSettings::Instance().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? TrackerSettings::Instance().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
 #else
 	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = 4;
 	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = 16;
@@ -1617,7 +1617,7 @@ bool CSoundFile::LoadStaticTunings()
 
 	// Load local tunings.
 	CString sPath;
-	sPath.Format(TEXT("%slocal_tunings%s"), CMainFrame::GetSettings().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
+	sPath.Format(TEXT("%slocal_tunings%s"), TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
 	s_pTuningsSharedLocal->SetSavefilePath(sPath);
 	s_pTuningsSharedLocal->Deserialize();
 

@@ -93,7 +93,7 @@ void CCtrlComments::RecalcLayout()
 	rect.right = rcClient.right - rect.left;
 	if ((rect.right > rect.left) && (rect.bottom > rect.top))
 	{
-		int cxmax = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_LARGECOMMENTS) ? 80*8 : 80*6;
+		int cxmax = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LARGECOMMENTS) ? 80*8 : 80*6;
 		int cx = rect.Width(), cy = rect.Height();
 		if (cx > cxmax) cx = cxmax;
 		if ((cx != cx0) || (cy != cy0)) m_EditComments.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
@@ -108,7 +108,7 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	if (m_nLockCount) return;
 	m_nLockCount++;
 	HFONT newfont;
-	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_LARGECOMMENTS)
+	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LARGECOMMENTS)
 		newfont = CMainFrame::GetLargeFixedFont();
 	else
 		newfont = CMainFrame::GetFixedFont();

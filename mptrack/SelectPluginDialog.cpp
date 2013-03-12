@@ -91,10 +91,10 @@ BOOL CSelectPluginDlg::OnInitDialog()
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
 	}
 
-	MoveWindow(CMainFrame::GetSettings().gnPlugWindowX,
-		CMainFrame::GetSettings().gnPlugWindowY,
-		CMainFrame::GetSettings().gnPlugWindowWidth,
-		CMainFrame::GetSettings().gnPlugWindowHeight);
+	MoveWindow(TrackerSettings::Instance().gnPlugWindowX,
+		TrackerSettings::Instance().gnPlugWindowY,
+		TrackerSettings::Instance().gnPlugWindowWidth,
+		TrackerSettings::Instance().gnPlugWindowHeight);
 
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
@@ -203,15 +203,15 @@ void CSelectPluginDlg::OnOK()
 	//remember window size:
 	RECT rect;
 	GetWindowRect(&rect);
-	CMainFrame::GetSettings().gnPlugWindowX = rect.left;
-	CMainFrame::GetSettings().gnPlugWindowY = rect.top;
-	CMainFrame::GetSettings().gnPlugWindowWidth  = rect.right - rect.left;
-	CMainFrame::GetSettings().gnPlugWindowHeight = rect.bottom - rect.top;
+	TrackerSettings::Instance().gnPlugWindowX = rect.left;
+	TrackerSettings::Instance().gnPlugWindowY = rect.top;
+	TrackerSettings::Instance().gnPlugWindowWidth  = rect.right - rect.left;
+	TrackerSettings::Instance().gnPlugWindowHeight = rect.bottom - rect.top;
 
 	if (changed)
 	{
 		if(m_pPlugin->Info.dwPluginId2)
-			CMainFrame::GetSettings().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
+			TrackerSettings::Instance().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
 	}
 	else
@@ -227,10 +227,10 @@ void CSelectPluginDlg::OnCancel()
 	//remember window size:
 	RECT rect;
 	GetWindowRect(&rect);
-	CMainFrame::GetSettings().gnPlugWindowX = rect.left;
-	CMainFrame::GetSettings().gnPlugWindowY = rect.top;
-	CMainFrame::GetSettings().gnPlugWindowWidth  = rect.right - rect.left;
-	CMainFrame::GetSettings().gnPlugWindowHeight = rect.bottom - rect.top;
+	TrackerSettings::Instance().gnPlugWindowX = rect.left;
+	TrackerSettings::Instance().gnPlugWindowY = rect.top;
+	TrackerSettings::Instance().gnPlugWindowWidth  = rect.right - rect.left;
+	TrackerSettings::Instance().gnPlugWindowHeight = rect.bottom - rect.top;
 
 	CDialog::OnCancel();
 }
@@ -336,7 +336,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 					{
 						currentPlug = h;
 					}
-				} else if(p->dwPluginId2 == CMainFrame::GetSettings().gnPlugWindowLast)
+				} else if(p->dwPluginId2 == TrackerSettings::Instance().gnPlugWindowLast)
 				{
 					// Previously selected plugin
 					currentPlug = h;
@@ -452,11 +452,11 @@ void CSelectPluginDlg::OnAddPlugin()
 {
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dll", "",
 		"VST Plugins (*.dll)|*.dll||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_PLUGINS),
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINS),
 		true);
 	if(files.abort) return;
 
-	CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINS, true);
+	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINS, true);
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	bool bOk = false;

@@ -149,7 +149,7 @@ STATIC_ASSERT(CountOf(volEffectColors) == MAX_VOLCMDS);
 inline PCPATTERNFONT GetCurrentPatternFont()
 //------------------------------------------
 {
-	return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SMALLFONT) ? &gSmallPatternFont : &gDefaultPatternFont;
+	return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMALLFONT) ? &gSmallPatternFont : &gDefaultPatternFont;
 }
 
 
@@ -171,25 +171,25 @@ void CViewPattern::UpdateColors()
 {
 	BYTE r,g,b;
 
-	m_Dib.SetAllColors(0, MAX_MODCOLORS, CMainFrame::GetSettings().rgbCustomColors);
+	m_Dib.SetAllColors(0, MAX_MODCOLORS, TrackerSettings::Instance().rgbCustomColors);
 
-	r = hilightcolor(GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-		GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	g = hilightcolor(GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-		GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	b = hilightcolor(GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-		GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	r = hilightcolor(GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
+		GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	g = hilightcolor(GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
+		GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	b = hilightcolor(GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
+		GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	m_Dib.SetColor(MODCOLOR_2NDHIGHLIGHT, RGB(r,g,b));
 
-	r = hilightcolor(GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_VOLUME]),
-					GetRValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	g = hilightcolor(GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_VOLUME]),
-					GetGValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	b = hilightcolor(GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_VOLUME]),
-					GetBValue(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	r = hilightcolor(GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_VOLUME]),
+					GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	g = hilightcolor(GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_VOLUME]),
+					GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
+	b = hilightcolor(GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_VOLUME]),
+					GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	m_Dib.SetColor(MODCOLOR_DEFAULTVOLUME, RGB(r,g,b));
 
-	m_Dib.SetBlendColor(CMainFrame::GetSettings().rgbCustomColors[MODCOLOR_BLENDCOLOR]);
+	m_Dib.SetBlendColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BLENDCOLOR]);
 }
 
 
@@ -670,7 +670,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			PATTERNINDEX nPrevPat = PATTERNINDEX_INVALID;
 
 			// Display previous pattern
-			if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
+			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 			{
 				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 				if(startOrder > 0)
@@ -713,7 +713,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	DrawPatternData(hdc, pSndFile, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc),
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
-	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
+	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
 	{
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
 		if ((nVisRows > 0) && (m_nMidRow))
@@ -825,9 +825,9 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 	for (UINT row=startRow; row<numRows; row++)
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
-		const int compRow = row + CMainFrame::GetSettings().rowDisplayOffset;
+		const int compRow = row + TrackerSettings::Instance().rowDisplayOffset;
 
-		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_HEXDISPLAY))
+		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY))
 			wsprintf(s, "%s%02X", compRow < 0 ? "-" : "", abs(compRow));
 		else
 			wsprintf(s, "%d", compRow);
@@ -857,7 +857,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			nMeasure = pSndFile->Patterns[nPattern].GetRowsPerMeasure();
 		}
 		// secondary highlight (beats)
-		if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
+		if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
 		 && (nBeat) && (nBeat < numRows))
 		{
 			if(!(compRow % nBeat))
@@ -866,7 +866,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			}
 		}
 		// primary highlight (measures)
-		if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
+		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
 			&& (nMeasure) && (nMeasure < numRows))
 		{
 			if(!(compRow % nMeasure))
@@ -962,7 +962,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
-				if((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && m->IsNote())
+				if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && m->IsNote())
 				{
 					tx_col = MODCOLOR_NOTE;
 
@@ -1000,7 +1000,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				{
 					tx_col = row_col;
 					bk_col = row_bkcol;
-					if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->instr))
+					if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->instr))
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
@@ -1026,7 +1026,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
-					} else if (!m->IsPcNote() && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+					} else if (!m->IsPcNote() && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
 						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && volEffectColors[m->volcmd] != 0)
 						{
@@ -1049,7 +1049,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				uint16 val = m->GetValueEffectCol();
 				if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue;
 				fx_col = row_col;
-				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
 					if(effectColors[m->command] != 0)
 						fx_col = effectColors[m->command];
@@ -1310,7 +1310,7 @@ void CViewPattern::UpdateScrollSize()
 		sizePage.cy = sizeLine.cy * 8;
 		GetClientRect(&rect);
 		m_nMidRow = 0;
-		if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy << 1);
+		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy << 1);
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue

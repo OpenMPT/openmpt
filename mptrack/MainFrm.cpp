@@ -34,6 +34,7 @@
 #include "CloseMainDialog.h"
 #include "SelectPluginDialog.h"
 #include "ExceptionHandler.h"
+#include "PatternClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,15 +71,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_RBUTTONDOWN()
 	ON_COMMAND(ID_VIEW_OPTIONS,				OnViewOptions)
 
-// -> CODE#0002
-// -> DESC="list box to choose VST plugin presets (programs)"
 	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginManager)
-// -! NEW_FEATURE#0002
-
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ON_COMMAND(ID_CHANNEL_MANAGER,			OnChannelManager)
-// -! NEW_FEATURE#0015
+	ON_COMMAND(ID_CLIPBOARD_MANAGER,		OnClipboardManager)
 	ON_COMMAND(ID_VIEW_MIDIMAPPING,			OnViewMIDIMapping)
 	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
 	ON_COMMAND(ID_VIEW_SONGPROPERTIES,		OnSongProperties)
@@ -122,8 +117,6 @@ static int gdwLastLowLatencyTime = 0;
 static int gdwLastMixActiveTime = 0;
 static DWORD gsdwTotalSamples = 0;
 static DWORD gdwPlayLatency = 0;
-
-TrackerSettings CMainFrame::m_Settings;
 
 // Globals
 DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
@@ -238,7 +231,7 @@ CMainFrame::CMainFrame()
 	MemsetZero(g_csAudio);
 	InitializeCriticalSection(&g_csAudio);
 
-	m_Settings.LoadSettings();
+	TrackerSettings::Instance().LoadSettings();
 
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 	//m_pPerfCounter= new CPerformanceCounter();
@@ -270,12 +263,12 @@ VOID CMainFrame::Initialize()
 	OnUpdateFrameTitle(false);
 
 	// Check for valid sound device
-	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(GetSettings().m_nWaveDevice), SNDDEV_GET_NUMBER(GetSettings().m_nWaveDevice), nullptr, 0))
+	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
 	{
-		GetSettings().m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND);
-		if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(GetSettings().m_nWaveDevice), SNDDEV_GET_NUMBER(GetSettings().m_nWaveDevice), nullptr, 0))
+		TrackerSettings::Instance().m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_DSOUND);
+		if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
 		{
-			GetSettings().m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);
+			TrackerSettings::Instance().m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);
 		}
 	}
 
@@ -386,7 +379,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	AddControlBar(&m_wndStatusBar); //Restore statusbar to mainframe.
 
-	if(GetSettings().m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
+	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
 
 	return 0;
 }
@@ -486,7 +479,7 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 //------------------------
 {
-	if(!(GetSettings().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
+	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
 	{
 		// Show modified documents window
 		CloseMainDialog dlg;
@@ -511,12 +504,12 @@ void CMainFrame::OnClose()
 	}
 	// Save Settings
 	RemoveControlBar(&m_wndStatusBar); // Remove statusbar so that its state won't get saved.
-	m_Settings.SaveSettings();
+	TrackerSettings::Instance().SaveSettings();
 	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
 
 	if(m_InputHandler && m_InputHandler->activeCommandSet)
 	{
-		m_InputHandler->activeCommandSet->SaveFile(GetSettings().m_szKbdFile);
+		m_InputHandler->activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 	}
 
 	EndWaitCursor();
@@ -751,7 +744,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 				{
 					ULONG nMaxSleep = CMainFrame::gpSoundDevice->GetMaxFillInterval();
 					bWait = FALSE;
-					nSleep = CMainFrame::GetSettings().m_nBufferLength / 8;
+					nSleep = TrackerSettings::Instance().m_nBufferLength / 8;
 					if (nSleep > nMaxSleep) nSleep = nMaxSleep;
 					if (nSleep < 10) nSleep = 10;
 					if (nSleep > 40) nSleep = 40;
@@ -873,7 +866,7 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 //----------------------------------------------------------------------------------
 {
 	WAVEFORMATEXTENSIBLE WaveFormat;
-	UINT buflen = GetSettings().m_nBufferLength;
+	UINT buflen = TrackerSettings::Instance().m_nBufferLength;
 	
 	if (!m_pSndFile) return -1;
 	slSampleSize = (bits/8) * channels;
@@ -905,14 +898,14 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 		}
 		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
 	}
-	if (GetSettings().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
+	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
 	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
-	m_pSndFile->SetWaveConfig(samplespersec, bits, channels, (GetSettings().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
+	m_pSndFile->SetWaveConfig(samplespersec, bits, channels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
 	// Maybe we failed because someone is playing sound already.
 	// Shut any sound off, and try once more before giving up.
-	UINT nDevType = SNDDEV_GET_TYPE(GetSettings().m_nWaveDevice);
-	UINT nDevNo = SNDDEV_GET_NUMBER(GetSettings().m_nWaveDevice);
-	UINT fulOptions = (GetSettings().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0;
+	UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
+	UINT nDevNo = SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice);
+	UINT fulOptions = (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0;
 	if ((gpSoundDevice) && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
 		gpSoundDevice->Release();
@@ -922,11 +915,11 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	{
 		if (!CreateSoundDevice(nDevType, &gpSoundDevice)) return -1;
 	}
-	gpSoundDevice->Configure(m_hWnd, NUM_AUDIO_BUFFERS, GetSettings().m_nBufferLength, fulOptions);
+	gpSoundDevice->Configure(m_hWnd, NUM_AUDIO_BUFFERS, TrackerSettings::Instance().m_nBufferLength, fulOptions);
 	gbStopSent = FALSE;
-	m_pSndFile->SetResamplingMode(GetSettings().m_nSrcMode);
+	m_pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
 	m_pSndFile->UPDATEDSPEFFECTS();
-	m_pSndFile->SetAGC(GetSettings().m_dwQuality & QUALITY_AGC);
+	m_pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
 	if (!gpSoundDevice->Open(nDevNo, &WaveFormat.Format)) return -1;
 	return 0;
 }
@@ -940,25 +933,25 @@ BOOL CMainFrame::audioOpenDevice()
 
 	if ((!m_pSndFile) || (!m_pSndFile->GetType())) return FALSE;
 	if (m_dwStatus & MODSTATUS_PLAYING) return TRUE;
-	if (!GetSettings().m_dwRate) GetSettings().m_dwRate = 22050;
-	if ((GetSettings().m_nChannels != 1) && (GetSettings().m_nChannels != 2) && (GetSettings().m_nChannels != 4)) GetSettings().m_nChannels = 2;
-	err = audioTryOpeningDevice(GetSettings().m_nChannels,
-								GetSettings().m_nBitsPerSample,
-								GetSettings().m_dwRate);
+	if (!TrackerSettings::Instance().m_dwRate) TrackerSettings::Instance().m_dwRate = 22050;
+	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) TrackerSettings::Instance().m_nChannels = 2;
+	err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+								TrackerSettings::Instance().m_nBitsPerSample,
+								TrackerSettings::Instance().m_dwRate);
 	nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
-	if ((err) && ((GetSettings().m_dwRate > 44100) || (GetSettings().m_nChannels > 2) || (GetSettings().m_nBitsPerSample > 16)
-			   || ((nFixedBitsPerSample) && (nFixedBitsPerSample != GetSettings().m_nBitsPerSample))))
+	if ((err) && ((TrackerSettings::Instance().m_dwRate > 44100) || (TrackerSettings::Instance().m_nChannels > 2) || (TrackerSettings::Instance().m_nBitsPerSample > 16)
+			   || ((nFixedBitsPerSample) && (nFixedBitsPerSample != TrackerSettings::Instance().m_nBitsPerSample))))
 	{
-		DWORD oldrate = GetSettings().m_dwRate;
+		DWORD oldrate = TrackerSettings::Instance().m_dwRate;
 
-		GetSettings().m_dwRate = 44100;
-		if (GetSettings().m_nChannels > 2) GetSettings().m_nChannels = 2;
-		if (nFixedBitsPerSample) GetSettings().m_nBitsPerSample = nFixedBitsPerSample;
-		else if (GetSettings().m_nBitsPerSample > 16) GetSettings().m_nBitsPerSample = 16;
-		err = audioTryOpeningDevice(GetSettings().m_nChannels,
-									GetSettings().m_nBitsPerSample,
-									GetSettings().m_dwRate);
-		if (err) GetSettings().m_dwRate = oldrate;
+		TrackerSettings::Instance().m_dwRate = 44100;
+		if (TrackerSettings::Instance().m_nChannels > 2) TrackerSettings::Instance().m_nChannels = 2;
+		if (nFixedBitsPerSample) TrackerSettings::Instance().m_nBitsPerSample = nFixedBitsPerSample;
+		else if (TrackerSettings::Instance().m_nBitsPerSample > 16) TrackerSettings::Instance().m_nBitsPerSample = 16;
+		err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+									TrackerSettings::Instance().m_nBitsPerSample,
+									TrackerSettings::Instance().m_dwRate);
+		if (err) TrackerSettings::Instance().m_dwRate = oldrate;
 	}
 	// Display error message box
 	if (err != 0)
@@ -1117,7 +1110,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 				if (rVu > 0x10000) rVu = 0x10000;
 				p->dwPos[0] = lVu;
 				p->dwPos[1] = rVu;
-				DWORD dwVuDecay = _muldiv(dwSamplesRead, 120000, GetSettings().m_dwRate) + 1;
+				DWORD dwVuDecay = _muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_dwRate) + 1;
 				if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 				if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
 			}
@@ -1132,32 +1125,32 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 void CMainFrame::UpdateAudioParameters(BOOL bReset)
 //-------------------------------------------------
 {
-	if ((GetSettings().m_nBitsPerSample != 8) && (GetSettings().m_nBitsPerSample != 32)) GetSettings().m_nBitsPerSample = 16;
-	CSoundFile::SetWaveConfig(GetSettings().m_dwRate,
-			GetSettings().m_nBitsPerSample,
-			GetSettings().m_nChannels,
-			(GetSettings().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
-	if (GetSettings().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
+	if ((TrackerSettings::Instance().m_nBitsPerSample != 8) && (TrackerSettings::Instance().m_nBitsPerSample != 32)) TrackerSettings::Instance().m_nBitsPerSample = 16;
+	CSoundFile::SetWaveConfig(TrackerSettings::Instance().m_dwRate,
+			TrackerSettings::Instance().m_nBitsPerSample,
+			TrackerSettings::Instance().m_nChannels,
+			(TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
+	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
 		CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
 	
 	// Soft panning
-	if (GetSettings().m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
+	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
 		CSoundFile::gdwSoundSetup |= SNDMIX_SOFTPANNING;
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
-	if (GetSettings().m_dwPatternSetup & PATTERN_MUTECHNMODE)
+	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
 		CSoundFile::gdwSoundSetup |= SNDMIX_MUTECHNMODE;
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_MUTECHNMODE;
-	CSoundFile::SetResamplingMode(GetSettings().m_nSrcMode);
+	CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
 	CSoundFile::UPDATEDSPEFFECTS();
-	CSoundFile::SetAGC(GetSettings().m_dwQuality & QUALITY_AGC);
-	CSoundFile::SetEQGains(	GetSettings().m_EqSettings.Gains, MAX_EQ_BANDS, GetSettings().m_EqSettings.Freqs, bReset );
+	CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
+	CSoundFile::SetEQGains(	TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, bReset );
 	if (bReset)
 	{
-		CSoundFile::SetMixerSettings(GetSettings().m_MixerSettings);
+		CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 		CSoundFile::InitPlayer(TRUE);
 	}
 }
@@ -1194,7 +1187,7 @@ void CMainFrame::Dump(CDumpContext& dc) const
 void CMainFrame::UpdateColors()
 //-----------------------------
 {
-	COLORREF (&colors)[MAX_MODCOLORS] = GetSettings().rgbCustomColors;
+	COLORREF (&colors)[MAX_MODCOLORS] = TrackerSettings::Instance().rgbCustomColors;
 	if (bmpPatterns)
 	{
 		bmpPatterns->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
@@ -1291,8 +1284,8 @@ UINT CMainFrame::GetBaseOctave()
 void CMainFrame::SetPreAmp(UINT n)
 //--------------------------------
 {
-	GetSettings().m_nPreAmp = n;
-	if (m_pSndFile) m_pSndFile->SetMasterVolume(GetSettings().m_nPreAmp, true);
+	TrackerSettings::Instance().m_nPreAmp = n;
+	if (m_pSndFile) m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 }
 
 
@@ -1355,10 +1348,10 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 			pModDoc->SetPause(FALSE);
 		}
 	}
-	pSndFile->SetRepeatCount((GetSettings().gbLoopSong) ? -1 : 0);
+	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 
-	m_pSndFile->SetMasterVolume(GetSettings().m_nPreAmp, true);
-	m_pSndFile->SetMixerSettings(GetSettings().m_MixerSettings);
+	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
+	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 	m_pSndFile->InitPlayer(TRUE);
 	MemsetZero(NotifyBuffer);
 	m_dwStatus |= MODSTATUS_PLAYING;
@@ -1452,8 +1445,8 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 		return FALSE;
 	}
 	gsdwTotalSamples = 0;
-	m_pSndFile->SetMasterVolume(GetSettings().m_nPreAmp, true);
-	m_pSndFile->SetMixerSettings(GetSettings().m_MixerSettings);
+	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
+	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 	m_pSndFile->InitPlayer(TRUE);
 	m_dwStatus |= MODSTATUS_PLAYING;
 	if (gpSoundDevice) gpSoundDevice->Start();
@@ -1663,9 +1656,9 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 //-------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = (m_dwStatus & MODSTATUS_PLAYING) != 0;
-	if ((GetSettings().m_dwRate != rate) || ((GetSettings().m_dwSoundSetup & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
-	 || (GetSettings().m_nWaveDevice != wd) || (GetSettings().m_nBufferLength != bufsize) || (nBits != GetSettings().m_nBitsPerSample)
-	 || (GetSettings().m_nChannels != nChns))
+	if ((TrackerSettings::Instance().m_dwRate != rate) || ((TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
+	 || (TrackerSettings::Instance().m_nWaveDevice != wd) || (TrackerSettings::Instance().m_nBufferLength != bufsize) || (nBits != TrackerSettings::Instance().m_nBitsPerSample)
+	 || (TrackerSettings::Instance().m_nChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
 		HWND hFollow = m_hFollowSong;
@@ -1674,12 +1667,12 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = m_pModPlaying;
 			PauseMod();
 		}
-		GetSettings().m_nWaveDevice = wd;
-		GetSettings().m_dwRate = rate;
-		GetSettings().m_dwSoundSetup = q;
-		GetSettings().m_nBufferLength = bufsize;
-		GetSettings().m_nBitsPerSample = nBits;
-		GetSettings().m_nChannels = nChns;
+		TrackerSettings::Instance().m_nWaveDevice = wd;
+		TrackerSettings::Instance().m_dwRate = rate;
+		TrackerSettings::Instance().m_dwSoundSetup = q;
+		TrackerSettings::Instance().m_nBufferLength = bufsize;
+		TrackerSettings::Instance().m_nBitsPerSample = nBits;
+		TrackerSettings::Instance().m_nChannels = nChns;
 		{
 			CriticalSection cs;
 			UpdateAudioParameters(FALSE);
@@ -1689,9 +1682,9 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 	} else
 	{
 		// No need to restart playback
-		GetSettings().m_dwSoundSetup = q;
-		CSoundFile::EnableMMX((GetSettings().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) != 0);
-		if (GetSettings().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
+		TrackerSettings::Instance().m_dwSoundSetup = q;
+		CSoundFile::EnableMMX((TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) != 0);
+		if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
 			CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
 		else
 			CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
@@ -1703,16 +1696,16 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 //---------------------------------------------------------------------
 {
-	if ((q != GetSettings().m_dwQuality) || (srcmode != GetSettings().m_nSrcMode) || (bForceUpdate))
+	if ((q != TrackerSettings::Instance().m_dwQuality) || (srcmode != TrackerSettings::Instance().m_nSrcMode) || (bForceUpdate))
 	{
-		GetSettings().m_nSrcMode = srcmode;
-		GetSettings().m_dwQuality = q;
+		TrackerSettings::Instance().m_nSrcMode = srcmode;
+		TrackerSettings::Instance().m_dwQuality = q;
 		{
 			CriticalSection cs;
-			CSoundFile::SetMixerSettings(GetSettings().m_MixerSettings);
-			CSoundFile::SetResamplingMode(GetSettings().m_nSrcMode);
+			CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
 			CSoundFile::UPDATEDSPEFFECTS();
-			CSoundFile::SetAGC(GetSettings().m_dwQuality & QUALITY_AGC);
+			CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
 		}
 		PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTSETUP);
 	}
@@ -1724,23 +1717,23 @@ BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR
 //---------------------------------------------------------------------------------------------------------------------------------
 {
 	// will also set working directory
-	GetSettings().SetDefaultDirectory(szModDir, DIR_MODS);
-	GetSettings().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
-	GetSettings().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
-	GetSettings().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
-	GetSettings().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
+	TrackerSettings::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
+	TrackerSettings::Instance().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
+	TrackerSettings::Instance().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
+	TrackerSettings::Instance().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
+	TrackerSettings::Instance().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
 	return TRUE;
 }
 
 BOOL CMainFrame::SetupMiscOptions()
 //---------------------------------
 {
-	if (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_MUTECHNMODE)
+	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
 		CSoundFile::gdwSoundSetup |= SNDMIX_MUTECHNMODE;
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_MUTECHNMODE;
 
-	m_wndToolBar.EnableFlatButtons(GetSettings().m_dwPatternSetup & PATTERN_FLATBUTTONS);
+	m_wndToolBar.EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
 
 	UpdateTree(NULL, HINT_MPTOPTIONS);
 	UpdateAllViews(HINT_MPTOPTIONS, NULL);
@@ -1751,8 +1744,8 @@ BOOL CMainFrame::SetupMiscOptions()
 BOOL CMainFrame::SetupMidi(DWORD d, LONG n)
 //-----------------------------------------
 {
-	GetSettings().m_dwMidiSetup = d;
-	GetSettings().m_nMidiDevice = n;
+	TrackerSettings::Instance().m_dwMidiSetup = d;
+	TrackerSettings::Instance().m_nMidiDevice = n;
 	return TRUE;
 }
 
@@ -1851,12 +1844,12 @@ void CMainFrame::OnViewOptions()
 		
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(GetSettings().m_dwRate, GetSettings().m_dwSoundSetup, GetSettings().m_nBitsPerSample, GetSettings().m_nChannels, GetSettings().m_nBufferLength, GetSettings().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_dwSoundSetup, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, TrackerSettings::Instance().m_nBufferLength, TrackerSettings::Instance().m_nWaveDevice);
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
-	CMidiSetupDlg mididlg(GetSettings().m_dwMidiSetup, GetSettings().m_nMidiDevice);
-	CEQSetupDlg eqdlg(&GetSettings().m_EqSettings);
+	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
+	CEQSetupDlg eqdlg(&TrackerSettings::Instance().m_EqSettings);
 	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
 	CUpdateSetupDlg updatedlg;
 	dlg.AddPage(&general);
@@ -1921,8 +1914,6 @@ void CMainFrame::OnPluginManager()
 // -! NEW_FEATURE#0002
 
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 void CMainFrame::OnChannelManager()
 //---------------------------------
 {
@@ -1937,7 +1928,15 @@ void CMainFrame::OnChannelManager()
 		}
 	}
 }
-// -! NEW_FEATURE#0015
+
+
+void CMainFrame::OnClipboardManager()
+//-----------------------------------
+{
+	PatternClipboardDialog::Instance().Show();
+}
+
+
 void CMainFrame::OnAddDlsBank()
 //-----------------------------
 {

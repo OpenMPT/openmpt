@@ -274,7 +274,7 @@ void COptionsSoundcard::UpdateStereoSep()
 void COptionsSoundcard::SetPreAmpSliderPosition()
 //-----------------------------------------------
 {
-	int n = (CMainFrame::GetSettings().m_nPreAmp - 64) / 8;
+	int n = (TrackerSettings::Instance().m_nPreAmp - 64) / 8;
 	if ((n < 0) || (n > 40)) n = 16;
 	m_SliderPreAmp.SetPos(40 - n);
 }
@@ -335,7 +335,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 
 	ISoundDevice *dummy = nullptr;
 	bool justCreated = false, knowRates = false;
-	if(CMainFrame::GetSettings().m_nWaveDevice == dev)
+	if(TrackerSettings::Instance().m_nWaveDevice == dev)
 	{
 		// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
 		dummy = CMainFrame::gpSoundDevice;
@@ -487,7 +487,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	DWORD dwQuality;
 	
 	CPropertyPage::OnInitDialog();
-	dwQuality = CMainFrame::GetSettings().m_dwQuality;
+	dwQuality = TrackerSettings::Instance().m_dwQuality;
 	// Resampling type
 	{
 		m_CbnResampling.AddString("No Interpolation");
@@ -497,7 +497,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("Polyphase");
 		m_CbnResampling.AddString("XMMS-ModPlug");
 		//end rewbs.resamplerConf
-		m_CbnResampling.SetCurSel(CMainFrame::GetSettings().m_nSrcMode);
+		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_nSrcMode);
 	}
 	// Effects
 	if (dwQuality & QUALITY_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
@@ -551,10 +551,10 @@ BOOL COptionsPlayer::OnInitDialog()
 	OnResamplerChanged();
 
 	char s[16] = "";
-	_ltoa(CMainFrame::GetSettings().m_MixerSettings.glVolumeRampUpSamples, s, 10);
+	_ltoa(TrackerSettings::Instance().m_MixerSettings.glVolumeRampUpSamples, s, 10);
 	m_CEditRampUp.SetWindowText(s);
 
-	_ltoa(CMainFrame::GetSettings().m_MixerSettings.glVolumeRampDownSamples, s, 10);
+	_ltoa(TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples, s, 10);
 	m_CEditRampDown.SetWindowText(s);
 
 	//end rewbs.resamplerConf
@@ -590,7 +590,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	CMainFrame::GetSettings().m_MixerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
+	TrackerSettings::Instance().m_MixerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -607,7 +607,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().m_MixerSettings.gdWFIRCutoff * 100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff * 100)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -618,10 +618,10 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
 		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
 		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(CMainFrame::GetSettings().m_MixerSettings.gbWFIRType);
+		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().m_MixerSettings.gbWFIRType);
 		m_CbnWFIRType.EnableWindow(TRUE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((CMainFrame::GetSettings().m_MixerSettings.gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff*100)));
 		break;
 	default: 
 		m_CbnWFIRType.AddString("None");
@@ -692,15 +692,15 @@ void COptionsPlayer::OnOK()
 	CString s;
 	m_CEditWFIRCutoff.GetWindowText(s);
 	if (s != "")
-		CMainFrame::GetSettings().m_MixerSettings.gdWFIRCutoff = atoi(s)/100.0;
-	//CMainFrame::GetSettings().m_MixerSettings.gbWFIRType set in OnWFIRTypeChange
+		TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff = atoi(s)/100.0;
+	//TrackerSettings::Instance().m_MixerSettings.gbWFIRType set in OnWFIRTypeChange
 
 	m_CEditRampUp.GetWindowText(s);
-	CMainFrame::GetSettings().m_MixerSettings.glVolumeRampUpSamples = atol(s);
+	TrackerSettings::Instance().m_MixerSettings.glVolumeRampUpSamples = atol(s);
 	m_CEditRampDown.GetWindowText(s);
-	CMainFrame::GetSettings().m_MixerSettings.glVolumeRampDownSamples = atol(s);
+	TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples = atol(s);
 
-	SndMixInitializeTables(CMainFrame::GetSettings().m_MixerSettings); //regenerate resampling tables
+	SndMixInitializeTables(TrackerSettings::Instance().m_MixerSettings); //regenerate resampling tables
 	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);
 	CPropertyPage::OnOK();
@@ -725,7 +725,7 @@ const UINT gEqBandFreqs[MAX_EQ_BANDS][EQ_MAX_FREQS] =
 };
 
 
-const EQPRESET CEQSetupDlg::gEQPresets[] =
+const EQPreset CEQSetupDlg::gEQPresets[] =
 {
 	{ "Flat",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// Flat
 	{ "Jazz",	{16,16,24,20,20,14}, { 125, 300, 600, 1250, 4000, 8000 } },	// Jazz
@@ -736,7 +736,7 @@ const EQPRESET CEQSetupDlg::gEQPresets[] =
 };
 
 
-EQPRESET CEQSetupDlg::gUserPresets[] =
+EQPreset CEQSetupDlg::gUserPresets[] =
 {
 	{ "User1",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User1
 	{ "User2",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User2
@@ -755,10 +755,10 @@ class CEQSavePresetDlg: public CDialog
 //====================================
 {
 protected:
-	EQPRESET *m_pEq;
+	EQPreset *m_pEq;
 
 public:
-	CEQSavePresetDlg(EQPRESET *pEq, CWnd *parent=NULL):CDialog(IDD_SAVEPRESET, parent) { m_pEq = pEq; }
+	CEQSavePresetDlg(EQPreset *pEq, CWnd *parent=NULL):CDialog(IDD_SAVEPRESET, parent) { m_pEq = pEq; }
 	BOOL OnInitDialog();
 	VOID OnOK();
 };
@@ -930,7 +930,7 @@ void CEQSetupDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 }
 
 
-void CEQSetupDlg::LoadEQPreset(const EQPRESET &preset)
+void CEQSetupDlg::LoadEQPreset(const EQPreset &preset)
 //----------------------------------------------------
 {
 	*m_pEqPreset = preset;
@@ -1086,19 +1086,19 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	{
 		int item = m_ATBehaviour.AddString(aftertouchOptions[i].text);
 		m_ATBehaviour.SetItemData(item, aftertouchOptions[i].option);
-		if(aftertouchOptions[i].option == CMainFrame::GetSettings().aftertouchBehaviour)
+		if(aftertouchOptions[i].option == TrackerSettings::Instance().aftertouchBehaviour)
 		{
 			m_ATBehaviour.SetCurSel(i);
 		}
 	}
 
 	// Note Velocity amp
-	SetDlgItemInt(IDC_EDIT3, CMainFrame::GetSettings().midiVelocityAmp);
+	SetDlgItemInt(IDC_EDIT3, TrackerSettings::Instance().midiVelocityAmp);
 	m_SpinAmp.SetRange(1, 10000);
 
 	// Midi Import settings
-	SetDlgItemInt(IDC_EDIT1, CMainFrame::GetSettings().midiImportSpeed);
-	SetDlgItemInt(IDC_EDIT2, CMainFrame::GetSettings().midiImportPatternLen);
+	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportSpeed);
+	SetDlgItemInt(IDC_EDIT2, TrackerSettings::Instance().midiImportPatternLen);
 	m_SpinSpd.SetRange(2, 6);
 	m_SpinPat.SetRange(64, 256);
 	return TRUE;
@@ -1127,11 +1127,11 @@ void CMidiSetupDlg::OnOK()
 		if (n >= 0) m_nMidiDevice = combo->GetItemData(n);
 	}
 
-	CMainFrame::GetSettings().aftertouchBehaviour = static_cast<TrackerSettings::RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
+	TrackerSettings::Instance().aftertouchBehaviour = static_cast<TrackerSettings::RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
 
-	CMainFrame::GetSettings().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
-	CMainFrame::GetSettings().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
-	CMainFrame::GetSettings().midiVelocityAmp = static_cast<uint16>(Clamp(GetDlgItemInt(IDC_EDIT3), 1u, 10000u));
+	TrackerSettings::Instance().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
+	TrackerSettings::Instance().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
+	TrackerSettings::Instance().midiVelocityAmp = static_cast<uint16>(Clamp(GetDlgItemInt(IDC_EDIT3), 1u, 10000u));
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();
 }

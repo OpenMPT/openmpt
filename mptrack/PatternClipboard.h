@@ -54,6 +54,9 @@ public:
 
 protected:
 
+	// The one and only pattern clipboard object.
+	static PatternClipboard patternClipboard;
+
 	// Active internal clipboard index
 	clipindex_t activeClipboard;
 	// Internal clipboard collection
@@ -82,6 +85,9 @@ public:
 	// Return the current number of clipboards.
 	clipindex_t GetClipboardSize() const { return clipboards.size(); };
 
+	// Get the pattern clipboard singleton
+	static PatternClipboard &Instance() { return patternClipboard; }
+
 protected:
 
 	// Create the clipboard text for a pattern selection
@@ -103,6 +109,10 @@ class PatternClipboardDialog : public CDialog
 //===========================================
 {
 protected:
+
+	// The one and only pattern clipboard dialog object
+	static PatternClipboardDialog patternClipboardDialog;
+
 	PatternClipboard &clipboards;
 	CSpinButtonCtrl numClipboardsSpin;
 	CListBox clipList;
@@ -110,12 +120,17 @@ protected:
 	bool isLocked, isCreated;
 
 public:
+
 	PatternClipboardDialog(PatternClipboard &c);
 	void UpdateList();
 	void Show();
 	void Toggle() { if(isCreated) OnCancel(); else Show(); }
 
+	// Get the pattern clipboard dialog singleton
+	static PatternClipboardDialog &Instance() { return patternClipboardDialog; }
+
 protected:
+
 	virtual void DoDataExchange(CDataExchange* pDX);
 	DECLARE_MESSAGE_MAP();
 

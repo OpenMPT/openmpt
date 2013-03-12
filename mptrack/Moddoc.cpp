@@ -604,10 +604,10 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		
 		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultExtension, s,
 			ModTypeToFilter(m_SndFile),
-			CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS));
+			TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
 		if(files.abort) return FALSE;
 
-		CMainFrame::GetSettings().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
 
 		strcpy(s, files.first_file.c_str());
 		_splitpath(s, drive, path, fname, fext);
@@ -620,7 +620,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcat(s, fext);
 	}
 	// Do we need to create a backup file ?
-	if ((CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_CREATEBACKUP)
+	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CREATEBACKUP)
 	 && (IsModified()) && (!lstrcmpi(s, m_strPathName)))
 	{
 		CFileStatus rStatus;
@@ -989,7 +989,7 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 		}
 
 		// Handle extra-loud flag
-		pChn->dwFlags.set(CHN_EXTRALOUD, !(CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && nsmp);
+		pChn->dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && nsmp);
 
 		// Handle custom start position
 		if(sampleOffset > 0 && pChn->pModSample)
@@ -1133,7 +1133,7 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 //------------------------------------------------------
 {
-	const ChannelFlags muteType = (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SYNCMUTE) ? CHN_SYNCMUTE : CHN_MUTE;
+	const ChannelFlags muteType = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCMUTE) ? CHN_SYNCMUTE : CHN_MUTE;
 
 	if (nChn >= m_SndFile.GetNumChannels())
 	{
@@ -1537,11 +1537,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", fname,
 		"Wave Files (*.wav)|*.wav||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_EXPORT));
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT));
 	if(files.abort) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	CMainFrame::GetSettings().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
+	TrackerSettings::Instance().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
 	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
 	_splitpath(files.first_file.c_str(), drive, dir, name, ext);
@@ -1736,7 +1736,7 @@ void CModDoc::OnFileMP3Convert()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mp3", sFName,
 		"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||",
-		CMainFrame::GetSettings().GetWorkingDirectory(DIR_EXPORT),
+		TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT),
 		false,
 		&nFilterIndex);
 	if(files.abort) return;
@@ -1745,7 +1745,7 @@ void CModDoc::OnFileMP3Convert()
 	HACMDRIVERID hadid;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	CMainFrame::GetSettings().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
+	TrackerSettings::Instance().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
 	TCHAR s[_MAX_PATH], fext[_MAX_EXT];
 	strcpy(s, files.first_file.c_str());
@@ -1850,7 +1850,7 @@ void CModDoc::OnFileCompatibilitySave()
 		filename += ext;
 	}
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, CMainFrame::GetSettings().GetWorkingDirectory(DIR_MODS));
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
 	if(files.abort) return;
 
 	ClearLog();
@@ -2788,7 +2788,7 @@ void CModDoc::OnSaveTemplateModule()
 //----------------------------------
 {
 	// Create template folder if doesn't exist already.
-	const LPCTSTR pszTemplateFolder = CMainFrame::GetSettings().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
+	const LPCTSTR pszTemplateFolder = TrackerSettings::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
 	if (!PathIsDirectory(pszTemplateFolder))
 	{
 		if (!CreateDirectory(pszTemplateFolder, nullptr))

@@ -21,7 +21,7 @@ protected:
 
 public:
 	CCtrlComments();
-	LONG* GetSplitPosRef() {return &CMainFrame::GetSettings().glCommentsWindowHeight;} 	//rewbs.varWindowSize
+	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_DATA(CCtrlComments)

@@ -67,7 +67,7 @@ public:
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
 	bool OpenSample(LPCSTR lpszFileName);
 	bool OpenSample(const CSoundFile *pSndFile, SAMPLEINDEX nSample);
-	LONG* GetSplitPosRef() {return &CMainFrame::GetSettings().glSampleWindowHeight;} 	//rewbs.varWindowSize
+	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlSamples)

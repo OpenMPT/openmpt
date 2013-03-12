@@ -1260,7 +1260,7 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 //----------------------------------------------
 {
 	// Check whether the message should be shown.
-	if((CMainFrame::GetSettings().gnMsgBoxVisiblityFlags & HidableMessages[enMsg].nMask) == 0)
+	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & HidableMessages[enMsg].nMask) == 0)
 		return;
 
 	const LPCTSTR strMsg = HidableMessages[enMsg].strMsg;
@@ -1273,9 +1273,9 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 
 	// Update visibility flags.
 	if(dlg.m_nCheckStatus == BST_CHECKED)
-		CMainFrame::GetSettings().gnMsgBoxVisiblityFlags &= ~mask;
+		TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~mask;
 	else
-		CMainFrame::GetSettings().gnMsgBoxVisiblityFlags |= mask;
+		TrackerSettings::Instance().gnMsgBoxVisiblityFlags |= mask;
 }
 
 

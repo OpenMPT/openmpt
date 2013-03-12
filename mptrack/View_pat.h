@@ -188,10 +188,6 @@ protected:
 	static ModCommand m_cmdOld;			// Quick cursor copy/paste data
 	static FindReplace m_findReplace;	// Find/replace data
 
-	// Internal pattern clipboard
-	static PatternClipboard patternClipboard;
-	static PatternClipboardDialog patternClipboardDialog;
-
 	QuickChannelProperties quickChannelProperties;
 
 	vector<ModCommand::NOTE> octaveKeyMemory;
@@ -214,9 +210,6 @@ public:
 	CSoundFile *GetSoundFile() { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
 
 	void SetModified(bool updateAllViews = true);
-
-	static PatternClipboard &GetPatternClipboard() { return patternClipboard; }
-	static PatternClipboardDialog &GetPatternClipboardDialog() { return patternClipboardDialog; }
 
 	bool UpdateSizes();
 	void UpdateScrollSize();
@@ -297,7 +290,7 @@ public:
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
 	// True if default volume should be drawn for a given cell.
-	static bool DrawDefaultVolume(const ModCommand *m) { return (CMainFrame::GetSettings().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
+	static bool DrawDefaultVolume(const ModCommand *m) { return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
 
 	void CursorJump(DWORD distance, bool upwards, bool snap);
 
