@@ -59,7 +59,7 @@ public:
 	PluginEventQueue()
 	{
 		numEvents = 0;
-		reserved = nullptr;
+		reserved = 0;
 		MemsetZero(events);
 		MemsetZero(criticalSection);
 		InitializeCriticalSection(&criticalSection);
