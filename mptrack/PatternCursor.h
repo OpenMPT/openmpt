@@ -187,8 +187,10 @@ public:
 		{
 			chn = maxChans - 1;
 			col = lastColumn;
+		} else if(col > lastColumn)
+		{
+			col = lastColumn;
 		}
-		LimitMax(col, lastColumn);
 		Set(row, chn, col);
 	};
 
