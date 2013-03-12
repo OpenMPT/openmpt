@@ -1320,7 +1320,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				CHAR szFullPath[_MAX_PATH] = "";
 				InsLibGetFullPath(hItem, szFullPath);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->PlaySoundFile(szFullPath, nParam);
+				if (pMainFrm) pMainFrm->PlaySoundFile(szFullPath, static_cast<ModCommand::NOTE>(nParam));
 			}
 			break;
 
@@ -1332,7 +1332,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				if ((lpMidiLib) && (modItemID < 256) && (lpMidiLib->MidiMap[modItemID]))
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-					if (pMainFrm) pMainFrm->PlaySoundFile(lpMidiLib->MidiMap[modItemID], nParam);
+					if (pMainFrm) pMainFrm->PlaySoundFile(lpMidiLib->MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam));
 				}
 			}
 			break;
@@ -1355,9 +1355,9 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 					if (modItem & 0x40000000)
 					{
 						if ((!nParam) || (nParam > NOTE_MAX)) nParam = NOTE_MIDDLEC;
-						rgn = pDLSBank->GetRegionFromKey(instr, nParam-1);
+						rgn = pDLSBank->GetRegionFromKey(instr, nParam - NOTE_MIN);
 					}
-					pMainFrm->PlayDLSInstrument(bank, instr, rgn);
+					pMainFrm->PlayDLSInstrument(bank, instr, rgn, static_cast<ModCommand::NOTE>(nParam));
 				}
 			}
 		}

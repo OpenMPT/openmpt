@@ -1455,15 +1455,15 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 }
 
 
-BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn)
-//---------------------------------------------------------------------
+BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note)
+//--------------------------------------------------------------------------------------------
 {
 	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
 	BeginWaitCursor();
 	InitPreview();
-	if (CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
+	if(CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
 	{
-		PreparePreview(NOTE_MIDDLEC);
+		PreparePreview(note);
 		PlaySoundFile(&m_WaveFile);
 	}
 	EndWaitCursor();
@@ -1562,7 +1562,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.m_nDefaultTempo = 125;
-	m_WaveFile.m_nDefaultSpeed = 4;
+	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_IT;
 	m_WaveFile.m_nChannels = 4;
 	m_WaveFile.m_nInstruments = 1;

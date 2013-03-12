@@ -1691,18 +1691,20 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 		StringFixer::SetNullTerminator(pIns->name);
 	}
 	int nTranspose = 0;
-	for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
+	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
-		if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
+		for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
 		{
 			if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
 			{
 				if (iNoteMap < pDlsIns->Regions[nDrumRgn].uKeyMin) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMin + 1);
 				if (iNoteMap > pDlsIns->Regions[nDrumRgn].uKeyMax) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMax + 1);
 			} else
-			if (iNoteMap == pDlsIns->Regions[nDrumRgn].uKeyMin)
 			{
-				nTranspose = pDlsIns->Regions[nDrumRgn].uKeyMin - 60;
+				if (iNoteMap == pDlsIns->Regions[nDrumRgn].uKeyMin)
+				{
+					nTranspose = pDlsIns->Regions[nDrumRgn].uKeyMin - 60;
+				}
 			}
 		}
 	}
@@ -1749,7 +1751,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				nSample = pSndFile->GetNextFreeSample(nInstr);
+				nSample = pSndFile->GetNextFreeSample(nInstr, nSample + 1);
 				if (nSample == SAMPLEINDEX_INVALID) break;
 				if (nSample > pSndFile->GetNumSamples()) pSndFile->m_nSamples = nSample;
 				nSmp = nSample;
