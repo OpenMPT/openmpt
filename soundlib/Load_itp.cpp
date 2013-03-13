@@ -403,7 +403,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// patterns data content
-	for(UINT npat=0; npat<MAX_PATTERNS; npat++)
+	for(PATTERNINDEX npat = 0; npat < MAX_PATTERNS; npat++)
 	{
 		// pattern size (number of rows)
 		id = Patterns[npat] ? Patterns[npat].GetNumRows() : 0;

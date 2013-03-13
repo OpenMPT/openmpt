@@ -10,7 +10,8 @@
 
 #pragma once
 
-#include "Moddoc.h"
+#include "modcommand.h"
+class CSoundFile;
 
 //==============
 class EffectInfo
