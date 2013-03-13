@@ -187,8 +187,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 		{
 			if (!(pMsg->lParam & 0x40000000)) OnPlayTreeItem();
 			return TRUE;
-		} else
-		if (pMsg->wParam == VK_RETURN)
+		} else if (pMsg->wParam == VK_RETURN)
 		{
 			if (!(pMsg->lParam & 0x40000000))
 			{
@@ -204,6 +203,13 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 					}
 				}
 			}
+			return TRUE;
+		} else if(pMsg->wParam == VK_TAB)
+		{
+			if(this == CMainFrame::GetMainFrame()->GetUpperTreeview())
+				CMainFrame::GetMainFrame()->GetLowerTreeview()->SetFocus();
+			else
+				CMainFrame::GetMainFrame()->GetUpperTreeview()->SetFocus();
 			return TRUE;
 		}
 	}

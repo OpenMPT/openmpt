@@ -436,6 +436,9 @@ public:
 	double GetApproxBPM();		//rewbs.VSTTimeInfo
 	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
 
+	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
+	CModTree *GetLowerTreeview() { return m_wndTree.m_pModTreeData; }
+
 	void CreateExampleModulesMenu();
 	void CreateTemplateModulesMenu();
 

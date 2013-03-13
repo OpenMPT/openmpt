@@ -90,7 +90,6 @@ class CModTreeBar: public CDialogBar
 //==================================
 {
 protected:
-	CModTree *m_pModTree, *m_pModTreeData;
 	DWORD m_dwStatus; // MTB_XXXX
 	UINT m_nCursorDrag;
 	CPoint ptDragging;
@@ -98,6 +97,8 @@ protected:
 	UINT m_nTreeSplitRatio;
 
 public:
+	CModTree *m_pModTree, *m_pModTreeData;
+
 	CModTreeBar();
 	virtual ~CModTreeBar();
 
