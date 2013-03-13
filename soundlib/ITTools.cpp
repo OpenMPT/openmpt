@@ -642,6 +642,8 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 
 #ifdef MODPLUG_TRACKER
 
+#include "../mptrack/Moddoc.h"
+
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void ITHistoryStruct::ConvertEndianness()
 //---------------------------------------

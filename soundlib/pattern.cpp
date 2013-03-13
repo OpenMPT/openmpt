@@ -15,6 +15,7 @@
 #include "../common/version.h"
 #include "../common/AudioCriticalSection.h"
 #include "ITTools.h"
+#include "Sndfile.h"
 
 
 CSoundFile& CPattern::GetSoundFile() { return m_rPatternContainer.GetSoundFile(); }
@@ -446,14 +447,7 @@ void CPattern::FreePattern(ModCommand *pat)
 bool CPattern::WriteITPdata(FILE* f) const
 //----------------------------------------
 {
-	for(ROWINDEX r = 0; r < GetNumRows(); r++)
-	{
-		for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
-		{
-			ModCommand mc = GetModCommand(r,c);
-			fwrite(&mc, sizeof(ModCommand), 1, f);
-		}
-	}
+	fwrite(m_ModCommands, sizeof(ModCommand), GetNumRows() * GetNumChannels(), f);
 	return false;
 }
 
@@ -465,7 +459,7 @@ bool CPattern::WriteITPdata(FILE* f) const
 ////////////////////////////////////////////////////////////////////////
 
 
-static enum maskbits
+enum maskbits
 {
 	noteBit			= (1 << 0),
 	instrBit		= (1 << 1),
@@ -511,8 +505,8 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 }
 
 
-uint8 CreateDiffMask(ModCommand chnMC, ModCommand newMC)
-//------------------------------------------------------
+static uint8 CreateDiffMask(const ModCommand &chnMC, const ModCommand &newMC)
+//---------------------------------------------------------------------------
 {
 	uint8 mask = 0;
 	if(chnMC.note != newMC.note)

@@ -339,42 +339,64 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 // Filter values are clipped to double the input range (assuming input is 16-Bit, which it currently is)
 #define ClipFilter(x) Clamp(x, 2.0f * (float)int16_min, 2.0f * (float)int16_max)
 
-// Mono
-#define MIX_BEGIN_FILTER\
-	float fy1 = pChannel->nFilter_Y1;\
-	float fy2 = pChannel->nFilter_Y2;
+// Resonant filter for Mono samples
+static inline void ProcessMonoFilter(int &vol, ModChannel *pChn)
+//--------------------------------------------------------------
+{
+	float fy1 = pChn->nFilter_Y1;
+	float fy2 = pChn->nFilter_Y2;
 
-#define MIX_END_FILTER\
-	pChannel->nFilter_Y1 = fy1;\
-	pChannel->nFilter_Y2 = fy2;
-
-#define SNDMIX_PROCESSFILTER\
-	float fy = ((float)vol * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);\
-	fy2 = fy1;\
-	fy1 = fy - (float)(vol & pChn->nFilter_HP);\
+	float fy = ((float)vol * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);
+	fy2 = fy1;
+	fy1 = fy - (float)(vol & pChn->nFilter_HP);
 	vol = (int)fy;
-	
+
+	pChn->nFilter_Y1 = fy1;
+	pChn->nFilter_Y2 = fy2;
+}
+
+
+// Resonant filter for Stereo samples
+static inline void ProcessStereoFilter(int &vol_l, int &vol_r, ModChannel *pChn)
+//------------------------------------------------------------------------------
+{
+	// Left channel
+
+	float fy1 = pChn->nFilter_Y1;
+	float fy2 = pChn->nFilter_Y2;
+
+	float fy = ((float)vol_l * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);
+	fy2 = fy1;
+	fy1 = fy - (float)(vol_l & pChn->nFilter_HP);
+	vol_l = (int)fy;
+
+	pChn->nFilter_Y1 = fy1;
+	pChn->nFilter_Y2 = fy2;
+
+	// Right channel
+
+	fy1 = pChn->nFilter_Y3;
+	fy2 = pChn->nFilter_Y4;
+
+	fy = ((float)vol_r * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);
+	fy2 = fy1;
+	fy1 = fy - (float)(vol_r & pChn->nFilter_HP);
+	vol_r = (int)fy;
+
+	pChn->nFilter_Y3 = fy1;
+	pChn->nFilter_Y4 = fy2;
+}
+
+
+// Mono
+#define SNDMIX_PROCESSFILTER \
+	ProcessMonoFilter(vol, pChn);
+
 
 // Stereo
-#define MIX_BEGIN_STEREO_FILTER\
-	float fy1 = pChannel->nFilter_Y1;\
-	float fy2 = pChannel->nFilter_Y2;\
-	float fy3 = pChannel->nFilter_Y3;\
-	float fy4 = pChannel->nFilter_Y4;
+#define SNDMIX_PROCESSSTEREOFILTER \
+	ProcessStereoFilter(vol_l, vol_r, pChn);
 
-#define MIX_END_STEREO_FILTER\
-	pChannel->nFilter_Y1 = fy1;\
-	pChannel->nFilter_Y2 = fy2;\
-	pChannel->nFilter_Y3 = fy3;\
-	pChannel->nFilter_Y4 = fy4;
-
-#define SNDMIX_PROCESSSTEREOFILTER\
-	float fy = ((float)vol_l * pChn->nFilter_A0 + ClipFilter(fy1) * pChn->nFilter_B0 + ClipFilter(fy2) * pChn->nFilter_B1);\
-	fy2 = fy1; fy1 = fy - (float)(vol_l & pChn->nFilter_HP);\
-	vol_l = (int)fy;\
-	fy = ((float)vol_r * pChn->nFilter_A0 + ClipFilter(fy3) * pChn->nFilter_B0 + ClipFilter(fy4) * pChn->nFilter_B1);\
-	fy4 = fy3; fy3 = fy - (float)(vol_r & pChn->nFilter_HP);\
-	vol_r = (int)fy;
 
 
 //////////////////////////////////////////////////////////
@@ -420,24 +442,20 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, int *, int *);
 
 // Mono Resonant Filters
 #define BEGIN_MIX_FLT_INTERFACE(func)\
-	BEGIN_MIX_INTERFACE(func)\
-	MIX_BEGIN_FILTER
-	
+	BEGIN_MIX_INTERFACE(func)
+
 
 #define END_MIX_FLT_INTERFACE()\
 	SNDMIX_ENDSAMPLELOOP\
-	MIX_END_FILTER\
 	}
 
 #define BEGIN_RAMPMIX_FLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
 		LONG nRampRightVol = pChannel->nRampRightVol;\
-		LONG nRampLeftVol = pChannel->nRampLeftVol;\
-		MIX_BEGIN_FILTER
+		LONG nRampLeftVol = pChannel->nRampLeftVol;
 
 #define END_RAMPMIX_FLT_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		MIX_END_FILTER\
 		pChannel->nRampRightVol = nRampRightVol;\
 		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
 		pChannel->nRampLeftVol = nRampLeftVol;\
@@ -446,24 +464,20 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, int *, int *);
 
 // Stereo Resonant Filters
 #define BEGIN_MIX_STFLT_INTERFACE(func)\
-	BEGIN_MIX_INTERFACE(func)\
-	MIX_BEGIN_STEREO_FILTER
-	
+	BEGIN_MIX_INTERFACE(func)
+
 
 #define END_MIX_STFLT_INTERFACE()\
 	SNDMIX_ENDSAMPLELOOP\
-	MIX_END_STEREO_FILTER\
 	}
 
 #define BEGIN_RAMPMIX_STFLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
 		LONG nRampRightVol = pChannel->nRampRightVol;\
-		LONG nRampLeftVol = pChannel->nRampLeftVol;\
-		MIX_BEGIN_STEREO_FILTER
+		LONG nRampLeftVol = pChannel->nRampLeftVol;
 
 #define END_RAMPMIX_STFLT_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		MIX_END_STEREO_FILTER\
 		pChannel->nRampRightVol = nRampRightVol;\
 		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
 		pChannel->nRampLeftVol = nRampLeftVol;\
@@ -1458,7 +1472,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 {
 	LPLONG pOfsL, pOfsR;
 	DWORD nchused, nchmixed;
-	
+
 	if (!count) return 0;
 	BOOL bSurround;
 	if (gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
@@ -1506,7 +1520,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 
 		//Look for plugins associated with this implicit tracker channel.
 		PLUGINDEX nMixPlugin = GetBestPlugin(ChnMix[nChn], PrioritiseInstrument, RespectMutes);
-		
+
 		//rewbs.instroVSTi
 /*		UINT nMixPlugin=0;
 		if (pChannel->pModInstrument && pChannel->pInstrument) {	// first try intrument VST
@@ -1514,12 +1528,12 @@ UINT CSoundFile::CreateStereoMix(int count)
 				nMixPlugin = pChannel->pModInstrument->nMixPlug;
 		}
 		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) { 	// Then try Channel VST
-			if(!(pChannel->dwFlags & CHN_NOFX)) 
+			if(!(pChannel->dwFlags & CHN_NOFX))
 				nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
 		}
 */
 
-		//end rewbs.instroVSTi		
+		//end rewbs.instroVSTi
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
 			SNDMIXPLUGINSTATE *pPlugin = m_MixPlugins[nMixPlugin - 1].pMixState;
@@ -1640,7 +1654,7 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 //			default: ;
 		}
 	}
-	
+
 	//didn't manage to get flag from instrument header, use channel flags.
 	if(pChannel->dwFlags[CHN_HQSRC])
 	{
@@ -1651,7 +1665,7 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 	{
 		return MIXNDX_LINEARSRC;
 	}
-	
+
 	return 0;
 }
 
@@ -1660,10 +1674,10 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
 	// Setup float inputs
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
-		SNDMIXPLUGIN &plugin = m_MixPlugins[iPlug];
-		if (plugin.pMixPlugin != nullptr && plugin.pMixState != nullptr
+		SNDMIXPLUGIN &plugin = m_MixPlugins[plug];
+		if(plugin.pMixPlugin != nullptr && plugin.pMixState != nullptr
 			&& plugin.pMixState->pMixBuffer != nullptr
 			&& plugin.pMixState->pOutBufferL != nullptr
 			&& plugin.pMixState->pOutBufferR != nullptr)
@@ -1703,18 +1717,18 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 	FLOAT *pMixR = MixFloatBuffer + MIXBUFFERSIZE;
 
 	// Process Plugins
-	for (UINT iDoPlug=0; iDoPlug<MAX_MIXPLUGINS; iDoPlug++)
+	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
-		SNDMIXPLUGIN &plugin = m_MixPlugins[iDoPlug];
+		SNDMIXPLUGIN &plugin = m_MixPlugins[plug];
 		if (plugin.pMixPlugin != nullptr && plugin.pMixState != nullptr
 			&& plugin.pMixState->pMixBuffer != nullptr
 			&& plugin.pMixState->pOutBufferL != nullptr
 			&& plugin.pMixState->pOutBufferR != nullptr)
 		{
-			BOOL bMasterMix = FALSE;
+			bool isMasterMix = false;
 			if (pMixL == plugin.pMixState->pOutBufferL)
 			{
-				bMasterMix = TRUE;
+				isMasterMix = true;
 				pMixL = MixFloatBuffer;
 				pMixR = MixFloatBuffer + MIXBUFFERSIZE;
 			}
@@ -1726,7 +1740,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			if (!plugin.IsOutputToMaster())
 			{
 				PLUGINDEX nOutput = plugin.GetOutputPlugin();
-				if(nOutput > iDoPlug && nOutput != PLUGINDEX_INVALID
+				if(nOutput > plug && nOutput != PLUGINDEX_INVALID
 					&& m_MixPlugins[nOutput].pMixState != nullptr)
 				{
 					SNDMIXPLUGINSTATE *pOutState = m_MixPlugins[nOutput].pMixState;
@@ -1748,13 +1762,12 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 					pOutputs[2 * nOutput] = pOutState->pOutBufferL;
 					pOutputs[2 * (nOutput + 1)] = pOutState->pOutBufferR;
 				}
-				
-			}
-*/
+
+			}*/
 
 			if (plugin.IsMasterEffect())
 			{
-				if (!bMasterMix)
+				if (!isMasterMix)
 				{
 					FLOAT *pInL = pState->pOutBufferL;
 					FLOAT *pInR = pState->pOutBufferR;
@@ -1860,7 +1873,7 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 			return;
 		}
 	}
-	X86_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());	
+	X86_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
 
 }
 
@@ -2373,4 +2386,3 @@ void CSoundFile::ResetAGC()
 }
 
 #endif // NO_AGC
-
