@@ -2416,6 +2416,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			{	CModDoc* pModDoc = GetActiveDoc();
 				if (pModDoc)
 					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
+				else if(wParam == kcPlayPauseSong  || wParam == kcStopSong)
+					StopPreview();
 				break;
 			}
 

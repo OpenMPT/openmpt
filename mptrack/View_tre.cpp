@@ -1236,7 +1236,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 		default:
 			if (modItemType & 0x8000)
 			{
-				PlayItem(hItem);
+				PlayItem(hItem, NOTE_MIDDLEC);
 				return TRUE;
 			}
 		}
@@ -1245,8 +1245,8 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 }
 
 
-BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
-//---------------------------------------------------
+BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
+//---------------------------------------------------------------
 {
 	if (hItem)
 	{
@@ -1260,7 +1260,6 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 		case MODITEM_SAMPLE:
 			if (pModDoc)
 			{
-				if (!nParam) nParam = NOTE_MIDDLEC;
 				if (nParam & 0x80)
 				{
 					pModDoc->NoteOff(nParam & 0x7F, true);
@@ -1275,7 +1274,6 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 		case MODITEM_INSTRUMENT:
 			if (pModDoc)
 			{
-				if (!nParam) nParam = NOTE_MIDDLEC;
 				if (nParam & 0x80)
 				{
 					pModDoc->NoteOff(nParam, true);
@@ -1314,10 +1312,10 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				{
 					if (modItemType == MODITEM_INSLIB_INSTRUMENT)
 					{
-						pMainFrm->PlaySoundFile(&m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, static_cast<ModCommand::NOTE>(nParam));
+						pMainFrm->PlaySoundFile(&m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
 					} else
 					{
-						pMainFrm->PlaySoundFile(&m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), static_cast<ModCommand::NOTE>(nParam));
+						pMainFrm->PlaySoundFile(&m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
 					}
 				}
 			} else
@@ -1326,7 +1324,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				CHAR szFullPath[_MAX_PATH] = "";
 				InsLibGetFullPath(hItem, szFullPath);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->PlaySoundFile(szFullPath, static_cast<ModCommand::NOTE>(nParam));
+				if (pMainFrm) pMainFrm->PlaySoundFile(szFullPath, nParam);
 			}
 			break;
 
@@ -1360,7 +1358,6 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 					// Melodic
 					if (modItem & 0x40000000)
 					{
-						if ((!nParam) || (nParam > NOTE_MAX)) nParam = NOTE_MIDDLEC;
 						rgn = pDLSBank->GetRegionFromKey(instr, nParam - NOTE_MIN);
 					}
 					pMainFrm->PlayDLSInstrument(bank, instr, rgn, static_cast<ModCommand::NOTE>(nParam));
@@ -2891,7 +2888,7 @@ void CModTree::OnDeleteTreeItem()
 void CModTree::OnPlayTreeItem()
 //-----------------------------
 {
-	PlayItem(GetSelectedItem());
+	PlayItem(GetSelectedItem(), NOTE_MIDDLEC);
 }
 
 
@@ -3403,7 +3400,7 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	if (wParam>=kcTreeViewStartNotes && wParam<=kcTreeViewEndNotes)
 	{
-		PlayItem(GetSelectedItem(), wParam - kcTreeViewStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
+		PlayItem(GetSelectedItem(), static_cast<ModCommand::NOTE>(wParam - kcTreeViewStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
 	}
 	if (wParam>=kcTreeViewStartNoteStops && wParam<=kcTreeViewEndNoteStops)

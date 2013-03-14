@@ -151,7 +151,7 @@ public:
 	BOOL SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
 	BOOL DeleteTreeItem(HTREEITEM hItem);
-	BOOL PlayItem(HTREEITEM hItem, UINT nParam=0);
+	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);
 	BOOL InstrumentLibraryChDir(LPCSTR lpszDir);
