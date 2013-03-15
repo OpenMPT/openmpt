@@ -75,6 +75,18 @@ typedef struct {
 #define  WAVE_FORMAT_EXTENSIBLE                 0xFFFE
 #endif // !defined(WAVE_FORMAT_EXTENSIBLE)
 
+// Generate inline assembly using MMX instructions (only used when the CPU supports it).
+#define ENABLE_MMX
+
+// Generate inline assembly using 3DNOW instructions (only used when the CPU supports it).
+#define ENABLE_3DNOW
+
+// Generate inline assembly using SSE instructions (only used when the CPU supports it).
+#define ENABLE_SSE
+
+// Enable the built-in equalizer.
+#define	ENABLE_EQ
+
 // Define to build without ASIO support; makes build possible without ASIO SDK.
 //#define NO_ASIO 
 
