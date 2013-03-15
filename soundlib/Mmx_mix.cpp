@@ -7,7 +7,7 @@
  *          This file contains critical code. The basic X86 functions are
  *          defined at the bottom of the file. #define's are used to isolate
  *          the different flavours of functionality:
- *          ENABLE_MMX, ENABLE_AMDNOW, ENABLE_SSE flags must be set to
+ *          ENABLE_MMX, ENABLE_3DNOW, ENABLE_SSE flags must be set to
  *          to compile the optimized sections of the code. In both cases the 
  *          X86_xxxxxx functions will compile.
  *
@@ -172,7 +172,7 @@ VOID MMX_EndMix()
 ////////////////////////////////////////////////////////////////////////////////////
 // 3DNow! optimizations
 
-#ifdef ENABLE_AMDNOW
+#ifdef ENABLE_3DNOW
 
 // Convert integer mix to floating-point
 void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
