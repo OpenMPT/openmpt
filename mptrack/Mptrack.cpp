@@ -640,7 +640,7 @@ END_MESSAGE_MAP()
 CTrackApp::CTrackApp()
 //--------------------
 {
-	#if (_MSC_VER >= MSVC_VER_2005)
+	#ifdef _MSC_VER
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 

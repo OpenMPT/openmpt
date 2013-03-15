@@ -12,10 +12,6 @@
 
 // Definitions for MSVC versions to write more understandable conditional-compilation,
 // e.g. #if (_MSC_VER > MSVC_VER_2008) instead of #if (_MSC_VER > 1500) 
-#define MSVC_VER_VC71		1310
-#define MSVC_VER_2003		MSVC_VER_VC71
-#define MSVC_VER_VC8		1400
-#define MSVC_VER_2005		MSVC_VER_VC8
 #define MSVC_VER_VC9		1500
 #define MSVC_VER_2008		MSVC_VER_VC9
 #define MSVC_VER_VC10		1600
@@ -26,7 +22,7 @@
 #endif
 
 //  CountOf macro computes the number of elements in a statically-allocated array.
-#if _MSC_VER >= MSVC_VER_2005
+#ifdef _MSC_VER
 	#define CountOf(x) _countof(x)
 #else
 	#define CountOf(x) (sizeof(x)/sizeof(x[0]))

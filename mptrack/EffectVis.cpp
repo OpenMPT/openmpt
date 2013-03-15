@@ -412,26 +412,12 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 	{
 		// draw the grid
 		memDC.BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcGrid, 0, 0, SRCCOPY) ;
-#ifndef HAVE_DOT_NET
-		
-		// VC6 TransparentBlit...
-		// WINGDIAPI BOOL  WINAPI TransparentBlt(HDC,int,int,int,int,HDC,int,int,int,int,UINT);
-        // hDestDC, xDest, yDest, nDestWidth,nDestHeight,xSrc,ySrc,nSrcWidth,nSrcHeight, crTransparent
-        // 0,     , 0    ,
-		unsigned int height = m_rcDraw.Height();
-		unsigned int width  = m_rcDraw.Width();
 
-		// FIX ME!
-		memDC.BitBlt(0,0,width, height, &m_dcNodes,width,height,PATCOPY);
-        memDC.BitBlt(0,0,width, height, &m_dcPlayPos,width,height,PATCOPY);
-#endif
-
-#ifdef HAVE_DOT_NET
 		// merge the nodes image with the grid
 		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcNodes, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
 		// further merge the playpos 
 		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcPlayPos, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
-#endif
+
 		// copy the resulting bitmap to the destination
 		pDC->BitBlt(LEFTBORDER, TOPBORDER, m_rcDraw.Width()+LEFTBORDER, m_rcDraw.Height()+TOPBORDER, &memDC, 0, 0, SRCCOPY) ;
 	}
