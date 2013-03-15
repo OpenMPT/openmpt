@@ -27,7 +27,7 @@ extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const f
 #ifdef ENABLE_SSE
 extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 #endif
-#ifdef ENABLE_AMD
+#ifdef ENABLE_3DNOW
 extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 #endif
@@ -139,7 +139,7 @@ EQ_Loop:
 void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
 //---------------------------------------------------------------------------------
 {
-#ifdef ENABLE_AMD
+#ifdef ENABLE_3DNOW
 	float tmp[16];
 
 	_asm {
@@ -377,9 +377,9 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 	} else
 
 #endif // ENABLE_SSE
-#endif // ENABLE_AMD
+#endif // ENABLE_3DNOW
 
-#ifdef ENABLE_AMD
+#ifdef ENABLE_3DNOW
      
      // We still perform the MMX check because the user can enable/disable this
 
@@ -397,7 +397,7 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, m_pConfig->getFloatToInt());
 		
 	} else
-#endif // ENABLE_AMD
+#endif // ENABLE_3DNOW
 
 	{	
 		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, m_pConfig->getIntToFloat());

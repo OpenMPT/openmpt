@@ -503,7 +503,7 @@ extern VOID MMX_EndMix();
 #endif
 
 
-#ifdef ENABLE_AMD
+#ifdef ENABLE_3DNOW
 extern void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 extern void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
 extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
@@ -1825,7 +1825,7 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 		}
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
-#ifdef ENABLE_AMD
+#ifdef ENABLE_3DNOW
 		AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
 #endif
 			return;
@@ -1845,7 +1845,7 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 	{
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
-#ifdef ENABLE_AMDNOW
+#ifdef ENABLE_3DNOW
 			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_pConfig->getFloatToInt());
 #endif
 			return;
@@ -1869,7 +1869,7 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 		}
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
-#ifdef ENABLE_AMDNOW
+#ifdef ENABLE_3DNOW
 			AMD_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
 #endif
 			return;
@@ -1887,7 +1887,7 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 	{
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
-#ifdef ENABLE_AMDNOW
+#ifdef ENABLE_3DNOW
 			AMD_FloatToMonoMix(pIn, pOut, nCount, m_pConfig->getFloatToInt());
 #endif
 			return;
