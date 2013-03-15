@@ -1288,19 +1288,15 @@ LPCTSTR CSoundFile::GetSampleName(UINT nSample) const
 }
 
 
-CString CSoundFile::GetInstrumentName(UINT nInstr) const
+mpt::String CSoundFile::GetInstrumentName(UINT nInstr) const
 //------------------------------------------------------
 {
 	if ((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
 		return TEXT("");
 
 	ASSERT(nInstr <= GetNumInstruments());
-	const size_t nSize = CountOf(Instruments[nInstr]->name);
-	CString str;
-	LPTSTR p = str.GetBuffer(nSize + 1);
-	ArrayCopy(p, Instruments[nInstr]->name, nSize);
-	p[nSize] = 0;
-	str.ReleaseBuffer();
+	mpt::String str;
+	str.AppendChars(Instruments[nInstr]->name);
 	return str;
 }
 
@@ -1625,8 +1621,8 @@ bool CSoundFile::LoadStaticTunings()
 	}
 
 	// Load local tunings.
-	CString sPath;
-	sPath.Format(TEXT("%slocal_tunings%s"), TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
+	mpt::String sPath;
+	sPath.Format("%slocal_tunings%s", TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
 	s_pTuningsSharedLocal->SetSavefilePath(sPath);
 	s_pTuningsSharedLocal->Deserialize();
 

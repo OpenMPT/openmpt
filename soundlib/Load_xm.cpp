@@ -557,7 +557,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	\
 	if((len > uint16_max - (UINT)x) && GetpModDoc()) /*Reaching the limits of file format?*/ \
 	{ \
- 		CString str; str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, pat); \
+ 		mpt::String str; str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, pat); \
 		GetpModDoc()->AddToLog(str); \
 		break; \
 	}

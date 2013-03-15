@@ -14,16 +14,15 @@
 #include "Mainfrm.h"
 
 
-CString CMIDIMappingDirective::ToString() const
-//---------------------------------------------
+mpt::String CMIDIMappingDirective::ToString() const
+//-------------------------------------------------
 {
-	CString str; str.Preallocate(20);
+	mpt::String str;
 	char flags[4] = "000";
 	if(m_Active) flags[0] = '1';
 	if(m_CaptureMIDI) flags[1] = '1';
 	if(m_AllowPatternEdit) flags[2] = '1';
 	str.Format("%s:%d:%x:%d:%d:%d", flags, (int)GetChannel(), (int)GetEvent(), (int)GetController(), (int)m_PluginIndex, m_Parameter);
-	str.Trim();
 	return str;
 }
 

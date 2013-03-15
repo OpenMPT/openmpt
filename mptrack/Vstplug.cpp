@@ -201,7 +201,7 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 			if(error != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
 			{
 				TCHAR szBuf[256];
-				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", error, (LPCTSTR)GetErrorMessage(error));
+				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", error, GetErrorMessage(error).c_str());
 				Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
 			}
 #endif //_DEBUG
@@ -3545,7 +3545,7 @@ AEffect *DmoToVst(VSTPluginLib *pLib)
 #endif // NO_VST
 
 
-CString SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
+mpt::String SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 //------------------------------------------------------------
 {
 	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pMixPlugin);
@@ -3554,6 +3554,6 @@ CString SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 		return vstPlug->GetParamName(index);
 	} else
 	{
-		return CString();
+		return mpt::String();
 	}
 }
