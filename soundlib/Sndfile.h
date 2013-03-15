@@ -359,7 +359,7 @@ public:
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	LPCSTR GetTitle() const { return m_szNames[0]; }
 	LPCTSTR GetSampleName(UINT nSample) const;
-	CString GetInstrumentName(UINT nInstr) const;
+	mpt::String GetInstrumentName(UINT nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
 
@@ -696,7 +696,7 @@ public:
 	// [in]  lineEnding: line ending formatting of the text in memory.
 	// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
 	// [out] returns formatted song message.
-	CString GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr) const;
+	mpt::String GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr) const;
 
 protected:
 	// Read song message from a mapped file.

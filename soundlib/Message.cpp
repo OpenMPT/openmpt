@@ -194,10 +194,10 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
 // [out] returns formatted song message.
-CString CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &)) const
+mpt::String CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &)) const
 //-------------------------------------------------------------------------------------------------------
 {
-	CString comments;
+	mpt::String comments;
 
 	if(m_lpszSongComments == nullptr)
 	{
@@ -205,7 +205,7 @@ CString CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*pText
 	}
 
 	const size_t len = strlen(m_lpszSongComments);
-	comments.Preallocate(len);
+	comments.Reserve(len);
 
 	for(size_t i = 0; i < len; i++)
 	{

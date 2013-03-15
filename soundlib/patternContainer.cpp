@@ -190,7 +190,7 @@ PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
 	}
 	for(PATTERNINDEX nPat = Size(); nPat > 0; nPat--)
 	{
-		if(m_Patterns[nPat - 1].GetName() != "")
+		if(!m_Patterns[nPat - 1].GetName().IsEmpty())
 		{
 			return nPat;
 		}

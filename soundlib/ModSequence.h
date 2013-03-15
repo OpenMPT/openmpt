@@ -121,7 +121,7 @@ protected:
 	const_iterator end() const {return m_pArray + m_nSize;}
 
 public:
-	CString m_sName;				// Sequence name.
+	mpt::String m_sName;				// Sequence name.
 
 protected:
 	PATTERNINDEX* m_pArray;			// Pointer to sequence array.

@@ -44,8 +44,8 @@ LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, 
 
 
 // Returns WinAPI error message corresponding to error code returned by GetLastError().
-CString GetErrorMessage(DWORD nErrorCode)
-//---------------------------------------
+std::string GetErrorMessage(DWORD nErrorCode)
+//-------------------------------------------
 {
 	LPVOID lpMsgBuf;
 
@@ -57,7 +57,7 @@ CString GetErrorMessage(DWORD nErrorCode)
 					0,
 					NULL );
 
-	CString msg = (LPTSTR)lpMsgBuf;
+	std::string msg = (LPTSTR)lpMsgBuf;
 	LocalFree(lpMsgBuf);
 
 	return msg;

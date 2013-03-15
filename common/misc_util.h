@@ -141,7 +141,7 @@ inline void LimitMax(T& val, const C upperLimit)
  
 #ifdef MODPLUG_TRACKER
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
-CString GetErrorMessage(DWORD nErrorCode);
+std::string GetErrorMessage(DWORD nErrorCode);
 #endif // MODPLUG_TRACKER
 
 namespace utilImpl

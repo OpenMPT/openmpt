@@ -717,7 +717,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	if(size > ModSpecs::mptm.ordersMax)
 	{
 		// Hack: Show message here if trying to load longer sequence than what is supported.
-		CString str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
+		mpt::String str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
 		Reporting::Warning(str);
 		size = ModSpecs::mptm.ordersMax;
 	}
@@ -753,7 +753,7 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 {
 	srlztn::Ssb ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, MptVersion::num);
-	ssb.WriteItem((LPCSTR)seq.m_sName, "n");
+	ssb.WriteItem((const char*)seq.m_sName, "n");
 	const uint16 nLength = seq.GetLengthTailTrimmed();
 	ssb.WriteItem<uint16>(nLength, "l");
 	ssb.WriteItem(seq.m_pArray, "a", 1, srlztn::ArrayWriter<uint16>(nLength));

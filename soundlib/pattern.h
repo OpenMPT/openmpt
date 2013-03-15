@@ -90,14 +90,13 @@ public:
 	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure);
 	void RemoveSignature() { m_RowsPerBeat = m_RowsPerMeasure = 0; }
 
-	// Patter name functions (for both CString and char[] arrays) - bool functions return true on success.
+	// Pattern name functions - bool functions return true on success.
 	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
 	template<size_t bufferSize>
 	bool SetName(const char (&buffer)[bufferSize])
 	{
 		return SetName(buffer, bufferSize);
 	}
-	bool SetName(const CString newName) { m_PatternName = newName; return true; };
 
 	template<size_t bufferSize>
 	bool GetName(char (&buffer)[bufferSize]) const
@@ -105,7 +104,7 @@ public:
 		return GetName(buffer, bufferSize);
 	}
 	bool GetName(char *buffer, size_t maxChars) const;
-	CString GetName() const { return m_PatternName; };
+	const mpt::String& GetName() const { return m_PatternName; };
 
 	// Double number of rows
 	bool Expand();
@@ -149,7 +148,7 @@ protected:
 	ROWINDEX m_Rows;
 	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
 	ROWINDEX m_RowsPerMeasure;	// dito
-	CString m_PatternName;
+	mpt::String m_PatternName;
 	CPatternContainer& m_rPatternContainer;
 //END: DATA
 };
