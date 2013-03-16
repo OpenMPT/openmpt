@@ -886,8 +886,8 @@ uint8 CModDoc::GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nC
 }
 
 
-UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset) //rewbs.vstiLive: added current chan param
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CHANNELINDEX nChn = GetNumChannels();
@@ -1038,30 +1038,32 @@ UINT CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool p
 }
 
 
-BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX nCurrentChn) //rewbs.vstiLive: added chan and nins
-//-----------------------------------------------------------------------------------------
+bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX currentChn, CHANNELINDEX stopChn)
+//-------------------------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
 
 	//rewbs.vstiLive
-	if((nins != INSTRUMENTINDEX_INVALID) && (nins <= m_SndFile.GetNumInstruments()) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
+	if(ins != INSTRUMENTINDEX_INVALID && ins <= m_SndFile.GetNumInstruments() && ModCommand::IsNote(note))
 	{
 
-		ModInstrument *pIns = m_SndFile.Instruments[nins];
-		if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
+		ModInstrument *pIns = m_SndFile.Instruments[ins];
+		if(pIns && pIns->HasValidMIDIChannel())	// instro sends to a midi chan
 		{
 
-			UINT nPlugin = pIns->nMixPlug;  		// First try intrument VST
-			if (((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) && //no good plug yet
-				(nCurrentChn < MAX_BASECHANNELS)) // chan OK
-				nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
-			
-			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+			PLUGINDEX plug = pIns->nMixPlug;		// First try intrument VST
+			if((!plug || plug > MAX_MIXPLUGINS)		// No good plug yet
+				&& currentChn < MAX_BASECHANNELS)	// Chan OK
 			{
-				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
-				if (pPlugin)
+				plug = m_SndFile.ChnSettings[currentChn].nMixPlugin;// Then try Channel VST
+			}
+			
+			if(plug && plug <= MAX_MIXPLUGINS)
+			{
+				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[plug - 1].pMixPlugin;
+				if(pPlugin)
 				{
-					pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
+					pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, currentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -1069,8 +1071,8 @@ BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX n
 	//end rewbs.vstiLive
 
 	const ChannelFlags mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
-	ModChannel *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
-	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
+	ModChannel *pChn = &m_SndFile.Chn[stopChn != CHANNELINDEX_INVALID ? stopChn : m_SndFile.m_nChannels];
+	for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 
 		// Fade all channels > m_nChannels which are playing this note. 
@@ -1084,7 +1086,7 @@ BOOL CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX nins, CHANNELINDEX n
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 
@@ -1982,15 +1984,12 @@ void CModDoc::OnPlayerPlayFromStart()
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
 		
-
+		CriticalSection cs;
 		pMainFrm->PauseMod();
 		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
-		m_SndFile.visitedSongRows.Initialize(true);
+		//m_SndFile.visitedSongRows.Initialize(true);
 		m_SndFile.m_lTotalSampleCount = 0;
-		m_SndFile.m_bPositionChanged = true;
-
-		CriticalSection cs;
 
 		m_SndFile.m_bPositionChanged = true;
 		m_SndFile.ResumePlugins();

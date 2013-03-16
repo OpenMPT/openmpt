@@ -173,7 +173,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		AppendNotesToControlEx(*combo, pSndFile);
 
 		UINT ncount = combo->GetCount();
-		for (UINT i=0; i<ncount; i++) if (m_nNote == combo->GetItemData(i))
+		for (UINT i=0; i<ncount; i++) if (m_Cmd.note == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
 			break;
@@ -202,7 +202,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		UINT ncount = combo->GetCount();
 		for (UINT i=0; i<ncount; i++)
 		{
-			if (m_nInstr == combo->GetItemData(i) || (cInstrRelChange == -1 && combo->GetItemData(i) == replaceInstrumentMinusOne) || (cInstrRelChange == 1 && combo->GetItemData(i) == replaceInstrumentPlusOne))
+			if (m_Cmd.instr == combo->GetItemData(i) || (cInstrRelChange == -1 && combo->GetItemData(i) == replaceInstrumentMinusOne) || (cInstrRelChange == 1 && combo->GetItemData(i) == replaceInstrumentPlusOne))
 			{
 				combo->SetCurSel(i);
 				break;
@@ -223,7 +223,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromVolCmd(ModCommand::VOLCMD(m_nVolCmd));
+		UINT fxndx = effectInfo.GetIndexFromVolCmd(ModCommand::VOLCMD(m_Cmd.volcmd));
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -240,7 +240,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetItemData(combo->AddString(s), n);
 		}
 		UINT ncount = combo->GetCount();
-		for (UINT i=0; i<ncount; i++) if (m_nVol == combo->GetItemData(i))
+		for (UINT i=0; i<ncount; i++) if (m_Cmd.vol == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
 			break;
@@ -260,7 +260,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromEffect(ModCommand::COMMAND(m_nCommand), ModCommand::PARAM(m_nParam));
+		UINT fxndx = effectInfo.GetIndexFromEffect(ModCommand::COMMAND(m_Cmd.command), ModCommand::PARAM(m_Cmd.param));
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -292,7 +292,7 @@ void CFindReplaceTab::ChangeEffect()
 		{
 			CHAR s[16];
 			int newpos;
-			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_nParam % newcount;
+			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
 			combo->ResetContent();
 			combo->InitStorage(newcount, 4);
 			for (UINT i=0; i<newcount; i++)
@@ -330,7 +330,7 @@ void CFindReplaceTab::ChangeVolCmd()
 		{
 			CHAR s[16];
 			int newpos;
-			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_nParam % newcount;
+			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
 			combo->ResetContent();
 			for (UINT i = rangeMin; i <= rangeMax; i++)
 			{
@@ -381,12 +381,12 @@ void CFindReplaceTab::OnOK()
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
-		m_nNote = combo->GetItemData(combo->GetCurSel());
+		m_Cmd.note = static_cast<ModCommand::NOTE>(combo->GetItemData(combo->GetCurSel()));
 	}
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
-		m_nInstr = 0;
+		m_Cmd.instr = 0;
 		cInstrRelChange = 0;
 		switch(combo->GetItemData(combo->GetCurSel()))
 		{
@@ -397,19 +397,19 @@ void CFindReplaceTab::OnOK()
 			cInstrRelChange = 1;
 			break;
 		default:
-			m_nInstr = combo->GetItemData(combo->GetCurSel());
+			m_Cmd.instr = static_cast<ModCommand::INSTR>(combo->GetItemData(combo->GetCurSel()));
 			break;
 		}
 	}
 	// Volume Command
 	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL))
 	{
-		m_nVolCmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(combo->GetCurSel()));
+		m_Cmd.volcmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(combo->GetCurSel()));
 	}
 	// Volume
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL)
 	{
-		m_nVol = combo->GetItemData(combo->GetCurSel());
+		m_Cmd.vol = static_cast<ModCommand::VOL>(combo->GetItemData(combo->GetCurSel()));
 	}
 	// Effect
 	int effectIndex = -1;
@@ -417,18 +417,18 @@ void CFindReplaceTab::OnOK()
 	{
 		int n = -1; // unused parameter adjustment
 		effectIndex = combo->GetItemData(combo->GetCurSel());
-		m_nCommand = effectInfo.GetEffectFromIndex(effectIndex, n);
+		m_Cmd.command = effectInfo.GetEffectFromIndex(effectIndex, n);
 	}
 	// Param
-	m_nParam = 0;
+	m_Cmd.param = 0;
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL)
 	{
-		m_nParam = combo->GetItemData(combo->GetCurSel());
+		m_Cmd.param = static_cast<ModCommand::PARAM>(combo->GetItemData(combo->GetCurSel()));
 
 		// Apply parameter value mask if required (e.g. SDx has mask D0).
 		if (effectIndex > -1)
 		{
-			m_nParam |= effectInfo.GetEffectMaskFromIndex(effectIndex);
+			m_Cmd.param |= effectInfo.GetEffectMaskFromIndex(effectIndex);
 		}
 	}
 	// Min/Max channels
@@ -1663,6 +1663,7 @@ void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
 	}
 }
 
+
 // Show channel properties for a given channel at a given screen position.
 void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position)
 //-----------------------------------------------------------------------------------------------------
@@ -1710,7 +1711,7 @@ void QuickChannelProperties::UpdateDisplay()
 //------------------------------------------
 {
 	// Set up channel properties
-	settingsChanged = true;
+	visible = false;
 	const ModChannelSettings &settings = document->GetSoundFile()->ChnSettings[channel];
 	SetDlgItemInt(IDC_EDIT1, settings.nVolume, FALSE);
 	SetDlgItemInt(IDC_EDIT2, settings.nPan, FALSE);
@@ -1726,6 +1727,7 @@ void QuickChannelProperties::UpdateDisplay()
 	nameEdit.SetWindowText(settings.szName);
 
 	settingsChanged = false;
+	visible = true;
 
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), channel > 0 ? TRUE : FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), channel < document->GetNumChannels() - 1 ? TRUE : FALSE);
@@ -1750,6 +1752,7 @@ void QuickChannelProperties::OnVolChanged()
 	{
 		return;
 	}
+
 	uint16 volume = static_cast<uint16>(GetDlgItemInt(IDC_EDIT1));
 	if(volume >= 0 && volume <= 64)
 	{
@@ -1768,6 +1771,7 @@ void QuickChannelProperties::OnPanChanged()
 	{
 		return;
 	}
+
 	uint16 panning = static_cast<uint16>(GetDlgItemInt(IDC_EDIT2));
 	if(panning >= 0 && panning <= 256)
 	{
@@ -1827,6 +1831,7 @@ void QuickChannelProperties::OnMuteChanged()
 	{
 		return;
 	}
+
 	document->MuteChannel(channel, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
 }
@@ -1839,6 +1844,7 @@ void QuickChannelProperties::OnSurroundChanged()
 	{
 		return;
 	}
+
 	PrepareUndo();
 	document->SurroundChannel(channel, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
 	document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
@@ -1896,7 +1902,7 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 	if(pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
+		if((pMsg->message == WM_SYSKEYUP) || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
 			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
