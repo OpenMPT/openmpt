@@ -38,16 +38,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	const FileReader::off_t fileSize = file.BytesLeft(), filePosition = file.GetPosition();
 	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
 
-	sample.uFlags &= ~(CHN_16BIT | CHN_STEREO);
-	if(GetBitDepth() >= 16)
-	{
-		sample.uFlags |= CHN_16BIT;
-	}
-	if(GetChannelFormat() != mono)
-	{
-		ASSERT(GetNumChannels() == 2);
-		sample.uFlags |= CHN_STEREO;
-	}
+	sample.uFlags.set(CHN_16BIT, GetBitDepth() >= 16);
+	sample.uFlags.set(CHN_STEREO, GetChannelFormat() != mono);
 	size_t sampleSize = sample.AllocateSample();	// Target sample size in bytes
 
 	if(sampleSize == 0)
@@ -293,9 +285,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	} else if(GetEncoding() == IT214 || GetEncoding() == IT215)
 	{
 		// IT 2.14 / 2.15 compressed samples
-		size_t startPos = file.GetPosition();
 		ITDecompression(file, sample, GetEncoding() == IT215);
-		bytesRead = file.GetPosition() - startPos;
+		bytesRead = file.GetPosition() - filePosition;
 	} else if(GetEncoding() == AMS && GetChannelFormat() == mono)
 	{
 		// AMS compressed samples
@@ -321,7 +312,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
 
-			uint8 *outBuf = reinterpret_cast<uint8 *>(sample.pSample);
+			uint8 *outBuf8 = reinterpret_cast<uint8 *>(sample.pSample);
+			uint16 *outBuf16 = reinterpret_cast<uint16 *>(sample.pSample);
 			const uint8 *inBuf = sourceBuf + 4;
 
 			uint8 dlt = 0, lowbyte = 0;
@@ -347,11 +339,10 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				dlt += hibyte;
 				if(GetBitDepth() != 16)
 				{
-					outBuf[j] = dlt;
+					outBuf8[j] = dlt;
 				} else
 				{
-					outBuf[j << 1] = lowbyte;
-					outBuf[(j << 1) + 1] = dlt;
+					outBuf16[j] = lowbyte | (dlt << 8);
 				}
 			}
 
@@ -509,7 +500,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	{
 		// Stereo unsigned interleaved
 		len = numSamples * 2;
-		for (UINT j=0; j<len; j++)
+		for(SmpLength j = 0; j < len; j++)
 		{
 			*((uint8 *)(&buffer[bufcount])) = *((uint8 *)(&pSample[j])) + 0x80;
 			bufcount++;

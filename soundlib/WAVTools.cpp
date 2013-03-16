@@ -179,9 +179,15 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 }
 
 
-void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampleLength, FlagSet<ChannelFlags, uint16> &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Apply WAV loop information to a mod sample.
+void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sampleLength, FlagSet<ChannelFlags, uint16> &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	if(loopEnd == 0)
+	{
+		// Some WAV files seem to have loops going from 0 to 0... We should ignore those.
+		return;
+	}
 	start = Util::Min(static_cast<SmpLength>(loopStart), sampleLength);
 	end = Clamp(static_cast<SmpLength>(loopEnd), start, sampleLength);
 	if(!mptLoopFix && end < sampleLength)
@@ -195,4 +201,24 @@ void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, uint32 sampl
 	{
 		flags.set(bidiFlag);
 	}
+}
+
+
+// Convert internal loop information into a WAV loop.
+void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
+//-------------------------------------------------------------------------
+{
+	identifier = 0;
+	loopType = bidi ? loopBidi : loopForward;
+	loopStart = start;
+	// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
+	if(end > start)
+	{
+		loopEnd = end - 1;
+	} else
+	{
+		loopEnd = start;
+	}
+	fraction = 0;
+	playCount = 0;
 }
