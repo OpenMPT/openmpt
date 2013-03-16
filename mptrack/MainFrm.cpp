@@ -1110,7 +1110,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 				if (rVu > 0x10000) rVu = 0x10000;
 				p->dwPos[0] = lVu;
 				p->dwPos[1] = rVu;
-				DWORD dwVuDecay = _muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_dwRate) + 1;
+				DWORD dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_dwRate) + 1;
 				if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 				if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
 			}

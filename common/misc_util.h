@@ -370,3 +370,17 @@ namespace Util { namespace sdOs
 
 } } // namespace Util::sdOs
 #endif // MODPLUG_TRACKER
+
+namespace Util {
+
+	inline int32 muldiv(int32 a, int32 b, int32 c)
+	{
+		return static_cast<int32>( ( static_cast<int64>(a) * b ) / c );
+	}
+
+	inline int32 muldivr(int32 a, int32 b, int32 c)
+	{
+		return static_cast<int32>( ( static_cast<int64>(a) * b + ( c / 2 ) ) / c );
+	}
+
+} // namespace Util

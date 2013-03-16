@@ -2023,6 +2023,7 @@ done:
 DWORD MPPASMCALL X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //-------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 32-bit buffer
@@ -2054,39 +2055,26 @@ done:
 	mov result, eax
 	}
 	return result;
+#else
+	int32 * p = (int32*)lp16;
+	for ( DWORD i=0; i<lSampleCount; i++ ) {
+		int v = pBuffer[i];
+		if ( v < MIXING_CLIPMIN ) {
+			v = MIXING_CLIPMIN;
+		} else if ( v > MIXING_CLIPMAX ) {
+			v = MIXING_CLIPMAX;
+		}
+		p[i] = v << MIXING_ATTENUATION;
+	}
+	return lSampleCount * 4;
+#endif
 }
 
 
 void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
 //------------------------------------------------------------
 {
-	_asm {
-	mov ecx, nSamples
-	mov esi, pBuffer
-	xor eax, eax
-	mov edx, ecx
-	shr ecx, 2
-	and edx, 3
-	jz unroll4x
-loop1x:
-	add esi, 4
-	dec edx
-	mov dword ptr [esi-4], eax
-	jnz loop1x
-unroll4x:
-	or ecx, ecx
-	jnz loop4x
-	jmp done
-loop4x:
-	add esi, 16
-	dec ecx
-	mov dword ptr [esi-16], eax
-	mov dword ptr [esi-12], eax
-	mov dword ptr [esi-8], eax
-	mov dword ptr [esi-4], eax
-	jnz loop4x
-done:;
-	}
+	memset(pBuffer, 0, nSamples * sizeof(int));
 }
 
 
@@ -2100,7 +2088,7 @@ void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
 {
 	static int gDitherA, gDitherB;
 
-	__asm {
+	_asm {
 	mov esi, pBuffer	// esi = pBuffer+i
 	mov eax, nSamples	// ebp = i
 	mov ecx, nBits		// ecx = number of bits of noise
@@ -2201,6 +2189,7 @@ stloop:
 void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
 //---------------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	_asm {
 	mov edi, pBuffer
 	mov ecx, nSamples
@@ -2268,12 +2257,34 @@ done:
 	mov [esi], eax
 	mov [edi], edx
 	}
+#else // c implementation taken from libmodplug
+	int rofs = *lpROfs;
+	int lofs = *lpLOfs;
+
+	if ((!rofs) && (!lofs))
+	{
+		X86_InitMixBuffer(pBuffer, nSamples*2);
+		return;
+	}
+	for (UINT i=0; i<nSamples; i++)
+	{
+		int x_r = (rofs + (((-rofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		int x_l = (lofs + (((-lofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		rofs -= x_r;
+		lofs -= x_l;
+		pBuffer[i*2] = x_r;
+		pBuffer[i*2+1] = x_l;
+	}
+	*lpROfs = rofs;
+	*lpLOfs = lofs;
+#endif
 }
 
 
 void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
 //----------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	_asm {
 	mov esi, pChannel
 	mov edi, pBuffer
@@ -2310,6 +2321,23 @@ brkloop:
 	mov dword ptr [esi+ModChannel.nROfs], eax
 	mov dword ptr [esi+ModChannel.nLOfs], edx
 	}
+#else // c implementation taken from libmodplug
+	int rofs = pChannel->nROfs;
+	int lofs = pChannel->nLOfs;
+
+	if ((!rofs) && (!lofs)) return;
+	for (UINT i=0; i<nSamples; i++)
+	{
+		int x_r = (rofs + (((-rofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		int x_l = (lofs + (((-lofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		rofs -= x_r;
+		lofs -= x_l;
+		pBuffer[i*2] += x_r;
+		pBuffer[i*2+1] += x_l;
+	}
+	pChannel->nROfs = rofs;
+	pChannel->nLOfs = lofs;
+#endif
 }
 
 
@@ -2326,7 +2354,7 @@ UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
 //-------------------------------------------------------------
 {
 	UINT result;
-	__asm {
+	_asm {
 	mov esi, pBuffer	// esi = pBuffer+i
 	mov ecx, nSamples	// ecx = i
 	mov edi, nAGC		// edi = AGC (0..256)

@@ -780,9 +780,6 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 #define MOD2XMFineTune(k)	((int)( (signed char)((k)<<4) ))
 #define XM2MODFineTune(k)	((int)( (k>>4)&0x0f ))
 
-int _muldiv(long a, long b, long c);
-int _muldivr(long a, long b, long c);
-
 // Read instrument property with 'code' and 'size' from 'file' to instrument 'pIns'.
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file);
 

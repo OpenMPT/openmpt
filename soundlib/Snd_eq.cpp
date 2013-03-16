@@ -376,8 +376,8 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 
 	} else
 
+#endif // ENABLE_MMX
 #endif // ENABLE_SSE
-#endif // ENABLE_3DNOW
 
 #ifdef ENABLE_3DNOW
      

@@ -101,7 +101,7 @@ __inline float sqrtMPT(FLOAT x)
 // sin(x) - sine of x (radians)
 __inline float sinMPT(float x)
 {
-	__asm {
+	_asm {
 	fld x
 	fsin
 	fstp x

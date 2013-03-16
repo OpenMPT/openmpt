@@ -3497,7 +3497,7 @@ void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
 		DeinterleaveInt16ToFloat(outputs[0], outputs[1], samples);
 	}
 
-	m_DataTime += _muldiv(samples, 10000000, m_nSamplesPerSec);
+	m_DataTime += Util::muldiv(samples, 10000000, m_nSamplesPerSec);
 }
 
 

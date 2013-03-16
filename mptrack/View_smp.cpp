@@ -349,7 +349,7 @@ LONG CViewSample::SampleToScreen(LONG n) const
 			return (n >> ((LONG)m_nZoom-1)) - m_nScrollPos;
 		} else
 		{
-			return _muldiv(n, m_sizeTotal.cx, nLen);
+			return Util::muldiv(n, m_sizeTotal.cx, nLen);
 		}
 	}
 	return 0;
@@ -373,7 +373,7 @@ DWORD CViewSample::ScreenToSample(LONG x) const
 		} else
 		{
 			if (x < 0) x = 0;
-			if (m_sizeTotal.cx) n = _muldiv(x, nLen, m_sizeTotal.cx);
+			if (m_sizeTotal.cx) n = Util::muldiv(x, nLen, m_sizeTotal.cx);
 		}
 		if (n < 0) n = 0;
 		if (n > (LONG)nLen) n = nLen;
@@ -685,7 +685,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	} else
 	{
 		xmax = cx;
-		//posincr = _muldiv(len, 0x10000, cx);
+		//posincr = Util::muldiv(len, 0x10000, cx);
 		posincr = uint64(len) * uint64(0x10000) / uint64(cx);
 	}
 	::MoveToEx(hdc, 0, ymed, NULL);

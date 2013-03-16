@@ -320,7 +320,7 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 			// Old tempo
 			if (!(pmsh->flags2 & MMD_FLAG2_BPM))
 			{
-				param = _muldiv(param, 5*715909, 2*474326);
+				param = Util::muldiv(param, 5*715909, 2*474326);
 			}
 			// F.0B - F.F0: Set Tempo (assumes LPB=4)
 			if (param > 0x0A)
@@ -591,7 +591,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	#endif
 	} else
 	{
-		deftempo = _muldiv(deftempo, 5*715909, 2*474326);
+		deftempo = Util::muldiv(deftempo, 5*715909, 2*474326);
 	#ifdef MED_LOG
 		Log("oldtempo: %3d bpm (bpm=%3d)\n", deftempo, BigEndianW(pmsh->deftempo));
 	#endif
