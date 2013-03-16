@@ -420,8 +420,8 @@ namespace mpt
 		// Tests whether string is empty.
 		bool IsEmpty() const {return empty();}
 
-		// Compares this and other string.
-		bool Compare(const CharT* psz) const {return ((*this) == psz);}
+		// See std::string::compare.
+		int Compare(const CharT* psz) const {return compare(psz);}
 
 		// Equivalent to Empty(); Append(psz, nCount);
 		void SetString(const CharT* psz, const size_t nCount)
