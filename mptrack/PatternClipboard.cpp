@@ -949,7 +949,7 @@ void PatternClipboardDialog::UpdateList()
 	}
 	instance.clipList.ResetContent();
 	PatternClipboard::clipindex_t i = 0;
-	for(std::deque<PatternClipboardElement>::const_iterator clip = PatternClipboard::instance.clipboards.cbegin(); clip != PatternClipboard::instance.clipboards.cend(); clip++, i++)
+	for(std::deque<PatternClipboardElement>::const_iterator clip = PatternClipboard::instance.clipboards.begin(); clip != PatternClipboard::instance.clipboards.end(); clip++, i++)
 	{
 		const int item = instance.clipList.AddString(clip->description);
 		instance.clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));

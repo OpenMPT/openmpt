@@ -199,6 +199,11 @@ void TestTypes()
 	VERIFY_EQUAL(int64_min, (std::numeric_limits<int64>::min)());
 	VERIFY_EQUAL(int64_max, (std::numeric_limits<int64>::max)());
 	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
+
+	VERIFY_EQUAL(Util::NumericTraits<long>::minValue, (std::numeric_limits<long>::min)());
+	VERIFY_EQUAL(Util::NumericTraits<long>::maxValue, (std::numeric_limits<long>::max)());
+	VERIFY_EQUAL(Util::NumericTraits<unsigned long>::minValue, (std::numeric_limits<unsigned long>::min)());
+	VERIFY_EQUAL(Util::NumericTraits<unsigned long>::maxValue, (std::numeric_limits<unsigned long>::max)());
 }
 
 

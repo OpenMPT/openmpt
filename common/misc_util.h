@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <limits>
+#include <limits.h>
 #include "typedefs.h"
 #include <io.h> // for _taccess
 
@@ -304,11 +305,13 @@ namespace Util
 	template <> struct NumericTraits<int16> {static const int16 maxValue = int16_max; static const int16 minValue = int16_min;};
 	template <> struct NumericTraits<int32> {static const int32 maxValue = int32_max; static const int32 minValue = int32_min;};
 	template <> struct NumericTraits<int64> {static const int64 maxValue = int64_max; static const int64 minValue = int64_min;};
+	template <> struct NumericTraits<long> {static const long maxValue = LONG_MAX; static const long minValue = LONG_MIN;};
 
 	template <> struct NumericTraits<uint8> {static const uint8 maxValue = uint8_max; static const uint8 minValue = 0;};
 	template <> struct NumericTraits<uint16> {static const uint16 maxValue = uint16_max; static const uint16 minValue = 0;};
 	template <> struct NumericTraits<uint32> {static const uint32 maxValue = uint32_max; static const uint32 minValue = 0;};
 	template <> struct NumericTraits<uint64> {static const uint64 maxValue = uint64_max; static const uint64 minValue = 0;};
+	template <> struct NumericTraits<unsigned long> {static const unsigned long maxValue = ULONG_MAX; static const unsigned long minValue = 0;};
 
 	// Like std::max, but avoids conflict with max-macro.
 	template <class T> inline const T& Max(const T& a, const T& b) {return (std::max)(a, b);}
