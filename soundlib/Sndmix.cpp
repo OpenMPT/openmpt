@@ -121,95 +121,6 @@ inline RATIOTYPE TwoToPowerXOver12(const BYTE i)
 }
 
 
-// Return (a*b)/c - no divide error
-int _muldiv(long a, long b, long c)
-{
-	int sign, result;
-	_asm {
-	mov eax, a
-	mov ebx, b
-	or eax, eax
-	mov edx, eax
-	jge aneg
-	neg eax
-aneg:
-	xor edx, ebx
-	or ebx, ebx
-	mov ecx, c
-	jge bneg
-	neg ebx
-bneg:
-	xor edx, ecx
-	or ecx, ecx
-	mov sign, edx
-	jge cneg
-	neg ecx
-cneg:
-	mul ebx
-	cmp edx, ecx
-	jae diverr
-	div ecx
-	jmp ok
-diverr:
-	mov eax, 0x7fffffff
-ok:
-	mov edx, sign
-	or edx, edx
-	jge rneg
-	neg eax
-rneg:
-	mov result, eax
-}
-	return result;
-}
-
-
-// Return (a*b+c/2)/c - no divide error
-int _muldivr(long a, long b, long c)
-{
-	int sign, result;
-	_asm {
-	mov eax, a
-	mov ebx, b
-	or eax, eax
-	mov edx, eax
-	jge aneg
-	neg eax
-aneg:
-	xor edx, ebx
-	or ebx, ebx
-	mov ecx, c
-	jge bneg
-	neg ebx
-bneg:
-	xor edx, ecx
-	or ecx, ecx
-	mov sign, edx
-	jge cneg
-	neg ecx
-cneg:
-	mul ebx
-	mov ebx, ecx
-	shr ebx, 1
-	add eax, ebx
-	adc edx, 0
-	cmp edx, ecx
-	jae diverr
-	div ecx
-	jmp ok
-diverr:
-	mov eax, 0x7fffffff
-ok:
-	mov edx, sign
-	or edx, edx
-	jge rneg
-	neg eax
-rneg:
-	mov result, eax
-	}
-	return result;
-}
-
 
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 //-------------------------------------------------------------------
@@ -265,7 +176,7 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 BOOL CSoundFile::FadeSong(UINT msec)
 //----------------------------------
 {
-	samplecount_t nsamples = _muldiv(msec, gdwMixingFreq, 1000);
+	samplecount_t nsamples = Util::muldiv(msec, gdwMixingFreq, 1000);
 	if (nsamples <= 0) return FALSE;
 	if (nsamples > 0x100000) nsamples = 0x100000;
 	m_nBufferCount = nsamples;
@@ -292,7 +203,7 @@ BOOL CSoundFile::GlobalFadeSong(UINT msec)
 //----------------------------------------
 {
 	if(m_SongFlags[SONG_GLOBALFADE]) return FALSE;
-	m_nGlobalFadeMaxSamples = _muldiv(msec, gdwMixingFreq, 1000);
+	m_nGlobalFadeMaxSamples = Util::muldiv(msec, gdwMixingFreq, 1000);
 	m_nGlobalFadeSamples = m_nGlobalFadeMaxSamples;
 	m_SongFlags.set(SONG_GLOBALFADE);
 	return TRUE;
@@ -1249,11 +1160,11 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 				{
 					l = -l;
 					LimitMax(l, 255);
-					period = _muldiv(period, LinearSlideUpTable[l], 0x10000);
+					period = Util::muldiv(period, LinearSlideUpTable[l], 0x10000);
 				} else
 				{
 					LimitMax(l, 255);
-					period = _muldiv(period, LinearSlideDownTable[l], 0x10000);
+					period = Util::muldiv(period, LinearSlideDownTable[l], 0x10000);
 				}
 			} //End: Original behavior.
 		}
@@ -1641,12 +1552,12 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				if (l < 0)
 				{
 					l = -l;
-					vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
-					if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+					vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
 				} else
 				{
-					vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
-					if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+					vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
 				}
 			}
 			period += vdelta;
@@ -1743,17 +1654,17 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			int l = abs(vdelta);
 			if(vdelta < 0)
 			{
-				vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+				vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
 				if (l & 0x03)
 				{
-					vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+					vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
 				}
 			} else
 			{
-				vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+				vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
 				if (l & 0x03)
 				{
-					vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+					vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
 				}
 			}
 			period -= vdelta;
@@ -1837,7 +1748,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 						df2 = LinearSlideDownTable[n1+1];
 					}
 					n >>= 2;
-					period = _muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
+					period = Util::muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
 					nPeriodFrac = period & 0xFF;
 					period >>= 8;
 				} else
@@ -1968,7 +1879,7 @@ BOOL CSoundFile::ReadNote()
 
 		if(m_SongFlags[SONG_GLOBALFADE] && m_nGlobalFadeMaxSamples != 0)
 		{
-			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
+			mastervol = Util::muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
 		}
 
 		if (m_pConfig->getUseGlobalPreAmp())
@@ -2075,7 +1986,7 @@ BOOL CSoundFile::ReadNote()
 			if (vol)
 			{
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
-				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
+				// -> Util::muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
 				if(pChn->dwFlags[CHN_SYNCMUTE])
 				{
@@ -2084,10 +1995,10 @@ BOOL CSoundFile::ReadNote()
 				{
 					// Don't let global volume affect level of sample if
 					// Global volume is going to be applied to master output anyway.
-					pChn->nRealVolume = _muldiv(vol * MAX_GLOBAL_VOLUME, pChn->nGlobalVol * insVol, 1 << 20);
+					pChn->nRealVolume = Util::muldiv(vol * MAX_GLOBAL_VOLUME, pChn->nGlobalVol * insVol, 1 << 20);
 				} else
 				{
-					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * insVol, 1 << 20);
+					pChn->nRealVolume = Util::muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * insVol, 1 << 20);
 				}
 			}
 
@@ -2185,7 +2096,7 @@ BOOL CSoundFile::ReadNote()
 			// Applying Pitch/Tempo lock.
 			if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
 			{
-				freq = _muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
+				freq = Util::muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
 			}
 
 			if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
@@ -2196,7 +2107,7 @@ BOOL CSoundFile::ReadNote()
 				pChn->nCalcVolume = 0;
 			}
 
-			UINT ninc = _muldiv(freq, 0x10000, gdwMixingFreq);
+			UINT ninc = Util::muldiv(freq, 0x10000, gdwMixingFreq);
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
 			if (ninc > 0xFF0000) ninc = 0xFF0000;
@@ -2608,11 +2519,11 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 			{
 				// Ramping required
 				m_lHighResRampingGlobalVolume += step;
-				*sample = _muldiv(*sample, m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
+				*sample = Util::muldiv(*sample, m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
 				m_nSamplesToGlobalVolRampDest--;
 			} else
 			{
-				*sample = _muldiv(*sample, m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+				*sample = Util::muldiv(*sample, m_nGlobalVolume, MAX_GLOBAL_VOLUME);
 				m_lHighResRampingGlobalVolume = m_nGlobalVolume << VOLUMERAMPPRECISION;
 			}
 		}

@@ -75,6 +75,15 @@ typedef struct {
 #define  WAVE_FORMAT_EXTENSIBLE                 0xFFFE
 #endif // !defined(WAVE_FORMAT_EXTENSIBLE)
 
+// Use inline assembly at all
+#define ENABLE_ASM
+
+// inline assembly requires MSVC compiler
+#if defined(ENABLE_ASM) && defined(_MSC_VER)
+
+// Generate general x86 inline assembly.
+#define ENABLE_X86
+
 // Generate inline assembly using MMX instructions (only used when the CPU supports it).
 #define ENABLE_MMX
 
@@ -83,6 +92,8 @@ typedef struct {
 
 // Generate inline assembly using SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
+
+#endif // ENABLE_ASM
 
 // Enable the built-in equalizer.
 #define	ENABLE_EQ
