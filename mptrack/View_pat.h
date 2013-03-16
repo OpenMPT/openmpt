@@ -197,6 +197,8 @@ protected:
 
 	BYTE activeNoteChannel[NOTE_MAX + 1];
 	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
+	CHANNELINDEX chordPlayChannels[4];
+	ModCommand::NOTE prevChordNote;
 
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
@@ -226,6 +228,7 @@ public:
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
 	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
+	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER)); }
 	// Get ModCommand at the pattern cursor position.
 	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
 
@@ -305,6 +308,9 @@ public:
 	void TempEnterFX(int c, int v = -1);
 	void TempEnterFXparam(int v);
 	void EnterAftertouch(int note, int atValue);
+
+	// Construct a chord from the chord presets. Returns number of notes in chord.
+	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[4]);
 
 	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
 	PATTERNINDEX GetNextPattern() const;
@@ -433,14 +439,14 @@ private:
 	bool PastePattern(PATTERNINDEX nPattern, const PatternCursor &pastePos, PatternClipboard::PasteModes mode);
 
 	void SetSplitKeyboardSettings();
-	bool HandleSplit(ModCommand *p, int note);
+	bool HandleSplit(ModCommand &m, int note);
 	bool IsNoteSplit(int note) const;
 
 	CHANNELINDEX FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
 
 	bool BuildChannelControlCtxMenu(HMENU hMenu) const;
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
-	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CModDoc *pModDoc) const;
+	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn, CModDoc *pModDoc) const;
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const;
 	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const;

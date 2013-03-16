@@ -30,7 +30,7 @@ protected:
 
 public:
 	FlagSet<FindReplace::Flags> m_Flags;
-	UINT m_nNote, m_nInstr, m_nVolCmd, m_nVol, m_nCommand, m_nParam;
+	ModCommand m_Cmd;
 	CHANNELINDEX m_nMinChannel, m_nMaxChannel;
 	signed char cInstrRelChange;
 	bool m_bPatSel;
