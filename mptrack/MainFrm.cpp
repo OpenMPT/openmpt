@@ -1274,8 +1274,8 @@ void CMainFrame::UpdateColors()
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame operations
 
-UINT CMainFrame::GetBaseOctave()
-//------------------------------
+UINT CMainFrame::GetBaseOctave() const
+//------------------------------------
 {
 	return m_wndToolBar.GetBaseOctave();
 }

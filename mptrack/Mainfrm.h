@@ -420,11 +420,12 @@ public:
 	void SetInfoText(LPCSTR lpszText);
 	void SetXInfoText(LPCSTR lpszText); //rewbs.xinfo
 	void SetHelpText(LPCSTR lpszText);
-	UINT GetBaseOctave();
+	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
 	CImageList *GetImageList() { return &m_ImageList; }
 	MPTChords &GetChords() { return TrackerSettings::Instance().Chords; }
+	const MPTChords &GetChords() const { return TrackerSettings::Instance().Chords; }
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);

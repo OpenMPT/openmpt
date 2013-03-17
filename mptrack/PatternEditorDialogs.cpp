@@ -1303,11 +1303,12 @@ BOOL CChordEditor::OnInitDialog()
 	pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return TRUE;
 	// Fills the shortcut key combo box
-	AppendNotesToControl(m_CbnShortcut, 0, 3*12-1);
+	AppendNotesToControl(m_CbnShortcut, 0, 3 * 12 - 1);
 
 	m_CbnShortcut.SetCurSel(0);
 	// Base Note combo box
-	AppendNotesToControl(m_CbnBaseNote, 0, 3*12-1);
+	m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString("Relative"), MPTChord::relativeMode);
+	AppendNotesToControl(m_CbnBaseNote, 0, 3 * 12 - 1);
 
 	// Minor notes
 	for (int inotes=-1; inotes<24; inotes++)
@@ -1371,7 +1372,10 @@ void CChordEditor::OnChordChanged()
 	chord = m_CbnShortcut.GetCurSel();
 	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
 	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
-	m_CbnBaseNote.SetCurSel(chords[chord].key);
+	if(chords[chord].key != MPTChord::relativeMode)
+		m_CbnBaseNote.SetCurSel(chords[chord].key + 1);
+	else
+		m_CbnBaseNote.SetCurSel(0);
 	m_CbnNote1.SetCurSel(chords[chord].notes[0]);
 	m_CbnNote2.SetCurSel(chords[chord].notes[1]);
 	m_CbnNote3.SetCurSel(chords[chord].notes[2]);
@@ -1393,7 +1397,12 @@ void CChordEditor::UpdateKeyboard()
 	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
 	note = chords[chord].key % 12;
 	octave = chords[chord].key / 12;
-	for (UINT i=0; i<2*12; i++)
+	if(chords[chord].key == MPTChord::relativeMode)
+	{
+		note = -1;
+		octave = 0;
+	}
+	for(UINT i=0; i<2*12; i++)
 	{
 		BOOL b = FALSE;
 
@@ -1417,12 +1426,9 @@ void CChordEditor::OnBaseNoteChanged()
 	int chord = m_CbnShortcut.GetCurSel();
 	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
 	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
-	int basenote = m_CbnBaseNote.GetCurSel();
-	if (basenote >= 0)
-	{
-		chords[chord].key = (uint8)basenote;
-		UpdateKeyboard();
-	}
+	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel());
+	chords[chord].key = (uint8)basenote;
+	UpdateKeyboard();
 }
 
 

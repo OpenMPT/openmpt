@@ -186,7 +186,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nFoundInstrument = 0;
 	m_nLastPlayedRow = 0;
 	m_nLastPlayedOrder = 0;
-	prevChordNote = 0;
+	prevChordNote = NOTE_NONE;
 }
 
 
@@ -4723,11 +4723,16 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 			m_Status.reset(psChordPlaying);
 
 			ModCommand::NOTE notes[4];
-			int numNotes = ConstructChord(note, notes);
+			int numNotes = ConstructChord(note, notes, prevChordBaseNote);
+			if(!numNotes)
+			{
+				return;
+			}
 			for(int i = 0; i < numNotes; i++)
 			{
 				pModDoc->NoteOff(notes[i], true, ins, GetCurrentChannel(), playWholeRow ? chordPlayChannels[i] : CHANNELINDEX_INVALID);
 			}
+			prevChordNote = NOTE_NONE;
 		} else
 		{
 			pModDoc->NoteOff(note, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOTEFADE) || pSndFile->GetNumInstruments() == 0), ins, nChnCursor, playWholeRow ? nChn : CHANNELINDEX_INVALID);
@@ -5216,34 +5221,51 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 
 // Construct a chord from the chord presets. Returns number of notes in chord.
-int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[4])
-//-------------------------------------------------------------------------
+int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[4], ModCommand::NOTE baseNote)
+//----------------------------------------------------------------------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	MPTChords &chords = pMainFrm->GetChords();
+	const CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	const MPTChords &chords = pMainFrm->GetChords();
 	UINT baseOctave = pMainFrm->GetBaseOctave();
-	UINT chordNum = note - baseOctave * 12 - 1;
+	UINT chordNum = note - baseOctave * 12 - NOTE_MIN;
 
 	if(chordNum >= CountOf(chords))
 	{
 		return 0;
 	}
-	MPTChord &chord = chords[chordNum];
+	const MPTChord &chord = chords[chordNum];
 
-	ModCommand::NOTE baseNote = static_cast<ModCommand::NOTE>(chord.key + baseOctave * 12 + 1);
-	if(!ModCommand::IsNote(baseNote))
+	const bool relativeMode = (chord.key == MPTChord::relativeMode);	// Notes are relative to a previously entered note in the pattern
+	ModCommand::NOTE key;
+	if(relativeMode)
+	{
+		// Relative mode: Use pattern note as base note.
+		// If there is no valid note in the pattern: Use shortcut note as relative base note
+		key = ModCommand::IsNote(baseNote) ? baseNote : static_cast<ModCommand::NOTE>(note);
+	} else
+	{
+		// Default mode: Use base key
+		key = static_cast<ModCommand::NOTE>(chord.key + baseOctave * 12 + NOTE_MIN);
+	}
+	if(!ModCommand::IsNote(key))
 	{
 		return 0;
 	}
 
 	int numNotes = 1;
-	outNotes[0] = baseNote;
+	outNotes[0] = key;
 
 	for(size_t i = 0; i < CountOf(chord.notes); i++)
 	{
 		if(chord.notes[i])
 		{
-			ModCommand::NOTE note = static_cast<ModCommand::NOTE>(((baseNote - 1) / 12) * 12 + chord.notes[i]);
+			ModCommand::NOTE note = key - NOTE_MIN;
+			if(!relativeMode)
+			{
+				// Only use octave information from the base key
+				note = (note / 12) * 12;
+			}
+			note += chord.notes[i];
 			if(ModCommand::IsNote(note))
 			{
 				outNotes[numNotes++] = note;
@@ -5266,15 +5288,16 @@ void CViewPattern::TempEnterChord(int note)
 	}
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
-	ModCommand::NOTE chordNotes[4];
-	int numNotes = ConstructChord(note, chordNotes);
+	const CHANNELINDEX chn = GetCurrentChannel();
+	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
+
+	ModCommand::NOTE chordNotes[4], baseNote = rowBase[chn].note;
+	int numNotes = ConstructChord(note, chordNotes, baseNote);
 	if(!numNotes)
 	{
 		return;
 	}
 
-	const CHANNELINDEX chn = GetCurrentChannel();
-	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
 	// Save old row contents
 	std::vector<ModCommand> newRow(rowBase, rowBase + sndFile.GetNumChannels());
 
@@ -5342,11 +5365,13 @@ void CViewPattern::TempEnterChord(int note)
 	// -- play note
 	if((TrackerSettings::Instance().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE | PATTERN_PLAYEDITROW)) || !recordEnabled)
 	{
-		if(prevChordNote)
+		if(prevChordNote != NOTE_NONE)
 		{
 			TempStopChord(prevChordNote);
-			prevChordNote = note;
 		}
+		prevChordNote = note;
+		prevChordBaseNote = baseNote;
+
 		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
 		if(playWholeRow)
 		{

@@ -126,8 +126,13 @@ struct EQPreset
 // Chords
 struct MPTChord
 {
-	uint8 key;
-	uint8 notes[3];
+	enum
+	{
+		relativeMode = 0x3F,
+	};
+
+	uint8 key;			// Base note
+	uint8 notes[3];		// Additional chord notes
 };
 
 typedef MPTChord MPTChords[3 * 12];	// 3 octaves
