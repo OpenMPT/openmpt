@@ -281,6 +281,8 @@ public:
 	CChordEditor(CWnd *parent=NULL):CDialog(IDD_CHORDEDIT, parent) {}
 
 protected:
+	MPTChord &GetChord();
+
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	void UpdateKeyboard();

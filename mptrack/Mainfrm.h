@@ -424,8 +424,6 @@ public:
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
 	CImageList *GetImageList() { return &m_ImageList; }
-	MPTChords &GetChords() { return TrackerSettings::Instance().Chords; }
-	const MPTChords &GetChords() const { return TrackerSettings::Instance().Chords; }
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
