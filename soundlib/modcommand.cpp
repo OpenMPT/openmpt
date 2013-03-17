@@ -24,19 +24,19 @@ void ModCommand::ExtendedMODtoS3MEffect()
 	command = CMD_S3MCMDEX;
 	switch(param & 0xF0)
 	{
-	case 0x10:	command = CMD_PORTAMENTOUP; param |= 0xF0; break;
-	case 0x20:	command = CMD_PORTAMENTODOWN; param |= 0xF0; break;
-	case 0x30:	param = (param & 0x0F) | 0x10; break;
-	case 0x40:	param = (param & 0x03) | 0x30; break;
-	case 0x50:	param = (param & 0x0F) | 0x20; break;
-	case 0x60:	param = (param & 0x0F) | 0xB0; break;
-	case 0x70:	param = (param & 0x03) | 0x40; break;
-	case 0x90:	command = CMD_RETRIG; param = (param & 0x0F); break;
-	case 0xA0:	if (param & 0x0F) { command = CMD_VOLUMESLIDE; param = (param << 4) | 0x0F; } else command = 0; break;
-	case 0xB0:	if (param & 0x0F) { command = CMD_VOLUMESLIDE; param |= 0xF0; } else command = 0; break;
-	case 0xC0:  if (param == 0xC0) { command = CMD_NONE; note = NOTE_NOTECUT; }	// this does different things in IT and ST3
-	case 0xD0:  if (param == 0xD0) { command = CMD_NONE; }	// dito
-				// rest are the same
+	case 0x10: command = CMD_PORTAMENTOUP; param |= 0xF0; break;
+	case 0x20: command = CMD_PORTAMENTODOWN; param |= 0xF0; break;
+	case 0x30: param = (param & 0x0F) | 0x10; break;
+	case 0x40: param = (param & 0x03) | 0x30; break;
+	case 0x50: param = (param & 0x0F) | 0x20; break;
+	case 0x60: param = (param & 0x0F) | 0xB0; break;
+	case 0x70: param = (param & 0x03) | 0x40; break;
+	case 0x90: command = CMD_RETRIG; param = (param & 0x0F); break;
+	case 0xA0: if(param & 0x0F) { command = CMD_VOLUMESLIDE; param = (param << 4) | 0x0F; } else command = 0; break;
+	case 0xB0: if(param & 0x0F) { command = CMD_VOLUMESLIDE; param |= 0xF0; } else command = 0; break;
+	case 0xC0: if(param == 0xC0) { command = CMD_NONE; note = NOTE_NOTECUT; }	// this does different things in IT and ST3
+	case 0xD0: if(param == 0xD0) { command = CMD_NONE; }	// dito
+	// rest are the same
 	}
 }
 
@@ -51,17 +51,17 @@ void ModCommand::ExtendedS3MtoMODEffect()
 	command = CMD_MODCMDEX;
 	switch(param & 0xF0)
 	{
-	case 0x10:	param = (param & 0x0F) | 0x30; break;
-	case 0x20:	param = (param & 0x0F) | 0x50; break;
-	case 0x30:	param = (param & 0x0F) | 0x40; break;
-	case 0x40:	param = (param & 0x0F) | 0x70; break;
+	case 0x10: param = (param & 0x0F) | 0x30; break;
+	case 0x20: param = (param & 0x0F) | 0x50; break;
+	case 0x30: param = (param & 0x0F) | 0x40; break;
+	case 0x40: param = (param & 0x0F) | 0x70; break;
 	case 0x50:
 	case 0x60:
 	case 0x90:
-	case 0xA0:	command = CMD_XFINEPORTAUPDOWN; break;
-	case 0xB0:	param = (param & 0x0F) | 0x60; break;
-	case 0x70:  command = CMD_NONE;	// No NNA / envelope control in MOD/XM format
-		// rest are the same
+	case 0xA0: command = CMD_XFINEPORTAUPDOWN; break;
+	case 0xB0: param = (param & 0x0F) | 0x60; break;
+	case 0x70: command = CMD_NONE;	// No NNA / envelope control in MOD/XM format
+	// rest are the same
 	}
 }
 
@@ -95,16 +95,14 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		if(newTypeIsS3M)
 		{
 			param = (param + 1) >> 1;
-		}
-		else if(oldTypeIsS3M)
+		} else if(oldTypeIsS3M)
 		{
 			if(param == 0xA4)
 			{
 				// surround remap
-				command = static_cast<ModCommand::COMMAND>((toType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN);
+				command = static_cast<COMMAND>((toType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN);
 				param = 0x91;
-			}
-			else
+			} else
 			{
 				param = min(param << 1, 0xFF);
 			}
@@ -123,18 +121,18 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		if(IsPcNote())
 		{
-			ModCommand::COMMAND newcommand = static_cast<ModCommand::COMMAND>(note == NOTE_PC ? CMD_MIDI : CMD_SMOOTHMIDI);
-			if(!CSoundFile::GetModSpecifications(toType).HasCommand(newcommand))
+			COMMAND newCmd = static_cast<COMMAND>(note == NOTE_PC ? CMD_MIDI : CMD_SMOOTHMIDI);
+			if(!CSoundFile::GetModSpecifications(toType).HasCommand(newCmd))
 			{
-				newcommand = CMD_MIDI;	// assuming that this was CMD_SMOOTHMIDI
-			}
-			if(!CSoundFile::GetModSpecifications(toType).HasCommand(newcommand))
-			{
-				newcommand = CMD_NONE;
+				newCmd = CMD_MIDI;	// assuming that this was CMD_SMOOTHMIDI
+				if(!CSoundFile::GetModSpecifications(toType).HasCommand(newCmd))
+				{
+					newCmd = CMD_NONE;
+				}
 			}
 
-			param = (BYTE)(min(ModCommand::maxColumnValue, GetValueEffectCol()) * 0x7F / ModCommand::maxColumnValue);
-			command = newcommand; // might be removed later
+			param = (BYTE)(min(maxColumnValue, GetValueEffectCol()) * 0x7F / maxColumnValue);
+			command = newCmd; // might be removed later
 			volcmd = VOLCMD_NONE;
 			note = NOTE_NONE;
 			instr = 0;
@@ -148,8 +146,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 
 		if(command == CMD_DELAYCUT)
 		{
-			command = CMD_S3MCMDEX; // when converting to MOD/XM, this will be converted to CMD_MODCMDEX later
-			param = 0xD0 | (param >> 4); // preserve delay nibble.
+			command = CMD_S3MCMDEX;			// When converting to MOD/XM, this will be converted to CMD_MODCMDEX later
+			param = 0xD0 | (param >> 4);	// Preserve delay nibble.
 		}
 	} // End if(oldTypeIsMPT)
 
@@ -159,13 +157,17 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		switch(command)
 		{
+		case CMD_ARPEGGIO:
+			if(!param) command = CMD_NONE;	// 000 does nothing in MOD/XM
+			break;
+
 		case CMD_MODCMDEX:
 			ExtendedMODtoS3MEffect();
 			break;
 
 		case CMD_VOLUME:
 			// Effect column volume command overrides the volume column in XM.
-			if (volcmd == VOLCMD_NONE || volcmd == VOLCMD_VOLUME)
+			if(volcmd == VOLCMD_NONE || volcmd == VOLCMD_VOLUME)
 			{
 				volcmd = VOLCMD_VOLUME;
 				vol = param;
@@ -182,11 +184,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			break;
 
 		case CMD_PORTAMENTOUP:
-			if (param > 0xDF) param = 0xDF;
+			if(param > 0xDF) param = 0xDF;
 			break;
 
 		case CMD_PORTAMENTODOWN:
-			if (param > 0xDF) param = 0xDF;
+			if(param > 0xDF) param = 0xDF;
 			break;
 
 		case CMD_XFINEPORTAUPDOWN:
@@ -200,7 +202,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			case 0x90:
 			case 0xA0:
 				command = CMD_S3MCMDEX;
-				// surround remap (this is the "official" command)
+				// Surround remap (this is the "official" command)
 				if(toType & MOD_TYPE_S3M && param == 0x91)
 				{
 					command = CMD_PANNING8;
@@ -213,7 +215,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		case CMD_KEYOFF:
 			if(note == NOTE_NONE)
 			{
-				note = (newTypeIsS3M) ? NOTE_NOTECUT : NOTE_KEYOFF;
+				note = newTypeIsS3M ? NOTE_NOTECUT : NOTE_KEYOFF;
 				command = CMD_S3MCMDEX;
 				if(param == 0)
 					instr = 0;
@@ -260,62 +262,63 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			break;
 
 		case CMD_VOLUMESLIDE:
-			if ((param & 0xF0) && ((param & 0x0F) == 0x0F))
+			if((param & 0xF0) && ((param & 0x0F) == 0x0F))
 			{
 				command = CMD_MODCMDEX;
 				param = (param >> 4) | 0xA0;
-			} else
-				if ((param & 0x0F) && ((param & 0xF0) == 0xF0))
-				{
-					command = CMD_MODCMDEX;
-					param = (param & 0x0F) | 0xB0;
-				}
-				break;
+			} else if((param & 0x0F) && ((param & 0xF0) == 0xF0))
+			{
+				command = CMD_MODCMDEX;
+				param = (param & 0x0F) | 0xB0;
+			}
+			break;
 
 		case CMD_PORTAMENTOUP:
-			if (param >= 0xF0)
+			if(param >= 0xF0)
 			{
 				command = CMD_MODCMDEX;
 				param = (param & 0x0F) | 0x10;
-			} else
-				if (param >= 0xE0)
+			} else if(param >= 0xE0)
+			{
+				if(newTypeIsXM)
 				{
-					if(newTypeIsXM)
-					{
-						command = CMD_XFINEPORTAUPDOWN;
-						param = 0x10 | (param & 0x0F);
-					} else
-					{
-						command = CMD_MODCMDEX;
-						param = (((param & 0x0F) + 3) >> 2) | 0x10;
-					}
-				} else command = CMD_PORTAMENTOUP;
+					command = CMD_XFINEPORTAUPDOWN;
+					param = 0x10 | (param & 0x0F);
+				} else
+				{
+					command = CMD_MODCMDEX;
+					param = (((param & 0x0F) + 3) >> 2) | 0x10;
+				}
+			} else
+			{
+				command = CMD_PORTAMENTOUP;
+			}
 			break;
 
 		case CMD_PORTAMENTODOWN:
-			if (param >= 0xF0)
+			if(param >= 0xF0)
 			{
 				command = CMD_MODCMDEX;
 				param = (param & 0x0F) | 0x20;
-			} else
-				if (param >= 0xE0)
+			} else if(param >= 0xE0)
+			{
+				if(newTypeIsXM)
 				{
-					if(newTypeIsXM)
-					{
-						command = CMD_XFINEPORTAUPDOWN;
-						param = 0x20 | (param & 0x0F);
-					} else
-					{
-						command = CMD_MODCMDEX;
-						param = (((param & 0x0F) + 3) >> 2) | 0x20;
-					}
-				} else command = CMD_PORTAMENTODOWN;
+					command = CMD_XFINEPORTAUPDOWN;
+					param = 0x20 | (param & 0x0F);
+				} else
+				{
+					command = CMD_MODCMDEX;
+					param = (((param & 0x0F) + 3) >> 2) | 0x20;
+				}
+			} else
+			{
+				command = CMD_PORTAMENTODOWN;
+			}
 			break;
 
 		case CMD_SPEED:
-			{
-				param = min(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
-			}
+			param = min(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
 			break;
 
 		case CMD_TEMPO:
@@ -391,7 +394,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		default:
 			break;
 		}
-	} // End if (oldTypeIsIT_MPT && newTypeIsS3M)
+	} // End if(oldTypeIsIT_MPT && newTypeIsS3M)
 
 	//////////////////////
 	// Convert IT to XM
@@ -440,7 +443,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 
 	///////////////////////////////////////////////////////////////////////
 	// Convert MOD to anything - adjust effect memory, remove Invert Loop
-	if (oldTypeIsMOD)
+	if(oldTypeIsMOD)
 	{
 		switch(command)
 		{
@@ -457,11 +460,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			if((param & 0xF0) == 0xF0) command = CMD_NONE;
 			break;
 		}
-	} // End if (oldTypeIsMOD && newTypeIsXM)
+	} // End if(oldTypeIsMOD && newTypeIsXM)
 
 	/////////////////////////////////////////////////////////////////////
 	// Convert anything to MOD - remove volume column, remove Set Macro
-	if (newTypeIsMOD)
+	if(newTypeIsMOD)
 	{
 		// convert note off events
 		if(note >= NOTE_MIN_SPECIAL)
@@ -556,11 +559,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 
 		}
 		volcmd = CMD_NONE;
-	} // End if (newTypeIsMOD)
+	} // End if(newTypeIsMOD)
 
 	///////////////////////////////////////////////////
 	// Convert anything to S3M - adjust volume column
-	if (newTypeIsS3M)
+	if(newTypeIsS3M)
 	{
 		if(!command) switch(volcmd)
 		{
@@ -638,11 +641,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				break;
 
 		}
-	} // End if (newTypeIsS3M)
+	} // End if(newTypeIsS3M)
 
 	////////////////////////////////////////////////////////////////////////
 	// Convert anything to XM - adjust volume column, breaking EDx command
-	if (newTypeIsXM)
+	if(newTypeIsXM)
 	{
 		// remove EDx if no note is next to it, or it will retrigger the note in FT2 mode
 		if(command == CMD_MODCMDEX && (param & 0xF0) == 0xD0 && note == NOTE_NONE)
@@ -686,11 +689,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				break;
 
 		}
-	} // End if (newTypeIsXM)
+	} // End if(newTypeIsXM)
 
 	///////////////////////////////////////////////////
 	// Convert anything to IT - adjust volume column
-	if (newTypeIsIT_MPT)
+	if(newTypeIsIT_MPT)
 	{
 		if(!command) switch(volcmd)
 		{
@@ -726,7 +729,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				break;
 
 		}
-	} // End if (newTypeIsIT)
+	} // End if(newTypeIsIT_MPT)
 
 	if(!CSoundFile::GetModSpecifications(toType).HasNote(note))
 		note = NOTE_NONE;
