@@ -393,8 +393,8 @@ BOOL CMainToolBar::SetVertical()
 }
 
 
-UINT CMainToolBar::GetBaseOctave()
-//--------------------------------
+UINT CMainToolBar::GetBaseOctave() const
+//--------------------------------------
 {
 	if (nCurrentOctave >= MIN_BASEOCTAVE) return (UINT)nCurrentOctave;
 	return 4;

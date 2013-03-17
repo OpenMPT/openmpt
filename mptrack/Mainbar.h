@@ -68,7 +68,7 @@ public:
 public:
 	BOOL Create(CWnd *parent);
 	void Init(CMainFrame *);
-	UINT GetBaseOctave();
+	UINT GetBaseOctave() const;
 	BOOL SetBaseOctave(UINT nOctave);
 	BOOL SetCurrentSong(CSoundFile *pModDoc);
 

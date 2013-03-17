@@ -195,10 +195,12 @@ protected:
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 
+	// Chord preview
+	CHANNELINDEX chordPlayChannels[4];
+	ModCommand::NOTE prevChordNote, prevChordBaseNote;
+
 	BYTE activeNoteChannel[NOTE_MAX + 1];
 	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
-	CHANNELINDEX chordPlayChannels[4];
-	ModCommand::NOTE prevChordNote;
 
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
@@ -310,7 +312,7 @@ public:
 	void EnterAftertouch(int note, int atValue);
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
-	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[4]);
+	static int ConstructChord(int note, ModCommand::NOTE (&outNotes)[4], ModCommand::NOTE baseNote);
 
 	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
 	PATTERNINDEX GetNextPattern() const;
