@@ -400,8 +400,8 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 					if((sampleHeader.flags & 3) == 3 && madeWith[verNewModPlug])
 					{
-						// MPT 1.09 and maybe newer / older versions set both loop flags for bidi loops
-						madeWith = (verModPlug1_09 | verConfirmed);
+						// MPT 1.09 and maybe newer / older versions set both loop flags for bidi loops.
+						madeWith.set(verModPlug1_09);
 					}
 				}
 			}
