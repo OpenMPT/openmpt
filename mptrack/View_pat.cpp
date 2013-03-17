@@ -2435,12 +2435,12 @@ EndSearch:
 void CViewPattern::OnPatternStep()
 //--------------------------------
 {
-	PatternStep(true);
+	PatternStep();
 }
 
 
-void CViewPattern::PatternStep(bool autoStep)
-//-------------------------------------------
+void CViewPattern::PatternStep(ROWINDEX row)
+//------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -2459,7 +2459,7 @@ void CViewPattern::PatternStep(bool autoStep)
 			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		pSndFile->LoopPattern(m_nPattern);
-		pSndFile->m_nNextRow = GetCurrentRow();
+		pSndFile->m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;
 		pSndFile->m_SongFlags.reset(SONG_PAUSED);
 		pSndFile->m_SongFlags.set(SONG_STEP);
 
@@ -2470,7 +2470,7 @@ void CViewPattern::PatternStep(bool autoStep)
 			pMainFrm->PlayMod(pModDoc, m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
 		}
 		CMainFrame::EnableLowLatencyMode();
-		if(autoStep)
+		if(row == ROWINDEX_INVALID)
 		{
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 				SetCurrentRow(GetCurrentRow() + 1, TRUE);
@@ -2552,6 +2552,11 @@ void CViewPattern::OnCursorPaste()
 	}
 
 	SetModified(false);
+	// Preview Row
+	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !IsLiveRecord())
+	{
+		PatternStep(GetCurrentRow());
+	}
 
 	if(GetSoundFile()->IsPaused() || !m_Status[psFollowSong] || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
 	{
@@ -5111,7 +5116,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 		if (playWholeRow)
 		{
 			// play the whole row in "step mode"
-			PatternStep(false);
+			PatternStep(nRow);
 		}
 		if (!playWholeRow || !recordEnabled)
 		{
@@ -5346,7 +5351,7 @@ void CViewPattern::TempEnterChord(int note)
 		if(playWholeRow)
 		{
 			// play the whole row in "step mode"
-			PatternStep(false);
+			PatternStep(GetCurrentRow());
 		}
 		if(!playWholeRow || !recordEnabled)
 		{
@@ -5684,6 +5689,12 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 	if(step && (pSndFile->IsPaused() || !m_Status[psFollowSong] ||
 		(CMainFrame::GetMainFrame() != nullptr && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd)))
 	{
+		// Preview Row
+		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !IsLiveRecord())
+		{
+			PatternStep(GetCurrentRow());
+		}
+
 		if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
 			SetCurrentRow(GetCurrentRow() + m_nSpacing);
 

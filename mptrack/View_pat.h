@@ -505,7 +505,7 @@ private:
 	bool IsEditingEnabled_bmsg();
 
 	// Play one pattern row and stop ("step mode")
-	void PatternStep(bool autoStep);
+	void PatternStep(ROWINDEX row = ROWINDEX_INVALID);
 
 	// Add a channel.
 	void AddChannelBefore(CHANNELINDEX nBefore);
