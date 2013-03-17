@@ -228,6 +228,8 @@ public:
 	void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
 	LPCTSTR GetDefaultDirectory(Directory dir) const;
 
+	static MPTChords &GetChords() { return Instance().Chords; }
+
 	// Get settings object singleton
 	static TrackerSettings &Instance() { return settings; }
 

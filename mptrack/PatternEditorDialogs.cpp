@@ -1326,24 +1326,36 @@ BOOL CChordEditor::OnInitDialog()
 }
 
 
+MPTChord &CChordEditor::GetChord()
+//--------------------------------
+{
+	MPTChords &chords = TrackerSettings::GetChords();
+	int chord = m_CbnShortcut.GetCurSel();
+	if(chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
+	if(chord < 0 || chord >= CountOf(chords)) chord = 0;
+	return chords[chord];
+}
+
+
 LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 //----------------------------------------------------------------
 {
-	CMainFrame *pMainFrm;
-	int chord;
-
 	if (wParam != KBDNOTIFY_LBUTTONDOWN) return 0;
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return 0;
-	MPTChords &chords = pMainFrm->GetChords();
-	chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
+	MPTChord &chord = GetChord();
 	UINT cnote = NOTE_NONE;
-	chords[chord].notes[0] = NOTE_NONE;
-	chords[chord].notes[1] = NOTE_NONE;
-	chords[chord].notes[2] = NOTE_NONE;
-	for (UINT i=0; i<2*12; i++) if (i != (chords[chord].key % 12) || chords[chord].key == MPTChord::relativeMode)
+	chord.notes[0] = NOTE_NONE;
+	chord.notes[1] = NOTE_NONE;
+	chord.notes[2] = NOTE_NONE;
+	for(UINT i = 0; i < 2 * 12; i++)
 	{
+		if(chord.key == MPTChord::relativeMode)
+		{
+			if(!i) continue;
+		} else
+		{
+			if(i == chord.key % 12) continue;
+		}
+
 		UINT n = m_Keyboard.GetFlags(i);
 		if (i == (UINT)nKey) n = (n) ? 0 : 1;
 		if (n)
@@ -1351,7 +1363,7 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 			if ((cnote < 3) || (i == (UINT)nKey))
 			{
 				UINT k = (cnote < 3) ? cnote : 2;
-				chords[chord].notes[k] = static_cast<BYTE>(i+1);
+				chord.notes[k] = static_cast<BYTE>(i+1);
 				if (cnote < 3) cnote++;
 			}
 		}
@@ -1364,21 +1376,14 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 void CChordEditor::OnChordChanged()
 //---------------------------------
 {
-	CMainFrame *pMainFrm;
-	int chord;
-
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return;
-	MPTChords &chords = pMainFrm->GetChords();
-	chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
-	if(chords[chord].key != MPTChord::relativeMode)
-		m_CbnBaseNote.SetCurSel(chords[chord].key + 1);
+	MPTChord &chord = GetChord();
+	if(chord.key != MPTChord::relativeMode)
+		m_CbnBaseNote.SetCurSel(chord.key + 1);
 	else
 		m_CbnBaseNote.SetCurSel(0);
-	m_CbnNote1.SetCurSel(chords[chord].notes[0]);
-	m_CbnNote2.SetCurSel(chords[chord].notes[1]);
-	m_CbnNote3.SetCurSel(chords[chord].notes[2]);
+	m_CbnNote1.SetCurSel(chord.notes[0]);
+	m_CbnNote2.SetCurSel(chord.notes[1]);
+	m_CbnNote3.SetCurSel(chord.notes[2]);
 	UpdateKeyboard();
 }
 
@@ -1386,30 +1391,20 @@ void CChordEditor::OnChordChanged()
 void CChordEditor::UpdateKeyboard()
 //---------------------------------
 {
-	CMainFrame *pMainFrm;
-	int chord;
-	UINT note, octave;
-
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return;
-	MPTChords &chords = pMainFrm->GetChords();
-	chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
-	note = chords[chord].key % 12;
-	octave = chords[chord].key / 12;
-	if(chords[chord].key == MPTChord::relativeMode)
+	MPTChord &chord = GetChord();
+	UINT note = chord.key % 12;
+	if(chord.key == MPTChord::relativeMode)
 	{
-		note = octave = 0;
+		note = 0;
 	}
-	for(UINT i=0; i<2*12; i++)
+	for(UINT i = 0; i < 2 * 12; i++)
 	{
-		BOOL b = FALSE;
-
-		if (i == note) b = TRUE;
-		if ((chords[chord].notes[0]) && (i+1 == chords[chord].notes[0])) b = TRUE;
-		if ((chords[chord].notes[1]) && (i+1 == chords[chord].notes[1])) b = TRUE;
-		if ((chords[chord].notes[2]) && (i+1 == chords[chord].notes[2])) b = TRUE;
-		m_Keyboard.SetFlags(i, (b) ? 1 : 0);
+		UINT b = 0;
+		if(i == note) b = 1;
+		else if(chord.notes[0] && i + 1 == chord.notes[0]) b = 1;
+		else if(chord.notes[1] && i + 1 == chord.notes[1]) b = 1;
+		else if(chord.notes[2] && i + 1 == chord.notes[2]) b = 1;
+		m_Keyboard.SetFlags(i, b);
 	}
 	m_Keyboard.InvalidateRect(NULL, FALSE);
 }
@@ -1418,15 +1413,9 @@ void CChordEditor::UpdateKeyboard()
 void CChordEditor::OnBaseNoteChanged()
 //------------------------------------
 {
-	CMainFrame *pMainFrm;
-
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return;
-	MPTChords &chords = pMainFrm->GetChords();
-	int chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
+	MPTChord &chord = GetChord();
 	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel());
-	chords[chord].key = (uint8)basenote;
+	chord.key = (uint8)basenote;
 	UpdateKeyboard();
 }
 
@@ -1434,17 +1423,11 @@ void CChordEditor::OnBaseNoteChanged()
 void CChordEditor::OnNote1Changed()
 //---------------------------------
 {
-	CMainFrame *pMainFrm;
-
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return;
-	MPTChords &chords = pMainFrm->GetChords();
-	int chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
+	MPTChord &chord = GetChord();
 	int note = m_CbnNote1.GetCurSel();
-	if (note >= 0)
+	if(note >= 0)
 	{
-		chords[chord].notes[0] = (uint8)note;
+		chord.notes[0] = (uint8)note;
 		UpdateKeyboard();
 	}
 }
@@ -1453,17 +1436,11 @@ void CChordEditor::OnNote1Changed()
 void CChordEditor::OnNote2Changed()
 //---------------------------------
 {
-	CMainFrame *pMainFrm;
-	
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return;
-	MPTChords &chords = pMainFrm->GetChords();
-	int chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
+	MPTChord &chord = GetChord();
 	int note = m_CbnNote2.GetCurSel();
-	if (note >= 0)
+	if(note >= 0)
 	{
-		chords[chord].notes[1] = (uint8)note;
+		chord.notes[1] = (uint8)note;
 		UpdateKeyboard();
 	}
 }
@@ -1472,17 +1449,11 @@ void CChordEditor::OnNote2Changed()
 void CChordEditor::OnNote3Changed()
 //---------------------------------
 {
-	CMainFrame *pMainFrm;
-
-	if ((pMainFrm = CMainFrame::GetMainFrame()) == NULL) return;
-	MPTChords &chords = pMainFrm->GetChords();
-	int chord = m_CbnShortcut.GetCurSel();
-	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
-	if ((chord < 0) || (chord >= CountOf(chords))) chord = 0;
+	MPTChord &chord = GetChord();
 	int note = m_CbnNote3.GetCurSel();
-	if (note >= 0)
+	if(note >= 0)
 	{
-		chords[chord].notes[2] = (uint8)note;
+		chord.notes[2] = (uint8)note;
 		UpdateKeyboard();
 	}
 }

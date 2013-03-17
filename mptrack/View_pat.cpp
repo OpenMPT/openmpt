@@ -5231,9 +5231,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[4], ModCommand::NOTE baseNote)
 //----------------------------------------------------------------------------------------------------
 {
-	const CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	const MPTChords &chords = pMainFrm->GetChords();
-	UINT baseOctave = pMainFrm->GetBaseOctave();
+	const MPTChords &chords = TrackerSettings::GetChords();
+	UINT baseOctave = CMainFrame::GetMainFrame()->GetBaseOctave();
 	UINT chordNum = note - baseOctave * 12 - NOTE_MIN;
 
 	if(chordNum >= CountOf(chords))
