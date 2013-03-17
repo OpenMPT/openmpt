@@ -46,8 +46,9 @@ typedef struct __declspec(align(32)) ModChannel_
 	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
 	int32 nRampRightVol;
 	int32 nRampLeftVol;
-	float nFilter_Y1, nFilter_Y2, nFilter_Y3, nFilter_Y4;
-	float nFilter_A0, nFilter_B0, nFilter_B1;
+	float nFilter_Y1, nFilter_Y2;	// Mono / left channel filter memory
+	float nFilter_Y3, nFilter_Y4;	// Right channel filter memory
+	float nFilter_A0, nFilter_B0, nFilter_B1;	// Filter coeffs
 	int32 nFilter_HP;
 	int32 nROfs, nLOfs;
 	int32 nRampLength;

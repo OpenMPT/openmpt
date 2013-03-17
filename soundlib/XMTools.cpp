@@ -52,7 +52,7 @@ void XMInstrument::ConvertEndianness()
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 (&envData)[24])
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	numPoints = static_cast<uint8>(min(12, mptEnv.nNodes));
+	numPoints = static_cast<uint8>(Util::Min(12u, mptEnv.nNodes));
 
 	// Envelope Data
 	for(size_t i = 0; i < numPoints; i++)
@@ -67,9 +67,9 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &
 	if(mptEnv.dwFlags[ENV_LOOP]) flags |= XMInstrument::envLoop;
 
 	// Envelope Loops
-	sustain = static_cast<uint8>(min(12, mptEnv.nSustainStart));
-	loopStart = static_cast<uint8>(min(12, mptEnv.nLoopStart));
-	loopEnd = static_cast<uint8>(min(12, mptEnv.nLoopEnd));
+	sustain = Util::Min(uint8(12), mptEnv.nSustainStart);
+	loopStart = Util::Min(uint8(12), mptEnv.nLoopStart);
+	loopEnd = Util::Min(uint8(12), mptEnv.nLoopEnd);
 
 }
 
@@ -370,8 +370,8 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	MemsetZero(*this);
 
 	// Volume / Panning
-	vol = static_cast<uint8>(min(mptSmp.nVolume / 4, 64));
-	pan = static_cast<uint8>(min(mptSmp.nPan, 255));
+	vol = static_cast<uint8>(Util::Min(mptSmp.nVolume / 4u, 64u));
+	pan = static_cast<uint8>(Util::Min(mptSmp.nPan, uint16(255)));
 
 	// Sample Frequency
 	if((fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))
@@ -386,9 +386,9 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	}
 
 	flags = 0;
-	if((mptSmp.uFlags & CHN_LOOP))
+	if(mptSmp.uFlags[CHN_LOOP])
 	{
-		flags |= (mptSmp.uFlags & CHN_PINGPONGLOOP) ? XMSample::sampleBidiLoop : XMSample::sampleLoop;
+		flags |= mptSmp.uFlags[CHN_PINGPONGLOOP] ? XMSample::sampleBidiLoop : XMSample::sampleLoop;
 	}
 
 	// Sample Length and Loops
@@ -396,7 +396,7 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	loopStart = mptSmp.nLoopStart;
 	loopLength = mptSmp.nLoopEnd - mptSmp.nLoopStart;
 
-	if((mptSmp.uFlags & CHN_16BIT))
+	if(mptSmp.uFlags[CHN_16BIT])
 	{
 		flags |= XMSample::sample16Bit;
 		length *= 2;
@@ -404,7 +404,7 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 		loopLength *= 2;
 	}
 
-	if((mptSmp.uFlags & CHN_STEREO) && !compatibilityExport)
+	if(mptSmp.uFlags[CHN_STEREO] && !compatibilityExport)
 	{
 		flags |= XMSample::sampleStereo;
 		length *= 2;

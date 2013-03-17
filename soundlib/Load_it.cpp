@@ -57,11 +57,11 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	return false;
 }
 
-void ReadTuningCollection(istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
-void WriteTuningCollection(ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
+static void ReadTuningCollection(istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
+static void WriteTuningCollection(ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
 
-void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
-//-------------------------------------------------------
+static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
+//--------------------------------------------------------------
 {
 	if(sf.GetNumInstruments() > 0)
 	{
@@ -120,6 +120,7 @@ void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 	}
 }
 
+
 template<class TUNNUMTYPE, class STRSIZETYPE>
 static bool ReadTuningMap(istream& iStrm, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
 //--------------------------------------------------------------------------------------------------------
@@ -147,8 +148,9 @@ static bool ReadTuningMap(istream& iStrm, map<uint16, string>& shortToTNameMap, 
 		return true;
 }
 
-void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
-//-------------------------------------------------------------------
+
+static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
+//--------------------------------------------------------------------------
 {
 	typedef map<WORD, string> MAP;
 	typedef MAP::iterator MAP_ITER;
@@ -225,8 +227,8 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 // Impulse Tracker IT file support
 
 
-uint8 ConvertVolParam(const ModCommand *m)
-//----------------------------------------
+static uint8 ConvertVolParam(const ModCommand *m)
+//-----------------------------------------------
 {
 	return min(m->vol, 9);
 }
@@ -266,8 +268,8 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 }
 
 
-void CopyPatternName(CPattern &pattern, FileReader &file)
-//-------------------------------------------------------
+static void CopyPatternName(CPattern &pattern, FileReader &file)
+//--------------------------------------------------------------
 {
 	char name[MAX_PATTERNNAME] = "";
 	file.ReadString<StringFixer::maybeNullTerminated>(name, MAX_PATTERNNAME);
@@ -410,7 +412,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	// Reading Channels Pan Positions
 	for(CHANNELINDEX i = 0; i < 64; i++) if(fileHeader.chnpan[i] != 0xFF)
 	{
-		ChnSettings[i].nVolume = fileHeader.chnvol[i];
+		ChnSettings[i].nVolume = Clamp(fileHeader.chnvol[i], uint8(0), uint8(64));
 		ChnSettings[i].nPan = 128;
 		ChnSettings[i].dwFlags.reset();
 		if(fileHeader.chnpan[i] & 0x80) ChnSettings[i].dwFlags.set(CHN_MUTE);
@@ -977,7 +979,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 		return bytes_written;
 
 	// Write number of history entries
-	fnum = LittleEndianW(fnum);
+	SwapBytesLE(fnum);
 	fwrite(&fnum, 2, 1, f);
 
 #ifdef MODPLUG_TRACKER
@@ -1042,8 +1044,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	itHeader.id = ITFileHeader::itMagic;
 	StringFixer::WriteString<StringFixer::nullTerminated>(itHeader.songname, m_szNames[0]);
 
-	itHeader.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
-	itHeader.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
+	itHeader.highlight_minor = (uint8)Util::Min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
+	itHeader.highlight_major = (uint8)Util::Min(m_nDefaultRowsPerMeasure, ROWINDEX(uint8_max));
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
@@ -1056,13 +1058,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
-		itHeader.ordnum = min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
+		itHeader.ordnum = Util::Min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
 		if(itHeader.ordnum < 2) itHeader.ordnum = 2;
 	}
 
-	itHeader.insnum = min(m_nInstruments, specs.instrumentsMax);
-	itHeader.smpnum = min(m_nSamples, specs.samplesMax);
-	itHeader.patnum = min(Patterns.GetNumPatterns(), specs.patternsMax);
+	itHeader.insnum = Util::Min(m_nInstruments, specs.instrumentsMax);
+	itHeader.smpnum = Util::Min(m_nSamples, specs.samplesMax);
+	itHeader.patnum = Util::Min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
 	vector<uint32> patpos(itHeader.patnum, 0);
@@ -1098,7 +1100,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		}
 	}
 
-	itHeader.flags = ITFileHeader::useStereoPlayback;
+	itHeader.flags = ITFileHeader::useStereoPlayback | ITFileHeader::useMIDIPitchController;
 	itHeader.special = ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights;
 	if(m_nInstruments) itHeader.flags |= ITFileHeader::instrumentMode;
 	if(m_SongFlags[SONG_LINEARSLIDES]) itHeader.flags |= ITFileHeader::linearSlides;
@@ -1171,10 +1173,11 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	dwExtra += SaveITEditHistory(this, nullptr);
 
 	// Comments
+	uint16 msglength = 0;
 	if(m_lpszSongComments)
 	{
 		itHeader.special |= ITFileHeader::embedSongMessage;
-		itHeader.msglength = (uint16)min(strlen(m_lpszSongComments) + 1, uint16_max);
+		itHeader.msglength = msglength = (uint16)min(strlen(m_lpszSongComments) + 1, uint16_max);
 		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
@@ -1240,8 +1243,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	dwPos = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	if(itHeader.special & ITFileHeader::embedSongMessage)
 	{
-		dwPos += itHeader.msglength;
-		fwrite(m_lpszSongComments, 1, itHeader.msglength, f);
+		dwPos += msglength;
+		fwrite(m_lpszSongComments, 1, msglength, f);
 	}
 
 	// Writing instruments
@@ -1254,8 +1257,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		{
 			instSize = iti.ConvertToIT(*Instruments[nins], compatibilityExport, *this);
 		} else
-		// Save Empty Instrument
 		{
+			// Save Empty Instrument
 			ModInstrument dummy;
 			instSize = iti.ConvertToIT(dummy, compatibilityExport, *this);
 		}
@@ -1487,7 +1490,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		bool compress = (::GetPrivateProfileInt("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0, theApp.GetConfigFileName()) & type) != 0;
 #else
 		bool compress = false;
-#endif
+#endif // MODPLUG_TRACKER
 		// Old MPT will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
 		itss.ConvertToIT(Samples[nsmp], GetType(), compress, itHeader.cmwt >= 0x215);
 
@@ -1513,9 +1516,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
-	if (itHeader.insnum) fwrite(&inspos[0], 4, itHeader.insnum, f);
-	if (itHeader.smpnum) fwrite(&smppos[0], 4, itHeader.smpnum, f);
-	if (itHeader.patnum) fwrite(&patpos[0], 4, itHeader.patnum, f);
+	if(itHeader.insnum) fwrite(&inspos[0], 4, itHeader.insnum, f);
+	if(itHeader.smpnum) fwrite(&smppos[0], 4, itHeader.smpnum, f);
+	if(itHeader.patnum) fwrite(&patpos[0], 4, itHeader.patnum, f);
 
 	if(GetType() == MOD_TYPE_IT)
 	{
@@ -1534,19 +1537,19 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	srlztn::Ssb ssb(fout);
 	ssb.BeginWrite("mptm", MptVersion::num);
 
-	if (GetTuneSpecificTunings().GetNumTunings() > 0)
+	if(GetTuneSpecificTunings().GetNumTunings() > 0)
 		ssb.WriteItem(GetTuneSpecificTunings(), "0", 1, &WriteTuningCollection);
-	if (AreNonDefaultTuningsUsed(*this))
+	if(AreNonDefaultTuningsUsed(*this))
 		ssb.WriteItem(*this, "1", 1, &WriteTuningMap);
-	if (Order.NeedsExtraDatafield())
+	if(Order.NeedsExtraDatafield())
 		ssb.WriteItem(Order, "2", 1, &WriteModSequenceOld);
-	if (bNeedsMptPatSave)
+	if(bNeedsMptPatSave)
 		ssb.WriteItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &WriteModPatterns);
 	ssb.WriteItem(Order, FileIdSequences, strlen(FileIdSequences), &WriteModSequences);
 
 	ssb.FinishWrite();
 
-	if (ssb.m_Status & srlztn::SNT_FAILURE)
+	if(ssb.m_Status & srlztn::SNT_FAILURE)
 	{
 #ifdef MODPLUG_TRACKER
 		if(GetpModDoc())
@@ -1580,10 +1583,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 //----------------------------------------------------
 {
-
-
 	uint32 chinfo[MAX_BASECHANNELS];
-	CHAR s[32];
+	char id[4];
 	uint32 nPluginSize;
 	uint32 nTotalSize = 0;
 	uint32 nChInfo = 0;
@@ -1610,72 +1611,62 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 
 			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(DWORD) is 4
 			// rewbs.modularPlugData
-			if (f)
+			if(f)
 			{
 				// write plugin ID
-				s[0] = 'F';
-				s[1] = 'X';
-				s[2] = '0' + (i/10);
-				s[3] = '0' + (i%10);
-				fwrite(s, 1, 4, f);
+				id[0] = 'F';
+				id[1] = 'X';
+				id[2] = '0' + (i / 10);
+				id[3] = '0' + (i % 10);
+				fwrite(id, 1, 4, f);
 
 				// write plugin size:
 				fwrite(&nPluginSize, 1, 4, f);
 				fwrite(&plugin.Info, 1, sizeof(SNDMIXPLUGININFO), f);
 				fwrite(&m_MixPlugins[i].nPluginDataSize, 1, 4, f);
-				if (m_MixPlugins[i].pPluginData)
+				if(m_MixPlugins[i].pPluginData)
 				{
 					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
 				}
 
-				//rewbs.dryRatio
 				fwrite(&MPTxPlugDataSize, 1, 4, f);
 
 				//write ID for this xPlugData chunk:
-				s[0] = 'D'; s[1] = 'W';	s[2] = 'R'; s[3] = 'T';
-				fwrite(s, 1, 4, f);
+				memcpy(id, "DWRT", 4);
+				fwrite(id, 1, 4, f);
 				//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
 				fwrite(&(m_MixPlugins[i].fDryRatio), 1, sizeof(float), f);
-				//end rewbs.dryRatio
 
-				//rewbs.plugDefaultProgram
-				//if (nProgram>=0) {
-					s[0] = 'P'; s[1] = 'R';	s[2] = 'O'; s[3] = 'G';
-					fwrite(s, 1, 4, f);
-					//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
-					fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(long), f);
-				//}
-				//end rewbs.plugDefaultProgram
+				memcpy(id, "PROG", 4);
+				fwrite(id, 1, 4, f);
+				//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
+				fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(long), f);
 
 			}
 			nTotalSize += nPluginSize + 8;
 		}
 	}
-	for (UINT j=0; j<m_nChannels; j++)
+	for(CHANNELINDEX j = 0; j < m_nChannels; j++)
 	{
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//		if (j < 64)
-		if (j < MAX_BASECHANNELS)
-// -! BEHAVIOUR_CHANGE#0006
+		if(j < MAX_BASECHANNELS)
 		{
-			if ((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
+			if((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
 			{
-				nChInfo = j+1;
+				nChInfo = j + 1;
 			}
 		}
 	}
-	if (nChInfo)
+	if(nChInfo)
 	{
-		if (f)
+		if(f)
 		{
-			memcpy(&nPluginSize, "CHFX", 4);
-			fwrite(&nPluginSize, 1, 4, f);
-			nPluginSize = nChInfo*4;
+			memcpy(id, "CHFX", 4);
+			fwrite(id, 1, 4, f);
+			nPluginSize = nChInfo * 4;
 			fwrite(&nPluginSize, 1, 4, f);
 			fwrite(chinfo, 1, nPluginSize, f);
 		}
-		nTotalSize += nChInfo*4 + 8;
+		nTotalSize += nChInfo * 4 + 8;
 	}
 	return nTotalSize;
 }

@@ -10,22 +10,21 @@
 
 #pragma once
 
-#include "../common/misc_util.h"
-#include "../soundlib/tuning.h"
+#include "tuning.h"
 #include <set>
 
 // Instrument Envelopes
 struct InstrumentEnvelope
 {
-	FlagSet<EnvelopeFlags> dwFlags;	// envelope flags
-	uint32 nNodes;					// amount of nodes used
-	uint8  nLoopStart;				// loop start node
-	uint8  nLoopEnd;				// loop end node
-	uint8  nSustainStart;			// sustain start node
-	uint8  nSustainEnd;				// sustain end node
-	uint8  nReleaseNode;			// release node
-	uint16 Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
-	uint8  Values[MAX_ENVPOINTS];	// envelope point value (y axis)
+	FlagSet<EnvelopeFlags> dwFlags;	// Envelope flags
+	uint32 nNodes;					// Amount of nodes used
+	uint8  nLoopStart;				// Loop start node
+	uint8  nLoopEnd;				// Loop end node
+	uint8  nSustainStart;			// Sustain start node
+	uint8  nSustainEnd;				// Sustain end node
+	uint8  nReleaseNode;			// Release node
+	uint16 Ticks[MAX_ENVPOINTS];	// Envelope point position (x axis)
+	uint8  Values[MAX_ENVPOINTS];	// Envelope point value (y axis)
 
 	InstrumentEnvelope()
 	{
@@ -152,35 +151,11 @@ struct ModInstrument
 	}
 
 	// Get a set of all samples referenced by this instrument
-	std::set<SAMPLEINDEX> GetSamples() const
-	{
-		std::set<SAMPLEINDEX> referencedSamples;
-
-		for(size_t i = 0; i < CountOf(Keyboard); i++)
-		{
-			// 0 isn't a sample.
-			if(Keyboard[i] != 0)
-			{
-				referencedSamples.insert(Keyboard[i]);
-			}
-		}
-
-		return referencedSamples;
-	}
+	std::set<SAMPLEINDEX> GetSamples() const;
 
 	// Write sample references into a bool vector. If a sample is referenced by this instrument, true is written.
 	// The caller has to initialize the vector.
-	void GetSamples(std::vector<bool> &referencedSamples) const
-	{
-		for(size_t i = 0; i < CountOf(Keyboard); i++)
-		{
-			// 0 isn't a sample.
-			if(Keyboard[i] != 0 && Keyboard[i] < referencedSamples.size())
-			{
-				referencedSamples[Keyboard[i]] = true;
-			}
-		}
-	}
+	void GetSamples(std::vector<bool> &referencedSamples) const;
 
 	// Translate instrument properties between two given formats.
 	void Convert(MODTYPE fromType, MODTYPE toType);

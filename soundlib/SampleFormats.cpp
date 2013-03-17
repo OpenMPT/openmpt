@@ -2019,7 +2019,10 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 	// Check if we're dealing with FLAC in an OGG container.
 	// We won't check for the "fLaC" signature but let libFLAC decide whether a file is valid or not, as some FLAC files might have e.g. leading ID3v2 data.
 	file.Rewind();
-	const bool isOgg = FLAC_API_SUPPORTS_OGG_FLAC && file.ReadMagic("OggS") && file.Seek(29) && file.ReadMagic("FLAC");
+	if(!file.ReadMagic("fLaC"))
+	{
+		return false;
+	}
 	file.Rewind();
 
 	FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
@@ -2034,11 +2037,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 	FLACDecoder client(file, *this, sample);
 
 	// Init decoder
-	FLAC__StreamDecoderInitStatus initStatus;
-	if(isOgg)
-		initStatus = FLAC__stream_decoder_init_ogg_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
-	else
-		initStatus = FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
+	FLAC__StreamDecoderInitStatus initStatus = FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
 	if(initStatus != FLAC__STREAM_DECODER_INIT_STATUS_OK)
 	{
 		return false;
