@@ -201,7 +201,7 @@
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Release/mptrack.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\ReleaseLTCG/mptrack.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\ReleaseLTCG/</AssemblerListingLocation>
       <ObjectFileName>.\ReleaseLTCG/</ObjectFileName>
       <ProgramDataBaseFileName>.\ReleaseLTCG/</ProgramDataBaseFileName>
