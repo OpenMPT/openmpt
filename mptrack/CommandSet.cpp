@@ -655,6 +655,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcToggleClipboardManager, 1900, _T("Toggle Clipboard Manager"));
 	DefineKeyCommand(kcClipboardPrev, 1901, _T("Cycle to Previous Clipboard"));
 	DefineKeyCommand(kcClipboardNext, 1902, _T("Cycle to Next Clipboard"));
+	DefineKeyCommand(kcSelectRow, 1903, _T("Select Row"));
+	DefineKeyCommand(kcSelectEvent, 1904, _T("Select Event"));
 
 	// Add new key commands here.
 

@@ -4274,6 +4274,13 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSelectMeasure:
 			SelectBeatOrMeasure(wParam == kcSelectBeat); return wParam;
 
+		case kcSelectEvent:		SetCurSel(PatternCursor(m_Selection.GetStartRow(), m_Selection.GetStartChannel(), PatternCursor::firstColumn),
+									PatternCursor(m_Selection.GetEndRow(), m_Selection.GetEndChannel(), PatternCursor::lastColumn));
+								return wParam;
+		case kcSelectRow:		SetCurSel(PatternCursor(m_Selection.GetStartRow(), 0, PatternCursor::firstColumn),
+									PatternCursor(m_Selection.GetEndRow(), pSndFile->GetNumChannels(), PatternCursor::lastColumn));
+								return wParam;
+
 		case kcClearRow:		OnClearField(RowMask(), false);	return wParam;
 		case kcClearField:		OnClearField(RowMask(m_Cursor), false);	return wParam;
 		case kcClearFieldITStyle: OnClearField(RowMask(m_Cursor), false, true);	return wParam;

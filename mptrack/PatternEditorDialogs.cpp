@@ -1342,7 +1342,7 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 	chords[chord].notes[0] = NOTE_NONE;
 	chords[chord].notes[1] = NOTE_NONE;
 	chords[chord].notes[2] = NOTE_NONE;
-	for (UINT i=0; i<2*12; i++) if (i != (UINT)(chords[chord].key % 12))
+	for (UINT i=0; i<2*12; i++) if (i != (chords[chord].key % 12) || chords[chord].key == MPTChord::relativeMode)
 	{
 		UINT n = m_Keyboard.GetFlags(i);
 		if (i == (UINT)nKey) n = (n) ? 0 : 1;
@@ -1399,8 +1399,7 @@ void CChordEditor::UpdateKeyboard()
 	octave = chords[chord].key / 12;
 	if(chords[chord].key == MPTChord::relativeMode)
 	{
-		note = -1;
-		octave = 0;
+		note = octave = 0;
 	}
 	for(UINT i=0; i<2*12; i++)
 	{
