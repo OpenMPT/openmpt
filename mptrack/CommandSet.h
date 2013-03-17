@@ -215,6 +215,8 @@ enum CommandID
 	kcCopySelectWithSelect,
 	kcCopySelectOffWithSelect,
 	kcSelectColumn,
+	kcSelectRow,
+	kcSelectEvent,
 	kcSelectBeat,
 	kcSelectMeasure,
 	kcEndSelect=kcSelectMeasure,

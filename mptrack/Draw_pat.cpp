@@ -1441,19 +1441,11 @@ void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor 
 	RECT rect1, rect2, rect, rcInt, rcUni;
 	POINT pt;
 
-	PatternRect oldSel = m_Selection;
-	m_Selection = PatternRect(beginSel, endSel);
-	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr)
-	{
-		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
-	}
-
 	// Get current selection area
-	PatternCursor endSel2(oldSel.GetLowerRight());
+	PatternCursor endSel2(m_Selection.GetLowerRight());
 	endSel2.Move(1, 0, 1);
 
-	pt = GetPointFromPosition(oldSel.GetUpperLeft());
+	pt = GetPointFromPosition(m_Selection.GetUpperLeft());
 	rect1.left = pt.x;
 	rect1.top = pt.y;
 	pt = GetPointFromPosition(endSel2);
@@ -1463,6 +1455,13 @@ void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor 
 	if(rect1.top < m_szHeader.cy) rect1.top = m_szHeader.cy;
 
 	// Get new selection area
+	m_Selection = PatternRect(beginSel, endSel);
+	const CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile != nullptr)
+	{
+		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+	}
+
 	pt = GetPointFromPosition(m_Selection.GetUpperLeft());
 	rect2.left = pt.x;
 	rect2.top = pt.y;
