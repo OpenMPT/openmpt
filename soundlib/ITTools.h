@@ -103,9 +103,9 @@ struct ITEnvelope
 	uint8 reserved;		// Reserved
 
 	// Convert OpenMPT's internal envelope format to an IT/MPTM envelope.
-	void ConvertToIT(const InstrumentEnvelope &mptEnv, BYTE envOffset, BYTE envDefault);
+	void ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 envDefault);
 	// Convert IT/MPTM envelope data into OpenMPT's internal envelope format - To be used by ITInstrToMPT()
-	void ConvertToMPT(InstrumentEnvelope &mptEnv, BYTE envOffset, int maxNodes) const;
+	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, int maxNodes) const;
 };
 
 STATIC_ASSERT(sizeof(ITEnvelope) == 82);
@@ -258,7 +258,6 @@ struct ITSample
 		enablePanning		= 0x80,
 
 		cvtSignedSample		= 0x01,
-		cvtIT215Compression	= 0x04,
 		cvtADPCMSample		= 0xFF,		// MODPlugin :(
 
 		// ITTECH.TXT says these convert flags are "safe to ignore". IT doesn't ignore them, though, so why should we? :)

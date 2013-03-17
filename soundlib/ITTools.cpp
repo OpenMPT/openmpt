@@ -72,8 +72,8 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, BYTE envOffset, B
 
 
 // Convert IT/MPTM envelope data into OpenMPT's internal envelope format - To be used by ITInstrToMPT()
-void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, BYTE envOffset, int maxNodes) const
-//-------------------------------------------------------------------------------------------
+void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, int maxNodes) const
+//--------------------------------------------------------------------------------------------
 {
 	// Envelope Flags
 	mptEnv.dwFlags.set(ENV_ENABLED, (flags & ITEnvelope::envEnabled) != 0);
@@ -149,7 +149,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	// Sample Map
 	for(size_t i = 0; i < 120; i++)
 	{
-		BYTE note = keyboard[i * 2];
+		uint8 note = keyboard[i * 2];
 		SAMPLEINDEX ins = keyboard[i * 2 + 1];
 		if(ins < MAX_SAMPLES)
 		{
@@ -160,7 +160,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 			mptIns.NoteMap[i] = note + 1u;
 		} else
 		{
-			mptIns.NoteMap[i] = static_cast<BYTE>(i + 1);
+			mptIns.NoteMap[i] = static_cast<uint8>(i + 1);
 		}
 	}
 
@@ -354,7 +354,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	// Sample Map
 	for(size_t i = 0; i < 120; i++)
 	{
-		BYTE note = keyboard[i * 2];
+		uint8 note = keyboard[i * 2];
 		SAMPLEINDEX ins = keyboard[i * 2 + 1];
 		if(ins < MAX_SAMPLES)
 		{
@@ -365,7 +365,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 			mptIns.NoteMap[i] = note + 1u;
 		} else
 		{
-			mptIns.NoteMap[i] = static_cast<BYTE>(i + 1);
+			mptIns.NoteMap[i] = static_cast<uint8>(i + 1);
 		}
 	}
 
@@ -479,9 +479,9 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	//StringFixer::WriteString<StringFixer::nullTerminated>(name, m_szNames[nsmp]);
 
 	// Volume / Panning
-	gvl = static_cast<BYTE>(mptSmp.nGlobalVol);
-	vol = static_cast<BYTE>(mptSmp.nVolume / 4);
-	dfp = static_cast<BYTE>(mptSmp.nPan / 4);
+	gvl = static_cast<uint8>(mptSmp.nGlobalVol);
+	vol = static_cast<uint8>(mptSmp.nVolume / 4);
+	dfp = static_cast<uint8>(mptSmp.nPan / 4);
 	if(mptSmp.uFlags & CHN_PANNING) dfp |= ITSample::enablePanning;
 
 	// Sample Format / Loop Flags
@@ -508,7 +508,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 			flags |= ITSample::sampleCompressed;
 			if(compressIT215)
 			{
-				cvt |= ITSample::cvtIT215Compression;
+				cvt |= ITSample::cvtDelta;
 			}
 		}
 	} else
@@ -555,11 +555,11 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 
 	// Volume / Panning
 	mptSmp.nVolume = vol * 4;
-	LimitMax(mptSmp.nVolume, WORD(256));
+	LimitMax(mptSmp.nVolume, uint16(256));
 	mptSmp.nGlobalVol = gvl;
-	LimitMax(mptSmp.nGlobalVol, WORD(64));
+	LimitMax(mptSmp.nGlobalVol, uint16(64));
 	mptSmp.nPan = (dfp & 0x7F) * 4;
-	LimitMax(mptSmp.nPan, WORD(256));
+	LimitMax(mptSmp.nPan, uint16(256));
 	if(dfp & ITSample::enablePanning) mptSmp.uFlags |= CHN_PANNING;
 
 	// Loop Flags
@@ -611,7 +611,7 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 	if(flags & ITSample::sampleCompressed)
 	{
 		// IT 2.14 packed sample
-		sampleIO |= (cvt & ITSample::cvtIT215Compression) ? SampleIO::IT215 : SampleIO::IT214;
+		sampleIO |= (cvt & ITSample::cvtDelta) ? SampleIO::IT215 : SampleIO::IT214;
 	} else
 	{
 		// MODPlugin :(

@@ -2,7 +2,7 @@
  * RowVisitor.cpp
  * --------------
  * Purpose: Class for managing which rows of a song has already been visited. Useful for detecting backwards jumps, loops, etc.
- * Notes  : The class keepts track of rows that have been visited by the player before.
+ * Notes  : The class keeps track of rows that have been visited by the player before.
  *          This way, we can tell when the module starts to loop, i.e. we can determine the song length,
  *          or find out that a given point of the module can never be reached.
  *

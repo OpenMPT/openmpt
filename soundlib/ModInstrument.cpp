@@ -225,3 +225,38 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		nCutSwing = nResSwing = 0;
 	}
 }
+
+
+// Get a set of all samples referenced by this instrument
+std::set<SAMPLEINDEX> ModInstrument::GetSamples() const
+//-----------------------------------------------------
+{
+	std::set<SAMPLEINDEX> referencedSamples;
+
+	for(size_t i = 0; i < CountOf(Keyboard); i++)
+	{
+		// 0 isn't a sample.
+		if(Keyboard[i] != 0)
+		{
+			referencedSamples.insert(Keyboard[i]);
+		}
+	}
+
+	return referencedSamples;
+}
+
+
+// Write sample references into a bool vector. If a sample is referenced by this instrument, true is written.
+// The caller has to initialize the vector.
+void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
+//------------------------------------------------------------------------
+{
+	for(size_t i = 0; i < CountOf(Keyboard); i++)
+	{
+		// 0 isn't a sample.
+		if(Keyboard[i] != 0 && Keyboard[i] < referencedSamples.size())
+		{
+			referencedSamples[Keyboard[i]] = true;
+		}
+	}
+}

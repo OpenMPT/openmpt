@@ -3521,7 +3521,18 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 				break;
 	// SBx: Pattern Loop
 	// SCx: Note Cut
-	case 0xC0:	NoteCut(nChn, param); break;
+	case 0xC0:
+		if(param == 0)
+		{
+			//IT compatibility 22. SC0 == SC1
+			if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				param = 1;
+			// ST3 doesn't cut notes with SC0
+			else if(GetType() == MOD_TYPE_S3M)
+				return;
+		}
+		NoteCut(nChn, param);
+		break;
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
 	// SFx: S3M: Not used, IT: Set Active Midi Macro
@@ -4237,16 +4248,6 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide)
 void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
 //-----------------------------------------------------
 {
-	if(nTick == 0)
-	{
-		//IT compatibility 22. SC0 == SC1
-		if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-			nTick = 1;
-		// ST3 doesn't cut notes with SC0
-		else if(GetType() == MOD_TYPE_S3M)
-			return;
-	}
-
 	if (m_nTickCount == nTick)
 	{
 		ModChannel *pChn = &Chn[nChn];

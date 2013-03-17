@@ -9,6 +9,7 @@
 
 
 #include "stdafx.h"
+#include "Loaders.h"
 #include "WAVTools.h"
 
 

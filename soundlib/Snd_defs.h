@@ -167,11 +167,11 @@ FLAGSET(EnvelopeFlags)
 
 
 // Envelope value boundaries
-#define ENVELOPE_MIN		0		// vertical min value of a point
-#define ENVELOPE_MID		32		// vertical middle line
-#define ENVELOPE_MAX		64		// vertical max value of a point
+#define ENVELOPE_MIN		0		// Vertical min value of a point
+#define ENVELOPE_MID		32		// Vertical middle line
+#define ENVELOPE_MAX		64		// Vertical max value of a point
 #define MAX_ENVPOINTS		240		// Maximum length of each instrument envelope
-#define ENVELOPE_MAX_LENGTH 0x3FFF	// max envelope length in ticks. note: this value seems to be conservatively low...
+#define ENVELOPE_MAX_LENGTH 0x3FFF	// Max envelope length in ticks. note: this value is only really required because too long envelopes won't be displayed properly in the instrument editor (win32 scrollbar issues)
 
 
 // Flags of 'dF..' datafield in extended instrument properties.
