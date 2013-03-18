@@ -196,7 +196,7 @@ protected:
 	WORD OldVUMeters[MAX_BASECHANNELS];
 
 	// Chord preview
-	CHANNELINDEX chordPlayChannels[4];
+	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
 	ModCommand::NOTE prevChordNote, prevChordBaseNote;
 
 	BYTE activeNoteChannel[NOTE_MAX + 1];
@@ -312,7 +312,7 @@ public:
 	void EnterAftertouch(int note, int atValue);
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
-	static int ConstructChord(int note, ModCommand::NOTE (&outNotes)[4], ModCommand::NOTE baseNote);
+	static int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);
 
 	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
 	PATTERNINDEX GetNextPattern() const;

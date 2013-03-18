@@ -128,6 +128,7 @@ struct MPTChord
 {
 	enum
 	{
+		notesPerChord = 4,
 		relativeMode = 0x3F,
 	};
 

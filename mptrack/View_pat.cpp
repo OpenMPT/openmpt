@@ -4704,11 +4704,14 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	const bool liveRecord = IsLiveRecord();
 	const bool isSplit = IsNoteSplit(note);
-	const CHANNELINDEX nChnCursor = GetCurrentChannel();
 	UINT ins = 0;
 
 	BYTE *activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
-	const CHANNELINDEX nChn = (activeNoteMap[note] < pSndFile->GetNumChannels()) ? activeNoteMap[note] : nChnCursor;
+	const CHANNELINDEX nChnCursor = GetCurrentChannel();
+	const CHANNELINDEX nChn = bChordMode ? chordPatternChannels[0] : (activeNoteMap[note] < pSndFile->GetNumChannels() ? activeNoteMap[note] : nChnCursor);
+
+	CHANNELINDEX noteChannels[MPTChord::notesPerChord] = { nChn };
+	int numNotes = 1;
 
 	if(pModDoc)
 	{
@@ -4724,20 +4727,21 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		if(!ins)
 			ins = m_nFoundInstrument;
 
-		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
+		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord && IsLiveRecord());
 		if(bChordMode == true)
 		{
 			m_Status.reset(psChordPlaying);
 
 			ModCommand::NOTE notes[4];
-			int numNotes = ConstructChord(note, notes, prevChordBaseNote);
+			numNotes = ConstructChord(note, notes, prevChordBaseNote);
 			if(!numNotes)
 			{
 				return;
 			}
 			for(int i = 0; i < numNotes; i++)
 			{
-				pModDoc->NoteOff(notes[i], true, ins, GetCurrentChannel(), playWholeRow ? chordPlayChannels[i] : CHANNELINDEX_INVALID);
+				pModDoc->NoteOff(notes[i], true, ins, GetCurrentChannel(), playWholeRow ? chordPatternChannels[i] : CHANNELINDEX_INVALID);
+				noteChannels[i] = chordPatternChannels[i];
 			}
 			prevChordNote = NOTE_NONE;
 		} else
@@ -4779,7 +4783,6 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	ModCommand *pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
-
 	// Don't overwrite:
 	if(pTarget->note != NOTE_NONE || pTarget->instr || pTarget->volcmd != VOLCMD_NONE)
 	{
@@ -4789,7 +4792,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		if(pTarget->note == note && liveRecord && pSndFile->Patterns[nPat].IsValidRow(nRow))
 		{
 			pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
-			if(pTarget->note || (!bChordMode && (pTarget->instr || pTarget->volcmd)))
+			if(pTarget->note != NOTE_NONE || (!bChordMode && (pTarget->instr || pTarget->volcmd)))
 				return;
 		} else
 		{
@@ -4798,49 +4801,53 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	// Create undo-point.
-	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, 1, 1);
+	pModDoc->GetPatternUndo().PrepareUndo(nPat, nChn, nRow, noteChannels[numNotes - 1] - nChn + 1, 1);
 
-	// -- write sdx if playing live
-	if(usePlaybackPosition && nTick && pTarget->command == CMD_NONE && !doQuantize)
+	for(int i = 0; i < numNotes; i++)
 	{
-		pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-		pTarget->param = 0xD0 | min(0xF, nTick);
-	}
+		ModCommand *pTarget = pSndFile->Patterns[nPat].GetpModCommand(nRow, noteChannels[i]);
 
-	//Enter note off
-	if(pSndFile->GetModSpecifications().hasNoteOff && (pSndFile->GetNumInstruments() > 0 || !pSndFile->GetModSpecifications().hasNoteCut))
-	{
-		 // ===
-		// Not used in sample (if module format supports ^^^ instead)
-		pTarget->note = NOTE_KEYOFF;
-	} else if(pSndFile->GetModSpecifications().hasNoteCut)
-	{
-		// ^^^
-		pTarget->note = NOTE_NOTECUT;
-	} else
-	{
-		// we don't have anything to cut (MOD format) - use volume or ECx
-		if(usePlaybackPosition && nTick && !doQuantize) // ECx
+		// -- write sdx if playing live
+		if(usePlaybackPosition && nTick && pTarget->command == CMD_NONE && !doQuantize)
 		{
 			pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-			pTarget->param   = 0xC0 | min(0xF, nTick);
-		} else // C00
-		{
-			pTarget->note = NOTE_NONE;
-			pTarget->command = CMD_VOLUME;
-			pTarget->param = 0;
+			pTarget->param = 0xD0 | min(0xF, nTick);
 		}
+
+		//Enter note off
+		if(pSndFile->GetModSpecifications().hasNoteOff && (pSndFile->GetNumInstruments() > 0 || !pSndFile->GetModSpecifications().hasNoteCut))
+		{
+			// ===
+			// Not used in sample (if module format supports ^^^ instead)
+			pTarget->note = NOTE_KEYOFF;
+		} else if(pSndFile->GetModSpecifications().hasNoteCut)
+		{
+			// ^^^
+			pTarget->note = NOTE_NOTECUT;
+		} else
+		{
+			// we don't have anything to cut (MOD format) - use volume or ECx
+			if(usePlaybackPosition && nTick && !doQuantize) // ECx
+			{
+				pTarget->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+				pTarget->param   = 0xC0 | min(0xF, nTick);
+			} else // C00
+			{
+				pTarget->note = NOTE_NONE;
+				pTarget->command = CMD_VOLUME;
+				pTarget->param = 0;
+			}
+		}
+		pTarget->instr = 0;	// Instrument numbers next to note-offs can do all kinds of weird things in XM files, and they are pointless anyway.
+		pTarget->volcmd = VOLCMD_NONE;
+		pTarget->vol = 0;
 	}
-	pTarget->instr = 0;	// Instrument numbers next to note-offs can do all kinds of weird things in XM files, and they are pointless anyway.
-	pTarget->volcmd	= VOLCMD_NONE;
-	pTarget->vol = 0;
 
 	pModDoc->SetModified();
 
 	if(nPat == m_nPattern)
 	{
-		PatternCursor sel(nRow, nChn);
-		InvalidateCell(sel);
+		InvalidateRow(nRow);
 	} else
 	{
 		InvalidatePattern();
@@ -5228,8 +5235,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 
 // Construct a chord from the chord presets. Returns number of notes in chord.
-int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[4], ModCommand::NOTE baseNote)
-//----------------------------------------------------------------------------------------------------
+int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	const MPTChords &chords = TrackerSettings::GetChords();
 	UINT baseOctave = CMainFrame::GetMainFrame()->GetBaseOctave();
@@ -5297,7 +5304,7 @@ void CViewPattern::TempEnterChord(int note)
 	const CHANNELINDEX chn = GetCurrentChannel();
 	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
 
-	ModCommand::NOTE chordNotes[4], baseNote = rowBase[chn].note;
+	ModCommand::NOTE chordNotes[MPTChord::notesPerChord], baseNote = rowBase[chn].note;
 	if(!ModCommand::IsNote(baseNote))
 	{
 		baseNote = prevChordBaseNote;
@@ -5333,7 +5340,7 @@ void CViewPattern::TempEnterChord(int note)
 			break;
 		}
 
-		chordPlayChannels[i] = curChn;
+		chordPatternChannels[i] = curChn;
 		
 		ModCommand &m = newRow[curChn];
 		m.note = chordNotes[i];
@@ -5417,7 +5424,7 @@ void CViewPattern::TempEnterChord(int note)
 			const bool isPlaying = pMainFrm->GetModPlaying() == pModDoc && pMainFrm->IsPlaying();
 			for(int i = 0; i < numNotes; i++)
 			{
-				chordPlayChannels[i] = pModDoc->PlayNote(chordNotes[i], nPlayIns, 0, !isPlaying && i == 0, -1, 0, 0, chn);
+				pModDoc->PlayNote(chordNotes[i], nPlayIns, 0, !isPlaying && i == 0, -1, 0, 0, chn);
 			}
 		}
 	} // end play note

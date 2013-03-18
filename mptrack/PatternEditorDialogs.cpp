@@ -1353,7 +1353,7 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 			if(!i) continue;
 		} else
 		{
-			if(i == chord.key % 12) continue;
+			if(i == chord.key % 12u) continue;
 		}
 
 		UINT n = m_Keyboard.GetFlags(i);
