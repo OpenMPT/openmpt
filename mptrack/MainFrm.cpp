@@ -1042,6 +1042,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			p->nOrder = m_pSndFile->m_nCurrentOrder;
 			p->nRow = m_pSndFile->m_nRow;
 			p->nPattern = m_pSndFile->m_nPattern;
+			p->nTick = m_pSndFile->m_nTickCount;
 			if (m_dwNotifyType & MPTNOTIFY_SAMPLE)
 			{
 				SAMPLEINDEX nSmp = m_dwNotifyType & 0xFFFF;
@@ -1056,8 +1057,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 						p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->nPos);
 					}
 				}
-			} else
-			if (m_dwNotifyType & (MPTNOTIFY_VOLENV|MPTNOTIFY_PANENV|MPTNOTIFY_PITCHENV))
+			} else if (m_dwNotifyType & (MPTNOTIFY_VOLENV|MPTNOTIFY_PANENV|MPTNOTIFY_PITCHENV))
 			{
 				UINT nIns = m_dwNotifyType & 0xFFFF;
 				for (CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
@@ -1079,9 +1079,9 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 						if(chnEnv.flags[ENV_ENABLED])
 						{
 							uint32 pos = chnEnv.nEnvPosition;
-							if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+							if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER))
 							{
-								// Impulse Tracker / Fasttracker 2 envelope handling (see SndMix.cpp for details)
+								// Impulse Tracker envelope handling (see e.g. CSoundFile::IncrementEnvelopePosition in SndMix.cpp for details)
 								if(pos > 0)
 									pos--;
 								else
@@ -1091,8 +1091,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 						}
 					}
 				}
-			} else
-			if (m_dwNotifyType & (MPTNOTIFY_VUMETERS))
+			} else if (m_dwNotifyType & (MPTNOTIFY_VUMETERS))
 			{
 				for (UINT k=0; k<MAX_CHANNELS; k++)
 				{
@@ -1101,8 +1100,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					UINT vur = pChn->nRightVU;
 					p->dwPos[k] = (vul << 8) | (vur);
 				}
-			} else
-			if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
+			} else if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
 			{
 				DWORD lVu = (gnLVuMeter >> 11);
 				DWORD rVu = (gnRVuMeter >> 11);

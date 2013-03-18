@@ -273,15 +273,16 @@ enum
 #define MPTNOTIFY_STOP			0x00800000
 #define MPTNOTIFY_POSVALID		0x80000000	// dwPos[i] is valid
 
-typedef struct MPTNOTIFICATION
+struct MPTNOTIFICATION
 {
 	DWORD dwType;
 	DWORD dwLatency;
-	ORDERINDEX nOrder;			// Always valid
+	ROWINDEX nRow;				// Always valid
+	UINT nTick;					// dito
+	ORDERINDEX nOrder;			// dito
 	PATTERNINDEX nPattern;		// dito
-	ROWINDEX nRow;				// dito
 	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
-} MPTNOTIFICATION, *PMPTNOTIFICATION;
+};
 
 
 /////////////////////////////////////////////////////////////////////////

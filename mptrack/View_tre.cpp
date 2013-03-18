@@ -2200,7 +2200,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 }
 
 
-void CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
+void CModTree::UpdatePlayPos(CModDoc *pModDoc, MPTNOTIFICATION *pNotify)
 //----------------------------------------------------------------------
 {
 	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(pModDoc);

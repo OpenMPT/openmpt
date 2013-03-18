@@ -937,7 +937,7 @@ VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
 }
 
 
-VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
+VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, MPTNOTIFICATION *pNotify)
 //-------------------------------------------------------------------------
 {
 	if (m_pModTree) m_pModTree->UpdatePlayPos(pModDoc, pNotify);

@@ -162,6 +162,7 @@ protected:
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow;
+	UINT m_nPlayTick;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
 
 	int m_nXScroll, m_nYScroll;
@@ -192,15 +193,15 @@ protected:
 
 	vector<ModCommand::NOTE> octaveKeyMemory;
 
-	WORD ChnVUMeters[MAX_BASECHANNELS];
-	WORD OldVUMeters[MAX_BASECHANNELS];
-
 	// Chord preview
 	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
 	ModCommand::NOTE prevChordNote, prevChordBaseNote;
 
-	BYTE activeNoteChannel[NOTE_MAX + 1];
-	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
+	WORD ChnVUMeters[MAX_BASECHANNELS];
+	WORD OldVUMeters[MAX_BASECHANNELS];
+
+	BYTE activeNoteChannel[NOTE_MAX + NOTE_MIN];
+	BYTE splitActiveNoteChannel[NOTE_MAX + NOTE_MIN];
 
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
