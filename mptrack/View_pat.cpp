@@ -5298,6 +5298,10 @@ void CViewPattern::TempEnterChord(int note)
 	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
 
 	ModCommand::NOTE chordNotes[4], baseNote = rowBase[chn].note;
+	if(!ModCommand::IsNote(baseNote))
+	{
+		baseNote = prevChordBaseNote;
+	}
 	int numNotes = ConstructChord(note, chordNotes, baseNote);
 	if(!numNotes)
 	{
@@ -5367,7 +5371,6 @@ void CViewPattern::TempEnterChord(int note)
 		}
 	}
 
-
 	// -- play note
 	if((TrackerSettings::Instance().m_dwPatternSetup & (PATTERN_PLAYNEWNOTE | PATTERN_PLAYEDITROW)) || !recordEnabled)
 	{
@@ -5375,8 +5378,6 @@ void CViewPattern::TempEnterChord(int note)
 		{
 			TempStopChord(prevChordNote);
 		}
-		prevChordNote = note;
-		prevChordBaseNote = baseNote;
 
 		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
 		if(playWholeRow)
@@ -5421,6 +5422,8 @@ void CViewPattern::TempEnterChord(int note)
 		}
 	} // end play note
 
+	prevChordNote = note;
+	prevChordBaseNote = baseNote;
 
 	// Set new cursor position (row spacing) - only when not recording live
 	if(recordEnabled && !liveRecord)
