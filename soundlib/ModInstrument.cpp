@@ -217,12 +217,13 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		LimitMax(nFadeOut, 8192u);
 	}
 
-	// MPT-specific features - remove instrument tunings, Pitch/Tempo Lock for other formats
+	// MPT-specific features - remove instrument tunings, Pitch/Tempo Lock, cutoff / resonance swing and filter mode for other formats
 	if(!(toType & MOD_TYPE_MPT))
 	{
 		SetTuning(nullptr);
 		wPitchToTempoLock = 0;
 		nCutSwing = nResSwing = 0;
+		nFilterMode = FLTMODE_UNCHANGED;
 	}
 }
 
