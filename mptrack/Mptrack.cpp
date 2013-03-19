@@ -908,7 +908,7 @@ BOOL CTrackApp::InitInstance()
 	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
 	m_pMainWnd = pMainFrame;
 
-	if (cmdInfo.m_bShowSplash)
+	if (cmdInfo.m_bShowSplash && TrackerSettings::Instance().m_ShowSplashScreen)
 	{
 		StartSplashScreen();
 	}
