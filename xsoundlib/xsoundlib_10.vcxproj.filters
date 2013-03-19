@@ -1,59 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src_zoh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src_sinc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src_linear.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="smbPitchShift.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="samplerate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unistd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fastest_coeffs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="float_cast.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="high_qual_coeffs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mid_qual_coeffs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="samplerate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="smbPitchShift.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

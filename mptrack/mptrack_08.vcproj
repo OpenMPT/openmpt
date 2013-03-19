@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -156,7 +156,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\xsoundlib;..\"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -325,10 +325,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\VstPresets.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\globals.cpp"
 				>
 			</File>
@@ -346,6 +342,10 @@
 			</File>
 			<File
 				RelativePath="InputHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ITCompression.cpp"
 				>
 			</File>
 			<File
@@ -489,10 +489,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\ITCompression.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\common\serialization_utils.cpp"
 				>
 			</File>
@@ -610,6 +606,10 @@
 			</File>
 			<File
 				RelativePath=".\vstplug.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\VstPresets.cpp"
 				>
 			</File>
 			<File
@@ -887,15 +887,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\VstPresets.h"
-				>
-			</File>
-			<File
 				RelativePath=".\globals.h"
 				>
 			</File>
 			<File
 				RelativePath="InputHandler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\ITCompression.h"
 				>
 			</File>
 			<File
@@ -1035,10 +1035,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\ITCompression.h"
-				>
-			</File>
-			<File
 				RelativePath="..\common\serialization_utils.h"
 				>
 			</File>
@@ -1124,6 +1120,10 @@
 			</File>
 			<File
 				RelativePath=".\vstplug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VstPresets.h"
 				>
 			</File>
 			<File
