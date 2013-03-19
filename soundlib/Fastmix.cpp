@@ -15,13 +15,6 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#if defined(_MSC_VER)
-#elif defined(__GNUC__)
-#define __forceinline __attribute__((always_inline))
-#else
-#define __forceinline inline
-#endif
-
 #include "WindowedFIR.h"
 
 #pragma bss_seg(".modplug")
@@ -344,8 +337,8 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 #define ClipFilter(x) Clamp(x, 2.0f * (float)int16_min, 2.0f * (float)int16_max)
 
 // Resonant filter for Mono samples
-static __forceinline void ProcessMonoFilter(int &vol, ModChannel *pChn)
-//---------------------------------------------------------------------
+static forceinline void ProcessMonoFilter(int &vol, ModChannel *pChn)
+//-------------------------------------------------------------------
 {
 	float fy1 = pChn->nFilter_Y1;
 	float fy2 = pChn->nFilter_Y2;
@@ -361,8 +354,8 @@ static __forceinline void ProcessMonoFilter(int &vol, ModChannel *pChn)
 
 
 // Resonant filter for Stereo samples
-static __forceinline void ProcessStereoFilter(int &vol_l, int &vol_r, ModChannel *pChn)
-//-------------------------------------------------------------------------------------
+static forceinline void ProcessStereoFilter(int &vol_l, int &vol_r, ModChannel *pChn)
+//-----------------------------------------------------------------------------------
 {
 	// Left channel
 	float fy1 = pChn->nFilter_Y1;

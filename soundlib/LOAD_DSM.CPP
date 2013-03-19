@@ -230,12 +230,13 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			sample.nVolume = (WORD)(pSmp->volume << 2);
 			if (sample.nVolume > 256) sample.nVolume = 256;
 
+			FileReader chunk(lpStream + dwPos, dwMemLength - dwPos);
 			SampleIO(
 				SampleIO::_8bit,
 				SampleIO::mono,
 				SampleIO::littleEndian,
 				(pSmp->flags & 2) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
-				.ReadSample(sample, (LPCSTR)(lpStream + dwPos), dwMemLength - dwPos);
+				.ReadSample(sample, chunk);
 
 			nSmp++;
 		} else

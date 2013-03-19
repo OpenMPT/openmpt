@@ -28,7 +28,7 @@
 	#define CountOf(x) (sizeof(x)/sizeof(x[0]))
 #endif
 
-//Compile time assert.
+// Compile time assert.
 #ifndef C_ASSERT
 #define C_ASSERT(expr)				typedef char __C_ASSERT__[(expr)?1:-1]
 #endif
@@ -37,6 +37,19 @@
 #if (_MSC_VER < MSVC_VER_2010)
 	#define static_assert(expr, msg)	C_ASSERT(expr)
 #endif
+
+// Advanced inline attributes
+#if defined(_MSC_VER)
+#define forceinline __forceinline
+#define noinline __declspec(noinline)
+#elif defined(__GNUC__)
+#define forceinline __attribute__((always_inline)) inline
+#define noinline __attribute__((noinline))
+#else
+#define forceinline inline
+#define noinline
+#endif
+
 
 typedef __int8 int8;
 typedef __int16 int16;

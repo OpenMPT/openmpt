@@ -192,7 +192,7 @@ MPWD			MIDI Pitch Wheel Depth
 // Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_sized_member(name,type,code) \
-static_assert(sizeof(input->name) >= sizeof(type), "");\
+static_assert(sizeof(input->name) >= sizeof(type), "Instrument property does not fit into specified type!");\
 fcode = #@code;\
 fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
 fsize = sizeof( type );\

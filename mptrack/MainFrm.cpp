@@ -1341,9 +1341,6 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 		if (bPaused)
 		{
 			pSndFile->m_SongFlags.set(SONG_PAUSED);
-		} else
-		{
-			pModDoc->SetPause(FALSE);
 		}
 	}
 	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
@@ -1388,7 +1385,6 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	}
 	if (m_pModPlaying)
 	{
-		m_pModPlaying->SetPause(TRUE);
 		m_wndTree.UpdatePlayPos(m_pModPlaying, NULL);
 	}
 	if (m_pSndFile)
@@ -1422,10 +1418,8 @@ BOOL CMainFrame::StopMod(CModDoc *pModDoc)
 //----------------------------------------
 {
 	if ((pModDoc) && (pModDoc != m_pModPlaying)) return FALSE;
-	CModDoc *pPlay = m_pModPlaying;
 	CSoundFile *pSndFile = m_pSndFile;
 	PauseMod();
-	if (pPlay) pPlay->SetPause(FALSE);
 	if (pSndFile) pSndFile->SetCurrentPos(0);
 	return TRUE;
 }
@@ -1611,14 +1605,6 @@ BOOL CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 	if ((pSndFile) && (pSndFile != m_pSndFile)) return FALSE;
 	PauseMod(NULL);
 	return TRUE;
-}
-
-
-void CMainFrame::StopPreview()
-//----------------------------
-{
-	StopSoundFile(&m_WaveFile);
-	m_WaveFile.Destroy();
 }
 
 

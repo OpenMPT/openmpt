@@ -122,7 +122,6 @@ CModDoc::CModDoc()
 //----------------
 {
 	m_bHasValidPath = false;
-	m_bPaused = TRUE;
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 
@@ -925,11 +924,8 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 
 		CriticalSection cs;
 
-		//find a channel if required
-		//if (nCurrentChn == CHANNELINDEX_INVALID)
-		{ 
-			nChn = FindAvailableChannel();
-		}
+		// Find a channel to play on
+		nChn = FindAvailableChannel();
 
 		ModChannel *pChn = &m_SndFile.Chn[nChn];
 		
@@ -2584,7 +2580,7 @@ CHANNELINDEX CModDoc::FindAvailableChannel()
 	if(nStoppedChannel != CHANNELINDEX_INVALID)
 		return nStoppedChannel;
 	
-	//Last resort: go for first virutal channel.
+	//Last resort: go for first virtual channel.
 	return m_SndFile.m_nChannels;
 }
 

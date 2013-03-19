@@ -593,7 +593,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 
 				if (!smpinfo[i])
 				{
-					dwPos += sampleIO.ReadSample(sample, (LPSTR)(lpStream+dwPos), dwMemLength - dwPos);
+					FileReader chunk(lpStream + dwPos, dwMemLength - dwPos);
+					dwPos += sampleIO.ReadSample(sample, chunk);
 				} else
 				{
 					DWORD dwLen = *((DWORD *)(lpStream+dwPos));
@@ -601,7 +602,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
 					{
 						sampleIO |= SampleIO::MDL;
-						sampleIO.ReadSample(sample, (LPSTR)(lpStream+dwPos), dwLen);
+						FileReader chunk(lpStream + dwPos , dwLen);
+						sampleIO.ReadSample(sample, chunk);
 					}
 					dwPos += dwLen;
 				}
