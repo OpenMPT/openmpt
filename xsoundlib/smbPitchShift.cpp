@@ -36,7 +36,8 @@
 *
 *****************************************************************************/ 
 
-#include <stdafx.h>
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+
 #include <string.h>
 #include <math.h>
 #include "smbPitchShift.h"
