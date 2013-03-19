@@ -32,6 +32,7 @@ const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Song
 TrackerSettings::TrackerSettings()
 //--------------------------------
 {
+	m_ShowSplashScreen = true;
 	gnPatternSpacing = 0;
 	gbPatternRecord = TRUE;
 	gbPatternVUMeters = FALSE;
@@ -250,6 +251,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	}
 
 	// GUI Stuff
+	m_ShowSplashScreen = CMainFrame::GetPrivateProfileLong("Display", "ShowSplashScreen", m_ShowSplashScreen, iniFile);
 	gbMdiMaximize = CMainFrame::GetPrivateProfileLong("Display", "MDIMaximize", gbMdiMaximize, iniFile);
 	glTreeWindowWidth = CMainFrame::GetPrivateProfileLong("Display", "MDITreeWidth", glTreeWindowWidth, iniFile);
 	glTreeSplitRatio = CMainFrame::GetPrivateProfileLong("Display", "MDITreeRatio", glTreeSplitRatio, iniFile);

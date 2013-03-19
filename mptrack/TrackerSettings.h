@@ -154,6 +154,7 @@ public:
 		atRecordAsMacro,
 	};
 
+	bool m_ShowSplashScreen;
 	BOOL gbMdiMaximize;
 	bool gbShowHackControls;
 	LONG glTreeWindowWidth, glTreeSplitRatio;
