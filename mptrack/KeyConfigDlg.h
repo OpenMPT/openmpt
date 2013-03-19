@@ -9,7 +9,6 @@
 
 
 #pragma once
-#include "stdafx.h"
 #include "mptrack.h"
 #include "MainFrm.h"
 #include "mpdlgs.h"

@@ -464,7 +464,7 @@ public:
 	BOOL StopSoundFile(CSoundFile *);
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note);
-	void StopPreview();
+	void StopPreview() { StopSoundFile(&m_WaveFile); }
 	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); }
 	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); }
 	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }

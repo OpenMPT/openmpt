@@ -27,7 +27,6 @@
 
 // SNDMIX: These are global flags for playback control
 UINT CSoundFile::m_nStereoSeparation = 128;
-LONG CSoundFile::m_nStreamVolume = 0x8000;
 UINT CSoundFile::m_nMaxMixChannels = MAX_CHANNELS;
 // Mixing Configuration (SetWaveConfig)
 DWORD CSoundFile::gdwSysInfo = 0;
@@ -389,202 +388,6 @@ MixDone:
 	if (nStat) { m_nMixStat += nStat-1; m_nMixStat /= nStat; }
 	return lMax - lRead;
 }
-
-
-#ifdef MODPLUG_PLAYER
-UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFile, DWORD *pstatus, LPBYTE pstream)
-//----------------------------------------------------------------------------------------------------------------
-{
-	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
-	LPCONVERTPROC pCvt = X86_Convert32To8;
-	UINT lRead, lMax, lSampleSize, lCount, lSampleCount, nStat1=0, nStat2=0;
-	BOOL active1, active2, bstream = FALSE, b16stream = FALSE;
-	DWORD dwenable = *pstatus;
-	UINT nMaxPlugins;
-		
-	{
-		nMaxPlugins = MAX_MIXPLUGINS;
-		while ((nMaxPlugins > 0) && (!m_MixPlugins[nMaxPlugins-1].pMixPlugin)) nMaxPlugins--;
-	}
-	lSampleSize = gnChannels;
-	if (gnBitsPerSample == 16) { lSampleSize *= 2; pCvt = X86_Convert32To16; }
-	else if (gnBitsPerSample == 24) { lSampleSize *= 3; pCvt = X86_Convert32To24; } 
-	else if (gnBitsPerSample == 32) { lSampleSize *= 4; pCvt = X86_Convert32To32; } 
-	lMax = cbBuffer / lSampleSize;
-	if ((!lMax) || (!lpBuffer) || (!pSndFile) || (!pstatus)) return 0;
-	if (*pstatus & 4) bstream = TRUE;
-	if (*pstatus & 8) b16stream = TRUE;
-	m_nMixStat = 0;
-	pSndFile->m_nMixStat = 0;
-	lRead = lMax;
-	*pstatus = 0;
-	while (lRead > 0)
-	{
-		active1 = active2 = FALSE;
-		lCount = 0;
-		if ((m_nChannels) && (dwenable & 1))
-		{
-			if (!m_nBufferCount)
-			{
-				if(m_SongFlags[SONG_ENDREACHED])
-				{
-					m_nBufferCount = 0;
-					*pstatus &= ~1;
-				} else
-				if(m_SongFlags[SONG_FADINGSONG])
-				{
-					m_SongFlags.set(SONG_ENDREACHED);
-					m_nBufferCount = lRead;
-					*pstatus &= ~1;
-				} else
-				if (!ReadNote())
-				{
-					if (!FadeSong(FADESONGDELAY))
-					{
-						m_SongFlags.set(SONG_ENDREACHED);
-						m_nBufferCount = lRead;
-						*pstatus &= ~1;
-					}
-				}
-			}
-			lCount = m_nBufferCount;
-			if (lCount)
-			{
-				*pstatus |= 1;
-				active1 = TRUE;
-			}
-		}
-		if ((pSndFile->m_nChannels) && (dwenable & 2))
-		{
-			if (!pSndFile->m_nBufferCount)
-			{
-				if(pSndFile->m_SongFlags[SONG_ENDREACHED])
-				{
-					pSndFile->m_nBufferCount = 0;
-					*pstatus &= ~2;
-				} else
-				if(pSndFile->m_SongFlags[SONG_FADINGSONG])
-				{
-					pSndFile->m_SongFlags.set(SONG_ENDREACHED);
-					pSndFile->m_nBufferCount = lRead;
-					*pstatus &= ~2;
-				} else
-				if (!pSndFile->ReadNote())
-				{
-					if (!pSndFile->FadeSong(FADESONGDELAY))
-					{
-						pSndFile->m_SongFlags.set(SONG_ENDREACHED);
-						pSndFile->m_nBufferCount = lRead;
-						*pstatus &= ~2;
-					}
-				}
-			}
-			if (pSndFile->m_nBufferCount)
-			{
-				*pstatus |= 2;
-				active2 = TRUE;
-				if ((!lCount) || (pSndFile->m_nBufferCount < lCount)) lCount = pSndFile->m_nBufferCount;
-			}
-		}
-		// No sound?
-		if (!lCount)
-		{
-			if ((lRead == lMax) && (!bstream)) break;
-			lCount = lRead;
-		}
-		if (lCount > MIXBUFFERSIZE) lCount = MIXBUFFERSIZE;
-		if (lCount > lRead) lCount = lRead;
-		lSampleCount = lCount;
-		if (!lCount) break;
-		// Resetting sound buffer
-	#ifndef NO_REVERB
-		gnReverbSend = 0;
-	#endif
-		X86_StereoFill(MixSoundBuffer, lSampleCount, &gnDryROfsVol, &gnDryLOfsVol);
-		if (pstream)
-		{
-			if (b16stream)
-			{
-				signed short *p = (signed short *)pstream;
-				for (UINT i=0; i<lSampleCount; i++, p++)
-				{
-					int k = (int)(*p) * (m_nStreamVolume >> MIXING_ATTENUATION);
-					MixSoundBuffer[i*2] += k;
-					MixSoundBuffer[i*2+1] += k;
-				}
-				pstream = (LPBYTE)p;
-			} else
-			{
-				BYTE *p = (BYTE *)pstream;
-				for (UINT i=0; i<lSampleCount; i++, p++)
-				{
-					int k = ((((int)(*p)) - 0x80) << 8) * (m_nStreamVolume >> MIXING_ATTENUATION);
-					MixSoundBuffer[i*2] += k;
-					MixSoundBuffer[i*2+1] += k;
-				}
-				pstream = (LPBYTE)p;
-			}
-		}
-		if (gnChannels >= 2)
-		{
-			lSampleCount *= 2;
-			if (active1) { m_nMixStat += CreateStereoMix(lCount); nStat1++; }
-			if (active2) { pSndFile->m_nMixStat += pSndFile->CreateStereoMix(lCount); nStat2++; }
-		#ifndef NO_REVERB
-			ProcessReverb(lCount);
-		#endif
-			ProcessStereoDSP(lCount);
-		} else
-		{
-			if (active1) { m_nMixStat += CreateStereoMix(lCount); nStat1++; }
-			if (active2) { pSndFile->m_nMixStat += pSndFile->CreateStereoMix(lCount); nStat2++; }
-		#ifndef NO_REVERB
-			ProcessReverb(lCount);
-		#endif
-			X86_MonoFromStereo(MixSoundBuffer, lCount);
-			ProcessMonoDSP(lCount);
-		}
-#ifdef ENABLE_EQ
-		if (gdwSoundSetup & SNDMIX_EQ)
-		{
-			if (gnChannels >= 2)
-				EQStereo(MixSoundBuffer, lCount);
-			else
-				EQMono(MixSoundBuffer, lCount);
-		}
-#endif
-#ifndef NO_AGC
-		// Automatic Gain Control
-		if (gdwSoundSetup & SNDMIX_AGC) ProcessAGC(lSampleCount);
-#endif
-		UINT lTotalSampleCount = lSampleCount;
-		// Multichannel
-		if (gnChannels > 2)
-		{
-			X86_InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lSampleCount);
-			lTotalSampleCount *= 2;
-		}
-		// Noise Shaping
-		if (gnBitsPerSample <= 24)
-		{
-			if ((gdwSoundSetup & SNDMIX_HQRESAMPLER)
-			 && ((gnCPUUsage < 25) || (gdwSoundSetup & SNDMIX_DIRECTTODISK)))
-				X86_Dither(MixSoundBuffer, lTotalSampleCount, gnBitsPerSample);
-		}
-
-		// Perform clipping + VU-Meter
-		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
-		// Buffer ready
-		lRead -= lCount;
-		if (active1) m_nBufferCount -= lCount;
-		if (active2) pSndFile->m_nBufferCount -= lCount;
-	}
-	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
-	if (nStat1) { m_nMixStat += nStat1 - 1; m_nMixStat /= nStat1; }
-	if (nStat2) { pSndFile->m_nMixStat += nStat2 - 1; pSndFile->m_nMixStat /= nStat2; }
-	return lMax - lRead;
-}
-#endif // MODPLUG_PLAYER
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2127,21 +1930,8 @@ BOOL CSoundFile::ReadNote()
 			IncrementEnvelopePositions(pChn);
 		}
 
-#ifdef MODPLUG_PLAYER
-		// Limit CPU -> > 80% -> don't ramp
-		if ((gnCPUUsage >= 80) && (!pChn->nRealVolume))
-		{
-			pChn->nLeftVol = pChn->nRightVol = 0;
-		}
-#endif // MODPLUG_PLAYER
-
 		// Volume ramping
 		pChn->dwFlags.set(CHN_VOLUMERAMP, (pChn->nRealVolume | pChn->nLeftVol | pChn->nRightVol) != 0);
-
-#ifdef MODPLUG_PLAYER
-		// Decrease VU-Meter
-		if (pChn->nVUMeter > VUMETER_DECAY)	pChn->nVUMeter -= VUMETER_DECAY; else pChn->nVUMeter = 0;
-#endif // MODPLUG_PLAYER
 
 #ifdef ENABLE_STEREOVU
 		if (pChn->nLeftVU > VUMETER_DECAY) pChn->nLeftVU -= VUMETER_DECAY; else pChn->nLeftVU = 0;
@@ -2155,14 +1945,6 @@ BOOL CSoundFile::ReadNote()
 		if (pChn->pCurrentSample)
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
-#ifdef MODPLUG_PLAYER
-			UINT vutmp = pChn->nRealVolume >> (14 - 8);
-			if (vutmp > 0xFF) vutmp = 0xFF;
-			if (pChn->nVUMeter >= 0x100) pChn->nVUMeter = vutmp;
-			vutmp >>= 1;
-			if (pChn->nVUMeter < vutmp)	pChn->nVUMeter = vutmp;
-#endif // MODPLUG_PLAYER
-
 #ifdef ENABLE_STEREOVU
 			UINT vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
 			if (vul > 127) vul = 127;

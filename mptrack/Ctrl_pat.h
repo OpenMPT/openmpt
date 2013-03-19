@@ -60,7 +60,8 @@ public:
 		if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
 		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
 	};
-	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
+	// Why VC wants to inline this huge function is beyond my understanding...
+	noinline bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();

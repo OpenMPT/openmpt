@@ -467,12 +467,13 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 
 				if(sampleflags & 3)
 				{
+					FileReader chunk(psh->sampledata, samplesize);
 					SampleIO(
 						(sampleflags & 2) ? SampleIO::_16bit : SampleIO::_8bit,
 						SampleIO::mono,
 						SampleIO::bigEndian,
 						SampleIO::signedPCM)
-						.ReadSample(sample, (LPSTR)(psh->sampledata), samplesize);
+						.ReadSample(sample, chunk);
 				}
 				chunk_pos += samplesize;
 			}

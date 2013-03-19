@@ -802,7 +802,8 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		}
 		Samples[iSmp + 1].nLength = len;
-		sampleIO.ReadSample(Samples[iSmp + 1], psdata, dwMemLength - dwPos - 6);
+		FileReader chunk(psdata, dwMemLength - dwPos - 6);
+		sampleIO.ReadSample(Samples[iSmp + 1], chunk);
 	}
 	// Reading patterns (blocks)
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;

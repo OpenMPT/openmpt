@@ -138,7 +138,8 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 			if(sample.nLength && samplepos && samplepos < dwMemLength)
 			{
-				sampleIO.ReadSample(sample, (LPSTR)(lpStream + samplepos), dwMemLength - samplepos);
+				FileReader chunk(lpStream + samplepos, dwMemLength - samplepos);
+				sampleIO.ReadSample(sample, chunk);
 			}
 		}
 	}

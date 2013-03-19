@@ -119,10 +119,11 @@ struct SplitKeyboardSettings
 	};
 
 	bool IsSplitActive() const { return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0); }
+
+	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
 	ModCommand::NOTE splitNote;
 	ModCommand::INSTR splitInstrument;
 	ModCommand::VOL splitVolume;
-	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
 	bool octaveLink;	// apply octaveModifier
 
 	SplitKeyboardSettings()
@@ -151,26 +152,24 @@ protected:
 	std::basic_ostringstream<TCHAR> m_logEvents; // Log for general progress and error events.
 	CSoundFile m_SndFile;
 
-	BOOL m_bPaused;
 	HWND m_hWndFollow;
 	DWORD m_dwNotifyType;
-
-	bool bModifiedAutosave; // Modified since last autosave?
-
-	bool m_ShowSavedialog;
-
-// -> CODE#0015
-// -> DESC="channels management dlg"
-	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
-	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
-// -! NEW_FEATURE#0015
+	CSize m_szOldPatternScrollbarsPos;
 
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
-	vector<FileHistory> m_FileHistory;	// File edit history
+	std::vector<FileHistory> m_FileHistory;	// File edit history
 	time_t m_creationTime;
 
+	bool bModifiedAutosave; // Modified since last autosave?
+	bool m_ShowSavedialog;
+public:
+	bool m_bHasValidPath; //becomes true if document is loaded or saved.
+
+protected:
+	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
+	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
 public:
 	std::bitset<MAX_INSTRUMENTS> m_bsInstrumentModified;	// which instruments have been modified? (for ITP functionality)
 
@@ -186,7 +185,6 @@ public:
 	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
 
 	void InitPlayer();
-	void SetPause(BOOL bPause) { m_bPaused = bPause; }
 	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = (bModified != FALSE); }
 	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
@@ -199,7 +197,7 @@ public:
 	LPCSTR GetLog() const { return m_lpszLog; }
 	BOOL ClearLog();
 	UINT ShowLog(LPCSTR lpszTitle=NULL, CWnd *parent=NULL);
-	void ClearFilePath() {m_strPathName.Empty();}
+	void ClearFilePath() { m_strPathName.Empty(); }
 
 	// Logging for general progress and error events.
 	void AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...);
@@ -257,19 +255,17 @@ public:
 	bool UpdateChannelMuteStatus(CHANNELINDEX nChn);
 	bool MuteSample(SAMPLEINDEX nSample, bool bMute);
 	bool MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
+
 	bool SoloChannel(CHANNELINDEX nChn, bool bSolo);
 	bool IsChannelSolo(CHANNELINDEX nChn) const;
-// -! NEW_FEATURE#0012
+
 	bool SurroundChannel(CHANNELINDEX nChn, bool bSurround);
 	bool SetChannelGlobalVolume(CHANNELINDEX nChn, uint16 nVolume);
 	bool SetChannelDefaultPan(CHANNELINDEX nChn, uint16 nPan);
 	bool IsChannelMuted(CHANNELINDEX nChn) const;
 	bool IsSampleMuted(SAMPLEINDEX nSample) const;
 	bool IsInstrumentMuted(INSTRUMENTINDEX nInstr) const;
-// -> CODE#0015
-// -> DESC="channels management dlg"
+	
 	bool NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix = true);
 	bool IsChannelNoFx(CHANNELINDEX nChn) const;
 	bool IsChannelRecord1(CHANNELINDEX channel) const;
@@ -278,7 +274,7 @@ public:
 	void Record1Channel(CHANNELINDEX channel, bool select = true);
 	void Record2Channel(CHANNELINDEX channel, bool select = true);
 	void ReinitRecordState(bool unselect = true);
-// -! NEW_FEATURE#0015
+
 	CHANNELINDEX GetNumChannels() const { return m_SndFile.m_nChannels; }
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
 	BOOL AdjustEndOfSample(UINT nSample);
@@ -294,9 +290,9 @@ public:
 
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
-	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord); //rewbs.customKeys
-	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);				   //rewbs.customKeys
-	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
+	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
+	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	void TogglePluginEditor(UINT m_nCurrentPlugin);
 	void RecordParamChange(int slot, long param);
 	void LearnMacro(int macro, long param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
@@ -309,7 +305,6 @@ public:
 
 	void FixNullStrings();
 
-	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 // Fix: save pattern scrollbar position when switching to other tab
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };
 	void SetOldPatternScrollbarsPos( CSize s ){ m_szOldPatternScrollbarsPos = s; };
@@ -327,7 +322,6 @@ public:
 
 // protected members
 protected:
-	CSize m_szOldPatternScrollbarsPos;
 
 	BOOL InitializeMod();
 	void* GetChildFrame(); //rewbs.customKeys
