@@ -1226,9 +1226,6 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ComboNNA.EnableWindow(bITandMPT);
 		m_SliderVolSwing.EnableWindow(bITandMPT);
 		m_SliderPanSwing.EnableWindow(bITandMPT);
-		m_SliderCutSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || (pIns != nullptr && pIns->nCutSwing != 0)) ? TRUE : FALSE);
-		m_SliderResSwing.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_MPT || (pIns != nullptr && pIns->nResSwing != 0)) ? TRUE : FALSE);
-		m_CbnFilterMode.EnableWindow(bITandMPT);
 		m_ComboDCT.EnableWindow(bITandMPT);
 		m_ComboDCA.EnableWindow(bITandMPT);
 		m_ComboPPC.EnableWindow(bITandMPT);
@@ -1267,6 +1264,11 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
+		// Backwards compatibility with IT modules that use now deprecated hack features.
+		m_SliderCutSwing.EnableWindow((pIns != nullptr && (m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0)) ? TRUE : FALSE);
+		m_SliderResSwing.EnableWindow((pIns != nullptr && (m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0)) ? TRUE : FALSE);
+		m_CbnFilterMode.EnableWindow((pIns != nullptr && (m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nFilterMode != FLTMODE_UNCHANGED)) ? TRUE : FALSE);
+
 		CHAR s[128];
 		if (pIns)
 		{
