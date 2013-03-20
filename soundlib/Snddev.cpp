@@ -93,6 +93,7 @@ CWaveDevice::CWaveDevice()
 	m_nWaveBufferSize = 0;
 	m_nPreparedHeaders = 0;
 	m_nBytesPerSec = 0;
+	m_BytesPerSample = 0;
 	RtlZeroMemory(m_WaveBuffers, sizeof(m_WaveBuffers));
 }
 
@@ -121,6 +122,7 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		if (err) return FALSE;
 	}
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
+	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
 	m_nWaveBufferSize = (m_UpdateIntervalMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nWaveBufferSize = (m_nWaveBufferSize + 7) & ~7;
 	if (m_nWaveBufferSize < WAVEOUT_MINBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MINBUFFERSIZE;
@@ -207,7 +209,7 @@ BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 
 	while((ULONG)oldBuffersPending < m_nPreparedHeaders)
 	{
-		ULONG len = pSource->AudioRead(m_WaveBuffers[m_nWriteBuffer]->lpData, m_nWaveBufferSize);
+		ULONG len = m_BytesPerSample * pSource->AudioRead(m_WaveBuffers[m_nWriteBuffer]->lpData, m_nWaveBufferSize/m_BytesPerSample);
 		if(!len)
 		{
 			if(!InterlockedExchangeAdd(&m_nBuffersPending, 0))
@@ -230,7 +232,7 @@ BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 
 	if (nBytesWritten > 0)
 	{
-		pSource->AudioDone(nBytesWritten, nLatency);
+		pSource->AudioDone(nBytesWritten/m_BytesPerSample, nLatency/m_BytesPerSample);
 	}
 	return TRUE;
 }
@@ -337,6 +339,7 @@ CDSoundDevice::CDSoundDevice()
 	m_pMixBuffer = NULL;
 	m_bMixRunning = FALSE;
 	m_nBytesPerSec = 0;
+	m_BytesPerSample = 0;
 }
 
 
@@ -370,6 +373,7 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	if(m_nDSoundBufferSize < DSOUND_MINBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MINBUFFERSIZE;
 	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
+	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
 	if (m_fulCfgOptions & SNDDEV_OPTIONS_SECONDARY)
 	{
 		// Set the format of the primary buffer
@@ -543,15 +547,15 @@ BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 	{
 		DWORD nRead1=0, nRead2=0;
 
-		if ((lpBuf1) && (dwSize1)) nRead1 = pSource->AudioRead(lpBuf1, dwSize1);
-		if ((lpBuf2) && (dwSize2)) nRead2 = pSource->AudioRead(lpBuf2, dwSize2);
+		if ((lpBuf1) && (dwSize1)) nRead1 = m_BytesPerSample * pSource->AudioRead(lpBuf1, dwSize1/m_BytesPerSample);
+		if ((lpBuf2) && (dwSize2)) nRead2 = m_BytesPerSample * pSource->AudioRead(lpBuf2, dwSize2/m_BytesPerSample);
 		UnlockBuffer(lpBuf1, dwSize1, lpBuf2, dwSize2);
 		if (!m_bMixRunning)
 		{
 			m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING);
 			m_bMixRunning = TRUE;
 		}
-		pSource->AudioDone(dwSize1+dwSize2, m_dwLatency);
+		pSource->AudioDone((dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample);
 		if ((!nRead1) && (!nRead2)) return FALSE;
 	}
 	return TRUE;
@@ -946,7 +950,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, DWORD dwBuffer)
 	while ((LONG)dwSamplesLeft > 0)
 	{
 		UINT n = (dwSamplesLeft < dwFrameLen) ? dwSamplesLeft : dwFrameLen;
-		n = pSource->AudioRead(m_FrameBuffer, n*dwSampleSize) / dwSampleSize;
+		n = pSource->AudioRead(m_FrameBuffer, n);
 		if (!n) return FALSE;
 		dwSamplesLeft -= n;
 		for (UINT ich=0; ich<m_nChannels; ich++)
@@ -1022,7 +1026,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, DWORD dwBuffer)
 		dwBufferOffset += n;
 	}
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
-	pSource->AudioDone(dwBufferOffset*dwSampleSize, m_nAsioBufferLen);
+	pSource->AudioDone(dwBufferOffset, m_nAsioBufferLen/dwSampleSize);
 
 	return TRUE;
 }

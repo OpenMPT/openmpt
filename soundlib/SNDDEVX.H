@@ -43,6 +43,7 @@ protected:
 	ULONG m_nWriteBuffer;
 	LONG m_nBuffersPending;
 	ULONG m_nBytesPerSec;
+	ULONG m_BytesPerSample;
 	LPWAVEHDR m_WaveBuffers[WAVEOUT_MAXBUFFERS];
 
 public:
@@ -85,6 +86,7 @@ protected:
 	IDirectSoundBuffer *m_pPrimary, *m_pMixBuffer;
 	ULONG m_nDSoundBufferSize;
 	ULONG m_nBytesPerSec;
+	ULONG m_BytesPerSample;
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos, m_dwLatency;
 

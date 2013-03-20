@@ -51,8 +51,8 @@ class CMPTSoundSource: public ISoundSource
 {
 public:
 	CMPTSoundSource() {}
-	ULONG AudioRead(PVOID pData, ULONG cbSize);
-	VOID AudioDone(ULONG dwSize, ULONG dwLatency);
+	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
+	VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency);
 };
 
 
@@ -120,7 +120,6 @@ HHOOK CMainFrame::ghKbdHook = NULL;
 std::vector<CString> CMainFrame::s_ExampleModulePaths;
 std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
-LONG CMainFrame::slSampleSize = 2;
 UINT CMainFrame::gdwIdleTime = 0;
 LONG CMainFrame::gnLVuMeter = 0;
 LONG CMainFrame::gnRVuMeter = 0;
@@ -883,39 +882,39 @@ void CMainFrame::SetAudioThreadActive(bool active)
 	}
 }
 
-ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG cbSize)
+ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG MaxSamples)
 //---------------------------------------------------------
 {
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) return pMainFrm->AudioRead(pData, cbSize);
+	if (pMainFrm) return pMainFrm->AudioRead(pData, MaxSamples);
 	return 0;
 }
 
 
-VOID CMPTSoundSource::AudioDone(ULONG nBytesWritten, ULONG nLatency)
+VOID CMPTSoundSource::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency)
 //------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) pMainFrm->AudioDone(nBytesWritten, nLatency);
+	if (pMainFrm) pMainFrm->AudioDone(SamplesWritten, SamplesLatency);
 }
 
 
 
-ULONG CMainFrame::AudioRead(PVOID pvData, ULONG ulSize)
+ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
 //-----------------------------------------------------
 {
-		DWORD dwSamplesRead = m_pSndFile->Read(pvData, ulSize);
+		DWORD dwSamplesRead = m_pSndFile->Read(pvData, MaxSamples);
 		//m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
-		return dwSamplesRead * slSampleSize;
+		return dwSamplesRead;
 }
 
 
-VOID CMainFrame::AudioDone(ULONG nBytesWritten, ULONG nLatency)
+VOID CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency)
 //-------------------------------------------------------------
 {
-	if (nBytesWritten > (DWORD)slSampleSize)
+	if (SamplesWritten > 0)
 	{
-		DoNotification(nBytesWritten/CMainFrame::slSampleSize, nLatency);
+		DoNotification(SamplesWritten, SamplesLatency);
 	}
 }
 
@@ -926,12 +925,12 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	WAVEFORMATEXTENSIBLE WaveFormat;
 
 	if (!m_pSndFile) return -1;
-	slSampleSize = (bits/8) * channels;
+	UINT bytespersample = (bits/8) * channels;
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (unsigned short) channels;
 	WaveFormat.Format.nSamplesPerSec = samplespersec;
-	WaveFormat.Format.nAvgBytesPerSec = samplespersec * slSampleSize;
-	WaveFormat.Format.nBlockAlign = (unsigned short) slSampleSize;
+	WaveFormat.Format.nAvgBytesPerSec = samplespersec * bytespersample;
+	WaveFormat.Format.nBlockAlign = (unsigned short)bytespersample;
 	WaveFormat.Format.wBitsPerSample = (unsigned short)bits;
 	WaveFormat.Format.cbSize = 0;
 	// MultiChannel configuration
@@ -1060,7 +1059,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 }
 
 
-BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
+BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency)
 //-------------------------------------------------------------------
 {
 	int64 totalsamples = 0;
@@ -1085,8 +1084,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 	MPTNOTIFICATION *p = &notification;
 
 			p->dwType = m_dwNotifyType;
-			DWORD d = dwLatency / slSampleSize;
-			p->TimestampSamples = totalsamples + d;
+			p->TimestampSamples = totalsamples + SamplesLatency;
 			p->nOrder = m_pSndFile->m_nCurrentOrder;
 			p->nRow = m_pSndFile->m_nRow;
 			p->nPattern = m_pSndFile->m_nPattern;
