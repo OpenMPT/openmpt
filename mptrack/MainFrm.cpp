@@ -1402,7 +1402,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 
 		{
 			CriticalSection cs;
-			m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
+			m_pSndFile->SuspendPlugins();
 		}
 
 		m_nMixChn = m_nAvgMixChn = 0;
@@ -1423,7 +1423,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		m_pSndFile->m_SongFlags.reset(SONG_PAUSED);
 		if (m_pSndFile == &m_WaveFile)
 		{
-			m_pSndFile = NULL;
+			// Unload previewed instrument
 			m_WaveFile.Destroy();
 		} else
 		{
@@ -1437,9 +1437,9 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		}
 	}
 
-	m_pModPlaying = NULL;
-	m_pSndFile = NULL;
-	m_hFollowSong = NULL;
+	m_pModPlaying = nullptr;
+	m_pSndFile = nullptr;
+	m_hFollowSong = nullptr;
 	m_wndToolBar.SetCurrentSong(NULL);
 	return TRUE;
 }
@@ -1482,6 +1482,7 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 {
 	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
 	BeginWaitCursor();
+	CriticalSection cs;
 	InitPreview();
 	if(CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
 	{
@@ -1511,8 +1512,6 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 			return FALSE;
 		}
 
-		m_WaveFile.Destroy();
-		m_WaveFile.Create(NULL, 0);
 		InitPreview();
 
 		DWORD dwLen = f.GetLength();
@@ -1552,8 +1551,6 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, S
 //------------------------------------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-	m_WaveFile.Destroy();
-	m_WaveFile.Create(NULL, 0);
 	InitPreview();
 	m_WaveFile.m_nType = pSong->m_nType;
 	if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
@@ -1581,6 +1578,8 @@ void CMainFrame::InitPreview()
 //----------------------------
 {
 	// Avoid global volume ramping when trying samples in the treeview.
+	m_WaveFile.Destroy();
+	m_WaveFile.Create(NULL, 0);
 	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.m_nDefaultTempo = 125;
