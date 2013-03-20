@@ -209,7 +209,7 @@ BOOL CSoundFile::GlobalFadeSong(UINT msec)
 }
 
 
-UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
+UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 //-------------------------------------------------------
 {
 	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
@@ -228,7 +228,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 	else if(gnBitsPerSample == 24) { lSampleSize *= 3; pCvt = X86_Convert32To24; } 
 	else if(gnBitsPerSample == 32) { lSampleSize *= 4; pCvt = X86_Convert32To32; } 
 
-	lMax = cbBuffer / lSampleSize;
+	lMax = count;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
 	samplecount_t lRead = lMax;
 	if(m_SongFlags[SONG_ENDREACHED])

@@ -24,8 +24,8 @@ class ISoundSource
 //================
 {
 public:
-	virtual ULONG AudioRead(PVOID pData, ULONG cbSize) = 0;
-	virtual VOID AudioDone(ULONG nBytesWritten, ULONG nLatency) = 0; // All in bytes
+	virtual ULONG AudioRead(PVOID pData, ULONG MaxSamples) = 0; // returns number of samples read
+	virtual VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency) = 0; // all in samples
 };
 
 

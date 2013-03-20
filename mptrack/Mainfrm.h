@@ -325,7 +325,6 @@ public:
 	DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
-	static LONG slSampleSize;
 	LONG m_AudioThreadActive;
 
 	// Midi Input
@@ -375,14 +374,14 @@ public:
 	DWORD NotifyThread();
 	void SetAudioThreadActive(bool active=true);
 	bool IsAudioThreadActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
-	ULONG AudioRead(PVOID pData, ULONG cbSize);
-	void AudioDone(ULONG nBytesWritten, ULONG nLatency);
+	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
+	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency);
 	LONG audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	BOOL audioOpenDevice();
 	void audioCloseDevice();
 	BOOL audioFillBuffers();
 	BOOL DSoundDone(LPBYTE lpBuffer, DWORD dwBytes);
-	BOOL DoNotification(DWORD dwSamplesRead, DWORD dwLatency);
+	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency);
 
 // Midi Input Functions
 public:
