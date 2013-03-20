@@ -28,9 +28,9 @@
 // MMSYSTEM WaveOut device
 //
 
-#define WAVEOUT_MAXBUFFERS		16
-#define WAVEOUT_MINBUFFERSIZE	1024
-#define WAVEOUT_MAXBUFFERSIZE	32768
+#define WAVEOUT_MAXBUFFERS           256
+#define WAVEOUT_MINBUFFERSIZE        1024
+#define WAVEOUT_MAXBUFFERSIZE        65536
 
 //====================================
 class CWaveDevice: public ISoundDevice
@@ -42,6 +42,7 @@ protected:
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
 	LONG m_nBuffersPending;
+	ULONG m_nBytesPerSec;
 	LPWAVEHDR m_WaveBuffers[WAVEOUT_MAXBUFFERS];
 
 public:
@@ -52,14 +53,15 @@ public:
 	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD);
+	BOOL FillAudioBuffer(ISoundSource *pSource, DWORD);
 	VOID Reset();
 	VOID Start() {}
 	bool IsOpen() { return (m_hWaveOut != NULL); }
-	UINT GetCurrentLatency() { return m_nBuffersPending * m_nWaveBufferSize; }
+	UINT GetNumBuffers() { return m_nPreparedHeaders; }
+	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
 
 public:
-	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD, DWORD dw1, DWORD dw2);
+	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
 };
 
@@ -71,6 +73,9 @@ public:
 
 #ifndef NO_DSOUND
 
+#define DSOUND_MINBUFFERSIZE 1024
+#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
+
 //======================================
 class CDSoundDevice: public ISoundDevice
 //======================================
@@ -79,6 +84,7 @@ protected:
 	IDirectSound *m_piDS;
 	IDirectSoundBuffer *m_pPrimary, *m_pMixBuffer;
 	ULONG m_nDSoundBufferSize;
+	ULONG m_nBytesPerSec;
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos, m_dwLatency;
 
@@ -90,11 +96,12 @@ public:
 	UINT GetDeviceType() { return SNDDEV_DSOUND; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD);
+	BOOL FillAudioBuffer(ISoundSource *pSource, DWORD);
 	VOID Reset();
 	VOID Start() {}
 	bool IsOpen() { return (m_pMixBuffer != NULL); }
-	UINT GetCurrentLatency() { return m_dwLatency; }
+	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
+	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
 
 protected:
 	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);
@@ -126,6 +133,7 @@ protected:
 	BOOL m_bMixRunning;
 	BOOL m_bPostOutput;
 	UINT m_nCurrentDevice;
+	ULONG m_nSamplesPerSec;
 	ASIOCallbacks m_Callbacks;
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
@@ -141,13 +149,14 @@ public:
 	UINT GetDeviceType() { return SNDDEV_ASIO; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwUser);
+	BOOL FillAudioBuffer(ISoundSource *pSource, DWORD dwUser);
 	VOID Reset();
 	VOID Start();
 	bool IsOpen() { return (m_pAsioDrv != NULL); }
 	BOOL Directcallback() { return TRUE; }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
-	UINT GetCurrentLatency() { return m_nAsioBufferLen; }
+	UINT GetNumBuffers() { return 2; }
+	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_nSamplesPerSec;; }
 
 	bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);

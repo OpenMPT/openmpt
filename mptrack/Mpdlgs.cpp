@@ -67,10 +67,12 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_COMMAND(IDC_CHECK4,	OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnDeviceChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
+	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -101,12 +103,14 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
 	DDX_Control(pDX, IDC_COMBO1,		m_CbnDevice);
-	DDX_Control(pDX, IDC_COMBO2,		m_CbnBufferLength);
+	DDX_Control(pDX, IDC_COMBO2,		m_CbnLatencyMS);
+	DDX_Control(pDX, IDC_COMBO_UPDATEINTERVAL, m_CbnUpdateIntervalMS);
 	DDX_Control(pDX, IDC_COMBO3,		m_CbnMixingFreq);
 	DDX_Control(pDX, IDC_COMBO4,		m_CbnPolyphony);
 	DDX_Control(pDX, IDC_COMBO5,		m_CbnQuality);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SliderStereoSep);
 	DDX_Control(pDX, IDC_SLIDER_PREAMP,	m_SliderPreAmp);
+	DDX_Control(pDX, IDC_EDIT_STATISTICS,	m_EditStatistics);
 	//}}AFX_DATA_MAP
 }
 
@@ -145,27 +149,40 @@ BOOL COptionsSoundcard::OnInitDialog()
 			if (CSoundFile::m_nMaxMixChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
 		}
 	}
-	// Sound Buffer Length
+	// latency
 	{
-		wsprintf(s, "%d ms", m_nBufferLength);
-		m_CbnBufferLength.SetWindowText(s);
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-		m_CbnBufferLength.AddString("1 ms");
-		m_CbnBufferLength.AddString("5 ms");
-		m_CbnBufferLength.AddString("10 ms");
-		m_CbnBufferLength.AddString("20 ms");
-// -! BEHAVIOUR_CHANGE#0006
-		m_CbnBufferLength.AddString("30 ms");
-		m_CbnBufferLength.AddString("50 ms");
-		m_CbnBufferLength.AddString("75 ms");
-		m_CbnBufferLength.AddString("100 ms");
-		m_CbnBufferLength.AddString("125 ms");
-		m_CbnBufferLength.AddString("150 ms");
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-		m_CbnBufferLength.AddString("200 ms");
-// -! BEHAVIOUR_CHANGE#0006
+		wsprintf(s, "%d ms", m_LatencyMS);
+		m_CbnLatencyMS.SetWindowText(s);
+		m_CbnLatencyMS.AddString("1 ms");
+		m_CbnLatencyMS.AddString("2 ms");
+		m_CbnLatencyMS.AddString("3 ms");
+		m_CbnLatencyMS.AddString("4 ms");
+		m_CbnLatencyMS.AddString("5 ms");
+		m_CbnLatencyMS.AddString("10 ms");
+		m_CbnLatencyMS.AddString("15 ms");
+		m_CbnLatencyMS.AddString("20 ms");
+		m_CbnLatencyMS.AddString("25 ms");
+		m_CbnLatencyMS.AddString("30 ms");
+		m_CbnLatencyMS.AddString("40 ms");
+		m_CbnLatencyMS.AddString("50 ms");
+		m_CbnLatencyMS.AddString("75 ms");
+		m_CbnLatencyMS.AddString("100 ms");
+		m_CbnLatencyMS.AddString("150 ms");
+		m_CbnLatencyMS.AddString("200 ms");
+		m_CbnLatencyMS.AddString("250 ms");
+	}
+	// update interval
+	{
+		wsprintf(s, "%d ms", m_UpdateIntervalMS);
+		m_CbnUpdateIntervalMS.SetWindowText(s);
+		m_CbnUpdateIntervalMS.AddString("1 ms");
+		m_CbnUpdateIntervalMS.AddString("2 ms");
+		m_CbnUpdateIntervalMS.AddString("5 ms");
+		m_CbnUpdateIntervalMS.AddString("10 ms");
+		m_CbnUpdateIntervalMS.AddString("15 ms");
+		m_CbnUpdateIntervalMS.AddString("20 ms");
+		m_CbnUpdateIntervalMS.AddString("25 ms");
+		m_CbnUpdateIntervalMS.AddString("50 ms");
 	}
 	// Stereo Separation
 	{
@@ -228,6 +245,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 			}
 		}
 		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_DSOUND) ? TRUE : FALSE);
+		GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_ASIO) ? FALSE : TRUE);
+		GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_ASIO) ? FALSE : TRUE);
 	}
 	// Sample Format
 	{
@@ -256,7 +275,28 @@ void COptionsSoundcard::OnHScroll(UINT n, UINT pos, CScrollBar *p)
 //----------------------------------------------------------------
 {
 	CPropertyPage::OnHScroll(n, pos, p);
-	UpdateStereoSep();
+	// stereo sep
+	{
+		UpdateStereoSep();
+	}
+	// PreAmp
+	{
+		if(m_PreAmpNoteShowed == true)
+		{
+			int n = 40 - m_SliderPreAmp.GetPos();
+			if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
+			{
+				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+				if (pMainFrm) pMainFrm->SetPreAmp(64 + (n * 8));
+			}
+		}
+		else
+		{
+			m_PreAmpNoteShowed = true;
+			Reporting::Information(str_preampChangeNote);
+			SetPreAmpSliderPosition();
+		}
+	}
 }
 
 
@@ -284,24 +324,6 @@ void COptionsSoundcard::OnVScroll(UINT n, UINT pos, CScrollBar *p)
 //----------------------------------------------------------------
 {
 	CPropertyPage::OnVScroll(n, pos, p);
-	// PreAmp
-	{
-		if(m_PreAmpNoteShowed == true)
-		{
-			int n = 40 - m_SliderPreAmp.GetPos();
-			if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
-			{
-				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->SetPreAmp(64 + (n * 8));
-			}
-		}
-		else
-		{
-			m_PreAmpNoteShowed = true;
-			Reporting::Information(str_preampChangeNote);
-			SetPreAmpSliderPosition();
-		}
-	}
 }
 
 
@@ -313,6 +335,8 @@ void COptionsSoundcard::OnDeviceChanged()
 	{
 		int dev = m_CbnDevice.GetItemData(n);
 		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_DSOUND) ? TRUE : FALSE);
+		GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO) ? FALSE : TRUE);
+		GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO) ? FALSE : TRUE);
 		UpdateSampleRates(dev);
 		OnSettingsChanged();
 	}
@@ -414,15 +438,25 @@ void COptionsSoundcard::OnOK()
 		int n = m_CbnDevice.GetCurSel();
 		if (n >= 0) m_nSoundDevice = m_CbnDevice.GetItemData(n);
 	}
-	// Buffer Length
+	// Latency
 	{
 		CHAR s[32];
-		m_CbnBufferLength.GetWindowText(s, sizeof(s));
-		m_nBufferLength = atoi(s);
+		m_CbnLatencyMS.GetWindowText(s, sizeof(s));
+		m_LatencyMS = atoi(s);
 		//Check given value.
-		m_nBufferLength = CLAMP(m_nBufferLength, SNDDEV_MINBUFFERLEN, SNDDEV_MAXBUFFERLEN);
-		wsprintf(s, "%d ms", m_nBufferLength);
-		m_CbnBufferLength.SetWindowText(s);
+		m_LatencyMS = CLAMP(m_LatencyMS, SNDDEV_MINLATENCY_MS, SNDDEV_MAXLATENCY_MS);
+		wsprintf(s, "%d ms", m_LatencyMS);
+		m_CbnLatencyMS.SetWindowText(s);
+	}
+	// Update Interval
+	{
+		CHAR s[32];
+		m_CbnUpdateIntervalMS.GetWindowText(s, sizeof(s));
+		m_UpdateIntervalMS = atoi(s);
+		//Check given value.
+		m_UpdateIntervalMS = CLAMP(m_UpdateIntervalMS, SNDDEV_MINUPDATEINTERVAL_MS, SNDDEV_MAXUPDATEINTERVAL_MS);
+		wsprintf(s, "%d ms", m_UpdateIntervalMS);
+		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
 	// Soft Panning
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
@@ -430,10 +464,31 @@ void COptionsSoundcard::OnOK()
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_nBufferLength, m_nSoundDevice);
+	if (pMainFrm) pMainFrm->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
+	UpdateStatistics();
 	CPropertyPage::OnOK();
 }
 
+void COptionsSoundcard::UpdateStatistics()
+//----------------------------------------
+{
+	if (!m_EditStatistics) return;
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if (pMainFrm && pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
+	{
+		CHAR s[256];
+		_snprintf(s, 255, "Buffers: %d\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
+			pMainFrm->gpSoundDevice->GetNumBuffers(),
+			(float)pMainFrm->gpSoundDevice->GetRealUpdateIntervalMS(),
+			(float)pMainFrm->gpSoundDevice->GetRealLatencyMS(),
+			(float)pMainFrm->gpSoundDevice->GetCurrentRealLatencyMS()
+			);
+		m_EditStatistics.SetWindowText(s);
+	}	else
+	{
+		m_EditStatistics.SetWindowText("");
+	}
+}
 
 //////////////////////////////////////////////////////////
 // COptionsPlayer

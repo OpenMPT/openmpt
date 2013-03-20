@@ -167,7 +167,8 @@ public:
 	// Audio Setup
 	DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
-	DWORD m_nBufferLength;
+	DWORD m_LatencyMS;
+	DWORD m_UpdateIntervalMS;
 	EQPreset m_EqSettings;
 
 	// MIDI Setup
