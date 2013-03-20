@@ -15,6 +15,7 @@
 #include "inputhandler.h"
 #include "mptrack.h"
 #include "../common/AudioCriticalSection.h"
+#include "../common/mutex.h"
 
 class CInputHandler;
 class CMainFrame;
@@ -23,9 +24,6 @@ class CAutoSaver;
 class ISoundDevice;
 class ISoundSource;
 
-#define NUM_AUDIO_BUFFERS			3
-#define MIN_AUDIO_BUFFERSIZE		1024
-#define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
 #define INIBUFFERSIZE				MAX_PATH
 
@@ -112,7 +110,6 @@ enum
 
 
 #define MODSTATUS_PLAYING		0x01
-#define MODSTATUS_BUSY			0x02
 #define MODSTATUS_RENDERING     0x04 //rewbs.VSTTimeInfo
 
 #define SOUNDSETUP_ENABLEMMX	0x08
@@ -258,10 +255,9 @@ enum
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
 
-#define MAX_UPDATE_HISTORY		8
+#define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
 
 #define MPTNOTIFY_TYPEMASK		0x00FF0000	// HiWord = type, LoWord = subtype (smp/instr #)
-#define MPTNOTIFY_PENDING		0x01000000	// Being processed
 #define MPTNOTIFY_DEFAULT		0x00010000
 #define MPTNOTIFY_POSITION		0x00010000
 #define MPTNOTIFY_SAMPLE		0x00020000
@@ -273,10 +269,11 @@ enum
 #define MPTNOTIFY_STOP			0x00800000
 #define MPTNOTIFY_POSVALID		0x80000000	// dwPos[i] is valid
 
+// struct MPTNOTIFICATION requires working copy constructor / copy assignment, keep in mind when extending
 struct MPTNOTIFICATION
 {
+	int64 TimestampSamples;
 	DWORD dwType;
-	DWORD dwLatency;
 	ROWINDEX nRow;				// Always valid
 	UINT nTick;					// dito
 	ORDERINDEX nOrder;			// dito
@@ -311,7 +308,6 @@ public:
 	// Globals
 	static UINT m_nLastOptionsPage;
 	static HHOOK ghKbdHook;
-	static DWORD gdwNotificationType;
 
 	// GDI
 	static HICON m_hIcon;
@@ -332,7 +328,7 @@ public:
 	static DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
-	static LONG slSampleSize, sdwSamplesPerSec, sdwAudioBufferSize;
+	static LONG slSampleSize;
 
 	// Midi Input
 public:
@@ -354,10 +350,17 @@ protected:
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
+
 	// Notification Buffer
-	MPTNOTIFICATION NotifyBuffer[MAX_UPDATE_HISTORY];
+	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
+	int64 m_TotalSamplesRendered;
+	Util::fixed_size_queue<MPTNOTIFICATION,MAX_UPDATE_HISTORY> m_NotifyBuffer;
+	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
+	MPTNOTIFICATION m_PendingNotification;
+
 	// Misc
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
+	class COptionsSoundcard * m_SoundCardOptionsDialog;
 	CModDoc* m_pJustModifiedDoc;
 
 public:
@@ -368,7 +371,6 @@ public:
 // Low-Level Audio
 public:
 	static void UpdateAudioParameters(BOOL bReset=FALSE);
-	static void EnableLowLatencyMode(BOOL bOn=TRUE);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 	static DWORD WINAPI AudioThread(LPVOID);
 	static DWORD WINAPI NotifyThread(LPVOID);
@@ -472,7 +474,7 @@ public:
 	BOOL InitRenderer(CSoundFile*);
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
-	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
+	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
 	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
@@ -480,7 +482,7 @@ public:
 	void SetPreAmp(UINT n);
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == m_pModPlaying) ? m_hFollowSong : NULL; }
 	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, DWORD dwType=MPTNOTIFY_DEFAULT);
-	BOOL ResetNotificationBuffer(HWND hwnd=NULL);
+	void ResetNotificationBuffer();
 
 
 // Overrides
@@ -509,7 +511,6 @@ public:
 public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
-	afx_msg void SetLastMixActiveTime(); //rewbs.VSTCompliance
 	afx_msg void OnViewOptions();		 //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -543,6 +544,7 @@ protected:
 	afx_msg void OnReportBug();	//rewbs.customKeys
 	afx_msg BOOL OnInternetLink(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
+	afx_msg LRESULT OnUpdatePositionThreaded(WPARAM, LPARAM lParam);
 	afx_msg void OnExampleSong(UINT nId);
 	afx_msg void OnOpenTemplateModule(UINT nId);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);

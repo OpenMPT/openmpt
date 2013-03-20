@@ -383,4 +383,71 @@ namespace Util {
 		return static_cast<int32>( ( static_cast<int64>(a) * b + ( c / 2 ) ) / c );
 	}
 
+	template<typename T, std::size_t n>
+	class fixed_size_queue {
+	private:
+		T buffer[n+1];
+		std::size_t read_position;
+		std::size_t write_position;
+	public:
+		fixed_size_queue() : read_position(0), write_position(0) {
+			return;
+		}
+		void clear() {
+			read_position = 0;
+			write_position = 0;
+		}
+		std::size_t read_size() const {
+			if ( write_position > read_position ) {
+				return write_position - read_position;
+			} else if ( write_position < read_position ) {
+				return write_position - read_position + n + 1;
+			} else {
+				return 0;
+			}
+		}
+		std::size_t write_size() const {
+			if ( write_position > read_position ) {
+				return read_position - write_position + n;
+			} else if ( write_position < read_position ) {
+				return read_position - write_position - 1;
+			} else {
+				return n;
+			}
+		}
+		bool push( const T & v ) {
+			if ( !write_size() ) {
+				return false;
+			}
+			buffer[write_position] = v;
+			write_position = ( write_position + 1 ) % ( n + 1 );
+			return true;
+		}
+		bool pop() {
+			if ( !read_size() ) {
+				return false;
+			}
+			read_position = ( read_position + 1 ) % ( n + 1 );
+			return true;
+		}
+		T peek() {
+			if ( !read_size() ) {
+				return T();
+			}
+			return buffer[read_position];
+		}
+		const T * peek_p() {
+			if ( !read_size() ) {
+				return nullptr;
+			}
+			return &(buffer[read_position]);
+		}
+		const T * peek_next_p() {
+			if ( read_size() < 2 ) {
+				return nullptr;
+			}
+			return &(buffer[(read_position+1)%(n+1)]);
+		}
+	};
+
 } // namespace Util

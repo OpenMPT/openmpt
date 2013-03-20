@@ -400,6 +400,7 @@
     <ClInclude Include="..\common\AudioCriticalSection.h" />
     <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\misc_util.h" />
+    <ClInclude Include="..\common\mutex.h" />
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />

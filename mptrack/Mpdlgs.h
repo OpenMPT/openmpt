@@ -21,17 +21,21 @@ class COptionsSoundcard: public CPropertyPage
 {
 protected:
 	CComboBoxEx m_CbnDevice;
-	CComboBox m_CbnBufferLength, m_CbnMixingFreq, m_CbnPolyphony, m_CbnQuality;
+	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnQuality;
 	CSliderCtrl m_SliderStereoSep, m_SliderPreAmp;
+	CEdit m_EditStatistics;
 	DWORD m_dwRate, m_dwSoundSetup, m_nBitsPerSample, m_nChannels;
-	DWORD m_nBufferLength;
+	DWORD m_LatencyMS;
+	DWORD m_UpdateIntervalMS;
 	DWORD m_nSoundDevice;
 	bool m_PreAmpNoteShowed;
 
 public:
-	COptionsSoundcard(DWORD rate, DWORD q, DWORD bits, DWORD chns, DWORD bufsize, DWORD sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
+	COptionsSoundcard(DWORD rate, DWORD q, DWORD bits, DWORD chns, DWORD latency_ms, DWORD updateinterval_ms, DWORD sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
 		{ m_dwRate = rate; m_dwSoundSetup = q; m_nBitsPerSample = bits; m_nChannels = chns;
-		  m_nBufferLength = bufsize; m_nSoundDevice = sd; m_PreAmpNoteShowed = false;}
+		  m_LatencyMS = latency_ms; m_UpdateIntervalMS = updateinterval_ms; m_nSoundDevice = sd; m_PreAmpNoteShowed = false; }
+
+	void UpdateStatistics();
 
 private:
 	void UpdateSampleRates(int dev);

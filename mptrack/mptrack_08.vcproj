@@ -927,6 +927,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mutex.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\MixerSettings.h"
 				>
 			</File>

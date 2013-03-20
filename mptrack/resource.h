@@ -940,6 +940,11 @@
 #define IDC_FIND                        2438
 #define IDC_PITCHWHEELDEPTH             2439
 #define IDC_PROMPT                      2440
+#define IDC_SLIDER_NUMBUFFERS           2454
+#define IDC_EDIT_STATISTICS             2455
+#define IDC_STATIC_BUFFERLENGTH         2457
+#define IDC_STATIC_UPDATEINTERVAL       2458
+#define IDC_COMBO_UPDATEINTERVAL        2459
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1129,7 +1134,7 @@
 #define ID_VIEW_SONGPROPERTIES          38002
 #define ID_SEQUENCE_ITEM                38003
 // From here: Command range [ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2]
-#define ID_NOTEMAP_EDITSAMPLE			39000
+#define ID_NOTEMAP_EDITSAMPLE           39000
 // From here: Command range [ID_NOTEMAP_EDITSAMPLE, ID_NOTEMAP_EDITSAMPLE + MAX_SAMPLES]
 #define ID_GROW_SELECTION               43001
 #define ID_SHRINK_SELECTION             43002
@@ -1219,7 +1224,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        539
 #define _APS_NEXT_COMMAND_VALUE         44611
-#define _APS_NEXT_CONTROL_VALUE         2454
+#define _APS_NEXT_CONTROL_VALUE         2460
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

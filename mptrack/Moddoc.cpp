@@ -902,7 +902,6 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			CriticalSection cs;
 
 			//OnPlayerPause();					// pause song - pausing VSTis is too slow
-			pMainFrm->SetLastMixActiveTime();	// mark activity
 
 			// All notes off
 			for (UINT i=0; i<MAX_CHANNELS; i++)
@@ -920,7 +919,6 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			m_SndFile.m_SongFlags.set(SONG_PAUSED);
 			pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 		}
-		CMainFrame::EnableLowLatencyMode();
 
 		CriticalSection cs;
 
@@ -1993,7 +1991,6 @@ void CModDoc::OnPlayerPlayFromStart()
 		cs.Leave();
 
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
-		CMainFrame::EnableLowLatencyMode(FALSE);
 	}
 }
 

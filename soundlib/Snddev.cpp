@@ -27,10 +27,12 @@ ISoundDevice::ISoundDevice()
 //--------------------------
 {
 	m_RefCount = 1;
-	m_nBuffers = 3;
-	m_nBufferLen = 100;
-	m_nMaxFillInterval = 100;
+	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
+	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
 	m_fulCfgOptions = 0;
+
+	m_RealLatencyMS = static_cast<float>(m_LatencyMS);
+	m_RealUpdateIntervalMS = static_cast<float>(m_UpdateIntervalMS);
 }
 
 ISoundDevice::~ISoundDevice()
@@ -61,17 +63,19 @@ ULONG ISoundDevice::Release()
 }
 
 
-VOID ISoundDevice::Configure(HWND hwnd, UINT nBuffers, UINT nBufferLen, DWORD fdwCfgOptions)
+VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions)
 //------------------------------------------------------------------------------------------
 {
-	if (nBuffers < SNDDEV_MINBUFFERS) nBuffers = SNDDEV_MINBUFFERS;
-	if (nBuffers > SNDDEV_MAXBUFFERS) nBuffers = SNDDEV_MAXBUFFERS;
-	if (nBufferLen < SNDDEV_MINBUFFERLEN) nBufferLen = SNDDEV_MINBUFFERLEN;
-	if (nBufferLen > SNDDEV_MAXBUFFERLEN) nBufferLen = SNDDEV_MAXBUFFERLEN;
-	m_nBuffers = nBuffers;
-	m_nBufferLen = nBufferLen;
+	if(LatencyMS < SNDDEV_MINLATENCY_MS) LatencyMS = SNDDEV_MINLATENCY_MS;
+	if(LatencyMS > SNDDEV_MAXLATENCY_MS) LatencyMS = SNDDEV_MAXLATENCY_MS;
+	if(UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
+	if(UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
+	m_LatencyMS = LatencyMS;
+	m_UpdateIntervalMS = UpdateIntervalMS;
 	m_fulCfgOptions = fdwCfgOptions;
 	m_hWnd = hwnd;
+	m_RealLatencyMS = static_cast<float>(m_LatencyMS);
+	m_RealUpdateIntervalMS = static_cast<float>(m_UpdateIntervalMS);
 }
 
 
@@ -88,6 +92,7 @@ CWaveDevice::CWaveDevice()
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
 	m_nPreparedHeaders = 0;
+	m_nBytesPerSec = 0;
 	RtlZeroMemory(m_WaveBuffers, sizeof(m_WaveBuffers));
 }
 
@@ -98,14 +103,6 @@ CWaveDevice::~CWaveDevice()
 	if (m_hWaveOut)
 	{
 		Close();
-	}
-	for (UINT iBuf=0; iBuf<WAVEOUT_MAXBUFFERS; iBuf++)
-	{
-		if (m_WaveBuffers[iBuf])
-		{
-			GlobalFreePtr(m_WaveBuffers[iBuf]);
-			m_WaveBuffers[iBuf] = NULL;
-		}
 	}
 }
 
@@ -123,17 +120,20 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		LONG err = waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD)WaveOutCallBack, (DWORD)this, CALLBACK_FUNCTION);
 		if (err) return FALSE;
 	}
-	m_nWaveBufferSize = (m_nBufferLen * pwfx->nAvgBytesPerSec) / 1000;
+	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
+	m_nWaveBufferSize = (m_UpdateIntervalMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nWaveBufferSize = (m_nWaveBufferSize + 7) & ~7;
 	if (m_nWaveBufferSize < WAVEOUT_MINBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MINBUFFERSIZE;
 	if (m_nWaveBufferSize > WAVEOUT_MAXBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MAXBUFFERSIZE;
+	ULONG NumBuffers = m_LatencyMS * pwfx->nAvgBytesPerSec / ( m_nWaveBufferSize * 1000 );
+	NumBuffers = CLAMP(NumBuffers, 3, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
-	for (UINT iBuf=0; iBuf<m_nBuffers; iBuf++)
+	for(UINT iBuf=0; iBuf<NumBuffers; iBuf++)
 	{
 		if (iBuf >= WAVEOUT_MAXBUFFERS) break;
 		if (!m_WaveBuffers[iBuf])
 		{
-			m_WaveBuffers[iBuf] = (LPWAVEHDR)GlobalAllocPtr(GMEM_FIXED, sizeof(WAVEHDR)+WAVEOUT_MAXBUFFERSIZE);
+			m_WaveBuffers[iBuf] = (LPWAVEHDR)GlobalAllocPtr(GMEM_FIXED, sizeof(WAVEHDR)+m_nWaveBufferSize);
 			if (!m_WaveBuffers[iBuf]) break;
 		}
 		RtlZeroMemory(m_WaveBuffers[iBuf], sizeof(WAVEHDR));
@@ -151,12 +151,12 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		Close();
 		return FALSE;
 	}
-	m_nMaxFillInterval = (m_nWaveBufferSize / pwfx->nBlockAlign) * (m_nPreparedHeaders / 2);
+	m_RealLatencyMS = m_nWaveBufferSize * m_nPreparedHeaders * 1000.0f / m_nBytesPerSec;
+	m_RealUpdateIntervalMS = m_nWaveBufferSize * 1000.0f / m_nBytesPerSec;
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
 	return TRUE;
 }
-
 
 BOOL CWaveDevice::Close()
 //-----------------------
@@ -167,6 +167,8 @@ BOOL CWaveDevice::Close()
 		{
 			m_nPreparedHeaders--;
 			waveOutUnprepareHeader(m_hWaveOut, m_WaveBuffers[m_nPreparedHeaders], sizeof(WAVEHDR));
+			GlobalFreePtr(m_WaveBuffers[m_nPreparedHeaders]);
+			m_WaveBuffers[m_nPreparedHeaders] = NULL;
 		}
 		waveOutClose(m_hWaveOut);
 		m_hWaveOut = NULL;
@@ -186,33 +188,46 @@ VOID CWaveDevice::Reset()
 }
 
 
-BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
+BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 //--------------------------------------------------------------------------------
 {
 	ULONG nBytesWritten;
 	ULONG nLatency;
+	LONG oldBuffersPending;
 	if (!m_hWaveOut) return FALSE;
 	nBytesWritten = 0;
-	nLatency = m_nBuffersPending * m_nWaveBufferSize;
-	while ((ULONG)m_nBuffersPending < m_nPreparedHeaders)
+	oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
+	nLatency = oldBuffersPending * m_nWaveBufferSize;
+
+	bool wasempty = false;
+	if(oldBuffersPending == 0) wasempty = true;
+	// When there were no pending buffers at all, pause the output, fill the buffers completely and then restart the output.
+	// This avoids buffer underruns which result in audible crackling on stream start with small buffers.
+	if(wasempty) waveOutPause(m_hWaveOut);
+
+	while((ULONG)oldBuffersPending < m_nPreparedHeaders)
 	{
-		ULONG latency = m_nBuffersPending * m_nBufferLen;
-		if ((nMaxLatency) && (m_nBuffersPending >= 2) && (latency >= nMaxLatency))
-		{
-			break;
-		}
 		ULONG len = pSource->AudioRead(m_WaveBuffers[m_nWriteBuffer]->lpData, m_nWaveBufferSize);
-		if (!len)
+		if(!len)
 		{
-			if (!m_nBuffersPending) return FALSE;
+			if(!InterlockedExchangeAdd(&m_nBuffersPending, 0))
+			{
+				if(wasempty) waveOutRestart(m_hWaveOut);
+				return FALSE;
+			}
 			break;
 		}
 		nBytesWritten += len;
 		m_WaveBuffers[m_nWriteBuffer]->dwBufferLength = len;
 		InterlockedIncrement(&m_nBuffersPending);
+		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
 		waveOutWrite(m_hWaveOut, m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
-		if (++m_nWriteBuffer >= m_nPreparedHeaders) m_nWriteBuffer = 0;
+		m_nWriteBuffer++;
+		m_nWriteBuffer %= m_nPreparedHeaders;
 	}
+
+	if(wasempty) waveOutRestart(m_hWaveOut);
+
 	if (nBytesWritten > 0)
 	{
 		pSource->AudioDone(nBytesWritten, nLatency);
@@ -221,7 +236,7 @@ BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWOR
 }
 
 
-VOID CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD dwUser, DWORD, DWORD)
+VOID CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
 //--------------------------------------------------------------------------------
 {
 	if ((uMsg == MM_WOM_DONE) && (dwUser))
@@ -266,7 +281,7 @@ BOOL CWaveDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSiz
 #define DSBCAPS_GLOBALFOCUS		0x8000
 #endif
 
-#define MAX_DSOUND_DEVICES		8
+#define MAX_DSOUND_DEVICES		16
 
 typedef BOOL (WINAPI * LPDSOUNDENUMERATE)(LPDSENUMCALLBACK lpDSEnumCallback, LPVOID lpContext);
 typedef HRESULT (WINAPI * LPDSOUNDCREATE)(GUID * lpGuid, LPDIRECTSOUND * ppDS, IUnknown * pUnkOuter);
@@ -321,6 +336,7 @@ CDSoundDevice::CDSoundDevice()
 	m_pPrimary = NULL;
 	m_pMixBuffer = NULL;
 	m_bMixRunning = FALSE;
+	m_nBytesPerSec = 0;
 }
 
 
@@ -349,11 +365,11 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	if (!m_piDS) return FALSE;
 	m_piDS->SetCooperativeLevel(m_hWnd, nPriorityLevel);
 	m_bMixRunning = FALSE;
-	m_nDSoundBufferSize = (m_nBuffers * m_nBufferLen * pwfx->nAvgBytesPerSec) / 1000;
+	m_nDSoundBufferSize = (m_LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + 15) & ~15;
-	if (m_nDSoundBufferSize < 1024) m_nDSoundBufferSize = 1024;
-	if (m_nDSoundBufferSize > 65536) m_nDSoundBufferSize = 65536;
-	
+	if(m_nDSoundBufferSize < DSOUND_MINBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MINBUFFERSIZE;
+	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
+	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
 	if (m_fulCfgOptions & SNDDEV_OPTIONS_SECONDARY)
 	{
 		// Set the format of the primary buffer
@@ -421,7 +437,8 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		m_pMixBuffer->GetStatus(&dwStat);
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
-	m_nMaxFillInterval = m_nDSoundBufferSize / (pwfx->nBlockAlign*2);
+	m_RealLatencyMS = m_nDSoundBufferSize * 1000.0f / m_nBytesPerSec;
+	m_RealUpdateIntervalMS = CLAMP(static_cast<float>(m_UpdateIntervalMS), 1.0f, m_nDSoundBufferSize * 1000.0f / ( 2.0f * m_nBytesPerSec ) );
 	m_dwWritePos = 0xFFFFFFFF;
 	return TRUE;
 }
@@ -513,7 +530,7 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 }
 
 
-BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
+BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 //----------------------------------------------------------------------------------
 {
 	LPVOID lpBuf1=NULL, lpBuf2=NULL;
@@ -521,8 +538,7 @@ BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DW
 	DWORD dwBytes;
 
 	if (!m_pMixBuffer) return FALSE;
-	if (!nMaxLatency) nMaxLatency = m_nDSoundBufferSize;
-	dwBytes = LockBuffer(nMaxLatency, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2);
+	dwBytes = LockBuffer(m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2);
 	if (dwBytes)
 	{
 		DWORD nRead1=0, nRead2=0;
@@ -644,6 +660,7 @@ CASIODevice::CASIODevice()
 	m_Callbacks.bufferSwitchTimeInfo = BufferSwitchTimeInfo;
 	m_nBitsPerSample = 0; // Unknown
 	m_nCurrentDevice = (ULONG)-1;
+	m_nSamplesPerSec = 0;
 }
 
 
@@ -739,7 +756,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		Log("  getBufferSize(): minSize=%d maxSize=%d preferredSize=%d granularity=%d\n",
 				minSize, maxSize, preferredSize, granularity);
 	#endif
-		m_nAsioBufferLen = ((m_nBufferLen * pwfx->nSamplesPerSec) / 2000);
+		m_nAsioBufferLen = ((m_LatencyMS * pwfx->nSamplesPerSec) / 2000);
 		if (m_nAsioBufferLen < (UINT)minSize) m_nAsioBufferLen = minSize; else
 		if (m_nAsioBufferLen > (UINT)maxSize) m_nAsioBufferLen = maxSize; else
 		if (granularity < 0)
@@ -767,6 +784,9 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 			}
 			m_nAsioBufferLen = n;
 		}
+		m_nSamplesPerSec = pwfx->nSamplesPerSec;
+		m_RealLatencyMS = m_nAsioBufferLen * 2 * 1000.0f / m_nSamplesPerSec;
+		m_RealUpdateIntervalMS = m_nAsioBufferLen * 1000.0f / m_nSamplesPerSec;
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif
@@ -912,10 +932,9 @@ void CASIODevice::CloseDevice()
 }
 
 
-BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, DWORD dwBuffer)
 //-----------------------------------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(nMaxLatency);
 
 	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
 	DWORD dwSamplesLeft = m_nAsioBufferLen;

@@ -66,7 +66,8 @@ TrackerSettings::TrackerSettings()
 	m_nPreAmp = 128;
 	gbLoopSong = TRUE;
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
-	m_nBufferLength = 50;
+	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
+	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
 
 	// Default EQ settings
 	MemCopy(m_EqSettings, CEQSetupDlg::gEQPresets[0]);
@@ -316,9 +317,36 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_dwRate = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
 	m_nBitsPerSample = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
 	m_nChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
-	m_nBufferLength = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BufferLength", m_nBufferLength, iniFile);
-	if(m_nBufferLength < SNDDEV_MINBUFFERLEN) m_nBufferLength = SNDDEV_MINBUFFERLEN;
-	if(m_nBufferLength > SNDDEV_MAXBUFFERLEN) m_nBufferLength = SNDDEV_MAXBUFFERLEN;
+	DWORD LatencyMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Latency", 0, iniFile);
+	DWORD UpdateIntervalMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "UpdateInterval", 0, iniFile);
+	if(LatencyMS == 0 || UpdateIntervalMS == 0)
+	{
+		// old versions have set BufferLength which meant different things than the current ISoundDevice interface wants to know
+		DWORD BufferLengthMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BufferLength", 0, iniFile);
+		if(BufferLengthMS != 0)
+		{
+			if(BufferLengthMS < SNDDEV_OLD_MINBUFFERLEN) BufferLengthMS = SNDDEV_OLD_MINBUFFERLEN;
+			if(BufferLengthMS > SNDDEV_OLD_MAXBUFFERLEN) BufferLengthMS = SNDDEV_OLD_MAXBUFFERLEN;
+			if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
+			{
+				m_LatencyMS = BufferLengthMS;
+				m_UpdateIntervalMS = BufferLengthMS / 8;
+			} else
+			{
+				m_LatencyMS = BufferLengthMS * 3;
+				m_UpdateIntervalMS = BufferLengthMS / 8;
+			}
+		} else
+		{
+			// use defaults
+			m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
+			m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
+		}
+	} else
+	{
+		m_LatencyMS = LatencyMS;
+		m_UpdateIntervalMS = UpdateIntervalMS;
+	}
 	if(m_dwRate == 0)
 	{
 		m_dwRate = 44100;
@@ -538,11 +566,25 @@ bool TrackerSettings::LoadRegistrySettings()
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwSoundSetup, &dwDWORDSize);
+		RegQueryValueEx(key, "WaveDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nWaveDevice, &dwDWORDSize);
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
 		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nSrcMode, &dwDWORDSize);
 		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_dwRate, &dwDWORDSize);
-		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&m_nBufferLength, &dwDWORDSize);
-		if ((m_nBufferLength < SNDDEV_MINBUFFERLEN) || (m_nBufferLength > SNDDEV_MAXBUFFERLEN)) m_nBufferLength = 100;
+		DWORD BufferLengthMS = 0;
+		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&BufferLengthMS, &dwDWORDSize);
+		if(BufferLengthMS != 0)
+		{
+			if((BufferLengthMS < SNDDEV_OLD_MINBUFFERLEN) || (BufferLengthMS > SNDDEV_OLD_MAXBUFFERLEN)) BufferLengthMS = 100;
+			if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
+			{
+				m_LatencyMS = BufferLengthMS;
+				m_UpdateIntervalMS = BufferLengthMS / 8;
+			} else
+			{
+				m_LatencyMS = BufferLengthMS * 3;
+				m_UpdateIntervalMS = BufferLengthMS / 8;
+			}
+		}
 		RegQueryValueEx(key, "PreAmp", NULL, &dwREG_DWORD, (LPBYTE)&m_nPreAmp, &dwDWORDSize);
 
 		CHAR sPath[_MAX_PATH] = "";
@@ -569,7 +611,6 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "ProLogicDelay", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nProLogicDelay, &dwDWORDSize);
 		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nStereoSeparation, &dwDWORDSize);
 		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nMaxMixChannels, &dwDWORDSize);
-		RegQueryValueEx(key, "WaveDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nWaveDevice, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
 		if((m_dwMidiSetup & 0x40) != 0)
 		{
@@ -728,7 +769,8 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_dwRate, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BufferLength", m_nBufferLength, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Latency", m_LatencyMS, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "UpdateInterval", m_UpdateIntervalMS, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
