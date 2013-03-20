@@ -981,31 +981,27 @@ BOOL CMainFrame::audioOpenDevice()
 //--------------------------------
 {
 	UINT nFixedBitsPerSample;
-	LONG err;
+	LONG err = 0;
 
 	if ((!m_pSndFile) || (!m_pSndFile->GetType())) return FALSE;
-	if (!TrackerSettings::Instance().m_dwRate) TrackerSettings::Instance().m_dwRate = 22050;
-	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) TrackerSettings::Instance().m_nChannels = 2;
-	err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+	if (!TrackerSettings::Instance().m_dwRate) err = 1;
+	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) err = 1;
+	if(!err)
+	{
+		err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
 								TrackerSettings::Instance().m_nBitsPerSample,
 								TrackerSettings::Instance().m_dwRate);
-	nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
-	if ((err) && ((TrackerSettings::Instance().m_dwRate > 44100) || (TrackerSettings::Instance().m_nChannels > 2) || (TrackerSettings::Instance().m_nBitsPerSample > 16)
-			   || ((nFixedBitsPerSample) && (nFixedBitsPerSample != TrackerSettings::Instance().m_nBitsPerSample))))
-	{
-		DWORD oldrate = TrackerSettings::Instance().m_dwRate;
-
-		TrackerSettings::Instance().m_dwRate = 44100;
-		if (TrackerSettings::Instance().m_nChannels > 2) TrackerSettings::Instance().m_nChannels = 2;
-		if (nFixedBitsPerSample) TrackerSettings::Instance().m_nBitsPerSample = nFixedBitsPerSample;
-		else if (TrackerSettings::Instance().m_nBitsPerSample > 16) TrackerSettings::Instance().m_nBitsPerSample = 16;
-		err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+		nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
+		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_nBitsPerSample)))
+		{
+			if(nFixedBitsPerSample) TrackerSettings::Instance().m_nBitsPerSample = nFixedBitsPerSample;
+			err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
 									TrackerSettings::Instance().m_nBitsPerSample,
 									TrackerSettings::Instance().m_dwRate);
-		if (err) TrackerSettings::Instance().m_dwRate = oldrate;
+		}
 	}
 	// Display error message box
-	if (err != 0)
+	if(err)
 	{
 		Reporting::Error("Unable to open sound device!");
 		return FALSE;
