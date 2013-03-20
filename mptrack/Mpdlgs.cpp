@@ -362,7 +362,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 	if(TrackerSettings::Instance().m_nWaveDevice == dev)
 	{
 		// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
-		dummy = CMainFrame::gpSoundDevice;
+		dummy = CMainFrame::GetMainFrame()->gpSoundDevice;
 	}
 	if(dummy == nullptr)
 	{

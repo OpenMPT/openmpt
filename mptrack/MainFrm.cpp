@@ -120,13 +120,6 @@ HHOOK CMainFrame::ghKbdHook = NULL;
 std::vector<CString> CMainFrame::s_ExampleModulePaths;
 std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
-HANDLE CMainFrame::m_hPlayThread = NULL;
-DWORD CMainFrame::m_dwPlayThreadId = 0;
-HANDLE CMainFrame::m_hAudioWakeUp = NULL;
-HANDLE CMainFrame::m_hNotifyThread = NULL;
-DWORD CMainFrame::m_dwNotifyThreadId = 0;
-HANDLE CMainFrame::m_hNotifyWakeUp = NULL;
-ISoundDevice *CMainFrame::gpSoundDevice = NULL;
 LONG CMainFrame::slSampleSize = 2;
 UINT CMainFrame::gdwIdleTime = 0;
 LONG CMainFrame::gnLVuMeter = 0;
@@ -198,6 +191,16 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 //----------------------
 {
+
+	m_hPlayThread = NULL;
+	m_dwPlayThreadId = 0;
+	m_hAudioWakeUp = NULL;
+	m_hNotifyThread = NULL;
+	m_dwNotifyThreadId = 0;
+	m_hNotifyWakeUp = NULL;
+	gpSoundDevice = NULL;
+	m_AudioThreadActive = 0;
+
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
 	m_pOrderlistHasFocus = nullptr;
@@ -206,11 +209,9 @@ CMainFrame::CMainFrame()
 	m_SoundCardOptionsDialog = nullptr;
 
 	m_pJustModifiedDoc = nullptr;
-	m_pModPlaying = nullptr;
 	m_hFollowSong = NULL;
 	m_hWndMidi = NULL;
 	m_pSndFile = nullptr;
-	m_dwStatus = 0;
 	m_dwTimeSec = 0;
 	m_dwNotifyType = 0;
 	m_nTimer = 0;
@@ -273,8 +274,8 @@ VOID CMainFrame::Initialize()
 	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
 	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hPlayThread = CreateThread(NULL, 0, AudioThread, NULL, 0, &m_dwPlayThreadId);
-	m_hNotifyThread = CreateThread(NULL, 0, NotifyThread, NULL, 0, &m_dwNotifyThreadId);
+	m_hPlayThread = CreateThread(NULL, 0, AudioThreadWrapper, NULL, 0, &m_dwPlayThreadId);
+	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
 	// Setup timer
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
@@ -698,9 +699,9 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	if (gbStopSent) return FALSE;
 	CriticalSection cs;
-	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
+	if (pMainFrm && pMainFrm->IsAudioThreadActive() && pMainFrm->gpSoundDevice)
 	{
-		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, dwUser);
+		bOk = pMainFrm->gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, dwUser);
 	}
 	if (!bOk)
 	{
@@ -712,7 +713,11 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 
 
 // Audio thread
-DWORD WINAPI CMainFrame::AudioThread(LPVOID)
+DWORD WINAPI CMainFrame::AudioThreadWrapper(LPVOID)
+{
+	return ((CMainFrame*)theApp.m_pMainWnd)->AudioThread();
+}
+DWORD CMainFrame::AudioThread()
 //------------------------------------------
 {
 	ExceptionHandler::RegisterAudioThread();
@@ -721,7 +726,6 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
 	// increase resolution of multimedia timer
 	timeBeginPeriod(1);
-	CMainFrame * pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	HANDLE sleepEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
 #ifdef NDEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
@@ -740,7 +744,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 		
 		if(bWait)
 		{
-			WaitForSingleObject(CMainFrame::m_hAudioWakeUp, 250);
+			WaitForSingleObject(m_hAudioWakeUp, 250);
 		} else
 		{
 			timeSetEvent(nSleep,1,(LPTIMECALLBACK)sleepEvent,NULL,TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
@@ -749,10 +753,10 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 		}
 		{
 			CriticalSection cs;
-			if((!gbStopSent) && (pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
+			if(!gbStopSent && IsAudioThreadActive())
 			{
 				// we are playing, everything is fine
-				if(CMainFrame::gpSoundDevice->Directcallback())
+				if(gpSoundDevice->Directcallback())
 				{
 					// ASIO case
 					nSleep = 50;
@@ -760,10 +764,10 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 					continue; // restart loop
 				}
 				// non-ASIO case
-				if(CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource))
+				if(gpSoundDevice->FillAudioBuffer(&gMPTSoundSource))
 				{
 					bWait = FALSE;
-					nSleep = static_cast<UINT>(CMainFrame::gpSoundDevice->GetRealUpdateIntervalMS());
+					nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
 					if(nSleep < SNDDEV_MINUPDATEINTERVAL_MS) nSleep = SNDDEV_MINUPDATEINTERVAL_MS;
 					if(nSleep > SNDDEV_MAXUPDATEINTERVAL_MS) nSleep = SNDDEV_MAXUPDATEINTERVAL_MS;
 
@@ -773,7 +777,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 					bWait = TRUE;
 					nSleep = 50;
 					gbStopSent = TRUE;
-					pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
+					PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 				}
 			}
 		}
@@ -786,14 +790,17 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 
 
 // Notify thread
-DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
+DWORD WINAPI CMainFrame::NotifyThreadWrapper(LPVOID)
+{
+	return ((CMainFrame*)theApp.m_pMainWnd)->NotifyThread();
+}
+DWORD CMainFrame::NotifyThread()
 //-------------------------------------------
 {
 	ExceptionHandler::RegisterNotifyThread();
 	// initialize thread message queue
 	MSG msg;
 	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-	CMainFrame * pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 #ifdef NDEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL ); // we shall not stall the audio thread while holding m_NotificationBufferMutex
 #endif
@@ -812,22 +819,19 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 			}
 			break;
 			case WAIT_OBJECT_0:
-			{
-				pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-				if (pMainFrm)
 				{
 					const MPTNOTIFICATION * pnotify = nullptr;
 					{
-						Util::lock_guard<Util::mutex> lock(pMainFrm->m_NotificationBufferMutex);
+						Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
 						// advance to the newest notification, drop the obsolete ones
-						const MPTNOTIFICATION * p = pMainFrm->m_NotifyBuffer.peek_p();
-						if(p && pMainFrm->m_TotalSamplesRendered >= p->TimestampSamples)
+						const MPTNOTIFICATION * p = m_NotifyBuffer.peek_p();
+						if(p && m_TotalSamplesRendered >= p->TimestampSamples)
 						{
 							pnotify = p;
-							while(pMainFrm->m_NotifyBuffer.peek_next_p() && pMainFrm->m_TotalSamplesRendered >= pMainFrm->m_NotifyBuffer.peek_next_p()->TimestampSamples)
+							while(m_NotifyBuffer.peek_next_p() && m_TotalSamplesRendered >= m_NotifyBuffer.peek_next_p()->TimestampSamples)
 							{
-								pMainFrm->m_NotifyBuffer.pop();
-								p = pMainFrm->m_NotifyBuffer.peek_p();
+								m_NotifyBuffer.pop();
+								p = m_NotifyBuffer.peek_p();
 								pnotify = p;
 							}
 						}
@@ -837,7 +841,7 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 						if(!cansend)
 						{
 							// poll the semaphore instead of waiting directly after sending the message to avoid deadlocks on termination of openmpt or when stopping audio rendering
-							if(WaitForSingleObject(pMainFrm->m_PendingNotificationSempahore, 0) == WAIT_OBJECT_0)
+							if(WaitForSingleObject(m_PendingNotificationSempahore, 0) == WAIT_OBJECT_0)
 							{
 								// last notification has been handled by gui thread, so we can pop the notify buffer
 								cansend = true;
@@ -845,19 +849,18 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 						}
 						if(cansend)
 						{
-							pMainFrm->m_PendingNotification = *pnotify; // copy notification so that we can free the buffer
+							m_PendingNotification = *pnotify; // copy notification so that we can free the buffer
 							{
-								Util::lock_guard<Util::mutex> lock(pMainFrm->m_NotificationBufferMutex);
-								pMainFrm->m_NotifyBuffer.pop();
+								Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+								m_NotifyBuffer.pop();
 							}
-							if(pMainFrm->PostMessage(WM_MOD_UPDATEPOSITIONTHREADED, 0, 0))
+							if(PostMessage(WM_MOD_UPDATEPOSITIONTHREADED, 0, 0))
 							{
 								cansend = false;
 							}
 						}
 					}
 				}
-			}
 			break;
 		}
 	}
@@ -866,6 +869,13 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 
 
 
+
+void CMainFrame::SetAudioThreadActive(bool active)
+{
+	gpSoundDevice->Start();
+	InterlockedExchange(&m_AudioThreadActive, active?1:0);
+	SetEvent(m_hAudioWakeUp);
+}
 
 ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG cbSize)
 //---------------------------------------------------------
@@ -888,13 +898,9 @@ VOID CMPTSoundSource::AudioDone(ULONG nBytesWritten, ULONG nLatency)
 ULONG CMainFrame::AudioRead(PVOID pvData, ULONG ulSize)
 //-----------------------------------------------------
 {
-	if ((IsPlaying()) && (m_pSndFile))
-	{
 		DWORD dwSamplesRead = m_pSndFile->Read(pvData, ulSize);
 		//m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
 		return dwSamplesRead * slSampleSize;
-	}
-	return 0;
 }
 
 
@@ -973,7 +979,6 @@ BOOL CMainFrame::audioOpenDevice()
 	LONG err;
 
 	if ((!m_pSndFile) || (!m_pSndFile->GetType())) return FALSE;
-	if (IsPlaying()) return TRUE;
 	if (!TrackerSettings::Instance().m_dwRate) TrackerSettings::Instance().m_dwRate = 22050;
 	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) TrackerSettings::Instance().m_nChannels = 2;
 	err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
@@ -1338,14 +1343,16 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
 	const bool bPaused = pSndFile->IsPaused();
 	const bool bPatLoop = pSndFile->m_SongFlags[SONG_PATTERNLOOP];
+
 	pSndFile->ResetChannels();
 	// Select correct bidi loop mode when playing a module.
 	pSndFile->SetupITBidiMode();
 
-	if(m_pSndFile != nullptr || (IsPlaying())) PauseMod();
-	if(m_pSndFile != nullptr && (pSndFile != m_pSndFile || !m_pSndFile->GetTotalSampleCount())) CSoundFile::ResetAGC();
-	m_pSndFile = pSndFile;
-	m_pModPlaying = pModDoc;
+	CSoundFile *oldSndFile = m_pSndFile;
+	if(IsPlaying()) PauseMod();
+	// reset AGC if the sndfile changed
+	if(oldSndFile != nullptr && (pSndFile != oldSndFile || !oldSndFile->GetTotalSampleCount())) CSoundFile::ResetAGC();
+
 	m_hFollowSong = hPat;
 	m_dwNotifyType = dwNotifyType;
 	if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
@@ -1357,10 +1364,10 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 		CSoundFile::gpSndMixHook = NULL;
 	}
 
+	m_pSndFile = pSndFile;
 	if (!audioOpenDevice())
 	{
 		m_pSndFile = NULL;
-		m_pModPlaying = NULL;
 		m_hFollowSong = NULL;
 		return FALSE;
 	}
@@ -1381,10 +1388,9 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
 		m_NotifyBuffer.clear();
 	}
-	m_dwStatus |= MODSTATUS_PLAYING;
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 	if (gpSoundDevice) gpSoundDevice->Start();
-	SetEvent(m_hAudioWakeUp);
+	SetAudioThreadActive(true);
 	return TRUE;
 }
 
@@ -1392,12 +1398,12 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 //-----------------------------------------
 {
-	if ((pModDoc) && (pModDoc != m_pModPlaying)) return FALSE;
+	if ((pModDoc) && (pModDoc != GetModPlaying())) return FALSE;
+	pModDoc = GetModPlaying();
+	SetAudioThreadActive(false);
 	if (IsPlaying())
 	{
-		m_dwStatus &= ~MODSTATUS_PLAYING;
 
-		if (gpSoundDevice) gpSoundDevice->Reset();
 		audioCloseDevice();
 
 		{
@@ -1414,9 +1420,9 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 			SendMessage(WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
 		}
 	}
-	if (m_pModPlaying)
+	if (pModDoc)
 	{
-		m_wndTree.UpdatePlayPos(m_pModPlaying, NULL);
+		m_wndTree.UpdatePlayPos(pModDoc, NULL);
 	}
 	if (m_pSndFile)
 	{
@@ -1437,9 +1443,8 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 		}
 	}
 
-	m_pModPlaying = nullptr;
-	m_pSndFile = nullptr;
-	m_hFollowSong = nullptr;
+	m_pSndFile = NULL;
+	m_hFollowSong = NULL;
 	m_wndToolBar.SetCurrentSong(NULL);
 	return TRUE;
 }
@@ -1448,7 +1453,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 BOOL CMainFrame::StopMod(CModDoc *pModDoc)
 //----------------------------------------
 {
-	if ((pModDoc) && (pModDoc != m_pModPlaying)) return FALSE;
+	if ((pModDoc) && (pModDoc != GetModPlaying())) return FALSE;
 	CSoundFile *pSndFile = m_pSndFile;
 	PauseMod();
 	if (pSndFile) pSndFile->SetCurrentPos(0);
@@ -1461,18 +1466,23 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 {
 	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
 	if (m_pSndFile && m_pSndFile != pSndFile) PauseMod(NULL);
+	bool isplaying = IsPlaying();
 	m_pSndFile = pSndFile;
-	if (!audioOpenDevice())
+	if(!isplaying)
 	{
-		m_pSndFile = NULL;
-		return FALSE;
+		if (!audioOpenDevice())
+		{
+			m_pSndFile = NULL;
+			return FALSE;
+		}
 	}
 	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 	m_pSndFile->InitPlayer(TRUE);
-	if(gpSoundDevice && !(IsPlaying())) gpSoundDevice->Start();
-	m_dwStatus |= MODSTATUS_PLAYING;
-	SetEvent(m_hAudioWakeUp);
+	if(!isplaying)
+	{
+		SetAudioThreadActive();
+	}
 	return TRUE;
 }
 
@@ -1640,7 +1650,7 @@ BOOL CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, DWORD dwType)
 //--------------------------------------------------------------------------------------
 {
-	if ((!pDoc) || (pDoc != m_pModPlaying)) return FALSE;
+	if ((!pDoc) || (pDoc != GetModPlaying())) return FALSE;
 	if (bFollowSong)
 	{
 		m_hFollowSong = hwnd;
@@ -1673,7 +1683,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 		HWND hFollow = m_hFollowSong;
 		if (isPlaying)
 		{
-			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = m_pModPlaying;
+			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
 			PauseMod();
 		}
 		TrackerSettings::Instance().m_nWaveDevice = wd;
@@ -1826,7 +1836,7 @@ VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 //-------------------------------------------------
 {
-	if (pModDoc == m_pModPlaying) PauseMod();
+	if (pModDoc == GetModPlaying()) PauseMod();
 
 	// Make sure that OnTimer() won't try to set the closed document modified anymore.
 	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = nullptr;
@@ -2154,9 +2164,9 @@ void CMainFrame::OnUpdateXInfo(CCmdUI *)
 void CMainFrame::OnPlayerPause()
 //------------------------------
 {
-	if (m_pModPlaying)
+	if (GetModPlaying())
 	{
-		m_pModPlaying->OnPlayerPause();
+		GetModPlaying()->OnPlayerPause();
 	} else
 	{
 		PauseMod();
@@ -2255,9 +2265,9 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 	if (pnotify)
 	{
 		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->TimestampSamples);
-		if ((m_pModPlaying) && (m_pSndFile))
+		if (GetModPlaying())
 		{
-			m_wndTree.UpdatePlayPos(m_pModPlaying, pnotify);
+			m_wndTree.UpdatePlayPos(GetModPlaying(), pnotify);
 			if (m_hFollowSong)
 				::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
@@ -2270,8 +2280,8 @@ void CMainFrame::OnPanic()
 //------------------------
 {
 	// "Panic button." At the moment, it just resets all VSTi and sample notes.
-	if(m_pModPlaying)
-		m_pModPlaying->OnPanic();
+	if(GetModPlaying())
+		GetModPlaying()->OnPanic();
 }
 
 
@@ -2488,8 +2498,6 @@ BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 	pSndFile->m_bIsRendering=true;
 	pSndFile->SuspendPlugins();
 	pSndFile->ResumePlugins();
-	m_dwStatus |= MODSTATUS_RENDERING;
-	m_pModPlaying = GetActiveDoc();
 	return true;
 }
 
@@ -2497,8 +2505,6 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------
 {
 	CriticalSection cs;
-	m_dwStatus &= ~MODSTATUS_RENDERING;
-	m_pModPlaying = NULL;
 	pSndFile->SuspendPlugins();
 	pSndFile->m_bIsRendering=false;
 	return true;
