@@ -872,9 +872,15 @@ DWORD CMainFrame::NotifyThread()
 
 void CMainFrame::SetAudioThreadActive(bool active)
 {
-	gpSoundDevice->Start();
-	InterlockedExchange(&m_AudioThreadActive, active?1:0);
-	SetEvent(m_hAudioWakeUp);
+	if(active)
+	{
+		gpSoundDevice->Start();
+		InterlockedExchange(&m_AudioThreadActive, 1);
+		SetEvent(m_hAudioWakeUp);
+	} else
+	{
+		InterlockedExchange(&m_AudioThreadActive, 0);
+	}
 }
 
 ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG cbSize)
@@ -1389,7 +1395,6 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 		m_NotifyBuffer.clear();
 	}
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
-	if (gpSoundDevice) gpSoundDevice->Start();
 	SetAudioThreadActive(true);
 	return TRUE;
 }
@@ -1400,10 +1405,10 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 {
 	if ((pModDoc) && (pModDoc != GetModPlaying())) return FALSE;
 	pModDoc = GetModPlaying();
-	SetAudioThreadActive(false);
 	if (IsPlaying())
 	{
 
+		SetAudioThreadActive(false);
 		audioCloseDevice();
 
 		{
