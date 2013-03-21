@@ -525,7 +525,7 @@ void CMainFrame::OnClose()
 		CriticalSection cs;
 		//gpSoundDevice->Reset();
 		//audioCloseDevice();
-		gpSoundDevice->Release();
+		delete gpSoundDevice;
 		gpSoundDevice = NULL;
 	}
 	// Save Settings
@@ -976,13 +976,11 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
 	if ((gpSoundDevice) && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
-		gpSoundDevice->Release();
+		delete gpSoundDevice;
 		gpSoundDevice = NULL;
 	}
-	if (!gpSoundDevice)
-	{
-		if (!CreateSoundDevice(nDevType, &gpSoundDevice)) return false;
-	}
+	if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
+	if(!gpSoundDevice) return false;
 	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0);
 	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	return true;

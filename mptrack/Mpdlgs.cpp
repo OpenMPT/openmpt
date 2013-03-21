@@ -367,7 +367,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 	if(dummy == nullptr)
 	{
 		justCreated = true;
-		CreateSoundDevice(SNDDEV_GET_TYPE(dev), &dummy);
+		dummy = CreateSoundDevice(SNDDEV_GET_TYPE(dev));
 	}
 
 	if(dummy != nullptr)

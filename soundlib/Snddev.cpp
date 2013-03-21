@@ -26,7 +26,6 @@
 ISoundDevice::ISoundDevice()
 //--------------------------
 {
-	m_RefCount = 1;
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
 	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
 	m_fulCfgOptions = 0;
@@ -38,28 +37,6 @@ ISoundDevice::ISoundDevice()
 ISoundDevice::~ISoundDevice()
 //---------------------------
 {
-}
-
-
-ULONG ISoundDevice::AddRef()
-//--------------------------
-{
-	m_RefCount++;
-	return m_RefCount;
-}
-
-
-ULONG ISoundDevice::Release()
-//---------------------------
-{
-	if (!--m_RefCount)
-	{
-		delete this;
-		return 0;
-	} else
-	{
-		return m_RefCount;
-	}
 }
 
 
@@ -1427,22 +1404,20 @@ BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
 	return FALSE;
 }
 
-BOOL CreateSoundDevice(UINT nType, ISoundDevice **ppsd)
-//-----------------------------------------------------
+ISoundDevice *CreateSoundDevice(UINT nType)
+//-----------------------------------------
 {
-	if (!ppsd) return FALSE;
-	*ppsd = NULL;
 	switch(nType)
 	{
-	case SNDDEV_WAVEOUT:	*ppsd = new CWaveDevice(); break;
+	case SNDDEV_WAVEOUT:	return new CWaveDevice(); break;
 #ifndef NO_DSOUND
-	case SNDDEV_DSOUND:		*ppsd = new CDSoundDevice(); break;
+	case SNDDEV_DSOUND:		return new CDSoundDevice(); break;
 #endif // NO_DIRECTSOUND
 #ifndef NO_ASIO
-	case SNDDEV_ASIO:		*ppsd = new CASIODevice(); break;
+	case SNDDEV_ASIO:		return new CASIODevice(); break;
 #endif // NO_ASIO
 	}
-	return (*ppsd) ? TRUE : FALSE;
+	return nullptr;
 }
 
 
