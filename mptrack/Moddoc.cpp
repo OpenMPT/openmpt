@@ -1978,8 +1978,8 @@ void CModDoc::OnPlayerPlayFromStart()
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
 		
-		CriticalSection cs;
 		pMainFrm->PauseMod();
+		CriticalSection cs;
 		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
 		//m_SndFile.visitedSongRows.Initialize(true);

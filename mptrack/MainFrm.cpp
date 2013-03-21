@@ -197,6 +197,8 @@ CMainFrame::CMainFrame()
 	m_hNotifyThread = NULL;
 	m_dwNotifyThreadId = 0;
 	m_hNotifyWakeUp = NULL;
+	m_hAudioThreadTerminateRequest = NULL;
+	m_hAudioThreadGoneIdle = NULL;
 	gpSoundDevice = NULL;
 	m_AudioThreadActive = 0;
 	m_AudioThreadSentStop = false;
@@ -275,6 +277,7 @@ VOID CMainFrame::Initialize()
 	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hAudioThreadTerminateRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hAudioThreadGoneIdle = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hPlayThread = CreateThread(NULL, 0, AudioThreadWrapper, NULL, 0, &m_dwPlayThreadId);
 	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
 	// Setup timer
@@ -420,6 +423,11 @@ BOOL CMainFrame::DestroyWindow()
 	{
 		CloseHandle(m_hAudioThreadTerminateRequest);
 		m_hAudioThreadTerminateRequest = 0;
+	}
+	if(m_hAudioThreadGoneIdle != NULL)
+	{
+		CloseHandle(m_hAudioThreadGoneIdle);
+		m_hAudioThreadGoneIdle = 0;
 	}
 	if(m_hAudioWakeUp != NULL)
 	{
@@ -747,6 +755,7 @@ DWORD CMainFrame::AudioThread()
 
 		if(idle)
 		{
+			SetEvent(m_hAudioThreadGoneIdle);
 			switch(WaitForMultipleObjects(2, waithandles, FALSE, INFINITE))
 			{
 			case WAIT_OBJECT_0:
@@ -760,7 +769,7 @@ DWORD CMainFrame::AudioThread()
 		}
 
 		// increase resolution of multimedia timer
-		timeBeginPeriod(1);
+		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR );
 
 		while(!idle && !terminate) 
 		{
@@ -791,6 +800,9 @@ DWORD CMainFrame::AudioThread()
 						m_AudioThreadSentStop = true;
 						PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 					}
+				} else
+				{
+					idle = true;
 				}
 			}
 
@@ -802,9 +814,11 @@ DWORD CMainFrame::AudioThread()
 
 		}
 
-		timeEndPeriod(1);
+		if(period_set) timeEndPeriod(1);
 
 	}
+
+	SetEvent(m_hAudioThreadGoneIdle);
 
 	CloseHandle(sleepEvent);
 	return 0;
@@ -890,24 +904,27 @@ DWORD CMainFrame::NotifyThread()
 }
 
 
-
-
 void CMainFrame::SetAudioThreadActive(bool active)
+//------------------------------------------------
 {
 	if(active)
 	{
-		m_AudioThreadSentStop = false;
 		gpSoundDevice->Start();
+		m_AudioThreadSentStop = false;
+		ResetEvent(m_hAudioThreadGoneIdle);
 		InterlockedExchange(&m_AudioThreadActive, 1);
 		SetEvent(m_hAudioWakeUp);
 	} else
 	{
 		InterlockedExchange(&m_AudioThreadActive, 0);
+		WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
+		gpSoundDevice->Stop();
 	}
 }
 
+
 ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG MaxSamples)
-//---------------------------------------------------------
+//-------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	if (pMainFrm) return pMainFrm->AudioRead(pData, MaxSamples);
