@@ -190,13 +190,13 @@ VOID CWaveDevice::Reset()
 }
 
 
-BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
-//--------------------------------------------------------------------------------
+bool CWaveDevice::FillAudioBuffer(ISoundSource *pSource)
+//------------------------------------------------------
 {
 	ULONG nBytesWritten;
 	ULONG nLatency;
 	LONG oldBuffersPending;
-	if (!m_hWaveOut) return FALSE;
+	if (!m_hWaveOut) return false;
 	nBytesWritten = 0;
 	oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
 	nLatency = oldBuffersPending * m_nWaveBufferSize;
@@ -215,7 +215,7 @@ BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 			if(!InterlockedExchangeAdd(&m_nBuffersPending, 0))
 			{
 				if(wasempty) waveOutRestart(m_hWaveOut);
-				return FALSE;
+				return false;
 			}
 			break;
 		}
@@ -234,7 +234,7 @@ BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
 	{
 		pSource->AudioDone(nBytesWritten/m_BytesPerSample, nLatency/m_BytesPerSample);
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -534,8 +534,8 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 }
 
 
-BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, DWORD)
-//----------------------------------------------------------------------------------
+bool CDSoundDevice::FillAudioBuffer(ISoundSource *pSource)
+//--------------------------------------------------------
 {
 	LPVOID lpBuf1=NULL, lpBuf2=NULL;
 	DWORD dwSize1=0, dwSize2=0;
@@ -586,6 +586,9 @@ int CASIODevice::baseChannel = 0;
 static UINT gnNumAsioDrivers = 0;
 static BOOL gbAsioEnumerated = FALSE;
 static ASIODRIVERDESC gAsioDrivers[ASIO_MAX_DRIVERS];
+
+static DWORD g_dwBuffer = 0;
+
 
 BOOL CASIODevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize)
 //--------------------------------------------------------------------------------
@@ -935,9 +938,8 @@ void CASIODevice::CloseDevice()
 	}
 }
 
-
-BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, DWORD dwBuffer)
-//-----------------------------------------------------------------------------------------
+bool CASIODevice::FillAudioBuffer(ISoundSource *pSource)
+//------------------------------------------------------
 {
 
 	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
@@ -945,8 +947,8 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, DWORD dwBuffer)
 	DWORD dwFrameLen = (ASIO_BLOCK_LEN*sizeof(int)) / dwSampleSize;
 	DWORD dwBufferOffset = 0;
 	
-	dwBuffer &= 1;
-	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", dwBuffer, dwSampleSize, dwSamplesLeft, dwFrameLen);
+	g_dwBuffer &= 1;
+	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", g_dwBuffer, dwSampleSize, dwSamplesLeft, dwFrameLen);
 	while ((LONG)dwSamplesLeft > 0)
 	{
 		UINT n = (dwSamplesLeft < dwFrameLen) ? dwSamplesLeft : dwFrameLen;
@@ -956,7 +958,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, DWORD dwBuffer)
 		for (UINT ich=0; ich<m_nChannels; ich++)
 		{
 			char *psrc = (char *)m_FrameBuffer;
-			char *pbuffer = (char *)m_BufferInfo[ich].buffers[dwBuffer];
+			char *pbuffer = (char *)m_BufferInfo[ich].buffers[g_dwBuffer];
 			switch(m_ChannelInfo[ich].type)
 			{
 			case ASIOSTInt16MSB:
@@ -1036,7 +1038,8 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
 	UNREFERENCED_PARAMETER(directProcess);
-	if ((gpCurrentAsio) && (gpCurrentAsio->m_bMixRunning)) SoundDeviceCallback(doubleBufferIndex);
+	g_dwBuffer = doubleBufferIndex;
+	if ((gpCurrentAsio) && (gpCurrentAsio->m_bMixRunning)) SoundDeviceCallback();
 }
 
 

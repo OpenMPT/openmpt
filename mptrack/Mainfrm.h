@@ -372,6 +372,7 @@ public:
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD AudioThread();
 	DWORD NotifyThread();
+	bool SoundDeviceCallback();
 	void SetAudioThreadActive(bool active=true);
 	bool IsAudioThreadActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);

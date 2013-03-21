@@ -690,24 +690,30 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 static BOOL gbStopSent = FALSE;
 
 // Sound Device Callback
-BOOL SoundDeviceCallback(DWORD dwUser)
+BOOL SoundDeviceCallback()
+//------------------------------------
+{
+	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
+	if(!pMainFrm) return FALSE;
+	return pMainFrm->SoundDeviceCallback() ? TRUE : FALSE;
+}
+bool CMainFrame::SoundDeviceCallback()
 //------------------------------------
 {
 	// ASIO case (NOT called for other snddev)
-	BOOL bOk = FALSE;
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (gbStopSent) return FALSE;
+	bool ok = false;
+	if(gbStopSent) return false;
 	CriticalSection cs;
-	if (pMainFrm && pMainFrm->IsAudioThreadActive() && pMainFrm->gpSoundDevice)
+	if(IsAudioThreadActive() && gpSoundDevice)
 	{
-		bOk = pMainFrm->gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, dwUser);
+		ok = gpSoundDevice->FillAudioBuffer(&gMPTSoundSource);
 	}
-	if (!bOk)
+	if(!ok)
 	{
-		gbStopSent = TRUE;
-		pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
+		gbStopSent = true;
+		PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 	}
-	return bOk;
+	return ok;
 }
 
 
