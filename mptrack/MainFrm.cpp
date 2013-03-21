@@ -199,6 +199,7 @@ CMainFrame::CMainFrame()
 	m_hNotifyWakeUp = NULL;
 	gpSoundDevice = NULL;
 	m_AudioThreadActive = 0;
+	m_AudioThreadSentStop = false;
 
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
@@ -273,6 +274,7 @@ VOID CMainFrame::Initialize()
 	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
 	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hAudioThreadTerminateRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hPlayThread = CreateThread(NULL, 0, AudioThreadWrapper, NULL, 0, &m_dwPlayThreadId);
 	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
 	// Setup timer
@@ -409,11 +411,15 @@ BOOL CMainFrame::DestroyWindow()
 	if (shMidiIn) midiCloseDevice();
 	if(m_hPlayThread != NULL)
 	{
-		PostThreadMessage(m_dwPlayThreadId, WM_QUIT, 0, 0);
-		SetEvent(m_hAudioWakeUp);
+		SetEvent(m_hAudioThreadTerminateRequest);
 		WaitForSingleObject(m_hPlayThread, INFINITE);
 		m_dwPlayThreadId = 0;
 		m_hPlayThread = NULL;
+	}
+	if(m_hAudioThreadTerminateRequest)
+	{
+		CloseHandle(m_hAudioThreadTerminateRequest);
+		m_hAudioThreadTerminateRequest = 0;
 	}
 	if(m_hAudioWakeUp != NULL)
 	{
@@ -687,8 +693,6 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame Sound Library
 
-static BOOL gbStopSent = FALSE;
-
 // Sound Device Callback
 BOOL SoundDeviceCallback()
 //------------------------------------
@@ -702,7 +706,7 @@ bool CMainFrame::SoundDeviceCallback()
 {
 	// ASIO case (NOT called for other snddev)
 	bool ok = false;
-	if(gbStopSent) return false;
+	if(m_AudioThreadSentStop) return false;
 	CriticalSection cs;
 	if(IsAudioThreadActive() && gpSoundDevice)
 	{
@@ -710,7 +714,7 @@ bool CMainFrame::SoundDeviceCallback()
 	}
 	if(!ok)
 	{
-		gbStopSent = true;
+		m_AudioThreadSentStop = true;
 		PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 	}
 	return ok;
@@ -723,73 +727,86 @@ DWORD WINAPI CMainFrame::AudioThreadWrapper(LPVOID)
 	return ((CMainFrame*)theApp.m_pMainWnd)->AudioThread();
 }
 DWORD CMainFrame::AudioThread()
-//------------------------------------------
+//-----------------------------
 {
 	ExceptionHandler::RegisterAudioThread();
-	// initialize thread message queue
-	MSG msg;
-	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-	// increase resolution of multimedia timer
-	timeBeginPeriod(1);
-	HANDLE sleepEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
+	HANDLE sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #ifdef NDEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 #endif
 
-	BOOL bWait = TRUE;
-	UINT nSleep = 50;
-	bool terminate = false;
-	do
-	{
-		MSG msg;
-		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if(msg.message == WM_QUIT) terminate = true;
-		}
-		
-		if(bWait)
-		{
-			WaitForSingleObject(m_hAudioWakeUp, 250);
-		} else
-		{
-			timeSetEvent(nSleep,1,(LPTIMECALLBACK)sleepEvent,NULL,TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
-			WaitForSingleObject(sleepEvent,nSleep);
-			ResetEvent(sleepEvent);
-		}
-		{
-			CriticalSection cs;
-			if(!gbStopSent && IsAudioThreadActive())
-			{
-				// we are playing, everything is fine
-				if(gpSoundDevice->Directcallback())
-				{
-					// ASIO case
-					nSleep = 50;
-					bWait = TRUE;
-					continue; // restart loop
-				}
-				// non-ASIO case
-				if(gpSoundDevice->FillAudioBuffer(&gMPTSoundSource))
-				{
-					bWait = FALSE;
-					nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
-					if(nSleep < SNDDEV_MINUPDATEINTERVAL_MS) nSleep = SNDDEV_MINUPDATEINTERVAL_MS;
-					if(nSleep > SNDDEV_MAXUPDATEINTERVAL_MS) nSleep = SNDDEV_MAXUPDATEINTERVAL_MS;
+	HANDLE waithandles[3];
+	waithandles[0] = m_hAudioThreadTerminateRequest;
+	waithandles[1] = m_hAudioWakeUp;
+	waithandles[2] = sleepEvent;
 
-				} else
+	bool idle = true;
+	bool terminate = false;
+	while(!terminate)
+	{
+
+		if(idle)
+		{
+			switch(WaitForMultipleObjects(2, waithandles, FALSE, INFINITE))
+			{
+			case WAIT_OBJECT_0:
+				terminate = true;
+				break;
+			case WAIT_OBJECT_0+1:
+				idle = false;
+				break;
+			}
+			continue;
+		}
+
+		// increase resolution of multimedia timer
+		timeBeginPeriod(1);
+
+		while(!idle && !terminate) 
+		{
+
+			UINT nSleep = 50;
+
+			{
+				CriticalSection cs;
+				if(IsAudioThreadActive() && !m_AudioThreadSentStop)
 				{
-					// stop
-					bWait = TRUE;
-					nSleep = 50;
-					gbStopSent = TRUE;
-					PostMessage(WM_COMMAND, ID_PLAYER_STOP);
+					// we are playing, everything is fine
+					if(gpSoundDevice->Directcallback())
+					{
+						// ASIO case
+						idle = true;
+					} else
+					if(gpSoundDevice->FillAudioBuffer(&gMPTSoundSource))
+					{
+						// non-ASIO case playing
+						nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
+						if(nSleep < SNDDEV_MINUPDATEINTERVAL_MS) nSleep = SNDDEV_MINUPDATEINTERVAL_MS;
+						if(nSleep > SNDDEV_MAXUPDATEINTERVAL_MS) nSleep = SNDDEV_MAXUPDATEINTERVAL_MS;
+
+					} else
+					{
+						// non-ASIO case stopping
+						idle = true;
+						m_AudioThreadSentStop = true;
+						PostMessage(WM_COMMAND, ID_PLAYER_STOP);
+					}
 				}
 			}
+
+			if(!idle)
+			{
+				timeSetEvent(nSleep, 1, (LPTIMECALLBACK)sleepEvent, NULL, TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+				if(WaitForMultipleObjects(3, waithandles, FALSE, nSleep) == WAIT_OBJECT_0) terminate = true;
+			}
+
 		}
-	} while(!terminate);
+
+		timeEndPeriod(1);
+
+	}
 
 	CloseHandle(sleepEvent);
-	timeEndPeriod(1);
 	return 0;
 }
 
@@ -879,6 +896,7 @@ void CMainFrame::SetAudioThreadActive(bool active)
 {
 	if(active)
 	{
+		m_AudioThreadSentStop = false;
 		gpSoundDevice->Start();
 		InterlockedExchange(&m_AudioThreadActive, 1);
 		SetEvent(m_hAudioWakeUp);
@@ -966,7 +984,6 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 		if (!CreateSoundDevice(nDevType, &gpSoundDevice)) return false;
 	}
 	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0);
-	gbStopSent = FALSE;
 	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	return true;
 }

@@ -322,10 +322,12 @@ public:
 	ISoundDevice *gpSoundDevice;
 	HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
 	HANDLE m_hPlayThread, m_hNotifyThread;
+	HANDLE m_hAudioThreadTerminateRequest;
 	DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
 	LONG m_AudioThreadActive;
+	bool m_AudioThreadSentStop;
 
 	// Midi Input
 public:
