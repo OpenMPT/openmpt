@@ -354,8 +354,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 		if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
 		{
-			ISoundDevice *dummy;
-			if(CreateSoundDevice(SNDDEV_ASIO, &dummy))
+			ISoundDevice *dummy = CreateSoundDevice(SNDDEV_ASIO);
+			if(dummy)
 			{
 				m_dwRate = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
 				delete dummy;

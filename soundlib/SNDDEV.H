@@ -70,7 +70,6 @@ class ISoundDevice
 //================
 {
 protected:
-	ULONG m_RefCount;
 	ULONG m_LatencyMS;
 	ULONG m_UpdateIntervalMS;
 	ULONG m_fulCfgOptions;
@@ -82,8 +81,6 @@ protected:
 public:
 	ISoundDevice();
 	virtual ~ISoundDevice();
-	ULONG AddRef();
-	ULONG Release();
 
 public:
 	VOID Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
@@ -119,7 +116,7 @@ BOOL SndDevUninitialize();
 
 // Enumerate devices for a specific type
 BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDescription, UINT cbSize);
-BOOL CreateSoundDevice(UINT nType, ISoundDevice **ppsd);
+ISoundDevice *CreateSoundDevice(UINT nType);
 extern BOOL SoundDeviceCallback();
 
 ////////////////////////////////////////////////////////////////////////////////////
