@@ -54,7 +54,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, DWORD);
+	bool FillAudioBuffer(ISoundSource *pSource);
 	VOID Reset();
 	VOID Start() {}
 	bool IsOpen() { return (m_hWaveOut != NULL); }
@@ -98,7 +98,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_DSOUND; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, DWORD);
+	bool FillAudioBuffer(ISoundSource *pSource);
 	VOID Reset();
 	VOID Start() {}
 	bool IsOpen() { return (m_pMixBuffer != NULL); }
@@ -151,7 +151,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_ASIO; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, DWORD dwUser);
+	bool FillAudioBuffer(ISoundSource *pSource);
 	VOID Reset();
 	VOID Start();
 	bool IsOpen() { return (m_pAsioDrv != NULL); }

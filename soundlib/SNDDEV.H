@@ -94,7 +94,7 @@ public:
 	virtual UINT GetDeviceType() = 0;
 	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
 	virtual BOOL Close() = 0;				// Close the currently open device
-	virtual BOOL FillAudioBuffer(ISoundSource *pSource, DWORD dwUser=0) = 0; // returns FALSE when pSource stops (as in stops delivering more data), causing sound output to halt
+	virtual bool FillAudioBuffer(ISoundSource *pSource) = 0; // returns FALSE when pSource stops (as in stops delivering more data), causing sound output to halt
 	virtual VOID Start() = 0;
 	virtual VOID Reset() = 0;
 	virtual BOOL Directcallback() { return FALSE; }
@@ -120,6 +120,6 @@ BOOL SndDevUninitialize();
 // Enumerate devices for a specific type
 BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDescription, UINT cbSize);
 BOOL CreateSoundDevice(UINT nType, ISoundDevice **ppsd);
-extern BOOL SoundDeviceCallback(DWORD dwUser);
+extern BOOL SoundDeviceCallback();
 
 ////////////////////////////////////////////////////////////////////////////////////
