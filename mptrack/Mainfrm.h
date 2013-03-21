@@ -377,8 +377,8 @@ public:
 	bool IsAudioThreadActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
 	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency);
-	LONG audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
-	BOOL audioOpenDevice();
+	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
+	bool audioOpenDevice();
 	void audioCloseDevice();
 	BOOL audioFillBuffers();
 	BOOL DSoundDone(LPBYTE lpBuffer, DWORD dwBytes);
@@ -455,6 +455,7 @@ public:
 
 // Player functions
 public:
+	static void ApplyTrackerSettings(CSoundFile *pSndFile);
 	BOOL PlayMod(CModDoc *, HWND hPat=NULL, DWORD dwNotifyType=0);
 	BOOL StopMod(CModDoc *pDoc=NULL);
 	BOOL PauseMod(CModDoc *pDoc=NULL);
