@@ -323,6 +323,7 @@ public:
 	HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
 	HANDLE m_hPlayThread, m_hNotifyThread;
 	HANDLE m_hAudioThreadTerminateRequest;
+	HANDLE m_hAudioThreadGoneIdle;
 	DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;

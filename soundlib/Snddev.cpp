@@ -157,10 +157,29 @@ BOOL CWaveDevice::Close()
 }
 
 
-VOID CWaveDevice::Reset()
+void CWaveDevice::Start()
 //-----------------------
 {
-	if (m_hWaveOut)
+	// done in FillAudioBuffer for now
+}
+
+
+void CWaveDevice::Stop()
+//----------------------
+{
+	if(m_hWaveOut)
+	{
+		waveOutReset(m_hWaveOut);
+	}
+	InterlockedExchange(&m_nBuffersPending, 0);
+	m_nWriteBuffer = 0;
+}
+
+
+void CWaveDevice::Reset()
+//-----------------------
+{
+	if(m_hWaveOut)
 	{
 		waveOutReset(m_hWaveOut);
 	}
@@ -448,7 +467,27 @@ BOOL CDSoundDevice::Close()
 }
 
 
-VOID CDSoundDevice::Reset()
+void CDSoundDevice::Start()
+//-------------------------
+{
+	if(!m_pMixBuffer) return;
+	// done in FillAudioBuffer for now
+}
+
+
+void CDSoundDevice::Stop()
+//------------------------
+{
+	if(!m_pMixBuffer) return;
+	if(m_bMixRunning)
+	{
+		m_bMixRunning = FALSE;
+		m_pMixBuffer->Stop();
+	}
+}
+
+
+void CDSoundDevice::Reset()
 //-------------------------
 {
 	if (m_pMixBuffer) m_pMixBuffer->Stop();
@@ -810,7 +849,7 @@ abort:
 }
 
 
-VOID CASIODevice::Start()
+void CASIODevice::Start()
 //-----------------------
 {
 	if (IsOpen())
@@ -823,6 +862,23 @@ VOID CASIODevice::Start()
 		{
 			CASIODevice::ReportASIOException("ASIO crash in start()\n");
 		}
+	}
+}
+
+
+void CASIODevice::Stop()
+//-----------------------
+{
+	if (IsOpen())
+	{
+		try
+		{
+			m_pAsioDrv->stop();
+		} catch(...)
+		{
+			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
+		}
+		m_bMixRunning = FALSE;
 	}
 }
 
@@ -860,7 +916,7 @@ BOOL CASIODevice::Close()
 }
 
 
-VOID CASIODevice::Reset()
+void CASIODevice::Reset()
 //-----------------------
 {
 	if (IsOpen())

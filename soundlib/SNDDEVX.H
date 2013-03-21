@@ -55,8 +55,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	bool FillAudioBuffer(ISoundSource *pSource);
-	VOID Reset();
-	VOID Start() {}
+	void Reset();
+	void Start();
+	void Stop();
 	bool IsOpen() { return (m_hWaveOut != NULL); }
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
 	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
@@ -99,8 +100,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	bool FillAudioBuffer(ISoundSource *pSource);
-	VOID Reset();
-	VOID Start() {}
+	void Reset();
+	void Start();
+	void Stop();
 	bool IsOpen() { return (m_pMixBuffer != NULL); }
 	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
 	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
@@ -152,8 +154,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	bool FillAudioBuffer(ISoundSource *pSource);
-	VOID Reset();
-	VOID Start();
+	void Reset();
+	void Start();
+	void Stop();
 	bool IsOpen() { return (m_pAsioDrv != NULL); }
 	BOOL Directcallback() { return TRUE; }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }

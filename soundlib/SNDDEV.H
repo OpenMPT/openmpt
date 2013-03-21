@@ -92,8 +92,9 @@ public:
 	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
 	virtual BOOL Close() = 0;				// Close the currently open device
 	virtual bool FillAudioBuffer(ISoundSource *pSource) = 0; // returns FALSE when pSource stops (as in stops delivering more data), causing sound output to halt
-	virtual VOID Start() = 0;
-	virtual VOID Reset() = 0;
+	virtual void Start() = 0;
+	virtual void Stop() = 0;
+	virtual void Reset() = 0;
 	virtual BOOL Directcallback() { return FALSE; }
 	virtual UINT HasFixedBitsPerSample() { return 0; }
 	virtual bool IsOpen() = 0;
