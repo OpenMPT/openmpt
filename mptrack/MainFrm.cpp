@@ -925,12 +925,11 @@ VOID CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency)
 }
 
 
-LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
+bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
 //----------------------------------------------------------------------------------
 {
 	WAVEFORMATEXTENSIBLE WaveFormat;
 
-	if (!m_pSndFile) return -1;
 	UINT bytespersample = (bits/8) * channels;
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (unsigned short) channels;
@@ -952,18 +951,11 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 		case 2:		WaveFormat.dwChannelMask = 0x0003; break; // FRONT_LEFT | FRONT_RIGHT
 		case 3:		WaveFormat.dwChannelMask = 0x0103; break; // FRONT_LEFT|FRONT_RIGHT|BACK_CENTER
 		case 4:		WaveFormat.dwChannelMask = 0x0033; break; // FRONT_LEFT|FRONT_RIGHT|BACK_LEFT|BACK_RIGHT
-		default:	WaveFormat.dwChannelMask = 0; break;
+		default:	WaveFormat.dwChannelMask = 0; return false; break;
 		}
 		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
 	}
-	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
-	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
-	m_pSndFile->SetWaveConfig(samplespersec, bits, channels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
-	// Maybe we failed because someone is playing sound already.
-	// Shut any sound off, and try once more before giving up.
 	UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
-	UINT nDevNo = SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice);
-	UINT fulOptions = (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0;
 	if ((gpSoundDevice) && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
 		gpSoundDevice->Release();
@@ -971,37 +963,32 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	}
 	if (!gpSoundDevice)
 	{
-		if (!CreateSoundDevice(nDevType, &gpSoundDevice)) return -1;
+		if (!CreateSoundDevice(nDevType, &gpSoundDevice)) return false;
 	}
-	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, fulOptions);
-	gbStopSent = FALSE;
-	m_pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
-	m_pSndFile->UPDATEDSPEFFECTS();
-	m_pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
-	if (!gpSoundDevice->Open(nDevNo, &WaveFormat.Format)) return -1;
-	return 0;
+	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0);
+	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
+	return true;
 }
 
 
-BOOL CMainFrame::audioOpenDevice()
+bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
 	UINT nFixedBitsPerSample;
-	LONG err = 0;
+	bool err = false;
 
-	if ((!m_pSndFile) || (!m_pSndFile->GetType())) return FALSE;
-	if (!TrackerSettings::Instance().m_dwRate) err = 1;
-	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) err = 1;
+	if (!TrackerSettings::Instance().m_dwRate) err = true;
+	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) err = true;
 	if(!err)
 	{
-		err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
 								TrackerSettings::Instance().m_nBitsPerSample,
 								TrackerSettings::Instance().m_dwRate);
 		nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
 		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_nBitsPerSample)))
 		{
 			if(nFixedBitsPerSample) TrackerSettings::Instance().m_nBitsPerSample = nFixedBitsPerSample;
-			err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
 									TrackerSettings::Instance().m_nBitsPerSample,
 									TrackerSettings::Instance().m_dwRate);
 		}
@@ -1010,10 +997,10 @@ BOOL CMainFrame::audioOpenDevice()
 	if(err)
 	{
 		Reporting::Error("Unable to open sound device!");
-		return FALSE;
+		return false;
 	}
 	// Device is ready
-	return TRUE;
+	return true;
 }
 
 
@@ -1341,6 +1328,21 @@ void CMainFrame::ResetNotificationBuffer()
 }
 
 
+void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
+//----------------------------------------------------------
+{
+	if(!pSndFile) return;
+	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
+	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
+	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
+	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
+	pSndFile->UPDATEDSPEFFECTS();
+	pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
+	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
+	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+}
+
+
 BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 //-----------------------------------------------------------------------
 {
@@ -1387,8 +1389,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	}
 	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 
-	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
-	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+	ApplyTrackerSettings(m_pSndFile);
 	m_pSndFile->InitPlayer(TRUE);
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
@@ -1481,8 +1482,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 			return FALSE;
 		}
 	}
-	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
-	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+	ApplyTrackerSettings(m_pSndFile);
 	m_pSndFile->InitPlayer(TRUE);
 	if(!isplaying)
 	{
