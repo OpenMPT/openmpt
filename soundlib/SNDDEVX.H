@@ -54,7 +54,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	bool FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer(ISoundSource *pSource);
 	void Reset();
 	void Start();
 	void Stop();
@@ -99,7 +99,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_DSOUND; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	bool FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer(ISoundSource *pSource);
 	void Reset();
 	void Start();
 	void Stop();
@@ -153,7 +153,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_ASIO; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	bool FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer(ISoundSource *pSource);
 	void Reset();
 	void Start();
 	void Stop();

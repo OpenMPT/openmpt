@@ -24,8 +24,9 @@ class ISoundSource
 //================
 {
 public:
-	virtual ULONG AudioRead(PVOID pData, ULONG MaxSamples) = 0; // returns number of samples read
-	virtual VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency) = 0; // all in samples
+	virtual ULONG AudioRead(PVOID pData, ULONG MaxSamples) = 0; // returns number of valid samples read, the remaining space has to be filled with zeroes by the callee,
+	                                                            // if return value != MaxSamples then end_of_stream = true
+	virtual VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
 };
 
 
@@ -91,7 +92,7 @@ public:
 	virtual UINT GetDeviceType() = 0;
 	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
 	virtual BOOL Close() = 0;				// Close the currently open device
-	virtual bool FillAudioBuffer(ISoundSource *pSource) = 0; // returns FALSE when pSource stops (as in stops delivering more data), causing sound output to halt
+	virtual void FillAudioBuffer(ISoundSource *pSource) = 0;
 	virtual void Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Reset() = 0;
@@ -118,6 +119,6 @@ BOOL SndDevUninitialize();
 // Enumerate devices for a specific type
 BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDescription, UINT cbSize);
 ISoundDevice *CreateSoundDevice(UINT nType);
-extern BOOL SoundDeviceCallback();
+extern void SoundDeviceCallback();
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -254,17 +254,18 @@ enum
 
 #define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
 
-#define MPTNOTIFY_TYPEMASK		0x00FF0000	// HiWord = type, LoWord = subtype (smp/instr #)
-#define MPTNOTIFY_DEFAULT		0x00010000
-#define MPTNOTIFY_POSITION		0x00010000
-#define MPTNOTIFY_SAMPLE		0x00020000
-#define MPTNOTIFY_VOLENV		0x00040000
-#define MPTNOTIFY_PANENV		0x00080000
-#define MPTNOTIFY_PITCHENV		0x00100000
-#define MPTNOTIFY_VUMETERS		0x00200000
-#define MPTNOTIFY_MASTERVU		0x00400000
-#define MPTNOTIFY_STOP			0x00800000
-#define MPTNOTIFY_POSVALID		0x80000000	// dwPos[i] is valid
+#define MPTNOTIFY_TYPEMASK  0x01FF0000	// HiWord = type, LoWord = subtype (smp/instr #)
+#define MPTNOTIFY_DEFAULT   0x00010000
+#define MPTNOTIFY_POSITION  0x00010000
+#define MPTNOTIFY_SAMPLE    0x00020000
+#define MPTNOTIFY_VOLENV    0x00040000
+#define MPTNOTIFY_PANENV    0x00080000
+#define MPTNOTIFY_PITCHENV  0x00100000
+#define MPTNOTIFY_VUMETERS  0x00200000
+#define MPTNOTIFY_MASTERVU  0x00400000
+#define MPTNOTIFY_STOP      0x00800000
+#define MPTNOTIFY_EOS       0x01000000
+#define MPTNOTIFY_POSVALID  0x80000000	// dwPos[i] is valid
 
 // struct MPTNOTIFICATION requires working copy constructor / copy assignment, keep in mind when extending
 struct MPTNOTIFICATION
@@ -328,7 +329,6 @@ public:
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
 	LONG m_AudioThreadActive;
-	bool m_AudioThreadSentStop;
 
 	// Midi Input
 public:
@@ -375,17 +375,17 @@ public:
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD AudioThread();
 	DWORD NotifyThread();
-	bool SoundDeviceCallback();
+	void SoundDeviceCallback();
 	void SetAudioThreadActive(bool active=true);
 	bool IsAudioThreadActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
-	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency);
+	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
 	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	bool audioOpenDevice();
 	void audioCloseDevice();
 	BOOL audioFillBuffers();
 	BOOL DSoundDone(LPBYTE lpBuffer, DWORD dwBytes);
-	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency);
+	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream);
 
 // Midi Input Functions
 public:
