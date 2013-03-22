@@ -1061,7 +1061,7 @@ bool CASIODevice::FillAudioBuffer(ISoundSource *pSource)
 		dwBufferOffset += n;
 	}
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
-	pSource->AudioDone(dwBufferOffset, m_nAsioBufferLen/dwSampleSize);
+	pSource->AudioDone(dwBufferOffset, m_nAsioBufferLen);
 
 	return TRUE;
 }
