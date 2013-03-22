@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "../common/mutex.h"
 #include <vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h>
 #include <portmidi/pm_common/portmidi.h>
 #include <string>
@@ -52,6 +53,10 @@ protected:
 		maxDevices = 65536,		// Should be a power of 2 to avoid rounding errors.
 	};
 
+	// For getChunk
+	Util::mutex mutex;
+	char *chunk;
+
 	// I/O device settings
 	MidiDevice inputDevice;
 	MidiDevice outputDevice;
@@ -78,6 +83,10 @@ public:
 	virtual void setProgramName(char *name);
 	virtual void getProgramName(char *name);
 
+	// Settings
+	virtual VstInt32 getChunk(void **data, bool isPreset);
+	virtual VstInt32 setChunk(void *data, VstInt32 byteSize, bool isPreset);
+
 	// Parameters
 	virtual void setParameter(VstInt32 index, float value);
 	virtual float getParameter(VstInt32 index);
@@ -92,12 +101,12 @@ public:
 	// MIDI channels
 	virtual VstInt32 getNumMidiInputChannels()
 	{
-		return (inputDevice.index != noDevice) ? 16 : 0;
+		return 16;
 	}
 
 	virtual VstInt32 getNumMidiOutputChannels()
 	{
-		return (outputDevice.index != noDevice) ? 16 : 0;
+		return 16;
 	}
 
 	// Effect name + version stuff
@@ -133,4 +142,6 @@ protected:
 	void OpenDevice(PmDeviceID newDevice, bool asInputDevice);
 	// Close an active device.
 	void CloseDevice(MidiDevice &device);
+	// Get a device name
+	const char *GetDeviceName(PmDeviceID index) const;
 };
