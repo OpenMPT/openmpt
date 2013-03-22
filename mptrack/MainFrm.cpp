@@ -52,7 +52,7 @@ class CMPTSoundSource: public ISoundSource
 public:
 	CMPTSoundSource() {}
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
-	VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency);
+	VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
 };
 
 
@@ -201,7 +201,6 @@ CMainFrame::CMainFrame()
 	m_hAudioThreadGoneIdle = NULL;
 	gpSoundDevice = NULL;
 	m_AudioThreadActive = 0;
-	m_AudioThreadSentStop = false;
 
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
@@ -702,30 +701,20 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 // CMainFrame Sound Library
 
 // Sound Device Callback
-BOOL SoundDeviceCallback()
+void SoundDeviceCallback()
 //------------------------------------
 {
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if(!pMainFrm) return FALSE;
-	return pMainFrm->SoundDeviceCallback() ? TRUE : FALSE;
+	if(!pMainFrm) return;
+	pMainFrm->SoundDeviceCallback();
 }
-bool CMainFrame::SoundDeviceCallback()
+void CMainFrame::SoundDeviceCallback()
 //------------------------------------
 {
 	// ASIO case (NOT called for other snddev)
-	bool ok = false;
-	if(m_AudioThreadSentStop) return false;
 	CriticalSection cs;
-	if(IsAudioThreadActive() && gpSoundDevice)
-	{
-		ok = gpSoundDevice->FillAudioBuffer(&gMPTSoundSource);
-	}
-	if(!ok)
-	{
-		m_AudioThreadSentStop = true;
-		PostMessage(WM_COMMAND, ID_PLAYER_STOP);
-	}
-	return ok;
+	if(!gpSoundDevice) return;
+	gpSoundDevice->FillAudioBuffer(&gMPTSoundSource);
 }
 
 
@@ -769,7 +758,9 @@ DWORD CMainFrame::AudioThread()
 		}
 
 		// increase resolution of multimedia timer
-		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR );
+		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
+
+		gpSoundDevice->Start();
 
 		while(!idle && !terminate) 
 		{
@@ -778,28 +769,12 @@ DWORD CMainFrame::AudioThread()
 
 			{
 				CriticalSection cs;
-				if(IsAudioThreadActive() && !m_AudioThreadSentStop)
+				if(IsAudioThreadActive())
 				{
 					// we are playing, everything is fine
-					if(gpSoundDevice->Directcallback())
-					{
-						// ASIO case
-						idle = true;
-					} else
-					if(gpSoundDevice->FillAudioBuffer(&gMPTSoundSource))
-					{
-						// non-ASIO case playing
-						nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
-						if(nSleep < SNDDEV_MINUPDATEINTERVAL_MS) nSleep = SNDDEV_MINUPDATEINTERVAL_MS;
-						if(nSleep > SNDDEV_MAXUPDATEINTERVAL_MS) nSleep = SNDDEV_MAXUPDATEINTERVAL_MS;
-
-					} else
-					{
-						// non-ASIO case stopping
-						idle = true;
-						m_AudioThreadSentStop = true;
-						PostMessage(WM_COMMAND, ID_PLAYER_STOP);
-					}
+					gpSoundDevice->FillAudioBuffer(&gMPTSoundSource);
+					nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
+					if(nSleep < 1) nSleep = 1;
 				} else
 				{
 					idle = true;
@@ -813,6 +788,8 @@ DWORD CMainFrame::AudioThread()
 			}
 
 		}
+
+		gpSoundDevice->Stop();
 
 		if(period_set) timeEndPeriod(1);
 
@@ -909,16 +886,25 @@ void CMainFrame::SetAudioThreadActive(bool active)
 {
 	if(active)
 	{
-		gpSoundDevice->Start();
-		m_AudioThreadSentStop = false;
-		ResetEvent(m_hAudioThreadGoneIdle);
-		InterlockedExchange(&m_AudioThreadActive, 1);
-		SetEvent(m_hAudioWakeUp);
+		if(gpSoundDevice->Directcallback())
+		{
+			gpSoundDevice->Start();
+		} else
+		{
+			ResetEvent(m_hAudioThreadGoneIdle);
+			InterlockedExchange(&m_AudioThreadActive, 1);
+			SetEvent(m_hAudioWakeUp);
+		}
 	} else
 	{
-		InterlockedExchange(&m_AudioThreadActive, 0);
-		WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
-		gpSoundDevice->Stop();
+		if(gpSoundDevice->Directcallback())
+		{
+			gpSoundDevice->Stop();
+		} else
+		{
+			InterlockedExchange(&m_AudioThreadActive, 0);
+			WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
+		}
 	}
 }
 
@@ -932,11 +918,11 @@ ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG MaxSamples)
 }
 
 
-VOID CMPTSoundSource::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency)
+VOID CMPTSoundSource::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream)
 //------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) pMainFrm->AudioDone(SamplesWritten, SamplesLatency);
+	if (pMainFrm) pMainFrm->AudioDone(SamplesWritten, SamplesLatency, end_of_stream);
 }
 
 
@@ -950,12 +936,12 @@ ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
 }
 
 
-VOID CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency)
+VOID CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream)
 //-------------------------------------------------------------
 {
 	if (SamplesWritten > 0)
 	{
-		DoNotification(SamplesWritten, SamplesLatency);
+		DoNotification(SamplesWritten, SamplesLatency, end_of_stream);
 	}
 }
 
@@ -1081,7 +1067,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 }
 
 
-BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency)
+BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream)
 //-------------------------------------------------------------------
 {
 	int64 totalsamples = 0;
@@ -1105,7 +1091,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency)
 	MemsetZero(notification);
 	MPTNOTIFICATION *p = &notification;
 
-			p->dwType = m_dwNotifyType;
+			p->dwType = m_dwNotifyType | (end_of_stream ? MPTNOTIFY_EOS : 0);
 			p->TimestampSamples = totalsamples + SamplesLatency;
 			p->nOrder = m_pSndFile->m_nCurrentOrder;
 			p->nRow = m_pSndFile->m_nRow;
@@ -2302,6 +2288,10 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 	MPTNOTIFICATION *pnotify = (MPTNOTIFICATION *)lParam;
 	if (pnotify)
 	{
+		if(pnotify->dwType & MPTNOTIFY_EOS)
+		{
+			PostMessage(WM_COMMAND, ID_PLAYER_STOP);
+		}
 		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->TimestampSamples);
 		if (GetModPlaying())
 		{
