@@ -31,7 +31,7 @@
 // EffectVis dialog
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
-CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, UINT nchn, CModDoc* pModDoc, UINT pat) : effectInfo(*pModDoc->GetSoundFile())
+CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, UINT nchn, CModDoc* pModDoc, UINT pat) : effectInfo(pModDoc->GetrSoundFile())
 {
 	m_pViewPattern = pViewPattern;
 	m_dwStatus = 0x00;
@@ -578,7 +578,7 @@ void CEffectVis::UpdateSelection(UINT startRow, UINT endRow, UINT nchn, CModDoc*
 {
 	m_pModDoc = pModDoc;
 	m_startRow = startRow;
-    m_endRow = endRow;
+	m_endRow = endRow;
 	m_nRows = endRow - startRow;
 	m_nChan = static_cast<CHANNELINDEX>(nchn);
 	m_nPattern = pat;
