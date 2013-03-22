@@ -13,15 +13,15 @@
 #include "Snd_defs.h"
 
 // Note definitions
-#define NOTE_NONE			0
-#define NOTE_MIN			1
-#define NOTE_MAX			120  // Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
-#define NOTE_MIDDLEC		(5 * 12 + NOTE_MIN)
-#define NOTE_KEYOFF			0xFF // 255
-#define NOTE_NOTECUT		0xFE // 254
-#define NOTE_FADE			0xFD // 253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
-#define NOTE_PC				0xFC // 252, Param Control 'note'. Changes param value on first tick.
-#define NOTE_PCS			0xFB // 251, Param Control (Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_NONE			(ModCommand::NOTE(0))
+#define NOTE_MIN			(ModCommand::NOTE(1))
+#define NOTE_MAX			(ModCommand::NOTE(120)) // Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
+#define NOTE_MIDDLEC		(ModCommand::NOTE(5 * 12 + NOTE_MIN))
+#define NOTE_KEYOFF			(ModCommand::NOTE(0xFF)) // 255
+#define NOTE_NOTECUT		(ModCommand::NOTE(0xFE)) // 254
+#define NOTE_FADE			(ModCommand::NOTE(0xFD)) // 253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
+#define NOTE_PC				(ModCommand::NOTE(0xFC)) // 252, Param Control 'note'. Changes param value on first tick.
+#define NOTE_PCS			(ModCommand::NOTE(0xFB)) // 251, Param Control (Smooth) 'note'. Interpolates param value during the whole row.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
 #define NOTE_MIN_SPECIAL	NOTE_PCS
 
