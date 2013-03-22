@@ -2632,7 +2632,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 	if(pVstEditor && pVstEditor->m_hWnd)
 	{
 		// Mark track modified if GUI is open and format supports plugins
-		if(pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->GetModSpecifications().supportsPlugins)
+		if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
 		{
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 		}
@@ -2647,7 +2647,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
 
 			const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
-			CMIDIMappingDialog dlg(pVstEditor, *pModDoc->GetSoundFile());
+			CMIDIMappingDialog dlg(pVstEditor, pModDoc->GetrSoundFile());
 			dlg.m_Setting.SetParamIndex(param);
 			dlg.m_Setting.SetPlugIndex(GetSlot() + 1);
 			dlg.DoModal();
@@ -2804,12 +2804,10 @@ void CVstPlugin::ToggleEditor()
 			m_pEditor = nullptr;
 		} else
 		{
-			//rewbs.defaultPlugGui
 			if (HasEditor())
 				m_pEditor =  new COwnerVstEditor(this);
 			else
 				m_pEditor = new CDefaultVstEditor(this);
-			//end rewbs.defaultPlugGui
 
 			if (m_pEditor)
 				m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
@@ -2832,7 +2830,6 @@ BOOL CVstPlugin::GetCommandName(UINT nIndex, LPSTR pszName)
 }
 
 
-//rewbs.defaultPlugGui
 CAbstractVstEditor* CVstPlugin::GetEditor()
 //-----------------------------------------
 {
@@ -2852,10 +2849,6 @@ void CVstPlugin::Bypass(bool bypass)
 		m_pModDoc->UpdateAllViews(nullptr, HINT_MIXPLUGINS, nullptr);
 #endif // MODPLUG_TRACKER
 }
-
-
-//end rewbs.defaultPlugGui
-//rewbs.defaultPlugGui: CVstEditor now COwnerVstEditor
 
 
 void CVstPlugin::NotifySongPlaying(bool playing)

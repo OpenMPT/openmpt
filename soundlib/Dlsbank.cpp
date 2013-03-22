@@ -1507,12 +1507,13 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			sample.nFineTune = p->chPitchCorrection;
 			sample.Convert(MOD_TYPE_IT, pSndFile->GetType());
 
+			FileReader chunk(pWaveForm, dwLen);
 			SampleIO(
 				SampleIO::_16bit,
 				SampleIO::mono,
 				SampleIO::littleEndian,
 				SampleIO::signedPCM)
-				.ReadSample(sample, (LPSTR)pWaveForm, dwLen);
+				.ReadSample(sample, chunk);
 		}
 		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else

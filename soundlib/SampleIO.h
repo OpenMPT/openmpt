@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "../soundlib/FileReader.h"
+class FileReader;
 
 // Sample import / export formats
 //============
@@ -143,12 +143,6 @@ public:
 
 	// Read a sample from memory
 	size_t ReadSample(ModSample &sample, FileReader &file) const;
-	// Legacy implementation of above function
-	/*__declspec(deprecated)*/ size_t ReadSample(ModSample &sample, const void *memFile, size_t memLength) const
-	{
-		FileReader file(static_cast<const char *>(memFile), memLength);
-		return ReadSample(sample, file);
-	}
 
 #ifndef MODPLUG_NO_FILESAVE
 	// Write a sample to file

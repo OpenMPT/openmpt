@@ -978,7 +978,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType)
 //------------------------------------------------------------------------------------
 {
-	ModChannelEnvInfo &chnEnv = pChn->GetEnvelope(envType);
+	ModChannel::EnvInfo &chnEnv = pChn->GetEnvelope(envType);
 
 	if(pChn->pModInstrument == nullptr || !chnEnv.flags[ENV_ENABLED])
 	{

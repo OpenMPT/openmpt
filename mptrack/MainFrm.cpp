@@ -1074,7 +1074,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 						else if (m_dwNotifyType & MPTNOTIFY_PANENV)
 							notifyEnv = ENV_PANNING;
 
-						const ModChannelEnvInfo &chnEnv = pChn->GetEnvelope(notifyEnv);
+						const ModChannel::EnvInfo &chnEnv = pChn->GetEnvelope(notifyEnv);
 
 						if(chnEnv.flags[ENV_ENABLED])
 						{
@@ -1396,6 +1396,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 			m_WaveFile.Destroy();
 		} else
 		{
+			// Stop sample preview channels
 			for(CHANNELINDEX i = m_pSndFile->m_nChannels; i < MAX_CHANNELS; i++)
 			{
 				if(!(m_pSndFile->Chn[i].nMasterChn))
@@ -1547,9 +1548,9 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, S
 void CMainFrame::InitPreview()
 //----------------------------
 {
-	// Avoid global volume ramping when trying samples in the treeview.
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(NULL, 0);
+	// Avoid global volume ramping when trying samples in the treeview.
 	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.m_nDefaultTempo = 125;
