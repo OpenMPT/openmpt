@@ -9,11 +9,8 @@
 
 
 #include "stdafx.h"
-#include "autosaver.h"
-#include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
-#include "sndfile.h"
 #include "moddoc.h"
 #include "AutoSaver.h"
 #include "moptions.h"
@@ -87,7 +84,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 			while (posDocument)	//for all open documents
 			{
 				pModDoc = (CModDoc*)(pDocTemplate->GetNextDoc(posDocument));
-				if (pModDoc && pModDoc->ModifiedSinceLastAutosave() && pModDoc->GetSoundFile())
+				if(pModDoc && pModDoc->ModifiedSinceLastAutosave())
 				{
 					if (SaveSingleFile(pModDoc))
 					{
@@ -238,7 +235,7 @@ CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + pModDoc->GetTitle(); 		
+			name = theApp.GetConfigPath() + pModDoc->GetTitle();
 		}
 	
 	} else
@@ -250,12 +247,12 @@ CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
 	name.Append(".AutoSave.");					//append backup tag
 	name.Append(timeStamp);						//append timestamp
 	name.Append(".");							//append extension
-	if(pModDoc->GetSoundFile()->m_SongFlags[SONG_ITPROJECT])
+	if(pModDoc->GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
 	{
 		name.Append("itp");
 	} else
 	{
-		name.Append(pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+		name.Append(pModDoc->GetrSoundFile().GetModSpecifications().fileExtension);
 	}
 
 	return name;
@@ -268,39 +265,36 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
 	bool success = false;
-	CSoundFile* pSndFile = pModDoc->GetSoundFile(); 
+	CSoundFile &sndFile = pModDoc->GetrSoundFile(); 
 	
-	if (pSndFile)
+	CString fileName = BuildFileName(pModDoc);
+
+	switch (pModDoc->GetModType())
 	{
-		CString fileName = BuildFileName(pModDoc);
+	case MOD_TYPE_MOD:
+		success = sndFile.SaveMod(fileName);
+		break;
 
-		switch (pModDoc->GetModType())
-		{
-		case MOD_TYPE_MOD:
-			success = pSndFile->SaveMod(fileName); 
-			break;
+	case MOD_TYPE_S3M:
+		success = sndFile.SaveS3M(fileName);
+		break;
 
-		case MOD_TYPE_S3M:
-			success = pSndFile->SaveS3M(fileName); 
-			break;
+	case MOD_TYPE_XM:
+		success = sndFile.SaveXM(fileName);
+		break;
 
-		case MOD_TYPE_XM:
-			success = pSndFile->SaveXM(fileName); 
-			break;
+	case MOD_TYPE_IT:
+		success = sndFile.m_SongFlags[SONG_ITPROJECT] ? 
+			sndFile.SaveITProject(fileName) :
+			sndFile.SaveIT(fileName); 
+		break;
 
-		case MOD_TYPE_IT:
-			success = pSndFile->m_SongFlags[SONG_ITPROJECT] ? 
-				pSndFile->SaveITProject(fileName) :
-				pSndFile->SaveIT(fileName); 
-			break;
-
-		case MOD_TYPE_MPT:
-			//Using IT save function also for MPT.
-			success = pSndFile->SaveIT(fileName);
-			break;
-			//default:
-			//Do nothing
-		}
+	case MOD_TYPE_MPT:
+		//Using IT save function also for MPT.
+		success = sndFile.SaveIT(fileName);
+		break;
+		//default:
+		//Do nothing
 	}
 	return success;
 }

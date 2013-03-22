@@ -717,7 +717,8 @@ void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD
 		sample.nLoopStart /= 2;
 		sample.nLoopEnd /= 2;
 	}
-	sampleIO.ReadSample(sample, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+	FileReader chunk(lpStream + dwMemPos, dwMemLength - dwMemPos);
+	sampleIO.ReadSample(sample, chunk);
 }
 
 
@@ -912,12 +913,13 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 
 	sample.Convert(MOD_TYPE_S3M, GetType());
 
+	FileReader chunk(lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 	SampleIO(
 		(pss->flags & 0x04) ? SampleIO::_16bit : SampleIO::_8bit,
 		(pss->flags & 0x02) ? SampleIO::stereoSplit : SampleIO::mono,
 		SampleIO::littleEndian,
 		SampleIO::unsignedPCM)
-		.ReadSample(sample, (LPSTR)(lpMemFile + dwMemPos), dwFileLength - dwMemPos);
+		.ReadSample(sample, chunk);
 
 	return true;
 }
@@ -1824,12 +1826,13 @@ bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 					sample.nLength = len;
 					if ((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags |= CHN_LOOP;
 
+					FileReader chunk(pChunkData, len);
 					SampleIO(
 						SampleIO::_8bit,
 						SampleIO::mono,
 						SampleIO::bigEndian,
 						SampleIO::signedPCM)
-						.ReadSample(sample, (LPSTR)(pChunkData), len);
+						.ReadSample(sample, chunk);
 				}
 			}
 			break;

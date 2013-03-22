@@ -2192,7 +2192,6 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 //------------------------------------------------------------------------------
 {
 	HWND followSonghWnd;
-	PATTERNVIEWSTATE *patternViewState;
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
 
 	if(strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
@@ -2208,7 +2207,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	{
 		//patern editor object does not exist (i.e. is not active)  - use saved state.
 		followSonghWnd = NULL;
-		patternViewState = pChildFrm->GetPatternViewState();
+		PATTERNVIEWSTATE *patternViewState = pChildFrm->GetPatternViewState();
 
 		pat = patternViewState->nPattern;
 		row = patternViewState->cursor.GetRow();
@@ -2644,7 +2643,7 @@ void CModDoc::SongProperties()
 		
 		CHANNELINDEX nNewChannels = CLAMP(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 
-		if (nNewChannels != GetSoundFile()->GetNumChannels())
+		if (nNewChannels != GetNumChannels())
 		{
 			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
 			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = true;

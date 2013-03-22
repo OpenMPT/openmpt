@@ -599,12 +599,13 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				Log("  Reading sample #%d at offset 0x%04X (len=%d)\n", iData+1, dwMemPos, psmp->nLength);
 			#endif
 
+				FileReader chunk(lpStream + dwMemPos, dwMemLength - dwMemPos);
 				dwMemPos += SampleIO(
 					(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
 					(pms->nChannels == 2) ? SampleIO::stereoSplit : SampleIO::mono,
 					SampleIO::littleEndian,
 					SampleIO::deltaPCM)
-					.ReadSample(sample, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+					.ReadSample(sample, chunk);
 			}
 		} else
 		if (dwMemPos+4 < dwMemLength)

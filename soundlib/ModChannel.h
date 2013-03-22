@@ -10,26 +10,27 @@
 
 #pragma once
 
-// Envelope playback info for each ModChannel
-struct ModChannelEnvInfo
-{
-	FlagSet<EnvelopeFlags> flags;
-	uint32 nEnvPosition;
-	int32 nEnvValueAtReleaseJump;
-
-	void Reset()
-	{
-		nEnvPosition = 0;
-		nEnvValueAtReleaseJump = NOT_YET_RELEASED;
-	}
-};
-
 
 #pragma warning(disable : 4324) //structure was padded due to __declspec(align())
 
 // Mix Channel Struct
 typedef struct __declspec(align(32)) ModChannel_
 {
+	// Envelope playback info
+	struct EnvInfo
+	{
+		FlagSet<EnvelopeFlags> flags;
+		uint32 nEnvPosition;
+		int32 nEnvValueAtReleaseJump;
+
+		void Reset()
+		{
+			nEnvPosition = 0;
+			nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+		}
+	};
+
+	// Information used in the mixer (should be kept tight for better caching)
 	LPSTR pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
 	uint32 nPos;
 	uint32 nPosLo;			// actually 16-bit (fractional part)
@@ -43,7 +44,6 @@ typedef struct __declspec(align(32)) ModChannel_
 	SmpLength nLoopStart;
 	SmpLength nLoopEnd;
 	FlagSet<ChannelFlags> dwFlags;
-	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
 	int32 nRampRightVol;
 	int32 nRampLeftVol;
 	float nFilter_Y1, nFilter_Y2;	// Mono / left channel filter memory
@@ -52,16 +52,18 @@ typedef struct __declspec(align(32)) ModChannel_
 	int32 nFilter_HP;
 	int32 nROfs, nLOfs;
 	int32 nRampLength;
+
 	// Information not used in the mixer
+	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
 	LPSTR pSample;			// Currently playing sample, or previously played sample if no sample is playing.
+	ModSample *pModSample;							// Currently assigned sample slot
+	ModInstrument *pModInstrument;					// Currently assigned instrument slot
 	int32 nNewRightVol, nNewLeftVol;
 	int32 nRealVolume, nRealPan;
 	int32 nVolume, nPan, nFadeOutVol;
 	int32 nPeriod, nC5Speed, nPortamentoDest;
 	int32 nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
-	ModInstrument *pModInstrument;					// Currently assigned instrument slot
-	ModChannelEnvInfo VolEnv, PanEnv, PitchEnv;		// Envelope playback info
-	ModSample *pModSample;							// Currently assigned sample slot
+	EnvInfo VolEnv, PanEnv, PitchEnv;				// Envelope playback info
 	uint32 nVUMeter;
 	int32 nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
 	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
@@ -108,7 +110,7 @@ typedef struct __declspec(align(32)) ModChannel_
 	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
 
 	// Get a reference to a specific envelope of this channel
-	const ModChannelEnvInfo &GetEnvelope(enmEnvelopeTypes envType) const
+	const EnvInfo &GetEnvelope(enmEnvelopeTypes envType) const
 	{
 		switch(envType)
 		{
@@ -122,9 +124,9 @@ typedef struct __declspec(align(32)) ModChannel_
 		}
 	}
 
-	ModChannelEnvInfo &GetEnvelope(enmEnvelopeTypes envType)
+	EnvInfo &GetEnvelope(enmEnvelopeTypes envType)
 	{
-		return const_cast<ModChannelEnvInfo &>(static_cast<const ModChannel &>(*this).GetEnvelope(envType));
+		return const_cast<EnvInfo &>(static_cast<const ModChannel &>(*this).GetEnvelope(envType));
 	}
 
 	void ResetEnvelopes()

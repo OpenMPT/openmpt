@@ -801,7 +801,8 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 				sample.nLength /= 2;
 			}
 
-			if (sampleIO.ReadSample(sample, lpFile, len))
+			FileReader chunk(lpFile, len);
+			if(sampleIO.ReadSample(sample, chunk))
 			{
 				bOk = true;
 
@@ -906,8 +907,8 @@ void CCtrlSamples::OnSampleChanged()
 			{
 				if (m_pSndFile->m_nInstruments)
 				{
-					UINT k = m_pParent->GetInstrumentChange();
-					if (!m_pModDoc->IsChildSample(k, m_nSample))
+					INSTRUMENTINDEX k = static_cast<INSTRUMENTINDEX>(m_pParent->GetInstrumentChange());
+					if(!m_pModDoc->IsChildSample(k, m_nSample))
 					{
 						INSTRUMENTINDEX nins = m_pModDoc->FindSampleParent(m_nSample);
 						if(nins != INSTRUMENTINDEX_INVALID)
