@@ -29,11 +29,14 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 {
 	editor = new MidiInOutEditor(static_cast<AudioEffect *>(this));
 
-	setNumInputs(0);		// No Input
-	setNumOutputs(0);		// No Output
+	setNumInputs(0);			// No Input
+	setNumOutputs(0);			// No Output
 	setUniqueID(CCONST('M', 'M', 'I', 'D'));	// Effect ID (ModPlug MIDI :)
-	canProcessReplacing();	// Supports replacing output (default)
-	isSynth(true);			// Not strictly a synth, but an instrument plugin in the broadest sense
+	canProcessReplacing();		// Supports replacing output (default)
+	isSynth(true);				// Not strictly a synth, but an instrument plugin in the broadest sense
+	cEffect.version = 2;		// Why is there a setter for everything, but not the plugin version?
+	programsAreChunks(true);	// Version 2 of our plugin stores program chunks, including the device name.
+
 	setEditor(editor);
 
 	if(!numInstances++)
@@ -41,6 +44,7 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 		Pm_Initialize();
 	}
 
+	chunk = nullptr;
 	isProcessing = false;
 	isBypassed = false;
 	OpenDevice(inputDevice.index, true);
@@ -54,6 +58,7 @@ MidiInOut::~MidiInOut()
 //---------------------
 {
 	suspend();
+	delete[] chunk;
 
 	if(--numInstances == 0)
 	{
@@ -74,6 +79,95 @@ void MidiInOut::getProgramName(char *name)
 //----------------------------------------
 {
 	vst_strncpy(name, programName, kVstMaxProgNameLen);
+}
+
+
+VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
+//----------------------------------------------------------
+{
+	VstInt32 byteSize = 5 * sizeof(VstInt32)
+		+ inputDevice.name.size()
+		+ outputDevice.name.size();
+
+	delete[] chunk;
+	(*data) = chunk = new (std::nothrow) char[byteSize];
+	if(chunk)
+	{
+		VstInt32 *header = reinterpret_cast<VstInt32 *>(chunk);
+		header[0] = cEffect.version;
+		header[1] = inputDevice.index;
+		header[2] = inputDevice.name.size();
+		header[3] = outputDevice.index;
+		header[4] = outputDevice.name.size();
+		strncpy(chunk + 5 * sizeof(VstInt32), inputDevice.name.c_str(), header[2]);
+		strncpy(chunk + 5 * sizeof(VstInt32) + header[2], outputDevice.name.c_str(), header[4]);
+		return byteSize;
+	} else
+	{
+		return 0;
+	}
+}
+
+
+VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
+//----------------------------------------------------------------------------
+{
+	if(byteSize < 5 * sizeof(VstInt32))
+	{
+		return 0;
+	}
+
+	const VstInt32 *header = reinterpret_cast<const VstInt32 *>(data);
+
+	VstInt32 version = header[0];
+	if(version > cEffect.version)
+	{
+		return 0;
+	}
+
+	VstInt32 inStrSize = std::min(header[2], byteSize - VstInt32(5 * sizeof(VstInt32)));
+	VstInt32 outStrSize = std::min(header[4], byteSize - VstInt32(5 * sizeof(VstInt32) + inStrSize));
+	PmDeviceID inID = header[1];
+	PmDeviceID outID = header[3];
+
+	const char *inStr = reinterpret_cast<const char *>(data) + 5 * sizeof(VstInt32);
+	const char *outStr = reinterpret_cast<const char *>(data) + 5 * sizeof(VstInt32) + inStrSize;
+
+	if(strncmp(inStr, GetDeviceName(inID), inStrSize))
+	{
+		// Stored name differs from actual device name - try finding another device with the same name.
+		PmDeviceID i = 0;
+		const PmDeviceInfo *device;
+		while((device = Pm_GetDeviceInfo(i)) != nullptr)
+		{
+			if(device->input && !strncmp(inStr, device->name, inStrSize))
+			{
+				inID = i;
+				break;
+			}
+			i++;
+		}
+	}
+	if(strncmp(outStr, GetDeviceName(outID), outStrSize))
+	{
+		// Stored name differs from actual device name - try finding another device with the same name.
+		PmDeviceID i = 0;
+		const PmDeviceInfo *device;
+		while((device = Pm_GetDeviceInfo(i)) != nullptr)
+		{
+			if(device->output && !strncmp(outStr, device->name, outStrSize))
+			{
+				outID = i;
+				break;
+			}
+			i++;
+		}
+	}
+
+	setParameter(MidiInOut::inputParameter, DeviceIDToParameter(inID));
+	setParameter(MidiInOut::outputParameter, DeviceIDToParameter(outID));
+
+	return 1;
 }
 
 
@@ -162,7 +256,7 @@ bool MidiInOut::getVendorString(char *text)
 VstInt32 MidiInOut::getVendorVersion()
 //------------------------------------
 { 
-	return 1000; 
+	return 1000;
 }
 
 
@@ -326,15 +420,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 	}
 
 	// Update current device name
-	const PmDeviceInfo *deviceInfo = Pm_GetDeviceInfo(device.index);
-
-	if(deviceInfo != nullptr)
-	{
-		device.name = deviceInfo->name;
-	} else
-	{
-		device.name = "Unavailable";
-	}
+	device.name = GetDeviceName(device.index);
 
 	MidiInOutEditor *realEditor = dynamic_cast<MidiInOutEditor *>(editor);
 
@@ -354,5 +440,21 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 	{
 		Pm_Close(device.stream);
 		device.stream = nullptr;
+	}
+}
+
+
+// Get a device name
+const char *MidiInOut::GetDeviceName(PmDeviceID index) const
+//-----------------------------------------------------------
+{
+	const PmDeviceInfo *deviceInfo = Pm_GetDeviceInfo(index);
+
+	if(deviceInfo != nullptr)
+	{
+		return deviceInfo->name;
+	} else
+	{
+		return "Unavailable";
 	}
 }
