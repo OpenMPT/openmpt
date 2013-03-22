@@ -47,8 +47,6 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 	chunk = nullptr;
 	isProcessing = false;
 	isBypassed = false;
-	OpenDevice(inputDevice.index, true);
-	OpenDevice(outputDevice.index, true);
 
 	vst_strncpy(programName, "Default", kVstMaxProgNameLen);	// default program name
 }
@@ -85,7 +83,9 @@ void MidiInOut::getProgramName(char *name)
 VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 //----------------------------------------------------------
 {
-	VstInt32 byteSize = 5 * sizeof(VstInt32)
+	const VstInt32 programNameLen = strlen(programName);
+	VstInt32 byteSize = 8 * sizeof(VstInt32)
+		+ programNameLen
 		+ inputDevice.name.size()
 		+ outputDevice.name.size();
 
@@ -95,12 +95,16 @@ VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 	{
 		VstInt32 *header = reinterpret_cast<VstInt32 *>(chunk);
 		header[0] = cEffect.version;
-		header[1] = inputDevice.index;
-		header[2] = inputDevice.name.size();
-		header[3] = outputDevice.index;
-		header[4] = outputDevice.name.size();
-		strncpy(chunk + 5 * sizeof(VstInt32), inputDevice.name.c_str(), header[2]);
-		strncpy(chunk + 5 * sizeof(VstInt32) + header[2], outputDevice.name.c_str(), header[4]);
+		header[1] = 1;	// Number of programs
+		header[2] = programNameLen;
+		header[3] = inputDevice.index;
+		header[4] = inputDevice.name.size();
+		header[5] = outputDevice.index;
+		header[6] = outputDevice.name.size();
+		header[7] = 0;	// Reserved
+		strncpy(chunk + 8 * sizeof(VstInt32), programName, programNameLen);
+		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen, inputDevice.name.c_str(), header[4]);
+		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen + header[2], outputDevice.name.c_str(), header[6]);
 		return byteSize;
 	} else
 	{
@@ -112,7 +116,7 @@ VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
 //----------------------------------------------------------------------------
 {
-	if(byteSize < 5 * sizeof(VstInt32))
+	if(byteSize < 8 * sizeof(VstInt32))
 	{
 		return 0;
 	}
@@ -125,13 +129,14 @@ VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
 		return 0;
 	}
 
-	VstInt32 inStrSize = std::min(header[2], byteSize - VstInt32(5 * sizeof(VstInt32)));
-	VstInt32 outStrSize = std::min(header[4], byteSize - VstInt32(5 * sizeof(VstInt32) + inStrSize));
-	PmDeviceID inID = header[1];
-	PmDeviceID outID = header[3];
+	VstInt32 nameStrSize = std::min(header[2], byteSize - VstInt32(8 * sizeof(VstInt32)));
+	VstInt32 inStrSize = std::min(header[4], byteSize - VstInt32(8 * sizeof(VstInt32) - nameStrSize));
+	VstInt32 outStrSize = std::min(header[6], byteSize - VstInt32(8 * sizeof(VstInt32) - nameStrSize - inStrSize));
+	PmDeviceID inID = header[3];
+	PmDeviceID outID = header[5];
 
-	const char *inStr = reinterpret_cast<const char *>(data) + 5 * sizeof(VstInt32);
-	const char *outStr = reinterpret_cast<const char *>(data) + 5 * sizeof(VstInt32) + inStrSize;
+	const char *inStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + header[2];
+	const char *outStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + header[2] + inStrSize;
 
 	if(strncmp(inStr, GetDeviceName(inID), inStrSize))
 	{
@@ -281,6 +286,8 @@ void MidiInOut::processReplacing(float **inputs, float **outputs, VstInt32 sampl
 		return;
 	}
 
+	Util::lock_guard<Util::mutex> lock(mutex);
+
 	VstEvents events;
 	events.numEvents = 1;
 	events.reserved = 0;
@@ -410,6 +417,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 		// Don't open MIDI devices if we're not processing.
 		// This has to be done since we receive MIDI events in processReplacing(),
 		// so if no processing is happening, some irrelevant events might be queued until the next processing happens...
+		Util::lock_guard<Util::mutex> lock(mutex);
 		if(asInputDevice)
 		{
 			result = Pm_OpenInput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr);
@@ -438,6 +446,7 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 {
 	if(device.stream != nullptr)
 	{
+		Util::lock_guard<Util::mutex> lock(mutex);
 		Pm_Close(device.stream);
 		device.stream = nullptr;
 	}

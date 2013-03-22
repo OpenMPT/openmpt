@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "../common/mutex.h"
 #include <vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h>
 #include <portmidi/pm_common/portmidi.h>
 #include <string>
@@ -53,6 +54,7 @@ protected:
 	};
 
 	// For getChunk
+	Util::mutex mutex;
 	char *chunk;
 
 	// I/O device settings
@@ -99,12 +101,12 @@ public:
 	// MIDI channels
 	virtual VstInt32 getNumMidiInputChannels()
 	{
-		return (inputDevice.index != noDevice) ? 16 : 0;
+		return 16;
 	}
 
 	virtual VstInt32 getNumMidiOutputChannels()
 	{
-		return (outputDevice.index != noDevice) ? 16 : 0;
+		return 16;
 	}
 
 	// Effect name + version stuff
