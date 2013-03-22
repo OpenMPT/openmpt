@@ -1,6 +1,6 @@
 /*
- * misc_util.h
- * -----------
+ * mutex.h
+ * -------
  * Purpose: Partially implement c++ mutexes as far as openmpt needs them. Can eventually go away when we only support c++11 compilers some time.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -9,11 +9,14 @@
 
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#define NOMINMAX
 #include <windows.h>
 
 namespace Util {
 
-	// compatible with c++11 std::mutex, can eventually be replaced without touching any usage site
+// compatible with c++11 std::mutex, can eventually be replaced without touching any usage site
 class mutex {
 private:
 	CRITICAL_SECTION impl;
