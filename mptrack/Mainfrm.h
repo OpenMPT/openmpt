@@ -270,6 +270,13 @@ enum
 // struct MPTNOTIFICATION requires working copy constructor / copy assignment, keep in mind when extending
 struct MPTNOTIFICATION
 {
+	/*
+	   TimestampSamples is kind of confusing at the moment:
+	   If gpSoundDevice->HasGetStreamPosition(),
+		   then it contains the sample timestamp as when it was generated and the output stream is later queried when this exact timestamp has actually reached the speakers.
+		 If !gpSoundDevice->HasGetStreamPosition(),
+		   then it contains a sample timestamp in the future, incremented by the current latency estimation of the sound buffers. It is later checked against the total number of rendered samples at that time.
+	*/
 	int64 TimestampSamples;
 	DWORD dwType;
 	ROWINDEX nRow;				// Always valid

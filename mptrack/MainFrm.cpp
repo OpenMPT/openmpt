@@ -835,13 +835,21 @@ DWORD CMainFrame::NotifyThread()
 				{
 					const MPTNOTIFICATION * pnotify = nullptr;
 					{
+						int64 currenttotalsamples = 0;
 						Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+						if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
+						{
+							currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
+						} else
+						{
+							currenttotalsamples = m_TotalSamplesRendered; 
+						}
 						// advance to the newest notification, drop the obsolete ones
 						const MPTNOTIFICATION * p = m_NotifyBuffer.peek_p();
-						if(p && m_TotalSamplesRendered >= p->TimestampSamples)
+						if(p && currenttotalsamples >= p->TimestampSamples)
 						{
 							pnotify = p;
-							while(m_NotifyBuffer.peek_next_p() && m_TotalSamplesRendered >= m_NotifyBuffer.peek_next_p()->TimestampSamples)
+							while(m_NotifyBuffer.peek_next_p() && currenttotalsamples >= m_NotifyBuffer.peek_next_p()->TimestampSamples)
 							{
 								m_NotifyBuffer.pop();
 								p = m_NotifyBuffer.peek_p();
@@ -1032,6 +1040,13 @@ void CMainFrame::audioCloseDevice()
 
 		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
+
+		// reset notify buffer as timestamps revert here
+		{
+			Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+			m_NotifyBuffer.clear();
+			m_TotalSamplesRendered = 0;
+		}
 	}
 }
 
@@ -1070,11 +1085,17 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream)
 //-------------------------------------------------------------------
 {
-	int64 totalsamples = 0;
+	int64 notificationtimestamp = 0;
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex); // protect m_TotalSamplesRendered
 		m_TotalSamplesRendered += dwSamplesRead;
-		totalsamples = m_TotalSamplesRendered;
+		if(gpSoundDevice->HasGetStreamPosition())
+		{
+			notificationtimestamp = m_TotalSamplesRendered;
+		} else
+		{
+			notificationtimestamp = m_TotalSamplesRendered + SamplesLatency;
+		}
 	}
 	if (!m_pSndFile) return FALSE;
 	if (m_nMixChn < m_pSndFile->m_nMixStat) m_nMixChn++;
@@ -1092,7 +1113,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	MPTNOTIFICATION *p = &notification;
 
 			p->dwType = m_dwNotifyType | (end_of_stream ? MPTNOTIFY_EOS : 0);
-			p->TimestampSamples = totalsamples + SamplesLatency;
+			p->TimestampSamples = notificationtimestamp;
 			p->nOrder = m_pSndFile->m_nCurrentOrder;
 			p->nRow = m_pSndFile->m_nRow;
 			p->nPattern = m_pSndFile->m_nPattern;
