@@ -52,6 +52,9 @@ protected:
 		maxDevices = 65536,		// Should be a power of 2 to avoid rounding errors.
 	};
 
+	// For getChunk
+	char *chunk;
+
 	// I/O device settings
 	MidiDevice inputDevice;
 	MidiDevice outputDevice;
@@ -77,6 +80,10 @@ public:
 	// Program
 	virtual void setProgramName(char *name);
 	virtual void getProgramName(char *name);
+
+	// Settings
+	virtual VstInt32 getChunk(void **data, bool isPreset);
+	virtual VstInt32 setChunk(void *data, VstInt32 byteSize, bool isPreset);
 
 	// Parameters
 	virtual void setParameter(VstInt32 index, float value);
@@ -133,4 +140,6 @@ protected:
 	void OpenDevice(PmDeviceID newDevice, bool asInputDevice);
 	// Close an active device.
 	void CloseDevice(MidiDevice &device);
+	// Get a device name
+	const char *GetDeviceName(PmDeviceID index) const;
 };
