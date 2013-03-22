@@ -98,9 +98,11 @@ public:
 	virtual void Reset() = 0;
 	virtual BOOL Directcallback() { return FALSE; }
 	virtual UINT HasFixedBitsPerSample() { return 0; }
-	virtual bool IsOpen() = 0;
+	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
+	virtual bool HasGetStreamPosition() const { return false; }
+	virtual int64 GetStreamPositionSamples() const { return 0; }
 	virtual UINT GetCurrentSampleRate(UINT nDevice) { UNREFERENCED_PARAMETER(nDevice); return 0; }
 	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
 	virtual bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;

@@ -169,10 +169,8 @@ void CWaveDevice::Stop()
 {
 	if(m_hWaveOut)
 	{
-		waveOutReset(m_hWaveOut);
+		waveOutPause(m_hWaveOut);
 	}
-	InterlockedExchange(&m_nBuffersPending, 0);
-	m_nWriteBuffer = 0;
 }
 
 
@@ -183,6 +181,8 @@ void CWaveDevice::Reset()
 	{
 		waveOutReset(m_hWaveOut);
 	}
+	InterlockedExchange(&m_nBuffersPending, 0);
+	m_nWriteBuffer = 0;
 }
 
 
@@ -211,6 +211,7 @@ void CWaveDevice::FillAudioBuffer(ISoundSource *pSource)
 		{
 			eos = true;
 		}
+		nLatency += m_nWaveBufferSize;
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer]->dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
@@ -218,15 +219,29 @@ void CWaveDevice::FillAudioBuffer(ISoundSource *pSource)
 		waveOutWrite(m_hWaveOut, m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
+		pSource->AudioDone(m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample, eos);
 	}
 
 	if(wasempty) waveOutRestart(m_hWaveOut);
 
-	if (nBytesWritten > 0)
+}
+
+
+int64 CWaveDevice::GetStreamPositionSamples() const
+//------------------------------------------------------
+{
+	if(!IsOpen()) return 0;
+	MMTIME mmtime;
+	ZeroMemory(&mmtime, sizeof(mmtime));
+	mmtime.wType = TIME_SAMPLES;
+	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR) return 0;
+	switch(mmtime.wType)
 	{
-		pSource->AudioDone(nBytesWritten/m_BytesPerSample, nLatency/m_BytesPerSample, eos);
+		case TIME_BYTES:   return mmtime.u.cb / m_BytesPerSample; break;
+		case TIME_MS:      return mmtime.u.ms * m_nBytesPerSec / (1000 * m_BytesPerSample); break;
+		case TIME_SAMPLES: return mmtime.u.sample; break;
+		default: return 0; break;
 	}
-	return;
 }
 
 

@@ -58,9 +58,11 @@ public:
 	void Reset();
 	void Start();
 	void Stop();
-	bool IsOpen() { return (m_hWaveOut != NULL); }
+	bool IsOpen() const { return (m_hWaveOut != NULL); }
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
 	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
+	bool HasGetStreamPosition() const { return true; }
+	int64 GetStreamPositionSamples() const;
 
 public:
 	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
@@ -103,7 +105,7 @@ public:
 	void Reset();
 	void Start();
 	void Stop();
-	bool IsOpen() { return (m_pMixBuffer != NULL); }
+	bool IsOpen() const { return (m_pMixBuffer != NULL); }
 	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
 	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
 
@@ -157,7 +159,7 @@ public:
 	void Reset();
 	void Start();
 	void Stop();
-	bool IsOpen() { return (m_pAsioDrv != NULL); }
+	bool IsOpen() const { return (m_pAsioDrv != NULL); }
 	BOOL Directcallback() { return TRUE; }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
 	UINT GetNumBuffers() { return 2; }
