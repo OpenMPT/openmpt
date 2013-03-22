@@ -160,7 +160,10 @@ BOOL CWaveDevice::Close()
 void CWaveDevice::Start()
 //-----------------------
 {
-	// done in FillAudioBuffer for now
+	if(m_hWaveOut)
+	{
+		waveOutRestart(m_hWaveOut);
+	}
 }
 
 
