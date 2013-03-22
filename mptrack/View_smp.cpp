@@ -124,8 +124,8 @@ CViewSample::CViewSample()
 	m_dwStatus = 0;
 	m_nScrollFactor = 0;
 	m_nBtnMouseOver = 0xFFFF;
-	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
-	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
+	MemsetZero(m_dwNotifyPos);
+	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 0, RGB(192,192,192));
 	m_lastDrawPoint.SetPoint(-1, -1);
 }
@@ -1246,7 +1246,7 @@ T CViewSample::GetSampleValueFromPoint(const CPoint &point)
 //---------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
-	int value = (std::numeric_limits<T>::max)() - (std::numeric_limits<uT>::max)() * point.y / (m_rcClient.bottom - m_rcClient.top);
+	int value = (std::numeric_limits<T>::max)() - (std::numeric_limits<uT>::max)() * point.y / m_rcClient.Height();
 	Limit(value, (std::numeric_limits<T>::min)(), (std::numeric_limits<T>::max)());
 	return static_cast<T>(value);
 }
@@ -1440,8 +1440,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 
 		InvalidateSample();
 		pModDoc->SetModified();
-	}
-	else
+	} else
 	{
 		// ctrl + click = play from cursor pos
 		if(CMainFrame::GetInputHandler()->CtrlPressed())
@@ -1565,7 +1564,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cu&t\t" + ih->GetKeyTextFromCommand(kcEditCut));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "&Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
-		::AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "&Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
+		::AppendMenu(hMenu, MF_STRING | (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED), ID_EDIT_PASTE, "&Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -2043,7 +2042,7 @@ void CViewSample::On8BitConvert()
 			{
 				p[i] = (signed char) ((*((short int *)(p+i*2))) / 256);
 			}
-			sample.uFlags &= ~(CHN_16BIT);
+			sample.uFlags.reset(CHN_16BIT);
 			for (UINT j=0; j<MAX_CHANNELS; j++) if (pSndFile->Chn[j].pSample == sample.pSample)
 			{
 				pSndFile->Chn[j].dwFlags.reset(CHN_16BIT);
@@ -2180,12 +2179,12 @@ void CViewSample::OnSampleTrim()
 		if (sample.nLoopStart >= sample.nLoopEnd)
 		{
 			sample.nLoopStart = sample.nLoopEnd = 0;
-			sample.uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
+			sample.uFlags.reset(CHN_LOOP|CHN_PINGPONGLOOP);
 		}
 		if (sample.nSustainStart >= sample.nSustainEnd)
 		{
 			sample.nSustainStart = sample.nSustainEnd = 0;
-			sample.uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+			sample.uFlags.reset(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		}
 		sample.nLength = nEnd;
 
@@ -2204,6 +2203,7 @@ void CViewSample::OnChar(UINT /*nChar*/, UINT, UINT /*nFlags*/)
 //-------------------------------------------------------------
 {
 }
+
 
 void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 //-----------------------------------------------------------
@@ -2225,7 +2225,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 				pModDoc->NoteOff(0, true);
 
 			SmpLength loopstart = m_dwBeginSel, loopend = m_dwEndSel;
-			if (loopend - loopstart < (UINT)(4 << m_nZoom))
+			if (loopend - loopstart < (SmpLength)(4 << m_nZoom))
 				loopend = loopstart = 0; // selection is too small -> no loop
 
 			pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
