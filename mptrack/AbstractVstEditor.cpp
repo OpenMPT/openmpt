@@ -179,6 +179,7 @@ void CAbstractVstEditor::OnPasteParameters()
 				{
 					pModDoc->SetModified();
 				}
+				UpdatePresetField();
 			} else
 			{
 				Reporting::Error(VSTPresets::GetErrorMessage(error));
@@ -450,11 +451,7 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU)
 	{
 	case 0:
 		// Grey out paste menu item.
-		if(CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->OpenClipboard())
-		{
-			m_pMenu->EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (::GetClipboardData(clipboardFormat) != nullptr ? 0 : MF_GRAYED));
-			CloseClipboard();
-		}
+		m_pMenu->EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (IsClipboardFormatAvailable(clipboardFormat) ? 0 : MF_GRAYED));
 		break;
 	case 1:
 		// Generate preset menu on click.
