@@ -104,7 +104,7 @@ VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 		header[7] = 0;	// Reserved
 		strncpy(chunk + 8 * sizeof(VstInt32), programName, programNameLen);
 		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen, inputDevice.name.c_str(), header[4]);
-		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen + header[2], outputDevice.name.c_str(), header[6]);
+		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen + header[4], outputDevice.name.c_str(), header[6]);
 		return byteSize;
 	} else
 	{
