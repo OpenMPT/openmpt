@@ -125,10 +125,9 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		SaveProgram(f, plugin);
 	} else
 	{
-		const bool writeChunk = plugin.ProgramsAreChunks();
+		bool writeChunk = plugin.ProgramsAreChunks();
 		ChunkHeader header;
 		header.chunkMagic = cMagic;
-		header.fxMagic = writeChunk ? chunkBankMagic : bankMagic;
 		header.version = 2;
 		header.fxID = plugin.GetUID();
 		header.fxVersion = plugin.GetVersion();
@@ -136,7 +135,7 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		// Write unfinished header... We need to update the size once we're done writing.
 		Write(header, f);
 
-		uint32 numProgs = plugin.GetNumPrograms(), curProg = plugin.GetCurrentProgram();
+		uint32 numProgs = Util::Max(plugin.GetNumPrograms(), VstInt32(1)), curProg = plugin.GetCurrentProgram();
 		WriteBE(numProgs, f);
 		WriteBE(curProg, f);
 		char reserved[124];
@@ -151,8 +150,13 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 			{
 				WriteBE(chunkSize, f);
 				f.write(chunk, chunkSize);
+			} else
+			{
+				// The plugin returned no chunk! Gracefully go back and save parameters instead...
+				writeChunk = false;
 			}
-		} else
+		}
+		if(!writeChunk)
 		{
 			for(uint32 p = 0; p < numProgs; p++)
 			{
@@ -165,6 +169,7 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		// Now we know the correct chunk size.
 		std::streamoff end = f.tellp();
 		header.byteSize = static_cast<VstInt32>(end - 8);
+		header.fxMagic = writeChunk ? chunkBankMagic : bankMagic;
 		header.ConvertEndianness();
 		f.seekp(0);
 		Write(header, f);
@@ -177,10 +182,9 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 //---------------------------------------------------------------
 {
-	const bool writeChunk = plugin.ProgramsAreChunks();
+	bool writeChunk = plugin.ProgramsAreChunks();
 	ChunkHeader header;
 	header.chunkMagic = cMagic;
-	header.fxMagic = writeChunk ? chunkPresetMagic : fMagic;
 	header.version = 1;
 	header.fxID = plugin.GetUID();
 	header.fxVersion = plugin.GetVersion();
@@ -204,8 +208,13 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 		{
 			WriteBE(chunkSize, f);
 			f.write(chunk, chunkSize);
+		} else
+		{
+			// The plugin returned no chunk! Gracefully go back and save parameters instead...
+			writeChunk = false;
 		}
-	} else
+	}
+	if(!writeChunk)
 	{
 		for(uint32 p = 0; p < numParams; p++)
 		{
@@ -216,6 +225,7 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	// Now we know the correct chunk size.
 	std::streamoff end = f.tellp();
 	header.byteSize = static_cast<VstInt32>(end - start - 8);
+	header.fxMagic = writeChunk ? chunkPresetMagic : fMagic;
 	header.ConvertEndianness();
 	f.seekp(start);
 	Write(header, f);

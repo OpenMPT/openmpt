@@ -132,11 +132,15 @@ VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
 	VstInt32 nameStrSize = std::min(header[2], byteSize - VstInt32(8 * sizeof(VstInt32)));
 	VstInt32 inStrSize = std::min(header[4], byteSize - VstInt32(8 * sizeof(VstInt32) - nameStrSize));
 	VstInt32 outStrSize = std::min(header[6], byteSize - VstInt32(8 * sizeof(VstInt32) - nameStrSize - inStrSize));
+
+	const char *nameStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32);
+	const char *inStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + nameStrSize;
+	const char *outStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + nameStrSize + inStrSize;
+
 	PmDeviceID inID = header[3];
 	PmDeviceID outID = header[5];
 
-	const char *inStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + header[2];
-	const char *outStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + header[2] + inStrSize;
+	vst_strncpy(programName, nameStr, std::min(nameStrSize, VstInt32(kVstMaxProgNameLen)));
 
 	if(strncmp(inStr, GetDeviceName(inID), inStrSize))
 	{
