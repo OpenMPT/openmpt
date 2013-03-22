@@ -1003,7 +1003,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWOR
 		dwBufferOffset += n;
 	}
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
-	pSource->AudioDone(dwBufferOffset*dwSampleSize, m_nAsioBufferLen);
+	pSource->AudioDone(dwBufferOffset*dwSampleSize, m_nAsioBufferLen*dwSampleSize);
 
 	return TRUE;
 }
