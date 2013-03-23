@@ -131,7 +131,11 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 
 	if(m_pMainFrm && executeCommand != kcNull)
 	{
-		m_pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
+		if(!m_pMainFrm->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam))
+		{
+			// Command was not handled, so let Windows process it.
+			return kcNull;
+		}
 	}
 
 	return executeCommand;
@@ -151,7 +155,11 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 
 	if(pSourceWnd && (executeCommand != kcNull))
 	{
-		pSourceWnd->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar);
+		if(!pSourceWnd->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar))
+		{
+			// Command was not handled, so let Windows process it.
+			return kcNull;
+		}
 	}
 
 	return executeCommand;
@@ -525,7 +533,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c = kcShowSplitKeyboardSettings; break;
 			// "Paste Special" sub menu
 		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c = kcEditMixPaste; break;
-		case ID_EDIT_MIXPASTE_ITSTYLE:	s="&Mix Paste (IT Style)\t"; c = kcEditMixPasteITStyle; break;
+		case ID_EDIT_MIXPASTE_ITSTYLE:	s="M&ix Paste (IT Style)\t"; c = kcEditMixPasteITStyle; break;
 		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c = kcEditPasteFlood; break;
 		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste (Insert)\t"; c = kcEditPushForwardPaste; break;
 
