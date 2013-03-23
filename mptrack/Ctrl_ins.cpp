@@ -1469,9 +1469,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 			// -> CODE#0023
 			// -> DESC="IT project files (.itp)"
-			const size_t n = max(strlen(lpszFileName), size_t(_MAX_PATH - 1));
-			strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument - 1], lpszFileName, n);
-			m_pSndFile->m_szInstrumentPath[m_nInstrument-1][n] = '\0';
+			m_pSndFile->m_szInstrumentPath[m_nInstrument - 1] = lpszFileName;
 			SetInstrumentModified(false);
 			// -! NEW_FEATURE#0023
 			bOk = TRUE;
@@ -1836,9 +1834,7 @@ void CCtrlInstruments::OnInstrumentSave()
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	int n = strlen(files.first_file.c_str());
-	if(n > _MAX_PATH) n = _MAX_PATH;
-	strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1], files.first_file.c_str(),n);
+	m_pSndFile->m_szInstrumentPath[m_nInstrument - 1] = files.first_file;
 	SetInstrumentModified(false);
 // -! NEW_FEATURE#0023
 

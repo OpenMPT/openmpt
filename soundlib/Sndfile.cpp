@@ -454,15 +454,6 @@ CSoundFile::CSoundFile() :
 	m_dwCreatedWithVersion=0;
 	m_bChannelMuteTogglePending.reset();
 
-
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	for(UINT i = 0; i < MAX_INSTRUMENTS; i++)
-	{
-		MemsetZero(m_szInstrumentPath[i]);
-	}
-// -! NEW_FEATURE#0023
-
 	MemsetZero(ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);

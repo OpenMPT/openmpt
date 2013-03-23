@@ -109,7 +109,9 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	size = file.ReadUint32LE();	// path string length
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		file.ReadString<StringFixer::maybeNullTerminated>(m_szInstrumentPath[ins], size);
+		char path[_MAX_PATH];
+		file.ReadString<StringFixer::maybeNullTerminated>(path, size);
+		m_szInstrumentPath[ins] = path;
 	}
 
 	// Song Orders
@@ -199,7 +201,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins][0] == '\0' || !f.Open(m_szInstrumentPath[ins])) continue;
+		if(m_szInstrumentPath[ins].IsEmpty() || !f.Open(m_szInstrumentPath[ins])) continue;
 
 		size = f.GetLength();
 		LPBYTE lpFile = f.Lock(size);
@@ -263,7 +265,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	if(!m_SongFlags[SONG_ITPROJECT]) return false;
 
 	UINT i,j = 0;
-	for(i = 0 ; i < m_nInstruments ; i++) { if(m_szInstrumentPath[i][0] != '\0' || !Instruments[i+1]) j++; }
+	for(i = 0 ; i < m_nInstruments ; i++) { if(!m_szInstrumentPath[i].IsEmpty() || !Instruments[i+1]) j++; }
 	if(m_nInstruments && j != m_nInstruments) return false;
 
 	// Open file
@@ -363,7 +365,13 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// instruments' path
-	for(i=0; i<m_nInstruments; i++) fwrite(&m_szInstrumentPath[i][0], 1, _MAX_PATH, f);
+	for(i = 0; i < m_nInstruments; i++)
+	{
+		char path[_MAX_PATH];
+		MemsetZero(path);
+		strncpy(path, m_szInstrumentPath[i], _MAX_PATH);
+		fwrite(path, 1, _MAX_PATH, f);
+	}
 
 	// Song Orders
 
@@ -419,26 +427,21 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	id = m_nSamples;
 	fwrite(&id, 1, sizeof(id), f);
 
-	vector<bool> sampleUsed(m_nSamples, false);
+	vector<bool> sampleUsed(GetNumSamples() + 1, false);
 
 	// Mark samples used in instruments
-	for(i=0; i<m_nInstruments; i++)
+	for(i = 0; i < m_nInstruments; i++)
 	{
 		if(Instruments[i + 1] != nullptr)
 		{
-			ModInstrument *p = Instruments[i + 1];
-			for(j = 0; j < 128; j++)
-			{
-				if(p->Keyboard[j] > 0 && p->Keyboard[j] <= m_nSamples)
-					sampleUsed[p->Keyboard[j] - 1] = true;
-			}
+			Instruments[i + 1]->GetSamples(sampleUsed);
 		}
 	}
 
 	// Count samples not used in any instrument
 	i = 0;
 	for(j = 1; j <= m_nSamples; j++)
-		if(!sampleUsed[j - 1] && Samples[j].pSample) i++;
+		if(!sampleUsed[j] && Samples[j].pSample) i++;
 
 	id = i;
 	fwrite(&id, 1, sizeof(id), f);
@@ -446,7 +449,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Write samples not used in any instrument (help, this looks like duplicate code!)
 	for(UINT nsmp=1; nsmp<=m_nSamples; nsmp++)
 	{
-		if(!sampleUsed[nsmp - 1] && Samples[nsmp].pSample)
+		if(!sampleUsed[nsmp] && Samples[nsmp].pSample)
 		{
 			ITSample itss;
 			itss.ConvertToIT(Samples[nsmp], GetType(), false, false);
