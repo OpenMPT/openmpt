@@ -606,8 +606,8 @@ BEGIN_MESSAGE_MAP(CModTreeBar, CDialogBar)
 END_MESSAGE_MAP()
 
 
-CModTreeBar::CModTreeBar()
-//------------------------
+CModTreeBar::CModTreeBar(CSoundFile &sf) : m_TreeBrowseFile(sf)
+//-------------------------------------------------------------
 {
 	m_pModTree = m_pModTreeData = NULL;
 	m_nTreeSplitRatio = TrackerSettings::Instance().glTreeSplitRatio;
@@ -618,9 +618,9 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------
 {
 	LRESULT l = CDialogBar::HandleInitDialog(wParam, lParam);
-	m_pModTreeData = new CModTree();
+	m_pModTreeData = new CModTree(nullptr, m_TreeBrowseFile);
 	if (m_pModTreeData)	m_pModTreeData->SubclassDlgItem(IDC_TREEDATA, this);
-	m_pModTree = new CModTree(m_pModTreeData);
+	m_pModTree = new CModTree(m_pModTreeData, m_TreeBrowseFile);
 	if (m_pModTree)	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
 	m_dwStatus = 0;
 	m_sizeDefault.cx = TrackerSettings::Instance().glTreeWindowWidth + 3;
@@ -635,12 +635,12 @@ CModTreeBar::~CModTreeBar()
 	if (m_pModTree)
 	{
 		delete m_pModTree;
-		m_pModTree = NULL;
+		m_pModTree = nullptr;
 	}
 	if (m_pModTreeData)
 	{
 		delete m_pModTreeData;
-		m_pModTreeData = NULL;
+		m_pModTreeData = nullptr;
 	}
 }
 
@@ -1068,9 +1068,9 @@ HWND CModTreeBar::GetModTreeHWND()
 BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 {
 	if (::GetFocus() == m_pModTree->m_hWnd)
-		return m_pModTree->PostMessage(cmdID, wParam, lParam);
+		return m_pModTree->SendMessage(cmdID, wParam, lParam);
 	if (::GetFocus() == m_pModTreeData->m_hWnd)
-		return m_pModTreeData->PostMessage(cmdID, wParam, lParam);
+		return m_pModTreeData->SendMessage(cmdID, wParam, lParam);
 
 	return 0;
 }

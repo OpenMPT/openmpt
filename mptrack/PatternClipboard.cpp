@@ -832,6 +832,15 @@ void PatternClipboard::SetClipboardSize(clipindex_t maxEntries)
 }
 
 
+// Check whether patterns can be pasted from clipboard
+bool PatternClipboard::CanPaste()
+//-------------------------------
+{
+	return !!IsClipboardFormatAvailable(CF_TEXT);
+}
+
+
+
 // System-specific clipboard functions
 bool PatternClipboard::ToSystemClipboard(const CString &data)
 //-----------------------------------------------------------
