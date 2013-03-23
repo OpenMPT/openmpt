@@ -26,6 +26,7 @@
 ISoundDevice::ISoundDevice()
 //--------------------------
 {
+	m_Source = nullptr;
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
 	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
 	m_fulCfgOptions = 0;
@@ -189,9 +190,10 @@ void CWaveDevice::Reset()
 }
 
 
-void CWaveDevice::FillAudioBuffer(ISoundSource *pSource)
-//------------------------------------------------------
+void CWaveDevice::FillAudioBuffer()
+//---------------------------------
 {
+	ISoundSource *pSource = m_Source;
 	ULONG nBytesWritten;
 	ULONG nLatency;
 	LONG oldBuffersPending;
@@ -564,9 +566,10 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 }
 
 
-void CDSoundDevice::FillAudioBuffer(ISoundSource *pSource)
-//--------------------------------------------------------
+void CDSoundDevice::FillAudioBuffer()
+//-----------------------------------
 {
+	ISoundSource *pSource = m_Source;
 	LPVOID lpBuf1=NULL, lpBuf2=NULL;
 	DWORD dwSize1=0, dwSize2=0;
 	DWORD dwBytes;
@@ -1007,9 +1010,10 @@ void CASIODevice::CloseDevice()
 	}
 }
 
-void CASIODevice::FillAudioBuffer(ISoundSource *pSource)
-//------------------------------------------------------
+void CASIODevice::FillAudioBuffer()
+//---------------------------------
 {
+	ISoundSource *pSource = m_Source;
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 
 	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
@@ -1121,7 +1125,7 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 {
 	UNREFERENCED_PARAMETER(directProcess);
 	g_dwBuffer = doubleBufferIndex;
-	if (gpCurrentAsio) SoundDeviceCallback();
+	if (gpCurrentAsio && gpCurrentAsio->m_Source) gpCurrentAsio->m_Source->FillAudioBufferLocked();
 }
 
 
@@ -1424,7 +1428,7 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 }
 
 
-bool CASIODevice::CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result)
+bool CASIODevice::CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result)
 //--------------------------------------------------------------------------------------------
 {
 	const bool wasOpen = (m_pAsioDrv != NULL);
@@ -1591,9 +1595,10 @@ void CPortaudioDevice::Stop()
 }
 
 
-void CPortaudioDevice::FillAudioBuffer(ISoundSource *pSource)
-//-----------------------------------------------------------
+void CPortaudioDevice::FillAudioBuffer()
+//--------------------------------------
 {
+	ISoundSource *pSource = m_Source;
 	if(m_CurrentFrameCount == 0) return;
 	bool eos = false;
 	ULONG read = pSource->AudioRead(m_CurrentFrameBuffer, m_CurrentFrameCount);
@@ -1637,7 +1642,7 @@ int CPortaudioDevice::StreamCallback(
 	m_CurrentRealLatencyMS = static_cast<float>( timeInfo->outputBufferDacTime - timeInfo->currentTime ) * 1000.0f;
 	m_CurrentFrameBuffer = output;
 	m_CurrentFrameCount = frameCount;
-	SoundDeviceCallback();
+	m_Source->FillAudioBufferLocked();
 	m_CurrentFrameCount = 0;
 	m_CurrentFrameBuffer = 0;
 	return paContinue;

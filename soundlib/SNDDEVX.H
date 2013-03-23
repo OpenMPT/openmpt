@@ -58,7 +58,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	void FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer();
 	void Reset();
 	void Start();
 	void Stop();
@@ -105,7 +105,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_DSOUND; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	void FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer();
 	void Reset();
 	void Start();
 	void Stop();
@@ -160,7 +160,7 @@ public:
 	UINT GetDeviceType() { return SNDDEV_ASIO; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	void FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer();
 	void Reset();
 	void Start();
 	void Stop();
@@ -170,7 +170,7 @@ public:
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_nSamplesPerSec;; }
 
-	bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result);
+	bool CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);
 
 public:
@@ -234,7 +234,7 @@ public:
 	UINT GetDeviceType() { return HostApiToSndDevType(m_HostApi); }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	void FillAudioBuffer(ISoundSource *pSource);
+	void FillAudioBuffer();
 	void Reset();
 	void Start();
 	void Stop();
