@@ -181,7 +181,6 @@ CMainFrame::CMainFrame() : m_wndTree(m_TreeBrowseFile)
 	m_hNotifyThread = NULL;
 	m_dwNotifyThreadId = 0;
 	m_hNotifyWakeUp = NULL;
-	m_AudioThread = nullptr;
 	gpSoundDevice = NULL;
 	m_IsPlaybackRunning = false;
 
@@ -258,8 +257,6 @@ VOID CMainFrame::Initialize()
 	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
-	// Create Audio Thread
-	m_AudioThread = new CAudioThread(&gpSoundDevice);
 	// Setup timer
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
@@ -392,11 +389,6 @@ BOOL CMainFrame::DestroyWindow()
 		m_nTimer = 0;
 	}
 	if (shMidiIn) midiCloseDevice();
-	if(m_AudioThread)
-	{
-		delete m_AudioThread;
-		m_AudioThread = nullptr;
-	}
 	if(m_hNotifyThread != NULL)
 	{
 		PostThreadMessage(m_dwNotifyThreadId, WM_QUIT, 0, 0);
@@ -757,23 +749,11 @@ void CMainFrame::SetAudioThreadActive(bool active)
 	{
 		if(m_IsPlaybackRunning) return;
 		m_IsPlaybackRunning = true;
-		if(gpSoundDevice->Directcallback())
-		{
-			gpSoundDevice->Start();
-		} else
-		{
-			m_AudioThread->Activate();
-		}
+		gpSoundDevice->Start();
 	} else
 	{
 		if(!m_IsPlaybackRunning) return;
-		if(gpSoundDevice->Directcallback())
-		{
-			gpSoundDevice->Stop();
-		} else
-		{
-			m_AudioThread->Deactivate();
-		}
+		gpSoundDevice->Stop();
 		m_IsPlaybackRunning = false;
 	}
 }

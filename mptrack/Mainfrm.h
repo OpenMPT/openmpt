@@ -334,7 +334,6 @@ public:
 	HANDLE m_hNotifyThread;
 	DWORD m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
-	CAudioThread * m_AudioThread; 
 	bool m_IsPlaybackRunning;
 
 	// Midi Input
