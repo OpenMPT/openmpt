@@ -698,8 +698,6 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	BOOL bWait;
 	UINT nSleep;
 
-	ExceptionHandler::RegisterAudioThread();
-
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
 	HANDLE sleepEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
@@ -777,8 +775,6 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 //-------------------------------------------
 {
 	CMainFrame *pMainFrm;
-
-	ExceptionHandler::RegisterNotifyThread();
 
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
 	for (;;)
