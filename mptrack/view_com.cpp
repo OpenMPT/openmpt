@@ -416,7 +416,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_PATH:
 						if (pIns)
 						{
-							memcpy(s, pSndFile->m_szInstrumentPath[iIns], _MAX_PATH);
+							strncpy(s, pSndFile->m_szInstrumentPath[iIns], _MAX_PATH);
 							s[_MAX_PATH] = 0;
 						}
 						break;

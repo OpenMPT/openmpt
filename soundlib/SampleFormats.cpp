@@ -150,7 +150,7 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_szInstrumentPath[nInstr - 1][0] = '\0';
+	m_szInstrumentPath[nInstr - 1].Empty();
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc())
 	{

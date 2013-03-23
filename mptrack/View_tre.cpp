@@ -993,7 +993,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				if(sndFile.m_SongFlags[SONG_ITPROJECT])
 				{
 					// path info for ITP instruments
-					const bool pathOk = sndFile.m_szInstrumentPath[nIns - 1][0] != '\0';
+					const bool pathOk = !sndFile.m_szInstrumentPath[nIns - 1].IsEmpty();
 					const bool instMod = pDoc->m_bsInstrumentModified.test(nIns - 1);
 					wsprintf(s, pathOk ? (instMod ? "%3d: * %s" : "%3d: %s") : "%3d: ? %s", nIns, (LPCTSTR)sndFile.GetInstrumentName(nIns));
 				} else
@@ -3157,7 +3157,7 @@ void CModTree::OnSetItemPath()
 			"All files(*.*)|*.*||");
 		if(files.abort) return;
 
-		strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], files.first_file.c_str());
+		pSndFile->m_szInstrumentPath[modItemID - 1] = files.first_file;
 		OnRefreshTree();
 	}
 }
@@ -3173,9 +3173,10 @@ void CModTree::OnSaveItem()
 	//const uint32 modItemType = GetModItemType(modItem);
 	const uint32 modItemID = GetModItemID(modItem);
 
-	if(pSndFile && modItemID){
+	if(pSndFile && modItemID)
+	{
 
-		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] == '\0')
+		if(pSndFile->m_szInstrumentPath[modItemID - 1].IsEmpty())
 		{
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", "",
 				(pSndFile->GetType() == MOD_TYPE_XM) ?
@@ -3185,22 +3186,10 @@ void CModTree::OnSaveItem()
 				"FastTracker II Instruments (*.xi)|*.xi||");
 			if(files.abort) return;
 
-			strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], files.first_file.c_str());
+			pSndFile->m_szInstrumentPath[modItemID - 1] = files.first_file;
 		}
 
-		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] != '\0')
-		{
-			int size = strlen(pSndFile->m_szInstrumentPath[modItemID - 1]);
-			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[modItemID - 1][size-3],"iti") == 0;
-			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[modItemID - 1][size-2],"xi") == 0;
-
-			if(iti || (!iti && !xi  && pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
-				pSndFile->SaveITIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1], false);
-			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
-				pSndFile->SaveXIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1]);
-
-			pModDoc->m_bsInstrumentModified.reset(modItemID - 1);
-		}
+		pModDoc->SaveInstrument(modItemID);
 
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
 		OnRefreshTree();
