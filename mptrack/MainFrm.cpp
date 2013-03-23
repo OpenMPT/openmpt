@@ -696,7 +696,6 @@ DWORD WINAPI CMainFrame::AudioThreadWrapper(LPVOID)
 DWORD CMainFrame::AudioThread()
 //-----------------------------
 {
-	ExceptionHandler::RegisterAudioThread();
 	HANDLE sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #ifdef NDEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
@@ -782,7 +781,6 @@ DWORD WINAPI CMainFrame::NotifyThreadWrapper(LPVOID)
 DWORD CMainFrame::NotifyThread()
 //-------------------------------------------
 {
-	ExceptionHandler::RegisterNotifyThread();
 	// initialize thread message queue
 	MSG msg;
 	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);

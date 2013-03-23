@@ -17,27 +17,6 @@
 #include "dbghelp.h"
 
 
-LONG ExceptionHandler::UnhandledExceptionFilterMain(_EXCEPTION_POINTERS *pExceptionInfo)
-//--------------------------------------------------------------------------------------
-{
-	return UnhandledExceptionFilter(pExceptionInfo, "main");
-}
-
-
-LONG ExceptionHandler::UnhandledExceptionFilterAudio(_EXCEPTION_POINTERS *pExceptionInfo)
-//---------------------------------------------------------------------------------------
-{
-	return UnhandledExceptionFilter(pExceptionInfo, "audio");
-}
-
-
-LONG ExceptionHandler::UnhandledExceptionFilterNotify(_EXCEPTION_POINTERS *pExceptionInfo)
-//----------------------------------------------------------------------------------------
-{
-	return UnhandledExceptionFilter(pExceptionInfo, "notify");
-}
-
-
 typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
 	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
 	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
@@ -45,8 +24,8 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 	);
 
 // Try to close the audio device and rescue unsaved work if an unhandled exception occours...
-LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo, const CString threadName)
-//------------------------------------------------------------------------------------------------------------
+LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
+//----------------------------------------------------------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
@@ -63,7 +42,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	}
 
 	CString errorMessage;
-	errorMessage.Format("Unhandled exception 0x%X at address %p occoured in the %s thread.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress, threadName);
+	errorMessage.Format("Unhandled exception 0x%X at address %p occoured.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
 	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
 	CString baseRescuePath;
@@ -90,7 +69,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
 		if (pDump)
 		{
-			const CString filename = baseRescuePath + "crash-" + threadName + ".dmp";
+			const CString filename = baseRescuePath + "crash.dmp";
 
 			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE)
