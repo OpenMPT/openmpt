@@ -391,7 +391,6 @@ public:
 	bool audioReopenDevice();
 	void audioCloseDevice();
 	bool IsAudioDeviceOpen() const;
-	BOOL audioFillBuffers();
 	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream);
 
 // Midi Input Functions
