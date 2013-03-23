@@ -170,6 +170,22 @@ static UINT indicators[] =
 	ID_INDICATOR_CPU
 };
 
+
+CAudioThread::CAudioThread(ISoundDevice **ppSoundDevice) : m_ppSoundDevice(ppSoundDevice)
+{
+	m_hPlayThread = NULL;
+	m_dwPlayThreadId = 0;
+	m_hAudioWakeUp = NULL;
+	m_hAudioThreadTerminateRequest = NULL;
+	m_hAudioThreadGoneIdle = NULL;
+	m_AudioThreadActive = 0;
+	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hAudioThreadTerminateRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hAudioThreadGoneIdle = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hPlayThread = CreateThread(NULL, 0, AudioThreadWrapper, (LPVOID)this, 0, &m_dwPlayThreadId);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 //#include <direct.h>
@@ -177,16 +193,11 @@ CMainFrame::CMainFrame() : m_wndTree(m_TreeBrowseFile)
 //----------------------------------------------------
 {
 
-	m_hPlayThread = NULL;
-	m_dwPlayThreadId = 0;
-	m_hAudioWakeUp = NULL;
 	m_hNotifyThread = NULL;
 	m_dwNotifyThreadId = 0;
 	m_hNotifyWakeUp = NULL;
-	m_hAudioThreadTerminateRequest = NULL;
-	m_hAudioThreadGoneIdle = NULL;
+	m_AudioThread = nullptr;
 	gpSoundDevice = NULL;
-	m_AudioThreadActive = 0;
 	m_IsPlaybackRunning = false;
 
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
@@ -258,14 +269,12 @@ VOID CMainFrame::Initialize()
 		}
 	}
 
-	// Create Audio Thread
+	// Create Notify Thread
 	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
-	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hAudioThreadTerminateRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hAudioThreadGoneIdle = CreateEvent(NULL, TRUE, FALSE, NULL);
-	m_hPlayThread = CreateThread(NULL, 0, AudioThreadWrapper, NULL, 0, &m_dwPlayThreadId);
 	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
+	// Create Audio Thread
+	m_AudioThread = new CAudioThread(&gpSoundDevice);
 	// Setup timer
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
@@ -381,23 +390,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 
-BOOL CMainFrame::DestroyWindow()
-//------------------------------
+CAudioThread::~CAudioThread()
 {
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-	// Uninstall Keyboard Hook
-	if (ghKbdHook)
-	{
-		UnhookWindowsHookEx(ghKbdHook);
-		ghKbdHook = NULL;
-	}
-	// Kill Timer
-	if (m_nTimer)
-	{
-		KillTimer(m_nTimer);
-		m_nTimer = 0;
-	}
-	if (shMidiIn) midiCloseDevice();
 	if(m_hPlayThread != NULL)
 	{
 		SetEvent(m_hAudioThreadTerminateRequest);
@@ -419,6 +413,31 @@ BOOL CMainFrame::DestroyWindow()
 	{
 		CloseHandle(m_hAudioWakeUp);
 		m_hAudioWakeUp = NULL;
+	}
+}
+
+
+BOOL CMainFrame::DestroyWindow()
+//------------------------------
+{
+	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+	// Uninstall Keyboard Hook
+	if (ghKbdHook)
+	{
+		UnhookWindowsHookEx(ghKbdHook);
+		ghKbdHook = NULL;
+	}
+	// Kill Timer
+	if (m_nTimer)
+	{
+		KillTimer(m_nTimer);
+		m_nTimer = 0;
+	}
+	if (shMidiIn) midiCloseDevice();
+	if(m_AudioThread)
+	{
+		delete m_AudioThread;
+		m_AudioThread = nullptr;
 	}
 	if(m_hNotifyThread != NULL)
 	{
@@ -689,11 +708,11 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 
 
 // Audio thread
-DWORD WINAPI CMainFrame::AudioThreadWrapper(LPVOID)
+DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
 {
-	return ((CMainFrame*)theApp.m_pMainWnd)->AudioThread();
+	return ((CAudioThread*)user)->AudioThread();
 }
-DWORD CMainFrame::AudioThread()
+DWORD CAudioThread::AudioThread()
 //-----------------------------
 {
 	HANDLE sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -729,7 +748,7 @@ DWORD CMainFrame::AudioThread()
 		// increase resolution of multimedia timer
 		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
 
-		gpSoundDevice->Start();
+		(*m_ppSoundDevice)->Start();
 
 		while(!idle && !terminate) 
 		{
@@ -737,14 +756,14 @@ DWORD CMainFrame::AudioThread()
 			UINT nSleep = 50;
 
 			{
-				if(IsAudioThreadActive())
+				if(IsActive())
 				{
 					// we are playing, everything is fine
 					{
 						CriticalSection cs;
-						gpSoundDevice->FillAudioBuffer();
+						(*m_ppSoundDevice)->FillAudioBuffer();
 					}
-					nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
+					nSleep = static_cast<UINT>((*m_ppSoundDevice)->GetRealUpdateIntervalMS());
 					if(nSleep < 1) nSleep = 1;
 				} else
 				{
@@ -760,7 +779,7 @@ DWORD CMainFrame::AudioThread()
 
 		}
 
-		gpSoundDevice->Stop();
+		(*m_ppSoundDevice)->Stop();
 
 		if(period_set) timeEndPeriod(1);
 
@@ -859,6 +878,22 @@ DWORD CMainFrame::NotifyThread()
 }
 
 
+void CAudioThread::Activate()
+{
+	ResetEvent(m_hAudioThreadGoneIdle);
+	InterlockedExchange(&m_AudioThreadActive, 1);
+	SetEvent(m_hAudioWakeUp);
+}
+
+
+void CAudioThread::Deactivate()
+{
+	InterlockedExchange(&m_AudioThreadActive, 0);
+	WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
+
+}
+
+
 void CMainFrame::SetAudioThreadActive(bool active)
 //------------------------------------------------
 {
@@ -871,9 +906,7 @@ void CMainFrame::SetAudioThreadActive(bool active)
 			gpSoundDevice->Start();
 		} else
 		{
-			ResetEvent(m_hAudioThreadGoneIdle);
-			InterlockedExchange(&m_AudioThreadActive, 1);
-			SetEvent(m_hAudioWakeUp);
+			m_AudioThread->Activate();
 		}
 	} else
 	{
@@ -883,8 +916,7 @@ void CMainFrame::SetAudioThreadActive(bool active)
 			gpSoundDevice->Stop();
 		} else
 		{
-			InterlockedExchange(&m_AudioThreadActive, 0);
-			WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
+			m_AudioThread->Deactivate();
 		}
 		m_IsPlaybackRunning = false;
 	}
