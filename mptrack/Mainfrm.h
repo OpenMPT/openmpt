@@ -303,25 +303,6 @@ struct MPTNOTIFICATION
 #include "mainbar.h"
 #include "TrackerSettings.h"
 
-class CAudioThread
-{
-private:
-	ISoundDevice **const m_ppSoundDevice;
-	HANDLE m_hAudioWakeUp;
-	HANDLE m_hPlayThread;
-	HANDLE m_hAudioThreadTerminateRequest;
-	HANDLE m_hAudioThreadGoneIdle;
-	DWORD m_dwPlayThreadId;
-	LONG m_AudioThreadActive;
-	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
-	DWORD AudioThread();
-	bool IsActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
-public:
-	CAudioThread(ISoundDevice **ppSoundDevice);
-	~CAudioThread();
-	void Activate();
-	void Deactivate();
-};
 
 //========================================================
 class CMainFrame: public CMDIFrameWnd, public ISoundSource

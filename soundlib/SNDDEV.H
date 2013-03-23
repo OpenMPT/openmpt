@@ -87,6 +87,7 @@ public:
 	ISoundDevice();
 	virtual ~ISoundDevice();
 	void SetSource(ISoundSource *source) { m_Source = source; }
+	ISoundSource *GetSource() const { return m_Source; }
 
 public:
 	VOID Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
@@ -111,6 +112,27 @@ public:
 	virtual UINT GetCurrentSampleRate(UINT nDevice) { UNREFERENCED_PARAMETER(nDevice); return 0; }
 	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
 	virtual bool CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;
+};
+
+
+class CAudioThread
+{
+private:
+	ISoundDevice **const m_ppSoundDevice;
+	HANDLE m_hAudioWakeUp;
+	HANDLE m_hPlayThread;
+	HANDLE m_hAudioThreadTerminateRequest;
+	HANDLE m_hAudioThreadGoneIdle;
+	DWORD m_dwPlayThreadId;
+	LONG m_AudioThreadActive;
+	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
+	DWORD AudioThread();
+	bool IsActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
+public:
+	CAudioThread(ISoundDevice **ppSoundDevice);
+	~CAudioThread();
+	void Activate();
+	void Deactivate();
 };
 
 
