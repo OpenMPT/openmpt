@@ -57,6 +57,145 @@ VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, D
 }
 
 
+CAudioThread::CAudioThread(ISoundDevice **ppSoundDevice) : m_ppSoundDevice(ppSoundDevice)
+{
+	m_hPlayThread = NULL;
+	m_dwPlayThreadId = 0;
+	m_hAudioWakeUp = NULL;
+	m_hAudioThreadTerminateRequest = NULL;
+	m_hAudioThreadGoneIdle = NULL;
+	m_AudioThreadActive = 0;
+	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hAudioThreadTerminateRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hAudioThreadGoneIdle = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hPlayThread = CreateThread(NULL, 0, AudioThreadWrapper, (LPVOID)this, 0, &m_dwPlayThreadId);
+}
+
+
+CAudioThread::~CAudioThread()
+{
+	if(m_hPlayThread != NULL)
+	{
+		SetEvent(m_hAudioThreadTerminateRequest);
+		WaitForSingleObject(m_hPlayThread, INFINITE);
+		m_dwPlayThreadId = 0;
+		m_hPlayThread = NULL;
+	}
+	if(m_hAudioThreadTerminateRequest)
+	{
+		CloseHandle(m_hAudioThreadTerminateRequest);
+		m_hAudioThreadTerminateRequest = 0;
+	}
+	if(m_hAudioThreadGoneIdle != NULL)
+	{
+		CloseHandle(m_hAudioThreadGoneIdle);
+		m_hAudioThreadGoneIdle = 0;
+	}
+	if(m_hAudioWakeUp != NULL)
+	{
+		CloseHandle(m_hAudioWakeUp);
+		m_hAudioWakeUp = NULL;
+	}
+}
+
+
+DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
+{
+	return ((CAudioThread*)user)->AudioThread();
+}
+DWORD CAudioThread::AudioThread()
+//-------------------------------
+{
+	HANDLE sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+#ifdef NDEBUG
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+#endif
+
+	HANDLE waithandles[3];
+	waithandles[0] = m_hAudioThreadTerminateRequest;
+	waithandles[1] = m_hAudioWakeUp;
+	waithandles[2] = sleepEvent;
+
+	bool idle = true;
+	bool terminate = false;
+	while(!terminate)
+	{
+
+		if(idle)
+		{
+			SetEvent(m_hAudioThreadGoneIdle);
+			switch(WaitForMultipleObjects(2, waithandles, FALSE, INFINITE))
+			{
+			case WAIT_OBJECT_0:
+				terminate = true;
+				break;
+			case WAIT_OBJECT_0+1:
+				idle = false;
+				break;
+			}
+			continue;
+		}
+
+		// increase resolution of multimedia timer
+		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
+
+		(*m_ppSoundDevice)->Start();
+
+		while(!idle && !terminate) 
+		{
+
+			UINT nSleep = 50;
+
+			{
+				if(IsActive())
+				{
+					// we are playing, everything is fine
+					(*m_ppSoundDevice)->GetSource()->FillAudioBufferLocked();
+					nSleep = static_cast<UINT>((*m_ppSoundDevice)->GetRealUpdateIntervalMS());
+					if(nSleep < 1) nSleep = 1;
+				} else
+				{
+					idle = true;
+				}
+			}
+
+			if(!idle)
+			{
+				timeSetEvent(nSleep, 1, (LPTIMECALLBACK)sleepEvent, NULL, TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+				if(WaitForMultipleObjects(3, waithandles, FALSE, nSleep) == WAIT_OBJECT_0) terminate = true;
+			}
+
+		}
+
+		(*m_ppSoundDevice)->Stop();
+
+		if(period_set) timeEndPeriod(1);
+
+	}
+
+	SetEvent(m_hAudioThreadGoneIdle);
+
+	CloseHandle(sleepEvent);
+	return 0;
+}
+
+
+void CAudioThread::Activate()
+{
+	ResetEvent(m_hAudioThreadGoneIdle);
+	InterlockedExchange(&m_AudioThreadActive, 1);
+	SetEvent(m_hAudioWakeUp);
+}
+
+
+void CAudioThread::Deactivate()
+{
+	InterlockedExchange(&m_AudioThreadActive, 0);
+	WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
+
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut Device
