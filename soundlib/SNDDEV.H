@@ -60,9 +60,6 @@ enum
 #define SNDDEV_MINUPDATEINTERVAL_MS 1
 #define SNDDEV_MAXUPDATEINTERVAL_MS 200
 
-#define SNDDEV_OLD_MINBUFFERLEN			1    // 1ms
-#define SNDDEV_OLD_MAXBUFFERLEN			1000 // 1sec
-
 #define SNDDEV_OPTIONS_SECONDARY	0x01	// Use secondary buffers (if available)
 
 
