@@ -243,6 +243,8 @@ VOID CMainFrame::Initialize()
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
+	CSoundFile::gpSndMixHook = CalcStereoVuMeters;
+
 	// Check for valid sound device
 	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
 	{
@@ -375,6 +377,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
+	CSoundFile::gpSndMixHook = nullptr;
+
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
@@ -1024,14 +1028,14 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 					UINT vur = pChn->nRightVU;
 					p->dwPos[k] = (vul << 8) | (vur);
 				}
-			} else if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
+			}
 			{
 				DWORD lVu = (gnLVuMeter >> 11);
 				DWORD rVu = (gnRVuMeter >> 11);
 				if (lVu > 0x10000) lVu = 0x10000;
 				if (rVu > 0x10000) rVu = 0x10000;
-				p->dwPos[0] = lVu;
-				p->dwPos[1] = rVu;
+				p->MasterVuLeft = lVu;
+				p->MasterVuRight = rVu;
 				DWORD dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_dwRate) + 1;
 				if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 				if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
@@ -1233,13 +1237,6 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 }
 
 
-void CMainFrame::ApplyMixerHooks()
-//--------------------------------
-{
-	CSoundFile::gpSndMixHook = (m_dwNotifyType & MPTNOTIFY_MASTERVU) ? CalcStereoVuMeters : nullptr;
-}
-
-
 bool CMainFrame::PreparePlayback()
 //--------------------------------
 {
@@ -1356,8 +1353,6 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	ApplyTrackerSettings(pSndFile);
 
 	SetPlaybackSoundFile(pSndFile, hPat, dwNotifyType);
-
-	ApplyMixerHooks();
 
 	const bool bPaused = m_pSndFile->IsPaused();
 	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
@@ -1673,14 +1668,6 @@ BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, DWORD
 		if (hwnd == m_hFollowSong) m_hFollowSong = NULL;
 	}
 	if (dwType) m_dwNotifyType = dwType;
-	if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
-	{
-		CSoundFile::gpSndMixHook = CalcStereoVuMeters;
-	} else
-	{
-		gnLVuMeter = gnRVuMeter = 0;
-		CSoundFile::gpSndMixHook = NULL;
-	}
 	return TRUE;
 }
 
