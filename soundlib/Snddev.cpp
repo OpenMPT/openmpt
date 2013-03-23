@@ -1657,7 +1657,7 @@ int CPortaudioDevice::StreamCallbackWrapper(
 }
 
 
-PaDeviceIndex CPortaudioDevice::HostApiOutputIndexToGlobalDeviceIndex(int hostapideviceindex, PaHostApiIndex hostapi)
+PaDeviceIndex CPortaudioDevice::HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi)
 //-------------------------------------------------------------------------------------------------------------------
 {
 	if(hostapi < 0)
@@ -1666,26 +1666,31 @@ PaDeviceIndex CPortaudioDevice::HostApiOutputIndexToGlobalDeviceIndex(int hostap
 		return -1;
 	if(!Pa_GetHostApiInfo(hostapi))
 		return -1;
-	if(hostapideviceindex < 0)
+	if(hostapioutputdeviceindex < 0)
 		return -1;
-	if(hostapideviceindex >= Pa_GetHostApiInfo(hostapi)->deviceCount)
+	if(hostapioutputdeviceindex >= Pa_GetHostApiInfo(hostapi)->deviceCount)
 		return -1;
-	for(PaDeviceIndex dev=0; dev<Pa_GetHostApiInfo(hostapi)->deviceCount; dev++)
+	int dev = hostapioutputdeviceindex;
+	for(int hostapideviceindex=0; hostapideviceindex<Pa_GetHostApiInfo(hostapi)->deviceCount; hostapideviceindex++)
 	{
-		if(!Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, dev)))
+		if(!Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, hostapideviceindex)))
 		{
-			hostapideviceindex++; // skip this device
+			dev++; // skip this device
 			continue;
 		}
-		if(Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, dev))->maxOutputChannels == 0)
+		if(Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, hostapideviceindex))->maxOutputChannels == 0)
 		{
-			hostapideviceindex++; // skip this device
+			dev++; // skip this device
 			continue;
+		}
+		if(dev == hostapideviceindex)
+		{
+			break;
 		}
 	}
-	if(hostapideviceindex >= Pa_GetHostApiInfo(hostapi)->deviceCount)
+	if(dev >= Pa_GetHostApiInfo(hostapi)->deviceCount)
 		return -1;
-	return Pa_HostApiDeviceIndexToDeviceIndex(hostapi, hostapideviceindex);
+	return Pa_HostApiDeviceIndexToDeviceIndex(hostapi, dev);
 }
 
 

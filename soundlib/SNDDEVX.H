@@ -261,7 +261,7 @@ public:
 		void *userData
 		);
 
-	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapideviceindex, PaHostApiIndex hostapi);
+	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
 	static int HostApiToSndDevType(PaHostApiIndex hostapi);
 	static PaHostApiIndex SndDevTypeToHostApi(int snddevtype);
 
