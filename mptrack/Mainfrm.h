@@ -16,6 +16,7 @@
 #include "mptrack.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
+#include "soundlib/snddev.h"
 
 class CInputHandler;
 class CMainFrame;
@@ -302,9 +303,9 @@ struct MPTNOTIFICATION
 #include "mainbar.h"
 #include "TrackerSettings.h"
 
-//===================================
-class CMainFrame: public CMDIFrameWnd
-//===================================
+//========================================================
+class CMainFrame: public CMDIFrameWnd, public ISoundSource
+//========================================================
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
@@ -382,11 +383,14 @@ public:
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD AudioThread();
 	DWORD NotifyThread();
-	void SoundDeviceCallback();
 	void SetAudioThreadActive(bool active=true);
 	bool IsAudioThreadActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
+
+	// from ISoundSource
+	void FillAudioBufferLocked();
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
 	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
+	
 	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	bool audioOpenDevice();
 	bool audioReopenDevice();

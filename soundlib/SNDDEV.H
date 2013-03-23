@@ -12,7 +12,6 @@
 #pragma once
 
 #include <vector>
-using std::vector;
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -24,9 +23,10 @@ class ISoundSource
 //================
 {
 public:
+	virtual void FillAudioBufferLocked() = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
 	virtual ULONG AudioRead(PVOID pData, ULONG MaxSamples) = 0; // returns number of valid samples read, the remaining space has to be filled with zeroes by the callee,
 	                                                            // if return value != MaxSamples then end_of_stream = true
-	virtual VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
+	virtual void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
 };
 
 
@@ -73,6 +73,8 @@ class ISoundDevice
 //================
 {
 protected:
+	ISoundSource *m_Source;
+
 	ULONG m_LatencyMS;
 	ULONG m_UpdateIntervalMS;
 	ULONG m_fulCfgOptions;
@@ -84,6 +86,7 @@ protected:
 public:
 	ISoundDevice();
 	virtual ~ISoundDevice();
+	void SetSource(ISoundSource *source) { m_Source = source; }
 
 public:
 	VOID Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
@@ -94,7 +97,7 @@ public:
 	virtual UINT GetDeviceType() = 0;
 	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
 	virtual BOOL Close() = 0;				// Close the currently open device
-	virtual void FillAudioBuffer(ISoundSource *pSource) = 0;
+	virtual void FillAudioBuffer() = 0;
 	virtual void Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Reset() = 0;
@@ -107,7 +110,7 @@ public:
 	virtual int64 GetStreamPositionSamples() const { return 0; }
 	virtual UINT GetCurrentSampleRate(UINT nDevice) { UNREFERENCED_PARAMETER(nDevice); return 0; }
 	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
-	virtual bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;
+	virtual bool CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;
 };
 
 
@@ -123,6 +126,5 @@ BOOL SndDevUninitialize();
 // Enumerate devices for a specific type
 BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDescription, UINT cbSize);
 ISoundDevice *CreateSoundDevice(UINT nType);
-extern void SoundDeviceCallback();
 
 ////////////////////////////////////////////////////////////////////////////////////

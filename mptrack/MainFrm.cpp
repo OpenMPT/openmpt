@@ -45,19 +45,6 @@ static char THIS_FILE[] = __FILE__;
 #define MPTTIMER_PERIOD		200
 
 
-//========================================
-class CMPTSoundSource: public ISoundSource
-//========================================
-{
-public:
-	CMPTSoundSource() {}
-	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
-	VOID AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
-};
-
-
-CMPTSoundSource gMPTSoundSource;
-
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
@@ -700,23 +687,6 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame Sound Library
 
-// Sound Device Callback
-void SoundDeviceCallback()
-//------------------------------------
-{
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if(!pMainFrm) return;
-	pMainFrm->SoundDeviceCallback();
-}
-void CMainFrame::SoundDeviceCallback()
-//------------------------------------
-{
-	// ASIO case (NOT called for other snddev)
-	CriticalSection cs;
-	if(!gpSoundDevice) return;
-	gpSoundDevice->FillAudioBuffer(&gMPTSoundSource);
-}
-
 
 // Audio thread
 DWORD WINAPI CMainFrame::AudioThreadWrapper(LPVOID)
@@ -768,11 +738,13 @@ DWORD CMainFrame::AudioThread()
 			UINT nSleep = 50;
 
 			{
-				CriticalSection cs;
 				if(IsAudioThreadActive())
 				{
 					// we are playing, everything is fine
-					gpSoundDevice->FillAudioBuffer(&gMPTSoundSource);
+					{
+						CriticalSection cs;
+						gpSoundDevice->FillAudioBuffer();
+					}
 					nSleep = static_cast<UINT>(gpSoundDevice->GetRealUpdateIntervalMS());
 					if(nSleep < 1) nSleep = 1;
 				} else
@@ -921,26 +893,16 @@ void CMainFrame::SetAudioThreadActive(bool active)
 }
 
 
-ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG MaxSamples)
-//-------------------------------------------------------------
+void CMainFrame::FillAudioBufferLocked()
+//--------------------------------------
 {
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) return pMainFrm->AudioRead(pData, MaxSamples);
-	return 0;
+	CriticalSection cs;
+	gpSoundDevice->FillAudioBuffer();
 }
-
-
-VOID CMPTSoundSource::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream)
-//------------------------------------------------------------------
-{
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) pMainFrm->AudioDone(SamplesWritten, SamplesLatency, end_of_stream);
-}
-
 
 
 ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
-//-----------------------------------------------------
+//---------------------------------------------------------
 {
 		DWORD dwSamplesRead = m_pSndFile->Read(pvData, MaxSamples);
 		//m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
@@ -948,8 +910,8 @@ ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
 }
 
 
-VOID CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream)
-//-------------------------------------------------------------
+void CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream)
+//----------------------------------------------------------------------------------------
 {
 	if (SamplesWritten > 0)
 	{
@@ -996,6 +958,7 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	}
 	if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
 	if(!gpSoundDevice) return false;
+	gpSoundDevice->SetSource(this);
 	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0);
 	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	return true;
