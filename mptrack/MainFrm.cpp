@@ -1655,7 +1655,6 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 //--------------------------------------------------------------------------------------------
 {
 	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
-	PausePlayback();
 	bool ok = false;
 	BeginWaitCursor();
 	{
@@ -1670,6 +1669,7 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 	EndWaitCursor();
 	if(!ok)
 	{
+		PausePlayback();
 		UnsetPlaybackSoundFile();
 		StopPlayback();
 		return false;
@@ -1730,6 +1730,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 	PausePlayback();
 	if(!ok)
 	{
+		PausePlayback();
 		UnsetPlaybackSoundFile();
 		StopPlayback();
 		return false;
@@ -1741,7 +1742,6 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note)
 //------------------------------------------------------------------------------------------------------------------------
 {
-	PausePlayback();
 	bool ok = false;
 	BeginWaitCursor();
 	{
@@ -1770,6 +1770,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, S
 	EndWaitCursor();
 	if(!ok)
 	{
+		PausePlayback();
 		UnsetPlaybackSoundFile();
 		StopPlayback();
 		return false;
