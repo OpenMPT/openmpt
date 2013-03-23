@@ -1727,7 +1727,6 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 		}
 	}
 	EndWaitCursor();
-	PausePlayback();
 	if(!ok)
 	{
 		PausePlayback();
