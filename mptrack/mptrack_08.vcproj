@@ -89,7 +89,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_i16.dll"
+				DelayLoadDLLs="OpenMPT_SoundTouch_i16.dll;OpenMPT_portaudio.dll"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				ProgramDatabaseFile=".\Debug/mptrack.pdb"
@@ -195,7 +195,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_i16.dll"
+				DelayLoadDLLs="OpenMPT_SoundTouch_i16.dll;OpenMPT_portaudio.dll"
 				GenerateDebugInformation="true"
 				GenerateMapFile="false"
 				MapFileName=".\Release/mptrack.map"
@@ -927,10 +927,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\mutex.h"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\MixerSettings.h"
 				>
 			</File>
@@ -980,6 +976,10 @@
 			</File>
 			<File
 				RelativePath=".\mptrack.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\mutex.h"
 				>
 			</File>
 			<File
