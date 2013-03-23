@@ -382,7 +382,7 @@ public:
 	void SetAudioThreadActive(bool active=true);
 
 	// from ISoundSource
-	void FillAudioBufferLocked();
+	void FillAudioBufferLocked(IFillAudioBuffer &callback);
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
 	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
 	

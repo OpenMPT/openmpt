@@ -28,10 +28,12 @@
 #endif
 
 
+class CSoundDeviceWithThread;
+
 class CAudioThread
 {
 private:
-	ISoundDevice *const m_pSoundDevice;
+	CSoundDeviceWithThread & m_SoundDevice;
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;
 	HANDLE m_hAudioThreadTerminateRequest;
@@ -42,7 +44,7 @@ private:
 	DWORD AudioThread();
 	bool IsActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
 public:
-	CAudioThread(ISoundDevice *pSoundDevice);
+	CAudioThread(CSoundDeviceWithThread &SoundDevice);
 	~CAudioThread();
 	void Activate();
 	void Deactivate();
@@ -51,10 +53,13 @@ public:
 
 class CSoundDeviceWithThread : public ISoundDevice
 {
+	friend class CAudioThread;
 protected:
 	CAudioThread m_AudioThread;
+private:
+	void FillAudioBufferLocked();
 public:
-	CSoundDeviceWithThread() : m_AudioThread(this) {}
+	CSoundDeviceWithThread() : m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
 	void Start();
 	void Stop();

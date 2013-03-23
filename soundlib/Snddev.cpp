@@ -57,7 +57,7 @@ VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, D
 }
 
 
-CAudioThread::CAudioThread(ISoundDevice *pSoundDevice) : m_pSoundDevice(pSoundDevice)
+CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //-----------------------------------------------------------------------------------
 {
 	m_hPlayThread = NULL;
@@ -141,7 +141,7 @@ DWORD CAudioThread::AudioThread()
 		// increase resolution of multimedia timer
 		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
 
-		m_pSoundDevice->Start();
+		m_SoundDevice.Start();
 
 		while(!idle && !terminate) 
 		{
@@ -152,8 +152,8 @@ DWORD CAudioThread::AudioThread()
 				if(IsActive())
 				{
 					// we are playing, everything is fine
-					m_pSoundDevice->GetSource()->FillAudioBufferLocked();
-					nSleep = static_cast<UINT>(m_pSoundDevice->GetRealUpdateIntervalMS());
+					m_SoundDevice.FillAudioBufferLocked();
+					nSleep = static_cast<UINT>(m_SoundDevice.GetRealUpdateIntervalMS());
 					if(nSleep < 1) nSleep = 1;
 				} else
 				{
@@ -169,7 +169,7 @@ DWORD CAudioThread::AudioThread()
 
 		}
 
-		m_pSoundDevice->Stop();
+		m_SoundDevice.Stop();
 
 		if(period_set) timeEndPeriod(1);
 
@@ -199,6 +199,13 @@ void CAudioThread::Deactivate()
 	InterlockedExchange(&m_AudioThreadActive, 0);
 	WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
 
+}
+
+
+void CSoundDeviceWithThread::FillAudioBufferLocked()
+//--------------------------------------------------
+{
+	m_Source->FillAudioBufferLocked(*this);
 }
 
 
@@ -1292,7 +1299,7 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 {
 	UNREFERENCED_PARAMETER(directProcess);
 	g_dwBuffer = doubleBufferIndex;
-	if (gpCurrentAsio && gpCurrentAsio->m_Source) gpCurrentAsio->m_Source->FillAudioBufferLocked();
+	if (gpCurrentAsio && gpCurrentAsio->m_Source) gpCurrentAsio->m_Source->FillAudioBufferLocked(*gpCurrentAsio);
 }
 
 
@@ -1809,7 +1816,7 @@ int CPortaudioDevice::StreamCallback(
 	m_CurrentRealLatencyMS = static_cast<float>( timeInfo->outputBufferDacTime - timeInfo->currentTime ) * 1000.0f;
 	m_CurrentFrameBuffer = output;
 	m_CurrentFrameCount = frameCount;
-	m_Source->FillAudioBufferLocked();
+	m_Source->FillAudioBufferLocked(*this);
 	m_CurrentFrameCount = 0;
 	m_CurrentFrameBuffer = 0;
 	return paContinue;

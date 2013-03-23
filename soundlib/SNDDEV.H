@@ -18,12 +18,22 @@
 // ISoundSource: provides streaming audio data to a device
 //
 
+
+//====================
+class IFillAudioBuffer
+//====================
+{
+public:
+	virtual void FillAudioBuffer() = 0;
+};
+
+
 //================
 class ISoundSource
 //================
 {
 public:
-	virtual void FillAudioBufferLocked() = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
+	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
 	virtual ULONG AudioRead(PVOID pData, ULONG MaxSamples) = 0; // returns number of valid samples read, the remaining space has to be filled with zeroes by the callee,
 	                                                            // if return value != MaxSamples then end_of_stream = true
 	virtual void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
@@ -68,9 +78,9 @@ enum // do not change old values, these get saved to the ini
 #define SNDDEV_OPTIONS_SECONDARY	0x01	// Use secondary buffers (if available)
 
 
-//================
-class ISoundDevice
-//================
+//=============================================
+class ISoundDevice : protected IFillAudioBuffer
+//=============================================
 {
 protected:
 	ISoundSource *m_Source;
@@ -82,6 +92,9 @@ protected:
 
 	float m_RealLatencyMS;
 	float m_RealUpdateIntervalMS;
+
+protected:
+	virtual void FillAudioBuffer() = 0;
 
 public:
 	ISoundDevice();
@@ -98,7 +111,6 @@ public:
 	virtual UINT GetDeviceType() = 0;
 	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
 	virtual BOOL Close() = 0;				// Close the currently open device
-	virtual void FillAudioBuffer() = 0;
 	virtual void Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Reset() = 0;
