@@ -102,7 +102,6 @@ public:
 	virtual void Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Reset() = 0;
-	virtual BOOL Directcallback() = 0;
 	virtual UINT HasFixedBitsPerSample() { return 0; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }

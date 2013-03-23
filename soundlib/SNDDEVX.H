@@ -59,7 +59,6 @@ public:
 	void Start();
 	void Stop();
 	void Reset();
-	BOOL Directcallback() { return FALSE; }
 	virtual void StartFromSoundThread() = 0;
 	virtual void StopFromSoundThread() = 0;
 	virtual void ResetFromOutsideSoundThread() = 0;
@@ -204,7 +203,6 @@ public:
 	void Start();
 	void Stop();
 	bool IsOpen() const { return (m_pAsioDrv != NULL); }
-	BOOL Directcallback() { return TRUE; }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_nSamplesPerSec;; }
@@ -280,7 +278,6 @@ public:
 	bool IsOpen() const { return m_Stream ? true : false; }
 	UINT GetNumBuffers() { return 1; }
 	float GetCurrentRealLatencyMS();
-	BOOL Directcallback() { return true; }
 	bool HasGetStreamPosition() const { return false; }
 	int64 GetStreamPositionSamples() const;
 
