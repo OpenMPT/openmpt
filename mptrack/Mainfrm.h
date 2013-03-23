@@ -303,6 +303,26 @@ struct MPTNOTIFICATION
 #include "mainbar.h"
 #include "TrackerSettings.h"
 
+class CAudioThread
+{
+private:
+	ISoundDevice **const m_ppSoundDevice;
+	HANDLE m_hAudioWakeUp;
+	HANDLE m_hPlayThread;
+	HANDLE m_hAudioThreadTerminateRequest;
+	HANDLE m_hAudioThreadGoneIdle;
+	DWORD m_dwPlayThreadId;
+	LONG m_AudioThreadActive;
+	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
+	DWORD AudioThread();
+	bool IsActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
+public:
+	CAudioThread(ISoundDevice **ppSoundDevice);
+	~CAudioThread();
+	void Activate();
+	void Deactivate();
+};
+
 //========================================================
 class CMainFrame: public CMDIFrameWnd, public ISoundSource
 //========================================================
@@ -329,13 +349,11 @@ public:
 
 	// Low-Level Audio
 	ISoundDevice *gpSoundDevice;
-	HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
-	HANDLE m_hPlayThread, m_hNotifyThread;
-	HANDLE m_hAudioThreadTerminateRequest;
-	HANDLE m_hAudioThreadGoneIdle;
-	DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
+	HANDLE m_hNotifyWakeUp;
+	HANDLE m_hNotifyThread;
+	DWORD m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
-	LONG m_AudioThreadActive;
+	CAudioThread * m_AudioThread; 
 	bool m_IsPlaybackRunning;
 
 	// Midi Input
@@ -379,12 +397,9 @@ public:
 public:
 	static void UpdateAudioParameters(BOOL bReset=FALSE);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
-	static DWORD WINAPI AudioThreadWrapper(LPVOID);
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
-	DWORD AudioThread();
 	DWORD NotifyThread();
 	void SetAudioThreadActive(bool active=true);
-	bool IsAudioThreadActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
 
 	// from ISoundSource
 	void FillAudioBufferLocked();
