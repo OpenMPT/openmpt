@@ -83,6 +83,8 @@ public:
 	static void SetClipboardSize(clipindex_t maxEntries);
 	// Return the current number of clipboards.
 	static clipindex_t GetClipboardSize() { return instance.clipboards.size(); };
+	// Check whether patterns can be pasted from clipboard
+	static bool CanPaste();
 
 protected:
 

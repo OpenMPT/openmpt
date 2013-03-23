@@ -28,17 +28,18 @@ using std::bitset;
 struct ModTreeDocInfo
 {
 	CModDoc *pModDoc;
-	// Module information
-	SEQUENCEINDEX nSeqSel;
-	ORDERINDEX nOrdSel;
 	// Tree state variables
+	vector<vector<HTREEITEM> > tiOrders;
+	vector<HTREEITEM> tiSequences, tiPatterns;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
-	vector<HTREEITEM> tiPatterns;
 	HTREEITEM tiSamples[MAX_SAMPLES];
 	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
-	vector<vector<HTREEITEM> > tiOrders;
-	vector<HTREEITEM> tiSequences;
 	HTREEITEM tiEffects[MAX_MIXPLUGINS];
+
+	// Module information
+	ORDERINDEX nOrdSel;
+	SEQUENCEINDEX nSeqSel;
+
 	bitset<MAX_SAMPLES> samplesPlaying;
 	bitset<MAX_INSTRUMENTS> instrumentsPlaying;
 	
@@ -112,13 +113,12 @@ protected:
 		MODITEM_SEQUENCE,
 	};
 
-	CSoundFile m_SongFile;
+	CSoundFile &m_SongFile;	// For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
-	CModTree *m_pDataTree;
+	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	DWORD m_dwStatus;
 	HWND m_hDropWnd;
 	uint64 m_qwItemDrag;
-	bool m_bShowAllFiles;
 	UINT m_nDocNdx, m_nDragDocNdx;
 	HTREEITEM m_hItemDrag, m_hItemDrop;
 	HTREEITEM m_hInsLib, m_hMidiLib;
@@ -128,10 +128,11 @@ protected:
 	vector<HTREEITEM> m_tiDLS;
 	vector<ModTreeDocInfo *> DocInfo;
 	// Instrument library
+	bool m_bShowAllFiles;
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 
 public:
-	CModTree(CModTree *pDataTree=NULL);
+	CModTree(CModTree *pDataTree, CSoundFile &sf);
 	virtual ~CModTree();
 
 // Attributes

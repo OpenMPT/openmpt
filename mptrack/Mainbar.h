@@ -90,6 +90,7 @@ class CModTreeBar: public CDialogBar
 //==================================
 {
 protected:
+	CSoundFile &m_TreeBrowseFile;
 	DWORD m_dwStatus; // MTB_XXXX
 	UINT m_nCursorDrag;
 	CPoint ptDragging;
@@ -99,7 +100,7 @@ protected:
 public:
 	CModTree *m_pModTree, *m_pModTreeData;
 
-	CModTreeBar();
+	CModTreeBar(CSoundFile &sf);
 	virtual ~CModTreeBar();
 
 public:
