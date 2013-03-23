@@ -27,6 +27,45 @@
 #include "portaudio/include/portaudio.h"
 #endif
 
+
+class CAudioThread
+{
+private:
+	ISoundDevice *const m_pSoundDevice;
+	HANDLE m_hAudioWakeUp;
+	HANDLE m_hPlayThread;
+	HANDLE m_hAudioThreadTerminateRequest;
+	HANDLE m_hAudioThreadGoneIdle;
+	DWORD m_dwPlayThreadId;
+	LONG m_AudioThreadActive;
+	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
+	DWORD AudioThread();
+	bool IsActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
+public:
+	CAudioThread(ISoundDevice *pSoundDevice);
+	~CAudioThread();
+	void Activate();
+	void Deactivate();
+};
+
+
+class CSoundDeviceWithThread : public ISoundDevice
+{
+protected:
+	CAudioThread m_AudioThread;
+public:
+	CSoundDeviceWithThread() : m_AudioThread(this) {}
+	virtual ~CSoundDeviceWithThread() {}
+	void Start();
+	void Stop();
+	void Reset();
+	BOOL Directcallback() { return FALSE; }
+	virtual void StartFromSoundThread() = 0;
+	virtual void StopFromSoundThread() = 0;
+	virtual void ResetFromOutsideSoundThread() = 0;
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut device
@@ -36,9 +75,9 @@
 #define WAVEOUT_MINBUFFERSIZE        1024
 #define WAVEOUT_MAXBUFFERSIZE        65536
 
-//====================================
-class CWaveDevice: public ISoundDevice
-//====================================
+//==============================================
+class CWaveDevice: public CSoundDeviceWithThread
+//==============================================
 {
 protected:
 	HWAVEOUT m_hWaveOut;
@@ -59,9 +98,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	void FillAudioBuffer();
-	void Reset();
-	void Start();
-	void Stop();
+	void ResetFromOutsideSoundThread();
+	void StartFromSoundThread();
+	void StopFromSoundThread();
 	bool IsOpen() const { return (m_hWaveOut != NULL); }
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
 	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
@@ -84,9 +123,9 @@ public:
 #define DSOUND_MINBUFFERSIZE 1024
 #define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
 
-//======================================
-class CDSoundDevice: public ISoundDevice
-//======================================
+//================================================
+class CDSoundDevice: public CSoundDeviceWithThread
+//================================================
 {
 protected:
 	IDirectSound *m_piDS;
@@ -106,9 +145,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	void FillAudioBuffer();
-	void Reset();
-	void Start();
-	void Stop();
+	void ResetFromOutsideSoundThread();
+	void StartFromSoundThread();
+	void StopFromSoundThread();
 	bool IsOpen() const { return (m_pMixBuffer != NULL); }
 	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
 	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }

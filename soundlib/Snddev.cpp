@@ -42,7 +42,7 @@ ISoundDevice::~ISoundDevice()
 
 
 VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions)
-//------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 {
 	if(LatencyMS < SNDDEV_MINLATENCY_MS) LatencyMS = SNDDEV_MINLATENCY_MS;
 	if(LatencyMS > SNDDEV_MAXLATENCY_MS) LatencyMS = SNDDEV_MAXLATENCY_MS;
@@ -57,7 +57,8 @@ VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, D
 }
 
 
-CAudioThread::CAudioThread(ISoundDevice **ppSoundDevice) : m_ppSoundDevice(ppSoundDevice)
+CAudioThread::CAudioThread(ISoundDevice *pSoundDevice) : m_pSoundDevice(pSoundDevice)
+//-----------------------------------------------------------------------------------
 {
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -73,6 +74,7 @@ CAudioThread::CAudioThread(ISoundDevice **ppSoundDevice) : m_ppSoundDevice(ppSou
 
 
 CAudioThread::~CAudioThread()
+//---------------------------
 {
 	if(m_hPlayThread != NULL)
 	{
@@ -139,7 +141,7 @@ DWORD CAudioThread::AudioThread()
 		// increase resolution of multimedia timer
 		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
 
-		(*m_ppSoundDevice)->Start();
+		m_pSoundDevice->Start();
 
 		while(!idle && !terminate) 
 		{
@@ -150,8 +152,8 @@ DWORD CAudioThread::AudioThread()
 				if(IsActive())
 				{
 					// we are playing, everything is fine
-					(*m_ppSoundDevice)->GetSource()->FillAudioBufferLocked();
-					nSleep = static_cast<UINT>((*m_ppSoundDevice)->GetRealUpdateIntervalMS());
+					m_pSoundDevice->GetSource()->FillAudioBufferLocked();
+					nSleep = static_cast<UINT>(m_pSoundDevice->GetRealUpdateIntervalMS());
 					if(nSleep < 1) nSleep = 1;
 				} else
 				{
@@ -167,7 +169,7 @@ DWORD CAudioThread::AudioThread()
 
 		}
 
-		(*m_ppSoundDevice)->Stop();
+		m_pSoundDevice->Stop();
 
 		if(period_set) timeEndPeriod(1);
 
@@ -181,7 +183,9 @@ DWORD CAudioThread::AudioThread()
 
 
 void CAudioThread::Activate()
+//---------------------------
 {
+	if(InterlockedExchangeAdd(&m_AudioThreadActive, 0)) return;
 	ResetEvent(m_hAudioThreadGoneIdle);
 	InterlockedExchange(&m_AudioThreadActive, 1);
 	SetEvent(m_hAudioWakeUp);
@@ -189,10 +193,34 @@ void CAudioThread::Activate()
 
 
 void CAudioThread::Deactivate()
+//-----------------------------
 {
+	if(!InterlockedExchangeAdd(&m_AudioThreadActive, 0)) return;
 	InterlockedExchange(&m_AudioThreadActive, 0);
 	WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
 
+}
+
+
+void CSoundDeviceWithThread::Start()
+//----------------------------------
+{
+	m_AudioThread.Activate();
+}
+
+
+void CSoundDeviceWithThread::Stop()
+//---------------------------------
+{
+	m_AudioThread.Deactivate();
+}
+
+
+void CSoundDeviceWithThread::Reset()
+//----------------------------------
+{
+	m_AudioThread.Deactivate();
+	ResetFromOutsideSoundThread();
 }
 
 
@@ -297,7 +325,7 @@ BOOL CWaveDevice::Close()
 }
 
 
-void CWaveDevice::Start()
+void CWaveDevice::StartFromSoundThread()
 //-----------------------
 {
 	if(m_hWaveOut)
@@ -307,7 +335,7 @@ void CWaveDevice::Start()
 }
 
 
-void CWaveDevice::Stop()
+void CWaveDevice::StopFromSoundThread()
 //----------------------
 {
 	if(m_hWaveOut)
@@ -317,7 +345,7 @@ void CWaveDevice::Stop()
 }
 
 
-void CWaveDevice::Reset()
+void CWaveDevice::ResetFromOutsideSoundThread()
 //-----------------------
 {
 	if(m_hWaveOut)
@@ -622,7 +650,7 @@ BOOL CDSoundDevice::Close()
 }
 
 
-void CDSoundDevice::Start()
+void CDSoundDevice::StartFromSoundThread()
 //-------------------------
 {
 	if(!m_pMixBuffer) return;
@@ -630,7 +658,7 @@ void CDSoundDevice::Start()
 }
 
 
-void CDSoundDevice::Stop()
+void CDSoundDevice::StopFromSoundThread()
 //------------------------
 {
 	if(!m_pMixBuffer) return;
@@ -642,7 +670,7 @@ void CDSoundDevice::Stop()
 }
 
 
-void CDSoundDevice::Reset()
+void CDSoundDevice::ResetFromOutsideSoundThread()
 //-------------------------
 {
 	if (m_pMixBuffer) m_pMixBuffer->Stop();
