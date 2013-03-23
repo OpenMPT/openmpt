@@ -25,6 +25,10 @@
 #include "PatternClipboard.h"
 
 
+#define OLD_SNDDEV_MINBUFFERLEN			1    // 1ms
+#define OLD_SNDDEV_MAXBUFFERLEN			1000 // 1sec
+
+
 TrackerSettings TrackerSettings::settings;
 const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
 
@@ -325,8 +329,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		DWORD BufferLengthMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BufferLength", 0, iniFile);
 		if(BufferLengthMS != 0)
 		{
-			if(BufferLengthMS < SNDDEV_OLD_MINBUFFERLEN) BufferLengthMS = SNDDEV_OLD_MINBUFFERLEN;
-			if(BufferLengthMS > SNDDEV_OLD_MAXBUFFERLEN) BufferLengthMS = SNDDEV_OLD_MAXBUFFERLEN;
+			if(BufferLengthMS < OLD_SNDDEV_MINBUFFERLEN) BufferLengthMS = OLD_SNDDEV_MINBUFFERLEN;
+			if(BufferLengthMS > OLD_SNDDEV_MAXBUFFERLEN) BufferLengthMS = OLD_SNDDEV_MAXBUFFERLEN;
 			if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
 			{
 				m_LatencyMS = BufferLengthMS;
@@ -574,7 +578,7 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&BufferLengthMS, &dwDWORDSize);
 		if(BufferLengthMS != 0)
 		{
-			if((BufferLengthMS < SNDDEV_OLD_MINBUFFERLEN) || (BufferLengthMS > SNDDEV_OLD_MAXBUFFERLEN)) BufferLengthMS = 100;
+			if((BufferLengthMS < OLD_SNDDEV_MINBUFFERLEN) || (BufferLengthMS > OLD_SNDDEV_MAXBUFFERLEN)) BufferLengthMS = 100;
 			if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
 			{
 				m_LatencyMS = BufferLengthMS;
