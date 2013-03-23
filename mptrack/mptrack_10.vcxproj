@@ -107,7 +107,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_i16.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>OpenMPT_SoundTouch_i16.dll;OpenMPT_portaudio.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <ProgramDatabaseFile>.\Debug/mptrack.pdb</ProgramDatabaseFile>
@@ -165,7 +165,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_i16.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>OpenMPT_SoundTouch_i16.dll;OpenMPT_portaudio.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
       <MapFileName>.\Release/mptrack.map</MapFileName>
@@ -226,7 +226,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_i16.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>OpenMPT_SoundTouch_i16.dll;OpenMPT_portaudio.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
       <MapFileName>.\ReleaseLTCG/mptrack.map</MapFileName>
@@ -538,6 +538,9 @@
   <ItemGroup>
     <ProjectReference Include="..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj">
       <Project>{4cefbc84-c215-11db-8314-0800200c9a66}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\include\portaudio\build\msvc\portaudio_openmpt_vs2010.vcxproj">
+      <Project>{0a18a071-125e-442f-aff7-a3f68abecf99}</Project>
     </ProjectReference>
     <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
       <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
