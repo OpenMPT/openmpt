@@ -1457,13 +1457,262 @@ UINT CASIODevice::GetCurrentSampleRate(UINT nDevice)
 	return (UINT)samplerate;
 }
 
-
 #endif // NO_ASIO
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+//
+// Portaudio Device implementation
+//
+
+#ifndef NO_PORTAUDIO
+
+CPortaudioDevice::CPortaudioDevice(PaHostApiIndex hostapi)
+//--------------------------------------------------------
+{
+	m_HostApi = hostapi;
+	memset(&m_StreamParameters, 0, sizeof(m_StreamParameters));
+	m_Stream = 0;
+	m_CurrentFrameCount = 0;
+	m_CurrentRealLatencyMS = 0.0f;
+}
+
+
+CPortaudioDevice::~CPortaudioDevice()
+//-----------------------------------
+{
+	if(IsOpen())
+	{
+		Close();
+	}
+}
+
+
+BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
+//------------------------------------------------------------
+{
+	memset(&m_StreamParameters, 0, sizeof(m_StreamParameters));
+	m_Stream = 0;
+	m_CurrentFrameBuffer = 0;
+	m_CurrentFrameCount = 0;
+	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
+	if(m_StreamParameters.device == -1) return false;
+	m_StreamParameters.channelCount = pwfx->nChannels;
+	switch(pwfx->wBitsPerSample)
+	{
+		case 8: m_StreamParameters.sampleFormat = paInt8; break;
+		case 16: m_StreamParameters.sampleFormat = paInt16; break;
+		case 24: m_StreamParameters.sampleFormat = paInt24; break;
+		case 32: m_StreamParameters.sampleFormat = paInt32; break;
+		default: return false; break;
+	}
+	m_StreamParameters.suggestedLatency = m_LatencyMS / 1000.0;
+	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
+	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, pwfx->nSamplesPerSec) != paFormatIsSupported) return false;
+	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, pwfx->nSamplesPerSec, (m_fulCfgOptions & SNDDEV_OPTIONS_SECONDARY && false) ? static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f) : paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	if(!Pa_GetStreamInfo(m_Stream))
+	{
+		Pa_CloseStream(m_Stream);
+		m_Stream = 0;
+		return false;
+	}
+	m_RealLatencyMS = static_cast<float>(Pa_GetStreamInfo(m_Stream)->outputLatency) * 1000.0f;
+	m_RealUpdateIntervalMS = static_cast<float>(m_UpdateIntervalMS);
+	return true;
+}
+
+
+BOOL CPortaudioDevice::Close()
+//----------------------------
+{
+	if(m_Stream)
+	{
+		Pa_AbortStream(m_Stream);
+		Pa_CloseStream(m_Stream);
+		if(Pa_GetDeviceInfo(m_StreamParameters.device)->hostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS)) Pa_Sleep((long)(m_RealLatencyMS*2)); // wait for broken wdm drivers not closing the stream immediatly
+		memset(&m_StreamParameters, 0, sizeof(m_StreamParameters));
+		m_Stream = 0;
+		m_CurrentFrameCount = 0;
+		m_CurrentFrameBuffer = 0;
+	}
+	return true;
+}
+
+
+void CPortaudioDevice::Reset()
+//----------------------------
+{
+	if(!IsOpen()) return;
+	Pa_AbortStream(m_Stream);
+}
+
+
+void CPortaudioDevice::Start()
+//----------------------------
+{
+	if(!IsOpen()) return;
+	Pa_StartStream(m_Stream);
+}
+
+
+void CPortaudioDevice::Stop()
+//---------------------------
+{
+	if(!IsOpen()) return;
+	Pa_StopStream(m_Stream);
+}
+
+
+void CPortaudioDevice::FillAudioBuffer(ISoundSource *pSource)
+//-----------------------------------------------------------
+{
+	if(m_CurrentFrameCount == 0) return;
+	bool eos = false;
+	ULONG read = pSource->AudioRead(m_CurrentFrameBuffer, m_CurrentFrameCount);
+	if(read < m_CurrentFrameCount)
+	{
+		eos = true;
+	}
+	pSource->AudioDone(m_CurrentFrameCount, static_cast<ULONG>(m_CurrentRealLatencyMS * Pa_GetStreamInfo(m_Stream)->sampleRate / 1000.0f), eos);
+}
+
+
+int64 CPortaudioDevice::GetStreamPositionSamples() const
+//------------------------------------------------------
+{
+	if(!IsOpen()) return 0;
+	if(Pa_IsStreamActive(m_Stream) != 1) return 0;
+	return static_cast<int64>(Pa_GetStreamTime(m_Stream) * Pa_GetStreamInfo(m_Stream)->sampleRate);
+}
+
+
+float CPortaudioDevice::GetCurrentRealLatencyMS()
+//-----------------------------------------------
+{
+	if(!IsOpen()) return 0.0f;
+	return m_CurrentRealLatencyMS;
+}
+
+
+
+int CPortaudioDevice::StreamCallback(
+	const void *input, void *output,
+	unsigned long frameCount,
+	const PaStreamCallbackTimeInfo* timeInfo,
+	PaStreamCallbackFlags statusFlags
+	)
+//-----------------------------------------
+{
+	UNREFERENCED_PARAMETER(input);
+	UNREFERENCED_PARAMETER(statusFlags);
+	if(!output) return paAbort;
+	m_CurrentRealLatencyMS = static_cast<float>( timeInfo->outputBufferDacTime - timeInfo->currentTime ) * 1000.0f;
+	m_CurrentFrameBuffer = output;
+	m_CurrentFrameCount = frameCount;
+	SoundDeviceCallback();
+	m_CurrentFrameCount = 0;
+	m_CurrentFrameBuffer = 0;
+	return paContinue;
+}
+
+
+int CPortaudioDevice::StreamCallbackWrapper(
+	const void *input, void *output,
+	unsigned long frameCount,
+	const PaStreamCallbackTimeInfo* timeInfo,
+	PaStreamCallbackFlags statusFlags,
+	void *userData
+	)
+//------------------------------------------
+{
+	return ((CPortaudioDevice*)userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
+}
+
+
+PaDeviceIndex CPortaudioDevice::HostApiOutputIndexToGlobalDeviceIndex(int hostapideviceindex, PaHostApiIndex hostapi)
+//-------------------------------------------------------------------------------------------------------------------
+{
+	if(hostapi < 0)
+		return -1;
+	if(hostapi >= Pa_GetHostApiCount())
+		return -1;
+	if(!Pa_GetHostApiInfo(hostapi))
+		return -1;
+	if(hostapideviceindex < 0)
+		return -1;
+	if(hostapideviceindex >= Pa_GetHostApiInfo(hostapi)->deviceCount)
+		return -1;
+	for(PaDeviceIndex dev=0; dev<Pa_GetHostApiInfo(hostapi)->deviceCount; dev++)
+	{
+		if(!Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, dev)))
+		{
+			hostapideviceindex++; // skip this device
+			continue;
+		}
+		if(Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, dev))->maxOutputChannels == 0)
+		{
+			hostapideviceindex++; // skip this device
+			continue;
+		}
+	}
+	if(hostapideviceindex >= Pa_GetHostApiInfo(hostapi)->deviceCount)
+		return -1;
+	return Pa_HostApiDeviceIndexToDeviceIndex(hostapi, hostapideviceindex);
+}
+
+
+int CPortaudioDevice::HostApiToSndDevType(PaHostApiIndex hostapi)
+//---------------------------------------------------------------
+{
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) return SNDDEV_PORTAUDIO_WASAPI;
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS)) return SNDDEV_PORTAUDIO_WDMKS;
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paMME)) return SNDDEV_PORTAUDIO_WMME;
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound)) return SNDDEV_PORTAUDIO_DS;
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paASIO)) return SNDDEV_PORTAUDIO_ASIO;
+	return -1;
+}
+
+
+PaHostApiIndex CPortaudioDevice::SndDevTypeToHostApi(int snddevtype)
+//------------------------------------------------------------------
+{
+	if(snddevtype == SNDDEV_PORTAUDIO_WASAPI) return Pa_HostApiTypeIdToHostApiIndex(paWASAPI);
+	if(snddevtype == SNDDEV_PORTAUDIO_WDMKS) return Pa_HostApiTypeIdToHostApiIndex(paWDMKS);
+	if(snddevtype == SNDDEV_PORTAUDIO_WMME) return Pa_HostApiTypeIdToHostApiIndex(paMME);
+	if(snddevtype == SNDDEV_PORTAUDIO_DS) return Pa_HostApiTypeIdToHostApiIndex(paDirectSound);
+	if(snddevtype == SNDDEV_PORTAUDIO_ASIO) return Pa_HostApiTypeIdToHostApiIndex(paASIO);
+	return paInDevelopment;
+}
+
+
+BOOL CPortaudioDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize, PaHostApiIndex hostapi)
+//-------------------------------------------------------------------------------------------------------------
+{
+	memset(pszDescription, 0, cbSize);
+	PaDeviceIndex dev = HostApiOutputIndexToGlobalDeviceIndex(nIndex, hostapi);
+	if(dev == -1)
+		return false;
+	if(!Pa_GetDeviceInfo(dev))
+		return false;
+	_snprintf(pszDescription, cbSize, "%s - %s%s (portaudio)",
+		Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name,
+		Pa_GetDeviceInfo(dev)->name,
+		Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
+		);
+	return true;
+}
+
+#endif
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // Global Functions
 //
+
+
+static HMODULE g_hPortaudioDLL = NULL;
+
 
 BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
 //-----------------------------------------------------------------------------
@@ -1477,9 +1726,19 @@ BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
 #ifndef NO_ASIO
 	case SNDDEV_ASIO:		return CASIODevice::EnumerateDevices(nIndex, pszDesc, cbSize);
 #endif // NO_ASIO
+#ifndef NO_PORTAUDIO
+	case SNDDEV_PORTAUDIO_WASAPI:
+	case SNDDEV_PORTAUDIO_WDMKS:
+	case SNDDEV_PORTAUDIO_WMME:
+	case SNDDEV_PORTAUDIO_DS:
+	case SNDDEV_PORTAUDIO_ASIO:
+		return g_hPortaudioDLL ? CPortaudioDevice::EnumerateDevices(nIndex, pszDesc, cbSize, CPortaudioDevice::SndDevTypeToHostApi(nType)) : FALSE;
+		break;
+#endif
 	}
 	return FALSE;
 }
+
 
 ISoundDevice *CreateSoundDevice(UINT nType)
 //-----------------------------------------
@@ -1493,30 +1752,70 @@ ISoundDevice *CreateSoundDevice(UINT nType)
 #ifndef NO_ASIO
 	case SNDDEV_ASIO:		return new CASIODevice(); break;
 #endif // NO_ASIO
+#ifndef NO_PORTAUDIO
+	case SNDDEV_PORTAUDIO_WASAPI:
+	case SNDDEV_PORTAUDIO_WDMKS:
+	case SNDDEV_PORTAUDIO_WMME:
+	case SNDDEV_PORTAUDIO_DS:
+	case SNDDEV_PORTAUDIO_ASIO:
+		return g_hPortaudioDLL ? new CPortaudioDevice(CPortaudioDevice::SndDevTypeToHostApi(nType)) : nullptr;
+		break;
+#endif
 	}
 	return nullptr;
 }
 
 
-BOOL SndDevInitialize()
-//---------------------
+#ifndef NO_PORTAUDIO
+
+static void SndDevPortaudioInitialize()
+//-------------------------------------
 {
+	// try loading delay-loaded dll, if it fails, portaudio gets disabled automatically
+	g_hPortaudioDLL = LoadLibrary("OpenMPT_portaudio.dll");
+	if(g_hPortaudioDLL)
+	{
+		if(Pa_Initialize() != paNoError)
+		{
+			FreeLibrary(g_hPortaudioDLL);
+			g_hPortaudioDLL = NULL;
+		}
+	}
+}
+
+
+static void SndDevPortaudioUnnitialize()
+//--------------------------------------
+{
+	if(g_hPortaudioDLL)
+	{
+		Pa_Terminate();
+		FreeLibrary(g_hPortaudioDLL);
+		g_hPortaudioDLL = NULL;
+	}
+}
+
+#endif // NO_PORTAUDIO
+
+
 #ifndef NO_DSOUND
+
+static BOOL SndDevDSoundInitialize()
+//----------------------------------
+{
 	if (ghDSoundDLL) return TRUE;
 	if ((ghDSoundDLL = LoadLibrary("dsound.dll")) == NULL) return FALSE;
 	static_assert(sizeof(TCHAR) == 1, "Check DirectSoundEnumerateA below");
 	if ((gpDSoundEnumerate = (LPDSOUNDENUMERATE)GetProcAddress(ghDSoundDLL, "DirectSoundEnumerateA")) == NULL) return FALSE;
 	if ((gpDSoundCreate = (LPDSOUNDCREATE)GetProcAddress(ghDSoundDLL, "DirectSoundCreate")) == NULL) return FALSE;
 	RtlZeroMemory(glpDSoundGUID, sizeof(glpDSoundGUID));
-#endif // NO_DIRECTSOUND
 	return TRUE;
 }
 
 
-BOOL SndDevUninitialize()
-//-----------------------
+static BOOL SndDevDSoundUninitialize()
+//------------------------------------
 {
-#ifndef NO_DSOUND
 	gpDSoundEnumerate = NULL;
 	gpDSoundCreate = NULL;
 	if (ghDSoundDLL)
@@ -1534,6 +1833,33 @@ BOOL SndDevUninitialize()
 	}
 	gbDSoundEnumerated = FALSE;
 	gnDSoundDevices = 0;
-#endif // NO_DIRECTSOUND
+	return TRUE;
+}
+
+#endif // NO_DSOUND
+
+
+BOOL SndDevInitialize()
+//---------------------
+{
+#ifndef NO_DSOUND
+	SndDevDSoundInitialize();
+#endif // NO_DSOUND
+#ifndef NO_PORTAUDIO
+	SndDevPortaudioInitialize();
+#endif // NO_PORTAUDIO
+	return TRUE;
+}
+
+
+BOOL SndDevUninitialize()
+//-----------------------
+{
+#ifndef NO_PORTAUDIO
+	SndDevPortaudioUnnitialize();
+#endif // NO_PORTAUDIO
+#ifndef NO_DSOUND
+	SndDevDSoundUninitialize();
+#endif // NO_DSOUND
 	return TRUE;
 }
