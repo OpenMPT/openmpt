@@ -36,11 +36,16 @@ public:
 //
 
 // Sound Device Types
-enum
+enum // do not change old values, these get saved to the ini
 {
-	SNDDEV_WAVEOUT = 0,
-	SNDDEV_DSOUND,
-	SNDDEV_ASIO,
+	SNDDEV_WAVEOUT          = 0,
+	SNDDEV_DSOUND           = 1,
+	SNDDEV_ASIO             = 2,
+	SNDDEV_PORTAUDIO_WASAPI = 3,
+	SNDDEV_PORTAUDIO_WDMKS  = 4,
+	SNDDEV_PORTAUDIO_WMME   = 5,
+	SNDDEV_PORTAUDIO_DS     = 6,
+	SNDDEV_PORTAUDIO_ASIO   = 7,
 	SNDDEV_NUM_DEVTYPES
 };
 

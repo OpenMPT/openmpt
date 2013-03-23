@@ -23,6 +23,10 @@
 #define ASIO_LOG
 #endif
 
+#ifndef NO_PORTAUDIO
+#include "portaudio/include/portaudio.h"
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut device
@@ -201,3 +205,67 @@ protected:
 
 
 ////////////////////////////////////////////////////////////////////////////////////
+//
+// Protaudio device
+//
+
+#ifndef NO_PORTAUDIO
+
+class CPortaudioDevice: public ISoundDevice
+	//====================================
+{
+protected:
+	PaHostApiIndex m_HostApi;
+	PaStreamParameters m_StreamParameters;
+	PaStream * m_Stream;
+	void * m_CurrentFrameBuffer;
+	unsigned long m_CurrentFrameCount;
+
+	float m_CurrentRealLatencyMS;
+
+public:
+
+public:
+	CPortaudioDevice(PaHostApiIndex hostapi);
+	~CPortaudioDevice();
+
+public:
+	UINT GetDeviceType() { return HostApiToSndDevType(m_HostApi); }
+	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
+	BOOL Close();
+	void FillAudioBuffer(ISoundSource *pSource);
+	void Reset();
+	void Start();
+	void Stop();
+	bool IsOpen() const { return m_Stream ? true : false; }
+	UINT GetNumBuffers() { return 1; }
+	float GetCurrentRealLatencyMS();
+	BOOL Directcallback() { return true; }
+	bool HasGetStreamPosition() const { return false; }
+	int64 GetStreamPositionSamples() const;
+
+	int StreamCallback(
+		const void *input, void *output,
+		unsigned long frameCount,
+		const PaStreamCallbackTimeInfo* timeInfo,
+		PaStreamCallbackFlags statusFlags
+		);
+
+public:
+	static int StreamCallbackWrapper(
+		const void *input, void *output,
+		unsigned long frameCount,
+		const PaStreamCallbackTimeInfo* timeInfo,
+		PaStreamCallbackFlags statusFlags,
+		void *userData
+		);
+
+	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapideviceindex, PaHostApiIndex hostapi);
+	static int HostApiToSndDevType(PaHostApiIndex hostapi);
+	static PaHostApiIndex SndDevTypeToHostApi(int snddevtype);
+
+	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize, PaHostApiIndex hostapi);
+
+};
+
+#endif // NO_PORTAUDIO
