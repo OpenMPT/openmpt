@@ -759,11 +759,11 @@ void CMainFrame::SetAudioThreadActive(bool active)
 }
 
 
-void CMainFrame::FillAudioBufferLocked()
-//--------------------------------------
+void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
+//----------------------------------------------------------------
 {
 	CriticalSection cs;
-	gpSoundDevice->FillAudioBuffer();
+	callback.FillAudioBuffer();
 }
 
 
