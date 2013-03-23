@@ -4,5 +4,5 @@ The following changes have been made to build portaudio for OpenMPT:
 - Change the Runtime library [C/C++/Code Generation/Runtime Library] to static linking in both Release and Debug configurations (/MT and /MTd instead of /MD and /MDd).
 - Change [Linker/General/Output File] to ..\..\..\..\mptrack\bin\OpenMPT_portaudio.dll respectively ..\..\..\..\mptrack\Debug\OpenMPT_portaudio.dll.
 - Exclude hostapi/ASIO/ASIOSDK/asio.cpp hostapi/ASIO/ASIOSDK/asiodrivers.cpp hostapi/ASIO/ASIOSDK/asiolist.cpp and hostapi/ASIO/pa_asio.cpp from the build.
-- Change the following preprocessor definitions in [C/C++/Preprocessor]: PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=0;PA_USE_WASAPI=1;PA_USE_WDMKS=1; to only build portaudio with wasapi and wdmks support.
+- Change the following preprocessor definitions in [C/C++/Preprocessor]: PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=0;PA_USE_WASAPI=1;PA_USE_WDMKS=0; to only build portaudio with wasapi support.
 - Edit build/msvc/portaudio.def and comment out (;) PaAsio_GetAvailableBufferSizes PaAsio_ShowControlPanel PaAsio_GetInputChannelName and PaAsio_GetOutputChannelName
