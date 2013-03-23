@@ -644,7 +644,7 @@ CTrackApp::CTrackApp()
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 
-	ExceptionHandler::RegisterMainThread();
+	ExceptionHandler::Register();
 
 	m_bPortableMode = false;
 	m_pModTemplate = NULL;
