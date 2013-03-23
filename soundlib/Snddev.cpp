@@ -622,6 +622,10 @@ static ASIODRIVERDESC gAsioDrivers[ASIO_MAX_DRIVERS];
 
 static DWORD g_dwBuffer = 0;
 
+#ifdef _DEBUG
+static int g_asio_startcount = 0;
+#endif
+
 
 BOOL CASIODevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize)
 //--------------------------------------------------------------------------------
@@ -701,6 +705,8 @@ CASIODevice::CASIODevice()
 	m_nBitsPerSample = 0; // Unknown
 	m_nCurrentDevice = (ULONG)-1;
 	m_nSamplesPerSec = 0;
+	m_bMixRunning = FALSE;
+	InterlockedExchange(&m_RenderSilence, 0);
 }
 
 
@@ -871,13 +877,22 @@ void CASIODevice::Start()
 {
 	if (IsOpen())
 	{
-		m_bMixRunning = TRUE;
-		try
+#ifdef _DEBUG
+		ASSERT(g_asio_startcount==0);
+		g_asio_startcount++;
+#endif
+
+		InterlockedExchange(&m_RenderSilence, 0);
+		if(!m_bMixRunning)
 		{
-			m_pAsioDrv->start();
-		} catch(...)
-		{
-			CASIODevice::ReportASIOException("ASIO crash in start()\n");
+			m_bMixRunning = TRUE;
+			try
+			{
+				m_pAsioDrv->start();
+			} catch(...)
+			{
+				CASIODevice::ReportASIOException("ASIO crash in start()\n");
+			}
 		}
 	}
 }
@@ -888,14 +903,11 @@ void CASIODevice::Stop()
 {
 	if (IsOpen())
 	{
-		try
-		{
-			m_pAsioDrv->stop();
-		} catch(...)
-		{
-			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
-		}
-		m_bMixRunning = FALSE;
+		InterlockedExchange(&m_RenderSilence, 1);
+#ifdef _DEBUG
+		g_asio_startcount--;
+		ASSERT(g_asio_startcount==0);
+#endif
 	}
 }
 
@@ -938,13 +950,20 @@ void CASIODevice::Reset()
 {
 	if (IsOpen())
 	{
-		m_bMixRunning = FALSE;
-		try
+		if(m_bMixRunning)
 		{
-			m_pAsioDrv->stop();
-		} catch(...)
-		{
-			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
+			m_bMixRunning = FALSE;
+			try
+			{
+				m_pAsioDrv->stop();
+			} catch(...)
+			{
+				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
+			}
+#ifdef _DEBUG
+			g_asio_startcount = 0;
+#endif
+			InterlockedExchange(&m_RenderSilence, 0);
 		}
 	}
 }
@@ -991,6 +1010,7 @@ void CASIODevice::CloseDevice()
 void CASIODevice::FillAudioBuffer(ISoundSource *pSource)
 //------------------------------------------------------
 {
+	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 
 	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
 	DWORD dwSamplesLeft = m_nAsioBufferLen;
@@ -1003,10 +1023,16 @@ void CASIODevice::FillAudioBuffer(ISoundSource *pSource)
 	while ((LONG)dwSamplesLeft > 0)
 	{
 		UINT n = (dwSamplesLeft < dwFrameLen) ? dwSamplesLeft : dwFrameLen;
-		UINT readn = pSource->AudioRead(m_FrameBuffer, n);
-		if(readn < n)
+		if(rendersilence)
 		{
-			eos = true;
+			memset(m_FrameBuffer, 0, n*dwSampleSize);
+		} else
+		{
+			UINT readn = pSource->AudioRead(m_FrameBuffer, n);
+			if(readn < n)
+			{
+				eos = true;
+			}
 		}
 		dwSamplesLeft -= n;
 		for (UINT ich=0; ich<m_nChannels; ich++)
@@ -1082,8 +1108,10 @@ void CASIODevice::FillAudioBuffer(ISoundSource *pSource)
 		dwBufferOffset += n;
 	}
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
-	pSource->AudioDone(dwBufferOffset, m_nAsioBufferLen, eos);
-
+	if(!rendersilence)
+	{
+		pSource->AudioDone(dwBufferOffset, m_nAsioBufferLen, eos);
+	}
 	return;
 }
 

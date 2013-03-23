@@ -144,6 +144,7 @@ protected:
 	BOOL m_bPostOutput;
 	UINT m_nCurrentDevice;
 	ULONG m_nSamplesPerSec;
+	LONG m_RenderSilence;
 	ASIOCallbacks m_Callbacks;
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
