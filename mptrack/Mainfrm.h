@@ -254,18 +254,18 @@ enum
 
 #define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
 
-#define MPTNOTIFY_TYPEMASK  0x01FF0000	// HiWord = type, LoWord = subtype (smp/instr #)
-#define MPTNOTIFY_DEFAULT   0x00010000
-#define MPTNOTIFY_POSITION  0x00010000
-#define MPTNOTIFY_SAMPLE    0x00020000
-#define MPTNOTIFY_VOLENV    0x00040000
-#define MPTNOTIFY_PANENV    0x00080000
-#define MPTNOTIFY_PITCHENV  0x00100000
-#define MPTNOTIFY_VUMETERS  0x00200000
-#define MPTNOTIFY_MASTERVU  0x00400000
-#define MPTNOTIFY_STOP      0x00800000
-#define MPTNOTIFY_EOS       0x01000000
-#define MPTNOTIFY_POSVALID  0x80000000	// dwPos[i] is valid
+#define MPTNOTIFY_TYPEMASK  0x01FF0000  // HiWord = type, LoWord = subtype (smp/instr #)
+#define MPTNOTIFY_DEFAULT   0x00010000  // 
+#define MPTNOTIFY_POSITION  0x00010000  // 
+#define MPTNOTIFY_SAMPLE    0x00020000  // dwPos[i] contains sample position
+#define MPTNOTIFY_VOLENV    0x00040000  // dwPos[i] contains volume envelope position
+#define MPTNOTIFY_PANENV    0x00080000  // dwPos[i] contains panning envelope position
+#define MPTNOTIFY_PITCHENV  0x00100000  // dwPos[i] contains pitch envelope position
+#define MPTNOTIFY_VUMETERS  0x00200000  // dwPos[i] contains VU meter for every channel
+#define MPTNOTIFY_MASTERVU  0x00400000  // dwPos[0] and dwPos[1] contain master VU levels
+#define MPTNOTIFY_EOS       0x00800000  // end of stream reached, the gui should stop the audio device
+#define MPTNOTIFY_STOP      0x01000000  // audio device has been stopped -> reset GUI
+#define MPTNOTIFY_POSVALID  0x80000000  // dwPos[i] is valid (if it contains sample or envelope position)
 
 // struct MPTNOTIFICATION requires working copy constructor / copy assignment, keep in mind when extending
 struct MPTNOTIFICATION
@@ -336,6 +336,7 @@ public:
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
 	LONG m_AudioThreadActive;
+	bool m_IsPlaybackRunning;
 
 	// Midi Input
 public:
@@ -389,7 +390,9 @@ public:
 	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
 	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	bool audioOpenDevice();
+	bool audioReopenDevice();
 	void audioCloseDevice();
+	bool IsAudioDeviceOpen() const;
 	BOOL audioFillBuffers();
 	BOOL DSoundDone(LPBYTE lpBuffer, DWORD dwBytes);
 	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream);
@@ -466,17 +469,33 @@ public:
 // Player functions
 public:
 	static void ApplyTrackerSettings(CSoundFile *pSndFile);
-	BOOL PlayMod(CModDoc *, HWND hPat=NULL, DWORD dwNotifyType=0);
-	BOOL StopMod(CModDoc *pDoc=NULL);
-	BOOL PauseMod(CModDoc *pDoc=NULL);
-	BOOL PlaySoundFile(CSoundFile *);
+	void ApplyMixerHooks();
+
+	// high level synchronous playback functions, do not hold AudioCriticalSection while calling these
+	bool PreparePlayback();
+	bool StartPlayback();
+	void StopPlayback();
+	bool PausePlayback();
+	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
+	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
+	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat=NULL, DWORD dwNotifyType=0);
+	void UnsetPlaybackSoundFile();
+	void GenerateStopNotification();
+
+	bool PlayMod(CModDoc *, HWND hPat=NULL, DWORD dwNotifyType=0);
+	bool StopMod(CModDoc *pDoc=NULL);
+	bool PauseMod(CModDoc *pDoc=NULL);
+
+	bool StopSoundFile(CSoundFile *);
+	bool PlaySoundFile(CSoundFile *);
 	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note);
 	BOOL PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note);
-	BOOL StopSoundFile(CSoundFile *);
+
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note);
 	void StopPreview() { StopSoundFile(&m_WaveFile); }
+
 	inline bool IsPlaying() const { return m_pSndFile ? true : false; }
 	inline bool IsRendering() const { return m_pSndFile ? m_pSndFile->m_bIsRendering : false; }
 	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }

@@ -12,3 +12,7 @@
 #include "../common/AudioCriticalSection.h"
 
 CRITICAL_SECTION g_csAudio;
+#ifdef _DEBUG
+int g_csAudioLockCount = 0;
+#endif
+
