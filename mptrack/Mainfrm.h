@@ -263,7 +263,6 @@ enum
 #define MPTNOTIFY_PANENV    0x00080000  // dwPos[i] contains panning envelope position
 #define MPTNOTIFY_PITCHENV  0x00100000  // dwPos[i] contains pitch envelope position
 #define MPTNOTIFY_VUMETERS  0x00200000  // dwPos[i] contains VU meter for every channel
-#define MPTNOTIFY_MASTERVU  0x00400000  // dwPos[0] and dwPos[1] contain master VU levels
 #define MPTNOTIFY_EOS       0x00800000  // end of stream reached, the gui should stop the audio device
 #define MPTNOTIFY_STOP      0x01000000  // audio device has been stopped -> reset GUI
 #define MPTNOTIFY_POSVALID  0x80000000  // dwPos[i] is valid (if it contains sample or envelope position)
@@ -284,6 +283,8 @@ struct MPTNOTIFICATION
 	UINT nTick;					// dito
 	ORDERINDEX nOrder;			// dito
 	PATTERNINDEX nPattern;		// dito
+	DWORD MasterVuLeft; // dito
+	DWORD MasterVuRight; // dito
 	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
 };
 
@@ -465,7 +466,6 @@ public:
 // Player functions
 public:
 	static void ApplyTrackerSettings(CSoundFile *pSndFile);
-	void ApplyMixerHooks();
 
 	// high level synchronous playback functions, do not hold AudioCriticalSection while calling these
 	bool PreparePlayback();
