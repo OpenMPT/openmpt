@@ -334,7 +334,6 @@ public:
 	HANDLE m_hAudioThreadGoneIdle;
 	DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
-	static UINT gdwIdleTime;
 	LONG m_AudioThreadActive;
 	bool m_IsPlaybackRunning;
 

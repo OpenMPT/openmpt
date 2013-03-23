@@ -120,7 +120,6 @@ HHOOK CMainFrame::ghKbdHook = NULL;
 std::vector<CString> CMainFrame::s_ExampleModulePaths;
 std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
-UINT CMainFrame::gdwIdleTime = 0;
 LONG CMainFrame::gnLVuMeter = 0;
 LONG CMainFrame::gnRVuMeter = 0;
 
@@ -1682,7 +1681,6 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 //------------------------------------------------------------------------
 {
-	PausePlayback();
 	bool ok = false;
 	BeginWaitCursor();
 	{
@@ -1729,6 +1727,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 		}
 	}
 	EndWaitCursor();
+	PausePlayback();
 	if(!ok)
 	{
 		UnsetPlaybackSoundFile();
@@ -2203,19 +2202,7 @@ void CMainFrame::OnTimer(UINT)
 	}
 	// Idle Time Check
 	DWORD curTime = timeGetTime();
-	if (IsPlaying())
-	{
-		gdwIdleTime = 0;
-	} else
-	{
-		gdwIdleTime += MPTTIMER_PERIOD;
-		if (gdwIdleTime > 15000)
-		{
-			gdwIdleTime = 0;
-			// After 15 seconds of inactivity, we reset the AGC
-			CSoundFile::ResetAGC();
-		}
-	}
+
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
 	if (m_pAutoSaver && m_pAutoSaver->IsEnabled())
