@@ -313,7 +313,7 @@ public:
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	CHAR m_szInstrumentPath[MAX_INSTRUMENTS][_MAX_PATH];
+	mpt::String m_szInstrumentPath[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
 
 public:

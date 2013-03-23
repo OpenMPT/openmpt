@@ -340,6 +340,7 @@ protected:
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	virtual BOOL SaveModified();
+	bool SaveInstrument(INSTRUMENTINDEX instr);
 // -! NEW_FEATURE#0023
 
 	virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE);
