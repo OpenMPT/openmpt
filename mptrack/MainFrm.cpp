@@ -174,8 +174,8 @@ static UINT indicators[] =
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 //#include <direct.h>
-CMainFrame::CMainFrame() : m_wndTree(m_TreeBrowseFile)
-//----------------------------------------------------
+CMainFrame::CMainFrame()
+//----------------------
 {
 
 	m_hNotifyThread = NULL;

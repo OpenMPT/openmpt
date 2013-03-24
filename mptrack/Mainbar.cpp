@@ -606,8 +606,8 @@ BEGIN_MESSAGE_MAP(CModTreeBar, CDialogBar)
 END_MESSAGE_MAP()
 
 
-CModTreeBar::CModTreeBar(CSoundFile &sf) : m_TreeBrowseFile(sf)
-//-------------------------------------------------------------
+CModTreeBar::CModTreeBar()
+//------------------------
 {
 	m_pModTree = m_pModTreeData = NULL;
 	m_nTreeSplitRatio = TrackerSettings::Instance().glTreeSplitRatio;
@@ -618,9 +618,9 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------
 {
 	LRESULT l = CDialogBar::HandleInitDialog(wParam, lParam);
-	m_pModTreeData = new CModTree(nullptr, m_TreeBrowseFile);
+	m_pModTreeData = new CModTree(nullptr);
 	if (m_pModTreeData)	m_pModTreeData->SubclassDlgItem(IDC_TREEDATA, this);
-	m_pModTree = new CModTree(m_pModTreeData, m_TreeBrowseFile);
+	m_pModTree = new CModTree(m_pModTreeData);
 	if (m_pModTree)	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
 	m_dwStatus = 0;
 	m_sizeDefault.cx = TrackerSettings::Instance().glTreeWindowWidth + 3;
