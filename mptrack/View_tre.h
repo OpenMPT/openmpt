@@ -113,7 +113,7 @@ protected:
 		MODITEM_SEQUENCE,
 	};
 
-	CSoundFile &m_SongFile;	// For browsing samples and instruments inside modules on disk
+	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	DWORD m_dwStatus;
@@ -132,7 +132,7 @@ protected:
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 
 public:
-	CModTree(CModTree *pDataTree, CSoundFile &sf);
+	CModTree(CModTree *pDataTree);
 	virtual ~CModTree();
 
 // Attributes
