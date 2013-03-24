@@ -232,7 +232,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_USRDLL;PA_ENABLE_DEBUG_OUTPUT;_CRT_SECURE_NO_DEPRECATE;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=0;PA_USE_WASAPI=1;PA_USE_WDMKS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>$(Platform)\$(Configuration)/portaudio.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(Platform)\$(Configuration)\</AssemblerListingLocation>
       <ObjectFileName>$(Platform)\$(Configuration)\</ObjectFileName>
@@ -658,7 +658,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\src\hostapi\wasapi\pa_win_wasapi.c" />
-    <ClCompile Include="..\..\src\hostapi\wdmks\pa_win_wdmks.c" />
+    <ClCompile Include="..\..\src\hostapi\wdmks\pa_win_wdmks.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\os\win\pa_win_coinitialize.c" />
     <ClCompile Include="..\..\src\os\win\pa_win_hostapis.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
