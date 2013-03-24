@@ -19,6 +19,8 @@
 #include "vstplug.h"
 
 
+CSoundFile *CModTree::m_SongFile = nullptr;
+
 /////////////////////////////////////////////////////////////////////////////
 // CModTreeDropTarget
 
@@ -108,8 +110,8 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CViewModTree construction/destruction
 
-CModTree::CModTree(CModTree *pDataTree, CSoundFile &sf) : m_SongFile(sf)
-//----------------------------------------------------------------------
+CModTree::CModTree(CModTree *pDataTree)
+//-------------------------------------
 {
 	m_pDataTree = pDataTree;
 	m_dwStatus = 0;
@@ -250,6 +252,7 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 	strcpy(m_szInstrLibPath, pszLibPath);
 	if ((pszSongName[0]) && (_stricmp(m_szSongName, pszSongName)))
 	{
+		// Load module for previewing its instruments
 		CMappedFile f;
 
 		SetCurrentDirectory(m_szInstrLibPath);
@@ -261,8 +264,20 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 				LPBYTE lpStream = f.Lock();
 				if (lpStream)
 				{
-					m_SongFile.Destroy();
-					m_SongFile.Create(lpStream, NULL, dwLen);
+					if(m_SongFile != nullptr)
+					{
+						m_SongFile->Destroy();
+					} else
+					{
+						m_SongFile = new (std::nothrow) CSoundFile;
+					}
+					if(m_SongFile != nullptr)
+					{
+						m_SongFile->Create(lpStream, NULL, dwLen);
+						// Destroy some stuff that we're not going to use anyway.
+						m_SongFile->Patterns.DestroyPatterns();
+						m_SongFile->FreeMessage();
+					}
 					f.Unlock();
 				}
 			}
@@ -1310,14 +1325,14 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				lstrcpyn(szName, GetItemText(hItem), sizeof(szName));
 				const size_t n = ConvertStrTo<size_t>(szName);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm)
+				if (pMainFrm && m_SongFile)
 				{
 					if (modItemType == MODITEM_INSLIB_INSTRUMENT)
 					{
-						pMainFrm->PlaySoundFile(&m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
+						pMainFrm->PlaySoundFile(m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
 					} else
 					{
-						pMainFrm->PlaySoundFile(&m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
+						pMainFrm->PlaySoundFile(m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
 					}
 				}
 			} else
@@ -1594,15 +1609,15 @@ void CModTree::FillInstrumentLibrary()
 
 	if (!m_hInsLib) return;
 	SetRedraw(FALSE);
-	if ((m_szSongName[0]) && (!m_pDataTree))
+	if(m_szSongName[0] && !m_pDataTree && m_SongFile)
 	{
 		wsprintf(s, "%s", m_szSongName);
 		SetItemText(m_hInsLib, s);
 		SetItemImage(m_hInsLib, IMAGE_FOLDERSONG, IMAGE_FOLDERSONG);
-		for (UINT iIns=1; iIns<=m_SongFile.m_nInstruments; iIns++)
+		for(INSTRUMENTINDEX iIns = 1; iIns <= m_SongFile->GetNumInstruments(); iIns++)
 		{
-			ModInstrument *pIns = m_SongFile.Instruments[iIns];
-			if (pIns)
+			ModInstrument *pIns = m_SongFile->Instruments[iIns];
+			if(pIns)
 			{
 				lstrcpyn(szPath, pIns->name, 32);
 				wsprintf(s, "%3d: %s", iIns, szPath);
@@ -1610,10 +1625,10 @@ void CModTree::FillInstrumentLibrary()
 				InsertItem(&tvis);
 			}
 		}
-		for(SAMPLEINDEX iSmp = 1; iSmp <= m_SongFile.GetNumSamples(); iSmp++)
+		for(SAMPLEINDEX iSmp = 1; iSmp <= m_SongFile->GetNumSamples(); iSmp++)
 		{
-			const ModSample &sample = m_SongFile.GetSample(iSmp);
-			lstrcpyn(szPath, m_SongFile.m_szNames[iSmp], 32);
+			const ModSample &sample = m_SongFile->GetSample(iSmp);
+			lstrcpyn(szPath, m_SongFile->m_szNames[iSmp], 32);
 			if (sample.pSample)
 			{
 				wsprintf(s, "%3d: %s", iSmp, szPath);
@@ -1924,10 +1939,11 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 		bOk = TRUE;
 	} else
 	{
-		if (SetCurrentDirectory(lpszDir))
+		if(SetCurrentDirectory(lpszDir))
 		{
 			m_szSongName[0] = 0;
-			if (m_SongFile.GetType() != MOD_TYPE_NONE) m_SongFile.Destroy();
+			delete m_SongFile;
+			m_SongFile = nullptr;
 			GetCurrentDirectory(sizeof(m_szInstrLibPath), m_szInstrLibPath);
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 			bOk = TRUE;
@@ -1988,7 +2004,7 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 			pdropinfo->dwDropType = ((m_qwItemDrag & 0xFFFF) == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
 			pdropinfo->dwDropItem = n;
 			pdropinfo->pModDoc = nullptr;
-			pdropinfo->lDropParam = (LPARAM)&m_SongFile;
+			pdropinfo->lDropParam = (LPARAM)m_SongFile;
 		} else
 		{
 			InsLibGetFullPath(m_hItemDrag, pszFullPath);

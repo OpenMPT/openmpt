@@ -341,7 +341,7 @@ public:
 
 protected:
 
-	CSoundFile m_WaveFile, m_TreeBrowseFile;
+	CSoundFile m_WaveFile;
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
