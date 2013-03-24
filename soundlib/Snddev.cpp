@@ -715,11 +715,15 @@ DWORD CDSoundDevice::LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, 
 	}
 	d &= ~0x0f;
 	if (d <= 16) return 0;
-	if (m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0) != DS_OK)
+	HRESULT hr = m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0);
+	if(hr == DSERR_BUFFERLOST)
 	{
-		DWORD dwStat = 0;
-		m_pMixBuffer->GetStatus(&dwStat);
-		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
+		// buffer lost, restore buffer and try again, fail if it fails again
+		if(m_pMixBuffer->Restore() != DS_OK) return 0;
+		if(m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0) != DS_OK) return 0;
+		return d;
+	} else if(hr != DS_OK)
+	{
 		return 0;
 	}
 	return d;
@@ -762,10 +766,30 @@ void CDSoundDevice::FillAudioBuffer()
 		{
 			eos = true;
 		}
-		if (!m_bMixRunning)
+		DWORD dwStatus = 0;
+		m_pMixBuffer->GetStatus(&dwStatus);
+		if(!m_bMixRunning || !(dwStatus & DSBSTATUS_PLAYING))
 		{
-			m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING);
-			m_bMixRunning = TRUE;
+			HRESULT hr;
+			if(!(dwStatus & DSBSTATUS_BUFFERLOST))
+			{
+				// start playing
+				hr = m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING);
+			} else
+			{
+				// buffer lost flag is set, do not try start playing, we know it will fail with DSERR_BUFFERLOST.
+				hr = DSERR_BUFFERLOST;
+			}
+			if(hr == DSERR_BUFFERLOST)
+			{
+				// buffer lost, restore buffer and try again, fail if it fails again
+				if(m_pMixBuffer->Restore() != DS_OK) return;
+				if(m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING) != DS_OK) return;
+			} else if(hr != DS_OK)
+			{
+				return;
+			}
+			m_bMixRunning = TRUE; 
 		}
 		pSource->AudioDone((dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample, eos);
 	}
