@@ -1923,7 +1923,7 @@ BOOL CPortaudioDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT 
 //
 
 
-static HMODULE g_hPortaudioDLL = NULL;
+static bool g_PortaudioInitialized = false;
 
 
 BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
@@ -1944,7 +1944,7 @@ BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
 	case SNDDEV_PORTAUDIO_WMME:
 	case SNDDEV_PORTAUDIO_DS:
 	case SNDDEV_PORTAUDIO_ASIO:
-		return g_hPortaudioDLL ? CPortaudioDevice::EnumerateDevices(nIndex, pszDesc, cbSize, CPortaudioDevice::SndDevTypeToHostApi(nType)) : FALSE;
+		return g_PortaudioInitialized ? CPortaudioDevice::EnumerateDevices(nIndex, pszDesc, cbSize, CPortaudioDevice::SndDevTypeToHostApi(nType)) : FALSE;
 		break;
 #endif
 	}
@@ -1970,7 +1970,7 @@ ISoundDevice *CreateSoundDevice(UINT nType)
 	case SNDDEV_PORTAUDIO_WMME:
 	case SNDDEV_PORTAUDIO_DS:
 	case SNDDEV_PORTAUDIO_ASIO:
-		return g_hPortaudioDLL ? new CPortaudioDevice(CPortaudioDevice::SndDevTypeToHostApi(nType)) : nullptr;
+		return g_PortaudioInitialized ? new CPortaudioDevice(CPortaudioDevice::SndDevTypeToHostApi(nType)) : nullptr;
 		break;
 #endif
 	}
@@ -1984,27 +1984,17 @@ static void SndDevPortaudioInitialize()
 //-------------------------------------
 {
 	// try loading delay-loaded dll, if it fails, portaudio gets disabled automatically
-	g_hPortaudioDLL = LoadLibrary("OpenMPT_portaudio.dll");
-	if(g_hPortaudioDLL)
-	{
-		if(Pa_Initialize() != paNoError)
-		{
-			FreeLibrary(g_hPortaudioDLL);
-			g_hPortaudioDLL = NULL;
-		}
-	}
+	if(Pa_Initialize() != paNoError) return;
+	g_PortaudioInitialized = true;
 }
 
 
 static void SndDevPortaudioUnnitialize()
 //--------------------------------------
 {
-	if(g_hPortaudioDLL)
-	{
-		Pa_Terminate();
-		FreeLibrary(g_hPortaudioDLL);
-		g_hPortaudioDLL = NULL;
-	}
+	if(!g_PortaudioInitialized) return;
+	Pa_Terminate();
+	g_PortaudioInitialized = false;
 }
 
 #endif // NO_PORTAUDIO
