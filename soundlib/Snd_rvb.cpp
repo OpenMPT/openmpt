@@ -34,6 +34,9 @@ UINT gnReverbSend = 0;
 LONG gnRvbROfsVol = 0;
 LONG gnRvbLOfsVol = 0;
 
+UINT CSoundFile::gnReverbType = 0;
+UINT CSoundFile::m_nReverbDepth = 8; // 50%
+
 // Internal reverb state
 static BOOL g_bLastInPresent = 0;
 static BOOL g_bLastOutPresent = 0;
@@ -243,6 +246,7 @@ void ReverbShutdown()
 VOID InitializeReverb(BOOL bReset)
 //--------------------------------
 {
+	if (CSoundFile::gnReverbType >= NUM_REVERBTYPES) CSoundFile::gnReverbType = 0;
 	static PSNDMIX_REVERB_PROPERTIES spCurrentPreset = NULL;
 	PSNDMIX_REVERB_PROPERTIES pRvbPreset = &gRvbPresets[CSoundFile::gnReverbType].Preset;
 
@@ -348,6 +352,20 @@ VOID InitializeReverb(BOOL bReset)
 	{
 		gnReverbDecaySamples = CSoundFile::gdwMixingFreq*5;
 	}
+}
+
+
+// [Reverb level 0(quiet)-100(loud)], [type = REVERBTYPE_XXXX]
+BOOL CSoundFile::SetReverbParameters(UINT nDepth, UINT nType)
+//-----------------------------------------------------------
+{
+	if (nDepth > 100) nDepth = 100;
+	UINT gain = (nDepth * 16) / 100;
+	if (gain > 16) gain = 16;
+	if (gain < 1) gain = 1;
+	m_nReverbDepth = gain;
+	if (nType < NUM_REVERBTYPES) gnReverbType = nType;
+	return TRUE;
 }
 
 
