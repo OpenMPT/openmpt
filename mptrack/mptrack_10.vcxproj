@@ -420,6 +420,7 @@
     <ClInclude Include="..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\soundlib\SampleFormatConverters.h" />
     <ClInclude Include="..\soundlib\SampleIO.h" />
+    <ClInclude Include="..\soundlib\snd_rvb.h" />
     <ClInclude Include="..\soundlib\WAVTools.h" />
     <ClInclude Include="..\soundlib\XMTools.h" />
     <ClInclude Include="ACMConvert.h" />

@@ -759,6 +759,9 @@
     <ClInclude Include="..\soundlib\ITCompression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\snd_rvb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
