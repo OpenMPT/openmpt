@@ -1603,10 +1603,10 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
 		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
 //		if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
-//			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
+//			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX))
 //			&& (gdwSoundSetup & SNDMIX_HQRESAMPLER)))
 		if((gdwSoundSetup & SNDMIX_DIRECTTODISK)
-			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX | SYSMIX_FASTCPU)) && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && !enableCustomRamp))
+			|| ((gdwSysInfo & SYSMIX_ENABLEMMX) && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && !enableCustomRamp))
 		{
 			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
@@ -2044,11 +2044,7 @@ BOOL CSoundFile::ReadNote()
 					if ((!(gdwSoundSetup & SNDMIX_DIRECTTODISK)) && (!(gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE)))
 					{
 						int fmax = 0x20000;
-						if (gdwSysInfo & SYSMIX_SLOWCPU)
-						{
-							fmax = 0xFE00;
-						} else
-						if (!(gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))) 
+						if (!(gdwSysInfo & SYSMIX_ENABLEMMX)) 
 						{
 							fmax = 0x18000;
 						}
@@ -2067,8 +2063,7 @@ BOOL CSoundFile::ReadNote()
 					
 				} else
 				{
-					if ((pChn->nInc >= 0x14000)
-					|| ((pChn->nInc >= 0xFF00) && ((pChn->nInc < 0x10100) || (gdwSysInfo & SYSMIX_SLOWCPU))))
+					if ((pChn->nInc >= 0x14000) || ((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100)))
 						pChn->dwFlags.set(CHN_NOIDO);
 				}
 			}
