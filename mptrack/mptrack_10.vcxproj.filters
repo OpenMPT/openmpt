@@ -427,6 +427,9 @@
     <ClCompile Include="..\sounddsp\EQ.cpp">
       <Filter>Source Files\sounddsp</Filter>
     </ClCompile>
+    <ClCompile Include="..\sounddsp\AGC.cpp">
+      <Filter>Source Files\sounddsp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -766,6 +769,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\sounddsp\DSP.h">
+      <Filter>Header Files\sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddsp\AGC.h">
       <Filter>Header Files\sounddsp</Filter>
     </ClInclude>
   </ItemGroup>
