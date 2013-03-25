@@ -275,16 +275,24 @@ FLAGSET(SongFlags)
 
 // Global Options (Renderer)
 #define SNDMIX_REVERSESTEREO	0x0001	// swap L/R audio channels
+#ifndef NO_DSP
 #define SNDMIX_NOISEREDUCTION	0x0002	// reduce hiss (do not use, it's just a simple low-pass filter)
+#endif // NO_DSP
+#ifndef NO_AGC
 #define SNDMIX_AGC				0x0004	// automatic gain control
+#endif // ~NO_AGC
 #define SNDMIX_NORESAMPLING		0x0008	// force no resampling
 //      SNDMIX_NOLINEARSRCMODE is the default
 //#define SNDMIX_HQRESAMPLER		0x0010	 //rewbs.resamplerConf: renamed SNDMIX_HQRESAMPLER to SNDMIX_SPLINESRCMODE
 #define SNDMIX_SPLINESRCMODE	0x0010	// cubic resampling (?)
+#ifndef NO_DSP
 #define SNDMIX_MEGABASS			0x0020	// bass expansion
 #define SNDMIX_SURROUND			0x0040	// surround mix
+#endif // NO_DSP
 #define SNDMIX_REVERB			0x0080	// apply reverb
+#ifndef NO_EQ
 #define SNDMIX_EQ				0x0100	// apply EQ
+#endif // NO_EQ
 #define SNDMIX_SOFTPANNING		0x0200	// soft panning mode (this is forced with mixmode RC3 and later)
 //#define SNDMIX_ULTRAHQSRCMODE	0x0400 	//rewbs.resamplerConf: renamed SNDMIX_ULTRAHQSRCMODE to SNDMIX_POLYPHASESRCMODE
 #define SNDMIX_POLYPHASESRCMODE	0x0400	// polyphase resampling

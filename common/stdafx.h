@@ -95,8 +95,14 @@ typedef struct {
 
 #endif // ENABLE_ASM
 
-// Enable the built-in equalizer.
-#define	ENABLE_EQ
+// Disable built-in miscellaneous DSP effects (surround, mega bass, noise reduction) 
+//#define NO_DSP
+
+// Disable the built-in equalizer.
+//#define NO_EQ
+
+// Disable the built-in automatic gain control
+//#define NO_AGC
 
 // Define to build without ASIO support; makes build possible without ASIO SDK.
 //#define NO_ASIO 
