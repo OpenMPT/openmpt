@@ -493,11 +493,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\snd_dsp.cpp"
+				RelativePath="..\sounddsp\DSP.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\snd_eq.cpp"
+				RelativePath="..\sounddsp\EQ.cpp"
 				>
 			</File>
 			<File

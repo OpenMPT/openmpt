@@ -1,5 +1,5 @@
 /*
- * snd_dsp.cpp
+ * DSP.cpp
  * -----------
  * Purpose: Mixing code for various DSPs (EQ, Mega-Bass, ...)
  * Notes  : Ugh... This should really be removed at some point.
@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "../soundlib/sndfile.h"
 #include <math.h>
 
 
