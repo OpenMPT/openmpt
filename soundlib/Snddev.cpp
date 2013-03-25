@@ -246,7 +246,7 @@ CWaveDevice::CWaveDevice()
 	m_nPreparedHeaders = 0;
 	m_nBytesPerSec = 0;
 	m_BytesPerSample = 0;
-	RtlZeroMemory(m_WaveBuffers, sizeof(m_WaveBuffers));
+	MemsetZero(m_WaveBuffers);
 }
 
 
@@ -411,7 +411,7 @@ int64 CWaveDevice::GetStreamPositionSamples() const
 {
 	if(!IsOpen()) return 0;
 	MMTIME mmtime;
-	ZeroMemory(&mmtime, sizeof(mmtime));
+	MemsetZero(mmtime);
 	mmtime.wType = TIME_SAMPLES;
 	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR) return 0;
 	switch(mmtime.wType)
@@ -447,7 +447,7 @@ BOOL CWaveDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSiz
 	if (nIndex > gnNumWaveDevs) return FALSE;
 	if (nIndex)
 	{
-		RtlZeroMemory(&woc, sizeof(woc));
+		MemsetZero(woc);
 		waveOutGetDevCaps(nIndex-1, &woc, sizeof(woc));
 		if (pszDescription) lstrcpyn(pszDescription, woc.szPname, cbSize);
 	} else
@@ -1701,7 +1701,7 @@ CPortaudioDevice::CPortaudioDevice(PaHostApiIndex hostapi)
 //--------------------------------------------------------
 {
 	m_HostApi = hostapi;
-	memset(&m_StreamParameters, 0, sizeof(m_StreamParameters));
+	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
 	m_CurrentFrameCount = 0;
 	m_CurrentRealLatencyMS = 0.0f;
@@ -1721,7 +1721,7 @@ CPortaudioDevice::~CPortaudioDevice()
 BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 //------------------------------------------------------------
 {
-	memset(&m_StreamParameters, 0, sizeof(m_StreamParameters));
+	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
 	m_CurrentFrameBuffer = 0;
 	m_CurrentFrameCount = 0;
@@ -1760,7 +1760,7 @@ BOOL CPortaudioDevice::Close()
 		Pa_AbortStream(m_Stream);
 		Pa_CloseStream(m_Stream);
 		if(Pa_GetDeviceInfo(m_StreamParameters.device)->hostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS)) Pa_Sleep((long)(m_RealLatencyMS*2)); // wait for broken wdm drivers not closing the stream immediatly
-		memset(&m_StreamParameters, 0, sizeof(m_StreamParameters));
+		MemsetZero(m_StreamParameters);
 		m_Stream = 0;
 		m_CurrentFrameCount = 0;
 		m_CurrentFrameBuffer = 0;
@@ -2034,7 +2034,7 @@ static BOOL SndDevDSoundInitialize()
 	static_assert(sizeof(TCHAR) == 1, "Check DirectSoundEnumerateA below");
 	if ((gpDSoundEnumerate = (LPDSOUNDENUMERATE)GetProcAddress(ghDSoundDLL, "DirectSoundEnumerateA")) == NULL) return FALSE;
 	if ((gpDSoundCreate = (LPDSOUNDCREATE)GetProcAddress(ghDSoundDLL, "DirectSoundCreate")) == NULL) return FALSE;
-	RtlZeroMemory(glpDSoundGUID, sizeof(glpDSoundGUID));
+	MemsetZero(glpDSoundGUID);
 	return TRUE;
 }
 
