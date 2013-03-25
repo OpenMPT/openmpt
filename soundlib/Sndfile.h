@@ -247,7 +247,6 @@ public:	// Static Members
 	static double gdWFIRCutoff;
 	static BYTE gbWFIRType;
 	static UINT gnVolumeRampUpSamples, gnVolumeRampUpSamplesTarget, gnVolumeRampDownSamples;
-	static UINT gnCPUUsage;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 	static uint8 s_DefaultPlugVolumeHandling;
