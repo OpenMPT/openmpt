@@ -65,8 +65,7 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 	{0,0,0,0,0, 0,0,0,0, 1, 10000, FALSE},
 };
 
-#define ASM_EQ
-#ifdef ASM_EQ
+#ifdef ENABLE_X86
 
 #pragma warning(disable:4100)
 
