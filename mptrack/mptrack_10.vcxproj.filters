@@ -768,6 +768,9 @@
     <ClInclude Include="..\common\mptString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\sounddsp\DSP.h">
+      <Filter>Header Files\sounddsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

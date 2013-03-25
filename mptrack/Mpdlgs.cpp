@@ -565,9 +565,9 @@ BOOL COptionsPlayer::OnInitDialog()
 
 	// Bass Expansion
 	m_SbXBassDepth.SetRange(0,4);
-	m_SbXBassDepth.SetPos(8-CSoundFile::m_nXBassDepth);
+	m_SbXBassDepth.SetPos(8-CSoundFile::m_DSP.m_Settings.m_nXBassDepth);
 	m_SbXBassRange.SetRange(0,4);
-	m_SbXBassRange.SetPos(4 - (CSoundFile::m_nXBassRange - 1) / 5);
+	m_SbXBassRange.SetPos(4 - (CSoundFile::m_DSP.m_Settings.m_nXBassRange - 1) / 5);
 	// Reverb
 	m_SbReverbDepth.SetRange(1, 16);
 	m_SbReverbDepth.SetPos(CSoundFile::m_nReverbDepth);
@@ -594,13 +594,13 @@ BOOL COptionsPlayer::OnInitDialog()
 	}
 	// Surround
 	{
-		UINT n = CSoundFile::m_nProLogicDepth;
+		UINT n = CSoundFile::m_DSP.m_Settings.m_nProLogicDepth;
 		if (n < 1) n = 1;
 		if (n > 16) n = 16;
 		m_SbSurroundDepth.SetRange(1, 16);
 		m_SbSurroundDepth.SetPos(n);
 		m_SbSurroundDelay.SetRange(0, 8);
-		m_SbSurroundDelay.SetPos((CSoundFile::m_nProLogicDelay-5)/5);
+		m_SbSurroundDelay.SetPos((CSoundFile::m_DSP.m_Settings.m_nProLogicDelay-5)/5);
 	}
 	//rewbs.resamplerConf
 	OnResamplerChanged();
@@ -725,8 +725,8 @@ void COptionsPlayer::OnOK()
 		UINT nXBassRange = (4-m_SbXBassRange.GetPos()) * 5 + 1;
 		if (nXBassRange < 5) nXBassRange = 5;
 		if (nXBassRange > 21) nXBassRange = 21;
-		CSoundFile::m_nXBassDepth = nXBassDepth;
-		CSoundFile::m_nXBassRange = nXBassRange;
+		CSoundFile::m_DSP.m_Settings.m_nXBassDepth = nXBassDepth;
+		CSoundFile::m_DSP.m_Settings.m_nXBassRange = nXBassRange;
 	}
 	// Reverb
 	{
@@ -738,8 +738,8 @@ void COptionsPlayer::OnOK()
 	{
 		UINT nProLogicDepth = m_SbSurroundDepth.GetPos();
 		UINT nProLogicDelay = 5 + (m_SbSurroundDelay.GetPos() * 5);
-		CSoundFile::m_nProLogicDepth = nProLogicDepth;
-		CSoundFile::m_nProLogicDelay = nProLogicDelay;
+		CSoundFile::m_DSP.m_Settings.m_nProLogicDepth = nProLogicDepth;
+		CSoundFile::m_DSP.m_Settings.m_nProLogicDelay = nProLogicDelay;
 	}
 	// Notify CMainFrame
 	CMainFrame *pParent = CMainFrame::GetMainFrame();

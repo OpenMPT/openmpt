@@ -32,6 +32,8 @@
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 
+#include "../sounddsp/DSP.h"
+
 // -----------------------------------------------------------------------------------------
 // MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
 // -----------------------------------------------------------------------------------------
@@ -227,9 +229,8 @@ private: //Misc data
 	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
 public:	// Static Members
-	static UINT m_nXBassDepth, m_nXBassRange;
+	static CDSP m_DSP;
 	static UINT m_nReverbDepth, gnReverbType;
-	static UINT m_nProLogicDepth, m_nProLogicDelay;
 	static UINT m_nStereoSeparation;
 	static UINT m_nMaxMixChannels;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
@@ -486,16 +487,8 @@ public:
 	static void SetAGC(BOOL b);
 	static void ResetAGC();
 	static void ProcessAGC(int count);
-	// DSP Effects
-	static void InitializeDSP(BOOL bReset);
-	static void ProcessStereoDSP(int count);
-	static void ProcessMonoDSP(int count);
 	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
 	static BOOL SetReverbParameters(UINT nDepth, UINT nType);
-	// [XBass level 0(quiet)-100(loud)], [cutoff in Hz 10-100]
-	static BOOL SetXBassParameters(UINT nDepth, UINT nRange);
-	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
-	static BOOL SetSurroundParameters(UINT nDepth, UINT nDelay);
 #ifdef ENABLE_EQ
 	// EQ
 	static void InitializeEQ(BOOL bReset=TRUE);
