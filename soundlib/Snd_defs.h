@@ -234,8 +234,6 @@ enum enmEnvelopeTypes
 
 // Mixer Hardware-Dependent features
 #define SYSMIX_ENABLEMMX	0x01		// Hardware acceleration features (MMX/3DNow!/SSE) are supported by this processor
-#define SYSMIX_SLOWCPU		0x02		// *Really* old processor (in this context, it doesn't know CPUID instructions => Must be older than Pentium)
-#define SYSMIX_FASTCPU		0x04		// "Fast" processor (in this context, anything that is at least a Pentium MMX)
 #define SYSMIX_MMXEX		0x08		// Processor supports AMD MMX extensions
 #define SYSMIX_3DNOW		0x10		// Processor supports AMD 3DNow! instructions
 #define SYSMIX_SSE			0x20		// Processor supports SSE instructions

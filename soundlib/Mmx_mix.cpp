@@ -137,11 +137,9 @@ DWORD CSoundFile::InitSysInfo()
 			dwProcSupport &= PROCSUPPORT_CPUID|PROCSUPPORT_MMX|PROCSUPPORT_3DNOW|PROCSUPPORT_MMXEX;
 		}
 	}
-	if (dwProcSupport & PROCSUPPORT_MMX) d |= (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU);
 	if (dwProcSupport & PROCSUPPORT_MMXEX) d |= SYSMIX_MMXEX;
 	if (dwProcSupport & PROCSUPPORT_3DNOW) d |= SYSMIX_3DNOW;
 	if (dwProcSupport & PROCSUPPORT_SSE) d |= SYSMIX_SSE;
-	if (!(dwProcSupport & PROCSUPPORT_CPUID)) d |= SYSMIX_SLOWCPU;
 	gdwSysInfo = d;
 	return d;
 }
