@@ -263,7 +263,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						lstrcpyn(s, pSndFile->m_szNames[iSmp + 1], MAX_SAMPLENAME);
+						StringFixer::Copy(s, pSndFile->m_szNames[iSmp + 1]);
 						break;
 					case SMPLIST_SAMPLENO:
 						wsprintf(s, "%02d", iSmp + 1);
@@ -278,7 +278,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case SMPLIST_TYPE:
-						if (sample.nLength)
+						if(sample.nLength)
 						{
 							wsprintf(s, "%d Bit", sample.GetElementarySampleSize() * 8);
 						}
@@ -363,7 +363,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					switch(iCol)
 					{
 					case INSLIST_INSTRUMENTNAME:
-						if (pIns) lstrcpyn(s, pIns->name, sizeof(pIns->name));
+						if (pIns) StringFixer::Copy(s, pIns->name);
 						break;
 					case INSLIST_INSTRUMENTNO:
 						wsprintf(s, "%02d", iIns+1);
@@ -515,8 +515,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 		{
 			if(iItem < pSndFile->GetNumSamples())
 			{
-				strncpy(pSndFile->m_szNames[iItem + 1], lvItem.pszText, MAX_SAMPLENAME);
-				StringFixer::SetNullTerminator(pSndFile->m_szNames[iItem + 1]);
+				StringFixer::CopyN(pSndFile->m_szNames[iItem + 1], lvItem.pszText);
 				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES | HINT_SAMPLEINFO), this);
 				pModDoc->SetModified();
 			}
@@ -525,8 +524,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			if((iItem < pSndFile->GetNumInstruments()) && (pSndFile->Instruments[iItem + 1]))
 			{
 				ModInstrument *pIns = pSndFile->Instruments[iItem + 1];
-				strncpy(pIns->name, lvItem.pszText, MAX_INSTRUMENTNAME);
-				StringFixer::SetNullTerminator(pIns->name);
+				StringFixer::CopyN(pIns->name, lvItem.pszText);
 				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES | HINT_INSTRUMENT), this);
 				pModDoc->SetModified();
 			}

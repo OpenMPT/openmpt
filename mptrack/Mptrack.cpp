@@ -157,7 +157,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 		CHAR s[_MAX_PATH], *pszCmd, *pszData;
 		int len;
 
-		lstrcpyn(s, lpszCommand, CountOf(s));
+		StringFixer::CopyN(s, lpszCommand);
 		len = strlen(s) - 1;
 		while ((len > 0) && (strchr("(){}[]\'\" ", s[len]))) s[len--] = 0;
 		pszCmd = s;

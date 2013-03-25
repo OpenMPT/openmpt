@@ -49,8 +49,7 @@ UINT32 CalculateCRC32fromFilename(const char *s)
 //----------------------------------------------
 {
 	char fn[_MAX_PATH];
-	strncpy(fn, s, sizeof(fn));
-	fn[sizeof(fn)-1] = 0;
+	StringFixer::Copy(fn, s);
 	int f;
 	for(f = 0; fn[f] != 0; f++) fn[f] = toupper(fn[f]);
 	return LittleEndian(crc32(0, (BYTE *)fn, f));
@@ -161,8 +160,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 						p->dwPluginId1 = kDmoMagic;
 						p->dwPluginId2 = clsid.Data1;
 						p->category = VSTPluginLib::catDMO;
-						lstrcpyn(p->szLibraryName, s, sizeof(p->szLibraryName));
-						StringFixer::SetNullTerminator(p->szLibraryName);
+						StringFixer::Copy(p->szLibraryName, s);
 
 						StringFromGUID2(clsid, w, 100);
 						WideCharToMultiByte(CP_ACP, 0, w, -1, p->szDllPath, sizeof(p->szDllPath), nullptr, nullptr);
@@ -556,10 +554,10 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 	{
 		// Try finding the plugin DLL in the plugin directory instead.
 		CHAR s[_MAX_PATH];
-		strncpy(s, TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS), CountOf(s));
-		if(!strcmp(s, ""))
+		StringFixer::CopyN(s, TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
+		if(!s[0])
 		{
-			strncpy(s, theApp.GetAppDirPath(), CountOf(s));
+			StringFixer::CopyN(s, theApp.GetAppDirPath());
 		}
 		size_t len = strlen(s);
 		if((len > 0) && (s[len - 1] != '\\') && (s[len - 1] != '/'))
@@ -1197,7 +1195,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			MemsetZero(szInitPath);
 			if(fileSel->initialPath)
 			{
-				strncpy(szInitPath, fileSel->initialPath, _MAX_PATH - 1);
+				StringFixer::CopyN(szInitPath, fileSel->initialPath);
 			}
 
 			char szBuffer[_MAX_PATH];

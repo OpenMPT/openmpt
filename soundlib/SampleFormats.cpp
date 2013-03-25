@@ -150,7 +150,7 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_szInstrumentPath[nInstr - 1].Empty();
+	m_szInstrumentPath[nInstr - 1].clear();
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc())
 	{
@@ -776,8 +776,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 	Instruments[nInstr] = pIns;
 	nSamples = plh->samples;
 	if (nSamples > 16) nSamples = 16;
-	memcpy(pIns->name, pih->name, 16);
-	pIns->name[16] = 0;
+	StringFixer::Copy(pIns->name, pih->name);
 	pIns->nFadeOut = 2048;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
@@ -1673,6 +1672,10 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const 
 	 
 	if(fadr && code != 'K[..')	// copy field data in instrument's header
 		memcpy(fadr, file.GetRawData(), size);  // (except for keyboard mapping)
+	if(fadr && code == 'n[..')
+		StringFixer::SetNullTerminator(pIns->name);
+	if(fadr && code == 'fn[.')
+		StringFixer::SetNullTerminator(pIns->filename);
 	file.Skip(size);
 
 	if(code == 'dF..' && fadr != nullptr) // 'dF..' field requires additional processing.

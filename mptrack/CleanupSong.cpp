@@ -328,7 +328,7 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
 		//	strTipText.GetLength() + 1);
-		strncpy(pTTTA->szText, strTipText, min(strTipText.GetLength() + 1, CountOf(pTTTA->szText) - 1));
+		StringFixer::CopyN(pTTTA->szText, strTipText);
 	}
 	else
 	{

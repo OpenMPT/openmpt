@@ -1269,15 +1269,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SliderResSwing.EnableWindow((pIns != nullptr && (m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0)) ? TRUE : FALSE);
 		m_CbnFilterMode.EnableWindow((pIns != nullptr && (m_pSndFile->GetType() == MOD_TYPE_MPT || pIns->nFilterMode != FLTMODE_UNCHANGED)) ? TRUE : FALSE);
 
-		CHAR s[128];
 		if (pIns)
 		{
-			memcpy(s, pIns->name, 32);
-			s[32] = 0;
-			m_EditName.SetWindowText(s);
-			memcpy(s, pIns->filename, 12);
-			s[12] = 0;
-			m_EditFileName.SetWindowText(s);
+			m_EditName.SetWindowText(pIns->name);
+			m_EditFileName.SetWindowText(pIns->filename);
 			// Fade Out Volume
 			SetDlgItemInt(IDC_EDIT7, pIns->nFadeOut);
 			// Global Volume
@@ -1491,16 +1486,12 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	
 			if (!pIns->name[0] && m_pSndFile->GetModSpecifications().instrNameLengthMax > 0)
 			{
-				strncpy(pIns->name, szName, CountOf(pIns->name) - 1);
-				ASSERT(m_pSndFile->GetModSpecifications().instrNameLengthMax < CountOf(pIns->name));
-				pIns->name[m_pSndFile->GetModSpecifications().instrNameLengthMax] = '\0';
+				StringFixer::CopyN(pIns->name, szName, m_pSndFile->GetModSpecifications().instrNameLengthMax);
 			}
 			if (!pIns->filename[0] && m_pSndFile->GetModSpecifications().instrFilenameLengthMax > 0)
 			{
 				strcat(szName, szExt);
-				strncpy(pIns->filename, szName, CountOf(pIns->filename) - 1);
-				ASSERT(m_pSndFile->GetModSpecifications().instrFilenameLengthMax < CountOf(pIns->filename));
-				pIns->filename[m_pSndFile->GetModSpecifications().instrFilenameLengthMax] = '\0';
+				StringFixer::CopyN(pIns->filename, szName, m_pSndFile->GetModSpecifications().instrFilenameLengthMax);
 			}
 
 			SetCurrentInstrument(m_nInstrument);
@@ -1803,12 +1794,11 @@ void CCtrlInstruments::OnInstrumentSave()
 	if (!pIns) return;
 	if (pIns->filename[0])
 	{
-		strncpy(szFileName, pIns->filename, min(CountOf(pIns->filename), CountOf(szFileName) - 1));
+		StringFixer::Copy(szFileName, pIns->filename);
 	} else
 	{
-		strncpy(szFileName, pIns->name, min(CountOf(pIns->name), CountOf(szFileName) - 1));
+		StringFixer::Copy(szFileName, pIns->name);
 	}
-	StringFixer::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
 	int index = 0;
@@ -1881,11 +1871,10 @@ void CCtrlInstruments::OnNameChanged()
 		CHAR s[64];
 		s[0] = 0;
 		m_EditName.GetWindowText(s, sizeof(s));
-		for (UINT i=strlen(s); i<=32; i++) s[i] = 0;
 		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
-		if ((pIns) && (strncmp(s, pIns->name, 32)))
+		if ((pIns) && (strncmp(s, pIns->name, MAX_INSTRUMENTNAME)))
 		{
-			memcpy(pIns->name, s, 32);
+			StringFixer::Copy(pIns->name, s);
 			SetInstrumentModified(true);
 		}
 	}

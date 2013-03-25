@@ -289,7 +289,7 @@ bool CSoundFile::ReadUMX(FileReader &file)
 					m_nSamples++;
 					if(static_cast<size_t>(objName) < names.size())
 					{
-						strncpy(m_szNames[GetNumSamples()], names[objName].c_str(), MAX_SAMPLENAME - 1);
+						StringFixer::CopyN(m_szNames[GetNumSamples()], names[objName].c_str());
 					}
 				}
 			}
