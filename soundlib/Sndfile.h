@@ -34,6 +34,7 @@
 
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
+#include "../sounddsp/EQ.h"
 
 // -----------------------------------------------------------------------------------------
 // MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
@@ -231,6 +232,7 @@ private: //Misc data
 
 public:	// Static Members
 	static CDSP m_DSP;
+	static CEQ m_EQ;
 	static CAGC m_AGC;
 	static UINT m_nReverbDepth, gnReverbType;
 	static UINT m_nStereoSeparation;
@@ -490,10 +492,7 @@ public:
 	static BOOL SetReverbParameters(UINT nDepth, UINT nType);
 #ifdef ENABLE_EQ
 	// EQ
-	static void InitializeEQ(BOOL bReset=TRUE);
-	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE);	// 0=-12dB, 32=+12dB
-	/*static*/ void EQStereo(int *pbuffer, UINT nCount);
-	/*static*/ void EQMono(int *pbuffer, UINT nCount);
+	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE) { m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, gdwMixingFreq); }	// 0=-12dB, 32=+12dB
 #endif
 	// Float <-> Int conversion routines
 	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
