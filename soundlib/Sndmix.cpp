@@ -1603,10 +1603,9 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
 		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
 //		if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
-//			|| ((gdwSysInfo & (SYSMIX_ENABLEMMX))
-//			&& (gdwSoundSetup & SNDMIX_HQRESAMPLER)))
+//			|| (gdwSoundSetup & SNDMIX_HQRESAMPLER))
 		if((gdwSoundSetup & SNDMIX_DIRECTTODISK)
-			|| ((gdwSysInfo & SYSMIX_ENABLEMMX) && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && !enableCustomRamp))
+			|| ((gdwSoundSetup & SNDMIX_HQRESAMPLER) && !enableCustomRamp))
 		{
 			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
@@ -2044,10 +2043,6 @@ BOOL CSoundFile::ReadNote()
 					if ((!(gdwSoundSetup & SNDMIX_DIRECTTODISK)) && (!(gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE)))
 					{
 						int fmax = 0x20000;
-						if (!(gdwSysInfo & SYSMIX_ENABLEMMX)) 
-						{
-							fmax = 0x18000;
-						}
 						if ((pChn->nNewLeftVol < 0x80) && (pChn->nNewRightVol < 0x80)
 						 && (pChn->nLeftVol < 0x80) && (pChn->nRightVol < 0x80))
 						{
