@@ -81,6 +81,7 @@ extern UINT gnReverbSend;
 extern LONG gnRvbROfsVol;
 extern LONG gnRvbLOfsVol;
 
+extern VOID InitializeReverb(BOOL bReset);
 extern void ProcessReverb(UINT nSamples);
 #endif
 
@@ -164,6 +165,9 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 	gnRvbROfsVol = gnRvbLOfsVol = 0;
 #endif
 	if (bReset) gnCPUUsage = 0;
+#ifndef NO_REVERB
+	InitializeReverb(bReset);
+#endif
 	InitializeDSP(bReset);
 #ifdef ENABLE_EQ
 	InitializeEQ(bReset);
