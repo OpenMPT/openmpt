@@ -624,58 +624,47 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv)
 //--------------------------------------------------------------------------------------------------------
 {
-	if (instr >= MAX_INSTRUMENTS) return;
+	if(instr >= MAX_INSTRUMENTS) return;
 	ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
 	ModSample *pSmp = &Samples[instr];
 	UINT note = pChn->nNewNote;
 
 	if(note == NOTE_NONE && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
 
-	if (pIns != nullptr && ModCommand::IsNote(note))
+	if(pIns != nullptr && ModCommand::IsNote(note))
 	{
-		if(bPorta && pIns == pChn->pModInstrument && (pChn->pModSample != nullptr && pChn->pModSample->pSample != nullptr) && IsCompatibleMode(TRK_IMPULSETRACKER))
+		// Impulse Tracker ignores empty slots.
+		// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
+		// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
+		if(pIns->Keyboard[note - NOTE_MIN] == 0 && IsCompatibleMode(TRK_IMPULSETRACKER) && !pIns->HasValidMIDIChannel())
 		{
-#ifdef DEBUG
-			{
-				// Check if original behaviour would have been used here
-				if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL)
-				{
-					ASSERT(false);
+			pChn->pModInstrument = pIns;
 			return;
 		}
-				UINT n = pIns->Keyboard[note-1];
+
+		if(pIns->NoteMap[note - NOTE_MIN] > NOTE_MAX) return;
+		UINT n = pIns->Keyboard[note - NOTE_MIN];
 		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
-				if(pSmp != pChn->pModSample)
-				{
-					ASSERT(false);
-				}
-			}
-#endif // DEBUG
-			// Impulse Tracker doesn't seem to look up the sample for new notes when in instrument mode and it encounters a situation like this:
-			// G-6 01 ... ... <-- G-6 is bound to sample 01
-			// F-6 01 ... GFF <-- F-6 is bound to sample 02, but sample 01 will be played
-			// This behaviour is not used if sample 01 has no actual sample data (hence the "pChn->pModSample->pSample != nullptr")
-			// and it is also ignored when the instrument number changes. This fixes e.g. the guitars in "Ultima Ratio" by Nebularia
-			// and some slides in spx-shuttledeparture.it.
-			pSmp = pChn->pModSample;
-		} else
-		{
-			// Original behaviour
-			if(pIns->NoteMap[note - 1] > NOTE_MAX) return;
-			UINT n = pIns->Keyboard[note - 1];
-			pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
-		}
-	} else if (GetNumInstruments())
+	} else if(GetNumInstruments())
 	{
 		// No valid instrument, or not a valid note.
 		if (note >= NOTE_MIN_SPECIAL) return;
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && (pIns == nullptr || !pIns->HasValidMIDIChannel()))
+		{
+			// Impulse Tracker ignores empty slots.
+			// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
+			// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
+			pChn->pModInstrument = nullptr;
+			pChn->nNewIns = 0;
+			return;
+		}
 		pSmp = nullptr;
 	}
 
-	const bool bNewTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
+	const bool newTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
 	// Playback behavior change for MPT: With portamento don't change sample if it is in
 	// the same instrument as previous sample.
-	if(bPorta && bNewTuning && pIns == pChn->pModInstrument)
+	if(bPorta && newTuning && pIns == pChn->pModInstrument)
 		return;
 
 	bool returnAfterVolumeAdjust = false;
@@ -899,7 +888,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		pChn->nAutoVibPos = 0;
 	}
 
-	if(bNewTuning)
+	if(newTuning)
 	{
 		pChn->nC5Speed = pSmp->nC5Speed;
 		pChn->m_CalculateFreq = true;
@@ -962,7 +951,16 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	if((pIns) && (note - NOTE_MIN < CountOf(pIns->Keyboard)))
 	{
 		UINT n = pIns->Keyboard[note - NOTE_MIN];
-		if ((n) && (n < MAX_SAMPLES)) pSmp = &Samples[n];
+		if((n) && (n < MAX_SAMPLES))
+		{
+			pSmp = &Samples[n];
+		} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && !pIns->HasValidMIDIChannel())
+		{
+			// Impulse Tracker ignores empty slots.
+			// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
+			// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
+			return;
+		}
 		note = pIns->NoteMap[note-1];
 	}
 	// Key Off
@@ -1353,7 +1351,16 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 			{
 				n = pIns->Keyboard[note - 1];
 				note = pIns->NoteMap[note - 1];
-				if(n > 0  && n < MAX_SAMPLES) pSample = Samples[n].pSample;
+				if ((n) && (n < MAX_SAMPLES))
+				{
+					pSample = Samples[n].pSample;
+				} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && !pIns->HasValidMIDIChannel())
+				{
+					// Impulse Tracker ignores empty slots.
+					// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
+					// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
+					return;
+				}
 			}
 		} else pSample = nullptr;
 	}
@@ -1927,16 +1934,30 @@ BOOL CSoundFile::ProcessEffects()
 			// Instrument Change ?
 			if(instr)
 			{
-				ModSample *psmp = pChn->pModSample;
+				const ModSample *oldSample = pChn->pModSample;
+				const ModInstrument *oldInstrument = pChn->pModInstrument;
+
 				InstrumentChange(pChn, instr, bPorta, true);
 				pChn->nNewIns = 0;
+
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
+					// Test cases: PortaInsNum.it, PortaSample.it
+					if(ModCommand::IsNote(note) && oldSample != pChn->pModSample)
+					{
+						//const bool newInstrument = oldInstrument != pChn->pModInstrument && pChn->pModInstrument->Keyboard[pChn->nNewNote - NOTE_MIN] != 0;
+						pChn->nPos = pChn->nPosLo = 0;
+					}
+				} else
+				{
 					// Special IT case: portamento+note causes sample change -> ignore portamento
 					if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
-					&& (psmp != pChn->pModSample) && (note) && (note < 0x80))
+						&& oldSample != pChn->pModSample && ModCommand::IsNote(note))
 					{
 						bPorta = false;
 					}
 				}
+			}
 			// New Note ?
 			if (note)
 			{
