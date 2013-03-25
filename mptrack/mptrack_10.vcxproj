@@ -247,6 +247,7 @@
     <ClCompile Include="..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\Reporting.cpp" />
+    <ClCompile Include="..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\sounddsp\EQ.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
@@ -405,6 +406,7 @@
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
+    <ClInclude Include="..\sounddsp\AGC.h" />
     <ClInclude Include="..\sounddsp\DSP.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\FileReader.h" />
