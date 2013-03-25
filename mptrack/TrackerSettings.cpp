@@ -73,8 +73,10 @@ TrackerSettings::TrackerSettings()
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
 	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
 
+#ifndef NO_EQ
 	// Default EQ settings
 	MemCopy(m_EqSettings, CEQSetupDlg::gEQPresets[0]);
+#endif
 
 	// MIDI Setup
 	m_nMidiDevice = 0;
@@ -448,14 +450,19 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 
 	// Effects Settings
+#ifndef NO_DSP
 	CSoundFile::m_DSP.m_Settings.m_nXBassDepth = CMainFrame::GetPrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_DSP.m_Settings.m_nXBassDepth, iniFile);
 	CSoundFile::m_DSP.m_Settings.m_nXBassRange = CMainFrame::GetPrivateProfileLong("Effects", "XBassRange", CSoundFile::m_DSP.m_Settings.m_nXBassRange, iniFile);
+#endif
 	CSoundFile::m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_nReverbDepth, iniFile);
 	CSoundFile::gnReverbType = CMainFrame::GetPrivateProfileLong("Effects", "ReverbType", CSoundFile::gnReverbType, iniFile);
+#ifndef NO_DSP
 	CSoundFile::m_DSP.m_Settings.m_nProLogicDepth = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, iniFile);
 	CSoundFile::m_DSP.m_Settings.m_nProLogicDelay = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, iniFile);
+#endif
 
 
+#ifndef NO_EQ
 	// EQ Settings
 	GetPrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPreset), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPreset), iniFile);
@@ -467,6 +474,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[1].szName);
 	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[2].szName);
 	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[3].szName);
+#endif
 
 
 	// Auto saver settings
@@ -607,12 +615,16 @@ bool TrackerSettings::LoadRegistrySettings()
 		dwSZSIZE = sizeof(m_szKbdFile);
 		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);
 
+#ifndef NO_DSP
 		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nXBassDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nXBassRange, &dwDWORDSize);
+#endif
 		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nReverbDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "ReverbType", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::gnReverbType, &dwDWORDSize);
+#ifndef NO_DSP
 		RegQueryValueEx(key, "ProLogicDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "ProLogicDelay", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, &dwDWORDSize);
+#endif
 		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nStereoSeparation, &dwDWORDSize);
 		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nMaxMixChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
@@ -634,12 +646,14 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportSpeed", NULL, &dwREG_DWORD, (LPBYTE)&midiImportSpeed, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportPatLen", NULL, &dwREG_DWORD, (LPBYTE)&midiImportPatternLen, &dwDWORDSize);
+#ifndef NO_EQ
 		// EQ
 		LoadRegistryEQ(key, "EQ_Settings", &m_EqSettings);
 		LoadRegistryEQ(key, "EQ_User1", &CEQSetupDlg::gUserPresets[0]);
 		LoadRegistryEQ(key, "EQ_User2", &CEQSetupDlg::gUserPresets[1]);
 		LoadRegistryEQ(key, "EQ_User3", &CEQSetupDlg::gUserPresets[2]);
 		LoadRegistryEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
+#endif
 
 		//rewbs.resamplerConf
 		dwDWORDSize = sizeof(m_MixerSettings.gbWFIRType);
@@ -824,18 +838,24 @@ void TrackerSettings::SaveSettings()
 	// Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so removing this entry after having read it is kind of backwards compatible.
 	WritePrivateProfileString("Paths", "Key_Config_File", nullptr, iniFile);
 
+#ifndef NO_DSP
 	CMainFrame::WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_DSP.m_Settings.m_nXBassDepth, iniFile);
 	CMainFrame::WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_DSP.m_Settings.m_nXBassRange, iniFile);
+#endif
 	CMainFrame::WritePrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_nReverbDepth, iniFile);
 	CMainFrame::WritePrivateProfileLong("Effects", "ReverbType", CSoundFile::gnReverbType, iniFile);
+#ifndef NO_DSP
 	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, iniFile);
 	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, iniFile);
+#endif
 
+#ifndef NO_EQ
 	WritePrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPreset), iniFile);
 	WritePrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPreset), iniFile);
 	WritePrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPreset), iniFile);
 	WritePrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPreset), iniFile);
 	WritePrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPreset), iniFile);
+#endif
 
 	if(CMainFrame::m_pAutoSaver != nullptr)
 	{

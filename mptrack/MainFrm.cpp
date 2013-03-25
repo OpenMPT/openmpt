@@ -1055,6 +1055,32 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 }
 
 
+void CMainFrame::UpdateDspEffects()
+//---------------------------------
+{
+	CSoundFile::SetDspEffects(
+#ifndef NO_DSP
+		TrackerSettings::Instance().m_dwQuality & QUALITY_SURROUND,
+#else
+		FALSE,
+#endif
+		TrackerSettings::Instance().m_dwQuality & QUALITY_REVERB,
+#ifndef NO_DSP
+		TrackerSettings::Instance().m_dwQuality & QUALITY_MEGABASS,
+		TrackerSettings::Instance().m_dwQuality & QUALITY_NOISEREDUCTION,
+#else
+		FALSE,
+		FALSE,
+#endif
+#ifndef NO_EQ
+		TrackerSettings::Instance().m_dwQuality & QUALITY_EQ
+#else
+		FALSE
+#endif
+		);
+}
+
+
 void CMainFrame::UpdateAudioParameters(BOOL bReset)
 //-------------------------------------------------
 {
@@ -1078,9 +1104,13 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_MUTECHNMODE;
 	CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
-	CSoundFile::UPDATEDSPEFFECTS();
+	UpdateDspEffects();
+#ifndef NO_AGC
 	CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
+#endif
+#ifndef NO_EQ
 	CSoundFile::SetEQGains(	TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, bReset );
+#endif
 	if (bReset)
 	{
 		CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
@@ -1230,11 +1260,15 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
 	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
 	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
-	pSndFile->UPDATEDSPEFFECTS();
+	UpdateDspEffects();
+#ifndef NO_AGC
 	pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
+#endif
 	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+#ifndef NO_AGC
 	CSoundFile::m_AGC.Reset();
+#endif
 }
 
 
@@ -1729,8 +1763,10 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 			CriticalSection cs;
 			CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
-			CSoundFile::UPDATEDSPEFFECTS();
+			UpdateDspEffects();
+#ifndef NO_AGC
 			CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
+#endif
 		}
 		PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTSETUP);
 	}
@@ -1874,13 +1910,17 @@ void CMainFrame::OnViewOptions()
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
+#ifndef NO_EQ
 	CEQSetupDlg eqdlg(&TrackerSettings::Instance().m_EqSettings);
+#endif
 	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
 	CUpdateSetupDlg updatedlg;
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&playerdlg);
+#ifndef NO_EQ
 	dlg.AddPage(&eqdlg);
+#endif
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);

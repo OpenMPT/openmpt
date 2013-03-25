@@ -116,12 +116,18 @@ enum
 #define SOUNDSETUP_SECONDARY	0x40
 #define SOUNDSETUP_RESTARTMASK	SOUNDSETUP_SECONDARY
 
+#ifndef NO_DSP
 #define QUALITY_NOISEREDUCTION	0x01
 #define QUALITY_MEGABASS		0x02
 #define QUALITY_SURROUND		0x08
+#endif
 #define QUALITY_REVERB			0x20
+#ifndef NO_AGC
 #define QUALITY_AGC				0x40
+#endif
+#ifndef NO_EQ
 #define QUALITY_EQ				0x80
+#endif
 
 
 #define NUM_VUMETER_PENS		32
@@ -294,12 +300,6 @@ struct MPTNOTIFICATION
 
 
 #define DeleteGDIObject(h) if (h) { ::DeleteObject(h); h = NULL; }
-#define UPDATEDSPEFFECTS() SetDspEffects(\
-								TrackerSettings::Instance().m_dwQuality & QUALITY_SURROUND,\
-								TrackerSettings::Instance().m_dwQuality & QUALITY_REVERB,\
-								TrackerSettings::Instance().m_dwQuality & QUALITY_MEGABASS,\
-								TrackerSettings::Instance().m_dwQuality & QUALITY_NOISEREDUCTION,\
-								TrackerSettings::Instance().m_dwQuality & QUALITY_EQ)
 
 #include "mainbar.h"
 #include "TrackerSettings.h"
@@ -376,6 +376,7 @@ public:
 
 // Low-Level Audio
 public:
+	static void UpdateDspEffects();
 	static void UpdateAudioParameters(BOOL bReset=FALSE);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
