@@ -254,8 +254,9 @@ protected:
 
 #ifndef NO_PORTAUDIO
 
+//=========================================
 class CPortaudioDevice: public ISoundDevice
-	//====================================
+//=========================================
 {
 protected:
 	PaHostApiIndex m_HostApi;
