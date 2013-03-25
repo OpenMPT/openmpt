@@ -259,12 +259,6 @@
     <ClCompile Include="..\soundlib\snd_flt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\snd_eq.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\soundlib\snd_dsp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\serialization_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -426,6 +420,12 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\ITCompression.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddsp\DSP.cpp">
+      <Filter>Source Files\sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddsp\EQ.cpp">
+      <Filter>Source Files\sounddsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -870,6 +870,12 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{5a7bae01-9526-4d85-9c00-0a280e22ad0b}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Source Files\sounddsp">
+      <UniqueIdentifier>{ad75f592-baa3-4f6a-b4fe-496e1fad42e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sounddsp">
+      <UniqueIdentifier>{2174b62f-1cac-4ad9-9db3-e3447eaa1bd0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

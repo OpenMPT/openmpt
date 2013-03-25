@@ -1,5 +1,5 @@
 /*
- * snd_eq.cpp
+ * EQ.cpp
  * ----------
  * Purpose: Mixing code for equalizer.
  * Notes  : Ugh... This should really be removed at some point.
@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "../soundlib/sndfile.h"
 #include "../mptrack/TrackerSettings.h"
 
 #define EQ_BANDWIDTH	2.0
