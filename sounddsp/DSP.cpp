@@ -26,8 +26,6 @@
 // DSP Effects: PUBLIC members
 UINT CSoundFile::m_nXBassDepth = DEFAULT_XBASS_DEPTH;
 UINT CSoundFile::m_nXBassRange = DEFAULT_XBASS_RANGE;
-UINT CSoundFile::gnReverbType = 0;
-UINT CSoundFile::m_nReverbDepth = 8; // 50%
 UINT CSoundFile::m_nProLogicDepth = 12;
 UINT CSoundFile::m_nProLogicDelay = 20;
 
@@ -74,8 +72,6 @@ static LONG SurroundBuffer[SURROUNDBUFFERSIZE];
 extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
 extern int MixRearBuffer[MIXBUFFERSIZE * 2];
 
-extern VOID InitializeReverb(BOOL bReset);
-extern VOID ProcessReverb(UINT nSamples);
 extern VOID MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_StereoDCRemoval(int *, UINT count);
@@ -160,7 +156,6 @@ VOID ShelfEQ(LONG scale,
 void CSoundFile::InitializeDSP(BOOL bReset)
 //-----------------------------------------
 {
-	if (gnReverbType >= NUM_REVERBTYPES) gnReverbType = 0;
 	if (!m_nProLogicDelay) m_nProLogicDelay = 20;
 	if (bReset)
 	{
@@ -189,10 +184,6 @@ void CSoundFile::InitializeDSP(BOOL bReset)
 		nDolbyLP_B0 *= 2;
 		nDolbyLP_B1 *= 2;
 	}
-	// Reverb Setup
-#ifndef NO_REVERB
-	InitializeReverb(bReset);
-#endif
 	// Bass Expansion Reset
 	if (gdwSoundSetup & SNDMIX_MEGABASS)
 	{
@@ -472,20 +463,6 @@ stereodcr:
 
 /////////////////////////////////////////////////////////////////
 // Clean DSP Effects interface
-
-// [Reverb level 0(quiet)-100(loud)], [type = REVERBTYPE_XXXX]
-BOOL CSoundFile::SetReverbParameters(UINT nDepth, UINT nType)
-//-----------------------------------------------------------
-{
-	if (nDepth > 100) nDepth = 100;
-	UINT gain = (nDepth * 16) / 100;
-	if (gain > 16) gain = 16;
-	if (gain < 1) gain = 1;
-	m_nReverbDepth = gain;
-	if (nType < NUM_REVERBTYPES) gnReverbType = nType;
-	return TRUE;
-}
-
 
 // [XBass level 0(quiet)-100(loud)], [cutoff in Hz 20-100]
 BOOL CSoundFile::SetXBassParameters(UINT nDepth, UINT nRange)
