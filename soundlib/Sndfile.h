@@ -32,6 +32,7 @@
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 
+#include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
 
 // -----------------------------------------------------------------------------------------
@@ -230,11 +231,11 @@ private: //Misc data
 
 public:	// Static Members
 	static CDSP m_DSP;
+	static CAGC m_AGC;
 	static UINT m_nReverbDepth, gnReverbType;
 	static UINT m_nStereoSeparation;
 	static UINT m_nMaxMixChannels;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
-	static UINT gnAGC;
 	static double gdWFIRCutoff;
 	static BYTE gbWFIRType;
 	static UINT gnVolumeRampUpSamples, gnVolumeRampUpSamplesTarget, gnVolumeRampDownSamples;
@@ -485,8 +486,6 @@ public:
 	// AGC
 	static BOOL GetAGC() { return (gdwSoundSetup & SNDMIX_AGC) ? TRUE : FALSE; }
 	static void SetAGC(BOOL b);
-	static void ResetAGC();
-	static void ProcessAGC(int count);
 	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
 	static BOOL SetReverbParameters(UINT nDepth, UINT nType);
 #ifdef ENABLE_EQ
@@ -753,8 +752,6 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 #define VOLUMERAMPPRECISION	12
 #define FADESONGDELAY		100
 #define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
-#define AGC_PRECISION		10
-#define AGC_UNITY			(1 << AGC_PRECISION)
 
 // Calling conventions
 #ifdef WIN32

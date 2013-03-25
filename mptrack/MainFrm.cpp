@@ -1234,7 +1234,7 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 	pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
 	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-	CSoundFile::ResetAGC();
+	CSoundFile::m_AGC.Reset();
 }
 
 

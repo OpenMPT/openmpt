@@ -36,7 +36,7 @@ DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
 CDSP CSoundFile::m_DSP;
-UINT CSoundFile::gnAGC = AGC_UNITY;
+CAGC CSoundFile::m_AGC;
 double CSoundFile::gdWFIRCutoff = 0.97; //default value
 BYTE CSoundFile::gbWFIRType = 7; //WFIR_KAISER4T; //default value
 UINT CSoundFile::gnVolumeRampUpSamples = 42;		//default value
@@ -349,7 +349,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 
 #ifndef NO_AGC
 		// Automatic Gain Control
-		if (gdwSoundSetup & SNDMIX_AGC) ProcessAGC(lSampleCount);
+		if (gdwSoundSetup & SNDMIX_AGC) m_AGC.Process(MixSoundBuffer, lSampleCount, gdwMixingFreq, gnChannels);
 #endif // NO_AGC
 
 		UINT lTotalSampleCount = lSampleCount;	// Including rear channels

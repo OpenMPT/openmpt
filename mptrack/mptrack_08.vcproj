@@ -493,6 +493,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\AGC.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\sounddsp\DSP.cpp"
 				>
 			</File>
@@ -1056,6 +1060,10 @@
 			</File>
 			<File
 				RelativePath="..\Soundlib\Sndfile.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddsp\AGC.h"
 				>
 			</File>
 			<File
