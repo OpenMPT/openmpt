@@ -958,8 +958,7 @@ void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
 	if ((nVol < m_nMasterVolume) && (nVol) && (gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
 	{
-		gnAGC = gnAGC * m_nMasterVolume / nVol;
-		if (gnAGC > AGC_UNITY) gnAGC = AGC_UNITY;
+		m_AGC.Adjust(m_nMasterVolume, nVol);
 	}
 	m_nMasterVolume = nVol;
 }
@@ -973,7 +972,7 @@ void CSoundFile::SetAGC(BOOL b)
 		if (!(gdwSoundSetup & SNDMIX_AGC))
 		{
 			gdwSoundSetup |= SNDMIX_AGC;
-			gnAGC = AGC_UNITY;
+			m_AGC.Reset();
 		}
 	} else gdwSoundSetup &= ~SNDMIX_AGC;
 }

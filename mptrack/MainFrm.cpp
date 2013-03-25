@@ -1310,7 +1310,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	pSndFile->SetupITBidiMode();
 
 	if(m_pSndFile != nullptr || (m_dwStatus & MODSTATUS_PLAYING)) PauseMod();
-	if(m_pSndFile != nullptr && (pSndFile != m_pSndFile || !m_pSndFile->GetTotalSampleCount())) CSoundFile::ResetAGC();
+	if(m_pSndFile != nullptr && (pSndFile != m_pSndFile || !m_pSndFile->GetTotalSampleCount())) CSoundFile::m_AGC.Reset();
 	m_pSndFile = pSndFile;
 	m_pModPlaying = pModDoc;
 	m_hFollowSong = hPat;
@@ -2007,7 +2007,7 @@ void CMainFrame::OnTimer(UINT)
 		{
 			gdwIdleTime = 0;
 			// After 15 seconds of inactivity, we reset the AGC
-			CSoundFile::ResetAGC();
+			CSoundFile::m_AGC.Reset();
 			gdwPlayLatency = 0;
 		}
 	}
