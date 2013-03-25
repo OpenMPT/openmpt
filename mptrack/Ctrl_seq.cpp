@@ -1014,7 +1014,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			for(SEQUENCEINDEX i = 0; i < numSequences; i++)
 			{
 				CString str;
-				if(sndFile.Order.GetSequence(i).m_sName.IsEmpty())
+				if(sndFile.Order.GetSequence(i).m_sName.empty())
 					str.Format(TEXT("Sequence %u"), i);
 				else
 					str.Format(TEXT("%u: %s"), i, (LPCTSTR)sndFile.Order.GetSequence(i).m_sName);

@@ -1117,13 +1117,13 @@ void CCtrlPatterns::OnPatternNameChanged()
 		m_EditPatName.GetWindowText(s, CountOf(s));
 		StringFixer::SetNullTerminator(s);
 		
-		if (m_pSndFile->Patterns[nPat].GetName().Compare(s))
+		if(m_pSndFile->Patterns[nPat].GetName() != s)
 		{
-			 if(m_pSndFile->Patterns[nPat].SetName(s))
-			 {
-				 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
-				 m_pModDoc->UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
-			 }
+			if(m_pSndFile->Patterns[nPat].SetName(s))
+			{
+				if(m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
+				m_pModDoc->UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
+			}
 		}
 	}
 }

@@ -44,31 +44,16 @@ namespace mpt
 		// To allow easy assignment to CString in GUI side.
 		operator const CharT*() const {return c_str();}
 
-		// Clears string.
-		void Empty() {clear();}
-
-		// Tests whether string is empty.
-		bool IsEmpty() const {return empty();}
-
-		// See std::string::compare.
-		int Compare(const CharT* psz) const {return compare(psz);}
-
-		// Equivalent to Empty(); Append(psz, nCount);
+		// Set the string to psz, copy at most nCount characters
 		void SetString(const CharT* psz, const size_t nCount)
 		{
-			Empty();
+			clear();
 			Append(psz, nCount);
 		}
-
-		// Append string to this.
-		void Append(const CharT* psz) {append(psz);}
 
 		// Appends given string to this. Stops after 'nCount' chars if null terminator 
 		// hasn't been encountered before that.
 		void Append(const CharT* psz, const size_t nCount) {append(psz, nCount);}
-
-		// Appends single character to string.
-		void AppendChar(const CharT c) {append(1, c);}
 
 		// Difference between Append and AppendChars is that latter can be used to add 
 		// potentially non-null terminated char array.
@@ -77,9 +62,6 @@ namespace mpt
 		{
 			append(arr, arr + N);
 		}
-
-		// Reserves store for the string without resizing.
-		void Reserve(size_t nSize) {reserve(nSize);}
 
 		// Formats this string, like CString::Format.
 		void Format(const CharT* pszFormat, ...)

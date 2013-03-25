@@ -528,7 +528,7 @@ bool CModDoc::ConvertSamplesToInstruments()
 		}
 
 		InitializeInstrument(instrument);
-		lstrcpyn(instrument->name, m_SndFile.m_szNames[smp], MAX_INSTRUMENTNAME);
+		StringFixer::Copy(instrument->name, m_SndFile.m_szNames[smp]);
 		MuteInstrument(smp, muted);
 	}
 

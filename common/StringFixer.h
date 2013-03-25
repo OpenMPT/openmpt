@@ -215,4 +215,22 @@ namespace StringFixer
 		}
 	}
 
+
+	// Copy from one fixed size char array to another one.
+	template <size_t destSize, size_t srcSize>
+	void Copy(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
+	//-----------------------------------------------------------------------
+	{
+		CopyN(destBuffer, srcBuffer, srcSize);
+	}
+
+	// Copy from a char array to a fixed size char array.
+	template <size_t destSize>
+	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_T_MAX)
+	//------------------------------------------------------------------------------------------------
+	{
+		const size_t copySize = min(destSize - 1, srcSize);
+		strncpy(destBuffer, srcBuffer, copySize);
+		destBuffer[copySize] = '\0';
+	}
 };

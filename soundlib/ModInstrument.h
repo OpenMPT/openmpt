@@ -89,7 +89,7 @@ struct ModInstrument
 	uint8 NoteMap[128];					// Note mapping, e.g. C-5 => D-5.
 	SAMPLEINDEX Keyboard[128];			// Sample mapping, e.g. C-5 => Sample 1
 
-	char name[MAX_INSTRUMENTNAME];		// Note: not guaranteed to be null-terminated.
+	char name[MAX_INSTRUMENTNAME];
 	char filename[MAX_INSTRUMENTFILENAME];
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

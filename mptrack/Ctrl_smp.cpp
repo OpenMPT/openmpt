@@ -668,12 +668,10 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		wsprintf(s, "%d-bit %s, len: %d", sample.GetElementarySampleSize() * 8, (sample.uFlags & CHN_STEREO) ? "stereo" : "mono", sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
-		memcpy(s, m_pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
-		s[31] = 0;
+		StringFixer::Copy(s, m_pSndFile->m_szNames[m_nSample]);
 		SetDlgItemText(IDC_SAMPLE_NAME, s);
 		// File Name
-		memcpy(s, sample.filename, MAX_SAMPLEFILENAME);
-		s[21] = 0;
+		StringFixer::Copy(s, sample.filename);
 		if (m_pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) s[0] = 0;
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
 		// Volume
@@ -848,11 +846,10 @@ OpenError:
 			{
 				// S3M/IT
 				szFullFilename[31] = 0;
-				if (!m_pSndFile->m_szNames[m_nSample][0]) memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, MAX_SAMPLENAME);
+				if (!m_pSndFile->m_szNames[m_nSample][0]) StringFixer::Copy(m_pSndFile->m_szNames[m_nSample], szFullFilename);
 				if (strlen(szFullFilename) < 9) strcat(szFullFilename, szExt);
 			}
-			szFullFilename[21] = 0;
-			memcpy(sample.filename, szFullFilename, MAX_SAMPLEFILENAME);
+			StringFixer::Copy(sample.filename, szFullFilename);
 		}
 		if ((m_pSndFile->GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
 		{
@@ -1029,11 +1026,11 @@ void CCtrlSamples::OnSampleSave()
 		}
 		if(m_pSndFile->GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			strncpy(szFileName, m_pSndFile->GetSample(m_nSample).filename, Util::Min(CountOf(m_pSndFile->GetSample(m_nSample).filename), CountOf(szFileName) - 1));
+			StringFixer::Copy(szFileName, m_pSndFile->GetSample(m_nSample).filename);
 		}
 		if(!szFileName[0])
 		{
-			strncpy(szFileName, m_pSndFile->m_szNames[m_nSample], Util::Min(CountOf(m_pSndFile->m_szNames[m_nSample]), CountOf(szFileName) - 1));
+			StringFixer::Copy(szFileName, m_pSndFile->m_szNames[m_nSample]);
 		}
 		if(!szFileName[0]) strcpy(szFileName, "untitled");
 		if(strlen(szFileName) >= 5 && !_strcmpi(szFileName + strlen(szFileName) - 5, ".flac"))
@@ -2364,7 +2361,7 @@ void CCtrlSamples::OnNameChanged()
 	s[31] = 0;
 	if (strncmp(s, m_pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME))
 	{
-		memcpy(m_pSndFile->m_szNames[m_nSample], s, MAX_SAMPLENAME);
+		StringFixer::Copy(m_pSndFile->m_szNames[m_nSample], s);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_pModDoc->SetModified();
@@ -2384,7 +2381,7 @@ void CCtrlSamples::OnFileNameChanged()
 
 	if (strncmp(s, m_pSndFile->GetSample(m_nSample).filename, MAX_SAMPLEFILENAME))
 	{
-		memcpy(m_pSndFile->GetSample(m_nSample).filename, s, MAX_SAMPLEFILENAME);
+		StringFixer::Copy(m_pSndFile->GetSample(m_nSample).filename, s);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, this);
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}
