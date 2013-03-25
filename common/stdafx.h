@@ -121,6 +121,8 @@ void Log(LPCSTR format,...);
 
 #include "../common/typedefs.h"
 
+#include "../common/mptString.h"
+
 // Exception type that is used to catch "operator new" exceptions.
 //typedef std::bad_alloc & MPTMemoryException;
 typedef CMemoryException * MPTMemoryException;
