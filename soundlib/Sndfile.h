@@ -503,7 +503,6 @@ public:
 	/*static*/ void EQStereo(int *pbuffer, UINT nCount);
 	/*static*/ void EQMono(int *pbuffer, UINT nCount);
 #endif
-	static LONG SpectrumAnalyzer(signed char *pBuffer, UINT nSamples, UINT nInc, UINT nChannels);
 	// Float <-> Int conversion routines
 	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
 	/*static */VOID FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
