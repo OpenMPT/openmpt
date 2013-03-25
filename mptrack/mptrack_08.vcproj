@@ -1083,6 +1083,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptString.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Undo.h"
 				>
 			</File>
