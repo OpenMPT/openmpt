@@ -36,6 +36,7 @@ DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
 CDSP CSoundFile::m_DSP;
+CEQ CSoundFile::m_EQ;
 CAGC CSoundFile::m_AGC;
 double CSoundFile::gdWFIRCutoff = 0.97; //default value
 BYTE CSoundFile::gbWFIRType = 7; //WFIR_KAISER4T; //default value
@@ -171,7 +172,7 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 #endif
 	m_DSP.Initialize(bReset, gdwMixingFreq, gdwSoundSetup);
 #ifdef ENABLE_EQ
-	InitializeEQ(bReset);
+	m_EQ.Initialize(bReset, gdwMixingFreq);
 #endif
 	return TRUE;
 }
@@ -339,9 +340,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		if (gdwSoundSetup & SNDMIX_EQ)
 		{
 			if (gnChannels >= 2)
-				EQStereo(MixSoundBuffer, lCount);
+				m_EQ.ProcessStereo(MixSoundBuffer, lCount, m_pConfig, gdwSoundSetup, gdwSysInfo);
 			else
-				EQMono(MixSoundBuffer, lCount);
+				m_EQ.ProcessMono(MixSoundBuffer, lCount, m_pConfig);
 		}
 #endif // ENABLE_EQ
 

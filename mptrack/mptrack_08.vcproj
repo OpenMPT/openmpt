@@ -1071,6 +1071,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\EQ.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\SoundFilePlayConfig.h"
 				>
 			</File>

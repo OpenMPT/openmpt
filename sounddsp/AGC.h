@@ -1,19 +1,6 @@
 /*
  * AGC.h
  * -----
- * Purpose: Mixing code for various DSPs (EQ, Mega-Bass, ...)
- * Notes  : Ugh... This should really be removed at some point.
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
-
-
-#pragma once
-
-/*
- * AGC.h
- * -----
  * Purpose: Automatic Gain Control
  * Notes  : Ugh... This should really be removed at some point.
  * Authors: Olivier Lapicque

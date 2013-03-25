@@ -1,6 +1,6 @@
 /*
  * EQ.cpp
- * ----------
+ * ------
  * Purpose: Mixing code for equalizer.
  * Notes  : Ugh... This should really be removed at some point.
  * Authors: Olivier Lapicque
@@ -11,11 +11,11 @@
 
 #include "stdafx.h"
 #include "../soundlib/sndfile.h"
-#include "../mptrack/TrackerSettings.h"
+#include "../sounddsp/EQ.h"
+
 
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001
-#define REAL			float
 
 extern REAL MixFloatBuffer[];
 
@@ -35,17 +35,8 @@ extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const f
 
 
 
-#pragma pack(push, 4)
-typedef struct _EQBANDSTRUCT
-{
-	REAL a0, a1, a2, b1, b2;
-	REAL x1, x2, y1, y2;
-	REAL Gain, CenterFrequency;
-	BOOL bEnable;
-} EQBANDSTRUCT, *PEQBANDSTRUCT;
-#pragma pack(pop)
 
-UINT gEqLinearToDB[33] =
+static const UINT gEqLinearToDB[33] =
 {
 	16, 19, 22, 25, 28, 31, 34, 37,
 	40, 43, 46, 49, 52, 55, 58, 61,
@@ -54,10 +45,10 @@ UINT gEqLinearToDB[33] =
 };
 
 
-static REAL f2ic = (REAL)(1 << 28);
-static REAL i2fc = (REAL)(1.0 / (1 << 28));
+static const REAL f2ic = (REAL)(1 << 28);
+static const REAL i2fc = (REAL)(1.0 / (1 << 28));
 
-static EQBANDSTRUCT gEQ[MAX_EQ_BANDS*2] =
+static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 {
 	// Default: Flat EQ
 	{0,0,0,0,0, 0,0,0,0, 1,   120, FALSE},
@@ -89,8 +80,8 @@ static EQBANDSTRUCT gEQ[MAX_EQ_BANDS*2] =
 #define PBS_Y1	DWORD PTR [eax+28]
 #define PBS_Y2	DWORD PTR [eax+32]
 
-void __cdecl EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
-//------------------------------------------------------------------
+static void __cdecl EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
+//-------------------------------------------------------------------------
 {
 	_asm {
 	mov eax, pbs		// eax = pbs
@@ -136,8 +127,8 @@ EQ_Loop:
 }
 
 
-void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
-//---------------------------------------------------------------------------------
+static void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
+//----------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_3DNOW
 	float tmp[16];
@@ -220,8 +211,8 @@ mainloop:
 }
 
 
-void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
-//---------------------------------------------------------------------------------
+static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
+//----------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_SSE
 	static const float gk1 = 1.0f;
@@ -311,15 +302,15 @@ mainloop:
 	movss [edx+EQBANDSTRUCT.y2], xmm1
 done:;
 	}
-#endif SSE_SPECIFIC
+#endif // ENABLE_SSE
 }
 
 #pragma warning(default:4100)
 
 #else
 
-void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
-//----------------------------------------------------------
+static void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
+//-----------------------------------------------------------------
 {
 	for (UINT i=0; i<nCount; i++)
 	{
@@ -336,20 +327,20 @@ void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
 #endif
 
 
-void CSoundFile::EQMono(int *pbuffer, UINT nCount)
-//------------------------------------------------
+void CEQ::ProcessMono(int *pbuffer, UINT nCount, CSoundFilePlayConfig *pConfig)
+//------------------------------------------------------------------------
 {
-	MonoMixToFloat(pbuffer, MixFloatBuffer, nCount);
+	X86_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, pConfig->getIntToFloat());
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
 	{
 		if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) EQFilter(&gEQ[b], MixFloatBuffer, nCount);
 	}
-	FloatToMonoMix(MixFloatBuffer, pbuffer, nCount);
+	X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount, pConfig->getFloatToInt());
 }
 
 
-void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
-//--------------------------------------------------
+void CEQ::ProcessStereo(int *pbuffer, UINT nCount, CSoundFilePlayConfig *pConfig, DWORD SoundSetupFlags, DWORD SysInfoFlags)
+//---------------------------------------------------------------------------------------------------------------------------
 {
 
 #ifdef ENABLE_SSE
@@ -357,10 +348,10 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 
 	// Still allow the check, because the user can turn this on/off
 	
-	if ((gdwSysInfo & SYSMIX_SSE) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
+	if ((SysInfoFlags & SYSMIX_SSE) && (SoundSetupFlags & SNDMIX_ENABLEMMX))
     {
 		int sse_state, sse_eqstate;
-		SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, m_pConfig->getIntToFloat());
+		SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, pConfig->getIntToFloat());
 
 		_asm stmxcsr sse_state;
 		sse_eqstate = sse_state | 0xFF80;
@@ -372,7 +363,7 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 		}
 		_asm ldmxcsr sse_state;
 
-		X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, m_pConfig->getFloatToInt());
+		X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, pConfig->getFloatToInt());
 
 	} else
 
@@ -383,9 +374,9 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
      
      // We still perform the MMX check because the user can enable/disable this
 
-	if ((gdwSysInfo & SYSMIX_3DNOW) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
+	if ((SysInfoFlags & SYSMIX_3DNOW) && (SoundSetupFlags & SNDMIX_ENABLEMMX))
 	{ 
-		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, m_pConfig->getIntToFloat());
+		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, pConfig->getIntToFloat());
 
 		for (UINT b=0; b<MAX_EQ_BANDS; b++)
 		{
@@ -394,13 +385,13 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 				AMD_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
 
-		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, m_pConfig->getFloatToInt());
+		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, pConfig->getFloatToInt());
 		
 	} else
 #endif // ENABLE_3DNOW
 
 	{	
-		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, m_pConfig->getIntToFloat());
+		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, pConfig->getIntToFloat());
 		
 		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
 		{
@@ -411,15 +402,22 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		}
 
-		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, m_pConfig->getFloatToInt());
+		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, pConfig->getFloatToInt());
 	}
 }
 
 
-void CSoundFile::InitializeEQ(BOOL bReset)
-//----------------------------------------
+CEQ::CEQ()
+//--------
 {
-	REAL fMixingFreq = (REAL)gdwMixingFreq;
+	memcpy(gEQ, gEQDefaults, sizeof(gEQ));
+}
+
+
+void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
+//-------------------------------------------------
+{
+	REAL fMixingFreq = (REAL)MixingFreq;
 	// Gain = 0.5 (-6dB) .. 2 (+6dB)
 	for (UINT band=0; band<MAX_EQ_BANDS*2; band++) if (gEQ[band].bEnable)
 	{
@@ -498,8 +496,8 @@ void CSoundFile::InitializeEQ(BOOL bReset)
 }
 
 
-void CSoundFile::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset)
-//-------------------------------------------------------------------------------------------
+void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq)
+//------------------------------------------------------------------------------------------------------
 {
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
@@ -528,5 +526,6 @@ void CSoundFile::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs,
 			gEQ[i+MAX_EQ_BANDS].bEnable = FALSE;
 		}
 	}
-	InitializeEQ(bReset);
+	Initialize(bReset, MixingFreq);
 }
+
