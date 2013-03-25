@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../soundlib/MixerSettings.h"
+#include "../sounddsp/EQ.h"
 
 /////////////////////////////////////////////////////////////////////////
 // Default directories
@@ -114,7 +115,6 @@ enum
 
 
 // EQ
-#define MAX_EQ_BANDS	6
 struct EQPreset
 {
 	char szName[12];
