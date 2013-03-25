@@ -35,6 +35,7 @@ DWORD CSoundFile::gdwSoundSetup = 0;
 DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
+CDSP CSoundFile::m_DSP;
 UINT CSoundFile::gnAGC = AGC_UNITY;
 double CSoundFile::gdWFIRCutoff = 0.97; //default value
 BYTE CSoundFile::gbWFIRType = 7; //WFIR_KAISER4T; //default value
@@ -168,7 +169,7 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 #ifndef NO_REVERB
 	InitializeReverb(bReset);
 #endif
-	InitializeDSP(bReset);
+	m_DSP.Initialize(bReset, gdwMixingFreq, gdwSoundSetup);
 #ifdef ENABLE_EQ
 	InitializeEQ(bReset);
 #endif
@@ -313,8 +314,6 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			{
 				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lSampleCount);
 			}
-
-			ProcessStereoDSP(lCount);
 		} else
 		{
 			m_nMixStat += CreateStereoMix(lCount);
@@ -331,9 +330,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			{
 				ApplyGlobalVolume(MixSoundBuffer, nullptr, lSampleCount);
 			}
-
-			ProcessMonoDSP(lCount);
 		}
+
+		m_DSP.Process(MixSoundBuffer, MixRearBuffer, lCount, gdwSoundSetup, gnChannels);
 
 #ifdef ENABLE_EQ
 		// Graphic Equalizer

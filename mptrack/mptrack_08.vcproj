@@ -1059,6 +1059,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\DSP.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\SoundFilePlayConfig.h"
 				>
 			</File>
