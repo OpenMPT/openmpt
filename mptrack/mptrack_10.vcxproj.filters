@@ -777,6 +777,9 @@
     <ClInclude Include="..\sounddsp\AGC.h">
       <Filter>Header Files\sounddsp</Filter>
     </ClInclude>
+    <ClInclude Include="..\sounddsp\EQ.h">
+      <Filter>Header Files\sounddsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

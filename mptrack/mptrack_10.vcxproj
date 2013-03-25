@@ -408,6 +408,7 @@
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\sounddsp\AGC.h" />
     <ClInclude Include="..\sounddsp\DSP.h" />
+    <ClInclude Include="..\sounddsp\EQ.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\FileReader.h" />
     <ClInclude Include="..\soundlib\ITCompression.h" />
