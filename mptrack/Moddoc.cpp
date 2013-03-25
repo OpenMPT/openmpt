@@ -276,7 +276,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 						if ((dwKey >= 24) && (dwKey < 100))
 						{
-							lstrcpyn(pIns->name, szMidiPercussionNames[dwKey-24], sizeof(pIns->name));
+							StringFixer::CopyN(pIns->name, szMidiPercussionNames[dwKey - 24]);
 						}
 						bEmbedded = TRUE;
 					}
@@ -318,7 +318,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 							pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 							if ((dwKey >= 24) && (dwKey < 24+61))
 							{
-								lstrcpyn(pIns->name, szMidiPercussionNames[dwKey-24], sizeof(pIns->name));
+								StringFixer::CopyN(pIns->name, szMidiPercussionNames[dwKey-24]);
 							}
 						}
 					}
@@ -339,17 +339,17 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 							_splitpath(pszMidiMapName, NULL, NULL, szName, szExt);
 							strncat(szName, szExt, sizeof(szName));
 							pIns = m_SndFile.Instruments[nIns];
-							if (!pIns->filename[0]) lstrcpyn(pIns->filename, szName, sizeof(pIns->filename));
+							if (!pIns->filename[0]) StringFixer::Copy(pIns->filename, szName);
 							if (!pIns->name[0])
 							{
 								if (nMidiCode < 128)
 								{
-									lstrcpyn(pIns->name, szMidiProgramNames[nMidiCode], sizeof(pIns->name));
+									StringFixer::CopyN(pIns->name, szMidiProgramNames[nMidiCode]);
 								} else
 								{
 									UINT nKey = nMidiCode & 0x7F;
 									if (nKey >= 24)
-										lstrcpyn(pIns->name, szMidiPercussionNames[nKey-24], sizeof(pIns->name));
+										StringFixer::CopyN(pIns->name, szMidiPercussionNames[nKey - 24]);
 								}
 							}
 						}
@@ -521,7 +521,7 @@ bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
 	if(instr > 0 && instr <= GetNumInstruments())
 	{
 		instr--;
-		if(!m_SndFile.m_szInstrumentPath[instr].IsEmpty())
+		if(!m_SndFile.m_szInstrumentPath[instr].empty())
 		{
 			const size_t len = m_SndFile.m_szInstrumentPath[instr].length();
 			const bool iti = _stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 3], "iti") == 0;

@@ -872,8 +872,7 @@ BOOL CDLSBank::UpdateSF2PresetData(LPVOID pvsf2, LPVOID pvchunk, DWORD dwMaxLen)
 			SFSAMPLE *p = (SFSAMPLE *)(pchunk+1);
 			for (UINT i=0; i<m_nSamplesEx; i++, pDlsSmp++, p++)
 			{
-				memcpy(pDlsSmp->szName, p->achSampleName, 20);
-				StringFixer::SetNullTerminator(pDlsSmp->szName);
+				StringFixer::Copy(pDlsSmp->szName, p->achSampleName);
 				pDlsSmp->dwLen = 0;
 				pDlsSmp->dwSampleRate = p->dwSampleRate;
 				pDlsSmp->byOriginalPitch = p->byOriginalPitch;
@@ -1684,12 +1683,10 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 			}
 			lstrcat(s, ")");
 		}
-		s[31] = 0;
-		strcpy(pIns->name, s);
+		StringFixer::Copy(pIns->name, s);
 	} else
 	{
-		memcpy(pIns->name, pDlsIns->szName, 32);
-		StringFixer::SetNullTerminator(pIns->name);
+		StringFixer::Copy(pIns->name, pDlsIns->szName);
 	}
 	int nTranspose = 0;
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)

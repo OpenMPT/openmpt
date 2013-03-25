@@ -877,7 +877,7 @@ void CViewGlobals::OnPluginNameChanged()
 		StringFixer::SetNullTerminator(s);
 		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].GetName()))
 		{
-			lstrcpyn(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s, 32);
+			StringFixer::Copy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s);
 			if(pSndFile->GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));

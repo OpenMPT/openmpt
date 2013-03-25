@@ -873,7 +873,7 @@ bool CAbstractVstEditor::CreateInstrument()
 	m_nInstrument = nIns;
 
 	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].GetName());
-	strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].GetLibraryName(), CountOf(pIns->filename) - 1);
+	StringFixer::CopyN(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].GetLibraryName());
 	pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
 	pIns->nMidiChannel = 1;
 	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.

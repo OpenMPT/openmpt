@@ -205,7 +205,7 @@ mpt::String CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*p
 	}
 
 	const size_t len = strlen(m_lpszSongComments);
-	comments.Reserve(len);
+	comments.reserve(len);
 
 	for(size_t i = 0; i < len; i++)
 	{
@@ -215,13 +215,13 @@ mpt::String CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*p
 			{
 			case leCR:
 			default:
-				comments.Append("\r");
-				break;
-			case leLF:
-				comments.Append("\n");
+				comments.append(1, '\r');
 				break;
 			case leCRLF:
-				comments.Append("\r\n");
+				comments.append(1, 'r');
+				// Intentional fall-through
+			case leLF:
+				comments.append(1, '\n');
 				break;
 			}
 		} else
@@ -229,7 +229,7 @@ mpt::String CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*p
 			char c = m_lpszSongComments[i];
 			// Pre-process text
 			if(pTextConverter != nullptr) pTextConverter(c);
-			comments.AppendChar(c);
+			comments.append(1, c);
 		}
 	}
 	return comments;

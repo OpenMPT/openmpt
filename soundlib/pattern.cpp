@@ -133,7 +133,7 @@ void CPattern::Deallocate()
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	FreePattern(m_ModCommands);
 	m_ModCommands = nullptr;
-	m_PatternName.Empty();
+	m_PatternName.clear();
 }
 
 
