@@ -35,9 +35,15 @@ DWORD CSoundFile::gdwSoundSetup = 0;
 DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
+#ifndef NO_DSP
 CDSP CSoundFile::m_DSP;
+#endif
+#ifndef NO_EQ
 CEQ CSoundFile::m_EQ;
+#endif
+#ifndef NO_AGC
 CAGC CSoundFile::m_AGC;
+#endif
 double CSoundFile::gdWFIRCutoff = 0.97; //default value
 BYTE CSoundFile::gbWFIRType = 7; //WFIR_KAISER4T; //default value
 UINT CSoundFile::gnVolumeRampUpSamples = 42;		//default value
@@ -90,7 +96,7 @@ extern void ProcessReverb(UINT nSamples);
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
 // Which this table takes care of.
-const UINT PreAmpTable[16] =
+static const UINT PreAmpTable[16] =
 {
 	0x60, 0x60, 0x60, 0x70,	// 0-7
 	0x80, 0x88, 0x90, 0x98,	// 8-15
@@ -98,13 +104,15 @@ const UINT PreAmpTable[16] =
 	0xB0, 0xB4, 0xB8, 0xBC,	// 24-31
 };
 
-const UINT PreAmpAGCTable[16] =
+#ifndef NO_AGC
+static const UINT PreAmpAGCTable[16] =
 {
 	0x60, 0x60, 0x60, 0x64,
 	0x68, 0x70, 0x78, 0x80,
 	0x84, 0x88, 0x8C, 0x90,
 	0x92, 0x94, 0x96, 0x98,
 };
+#endif
 
 typedef CTuning::RATIOTYPE RATIOTYPE;
 
@@ -170,8 +178,10 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 #ifndef NO_REVERB
 	InitializeReverb(bReset);
 #endif
+#ifndef NO_DSP
 	m_DSP.Initialize(bReset, gdwMixingFreq, gdwSoundSetup);
-#ifdef ENABLE_EQ
+#endif
+#ifndef NO_EQ
 	m_EQ.Initialize(bReset, gdwMixingFreq);
 #endif
 	return TRUE;
@@ -333,9 +343,11 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			}
 		}
 
+#ifndef NO_DSP
 		m_DSP.Process(MixSoundBuffer, MixRearBuffer, lCount, gdwSoundSetup, gnChannels);
+#endif
 
-#ifdef ENABLE_EQ
+#ifndef NO_EQ
 		// Graphic Equalizer
 		if (gdwSoundSetup & SNDMIX_EQ)
 		{
@@ -344,7 +356,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			else
 				m_EQ.ProcessMono(MixSoundBuffer, lCount, m_pConfig);
 		}
-#endif // ENABLE_EQ
+#endif // NO_EQ
 
 		nStat++;
 
@@ -1691,7 +1703,11 @@ BOOL CSoundFile::ReadNote()
 
 		if (m_pConfig->getUseGlobalPreAmp())
 		{
-			UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32 >> 1] : PreAmpTable[nchn32 >> 1];
+			UINT attenuation =
+#ifndef NO_AGC
+				(gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32 >> 1] :
+#endif
+				PreAmpTable[nchn32 >> 1];
 			if(attenuation < 1) attenuation = 1;
 			nMasterVol = (mastervol << 7) / attenuation;
 		} else

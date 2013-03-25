@@ -916,13 +916,16 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 //------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-
-	DWORD d = gdwSoundSetup & ~(SNDMIX_SURROUND | SNDMIX_REVERB | SNDMIX_MEGABASS | SNDMIX_NOISEREDUCTION | SNDMIX_EQ);
-	if (bSurround) d |= SNDMIX_SURROUND;
-	if ((bReverb) && (gdwSysInfo & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB;
-	if (bMegaBass) d |= SNDMIX_MEGABASS;
-	if (bNR) d |= SNDMIX_NOISEREDUCTION;
-	if (bEQ) d |= SNDMIX_EQ;
+	DWORD d = gdwSoundSetup;	
+	if ((bReverb) && (gdwSysInfo & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
+#ifndef NO_DSP
+	if (bSurround) d |= SNDMIX_SURROUND; else d &= ~SNDMIX_SURROUND;
+	if (bMegaBass) d |= SNDMIX_MEGABASS; else d &= ~SNDMIX_MEGABASS;
+	if (bNR) d |= SNDMIX_NOISEREDUCTION; else d &= ~SNDMIX_NOISEREDUCTION;
+#endif
+#ifndef NO_EQ
+	if (bEQ) d |= SNDMIX_EQ; else d &= ~SNDMIX_EQ;
+#endif
 	gdwSoundSetup = d;
 	InitPlayer(FALSE);
 	return TRUE;
@@ -956,14 +959,17 @@ void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
 {
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
+#ifndef NO_AGC
 	if ((nVol < m_nMasterVolume) && (nVol) && (gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
 	{
 		m_AGC.Adjust(m_nMasterVolume, nVol);
 	}
+#endif
 	m_nMasterVolume = nVol;
 }
 
 
+#ifndef NO_AGC
 void CSoundFile::SetAGC(BOOL b)
 //-----------------------------
 {
@@ -976,6 +982,7 @@ void CSoundFile::SetAGC(BOOL b)
 		}
 	} else gdwSoundSetup &= ~SNDMIX_AGC;
 }
+#endif
 
 
 UINT CSoundFile::GetCurrentPos() const
