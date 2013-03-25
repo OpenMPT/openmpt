@@ -18,64 +18,17 @@
 #define DEFAULT_XBASS_RANGE		14	// (x+2)*20 Hz (320Hz)
 #define DEFAULT_XBASS_DEPTH		6	// 1+(3>>(x-4)) (+6dB)
 
-// Buffer Sizes
-#define XBASSBUFFERSIZE			64		// 2 ms at 50KHz
-#define SURROUNDBUFFERSIZE		2048	// 50ms @ 48kHz
 
-
-// DSP Effects: PUBLIC members
-UINT CSoundFile::m_nXBassDepth = DEFAULT_XBASS_DEPTH;
-UINT CSoundFile::m_nXBassRange = DEFAULT_XBASS_RANGE;
-UINT CSoundFile::m_nProLogicDepth = 12;
-UINT CSoundFile::m_nProLogicDelay = 20;
 
 ////////////////////////////////////////////////////////////////////
 // DSP Effects internal state
 
-// Noise Reduction: simple low-pass filter
-static LONG nLeftNR = 0;
-static LONG nRightNR = 0;
 
-// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
-static LONG nSurroundSize = 0;
-static LONG nSurroundPos = 0;
-static LONG nDolbyDepth = 0;
-// Surround Biquads
-static LONG nDolbyHP_Y1 = 0;
-static LONG nDolbyHP_X1 = 0;
-static LONG nDolbyLP_Y1 = 0;
-static LONG nDolbyHP_B0 = 0;
-static LONG nDolbyHP_B1 = 0;
-static LONG nDolbyHP_A1 = 0;
-static LONG nDolbyLP_B0 = 0;
-static LONG nDolbyLP_B1 = 0;
-static LONG nDolbyLP_A1 = 0;
-
-// Bass Expansion: low-pass filter
-static LONG nXBassFlt_Y1 = 0;
-static LONG nXBassFlt_X1 = 0;
-static LONG nXBassFlt_B0 = 0;
-static LONG nXBassFlt_B1 = 0;
-static LONG nXBassFlt_A1 = 0;
-
-// DC Removal Biquad
-static LONG nDCRFlt_Y1l = 0;
-static LONG nDCRFlt_X1l = 0;
-static LONG nDCRFlt_Y1r = 0;
-static LONG nDCRFlt_X1r = 0;
-
-
-static LONG SurroundBuffer[SURROUNDBUFFERSIZE];
-
-
-// Access the main temporary mix buffer directly: avoids an extra pointer
-extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
-extern int MixRearBuffer[MIXBUFFERSIZE * 2];
 
 extern VOID MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
-extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-extern VOID MPPASMCALL X86_StereoDCRemoval(int *, UINT count);
-extern VOID MPPASMCALL X86_MonoDCRemoval(int *, UINT count);
+
+static VOID MPPASMCALL X86_StereoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r);
+static VOID MPPASMCALL X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -84,8 +37,8 @@ extern VOID MPPASMCALL X86_MonoDCRemoval(int *, UINT count);
 
 
 #define PI	3.14159265358979323f
-inline FLOAT Sgn(FLOAT x) { return (x >= 0) ? 1.0f : -1.0f; }
-VOID ShelfEQ(LONG scale,
+static inline FLOAT Sgn(FLOAT x) { return (x >= 0) ? 1.0f : -1.0f; }
+static VOID ShelfEQ(LONG scale,
 			 LONG *outA1, LONG *outB0, LONG *outB1,
 			 LONG F_c, LONG F_s, FLOAT gainDC, FLOAT gainFT, FLOAT gainPI)
 {
@@ -153,10 +106,56 @@ VOID ShelfEQ(LONG scale,
 }
 
 
-void CSoundFile::InitializeDSP(BOOL bReset)
-//-----------------------------------------
+CDSPSettings::CDSPSettings() : m_nXBassDepth(DEFAULT_XBASS_DEPTH), m_nXBassRange(DEFAULT_XBASS_RANGE), m_nProLogicDepth(12), m_nProLogicDelay(20)
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if (!m_nProLogicDelay) m_nProLogicDelay = 20;
+
+}
+
+
+CDSP::CDSP()
+{
+	// Noise Reduction: simple low-pass filter
+	nLeftNR = 0;
+	nRightNR = 0;
+
+	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
+	nSurroundSize = 0;
+	nSurroundPos = 0;
+	nDolbyDepth = 0;
+
+	// Surround Biquads
+	nDolbyHP_Y1 = 0;
+	nDolbyHP_X1 = 0;
+	nDolbyLP_Y1 = 0;
+	nDolbyHP_B0 = 0;
+	nDolbyHP_B1 = 0;
+	nDolbyHP_A1 = 0;
+	nDolbyLP_B0 = 0;
+	nDolbyLP_B1 = 0;
+	nDolbyLP_A1 = 0;
+
+	// Bass Expansion: low-pass filter
+	nXBassFlt_Y1 = 0;
+	nXBassFlt_X1 = 0;
+	nXBassFlt_B0 = 0;
+	nXBassFlt_B1 = 0;
+	nXBassFlt_A1 = 0;
+
+	// DC Removal Biquad
+	nDCRFlt_Y1l = 0;
+	nDCRFlt_X1l = 0;
+	nDCRFlt_Y1r = 0;
+	nDCRFlt_X1r = 0;
+
+	MemsetZero(SurroundBuffer);
+
+}
+
+void CDSP::Initialize(BOOL bReset, DWORD MixingFreq, DWORD SoundSetupFlags)
+//-------------------------------------------------------------------------
+{
+	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;
 	if (bReset)
 	{
 		// Noise Reduction
@@ -164,17 +163,17 @@ void CSoundFile::InitializeDSP(BOOL bReset)
 	}
 	// Pro-Logic Surround
 	nSurroundPos = nSurroundSize = 0;
-	if (gdwSoundSetup & SNDMIX_SURROUND)
+	if (SoundSetupFlags & SNDMIX_SURROUND)
 	{
 		memset(SurroundBuffer, 0, sizeof(SurroundBuffer));
-		nSurroundSize = (gdwMixingFreq * m_nProLogicDelay) / 1000;
+		nSurroundSize = (MixingFreq * m_Settings.m_nProLogicDelay) / 1000;
 		if (nSurroundSize > SURROUNDBUFFERSIZE) nSurroundSize = SURROUNDBUFFERSIZE;
-		nDolbyDepth = m_nProLogicDepth;
+		nDolbyDepth = m_Settings.m_nProLogicDepth;
 		if (nDolbyDepth < 1) nDolbyDepth = 1;
 		if (nDolbyDepth > 16) nDolbyDepth = 16;
 		// Setup biquad filters
-		ShelfEQ(1024, &nDolbyHP_A1, &nDolbyHP_B0, &nDolbyHP_B1, 200, gdwMixingFreq, 0, 0.5f, 1);
-		ShelfEQ(1024, &nDolbyLP_A1, &nDolbyLP_B0, &nDolbyLP_B1, 7000, gdwMixingFreq, 1, 0.75f, 0);
+		ShelfEQ(1024, &nDolbyHP_A1, &nDolbyHP_B0, &nDolbyHP_B1, 200, MixingFreq, 0, 0.5f, 1);
+		ShelfEQ(1024, &nDolbyLP_A1, &nDolbyLP_B0, &nDolbyLP_B1, 7000, MixingFreq, 1, 0.75f, 0);
 		nDolbyHP_X1 = nDolbyHP_Y1 = 0;
 		nDolbyLP_Y1 = 0;
 		// Surround Level
@@ -185,14 +184,14 @@ void CSoundFile::InitializeDSP(BOOL bReset)
 		nDolbyLP_B1 *= 2;
 	}
 	// Bass Expansion Reset
-	if (gdwSoundSetup & SNDMIX_MEGABASS)
+	if (SoundSetupFlags & SNDMIX_MEGABASS)
 	{
 		LONG a1 = 0, b0 = 1024, b1 = 0;
-		int nXBassCutOff = 50 + (m_nXBassRange+2) * 20;
-		int nXBassGain = m_nXBassDepth;
+		int nXBassCutOff = 50 + (m_Settings.m_nXBassRange+2) * 20;
+		int nXBassGain = m_Settings.m_nXBassDepth;
 		Limit(nXBassGain, 2, 8);
 		Limit(nXBassCutOff, 60, 600);
-		ShelfEQ(1024, &a1, &b0, &b1, nXBassCutOff, gdwMixingFreq,
+		ShelfEQ(1024, &a1, &b0, &b1, nXBassCutOff, MixingFreq,
 				1.0f + (1.0f/16.0f) * (0x300 >> nXBassGain),
 				1.0f,
 				0.0000001f);
@@ -219,8 +218,8 @@ void CSoundFile::InitializeDSP(BOOL bReset)
 
 
 // 2-channel surround
-static void ProcessStereoSurround(int count)
-//------------------------------------------
+void CDSP::ProcessStereoSurround(int * MixSoundBuffer, int count)
+//---------------------------------------------------------------
 {
 	int *pr = MixSoundBuffer, hy1 = nDolbyHP_Y1;
 	for (int r=count; r; r--)
@@ -246,8 +245,8 @@ static void ProcessStereoSurround(int count)
 
 
 // 4-channels surround
-static void ProcessQuadSurround(int count)
-//----------------------------------------
+void CDSP::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count)
+//----------------------------------------------------------------------------------
 {
 	int *pr = MixSoundBuffer, hy1 = nDolbyHP_Y1;
 	for (int r=count; r; r--)
@@ -276,22 +275,28 @@ static void ProcessQuadSurround(int count)
 }
 
 
-void CSoundFile::ProcessStereoDSP(int count)
-//------------------------------------------
+void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD SoundSetupFlags, UINT nChannels)
+//-------------------------------------------------------------------------------------------------------------
 {
-	// Dolby Pro-Logic Surround
-	if (gdwSoundSetup & SNDMIX_SURROUND)
+
+
+	if(nChannels >= 2)
 	{
-		if (gnChannels > 2) ProcessQuadSurround(count); else
-		ProcessStereoSurround(count);
+
+
+	// Dolby Pro-Logic Surround
+	if (SoundSetupFlags & SNDMIX_SURROUND)
+	{
+		if (nChannels > 2) ProcessQuadSurround(MixSoundBuffer, MixRearBuffer, count); else
+		ProcessStereoSurround(MixSoundBuffer, count);
 	}
 	// DC Removal
-	if (gdwSoundSetup & SNDMIX_MEGABASS)
+	if (SoundSetupFlags & SNDMIX_MEGABASS)
 	{
-		X86_StereoDCRemoval(MixSoundBuffer, count);
+		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l, &nDCRFlt_Y1r, &nDCRFlt_X1r);
 	}
 	// Bass Expansion
-	if (gdwSoundSetup & SNDMIX_MEGABASS)
+	if (SoundSetupFlags & SNDMIX_MEGABASS)
 	{
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
@@ -311,7 +316,7 @@ void CSoundFile::ProcessStereoDSP(int count)
 		nXBassFlt_Y1 = y1;
 	}
 	// Noise Reduction
-	if (gdwSoundSetup & SNDMIX_NOISEREDUCTION)
+	if (SoundSetupFlags & SNDMIX_NOISEREDUCTION)
 	{
 		int n1 = nLeftNR, n2 = nRightNR;
 		int *pnr = MixSoundBuffer;
@@ -328,19 +333,19 @@ void CSoundFile::ProcessStereoDSP(int count)
 		nLeftNR = n1;
 		nRightNR = n2;
 	}
-}
 
-
-void CSoundFile::ProcessMonoDSP(int count)
-//----------------------------------------
-{
-	// DC Removal
-	if (gdwSoundSetup & SNDMIX_MEGABASS)
+	
+	} else
 	{
-		X86_MonoDCRemoval(MixSoundBuffer, count);
+
+	
+	// DC Removal
+	if (SoundSetupFlags & SNDMIX_MEGABASS)
+	{
+		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l);
 	}
 	// Bass Expansion
-	if (gdwSoundSetup & SNDMIX_MEGABASS)
+	if (SoundSetupFlags & SNDMIX_MEGABASS)
 	{
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
@@ -359,7 +364,7 @@ void CSoundFile::ProcessMonoDSP(int count)
 		nXBassFlt_Y1 = y1;
 	}
 	// Noise Reduction
-	if (gdwSoundSetup & SNDMIX_NOISEREDUCTION)
+	if (SoundSetupFlags & SNDMIX_NOISEREDUCTION)
 	{
 		int n = nLeftNR;
 		int *pnr = MixSoundBuffer;
@@ -371,6 +376,11 @@ void CSoundFile::ProcessMonoDSP(int count)
 		}
 		nLeftNR = n;
 	}
+
+
+	}
+
+
 }
 
 
@@ -382,10 +392,10 @@ void CSoundFile::ProcessMonoDSP(int count)
 
 #define DCR_AMOUNT		9
 
-VOID MPPASMCALL X86_StereoDCRemoval(int *pBuffer, UINT nSamples)
+static VOID MPPASMCALL X86_StereoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r)
 {
-	int y1l=nDCRFlt_Y1l, x1l=nDCRFlt_X1l;
-	int y1r=nDCRFlt_Y1r, x1r=nDCRFlt_X1r;
+	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
+	int y1r=*nDCRFlt_Y1r, x1r=*nDCRFlt_X1r;
 
 	_asm {
 	mov esi, pBuffer
@@ -421,20 +431,21 @@ stereodcr:
 	mov y1r, edx
 	jnz stereodcr
 	}
-	nDCRFlt_Y1l = y1l;
-	nDCRFlt_X1l = x1l;
-	nDCRFlt_Y1r = y1r;
-	nDCRFlt_X1r = x1r;
+	*nDCRFlt_Y1l = y1l;
+	*nDCRFlt_X1l = x1l;
+	*nDCRFlt_Y1r = y1r;
+	*nDCRFlt_X1r = x1r;
 }
 
 
-VOID MPPASMCALL X86_MonoDCRemoval(int *pBuffer, UINT nSamples)
+static VOID MPPASMCALL X86_MonoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l)
 {
+	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	_asm {
 	mov esi, pBuffer
 	mov ecx, nSamples
-	mov edx, nDCRFlt_X1l
-	mov edi, nDCRFlt_Y1l
+	mov edx, x1l
+	mov edi, y1l
 stereodcr:
 	mov eax, [esi]
 	mov ebx, edx
@@ -452,9 +463,11 @@ stereodcr:
 	dec ecx
 	mov edi, eax
 	jnz stereodcr
-	mov nDCRFlt_X1l, edx
-	mov nDCRFlt_Y1l, edi
+	mov x1l, edx
+	mov y1l, edi
 	}
+	*nDCRFlt_Y1l = y1l;
+	*nDCRFlt_X1l = x1l;
 }
 
 
@@ -465,34 +478,33 @@ stereodcr:
 // Clean DSP Effects interface
 
 // [XBass level 0(quiet)-100(loud)], [cutoff in Hz 20-100]
-BOOL CSoundFile::SetXBassParameters(UINT nDepth, UINT nRange)
-//-----------------------------------------------------------
+BOOL CDSP::SetXBassParameters(UINT nDepth, UINT nRange)
+//-----------------------------------------------------
 {
 	if (nDepth > 100) nDepth = 100;
 	UINT gain = nDepth / 20;
 	if (gain > 4) gain = 4;
-	m_nXBassDepth = 8 - gain;	// filter attenuation 1/256 .. 1/16
+	m_Settings.m_nXBassDepth = 8 - gain;	// filter attenuation 1/256 .. 1/16
 	UINT range = nRange / 5;
 	if (range > 5) range -= 5; else range = 0;
 	if (nRange > 16) nRange = 16;
-	m_nXBassRange = 21 - range;	// filter average on 0.5-1.6ms
+	m_Settings.m_nXBassRange = 21 - range;	// filter average on 0.5-1.6ms
 	return TRUE;
 }
 
 
 // [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-50ms]
-BOOL CSoundFile::SetSurroundParameters(UINT nDepth, UINT nDelay)
-//--------------------------------------------------------------
+BOOL CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
+//--------------------------------------------------------
 {
 	UINT gain = (nDepth * 16) / 100;
 	if (gain > 16) gain = 16;
 	if (gain < 1) gain = 1;
-	m_nProLogicDepth = gain;
+	m_Settings.m_nProLogicDepth = gain;
 	if (nDelay < 4) nDelay = 4;
 	if (nDelay > 50) nDelay = 50;
-	m_nProLogicDelay = nDelay;
+	m_Settings.m_nProLogicDelay = nDelay;
 	return TRUE;
 }
-
 
 
