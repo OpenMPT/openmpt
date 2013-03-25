@@ -201,7 +201,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins].IsEmpty() || !f.Open(m_szInstrumentPath[ins])) continue;
+		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins])) continue;
 
 		size = f.GetLength();
 		LPBYTE lpFile = f.Lock(size);
@@ -265,7 +265,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	if(!m_SongFlags[SONG_ITPROJECT]) return false;
 
 	UINT i,j = 0;
-	for(i = 0 ; i < m_nInstruments ; i++) { if(!m_szInstrumentPath[i].IsEmpty() || !Instruments[i+1]) j++; }
+	for(i = 0 ; i < m_nInstruments ; i++) { if(!m_szInstrumentPath[i].empty() || !Instruments[i+1]) j++; }
 	if(m_nInstruments && j != m_nInstruments) return false;
 
 	// Open file

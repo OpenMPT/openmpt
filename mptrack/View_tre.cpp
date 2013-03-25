@@ -801,7 +801,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 			{
 				// more than one sequence -> add folder
 				CString sSeqName;
-				if(sndFile.Order.GetSequence(nSeq).m_sName.IsEmpty())
+				if(sndFile.Order.GetSequence(nSeq).m_sName.empty())
 					sSeqName.Format("Sequence %d", nSeq);
 				else
 					sSeqName.Format("%d: %s", nSeq, (LPCTSTR)sndFile.Order.GetSequence(nSeq).m_sName);
@@ -1008,7 +1008,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				if(sndFile.m_SongFlags[SONG_ITPROJECT])
 				{
 					// path info for ITP instruments
-					const bool pathOk = !sndFile.m_szInstrumentPath[nIns - 1].IsEmpty();
+					const bool pathOk = !sndFile.m_szInstrumentPath[nIns - 1].empty();
 					const bool instMod = pDoc->m_bsInstrumentModified.test(nIns - 1);
 					wsprintf(s, pathOk ? (instMod ? "%3d: * %s" : "%3d: %s") : "%3d: ? %s", nIns, (LPCTSTR)sndFile.GetInstrumentName(nIns));
 				} else
@@ -1322,7 +1322,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 			{
 				// Preview sample / instrument in module
 				char szName[16];
-				lstrcpyn(szName, GetItemText(hItem), sizeof(szName));
+				StringFixer::CopyN(szName, GetItemText(hItem));
 				const size_t n = ConvertStrTo<size_t>(szName);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm && m_SongFile)
@@ -1619,7 +1619,7 @@ void CModTree::FillInstrumentLibrary()
 			ModInstrument *pIns = m_SongFile->Instruments[iIns];
 			if(pIns)
 			{
-				lstrcpyn(szPath, pIns->name, 32);
+				StringFixer::Copy(szPath, pIns->name);
 				wsprintf(s, "%3d: %s", iIns, szPath);
 				ModTreeBuildTVIParam(tvis, s, IMAGE_INSTRUMENTS);
 				InsertItem(&tvis);
@@ -1628,7 +1628,7 @@ void CModTree::FillInstrumentLibrary()
 		for(SAMPLEINDEX iSmp = 1; iSmp <= m_SongFile->GetNumSamples(); iSmp++)
 		{
 			const ModSample &sample = m_SongFile->GetSample(iSmp);
-			lstrcpyn(szPath, m_SongFile->m_szNames[iSmp], 32);
+			strcpy(szPath, m_SongFile->m_szNames[iSmp]);
 			if (sample.pSample)
 			{
 				wsprintf(s, "%3d: %s", iSmp, szPath);
@@ -1996,7 +1996,7 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		if (m_szSongName[0])
 		{
 			CHAR s[32];
-			lstrcpyn(s, GetItemText(m_hItemDrag), CountOf(s));
+			StringFixer::CopyN(s, GetItemText(m_hItemDrag));
 			UINT n = 0;
 			if (s[0] >= '0') n += (s[0] - '0');
 			if ((s[1] >= '0') && (s[1] <= '9')) n = n*10 + (s[1] - '0');
@@ -3192,7 +3192,7 @@ void CModTree::OnSaveItem()
 	if(pSndFile && modItemID)
 	{
 
-		if(pSndFile->m_szInstrumentPath[modItemID - 1].IsEmpty())
+		if(pSndFile->m_szInstrumentPath[modItemID - 1].empty())
 		{
 			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", "",
 				(pSndFile->GetType() == MOD_TYPE_XM) ?
@@ -3612,7 +3612,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_SAMPLE:
 			if(modItemID <= sndFile.GetNumSamples() && strcmp(sndFile.m_szNames[modItemID], info->item.pszText))
 			{
-				strncpy(sndFile.m_szNames[modItemID], info->item.pszText, modSpecs.sampleNameLengthMax);
+				StringFixer::CopyN(sndFile.m_szNames[modItemID], info->item.pszText, modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO);
 			}
@@ -3621,7 +3621,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_INSTRUMENT:
 			if(modItemID <= sndFile.GetNumInstruments() && sndFile.Instruments[modItemID] != nullptr && strcmp(sndFile.Instruments[modItemID]->name, info->item.pszText))
 			{
-				strncpy(sndFile.Instruments[modItemID]->name, info->item.pszText, modSpecs.instrNameLengthMax);
+				StringFixer::CopyN(sndFile.Instruments[modItemID]->name, info->item.pszText, modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_ENVELOPE | HINT_INSTRUMENT);
 			}

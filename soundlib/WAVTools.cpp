@@ -129,8 +129,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	if(isDLS)
 	{
 		// DLS sample -> sample filename
-		strncpy(sample.filename, sampleName, CountOf(sample.filename) - 1);
-		StringFixer::SetNullTerminator(sample.filename);
+		StringFixer::Copy(sample.filename, sampleName);
 	}
 
 	// Read software name

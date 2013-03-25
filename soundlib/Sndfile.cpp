@@ -1292,9 +1292,7 @@ mpt::String CSoundFile::GetInstrumentName(UINT nInstr) const
 		return TEXT("");
 
 	ASSERT(nInstr <= GetNumInstruments());
-	mpt::String str;
-	str.AppendChars(Instruments[nInstr]->name);
-	return str;
+	return mpt::String(Instruments[nInstr]->name);
 }
 
 
@@ -1721,8 +1719,7 @@ bool CSoundFile::SetTitle(const char *titleCandidate, size_t strSize)
 {
 	if(strcmp(m_szNames[0], titleCandidate))
 	{
-		strncpy(m_szNames[0], titleCandidate, Util::Min(CountOf(m_szNames[0]), strSize));
-		StringFixer::SetNullTerminator(m_szNames[0]);
+		StringFixer::CopyN(m_szNames[0], titleCandidate, strSize);
 		return true;
 	}
 	return false;

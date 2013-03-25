@@ -920,7 +920,7 @@ void CPageEditNote::UpdateDialog()
 				if (pSndFile->GetNumInstruments())
 				{
 					if (pSndFile->Instruments[i])
-						memcpy(s+k, pSndFile->Instruments[i]->name, 32);
+						memcpy(s + k, pSndFile->Instruments[i]->name, CountOf(pSndFile->Instruments[i]->name));
 				} else
 					memcpy(s+k, pSndFile->m_szNames[i], MAX_SAMPLENAME);
 				s[k+32] = 0;

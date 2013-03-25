@@ -404,7 +404,7 @@ BOOL CModToMidi::DoConvert()
 	for (CHANNELINDEX iInit = 0; iInit < m_pSndFile->GetNumChannels(); iInit++)
 	{
 		DYNMIDITRACK &track = Tracks[iInit];
-		lstrcpyn(s, m_pSndFile->ChnSettings[iInit].szName, MAX_CHANNELNAME);
+		StringFixer::Copy(s, m_pSndFile->ChnSettings[iInit].szName);
 		track.nMidiChannel = iInit & 7;
 		if (s[0])
 		{
