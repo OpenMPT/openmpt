@@ -759,6 +759,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 				pChn->dwFlags.reset(CHN_SURROUND);
 			}
 		}
+	} else if(pIns && pIns->HasValidMIDIChannel())
+	{
+		pChn->nInsVol = pIns->nGlobalVol;
 	}
 
 
@@ -829,7 +832,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 	}
 	// Invalid sample ?
-	if(!pSmp)
+	if(pSmp == nullptr && (pIns == nullptr || !pIns->HasValidMIDIChannel()))
 	{
 		pChn->pModSample = nullptr;
 		pChn->nInsVol = 0;
@@ -837,23 +840,22 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Tone-Portamento doesn't reset the pingpong direction flag
-	if(bPorta && pSmp == pChn->pModSample)
+	if(bPorta && pSmp == pChn->pModSample && pSmp != nullptr)
 	{
 		// If channel length is 0, we cut a previous sample using SCx. In that case, we have to update sample length, loop points, etc...
 		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && pChn->nLength != 0) return;
 		pChn->dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
-		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
-	} else
+		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG));
+	} else //if(!instrumentChanged || pChn->rowCommand.instr != 0 || !IsCompatibleMode(TRK_FASTTRACKER2))	// SampleChange.xm?
 	{
 		pChn->dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
 
 		// IT compatibility tentative fix: Don't change bidi loop direction when
 		// no sample nor instrument is changed.
 		if(IsCompatibleMode(TRK_ALLTRACKERS) && pSmp == pChn->pModSample && !instrumentChanged)
-			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
+			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG));
 		else
-			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
-
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS);
 
 		if(pIns)
 		{
@@ -876,10 +878,16 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		pChn->nResSwing = pChn->nCutSwing = 0;
 	}
 
+	if(pSmp == nullptr)
+	{
+		return;
+	}
+
 	pChn->pModSample = pSmp;
 	pChn->nLength = pSmp->nLength;
 	pChn->nLoopStart = pSmp->nLoopStart;
 	pChn->nLoopEnd = pSmp->nLoopEnd;
+	pChn->dwFlags |= (pSmp->uFlags & CHN_SAMPLEFLAGS);
 
 	// IT Compatibility: Autovibrato reset
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))

@@ -1060,9 +1060,10 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 				{
 					ModChannel *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
-					if ((nIns) && (nIns <= m_pSndFile->m_nInstruments) && (pChn->nLength)
-					 && (pChn->pModInstrument) && (pChn->pModInstrument == m_pSndFile->Instruments[nIns])
-					 && ((!(pChn->dwFlags & CHN_NOTEFADE)) || (pChn->nFadeOutVol)))
+					if(nIns != 0 && nIns <= m_pSndFile->GetNumInstruments()									// There is an instrument
+						&& pChn->pModInstrument && pChn->pModInstrument == m_pSndFile->Instruments[nIns]	// And it's the correct instrument
+						&& (pChn->nLength || pChn->pModInstrument->HasValidMIDIChannel())					// And it's playing something (sample or instrument)
+						&& (!pChn->dwFlags[CHN_NOTEFADE] || pChn->nFadeOutVol))								// And it hasn't completely faded out yet, so it's still playing
 					{
 						enmEnvelopeTypes notifyEnv = ENV_VOLUME;
 						if (m_dwNotifyType & MPTNOTIFY_PITCHENV)
@@ -1549,11 +1550,14 @@ void CMainFrame::InitPreview()
 	// Avoid global volume ramping when trying samples in the treeview.
 	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_WaveFile.m_nSamplePreAmp = 48;
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_IT;
 	m_WaveFile.m_nChannels = 4;
 	m_WaveFile.m_nInstruments = 1;
+	m_WaveFile.m_nTempoMode = tempo_mode_classic;
+	m_WaveFile.m_nMixLevels = mixLevels_compatible;
 	m_WaveFile.Order.resize(2);
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
