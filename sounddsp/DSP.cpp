@@ -15,15 +15,16 @@
 #include <math.h>
 
 
+#ifndef NO_DSP
+
+
 // Bass Expansion
 #define DEFAULT_XBASS_RANGE		14	// (x+2)*20 Hz (320Hz)
 #define DEFAULT_XBASS_DEPTH		6	// 1+(3>>(x-4)) (+6dB)
 
 
-
 ////////////////////////////////////////////////////////////////////
 // DSP Effects internal state
-
 
 
 extern VOID MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
@@ -508,4 +509,6 @@ BOOL CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
 	return TRUE;
 }
 
+
+#endif // NO_DSP
 

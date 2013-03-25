@@ -12,6 +12,8 @@
 #pragma once
 
 
+#ifndef NO_DSP
+
 // Buffer Sizes
 #define SURROUNDBUFFERSIZE		2048	// 50ms @ 48kHz
 
@@ -89,3 +91,4 @@ private:
 	void ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count);
 };
 
+#endif // NO_DSP

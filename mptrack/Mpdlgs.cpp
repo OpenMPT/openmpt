@@ -500,19 +500,42 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_nSrcMode);
 	}
 	// Effects
+#ifndef NO_DSP
 	if (dwQuality & QUALITY_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
+#else
+	GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);
+#endif
+#ifndef NO_AGC
 	if (dwQuality & QUALITY_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+#else
+	GetDlgItem(IDC_CHECK2)->ShowWindow(SW_HIDE);
+#endif
+#ifndef NO_DSP
 	if (dwQuality & QUALITY_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 	if (dwQuality & QUALITY_NOISEREDUCTION) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
+#else
+	GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_CHECK5)->ShowWindow(SW_HIDE);
+#endif
+#ifndef NO_EQ
 	if (CSoundFile::GetSysInfo() & SYSMIX_SLOWCPU)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
 	else if (dwQuality & QUALITY_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+#else
+	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
+#endif
 
+#ifndef NO_DSP
 	// Bass Expansion
 	m_SbXBassDepth.SetRange(0,4);
 	m_SbXBassDepth.SetPos(8-CSoundFile::m_DSP.m_Settings.m_nXBassDepth);
 	m_SbXBassRange.SetRange(0,4);
 	m_SbXBassRange.SetPos(4 - (CSoundFile::m_DSP.m_Settings.m_nXBassRange - 1) / 5);
+#else
+	m_SbXBassDepth.ShowWindow(SW_HIDE);
+	m_SbXBassRange.ShowWindow(SW_HIDE);
+#endif
 	// Reverb
 	m_SbReverbDepth.SetRange(1, 16);
 	m_SbReverbDepth.SetPos(CSoundFile::m_nReverbDepth);
@@ -537,6 +560,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	{
 		if (dwQuality & QUALITY_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
 	}
+#ifndef NO_DSP
 	// Surround
 	{
 		UINT n = CSoundFile::m_DSP.m_Settings.m_nProLogicDepth;
@@ -547,6 +571,10 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_SbSurroundDelay.SetRange(0, 8);
 		m_SbSurroundDelay.SetPos((CSoundFile::m_DSP.m_Settings.m_nProLogicDelay-5)/5);
 	}
+#else
+	m_SbSurroundDepth.ShowWindow(SW_HIDE);
+	m_SbSurroundDelay.ShowWindow(SW_HIDE);
+#endif
 	//rewbs.resamplerConf
 	OnResamplerChanged();
 
@@ -654,14 +682,23 @@ void COptionsPlayer::OnOK()
 	DWORD dwQuality = 0;
 	DWORD dwSrcMode = 0;
 
+#ifndef NO_DSP
 	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= QUALITY_MEGABASS;
+#endif
+#ifndef NO_AGC
 	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= QUALITY_AGC;
+#endif
+#ifndef NO_EQ
 	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= QUALITY_EQ;
+#endif
+#ifndef NO_DSP
 	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= QUALITY_SURROUND;
 	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= QUALITY_NOISEREDUCTION;
+#endif
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= QUALITY_REVERB;
 	dwSrcMode = m_CbnResampling.GetCurSel();
 
+#ifndef NO_DSP
 	// Bass Expansion
 	{
 		UINT nXBassDepth = 8-m_SbXBassDepth.GetPos();
@@ -673,12 +710,14 @@ void COptionsPlayer::OnOK()
 		CSoundFile::m_DSP.m_Settings.m_nXBassDepth = nXBassDepth;
 		CSoundFile::m_DSP.m_Settings.m_nXBassRange = nXBassRange;
 	}
+#endif
 	// Reverb
 	{
 		// Reverb depth is dynamically changed
 		UINT nReverbType = m_CbnReverbPreset.GetItemData(m_CbnReverbPreset.GetCurSel());
 		if (nReverbType < NUM_REVERBTYPES) CSoundFile::gnReverbType = nReverbType;
 	}
+#ifndef NO_DSP
 	// Surround
 	{
 		UINT nProLogicDepth = m_SbSurroundDepth.GetPos();
@@ -686,6 +725,7 @@ void COptionsPlayer::OnOK()
 		CSoundFile::m_DSP.m_Settings.m_nProLogicDepth = nProLogicDepth;
 		CSoundFile::m_DSP.m_Settings.m_nProLogicDelay = nProLogicDelay;
 	}
+#endif
 	// Notify CMainFrame
 	CMainFrame *pParent = CMainFrame::GetMainFrame();
 	//rewbs.resamplerConf
@@ -912,8 +952,10 @@ void CEQSetupDlg::UpdateDialog()
 void CEQSetupDlg::UpdateEQ(BOOL bReset)
 //-------------------------------------
 {
+#ifndef NO_EQ
 	CriticalSection cs;
 	CSoundFile::SetEQGains(	m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset);
+#endif
 }
 
 

@@ -168,7 +168,9 @@ public:
 	DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
 	DWORD m_nBufferLength;
+#ifndef NO_EQ
 	EQPreset m_EqSettings;
+#endif
 
 	// MIDI Setup
 	LONG m_nMidiDevice;
