@@ -518,9 +518,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	GetDlgItem(IDC_CHECK5)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_EQ
-	if (CSoundFile::GetSysInfo() & SYSMIX_SLOWCPU)
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
-	else if (dwQuality & QUALITY_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (dwQuality & QUALITY_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
