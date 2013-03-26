@@ -1010,10 +1010,10 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					// path info for ITP instruments
 					const bool pathOk = !sndFile.m_szInstrumentPath[nIns - 1].empty();
 					const bool instMod = pDoc->m_bsInstrumentModified.test(nIns - 1);
-					wsprintf(s, pathOk ? (instMod ? "%3d: * %s" : "%3d: %s") : "%3d: ? %s", nIns, (LPCTSTR)sndFile.GetInstrumentName(nIns));
+					wsprintf(s, pathOk ? (instMod ? "%3d: * %s" : "%3d: %s") : "%3d: ? %s", nIns, sndFile.GetInstrumentName(nIns));
 				} else
 				{
-					wsprintf(s, "%3d: %s", nIns, (LPCTSTR)sndFile.GetInstrumentName(nIns));
+					wsprintf(s, "%3d: %s", nIns, sndFile.GetInstrumentName(nIns));
 				}
 
 				int nImage = IMAGE_INSTRUMENTS;
