@@ -1285,14 +1285,14 @@ LPCTSTR CSoundFile::GetSampleName(UINT nSample) const
 }
 
 
-mpt::String CSoundFile::GetInstrumentName(UINT nInstr) const
-//------------------------------------------------------
+const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
+//---------------------------------------------------------------------
 {
-	if ((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
+	if((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
 		return TEXT("");
 
 	ASSERT(nInstr <= GetNumInstruments());
-	return mpt::String(Instruments[nInstr]->name);
+	return Instruments[nInstr]->name;
 }
 
 

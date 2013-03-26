@@ -904,14 +904,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return 1; //we replace.
 	
 	case audioMasterGetCurrentProcessLevel:
-		//Log("VST plugin to host: Get Current Process Level\n");
-		//TODO: Support offline processing
-/*		if (CMainFrame::GetMainFrame()->IsRendering()) {
-			return 4;   //Offline
-		} else {
-			return 2;   //Unknown.
-		}
-*/
+		if(CMainFrame::GetMainFrame()->IsRendering())
+			return kVstProcessLevelOffline;
+		else
+			return kVstProcessLevelRealtime;
 		break;
 	
 	// returns 0: not supported, 1: off, 2:read, 3:write, 4:read/write
@@ -1027,7 +1023,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterUpdateDisplay:
 		if (pVstPlugin != nullptr)
 		{
-			// Note to self for testing: Electri-Q sends opcode. Korg M1 sends this when switchin between Combi and Multi mode to update the preset names.
+			// Note to self for testing: Electri-Q sends opcode. Korg M1 sends this when switching between Combi and Multi mode to update the preset names.
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 			if (pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
 			{
@@ -1903,10 +1899,10 @@ CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 //-------------------------------------------------------------
 {
-	static VstParameterProperties properties;
-
 	CString paramName;
 
+	VstParameterProperties properties;
+	MemsetZero(properties.label);
 	if(Dispatch(effGetParameterProperties, param, 0, &properties, 0.0f) == 1)
 	{
 		StringFixer::SetNullTerminator(properties.label);
@@ -2144,7 +2140,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			{
 				for(size_t i = 0; i < nSamples; i++)
 				{
-					outputBuffers[iOut % 2][i] += outputBuffers[iOut][i]; // assumed stereo.
+					outputBuffers[iOut % 2u][i] += outputBuffers[iOut][i]; // assumed stereo.
 				}
 			}
 
@@ -2342,8 +2338,8 @@ void CVstPlugin::HardAllNotesOff()
 	{
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
-		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre)); // centre pitch bend
-		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));	// reset all controllers
+		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 

@@ -880,6 +880,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 
 	if(pSmp == nullptr)
 	{
+		pChn->pModSample = nullptr;
+		pChn->nLength = 0;
 		return;
 	}
 
