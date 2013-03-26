@@ -192,7 +192,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			if (pSndFile->m_nInstruments)
 			{
-				wsprintf(s, "%03d:%s", n, (pSndFile->Instruments[n]) ? (LPCTSTR)pSndFile->GetInstrumentName(n) : "");
+				wsprintf(s, "%03d:%s", n, pSndFile->GetInstrumentName(n));
 			} else
 			{
 				wsprintf(s, "%03d:%s", n, pSndFile->m_szNames[n]);

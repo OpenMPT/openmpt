@@ -92,13 +92,17 @@ enum enmLineEndings
 #define INTERNAL_LINEENDING	'\r'	// The character that represents line endings internally
 
 
+#ifdef MODPLUG_TRACKER
+
 // For WAV export (writing pattern positions to file)
 struct PatternCuePoint
 {
-	ULONGLONG	offset;			// offset in the file (in samples)
-	ORDERINDEX	order;			// which order is this?
-	bool		processed;		// has this point been processed by the main WAV render function yet?
+	uint64     offset;			// offset in the file (in samples)
+	ORDERINDEX order;			// which order is this?
+	bool       processed;		// has this point been processed by the main WAV render function yet?
 };
+
+#endif // MODPLUG_TRACKER
 
 
 // Return values for GetLength()
@@ -315,7 +319,9 @@ public:
 	DWORD m_dwCreatedWithVersion;
 	DWORD m_dwLastSavedWithVersion;
 
+#ifdef MODPLUG_TRACKER
 	vector<PatternCuePoint> m_PatternCuePoints;			// For WAV export (writing pattern positions to file)
+#endif // MODPLUG_TRACKER
 
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 	RowVisitor visitedSongRows;
@@ -365,7 +371,7 @@ public:
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	LPCSTR GetTitle() const { return m_szNames[0]; }
 	LPCTSTR GetSampleName(UINT nSample) const;
-	mpt::String GetInstrumentName(UINT nInstr) const;
+	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
 
