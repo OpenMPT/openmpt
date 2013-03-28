@@ -1353,40 +1353,41 @@ bool CModDoc::SurroundChannel(CHANNELINDEX nChn, bool surround)
 bool CModDoc::SetChannelGlobalVolume(CHANNELINDEX nChn, uint16 nVolume)
 //---------------------------------------------------------------------
 {
-	bool bOk = false;
-	if ((nChn >= m_SndFile.GetNumChannels()) || (nVolume > 64)) return false;
-	if (m_SndFile.ChnSettings[nChn].nVolume != nVolume)
+	bool ok = false;
+	if(nChn >= m_SndFile.GetNumChannels() || nVolume > 64) return false;
+	if(m_SndFile.ChnSettings[nChn].nVolume != nVolume)
 	{
 		m_SndFile.ChnSettings[nChn].nVolume = nVolume;
-		if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
-		bOk = true;
+		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
+		ok = true;
 	}
 	m_SndFile.Chn[nChn].nGlobalVol = nVolume;
-	return bOk;
+	return ok;
 }
 
 
 bool CModDoc::SetChannelDefaultPan(CHANNELINDEX nChn, uint16 nPan)
 //----------------------------------------------------------------
 {
-	bool bOk = false;
-	if ((nChn >= m_SndFile.GetNumChannels()) || (nPan > 256)) return false;
-	if (m_SndFile.ChnSettings[nChn].nPan != nPan)
+	bool ok = false;
+	if(nChn >= m_SndFile.GetNumChannels() || nPan > 256) return false;
+	if(m_SndFile.ChnSettings[nChn].nPan != nPan || m_SndFile.ChnSettings[nChn].dwFlags[CHN_SURROUND])
 	{
 		m_SndFile.ChnSettings[nChn].nPan = nPan;
 		m_SndFile.ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
-		if (m_SndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
-		bOk = true;
+		if(m_SndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
+		ok = true;
 	}
 	m_SndFile.Chn[nChn].nPan = nPan;
-	return bOk;
+	m_SndFile.Chn[nChn].dwFlags.reset(CHN_SURROUND);
+	return ok;
 }
 
 
 bool CModDoc::IsChannelMuted(CHANNELINDEX nChn) const
 //---------------------------------------------------
 {
-	if (nChn >= m_SndFile.GetNumChannels()) return true;
+	if(nChn >= m_SndFile.GetNumChannels()) return true;
 	return m_SndFile.ChnSettings[nChn].dwFlags[CHN_MUTE];
 }
 
@@ -1394,15 +1395,15 @@ bool CModDoc::IsChannelMuted(CHANNELINDEX nChn) const
 bool CModDoc::IsSampleMuted(SAMPLEINDEX nSample) const
 //----------------------------------------------------
 {
-	if ((!nSample) || (nSample > m_SndFile.GetNumSamples())) return false;
-	return (m_SndFile.GetSample(nSample).uFlags & CHN_MUTE) != 0;
+	if(!nSample || nSample > m_SndFile.GetNumSamples()) return false;
+	return m_SndFile.GetSample(nSample).uFlags[CHN_MUTE];
 }
 
 
 bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
 //-----------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_SndFile.GetNumInstruments()) || (!m_SndFile.Instruments[nInstr])) return false;
+	if(!nInstr || nInstr > m_SndFile.GetNumInstruments() || !m_SndFile.Instruments[nInstr]) return false;
 	return m_SndFile.Instruments[nInstr]->dwFlags[INS_MUTE];
 }
 
@@ -1410,7 +1411,7 @@ bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
 UINT CModDoc::GetPatternSize(PATTERNINDEX nPat) const
 //---------------------------------------------------
 {
-	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat])) return m_SndFile.Patterns[nPat].GetNumRows();
+	if(nPat < m_SndFile.Patterns.Size() && m_SndFile.Patterns[nPat]) return m_SndFile.Patterns[nPat].GetNumRows();
 	return 0;
 }
 
@@ -1421,7 +1422,7 @@ void CModDoc::SetFollowWnd(HWND hwnd, DWORD dwType)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	m_hWndFollow = hwnd;
 	m_dwNotifyType = dwType;
-	if (pMainFrm) pMainFrm->SetFollowSong(this, m_hWndFollow, TRUE, m_dwNotifyType);
+	if(pMainFrm) pMainFrm->SetFollowSong(this, m_hWndFollow, TRUE, m_dwNotifyType);
 }
 
 
