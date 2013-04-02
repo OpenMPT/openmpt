@@ -50,31 +50,6 @@
 #include <fstream>
 #include <strstream>
 
-#ifndef OFN_FORCESHOWHIDDEN
-#define OFN_FORCESHOWHIDDEN		0x10000000
-#endif
-
-#ifndef _WAVEFORMATEXTENSIBLE_
-#define _WAVEFORMATEXTENSIBLE_
-
-typedef struct {
-    WAVEFORMATEX    Format;
-    union {
-        WORD wValidBitsPerSample;       /* bits of precision  */
-        WORD wSamplesPerBlock;          /* valid if wBitsPerSample==0 */
-        WORD wReserved;                 /* If neither applies, set to zero. */
-    } Samples;
-    DWORD           dwChannelMask;      /* which channels are */
-                                        /* present in stream  */
-    GUID            SubFormat;
-} WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
-
-#endif // !_WAVEFORMATEXTENSIBLE_
-
-#if !defined(WAVE_FORMAT_EXTENSIBLE)
-#define  WAVE_FORMAT_EXTENSIBLE                 0xFFFE
-#endif // !defined(WAVE_FORMAT_EXTENSIBLE)
-
 // Use inline assembly at all
 #define ENABLE_ASM
 
@@ -115,7 +90,7 @@ typedef struct {
 
 // Define to build without MO3 support.
 //#define NO_MO3_SUPPORT
-				  
+
 // Define to build without DirectSound support.
 //#define NO_DSOUND
 

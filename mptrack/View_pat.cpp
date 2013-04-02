@@ -4701,6 +4701,11 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
+	if(note < NOTE_MIN_SPECIAL)
+	{
+		Limit(note, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
+	}
+
 	const bool liveRecord = IsLiveRecord();
 	const bool isSplit = IsNoteSplit(note);
 	UINT ins = 0;

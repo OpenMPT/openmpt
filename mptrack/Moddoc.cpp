@@ -518,24 +518,28 @@ BOOL CModDoc::SaveModified()
 bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
 //-------------------------------------------------
 {
+	bool success = false;
 	if(instr > 0 && instr <= GetNumInstruments())
 	{
 		instr--;
 		if(!m_SndFile.m_szInstrumentPath[instr].empty())
 		{
 			const size_t len = m_SndFile.m_szInstrumentPath[instr].length();
-			const bool iti = _stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 3], "iti") == 0;
-			const bool xi  = _stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 2], "xi") == 0;
+			const bool iti = !_stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 3], "iti");
+			const bool xi  = !_stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 2], "xi");
 
-			if(iti || (!iti && !xi  && m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-				m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr], false);
-			if(xi  || (!xi  && !iti && m_SndFile.GetType() == MOD_TYPE_XM))
-				m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr]);
-			m_bsInstrumentModified.reset(instr);
-			return true;
+			if(iti || (!xi  && m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+				success = m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr], false);
+			else
+				success = m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr]);
+
+			if(success)
+				m_bsInstrumentModified.reset(instr);
+			else
+				Reporting::Error(("Error while saving\n" + m_SndFile.m_szInstrumentPath[instr] + "!").c_str());
 		}
 	}
-	return false;
+	return success;
 }
 
 // -! NEW_FEATURE#0023

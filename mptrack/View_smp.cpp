@@ -2621,7 +2621,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
 	if (!pSndFile) return 0;
 
-	const BYTE nNote  = midibyte1 + NOTE_MIN;
+	uint8 nNote = midibyte1 + NOTE_MIN;
 	int nVol = midibyte2;
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
 	if(event == MIDIEvents::evNoteOn && !nVol)
@@ -2644,6 +2644,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		midibyte2 = 0;
 
 	case MIDIEvents::evNoteOn: // Note On
+		LimitMax(nNote, NOTE_MAX);
 		pModDoc->NoteOff(nNote, true);
 		if(midibyte2 & 0x7F)
 		{
