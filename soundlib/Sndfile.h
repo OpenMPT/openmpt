@@ -32,6 +32,7 @@
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 
+#include "snd_rvb.h"
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
@@ -235,6 +236,9 @@ private: //Misc data
 	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
 public:	// Static Members
+#ifndef NO_REVERB
+	static CReverb m_Reverb;
+#endif
 #ifndef NO_DSP
 	static CDSP m_DSP;
 #endif
@@ -243,9 +247,6 @@ public:	// Static Members
 #endif
 #ifndef NO_AGC
 	static CAGC m_AGC;
-#endif
-#ifndef NO_REVERB
-	static UINT m_nReverbDepth, gnReverbType;
 #endif
 	static UINT m_nStereoSeparation;
 	static UINT m_nMaxMixChannels;
@@ -501,8 +502,6 @@ public:
 #ifndef NO_AGC
 	static void SetAGC(BOOL b);
 #endif
-	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
-	static BOOL SetReverbParameters(UINT nDepth, UINT nType);
 #ifndef NO_EQ
 	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
