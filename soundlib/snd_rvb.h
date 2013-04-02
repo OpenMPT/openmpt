@@ -10,6 +10,8 @@
 
 #pragma once
 
+#ifndef NO_REVERB
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // SW Reverb structures
@@ -197,3 +199,4 @@ VOID MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixO
 #define SNDMIX_REVERB_PRESET_PLATE \
  -1000, -200, 1.30f,0.90f,     0,0.002f,     0,0.010f,100.0f, 75.0f
 
+#endif // NO_REVERB

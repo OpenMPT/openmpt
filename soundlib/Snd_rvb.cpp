@@ -13,6 +13,8 @@
 #include "sndfile.h"
 #include "snd_rvb.h"
 
+#ifndef NO_REVERB
+
 #pragma warning(disable:4725)	// Pentium fdiv bug
 #pragma warning(disable:4731)	// ebp modified
 
@@ -1054,3 +1056,5 @@ FLOAT mBToLinear(LONG value_mB)
 	}
 	return fresult;
 }
+
+#endif // NO_REVERB
