@@ -1595,11 +1595,9 @@ void CMainFrame::InitPreview()
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = tempo_mode_classic;
 	m_WaveFile.m_nMixLevels = mixLevels_compatible;
-	m_WaveFile.Order.resize(2);
+	m_WaveFile.Order.resize(1);
 	m_WaveFile.Order[0] = 0;
-	m_WaveFile.Order[1] = 1;
 	m_WaveFile.Patterns.Insert(0, 64);
-	m_WaveFile.Patterns.Insert(1, 1);
 }
 
 
@@ -1625,13 +1623,9 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 			m[63 * 4].note = NOTE_NOTECUT;
 			m[63 * 4 + 1].note = NOTE_NOTECUT;
 		}
-	}
-
-	m = m_WaveFile.Patterns[1];
-	if(m)
-	{
-		m->command = CMD_POSITIONJUMP;
-		m->param = 1;
+		m[63 * 4 + 2].command = CMD_POSITIONJUMP;
+		m[63 * 4 + 3].command = CMD_PATTERNBREAK;
+		m[63 * 4 + 3].param = 63;
 	}
 }
 

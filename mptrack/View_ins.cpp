@@ -2158,8 +2158,8 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	if(!pSndFile) return 0;
 
-	const BYTE nNote  = midiByte1 + NOTE_MIN;
-	int nVol   = midiByte2;
+	uint8 nNote  = midiByte1 + NOTE_MIN;
+	int nVol = midiByte2;
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
 	if((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
@@ -2188,8 +2188,9 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		midiByte2 = 0;
 
 	case MIDIEvents::evNoteOn: // Note On
+		LimitMax(nNote, NOTE_MAX);
 		pModDoc->NoteOff(nNote, false, m_nInstrument);
-		if (midiByte2 & 0x7F)
+		if(midiByte2 & 0x7F)
 		{
 			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
 			pModDoc->PlayNote(nNote, m_nInstrument, 0, false, nVol);
