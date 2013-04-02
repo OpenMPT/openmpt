@@ -10,8 +10,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
-
-extern BYTE ImpulseTrackerPortaVolCmd[16];
+#include "Tables.h"
 
 
 // Convert an Exx command (MOD) to Sxx command (S3M)
