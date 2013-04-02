@@ -455,8 +455,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CSoundFile::m_DSP.m_Settings.m_nXBassRange = CMainFrame::GetPrivateProfileLong("Effects", "XBassRange", CSoundFile::m_DSP.m_Settings.m_nXBassRange, iniFile);
 #endif
 #ifndef NO_REVERB
-	CSoundFile::m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_nReverbDepth, iniFile);
-	CSoundFile::gnReverbType = CMainFrame::GetPrivateProfileLong("Effects", "ReverbType", CSoundFile::gnReverbType, iniFile);
+	CSoundFile::m_Reverb.m_Settings.m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_Reverb.m_Settings.m_nReverbDepth, iniFile);
+	CSoundFile::m_Reverb.m_Settings.m_nReverbType = CMainFrame::GetPrivateProfileLong("Effects", "ReverbType", CSoundFile::m_Reverb.m_Settings.m_nReverbType, iniFile);
 #endif
 #ifndef NO_DSP
 	CSoundFile::m_DSP.m_Settings.m_nProLogicDepth = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, iniFile);
@@ -622,8 +622,8 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nXBassRange, &dwDWORDSize);
 #endif
 #ifndef NO_REVERB
-		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nReverbDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "ReverbType", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::gnReverbType, &dwDWORDSize);
+		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_Reverb.m_Settings.m_nReverbDepth, &dwDWORDSize);
+		RegQueryValueEx(key, "ReverbType", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_Reverb.m_Settings.m_nReverbType, &dwDWORDSize);
 #endif NO_REVERB
 #ifndef NO_DSP
 		RegQueryValueEx(key, "ProLogicDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, &dwDWORDSize);
@@ -847,8 +847,8 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_DSP.m_Settings.m_nXBassRange, iniFile);
 #endif
 #ifndef NO_REVERB
-	CMainFrame::WritePrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_nReverbDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "ReverbType", CSoundFile::gnReverbType, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_Reverb.m_Settings.m_nReverbDepth, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "ReverbType", CSoundFile::m_Reverb.m_Settings.m_nReverbType, iniFile);
 #endif
 #ifndef NO_DSP
 	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, iniFile);
