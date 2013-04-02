@@ -36,6 +36,9 @@ DWORD CSoundFile::gdwSoundSetup = 0;
 DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
+#ifndef NO_REVERB
+CReverb CSoundFile::m_Reverb;
+#endif
 #ifndef NO_DSP
 CDSP CSoundFile::m_DSP;
 #endif
@@ -73,12 +76,7 @@ extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
 extern int MixRearBuffer[MIXBUFFERSIZE * 2];
 
 #ifndef NO_REVERB
-extern UINT gnReverbSend;
-extern LONG gnRvbROfsVol;
-extern LONG gnRvbLOfsVol;
-
-extern VOID InitializeReverb(BOOL bReset);
-extern void ProcessReverb(UINT nSamples);
+extern int MixReverbBuffer[MIXBUFFERSIZE * 2];
 #endif
 
 // Log tables for pre-amp
@@ -160,10 +158,10 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 	if (gdwMixingFreq > MAX_SAMPLE_RATE) gdwMixingFreq = MAX_SAMPLE_RATE;
 	gnDryROfsVol = gnDryLOfsVol = 0;
 #ifndef NO_REVERB
-	gnRvbROfsVol = gnRvbLOfsVol = 0;
+	m_Reverb.gnRvbROfsVol = m_Reverb.gnRvbLOfsVol = 0;
 #endif
 #ifndef NO_REVERB
-	InitializeReverb(bReset);
+	m_Reverb.Initialize(bReset, gdwMixingFreq);
 #endif
 #ifndef NO_DSP
 	m_DSP.Initialize(bReset, gdwMixingFreq, gdwSoundSetup);
@@ -289,7 +287,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		lSampleCount = lCount;
 
 #ifndef NO_REVERB
-		gnReverbSend = 0;
+		m_Reverb.gnReverbSend = 0;
 #endif // NO_REVERB
 
 		// Resetting sound buffer
@@ -302,7 +300,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			m_nMixStat += CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			ProcessReverb(lCount);
+			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount);
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
@@ -317,7 +315,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			m_nMixStat += CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			ProcessReverb(lCount);
+			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount);
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);

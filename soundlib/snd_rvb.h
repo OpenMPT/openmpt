@@ -106,19 +106,76 @@ typedef struct _ENVIRONMENTREVERB
 } ENVIRONMENTREVERB, *PENVIRONMENTREVERB;
 
 
-// Pre/Post resampling and filtering
-UINT X86_ReverbProcessPreFiltering1x(int *pWet, UINT nSamples);
-UINT X86_ReverbProcessPreFiltering2x(int *pWet, UINT nSamples);
-VOID MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, UINT nSamples);
-VOID X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT nSamples);
-VOID MMX_ReverbDCRemoval(int *pBuffer, UINT nSamples);
-VOID X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, UINT nSamples);
-// Process pre-diffusion and pre-delay
-VOID MMX_ProcessPreDelay(PSWRVBREFDELAY pPreDelay, const int *pIn, UINT nSamples);
-// Process reflections
-VOID MMX_ProcessReflections(PSWRVBREFDELAY pPreDelay, short int *pRefOut, int *pMixOut, UINT nSamples);
-// Process Late Reverb (SW Reflections): stereo reflections output, 32-bit reverb output, SW reverb gain
-VOID MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixOut, UINT nSamples);
+//===================
+class CReverbSettings
+//===================
+{
+public:
+	UINT m_nReverbDepth;
+	UINT m_nReverbType;
+public:
+	CReverbSettings();
+};
+
+
+//===========
+class CReverb
+//===========
+{
+public:
+	CReverbSettings m_Settings;
+
+	// Shared reverb state
+	UINT gnReverbSend;
+	LONG gnRvbROfsVol;
+	LONG gnRvbLOfsVol;
+
+private:
+
+	UINT gnReverbSamples;
+	UINT gnReverbDecaySamples;
+
+	// Internal reverb state
+	BOOL g_bLastInPresent;
+	BOOL g_bLastOutPresent;
+	int g_nLastRvbIn_xl;
+	int g_nLastRvbIn_xr;
+	int g_nLastRvbIn_yl;
+	int g_nLastRvbIn_yr;
+	int g_nLastRvbOut_xl;
+	int g_nLastRvbOut_xr;
+	__int64 gnDCRRvb_Y1;
+	__int64 gnDCRRvb_X1;
+
+	// Reverb mix buffers
+	SWRVBREFDELAY g_RefDelay;
+	SWLATEREVERB g_LateReverb;
+
+public:
+	CReverb();
+	~CReverb() {}
+public:
+	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples);
+	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
+	bool SetReverbParameters(UINT nDepth, UINT nType);
+private:
+	void Shutdown();
+	// Pre/Post resampling and filtering
+	UINT X86_ReverbProcessPreFiltering1x(int *pWet, UINT nSamples);
+	UINT X86_ReverbProcessPreFiltering2x(int *pWet, UINT nSamples);
+	VOID MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, UINT nSamples);
+	VOID X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT nSamples);
+	VOID MMX_ReverbDCRemoval(int *pBuffer, UINT nSamples);
+	VOID X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, UINT nSamples);
+	// Process pre-diffusion and pre-delay
+	VOID MMX_ProcessPreDelay(PSWRVBREFDELAY pPreDelay, const int *pIn, UINT nSamples);
+	// Process reflections
+	VOID MMX_ProcessReflections(PSWRVBREFDELAY pPreDelay, short int *pRefOut, int *pMixOut, UINT nSamples);
+	// Process Late Reverb (SW Reflections): stereo reflections output, 32-bit reverb output, SW reverb gain
+	VOID MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixOut, UINT nSamples);
+};
+
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -198,5 +255,6 @@ VOID MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixO
  -1000, -600, 1.80f,0.70f, -2000,0.030f, -1400,0.060f,100.0f,100.0f
 #define SNDMIX_REVERB_PRESET_PLATE \
  -1000, -200, 1.30f,0.90f,     0,0.002f,     0,0.010f,100.0f, 75.0f
+
 
 #endif // NO_REVERB
