@@ -244,7 +244,9 @@ public:	// Static Members
 #ifndef NO_AGC
 	static CAGC m_AGC;
 #endif
+#ifndef NO_REVERB
 	static UINT m_nReverbDepth, gnReverbType;
+#endif
 	static UINT m_nStereoSeparation;
 	static UINT m_nMaxMixChannels;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;

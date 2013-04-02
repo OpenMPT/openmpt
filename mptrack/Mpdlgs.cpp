@@ -589,6 +589,8 @@ BOOL COptionsPlayer::OnInitDialog()
 	m_SbXBassDepth.ShowWindow(SW_HIDE);
 	m_SbXBassRange.ShowWindow(SW_HIDE);
 #endif
+
+#ifndef NO_REVERB
 	// Reverb
 	m_SbReverbDepth.SetRange(1, 16);
 	m_SbReverbDepth.SetPos(CSoundFile::m_nReverbDepth);
@@ -613,6 +615,12 @@ BOOL COptionsPlayer::OnInitDialog()
 	{
 		if (dwQuality & QUALITY_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
 	}
+#else
+	GetDlgItem(IDC_CHECK6)->ShowWindow(SW_HIDE);
+	m_SbReverbDepth.ShowWindow(SW_HIDE);
+	m_CbnReverbPreset.ShowWindow(SW_HIDE);
+#endif
+
 #ifndef NO_DSP
 	// Surround
 	{
@@ -655,13 +663,15 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //-----------------------------------------------------------------
 {
 	if (nSBCode == SB_ENDSCROLL) return;
-	UINT n = m_SbReverbDepth.GetPos();
 	if ((psb) && (psb->m_hWnd == m_SbReverbDepth.m_hWnd))
 	{
+#ifndef NO_REVERB
+		UINT n = m_SbReverbDepth.GetPos();
 		if (n != CSoundFile::m_nReverbDepth)
 		{
 			if ((n) && (n <= 16)) CSoundFile::m_nReverbDepth = n;
 		}
+#endif
 	} else
 	{
 		OnSettingsChanged();
@@ -764,12 +774,14 @@ void COptionsPlayer::OnOK()
 		CSoundFile::m_DSP.m_Settings.m_nXBassRange = nXBassRange;
 	}
 #endif
+#ifndef NO_REVERB
 	// Reverb
 	{
 		// Reverb depth is dynamically changed
 		UINT nReverbType = m_CbnReverbPreset.GetItemData(m_CbnReverbPreset.GetCurSel());
 		if (nReverbType < NUM_REVERBTYPES) CSoundFile::gnReverbType = nReverbType;
 	}
+#endif
 #ifndef NO_DSP
 	// Surround
 	{
