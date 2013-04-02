@@ -1499,15 +1499,18 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pMixFuncTable = gpMixFunctionTable;
 		}
 		nsamples = count;
-	#ifndef NO_REVERB
-		pbuffer = (gdwSoundSetup & SNDMIX_REVERB) ? MixReverbBuffer : MixSoundBuffer;
-		if(pChannel->dwFlags[CHN_SURROUND] && gnChannels > 2) pbuffer = MixRearBuffer;
-		if(pChannel->dwFlags[CHN_NOREVERB]) pbuffer = MixSoundBuffer;
 
-	#ifdef ENABLE_MMX
+		pbuffer = MixSoundBuffer;
+#ifndef NO_REVERB
+#ifdef ENABLE_MMX
+		if((gdwSoundSetup & SNDMIX_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX) && !pChannel->dwFlags[CHN_NOREVERB])
+			pbuffer = MixReverbBuffer;
 		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & SYSMIX_ENABLEMMX))
 			pbuffer = MixReverbBuffer;
-	#endif
+#endif
+#endif
+		if(pChannel->dwFlags[CHN_SURROUND] && gnChannels > 2)
+			pbuffer = MixRearBuffer;
 
 		//Look for plugins associated with this implicit tracker channel.
 		PLUGINDEX nMixPlugin = GetBestPlugin(ChnMix[nChn], PrioritiseInstrument, RespectMutes);
@@ -1540,6 +1543,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 				}
 			}
 		}
+#ifndef NO_REVERB
 		if (pbuffer == MixReverbBuffer)
 		{
 			if (!gnReverbSend)
@@ -1550,10 +1554,8 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pOfsR = &gnRvbROfsVol;
 			pOfsL = &gnRvbLOfsVol;
 		}
+#endif
 		bSurround = (pbuffer == MixRearBuffer);
-	#else
-		pbuffer = MixSoundBuffer;
-	#endif
 		nchused++;
 		////////////////////////////////////////////////////
 	SampleLooping:
