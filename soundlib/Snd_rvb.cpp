@@ -22,10 +22,8 @@ extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 // Reverb mix buffers
-#pragma bss_seg(".modplug")
 static SWRVBREFDELAY g_RefDelay;
 static SWLATEREVERB g_LateReverb;
-#pragma bss_seg()
 
 // Shared reverb state
 UINT gnReverbSamples = 0;

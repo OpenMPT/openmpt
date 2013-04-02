@@ -11,14 +11,13 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#include "Tables.h"
 
 // AWE32: cutoff = reg[0-255] * 31.25 + 100 -> [100Hz-8060Hz]
 // EMU10K1 docs: cutoff = reg[0-127]*62+100
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-
-extern float ITResonanceTable[128];
 
 
 DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const

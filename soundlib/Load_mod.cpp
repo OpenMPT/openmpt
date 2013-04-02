@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "Tables.h"
 
 void CSoundFile::ConvertModCommand(ModCommand &m) const
 //-----------------------------------------------------
@@ -1024,8 +1025,6 @@ bool CSoundFile::ReadM15(FileReader &file)
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif	// MODPLUG_TRACKER
-
-extern WORD ProTrackerPeriodTable[6*12];
 
 bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 //-------------------------------------------------

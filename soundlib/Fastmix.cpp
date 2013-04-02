@@ -17,8 +17,6 @@
 
 #include "WindowedFIR.h"
 
-#pragma bss_seg(".modplug")
-
 // Front Mix Buffer (Also room for interleaved rear mix)
 int MixSoundBuffer[MIXBUFFERSIZE * 4];
 
@@ -29,8 +27,6 @@ int MixReverbBuffer[MIXBUFFERSIZE * 2];
 
 int MixRearBuffer[MIXBUFFERSIZE * 2];
 float MixFloatBuffer[MIXBUFFERSIZE * 2];
-
-#pragma bss_seg()
 
 
 #ifndef NO_REVERB
