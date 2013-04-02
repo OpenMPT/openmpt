@@ -1083,6 +1083,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Tables.h"
+				>
+			</File>
+			<File
 				RelativePath=".\tagging.h"
 				>
 			</File>
