@@ -1,5 +1,14 @@
-#ifndef _SNDMIX_REVERB_H_
-#define _SNDMIX_REVERB_H_
+/*
+ * Snd_rvb.h
+ * ---------
+ * Purpose: Mixing code for reverb.
+ * Notes  : Ugh... This should really be removed at some point.
+ * Authors: Olivier Lapicque
+ *          OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+#pragma once
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -187,7 +196,4 @@ VOID MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixO
  -1000, -600, 1.80f,0.70f, -2000,0.030f, -1400,0.060f,100.0f,100.0f
 #define SNDMIX_REVERB_PRESET_PLATE \
  -1000, -200, 1.30f,0.90f,     0,0.002f,     0,0.010f,100.0f, 75.0f
-
-
-#endif // _SNDMIX_REVERB_H_
 
