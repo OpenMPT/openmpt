@@ -29,14 +29,9 @@ int MixRearBuffer[MIXBUFFERSIZE * 2];
 float MixFloatBuffer[MIXBUFFERSIZE * 2];
 
 
-#ifndef NO_REVERB
-extern UINT gnReverbSend;
-#endif
-
 extern LONG gnDryROfsVol;
 extern LONG gnDryLOfsVol;
-extern LONG gnRvbROfsVol;
-extern LONG gnRvbLOfsVol;
+
 
 // 4x256 taps polyphase FIR resampling filter
 extern short int gFastSinc[];
@@ -1546,13 +1541,13 @@ UINT CSoundFile::CreateStereoMix(int count)
 #ifndef NO_REVERB
 		if (pbuffer == MixReverbBuffer)
 		{
-			if (!gnReverbSend)
+			if (!m_Reverb.gnReverbSend)
 			{
-				X86_StereoFill(MixReverbBuffer, count, &gnRvbROfsVol, &gnRvbLOfsVol);
+				X86_StereoFill(MixReverbBuffer, count, &m_Reverb.gnRvbROfsVol, &m_Reverb.gnRvbLOfsVol);
 			}
-			gnReverbSend += count;
-			pOfsR = &gnRvbROfsVol;
-			pOfsL = &gnRvbLOfsVol;
+			m_Reverb.gnReverbSend += count;
+			pOfsR = &m_Reverb.gnRvbROfsVol;
+			pOfsL = &m_Reverb.gnRvbLOfsVol;
 		}
 #endif
 		bSurround = (pbuffer == MixRearBuffer);
