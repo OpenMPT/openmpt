@@ -14,6 +14,7 @@
 #include "sndfile.h"
 #include "MIDIEvents.h"
 #include "tuning.h"
+#include "Tables.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif
@@ -68,18 +69,6 @@ extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
 extern void SndMixInitializeTables(const MixerSettings &mixersettings);
 
-extern short int ModSinusTable[64];
-extern short int ModRampDownTable[64];
-extern short int ModSquareTable[64];
-extern short int ModRandomTable[64];
-extern short int ITSinusTable[256];
-extern short int ITRampDownTable[256];
-extern short int ITSquareTable[256];
-extern DWORD LinearSlideUpTable[256];
-extern DWORD LinearSlideDownTable[256];
-extern DWORD FineLinearSlideUpTable[16];
-extern DWORD FineLinearSlideDownTable[16];
-extern signed char ft2VibratoTable[256];	// -64 .. +64
 extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
 extern int MixRearBuffer[MIXBUFFERSIZE * 2];
 

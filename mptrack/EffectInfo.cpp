@@ -12,8 +12,7 @@
 #include "EffectInfo.h"
 #include "mptrack.h"
 #include "..\soundlib\modcommand.h"
-
-extern WORD S3MFineTuneTable[16];
+#include "../soundlib/Tables.h"
 
 ///////////////////////////////////////////////////////////////////////////
 // Effects description
