@@ -57,7 +57,7 @@ class CModDocTemplate: public CMultiDocTemplate
 public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
-	
+
 	#if (_MSC_VER < MSVC_VER_2010)
 		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE);
 	#else
@@ -88,7 +88,7 @@ public:
 	}
 
 	#if (_MSC_VER < MSVC_VER_2010)
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, makeVisible); 
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, makeVisible);
 	#else
 		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
 	#endif
@@ -108,7 +108,7 @@ public:
 				Reporting::Error(str);
 			}
 			else //Case: Valid path but opening fails.
-			{		
+			{
 				const int nOdc = theApp.GetOpenDocumentCount();
 				CString str;
 				str.Format(GetStrI18N(_TEXT("Opening \"%s\" failed. This can happen if "
@@ -298,9 +298,9 @@ public:
 
 public:
 	CMPTCommandLineInfo()
-	{ 
-		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx = 
-		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false; 
+	{
+		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx =
+		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false;
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
 };
@@ -334,7 +334,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 //-------------------------------------------------------------------
 {
 	TCHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
-	
+
 	if ((!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
 	if (!glpMidiLibrary)
 	{
@@ -427,7 +427,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 //-----------------------------------------------------
 {
 	TCHAR szFileName[_MAX_PATH], s[128];
-	
+
 	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
 	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
 	{
@@ -548,10 +548,10 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 	DWORD nBanks = 0;
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
-		
+
 		if(!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
 			continue;
-		
+
 		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), CountOf(szPath) - 1);
 		if(theApp.IsPortableMode())
 		{
@@ -621,7 +621,7 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	ON_COMMAND(ID_FILE_NEWIT,	OnFileNewIT)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	ON_COMMAND(ID_NEW_ITPROJECT,OnFileNewITProject)	
+	ON_COMMAND(ID_NEW_ITPROJECT,OnFileNewITProject)
 // -! NEW_FEATURE#0023
 	ON_COMMAND(ID_NEW_MPT,		OnFileNewMPT)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
@@ -772,7 +772,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	{
 		strcpy(m_szConfigDirectory, m_szExePath);
 	}
-	
+
 	// Create tunings dir
 	CString sTuningPath;
 	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
@@ -798,9 +798,9 @@ void CTrackApp::SetupPaths(bool overridePortable)
 			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind;
 			hFind = FindFirstFile(sSearchPattern, &FindFileData);
-			if(hFind != INVALID_HANDLE_VALUE) 
+			if(hFind != INVALID_HANDLE_VALUE)
 			{
-				do 
+				do
 				{
 					MoveConfigFile(FindFileData.cFileName, "tunings\\");
 				} while(FindNextFile(hFind, &FindFileData) != 0);
@@ -875,7 +875,7 @@ BOOL CTrackApp::InitInstance()
 	{
 		free((void *)m_pszProfileName);
 	}
-	m_pszProfileName = _tcsdup(m_szConfigFileName); 
+	m_pszProfileName = _tcsdup(m_szConfigFileName);
 
 	int mruListLength = GetPrivateProfileInt("Misc", "MRUListLength", 10, m_pszProfileName);
 	Limit(mruListLength, 0, 15);
@@ -1252,7 +1252,7 @@ public:
 protected:
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
-	afx_msg void OnLButtonDblClk(UINT, CPoint) { m_dwStartTime = timeGetTime(); } 
+	afx_msg void OnLButtonDblClk(UINT, CPoint) { m_dwStartTime = timeGetTime(); }
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -1431,7 +1431,7 @@ const int __SinusTable[256] =
 #define PI	3.14159265358979323f
 BOOL CPaletteBitmap::Animate()
 //----------------------------
-{	
+{
 	//included random hacking by rewbs to get funny animation.
 	LPBYTE dest, src;
 	DWORD t = (timeGetTime() - m_dwStartTime) / 10;
@@ -1447,7 +1447,7 @@ BOOL CPaletteBitmap::Animate()
 	dir = ((t/256) % 2 != 0); //change dir every 256 t
 	t = t%256;
 	if (!dir) t = (256-t);
-	
+
 	sizex = m_nRotoWidth;
 	sizey = m_nRotoHeight;
 	m_dwFrameTime = t;
@@ -1459,8 +1459,8 @@ BOOL CPaletteBitmap::Animate()
 	spdy = 0;
 	spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
 	spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
-	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);	
-	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);	
+	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);
+	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);
 	for (UINT y=sizey; y; y--)
 	{
 		UINT oldx = srcx, oldy = srcy;
@@ -1538,11 +1538,10 @@ void CAboutDlg::OnCancel()
 BOOL CAboutDlg::OnInitDialog()
 //----------------------------
 {
-	CHAR s[256];
+	const char * const s = "Build Date: " __DATE__ " " __TIME__;
 	CDialog::OnInitDialog();
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
-	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
 	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str
 #if (MPT_VERSION_NUMERIC & 0xFF) != 0
@@ -1557,14 +1556,15 @@ BOOL CAboutDlg::OnInitDialog()
 		"http://openmpt.org/download");
 
 	static const char* const pArrCredit =
-	{ 
+	{
 		"OpenMPT / ModPlug Tracker|"
 		"Copyright © 2004-2013 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque|"
 		"|"
 		"Contributors:|"
 		"Johannes Schultz (2008-2013)|"
-		"Ahti Leppänen (2005-2011)|"
+		"Ahti Leppänen (2005-2011, 2013)|"
+		"Joern Heusipp (2012-2013)|"
 		"Robin Fernandes (2004-2007)|"
 		"Sergiy Pylypenko (2007)|"
 		"Eric Chavanon (2004-2005)|"
@@ -1591,6 +1591,8 @@ BOOL CAboutDlg::OnInitDialog()
 		"https://github.com/iamgreaser/it2everything/|"
 		"Jean-loup Gailly and Mark Adler for zlib|"
 		"http://zlib.net/|"
+		"PortAudio|"
+		"http://www.portaudio.com/|"
 		"Josh Coalson for libFLAC|"
 		"http://flac.sourceforge.net/|"
 		"The mpg123 project for libmpg123|"
@@ -1677,7 +1679,7 @@ BOOL CSplashScreen::OnInitDialog()
 {
 	CRect rect;
 	int cx, cy, newcx, newcy;
-	
+
 	CDialog::OnInitDialog();
 	m_Bmp.SubclassDlgItem(IDC_SPLASH, this);
 	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
@@ -1893,7 +1895,7 @@ void ErrorBox(UINT nStringID, CWnd *parent)
 
 ////////////////////////////////////////////////////////////////////////////////
 // CFastBitmap 8-bit output / 4-bit input
-// useful for lots of small blits with color mapping 
+// useful for lots of small blits with color mapping
 // combined in one big blit
 
 void CFastBitmap::Init(LPMODPLUGDIB lpTextDib)
@@ -1989,7 +1991,7 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMO
 	BYTE *pdest;
 	UINT x1, x2;
 	int srcwidth, srcinc;
-	
+
 	m_n4BitPalette[0] = (BYTE)m_nTextColor;
 	m_n4BitPalette[15] = (BYTE)m_nBkColor;
 	if (x < 0)
@@ -2117,6 +2119,7 @@ LPBYTE CMappedFile::Lock(DWORD dwMaxLen)
 		}
 		CloseHandle(hmf);
 	}
+	// Fallback
 	if (dwLen > CTrackApp::gMemStatus.dwTotalPhys) return NULL;
 	if ((lpStream = (LPBYTE)GlobalAllocPtr(GHND, dwLen)) == NULL) return NULL;
 	m_File.Read(lpStream, dwLen);
@@ -2379,12 +2382,12 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(const bool load, const std::stri
 
 	// Do it!
 	CMainFrame::GetInputHandler()->Bypass(true);
-	if(dlg.DoModal() != IDOK)
+	bool doCancel = dlg.DoModal() != IDOK;
+	CMainFrame::GetInputHandler()->Bypass(false);
+	if(doCancel)
 	{
-		CMainFrame::GetInputHandler()->Bypass(false);
 		return result;
 	}
-	CMainFrame::GetInputHandler()->Bypass(false);
 
 	// Retrieve variables
 	if(filterIndex != nullptr)
