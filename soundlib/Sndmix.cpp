@@ -1962,7 +1962,6 @@ BOOL CSoundFile::ReadNote()
 				pan /= 128;
 				pan += 128;
 				Limit(pan, 0, 256);
-				if (gdwSoundSetup & SNDMIX_REVERSESTEREO) pan = 256 - pan;
 
 				LONG realvol;
 				if (m_pConfig->getUseGlobalPreAmp())

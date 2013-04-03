@@ -123,7 +123,6 @@ BOOL COptionsSoundcard::OnInitDialog()
 	CHAR s[128];
 	
 	CPropertyPage::OnInitDialog();
-	if (m_dwSoundSetup & SOUNDSETUP_STREVERSE) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_SECONDARY) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
@@ -411,8 +410,7 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	m_dwSoundSetup &= ~(SOUNDSETUP_ENABLEMMX | SOUNDSETUP_SECONDARY | SOUNDSETUP_STREVERSE | SOUNDSETUP_SOFTPANNING);
-	if (IsDlgButtonChecked(IDC_CHECK1)) m_dwSoundSetup |= SOUNDSETUP_STREVERSE;
+	m_dwSoundSetup &= ~(SOUNDSETUP_ENABLEMMX | SOUNDSETUP_SECONDARY | SOUNDSETUP_SOFTPANNING);
 	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwSoundSetup |= SOUNDSETUP_SOFTPANNING;
 	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwSoundSetup |= SOUNDSETUP_SECONDARY;

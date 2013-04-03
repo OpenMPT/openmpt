@@ -1089,10 +1089,6 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 			TrackerSettings::Instance().m_nBitsPerSample,
 			TrackerSettings::Instance().m_nChannels,
 			(TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
-	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
-		CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
-	else
-		CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
 
 	// Soft panning
 	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
@@ -1256,8 +1252,6 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 //----------------------------------------------------------
 {
 	if(!pSndFile) return;
-	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
-	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
 	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
 	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
 	UpdateDspEffects();
@@ -1648,7 +1642,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.m_nSamplePreAmp = 48;
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
-	m_WaveFile.m_nType = MOD_TYPE_IT;
+	m_WaveFile.m_nType = MOD_TYPE_MPT;
 	m_WaveFile.m_nChannels = 4;
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = tempo_mode_classic;
@@ -1737,10 +1731,6 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 		// No need to restart playback
 		TrackerSettings::Instance().m_dwSoundSetup = q;
 		CSoundFile::EnableMMX((TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) != 0);
-		if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE)
-			CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
-		else
-			CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
 	}
 	return TRUE;
 }
