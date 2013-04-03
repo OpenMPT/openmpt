@@ -272,7 +272,6 @@ FLAGSET(SongFlags)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
-#define SNDMIX_REVERSESTEREO	0x0001	// swap L/R audio channels
 #ifndef NO_DSP
 #define SNDMIX_NOISEREDUCTION	0x0002	// reduce hiss (do not use, it's just a simple low-pass filter)
 #endif // NO_DSP
