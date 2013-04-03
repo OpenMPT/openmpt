@@ -983,6 +983,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mutex.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\pattern.h"
 				>
 			</File>

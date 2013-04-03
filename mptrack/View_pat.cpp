@@ -2469,7 +2469,6 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		{
 			pMainFrm->PlayMod(pModDoc, m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
 		}
-		CMainFrame::EnableLowLatencyMode();
 		if(row == ROWINDEX_INVALID)
 		{
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)

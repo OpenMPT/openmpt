@@ -23,18 +23,65 @@
 #define ASIO_LOG
 #endif
 
+#ifndef NO_PORTAUDIO
+#include "portaudio/include/portaudio.h"
+#endif
+
+
+class CSoundDeviceWithThread;
+
+class CAudioThread
+{
+private:
+	CSoundDeviceWithThread & m_SoundDevice;
+	HANDLE m_hAudioWakeUp;
+	HANDLE m_hPlayThread;
+	HANDLE m_hAudioThreadTerminateRequest;
+	HANDLE m_hAudioThreadGoneIdle;
+	DWORD m_dwPlayThreadId;
+	LONG m_AudioThreadActive;
+	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
+	DWORD AudioThread();
+	bool IsActive() { return InterlockedExchangeAdd(&m_AudioThreadActive, 0)?true:false; }
+public:
+	CAudioThread(CSoundDeviceWithThread &SoundDevice);
+	~CAudioThread();
+	void Activate();
+	void Deactivate();
+};
+
+
+class CSoundDeviceWithThread : public ISoundDevice
+{
+	friend class CAudioThread;
+protected:
+	CAudioThread m_AudioThread;
+private:
+	void FillAudioBufferLocked();
+public:
+	CSoundDeviceWithThread() : m_AudioThread(*this) {}
+	virtual ~CSoundDeviceWithThread() {}
+	void Start();
+	void Stop();
+	void Reset();
+	virtual void StartFromSoundThread() = 0;
+	virtual void StopFromSoundThread() = 0;
+	virtual void ResetFromOutsideSoundThread() = 0;
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut device
 //
 
-#define WAVEOUT_MAXBUFFERS		16
-#define WAVEOUT_MINBUFFERSIZE	1024
-#define WAVEOUT_MAXBUFFERSIZE	32768
+#define WAVEOUT_MAXBUFFERS           256
+#define WAVEOUT_MINBUFFERSIZE        1024
+#define WAVEOUT_MAXBUFFERSIZE        65536
 
-//====================================
-class CWaveDevice: public ISoundDevice
-//====================================
+//==============================================
+class CWaveDevice: public CSoundDeviceWithThread
+//==============================================
 {
 protected:
 	HWAVEOUT m_hWaveOut;
@@ -42,6 +89,8 @@ protected:
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
 	LONG m_nBuffersPending;
+	ULONG m_nBytesPerSec;
+	ULONG m_BytesPerSample;
 	LPWAVEHDR m_WaveBuffers[WAVEOUT_MAXBUFFERS];
 
 public:
@@ -52,14 +101,18 @@ public:
 	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD);
-	VOID Reset();
-	VOID Start() {}
-	bool IsOpen() { return (m_hWaveOut != NULL); }
-	UINT GetCurrentLatency() { return m_nBuffersPending * m_nWaveBufferSize; }
+	void FillAudioBuffer();
+	void ResetFromOutsideSoundThread();
+	void StartFromSoundThread();
+	void StopFromSoundThread();
+	bool IsOpen() const { return (m_hWaveOut != NULL); }
+	UINT GetNumBuffers() { return m_nPreparedHeaders; }
+	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
+	bool HasGetStreamPosition() const { return true; }
+	int64 GetStreamPositionSamples() const;
 
 public:
-	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD, DWORD dw1, DWORD dw2);
+	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
 };
 
@@ -71,14 +124,19 @@ public:
 
 #ifndef NO_DSOUND
 
-//======================================
-class CDSoundDevice: public ISoundDevice
-//======================================
+#define DSOUND_MINBUFFERSIZE 1024
+#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
+
+//================================================
+class CDSoundDevice: public CSoundDeviceWithThread
+//================================================
 {
 protected:
 	IDirectSound *m_piDS;
 	IDirectSoundBuffer *m_pPrimary, *m_pMixBuffer;
 	ULONG m_nDSoundBufferSize;
+	ULONG m_nBytesPerSec;
+	ULONG m_BytesPerSample;
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos, m_dwLatency;
 
@@ -90,11 +148,13 @@ public:
 	UINT GetDeviceType() { return SNDDEV_DSOUND; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD);
-	VOID Reset();
-	VOID Start() {}
-	bool IsOpen() { return (m_pMixBuffer != NULL); }
-	UINT GetCurrentLatency() { return m_dwLatency; }
+	void FillAudioBuffer();
+	void ResetFromOutsideSoundThread();
+	void StartFromSoundThread();
+	void StopFromSoundThread();
+	bool IsOpen() const { return (m_pMixBuffer != NULL); }
+	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
+	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
 
 protected:
 	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);
@@ -126,6 +186,8 @@ protected:
 	BOOL m_bMixRunning;
 	BOOL m_bPostOutput;
 	UINT m_nCurrentDevice;
+	ULONG m_nSamplesPerSec;
+	LONG m_RenderSilence;
 	ASIOCallbacks m_Callbacks;
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
@@ -141,15 +203,16 @@ public:
 	UINT GetDeviceType() { return SNDDEV_ASIO; }
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
-	BOOL FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwUser);
-	VOID Reset();
-	VOID Start();
-	bool IsOpen() { return (m_pAsioDrv != NULL); }
-	BOOL Directcallback() { return TRUE; }
+	void FillAudioBuffer();
+	void Reset();
+	void Start();
+	void Stop();
+	bool IsOpen() const { return (m_pAsioDrv != NULL); }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
-	UINT GetCurrentLatency() { return m_nAsioBufferLen; }
+	UINT GetNumBuffers() { return 2; }
+	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_nSamplesPerSec;; }
 
-	bool CanSampleRate(UINT nDevice, vector<UINT> &samplerates, vector<bool> &result);
+	bool CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);
 
 public:
@@ -185,3 +248,67 @@ protected:
 
 
 ////////////////////////////////////////////////////////////////////////////////////
+//
+// Protaudio device
+//
+
+#ifndef NO_PORTAUDIO
+
+//=========================================
+class CPortaudioDevice: public ISoundDevice
+//=========================================
+{
+protected:
+	PaHostApiIndex m_HostApi;
+	PaStreamParameters m_StreamParameters;
+	PaStream * m_Stream;
+	void * m_CurrentFrameBuffer;
+	unsigned long m_CurrentFrameCount;
+
+	float m_CurrentRealLatencyMS;
+
+public:
+
+public:
+	CPortaudioDevice(PaHostApiIndex hostapi);
+	~CPortaudioDevice();
+
+public:
+	UINT GetDeviceType() { return HostApiToSndDevType(m_HostApi); }
+	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
+	BOOL Close();
+	void FillAudioBuffer();
+	void Reset();
+	void Start();
+	void Stop();
+	bool IsOpen() const { return m_Stream ? true : false; }
+	UINT GetNumBuffers() { return 1; }
+	float GetCurrentRealLatencyMS();
+	bool HasGetStreamPosition() const { return false; }
+	int64 GetStreamPositionSamples() const;
+
+	int StreamCallback(
+		const void *input, void *output,
+		unsigned long frameCount,
+		const PaStreamCallbackTimeInfo* timeInfo,
+		PaStreamCallbackFlags statusFlags
+		);
+
+public:
+	static int StreamCallbackWrapper(
+		const void *input, void *output,
+		unsigned long frameCount,
+		const PaStreamCallbackTimeInfo* timeInfo,
+		PaStreamCallbackFlags statusFlags,
+		void *userData
+		);
+
+	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
+	static int HostApiToSndDevType(PaHostApiIndex hostapi);
+	static PaHostApiIndex SndDevTypeToHostApi(int snddevtype);
+
+	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize, PaHostApiIndex hostapi);
+
+};
+
+#endif // NO_PORTAUDIO

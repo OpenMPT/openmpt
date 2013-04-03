@@ -45,19 +45,6 @@ static char THIS_FILE[] = __FILE__;
 #define MPTTIMER_PERIOD		200
 
 
-//========================================
-class CMPTSoundSource: public ISoundSource
-//========================================
-{
-public:
-	CMPTSoundSource() {}
-	ULONG AudioRead(PVOID pData, ULONG cbSize);
-	VOID AudioDone(ULONG dwSize, ULONG dwLatency);
-};
-
-
-CMPTSoundSource gMPTSoundSource;
-
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
@@ -99,6 +86,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_CPU,  OnUpdateCPU)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
+	ON_MESSAGE(WM_MOD_UPDATEPOSITIONTHREADED,		OnUpdatePositionThreaded)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
@@ -112,31 +100,13 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
-// Static
-static int gdwLastLowLatencyTime = 0;
-static int gdwLastMixActiveTime = 0;
-static DWORD gsdwTotalSamples = 0;
-static DWORD gdwPlayLatency = 0;
-
 // Globals
-DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
 UINT CMainFrame::m_nLastOptionsPage = 0;
 HHOOK CMainFrame::ghKbdHook = NULL;
 
 std::vector<CString> CMainFrame::s_ExampleModulePaths;
 std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
-HANDLE CMainFrame::m_hPlayThread = NULL;
-DWORD CMainFrame::m_dwPlayThreadId = 0;
-HANDLE CMainFrame::m_hAudioWakeUp = NULL;
-HANDLE CMainFrame::m_hNotifyThread = NULL;
-DWORD CMainFrame::m_dwNotifyThreadId = 0;
-HANDLE CMainFrame::m_hNotifyWakeUp = NULL;
-ISoundDevice *CMainFrame::gpSoundDevice = NULL;
-LONG CMainFrame::slSampleSize = 2;
-LONG CMainFrame::sdwSamplesPerSec = 44100;
-LONG CMainFrame::sdwAudioBufferSize = MAX_AUDIO_BUFFERSIZE;
-UINT CMainFrame::gdwIdleTime = 0;
 LONG CMainFrame::gnLVuMeter = 0;
 LONG CMainFrame::gnRVuMeter = 0;
 
@@ -200,23 +170,31 @@ static UINT indicators[] =
 	ID_INDICATOR_CPU
 };
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 //#include <direct.h>
 CMainFrame::CMainFrame()
 //----------------------
 {
+
+	m_hNotifyThread = NULL;
+	m_dwNotifyThreadId = 0;
+	m_hNotifyWakeUp = NULL;
+	gpSoundDevice = NULL;
+	m_IsPlaybackRunning = false;
+
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
 	m_pOrderlistHasFocus = nullptr;
 	m_bOptionsLocked = false;	//rewbs.customKeys
 
+	m_SoundCardOptionsDialog = nullptr;
+
 	m_pJustModifiedDoc = nullptr;
-	m_pModPlaying = nullptr;
 	m_hFollowSong = NULL;
 	m_hWndMidi = NULL;
 	m_pSndFile = nullptr;
-	m_dwStatus = 0;
 	m_dwTimeSec = 0;
 	m_dwNotifyType = 0;
 	m_nTimer = 0;
@@ -224,6 +202,9 @@ CMainFrame::CMainFrame()
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
+
+	m_TotalSamplesRendered = 0;
+	m_PendingNotificationSempahore = NULL;
 
 	MemsetZero(gpenVuMeter);
 
@@ -262,6 +243,8 @@ VOID CMainFrame::Initialize()
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
+	CSoundFile::gpSndMixHook = CalcStereoVuMeters;
+
 	// Check for valid sound device
 	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
 	{
@@ -272,11 +255,10 @@ VOID CMainFrame::Initialize()
 		}
 	}
 
-	// Create Audio Thread
-	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
+	// Create Notify Thread
+	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hPlayThread = CreateThread(NULL, 0, AudioThread, NULL, 0, &m_dwPlayThreadId);
-	m_hNotifyThread = CreateThread(NULL, 0, NotifyThread, NULL, 0, &m_dwNotifyThreadId);
+	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
 	// Setup timer
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
@@ -395,6 +377,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
+	CSoundFile::gpSndMixHook = nullptr;
+
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
@@ -409,13 +393,22 @@ BOOL CMainFrame::DestroyWindow()
 		m_nTimer = 0;
 	}
 	if (shMidiIn) midiCloseDevice();
-	if (m_hPlayThread != NULL)
+	if(m_hNotifyThread != NULL)
 	{
-		if(TerminateThread(m_hPlayThread, 0)) m_hPlayThread = NULL;
+		PostThreadMessage(m_dwNotifyThreadId, WM_QUIT, 0, 0);
+		WaitForSingleObject(m_hNotifyThread, INFINITE);
+		m_dwNotifyThreadId = 0;
+		m_hNotifyThread = NULL;
 	}
-	if (m_hNotifyThread != NULL)
+	if(m_hNotifyWakeUp != NULL)
 	{
-		if(TerminateThread(m_hNotifyThread, 0)) m_hNotifyThread = NULL;
+		CloseHandle(m_hNotifyWakeUp);
+		m_hNotifyWakeUp = NULL;
+	}
+	if(m_PendingNotificationSempahore != NULL)
+	{
+		CloseHandle(m_PendingNotificationSempahore);
+		m_PendingNotificationSempahore = NULL;
 	}
 	// Delete bitmaps
 	if (bmpPatterns)
@@ -492,14 +485,14 @@ void CMainFrame::OnClose()
 	CChildFrame *pMDIActive = (CChildFrame *)MDIGetActive();
 
 	BeginWaitCursor();
-	if (m_dwStatus & MODSTATUS_PLAYING) PauseMod();
+	if (IsPlaying()) PauseMod();
 	if (pMDIActive) pMDIActive->SavePosition(TRUE);
 	if (gpSoundDevice)
 	{
 		CriticalSection cs;
 		//gpSoundDevice->Reset();
 		//audioCloseDevice();
-		gpSoundDevice->Release();
+		delete gpSoundDevice;
 		gpSoundDevice = NULL;
 	}
 	// Save Settings
@@ -667,214 +660,147 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame Sound Library
 
-static BOOL gbStopSent = FALSE;
-
-// Sound Device Callback
-BOOL SoundDeviceCallback(DWORD dwUser)
-//------------------------------------
-{
-	BOOL bOk = FALSE;
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (gbStopSent) return FALSE;
-	CriticalSection cs;
-	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
-	{
-		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
-	}
-	if (!bOk)
-	{
-		gbStopSent = TRUE;
-		pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
-	}
-	return bOk;
-}
-
-
-// Audio thread
-DWORD WINAPI CMainFrame::AudioThread(LPVOID)
-//------------------------------------------
-{
-	CMainFrame *pMainFrm;
-	BOOL bWait;
-	UINT nSleep;
-
-// -> CODE#0021
-// -> DESC="use multimedia timer instead of Sleep() in audio thread"
-	HANDLE sleepEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
-// -! BEHAVIOUR_CHANGE#0021
-
-	bWait = TRUE;
-	nSleep = 50;
-// -> CODE#0021
-// -> DESC="use multimedia timer instead of Sleep() in audio thread"
-//rewbs: reduce to normal priority during debug for easier hang debugging
-#ifdef NDEBUG
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
-#endif
-#ifdef _DEBUG
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-#endif
-//	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-// -! BEHAVIOUR_CHANGE#0021
-	for (;;)
-	{
-		if (bWait)
-		{
-			WaitForSingleObject(CMainFrame::m_hAudioWakeUp, 250);
-		} else
-		{
-// -> CODE#0021
-// -> DESC="use multimedia timer instead of Sleep() in audio thread"
-//			Sleep(nSleep);
-			timeSetEvent(nSleep,1,(LPTIMECALLBACK)sleepEvent,NULL,TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
-			WaitForSingleObject(sleepEvent,nSleep);
-			ResetEvent(sleepEvent);
-// -! BEHAVIOUR_CHANGE#0021
-		}
-		bWait = TRUE;
-		pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-		CriticalSection cs;
-		if ((!gbStopSent) && (pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
-		{
-			if (!CMainFrame::gpSoundDevice->Directcallback())
-			{
-				if (CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency))
-				{
-					ULONG nMaxSleep = CMainFrame::gpSoundDevice->GetMaxFillInterval();
-					bWait = FALSE;
-					nSleep = TrackerSettings::Instance().m_nBufferLength / 8;
-					if (nSleep > nMaxSleep) nSleep = nMaxSleep;
-					if (nSleep < 10) nSleep = 10;
-					if (nSleep > 40) nSleep = 40;
-				} else
-				{
-					gbStopSent = TRUE;
-					pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
-				}
-			} else
-			{
-				nSleep = 50;
-			}
-		}
-	}
-
-// -> CODE#0021
-// -> DESC="use multimedia timer instead of Sleep() in audio thread"
-	// Commented as this caused "warning C4702: unreachable code"
-	//CloseHandle(sleepEvent);
-// -! BEHAVIOUR_CHANGE#0021
-
-	// Commented the two lines below as those caused "warning C4702: unreachable code"
-	//ExitThread(0);
-	//return 0;
-}
-
-
 // Notify thread
-DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
+DWORD WINAPI CMainFrame::NotifyThreadWrapper(LPVOID)
+{
+	return ((CMainFrame*)theApp.m_pMainWnd)->NotifyThread();
+}
+DWORD CMainFrame::NotifyThread()
 //-------------------------------------------
 {
-	CMainFrame *pMainFrm;
-
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
-	for (;;)
+	// initialize thread message queue
+	MSG msg;
+	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+#ifdef NDEBUG
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL ); // we shall not stall the audio thread while holding m_NotificationBufferMutex
+#endif
+	bool terminate = false;
+	bool cansend = true;
+	while(!terminate)
 	{
-		WaitForSingleObject(CMainFrame::m_hNotifyWakeUp, 1000);
-		pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-		if ((pMainFrm) && (pMainFrm->IsPlaying()))
+		switch(MsgWaitForMultipleObjects(1, &m_hNotifyWakeUp, FALSE, 1000, QS_ALLEVENTS))
 		{
-			MPTNOTIFICATION *pnotify = NULL;
-			DWORD dwLatency = 0;
-
-			for (UINT i=0; i<MAX_UPDATE_HISTORY; i++)
+			case WAIT_OBJECT_0 + 1:
 			{
-				MPTNOTIFICATION *p = &pMainFrm->NotifyBuffer[i];
-				if ((p->dwType & MPTNOTIFY_PENDING)
-				 && (!(pMainFrm->m_dwStatus & MODSTATUS_BUSY)))
+				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{
-					if (p->dwLatency >= dwLatency)
-					{
-						if (pnotify) pnotify->dwType = 0;
-						pnotify = p;
-					} else
-					{
-						p->dwType = 0;
-					}
+					if(msg.message == WM_QUIT) terminate = true;
 				}
 			}
-			if (pnotify)
-			{
-				pMainFrm->m_dwStatus |= MODSTATUS_BUSY;
-				pMainFrm->PostMessage(WM_MOD_UPDATEPOSITION, 0, (LPARAM)pnotify);
-			}
+			break;
+			case WAIT_OBJECT_0:
+				{
+					const MPTNOTIFICATION * pnotify = nullptr;
+					{
+						int64 currenttotalsamples = 0;
+						Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+						if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
+						{
+							currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
+						} else
+						{
+							currenttotalsamples = m_TotalSamplesRendered; 
+						}
+						// advance to the newest notification, drop the obsolete ones
+						const MPTNOTIFICATION * p = m_NotifyBuffer.peek_p();
+						if(p && currenttotalsamples >= p->TimestampSamples)
+						{
+							pnotify = p;
+							while(m_NotifyBuffer.peek_next_p() && currenttotalsamples >= m_NotifyBuffer.peek_next_p()->TimestampSamples)
+							{
+								m_NotifyBuffer.pop();
+								p = m_NotifyBuffer.peek_p();
+								pnotify = p;
+							}
+						}
+					}
+					if(pnotify)
+					{
+						if(!cansend)
+						{
+							// poll the semaphore instead of waiting directly after sending the message to avoid deadlocks on termination of openmpt or when stopping audio rendering
+							if(WaitForSingleObject(m_PendingNotificationSempahore, 0) == WAIT_OBJECT_0)
+							{
+								// last notification has been handled by gui thread, so we can pop the notify buffer
+								cansend = true;
+							}
+						}
+						if(cansend)
+						{
+							m_PendingNotification = *pnotify; // copy notification so that we can free the buffer
+							{
+								Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+								m_NotifyBuffer.pop();
+							}
+							if(PostMessage(WM_MOD_UPDATEPOSITIONTHREADED, 0, 0))
+							{
+								cansend = false;
+							}
+						}
+					}
+				}
+			break;
 		}
 	}
-	// Commented the two lines below as those caused "warning C4702: unreachable code"
-	//ExitThread(0);
-	//return 0;
+	return 0;
 }
 
 
+void CMainFrame::SetAudioThreadActive(bool active)
+//------------------------------------------------
+{
+	if(active)
+	{
+		if(m_IsPlaybackRunning) return;
+		m_IsPlaybackRunning = true;
+		gpSoundDevice->Start();
+	} else
+	{
+		if(!m_IsPlaybackRunning) return;
+		gpSoundDevice->Stop();
+		m_IsPlaybackRunning = false;
+	}
+}
 
 
-ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG cbSize)
+void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
+//----------------------------------------------------------------
+{
+	CriticalSection cs;
+	callback.FillAudioBuffer();
+}
+
+
+ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
 //---------------------------------------------------------
 {
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) return pMainFrm->AudioRead(pData, cbSize);
-	return 0;
-}
-
-
-VOID CMPTSoundSource::AudioDone(ULONG nBytesWritten, ULONG nLatency)
-//------------------------------------------------------------------
-{
-	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
-	if (pMainFrm) pMainFrm->AudioDone(nBytesWritten, nLatency);
-}
-
-
-
-ULONG CMainFrame::AudioRead(PVOID pvData, ULONG ulSize)
-//-----------------------------------------------------
-{
-	if ((IsPlaying()) && (m_pSndFile))
-	{
-		DWORD dwSamplesRead = m_pSndFile->Read(pvData, ulSize);
+		DWORD dwSamplesRead = m_pSndFile->Read(pvData, MaxSamples);
 		//m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
-		return dwSamplesRead * slSampleSize;
-	}
-	return 0;
+		return dwSamplesRead;
 }
 
 
-VOID CMainFrame::AudioDone(ULONG nBytesWritten, ULONG nLatency)
-//-------------------------------------------------------------
+void CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream)
+//----------------------------------------------------------------------------------------
 {
-	if (nBytesWritten > (DWORD)slSampleSize)
+	if (SamplesWritten > 0)
 	{
-		DoNotification(nBytesWritten/CMainFrame::slSampleSize, nLatency);
+		DoNotification(SamplesWritten, SamplesLatency, end_of_stream);
 	}
 }
 
 
-LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
+bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
 //----------------------------------------------------------------------------------
 {
 	WAVEFORMATEXTENSIBLE WaveFormat;
-	UINT buflen = TrackerSettings::Instance().m_nBufferLength;
 
-	if (!m_pSndFile) return -1;
-	slSampleSize = (bits/8) * channels;
-	sdwAudioBufferSize = ((samplespersec * buflen) / 1000) * slSampleSize;
-	sdwAudioBufferSize = (sdwAudioBufferSize + 0x0F) & ~0x0F;
-	if (sdwAudioBufferSize < MIN_AUDIO_BUFFERSIZE) sdwAudioBufferSize = MIN_AUDIO_BUFFERSIZE;
-	if (sdwAudioBufferSize > MAX_AUDIO_BUFFERSIZE) sdwAudioBufferSize = MAX_AUDIO_BUFFERSIZE;
+	UINT bytespersample = (bits/8) * channels;
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (unsigned short) channels;
 	WaveFormat.Format.nSamplesPerSec = samplespersec;
-	WaveFormat.Format.nAvgBytesPerSec = samplespersec * slSampleSize;
-	WaveFormat.Format.nBlockAlign = (unsigned short) slSampleSize;
+	WaveFormat.Format.nAvgBytesPerSec = samplespersec * bytespersample;
+	WaveFormat.Format.nBlockAlign = (unsigned short)bytespersample;
 	WaveFormat.Format.wBitsPerSample = (unsigned short)bits;
 	WaveFormat.Format.cbSize = 0;
 	// MultiChannel configuration
@@ -890,76 +816,71 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 		case 2:		WaveFormat.dwChannelMask = 0x0003; break; // FRONT_LEFT | FRONT_RIGHT
 		case 3:		WaveFormat.dwChannelMask = 0x0103; break; // FRONT_LEFT|FRONT_RIGHT|BACK_CENTER
 		case 4:		WaveFormat.dwChannelMask = 0x0033; break; // FRONT_LEFT|FRONT_RIGHT|BACK_LEFT|BACK_RIGHT
-		default:	WaveFormat.dwChannelMask = 0; break;
+		default:	WaveFormat.dwChannelMask = 0; return false; break;
 		}
 		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
 	}
-	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
-	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
-	m_pSndFile->SetWaveConfig(samplespersec, bits, channels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
-	// Maybe we failed because someone is playing sound already.
-	// Shut any sound off, and try once more before giving up.
 	UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
-	UINT nDevNo = SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice);
-	UINT fulOptions = (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0;
 	if ((gpSoundDevice) && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
-		gpSoundDevice->Release();
+		delete gpSoundDevice;
 		gpSoundDevice = NULL;
 	}
-	if (!gpSoundDevice)
-	{
-		if (!CreateSoundDevice(nDevType, &gpSoundDevice)) return -1;
-	}
-	gpSoundDevice->Configure(m_hWnd, NUM_AUDIO_BUFFERS, TrackerSettings::Instance().m_nBufferLength, fulOptions);
-	gbStopSent = FALSE;
-	m_pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
-	UpdateDspEffects();
-#ifndef NO_AGC
-	m_pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
-#endif
-	if (!gpSoundDevice->Open(nDevNo, &WaveFormat.Format)) return -1;
-	return 0;
+	if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
+	if(!gpSoundDevice) return false;
+	gpSoundDevice->SetSource(this);
+	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0);
+	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
+	return true;
 }
 
 
-BOOL CMainFrame::audioOpenDevice()
+bool CMainFrame::IsAudioDeviceOpen() const
+//----------------------------------------
+{
+	 return gpSoundDevice && gpSoundDevice->IsOpen();
+}
+
+
+bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
+	if(IsAudioDeviceOpen()) return true;
 	UINT nFixedBitsPerSample;
-	LONG err;
+	bool err = false;
 
-	if ((!m_pSndFile) || (!m_pSndFile->GetType())) return FALSE;
-	if (m_dwStatus & MODSTATUS_PLAYING) return TRUE;
-	if (!TrackerSettings::Instance().m_dwRate) TrackerSettings::Instance().m_dwRate = 22050;
-	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) TrackerSettings::Instance().m_nChannels = 2;
-	err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+	if (!TrackerSettings::Instance().m_dwRate) err = true;
+	if ((TrackerSettings::Instance().m_nChannels != 1) && (TrackerSettings::Instance().m_nChannels != 2) && (TrackerSettings::Instance().m_nChannels != 4)) err = true;
+	if(!err)
+	{
+		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
 								TrackerSettings::Instance().m_nBitsPerSample,
 								TrackerSettings::Instance().m_dwRate);
-	nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
-	if ((err) && ((TrackerSettings::Instance().m_dwRate > 44100) || (TrackerSettings::Instance().m_nChannels > 2) || (TrackerSettings::Instance().m_nBitsPerSample > 16)
-			   || ((nFixedBitsPerSample) && (nFixedBitsPerSample != TrackerSettings::Instance().m_nBitsPerSample))))
-	{
-		DWORD oldrate = TrackerSettings::Instance().m_dwRate;
-
-		TrackerSettings::Instance().m_dwRate = 44100;
-		if (TrackerSettings::Instance().m_nChannels > 2) TrackerSettings::Instance().m_nChannels = 2;
-		if (nFixedBitsPerSample) TrackerSettings::Instance().m_nBitsPerSample = nFixedBitsPerSample;
-		else if (TrackerSettings::Instance().m_nBitsPerSample > 16) TrackerSettings::Instance().m_nBitsPerSample = 16;
-		err = audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
+		nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
+		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_nBitsPerSample)))
+		{
+			if(nFixedBitsPerSample) TrackerSettings::Instance().m_nBitsPerSample = nFixedBitsPerSample;
+			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_nChannels,
 									TrackerSettings::Instance().m_nBitsPerSample,
 									TrackerSettings::Instance().m_dwRate);
-		if (err) TrackerSettings::Instance().m_dwRate = oldrate;
+		}
 	}
 	// Display error message box
-	if (err != 0)
+	if(err)
 	{
 		Reporting::Error("Unable to open sound device!");
-		return FALSE;
+		return false;
 	}
 	// Device is ready
-	gdwLastMixActiveTime = timeGetTime();
-	return TRUE;
+	return true;
+}
+
+
+bool CMainFrame::audioReopenDevice()
+//----------------------------------
+{
+	audioCloseDevice();
+	return audioOpenDevice();
 }
 
 
@@ -972,6 +893,13 @@ void CMainFrame::audioCloseDevice()
 
 		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
+
+		// reset notify buffer as timestamps revert here
+		{
+			Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+			m_NotifyBuffer.clear();
+			m_TotalSamplesRendered = 0;
+		}
 	}
 }
 
@@ -1007,36 +935,38 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 }
 
 
-BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
+BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream)
 //-------------------------------------------------------------------
 {
-	gsdwTotalSamples += dwSamplesRead;
+	int64 notificationtimestamp = 0;
+	{
+		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex); // protect m_TotalSamplesRendered
+		m_TotalSamplesRendered += dwSamplesRead;
+		if(gpSoundDevice->HasGetStreamPosition())
+		{
+			notificationtimestamp = m_TotalSamplesRendered;
+		} else
+		{
+			notificationtimestamp = m_TotalSamplesRendered + SamplesLatency;
+		}
+	}
 	if (!m_pSndFile) return FALSE;
 	if (m_nMixChn < m_pSndFile->m_nMixStat) m_nMixChn++;
 	if (m_nMixChn > m_pSndFile->m_nMixStat) m_nMixChn--;
 	if (!(m_dwNotifyType & MPTNOTIFY_TYPEMASK)) return FALSE;
 	// Notify Client
-	for (UINT i=0; i<MAX_UPDATE_HISTORY; i++)
+	//if(m_NotifyBuffer.read_size() > 0)
 	{
-		MPTNOTIFICATION *p = &NotifyBuffer[i];
-		if ((p->dwType & MPTNOTIFY_TYPEMASK)
-		 && (!(p->dwType & MPTNOTIFY_PENDING))
-		 && (gsdwTotalSamples >= p->dwLatency))
-		{
-			p->dwType |= MPTNOTIFY_PENDING;
-			SetEvent(m_hNotifyWakeUp);
-		}
+		SetEvent(m_hNotifyWakeUp);
 	}
-	if (!m_pSndFile) return FALSE;
 	// Add an entry to the notification history
-	for (UINT j=0; j<MAX_UPDATE_HISTORY; j++)
-	{
-		MPTNOTIFICATION *p = &NotifyBuffer[j];
-		if (!(p->dwType & MPTNOTIFY_TYPEMASK))
-		{
-			p->dwType = m_dwNotifyType;
-			DWORD d = dwLatency / slSampleSize;
-			p->dwLatency = gsdwTotalSamples + d;
+
+	MPTNOTIFICATION notification;
+	MemsetZero(notification);
+	MPTNOTIFICATION *p = &notification;
+
+			p->dwType = m_dwNotifyType | (end_of_stream ? MPTNOTIFY_EOS : 0);
+			p->TimestampSamples = notificationtimestamp;
 			p->nOrder = m_pSndFile->m_nCurrentOrder;
 			p->nRow = m_pSndFile->m_nRow;
 			p->nPattern = m_pSndFile->m_nPattern;
@@ -1099,23 +1029,29 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					UINT vur = pChn->nRightVU;
 					p->dwPos[k] = (vul << 8) | (vur);
 				}
-			} else if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
+			}
 			{
 				DWORD lVu = (gnLVuMeter >> 11);
 				DWORD rVu = (gnRVuMeter >> 11);
 				if (lVu > 0x10000) lVu = 0x10000;
 				if (rVu > 0x10000) rVu = 0x10000;
-				p->dwPos[0] = lVu;
-				p->dwPos[1] = rVu;
+				p->MasterVuLeft = lVu;
+				p->MasterVuRight = rVu;
 				DWORD dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_dwRate) + 1;
 				if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 				if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
 			}
-			return TRUE;
-		}
+
+	{
+		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+		if(m_NotifyBuffer.write_size() == 0) return FALSE; // drop notification
+		m_NotifyBuffer.push(notification);
 	}
 
-	return FALSE;
+	SetEvent(m_hNotifyWakeUp);
+
+	return TRUE;
+
 }
 
 
@@ -1180,14 +1116,6 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 		CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 		CSoundFile::InitPlayer(TRUE);
 	}
-}
-
-
-void CMainFrame::EnableLowLatencyMode(BOOL bOn)
-//---------------------------------------------
-{
-	gdwPlayLatency = (bOn) ? sdwAudioBufferSize : 0;
-	gdwLastLowLatencyTime = timeGetTime();
 }
 
 
@@ -1316,115 +1244,95 @@ void CMainFrame::SetPreAmp(UINT n)
 }
 
 
-BOOL CMainFrame::ResetNotificationBuffer(HWND hwnd)
-//-------------------------------------------------
+void CMainFrame::ResetNotificationBuffer()
+//----------------------------------------
 {
-	if ((!hwnd) || (m_hFollowSong == hwnd))
-	{
-		MemsetZero(NotifyBuffer);
-		gsdwTotalSamples = 0;
-		return TRUE;
-	}
-	return FALSE;
+	Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+	m_NotifyBuffer.clear();
 }
 
 
-BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
-//-----------------------------------------------------------------------
+void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
+//----------------------------------------------------------
 {
-	if (!pModDoc) return FALSE;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
-	const bool bPaused = pSndFile->IsPaused();
-	const bool bPatLoop = pSndFile->m_SongFlags[SONG_PATTERNLOOP];
-	pSndFile->ResetChannels();
-	// Select correct bidi loop mode when playing a module.
-	pSndFile->SetupITBidiMode();
-
-	if(m_pSndFile != nullptr || (m_dwStatus & MODSTATUS_PLAYING)) PauseMod();
-	if(m_pSndFile != nullptr && (pSndFile != m_pSndFile || !m_pSndFile->GetTotalSampleCount()))
-	{
+	if(!pSndFile) return;
+	if (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_STREVERSE) CSoundFile::gdwSoundSetup |= SNDMIX_REVERSESTEREO;
+	else CSoundFile::gdwSoundSetup &= ~SNDMIX_REVERSESTEREO;
+	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, (TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
+	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
+	UpdateDspEffects();
 #ifndef NO_AGC
-		CSoundFile::m_AGC.Reset();
+	pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
 #endif
-	}
-	m_pSndFile = pSndFile;
-	m_pModPlaying = pModDoc;
-	m_hFollowSong = hPat;
-	m_dwNotifyType = dwNotifyType;
-	if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
-	{
-		gnLVuMeter = gnRVuMeter = 0;
-		CSoundFile::gpSndMixHook = CalcStereoVuMeters;
-	} else
-	{
-		CSoundFile::gpSndMixHook = NULL;
-	}
-
-	if (!audioOpenDevice())
-	{
-		m_pSndFile = NULL;
-		m_pModPlaying = NULL;
-		m_hFollowSong = NULL;
-		return FALSE;
-	}
-	m_nMixChn = m_nAvgMixChn = 0;
-	gsdwTotalSamples = 0;
-	if (!bPatLoop)
-	{
-		if (bPaused)
-		{
-			pSndFile->m_SongFlags.set(SONG_PAUSED);
-		}
-	}
-	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
-
-	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
-	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-	m_pSndFile->InitPlayer(TRUE);
-	MemsetZero(NotifyBuffer);
-	m_dwStatus |= MODSTATUS_PLAYING;
-	m_wndToolBar.SetCurrentSong(m_pSndFile);
-	if (gpSoundDevice) gpSoundDevice->Start();
-	SetEvent(m_hAudioWakeUp);
-	return TRUE;
+	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
+	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+#ifndef NO_AGC
+	CSoundFile::m_AGC.Reset();
+#endif
 }
 
 
-BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
+bool CMainFrame::PreparePlayback()
+//--------------------------------
+{
+	// open the audio device to update needed TrackerSettings mixer parameters
+	if(!audioOpenDevice()) return false;
+	return true;
+}
+
+
+bool CMainFrame::StartPlayback()
+//------------------------------
+{
+	if(!m_pSndFile) return false; // nothing to play
+	if(!IsAudioDeviceOpen()) return false;
+	SetAudioThreadActive(true);
+	return true;
+}
+
+
+void CMainFrame::StopPlayback()
+//-----------------------------
+{
+	if(!IsAudioDeviceOpen()) return;
+	SetAudioThreadActive(false);
+	audioCloseDevice();
+}
+
+
+bool CMainFrame::PausePlayback()
+//------------------------------
+{
+	if(!IsAudioDeviceOpen()) return false;
+	SetAudioThreadActive(false);
+	return true;
+}
+
+
+void CMainFrame::GenerateStopNotification()
 //-----------------------------------------
 {
-	if ((pModDoc) && (pModDoc != m_pModPlaying)) return FALSE;
-	if (m_dwStatus & MODSTATUS_PLAYING)
+	MPTNOTIFICATION mn;
+	MemsetZero(mn);
+	mn.dwType = MPTNOTIFY_STOP;
+	SendMessage(WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
+}
+
+
+void CMainFrame::UnsetPlaybackSoundFile()
+//---------------------------------------
+{
+	if(m_pSndFile)
 	{
-		m_dwStatus &= ~MODSTATUS_PLAYING;
-
-		if (gpSoundDevice) gpSoundDevice->Reset();
-		audioCloseDevice();
-
+		m_pSndFile->SuspendPlugins();
+		m_nMixChn = 0;
+		m_nAvgMixChn = 0;
+		if(m_pSndFile->GetpModDoc())
 		{
-			CriticalSection cs;
-			m_pSndFile->SuspendPlugins();
+			m_wndTree.UpdatePlayPos(m_pSndFile->GetpModDoc(), NULL);
 		}
-
-		m_nMixChn = m_nAvgMixChn = 0;
-		Sleep(1);
-		if (m_hFollowSong)
-		{
-			MPTNOTIFICATION mn;
-			MemsetZero(mn);
-			mn.dwType = MPTNOTIFY_STOP;
-			::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
-		}
-	}
-	if (m_pModPlaying)
-	{
-		m_wndTree.UpdatePlayPos(m_pModPlaying, NULL);
-	}
-	if (m_pSndFile)
-	{
 		m_pSndFile->m_SongFlags.reset(SONG_PAUSED);
-		if (m_pSndFile == &m_WaveFile)
+		if(m_pSndFile == &m_WaveFile)
 		{
 			// Unload previewed instrument
 			m_WaveFile.Destroy();
@@ -1440,45 +1348,165 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 			}
 		}
 	}
-
-	m_pModPlaying = nullptr;
 	m_pSndFile = nullptr;
-	m_hFollowSong = nullptr;
-	m_wndToolBar.SetCurrentSong(NULL);
-	return TRUE;
+	m_hFollowSong = NULL;
+	m_wndToolBar.SetCurrentSong(nullptr);
+	{
+		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+		m_NotifyBuffer.clear();
+	}
 }
 
 
-BOOL CMainFrame::StopMod(CModDoc *pModDoc)
+void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat, DWORD dwNotifyType)
+//----------------------------------------------------------------------------------------
+{
+	m_pSndFile = pSndFile;
+	m_hFollowSong = hPat;
+	m_dwNotifyType = dwNotifyType;
+}
+
+
+bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
+//-----------------------------------------------------------------------
+{
+	CriticalSection::AssertUnlocked();
+	if(!pModDoc) return false;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if(!IsValidSoundFile(pSndFile)) return false;
+
+	// if something is playing, pause it
+	PausePlayback();
+	GenerateStopNotification();
+
+	UnsetPlaybackSoundFile();
+
+	// open audio device if not already open
+	if (!PreparePlayback()) return false;
+
+	// set mixing parameters in CSoundFile
+	ApplyTrackerSettings(pSndFile);
+
+	SetPlaybackSoundFile(pSndFile, hPat, dwNotifyType);
+
+	const bool bPaused = m_pSndFile->IsPaused();
+	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
+
+	m_pSndFile->ResetChannels();
+	// Select correct bidi loop mode when playing a module.
+	m_pSndFile->SetupITBidiMode();
+
+	if(!bPatLoop && bPaused) pSndFile->m_SongFlags.set(SONG_PAUSED);
+	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
+
+	m_pSndFile->InitPlayer(TRUE);
+
+	m_wndToolBar.SetCurrentSong(m_pSndFile);
+
+	gnLVuMeter = 0;
+	gnRVuMeter = 0;
+	m_nMixChn = 0;
+	m_nAvgMixChn = 0;
+
+	if(!StartPlayback())
+	{
+		UnsetPlaybackSoundFile();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool CMainFrame::PauseMod(CModDoc *pModDoc)
+//-----------------------------------------
+{
+	CriticalSection::AssertUnlocked();
+	if(pModDoc && (pModDoc != GetModPlaying())) return false;
+	if(!IsPlaying()) return true;
+
+	PausePlayback();
+	GenerateStopNotification();
+
+	UnsetPlaybackSoundFile();
+
+	StopPlayback();
+
+	return true;
+}
+
+
+bool CMainFrame::StopMod(CModDoc *pModDoc)
 //----------------------------------------
 {
-	if ((pModDoc) && (pModDoc != m_pModPlaying)) return FALSE;
-	CSoundFile *pSndFile = m_pSndFile;
-	PauseMod();
-	if (pSndFile) pSndFile->SetCurrentPos(0);
-	return TRUE;
+	CriticalSection::AssertUnlocked();
+	if(pModDoc && (pModDoc != GetModPlaying())) return false;
+	if(!IsPlaying()) return true;
+
+	PausePlayback();
+	GenerateStopNotification();
+
+	m_pSndFile->SetCurrentPos(0);
+	UnsetPlaybackSoundFile();
+
+	StopPlayback();
+
+	return true;
 }
 
 
-BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
+bool CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 //--------------------------------------------------
 {
-	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
-	if (m_pSndFile && m_pSndFile != pSndFile) PauseMod(NULL);
-	m_pSndFile = pSndFile;
-	if (!audioOpenDevice())
+	CriticalSection::AssertUnlocked();
+	if(!IsValidSoundFile(pSndFile)) return false;
+	if(pSndFile != m_pSndFile) return false;
+	if(!IsPlaying()) return true;
+
+	PausePlayback();
+	GenerateStopNotification();
+
+	UnsetPlaybackSoundFile();
+
+	StopPlayback();
+
+	return true;
+}
+
+
+bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
+//--------------------------------------------------
+{
+	CriticalSection::AssertUnlocked();
+	if(!IsValidSoundFile(pSndFile)) return false;
+
+	PausePlayback();
+	GenerateStopNotification();
+
+	if(m_pSndFile != pSndFile)
 	{
-		m_pSndFile = NULL;
-		return FALSE;
+		UnsetPlaybackSoundFile();
 	}
-	gsdwTotalSamples = 0;
-	m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
-	m_pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+
+	if(!PreparePlayback())
+	{
+		UnsetPlaybackSoundFile();
+		return false;
+	}
+
+	ApplyTrackerSettings(pSndFile);
+
+	SetPlaybackSoundFile(pSndFile);
+
 	m_pSndFile->InitPlayer(TRUE);
-	if(gpSoundDevice && !(m_dwStatus & MODSTATUS_PLAYING)) gpSoundDevice->Start();
-	m_dwStatus |= MODSTATUS_PLAYING;
-	SetEvent(m_hAudioWakeUp);
-	return TRUE;
+
+	if(!StartPlayback())
+	{
+		UnsetPlaybackSoundFile();
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -1486,95 +1514,125 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 //--------------------------------------------------------------------------------------------
 {
 	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
+	bool ok = false;
 	BeginWaitCursor();
-	CriticalSection cs;
-	InitPreview();
-	if(CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
 	{
-		PreparePreview(note);
-		PlaySoundFile(&m_WaveFile);
+		CriticalSection cs;
+		InitPreview();
+		if(CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
+		{
+			PreparePreview(note);
+			ok = true;
+		}
 	}
 	EndWaitCursor();
-	return TRUE;
+	if(!ok)
+	{
+		PausePlayback();
+		UnsetPlaybackSoundFile();
+		StopPlayback();
+		return false;
+	}
+	return PlaySoundFile(&m_WaveFile);
 }
 
 
 BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 //------------------------------------------------------------------------
 {
-	static CString prevFile;
-	bool bOk = (prevFile == lpszFileName && m_pSndFile == &m_WaveFile);
-
-	CriticalSection cs;
-	if(!bOk && lpszFileName)
+	bool ok = false;
+	BeginWaitCursor();
 	{
-		CMappedFile f;
+		CriticalSection cs;
+		static CString prevFile;
+		// Did we already load this file for previewing? Don't load it again if the preview is still running.
+		ok = (prevFile == lpszFileName && m_pSndFile == &m_WaveFile);
 
-		BeginWaitCursor();
-		if(!f.Open(lpszFileName))
+		if(!ok && lpszFileName)
 		{
-			EndWaitCursor();
-			return FALSE;
-		}
+			CMappedFile f;
 
-		InitPreview();
-
-		DWORD dwLen = f.GetLength();
-		if(dwLen)
-		{
-			LPBYTE p = f.Lock();
-			if(p)
+			if(f.Open(lpszFileName))
 			{
-				m_WaveFile.m_SongFlags.set(SONG_PAUSED);
-				cs.Leave();	// Avoid hanging audio while reading file
-				bOk = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen);
-				if(!bOk)
+				DWORD dwLen = f.GetLength();
+				if(dwLen)
 				{
-					bOk = m_WaveFile.ReadSampleFromFile(1, p, dwLen);
-					m_WaveFile.AllocateInstrument(1, 1);
+					LPBYTE p = f.Lock();
+					if(p)
+					{
+						InitPreview();
+						m_WaveFile.m_SongFlags.set(SONG_PAUSED);
+						// Avoid hanging audio while reading file - we have removed all sample and instrument references before,
+						// so it's safe to replace the sample / instrument now.
+						cs.Leave();
+						ok = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen);
+						if(!ok)
+						{
+							// Try reading as sample if reading as instrument fails
+							ok = m_WaveFile.ReadSampleFromFile(1, p, dwLen);
+							m_WaveFile.AllocateInstrument(1, 1);
+						}
+						f.Unlock();
+					}
 				}
-				f.Unlock();
+				f.Close();
 			}
 		}
-		f.Close();
-		EndWaitCursor();
+		if(ok)
+		{
+			// Write notes to pattern. Also done if we have previously loaded this file, since we might be previewing another note now.
+			PreparePreview(note);
+			prevFile = lpszFileName;
+		}
 	}
-
-	if(bOk)
+	EndWaitCursor();
+	if(!ok)
 	{
-		cs.Enter();
-		PreparePreview(note);
-		bOk = PlaySoundFile(&m_WaveFile) != FALSE;
-
-		prevFile = lpszFileName;
+		PausePlayback();
+		UnsetPlaybackSoundFile();
+		StopPlayback();
+		return false;
 	}
-	return bOk;
+	return PlaySoundFile(&m_WaveFile);
 }
 
 
 BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note)
 //------------------------------------------------------------------------------------------------------------------------
 {
-	CriticalSection cs;
-	InitPreview();
-	m_WaveFile.m_nType = pSong->m_nType;
-	if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
+	bool ok = false;
+	BeginWaitCursor();
 	{
-		m_WaveFile.m_nInstruments = 1;
-		m_WaveFile.m_nSamples = 32;
-	} else
-	{
-		m_WaveFile.m_nInstruments = 0;
-		m_WaveFile.m_nSamples = 1;
+		CriticalSection cs;
+		InitPreview();
+		m_WaveFile.m_nType = pSong->m_nType;
+		if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
+		{
+			m_WaveFile.m_nInstruments = 1;
+			m_WaveFile.m_nSamples = 32;
+		} else
+		{
+			m_WaveFile.m_nInstruments = 0;
+			m_WaveFile.m_nSamples = 1;
+		}
+		if (nInstrument != INSTRUMENTINDEX_INVALID && nInstrument <= pSong->GetNumInstruments())
+		{
+			m_WaveFile.ReadInstrumentFromSong(1, pSong, nInstrument);
+		} else if(nSample != SAMPLEINDEX_INVALID && nSample <= pSong->GetNumSamples())
+		{
+			m_WaveFile.ReadSampleFromSong(1, pSong, nSample);
+		}
+		PreparePreview(note);
+		ok = true;
 	}
-	if (nInstrument != INSTRUMENTINDEX_INVALID && nInstrument <= pSong->GetNumInstruments())
+	EndWaitCursor();
+	if(!ok)
 	{
-		m_WaveFile.ReadInstrumentFromSong(1, pSong, nInstrument);
-	} else if(nSample != SAMPLEINDEX_INVALID && nSample <= pSong->GetNumSamples())
-	{
-		m_WaveFile.ReadSampleFromSong(1, pSong, nSample);
+		PausePlayback();
+		UnsetPlaybackSoundFile();
+		StopPlayback();
+		return false;
 	}
-	PreparePreview(note);
 	return PlaySoundFile(&m_WaveFile);
 }
 
@@ -1630,19 +1688,10 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 }
 
 
-BOOL CMainFrame::StopSoundFile(CSoundFile *pSndFile)
-//--------------------------------------------------
-{
-	if ((pSndFile) && (pSndFile != m_pSndFile)) return FALSE;
-	PauseMod(NULL);
-	return TRUE;
-}
-
-
 BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, DWORD dwType)
 //--------------------------------------------------------------------------------------
 {
-	if ((!pDoc) || (pDoc != m_pModPlaying)) return FALSE;
+	if ((!pDoc) || (pDoc != GetModPlaying())) return FALSE;
 	if (bFollowSong)
 	{
 		m_hFollowSong = hwnd;
@@ -1651,37 +1700,30 @@ BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, DWORD
 		if (hwnd == m_hFollowSong) m_hFollowSong = NULL;
 	}
 	if (dwType) m_dwNotifyType = dwType;
-	if (m_dwNotifyType & MPTNOTIFY_MASTERVU)
-	{
-		CSoundFile::gpSndMixHook = CalcStereoVuMeters;
-	} else
-	{
-		gnLVuMeter = gnRVuMeter = 0;
-		CSoundFile::gpSndMixHook = NULL;
-	}
 	return TRUE;
 }
 
 
-BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UINT bufsize, LONG wd)
+BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
 //-------------------------------------------------------------------------------------------------
 {
-	const bool isPlaying = (m_dwStatus & MODSTATUS_PLAYING) != 0;
+	const bool isPlaying = (IsPlaying() != 0);
 	if ((TrackerSettings::Instance().m_dwRate != rate) || ((TrackerSettings::Instance().m_dwSoundSetup & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
-	 || (TrackerSettings::Instance().m_nWaveDevice != wd) || (TrackerSettings::Instance().m_nBufferLength != bufsize) || (nBits != TrackerSettings::Instance().m_nBitsPerSample)
+	 || (TrackerSettings::Instance().m_nWaveDevice != wd) || (TrackerSettings::Instance().m_LatencyMS != latency_ms) || (TrackerSettings::Instance().m_UpdateIntervalMS != updateinterval_ms) || (nBits != TrackerSettings::Instance().m_nBitsPerSample)
 	 || (TrackerSettings::Instance().m_nChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
 		HWND hFollow = m_hFollowSong;
 		if (isPlaying)
 		{
-			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = m_pModPlaying;
+			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
 			PauseMod();
 		}
 		TrackerSettings::Instance().m_nWaveDevice = wd;
 		TrackerSettings::Instance().m_dwRate = rate;
 		TrackerSettings::Instance().m_dwSoundSetup = q;
-		TrackerSettings::Instance().m_nBufferLength = bufsize;
+		TrackerSettings::Instance().m_LatencyMS = latency_ms;
+		TrackerSettings::Instance().m_UpdateIntervalMS = updateinterval_ms;
 		TrackerSettings::Instance().m_nBitsPerSample = nBits;
 		TrackerSettings::Instance().m_nChannels = nChns;
 		{
@@ -1829,7 +1871,7 @@ VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 //-------------------------------------------------
 {
-	if (pModDoc == m_pModPlaying) PauseMod();
+	if (pModDoc == GetModPlaying()) PauseMod();
 
 	// Make sure that OnTimer() won't try to set the closed document modified anymore.
 	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = nullptr;
@@ -1857,7 +1899,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_dwSoundSetup, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, TrackerSettings::Instance().m_nBufferLength, TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_dwRate, TrackerSettings::Instance().m_dwSoundSetup, TrackerSettings::Instance().m_nBitsPerSample, TrackerSettings::Instance().m_nChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
@@ -1879,7 +1921,9 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&autosavedlg);
 	dlg.AddPage(&updatedlg);
 	m_bOptionsLocked=true;	//rewbs.customKeys
+	m_SoundCardOptionsDialog = &sounddlg;
 	dlg.DoModal();
+	m_SoundCardOptionsDialog = nullptr;
 	m_bOptionsLocked=false;	//rewbs.customKeys
 	m_wndTree.OnOptionsChanged();
 }
@@ -1994,12 +2038,6 @@ void CMainFrame::OnImportMidiLib()
 }
 
 
-void CMainFrame::SetLastMixActiveTime()		//rewbs.LiveVSTi
-//-------------------------------------
-{
-	gdwLastMixActiveTime = timeGetTime();
-}
-
 void CMainFrame::OnTimer(UINT)
 //----------------------------
 {
@@ -2018,38 +2056,7 @@ void CMainFrame::OnTimer(UINT)
 	}
 	// Idle Time Check
 	DWORD curTime = timeGetTime();
-	if (IsPlaying())
-	{
-		gdwIdleTime = 0;
-		if (curTime - gdwLastLowLatencyTime > 15000)
-		{
-			gdwPlayLatency = 0;
-		}
-		if ((m_pSndFile) && (m_pSndFile->IsPaused()) && (!m_pSndFile->m_nMixChannels))
-		{
-			//Log("%d (%d)\n", dwTime - gdwLastMixActiveTime, gdwLastMixActiveTime);
-			if (curTime - gdwLastMixActiveTime > 5000)
-			{
-				//rewbs.instroVSTi: testing without shutting down audio device after 5s of idle time.
-				//PauseMod();
-			}
-		} else
-		{
-			gdwLastMixActiveTime = curTime;
-		}
-	} else
-	{
-		gdwIdleTime += MPTTIMER_PERIOD;
-		if (gdwIdleTime > 15000)
-		{
-			gdwIdleTime = 0;
-			// After 15 seconds of inactivity, we reset the AGC
-#ifndef NO_AGC
-			CSoundFile::m_AGC.Reset();
-#endif
-			gdwPlayLatency = 0;
-		}
-	}
+
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
 	if (m_pAutoSaver && m_pAutoSaver->IsEnabled())
@@ -2074,6 +2081,11 @@ void CMainFrame::OnTimer(UINT)
 	{
 		m_pJustModifiedDoc->SetModified(true);
 		m_pJustModifiedDoc = NULL;
+	}
+
+	if(m_SoundCardOptionsDialog)
+	{
+		m_SoundCardOptionsDialog->UpdateStatistics();
 	}
 
 }
@@ -2179,9 +2191,9 @@ void CMainFrame::OnUpdateXInfo(CCmdUI *)
 void CMainFrame::OnPlayerPause()
 //------------------------------
 {
-	if (m_pModPlaying)
+	if (GetModPlaying())
 	{
-		m_pModPlaying->OnPlayerPause();
+		GetModPlaying()->OnPlayerPause();
 	} else
 	{
 		PauseMod();
@@ -2263,21 +2275,34 @@ LRESULT CMainFrame::OnInvalidatePatterns(WPARAM wParam, LPARAM)
 }
 
 
+LRESULT CMainFrame::OnUpdatePositionThreaded(WPARAM, LPARAM)
+//-----------------------------------------------------------------
+{
+	MPTNOTIFICATION * pnotify = &m_PendingNotification;
+	LRESULT retval = OnUpdatePosition(0, (LPARAM)pnotify);
+	// for all notifications which were delivered via the notification thread, release the semaphore
+	ReleaseSemaphore(m_PendingNotificationSempahore, 1, NULL);
+	return retval;
+}
+
 LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 //---------------------------------------------------------
 {
 	MPTNOTIFICATION *pnotify = (MPTNOTIFICATION *)lParam;
 	if (pnotify)
 	{
-		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->dwLatency);
-		if ((m_pModPlaying) && (m_pSndFile))
+		if(pnotify->dwType & MPTNOTIFY_EOS)
 		{
-			m_wndTree.UpdatePlayPos(m_pModPlaying, pnotify);
-			if (m_hFollowSong) ::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, lParam);
+			PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 		}
-		pnotify->dwType = 0;
+		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->TimestampSamples);
+		if (GetModPlaying())
+		{
+			m_wndTree.UpdatePlayPos(GetModPlaying(), pnotify);
+			if (m_hFollowSong)
+				::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, lParam);
+		}
 	}
-	m_dwStatus &= ~MODSTATUS_BUSY;
 	return 0;
 }
 
@@ -2286,8 +2311,8 @@ void CMainFrame::OnPanic()
 //------------------------
 {
 	// "Panic button." At the moment, it just resets all VSTi and sample notes.
-	if(m_pModPlaying)
-		m_pModPlaying->OnPanic();
+	if(GetModPlaying())
+		GetModPlaying()->OnPanic();
 }
 
 
@@ -2504,8 +2529,6 @@ BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 	pSndFile->m_bIsRendering=true;
 	pSndFile->SuspendPlugins();
 	pSndFile->ResumePlugins();
-	m_dwStatus |= MODSTATUS_RENDERING;
-	m_pModPlaying = GetActiveDoc();
 	return true;
 }
 
@@ -2513,8 +2536,6 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------
 {
 	CriticalSection cs;
-	m_dwStatus &= ~MODSTATUS_RENDERING;
-	m_pModPlaying = NULL;
 	pSndFile->SuspendPlugins();
 	pSndFile->m_bIsRendering=false;
 	return true;
