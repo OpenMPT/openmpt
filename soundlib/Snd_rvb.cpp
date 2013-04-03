@@ -65,6 +65,21 @@ static LONG OnePoleLowPassCoef(LONG scale, FLOAT g, FLOAT F_c, FLOAT F_s);
 static LONG mBToLinear(LONG scale, LONG value_mB);
 static FLOAT mBToLinear(LONG value_mB);
 
+struct SNDMIX_REVERB_PROPERTIES
+{
+	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
+	LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
+	FLOAT flDecayTime;             // [0.1, 20.0]      default: 1.0 s
+	FLOAT flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
+	LONG  lReflections;            // [-10000, 1000]   default: -10000 mB
+	FLOAT flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
+	LONG  lReverb;                 // [-10000, 2000]   default: -10000 mB
+	FLOAT flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
+	FLOAT flDiffusion;             // [0.0, 100.0]     default: 100.0 %
+	FLOAT flDensity;               // [0.0, 100.0]     default: 100.0 %
+};
+typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
+
 typedef struct _SNDMIX_RVBPRESET
 {
 	SNDMIX_REVERB_PROPERTIES Preset;

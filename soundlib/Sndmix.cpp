@@ -36,6 +36,7 @@ DWORD CSoundFile::gdwSoundSetup = 0;
 DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
+CResampler CSoundFile::m_Resampler;
 #ifndef NO_REVERB
 CReverb CSoundFile::m_Reverb;
 #endif
@@ -48,11 +49,7 @@ CEQ CSoundFile::m_EQ;
 #ifndef NO_AGC
 CAGC CSoundFile::m_AGC;
 #endif
-double CSoundFile::gdWFIRCutoff = 0.97; //default value
-BYTE CSoundFile::gbWFIRType = 7; //WFIR_KAISER4T; //default value
-UINT CSoundFile::gnVolumeRampUpSamples = 42;		//default value
-UINT CSoundFile::gnVolumeRampUpSamplesTarget = 42;		//default value
-UINT CSoundFile::gnVolumeRampDownSamples = 42;		//default value
+UINT CSoundFile::gnVolumeRampUpSamplesActual = 42;		//default value
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 LONG gnDryROfsVol = 0;
@@ -70,7 +67,6 @@ extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
-extern void SndMixInitializeTables(const MixerSettings &mixersettings);
 
 extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
 extern int MixRearBuffer[MIXBUFFERSIZE * 2];
@@ -124,23 +120,14 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 
 	// Start with ramping disabled to avoid clicks on first read.
 	// Ramping is now set after the first read in CSoundFile::Read();
-	gnVolumeRampUpSamples = 0;
-	gnVolumeRampUpSamplesTarget = mixersettings.glVolumeRampUpSamples;
-	gnVolumeRampDownSamples = mixersettings.glVolumeRampDownSamples;
-
-	gdWFIRCutoff = mixersettings.gdWFIRCutoff;
-	gbWFIRType =  mixersettings.gbWFIRType;
+	gnVolumeRampUpSamplesActual = 0;
+	m_Resampler.m_Settings = mixersettings;
 }
 
 MixerSettings CSoundFile::GetMixerSettings()
 //------------------------------------------
 {
-	MixerSettings mixersettings;
-	mixersettings.glVolumeRampUpSamples = gnVolumeRampUpSamplesTarget;
-	mixersettings.glVolumeRampDownSamples = gnVolumeRampDownSamples;
-	mixersettings.gdWFIRCutoff = gdWFIRCutoff;
-	mixersettings.gbWFIRType = gbWFIRType;
-	return mixersettings;
+	return m_Resampler.m_Settings;
 }
 
 
@@ -149,7 +136,7 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 {
 	if (!gbInitTables)
 	{
-		SndMixInitializeTables(GetMixerSettings());
+		m_Resampler.InitializeTables();
 		gbInitTables = true;
 	}
 
@@ -381,7 +368,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
 		// Turn on ramping after first read (fix http://forum.openmpt.org/index.php?topic=523.0 )
-		gnVolumeRampUpSamples = gnVolumeRampUpSamplesTarget;
+		gnVolumeRampUpSamplesActual = m_Resampler.m_Settings.glVolumeRampUpSamples;
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
@@ -1572,7 +1559,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 	{
 		const bool rampUp = (pChn->nNewRightVol > pChn->nRightVol) || (pChn->nNewLeftVol > pChn->nLeftVol);
 		LONG rampLength, globalRampLength, instrRampLength = 0;
-		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamples : gnVolumeRampDownSamples);
+		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamplesActual : m_Resampler.m_Settings.glVolumeRampDownSamples);
 		//XXXih: add real support for bidi ramping here	
 		
 		if(pChn->pModInstrument != nullptr && rampUp)
@@ -2256,7 +2243,7 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 		// User has provided new global volume
 		const bool rampUp = m_nGlobalVolumeDestination > m_nGlobalVolume;
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
-		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? gnVolumeRampUpSamples : gnVolumeRampDownSamples;
+		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? gnVolumeRampUpSamplesActual : m_Resampler.m_Settings.glVolumeRampDownSamples;
 	} 
 
 	if (m_nSamplesToGlobalVolRampDest > 0)

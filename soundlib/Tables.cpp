@@ -14,6 +14,7 @@
 #include <math.h>
 #include "sndfile.h"
 
+#include "Resampler.h"
 // rewbs.resamplerConf
 #include "WindowedFIR.h"
 // end  rewbs.resamplerConf
@@ -625,10 +626,6 @@ short int gFastSinc[256*4] =
 
 
 
-#define SINC_PHASES		4096
-short int gKaiserSinc[SINC_PHASES*8];		// Upsampling
-short int gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-short int gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -699,10 +696,10 @@ static void getdownsample2x(short int *psinc)
 
 
 
-void SndMixInitializeTables(const MixerSettings & mixersettings)
+void CResampler::InitializeTables()
 {
-	CWindowedFIR::InitTable(mixersettings);
-	getsinc(gKaiserSinc, 9.6377, mixersettings.gdWFIRCutoff);
+	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
+	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
  	//ericus' downsampling improvement.
  	//getsinc(gDownsample13x, 8.5, 3.0/4.0);
 	//getdownsample2x(gDownsample2x);

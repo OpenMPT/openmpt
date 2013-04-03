@@ -737,8 +737,7 @@ void COptionsPlayer::OnDefaultResampling()
 	
 }
 
-extern void SndMixInitializeTables(const MixerSettings & mixersettings);
-//end rewbs.resamplerConf
+
 void COptionsPlayer::OnOK()
 //-------------------------
 {
@@ -805,7 +804,8 @@ void COptionsPlayer::OnOK()
 	m_CEditRampDown.GetWindowText(s);
 	TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples = atol(s);
 
-	SndMixInitializeTables(TrackerSettings::Instance().m_MixerSettings); //regenerate resampling tables
+	CSoundFile::m_Resampler.m_Settings = TrackerSettings::Instance().m_MixerSettings;
+	CSoundFile::m_Resampler.InitializeTables(); //regenerate resampling tables
 	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);
 	CPropertyPage::OnOK();

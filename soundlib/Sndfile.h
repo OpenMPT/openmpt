@@ -32,6 +32,7 @@
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 
+#include "Resampler.h"
 #include "snd_rvb.h"
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
@@ -48,21 +49,6 @@ extern char *GetInstrumentHeaderFieldPointer(const ModInstrument * input, uint32
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
-
-struct SNDMIX_REVERB_PROPERTIES
-{
-	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
-    LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
-    FLOAT flDecayTime;             // [0.1, 20.0]      default: 1.0 s
-    FLOAT flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
-    LONG  lReflections;            // [-10000, 1000]   default: -10000 mB
-    FLOAT flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
-    LONG  lReverb;                 // [-10000, 2000]   default: -10000 mB
-    FLOAT flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
-    FLOAT flDiffusion;             // [0.0, 100.0]     default: 100.0 %
-    FLOAT flDensity;               // [0.0, 100.0]     default: 100.0 %
-};
-typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
 
 #ifndef NO_REVERB
 
@@ -236,6 +222,7 @@ private: //Misc data
 	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
 public:	// Static Members
+	static CResampler m_Resampler;
 #ifndef NO_REVERB
 	static CReverb m_Reverb;
 #endif
@@ -251,9 +238,7 @@ public:	// Static Members
 	static UINT m_nStereoSeparation;
 	static UINT m_nMaxMixChannels;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
-	static double gdWFIRCutoff;
-	static BYTE gbWFIRType;
-	static UINT gnVolumeRampUpSamples, gnVolumeRampUpSamplesTarget, gnVolumeRampDownSamples;
+	static UINT gnVolumeRampUpSamplesActual;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 	static uint8 s_DefaultPlugVolumeHandling;
