@@ -484,7 +484,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_pModDoc = pModDoc;
 #else
 BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 {
 #endif // MODPLUG_TRACKER
 
@@ -737,7 +737,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		{
 			if(m_MixPlugins[iPlug].IsValidPlugin())
 			{
-				gpMixPluginCreateProc(&m_MixPlugins[iPlug], this);
+				gpMixPluginCreateProc(m_MixPlugins[iPlug], *this);
 				if (m_MixPlugins[iPlug].pMixPlugin)
 				{
 					// plugin has been found
@@ -916,7 +916,7 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 //------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-	DWORD d = gdwSoundSetup;	
+	DWORD d = gdwSoundSetup;
 	if ((bReverb) && (gdwSysInfo & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
 #ifndef NO_DSP
 	if (bSurround) d |= SNDMIX_SURROUND; else d &= ~SNDMIX_SURROUND;

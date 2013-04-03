@@ -119,7 +119,7 @@ struct VSTInstrChannel
 class CVstPlugin: public IMixPlugin
 //=================================
 {
-	friend class CAbstractVstEditor;	//rewbs.defaultPlugGUI
+	friend class CAbstractVstEditor;
 	friend class CVstPluginManager;
 #ifndef NO_VST
 protected:
@@ -133,19 +133,16 @@ protected:
 		vstPitchBendShift	= 12,		// Use lowest 12 bits for fractional part and vibrato flag => 16.11 fixed point precision
 		vstPitchBendMask	= (~1),
 		vstVibratoFlag		= 1,
-	}; 
+	};
 
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
-	VSTPluginLib *m_pFactory;
+	VSTPluginLib &m_Factory;
 	SNDMIXPLUGIN *m_pMixStruct;
-	AEffect *m_pEffect;
+	AEffect &m_Effect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;
-#ifdef MODPLUG_TRACKER
-	CModDoc *m_pModDoc;
-#endif // MODPLUG_TRACKER
-	CSoundFile *m_pSndFile;
+	CSoundFile &m_SndFile;
 
 	size_t m_nRefCount;
 	static const uint32 nInvalidSampleRate = UINT_MAX;
@@ -173,12 +170,12 @@ public:
 	bool m_bRecordMIDIOut;
 
 public:
-	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *pMixPlugin, AEffect *pEffect);
+	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
 	virtual ~CVstPlugin();
-	void Initialize(CSoundFile* pSndFile);
+	void Initialize();
 
 public:
-	VSTPluginLib *GetPluginFactory() const { return m_pFactory; }
+	VSTPluginLib &GetPluginFactory() const { return m_Factory; }
 	bool HasEditor();
 	VstInt32 GetNumPrograms();
 	PlugParamIndex GetNumParameters();
@@ -190,15 +187,15 @@ public:
 	VstInt32 GetUID() const;
 	VstInt32 GetVersion() const;
 	// Check if programs should be stored as chunks or parameters
-	bool ProgramsAreChunks() const { return m_pEffect && (m_pEffect->flags & effFlagsProgramChunks) != 0; }
+	bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
 	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
 #ifdef MODPLUG_TRACKER
-	inline CModDoc *GetModDoc() { return m_pModDoc; }
-	inline const CModDoc *GetModDoc() const { return m_pModDoc; }
+	inline CModDoc *GetModDoc() { return m_SndFile.GetpModDoc(); }
+	inline const CModDoc *GetModDoc() const { return m_SndFile.GetpModDoc(); }
 #endif // MODPLUG_TRACKER
-	inline CSoundFile *GetSoundFile() { return m_pSndFile; }
-	inline const CSoundFile *GetSoundFile() const { return m_pSndFile; }
+	inline CSoundFile &GetSoundFile() { return m_SndFile; }
+	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
 	PLUGINDEX FindSlot();
 	void SetSlot(PLUGINDEX slot);
 	PLUGINDEX GetSlot();
@@ -207,7 +204,7 @@ public:
 	void SetEditorPos(int x, int y) { m_nEditorX = x; m_nEditorY = y; }
 	void GetEditorPos(int &x, int &y) const { x = m_nEditorX; y = m_nEditorY; }
 
-	void SetCurrentProgram(UINT nIndex);
+	void SetCurrentProgram(VstInt32 nIndex);
 	PlugParamValue GetParameter(PlugParamIndex nIndex);
 	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
 
@@ -230,16 +227,16 @@ public:
 	bool isInstrument();
 	bool CanRecieveMidiEvents();
 
-	size_t GetOutputPlugList(vector<CVstPlugin *> &list);
-	size_t GetInputPlugList(vector<CVstPlugin *> &list);
-	size_t GetInputInstrumentList(vector<INSTRUMENTINDEX> &list);
-	size_t GetInputChannelList(vector<CHANNELINDEX> &list);
+	size_t GetOutputPlugList(std::vector<CVstPlugin *> &list);
+	size_t GetInputPlugList(std::vector<CVstPlugin *> &list);
+	size_t GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list);
+	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
 
 public:
 	size_t AddRef() { return ++m_nRefCount; }
 	size_t Release();
 	void SaveAllParameters();
-	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param 
+	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param
 	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
 	bool MidiSend(DWORD dwMidiCode);
@@ -312,7 +309,7 @@ public:
 	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
 	bool LoadProgram() { return false; }
 	bool SaveProgram() { return false; }
-	void SetCurrentProgram(UINT) {}
+	void SetCurrentProgram(VstInt32) {}
 	void SetSlot(UINT) {}
 	void UpdateMixStructPtr(void*) {}
 	void Bypass(bool = true) { }
@@ -336,10 +333,10 @@ public:
 
 public:
 	VSTPluginLib *GetFirstPlugin() const { return m_pVstHead; }
-	BOOL IsValidPlugin(const VSTPluginLib *pLib);
+	bool IsValidPlugin(const VSTPluginLib *pLib);
 	VSTPluginLib *AddPlugin(LPCSTR pszDllPath, bool fromCache = true, const bool checkFileExistence = false, CString* const errStr = 0);
 	bool RemovePlugin(VSTPluginLib *);
-	BOOL CreateMixPlugin(SNDMIXPLUGIN *, CSoundFile *);
+	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
 
@@ -351,7 +348,7 @@ protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect);
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	static BOOL __cdecl CreateMixPluginProc(SNDMIXPLUGIN *, CSoundFile *);
+	static bool __cdecl CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 
 public:
