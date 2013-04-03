@@ -402,6 +402,7 @@
     <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptString.h" />
+    <ClInclude Include="..\common\mutex.h" />
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
@@ -544,6 +545,9 @@
   <ItemGroup>
     <ProjectReference Include="..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj">
       <Project>{4cefbc84-c215-11db-8314-0800200c9a66}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\include\portaudio\build\msvc\portaudio_openmpt_vs2010.vcxproj">
+      <Project>{0a18a071-125e-442f-aff7-a3f68abecf99}</Project>
     </ProjectReference>
     <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
       <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>

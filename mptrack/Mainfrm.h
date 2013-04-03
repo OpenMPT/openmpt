@@ -15,6 +15,8 @@
 #include "inputhandler.h"
 #include "mptrack.h"
 #include "../common/AudioCriticalSection.h"
+#include "../common/mutex.h"
+#include "soundlib/snddev.h"
 
 class CInputHandler;
 class CMainFrame;
@@ -23,9 +25,6 @@ class CAutoSaver;
 class ISoundDevice;
 class ISoundSource;
 
-#define NUM_AUDIO_BUFFERS			3
-#define MIN_AUDIO_BUFFERSIZE		1024
-#define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
 #define INIBUFFERSIZE				MAX_PATH
 
@@ -110,10 +109,6 @@ enum
 
 };
 
-
-#define MODSTATUS_PLAYING		0x01
-#define MODSTATUS_BUSY			0x02
-#define MODSTATUS_RENDERING     0x04 //rewbs.VSTTimeInfo
 
 #define SOUNDSETUP_ENABLEMMX	0x08
 #define SOUNDSETUP_SOFTPANNING	0x10
@@ -264,29 +259,38 @@ enum
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
 
-#define MAX_UPDATE_HISTORY		8
+#define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
 
-#define MPTNOTIFY_TYPEMASK		0x00FF0000	// HiWord = type, LoWord = subtype (smp/instr #)
-#define MPTNOTIFY_PENDING		0x01000000	// Being processed
-#define MPTNOTIFY_DEFAULT		0x00010000
-#define MPTNOTIFY_POSITION		0x00010000
-#define MPTNOTIFY_SAMPLE		0x00020000
-#define MPTNOTIFY_VOLENV		0x00040000
-#define MPTNOTIFY_PANENV		0x00080000
-#define MPTNOTIFY_PITCHENV		0x00100000
-#define MPTNOTIFY_VUMETERS		0x00200000
-#define MPTNOTIFY_MASTERVU		0x00400000
-#define MPTNOTIFY_STOP			0x00800000
-#define MPTNOTIFY_POSVALID		0x80000000	// dwPos[i] is valid
+#define MPTNOTIFY_TYPEMASK  0x01FF0000  // HiWord = type, LoWord = subtype (smp/instr #)
+#define MPTNOTIFY_DEFAULT   0x00010000  // 
+#define MPTNOTIFY_POSITION  0x00010000  // 
+#define MPTNOTIFY_SAMPLE    0x00020000  // dwPos[i] contains sample position
+#define MPTNOTIFY_VOLENV    0x00040000  // dwPos[i] contains volume envelope position
+#define MPTNOTIFY_PANENV    0x00080000  // dwPos[i] contains panning envelope position
+#define MPTNOTIFY_PITCHENV  0x00100000  // dwPos[i] contains pitch envelope position
+#define MPTNOTIFY_VUMETERS  0x00200000  // dwPos[i] contains VU meter for every channel
+#define MPTNOTIFY_EOS       0x00800000  // end of stream reached, the gui should stop the audio device
+#define MPTNOTIFY_STOP      0x01000000  // audio device has been stopped -> reset GUI
+#define MPTNOTIFY_POSVALID  0x80000000  // dwPos[i] is valid (if it contains sample or envelope position)
 
+// struct MPTNOTIFICATION requires working copy constructor / copy assignment, keep in mind when extending
 struct MPTNOTIFICATION
 {
+	/*
+	   TimestampSamples is kind of confusing at the moment:
+	   If gpSoundDevice->HasGetStreamPosition(),
+		   then it contains the sample timestamp as when it was generated and the output stream is later queried when this exact timestamp has actually reached the speakers.
+		 If !gpSoundDevice->HasGetStreamPosition(),
+		   then it contains a sample timestamp in the future, incremented by the current latency estimation of the sound buffers. It is later checked against the total number of rendered samples at that time.
+	*/
+	int64 TimestampSamples;
 	DWORD dwType;
-	DWORD dwLatency;
 	ROWINDEX nRow;				// Always valid
 	UINT nTick;					// dito
 	ORDERINDEX nOrder;			// dito
 	PATTERNINDEX nPattern;		// dito
+	DWORD MasterVuLeft; // dito
+	DWORD MasterVuRight; // dito
 	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
 };
 
@@ -300,9 +304,10 @@ struct MPTNOTIFICATION
 #include "mainbar.h"
 #include "TrackerSettings.h"
 
-//===================================
-class CMainFrame: public CMDIFrameWnd
-//===================================
+
+//========================================================
+class CMainFrame: public CMDIFrameWnd, public ISoundSource
+//========================================================
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
@@ -311,7 +316,6 @@ public:
 	// Globals
 	static UINT m_nLastOptionsPage;
 	static HHOOK ghKbdHook;
-	static DWORD gdwNotificationType;
 
 	// GDI
 	static HICON m_hIcon;
@@ -326,13 +330,12 @@ public:
 public:
 
 	// Low-Level Audio
-	static ISoundDevice *gpSoundDevice;
-	static HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
-	static HANDLE m_hPlayThread, m_hNotifyThread;
-	static DWORD m_dwPlayThreadId, m_dwNotifyThreadId;
+	ISoundDevice *gpSoundDevice;
+	HANDLE m_hNotifyWakeUp;
+	HANDLE m_hNotifyThread;
+	DWORD m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
-	static UINT gdwIdleTime;
-	static LONG slSampleSize, sdwSamplesPerSec, sdwAudioBufferSize;
+	bool m_IsPlaybackRunning;
 
 	// Midi Input
 public:
@@ -346,18 +349,24 @@ protected:
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
 	CImageList m_ImageList;
-	CModDoc *m_pModPlaying;
-	CSoundFile *m_pSndFile;
+	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwStatus, m_dwNotifyType;
+	DWORD m_dwNotifyType;
 	CSoundFile::samplecount_t m_dwTimeSec;
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
+
 	// Notification Buffer
-	MPTNOTIFICATION NotifyBuffer[MAX_UPDATE_HISTORY];
+	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
+	int64 m_TotalSamplesRendered;
+	Util::fixed_size_queue<MPTNOTIFICATION,MAX_UPDATE_HISTORY> m_NotifyBuffer;
+	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
+	MPTNOTIFICATION m_PendingNotification;
+
 	// Misc
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
+	class COptionsSoundcard * m_SoundCardOptionsDialog;
 	CModDoc* m_pJustModifiedDoc;
 
 public:
@@ -369,20 +378,22 @@ public:
 public:
 	static void UpdateDspEffects();
 	static void UpdateAudioParameters(BOOL bReset=FALSE);
-	static void EnableLowLatencyMode(BOOL bOn=TRUE);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
-	static DWORD WINAPI AudioThread(LPVOID);
-	static DWORD WINAPI NotifyThread(LPVOID);
-	ULONG AudioRead(PVOID pData, ULONG cbSize);
-	void AudioDone(ULONG nBytesWritten, ULONG nLatency);
-	LONG audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
-	BOOL audioOpenDevice();
+	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
+	DWORD NotifyThread();
+	void SetAudioThreadActive(bool active=true);
+
+	// from ISoundSource
+	void FillAudioBufferLocked(IFillAudioBuffer &callback);
+	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
+	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
+	
+	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
+	bool audioOpenDevice();
+	bool audioReopenDevice();
 	void audioCloseDevice();
-	BOOL audioFillBuffers();
-	LRESULT OnWOMDone(WPARAM, LPARAM);
-	BOOL dsoundFillBuffers(LPBYTE lpBuf, DWORD dwSize);
-	BOOL DSoundDone(LPBYTE lpBuffer, DWORD dwBytes);
-	BOOL DoNotification(DWORD dwSamplesRead, DWORD dwLatency);
+	bool IsAudioDeviceOpen() const;
+	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream);
 
 // Midi Input Functions
 public:
@@ -455,33 +466,49 @@ public:
 
 // Player functions
 public:
-	BOOL PlayMod(CModDoc *, HWND hPat=NULL, DWORD dwNotifyType=0);
-	BOOL StopMod(CModDoc *pDoc=NULL);
-	BOOL PauseMod(CModDoc *pDoc=NULL);
-	BOOL PlaySoundFile(CSoundFile *);
+	static void ApplyTrackerSettings(CSoundFile *pSndFile);
+
+	// high level synchronous playback functions, do not hold AudioCriticalSection while calling these
+	bool PreparePlayback();
+	bool StartPlayback();
+	void StopPlayback();
+	bool PausePlayback();
+	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
+	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
+	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat=NULL, DWORD dwNotifyType=0);
+	void UnsetPlaybackSoundFile();
+	void GenerateStopNotification();
+
+	bool PlayMod(CModDoc *, HWND hPat=NULL, DWORD dwNotifyType=0);
+	bool StopMod(CModDoc *pDoc=NULL);
+	bool PauseMod(CModDoc *pDoc=NULL);
+
+	bool StopSoundFile(CSoundFile *);
+	bool PlaySoundFile(CSoundFile *);
 	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note);
 	BOOL PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note);
-	BOOL StopSoundFile(CSoundFile *);
+
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note);
 	void StopPreview() { StopSoundFile(&m_WaveFile); }
-	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); }
-	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); }
-	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
-	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }
+
+	inline bool IsPlaying() const { return m_pSndFile ? true : false; }
+	inline bool IsRendering() const { return m_pSndFile ? m_pSndFile->m_bIsRendering : false; }
+	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }
+	inline CSoundFile *GetSoundFilePlaying() const { return m_pSndFile; } // may be nullptr
 	BOOL InitRenderer(CSoundFile*);
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
-	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
+	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
 	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
-	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == m_pModPlaying) ? m_hFollowSong : NULL; }
+	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? m_hFollowSong : NULL; }
 	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, DWORD dwType=MPTNOTIFY_DEFAULT);
-	BOOL ResetNotificationBuffer(HWND hwnd=NULL);
+	void ResetNotificationBuffer();
 
 
 // Overrides
@@ -510,7 +537,6 @@ public:
 public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
-	afx_msg void SetLastMixActiveTime(); //rewbs.VSTCompliance
 	afx_msg void OnViewOptions();		 //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -544,6 +570,7 @@ protected:
 	afx_msg void OnReportBug();	//rewbs.customKeys
 	afx_msg BOOL OnInternetLink(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
+	afx_msg LRESULT OnUpdatePositionThreaded(WPARAM, LPARAM lParam);
 	afx_msg void OnExampleSong(UINT nId);
 	afx_msg void OnOpenTemplateModule(UINT nId);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);

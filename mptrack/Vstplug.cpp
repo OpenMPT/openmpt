@@ -873,8 +873,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	
 	case audioMasterGetOutputLatency:
 		{
-			VstIntPtr latency = TrackerSettings::Instance().m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate() / 1000L);
-			return latency;
+			return Util::muldiv(TrackerSettings::Instance().m_LatencyMS, CMainFrame::GetMainFrame()->GetSampleRate(), 1000);
 		}
 	
 	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
