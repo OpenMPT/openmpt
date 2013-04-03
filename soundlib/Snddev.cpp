@@ -1825,6 +1825,29 @@ float CPortaudioDevice::GetCurrentRealLatencyMS()
 }
 
 
+bool CPortaudioDevice::CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result)
+//-----------------------------------------------------------------------------------------------------------
+{
+	result.clear();
+	for(UINT n=0; n<samplerates.size(); n++)
+	{
+		PaStreamParameters StreamParameters;
+		MemsetZero(StreamParameters);
+		StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
+		if(StreamParameters.device == -1)
+		{
+			result.assign(samplerates.size(), false);
+			return false;
+		}
+		StreamParameters.channelCount = 2;
+		StreamParameters.sampleFormat = paInt16;
+		StreamParameters.suggestedLatency = 0.0;
+		StreamParameters.hostApiSpecificStreamInfo = NULL;
+		result.push_back(Pa_IsFormatSupported(NULL, &StreamParameters, samplerates[n]) == paFormatIsSupported);
+	}
+	return true;
+}
+
 
 int CPortaudioDevice::StreamCallback(
 	const void *input, void *output,
