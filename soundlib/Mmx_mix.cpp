@@ -24,11 +24,6 @@
 #include "sndfile.h"
 #include "../common/Reporting.h"
 
-extern short int gFastSinc[];
-extern short int gKaiserSinc[];
-extern short int gDownsample13x[];
-extern short int gDownsample2x[];
-
 #define PROCSUPPORT_CPUID	0x01
 #define PROCSUPPORT_MMX		0x02
 #define PROCSUPPORT_MMXEX	0x04
@@ -145,21 +140,6 @@ DWORD CSoundFile::InitSysInfo()
 	return d;
 }
 
-
-#ifdef ENABLE_MMX
-
-
-
-VOID MMX_EndMix()
-{
-	_asm {
-	pxor mm0, mm0
-	emms
-	}
-}
-
-
-#endif  // MMX code
 
 //////////////////////////////////////////////////////////////////////////////////
 //

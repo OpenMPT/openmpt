@@ -15,6 +15,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
+#include "Resampler.h"
 #include "WindowedFIR.h"
 
 // Front Mix Buffer (Also room for interleaved rear mix)
@@ -35,9 +36,6 @@ extern LONG gnDryLOfsVol;
 
 // 4x256 taps polyphase FIR resampling filter
 extern short int gFastSinc[];
-extern short int gKaiserSinc[]; // 8-taps polyphase
-extern short int gDownsample13x[]; // 1.3x downsampling
-extern short int gDownsample2x[]; // 2x downsampling
 
 
 /////////////////////////////////////////////////////
@@ -68,7 +66,6 @@ extern short int gDownsample2x[]; // 2x downsampling
 #define SNDMIX_ENDSAMPLELOOP8	SNDMIX_ENDSAMPLELOOP
 #define SNDMIX_ENDSAMPLELOOP16	SNDMIX_ENDSAMPLELOOP
 
-signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 //////////////////////////////////////////////////////////////////////////////
 // Mono
 
@@ -128,35 +125,39 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 	int poshi  = nPos >> 16;\
 	int poslo  = (nPos & 0xFFFF);\
 	int firidx = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
-	int vol    = (CWindowedFIR::lut[firidx+0]*(int)p[poshi+1-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+1]*(int)p[poshi+2-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+2]*(int)p[poshi+3-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+3]*(int)p[poshi+4-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+4]*(int)p[poshi+5-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+5]*(int)p[poshi+6-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+6]*(int)p[poshi+7-4]);	\
-        vol   += (CWindowedFIR::lut[firidx+7]*(int)p[poshi+8-4]);	\
+	int vol    = (WFIR_lut[firidx+0]*(int)p[poshi+1-4]);	\
+        vol   += (WFIR_lut[firidx+1]*(int)p[poshi+2-4]);	\
+        vol   += (WFIR_lut[firidx+2]*(int)p[poshi+3-4]);	\
+        vol   += (WFIR_lut[firidx+3]*(int)p[poshi+4-4]);	\
+        vol   += (WFIR_lut[firidx+4]*(int)p[poshi+5-4]);	\
+        vol   += (WFIR_lut[firidx+5]*(int)p[poshi+6-4]);	\
+        vol   += (WFIR_lut[firidx+6]*(int)p[poshi+7-4]);	\
+        vol   += (WFIR_lut[firidx+7]*(int)p[poshi+8-4]);	\
         vol  >>= WFIR_8SHIFT;
 
 #define SNDMIX_GETMONOVOL16FIRFILTER \
     int poshi  = nPos >> 16;\
     int poslo  = (nPos & 0xFFFF);\
     int firidx = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
-    int vol1   = (CWindowedFIR::lut[firidx+0]*(int)p[poshi+1-4]);	\
-        vol1  += (CWindowedFIR::lut[firidx+1]*(int)p[poshi+2-4]);	\
-        vol1  += (CWindowedFIR::lut[firidx+2]*(int)p[poshi+3-4]);	\
-        vol1  += (CWindowedFIR::lut[firidx+3]*(int)p[poshi+4-4]);	\
-    int vol2   = (CWindowedFIR::lut[firidx+4]*(int)p[poshi+5-4]);	\
-		vol2  += (CWindowedFIR::lut[firidx+5]*(int)p[poshi+6-4]);	\
-		vol2  += (CWindowedFIR::lut[firidx+6]*(int)p[poshi+7-4]);	\
-		vol2  += (CWindowedFIR::lut[firidx+7]*(int)p[poshi+8-4]);	\
+    int vol1   = (WFIR_lut[firidx+0]*(int)p[poshi+1-4]);	\
+        vol1  += (WFIR_lut[firidx+1]*(int)p[poshi+2-4]);	\
+        vol1  += (WFIR_lut[firidx+2]*(int)p[poshi+3-4]);	\
+        vol1  += (WFIR_lut[firidx+3]*(int)p[poshi+4-4]);	\
+    int vol2   = (WFIR_lut[firidx+4]*(int)p[poshi+5-4]);	\
+		vol2  += (WFIR_lut[firidx+5]*(int)p[poshi+6-4]);	\
+		vol2  += (WFIR_lut[firidx+6]*(int)p[poshi+7-4]);	\
+		vol2  += (WFIR_lut[firidx+7]*(int)p[poshi+8-4]);	\
     int vol    = ((vol1>>1)+(vol2>>1)) >> (WFIR_16BITSHIFT-1);
 
 
 // end rewbs.resamplerConf
 #define SNDMIX_INITSINCTABLE\
 	const char * const sinc = (const char *)(((pChannel->nInc > 0x13000) || (pChannel->nInc < -0x13000)) ?\
-		(((pChannel->nInc > 0x18000) || (pChannel->nInc < -0x18000)) ? gDownsample2x : gDownsample13x) : gKaiserSinc);
+		(((pChannel->nInc > 0x18000) || (pChannel->nInc < -0x18000)) ? pResampler->gDownsample2x : pResampler->gDownsample13x) : pResampler->gKaiserSinc);
+
+#define SNDMIX_INITFIRTABLE\
+	const signed short * const WFIR_lut = pResampler->m_WindowedFIR.lut;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Stereo
@@ -236,46 +237,46 @@ signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
     int poshi   = nPos >> 16;\
     int poslo   = (nPos & 0xFFFF);\
     int firidx  = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
-    int vol_l   = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2  ]);   \
-		vol_l  += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2  ]);   \
-		vol_l  += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2  ]);   \
-        vol_l  += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2  ]);   \
-        vol_l  += (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2  ]);   \
-		vol_l  += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2  ]);   \
-		vol_l  += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2  ]);   \
-        vol_l  += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2  ]);   \
+    int vol_l   = (WFIR_lut[firidx+0]*(int)p[(poshi+1-4)*2  ]);   \
+		vol_l  += (WFIR_lut[firidx+1]*(int)p[(poshi+2-4)*2  ]);   \
+		vol_l  += (WFIR_lut[firidx+2]*(int)p[(poshi+3-4)*2  ]);   \
+        vol_l  += (WFIR_lut[firidx+3]*(int)p[(poshi+4-4)*2  ]);   \
+        vol_l  += (WFIR_lut[firidx+4]*(int)p[(poshi+5-4)*2  ]);   \
+		vol_l  += (WFIR_lut[firidx+5]*(int)p[(poshi+6-4)*2  ]);   \
+		vol_l  += (WFIR_lut[firidx+6]*(int)p[(poshi+7-4)*2  ]);   \
+        vol_l  += (WFIR_lut[firidx+7]*(int)p[(poshi+8-4)*2  ]);   \
 		vol_l >>= WFIR_8SHIFT; \
-    int vol_r   = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2+1]);   \
-		vol_r  += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2+1]);   \
-		vol_r  += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2+1]);   \
-		vol_r  += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2+1]);   \
-		vol_r  += (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2+1]);   \
-        vol_r  += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2+1]);   \
-        vol_r  += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2+1]);   \
-        vol_r  += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2+1]);   \
+    int vol_r   = (WFIR_lut[firidx+0]*(int)p[(poshi+1-4)*2+1]);   \
+		vol_r  += (WFIR_lut[firidx+1]*(int)p[(poshi+2-4)*2+1]);   \
+		vol_r  += (WFIR_lut[firidx+2]*(int)p[(poshi+3-4)*2+1]);   \
+		vol_r  += (WFIR_lut[firidx+3]*(int)p[(poshi+4-4)*2+1]);   \
+		vol_r  += (WFIR_lut[firidx+4]*(int)p[(poshi+5-4)*2+1]);   \
+        vol_r  += (WFIR_lut[firidx+5]*(int)p[(poshi+6-4)*2+1]);   \
+        vol_r  += (WFIR_lut[firidx+6]*(int)p[(poshi+7-4)*2+1]);   \
+        vol_r  += (WFIR_lut[firidx+7]*(int)p[(poshi+8-4)*2+1]);   \
         vol_r >>= WFIR_8SHIFT;
 
 #define SNDMIX_GETSTEREOVOL16FIRFILTER \
     int poshi   = nPos >> 16;\
     int poslo   = (nPos & 0xFFFF);\
     int firidx  = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
-    int vol1_l  = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2  ]);   \
-		vol1_l += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2  ]);   \
-        vol1_l += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2  ]);   \
-		vol1_l += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2  ]);   \
-	int vol2_l  = (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2  ]);   \
-		vol2_l += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2  ]);   \
-		vol2_l += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2  ]);   \
-		vol2_l += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2  ]);   \
+    int vol1_l  = (WFIR_lut[firidx+0]*(int)p[(poshi+1-4)*2  ]);   \
+		vol1_l += (WFIR_lut[firidx+1]*(int)p[(poshi+2-4)*2  ]);   \
+        vol1_l += (WFIR_lut[firidx+2]*(int)p[(poshi+3-4)*2  ]);   \
+		vol1_l += (WFIR_lut[firidx+3]*(int)p[(poshi+4-4)*2  ]);   \
+	int vol2_l  = (WFIR_lut[firidx+4]*(int)p[(poshi+5-4)*2  ]);   \
+		vol2_l += (WFIR_lut[firidx+5]*(int)p[(poshi+6-4)*2  ]);   \
+		vol2_l += (WFIR_lut[firidx+6]*(int)p[(poshi+7-4)*2  ]);   \
+		vol2_l += (WFIR_lut[firidx+7]*(int)p[(poshi+8-4)*2  ]);   \
 	int vol_l   = ((vol1_l>>1)+(vol2_l>>1)) >> (WFIR_16BITSHIFT-1); \
-	int vol1_r  = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2+1]);   \
-		vol1_r += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2+1]);   \
-		vol1_r += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2+1]);   \
-		vol1_r += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2+1]);   \
-	int vol2_r  = (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2+1]);   \
-		vol2_r += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2+1]);   \
-		vol2_r += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2+1]);   \
-		vol2_r += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2+1]);   \
+	int vol1_r  = (WFIR_lut[firidx+0]*(int)p[(poshi+1-4)*2+1]);   \
+		vol1_r += (WFIR_lut[firidx+1]*(int)p[(poshi+2-4)*2+1]);   \
+		vol1_r += (WFIR_lut[firidx+2]*(int)p[(poshi+3-4)*2+1]);   \
+		vol1_r += (WFIR_lut[firidx+3]*(int)p[(poshi+4-4)*2+1]);   \
+	int vol2_r  = (WFIR_lut[firidx+4]*(int)p[(poshi+5-4)*2+1]);   \
+		vol2_r += (WFIR_lut[firidx+5]*(int)p[(poshi+6-4)*2+1]);   \
+		vol2_r += (WFIR_lut[firidx+6]*(int)p[(poshi+7-4)*2+1]);   \
+		vol2_r += (WFIR_lut[firidx+7]*(int)p[(poshi+8-4)*2+1]);   \
 	int vol_r   = ((vol1_r>>1)+(vol2_r>>1)) >> (WFIR_16BITSHIFT-1);
 //end rewbs.resamplerConf
 // -! BEHAVIOUR_CHANGE#0025
@@ -388,10 +389,10 @@ static forceinline void ProcessStereoFilter(int &vol_l, int &vol_r, ModChannel *
 //////////////////////////////////////////////////////////
 // Interfaces
 
-typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, int *, int *);
+typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
 
 #define BEGIN_MIX_INTERFACE(func)\
-	VOID MPPASMCALL func(ModChannel *pChannel, int *pbuffer, int *pbufmax)\
+	VOID MPPASMCALL func(ModChannel *pChannel, const CResampler *pResampler, int *pbuffer, int *pbufmax)\
 	{\
 		LONG nPos;
 
@@ -481,10 +482,6 @@ extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const f
 void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
 void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
 void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-
-#ifdef ENABLE_MMX
-extern VOID MMX_EndMix();
-#endif
 
 
 #ifdef ENABLE_3DNOW
@@ -617,14 +614,14 @@ END_RAMPMIX_INTERFACE()
 
 // Normal
 BEGIN_MIX_INTERFACE(Mono8BitFIRFilterMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETMONOVOL8FIRFILTER
 	SNDMIX_STOREMONOVOL
 END_MIX_INTERFACE()
 
 BEGIN_MIX_INTERFACE(Mono16BitFIRFilterMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETMONOVOL16FIRFILTER
 	SNDMIX_STOREMONOVOL
@@ -632,14 +629,14 @@ END_MIX_INTERFACE()
 
 // Ramp
 BEGIN_RAMPMIX_INTERFACE(Mono8BitFIRFilterRampMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETMONOVOL8FIRFILTER
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_INTERFACE()
 
 BEGIN_RAMPMIX_INTERFACE(Mono16BitFIRFilterRampMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETMONOVOL16FIRFILTER
 	SNDMIX_RAMPMONOVOL
@@ -817,14 +814,14 @@ END_RAMPMIX_INTERFACE()
 // Stereo FIR Filter
 
 BEGIN_MIX_INTERFACE(Stereo8BitFIRFilterMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETSTEREOVOL8FIRFILTER
 	SNDMIX_STORESTEREOVOL
 END_MIX_INTERFACE()
 
 BEGIN_MIX_INTERFACE(Stereo16BitFIRFilterMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETSTEREOVOL16FIRFILTER
 	SNDMIX_STORESTEREOVOL
@@ -832,14 +829,14 @@ END_MIX_INTERFACE()
 
 // Ramp
 BEGIN_RAMPMIX_INTERFACE(Stereo8BitFIRFilterRampMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETSTEREOVOL8FIRFILTER
 	SNDMIX_RAMPSTEREOVOL
 END_RAMPMIX_INTERFACE()
 
 BEGIN_RAMPMIX_INTERFACE(Stereo16BitFIRFilterRampMix)
-	//SNDMIX_INITSINCTABLE
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETSTEREOVOL16FIRFILTER
 	SNDMIX_RAMPSTEREOVOL
@@ -922,6 +919,7 @@ END_MIX_FLT_INTERFACE()
 // Enable FIR Filter with resonant filters
 
 BEGIN_MIX_FLT_INTERFACE(FilterMono8BitFIRFilterMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETMONOVOL8FIRFILTER
 	SNDMIX_PROCESSFILTER
@@ -929,6 +927,7 @@ BEGIN_MIX_FLT_INTERFACE(FilterMono8BitFIRFilterMix)
 END_MIX_FLT_INTERFACE()
 
 BEGIN_MIX_FLT_INTERFACE(FilterMono16BitFIRFilterMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETMONOVOL16FIRFILTER
 	SNDMIX_PROCESSFILTER
@@ -1003,6 +1002,7 @@ END_RAMPMIX_FLT_INTERFACE()
 
 //FIR Filter + reso filter + ramp
 BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitFIRFilterRampMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETMONOVOL8FIRFILTER
 	SNDMIX_PROCESSFILTER
@@ -1010,6 +1010,7 @@ BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitFIRFilterRampMix)
 END_RAMPMIX_FLT_INTERFACE()
 
 BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitFIRFilterRampMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETMONOVOL16FIRFILTER
 	SNDMIX_PROCESSFILTER
@@ -1085,6 +1086,7 @@ END_MIX_STFLT_INTERFACE()
 
 //FIR filter stereo + reso filter
 BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitFIRFilterMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETSTEREOVOL8FIRFILTER
 	SNDMIX_PROCESSSTEREOFILTER
@@ -1092,6 +1094,7 @@ BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitFIRFilterMix)
 END_MIX_STFLT_INTERFACE()
 
 BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitFIRFilterMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETSTEREOVOL16FIRFILTER
 	SNDMIX_PROCESSSTEREOFILTER
@@ -1168,6 +1171,7 @@ END_RAMPMIX_STFLT_INTERFACE()
 
 //FIR filter stereo + ramp + reso filter
 BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitFIRFilterRampMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP8
 	SNDMIX_GETSTEREOVOL8FIRFILTER
 	SNDMIX_PROCESSSTEREOFILTER
@@ -1175,6 +1179,7 @@ BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitFIRFilterRampMix)
 END_RAMPMIX_STFLT_INTERFACE()
 
 BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitFIRFilterRampMix)
+	SNDMIX_INITFIRTABLE
 	SNDMIX_BEGINSAMPLELOOP16
 	SNDMIX_GETSTEREOVOL16FIRFILTER
 	SNDMIX_PROCESSSTEREOFILTER
@@ -1594,7 +1599,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			int *pbufmax = pbuffer + (nSmpCount*2);
 			pChannel->nROfs = - *(pbufmax-2);
 			pChannel->nLOfs = - *(pbufmax-1);
-			pMixFunc(pChannel, pbuffer, pbufmax);
+			pMixFunc(pChannel, &m_Resampler, pbuffer, pbufmax);
 			pChannel->nROfs += *(pbufmax-2);
 			pChannel->nLOfs += *(pbufmax-1);
 			pbuffer = pbufmax;
@@ -1620,12 +1625,6 @@ UINT CSoundFile::CreateStereoMix(int count)
 		if (nsamples > 0) goto SampleLooping;
 		nchmixed += naddmix;
 	}
-#ifdef ENABLE_MMX
-	if ((gdwSysInfo & SYSMIX_ENABLEMMX) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
-	{
-		MMX_EndMix();
-	}
-#endif
 	return nchused;
 }
 

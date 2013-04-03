@@ -1023,6 +1023,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\Resampler.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Resource.h"
 				>
 			</File>
