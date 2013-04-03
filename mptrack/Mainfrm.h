@@ -19,7 +19,6 @@
 #include "soundlib/snddev.h"
 
 class CInputHandler;
-class CMainFrame;
 class CModDoc;
 class CAutoSaver;
 class ISoundDevice;
@@ -112,7 +111,6 @@ enum
 
 #define SOUNDSETUP_ENABLEMMX	0x08
 #define SOUNDSETUP_SOFTPANNING	0x10
-#define SOUNDSETUP_STREVERSE	0x20
 #define SOUNDSETUP_SECONDARY	0x40
 #define SOUNDSETUP_RESTARTMASK	SOUNDSETUP_SECONDARY
 
@@ -344,7 +342,6 @@ public:
 
 protected:
 
-	CSoundFile m_WaveFile;
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
@@ -355,7 +352,10 @@ protected:
 	CSoundFile::samplecount_t m_dwTimeSec;
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
-	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
+	// Misc
+	CModDoc* m_pJustModifiedDoc;
+	class COptionsSoundcard *m_SoundCardOptionsDialog;
+	bool m_bOptionsLocked;
 
 	// Notification Buffer
 	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
@@ -364,10 +364,10 @@ protected:
 	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
 	MPTNOTIFICATION m_PendingNotification;
 
-	// Misc
-	bool m_bOptionsLocked; 	 	//rewbs.customKeys
-	class COptionsSoundcard * m_SoundCardOptionsDialog;
-	CModDoc* m_pJustModifiedDoc;
+	// Instrument preview in tree view
+	CSoundFile m_WaveFile;
+
+	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
 
 public:
 	CMainFrame(/*CString regKeyExtension*/);

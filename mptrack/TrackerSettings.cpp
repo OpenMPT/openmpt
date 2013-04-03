@@ -100,6 +100,7 @@ TrackerSettings::TrackerSettings()
 	recordQuantizeRows = 0;
 	rowDisplayOffset = 0;
 
+	// Sample Editor
 	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
 
 	GetDefaultColourScheme(rgbCustomColors);
@@ -318,6 +319,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
 	m_dwSoundSetup = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26))
+		m_dwSoundSetup &= ~0x20;	// Reverse stereo
 	m_dwQuality = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
 	m_nSrcMode = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
 	m_dwRate = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
@@ -580,7 +583,7 @@ bool TrackerSettings::LoadRegistrySettings()
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwSoundSetup, &dwDWORDSize);
-		RegQueryValueEx(key, "WaveDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nWaveDevice, &dwDWORDSize);
+		m_dwSoundSetup &= ~0x20;	// Reverse stereo
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
 		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nSrcMode, &dwDWORDSize);
 		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_dwRate, &dwDWORDSize);
