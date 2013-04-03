@@ -50,12 +50,11 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent
 	m_pModDoc = pModDoc;
 	m_nPlugSlot = nPlugSlot;
 
-	if (m_pModDoc)
+	if(m_pModDoc)
 	{
-		CSoundFile* pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile && (0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS))
+		if(0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
 		{
-			m_pPlugin = &pSndFile->m_MixPlugins[m_nPlugSlot];
+			m_pPlugin = &(pModDoc->GetrSoundFile().m_MixPlugins[m_nPlugSlot]);
 		}
 	}
 
@@ -105,10 +104,7 @@ BOOL CSelectPluginDlg::OnInitDialog()
 void CSelectPluginDlg::OnOK()
 //---------------------------
 {
-	// -> CODE#0002
-	// -> DESC="list box to choose VST plugin presets (programs)"
 	if(m_pPlugin==nullptr) { CDialog::OnOK(); return; }
-	// -! NEW_FEATURE#0002
 
 	bool changed = false;
 	CVstPluginManager *pManager = theApp.GetPluginManager();
@@ -121,7 +117,7 @@ void CSelectPluginDlg::OnOK()
 	if (pFactory)
 	{
 		// Plugin selected
-		if ((!pCurrentPlugin) || (pCurrentPlugin->GetPluginFactory() != pFactory))
+		if ((!pCurrentPlugin) || &pCurrentPlugin->GetPluginFactory() != pFactory)
 		{
 			CriticalSection cs;
 
@@ -158,9 +154,9 @@ void CSelectPluginDlg::OnOK()
 			cs.Leave();
 
 			// Now, create the new plugin
-			if (pManager)
+			if(pManager && m_pModDoc)
 			{
-				pManager->CreateMixPlugin(m_pPlugin, (m_pModDoc) ? m_pModDoc->GetSoundFile() : 0);
+				pManager->CreateMixPlugin(*m_pPlugin, m_pModDoc->GetrSoundFile());
 				if (m_pPlugin->pMixPlugin)
 				{
 					CHAR s[128];
@@ -211,8 +207,7 @@ void CSelectPluginDlg::OnOK()
 		if(m_pPlugin->Info.dwPluginId2)
 			TrackerSettings::Instance().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
-	}
-	else
+	} else
 	{
 		CDialog::OnCancel();
 	}
@@ -234,7 +229,7 @@ void CSelectPluginDlg::OnCancel()
 }
 
 
-void CSelectPluginDlg::OnNameFilterChanged() 
+void CSelectPluginDlg::OnNameFilterChanged()
 //------------------------------------------
 {
 	GetDlgItem(IDC_NAMEFILTER)->GetWindowText(m_sNameFilter);
@@ -271,7 +266,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 		{ VSTPluginLib::catDMO,				"DirectX Media Audio Effects" },
 		{ VSTPluginLib::catSynth,			"Instrument Plugins" },
 	};
-	
+
 	std::bitset<VSTPluginLib::numCategories> categoryUsed;
 	HTREEITEM categoryFolders[VSTPluginLib::numCategories];
 	for(size_t i = CountOf(categories); i != 0; )
@@ -322,7 +317,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				{
 					//Current slot's plugin
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
-					if (pVstPlug->GetPluginFactory() == p)
+					if (&pVstPlug->GetPluginFactory() == p)
 					{
 						currentPlug = h;
 					}
@@ -413,7 +408,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 }
 
 
-bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug) 
+bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
 //---------------------------------------------------
 {
 	// TODO: Keep this list up-to-date.
@@ -518,10 +513,10 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 		::MoveWindow(GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->m_hWnd, 8, 11, 40, 21, FALSE);
 		::MoveWindow(GetDlgItem(IDC_NAMEFILTER)->m_hWnd, 40, 8, cx - 136, 21, FALSE);
 
-		::MoveWindow(GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->m_hWnd, 8, cy - 20, cx - 22, 25, FALSE);   
+		::MoveWindow(GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->m_hWnd, 8, cy - 20, cx - 22, 25, FALSE);
 		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,			cx-85,	8,    75, 23, FALSE);
 		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,		cx-85,	39,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd ,	cx-85,	cy-80, 75, 23, FALSE);	
+		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd ,	cx-85,	cy-80, 75, 23, FALSE);
 		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,	cx-85,	cy-52, 75, 23, FALSE);
 		Invalidate();
 	}

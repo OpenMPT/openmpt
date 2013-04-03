@@ -46,13 +46,13 @@ public:
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
-	virtual void RecalculateGain() = 0;		
+	virtual void RecalculateGain() = 0;
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
 	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
-	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
+	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual void AutomateParameter(PlugParamIndex param) = 0;
 	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
@@ -199,4 +199,4 @@ struct SNDMIXPLUGIN
 }; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
 
 class CSoundFile;
-typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN *, CSoundFile *);
+typedef bool (__cdecl *PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
