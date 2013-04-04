@@ -61,12 +61,8 @@ TrackerSettings::TrackerSettings()
 	gnMsgBoxVisiblityFlags = uint32_max;
 
 	// Audio device
-	m_dwRate = 44100;	// Default value will be overridden
-	m_dwSoundSetup = SOUNDSETUP_SECONDARY;
-	m_nChannels = 2;
 	m_dwQuality = 0;
 	m_nSrcMode = SRCMODE_FIRFILTER;
-	m_nBitsPerSample = 16;
 	m_nPreAmp = 128;
 	gbLoopSong = TRUE;
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
@@ -318,14 +314,14 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
-	m_dwSoundSetup = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
+	m_MixerSettings.gdwSoundSetup = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.gdwSoundSetup, iniFile);
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26))
-		m_dwSoundSetup &= ~0x20;	// Reverse stereo
+		m_MixerSettings.gdwSoundSetup &= ~0x20;	// Reverse stereo
 	m_dwQuality = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
 	m_nSrcMode = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
-	m_dwRate = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
-	m_nBitsPerSample = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
-	m_nChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
+	m_MixerSettings.gdwMixingFreq = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
+	m_MixerSettings.gnBitsPerSample = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BitsPerSample", m_MixerSettings.gnBitsPerSample, iniFile);
+	m_MixerSettings.gnChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
 	DWORD LatencyMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Latency", 0, iniFile);
 	DWORD UpdateIntervalMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "UpdateInterval", 0, iniFile);
 	if(LatencyMS == 0 || UpdateIntervalMS == 0)
@@ -356,9 +352,9 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		m_LatencyMS = LatencyMS;
 		m_UpdateIntervalMS = UpdateIntervalMS;
 	}
-	if(m_dwRate == 0)
+	if(m_MixerSettings.gdwMixingFreq == 0)
 	{
-		m_dwRate = 44100;
+		m_MixerSettings.gdwMixingFreq = 44100;
 #ifndef NO_ASIO
 		// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 		if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
@@ -366,7 +362,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 			ISoundDevice *dummy = CreateSoundDevice(SNDDEV_ASIO);
 			if(dummy)
 			{
-				m_dwRate = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
+				m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
 				delete dummy;
 			}
 		}
@@ -374,8 +370,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	}
 
 	m_nPreAmp = CMainFrame::GetPrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
-	CSoundFile::m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
-	CSoundFile::m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
+	m_MixerSettings.m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", m_MixerSettings.m_nStereoSeparation, iniFile);
+	m_MixerSettings.m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", m_MixerSettings.m_nMaxMixChannels, iniFile);
 	m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile));
 	//gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
 	m_ResamplerSettings.gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(m_ResamplerSettings.gdWFIRCutoff * 100.0), iniFile)) / 100.0;
@@ -582,11 +578,11 @@ bool TrackerSettings::LoadRegistrySettings()
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
-		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwSoundSetup, &dwDWORDSize);
-		m_dwSoundSetup &= ~0x20;	// Reverse stereo
+		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdwSoundSetup, &dwDWORDSize);
+		m_MixerSettings.gdwSoundSetup &= ~0x20;	// Reverse stereo
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
 		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nSrcMode, &dwDWORDSize);
-		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_dwRate, &dwDWORDSize);
+		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdwMixingFreq, &dwDWORDSize);
 		DWORD BufferLengthMS = 0;
 		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&BufferLengthMS, &dwDWORDSize);
 		if(BufferLengthMS != 0)
@@ -632,8 +628,8 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "ProLogicDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "ProLogicDelay", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, &dwDWORDSize);
 #endif
-		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nStereoSeparation, &dwDWORDSize);
-		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nMaxMixChannels, &dwDWORDSize);
+		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nStereoSeparation, &dwDWORDSize);
+		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nMaxMixChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
 		if((m_dwMidiSetup & 0x40) != 0)
 		{
@@ -649,8 +645,8 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowHighlightMeasures, &dwDWORDSize);
 		RegQueryValueEx(key, "RowSpacing2", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowHighlightBeats, &dwDWORDSize);
 		RegQueryValueEx(key, "LoopSong", NULL, &dwREG_DWORD, (LPBYTE)&gbLoopSong, &dwDWORDSize);
-		RegQueryValueEx(key, "BitsPerSample", NULL, &dwREG_DWORD, (LPBYTE)&m_nBitsPerSample, &dwDWORDSize);
-		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nChannels, &dwDWORDSize);
+		RegQueryValueEx(key, "BitsPerSample", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gnBitsPerSample, &dwDWORDSize);
+		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gnChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportSpeed", NULL, &dwREG_DWORD, (LPBYTE)&midiImportSpeed, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportPatLen", NULL, &dwREG_DWORD, (LPBYTE)&midiImportPatternLen, &dwDWORDSize);
 #ifndef NO_EQ
@@ -788,17 +784,17 @@ void TrackerSettings::SaveSettings()
 	}
 
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.gdwSoundSetup, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_dwRate, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_MixerSettings.gdwMixingFreq, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_MixerSettings.gnBitsPerSample, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Latency", m_LatencyMS, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "UpdateInterval", m_UpdateIntervalMS, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", m_MixerSettings.m_nStereoSeparation, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", m_MixerSettings.m_nMaxMixChannels, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(m_ResamplerSettings.gdWFIRCutoff*100+0.5), iniFile);
 	WritePrivateProfileString("Sound Settings", "VolumeRampSamples", NULL, iniFile);	// deprecated

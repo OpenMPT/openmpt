@@ -43,7 +43,6 @@ typedef uintptr_t SmpLength;
 #define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
 const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
 													// Note: Sample size in bytes can be more than this (= 256 MB).
-#define MAX_SAMPLE_RATE		192000					// Max playback / render rate in Hz
 
 const ROWINDEX MAX_PATTERN_ROWS			= 1024;
 const ORDERINDEX MAX_ORDERS				= 256;

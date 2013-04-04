@@ -31,7 +31,7 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (24.0f * 512.0f));
 	LONG freq = (LONG)Fc;
 	Limit(freq, 120, 20000);
-	if (freq * 2 > (LONG)gdwMixingFreq) freq = gdwMixingFreq >> 1;
+	if (freq * 2 > (LONG)m_MixerSettings.gdwMixingFreq) freq = m_MixerSettings.gdwMixingFreq >> 1;
 	return (DWORD)freq;
 }
 
@@ -80,7 +80,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 		static const float freqParameterMultiplier = 128.0f / (24.0f * 256.0f);
 
 		// 2 ^ (i / 24 * 256)
-		const float r = (float)gdwMixingFreq / (freqMultiplier * pow(2.0f, (float)computedCutoff * freqParameterMultiplier));
+		const float r = (float)m_MixerSettings.gdwMixingFreq / (freqMultiplier * pow(2.0f, (float)computedCutoff * freqParameterMultiplier));
 
 		d = ITResonanceTable[resonance] * r + ITResonanceTable[resonance] - 1.0f;
 		e = r * r;
@@ -91,7 +91,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 		float fc = (float)CutOffToFrequency(cutoff, flt_modifier);
 		const float dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)resonance) / 20.0f);
 
-		fc *= (float)(2.0f * (float)M_PI / (float)gdwMixingFreq);
+		fc *= (float)(2.0f * (float)M_PI / (float)m_MixerSettings.gdwMixingFreq);
 
 		d = (1.0f - 2.0f * dmpfac) * fc;
 		LimitMax(d, 2.0f);

@@ -239,9 +239,6 @@ public:	// Static Members
 #ifndef NO_AGC
 	static CAGC m_AGC;
 #endif
-	static UINT m_nStereoSeparation;
-	static UINT m_nMaxMixChannels;
-	static DWORD gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
 	static UINT gnVolumeRampUpSamplesActual;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
@@ -479,21 +476,19 @@ public:
 	// Mixer Config
 	static void SetMixerSettings(const MixerSettings &mixersettings);
 	static void SetResamplerSettings(const CResamplerSettings &resamplersettings);
-	static MixerSettings GetMixerSettings();
 	static BOOL InitPlayer(BOOL bReset=FALSE);
 	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
 	static BOOL SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL xbass,BOOL dolbynr,BOOL bEQ);
 	static BOOL SetResamplingMode(UINT nMode); // SRCMODE_XXXX
-	static DWORD GetSampleRate() { return gdwMixingFreq; }
-	static DWORD GetBitsPerSample() { return gnBitsPerSample; }
+	static DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
 	static void AssertAlignment();
 	static DWORD GetSysInfo();
-	static void EnableMMX(bool b) { if (b) gdwSoundSetup |= SNDMIX_ENABLEMMX; else gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
+	static void EnableMMX(bool b) { if (b) m_MixerSettings.gdwSoundSetup |= SNDMIX_ENABLEMMX; else m_MixerSettings.gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
 #ifndef NO_AGC
 	static void SetAGC(BOOL b);
 #endif
 #ifndef NO_EQ
-	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 	// Float <-> Int conversion routines
 	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);

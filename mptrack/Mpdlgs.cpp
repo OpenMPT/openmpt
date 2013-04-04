@@ -145,7 +145,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 		{
 			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
 			m_CbnPolyphony.AddString(s);
-			if (CSoundFile::m_nMaxMixChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
+			if (TrackerSettings::Instance().m_MixerSettings.m_nMaxMixChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
 		}
 	}
 	// latency
@@ -189,7 +189,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 		m_SliderStereoSep.SetPos(2);
 		for (int n=0; n<=4; n++)
 		{
-			if ((int)CSoundFile::m_nStereoSeparation <= (int)(32 << n))
+			if ((int)TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation <= (int)(32 << n))
 			{
 				m_SliderStereoSep.SetPos(n);
 				break;
@@ -303,8 +303,9 @@ void COptionsSoundcard::UpdateStereoSep()
 //---------------------------------------
 {
 	CHAR s[64];
-	CSoundFile::m_nStereoSeparation = 32 << m_SliderStereoSep.GetPos();
-	wsprintf(s, "%d%%", (CSoundFile::m_nStereoSeparation * 100) / 128);
+	TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation = 32 << m_SliderStereoSep.GetPos();
+	CSoundFile::m_MixerSettings.m_nStereoSeparation = TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation;
+	wsprintf(s, "%d%%", (TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation * 100) / 128);
 	SetDlgItemText(IDC_TEXT1, s);
 
 }
@@ -429,7 +430,11 @@ void COptionsSoundcard::OnOK()
 	// Polyphony
 	{
 		int nmmx = m_CbnPolyphony.GetCurSel();
-		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix))) CSoundFile::m_nMaxMixChannels = nCPUMix[nmmx];
+		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix)))
+		{
+			TrackerSettings::Instance().m_MixerSettings.m_nMaxMixChannels = nCPUMix[nmmx];
+			CSoundFile::m_MixerSettings.m_nMaxMixChannels = nCPUMix[nmmx];
+		}
 	}
 	// Sound Device
 	{
@@ -458,9 +463,14 @@ void COptionsSoundcard::OnOK()
 	}
 	// Soft Panning
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
-		CSoundFile::gdwSoundSetup |= SNDMIX_SOFTPANNING;
-	else
-		CSoundFile::gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
+	{
+		TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup |= SNDMIX_SOFTPANNING;
+		CSoundFile::m_MixerSettings.gdwSoundSetup |= SNDMIX_SOFTPANNING;
+	} else
+	{
+		TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
+		CSoundFile::m_MixerSettings.gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
+	}
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
 	UpdateStatistics();
