@@ -24,6 +24,8 @@
 #include "sndfile.h"
 #include "../common/Reporting.h"
 
+extern short int gFastSinc[];
+
 #define PROCSUPPORT_CPUID	0x01
 #define PROCSUPPORT_MMX		0x02
 #define PROCSUPPORT_MMXEX	0x04
