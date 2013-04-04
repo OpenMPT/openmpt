@@ -717,6 +717,7 @@ void CDoWaveConvert::OnButton1()
 
 	m_pSndFile->ResetChannels();
 	CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+	CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 	CSoundFile::InitPlayer(TRUE);
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
@@ -1117,6 +1118,7 @@ void CDoAcmConvert::OnButton1()
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();
 	CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+	CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 	CSoundFile::InitPlayer(TRUE);
 	CSoundFile::gdwSoundSetup |= SNDMIX_DIRECTTODISK;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);

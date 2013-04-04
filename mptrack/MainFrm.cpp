@@ -1110,6 +1110,7 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 	if (bReset)
 	{
 		CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+		CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 		CSoundFile::InitPlayer(TRUE);
 	}
 }
@@ -1260,6 +1261,7 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 #endif
 	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+	pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 #ifndef NO_AGC
 	CSoundFile::m_AGC.Reset();
 #endif
@@ -1746,6 +1748,7 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 		{
 			CriticalSection cs;
 			CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+			CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
 			UpdateDspEffects();
 #ifndef NO_AGC

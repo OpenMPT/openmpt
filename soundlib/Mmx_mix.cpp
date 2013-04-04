@@ -88,12 +88,9 @@ Done:
 }
 
 
-DWORD CSoundFile::InitSysInfo()
-//-----------------------------
+void CSoundFile::AssertAlignment()
+//--------------------------------
 {
-	OSVERSIONINFO osvi;
-	DWORD d = 0;
-
 #ifdef _DEBUG
 	// Must be aligned on 32 bytes for best performance
 	if (sizeof(ModChannel) & 0x1F)
@@ -110,35 +107,18 @@ DWORD CSoundFile::InitSysInfo()
 		Reporting::Warning(s);
 	}
 #endif
-	memset(&osvi, 0, sizeof(osvi));
-	osvi.dwOSVersionInfoSize = sizeof(osvi);
-	GetVersionEx(&osvi);
+}
+
+
+DWORD CSoundFile::GetSysInfo()
+//----------------------------
+{
+	DWORD d = 0;
 	DWORD dwProcSupport = QueryProcessorExtensions();
-	switch(osvi.dwPlatformId)
-	{
-	// Don't use MMX for Windows 3.1
-	case VER_PLATFORM_WIN32s:
-		dwProcSupport &= PROCSUPPORT_CPUID;
-		break;
-	// XMM requires Windows 98
-	case VER_PLATFORM_WIN32_WINDOWS:
-		if ((osvi.dwMajorVersion < 4) || ((osvi.dwMajorVersion==4) && (!osvi.dwMinorVersion)))
-		{
-			dwProcSupport &= PROCSUPPORT_CPUID|PROCSUPPORT_MMX|PROCSUPPORT_3DNOW|PROCSUPPORT_MMXEX;
-		}
-		break;
-	// XMM requires Windows 2000
-	case VER_PLATFORM_WIN32_NT:
-		if (osvi.dwMajorVersion < 5)
-		{
-			dwProcSupport &= PROCSUPPORT_CPUID|PROCSUPPORT_MMX|PROCSUPPORT_3DNOW|PROCSUPPORT_MMXEX;
-		}
-	}
 	if (dwProcSupport & PROCSUPPORT_MMX) d |= SYSMIX_ENABLEMMX;
 	if (dwProcSupport & PROCSUPPORT_MMXEX) d |= SYSMIX_MMXEX;
 	if (dwProcSupport & PROCSUPPORT_3DNOW) d |= SYSMIX_3DNOW;
 	if (dwProcSupport & PROCSUPPORT_SSE) d |= SYSMIX_SSE;
-	gdwSysInfo = d;
 	return d;
 }
 

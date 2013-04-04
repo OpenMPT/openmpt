@@ -16,12 +16,29 @@
 
 #define SINC_PHASES		4096
 
+
+//======================
+class CResamplerSettings
+//======================
+{
+public:
+	double gdWFIRCutoff;
+	uint8 gbWFIRType;
+public:
+	CResamplerSettings()
+	{
+		gdWFIRCutoff = 0.97;
+		gbWFIRType = 7; //WFIR_KAISER4T;
+	}
+};
+
+
 //==============
 class CResampler
 //==============
 {
 public:
-	MixerSettings m_Settings;
+	CResamplerSettings m_Settings;
 	CWindowedFIR m_WindowedFIR;
 	short int gKaiserSinc[SINC_PHASES*8];		// Upsampling
 	short int gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x

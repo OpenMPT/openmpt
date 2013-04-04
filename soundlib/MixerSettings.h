@@ -13,8 +13,6 @@ struct MixerSettings
 {
 
 	//rewbs.resamplerConf
-	double gdWFIRCutoff;
-	uint8 gbWFIRType;
 	long glVolumeRampUpSamples, glVolumeRampDownSamples;
 	//end rewbs.resamplerConf
 
