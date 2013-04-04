@@ -229,7 +229,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	{
 		return false;
 	}
-		
+
 	DestroyInstrument(targetInstr, deleteAssociatedSamples);
 
 	Instruments[targetInstr] = pIns;

@@ -69,15 +69,15 @@ VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt3
 }
 
 
-BOOL CVstPluginManager::CreateMixPluginProc(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pSndFile)
-//-----------------------------------------------------------------------------------------
+bool CVstPluginManager::CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
+//---------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
-	if (that)
+	if(that)
 	{
-		return that->CreateMixPlugin(pMixPlugin, pSndFile);
+		return that->CreateMixPlugin(mixPlugin, sndFile);
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -110,7 +110,7 @@ CVstPluginManager::~CVstPluginManager()
 }
 
 
-BOOL CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib)
+bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib)
 //-------------------------------------------------------------
 {
 	VSTPluginLib *p = m_pVstHead;
@@ -446,7 +446,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 	{
 		delete p;
 	}
-	
+
 	return (validPlug ? m_pVstHead : nullptr);
 }
 
@@ -487,70 +487,65 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 }
 
 
-BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pSndFile)
-//-------------------------------------------------------------------------------------
+bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------
 {
 	UINT nMatch = 0;
 	VSTPluginLib *pFound = nullptr;
 
-	if (pMixPlugin)
-	{
-		VSTPluginLib *p = m_pVstHead;
+	VSTPluginLib *p = m_pVstHead;
 
-		while (p)
+	while (p)
+	{
+		bool b1 = false, b2 = false;
+		if ((p->dwPluginId1 == mixPlugin.Info.dwPluginId1)
+			&& (p->dwPluginId2 == mixPlugin.Info.dwPluginId2))
 		{
-			if (pMixPlugin)
-			{
-				bool b1 = false, b2 = false;
-				if ((p->dwPluginId1 == pMixPlugin->Info.dwPluginId1)
-				 && (p->dwPluginId2 == pMixPlugin->Info.dwPluginId2))
-				{
-					b1 = true;
-				}
-				if (!_strnicmp(p->szLibraryName, pMixPlugin->GetLibraryName(), 64))
-				{
-					b2 = true;
-				}
-				if ((b1) && (b2))
-				{
-					nMatch = 3;
-					pFound = p;
-				} else
-				if ((b1) && (nMatch < 2))
-				{
-					nMatch = 2;
-					pFound = p;
-				} else
-				if ((b2) && (nMatch < 1))
-				{
-					nMatch = 1;
-					pFound = p;
-				}
-			}
-			p = p->pNext;
+			b1 = true;
 		}
+		if (!_strnicmp(p->szLibraryName, mixPlugin.GetLibraryName(), 64))
+		{
+			b2 = true;
+		}
+		if ((b1) && (b2))
+		{
+			nMatch = 3;
+			pFound = p;
+		} else
+		if ((b1) && (nMatch < 2))
+		{
+			nMatch = 2;
+			pFound = p;
+		} else
+		if ((b2) && (nMatch < 1))
+		{
+			nMatch = 1;
+			pFound = p;
+		}
+		p = p->pNext;
 	}
-	if (pMixPlugin->Info.dwPluginId1 == kDmoMagic)
+
+	if (mixPlugin.Info.dwPluginId1 == kDmoMagic)
 	{
 		if (!pFound) return FALSE;
 		AEffect *pEffect = DmoToVst(pFound);
 		if ((pEffect) && (pEffect->dispatcher) && (pEffect->magic == kDmoMagic))
 		{
-			BOOL bOk = FALSE;
+			bool result = false;
 
 			CriticalSection cs;
 
-			CVstPlugin *pVstPlug = new CVstPlugin(NULL, pFound, pMixPlugin, pEffect);
-			if (pVstPlug)
+			CVstPlugin *pVstPlug = new CVstPlugin(NULL, *pFound, mixPlugin, *pEffect, sndFile);
+			if(pVstPlug)
 			{
-				pVstPlug->Initialize(pSndFile);
-				bOk = TRUE;
+				pVstPlug->Initialize();
+				result = true;
 			}
-			return bOk;
+			return result;
 		}
 	}
 
-	if ((!pFound) && strcmp(pMixPlugin->GetLibraryName(), ""))
+	if ((!pFound) && strcmp(mixPlugin.GetLibraryName(), ""))
 	{
 		// Try finding the plugin DLL in the plugin directory instead.
 		CHAR s[_MAX_PATH];
@@ -564,17 +559,17 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 		{
 			strcat(s, "\\");
 		}
-		strncat(s, pMixPlugin->GetLibraryName(), CountOf(s));
+		strncat(s, mixPlugin.GetLibraryName(), CountOf(s));
 		strncat(s, ".dll", CountOf(s));
 
 		StringFixer::SetNullTerminator(s);
-		
+
 		pFound = AddPlugin(s);
 		if (!pFound)
 		{
 			CString cacheSection = "PluginCache";
 			CString cacheFile = theApp.GetPluginCacheFileName();
-			CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, pMixPlugin->GetLibraryName(), "", cacheFile);
+			CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, mixPlugin.GetLibraryName(), "", cacheFile);
 			if (IDs.GetLength() >= 16)
 			{
 				CString strFullPath = CMainFrame::GetPrivateProfileCString(cacheSection, IDs, "", cacheFile);
@@ -615,8 +610,8 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 					CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, pFound->EncodeCacheFlags(), cacheFile);
 				}
 
-				CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
-				if (pVstPlug) pVstPlug->Initialize(pSndFile);
+				CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
+				if (pVstPlug) pVstPlug->Initialize();
 			}
 
 			if(!validPlugin)
@@ -636,7 +631,7 @@ BOOL CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN *pMixPlugin, CSoundFile* pS
 			Log("Unknown plugin\n");
 		#endif
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -737,14 +732,14 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		MemsetZero(timeInfo);
 		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
-		CSoundFile *pSndFile;
-		if(pVstPlugin && (pSndFile = pVstPlugin->GetSoundFile()) != nullptr)
+		if(pVstPlugin)
 		{
+			CSoundFile &sndFile = pVstPlugin->GetSoundFile();
 			if(pVstPlugin->IsSongPlaying())
 			{
 				timeInfo.flags |= kVstTransportPlaying;
-				timeInfo.samplePos = pSndFile->GetTotalSampleCount();
-				if(pSndFile->HasPositionChanged())
+				timeInfo.samplePos = sndFile.GetTotalSampleCount();
+				if(sndFile.HasPositionChanged())
 				{
 					timeInfo.flags |= kVstTransportChanged;
 				}
@@ -763,7 +758,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 				timeInfo.flags |= kVstPpqPosValid;
 				if (timeInfo.flags & kVstTransportPlaying)
 				{
-					timeInfo.ppqPos = (timeInfo.samplePos / timeInfo.sampleRate) * (pSndFile->GetCurrentBPM() / 60.0);
+					timeInfo.ppqPos = (timeInfo.samplePos / timeInfo.sampleRate) * (sndFile.GetCurrentBPM() / 60.0);
 				} else
 				{
 					timeInfo.ppqPos = 0;
@@ -771,7 +766,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			}
 			if((value & kVstTempoValid))
 			{
-				timeInfo.tempo = pSndFile->GetCurrentBPM();
+				timeInfo.tempo = sndFile.GetCurrentBPM();
 				if (timeInfo.tempo)
 				{
 					timeInfo.flags |= kVstTempoValid;
@@ -783,7 +778,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
-				timeInfo.timeSigNumerator = pSndFile->m_nCurrentRowsPerMeasure / max(pSndFile->m_nCurrentRowsPerBeat, 1);
+				timeInfo.timeSigNumerator = sndFile.m_nCurrentRowsPerMeasure / max(sndFile.m_nCurrentRowsPerBeat, 1);
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
@@ -808,14 +803,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
 		if (pVstPlugin != nullptr)
 		{
-			CSoundFile *pSndFile = pVstPlugin->GetSoundFile();
-			if (pSndFile)
-			{
-				return (VstInt32)(pSndFile->GetCurrentBPM() * 10000);
-			}
+			return (VstInt32)(pVstPlugin->GetSoundFile().GetCurrentBPM() * 10000);
 		}
 		return (VstInt32)(125 * 10000);
-	
+
 	// parameters - DEPRECATED in VST 2.4
 	case audioMasterGetNumAutomatableParameters:
 		//Log("VST plugin to host: Get Num Automatable Parameters\n");
@@ -824,12 +815,12 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			return pVstPlugin->GetNumParameters();
 		}
 		break;
-	
+
 	// Apparently, this one is broken in VST SDK anyway. - DEPRECATED in VST 2.4
 	case audioMasterGetParameterQuantization:
 		Log("VST plugin to host: Audio Master Get Parameter Quantization\n");
 		break;
-	
+
 	// numInputs and/or numOutputs has changed
 	case audioMasterIOChanged:
 		if (pVstPlugin != nullptr)
@@ -838,7 +829,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			return pVstPlugin->InitializeIOBuffers() ? 1 : 0;
 		}
 		break;
-	
+
 	// plug needs idle calls (outside its editor window) - DEPRECATED in VST 2.4
 	case audioMasterNeedIdle:
 		if (pVstPlugin != nullptr)
@@ -847,7 +838,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		}
 
 		return 1;
-	
+
 	// index: width, value: height
 	case audioMasterSizeWindow:
 		if (pVstPlugin != nullptr)
@@ -860,22 +851,22 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		}
 		Log("VST plugin to host: Size Window\n");
 		return 1;
-	
+
 	case audioMasterGetSampleRate:
 		return CMainFrame::GetMainFrame()->GetSampleRate();
-	
+
 	case audioMasterGetBlockSize:
 		return MIXBUFFERSIZE;
-	
+
 	case audioMasterGetInputLatency:
 		Log("VST plugin to host: Get Input Latency\n");
 		break;
-	
+
 	case audioMasterGetOutputLatency:
 		{
 			return Util::muldiv(TrackerSettings::Instance().m_LatencyMS, CMainFrame::GetMainFrame()->GetSampleRate(), 1000);
 		}
-	
+
 	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetPreviousPlug:
 		if(pVstPlugin != nullptr)
@@ -886,7 +877,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			return ToVstPtr(list[0]);
 		}
 		break;
-	
+
 	// output pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetNextPlug:
 		if(pVstPlugin != nullptr)
@@ -897,19 +888,19 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			return ToVstPtr(list[0]);
 		}
 		break;
-	
+
 	// realtime info
 	// returns: 0: not supported, 1: replace, 2: accumulate - DEPRECATED in VST 2.4 (replace is default)
 	case audioMasterWillReplaceOrAccumulate:
 		return 1; //we replace.
-	
+
 	case audioMasterGetCurrentProcessLevel:
 		if(CMainFrame::GetMainFrame()->IsRendering())
 			return kVstProcessLevelOffline;
 		else
 			return kVstProcessLevelRealtime;
 		break;
-	
+
 	// returns 0: not supported, 1: off, 2:read, 3:write, 4:read/write
 	case audioMasterGetAutomationState:
 		// Not entirely sure what this means. We can write automation TO the plug.
@@ -920,33 +911,33 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterOfflineStart:
 		Log("VST plugin to host: Offlinestart\n");
 		break;
-	
+
 	case audioMasterOfflineRead:
 		Log("VST plugin to host: Offlineread\n");
 		break;
-	
+
 	case audioMasterOfflineWrite:
 		Log("VST plugin to host: Offlinewrite\n");
 		break;
-	
+
 	case audioMasterOfflineGetCurrentPass:
 		Log("VST plugin to host: OfflineGetcurrentpass\n");
 		break;
-	
+
 	case audioMasterOfflineGetCurrentMetaPass:
 		Log("VST plugin to host: OfflineGetCurrentMetapass\n");
 		break;
-	
+
 	// for variable i/o, sample rate in <opt> - DEPRECATED in VST 2.4
 	case audioMasterSetOutputSampleRate:
 		Log("VST plugin to host: Set Output Sample Rate\n");
 		break;
-	
+
 	// result in ret - DEPRECATED in VST 2.4
 	case audioMasterGetOutputSpeakerArrangement:
 		Log("VST plugin to host: Get Output Speaker Arrangement\n");
 		break;
-	
+
 	case audioMasterGetVendorString:
 		strcpy((char *) ptr, s_szHostVendorString);
 		//strcpy((char*)ptr,"Steinberg");
@@ -965,12 +956,12 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	case audioMasterVendorSpecific:
 		return 0;
-	
+
 	// void* in <ptr>, format not defined yet - DEPRECATED in VST 2.4
 	case audioMasterSetIcon:
 		Log("VST plugin to host: Set Icon\n");
 		break;
-	
+
 	// string in ptr, see below
 	case audioMasterCanDo:
 		//Other possible Can Do strings are:
@@ -1008,17 +999,17 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterOpenWindow:
 		Log("VST plugin to host: Open Window\n");
 		break;
-	
+
 	// close window, platform specific handle in <ptr> - DEPRECATED in VST 2.4
 	case audioMasterCloseWindow:
 		Log("VST plugin to host: Close Window\n");
 		break;
-	
+
 	// get plug directory, FSSpec on MAC, else char*
 	case audioMasterGetDirectory:
 		//Log("VST plugin to host: Get Directory\n");
 		return ToVstPtr(TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
-	
+
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
 		if (pVstPlugin != nullptr)
@@ -1043,7 +1034,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterEndEdit:
 		Log("VST plugin to host: End Edit\n");
 		break;
-	
+
 	// open a fileselector window with VstFileSelect* in <ptr>
 	case audioMasterOpenFileSelector:
 
@@ -1057,7 +1048,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterEditFile:
 		Log("VST plugin to host: Edit File\n");
 		break;
-	
+
 	// get the native path of currently loading bank or project
 	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED in VST 2.4
 	case audioMasterGetChunkFile:
@@ -1289,34 +1280,27 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 // CVstPlugin
 //
 
-CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *pMixStruct, AEffect *pEffect)
-//----------------------------------------------------------------------------------------------------------
+CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile) : m_SndFile(sndFile), m_Factory(factory), m_Effect(effect)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	m_hLibrary = hLibrary;
 	m_nRefCount = 1;
 	m_pPrev = nullptr;
 	m_pNext = nullptr;
-	m_pFactory = pFactory;
-	m_pMixStruct = pMixStruct;
-	m_pEffect = pEffect;
+	m_pMixStruct = &mixStruct;
 	m_pEditor = nullptr;
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
-#ifdef MODPLUG_TRACKER
-	m_pModDoc = nullptr; //rewbs.plugDocAware
-#endif // MODPLUG_TRACKER
 	m_pProcessFP = nullptr;
 
 	// Insert ourselves in the beginning of the list
-	if (m_pFactory)
+	m_pNext = m_Factory.pPluginsList;
+	if(m_Factory.pPluginsList)
 	{
-		m_pNext = m_pFactory->pPluginsList;
-		if (m_pFactory->pPluginsList)
-		{
-			m_pFactory->pPluginsList->m_pPrev = this;
-		}
-		m_pFactory->pPluginsList = this;
+		m_Factory.pPluginsList->m_pPrev = this;
 	}
+	m_Factory.pPluginsList = this;
+
 	m_MixState.dwFlags = 0;
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
@@ -1336,8 +1320,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib *pFactory, SNDMIXPLUGIN *p
 }
 
 
-void CVstPlugin::Initialize(CSoundFile* pSndFile)
-//-----------------------------------------------
+void CVstPlugin::Initialize()
+//---------------------------
 {
 	m_bNeedIdle = false;
 	m_bRecordAutomation = false;
@@ -1346,14 +1330,8 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
-	m_pEffect->resvd1 = ToVstPtr(this);
-	//rewbs.plugDocAware
-	m_pSndFile = pSndFile;
-#ifdef MODPLUG_TRACKER
-	m_pModDoc = pSndFile->GetpModDoc();
-#endif // MODPLUG_TRACKER
+	m_Effect.resvd1 = ToVstPtr(this);
 	m_nSlot = FindSlot();
-	//end rewbs.plugDocAware
 
 	Dispatch(effOpen, 0, 0, nullptr, 0.0f);
 	// VST 2.0 plugins return 2 here, VST 2.4 plugins return 2400... Great!
@@ -1387,24 +1365,24 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 				sa.speakers[i].type = kSpeakerUndefined;
 				break;
 			}
-		} 
+		}
 		// For now, input setup = output setup.
 		Dispatch(effSetSpeakerArrangement, 0, ToVstPtr(&sa), &sa, 0.0f);
 
-		// Dummy pin properties collection. 
+		// Dummy pin properties collection.
 		// We don't use them but some plugs might do inits in here.
 		VstPinProperties tempPinProperties;
 		Dispatch(effGetInputProperties, 0, 0, &tempPinProperties, 0);
 		Dispatch(effGetOutputProperties, 0, 0, &tempPinProperties, 0);
 
 		Dispatch(effConnectInput, 0, 1, nullptr, 0.0f);
-		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 1, nullptr, 0.0f);
+		if (m_Effect.numInputs > 1) Dispatch(effConnectInput, 1, 1, nullptr, 0.0f);
 		Dispatch(effConnectOutput, 0, 1, nullptr, 0.0f);
-		if (m_pEffect->numOutputs > 1) Dispatch(effConnectOutput, 1, 1, nullptr, 0.0f);
+		if (m_Effect.numOutputs > 1) Dispatch(effConnectOutput, 1, 1, nullptr, 0.0f);
 		//rewbs.VSTCompliance: disable all inputs and outputs beyond stereo left and right:
-		for (int i=2; i<m_pEffect->numInputs; i++)
+		for (int i=2; i<m_Effect.numInputs; i++)
 			Dispatch(effConnectInput, i, 0, nullptr, 0.0f);
-		for (int i=2; i<m_pEffect->numOutputs; i++)
+		for (int i=2; i<m_Effect.numOutputs; i++)
 			Dispatch(effConnectOutput, i, 0, nullptr, 0.0f);
 		//end rewbs.VSTCompliance
 
@@ -1413,7 +1391,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_nSampleRate = CSoundFile::gdwMixingFreq;
 	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(CSoundFile::gdwMixingFreq));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
-	if (m_pEffect->numPrograms > 0)
+	if (m_Effect.numPrograms > 0)
 	{
 		Dispatch(effSetProgram, 0, 0, nullptr, 0);
 	}
@@ -1424,8 +1402,8 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
-		m_pFactory->szLibraryName, (m_bIsVst2) ? 2 : 1, m_pEffect->flags,
-		m_pEffect->numPrograms, m_pEffect->numParams);
+		m_Factory.szLibraryName, (m_bIsVst2) ? 2 : 1, m_Effect.flags,
+		m_Effect.numPrograms, m_Effect.numParams);
 #endif
 	// Update Mix structure
 	if (m_pMixStruct)
@@ -1437,7 +1415,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	//rewbs.VSTcompliance
 	m_bIsInstrument = isInstrument();
 	RecalculateGain();
-	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ? m_pEffect->processReplacing : m_pEffect->process;
+	m_pProcessFP = (m_Effect.flags & effFlagsCanReplacing) ? m_Effect.processReplacing : m_Effect.process;
 
 	// issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
 	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(CSoundFile::gdwMixingFreq));
@@ -1460,8 +1438,8 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 bool CVstPlugin::InitializeIOBuffers()
 //------------------------------------
 {
-	m_nInputs = m_pEffect->numInputs;
-	m_nOutputs = m_pEffect->numOutputs;
+	m_nInputs = m_Effect.numInputs;
+	m_nOutputs = m_Effect.numOutputs;
 
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
 	bool result = mixBuffer.Initialize(max(m_nInputs, 2), m_nOutputs);
@@ -1481,7 +1459,7 @@ CVstPlugin::~CVstPlugin()
 	CriticalSection cs;
 
 	// First thing to do, if we don't want to hang in a loop
-	if ((m_pFactory) && (m_pFactory->pPluginsList == this)) m_pFactory->pPluginsList = m_pNext;
+	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
 	if (m_pMixStruct)
 	{
 		m_pMixStruct->pMixPlugin = nullptr;
@@ -1501,14 +1479,13 @@ CVstPlugin::~CVstPlugin()
 	if (m_bIsVst2)
 	{
 		Dispatch(effConnectInput, 0, 0, nullptr, 0);
-		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 0, nullptr, 0);
+		if (m_Effect.numInputs > 1) Dispatch(effConnectInput, 1, 0, nullptr, 0);
 		Dispatch(effConnectOutput, 0, 0, nullptr, 0);
-		if (m_pEffect->numOutputs > 1) Dispatch(effConnectOutput, 1, 0, nullptr, 0);
+		if (m_Effect.numOutputs > 1) Dispatch(effConnectOutput, 1, 0, nullptr, 0);
 	}
 	Suspend();
 	CVstPlugin::Dispatch(effClose, 0, 0, nullptr, 0);
-	m_pFactory = nullptr;
-	if (m_hLibrary)
+	if(m_hLibrary)
 	{
 		FreeLibrary(m_hLibrary);
 		m_hLibrary = nullptr;
@@ -1540,45 +1517,34 @@ void CVstPlugin::GetPluginType(LPSTR pszType)
 //-------------------------------------------
 {
 	pszType[0] = 0;
-	if (m_pEffect)
-	{
-		if (m_pEffect->numInputs < 1) strcpy(pszType, "No input"); else
-		if (m_pEffect->numInputs == 1) strcpy(pszType, "Mono-In"); else
-		strcpy(pszType, "Stereo-In");
-		strcat(pszType, ", ");
-		if (m_pEffect->numOutputs < 1) strcat(pszType, "No output"); else
-		if (m_pEffect->numInputs == 1) strcat(pszType, "Mono-Out"); else
-		strcat(pszType, "Stereo-Out");
-	}
+	if (m_Effect.numInputs < 1) strcpy(pszType, "No input"); else
+	if (m_Effect.numInputs == 1) strcpy(pszType, "Mono-In"); else
+	strcpy(pszType, "Stereo-In");
+	strcat(pszType, ", ");
+	if (m_Effect.numOutputs < 1) strcat(pszType, "No output"); else
+	if (m_Effect.numInputs == 1) strcat(pszType, "Mono-Out"); else
+	strcat(pszType, "Stereo-Out");
 }
 
 
 bool CVstPlugin::HasEditor()
 //--------------------------
 {
-	return (m_pEffect != nullptr) && (m_pEffect->flags & effFlagsHasEditor);
+	return (m_Effect.flags & effFlagsHasEditor) != 0;
 }
 
-//rewbs.VSTcompliance: changed from BOOL to long
+
 VstInt32 CVstPlugin::GetNumPrograms()
 //-----------------------------------
 {
-	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
-	{
-		return m_pEffect->numPrograms;
-	}
-	return 0;
+	return Util::Max(m_Effect.numPrograms, VstInt32(0));
 }
 
 
 PlugParamIndex CVstPlugin::GetNumParameters()
 //-------------------------------------------
 {
-	if ((m_pEffect) && (m_pEffect->numParams > 0))
-	{
-		return m_pEffect->numParams;
-	}
-	return 0;
+	return Util::Max(m_Effect.numParams, VstInt32(0));
 }
 
 
@@ -1593,32 +1559,24 @@ bool CVstPlugin::CanAutomateParameter(PlugParamIndex index)
 VstInt32 CVstPlugin::GetUID() const
 //---------------------------------
 {
-	if (!(m_pEffect))
-		return 0;
-	return m_pEffect->uniqueID;
+	return m_Effect.uniqueID;
 }
 
 
 VstInt32 CVstPlugin::GetVersion() const
 //-------------------------------------
 {
-	if (!(m_pEffect))
-		return 0;
-
-	return m_pEffect->version;
+	return m_Effect.version;
 }
 
 
 bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
 //------------------------------------------------------------------
 {
-	if (!(m_pEffect))
-		return false;
-
-	LimitMax(max, m_pEffect->numParams);
+	LimitMax(max, m_Effect.numParams);
 
 	for(VstInt32 p = min; p < max; p++)
-		param[p - min]=GetParameter(p);
+		param[p - min] = GetParameter(p);
 
 	return true;
 
@@ -1628,15 +1586,12 @@ bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
 bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxParam)
 //--------------------------------------------------------------------------------
 {
-	if (!(m_pEffect))
-		return false;
-
 	if (minParam == 0 && maxParam == 0)
 	{
-		maxParam = m_pEffect->numParams;
+		maxParam = m_Effect.numParams;
 
 	}
-	LimitMax(maxParam, PlugParamIndex(m_pEffect->numParams));
+	LimitMax(maxParam, PlugParamIndex(m_Effect.numParams));
 
 	for(PlugParamIndex p = minParam; p < maxParam; p++)
 	{
@@ -1654,7 +1609,7 @@ bool CVstPlugin::SaveProgram()
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
-		defaultDir = m_pFactory->szDllPath;
+		defaultDir = m_Factory.szDllPath;
 		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
 	}
 
@@ -1672,7 +1627,7 @@ bool CVstPlugin::SaveProgram()
 	{
 		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 	}
-	
+
 	bool bank = !_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
 
 	std::fstream f;
@@ -1696,7 +1651,7 @@ bool CVstPlugin::LoadProgram()
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
-		defaultDir = m_pFactory->szDllPath;
+		defaultDir = m_Factory.szDllPath;
 		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
 	}
 
@@ -1729,7 +1684,7 @@ bool CVstPlugin::LoadProgram()
 
 	if(errorStr == nullptr)
 	{
-		if(GetModDoc() != nullptr && GetSoundFile() != nullptr && GetSoundFile()->GetModSpecifications().supportsPlugins)
+		if(GetModDoc() != nullptr && GetSoundFile().GetModSpecifications().supportsPlugins)
 		{
 			GetModDoc()->SetModified();
 		}
@@ -1745,30 +1700,30 @@ bool CVstPlugin::LoadProgram()
 VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------
 {
-	VstIntPtr lresult = 0;
+	VstIntPtr result = 0;
 
 	try
 	{
-		if ((m_pEffect) && (m_pEffect->dispatcher))
+		if(m_Effect.dispatcher != nullptr)
 		{
 			#ifdef VST_LOG
-			Log("About to Dispatch(%d) (Plugin=\"%s\"), index: %d, value: %d, value: %h, value: %f!\n", opCode, m_pFactory->szLibraryName, index, value, ptr, opt);
+			Log("About to Dispatch(%d) (Plugin=\"%s\"), index: %d, value: %d, value: %h, value: %f!\n", opCode, m_Factory.szLibraryName, index, value, ptr, opt);
 			#endif
-			lresult = m_pEffect->dispatcher(m_pEffect, opCode, index, value, ptr, opt);
+			result = m_Effect.dispatcher(&m_Effect, opCode, index, value, ptr, opt);
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in Dispatch(%d) (Plugin=\"%s\")!\n", opCode, m_pFactory->szLibraryName);
+		CVstPluginManager::ReportPlugException("Exception in Dispatch(%d) (Plugin=\"%s\")!\n", opCode, m_Factory.szLibraryName);
 	}
 
-	return lresult;
+	return result;
 }
 
 
 VstInt32 CVstPlugin::GetCurrentProgram()
 //--------------------------------------
 {
-	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
+	if(m_Effect.numPrograms > 0)
 	{
 		return Dispatch(effGetProgram, 0, 0, nullptr, 0);
 	}
@@ -1779,7 +1734,7 @@ VstInt32 CVstPlugin::GetCurrentProgram()
 bool CVstPlugin::GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text)
 //------------------------------------------------------------------------------------
 {
-	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
+	if(m_Effect.numPrograms > 0)
 	{
 		return (Dispatch(effGetProgramNameIndexed, index, category, text, 0) == 1);
 	}
@@ -1825,12 +1780,12 @@ CString CVstPlugin::GetFormattedProgramName(VstInt32 index)
 }
 
 
-void CVstPlugin::SetCurrentProgram(UINT nIndex)
-//---------------------------------------------
+void CVstPlugin::SetCurrentProgram(VstInt32 nIndex)
+//-------------------------------------------------
 {
-	if ((m_pEffect) && (m_pEffect->numPrograms > 0))
+	if(m_Effect.numPrograms > 0)
 	{
-		if (nIndex < (UINT)m_pEffect->numPrograms)
+		if(nIndex < m_Effect.numPrograms)
 		{
 			Dispatch(effSetProgram, 0, nIndex, nullptr, 0);
 		}
@@ -1842,14 +1797,14 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 //------------------------------------------------------------
 {
 	float fResult = 0;
-	if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->getParameter))
+	if(nIndex < m_Effect.numParams && m_Effect.getParameter != nullptr)
 	{
 		try
 		{
-			fResult = m_pEffect->getParameter(m_pEffect, nIndex);
+			fResult = m_Effect.getParameter(&m_Effect, nIndex);
 		} catch (...)
 		{
-			//CVstPluginManager::ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_pFactory->szLibraryName);
+			//CVstPluginManager::ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_Factory.szLibraryName);
 		}
 	}
 	//rewbs.VSTcompliance
@@ -1868,14 +1823,14 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 {
 	try
 	{
-		if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->setParameter))
+		if(nIndex < m_Effect.numParams && m_Effect.setParameter)
 		{
 			if ((fValue >= 0.0f) && (fValue <= 1.0f))
-				m_pEffect->setParameter(m_pEffect, nIndex, fValue);
+				m_Effect.setParameter(&m_Effect, nIndex, fValue);
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in SetParameter(%d, 0.%03d) (Plugin=%s)\n", nIndex, (int)(fValue*1000), m_pFactory->szLibraryName);
+		CVstPluginManager::ReportPlugException("Exception in SetParameter(%d, 0.%03d) (Plugin=%s)\n", nIndex, (int)(fValue*1000), m_Factory.szLibraryName);
 	}
 }
 
@@ -1887,7 +1842,7 @@ CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 	CHAR s[max(kVstMaxParamStrLen + 1, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
 	s[0] = '\0';
 
-	if(m_pEffect != nullptr && m_pEffect->numParams > 0 && param < m_pEffect->numParams)
+	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
 	{
 		Dispatch(opcode, param, 0, s, 0);
 		StringFixer::SetNullTerminator(s);
@@ -1979,7 +1934,7 @@ void CVstPlugin::Resume()
 		m_bPlugResumed = true;
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
+		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_Factory.szLibraryName);
 	}
 
 
@@ -1997,7 +1952,7 @@ void CVstPlugin::Suspend()
 			m_bPlugResumed = false;
 		} catch (...)
 		{
-			CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
+			CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_Factory.szLibraryName);
 		}
 	}
 }
@@ -2008,15 +1963,15 @@ void CVstPlugin::ProcessVSTEvents()
 //---------------------------------
 {
 	// Process VST events
-	if(m_pEffect != nullptr && m_pEffect->dispatcher != nullptr && vstEvents.Finalise() > 0)
+	if(m_Effect.dispatcher != nullptr && vstEvents.Finalise() > 0)
 	{
 		try
 		{
-			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, &vstEvents, 0);
+			m_Effect.dispatcher(&m_Effect, effProcessEvents, 0, 0, &vstEvents, 0);
 		} catch (...)
 		{
 			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, numEvents:%d)\n",
-				m_pFactory->szLibraryName, vstEvents.GetNumEvents());
+				m_Factory.szLibraryName, vstEvents.GetNumEvents());
 		}
 	}
 }
@@ -2026,7 +1981,7 @@ void CVstPlugin::ProcessVSTEvents()
 void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 //--------------------------------------------------------------
 {
-	if(m_pSndFile == nullptr || m_pMixStruct == nullptr)
+	if(m_pMixStruct == nullptr)
 	{
 		return;
 	}
@@ -2034,10 +1989,10 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
 	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
 	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
 	PLUGINDEX receiver = m_pMixStruct->GetOutputPlugin();
-	
+
 	if(receiver != PLUGINDEX_INVALID)
 	{
-		SNDMIXPLUGIN &mixPlug = m_pSndFile->m_MixPlugins[receiver];
+		SNDMIXPLUGIN &mixPlug = m_SndFile.m_MixPlugins[receiver];
 		CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(mixPlug.pMixPlugin);
 		if(vstPlugin != nullptr)
 		{
@@ -2072,10 +2027,10 @@ void CVstPlugin::RecalculateGain()
 	float gain = 0.1f * static_cast<float>(m_pMixStruct ? m_pMixStruct->GetGain() : 10);
 	if(gain < 0.1f) gain = 1.0f;
 
-	if(m_bIsInstrument && m_pSndFile)
+	if(m_bIsInstrument)
 	{
-		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
-		gain = static_cast<float>(gain * (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol()));
+		gain /= m_SndFile.m_pConfig->getVSTiAttenuation();
+		gain = static_cast<float>(gain * (m_SndFile.m_nVSTiVolume / m_SndFile.m_pConfig->getNormalVSTiVol()));
 	}
 	m_fGain = gain;
 }
@@ -2095,13 +2050,13 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 	ProcessVSTEvents();
 
 	//If the plug is found & ok, continue
-	if ((m_pEffect) && (m_pProcessFP) && (mixBuffer.GetInputBufferArray()) && (mixBuffer.GetOutputBufferArray()) && (m_pMixStruct))
+	if(m_pProcessFP != nullptr && (mixBuffer.GetInputBufferArray()) && mixBuffer.GetOutputBufferArray() && m_pMixStruct != nullptr)
 	{
 
 		//RecalculateGain();
 
 		// Merge stereo input before sending to the plug if the plug can only handle one input.
-		if (m_pEffect->numInputs == 1)
+		if (m_Effect.numInputs == 1)
 		{
 			for (size_t i = 0; i < nSamples; i++)
 			{
@@ -2116,11 +2071,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		try
 		{
 			ASSERT(nSamples <= MIXBUFFERSIZE);
-			m_pProcessFP(m_pEffect, mixBuffer.GetInputBufferArray(), outputBuffers, nSamples);
+			m_pProcessFP(&m_Effect, mixBuffer.GetInputBufferArray(), outputBuffers, nSamples);
 		} catch (...)
 		{
 			Bypass();
-			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
+			CString processMethod = (m_Effect.flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->GetName(), processMethod);
 			vstEvents.Clear();
 		}
@@ -2181,11 +2136,11 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 	float *leftPlugOutput;
 	float *rightPlugOutput;
 
-	if(m_pEffect->numOutputs == 1)
+	if(m_Effect.numOutputs == 1)
 	{
 		// If there was just the one plugin output we copy it into our 2 outputs
 		leftPlugOutput = rightPlugOutput = mixBuffer.GetOutputBuffer(0);
-	} else if(m_pEffect->numOutputs > 1)
+	} else if(m_Effect.numOutputs > 1)
 	{
 		// Otherwise we actually only cater for two outputs max (outputs > 2 have been mixed together already).
 		leftPlugOutput = mixBuffer.GetOutputBuffer(0);
@@ -2217,7 +2172,7 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 	float dryRatio = m_bIsInstrument ? 1 : m_pMixStruct->fDryRatio; // Always mix full dry if this is an instrument
 
 	// Wet / Dry range expansion [0,1] -> [-1,1]
-	if(m_pEffect->numInputs > 0 && m_pMixStruct->IsExpandedMix())
+	if(m_Effect.numInputs > 0 && m_pMixStruct->IsExpandedMix())
 	{
 		wetRatio = 2.0f * wetRatio - 1.0f;
 		dryRatio = -wetRatio;
@@ -2376,7 +2331,7 @@ void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nPa
 	LimitMax(nController, MIDIEvents::MIDICC_end);
 	LimitMax(nParam, uint8(127));
 
-	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
+	if(m_SndFile.GetModFlag(MSF_MIDICC_BUGEMULATION))
 		MidiSend(MIDIEvents::Event(MIDIEvents::evControllerChange, nMidiCh, nParam, static_cast<uint8>(nController)));	// param and controller are swapped (old broken implementation)
 	else
 		MidiSend(MIDIEvents::CC(nController, nMidiCh, nParam));
@@ -2400,7 +2355,7 @@ void CVstPlugin::ApplyPitchWheelDepth(int32 &value, int8 pwd)
 void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
 //----------------------------------------------------------------------
 {
-	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
+	if(m_SndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
 	{
 		// OpenMPT Legacy: Old pitch slides never were really accurate, but setting the PWD to 13 in plugins would give the closest results.
 		increment = (increment * 0x800 * 13) / (0xFF * pwd);
@@ -2662,7 +2617,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 void CVstPlugin::SaveAllParameters()
 //----------------------------------
 {
-	if ((m_pEffect) && (m_pMixStruct))
+	if (m_pMixStruct)
 	{
 		m_pMixStruct->defaultProgram = -1;
 
@@ -2705,7 +2660,7 @@ void CVstPlugin::SaveAllParameters()
 			}
 		}
 		// This plug doesn't support chunks: save parameters
-		PlugParamIndex nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
+		PlugParamIndex nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
 		UINT nLen = nParams * sizeof(float);
 		if (!nLen) return;
 		nLen += 4;
@@ -2740,9 +2695,9 @@ void CVstPlugin::SaveAllParameters()
 void CVstPlugin::RestoreAllParameters(long nProgram)
 //--------------------------------------------------
 {
-	if ((m_pEffect) && (m_pMixStruct) && (m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= 4))
+	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= 4)
 	{
-		UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
+		UINT nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
 		UINT nLen = nParams * sizeof(float);
 		ULONG nType = *(ULONG *)m_pMixStruct->pPluginData;
 
@@ -2751,7 +2706,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 			void *p = nullptr;
 			Dispatch(effGetChunk, 0,0, &p, 0); //init plug for chunk reception
 
-			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms))
+			if ((nProgram>=0) && (nProgram < m_Effect.numPrograms))
 			{
 				// Bank
 				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize - 4, ((BYTE *)m_pMixStruct->pPluginData) + 4, 0);
@@ -2781,8 +2736,6 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 void CVstPlugin::ToggleEditor()
 //-----------------------------
 {
-	if (!m_pEffect) return;
-
 	try
 	{
 		if ((m_pEditor) && (!m_pEditor->m_hWnd))
@@ -2807,7 +2760,7 @@ void CVstPlugin::ToggleEditor()
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_pFactory->szLibraryName);
+		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_Factory.szLibraryName);
 	}
 }
 
@@ -2815,11 +2768,7 @@ void CVstPlugin::ToggleEditor()
 BOOL CVstPlugin::GetCommandName(UINT nIndex, LPSTR pszName)
 //---------------------------------------------------------
 {
-	if (m_pEffect)
-	{
-		return Dispatch(effGetParamName, nIndex, 0, pszName, 0.0f);
-	}
-	return 0;
+	return Dispatch(effGetParamName, nIndex, 0, pszName, 0.0f);
 }
 
 
@@ -2838,8 +2787,8 @@ void CVstPlugin::Bypass(bool bypass)
 	Dispatch(effSetBypass, bypass ? 1 : 0, 0, nullptr, 0.0f);
 
 #ifdef MODPLUG_TRACKER
-	if(m_pModDoc)
-		m_pModDoc->UpdateAllViews(nullptr, HINT_MIXPLUGINS, nullptr);
+	if(m_SndFile.GetpModDoc())
+		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, HINT_MIXPLUGINS, nullptr);
 #endif // MODPLUG_TRACKER
 }
 
@@ -2855,12 +2804,9 @@ PLUGINDEX CVstPlugin::FindSlot()
 //------------------------------
 {
 	PLUGINDEX slot = 0;
-	if(m_pSndFile)
+	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[slot]) && slot < MAX_MIXPLUGINS - 1)
 	{
-		while(m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot]) && slot < MAX_MIXPLUGINS - 1)
-		{
-			slot++;
-		}
+		slot++;
 	}
 	return slot;
 }
@@ -2886,13 +2832,11 @@ void CVstPlugin::UpdateMixStructPtr(SNDMIXPLUGIN *p)
 	m_pMixStruct = p;
 }
 
-//end rewbs.VSTcompliance
 
-bool CVstPlugin::isInstrument() // ericus 18/02/2005
+bool CVstPlugin::isInstrument()
 //-----------------------------
 {
-	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)); // rewbs.dryRatio
-	return false;
+	return ((m_Effect.flags & effFlagsIsSynth) || (!m_Effect.numInputs));
 }
 
 
@@ -2915,9 +2859,9 @@ size_t CVstPlugin::GetOutputPlugList(vector<CVstPlugin *> &list)
 	if(!m_pMixStruct->IsOutputToMaster())
 	{
 		PLUGINDEX nOutput = m_pMixStruct->GetOutputPlugin();
-		if(m_pSndFile && nOutput > m_nSlot && nOutput != PLUGINDEX_INVALID)
+		if(nOutput > m_nSlot && nOutput != PLUGINDEX_INVALID)
 		{
-			outputPlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[nOutput].pMixPlugin);
+			outputPlug = dynamic_cast<CVstPlugin *>(m_SndFile.m_MixPlugins[nOutput].pMixPlugin);
 		}
 	}
 	list.push_back(outputPlug);
@@ -2927,22 +2871,20 @@ size_t CVstPlugin::GetOutputPlugList(vector<CVstPlugin *> &list)
 
 
 // Get a list of plugins that send data to this plugin.
-size_t CVstPlugin::GetInputPlugList(vector<CVstPlugin *> &list)
-//-------------------------------------------------------------
+size_t CVstPlugin::GetInputPlugList(std::vector<CVstPlugin *> &list)
+//------------------------------------------------------------------
 {
-	if(m_pSndFile == nullptr) return 0;
-
-	vector<CVstPlugin *> candidatePlugOutputs;
+	std::vector<CVstPlugin *> candidatePlugOutputs;
 	list.clear();
 
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
-		CVstPlugin *candidatePlug = dynamic_cast<CVstPlugin *>(m_pSndFile->m_MixPlugins[plug].pMixPlugin);
+		CVstPlugin *candidatePlug = dynamic_cast<CVstPlugin *>(m_SndFile.m_MixPlugins[plug].pMixPlugin);
 		if(candidatePlug)
 		{
 			candidatePlug->GetOutputPlugList(candidatePlugOutputs);
 
-			for(vector<CVstPlugin *>::iterator iter = candidatePlugOutputs.begin(); iter != candidatePlugOutputs.end(); iter++)
+			for(std::vector<CVstPlugin *>::iterator iter = candidatePlugOutputs.begin(); iter != candidatePlugOutputs.end(); iter++)
 			{
 				if(*iter == this)
 				{
@@ -2958,16 +2900,15 @@ size_t CVstPlugin::GetInputPlugList(vector<CVstPlugin *> &list)
 
 
 // Get a list of instruments that send data to this plugin.
-size_t CVstPlugin::GetInputInstrumentList(vector<INSTRUMENTINDEX> &list)
-//----------------------------------------------------------------------
+size_t CVstPlugin::GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list)
+//---------------------------------------------------------------------------
 {
 	list.clear();
-	if(m_pSndFile == nullptr) return 0;
-
 	const PLUGINDEX nThisMixPlug = m_nSlot + 1;		//m_nSlot is position in mixplug array.
-	for(INSTRUMENTINDEX ins = 0; ins <= m_pSndFile->GetNumInstruments(); ins++)
+
+	for(INSTRUMENTINDEX ins = 0; ins <= m_SndFile.GetNumInstruments(); ins++)
 	{
-		if(m_pSndFile->Instruments[ins] != nullptr && (m_pSndFile->Instruments[ins]->nMixPlug == nThisMixPlug))
+		if(m_SndFile.Instruments[ins] != nullptr && m_SndFile.Instruments[ins]->nMixPlug == nThisMixPlug)
 		{
 			list.push_back(ins);
 		}
@@ -2977,17 +2918,16 @@ size_t CVstPlugin::GetInputInstrumentList(vector<INSTRUMENTINDEX> &list)
 }
 
 
-size_t CVstPlugin::GetInputChannelList(vector<CHANNELINDEX> &list)
-//----------------------------------------------------------------
+size_t CVstPlugin::GetInputChannelList(std::vector<CHANNELINDEX> &list)
+//---------------------------------------------------------------------
 {
-	if(m_pSndFile == nullptr) return 0;
 	list.clear();
 
-	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
-	const CHANNELINDEX chnCount = m_pSndFile->GetNumChannels();
-	for (CHANNELINDEX nChn=0; nChn<chnCount; nChn++)
+	PLUGINDEX nThisMixPlug = m_nSlot + 1;		//m_nSlot is position in mixplug array.
+	const CHANNELINDEX chnCount = m_SndFile.GetNumChannels();
+	for(CHANNELINDEX nChn=0; nChn<chnCount; nChn++)
 	{
-		if (m_pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug)
+		if(m_SndFile.ChnSettings[nChn].nMixPlugin == nThisMixPlug)
 		{
 			list.push_back(nChn);
 		}
