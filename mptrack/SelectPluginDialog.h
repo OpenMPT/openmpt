@@ -29,7 +29,7 @@ protected:
 	HTREEITEM AddTreeItem(const char *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
 public:
-	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
+	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent);
 	~CSelectPluginDlg();
 	void DoClose();
 	void UpdatePluginsList(VstInt32 forceSelect = 0);
