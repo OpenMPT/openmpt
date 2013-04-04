@@ -339,7 +339,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		// Noise Shaping
 		if (m_MixerSettings.gnBitsPerSample <= 16)
 		{
-			if (m_MixerSettings.gdwSoundSetup & SNDMIX_HQRESAMPLER)
+			if(m_Resampler.IsHQ())
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.gnBitsPerSample);
 		}
 
@@ -1567,9 +1567,9 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
 		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
 //		if ((m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)
-//			|| (m_MixerSettings.gdwSoundSetup & SNDMIX_HQRESAMPLER))
+//			|| m_Resampler.IsHQ())
 		if((m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)
-			|| ((m_MixerSettings.gdwSoundSetup & SNDMIX_HQRESAMPLER) && !enableCustomRamp))
+			|| (m_Resampler.IsHQ() && !enableCustomRamp))
 		{
 			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
@@ -1990,7 +1990,7 @@ BOOL CSoundFile::ReadNote()
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
 			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 			// Check IDO
-			if (m_MixerSettings.gdwSoundSetup & SNDMIX_NORESAMPLING)
+			if (m_Resampler.Is(SRCMODE_NEAREST))
 			{
 				pChn->dwFlags.set(CHN_NOIDO);
 			} else
@@ -2001,9 +2001,9 @@ BOOL CSoundFile::ReadNote()
 				{
 					pChn->dwFlags.set(CHN_NOIDO);
 				} else
-				if (m_MixerSettings.gdwSoundSetup & SNDMIX_HQRESAMPLER)
+				if (m_Resampler.IsHQ())
 				{
-					if ((!(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)) && (!(m_MixerSettings.gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE)))
+					if ((!(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)) && (!m_Resampler.IsUltraHQ()))
 					{
 						int fmax = 0x20000;
 						if ((pChn->nNewLeftVol < 0x80) && (pChn->nNewRightVol < 0x80)

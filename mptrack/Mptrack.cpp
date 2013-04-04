@@ -895,11 +895,11 @@ BOOL CTrackApp::InitInstance()
 	if(sysinfo & SYSMIX_ENABLEMMX)
 	{
 		TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup |= SOUNDSETUP_ENABLEMMX;
-		TrackerSettings::Instance().m_nSrcMode = SRCMODE_SPLINE;
+		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_SPLINE;
 	}
 	if(sysinfo & SYSMIX_MMXEX)
 	{
-		TrackerSettings::Instance().m_nSrcMode = SRCMODE_POLYPHASE;
+		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
 	}
 	// Load Midi Library
 	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);

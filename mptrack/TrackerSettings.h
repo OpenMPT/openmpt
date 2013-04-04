@@ -166,7 +166,7 @@ public:
 	MODTYPE defaultModType;
 
 	// Audio Setup
-	DWORD m_dwQuality, m_nSrcMode, m_nPreAmp, gbLoopSong;
+	DWORD m_dwQuality, m_nPreAmp, gbLoopSong;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
 	DWORD m_LatencyMS;
 	DWORD m_UpdateIntervalMS;
