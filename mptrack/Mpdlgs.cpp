@@ -121,7 +121,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	BOOL bAsio = FALSE;
 	CHAR s[128];
-	
+
 	CPropertyPage::OnInitDialog();
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
@@ -282,7 +282,7 @@ void COptionsSoundcard::OnHScroll(UINT n, UINT pos, CScrollBar *p)
 	{
 		if(m_PreAmpNoteShowed == true)
 		{
-			int n = 40 - m_SliderPreAmp.GetPos();
+			int n = m_SliderPreAmp.GetPos();
 			if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
 			{
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -306,7 +306,7 @@ void COptionsSoundcard::UpdateStereoSep()
 	CSoundFile::m_nStereoSeparation = 32 << m_SliderStereoSep.GetPos();
 	wsprintf(s, "%d%%", (CSoundFile::m_nStereoSeparation * 100) / 128);
 	SetDlgItemText(IDC_TEXT1, s);
-	
+
 }
 
 
@@ -315,7 +315,7 @@ void COptionsSoundcard::SetPreAmpSliderPosition()
 {
 	int n = (TrackerSettings::Instance().m_nPreAmp - 64) / 8;
 	if ((n < 0) || (n > 40)) n = 16;
-	m_SliderPreAmp.SetPos(40 - n);
+	m_SliderPreAmp.SetPos(n);
 }
 
 
@@ -538,7 +538,7 @@ BOOL COptionsPlayer::OnInitDialog()
 //---------------------------------
 {
 	DWORD dwQuality;
-	
+
 	CPropertyPage::OnInitDialog();
 	dwQuality = TrackerSettings::Instance().m_dwQuality;
 	// Resampling type
@@ -712,12 +712,12 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
 		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff*100)));
 		break;
-	default: 
+	default:
 		m_CbnWFIRType.AddString("None");
 		m_CEditWFIRCutoff.EnableWindow(FALSE);
 		m_CbnWFIRType.EnableWindow(FALSE);
 	}
-	
+
 	m_CEditWFIRCutoff.SetWindowText(s);
 	OnSettingsChanged();
 }
@@ -732,7 +732,7 @@ void COptionsPlayer::OnDefaultResampling()
 	m_CEditWFIRCutoff.SetWindowText("97");
 	m_CEditRampUp.SetWindowText("16");
 	m_CEditRampDown.SetWindowText("42");
-	
+
 }
 
 
@@ -1102,7 +1102,7 @@ BOOL CEQSetupDlg::OnSetActive()
 //-----------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_EQ;
-	SetDlgItemText(IDC_EQ_WARNING, 
+	SetDlgItemText(IDC_EQ_WARNING,
 		"Note: This EQ, when enabled from Player tab, is applied to "
 		"any and all of the modules "
 		"that you load in OpenMPT; its settings are stored globally, "
@@ -1142,7 +1142,7 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,	m_ATBehaviour);
 	//}}AFX_DATA_MAP
 }
-	
+
 
 BOOL CMidiSetupDlg::OnInitDialog()
 //--------------------------------
@@ -1225,7 +1225,7 @@ void CMidiSetupDlg::OnOK()
 	if (IsDlgButtonChecked(IDC_MIDIVOL_TO_NOTEVOL)) m_dwMidiSetup |= MIDISETUP_MIDIVOL_TO_NOTEVOL;
 	if (IsDlgButtonChecked(IDC_MIDIPLAYCONTROL)) m_dwMidiSetup |= MIDISETUP_RESPONDTOPLAYCONTROLMSGS;
 	if (IsDlgButtonChecked(IDC_MIDIPLAYPATTERNONMIDIIN)) m_dwMidiSetup |= MIDISETUP_PLAYPATTERNONMIDIIN;
-	
+
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		int n = combo->GetCurSel();
@@ -1248,4 +1248,3 @@ BOOL CMidiSetupDlg::OnSetActive()
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
 	return CPropertyPage::OnSetActive();
 }
-
