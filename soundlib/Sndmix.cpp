@@ -2141,46 +2141,43 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 //------------------------------------------------
 {
-	ModChannel *pChn = &Chn[nChn];
+	ModChannel &chn = Chn[nChn];
 
-	// Do we need to process midi?
+	// Do we need to process MIDI?
 	// For now there is no difference between mute and sync mute with VSTis.
-	if(pChn->dwFlags[CHN_MUTE | CHN_SYNCMUTE]) return;
-	if(!m_nInstruments
-		|| m_nPattern >= Patterns.Size()
-		|| m_nRow >= Patterns[m_nPattern].GetNumRows()
-		|| !Patterns[m_nPattern])
+	if(chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE] || !chn.HasMIDIOutput()) return;
+
+	// Get instrument info and plugin reference
+	const ModInstrument *pIns = chn.pModInstrument;	// Can't be nullptr at this point, as we have valid MIDI output.
+
+	// No instrument or muted instrument?
+	if(pIns->dwFlags[INS_MUTE])
 	{
 		return;
 	}
 
-	const ModCommand::NOTE note = pChn->rowCommand.note;
-	const ModCommand::VOL vol = pChn->rowCommand.vol;
-	const ModCommand::VOLCMD volcmd = pChn->rowCommand.volcmd;
-
-	// Get instrument info and plugin reference
-	ModInstrument *pIns = pChn->pModInstrument;
-	PLUGINDEX nPlugin = 0;
+	// Check instrument plugins
+	const PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 	IMixPlugin *pPlugin = nullptr;
-
-	if (pIns)
+	if(nPlugin > 0 && nPlugin <= MAX_MIXPLUGINS)
 	{
-		// Check instrument plugins
-		if (pIns->HasValidMIDIChannel())
-		{
-			nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
-			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
-			{
-				pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-			}
-		}
-
-		// Muted instrument?
-		if(pIns != nullptr && pIns->dwFlags[INS_MUTE]) return;
+		pPlugin = m_MixPlugins[nPlugin - 1].pMixPlugin;
 	}
 
 	// Couldn't find a valid plugin
-	if (pPlugin == nullptr) return;
+	if(pPlugin == nullptr) return;
+
+	const ModCommand::NOTE note = chn.rowCommand.note;
+	// Check for volume commands
+	uint8 vol = 0xFF;
+	if(chn.rowCommand.volcmd == VOLCMD_VOLUME)
+	{
+		vol = Util::Min(chn.rowCommand.vol, uint8(64));
+	} else if(chn.rowCommand.command == CMD_VOLUME)
+	{
+		vol = Util::Min(chn.rowCommand.param, uint8(64));
+	}
+	const bool hasVolCommand = (vol != 0xFF);
 
 	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
 	{
@@ -2189,18 +2186,15 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			ModCommand::NOTE realNote = note;
 			if(ModCommand::IsNote(note))
 				realNote = pIns->NoteMap[note - 1];
-			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, static_cast<uint16>(pChn->nVolume), nChn);
-		} else if (volcmd == VOLCMD_VOLUME)
+			pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, static_cast<uint16>(chn.nVolume), nChn);
+		} else if(hasVolCommand)
 		{
 			pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Fine, vol, nChn);
 		}
 		return;
 	}
 
-
-	const bool hasVolCommand = (volcmd == VOLCMD_VOLUME);
-	const UINT defaultVolume = pIns->nGlobalVol;
-
+	const uint32 defaultVolume = pIns->nGlobalVol;
 	
 	//If new note, determine notevelocity to use.
 	if(note != NOTE_NONE)
@@ -2209,7 +2203,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		switch(pIns->nPluginVelocityHandling)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:
-				velocity = static_cast<uint16>(pChn->nVolume);
+				velocity = static_cast<uint16>(chn.nVolume);
 			break;
 		}
 
@@ -2229,7 +2223,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		switch(pIns->nPluginVolumeHandling)
 		{
 			case PLUGIN_VOLUMEHANDLING_DRYWET:
-				if(hasVolCommand) pPlugin->SetDryRatio(2*vol);
+				if(hasVolCommand) pPlugin->SetDryRatio(2 * vol);
 				else pPlugin->SetDryRatio(2 * defaultVolume);
 				break;
 
