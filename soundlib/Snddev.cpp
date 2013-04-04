@@ -1730,7 +1730,7 @@ BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	m_StreamParameters.channelCount = pwfx->nChannels;
 	switch(pwfx->wBitsPerSample)
 	{
-		case 8: m_StreamParameters.sampleFormat = paInt8; break;
+		case 8: m_StreamParameters.sampleFormat = paUInt8; break;
 		case 16: m_StreamParameters.sampleFormat = paInt16; break;
 		case 24: m_StreamParameters.sampleFormat = paInt24; break;
 		case 32: m_StreamParameters.sampleFormat = paInt32; break;
