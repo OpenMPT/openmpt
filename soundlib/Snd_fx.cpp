@@ -948,7 +948,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		if((n) && (n < MAX_SAMPLES))
 		{
 			pSmp = &Samples[n];
-		} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && !pIns->HasValidMIDIChannel())
+		} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && !pChn->HasMIDIOutput())
 		{
 			// Impulse Tracker ignores empty slots.
 			// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
@@ -1451,7 +1451,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 	// Do we need to apply New/Duplicate Note Action to a VSTi?
 	bool applyNNAtoPlug = false;
 	IMixPlugin *pPlugin = NULL;
-	if (pChn->pModInstrument && pChn->pModInstrument->HasValidMIDIChannel() && ModCommand::IsNote(pChn->nNote)) // instro sends to a midi chan
+	if(pChn->HasMIDIOutput() && ModCommand::IsNote(pChn->nNote)) // instro sends to a midi chan
 	{
 		PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 
@@ -4086,21 +4086,21 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 //--------------------------------------------------------------------
 {
 	// Retrig: bit 8 is set if it's the new XM retrig
-	ModChannel *pChn = &Chn[nChn];
+	ModChannel &chn = Chn[nChn];
 	int nRetrigSpeed = param & 0x0F;
-	int nRetrigCount = pChn->nRetrigCount;
+	int nRetrigCount = chn.nRetrigCount;
 	bool bDoRetrig = false;
 
 	//IT compatibility 15. Retrigger
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
-		if(m_nTickCount == 0 && pChn->rowCommand.note)
+		if(m_nTickCount == 0 && chn.rowCommand.note)
 		{
-			pChn->nRetrigCount = param & 0xf;
+			chn.nRetrigCount = param & 0xf;
 		}
-		else if(!pChn->nRetrigCount || !--pChn->nRetrigCount)
+		else if(!chn.nRetrigCount || !--chn.nRetrigCount)
 		{
-			pChn->nRetrigCount = param & 0xf;
+			chn.nRetrigCount = param & 0xf;
 			bDoRetrig = true;
 		}
 	} else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
@@ -4109,13 +4109,13 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		if(m_SongFlags[SONG_FIRSTTICK])
 		{
 			// here are some really stupid things FT2 does
-			if(pChn->rowCommand.volcmd == VOLCMD_VOLUME) return;
-			if(pChn->rowCommand.instr > 0 && pChn->rowCommand.note == NOTE_NONE) nRetrigCount = 1;
-			if(pChn->rowCommand.note != NOTE_NONE && pChn->rowCommand.note <= GetModSpecifications().noteMax) nRetrigCount++;
+			if(chn.rowCommand.volcmd == VOLCMD_VOLUME) return;
+			if(chn.rowCommand.instr > 0 && chn.rowCommand.note == NOTE_NONE) nRetrigCount = 1;
+			if(chn.rowCommand.note != NOTE_NONE && chn.rowCommand.note <= GetModSpecifications().noteMax) nRetrigCount++;
 		}
 		if (nRetrigCount >= nRetrigSpeed)
 		{
-			if(!m_SongFlags[SONG_FIRSTTICK] || pChn->rowCommand.note == NOTE_NONE)
+			if(!m_SongFlags[SONG_FIRSTTICK] || chn.rowCommand.note == NOTE_NONE)
 			{
 				bDoRetrig = true;
 				nRetrigCount = 0;
@@ -4133,7 +4133,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			int realspeed = nRetrigSpeed;
 			// FT2 bug: if a retrig (Rxy) occours together with a volume command, the first retrig interval is increased by one tick
-			if ((param & 0x100) && (pChn->rowCommand.volcmd == VOLCMD_VOLUME) && (pChn->rowCommand.param & 0xF0)) realspeed++;
+			if ((param & 0x100) && (chn.rowCommand.volcmd == VOLCMD_VOLUME) && (chn.rowCommand.param & 0xF0)) realspeed++;
 			if(!m_SongFlags[SONG_FIRSTTICK] || (param & 0x100))
 			{
 				if (!realspeed) realspeed = 1;
@@ -4142,14 +4142,14 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			} else if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
 			if (nRetrigCount >= realspeed)
 			{
-				if ((m_nTickCount) || ((param & 0x100) && (!pChn->rowCommand.note))) bDoRetrig = true;
+				if ((m_nTickCount) || ((param & 0x100) && (!chn.rowCommand.note))) bDoRetrig = true;
 			}
 		}
 	}
 
 	// IT compatibility: If a sample is shorter than the retrig time (i.e. it stops before the retrig counter hits zero), it is not retriggered.
 	// Test case: retrig-short.it
-	if(pChn->nLength == 0 && IsCompatibleMode(TRK_IMPULSETRACKER))
+	if(chn.nLength == 0 && IsCompatibleMode(TRK_IMPULSETRACKER) && !chn.HasMIDIOutput())
 	{
 		return;
 	}
@@ -4159,10 +4159,10 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		UINT dv = (param >> 4) & 0x0F;
 		if (dv)
 		{
-			int vol = pChn->nVolume;
+			int vol = chn.nVolume;
 
 			// FT2 compatibility: Retrig + volume will not change volume of retrigged notes
-			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(pChn->rowCommand.volcmd == VOLCMD_VOLUME))
+			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(chn.rowCommand.volcmd == VOLCMD_VOLUME))
 			{
 				if (retrigTable1[dv])
 					vol = (vol * retrigTable1[dv]) >> 4;
@@ -4172,18 +4172,18 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 
 			Limit(vol, 0, 256);
 
-			pChn->nVolume = vol;
-			pChn->dwFlags.set(CHN_FASTVOLRAMP);
+			chn.nVolume = vol;
+			chn.dwFlags.set(CHN_FASTVOLRAMP);
 		}
-		UINT nNote = pChn->nNewNote;
-		int32 nOldPeriod = pChn->nPeriod;
-		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, true);
+		UINT nNote = chn.nNewNote;
+		int32 nOldPeriod = chn.nPeriod;
+		if ((nNote) && (nNote <= NOTE_MAX) && (chn.nLength)) CheckNNA(nChn, 0, nNote, true);
 		bool bResetEnv = false;
 		if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
-			if ((pChn->rowCommand.instr) && (param < 0x100))
+			if ((chn.rowCommand.instr) && (param < 0x100))
 			{
-				InstrumentChange(pChn, pChn->rowCommand.instr, false, false);
+				InstrumentChange(&chn, chn.rowCommand.instr, false, false);
 				bResetEnv = true;
 			}
 			if (param < 0x100) bResetEnv = true;
@@ -4191,19 +4191,20 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		// Test case: retrig.it
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER), bResetEnv);
-		if (m_nInstruments)
+		if(m_nInstruments)
 		{
+			chn.rowCommand.note = nNote;	// No retrig without note...
 			ProcessMidiOut(nChn);	//Send retrig to Midi
 		}
-		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->rowCommand.note) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
+		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!chn.rowCommand.note) && (nOldPeriod)) chn.nPeriod = nOldPeriod;
 		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
 		// IT compatibility: see previous IT compatibility comment =)
-		if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPos = pChn->nPosLo = 0;
+		if(IsCompatibleMode(TRK_IMPULSETRACKER)) chn.nPos = chn.nPosLo = 0;
 
 		if (offset)									//rewbs.volOffset: apply offset on retrig
 		{
-			if (pChn->pModSample)
-				pChn->nLength = pChn->pModSample->nLength;
+			if (chn.pModSample)
+				chn.nLength = chn.pModSample->nLength;
 			SampleOffset(nChn, offset);
 		}
 	}
@@ -4213,7 +4214,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 
 	// Now we can also store the retrig value for IT...
 	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-		pChn->nRetrigCount = nRetrigCount;
+		chn.nRetrigCount = nRetrigCount;
 }
 
 
@@ -4771,9 +4772,9 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 		return nullptr;
 	}
 
-	const ModInstrument *pIns = Chn[chn].pModInstrument;
-	if(pIns != nullptr && pIns->HasValidMIDIChannel())
+	if(Chn[chn].HasMIDIOutput())
 	{
+		const ModInstrument *pIns = Chn[chn].pModInstrument;
 		// Instrument sends to a MIDI channel
 		if(pIns->nMixPlug != 0 && pIns->nMixPlug <= MAX_MIXPLUGINS)
 		{
