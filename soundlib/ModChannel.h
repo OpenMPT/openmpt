@@ -150,6 +150,9 @@ typedef struct __declspec(align(32)) ModChannel_
 	typedef uint32 volume_t;
 	volume_t GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
 
+	// Check if the channel has a valid MIDI output. This function guarantees that pModInstrument != nullptr.
+	bool HasMIDIOutput() const { return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel(); }
+
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	bool m_ReCalculateFreqOnFirstTick;
 	//If true, freq should be recalculated in ReadNote() on first tick.
