@@ -695,7 +695,6 @@ void CDoWaveConvert::OnButton1()
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	int oldVol = m_pSndFile->GetMasterVolume();
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
-	mixersettings.gdwSoundSetup |= SNDMIX_DIRECTTODISK;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	mixersettings.gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
 	mixersettings.gnChannels = m_pWaveFormat->nChannels;
@@ -962,7 +961,6 @@ void CDoWaveConvert::OnButton1()
 	fseek(f, dwDataOffset-sizeof(datahdr), SEEK_SET);
 	fwrite(&datahdr, sizeof(datahdr), 1, f);
 	fclose(f);
-	CSoundFile::m_MixerSettings.gdwSoundSetup &= ~SNDMIX_DIRECTTODISK;
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	if (m_bNormalize)
 	{
@@ -1118,7 +1116,6 @@ void CDoAcmConvert::OnButton1()
 	mixersettings.gnBitsPerSample = 16;
 //	CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE); //rewbs.resamplerConf - we don't want this anymore.
 	mixersettings.gnChannels = wfxSrc.nChannels;
-	mixersettings.gdwSoundSetup |= SNDMIX_DIRECTTODISK;
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();
 	CSoundFile::SetMixerSettings(mixersettings);
@@ -1215,7 +1212,6 @@ void CDoAcmConvert::OnButton1()
 	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	// Done
 	CSoundFile::m_MixerSettings.gdwSoundSetup = oldsndcfg;
-	CSoundFile::m_MixerSettings.gdwSoundSetup &= ~SNDMIX_DIRECTTODISK;
 	m_pSndFile->SetRepeatCount(oldrepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	m_pSndFile->visitedSongRows.Initialize(true);

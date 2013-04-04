@@ -2519,7 +2519,7 @@ BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------
 {
 	CriticalSection cs;
-	pSndFile->m_bIsRendering=true;
+	pSndFile->m_bIsRendering = true;
 	pSndFile->SuspendPlugins();
 	pSndFile->ResumePlugins();
 	return true;
@@ -2530,7 +2530,7 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 {
 	CriticalSection cs;
 	pSndFile->SuspendPlugins();
-	pSndFile->m_bIsRendering=false;
+	pSndFile->m_bIsRendering = false;
 	return true;
 }
 //end rewbs.VSTTimeInfo

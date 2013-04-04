@@ -288,7 +288,6 @@ FLAGSET(SongFlags)
 #define SNDMIX_SOFTPANNING		0x0200	// soft panning mode (this is forced with mixmode RC3 and later)
 
 // Misc Flags (can safely be turned on or off)
-#define SNDMIX_DIRECTTODISK		0x10000		// WAV writer mode
 #define SNDMIX_ENABLEMMX		0x20000		// use MMX-accelerated code
 //#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)

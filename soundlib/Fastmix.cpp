@@ -1581,7 +1581,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		}
 		// Should we mix this channel ?
 		UINT naddmix;
-		if (((nchmixed >= m_MixerSettings.m_nMaxMixChannels) && (!(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)))
+		if (((nchmixed >= m_MixerSettings.m_nMaxMixChannels) && !IsRenderingToDisc())
 		 || ((!pChannel->nRampLength) && (!(pChannel->nLeftVol|pChannel->nRightVol))))
 		{
 			LONG delta = (pChannel->nInc * (LONG)nSmpCount) + (LONG)pChannel->nPosLo;
