@@ -604,7 +604,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		}
 	}
 	m_CbnReverbPreset.SetCurSel(nSel);
-	if (!(CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX))
+	if (!(CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX))
 	{
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK6), FALSE);
 		m_SbReverbDepth.EnableWindow(FALSE);
@@ -679,7 +679,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	TrackerSettings::Instance().m_MixerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
+	TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -696,7 +696,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff * 100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff * 100)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -707,10 +707,10 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
 		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
 		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().m_MixerSettings.gbWFIRType);
+		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType);
 		m_CbnWFIRType.EnableWindow(TRUE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff*100)));
 		break;
 	default:
 		m_CbnWFIRType.AddString("None");
@@ -794,15 +794,16 @@ void COptionsPlayer::OnOK()
 	CString s;
 	m_CEditWFIRCutoff.GetWindowText(s);
 	if (s != "")
-		TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff = atoi(s)/100.0;
-	//TrackerSettings::Instance().m_MixerSettings.gbWFIRType set in OnWFIRTypeChange
+		TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff = atoi(s)/100.0;
+	//TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType set in OnWFIRTypeChange
 
 	m_CEditRampUp.GetWindowText(s);
 	TrackerSettings::Instance().m_MixerSettings.glVolumeRampUpSamples = atol(s);
 	m_CEditRampDown.GetWindowText(s);
 	TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples = atol(s);
 
-	CSoundFile::m_Resampler.m_Settings = TrackerSettings::Instance().m_MixerSettings;
+	CSoundFile::m_MixerSettings = TrackerSettings::Instance().m_MixerSettings;
+	CSoundFile::m_Resampler.m_Settings = TrackerSettings::Instance().m_ResamplerSettings;
 	CSoundFile::m_Resampler.InitializeTables(); //regenerate resampling tables
 	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);

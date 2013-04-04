@@ -221,7 +221,11 @@ private: //Misc data
 	const CModSpecifications* m_pModSpecs;
 	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
+private:
+	DWORD gdwSysInfo;
+
 public:	// Static Members
+	static MixerSettings m_MixerSettings;
 	static CResampler m_Resampler;
 #ifndef NO_REVERB
 	static CReverb m_Reverb;
@@ -237,7 +241,7 @@ public:	// Static Members
 #endif
 	static UINT m_nStereoSeparation;
 	static UINT m_nMaxMixChannels;
-	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
+	static DWORD gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
 	static UINT gnVolumeRampUpSamplesActual;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
@@ -474,6 +478,7 @@ public:
 public:
 	// Mixer Config
 	static void SetMixerSettings(const MixerSettings &mixersettings);
+	static void SetResamplerSettings(const CResamplerSettings &resamplersettings);
 	static MixerSettings GetMixerSettings();
 	static BOOL InitPlayer(BOOL bReset=FALSE);
 	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
@@ -481,8 +486,8 @@ public:
 	static BOOL SetResamplingMode(UINT nMode); // SRCMODE_XXXX
 	static DWORD GetSampleRate() { return gdwMixingFreq; }
 	static DWORD GetBitsPerSample() { return gnBitsPerSample; }
-	static DWORD InitSysInfo();
-	static DWORD GetSysInfo() { return gdwSysInfo; }
+	static void AssertAlignment();
+	static DWORD GetSysInfo();
 	static void EnableMMX(bool b) { if (b) gdwSoundSetup |= SNDMIX_ENABLEMMX; else gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
 #ifndef NO_AGC
 	static void SetAGC(BOOL b);

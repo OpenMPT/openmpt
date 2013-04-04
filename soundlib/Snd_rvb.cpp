@@ -394,14 +394,14 @@ bool CReverb::SetReverbParameters(UINT nDepth, UINT nType)
 
 
 // Reverb
-void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples)
-//-----------------------------------------------------------------------------
+void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples, DWORD sysinfo)
+//--------------------------------------------------------------------------------------------
 {
 	UINT nIn, nOut;
 
 	if ((!gnReverbSend) && (!gnReverbSamples)) return;
 	if (!gnReverbSend) X86_StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
-	if (!(CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX)) return;
+	if (!(sysinfo & SYSMIX_ENABLEMMX)) return;
 	// Dynamically adjust reverb master gains
 	LONG lMasterGain;
 	lMasterGain = ((g_RefDelay.lMasterGain * m_Settings.m_nReverbDepth) >> 4);

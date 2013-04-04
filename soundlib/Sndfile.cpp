@@ -420,6 +420,7 @@ CSoundFile::CSoundFile() :
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
 //----------------------
 {
+	gdwSysInfo = GetSysInfo();
 	m_nType = MOD_TYPE_NONE;
 	m_nChannels = 0;
 	m_nMixChannels = 0;
@@ -917,7 +918,7 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 {
 	CriticalSection cs;
 	DWORD d = gdwSoundSetup;
-	if ((bReverb) && (gdwSysInfo & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
+	if ((bReverb) && (GetSysInfo() & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
 #ifndef NO_DSP
 	if (bSurround) d |= SNDMIX_SURROUND; else d &= ~SNDMIX_SURROUND;
 	if (bMegaBass) d |= SNDMIX_MEGABASS; else d &= ~SNDMIX_MEGABASS;

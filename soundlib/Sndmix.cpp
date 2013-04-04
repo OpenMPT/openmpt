@@ -30,12 +30,12 @@
 UINT CSoundFile::m_nStereoSeparation = 128;
 UINT CSoundFile::m_nMaxMixChannels = MAX_CHANNELS;
 // Mixing Configuration (SetWaveConfig)
-DWORD CSoundFile::gdwSysInfo = 0;
 DWORD CSoundFile::gnChannels = 1;
 DWORD CSoundFile::gdwSoundSetup = 0;
 DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
+MixerSettings CSoundFile::m_MixerSettings;
 CResampler CSoundFile::m_Resampler;
 #ifndef NO_REVERB
 CReverb CSoundFile::m_Reverb;
@@ -121,13 +121,21 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 	// Start with ramping disabled to avoid clicks on first read.
 	// Ramping is now set after the first read in CSoundFile::Read();
 	gnVolumeRampUpSamplesActual = 0;
-	m_Resampler.m_Settings = mixersettings;
+	m_MixerSettings = mixersettings;
 }
+
+
+void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersettings)
+//--------------------------------------------------------------------------------
+{
+	m_Resampler.m_Settings = resamplersettings;
+}
+
 
 MixerSettings CSoundFile::GetMixerSettings()
 //------------------------------------------
 {
-	return m_Resampler.m_Settings;
+	return m_MixerSettings;
 }
 
 
@@ -287,7 +295,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			m_nMixStat += CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount);
+			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, gdwSysInfo);
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
@@ -302,7 +310,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			m_nMixStat += CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount);
+			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, gdwSysInfo);
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
@@ -368,7 +376,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
 		// Turn on ramping after first read (fix http://forum.openmpt.org/index.php?topic=523.0 )
-		gnVolumeRampUpSamplesActual = m_Resampler.m_Settings.glVolumeRampUpSamples;
+		gnVolumeRampUpSamplesActual = m_MixerSettings.glVolumeRampUpSamples;
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
@@ -1559,7 +1567,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 	{
 		const bool rampUp = (pChn->nNewRightVol > pChn->nRightVol) || (pChn->nNewLeftVol > pChn->nLeftVol);
 		LONG rampLength, globalRampLength, instrRampLength = 0;
-		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamplesActual : m_Resampler.m_Settings.glVolumeRampDownSamples);
+		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamplesActual : m_MixerSettings.glVolumeRampDownSamples);
 		//XXXih: add real support for bidi ramping here	
 		
 		if(pChn->pModInstrument != nullptr && rampUp)
@@ -2242,7 +2250,7 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 		// User has provided new global volume
 		const bool rampUp = m_nGlobalVolumeDestination > m_nGlobalVolume;
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
-		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? gnVolumeRampUpSamplesActual : m_Resampler.m_Settings.glVolumeRampDownSamples;
+		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? gnVolumeRampUpSamplesActual : m_MixerSettings.glVolumeRampDownSamples;
 	} 
 
 	if (m_nSamplesToGlobalVolRampDest > 0)

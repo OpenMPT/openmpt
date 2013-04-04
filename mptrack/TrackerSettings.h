@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../soundlib/MixerSettings.h"
+#include "../soundlib/Resampler.h"
 #include "../sounddsp/EQ.h"
 
 /////////////////////////////////////////////////////////////////////////
@@ -197,6 +198,7 @@ public:
 	COLORREF rgbCustomColors[MAX_MODCOLORS];
 
 	MixerSettings m_MixerSettings;
+	CResamplerSettings m_ResamplerSettings;
 
 	UINT gnAutoChordWaitTime;
 
