@@ -62,7 +62,6 @@ TrackerSettings::TrackerSettings()
 
 	// Audio device
 	m_dwQuality = 0;
-	m_nSrcMode = SRCMODE_FIRFILTER;
 	m_nPreAmp = 128;
 	gbLoopSong = TRUE;
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
@@ -318,7 +317,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26))
 		m_MixerSettings.gdwSoundSetup &= ~0x20;	// Reverse stereo
 	m_dwQuality = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
-	m_nSrcMode = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
+	m_ResamplerSettings.SrcMode = (ResamplingMode)CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
 	m_MixerSettings.gdwMixingFreq = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
 	m_MixerSettings.gnBitsPerSample = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BitsPerSample", m_MixerSettings.gnBitsPerSample, iniFile);
 	m_MixerSettings.gnChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
@@ -581,7 +580,9 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdwSoundSetup, &dwDWORDSize);
 		m_MixerSettings.gdwSoundSetup &= ~0x20;	// Reverse stereo
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
-		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nSrcMode, &dwDWORDSize);
+		DWORD dummysrcmode = m_ResamplerSettings.SrcMode;
+		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&dummysrcmode, &dwDWORDSize);
+		m_ResamplerSettings.SrcMode = (ResamplingMode)dummysrcmode;
 		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdwMixingFreq, &dwDWORDSize);
 		DWORD BufferLengthMS = 0;
 		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&BufferLengthMS, &dwDWORDSize);
@@ -786,7 +787,7 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.gdwSoundSetup, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_MixerSettings.gdwMixingFreq, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_MixerSettings.gnBitsPerSample, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);

@@ -560,7 +560,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("Polyphase");
 		m_CbnResampling.AddString("XMMS-ModPlug");
 		//end rewbs.resamplerConf
-		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_nSrcMode);
+		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 	}
 	// Effects
 #ifndef NO_DSP

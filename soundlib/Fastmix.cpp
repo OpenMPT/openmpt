@@ -1645,9 +1645,12 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 	//didn't manage to get flag from instrument header, use channel flags.
 	if(pChannel->dwFlags[CHN_HQSRC])
 	{
-		if (m_MixerSettings.gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
-		if (m_MixerSettings.gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
-		if (m_MixerSettings.gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;
+		switch(m_Resampler.m_Settings.SrcMode)
+		{
+			case SRCMODE_SPLINE:    return MIXNDX_HQSRC; break;
+			case SRCMODE_POLYPHASE: return MIXNDX_KAISERSRC; break;
+			case SRCMODE_FIRFILTER: return MIXNDX_FIRFILTERSRC; break;
+		}
 	} else if(!pChannel->dwFlags[CHN_NOIDO])
 	{
 		return MIXNDX_LINEARSRC;

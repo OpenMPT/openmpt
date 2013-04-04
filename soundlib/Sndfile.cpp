@@ -936,21 +936,16 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 BOOL CSoundFile::SetResamplingMode(UINT nMode)
 //--------------------------------------------
 {
-	DWORD d = m_MixerSettings.gdwSoundSetup & ~(SNDMIX_NORESAMPLING|SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE);
 	switch(nMode)
 	{
-	case SRCMODE_NEAREST:	d |= SNDMIX_NORESAMPLING; break;
-	case SRCMODE_LINEAR:	break; // default
-	//rewbs.resamplerConf
-	//case SRCMODE_SPLINE:	d |= SNDMIX_HQRESAMPLER; break;
-	//case SRCMODE_POLYPHASE:	d |= (SNDMIX_HQRESAMPLER|SNDMIX_ULTRAHQSRCMODE); break;
-	case SRCMODE_SPLINE:	d |= SNDMIX_SPLINESRCMODE; break;
-	case SRCMODE_POLYPHASE:	d |= SNDMIX_POLYPHASESRCMODE; break;
-	case SRCMODE_FIRFILTER:	d |= SNDMIX_FIRFILTERSRCMODE; break;
-	default: return FALSE;
-	//end rewbs.resamplerConf
+		case SRCMODE_NEAREST:   break;
+		case SRCMODE_LINEAR:    break;
+		case SRCMODE_SPLINE:    break;
+		case SRCMODE_POLYPHASE: break;
+		case SRCMODE_FIRFILTER: break;
+		default: return FALSE;  break;
 	}
-	m_MixerSettings.gdwSoundSetup = d;
+	m_Resampler.m_Settings.SrcMode = (ResamplingMode)nMode;
 	return TRUE;
 }
 

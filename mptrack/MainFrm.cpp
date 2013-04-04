@@ -1099,7 +1099,7 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 		CSoundFile::m_MixerSettings.gdwSoundSetup |= SNDMIX_MUTECHNMODE;
 	else
 		CSoundFile::m_MixerSettings.gdwSoundSetup &= ~SNDMIX_MUTECHNMODE;
-	CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
+	CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 	UpdateDspEffects();
 #ifndef NO_AGC
 	CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
@@ -1254,7 +1254,7 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 {
 	if(!pSndFile) return;
 	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample, TrackerSettings::Instance().m_MixerSettings.gnChannels, (TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
-	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
+	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 	UpdateDspEffects();
 #ifndef NO_AGC
 	pSndFile->SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
@@ -1741,15 +1741,15 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 //---------------------------------------------------------------------
 {
-	if ((q != TrackerSettings::Instance().m_dwQuality) || (srcmode != TrackerSettings::Instance().m_nSrcMode) || (bForceUpdate))
+	if ((q != TrackerSettings::Instance().m_dwQuality) || (srcmode != TrackerSettings::Instance().m_ResamplerSettings.SrcMode) || (bForceUpdate))
 	{
-		TrackerSettings::Instance().m_nSrcMode = srcmode;
+		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = (ResamplingMode)srcmode;
 		TrackerSettings::Instance().m_dwQuality = q;
 		{
 			CriticalSection cs;
 			CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 			CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
-			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_nSrcMode);
+			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 			UpdateDspEffects();
 #ifndef NO_AGC
 			CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
