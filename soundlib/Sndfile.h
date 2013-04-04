@@ -471,6 +471,7 @@ public:
 	void ProcessPlugins(UINT nCount);
 	samplecount_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
 	bool HasPositionChanged() { bool b = m_bPositionChanged; m_bPositionChanged = false; return b; }
+	bool IsRenderingToDisc() const { return m_bIsRendering; }
 
 public:
 	// Mixer Config

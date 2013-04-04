@@ -227,7 +227,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			if (ReadNote())
 			{
 				// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
-				if(m_bIsRendering && (m_PatternCuePoints.empty() || m_nCurrentOrder != m_PatternCuePoints.back().order))
+				if(IsRenderingToDisc() && (m_PatternCuePoints.empty() || m_nCurrentOrder != m_PatternCuePoints.back().order))
 				{
 					PatternCuePoint cue;
 					cue.offset = lMax - lRead;
@@ -245,10 +245,10 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 				}
 #endif // MODPLUG_TRACKER
 
-				if (!FadeSong(FADESONGDELAY) || m_bIsRendering)	//rewbs: disable song fade when rendering.
+				if (!FadeSong(FADESONGDELAY) || IsRenderingToDisc())	//rewbs: disable song fade when rendering.
 				{
 					m_SongFlags.set(SONG_ENDREACHED);
-					if (lRead == lMax || m_bIsRendering)		//rewbs: don't complete buffer when rendering
+					if (lRead == lMax || IsRenderingToDisc())		//rewbs: don't complete buffer when rendering
 						goto MixDone;
 					m_nBufferCount = lRead;
 				}
@@ -386,7 +386,7 @@ BOOL CSoundFile::ProcessRow()
 
 #ifdef MODPLUG_TRACKER
 		// "Lock order" editing feature
-		if(Order.IsPositionLocked(m_nCurrentOrder) && !(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK))
+		if(Order.IsPositionLocked(m_nCurrentOrder) && !IsRenderingToDisc())
 		{
 			m_nCurrentOrder = m_lockOrderStart;
 		}
@@ -536,7 +536,7 @@ BOOL CSoundFile::ProcessRow()
 				// The visited rows vector might have been screwed up while editing...
 				// This is of course not possible during rendering to WAV, so we ignore that case.
 				GetLengthType t = GetLength(eNoAdjust);
-				if((m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK) || (t.lastOrder == m_nCurrentOrder && t.lastRow == m_nRow))
+				if(IsRenderingToDisc() || (t.lastOrder == m_nCurrentOrder && t.lastRow == m_nRow))
 #else
 				if(1)
 #endif // MODPLUG_TRACKER
@@ -1566,10 +1566,9 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 
 		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
 		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
-//		if ((m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)
+//		if (IsRenderingToDisc()
 //			|| m_Resampler.IsHQ())
-		if((m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)
-			|| (m_Resampler.IsHQ() && !enableCustomRamp))
+		if(IsRenderingToDisc() || (m_Resampler.IsHQ() && !enableCustomRamp))
 		{
 			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
@@ -2003,7 +2002,7 @@ BOOL CSoundFile::ReadNote()
 				} else
 				if (m_Resampler.IsHQ())
 				{
-					if ((!(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)) && (!m_Resampler.IsUltraHQ()))
+					if (!IsRenderingToDisc() && !m_Resampler.IsUltraHQ())
 					{
 						int fmax = 0x20000;
 						if ((pChn->nNewLeftVol < 0x80) && (pChn->nNewRightVol < 0x80)
@@ -2062,7 +2061,7 @@ BOOL CSoundFile::ReadNote()
 	}
 
 	// Checking Max Mix Channels reached: ordering by volume
-	if ((m_nMixChannels >= m_MixerSettings.m_nMaxMixChannels) && (!(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)))
+	if ((m_nMixChannels >= m_MixerSettings.m_nMaxMixChannels) && !IsRenderingToDisc())
 	{
 		for (UINT i=0; i<m_nMixChannels; i++)
 		{
