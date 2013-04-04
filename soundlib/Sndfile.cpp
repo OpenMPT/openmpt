@@ -901,13 +901,13 @@ BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
 	CriticalSection cs;
 
 	BOOL bReset = FALSE;
-	DWORD d = gdwSoundSetup & ~SNDMIX_ENABLEMMX;
+	DWORD d = m_MixerSettings.gdwSoundSetup & ~SNDMIX_ENABLEMMX;
 	if (bMMX) d |= SNDMIX_ENABLEMMX;
-	if ((gdwMixingFreq != nRate) || (gnBitsPerSample != nBits) || (gnChannels != nChannels) || (d != gdwSoundSetup)) bReset = TRUE;
-	gnChannels = nChannels;
-	gdwSoundSetup = d;
-	gdwMixingFreq = nRate;
-	gnBitsPerSample = nBits;
+	if ((m_MixerSettings.gdwMixingFreq != nRate) || (m_MixerSettings.gnBitsPerSample != nBits) || (m_MixerSettings.gnChannels != nChannels) || (d != m_MixerSettings.gdwSoundSetup)) bReset = TRUE;
+	m_MixerSettings.gnChannels = nChannels;
+	m_MixerSettings.gdwSoundSetup = d;
+	m_MixerSettings.gdwMixingFreq = nRate;
+	m_MixerSettings.gnBitsPerSample = nBits;
 	InitPlayer(bReset);
 	return TRUE;
 }
@@ -917,7 +917,7 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 //------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-	DWORD d = gdwSoundSetup;
+	DWORD d = m_MixerSettings.gdwSoundSetup;
 	if ((bReverb) && (GetSysInfo() & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
 #ifndef NO_DSP
 	if (bSurround) d |= SNDMIX_SURROUND; else d &= ~SNDMIX_SURROUND;
@@ -927,7 +927,7 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 #ifndef NO_EQ
 	if (bEQ) d |= SNDMIX_EQ; else d &= ~SNDMIX_EQ;
 #endif
-	gdwSoundSetup = d;
+	m_MixerSettings.gdwSoundSetup = d;
 	InitPlayer(FALSE);
 	return TRUE;
 }
@@ -936,7 +936,7 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 BOOL CSoundFile::SetResamplingMode(UINT nMode)
 //--------------------------------------------
 {
-	DWORD d = gdwSoundSetup & ~(SNDMIX_NORESAMPLING|SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE);
+	DWORD d = m_MixerSettings.gdwSoundSetup & ~(SNDMIX_NORESAMPLING|SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE);
 	switch(nMode)
 	{
 	case SRCMODE_NEAREST:	d |= SNDMIX_NORESAMPLING; break;
@@ -950,7 +950,7 @@ BOOL CSoundFile::SetResamplingMode(UINT nMode)
 	default: return FALSE;
 	//end rewbs.resamplerConf
 	}
-	gdwSoundSetup = d;
+	m_MixerSettings.gdwSoundSetup = d;
 	return TRUE;
 }
 
@@ -961,7 +961,7 @@ void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
 #ifndef NO_AGC
-	if ((nVol < m_nMasterVolume) && (nVol) && (gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
+	if ((nVol < m_nMasterVolume) && (nVol) && (m_MixerSettings.gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
 	{
 		m_AGC.Adjust(m_nMasterVolume, nVol);
 	}
@@ -976,12 +976,12 @@ void CSoundFile::SetAGC(BOOL b)
 {
 	if (b)
 	{
-		if (!(gdwSoundSetup & SNDMIX_AGC))
+		if (!(m_MixerSettings.gdwSoundSetup & SNDMIX_AGC))
 		{
-			gdwSoundSetup |= SNDMIX_AGC;
+			m_MixerSettings.gdwSoundSetup |= SNDMIX_AGC;
 			m_AGC.Reset();
 		}
-	} else gdwSoundSetup &= ~SNDMIX_AGC;
+	} else m_MixerSettings.gdwSoundSetup &= ~SNDMIX_AGC;
 }
 #endif
 
@@ -1008,7 +1008,7 @@ double CSoundFile::GetCurrentBPM() const
 	{																	//with other modes, we calculate it:
 		double ticksPerBeat = m_nMusicSpeed * m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
 		double samplesPerBeat = m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
-		bpm =  gdwMixingFreq/samplesPerBeat * 60;						//beats/sec  = samps/sec  / samps/beat
+		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;						//beats/sec  = samps/sec  / samps/beat
 	}																	//beats/min  =  beats/sec * 60
 
 	return bpm;
@@ -1744,15 +1744,15 @@ void CSoundFile::RecalculateSamplesPerTick()
 	{
 	case tempo_mode_classic:
 	default:
-		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 		break;
 
 	case tempo_mode_modern:
-		m_nSamplesPerTick = gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
+		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
 		break;
 
 	case tempo_mode_alternative:
-		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
+		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq / m_nMusicTempo;
 		break;
 	}
 }
@@ -1766,14 +1766,14 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 	{
 	case tempo_mode_classic:
 	default:
-		return (gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
+		return (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
 
 	case tempo_mode_alternative:
-		return gdwMixingFreq / tempo;
+		return m_MixerSettings.gdwMixingFreq / tempo;
 
 	case tempo_mode_modern:
 		{
-			double accurateBufferCount = static_cast<double>(gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
+			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
 			UINT bufferCount = static_cast<int>(accurateBufferCount);
 			m_dBufferDiff += accurateBufferCount - bufferCount;
 
@@ -1943,7 +1943,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 	{
 		ChnSettings[nChn].nVolume = 64;
 		ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
-		if(gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
+		if(m_MixerSettings.gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
 		else
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;

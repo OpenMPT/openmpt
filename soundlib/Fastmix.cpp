@@ -1466,7 +1466,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 
 	if (!count) return 0;
 	BOOL bSurround;
-	if (gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
+	if (m_MixerSettings.gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
 	nchused = nchmixed = 0;
 	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
 	{
@@ -1503,13 +1503,13 @@ UINT CSoundFile::CreateStereoMix(int count)
 		pbuffer = MixSoundBuffer;
 #ifndef NO_REVERB
 #ifdef ENABLE_MMX
-		if((gdwSoundSetup & SNDMIX_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX) && !pChannel->dwFlags[CHN_NOREVERB])
+		if((m_MixerSettings.gdwSoundSetup & SNDMIX_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX) && !pChannel->dwFlags[CHN_NOREVERB])
 			pbuffer = MixReverbBuffer;
 		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & SYSMIX_ENABLEMMX))
 			pbuffer = MixReverbBuffer;
 #endif
 #endif
-		if(pChannel->dwFlags[CHN_SURROUND] && gnChannels > 2)
+		if(pChannel->dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels > 2)
 			pbuffer = MixRearBuffer;
 
 		//Look for plugins associated with this implicit tracker channel.
@@ -1581,7 +1581,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		}
 		// Should we mix this channel ?
 		UINT naddmix;
-		if (((nchmixed >= m_nMaxMixChannels) && (!(gdwSoundSetup & SNDMIX_DIRECTTODISK)))
+		if (((nchmixed >= m_MixerSettings.m_nMaxMixChannels) && (!(m_MixerSettings.gdwSoundSetup & SNDMIX_DIRECTTODISK)))
 		 || ((!pChannel->nRampLength) && (!(pChannel->nLeftVol|pChannel->nRightVol))))
 		{
 			LONG delta = (pChannel->nInc * (LONG)nSmpCount) + (LONG)pChannel->nPosLo;
@@ -1645,9 +1645,9 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 	//didn't manage to get flag from instrument header, use channel flags.
 	if(pChannel->dwFlags[CHN_HQSRC])
 	{
-		if (gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
-		if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
-		if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;
+		if (m_MixerSettings.gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
+		if (m_MixerSettings.gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
+		if (m_MixerSettings.gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;
 	} else if(!pChannel->dwFlags[CHN_NOIDO])
 	{
 		return MIXNDX_LINEARSRC;
@@ -1798,7 +1798,7 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 //-----------------------------------------------------------------------------------------
 {
 
-	if(gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
 		if(gdwSysInfo & SYSMIX_SSE)
@@ -1824,7 +1824,7 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
 //---------------------------------------------------------------------------------------------
 {
-	if(gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
@@ -1841,7 +1841,7 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 //------------------------------------------------------------------------
 {
-	if(gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
 		if(gdwSysInfo & SYSMIX_SSE)
@@ -1866,7 +1866,7 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 //-----------------------------------------------------------------------
 {
-	if(gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
