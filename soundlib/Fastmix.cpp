@@ -18,17 +18,6 @@
 #include "Resampler.h"
 #include "WindowedFIR.h"
 
-// Front Mix Buffer (Also room for interleaved rear mix)
-int MixSoundBuffer[MIXBUFFERSIZE * 4];
-
-// Reverb Mix Buffer
-#ifndef NO_REVERB
-int MixReverbBuffer[MIXBUFFERSIZE * 2];
-#endif
-
-int MixRearBuffer[MIXBUFFERSIZE * 2];
-float MixFloatBuffer[MIXBUFFERSIZE * 2];
-
 
 extern LONG gnDryROfsVol;
 extern LONG gnDryLOfsVol;

@@ -421,6 +421,10 @@ CSoundFile::CSoundFile() :
 //----------------------
 {
 	gdwSysInfo = GetSysInfo();
+	MemsetZero(MixSoundBuffer);
+	MemsetZero(MixRearBuffer);
+	MemsetZero(MixReverbBuffer);
+	MemsetZero(MixFloatBuffer);
 	m_nType = MOD_TYPE_NONE;
 	m_nChannels = 0;
 	m_nMixChannels = 0;

@@ -60,13 +60,6 @@ extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DW
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
 
-extern int MixSoundBuffer[MIXBUFFERSIZE * 4];
-extern int MixRearBuffer[MIXBUFFERSIZE * 2];
-
-#ifndef NO_REVERB
-extern int MixReverbBuffer[MIXBUFFERSIZE * 2];
-#endif
-
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
 // Which this table takes care of.
@@ -314,9 +307,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		if (m_MixerSettings.gdwSoundSetup & SNDMIX_EQ)
 		{
 			if (m_MixerSettings.gnChannels >= 2)
-				m_EQ.ProcessStereo(MixSoundBuffer, lCount, m_pConfig, m_MixerSettings.gdwSoundSetup, gdwSysInfo);
+				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount, m_pConfig, m_MixerSettings.gdwSoundSetup, gdwSysInfo);
 			else
-				m_EQ.ProcessMono(MixSoundBuffer, lCount, m_pConfig);
+				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount, m_pConfig);
 		}
 #endif // NO_EQ
 

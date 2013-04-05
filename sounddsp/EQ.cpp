@@ -17,8 +17,6 @@
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001
 
-extern REAL MixFloatBuffer[];
-
 extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
 extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
@@ -326,8 +324,8 @@ static void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
 #endif
 
 
-void CEQ::ProcessMono(int *pbuffer, UINT nCount, CSoundFilePlayConfig *pConfig)
-//------------------------------------------------------------------------
+void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig *pConfig)
+//----------------------------------------------------------------------------------------------------
 {
 	X86_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, pConfig->getIntToFloat());
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
@@ -338,8 +336,8 @@ void CEQ::ProcessMono(int *pbuffer, UINT nCount, CSoundFilePlayConfig *pConfig)
 }
 
 
-void CEQ::ProcessStereo(int *pbuffer, UINT nCount, CSoundFilePlayConfig *pConfig, DWORD SoundSetupFlags, DWORD SysInfoFlags)
-//---------------------------------------------------------------------------------------------------------------------------
+void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig *pConfig, DWORD SoundSetupFlags, DWORD SysInfoFlags)
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 
 #ifdef ENABLE_SSE

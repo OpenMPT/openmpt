@@ -39,6 +39,8 @@ typedef uint8 SEQUENCEINDEX;
 typedef uintptr_t SmpLength;
 
 
+#define MIXBUFFERSIZE		512
+
 
 #define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
 const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
