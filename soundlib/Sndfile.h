@@ -224,6 +224,15 @@ private: //Misc data
 private:
 	DWORD gdwSysInfo;
 
+private:
+	// Front Mix Buffer (Also room for interleaved rear mix)
+	int MixSoundBuffer[MIXBUFFERSIZE * 4];
+	int MixRearBuffer[MIXBUFFERSIZE * 2];
+#ifndef NO_REVERB
+	int MixReverbBuffer[MIXBUFFERSIZE * 2];
+#endif
+	float MixFloatBuffer[MIXBUFFERSIZE * 2];
+
 public:	// Static Members
 	static MixerSettings m_MixerSettings;
 	static CResampler m_Resampler;
@@ -663,7 +672,7 @@ public:
 	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);
 
 	// WAV export
-	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
+	UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 
 	// Song message helper functions
 public:
@@ -742,12 +751,10 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 ///////////////////////////////////////////////////////////
 // Low-level Mixing functions
 
-#define MIXBUFFERSIZE		512
 #define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
 #define VOLUMERAMPPRECISION	12
 #define FADESONGDELAY		100
-#define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
 
 // Calling conventions
 #ifdef WIN32

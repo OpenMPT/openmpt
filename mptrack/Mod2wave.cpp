@@ -906,7 +906,7 @@ void CDoWaveConvert::OnButton1()
 			if (dwSize > dwCount) dwSize = dwCount;
 			fseek(f, dwPos, SEEK_SET);
 			if (fread(buffer, 1, dwSize, f) != dwSize) break;
-			CSoundFile::Normalize24BitBuffer(buffer, dwSize, lMax, dwBitSize);
+			m_pSndFile->Normalize24BitBuffer(buffer, dwSize, lMax, dwBitSize);
 			fseek(f, dwOutPos, SEEK_SET);
 			datahdr.length += (dwSize/3)*dwBitSize;
 			fwrite(buffer, 1, (dwSize/3)*dwBitSize, f);
