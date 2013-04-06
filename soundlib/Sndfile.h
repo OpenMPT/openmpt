@@ -493,7 +493,7 @@ public:
 	static DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
 	static void AssertAlignment();
 	static DWORD GetSysInfo();
-	static void EnableMMX(bool b) { if (b) m_MixerSettings.gdwSoundSetup |= SNDMIX_ENABLEMMX; else m_MixerSettings.gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
+	static void EnableMMX(bool b) { if (b) m_MixerSettings.MixerFlags |= SNDMIX_ENABLEMMX; else m_MixerSettings.MixerFlags &= ~SNDMIX_ENABLEMMX; }
 #ifndef NO_AGC
 	static void SetAGC(BOOL b);
 #endif

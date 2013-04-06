@@ -1109,7 +1109,7 @@ void CDoAcmConvert::OnButton1()
 		m_FileTags.WriteID3v2Tags(f);
 
 	}
-	static DWORD oldsndcfg = CSoundFile::m_MixerSettings.gdwSoundSetup;
+	static DWORD oldsndcfg = CSoundFile::m_MixerSettings.MixerFlags;
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	const DWORD dwSongTime = m_pSndFile->GetSongTime();
 	mixersettings.gdwMixingFreq = wfxSrc.nSamplesPerSec;
@@ -1211,7 +1211,7 @@ void CDoAcmConvert::OnButton1()
 	}
 	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	// Done
-	CSoundFile::m_MixerSettings.gdwSoundSetup = oldsndcfg;
+	CSoundFile::m_MixerSettings.MixerFlags = oldsndcfg;
 	m_pSndFile->SetRepeatCount(oldrepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	m_pSndFile->visitedSongRows.Initialize(true);

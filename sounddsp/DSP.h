@@ -84,8 +84,8 @@ public:
 	BOOL SetXBassParameters(UINT nDepth, UINT nRange);
 	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
 	BOOL SetSurroundParameters(UINT nDepth, UINT nDelay);
-	void Initialize(BOOL bReset, DWORD MixingFreq, DWORD SoundSetupFlags);
-	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD SoundSetupFlags, UINT nChannels);
+	void Initialize(BOOL bReset, DWORD MixingFreq, DWORD DSPMask);
+	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD DSPMask, UINT nChannels);
 private:
 	void ProcessStereoSurround(int * MixSoundBuffer, int count);
 	void ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count);

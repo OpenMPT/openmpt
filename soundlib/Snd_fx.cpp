@@ -1254,7 +1254,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	}
 	// Special case for MPT
 	if (bManual) pChn->dwFlags.reset(CHN_MUTE);
-	if((pChn->dwFlags[CHN_MUTE] && (m_MixerSettings.gdwSoundSetup & SNDMIX_MUTECHNMODE))
+	if((pChn->dwFlags[CHN_MUTE] && (m_MixerSettings.MixerFlags & SNDMIX_MUTECHNMODE))
 		|| (pChn->pModSample != nullptr && pChn->pModSample->uFlags[CHN_MUTE] && !bManual)
 		|| (pChn->pModInstrument != nullptr && pChn->pModInstrument->dwFlags[INS_MUTE] && !bManual))
 	{

@@ -115,6 +115,10 @@ enum
 #define MIDISETUP_PLAYPATTERNONMIDIIN		0x100	// Play pattern if MIDI Note is received and playback is paused
 
 
+#define SOUNDSETUP_SECONDARY   SNDMIX_SECONDARY
+#define SOUNDSETUP_RESTARTMASK SOUNDSETUP_SECONDARY
+
+
 // EQ
 struct EQPreset
 {
@@ -166,7 +170,7 @@ public:
 	MODTYPE defaultModType;
 
 	// Audio Setup
-	DWORD m_dwQuality, m_nPreAmp, gbLoopSong;
+	DWORD m_nPreAmp, gbLoopSong;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
 	DWORD m_LatencyMS;
 	DWORD m_UpdateIntervalMS;

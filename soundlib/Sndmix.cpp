@@ -134,7 +134,7 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 	m_Reverb.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
 #ifndef NO_DSP
-	m_DSP.Initialize(bReset, m_MixerSettings.gdwMixingFreq, m_MixerSettings.gdwSoundSetup);
+	m_DSP.Initialize(bReset, m_MixerSettings.gdwMixingFreq, m_MixerSettings.DSPMask);
 #endif
 #ifndef NO_EQ
 	m_EQ.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
@@ -299,15 +299,15 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		}
 
 #ifndef NO_DSP
-		m_DSP.Process(MixSoundBuffer, MixRearBuffer, lCount, m_MixerSettings.gdwSoundSetup, m_MixerSettings.gnChannels);
+		m_DSP.Process(MixSoundBuffer, MixRearBuffer, lCount, m_MixerSettings.DSPMask, m_MixerSettings.gnChannels);
 #endif
 
 #ifndef NO_EQ
 		// Graphic Equalizer
-		if (m_MixerSettings.gdwSoundSetup & SNDMIX_EQ)
+		if (m_MixerSettings.DSPMask & SNDDSP_EQ)
 		{
 			if (m_MixerSettings.gnChannels >= 2)
-				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount, m_pConfig, m_MixerSettings.gdwSoundSetup, gdwSysInfo);
+				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount, m_pConfig, m_MixerSettings.MixerFlags, gdwSysInfo);
 			else
 				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount, m_pConfig);
 		}
@@ -317,7 +317,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 
 #ifndef NO_AGC
 		// Automatic Gain Control
-		if (m_MixerSettings.gdwSoundSetup & SNDMIX_AGC) m_AGC.Process(MixSoundBuffer, lSampleCount, m_MixerSettings.gdwMixingFreq, m_MixerSettings.gnChannels);
+		if (m_MixerSettings.DSPMask & SNDDSP_AGC) m_AGC.Process(MixSoundBuffer, lSampleCount, m_MixerSettings.gdwMixingFreq, m_MixerSettings.gnChannels);
 #endif // NO_AGC
 
 		UINT lTotalSampleCount = lSampleCount;	// Including rear channels
@@ -1657,7 +1657,7 @@ BOOL CSoundFile::ReadNote()
 		{
 			UINT attenuation =
 #ifndef NO_AGC
-				(m_MixerSettings.gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32 >> 1] :
+				(m_MixerSettings.DSPMask & SNDDSP_AGC) ? PreAmpAGCTable[nchn32 >> 1] :
 #endif
 				PreAmpTable[nchn32 >> 1];
 			if(attenuation < 1) attenuation = 1;
@@ -1956,7 +1956,7 @@ BOOL CSoundFile::ReadNote()
 				}
 				
 				const forcePanningMode panningMode = m_pConfig->getForcePanningMode(); 				
-				if (panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (m_MixerSettings.gdwSoundSetup & SNDMIX_SOFTPANNING)))
+				if (panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
 				{
 					if (pan < 128)
 					{
