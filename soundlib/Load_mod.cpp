@@ -592,6 +592,10 @@ bool CSoundFile::ReadMod(FileReader &file)
 	m_nDefaultTempo = 125;
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
+	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
+	// is the maximum possible sample pre-amp without getting distortion (Compatible mix levels given).
+	// The more channels we have, the less likely it is that all of them are used at the same time, though, so clip at 32...
+	m_nSamplePreAmp = Util::Max(32, 256 / m_nChannels);
 	m_SongFlags.reset();
 
 	// Setup channel pan positions and volume
@@ -855,6 +859,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 	}
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
+	m_nSamplePreAmp = 64;
 	m_SongFlags.reset();
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], songname);
 
