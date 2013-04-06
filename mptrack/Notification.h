@@ -48,6 +48,18 @@ struct Notification
 	PATTERNINDEX pattern;			// dito
 	uint32 masterVu[2];				// dito
 	SmpLength pos[MAX_CHANNELS];	// Sample / envelope pos for each channel if != PosInvalid, or pattern channel VUs
+	Notification()
+	{
+		timestampSamples = 0;
+		type = Notification::None;
+		item = 0;
+		row = 0;
+		tick = 0;
+		order = 0;
+		pattern = 0;
+		MemsetZero(masterVu);
+		MemsetZero(pos);
+	}
 };
 
 DECLARE_FLAGSET(Notification::Type);
