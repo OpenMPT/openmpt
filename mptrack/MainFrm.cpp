@@ -696,15 +696,22 @@ DWORD CMainFrame::NotifyThread()
 					const Notification * pnotify = nullptr;
 					{
 						int64 currenttotalsamples = 0;
-						Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-						if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
+						bool currenttotalsamplesValid = false;
 						{
-							currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
-						} else
-						{
-							currenttotalsamples = m_TotalSamplesRendered; 
+							CriticalSection cs;
+							if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
+							{
+								currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
+								currenttotalsamplesValid = true;
+							}
 						}
 						// advance to the newest notification, drop the obsolete ones
+						Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+						if(!currenttotalsamplesValid)
+						{
+							currenttotalsamples = m_TotalSamplesRendered; 
+							currenttotalsamplesValid = true;
+						}
 						const Notification * p = m_NotifyBuffer.peek_p();
 						if(p && currenttotalsamples >= p->timestampSamples)
 						{
