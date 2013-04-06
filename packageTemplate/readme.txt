@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.21  *
+*  OpenMPT 1.22  *
 ******************
 
 
@@ -75,7 +75,7 @@ License
 
 OpenMPT is partially under the following license:
 
-> Copyright (c) 2004-2012, OpenMPT contributors
+> Copyright (c) 2004-2013, OpenMPT contributors
 > Copyright (c) 1997-2003, Olivier Lapicque
 > All rights reserved.
 >
@@ -107,11 +107,12 @@ VST is a trademark of Steinberg Media Technologies GmbH
 
 For more information about SoundTouch, see folder SoundTouch.
 
-PortMidi
---------
-OpenMPT's MIDI plugins make use of the PortMidi library, which is released under
-the MIT license.
-Visit http://portmedia.sourceforge.net/ for more information.
+PortAudio / PortMidi
+--------------------
+OpenMPT uses PortAudio for WASAPI output. OpenMPT's MIDI plugins make use of the
+PortMidi library, which are both released under the MIT license.
+Visit http://www.portaudio.com/ and http://portmedia.sourceforge.net/ for more
+information.
 
 unmo3.dll
 ---------
@@ -163,3 +164,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Visit http://flac.sourceforge.net/ for more information.
+
+libmpg123
+---------
+OpenMPT makes use of libmpg123, which is released under the LGPL license.
+A copy of the LGPL license can be found in SoundTouch\COPYING.TXT
+Visit http://mpg123.de/ for more information.
