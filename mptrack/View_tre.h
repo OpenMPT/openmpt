@@ -128,7 +128,7 @@ protected:
 	vector<HTREEITEM> m_tiDLS;
 	vector<ModTreeDocInfo *> DocInfo;
 	// Instrument library
-	bool m_bShowAllFiles;
+	bool m_bShowAllFiles, doLabelEdit;
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
 
 public:
