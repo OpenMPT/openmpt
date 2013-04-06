@@ -145,8 +145,9 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 //---------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd, Notification::Default);
-	if (pMainFrm) pMainFrm->SetFollowSong(m_pModDoc, m_hWnd, TRUE, Notification::Default);
+	if (m_pModDoc) m_pModDoc->SetNotifications(Notification::Default);
+	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd);
+	if (pMainFrm) pMainFrm->SetFollowSong(m_pModDoc, m_hWnd, TRUE);
 	PostViewMessage(VIEWMSG_SETACTIVE, NULL);
 	SetFocus();
 
@@ -158,7 +159,8 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 void CCtrlGeneral::OnDeactivatePage()
 //-----------------------------------
 {
-	if (m_pModDoc) m_pModDoc->SetFollowWnd(NULL, Notification::None);
+	if (m_pModDoc) m_pModDoc->SetNotifications(Notification::None);
+	if (m_pModDoc) m_pModDoc->SetFollowWnd(NULL);
 	m_VuMeterLeft.SetVuMeter(0);
 	m_VuMeterRight.SetVuMeter(0);
 }
