@@ -436,6 +436,7 @@
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="MIDIMacroDialog.h" />
     <ClInclude Include="MIDIMapping.h" />
+    <ClInclude Include="Notification.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
     <ClInclude Include="SelectPluginDialog.h" />

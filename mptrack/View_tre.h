@@ -163,7 +163,7 @@ public:
 	void UpdateView(ModTreeDocInfo *pInfo, DWORD dwHint);
 	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
-	void UpdatePlayPos(CModDoc *pModDoc, MPTNOTIFICATION *pNotify);
+	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 
 // Overrides
