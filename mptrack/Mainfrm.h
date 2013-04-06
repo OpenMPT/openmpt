@@ -239,39 +239,7 @@ enum
 // Player position notification
 
 #define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
-
-#define MPTNOTIFY_TYPEMASK  0x01FF0000  // HiWord = type, LoWord = subtype (smp/instr #)
-#define MPTNOTIFY_DEFAULT   0x00010000  // 
-#define MPTNOTIFY_POSITION  0x00010000  // 
-#define MPTNOTIFY_SAMPLE    0x00020000  // dwPos[i] contains sample position
-#define MPTNOTIFY_VOLENV    0x00040000  // dwPos[i] contains volume envelope position
-#define MPTNOTIFY_PANENV    0x00080000  // dwPos[i] contains panning envelope position
-#define MPTNOTIFY_PITCHENV  0x00100000  // dwPos[i] contains pitch envelope position
-#define MPTNOTIFY_VUMETERS  0x00200000  // dwPos[i] contains VU meter for every channel
-#define MPTNOTIFY_EOS       0x00800000  // end of stream reached, the gui should stop the audio device
-#define MPTNOTIFY_STOP      0x01000000  // audio device has been stopped -> reset GUI
-#define MPTNOTIFY_POSVALID  0x80000000  // dwPos[i] is valid (if it contains sample or envelope position)
-
-// struct MPTNOTIFICATION requires working copy constructor / copy assignment, keep in mind when extending
-struct MPTNOTIFICATION
-{
-	/*
-	   TimestampSamples is kind of confusing at the moment:
-	   If gpSoundDevice->HasGetStreamPosition(),
-		   then it contains the sample timestamp as when it was generated and the output stream is later queried when this exact timestamp has actually reached the speakers.
-		 If !gpSoundDevice->HasGetStreamPosition(),
-		   then it contains a sample timestamp in the future, incremented by the current latency estimation of the sound buffers. It is later checked against the total number of rendered samples at that time.
-	*/
-	int64 TimestampSamples;
-	DWORD dwType;
-	ROWINDEX nRow;				// Always valid
-	UINT nTick;					// dito
-	ORDERINDEX nOrder;			// dito
-	PATTERNINDEX nPattern;		// dito
-	DWORD MasterVuLeft; // dito
-	DWORD MasterVuRight; // dito
-	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
-};
+#include "Notification.h"
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -320,7 +288,6 @@ public:
 public:
 	static HMIDIIN shMidiIn;
 
-
 protected:
 
 	CModTreeBar m_wndTree;
@@ -329,7 +296,9 @@ protected:
 	CImageList m_ImageList;
 	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwNotifyType;
+	// Kind of notification that should be generated
+	FlagSet<Notification::Type, uint16> m_notifyType;
+	Notification::Item m_notifyItem;
 	CSoundFile::samplecount_t m_dwTimeSec;
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
@@ -341,9 +310,9 @@ protected:
 	// Notification Buffer
 	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
 	int64 m_TotalSamplesRendered;
-	Util::fixed_size_queue<MPTNOTIFICATION,MAX_UPDATE_HISTORY> m_NotifyBuffer;
+	Util::fixed_size_queue<Notification,MAX_UPDATE_HISTORY> m_NotifyBuffer;
 	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
-	MPTNOTIFICATION m_PendingNotification;
+	Notification m_PendingNotification;
 
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
@@ -367,14 +336,14 @@ public:
 	// from ISoundSource
 	void FillAudioBufferLocked(IFillAudioBuffer &callback);
 	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
-	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream);
+	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream);
 	
 	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	bool audioOpenDevice();
 	bool audioReopenDevice();
 	void audioCloseDevice();
 	bool IsAudioDeviceOpen() const;
-	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool end_of_stream);
+	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream);
 
 // Midi Input Functions
 public:
@@ -456,11 +425,11 @@ public:
 	bool PausePlayback();
 	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
-	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat=NULL, DWORD dwNotifyType=0);
+	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat = NULL, Notification::Type notifyType = Notification::None, Notification::Item notifyItem = 0);
 	void UnsetPlaybackSoundFile();
 	void GenerateStopNotification();
 
-	bool PlayMod(CModDoc *, HWND hPat=NULL, DWORD dwNotifyType=0);
+	bool PlayMod(CModDoc *, HWND hPat=NULL, Notification::Type notifyType = Notification::None, Notification::Item notifyItem = 0);
 	bool StopMod(CModDoc *pDoc=NULL);
 	bool PauseMod(CModDoc *pDoc=NULL);
 
@@ -488,7 +457,7 @@ public:
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? m_hFollowSong : NULL; }
-	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, DWORD dwType=MPTNOTIFY_DEFAULT);
+	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, Notification::Type type = Notification::Default, Notification::Item item = 0);
 	void ResetNotificationBuffer();
 
 

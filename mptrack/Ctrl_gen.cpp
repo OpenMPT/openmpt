@@ -145,8 +145,8 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 //---------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_DEFAULT);
-	if (pMainFrm) pMainFrm->SetFollowSong(m_pModDoc, m_hWnd, TRUE, MPTNOTIFY_DEFAULT);
+	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd, Notification::Default);
+	if (pMainFrm) pMainFrm->SetFollowSong(m_pModDoc, m_hWnd, TRUE, Notification::Default);
 	PostViewMessage(VIEWMSG_SETACTIVE, NULL);
 	SetFocus();
 
@@ -158,7 +158,7 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 void CCtrlGeneral::OnDeactivatePage()
 //-----------------------------------
 {
-	if (m_pModDoc) m_pModDoc->SetFollowWnd(NULL, 0);
+	if (m_pModDoc) m_pModDoc->SetFollowWnd(NULL, Notification::None);
 	m_VuMeterLeft.SetVuMeter(0);
 	m_VuMeterRight.SetVuMeter(0);
 }
@@ -524,11 +524,11 @@ void CCtrlGeneral::OnLoopSongChanged()
 LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 //-----------------------------------------------------------
 {
-	MPTNOTIFICATION *pnotify = (MPTNOTIFICATION *)lParam;
+	Notification *pnotify = (Notification *)lParam;
 	if (pnotify)
 	{
-		m_VuMeterLeft.SetVuMeter(pnotify->MasterVuLeft);
-		m_VuMeterRight.SetVuMeter(pnotify->MasterVuRight);
+		m_VuMeterLeft.SetVuMeter(pnotify->masterVu[0]);
+		m_VuMeterRight.SetVuMeter(pnotify->masterVu[1]);
 	}
 	return 0;
 }
