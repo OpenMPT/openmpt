@@ -1770,7 +1770,6 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 			UpdateDspEffects();
 		}
-		PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTSETUP);
 	}
 	return TRUE;
 }
