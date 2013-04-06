@@ -208,7 +208,11 @@ public:
 	void ViewSample(UINT nSmp);
 	void ViewInstrument(UINT nIns);
 	HWND GetFollowWnd() const { return m_hWndFollow; }
-	void SetFollowWnd(HWND hwnd, Notification::Type type, Notification::Item item = 0);
+	void SetFollowWnd(HWND hwnd);
+
+	void SetNotifications(Notification::Type type, Notification::Item item = 0) { m_notifyType = type; m_notifyItem = item; }
+	FlagSet<Notification::Type, uint16> GetNotificationType() const { return m_notifyType; }
+	Notification::Item GetNotificationItem() const { return m_notifyItem; }
 
 	void ActivateWindow();
 

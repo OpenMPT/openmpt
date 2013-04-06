@@ -315,9 +315,6 @@ protected:
 	CImageList m_ImageList;
 	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
 	HWND m_hFollowSong, m_hWndMidi;
-	// Kind of notification that should be generated
-	FlagSet<Notification::Type, uint16> m_notifyType;
-	Notification::Item m_notifyItem;
 	CSoundFile::samplecount_t m_dwTimeSec;
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
@@ -444,11 +441,11 @@ public:
 	bool PausePlayback();
 	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
-	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat = NULL, Notification::Type notifyType = Notification::None, Notification::Item notifyItem = 0);
+	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat=NULL);
 	void UnsetPlaybackSoundFile();
 	void GenerateStopNotification();
 
-	bool PlayMod(CModDoc *, HWND hPat=NULL, Notification::Type notifyType = Notification::None, Notification::Item notifyItem = 0);
+	bool PlayMod(CModDoc *, HWND hPat=NULL);
 	bool StopMod(CModDoc *pDoc=NULL);
 	bool PauseMod(CModDoc *pDoc=NULL);
 
@@ -476,7 +473,7 @@ public:
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? m_hFollowSong : NULL; }
-	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, Notification::Type type = Notification::Default, Notification::Item item = 0);
+	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE);
 	void ResetNotificationBuffer();
 
 
