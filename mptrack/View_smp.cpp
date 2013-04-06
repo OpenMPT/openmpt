@@ -225,7 +225,8 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	if (!pModDoc) return FALSE;
 	pSndFile = pModDoc->GetSoundFile();
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
-	pModDoc->SetFollowWnd(m_hWnd, Notification::Sample, nSmp);
+	pModDoc->SetNotifications(Notification::Sample, nSmp);
+	pModDoc->SetFollowWnd(m_hWnd);
 	if (nSmp == m_nSample) return FALSE;
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_bDrawingEnabled = false; // sample drawing
