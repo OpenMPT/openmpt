@@ -432,7 +432,6 @@ CSoundFile::CSoundFile() :
 	m_nInstruments = 0;
 	m_lpszSongComments = nullptr;
 	m_nFreqFactor = m_nTempoFactor = 128;
-	m_nMasterVolume = 128;
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
@@ -500,7 +499,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	m_nSamples = 0;
 	m_nInstruments = 0;
 	m_nFreqFactor = m_nTempoFactor = 128;
-	m_nMasterVolume = 128;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nOldGlbVolSlide = 0;
@@ -954,18 +952,18 @@ BOOL CSoundFile::SetResamplingMode(UINT nMode)
 }
 
 
-void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
-//---------------------------------------------------------
+void CSoundFile::SetPreAmp(UINT nVol)
+//-----------------------------------
 {
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
 #ifndef NO_AGC
-	if ((nVol < m_nMasterVolume) && (nVol) && (m_MixerSettings.DSPMask & SNDDSP_AGC) && (adjustAGC))
+	if ((nVol < m_MixerSettings.m_nPreAmp) && (nVol) && (m_MixerSettings.DSPMask & SNDDSP_AGC))
 	{
-		m_AGC.Adjust(m_nMasterVolume, nVol);
+		m_AGC.Adjust(m_MixerSettings.m_nPreAmp, nVol);
 	}
 #endif
-	m_nMasterVolume = nVol;
+	m_MixerSettings.m_nPreAmp = nVol;
 }
 
 

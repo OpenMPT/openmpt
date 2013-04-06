@@ -18,6 +18,7 @@ struct MixerSettings
 	DWORD DSPMask;
 	DWORD MixerFlags;
 	DWORD gdwMixingFreq, gnBitsPerSample, gnChannels;
+	DWORD m_nPreAmp;
 
 	//rewbs.resamplerConf
 	long glVolumeRampUpSamples, glVolumeRampDownSamples;

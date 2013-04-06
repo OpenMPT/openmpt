@@ -314,7 +314,7 @@ void COptionsSoundcard::UpdateStereoSep()
 void COptionsSoundcard::SetPreAmpSliderPosition()
 //-----------------------------------------------
 {
-	int n = (TrackerSettings::Instance().m_nPreAmp - 64) / 8;
+	int n = (TrackerSettings::Instance().m_MixerSettings.m_nPreAmp - 64) / 8;
 	if ((n < 0) || (n > 40)) n = 16;
 	m_SliderPreAmp.SetPos(n);
 }
