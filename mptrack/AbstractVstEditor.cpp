@@ -131,7 +131,7 @@ void CAbstractVstEditor::OnCopyParameters()
 	if(m_pVstPlugin == nullptr || CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
-	std::ostringstream f;
+	std::ostringstream f(std::ios::out | std::ios::binary);
 	if(VSTPresets::SaveFile(f, *m_pVstPlugin, false))
 	{
 		const std::string data = f.str();
