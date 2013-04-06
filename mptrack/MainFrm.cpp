@@ -1774,7 +1774,6 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 			CSoundFile::SetAGC(TrackerSettings::Instance().m_dwQuality & QUALITY_AGC);
 #endif
 		}
-		PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTSETUP);
 	}
 	return TRUE;
 }
