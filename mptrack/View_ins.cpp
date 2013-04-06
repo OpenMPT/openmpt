@@ -203,7 +203,8 @@ BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeType
 	case ENV_PITCH:		type = Notification::PitchEnv; break;
 	default:			m_nEnv = ENV_VOLUME; type = Notification::VolEnv; break;
 	}
-	pModDoc->SetFollowWnd(m_hWnd, type, m_nInstrument);
+	pModDoc->SetNotifications(type, m_nInstrument);
+	pModDoc->SetFollowWnd(m_hWnd);
 	UpdateScrollSize();
 	UpdateNcButtonState();
 	InvalidateRect(NULL, FALSE);

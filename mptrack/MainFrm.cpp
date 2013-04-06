@@ -196,7 +196,6 @@ CMainFrame::CMainFrame()
 	m_hWndMidi = NULL;
 	m_pSndFile = nullptr;
 	m_dwTimeSec = 0;
-	m_notifyItem = 0;
 	m_nTimer = 0;
 	m_nAvgMixChn = m_nMixChn = 0;
 	m_szUserText[0] = 0;
@@ -959,9 +958,18 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		}
 	}
 	if(!m_pSndFile) return FALSE;
+	FlagSet<Notification::Type,uint16> notifyType;
+	notifyType = Notification::None;
+	Notification::Item notifyItem = 0;
+
+	if(m_pSndFile->m_pModDoc)
+	{
+		notifyType = m_pSndFile->m_pModDoc->GetNotificationType();
+		notifyItem = m_pSndFile->m_pModDoc->GetNotificationItem();
+	}
 	if(m_nMixChn < m_pSndFile->m_nMixStat) m_nMixChn++;
 	if(m_nMixChn > m_pSndFile->m_nMixStat) m_nMixChn--;
-	if(m_notifyType == Notification::None) return FALSE;
+	if(notifyType == Notification::None) return FALSE;
 	// Notify Client
 	//if(m_NotifyBuffer.read_size() > 0)
 	{
@@ -972,8 +980,8 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	Notification notification;
 	Notification *p = &notification;
 
-	p->type = m_notifyType;
-	p->item = m_notifyItem;
+	p->type = notifyType;
+	p->item = notifyItem;
 	if(endOfStream) p->type.set(Notification::EOS);
 	p->timestampSamples = notificationtimestamp;
 
@@ -982,10 +990,10 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	p->order = m_pSndFile->m_nCurrentOrder;
 	p->pattern = m_pSndFile->m_nPattern;
 
-	if(m_notifyType[Notification::Sample])
+	if(notifyType[Notification::Sample])
 	{
 		// Sample positions
-		SAMPLEINDEX smp = m_notifyItem;
+		SAMPLEINDEX smp = notifyItem;
 		for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 		{
 			const ModChannel &chn = m_pSndFile->Chn[k];
@@ -999,10 +1007,10 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 				p->pos[k] = Notification::PosInvalid;
 			}
 		}
-	} else if(m_notifyType[Notification::VolEnv | Notification::PanEnv | Notification::PitchEnv])
+	} else if(notifyType[Notification::VolEnv | Notification::PanEnv | Notification::PitchEnv])
 	{
 		// Instrument envelopes
-		INSTRUMENTINDEX ins = m_notifyItem;
+		INSTRUMENTINDEX ins = notifyItem;
 		for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 		{
 			const ModChannel &chn = m_pSndFile->Chn[k];
@@ -1012,9 +1020,9 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 				&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))								// And it hasn't completely faded out yet, so it's still playing
 			{
 				enmEnvelopeTypes notifyEnv = ENV_VOLUME;
-				if(m_notifyType[Notification::PitchEnv])
+				if(notifyType[Notification::PitchEnv])
 					notifyEnv = ENV_PITCH;
-				else if(m_notifyType[Notification::PanEnv])
+				else if(notifyType[Notification::PanEnv])
 					notifyEnv = ENV_PANNING;
 
 				const ModChannel::EnvInfo &chnEnv = chn.GetEnvelope(notifyEnv);
@@ -1036,7 +1044,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 				p->pos[k] = Notification::PosInvalid;
 			}
 		}
-	} else if(m_notifyType[Notification::VUMeters])
+	} else if(notifyType[Notification::VUMeters])
 	{
 		// Pattern channel VU meters
 		for(CHANNELINDEX k = 0; k < m_pSndFile->GetNumChannels(); k++)
@@ -1367,18 +1375,16 @@ void CMainFrame::UnsetPlaybackSoundFile()
 }
 
 
-void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat, Notification::Type notifyType, Notification::Item notifyItem)
-//----------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat)
+//--------------------------------------------------------------------
 {
 	m_pSndFile = pSndFile;
 	m_hFollowSong = hPat;
-	m_notifyType = notifyType;
-	m_notifyItem = notifyItem;
 }
 
 
-bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, Notification::Type notifyType, Notification::Item notifyItem)
-//-----------------------------------------------------------------------------------------------------------------
+bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat)
+//---------------------------------------------------
 {
 	CriticalSection::AssertUnlocked();
 	if(!pModDoc) return false;
@@ -1397,7 +1403,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, Notification::Type notifyT
 	// set mixing parameters in CSoundFile
 	ApplyTrackerSettings(pSndFile);
 
-	SetPlaybackSoundFile(pSndFile, hPat, notifyType, notifyItem);
+	SetPlaybackSoundFile(pSndFile, hPat);
 
 	const bool bPaused = m_pSndFile->IsPaused();
 	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
@@ -1698,8 +1704,8 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 }
 
 
-BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, Notification::Type type, Notification::Item item)
-//--------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong)
+//------------------------------------------------------------------------
 {
 	if((!pDoc) || (pDoc != GetModPlaying())) return FALSE;
 	if(bFollowSong)
@@ -1708,11 +1714,6 @@ BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong, Notif
 	} else
 	{
 		if(hwnd == m_hFollowSong) m_hFollowSong = NULL;
-	}
-	if(type != Notification::None)
-	{
-		m_notifyType = type;
-		m_notifyItem = item;
 	}
 	return TRUE;
 }
@@ -1744,7 +1745,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 			CriticalSection cs;
 			UpdateAudioParameters(FALSE);
 		}
-		if (pActiveMod) PlayMod(pActiveMod, hFollow, m_notifyType);
+		if (pActiveMod) PlayMod(pActiveMod, hFollow);
 		UpdateWindow();
 	} else
 	{
