@@ -124,11 +124,13 @@ CViewInstrument::CViewInstrument()
 	m_rcClient.bottom = 2;
 	m_dwStatus = 0;
 	m_nBtnMouseOver = 0xFFFF;
-	m_dwNotifyPos.assign(MAX_CHANNELS, 0);
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		m_dwNotifyPos[i] = Notification::PosInvalid;
+	}
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
-	m_baPlayingNote.assign(128, false);
-	m_nPlayingChannel = CHANNELINDEX_INVALID;			//rewbs.customKeys
+	m_baPlayingNote.reset();
 	//rewbs.envRowGrid
 	m_bGrid=true;
 	m_bGridForceRedraw=false;
@@ -190,18 +192,18 @@ BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeType
 //-------------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	DWORD dwNotify;
+	Notification::Type type;
 
 	if ((!pModDoc) || (nIns < 1) || (nIns >= MAX_INSTRUMENTS)) return FALSE;
 	if (nEnv) m_nEnv = nEnv;
 	m_nInstrument = nIns;
 	switch(m_nEnv)
 	{
-	case ENV_PANNING:	dwNotify = MPTNOTIFY_PANENV; break;
-	case ENV_PITCH:		dwNotify = MPTNOTIFY_PITCHENV; break;
-	default:			m_nEnv = ENV_VOLUME; dwNotify = MPTNOTIFY_VOLENV; break;
+	case ENV_PANNING:	type = Notification::PanEnv; break;
+	case ENV_PITCH:		type = Notification::PitchEnv; break;
+	default:			m_nEnv = ENV_VOLUME; type = Notification::VolEnv; break;
 	}
-	pModDoc->SetFollowWnd(m_hWnd, dwNotify|m_nInstrument);
+	pModDoc->SetFollowWnd(m_hWnd, type, m_nInstrument);
 	UpdateScrollSize();
 	UpdateNcButtonState();
 	InvalidateRect(NULL, FALSE);
@@ -356,7 +358,7 @@ bool CViewInstrument::EnvGetFlag(const EnvelopeFlags dwFlag) const
 //----------------------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv != nullptr && pEnv->dwFlags[dwFlag]) return true;
+	if(pEnv != nullptr) return pEnv->dwFlags[dwFlag];
 	return false;
 }
 
@@ -479,12 +481,12 @@ bool CViewInstrument::EnvSetSustainStart(int nPoint)
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
 	// We won't do any security checks here as GetEnvelopePtr() does that for us.
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 
 	if (nPoint != envelope->nSustainStart)
 	{
 		envelope->nSustainStart = (BYTE)nPoint;
-		if ((envelope->nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) envelope->nSustainEnd = (BYTE)nPoint;
+		if ((envelope->nSustainEnd < nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainEnd = (BYTE)nPoint;
 		return true;
 	} else
 	{
@@ -501,12 +503,12 @@ bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
 	// We won't do any security checks here as GetEnvelopePtr() does that for us.
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 
 	if (nPoint != envelope->nSustainEnd)
 	{
 		envelope->nSustainEnd = (BYTE)nPoint;
-		if ((envelope->nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) envelope->nSustainStart = (BYTE)nPoint;
+		if ((envelope->nSustainStart > nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainStart = (BYTE)nPoint;
 		return true;
 	} else
 	{
@@ -523,7 +525,7 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 	if(nPoint < 1 || nPoint > (int)EnvGetLastPoint()) return false;
 
 	// Don't allow release nodes in IT/XM. GetDocument()/... nullptr check is done in GetEnvelopePtr, so no need to check twice.
-	if(!GetDocument()->GetSoundFile()->GetModSpecifications().hasReleaseNode)
+	if(!GetDocument()->GetrSoundFile().GetModSpecifications().hasReleaseNode)
 	{
 		if(envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
@@ -556,15 +558,10 @@ bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable) const
 }
 
 
-bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFile, ModInstrument *pIns, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(pIns == nullptr || pSndFile == nullptr)
-	{
-		return false;
-	}
-
-	InstrumentEnvelope &env = pIns->GetEnvelope(envelope);
+	InstrumentEnvelope &env = ins.GetEnvelope(envelope);
 
 	const EnvelopeFlags flags = (ENV_ENABLED | extraFlags);
 
@@ -583,9 +580,9 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile *pSndFi
 	// Update mixing flags...
 	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
 	{
-		if(pSndFile->Chn[nChn].pModInstrument == pIns)
+		if(sndFile.Chn[nChn].pModInstrument == &ins)
 		{
-			pSndFile->Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
+			sndFile.Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
 		}
 	}
 
@@ -598,9 +595,7 @@ bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
-
-	return EnvToggleEnv(ENV_VOLUME, pSndFile, pIns, bEnable, 64);
+	return EnvToggleEnv(ENV_VOLUME, GetDocument()->GetrSoundFile(), *pIns, bEnable, 64);
 }
 
 
@@ -609,9 +604,7 @@ bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
-
-	return EnvToggleEnv(ENV_PANNING, pSndFile, pIns, bEnable, 32);
+	return EnvToggleEnv(ENV_PANNING, GetDocument()->GetrSoundFile(), *pIns, bEnable, 32);
 }
 
 
@@ -620,10 +613,9 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
 	pIns->PitchEnv.dwFlags.reset(ENV_FILTER);
-	return EnvToggleEnv(ENV_PITCH, pSndFile, pIns, bEnable, 32);
+	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetrSoundFile(), *pIns, bEnable, 32);
 }
 
 
@@ -632,9 +624,8 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
-	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
-	return EnvToggleEnv(ENV_PITCH, pSndFile, pIns, bEnable, 64, ENV_FILTER);
+	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetrSoundFile(), *pIns, bEnable, 64, ENV_FILTER);
 }
 
 
@@ -735,11 +726,10 @@ void CViewInstrument::UpdateNcButtonState()
 //-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	CDC *pDC = NULL;
+	if(!pModDoc) return;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
-	if (!pModDoc) return;
-	pSndFile = pModDoc->GetSoundFile();
+	CDC *pDC = NULL;
 	for (UINT i=0; i<ENV_LEFTBAR_BUTTONS; i++) if (cLeftBarButtons[i] != ID_SEPARATOR)
 	{
 		DWORD dwStyle = 0;
@@ -748,17 +738,17 @@ void CViewInstrument::UpdateNcButtonState()
 		{
 		case ID_ENVSEL_VOLUME:		if (m_nEnv == ENV_VOLUME) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVSEL_PANNING:		if (m_nEnv == ENV_PANNING) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVSEL_PITCH:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
+		case ID_ENVSEL_PITCH:		if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 									else if (m_nEnv == ENV_PITCH) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_SETLOOP:	if (EnvGetLoop()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_SUSTAIN:	if (EnvGetSustain()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_CARRY:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
+		case ID_ENVELOPE_CARRY:		if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 									else if (EnvGetCarry()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VOLUME:	if (EnvGetVolEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_PANNING:	if (EnvGetPanEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_PITCH:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
+		case ID_ENVELOPE_PITCH:		if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
+		case ID_ENVELOPE_FILTER:	if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_ZOOM_IN:	if (m_fZoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
@@ -826,15 +816,15 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
 
 		//do draw
-		CSoundFile *pSndFile;
 		int width = m_rcClient.right - m_rcClient.left;
 		int nPrevTick = -1;
 		int nTick, nRow;
 		int nRowsPerBeat = 1, nRowsPerMeasure = 1;
-		if(GetDocument() != nullptr && (pSndFile = GetDocument()->GetSoundFile()) != nullptr)
+		CModDoc *modDoc = GetDocument();
+		if(modDoc != nullptr)
 		{
-			nRowsPerBeat = pSndFile->m_nDefaultRowsPerBeat;
-			nRowsPerMeasure = pSndFile->m_nDefaultRowsPerMeasure;
+			nRowsPerBeat = modDoc->GetrSoundFile().m_nDefaultRowsPerBeat;
+			nRowsPerMeasure = modDoc->GetrSoundFile().m_nDefaultRowsPerMeasure;
 		}
 
 		for (int x = 3; x < width; x++)
@@ -869,7 +859,6 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	RECT rect;
 	int nScrollPos = GetScrollPos(SB_HORZ);
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	HGDIOBJ oldpen;
 	//HDC hdc;
 	UINT maxpoint;
@@ -896,13 +885,12 @@ void CViewInstrument::OnDraw(CDC *pDC)
 //end rewbs.envRowGrid
 
 	if ((!pModDoc) || (!pDC)) return;
-	pSndFile = pModDoc->GetSoundFile();
 	//hdc = pDC->m_hDC;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	m_dcMemMain.FillRect(&m_rcClient, CBrush::FromHandle(CMainFrame::brushBlack));
 	if (m_bGrid)
 	{
-		DrawGrid(&m_dcMemMain, pSndFile->m_nMusicSpeed);
+		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_nMusicSpeed);
 	}
 
 	// Middle line (half volume or pitch / panning center)
@@ -1024,8 +1012,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (nPoint <= EnvGetLastPoint()))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = pModDoc->GetrSoundFile().Instruments[m_nInstrument];
 		if (pIns)
 		{
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
@@ -1069,8 +1056,8 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		if (pIns)
 		{
 			if(nTick < 0) return 0;
@@ -1103,7 +1090,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				return 0;
 			}
 
-			if (envelope->nNodes < pSndFile->GetModSpecifications().envelopePointsMax)
+			if (envelope->nNodes < sndFile.GetModSpecifications().envelopePointsMax)
 			{
 				if (!envelope->nNodes)
 				{
@@ -1143,10 +1130,10 @@ void CViewInstrument::DrawPositionMarks(HDC hdc)
 //----------------------------------------------
 {
 	CRect rect;
-	for(UINT i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] & MPTNOTIFY_POSVALID)
+	for(UINT i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
 	{
 		rect.top = -2;
-		rect.left = TickToScreen(m_dwNotifyPos[i] & 0xFFFF);
+		rect.left = TickToScreen(m_dwNotifyPos[i]);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
 		InvertRect(hdc, &rect);
@@ -1154,39 +1141,40 @@ void CViewInstrument::DrawPositionMarks(HDC hdc)
 }
 
 
-LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
-//---------------------------------------------------------------
+LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
+//------------------------------------------------------------
 {
-	DWORD dwType;
+	Notification::Type type;
 	CModDoc *pModDoc = GetDocument();
 	if ((!pnotify) || (!pModDoc)) return 0;
 	switch(m_nEnv)
 	{
-	case ENV_PANNING:	dwType = MPTNOTIFY_PANENV; break;
-	case ENV_PITCH:		dwType = MPTNOTIFY_PITCHENV; break;
-	default:			dwType = MPTNOTIFY_VOLENV; break;
+	case ENV_PANNING:	type = Notification::PanEnv; break;
+	case ENV_PITCH:		type = Notification::PitchEnv; break;
+	default:			type = Notification::VolEnv; break;
 	}
-	if (pnotify->dwType & MPTNOTIFY_STOP)
+	if (pnotify->type[Notification::Stop])
 	{
+		bool invalidate = false;
 		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if(m_dwNotifyPos[i])
+			if(m_dwNotifyPos[i] != Notification::PosInvalid)
 			{
-				m_dwNotifyPos.assign(MAX_CHANNELS, 0);
-				InvalidateEnvelope();
-				break;
+				m_dwNotifyPos[i] = Notification::PosInvalid;
+				invalidate = true;
 			}
-			m_baPlayingNote.assign(128, false);
-			m_nPlayingChannel = CHANNELINDEX_INVALID;			//rewbs.instViewNNA
 		}
-	} else
-	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
+		if(invalidate)
+		{
+			InvalidateEnvelope();
+		}
+		m_baPlayingNote.reset();
+	} else if(pnotify->type[type] && pnotify->item == m_nInstrument)
 	{
 		BOOL bUpdate = FALSE;
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			//DWORD newpos = (pSndFile->dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
-			DWORD newpos = pnotify->dwPos[i];
+			uint32 newpos = pnotify->pos[i];
 			if (m_dwNotifyPos[i] != newpos)
 			{
 				bUpdate = TRUE;
@@ -1200,7 +1188,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
 				//DWORD newpos = (pSndFile->m_SongFlags[SONG_PAUSED]) ? pnotify->dwPos[j] : 0;
-				DWORD newpos = pnotify->dwPos[j];
+				DWORD newpos = pnotify->pos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
 			DrawPositionMarks(hdc);
@@ -1690,8 +1678,7 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 {
 	const CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return;
-	const CSoundFile *pSndFile = GetDocument()->GetSoundFile();
-	if(!pSndFile) return;
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 
 	CMenu Menu;
 	if (m_dwStatus & INSSTATUS_DRAGGING) return;
@@ -1701,13 +1688,13 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 		if (pSubMenu != NULL)
 		{
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
-			const uint32 maxPoint = (pSndFile->GetType() == MOD_TYPE_XM) ? 11 : 24;
+			const uint32 maxPoint = (sndFile.GetType() == MOD_TYPE_XM) ? 11 : 24;
 			const uint32 lastpoint = EnvGetLastPoint();
-			const bool forceRelease = !pSndFile->GetModSpecifications().hasReleaseNode && (EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET);
+			const bool forceRelease = !sndFile.GetModSpecifications().hasReleaseNode && (EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxPoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 0)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, ((pSndFile->GetModSpecifications().hasReleaseNode && m_nEnv == ENV_VOLUME) || forceRelease) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, ((sndFile.GetModSpecifications().hasReleaseNode && m_nEnv == ENV_VOLUME) || forceRelease) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_CARRY, (EnvGetCarry()) ? MF_CHECKED : MF_UNCHECKED);
@@ -1960,14 +1947,14 @@ void CViewInstrument::PlayNote(UINT note)
 				}
 			}
 		*/
-			ModInstrument *pIns = pModDoc->GetSoundFile()->Instruments[m_nInstrument];
+			ModInstrument *pIns = pModDoc->GetrSoundFile().Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug)) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
-			m_nPlayingChannel = pModDoc->PlayNote(note, m_nInstrument, 0, false); //rewbs.instViewNNA
+			pModDoc->PlayNote(note, m_nInstrument, 0, false); //rewbs.instViewNNA
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX))
 			{
-				const std::string temp = pModDoc->GetSoundFile()->GetNoteName(static_cast<int16>(note), m_nInstrument);
+				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(static_cast<int16>(note), m_nInstrument);
 				if(temp.size() >= sizeofS)
 					wsprintf(s, "%s", "...");
 				else
@@ -2018,19 +2005,18 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 //-----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	BOOL bCanDrop = FALSE;
 	BOOL bUpdate;
 
 	if ((!lpDropInfo) || (!pModDoc)) return FALSE;
-	pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	switch(lpDropInfo->dwDropType)
 	{
 	case DRAGONDROP_INSTRUMENT:
 		if (lpDropInfo->pModDoc == pModDoc)
 		{
 			bCanDrop = ((lpDropInfo->dwDropItem)
-					 && (lpDropInfo->dwDropItem <= pSndFile->m_nInstruments)
+					 && (lpDropInfo->dwDropItem <= sndFile.m_nInstruments)
 					 && (lpDropInfo->pModDoc == pModDoc));
 		} else
 		{
@@ -2051,11 +2037,11 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 	}
 	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
-	if ((!pSndFile->m_nInstruments) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
+	if ((!sndFile.GetNumInstruments()) && sndFile.GetModSpecifications().instrumentsMax > 0)
 	{
 		SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT);
 	}
-	if ((!m_nInstrument) || (m_nInstrument > pSndFile->m_nInstruments)) return FALSE;
+	if ((!m_nInstrument) || (m_nInstrument > sndFile.GetNumInstruments())) return FALSE;
 	// Do the drop
 	bUpdate = FALSE;
 	BeginWaitCursor();
@@ -2095,7 +2081,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 				if (pDlsIns)
 				{
 					CriticalSection cs;
-					bCanDrop = dlsbank.ExtractInstrument(pSndFile, m_nInstrument, nIns, nRgn);
+					bCanDrop = dlsbank.ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
 				}
 				bUpdate = TRUE;
 				break;
@@ -2123,7 +2109,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 
 			CriticalSection cs;
 
-			bCanDrop = pDLSBank->ExtractInstrument(pSndFile, m_nInstrument, nIns, nRgn);
+			bCanDrop = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
 			bUpdate = TRUE;
 		}
 		break;
@@ -2152,11 +2138,14 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	static BYTE midivolume = 127;
 
 	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr)
+	{
+		return 0;
+	}
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+
 	BYTE midiByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
 	BYTE midiByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
-
-	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-	if(!pSndFile) return 0;
 
 	uint8 nNote  = midiByte1 + NOTE_MIN;
 	int nVol = midiByte2;
@@ -2165,7 +2154,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	BYTE mappedIndex = 0, paramValue = 0;
 	uint32 paramIndex = 0;
-	bool captured = pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
+	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
 
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
@@ -2209,13 +2198,13 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
 		{
 			const INSTRUMENTINDEX instr = m_nInstrument;
-			IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
+			IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
 			if(plug)
 			{
 				plug->MidiSend(dwMidiData);
 				// Sending midi may modify the plug. For now, if MIDI data
 				// is not active sensing or aftertouch messages, set modified.
-				if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense) && event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch && pSndFile->GetModSpecifications().supportsPlugins)
+				if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense) && event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch && sndFile.GetModSpecifications().supportsPlugins)
 				{
 					CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 				}
@@ -2263,7 +2252,6 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return NULL;
 
-	//CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
@@ -2318,13 +2306,13 @@ void CViewInstrument::OnEnvelopeScalepoints()
 //--------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
-	if(pSndFile == nullptr)
+	if(pModDoc == nullptr)
 		return;
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	if(m_nInstrument >= 1 &&
-		m_nInstrument <= pSndFile->GetNumInstruments() &&
-		pSndFile->Instruments[m_nInstrument])
+		m_nInstrument <= sndFile.GetNumInstruments() &&
+		sndFile.Instruments[m_nInstrument])
 	{
 		// "Center" y value of the envelope. For panning and pitch, this is 32, for volume and filter it is 0 (minimum).
 		int nOffset = ((m_nEnv != ENV_VOLUME) && !GetEnvelopePtr()->dwFlags[ENV_FILTER]) ? 32 : 0;
@@ -2336,8 +2324,6 @@ void CViewInstrument::OnEnvelopeScalepoints()
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		}
 	}
-
-
 }
 
 
@@ -2542,10 +2528,9 @@ ModInstrument *CViewInstrument::GetInstrumentPtr() const
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return nullptr;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return nullptr;
-	return pSndFile->Instruments[m_nInstrument];
+	return pModDoc->GetrSoundFile().Instruments[m_nInstrument];
 }
+
 
 // Get a pointer to the currently selected envelope.
 // This function also implicitely validates the moddoc and soundfile pointers.
