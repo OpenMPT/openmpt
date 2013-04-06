@@ -1126,7 +1126,12 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 
 	m_nType = MOD_TYPE_S3M;
 	m_nChannels = min(max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal), MAX_BASECHANNELS);
-	m_nMasterVolume = fileHeader.masterVolume;
+	m_nSamplePreAmp = fileHeader.masterVolume;
+	if(m_nSamplePreAmp == 255)
+	{
+		// Most of the time, the master volume value makes sense... Just not when it's 255.
+		m_nSamplePreAmp = 48;
+	}
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo = fileHeader.songTempo;
