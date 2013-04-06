@@ -6,7 +6,9 @@
 ; This file is provided for creating an install package without the proprietary unmo3.dll (for example for the SourceForge package).
 ; Instead of including the file in the setup package, the user instead has the possibility to automatically download unmo3.dll from
 ; our servers.
-; The download code requires the ISTool IDE with its downloader extension. You can download it from http://www.istool.org/
+; The download code requires the InnoScript Studio or ISTool IDE with its downloader extension.
+; You can download InnoScript Studio from https://www.kymoto.org/products/inno-script-studio/overview
+; or download ISTool from http://www.istool.org/
 
 #define DOWNLOAD_MO3
 #define BaseNameAddition "_sf"
