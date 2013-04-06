@@ -357,7 +357,7 @@ public:
 
 // Low-Level Audio
 public:
-	static void UpdateDspEffects();
+	static void UpdateDspEffects(bool reset=false);
 	static void UpdateAudioParameters(BOOL bReset=FALSE);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);

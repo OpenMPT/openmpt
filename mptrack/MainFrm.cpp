@@ -1055,8 +1055,8 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 }
 
 
-void CMainFrame::UpdateDspEffects()
-//---------------------------------
+void CMainFrame::UpdateDspEffects(bool reset)
+//-------------------------------------------
 {
 	CSoundFile::SetDspEffects(
 #ifndef NO_DSP
@@ -1078,6 +1078,12 @@ void CMainFrame::UpdateDspEffects()
 		FALSE
 #endif
 		);
+#ifndef NO_AGC
+	CSoundFile::SetAGC(TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_AGC);
+#endif
+#ifndef NO_EQ
+	CSoundFile::SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
+#endif
 }
 
 
@@ -1100,13 +1106,7 @@ void CMainFrame::UpdateAudioParameters(BOOL bReset)
 	else
 		CSoundFile::m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
 	CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
-	UpdateDspEffects();
-#ifndef NO_AGC
-	CSoundFile::SetAGC(TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_AGC);
-#endif
-#ifndef NO_EQ
-	CSoundFile::SetEQGains(	TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, bReset );
-#endif
+	UpdateDspEffects(bReset);
 	if (bReset)
 	{
 		CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
@@ -1256,9 +1256,6 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample, TrackerSettings::Instance().m_MixerSettings.gnChannels, (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) ? TRUE : FALSE);
 	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 	UpdateDspEffects();
-#ifndef NO_AGC
-	pSndFile->SetAGC(TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_AGC);
-#endif
 	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 	pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
@@ -1751,9 +1748,6 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 			CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 			UpdateDspEffects();
-#ifndef NO_AGC
-			CSoundFile::SetAGC(TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_AGC);
-#endif
 		}
 		PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTSETUP);
 	}
