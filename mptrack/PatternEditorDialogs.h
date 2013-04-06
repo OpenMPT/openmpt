@@ -60,7 +60,7 @@ protected:
 	void ChangeVolCmd();
 
 public:
-	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc) : CPropertyPage(nIDD), effectInfo(*pModDoc->GetSoundFile()) { ASSERT(pModDoc != nullptr); m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
+	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc) : CPropertyPage(nIDD), effectInfo(pModDoc->GetrSoundFile()) { ASSERT(pModDoc != nullptr); m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -127,7 +127,7 @@ protected:
 	bool m_bInitialized;
 
 public:
-	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id) : CPropertyPage(id), m_pModDoc(pModDoc), effectInfo(*pModDoc->GetSoundFile()), m_pParent(parent), m_bInitialized(false) {};
+	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id) : CPropertyPage(id), m_pModDoc(pModDoc), effectInfo(pModDoc->GetrSoundFile()), m_pParent(parent), m_bInitialized(false) {};
 
 	virtual ~CPageEditCommand() {}
 	virtual BOOL OnInitDialog();

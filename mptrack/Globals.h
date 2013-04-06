@@ -214,7 +214,7 @@ public:
 	virtual void UpdateView(DWORD, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP) { return FALSE; }
-	virtual LRESULT OnPlayerNotify(MPTNOTIFICATION *) { return 0; }
+	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
 	//}}AFX_VIRTUAL
 
 protected:

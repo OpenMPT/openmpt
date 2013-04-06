@@ -2220,13 +2220,13 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 }
 
 
-void CModTree::UpdatePlayPos(CModDoc *pModDoc, MPTNOTIFICATION *pNotify)
-//----------------------------------------------------------------------
+void CModTree::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
+//-------------------------------------------------------------------
 {
 	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(pModDoc);
 	if(pInfo == nullptr) return;
 
-	ORDERINDEX nNewOrd = (pNotify) ? pNotify->nOrder : ORDERINDEX_INVALID;
+	ORDERINDEX nNewOrd = (pNotify) ? pNotify->order : ORDERINDEX_INVALID;
 	SEQUENCEINDEX nNewSeq = pModDoc->GetrSoundFile().Order.GetCurrentSequenceIndex();
 	if (nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
 	{

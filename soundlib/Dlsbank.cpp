@@ -1469,15 +1469,15 @@ static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 }
 
 
-BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose)
-//----------------------------------------------------------------------------------------------------------
+BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose)
+//---------------------------------------------------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
 	LPBYTE pWaveForm = NULL;
 	DWORD dwLen = 0;
 	BOOL bOk, bWaveForm;
 
-	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
+	if ((!m_pInstruments) || (nIns >= m_nInstruments)) return FALSE;
 	pDlsIns = &m_pInstruments[nIns];
 	if (nRgn >= pDlsIns->nRegions) return FALSE;
 	if (!ExtractWaveForm(nIns, nRgn, &pWaveForm, &dwLen)) return FALSE;
@@ -1487,10 +1487,10 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	FileReader wsmpChunk;
 	if (m_nType & SOUNDBANK_TYPE_SF2)
 	{
-		pSndFile->DestroySample(nSample);
+		sndFile.DestroySample(nSample);
 		UINT nWaveLink = pDlsIns->Regions[nRgn].nWaveLink;
-		ModSample &sample = pSndFile->GetSample(nSample);
-		if (pSndFile->m_nSamples < nSample) pSndFile->m_nSamples = nSample;
+		ModSample &sample = sndFile.GetSample(nSample);
+		if (sndFile.m_nSamples < nSample) sndFile.m_nSamples = nSample;
 		if ((nWaveLink < m_nSamplesEx) && (m_pSamplesEx))
 		{
 			DLSSAMPLEEX *p = &m_pSamplesEx[nWaveLink];
@@ -1504,7 +1504,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			sample.nC5Speed = p->dwSampleRate;
 			sample.RelativeTone = p->byOriginalPitch;
 			sample.nFineTune = p->chPitchCorrection;
-			sample.Convert(MOD_TYPE_IT, pSndFile->GetType());
+			sample.Convert(MOD_TYPE_IT, sndFile.GetType());
 
 			FileReader chunk(pWaveForm, dwLen);
 			SampleIO(
@@ -1518,11 +1518,11 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 	} else
 	{
 		FileReader file(pWaveForm, dwLen);
-		bWaveForm = pSndFile->ReadWAVSample(nSample, file, &wsmpChunk);
+		bWaveForm = sndFile.ReadWAVSample(nSample, file, &wsmpChunk);
 	}
 	if (bWaveForm)
 	{
-		ModSample &sample = pSndFile->GetSample(nSample);
+		ModSample &sample = sndFile.GetSample(nSample);
 		DLSREGION *pRgn = &pDlsIns->Regions[nRgn];
 		sample.uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) sample.uFlags |= CHN_LOOP;
@@ -1596,18 +1596,18 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 			if ((pRgn->uPercEnv) && (pRgn->uPercEnv <= m_nEnvelopes))
 			{
 				sample.nPan = m_Envelopes[pRgn->uPercEnv-1].nDefPan;
-				if (pSndFile->m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
+				if (sndFile.m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
 			}
 		} else
 		{
 			if ((pDlsIns->nMelodicEnv) && (pDlsIns->nMelodicEnv <= m_nEnvelopes))
 			{
 				sample.nPan = m_Envelopes[pDlsIns->nMelodicEnv-1].nDefPan;
-				if (pSndFile->m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
+				if (sndFile.m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
 			}
 		}
-		if (pDlsIns->szName[0]) memcpy(pSndFile->m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
-		sample.Convert(MOD_TYPE_IT, pSndFile->GetType());
+		if (pDlsIns->szName[0]) memcpy(sndFile.m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
+		sample.Convert(MOD_TYPE_IT, sndFile.GetType());
 		bOk = TRUE;
 	}
 	FreeWaveForm(pWaveForm);
@@ -1615,8 +1615,8 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, SAMPLEINDEX nSample, UINT nIn
 }
 
 
-BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn)
-//------------------------------------------------------------------------------------------------------
+BOOL CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn)
+//-----------------------------------------------------------------------------------------------------
 {
 	BYTE RgnToSmp[DLSMAXREGIONS];
 	DLSINSTRUMENT *pDlsIns;
@@ -1624,7 +1624,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	UINT nRgnMin, nRgnMax, nEnv;
 	SAMPLEINDEX nSample;
 
-	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
+	if ((!m_pInstruments) || (nIns >= m_nInstruments)) return FALSE;
 	pDlsIns = &m_pInstruments[nIns];
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
@@ -1662,9 +1662,9 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 		return FALSE;
 	}
 
-	if (pSndFile->Instruments[nInstr])
+	if (sndFile.Instruments[nInstr])
 	{
-		pSndFile->DestroyInstrument(nInstr, deleteAssociatedSamples);
+		sndFile.DestroyInstrument(nInstr, deleteAssociatedSamples);
 	}
 	// Initializes Instrument
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
@@ -1693,7 +1693,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	{
 		for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
 		{
-			if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
+			if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
 			{
 				if (iNoteMap < pDlsIns->Regions[nDrumRgn].uKeyMin) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMin + 1);
 				if (iNoteMap > pDlsIns->Regions[nDrumRgn].uKeyMax) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMax + 1);
@@ -1713,7 +1713,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 	pIns->nNNA = NNA_NOTEOFF;
 	pIns->nDCT = DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
-	pSndFile->Instruments[nInstr] = pIns;
+	sndFile.Instruments[nInstr] = pIns;
 	nSample = 0;
 	UINT nLoadedSmp = 0;
 	// Extract Samples
@@ -1749,9 +1749,9 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				nSample = pSndFile->GetNextFreeSample(nInstr, nSample + 1);
+				nSample = sndFile.GetNextFreeSample(nInstr, nSample + 1);
 				if (nSample == SAMPLEINDEX_INVALID) break;
-				if (nSample > pSndFile->GetNumSamples()) pSndFile->m_nSamples = nSample;
+				if (nSample > sndFile.GetNumSamples()) sndFile.m_nSamples = nSample;
 				nSmp = nSample;
 				nLoadedSmp++;
 			}
@@ -1768,7 +1768,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, INSTRUMENTINDEX nInstr, U
 				}
 			}
 			// Load the sample
-			if (!bDupRgn) ExtractSample(pSndFile, nSample, nIns, nRgn, nTranspose);
+			if (!bDupRgn) ExtractSample(sndFile, nSample, nIns, nRgn, nTranspose);
 		}
 	}
 	// Initializes Envelope

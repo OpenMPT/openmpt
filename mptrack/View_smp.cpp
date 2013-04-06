@@ -124,7 +124,10 @@ CViewSample::CViewSample()
 	m_dwStatus = 0;
 	m_nScrollFactor = 0;
 	m_nBtnMouseOver = 0xFFFF;
-	MemsetZero(m_dwNotifyPos);
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		m_dwNotifyPos[i] = Notification::PosInvalid;
+	}
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 0, RGB(192,192,192));
 	m_lastDrawPoint.SetPoint(-1, -1);
@@ -222,14 +225,17 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	if (!pModDoc) return FALSE;
 	pSndFile = pModDoc->GetSoundFile();
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
-	pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_SAMPLE|nSmp);
+	pModDoc->SetFollowWnd(m_hWnd, Notification::Sample, nSmp);
 	if (nSmp == m_nSample) return FALSE;
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_bDrawingEnabled = false; // sample drawing
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetInfoText("");
 	m_nSample = nSmp;
-	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		m_dwNotifyPos[i] = Notification::PosInvalid;
+	}
 	UpdateScrollSize();
 	UpdateNcButtonState();
 	InvalidateRect(NULL, FALSE);
@@ -920,10 +926,10 @@ void CViewSample::DrawPositionMarks(HDC hdc)
 //------------------------------------------
 {
 	CRect rect;
-	for (UINT i=0; i<MAX_CHANNELS; i++) if (m_dwNotifyPos[i] & MPTNOTIFY_POSVALID)
+	for (UINT i=0; i<MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
 	{
 		rect.top = -2;
-		rect.left = SampleToScreen(m_dwNotifyPos[i] & 0x0FFFFFFF);
+		rect.left = SampleToScreen(m_dwNotifyPos[i]);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
 		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) InvertRect(hdc, &rect);
@@ -931,44 +937,45 @@ void CViewSample::DrawPositionMarks(HDC hdc)
 }
 
 
-LRESULT CViewSample::OnPlayerNotify(MPTNOTIFICATION *pnotify)
-//-----------------------------------------------------------
+LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
+//--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((!pnotify) || (!pModDoc)) return 0;
-	if (pnotify->dwType & MPTNOTIFY_STOP)
+	if (pnotify->type[Notification::Stop])
 	{
-		for (UINT i=0; i<MAX_CHANNELS; i++)
+		bool invalidate = false;
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if (m_dwNotifyPos[i])
+			if(m_dwNotifyPos[i] != Notification::PosInvalid)
 			{
-				memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
-				InvalidateRect(NULL, FALSE);
-				break;
+				m_dwNotifyPos[i] = Notification::PosInvalid;
+				invalidate = true;
 			}
 		}
-	} else
-	if ((pnotify->dwType & MPTNOTIFY_SAMPLE) && ((pnotify->dwType & 0xFFFF) == m_nSample))
-	{
-		//CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		BOOL bUpdate = FALSE;
-		for (UINT i=0; i<MAX_CHANNELS; i++)
+		if(invalidate)
 		{
-			DWORD newpos = /*(pSndFile->m_SongFlags[SONG_PAUSED]) ?*/ pnotify->dwPos[i]/* : 0*/;
+			InvalidateRect(NULL, FALSE);
+		}
+	} else if (pnotify->type[Notification::Sample] && pnotify->item == m_nSample)
+	{
+		bool doUpdate = false;
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		{
+			SmpLength newpos = pnotify->pos[i];
 			if (m_dwNotifyPos[i] != newpos)
 			{
-				bUpdate = TRUE;
+				doUpdate = true;
 				break;
 			}
 		}
-		if (bUpdate)
+		if (doUpdate)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
 			DrawPositionMarks(hdc);
-			for (UINT j=0; j<MAX_CHANNELS; j++)
+			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
-				DWORD newpos = /*(pSndFile->m_SongFlags[SONG_PAUSED]) ?*/ pnotify->dwPos[j] /*: 0*/;
-				m_dwNotifyPos[j] = newpos;
+				m_dwNotifyPos[i] = pnotify->pos[i];
 			}
 			DrawPositionMarks(hdc);
 			::ReleaseDC(m_hWnd, hdc);
@@ -2347,7 +2354,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 					CriticalSection cs;
 
 					pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-					bCanDrop = dlsbank.ExtractSample(pSndFile, m_nSample, nIns, nRgn);
+					bCanDrop = dlsbank.ExtractSample(*pSndFile, m_nSample, nIns, nRgn);
 				}
 				bUpdate = TRUE;
 				break;
@@ -2375,7 +2382,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 			CriticalSection cs;
 
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-			bCanDrop = pDLSBank->ExtractSample(pSndFile, m_nSample, nIns, nRgn);
+			bCanDrop = pDLSBank->ExtractSample(*pSndFile, m_nSample, nIns, nRgn);
 
 			bUpdate = TRUE;
 		}

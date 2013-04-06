@@ -292,7 +292,7 @@ public:
 	void DrawInstrument(int x, int y, UINT instr);
 	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
-	void UpdateAllVUMeters(MPTNOTIFICATION *pnotify);
+	void UpdateAllVUMeters(Notification *pnotify);
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
 	// True if default volume should be drawn for a given cell.
@@ -340,7 +340,7 @@ public:
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual LRESULT OnPlayerNotify(MPTNOTIFICATION *);
+	virtual LRESULT OnPlayerNotify(Notification *);
 	//}}AFX_VIRTUAL
 
 protected:

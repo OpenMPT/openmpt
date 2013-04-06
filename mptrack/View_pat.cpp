@@ -767,7 +767,7 @@ void CViewPattern::OnSetFocus(CWnd *pOldWnd)
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
+		pModDoc->SetFollowWnd(m_hWnd, Notification::Position | Notification::VUMeters);
 		UpdateIndicator();
 	}
 }
@@ -2467,7 +2467,7 @@ void CViewPattern::PatternStep(ROWINDEX row)
 
 		if (pMainFrm->GetModPlaying() != pModDoc)
 		{
-			pMainFrm->PlayMod(pModDoc, m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
+			pMainFrm->PlayMod(pModDoc, m_hWnd, Notification::Position|Notification::VUMeters);
 		}
 		if(row == ROWINDEX_INVALID)
 		{
@@ -3492,8 +3492,8 @@ void CViewPattern::OnPatternAmplify()
 }
 
 
-LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
-//------------------------------------------------------------
+LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
+//---------------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr || pnotify == nullptr)
@@ -3501,11 +3501,11 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		return 0;
 	}
 
-	if (pnotify->dwType & MPTNOTIFY_POSITION)
+	if(pnotify->type[Notification::Position])
 	{
-		ORDERINDEX nOrd = pnotify->nOrder;
-		ROWINDEX nRow = pnotify->nRow;
-		PATTERNINDEX nPat = pnotify->nPattern; //get player pattern
+		ORDERINDEX nOrd = pnotify->order;
+		ROWINDEX nRow = pnotify->row;
+		PATTERNINDEX nPat = pnotify->pattern; //get player pattern
 		bool updateOrderList = false;
 
 		if(m_nLastPlayedOrder != nOrd)
@@ -3559,11 +3559,11 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			}
 		}
 		SetPlayCursor(nPat, nRow);
-		m_nPlayTick = pnotify->nTick;
+		m_nPlayTick = pnotify->tick;
 
-	} //Ends condition "if(pnotify->dwType & MPTNOTIFY_POSITION)"
+	} //Ends condition "if(pnotify->dwType & MPTNotification::_POSITION)"
 
-	if((pnotify->dwType & (MPTNOTIFY_VUMETERS|MPTNOTIFY_STOP)) && m_Status[psShowVUMeters])
+	if(pnotify->type[Notification::VUMeters | Notification::Stop] && m_Status[psShowVUMeters])
 	{
 		UpdateAllVUMeters(pnotify);
 	}
@@ -3928,8 +3928,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			CModDoc *pModDoc = GetDocument();
 			m_Status.set(psFollowSong);
-			if (pModDoc) pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
-			if (pMainFrm) pMainFrm->SetFollowSong(pModDoc, m_hWnd, TRUE, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
+			if (pModDoc) pModDoc->SetFollowWnd(m_hWnd, Notification::Position|Notification::VUMeters);
+			if (pMainFrm) pMainFrm->SetFollowSong(pModDoc, m_hWnd, TRUE, Notification::Position|Notification::VUMeters);
 			SetFocus();
 		} else
 		{
