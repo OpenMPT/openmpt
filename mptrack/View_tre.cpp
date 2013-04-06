@@ -123,6 +123,7 @@ CModTree::CModTree(CModTree *pDataTree)
 	m_hDropWnd = NULL;
 	m_hInsLib = m_hMidiLib = NULL;
 	m_nDocNdx = m_nDragDocNdx = 0;
+	doLabelEdit = false;
 	MemsetZero(m_tiMidiGrp);
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
@@ -229,7 +230,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
 		InputTargetContext ctx = (InputTargetContext)(kCtxViewTree);
 
-		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if (!doLabelEdit && ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true; // Mapped to a command, no need to pass message on.
 	}
 	//end rewbs.customKeys
@@ -1048,7 +1049,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 
 
 uint64 CModTree::GetModItem(HTREEITEM hItem)
-//-----------------------------------------
+//------------------------------------------
 {
 	LPARAM lParam;
 	HTREEITEM hItemParent, hItemParentParent, hRootParent;
@@ -3205,7 +3206,7 @@ void CModTree::OnSaveItem()
 			pSndFile->m_szInstrumentPath[modItemID - 1] = files.first_file;
 		}
 
-		pModDoc->SaveInstrument(modItemID);
+		pModDoc->SaveInstrument(static_cast<INSTRUMENTINDEX>(modItemID));
 
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
 		OnRefreshTree();
@@ -3534,6 +3535,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 		if(text)
 		{
+			doLabelEdit = true;
 			CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
 			editCtrl->SetWindowText(text);
 			*result = FALSE;
@@ -3549,6 +3551,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 //----------------------------------------------------------
 {
 	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(false);
+	doLabelEdit = false;
 
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	const uint64 modItem = GetModItem(info->item.hItem);
