@@ -106,6 +106,7 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 	// Start with ramping disabled to avoid clicks on first read.
 	// Ramping is now set after the first read in CSoundFile::Read();
 	gnVolumeRampUpSamplesActual = 0;
+	SetPreAmp(mixersettings.m_nPreAmp); // adjust agc
 	m_MixerSettings = mixersettings;
 }
 
@@ -1635,7 +1636,7 @@ BOOL CSoundFile::ReadNote()
 
 		if (m_pConfig->getUseGlobalPreAmp())
 		{
-			int realmastervol = m_nMasterVolume;
+			int realmastervol = m_MixerSettings.m_nPreAmp;
 			if (realmastervol > 0x80)
 			{
 				//Attenuate global pre-amp depending on num channels

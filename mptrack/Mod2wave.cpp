@@ -693,7 +693,7 @@ void CDoWaveConvert::OnButton1()
 	}
 
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-	int oldVol = m_pSndFile->GetMasterVolume();
+	int oldVol = m_pSndFile->GetPreAmp();
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	mixersettings.gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
@@ -709,7 +709,7 @@ void CDoWaveConvert::OnButton1()
 #ifndef NO_AGC
 		m_pSndFile->SetAGC(FALSE);
 #endif
-		if (oldVol > 128) m_pSndFile->SetMasterVolume(128);
+		if (oldVol > 128) m_pSndFile->SetPreAmp(128);
 	} else
 	{
 		m_bNormalize = false;
@@ -964,7 +964,7 @@ void CDoWaveConvert::OnButton1()
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	if (m_bNormalize)
 	{
-		m_pSndFile->SetMasterVolume(oldVol);
+		m_pSndFile->SetPreAmp(oldVol);
 		CFile fw;
 		if (fw.Open(m_lpszFileName, CFile::modeReadWrite | CFile::modeNoTruncate))
 		{

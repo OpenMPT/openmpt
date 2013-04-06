@@ -1261,8 +1261,8 @@ UINT CMainFrame::GetBaseOctave() const
 void CMainFrame::SetPreAmp(UINT n)
 //--------------------------------
 {
-	TrackerSettings::Instance().m_nPreAmp = n;
-	if (m_pSndFile) m_pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
+	TrackerSettings::Instance().m_MixerSettings.m_nPreAmp = n;
+	if (m_pSndFile) m_pSndFile->SetPreAmp(TrackerSettings::Instance().m_MixerSettings.m_nPreAmp);
 }
 
 
@@ -1281,7 +1281,6 @@ void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
 	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample, TrackerSettings::Instance().m_MixerSettings.gnChannels, (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) ? TRUE : FALSE);
 	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 	UpdateDspEffects();
-	pSndFile->SetMasterVolume(TrackerSettings::Instance().m_nPreAmp, true);
 	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
 	pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
 #ifndef NO_AGC

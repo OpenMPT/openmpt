@@ -290,7 +290,7 @@ public:	// for Editing
 #endif // MODPLUG_TRACKER
 
 	bool m_bPatternTransitionOccurred;
-	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
+	UINT m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
@@ -349,8 +349,8 @@ public:
 	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 
-	void SetMasterVolume(UINT vol, bool adjustAGC = false);
-	UINT GetMasterVolume() const { return m_nMasterVolume; }
+	static void SetPreAmp(UINT vol);
+	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }

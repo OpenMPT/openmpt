@@ -26,6 +26,8 @@ MixerSettings::MixerSettings()
 	gdwMixingFreq = 44100;
 	gnBitsPerSample = 16;
 
+	m_nPreAmp = 128;
+
 	glVolumeRampUpSamples = 16;
 	glVolumeRampDownSamples = 42;
 }
