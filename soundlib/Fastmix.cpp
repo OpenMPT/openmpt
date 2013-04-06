@@ -1492,7 +1492,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		pbuffer = MixSoundBuffer;
 #ifndef NO_REVERB
 #ifdef ENABLE_MMX
-		if((m_MixerSettings.gdwSoundSetup & SNDMIX_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX) && !pChannel->dwFlags[CHN_NOREVERB])
+		if((m_MixerSettings.DSPMask & SNDDSP_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX) && !pChannel->dwFlags[CHN_NOREVERB])
 			pbuffer = MixReverbBuffer;
 		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & SYSMIX_ENABLEMMX))
 			pbuffer = MixReverbBuffer;
@@ -1790,7 +1790,7 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 //-----------------------------------------------------------------------------------------
 {
 
-	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
 		if(gdwSysInfo & SYSMIX_SSE)
@@ -1816,7 +1816,7 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
 //---------------------------------------------------------------------------------------------
 {
-	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
@@ -1833,7 +1833,7 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 //------------------------------------------------------------------------
 {
-	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
 		if(gdwSysInfo & SYSMIX_SSE)
@@ -1858,7 +1858,7 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 //-----------------------------------------------------------------------
 {
-	if(m_MixerSettings.gdwSoundSetup & SNDMIX_ENABLEMMX)
+	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)

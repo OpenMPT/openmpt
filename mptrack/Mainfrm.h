@@ -109,20 +109,6 @@ enum
 };
 
 
-#ifndef NO_DSP
-#define QUALITY_NOISEREDUCTION	0x01
-#define QUALITY_MEGABASS		0x02
-#define QUALITY_SURROUND		0x08
-#endif
-#define QUALITY_REVERB			0x20
-#ifndef NO_AGC
-#define QUALITY_AGC				0x40
-#endif
-#ifndef NO_EQ
-#define QUALITY_EQ				0x80
-#endif
-
-
 #define NUM_VUMETER_PENS		32
 
 

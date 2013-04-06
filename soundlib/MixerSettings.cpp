@@ -17,9 +17,12 @@ MixerSettings::MixerSettings()
 	// SNDMIX: These are global flags for playback control
 	m_nStereoSeparation = 128;
 	m_nMaxMixChannels = MAX_CHANNELS;
+
+	DSPMask = 0;
+	MixerFlags = 0;
+
 	// Mixing Configuration (SetWaveConfig)
 	gnChannels = 2;
-	gdwSoundSetup = SOUNDSETUP_SECONDARY;
 	gdwMixingFreq = 44100;
 	gnBitsPerSample = 16;
 

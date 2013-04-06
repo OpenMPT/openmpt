@@ -905,11 +905,11 @@ BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
 	CriticalSection cs;
 
 	BOOL bReset = FALSE;
-	DWORD d = m_MixerSettings.gdwSoundSetup & ~SNDMIX_ENABLEMMX;
+	DWORD d = m_MixerSettings.MixerFlags & ~SNDMIX_ENABLEMMX;
 	if (bMMX) d |= SNDMIX_ENABLEMMX;
-	if ((m_MixerSettings.gdwMixingFreq != nRate) || (m_MixerSettings.gnBitsPerSample != nBits) || (m_MixerSettings.gnChannels != nChannels) || (d != m_MixerSettings.gdwSoundSetup)) bReset = TRUE;
+	if ((m_MixerSettings.gdwMixingFreq != nRate) || (m_MixerSettings.gnBitsPerSample != nBits) || (m_MixerSettings.gnChannels != nChannels) || (d != m_MixerSettings.MixerFlags)) bReset = TRUE;
 	m_MixerSettings.gnChannels = nChannels;
-	m_MixerSettings.gdwSoundSetup = d;
+	m_MixerSettings.MixerFlags = d;
 	m_MixerSettings.gdwMixingFreq = nRate;
 	m_MixerSettings.gnBitsPerSample = nBits;
 	InitPlayer(bReset);
@@ -921,17 +921,17 @@ BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL b
 //------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-	DWORD d = m_MixerSettings.gdwSoundSetup;
-	if ((bReverb) && (GetSysInfo() & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
+	DWORD d = m_MixerSettings.DSPMask;
+	if ((bReverb) && (GetSysInfo() & SYSMIX_ENABLEMMX)) d |= SNDDSP_REVERB; else d &= ~SNDDSP_REVERB;
 #ifndef NO_DSP
-	if (bSurround) d |= SNDMIX_SURROUND; else d &= ~SNDMIX_SURROUND;
-	if (bMegaBass) d |= SNDMIX_MEGABASS; else d &= ~SNDMIX_MEGABASS;
-	if (bNR) d |= SNDMIX_NOISEREDUCTION; else d &= ~SNDMIX_NOISEREDUCTION;
+	if (bSurround) d |= SNDDSP_SURROUND; else d &= ~SNDDSP_SURROUND;
+	if (bMegaBass) d |= SNDDSP_MEGABASS; else d &= ~SNDDSP_MEGABASS;
+	if (bNR) d |= SNDDSP_NOISEREDUCTION; else d &= ~SNDDSP_NOISEREDUCTION;
 #endif
 #ifndef NO_EQ
-	if (bEQ) d |= SNDMIX_EQ; else d &= ~SNDMIX_EQ;
+	if (bEQ) d |= SNDDSP_EQ; else d &= ~SNDDSP_EQ;
 #endif
-	m_MixerSettings.gdwSoundSetup = d;
+	m_MixerSettings.DSPMask = d;
 	InitPlayer(FALSE);
 	return TRUE;
 }
@@ -960,7 +960,7 @@ void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
 #ifndef NO_AGC
-	if ((nVol < m_nMasterVolume) && (nVol) && (m_MixerSettings.gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
+	if ((nVol < m_nMasterVolume) && (nVol) && (m_MixerSettings.DSPMask & SNDDSP_AGC) && (adjustAGC))
 	{
 		m_AGC.Adjust(m_nMasterVolume, nVol);
 	}
@@ -975,12 +975,12 @@ void CSoundFile::SetAGC(BOOL b)
 {
 	if (b)
 	{
-		if (!(m_MixerSettings.gdwSoundSetup & SNDMIX_AGC))
+		if (!(m_MixerSettings.DSPMask & SNDDSP_AGC))
 		{
-			m_MixerSettings.gdwSoundSetup |= SNDMIX_AGC;
+			m_MixerSettings.DSPMask |= SNDDSP_AGC;
 			m_AGC.Reset();
 		}
-	} else m_MixerSettings.gdwSoundSetup &= ~SNDMIX_AGC;
+	} else m_MixerSettings.DSPMask &= ~SNDDSP_AGC;
 }
 #endif
 
@@ -1942,7 +1942,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 	{
 		ChnSettings[nChn].nVolume = 64;
 		ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
-		if(m_MixerSettings.gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
+		if(m_MixerSettings.MixerFlags & SNDMIX_MAXDEFAULTPAN)
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
 		else
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;

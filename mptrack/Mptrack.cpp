@@ -894,7 +894,7 @@ BOOL CTrackApp::InitInstance()
 	DWORD sysinfo = CSoundFile::GetSysInfo();
 	if(sysinfo & SYSMIX_ENABLEMMX)
 	{
-		TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup |= SOUNDSETUP_ENABLEMMX;
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_ENABLEMMX;
 		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_SPLINE;
 	}
 	if(sysinfo & SYSMIX_MMXEX)

@@ -274,23 +274,26 @@ FLAGSET(SongFlags)
 
 // Global Options (Renderer)
 #ifndef NO_DSP
-#define SNDMIX_NOISEREDUCTION	0x0002	// reduce hiss (do not use, it's just a simple low-pass filter)
+#define SNDDSP_NOISEREDUCTION 0x01	// reduce hiss (do not use, it's just a simple low-pass filter)
 #endif // NO_DSP
 #ifndef NO_AGC
-#define SNDMIX_AGC				0x0004	// automatic gain control
+#define SNDDSP_AGC            0x40	// automatic gain control
 #endif // ~NO_AGC
 #ifndef NO_DSP
-#define SNDMIX_MEGABASS			0x0020	// bass expansion
-#define SNDMIX_SURROUND			0x0040	// surround mix
+#define SNDDSP_MEGABASS       0x02	// bass expansion
+#define SNDDSP_SURROUND       0x08	// surround mix
 #endif // NO_DSP
-#define SNDMIX_REVERB			0x0080	// apply reverb
+#define SNDDSP_REVERB         0x20	// apply reverb
 #ifndef NO_EQ
-#define SNDMIX_EQ				0x0100	// apply EQ
+#define SNDDSP_EQ             0x80	// apply EQ
 #endif // NO_EQ
-#define SNDMIX_SOFTPANNING		0x0200	// soft panning mode (this is forced with mixmode RC3 and later)
 
+#define SNDMIX_SOFTPANNING    0x10	// soft panning mode (this is forced with mixmode RC3 and later)
 // Misc Flags (can safely be turned on or off)
-#define SNDMIX_ENABLEMMX		0x20000		// use MMX-accelerated code
+#define SNDMIX_ENABLEMMX      0x08		// use MMX-accelerated code
+
+#define SNDMIX_SECONDARY      0x40
+
 //#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels

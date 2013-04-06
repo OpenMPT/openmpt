@@ -123,8 +123,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 	CHAR s[128];
 
 	CPropertyPage::OnInitDialog();
-	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (m_dwSoundSetup & SNDMIX_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+	if (m_dwSoundSetup & SNDMIX_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_SECONDARY) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 	// Multimedia extensions
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), (CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX) ? TRUE : FALSE);
@@ -411,9 +411,9 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	m_dwSoundSetup &= ~(SOUNDSETUP_ENABLEMMX | SOUNDSETUP_SECONDARY | SOUNDSETUP_SOFTPANNING);
-	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwSoundSetup |= SOUNDSETUP_SOFTPANNING;
-	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
+	m_dwSoundSetup &= ~(SNDMIX_ENABLEMMX | SOUNDSETUP_SECONDARY | SNDMIX_SOFTPANNING);
+	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwSoundSetup |= SNDMIX_SOFTPANNING;
+	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwSoundSetup |= SNDMIX_ENABLEMMX;
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwSoundSetup |= SOUNDSETUP_SECONDARY;
 	// Mixing Freq
 	{
@@ -462,14 +462,14 @@ void COptionsSoundcard::OnOK()
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
 	// Soft Panning
-	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
+	if (m_dwSoundSetup & SNDMIX_SOFTPANNING)
 	{
-		TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup |= SNDMIX_SOFTPANNING;
-		CSoundFile::m_MixerSettings.gdwSoundSetup |= SNDMIX_SOFTPANNING;
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING;
+		CSoundFile::m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING;
 	} else
 	{
-		TrackerSettings::Instance().m_MixerSettings.gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
-		CSoundFile::m_MixerSettings.gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
+		CSoundFile::m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
 	}
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
@@ -550,7 +550,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	DWORD dwQuality;
 
 	CPropertyPage::OnInitDialog();
-	dwQuality = TrackerSettings::Instance().m_dwQuality;
+	dwQuality = TrackerSettings::Instance().m_MixerSettings.DSPMask;
 	// Resampling type
 	{
 		m_CbnResampling.AddString("No Interpolation");
@@ -564,24 +564,24 @@ BOOL COptionsPlayer::OnInitDialog()
 	}
 	// Effects
 #ifndef NO_DSP
-	if (dwQuality & QUALITY_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
+	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_AGC
-	if (dwQuality & QUALITY_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+	if (dwQuality & SNDDSP_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK2)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_DSP
-	if (dwQuality & QUALITY_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if (dwQuality & QUALITY_NOISEREDUCTION) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
+	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	if (dwQuality & SNDDSP_NOISEREDUCTION) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_CHECK5)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_EQ
-	if (dwQuality & QUALITY_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
@@ -621,7 +621,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnReverbPreset.EnableWindow(FALSE);
 	} else
 	{
-		if (dwQuality & QUALITY_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
+		if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
 	}
 #else
 	GetDlgItem(IDC_CHECK6)->ShowWindow(SW_HIDE);
@@ -753,19 +753,19 @@ void COptionsPlayer::OnOK()
 	DWORD dwSrcMode = 0;
 
 #ifndef NO_DSP
-	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= QUALITY_MEGABASS;
+	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= SNDDSP_MEGABASS;
 #endif
 #ifndef NO_AGC
-	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= QUALITY_AGC;
+	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= SNDDSP_AGC;
 #endif
 #ifndef NO_EQ
-	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= QUALITY_EQ;
+	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= SNDDSP_EQ;
 #endif
 #ifndef NO_DSP
-	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= QUALITY_SURROUND;
-	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= QUALITY_NOISEREDUCTION;
+	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= SNDDSP_SURROUND;
+	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_NOISEREDUCTION;
 #endif
-	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= QUALITY_REVERB;
+	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= SNDDSP_REVERB;
 	dwSrcMode = m_CbnResampling.GetCurSel();
 
 #ifndef NO_DSP
