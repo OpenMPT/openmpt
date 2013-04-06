@@ -120,7 +120,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 	
 	m_bEditsLocked=false;
-	UpdateView(HINT_MODGENERAL|HINT_MODTYPE|HINT_MODSEQUENCE|HINT_MPTSETUP, NULL);
+	UpdateView(HINT_MODGENERAL|HINT_MODTYPE|HINT_MODSEQUENCE, NULL);
 	OnActivatePage(0);
 	m_bInitialized = TRUE;
 	
@@ -249,10 +249,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		wsprintf(s, "%s, %d channel%s", pszModType, m_pSndFile->GetNumChannels(), (m_pSndFile->GetNumChannels() != 1) ? "s" : "");
 		m_EditModType.SetWindowText(s);
 	}
-	if (dwHint & HINT_MPTSETUP)
-	{
-		CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
-	}
+	CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
 	if (dwHint & HINT_MPTOPTIONS)
 	{
 		m_VuMeterLeft.InvalidateRect(NULL, FALSE);
