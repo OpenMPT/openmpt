@@ -154,8 +154,8 @@ void CDefaultVstEditor::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CDefaultVstEditor::CDefaultVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
-//-------------------------------------------------------------------------------------
+CDefaultVstEditor::CDefaultVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin)
+//-----------------------------------------------------------------------------------
 {
 	m_nControlLock = 0;
 	paramOffset = 0;
@@ -239,12 +239,7 @@ void CDefaultVstEditor::CreateControls()
 void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 //-----------------------------------------------------------
 {
-	if(m_pVstPlugin == nullptr)
-	{
-		return;
-	}
-
-	const PlugParamIndex numParams = m_pVstPlugin->GetNumParameters();
+	const PlugParamIndex numParams = m_VstPlugin.GetNumParameters();
 	const PlugParamIndex scrollMax = numParams - min(numParams, NUM_PLUGINEDITOR_PARAMETERS);
 	LimitMax(paramOffset, scrollMax);
 
@@ -276,7 +271,7 @@ void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 		if(updateParamNames)
 		{
 			// Update param name
-			controls[i]->SetParamName(m_pVstPlugin->GetFormattedParamName(param));
+			controls[i]->SetParamName(m_VstPlugin.GetFormattedParamName(param));
 		}
 
 		UpdateParamDisplay(param);
@@ -410,7 +405,7 @@ bool CDefaultVstEditor::OpenEditor(CWnd *parent)
 
 	// Restore previous editor position
 	int editorX, editorY;
-	m_pVstPlugin->GetEditorPos(editorX, editorY);
+	m_VstPlugin.GetEditorPos(editorX, editorY);
 
 	if((editorX >= 0) && (editorY >= 0))
 	{
@@ -453,17 +448,14 @@ void CDefaultVstEditor::OnCancel()
 void CDefaultVstEditor::DoClose()
 //-------------------------------
 {
-	if((m_pVstPlugin) && (m_hWnd))
+	if(m_hWnd)
 	{
 		CRect rect;
 		GetWindowRect(&rect);
-		m_pVstPlugin->SetEditorPos(rect.left, rect.top);
+		m_VstPlugin.SetEditorPos(rect.left, rect.top);
 	}
 
-	if(m_pVstPlugin)
-	{
-		m_pVstPlugin->Dispatch(effEditClose, 0, 0, NULL, 0);
-	}
+	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
 
 	DestroyWindow();
 }
@@ -514,18 +506,18 @@ void CDefaultVstEditor::OnParamSliderChanged(UINT id)
 void CDefaultVstEditor::SetParam(PlugParamIndex param, int value)
 //---------------------------------------------------------------
 {
-	if(m_pVstPlugin == nullptr || param >= m_pVstPlugin->GetNumParameters())
+	if(param >= m_VstPlugin.GetNumParameters())
 	{
 		return;
 	}
 
-	m_pVstPlugin->SetParameter(param, static_cast<PlugParamValue>(value) / static_cast<PlugParamValue>(PARAM_RESOLUTION));
+	m_VstPlugin.SetParameter(param, static_cast<PlugParamValue>(value) / static_cast<PlugParamValue>(PARAM_RESOLUTION));
 
 	// Update other GUI controls
 	UpdateParamDisplay(param);
 
 	// Act as if an automation message has been sent by the plugin (record param changes, set document modified, etc...)
-	m_pVstPlugin->AutomateParameter(param);
+	m_VstPlugin.AutomateParameter(param);
 
 }
 
@@ -534,21 +526,21 @@ void CDefaultVstEditor::SetParam(PlugParamIndex param, int value)
 void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
 //--------------------------------------------------------------
 {
-	if (m_nControlLock || param < paramOffset || param >= paramOffset + NUM_PLUGINEDITOR_PARAMETERS || m_pVstPlugin == nullptr)
+	if(m_nControlLock || param < paramOffset || param >= paramOffset + NUM_PLUGINEDITOR_PARAMETERS)
 	{
 		//Just to make sure we're not here as a consequence of an internal GUI change, and avoid modifying a parameter that doesn't exist on the GUI.
 		return;
 	}
 
 	// Get the actual parameter value from the plugin
-	const int val = static_cast<int>(m_pVstPlugin->GetParameter(param) * static_cast<float>(PARAM_RESOLUTION) + 0.5f);
+	const int val = static_cast<int>(m_VstPlugin.GetParameter(param) * static_cast<float>(PARAM_RESOLUTION) + 0.5f);
 
 	// Update the GUI controls
 
 	// Set lock to indicate that the changes to the GUI are internal - no need to notify the plug and re-update GUI.
 	m_nControlLock++;
 
-	controls[param - paramOffset]->SetParamValue(val, m_pVstPlugin->GetFormattedParamValue(param));
+	controls[param - paramOffset]->SetParamValue(val, m_VstPlugin.GetFormattedParamValue(param));
 
 	// Unset lock - done with internal GUI updates.
 	m_nControlLock--;

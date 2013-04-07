@@ -17,18 +17,12 @@
 
 #ifndef NO_VST
 
-//==============================
+//==============================================
 class COwnerVstEditor: public CAbstractVstEditor
-//==============================
+//==============================================
 {
-protected:
-/*	CVstPlugin *m_pVstPlugin;
-	CMenu *m_pMenu;
-	CMenu *m_pPresetMenu;
-*/
-
 public:
-	COwnerVstEditor(CVstPlugin *pPlugin);
+	COwnerVstEditor(CVstPlugin &plugin);
 	virtual ~COwnerVstEditor();
 	virtual void OnOK();
 	virtual void OnCancel();
@@ -38,7 +32,7 @@ public:
 	virtual bool SetSize(int contentWidth, int contentHeight);
 
 	//Overridden:
-	void UpdateParamDisplays() { m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0); };	//we trust that the plugin GUI can update its display with a bit of idle time.
+	void UpdateParamDisplays() { m_VstPlugin.Dispatch(effEditIdle, 0, 0, nullptr, 0.0f); };	//we trust that the plugin GUI can update its display with a bit of idle time.
 	afx_msg void OnClose();
 	bool OpenEditor(CWnd *parent);
 	void DoClose();

@@ -13,8 +13,8 @@
 
 #ifndef NO_VST
 
-COwnerVstEditor::COwnerVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
-//---------------------------------------------------------------------------------
+COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin)
+//-------------------------------------------------------------------------------
 {
 
 }
@@ -34,41 +34,38 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 
 	SetupMenu();
 
-	if(m_pVstPlugin)
+	// Set editor window size
+	ERect *pRect = nullptr;
+	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	m_VstPlugin.Dispatch(effEditOpen, 0, 0, m_hWnd, 0);
+	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
 	{
-		// Set editor window size
-		ERect *pRect = nullptr;
-		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, &pRect, 0);
-		m_pVstPlugin->Dispatch(effEditOpen, 0, 0, m_hWnd, 0);
-		m_pVstPlugin->Dispatch(effEditGetRect, 0, 0, &pRect, 0);
-		if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
-		{
-			// Plugin provided valid window size.
-			SetSize(pRect->right - pRect->left, pRect->bottom - pRect->top);
-		}
-
-		// Restore previous editor position
-		int editorX, editorY;
-		m_pVstPlugin->GetEditorPos(editorX, editorY);
-
-		if((editorX >= 0) && (editorY >= 0))
-		{
-			int cxScreen = GetSystemMetrics(SM_CXSCREEN);
-			int cyScreen = GetSystemMetrics(SM_CYSCREEN);
-			if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
-			{
-				SetWindowPos(NULL, editorX, editorY, 0, 0,
-					SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
-			}
-		}
-		SetTitle();
-
-		m_pVstPlugin->Dispatch(effEditTop, 0,0, NULL, 0);
-		m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
-
-		// Set knob mode to linear (2) instead of circular (0) for those plugins that support it (e.g. Steinberg VB-1)
-		m_pVstPlugin->Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
+		// Plugin provided valid window size.
+		SetSize(pRect->right - pRect->left, pRect->bottom - pRect->top);
 	}
+
+	// Restore previous editor position
+	int editorX, editorY;
+	m_VstPlugin.GetEditorPos(editorX, editorY);
+
+	if((editorX >= 0) && (editorY >= 0))
+	{
+		int cxScreen = GetSystemMetrics(SM_CXSCREEN);
+		int cyScreen = GetSystemMetrics(SM_CYSCREEN);
+		if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
+		{
+			SetWindowPos(NULL, editorX, editorY, 0, 0,
+				SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+		}
+	}
+	SetTitle();
+
+	m_VstPlugin.Dispatch(effEditTop, 0,0, NULL, 0);
+	m_VstPlugin.Dispatch(effEditIdle, 0,0, NULL, 0);
+
+	// Set knob mode to linear (2) instead of circular (0) for those plugins that support it (e.g. Steinberg VB-1)
+	m_VstPlugin.Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
 
 	ShowWindow(SW_SHOW);
 	return TRUE;
@@ -99,27 +96,15 @@ void COwnerVstEditor::OnCancel()
 void COwnerVstEditor::DoClose()
 //-----------------------------
 {
-#ifdef VST_LOG
-	Log("CVstEditor::DoClose()\n");
-#endif // VST_LOG
-	if ((m_pVstPlugin) && (m_hWnd))
+	if(m_hWnd)
 	{
 		CRect rect;
 		GetWindowRect(&rect);
-		m_pVstPlugin->SetEditorPos(rect.left, rect.top);
+		m_VstPlugin.SetEditorPos(rect.left, rect.top);
 	}
-	if (m_pVstPlugin)
+	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
+	if(m_hWnd)
 	{
-#ifdef VST_LOG
-		Log("Dispatching effEditClose...\n");
-#endif // VST_LOG
-		m_pVstPlugin->Dispatch(effEditClose, 0, 0, NULL, 0);
-	}
-	if (m_hWnd)
-	{
-#ifdef VST_LOG
-		Log("Destroying window...\n");
-#endif // VST_LOG
 		DestroyWindow();
 	}
 }
