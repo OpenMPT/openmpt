@@ -261,12 +261,6 @@ enum
 #include "Notification.h"
 
 
-/////////////////////////////////////////////////////////////////////////
-// Misc. Macros
-
-
-#define DeleteGDIObject(h) if (h) { ::DeleteObject(h); h = NULL; }
-
 #include "mainbar.h"
 #include "TrackerSettings.h"
 
@@ -301,6 +295,7 @@ public:
 	HANDLE m_hNotifyThread;
 	DWORD m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
+	static bool gnClipLeft, gnClipRight;
 	bool m_IsPlaybackRunning;
 
 	// Midi Input
@@ -564,8 +559,6 @@ public:
 	/// Array of paths of template modules that are available from file menu.
 	static std::vector<CString> s_TemplateModulePaths;
 };
-
-const CHAR gszBuildDate[] = __DATE__ " " __TIME__;
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -234,7 +234,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 
 		// MOD Type
 		LPCSTR pszModType = "MOD (ProTracker)";
-		switch(m_pSndFile->m_nType)
+		switch(m_pSndFile->GetType())
 		{
 		case MOD_TYPE_S3M:	pszModType = "S3M (ScreamTracker)"; break;
 		case MOD_TYPE_XM:	pszModType = "XM (FastTracker 2)"; break;
@@ -393,7 +393,7 @@ void CCtrlGeneral::OnSpeedChanged()
 
 
 void CCtrlGeneral::OnVSTiVolChanged()
-//-------------------------------------
+//-----------------------------------
 {
 	CHAR s[16];
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
@@ -418,7 +418,7 @@ void CCtrlGeneral::OnVSTiVolChanged()
 }
 
 void CCtrlGeneral::OnSamplePAChanged()
-//-------------------------------------
+//------------------------------------
 {
 	CHAR s[16];
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
@@ -526,8 +526,8 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 	Notification *pnotify = (Notification *)lParam;
 	if (pnotify)
 	{
-		m_VuMeterLeft.SetVuMeter(pnotify->masterVu[0]);
-		m_VuMeterRight.SetVuMeter(pnotify->masterVu[1]);
+		m_VuMeterLeft.SetVuMeter(pnotify->masterVU[0] & (~Notification::ClipVU));
+		m_VuMeterRight.SetVuMeter(pnotify->masterVU[1] & (~Notification::ClipVU));
 	}
 	return 0;
 }

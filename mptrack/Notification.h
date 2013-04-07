@@ -30,7 +30,8 @@ struct Notification
 
 	typedef uint16 Item;
 
-	static const SmpLength PosInvalid = -1;	// pos[i] is not valid (if it contains sample or envelope position)
+	static const SmpLength PosInvalid = SmpLength(-1);	// pos[i] is not valid (if it contains sample or envelope position)
+	static const uint32 ClipVU = 0x80000000;			// Master VU clip indicator bit (sound output has previously clipped)
 
 	/*
 		timestampSamples is kind of confusing at the moment:
@@ -46,19 +47,12 @@ struct Notification
 	uint32 tick;					// dito
 	ORDERINDEX order;				// dito
 	PATTERNINDEX pattern;			// dito
-	uint32 masterVu[2];				// dito
+	uint32 masterVU[2];				// dito
 	SmpLength pos[MAX_CHANNELS];	// Sample / envelope pos for each channel if != PosInvalid, or pattern channel VUs
-	Notification()
+
+	Notification(Type t = None, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p)
 	{
-		timestampSamples = 0;
-		type = Notification::None;
-		item = 0;
-		row = 0;
-		tick = 0;
-		order = 0;
-		pattern = 0;
-		MemsetZero(masterVu);
-		MemsetZero(pos);
+		MemsetZero(masterVU);
 	}
 };
 
