@@ -1660,7 +1660,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(NULL, 0);
 	// Avoid global volume ramping when trying samples in the treeview.
-	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
+	m_WaveFile.m_PlayConfig.setGlobalVolumeAppliesToMaster(false);
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.m_nSamplePreAmp = 48;
 	m_WaveFile.m_nDefaultTempo = 125;

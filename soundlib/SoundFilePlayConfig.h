@@ -18,11 +18,11 @@ enum
 	MIXING_CLIPMAX = 0x07FFFFFF,
 };
 
-enum
+enum tempoMode
 {
-	tempo_mode_classic      = 0,
-	tempo_mode_alternative  = 1,
-	tempo_mode_modern       = 2,
+	tempo_mode_classic		= 0,
+	tempo_mode_alternative	= 1,
+	tempo_mode_modern		= 2,
 };
 
 enum mixLevels
@@ -64,7 +64,7 @@ public:
 	void setVSTiVolume(float);
 	float getVSTiVolume();
 
-    void setGlobalVolumeAppliesToMaster(bool);
+	void setGlobalVolumeAppliesToMaster(bool);
 	bool getGlobalVolumeAppliesToMaster();
 	
 	void setUseGlobalPreAmp(bool);
@@ -90,13 +90,13 @@ public:
 
 private:
 
-//calculated internally (getters only):	
+//calculated internally (getters only):
 	float getVSTiGainFactor();
 
 	float m_IntToFloat;
 	float m_FloatToInt;
-	float m_VSTiAttenuation;	
-	float m_VSTiVolume;			
+	float m_VSTiAttenuation;
+	float m_VSTiVolume;
 
 	double m_normalSamplePreAmp;
 	double m_normalVSTiVol;
@@ -108,8 +108,5 @@ private:
 	bool m_displayDBValues;
 
 	int m_extraAttenuation;
-
-	DWORD m_LastSavedWithVersion;
-	DWORD m_CreatedWithVersion;
 };
 

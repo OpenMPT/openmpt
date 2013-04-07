@@ -463,7 +463,6 @@ CSoundFile::CSoundFile() :
 	m_lTotalSampleCount = 0;
 	m_bPositionChanged = true;
 
-	m_pConfig = new CSoundFilePlayConfig();
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
 }
 
@@ -471,7 +470,6 @@ CSoundFile::CSoundFile() :
 CSoundFile::~CSoundFile()
 //-----------------------
 {
-	delete m_pConfig;
 	delete m_pTuningsTuneSpecific;
 	Destroy();
 }
@@ -792,7 +790,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #endif // NO_VST
 
 	// Set up mix levels
-	m_pConfig->SetMixLevels(m_nMixLevels);
+	m_PlayConfig.SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
 	if(GetType() != MOD_TYPE_NONE)
