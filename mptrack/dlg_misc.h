@@ -21,7 +21,7 @@ class CModTypeDlg: public CDialog
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x;
-	CSoundFile *m_pSndFile;
+	CSoundFile &sndFile;
 	CHANNELINDEX m_nChannels;
 	MODTYPE m_nType;
 
@@ -31,7 +31,7 @@ public:
 // -! NEW_FEATURE#0023
 
 public:
-	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = MOD_TYPE_NONE; m_nChannels = 0; }
+	CModTypeDlg(CSoundFile &sf, CWnd *parent) : CDialog(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { m_nType = MOD_TYPE_NONE; m_nChannels = 0; }
 	bool VerifyData();
 	void UpdateDialog();
 
@@ -79,20 +79,20 @@ class CRemoveChannelsDlg: public CDialog
 //======================================
 {
 public:
-	CSoundFile *m_pSndFile;
+	CSoundFile &sndFile;
 	vector<bool> m_bKeepMask;
 	CHANNELINDEX m_nChannels, m_nRemove;
 	CListBox m_RemChansList;		//rewbs.removeChansDlgCleanup
 	bool m_ShowCancel;
 
 public:
-	CRemoveChannelsDlg(CSoundFile *pSndFile, CHANNELINDEX nChns, bool showCancel = true, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
-		{ m_pSndFile = pSndFile; 
-		  m_nChannels = m_pSndFile->GetNumChannels(); 
-		  m_nRemove = nChns;
-		  m_bKeepMask.assign(m_nChannels, true);
-		  m_ShowCancel = showCancel;
-		}
+	CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX nChns, bool showCancel = true, CWnd *parent=NULL) : CDialog(IDD_REMOVECHANNELS, parent), sndFile(sf)
+	{
+		m_nChannels = sndFile.GetNumChannels(); 
+		m_nRemove = nChns;
+		m_bKeepMask.assign(m_nChannels, true);
+		m_ShowCancel = showCancel;
+	}
 
 protected:
 	//{{AFX_VIRTUAL(CRemoveChannelsDlg)
@@ -185,14 +185,14 @@ protected:
 	CKeyboardControl m_Keyboard;
 	CComboBox m_CbnSample;
 	CSliderCtrl m_SbOctave;
-	CSoundFile *m_pSndFile;
+	CSoundFile &sndFile;
 	UINT m_nInstrument;
 	SAMPLEINDEX KeyboardMap[NOTE_MAX];
 	MouseAction mouseAction;
 
 public:
-	CSampleMapDlg(CSoundFile *pSndFile, UINT nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), mouseAction(mouseUnknown)
-		{ m_pSndFile = pSndFile; m_nInstrument = nInstr; }
+	CSampleMapDlg(CSoundFile &sf, UINT nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), mouseAction(mouseUnknown), sndFile(sf)
+		{ m_nInstrument = nInstr; }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

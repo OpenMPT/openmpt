@@ -452,7 +452,7 @@ public:
 	bool StopSoundFile(CSoundFile *);
 	bool PlaySoundFile(CSoundFile *);
 	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note);
-	BOOL PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
+	BOOL PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note);
 
 	void InitPreview();

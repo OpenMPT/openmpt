@@ -210,11 +210,11 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 // I/O From another song
 //
 
-bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile *pSrcSong, INSTRUMENTINDEX sourceInstr)
-//---------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile &srcSong, INSTRUMENTINDEX sourceInstr)
+//--------------------------------------------------------------------------------------------------------------------------
 {
-	if ((!pSrcSong) || (!sourceInstr) || (sourceInstr > pSrcSong->GetNumInstruments())
-		|| (targetInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[sourceInstr]))
+	if ((!sourceInstr) || (sourceInstr > srcSong.GetNumInstruments())
+		|| (targetInstr >= MAX_INSTRUMENTS) || (!srcSong.Instruments[sourceInstr]))
 	{
 		return false;
 	}
@@ -233,7 +233,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	DestroyInstrument(targetInstr, deleteAssociatedSamples);
 
 	Instruments[targetInstr] = pIns;
-	*pIns = *pSrcSong->Instruments[sourceInstr];
+	*pIns = *srcSong.Instruments[sourceInstr];
 
 	vector<SAMPLEINDEX> sourceSample;	// Sample index in source song
 	vector<SAMPLEINDEX> targetSample;	// Sample index in target song
@@ -242,7 +242,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
 	{
 		const SAMPLEINDEX sourceIndex = pIns->Keyboard[i];
-		if(sourceIndex > 0 && sourceIndex <= pSrcSong->GetNumSamples())
+		if(sourceIndex > 0 && sourceIndex <= srcSong.GetNumSamples())
 		{
 			const vector<SAMPLEINDEX>::const_iterator entry = std::find(sourceSample.begin(), sourceSample.end(), sourceIndex);
 			if(entry == sourceSample.end())
@@ -270,34 +270,34 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 		}
 	}
 
-	pIns->Convert(pSrcSong->GetType(), GetType());
+	pIns->Convert(srcSong.GetType(), GetType());
 
 	// Copy all referenced samples over
 	for(size_t i = 0; i < targetSample.size(); i++)
 	{
-		ReadSampleFromSong(targetSample[i], pSrcSong, sourceSample[i]);
+		ReadSampleFromSong(targetSample[i], srcSong, sourceSample[i]);
 	}
 
 	return true;
 }
 
 
-bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *pSrcSong, SAMPLEINDEX sourceSample)
-//-----------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &srcSong, SAMPLEINDEX sourceSample)
+//----------------------------------------------------------------------------------------------------------------
 {
-	if(pSrcSong == nullptr || !sourceSample || sourceSample > pSrcSong->GetNumSamples() || targetSample >= GetModSpecifications().samplesMax)
+	if(!sourceSample || sourceSample > srcSong.GetNumSamples() || targetSample >= GetModSpecifications().samplesMax)
 	{
 		return false;
 	}
 
 	DestroySampleThreadsafe(targetSample);
 
-	const ModSample &sourceSmp = pSrcSong->GetSample(sourceSample);
+	const ModSample &sourceSmp = srcSong.GetSample(sourceSample);
 
 	if(GetNumSamples() < targetSample) m_nSamples = targetSample;
 	Samples[targetSample] = sourceSmp;
-	Samples[targetSample].Convert(pSrcSong->GetType(), GetType());
-	strcpy(m_szNames[targetSample], pSrcSong->m_szNames[sourceSample]);
+	Samples[targetSample].Convert(srcSong.GetType(), GetType());
+	strcpy(m_szNames[targetSample], srcSong.m_szNames[sourceSample]);
 
 	if(sourceSmp.pSample)
 	{

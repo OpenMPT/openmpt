@@ -1289,7 +1289,6 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 {
 	CHAR s[64];
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 
 	if ((m_nBtnMouseOver < SMP_LEFTBAR_BUTTONS) || (m_dwStatus & SMPSTATUS_NCLBTNDOWN))
 	{
@@ -1300,7 +1299,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		if (pMainFrm) pMainFrm->SetHelpText("");
 	}
 	if (!pModDoc) return;
-	pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	if (m_rcClient.PtInRect(point))
 	{
 		const DWORD x = ScreenToSample(point.x);
@@ -1311,14 +1310,14 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
 		{
 			// Show cursor position as offset effect if no selection is made.
-			if(m_nSample > 0 && m_nSample <= pSndFile->GetNumSamples() && x < pSndFile->GetSample(m_nSample).nLength)
+			if(m_nSample > 0 && m_nSample <= sndFile.GetNumSamples() && x < sndFile.GetSample(m_nSample).nLength)
 			{
 				const DWORD xLow = (x / 0x100) % 0x100;
 				const DWORD xHigh = x / 0x10000;
 
-				const char cOffsetChar = pSndFile->GetModSpecifications().GetEffectLetter(CMD_OFFSET);
-				const bool bHasHighOffset = (pSndFile->TypeIsS3M_IT_MPT() || (pSndFile->GetType() == MOD_TYPE_XM));
-				const char cHighOffsetChar = pSndFile->GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(pSndFile->TypeIsS3M_IT_MPT() ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
+				const char cOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(CMD_OFFSET);
+				const bool bHasHighOffset = (sndFile.TypeIsS3M_IT_MPT() || (sndFile.GetType() == MOD_TYPE_XM));
+				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.TypeIsS3M_IT_MPT() ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
 				if(xHigh == 0)
 					wsprintf(s, "Offset: %c%02X", cOffsetChar, xLow);
@@ -1337,7 +1336,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	if (m_dwStatus & SMPSTATUS_MOUSEDRAG)
 	{
 		BOOL bAgain = FALSE;
-		const DWORD len = pSndFile->GetSample(m_nSample).nLength;
+		const DWORD len = sndFile.GetSample(m_nSample).nLength;
 		if (!len) return;
 		DWORD old = m_dwEndDrag;
 		if (m_nZoom)
@@ -1383,12 +1382,12 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 					m_lastDrawPoint.SetPoint(-1, -1);
 				}
 
-				if(pSndFile->GetSample(m_nSample).GetElementarySampleSize() == 2)
-					SetSampleData<int16, uint16>(pSndFile->GetSample(m_nSample).pSample, point, old);
-				else if(pSndFile->GetSample(m_nSample).GetElementarySampleSize() == 1)
-					SetSampleData<int8, uint8>(pSndFile->GetSample(m_nSample).pSample, point, old);
+				if(sndFile.GetSample(m_nSample).GetElementarySampleSize() == 2)
+					SetSampleData<int16, uint16>(sndFile.GetSample(m_nSample).pSample, point, old);
+				else if(sndFile.GetSample(m_nSample).GetElementarySampleSize() == 1)
+					SetSampleData<int8, uint8>(sndFile.GetSample(m_nSample).pSample, point, old);
 
-				ctrlSmp::AdjustEndOfSample(pSndFile->GetSample(m_nSample), pSndFile);
+				ctrlSmp::AdjustEndOfSample(sndFile.GetSample(m_nSample), sndFile);
 
 				InvalidateSample();
 				pModDoc->SetModified();
@@ -2074,8 +2073,8 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 	BeginWaitCursor();
 	if(pModDoc != nullptr && (m_nSample <= pModDoc->GetNumSamples()))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if(sample.GetNumChannels() > 1 && sample.pSample != nullptr && sample.nLength != 0)
 		{
 			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
@@ -2085,7 +2084,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 				rightSmp = pModDoc->InsertSample(true);
 				if(rightSmp != SAMPLEINDEX_INVALID)
 				{
-					pSndFile->ReadSampleFromSong(rightSmp, pSndFile, m_nSample);
+					sndFile.ReadSampleFromSong(rightSmp, sndFile, m_nSample);
 				} else
 				{
 					return;
@@ -2094,13 +2093,13 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
-			if(ctrlSmp::ConvertToMono(sample, pSndFile, convert))
+			if(ctrlSmp::ConvertToMono(sample, sndFile, convert))
 			{
 				if(convert == ctrlSmp::splitSample)
 				{
 					// Split mode: We need to convert the right channel as well!
-					ModSample &right = pSndFile->GetSample(rightSmp);
-					ctrlSmp::ConvertToMono(right, pSndFile, ctrlSmp::onlyRight);
+					ModSample &right = sndFile.GetSample(rightSmp);
+					ctrlSmp::ConvertToMono(right, sndFile, ctrlSmp::onlyRight);
 
 					// Try to create a new instrument as well which maps to the right sample.
 					INSTRUMENTINDEX ins = pModDoc->FindSampleParent(m_nSample);
@@ -2109,18 +2108,18 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 						INSTRUMENTINDEX rightIns = pModDoc->InsertInstrument(0, ins);
 						if(rightIns != INSTRUMENTINDEX_INVALID)
 						{
-							for(size_t i = 0; i < CountOf(pSndFile->Instruments[rightIns]->Keyboard); i++)
+							for(size_t i = 0; i < CountOf(sndFile.Instruments[rightIns]->Keyboard); i++)
 							{
-								if(pSndFile->Instruments[rightIns]->Keyboard[i] == m_nSample)
+								if(sndFile.Instruments[rightIns]->Keyboard[i] == m_nSample)
 								{
-									pSndFile->Instruments[rightIns]->Keyboard[i] = rightSmp;
+									sndFile.Instruments[rightIns]->Keyboard[i] = rightSmp;
 								}
 							}
 						}
 					}
 
 					// Finally, adjust sample panning
-					if(pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
+					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 					{
 						sample.uFlags.set(CHN_PANNING);
 						sample.nPan = 0;
@@ -2561,10 +2560,9 @@ void CViewSample::OnAddSilence()
 {
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if (!pSndFile) return;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
-	ModSample &sample = pSndFile->GetSample(m_nSample);
+	ModSample &sample = sndFile.GetSample(m_nSample);
 
 	CAddSilenceDlg dlg(this, 32, sample.nLength);
 	if (dlg.DoModal() != IDOK) return;
@@ -2591,7 +2589,7 @@ void CViewSample::OnAddSilence()
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, sample.nLength);
 			else	// make it longer!
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, sample.nLength, dlg.m_nSamples);
-			ctrlSmp::ResizeSample(sample, dlg.m_nSamples, pSndFile);
+			ctrlSmp::ResizeSample(sample, dlg.m_nSamples, sndFile);
 		}
 	} else
 	{
@@ -2602,7 +2600,7 @@ void CViewSample::OnAddSilence()
 
 			UINT nStart = (dlg.m_nEditOption == addsilence_at_end) ? sample.nLength : 0;
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, nStart, nStart + dlg.m_nSamples);
-			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, pSndFile);
+			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, sndFile);
 		}
 	}
 
