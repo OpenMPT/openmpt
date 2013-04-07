@@ -22,9 +22,9 @@ protected:
 
 
 public:
-	CVstPlugin *m_pVstPlugin;
+	CVstPlugin &m_VstPlugin;
 	int m_nCurProg;
-	CAbstractVstEditor(CVstPlugin *pPlugin);
+	CAbstractVstEditor(CVstPlugin &plugin);
 	virtual ~CAbstractVstEditor();
 	void SetupMenu(bool force = false);
 	void SetTitle();
