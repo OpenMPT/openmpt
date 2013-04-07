@@ -2132,90 +2132,18 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 }
 
 
-LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
-//-----------------------------------------------------------
+LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
+//---------------------------------------------------------
 {
-	const DWORD dwMidiData = dwMidiDataParam;
-	static BYTE midivolume = 127;
-
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr)
+	CModDoc *modDoc = GetDocument();
+	if(modDoc != nullptr)
 	{
-		return 0;
+		modDoc->ProcessMIDI(midiData, m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+		return 1;
 	}
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
-
-	BYTE midiByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
-	BYTE midiByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
-
-	uint8 nNote  = midiByte1 + NOTE_MIN;
-	int nVol = midiByte2;
-	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
-	if((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
-
-	BYTE mappedIndex = 0, paramValue = 0;
-	uint32 paramIndex = 0;
-	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
-
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if(ih->HandleMIDIMessage(kCtxViewInstruments, dwMidiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
-	{
-		// Mapped to a command, no need to pass message on.
-		captured = true;
-	}
-
-	if(captured)
-	{
-		// Event captured by MIDI mapping or shortcut, no need to pass message on.
-		return 0;
-	}
-
-	switch(event)
-	{
-	case MIDIEvents::evNoteOff: // Note Off
-		midiByte2 = 0;
-
-	case MIDIEvents::evNoteOn: // Note On
-		LimitMax(nNote, NOTE_MAX);
-		pModDoc->NoteOff(nNote, false, m_nInstrument);
-		if(midiByte2 & 0x7F)
-		{
-			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
-			pModDoc->PlayNote(nNote, m_nInstrument, 0, false, nVol);
-		}
-		break;
-
-	case MIDIEvents::evControllerChange: //Controller change
-		switch(midiByte1)
-		{
-		case MIDIEvents::MIDICC_Volume_Coarse: //Volume
-			midivolume = midiByte2;
-			break;
-		}
-
-	default:
-		if((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
-		{
-			const INSTRUMENTINDEX instr = m_nInstrument;
-			IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
-			if(plug)
-			{
-				plug->MidiSend(dwMidiData);
-				// Sending midi may modify the plug. For now, if MIDI data
-				// is not active sensing or aftertouch messages, set modified.
-				if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense) && event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch && sndFile.GetModSpecifications().supportsPlugins)
-				{
-					CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
-				}
-			}
-		}
-		break;
-	}
-
 	return 0;
 }
+
 
 BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 //--------------------------------------------------

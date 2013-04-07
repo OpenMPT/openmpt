@@ -72,8 +72,6 @@ void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, DWORD &dwParam1)
 /////////////////////////////////////////////////////////////////////////////
 // MMSYSTEM Midi Record
 
-DWORD gdwLastMidiEvtTime = 0;
-
 void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dwParam2)
 //-------------------------------------------------------------------------------------
 {
@@ -90,29 +88,25 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dw
 #endif
 
 	hWndMidi = pMainFrm->GetMidiRecordWnd();
-	if ((hWndMidi) && ((wMsg == MIM_DATA) || (wMsg == MIM_MOREDATA)))
+	if(wMsg == MIM_DATA || wMsg == MIM_MOREDATA)
 	{
-		switch(MIDIEvents::GetTypeFromEvent(dwParam1))
+		if(::IsWindow(hWndMidi))
 		{
-			case MIDIEvents::evSystem:	// Midi Clock
-				if (wMsg == MIM_DATA)
-				{
-					DWORD dwTime = timeGetTime();
-					const DWORD timediff = dwTime - gdwLastMidiEvtTime;
-					if (timediff < 20 * 3) break;
-					
-					gdwLastMidiEvtTime = dwTime; // continue
-				}
-				else break;
-
+			switch(MIDIEvents::GetTypeFromEvent(dwParam1))
+			{
 			case MIDIEvents::evNoteOff:	// Note Off
 			case MIDIEvents::evNoteOn:	// Note On
 				ApplyTransposeKeyboardSetting(*pMainFrm, dwParam1);
+				// Intentional fall-through
 
 			default:
-				::PostMessage(hWndMidi, WM_MOD_MIDIMSG, dwParam1, dwParam2);
-			break;
+				if(::SendMessage(hWndMidi, WM_MOD_MIDIMSG, dwParam1, dwParam2))
+					return;	// Message has been handled
+				break;
+			}
 		}
+		// Pass MIDI to keyboard handler
+		pMainFrm->GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, dwParam1);
 	}
 }
 

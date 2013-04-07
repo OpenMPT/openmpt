@@ -40,6 +40,7 @@ protected:
 private:
 	CSoundFile& m_rSndFile;
 	CMIDIMapper& m_rMIDIMapper;
+	HWND oldMIDIRecondWnd;
 
 private:
 	void UpdateString();

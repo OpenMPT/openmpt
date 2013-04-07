@@ -78,6 +78,7 @@ public:
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
+	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	virtual HBRUSH OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor);
 
 	// -> CODE#0015
