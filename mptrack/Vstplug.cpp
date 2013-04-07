@@ -2751,9 +2751,9 @@ void CVstPlugin::ToggleEditor()
 		} else
 		{
 			if (HasEditor())
-				m_pEditor =  new COwnerVstEditor(this);
+				m_pEditor =  new COwnerVstEditor(*this);
 			else
-				m_pEditor = new CDefaultVstEditor(this);
+				m_pEditor = new CDefaultVstEditor(*this);
 
 			if (m_pEditor)
 				m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
