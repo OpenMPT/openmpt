@@ -310,7 +310,7 @@ public:
 	ModInstrument *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
-	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
+	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
 	CSoundFilePlayConfig* m_pConfig;
@@ -643,8 +643,8 @@ public:
 	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const;
 
 	// I/O from another sound file
-	bool ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile *pSrcSong, INSTRUMENTINDEX sourceInstr);
-	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile *pSrcSong, SAMPLEINDEX sourceSample);
+	bool ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile &srcSong, INSTRUMENTINDEX sourceInstr);
+	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &srcSong, SAMPLEINDEX sourceSample);
 
 	// Period/Note functions
 	UINT GetNoteFromPeriod(UINT period) const;

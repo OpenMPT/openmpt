@@ -24,9 +24,9 @@ class CFindReplaceTab: public CPropertyPage
 //=========================================
 {
 protected:
-	bool m_bReplace;	// is this the replace tab?
-	CModDoc *m_pModDoc;
+	CSoundFile &sndFile;
 	EffectInfo effectInfo;
+	bool m_bReplace;	// is this the replace tab?
 
 public:
 	FlagSet<FindReplace::Flags> m_Flags;
@@ -60,7 +60,7 @@ protected:
 	void ChangeVolCmd();
 
 public:
-	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CModDoc *pModDoc) : CPropertyPage(nIDD), effectInfo(pModDoc->GetrSoundFile()) { ASSERT(pModDoc != nullptr); m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
+	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CSoundFile &sf) : CPropertyPage(nIDD), effectInfo(sf), sndFile(sf) { m_bReplace = bReplaceTab; }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -94,11 +94,11 @@ class CPatternPropertiesDlg: public CDialog
 //=========================================
 {
 protected:
-	CModDoc *m_pModDoc;
+	CModDoc &modDoc;
 	PATTERNINDEX m_nPattern;
 
 public:
-	CPatternPropertiesDlg(CModDoc *pModDoc, PATTERNINDEX nPat, CWnd *parent=NULL):CDialog(IDD_PATTERN_PROPERTIES, parent) { m_pModDoc = pModDoc; m_nPattern = nPat; }
+	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent=NULL):CDialog(IDD_PATTERN_PROPERTIES, parent), modDoc(modParent), m_nPattern(nPat) { }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -121,13 +121,13 @@ class CPageEditCommand: public CPropertyPage
 //==========================================
 {
 protected:
-	CModDoc *m_pModDoc;
+	CSoundFile &sndFile;
 	EffectInfo effectInfo;
 	CEditCommand *m_pParent;
 	bool m_bInitialized;
 
 public:
-	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id) : CPropertyPage(id), m_pModDoc(pModDoc), effectInfo(pModDoc->GetrSoundFile()), m_pParent(parent), m_bInitialized(false) {};
+	CPageEditCommand(CSoundFile &sf, CEditCommand *parent, UINT id) : CPropertyPage(id), sndFile(sf), effectInfo(sf), m_pParent(parent), m_bInitialized(false) {};
 
 	virtual ~CPageEditCommand() {}
 	virtual BOOL OnInitDialog();
@@ -145,7 +145,7 @@ protected:
 	ModCommand::INSTR m_nInstr;
 
 public:
-	CPageEditNote(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITNOTE) {}
+	CPageEditNote(CSoundFile &sf, CEditCommand *parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITNOTE) {}
 	void Init(ModCommand &m) { m_nNote = m.note; m_nInstr = m.instr; }
 	void UpdateDialog();
 
@@ -168,7 +168,7 @@ protected:
 	bool m_bIsParamControl;
 
 public:
-	CPageEditVolume(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITVOLUME) {};
+	CPageEditVolume(CSoundFile &sf, CEditCommand *parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITVOLUME) {};
 	void Init(ModCommand &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = m.IsPcNote(); };
 	void UpdateDialog();
 	void UpdateRanges();
@@ -200,7 +200,7 @@ protected:
 	ModCommand* m_pModcommand;
 
 public:
-	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
+	CPageEditEffect(CSoundFile &sf, CEditCommand *parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITEFFECT) {}
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	void Init(ModCommand &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = m.GetValueVolCol();}
@@ -305,15 +305,12 @@ class CSplitKeyboadSettings: public CDialog
 {
 protected:
 	CComboBox m_CbnSplitInstrument, m_CbnSplitNote, m_CbnOctaveModifier, m_CbnSplitVolume;
-	CSoundFile *m_pSndFile;
+	CSoundFile &sndFile;
 
 public:
 	SplitKeyboardSettings &m_Settings;
 
-	CSplitKeyboadSettings(CWnd *parent, CSoundFile *pSndFile, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), m_Settings(settings)
-	{
-		m_pSndFile = pSndFile;
-	}
+	CSplitKeyboadSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), m_Settings(settings), sndFile(sf) { }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

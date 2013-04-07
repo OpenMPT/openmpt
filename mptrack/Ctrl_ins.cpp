@@ -1123,7 +1123,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			LPDRAGONDROP pDropInfo = (LPDRAGONDROP)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
 			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
-			if (pSndFile) return OpenInstrument(pSndFile, pDropInfo->dwDropItem);
+			if (pSndFile) return OpenInstrument(*pSndFile, pDropInfo->dwDropItem);
 		}
 		break;
 
@@ -1508,16 +1508,16 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 }
 
 
-BOOL CCtrlInstruments::OpenInstrument(CSoundFile *pSndFile, UINT nInstr)
-//----------------------------------------------------------------------
+BOOL CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr)
+//--------------------------------------------------------------------------------
 {
-	if ((!pSndFile) || (!nInstr) || (nInstr > pSndFile->m_nInstruments)) return FALSE;
+	if((!nInstr) || (nInstr > sndFile.GetNumInstruments())) return FALSE;
 	BeginWaitCursor();
 
 	CriticalSection cs;
 
 	bool bFirst = false;
-	if (!m_pSndFile->m_nInstruments)
+	if (!m_pSndFile->GetNumInstruments())
 	{
 		bFirst = true;
 		m_pSndFile->m_nInstruments = 1;
@@ -1530,7 +1530,7 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile *pSndFile, UINT nInstr)
 		m_nInstrument = 1;
 		bFirst = true;
 	}
-	m_pSndFile->ReadInstrumentFromSong(m_nInstrument, pSndFile, nInstr);
+	m_pSndFile->ReadInstrumentFromSong(m_nInstrument, sndFile, nInstr);
 
 	cs.Leave();
 
@@ -2528,11 +2528,11 @@ void CCtrlInstruments::OnEditSampleMap()
 {
 	if ((m_nInstrument) && (m_pModDoc))
 	{
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		ModInstrument *pIns = pSndFile->Instruments[m_nInstrument];
+		CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
+		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		if (pIns)
 		{
-			CSampleMapDlg dlg(pSndFile, m_nInstrument, this);
+			CSampleMapDlg dlg(sndFile, m_nInstrument, this);
 			if (dlg.DoModal() == IDOK)
 			{
 				m_pModDoc->SetModified();
