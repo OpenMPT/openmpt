@@ -31,7 +31,7 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		SetKey(HOTKEYF_MIDI, MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
 		m_pOptKeyDlg->OnSetKeyChoice(); 
 	}
-	return 0;
+	return 1;
 }
 
 

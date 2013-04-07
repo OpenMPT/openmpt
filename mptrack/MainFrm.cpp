@@ -2605,13 +2605,10 @@ void CMainFrame::OnViewMIDIMapping()
 //----------------------------------
 {
 	CModDoc* pModDoc = GetActiveDoc();
-	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-	if(!pSndFile) return;
+	if(!pModDoc) return;
 
-	const HWND oldMIDIRecondWnd = GetMidiRecordWnd();
-	CMIDIMappingDialog dlg(this, *pSndFile);
+	CMIDIMappingDialog dlg(this, pModDoc->GetrSoundFile());
 	dlg.DoModal();
-	SetMidiRecordWnd(oldMIDIRecondWnd);
 }
 
 

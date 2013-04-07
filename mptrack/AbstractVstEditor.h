@@ -51,6 +51,7 @@ public:
 	afx_msg void OnCreateInstrument();
 	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 
 	//Overridden methods:
 	virtual void OnOK() = 0;
@@ -59,6 +60,7 @@ public:
 	virtual void DoClose() = 0;
 	virtual void UpdateParamDisplays() = 0;
 	virtual afx_msg void OnClose() = 0;
+	void OnSetFocus(CWnd *oldWnd);
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
@@ -81,8 +83,8 @@ private:
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();
 	void UpdateOptionsMenu();
-	INSTRUMENTINDEX GetBestInstrumentCandidate();
-	bool CheckInstrument(INSTRUMENTINDEX ins);
+	INSTRUMENTINDEX GetBestInstrumentCandidate() const;
+	bool CheckInstrument(INSTRUMENTINDEX ins) const;
 	bool ValidateCurrentInstrument();
 	INSTRUMENTINDEX m_nInstrument;
 	int m_nLearnMacro;

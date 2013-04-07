@@ -3794,7 +3794,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	if(captured)
 	{
 		// Event captured by MIDI mapping or shortcut, no need to pass message on.
-		return 0;
+		return 1;
 	}
 
 	switch(event)
@@ -3898,7 +3898,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 	}
 
-	return 0;
+	return 1;
 }
 
 
