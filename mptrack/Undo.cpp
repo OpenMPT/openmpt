@@ -44,20 +44,18 @@ void CPatternUndo::ClearUndo()
 bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious, bool storeChannelInfo)
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(m_pModDoc == nullptr) return false;
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	UndoInfo sUndo;
 	ModCommand *pUndoData, *pPattern;
 	ROWINDEX nRows;
 
-	if (!pSndFile->Patterns.IsValidPat(pattern)) return false;
-	nRows = pSndFile->Patterns[pattern].GetNumRows();
-	pPattern = pSndFile->Patterns[pattern];
-	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= pSndFile->GetNumChannels())) return false;
+	if (!sndFile.Patterns.IsValidPat(pattern)) return false;
+	nRows = sndFile.Patterns[pattern].GetNumRows();
+	pPattern = sndFile.Patterns[pattern];
+	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= sndFile.GetNumChannels())) return false;
 	if (firstRow + numRows >= nRows) numRows = nRows - firstRow;
-	if (firstChn + numChns >= pSndFile->GetNumChannels()) numChns = pSndFile->GetNumChannels() - firstChn;
+	if (firstChn + numChns >= sndFile.GetNumChannels()) numChns = sndFile.GetNumChannels() - firstChn;
 
 	pUndoData = CPattern::AllocatePattern(numRows, numChns);
 	if (!pUndoData) return false;
@@ -71,25 +69,25 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 	}
 
 	sUndo.pattern = pattern;
-	sUndo.patternsize = pSndFile->Patterns[pattern].GetNumRows();
+	sUndo.patternsize = sndFile.Patterns[pattern].GetNumRows();
 	sUndo.firstChannel = firstChn;
 	sUndo.firstRow = firstRow;
 	sUndo.numChannels = numChns;
 	sUndo.numRows = numRows;
 	sUndo.pbuffer = pUndoData;
 	sUndo.linkToPrevious = linkToPrevious;
-	pPattern += firstChn + firstRow * pSndFile->GetNumChannels();
+	pPattern += firstChn + firstRow * sndFile.GetNumChannels();
 	for(ROWINDEX iy = 0; iy < numRows; iy++)
 	{
 		memcpy(pUndoData, pPattern, numChns * sizeof(ModCommand));
 		pUndoData += numChns;
-		pPattern += pSndFile->GetNumChannels();
+		pPattern += sndFile.GetNumChannels();
 	}
 
 	if(storeChannelInfo)
 	{
-		sUndo.channelInfo = new ChannelInfo(pSndFile->GetNumChannels());
-		memcpy(sUndo.channelInfo->settings, pSndFile->ChnSettings, sizeof(ModChannelSettings) * pSndFile->GetNumChannels());
+		sUndo.channelInfo = new ChannelInfo(sndFile.GetNumChannels());
+		memcpy(sUndo.channelInfo->settings, sndFile.ChnSettings, sizeof(ModChannelSettings) * sndFile.GetNumChannels());
 	} else
 	{
 		sUndo.channelInfo = nullptr;
@@ -97,7 +95,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 
 	UndoBuffer.push_back(sUndo);
 
-	if(updateView) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
+	if(updateView) modDoc.UpdateAllViews(NULL, HINT_UNDO);
 	return true;
 }
 
@@ -115,9 +113,7 @@ PATTERNINDEX CPatternUndo::Undo()
 PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 //------------------------------------------------------
 {
-	if(m_pModDoc == nullptr) return PATTERNINDEX_INVALID;
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return PATTERNINDEX_INVALID;
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	ModCommand *pUndoData, *pPattern;
 	PATTERNINDEX nPattern;
@@ -127,7 +123,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 	if (CanUndo() == false) return PATTERNINDEX_INVALID;
 
 	// If the most recent undo step is invalid, trash it.
-	while(UndoBuffer.back().pattern >= pSndFile->Patterns.Size())
+	while(UndoBuffer.back().pattern >= sndFile.Patterns.Size())
 	{
 		RemoveLastUndoStep();
 		// The command which was connect to this command is no more valid, so don't search for the next command.
@@ -136,62 +132,62 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 	}
 
 	// Select most recent undo slot
-	const UndoInfo *pUndo = &UndoBuffer.back();
+	const UndoInfo &undo = UndoBuffer.back();
 
-	if(pUndo->channelInfo != nullptr)
+	if(undo.channelInfo != nullptr)
 	{
-		if(pUndo->channelInfo->oldNumChannels != pSndFile->GetNumChannels())
+		if(undo.channelInfo->oldNumChannels != sndFile.GetNumChannels())
 		{
 			// Add or remove channels
-			vector<CHANNELINDEX> channels(pUndo->channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
-			const CHANNELINDEX copyCount = Util::Min(pSndFile->GetNumChannels(), pUndo->channelInfo->oldNumChannels);
+			vector<CHANNELINDEX> channels(undo.channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
+			const CHANNELINDEX copyCount = Util::Min(sndFile.GetNumChannels(), undo.channelInfo->oldNumChannels);
 			for(CHANNELINDEX i = 0; i < copyCount; i++)
 			{
 				channels[i] = i;
 			}
-			m_pModDoc->ReArrangeChannels(channels, false);
+			modDoc.ReArrangeChannels(channels, false);
 		}
-		memcpy(pSndFile->ChnSettings, pUndo->channelInfo->settings, sizeof(ModChannelSettings) * pUndo->channelInfo->oldNumChannels);
+		memcpy(sndFile.ChnSettings, undo.channelInfo->settings, sizeof(ModChannelSettings) * undo.channelInfo->oldNumChannels);
 
 		// Channel mute status might have changed...
-		for(CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
+		for(CHANNELINDEX i = 0; i < sndFile.GetNumChannels(); i++)
 		{
-			m_pModDoc->UpdateChannelMuteStatus(i);
+			modDoc.UpdateChannelMuteStatus(i);
 		}
 
 	}
 
-	nPattern = pUndo->pattern;
-	nRows = pUndo->patternsize;
-	if(pUndo->firstChannel + pUndo->numChannels <= pSndFile->GetNumChannels())
+	nPattern = undo.pattern;
+	nRows = undo.patternsize;
+	if(undo.firstChannel + undo.numChannels <= sndFile.GetNumChannels())
 	{
-		if(!pSndFile->Patterns[nPattern])
+		if(!sndFile.Patterns[nPattern])
 		{
-			if(!pSndFile->Patterns[nPattern].AllocatePattern(nRows))
+			if(!sndFile.Patterns[nPattern].AllocatePattern(nRows))
 			{
 				return PATTERNINDEX_INVALID;
 			}
-		} else if(pSndFile->Patterns[nPattern].GetNumRows() != nRows)
+		} else if(sndFile.Patterns[nPattern].GetNumRows() != nRows)
 		{
-			pSndFile->Patterns[nPattern].Resize(nRows);
+			sndFile.Patterns[nPattern].Resize(nRows);
 		}
 
-		linkToPrevious = pUndo->linkToPrevious;
-		pUndoData = pUndo->pbuffer;
-		pPattern = pSndFile->Patterns[nPattern];
-		if (!pSndFile->Patterns[nPattern]) return PATTERNINDEX_INVALID;
-		pPattern += pUndo->firstChannel + (pUndo->firstRow * pSndFile->GetNumChannels());
-		for(ROWINDEX iy = 0; iy < pUndo->numRows; iy++)
+		linkToPrevious = undo.linkToPrevious;
+		pUndoData = undo.pbuffer;
+		pPattern = sndFile.Patterns[nPattern];
+		if (!sndFile.Patterns[nPattern]) return PATTERNINDEX_INVALID;
+		pPattern += undo.firstChannel + (undo.firstRow * sndFile.GetNumChannels());
+		for(ROWINDEX iy = 0; iy < undo.numRows; iy++)
 		{
-			memcpy(pPattern, pUndoData, pUndo->numChannels * sizeof(ModCommand));
-			pPattern += pSndFile->GetNumChannels();
-			pUndoData += pUndo->numChannels;
+			memcpy(pPattern, pUndoData, undo.numChannels * sizeof(ModCommand));
+			pPattern += sndFile.GetNumChannels();
+			pUndoData += undo.numChannels;
 		}
 	}		
 
 	RemoveLastUndoStep();
 
-	if(CanUndo() == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
+	if(CanUndo() == false) modDoc.UpdateAllViews(NULL, HINT_UNDO);
 
 	if(linkToPrevious)
 	{
@@ -268,28 +264,23 @@ void CSampleUndo::ClearUndo(const SAMPLEINDEX smp)
 bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType, SmpLength changeStart, SmpLength changeEnd)
 //--------------------------------------------------------------------------------------------------------------------------
 {	
-	if(m_pModDoc == nullptr || !SampleBufferExists(smp)) return false;
+	if(!SampleBufferExists(smp)) return false;
 
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
-	
 	// Remove an undo step if there are too many.
 	while(UndoBuffer[smp - 1].size() >= MAX_UNDO_LEVEL)
 	{
 		DeleteUndoStep(smp, 0);
 	}
 	
-	// Restrict amount of memory that's being used
-	RestrictBufferSize();
-
 	// Create new undo slot
 	UndoInfo undo;
 
-	const ModSample &oldSample = pSndFile->GetSample(smp);
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const ModSample &oldSample = sndFile.GetSample(smp);
 
 	// Save old sample header
 	undo.OldSample = oldSample;
-	MemCopy(undo.oldName, pSndFile->m_szNames[smp]);
+	StringFixer::Copy(undo.oldName, sndFile.m_szNames[smp]);
 	undo.changeType = changeType;
 
 	if(changeType == sundo_replace)
@@ -309,6 +300,9 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 		ASSERT(false);
 		return false;
 	}
+
+	// Restrict amount of memory that's being used
+	RestrictBufferSize();
 
 	undo.changeStart = changeStart;
 	undo.changeEnd = changeEnd;
@@ -331,7 +325,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 			const size_t bytesPerSample = oldSample.GetBytesPerSample();
 			const size_t changeLen = changeEnd - changeStart;
 
-			undo.samplePtr = pSndFile->AllocateSample((changeLen + 4) * bytesPerSample);
+			undo.samplePtr = sndFile.AllocateSample((changeLen + 4) * bytesPerSample);
 			if(undo.samplePtr == nullptr) return false;
 			memcpy(undo.samplePtr, oldSample.pSample + changeStart * bytesPerSample, changeLen * bytesPerSample);
 
@@ -352,7 +346,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 
 	UndoBuffer[smp - 1].push_back(undo);
 
-	m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
+	modDoc.UpdateAllViews(NULL, HINT_UNDO);
 
 	return true;
 }
@@ -362,15 +356,14 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 //-------------------------------------------
 {
-	if(m_pModDoc == nullptr || !CanUndo(smp)) return false;
+	if(!CanUndo(smp)) return false;
 
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	// Select most recent undo slot
 	UndoInfo &undo = UndoBuffer[smp - 1].back();
 
-	ModSample &sample = pSndFile->GetSample(smp);
+	ModSample &sample = sndFile.GetSample(smp);
 	LPSTR pCurrentSample = sample.pSample;
 	LPSTR pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
 	bool replace = false;
@@ -385,17 +378,17 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 
 	case sundo_invert:
 		// invert again
-		ctrlSmp::InvertSample(sample, undo.changeStart, undo.changeEnd, pSndFile);
+		ctrlSmp::InvertSample(sample, undo.changeStart, undo.changeEnd, sndFile);
 		break;
 
 	case sundo_reverse:
 		// reverse again
-		ctrlSmp::ReverseSample(sample, undo.changeStart, undo.changeEnd, pSndFile);
+		ctrlSmp::ReverseSample(sample, undo.changeStart, undo.changeEnd, sndFile);
 		break;
 
 	case sundo_unsign:
 		// unsign again
-		ctrlSmp::UnsignSample(sample, undo.changeStart, undo.changeEnd, pSndFile);
+		ctrlSmp::UnsignSample(sample, undo.changeStart, undo.changeEnd, sndFile);
 		break;
 
 	case sundo_insert:
@@ -414,7 +407,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 
 	case sundo_delete:
 		// insert deleted data
-		pNewSample = pSndFile->AllocateSample(undo.OldSample.GetSampleSizeInBytes() + 4 * bytesPerSample);
+		pNewSample = sndFile.AllocateSample(undo.OldSample.GetSampleSizeInBytes() + 4 * bytesPerSample);
 		if(pNewSample == nullptr) return false;
 		replace = true;
 		memcpy(pNewSample, pCurrentSample, undo.changeStart * bytesPerSample);
@@ -437,18 +430,18 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 	// Restore old sample header
 	sample = undo.OldSample;
 	sample.pSample = pCurrentSample; // select the "correct" old sample
-	MemCopy(pSndFile->m_szNames[smp], undo.oldName);
+	MemCopy(sndFile.m_szNames[smp], undo.oldName);
 
 	if(replace)
 	{
-		ctrlSmp::ReplaceSample(sample, pNewSample, undo.OldSample.nLength, pSndFile);
+		ctrlSmp::ReplaceSample(sample, pNewSample, undo.OldSample.nLength, sndFile);
 	}
-	ctrlSmp::AdjustEndOfSample(sample, pSndFile);
+	ctrlSmp::AdjustEndOfSample(sample, sndFile);
 
 	RemoveLastUndoStep(smp);
 
-	if(CanUndo(smp) == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
-	m_pModDoc->SetModified();
+	if(CanUndo(smp) == false) modDoc.UpdateAllViews(NULL, HINT_UNDO);
+	modDoc.SetModified();
 
 	return true;
 }

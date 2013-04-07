@@ -1354,9 +1354,9 @@ void CViewPattern::OnPatternProperties()
 //--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc && pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->Patterns.IsValidPat(m_nPattern))
+	if(pModDoc && pModDoc->GetrSoundFile().Patterns.IsValidPat(m_nPattern))
 	{
-		CPatternPropertiesDlg dlg(pModDoc, m_nPattern, this);
+		CPatternPropertiesDlg dlg(*pModDoc, m_nPattern, this);
 		if(dlg.DoModal() == IDOK)
 		{
 			UpdateScrollSize();
@@ -1924,8 +1924,8 @@ void CViewPattern::OnEditFind()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc);
-		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc);
+		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc->GetrSoundFile());
+		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc->GetrSoundFile());
 		CPropertySheet dlg("Find/Replace");
 
 		pageFind.m_Cmd = m_findReplace.cmdFind;
@@ -6506,10 +6506,8 @@ void CViewPattern::SetSplitKeyboardSettings()
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return;
 
-	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pSndFile, pModDoc->GetSplitKeyboardSettings());
+	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pModDoc->GetrSoundFile(), pModDoc->GetSplitKeyboardSettings());
 	if (dlg.DoModal() == IDOK)
 		pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_SMPNAMES);
 }

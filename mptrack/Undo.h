@@ -52,7 +52,7 @@ protected:
 	};
 
 	std::vector<UndoInfo> UndoBuffer;
-	CModDoc *m_pModDoc;
+	CModDoc &modDoc;
 
 	// Pattern undo helper functions
 	void DeleteUndoStep(size_t step);
@@ -71,12 +71,9 @@ public:
 	// Remove the latest added undo step from the undo buffer
 	void RemoveLastUndoStep();
 
-	void SetParent(CModDoc *pModDoc) { m_pModDoc = pModDoc; }
-
-	CPatternUndo()
+	CPatternUndo(CModDoc &parent) : modDoc(parent)
 	{
 		UndoBuffer.clear();
-		m_pModDoc = nullptr;
 	};
 
 	~CPatternUndo()
@@ -122,7 +119,7 @@ protected:
 
 	// Undo buffer
 	std::vector<std::vector<UndoInfo> > UndoBuffer;
-	CModDoc *m_pModDoc;
+	CModDoc &modDoc;
 
 	// Sample undo helper functions
 	void DeleteUndoStep(const SAMPLEINDEX smp, const size_t step);
@@ -140,12 +137,9 @@ public:
 	bool CanUndo(const SAMPLEINDEX smp);
 	void RemoveLastUndoStep(const SAMPLEINDEX smp);
 
-	void SetParent(CModDoc *pModDoc) { m_pModDoc = pModDoc; }
-
-	CSampleUndo()
+	CSampleUndo(CModDoc &parent) : modDoc(parent)
 	{
 		UndoBuffer.clear();
-		m_pModDoc = nullptr;
 	};
 
 	~CSampleUndo()

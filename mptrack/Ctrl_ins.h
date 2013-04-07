@@ -127,7 +127,7 @@ public:
 	void SetInstrumentModified(const bool modified = true);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	BOOL OpenInstrument(LPCSTR lpszFileName);
-	BOOL OpenInstrument(CSoundFile *pSndFile, UINT nInstr);
+	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
 	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize

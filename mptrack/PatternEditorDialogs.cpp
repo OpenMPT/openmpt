@@ -19,8 +19,8 @@
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, CSoundFile *pSndFile, UINT &xparam, UINT &multiplier)
-//-----------------------------------------------------------------------------------------------------------------------------------------
+static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 {
 	UINT xp = 0, mult = 1;
 	int nCmdRow = (int)nRow;
@@ -33,7 +33,7 @@ void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nCha
 		// Try to find previous command parameter to be extended
 		while(nCmdRow >= 0)
 		{
-			const ModCommand *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
+			const ModCommand *m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
 			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_PATTERNBREAK)
 				break;
 			if(m->command != CMD_XPARAM)
@@ -52,13 +52,13 @@ void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nCha
 	if(nCmdRow >= 0)
 	{
 		// An 'extendable' command parameter has been found
-		const ModCommand *m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
+		const ModCommand *m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
 
 		// Find extension resolution (8 to 24 bits)
 		ROWINDEX n = 1;
-		while(n < 4 && nCmdRow + n < pSndFile->Patterns[nPat].GetNumRows())
+		while(n < 4 && nCmdRow + n < sndFile.Patterns[nPat].GetNumRows())
 		{
-			if(pSndFile->Patterns[nPat].GetpModCommand(nCmdRow + n, nChannel)->command != CMD_XPARAM) break;
+			if(sndFile.Patterns[nPat].GetpModCommand(nCmdRow + n, nChannel)->command != CMD_XPARAM) break;
 			n++;
 		}
 
@@ -74,7 +74,7 @@ void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nCha
 			// its value is changed by user
 			for(UINT j = 0; j < n; j++)
 			{
-				m = pSndFile->Patterns[nPat].GetpModCommand(nCmdRow + j, nChannel);
+				m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow + j, nChannel);
 
 				UINT k = 8 * (n - j - 1);
 				if(nCmdRow + j == nRow) 
@@ -123,11 +123,8 @@ BOOL CFindReplaceTab::OnInitDialog()
 {
 	CHAR s[256];
 	CComboBox *combo;
-	CSoundFile *pSndFile;
 
 	CPropertyPage::OnInitDialog();
-	if(!m_pModDoc) return TRUE;
-	pSndFile = m_pModDoc->GetSoundFile();
 	// Search flags
 	CheckDlgButton(IDC_CHECK1, m_Flags[FindReplace::Note] ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK2, m_Flags[FindReplace::Instr] ? MF_CHECKED : MF_UNCHECKED);
@@ -170,7 +167,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			combo->SetItemData(combo->AddString("any"), findAny);
 		}
-		AppendNotesToControlEx(*combo, pSndFile);
+		AppendNotesToControlEx(*combo, &sndFile);
 
 		UINT ncount = combo->GetCount();
 		for (UINT i=0; i<ncount; i++) if (m_Cmd.note == combo->GetItemData(i))
@@ -190,12 +187,12 @@ BOOL CFindReplaceTab::OnInitDialog()
 		}
 		for (UINT n=1; n<MAX_INSTRUMENTS; n++)
 		{
-			if (pSndFile->m_nInstruments)
+			if(sndFile.GetNumInstruments())
 			{
-				wsprintf(s, "%03d:%s", n, pSndFile->GetInstrumentName(n));
+				wsprintf(s, "%03d:%s", n, sndFile.GetInstrumentName(n));
 			} else
 			{
-				wsprintf(s, "%03d:%s", n, pSndFile->m_szNames[n]);
+				wsprintf(s, "%03d:%s", n, sndFile.m_szNames[n]);
 			}
 			combo->SetItemData(combo->AddString(s), n);
 		}
@@ -460,13 +457,14 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	CComboBox *combo;
 	CDialog::OnInitDialog();
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	const CSoundFile *pSndFile = (m_pModDoc) ? m_pModDoc->GetSoundFile() : nullptr;
-	if ((pSndFile) && (m_nPattern < pSndFile->Patterns.Size()) && (combo))
+	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+
+	if(m_nPattern < sndFile.Patterns.Size() && combo)
 	{
 		CHAR s[256];
-		UINT nrows = pSndFile->Patterns[m_nPattern].GetNumRows();
+		UINT nrows = sndFile.Patterns[m_nPattern].GetNumRows();
 
-		const CModSpecifications& specs = pSndFile->GetModSpecifications();
+		const CModSpecifications& specs = sndFile.GetModSpecifications();
 		for (UINT irow = specs.patternRowsMin; irow <= specs.patternRowsMax; irow++)
 		{
 			wsprintf(s, "%d", irow);
@@ -475,13 +473,13 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		combo->SetCurSel(nrows - specs.patternRowsMin);
 		wsprintf(s, "Pattern #%d: %d row%s (%dK)",
 			m_nPattern,
-			pSndFile->Patterns[m_nPattern].GetNumRows(),
-			(pSndFile->Patterns[m_nPattern].GetNumRows() == 1) ? "" : "s",
-			(pSndFile->Patterns[m_nPattern].GetNumRows() * pSndFile->GetNumChannels() * sizeof(ModCommand)) / 1024);
+			sndFile.Patterns[m_nPattern].GetNumRows(),
+			(sndFile.Patterns[m_nPattern].GetNumRows() == 1) ? "" : "s",
+			(sndFile.Patterns[m_nPattern].GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024);
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title
-		const CString patternName = pSndFile->Patterns[m_nPattern].GetName();
+		const CString patternName = sndFile.Patterns[m_nPattern].GetName();
 		wsprintf(s, "Pattern Properties for Pattern #%d", m_nPattern);
 		if(!patternName.IsEmpty())
 		{
@@ -492,12 +490,12 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		SetWindowText(s);
 
 		// pattern time signature
-		const bool bOverride = pSndFile->Patterns[m_nPattern].GetOverrideSignature();
-		UINT nRPB = pSndFile->Patterns[m_nPattern].GetRowsPerBeat(), nRPM = pSndFile->Patterns[m_nPattern].GetRowsPerMeasure();
-		if(nRPB == 0 || !bOverride) nRPB = pSndFile->m_nDefaultRowsPerBeat;
-		if(nRPM == 0 || !bOverride) nRPM = pSndFile->m_nDefaultRowsPerMeasure;
+		const bool bOverride = sndFile.Patterns[m_nPattern].GetOverrideSignature();
+		UINT nRPB = sndFile.Patterns[m_nPattern].GetRowsPerBeat(), nRPM = sndFile.Patterns[m_nPattern].GetRowsPerMeasure();
+		if(nRPB == 0 || !bOverride) nRPB = sndFile.m_nDefaultRowsPerBeat;
+		if(nRPM == 0 || !bOverride) nRPM = sndFile.m_nDefaultRowsPerMeasure;
 
-		GetDlgItem(IDC_CHECK1)->EnableWindow(pSndFile->GetModSpecifications().hasPatternSignatures ? TRUE : FALSE);
+		GetDlgItem(IDC_CHECK1)->EnableWindow(sndFile.GetModSpecifications().hasPatternSignatures ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK1, bOverride ? MF_CHECKED : MF_UNCHECKED);
 		SetDlgItemInt(IDC_EDIT_ROWSPERBEAT, nRPB, FALSE);
 		SetDlgItemInt(IDC_EDIT_ROWSPERMEASURE, nRPM, FALSE);
@@ -510,14 +508,12 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 void CPatternPropertiesDlg::OnHalfRowNumber()
 //-------------------------------------------
 {
-	const CSoundFile *pSndFile = (m_pModDoc) ? m_pModDoc->GetSoundFile() : nullptr;
-	if(pSndFile == nullptr)
-		return;
+	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	UINT nRows = GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
 	nRows /= 2;
-	if(nRows < pSndFile->GetModSpecifications().patternRowsMin)
-		nRows = pSndFile->GetModSpecifications().patternRowsMin;
+	if(nRows < sndFile.GetModSpecifications().patternRowsMin)
+		nRows = sndFile.GetModSpecifications().patternRowsMin;
 	SetDlgItemInt(IDC_COMBO1, nRows, FALSE);
 }
 
@@ -525,14 +521,12 @@ void CPatternPropertiesDlg::OnHalfRowNumber()
 void CPatternPropertiesDlg::OnDoubleRowNumber()
 //---------------------------------------------
 {
-	const CSoundFile *pSndFile = (m_pModDoc) ? m_pModDoc->GetSoundFile() : nullptr;
-	if(pSndFile == nullptr)
-		return;
+	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	UINT nRows = GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
 	nRows *= 2;
-	if(nRows > pSndFile->GetModSpecifications().patternRowsMax)
-		nRows = pSndFile->GetModSpecifications().patternRowsMax;
+	if(nRows > sndFile.GetModSpecifications().patternRowsMax)
+		nRows = sndFile.GetModSpecifications().patternRowsMax;
 	SetDlgItemInt(IDC_COMBO1, nRows, FALSE);
 }
 
@@ -548,58 +542,55 @@ void CPatternPropertiesDlg::OnOverrideSignature()
 void CPatternPropertiesDlg::OnOK()
 //--------------------------------
 {
-	CSoundFile *pSndFile = (m_pModDoc) ? m_pModDoc->GetSoundFile() : nullptr;
-	if(pSndFile)
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	// Update pattern signature if necessary
+	if(sndFile.GetModSpecifications().hasPatternSignatures)
 	{
-		// Update pattern signature if necessary
-		if(pSndFile->GetModSpecifications().hasPatternSignatures)
+		if(IsDlgButtonChecked(IDC_CHECK1))	// Enable signature
 		{
-			if(IsDlgButtonChecked(IDC_CHECK1))	// Enable signature
+			ROWINDEX nNewBeat = (ROWINDEX)GetDlgItemInt(IDC_EDIT_ROWSPERBEAT, NULL, FALSE), nNewMeasure = (ROWINDEX)GetDlgItemInt(IDC_EDIT_ROWSPERMEASURE, NULL, FALSE);
+			if(nNewBeat != sndFile.Patterns[m_nPattern].GetRowsPerBeat() || nNewMeasure != sndFile.Patterns[m_nPattern].GetRowsPerMeasure())
 			{
-				ROWINDEX nNewBeat = (ROWINDEX)GetDlgItemInt(IDC_EDIT_ROWSPERBEAT, NULL, FALSE), nNewMeasure = (ROWINDEX)GetDlgItemInt(IDC_EDIT_ROWSPERMEASURE, NULL, FALSE);
-				if(nNewBeat != pSndFile->Patterns[m_nPattern].GetRowsPerBeat() || nNewMeasure != pSndFile->Patterns[m_nPattern].GetRowsPerMeasure())
+				if(!sndFile.Patterns[m_nPattern].SetSignature(nNewBeat, nNewMeasure))
 				{
-					if(!pSndFile->Patterns[m_nPattern].SetSignature(nNewBeat, nNewMeasure))
-					{
-						Reporting::Error("Invalid time signature!", "Pattern Properties");
-						GetDlgItem(IDC_EDIT_ROWSPERBEAT)->SetFocus();
-						return;
-					}
-					m_pModDoc->SetModified();
+					Reporting::Error("Invalid time signature!", "Pattern Properties");
+					GetDlgItem(IDC_EDIT_ROWSPERBEAT)->SetFocus();
+					return;
 				}
-			} else	// Disable signature
-			{
-				if(pSndFile->Patterns[m_nPattern].GetOverrideSignature())
-				{
-					pSndFile->Patterns[m_nPattern].RemoveSignature();
-					m_pModDoc->SetModified();
-				}
+				modDoc.SetModified();
 			}
-		}
-
-		const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
-
-		// Check if any pattern data would be removed.
-		bool resize = (newSize != pSndFile->Patterns[m_nPattern].GetNumRows());
-		for(ROWINDEX row = newSize; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
+		} else	// Disable signature
 		{
-			if(!pSndFile->Patterns[m_nPattern].IsEmptyRow(row))
+			if(sndFile.Patterns[m_nPattern].GetOverrideSignature())
 			{
-				resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
-				break;
+				sndFile.Patterns[m_nPattern].RemoveSignature();
+				modDoc.SetModified();
 			}
 		}
+	}
 
-		if(resize)
+	const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
+
+	// Check if any pattern data would be removed.
+	bool resize = (newSize != sndFile.Patterns[m_nPattern].GetNumRows());
+	for(ROWINDEX row = newSize; row < sndFile.Patterns[m_nPattern].GetNumRows(); row++)
+	{
+		if(!sndFile.Patterns[m_nPattern].IsEmptyRow(row))
 		{
-			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->Patterns[m_nPattern].GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
-			m_pModDoc->BeginWaitCursor();
-			if(pSndFile->Patterns[m_nPattern].Resize(newSize))
-			{
-				m_pModDoc->SetModified();
-			}
-			m_pModDoc->EndWaitCursor();
+			resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
+			break;
 		}
+	}
+
+	if(resize)
+	{
+		modDoc.GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.Patterns[m_nPattern].GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows());
+		modDoc.BeginWaitCursor();
+		if(sndFile.Patterns[m_nPattern].Resize(newSize))
+		{
+			modDoc.SetModified();
+		}
+		modDoc.EndWaitCursor();
 	}
 	CDialog::OnOK();
 }
@@ -636,9 +627,9 @@ BOOL CEditCommand::SetParent(CWnd *parent, CModDoc *pModDoc)
 	if ((!parent) || (!pModDoc)) return FALSE;
 	m_hWndView = parent->m_hWnd;
 	m_pModDoc = pModDoc;
-	m_pageNote = new CPageEditNote(m_pModDoc, this);
-	m_pageVolume = new CPageEditVolume(m_pModDoc, this);
-	m_pageEffect = new CPageEditEffect(m_pModDoc, this);
+	m_pageNote = new CPageEditNote(m_pModDoc->GetrSoundFile(), this);
+	m_pageVolume = new CPageEditVolume(m_pModDoc->GetrSoundFile(), this);
+	m_pageEffect = new CPageEditEffect(m_pModDoc->GetrSoundFile(), this);
 	AddPage(m_pageNote);
 	AddPage(m_pageVolume);
 	AddPage(m_pageEffect);
@@ -689,14 +680,14 @@ BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor
 //-------------------------------------------------------------------------------
 {
 	CHAR s[64];
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
 	const ROWINDEX nRow = cursor.GetRow();
 	const CHANNELINDEX nChannel = cursor.GetChannel();
 
-	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-		|| (nRow >= pSndFile->Patterns[nPat].GetNumRows()) || (nChannel >= pSndFile->GetNumChannels())
-		|| (!pSndFile->Patterns[nPat])) return FALSE;
-	m_Command = *pSndFile->Patterns[nPat].GetpModCommand(nRow, nChannel);
+	if ((nPat >= sndFile.Patterns.Size()) || (!m_pModDoc)
+		|| (nRow >= sndFile.Patterns[nPat].GetNumRows()) || (nChannel >= sndFile.GetNumChannels())
+		|| (!sndFile.Patterns[nPat])) return FALSE;
+	m_Command = *sndFile.Patterns[nPat].GetpModCommand(nRow, nChannel);
 	m_nRow = nRow;
 	m_nChannel = nChannel;
 	m_nPattern = nPat;
@@ -711,7 +702,7 @@ BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor
 	if (m_pageEffect)
 	{
 		UINT xp = 0, ml = 1;
-		getXParam(m_Command.command, nPat, nRow, nChannel, pSndFile, xp, ml);
+		getXParam(m_Command.command, nPat, nRow, nChannel, sndFile, xp, ml);
 		m_pageEffect->Init(m_Command);
 		m_pageEffect->XInit(xp,ml);
 	}
@@ -794,19 +785,19 @@ void CEditCommand::UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol)
 void CEditCommand::UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM param)
 //-----------------------------------------------------------------------------------
 {
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= pSndFile->GetNumChannels())
-		|| (!pSndFile->Patterns[m_nPattern])) return;
-	ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
+	CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
+	if ((m_nPattern >= sndFile.Patterns.Size()) || (!m_pModDoc)
+		|| (m_nRow >= sndFile.Patterns[m_nPattern].GetNumRows())
+		|| (m_nChannel >= sndFile.GetNumChannels())
+		|| (!sndFile.Patterns[m_nPattern])) return;
+	ModCommand *m = sndFile.Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
 
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	if(command == CMD_OFFSET || command == CMD_PATTERNBREAK || command == CMD_TEMPO || command == CMD_XPARAM)
 	{
 		UINT xp = 0, ml = 1;
-		getXParam(command, m_nPattern, m_nRow, m_nChannel, pSndFile, xp, ml);
+		getXParam(command, m_nPattern, m_nRow, m_nChannel, sndFile, xp, ml);
 		m_pageEffect->XInit(xp,ml);
 		m_pageEffect->UpdateDialog();
 	}
@@ -866,21 +857,20 @@ void CPageEditNote::UpdateDialog()
 {
 	char s[64];
 	CComboBox *combo;
-	CSoundFile *pSndFile;
 
-	if ((!m_bInitialized) || (!m_pModDoc)) return;
-	pSndFile = m_pModDoc->GetSoundFile();
+	if ((!m_bInitialized)) return;
+
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{	
 		combo->ResetContent();
 		combo->SetItemData(combo->AddString("No note"), 0);
-		AppendNotesToControlEx(*combo, pSndFile, m_nInstr);
+		AppendNotesToControlEx(*combo, &sndFile, m_nInstr);
 
 		if (ModCommand::IsNoteOrEmpty(m_nNote))
 		{
 			// Normal note / no note
-			const ModCommand::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
+			const ModCommand::NOTE noteStart = sndFile.GetModSpecifications().noteMin;
 			combo->SetCurSel(m_nNote - (noteStart - 1));
 		}
 		else
@@ -906,23 +896,23 @@ void CPageEditNote::UpdateDialog()
 		{
 			// control plugin param note
 			combo->SetItemData(combo->AddString("No Effect"), 0);
-			AddPluginNamesToCombobox(*combo, pSndFile->m_MixPlugins, false);
+			AddPluginNamesToCombobox(*combo, sndFile.m_MixPlugins, false);
 		} else
 		{
 			// instrument / sample
 			combo->SetItemData(combo->AddString("No Instrument"), 0);
-			const UINT nmax = pSndFile->GetNumInstruments() ? pSndFile->GetNumInstruments() : pSndFile->GetNumSamples();
+			const UINT nmax = sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples();
 			for (UINT i = 1; i <= nmax; i++)
 			{
 				wsprintf(s, "%02d: ", i);
 				int k = strlen(s);
 				// instrument / sample
-				if (pSndFile->GetNumInstruments())
+				if (sndFile.GetNumInstruments())
 				{
-					if (pSndFile->Instruments[i])
-						memcpy(s + k, pSndFile->Instruments[i]->name, CountOf(pSndFile->Instruments[i]->name));
+					if (sndFile.Instruments[i])
+						memcpy(s + k, sndFile.Instruments[i]->name, CountOf(sndFile.Instruments[i]->name));
 				} else
-					memcpy(s+k, pSndFile->m_szNames[i], MAX_SAMPLENAME);
+					memcpy(s+k, sndFile.m_szNames[i], MAX_SAMPLENAME);
 				s[k+32] = 0;
 				combo->SetItemData(combo->AddString(s), i);
 			}
@@ -949,12 +939,11 @@ void CPageEditNote::OnNoteChanged()
 		if(n >= 0)
 		{
 			const ModCommand::INSTR oldInstr = m_nInstr;
-			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
 			m_nInstr = static_cast<ModCommand::INSTR>(combo->GetItemData(n));
 			//Checking whether note names should be recreated.
-			if(!ModCommand::IsPcNote(m_nNote) && pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
+			if(!ModCommand::IsPcNote(m_nNote) && sndFile.Instruments[m_nInstr] && sndFile.Instruments[oldInstr])
 			{
-				if(pSndFile->Instruments[m_nInstr]->pTuning != pSndFile->Instruments[oldInstr]->pTuning)
+				if(sndFile.Instruments[m_nInstr]->pTuning != sndFile.Instruments[oldInstr]->pTuning)
 					UpdateDialog();
 			}
 		}
@@ -988,12 +977,11 @@ void CPageEditVolume::UpdateDialog()
 {
 	CComboBox *combo;
 
-	if ((!m_bInitialized) || (!m_pModDoc)) return;
+	if ((!m_bInitialized)) return;
 	UpdateRanges();
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if (pSndFile->m_nType == MOD_TYPE_MOD || m_bIsParamControl)
+		if (sndFile.GetType() == MOD_TYPE_MOD || m_bIsParamControl)
 		{
 			combo->EnableWindow(FALSE);
 			return;
@@ -1089,10 +1077,8 @@ void CPageEditEffect::UpdateDialog()
 //----------------------------------
 {
 	CComboBox *combo;
-	CSoundFile *pSndFile;
 
-	if ((!m_pModDoc) || (!m_bInitialized)) return;
-	pSndFile = m_pModDoc->GetSoundFile();
+	if (!m_bInitialized) return;
 
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
@@ -1103,7 +1089,7 @@ void CPageEditEffect::UpdateDialog()
 			if(m_nPlugin > 0 && m_nPlugin <= MAX_MIXPLUGINS)
 			{
 				combo->ModifyStyle(CBS_SORT, 0);	// Y U NO WORK?
-				AddPluginParameternamesToCombobox(*combo, pSndFile->m_MixPlugins[m_nPlugin - 1]);
+				AddPluginParameternamesToCombobox(*combo, sndFile.m_MixPlugins[m_nPlugin - 1]);
 				combo->SetCurSel(m_nPluginParam);
 			}
 		} else
@@ -1136,7 +1122,7 @@ void CPageEditEffect::UpdateRange(BOOL bSet)
 //------------------------------------------
 {
 	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
-	if ((slider) && (m_pModDoc))
+	if (slider)
 	{
 		DWORD rangeMin = 0, rangeMax = 0, pos;
 		bool enable = true;
@@ -1483,15 +1469,15 @@ void CSplitKeyboadSettings::DoDataExchange(CDataExchange* pDX)
 BOOL CSplitKeyboadSettings::OnInitDialog()
 //----------------------------------------
 {
-	if(!m_pSndFile || m_pSndFile->GetpModDoc() == nullptr) return FALSE;
+	if(sndFile.GetpModDoc() == nullptr) return FALSE;
 
 	CDialog::OnInitDialog();
 
 	CHAR s[64];
 
 	// Split Notes
-	AppendNotesToControl(m_CbnSplitNote, m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN, m_pSndFile->GetModSpecifications().noteMax - NOTE_MIN);
-	m_CbnSplitNote.SetCurSel(m_Settings.splitNote - (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
+	AppendNotesToControl(m_CbnSplitNote, sndFile.GetModSpecifications().noteMin - NOTE_MIN, sndFile.GetModSpecifications().noteMax - NOTE_MIN);
+	m_CbnSplitNote.SetCurSel(m_Settings.splitNote - (sndFile.GetModSpecifications().noteMin - NOTE_MIN));
 
 	// Octave modifier
 	for(int i = -SplitKeyboardSettings::splitOctaveRange; i < SplitKeyboardSettings::splitOctaveRange + 1; i++)
@@ -1519,24 +1505,24 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	m_CbnSplitInstrument.ResetContent();
 	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString("No Change"), 0);
 
-	if(m_pSndFile->GetNumInstruments())
+	if(sndFile.GetNumInstruments())
 	{
-		for (INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->GetNumInstruments(); nIns++)
+		for (INSTRUMENTINDEX nIns = 1; nIns <= sndFile.GetNumInstruments(); nIns++)
 		{
-			if(m_pSndFile->Instruments[nIns] == nullptr)
+			if(sndFile.Instruments[nIns] == nullptr)
 				continue;
 
-			CString displayName = m_pSndFile->GetpModDoc()->GetPatternViewInstrumentName(nIns);
+			CString displayName = sndFile.GetpModDoc()->GetPatternViewInstrumentName(nIns);
 			int n = m_CbnSplitInstrument.AddString(displayName);
 			m_CbnSplitInstrument.SetItemData(n, nIns);
 		}
 	} else
 	{
-		for(SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->GetNumSamples(); nSmp++)
+		for(SAMPLEINDEX nSmp = 1; nSmp <= sndFile.GetNumSamples(); nSmp++)
 		{
-			if(m_pSndFile->GetSample(nSmp).pSample)
+			if(sndFile.GetSample(nSmp).pSample)
 			{
-				wsprintf(s, "%02d: %s", nSmp, m_pSndFile->m_szNames[nSmp]);
+				wsprintf(s, "%02d: %s", nSmp, sndFile.m_szNames[nSmp]);
 				int n = m_CbnSplitInstrument.AddString(s);
 				m_CbnSplitInstrument.SetItemData(n, nSmp);
 			}
@@ -1553,7 +1539,7 @@ void CSplitKeyboadSettings::OnOK()
 {
 	CDialog::OnOK();
 
-	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetCurSel() + (m_pSndFile->GetModSpecifications().noteMin - NOTE_MIN));
+	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetCurSel() + (sndFile.GetModSpecifications().noteMin - NOTE_MIN));
 	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SplitKeyboardSettings::splitOctaveRange;
 	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE);
 	m_Settings.splitVolume = static_cast<ModCommand::VOL>(m_CbnSplitVolume.GetCurSel());
@@ -1836,7 +1822,7 @@ void QuickChannelProperties::OnNameChanged()
 		return;
 	}
 	
-	ModChannelSettings &settings = document->GetSoundFile()->ChnSettings[channel];
+	ModChannelSettings &settings = document->GetrSoundFile().ChnSettings[channel];
 	char newName[MAX_CHANNELNAME];
 	nameEdit.GetWindowText(newName, MAX_CHANNELNAME);
 

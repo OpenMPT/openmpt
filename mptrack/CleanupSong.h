@@ -42,8 +42,7 @@ class CModCleanupDlg: public CDialog
 //==================================
 {
 private:
-	CModDoc *m_pModDoc;
-	CWnd *m_wParent;
+	CModDoc &modDoc;
 	static bool m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS]; // Checkbox state
 	static const WORD m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS]; // Checkbox -> Control ID LUT
 	static const ENUM_CLEANUP_OPTIONS m_nMutuallyExclusive[CU_MAX_CLEANUP_OPTIONS]; // Options that are mutually exclusive to each other.
@@ -70,7 +69,7 @@ private:
 	bool ResetVariables(); // Turn module into samplepack (convert to IT, remove patterns, etc.)
 
 public:
-	CModCleanupDlg(CModDoc *pModDoc, CWnd *parent):CDialog(IDD_CLEANUP_SONG, parent) { m_pModDoc = pModDoc; m_wParent = parent; }
+	CModCleanupDlg(CModDoc &modParent, CWnd *parent) : CDialog(IDD_CLEANUP_SONG, parent), modDoc(modParent) { }
 
 protected:
 	//{{AFX_VIRTUAL(CModCleanupDlg)

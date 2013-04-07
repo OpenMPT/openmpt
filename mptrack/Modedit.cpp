@@ -61,7 +61,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 			nFound = GetNumChannels();
 		}
 		
-		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove, showCancelInRemoveDlg);
+		CRemoveChannelsDlg rem(m_SndFile, nChnToRemove, showCancelInRemoveDlg);
 		CheckUsedChannels(rem.m_bKeepMask, nFound);
 		if (rem.DoModal() != IDOK) return false;
 
@@ -330,7 +330,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 				// This sample slot is referenced multiple times, so we have to copy the actual sample.
 				m_SndFile.GetSample(i + 1).pSample = m_SndFile.AllocateSample(m_SndFile.GetSample(i + 1).GetSampleSizeInBytes());
 				memcpy(m_SndFile.GetSample(i + 1).pSample, sampleHeaders[origSlot].pSample, m_SndFile.GetSample(i + 1).GetSampleSizeInBytes());
-				ctrlSmp::AdjustEndOfSample(m_SndFile.GetSample(i + 1), &m_SndFile);
+				ctrlSmp::AdjustEndOfSample(m_SndFile.GetSample(i + 1), m_SndFile);
 			}
 			strcpy(m_SndFile.m_szNames[i + 1], sampleNames[origSlot].c_str());
 		} else
@@ -588,7 +588,7 @@ BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 	ModSample &sample = m_SndFile.GetSample(nSample);
 	if ((!sample.nLength) || (!sample.pSample)) return FALSE;
 
-	ctrlSmp::AdjustEndOfSample(sample, &m_SndFile);
+	ctrlSmp::AdjustEndOfSample(sample, m_SndFile);
 
 	return TRUE;
 }
