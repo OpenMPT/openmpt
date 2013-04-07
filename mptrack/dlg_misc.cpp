@@ -65,8 +65,8 @@ BOOL CModTypeDlg::OnInitDialog()
 //------------------------------
 {
 	CDialog::OnInitDialog();
-	m_nType = m_pSndFile->GetType();
-	m_nChannels = m_pSndFile->GetNumChannels();
+	m_nType = sndFile.GetType();
+	m_nChannels = sndFile.GetNumChannels();
 
 	// Mod types
 
@@ -85,7 +85,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	case MOD_TYPE_XM:	m_TypeBox.SetCurSel(2); break;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_SongFlags[SONG_ITPROJECT] ? 4 : 3); break;
+	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(sndFile.m_SongFlags[SONG_ITPROJECT] ? 4 : 3); break;
 // -! NEW_FEATURE#0023
 	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 	default:			m_TypeBox.SetCurSel(0); break;
@@ -94,17 +94,17 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Tempo modes
 
 	// Don't show new tempo modes for XM/IT, unless they are currently used
-	const bool showNewTempoModes = (m_pSndFile->GetType() == MOD_TYPE_MPT || (m_pSndFile->m_SongFlags[SONG_ITPROJECT] != 0));
+	const bool showNewTempoModes = (sndFile.GetType() == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
-	if(showNewTempoModes || m_pSndFile->m_nTempoMode == tempo_mode_alternative)
+	if(showNewTempoModes || sndFile.m_nTempoMode == tempo_mode_alternative)
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	if(showNewTempoModes || m_pSndFile->m_nTempoMode == tempo_mode_modern)
+	if(showNewTempoModes || sndFile.m_nTempoMode == tempo_mode_modern)
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
 	{
-		if(m_TempoModeBox.GetItemData(i) == m_pSndFile->m_nTempoMode)
+		if(m_TempoModeBox.GetItemData(i) == sndFile.m_nTempoMode)
 		{
 			m_TempoModeBox.SetCurSel(i);
 			break;
@@ -114,9 +114,9 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Mix levels
 
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
-	if(m_pSndFile->m_nMixLevels == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
+	if(sndFile.m_nMixLevels == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
-	if(m_pSndFile->m_nMixLevels == mixLevels_117RC1)	// Dito
+	if(sndFile.m_nMixLevels == mixLevels_117RC1)	// Dito
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
@@ -124,7 +124,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_PlugMixBox.SetCurSel(0);
 	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
 	{
-		if(m_PlugMixBox.GetItemData(i) == m_pSndFile->m_nMixLevels)
+		if(m_PlugMixBox.GetItemData(i) == sndFile.m_nMixLevels)
 		{
 			m_PlugMixBox.SetCurSel(i);
 			break;
@@ -133,23 +133,23 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	// Misc flags
 
-	CheckDlgButton(IDC_CHK_COMPATPLAY, m_pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY));
-	CheckDlgButton(IDC_CHK_MIDICCBUG, m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION));
-	CheckDlgButton(IDC_CHK_OLDRANDOM, m_pSndFile->GetModFlag(MSF_OLDVOLSWING));
-	CheckDlgButton(IDC_CHK_OLDPITCH, m_pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS));
+	CheckDlgButton(IDC_CHK_COMPATPLAY, sndFile.GetModFlag(MSF_COMPATIBLE_PLAY));
+	CheckDlgButton(IDC_CHK_MIDICCBUG, sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION));
+	CheckDlgButton(IDC_CHK_OLDRANDOM, sndFile.GetModFlag(MSF_OLDVOLSWING));
+	CheckDlgButton(IDC_CHK_OLDPITCH, sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS));
 
 	// Time signature information
 
-	SetDlgItemInt(IDC_ROWSPERBEAT, m_pSndFile->m_nDefaultRowsPerBeat);
-	SetDlgItemInt(IDC_ROWSPERMEASURE, m_pSndFile->m_nDefaultRowsPerMeasure);
+	SetDlgItemInt(IDC_ROWSPERBEAT, sndFile.m_nDefaultRowsPerBeat);
+	SetDlgItemInt(IDC_ROWSPERMEASURE, sndFile.m_nDefaultRowsPerMeasure);
 
 	// Version information
 
 	SetDlgItemText(IDC_TEXT_CREATEDWITH, "Created with:");
 	SetDlgItemText(IDC_TEXT_SAVEDWITH, "Last saved with:");
 
-	SetDlgItemText(IDC_EDIT_CREATEDWITH, FormatVersionNumber(m_pSndFile->m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT_SAVEDWITH, FormatVersionNumber(m_pSndFile->m_dwLastSavedWithVersion));
+	SetDlgItemText(IDC_EDIT_CREATEDWITH, FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
+	SetDlgItemText(IDC_EDIT_SAVEDWITH, FormatVersionNumber(sndFile.m_dwLastSavedWithVersion));
 
 	UpdateDialog();
 
@@ -201,19 +201,19 @@ void CModTypeDlg::UpdateDialog()
 
 	UpdateChannelCBox();
 
-	m_CheckBox1.SetCheck(m_pSndFile->m_SongFlags[SONG_LINEARSLIDES] ? BST_CHECKED : BST_UNCHECKED);
-	m_CheckBox2.SetCheck(m_pSndFile->m_SongFlags[SONG_FASTVOLSLIDES] ? BST_CHECKED : BST_UNCHECKED);
-	m_CheckBox3.SetCheck(m_pSndFile->m_SongFlags[SONG_ITOLDEFFECTS] ? BST_CHECKED : BST_UNCHECKED);
-	m_CheckBox4.SetCheck(m_pSndFile->m_SongFlags[SONG_ITCOMPATGXX] ? BST_CHECKED : BST_UNCHECKED);
-	m_CheckBox5.SetCheck(m_pSndFile->m_SongFlags[SONG_EXFILTERRANGE] ? BST_CHECKED : BST_UNCHECKED);
-	m_CheckBoxPT1x.SetCheck(m_pSndFile->m_SongFlags[SONG_PT1XMODE] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox1.SetCheck(sndFile.m_SongFlags[SONG_LINEARSLIDES] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox2.SetCheck(sndFile.m_SongFlags[SONG_FASTVOLSLIDES] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox3.SetCheck(sndFile.m_SongFlags[SONG_ITOLDEFFECTS] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox4.SetCheck(sndFile.m_SongFlags[SONG_ITCOMPATGXX] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBox5.SetCheck(sndFile.m_SongFlags[SONG_EXFILTERRANGE] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBoxPT1x.SetCheck(sndFile.m_SongFlags[SONG_PT1XMODE] ? BST_CHECKED : BST_UNCHECKED);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_CheckBox6.SetCheck(m_pSndFile->m_SongFlags[SONG_ITPEMBEDIH] ? MF_CHECKED : 0);
+	m_CheckBox6.SetCheck(sndFile.m_SongFlags[SONG_ITPEMBEDIH] ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
-	const FlagSet<SongFlags> allowedFlags(m_pSndFile->GetModSpecifications(type).songFlags);
+	const FlagSet<SongFlags> allowedFlags(sndFile.GetModSpecifications(type).songFlags);
 	m_CheckBox1.EnableWindow(allowedFlags[SONG_LINEARSLIDES]);
 	m_CheckBox2.EnableWindow(allowedFlags[SONG_FASTVOLSLIDES]);
 	m_CheckBox3.EnableWindow(allowedFlags[SONG_ITOLDEFFECTS]);
@@ -244,9 +244,9 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_CHK_OLDPITCH)->ShowWindow(XMorITorMPT);
 
 	// Deprecated flags are greyed out if they are not being used.
-	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
-	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && m_pSndFile->GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
-	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(m_pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && sndFile.GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
 
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
@@ -308,7 +308,7 @@ bool CModTypeDlg::VerifyData()
 		return FALSE;
 	}
 
-	if(maxChans < m_pSndFile->GetNumChannels())
+	if(maxChans < sndFile.GetNumChannels())
 	{
 		if(Reporting::Confirm("New module type supports less channels than currently used, and reducing channel number is required. Continue?") != cnfYes)
 			return false;
@@ -329,21 +329,21 @@ void CModTypeDlg::OnOK()
 		m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(sel));
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		if(m_pSndFile->m_SongFlags[SONG_ITPROJECT] && sel != 4)
+		if(sndFile.m_SongFlags[SONG_ITPROJECT] && sel != 4)
 		{
-			m_pSndFile->m_SongFlags.reset(SONG_ITPROJECT | SONG_ITPEMBEDIH);
+			sndFile.m_SongFlags.reset(SONG_ITPROJECT | SONG_ITPEMBEDIH);
 		}
-		if(sel == 4) m_pSndFile->m_SongFlags.set(SONG_ITPROJECT);
+		if(sel == 4) sndFile.m_SongFlags.set(SONG_ITPROJECT);
 // -! NEW_FEATURE#0023
 	}
 
-	m_pSndFile->m_SongFlags.set(SONG_LINEARSLIDES, m_CheckBox1.GetCheck() != BST_UNCHECKED);
-	m_pSndFile->m_SongFlags.set(SONG_FASTVOLSLIDES, m_CheckBox2.GetCheck() != BST_UNCHECKED);
-	m_pSndFile->m_SongFlags.set(SONG_ITOLDEFFECTS, m_CheckBox3.GetCheck() != BST_UNCHECKED);
-	m_pSndFile->m_SongFlags.set(SONG_ITCOMPATGXX, m_CheckBox4.GetCheck() != BST_UNCHECKED);
-	m_pSndFile->m_SongFlags.set(SONG_EXFILTERRANGE, m_CheckBox5.GetCheck() != BST_UNCHECKED);
-	m_pSndFile->m_SongFlags.set(SONG_ITPEMBEDIH, m_CheckBox6.GetCheck() != BST_UNCHECKED);
-	m_pSndFile->m_SongFlags.set(SONG_PT1XMODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_LINEARSLIDES, m_CheckBox1.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_FASTVOLSLIDES, m_CheckBox2.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_ITOLDEFFECTS, m_CheckBox3.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_ITCOMPATGXX, m_CheckBox4.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_EXFILTERRANGE, m_CheckBox5.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_ITPEMBEDIH, m_CheckBox6.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_PT1XMODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
 
 	sel = m_ChannelsBox.GetCurSel();
 	if (sel >= 0)
@@ -355,30 +355,30 @@ void CModTypeDlg::OnOK()
 	sel = m_TempoModeBox.GetCurSel();
 	if (sel >= 0)
 	{
-		m_pSndFile->m_nTempoMode = m_TempoModeBox.GetItemData(sel);
+		sndFile.m_nTempoMode = m_TempoModeBox.GetItemData(sel);
 	}
 
 	sel = m_PlugMixBox.GetCurSel();
 	if (sel >= 0)
 	{
-		m_pSndFile->m_nMixLevels = m_PlugMixBox.GetItemData(sel);
-		m_pSndFile->m_pConfig->SetMixLevels(m_pSndFile->m_nMixLevels);
-		m_pSndFile->RecalculateGainForAllPlugs();
+		sndFile.m_nMixLevels = m_PlugMixBox.GetItemData(sel);
+		sndFile.m_pConfig->SetMixLevels(sndFile.m_nMixLevels);
+		sndFile.RecalculateGainForAllPlugs();
 	}
 
 	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 	{
-		m_pSndFile->SetModFlags(0);
-		if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) m_pSndFile->SetModFlag(MSF_COMPATIBLE_PLAY, true);
-		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) m_pSndFile->SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) m_pSndFile->SetModFlag(MSF_OLDVOLSWING, true);
-		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) m_pSndFile->SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
+		sndFile.SetModFlags(0);
+		if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) sndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
+		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) sndFile.SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) sndFile.SetModFlag(MSF_OLDVOLSWING, true);
+		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) sndFile.SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
 	}
 
-	m_pSndFile->m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
-	m_pSndFile->m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
+	sndFile.m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
+	sndFile.m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
 
-	m_pSndFile->SetupITBidiMode();
+	sndFile.SetupITBidiMode();
 
 	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->Update();
@@ -532,8 +532,8 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	for (UINT n = 0; n < m_nChannels; n++)
 	{
-		if(m_pSndFile->ChnSettings[n].szName[0] >= 0x20)
-			wsprintf(label, "Channel %d: %s", (n + 1), m_pSndFile->ChnSettings[n].szName);
+		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
+			wsprintf(label, "Channel %d: %s", (n + 1), sndFile.ChnSettings[n].szName);
 		else
 			wsprintf(label, "Channel %d", n + 1);
 
@@ -546,7 +546,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 		wsprintf(label, "Select %d channel%s to remove:", m_nRemove, (m_nRemove != 1) ? "s" : "");
 	} else
 	{
-		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetModSpecifications().channelsMin);
+		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", sndFile.GetModSpecifications().channelsMin);
 	}
 	
 	SetDlgItemText(IDC_QUESTION1, label);
@@ -570,7 +570,7 @@ void CRemoveChannelsDlg::OnOK()
 	{
 		m_bKeepMask[aryListBoxSel[n]] = false;
 	}
-	if ((static_cast<CHANNELINDEX>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetModSpecifications().channelsMin)))
+	if ((static_cast<CHANNELINDEX>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (sndFile.GetNumChannels() >= nCount + sndFile.GetModSpecifications().channelsMin)))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -582,7 +582,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 {
 	UINT nr = 0;
 	nr = m_RemChansList.GetSelCount();
-	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nr + m_pSndFile->GetModSpecifications().channelsMin) && nr > 0)) ? TRUE : FALSE);
+	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (sndFile.GetNumChannels() >= nr + sndFile.GetModSpecifications().channelsMin) && nr > 0)) ? TRUE : FALSE);
 }
 //end rewbs.removeChansDlgCleanup
 
@@ -857,15 +857,12 @@ BOOL CSampleMapDlg::OnInitDialog()
 //--------------------------------
 {
 	CDialog::OnInitDialog();
-	if (m_pSndFile)
+	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
+	if (pIns)
 	{
-		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
-		if (pIns)
+		for (UINT i=0; i<NOTE_MAX; i++)
 		{
-			for (UINT i=0; i<NOTE_MAX; i++)
-			{
-				KeyboardMap[i] = pIns->Keyboard[i];
-			}
+			KeyboardMap[i] = pIns->Keyboard[i];
 		}
 	}
 	m_Keyboard.Init(m_hWnd, 3, TRUE);
@@ -893,7 +890,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 	UINT nNewPos = 0;
 	bool showAll;
 	
-	if ((!m_pSndFile) || (m_nInstrument >= MAX_INSTRUMENTS)) return;
+	if ((m_nInstrument >= MAX_INSTRUMENTS)) return;
 	if (m_CbnSample.GetCount() > 0)
 	{
 		nOldPos = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
@@ -905,7 +902,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 	nInsertPos = m_CbnSample.AddString("0: No sample");
 	m_CbnSample.SetItemData(nInsertPos, 0);
 
-	for (SAMPLEINDEX i = 1; i <= m_pSndFile->GetNumSamples(); i++)
+	for (SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
 	{
 		bool isUsed = showAll;
 
@@ -923,7 +920,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 		if (isUsed)
 		{
 			CString sampleName;
-			sampleName.Format("%d: %s", i, m_pSndFile->GetSampleName(i));
+			sampleName.Format("%d: %s", i, sndFile.GetSampleName(i));
 			nInsertPos = m_CbnSample.AddString(sampleName);
 			
 			m_CbnSample.SetItemData(nInsertPos, i);
@@ -973,18 +970,18 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 {
 	CHAR s[32] = "--";
 
-	if ((lParam >= 0) && (lParam < 3*12) && (m_pSndFile))
+	if ((lParam >= 0) && (lParam < 3*12))
 	{
 		SAMPLEINDEX nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		const std::string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
+		const std::string temp = sndFile.GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
 		if(temp.size() >= CountOf(s))
 			wsprintf(s, "%s", "...");
 		else
 			wsprintf(s, "%s", temp.c_str());
 
-		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
+		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
 		{
 			UINT iNote = nBaseOctave * 12 + lParam;
@@ -1043,25 +1040,22 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 VOID CSampleMapDlg::OnOK()
 //------------------------
 {
-	if (m_pSndFile)
+	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
+	if (pIns)
 	{
-		ModInstrument *pIns = m_pSndFile->Instruments[m_nInstrument];
-		if (pIns)
+		BOOL bModified = FALSE;
+		for (UINT i=0; i<NOTE_MAX; i++)
 		{
-			BOOL bModified = FALSE;
-			for (UINT i=0; i<NOTE_MAX; i++)
+			if (KeyboardMap[i] != pIns->Keyboard[i])
 			{
-				if (KeyboardMap[i] != pIns->Keyboard[i])
-				{
-					pIns->Keyboard[i] = KeyboardMap[i];
-					bModified = TRUE;
-				}
+				pIns->Keyboard[i] = KeyboardMap[i];
+				bModified = TRUE;
 			}
-			if (bModified)
-			{
-				CDialog::OnOK();
-				return;
-			}
+		}
+		if (bModified)
+		{
+			CDialog::OnOK();
+			return;
 		}
 	}
 	CDialog::OnCancel();

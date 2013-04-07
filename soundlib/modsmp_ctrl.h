@@ -25,21 +25,20 @@ enum ResetFlag
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
-SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile);
+SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile &sndFile);
 
 // Change sample size. 
 // Note: If resized sample is bigger, silence will be added to the sample's tail.
 // Return: Length of the new sample.
-SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile* pSndFile);
+SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &sndFile);
 
 // Replaces sample in 'smp' with given sample and frees the old sample.
-// If valid CSoundFile pointer is given, the sample will be replaced also from the sounds channels.
-void ReplaceSample(ModSample &smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile* pSndFile);
+void ReplaceSample(ModSample &smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile &sndFile);
 
-bool AdjustEndOfSample(ModSample &smp, CSoundFile *pSndFile = nullptr);
+bool AdjustEndOfSample(ModSample &smp, CSoundFile &sndFile);
 
 // Propagate loop point changes to player
-bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sf);
+bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile);
 
 // Returns the number of bytes allocated(at least) for sample data.
 // Note: Currently the return value is based on the sample length and the actual 
@@ -47,7 +46,7 @@ bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sf);
 inline SmpLength GetSampleCapacity(ModSample &smp) {return smp.GetSampleSizeInBytes();}
 
 // Resets samples.
-void ResetSamples(CSoundFile &rSndFile, ResetFlag resetflag, SAMPLEINDEX minSample = SAMPLEINDEX_INVALID, SAMPLEINDEX maxSample = SAMPLEINDEX_INVALID);
+void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSample = SAMPLEINDEX_INVALID, SAMPLEINDEX maxSample = SAMPLEINDEX_INVALID);
 
 // Remove DC offset and normalize.
 // Return: If DC offset was removed, returns original offset value, zero otherwise.
@@ -57,25 +56,25 @@ float RemoveDCOffset(ModSample &smp,
 					 const MODTYPE modtype,	// Used to determine whether to adjust global or default volume
 											// to keep volume level the same given the normalization.
 											// Volume adjustment is not done if this param is MOD_TYPE_NONE.
-					 CSoundFile* const pSndFile); // Passed to AdjustEndOfSample.
+					 CSoundFile &sndFile);	// Passed to AdjustEndOfSample.
 
 // Amplify / fade  sample data
-bool AmplifySample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile, double amplifyStart, double amplifyEnd);
+bool AmplifySample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile, double amplifyStart, double amplifyEnd);
 
 // Reverse sample data
-bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile);
 
 // Virtually unsign sample data
-bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile);
 
 // Invert sample data (flip by 180 degrees)
-bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile);
 
 // Detect whether to enable smart sample ramping.
-bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, const CSoundFile *pSndFile);
+bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, const CSoundFile &sndFile);
 
 // Crossfade sample data to create smooth loops
-bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile *pSndFile);
+bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile &sndFile);
 
 enum StereoToMonoMode
 {
@@ -86,7 +85,7 @@ enum StereoToMonoMode
 };
 
 // Convert a sample with any number of channels to mono
-bool ConvertToMono(ModSample &smp, CSoundFile *pSndFile, StereoToMonoMode conversionMode);
+bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode conversionMode);
 
 } // Namespace ctrlSmp
 

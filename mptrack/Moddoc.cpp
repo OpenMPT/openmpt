@@ -118,8 +118,8 @@ void CModDoc::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc construction/destruction
 
-CModDoc::CModDoc()
-//----------------
+CModDoc::CModDoc() : m_PatternUndo(*this), m_SampleUndo(*this)
+//------------------------------------------------------------
 {
 	m_bHasValidPath = false;
 	m_lpszLog = NULL;
@@ -127,9 +127,6 @@ CModDoc::CModDoc()
 
 	m_notifyType = Notification::None;
 	m_notifyItem = 0;
-
-	m_PatternUndo.SetParent(this);
-	m_SampleUndo.SetParent(this);
 
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
@@ -2065,7 +2062,7 @@ void CModDoc::OnEditGraph()
 void CModDoc::OnShowCleanup()
 //---------------------------
 {
-	CModCleanupDlg dlg(this, CMainFrame::GetMainFrame());
+	CModCleanupDlg dlg(*this, CMainFrame::GetMainFrame());
 	dlg.DoModal();
 }
 
@@ -2656,7 +2653,7 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 void CModDoc::SongProperties()
 //----------------------------
 {
-	CModTypeDlg dlg(GetSoundFile(), CMainFrame::GetMainFrame());
+	CModTypeDlg dlg(m_SndFile, CMainFrame::GetMainFrame());
 	if (dlg.DoModal() == IDOK)
 	{	
 		bool bShowLog = false;

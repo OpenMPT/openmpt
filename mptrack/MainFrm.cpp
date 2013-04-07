@@ -1614,16 +1614,16 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 }
 
 
-BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note)
-//------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	bool ok = false;
 	BeginWaitCursor();
 	{
 		CriticalSection cs;
 		InitPreview();
-		m_WaveFile.m_nType = pSong->m_nType;
-		if ((nInstrument) && (nInstrument <= pSong->GetNumInstruments()))
+		m_WaveFile.m_nType = sndFile.GetType();
+		if ((nInstrument) && (nInstrument <= sndFile.GetNumInstruments()))
 		{
 			m_WaveFile.m_nInstruments = 1;
 			m_WaveFile.m_nSamples = 32;
@@ -1632,12 +1632,12 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, INSTRUMENTINDEX nInstrument, S
 			m_WaveFile.m_nInstruments = 0;
 			m_WaveFile.m_nSamples = 1;
 		}
-		if (nInstrument != INSTRUMENTINDEX_INVALID && nInstrument <= pSong->GetNumInstruments())
+		if (nInstrument != INSTRUMENTINDEX_INVALID && nInstrument <= sndFile.GetNumInstruments())
 		{
-			m_WaveFile.ReadInstrumentFromSong(1, pSong, nInstrument);
-		} else if(nSample != SAMPLEINDEX_INVALID && nSample <= pSong->GetNumSamples())
+			m_WaveFile.ReadInstrumentFromSong(1, sndFile, nInstrument);
+		} else if(nSample != SAMPLEINDEX_INVALID && nSample <= sndFile.GetNumSamples())
 		{
-			m_WaveFile.ReadSampleFromSong(1, pSong, nSample);
+			m_WaveFile.ReadSampleFromSong(1, sndFile, nSample);
 		}
 		PreparePreview(note);
 		ok = true;
