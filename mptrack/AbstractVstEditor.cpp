@@ -49,10 +49,9 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
-CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
+CAbstractVstEditor::CAbstractVstEditor(CVstPlugin &plugin) : m_VstPlugin(plugin)
 {
 	m_nCurProg = -1;
-	m_pVstPlugin = pPlugin;
 	m_pMenu = new CMenu();
 	m_pInputMenu  = new CMenu();
 	m_pOutputMenu = new CMenu();
@@ -71,43 +70,39 @@ CAbstractVstEditor::~CAbstractVstEditor()
 #ifdef VST_LOG
 	Log("~CVstEditor()\n");
 #endif
-	if (m_pVstPlugin)
+	m_pMenu->DestroyMenu();
+	m_pPresetMenu->DestroyMenu();
+	m_pInputMenu->DestroyMenu();
+	m_pOutputMenu->DestroyMenu();
+	m_pMacroMenu->DestroyMenu();
+
+	m_pOptionsMenu->DestroyMenu();
+
+	delete m_pMenu;
+	delete m_pPresetMenu;
+	delete m_pInputMenu;
+	delete m_pOutputMenu;
+	delete m_pMacroMenu;
+	delete m_pOptionsMenu;
+
+	for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
 	{
-		m_pMenu->DestroyMenu();
-		m_pPresetMenu->DestroyMenu();
-		m_pInputMenu->DestroyMenu();
-		m_pOutputMenu->DestroyMenu();
-		m_pMacroMenu->DestroyMenu();
-
-		m_pOptionsMenu->DestroyMenu();
-
-		delete m_pMenu;
-		delete m_pPresetMenu;
-		delete m_pInputMenu;
-		delete m_pOutputMenu;
-		delete m_pMacroMenu;
-		delete m_pOptionsMenu;
-
-		for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
+		if(m_pPresetMenuGroup[i]->m_hMenu)
 		{
-			if(m_pPresetMenuGroup[i]->m_hMenu)
-			{
-				m_pPresetMenuGroup[i]->DestroyMenu();
-				delete m_pPresetMenuGroup[i];
-			}
+			m_pPresetMenuGroup[i]->DestroyMenu();
+			delete m_pPresetMenuGroup[i];
 		}
-		m_pPresetMenuGroup.clear();
-
-		m_pVstPlugin->m_pEditor = nullptr;
-		m_pVstPlugin = nullptr;
 	}
+	m_pPresetMenuGroup.clear();
+
+	m_VstPlugin.m_pEditor = nullptr;
 }
 
 
 void CAbstractVstEditor::OnLoadPreset()
 //-------------------------------------
 {
-	if(m_pVstPlugin && m_pVstPlugin->LoadProgram())
+	if(m_VstPlugin.LoadProgram())
 	{
 		UpdatePresetMenu(true);
 		UpdatePresetField();
@@ -118,21 +113,18 @@ void CAbstractVstEditor::OnLoadPreset()
 void CAbstractVstEditor::OnSavePreset()
 //-------------------------------------
 {
-	if(m_pVstPlugin)
-	{
-		m_pVstPlugin->SaveProgram();
-	}
+	m_VstPlugin.SaveProgram();
 }
 
 
 void CAbstractVstEditor::OnCopyParameters()
 //-----------------------------------------
 {
-	if(m_pVstPlugin == nullptr || CMainFrame::GetMainFrame() == nullptr) return;
+	if(CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
 	std::ostringstream f(std::ios::out | std::ios::binary);
-	if(VSTPresets::SaveFile(f, *m_pVstPlugin, false))
+	if(VSTPresets::SaveFile(f, m_VstPlugin, false))
 	{
 		const std::string data = f.str();
 
@@ -157,7 +149,7 @@ void CAbstractVstEditor::OnCopyParameters()
 void CAbstractVstEditor::OnPasteParameters()
 //------------------------------------------
 {
-	if(m_pVstPlugin == nullptr || CMainFrame::GetMainFrame() == nullptr) return;
+	if(CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
 	if(CMainFrame::GetMainFrame()->OpenClipboard())
@@ -168,12 +160,12 @@ void CAbstractVstEditor::OnPasteParameters()
 		if(hCpy != nullptr && (p = static_cast<const char *>(GlobalLock(hCpy))) != nullptr)
 		{
 			FileReader file(p, GlobalSize(hCpy));
-			VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, *m_pVstPlugin);
+			VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, m_VstPlugin);
 			GlobalUnlock(hCpy);
 
 			if(error == VSTPresets::noError)
 			{
-				const CSoundFile &sndFile = m_pVstPlugin->GetSoundFile();
+				const CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
 				CModDoc *pModDoc;
 				if(sndFile.GetModSpecifications().supportsPlugins && (pModDoc = sndFile.GetpModDoc()) != nullptr)
 				{
@@ -194,9 +186,9 @@ void CAbstractVstEditor::OnPasteParameters()
 VOID CAbstractVstEditor::OnRandomizePreset()
 //-----------------------------------------
 {
-	if(m_pVstPlugin && Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", false, false, this) == cnfYes)
+	if(Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", false, false, this) == cnfYes)
 	{
-		m_pVstPlugin->RandomizeParams();
+		m_VstPlugin.RandomizeParams();
 		UpdateParamDisplays();
 	}
 }
@@ -206,16 +198,13 @@ void CAbstractVstEditor::SetupMenu(bool force)
 //--------------------------------------------
 {
 	//TODO: create menus on click so they are only updated when required
-	if (m_pVstPlugin)
-	{
-		UpdatePresetMenu(force);
-		UpdateInputMenu();
-		UpdateOutputMenu();
-		UpdateMacroMenu();
-		UpdateOptionsMenu();
-		UpdatePresetField();
-		::SetMenu(m_hWnd, m_pMenu->m_hMenu);
-	}
+	UpdatePresetMenu(force);
+	UpdateInputMenu();
+	UpdateOutputMenu();
+	UpdateMacroMenu();
+	UpdateOptionsMenu();
+	UpdatePresetField();
+	::SetMenu(m_hWnd, m_pMenu->m_hMenu);
 	return;
 }
 
@@ -223,7 +212,7 @@ void CAbstractVstEditor::SetupMenu(bool force)
 void CAbstractVstEditor::UpdatePresetField()
 //------------------------------------------
 {
-	if(m_pVstPlugin->GetNumPrograms() > 0)
+	if(m_VstPlugin.GetNumPrograms() > 0)
 	{
 		if(m_pMenu->GetMenuItemCount() < 5)
 		{
@@ -234,7 +223,7 @@ void CAbstractVstEditor::UpdatePresetField()
 			m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
 		}
 
-		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, m_pVstPlugin->GetFormattedProgramName(m_pVstPlugin->GetCurrentProgram()));
+		m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, m_VstPlugin.GetFormattedProgramName(m_VstPlugin.GetCurrentProgram()));
 	}
 
 	DrawMenuBar();
@@ -248,12 +237,12 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 	int nIndex = nID - ID_PRESET_SET;
 	if(nIndex >= 0)
 	{
-		m_pVstPlugin->SetCurrentProgram(nIndex);
+		m_VstPlugin.SetCurrentProgram(nIndex);
 		UpdatePresetField();
 
-		if(m_pVstPlugin->GetSoundFile().GetModSpecifications().supportsPlugins)
+		if(m_VstPlugin.GetSoundFile().GetModSpecifications().supportsPlugins)
 		{
-			m_pVstPlugin->GetModDoc()->SetModified();
+			m_VstPlugin.GetModDoc()->SetModified();
 		}
 	}
 }
@@ -262,13 +251,10 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 void CAbstractVstEditor::OnBypassPlug()
 //-------------------------------------
 {
-	if(m_pVstPlugin)
+	m_VstPlugin.ToggleBypass();
+	if(m_VstPlugin.GetSoundFile().GetModSpecifications().supportsPlugins)
 	{
-		m_pVstPlugin->ToggleBypass();
-		if(m_pVstPlugin->GetSoundFile().GetModSpecifications().supportsPlugins)
-		{
-			m_pVstPlugin->GetModDoc()->SetModified();
-		}
+		m_VstPlugin.GetModDoc()->SetModified();
 	}
 }
 
@@ -276,30 +262,21 @@ void CAbstractVstEditor::OnBypassPlug()
 void CAbstractVstEditor::OnRecordAutomation()
 //-------------------------------------------
 {
-	if(m_pVstPlugin)
-	{
-		m_pVstPlugin->m_bRecordAutomation = !m_pVstPlugin->m_bRecordAutomation;
-	}
+	m_VstPlugin.m_bRecordAutomation = !m_VstPlugin.m_bRecordAutomation;
 }
 
 
 void CAbstractVstEditor::OnRecordMIDIOut()
 //----------------------------------------
 {
-	if(m_pVstPlugin)
-	{
-		m_pVstPlugin->m_bRecordMIDIOut = !m_pVstPlugin->m_bRecordMIDIOut;
-	}
+	m_VstPlugin.m_bRecordMIDIOut = !m_VstPlugin.m_bRecordMIDIOut;
 }
 
 
 void CAbstractVstEditor::OnPassKeypressesToPlug()
 //-----------------------------------------------
 {
-	if(m_pVstPlugin)
-	{
-		m_pVstPlugin->m_bPassKeypressesToPlug  = !m_pVstPlugin->m_bPassKeypressesToPlug;
-	}
+	m_VstPlugin.m_bPassKeypressesToPlug  = !m_VstPlugin.m_bPassKeypressesToPlug;
 }
 
 
@@ -309,7 +286,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 	if (pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if(!m_pVstPlugin->m_bPassKeypressesToPlug &&
+		if(!m_VstPlugin.m_bPassKeypressesToPlug &&
 			(pMsg->message == WM_SYSKEYUP   || pMsg->message == WM_KEYUP ||
 			 pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN) )
 		{
@@ -345,15 +322,15 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 void CAbstractVstEditor::SetTitle()
 //---------------------------------
 {
-	if(m_pVstPlugin && m_pVstPlugin->m_pMixStruct)
+	if(m_VstPlugin.m_pMixStruct)
 	{
 		CString Title;
-		Title.Format("FX %02d: ", m_pVstPlugin->m_nSlot + 1);
+		Title.Format("FX %02d: ", m_VstPlugin.m_nSlot + 1);
 
-		if(strcmp(m_pVstPlugin->m_pMixStruct->GetName(), ""))
-			Title.Append(m_pVstPlugin->m_pMixStruct->GetName());
+		if(strcmp(m_VstPlugin.m_pMixStruct->GetName(), ""))
+			Title.Append(m_VstPlugin.m_pMixStruct->GetName());
 		else
-			Title.Append(m_pVstPlugin->m_pMixStruct->GetLibraryName());
+			Title.Append(m_VstPlugin.m_pMixStruct->GetLibraryName());
 
 		SetWindowText(Title);
 	}
@@ -383,7 +360,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(ValidateCurrentInstrument())
 		{
-			CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
+			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 			pModDoc->PlayNote(wParam - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0, false);
 		}
@@ -393,7 +370,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(ValidateCurrentInstrument())
 		{
-			CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
+			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 			pModDoc->NoteOff(wParam - kcVSTGUIStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12, false, m_nInstrument);
 		}
@@ -415,13 +392,13 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 	//only show messagebox if plug is able to process notes.
 	if(m_nInstrument == INSTRUMENTINDEX_INVALID)
 	{
-		if(m_pVstPlugin->CanRecieveMidiEvents())
+		if(m_VstPlugin.CanRecieveMidiEvents())
 		{
-			CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+			CModDoc *pModDoc = m_VstPlugin.GetModDoc();
 			if(pModDoc == nullptr)
 				return false;
 
-			if(!m_pVstPlugin->isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
+			if(!m_VstPlugin.isInstrument() || pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
 				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false) == cnfNo)
 			{
 				return false;
@@ -476,8 +453,8 @@ void CAbstractVstEditor::FillPresetMenu()
 		return;
 	}
 
-	const VstInt32 numProgs = m_pVstPlugin->GetNumPrograms();
-	const VstInt32 curProg  = m_pVstPlugin->GetCurrentProgram();
+	const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
+	const VstInt32 curProg  = m_VstPlugin.GetCurrentProgram();
 
 	const int numSubMenus = ((numProgs - 1) / PRESETS_PER_GROUP) + 1;
 	if(numSubMenus > 1)
@@ -504,7 +481,7 @@ void CAbstractVstEditor::FillPresetMenu()
 
 	for(VstInt32 p = 0; p < numProgs; p++)
 	{
-		CString programName = m_pVstPlugin->GetFormattedProgramName(p);
+		CString programName = m_VstPlugin.GetFormattedProgramName(p);
 		UINT splitMenuFlag = 0;
 
 		if(entryInThisMenu++ == PRESETS_PER_GROUP)
@@ -531,8 +508,8 @@ void CAbstractVstEditor::FillPresetMenu()
 void CAbstractVstEditor::UpdatePresetMenu(bool force)
 //---------------------------------------------------
 {
-	const VstInt32 numProgs = m_pVstPlugin->GetNumPrograms();
-	const VstInt32 curProg  = m_pVstPlugin->GetCurrentProgram();
+	const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
+	const VstInt32 curProg  = m_VstPlugin.GetCurrentProgram();
 
 	if(m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
 	{												// So remove any exiting menus...
@@ -574,7 +551,7 @@ void CAbstractVstEditor::UpdateInputMenu()
  	CMenu *pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(0, MF_BYPOSITION);
 
-	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
+	CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 
 	if(m_pInputMenu->m_hMenu)
@@ -589,7 +566,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	CString name;
 
 	vector<CVstPlugin *> inputPlugs;
-	m_pVstPlugin->GetInputPlugList(inputPlugs);
+	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(size_t nPlug=0; nPlug < inputPlugs.size(); nPlug++)
 	{
 		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot + 1, inputPlugs[nPlug]->m_pMixStruct->GetName());
@@ -597,7 +574,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	}
 
 	vector<CHANNELINDEX> inputChannels;
-	m_pVstPlugin->GetInputChannelList(inputChannels);
+	m_VstPlugin.GetInputChannelList(inputChannels);
 	for(size_t nChn=0; nChn<inputChannels.size(); nChn++)
 	{
 		if(nChn == 0 && inputPlugs.size())
@@ -609,7 +586,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	}
 
 	vector<INSTRUMENTINDEX> inputInstruments;
-	m_pVstPlugin->GetInputInstrumentList(inputInstruments);
+	m_VstPlugin.GetInputInstrumentList(inputInstruments);
 	for(size_t nIns = 0; nIns<inputInstruments.size(); nIns++)
 	{
 		bool checked = false;
@@ -649,7 +626,7 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	}
 
 	vector<CVstPlugin *> outputPlugs;
-	m_pVstPlugin->GetOutputPlugList(outputPlugs);
+	m_VstPlugin.GetOutputPlugList(outputPlugs);
 	CString name;
 
 	for(size_t nPlug = 0; nPlug < outputPlugs.size(); nPlug++)
@@ -677,7 +654,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	bool greyed;
 	int action;
 
-	CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+	CModDoc *pModDoc = m_VstPlugin.GetModDoc();
 	if(!pModDoc)
 	{
 		return;
@@ -711,7 +688,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 			greyed = false;
 		} else
 		{
-			macroName = midiCfg.GetParameteredMacroName(nMacro, m_pVstPlugin->GetSlot(), *pModDoc->GetSoundFile());
+			macroName = midiCfg.GetParameteredMacroName(nMacro, m_VstPlugin.GetSlot(), *pModDoc->GetSoundFile());
 			if(macroType != sfx_plug || macroName.Left(3) != "N/A")
 			{
 				greyed = false;
@@ -737,16 +714,16 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 	m_pOptionsMenu->CreatePopupMenu();
 
 	//Bypass
-	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->IsBypassed() ? MF_CHECKED : 0,
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_VstPlugin.IsBypassed() ? MF_CHECKED : 0,
 							   ID_PLUG_BYPASS, "&Bypass Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIBypassPlug));
 	//Record Params
-	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bRecordAutomation ? MF_CHECKED : 0,
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_VstPlugin.m_bRecordAutomation ? MF_CHECKED : 0,
 							   ID_PLUG_RECORDAUTOMATION, "Record &Parameter Changes\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
 	//Record MIDI Out
-	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bRecordMIDIOut ? MF_CHECKED : 0,
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_VstPlugin.m_bRecordMIDIOut ? MF_CHECKED : 0,
 							   ID_PLUG_RECORD_MIDIOUT, "Record &MIDI Out to Pattern Editor\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordMIDIOut));
 	//Pass on keypresses
-	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bPassKeypressesToPlug ? MF_CHECKED : 0,
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_VstPlugin.m_bPassKeypressesToPlug ? MF_CHECKED : 0,
 							   ID_PLUG_PASSKEYS, "Pass &Keys to Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));
 
 
@@ -759,7 +736,7 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 void CAbstractVstEditor::OnToggleEditor(UINT nID)
 //-----------------------------------------------
 {
-	CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+	CModDoc *pModDoc = m_VstPlugin.GetModDoc();
 
 	if(pModDoc)
 	{
@@ -778,11 +755,11 @@ void CAbstractVstEditor::OnInitMenu(CMenu* /*pMenu*/)
 bool CAbstractVstEditor::CheckInstrument(INSTRUMENTINDEX ins)
 //-----------------------------------------------------------
 {
-	const CSoundFile &sndFile = m_pVstPlugin->GetSoundFile();
+	const CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
 
 	if(ins != INSTRUMENTINDEX_INVALID && ins < MAX_INSTRUMENTS && sndFile.Instruments[ins] != nullptr)
 	{
-		return (sndFile.Instruments[ins]->nMixPlug) == (m_pVstPlugin->m_nSlot + 1);
+		return (sndFile.Instruments[ins]->nMixPlug) == (m_VstPlugin.m_nSlot + 1);
 	}
 	return false;
 }
@@ -800,7 +777,7 @@ INSTRUMENTINDEX CAbstractVstEditor::GetBestInstrumentCandidate()
 */
 	//Then just take the first instrument that points to this plug..
 	vector<INSTRUMENTINDEX> plugInstrumentList;
-	m_pVstPlugin->GetInputInstrumentList(plugInstrumentList);
+	m_VstPlugin.GetInputInstrumentList(plugInstrumentList);
 	if(plugInstrumentList.size())
 	{
 		return static_cast<INSTRUMENTINDEX>(plugInstrumentList[0]);
@@ -821,28 +798,28 @@ void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
 void CAbstractVstEditor::OnSetPreviousVSTPreset()
 //-----------------------------------------------
 {
-	OnSetPreset(ID_PRESET_SET + m_pVstPlugin->GetCurrentProgram() - 1);
+	OnSetPreset(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() - 1);
 }
 
 
 void CAbstractVstEditor::OnSetNextVSTPreset()
 //-------------------------------------------
 {
-	OnSetPreset(ID_PRESET_SET + m_pVstPlugin->GetCurrentProgram() + 1);
+	OnSetPreset(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() + 1);
 }
 
 
 void CAbstractVstEditor::OnVSTPresetBackwardJump()
 //------------------------------------------------
 {
-	OnSetPreset(max(ID_PRESET_SET + m_pVstPlugin->GetCurrentProgram() - 10, ID_PRESET_SET));
+	OnSetPreset(max(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() - 10, ID_PRESET_SET));
 }
 
 
 void CAbstractVstEditor::OnVSTPresetForwardJump()
 //-----------------------------------------------
 {
-	OnSetPreset(min(ID_PRESET_SET + m_pVstPlugin->GetCurrentProgram() + 10, ID_PRESET_SET + m_pVstPlugin->GetNumPrograms() - 1));
+	OnSetPreset(min(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() + 10, ID_PRESET_SET + m_VstPlugin.GetNumPrograms() - 1));
 }
 
 
@@ -857,8 +834,8 @@ void CAbstractVstEditor::OnCreateInstrument()
 bool CAbstractVstEditor::CreateInstrument()
 //-----------------------------------------
 {
-	CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
-	CSoundFile &sndFile = m_pVstPlugin->GetSoundFile();
+	CModDoc *pModDoc = m_VstPlugin.GetModDoc();
+	CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
 	if(pModDoc == nullptr)
 	{
 		return false;
@@ -874,9 +851,9 @@ bool CAbstractVstEditor::CreateInstrument()
 	ModInstrument *pIns = sndFile.Instruments[nIns];
 	m_nInstrument = nIns;
 
-	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, sndFile.m_MixPlugins[m_pVstPlugin->GetSlot()].GetName());
-	StringFixer::CopyN(pIns->filename, sndFile.m_MixPlugins[m_pVstPlugin->GetSlot()].GetLibraryName());
-	pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
+	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_VstPlugin.GetSlot() + 1, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetName());
+	StringFixer::CopyN(pIns->filename, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetLibraryName());
+	pIns->nMixPlug = (PLUGINDEX)m_VstPlugin.GetSlot() + 1;
 	pIns->nMidiChannel = 1;
 	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
 	//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);

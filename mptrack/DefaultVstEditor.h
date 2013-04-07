@@ -23,9 +23,9 @@ enum
 
 #ifndef NO_VST
 
-//====================
+//===================
 class ParamControlSet
-//====================
+//===================
 {
 protected:
 	CSliderCtrl valueSlider;
@@ -66,7 +66,7 @@ protected:
 
 public:
 
-	CDefaultVstEditor(CVstPlugin *pPlugin);
+	CDefaultVstEditor(CVstPlugin &plugin);
 	virtual ~CDefaultVstEditor();
 
 	void UpdateParamDisplays() { UpdateControls(false); };
