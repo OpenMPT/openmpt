@@ -31,7 +31,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 	{
 
 		// Olivier's version gives us floats in [-0.5; 0.5] and slightly saturates VSTis. 
-		case mixLevels_original:		
+		case mixLevels_original:
 			setVSTiAttenuation(NO_ATTENUATION);
 			setIntToFloat(1.0f/static_cast<float>(1<<28));
 			setFloatToInt(static_cast<float>(1<<28));
@@ -39,7 +39,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setUseGlobalPreAmp(true);
 			setForcePanningMode(dontForcePanningMode);
 			setDisplayDBValues(false);
-			setNormalSamplePreAmp(128.0);
+			setNormalSamplePreAmp(256.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
@@ -47,7 +47,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 
 		// Ericus' version gives us floats in [-0.06;0.06] and requires attenuation to
 		// avoid massive VSTi saturation.
-		case mixLevels_117RC1:		
+		case mixLevels_117RC1:
 			setVSTiAttenuation(32.0f);
 			setIntToFloat(1.0f/static_cast<float>(0x07FFFFFFF));
 			setFloatToInt(static_cast<float>(0x07FFFFFFF));
@@ -55,7 +55,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setUseGlobalPreAmp(true);
 			setForcePanningMode(dontForcePanningMode);
 			setDisplayDBValues(false);
-			setNormalSamplePreAmp(128.0);
+			setNormalSamplePreAmp(256.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
@@ -72,7 +72,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setUseGlobalPreAmp(true);
 			setForcePanningMode(dontForcePanningMode);
 			setDisplayDBValues(false);
-			setNormalSamplePreAmp(128.0);
+			setNormalSamplePreAmp(256.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
@@ -114,7 +114,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			break;
 
 	}
-	
+
 	return;
 }
 

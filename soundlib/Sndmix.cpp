@@ -306,7 +306,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			if (nMaxPlugins) ProcessPlugins(lCount);
 
 			// Apply global volume
-			if (m_pConfig->getGlobalVolumeAppliesToMaster())
+			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
 			{
 				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lSampleCount);
 			}
@@ -322,7 +322,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			X86_MonoFromStereo(MixSoundBuffer, lCount);
 
 			// Apply global volume
-			if (m_pConfig->getGlobalVolumeAppliesToMaster())
+			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
 			{
 				ApplyGlobalVolume(MixSoundBuffer, nullptr, lSampleCount);
 			}
@@ -337,9 +337,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		if (gdwSoundSetup & SNDMIX_EQ)
 		{
 			if (gnChannels >= 2)
-				m_EQ.ProcessStereo(MixSoundBuffer, lCount, m_pConfig, gdwSoundSetup, gdwSysInfo);
+				m_EQ.ProcessStereo(MixSoundBuffer, lCount, m_PlayConfig, gdwSoundSetup, gdwSysInfo);
 			else
-				m_EQ.ProcessMono(MixSoundBuffer, lCount, m_pConfig);
+				m_EQ.ProcessMono(MixSoundBuffer, lCount, m_PlayConfig);
 		}
 #endif // NO_EQ
 
@@ -1664,7 +1664,7 @@ BOOL CSoundFile::ReadNote()
 		
 		DWORD mastervol;
 
-		if (m_pConfig->getUseGlobalPreAmp())
+		if (m_PlayConfig.getUseGlobalPreAmp())
 		{
 			int realmastervol = m_nMasterVolume;
 			if (realmastervol > 0x80)
@@ -1684,7 +1684,7 @@ BOOL CSoundFile::ReadNote()
 			mastervol = Util::muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
 		}
 
-		if (m_pConfig->getUseGlobalPreAmp())
+		if (m_PlayConfig.getUseGlobalPreAmp())
 		{
 			UINT attenuation =
 #ifndef NO_AGC
@@ -1797,7 +1797,7 @@ BOOL CSoundFile::ReadNote()
 				if(pChn->dwFlags[CHN_SYNCMUTE])
 				{
 					pChn->nRealVolume = 0;
-				} else if (m_pConfig->getGlobalVolumeAppliesToMaster())
+				} else if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
 				{
 					// Don't let global volume affect level of sample if
 					// Global volume is going to be applied to master output anyway.
@@ -1962,7 +1962,7 @@ BOOL CSoundFile::ReadNote()
 #endif
 
 #ifdef MODPLUG_TRACKER
-			const UINT kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? 0x100 : nMasterVol;
+			const UINT kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? (UINT)m_PlayConfig.getNormalSamplePreAmp() : nMasterVol;
 #else
 #define		kChnMasterVol	nMasterVol
 #endif // MODPLUG_TRACKER
@@ -1977,7 +1977,7 @@ BOOL CSoundFile::ReadNote()
 				Limit(pan, 0, 256);
 
 				LONG realvol;
-				if (m_pConfig->getUseGlobalPreAmp())
+				if (m_PlayConfig.getUseGlobalPreAmp())
 				{
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 7;
 				} else
@@ -1986,7 +1986,7 @@ BOOL CSoundFile::ReadNote()
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 				
-				const forcePanningMode panningMode = m_pConfig->getForcePanningMode(); 				
+				const forcePanningMode panningMode = m_PlayConfig.getForcePanningMode(); 				
 				if (panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (gdwSoundSetup & SNDMIX_SOFTPANNING)))
 				{
 					if (pan < 128)
@@ -2054,7 +2054,7 @@ BOOL CSoundFile::ReadNote()
 				pChn->nNewRightVol >>= MIXING_ATTENUATION;
 				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
 			}*/
-			const int extraAttenuation = m_pConfig->getExtraSampleAttenuation();
+			const int extraAttenuation = m_PlayConfig.getExtraSampleAttenuation();
 			pChn->nNewRightVol >>= extraAttenuation;
 			pChn->nNewLeftVol >>= extraAttenuation;
 

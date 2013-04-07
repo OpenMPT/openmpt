@@ -318,7 +318,7 @@ public:
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
-	CSoundFilePlayConfig* m_pConfig;
+	CSoundFilePlayConfig m_PlayConfig;
 	DWORD m_dwCreatedWithVersion;
 	DWORD m_dwLastSavedWithVersion;
 
