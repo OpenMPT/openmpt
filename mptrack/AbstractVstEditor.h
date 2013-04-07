@@ -66,13 +66,13 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CMenu *m_pMenu;
-	CMenu *m_pPresetMenu;
-	vector<CMenu *> m_pPresetMenuGroup;
-	CMenu *m_pInputMenu;
-	CMenu *m_pOutputMenu;
-	CMenu *m_pMacroMenu;
-	CMenu *m_pOptionsMenu;
+	CMenu m_Menu;
+	CMenu m_PresetMenu;
+	std::vector<CMenu *> m_pPresetMenuGroup;
+	CMenu m_InputMenu;
+	CMenu m_OutputMenu;
+	CMenu m_MacroMenu;
+	CMenu m_OptionsMenu;
 	static UINT clipboardFormat;
 
 	void FillPresetMenu();
@@ -86,7 +86,7 @@ private:
 	bool ValidateCurrentInstrument();
 	INSTRUMENTINDEX m_nInstrument;
 	int m_nLearnMacro;
-	
+
 	void OnToggleEditor(UINT nID);
 	void OnSetInputInstrument(UINT nID);
 	afx_msg void OnInitMenu(CMenu* pMenu);
@@ -96,5 +96,4 @@ private:
 //end rewbs.defaultPlugGUI
 
 #endif // NO_VST
-
 
