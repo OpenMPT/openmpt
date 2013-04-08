@@ -177,7 +177,7 @@ BOOL CModDoc::OnNewDocument()
 		m_SndFile.m_SongFlags.set(SONG_ITPROJECT);
 	}
 
-	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
+	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
 	if (m_SndFile.m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT))
 	{
 		m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES);

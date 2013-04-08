@@ -12,6 +12,11 @@
 
 #ifndef NO_VST
 
+#include <vector>
+#include "../soundlib/Snd_defs.h"
+
+class CVstPlugin;
+
 class CAbstractVstEditor: public CDialog
 {
 

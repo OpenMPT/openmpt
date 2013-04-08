@@ -10,7 +10,11 @@
 
 #pragma once
 
-#include "Sndfile.h"
+class CSoundFile;
+struct ModSample;
+struct ModChannel;
+
+#include "Snd_defs.h"
 
 namespace ctrlSmp
 {
@@ -39,11 +43,6 @@ bool AdjustEndOfSample(ModSample &smp, CSoundFile &sndFile);
 
 // Propagate loop point changes to player
 bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile);
-
-// Returns the number of bytes allocated(at least) for sample data.
-// Note: Currently the return value is based on the sample length and the actual 
-//       allocation may be more than what this function returns.
-inline SmpLength GetSampleCapacity(ModSample &smp) {return smp.GetSampleSizeInBytes();}
 
 // Resets samples.
 void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSample = SAMPLEINDEX_INVALID, SAMPLEINDEX maxSample = SAMPLEINDEX_INVALID);

@@ -18,7 +18,7 @@
 // Default checkbox state
 bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
 {
-	true,	false,	true,			// patterns	
+	true,	false,	true,			// patterns
 	false,	false,					// orders
 	true,	false,	false,	true,	// samples
 	true,	false,					// instruments
@@ -45,7 +45,7 @@ WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
 };
 
 // Options that are mutually exclusive to each other
-ENUM_CLEANUP_OPTIONS const CModCleanupDlg::m_nMutuallyExclusive[CU_MAX_CLEANUP_OPTIONS] =
+CModCleanupDlg::ENUM_CLEANUP_OPTIONS const CModCleanupDlg::m_nMutuallyExclusive[CModCleanupDlg::CU_MAX_CLEANUP_OPTIONS] =
 {
 	// patterns
 	CU_REMOVE_PATTERNS,		CU_CLEANUP_PATTERNS,	CU_REMOVE_PATTERNS,

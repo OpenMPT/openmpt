@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-//#include "vstplug.h"
-#include "moddoc.h"
 #include "DefaultVstEditor.h"
+#include "../soundlib/Sndfile.h"
+#include "Vstplug.h"
 
 #ifndef NO_VST
 

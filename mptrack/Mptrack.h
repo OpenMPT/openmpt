@@ -11,10 +11,12 @@
 #pragma once
 
 #include "resource.h"       // main symbols
-#include "../soundlib/Sndfile.h"
 #include "ACMConvert.h"
 #include <windows.h>
 #include "../common/Reporting.h"
+#include "../soundlib/MIDIMacros.h"
+#include "../soundlib/modcommand.h"
+#include <vector>
 
 class CModDoc;
 class CVstPluginManager;
@@ -94,7 +96,7 @@ protected:
 
 public:
 	static MEMORYSTATUS gMemStatus;
-	static vector<CDLSBank *> gpDLSBanks;
+	static std::vector<CDLSBank *> gpDLSBanks;
 
 #if (_MSC_VER < MSVC_VER_2010)
 	virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
@@ -152,13 +154,13 @@ public:
 	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
 
 	int GetOpenDocumentCount() const;
-	vector<CModDoc *>GetOpenDocuments() const;
+	std::vector<CModDoc *>GetOpenDocuments() const;
 
 public:
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
-	void GetDefaultMidiMacro(MIDIMacroConfig *pcfg) const { *pcfg = m_MidiCfg; }
-	void SetDefaultMidiMacro(const MIDIMacroConfig *pcfg) { m_MidiCfg = *pcfg; }
+	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
+	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	BOOL CanEncodeLayer3() const { return acmConvert.IsLayer3Present(); }
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
@@ -182,12 +184,12 @@ public:
 
 // Splash Screen
 protected:
-	VOID StartSplashScreen();
-	VOID StopSplashScreen();
+	void StartSplashScreen();
+	void StopSplashScreen();
 
 // Localized strings
 public:
-	VOID ImportLocalizedStrings();
+	void ImportLocalizedStrings();
 	BOOL GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize);
 
 // Overrides
@@ -324,6 +326,8 @@ UINT MsgBox(UINT nStringID, CWnd *p=NULL, LPCSTR lpszTitle=NULL, UINT n=MB_OK);
 void ErrorBox(UINT nStringID, CWnd*p=NULL);
 
 // Helper function declarations.
+struct SNDMIXPLUGIN;
+class CVstPlugin;
 void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames = false);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);

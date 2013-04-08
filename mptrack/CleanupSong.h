@@ -10,38 +10,38 @@
 
 #pragma once
 
-enum ENUM_CLEANUP_OPTIONS
-{
-	// patterns
-	CU_CLEANUP_PATTERNS = 0,
-	CU_REMOVE_PATTERNS,
-	CU_REARRANGE_PATTERNS,
-	// orders
-	CU_MERGE_SEQUENCES,
-	CU_REMOVE_ORDERS,
-	// samples
-	CU_CLEANUP_SAMPLES,
-	CU_REMOVE_SAMPLES,
-	CU_REARRANGE_SAMPLES,
-	CU_OPTIMIZE_SAMPLES,
-	// instruments
-	CU_CLEANUP_INSTRUMENTS,
-	CU_REMOVE_INSTRUMENTS,
-	// plugins
-	CU_CLEANUP_PLUGINS,
-	CU_REMOVE_PLUGINS,
-	// misc
-	CU_RESET_VARIABLES,
-
-	CU_NONE,
-	CU_MAX_CLEANUP_OPTIONS = CU_NONE
-};
-
 //==================================
 class CModCleanupDlg: public CDialog
 //==================================
 {
 private:
+	enum ENUM_CLEANUP_OPTIONS
+	{
+		// patterns
+		CU_CLEANUP_PATTERNS = 0,
+		CU_REMOVE_PATTERNS,
+		CU_REARRANGE_PATTERNS,
+		// orders
+		CU_MERGE_SEQUENCES,
+		CU_REMOVE_ORDERS,
+		// samples
+		CU_CLEANUP_SAMPLES,
+		CU_REMOVE_SAMPLES,
+		CU_REARRANGE_SAMPLES,
+		CU_OPTIMIZE_SAMPLES,
+		// instruments
+		CU_CLEANUP_INSTRUMENTS,
+		CU_REMOVE_INSTRUMENTS,
+		// plugins
+		CU_CLEANUP_PLUGINS,
+		CU_REMOVE_PLUGINS,
+		// misc
+		CU_RESET_VARIABLES,
+
+		CU_NONE,
+		CU_MAX_CLEANUP_OPTIONS = CU_NONE
+	};
+
 	CModDoc &modDoc;
 	static bool m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS]; // Checkbox state
 	static const WORD m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS]; // Checkbox -> Control ID LUT

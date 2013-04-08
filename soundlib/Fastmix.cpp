@@ -2256,6 +2256,8 @@ done:
 }
 
 
+typedef struct ModChannel ModChannel_;
+
 void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
 //----------------------------------------------------------------------------------
 {
@@ -2264,8 +2266,8 @@ void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamp
 	mov esi, pChannel
 	mov edi, pBuffer
 	mov ecx, nSamples
-	mov eax, dword ptr [esi+ModChannel.nROfs]
-	mov edx, dword ptr [esi+ModChannel.nLOfs]
+	mov eax, dword ptr [esi+ModChannel_.nROfs]
+	mov edx, dword ptr [esi+ModChannel_.nLOfs]
 	or ecx, ecx
 	jz brkloop
 ofsloop:
@@ -2293,8 +2295,8 @@ ofsloop:
 	jnz ofsloop
 brkloop:
 	mov esi, pChannel
-	mov dword ptr [esi+ModChannel.nROfs], eax
-	mov dword ptr [esi+ModChannel.nLOfs], edx
+	mov dword ptr [esi+ModChannel_.nROfs], eax
+	mov dword ptr [esi+ModChannel_.nLOfs], edx
 	}
 #else // c implementation taken from libmodplug
 	int rofs = pChannel->nROfs;

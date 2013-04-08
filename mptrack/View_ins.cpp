@@ -2239,14 +2239,14 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		return;
 	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
-	if(m_nInstrument >= 1 &&
-		m_nInstrument <= sndFile.GetNumInstruments() &&
-		sndFile.Instruments[m_nInstrument])
+	if(m_nInstrument >= 1
+		&& m_nInstrument <= sndFile.GetNumInstruments()
+		&& sndFile.Instruments[m_nInstrument])
 	{
 		// "Center" y value of the envelope. For panning and pitch, this is 32, for volume and filter it is 0 (minimum).
 		int nOffset = ((m_nEnv != ENV_VOLUME) && !GetEnvelopePtr()->dwFlags[ENV_FILTER]) ? 32 : 0;
 
-		CScaleEnvPointsDlg dlg(this, GetEnvelopePtr(), nOffset);
+		CScaleEnvPointsDlg dlg(this, *GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal() == IDOK)
 		{
 			SetInstrumentModified();

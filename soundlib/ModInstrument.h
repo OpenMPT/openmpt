@@ -11,6 +11,8 @@
 #pragma once
 
 #include "tuning.h"
+#include "Snd_defs.h"
+#include "../common/FlagSet.h"
 #include <set>
 
 // Instrument Envelopes

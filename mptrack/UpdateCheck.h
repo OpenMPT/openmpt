@@ -13,10 +13,7 @@
 #include <WinInet.h>
 #include <time.h>
 
-// Setup dialog stuff
-#include "Mainfrm.h"
 #include "resource.h"
-#include "Moptions.h"
 
 
 #define DOWNLOAD_BUFFER_SIZE 256
