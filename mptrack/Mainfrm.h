@@ -323,7 +323,6 @@ protected:
 	int64 m_TotalSamplesRendered;
 	Util::fixed_size_queue<Notification,MAX_UPDATE_HISTORY> m_NotifyBuffer;
 	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
-	Notification m_PendingNotification;
 
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
@@ -530,8 +529,8 @@ protected:
 	afx_msg void OnPanic();
 	afx_msg void OnReportBug();	//rewbs.customKeys
 	afx_msg BOOL OnInternetLink(UINT nID);
+	afx_msg LRESULT OnNotification(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
-	afx_msg LRESULT OnUpdatePositionThreaded(WPARAM, LPARAM lParam);
 	afx_msg void OnExampleSong(UINT nId);
 	afx_msg void OnOpenTemplateModule(UINT nId);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
