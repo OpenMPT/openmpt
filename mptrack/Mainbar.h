@@ -10,6 +10,29 @@
 
 #pragma once
 
+//=============================
+class CStereoVU: public CStatic
+//=============================
+{
+protected:
+	uint32 vuMeter[2];
+	bool horizontal;
+
+public:
+	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; horizontal = true; }
+	void SetVuMeter(uint32 left, uint32 right);
+	void SetOrientation(bool h) { horizontal = h; }
+
+protected:
+	void DrawVuMeters(HDC hdc);
+	void DrawVuMeter(HDC hdc, const CRect &rect, uint32 vu);
+
+protected:
+	afx_msg void OnPaint();
+	afx_msg void OnLButtonDown(UINT, CPoint);
+	DECLARE_MESSAGE_MAP();
+};
+
 #define MIN_BASEOCTAVE		0
 #define MAX_BASEOCTAVE		8
 
@@ -51,6 +74,8 @@ protected:
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat;
 	int nCurrentSpeed, nCurrentTempo, nCurrentOctave, nCurrentRowsPerBeat;
+public:
+	CStereoVU m_VuMeter;
 
 public:
 	CMainToolBar() {}

@@ -942,6 +942,7 @@
 #define IDC_PROMPT                      2440
 #define IDC_SLIDER_NUMBUFFERS           2454
 #define IDC_EDIT_STATISTICS             2455
+#define IDC_VUMETER                     2456
 #define IDC_STATIC_BUFFERLENGTH         2457
 #define IDC_STATIC_UPDATEINTERVAL       2458
 #define IDC_COMBO_UPDATEINTERVAL        2459
