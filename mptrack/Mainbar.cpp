@@ -74,16 +74,7 @@ CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 				SetVertical();
 		}
 	}
-#if 0
-	// Hack - fixed in VC++ 6.0
-	if ((sizeResult.cy > 30) && (m_bFlatButtons))
-	{
-		if (dwMode & LM_HORZ)
-			sizeResult.cy += ((sizeResult.cy-30)/28) * 4;
-		else
-			sizeResult.cy += 8;
-	}
-#endif
+
 	return sizeResult;
 }
 
@@ -138,7 +129,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 // Play Command
 #define PLAYCMD_INDEX		10
 #define TOOLBAR_IMAGE_PAUSE	8
-#define TOOLBAR_IMAGE_PLAY	16
+#define TOOLBAR_IMAGE_PLAY	12
 // Base octave
 #define EDITOCTAVE_INDEX	13
 #define EDITOCTAVE_WIDTH	55
@@ -182,8 +173,12 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 #define SPINRPB_INDEX		(EDITRPB_INDEX+1)
 #define SPINRPB_WIDTH		16
 #define SPINRPB_HEIGHT		(EDITRPB_HEIGHT)
+// VU Meters
+#define VUMETER_INDEX		(SPINRPB_INDEX+5)
+#define VUMETER_WIDTH		255
+#define VUMETER_HEIGHT		19
 
-static UINT BASED_CODE MainButtons[] =
+static UINT MainButtons[] =
 {
 	// same order as in the bitmap 'mainbar.bmp'
 	ID_FILE_NEW,
@@ -216,12 +211,9 @@ static UINT BASED_CODE MainButtons[] =
 		ID_SEPARATOR,
 		ID_SEPARATOR,
 	ID_VIEW_OPTIONS,
-	ID_APP_ABOUT,
-//	ID_CONTEXT_HELP,
-		ID_SEPARATOR,	//rewbs.reportBug
-	ID_REPORT_BUG,		//rewbs.reportBug
-		ID_SEPARATOR,
 	ID_PANIC,
+	ID_SEPARATOR,
+		ID_SEPARATOR,	// VU Meter
 };
 
 
@@ -282,10 +274,14 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	rect.SetRect(-SPINRPB_WIDTH, -SPINRPB_HEIGHT, 0, 0);
 	m_SpinRowsPerBeat.Create(WS_CHILD|UDS_ALIGNRIGHT, rect, this, IDC_SPIN_RPB);
 
+	// VU Meter
+	rect.SetRect(-VUMETER_WIDTH, -VUMETER_HEIGHT, 0, 0);
+	//m_VuMeter.CreateEx(WS_EX_STATICEDGE, "STATIC", "", WS_CHILD | WS_BORDER | SS_NOTIFY, rect, this, IDC_VUMETER);
+	m_VuMeter.Create("", WS_CHILD | WS_BORDER | SS_NOTIFY, rect, this, IDC_VUMETER);
 
 	// Adjust control styles
 	HFONT hFont = CMainFrame::GetGUIFont();
-  	m_EditOctave.SendMessage(WM_SETFONT, (WPARAM)hFont);
+	m_EditOctave.SendMessage(WM_SETFONT, (WPARAM)hFont);
 	m_EditOctave.ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_NOACTIVATE);
 	m_StaticTempo.SendMessage(WM_SETFONT, (WPARAM)hFont);
 	m_EditTempo.SendMessage(WM_SETFONT, (WPARAM)hFont);
@@ -326,6 +322,7 @@ BOOL CMainToolBar::SetHorizontal()
 //--------------------------------
 {
 	CToolBarEx::SetHorizontal();
+	m_VuMeter.SetOrientation(true);
 	SetButtonInfo(EDITOCTAVE_INDEX, IDC_EDIT_BASEOCTAVE, TBBS_SEPARATOR, EDITOCTAVE_WIDTH);
 	SetButtonInfo(SPINOCTAVE_INDEX, IDC_SPIN_BASEOCTAVE, TBBS_SEPARATOR, SPINOCTAVE_WIDTH);
 	SetButtonInfo(TEMPOTEXT_INDEX, IDC_TEXT_CURRENTTEMPO, TBBS_SEPARATOR, TEMPOTEXT_WIDTH);
@@ -337,6 +334,7 @@ BOOL CMainToolBar::SetHorizontal()
 	SetButtonInfo(RPBTEXT_INDEX, IDC_TEXT_RPB, TBBS_SEPARATOR, RPBTEXT_WIDTH);
 	SetButtonInfo(EDITRPB_INDEX, IDC_EDIT_RPB, TBBS_SEPARATOR, EDITRPB_WIDTH);
 	SetButtonInfo(SPINRPB_INDEX, IDC_SPIN_RPB, TBBS_SEPARATOR, SPINRPB_WIDTH);
+	SetButtonInfo(VUMETER_INDEX, IDC_VUMETER, TBBS_SEPARATOR, VUMETER_WIDTH);
 
 	//SetButtonInfo(SPINSPEED_INDEX+1, IDC_TEXT_BPM, TBBS_SEPARATOR, SPEEDTEXT_WIDTH);
 	// Octave Box
@@ -354,6 +352,7 @@ BOOL CMainToolBar::SetHorizontal()
 	EnableControl(m_StaticRowsPerBeat, RPBTEXT_INDEX, RPBTEXT_HEIGHT);
 	EnableControl(m_EditRowsPerBeat, EDITRPB_INDEX, EDITRPB_HEIGHT);
 	EnableControl(m_SpinRowsPerBeat, SPINRPB_INDEX, SPINRPB_HEIGHT);
+	EnableControl(m_VuMeter, VUMETER_INDEX, VUMETER_HEIGHT);
 
 	return TRUE;
 }
@@ -363,6 +362,7 @@ BOOL CMainToolBar::SetVertical()
 //------------------------------
 {
 	CToolBarEx::SetVertical();
+	m_VuMeter.SetOrientation(false);
 	// Change Buttons
 	SetButtonInfo(EDITOCTAVE_INDEX, ID_SEPARATOR, TBBS_SEPARATOR, 1);
 	SetButtonInfo(SPINOCTAVE_INDEX, ID_SEPARATOR, TBBS_SEPARATOR, 1);
@@ -375,6 +375,7 @@ BOOL CMainToolBar::SetVertical()
 	SetButtonInfo(RPBTEXT_INDEX, ID_SEPARATOR, TBBS_SEPARATOR, 1);
 	SetButtonInfo(EDITRPB_INDEX, ID_SEPARATOR, TBBS_SEPARATOR, 1);
 	SetButtonInfo(SPINRPB_INDEX, ID_SEPARATOR, TBBS_SEPARATOR, 1);
+	SetButtonInfo(VUMETER_INDEX, IDC_VUMETER, TBBS_SEPARATOR, VUMETER_HEIGHT);
 
 	// Hide Controls
 	if (m_EditOctave.m_hWnd != NULL) m_EditOctave.ShowWindow(SW_HIDE);
@@ -388,6 +389,7 @@ BOOL CMainToolBar::SetVertical()
 	if (m_StaticRowsPerBeat.m_hWnd != NULL) m_StaticRowsPerBeat.ShowWindow(SW_HIDE);
 	if (m_EditRowsPerBeat.m_hWnd != NULL) m_EditRowsPerBeat.ShowWindow(SW_HIDE);
 	if (m_SpinRowsPerBeat.m_hWnd != NULL) m_SpinRowsPerBeat.ShowWindow(SW_HIDE);
+	EnableControl(m_VuMeter, VUMETER_INDEX, VUMETER_HEIGHT);
 	//if (m_StaticBPM.m_hWnd != NULL) m_StaticBPM.ShowWindow(SW_HIDE);
 	return TRUE;
 }
@@ -1075,3 +1077,129 @@ BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 //end rewbs.customKeys
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Stereo VU Meter for toolbar
+//
+
+BEGIN_MESSAGE_MAP(CStereoVU, CStatic)
+	ON_WM_PAINT()
+	ON_WM_LBUTTONDOWN()
+END_MESSAGE_MAP()
+
+
+void CStereoVU::OnPaint()
+//-----------------------
+{
+	CRect rect;
+	CPaintDC dc(this);
+	HDC hdc = dc.m_hDC;
+	GetClientRect(&rect);
+	FillRect(hdc, &rect, CMainFrame::brushBlack);
+	DrawVuMeters(hdc);
+}
+
+
+void CStereoVU::SetVuMeter(uint32 left, uint32 right)
+//---------------------------------------------------
+{
+	if(left != vuMeter[0] || right != vuMeter[1])
+	{
+		vuMeter[0] = left;
+		vuMeter[1] = right;
+		CClientDC dc(this);
+		DrawVuMeters(dc.m_hDC);
+	}
+}
+
+
+// Draw stereo VU
+void CStereoVU::DrawVuMeters(HDC hdc)
+//-----------------------------------
+{
+	CRect rect;
+	GetClientRect(&rect);
+	CRect rectL = rect, rectR = rect;
+
+	if(horizontal)
+	{
+		const int mid = rect.top + rect.Height() / 2;
+		rectL.bottom = mid;
+
+		rectR.top = mid + 1;
+	} else
+	{
+		const int mid = rect.left + rect.Width() / 2;
+		rectL.right = mid;
+
+		rectR.left = mid + 1;
+	}
+
+	HGDIOBJ oldPen = SelectObject(hdc, CMainFrame::penBlack);
+	DrawVuMeter(hdc, rectL, vuMeter[0]);
+	DrawVuMeter(hdc, rectR, vuMeter[1]);
+	SelectObject(hdc, oldPen);
+}
+
+
+// Draw a single VU Meter
+void CStereoVU::DrawVuMeter(HDC hdc, const CRect &rect, uint32 vu)
+//----------------------------------------------------------------
+{
+	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying() == nullptr)
+	{
+		vu = 0;
+	}
+
+	const bool clip = (vu & Notification::ClipVU) != 0;
+	vu = (vu & (~Notification::ClipVU)) >> 8;
+
+	if(horizontal)
+	{
+		const int cx = Util::Max(1, rect.Width());
+		int v = (vu * cx) >> 8;
+
+		for(int rx = rect.left; rx <= rect.right; rx += 2)
+		{
+			int pen = Clamp((rx * NUM_VUMETER_PENS) / cx, 0, NUM_VUMETER_PENS - 1);
+			const bool last = (rx == rect.right - 1);
+
+			// Darken everything above volume, unless it's the clip indicator
+			if(v <= rx && (!last || !clip))
+				pen += NUM_VUMETER_PENS;
+
+			SelectObject(hdc, CMainFrame::gpenVuMeter[pen]);
+			MoveToEx(hdc, rx, rect.top, NULL);
+			LineTo(hdc, rx, rect.bottom);
+		}
+	} else
+	{
+		const int cy = Util::Max(1, rect.Height());
+		int v = (vu * cy) >> 8;
+
+		for(int ry = rect.bottom - 1; ry > rect.top; ry -= 2)
+		{
+			const int y0 = rect.bottom - ry;
+			int pen = Clamp((y0 * NUM_VUMETER_PENS) / cy, 0, NUM_VUMETER_PENS - 1);
+			const bool last = (ry == rect.top + 1);
+
+			// Darken everything above volume, unless it's the clip indicator
+			if(v <= y0 && (!last || !clip))
+				pen += NUM_VUMETER_PENS;
+
+			SelectObject(hdc, CMainFrame::gpenVuMeter[pen]);
+			MoveToEx(hdc, rect.left, ry, NULL);
+			LineTo(hdc, rect.right, ry);
+		}
+	}
+}
+
+
+void CStereoVU::OnLButtonDown(UINT, CPoint)
+//-----------------------------------------
+{
+	// Reset clip indicator.
+	CMainFrame::gnClipLeft = CMainFrame::gnClipRight = false;
+}

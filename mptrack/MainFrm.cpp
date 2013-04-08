@@ -109,6 +109,8 @@ std::vector<CString> CMainFrame::s_TemplateModulePaths;
 
 LONG CMainFrame::gnLVuMeter = 0;
 LONG CMainFrame::gnRVuMeter = 0;
+bool CMainFrame::gnClipLeft = false;
+bool CMainFrame::gnClipRight = false;
 
 // GDI
 HICON CMainFrame::m_hIcon = NULL;
@@ -437,6 +439,7 @@ BOOL CMainFrame::DestroyWindow()
 	}
 
 	// Kill GDI Objects
+#define DeleteGDIObject(h) if (h) { ::DeleteObject(h); h = NULL; }
 	DeleteGDIObject(brushGray);
 	DeleteGDIObject(penLightGray);
 	DeleteGDIObject(penDarkGray);
@@ -457,12 +460,9 @@ BOOL CMainFrame::DestroyWindow()
 
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
 	{
-		if (gpenVuMeter[i])
-		{
-			DeleteObject(gpenVuMeter[i]);
-			gpenVuMeter[i] = NULL;
-		}
+		DeleteGDIObject(gpenVuMeter[i]);
 	}
+#undef DeleteGDIObject
 
 	return CMDIFrameWnd::DestroyWindow();
 }
@@ -939,6 +939,8 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 	}
 	gnLVuMeter = lmax;
 	gnRVuMeter = rmax;
+	if(lmax > MIXING_CLIPMAX) gnClipLeft = true;
+	if(rmax > MIXING_CLIPMAX) gnClipRight = true;
 }
 
 
@@ -958,7 +960,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		}
 	}
 	if(!m_pSndFile) return FALSE;
-	FlagSet<Notification::Type,uint16> notifyType;
+	FlagSet<Notification::Type> notifyType;
 	notifyType = Notification::None;
 	Notification::Item notifyItem = 0;
 
@@ -977,18 +979,10 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	}
 	// Add an entry to the notification history
 
-	Notification notification;
+	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern);
 	Notification *p = &notification;
 
-	p->type = notifyType;
-	p->item = notifyItem;
 	if(endOfStream) p->type.set(Notification::EOS);
-	p->timestampSamples = notificationtimestamp;
-
-	p->row = m_pSndFile->m_nRow;
-	p->tick = m_pSndFile->m_nTickCount;
-	p->order = m_pSndFile->m_nCurrentOrder;
-	p->pattern = m_pSndFile->m_nPattern;
 
 	if(notifyType[Notification::Sample])
 	{
@@ -1054,15 +1048,19 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 			p->pos[k] = (vul << 8) | (vur);
 		}
 	}
+
 	{
 		// Master VU meter
 		uint32 lVu = (gnLVuMeter >> 11);
 		uint32 rVu = (gnRVuMeter >> 11);
 		if(lVu > 0x10000) lVu = 0x10000;
 		if(rVu > 0x10000) rVu = 0x10000;
-		p->masterVu[0] = lVu;
-		p->masterVu[1] = rVu;
+		p->masterVU[0] = lVu;
+		p->masterVU[1] = rVu;
+		if(gnClipLeft) p->masterVU[0] |= Notification::ClipVU;
+		if(gnClipRight) p->masterVU[1] |= Notification::ClipVU;
 		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq) + 1;
+
 		if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 		if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
 	}
@@ -1329,8 +1327,7 @@ bool CMainFrame::PausePlayback()
 void CMainFrame::GenerateStopNotification()
 //-----------------------------------------
 {
-	Notification mn;
-	mn.type = Notification::Stop;
+	Notification mn(Notification::Stop);
 	SendMessage(WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
 }
 
@@ -1418,8 +1415,8 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat)
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
-	gnLVuMeter = 0;
-	gnRVuMeter = 0;
+	gnLVuMeter = gnRVuMeter = 0;
+	gnClipLeft = gnClipRight = false;
 	m_nMixChn = 0;
 	m_nAvgMixChn = 0;
 
@@ -2283,7 +2280,7 @@ LRESULT CMainFrame::OnInvalidatePatterns(WPARAM wParam, LPARAM)
 
 
 LRESULT CMainFrame::OnUpdatePositionThreaded(WPARAM, LPARAM)
-//-----------------------------------------------------------------
+//----------------------------------------------------------
 {
 	Notification * pnotify = &m_PendingNotification;
 	LRESULT retval = OnUpdatePosition(0, (LPARAM)pnotify);
@@ -2291,6 +2288,7 @@ LRESULT CMainFrame::OnUpdatePositionThreaded(WPARAM, LPARAM)
 	ReleaseSemaphore(m_PendingNotificationSempahore, 1, NULL);
 	return retval;
 }
+
 
 LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 //---------------------------------------------------------
@@ -2309,6 +2307,8 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 			if (m_hFollowSong)
 				::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
+		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVU[0], pnotify->masterVU[1]);
+
 	}
 	return 0;
 }
@@ -2557,11 +2557,7 @@ bool CMainFrame::UpdateEffectKeys()
 	CModDoc* pModDoc = GetActiveDoc();
 	if (pModDoc)
 	{
-		CSoundFile* pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile)
-		{
-			return m_InputHandler->SetEffectLetters(pSndFile->GetModSpecifications());
-		}
+		return m_InputHandler->SetEffectLetters(pModDoc->GetrSoundFile().GetModSpecifications());
 	}
 
 	return false;

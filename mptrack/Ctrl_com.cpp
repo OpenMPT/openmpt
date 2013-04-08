@@ -52,7 +52,13 @@ CRuntimeClass *CCtrlComments::GetAssociatedViewClass()
 void CCtrlComments::OnActivatePage(LPARAM)
 //----------------------------------------
 {
-	// nothing
+	CModDoc *modDoc = GetDocument();
+	if(modDoc)
+	{
+		// Don't stop generating VU meter messages
+		modDoc->SetNotifications(Notification::Position);
+		modDoc->SetFollowWnd(m_hWnd);
+	}
 }
 
 
