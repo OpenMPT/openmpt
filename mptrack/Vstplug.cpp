@@ -2594,12 +2594,10 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			// Shift pressed -> Open MIDI mapping dialog
 			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
 
-			const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
 			CMIDIMappingDialog dlg(pVstEditor, pModDoc->GetrSoundFile());
 			dlg.m_Setting.SetParamIndex(param);
 			dlg.m_Setting.SetPlugIndex(GetSlot() + 1);
 			dlg.DoModal();
-			CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
 		}
 
 		// Learn macro

@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
 	ON_WM_MENUSELECT()
+	ON_WM_SETFOCUS()
 	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
 	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
@@ -43,6 +44,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_VSTPRESETFORWARDJUMP,	OnVSTPresetForwardJump)
 	ON_COMMAND(ID_PLUGINTOINSTRUMENT,	OnCreateInstrument)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET + MAX_PLUGPRESETS, OnSetPreset)
+	ON_MESSAGE(WM_MOD_MIDIMSG,		OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
 	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS, OnSetInputInstrument) //rewbs.patPlugName
@@ -82,6 +84,29 @@ CAbstractVstEditor::~CAbstractVstEditor()
 	m_pPresetMenuGroup.clear();
 
 	m_VstPlugin.m_pEditor = nullptr;
+}
+
+
+void CAbstractVstEditor::OnSetFocus(CWnd *oldWnd)
+//-----------------------------------------------
+{
+	CDialog::OnSetFocus(oldWnd);
+	CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
+}
+
+
+LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM)
+//------------------------------------------------------------
+{
+	CModDoc *modDoc = m_VstPlugin.GetModDoc();
+	if(modDoc != nullptr)
+	{
+		if(!CheckInstrument(m_nInstrument))
+			m_nInstrument = GetBestInstrumentCandidate();
+		modDoc->ProcessMIDI(midiData, m_nInstrument, &m_VstPlugin, kCtxVSTGUI);
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -738,8 +763,8 @@ void CAbstractVstEditor::OnInitMenu(CMenu* /*pMenu*/)
 }
 
 
-bool CAbstractVstEditor::CheckInstrument(INSTRUMENTINDEX ins)
-//-----------------------------------------------------------
+bool CAbstractVstEditor::CheckInstrument(INSTRUMENTINDEX ins) const
+//-----------------------------------------------------------------
 {
 	const CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
 
@@ -751,8 +776,8 @@ bool CAbstractVstEditor::CheckInstrument(INSTRUMENTINDEX ins)
 }
 
 
-INSTRUMENTINDEX CAbstractVstEditor::GetBestInstrumentCandidate()
-//--------------------------------------------------------------
+INSTRUMENTINDEX CAbstractVstEditor::GetBestInstrumentCandidate() const
+//--------------------------------------------------------------------
 {
 	//First try current instrument:
 /*	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
