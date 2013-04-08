@@ -85,8 +85,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_CPU,  OnUpdateCPU)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
+	ON_MESSAGE(WM_MOD_NOTIFICATION,		OnNotification)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
-	ON_MESSAGE(WM_MOD_UPDATEPOSITIONTHREADED,		OnUpdatePositionThreaded)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
@@ -670,87 +670,93 @@ DWORD WINAPI CMainFrame::NotifyThreadWrapper(LPVOID)
 DWORD CMainFrame::NotifyThread()
 //------------------------------
 {
-	// initialize thread message queue
 	MSG msg;
-	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-#ifdef NDEBUG
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL ); // we shall not stall the audio thread while holding m_NotificationBufferMutex
-#endif
+	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);	// initialize thread message queue
 	bool terminate = false;
 	bool cansend = true;
 	while(!terminate)
 	{
-		switch(MsgWaitForMultipleObjects(1, &m_hNotifyWakeUp, FALSE, 1000, QS_ALLEVENTS))
+		HANDLE waitHandles[2];
+		waitHandles[0] = m_PendingNotificationSempahore;
+		waitHandles[1] = m_hNotifyWakeUp;
+		switch(MsgWaitForMultipleObjects(2, waitHandles, FALSE, 1000, QS_ALLEVENTS))
 		{
+			case WAIT_OBJECT_0 + 0:
+				// last notification has been handled by gui thread
+				cansend = true;
+			break;
 			case WAIT_OBJECT_0 + 1:
-			{
+				if(cansend)
+				{
+					if(PostMessage(WM_MOD_NOTIFICATION, 0, 0))
+					{
+						// message sent, do not send any more until it has been handled
+						cansend = false;
+					}
+				}
+			break;
+			case WAIT_OBJECT_0 + 2:
 				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{
 					if(msg.message == WM_QUIT) terminate = true;
 				}
-			}
-			break;
-			case WAIT_OBJECT_0:
-				{
-					const Notification * pnotify = nullptr;
-					{
-						int64 currenttotalsamples = 0;
-						bool currenttotalsamplesValid = false;
-						{
-							CriticalSection cs;
-							if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
-							{
-								currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
-								currenttotalsamplesValid = true;
-							}
-						}
-						// advance to the newest notification, drop the obsolete ones
-						Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-						if(!currenttotalsamplesValid)
-						{
-							currenttotalsamples = m_TotalSamplesRendered; 
-							currenttotalsamplesValid = true;
-						}
-						const Notification * p = m_NotifyBuffer.peek_p();
-						if(p && currenttotalsamples >= p->timestampSamples)
-						{
-							pnotify = p;
-							while(m_NotifyBuffer.peek_next_p() && currenttotalsamples >= m_NotifyBuffer.peek_next_p()->timestampSamples)
-							{
-								m_NotifyBuffer.pop();
-								p = m_NotifyBuffer.peek_p();
-								pnotify = p;
-							}
-						}
-					}
-					if(pnotify)
-					{
-						if(!cansend)
-						{
-							// poll the semaphore instead of waiting directly after sending the message to avoid deadlocks on termination of openmpt or when stopping audio rendering
-							if(WaitForSingleObject(m_PendingNotificationSempahore, 0) == WAIT_OBJECT_0)
-							{
-								// last notification has been handled by gui thread, so we can pop the notify buffer
-								cansend = true;
-							}
-						}
-						if(cansend)
-						{
-							m_PendingNotification = *pnotify; // copy notification so that we can free the buffer
-							{
-								Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-								m_NotifyBuffer.pop();
-							}
-							if(PostMessage(WM_MOD_UPDATEPOSITIONTHREADED, 0, 0))
-							{
-								cansend = false;
-							}
-						}
-					}
-				}
 			break;
 		}
 	}
+	return 0;
+}
+
+
+LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
+//------------------------------------------------
+{
+	Notification PendingNotification;
+	bool found = false;
+	int64 currenttotalsamples = 0;
+	bool currenttotalsamplesValid = false;
+	{
+		CriticalSection cs;
+		if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
+		{
+			currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
+			currenttotalsamplesValid = true;
+		}
+	}
+	{
+		// advance to the newest notification, drop the obsolete ones
+		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+		if(!currenttotalsamplesValid)
+		{
+			currenttotalsamples = m_TotalSamplesRendered; 
+			currenttotalsamplesValid = true;
+		}
+		const Notification * pnotify = nullptr;
+		const Notification * p = m_NotifyBuffer.peek_p();
+		if(p && currenttotalsamples >= p->timestampSamples)
+		{
+			pnotify = p;
+			while(m_NotifyBuffer.peek_next_p() && currenttotalsamples >= m_NotifyBuffer.peek_next_p()->timestampSamples)
+			{
+				m_NotifyBuffer.pop();
+				p = m_NotifyBuffer.peek_p();
+				pnotify = p;
+			}
+		}
+		if(pnotify)
+		{
+			PendingNotification = *pnotify; // copy notification so that we can free the buffer
+			found = true;
+			{
+				Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+				m_NotifyBuffer.pop();
+			}
+		}
+	}
+	if(found)
+	{
+		OnUpdatePosition(0, (LPARAM)&PendingNotification);
+	}
+	ReleaseSemaphore(m_PendingNotificationSempahore, 1, NULL);
 	return 0;
 }
 
@@ -2280,17 +2286,6 @@ LRESULT CMainFrame::OnInvalidatePatterns(WPARAM wParam, LPARAM)
 {
 	UpdateAllViews(wParam, NULL);
 	return TRUE;
-}
-
-
-LRESULT CMainFrame::OnUpdatePositionThreaded(WPARAM, LPARAM)
-//----------------------------------------------------------
-{
-	Notification * pnotify = &m_PendingNotification;
-	LRESULT retval = OnUpdatePosition(0, (LPARAM)pnotify);
-	// for all notifications which were delivered via the notification thread, release the semaphore
-	ReleaseSemaphore(m_PendingNotificationSempahore, 1, NULL);
-	return retval;
 }
 
 
