@@ -36,7 +36,7 @@ LPCSTR szCPUNames[8] =
 };
 
 
-UINT nCPUMix[8] =
+UINT nCPUMix[] =
 {
 	16,
 	24,
@@ -141,7 +141,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 
 	// Max Mixing Channels
 	{
-		for (UINT n=0; n<8; n++)
+		for (UINT n = 0; n < CountOf(nCPUMix); n++)
 		{
 			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
 			m_CbnPolyphony.AddString(s);
@@ -279,6 +279,7 @@ void COptionsSoundcard::OnHScroll(UINT n, UINT pos, CScrollBar *p)
 		UpdateStereoSep();
 	}
 	// PreAmp
+	if(p == (CScrollBar *)(&m_SliderPreAmp))
 	{
 		if(m_PreAmpNoteShowed == true)
 		{
@@ -288,8 +289,7 @@ void COptionsSoundcard::OnHScroll(UINT n, UINT pos, CScrollBar *p)
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm) pMainFrm->SetPreAmp(64 + (n * 8));
 			}
-		}
-		else
+		} else
 		{
 			m_PreAmpNoteShowed = true;
 			Reporting::Information(str_preampChangeNote);

@@ -927,6 +927,10 @@ void CViewSample::DrawPositionMarks(HDC hdc)
 //------------------------------------------
 {
 	CRect rect;
+	if(GetDocument()->GetrSoundFile().GetSample(m_nSample).pSample == nullptr)
+	{
+		return;
+	}
 	for (UINT i=0; i<MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
 	{
 		rect.top = -2;
