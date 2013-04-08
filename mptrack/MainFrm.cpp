@@ -986,63 +986,74 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	// Add an entry to the notification history
 
 	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern);
-	Notification *p = &notification;
 
-	if(endOfStream) p->type.set(Notification::EOS);
+	if(endOfStream) notification.type.set(Notification::EOS);
 
 	if(notifyType[Notification::Sample])
 	{
 		// Sample positions
-		SAMPLEINDEX smp = notifyItem;
-		for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
+		const SAMPLEINDEX smp = notifyItem;
+		if(smp > 0 && smp <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(smp).pSample != nullptr)
 		{
-			const ModChannel &chn = m_pSndFile->Chn[k];
-			if(smp && smp <= m_pSndFile->GetNumSamples() && chn.nLength && chn.pSample	// There is a sample and it's playing
-				&& chn.pSample == m_pSndFile->GetSample(smp).pSample					// And it's the correct sample
-				&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))						// And it hasn't completely faded out yet, so it's still playing
+			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
-				p->pos[k] = chn.nPos;
-			} else
-			{
-				p->pos[k] = Notification::PosInvalid;
+				const ModChannel &chn = m_pSndFile->Chn[k];
+				if(chn.pSample == m_pSndFile->GetSample(smp).pSample && chn.nLength != 0	// Corrent sample is set up on this channel
+					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))						// And it hasn't completely faded out yet, so it's still playing
+				{
+					notification.pos[k] = chn.nPos;
+				} else
+				{
+					notification.pos[k] = Notification::PosInvalid;
+				}
 			}
+		} else
+		{
+			// Can't generate a valid notification.
+			notification.type.reset(Notification::Sample);
 		}
 	} else if(notifyType[Notification::VolEnv | Notification::PanEnv | Notification::PitchEnv])
 	{
 		// Instrument envelopes
-		INSTRUMENTINDEX ins = notifyItem;
-		for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
-		{
-			const ModChannel &chn = m_pSndFile->Chn[k];
-			if(ins != 0 && ins <= m_pSndFile->GetNumInstruments()								// There is an instrument
-				&& chn.pModInstrument && chn.pModInstrument == m_pSndFile->Instruments[ins]		// And it's the correct instrument
-				&& (chn.nLength || chn.pModInstrument->HasValidMIDIChannel())					// And it's playing something (sample or instrument)
-				&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))								// And it hasn't completely faded out yet, so it's still playing
-			{
-				enmEnvelopeTypes notifyEnv = ENV_VOLUME;
-				if(notifyType[Notification::PitchEnv])
-					notifyEnv = ENV_PITCH;
-				else if(notifyType[Notification::PanEnv])
-					notifyEnv = ENV_PANNING;
+		const INSTRUMENTINDEX ins = notifyItem;
 
-				const ModChannel::EnvInfo &chnEnv = chn.GetEnvelope(notifyEnv);
-				if(chnEnv.flags[ENV_ENABLED])
-				{
-					uint32 pos = chnEnv.nEnvPosition;
-					if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER))
-					{
-						// Impulse Tracker envelope handling (see e.g. CSoundFile::IncrementEnvelopePosition in SndMix.cpp for details)
-						if(pos > 0)
-							pos--;
-						else
-							continue;
-					}
-					p->pos[k] = pos;
-				}
-			} else
+		enmEnvelopeTypes notifyEnv = ENV_VOLUME;
+		if(notifyType[Notification::PitchEnv])
+			notifyEnv = ENV_PITCH;
+		else if(notifyType[Notification::PanEnv])
+			notifyEnv = ENV_PANNING;
+
+		if(ins > 0 && ins <= m_pSndFile->GetNumInstruments() && m_pSndFile->Instruments[ins] != nullptr)
+		{
+			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
-				p->pos[k] = Notification::PosInvalid;
+				const ModChannel &chn = m_pSndFile->Chn[k];
+				uint32 pos = Notification::PosInvalid;
+
+				if(chn.pModInstrument == m_pSndFile->Instruments[ins]				// Correct instrument is set up on this channel
+					&& (chn.nLength || chn.pModInstrument->HasValidMIDIChannel())	// And it's playing something (sample or instrument plugin)
+					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))				// And it hasn't completely faded out yet, so it's still playing
+				{
+					const ModChannel::EnvInfo &chnEnv = chn.GetEnvelope(notifyEnv);
+					if(chnEnv.flags[ENV_ENABLED])
+					{
+						pos = chnEnv.nEnvPosition;
+						if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER))
+						{
+							// Impulse Tracker envelope handling (see e.g. CSoundFile::IncrementEnvelopePosition in SndMix.cpp for details)
+							if(pos > 0)
+								pos--;
+							else
+								pos = Notification::PosInvalid;	// Envelope isn't playing yet (e.g. when disabling it right when triggering a note)
+						}
+					}
+				}
+				notification.pos[k] = pos;
 			}
+		} else
+		{
+			// Can't generate a valid notification.
+			notification.type.reset(Notification::VolEnv | Notification::PanEnv | Notification::PitchEnv);
 		}
 	} else if(notifyType[Notification::VUMeters])
 	{
@@ -1051,7 +1062,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		{
 			uint32 vul = m_pSndFile->Chn[k].nLeftVU;
 			uint32 vur = m_pSndFile->Chn[k].nRightVU;
-			p->pos[k] = (vul << 8) | (vur);
+			notification.pos[k] = (vul << 8) | (vur);
 		}
 	}
 
@@ -1061,10 +1072,10 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		uint32 rVu = (gnRVuMeter >> 11);
 		if(lVu > 0x10000) lVu = 0x10000;
 		if(rVu > 0x10000) rVu = 0x10000;
-		p->masterVU[0] = lVu;
-		p->masterVU[1] = rVu;
-		if(gnClipLeft) p->masterVU[0] |= Notification::ClipVU;
-		if(gnClipRight) p->masterVU[1] |= Notification::ClipVU;
+		notification.masterVU[0] = lVu;
+		notification.masterVU[1] = rVu;
+		if(gnClipLeft) notification.masterVU[0] |= Notification::ClipVU;
+		if(gnClipRight) notification.masterVU[1] |= Notification::ClipVU;
 		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq) + 1;
 
 		if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
