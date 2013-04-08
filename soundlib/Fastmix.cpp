@@ -1795,20 +1795,20 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 #ifdef ENABLE_SSE
 		if(gdwSysInfo & SYSMIX_SSE)
 		{
-			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
+			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
 			return;
 		}
 #endif // ENABLE_SSE
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
 		{
-			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
+			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
 			return;
 		}
 #endif // ENABLE_3DNOW
 	}
 
-	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
+	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
 
 }
 
@@ -1821,12 +1821,12 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
 		{
-			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_pConfig->getFloatToInt());
+			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
 			return;
 		}
 #endif // ENABLE_3DNOW
 	}
-	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_pConfig->getFloatToInt());
+	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
 }
 
 
@@ -1838,19 +1838,19 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 #ifdef ENABLE_SSE
 		if(gdwSysInfo & SYSMIX_SSE)
 		{
- 			SSE_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
+ 			SSE_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
 			return;
 		}
 #endif // ENABLE_SSE
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
 		{
-			AMD_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
+			AMD_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
 			return;
 		}
 #endif // ENABLE_3DNOW
 	}
-	X86_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
+	X86_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
 
 }
 
@@ -1863,12 +1863,12 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 #ifdef ENABLE_3DNOW
 		if(gdwSysInfo & SYSMIX_3DNOW)
 		{
-			AMD_FloatToMonoMix(pIn, pOut, nCount, m_pConfig->getFloatToInt());
+			AMD_FloatToMonoMix(pIn, pOut, nCount, m_PlayConfig.getFloatToInt());
 			return;
 		}
 #endif // ENABLE_3DNOW
 	}
-	X86_FloatToMonoMix(pIn, pOut, nCount, m_pConfig->getFloatToInt());
+	X86_FloatToMonoMix(pIn, pOut, nCount, m_PlayConfig.getFloatToInt());
 }
 
 

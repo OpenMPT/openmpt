@@ -490,7 +490,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(newTypeIsMOD || newTypeIsS3M)
 	{
 		m_SndFile.m_nMixLevels = mixLevels_compatible;
-		m_SndFile.m_pConfig->SetMixLevels(mixLevels_compatible);
+		m_SndFile.m_PlayConfig.SetMixLevels(mixLevels_compatible);
 	}
 	if(oldTypeIsMPT && m_SndFile.m_nMixLevels != mixLevels_compatible)
 	{

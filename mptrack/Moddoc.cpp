@@ -699,7 +699,7 @@ BOOL CModDoc::InitializeMod()
 
 		// Refresh mix levels now that the correct mod type has been set
 		m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
-		m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
+		m_SndFile.m_PlayConfig.SetMixLevels(m_SndFile.m_nMixLevels);
 		// ...and the order length
 		m_SndFile.Order.resize(min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 

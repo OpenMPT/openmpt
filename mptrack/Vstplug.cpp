@@ -2029,8 +2029,8 @@ void CVstPlugin::RecalculateGain()
 
 	if(m_bIsInstrument)
 	{
-		gain /= m_SndFile.m_pConfig->getVSTiAttenuation();
-		gain = static_cast<float>(gain * (m_SndFile.m_nVSTiVolume / m_SndFile.m_pConfig->getNormalVSTiVol()));
+		gain /= m_SndFile.m_PlayConfig.getVSTiAttenuation();
+		gain = static_cast<float>(gain * (m_SndFile.m_nVSTiVolume / m_SndFile.m_PlayConfig.getNormalVSTiVol()));
 	}
 	m_fGain = gain;
 }
