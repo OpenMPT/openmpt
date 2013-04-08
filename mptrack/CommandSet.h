@@ -10,8 +10,8 @@
 
 #pragma once
 #include "afxtempl.h"
-#include "../soundlib/mod_specifications.h"
 #include <string>
+struct CModSpecifications;
 
 //#define VK_ALT 0x12
 

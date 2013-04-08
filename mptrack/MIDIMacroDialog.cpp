@@ -228,14 +228,14 @@ void CMidiMacroSetup::UpdateDialog()
 void CMidiMacroSetup::OnSetAsDefault()
 //------------------------------------
 {
-	theApp.SetDefaultMidiMacro(&m_MidiCfg);
+	theApp.SetDefaultMidiMacro(m_MidiCfg);
 }
 
 
 void CMidiMacroSetup::OnResetCfg()
 //--------------------------------
 {
-	theApp.GetDefaultMidiMacro(&m_MidiCfg);
+	theApp.GetDefaultMidiMacro(m_MidiCfg);
 	m_CbnZxxPreset.SetCurSel(0);
 	OnSFxChanged();
 }

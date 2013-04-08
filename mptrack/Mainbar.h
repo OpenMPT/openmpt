@@ -39,6 +39,7 @@ protected:
 class CSoundFile;
 class CModDoc;
 class CModTree;
+class CMainFrame;
 
 //===============================
 class CToolBarEx: public CToolBar

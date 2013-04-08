@@ -10,13 +10,12 @@
 
 #pragma once
 
-#include "sndfile.h"
-#include "CommandSet.h"
-#include "inputhandler.h"
-#include "mptrack.h"
+#include "Mptrack.h"
+#include "InputHandler.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
-#include "soundlib/snddev.h"
+#include "../soundlib/snddev.h"
+#include "../soundlib/Sndfile.h"
 
 class CInputHandler;
 class CModDoc;
@@ -263,7 +262,7 @@ enum
 
 #include "mainbar.h"
 #include "TrackerSettings.h"
-
+struct MODPLUGDIB;
 
 //========================================================
 class CMainFrame: public CMDIFrameWnd, public ISoundSource
@@ -284,7 +283,7 @@ public:
 //	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
-	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters, bmpVisNode, bmpVisPcNode;
+	static MODPLUGDIB *bmpPatterns, *bmpNotes, *bmpVUMeters, *bmpVisNode, *bmpVisPcNode;
 	static HPEN gpenVuMeter[NUM_VUMETER_PENS * 2];	// General tab VU meters
 
 public:

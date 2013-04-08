@@ -574,8 +574,8 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 		HWND hWnd = ::GetFocus();
 		if(hWnd != NULL)
 		{
-			TCHAR activeWindowClassName[512];
-			GetClassName(hWnd, activeWindowClassName, 6);
+			TCHAR activeWindowClassName[6];
+			GetClassName(hWnd, activeWindowClassName, CountOf(activeWindowClassName));
 			textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
 			if(textboxHasFocus)
 			{

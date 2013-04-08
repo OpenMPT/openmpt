@@ -9,8 +9,9 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "resource.h"
 #include "ScaleEnvPointsDlg.h"
+#include "ModInstrument.h"
 
 float CScaleEnvPointsDlg::m_fFactorX = 1.0f;
 float CScaleEnvPointsDlg::m_fFactorY = 1.0f;
@@ -44,21 +45,21 @@ void CScaleEnvPointsDlg::OnOK()
 
 	if(m_fFactorX > 0 && m_fFactorX != 1)
 	{
-		for(UINT i = 0; i < m_pEnv->nNodes; i++)
+		for(uint32 i = 0; i < m_Env.nNodes; i++)
 		{
-			m_pEnv->Ticks[i] = static_cast<WORD>(m_fFactorX * m_pEnv->Ticks[i]);
+			m_Env.Ticks[i] = static_cast<WORD>(m_fFactorX * m_Env.Ticks[i]);
 
 			// Checking that the order of points is preserved.
-			if(i > 0 && m_pEnv->Ticks[i] <= m_pEnv->Ticks[i - 1])
-				m_pEnv->Ticks[i] = m_pEnv->Ticks[i - 1] + 1;
+			if(i > 0 && m_Env.Ticks[i] <= m_Env.Ticks[i - 1])
+				m_Env.Ticks[i] = m_Env.Ticks[i - 1] + 1;
 		}
 	}
 
 	if(m_fFactorY != 1)
 	{
-		for(UINT i = 0; i < m_pEnv->nNodes; i++)
+		for(uint32 i = 0; i < m_Env.nNodes; i++)
 		{
-			m_pEnv->Values[i] = CLAMP(static_cast<BYTE>((m_fFactorY * ((int)m_pEnv->Values[i] - m_nCenter)) + m_nCenter), ENVELOPE_MIN, ENVELOPE_MAX);
+			m_Env.Values[i] = CLAMP(static_cast<BYTE>((m_fFactorY * ((int)m_Env.Values[i] - m_nCenter)) + m_nCenter), ENVELOPE_MIN, ENVELOPE_MAX);
 		}
 	}
 

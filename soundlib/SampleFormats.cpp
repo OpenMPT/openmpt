@@ -13,7 +13,7 @@
 #include "sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
-#include "../mptrack/Mainfrm.h"
+#include "../mptrack/Mainfrm.h"	// For ini settings
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
 #include "Wav.h"

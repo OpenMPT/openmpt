@@ -10,8 +10,8 @@
 
 #include "stdafx.h"
 #include "EffectInfo.h"
-#include "mptrack.h"
-#include "..\soundlib\modcommand.h"
+#include "Mptrack.h"	// for szHexChar
+#include "../soundlib/Sndfile.h"
 #include "../soundlib/Tables.h"
 
 ///////////////////////////////////////////////////////////////////////////
