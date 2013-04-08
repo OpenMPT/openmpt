@@ -10,11 +10,6 @@
 
 #pragma once
 
-#include "mptrack.h"
-#include "MainFrm.h"
-#include "VstPlug.h"
-#include "abstractvsteditor.h"
-
 enum
 {
 	PARAM_RESOLUTION = 1000,
@@ -22,6 +17,9 @@ enum
 };
 
 #ifndef NO_VST
+
+#include "mptrack.h"
+#include "AbstractVstEditor.h"
 
 //===================
 class ParamControlSet
@@ -57,7 +55,7 @@ class CDefaultVstEditor : public CAbstractVstEditor
 {
 protected:
 
-	vector<ParamControlSet *> controls;
+	std::vector<ParamControlSet *> controls;
 
 	CScrollBar paramScroller;
 	PlugParamIndex paramOffset;

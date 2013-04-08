@@ -9,7 +9,8 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
+#include "../soundlib/Sndfile.h"
 #include "mod2midi.h"
 #include "Wav.h"
 

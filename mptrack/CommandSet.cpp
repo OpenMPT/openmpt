@@ -9,9 +9,10 @@
 
 
 #include "stdafx.h"
-#include "commandset.h"
+#include "CommandSet.h"
 #include "resource.h"
 #include "Mptrack.h"	// For MsgBox
+#include "../soundlib/mod_specifications.h"
 #include "../common/Reporting.h"
 #include <stdio.h>
 #include <stdlib.h>

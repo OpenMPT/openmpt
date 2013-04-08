@@ -12,6 +12,7 @@
 
 #pragma once
 
+struct ModSample;
 class FileReader;
 
 // Sample import / export formats

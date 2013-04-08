@@ -11,7 +11,6 @@
 #pragma once
 
 #include "pattern.h"
-#include "Snd_defs.h"
 
 class CSoundFile;
 typedef CPattern MODPATTERN;
@@ -22,7 +21,7 @@ class CPatternContainer
 {
 //BEGIN: TYPEDEFS
 public:
-	typedef vector<MODPATTERN> PATTERNVECTOR;
+	typedef std::vector<MODPATTERN> PATTERNVECTOR;
 //END: TYPEDEFS
 
 
@@ -97,7 +96,7 @@ public:
 //BEGIN: DATA MEMBERS
 private:
 	PATTERNVECTOR m_Patterns;
-	CSoundFile& m_rSndFile;
+	CSoundFile &m_rSndFile;
 //END: DATA MEMBERS
 
 };

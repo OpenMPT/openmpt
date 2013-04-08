@@ -206,7 +206,7 @@ void TrackerSettings::LoadSettings()
 
 	// Load default macro configuration
 	MIDIMacroConfig macros;
-	theApp.GetDefaultMidiMacro(&macros);
+	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
 		CHAR snam[8];
@@ -226,7 +226,7 @@ void TrackerSettings::LoadSettings()
 	{
 		macros.UpgradeMacros();
 	}
-	theApp.SetDefaultMidiMacro(&macros);
+	theApp.SetDefaultMidiMacro(macros);
 
 	// Default directory location
 	for(UINT i = 0; i < NUM_DIRS; i++)
@@ -885,7 +885,7 @@ void TrackerSettings::SaveSettings()
 
 	// Save default macro configuration
 	MIDIMacroConfig macros;
-	theApp.GetDefaultMidiMacro(&macros);
+	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
 		CHAR snam[8];

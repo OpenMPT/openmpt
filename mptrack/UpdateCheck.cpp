@@ -13,6 +13,10 @@
 #include "../common/version.h"
 #include "../common/misc_util.h"
 #include "Mptrack.h"
+#include "TrackerSettings.h"
+// Setup dialog stuff
+#include "Mainfrm.h"
+#include "Moptions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

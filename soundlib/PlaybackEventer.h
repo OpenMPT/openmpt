@@ -10,8 +10,7 @@
 
 #pragma once
 
-#include "pattern.h"
-
+#include "Snd_defs.h"
 class CSoundFile;
 
 //====================
@@ -19,11 +18,11 @@ class CPlaybackEventer
 //====================
 {
 public:
-	CPlaybackEventer(CSoundFile& sndf) : m_rSndFile(sndf) {}
+	CPlaybackEventer(CSoundFile &sndf) : m_rSndFile(sndf) {}
 
 	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
 	void PatternTransitionChnUnmuteAll();
 
 private:
-	CSoundFile& m_rSndFile;
+	CSoundFile &m_rSndFile;
 };

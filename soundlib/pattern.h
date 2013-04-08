@@ -14,8 +14,6 @@
 #include "modcommand.h"
 #include "Snd_defs.h"
 
-using std::vector;
-
 class CPatternContainer;
 class CSoundFile;
 class EffectWriter;

@@ -20,7 +20,7 @@ class CMoveFXSlotDialog : public CDialog
 public:
 	CMoveFXSlotDialog(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CMoveFXSlotDialog();
-	void SetupMove(PLUGINDEX currentSlot, vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex);
+	void SetupMove(PLUGINDEX currentSlot, std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex);
 	PLUGINDEX m_nToSlot;
 	
 
@@ -31,7 +31,7 @@ public:
 protected:
 	CString m_csPrompt, m_csTitle;
 	CEdit m_EditPrompt;
-	vector<PLUGINDEX> m_EmptySlots;
+	std::vector<PLUGINDEX> m_EmptySlots;
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	CComboBox m_CbnEmptySlots;
 	PLUGINDEX m_nDefaultSlot;

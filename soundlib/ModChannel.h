@@ -10,11 +10,10 @@
 
 #pragma once
 
-
 #pragma warning(disable : 4324) //structure was padded due to __declspec(align())
 
 // Mix Channel Struct
-typedef struct __declspec(align(32)) ModChannel_
+struct __declspec(align(32)) ModChannel
 {
 	// Envelope playback info
 	struct EnvInfo
@@ -169,12 +168,12 @@ typedef struct __declspec(align(32)) ModChannel_
 	float m_VibratoDepth;
 	//<----
 
-	ModChannel_()
+	ModChannel()
 	{
 		memset(this, 0, sizeof(*this));
 	}
 
-} ModChannel;
+};
 
 
 // Default pattern channel settings

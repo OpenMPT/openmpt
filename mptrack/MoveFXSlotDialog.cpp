@@ -48,14 +48,16 @@ void CMoveFXSlotDialog::OnOK()
 	CDialog::OnOK();
 }
 
-void CMoveFXSlotDialog::SetupMove(PLUGINDEX currentSlot, vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex)
-//-------------------------------------------------------------------------------------------------------------
+
+void CMoveFXSlotDialog::SetupMove(PLUGINDEX currentSlot, std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex)
+//------------------------------------------------------------------------------------------------------------------
 {	
 	m_nDefaultSlot = defaultIndex;
 	m_csPrompt.Format("Move plugin in slot %d to the following empty slot:", currentSlot + 1);
 	m_csTitle.Format("Move To Slot..");
 	m_EmptySlots = emptySlots;
 }
+
 
 BOOL CMoveFXSlotDialog::OnInitDialog()
 //------------------------------------
