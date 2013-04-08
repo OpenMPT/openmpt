@@ -774,7 +774,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			// NOTE: IT2.14 with SB/GUS/etc. output is different. We are going after IT's WAV writer here.
 			// For SB/GUS/etc. emulation, envelope carry should only apply when the NNA isn't set to "Note Cut".
 			// Test case: CarryNNA.it
-			resetAlways = (instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
+			resetAlways = (!pChn->nFadeOutVol || instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
 		} else
 		{
 			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
