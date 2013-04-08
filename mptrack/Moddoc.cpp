@@ -905,6 +905,80 @@ uint8 CModDoc::GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nC
 }
 
 
+void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx)
+//---------------------------------------------------------------------------------------------------------
+{
+	static uint8 midiVolume = 127;
+
+	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
+	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	uint8 note  = midiByte1 + NOTE_MIN;
+	int vol = midiByte2;
+
+	if((event == MIDIEvents::evNoteOn) && !vol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
+
+	uint8 mappedIndex = 0, paramValue = 0;
+	uint32 paramIndex = 0;
+	bool captured = m_SndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
+
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	if(ih->HandleMIDIMessage(ctx, midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
+	{
+		// Mapped to a command, no need to pass message on.
+		captured = true;
+	}
+
+	if(captured)
+	{
+		// Event captured by MIDI mapping or shortcut, no need to pass message on.
+		return;
+	}
+
+	switch(event)
+	{
+	case MIDIEvents::evNoteOff:
+		midiByte2 = 0;
+
+	case MIDIEvents::evNoteOn:
+		if(ins > 0 && ins <= GetNumInstruments())
+		{
+			LimitMax(note, NOTE_MAX);
+			NoteOff(note, false, ins);
+			if(midiByte2 & 0x7F)
+			{
+				vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
+				PlayNote(note, ins, 0, false, vol);
+			}
+			return;
+		}
+		break;
+
+	case MIDIEvents::evControllerChange:
+		if(midiByte1 == MIDIEvents::MIDICC_Volume_Coarse)
+		{
+			midiVolume = midiByte2;
+			break;
+		}
+	}
+
+	if((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == this && plugin != nullptr)
+	{
+		plugin->MidiSend(midiData);
+		// Sending midi may modify the plug. For now, if MIDI data is not active sensing or aftertouch messages, set modified.
+		if(midiData != MIDIEvents::System(MIDIEvents::sysActiveSense)
+			&& event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch
+			&& event != MIDIEvents::evPitchBend
+			&& m_SndFile.GetModSpecifications().supportsPlugins)
+		{
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+		}
+	}
+}
+
+
 CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset)
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -1023,11 +1097,11 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			{
 				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
 				 
-				UINT nPlugin = 0;
+				PLUGINDEX nPlugin = 0;
 				if (pChn->pModInstrument) 
-					nPlugin = pChn->pModInstrument->nMixPlug;  					// first try instrument VST
+					nPlugin = pChn->pModInstrument->nMixPlug;					// First try instrument plugin
 				if ((!nPlugin || nPlugin > MAX_MIXPLUGINS) && nCurrentChn != CHANNELINDEX_INVALID)
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;	// Then try Channel VST
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;	// Then try channel plugin
 				
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
@@ -1421,7 +1495,7 @@ UINT CModDoc::GetPatternSize(PATTERNINDEX nPat) const
 
 
 void CModDoc::SetFollowWnd(HWND hwnd)
-//-------------------------------------------------
+//-----------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	m_hWndFollow = hwnd;

@@ -2643,7 +2643,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
 	{
 		// Mapped to a command, no need to pass message on.
-		return 0;
+		return 1;
 	}
 
 	switch(event)
@@ -2672,7 +2672,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 	}
 
-	return 0;
+	return 1;
 }
 
 BOOL CViewSample::PreTranslateMessage(MSG *pMsg)

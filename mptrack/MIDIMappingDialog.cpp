@@ -23,12 +23,16 @@ CMIDIMappingDialog::CMIDIMappingDialog(CWnd* pParent /*=NULL*/, CSoundFile& rSnd
 	  m_rMIDIMapper(m_rSndFile.GetMIDIMapper())
 //---------------------------------------------------------------------
 {
+	oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
 }
+
 
 CMIDIMappingDialog::~CMIDIMappingDialog()
 //---------------------------------------
 {
+	CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
 }
+
 
 void CMIDIMappingDialog::DoDataExchange(CDataExchange* pDX)
 //---------------------------------------------------------
@@ -76,7 +80,7 @@ LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		OnCbnSelchangeComboController();
 		UpdateString();
 	}
-	return 0;
+	return 1;
 }
 
 
@@ -102,7 +106,7 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	//Add plugin parameter names
 	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[(m_Setting.GetPlugIndex() <= MAX_MIXPLUGINS) ? m_Setting.GetPlugIndex() - 1 : 0]);
 	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
-    
+
 	//Add directives to list.
 	typedef CMIDIMapper::const_iterator CITER;
 	for(CITER iter = m_rMIDIMapper.Begin(); iter != m_rMIDIMapper.End(); iter++)
@@ -238,7 +242,7 @@ void CMIDIMappingDialog::OnCbnSelchangeComboEvent()
 {
 	if(m_EventCBox.GetCurSel() == 0)
 	{
-        m_Setting.SetEvent(0xB);
+		m_Setting.SetEvent(0xB);
 		m_ControllerCBox.EnableWindow();
 	}
 	else
@@ -315,7 +319,7 @@ void CMIDIMappingDialog::OnBnClickedButtonRemove()
 
 
 CString CMIDIMappingDialog::CreateListString(const CMIDIMappingDirective& s)
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	CString str;
 	str.Preallocate(100);

@@ -96,6 +96,7 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	//{{AFX_MSG_MAP(CViewComments)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
+	ON_MESSAGE(WM_MOD_MIDIMSG,			OnMidiMsg)
 	ON_COMMAND(IDC_LIST_SAMPLES,		OnShowSamples)
 	ON_COMMAND(IDC_LIST_INSTRUMENTS,	OnShowInstruments)
 	ON_COMMAND(IDC_LIST_PATTERNS,		OnShowPatterns)
@@ -174,6 +175,17 @@ void CViewComments::OnDestroy()
 		pState->nId = m_nListId;
 	}
 	CView::OnDestroy();
+}
+
+
+LRESULT CViewComments::OnMidiMsg(WPARAM midiData, LPARAM)
+//-------------------------------------------------------
+{
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	ih->HandleMIDIMessage(kCtxViewComments, midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
+	return 1;
 }
 
 

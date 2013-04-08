@@ -109,6 +109,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
 	ON_MESSAGE(WM_MOD_VIEWMSG,	OnModViewMsg)
+	ON_MESSAGE(WM_MOD_MIDIMSG,	OnMidiMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -267,6 +268,17 @@ void CViewGlobals::OnDraw(CDC* pDC)
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
 }
 // -! NEW_FEATURE#0015
+
+
+LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
+//------------------------------------------------------
+{
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	ih->HandleMIDIMessage(kCtxViewGeneral, midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
+	return 1;
+}
 
 
 void CViewGlobals::RecalcLayout()

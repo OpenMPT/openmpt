@@ -44,6 +44,7 @@ public:
 	virtual void OnInitialUpdate();
 	virtual void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
+	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	//}}AFX_VIRTUAL
 
 protected:
