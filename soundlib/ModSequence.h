@@ -11,10 +11,10 @@
 #pragma once
 
 #include <vector>
-#include "Loaders.h"
 
 class CSoundFile;
 class ModSequenceSet;
+class FileReader;
 
 class ModSequence
 //===============

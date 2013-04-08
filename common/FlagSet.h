@@ -8,6 +8,8 @@
  */
 
 
+#pragma once
+
 #include <string>
 
 template <typename enum_t, typename store_t = enum_t>

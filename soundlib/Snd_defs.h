@@ -204,9 +204,10 @@ FLAGSET(InstrumentFlags)
 // envelope types in instrument editor
 enum enmEnvelopeTypes
 {
-	ENV_VOLUME = 1,
-	ENV_PANNING = 2,
-	ENV_PITCH = 3,
+	ENV_VOLUME = 0,
+	ENV_PANNING,
+	ENV_PITCH,
+	NUM_ENVELOPES,
 };
 
 // Filter Modes

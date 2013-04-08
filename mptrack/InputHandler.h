@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "CommandSet.h"
+
 //not sure why I shoved message IDs here anymore. Might want to move em. -rewbs
 enum
 {
@@ -37,7 +39,6 @@ enum
 {
 	HC_MIDI = 0x8000,
 };
-
 
 class CInputHandler
 {

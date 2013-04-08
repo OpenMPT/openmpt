@@ -11,18 +11,20 @@
 
 #pragma once
 
-struct SampleSelectionPoints
-{
-	UINT nStart;
-	UINT nEnd;
-	bool selectionActive;	// does sample selection exist or not?
-};
+#include "../soundlib/SampleIO.h"
 
 //=======================================
 class CCtrlSamples: public CModControlDlg
 //=======================================
 {
 protected:
+	struct SampleSelectionPoints
+	{
+		SmpLength nStart;
+		SmpLength nEnd;
+		bool selectionActive;	// does sample selection exist or not?
+	};
+
 	CModControlBar m_ToolBar1, m_ToolBar2;
 	CEdit m_EditSample, m_EditName, m_EditFileName, m_EditFineTune;
 	CEdit m_EditLoopStart, m_EditLoopEnd, m_EditSustainStart, m_EditSustainEnd;

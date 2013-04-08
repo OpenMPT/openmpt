@@ -31,6 +31,7 @@
 #include "modcommand.h"
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
+#include "FileReader.h"
 
 #include "Resampler.h"
 #include "snd_rvb.h"
@@ -318,7 +319,7 @@ public:
 	DWORD m_dwLastSavedWithVersion;
 
 #ifdef MODPLUG_TRACKER
-	vector<PatternCuePoint> m_PatternCuePoints;			// For WAV export (writing pattern positions to file)
+	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)
 #endif // MODPLUG_TRACKER
 
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
@@ -613,8 +614,8 @@ public:
 	bool IsSampleUsed(SAMPLEINDEX nSample) const;
 	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr) const;
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);
-	SAMPLEINDEX DetectUnusedSamples(vector<bool> &sampleUsed) const;
-	SAMPLEINDEX RemoveSelectedSamples(const vector<bool> &keepSamples);
+	SAMPLEINDEX DetectUnusedSamples(std::vector<bool> &sampleUsed) const;
+	SAMPLEINDEX RemoveSelectedSamples(const std::vector<bool> &keepSamples);
 	static void AdjustSampleLoop(ModSample &sample);
 
 	// Samples file I/O

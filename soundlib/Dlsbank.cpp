@@ -15,7 +15,7 @@
 #include "dlsbank.h"
 #include "Wav.h"
 #include "../common/StringFixer.h"
-
+#include "SampleIO.h"
 
 //#define DLSBANK_LOG
 //#define DLSINSTR_LOG

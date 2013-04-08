@@ -9,11 +9,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "moddoc.h"
-#include "mainfrm.h"
-#include "sndfile.h"
-#include "vstplug.h"
+#include "Mptrack.h"
+#include "Moddoc.h"
+#include "Mainfrm.h"
+#include "../soundlib/Sndfile.h"
+#include "Vstplug.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
 #include "../common/StringFixer.h"

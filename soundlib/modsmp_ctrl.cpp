@@ -12,6 +12,7 @@
 #include "modsmp_ctrl.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/Reporting.h"
+#include "Sndfile.h"
 
 #define new DEBUG_NEW
 

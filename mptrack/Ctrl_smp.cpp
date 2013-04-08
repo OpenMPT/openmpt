@@ -3077,8 +3077,8 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 // Return currently selected part of the sample.
 // The whole sample size will be returned if no part of the sample is selected.
 // However, point.bSelected indicates whether a sample selection exists or not.
-SampleSelectionPoints CCtrlSamples::GetSelectionPoints()
-//------------------------------------------------------
+CCtrlSamples::SampleSelectionPoints CCtrlSamples::GetSelectionPoints()
+//--------------------------------------------------------------------
 {
 	SampleSelectionPoints points;
 	SAMPLEVIEWSTATE viewstate;
