@@ -362,7 +362,7 @@ void CModTypeDlg::OnOK()
 	if (sel >= 0)
 	{
 		sndFile.m_nMixLevels = m_PlugMixBox.GetItemData(sel);
-		sndFile.m_pConfig->SetMixLevels(sndFile.m_nMixLevels);
+		sndFile.m_PlayConfig.SetMixLevels(sndFile.m_nMixLevels);
 		sndFile.RecalculateGainForAllPlugs();
 	}
 
