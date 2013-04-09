@@ -879,9 +879,7 @@ static ASIODRIVERDESC gAsioDrivers[ASIO_MAX_DRIVERS];
 
 static DWORD g_dwBuffer = 0;
 
-#ifdef _DEBUG
 static int g_asio_startcount = 0;
-#endif
 
 
 BOOL CASIODevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize)
@@ -1134,10 +1132,8 @@ void CASIODevice::Start()
 {
 	if (IsOpen())
 	{
-#ifdef _DEBUG
-		ASSERT(g_asio_startcount==0);
+		ALWAYS_ASSERT(g_asio_startcount==0);
 		g_asio_startcount++;
-#endif
 
 		InterlockedExchange(&m_RenderSilence, 0);
 		if(!m_bMixRunning)
@@ -1161,10 +1157,8 @@ void CASIODevice::Stop()
 	if (IsOpen())
 	{
 		InterlockedExchange(&m_RenderSilence, 1);
-#ifdef _DEBUG
 		g_asio_startcount--;
-		ASSERT(g_asio_startcount==0);
-#endif
+		ALWAYS_ASSERT(g_asio_startcount==0);
 	}
 }
 
@@ -1217,9 +1211,7 @@ void CASIODevice::Reset()
 			{
 				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
-#ifdef _DEBUG
 			g_asio_startcount = 0;
-#endif
 			InterlockedExchange(&m_RenderSilence, 0);
 		}
 	}
