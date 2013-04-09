@@ -23,7 +23,6 @@ public:
 	CAGC();
 	~CAGC() {}
 public:
-	void Initialize(BOOL bReset, DWORD MixingFreq, DWORD SoundSetupFlags);
 	void Process(int * MixSoundBuffer, int count, DWORD MixingFreq, UINT nChannels);
 	void Adjust(UINT oldVol, UINT newVol);
 	void Reset();
