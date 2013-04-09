@@ -38,6 +38,13 @@
 	#define static_assert(expr, msg)	C_ASSERT(expr)
 #endif
 
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
+#ifdef NDEBUG
+#define ALWAYS_ASSERT(expr) do { if(!(expr)) { if(IsDebuggerPresent()) { ASSERT(expr); } else { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } } while(0)
+#else
+#define ALWAYS_ASSERT(expr) ASSERT(expr)
+#endif
+
 // Advanced inline attributes
 #if defined(_MSC_VER)
 #define forceinline __forceinline
