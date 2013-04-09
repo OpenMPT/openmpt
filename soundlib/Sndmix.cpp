@@ -42,7 +42,9 @@ CEQ CSoundFile::m_EQ;
 CAGC CSoundFile::m_AGC;
 #endif
 UINT CSoundFile::gnVolumeRampUpSamplesActual = 42;		//default value
+#ifdef MODPLUG_TRACKER
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
+#endif
 #ifndef NO_VST
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
@@ -339,12 +341,14 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.gnBitsPerSample);
 		}
 
+#ifdef MODPLUG_TRACKER
 		// Hook Function
 		if (gpSndMixHook)
 		{
 			//Currently only used for VU Meter, so it's OK to do it after global Vol.
 			gpSndMixHook(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.gnChannels);
 		}
+#endif
 
 		// Perform clipping
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
