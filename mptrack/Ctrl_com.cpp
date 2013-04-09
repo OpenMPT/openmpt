@@ -56,7 +56,7 @@ void CCtrlComments::OnActivatePage(LPARAM)
 	if(modDoc)
 	{
 		// Don't stop generating VU meter messages
-		modDoc->SetNotifications(Notification::Position);
+		modDoc->SetNotifications(Notification::Default);
 		modDoc->SetFollowWnd(m_hWnd);
 	}
 }
