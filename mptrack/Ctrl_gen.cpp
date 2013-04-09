@@ -158,7 +158,6 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 void CCtrlGeneral::OnDeactivatePage()
 //-----------------------------------
 {
-	if (m_pModDoc) m_pModDoc->SetNotifications(Notification::None);
 	if (m_pModDoc) m_pModDoc->SetFollowWnd(NULL);
 	m_VuMeterLeft.SetVuMeter(0);
 	m_VuMeterRight.SetVuMeter(0);

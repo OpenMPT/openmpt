@@ -965,8 +965,8 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		}
 	}
 	if(!m_pSndFile) return FALSE;
-	FlagSet<Notification::Type> notifyType;
-	notifyType = Notification::None;
+
+	FlagSet<Notification::Type> notifyType(Notification::Default);
 	Notification::Item notifyItem = 0;
 
 	if(m_pSndFile->m_pModDoc)
@@ -976,7 +976,6 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	}
 	if(m_nMixChn < m_pSndFile->m_nMixStat) m_nMixChn++;
 	if(m_nMixChn > m_pSndFile->m_nMixStat) m_nMixChn--;
-	if(notifyType == Notification::None) return FALSE;
 	// Notify Client
 	//if(m_NotifyBuffer.read_size() > 0)
 	{
