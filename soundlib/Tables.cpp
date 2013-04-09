@@ -695,9 +695,9 @@ static void getdownsample2x(short int *psinc)
 }
 
 
-
-void CResampler::InitializeTables()
+void CResampler::InitializeTables(bool force)
 {
+	if((m_OldSettings == m_Settings) && !force) return;
 	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
 	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
  	//ericus' downsampling improvement.
@@ -706,5 +706,6 @@ void CResampler::InitializeTables()
 	getsinc(gDownsample13x, 8.5, 0.5);	   
 	getsinc(gDownsample2x, 2.7625, 0.425); 
 	//end ericus' downsampling improvement.
+	m_OldSettings = m_Settings;
 }
 
