@@ -671,13 +671,6 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 }
 
 
-void CModDoc::InitPlayer()
-//------------------------
-{
-	m_SndFile.ResetChannels();
-}
-
-
 BOOL CModDoc::InitializeMod()
 //---------------------------
 {
