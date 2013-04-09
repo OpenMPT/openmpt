@@ -15,16 +15,17 @@ struct Notification
 {
 	enum Type
 	{
-		Position	= 0x00,	// Pattern playback position and global VU meters (always valid)
-		Sample		= 0x01,	// pos[i] contains sample position on this channel
-		VolEnv		= 0x02,	// pos[i] contains volume envelope position
-		PanEnv		= 0x04,	// pos[i] contains panning envelope position
-		PitchEnv	= 0x08,	// pos[i] contains pitch envelope position
-		VUMeters	= 0x10,	// pos[i] contains pattern VU meter for this channel
-		EOS			= 0x20,	// End of stream reached, the GUI should stop the audio device
-		Stop		= 0x40,	// Audio device has been stopped -> reset GUI
+		GlobalVU	= 0x00,	// Global VU meters (always enabled)
+		Position	= 0x01,	// Pattern playback position
+		Sample		= 0x02,	// pos[i] contains sample position on this channel
+		VolEnv		= 0x04,	// pos[i] contains volume envelope position
+		PanEnv		= 0x08,	// pos[i] contains panning envelope position
+		PitchEnv	= 0x10,	// pos[i] contains pitch envelope position
+		VUMeters	= 0x20,	// pos[i] contains pattern VU meter for this channel
+		EOS			= 0x40,	// End of stream reached, the GUI should stop the audio device
+		Stop		= 0x80,	// Audio device has been stopped -> reset GUI
 
-		Default		= Position,
+		Default		= GlobalVU,
 	};
 
 	typedef uint16 Item;

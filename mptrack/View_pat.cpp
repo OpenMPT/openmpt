@@ -3504,63 +3504,66 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		return 0;
 	}
 
-	ORDERINDEX nOrd = pnotify->order;
-	ROWINDEX nRow = pnotify->row;
-	PATTERNINDEX nPat = pnotify->pattern; //get player pattern
-	bool updateOrderList = false;
-
-	if(m_nLastPlayedOrder != nOrd)
+	if(pnotify->type[Notification::Position])
 	{
-		updateOrderList = true;
-		m_nLastPlayedOrder = nOrd;
-	}
+		ORDERINDEX nOrd = pnotify->order;
+		ROWINDEX nRow = pnotify->row;
+		PATTERNINDEX nPat = pnotify->pattern; //get player pattern
+		bool updateOrderList = false;
 
-	if (nRow < m_nLastPlayedRow)
-	{
-		InvalidateChannelsHeaders();
-	}
-	m_nLastPlayedRow = nRow;
-
-	if(pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP]) return 0;
-
-
-	if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat)
-	{
-		//order doesn't correlate with pattern, so mark it as invalid
-		nOrd = ORDERINDEX_INVALID;
-	}
-
-	if (m_pEffectVis && m_pEffectVis->m_hWnd)
-	{
-		m_pEffectVis->SetPlayCursor(nPat, nRow);
-	}
-
-	// Don't follow song if user drags selections or scrollbars.
-	if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
-	{
-		if (nPat < pSndFile->Patterns.Size())
+		if(m_nLastPlayedOrder != nOrd)
 		{
-			if (nPat != m_nPattern || updateOrderList)
+			updateOrderList = true;
+			m_nLastPlayedOrder = nOrd;
+		}
+
+		if (nRow < m_nLastPlayedRow)
+		{
+			InvalidateChannelsHeaders();
+		}
+		m_nLastPlayedRow = nRow;
+
+		if(pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP]) return 0;
+
+
+		if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat)
+		{
+			//order doesn't correlate with pattern, so mark it as invalid
+			nOrd = ORDERINDEX_INVALID;
+		}
+
+		if (m_pEffectVis && m_pEffectVis->m_hWnd)
+		{
+			m_pEffectVis->SetPlayCursor(nPat, nRow);
+		}
+
+		// Don't follow song if user drags selections or scrollbars.
+		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
+		{
+			if (nPat < pSndFile->Patterns.Size())
 			{
-				if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
-				if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+				if (nPat != m_nPattern || updateOrderList)
+				{
+					if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
+					if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+					updateOrderList = false;
+				}
+				if (nRow != GetCurrentRow())
+				{
+					SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
+				}
+			}
+		} else
+		{
+			if(updateOrderList)
+			{
+				SendCtrlMessage(CTRLMSG_FORCEREFRESH); //force orderlist refresh
 				updateOrderList = false;
 			}
-			if (nRow != GetCurrentRow())
-			{
-				SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
-			}
 		}
-	} else
-	{
-		if(updateOrderList)
-		{
-			SendCtrlMessage(CTRLMSG_FORCEREFRESH); //force orderlist refresh
-			updateOrderList = false;
-		}
+		SetPlayCursor(nPat, nRow);
+		m_nPlayTick = pnotify->tick;
 	}
-	SetPlayCursor(nPat, nRow);
-	m_nPlayTick = pnotify->tick;
 
 	if(pnotify->type[Notification::VUMeters | Notification::Stop] && m_Status[psShowVUMeters])
 	{
@@ -3753,7 +3756,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	const uint8 nNote = nByte1 + NOTE_MIN;
 	int nVol = nByte2;							// At this stage nVol is a non linear value in [0;127]
 												// Need to convert to linear in [0;64] - see below
-	uint8 event = MIDIEvents::GetTypeFromEvent(dwMidiData);
+	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(dwMidiData);
 	uint8 channel = MIDIEvents::GetChannelFromEvent(dwMidiData);
 
 	if ((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
@@ -3924,7 +3927,6 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		m_Status.reset(psFollowSong);
 		if (lParam)
 		{
-			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			CModDoc *pModDoc = GetDocument();
 			m_Status.set(psFollowSong);
 			if(pModDoc) pModDoc->SetNotifications(Notification::Position | Notification::VUMeters);
