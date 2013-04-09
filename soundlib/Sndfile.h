@@ -250,7 +250,9 @@ public:	// Static Members
 	static CAGC m_AGC;
 #endif
 	static UINT gnVolumeRampUpSamplesActual;
+#ifdef MODPLUG_TRACKER
 	static LPSNDMIXHOOKPROC gpSndMixHook;
+#endif
 #ifndef NO_VST
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 #endif
