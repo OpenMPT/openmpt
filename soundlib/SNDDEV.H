@@ -75,7 +75,8 @@ enum // do not change old values, these get saved to the ini
 #define SNDDEV_MINUPDATEINTERVAL_MS 1
 #define SNDDEV_MAXUPDATEINTERVAL_MS 200
 
-#define SNDDEV_OPTIONS_SECONDARY	0x01	// Use secondary buffers (if available)
+#define SNDDEV_OPTIONS_EXCLUSIVE           0x01 // Use hardware buffers directly
+#define SNDDEV_OPTIONS_BOOSTTHREADPRIORITY 0x02 // Boost thread priority for glitch-free audio rendering
 
 
 //=============================================

@@ -836,7 +836,11 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
 	if(!gpSoundDevice) return false;
 	gpSoundDevice->SetSource(this);
-	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0);
+	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS,
+		((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_SECONDARY) ? 0 : SNDDEV_OPTIONS_EXCLUSIVE)
+		|
+		((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_NOBOOSTTHREADPRIORITY) ? 0 : SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)
+		);
 	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	return true;
 }
