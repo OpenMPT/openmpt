@@ -23,26 +23,11 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 	CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
 	);
 
-// Try to close the audio device and rescue unsaved work if an unhandled exception occours...
-LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
-//----------------------------------------------------------------------------------
+
+static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionInfo=NULL)
+//---------------------------------------------------------------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-
-	// Shut down audio device...
-	if(pMainFrame)
-	{
-		try
-		{
-			if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-			pMainFrame->audioCloseDevice();
-		} catch(...)
-		{
-		}
-	}
-
-	CString errorMessage;
-	errorMessage.Format("Unhandled exception 0x%X at address %p occoured.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
 	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
 	CString baseRescuePath;
@@ -76,11 +61,14 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 			{
 				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
 
-				ExInfo.ThreadId = ::GetCurrentThreadId();
-				ExInfo.ExceptionPointers = pExceptionInfo;
-				ExInfo.ClientPointers = NULL;
+				if(pExceptionInfo)
+				{
+					ExInfo.ThreadId = ::GetCurrentThreadId();
+					ExInfo.ExceptionPointers = pExceptionInfo;
+					ExInfo.ClientPointers = NULL;
+				}
 
-				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
+				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
 				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", baseRescuePath);
@@ -122,6 +110,41 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	
 	Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
 
+}
+
+
+// Try to close the audio device and rescue unsaved work if an unhandled exception occours...
+LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
+//----------------------------------------------------------------------------------
+{
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+
+	// Shut down audio device...
+	if(pMainFrame)
+	{
+		try
+		{
+			if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+			pMainFrame->audioCloseDevice();
+		} catch(...)
+		{
+		}
+	}
+
+	CString errorMessage;
+	errorMessage.Format("Unhandled exception 0x%X at address %p occoured.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
+
+	GenerateDump(errorMessage, pExceptionInfo);
+
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr)
+//------------------------------------------------------------------------------------------
+{
+	CString errorMessage;
+	errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
+	GenerateDump(errorMessage);
 }
