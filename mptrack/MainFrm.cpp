@@ -194,7 +194,6 @@ CMainFrame::CMainFrame()
 	m_SoundCardOptionsDialog = nullptr;
 
 	m_pJustModifiedDoc = nullptr;
-	m_hFollowSong = NULL;
 	m_hWndMidi = NULL;
 	m_pSndFile = nullptr;
 	m_dwTimeSec = 0;
@@ -1265,6 +1264,7 @@ void CMainFrame::UpdateColors()
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame operations
 
+
 UINT CMainFrame::GetBaseOctave() const
 //------------------------------------
 {
@@ -1381,7 +1381,6 @@ void CMainFrame::UnsetPlaybackSoundFile()
 		}
 	}
 	m_pSndFile = nullptr;
-	m_hFollowSong = NULL;
 	m_wndToolBar.SetCurrentSong(nullptr);
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
@@ -1390,16 +1389,15 @@ void CMainFrame::UnsetPlaybackSoundFile()
 }
 
 
-void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat)
-//--------------------------------------------------------------------
+void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile)
+//---------------------------------------------------------
 {
 	m_pSndFile = pSndFile;
-	m_hFollowSong = hPat;
 }
 
 
-bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat)
-//---------------------------------------------------
+bool CMainFrame::PlayMod(CModDoc *pModDoc)
+//----------------------------------------
 {
 	CriticalSection::AssertUnlocked();
 	if(!pModDoc) return false;
@@ -1418,7 +1416,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat)
 	// set mixing parameters in CSoundFile
 	ApplyTrackerSettings(pSndFile);
 
-	SetPlaybackSoundFile(pSndFile, hPat);
+	SetPlaybackSoundFile(pSndFile);
 
 	const bool bPaused = m_pSndFile->IsPaused();
 	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
@@ -1719,18 +1717,10 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 }
 
 
-BOOL CMainFrame::SetFollowSong(CModDoc *pDoc, HWND hwnd, BOOL bFollowSong)
-//------------------------------------------------------------------------
+HWND CMainFrame::GetFollowSong() const
+//------------------------------------
 {
-	if((!pDoc) || (pDoc != GetModPlaying())) return FALSE;
-	if(bFollowSong)
-	{
-		m_hFollowSong = hwnd;
-	} else
-	{
-		if(hwnd == m_hFollowSong) m_hFollowSong = NULL;
-	}
-	return TRUE;
+	return GetModPlaying() ? GetModPlaying()->GetFollowWnd() : NULL;
 }
 
 
@@ -1743,7 +1733,6 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 	 || (TrackerSettings::Instance().m_nChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
-		HWND hFollow = m_hFollowSong;
 		if (isPlaying)
 		{
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
@@ -1760,7 +1749,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 			CriticalSection cs;
 			UpdateAudioParameters(FALSE);
 		}
-		if (pActiveMod) PlayMod(pActiveMod, hFollow);
+		if (pActiveMod) PlayMod(pActiveMod);
 		UpdateWindow();
 	} else
 	{
@@ -2314,8 +2303,8 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 		if (GetModPlaying())
 		{
 			m_wndTree.UpdatePlayPos(GetModPlaying(), pnotify);
-			if (m_hFollowSong)
-				::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, lParam);
+			if (GetFollowSong())
+				::SendMessage(GetFollowSong(), WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
 		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVU[0], pnotify->masterVU[1]);
 

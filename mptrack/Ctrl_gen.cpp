@@ -147,7 +147,6 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (m_pModDoc) m_pModDoc->SetNotifications(Notification::Default);
 	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd);
-	if (pMainFrm) pMainFrm->SetFollowSong(m_pModDoc, m_hWnd, TRUE);
 	PostViewMessage(VIEWMSG_SETACTIVE, NULL);
 	SetFocus();
 
