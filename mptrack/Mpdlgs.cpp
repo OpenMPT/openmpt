@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_COMMAND(IDC_CHECK2,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK3,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,	OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK5,	OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnDeviceChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
@@ -126,6 +127,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_SECONDARY) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	if (!(m_dwSoundSetup & SOUNDSETUP_NOBOOSTTHREADPRIORITY)) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 	// Multimedia extensions
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), (CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX) ? TRUE : FALSE);
 	if(CSoundFile::GetSysInfo() & SYSMIX_SSE)
@@ -243,7 +245,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 				nDev++;
 			}
 		}
-		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_DSOUND) ? TRUE : FALSE);
+		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_DSOUND /*|| SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_PORTAUDIO_WASAPI*/) ? TRUE : FALSE);
 		GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_ASIO) ? FALSE : TRUE);
 		GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(m_nSoundDevice) == SNDDEV_ASIO) ? FALSE : TRUE);
 	}
@@ -333,7 +335,7 @@ void COptionsSoundcard::OnDeviceChanged()
 	if (n >= 0)
 	{
 		int dev = m_CbnDevice.GetItemData(n);
-		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_DSOUND) ? TRUE : FALSE);
+		GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_DSOUND /*|| SNDDEV_GET_TYPE(dev) == SNDDEV_PORTAUDIO_WASAPI*/) ? TRUE : FALSE);
 		GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO) ? FALSE : TRUE);
 		GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO) ? FALSE : TRUE);
 		UpdateSampleRates(dev);
@@ -410,10 +412,11 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	m_dwSoundSetup &= ~(SOUNDSETUP_ENABLEMMX | SOUNDSETUP_SECONDARY | SOUNDSETUP_SOFTPANNING);
+	m_dwSoundSetup &= ~(SOUNDSETUP_ENABLEMMX | SOUNDSETUP_SECONDARY | SOUNDSETUP_SOFTPANNING | SOUNDSETUP_NOBOOSTTHREADPRIORITY);
 	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwSoundSetup |= SOUNDSETUP_SOFTPANNING;
 	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwSoundSetup |= SOUNDSETUP_SECONDARY;
+	if (!IsDlgButtonChecked(IDC_CHECK5)) m_dwSoundSetup |= SOUNDSETUP_NOBOOSTTHREADPRIORITY;
 	// Mixing Freq
 	{
 		m_dwRate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
