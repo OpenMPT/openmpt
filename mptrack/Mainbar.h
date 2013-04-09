@@ -21,7 +21,7 @@ protected:
 
 public:
 	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; }
-	void SetVuMeter(uint32 left, uint32 right);
+	void SetVuMeter(uint32 left, uint32 right, bool force=false);
 	void SetOrientation(bool h) { horizontal = h; }
 
 protected:
