@@ -186,7 +186,6 @@ public:
 	CSoundFile &GetrSoundFile() { return m_SndFile; }
 	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
 
-	void InitPlayer();
 	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = (bModified != FALSE); }
 	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
