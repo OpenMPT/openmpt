@@ -642,7 +642,6 @@ void CModScrollView::OnDestroy()
 		if (pMainFrm->GetFollowSong(pModDoc) == m_hWnd)
 		{
 			pModDoc->SetNotifications(Notification::None);
-			pMainFrm->SetFollowSong(pModDoc, NULL, FALSE);
 			pModDoc->SetFollowWnd(NULL);
 		}
 		if (pMainFrm->GetMidiRecordWnd() == m_hWnd)
