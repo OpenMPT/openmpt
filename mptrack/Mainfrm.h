@@ -289,7 +289,7 @@ protected:
 	CMainToolBar m_wndToolBar;
 	CImageList m_ImageList;
 	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
-	HWND m_hFollowSong, m_hWndMidi;
+	HWND m_hWndMidi;
 	CSoundFile::samplecount_t m_dwTimeSec;
 	UINT_PTR m_nTimer;
 	UINT m_nAvgMixChn, m_nMixChn;
@@ -415,11 +415,11 @@ public:
 	bool PausePlayback();
 	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
-	void SetPlaybackSoundFile(CSoundFile *pSndFile, HWND hPat=NULL);
+	void SetPlaybackSoundFile(CSoundFile *pSndFile);
 	void UnsetPlaybackSoundFile();
 	void GenerateStopNotification();
 
-	bool PlayMod(CModDoc *, HWND hPat=NULL);
+	bool PlayMod(CModDoc *);
 	bool StopMod(CModDoc *pDoc=NULL);
 	bool PauseMod(CModDoc *pDoc=NULL);
 
@@ -446,8 +446,8 @@ public:
 	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
-	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? m_hFollowSong : NULL; }
-	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE);
+	HWND GetFollowSong() const;
+	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : NULL; }
 	void ResetNotificationBuffer();
 
 
