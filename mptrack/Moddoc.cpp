@@ -125,7 +125,7 @@ CModDoc::CModDoc() : m_PatternUndo(*this), m_SampleUndo(*this)
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 
-	m_notifyType = Notification::None;
+	m_notifyType = Notification::Default;
 	m_notifyItem = 0;
 
 	// Set the creation date of this file (or the load time if we're loading an existing file)

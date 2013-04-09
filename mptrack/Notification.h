@@ -15,15 +15,14 @@ struct Notification
 {
 	enum Type
 	{
-		None		= 0x00,
-		Position	= 0x01,	// Pattern playback position
-		Sample		= 0x02,	// pos[i] contains sample position on this channel
-		VolEnv		= 0x04,	// pos[i] contains volume envelope position
-		PanEnv		= 0x08,	// pos[i] contains panning envelope position
-		PitchEnv	= 0x10,	// pos[i] contains pitch envelope position
-		VUMeters	= 0x20,	// pos[i] contains VU meter for this channel
-		EOS			= 0x40,	// End of stream reached, the GUI should stop the audio device
-		Stop		= 0x80,	// Audio device has been stopped -> reset GUI
+		Position	= 0x00,	// Pattern playback position and global VU meters (always valid)
+		Sample		= 0x01,	// pos[i] contains sample position on this channel
+		VolEnv		= 0x02,	// pos[i] contains volume envelope position
+		PanEnv		= 0x04,	// pos[i] contains panning envelope position
+		PitchEnv	= 0x08,	// pos[i] contains pitch envelope position
+		VUMeters	= 0x10,	// pos[i] contains pattern VU meter for this channel
+		EOS			= 0x20,	// End of stream reached, the GUI should stop the audio device
+		Stop		= 0x40,	// Audio device has been stopped -> reset GUI
 
 		Default		= Position,
 	};
@@ -50,7 +49,7 @@ struct Notification
 	uint32 masterVU[2];				// dito
 	SmpLength pos[MAX_CHANNELS];	// Sample / envelope pos for each channel if != PosInvalid, or pattern channel VUs
 
-	Notification(Type t = None, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p)
+	Notification(Type t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p)
 	{
 		MemsetZero(masterVU);
 	}
