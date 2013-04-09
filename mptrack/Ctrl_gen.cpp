@@ -159,8 +159,8 @@ void CCtrlGeneral::OnDeactivatePage()
 //-----------------------------------
 {
 	if (m_pModDoc) m_pModDoc->SetFollowWnd(NULL);
-	m_VuMeterLeft.SetVuMeter(0);
-	m_VuMeterRight.SetVuMeter(0);
+	m_VuMeterLeft.SetVuMeter(0, true);
+	m_VuMeterRight.SetVuMeter(0, true);
 }
 
 
@@ -612,15 +612,20 @@ void CVuMeter::OnPaint()
 }
 
 
-VOID CVuMeter::SetVuMeter(LONG lVuMeter)
-//--------------------------------------
+VOID CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
+//--------------------------------------------------
 {
 	lVuMeter >>= 8;
 	if (lVuMeter != m_nVuMeter)
 	{
 		m_nVuMeter = lVuMeter;
-		CClientDC dc(this);
-		DrawVuMeter(dc.m_hDC);
+		DWORD curTime = timeGetTime();
+		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
+		{
+			CClientDC dc(this);
+			DrawVuMeter(dc.m_hDC);
+			lastVuUpdateTime = curTime;
+		}
 	}
 }
 
