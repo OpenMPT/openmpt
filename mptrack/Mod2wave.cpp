@@ -692,7 +692,6 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	int oldVol = m_pSndFile->GetPreAmp();
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
@@ -973,9 +972,6 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 	CMainFrame::UpdateAudioParameters(TRUE);
-//rewbs: reduce to normal priority during debug for easier hang debugging
-	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	EndDialog(ok);
 }
 
@@ -1042,7 +1038,6 @@ void CDoAcmConvert::OnButton1()
 
 	progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	if ((!m_pSndFile) || (!m_lpszFileName) || (!m_pwfx) || (!m_hadid)) goto OnError;
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	_splitpath(m_lpszFileName, NULL, NULL, NULL, fext);
 	if (((m_bSaveInfoField) && (m_pwfx->wFormatTag != WAVE_FORMAT_MPEGLAYER3))
 	 || (!lstrcmpi(fext, ".wav"))) bSaveWave = true;
@@ -1250,8 +1245,5 @@ OnError:
 	if (hADriver != NULL) theApp.GetACMConvert().AcmDriverClose(hADriver, 0L);
 	if (pcmBuffer) delete[] pcmBuffer;
 	if (dstBuffer) delete[] dstBuffer;
-//rewbs: reduce to normal priority during debug for easier hang debugging
-	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	EndDialog(retval);
 }

@@ -263,10 +263,6 @@ VOID CMainFrame::Initialize()
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
 
-//rewbs: reduce to normal priority during debug for easier hang debugging
-	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 	// Initialize Audio Mixer
@@ -379,7 +375,6 @@ BOOL CMainFrame::DestroyWindow()
 {
 	CSoundFile::gpSndMixHook = nullptr;
 
-	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
 	{
