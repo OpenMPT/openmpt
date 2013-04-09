@@ -15,9 +15,7 @@
 #include <windows.h>
 
 extern CRITICAL_SECTION g_csAudio;
-#ifdef _DEBUG
 extern int g_csAudioLockCount;
-#endif
 
 // Critical section handling done in (safe) RAII style.
 // Create a CriticalSection object whenever you need exclusive access to CSoundFile.
@@ -40,9 +38,7 @@ public:
 		{
 			inSection = true;
 			EnterCriticalSection(&g_csAudio);
-#ifdef _DEBUG
 			g_csAudioLockCount++;
-#endif
 		}
 	};
 	void Leave()
@@ -50,9 +46,7 @@ public:
 		if(inSection)
 		{
 			inSection = false;
-#ifdef _DEBUG
 			g_csAudioLockCount--;
-#endif
 			LeaveCriticalSection(&g_csAudio);
 		}
 	};
@@ -63,12 +57,10 @@ public:
 	static void AssertUnlocked()
 	{
 		// asserts that the critical section is currently not hold by THIS thread
-#ifdef _DEBUG
 		if(TryEnterCriticalSection(&g_csAudio))
 		{
-			ASSERT(g_csAudioLockCount==0);
+			ALWAYS_ASSERT(g_csAudioLockCount==0);
 			LeaveCriticalSection(&g_csAudio);
 		}
-#endif
 	}
 };
