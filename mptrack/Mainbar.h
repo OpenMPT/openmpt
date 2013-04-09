@@ -16,10 +16,11 @@ class CStereoVU: public CStatic
 {
 protected:
 	uint32 vuMeter[2];
+	DWORD lastVuUpdateTime;
 	bool horizontal;
 
 public:
-	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; horizontal = true; }
+	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; }
 	void SetVuMeter(uint32 left, uint32 right);
 	void SetOrientation(bool h) { horizontal = h; }
 

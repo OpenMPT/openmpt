@@ -169,6 +169,7 @@ public:
 	/*MptVersion::VersionNum*/ uint32 gcsPreviousVersion;
 	CString gcsInstallGUID;
 	MODTYPE defaultModType;
+	DWORD VuMeterUpdateInterval;
 
 	// Audio Setup
 	DWORD gbLoopSong;
