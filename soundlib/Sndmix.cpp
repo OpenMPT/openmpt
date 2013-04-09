@@ -43,7 +43,9 @@ CAGC CSoundFile::m_AGC;
 #endif
 UINT CSoundFile::gnVolumeRampUpSamplesActual = 42;		//default value
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
+#ifndef NO_VST
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
+#endif
 LONG gnDryROfsVol = 0;
 LONG gnDryLOfsVol = 0;
 bool gbInitTables = 0;
