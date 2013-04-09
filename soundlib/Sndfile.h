@@ -251,7 +251,9 @@ public:	// Static Members
 #endif
 	static UINT gnVolumeRampUpSamplesActual;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
+#ifndef NO_VST
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
+#endif
 	static uint8 s_DefaultPlugVolumeHandling;
 
 	typedef uint32 samplecount_t;	// Number of rendered samples
