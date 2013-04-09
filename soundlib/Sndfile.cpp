@@ -405,8 +405,10 @@ CTuning* ModInstrument::s_DefaultTuning = 0;
 //////////////////////////////////////////////////////////
 // CSoundFile
 
+#ifdef MODPLUG_TRACKER
 CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
+#endif
 uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
@@ -1552,14 +1554,17 @@ bool CSoundFile::DestroySampleThreadsafe(SAMPLEINDEX nSample)
 }
 
 
+#ifdef MODPLUG_TRACKER
 void CSoundFile::DeleteStaticdata()
 //---------------------------------
 {
 	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = nullptr;
 	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = nullptr;
 }
+#endif
 
 
+#ifdef MODPLUG_TRACKER
 bool CSoundFile::SaveStaticTunings()
 //----------------------------------
 {
@@ -1570,6 +1575,7 @@ bool CSoundFile::SaveStaticTunings()
 	}
 	return false;
 }
+#endif
 
 
 void SimpleMessageBox(const char* message, const char* title)
@@ -1579,6 +1585,7 @@ void SimpleMessageBox(const char* message, const char* title)
 }
 
 
+#ifdef MODPLUG_TRACKER
 bool CSoundFile::LoadStaticTunings()
 //----------------------------------
 {
@@ -1629,6 +1636,7 @@ bool CSoundFile::LoadStaticTunings()
 
 	return false;
 }
+#endif
 
 
 string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const

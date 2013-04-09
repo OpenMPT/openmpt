@@ -179,18 +179,22 @@ public: //Misc
 
 	//Tuning-->
 public:
+#ifdef MODPLUG_TRACKER
 	static bool LoadStaticTunings();
 	static bool SaveStaticTunings();
 	static void DeleteStaticdata();
 	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
+#endif
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
 	std::string GetNoteName(const int16&, const INSTRUMENTINDEX inst = INSTRUMENTINDEX_INVALID) const;
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
+#ifdef MODPLUG_TRACKER
 	static CTuningCollection* s_pTuningsSharedBuiltIn;
 	static CTuningCollection* s_pTuningsSharedLocal;
+#endif
 	//<--Tuning
 
 public: //Get 'controllers'
