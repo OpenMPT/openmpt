@@ -53,6 +53,7 @@ TrackerSettings::TrackerSettings()
 	//end rewbs.varWindowSize
 	glTreeWindowWidth = 160;
 	glTreeSplitRatio = 128;
+	VuMeterUpdateInterval = 15;
 
 	gcsPreviousVersion = 0;
 	gcsInstallGUID = "";
@@ -275,6 +276,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	gnPlugWindowHeight = GetPrivateProfileInt("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
 	gnPlugWindowLast = CMainFrame::GetPrivateProfileDWord("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
 	gnMsgBoxVisiblityFlags = CMainFrame::GetPrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
+	VuMeterUpdateInterval = CMainFrame::GetPrivateProfileDWord("Display", "VuMeterUpdateInterval", VuMeterUpdateInterval, iniFile);
 
 	// Internet Update
 	{
@@ -763,7 +765,8 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
 	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
-
+	CMainFrame::WritePrivateProfileDWord("Display", "VuMeterUpdateInterval", VuMeterUpdateInterval, iniFile);
+	
 	// Internet Update
 	{
 		CString outDate;

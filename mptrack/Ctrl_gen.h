@@ -17,10 +17,11 @@ class CVuMeter: public CWnd
 {
 protected:
 	LONG m_nDisplayedVu, m_nVuMeter;
+	DWORD lastVuUpdateTime;
 
 public:
-	CVuMeter() { m_nDisplayedVu = -1; m_nVuMeter = 0; }
-	VOID SetVuMeter(LONG lVuMeter);
+	CVuMeter() { m_nDisplayedVu = -1; lastVuUpdateTime = timeGetTime(); m_nVuMeter = 0; }
+	VOID SetVuMeter(LONG lVuMeter, bool force=false);
 
 protected:
 	VOID DrawVuMeter(HDC hdc);
