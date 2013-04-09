@@ -2300,8 +2300,7 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 			if (GetFollowSong())
 				::SendMessage(GetFollowSong(), WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
-		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVU[0], pnotify->masterVU[1]);
-
+		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVU[0], pnotify->masterVU[1], pnotify->type[Notification::Stop]);
 	}
 	return 0;
 }
