@@ -25,6 +25,7 @@
 
 #ifndef NO_PORTAUDIO
 #include "portaudio/include/portaudio.h"
+#include "portaudio/include/pa_win_wasapi.h"
 #endif
 
 
@@ -261,6 +262,7 @@ class CPortaudioDevice: public ISoundDevice
 protected:
 	PaHostApiIndex m_HostApi;
 	PaStreamParameters m_StreamParameters;
+	PaWasapiStreamInfo m_WasapiStreamInfo;
 	PaStream * m_Stream;
 	void * m_CurrentFrameBuffer;
 	unsigned long m_CurrentFrameCount;

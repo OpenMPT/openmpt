@@ -109,10 +109,6 @@ DWORD CAudioThread::AudioThread()
 //-------------------------------
 {
 	HANDLE sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-#ifdef NDEBUG
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
-#endif
-
 	HANDLE waithandles[3];
 	waithandles[0] = m_hAudioThreadTerminateRequest;
 	waithandles[1] = m_hAudioWakeUp;
@@ -137,6 +133,43 @@ DWORD CAudioThread::AudioThread()
 			}
 			continue;
 		}
+
+#ifdef NDEBUG
+		typedef HANDLE (WINAPI *FAvSetMmThreadCharacteristics)   (LPCTSTR,LPDWORD);
+		typedef BOOL   (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
+		FAvSetMmThreadCharacteristics    pAvSetMmThreadCharacteristics = NULL;
+		FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
+		HMODULE hAvrtDLL = NULL;
+		DWORD task_idx = 0;
+		HANDLE hTask = NULL;
+
+		OSVERSIONINFO versioninfo;
+		MemsetZero(versioninfo);
+		versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
+		GetVersionEx(&versioninfo);
+		
+		bool boostPriority = (m_SoundDevice.m_fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY);
+
+		if(boostPriority)
+		{
+			if(versioninfo.dwMajorVersion >= 6) // vista
+			{
+				hAvrtDLL = LoadLibrary("avrt.dll");
+				if(hAvrtDLL)
+				{
+					pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(hAvrtDLL, "AvSetMmThreadCharacteristicsA");
+					pAvRevertMmThreadCharacteristics = (FAvRevertMmThreadCharacteristics)GetProcAddress(hAvrtDLL, "AvRevertMmThreadCharacteristics");
+				}
+				if(pAvSetMmThreadCharacteristics && pAvRevertMmThreadCharacteristics)
+				{
+					hTask = pAvSetMmThreadCharacteristics("Pro Audio", &task_idx);
+				}
+			} else
+			{
+				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+			}
+		}
+#endif
 
 		// increase resolution of multimedia timer
 		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
@@ -172,6 +205,29 @@ DWORD CAudioThread::AudioThread()
 		m_SoundDevice.Stop();
 
 		if(period_set) timeEndPeriod(1);
+
+#ifdef NDEBUG
+		if(boostPriority)
+		{
+			if(versioninfo.dwMajorVersion >= 6) // vista
+			{
+				if(pAvSetMmThreadCharacteristics && pAvRevertMmThreadCharacteristics)
+				{
+					pAvRevertMmThreadCharacteristics(hTask);
+				}
+				if(hAvrtDLL)
+				{
+					pAvRevertMmThreadCharacteristics = NULL;
+					pAvSetMmThreadCharacteristics = NULL;
+					FreeLibrary(hAvrtDLL);
+					hAvrtDLL = NULL;
+				}
+			} else
+			{
+				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+			}
+		}
+#endif
 
 	}
 
@@ -544,7 +600,7 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 {
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
-	UINT nPriorityLevel = (m_fulCfgOptions & SNDDEV_OPTIONS_SECONDARY) ? DSSCL_PRIORITY : DSSCL_WRITEPRIMARY;
+	UINT nPriorityLevel = (m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
 	if (m_piDS) return TRUE;
 	if (!gpDSoundEnumerate) return FALSE;
@@ -560,7 +616,7 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
 	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
-	if (m_fulCfgOptions & SNDDEV_OPTIONS_SECONDARY)
+	if(!(m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
 	{
 		// Set the format of the primary buffer
 		dsbd.dwSize = sizeof(dsbd);
@@ -1738,8 +1794,17 @@ BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	}
 	m_StreamParameters.suggestedLatency = m_LatencyMS / 1000.0;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
+	if(false && (m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+	{
+		MemsetZero(m_WasapiStreamInfo);
+		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+		m_WasapiStreamInfo.hostApiType = paWASAPI;
+		m_WasapiStreamInfo.version = 1;
+		m_WasapiStreamInfo.flags = paWinWasapiExclusive;
+		m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+	}
 	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, pwfx->nSamplesPerSec) != paFormatIsSupported) return false;
-	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, pwfx->nSamplesPerSec, (m_fulCfgOptions & SNDDEV_OPTIONS_SECONDARY && false) ? static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f) : paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, pwfx->nSamplesPerSec, /*static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f)*/ paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
 	if(!Pa_GetStreamInfo(m_Stream))
 	{
 		Pa_CloseStream(m_Stream);
@@ -1843,6 +1908,15 @@ bool CPortaudioDevice::CanSampleRate(UINT nDevice, std::vector<UINT> &samplerate
 		StreamParameters.sampleFormat = paInt16;
 		StreamParameters.suggestedLatency = 0.0;
 		StreamParameters.hostApiSpecificStreamInfo = NULL;
+		if(false && (m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+		{
+			MemsetZero(m_WasapiStreamInfo);
+			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+			m_WasapiStreamInfo.hostApiType = paWASAPI;
+			m_WasapiStreamInfo.version = 1;
+			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
+			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+		}
 		result.push_back(Pa_IsFormatSupported(NULL, &StreamParameters, samplerates[n]) == paFormatIsSupported);
 	}
 	return true;
