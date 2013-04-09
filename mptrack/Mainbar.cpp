@@ -1102,15 +1102,15 @@ void CStereoVU::OnPaint()
 }
 
 
-void CStereoVU::SetVuMeter(uint32 left, uint32 right)
-//---------------------------------------------------
+void CStereoVU::SetVuMeter(uint32 left, uint32 right, bool force)
+//---------------------------------------------------------------
 {
 	if(left != vuMeter[0] || right != vuMeter[1])
 	{
 		vuMeter[0] = left;
 		vuMeter[1] = right;
 		DWORD curTime = timeGetTime();
-		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval)
+		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
 			CClientDC dc(this);
 			DrawVuMeters(dc.m_hDC);
