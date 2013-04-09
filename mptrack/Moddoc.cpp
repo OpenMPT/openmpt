@@ -1011,7 +1011,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			m_SndFile.m_SongFlags.set(SONG_PAUSED);
-			pMainFrm->PlayMod(this, m_hWndFollow);
+			pMainFrm->PlayMod(this);
 		}
 
 		CriticalSection cs;
@@ -1497,9 +1497,7 @@ UINT CModDoc::GetPatternSize(PATTERNINDEX nPat) const
 void CModDoc::SetFollowWnd(HWND hwnd)
 //-----------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	m_hWndFollow = hwnd;
-	if(pMainFrm) pMainFrm->SetFollowSong(this, m_hWndFollow, TRUE);
 }
 
 
@@ -1999,7 +1997,7 @@ void CModDoc::OnPlayerPlay()
 		cs.Leave();
 
 		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PAUSED | SONG_PATTERNLOOP);
-		pMainFrm->PlayMod(this, m_hWndFollow);
+		pMainFrm->PlayMod(this);
 	}
 }
 
@@ -2084,7 +2082,7 @@ void CModDoc::OnPlayerPlayFromStart()
 
 		cs.Leave();
 
-		pMainFrm->PlayMod(this, m_hWndFollow);
+		pMainFrm->PlayMod(this);
 	}
 }
 
@@ -2399,7 +2397,8 @@ void CModDoc::OnPatternRestart(bool loop)
 		if(pModPlaying != this)
 		{
 			SetNotifications(m_notifyType|Notification::Position|Notification::VUMeters, m_notifyItem);
-			pMainFrm->PlayMod(this, followSonghWnd); //rewbs.fix2977
+			SetFollowWnd(followSonghWnd);
+			pMainFrm->PlayMod(this); //rewbs.fix2977
 		}
 	}
 	//SwitchToView();
@@ -2456,7 +2455,8 @@ void CModDoc::OnPatternPlay()
 		if(pModPlaying != this)
 		{
 			SetNotifications(m_notifyType|Notification::Position|Notification::VUMeters, m_notifyItem);
-			pMainFrm->PlayMod(this, followSonghWnd);  //rewbs.fix2977
+			SetFollowWnd(followSonghWnd);
+			pMainFrm->PlayMod(this);  //rewbs.fix2977
 		}
 	}
 	//SwitchToView();
@@ -2516,7 +2516,8 @@ void CModDoc::OnPatternPlayNoLoop()
 		if(pModPlaying != this)
 		{
 			SetNotifications(m_notifyType|Notification::Position|Notification::VUMeters, m_notifyItem);
-			pMainFrm->PlayMod(this, followSonghWnd);  //rewbs.fix2977
+			SetFollowWnd(followSonghWnd);
+			pMainFrm->PlayMod(this);  //rewbs.fix2977
 		}
 	}
 	//SwitchToView();

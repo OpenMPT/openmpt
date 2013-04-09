@@ -2469,7 +2469,8 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		if (pMainFrm->GetModPlaying() != pModDoc)
 		{
 			pModDoc->SetNotifications(Notification::Position | Notification::VUMeters);
-			pMainFrm->PlayMod(pModDoc, m_hWnd);
+			pModDoc->SetFollowWnd(m_hWnd);
+			pMainFrm->PlayMod(pModDoc);
 		}
 		if(row == ROWINDEX_INVALID)
 		{
@@ -3932,7 +3933,6 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			m_Status.set(psFollowSong);
 			if(pModDoc) pModDoc->SetNotifications(Notification::Position | Notification::VUMeters);
 			if(pModDoc) pModDoc->SetFollowWnd(m_hWnd);
-			if(pMainFrm) pMainFrm->SetFollowSong(pModDoc, m_hWnd, TRUE);
 			SetFocus();
 		} else
 		{
