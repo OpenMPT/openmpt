@@ -364,7 +364,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const uint8 *sourceBuffer,
 		// Read left channel
 		CopySample<SampleConversion>(sample.pSample, sample.nLength, 2, sourceBuffer, sourceSize, 2);
 		// Read right channel
-		return CopySample<SampleConversion>(static_cast<SampleConversion::output_t *>(sample.pSample), sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
+		return CopySample<SampleConversion>(static_cast<SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
 	} else
 	{
 		// This is quicker (and smaller), but only possible if the functor doesn't care about what it actually processes:
