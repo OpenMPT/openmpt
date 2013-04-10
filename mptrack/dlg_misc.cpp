@@ -378,8 +378,6 @@ void CModTypeDlg::OnOK()
 	sndFile.m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
 	sndFile.m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
 
-	sndFile.SetupITBidiMode();
-
 	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->Update();
 	CDialog::OnOK();

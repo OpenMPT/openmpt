@@ -453,7 +453,6 @@ CSoundFile::CSoundFile() :
 #endif // MODPLUG_TRACKER
 
 	m_ModFlags.reset();
-	m_bITBidiMode = false;
 
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
@@ -1645,7 +1644,6 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 		return;
 
 	SetupMODPanning(); // Setup LRRL panning scheme if needed
-	SetupITBidiMode(); // Setup IT bidi mode
 
 	m_ModFlags = m_ModFlags & GetModFlagMask(oldtype, newType);
 
@@ -1887,14 +1885,6 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 		else
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
 	}
-}
-
-
-// Set or unset the IT bidi loop mode (see Fastmix.cpp for an explanation). The variable has to be static...
-void CSoundFile::SetupITBidiMode()
-//--------------------------------
-{
-	m_bITBidiMode = IsCompatibleMode(TRK_IMPULSETRACKER);
 }
 
 
