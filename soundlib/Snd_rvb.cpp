@@ -247,6 +247,9 @@ static VOID I3dl2_to_Generic(
 void CReverb::Shutdown()
 //----------------------
 {
+	gnRvbLOfsVol = 0;
+	gnRvbROfsVol = 0;
+
 	// Clear out all reverb state
 	g_bLastInPresent = FALSE;
 	g_bLastOutPresent = FALSE;

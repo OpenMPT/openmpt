@@ -26,31 +26,12 @@
 // VU-Meter
 #define VUMETER_DECAY		4
 
-// Mixing data initialized in
-MixerSettings CSoundFile::m_MixerSettings;
-CResampler CSoundFile::m_Resampler;
-#ifndef NO_REVERB
-CReverb CSoundFile::m_Reverb;
-#endif
-#ifndef NO_DSP
-CDSP CSoundFile::m_DSP;
-#endif
-#ifndef NO_EQ
-CEQ CSoundFile::m_EQ;
-#endif
-#ifndef NO_AGC
-CAGC CSoundFile::m_AGC;
-#endif
-UINT CSoundFile::gnVolumeRampUpSamplesActual = 42;		//default value
 #ifdef MODPLUG_TRACKER
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 #endif
 #ifndef NO_VST
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
-LONG gnDryROfsVol = 0;
-LONG gnDryLOfsVol = 0;
-bool gbInitTables = 0;
 
 typedef DWORD (MPPASMCALL * LPCONVERTPROC)(LPVOID, int *, DWORD);
 
@@ -102,16 +83,25 @@ inline RATIOTYPE TwoToPowerXOver12(const BYTE i)
 }
 
 
-
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 //-------------------------------------------------------------------
 {
-
 	// Start with ramping disabled to avoid clicks on first read.
 	// Ramping is now set after the first read in CSoundFile::Read();
 	gnVolumeRampUpSamplesActual = 0;
 	SetPreAmp(mixersettings.m_nPreAmp); // adjust agc
+	bool reset = false;
+	if(
+		(mixersettings.gdwMixingFreq != m_MixerSettings.gdwMixingFreq)
+		||
+		(mixersettings.gnBitsPerSample != m_MixerSettings.gnBitsPerSample)
+		||
+		(mixersettings.gnChannels != m_MixerSettings.gnChannels)
+		||
+		(mixersettings.MixerFlags != m_MixerSettings.MixerFlags))
+		reset = true;
 	m_MixerSettings = mixersettings;
+	InitPlayer(reset?TRUE:FALSE);
 }
 
 
@@ -119,22 +109,19 @@ void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersetting
 //--------------------------------------------------------------------------------
 {
 	m_Resampler.m_Settings = resamplersettings;
+	m_Resampler.InitializeTables();
 }
 
 
-BOOL CSoundFile::InitPlayer(BOOL bReset)
+void CSoundFile::InitPlayer(BOOL bReset)
 //--------------------------------------
 {
-	if (!gbInitTables)
+	if(bReset)
 	{
-		m_Resampler.InitializeTables();
-		gbInitTables = true;
+		gnDryLOfsVol = 0;
+		gnDryROfsVol = 0;
 	}
-
-	gnDryROfsVol = gnDryLOfsVol = 0;
-#ifndef NO_REVERB
-	m_Reverb.gnRvbROfsVol = m_Reverb.gnRvbLOfsVol = 0;
-#endif
+	m_Resampler.InitializeTables();
 #ifndef NO_REVERB
 	m_Reverb.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
@@ -144,7 +131,9 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 #ifndef NO_EQ
 	m_EQ.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
-	return TRUE;
+#ifndef NO_AGC
+	if(bReset) m_AGC.Reset();
+#endif
 }
 
 

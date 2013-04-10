@@ -316,8 +316,8 @@ public:
 
 // Low-Level Audio
 public:
-	static void UpdateDspEffects(bool reset=false);
-	static void UpdateAudioParameters(BOOL bReset=FALSE);
+	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
+	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD NotifyThread();
@@ -384,7 +384,7 @@ public:
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
 	CWnd* m_pOrderlistHasFocus;
-	long GetSampleRate();
+	__declspec(deprecated) long GetSampleRate();
 	double GetApproxBPM();
 	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
@@ -407,7 +407,6 @@ public:
 
 // Player functions
 public:
-	static void ApplyTrackerSettings(CSoundFile *pSndFile);
 
 	// high level synchronous playback functions, do not hold AudioCriticalSection while calling these
 	bool PreparePlayback();
@@ -415,6 +414,7 @@ public:
 	void StopPlayback();
 	bool PausePlayback();
 	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
+	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() ? true : false; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
 	void SetPlaybackSoundFile(CSoundFile *pSndFile);
 	void UnsetPlaybackSoundFile();
@@ -440,10 +440,12 @@ public:
 	BOOL InitRenderer(CSoundFile*);
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
+
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
-	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupMiscOptions();
-	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
+	BOOL SetupPlayer();
+
+	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
 	HWND GetFollowSong() const;

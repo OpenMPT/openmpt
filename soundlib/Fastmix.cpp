@@ -19,10 +19,6 @@
 #include "WindowedFIR.h"
 
 
-extern LONG gnDryROfsVol;
-extern LONG gnDryLOfsVol;
-
-
 // 4x256 taps polyphase FIR resampling filter
 extern short int gFastSinc[];
 

@@ -21,7 +21,7 @@ MixerSettings::MixerSettings()
 	DSPMask = 0;
 	MixerFlags = 0;
 
-	// Mixing Configuration (SetWaveConfig)
+	// Mixing Configuration
 	gnChannels = 2;
 	gdwMixingFreq = 44100;
 	gnBitsPerSample = 16;

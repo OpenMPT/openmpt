@@ -406,7 +406,6 @@ return pointer;
 CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 #endif
-uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 CSoundFile::CSoundFile() :
@@ -424,6 +423,9 @@ CSoundFile::CSoundFile() :
 	MemsetZero(MixRearBuffer);
 	MemsetZero(MixReverbBuffer);
 	MemsetZero(MixFloatBuffer);
+	gnDryLOfsVol = 0;
+	gnDryROfsVol = 0;
+	gnVolumeRampUpSamplesActual = 42;
 	m_nType = MOD_TYPE_NONE;
 	m_nChannels = 0;
 	m_nMixChannels = 0;
@@ -894,58 +896,13 @@ void CSoundFile::FreeSample(void *p)
 // Misc functions
 
 
-BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
-//----------------------------------------------------------------------------
+void CSoundFile::SetDspEffects(DWORD DSPMask)
+//----------------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-
-	BOOL bReset = FALSE;
-	DWORD d = m_MixerSettings.MixerFlags & ~SNDMIX_ENABLEMMX;
-	if (bMMX) d |= SNDMIX_ENABLEMMX;
-	if ((m_MixerSettings.gdwMixingFreq != nRate) || (m_MixerSettings.gnBitsPerSample != nBits) || (m_MixerSettings.gnChannels != nChannels) || (d != m_MixerSettings.MixerFlags)) bReset = TRUE;
-	m_MixerSettings.gnChannels = nChannels;
-	m_MixerSettings.MixerFlags = d;
-	m_MixerSettings.gdwMixingFreq = nRate;
-	m_MixerSettings.gnBitsPerSample = nBits;
-	InitPlayer(bReset);
-	return TRUE;
-}
-
-
-BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL bNR,BOOL bEQ)
-//------------------------------------------------------------------------------------------
-{
-	CriticalSection cs;
-	DWORD d = m_MixerSettings.DSPMask;
-	if ((bReverb) && (GetSysInfo() & SYSMIX_ENABLEMMX)) d |= SNDDSP_REVERB; else d &= ~SNDDSP_REVERB;
-#ifndef NO_DSP
-	if (bSurround) d |= SNDDSP_SURROUND; else d &= ~SNDDSP_SURROUND;
-	if (bMegaBass) d |= SNDDSP_MEGABASS; else d &= ~SNDDSP_MEGABASS;
-	if (bNR) d |= SNDDSP_NOISEREDUCTION; else d &= ~SNDDSP_NOISEREDUCTION;
-#endif
-#ifndef NO_EQ
-	if (bEQ) d |= SNDDSP_EQ; else d &= ~SNDDSP_EQ;
-#endif
-	m_MixerSettings.DSPMask = d;
+	if(!(GetSysInfo() & SYSMIX_ENABLEMMX)) DSPMask &= ~SNDDSP_REVERB;
+	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(FALSE);
-	return TRUE;
-}
-
-
-BOOL CSoundFile::SetResamplingMode(UINT nMode)
-//--------------------------------------------
-{
-	switch(nMode)
-	{
-		case SRCMODE_NEAREST:   break;
-		case SRCMODE_LINEAR:    break;
-		case SRCMODE_SPLINE:    break;
-		case SRCMODE_POLYPHASE: break;
-		case SRCMODE_FIRFILTER: break;
-		default: return FALSE;  break;
-	}
-	m_Resampler.m_Settings.SrcMode = (ResamplingMode)nMode;
-	return TRUE;
 }
 
 
@@ -962,22 +919,6 @@ void CSoundFile::SetPreAmp(UINT nVol)
 #endif
 	m_MixerSettings.m_nPreAmp = nVol;
 }
-
-
-#ifndef NO_AGC
-void CSoundFile::SetAGC(BOOL b)
-//-----------------------------
-{
-	if (b)
-	{
-		if (!(m_MixerSettings.DSPMask & SNDDSP_AGC))
-		{
-			m_MixerSettings.DSPMask |= SNDDSP_AGC;
-			m_AGC.Reset();
-		}
-	} else m_MixerSettings.DSPMask &= ~SNDDSP_AGC;
-}
-#endif
 
 
 UINT CSoundFile::GetCurrentPos() const
