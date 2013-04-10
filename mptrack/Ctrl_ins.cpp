@@ -2724,7 +2724,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	Reporting::Notification(str);
 
 	CriticalSection cs;
-	pIns->SetTuning(pIns->s_DefaultTuning);
+	pIns->SetTuning(m_pSndFile->GetDefaultTuning());
 
 	m_pModDoc->SetModified();
 }

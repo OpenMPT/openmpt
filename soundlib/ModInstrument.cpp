@@ -156,7 +156,7 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 	nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
 	nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
-	pTuning = s_DefaultTuning;
+	pTuning = CSoundFile::GetDefaultTuning();
 
 	AssignSample(sample);
 	ResetNoteMap();
