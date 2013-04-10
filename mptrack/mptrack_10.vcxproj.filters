@@ -430,6 +430,9 @@
     <ClCompile Include="..\sounddsp\AGC.cpp">
       <Filter>Source Files\sounddsp</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\Profiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -787,6 +790,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Notification.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Profiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
