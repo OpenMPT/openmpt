@@ -692,7 +692,7 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 
-	int oldVol = m_pSndFile->GetPreAmp();
+	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	mixersettings.gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
@@ -705,19 +705,17 @@ void CDoWaveConvert::OnButton1()
 // -! NEW_FEATURE#0024
 	{
 		mixersettings.gnBitsPerSample = 24;
-#ifndef NO_AGC
-		m_pSndFile->SetAGC(FALSE);
-#endif
-		if (oldVol > 128) m_pSndFile->SetPreAmp(128);
+		mixersettings.DSPMask &= ~SNDDSP_AGC;
+		if(mixersettings.m_nPreAmp > 128) mixersettings.m_nPreAmp = 128;
 	} else
 	{
 		m_bNormalize = false;
 	}
 
 	m_pSndFile->ResetChannels();
-	CSoundFile::SetMixerSettings(mixersettings);
-	CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
-	CSoundFile::InitPlayer(TRUE);
+	m_pSndFile->SetMixerSettings(mixersettings);
+	m_pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
+	m_pSndFile->InitPlayer(TRUE);
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
 	// File Header
@@ -769,7 +767,7 @@ void CDoWaveConvert::OnButton1()
 	m_pSndFile->m_PatternCuePoints.reserve(m_pSndFile->Order.GetLength());
 
 	// Process the conversion
-	UINT nBytesPerSample = (CSoundFile::m_MixerSettings.gnBitsPerSample * CSoundFile::m_MixerSettings.gnChannels) / 8;
+	UINT nBytesPerSample = (m_pSndFile->m_MixerSettings.gnBitsPerSample * m_pSndFile->m_MixerSettings.gnChannels) / 8;
 	// For calculating the remaining time
 	DWORD dwStartTime = timeGetTime();
 	// For giving away some processing time every now and then
@@ -778,7 +776,7 @@ void CDoWaveConvert::OnButton1()
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
-		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer)/(CSoundFile::m_MixerSettings.gnChannels*CSoundFile::m_MixerSettings.gnBitsPerSample/8));
+		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.gnBitsPerSample/8));
 
 		// Process cue points (add base offset), if there are any to process.
 		vector<PatternCuePoint>::reverse_iterator iter;
@@ -817,7 +815,7 @@ void CDoWaveConvert::OnButton1()
 		ullSamples += lRead;
 		if (m_bNormalize)
 		{
-			UINT imax = lRead*3*CSoundFile::m_MixerSettings.gnChannels;
+			UINT imax = lRead*3*m_pSndFile->m_MixerSettings.gnChannels;
 			for (UINT i=0; i<imax; i+=3)
 			{
 				LONG l = ((((buffer[i+2] << 8) + buffer[i+1]) << 8) + buffer[i]) << 8;
@@ -849,7 +847,7 @@ void CDoWaveConvert::OnButton1()
 			break;
 		if (!(n % 10))
 		{
-			DWORD l = (DWORD)(ullSamples / CSoundFile::m_MixerSettings.gdwMixingFreq);
+			DWORD l = (DWORD)(ullSamples / m_pSndFile->m_MixerSettings.gdwMixingFreq);
 
 			const DWORD dwCurrentTime = timeGetTime();
 			DWORD timeRemaining = 0; // estimated remainig time
@@ -963,7 +961,7 @@ void CDoWaveConvert::OnButton1()
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	if (m_bNormalize)
 	{
-		m_pSndFile->SetPreAmp(oldVol);
+		m_pSndFile->SetMixerSettings(oldmixersettings);
 		CFile fw;
 		if (fw.Open(m_lpszFileName, CFile::modeReadWrite | CFile::modeNoTruncate))
 		{
@@ -971,7 +969,7 @@ void CDoWaveConvert::OnButton1()
 			fw.Close();
 		}
 	}
-	CMainFrame::UpdateAudioParameters(TRUE);
+	CMainFrame::UpdateAudioParameters(*m_pSndFile, TRUE);
 	EndDialog(ok);
 }
 
@@ -1104,18 +1102,17 @@ void CDoAcmConvert::OnButton1()
 		m_FileTags.WriteID3v2Tags(f);
 
 	}
-	static DWORD oldsndcfg = CSoundFile::m_MixerSettings.MixerFlags;
+	DWORD oldsndcfg = m_pSndFile->m_MixerSettings.MixerFlags;
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	const DWORD dwSongTime = m_pSndFile->GetSongTime();
 	mixersettings.gdwMixingFreq = wfxSrc.nSamplesPerSec;
 	mixersettings.gnBitsPerSample = 16;
-//	CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE); //rewbs.resamplerConf - we don't want this anymore.
 	mixersettings.gnChannels = wfxSrc.nChannels;
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();
-	CSoundFile::SetMixerSettings(mixersettings);
-	CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
-	CSoundFile::InitPlayer(TRUE);
+	m_pSndFile->SetMixerSettings(mixersettings);
+	m_pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
+	m_pSndFile->InitPlayer(TRUE);
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 
 	m_pSndFile->visitedSongRows.Initialize(true);
@@ -1153,7 +1150,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(CSoundFile::m_MixerSettings.gnChannels*CSoundFile::m_MixerSettings.gnBitsPerSample/8));
+			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.gnBitsPerSample/8));
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;
@@ -1206,11 +1203,11 @@ void CDoAcmConvert::OnButton1()
 	}
 	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	// Done
-	CSoundFile::m_MixerSettings.MixerFlags = oldsndcfg;
+	m_pSndFile->m_MixerSettings.MixerFlags = oldsndcfg;
 	m_pSndFile->SetRepeatCount(oldrepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	m_pSndFile->visitedSongRows.Initialize(true);
-	CMainFrame::UpdateAudioParameters(TRUE);
+	CMainFrame::UpdateAudioParameters(*m_pSndFile, TRUE);
 
 	// Success
 

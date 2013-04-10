@@ -266,8 +266,7 @@ VOID CMainFrame::Initialize()
 
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
-	// Initialize Audio Mixer
-	UpdateAudioParameters(TRUE);
+
 	// Update the tree
 	m_wndTree.Init();
 
@@ -1091,64 +1090,36 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 }
 
 
-void CMainFrame::UpdateDspEffects(bool reset)
-//-------------------------------------------
+void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
+//----------------------------------------------------------------
 {
-	CSoundFile::SetDspEffects(
-#ifndef NO_DSP
-		TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_SURROUND,
-#else
-		FALSE,
+	CriticalSection cs;
+#ifndef NO_REVERB
+	sndFile.m_Reverb.m_Settings = TrackerSettings::Instance().m_ReverbSettings;
 #endif
-		TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_REVERB,
 #ifndef NO_DSP
-		TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_MEGABASS,
-		TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_NOISEREDUCTION,
-#else
-		FALSE,
-		FALSE,
+	sndFile.m_DSP.m_Settings = TrackerSettings::Instance().m_DSPSettings;
 #endif
 #ifndef NO_EQ
-		TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_EQ
-#else
-		FALSE
+	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
 #endif
-		);
-#ifndef NO_AGC
-	CSoundFile::SetAGC(TrackerSettings::Instance().m_MixerSettings.DSPMask & SNDDSP_AGC);
-#endif
-#ifndef NO_EQ
-	CSoundFile::SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
-#endif
+	sndFile.SetDspEffects(TrackerSettings::Instance().m_MixerSettings.DSPMask);
+	sndFile.InitPlayer(reset?TRUE:FALSE);
 }
 
 
-void CMainFrame::UpdateAudioParameters(BOOL bReset)
-//-------------------------------------------------
+void CMainFrame::UpdateAudioParameters(CSoundFile &sndFile, bool reset)
+//---------------------------------------------------------------------
 {
-	if ((TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample != 8) && (TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample != 32)) TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample = 16;
-	CSoundFile::SetWaveConfig(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq,
-			TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample,
-			TrackerSettings::Instance().m_MixerSettings.gnChannels,
-			(TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) ? TRUE : FALSE);
-
-	// Soft panning
-	if (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)
-		CSoundFile::m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING;
-	else
-		CSoundFile::m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
+	CriticalSection cs;
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
-		CSoundFile::m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
-		CSoundFile::m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
-	CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
-	UpdateDspEffects(bReset);
-	if (bReset)
-	{
-		CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-		CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
-		CSoundFile::InitPlayer(TRUE);
-	}
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
+	sndFile.SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
+	sndFile.SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
+	UpdateDspEffects(sndFile, false); // reset done in next line
+	sndFile.InitPlayer(reset?TRUE:FALSE);
 }
 
 
@@ -1281,21 +1252,6 @@ void CMainFrame::ResetNotificationBuffer()
 }
 
 
-void CMainFrame::ApplyTrackerSettings(CSoundFile *pSndFile)
-//----------------------------------------------------------
-{
-	if(!pSndFile) return;
-	pSndFile->SetWaveConfig(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample, TrackerSettings::Instance().m_MixerSettings.gnChannels, (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) ? TRUE : FALSE);
-	pSndFile->SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
-	UpdateDspEffects();
-	pSndFile->SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-	pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
-#ifndef NO_AGC
-	CSoundFile::m_AGC.Reset();
-#endif
-}
-
-
 bool CMainFrame::PreparePlayback()
 //--------------------------------
 {
@@ -1404,7 +1360,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	if (!PreparePlayback()) return false;
 
 	// set mixing parameters in CSoundFile
-	ApplyTrackerSettings(pSndFile);
+	UpdateAudioParameters(*pSndFile);
 
 	SetPlaybackSoundFile(pSndFile);
 
@@ -1513,7 +1469,7 @@ bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 		return false;
 	}
 
-	ApplyTrackerSettings(pSndFile);
+	UpdateAudioParameters(*pSndFile);
 
 	SetPlaybackSoundFile(pSndFile);
 
@@ -1717,9 +1673,13 @@ HWND CMainFrame::GetFollowSong() const
 BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
 //----------------------------------------------------------------------------------------------------------------------------
 {
-	const bool isPlaying = (IsPlaying() != 0);
-	if ((TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq != rate) || ((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
-	 || (TrackerSettings::Instance().m_nWaveDevice != wd) || (TrackerSettings::Instance().m_LatencyMS != latency_ms) || (TrackerSettings::Instance().m_UpdateIntervalMS != updateinterval_ms) || (nBits != TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample)
+	const bool isPlaying = IsPlaying();
+	if (((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
+	 || (TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq != rate)
+	 || (TrackerSettings::Instance().m_nWaveDevice != wd)
+	 || (TrackerSettings::Instance().m_LatencyMS != latency_ms)
+	 || (TrackerSettings::Instance().m_UpdateIntervalMS != updateinterval_ms)
+	 || (TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample != nBits)
 	 || (TrackerSettings::Instance().m_MixerSettings.gnChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
@@ -1737,35 +1697,25 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 		TrackerSettings::Instance().m_MixerSettings.gnChannels = nChns;
 		{
 			CriticalSection cs;
-			UpdateAudioParameters(FALSE);
+			if (pActiveMod) UpdateAudioParameters(pActiveMod->GetrSoundFile(), FALSE);
 		}
 		if (pActiveMod) PlayMod(pActiveMod);
 		UpdateWindow();
 	} else
 	{
 		// No need to restart playback
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags = q;
-		CSoundFile::EnableMMX((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) != 0);
+		CriticalSection cs;
+		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying(), FALSE);
 	}
 	return TRUE;
 }
 
 
-BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
-//---------------------------------------------------------------------
+BOOL CMainFrame::SetupPlayer()
+//----------------------------
 {
-	if ((q != TrackerSettings::Instance().m_MixerSettings.DSPMask) || (srcmode != TrackerSettings::Instance().m_ResamplerSettings.SrcMode) || (bForceUpdate))
-	{
-		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = (ResamplingMode)srcmode;
-		TrackerSettings::Instance().m_MixerSettings.DSPMask = q;
-		{
-			CriticalSection cs;
-			CSoundFile::SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-			CSoundFile::SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
-			CSoundFile::SetResamplingMode(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
-			UpdateDspEffects();
-		}
-	}
+	CriticalSection cs;
+	if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying(), FALSE);
 	return TRUE;
 }
 
@@ -1786,9 +1736,13 @@ BOOL CMainFrame::SetupMiscOptions()
 //---------------------------------
 {
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
-		CSoundFile::m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
-		CSoundFile::m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
+	{
+		CriticalSection cs;
+		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying());
+	}
 
 	m_wndToolBar.EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
 
@@ -2530,11 +2484,19 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 
 }
 
+
 //end rewbs.VSTTimeInfo
 long CMainFrame::GetSampleRate()
 //------------------------------
 {
-	return CSoundFile::GetSampleRate();
+	CriticalSection cs;
+	if(GetSoundFilePlaying())
+	{
+		return GetSoundFilePlaying()->GetSampleRate();
+	} else
+	{
+		return TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq;
+	}
 }
 
 

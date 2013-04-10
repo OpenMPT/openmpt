@@ -14,6 +14,8 @@
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"
 #include "../sounddsp/EQ.h"
+#include "../sounddsp/DSP.h"
+#include "../soundlib/snd_rvb.h"
 
 /////////////////////////////////////////////////////////////////////////
 // Default directories
@@ -205,6 +207,8 @@ public:
 
 	MixerSettings m_MixerSettings;
 	CResamplerSettings m_ResamplerSettings;
+	CReverbSettings m_ReverbSettings;
+	CDSPSettings m_DSPSettings;
 
 	UINT gnAutoChordWaitTime;
 
@@ -221,6 +225,8 @@ public:
 	TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
 	// Directory to INI setting translation
 	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
+
+	uint8 DefaultPlugVolumeHandling;
 
 	int gnPlugWindowX;
 	int gnPlugWindowY;

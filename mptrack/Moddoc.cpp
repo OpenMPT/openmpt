@@ -1767,7 +1767,6 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
-		//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
 
 		if(dwcdlg.DoModal() != IDOK) break;
 	}
@@ -1800,7 +1799,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	m_SndFile.SetRepeatCount(oldRepeat);
 	m_SndFile.SetCurrentPos(pos);
-	CMainFrame::UpdateAudioParameters(TRUE);
+	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
 }
 
 
@@ -1858,7 +1857,7 @@ void CModDoc::OnFileMP3Convert()
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.DoModal();
 	m_SndFile.SetCurrentPos(pos);
-	CMainFrame::UpdateAudioParameters(TRUE);
+	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
 }
 
 

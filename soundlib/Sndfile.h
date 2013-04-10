@@ -238,30 +238,31 @@ private:
 	int MixReverbBuffer[MIXBUFFERSIZE * 2];
 #endif
 	float MixFloatBuffer[MIXBUFFERSIZE * 2];
+	LONG gnDryLOfsVol;
+	LONG gnDryROfsVol;
 
-public:	// Static Members
-	static MixerSettings m_MixerSettings;
-	static CResampler m_Resampler;
+public:
+	MixerSettings m_MixerSettings;
+	CResampler m_Resampler;
 #ifndef NO_REVERB
-	static CReverb m_Reverb;
+	CReverb m_Reverb;
 #endif
 #ifndef NO_DSP
-	static CDSP m_DSP;
+	CDSP m_DSP;
 #endif
 #ifndef NO_EQ
-	static CEQ m_EQ;
+	CEQ m_EQ;
 #endif
 #ifndef NO_AGC
-	static CAGC m_AGC;
+	CAGC m_AGC;
 #endif
-	static UINT gnVolumeRampUpSamplesActual;
+	UINT gnVolumeRampUpSamplesActual;
 #ifdef MODPLUG_TRACKER
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 #endif
 #ifndef NO_VST
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 #endif
-	static uint8 s_DefaultPlugVolumeHandling;
 
 	typedef uint32 samplecount_t;	// Number of rendered samples
 
@@ -359,7 +360,7 @@ public:
 	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 
-	static void SetPreAmp(UINT vol);
+	void SetPreAmp(UINT vol);
 	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
@@ -494,21 +495,15 @@ public:
 
 public:
 	// Mixer Config
-	static void SetMixerSettings(const MixerSettings &mixersettings);
-	static void SetResamplerSettings(const CResamplerSettings &resamplersettings);
-	static BOOL InitPlayer(BOOL bReset=FALSE);
-	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
-	static BOOL SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL xbass,BOOL dolbynr,BOOL bEQ);
-	static BOOL SetResamplingMode(UINT nMode); // SRCMODE_XXXX
-	static DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
+	void SetMixerSettings(const MixerSettings &mixersettings);
+	void SetResamplerSettings(const CResamplerSettings &resamplersettings);
+	void InitPlayer(BOOL bReset=FALSE);
+	void SetDspEffects(DWORD DSPMask);
+	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
 	static void AssertAlignment();
 	static DWORD GetSysInfo();
-	static void EnableMMX(bool b) { if (b) m_MixerSettings.MixerFlags |= SNDMIX_ENABLEMMX; else m_MixerSettings.MixerFlags &= ~SNDMIX_ENABLEMMX; }
-#ifndef NO_AGC
-	static void SetAGC(BOOL b);
-#endif
 #ifndef NO_EQ
-	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 	// Float <-> Int conversion routines
 	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);

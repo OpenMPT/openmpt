@@ -753,7 +753,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 void CModDoc::InitializeInstrument(ModInstrument *pIns)
 //-----------------------------------------------------
 {
-	pIns->nPluginVolumeHandling = CSoundFile::s_DefaultPlugVolumeHandling;
+	pIns->nPluginVolumeHandling = TrackerSettings::Instance().DefaultPlugVolumeHandling;
 }
 
 
