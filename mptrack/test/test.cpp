@@ -629,7 +629,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
-			VERIFY_EQUAL_NONCONT(reinterpret_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
+			VERIFY_EQUAL_NONCONT(static_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
 		}
 	}
 
@@ -861,7 +861,7 @@ void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
-			VERIFY_EQUAL_NONCONT(reinterpret_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
+			VERIFY_EQUAL_NONCONT(static_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
 		}
 	}
 
@@ -1314,7 +1314,7 @@ void TestSampleConversion()
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			int16 normValue = reinterpret_cast<const int16 *>(sample.pSample)[i];
+			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
 			if(abs(normValue - static_cast<int16>(i - 0x8000u)) > 1)
 			{
 				VERIFY_EQUAL_NONCONT(true, false);
@@ -1348,7 +1348,7 @@ void TestSampleConversion()
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			int16 normValue = reinterpret_cast<const int16 *>(sample.pSample)[i];
+			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
 			if(abs(normValue - static_cast<int16>(i- 0x8000u)) > 1)
 			{
 				VERIFY_EQUAL_NONCONT(true, false);

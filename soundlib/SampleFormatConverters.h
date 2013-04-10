@@ -364,7 +364,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const uint8 *sourceBuffer,
 		// Read left channel
 		CopySample<SampleConversion>(sample.pSample, sample.nLength, 2, sourceBuffer, sourceSize, 2);
 		// Read right channel
-		return CopySample<SampleConversion>(sample.pSample + sizeof(SampleConversion::output_t), sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
+		return CopySample<SampleConversion>(static_cast<SampleConversion::output_t *>(sample.pSample), sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
 	} else
 	{
 		// This is quicker (and smaller), but only possible if the functor doesn't care about what it actually processes:
@@ -393,7 +393,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const uint8 *sourceBuffer, size_
 	} else
 	{
 		// Read right channel
-		return rightOffset + CopySample<SampleConversion>(sample.pSample + sizeof(SampleConversion::output_t), sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 1);
+		return rightOffset + CopySample<SampleConversion>(static_cast<SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 1);
 	}
 }
 
@@ -401,7 +401,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const uint8 *sourceBuffer, size_
 // Copy a sample data buffer and normalize it. Requires slightly advanced sample conversion functor.
 template<typename SampleConversion>
 size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size_t sourceSize)
-//------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 {
 	static_assert(SampleConversion::hasState == false, "Implementation of this conversion function is stateless");
 	const size_t inSize = sizeof(SampleConversion::input_t);
@@ -426,7 +426,7 @@ size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size
 	if(!sampleConv.IsSilent())
 	{
 		// Copying buffer.
-		SampleConversion::output_t *outBuf = reinterpret_cast<SampleConversion::output_t *>(sample.pSample);
+		SampleConversion::output_t *outBuf = static_cast<SampleConversion::output_t *>(sample.pSample);
 		inBuf = reinterpret_cast<const SampleConversion::input_t *>(sourceBuffer);
 
 		for(size_t i = numSamples; i != 0; i--)

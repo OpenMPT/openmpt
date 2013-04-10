@@ -1270,7 +1270,7 @@ template<class T, class uT>
 void CViewSample::SetInitialDrawPoint(void *pSample, const CPoint &point)
 //-----------------------------------------------------------------------
 {
-	T* data = reinterpret_cast<T*>(pSample);
+	T* data = static_cast<T *>(pSample);
 	data[m_dwEndDrag] = GetSampleValueFromPoint<T, uT>(point);
 }
 
@@ -1279,7 +1279,7 @@ template<class T, class uT>
 void CViewSample::SetSampleData(void *pSample, const CPoint &point, const DWORD old)
 //----------------------------------------------------------------------------------
 {
-	T* data = reinterpret_cast<T*>(pSample);
+	T* data = static_cast<T *>(pSample);
 	const int oldvalue = data[old];
 	const int value = GetSampleValueFromPoint<T, uT>(point);
 	for(DWORD i=old; i != m_dwEndDrag; i += (m_dwEndDrag > old ? 1 : -1))
@@ -1822,7 +1822,7 @@ void CViewSample::OnEditDelete()
 		sample.nLength -= cutlen;
 		cutlen *= sample.GetBytesPerSample();
 
-		LPSTR p = sample.pSample;
+		char *p = static_cast<char *>(sample.pSample);
 		for (UINT i=istart; i<iend; i++)
 		{
 			p[i] = (i+cutlen < iend) ? p[i+cutlen] : (char)0;
@@ -1911,7 +1911,7 @@ void CViewSample::OnEditCopy()
 		pdata->length = dwSmpLen;
 		phdr->filesize += pdata->length;
 		LPBYTE psamples = p + sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER);
-		memcpy(psamples, sample.pSample+dwSmpOffset, dwSmpLen);
+		memcpy(psamples, static_cast<const char *>(sample.pSample) + dwSmpOffset, dwSmpLen);
 		if (pfmt->bitspersample == 8)
 	{
 			for (UINT i = 0; i < dwSmpLen; i++) psamples[i] += 0x80;

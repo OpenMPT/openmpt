@@ -121,11 +121,11 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 	switch(sample.GetElementarySampleSize())
 	{
 	case 1:
-		CopySamples(reinterpret_cast<int8 *>(sample.pSample) + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
+		CopySamples(static_cast<int8 *>(sample.pSample) + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 
 	case 2:
-		CopySamples(reinterpret_cast<int16 *>(sample.pSample) + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
+		CopySamples(static_cast<int16 *>(sample.pSample) + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 	}
 

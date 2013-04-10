@@ -859,7 +859,7 @@ BOOL CSoundFile::Destroy()
 // Memory Allocation
 
 // Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
-LPSTR CSoundFile::AllocateSample(UINT nbytes)
+void *CSoundFile::AllocateSample(UINT nbytes)
 //-------------------------------------------
 {
 	if(nbytes > SIZE_MAX - 0x29u)
@@ -1320,7 +1320,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 template<typename T>
 void AdjustSampleLoopImpl(ModSample &sample)
 {
-	T *data = reinterpret_cast<T *>(sample.pSample);
+	T *data = static_cast<T *>(sample.pSample);
 	SmpLength numSamples = sample.nLength;
 
 	// Adjust end of sample

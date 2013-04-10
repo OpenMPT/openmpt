@@ -69,9 +69,9 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, FILE *f) : mpt
 			byteVal = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Compress<IT16BitParams>(sample.pSample + 2 * chn, offset, remain);
+				Compress<IT16BitParams>(static_cast<int16 *>(sample.pSample) + chn, offset, remain);
 			else
-				Compress<IT8BitParams>(sample.pSample + chn, offset, remain);
+				Compress<IT8BitParams>(static_cast<int8 *>(sample.pSample) + chn, offset, remain);
 
 			if(file) fwrite(&packedData[0], packedLength, 1, file);
 			packedTotalLength += packedLength;
@@ -362,9 +362,9 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 			mem1 = mem2 = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Uncompress<IT16BitParams>(mptSample.pSample + 2 * chn);
+				Uncompress<IT16BitParams>(static_cast<int16 *>(mptSample.pSample) + chn);
 			else
-				Uncompress<IT8BitParams>(mptSample.pSample + chn);
+				Uncompress<IT8BitParams>(static_cast<int8 *>(mptSample.pSample) + chn);
 		}
 	}
 }
