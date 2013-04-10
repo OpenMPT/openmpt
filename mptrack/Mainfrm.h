@@ -377,7 +377,6 @@ public:
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
-	//static CPerformanceCounter *m_pPerfCounter;
 
 	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
 	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
