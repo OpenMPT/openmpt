@@ -1414,8 +1414,6 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
 
 	m_pSndFile->ResetChannels();
-	// Select correct bidi loop mode when playing a module.
-	m_pSndFile->SetupITBidiMode();
 
 	if(!bPatLoop && bPaused) pSndFile->m_SongFlags.set(SONG_PAUSED);
 	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
