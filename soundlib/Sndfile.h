@@ -186,6 +186,7 @@ public:
 	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
 #endif
+	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
 	std::string GetNoteName(const int16&, const INSTRUMENTINDEX inst = INSTRUMENTINDEX_INVALID) const;
