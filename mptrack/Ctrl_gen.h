@@ -24,7 +24,7 @@ public:
 	VOID SetVuMeter(LONG lVuMeter, bool force=false);
 
 protected:
-	VOID DrawVuMeter(HDC hdc);
+	VOID DrawVuMeter(CDC &dc, bool redraw=false);
 
 protected:
 	afx_msg void OnPaint();
