@@ -404,9 +404,10 @@ public:
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
 	CWnd* m_pOrderlistHasFocus;
-	long GetSampleRate();  		//rewbs.VSTTimeInfo
-	double GetApproxBPM();		//rewbs.VSTTimeInfo
+	long GetSampleRate();
+	double GetApproxBPM();
 	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
+	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
 	CModTree *GetLowerTreeview() { return m_wndTree.m_pModTreeData; }
@@ -453,8 +454,7 @@ public:
 	void PreparePreview(ModCommand::NOTE note);
 	void StopPreview() { StopSoundFile(&m_WaveFile); }
 
-	inline bool IsPlaying() const { return m_pSndFile ? true : false; }
-	inline bool IsRendering() const { return m_pSndFile ? m_pSndFile->m_bIsRendering : false; }
+	inline bool IsPlaying() const { return m_pSndFile != nullptr; }
 	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }
 	inline CSoundFile *GetSoundFilePlaying() const { return m_pSndFile; } // may be nullptr
 	BOOL InitRenderer(CSoundFile*);
