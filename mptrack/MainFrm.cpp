@@ -35,6 +35,7 @@
 #include "SelectPluginDialog.h"
 #include "ExceptionHandler.h"
 #include "PatternClipboard.h"
+#include "../common/Profiler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -783,6 +784,7 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
 //---------------------------------------------------------
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	return m_pSndFile->Read(pvData, MaxSamples);
 }
 
@@ -951,6 +953,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream)
 //------------------------------------------------------------------------------------------
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	int64 notificationtimestamp = 0;
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex); // protect m_TotalSamplesRendered
@@ -2096,6 +2099,42 @@ void CMainFrame::OnTimer(UINT)
 		m_SoundCardOptionsDialog->UpdateStatistics();
 	}
 
+#ifdef USE_PROFILER
+	{
+		Profiler::Update();
+
+		CWnd * cwnd = CWnd::FromHandle(this->m_hWndMDIClient);
+		CClientDC dc(cwnd);
+
+		int height = 16;
+		int width = 256;
+
+		std::vector<std::string> catnames = Profiler::GetCategoryNames();
+		std::vector<double> cats = Profiler::DumpCategories();
+
+		for(int i=0; i<Profiler::CategoriesCount; i++)
+		{
+			dc.FillSolidRect(0, i * height, (int)(width * cats[i]), height, RGB(255,0,0));
+			dc.FillSolidRect((int)(width * cats[i]), i * height, width - (int)(width * cats[i]), height, RGB(192,192,192));
+			RECT rect;
+			cwnd->GetClientRect(&rect);
+			rect.left += width;
+			rect.top += i * height;
+			char dummy[1024];
+			sprintf(dummy, "%6.3f%% %s", cats[i] * 100.0, catnames[i].c_str());
+			dc.DrawText(dummy, strlen(dummy), &rect, DT_LEFT);
+		}
+
+		std::string dummy = Profiler::DumpProfiles();
+		RECT rect;
+		cwnd->GetClientRect(&rect);
+		rect.top += Profiler::CategoriesCount * height;
+		dc.DrawText(dummy.c_str(), dummy.length(), &rect, DT_LEFT);
+
+		cwnd->Detach();
+	}
+#endif
+
 }
 
 
@@ -2286,6 +2325,7 @@ LRESULT CMainFrame::OnInvalidatePatterns(WPARAM wParam, LPARAM)
 LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 //---------------------------------------------------------
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::GUI);
 	Notification *pnotify = (Notification *)lParam;
 	if (pnotify)
 	{
