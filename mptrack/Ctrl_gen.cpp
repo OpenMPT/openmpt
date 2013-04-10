@@ -604,11 +604,10 @@ void CVuMeter::OnPaint()
 {
 	CRect rect;
 	CPaintDC dc(this);
-	HDC hdc = dc.m_hDC;
 	GetClientRect(&rect);
-	FillRect(hdc, &rect, CMainFrame::brushBlack);
+	dc.FillSolidRect(rect.left, rect.top, rect.Width(), rect.Height(), RGB(0,0,0));
 	m_nDisplayedVu = -1;
-	DrawVuMeter(hdc);
+	DrawVuMeter(dc, true);
 }
 
 
@@ -623,22 +622,23 @@ VOID CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
 		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
 			CClientDC dc(this);
-			DrawVuMeter(dc.m_hDC);
+			DrawVuMeter(dc);
 			lastVuUpdateTime = curTime;
 		}
 	}
 }
 
 
-VOID CVuMeter::DrawVuMeter(HDC hdc)
-//---------------------------------
+VOID CVuMeter::DrawVuMeter(CDC &dc, bool redraw)
+//----------------------------------------------
 {
 	LONG vu;
+	LONG lastvu;
 	CRect rect;
 
 	GetClientRect(&rect);
-	HGDIOBJ oldpen = SelectObject(hdc, CMainFrame::penBlack);
 	vu = (m_nVuMeter * (rect.bottom-rect.top)) >> 8;
+	lastvu = (m_nDisplayedVu * (rect.bottom-rect.top)) >> 8;
 	int cy = rect.bottom - rect.top;
 	if (cy < 1) cy = 1;
 	for (int ry=rect.bottom-1; ry>rect.top; ry-=2)
@@ -647,11 +647,8 @@ VOID CVuMeter::DrawVuMeter(HDC hdc)
 		int n = Clamp((y0 * NUM_VUMETER_PENS) / cy, 0, NUM_VUMETER_PENS - 1);
 		if (vu < y0)
 			n += NUM_VUMETER_PENS;
-
-		SelectObject(hdc, CMainFrame::gpenVuMeter[n]);
-		MoveToEx(hdc, rect.left, ry, NULL);
-		LineTo(hdc, rect.right, ry);
+		dc.FillSolidRect(rect.left, ry, rect.Width(), 1, CMainFrame::gcolrefVuMeter[n]);
 	}
-	SelectObject(hdc, oldpen);
 	m_nDisplayedVu = m_nVuMeter;
 }
+

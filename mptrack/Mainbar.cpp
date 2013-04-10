@@ -1095,10 +1095,9 @@ void CStereoVU::OnPaint()
 {
 	CRect rect;
 	CPaintDC dc(this);
-	HDC hdc = dc.m_hDC;
 	GetClientRect(&rect);
-	FillRect(hdc, &rect, CMainFrame::brushBlack);
-	DrawVuMeters(hdc);
+	dc.FillSolidRect(rect.left, rect.top, rect.Width(), rect.Height(), RGB(0,0,0));
+	DrawVuMeters(dc, true);
 }
 
 
@@ -1113,7 +1112,7 @@ void CStereoVU::SetVuMeter(uint32 left, uint32 right, bool force)
 		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
 			CClientDC dc(this);
-			DrawVuMeters(dc.m_hDC);
+			DrawVuMeters(dc);
 			lastVuUpdateTime = curTime;
 		}
 	}
@@ -1121,8 +1120,8 @@ void CStereoVU::SetVuMeter(uint32 left, uint32 right, bool force)
 
 
 // Draw stereo VU
-void CStereoVU::DrawVuMeters(HDC hdc)
-//-----------------------------------
+void CStereoVU::DrawVuMeters(CDC &dc, bool redraw)
+//------------------------------------------------
 {
 	CRect rect;
 	GetClientRect(&rect);
@@ -1142,17 +1141,17 @@ void CStereoVU::DrawVuMeters(HDC hdc)
 		rectR.left = mid + 1;
 	}
 
-	HGDIOBJ oldPen = SelectObject(hdc, CMainFrame::penBlack);
-	DrawVuMeter(hdc, rectL, vuMeter[0]);
-	DrawVuMeter(hdc, rectR, vuMeter[1]);
-	SelectObject(hdc, oldPen);
+	DrawVuMeter(dc, rectL, 0, redraw);
+	DrawVuMeter(dc, rectR, 1, redraw);
 }
 
 
 // Draw a single VU Meter
-void CStereoVU::DrawVuMeter(HDC hdc, const CRect &rect, uint32 vu)
-//----------------------------------------------------------------
+void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
+//-----------------------------------------------------------------------------
 {
+	uint32 vu = vuMeter[index];
+
 	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying() == nullptr)
 	{
 		vu = 0;
@@ -1175,10 +1174,10 @@ void CStereoVU::DrawVuMeter(HDC hdc, const CRect &rect, uint32 vu)
 			if(v <= rx && (!last || !clip))
 				pen += NUM_VUMETER_PENS;
 
-			SelectObject(hdc, CMainFrame::gpenVuMeter[pen]);
-			MoveToEx(hdc, rx, rect.top, NULL);
-			LineTo(hdc, rx, rect.bottom);
+			bool draw = redraw || (v < lastV[index] && v<=rx && rx<=lastV[index]) || (lastV[index] < v && lastV[index]<=rx && rx<=v);
+			if(draw) dc.FillSolidRect(rx, rect. top, 1, rect.Height(), CMainFrame::gcolrefVuMeter[pen]);
 		}
+		lastV[index] = v;
 	} else
 	{
 		const int cy = Util::Max(1, rect.Height());
@@ -1194,10 +1193,10 @@ void CStereoVU::DrawVuMeter(HDC hdc, const CRect &rect, uint32 vu)
 			if(v <= y0 && (!last || !clip))
 				pen += NUM_VUMETER_PENS;
 
-			SelectObject(hdc, CMainFrame::gpenVuMeter[pen]);
-			MoveToEx(hdc, rect.left, ry, NULL);
-			LineTo(hdc, rect.right, ry);
+			bool draw = redraw || (v < lastV[index] && v<=ry && ry<=lastV[index]) || (lastV[index] < v && lastV[index]<=ry && ry<=v);
+			if(draw) dc.FillSolidRect(rect.left, ry, rect.Width(), 1, CMainFrame::gcolrefVuMeter[pen]);
 		}
+		lastV[index] = v;
 	}
 }
 
