@@ -6392,7 +6392,7 @@ void CViewPattern::OnPendingUnmuteAllChnFromClick()
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile != nullptr)
 	{
-		GetSoundFile()->GetPlaybackEventer().PatternTransitionChnUnmuteAll();
+		GetSoundFile()->PatternTransitionChnUnmuteAll();
 		InvalidateChannelsHeaders();
 	}
 }
@@ -6405,7 +6405,7 @@ void CViewPattern::PendingSoloChn(CHANNELINDEX nChn)
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile != nullptr)
 	{
-		GetSoundFile()->GetPlaybackEventer().PatternTranstionChnSolo(nChn);
+		GetSoundFile()->PatternTranstionChnSolo(nChn);
 		InvalidateChannelsHeaders();
 	}
 }
