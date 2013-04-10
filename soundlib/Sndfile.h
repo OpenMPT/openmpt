@@ -188,6 +188,12 @@ public: //Misc
 		return ((GetType() & type) && GetModFlag(MSF_COMPATIBLE_PLAY));
 	}
 
+	// Process pingpong loops like Impulse Tracker (see Fastmix.cpp for an explanation)
+	bool IsITPingPongMode() const
+	{
+		return IsCompatibleMode(TRK_IMPULSETRACKER);
+	}
+
 	// Check whether a filter algorithm closer to IT's should be used.
 	bool UseITFilterMode() const { return IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_EXFILTERRANGE]; }
 
@@ -235,7 +241,6 @@ private: //'Controllers'
 private: //Misc data
 	FlagSet<ModSpecificFlag, uint16> m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
-	bool m_bITBidiMode;	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for an explanation)
 
 public:	// Static Members
 #ifndef NO_REVERB
@@ -397,8 +402,6 @@ public:
 	int GetRepeatCount() const { return m_nRepeatCount; }
 	bool IsPaused() const {	return m_SongFlags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
-
-	void SetupITBidiMode();
 
 	bool InitChannel(CHANNELINDEX nChn);
 
