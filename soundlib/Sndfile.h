@@ -64,7 +64,6 @@ typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); 
 #include "pattern.h"
 #include "patternContainer.h"
 #include "ModSequence.h"
-#include "PlaybackEventer.h"
 
 
 // Line ending types (for reading song messages from module files)
@@ -204,9 +203,7 @@ private:
 #endif
 	//<--Tuning
 
-public: //Get 'controllers'
-	CPlaybackEventer& GetPlaybackEventer() {return m_PlaybackEventer;}
-	const CPlaybackEventer& GetPlaybackEventer() const {return m_PlaybackEventer;}
+public: // get 'controllers'
 
 #ifdef MODPLUG_TRACKER
 	CMIDIMapper& GetMIDIMapper() {return m_MIDIMapper;}
@@ -222,7 +219,6 @@ private: //Misc private methods.
 	ModSpecificFlag GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const;
 
 private: //'Controllers'
-	CPlaybackEventer m_PlaybackEventer;
 
 #ifdef MODPLUG_TRACKER
 	CMIDIMapper m_MIDIMapper;
@@ -379,6 +375,8 @@ public:
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
+	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
+	void PatternTransitionChnUnmuteAll();
 	double GetCurrentBPM() const;
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);

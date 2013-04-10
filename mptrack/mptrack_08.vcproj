@@ -469,10 +469,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\PlaybackEventer.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\common\Profiler.cpp"
 				>
 			</File>
@@ -1008,10 +1004,6 @@
 			</File>
 			<File
 				RelativePath=".\PatternCursor.h"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\PlaybackEventer.h"
 				>
 			</File>
 			<File
