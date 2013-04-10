@@ -17,16 +17,17 @@ class CStereoVU: public CStatic
 protected:
 	uint32 vuMeter[2];
 	DWORD lastVuUpdateTime;
+	int lastV[2];
 	bool horizontal;
 
 public:
-	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; }
+	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; lastV[0] = lastV[1] = 0; }
 	void SetVuMeter(uint32 left, uint32 right, bool force=false);
 	void SetOrientation(bool h) { horizontal = h; }
 
 protected:
-	void DrawVuMeters(HDC hdc);
-	void DrawVuMeter(HDC hdc, const CRect &rect, uint32 vu);
+	void DrawVuMeters(CDC &dc, bool redraw=false);
+	void DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw=false);
 
 protected:
 	afx_msg void OnPaint();

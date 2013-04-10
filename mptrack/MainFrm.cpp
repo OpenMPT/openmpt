@@ -157,7 +157,7 @@ LPMODPLUGDIB CMainFrame::bmpNotes = NULL;
 LPMODPLUGDIB CMainFrame::bmpVUMeters = NULL;
 LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;
 LPMODPLUGDIB CMainFrame::bmpVisPcNode = NULL;
-HPEN CMainFrame::gpenVuMeter[NUM_VUMETER_PENS*2];
+COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
@@ -207,7 +207,7 @@ CMainFrame::CMainFrame()
 	m_TotalSamplesRendered = 0;
 	m_PendingNotificationSempahore = NULL;
 
-	MemsetZero(gpenVuMeter);
+	MemsetZero(gcolrefVuMeter);
 
 	// Create Audio Critical Section
 	MemsetZero(g_csAudio);
@@ -453,10 +453,6 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penGraycc);
 	DeleteGDIObject(penGrayff);
 
-	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
-	{
-		DeleteGDIObject(gpenVuMeter[i]);
-	}
 #undef DeleteGDIObject
 
 	return CMDIFrameWnd::DestroyWindow();
@@ -1209,11 +1205,6 @@ void CMainFrame::UpdateColors()
 		int r, g, b;
 		int y;
 
-		if (gpenVuMeter[i])
-		{
-			DeleteObject(gpenVuMeter[i]);
-			gpenVuMeter[i] = NULL;
-		}
 		y = (i >= NUM_VUMETER_PENS) ? (i-NUM_VUMETER_PENS) : i;
 		if (y < (NUM_VUMETER_PENS/2))
 		{
@@ -1242,7 +1233,7 @@ void CMainFrame::UpdateColors()
 			g = (g*2)/5;
 			b = (b*2)/5;
 		}
-		gpenVuMeter[i] = CreatePen(PS_SOLID, 0, RGB(r, g, b));
+		gcolrefVuMeter[i] = RGB(r, g, b);
 	}
 	// Sequence window
 	{
