@@ -2755,7 +2755,12 @@ void CModDoc::SongProperties()
 void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 //----------------------------------------------------------
 {
-	m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
+	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if(pMainFrm != nullptr)
+	{
+		pMainFrm->SetElapsedTime(Util::Max(0.0, t));
+	}
 }
 
 
