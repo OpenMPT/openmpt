@@ -1175,7 +1175,9 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 				pen += NUM_VUMETER_PENS;
 
 			bool draw = redraw || (v < lastV[index] && v<=rx && rx<=lastV[index]) || (lastV[index] < v && lastV[index]<=rx && rx<=v);
+			draw = draw || (last && clip != lastClip[index]);
 			if(draw) dc.FillSolidRect(rx, rect. top, 1, rect.Height(), CMainFrame::gcolrefVuMeter[pen]);
+			if(last) lastClip[index] = clip;
 		}
 		lastV[index] = v;
 	} else
@@ -1194,7 +1196,9 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 				pen += NUM_VUMETER_PENS;
 
 			bool draw = redraw || (v < lastV[index] && v<=ry && ry<=lastV[index]) || (lastV[index] < v && lastV[index]<=ry && ry<=v);
+			draw = draw || (last && clip != lastClip[index]);
 			if(draw) dc.FillSolidRect(rect.left, ry, rect.Width(), 1, CMainFrame::gcolrefVuMeter[pen]);
+			if(last) lastClip[index] = clip;
 		}
 		lastV[index] = v;
 	}
