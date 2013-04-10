@@ -1451,6 +1451,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 
 	if (!count) return 0;
 	BOOL bSurround;
+	bool ITPingPongMode = IsITPingPongMode();
 	if (m_MixerSettings.gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
 	nchused = nchmixed = 0;
 	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
@@ -1549,7 +1550,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		{
 			if ((LONG)nrampsamples > pChannel->nRampLength) nrampsamples = pChannel->nRampLength;
 		}
-		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples, m_bITBidiMode)) <= 0)
+		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples, ITPingPongMode)) <= 0)
 		{
 			// Stopping the channel
 			pChannel->pCurrentSample = NULL;
