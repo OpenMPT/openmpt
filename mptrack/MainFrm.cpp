@@ -2054,14 +2054,14 @@ void CMainFrame::OnTimer(UINT)
 	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)
 	{
 		time = m_pSndFile->GetTotalSampleCount() / m_pSndFile->GetSampleRate();
+		if(time != m_dwTimeSec)
+		{
+			m_dwTimeSec = time;
+			m_nAvgMixChn = m_nMixChn;
+			OnUpdateTime(NULL);
+		}
 	}
 
-	if (time != m_dwTimeSec)
-	{
-		m_dwTimeSec = time;
-		m_nAvgMixChn = m_nMixChn;
-		OnUpdateTime(NULL);
-	}
 	// Idle Time Check
 	DWORD curTime = timeGetTime();
 
