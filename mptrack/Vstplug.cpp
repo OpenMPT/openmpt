@@ -683,7 +683,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	CVstPlugin *pVstPlugin = nullptr;
 	if(effect != nullptr)
 	{
-		pVstPlugin = reinterpret_cast<CVstPlugin *>(effect->resvd1);
+		pVstPlugin = FromVstPtr<CVstPlugin>(effect->resvd1);
 	}
 
 	switch(opcode)
@@ -823,7 +823,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// numInputs and/or numOutputs has changed
 	case audioMasterIOChanged:
-		if (pVstPlugin != nullptr)
+		if(pVstPlugin != nullptr)
 		{
 			CriticalSection cs;
 			return pVstPlugin->InitializeIOBuffers() ? 1 : 0;
@@ -832,7 +832,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// plug needs idle calls (outside its editor window) - DEPRECATED in VST 2.4
 	case audioMasterNeedIdle:
-		if (pVstPlugin != nullptr)
+		if(pVstPlugin != nullptr)
 		{
 			pVstPlugin->m_bNeedIdle = true;
 		}
@@ -841,7 +841,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// index: width, value: height
 	case audioMasterSizeWindow:
-		if (pVstPlugin != nullptr)
+		if(pVstPlugin != nullptr)
 		{
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 			if (pVstEditor && pVstEditor->IsResizable())
@@ -895,7 +895,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return 1; //we replace.
 
 	case audioMasterGetCurrentProcessLevel:
-		if(CMainFrame::GetMainFrame()->IsRendering())
+		if(pVstPlugin != nullptr && pVstPlugin->GetSoundFile().m_bIsRendering)
 			return kVstProcessLevelOffline;
 		else
 			return kVstProcessLevelRealtime;
@@ -940,19 +940,14 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	case audioMasterGetVendorString:
 		strcpy((char *) ptr, s_szHostVendorString);
-		//strcpy((char*)ptr,"Steinberg");
-		//return 0;
 		return 1;
 
 	case audioMasterGetProductString:
 		strcpy((char *) ptr, s_szHostProductString);
-		//strcpy((char*)ptr,"Cubase VST");
-		//return 0;
 		return 1;
 
 	case audioMasterGetVendorVersion:
 		return s_nHostVendorVersion;
-		//return 7000;
 
 	case audioMasterVendorSpecific:
 		return 0;
@@ -1012,11 +1007,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
-		if (pVstPlugin != nullptr)
+		if(pVstPlugin != nullptr)
 		{
 			// Note to self for testing: Electri-Q sends opcode. Korg M1 sends this when switching between Combi and Multi mode to update the preset names.
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-			if (pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
+			if(pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
 			{
 				pVstEditor->SetupMenu(true);
 			}
@@ -1177,8 +1172,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 		{
 			// Plugin wants a directory
 
-			char szInitPath[_MAX_PATH];
-			MemsetZero(szInitPath);
+			char szInitPath[_MAX_PATH] = { '\0' };
 			if(fileSel->initialPath)
 			{
 				StringFixer::CopyN(szInitPath, fileSel->initialPath);
@@ -1304,7 +1298,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	m_MixState.dwFlags = 0;
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
-	m_MixState.pMixBuffer = (int *)((((DWORD)m_MixBuffer)+7)&~7);
+	m_MixState.pMixBuffer = (int *)((((intptr_t)m_MixBuffer) + 7) & ~7);
 	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
 	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 
@@ -1391,9 +1385,11 @@ void CVstPlugin::Initialize()
 	m_nSampleRate = m_SndFile.GetSampleRate();
 	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_SndFile.GetSampleRate()));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
-	if (m_Effect.numPrograms > 0)
+	if(m_Effect.numPrograms > 0)
 	{
+		Dispatch(effBeginSetProgram, 0, 0, nullptr, 0);
 		Dispatch(effSetProgram, 0, 0, nullptr, 0);
+		Dispatch(effEndSetProgram, 0, 0, nullptr, 0);
 	}
 
 	InitializeIOBuffers();
@@ -1787,7 +1783,9 @@ void CVstPlugin::SetCurrentProgram(VstInt32 nIndex)
 	{
 		if(nIndex < m_Effect.numPrograms)
 		{
+			Dispatch(effBeginSetProgram, 0, 0, nullptr, 0);
 			Dispatch(effSetProgram, 0, nIndex, nullptr, 0);
+			Dispatch(effEndSetProgram, 0, 0, nullptr, 0);
 		}
 	}
 }
