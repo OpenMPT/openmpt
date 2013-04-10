@@ -112,7 +112,7 @@ protected:
 	{
 		ModSample OldSample;
 		char oldName[MAX_SAMPLENAME];
-		LPSTR samplePtr;
+		void *samplePtr;
 		SmpLength changeStart, changeEnd;
 		sampleUndoTypes changeType;
 	};

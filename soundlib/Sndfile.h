@@ -676,7 +676,7 @@ public:
 
 	// System-Dependant functions
 public:
-	static LPSTR AllocateSample(UINT nbytes);
+	static void *AllocateSample(UINT nbytes);
 	static void FreeSample(void *p);
 
 	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);

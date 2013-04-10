@@ -16,7 +16,7 @@ struct ModSample
 	SmpLength nLength;						// In samples, not bytes
 	SmpLength nLoopStart, nLoopEnd;			// Dito
 	SmpLength nSustainStart, nSustainEnd;	// Dito
-	LPSTR pSample;							// Pointer to sample data
+	void *pSample;							// Pointer to sample data
 	uint32 nC5Speed;						// Frequency of middle-C, in Hz (for IT/S3M/MPTM)
 	uint16 nPan;							// Default sample panning (if pan flag is set)
 	uint16 nVolume;							// Default volume

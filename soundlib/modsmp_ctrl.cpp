@@ -19,10 +19,10 @@
 namespace ctrlSmp
 {
 
-void ReplaceSample(ModSample &smp, const LPSTR pNewSample, const SmpLength nNewLength, CSoundFile &sndFile)
-//---------------------------------------------------------------------------------------------------------
+void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength, CSoundFile &sndFile)
+//---------------------------------------------------------------------------------------------------
 {
-	LPSTR const pOldSmp = smp.pSample;
+	void * const pOldSmp = smp.pSample;
 	FlagSet<ChannelFlags> setFlags, resetFlags;
 
 	setFlags.set(CHN_16BIT, smp.uFlags[CHN_16BIT]);
@@ -51,7 +51,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	const SmpLength nNewSmpBytes = nOldBytes + nSilenceBytes;
 	const SmpLength nNewLength = smp.nLength + nSilenceLength;
 
-	LPSTR pNewSmp = 0;
+	char *pNewSmp = nullptr;
 #if 0
 	if( GetSampleCapacity(smp) >= nNewSmpBytes ) // If sample has room to expand.
 	{
@@ -62,7 +62,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	else // Have to allocate new sample.
 #endif
 	{
-		pNewSmp = CSoundFile::AllocateSample(nNewSmpBytes);
+		pNewSmp = static_cast<char *>(CSoundFile::AllocateSample(nNewSmpBytes));
 		if(pNewSmp == 0)
 			return smp.nLength; //Sample allocation failed.
 		if(nStartFrom == 0)
@@ -111,9 +111,9 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &s
 
 	const SmpLength nNewSmpBytes = nNewLength * smp.GetBytesPerSample();
 
-	LPSTR pNewSmp = 0;
+	void *pNewSmp = nullptr;
 	pNewSmp = CSoundFile::AllocateSample(nNewSmpBytes);
-	if(pNewSmp == 0)
+	if(pNewSmp == nullptr)
 		return smp.nLength; //Sample allocation failed.
 
 	// Copy over old data and replace sample by the new one
@@ -149,7 +149,7 @@ void AdjustEndOfSampleImpl(ModSample &smp)
 {
 	ModSample* const pSmp = &smp;
 	const UINT len = pSmp->nLength;
-	T *p = reinterpret_cast<T *>(pSmp->pSample);
+	T *p = static_cast<T *>(pSmp->pSample);
 	if (pSmp->uFlags & CHN_STEREO)
 	{
 		p[(len+3)*2] = p[(len+2)*2] = p[(len+1)*2] = p[(len)*2] = p[(len-1)*2];
@@ -379,9 +379,9 @@ float RemoveDCOffset(ModSample &smp,
 	// step 1: Calculate offset.
 	OffsetData oData = {0,0,0};
 	if(smp.GetElementarySampleSize() == 2)
-		oData = CalculateOffset(reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart);
+		oData = CalculateOffset(static_cast<int16 *>(smp.pSample) + iStart, iEnd - iStart);
 	else if(smp.GetElementarySampleSize() == 1)
-		oData = CalculateOffset(reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart);
+		oData = CalculateOffset(static_cast<int8*>(smp.pSample) + iStart, iEnd - iStart);
 
 	double dMin = oData.dMin, dMax = oData.dMax, dOffset = oData.dOffset;
 
@@ -400,9 +400,9 @@ float RemoveDCOffset(ModSample &smp,
 	// step 2: centralize + normalize sample
 	dOffset *= dMaxAmplitude * dAmplify;
 	if(smp.GetElementarySampleSize() == 2)
-		RemoveOffsetAndNormalize( reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
+		RemoveOffsetAndNormalize( static_cast<int16 *>(smp.pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
 	else if(smp.GetElementarySampleSize() == 1)
-		RemoveOffsetAndNormalize( reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
+		RemoveOffsetAndNormalize( static_cast<int8 *>(smp.pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
 
 	// step 3: adjust global vol (if available)
 	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == smp.nLength * smp.GetNumChannels()))
@@ -449,13 +449,13 @@ bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 	if(iEnd - iStart < 2) return false;
 
 	if(smp.GetBytesPerSample() == 8)		// unused (yet)
-		ReverseSampleImpl(reinterpret_cast<int64*>(smp.pSample) + iStart, iEnd - iStart);
+		ASSERT(false); //ReverseSampleImpl(static_cast<int64 *>(smp.pSample) + iStart, iEnd - iStart);
 	else if(smp.GetBytesPerSample() == 4)	// 16 bit stereo
-		ReverseSampleImpl(reinterpret_cast<int32*>(smp.pSample) + iStart, iEnd - iStart);
+		ReverseSampleImpl(static_cast<int32 *>(smp.pSample) + iStart, iEnd - iStart);
 	else if(smp.GetBytesPerSample() == 2)	// 16 bit mono / 8 bit stereo
-		ReverseSampleImpl(reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart);
+		ReverseSampleImpl(static_cast<int16 *>(smp.pSample) + iStart, iEnd - iStart);
 	else if(smp.GetBytesPerSample() == 1)	// 8 bit mono
-		ReverseSampleImpl(reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart);
+		ReverseSampleImpl(static_cast<int8 *>(smp.pSample) + iStart, iEnd - iStart);
 	else
 		return false;
 
@@ -488,9 +488,9 @@ bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 	iStart *= smp.GetNumChannels();
 	iEnd *= smp.GetNumChannels();
 	if(smp.GetElementarySampleSize() == 2)
-		UnsignSampleImpl(reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart);
+		UnsignSampleImpl(static_cast<int16 *>(smp.pSample) + iStart, iEnd - iStart);
 	else if(smp.GetElementarySampleSize() == 1)
-		UnsignSampleImpl(reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart);
+		UnsignSampleImpl(static_cast<int8 *>(smp.pSample) + iStart, iEnd - iStart);
 	else
 		return false;
 
@@ -522,9 +522,9 @@ bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 	iStart *= smp.GetNumChannels();
 	iEnd *= smp.GetNumChannels();
 	if(smp.GetElementarySampleSize() == 2)
-		InvertSampleImpl(reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart);
+		InvertSampleImpl(static_cast<int16 *>(smp.pSample) + iStart, iEnd - iStart);
 	else if(smp.GetElementarySampleSize() == 1)
-		InvertSampleImpl(reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart);
+		InvertSampleImpl(static_cast<int8 *>(smp.pSample) + iStart, iEnd - iStart);
 	else
 		return false;
 
@@ -570,9 +570,9 @@ bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, cons
 
 	if(smp.pSample == nullptr || smpCount == 0) return false;
 	if(smp.GetElementarySampleSize() == 2)
-		return EnableSmartSampleRampingImpl(reinterpret_cast<int16*>(smp.pSample) + sampleOffset, smpCount);
+		return EnableSmartSampleRampingImpl(static_cast<int16 *>(smp.pSample) + sampleOffset, smpCount);
 	else if(smp.GetElementarySampleSize() == 1)
-		return EnableSmartSampleRampingImpl(reinterpret_cast<int8*>(smp.pSample) + sampleOffset, smpCount);
+		return EnableSmartSampleRampingImpl(static_cast<int8 *>(smp.pSample) + sampleOffset, smpCount);
 	else
 		return false;
 }
@@ -604,9 +604,9 @@ bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile &sndFile)
 	iFadeLength *= smp.GetNumChannels();
 
 	if(smp.GetElementarySampleSize() == 2)
-		XFadeSampleImpl(reinterpret_cast<int16*>(smp.pSample) + iStart, iEnd - iStart, iFadeLength);
+		XFadeSampleImpl(static_cast<int16 *>(smp.pSample) + iStart, iEnd - iStart, iFadeLength);
 	else if(smp.GetElementarySampleSize() == 1)
-		XFadeSampleImpl(reinterpret_cast<int8*>(smp.pSample) + iStart, iEnd - iStart, iFadeLength);
+		XFadeSampleImpl(static_cast<int8 *>(smp.pSample) + iStart, iEnd - iStart, iFadeLength);
 	else
 		return false;
 
@@ -649,9 +649,9 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 	if(conversionMode == mixChannels)
 	{
 		if(smp.GetElementarySampleSize() == 2)
-			ConvertStereoToMonoMixImpl(reinterpret_cast<int16 *>(smp.pSample), smp.nLength);
+			ConvertStereoToMonoMixImpl(static_cast<int16 *>(smp.pSample), smp.nLength);
 		else if(smp.GetElementarySampleSize() == 1)
-			ConvertStereoToMonoMixImpl(reinterpret_cast<int8 *>(smp.pSample), smp.nLength);
+			ConvertStereoToMonoMixImpl(static_cast<int8 *>(smp.pSample), smp.nLength);
 		else
 			return false;
 	} else
@@ -661,9 +661,9 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 			conversionMode = onlyLeft;
 		}
 		if(smp.GetElementarySampleSize() == 2)
-			ConvertStereoToMonoOneChannelImpl(reinterpret_cast<int16 *>(smp.pSample) + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
+			ConvertStereoToMonoOneChannelImpl(static_cast<int16 *>(smp.pSample) + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
 		else if(smp.GetElementarySampleSize() == 1)
-			ConvertStereoToMonoOneChannelImpl(reinterpret_cast<int8 *>(smp.pSample) + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
+			ConvertStereoToMonoOneChannelImpl(static_cast<int8 *>(smp.pSample) + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
 		else
 			return false;
 	}
@@ -691,8 +691,8 @@ namespace ctrlChn
 {
 
 void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
-					LPCSTR pOldSample,
-					LPSTR pNewSample,
+					const void * const pOldSample,
+					const void * const pNewSample,
 					const SmpLength nNewLength,
 					FlagSet<ChannelFlags> setFlags,
 					FlagSet<ChannelFlags> resetFlags)

@@ -959,7 +959,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 /////////////////////////////////////////////////////////////////////
 // AMS Sample unpacking
 
-void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, const size_t destSize, char packCharacter)
+void AMSUnpack(const char * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
 //------------------------------------------------------------------------------------------------------------------------
 {
 	int8 *tempBuf = new (std::nothrow) int8[destSize];
@@ -1008,6 +1008,7 @@ void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, 
 		int8 *out = tempBuf;
 		uint16 bitcount = 0x80;
 		size_t k = 0;
+		uint8 *dst = static_cast<uint8 *>(dest);
 		for(size_t i = 0; i < destSize; i++)
 		{
 			uint8 al = *out++;
@@ -1017,7 +1018,7 @@ void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, 
 				uint16 bl = al & bitcount;
 				bl = ((bl | (bl << 8)) >> ((dh + 8 - count) & 7)) & 0xFF;
 				bitcount = ((bitcount | (bitcount << 8)) >> 1) & 0xFF;
-				dest[k++] |= bl;
+				dst[k++] |= bl;
 				if(k >= destSize)
 				{
 					k = 0;
@@ -1031,7 +1032,7 @@ void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, 
 	// Delta Unpack
 	{
 		int8 old = 0;
-		int8 *out = dest;
+		int8 *out = static_cast<int8 *>(dest);
 		for(size_t i = destSize; i != 0; i--)
 		{
 			int pos = *reinterpret_cast<uint8 *>(out);
