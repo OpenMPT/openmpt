@@ -1989,10 +1989,10 @@ int CCtrlSamples::TimeStretch(float ratio)
 		::GdiFlush();
 
 		// Send sampledata for processing.
-		soundtouch_putSamples(handleSt, reinterpret_cast<int16*>(sample.pSample + pos * smpsize * nChn), len);
+		soundtouch_putSamples(handleSt, static_cast<int16 *>(sample.pSample) + pos * nChn, len);
 
 		// Receive some processed samples (it's not guaranteed that there is any available).
-		nLengthCounter += soundtouch_receiveSamples(handleSt, reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+		nLengthCounter += soundtouch_receiveSamples(handleSt, static_cast<int16 *>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
 
 		// Next buffer chunk
 		pos += len;
@@ -2002,7 +2002,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	soundtouch_flush(handleSt);
 	while(soundtouch_numSamples(handleSt) > 0 && nNewSampleLength > nLengthCounter)
 	{
-		nLengthCounter += soundtouch_receiveSamples(handleSt, reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+		nLengthCounter += soundtouch_receiveSamples(handleSt, static_cast<int16 *>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
 	}
 	soundtouch_clear(handleSt);
 	ASSERT(soundtouch_isEmpty(handleSt) != 0);
@@ -2789,7 +2789,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	UINT pinc = 1;
 	ModSample &sample = m_pSndFile->GetSample(m_nSample);
-	LPSTR pSample = sample.pSample;
+	const uint8 *pSample = static_cast<const uint8 *>(sample.pSample);
 	short int pos;
 	bool redraw = false;
 	
@@ -2805,7 +2805,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	if ((pos = (short int)m_SpinLoopStart.GetPos()) != 0)
 	{
 		bool bOk = false;
-		LPSTR p = pSample+sample.nLoopStart*pinc;
+		const uint8 *p = pSample + sample.nLoopStart * pinc;
 		int find0 = (int)pSample[sample.nLoopEnd*pinc-pinc];
 		int find1 = (int)pSample[sample.nLoopEnd*pinc];
 		// Find Next LoopStart Point
@@ -2851,7 +2851,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	if ((pos) && (sample.nLoopEnd))
 	{
 		bool bOk = false;
-		LPSTR p = pSample+sample.nLoopEnd*pinc;
+		const uint8 *p = pSample + sample.nLoopEnd * pinc;
 		int find0 = (int)pSample[sample.nLoopStart*pinc];
 		int find1 = (int)pSample[sample.nLoopStart*pinc+pinc];
 		// Find Next LoopEnd Point
@@ -2896,7 +2896,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	if ((pos) && (sample.nSustainEnd))
 	{
 		bool bOk = false;
-		LPSTR p = pSample+sample.nSustainStart*pinc;
+		const uint8 *p = pSample + sample.nSustainStart * pinc;
 		int find0 = (int)pSample[sample.nSustainEnd*pinc-pinc];
 		int find1 = (int)pSample[sample.nSustainEnd*pinc];
 		// Find Next Sustain LoopStart Point
@@ -2941,7 +2941,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	if (pos)
 	{
 		bool bOk = false;
-		LPSTR p = pSample+sample.nSustainEnd*pinc;
+		const uint8 *p = pSample + sample.nSustainEnd * pinc;
 		int find0 = (int)pSample[sample.nSustainStart*pinc];
 		int find1 = (int)pSample[sample.nSustainStart*pinc+pinc];
 		// Find Next LoopEnd Point

@@ -18,7 +18,7 @@
 
 
 // External decompressors
-extern void AMSUnpack(const char * const source, size_t sourceSize, char * const dest, const size_t destSize, char packCharacter);
+extern void AMSUnpack(const char * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
 extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
 extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
@@ -269,7 +269,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			LimitMax(readLength, file.BytesLeft());
 
 			const uint8 *inBuf = sourceBuf + sizeof(compressionTable);
-			int8 *outBuf = sample.pSample;
+			int8 *outBuf = static_cast<int8 *>(sample.pSample);
 			int8 delta = 0;
 
 			for(size_t i = readLength; i != 0; i--)
@@ -312,8 +312,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
 
-			uint8 *outBuf8 = reinterpret_cast<uint8 *>(sample.pSample);
-			uint16 *outBuf16 = reinterpret_cast<uint16 *>(sample.pSample);
+			uint8 *outBuf8 = static_cast<uint8 *>(sample.pSample);
+			uint16 *outBuf16 = static_cast<uint16 *>(sample.pSample);
 			const uint8 *inBuf = sourceBuf + 4;
 
 			uint8 dlt = 0, lowbyte = 0;
@@ -355,7 +355,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			const uint8 *inBuf = sourceBuf;
 			const uint8 *inBufMax = inBuf + fileSize;
-			uint8 *outBuf = reinterpret_cast<uint8 *>(sample.pSample);
+			uint8 *outBuf = static_cast<uint8 *>(sample.pSample);
 			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
 		}
 	}

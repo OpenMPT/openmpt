@@ -37,7 +37,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &sndFile);
 
 // Replaces sample in 'smp' with given sample and frees the old sample.
-void ReplaceSample(ModSample &smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile &sndFile);
+void ReplaceSample(ModSample &smp, void *pNewSample,  const SmpLength nNewLength, CSoundFile &sndFile);
 
 bool AdjustEndOfSample(ModSample &smp, CSoundFile &sndFile);
 
@@ -93,8 +93,8 @@ namespace ctrlChn
 
 // Replaces sample from sound channels by given sample.
 void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
-					LPCSTR pOldSample,
-					LPSTR pNewSample,
+					const void * const pOldSample,
+					const void * const pNewSample,
 					const SmpLength nNewLength,
 					FlagSet<ChannelFlags> setFlags,
 					FlagSet<ChannelFlags> resetFlags);

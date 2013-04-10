@@ -1302,7 +1302,6 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 {
 	ModChannel *pChn = &Chn[nChn];
 	ModInstrument *pIns = nullptr;
-	LPSTR pSample;
 	if(!ModCommand::IsNote(note))
 	{
 		return;
@@ -1333,7 +1332,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 		return;
 	}
 	if(instr >= MAX_INSTRUMENTS) instr = 0;
-	pSample = pChn->pSample;
+	const void *pSample = pChn->pSample;
 	pIns = pChn->pModInstrument;
 	if(instr && note)
 	{
@@ -3637,7 +3636,8 @@ void CSoundFile::InvertLoop(ModChannel *pChn)
 		pChn->nEFxOffset = 0;
 
 	// TRASH IT!!! (Yes, the sample!)
-	pModSample->pSample[pModSample->nLoopStart + pChn->nEFxOffset] = ~pModSample->pSample[pModSample->nLoopStart + pChn->nEFxOffset];
+	uint8 &sample = static_cast<uint8 *>(pModSample->pSample)[pModSample->nLoopStart + pChn->nEFxOffset];
+	sample = ~sample;
 	//AdjustSampleLoop(pModSample);
 }
 
