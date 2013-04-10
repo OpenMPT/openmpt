@@ -324,7 +324,6 @@
     <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
-    <ClCompile Include="..\soundlib\PlaybackEventer.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
     <ClCompile Include="SampleEditorDialogs.cpp" />
     <ClCompile Include="ScaleEnvPointsDlg.cpp" />
@@ -484,7 +483,6 @@
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="PatternEditorDialogs.h" />
     <ClInclude Include="PatternGotoDialog.h" />
-    <ClInclude Include="..\soundlib\PlaybackEventer.h" />
     <ClInclude Include="PSRatioCalc.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SampleEditorDialogs.h" />

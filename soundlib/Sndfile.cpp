@@ -411,7 +411,6 @@ CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 CSoundFile::CSoundFile() :
 	Patterns(*this),
 	Order(*this),
-	m_PlaybackEventer(*this),
 	m_pModSpecs(&ModSpecs::itEx),
 	m_MIDIMapper(*this),
 	visitedSongRows(*this)
@@ -1147,6 +1146,29 @@ void CSoundFile::ResetChannels()
 	}
 }
 
+
+void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
+//-------------------------------------------------------------------------
+{
+	if(chnIndex >= m_nChannels)
+		return;
+
+	for(CHANNELINDEX i = 0; i<m_nChannels; i++)
+	{
+		m_bChannelMuteTogglePending[i] = !ChnSettings[i].dwFlags[CHN_MUTE];
+	}
+	m_bChannelMuteTogglePending[chnIndex] = ChnSettings[chnIndex].dwFlags[CHN_MUTE];
+}
+
+
+void CSoundFile::PatternTransitionChnUnmuteAll()
+//----------------------------------------------------
+{
+	for(CHANNELINDEX i = 0; i<m_nChannels; i++)
+	{
+		m_bChannelMuteTogglePending[i] = ChnSettings[i].dwFlags[CHN_MUTE];
+	}
+}
 
 
 void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
