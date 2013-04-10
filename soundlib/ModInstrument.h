@@ -82,7 +82,6 @@ struct ModInstrument
 	uint16 wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
 	uint32 nResampling;					// Resampling mode
 	CTuning *pTuning;					// sample tuning assigned to this instrument
-	static CTuning *s_DefaultTuning;
 
 	InstrumentEnvelope VolEnv;			// Volume envelope data
 	InstrumentEnvelope PanEnv;			// Panning envelope data

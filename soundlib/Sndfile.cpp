@@ -399,9 +399,6 @@ return pointer;
 // -! NEW_FEATURE#0027
 
 
-CTuning* ModInstrument::s_DefaultTuning = 0;
-
-
 //////////////////////////////////////////////////////////
 // CSoundFile
 
@@ -1631,8 +1628,6 @@ bool CSoundFile::LoadStaticTunings()
 	#else
 		s_pTuningsSharedBuiltIn->SetConstStatus(CTuningCollection::EM_CONST);
 	#endif
-
-	ModInstrument::s_DefaultTuning = NULL;
 
 	return false;
 }

@@ -435,7 +435,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 	VERIFY_EQUAL_NONCONT(pIns->midiPWD, 8);
 
-	VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning);
+	VERIFY_EQUAL_NONCONT(pIns->pTuning, pSndFile->GetDefaultTuning());
 
 	VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 0);
 
@@ -670,7 +670,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 		VERIFY_EQUAL_NONCONT(pIns->midiPWD, ins);
 
-		VERIFY_EQUAL_NONCONT(pIns->pTuning, pIns->s_DefaultTuning);
+		VERIFY_EQUAL_NONCONT(pIns->pTuning, pSndFile->GetDefaultTuning());
 
 		VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 130);
 

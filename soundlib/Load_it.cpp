@@ -210,13 +210,13 @@ static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 #endif // MODPLUG_TRACKER
 
 			}
-			csf.Instruments[i]->pTuning = csf.Instruments[i]->s_DefaultTuning;
+			csf.Instruments[i]->pTuning = csf.GetDefaultTuning();
 
 		}
 		else //This 'else' happens probably only in case of corrupted file.
 		{
 			if(csf.Instruments[i])
-				csf.Instruments[i]->pTuning = ModInstrument::s_DefaultTuning;
+				csf.Instruments[i]->pTuning = csf.GetDefaultTuning();
 		}
 
 	}
