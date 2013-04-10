@@ -46,7 +46,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 #define SNDMIX_BEGINSAMPLELOOP8\
 	register ModChannel * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
-	const signed char *p = (signed char *)(pChn->pCurrentSample+pChn->nPos);\
+	const signed char *p = (signed char *)(pChn->pCurrentSample)+pChn->nPos;\
 	if (pChn->dwFlags[CHN_STEREO]) p += pChn->nPos;\
 	int *pvol = pbuffer;\
 	do {
@@ -54,7 +54,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 #define SNDMIX_BEGINSAMPLELOOP16\
 	register ModChannel * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
-	const signed short *p = (signed short *)(pChn->pCurrentSample+(pChn->nPos*2));\
+	const signed short *p = (signed short *)(pChn->pCurrentSample)+pChn->nPos;\
 	if (pChn->dwFlags[CHN_STEREO]) p += pChn->nPos;\
 	int *pvol = pbuffer;\
 	do {

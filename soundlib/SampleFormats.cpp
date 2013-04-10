@@ -1936,8 +1936,8 @@ struct FLACDecoder
 		// Source bit depth
 		const unsigned int bps = frame->header.bits_per_sample;
 
-		int8 *sampleData8 = reinterpret_cast<int8 *>(sample.pSample) + offset;
-		int16 *sampleData16 = reinterpret_cast<int16 *>(sample.pSample) + offset;
+		int8 *sampleData8 = static_cast<int8 *>(sample.pSample) + offset;
+		int16 *sampleData16 = static_cast<int16 *>(sample.pSample) + offset;
 
 		ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
 		ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
@@ -2378,7 +2378,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 	Samples[sample].AllocateSample();
 
 	size_t ndecoded;
-	mpg123_read(mh, reinterpret_cast<unsigned char*>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+	mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
 	mpg123_delete(mh);
 
 	if(Samples[sample].pSample != nullptr)

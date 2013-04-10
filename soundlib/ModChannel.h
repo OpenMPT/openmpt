@@ -30,11 +30,11 @@ struct __declspec(align(32)) ModChannel
 	};
 
 	// Information used in the mixer (should be kept tight for better caching)
-	LPSTR pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
-	uint32 nPos;
-	uint32 nPosLo;			// actually 16-bit (fractional part)
-	int32 nInc;				// 16.16 fixed point
-	int32 nRightVol;
+	const void *pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
+	uint32 nPos;			// Current play position
+	uint32 nPosLo;			// 16-bit fractional part of play position
+	int32 nInc;				// 16.16 fixed point sample speed relative to mixing frequency (0x10000 = one sample per output sample, 0x20000 = two samples per output sample, etc...)
+	int32 nRightVol;		// This is actually LEFT! >:( FIX THIS!
 	int32 nLeftVol;
 	int32 nRightRamp;
 	int32 nLeftRamp;
@@ -54,9 +54,9 @@ struct __declspec(align(32)) ModChannel
 
 	// Information not used in the mixer
 	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
-	LPSTR pSample;			// Currently playing sample, or previously played sample if no sample is playing.
-	ModSample *pModSample;							// Currently assigned sample slot
-	ModInstrument *pModInstrument;					// Currently assigned instrument slot
+	const void *pSample;				// Currently playing sample, or previously played sample if no sample is playing.
+	ModSample *pModSample;				// Currently assigned sample slot
+	ModInstrument *pModInstrument;		// Currently assigned instrument slot
 	int32 nNewRightVol, nNewLeftVol;
 	int32 nRealVolume, nRealPan;
 	int32 nVolume, nPan, nFadeOutVol;
@@ -102,9 +102,24 @@ struct __declspec(align(32)) ModChannel
 	ModCommand rowCommand;
 
 	//NOTE_PCs memory.
-	uint16 m_RowPlugParam;
 	float m_plugParamValueStep, m_plugParamTargetValue;
+	uint16 m_RowPlugParam;
 	PLUGINDEX m_RowPlug;
+
+	//-->Variables used to make user-definable tuning modes work with pattern effects.
+	int32 m_PortamentoFineSteps, m_PortamentoTickSlide;
+
+	uint32 m_Freq;
+	float m_VibratoDepth;
+
+	//If true, freq should be recalculated in ReadNote() on first tick.
+	//Currently used only for vibrato things - using in other context might be 
+	//problematic.
+	bool m_ReCalculateFreqOnFirstTick;
+
+	//To tell whether to calculate frequency.
+	bool m_CalculateFreq;
+	//<----
 
 	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
 
@@ -151,22 +166,6 @@ struct __declspec(align(32)) ModChannel
 
 	// Check if the channel has a valid MIDI output. This function guarantees that pModInstrument != nullptr.
 	bool HasMIDIOutput() const { return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel(); }
-
-	//-->Variables used to make user-definable tuning modes work with pattern effects.
-	bool m_ReCalculateFreqOnFirstTick;
-	//If true, freq should be recalculated in ReadNote() on first tick.
-	//Currently used only for vibrato things - using in other context might be 
-	//problematic.
-
-	bool m_CalculateFreq;
-	//To tell whether to calculate frequency.
-
-	int32 m_PortamentoFineSteps;
-	long m_PortamentoTickSlide;
-
-	uint32 m_Freq;
-	float m_VibratoDepth;
-	//<----
 
 	ModChannel()
 	{
