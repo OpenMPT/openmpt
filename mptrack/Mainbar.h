@@ -18,10 +18,11 @@ protected:
 	uint32 vuMeter[2];
 	DWORD lastVuUpdateTime;
 	int lastV[2];
+	bool lastClip[2];
 	bool horizontal;
 
 public:
-	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; lastV[0] = lastV[1] = 0; }
+	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; lastV[0] = lastV[1] = 0; lastClip[0] = lastClip[1] = false; }
 	void SetVuMeter(uint32 left, uint32 right, bool force=false);
 	void SetOrientation(bool h) { horizontal = h; }
 
