@@ -161,7 +161,6 @@ COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
-//CPerformanceCounter *CMainFrame::m_pPerfCounter = nullptr;
 
 static UINT indicators[] =
 {
@@ -216,7 +215,6 @@ CMainFrame::CMainFrame()
 	TrackerSettings::Instance().LoadSettings();
 
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
-	//m_pPerfCounter= new CPerformanceCounter();
 
 	//Loading static tunings here - probably not the best place to do that but anyway.
 	CSoundFile::LoadStaticTunings();
@@ -281,7 +279,6 @@ CMainFrame::~CMainFrame()
 	DeleteCriticalSection(&g_csAudio);
 	delete m_InputHandler; 	//rewbs.customKeys
 	delete m_pAutoSaver; //rewbs.autosaver
-	//delete m_pPerfCounter;
 
 	CChannelManagerDlg::DestroySharedInstance();
 	CSoundFile::DeleteStaticdata();
