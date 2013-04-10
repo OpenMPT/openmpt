@@ -473,6 +473,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\Profiler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\Reporting.cpp"
 				>
 			</File>
@@ -1008,6 +1012,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\PlaybackEventer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\Profiler.h"
 				>
 			</File>
 			<File
