@@ -1,6 +1,6 @@
 /*
- * snddevx.h
- * ---------
+ * SoundDevices.h
+ * --------------
  * Purpose: Actual sound device driver classes.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
@@ -12,7 +12,7 @@
 #pragma once
 
 #include <mmsystem.h>
-#include "snddev.h"
+#include "SoundDevice.h"
 
 #ifndef NO_DSOUND
 #include <dsound.h>

@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "Mainfrm.h"
-#include "snddev.h"
+#include "../sounddev/SoundDevice.h"
 #include "Moddoc.h"
 #include <shlwapi.h>
 #include "ExceptionHandler.h"

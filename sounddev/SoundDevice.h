@@ -1,6 +1,6 @@
 /*
- * snddev.h
- * --------
+ * SoundDevice.h
+ * -------------
  * Purpose: Sound device interface class.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque

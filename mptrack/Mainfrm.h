@@ -14,7 +14,7 @@
 #include "InputHandler.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
-#include "../soundlib/snddev.h"
+#include "../sounddev/SoundDevice.h"
 #include "../soundlib/Sndfile.h"
 
 class CInputHandler;

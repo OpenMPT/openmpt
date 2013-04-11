@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "MainFrm.h"
-#include "snddev.h"
+#include "../sounddev/SoundDevice.h"
 #include "moddoc.h"
 #include "childfrm.h"
 #include "dlsbank.h"
