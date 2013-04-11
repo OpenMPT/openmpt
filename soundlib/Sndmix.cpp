@@ -39,6 +39,7 @@ extern DWORD MPPASMCALL X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples)
 extern DWORD MPPASMCALL X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD MPPASMCALL Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
 extern UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC);
 extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
@@ -94,7 +95,7 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 	if(
 		(mixersettings.gdwMixingFreq != m_MixerSettings.gdwMixingFreq)
 		||
-		(mixersettings.gnBitsPerSample != m_MixerSettings.gnBitsPerSample)
+		(mixersettings.m_SampleFormat != m_MixerSettings.m_SampleFormat)
 		||
 		(mixersettings.gnChannels != m_MixerSettings.gnChannels)
 		||
@@ -178,7 +179,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 //-------------------------------------------------------
 {
 	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
-	LPCONVERTPROC pCvt = X86_Convert32To8;
+	LPCONVERTPROC pCvt = nullptr;
 	samplecount_t lMax, lCount, lSampleCount;
 	size_t lSampleSize;
 	UINT nStat = 0;
@@ -189,9 +190,15 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 	m_nMixStat = 0;
 
 	lSampleSize = m_MixerSettings.gnChannels;
-	if(m_MixerSettings.gnBitsPerSample == 16) { lSampleSize *= 2; pCvt = X86_Convert32To16; }
-	else if(m_MixerSettings.gnBitsPerSample == 24) { lSampleSize *= 3; pCvt = X86_Convert32To24; } 
-	else if(m_MixerSettings.gnBitsPerSample == 32) { lSampleSize *= 4; pCvt = X86_Convert32To32; } 
+	switch(m_MixerSettings.m_SampleFormat)
+	{
+		case SampleFormatUnsigned8: pCvt = X86_Convert32To8 ;  break;
+		case SampleFormatInt16:     pCvt = X86_Convert32To16;  break;
+		case SampleFormatInt24:     pCvt = X86_Convert32To24;  break;
+		case SampleFormatInt32:     pCvt = X86_Convert32To32;  break;
+		case SampleFormatFloat32:   pCvt = Convert32ToFloat32; break;
+	}
+	lSampleSize *= m_MixerSettings.GetBitsPerSample()/8;
 
 	lMax = count;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
@@ -324,10 +331,10 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		}
 
 		// Noise Shaping
-		if (m_MixerSettings.gnBitsPerSample <= 16)
+		if (m_MixerSettings.GetBitsPerSample() <= 16)
 		{
 			if(m_Resampler.IsHQ())
-				X86_Dither(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.gnBitsPerSample);
+				X86_Dither(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.GetBitsPerSample());
 		}
 
 #ifdef MODPLUG_TRACKER
@@ -350,7 +357,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		gnVolumeRampUpSamplesActual = m_MixerSettings.glVolumeRampUpSamples;
 	}
 MixDone:
-	if (lRead) memset(lpBuffer, (m_MixerSettings.gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
+	if (lRead) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize);
 	if (nStat) { m_nMixStat += nStat-1; m_nMixStat /= nStat; }
 	return lMax - lRead;
 }

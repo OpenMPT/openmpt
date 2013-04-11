@@ -263,7 +263,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 				wsprintf(s, "%s, %d Bit", gszChnCfgNames[j/3], nBits);
 				UINT ndx = m_CbnQuality.AddString(s);
 				m_CbnQuality.SetItemData( ndx, (nChannels << 8) | nBits );
-				if ((nBits == m_nBitsPerSample) && (nChannels == m_nChannels)) n = ndx;
+				if (((SampleFormat)nBits == m_SampleFormat) && (nChannels == m_nChannels)) n = ndx;
 			}
 		}
 		m_CbnQuality.SetCurSel(n);
@@ -426,9 +426,8 @@ void COptionsSoundcard::OnOK()
 	{
 		UINT n = m_CbnQuality.GetItemData( m_CbnQuality.GetCurSel() );
 		m_nChannels = n >> 8;
-		m_nBitsPerSample = n & 0xFF;
+		m_SampleFormat = (SampleFormat)(n & 0xFF);
 		if ((m_nChannels != 1) && (m_nChannels != 4)) m_nChannels = 2;
-		if ((m_nBitsPerSample != 8) && (m_nBitsPerSample != 32)) m_nBitsPerSample = 16;
 	}
 	// Polyphony
 	{
@@ -472,7 +471,7 @@ void COptionsSoundcard::OnOK()
 	{
 		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_SampleFormat, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
 	UpdateStatistics();
 	CPropertyPage::OnOK();
 }

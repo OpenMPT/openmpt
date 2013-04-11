@@ -2043,6 +2043,20 @@ done:
 }
 
 
+// convert to 32 bit floats and do NOT clip to [-1,1]
+DWORD MPPASMCALL Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
+//------------------------------------------------------------------------------------
+{
+	const float factor = (1.0f/(float)MIXING_CLIPMAX);
+	float *out = (float*)lpBuffer;
+	for(DWORD i=0; i<lSampleCount; i++)
+	{
+		out[i] = pBuffer[i] * factor;
+	}
+	return lSampleCount * 4;
+}
+
+
 void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
 //------------------------------------------------------------
 {
