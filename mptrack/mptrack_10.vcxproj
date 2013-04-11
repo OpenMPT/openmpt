@@ -248,6 +248,7 @@
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\Profiler.cpp" />
     <ClCompile Include="..\common\Reporting.cpp" />
+    <ClCompile Include="..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\sounddsp\EQ.cpp" />
@@ -332,7 +333,6 @@
     <ClCompile Include="..\common\serialization_utils.cpp" />
     <ClCompile Include="..\soundlib\snd_flt.cpp" />
     <ClCompile Include="..\soundlib\Snd_fx.cpp" />
-    <ClCompile Include="..\Soundlib\snddev.cpp" />
     <ClCompile Include="..\soundlib\Sndfile.cpp" />
     <ClCompile Include="..\soundlib\Sndmix.cpp" />
     <ClCompile Include="..\soundlib\SoundFilePlayConfig.cpp" />
@@ -407,6 +407,8 @@
     <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
+    <ClInclude Include="..\sounddev\SoundDevice.h" />
+    <ClInclude Include="..\sounddev\SoundDevices.h" />
     <ClInclude Include="..\sounddsp\AGC.h" />
     <ClInclude Include="..\sounddsp\DSP.h" />
     <ClInclude Include="..\sounddsp\EQ.h" />
@@ -489,8 +491,6 @@
     <ClInclude Include="ScaleEnvPointsDlg.h" />
     <ClInclude Include="..\common\serialization_utils.h" />
     <ClInclude Include="..\soundlib\Snd_defs.h" />
-    <ClInclude Include="..\Soundlib\snddev.h" />
-    <ClInclude Include="..\Soundlib\snddevx.h" />
     <ClInclude Include="..\Soundlib\Sndfile.h" />
     <ClInclude Include="..\soundlib\SoundFilePlayConfig.h" />
     <ClInclude Include="..\common\stdafx.h" />

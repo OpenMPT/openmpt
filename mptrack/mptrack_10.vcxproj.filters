@@ -247,9 +247,6 @@
     <ClCompile Include="..\soundlib\Sndfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Soundlib\snddev.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\Snd_fx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -430,6 +427,9 @@
     <ClCompile Include="..\sounddsp\Reverb.cpp">
       <Filter>Source Files\sounddsp</Filter>
     </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDevice.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractVstEditor.h">
@@ -609,12 +609,6 @@
     <ClInclude Include="..\soundlib\Snd_defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Soundlib\snddev.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Soundlib\snddevx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Soundlib\Sndfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -789,6 +783,12 @@
     <ClInclude Include="..\sounddsp\Reverb.h">
       <Filter>Header Files\sounddsp</Filter>
     </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDevices.h">
+      <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDevice.h">
+      <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -900,6 +900,12 @@
     </Filter>
     <Filter Include="Header Files\sounddsp">
       <UniqueIdentifier>{2174b62f-1cac-4ad9-9db3-e3447eaa1bd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sounddev">
+      <UniqueIdentifier>{909d97bd-08e7-4142-9061-5b493c80ee05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sounddev">
+      <UniqueIdentifier>{fdcc47cc-1845-4b7b-be8a-1e96fa99e0fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

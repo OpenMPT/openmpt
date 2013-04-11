@@ -517,7 +517,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Soundlib\snddev.cpp"
+				RelativePath="..\sounddev\SoundDevice.cpp"
 				>
 			</File>
 			<File
@@ -1055,11 +1055,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Soundlib\snddev.h"
+				RelativePath="..\sounddev\SoundDevice.h"
 				>
 			</File>
 			<File
-				RelativePath="..\Soundlib\snddevx.h"
+				RelativePath="..\sounddev\SoundDevices.h"
 				>
 			</File>
 			<File

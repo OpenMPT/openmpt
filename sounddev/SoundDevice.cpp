@@ -1,6 +1,6 @@
 /*
- * snddev.cpp
- * ----------
+ * SoundDevice.cpp
+ * ---------------
  * Purpose: Actual sound device driver classes.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
@@ -11,8 +11,8 @@
 
 #include "stdafx.h"
 
-#include "snddev.h"
-#include "snddevx.h"
+#include "SoundDevice.h"
+#include "SoundDevices.h"
 #include "../common/misc_util.h"
 #include "../common/Reporting.h"
 #include "../common/StringFixer.h"
