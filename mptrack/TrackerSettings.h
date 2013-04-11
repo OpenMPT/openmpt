@@ -15,7 +15,7 @@
 #include "../soundlib/Resampler.h"
 #include "../sounddsp/EQ.h"
 #include "../sounddsp/DSP.h"
-#include "../soundlib/snd_rvb.h"
+#include "../sounddsp/Reverb.h"
 
 /////////////////////////////////////////////////////////////////////////
 // Default directories

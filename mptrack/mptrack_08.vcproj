@@ -513,16 +513,8 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Soundlib\Snd_rvb.cpp"
+				RelativePath="..\sounddsp\Reverb.cpp"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="4"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\Soundlib\snddev.cpp"
@@ -1028,6 +1020,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Resampler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddsp\Reverb.h"
 				>
 			</File>
 			<File

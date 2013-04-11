@@ -1,6 +1,6 @@
 /*
- * Snd_rvb.h
- * ---------
+ * Reverb.h
+ * --------
  * Purpose: Mixing code for reverb.
  * Notes  : Ugh... This should really be removed at some point.
  * Authors: Olivier Lapicque
