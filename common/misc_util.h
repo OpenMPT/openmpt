@@ -17,31 +17,7 @@
 #include "typedefs.h"
 #include <io.h> // for _taccess
 
-#if(_MSC_VER < 1600)
-#if defined(_HAS_TR1)
-// vs2008sp1 has tr1
-#include <type_traits>
-#else
-	// has_trivial_assign for VS2008
-	namespace std
-	{
-		namespace tr1
-		{
-			template <class T> struct has_trivial_assign {static const bool value = false;};
-			#define SPECIALIZE_TRIVIAL_ASSIGN(type) template <> struct has_trivial_assign<type> {static const bool value = true;}
-			SPECIALIZE_TRIVIAL_ASSIGN(int8);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint8);
-			SPECIALIZE_TRIVIAL_ASSIGN(int16);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint16);
-			SPECIALIZE_TRIVIAL_ASSIGN(int32);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint32);
-			SPECIALIZE_TRIVIAL_ASSIGN(int64);
-			SPECIALIZE_TRIVIAL_ASSIGN(uint64);
-			#undef SPECIALIZE_TRIVIAL_ASSIGN
-		};
-	};
-#endif
-#else
+#if defined(HAS_TYPE_TRAITS)
 #include <type_traits>
 #endif
 
@@ -60,8 +36,8 @@ template<class T>
 inline T ConvertStrTo(const char *str)
 //------------------------------------
 {
-	#if _HAS_TR1
-		static_assert(std::tr1::is_const<T>::value == false && std::tr1::is_volatile<T>::value == false, "Const and volatile types are not handled correctly.");
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_const<T>::value == false && std::is_volatile<T>::value == false, "Const and volatile types are not handled correctly.");
 	#endif
 	if(std::numeric_limits<T>::is_integer)
 		return static_cast<T>(atoi(str));
@@ -79,9 +55,9 @@ template <class T>
 inline void MemsetZero(T &a)
 //--------------------------
 {
-#if _HAS_TR1
-	static_assert(std::tr1::is_pointer<T>::value == false, "Won't memset pointers.");
-	static_assert(std::tr1::is_pod<T>::value == true, "Won't memset non-pods.");
+#ifdef HAS_TYPE_TRAITS
+	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
+	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
 #endif
 	memset(&a, 0, sizeof(T));
 }
@@ -92,9 +68,9 @@ template <class T>
 inline T &MemCopy(T &destination, const T &source)
 //------------------------------------------------
 {
-#if _HAS_TR1
-	static_assert(std::tr1::is_pointer<T>::value == false, "Won't copy pointers.");
-	static_assert(std::tr1::is_pod<T>::value == true, "Won't copy non-pods.");
+#ifdef HAS_TYPE_TRAITS
+	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
+	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
 #endif
 	return *static_cast<T *>(memcpy(&destination, &source, sizeof(T)));
 }
@@ -144,36 +120,6 @@ inline void LimitMax(T& val, const C upperLimit)
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 std::string GetErrorMessage(DWORD nErrorCode);
 #endif // MODPLUG_TRACKER
-
-namespace utilImpl
-{
-	template <bool bMemcpy>
-	struct ArrayCopyImpl {};
-
-	template <>
-	struct ArrayCopyImpl<true>
-	{
-		template <class T>
-		static void Do(T* pDst, const T* pSrc, const size_t n) {memcpy(pDst, pSrc, sizeof(T) * n);}
-	};
-
-	template <>
-	struct ArrayCopyImpl<false>
-	{
-		template <class T>
-		static void Do(T* pDst, const T* pSrc, const size_t n) {std::copy(pSrc, pSrc + n, pDst);}
-	};
-} // namespace utilImpl
-
-
-// Copies n elements from array pSrc to array pDst.
-// If the source and destination arrays overlap, behaviour is undefined.
-template <class T>
-void ArrayCopy(T* pDst, const T* pSrc, const size_t n)
-//----------------------------------------------------
-{
-	utilImpl::ArrayCopyImpl<std::tr1::has_trivial_assign<T>::value>::Do(pDst, pSrc, n);
-}
 
 
 // Sanitize a filename (remove special chars)
