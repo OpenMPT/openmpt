@@ -17,8 +17,8 @@
 #include "../common/misc_util.h"
 #include "../common/typedefs.h"
 #include <limits>
-#if _HAS_TR1
-	#include <type_traits>
+#ifdef HAS_TYPE_TRAITS
+#include <type_traits>
 #endif
 #include <algorithm>
 
@@ -420,8 +420,8 @@ template <class T>
 inline void WriteItem(OutStream& oStrm, const T& data)
 //----------------------------------------------------
 {
-	#if _HAS_TR1
-		STATIC_ASSERT(std::tr1::has_trivial_assign<T>::value == true);
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	Binarywrite(oStrm, data);
 }
@@ -446,8 +446,8 @@ template <class T>
 inline void Binaryread(InStream& iStrm, T& data, const Offtype bytecount)
 //-----------------------------------------------------------------------
 {
-	#if _HAS_TR1
-		static_assert(std::tr1::has_trivial_assign<T>::value == true, "");
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	memset(&data, 0, sizeof(data));
 	iStrm.read(reinterpret_cast<char*>(&data), (std::min)((size_t)bytecount, sizeof(data)));
@@ -458,8 +458,8 @@ template <class T>
 inline void ReadItem(InStream& iStrm, T& data, const DataSize nSize)
 //------------------------------------------------------------------
 {
-	#if _HAS_TR1
-		static_assert(std::tr1::has_trivial_assign<T>::value == true, "");
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	if (nSize == sizeof(T) || nSize == invalidDatasize)
 		Binaryread(iStrm, data);

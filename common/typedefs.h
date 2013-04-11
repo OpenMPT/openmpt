@@ -21,6 +21,10 @@
 	#define nullptr		0
 #endif
 
+#if (_MSC_VER >= MSVC_VER_2010)
+#define HAS_TYPE_TRAITS
+#endif
+
 //  CountOf macro computes the number of elements in a statically-allocated array.
 #ifdef _MSC_VER
 	#define CountOf(x) _countof(x)
