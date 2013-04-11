@@ -33,6 +33,7 @@
 #include "RowVisitor.h"
 #include "FileReader.h"
 
+#include "Resampler.h"
 #include "snd_rvb.h"
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
@@ -49,21 +50,6 @@ extern char *GetInstrumentHeaderFieldPointer(const ModInstrument * input, uint32
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
-
-struct SNDMIX_REVERB_PROPERTIES
-{
-	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
-    LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
-    FLOAT flDecayTime;             // [0.1, 20.0]      default: 1.0 s
-    FLOAT flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
-    LONG  lReflections;            // [-10000, 1000]   default: -10000 mB
-    FLOAT flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
-    LONG  lReverb;                 // [-10000, 2000]   default: -10000 mB
-    FLOAT flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
-    FLOAT flDiffusion;             // [0.0, 100.0]     default: 100.0 %
-    FLOAT flDensity;               // [0.0, 100.0]     default: 100.0 %
-};
-typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
 
 #ifndef NO_REVERB
 
@@ -198,19 +184,23 @@ public: //Misc
 
 	//Tuning-->
 public:
+#ifdef MODPLUG_TRACKER
 	static bool LoadStaticTunings();
 	static bool SaveStaticTunings();
 	static void DeleteStaticdata();
 	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
+#endif
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
 	std::string GetNoteName(const int16&, const INSTRUMENTINDEX inst = INSTRUMENTINDEX_INVALID) const;
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
+#ifdef MODPLUG_TRACKER
 	static CTuningCollection* s_pTuningsSharedBuiltIn;
 	static CTuningCollection* s_pTuningsSharedLocal;
+#endif
 	//<--Tuning
 
 public: // get 'controllers'
@@ -238,28 +228,42 @@ private: //Misc data
 	FlagSet<ModSpecificFlag, uint16> m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
 
-public:	// Static Members
+private:
+	DWORD gdwSysInfo;
+
+private:
+	// Front Mix Buffer (Also room for interleaved rear mix)
+	int MixSoundBuffer[MIXBUFFERSIZE * 4];
+	int MixRearBuffer[MIXBUFFERSIZE * 2];
 #ifndef NO_REVERB
-	static CReverb m_Reverb;
+	int MixReverbBuffer[MIXBUFFERSIZE * 2];
+#endif
+	float MixFloatBuffer[MIXBUFFERSIZE * 2];
+	LONG gnDryLOfsVol;
+	LONG gnDryROfsVol;
+
+public:
+	MixerSettings m_MixerSettings;
+	CResampler m_Resampler;
+#ifndef NO_REVERB
+	CReverb m_Reverb;
 #endif
 #ifndef NO_DSP
-	static CDSP m_DSP;
+	CDSP m_DSP;
 #endif
 #ifndef NO_EQ
-	static CEQ m_EQ;
+	CEQ m_EQ;
 #endif
 #ifndef NO_AGC
-	static CAGC m_AGC;
+	CAGC m_AGC;
 #endif
-	static UINT m_nStereoSeparation;
-	static UINT m_nMaxMixChannels;
-	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
-	static double gdWFIRCutoff;
-	static BYTE gbWFIRType;
-	static UINT gnVolumeRampUpSamples, gnVolumeRampUpSamplesTarget, gnVolumeRampDownSamples;
+	UINT gnVolumeRampUpSamplesActual;
+#ifdef MODPLUG_TRACKER
 	static LPSNDMIXHOOKPROC gpSndMixHook;
+#endif
+#ifndef NO_VST
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
-	static uint8 s_DefaultPlugVolumeHandling;
+#endif
 
 	typedef uint32 samplecount_t;	// Number of rendered samples
 
@@ -298,7 +302,7 @@ public:	// for Editing
 #endif // MODPLUG_TRACKER
 
 	bool m_bPatternTransitionOccurred;
-	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
+	UINT m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
@@ -360,8 +364,8 @@ public:
 	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 
-	void SetMasterVolume(UINT vol, bool adjustAGC = false);
-	UINT GetMasterVolume() const { return m_nMasterVolume; }
+	void SetPreAmp(UINT vol);
+	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
@@ -491,25 +495,18 @@ public:
 	void ProcessPlugins(UINT nCount);
 	samplecount_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
 	bool HasPositionChanged() { bool b = m_bPositionChanged; m_bPositionChanged = false; return b; }
+	bool IsRenderingToDisc() const { return m_bIsRendering; }
 
 public:
 	// Mixer Config
-	static void SetMixerSettings(const MixerSettings &mixersettings);
-	static MixerSettings GetMixerSettings();
-	static BOOL InitPlayer(BOOL bReset=FALSE);
-	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
-	static BOOL SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL xbass,BOOL dolbynr,BOOL bEQ);
-	static BOOL SetResamplingMode(UINT nMode); // SRCMODE_XXXX
-	static DWORD GetSampleRate() { return gdwMixingFreq; }
-	static DWORD GetBitsPerSample() { return gnBitsPerSample; }
-	static DWORD InitSysInfo();
-	static DWORD GetSysInfo() { return gdwSysInfo; }
-	static void EnableMMX(bool b) { if (b) gdwSoundSetup |= SNDMIX_ENABLEMMX; else gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
-#ifndef NO_AGC
-	static void SetAGC(BOOL b);
-#endif
+	void SetMixerSettings(const MixerSettings &mixersettings);
+	void SetResamplerSettings(const CResamplerSettings &resamplersettings);
+	void InitPlayer(BOOL bReset=FALSE);
+	void SetDspEffects(DWORD DSPMask);
+	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
+	static DWORD GetSysInfo();
 #ifndef NO_EQ
-	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 	// Float <-> Int conversion routines
 	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
@@ -683,7 +680,7 @@ public:
 	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);
 
 	// WAV export
-	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
+	UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 
 	// Song message helper functions
 public:
@@ -762,12 +759,10 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 ///////////////////////////////////////////////////////////
 // Low-level Mixing functions
 
-#define MIXBUFFERSIZE		512
 #define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
 #define VOLUMERAMPPRECISION	12
 #define FADESONGDELAY		100
-#define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
 
 // Calling conventions
 #ifdef WIN32

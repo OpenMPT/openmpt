@@ -25,9 +25,6 @@
 #include "../common/Reporting.h"
 
 extern short int gFastSinc[];
-extern short int gKaiserSinc[];
-extern short int gDownsample13x[];
-extern short int gDownsample2x[];
 
 #define PROCSUPPORT_CPUID	0x01
 #define PROCSUPPORT_MMX		0x02
@@ -91,75 +88,18 @@ Done:
 }
 
 
-DWORD CSoundFile::InitSysInfo()
-//-----------------------------
+DWORD CSoundFile::GetSysInfo()
+//----------------------------
 {
-	OSVERSIONINFO osvi;
 	DWORD d = 0;
-
-#ifdef _DEBUG
-	// Must be aligned on 32 bytes for best performance
-	if (sizeof(ModChannel) & 0x1F)
-	{
-		CHAR s[64];
-		wsprintf(s, "ModChannel struct not aligned: sizeof(ModChannel) = %d", sizeof(ModChannel));
-		Reporting::Warning(s);
-	}
-	DWORD dwFastSinc = (DWORD)(LPVOID)gFastSinc;
-	if (dwFastSinc & 7)
-	{
-		CHAR s[64];
-		wsprintf(s, "gFastSinc is not aligned (%08X)!", dwFastSinc);
-		Reporting::Warning(s);
-	}
-#endif
-	memset(&osvi, 0, sizeof(osvi));
-	osvi.dwOSVersionInfoSize = sizeof(osvi);
-	GetVersionEx(&osvi);
 	DWORD dwProcSupport = QueryProcessorExtensions();
-	switch(osvi.dwPlatformId)
-	{
-	// Don't use MMX for Windows 3.1
-	case VER_PLATFORM_WIN32s:
-		dwProcSupport &= PROCSUPPORT_CPUID;
-		break;
-	// XMM requires Windows 98
-	case VER_PLATFORM_WIN32_WINDOWS:
-		if ((osvi.dwMajorVersion < 4) || ((osvi.dwMajorVersion==4) && (!osvi.dwMinorVersion)))
-		{
-			dwProcSupport &= PROCSUPPORT_CPUID|PROCSUPPORT_MMX|PROCSUPPORT_3DNOW|PROCSUPPORT_MMXEX;
-		}
-		break;
-	// XMM requires Windows 2000
-	case VER_PLATFORM_WIN32_NT:
-		if (osvi.dwMajorVersion < 5)
-		{
-			dwProcSupport &= PROCSUPPORT_CPUID|PROCSUPPORT_MMX|PROCSUPPORT_3DNOW|PROCSUPPORT_MMXEX;
-		}
-	}
 	if (dwProcSupport & PROCSUPPORT_MMX) d |= SYSMIX_ENABLEMMX;
 	if (dwProcSupport & PROCSUPPORT_MMXEX) d |= SYSMIX_MMXEX;
 	if (dwProcSupport & PROCSUPPORT_3DNOW) d |= SYSMIX_3DNOW;
 	if (dwProcSupport & PROCSUPPORT_SSE) d |= SYSMIX_SSE;
-	gdwSysInfo = d;
 	return d;
 }
 
-
-#ifdef ENABLE_MMX
-
-
-
-VOID MMX_EndMix()
-{
-	_asm {
-	pxor mm0, mm0
-	emms
-	}
-}
-
-
-#endif  // MMX code
 
 //////////////////////////////////////////////////////////////////////////////////
 //

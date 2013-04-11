@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include "../soundlib/MixerSettings.h"
-
 /*
   ------------------------------------------------------------------------------------------------
    fir interpolation doc,
@@ -69,10 +67,10 @@
 class CWindowedFIR
 {
 public:
-	CWindowedFIR(void);
-	~CWindowedFIR(void);
-	static float coef(int,float,float,int,int);
-	static void InitTable(const MixerSettings & mixersettings);
-	static signed short lut[WFIR_LUTLEN*WFIR_WIDTH];
+	CWindowedFIR();
+	~CWindowedFIR();
+	float coef(int,float,float,int,int);
+	void InitTable(double WFIRCutoff, uint8 WFIRType);
+	signed short lut[WFIR_LUTLEN*WFIR_WIDTH];
 
 };

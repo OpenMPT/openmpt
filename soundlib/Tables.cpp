@@ -14,6 +14,7 @@
 #include <math.h>
 #include "sndfile.h"
 
+#include "Resampler.h"
 // rewbs.resamplerConf
 #include "WindowedFIR.h"
 // end  rewbs.resamplerConf
@@ -551,9 +552,6 @@ const float ITResonanceTable[128] =
 
 // Reversed sinc coefficients
 
-// we should avoid all compiler directives like this. It will cause errors in vanilla VC6.
-//__declspec(align(8)) short int gFastSinc[256*4] =
-
 short int gFastSinc[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 
@@ -625,10 +623,6 @@ short int gFastSinc[256*4] =
 
 
 
-#define SINC_PHASES		4096
-short int gKaiserSinc[SINC_PHASES*8];		// Upsampling
-short int gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-short int gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -698,16 +692,17 @@ static void getdownsample2x(short int *psinc)
 }
 
 
-
-void SndMixInitializeTables(const MixerSettings & mixersettings)
+void CResampler::InitializeTables(bool force)
 {
-	CWindowedFIR::InitTable(mixersettings);
-	getsinc(gKaiserSinc, 9.6377, mixersettings.gdWFIRCutoff);
+	if((m_OldSettings == m_Settings) && !force) return;
+	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
+	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
  	//ericus' downsampling improvement.
  	//getsinc(gDownsample13x, 8.5, 3.0/4.0);
 	//getdownsample2x(gDownsample2x);
 	getsinc(gDownsample13x, 8.5, 0.5);	   
 	getsinc(gDownsample2x, 2.7625, 0.425); 
 	//end ericus' downsampling improvement.
+	m_OldSettings = m_Settings;
 }
 

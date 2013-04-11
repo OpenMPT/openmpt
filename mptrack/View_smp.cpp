@@ -673,6 +673,8 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	int32 y0 = 0, xmax, poshi;
 	uint64 posincr, posfrac;
 
+	DWORD sysinfo = CSoundFile::GetSysInfo();
+
 	if (len <= 0) return;
 	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;
 	if (uFlags & CHN_STEREO) smplsize *= 2;
@@ -716,7 +718,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			smin = 32767;
 			smax = -32768;
 #ifdef ENABLE_MMX
-			if (CSoundFile::gdwSysInfo & SYSMIX_MMXEX)
+			if (sysinfo & SYSMIX_MMXEX)
 			{
 				mmxex_findminmax16(p, scanlen, smplsize, &smin, &smax);
 			} else
@@ -739,7 +741,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			smin = 127;
 			smax = -128;
 #ifdef ENABLE_MMX
-			if (CSoundFile::gdwSysInfo & SYSMIX_MMXEX)
+			if (sysinfo & SYSMIX_MMXEX)
 			{
 				mmxex_findminmax8(p, scanlen, smplsize, &smin, &smax);
 			} else

@@ -780,6 +780,9 @@
     <ClInclude Include="..\soundlib\Tables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\Resampler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Notification.h">
       <Filter>Header Files</Filter>
     </ClInclude>

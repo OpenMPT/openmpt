@@ -402,9 +402,10 @@ return pointer;
 //////////////////////////////////////////////////////////
 // CSoundFile
 
+#ifdef MODPLUG_TRACKER
 CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
-uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+#endif
 
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 CSoundFile::CSoundFile() :
@@ -416,6 +417,16 @@ CSoundFile::CSoundFile() :
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
 //----------------------
 {
+	gdwSysInfo = GetSysInfo();
+	MemsetZero(MixSoundBuffer);
+	MemsetZero(MixRearBuffer);
+#ifndef NO_REVERB
+	MemsetZero(MixReverbBuffer);
+#endif
+	MemsetZero(MixFloatBuffer);
+	gnDryLOfsVol = 0;
+	gnDryROfsVol = 0;
+	gnVolumeRampUpSamplesActual = 42;
 	m_nType = MOD_TYPE_NONE;
 	m_nChannels = 0;
 	m_nMixChannels = 0;
@@ -423,7 +434,6 @@ CSoundFile::CSoundFile() :
 	m_nInstruments = 0;
 	m_lpszSongComments = nullptr;
 	m_nFreqFactor = m_nTempoFactor = 128;
-	m_nMasterVolume = 128;
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
@@ -499,7 +509,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	m_nSamples = 0;
 	m_nInstruments = 0;
 	m_nFreqFactor = m_nTempoFactor = 128;
-	m_nMasterVolume = 128;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nOldGlbVolSlide = 0;
@@ -898,95 +907,29 @@ void CSoundFile::FreeSample(void *p)
 // Misc functions
 
 
-BOOL CSoundFile::SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX)
-//----------------------------------------------------------------------------
+void CSoundFile::SetDspEffects(DWORD DSPMask)
+//----------------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-
-	BOOL bReset = FALSE;
-	DWORD d = gdwSoundSetup & ~SNDMIX_ENABLEMMX;
-	if (bMMX) d |= SNDMIX_ENABLEMMX;
-	if ((gdwMixingFreq != nRate) || (gnBitsPerSample != nBits) || (gnChannels != nChannels) || (d != gdwSoundSetup)) bReset = TRUE;
-	gnChannels = nChannels;
-	gdwSoundSetup = d;
-	gdwMixingFreq = nRate;
-	gnBitsPerSample = nBits;
-	InitPlayer(bReset);
-	return TRUE;
-}
-
-
-BOOL CSoundFile::SetDspEffects(BOOL bSurround,BOOL bReverb,BOOL bMegaBass,BOOL bNR,BOOL bEQ)
-//------------------------------------------------------------------------------------------
-{
-	CriticalSection cs;
-	DWORD d = gdwSoundSetup;
-	if ((bReverb) && (gdwSysInfo & SYSMIX_ENABLEMMX)) d |= SNDMIX_REVERB; else d &= ~SNDMIX_REVERB;
-#ifndef NO_DSP
-	if (bSurround) d |= SNDMIX_SURROUND; else d &= ~SNDMIX_SURROUND;
-	if (bMegaBass) d |= SNDMIX_MEGABASS; else d &= ~SNDMIX_MEGABASS;
-	if (bNR) d |= SNDMIX_NOISEREDUCTION; else d &= ~SNDMIX_NOISEREDUCTION;
-#endif
-#ifndef NO_EQ
-	if (bEQ) d |= SNDMIX_EQ; else d &= ~SNDMIX_EQ;
-#endif
-	gdwSoundSetup = d;
+	if(!(GetSysInfo() & SYSMIX_ENABLEMMX)) DSPMask &= ~SNDDSP_REVERB;
+	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(FALSE);
-	return TRUE;
 }
 
 
-BOOL CSoundFile::SetResamplingMode(UINT nMode)
-//--------------------------------------------
-{
-	DWORD d = gdwSoundSetup & ~(SNDMIX_NORESAMPLING|SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE);
-	switch(nMode)
-	{
-	case SRCMODE_NEAREST:	d |= SNDMIX_NORESAMPLING; break;
-	case SRCMODE_LINEAR:	break; // default
-	//rewbs.resamplerConf
-	//case SRCMODE_SPLINE:	d |= SNDMIX_HQRESAMPLER; break;
-	//case SRCMODE_POLYPHASE:	d |= (SNDMIX_HQRESAMPLER|SNDMIX_ULTRAHQSRCMODE); break;
-	case SRCMODE_SPLINE:	d |= SNDMIX_SPLINESRCMODE; break;
-	case SRCMODE_POLYPHASE:	d |= SNDMIX_POLYPHASESRCMODE; break;
-	case SRCMODE_FIRFILTER:	d |= SNDMIX_FIRFILTERSRCMODE; break;
-	default: return FALSE;
-	//end rewbs.resamplerConf
-	}
-	gdwSoundSetup = d;
-	return TRUE;
-}
-
-
-void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
-//---------------------------------------------------------
+void CSoundFile::SetPreAmp(UINT nVol)
+//-----------------------------------
 {
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
 #ifndef NO_AGC
-	if ((nVol < m_nMasterVolume) && (nVol) && (gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
+	if ((nVol < m_MixerSettings.m_nPreAmp) && (nVol) && (m_MixerSettings.DSPMask & SNDDSP_AGC))
 	{
-		m_AGC.Adjust(m_nMasterVolume, nVol);
+		m_AGC.Adjust(m_MixerSettings.m_nPreAmp, nVol);
 	}
 #endif
-	m_nMasterVolume = nVol;
+	m_MixerSettings.m_nPreAmp = nVol;
 }
-
-
-#ifndef NO_AGC
-void CSoundFile::SetAGC(BOOL b)
-//-----------------------------
-{
-	if (b)
-	{
-		if (!(gdwSoundSetup & SNDMIX_AGC))
-		{
-			gdwSoundSetup |= SNDMIX_AGC;
-			m_AGC.Reset();
-		}
-	} else gdwSoundSetup &= ~SNDMIX_AGC;
-}
-#endif
 
 
 UINT CSoundFile::GetCurrentPos() const
@@ -1011,7 +954,7 @@ double CSoundFile::GetCurrentBPM() const
 	{																	//with other modes, we calculate it:
 		double ticksPerBeat = m_nMusicSpeed * m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
 		double samplesPerBeat = m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
-		bpm =  gdwMixingFreq/samplesPerBeat * 60;						//beats/sec  = samps/sec  / samps/beat
+		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;						//beats/sec  = samps/sec  / samps/beat
 	}																	//beats/min  =  beats/sec * 60
 
 	return bpm;
@@ -1583,14 +1526,17 @@ bool CSoundFile::DestroySampleThreadsafe(SAMPLEINDEX nSample)
 }
 
 
+#ifdef MODPLUG_TRACKER
 void CSoundFile::DeleteStaticdata()
 //---------------------------------
 {
 	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = nullptr;
 	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = nullptr;
 }
+#endif
 
 
+#ifdef MODPLUG_TRACKER
 bool CSoundFile::SaveStaticTunings()
 //----------------------------------
 {
@@ -1601,6 +1547,7 @@ bool CSoundFile::SaveStaticTunings()
 	}
 	return false;
 }
+#endif
 
 
 void SimpleMessageBox(const char* message, const char* title)
@@ -1610,6 +1557,7 @@ void SimpleMessageBox(const char* message, const char* title)
 }
 
 
+#ifdef MODPLUG_TRACKER
 bool CSoundFile::LoadStaticTunings()
 //----------------------------------
 {
@@ -1658,6 +1606,7 @@ bool CSoundFile::LoadStaticTunings()
 
 	return false;
 }
+#endif
 
 
 string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
@@ -1767,15 +1716,15 @@ void CSoundFile::RecalculateSamplesPerTick()
 	{
 	case tempo_mode_classic:
 	default:
-		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 		break;
 
 	case tempo_mode_modern:
-		m_nSamplesPerTick = gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
+		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
 		break;
 
 	case tempo_mode_alternative:
-		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
+		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq / m_nMusicTempo;
 		break;
 	}
 }
@@ -1789,14 +1738,14 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 	{
 	case tempo_mode_classic:
 	default:
-		return (gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
+		return (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
 
 	case tempo_mode_alternative:
-		return gdwMixingFreq / tempo;
+		return m_MixerSettings.gdwMixingFreq / tempo;
 
 	case tempo_mode_modern:
 		{
-			double accurateBufferCount = static_cast<double>(gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
+			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
 			UINT bufferCount = static_cast<int>(accurateBufferCount);
 			m_dBufferDiff += accurateBufferCount - bufferCount;
 
@@ -1966,7 +1915,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 	{
 		ChnSettings[nChn].nVolume = 64;
 		ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
-		if(gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
+		if(m_MixerSettings.MixerFlags & SNDMIX_MAXDEFAULTPAN)
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
 		else
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;

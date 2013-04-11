@@ -124,8 +124,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 	CHAR s[128];
 
 	CPropertyPage::OnInitDialog();
-	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (m_dwSoundSetup & SNDMIX_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+	if (m_dwSoundSetup & SNDMIX_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_SECONDARY) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 	if (!(m_dwSoundSetup & SOUNDSETUP_NOBOOSTTHREADPRIORITY)) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 	// Multimedia extensions
@@ -147,7 +147,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 		{
 			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
 			m_CbnPolyphony.AddString(s);
-			if (CSoundFile::m_nMaxMixChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
+			if (TrackerSettings::Instance().m_MixerSettings.m_nMaxMixChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
 		}
 	}
 	// latency
@@ -191,7 +191,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 		m_SliderStereoSep.SetPos(2);
 		for (int n=0; n<=4; n++)
 		{
-			if ((int)CSoundFile::m_nStereoSeparation <= (int)(32 << n))
+			if ((int)TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation <= (int)(32 << n))
 			{
 				m_SliderStereoSep.SetPos(n);
 				break;
@@ -305,8 +305,9 @@ void COptionsSoundcard::UpdateStereoSep()
 //---------------------------------------
 {
 	CHAR s[64];
-	CSoundFile::m_nStereoSeparation = 32 << m_SliderStereoSep.GetPos();
-	wsprintf(s, "%d%%", (CSoundFile::m_nStereoSeparation * 100) / 128);
+	TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation = 32 << m_SliderStereoSep.GetPos();
+	CMainFrame::GetMainFrame()->SetupPlayer();
+	wsprintf(s, "%d%%", (TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation * 100) / 128);
 	SetDlgItemText(IDC_TEXT1, s);
 
 }
@@ -315,7 +316,7 @@ void COptionsSoundcard::UpdateStereoSep()
 void COptionsSoundcard::SetPreAmpSliderPosition()
 //-----------------------------------------------
 {
-	int n = (TrackerSettings::Instance().m_nPreAmp - 64) / 8;
+	int n = (TrackerSettings::Instance().m_MixerSettings.m_nPreAmp - 64) / 8;
 	if ((n < 0) || (n > 40)) n = 16;
 	m_SliderPreAmp.SetPos(n);
 }
@@ -412,9 +413,9 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	m_dwSoundSetup &= ~(SOUNDSETUP_ENABLEMMX | SOUNDSETUP_SECONDARY | SOUNDSETUP_SOFTPANNING | SOUNDSETUP_NOBOOSTTHREADPRIORITY);
-	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwSoundSetup |= SOUNDSETUP_SOFTPANNING;
-	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwSoundSetup |= SOUNDSETUP_ENABLEMMX;
+	m_dwSoundSetup &= ~(SNDMIX_ENABLEMMX | SOUNDSETUP_SECONDARY | SNDMIX_SOFTPANNING | SOUNDSETUP_NOBOOSTTHREADPRIORITY);
+	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwSoundSetup |= SNDMIX_SOFTPANNING;
+	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwSoundSetup |= SNDMIX_ENABLEMMX;
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwSoundSetup |= SOUNDSETUP_SECONDARY;
 	if (!IsDlgButtonChecked(IDC_CHECK5)) m_dwSoundSetup |= SOUNDSETUP_NOBOOSTTHREADPRIORITY;
 	// Mixing Freq
@@ -432,7 +433,11 @@ void COptionsSoundcard::OnOK()
 	// Polyphony
 	{
 		int nmmx = m_CbnPolyphony.GetCurSel();
-		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix))) CSoundFile::m_nMaxMixChannels = nCPUMix[nmmx];
+		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix)))
+		{
+			TrackerSettings::Instance().m_MixerSettings.m_nMaxMixChannels = nCPUMix[nmmx];
+			CMainFrame::GetMainFrame()->SetupPlayer();
+		}
 	}
 	// Sound Device
 	{
@@ -460,12 +465,14 @@ void COptionsSoundcard::OnOK()
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
 	// Soft Panning
-	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
-		CSoundFile::gdwSoundSetup |= SNDMIX_SOFTPANNING;
-	else
-		CSoundFile::gdwSoundSetup &= ~SNDMIX_SOFTPANNING;
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
+	if (m_dwSoundSetup & SNDMIX_SOFTPANNING)
+	{
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING;
+	} else
+	{
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
+	}
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_nBitsPerSample, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
 	UpdateStatistics();
 	CPropertyPage::OnOK();
 }
@@ -543,7 +550,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	DWORD dwQuality;
 
 	CPropertyPage::OnInitDialog();
-	dwQuality = TrackerSettings::Instance().m_dwQuality;
+	dwQuality = TrackerSettings::Instance().m_MixerSettings.DSPMask;
 	// Resampling type
 	{
 		m_CbnResampling.AddString("No Interpolation");
@@ -553,28 +560,28 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("Polyphase");
 		m_CbnResampling.AddString("XMMS-ModPlug");
 		//end rewbs.resamplerConf
-		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_nSrcMode);
+		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
 	}
 	// Effects
 #ifndef NO_DSP
-	if (dwQuality & QUALITY_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
+	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_AGC
-	if (dwQuality & QUALITY_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+	if (dwQuality & SNDDSP_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK2)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_DSP
-	if (dwQuality & QUALITY_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if (dwQuality & QUALITY_NOISEREDUCTION) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
+	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	if (dwQuality & SNDDSP_NOISEREDUCTION) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_CHECK5)->ShowWindow(SW_HIDE);
 #endif
 #ifndef NO_EQ
-	if (dwQuality & QUALITY_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
@@ -583,9 +590,9 @@ BOOL COptionsPlayer::OnInitDialog()
 #ifndef NO_DSP
 	// Bass Expansion
 	m_SbXBassDepth.SetRange(0,4);
-	m_SbXBassDepth.SetPos(8-CSoundFile::m_DSP.m_Settings.m_nXBassDepth);
+	m_SbXBassDepth.SetPos(8-TrackerSettings::Instance().m_DSPSettings.m_nXBassDepth);
 	m_SbXBassRange.SetRange(0,4);
-	m_SbXBassRange.SetPos(4 - (CSoundFile::m_DSP.m_Settings.m_nXBassRange - 1) / 5);
+	m_SbXBassRange.SetPos(4 - (TrackerSettings::Instance().m_DSPSettings.m_nXBassRange - 1) / 5);
 #else
 	m_SbXBassDepth.ShowWindow(SW_HIDE);
 	m_SbXBassRange.ShowWindow(SW_HIDE);
@@ -594,7 +601,7 @@ BOOL COptionsPlayer::OnInitDialog()
 #ifndef NO_REVERB
 	// Reverb
 	m_SbReverbDepth.SetRange(1, 16);
-	m_SbReverbDepth.SetPos(CSoundFile::m_Reverb.m_Settings.m_nReverbDepth);
+	m_SbReverbDepth.SetPos(TrackerSettings::Instance().m_ReverbSettings.m_nReverbDepth);
 	UINT nSel = 0;
 	for (UINT iRvb=0; iRvb<NUM_REVERBTYPES; iRvb++)
 	{
@@ -603,18 +610,18 @@ BOOL COptionsPlayer::OnInitDialog()
 		{
 			UINT n = m_CbnReverbPreset.AddString(pszName);
 			m_CbnReverbPreset.SetItemData(n, iRvb);
-			if (iRvb == CSoundFile::m_Reverb.m_Settings.m_nReverbType) nSel = n;
+			if (iRvb == TrackerSettings::Instance().m_ReverbSettings.m_nReverbType) nSel = n;
 		}
 	}
 	m_CbnReverbPreset.SetCurSel(nSel);
-	if (!(CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX))
+	if (!(CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX))
 	{
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK6), FALSE);
 		m_SbReverbDepth.EnableWindow(FALSE);
 		m_CbnReverbPreset.EnableWindow(FALSE);
 	} else
 	{
-		if (dwQuality & QUALITY_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
+		if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
 	}
 #else
 	GetDlgItem(IDC_CHECK6)->ShowWindow(SW_HIDE);
@@ -625,13 +632,13 @@ BOOL COptionsPlayer::OnInitDialog()
 #ifndef NO_DSP
 	// Surround
 	{
-		UINT n = CSoundFile::m_DSP.m_Settings.m_nProLogicDepth;
+		UINT n = TrackerSettings::Instance().m_DSPSettings.m_nProLogicDepth;
 		if (n < 1) n = 1;
 		if (n > 16) n = 16;
 		m_SbSurroundDepth.SetRange(1, 16);
 		m_SbSurroundDepth.SetPos(n);
 		m_SbSurroundDelay.SetRange(0, 8);
-		m_SbSurroundDelay.SetPos((CSoundFile::m_DSP.m_Settings.m_nProLogicDelay-5)/5);
+		m_SbSurroundDelay.SetPos((TrackerSettings::Instance().m_DSPSettings.m_nProLogicDelay-5)/5);
 	}
 #else
 	m_SbSurroundDepth.ShowWindow(SW_HIDE);
@@ -668,10 +675,9 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 	{
 #ifndef NO_REVERB
 		UINT n = m_SbReverbDepth.GetPos();
-		if (n != CSoundFile::m_Reverb.m_Settings.m_nReverbDepth)
-		{
-			if ((n) && (n <= 16)) CSoundFile::m_Reverb.m_Settings.m_nReverbDepth = n;
-		}
+		if ((n) && (n <= 16)) TrackerSettings::Instance().m_ReverbSettings.m_nReverbDepth = n;
+		//if ((n) && (n <= 16)) CSoundFile::m_Reverb.m_Settings.m_nReverbDepth = n;
+		CMainFrame::GetMainFrame()->SetupPlayer();
 #endif
 	} else
 	{
@@ -682,7 +688,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	TrackerSettings::Instance().m_MixerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
+	TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -699,7 +705,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff * 100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff * 100)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -710,10 +716,10 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
 		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
 		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().m_MixerSettings.gbWFIRType);
+		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType);
 		m_CbnWFIRType.EnableWindow(TRUE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff*100)));
 		break;
 	default:
 		m_CbnWFIRType.AddString("None");
@@ -738,8 +744,7 @@ void COptionsPlayer::OnDefaultResampling()
 
 }
 
-extern void SndMixInitializeTables(const MixerSettings & mixersettings);
-//end rewbs.resamplerConf
+
 void COptionsPlayer::OnOK()
 //-------------------------
 {
@@ -747,19 +752,19 @@ void COptionsPlayer::OnOK()
 	DWORD dwSrcMode = 0;
 
 #ifndef NO_DSP
-	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= QUALITY_MEGABASS;
+	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= SNDDSP_MEGABASS;
 #endif
 #ifndef NO_AGC
-	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= QUALITY_AGC;
+	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= SNDDSP_AGC;
 #endif
 #ifndef NO_EQ
-	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= QUALITY_EQ;
+	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= SNDDSP_EQ;
 #endif
 #ifndef NO_DSP
-	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= QUALITY_SURROUND;
-	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= QUALITY_NOISEREDUCTION;
+	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= SNDDSP_SURROUND;
+	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_NOISEREDUCTION;
 #endif
-	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= QUALITY_REVERB;
+	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= SNDDSP_REVERB;
 	dwSrcMode = m_CbnResampling.GetCurSel();
 
 #ifndef NO_DSP
@@ -771,8 +776,9 @@ void COptionsPlayer::OnOK()
 		UINT nXBassRange = (4-m_SbXBassRange.GetPos()) * 5 + 1;
 		if (nXBassRange < 5) nXBassRange = 5;
 		if (nXBassRange > 21) nXBassRange = 21;
-		CSoundFile::m_DSP.m_Settings.m_nXBassDepth = nXBassDepth;
-		CSoundFile::m_DSP.m_Settings.m_nXBassRange = nXBassRange;
+		TrackerSettings::Instance().m_DSPSettings.m_nXBassDepth = nXBassDepth;
+		TrackerSettings::Instance().m_DSPSettings.m_nXBassRange = nXBassRange;
+		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
 #ifndef NO_REVERB
@@ -780,7 +786,8 @@ void COptionsPlayer::OnOK()
 	{
 		// Reverb depth is dynamically changed
 		UINT nReverbType = m_CbnReverbPreset.GetItemData(m_CbnReverbPreset.GetCurSel());
-		if (nReverbType < NUM_REVERBTYPES) CSoundFile::m_Reverb.m_Settings.m_nReverbType = nReverbType;
+		if (nReverbType < NUM_REVERBTYPES) TrackerSettings::Instance().m_ReverbSettings.m_nReverbType = nReverbType;
+		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
 #ifndef NO_DSP
@@ -788,8 +795,9 @@ void COptionsPlayer::OnOK()
 	{
 		UINT nProLogicDepth = m_SbSurroundDepth.GetPos();
 		UINT nProLogicDelay = 5 + (m_SbSurroundDelay.GetPos() * 5);
-		CSoundFile::m_DSP.m_Settings.m_nProLogicDepth = nProLogicDepth;
-		CSoundFile::m_DSP.m_Settings.m_nProLogicDelay = nProLogicDelay;
+		TrackerSettings::Instance().m_DSPSettings.m_nProLogicDepth = nProLogicDepth;
+		TrackerSettings::Instance().m_DSPSettings.m_nProLogicDelay = nProLogicDelay;
+		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
 	// Notify CMainFrame
@@ -798,17 +806,16 @@ void COptionsPlayer::OnOK()
 	CString s;
 	m_CEditWFIRCutoff.GetWindowText(s);
 	if (s != "")
-		TrackerSettings::Instance().m_MixerSettings.gdWFIRCutoff = atoi(s)/100.0;
-	//TrackerSettings::Instance().m_MixerSettings.gbWFIRType set in OnWFIRTypeChange
+		TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff = atoi(s)/100.0;
+	//TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType set in OnWFIRTypeChange
 
 	m_CEditRampUp.GetWindowText(s);
 	TrackerSettings::Instance().m_MixerSettings.glVolumeRampUpSamples = atol(s);
 	m_CEditRampDown.GetWindowText(s);
 	TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples = atol(s);
-
-	SndMixInitializeTables(TrackerSettings::Instance().m_MixerSettings); //regenerate resampling tables
-	//end rewbs.resamplerConf
-	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);
+	TrackerSettings::Instance().m_ResamplerSettings.SrcMode = (ResamplingMode)dwSrcMode;
+	TrackerSettings::Instance().m_MixerSettings.DSPMask = dwQuality;
+	CMainFrame::GetMainFrame()->SetupPlayer();
 	CPropertyPage::OnOK();
 }
 
@@ -1020,7 +1027,8 @@ void CEQSetupDlg::UpdateEQ(BOOL bReset)
 {
 #ifndef NO_EQ
 	CriticalSection cs;
-	CSoundFile::SetEQGains(	m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset);
+	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
+		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains( m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset);
 #endif
 }
 

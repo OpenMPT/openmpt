@@ -1382,8 +1382,8 @@ void CVstPlugin::Initialize()
 
 	}
 
-	m_nSampleRate = CSoundFile::gdwMixingFreq;
-	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(CSoundFile::gdwMixingFreq));
+	m_nSampleRate = m_SndFile.GetSampleRate();
+	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_SndFile.GetSampleRate()));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
 	if(m_Effect.numPrograms > 0)
 	{
@@ -1414,7 +1414,7 @@ void CVstPlugin::Initialize()
 	m_pProcessFP = (m_Effect.flags & effFlagsCanReplacing) ? m_Effect.processReplacing : m_Effect.process;
 
 	// issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
-	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(CSoundFile::gdwMixingFreq));
+	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_SndFile.GetSampleRate()));
 
 	// Korg Wavestation GUI won't work until plugin was resumed at least once.
 	// On the other hand, some other plugins (notably Synthedit plugins like Superwave P8 2.3 or Rez 3.0) don't like this
@@ -1908,7 +1908,7 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 void CVstPlugin::Resume()
 //-----------------------
 {
-	const DWORD sampleRate = CSoundFile::gdwMixingFreq;
+	const DWORD sampleRate = m_SndFile.GetSampleRate();
 
 	try
 	{
@@ -3405,7 +3405,7 @@ void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
 
 #ifdef ENABLE_MMX
 #ifdef ENABLE_SSE
-	if((CSoundFile::gdwSysInfo & SYSMIX_SSE) && (CSoundFile::gdwSoundSetup & SNDMIX_ENABLEMMX))
+	if(CSoundFile::GetSysInfo() & SYSMIX_SSE)
 	{
 		SSEInterleaveFloatToInt16(inputs[0], inputs[1], samples);
 		m_pMediaProcess->Process(samples * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
