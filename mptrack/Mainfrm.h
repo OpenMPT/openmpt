@@ -383,7 +383,6 @@ public:
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
 	CWnd* m_pOrderlistHasFocus;
-	__declspec(deprecated) long GetSampleRate();
 	double GetApproxBPM();
 	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }

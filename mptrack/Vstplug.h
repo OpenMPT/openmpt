@@ -145,7 +145,6 @@ protected:
 	CSoundFile &m_SndFile;
 
 	size_t m_nRefCount;
-	static const uint32 nInvalidSampleRate = UINT_MAX;
 	uint32 m_nSampleRate;
 	SNDMIXPLUGINSTATE m_MixState;
 	uint32 m_nInputs, m_nOutputs;

@@ -730,10 +730,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// <value> should contain a mask indicating which fields are required
 	case audioMasterGetTime:
 		MemsetZero(timeInfo);
-		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
 		if(pVstPlugin)
 		{
+			timeInfo.sampleRate = pVstPlugin->m_nSampleRate;
 			CSoundFile &sndFile = pVstPlugin->GetSoundFile();
 			if(pVstPlugin->IsSongPlaying())
 			{
@@ -853,7 +853,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return 1;
 
 	case audioMasterGetSampleRate:
-		return CMainFrame::GetMainFrame()->GetSampleRate();
+		if(pVstPlugin)
+		{
+			return pVstPlugin->m_nSampleRate;
+		}
 
 	case audioMasterGetBlockSize:
 		return MIXBUFFERSIZE;
@@ -863,8 +866,9 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		break;
 
 	case audioMasterGetOutputLatency:
+		if(pVstPlugin)
 		{
-			return Util::muldiv(TrackerSettings::Instance().m_LatencyMS, CMainFrame::GetMainFrame()->GetSampleRate(), 1000);
+			return Util::muldiv(TrackerSettings::Instance().m_LatencyMS, pVstPlugin->m_nSampleRate, 1000);
 		}
 
 	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
@@ -1304,7 +1308,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 
 	m_bSongPlaying = false; //rewbs.VSTCompliance
 	m_bPlugResumed = false;
-	m_nSampleRate = nInvalidSampleRate; //rewbs.VSTCompliance: gets set on Resume()
+	m_nSampleRate = uint32_max;
 
 	MemsetZero(m_MidiCh);
 	for(int ch = 0; ch < 16; ch++)
@@ -1908,7 +1912,7 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 void CVstPlugin::Resume()
 //-----------------------
 {
-	const DWORD sampleRate = m_SndFile.GetSampleRate();
+	const uint32 sampleRate = m_SndFile.GetSampleRate();
 
 	try
 	{
