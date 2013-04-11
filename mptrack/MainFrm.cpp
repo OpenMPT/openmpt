@@ -1344,8 +1344,8 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 {
 	CriticalSection::AssertUnlocked();
 	if(!pModDoc) return false;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(!IsValidSoundFile(pSndFile)) return false;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	if(!IsValidSoundFile(sndFile)) return false;
 
 	// if something is playing, pause it
 	PausePlayback();
@@ -1357,19 +1357,20 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	if (!PreparePlayback()) return false;
 
 	// set mixing parameters in CSoundFile
-	UpdateAudioParameters(*pSndFile);
+	UpdateAudioParameters(sndFile);
 
-	SetPlaybackSoundFile(pSndFile);
+	SetPlaybackSoundFile(&sndFile);
 
 	const bool bPaused = m_pSndFile->IsPaused();
 	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
 
 	m_pSndFile->ResetChannels();
 
-	if(!bPatLoop && bPaused) pSndFile->m_SongFlags.set(SONG_PAUSED);
-	pSndFile->SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
+	if(!bPatLoop && bPaused) sndFile.m_SongFlags.set(SONG_PAUSED);
+	sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 
-	m_pSndFile->InitPlayer(TRUE);
+	sndFile.InitPlayer(TRUE);
+	sndFile.ResumePlugins();
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
