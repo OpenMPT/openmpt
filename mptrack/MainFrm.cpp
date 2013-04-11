@@ -859,14 +859,14 @@ bool CMainFrame::audioOpenDevice()
 	if(!err)
 	{
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-								TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample,
+								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
-		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample)))
+		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
 		{
-			if(nFixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample = nFixedBitsPerSample;
+			if(nFixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = (SampleFormat)nFixedBitsPerSample;
 			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-									TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample,
+									TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
 									TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		}
 	}
@@ -1665,8 +1665,8 @@ HWND CMainFrame::GetFollowSong() const
 }
 
 
-BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
-//----------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
+//---------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = IsPlaying();
 	if (((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
@@ -1674,7 +1674,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 	 || (TrackerSettings::Instance().m_nWaveDevice != wd)
 	 || (TrackerSettings::Instance().m_LatencyMS != latency_ms)
 	 || (TrackerSettings::Instance().m_UpdateIntervalMS != updateinterval_ms)
-	 || (TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample != nBits)
+	 || (TrackerSettings::Instance().m_MixerSettings.m_SampleFormat != sampleformat)
 	 || (TrackerSettings::Instance().m_MixerSettings.gnChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
@@ -1688,7 +1688,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, UINT nBits, UINT nChns, UIN
 		TrackerSettings::Instance().m_MixerSettings.MixerFlags = q;
 		TrackerSettings::Instance().m_LatencyMS = latency_ms;
 		TrackerSettings::Instance().m_UpdateIntervalMS = updateinterval_ms;
-		TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample = nBits;
+		TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = sampleformat;
 		TrackerSettings::Instance().m_MixerSettings.gnChannels = nChns;
 		{
 			CriticalSection cs;
@@ -1850,7 +1850,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.MixerFlags, TrackerSettings::Instance().m_MixerSettings.gnBitsPerSample, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.MixerFlags, TrackerSettings::Instance().m_MixerSettings.m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;

@@ -439,7 +439,7 @@ public:
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
 
-	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
+	BOOL SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 

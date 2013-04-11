@@ -695,7 +695,7 @@ void CDoWaveConvert::OnButton1()
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
-	mixersettings.gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
+	mixersettings.m_SampleFormat = (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	mixersettings.gnChannels = m_pWaveFormat->nChannels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 // -> CODE#0024
@@ -704,7 +704,7 @@ void CDoWaveConvert::OnButton1()
 	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 24))
 // -! NEW_FEATURE#0024
 	{
-		mixersettings.gnBitsPerSample = 24;
+		mixersettings.m_SampleFormat = SampleFormatInt24;
 #ifndef NO_AGC
 		mixersettings.DSPMask &= ~SNDDSP_AGC;
 #endif
@@ -769,7 +769,7 @@ void CDoWaveConvert::OnButton1()
 	m_pSndFile->m_PatternCuePoints.reserve(m_pSndFile->Order.GetLength());
 
 	// Process the conversion
-	UINT nBytesPerSample = (m_pSndFile->m_MixerSettings.gnBitsPerSample * m_pSndFile->m_MixerSettings.gnChannels) / 8;
+	UINT nBytesPerSample = (m_pSndFile->m_MixerSettings.GetBitsPerSample() * m_pSndFile->m_MixerSettings.gnChannels) / 8;
 	// For calculating the remaining time
 	DWORD dwStartTime = timeGetTime();
 	// For giving away some processing time every now and then
@@ -778,7 +778,7 @@ void CDoWaveConvert::OnButton1()
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
-		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.gnBitsPerSample/8));
+		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
 
 		// Process cue points (add base offset), if there are any to process.
 		vector<PatternCuePoint>::reverse_iterator iter;
@@ -1108,7 +1108,7 @@ void CDoAcmConvert::OnButton1()
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	const DWORD dwSongTime = m_pSndFile->GetSongTime();
 	mixersettings.gdwMixingFreq = wfxSrc.nSamplesPerSec;
-	mixersettings.gnBitsPerSample = 16;
+	mixersettings.m_SampleFormat = SampleFormatInt16;
 	mixersettings.gnChannels = wfxSrc.nChannels;
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();
@@ -1152,7 +1152,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.gnBitsPerSample/8));
+			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;

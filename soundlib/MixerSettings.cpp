@@ -24,7 +24,7 @@ MixerSettings::MixerSettings()
 	// Mixing Configuration
 	gnChannels = 2;
 	gdwMixingFreq = 44100;
-	gnBitsPerSample = 16;
+	m_SampleFormat = SampleFormatInt16;
 
 	m_nPreAmp = 128;
 
