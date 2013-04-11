@@ -597,12 +597,10 @@ bool CSoundFile::ReadS3M(FileReader &file)
 		}
 	}
 
-#ifdef MODPLUG_TRACKER
-	if(hasAdlibPatches && GetpModDoc() != nullptr)
+	if(hasAdlibPatches)
 	{
-		GetpModDoc()->AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
+		AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
 	}
-#endif // MODPLUG_TRACKER
 
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).

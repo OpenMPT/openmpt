@@ -1181,19 +1181,14 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	}
 
 	//Check for unsaved patterns
-#ifdef MODPLUG_TRACKER
-	if(GetpModDoc() != nullptr)
+	for(PATTERNINDEX pat = writePatterns; pat < Patterns.Size(); pat++)
 	{
-		for(PATTERNINDEX pat = writePatterns; pat < Patterns.Size(); pat++)
+		if(Patterns.IsValidPat(pat))
 		{
-			if(Patterns.IsValidPat(pat))
-			{
-				GetpModDoc()->AddToLog(_T("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the .mod format.\n"));
-				break;
-			}
+			AddToLog("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the .mod format.");
+			break;
 		}
 	}
-#endif
 
 	// Writing samples
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
