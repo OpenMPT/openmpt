@@ -156,7 +156,7 @@ public:
 	~CReverb() {}
 public:
 	void Initialize(BOOL bReset, DWORD MixingFreq);
-	void Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples);
+	void Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples, DWORD sysinfo);
 	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
 	bool SetReverbParameters(UINT nDepth, UINT nType);
 private:

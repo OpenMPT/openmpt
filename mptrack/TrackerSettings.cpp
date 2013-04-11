@@ -62,13 +62,6 @@ TrackerSettings::TrackerSettings()
 	gnMsgBoxVisiblityFlags = uint32_max;
 
 	// Audio device
-	m_dwRate = 44100;	// Default value will be overridden
-	m_dwSoundSetup = SOUNDSETUP_SECONDARY;
-	m_nChannels = 2;
-	m_dwQuality = 0;
-	m_nSrcMode = SRCMODE_FIRFILTER;
-	m_nBitsPerSample = 16;
-	m_nPreAmp = 128;
 	gbLoopSong = TRUE;
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
@@ -141,6 +134,8 @@ TrackerSettings::TrackerSettings()
 	}
 
 	defaultModType = MOD_TYPE_IT;
+
+	DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 	gnPlugWindowX = 243;
 	gnPlugWindowY = 273;
@@ -320,14 +315,14 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
-	m_dwSoundSetup = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
+	m_MixerSettings.MixerFlags = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26))
-		m_dwSoundSetup &= ~0x20;	// Reverse stereo
-	m_dwQuality = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
-	m_nSrcMode = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
-	m_dwRate = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
-	m_nBitsPerSample = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
-	m_nChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
+		m_MixerSettings.MixerFlags &= ~0x20;	// Reverse stereo
+	m_MixerSettings.DSPMask = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_MixerSettings.DSPMask, iniFile);
+	m_ResamplerSettings.SrcMode = (ResamplingMode)CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
+	m_MixerSettings.gdwMixingFreq = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
+	m_MixerSettings.gnBitsPerSample = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BitsPerSample", m_MixerSettings.gnBitsPerSample, iniFile);
+	m_MixerSettings.gnChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
 	DWORD LatencyMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Latency", 0, iniFile);
 	DWORD UpdateIntervalMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "UpdateInterval", 0, iniFile);
 	if(LatencyMS == 0 || UpdateIntervalMS == 0)
@@ -358,9 +353,9 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		m_LatencyMS = LatencyMS;
 		m_UpdateIntervalMS = UpdateIntervalMS;
 	}
-	if(m_dwRate == 0)
+	if(m_MixerSettings.gdwMixingFreq == 0)
 	{
-		m_dwRate = 44100;
+		m_MixerSettings.gdwMixingFreq = 44100;
 #ifndef NO_ASIO
 		// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 		if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
@@ -368,19 +363,19 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 			ISoundDevice *dummy = CreateSoundDevice(SNDDEV_ASIO);
 			if(dummy)
 			{
-				m_dwRate = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
+				m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
 				delete dummy;
 			}
 		}
 #endif // NO_ASIO
 	}
 
-	m_nPreAmp = CMainFrame::GetPrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
-	CSoundFile::m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
-	CSoundFile::m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
-	m_MixerSettings.gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_MixerSettings.gbWFIRType, iniFile));
+	m_MixerSettings.m_nPreAmp = CMainFrame::GetPrivateProfileDWord("Sound Settings", "PreAmp", m_MixerSettings.m_nPreAmp, iniFile);
+	m_MixerSettings.m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", m_MixerSettings.m_nStereoSeparation, iniFile);
+	m_MixerSettings.m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", m_MixerSettings.m_nMaxMixChannels, iniFile);
+	m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile));
 	//gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
-	m_MixerSettings.gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(m_MixerSettings.gdWFIRCutoff * 100.0), iniFile)) / 100.0;
+	m_ResamplerSettings.gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(m_ResamplerSettings.gdWFIRCutoff * 100.0), iniFile)) / 100.0;
 	
 	// Ramping... first try to read the old setting, then the new ones
 	const long volRamp = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", -1, iniFile);
@@ -430,8 +425,8 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	rowDisplayOffset = GetPrivateProfileInt("Pattern Editor", "RowDisplayOffset", rowDisplayOffset, iniFile);
 	recordQuantizeRows = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
 	gbShowHackControls = (0 != CMainFrame::GetPrivateProfileDWord("Misc", "ShowHackControls", gbShowHackControls ? 1 : 0, iniFile));
-	CSoundFile::s_DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", CSoundFile::s_DefaultPlugVolumeHandling, iniFile));
-	if(CSoundFile::s_DefaultPlugVolumeHandling >= PLUGIN_VOLUMEHANDLING_MAX) CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+	DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", DefaultPlugVolumeHandling, iniFile));
+	if(DefaultPlugVolumeHandling >= PLUGIN_VOLUMEHANDLING_MAX) DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
@@ -456,16 +451,16 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 	// Effects Settings
 #ifndef NO_DSP
-	CSoundFile::m_DSP.m_Settings.m_nXBassDepth = CMainFrame::GetPrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_DSP.m_Settings.m_nXBassDepth, iniFile);
-	CSoundFile::m_DSP.m_Settings.m_nXBassRange = CMainFrame::GetPrivateProfileLong("Effects", "XBassRange", CSoundFile::m_DSP.m_Settings.m_nXBassRange, iniFile);
+	m_DSPSettings.m_nXBassDepth = CMainFrame::GetPrivateProfileLong("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth, iniFile);
+	m_DSPSettings.m_nXBassRange = CMainFrame::GetPrivateProfileLong("Effects", "XBassRange", m_DSPSettings.m_nXBassRange, iniFile);
 #endif
 #ifndef NO_REVERB
-	CSoundFile::m_Reverb.m_Settings.m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_Reverb.m_Settings.m_nReverbDepth, iniFile);
-	CSoundFile::m_Reverb.m_Settings.m_nReverbType = CMainFrame::GetPrivateProfileLong("Effects", "ReverbType", CSoundFile::m_Reverb.m_Settings.m_nReverbType, iniFile);
+	m_ReverbSettings.m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth, iniFile);
+	m_ReverbSettings.m_nReverbType = CMainFrame::GetPrivateProfileLong("Effects", "ReverbType", m_ReverbSettings.m_nReverbType, iniFile);
 #endif
 #ifndef NO_DSP
-	CSoundFile::m_DSP.m_Settings.m_nProLogicDepth = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, iniFile);
-	CSoundFile::m_DSP.m_Settings.m_nProLogicDelay = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, iniFile);
+	m_DSPSettings.m_nProLogicDepth = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth, iniFile);
+	m_DSPSettings.m_nProLogicDelay = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay, iniFile);
 #endif
 
 
@@ -584,11 +579,13 @@ bool TrackerSettings::LoadRegistrySettings()
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
-		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwSoundSetup, &dwDWORDSize);
-		m_dwSoundSetup &= ~0x20;	// Reverse stereo
-		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
-		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nSrcMode, &dwDWORDSize);
-		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_dwRate, &dwDWORDSize);
+		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.MixerFlags, &dwDWORDSize);
+		m_MixerSettings.MixerFlags &= ~0x20;	// Reverse stereo
+		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.DSPMask, &dwDWORDSize);
+		DWORD dummysrcmode = m_ResamplerSettings.SrcMode;
+		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&dummysrcmode, &dwDWORDSize);
+		m_ResamplerSettings.SrcMode = (ResamplingMode)dummysrcmode;
+		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdwMixingFreq, &dwDWORDSize);
 		DWORD BufferLengthMS = 0;
 		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&BufferLengthMS, &dwDWORDSize);
 		if(BufferLengthMS != 0)
@@ -604,7 +601,7 @@ bool TrackerSettings::LoadRegistrySettings()
 				m_UpdateIntervalMS = BufferLengthMS / 8;
 			}
 		}
-		RegQueryValueEx(key, "PreAmp", NULL, &dwREG_DWORD, (LPBYTE)&m_nPreAmp, &dwDWORDSize);
+		RegQueryValueEx(key, "PreAmp", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nPreAmp, &dwDWORDSize);
 
 		CHAR sPath[_MAX_PATH] = "";
 		DWORD dwSZSIZE = sizeof(sPath);
@@ -623,19 +620,19 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);
 
 #ifndef NO_DSP
-		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nXBassDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nXBassRange, &dwDWORDSize);
+		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nXBassDepth, &dwDWORDSize);
+		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nXBassRange, &dwDWORDSize);
 #endif
 #ifndef NO_REVERB
-		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_Reverb.m_Settings.m_nReverbDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "ReverbType", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_Reverb.m_Settings.m_nReverbType, &dwDWORDSize);
+		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&m_ReverbSettings.m_nReverbDepth, &dwDWORDSize);
+		RegQueryValueEx(key, "ReverbType", NULL, &dwREG_DWORD, (LPBYTE)&m_ReverbSettings.m_nReverbType, &dwDWORDSize);
 #endif NO_REVERB
 #ifndef NO_DSP
-		RegQueryValueEx(key, "ProLogicDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "ProLogicDelay", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, &dwDWORDSize);
+		RegQueryValueEx(key, "ProLogicDepth", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nProLogicDepth, &dwDWORDSize);
+		RegQueryValueEx(key, "ProLogicDelay", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nProLogicDelay, &dwDWORDSize);
 #endif
-		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nStereoSeparation, &dwDWORDSize);
-		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nMaxMixChannels, &dwDWORDSize);
+		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nStereoSeparation, &dwDWORDSize);
+		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nMaxMixChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
 		if((m_dwMidiSetup & 0x40) != 0)
 		{
@@ -651,8 +648,8 @@ bool TrackerSettings::LoadRegistrySettings()
 		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowHighlightMeasures, &dwDWORDSize);
 		RegQueryValueEx(key, "RowSpacing2", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowHighlightBeats, &dwDWORDSize);
 		RegQueryValueEx(key, "LoopSong", NULL, &dwREG_DWORD, (LPBYTE)&gbLoopSong, &dwDWORDSize);
-		RegQueryValueEx(key, "BitsPerSample", NULL, &dwREG_DWORD, (LPBYTE)&m_nBitsPerSample, &dwDWORDSize);
-		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nChannels, &dwDWORDSize);
+		RegQueryValueEx(key, "BitsPerSample", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gnBitsPerSample, &dwDWORDSize);
+		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gnChannels, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportSpeed", NULL, &dwREG_DWORD, (LPBYTE)&midiImportSpeed, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiImportPatLen", NULL, &dwREG_DWORD, (LPBYTE)&midiImportPatternLen, &dwDWORDSize);
 #ifndef NO_EQ
@@ -665,10 +662,10 @@ bool TrackerSettings::LoadRegistrySettings()
 #endif
 
 		//rewbs.resamplerConf
-		dwDWORDSize = sizeof(m_MixerSettings.gbWFIRType);
-		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gbWFIRType, &dwDWORDSize);
-		dwDWORDSize = sizeof(m_MixerSettings.gdWFIRCutoff);
-		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdWFIRCutoff, &dwDWORDSize);
+		dwDWORDSize = sizeof(m_ResamplerSettings.gbWFIRType);
+		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&m_ResamplerSettings.gbWFIRType, &dwDWORDSize);
+		dwDWORDSize = sizeof(m_ResamplerSettings.gdWFIRCutoff);
+		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&m_ResamplerSettings.gdWFIRCutoff, &dwDWORDSize);
 		dwDWORDSize = sizeof(m_MixerSettings.glVolumeRampUpSamples);
 		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.glVolumeRampUpSamples, &dwDWORDSize);
 		m_MixerSettings.glVolumeRampDownSamples = m_MixerSettings.glVolumeRampUpSamples;
@@ -791,19 +788,19 @@ void TrackerSettings::SaveSettings()
 	}
 
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_dwRate, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Quality", m_MixerSettings.DSPMask, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_MixerSettings.gdwMixingFreq, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_MixerSettings.gnBitsPerSample, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Latency", m_LatencyMS, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "UpdateInterval", m_UpdateIntervalMS, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_MixerSettings.gbWFIRType, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(m_MixerSettings.gdWFIRCutoff*100+0.5), iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "PreAmp", m_MixerSettings.m_nPreAmp, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", m_MixerSettings.m_nStereoSeparation, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", m_MixerSettings.m_nMaxMixChannels, iniFile);
+	CMainFrame::WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(m_ResamplerSettings.gdWFIRCutoff*100+0.5), iniFile);
 	WritePrivateProfileString("Sound Settings", "VolumeRampSamples", NULL, iniFile);	// deprecated
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
@@ -849,16 +846,16 @@ void TrackerSettings::SaveSettings()
 	WritePrivateProfileString("Paths", "Key_Config_File", nullptr, iniFile);
 
 #ifndef NO_DSP
-	CMainFrame::WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_DSP.m_Settings.m_nXBassDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_DSP.m_Settings.m_nXBassRange, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "XBassRange", m_DSPSettings.m_nXBassRange, iniFile);
 #endif
 #ifndef NO_REVERB
-	CMainFrame::WritePrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_Reverb.m_Settings.m_nReverbDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "ReverbType", CSoundFile::m_Reverb.m_Settings.m_nReverbType, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "ReverbType", m_ReverbSettings.m_nReverbType, iniFile);
 #endif
 #ifndef NO_DSP
-	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_DSP.m_Settings.m_nProLogicDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_DSP.m_Settings.m_nProLogicDelay, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth, iniFile);
+	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay, iniFile);
 #endif
 
 #ifndef NO_EQ

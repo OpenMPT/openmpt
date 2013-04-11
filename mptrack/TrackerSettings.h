@@ -12,7 +12,10 @@
 #pragma once
 
 #include "../soundlib/MixerSettings.h"
+#include "../soundlib/Resampler.h"
 #include "../sounddsp/EQ.h"
+#include "../sounddsp/DSP.h"
+#include "../soundlib/snd_rvb.h"
 
 /////////////////////////////////////////////////////////////////////////
 // Default directories
@@ -114,6 +117,11 @@ enum
 #define MIDISETUP_PLAYPATTERNONMIDIIN		0x100	// Play pattern if MIDI Note is received and playback is paused
 
 
+#define SOUNDSETUP_SECONDARY             SNDMIX_SECONDARY
+#define SOUNDSETUP_NOBOOSTTHREADPRIORITY SNDMIX_NOBOOSTTHREADPRIORITY
+#define SOUNDSETUP_RESTARTMASK           (SOUNDSETUP_SECONDARY|SOUNDSETUP_NOBOOSTTHREADPRIORITY)
+
+
 // EQ
 struct EQPreset
 {
@@ -166,7 +174,7 @@ public:
 	DWORD VuMeterUpdateInterval;
 
 	// Audio Setup
-	DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
+	DWORD gbLoopSong;
 	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
 	DWORD m_LatencyMS;
 	DWORD m_UpdateIntervalMS;
@@ -198,6 +206,13 @@ public:
 	COLORREF rgbCustomColors[MAX_MODCOLORS];
 
 	MixerSettings m_MixerSettings;
+	CResamplerSettings m_ResamplerSettings;
+#ifndef NO_REVERB
+	CReverbSettings m_ReverbSettings;
+#endif
+#ifndef NO_DSP
+	CDSPSettings m_DSPSettings;
+#endif
 
 	UINT gnAutoChordWaitTime;
 
@@ -214,6 +229,8 @@ public:
 	TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
 	// Directory to INI setting translation
 	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
+
+	uint8 DefaultPlugVolumeHandling;
 
 	int gnPlugWindowX;
 	int gnPlugWindowY;

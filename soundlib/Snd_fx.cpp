@@ -533,7 +533,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		const UINT tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
 		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * max(rowDelay, 1);
 
-		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(gdwMixingFreq);
+		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		renderedSamples += rowDuration;
 	}
 
@@ -1254,7 +1254,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	}
 	// Special case for MPT
 	if (bManual) pChn->dwFlags.reset(CHN_MUTE);
-	if((pChn->dwFlags[CHN_MUTE] && (gdwSoundSetup & SNDMIX_MUTECHNMODE))
+	if((pChn->dwFlags[CHN_MUTE] && (m_MixerSettings.MixerFlags & SNDMIX_MUTECHNMODE))
 		|| (pChn->pModSample != nullptr && pChn->pModSample->uFlags[CHN_MUTE] && !bManual)
 		|| (pChn->pModInstrument != nullptr && pChn->pModInstrument->dwFlags[INS_MUTE] && !bManual))
 	{

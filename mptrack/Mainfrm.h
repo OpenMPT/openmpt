@@ -108,26 +108,6 @@ enum
 };
 
 
-#define SOUNDSETUP_ENABLEMMX	0x08
-#define SOUNDSETUP_SOFTPANNING	0x10
-#define SOUNDSETUP_SECONDARY	0x40
-#define SOUNDSETUP_NOBOOSTTHREADPRIORITY	0x80
-#define SOUNDSETUP_RESTARTMASK	(SOUNDSETUP_SECONDARY|SOUNDSETUP_NOBOOSTTHREADPRIORITY)
-
-#ifndef NO_DSP
-#define QUALITY_NOISEREDUCTION	0x01
-#define QUALITY_MEGABASS		0x02
-#define QUALITY_SURROUND		0x08
-#endif
-#define QUALITY_REVERB			0x20
-#ifndef NO_AGC
-#define QUALITY_AGC				0x40
-#endif
-#ifndef NO_EQ
-#define QUALITY_EQ				0x80
-#endif
-
-
 #define NUM_VUMETER_PENS		32
 
 
@@ -336,8 +316,8 @@ public:
 
 // Low-Level Audio
 public:
-	static void UpdateDspEffects();
-	static void UpdateAudioParameters(BOOL bReset=FALSE);
+	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
+	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD NotifyThread();
@@ -403,7 +383,7 @@ public:
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
 	CWnd* m_pOrderlistHasFocus;
-	long GetSampleRate();
+	__declspec(deprecated) long GetSampleRate();
 	double GetApproxBPM();
 	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
@@ -426,7 +406,6 @@ public:
 
 // Player functions
 public:
-	static void ApplyTrackerSettings(CSoundFile *pSndFile);
 
 	// high level synchronous playback functions, do not hold AudioCriticalSection while calling these
 	bool PreparePlayback();
@@ -434,6 +413,7 @@ public:
 	void StopPlayback();
 	bool PausePlayback();
 	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
+	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() ? true : false; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
 	void SetPlaybackSoundFile(CSoundFile *pSndFile);
 	void UnsetPlaybackSoundFile();
@@ -459,10 +439,12 @@ public:
 	BOOL InitRenderer(CSoundFile*);
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
+
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
-	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupMiscOptions();
-	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
+	BOOL SetupPlayer();
+
+	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
 	HWND GetFollowSong() const;

@@ -39,11 +39,12 @@ typedef uint8 SEQUENCEINDEX;
 typedef uintptr_t SmpLength;
 
 
+#define MIXBUFFERSIZE		512
+
 
 #define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
 const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
 													// Note: Sample size in bytes can be more than this (= 256 MB).
-#define MAX_SAMPLE_RATE		192000					// Max playback / render rate in Hz
 
 const ROWINDEX MAX_PATTERN_ROWS			= 1024;
 const ORDERINDEX MAX_ORDERS				= 256;
@@ -274,37 +275,27 @@ FLAGSET(SongFlags)
 
 // Global Options (Renderer)
 #ifndef NO_DSP
-#define SNDMIX_NOISEREDUCTION	0x0002	// reduce hiss (do not use, it's just a simple low-pass filter)
+#define SNDDSP_NOISEREDUCTION 0x01	// reduce hiss (do not use, it's just a simple low-pass filter)
 #endif // NO_DSP
 #ifndef NO_AGC
-#define SNDMIX_AGC				0x0004	// automatic gain control
+#define SNDDSP_AGC            0x40	// automatic gain control
 #endif // ~NO_AGC
-#define SNDMIX_NORESAMPLING		0x0008	// force no resampling
-//      SNDMIX_NOLINEARSRCMODE is the default
-//#define SNDMIX_HQRESAMPLER		0x0010	 //rewbs.resamplerConf: renamed SNDMIX_HQRESAMPLER to SNDMIX_SPLINESRCMODE
-#define SNDMIX_SPLINESRCMODE	0x0010	// cubic resampling (?)
 #ifndef NO_DSP
-#define SNDMIX_MEGABASS			0x0020	// bass expansion
-#define SNDMIX_SURROUND			0x0040	// surround mix
+#define SNDDSP_MEGABASS       0x02	// bass expansion
+#define SNDDSP_SURROUND       0x08	// surround mix
 #endif // NO_DSP
-#define SNDMIX_REVERB			0x0080	// apply reverb
+#define SNDDSP_REVERB         0x20	// apply reverb
 #ifndef NO_EQ
-#define SNDMIX_EQ				0x0100	// apply EQ
+#define SNDDSP_EQ             0x80	// apply EQ
 #endif // NO_EQ
-#define SNDMIX_SOFTPANNING		0x0200	// soft panning mode (this is forced with mixmode RC3 and later)
-//#define SNDMIX_ULTRAHQSRCMODE	0x0400 	//rewbs.resamplerConf: renamed SNDMIX_ULTRAHQSRCMODE to SNDMIX_POLYPHASESRCMODE
-#define SNDMIX_POLYPHASESRCMODE	0x0400	// polyphase resampling
-#define SNDMIX_FIRFILTERSRCMODE	0x0800  //rewbs: added SNDMIX_FIRFILTERSRCMODE
 
-//rewbs.resamplerConf: for stuff that applies to cubic spline, polyphase and FIR
-#define SNDMIX_HQRESAMPLER (SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE)
-
-////rewbs.resamplerConf: for stuff that applies to polyphase and FIR
-#define SNDMIX_ULTRAHQSRCMODE (SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE)
-
+#define SNDMIX_SOFTPANNING    0x10	// soft panning mode (this is forced with mixmode RC3 and later)
 // Misc Flags (can safely be turned on or off)
-#define SNDMIX_DIRECTTODISK		0x10000		// WAV writer mode
-#define SNDMIX_ENABLEMMX		0x20000		// use MMX-accelerated code
+#define SNDMIX_ENABLEMMX      0x08		// use MMX-accelerated code
+
+#define SNDMIX_SECONDARY      0x40
+#define SNDMIX_NOBOOSTTHREADPRIORITY 0x80
+
 //#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
@@ -315,14 +306,16 @@ FLAGSET(SongFlags)
 // Resampling modes
 enum ResamplingMode
 {
-	SRCMODE_NEAREST,
+	SRCMODE_NEAREST = 0,
 	SRCMODE_LINEAR,
 	SRCMODE_SPLINE,
 	SRCMODE_POLYPHASE,
 	SRCMODE_FIRFILTER, //rewbs.resamplerConf
+
 	SRCMODE_DEFAULT,
 	NUM_SRC_MODES
 };
+
 
 // Release node defines
 #define ENV_RELEASE_NODE_UNSET	0xFF

@@ -12,8 +12,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#define ASM_NORMALIZE
-#ifdef ASM_NORMALIZE
+#ifdef ENABLE_ASM
 
 #pragma warning(disable:4100)
 #pragma warning(disable:4731)
@@ -58,12 +57,11 @@ extern void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern DWORD MPPASMCALL X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
-extern int MixSoundBuffer[];
 
 UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24, DWORD dwByteInc)
 //-----------------------------------------------------------------------------------------------
 {
-#ifdef ASM_NORMALIZE
+#ifdef ENABLE_ASM
 	int * const tempbuf = MixSoundBuffer;
 	int n = dwSize / 3;
 	while (n > 0)
