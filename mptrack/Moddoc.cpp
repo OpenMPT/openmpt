@@ -122,7 +122,6 @@ CModDoc::CModDoc() : m_PatternUndo(*this), m_SampleUndo(*this)
 //------------------------------------------------------------
 {
 	m_bHasValidPath = false;
-	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 
 	m_notifyType = Notification::Default;
@@ -222,10 +221,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	EndWaitCursor();
 
 	// Show log messages from loaders.
-	if (GetLog() != nullptr)
+	if (GetLog().size() > 0)
 	{
 		CString sTemp;
-		sTemp.Format("File: %s\nLast saved with: %s, your version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLog());
+		sTemp.Format("File: %s\nLast saved with: %s, your version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLogString());
 		Reporting::Information(sTemp);
 		ClearLog();
 	}
@@ -810,72 +809,40 @@ void CModDoc::ViewInstrument(UINT nIns)
 }
 
 
-void CModDoc::AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...)
-//--------------------------------------------------------------------------------------------
+void CModDoc::AddToLog(const std::string &text)
+//---------------------------------------------
 {
-	CString strMsg;
-	va_list args;
-	va_start(args, pszFormat);
-	strMsg.FormatV(pszFormat, args);
-	va_end(args);
-
-	m_logEvents << Util::sdTime::GetDateTimeStr()
-				<< _T("Event type: ") << eventType << std::endl
-				<< _T("Function: ") << pszFuncName << std::endl
-				<< _T("Message: ") << strMsg << std::endl << std::endl;
+	m_Log.push_back(text);
 }
 
 
-BOOL CModDoc::AddToLog(LPCSTR lpszLog)
-//------------------------------------
+std::string CModDoc::GetLogString() const
+//---------------------------------------
 {
-	UINT len;
-	if ((!lpszLog) || (!lpszLog[0])) return FALSE;
-	len = strlen(lpszLog);
-	if (m_lpszLog)
+	std::ostringstream ret;
+	for(std::vector<std::string>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
 	{
-		LPSTR p = new CHAR[strlen(m_lpszLog)+len+2];
-		if (p)
-		{
-			strcpy(p, m_lpszLog);
-			strcat(p, lpszLog);
-			delete[] m_lpszLog;
-			m_lpszLog = p;
-		}
-	} else
-	{
-		m_lpszLog = new CHAR[len+2];
-		if (m_lpszLog) strcpy(m_lpszLog, lpszLog);
+		ret << *i << std::endl;
 	}
-	return TRUE;
+	return ret.str();
 }
 
 
-BOOL CModDoc::ClearLog()
+void CModDoc::ClearLog()
 //----------------------
 {
-	if (m_lpszLog)
-	{
-		delete[] m_lpszLog;
-		m_lpszLog = NULL;
-	}
-	return TRUE;
+	m_Log.clear();
 }
 
 
 UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 //---------------------------------------------------
 {
-	if (!lpszTitle) lpszTitle = MAINFRAME_TITLE;
-	if (m_lpszLog)
+	if(!lpszTitle) lpszTitle = MAINFRAME_TITLE;
+	if(GetLog().size() > 0)
 	{
-#if 0
-		CShowLogDlg dlg(parent);
-		return dlg.ShowLog(m_lpszLog, lpszTitle);
-#else
-		Reporting::Information(m_lpszLog, lpszTitle, parent);
+		Reporting::Information(GetLogString().c_str(), lpszTitle, parent);
 		return IDOK;
-#endif
 	}
 	return IDCANCEL;
 }
@@ -2529,7 +2496,7 @@ void CModDoc::OnViewMPTHacks()
 {
 	if(!HasMPTHacks())
 	{
-		AddToLog("No hacks found.\n");
+		AddToLog("No hacks found.");
 	}
 	ShowLog();
 	ClearLog();

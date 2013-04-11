@@ -41,7 +41,7 @@ UINT Reporting::ShowNotification(const char *text, const char *caption, UINT fla
 
 	return result;
 #else
-	std::cout << caption << std::endl << text << std::endl;
+	std::clog << caption << std::endl << text << std::endl;
 	return 0;
 #endif // MODPLUG_TRACKER
 }
