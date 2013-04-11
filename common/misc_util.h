@@ -355,8 +355,6 @@ namespace Util
 #ifdef MODPLUG_TRACKER
 namespace Util { namespace sdTime
 {
-	// Returns string containing date and time ended with newline.
-	std::basic_string<TCHAR> GetDateTimeStr();
 
 	time_t MakeGmTime(tm& timeUtc);
 
