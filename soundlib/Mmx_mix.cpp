@@ -88,28 +88,6 @@ Done:
 }
 
 
-void CSoundFile::AssertAlignment()
-//--------------------------------
-{
-#ifdef _DEBUG
-	// Must be aligned on 32 bytes for best performance
-	if (sizeof(ModChannel) & 0x1F)
-	{
-		CHAR s[64];
-		wsprintf(s, "ModChannel struct not aligned: sizeof(ModChannel) = %d", sizeof(ModChannel));
-		Reporting::Warning(s);
-	}
-	DWORD dwFastSinc = (DWORD)(LPVOID)gFastSinc;
-	if (dwFastSinc & 7)
-	{
-		CHAR s[64];
-		wsprintf(s, "gFastSinc is not aligned (%08X)!", dwFastSinc);
-		Reporting::Warning(s);
-	}
-#endif
-}
-
-
 DWORD CSoundFile::GetSysInfo()
 //----------------------------
 {

@@ -504,7 +504,6 @@ public:
 	void InitPlayer(BOOL bReset=FALSE);
 	void SetDspEffects(DWORD DSPMask);
 	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
-	static void AssertAlignment();
 	static DWORD GetSysInfo();
 #ifndef NO_EQ
 	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB

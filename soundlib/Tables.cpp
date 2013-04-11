@@ -552,9 +552,6 @@ const float ITResonanceTable[128] =
 
 // Reversed sinc coefficients
 
-// we should avoid all compiler directives like this. It will cause errors in vanilla VC6.
-//__declspec(align(8)) short int gFastSinc[256*4] =
-
 short int gFastSinc[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 

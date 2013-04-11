@@ -890,7 +890,6 @@ BOOL CTrackApp::InitInstance()
 	AddDocTemplate(m_pModTemplate);
 
 	// Initialize Audio
-	CSoundFile::AssertAlignment();
 	DWORD sysinfo = CSoundFile::GetSysInfo();
 	if(sysinfo & SYSMIX_ENABLEMMX)
 	{
