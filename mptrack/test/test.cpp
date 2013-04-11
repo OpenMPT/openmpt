@@ -395,11 +395,11 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	// Sample Data
 	for(size_t i = 0; i < 6; i++)
 	{
-		VERIFY_EQUAL_NONCONT(sample.pSample[i], 18);
+		VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 18);
 	}
 	for(size_t i = 6; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(sample.pSample[i], 0);
+		VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 0);
 	}
 
 	// Instruments
@@ -608,11 +608,11 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		// Sample Data
 		for(size_t i = 0; i < 6; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample[i], 18);
+			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 18);
 		}
 		for(size_t i = 6; i < 16; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample[i], 0);
+			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 0);
 		}
 	}
 
@@ -828,11 +828,11 @@ void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 		// Sample Data
 		for(size_t i = 0; i < 30; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample[i], 127);
+			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 127);
 		}
 		for(size_t i = 31; i < 60; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample[i], -128);
+			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], -128);
 		}
 	}
 
