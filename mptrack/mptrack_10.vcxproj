@@ -251,6 +251,7 @@
     <ClCompile Include="..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\sounddsp\EQ.cpp" />
+    <ClCompile Include="..\sounddsp\Reverb.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\MIDIEvents.cpp" />
@@ -331,7 +332,6 @@
     <ClCompile Include="..\common\serialization_utils.cpp" />
     <ClCompile Include="..\soundlib\snd_flt.cpp" />
     <ClCompile Include="..\soundlib\Snd_fx.cpp" />
-    <ClCompile Include="..\Soundlib\Snd_rvb.cpp" />
     <ClCompile Include="..\Soundlib\snddev.cpp" />
     <ClCompile Include="..\soundlib\Sndfile.cpp" />
     <ClCompile Include="..\soundlib\Sndmix.cpp" />
@@ -410,6 +410,7 @@
     <ClInclude Include="..\sounddsp\AGC.h" />
     <ClInclude Include="..\sounddsp\DSP.h" />
     <ClInclude Include="..\sounddsp\EQ.h" />
+    <ClInclude Include="..\sounddsp\Reverb.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\FileReader.h" />
     <ClInclude Include="..\soundlib\ITCompression.h" />
@@ -428,7 +429,6 @@
     <ClInclude Include="..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\soundlib\SampleFormatConverters.h" />
     <ClInclude Include="..\soundlib\SampleIO.h" />
-    <ClInclude Include="..\soundlib\snd_rvb.h" />
     <ClInclude Include="..\soundlib\Tables.h" />
     <ClInclude Include="..\soundlib\WAVTools.h" />
     <ClInclude Include="..\soundlib\XMTools.h" />

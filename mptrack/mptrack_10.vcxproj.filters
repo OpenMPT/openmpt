@@ -250,9 +250,6 @@
     <ClCompile Include="..\Soundlib\snddev.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Soundlib\Snd_rvb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\Snd_fx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -429,6 +426,9 @@
     </ClCompile>
     <ClCompile Include="..\common\Profiler.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddsp\Reverb.cpp">
+      <Filter>Source Files\sounddsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -762,9 +762,6 @@
     <ClInclude Include="..\common\mutex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\snd_rvb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\mptString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -788,6 +785,9 @@
     </ClInclude>
     <ClInclude Include="..\common\Profiler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddsp\Reverb.h">
+      <Filter>Header Files\sounddsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

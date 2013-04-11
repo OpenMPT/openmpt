@@ -1,6 +1,6 @@
 /*
- * Snd_rvb.cpp
- * -----------
+ * Reverb.cpp
+ * ----------
  * Purpose: Mixing code for reverb.
  * Notes  : Ugh... This should really be removed at some point.
  * Authors: Olivier Lapicque
@@ -10,8 +10,8 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
-#include "snd_rvb.h"
+#include "../soundlib/Sndfile.h"
+#include "Reverb.h"
 
 #ifndef NO_REVERB
 

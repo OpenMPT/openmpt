@@ -34,7 +34,7 @@
 #include "FileReader.h"
 
 #include "Resampler.h"
-#include "snd_rvb.h"
+#include "../sounddsp/Reverb.h"
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
