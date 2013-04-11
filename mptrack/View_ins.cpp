@@ -195,7 +195,7 @@ BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeType
 	Notification::Type type;
 
 	if ((!pModDoc) || (nIns < 1) || (nIns >= MAX_INSTRUMENTS)) return FALSE;
-	if (nEnv) m_nEnv = nEnv;
+	m_nEnv = nEnv;
 	m_nInstrument = nIns;
 	switch(m_nEnv)
 	{
