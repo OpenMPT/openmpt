@@ -705,7 +705,9 @@ void CDoWaveConvert::OnButton1()
 // -! NEW_FEATURE#0024
 	{
 		mixersettings.gnBitsPerSample = 24;
+#ifndef NO_AGC
 		mixersettings.DSPMask &= ~SNDDSP_AGC;
+#endif
 		if(mixersettings.m_nPreAmp > 128) mixersettings.m_nPreAmp = 128;
 	} else
 	{

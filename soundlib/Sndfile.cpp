@@ -420,7 +420,9 @@ CSoundFile::CSoundFile() :
 	gdwSysInfo = GetSysInfo();
 	MemsetZero(MixSoundBuffer);
 	MemsetZero(MixRearBuffer);
+#ifndef NO_REVERB
 	MemsetZero(MixReverbBuffer);
+#endif
 	MemsetZero(MixFloatBuffer);
 	gnDryLOfsVol = 0;
 	gnDryROfsVol = 0;

@@ -207,8 +207,12 @@ public:
 
 	MixerSettings m_MixerSettings;
 	CResamplerSettings m_ResamplerSettings;
+#ifndef NO_REVERB
 	CReverbSettings m_ReverbSettings;
+#endif
+#ifndef NO_DSP
 	CDSPSettings m_DSPSettings;
+#endif
 
 	UINT gnAutoChordWaitTime;
 
