@@ -987,7 +987,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 			const tm* const p = localtime(&creationTime);
 			if (p != nullptr)
 				mptHistory.loadDate = *p;
-			else if (pSndFile->GetpModDoc() != nullptr)
+			else
 				pSndFile->AddToLog("localtime() returned nullptr.");
 
 			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * (double)HISTORY_TIMER_PRECISION);
