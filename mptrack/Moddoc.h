@@ -137,11 +137,6 @@ struct SplitKeyboardSettings
 	}
 };
 
-enum LogEventType
-{
-	LogEventUnexpectedError
-};
-
 enum InputTargetContext;
 
 //=============================
@@ -149,8 +144,7 @@ class CModDoc: public CDocument
 //=============================
 {
 protected:
-	LPSTR m_lpszLog;
-	std::basic_ostringstream<TCHAR> m_logEvents; // Log for general progress and error events.
+	std::vector<std::string> m_Log;
 	CSoundFile m_SndFile;
 
 	HWND m_hWndFollow;
@@ -194,14 +188,14 @@ public:
 	MODTYPE GetModType() const { return m_SndFile.m_nType; }
 	INSTRUMENTINDEX GetNumInstruments() const { return m_SndFile.m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
-	BOOL AddToLog(LPCSTR lpszLog);
-	LPCSTR GetLog() const { return m_lpszLog; }
-	BOOL ClearLog();
-	UINT ShowLog(LPCSTR lpszTitle=NULL, CWnd *parent=NULL);
-	void ClearFilePath() { m_strPathName.Empty(); }
 
 	// Logging for general progress and error events.
-	void AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...);
+	void AddToLog(const std::string &text);
+	const std::vector<std::string> & GetLog() const { return m_Log; }
+	std::string GetLogString() const;
+	void ClearLog();
+	UINT ShowLog(LPCSTR lpszTitle=NULL, CWnd *parent=NULL);
+	void ClearFilePath() { m_strPathName.Empty(); }
 
 	void ViewPattern(UINT nPat, UINT nOrd);
 	void ViewSample(UINT nSmp);

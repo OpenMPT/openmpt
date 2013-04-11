@@ -65,13 +65,6 @@ std::string GetErrorMessage(DWORD nErrorCode)
 #endif // MODPLUG_TRACKER
 
 
-std::basic_string<TCHAR> Util::sdTime::GetDateTimeStr()
-{
-	time_t t;
-	std::time(&t);
-	return _tctime(&t);
-}
-
 time_t Util::sdTime::MakeGmTime(tm& timeUtc)
 {
 	return _mkgmtime(&timeUtc);

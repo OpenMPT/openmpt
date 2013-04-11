@@ -478,6 +478,17 @@ CSoundFile::~CSoundFile()
 }
 
 
+void CSoundFile::AddToLog(const std::string &text) const
+//------------------------------------------------------
+{
+#ifdef MODPLUG_TRACKER
+	if(GetpModDoc()) GetpModDoc()->AddToLog(text);
+#else
+	Reporting::Warning(text.c_str());
+#endif
+}
+
+
 #ifdef MODPLUG_TRACKER
 BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 //----------------------------------------------------------------------------

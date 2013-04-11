@@ -505,7 +505,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 		modDoc.GetPatternUndo().ClearUndo();
 		if (nPatRemoved)
 		{
-			wsprintf(s, "%d pattern%s removed.\n", nPatRemoved, (nPatRemoved == 1) ? "" : "s");
+			wsprintf(s, "%d pattern%s removed.", nPatRemoved, (nPatRemoved == 1) ? "" : "s");
 			modDoc.AddToLog(s);
 		}
 		return true;
@@ -555,7 +555,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	if(nRemoved > 0)
 	{
-		wsprintf(s, "%d unused sample%s removed\n" , nRemoved, (nRemoved == 1) ? "" : "s");
+		wsprintf(s, "%d unused sample%s removed" , nRemoved, (nRemoved == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 
@@ -622,7 +622,7 @@ bool CModCleanupDlg::OptimizeSamples()
 				}
 			}
 		}
-		wsprintf(s, "%d sample loop%s optimized\n" ,numLoopOpt, (numLoopOpt == 1) ? "" : "s");
+		wsprintf(s, "%d sample loop%s optimized" ,numLoopOpt, (numLoopOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 		return true;
 	}
@@ -734,7 +734,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		EndWaitCursor();
 
 		char s[64];
-		wsprintf(s, "%d unused instrument%s removed\n", numRemoved, (numRemoved == 1) ? "" : "s");
+		wsprintf(s, "%d unused instrument%s removed", numRemoved, (numRemoved == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 		return true;
 	}

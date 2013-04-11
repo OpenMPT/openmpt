@@ -347,6 +347,8 @@ public:
 
 public:
 
+	void AddToLog(const std::string &text) const;
+
 #ifdef MODPLUG_TRACKER
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
@@ -355,6 +357,7 @@ public:
 	BOOL Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength=0);
 	void *GetpModDoc() const { return nullptr; }
 #endif // MODPLUG_TRACKER
+
 	BOOL Destroy();
 	MODTYPE GetType() const { return m_nType; }
 	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
