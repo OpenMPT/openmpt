@@ -2480,21 +2480,6 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 }
 
 
-//end rewbs.VSTTimeInfo
-long CMainFrame::GetSampleRate()
-//------------------------------
-{
-	CriticalSection cs;
-	if(GetSoundFilePlaying())
-	{
-		return GetSoundFilePlaying()->GetSampleRate();
-	} else
-	{
-		return TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq;
-	}
-}
-
-
 double CMainFrame::GetApproxBPM()
 //-------------------------------
 {
