@@ -57,6 +57,13 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 #define noinline
 #endif
 
+// Some functions might be deprecated although they are still in use.
+// Tag them with "DEPRECATED".
+#if defined(_MSC_VER)
+#define DEPRECATED __declspec(deprecated)
+#else
+#define DEPRECATED
+#endif
 
 typedef __int8 int8;
 typedef __int16 int16;
