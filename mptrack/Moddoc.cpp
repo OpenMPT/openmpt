@@ -1033,7 +1033,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			pChn->nPosLo = 0;
 			pChn->nLoopStart = loopStart;
 			pChn->nLoopEnd = loopEnd;
-			pChn->nLength = min(UINT(loopEnd), pChn->pModSample->nLength);
+			pChn->nLength = Util::Min(loopEnd, pChn->pModSample->nLength);
 		}
 
 		// Handle extra-loud flag
@@ -1945,12 +1945,9 @@ void CModDoc::OnPlayerPlay()
 
 		m_SndFile.m_bPositionChanged = true;
 
-		if (isPlaying)
+		if(isPlaying)
 		{
 			m_SndFile.StopAllVsti();
-		} else
-		{
-			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
@@ -2037,7 +2034,6 @@ void CModDoc::OnPlayerPlayFromStart()
 		m_SndFile.m_lTotalSampleCount = 0;
 
 		m_SndFile.m_bPositionChanged = true;
-		m_SndFile.ResumePlugins();
 
 		cs.Leave();
 
@@ -2346,9 +2342,6 @@ void CModDoc::OnPatternRestart(bool loop)
 		if(pModPlaying == this)
 		{
 			m_SndFile.StopAllVsti();
-		} else
-		{
-			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
@@ -2404,9 +2397,6 @@ void CModDoc::OnPatternPlay()
 		if(pModPlaying == this)
 		{
 			m_SndFile.StopAllVsti();
-		} else
-		{
-			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
@@ -2465,9 +2455,6 @@ void CModDoc::OnPatternPlayNoLoop()
 		if(pModPlaying == this)
 		{
 			m_SndFile.StopAllVsti();
-		} else
-		{
-			m_SndFile.ResumePlugins();
 		}
 
 		cs.Leave();
