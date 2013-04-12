@@ -553,7 +553,7 @@ void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posB
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
 
-	if (nRawEntrySize > DataSize_max)
+	if (nRawEntrySize > std::numeric_limits<DataSize>::max())
 		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }	
 
 	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
@@ -727,13 +727,13 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 	if (GetFlag(RwfRwHasMap))
 	{
 		ReadAdaptive1248(iStrm, tempU64);
-		if(tempU64 > Offtype_max)
+		if(tempU64 > std::numeric_limits<Offtype>::max())
 			{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 	}
 
 	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
 
-	if (rawEndOfHdrData < 0 || rawEndOfHdrData > RposType_max)
+	if (rawEndOfHdrData < 0 || rawEndOfHdrData > std::numeric_limits<RposType>::max())
 		{ AddReadNote(SNR_INSUFFICIENT_RPOSTYPE); return; }
 
 	m_rposEndofHdrData = static_cast<RposType>(rawEndOfHdrData);
@@ -787,7 +787,7 @@ void Ssb::CacheMap()
 			{
 				uint64 tempU64;
 				ReadAdaptive1248(iStrm, tempU64);
-				if(tempU64 > Offtype_max)
+				if(tempU64 > std::numeric_limits<Offtype>::max())
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].rposStart = static_cast<RposType>(tempU64);
 			}
@@ -799,7 +799,7 @@ void Ssb::CacheMap()
 			{
 				uint64 tempU64;
 				ReadAdaptive1248(iStrm, tempU64);
-				if(tempU64 > Offtype_max)
+				if(tempU64 > std::numeric_limits<Offtype>::max())
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].nSize = static_cast<DataSize>(tempU64);
 			}

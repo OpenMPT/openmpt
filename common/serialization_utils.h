@@ -34,19 +34,11 @@ typedef OutStream::off_type Offtype;
 typedef Offtype Postype;
 typedef std::streamsize Streamsize;
 
-//typedef uintptr_t	DataSize;	// Data size type.
-//typedef uintptr_t	RposType;	// Relative position type.
-//typedef uintptr_t	NumType;	// Entry count type.
 typedef uintptr_t	DataSize;	// Data size type.
 typedef uintptr_t	RposType;	// Relative position type.
 typedef uintptr_t	NumType;	// Entry count type.
-const DataSize DataSize_max = Util::NumericTraits<DataSize>::maxValue;
-const RposType RposType_max = Util::NumericTraits<RposType>::maxValue;
-const NumType NumType_max	= Util::NumericTraits<NumType>::maxValue;
 
-const DataSize invalidDatasize = DataSize_max;
-const Offtype Offtype_min = Util::NumericTraits<Offtype>::minValue;
-const Offtype Offtype_max = Util::NumericTraits<Offtype>::maxValue;
+const DataSize invalidDatasize = DataSize(-1);
 
 typedef std::basic_string<TCHAR> String;
 
