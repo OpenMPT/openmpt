@@ -1875,6 +1875,7 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 DWORD MPPASMCALL X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 8-bit buffer
@@ -1907,6 +1908,17 @@ done:
 	mov result, eax
 	}
 	return result;
+#else
+	uint8 * p = (uint8*)lp16;
+	for(DWORD i=0; i<lSampleCount; i++)
+	{
+		int v = pBuffer[i];
+		if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
+		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
+		p[i] = (uint8)((v >> (24-MIXING_ATTENUATION))+0x80); // unsigned
+	}
+	return lSampleCount * 1;
+#endif
 }
 
 
@@ -1914,6 +1926,7 @@ done:
 DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //-------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	DWORD result;
 	_asm {
 	mov ebx, lp16				// ebx = 16-bit buffer
@@ -1946,6 +1959,17 @@ done:
 	mov result, eax
 	}
 	return result;
+#else
+	int16 * p = (int16*)lp16;
+	for(DWORD i=0; i<lSampleCount; i++)
+	{
+		int v = pBuffer[i];
+		if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
+		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
+		p[i] = (int16)(v >> (16-MIXING_ATTENUATION));
+	}
+	return lSampleCount * 2;
+#endif
 }
 
 
@@ -1953,6 +1977,7 @@ done:
 DWORD MPPASMCALL X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //-------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 8-bit buffer
@@ -1961,8 +1986,7 @@ DWORD MPPASMCALL X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount
 cliploop:
 	mov eax, dword ptr [edx]
 	add ebx, 3
-	//add eax, (7-MIXING_ATTENUATION)
-	add eax, (1<<(7-MIXING_ATTENUATION))  //ericus' 24bit fix
+	add eax, (1<<(7-MIXING_ATTENUATION))
 	add edx, 4
 	cmp eax, MIXING_CLIPMIN
 	jl cliplow
@@ -1988,6 +2012,26 @@ done:
 	mov result, eax
 	}
 	return result;
+#else
+	uint8 * p = (uint8*)lp16;
+	for(DWORD i=0; i<lSampleCount; i++)
+	{
+		int v = pBuffer[i];
+		if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
+		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
+		v >>= (8-MIXING_ATTENUATION);
+#ifdef PLATFORM_BIG_ENDIAN
+		p[i*3+0] = ((unsigned)v>>0)&0xff;
+		p[i*3+1] = ((unsigned)v>>8)&0xff;
+		p[i*3+2] = ((unsigned)v>>16)&0xff;
+#else
+		p[i*3+0] = ((unsigned)v>>16)&0xff;
+		p[i*3+1] = ((unsigned)v>>8)&0xff;
+		p[i*3+2] = ((unsigned)v>>0)&0xff;
+#endif
+	}
+	return lSampleCount * 3;
+#endif
 }
 
 
@@ -2029,13 +2073,11 @@ done:
 	return result;
 #else
 	int32 * p = (int32*)lp16;
-	for ( DWORD i=0; i<lSampleCount; i++ ) {
+	for(DWORD i=0; i<lSampleCount; i++)
+	{
 		int v = pBuffer[i];
-		if ( v < MIXING_CLIPMIN ) {
-			v = MIXING_CLIPMIN;
-		} else if ( v > MIXING_CLIPMAX ) {
-			v = MIXING_CLIPMAX;
-		}
+		if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
+		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
 		p[i] = v << MIXING_ATTENUATION;
 	}
 	return lSampleCount * 4;
