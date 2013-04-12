@@ -14,8 +14,6 @@
 enum
 {
 	NO_ATTENUATION = 1,
-	MIXING_CLIPMIN = -0x07FFFFFF,
-	MIXING_CLIPMAX = 0x07FFFFFF,
 };
 
 enum tempoMode
