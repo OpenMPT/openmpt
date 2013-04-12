@@ -105,7 +105,7 @@ bool CMIDIMapper::Deserialize(const char *ptr, const size_t size)
 		memcpy(&i16, ptr, 2); ptr += 2; //Channel, event, MIDIbyte1.
 		memcpy(&i8, ptr, 1); ptr++;		//Plugindex
 		const BYTE remainingbytes = psize - 4;
-		memcpy(&i32, ptr, min(4, remainingbytes)); ptr += remainingbytes;
+		memcpy(&i32, ptr, MIN(4, remainingbytes)); ptr += remainingbytes;
 
 		s.SetChannel(((i16 & 1) != 0) ? 0 : 1 + ((i16 >> 1) & 0xF));
 		s.SetEvent(static_cast<BYTE>((i16 >> 5) & 0xF));

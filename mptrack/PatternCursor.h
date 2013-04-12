@@ -114,7 +114,7 @@ public:
 	// Move the cursor relatively.
 	void Move(int rows, int channels, int columns)
 	{
-		int row = max(0, static_cast<int>(GetRow()) + rows);
+		int row = MAX(0, static_cast<int>(GetRow()) + rows);
 		int chn = static_cast<int>(GetChannel()) + channels;
 		int col = static_cast<int>(GetColumnType() + columns);
 
@@ -179,7 +179,7 @@ public:
 	// Ensure that the point lies within a given pattern size.
 	void Sanitize(ROWINDEX maxRows, CHANNELINDEX maxChans)
 	{
-		ROWINDEX row = min(GetRow(), maxRows - 1);
+		ROWINDEX row = MIN(GetRow(), maxRows - 1);
 		CHANNELINDEX chn = GetChannel();
 		Columns col = GetColumnType();
 

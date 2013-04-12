@@ -96,7 +96,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 		{
 			if(param <= 0x80)
 			{
-				param = min(param << 1, 0xFF);
+				param = MIN(param << 1, 0xFF);
 			}
 			else if(param == 0xA4)	// surround
 			{
@@ -118,8 +118,8 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_VOLUME:			command = 0x0C; break;
 	case CMD_PATTERNBREAK:		command = 0x0D; param = ((param / 10) << 4) | (param % 10); break;
 	case CMD_MODCMDEX:			command = 0x0E; break;
-	case CMD_SPEED:				command = 0x0F; param = min(param, (toXM) ? 0x1Fu : 0x20u); break;
-	case CMD_TEMPO:				command = 0x0F; param = max(param, (toXM) ? 0x20u : 0x21u); break;
+	case CMD_SPEED:				command = 0x0F; param = MIN(param, (toXM) ? 0x1Fu : 0x20u); break;
+	case CMD_TEMPO:				command = 0x0F; param = MAX(param, (toXM) ? 0x20u : 0x21u); break;
 	case CMD_GLOBALVOLUME:		command = 'G' - 55; break;
 	case CMD_GLOBALVOLSLIDE:	command = 'H' - 55; break;
 	case CMD_KEYOFF:			command = 'K' - 55; break;
@@ -227,7 +227,7 @@ struct MODSampleHeader
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length * 2;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune & 0x0F);
-		mptSmp.nVolume = 4 * min(volume, 64);
+		mptSmp.nVolume = 4 * MIN(volume, 64);
 
 		SmpLength lStart = loopStart * 2;
 		SmpLength lLength = loopLength * 2;
@@ -304,7 +304,7 @@ struct MODSampleHeader
 		if(mptSmp.uFlags[CHN_LOOP])
 		{
 			loopStart = static_cast<uint16>(mptSmp.nLoopStart / 2);
-			loopLength = static_cast<uint16>(max(1, (mptSmp.nLoopEnd - mptSmp.nLoopStart) / 2));
+			loopLength = static_cast<uint16>(MAX(1, (mptSmp.nLoopEnd - mptSmp.nLoopStart) / 2));
 		}
 
 		return writeLength;
@@ -353,7 +353,7 @@ struct FixMODPatterns
 				m.param = 0x91;
 			} else
 			{
-				m.param = min(m.param * 2, 0xFF);
+				m.param = MIN(m.param * 2, 0xFF);
 			}
 		}
 	}
@@ -1159,7 +1159,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 				{
 					// Maybe we can save some volume commands...
 					command = 0x0C;
-					param = min(m.vol, 64);
+					param = MIN(m.vol, 64);
 				}
 
 				uint16 period = 0;
@@ -1209,7 +1209,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 			// First two bytes of oneshot samples have to be 0 due to PT's one-shot loop
 			const long sampleEnd = ftell(f);
 			fseek(f, sampleStart, SEEK_SET);
-			fwrite(&silence, min(writtenBytes, 2), 1, f);
+			fwrite(&silence, MIN(writtenBytes, 2), 1, f);
 			fseek(f, sampleEnd, SEEK_SET);
 		}
 

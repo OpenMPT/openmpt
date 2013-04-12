@@ -513,7 +513,7 @@ bool CModDoc::ConvertSamplesToInstruments()
 	}
 
 	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
-	const SAMPLEINDEX nInstruments = min(m_SndFile.GetNumSamples(), nInstrumentMax);
+	const SAMPLEINDEX nInstruments = MIN(m_SndFile.GetNumSamples(), nInstrumentMax);
 
 	for(SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
 	{
@@ -544,7 +544,7 @@ UINT CModDoc::RemovePlugs(const vector<bool> &keepMask)
 {
 	//Remove all plugins whose keepMask[plugindex] is false.
 	UINT nRemoved = 0;
-	const PLUGINDEX maxPlug = min(MAX_MIXPLUGINS, keepMask.size());
+	const PLUGINDEX maxPlug = MIN(MAX_MIXPLUGINS, keepMask.size());
 
 	for (PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
 	{
@@ -844,12 +844,12 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate, bool bCopy, SEQUENCEINDEX nSourceSeq, SEQUENCEINDEX nDestSeq)
 //---------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if (max(nSourceNdx, nDestNdx) >= m_SndFile.Order.size()) return false;
+	if (MAX(nSourceNdx, nDestNdx) >= m_SndFile.Order.size()) return false;
 	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;
 
 	if(nSourceSeq == SEQUENCEINDEX_INVALID) nSourceSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 	if(nDestSeq == SEQUENCEINDEX_INVALID) nDestSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-	if (max(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
+	if (MAX(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
 	PATTERNINDEX nSourcePat = m_SndFile.Order.GetSequence(nSourceSeq)[nSourceNdx];
 
 	// save current working sequence
@@ -1013,7 +1013,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			sscanf(p + dwPos, pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
 			while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
 
-			nPoints = min(nPoints, m_SndFile.GetModSpecifications().envelopePointsMax);
+			nPoints = MIN(nPoints, m_SndFile.GetModSpecifications().envelopePointsMax);
 			if (susEnd >= nPoints) susEnd = 0;
 			if (susBegin > susEnd) susBegin = susEnd;
 			if (loopEnd >= nPoints) loopEnd = 0;

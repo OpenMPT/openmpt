@@ -126,8 +126,8 @@ struct ModInstrument
 	bool IsResonanceEnabled() const { return (nIFR & 0x80) != 0; }
 	uint8 GetCutoff() const { return (nIFC & 0x7F); }
 	uint8 GetResonance() const { return (nIFR & 0x7F); }
-	void SetCutoff(uint8 cutoff, bool enable) { nIFC = min(cutoff, 0x7F) | (enable ? 0x80 : 0x00); }
-	void SetResonance(uint8 resonance, bool enable) { nIFR = min(resonance, 0x7F) | (enable ? 0x80 : 0x00); }
+	void SetCutoff(uint8 cutoff, bool enable) { nIFC = MIN(cutoff, 0x7F) | (enable ? 0x80 : 0x00); }
+	void SetResonance(uint8 resonance, bool enable) { nIFR = MIN(resonance, 0x7F) | (enable ? 0x80 : 0x00); }
 
 	bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
 

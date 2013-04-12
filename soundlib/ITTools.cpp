@@ -44,7 +44,7 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, BYTE envOffset, B
 	if(mptEnv.dwFlags[ENV_CARRY]) flags |= ITEnvelope::envCarry;
 
 	// Nodes and Loops
-	num = (uint8)min(mptEnv.nNodes, 25);
+	num = (uint8)MIN(mptEnv.nNodes, 25);
 	lpb = (uint8)mptEnv.nLoopStart;
 	lpe = (uint8)mptEnv.nLoopEnd;
 	slb = (uint8)mptEnv.nSustainStart;
@@ -82,10 +82,10 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, int m
 	mptEnv.dwFlags.set(ENV_CARRY, (flags & ITEnvelope::envCarry) != 0);
 
 	// Nodes and Loops
-	mptEnv.nNodes = min(num, maxNodes);
-	mptEnv.nLoopStart = min(lpb, static_cast<uint8>(maxNodes));
+	mptEnv.nNodes = MIN(num, maxNodes);
+	mptEnv.nLoopStart = MIN(lpb, static_cast<uint8>(maxNodes));
 	mptEnv.nLoopEnd = Clamp(lpe, mptEnv.nLoopStart, static_cast<uint8>(maxNodes));
-	mptEnv.nSustainStart = min(slb, static_cast<uint8>(maxNodes));
+	mptEnv.nSustainStart = MIN(slb, static_cast<uint8>(maxNodes));
 	mptEnv.nSustainEnd = Clamp(sle, mptEnv.nSustainStart, static_cast<uint8>(maxNodes));
 
 	// Envelope Data
@@ -187,8 +187,8 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		mptIns.VolEnv.Values[i] = nodes[i * 2 + 1];
 	}
 
-	if(max(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_LOOP);
-	if(max(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_SUSTAIN);
+	if(MAX(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_LOOP);
+	if(MAX(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_SUSTAIN);
 }
 
 
@@ -218,14 +218,14 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	StringFixer::WriteString<StringFixer::nullTerminated>(name, mptIns.name);
 
 	// Volume / Panning
-	fadeout = static_cast<uint16>(min(mptIns.nFadeOut >> 5, 256));
-	gbv = static_cast<uint8>(min(mptIns.nGlobalVol * 2, 128));
-	dfp = static_cast<uint8>(min(mptIns.nPan / 4, 64));
+	fadeout = static_cast<uint16>(MIN(mptIns.nFadeOut >> 5, 256));
+	gbv = static_cast<uint8>(MIN(mptIns.nGlobalVol * 2, 128));
+	dfp = static_cast<uint8>(MIN(mptIns.nPan / 4, 64));
 	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
 
 	// Random Variation
-	rv = min(mptIns.nVolSwing, 100);
-	rp = min(mptIns.nPanSwing, 64);
+	rv = MIN(mptIns.nVolSwing, 100);
+	rp = MIN(mptIns.nPanSwing, 64);
 
 	// NNA Stuff
 	nna = mptIns.nNNA;
@@ -307,8 +307,8 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.dwFlags.set(INS_SETPANNING, !(dfp & ITInstrument::ignorePanning));
 
 	// Random Variation
-	mptIns.nVolSwing = min(rv, 100);
-	mptIns.nPanSwing = min(rp, 64);
+	mptIns.nVolSwing = MIN(rv, 100);
+	mptIns.nPanSwing = MIN(rp, 64);
 
 	// NNA Stuff
 	mptIns.nNNA = nna;
@@ -529,9 +529,9 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	// Auto Vibrato settings
 	static const uint8 autovibxm2it[8] = { 0, 2, 4, 1, 3, 0, 0, 0 };	// OpenMPT VibratoType -> IT Vibrato
 	vit = autovibxm2it[mptSmp.nVibType & 7];
-	vis = min(mptSmp.nVibRate, 64);
-	vid = min(mptSmp.nVibDepth, 32);
-	vir = min(mptSmp.nVibSweep, 255);
+	vis = MIN(mptSmp.nVibRate, 64);
+	vid = MIN(mptSmp.nVibDepth, 32);
+	vir = MIN(mptSmp.nVibSweep, 255);
 
 	if((vid | vis) != 0 && (fromType & MOD_TYPE_XM))
 	{

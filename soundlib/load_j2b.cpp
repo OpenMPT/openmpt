@@ -599,7 +599,7 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 			continue;
 		}
 
-		ModCommand &m = rowBase[min((flags & channelMask), channels - 1)];
+		ModCommand &m = rowBase[MIN((flags & channelMask), channels - 1)];
 
 		if(flags & dataFlag)
 		{
@@ -645,7 +645,7 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 					if (m.param & 0xF0) m.param &= 0xF0;
 					break;
 				case CMD_PANNING8:
-					if(m.param <= 0x80) m.param = min(m.param << 1, 0xFF);
+					if(m.param <= 0x80) m.param = MIN(m.param << 1, 0xFF);
 					else if(m.param == 0xA4) {m.command = CMD_S3MCMDEX; m.param = 0x91;}
 					break;
 				case CMD_PATTERNBREAK:
@@ -747,7 +747,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 	m_SongFlags.set(SONG_LINEARSLIDES, !(mainChunk.flags & AMFFMainChunk::amigaSlides));
 
-	m_nChannels = min(mainChunk.channels, MAX_BASECHANNELS);
+	m_nChannels = MIN(mainChunk.channels, MAX_BASECHANNELS);
 	m_nDefaultSpeed = mainChunk.speed;
 	m_nDefaultTempo = mainChunk.tempo;
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
@@ -822,7 +822,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 				continue;
 			}
 
-			m_nInstruments = max(m_nInstruments, instr);
+			m_nInstruments = MAX(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
@@ -882,7 +882,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 			{
 				continue;
 			}
-			m_nInstruments = max(m_nInstruments, instr);
+			m_nInstruments = MAX(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 

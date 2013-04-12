@@ -395,7 +395,7 @@ float RemoveDCOffset(ModSample &smp,
 	dMin += dOffset;
 
 	// ... and that might cause distortion, so we will normalize this.
-	const double dAmplify = 1 / max(dMax, -dMin);
+	const double dAmplify = 1 / MAX(dMax, -dMin);
 
 	// step 2: centralize + normalize sample
 	dOffset *= dMaxAmplitude * dAmplify;
@@ -409,7 +409,7 @@ float RemoveDCOffset(ModSample &smp,
 	{
 		CriticalSection cs;
 
-		smp.nGlobalVol = min((WORD)(smp.nGlobalVol / dAmplify), 64);
+		smp.nGlobalVol = MIN((WORD)(smp.nGlobalVol / dAmplify), 64);
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			if(sndFile.Chn[i].pSample == smp.pSample)

@@ -39,7 +39,7 @@ SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note, double pitchReferen
 //---------------------------------------------------------------------------------------
 {
 	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
-	return (SmpLength)max(Util::Round((double)sampleFreq / fundamentalFrequency), 1);
+	return (SmpLength)MAX(Util::Round((double)sampleFreq / fundamentalFrequency), 1);
 }
 
 
@@ -103,7 +103,7 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 	}
 
 	// We should analyse at least a one second (= GetSampleRate() samples) long sample.
-	sampleLength = max(sampleLoopEnd, sample.GetSampleRate(modType)) + maxShift;
+	sampleLength = MAX(sampleLoopEnd, sample.GetSampleRate(modType)) + maxShift;
 
 	if(sampleData != nullptr)
 	{

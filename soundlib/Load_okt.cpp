@@ -68,7 +68,7 @@ STATIC_ASSERT(sizeof(OktSample) == 32);
 void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSndFile)
 //------------------------------------------------------------------------------------
 {
-	pSndFile->m_nSamples = min((SAMPLEINDEX)(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1);	// typically 36
+	pSndFile->m_nSamples = MIN((SAMPLEINDEX)(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1);	// typically 36
 	sample7bit.resize(pSndFile->GetNumSamples());
 
 	for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
@@ -88,7 +88,7 @@ void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSn
 
 		mptSmp.nC5Speed = 8287;
 		mptSmp.nGlobalVol = 64;
-		mptSmp.nVolume = min(oktSmp.volume, 64) * 4;
+		mptSmp.nVolume = MIN(oktSmp.volume, 64) * 4;
 		mptSmp.nLength = oktSmp.length & ~1;	// round down
 		// parse loops
 		if (oktSmp.loopLength > 2 && static_cast<SmpLength>(oktSmp.loopStart) + static_cast<SmpLength>(oktSmp.loopLength) <= mptSmp.nLength)
@@ -176,14 +176,14 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile *pSndFile)
 				if (m->param)
 				{
 					m->command = CMD_NOTESLIDEDOWN;
-					m->param = 0x10 | min(0x0F, m->param);
+					m->param = 0x10 | MIN(0x0F, m->param);
 				}
 				break;
 			case 30: // U Slide Up (Notes)
 				if (m->param)
 				{
 					m->command = CMD_NOTESLIDEUP;
-					m->param = 0x10 | min(0x0F, m->param);
+					m->param = 0x10 | MIN(0x0F, m->param);
 				}
 				break;
 			/* We don't have fine note slide, but this is supposed to happen once
@@ -193,14 +193,14 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile *pSndFile)
 				if (m->param)
 				{
 					m->command = CMD_NOTESLIDEDOWN;
-					m->param = 0x50 | min(0x0F, m->param);
+					m->param = 0x50 | MIN(0x0F, m->param);
 				}
 				break;
 			case 17: // H Slide Up Once (Notes)
 				if (m->param)
 				{
 					m->command = CMD_NOTESLIDEUP;
-					m->param = 0x50 | min(0x0F, m->param);
+					m->param = 0x50 | MIN(0x0F, m->param);
 				}
 				break;
 
@@ -244,10 +244,10 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile *pSndFile)
 					m->param = (m->param & 0x0F) << 4; // Dx0
 					break;
 				case 6:
-					m->param = 0xF0 | min(m->param & 0x0F, 0x0E); // DFx
+					m->param = 0xF0 | MIN(m->param & 0x0F, 0x0E); // DFx
 					break;
 				case 7:
-					m->param = (min(m->param & 0x0F, 0x0E) << 4) | 0x0F; // DxF
+					m->param = (MIN(m->param & 0x0F, 0x0E) << 4) | 0x0F; // DxF
 					break;
 				default:
 					// Junk.
@@ -417,7 +417,7 @@ bool CSoundFile::ReadOKT(FileReader &file)
 			continue;
 
 		// weird stuff?
-		mptSample.nLength = min(mptSample.nLength, sampleChunks[nFileSmp].GetLength());
+		mptSample.nLength = MIN(mptSample.nLength, sampleChunks[nFileSmp].GetLength());
 
 		SampleIO(
 			SampleIO::_8bit,

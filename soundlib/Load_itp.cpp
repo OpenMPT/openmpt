@@ -390,7 +390,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// number of pattern name strings
 	PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
-	numNamedPats = min(numNamedPats, MAX_PATTERNS);
+	numNamedPats = MIN(numNamedPats, MAX_PATTERNS);
 	id = numNamedPats;
 	fwrite(&id, 1, sizeof(id), f);
 

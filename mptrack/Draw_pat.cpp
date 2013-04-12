@@ -466,7 +466,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 
 	if(mc.IsPcNote())
 	{	//If note is parameter control note, drawing volume command differently.
-		const int val = min(ModCommand::maxColumnValue, mc.GetValueVolCol());
+		const int val = MIN(ModCommand::maxColumnValue, mc.GetValueVolCol());
 
 		m_Dib.TextBlt(x, y, 1, COLUMN_HEIGHT, pfnt->nClrX, pfnt->nClrY);
 		m_Dib.TextBlt(x + 1, y, pfnt->nVolCmdWidth, COLUMN_HEIGHT,
@@ -687,7 +687,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			if(pSndFile->Patterns.IsValidPat(nPrevPat))
 			{
 				ROWINDEX nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
-				ROWINDEX n = min(static_cast<ROWINDEX>(nSkip), nPrevRows);
+				ROWINDEX n = MIN(static_cast<ROWINDEX>(nSkip), nPrevRows);
 
 				ypaint += (nSkip - n) * m_szCell.cy;
 				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
@@ -733,7 +733,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			if(pSndFile->Patterns.IsValidPat(nNextPat))
 			{
 				ROWINDEX nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
-				ROWINDEX n = min(static_cast<ROWINDEX>(nVisRows), nNextRows);
+				ROWINDEX n = MIN(static_cast<ROWINDEX>(nVisRows), nNextRows);
 
 				m_Dib.SetBlendMode(0x80);
 				DrawPatternData(hdc, pSndFile, nNextPat, false, false,

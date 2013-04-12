@@ -346,7 +346,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_TabCtrl.DeleteAllItems();
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
-			const int lastItem = min(iItem * 4 + 4, MAX_BASECHANNELS);
+			const int lastItem = MIN(iItem * 4 + 4, MAX_BASECHANNELS);
 			wsprintf(s, "%d - %d", iItem * 4 + 1, lastItem);
 			tci.mask = TCIF_TEXT | TCIF_PARAM;
 			tci.pszText = s;
@@ -699,7 +699,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		short int pos;
 		
 		LockControls();
-		const CHANNELINDEX nLoopLimit = min(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
+		const CHANNELINDEX nLoopLimit = MIN(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
 		{
 			// Volume sliders

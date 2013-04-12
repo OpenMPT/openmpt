@@ -239,7 +239,7 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 	else if((val <= 0x0F || internalTicks < 2) && hasFine)
 		return (val | 0xF0);
 	else
-		return max(1, (val / (internalTicks - 1)));	// no porta on first tick!
+		return MAX(1, (val / (internalTicks - 1)));	// no porta on first tick!
 }
 
 
@@ -247,10 +247,10 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 static uint8 DMFslide2MPT(uint8 val, const uint8 internalTicks, const bool up)
 //----------------------------------------------------------------------------
 {
-	val = max(1, val / 4);
+	val = MAX(1, val / 4);
 	const bool isFine = (val < 0x0F) || (internalTicks < 2);
 	if(!isFine)
-		val = max(1, (val + internalTicks - 2) / (internalTicks - 1));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
+		val = MAX(1, (val + internalTicks - 2) / (internalTicks - 1));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
 
 	if(up)
 		return (isFine ? 0x0F : 0x00) | (val << 4);
@@ -288,9 +288,9 @@ static uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
 {
 	// MPT: 1 vibrato period == 64 ticks... we have internalTicks ticks per row.
 	// X-Tracker: Period length specified in rows!
-	const int periodInTicks = max(1, (val >> 4)) * internalTicks;
+	const int periodInTicks = MAX(1, (val >> 4)) * internalTicks;
 	const uint8 matchingPeriod = (uint8)CLAMP((128 / periodInTicks), 1, 15);
-	return (matchingPeriod << 4) | max(1, (val & 0x0F));
+	return (matchingPeriod << 4) | MAX(1, (val & 0x0F));
 }
 
 
@@ -513,7 +513,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 				// => Tempo = 60 * Rows per Second * Speed / 24
 				// For some reason, using settings.tempoTicks + 1 gives more accurate results than just settings.tempoTicks... (same problem in the old libmodplug DMF loader)
 				// Original unoptimized formula:
-				//const int tickspeed = (tempoRealBPMmode) ? max(1, (tempoData * beat * 4) / 60) : tempoData;
+				//const int tickspeed = (tempoRealBPMmode) ? MAX(1, (tempoData * beat * 4) / 60) : tempoData;
 				const int tickspeed = (settings.realBPMmode) ? Util::Max(1, settings.tempoBPM * settings.beat * 2) : ((settings.tempoTicks + 1) * 30);
 				// Try to find matching speed - try higher speeds first, so that effects like arpeggio and tremor work better.
 				for(speed = 255; speed > 1; speed--)
@@ -645,7 +645,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						}
 						break;
 					case 5:		// Tremolo Retrig Sample (who invented those stupid effect names?)
-						effectParam1 = max(1, DMFdelay2MPT(effectParam1, settings.internalTicks));
+						effectParam1 = MAX(1, DMFdelay2MPT(effectParam1, settings.internalTicks));
 						effect1 = CMD_RETRIG;
 						settings.channels[chn].playDir = false;
 						break;
@@ -690,7 +690,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 					case 1:		// Note Finetune
 						effect2 = static_cast<ModCommand::COMMAND>(effectParam2 < 128 ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
 						if(effectParam2 > 128) effectParam2 = 255 - effectParam2 + 1;
-						effectParam2 = 0xF0 | min(0x0F, effectParam2);	// Well, this is not too accurate...
+						effectParam2 = 0xF0 | MIN(0x0F, effectParam2);	// Well, this is not too accurate...
 						break;
 					case 2:		// Note Delay (wtf is the difference to Sample Delay?)
 						effectParam2 = DMFdelay2MPT(effectParam2, settings.internalTicks);

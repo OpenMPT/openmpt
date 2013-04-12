@@ -205,7 +205,7 @@ ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX 
 	// Limit number of orders to be inserted.
 	LimitMax(nCount, ORDERINDEX(m_pSndFile->GetModSpecifications().ordersMax - nPos));
 	// Calculate new length.
-	const ORDERINDEX nNewLength = min(nLengthTt + nCount, m_pSndFile->GetModSpecifications().ordersMax);
+	const ORDERINDEX nNewLength = MIN(nLengthTt + nCount, m_pSndFile->GetModSpecifications().ordersMax);
 	// Resize if needed.
 	if (nNewLength > GetLength())
 		resize(nNewLength);
@@ -215,7 +215,7 @@ ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX 
 	const ORDERINDEX nFreeSpace = GetLength() - (nPos + nCount);
 	// Move orders nCount steps right starting from nPos.
 	if (nPos < nLengthTt)
-		memmove(m_pArray + nPos + nCount, m_pArray + nPos, min(nFreeSpace, nNeededSpace) * sizeof(PATTERNINDEX));
+		memmove(m_pArray + nPos + nCount, m_pArray + nPos, MIN(nFreeSpace, nNeededSpace) * sizeof(PATTERNINDEX));
 	// Set nFill to new orders.
 	std::fill(begin() + nPos, begin() + nPos + nCount, nFill);
 	return nCount;
@@ -564,7 +564,7 @@ bool ModSequenceSet::MergeSequences()
 							ModCommand *pDest = m_pSndFile->Patterns[nNewPat];
 							memcpy(pDest, pSrc, m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels * sizeof(ModCommand));
 							m = pDest + len;
-							patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
+							patternsFixed.resize(MAX(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
 							nPat = nNewPat;
 						} else
 						{
@@ -632,7 +632,7 @@ bool ModSequence::Deserialize(FileReader &file)
 size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
 //----------------------------------------------------------------
 {
-	const size_t limit = min(count, GetLength());
+	const size_t limit = MIN(count, GetLength());
 
 	size_t i = 0;
 	
@@ -712,7 +712,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 		Reporting::Warning(str);
 		size = ModSpecs::mptm.ordersMax;
 	}
-	seq.resize(max(size, MAX_ORDERS));
+	seq.resize(MAX(size, MAX_ORDERS));
 	if(size == 0)
 		{ seq.Init(); return; }
 
@@ -765,7 +765,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 	uint16 nSize = MAX_ORDERS;
 	ssb.ReadItem<uint16>(nSize, "l");
 	LimitMax(nSize, ModSpecs::mptm.ordersMax);
-	seq.resize(max(nSize, ModSequenceSet::s_nCacheSize));
+	seq.resize(MAX(nSize, ModSequenceSet::s_nCacheSize));
 	ssb.ReadItem(seq.m_pArray, "a", 1, srlztn::ArrayReader<uint16>(nSize));
 }
 

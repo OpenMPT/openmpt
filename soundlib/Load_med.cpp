@@ -703,7 +703,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		// Song Comments (null-terminated)
 		UINT annotxt = BigEndian(pmex->annotxt);
 		UINT annolen = BigEndian(pmex->annolen);
-		annolen = min(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
+		annolen = MIN(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
 		{
 			ReadMessage(lpStream + annotxt, annolen - 1, leAutodetect);

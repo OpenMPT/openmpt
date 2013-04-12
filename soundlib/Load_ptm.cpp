@@ -90,7 +90,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 
 	m_nType = MOD_TYPE_PTM;
 	m_nChannels = pfh.nchannels;
-	m_nSamples = min(pfh.nsamples, MAX_SAMPLES - 1);
+	m_nSamples = MIN(pfh.nsamples, MAX_SAMPLES - 1);
 	dwMemPos = sizeof(PTMFILEHEADER);
 	nOrders = (pfh.norders < MAX_ORDERS) ? pfh.norders : MAX_ORDERS-1;
 	Order.ReadFromArray(pfh.orders, nOrders);

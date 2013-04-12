@@ -103,7 +103,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				param = 0x91;
 			} else
 			{
-				param = min(param << 1, 0xFF);
+				param = MIN(param << 1, 0xFF);
 			}
 		}
 	} // End if(command == CMD_PANNING8)
@@ -130,7 +130,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				}
 			}
 
-			param = (BYTE)(min(maxColumnValue, GetValueEffectCol()) * 0x7F / maxColumnValue);
+			param = (BYTE)(MIN(maxColumnValue, GetValueEffectCol()) * 0x7F / maxColumnValue);
 			command = newCmd; // might be removed later
 			volcmd = VOLCMD_NONE;
 			note = NOTE_NONE;
@@ -226,10 +226,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			// swap L/R, convert to fine slide
 			if(param & 0xF0)
 			{
-				param = 0xF0 | min(0x0E, (param >> 4));
+				param = 0xF0 | MIN(0x0E, (param >> 4));
 			} else
 			{
-				param = 0x0F | (min(0x0E, param & 0x0F) << 4);
+				param = 0x0F | (MIN(0x0E, param & 0x0F) << 4);
 			}
 
 		default:
@@ -317,7 +317,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			break;
 
 		case CMD_SPEED:
-			param = min(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
+			param = MIN(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
 			break;
 
 		case CMD_TEMPO:
@@ -387,7 +387,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			break;
 
 		case CMD_GLOBALVOLUME:
-			param = (min(0x80, param) + 1) / 2;
+			param = (MIN(0x80, param) + 1) / 2;
 			break;
 
 		default:
@@ -402,7 +402,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_GLOBALVOLUME:
-			param = (min(0x80, param) + 1) / 2;
+			param = (MIN(0x80, param) + 1) / 2;
 			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
@@ -414,7 +414,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_GLOBALVOLUME:
-			param = min(0x80, param * 2);
+			param = MIN(0x80, param * 2);
 			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
@@ -426,7 +426,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_SPEED:
-			param = min(param, 0x1F);
+			param = MIN(param, 0x1F);
 			break;
 		}
 	} else if(oldTypeIsXM && newTypeIsMOD)
@@ -434,7 +434,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_TEMPO:
-			param = max(param, 0x21);
+			param = MAX(param, 0x21);
 			break;
 		}
 	}
@@ -706,7 +706,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			case VOLCMD_VIBRATODEPTH:
 				// OpenMPT-specific commands
 			case VOLCMD_OFFSET:
-				vol = min(vol, 9);
+				vol = MIN(vol, 9);
 				break;
 
 			case VOLCMD_PANSLIDELEFT:
@@ -816,20 +816,20 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		return true;
 	case CMD_VOLUME:
 		effect = VOLCMD_VOLUME;
-		param = min(param, 64);
+		param = MIN(param, 64);
 		break;
 	case CMD_PORTAMENTOUP:
 		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
 		// large to fit. (volume column Ex/Fx are four times stronger than effect column)
 		if(!force && ((param & 3) || param > 9 * 4 + 3))
 			return false;
-		param = min(param / 4, 9);
+		param = MIN(param / 4, 9);
 		effect = VOLCMD_PORTAUP;
 		break;
 	case CMD_PORTAMENTODOWN:
 		if(!force && ((param & 3) || param > 9 * 4 + 3))
 			return false;
-		param = min(param / 4, 9);
+		param = MIN(param / 4, 9);
 		effect = VOLCMD_PORTADOWN;
 		break;
 	case CMD_TONEPORTAMENTO:
@@ -854,7 +854,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		return false;
 	case CMD_VIBRATO:
 		if(force)
-			param = min(param & 0x0F, 9);
+			param = MIN(param & 0x0F, 9);
 		else if((param & 0x0F) > 9 || (param & 0xF0) != 0)
 			return false;
 		param &= 0x0F;
@@ -868,7 +868,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		effect = VOLCMD_VIBRATODEPTH;
 		break;
 	case CMD_PANNING8:
-		param = min(64, param * 64 / 255);
+		param = MIN(64, param * 64 / 255);
 		effect = VOLCMD_PANNING;
 		break;
 	case CMD_VOLUMESLIDE:
@@ -877,7 +877,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		if((param & 0xF) == 0)	// Dx0 / Cx
 		{
 			if(force)
-				param = min(param >> 4, 9);
+				param = MIN(param >> 4, 9);
 			else if((param >> 4) > 9)
 				return false;
 			else
@@ -886,14 +886,14 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		} else if((param & 0xF0) == 0)	// D0x / Dx
 		{
 			if(force)
-				param = min(param, 9);
+				param = MIN(param, 9);
 			else if(param > 9)
 				return false;
 			effect = VOLCMD_VOLSLIDEDOWN;
 		} else if((param & 0xF) == 0xF)	// DxF / Ax
 		{
 			if(force)
-				param = min(param >> 4, 9);
+				param = MIN(param >> 4, 9);
 			else if((param >> 4) > 9)
 				return false;
 			else
@@ -902,7 +902,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		} else if((param & 0xf0) == 0xf0)	// DFx / Bx
 		{
 			if(force)
-				param = min(param, 9);
+				param = MIN(param, 9);
 			else if((param & 0xF) > 9)
 				return false;
 			else

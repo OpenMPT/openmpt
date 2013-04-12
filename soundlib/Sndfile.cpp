@@ -2105,7 +2105,7 @@ void CSoundFile::UpgradeSong()
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
 		{
 			// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
-			Instruments[i]->nVolSwing = min(Instruments[i]->nVolSwing * 100 / 64, 100);
+			Instruments[i]->nVolSwing = MIN(Instruments[i]->nVolSwing * 100 / 64, 100);
 
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
 			{

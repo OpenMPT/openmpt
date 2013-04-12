@@ -196,7 +196,7 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	const uint32 numParams = plugin.GetNumParameters();
 	WriteBE(numParams, f);
 
-	char name[max(kVstMaxProgNameLen + 1, 256)];
+	char name[MAX(kVstMaxProgNameLen + 1, 256)];
 	plugin.Dispatch(effGetProgramName, 0, 0, name, 0);
 	f.write(name, 28);
 

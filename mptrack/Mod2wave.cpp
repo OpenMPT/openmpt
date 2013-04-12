@@ -616,7 +616,7 @@ void CLayer3Convert::OnOK()
 	m_EditAlbum.GetWindowText(sText, sizeof(sText));
 	m_FileTags.album = sText;
 
-	m_EditYear.GetWindowText(sText, min(5, sizeof(sText)));
+	m_EditYear.GetWindowText(sText, MIN(5, sizeof(sText)));
 	m_FileTags.year = sText;
 	if(m_FileTags.year == "0")
 		m_FileTags.year = "";

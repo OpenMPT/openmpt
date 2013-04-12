@@ -1399,7 +1399,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			const int vibpos = pChn->nAutoVibPos & 0xFF;
 			int adepth = pChn->nAutoVibDepth; // (1)
 			adepth += pSmp->nVibSweep; // (2 & 3)
-			adepth = min(adepth, (int)(pSmp->nVibDepth << 8));
+			adepth = MIN(adepth, (int)(pSmp->nVibDepth << 8));
 			pChn->nAutoVibDepth = adepth; // (5)
 			adepth >>= 8; // (4)
 
@@ -2200,8 +2200,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 				break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, min(127, 2 * vol), nChn);
-				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(min(127, 2 * defaultVolume)), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, MIN(127, 2 * vol), nChn);
+				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(MIN(127, 2 * defaultVolume)), nChn);
 				break;
 
 		}
@@ -2234,7 +2234,7 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 
 		// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
 		// If step is too big (might cause click), extend ramp length.
-		UINT maxStep = max(50, (10000 / (m_nGlobalVolumeRampAmount + 1)));
+		UINT maxStep = MAX(50, (10000 / (m_nGlobalVolumeRampAmount + 1)));
 		while(static_cast<UINT>(abs(step)) > maxStep)
 		{
 			m_nSamplesToGlobalVolRampDest += m_nGlobalVolumeRampAmount;
@@ -2247,7 +2247,7 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 
 	// SoundBuffer has interleaved left/right channels for the front channels; RearBuffer has the rear left/right channels.
 	// So we process the pairs independently for ramping.
-	for (int pairs = max(m_MixerSettings.gnChannels / 2, 1); pairs > 0; pairs--)
+	for (int pairs = MAX(m_MixerSettings.gnChannels / 2, 1); pairs > 0; pairs--)
 	{
 		int *sample = (pairs == 1) ? SoundBuffer : RearBuffer;
 		m_lHighResRampingGlobalVolume = highResVolume;

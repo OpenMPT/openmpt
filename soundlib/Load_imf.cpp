@@ -302,13 +302,13 @@ static void ImportIMFEffect(ModCommand &m)
 		break;
 	case 0xF: // set finetune
 		// we don't implement this, but let's at least import the value
-		m.param = 0x20 | min(m.param >> 4, 0x0F);
+		m.param = 0x20 | MIN(m.param >> 4, 0x0F);
 		break;
 	case 0x14: // fine slide up
 	case 0x15: // fine slide down
 		// this is about as close as we can do...
 		if(m.param >> 4)
-			m.param = 0xF0 | min(m.param >> 4, 0x0F);
+			m.param = 0xF0 | MIN(m.param >> 4, 0x0F);
 		else
 			m.param |= 0xE0;
 		break;
@@ -316,7 +316,7 @@ static void ImportIMFEffect(ModCommand &m)
 		m.param >>= 1;
 		break;
 	case 0x1F: // set global volume
-		m.param = min(m.param << 1, 0xFF);
+		m.param = MIN(m.param << 1, 0xFF);
 		break;
 	case 0x21:
 		n = 0;
@@ -506,13 +506,13 @@ bool CSoundFile::ReadIMF(FileReader &file)
 
 				if(e1c == 0x0C)
 				{
-					m.vol = min(e1d, 0x40);
+					m.vol = MIN(e1d, 0x40);
 					m.volcmd = VOLCMD_VOLUME;
 					m.command = e2c;
 					m.param = e2d;
 				} else if(e2c == 0x0C)
 				{
-					m.vol = min(e2d, 0x40);
+					m.vol = MIN(e2d, 0x40);
 					m.volcmd = VOLCMD_VOLUME;
 					m.command = e1c;
 					m.param = e1d;

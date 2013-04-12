@@ -693,7 +693,7 @@ BOOL CModDoc::InitializeMod()
 		m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
 		m_SndFile.m_PlayConfig.SetMixLevels(m_SndFile.m_nMixLevels);
 		// ...and the order length
-		m_SndFile.Order.resize(min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
+		m_SndFile.Order.resize(MIN(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 
 		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())
 			m_SndFile.Order[0] = 0;

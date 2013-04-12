@@ -823,14 +823,14 @@ void CAbstractVstEditor::OnSetNextVSTPreset()
 void CAbstractVstEditor::OnVSTPresetBackwardJump()
 //------------------------------------------------
 {
-	OnSetPreset(max(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() - 10, ID_PRESET_SET));
+	OnSetPreset(MAX(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() - 10, ID_PRESET_SET));
 }
 
 
 void CAbstractVstEditor::OnVSTPresetForwardJump()
 //-----------------------------------------------
 {
-	OnSetPreset(min(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() + 10, ID_PRESET_SET + m_VstPlugin.GetNumPrograms() - 1));
+	OnSetPreset(MIN(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() + 10, ID_PRESET_SET + m_VstPlugin.GetNumPrograms() - 1));
 }
 
 

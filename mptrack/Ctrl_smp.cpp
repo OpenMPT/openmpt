@@ -1766,10 +1766,10 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		//Update loop points only if no error occured.
 		if(errorcode == 0)
 		{
-			sample.nLoopStart = (UINT)min(sample.nLoopStart * (m_dTimeStretchRatio / 100.0), sample.nLength);
-			sample.nLoopEnd = (UINT)min(sample.nLoopEnd * (m_dTimeStretchRatio/100.0), sample.nLength);
-			sample.nSustainStart = (UINT)min(sample.nSustainStart * (m_dTimeStretchRatio/100.0), sample.nLength);
-			sample.nSustainEnd = (UINT)min(sample.nSustainEnd * (m_dTimeStretchRatio/100.0), sample.nLength);
+			sample.nLoopStart = (UINT)MIN(sample.nLoopStart * (m_dTimeStretchRatio / 100.0), sample.nLength);
+			sample.nLoopEnd = (UINT)MIN(sample.nLoopEnd * (m_dTimeStretchRatio/100.0), sample.nLength);
+			sample.nSustainStart = (UINT)MIN(sample.nSustainStart * (m_dTimeStretchRatio/100.0), sample.nLength);
+			sample.nSustainEnd = (UINT)MIN(sample.nSustainEnd * (m_dTimeStretchRatio/100.0), sample.nLength);
 		}
 		
 	}

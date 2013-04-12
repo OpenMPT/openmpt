@@ -508,9 +508,9 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			if ((n = (short int)m_SpinTempo.GetPos()) != 0)
 			{
 				if (n < 0)
-					pSndFile->SetTempo(max(nCurrentTempo - 1, pSndFile->GetModSpecifications().tempoMin), true);
+					pSndFile->SetTempo(MAX(nCurrentTempo - 1, pSndFile->GetModSpecifications().tempoMin), true);
 				else
-					pSndFile->SetTempo(min(nCurrentTempo + 1, pSndFile->GetModSpecifications().tempoMax), true);
+					pSndFile->SetTempo(MIN(nCurrentTempo + 1, pSndFile->GetModSpecifications().tempoMax), true);
 		
 				m_SpinTempo.SetPos(0);
 			}

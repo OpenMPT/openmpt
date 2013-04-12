@@ -510,7 +510,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 					param = (param & 0x0F) * memory.musicSpeed;
 					param = (memory.chnSettings[nChn].chnVol > param) ? memory.chnSettings[nChn].chnVol - param : 0;
 				} else param = ((param & 0xF0) >> 4) * memory.musicSpeed + memory.chnSettings[nChn].chnVol;
-				param = min(param, 64);
+				param = MIN(param, 64);
 				memory.chnSettings[nChn].chnVol = param;
 				break;
 			}
@@ -531,7 +531,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		}
 
 		const UINT tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
-		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * max(rowDelay, 1);
+		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
 
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		renderedSamples += rowDuration;
@@ -3690,13 +3690,13 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			const int swing = (IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING)) ? pChn->nVolSwing : 0;
 			const int vol = Util::muldiv((pChn->nVolume + swing) * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 			data = (unsigned char)Clamp(vol / 2, 1, 127);
-			//data = (unsigned char)min((pChn->nVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (1 + 6 + 8), 127);
+			//data = (unsigned char)MIN((pChn->nVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (1 + 6 + 8), 127);
 		} else if(macro[pos] == 'u')		// u: volume (calculated)
 		{
 			// Same note as with velocity applies here, but apparently also for instrument / sample volumes?
 			const int vol = Util::muldiv(pChn->nCalcVolume * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 26);
 			data = (unsigned char)Clamp(vol / 2, 1, 127);
-			//data = (unsigned char)min((pChn->nCalcVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
+			//data = (unsigned char)MIN((pChn->nCalcVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
 		} else if(macro[pos] == 'x')		// x: pan set
 		{
 			data = (unsigned char)Util::Min(pChn->nPan / 2, 127);
