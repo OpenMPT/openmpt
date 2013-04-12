@@ -12,7 +12,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#ifdef ENABLE_ASM
+#ifdef ENABLE_X86
 
 #pragma warning(disable:4100)
 #pragma warning(disable:4731)
@@ -53,7 +53,9 @@ normloop:
 
 #endif
 
+#ifdef ENABLE_X86
 extern void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
+#endif
 extern DWORD MPPASMCALL X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
@@ -61,7 +63,7 @@ extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples
 UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24, DWORD dwByteInc)
 //-----------------------------------------------------------------------------------------------
 {
-#ifdef ENABLE_ASM
+#ifdef ENABLE_X86
 	int * const tempbuf = MixSoundBuffer;
 	int n = dwSize / 3;
 	while (n > 0)
