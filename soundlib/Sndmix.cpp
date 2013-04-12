@@ -152,11 +152,11 @@ BOOL CSoundFile::FadeSong(UINT msec)
 	{
 		ModChannel *pramp = &Chn[ChnMix[noff]];
 		if (!pramp) continue;
-		pramp->nNewLeftVol = pramp->nNewRightVol = 0;
-		pramp->nRightRamp = (-pramp->nRightVol << VOLUMERAMPPRECISION) / nRampLength;
-		pramp->nLeftRamp = (-pramp->nLeftVol << VOLUMERAMPPRECISION) / nRampLength;
-		pramp->nRampRightVol = pramp->nRightVol << VOLUMERAMPPRECISION;
-		pramp->nRampLeftVol = pramp->nLeftVol << VOLUMERAMPPRECISION;
+		pramp->newRightVol = pramp->newLeftVol = 0;
+		pramp->leftRamp = (-pramp->leftVol << VOLUMERAMPPRECISION) / nRampLength;
+		pramp->rightRamp = (-pramp->rightVol << VOLUMERAMPPRECISION) / nRampLength;
+		pramp->rampLeftVol = pramp->leftVol << VOLUMERAMPPRECISION;
+		pramp->rampRightVol = pramp->rightVol << VOLUMERAMPPRECISION;
 		pramp->nRampLength = nRampLength;
 		pramp->dwFlags.set(CHN_VOLUMERAMP);
 	}
@@ -573,8 +573,8 @@ BOOL CSoundFile::ProcessRow()
 		{
 			pChn->rowCommand = *m;
 
-			pChn->nLeftVol = pChn->nNewLeftVol;
-			pChn->nRightVol = pChn->nNewRightVol;
+			pChn->rightVol = pChn->newRightVol;
+			pChn->leftVol = pChn->newLeftVol;
 			pChn->dwFlags.reset(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
 			pChn->nCommand = CMD_NONE;
 			pChn->m_plugParamValueStep = 0;
@@ -1543,10 +1543,10 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 void CSoundFile::ProcessRamping(ModChannel *pChn)
 //-----------------------------------------------
 {
-	pChn->nRightRamp = pChn->nLeftRamp = 0;
-	if(pChn->dwFlags[CHN_VOLUMERAMP] && (pChn->nRightVol != pChn->nNewRightVol || pChn->nLeftVol != pChn->nNewLeftVol))
+	pChn->leftRamp = pChn->rightRamp = 0;
+	if(pChn->dwFlags[CHN_VOLUMERAMP] && (pChn->leftVol != pChn->newLeftVol || pChn->rightVol != pChn->newRightVol))
 	{
-		const bool rampUp = (pChn->nNewRightVol > pChn->nRightVol) || (pChn->nNewLeftVol > pChn->nLeftVol);
+		const bool rampUp = (pChn->newLeftVol > pChn->leftVol) || (pChn->newRightVol > pChn->rightVol);
 		LONG rampLength, globalRampLength, instrRampLength = 0;
 		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamplesActual : m_MixerSettings.glVolumeRampDownSamples);
 		//XXXih: add real support for bidi ramping here	
@@ -1563,13 +1563,13 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 			rampLength = 1;
 		}
 
-		LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
-		LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
+		LONG leftDelta = ((pChn->newLeftVol - pChn->leftVol) << VOLUMERAMPPRECISION);
+		LONG rightDelta = ((pChn->newRightVol - pChn->rightVol) << VOLUMERAMPPRECISION);
 //		if (IsRenderingToDisc()
 //			|| m_Resampler.IsHQ())
 		if(IsRenderingToDisc() || (m_Resampler.IsHQ() && !enableCustomRamp))
 		{
-			if((pChn->nRightVol | pChn->nLeftVol) && (pChn->nNewRightVol | pChn->nNewLeftVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
+			if((pChn->leftVol | pChn->rightVol) && (pChn->newLeftVol | pChn->newRightVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
 				rampLength = m_nBufferCount;
 				if(rampLength > (1 << (VOLUMERAMPPRECISION-1)))
@@ -1583,28 +1583,28 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 			}
 		}
 
-		pChn->nRightRamp = nRightDelta / rampLength;
-		pChn->nLeftRamp = nLeftDelta / rampLength;
-		pChn->nRightVol = pChn->nNewRightVol - ((pChn->nRightRamp * rampLength) >> VOLUMERAMPPRECISION);
-		pChn->nLeftVol = pChn->nNewLeftVol - ((pChn->nLeftRamp * rampLength) >> VOLUMERAMPPRECISION);
+		pChn->leftRamp = leftDelta / rampLength;
+		pChn->rightRamp = rightDelta / rampLength;
+		pChn->leftVol = pChn->newLeftVol - ((pChn->leftRamp * rampLength) >> VOLUMERAMPPRECISION);
+		pChn->rightVol = pChn->newRightVol - ((pChn->rightRamp * rampLength) >> VOLUMERAMPPRECISION);
 
-		if (pChn->nRightRamp|pChn->nLeftRamp)
+		if (pChn->leftRamp|pChn->rightRamp)
 		{
 			pChn->nRampLength = rampLength;
 		} else
 		{
 			pChn->dwFlags.reset(CHN_VOLUMERAMP);
-			pChn->nRightVol = pChn->nNewRightVol;
-			pChn->nLeftVol = pChn->nNewLeftVol;
+			pChn->leftVol = pChn->newLeftVol;
+			pChn->rightVol = pChn->newRightVol;
 		}
 	} else
 	{
 		pChn->dwFlags.reset(CHN_VOLUMERAMP);
-		pChn->nRightVol = pChn->nNewRightVol;
-		pChn->nLeftVol = pChn->nNewLeftVol;
+		pChn->leftVol = pChn->newLeftVol;
+		pChn->rightVol = pChn->newRightVol;
 	}
-	pChn->nRampRightVol = pChn->nRightVol << VOLUMERAMPPRECISION;
-	pChn->nRampLeftVol = pChn->nLeftVol << VOLUMERAMPPRECISION;
+	pChn->rampLeftVol = pChn->leftVol << VOLUMERAMPPRECISION;
+	pChn->rampRightVol = pChn->rightVol << VOLUMERAMPPRECISION;
 }
 
 
@@ -1683,7 +1683,7 @@ BOOL CSoundFile::ReadNote()
 		// FT2 Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
 		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
-		if(pChn->dwFlags[CHN_NOTEFADE] && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
+		if(pChn->dwFlags[CHN_NOTEFADE] && (!(pChn->nFadeOutVol|pChn->leftVol|pChn->rightVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
 		{
 			pChn->nLength = 0;
 			pChn->nROfs = pChn->nLOfs = 0;
@@ -1909,7 +1909,7 @@ BOOL CSoundFile::ReadNote()
 		}
 
 		// Volume ramping
-		pChn->dwFlags.set(CHN_VOLUMERAMP, (pChn->nRealVolume | pChn->nLeftVol | pChn->nRightVol) != 0);
+		pChn->dwFlags.set(CHN_VOLUMERAMP, (pChn->nRealVolume | pChn->rightVol | pChn->leftVol) != 0);
 
 #ifdef ENABLE_STEREOVU
 		if (pChn->nLeftVU > VUMETER_DECAY) pChn->nLeftVU -= VUMETER_DECAY; else pChn->nLeftVU = 0;
@@ -1918,7 +1918,7 @@ BOOL CSoundFile::ReadNote()
 
 		// Check for too big nInc
 		if (((pChn->nInc >> 16) + 1) >= (LONG)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags.reset(CHN_LOOP);
-		pChn->nNewRightVol = pChn->nNewLeftVol = 0;
+		pChn->newLeftVol = pChn->newRightVol = 0;
 		pChn->pCurrentSample = ((pChn->pSample) && (pChn->nLength) && (pChn->nInc)) ? pChn->pSample : NULL;
 		if (pChn->pCurrentSample)
 		{
@@ -1966,23 +1966,23 @@ BOOL CSoundFile::ReadNote()
 				{
 					if (pan < 128)
 					{
-						pChn->nNewLeftVol = (realvol * pan) >> 8;
-						pChn->nNewRightVol = (realvol * 128) >> 8;
+						pChn->newLeftVol = (realvol * 128) >> 8;
+						pChn->newRightVol = (realvol * pan) >> 8;
 					} else
 					{
-						pChn->nNewLeftVol = (realvol * 128) >> 8;
-						pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
+						pChn->newLeftVol = (realvol * (256 - pan)) >> 8;
+						pChn->newRightVol = (realvol * 128) >> 8;
 					}
 				} else
 				{
-					pChn->nNewLeftVol = (realvol * pan) >> 8;
-					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
+					pChn->newLeftVol = (realvol * (256 - pan)) >> 8;
+					pChn->newRightVol = (realvol * pan) >> 8;
 				}
 
 			} else
 			{
-				pChn->nNewRightVol = (pChn->nRealVolume * kChnMasterVol) >> 8;
-				pChn->nNewLeftVol = pChn->nNewRightVol;
+				pChn->newLeftVol = (pChn->nRealVolume * kChnMasterVol) >> 8;
+				pChn->newRightVol = pChn->newLeftVol;
 			}
 			// Clipping volumes
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
@@ -2004,8 +2004,8 @@ BOOL CSoundFile::ReadNote()
 					if (!IsRenderingToDisc() && !m_Resampler.IsUltraHQ())
 					{
 						int fmax = 0x20000;
-						if ((pChn->nNewLeftVol < 0x80) && (pChn->nNewRightVol < 0x80)
-						 && (pChn->nLeftVol < 0x80) && (pChn->nRightVol < 0x80))
+						if ((pChn->newRightVol < 0x80) && (pChn->newLeftVol < 0x80)
+						 && (pChn->rightVol < 0x80) && (pChn->leftVol < 0x80))
 						{
 							if (pChn->nInc >= 0xFF00) pChn->dwFlags.set(CHN_NOIDO);
 						} else
@@ -2030,11 +2030,11 @@ BOOL CSoundFile::ReadNote()
 				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
 			}*/
 			const int extraAttenuation = m_PlayConfig.getExtraSampleAttenuation();
-			pChn->nNewRightVol >>= extraAttenuation;
-			pChn->nNewLeftVol >>= extraAttenuation;
+			pChn->newLeftVol >>= extraAttenuation;
+			pChn->newRightVol >>= extraAttenuation;
 
 			// Dolby Pro-Logic Surround
-			if(pChn->dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels == 2) pChn->nNewLeftVol = - pChn->nNewLeftVol;
+			if(pChn->dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels == 2) pChn->newRightVol = - pChn->newRightVol;
 
 			// Checking Ping-Pong Loops
 			if(pChn->dwFlags[CHN_PINGPONGFLAG]) pChn->nInc = -pChn->nInc;
@@ -2052,7 +2052,7 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->nRightVU > 128) pChn->nRightVU = 0;
 #endif // ENABLE_STEREOVU
 			if (pChn->nVUMeter > 0xFF) pChn->nVUMeter = 0;
-			pChn->nLeftVol = pChn->nRightVol = 0;
+			pChn->rightVol = pChn->leftVol = 0;
 			pChn->nLength = 0;
 		}
 

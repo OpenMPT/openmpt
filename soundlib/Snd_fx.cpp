@@ -1223,7 +1223,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				pChn->nVibratoPos = 0;
 			}
 		}
-		pChn->nLeftVol = pChn->nRightVol = 0;
+		pChn->rightVol = pChn->leftVol = 0;
 		bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
 		// Setup Initial Filter for this note
 		if(pIns)
@@ -1309,7 +1309,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 	// Always NNA cut - using
 	if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut)
 	{
-		if(!pChn->nLength || pChn->dwFlags[CHN_MUTE] || !(pChn->nLeftVol | pChn->nRightVol))
+		if(!pChn->nLength || pChn->dwFlags[CHN_MUTE] || !(pChn->rightVol | pChn->leftVol))
 		{
 			return;
 		}
@@ -1328,7 +1328,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 		// Stop this channel
 		pChn->nLength = pChn->nPos = pChn->nPosLo = 0;
 		pChn->nROfs = pChn->nLOfs = 0;
-		pChn->nLeftVol = pChn->nRightVol = 0;
+		pChn->rightVol = pChn->leftVol = 0;
 		return;
 	}
 	if(instr >= MAX_INSTRUMENTS) instr = 0;
@@ -3887,7 +3887,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			oldcutoff -= pChn->nCutOff;
 			if(oldcutoff < 0) oldcutoff = -oldcutoff;
 			if((pChn->nVolume > 0) || (oldcutoff < 0x10)
-				|| !pChn->dwFlags[CHN_FILTER] || (!(pChn->nLeftVol | pChn->nRightVol)))
+				|| !pChn->dwFlags[CHN_FILTER] || (!(pChn->rightVol | pChn->leftVol)))
 				SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
 
 			return 4;
