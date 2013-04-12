@@ -911,7 +911,7 @@ void CSoundFile::SetDspEffects(DWORD DSPMask)
 //----------------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
-	if(!(GetSysInfo() & SYSMIX_ENABLEMMX)) DSPMask &= ~SNDDSP_REVERB;
+	if(!(GetSysInfo() & PROCSUPPORT_MMX)) DSPMask &= ~SNDDSP_REVERB;
 	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(FALSE);
 }
