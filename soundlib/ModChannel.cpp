@@ -49,9 +49,9 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nCutOff = 0x7F;
 		nResonance = 0;
 		nFilterMode = 0;
-		nLeftVol = nRightVol = 0;
-		nNewLeftVol = nNewRightVol = 0;
-		nLeftRamp = nRightRamp = 0;
+		rightVol = leftVol = 0;
+		newRightVol = newLeftVol = 0;
+		rightRamp = leftRamp = 0;
 		nVolume = 256;
 		nVibratoPos = nTremoloPos = nPanbrelloPos = 0;
 

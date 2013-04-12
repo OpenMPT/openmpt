@@ -988,7 +988,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		pChn->nGlobalVol = 64;
 		pChn->nInsVol = 64;
 		pChn->nPan = 128;
-		pChn->nRightVol = pChn->nLeftVol = 0;
+		pChn->leftVol = pChn->rightVol = 0;
 		pChn->nROfs = pChn->nLOfs = 0;
 		pChn->nCutOff = 0x7F;
 		pChn->nResonance = 0;

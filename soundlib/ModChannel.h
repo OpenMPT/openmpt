@@ -34,17 +34,17 @@ struct __declspec(align(32)) ModChannel
 	uint32 nPos;			// Current play position
 	uint32 nPosLo;			// 16-bit fractional part of play position
 	int32 nInc;				// 16.16 fixed point sample speed relative to mixing frequency (0x10000 = one sample per output sample, 0x20000 = two samples per output sample, etc...)
-	int32 nRightVol;		// This is actually LEFT! >:( FIX THIS!
-	int32 nLeftVol;
-	int32 nRightRamp;
-	int32 nLeftRamp;
+	int32 leftVol;
+	int32 rightVol;
+	int32 leftRamp;
+	int32 rightRamp;
 
 	SmpLength nLength;
 	SmpLength nLoopStart;
 	SmpLength nLoopEnd;
 	FlagSet<ChannelFlags> dwFlags;
-	int32 nRampRightVol;
-	int32 nRampLeftVol;
+	int32 rampLeftVol;
+	int32 rampRightVol;
 	float nFilter_Y1, nFilter_Y2;	// Mono / left channel filter memory
 	float nFilter_Y3, nFilter_Y4;	// Right channel filter memory
 	float nFilter_A0, nFilter_B0, nFilter_B1;	// Filter coeffs
@@ -53,11 +53,11 @@ struct __declspec(align(32)) ModChannel
 	int32 nRampLength;
 
 	// Information not used in the mixer
-	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
 	const void *pSample;				// Currently playing sample, or previously played sample if no sample is playing.
 	ModSample *pModSample;				// Currently assigned sample slot
 	ModInstrument *pModInstrument;		// Currently assigned instrument slot
-	int32 nNewRightVol, nNewLeftVol;
+	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
+	int32 newLeftVol, newRightVol;
 	int32 nRealVolume, nRealPan;
 	int32 nVolume, nPan, nFadeOutVol;
 	int32 nPeriod, nC5Speed, nPortamentoDest;

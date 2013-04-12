@@ -270,40 +270,40 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #define SNDMIX_STOREMONOVOL\
-	pvol[0] += vol * pChn->nRightVol;\
-	pvol[1] += vol * pChn->nLeftVol;\
+	pvol[0] += vol * pChn->leftVol;\
+	pvol[1] += vol * pChn->rightVol;\
 	pvol += 2;
 
 #define SNDMIX_STORESTEREOVOL\
-	pvol[0] += vol_l * pChn->nRightVol;\
-	pvol[1] += vol_r * pChn->nLeftVol;\
+	pvol[0] += vol_l * pChn->leftVol;\
+	pvol[1] += vol_r * pChn->rightVol;\
 	pvol += 2;
 
 #define SNDMIX_STOREFASTMONOVOL\
-	int v = vol * pChn->nRightVol;\
+	int v = vol * pChn->leftVol;\
 	pvol[0] += v;\
 	pvol[1] += v;\
 	pvol += 2;
 
 #define SNDMIX_RAMPMONOVOL\
-	nRampLeftVol += pChn->nLeftRamp;\
-	nRampRightVol += pChn->nRightRamp;\
-	pvol[0] += vol * (nRampRightVol >> VOLUMERAMPPRECISION);\
-	pvol[1] += vol * (nRampLeftVol >> VOLUMERAMPPRECISION);\
+	rampLeftVol += pChn->leftRamp;\
+	rampRightVol += pChn->rightRamp;\
+	pvol[0] += vol * (rampLeftVol >> VOLUMERAMPPRECISION);\
+	pvol[1] += vol * (rampRightVol >> VOLUMERAMPPRECISION);\
 	pvol += 2;
 
 #define SNDMIX_RAMPFASTMONOVOL\
-	nRampRightVol += pChn->nRightRamp;\
-	int fastvol = vol * (nRampRightVol >> VOLUMERAMPPRECISION);\
+	rampLeftVol += pChn->leftRamp;\
+	int fastvol = vol * (rampLeftVol >> VOLUMERAMPPRECISION);\
 	pvol[0] += fastvol;\
 	pvol[1] += fastvol;\
 	pvol += 2;
 
 #define SNDMIX_RAMPSTEREOVOL\
-	nRampLeftVol += pChn->nLeftRamp;\
-	nRampRightVol += pChn->nRightRamp;\
-	pvol[0] += vol_l * (nRampRightVol >> VOLUMERAMPPRECISION);\
-	pvol[1] += vol_r * (nRampLeftVol >> VOLUMERAMPPRECISION);\
+	rampLeftVol += pChn->leftRamp;\
+	rampRightVol += pChn->rightRamp;\
+	pvol[0] += vol_l * (rampLeftVol >> VOLUMERAMPPRECISION);\
+	pvol[1] += vol_r * (rampRightVol >> VOLUMERAMPPRECISION);\
 	pvol += 2;
 
 
@@ -388,27 +388,27 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, const CResampler *, int
 // Volume Ramps
 #define BEGIN_RAMPMIX_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
-		LONG nRampRightVol = pChannel->nRampRightVol;\
-		LONG nRampLeftVol = pChannel->nRampLeftVol;
+		LONG rampLeftVol = pChannel->rampLeftVol;\
+		LONG rampRightVol = pChannel->rampRightVol;
 
 #define END_RAMPMIX_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		pChannel->nRampRightVol = nRampRightVol;\
-		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		pChannel->nRampLeftVol = nRampLeftVol;\
-		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rampLeftVol = rampLeftVol;\
+		pChannel->leftVol = rampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rampRightVol = rampRightVol;\
+		pChannel->rightVol = rampRightVol >> VOLUMERAMPPRECISION;\
 	}
 
 #define BEGIN_FASTRAMPMIX_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
-		LONG nRampRightVol = pChannel->nRampRightVol;
+		LONG rampLeftVol = pChannel->rampLeftVol;
 
 #define END_FASTRAMPMIX_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		pChannel->nRampRightVol = nRampRightVol;\
-		pChannel->nRampLeftVol = nRampRightVol;\
-		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		pChannel->nLeftVol = pChannel->nRightVol;\
+		pChannel->rampLeftVol = rampLeftVol;\
+		pChannel->rampRightVol = rampLeftVol;\
+		pChannel->leftVol = rampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rightVol = pChannel->leftVol;\
 	}
 
 
@@ -423,15 +423,15 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, const CResampler *, int
 
 #define BEGIN_RAMPMIX_FLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
-		LONG nRampRightVol = pChannel->nRampRightVol;\
-		LONG nRampLeftVol = pChannel->nRampLeftVol;
+		LONG rampLeftVol = pChannel->rampLeftVol;\
+		LONG rampRightVol = pChannel->rampRightVol;
 
 #define END_RAMPMIX_FLT_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		pChannel->nRampRightVol = nRampRightVol;\
-		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		pChannel->nRampLeftVol = nRampLeftVol;\
-		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rampLeftVol = rampLeftVol;\
+		pChannel->leftVol = rampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rampRightVol = rampRightVol;\
+		pChannel->rightVol = rampRightVol >> VOLUMERAMPPRECISION;\
 	}
 
 // Stereo Resonant Filters
@@ -445,15 +445,15 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, const CResampler *, int
 
 #define BEGIN_RAMPMIX_STFLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
-		LONG nRampRightVol = pChannel->nRampRightVol;\
-		LONG nRampLeftVol = pChannel->nRampLeftVol;
+		LONG rampLeftVol = pChannel->rampLeftVol;\
+		LONG rampRightVol = pChannel->rampRightVol;
 
 #define END_RAMPMIX_STFLT_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		pChannel->nRampRightVol = nRampRightVol;\
-		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		pChannel->nRampLeftVol = nRampLeftVol;\
-		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rampLeftVol = rampLeftVol;\
+		pChannel->leftVol = rampLeftVol >> VOLUMERAMPPRECISION;\
+		pChannel->rampRightVol = rampRightVol;\
+		pChannel->rightVol = rampRightVol >> VOLUMERAMPPRECISION;\
 	}
 
 
@@ -1476,8 +1476,8 @@ UINT CSoundFile::CreateStereoMix(int count)
 		//rewbs.resamplerConf
 		nFlags |= GetResamplingFlag(pChannel);
 		//end rewbs.resamplerConf
-		if ((nFlags < 0x20) && (pChannel->nLeftVol == pChannel->nRightVol)
-		 && ((!pChannel->nRampLength) || (pChannel->nLeftRamp == pChannel->nRightRamp)))
+		if ((nFlags < 0x20) && (pChannel->rightVol == pChannel->leftVol)
+		 && ((!pChannel->nRampLength) || (pChannel->rightRamp == pChannel->leftRamp)))
 		{
 			pMixFuncTable = gpFastMixFunctionTable;
 		} else
@@ -1568,7 +1568,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		// Should we mix this channel ?
 		UINT naddmix;
 		if (((nchmixed >= m_MixerSettings.m_nMaxMixChannels) && !IsRenderingToDisc())
-		 || ((!pChannel->nRampLength) && (!(pChannel->nLeftVol|pChannel->nRightVol))))
+		 || ((!pChannel->nRampLength) && (!(pChannel->rightVol|pChannel->leftVol))))
 		{
 			LONG delta = (pChannel->nInc * (LONG)nSmpCount) + (LONG)pChannel->nPosLo;
 			pChannel->nPosLo = delta & 0xFFFF;
@@ -1598,9 +1598,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 			if (pChannel->nRampLength <= 0)
 			{
 				pChannel->nRampLength = 0;
-				pChannel->nRightVol = pChannel->nNewRightVol;
-				pChannel->nLeftVol = pChannel->nNewLeftVol;
-				pChannel->nRightRamp = pChannel->nLeftRamp = 0;
+				pChannel->leftVol = pChannel->newLeftVol;
+				pChannel->rightVol = pChannel->newRightVol;
+				pChannel->leftRamp = pChannel->rightRamp = 0;
 				if(pChannel->dwFlags[CHN_NOTEFADE] && !pChannel->nFadeOutVol)
 				{
 					pChannel->nLength = 0;
