@@ -77,7 +77,7 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 #define PBS_Y1	DWORD PTR [eax+28]
 #define PBS_Y2	DWORD PTR [eax+32]
 
-static void __cdecl EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
+static void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
 //-------------------------------------------------------------------------
 {
 	_asm {

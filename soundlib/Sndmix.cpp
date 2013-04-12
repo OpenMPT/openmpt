@@ -33,19 +33,19 @@ LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
 
-typedef DWORD (MPPASMCALL * LPCONVERTPROC)(LPVOID, int *, DWORD);
+typedef DWORD (* LPCONVERTPROC)(LPVOID, int *, DWORD);
 
-extern DWORD MPPASMCALL X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD MPPASMCALL X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD MPPASMCALL X86_Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD MPPASMCALL Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
+extern DWORD X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD X86_Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
 #ifdef ENABLE_X86
-extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
+extern VOID X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 #endif
-extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
-extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
+extern VOID X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
+extern VOID X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+extern VOID X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
 
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,

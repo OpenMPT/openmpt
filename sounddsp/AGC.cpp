@@ -26,7 +26,7 @@
 #define MIXING_LIMITMAX		(0x08100000)
 #define MIXING_LIMITMIN		(-MIXING_LIMITMAX)
 
-UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
+UINT X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
 //-------------------------------------------------------------
 {
 	UINT result;

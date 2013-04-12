@@ -66,7 +66,7 @@ static const char *id3v1GenreNames[] =
 };
 
 // this converts a buffer of 32-bit integer sample data to 32 bit floating point
-static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
+static void M2W_32ToFloat(void *pBuffer, long nCount)
 {
 //	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x80000000); //olivier 
 	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff); //ericus' 32bit fix
