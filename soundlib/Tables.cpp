@@ -692,17 +692,34 @@ static void getdownsample2x(short int *psinc)
 }
 
 
+#ifdef MODPLUG_TRACKER
+bool CResampler::StaticTablesInitialized = false;
+short int CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+short int CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+#endif
+
+
 void CResampler::InitializeTables(bool force)
 {
+	#ifdef MODPLUG_TRACKER
+		if(!StaticTablesInitialized)
+		{
+			//ericus' downsampling improvement.
+			//getsinc(gDownsample13x, 8.5, 3.0/4.0);
+			//getdownsample2x(gDownsample2x);
+			getsinc(gDownsample13x, 8.5, 0.5);	   
+			getsinc(gDownsample2x, 2.7625, 0.425); 
+			//end ericus' downsampling improvement.
+			StaticTablesInitialized = true;
+		}
+	#endif
 	if((m_OldSettings == m_Settings) && !force) return;
 	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
 	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
- 	//ericus' downsampling improvement.
- 	//getsinc(gDownsample13x, 8.5, 3.0/4.0);
-	//getdownsample2x(gDownsample2x);
-	getsinc(gDownsample13x, 8.5, 0.5);	   
-	getsinc(gDownsample2x, 2.7625, 0.425); 
-	//end ericus' downsampling improvement.
+	#ifndef MODPLUG_TRACKER
+		getsinc(gDownsample13x, 8.5, 0.5);
+		getsinc(gDownsample2x, 2.7625, 0.425);
+	#endif
 	m_OldSettings = m_Settings;
 }
 
