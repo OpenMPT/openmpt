@@ -59,7 +59,7 @@ LPCSTR GetReverbPresetName(UINT nPreset);
 
 #endif
 
-typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
+typedef VOID (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
 #include "pattern.h"
 #include "patternContainer.h"
@@ -731,9 +731,9 @@ protected:
 	}
 
 private:
-	PLUGINDEX __cdecl GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
-	PLUGINDEX __cdecl GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
-	IMixPlugin *__cdecl GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
+	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
+	PLUGINDEX GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
+	IMixPlugin * GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
 
 	void HandlePatternTransitionEvents();
 
