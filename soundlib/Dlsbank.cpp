@@ -363,8 +363,8 @@ typedef struct SF2LOADERINFO
 /////////////////////////////////////////////////////////////////////
 // Unit conversion
 
-LONG __cdecl CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
-//---------------------------------------------------------------------
+LONG CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
+//-------------------------------------------------------------
 {
 	// tc = log2(time[secs]) * 1200*65536
 	// time[secs] = 2^(tc/(1200*65536))
@@ -377,16 +377,16 @@ LONG __cdecl CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
 
 
 // 0dB = 0x10000
-LONG __cdecl CDLSBank::DLS32BitRelativeGainToLinear(LONG lCentibels)
-//------------------------------------------------------------------
+LONG CDLSBank::DLS32BitRelativeGainToLinear(LONG lCentibels)
+//----------------------------------------------------------
 {
 	// v = 10^(cb/(200*65536)) * V
 	return (LONG)(65536.0 * pow(10.0, ((double)lCentibels)/(200*65536.0)) );
 }
 
 
-LONG __cdecl CDLSBank::DLS32BitRelativeLinearToGain(LONG lGain)
-//-------------------------------------------------------------
+LONG CDLSBank::DLS32BitRelativeLinearToGain(LONG lGain)
+//-----------------------------------------------------
 {
 	// cb = log10(v/V) * 200 * 65536
 	if (lGain <= 0) return -960 * 65536;
@@ -394,8 +394,8 @@ LONG __cdecl CDLSBank::DLS32BitRelativeLinearToGain(LONG lGain)
 }
 
 
-LONG __cdecl CDLSBank::DLSMidiVolumeToLinear(UINT nMidiVolume)
-//------------------------------------------------------------
+LONG CDLSBank::DLSMidiVolumeToLinear(UINT nMidiVolume)
+//----------------------------------------------------
 {
 	return (nMidiVolume * nMidiVolume << 16) / (127*127);
 }

@@ -144,8 +144,8 @@ protected:
 
 public:
 	// DLS Unit conversion
-	static LONG __cdecl DLS32BitTimeCentsToMilliseconds(LONG lTimeCents);
-	static LONG __cdecl DLS32BitRelativeGainToLinear(LONG lCentibels);	// 0dB = 0x10000
-	static LONG __cdecl DLS32BitRelativeLinearToGain(LONG lGain);		// 0dB = 0x10000
-	static LONG __cdecl DLSMidiVolumeToLinear(UINT nMidiVolume);		// [0-127] -> [0-0x10000]
+	static LONG DLS32BitTimeCentsToMilliseconds(LONG lTimeCents);
+	static LONG DLS32BitRelativeGainToLinear(LONG lCentibels);	// 0dB = 0x10000
+	static LONG DLS32BitRelativeLinearToGain(LONG lGain);		// 0dB = 0x10000
+	static LONG DLSMidiVolumeToLinear(UINT nMidiVolume);		// [0-127] -> [0-0x10000]
 };
