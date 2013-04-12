@@ -47,6 +47,7 @@ class CResampler
 public:
 	CResamplerSettings m_Settings;
 	CWindowedFIR m_WindowedFIR;
+	static const short int FastSincTable[256*4];
 	short int gKaiserSinc[SINC_PHASES*8];		// Upsampling
 #ifdef MODPLUG_TRACKER
 	static bool StaticTablesInitialized;

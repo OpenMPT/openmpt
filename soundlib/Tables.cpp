@@ -552,7 +552,7 @@ const float ITResonanceTable[128] =
 
 // Reversed sinc coefficients
 
-short int gFastSinc[256*4] =
+const short int CResampler::FastSincTable[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 
  -124, 16374,   135,    -1,  -153, 16368,   172,    -3,  -183, 16361,   209,    -4,  -211, 16353,   247,    -5, 
