@@ -860,7 +860,7 @@ void CViewPattern::OnGrowSelection()
 	}
 
 	// Adjust selection
-	m_Selection = PatternRect(startSel, PatternCursor(min(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
+	m_Selection = PatternRect(startSel, PatternCursor(MIN(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
 
 	InvalidatePattern(false);
 	SetModified();
@@ -961,7 +961,7 @@ void CViewPattern::OnShrinkSelection()
 	}
 
 	// Adjust selection
-	m_Selection = PatternRect(startSel, PatternCursor(min(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
+	m_Selection = PatternRect(startSel, PatternCursor(MIN(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
 
 	InvalidatePattern(false);
 	SetModified();
@@ -2057,15 +2057,15 @@ void CViewPattern::OnEditFindNext()
 	if(m_findReplace.findFlags[FindReplace::InChannels])
 	{
 		// Limit search to given channels
-		firstChannel = min(m_findReplace.findMinChn, lastChannel);
-		lastChannel = min(m_findReplace.findMaxChn, lastChannel);
+		firstChannel = MIN(m_findReplace.findMinChn, lastChannel);
+		lastChannel = MIN(m_findReplace.findMaxChn, lastChannel);
 	}
 
 	if(m_findReplace.findFlags[FindReplace::InPatSelection])
 	{
 		// Limit search to pattern selection
-		firstChannel = min(m_findReplace.selection.GetStartChannel(), lastChannel);
-		lastChannel = min(m_findReplace.selection.GetEndChannel(), lastChannel);
+		firstChannel = MIN(m_findReplace.selection.GetStartChannel(), lastChannel);
+		lastChannel = MIN(m_findReplace.selection.GetEndChannel(), lastChannel);
 	}
 
 	for(PATTERNINDEX pat = patStart; pat < patEnd; pat++)
@@ -4812,7 +4812,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		if(usePlaybackPosition && m_nPlayTick && pTarget->command == CMD_NONE && !doQuantize)
 		{
 			pTarget->command = (sndFile.TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-			pTarget->param = 0xD0 | min(0xF, m_nPlayTick);
+			pTarget->param = 0xD0 | MIN(0xF, m_nPlayTick);
 		}
 
 		//Enter note off
@@ -4831,7 +4831,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 			if(usePlaybackPosition && m_nPlayTick && !doQuantize) // ECx
 			{
 				pTarget->command = (sndFile.TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-				pTarget->param   = 0xC0 | min(0xF, m_nPlayTick);
+				pTarget->param   = 0xC0 | MIN(0xF, m_nPlayTick);
 			} else // C00
 			{
 				pTarget->note = NOTE_NONE;
@@ -5104,8 +5104,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 			{
 				newcmd.command = (sndFile.TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
-				if(sndFile.m_nMusicSpeed > 0) maxSpeed = min(0x0F, sndFile.m_nMusicSpeed - 1);
-				newcmd.param = 0xD0 + min(maxSpeed, m_nPlayTick);
+				if(sndFile.m_nMusicSpeed > 0) maxSpeed = MIN(0x0F, sndFile.m_nMusicSpeed - 1);
+				newcmd.param = 0xD0 + MIN(maxSpeed, m_nPlayTick);
 			}
 		}
 

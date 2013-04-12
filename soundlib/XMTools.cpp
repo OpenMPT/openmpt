@@ -149,7 +149,7 @@ vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns, boo
 void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, const uint16 (&envData)[24]) const
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	mptEnv.nNodes = min(numPoints, 12);
+	mptEnv.nNodes = MIN(numPoints, 12);
 
 	// Envelope Data
 	for(size_t i = 0; i < 12; i++)

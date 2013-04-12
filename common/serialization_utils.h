@@ -413,7 +413,7 @@ template<class T>
 inline void Binarywrite(OutStream& oStrm, const T& data, const Offtype bytecount)
 //--------------------------------------------------------------------------
 {
-	oStrm.write(reinterpret_cast<const char*>(&data), min(bytecount, sizeof(data)));
+	oStrm.write(reinterpret_cast<const char*>(&data), MIN(bytecount, sizeof(data)));
 }
 
 template <class T>

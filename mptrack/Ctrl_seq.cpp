@@ -1142,9 +1142,9 @@ void COrderList::OnInsertOrder()
 			   nInsertEnd + i + 1 < sndFile.Order.GetLength())
 				sndFile.Order[nInsertEnd + i + 1] = sndFile.Order[nInsertEnd - nInsertCount + i];
 		}
-		m_nScrollPos = min(nInsertEnd + 1, sndFile.Order.GetLastIndex());
+		m_nScrollPos = MIN(nInsertEnd + 1, sndFile.Order.GetLastIndex());
 		if(nInsertCount > 0)
-			m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, sndFile.Order.GetLastIndex());
+			m_nScrollPos2nd = MIN(m_nScrollPos + nInsertCount, sndFile.Order.GetLastIndex());
 		else
 			m_nScrollPos2nd = ORDERINDEX_INVALID;
 
@@ -1375,7 +1375,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	else if(nSeq < sndFile.Order.GetNumSequences())
 		sndFile.Order.SetSequence(nSeq);
 	ORDERINDEX nPosCandidate = sndFile.Order.GetLengthTailTrimmed() - 1;
-	SetCurSel(min(m_nScrollPos, nPosCandidate), true, false, true);
+	SetCurSel(MIN(m_nScrollPos, nPosCandidate), true, false, true);
 	if (m_pParent)
 		m_pParent->SetCurrentPattern(sndFile.Order[m_nScrollPos]);
 

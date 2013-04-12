@@ -109,7 +109,7 @@ public:
 	VstInt32 Finalise()
 	{
 		EnterCriticalSection(&criticalSection);
-		numEvents = min(eventQueue.size(), N);
+		numEvents = MIN(eventQueue.size(), N);
 		for(VstInt32 i = 0; i < numEvents; i++)
 		{
 			events[i] = reinterpret_cast<VstEvent *>(&eventQueue[i]);

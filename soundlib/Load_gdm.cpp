@@ -159,7 +159,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	{
 		if(fileHeader.panMap[i] < 16)
 		{
-			ChnSettings[i].nPan = min((fileHeader.panMap[i] * 16) + 8, 256);
+			ChnSettings[i].nPan = MIN((fileHeader.panMap[i] * 16) + 8, 256);
 		} else if(fileHeader.panMap[i] == 16)
 		{
 			ChnSettings[i].nPan = 128;
@@ -171,7 +171,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 		}
 	}
 
-	m_nDefaultGlobalVolume = min(fileHeader.masterVol * 4, 256);
+	m_nDefaultGlobalVolume = MIN(fileHeader.masterVol * 4, 256);
 	m_nDefaultSpeed = fileHeader.tempo;
 	m_nDefaultTempo = fileHeader.bpm;
 	m_nRestartPos = 0; // Not supported in this format, so use the default value
@@ -216,8 +216,8 @@ bool CSoundFile::ReadGDM(FileReader &file)
 			Samples[smp].nLength /= 2;
 		}
 
-		Samples[smp].nLoopStart = min(gdmSample.loopBegin, Samples[smp].nLength);	// in samples
-		Samples[smp].nLoopEnd = min(gdmSample.loopEnd - 1, Samples[smp].nLength);	// dito
+		Samples[smp].nLoopStart = MIN(gdmSample.loopBegin, Samples[smp].nLength);	// in samples
+		Samples[smp].nLoopEnd = MIN(gdmSample.loopEnd - 1, Samples[smp].nLength);	// dito
 		Samples[smp].FrequencyToTranspose();	// set transpose + finetune for mod files
 
 		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
@@ -244,7 +244,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 		if(gdmSample.flags & GDMSampleHeader::smpVolume)
 		{
 			// Default volume is used... 0...64, 255 = no default volume
-			Samples[smp].nVolume = min(gdmSample.volume, 64) * 4;
+			Samples[smp].nVolume = MIN(gdmSample.volume, 64) * 4;
 		} else
 		{
 			Samples[smp].nVolume = 256;
@@ -255,7 +255,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 			// Default panning is used
 			Samples[smp].uFlags |= CHN_PANNING;
 			// 0...15, 16 = surround (not supported), 255 = no default panning
-			Samples[smp].nPan = (gdmSample.panning > 15) ? 128 : min((gdmSample.panning * 16) + 8, 256);
+			Samples[smp].nPan = (gdmSample.panning > 15) ? 128 : MIN((gdmSample.panning * 16) + 8, 256);
 		} else
 		{
 			Samples[smp].nPan = 128;
@@ -277,7 +277,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	}
 
 	// Read patterns
-	Patterns.ResizeArray(max(MAX_PATTERNS, fileHeader.lastPattern + 1));
+	Patterns.ResizeArray(MAX(MAX_PATTERNS, fileHeader.lastPattern + 1));
 
 	const CModSpecifications &modSpecs = GetModSpecifications(GetBestSaveFormat());
 
@@ -406,7 +406,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 							break;
 
 						case CMD_VOLUME:
-							m.param = min(m.param, 64);
+							m.param = MIN(m.param, 64);
 							if(modSpecs.HasVolCommand(VOLCMD_VOLUME))
 							{
 								m.volcmd = VOLCMD_VOLUME;

@@ -298,8 +298,8 @@ struct S3MSampleHeader
 			if(sampleType == typePCM)
 			{
 				mptSmp.nLength = length;
-				mptSmp.nLoopStart = min(loopStart, mptSmp.nLength - 1);
-				mptSmp.nLoopEnd = min(loopEnd, mptSmp.nLength);
+				mptSmp.nLoopStart = MIN(loopStart, mptSmp.nLength - 1);
+				mptSmp.nLoopEnd = MIN(loopEnd, mptSmp.nLength);
 				mptSmp.uFlags.set(CHN_LOOP, (flags & smpLoop) != 0);
 			}
 
@@ -310,7 +310,7 @@ struct S3MSampleHeader
 			}
 
 			// Volume / Panning
-			mptSmp.nVolume = min(defaultVolume, 64) * 4;
+			mptSmp.nVolume = MIN(defaultVolume, 64) * 4;
 
 			// C-5 frequency
 			mptSmp.nC5Speed = c5speed;
@@ -333,9 +333,9 @@ struct S3MSampleHeader
 		if(mptSmp.pSample != nullptr)
 		{
 			sampleType = typePCM;
-			length = static_cast<uint32>(min(mptSmp.nLength, uint32_max));
-			loopStart = static_cast<uint32>(min(mptSmp.nLoopStart, uint32_max));
-			loopEnd = static_cast<uint32>(min(mptSmp.nLoopEnd, uint32_max));
+			length = static_cast<uint32>(MIN(mptSmp.nLength, uint32_max));
+			loopStart = static_cast<uint32>(MIN(mptSmp.nLoopStart, uint32_max));
+			loopEnd = static_cast<uint32>(MIN(mptSmp.nLoopEnd, uint32_max));
 
 			smpLength = length;
 
@@ -353,7 +353,7 @@ struct S3MSampleHeader
 			sampleType = typeNone;
 		}
 
-		defaultVolume = static_cast<uint8>(min(mptSmp.nVolume / 4, 64));
+		defaultVolume = static_cast<uint8>(MIN(mptSmp.nVolume / 4, 64));
 		if(mptSmp.nC5Speed != 0)
 		{
 			c5speed = mptSmp.nC5Speed;
@@ -499,7 +499,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	}
 
 	// Global Volume
-	m_nDefaultGlobalVolume = min(fileHeader.globalVol, 64) * 4;
+	m_nDefaultGlobalVolume = MIN(fileHeader.globalVol, 64) * 4;
 	// The following check is probably not very reliable, but it fixes a few tunes, e.g.
 	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
 	if(m_nDefaultGlobalVolume == 0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
@@ -571,7 +571,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	bool hasAdlibPatches = false;
 
 	// Reading sample headers
-	m_nSamples = min(fileHeader.smpNum, MAX_SAMPLES - 1);
+	m_nSamples = MIN(fileHeader.smpNum, MAX_SAMPLES - 1);
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		S3MSampleHeader sampleHeader;
@@ -613,7 +613,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	int zxxCountRight = 0, zxxCountLeft = 0;
 
 	// Reading patterns
-	const PATTERNINDEX readPatterns = min(fileHeader.patNum, MAX_PATTERNS);
+	const PATTERNINDEX readPatterns = MIN(fileHeader.patNum, MAX_PATTERNS);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{
 		// A zero parapointer indicates an empty pattern.
@@ -681,7 +681,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 				} else
 				{
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = min(volume, 64);
+					m.vol = MIN(volume, 64);
 				}
 			}
 
@@ -777,7 +777,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	fileHeader.smpNum = static_cast<uint16>(writeSamples);
 
 	// Patterns
-	PATTERNINDEX writePatterns = min(Patterns.GetNumPatterns(), 100u);
+	PATTERNINDEX writePatterns = MIN(Patterns.GetNumPatterns(), 100u);
 	fileHeader.patNum = static_cast<uint16>(writePatterns);
 
 	// Flags
@@ -798,7 +798,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	fileHeader.magic = S3MFileHeader::idSCRM;
 
 	// Song Variables
-	fileHeader.globalVol = static_cast<uint8>(min(m_nDefaultGlobalVolume / 4, 64));
+	fileHeader.globalVol = static_cast<uint8>(MIN(m_nDefaultGlobalVolume / 4, 64));
 	fileHeader.speed = static_cast<uint8>(Clamp(m_nDefaultSpeed, 1u, 254u));
 	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo, 33u, 255u));
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);
@@ -931,7 +931,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 
 				const PatternRow rowBase = Patterns[pat].GetRow(row);
 
-				CHANNELINDEX writeChannels = min(32, GetNumChannels());
+				CHANNELINDEX writeChannels = MIN(32, GetNumChannels());
 				for(CHANNELINDEX chn = 0; chn < writeChannels; chn++)
 				{
 					ModCommand &m = rowBase[chn];
@@ -970,7 +970,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 					{
 						command = CMD_NONE;
 						volcmd = VOLCMD_VOLUME;
-						vol = min(param, 64);
+						vol = MIN(param, 64);
 					}
 
 					if(volcmd == VOLCMD_VOLUME)
@@ -1019,7 +1019,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 			buffer.insert(buffer.end(), 64, s3mEndOfRow);
 		}
 
-		size_t length = min(buffer.size(), uint16_max);
+		size_t length = MIN(buffer.size(), uint16_max);
 		buffer[0] = static_cast<uint8>(length & 0xFF);
 		buffer[1] = static_cast<uint8>((length >> 8) & 0xFF);
 

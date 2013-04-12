@@ -350,7 +350,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 					newParam <<= 1;
 				} else
 				{
-					newParam = min(settings.param << 2, 0xFF);
+					newParam = MIN(settings.param << 2, 0xFF);
 				}
 				break;
 			case VOLCMD_VOLUME:

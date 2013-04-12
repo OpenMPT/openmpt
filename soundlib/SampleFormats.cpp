@@ -1809,12 +1809,12 @@ bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwF
 		DWORD dwChunkLen = BigEndian(*((LPDWORD)(lpMemFile+dwMemPos+4)));
 		LPBYTE pChunkData = (LPBYTE)(lpMemFile+dwMemPos+8);
 		// Hack for broken files: Trim claimed length if it's too long
-		dwChunkLen = min(dwChunkLen, dwFileLength - dwMemPos);
+		dwChunkLen = MIN(dwChunkLen, dwFileLength - dwMemPos);
 		switch(dwChunkId)
 		{
 		case IFFID_NAME:
 			{
-				const UINT len = min(dwChunkLen, MAX_SAMPLENAME - 1);
+				const UINT len = MIN(dwChunkLen, MAX_SAMPLENAME - 1);
 				MemsetZero(m_szNames[nSample]);
 				memcpy(m_szNames[nSample], pChunkData, len);
 			}

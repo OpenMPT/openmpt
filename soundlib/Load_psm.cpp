@@ -596,7 +596,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 			SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
 			if(smp < MAX_SAMPLES)
 			{
-				m_nSamples = max(m_nSamples, smp);
+				m_nSamples = MAX(m_nSamples, smp);
 				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 				sampleHeader.ConvertToMPT(Samples[smp]);
@@ -614,7 +614,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 			SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
 			if(smp < MAX_SAMPLES)
 			{
-				m_nSamples = max(m_nSamples, smp);
+				m_nSamples = MAX(m_nSamples, smp);
 				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 				sampleHeader.ConvertToMPT(Samples[smp]);
@@ -679,7 +679,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 				uint8 flags = rowChunk.ReadUint8();
 				uint8 channel = rowChunk.ReadUint8();
 				// Point to the correct channel
-				ModCommand &m = rowBase[min(m_nChannels - 1, channel)];
+				ModCommand &m = rowBase[MIN(m_nChannels - 1, channel)];
 
 				if(flags & noteFlag)
 				{
@@ -709,7 +709,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 					// Volume present
 					uint8 vol = rowChunk.ReadUint8();
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = (min(vol, 127) + 1) / 2;
+					m.vol = (MIN(vol, 127) + 1) / 2;
 				}
 
 				if(flags & effectFlag)
@@ -1117,7 +1117,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
 		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
 		|| (fileHeader.songType & 3) != 0
-		|| max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
+		|| MAX(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
 	{
 		return false;
 	}
@@ -1125,7 +1125,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 	// Seems to be valid!
 
 	m_nType = MOD_TYPE_S3M;
-	m_nChannels = min(max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal), MAX_BASECHANNELS);
+	m_nChannels = MIN(MAX(fileHeader.numChannelsPlay, fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;
 	if(m_nSamplePreAmp == 255)
 	{
@@ -1170,7 +1170,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 			}
 
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
-			m_nSamples = max(m_nSamples, smp);
+			m_nSamples = MAX(m_nSamples, smp);
 
 			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.name);
 			sampleHeader.ConvertToMPT(Samples[smp]);
@@ -1223,7 +1223,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 					continue;
 				}
 
-				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, min(chnFlag & channelMask, m_nChannels - 1));
+				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, MIN(chnFlag & channelMask, m_nChannels - 1));
 
 				if(chnFlag & noteFlag)
 				{

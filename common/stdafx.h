@@ -15,6 +15,8 @@
 
 #define _WIN32_WINNT	0x0500	// 0x0500 = Windows 2000
 
+// no stupid min/max macros
+#define NOMINMAX
 // windows excludes
 #define NOMCX
 // mmreg excludes

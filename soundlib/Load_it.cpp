@@ -229,7 +229,7 @@ static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 static uint8 ConvertVolParam(const ModCommand *m)
 //-----------------------------------------------
 {
-	return min(m->vol, 9);
+	return MIN(m->vol, 9);
 }
 
 
@@ -956,7 +956,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	const size_t num = 0;
 #endif // MODPLUG_TRACKER
 
-	uint16 fnum = (uint16)min(num, uint16_max);	// Number of entries that are actually going to be written
+	uint16 fnum = (uint16)MIN(num, uint16_max);	// Number of entries that are actually going to be written
 	const size_t bytes_written = 2 + fnum * 8;	// Number of bytes that are actually going to be written
 
 	if(f == nullptr)
@@ -1032,7 +1032,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	if(GetType() == MOD_TYPE_MPT)
 	{
 		if(!Order.NeedsExtraDatafield()) itHeader.ordnum = Order.size();
-		else itHeader.ordnum = min(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
+		else itHeader.ordnum = MIN(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
 
 		//Crop unused orders from the end.
 		while(itHeader.ordnum > 1 && Order[itHeader.ordnum - 1] == Order.GetInvalidPatIndex()) itHeader.ordnum--;
@@ -1091,9 +1091,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
 
 	itHeader.globalvol = (uint8)(m_nDefaultGlobalVolume >> 1);
-	itHeader.mv = (uint8)min(m_nSamplePreAmp, 128);
-	itHeader.speed = (uint8)min(m_nDefaultSpeed, 255);
- 	itHeader.tempo = (uint8)min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
+	itHeader.mv = (uint8)MIN(m_nSamplePreAmp, 128);
+	itHeader.speed = (uint8)MIN(m_nDefaultSpeed, 255);
+ 	itHeader.tempo = (uint8)MIN(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
 	itHeader.sep = 128; // pan separation
 	// IT doesn't have a per-instrument Pitch Wheel Depth setting, so we just store the first non-zero PWD setting in the header.
 	for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)
@@ -1110,7 +1110,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	memset(itHeader.chnpan, 0xA0, 64);
 	memset(itHeader.chnvol, 64, 64);
 
-	for (CHANNELINDEX ich = 0; ich < min(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
+	for (CHANNELINDEX ich = 0; ich < MIN(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
 	{
 		itHeader.chnpan[ich] = (uint8)(ChnSettings[ich].nPan >> 2);
 		if (ChnSettings[ich].dwFlags[CHN_SURROUND]) itHeader.chnpan[ich] = 100;
@@ -1159,7 +1159,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	if(m_lpszSongComments)
 	{
 		itHeader.special |= ITFileHeader::embedSongMessage;
-		itHeader.msglength = msglength = (uint16)min(strlen(m_lpszSongComments) + 1, uint16_max);
+		itHeader.msglength = msglength = (uint16)MIN(strlen(m_lpszSongComments) + 1, uint16_max);
 		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
@@ -1300,7 +1300,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
 
-		const CHANNELINDEX maxChannels = min(specs.channelsMax, GetNumChannels());
+		const CHANNELINDEX maxChannels = MIN(specs.channelsMax, GetNumChannels());
 		vector<BYTE> chnmask(maxChannels, 0xFF);
 		vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
 
@@ -1794,9 +1794,9 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		UINT maxNodes = 0;
 		for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++) if(Instruments[nIns] != nullptr)
 		{
-			maxNodes = max(maxNodes, Instruments[nIns]->VolEnv.nNodes);
-			maxNodes = max(maxNodes, Instruments[nIns]->PanEnv.nNodes);
-			maxNodes = max(maxNodes, Instruments[nIns]->PitchEnv.nNodes);
+			maxNodes = MAX(maxNodes, Instruments[nIns]->VolEnv.nNodes);
+			maxNodes = MAX(maxNodes, Instruments[nIns]->PanEnv.nNodes);
+			maxNodes = MAX(maxNodes, Instruments[nIns]->PitchEnv.nNodes);
 		}
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)

@@ -96,7 +96,7 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 		sprintf(parameteredMacro, "Bc%02Xz", (subType & 0x7F));
 		break;
 	case sfx_plug:
-		sprintf(parameteredMacro, "F0F%03Xz", min(subType, 0x17F) + 0x80);
+		sprintf(parameteredMacro, "F0F%03Xz", MIN(subType, 0x17F) + 0x80);
 		break;
 	case sfx_channelAT:
 		strcpy(parameteredMacro, "Dcz");

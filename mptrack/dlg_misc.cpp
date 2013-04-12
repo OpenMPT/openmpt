@@ -526,7 +526,7 @@ END_MESSAGE_MAP()
 BOOL CRemoveChannelsDlg::OnInitDialog()
 //-------------------------------------
 {
-	CHAR label[max(100, 20 + MAX_CHANNELNAME)];
+	CHAR label[MAX(100, 20 + MAX_CHANNELNAME)];
 	CDialog::OnInitDialog();
 	for (UINT n = 0; n < m_nChannels; n++)
 	{
@@ -1324,7 +1324,7 @@ LPCTSTR GetNoteStr(const ModCommand::NOTE nNote)
 void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart, const ModCommand::NOTE noteEnd)
 //------------------------------------------------------------------------------------------------------------------
 {
-	const ModCommand::NOTE upperLimit = min(CountOf(szDefaultNoteNames) - 1, noteEnd);
+	const ModCommand::NOTE upperLimit = MIN(CountOf(szDefaultNoteNames) - 1, noteEnd);
 	for(ModCommand::NOTE note = noteStart; note <= upperLimit; ++note)
 		combobox.SetItemData(combobox.AddString(szDefaultNoteNames[note]), note);
 }

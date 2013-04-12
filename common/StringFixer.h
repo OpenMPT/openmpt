@@ -85,7 +85,7 @@ namespace StringFixer
 		STATIC_ASSERT(destSize > 0);
 		//ASSERT(srcSize > 0);
 
-		const size_t maxSize = min(destSize, srcSize);
+		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
 		const char *src = srcBuffer;
 
@@ -111,7 +111,7 @@ namespace StringFixer
 			} else
 			{
 				// Last character of source buffer may actually be a valid character.
-				destBuffer[min(destSize - 1, srcSize)] = '\0';
+				destBuffer[MIN(destSize - 1, srcSize)] = '\0';
 			}
 
 		} else if(mode == spacePadded || mode == spacePaddedNull)
@@ -181,7 +181,7 @@ namespace StringFixer
 		STATIC_ASSERT(destSize > 0);
 		ASSERT(srcSize > 0);
 
-		const size_t maxSize = min(destSize, srcSize);
+		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
 		const char *src = srcBuffer;
 
@@ -229,7 +229,7 @@ namespace StringFixer
 	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_T_MAX)
 	//------------------------------------------------------------------------------------------------
 	{
-		const size_t copySize = min(destSize - 1, srcSize);
+		const size_t copySize = MIN(destSize - 1, srcSize);
 		strncpy(destBuffer, srcBuffer, copySize);
 		destBuffer[copySize] = '\0';
 	}

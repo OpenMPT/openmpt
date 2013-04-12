@@ -32,6 +32,14 @@
 	#define CountOf(x) (sizeof(x)/sizeof(x[0]))
 #endif
 
+#ifndef MAX
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 // Compile time assert.
 #ifndef C_ASSERT
 #define C_ASSERT(expr)				typedef char __C_ASSERT__[(expr)?1:-1]

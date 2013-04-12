@@ -163,9 +163,9 @@ void ReadItemString(InStream& iStrm, std::string& str, const DataSize)
 	Binaryread(iStrm, id, 1);
 	const uint8 nSizeBytes = (id & 12) >> 2; // 12 == 1100b
 	if (nSizeBytes > 0)
-		iStrm.read(reinterpret_cast<char*>(&id) + 1, min(3, nSizeBytes));
+		iStrm.read(reinterpret_cast<char*>(&id) + 1, MIN(3, nSizeBytes));
 	// Limit to 1 MB.
-	str.resize(min(id >> 4, 1000000));
+	str.resize(MIN(id >> 4, 1000000));
 	for(size_t i = 0; i < str.size(); i++)
 		iStrm.read(&str[i], 1);
 
@@ -906,7 +906,7 @@ void Ssb::FinishWrite()
 	}
 
 	// Seek to end.
-	oStrm.seekp(max(posMapEnd, posDataEnd)); 
+	oStrm.seekp(MAX(posMapEnd, posDataEnd)); 
 
 	if (m_fpLogFunc)
 		m_fpLogFunc(tstrEndOfStream, uint32(oStrm.tellp() - m_posStart));

@@ -925,7 +925,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		SaveMixPlugins(f);
 		if(m_nInstruments)
 		{
-			SaveExtendedInstrumentProperties(min(GetNumInstruments(), writeInstruments), f);
+			SaveExtendedInstrumentProperties(MIN(GetNumInstruments(), writeInstruments), f);
 		}
 		SaveExtendedSongProperties(f);
 	}

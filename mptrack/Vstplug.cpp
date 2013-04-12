@@ -778,7 +778,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
-				timeInfo.timeSigNumerator = sndFile.m_nCurrentRowsPerMeasure / max(sndFile.m_nCurrentRowsPerBeat, 1);
+				timeInfo.timeSigNumerator = sndFile.m_nCurrentRowsPerMeasure / MAX(sndFile.m_nCurrentRowsPerBeat, 1);
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
@@ -1442,7 +1442,7 @@ bool CVstPlugin::InitializeIOBuffers()
 	m_nOutputs = m_Effect.numOutputs;
 
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
-	bool result = mixBuffer.Initialize(max(m_nInputs, 2), m_nOutputs);
+	bool result = mixBuffer.Initialize(MAX(m_nInputs, 2), m_nOutputs);
 	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
 	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 
@@ -1613,7 +1613,7 @@ bool CVstPlugin::SaveProgram()
 		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
 	}
 
-	char rawname[max(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
+	char rawname[MAX(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
 	Dispatch(effGetProgramName, 0, 0, rawname, 0);
 	SanitizeFilename(rawname);
 	StringFixer::SetNullTerminator(rawname);
@@ -1745,7 +1745,7 @@ bool CVstPlugin::GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char 
 CString CVstPlugin::GetFormattedProgramName(VstInt32 index)
 //---------------------------------------------------------
 {
-	char rawname[max(kVstMaxProgNameLen + 1, 256)];	// kVstMaxProgNameLen is 24...
+	char rawname[MAX(kVstMaxProgNameLen + 1, 256)];	// kVstMaxProgNameLen is 24...
 	if(!GetProgramNameIndexed(index, -1, rawname))
 	{
 		// Fallback: Try to get current program name.
@@ -1841,7 +1841,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 //-------------------------------------------------------------------------
 {
-	CHAR s[max(kVstMaxParamStrLen + 1, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
+	CHAR s[MAX(kVstMaxParamStrLen + 1, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
 	s[0] = '\0';
 
 	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
@@ -2041,7 +2041,7 @@ void CVstPlugin::RecalculateGain()
 void CVstPlugin::SetDryRatio(UINT param)
 //--------------------------------------
 {
-	param = min(param, 127);
+	param = MIN(param, 127);
 	m_pMixStruct->fDryRatio = static_cast<float>(1.0-(static_cast<double>(param)/127.0));
 }
 

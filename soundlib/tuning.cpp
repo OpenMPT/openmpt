@@ -503,7 +503,7 @@ namespace CTuningS11n
 void RatioWriter::operator()(srlztn::OutStream& oStrm, const std::vector<float>& v)
 //---------------------------------------------------------------------------------
 {
-	const size_t nWriteCount = min(v.size(), m_nWriteCount);
+	const size_t nWriteCount = MIN(v.size(), m_nWriteCount);
 	srlztn::WriteAdaptive1248(oStrm, nWriteCount);
 	for(size_t i = 0; i < nWriteCount; i++)
 		srlztn::Binarywrite(oStrm, v[i]);
@@ -532,7 +532,7 @@ void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, c
 {
 	uint64 val;
 	srlztn::ReadAdaptive1248(iStrm, val);
-	v.resize( static_cast<size_t>(min(val, 256))); // Read 256 vals at max.
+	v.resize( static_cast<size_t>(MIN(val, 256))); // Read 256 vals at max.
 	for(size_t i = 0; i < v.size(); i++)
 		srlztn::Binaryread(iStrm, v[i]);
 }
