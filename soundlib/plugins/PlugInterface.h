@@ -199,4 +199,4 @@ struct SNDMIXPLUGIN
 }; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
 
 class CSoundFile;
-typedef bool (__cdecl *PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
+typedef bool (*PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);

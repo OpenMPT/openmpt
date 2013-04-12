@@ -347,7 +347,7 @@ protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect);
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	static bool __cdecl CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
+	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 
 public:
