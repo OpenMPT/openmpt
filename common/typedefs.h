@@ -52,7 +52,7 @@
 
 void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
 #ifdef NDEBUG
-#define ALWAYS_ASSERT(expr) do { if(!(expr)) { if(IsDebuggerPresent()) { ASSERT(expr); } else { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } } while(0)
+#define ALWAYS_ASSERT(expr) do { if(!(expr)) { if(IsDebuggerPresent()) { OutputDebugString("assert failed: " #expr); DebugBreak(); } else { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } } while(0)
 #else
 #define ALWAYS_ASSERT(expr) ASSERT(expr)
 #endif
