@@ -1751,8 +1751,15 @@ BOOL CMainFrame::SetupMiscOptions()
 BOOL CMainFrame::SetupMidi(DWORD d, LONG n)
 //-----------------------------------------
 {
+	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != n);
 	TrackerSettings::Instance().m_dwMidiSetup = d;
 	TrackerSettings::Instance().m_nMidiDevice = n;
+	if(deviceChanged && shMidiIn)
+	{
+		// Device has changed, close the old one.
+		midiCloseDevice();
+		midiOpenDevice();
+	}
 	return TRUE;
 }
 
