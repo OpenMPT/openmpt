@@ -760,7 +760,6 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 // Low-level Mixing functions
 
 #define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
-#define MIXING_ATTENUATION	4
 #define VOLUMERAMPPRECISION	12
 #define FADESONGDELAY		100
 
