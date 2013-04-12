@@ -186,7 +186,7 @@ bool CSoundFile::ReadMTM(FileReader &file)
 	{
 		// Read message with a fixed line length of 40 characters
 		// (actually the last character is always null, so make that 39 + 1 padding byte)
-		ReadFixedLineLengthMessage(file, fileHeader.commentSize, 39, 1);
+		songMessage.ReadFixedLineLength(file, fileHeader.commentSize, 39, 1);
 	}
 
 	// Reading Samples

@@ -450,7 +450,7 @@ bool CSoundFile::ReadAMS(FileReader &file)
 		}
 
 		// Packed text doesn't include any line breaks!
-		ReadFixedLineLengthMessage(&textOut[0], textOut.size(), 76, 0, ConvertAMSTextChars);
+		songMessage.ReadFixedLineLength(&textOut[0], textOut.size(), 76, 0, ConvertAMSTextChars);
 	}
 
 	// Read Order List
@@ -828,7 +828,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 	uint8 composerLength = file.ReadUint8();
 	if(composerLength)
 	{
-		ReadMessage(file, composerLength, leAutodetect, ConvertAMSTextChars);
+		songMessage.Read(file, composerLength, SongMessage::leAutodetect, ConvertAMSTextChars);
 	}
 
 	// Channel names
@@ -867,7 +867,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 			}
 		}
 		// Packed text doesn't include any line breaks!
-		ReadFixedLineLengthMessage(&textOut[0], descriptionHeader.unpackedLen, 74, 0, ConvertAMSTextChars);
+		songMessage.ReadFixedLineLength(&textOut[0], descriptionHeader.unpackedLen, 74, 0, ConvertAMSTextChars);
 	}
 
 	// Read Order List

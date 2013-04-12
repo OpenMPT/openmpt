@@ -722,17 +722,17 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 								memcpy(m_szNames[0], ptrk->ptracks, len);
 								m_szNames[0][len] = 0;
 							} else
-							if ((!m_lpszSongComments) && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
+							if (songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
 							{
-								ReadMessage(ptrk->ptracks, len, leAutodetect);
+								songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
 							}
 							break;
 						// FF.02 [text]: Song Copyright
 						case 0x02:
 							if (!len) break;
-							if ((!m_lpszSongComments) && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F) && (len > 7))
+							if (songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F) && (len > 7))
 							{
-								ReadMessage(ptrk->ptracks, len, leAutodetect);
+								songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
 							}
 							break;
 						// FF.03: Sequence Name

@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "../soundlib/Sndfile.h"
+#include "../common/StringFixer.h"
 #include "mod2midi.h"
 #include "Wav.h"
 
@@ -393,12 +394,13 @@ BOOL CModToMidi::DoConvert()
 	}
 
 	// Add Song comments on track 0
-	if ((m_pSndFile->m_lpszSongComments) && (m_pSndFile->m_lpszSongComments[0]))
+	if(!m_pSndFile->songMessage.empty())
 	{
+		const std::string msg = m_pSndFile->songMessage.GetFormatted(SongMessage::leCR);
 		tmp[0] = 0; tmp[1] = 0xff; tmp[2] = 0x02;
 		Tracks[0].Write(tmp, 3);
-		Tracks[0].WriteLen(strlen(m_pSndFile->m_lpszSongComments));
-		Tracks[0].Write(m_pSndFile->m_lpszSongComments, strlen(m_pSndFile->m_lpszSongComments));
+		Tracks[0].WriteLen(msg.length());
+		Tracks[0].Write(msg.c_str(), msg.length());
 	}
 
 	// Add channel names

@@ -392,7 +392,7 @@ bool CSoundFile::ReadUlt(FileReader &file)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// read "messageLength" lines, each containing 32 characters.
-	ReadFixedLineLengthMessage(file, fileHeader.messageLength * 32, 32, 0);
+	songMessage.ReadFixedLineLength(file, fileHeader.messageLength * 32, 32, 0);
 
 	m_nSamples = static_cast<SAMPLEINDEX>(file.ReadUint8());
 	if(GetNumSamples() >= MAX_SAMPLES)

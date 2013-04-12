@@ -328,7 +328,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "Test Module"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_lpszSongComments[0], 'O');
+	VERIFY_EQUAL_NONCONT(pSndFile->songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 139);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
@@ -522,7 +522,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "Test Module_____________X"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_lpszSongComments[0], 'O');
+	VERIFY_EQUAL_NONCONT(pSndFile->songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 139);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);

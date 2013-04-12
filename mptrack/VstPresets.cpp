@@ -11,10 +11,11 @@
 #include "stdafx.h"
 
 #ifndef NO_VST
-#include "Sndfile.h"
+#include "../soundlib/Sndfile.h"
 #include "Vstplug.h"
 #include <vstsdk2.4/pluginterfaces/vst2.x/vstfxstore.h>
 #include "VstPresets.h"
+#include "../soundlib/FileReader.h"
 
 
 // This part of the header is identical for both presets and banks.

@@ -17,6 +17,7 @@
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
 #include "../common/Reporting.h"
+#include "FileReader.h"
 #include <functional>
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))

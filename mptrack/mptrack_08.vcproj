@@ -1291,6 +1291,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\Message.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\Load_669.cpp"
 				>
 			</File>

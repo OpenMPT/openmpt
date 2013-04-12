@@ -205,8 +205,8 @@ bool CZipArchive::ExtractFile()
 }
 
 
-void *CZipArchive::GetComments(bool get)
-//--------------------------------------
+const char *CZipArchive::GetComments(bool get)
+//--------------------------------------------
 {
 	unz_global_info info;
 	if(zipFile == nullptr || unzGetGlobalInfo(zipFile, &info) != UNZ_OK)
@@ -216,7 +216,7 @@ void *CZipArchive::GetComments(bool get)
 
 	if(!get)
 	{
-		return reinterpret_cast<void *>((info.size_comment > 0) ? 1 : 0);
+		return reinterpret_cast<char *>((info.size_comment > 0) ? 1 : 0);
 	} else if(info.size_comment > 0)
 	{
 		if(info.size_comment < Util::MaxValueOfType(info.size_comment))

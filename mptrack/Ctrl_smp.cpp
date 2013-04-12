@@ -27,6 +27,7 @@
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
 #include "../common/StringFixer.h"
+#include "../soundlib/FileReader.h"
 #include <Shlwapi.h>
 
 #ifdef _DEBUG

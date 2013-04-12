@@ -14,41 +14,8 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
-
-// Allocate memory for song message.
-// [in]  length: text length in characters, without possible trailing null terminator.
-// [out] returns true on success.
-bool CSoundFile::AllocateMessage(size_t length)
-//---------------------------------------------
-{
-	FreeMessage();
-	try
-	{
-		if(length == Util::MaxValueOfType(length))
-		{
-			return false;
-		}
-		length++;	// + 1 for trailing null
-		m_lpszSongComments = new char[length];
-		memset(m_lpszSongComments, 0, length);
-		return true;
-	} catch(MPTMemoryException)
-	{
-		m_lpszSongComments = nullptr;
-		return false;
-	}
-}
-
-
-// Free previously allocated song message memory
-void CSoundFile::FreeMessage()
-//----------------------------
-{
-	delete[] m_lpszSongComments;
-	m_lpszSongComments = nullptr;
-}
-
+#include "Message.h"
+#include "FileReader.h"
 
 // Read song message from a mapped file.
 // [in]  data: pointer to the data in memory that is going to be read
@@ -56,16 +23,15 @@ void CSoundFile::FreeMessage()
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &))
-//----------------------------------------------------------------------------------------------------------------------
+bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, ConverterFunc pTextConverter)
+//----------------------------------------------------------------------------------------------------------
 {
-	while(length != 0 && data[length - 1] == '\0')
+	const char *str = static_cast<const char *>(data);
+	while(length != 0 && str[length - 1] == '\0')
 	{
 		// Ignore trailing null character.
 		length--;
 	}
-
-	char c;
 
 	// Simple line-ending detection algorithm. VERY simple.
 	if(lineEnding == leAutodetect)
@@ -75,7 +41,7 @@ bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lin
 		// find CRs, LFs and CRLFs
 		for(size_t i = 0; i < length; i++)
 		{
-			c = data[i];
+			char c = str[i];
 			if(pTextConverter != nullptr)
 				pTextConverter(c);
 
@@ -100,7 +66,7 @@ bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lin
 	// calculate the final amount of characters to be allocated.
 	for(size_t i = 0; i < length; i++)
 	{
-		c = data[i];
+		char c = str[i];
 		if(pTextConverter != nullptr)
 			pTextConverter(c);
 
@@ -108,13 +74,12 @@ bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lin
 			finalLength++;
 	}
 
-	if(!AllocateMessage(finalLength))
-		return false;
+	resize(finalLength);
 
 	size_t cpos = 0;
 	for(size_t i = 0; i < length; i++, cpos++)
 	{
-		c = data[i];
+		char c = str[i];
 		if(pTextConverter != nullptr)
 			pTextConverter(c);
 
@@ -122,27 +87,37 @@ bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lin
 		{
 		case '\r':
 			if(lineEnding != leLF)
-				m_lpszSongComments[cpos] = INTERNAL_LINEENDING;
+				at(cpos) = INTERNAL_LINEENDING;
 			else
-				m_lpszSongComments[cpos] = ' ';
+				at(cpos) = ' ';
 			if(lineEnding == leCRLF) i++;	// skip the LF
 			break;
 		case '\n':
 			if(lineEnding != leCR && lineEnding != leCRLF)
-				m_lpszSongComments[cpos] = INTERNAL_LINEENDING;
+				at(cpos) = INTERNAL_LINEENDING;
 			else
-				m_lpszSongComments[cpos] = ' ';
+				at(cpos) = ' ';
 			break;
 		case '\0':
-			m_lpszSongComments[cpos] = ' ';
+			at(cpos) = ' ';
 			break;
 		default:
-			m_lpszSongComments[cpos] = c;
+			at(cpos) = c;
 			break;
 		}
 	}
 
 	return true;
+}
+
+
+bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnding, ConverterFunc pTextConverter)
+//----------------------------------------------------------------------------------------------------------------
+{
+	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
+	bool success = Read(file.GetRawData(), readLength, lineEnding, pTextConverter);
+	file.Skip(readLength);
+	return success;
 }
 
 
@@ -153,34 +128,35 @@ bool CSoundFile::ReadMessage(const BYTE *data, size_t length, enmLineEndings lin
 // [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
 // [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &))
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, ConverterFunc pTextConverter)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	const char *str = static_cast<const char *>(data);
 	if(lineLength == 0)
 		return false;
 
 	const size_t numLines = (length / (lineLength + lineEndingLength));
 	const size_t finalLength = numLines * (lineLength + 1);
-	if(!AllocateMessage(finalLength))
-		return false;
+	clear();
+	reserve(finalLength);
 
 	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
 	{
-		memcpy(m_lpszSongComments + cpos, data + fpos, std::min(lineLength, length - fpos));
-		m_lpszSongComments[cpos + lineLength] = INTERNAL_LINEENDING;
+		append(str + fpos, std::min(lineLength, length - fpos));
+		at(cpos + lineLength) = INTERNAL_LINEENDING;
 
 		// fix weird chars
 		for(size_t lpos = 0; lpos < lineLength; lpos++)
 		{
 			// Pre-process text
-			if(pTextConverter != nullptr) pTextConverter(m_lpszSongComments[cpos + lpos]);
+			if(pTextConverter != nullptr) pTextConverter(at(cpos + lpos));
 
-			switch(m_lpszSongComments[cpos + lpos])
+			switch(at(cpos + lpos))
 			{
 			case '\0':
 			case '\n':
 			case '\r':
-				m_lpszSongComments[cpos + lpos] = ' ';
+				at(cpos + lpos) = ' ';
 				break;
 			}
 
@@ -190,46 +166,57 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 }
 
 
+bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength, ConverterFunc pTextConverter)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
+	bool success = ReadFixedLineLength(file.GetRawData(), readLength, lineLength, lineEndingLength, pTextConverter);
+	file.Skip(readLength);
+	return success;
+}
+
+
 // Retrieve song message.
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
 // [out] returns formatted song message.
-mpt::String CSoundFile::GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &)) const
-//-------------------------------------------------------------------------------------------------------
+std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc pTextConverter) const
+//----------------------------------------------------------------------------------------------------
 {
-	mpt::String comments;
+	std::string comments;
 
-	if(m_lpszSongComments == nullptr)
+	if(empty())
 	{
 		return comments;
 	}
 
-	const size_t len = strlen(m_lpszSongComments);
-	comments.reserve(len);
+	const size_t len = length();
+	comments.resize(len);
 
+	size_t writePos = 0;
 	for(size_t i = 0; i < len; i++)
 	{
-		if(m_lpszSongComments[i] == INTERNAL_LINEENDING)
+		if(at(i) == INTERNAL_LINEENDING)
 		{
 			switch(lineEnding)
 			{
 			case leCR:
 			default:
-				comments.append(1, '\r');
+				comments.at(writePos++) = '\r';
 				break;
 			case leCRLF:
-				comments.append(1, 'r');
+				comments.at(writePos++) = '\r';
 				// Intentional fall-through
 			case leLF:
-				comments.append(1, '\n');
+				comments.at(writePos++) = '\n';
 				break;
 			}
 		} else
 		{
-			char c = m_lpszSongComments[i];
+			char c = at(i);
 			// Pre-process text
 			if(pTextConverter != nullptr) pTextConverter(c);
-			comments.append(1, c);
+			comments.at(writePos++) = c;
 		}
 	}
 	return comments;

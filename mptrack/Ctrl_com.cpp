@@ -127,9 +127,10 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	m_EditComments.SetRedraw(FALSE);
 	m_EditComments.SetSel(0, -1, TRUE);
 	m_EditComments.ReplaceSel("");
-	if (m_pSndFile->m_lpszSongComments)
+	if(!m_pSndFile->songMessage.empty())
 	{
-		CHAR s[256], *p = m_pSndFile->m_lpszSongComments, c;
+		CHAR s[256], c;
+		const char *p = m_pSndFile->songMessage.c_str();
 		UINT ln = 0;
 		while ((c = *p++) != NULL)
 		{
@@ -167,24 +168,23 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 void CCtrlComments::OnCommentsChanged()
 //-------------------------------------
 {
-	CHAR s[256], *oldcomments = NULL;
-	
 	if ((m_nLockCount) || (!m_pSndFile)
 		|| !m_pSndFile->GetModSpecifications().hasComments) return;
 	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
-	if (m_pSndFile->m_lpszSongComments)
-	{
-		oldcomments = m_pSndFile->m_lpszSongComments;
-		m_pSndFile->m_lpszSongComments = NULL;
-	}
+
+	CHAR s[LINE_LENGTH + 2];
+	const char *oldMsg = m_pSndFile->songMessage.c_str();
+
 	// Updating comments
 	{
-
-
 		UINT n = m_EditComments.GetLineCount();
 		LPSTR p = new char[n * LINE_LENGTH + 1];
+		if (!p)
+		{
+			return;
+		}
 		p[0] = 0;
-		if (!p) return;
+
 		for (UINT i=0; i<n; i++)
 		{
 			int ln = m_EditComments.GetLine(i, s, LINE_LENGTH);
@@ -206,27 +206,20 @@ void CCtrlComments::OnCommentsChanged()
 			len--;
 			p[len] = 0;
 		}
-		if (p[0])
-			m_pSndFile->m_lpszSongComments = p;
-		else
-			delete[] p;
-		if (oldcomments)
+
+		m_EditComments.SetModify(FALSE);
+		if(p != m_pSndFile->songMessage)
 		{
-			bool bSame = false;
-			if ((m_pSndFile->m_lpszSongComments)
-			 && (!strcmp(m_pSndFile->m_lpszSongComments, oldcomments))) bSame = true;
-			delete[] oldcomments;
-			if (bSame) return;
-		} else
-		{
-			if (!m_pSndFile->m_lpszSongComments) return;
+			m_pSndFile->songMessage.assign(p);
+
+			if(m_pModDoc)
+			{
+				m_pModDoc->SetModified();
+				m_pModDoc->UpdateAllViews(NULL, HINT_MODCOMMENTS, this);
+			}
 		}
-		if (m_pModDoc)
-		{
-			m_EditComments.SetModify(FALSE);
-			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_MODCOMMENTS, this);
-		}
+
+		delete[] p;
 	}
 }
 

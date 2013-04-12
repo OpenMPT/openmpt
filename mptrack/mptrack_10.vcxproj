@@ -417,6 +417,7 @@
     <ClInclude Include="..\soundlib\FileReader.h" />
     <ClInclude Include="..\soundlib\ITCompression.h" />
     <ClInclude Include="..\soundlib\ITTools.h" />
+    <ClInclude Include="..\soundlib\Message.h" />
     <ClInclude Include="..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
     <ClInclude Include="..\soundlib\MixerSettings.h" />

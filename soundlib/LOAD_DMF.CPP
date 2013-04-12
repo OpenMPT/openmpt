@@ -1030,7 +1030,7 @@ bool CSoundFile::ReadDMF(FileReader &file)
 	chunk = chunks.GetChunk(DMFChunk::idCMSG);
 	if(chunk.IsValid())
 	{
-		ReadFixedLineLengthMessage(chunk, chunk.GetLength() - 1, 40, 0);
+		songMessage.ReadFixedLineLength(chunk, chunk.GetLength() - 1, 40, 0);
 	}
 	
 	// Read sample headers + data

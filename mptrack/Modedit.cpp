@@ -16,6 +16,7 @@
 #include "dlsbank.h"
 #include "modsmp_ctrl.h"
 #include "../common/misc_util.h"
+#include "../common/StringFixer.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
