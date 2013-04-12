@@ -31,7 +31,7 @@
 #include "modcommand.h"
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
-#include "FileReader.h"
+#include "Message.h"
 
 #include "Resampler.h"
 #include "../sounddsp/Reverb.h"
@@ -64,17 +64,6 @@ typedef VOID (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffe
 #include "pattern.h"
 #include "patternContainer.h"
 #include "ModSequence.h"
-
-
-// Line ending types (for reading song messages from module files)
-enum enmLineEndings
-{
-	leCR,			// Carriage Return (0x0D, \r)
-	leLF,			// Line Feed (0x0A \n)
-	leCRLF,			// Carriage Return, Line Feed (0x0D0A, \r\n)
-	leMixed,		// It is not defined whether Carriage Return or Line Feed is the actual line ending. Both are accepted.
-	leAutodetect,	// Detect suitable line ending
-};
 
 #define INTERNAL_LINEENDING	'\r'	// The character that represents line endings internally
 
@@ -310,7 +299,6 @@ public:	// for Editing
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
 	UINT m_nMaxOrderPosition;
-	LPSTR m_lpszSongComments;
 	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
 	ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
@@ -335,6 +323,9 @@ public:
 
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 	RowVisitor visitedSongRows;
+
+	// Song message
+	SongMessage songMessage;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -681,54 +672,6 @@ public:
 
 	// WAV export
 	UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
-
-	// Song message helper functions
-public:
-	// Allocate memory for song message.
-	// [in]  length: text length in characters, without possible trailing null terminator.
-	// [out] returns true on success.
-	bool AllocateMessage(size_t length);
-
-	// Free previously allocated song message memory.
-	void FreeMessage();
-
-	// Retrieve song message.
-	// [in]  lineEnding: line ending formatting of the text in memory.
-	// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
-	// [out] returns formatted song message.
-	mpt::String GetSongMessage(const enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr) const;
-
-protected:
-	// Read song message from a mapped file.
-	// [in]  data: pointer to the data in memory that is going to be read
-	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
-	// [in]  lineEnding: line ending formatting of the text in memory.
-	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
-	// [out] returns true on success.
-	bool ReadMessage(const BYTE *data, FileReader::off_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
-	bool ReadMessage(FileReader &file, FileReader::off_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
-	{
-		FileReader::off_t readLength = std::min(length, file.BytesLeft());
-		bool success = ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineEnding, pTextConverter);
-		file.Skip(readLength);
-		return success;
-	}
-
-	// Read comments with fixed line length from a mapped file.
-	// [in]  data: pointer to the data in memory that is going to be read
-	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
-	// [in]  lineLength: The fixed length of a line.
-	// [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
-	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
-	// [out] returns true on success.
-	bool ReadFixedLineLengthMessage(const BYTE *data, const FileReader::off_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
-	bool ReadFixedLineLengthMessage(FileReader &file, const FileReader::off_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr)
-	{
-		FileReader::off_t readLength = std::min(length, file.BytesLeft());
-		bool success = ReadFixedLineLengthMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineLength, lineEndingLength, pTextConverter);
-		file.Skip(readLength);
-		return success;
-	}
 
 private:
 	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;

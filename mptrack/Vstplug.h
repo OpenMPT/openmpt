@@ -18,6 +18,8 @@
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/plugins/PluginMixBuffer.h"
 
+#include "../common/StringFixer.h"
+
 //#define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
 

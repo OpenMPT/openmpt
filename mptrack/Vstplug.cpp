@@ -25,6 +25,7 @@
 #include "../common/version.h"
 #include "midimappingdialog.h"
 #include "../common/StringFixer.h"
+#include "../soundlib/FileReader.h"
 #include "../soundlib/plugins/JBridge.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #define ZLIB_WINAPI

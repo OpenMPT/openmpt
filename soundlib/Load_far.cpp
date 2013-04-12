@@ -165,7 +165,7 @@ bool CSoundFile::ReadFAR(FileReader &file)
 	// Read song message
 	if(fileHeader.messageLength != 0)
 	{
-		ReadFixedLineLengthMessage(file, fileHeader.messageLength, 132, 0);	// 132 characters per line... wow. :)
+		songMessage.ReadFixedLineLength(file, fileHeader.messageLength, 132, 0);	// 132 characters per line... wow. :)
 	}
 
 	// Read orders

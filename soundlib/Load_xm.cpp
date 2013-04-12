@@ -440,7 +440,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 	// Read song comments: "text"
 	if(file.ReadMagic("text"))
 	{
-		ReadMessage(file, file.ReadUint32LE(), leCR);
+		songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
 		madeWith |= verConfirmed;
 	}
 	
@@ -866,13 +866,13 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	if(!compatibilityExport)
 	{
 		// Writing song comments
-		if ((m_lpszSongComments) && (m_lpszSongComments[0]))
+		if(!songMessage.empty())
 		{
 			DWORD d = 0x74786574;
 			fwrite(&d, 1, 4, f);
-			d = strlen(m_lpszSongComments);
+			d = songMessage.length();
 			fwrite(&d, 1, 4, f);
-			fwrite(m_lpszSongComments, 1, d, f);
+			fwrite(songMessage.c_str(), 1, d, f);
 		}
 		// Writing midi cfg
 		if (m_SongFlags[SONG_EMBEDMIDICFG])

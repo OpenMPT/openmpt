@@ -16,9 +16,10 @@
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
+#include "FileReader.h"
 
 #ifndef NO_COPYRIGHT
 #ifndef NO_MMCMP_SUPPORT
@@ -432,7 +433,6 @@ CSoundFile::CSoundFile() :
 	m_nMixChannels = 0;
 	m_nSamples = 0;
 	m_nInstruments = 0;
-	m_lpszSongComments = nullptr;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
@@ -529,7 +529,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	m_nSamplePreAmp = 48;
 	m_nVSTiVolume = 48;
 	m_nMaxOrderPosition = 0;
-	m_lpszSongComments = nullptr;
 	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
 	MemsetZero(ChnMix);
 	MemsetZero(Instruments);
@@ -538,6 +537,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order.resize(1);
 	Patterns.ClearPatterns();
+	songMessage.clear();
 
 	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
@@ -647,9 +647,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 
 #ifdef ZIPPED_MOD_SUPPORT
 		// Read archive comment if there is no song comment
-		if((!m_lpszSongComments) && unzip.GetComments(false))
+		if(!songMessage.empty() && unzip.GetComments(false))
 		{
-			m_lpszSongComments = (LPSTR)unzip.GetComments(true);
+			songMessage.assign(unzip.GetComments(true));
 		}
 #endif
 #ifdef MMCMP_SUPPORT
@@ -835,7 +835,7 @@ BOOL CSoundFile::Destroy()
 
 	Patterns.DestroyPatterns();
 
-	FreeMessage();
+	songMessage.clear();
 
 	for(SAMPLEINDEX i = 1; i < MAX_SAMPLES; i++)
 	{

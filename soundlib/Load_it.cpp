@@ -580,7 +580,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 			// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
 			// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
 			// But we'll just use autodetection here:
-			ReadMessage(file, fileHeader.msglength, leAutodetect);
+			songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
 		}
 	}
 
@@ -1156,10 +1156,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	// Comments
 	uint16 msglength = 0;
-	if(m_lpszSongComments)
+	if(!songMessage.empty())
 	{
 		itHeader.special |= ITFileHeader::embedSongMessage;
-		itHeader.msglength = msglength = (uint16)MIN(strlen(m_lpszSongComments) + 1, uint16_max);
+		itHeader.msglength = msglength = (uint16)MIN(songMessage.length() + 1, uint16_max);
 		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
@@ -1226,7 +1226,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	if(itHeader.special & ITFileHeader::embedSongMessage)
 	{
 		dwPos += msglength;
-		fwrite(m_lpszSongComments, 1, msglength, f);
+		fwrite(songMessage.c_str(), 1, msglength, f);
 	}
 
 	// Writing instruments

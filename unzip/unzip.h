@@ -23,7 +23,7 @@ public:
 	FileReader GetOutputFile() const { return outFile; }
 	bool IsArchive() const;
 	bool ExtractFile();
-	void *GetComments(bool get);
+	const char *GetComments(bool get);
 
 	CZipArchive(FileReader &file, const std::vector<const char *> &ext);
 	~CZipArchive();

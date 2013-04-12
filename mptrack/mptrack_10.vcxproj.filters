@@ -789,6 +789,9 @@
     <ClInclude Include="..\sounddev\SoundDevice.h">
       <Filter>Header Files\sounddev</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\Message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

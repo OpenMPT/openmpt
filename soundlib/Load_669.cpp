@@ -129,7 +129,7 @@ bool CSoundFile::Read669(FileReader &file)
 	// Copy first song message line into song title
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songMessage, 36);
 	// Song Message
-	ReadFixedLineLengthMessage(reinterpret_cast<const BYTE *>(fileHeader.songMessage), 108, 36, 0);
+	songMessage.ReadFixedLineLength(fileHeader.songMessage, 108, 36, 0);
 
 	// Reading Orders
 	Order.ReadFromArray(fileHeader.orders);

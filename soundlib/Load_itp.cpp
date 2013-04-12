@@ -51,7 +51,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	}
 
 	// Song comments
-	ReadMessage(file, file.ReadUint32LE(), leCR);
+	songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
 
 	// Song global config
 	m_SongFlags = static_cast<SongFlags>(file.ReadUint32LE() & SONG_FILE_FLAGS);
@@ -295,11 +295,14 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Song comments
 
 	// comment string length
-	id = m_lpszSongComments ? strlen(m_lpszSongComments)+1 : 0;
-	fwrite(&id, 1, sizeof(id), f);
+	{
+		const size_t msgLength = songMessage.empty() ? 0 : songMessage.length() + 1;
+		id = msgLength;
+		fwrite(&id, 1, sizeof(id), f);
 
-	// comment string
-	if(m_lpszSongComments) fwrite(&m_lpszSongComments[0], 1, strlen(m_lpszSongComments)+1, f);
+		// comment string
+		if(msgLength) fwrite(songMessage.c_str(), 1, msgLength, f);
+	}
 
 	// Song global config
 

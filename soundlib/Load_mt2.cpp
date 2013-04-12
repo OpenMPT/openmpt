@@ -267,7 +267,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			{
 				DWORD nTxtLen = dwLen;
 				if (nTxtLen > 32000) nTxtLen = 32000;
-				ReadMessage(lpStream + dwMemPos + 1, nTxtLen - 1, leCRLF);
+				songMessage.Read(lpStream + dwMemPos + 1, nTxtLen - 1, SongMessage::leCRLF);
 			}
 			break;
 		// SUM -> author name (or "Unregistered")

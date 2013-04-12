@@ -14,6 +14,7 @@
 #include "MainFrm.h"
 #include "modsmp_ctrl.h"
 #include "Undo.h"
+#include "../common/StringFixer.h"
 
 #define new DEBUG_NEW
 

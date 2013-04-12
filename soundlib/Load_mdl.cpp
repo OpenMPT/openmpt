@@ -348,7 +348,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 		#endif
 			if(blocklen)
 			{
-				ReadMessage(lpStream + dwMemPos, blocklen - 1, leCR);
+				songMessage.Read(lpStream + dwMemPos, blocklen - 1, SongMessage::leCR);
 			}
 			break;
 		// PA: Pattern Data

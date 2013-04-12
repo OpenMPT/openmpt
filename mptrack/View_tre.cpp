@@ -277,7 +277,7 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 						m_SongFile->Create(lpStream, NULL, dwLen);
 						// Destroy some stuff that we're not going to use anyway.
 						m_SongFile->Patterns.DestroyPatterns();
-						m_SongFile->FreeMessage();
+						m_SongFile->songMessage.clear();
 					}
 					f.Unlock();
 				}

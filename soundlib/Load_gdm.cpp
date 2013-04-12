@@ -509,7 +509,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	// Read song comments
 	if(fileHeader.messageTextLength > 0 && file.Seek(fileHeader.messageTextOffset))
 	{
-		ReadMessage(file, fileHeader.messageTextLength, leAutodetect);
+		songMessage.Read(file, fileHeader.messageTextLength, SongMessage::leAutodetect);
 	}
 
 	return true;

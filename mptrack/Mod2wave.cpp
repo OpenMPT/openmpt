@@ -624,9 +624,9 @@ void CLayer3Convert::OnOK()
 	m_CbnGenre.GetWindowText(sText, sizeof(sText));
 	m_FileTags.genre = sText;
 
-	if (m_pSndFile->m_lpszSongComments)
+	if(!m_pSndFile->songMessage.empty())
 	{
-		m_FileTags.comments = m_pSndFile->GetSongMessage(leLF);
+		m_FileTags.comments = m_pSndFile->songMessage.GetFormatted(SongMessage::leLF);
 	}
 	else
 	{

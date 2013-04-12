@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
+#include "../common/StringFixer.h"
 
 // Default checkbox state
 bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
