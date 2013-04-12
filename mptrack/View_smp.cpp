@@ -2790,7 +2790,7 @@ UINT CViewSample::GetAutoZoomLevel(const ModSample& smp)
 	// Solve samplesPerPixel from [2], then "m_nZoom" from [1].
 	float zoom = static_cast<float>(smp.nLength) / static_cast<float>(m_rcClient.Width());
 	zoom = 1 + (log10(zoom) / log10(2.0f));
-	return static_cast<UINT>(Util::Max(zoom + 1, MIN_ZOOM + 1.0f));
+	return static_cast<UINT>(std::max(zoom + 1, MIN_ZOOM + 1.0f));
 }
 
 

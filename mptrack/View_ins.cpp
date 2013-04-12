@@ -328,7 +328,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 		tickDiff = envelope->Ticks[nPoint] - tickDiff;
 		for(uint32 i = nPoint + 1; i < envelope->nNodes; i++)
 		{
-			envelope->Ticks[i] = (uint16)(Util::Max(0, (int)envelope->Ticks[i] + tickDiff));
+			envelope->Ticks[i] = (uint16)(std::max(0, (int)envelope->Ticks[i] + tickDiff));
 		}
 	}
 
@@ -2511,7 +2511,7 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if (nFlags == MK_CONTROL)
 	{
 		// Speed up zoom scrolling by some factor (might need some tuning).
-		const float speedUpFactor = Util::Max(1.0f, m_fZoom * 7.0f / ENV_MAX_ZOOM);
+		const float speedUpFactor = std::max(1.0f, m_fZoom * 7.0f / ENV_MAX_ZOOM);
 		EnvSetZoom(m_fZoom + speedUpFactor * (zDelta / WHEEL_DELTA));
 	}
 

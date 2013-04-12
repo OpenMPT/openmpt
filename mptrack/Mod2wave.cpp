@@ -750,7 +750,7 @@ void CDoWaveConvert::OnButton1()
 
 	// calculate maximum samples
 	ULONGLONG max = ullMaxSamples;
-	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec * (ULONGLONG)Util::Max(1, 1 + m_pSndFile->GetRepeatCount());
+	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec * (ULONGLONG)std::max(1, 1 + m_pSndFile->GetRepeatCount());
 	if (m_nMaxPatterns > 0)
 	{
 		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();

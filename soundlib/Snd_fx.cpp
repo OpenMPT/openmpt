@@ -3699,10 +3699,10 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			//data = (unsigned char)MIN((pChn->nCalcVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
 		} else if(macro[pos] == 'x')		// x: pan set
 		{
-			data = (unsigned char)Util::Min(pChn->nPan / 2, 127);
+			data = (unsigned char)std::min(pChn->nPan / 2, 127);
 		} else if(macro[pos] == 'y')		// y: calculated pan
 		{
-			data = (unsigned char)Util::Min(pChn->nRealPan / 2, 127);
+			data = (unsigned char)std::min(pChn->nRealPan / 2, 127);
 		} else if(macro[pos] == 'a')		// a: high byte of bank select
 		{
 			if(pIns && pIns->wMidiBank)
@@ -3987,7 +3987,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 					for(size_t pos = 0; pos < macroLen; pos += 3)
 					{
 						DWORD curData = 0;
-						memcpy(&curData, macro + pos, Util::Min(3u, macroLen - pos));
+						memcpy(&curData, macro + pos, std::min(3u, macroLen - pos));
 						pPlugin->MidiSend(curData);
 					}
 				}

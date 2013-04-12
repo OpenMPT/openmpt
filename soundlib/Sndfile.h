@@ -708,7 +708,7 @@ protected:
 	bool ReadMessage(const BYTE *data, FileReader::off_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
 	bool ReadMessage(FileReader &file, FileReader::off_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr)
 	{
-		FileReader::off_t readLength = Util::Min(length, file.BytesLeft());
+		FileReader::off_t readLength = std::min(length, file.BytesLeft());
 		bool success = ReadMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineEnding, pTextConverter);
 		file.Skip(readLength);
 		return success;
@@ -724,7 +724,7 @@ protected:
 	bool ReadFixedLineLengthMessage(const BYTE *data, const FileReader::off_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 	bool ReadFixedLineLengthMessage(FileReader &file, const FileReader::off_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr)
 	{
-		FileReader::off_t readLength = Util::Min(length, file.BytesLeft());
+		FileReader::off_t readLength = std::min(length, file.BytesLeft());
 		bool success = ReadFixedLineLengthMessage(reinterpret_cast<const BYTE*>(file.GetRawData()), readLength, lineLength, lineEndingLength, pTextConverter);
 		file.Skip(readLength);
 		return success;

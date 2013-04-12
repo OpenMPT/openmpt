@@ -2144,10 +2144,10 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	uint8 vol = 0xFF;
 	if(chn.rowCommand.volcmd == VOLCMD_VOLUME)
 	{
-		vol = Util::Min(chn.rowCommand.vol, uint8(64));
+		vol = std::min(chn.rowCommand.vol, uint8(64));
 	} else if(chn.rowCommand.command == CMD_VOLUME)
 	{
-		vol = Util::Min(chn.rowCommand.param, uint8(64));
+		vol = std::min(chn.rowCommand.param, uint8(64));
 	}
 	const bool hasVolCommand = (vol != 0xFF);
 

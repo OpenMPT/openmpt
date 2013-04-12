@@ -390,7 +390,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 	}
 
 	PatternRow m = sndFile.Patterns[pat].GetRow(0);
-	const CHANNELINDEX numChannels = Util::Min(sndFile.GetNumChannels(), CHANNELINDEX(patHead.numTracks));
+	const CHANNELINDEX numChannels = std::min(sndFile.GetNumChannels(), CHANNELINDEX(patHead.numTracks));
 
 	// When breaking to a pattern with less channels that the previous pattern,
 	// all voices in the now unused channels are killed:
@@ -431,7 +431,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 			{
 			case 1:		// Set Tick Frame Speed
 				settings.realBPMmode = false;
-				settings.tempoTicks = Util::Max(uint8(1), globalData);	// Tempo in 1/4 rows per second
+				settings.tempoTicks = std::max(uint8(1), globalData);	// Tempo in 1/4 rows per second
 				settings.tempoBPM = 0;									// Automatically updated by X-Tracker
 				tempoChange = true;
 				break;
@@ -514,7 +514,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 				// For some reason, using settings.tempoTicks + 1 gives more accurate results than just settings.tempoTicks... (same problem in the old libmodplug DMF loader)
 				// Original unoptimized formula:
 				//const int tickspeed = (tempoRealBPMmode) ? MAX(1, (tempoData * beat * 4) / 60) : tempoData;
-				const int tickspeed = (settings.realBPMmode) ? Util::Max(1, settings.tempoBPM * settings.beat * 2) : ((settings.tempoTicks + 1) * 30);
+				const int tickspeed = (settings.realBPMmode) ? std::max(1, settings.tempoBPM * settings.beat * 2) : ((settings.tempoTicks + 1) * 30);
 				// Try to find matching speed - try higher speeds first, so that effects like arpeggio and tremor work better.
 				for(speed = 255; speed > 1; speed--)
 				{
@@ -975,7 +975,7 @@ bool CSoundFile::ReadDMF(FileReader &file)
 	{
 		return false;
 	}
-	const ORDERINDEX numOrders = Util::Min(MAX_ORDERS, static_cast<ORDERINDEX>((chunk.GetLength() - sizeof(DMFSequence)) / 2));
+	const ORDERINDEX numOrders = std::min(MAX_ORDERS, static_cast<ORDERINDEX>((chunk.GetLength() - sizeof(DMFSequence)) / 2));
 	Order.resize(numOrders, Order.GetInvalidPatIndex());
 
 	for(ORDERINDEX i = 0; i < numOrders; i++)

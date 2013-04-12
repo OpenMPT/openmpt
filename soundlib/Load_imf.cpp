@@ -117,9 +117,9 @@ struct IMFInstrument
 		uint16 minTick = 0; // minimum tick value for next node
 		for(uint32 n = 0; n < mptEnv.nNodes; n++)
 		{
-			minTick = mptEnv.Ticks[n] = Util::Max(minTick, nodes[e][n].tick);
+			minTick = mptEnv.Ticks[n] = std::max(minTick, nodes[e][n].tick);
 			minTick++;
-			mptEnv.Values[n] = static_cast<uint8>(Util::Min(nodes[e][n].value >> shift, ENVELOPE_MAX));
+			mptEnv.Values[n] = static_cast<uint8>(std::min(nodes[e][n].value >> shift, ENVELOPE_MAX));
 		}
 	}
 

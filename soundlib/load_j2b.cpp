@@ -175,7 +175,7 @@ struct AMFFEnvelope
 		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.nNodes);
 
 		// The buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
-		mptEnv.nNodes = Util::Min(numPoints, static_cast<uint8>(10));
+		mptEnv.nNodes = std::min(numPoints, static_cast<uint8>(10));
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 
@@ -381,7 +381,7 @@ struct AMEnvelope
 		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.nNodes);
 		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.nNodes);
 
-		mptEnv.nNodes = Util::Min(numPoints + 1, 10);
+		mptEnv.nNodes = std::min(numPoints + 1, 10);
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 
@@ -502,8 +502,8 @@ struct AMSampleHeader
 	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mptSmp.nPan = Util::Min(pan, static_cast<uint16>(32767)) * 256 / 32767;
-		mptSmp.nVolume = Util::Min(volume, static_cast<uint16>(32767)) * 256 / 32767;
+		mptSmp.nPan = std::min(pan, static_cast<uint16>(32767)) * 256 / 32767;
+		mptSmp.nVolume = std::min(volume, static_cast<uint16>(32767)) * 256 / 32767;
 		mptSmp.nGlobalVol = 64;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;

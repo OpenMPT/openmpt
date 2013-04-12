@@ -38,7 +38,7 @@ struct STMSampleHeader
 		StringFixer::ReadString<StringFixer::nullTerminated>(mptSmp.filename, filename);
 
 		mptSmp.nC5Speed = sampleRate;
-		mptSmp.nVolume = Util::Min(volume * 4u, 256u);
+		mptSmp.nVolume = std::min(volume * 4u, 256u);
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
@@ -55,7 +55,7 @@ struct STMSampleHeader
 			&& mptSmp.nLoopEnd != 0xFFFF)
 		{
 			mptSmp.uFlags = CHN_LOOP;
-			mptSmp.nLoopEnd = Util::Min(mptSmp.nLoopEnd, mptSmp.nLength);
+			mptSmp.nLoopEnd = std::min(mptSmp.nLoopEnd, mptSmp.nLength);
 		}
 	}
 

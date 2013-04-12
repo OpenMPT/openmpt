@@ -156,7 +156,7 @@ ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
 {
 	const ORDERINDEX nLength = GetLength();
 	if(nLength == 0) return 0;
-	ORDERINDEX next = Util::Min(ORDERINDEX(nLength - 1), ORDERINDEX(start + 1));
+	ORDERINDEX next = std::min(ORDERINDEX(nLength - 1), ORDERINDEX(start + 1));
 	while(next+1 < nLength && (*this)[next] == GetIgnoreIndex()) next++;
 	return next;
 }
@@ -167,7 +167,7 @@ ORDERINDEX ModSequence::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) co
 {
 	const ORDERINDEX nLength = GetLength();
 	if(start == 0 || nLength == 0) return 0;
-	ORDERINDEX prev = Util::Min(ORDERINDEX(start - 1), ORDERINDEX(nLength - 1));
+	ORDERINDEX prev = std::min(ORDERINDEX(start - 1), ORDERINDEX(nLength - 1));
 	while(prev > 0 && (*this)[prev] == GetIgnoreIndex()) prev--;
 	return prev;
 }
@@ -583,7 +583,7 @@ bool ModSequenceSet::MergeSequences()
 	}
 	// Remove order name + fill up with empty patterns.
 	m_sName = "";
-	const ORDERINDEX nMinLength = Util::Min(ModSequenceSet::s_nCacheSize, m_pSndFile->GetModSpecifications().ordersMax);
+	const ORDERINDEX nMinLength = std::min(ModSequenceSet::s_nCacheSize, m_pSndFile->GetModSpecifications().ordersMax);
 	if(GetLength() < nMinLength)
 		resize(nMinLength);
 	return true;

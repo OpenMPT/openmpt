@@ -52,12 +52,12 @@ void XMInstrument::ConvertEndianness()
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 (&envData)[24])
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	numPoints = static_cast<uint8>(Util::Min(12u, mptEnv.nNodes));
+	numPoints = static_cast<uint8>(std::min(12u, mptEnv.nNodes));
 
 	// Envelope Data
 	for(size_t i = 0; i < numPoints; i++)
 	{
-		envData[i * 2] = Util::Min(mptEnv.Ticks[i], uint16_max);
+		envData[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
 		envData[i * 2 + 1] = mptEnv.Values[i];
 	}
 
@@ -67,9 +67,9 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &
 	if(mptEnv.dwFlags[ENV_LOOP]) flags |= XMInstrument::envLoop;
 
 	// Envelope Loops
-	sustain = Util::Min(uint8(12), mptEnv.nSustainStart);
-	loopStart = Util::Min(uint8(12), mptEnv.nLoopStart);
-	loopEnd = Util::Min(uint8(12), mptEnv.nLoopEnd);
+	sustain = std::min(uint8(12), mptEnv.nSustainStart);
+	loopStart = std::min(uint8(12), mptEnv.nLoopStart);
+	loopEnd = std::min(uint8(12), mptEnv.nLoopEnd);
 
 }
 
@@ -81,7 +81,7 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 	MemsetZero(*this);
 
 	// FFF is maximum in the FT2 GUI, but it can also accept other values. MilkyTracker just allows 0...4095 and 32767 ("cut")
-	volFade = static_cast<uint16>(Util::Min(mptIns.nFadeOut, uint32(32767)));
+	volFade = static_cast<uint16>(std::min(mptIns.nFadeOut, uint32(32767)));
 
 	// Convert envelopes
 	ConvertEnvelopeToXM(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, volEnv);
@@ -108,7 +108,7 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 		midiChannel = (mptIns.nMidiChannel != MidiMappedChannel ? (mptIns.nMidiChannel - MidiFirstChannel) : 0);
 	}
 	midiProgram = (mptIns.nMidiProgram != 0 ? mptIns.nMidiProgram - 1 : 0);
-	pitchWheelRange = Util::Min(mptIns.midiPWD, int8(36));
+	pitchWheelRange = std::min(mptIns.midiPWD, int8(36));
 
 	return static_cast<uint16>(sampleList.size());
 }
@@ -370,8 +370,8 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	MemsetZero(*this);
 
 	// Volume / Panning
-	vol = static_cast<uint8>(Util::Min(mptSmp.nVolume / 4u, 64u));
-	pan = static_cast<uint8>(Util::Min(mptSmp.nPan, uint16(255)));
+	vol = static_cast<uint8>(std::min(mptSmp.nVolume / 4u, 64u));
+	pan = static_cast<uint8>(std::min(mptSmp.nPan, uint16(255)));
 
 	// Sample Frequency
 	if((fromType & (MOD_TYPE_MOD | MOD_TYPE_XM)))

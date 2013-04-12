@@ -135,7 +135,7 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		// Write unfinished header... We need to update the size once we're done writing.
 		Write(header, f);
 
-		uint32 numProgs = Util::Max(plugin.GetNumPrograms(), VstInt32(1)), curProg = plugin.GetCurrentProgram();
+		uint32 numProgs = std::max(plugin.GetNumPrograms(), VstInt32(1)), curProg = plugin.GetCurrentProgram();
 		WriteBE(numProgs, f);
 		WriteBE(curProg, f);
 		char reserved[124];

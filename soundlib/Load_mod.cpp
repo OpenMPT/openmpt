@@ -595,7 +595,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
 	// is the maximum possible sample pre-amp without getting distortion (Compatible mix levels given).
 	// The more channels we have, the less likely it is that all of them are used at the same time, though, so clip at 32...
-	m_nSamplePreAmp = Util::Max(32, 256 / m_nChannels);
+	m_nSamplePreAmp = std::max(32, 256 / m_nChannels);
 	m_SongFlags.reset();
 
 	// Setup channel pan positions and volume
@@ -797,7 +797,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 		// UST only handles samples up to 9999 bytes. Master Soundtracker 1.0 and SoundTracker 2.0 introduce 32KB samples.
 		if(sampleHeader.length > 4999 || sampleHeader.loopStart > 9999)
 		{
-			minVersion = Util::Max(minVersion, MST1_00);
+			minVersion = std::max(minVersion, MST1_00);
 		}
 	}
 
@@ -849,11 +849,11 @@ bool CSoundFile::ReadM15(FileReader &file)
 			if(minVersion > UST1_80)
 			{
 				// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
-				minVersion = Util::Max(minVersion, hasDiskNames ? ST_IX : MST1_00);
+				minVersion = std::max(minVersion, hasDiskNames ? ST_IX : MST1_00);
 			} else
 			{
 				// Ultimate Soundtracker 1.8 adds variable tempo
-				minVersion = Util::Max(minVersion, hasDiskNames ? UST1_80 : ST2_00_Exterminator);
+				minVersion = std::max(minVersion, hasDiskNames ? UST1_80 : ST2_00_Exterminator);
 			}
 		}
 	}
@@ -900,7 +900,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 			} else if(eff == 1 && param < 0x03)
 			{
 				// This doesn't look like an arpeggio.
-				minVersion = Util::Max(minVersion, ST2_00_Exterminator);
+				minVersion = std::max(minVersion, ST2_00_Exterminator);
 			}
 			break;
 		case 0x0B:
@@ -909,16 +909,16 @@ bool CSoundFile::ReadM15(FileReader &file)
 		case 0x0C:
 		case 0x0D:
 		case 0x0E:
-			minVersion = Util::Max(minVersion, ST2_00_Exterminator);
+			minVersion = std::max(minVersion, ST2_00_Exterminator);
 			if(eff == 0x0D && param == 0)
 			{
 				// Assume this is a pattern break command.
-				minVersion = Util::Max(minVersion, ST2_00);
+				minVersion = std::max(minVersion, ST2_00);
 			}
 			emptyCmds = 1;
 			break;
 		case 0x0F:
-			minVersion = Util::Max(minVersion, ST_III);
+			minVersion = std::max(minVersion, ST_III);
 			break;
 		}
 	}
@@ -1107,7 +1107,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 
 	// Write magic bytes
 	char modMagic[6];
-	CHANNELINDEX writeChannels = Util::Min(CHANNELINDEX(99), GetNumChannels());
+	CHANNELINDEX writeChannels = std::min(CHANNELINDEX(99), GetNumChannels());
 	if(writeChannels == 4)
 	{
 		if(writePatterns < 64)

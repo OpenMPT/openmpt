@@ -565,8 +565,8 @@ bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, cons
 	if(!(smp.uFlags & CHN_LOOP) && (sndFile.GetType() & MOD_TYPE_MOD) && sampleOffset == 0) sampleOffset = 2;
 
 	// Just look at the first four samples, starting from the given offset.
-	sampleOffset = Util::Min(sampleOffset, smp.nLength);
-	const SmpLength smpCount = Util::Min(4u, smp.nLength - sampleOffset) * smp.GetNumChannels();
+	sampleOffset = std::min(sampleOffset, smp.nLength);
+	const SmpLength smpCount = std::min(4u, smp.nLength - sampleOffset) * smp.GetNumChannels();
 
 	if(smp.pSample == nullptr || smpCount == 0) return false;
 	if(smp.GetElementarySampleSize() == 2)

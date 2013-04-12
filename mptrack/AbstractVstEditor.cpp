@@ -478,7 +478,7 @@ void CAbstractVstEditor::FillPresetMenu()
 			m_pPresetMenuGroup[bank]->CreatePopupMenu();
 
 			CString label;
-			label.Format("Bank %d (%d-%d)", bank + 1, prog, Util::Min(prog + PRESETS_PER_GROUP - 1, numProgs));
+			label.Format("Bank %d (%d-%d)", bank + 1, prog, std::min(prog + PRESETS_PER_GROUP - 1, numProgs));
 			m_PresetMenu.AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), reinterpret_cast<UINT_PTR>(m_pPresetMenuGroup[bank]->m_hMenu), label);
 		}
 	}

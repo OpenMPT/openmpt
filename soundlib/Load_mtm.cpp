@@ -64,7 +64,7 @@ struct MTMSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mptSmp.nVolume = Util::Min(uint16(volume * 4), uint16(256));
+		mptSmp.nVolume = std::min(uint16(volume * 4), uint16(256));
 		if(length > 2)
 		{
 			mptSmp.nLength = length;
@@ -137,7 +137,7 @@ bool CSoundFile::ReadMTM(FileReader &file)
 	file.Skip(128 - readOrders);
 
 	// Reading Patterns
-	const ROWINDEX rowsPerPat = Util::Min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);
+	const ROWINDEX rowsPerPat = std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);
 	FileReader tracks = file.GetChunk(192 * fileHeader.numTracks);
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
