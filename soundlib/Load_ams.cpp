@@ -170,7 +170,7 @@ void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk
 						case CMD_VOLUME:
 							m.command = CMD_NONE;
 							m.volcmd = VOLCMD_VOLUME;
-							m.vol = static_cast<ModCommand::VOL>(Util::Min((m.param + 1) / 2, 64));
+							m.vol = static_cast<ModCommand::VOL>(std::min((m.param + 1) / 2, 64));
 							break;
 
 						case CMD_MODCMDEX:
@@ -206,13 +206,13 @@ void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk
 						case 0x11:
 						case 0x12:
 							// Extra fine slides
-							m.param = static_cast<ModCommand::PARAM>(Util::Min(uint8(0x0F), m.param) | 0xE0);
+							m.param = static_cast<ModCommand::PARAM>(std::min(uint8(0x0F), m.param) | 0xE0);
 							break;
 
 						case 0x15:
 						case 0x16:
 							// Fine slides
-							m.param = static_cast<ModCommand::PARAM>((Util::Min(0x10, m.param + 1) / 2) | 0xF0);
+							m.param = static_cast<ModCommand::PARAM>((std::min(0x10, m.param + 1) / 2) | 0xF0);
 							break;
 
 						case 0x1E:
@@ -247,7 +247,7 @@ void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk
 
 						case 0x1C:
 							// Adjust channel volume range
-							m.param = static_cast<ModCommand::PARAM>(Util::Min((m.param + 1) / 2, 64));
+							m.param = static_cast<ModCommand::PARAM>(std::min((m.param + 1) / 2, 64));
 							break;
 						}
 					}
@@ -339,10 +339,10 @@ struct AMSSampleHeader
 		mptSmp.Initialize();
 
 		mptSmp.nLength = length;
-		mptSmp.nLoopStart = Util::Min(loopStart, length);
-		mptSmp.nLoopEnd = Util::Min(loopEnd, length);
+		mptSmp.nLoopStart = std::min(loopStart, length);
+		mptSmp.nLoopEnd = std::min(loopEnd, length);
 
-		mptSmp.nVolume = (Util::Min(uint8(127), volume) * 256 + 64) / 127;
+		mptSmp.nVolume = (std::min(uint8(127), volume) * 256 + 64) / 127;
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -541,7 +541,7 @@ struct AMS2Envelope
 		}
 
 		STATIC_ASSERT(MAX_ENVPOINTS >= CountOf(data));
-		mptEnv.nNodes = Util::Min(numPoints, uint8(CountOf(data)));
+		mptEnv.nNodes = std::min(numPoints, uint8(CountOf(data)));
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
@@ -550,7 +550,7 @@ struct AMS2Envelope
 		{
 			if(i != 0)
 			{
-				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + static_cast<uint16>(Util::Max(1, data[i][0] | ((data[i][1] & 0x01) << 8)));
+				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + static_cast<uint16>(std::max(1, data[i][0] | ((data[i][1] & 0x01) << 8)));
 			}
 			mptEnv.Values[i] = data[i][2];
 		}
@@ -645,8 +645,8 @@ struct AMS2SampleHeader
 		mptSmp.Initialize();
 
 		mptSmp.nLength = length;
-		mptSmp.nLoopStart = Util::Min(loopStart, length);
-		mptSmp.nLoopEnd = Util::Min(loopEnd, length);
+		mptSmp.nLoopStart = std::min(loopStart, length);
+		mptSmp.nLoopEnd = std::min(loopEnd, length);
 
 		mptSmp.nC5Speed = c4speed * 2;
 		if(c4speed == 0)
@@ -657,7 +657,7 @@ struct AMS2SampleHeader
 		uint32 newC4speed = ModSample::TransposeToFrequency(relativeTone, MOD2XMFineTune(panFinetune & 0x0F));
 		mptSmp.nC5Speed = (mptSmp.nC5Speed * newC4speed) / 8363;
 
-		mptSmp.nVolume = (Util::Min(uint8(127), volume) * 256 + 64) / 127;
+		mptSmp.nVolume = (std::min(uint8(127), volume) * 256 + 64) / 127;
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -717,14 +717,14 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 	uint16 headerFlags;
 	if(fileHeader.format == 0x202)
 	{
-		m_nDefaultTempo = Util::Max(uint8(32), static_cast<uint8>(file.ReadUint16LE() >> 8));	// 16.16 Tempo
-		m_nDefaultSpeed = Util::Max(uint8(1), file.ReadUint8());
+		m_nDefaultTempo = std::max(uint8(32), static_cast<uint8>(file.ReadUint16LE() >> 8));	// 16.16 Tempo
+		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
 		file.Skip(3);	// Default values for pattern editor
 		headerFlags = file.ReadUint16LE();
 	} else if(fileHeader.format == 0x201)
 	{
-		m_nDefaultTempo = Util::Max(uint8(32), file.ReadUint8());
-		m_nDefaultSpeed = Util::Max(uint8(1), file.ReadUint8());
+		m_nDefaultTempo = std::max(uint8(32), file.ReadUint8());
+		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
 		headerFlags = file.ReadUint8();
 	} else
 	{
@@ -793,9 +793,9 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		// Scale envelopes to correct range
 		for(size_t i = 0; i < MAX_ENVPOINTS; i++)
 		{
-			instrument->VolEnv.Values[i] = Util::Min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->VolEnv.Values[i] * ENVELOPE_MAX + 64u) / 127u));
-			instrument->PanEnv.Values[i] = Util::Min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->PanEnv.Values[i] * ENVELOPE_MAX + 128u) / 255u));
-			instrument->PitchEnv.Values[i] = Util::Min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + (static_cast<int8>(instrument->PitchEnv.Values[i] - 128) * vibAmp) / 255));
+			instrument->VolEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->VolEnv.Values[i] * ENVELOPE_MAX + 64u) / 127u));
+			instrument->PanEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->PanEnv.Values[i] * ENVELOPE_MAX + 128u) / 255u));
+			instrument->PitchEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + (static_cast<int8>(instrument->PitchEnv.Values[i] - 128) * vibAmp) / 255));
 		}
 
 		// Sample headers - we will have to read them even for shadow samples, and we will have to load them several times,
@@ -819,7 +819,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		}
 
 		firstSample.push_back(firstSmp);
-		m_nSamples = static_cast<SAMPLEINDEX>(Util::Min(MAX_SAMPLES - 1, GetNumSamples() + numSamples));
+		m_nSamples = static_cast<SAMPLEINDEX>(std::min(MAX_SAMPLES - 1, GetNumSamples() + numSamples));
 	}
 
 	// Text
@@ -857,7 +857,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 			{
 				c = textIn[readLen++];
 				uint32 count = textIn[readLen++];
-				for(size_t i = Util::Min(descriptionHeader.unpackedLen - writeLen, count); i != 0; i--)
+				for(size_t i = std::min(descriptionHeader.unpackedLen - writeLen, count); i != 0; i--)
 				{
 					textOut[writeLen++] = c;
 				}
@@ -980,7 +980,7 @@ void AMSUnpack(const char * const source, size_t sourceSize, void * const dest, 
 			if(--i != 0 && ch == packCharacter)
 			{
 				uint8 repCount = *(in++);
-				repCount = static_cast<uint8>(Util::Min(static_cast<size_t>(repCount), j));
+				repCount = static_cast<uint8>(std::min(static_cast<size_t>(repCount), j));
 				if(--i != 0 && repCount)
 				{
 					ch = *(in++);

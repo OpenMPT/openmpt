@@ -56,7 +56,7 @@ struct AsylumSampleHeader
 	{
 		mptSmp.Initialize();
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = Util::Min(defaultVolume, uint8(64)) * 4u;
+		mptSmp.nVolume = std::min(defaultVolume, uint8(64)) * 4u;
 		mptSmp.RelativeTone = transpose;
 		mptSmp.nLength = length;
 
@@ -272,7 +272,7 @@ void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
 
 			// 03: Volume
 			case 0x03:
-				param = Util::Min(param, uint8(64));
+				param = std::min(param, uint8(64));
 				if(m.volcmd == VOLCMD_NONE || m.volcmd == VOLCMD_VOLUME)
 				{
 					m.volcmd = VOLCMD_VOLUME;
@@ -465,7 +465,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 		}
 
 		sample.nC5Speed = file.ReadUint16LE();
-		sample.nVolume = Util::Min(file.ReadUint8(), uint8(64)) * 4u;
+		sample.nVolume = std::min(file.ReadUint8(), uint8(64)) * 4u;
 
 		if(fileHeader.version < 10)
 		{
@@ -497,7 +497,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 				sample.nLoopStart = sample.nLoopEnd = 0;
 			}
 
-			maxSamplePos = Util::Max(maxSamplePos, samplePos[smp - 1]);
+			maxSamplePos = std::max(maxSamplePos, samplePos[smp - 1]);
 		}
 	}
 	
@@ -507,7 +507,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 	uint16 trackCount = 0;
 	for(vector<uint16>::const_iterator i = trackMap.begin(); i != trackMap.end(); i++)
 	{
-		trackCount = Util::Max(trackCount, *i);
+		trackCount = std::max(trackCount, *i);
 	}
 
 	// Store Tracks Positions

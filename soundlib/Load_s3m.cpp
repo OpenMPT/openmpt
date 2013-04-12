@@ -806,7 +806,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;
 
 	// Channel Table
-	const uint8 midCh = static_cast<uint8>(Util::Min(GetNumChannels() / 2, 8));
+	const uint8 midCh = static_cast<uint8>(std::min(GetNumChannels() / 2, 8));
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
 		if(chn < GetNumChannels())

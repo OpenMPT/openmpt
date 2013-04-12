@@ -1537,14 +1537,14 @@ bool CVstPlugin::HasEditor()
 VstInt32 CVstPlugin::GetNumPrograms()
 //-----------------------------------
 {
-	return Util::Max(m_Effect.numPrograms, VstInt32(0));
+	return std::max(m_Effect.numPrograms, VstInt32(0));
 }
 
 
 PlugParamIndex CVstPlugin::GetNumParameters()
 //-------------------------------------------
 {
-	return Util::Max(m_Effect.numParams, VstInt32(0));
+	return std::max(m_Effect.numParams, VstInt32(0));
 }
 
 
@@ -2421,7 +2421,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 	bool bankChanged = (channel.currentBank != --wMidiBank) && (wMidiBank < 0x4000);
 	bool progChanged = (channel.currentProgram != --nMidiProg) && (nMidiProg < 0x80);
 	//get vol in [0,128[
-	uint8 volume = static_cast<uint8>(Util::Min(vol / 2, 127));
+	uint8 volume = static_cast<uint8>(std::min(vol / 2, 127));
 
 	// Bank change
 	if(wMidiBank < 0x4000 && bankChanged)

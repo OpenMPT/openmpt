@@ -1462,7 +1462,7 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
 	}
 
 	SAMPLEINDEX nRemoved = 0;
-	for(SAMPLEINDEX nSmp = Util::Min(GetNumSamples(), static_cast<SAMPLEINDEX>(keepSamples.size() - 1)); nSmp >= 1; nSmp--)
+	for(SAMPLEINDEX nSmp = std::min(GetNumSamples(), static_cast<SAMPLEINDEX>(keepSamples.size() - 1)); nSmp >= 1; nSmp--)
 	{
 		if(!keepSamples[nSmp])
 		{
@@ -2080,7 +2080,7 @@ struct UpgradePatternData
 				// Previously the values were just added up, so let's fix this!
 				m.volcmd = VOLCMD_NONE;
 				const uint16 param = static_cast<uint16>(m.param) + static_cast<uint16>(m.vol << 4);
-				m.param = static_cast<uint8>(Util::Min(param, uint16(0xFF)));
+				m.param = static_cast<uint8>(std::min(param, uint16(0xFF)));
 			}
 		}
 

@@ -1033,7 +1033,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			pChn->nPosLo = 0;
 			pChn->nLoopStart = loopStart;
 			pChn->nLoopEnd = loopEnd;
-			pChn->nLength = Util::Min(loopEnd, pChn->pModSample->nLength);
+			pChn->nLength = std::min(loopEnd, pChn->pModSample->nLength);
 		}
 
 		// Handle extra-loud flag
@@ -1726,7 +1726,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			m_SndFile.SetRepeatCount(0);
 		} else
 		{
-			m_SndFile.SetRepeatCount(Util::Max(0, wsdlg.loopCount - 1));
+			m_SndFile.SetRepeatCount(std::max(0, wsdlg.loopCount - 1));
 		}
 
 		CDoWaveConvert dwcdlg(&m_SndFile, thisName, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
@@ -2712,7 +2712,7 @@ void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr)
 	{
-		pMainFrm->SetElapsedTime(Util::Max(0.0, t));
+		pMainFrm->SetElapsedTime(std::max(0.0, t));
 	}
 }
 

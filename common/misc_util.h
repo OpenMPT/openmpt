@@ -259,14 +259,8 @@ namespace Util
 	template <> struct NumericTraits<uint64> {static const uint64 maxValue = uint64_max; static const uint64 minValue = 0;};
 	template <> struct NumericTraits<unsigned long> {static const unsigned long maxValue = ULONG_MAX; static const unsigned long minValue = 0;};
 
-	// Like std::max, but avoids conflict with max-macro.
-	template <class T> inline const T& Max(const T& a, const T& b) {return (std::max)(a, b);}
-
-	// Like std::min, but avoids conflict with min-macro.
-	template <class T> inline const T& Min(const T& a, const T& b) {return (std::min)(a, b);}
-
 	// Minimum of 3 values
-	template <class T> inline const T& Min(const T& a, const T& b, const T& c) {return Min(Min(a, b), c);}
+	template <class T> inline const T& Min(const T& a, const T& b, const T& c) {return std::min(std::min(a, b), c);}
 
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}

@@ -518,10 +518,10 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			{
 				if (n < 0)
 				{
-					pSndFile->m_nMusicSpeed = Util::Max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
+					pSndFile->m_nMusicSpeed = std::max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
 				} else
 				{
-					pSndFile->m_nMusicSpeed = Util::Min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
+					pSndFile->m_nMusicSpeed = std::min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
 				}
 				m_SpinSpeed.SetPos(0);
 			}
@@ -1162,7 +1162,7 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 
 	if(horizontal)
 	{
-		const int cx = Util::Max(1, rect.Width());
+		const int cx = std::max(1, rect.Width());
 		int v = (vu * cx) >> 8;
 
 		for(int rx = rect.left; rx <= rect.right; rx += 2)
@@ -1182,7 +1182,7 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 		lastV[index] = v;
 	} else
 	{
-		const int cy = Util::Max(1, rect.Height());
+		const int cy = std::max(1, rect.Height());
 		int v = (vu * cy) >> 8;
 
 		for(int ry = rect.bottom - 1; ry > rect.top; ry -= 2)

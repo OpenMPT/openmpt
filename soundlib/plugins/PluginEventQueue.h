@@ -91,7 +91,7 @@ public:
 		ASSERT(event->type != kVstMidiType || event->byteSize == sizeof(VstMidiEvent));
 
 		BiggestVstEvent copyEvent;
-		memcpy(&copyEvent, event, Util::Min(size_t(event->byteSize), sizeof(copyEvent)));
+		memcpy(&copyEvent, event, std::min(size_t(event->byteSize), sizeof(copyEvent)));
 
 		EnterCriticalSection(&criticalSection);
 		if(insertFront)

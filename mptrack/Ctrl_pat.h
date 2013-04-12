@@ -80,7 +80,7 @@ public:
 	ORDERINDEX GetMargins() { return GetMargins(GetMarginsMax()); }
 
 	// Returns the effective margin value.
-	ORDERINDEX GetMargins(const ORDERINDEX maxMargins) const { return Util::Min(maxMargins, static_cast<ORDERINDEX>(m_nOrderlistMargins)); }
+	ORDERINDEX GetMargins(const ORDERINDEX maxMargins) const { return std::min(maxMargins, static_cast<ORDERINDEX>(m_nOrderlistMargins)); }
 
 	// Returns maximum margin value given current window width.
 	ORDERINDEX GetMarginsMax() { return GetMarginsMax(GetLength()); }

@@ -161,9 +161,9 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	{
 		if(mptInfo.flags & WAVExtraChunk::setPanning) sample.uFlags.set(CHN_PANNING);
 
-		sample.nPan = Util::Min(mptInfo.defaultPan, uint16(256));
-		sample.nVolume = Util::Min(mptInfo.defaultVolume, uint16(256));
-		sample.nGlobalVol = Util::Min(mptInfo.globalVolume, uint16(64));
+		sample.nPan = std::min(mptInfo.defaultPan, uint16(256));
+		sample.nVolume = std::min(mptInfo.defaultVolume, uint16(256));
+		sample.nGlobalVol = std::min(mptInfo.globalVolume, uint16(64));
 		sample.nVibType = mptInfo.vibratoType;
 		sample.nVibSweep = mptInfo.vibratoSweep;
 		sample.nVibDepth = mptInfo.vibratoDepth;
@@ -188,7 +188,7 @@ void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sa
 		// Some WAV files seem to have loops going from 0 to 0... We should ignore those.
 		return;
 	}
-	start = Util::Min(static_cast<SmpLength>(loopStart), sampleLength);
+	start = std::min(static_cast<SmpLength>(loopStart), sampleLength);
 	end = Clamp(static_cast<SmpLength>(loopEnd), start, sampleLength);
 	if(!mptLoopFix && end < sampleLength)
 	{

@@ -257,7 +257,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 		|| fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
 		|| _strnicmp(fileHeader.signature, "Extended Module: ", 17)
-		|| !Order.ReadAsByte(file, Util::Min(ORDERINDEX(fileHeader.orders), MAX_ORDERS))
+		|| !Order.ReadAsByte(file, std::min(ORDERINDEX(fileHeader.orders), MAX_ORDERS))
 		|| !file.Seek(fileHeader.size + 60))
 	{
 		return false;
@@ -281,7 +281,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 	m_nRestartPos = fileHeader.restartPos;
 	m_nChannels = fileHeader.channels;
-	m_nInstruments = Util::Min(fileHeader.instruments, uint16(MAX_INSTRUMENTS - 1));
+	m_nInstruments = std::min(fileHeader.instruments, uint16(MAX_INSTRUMENTS - 1));
 	m_nSamples = 0;
 	m_nDefaultSpeed = Clamp(fileHeader.speed, uint16(1), uint16(31));
 	m_nDefaultTempo = Clamp(fileHeader.tempo, uint16(32), uint16(512));
@@ -456,7 +456,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 	// Read pattern names: "PNAM"
 	if(file.ReadMagic("PNAM"))
 	{
-		const PATTERNINDEX namedPats = Util::Min(static_cast<PATTERNINDEX>(file.ReadUint32LE() / MAX_PATTERNNAME), Patterns.Size());
+		const PATTERNINDEX namedPats = std::min(static_cast<PATTERNINDEX>(file.ReadUint32LE() / MAX_PATTERNNAME), Patterns.Size());
 		
 		for(PATTERNINDEX pat = 0; pat < namedPats; pat++)
 		{
@@ -470,7 +470,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 	// Read channel names: "CNAM"
 	if(file.ReadMagic("CNAM"))
 	{
-		const CHANNELINDEX namedChans = Util::Min(static_cast<CHANNELINDEX>(file.ReadUint32LE() / MAX_CHANNELNAME), GetNumChannels());
+		const CHANNELINDEX namedChans = std::min(static_cast<CHANNELINDEX>(file.ReadUint32LE() / MAX_CHANNELNAME), GetNumChannels());
 		for(CHANNELINDEX chn = 0; chn < namedChans; chn++)
 		{
 			file.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);

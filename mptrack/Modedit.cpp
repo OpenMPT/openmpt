@@ -274,7 +274,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 
 	const SAMPLEINDEX oldNumSamples = m_SndFile.GetNumSamples(), newNumSamples = static_cast<SAMPLEINDEX>(newOrder.size());
 
-	for(SAMPLEINDEX i = 0; i < Util::Min(newNumSamples, oldNumSamples); i++)
+	for(SAMPLEINDEX i = 0; i < std::min(newNumSamples, oldNumSamples); i++)
 	{
 		if(newOrder[i] != i + 1)
 		{

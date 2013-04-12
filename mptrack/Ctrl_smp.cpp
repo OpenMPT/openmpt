@@ -2011,7 +2011,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 
 	m_pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
-	ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, Util::Min(nLengthCounter, nNewSampleLength), *m_pSndFile);
+	ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, std::min(nLengthCounter, nNewSampleLength), *m_pSndFile);
 
 	// Free progress bar brushes
 	DeleteObject((HBRUSH)green);

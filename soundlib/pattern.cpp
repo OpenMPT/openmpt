@@ -84,7 +84,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount)
 	}
 
 	// Copy over pattern data
-	memcpy(newPattern, m_ModCommands, GetNumChannels() * Util::Min(m_Rows, newRowCount) * sizeof(ModCommand));
+	memcpy(newPattern, m_ModCommands, GetNumChannels() * std::min(m_Rows, newRowCount) * sizeof(ModCommand));
 
 	CriticalSection cs;
 	FreePattern(m_ModCommands);

@@ -293,7 +293,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 		{
 			// Must move first shown sequence item to left in order to show
 			// the new active order.
-			m_nXScroll = Util::Max(ORDERINDEX(0), static_cast<ORDERINDEX>(nOrder - nMargins));
+			m_nXScroll = std::max(ORDERINDEX(0), static_cast<ORDERINDEX>(nOrder - nMargins));
 			SetScrollPos(SB_HORZ, m_nXScroll);
 			InvalidateRect(NULL, FALSE);
 		} else
@@ -682,7 +682,7 @@ void COrderList::OnPaint()
 		if(sndFile.Order.GetLength() > maxEntries)
 		{
 			// Only computed if potentially needed.
-			maxEntries = Util::Max(maxEntries, sndFile.Order.GetLengthTailTrimmed());
+			maxEntries = std::max(maxEntries, sndFile.Order.GetLengthTailTrimmed());
 		}
 
 		// Scrolling the shown orders(the showns rectangles)?
@@ -737,7 +737,7 @@ void COrderList::OnPaint()
 			{
 				if(nPat == sndFile.Order.GetInvalidPatIndex()) strcpy(s, "---");
 				else if(nPat == sndFile.Order.GetIgnoreIndex()) strcpy(s, "+++");
-				else if(nPat < Util::Max(sndFile.Patterns.Size(), sndFile.GetModSpecifications().patternsMax)) wsprintf(s, "%u", nPat);
+				else if(nPat < std::max(sndFile.Patterns.Size(), sndFile.GetModSpecifications().patternsMax)) wsprintf(s, "%u", nPat);
 				else strcpy(s, "???");
 			}
 

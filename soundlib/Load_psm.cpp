@@ -1235,7 +1235,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 				{
 					// volume present
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = Util::Min(patternChunk.ReadUint8(), uint8(64));
+					m.vol = std::min(patternChunk.ReadUint8(), uint8(64));
 				}
 				if(chnFlag & effectFlag)
 				{

@@ -582,7 +582,7 @@ bool CModCleanupDlg::OptimizeSamples()
 			loopLength = sample.nLoopEnd;
 			if(sample.uFlags[CHN_SUSTAINLOOP])
 			{
-				loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
+				loopLength = std::max(sample.nLoopEnd, sample.nSustainEnd);
 			}
 		}
 
@@ -608,7 +608,7 @@ bool CModCleanupDlg::OptimizeSamples()
 				// Sustain loop is played before normal loop, and it can actually be located after the normal loop.
 				if(sample.uFlags[CHN_SUSTAINLOOP])
 				{
-					loopLength = Util::Max(sample.nLoopEnd, sample.nSustainEnd);
+					loopLength = std::max(sample.nLoopEnd, sample.nSustainEnd);
 				}
 			}
 

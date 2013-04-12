@@ -70,7 +70,7 @@ struct UltSample
 
 		mptSmp.nLength = sizeEnd - sizeStart;
 		mptSmp.nLoopStart = loopStart;
-		mptSmp.nLoopEnd = Util::Min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
+		mptSmp.nLoopEnd = std::min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
 		mptSmp.nVolume = volume;
 		mptSmp.nGlobalVol = 64;
 

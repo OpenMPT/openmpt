@@ -403,8 +403,8 @@ bool CSoundFile::ReadIT(FileReader &file)
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(fileHeader.speed) m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo = Util::Max(uint8(32), fileHeader.tempo); // Tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
-	m_nSamplePreAmp = Util::Min(fileHeader.mv, uint8(128));
+	m_nDefaultTempo = std::max(uint8(32), fileHeader.tempo); // Tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
+	m_nSamplePreAmp = std::min(fileHeader.mv, uint8(128));
 
 	// Reading Channels Pan Positions
 	for(CHANNELINDEX i = 0; i < 64; i++) if(fileHeader.chnpan[i] != 0xFF)
@@ -461,7 +461,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	{
 		if(insPos[n] > 0)
 		{
-			minPtr = Util::Min(minPtr, insPos[n]);
+			minPtr = std::min(minPtr, insPos[n]);
 		}
 	}
 
@@ -469,7 +469,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	{
 		if(smpPos[n] > 0)
 		{
-			minPtr = Util::Min(minPtr, smpPos[n]);
+			minPtr = std::min(minPtr, smpPos[n]);
 		}
 	}
 
@@ -477,13 +477,13 @@ bool CSoundFile::ReadIT(FileReader &file)
 	{
 		if(patPos[n] > 0)
 		{
-			minPtr = Util::Min(minPtr, patPos[n]);
+			minPtr = std::min(minPtr, patPos[n]);
 		}
 	}
 
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
 	{
-		minPtr = Util::Min(minPtr, fileHeader.msgoffset);
+		minPtr = std::min(minPtr, fileHeader.msgoffset);
 	}
 
 	// Reading IT Edit History Info
@@ -557,7 +557,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	if(file.ReadMagic("CNAM"))
 	{
 		FileReader chnNames = file.GetChunk(file.ReadUint32LE());
-		const CHANNELINDEX readChns = Util::Min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME));
+		const CHANNELINDEX readChns = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME));
 		m_nChannels = readChns;
 
 		for(CHANNELINDEX i = 0; i < readChns; i++)
@@ -588,7 +588,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	m_nInstruments = 0;
 	if(fileHeader.flags & ITFileHeader::instrumentMode)
 	{
-		m_nInstruments = Util::Min(fileHeader.insnum, INSTRUMENTINDEX(MAX_INSTRUMENTS - 1));
+		m_nInstruments = std::min(fileHeader.insnum, INSTRUMENTINDEX(MAX_INSTRUMENTS - 1));
 	}
 	for(INSTRUMENTINDEX i = 0; i < GetNumInstruments(); i++)
 	{
@@ -614,7 +614,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	}
 
 	// Reading Samples
-	m_nSamples = Util::Min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
+	m_nSamples = std::min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
 	for(SAMPLEINDEX i = 0; i < GetNumSamples(); i++)
 	{
 		ITSample sampleHeader;
@@ -629,12 +629,12 @@ bool CSoundFile::ReadIT(FileReader &file)
 				if(file.Seek(sampleOffset))
 				{
 					sampleHeader.GetSampleFormat(fileHeader.cwtv).ReadSample(Samples[i + 1], file);
-					lastSampleOffset = Util::Max(lastSampleOffset, file.GetPosition());
+					lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 				}
 			}
 		}
 	}
-	m_nSamples = Util::Max(SAMPLEINDEX(1), GetNumSamples());
+	m_nSamples = std::max(SAMPLEINDEX(1), GetNumSamples());
 
 	m_nMinPeriod = 8;
 	m_nMaxPeriod = 0xF000;
@@ -653,7 +653,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	}
 	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
 
-	const PATTERNINDEX numPats = Util::Min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
+	const PATTERNINDEX numPats = std::min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
 
 	if(numPats != patPos.size())
 	{
@@ -725,7 +725,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 		}
 	}
 	// Reading Patterns
-	Patterns.ResizeArray(Util::Max(MAX_PATTERNS, numPats));
+	Patterns.ResizeArray(std::max(MAX_PATTERNS, numPats));
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
@@ -1026,8 +1026,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	itHeader.id = ITFileHeader::itMagic;
 	StringFixer::WriteString<StringFixer::nullTerminated>(itHeader.songname, m_szNames[0]);
 
-	itHeader.highlight_minor = (uint8)Util::Min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
-	itHeader.highlight_major = (uint8)Util::Min(m_nDefaultRowsPerMeasure, ROWINDEX(uint8_max));
+	itHeader.highlight_minor = (uint8)std::min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
+	itHeader.highlight_major = (uint8)std::min(m_nDefaultRowsPerMeasure, ROWINDEX(uint8_max));
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
@@ -1040,13 +1040,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
-		itHeader.ordnum = Util::Min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
+		itHeader.ordnum = std::min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
 		if(itHeader.ordnum < 2) itHeader.ordnum = 2;
 	}
 
-	itHeader.insnum = Util::Min(m_nInstruments, specs.instrumentsMax);
-	itHeader.smpnum = Util::Min(m_nSamples, specs.samplesMax);
-	itHeader.patnum = Util::Min(Patterns.GetNumPatterns(), specs.patternsMax);
+	itHeader.insnum = std::min(m_nInstruments, specs.instrumentsMax);
+	itHeader.smpnum = std::min(m_nSamples, specs.samplesMax);
+	itHeader.patnum = std::min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
 	vector<uint32> patpos(itHeader.patnum, 0);
@@ -1289,7 +1289,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		patpos[pat] = dwPos;
 
 		// Write pattern header
-		ROWINDEX writeRows = Util::Min(Patterns[pat].GetNumRows(), ROWINDEX(uint16_max));
+		ROWINDEX writeRows = std::min(Patterns[pat].GetNumRows(), ROWINDEX(uint16_max));
 		uint16 patinfo[4];
 		patinfo[0] = 0;
 		patinfo[1] = (uint16)writeRows;
@@ -2025,9 +2025,9 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 
 	// Case macros.
 	#define CASE(id, data)	\
-		case id: fadr = reinterpret_cast<char *>(&data); maxReadCount = Util::Min(size_t(size), sizeof(data)); break;
+		case id: fadr = reinterpret_cast<char *>(&data); maxReadCount = std::min(size_t(size), sizeof(data)); break;
 	#define CASE_NOTXM(id, data) \
-		case id: if(modtype != MOD_TYPE_XM) { fadr = reinterpret_cast<char *>(&data); maxReadCount = Util::Min(size_t(size), sizeof(data));} break;
+		case id: if(modtype != MOD_TYPE_XM) { fadr = reinterpret_cast<char *>(&data); maxReadCount = std::min(size_t(size), sizeof(data));} break;
 
 	while(file.BytesLeft() > 6)
 	{
@@ -2063,7 +2063,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
-					const CHANNELINDEX loopLimit = Util::Min(uint16(size / 2), uint16(CountOf(ChnSettings) - 64));
+					const CHANNELINDEX loopLimit = std::min(uint16(size / 2), uint16(CountOf(ChnSettings) - 64));
 
 					for(CHANNELINDEX i = 0; i < loopLimit; i++)
 					{

@@ -119,7 +119,7 @@ template<typename Properties>
 void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actualLength)
 //--------------------------------------------------------------------------------------
 {
-	baseLength = Util::Min(actualLength, SmpLength(blockSize / sizeof(Properties::sample_t)));
+	baseLength = std::min(actualLength, SmpLength(blockSize / sizeof(Properties::sample_t)));
 
 	CopySample<Properties::sample_t>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
 
@@ -374,7 +374,7 @@ template<typename Properties>
 void ITDecompression::Uncompress(void *target)
 //--------------------------------------------
 {
-	curLength = Util::Min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(Properties::sample_t)));
+	curLength = std::min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(Properties::sample_t)));
 
 	int width = Properties::defWidth;
 	while(curLength > 0)

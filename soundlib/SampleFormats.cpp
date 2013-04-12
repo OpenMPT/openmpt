@@ -1568,7 +1568,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		samplemap[i] = smp;
 		const FileReader::off_t offset = file.GetPosition();
 		ReadITSSample(smp, file, false);
-		extraOffset = Util::Max(extraOffset, file.GetPosition());
+		extraOffset = std::max(extraOffset, file.GetPosition());
 		file.Seek(offset + sizeof(ITSample));
 	}
 	if(GetNumSamples() < smp) m_nSamples = smp;
@@ -1926,7 +1926,7 @@ struct FLACDecoder
 		}
 
 		// Number of samples to be copied in this call
-		const SmpLength copySamples = Util::Min(static_cast<SmpLength>(frame->header.blocksize), static_cast<SmpLength>(sample.nLength - frame->header.number.sample_number));
+		const SmpLength copySamples = std::min(static_cast<SmpLength>(frame->header.blocksize), static_cast<SmpLength>(sample.nLength - frame->header.number.sample_number));
 		// Number of target channels
 		const uint8 modChannels = sample.GetNumChannels();
 		// Offset (in samples) into target data
@@ -2245,7 +2245,7 @@ namespace mpg123
 	size_t FileReaderRead(void *fp, void *buf, size_t count)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
-		size_t readBytes = Util::Min(count, static_cast<size_t>(file.BytesLeft()));
+		size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
 		memcpy(buf, file.GetRawData(), readBytes);
 		file.Skip(readBytes);
 		return readBytes;

@@ -166,7 +166,7 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 
 	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
 	{
-		memcpy(m_lpszSongComments + cpos, data + fpos, Util::Min(lineLength, length - fpos));
+		memcpy(m_lpszSongComments + cpos, data + fpos, std::min(lineLength, length - fpos));
 		m_lpszSongComments[cpos + lineLength] = INTERNAL_LINEENDING;
 
 		// fix weird chars

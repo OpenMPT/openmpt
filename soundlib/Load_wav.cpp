@@ -55,7 +55,7 @@ bool CSoundFile::ReadWav(FileReader &file)
 		return false;
 	}
 
-	m_nChannels = Util::Max(wavFile.GetNumChannels(), uint16(2));
+	m_nChannels = std::max(wavFile.GetNumChannels(), uint16(2));
 	if(Patterns.Insert(0, 64) || Patterns.Insert(1, 64))
 	{
 		return false;
@@ -66,7 +66,7 @@ bool CSoundFile::ReadWav(FileReader &file)
 	// Setting up module length
 	// Calculate sample length in ticks at tempo 125
 	const uint32 sampleTicks = ((sampleLength * 50) / wavFile.GetSampleRate()) + 1;
-	uint32 ticksPerRow = Util::Max((sampleTicks + 63u) / 63u, 1u);
+	uint32 ticksPerRow = std::max((sampleTicks + 63u) / 63u, 1u);
 
 	Order.clear();
 	Order.Append(0);
