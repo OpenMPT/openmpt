@@ -20,7 +20,7 @@
 
 
 // 4x256 taps polyphase FIR resampling filter
-extern short int gFastSinc[];
+#define gFastSinc CResampler::FastSincTable
 
 
 /////////////////////////////////////////////////////
