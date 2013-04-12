@@ -374,10 +374,10 @@ static forceinline void ProcessStereoFilter(int &vol_l, int &vol_r, ModChannel *
 //////////////////////////////////////////////////////////
 // Interfaces
 
-typedef VOID (MPPASMCALL * LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
+typedef VOID (* LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
 
 #define BEGIN_MIX_INTERFACE(func)\
-	VOID MPPASMCALL func(ModChannel *pChannel, const CResampler *pResampler, int *pbuffer, int *pbufmax)\
+	VOID func(ModChannel *pChannel, const CResampler *pResampler, int *pbuffer, int *pbufmax)\
 	{\
 		LONG nPos;
 
@@ -464,9 +464,9 @@ extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut
 extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
-void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
-void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
-void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+void X86_InitMixBuffer(int *pBuffer, UINT nSamples);
+void X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
+void X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 
 #ifdef ENABLE_3DNOW
@@ -1320,7 +1320,7 @@ const LPMIXINTERFACE gpFastMixFunctionTable[2*16] =
 
 /////////////////////////////////////////////////////////////////////////
 
-static LONG MPPFASTCALL GetSampleCount(ModChannel *pChn, LONG nSamples, bool bITBidiMode)
+static forceinline LONG GetSampleCount(ModChannel *pChn, LONG nSamples, bool bITBidiMode)
 //---------------------------------------------------------------------------------------
 {
 	LONG nLoopStart = pChn->dwFlags[CHN_LOOP] ? pChn->nLoopStart : 0;
@@ -1872,8 +1872,8 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 #pragma warning (disable:4100)
 
 // Clip and convert to 8 bit
-DWORD MPPASMCALL X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//------------------------------------------------------------------------------
+DWORD X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//-------------------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	DWORD result;
@@ -1923,8 +1923,8 @@ done:
 
 
 // Clip and convert to 16 bit
-DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------------
+DWORD X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	DWORD result;
@@ -1974,8 +1974,8 @@ done:
 
 
 // Clip and convert to 24 bit
-DWORD MPPASMCALL X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------------
+DWORD X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	DWORD result;
@@ -2036,8 +2036,8 @@ done:
 
 
 // Clip and convert to 32 bit
-DWORD MPPASMCALL X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------------
+DWORD X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	DWORD result;
@@ -2086,8 +2086,8 @@ done:
 
 
 // convert to 32 bit floats and do NOT clip to [-1,1]
-DWORD MPPASMCALL Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
-//------------------------------------------------------------------------------------
+DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
+//-------------------------------------------------------------------------
 {
 	const float factor = (1.0f/(float)MIXING_CLIPMAX);
 	float *out = (float*)lpBuffer;
@@ -2099,8 +2099,8 @@ DWORD MPPASMCALL Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSample
 }
 
 
-void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
-//------------------------------------------------------------
+void X86_InitMixBuffer(int *pBuffer, UINT nSamples)
+//-------------------------------------------------
 {
 	memset(pBuffer, 0, nSamples * sizeof(int));
 }
@@ -2113,8 +2113,8 @@ void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
 
 
 #ifdef ENABLE_X86
-void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
-//-----------------------------------------------------------------
+void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
+//------------------------------------------------------
 {
 	static int gDitherA, gDitherB;
 
@@ -2163,8 +2163,8 @@ noiseloop:
 #endif
 
 
-void MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples)
-//------------------------------------------------------------------------------------
+void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples)
+//-------------------------------------------------------------------------
 {
 	_asm {
 	mov ecx, nSamples	// ecx = samplecount
@@ -2193,8 +2193,8 @@ interleaveloop:
 }
 
 
-VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
-//-------------------------------------------------------------
+VOID X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
+//--------------------------------------------------
 {
 	_asm {
 	mov ecx, nSamples
@@ -2217,8 +2217,8 @@ stloop:
 #define OFSDECAYMASK	0xFF
 
 
-void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
-//---------------------------------------------------------------------------------------
+void X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+//----------------------------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	_asm {
@@ -2314,8 +2314,8 @@ done:
 
 typedef struct ModChannel ModChannel_;
 
-void MPPASMCALL X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
-//----------------------------------------------------------------------------------
+void X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
+//-----------------------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	_asm {

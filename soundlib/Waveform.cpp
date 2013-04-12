@@ -17,7 +17,7 @@
 #pragma warning(disable:4100)
 #pragma warning(disable:4731)
 
-void __cdecl X86_Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24, int *poutput)
+static void X86_Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24, int *poutput)
 {
 	_asm {
 	mov esi, pbuffer	// esi = edi = pbuffer
@@ -54,11 +54,11 @@ normloop:
 #endif
 
 #ifdef ENABLE_X86
-extern void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
+extern void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 #endif
-extern DWORD MPPASMCALL X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD MPPASMCALL X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
 
 UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24, DWORD dwByteInc)
 //-----------------------------------------------------------------------------------------------

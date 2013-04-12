@@ -18,7 +18,7 @@
 #pragma warning(disable:4725)	// Pentium fdiv bug
 #pragma warning(disable:4731)	// ebp modified
 
-extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+extern VOID X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 
 

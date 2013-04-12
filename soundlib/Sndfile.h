@@ -763,15 +763,6 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 #define VOLUMERAMPPRECISION	12
 #define FADESONGDELAY		100
 
-// Calling conventions
-#ifdef WIN32
-#define MPPASMCALL	__cdecl
-#define MPPFASTCALL	__fastcall
-#else
-#define MPPASMCALL
-#define MPPFASTCALL
-#endif
-
 #define MOD2XMFineTune(k)	((int)( (signed char)((k)<<4) ))
 #define XM2MODFineTune(k)	((int)( (k>>4)&0x0f ))
 

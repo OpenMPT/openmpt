@@ -27,10 +27,10 @@
 // DSP Effects internal state
 
 
-extern VOID MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
+extern VOID X86_InitMixBuffer(int *pBuffer, UINT nSamples);
 
-static VOID MPPASMCALL X86_StereoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r);
-static VOID MPPASMCALL X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l);
+static VOID X86_StereoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r);
+static VOID X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -394,7 +394,7 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD D
 
 #define DCR_AMOUNT		9
 
-static VOID MPPASMCALL X86_StereoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r)
+static VOID X86_StereoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r)
 {
 	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	int y1r=*nDCRFlt_Y1r, x1r=*nDCRFlt_X1r;
@@ -440,7 +440,7 @@ stereodcr:
 }
 
 
-static VOID MPPASMCALL X86_MonoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l)
+static VOID X86_MonoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l)
 {
 	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	_asm {
