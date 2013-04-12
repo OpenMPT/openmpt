@@ -24,13 +24,9 @@
 #include "sndfile.h"
 #include "../common/Reporting.h"
 
-#define PROCSUPPORT_CPUID	0x01
-#define PROCSUPPORT_MMX		0x02
-#define PROCSUPPORT_MMXEX	0x04
-#define PROCSUPPORT_3DNOW	0x08
-#define PROCSUPPORT_SSE		0x10
 
-static unsigned int QueryProcessorExtensions()
+DWORD CSoundFile::GetSysInfo()
+//----------------------------
 {
 	static unsigned int fProcessorExtensions = 0;
 	static bool bMMXChecked = false;
@@ -84,26 +80,6 @@ Done:
     }
     return fProcessorExtensions;
 }
-
-
-DWORD CSoundFile::GetSysInfo()
-//----------------------------
-{
-	DWORD d = 0;
-	DWORD dwProcSupport = QueryProcessorExtensions();
-	if (dwProcSupport & PROCSUPPORT_MMX) d |= SYSMIX_ENABLEMMX;
-	if (dwProcSupport & PROCSUPPORT_MMXEX) d |= SYSMIX_MMXEX;
-	if (dwProcSupport & PROCSUPPORT_3DNOW) d |= SYSMIX_3DNOW;
-	if (dwProcSupport & PROCSUPPORT_SSE) d |= SYSMIX_SSE;
-	return d;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//
-// Misc. mix functions
-//
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////

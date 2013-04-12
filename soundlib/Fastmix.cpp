@@ -1489,9 +1489,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 		pbuffer = MixSoundBuffer;
 #ifndef NO_REVERB
 #ifdef ENABLE_MMX
-		if((m_MixerSettings.DSPMask & SNDDSP_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX) && !pChannel->dwFlags[CHN_NOREVERB])
+		if((m_MixerSettings.DSPMask & SNDDSP_REVERB) && (gdwSysInfo & PROCSUPPORT_MMX) && !pChannel->dwFlags[CHN_NOREVERB])
 			pbuffer = MixReverbBuffer;
-		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & SYSMIX_ENABLEMMX))
+		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & PROCSUPPORT_MMX))
 			pbuffer = MixReverbBuffer;
 #endif
 #endif
@@ -1790,14 +1790,14 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
-		if(gdwSysInfo & SYSMIX_SSE)
+		if(gdwSysInfo & PROCSUPPORT_SSE)
 		{
 			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
 			return;
 		}
 #endif // ENABLE_SSE
 #ifdef ENABLE_3DNOW
-		if(gdwSysInfo & SYSMIX_3DNOW)
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
 		{
 			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
 			return;
@@ -1816,7 +1816,7 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
-		if(gdwSysInfo & SYSMIX_3DNOW)
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
 		{
 			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
 			return;
@@ -1833,14 +1833,14 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
-		if(gdwSysInfo & SYSMIX_SSE)
+		if(gdwSysInfo & PROCSUPPORT_SSE)
 		{
  			SSE_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
 			return;
 		}
 #endif // ENABLE_SSE
 #ifdef ENABLE_3DNOW
-		if(gdwSysInfo & SYSMIX_3DNOW)
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
 		{
 			AMD_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
 			return;
@@ -1858,7 +1858,7 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
-		if(gdwSysInfo & SYSMIX_3DNOW)
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
 		{
 			AMD_FloatToMonoMix(pIn, pOut, nCount, m_PlayConfig.getFloatToInt());
 			return;

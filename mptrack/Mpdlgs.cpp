@@ -129,11 +129,11 @@ BOOL COptionsSoundcard::OnInitDialog()
 	if (m_dwSoundSetup & SOUNDSETUP_SECONDARY) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 	if (!(m_dwSoundSetup & SOUNDSETUP_NOBOOSTTHREADPRIORITY)) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 	// Multimedia extensions
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), (CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX) ? TRUE : FALSE);
-	if(CSoundFile::GetSysInfo() & SYSMIX_SSE)
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), (CSoundFile::GetSysInfo() & PROCSUPPORT_MMX) ? TRUE : FALSE);
+	if(CSoundFile::GetSysInfo() & PROCSUPPORT_SSE)
 	{
 		SetDlgItemText(IDC_CHECK3, _T("Enable SSE acceleration"));
-	} else if (CSoundFile::GetSysInfo() & SYSMIX_3DNOW)
+	} else if (CSoundFile::GetSysInfo() & PROCSUPPORT_3DNOW)
 	{
 		SetDlgItemText(IDC_CHECK3, _T("Enable 3DNow! acceleration"));
 	}
@@ -613,7 +613,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		}
 	}
 	m_CbnReverbPreset.SetCurSel(nSel);
-	if (!(CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX))
+	if (!(CSoundFile::GetSysInfo() & PROCSUPPORT_MMX))
 	{
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK6), FALSE);
 		m_SbReverbDepth.EnableWindow(FALSE);

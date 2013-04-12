@@ -718,7 +718,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			smin = 32767;
 			smax = -32768;
 #ifdef ENABLE_MMX
-			if (sysinfo & SYSMIX_MMXEX)
+			if (sysinfo & PROCSUPPORT_MMXEX)
 			{
 				mmxex_findminmax16(p, scanlen, smplsize, &smin, &smax);
 			} else
@@ -741,7 +741,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			smin = 127;
 			smax = -128;
 #ifdef ENABLE_MMX
-			if (sysinfo & SYSMIX_MMXEX)
+			if (sysinfo & PROCSUPPORT_MMXEX)
 			{
 				mmxex_findminmax8(p, scanlen, smplsize, &smin, &smax);
 			} else

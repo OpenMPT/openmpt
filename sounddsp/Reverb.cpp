@@ -404,7 +404,7 @@ void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples, 
 
 	if ((!gnReverbSend) && (!gnReverbSamples)) return;
 	if (!gnReverbSend) X86_StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
-	if (!(sysinfo & SYSMIX_ENABLEMMX)) return;
+	if (!(sysinfo & PROCSUPPORT_MMX)) return;
 	// Dynamically adjust reverb master gains
 	LONG lMasterGain;
 	lMasterGain = ((g_RefDelay.lMasterGain * m_Settings.m_nReverbDepth) >> 4);

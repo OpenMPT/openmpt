@@ -345,7 +345,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSound
 
 	// Still allow the check, because the user can turn this on/off
 	
-	if ((SysInfoFlags & SYSMIX_SSE) && (SoundSetupFlags & SNDMIX_ENABLEMMX))
+	if ((SysInfoFlags & PROCSUPPORT_SSE) && (SoundSetupFlags & SNDMIX_ENABLEMMX))
 	{
 		int sse_state, sse_eqstate;
 		SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, config.getIntToFloat());
@@ -371,7 +371,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSound
 
 	// We still perform the MMX check because the user can enable/disable this
 
-	if ((SysInfoFlags & SYSMIX_3DNOW) && (SoundSetupFlags & SNDMIX_ENABLEMMX))
+	if ((SysInfoFlags & PROCSUPPORT_3DNOW) && (SoundSetupFlags & SNDMIX_ENABLEMMX))
 	{ 
 		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, config.getIntToFloat());
 
