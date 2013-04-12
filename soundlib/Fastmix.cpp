@@ -2069,6 +2069,8 @@ void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
 
 #pragma warning(disable:4731) // ebp modified
 
+
+#ifdef ENABLE_X86
 void MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
 //-----------------------------------------------------------------
 {
@@ -2116,6 +2118,7 @@ noiseloop:
 	mov gDitherB, ebx
 	}
 }
+#endif
 
 
 void MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples)

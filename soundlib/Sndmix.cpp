@@ -40,8 +40,9 @@ extern DWORD MPPASMCALL X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples
 extern DWORD MPPASMCALL X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL X86_Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD MPPASMCALL Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
-extern UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC);
+#ifdef ENABLE_X86
 extern VOID MPPASMCALL X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
+#endif
 extern VOID MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
 extern VOID MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
@@ -330,12 +331,14 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			lTotalSampleCount *= 2;
 		}
 
+#ifdef ENABLE_X86
 		// Noise Shaping
 		if (m_MixerSettings.GetBitsPerSample() <= 16)
 		{
 			if(m_Resampler.IsHQ())
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.GetBitsPerSample());
 		}
+#endif
 
 #ifdef MODPLUG_TRACKER
 		// Hook Function
