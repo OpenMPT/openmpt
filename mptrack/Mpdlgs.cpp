@@ -359,8 +359,11 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 		samplerates.push_back(nMixingRates[i]);
 	}
 
+	bool knowRates = false;
+	{
+	Util::lock_guard<Util::mutex> lock(CMainFrame::GetMainFrame()->m_SoundDeviceMutex);
 	ISoundDevice *dummy = nullptr;
-	bool justCreated = false, knowRates = false;
+	bool justCreated = false;
 	if(TrackerSettings::Instance().m_nWaveDevice == dev)
 	{
 		// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
@@ -380,6 +383,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 		{
 			delete dummy;
 		}
+	}
 	}
 
 	if(!knowRates)
@@ -481,19 +485,22 @@ void COptionsSoundcard::UpdateStatistics()
 {
 	if (!m_EditStatistics) return;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm && pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
 	{
-		CHAR s[256];
-		_snprintf(s, 255, "Buffers: %d\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
-			pMainFrm->gpSoundDevice->GetNumBuffers(),
-			(float)pMainFrm->gpSoundDevice->GetRealUpdateIntervalMS(),
-			(float)pMainFrm->gpSoundDevice->GetRealLatencyMS(),
-			(float)pMainFrm->gpSoundDevice->GetCurrentRealLatencyMS()
-			);
-		m_EditStatistics.SetWindowText(s);
-	}	else
-	{
-		m_EditStatistics.SetWindowText("");
+		Util::lock_guard<Util::mutex> lock(pMainFrm->m_SoundDeviceMutex);
+		if(pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
+		{
+			CHAR s[256];
+			_snprintf(s, 255, "Buffers: %d\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
+				pMainFrm->gpSoundDevice->GetNumBuffers(),
+				(float)pMainFrm->gpSoundDevice->GetRealUpdateIntervalMS(),
+				(float)pMainFrm->gpSoundDevice->GetRealLatencyMS(),
+				(float)pMainFrm->gpSoundDevice->GetCurrentRealLatencyMS()
+				);
+			m_EditStatistics.SetWindowText(s);
+		}	else
+		{
+			m_EditStatistics.SetWindowText("");
+		}
 	}
 }
 

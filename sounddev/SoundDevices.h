@@ -62,9 +62,9 @@ private:
 public:
 	CSoundDeviceWithThread() : m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
-	void Start();
-	void Stop();
-	void Reset();
+	void InternalStart();
+	void InternalStop();
+	void InternalReset();
 	virtual void StartFromSoundThread() = 0;
 	virtual void StopFromSoundThread() = 0;
 	virtual void ResetFromOutsideSoundThread() = 0;
@@ -205,9 +205,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	void FillAudioBuffer();
-	void Reset();
-	void Start();
-	void Stop();
+	void InternalReset();
+	void InternalStart();
+	void InternalStop();
 	bool IsOpen() const { return (m_pAsioDrv != NULL); }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
 	UINT GetNumBuffers() { return 2; }
@@ -280,9 +280,9 @@ public:
 	BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx);
 	BOOL Close();
 	void FillAudioBuffer();
-	void Reset();
-	void Start();
-	void Stop();
+	void InternalReset();
+	void InternalStart();
+	void InternalStop();
 	bool IsOpen() const { return m_Stream ? true : false; }
 	UINT GetNumBuffers() { return 1; }
 	float GetCurrentRealLatencyMS();

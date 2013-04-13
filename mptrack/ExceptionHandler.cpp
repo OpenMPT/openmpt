@@ -117,15 +117,18 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 //----------------------------------------------------------------------------------
 {
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-
 	// Shut down audio device...
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 	if(pMainFrame)
 	{
 		try
 		{
-			if(pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
-			pMainFrame->audioCloseDevice();
+			// do not take m_SoundDeviceMutex here, just try closing it, no matter what
+			if(pMainFrame->gpSoundDevice)
+			{
+				pMainFrame->gpSoundDevice->Reset();
+				pMainFrame->gpSoundDevice->Close();
+			}
 		} catch(...)
 		{
 		}
