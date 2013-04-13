@@ -283,9 +283,9 @@ struct MODSampleHeader
 		{
 			writeLength++;
 		}
-		LimitMax(writeLength, SmpLength(0x1FFF0));
+		LimitMax(writeLength, SmpLength(0x1FFFE));
 
-		length = static_cast<uint16>(writeLength / 2);
+		length = static_cast<uint16>(writeLength / 2u);
 
 		if(mptSmp.RelativeTone < 0)
 		{
@@ -297,14 +297,15 @@ struct MODSampleHeader
 		{
 			finetune = XM2MODFineTune(mptSmp.nFineTune);
 		}
-		volume = static_cast<uint8>(mptSmp.nVolume / 4);
+		volume = static_cast<uint8>(mptSmp.nVolume / 4u);
 
 		loopStart = 0;
 		loopLength = 1;
-		if(mptSmp.uFlags[CHN_LOOP])
+		if(mptSmp.uFlags[CHN_LOOP] && (mptSmp.nLoopStart + 2u) < writeLength)
 		{
-			loopStart = static_cast<uint16>(mptSmp.nLoopStart / 2);
-			loopLength = static_cast<uint16>(MAX(1, (mptSmp.nLoopEnd - mptSmp.nLoopStart) / 2));
+			const SmpLength loopEnd = Clamp(mptSmp.nLoopEnd, mptSmp.nLoopStart + 2u, writeLength);
+			loopStart = static_cast<uint16>(mptSmp.nLoopStart / 2u);
+			loopLength = static_cast<uint16>((loopEnd - mptSmp.nLoopStart) / 2u);
 		}
 
 		return writeLength;
@@ -790,9 +791,12 @@ bool CSoundFile::ReadM15(FileReader &file)
 		}
 
 		// Loop start is always in bytes, not words, so don't trust the auto-fix magic in the sample header conversion (fixes loop of "st-01:asia" in mod.drag 10)
-		Samples[smp].nLoopStart = sampleHeader.loopStart;
-		Samples[smp].nLoopEnd = sampleHeader.loopStart + sampleHeader.loopLength * 2;
-		Samples[smp].SanitizeLoops();
+		if(sampleHeader.loopLength > 1)
+		{
+			Samples[smp].nLoopStart = sampleHeader.loopStart;
+			Samples[smp].nLoopEnd = sampleHeader.loopStart + sampleHeader.loopLength * 2;
+			Samples[smp].SanitizeLoops();
+		}
 
 		// UST only handles samples up to 9999 bytes. Master Soundtracker 1.0 and SoundTracker 2.0 introduce 32KB samples.
 		if(sampleHeader.length > 4999 || sampleHeader.loopStart > 9999)
@@ -804,8 +808,8 @@ bool CSoundFile::ReadM15(FileReader &file)
 	MODFileHeader fileHeader;
 	file.Read(fileHeader);
 
-	// Sanity check: No more than 128 positions.
-	if(fileHeader.numOrders > 128)
+	// Sanity check: No more than 128 positions. ST's GUI limits tempo to [1, 220].
+	if(fileHeader.numOrders > 128 || fileHeader.restartPos == 0 || fileHeader.restartPos > 220)
 	{
 		return false;
 	}
@@ -833,28 +837,22 @@ bool CSoundFile::ReadM15(FileReader &file)
 	m_nChannels = 4;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
-	if(fileHeader.restartPos <= 0x20)
+	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
+	m_nDefaultTempo = fileHeader.restartPos * 25 / 24;
+	m_nRestartPos = 0;
+	if(fileHeader.restartPos != 0x78)
 	{
-		m_nDefaultTempo = 125;
-		m_nRestartPos = (fileHeader.restartPos < fileHeader.numOrders ? fileHeader.restartPos : 0);
-	} else
-	{
-		// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
-		m_nDefaultTempo = fileHeader.restartPos * 25 / 24;
-		m_nRestartPos = 0;
-		if(fileHeader.restartPos != 0x78)
+		// Convert to CIA timing
+		//m_nDefaultTempo = static_cast<TEMPO>(((709378.92f / 50.0f) * 125.0f) / ((240.0f - static_cast<float>(fileHeader.restartPos)) * 122.0f));
+		m_nDefaultTempo = (709379 / ((240 - fileHeader.restartPos) * 122)) * 125 / 50;
+		if(minVersion > UST1_80)
 		{
-			// Convert to CIA timing
-			m_nDefaultTempo = static_cast<TEMPO>(((709378.92f / 50.0f) * 125.0f) / ((240.0f - static_cast<float>(fileHeader.restartPos)) * 122.0f));
-			if(minVersion > UST1_80)
-			{
-				// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
-				minVersion = std::max(minVersion, hasDiskNames ? ST_IX : MST1_00);
-			} else
-			{
-				// Ultimate Soundtracker 1.8 adds variable tempo
-				minVersion = std::max(minVersion, hasDiskNames ? UST1_80 : ST2_00_Exterminator);
-			}
+			// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
+			minVersion = std::max(minVersion, hasDiskNames ? ST_IX : MST1_00);
+		} else
+		{
+			// Ultimate Soundtracker 1.8 adds variable tempo
+			minVersion = std::max(minVersion, hasDiskNames ? UST1_80 : ST2_00_Exterminator);
 		}
 	}
 	m_nMinPeriod = 14 * 4;
@@ -1202,21 +1200,21 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 		const long sampleStart = ftell(f);
 		const size_t writtenBytes = MODSampleHeader::GetSampleFormat().WriteSample(f, sample, sampleLength[smp]);
 
-		static const int8 silence[] = {0, 0};
+		const int8 silence[] = { 0, 0 };
 
-		if(!sample.uFlags[CHN_LOOP])
+		// Write padding byte if the sample size is odd.
+		if((writtenBytes % 2u) != 0)
+		{
+			fwrite(silence, 1, 1, f);
+		}
+
+		if(!sample.uFlags[CHN_LOOP] && writtenBytes >= 2)
 		{
 			// First two bytes of oneshot samples have to be 0 due to PT's one-shot loop
 			const long sampleEnd = ftell(f);
 			fseek(f, sampleStart, SEEK_SET);
-			fwrite(&silence, MIN(writtenBytes, 2), 1, f);
+			fwrite(&silence, 2, 1, f);
 			fseek(f, sampleEnd, SEEK_SET);
-		}
-
-		// Write padding byte if the sample size is odd.
-		if((sample.nLength % 2u) != 0)
-		{
-			fwrite(&silence[0], 1, 1, f);
 		}
 	}
 
