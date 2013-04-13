@@ -617,10 +617,10 @@ VOID CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
 	lVuMeter >>= 8;
 	if (lVuMeter != m_nVuMeter)
 	{
-		m_nVuMeter = lVuMeter;
 		DWORD curTime = timeGetTime();
 		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
+			m_nVuMeter = lVuMeter;
 			CClientDC dc(this);
 			DrawVuMeter(dc);
 			lastVuUpdateTime = curTime;

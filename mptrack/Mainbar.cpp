@@ -1106,11 +1106,11 @@ void CStereoVU::SetVuMeter(uint32 left, uint32 right, bool force)
 {
 	if(left != vuMeter[0] || right != vuMeter[1])
 	{
-		vuMeter[0] = left;
-		vuMeter[1] = right;
 		DWORD curTime = timeGetTime();
 		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
+			vuMeter[0] = left;
+			vuMeter[1] = right;
 			CClientDC dc(this);
 			DrawVuMeters(dc);
 			lastVuUpdateTime = curTime;
