@@ -13,6 +13,12 @@
 
 #include <vector>
 
+
+class ISoundDevice;
+class IFillAudioBuffer;
+class ISoundSource;
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // ISoundSource: provides streaming audio data to a device
@@ -33,10 +39,10 @@ class ISoundSource
 //================
 {
 public:
-	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual ULONG AudioRead(PVOID pData, ULONG MaxSamples) = 0; // returns number of valid samples read, the remaining space has to be filled with zeroes by the callee,
+	virtual void FillAudioBufferLocked(const ISoundDevice &device, IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
+	virtual ULONG AudioRead(const ISoundDevice &device, PVOID pData, ULONG MaxSamples) = 0; // returns number of valid samples read, the remaining space has to be filled with zeroes by the callee,
 	                                                            // if return value != MaxSamples then end_of_stream = true
-	virtual void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
+	virtual void AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
 };
 
 
@@ -94,6 +100,8 @@ protected:
 	float m_RealLatencyMS;
 	float m_RealUpdateIntervalMS;
 
+	bool m_IsPlaying;
+
 protected:
 	virtual void FillAudioBuffer() = 0;
 
@@ -107,14 +115,20 @@ public:
 	VOID Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
 	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
 	float GetRealUpdateIntervalMS() const { return m_RealUpdateIntervalMS; }
+	bool IsPlaying() const { return m_IsPlaying; }
+
+protected:
+	virtual void InternalStart() = 0;
+	virtual void InternalStop() = 0;
+	virtual void InternalReset() = 0;
 
 public:
 	virtual UINT GetDeviceType() = 0;
 	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
 	virtual BOOL Close() = 0;				// Close the currently open device
-	virtual void Start() = 0;
-	virtual void Stop() = 0;
-	virtual void Reset() = 0;
+	void Start();
+	void Stop();
+	void Reset();
 	virtual UINT HasFixedBitsPerSample() { return 0; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }

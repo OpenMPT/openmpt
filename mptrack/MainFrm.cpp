@@ -184,7 +184,6 @@ CMainFrame::CMainFrame()
 	m_dwNotifyThreadId = 0;
 	m_hNotifyWakeUp = NULL;
 	gpSoundDevice = NULL;
-	m_IsPlaybackRunning = false;
 
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
@@ -473,14 +472,16 @@ void CMainFrame::OnClose()
 	BeginWaitCursor();
 	if (IsPlaying()) PauseMod();
 	if (pMDIActive) pMDIActive->SavePosition(TRUE);
-	if (gpSoundDevice)
+
 	{
-		CriticalSection cs;
-		//gpSoundDevice->Reset();
-		//audioCloseDevice();
-		delete gpSoundDevice;
-		gpSoundDevice = NULL;
+		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+		if(gpSoundDevice)
+		{
+			delete gpSoundDevice;
+			gpSoundDevice = nullptr;
+		}
 	}
+
 	// Save Settings
 	RemoveControlBar(&m_wndStatusBar); // Remove statusbar so that its state won't get saved.
 	TrackerSettings::Instance().SaveSettings();
@@ -702,7 +703,7 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 	int64 currenttotalsamples = 0;
 	bool currenttotalsamplesValid = false;
 	{
-		CriticalSection cs;
+		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
 		if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
 		{
 			currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
@@ -748,45 +749,28 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 }
 
 
-void CMainFrame::SetAudioThreadActive(bool active)
-//------------------------------------------------
-{
-	if(active)
-	{
-		if(m_IsPlaybackRunning) return;
-		m_IsPlaybackRunning = true;
-		gpSoundDevice->Start();
-	} else
-	{
-		if(!m_IsPlaybackRunning) return;
-		gpSoundDevice->Stop();
-		m_IsPlaybackRunning = false;
-	}
-}
-
-
-void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
-//----------------------------------------------------------------
+void CMainFrame::FillAudioBufferLocked(const ISoundDevice &device, IFillAudioBuffer &callback)
+//--------------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
 	callback.FillAudioBuffer();
 }
 
 
-ULONG CMainFrame::AudioRead(PVOID pvData, ULONG MaxSamples)
-//---------------------------------------------------------
+ULONG CMainFrame::AudioRead(const ISoundDevice &device, PVOID pvData, ULONG MaxSamples)
+//-------------------------------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	return m_pSndFile->Read(pvData, MaxSamples);
 }
 
 
-void CMainFrame::AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream)
-//--------------------------------------------------------------------------------------
+void CMainFrame::AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream)
+//------------------------------------------------------------------------------------------------------------------
 {
 	if(SamplesWritten > 0)
 	{
-		DoNotification(SamplesWritten, SamplesLatency, endOfStream);
+		DoNotification(SamplesWritten, SamplesLatency, endOfStream, device.HasGetStreamPosition());
 	}
 }
 
@@ -821,21 +805,24 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 		}
 		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
 	}
-	UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
-	if ((gpSoundDevice) && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
-		delete gpSoundDevice;
-		gpSoundDevice = NULL;
+		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+		UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
+		if(gpSoundDevice && (gpSoundDevice->GetDeviceType() != nDevType))
+		{
+			delete gpSoundDevice;
+			gpSoundDevice = NULL;
+		}
+		if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
+		if(!gpSoundDevice) return false;
+		gpSoundDevice->SetSource(this);
+		gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS,
+			((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_SECONDARY) ? 0 : SNDDEV_OPTIONS_EXCLUSIVE)
+			|
+			((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_NOBOOSTTHREADPRIORITY) ? 0 : SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)
+			);
+		if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	}
-	if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
-	if(!gpSoundDevice) return false;
-	gpSoundDevice->SetSource(this);
-	gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS,
-		((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_SECONDARY) ? 0 : SNDDEV_OPTIONS_EXCLUSIVE)
-		|
-		((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_NOBOOSTTHREADPRIORITY) ? 0 : SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)
-		);
-	if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	return true;
 }
 
@@ -843,7 +830,8 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 bool CMainFrame::IsAudioDeviceOpen() const
 //----------------------------------------
 {
-	 return gpSoundDevice && gpSoundDevice->IsOpen();
+	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+	return gpSoundDevice && gpSoundDevice->IsOpen();
 }
 
 
@@ -861,7 +849,10 @@ bool CMainFrame::audioOpenDevice()
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
 								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
-		nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
+		{
+			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+			nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
+		}
 		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
 		{
 			if(nFixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = (SampleFormat)nFixedBitsPerSample;
@@ -892,19 +883,18 @@ bool CMainFrame::audioReopenDevice()
 void CMainFrame::audioCloseDevice()
 //---------------------------------
 {
-	if (gpSoundDevice)
+	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+	if(gpSoundDevice)
 	{
-		CriticalSection cs;
-
 		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
+	}
 
-		// reset notify buffer as timestamps revert here
-		{
-			Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-			m_NotifyBuffer.clear();
-			m_TotalSamplesRendered = 0;
-		}
+	// reset notify buffer as timestamps revert here
+	{
+		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+		m_NotifyBuffer.clear();
+		m_TotalSamplesRendered = 0;
 	}
 }
 
@@ -942,15 +932,15 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 }
 
 
-BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream)
-//------------------------------------------------------------------------------------------
+BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream, bool hasSoundDeviceGetStreamPosition)
+//--------------------------------------------------------------------------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	int64 notificationtimestamp = 0;
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex); // protect m_TotalSamplesRendered
 		m_TotalSamplesRendered += dwSamplesRead;
-		if(gpSoundDevice->HasGetStreamPosition())
+		if(hasSoundDeviceGetStreamPosition)
 		{
 			notificationtimestamp = m_TotalSamplesRendered;
 		} else
@@ -1263,7 +1253,10 @@ bool CMainFrame::StartPlayback()
 {
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
-	SetAudioThreadActive(true);
+	{
+		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+		gpSoundDevice->Start();
+	}
 	return true;
 }
 
@@ -1272,7 +1265,10 @@ void CMainFrame::StopPlayback()
 //-----------------------------
 {
 	if(!IsAudioDeviceOpen()) return;
-	SetAudioThreadActive(false);
+	{
+		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+		gpSoundDevice->Stop();
+	}
 	audioCloseDevice();
 }
 
@@ -1281,7 +1277,10 @@ bool CMainFrame::PausePlayback()
 //------------------------------
 {
 	if(!IsAudioDeviceOpen()) return false;
-	SetAudioThreadActive(false);
+	{
+		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+		gpSoundDevice->Stop();
+	}
 	return true;
 }
 

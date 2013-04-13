@@ -270,13 +270,13 @@ public:
 public:
 
 	// Low-Level Audio
+	mutable Util::mutex m_SoundDeviceMutex;
 	ISoundDevice *gpSoundDevice;
 	HANDLE m_hNotifyWakeUp;
 	HANDLE m_hNotifyThread;
 	DWORD m_dwNotifyThreadId;
 	static LONG gnLVuMeter, gnRVuMeter;
 	static bool gnClipLeft, gnClipRight;
-	bool m_IsPlaybackRunning;
 
 	// Midi Input
 public:
@@ -321,19 +321,18 @@ public:
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD NotifyThread();
-	void SetAudioThreadActive(bool active=true);
 
 	// from ISoundSource
-	void FillAudioBufferLocked(IFillAudioBuffer &callback);
-	ULONG AudioRead(PVOID pData, ULONG MaxSamples);
-	void AudioDone(ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream);
+	void FillAudioBufferLocked(const ISoundDevice &device, IFillAudioBuffer &callback);
+	ULONG AudioRead(const ISoundDevice &device, PVOID pData, ULONG MaxSamples);
+	void AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream);
 	
 	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	bool audioOpenDevice();
 	bool audioReopenDevice();
 	void audioCloseDevice();
 	bool IsAudioDeviceOpen() const;
-	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream);
+	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream, bool hasSoundDeviceGetStreamPosition);
 
 // Midi Input Functions
 public:
@@ -411,7 +410,6 @@ public:
 	bool StartPlayback();
 	void StopPlayback();
 	bool PausePlayback();
-	bool IsPlaybackRunning() const { return m_IsPlaybackRunning; }
 	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() ? true : false; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
 	void SetPlaybackSoundFile(CSoundFile *pSndFile);
