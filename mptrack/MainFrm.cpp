@@ -336,7 +336,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
 	bmpVisNode = LoadDib(MAKEINTRESOURCE(IDB_VISNODE));
 	bmpVisPcNode = LoadDib(MAKEINTRESOURCE(IDB_VISPCNODE));
-	UpdateColors();
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
 	if (!m_wndToolBar.Create(this)) return -1;
@@ -352,6 +351,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	LoadBarState("Toolbars");
 
 	AddControlBar(&m_wndStatusBar); //Restore statusbar to mainframe.
+
+	UpdateColors();
 
 	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
 
@@ -749,16 +750,16 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 }
 
 
-void CMainFrame::FillAudioBufferLocked(const ISoundDevice &device, IFillAudioBuffer &callback)
-//--------------------------------------------------------------------------------------------
+void CMainFrame::FillAudioBufferLocked(const ISoundDevice &, IFillAudioBuffer &callback)
+//--------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
 	callback.FillAudioBuffer();
 }
 
 
-ULONG CMainFrame::AudioRead(const ISoundDevice &device, PVOID pvData, ULONG MaxSamples)
-//-------------------------------------------------------------------------------------
+ULONG CMainFrame::AudioRead(const ISoundDevice &, PVOID pvData, ULONG MaxSamples)
+//-------------------------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	return m_pSndFile->Read(pvData, MaxSamples);
@@ -1194,6 +1195,12 @@ void CMainFrame::UpdateColors()
 		}
 		gcolrefVuMeter[i] = RGB(r, g, b);
 	}
+	CMainFrame *mainFrm = GetMainFrame();
+	if(mainFrm != nullptr)
+	{
+		mainFrm->m_wndToolBar.m_VuMeter.Invalidate();
+	}
+
 	// Sequence window
 	{
 		COLORREF crBkgnd = GetSysColor(COLOR_WINDOW);
