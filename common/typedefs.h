@@ -29,7 +29,20 @@
 #ifdef _MSC_VER
 	#define CountOf(x) _countof(x)
 #else
-	#define CountOf(x) (sizeof(x)/sizeof(x[0]))
+	#define CountOf(x) (sizeof((x))/sizeof((x)[0]))
+#endif
+
+#if defined(_MSC_VER)
+//#define USE_PRAGMA_PACK
+#define PACKED __declspec(align(1))
+#elif defined(__GNUC__)
+#define PACKED __attribute__((packed))) __attribute__((aligned(1))))
+#endif
+
+#if defined(_MSC_VER)
+#define ALIGN(n) __declspec(align(n))
+#elif defined(__GNUC__)
+#define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
 #ifndef MAX
