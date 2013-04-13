@@ -13,7 +13,7 @@
 #pragma warning(disable : 4324) //structure was padded due to __declspec(align())
 
 // Mix Channel Struct
-struct __declspec(align(32)) ModChannel
+struct ALIGN(32) ModChannel
 {
 	// Envelope playback info
 	struct EnvInfo
@@ -176,7 +176,7 @@ struct __declspec(align(32)) ModChannel
 
 
 // Default pattern channel settings
-struct __declspec(align(32)) ModChannelSettings
+struct ALIGN(32) ModChannelSettings
 {
 	FlagSet<ChannelFlags> dwFlags;	// Channel flags
 	uint16 nPan;					// Initial pan (0...256)
