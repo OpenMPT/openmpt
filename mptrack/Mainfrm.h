@@ -357,6 +357,8 @@ public:
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 
+	static bool WritePrivateProfileBool(const CString section, const CString key, const bool value, const CString iniFile);
+	static bool GetPrivateProfileBool(const CString section, const CString key, const bool defaultValue, const CString iniFile);
 	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
 	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
 	static bool WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile);
@@ -437,7 +439,7 @@ public:
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
 
-	BOOL SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
+	BOOL SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat sampleformat, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 

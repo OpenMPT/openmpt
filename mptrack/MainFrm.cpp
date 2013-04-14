@@ -498,6 +498,26 @@ void CMainFrame::OnClose()
 }
 
 
+bool CMainFrame::WritePrivateProfileBool(const CString section, const CString key, const bool value, const CString iniFile)
+{
+	CHAR valueBuffer[INIBUFFERSIZE];
+	wsprintf(valueBuffer, "%li", value?1:0);
+	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
+}
+
+
+bool CMainFrame::GetPrivateProfileBool(const CString section, const CString key, const bool defaultValue, const CString iniFile)
+{
+	CHAR defaultValueBuffer[INIBUFFERSIZE];
+	wsprintf(defaultValueBuffer, "%li", defaultValue?1:0);
+
+	CHAR valueBuffer[INIBUFFERSIZE];
+	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
+
+	return atol(valueBuffer)?true:false;
+}
+
+
 bool CMainFrame::WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile)
 {
 	CHAR valueBuffer[INIBUFFERSIZE];
@@ -817,11 +837,7 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 		if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
 		if(!gpSoundDevice) return false;
 		gpSoundDevice->SetSource(this);
-		gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS,
-			((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_SECONDARY) ? 0 : SNDDEV_OPTIONS_EXCLUSIVE)
-			|
-			((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_NOBOOSTTHREADPRIORITY) ? 0 : SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)
-			);
+		gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().GetSoundDeviceFlags());
 		if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
 	}
 	return true;
@@ -1672,11 +1688,11 @@ HWND CMainFrame::GetFollowSong() const
 }
 
 
-BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
+BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat sampleformat, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
 //---------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = IsPlaying();
-	if (((TrackerSettings::Instance().m_MixerSettings.MixerFlags & SOUNDSETUP_RESTARTMASK) != (q & SOUNDSETUP_RESTARTMASK))
+	if ((TrackerSettings::Instance().GetSoundDeviceFlags() != deviceflags)
 	 || (TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq != rate)
 	 || (TrackerSettings::Instance().m_nWaveDevice != wd)
 	 || (TrackerSettings::Instance().m_LatencyMS != latency_ms)
@@ -1692,7 +1708,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, 
 		}
 		TrackerSettings::Instance().m_nWaveDevice = wd;
 		TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = rate;
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags = q;
+		TrackerSettings::Instance().SetSoundDeviceFlags(deviceflags);
 		TrackerSettings::Instance().m_LatencyMS = latency_ms;
 		TrackerSettings::Instance().m_UpdateIntervalMS = updateinterval_ms;
 		TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = sampleformat;
@@ -1705,7 +1721,6 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, 
 		UpdateWindow();
 	} else
 	{
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags = q;
 		// No need to restart playback
 		CriticalSection cs;
 		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying(), FALSE);
@@ -1865,7 +1880,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().m_MixerSettings.MixerFlags, TrackerSettings::Instance().m_MixerSettings.m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().GetSoundDeviceFlags(), TrackerSettings::Instance().m_MixerSettings.m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
