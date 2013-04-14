@@ -774,6 +774,7 @@ void CMainFrame::FillAudioBufferLocked(const ISoundDevice &, IFillAudioBuffer &c
 //--------------------------------------------------------------------------------------
 {
 	CriticalSection cs;
+	ALWAYS_ASSERT(m_pSndFile != nullptr);
 	callback.FillAudioBuffer();
 }
 
@@ -789,10 +790,8 @@ ULONG CMainFrame::AudioRead(const ISoundDevice &, PVOID pvData, ULONG MaxSamples
 void CMainFrame::AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream)
 //------------------------------------------------------------------------------------------------------------------
 {
-	if(SamplesWritten > 0)
-	{
-		DoNotification(SamplesWritten, SamplesLatency, endOfStream, device.HasGetStreamPosition());
-	}
+	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
+	DoNotification(SamplesWritten, SamplesLatency, endOfStream, device.HasGetStreamPosition());
 }
 
 
@@ -952,7 +951,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream, bool hasSoundDeviceGetStreamPosition)
 //--------------------------------------------------------------------------------------------------------------------------------
 {
-	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
+	if(dwSamplesRead == 0) return FALSE;
 	int64 notificationtimestamp = 0;
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex); // protect m_TotalSamplesRendered
