@@ -1975,11 +1975,11 @@ void CViewPattern::OnEditGoto()
 	}
 	if (m_pGotoWnd)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		ORDERINDEX curOrder = GetCurrentOrder();
 		CHANNELINDEX curChannel = GetCurrentChannel() + 1;
 
-		m_pGotoWnd->UpdatePos(GetCurrentRow(), curChannel, m_nPattern, curOrder, pSndFile);
+		m_pGotoWnd->UpdatePos(GetCurrentRow(), curChannel, m_nPattern, curOrder, sndFile);
 
 		if (m_pGotoWnd->DoModal() == IDOK)
 		{

@@ -39,7 +39,7 @@ SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note, double pitchReferen
 //---------------------------------------------------------------------------------------
 {
 	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
-	return (SmpLength)MAX(Util::Round((double)sampleFreq / fundamentalFrequency), 1);
+	return std::max(Util::Round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
 }
 
 

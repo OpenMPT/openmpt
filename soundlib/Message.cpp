@@ -87,14 +87,14 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 		{
 		case '\r':
 			if(lineEnding != leLF)
-				at(cpos) = INTERNAL_LINEENDING;
+				at(cpos) = InternalLineEnding;
 			else
 				at(cpos) = ' ';
 			if(lineEnding == leCRLF) i++;	// skip the LF
 			break;
 		case '\n':
 			if(lineEnding != leCR && lineEnding != leCRLF)
-				at(cpos) = INTERNAL_LINEENDING;
+				at(cpos) = InternalLineEnding;
 			else
 				at(cpos) = ' ';
 			break;
@@ -143,7 +143,7 @@ bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, con
 	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
 	{
 		append(str + fpos, std::min(lineLength, length - fpos));
-		at(cpos + lineLength) = INTERNAL_LINEENDING;
+		at(cpos + lineLength) = InternalLineEnding;
 
 		// fix weird chars
 		for(size_t lpos = 0; lpos < lineLength; lpos++)
@@ -196,7 +196,7 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc
 	size_t writePos = 0;
 	for(size_t i = 0; i < len; i++)
 	{
-		if(at(i) == INTERNAL_LINEENDING)
+		if(at(i) == InternalLineEnding)
 		{
 			switch(lineEnding)
 			{

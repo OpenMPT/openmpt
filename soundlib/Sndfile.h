@@ -65,8 +65,6 @@ typedef VOID (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffe
 #include "patternContainer.h"
 #include "ModSequence.h"
 
-#define INTERNAL_LINEENDING	'\r'	// The character that represents line endings internally
-
 
 #ifdef MODPLUG_TRACKER
 

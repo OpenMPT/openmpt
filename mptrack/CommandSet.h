@@ -1223,8 +1223,6 @@ protected:
 	bool IsDummyCommand(CommandID cmd);
 	UINT CodeToModifier(UINT code);
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
-	void GetParentContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> ctxList);
-	void GetChildContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> ctxList);
 
 	bool IsExtended(UINT code);
 	int FindCmd(int uid);

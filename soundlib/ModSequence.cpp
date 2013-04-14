@@ -594,6 +594,7 @@ bool ModSequenceSet::MergeSequences()
 #ifdef MODPLUG_TRACKER
 // Check if a playback position is currently locked (inaccessible)
 bool ModSequence::IsPositionLocked(ORDERINDEX position)
+//-----------------------------------------------------
 {
 	return(m_pSndFile->m_lockOrderStart != ORDERINDEX_INVALID
 		&& (position < m_pSndFile->m_lockOrderStart || position > m_pSndFile->m_lockOrderEnd));

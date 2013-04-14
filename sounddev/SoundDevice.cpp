@@ -185,7 +185,7 @@ DWORD CAudioThread::AudioThread()
 		versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
 		GetVersionEx(&versioninfo);
 		
-		bool boostPriority = (m_SoundDevice.m_fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY);
+		bool boostPriority = (m_SoundDevice.m_fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY) != 0;
 
 		if(boostPriority)
 		{
@@ -364,10 +364,10 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 
 	if (m_hWaveOut) Close();
 	nWaveDev = (nDevice) ? nDevice-1 : WAVE_MAPPER;
-	if (waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD)WaveOutCallBack, (DWORD)this, CALLBACK_FUNCTION))
+	if (waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION))
 	{
 		sndPlaySound(NULL, 0);
-		LONG err = waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD)WaveOutCallBack, (DWORD)this, CALLBACK_FUNCTION);
+		LONG err = waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION);
 		if (err) return FALSE;
 	}
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
@@ -1707,7 +1707,7 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 
 
 bool CASIODevice::CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result)
-//--------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
 {
 	const bool wasOpen = (m_pAsioDrv != NULL);
 	if(!wasOpen)

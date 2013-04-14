@@ -226,8 +226,8 @@ namespace StringFixer
 
 	// Copy from a char array to a fixed size char array.
 	template <size_t destSize>
-	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_T_MAX)
-	//------------------------------------------------------------------------------------------------
+	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_MAX)
+	//----------------------------------------------------------------------------------------------
 	{
 		const size_t copySize = MIN(destSize - 1, srcSize);
 		strncpy(destBuffer, srcBuffer, copySize);

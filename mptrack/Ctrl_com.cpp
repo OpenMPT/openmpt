@@ -137,9 +137,9 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 			if ((ln >= LINE_LENGTH-1) || (!*p))
 			{
 				if (((BYTE)c) > ' ') s[ln++] = c;
-				c = INTERNAL_LINEENDING;
+				c = SongMessage::InternalLineEnding;
 			}
-			if (c == INTERNAL_LINEENDING)
+			if (c == SongMessage::InternalLineEnding)
 			{
 				s[ln] = 0x0D;
 				s[ln+1] = 0x0A;
@@ -173,7 +173,6 @@ void CCtrlComments::OnCommentsChanged()
 	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
 
 	CHAR s[LINE_LENGTH + 2];
-	const char *oldMsg = m_pSndFile->songMessage.c_str();
 
 	// Updating comments
 	{
@@ -195,13 +194,13 @@ void CCtrlComments::OnCommentsChanged()
 			if (i+1 < n)
 			{
 				size_t l = strlen(s);
-				s[l++] = INTERNAL_LINEENDING;
+				s[l++] = SongMessage::InternalLineEnding;
 				s[l] = '\0';
 			}
 			strcat(p, s);
 		}
 		UINT len = strlen(p);
-		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == INTERNAL_LINEENDING)))
+		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == SongMessage::InternalLineEnding)))
 		{
 			len--;
 			p[len] = 0;

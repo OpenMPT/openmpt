@@ -3,8 +3,7 @@
  * --------
  * Purpose: Unit tests for OpenMPT.
  * Notes  : We need FAAAAAAAR more unit tests!
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -324,50 +323,50 @@ void TestMIDIEvents()
 void TestLoadXMFile(const CModDoc *pModDoc)
 //-----------------------------------------
 {
-	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	// Global Variables
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "Test Module"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->songMessage.at(0), 'O');
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 139);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 5);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 42);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 23);
-	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_modern);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerBeat, 6);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerMeasure, 12);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[0], "Test Module"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
+	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_COMPATIBLE_PLAY), true);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION), false);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLDVOLSWING), false);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_modern);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
+	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 
 	// Macros
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetFixedMacroType(), zxx_resomode);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetFixedMacroType(), zxx_resomode);
 
 	// Channels
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 2);
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[0].szName, "First Channel"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nMixPlugin, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[0].szName, "First Channel"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nMixPlugin, 0);
 
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[1].szName, "Second Channel"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nMixPlugin, 1);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[1].szName, "Second Channel"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nMixPlugin, 1);
 
 	// Samples
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 3);
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[1], "Pulse Sample"), 0);
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[2], "Empty Sample"), 0);
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[3], "Unassigned Sample"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[1], "Pulse Sample"), 0);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Empty Sample"), 0);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[3], "Unassigned Sample"), 0);
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(1), 1);
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(2), 1);
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(3), INSTRUMENTINDEX_INVALID);
-	const ModSample &sample = pSndFile->GetSample(1);
+	const ModSample &sample = sndFile.GetSample(1);
 	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
@@ -388,18 +387,19 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
 
 	// Sample Data
+	const int8 *p8 = static_cast<const int8 *>(sample.pSample);
 	for(size_t i = 0; i < 6; i++)
 	{
-		VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 18);
+		VERIFY_EQUAL_NONCONT(p8[i], 18);
 	}
 	for(size_t i = 6; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 0);
+		VERIFY_EQUAL_NONCONT(p8[i], 0);
 	}
 
 	// Instruments
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 1);
-	const ModInstrument *pIns = pSndFile->Instruments[1];
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumInstruments(), 1);
+	const ModInstrument *pIns = sndFile.Instruments[1];
 	VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
 	VERIFY_EQUAL_NONCONT(pIns->nPan, 128);
 	VERIFY_EQUAL_NONCONT(pIns->dwFlags, InstrumentFlags(0));
@@ -430,14 +430,14 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 	VERIFY_EQUAL_NONCONT(pIns->midiPWD, 8);
 
-	VERIFY_EQUAL_NONCONT(pIns->pTuning, pSndFile->GetDefaultTuning());
+	VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
 
 	VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 0);
 
 	VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
 	VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
 
-	for(size_t i = pSndFile->GetModSpecifications().noteMin; i < pSndFile->GetModSpecifications().noteMax; i++)
+	for(size_t i = sndFile.GetModSpecifications().noteMin; i < sndFile.GetModSpecifications().noteMax; i++)
 	{
 		VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], (i == NOTE_MIDDLEC - 1) ? 2 : 1);
 	}
@@ -462,51 +462,51 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nNodes, 0);
 
 	// Sequences
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetNumSequences(), 1);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[0], 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[1], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order[0], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order[1], 1);
 
 	// Patterns
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.GetNumPatterns(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetName(), "First Pattern");
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 64);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumChannels(), 2);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetOverrideSignature(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerBeat(), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerMeasure(), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(0), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetName(), "First Pattern");
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerBeat(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(0), true);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetName(), "Second Pattern");
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumRows(), 32);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumChannels(), 2);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetOverrideSignature(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerBeat(), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerMeasure(), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->IsPcNote(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->note, NOTE_NONE);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->instr, 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->volcmd, VOLCMD_VIBRATOSPEED);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->vol, 15);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->instr, 45);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->volcmd, VOLCMD_VOLSLIDEDOWN);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->vol, 5);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetName(), "Second Pattern");
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumRows(), 32);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumChannels(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerBeat(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(1), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->IsPcNote(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->note, NOTE_NONE);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->instr, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->volcmd, VOLCMD_VIBRATOSPEED);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->vol, 15);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->instr, 45);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->volcmd, VOLCMD_VOLSLIDEDOWN);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->vol, 5);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
 
 	// Test 4-Bit Panning conversion
 	for(int i = 0; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(10 + i, 0)->vol, ((i * 64 + 8) / 15));
+		VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(10 + i, 0)->vol, ((i * 64 + 8) / 15));
 	}
 
 	// Plugins
-	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
+	const SNDMIXPLUGIN &plug = sndFile.m_MixPlugins[0];
 	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
@@ -518,27 +518,27 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 void TestLoadMPTMFile(const CModDoc *pModDoc)
 //-------------------------------------------
 {
-	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	// Global Variables
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "Test Module_____________X"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->songMessage.at(0), 'O');
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 139);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 5);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 128);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 42);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 23);
-	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY), true);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLDVOLSWING), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_modern);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerBeat, 6);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultRowsPerMeasure, 12);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 1);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[0], "Test Module_____________X"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
+	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_COMPATIBLE_PLAY), true);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION), false);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLDVOLSWING), false);
+	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_modern);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
+	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 	
 	// Edit history
 	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory().size() > 0, true);
@@ -552,34 +552,34 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
 
 	// Macros
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetParameteredMacroType(2), sfx_polyAT);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_MidiCfg.GetFixedMacroType(), zxx_resomode);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(1), sfx_drywet);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(2), sfx_polyAT);
+	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetFixedMacroType(), zxx_resomode);
 
 	// Channels
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 70);
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[0].szName, "First Channel"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nPan, 32);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nVolume, 32);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].dwFlags, CHN_MUTE);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nMixPlugin, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 70);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[0].szName, "First Channel"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nPan, 32);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nVolume, 32);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].dwFlags, CHN_MUTE);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nMixPlugin, 0);
 
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[1].szName, "Second Channel"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nPan, 128);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nVolume, 16);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].dwFlags, CHN_SURROUND);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nMixPlugin, 1);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[1].szName, "Second Channel"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nPan, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nVolume, 16);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].dwFlags, CHN_SURROUND);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nMixPlugin, 1);
 
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->ChnSettings[69].szName, "Last Channel______X"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[69].nPan, 256);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[69].nVolume, 7);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[69].dwFlags, 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[69].nMixPlugin, 1);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[69].szName, "Last Channel______X"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nPan, 256);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nVolume, 7);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nMixPlugin, 1);
 	// Samples
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
 	{
-		const ModSample &sample = pSndFile->GetSample(1);
+		const ModSample &sample = sndFile.GetSample(1);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
@@ -601,19 +601,20 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
 
 		// Sample Data
+		const int8 *p8 = static_cast<const int8 *>(sample.pSample);
 		for(size_t i = 0; i < 6; i++)
 		{
-			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 18);
+			VERIFY_EQUAL_NONCONT(p8[i], 18);
 		}
 		for(size_t i = 6; i < 16; i++)
 		{
-			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 0);
+			VERIFY_EQUAL_NONCONT(p8[i], 0);
 		}
 	}
 
 	{
-		const ModSample &sample = pSndFile->GetSample(2);
-		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[2], "Stereo / 16-Bit"), 0);
+		const ModSample &sample = sndFile.GetSample(2);
+		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Stereo / 16-Bit"), 0);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 2);
@@ -629,10 +630,10 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	}
 
 	// Instruments
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumInstruments(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumInstruments(), 2);
 	for(INSTRUMENTINDEX ins = 1; ins <= 2; ins++)
 	{
-		const ModInstrument *pIns = pSndFile->Instruments[ins];
+		const ModInstrument *pIns = sndFile.Instruments[ins];
 		VERIFY_EQUAL_NONCONT(pIns->nGlobalVol, 32);
 		VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
 		VERIFY_EQUAL_NONCONT(pIns->nPan, 64);
@@ -665,7 +666,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 		VERIFY_EQUAL_NONCONT(pIns->midiPWD, ins);
 
-		VERIFY_EQUAL_NONCONT(pIns->pTuning, pSndFile->GetDefaultTuning());
+		VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
 
 		VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 130);
 
@@ -700,62 +701,62 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.Values[1], 64);
 	}
 	// Sequences
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetNumSequences(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 2);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0).GetLengthTailTrimmed(), 3);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0).m_sName, "First Sequence");
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0)[0], pSndFile->Order.GetIgnoreIndex());
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0)[1], 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(0)[2], pSndFile->Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetLengthTailTrimmed(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).m_sName, "First Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[0], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[1], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[2], sndFile.Order.GetIgnoreIndex());
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1).GetLengthTailTrimmed(), 2);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1).m_sName, "Second Sequence");
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1)[0], 1);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetSequence(1)[1], 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetLengthTailTrimmed(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).m_sName, "Second Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[0], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[1], 2);
 
 	// Patterns
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.GetNumPatterns(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetName(), "First Pattern");
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 70);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumChannels(), 70);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetOverrideSignature(), true);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerBeat(), 5);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetRowsPerMeasure(), 10);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(0), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetName(), "First Pattern");
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetNumRows(), 70);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetNumChannels(), 70);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetOverrideSignature(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerBeat(), 5);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerMeasure(), 10);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(0), true);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetName(), "Second Pattern");
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumRows(), 32);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumChannels(), 70);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetOverrideSignature(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerBeat(), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetRowsPerMeasure(), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->IsPcNote(), true);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->note, NOTE_PC);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->instr, 99);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->instr, 45);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->volcmd, VOLCMD_VOLSLIDEDOWN);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->vol, 5);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetName(), "Second Pattern");
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumRows(), 32);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumChannels(), 70);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerBeat(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(1), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->IsPcNote(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->note, NOTE_PC);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->instr, 99);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->instr, 45);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->volcmd, VOLCMD_VOLSLIDEDOWN);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->vol, 5);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->command, CMD_PANNING8);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->param, 0xFF);
 
 	// Plugins
-	const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[0];
+	const SNDMIXPLUGIN &plug = sndFile.m_MixPlugins[0];
 	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
 
 	// MIDI Mapping
-	VERIFY_EQUAL_NONCONT(pSndFile->GetMIDIMapper().GetCount(), 1);
-	const CMIDIMappingDirective &mapping = pSndFile->GetMIDIMapper().GetDirective(0);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMIDIMapper().GetCount(), 1);
+	const CMIDIMappingDirective &mapping = sndFile.GetMIDIMapper().GetDirective(0);
 	VERIFY_EQUAL_NONCONT(mapping.GetAllowPatternEdit(), true);
 	VERIFY_EQUAL_NONCONT(mapping.GetCaptureMIDI(), false);
 	VERIFY_EQUAL_NONCONT(mapping.IsActive(), true);
@@ -773,40 +774,40 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 //--------------------------------------------------------
 {
-	const CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	// Global Variables
-	VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[0], "S3M_Test__________________X"), 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultTempo, 33);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nDefaultSpeed, 254);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nGlobalVolume, 32 * 4);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nVSTiVolume, 48);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nSamplePreAmp, 16);
-	VERIFY_EQUAL_NONCONT((pSndFile->m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nMixLevels, mixLevels_compatible);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nTempoMode, tempo_mode_classic);
-	VERIFY_EQUAL_NONCONT(pSndFile->m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
-	VERIFY_EQUAL_NONCONT(pSndFile->m_nRestartPos, 0);
+	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[0], "S3M_Test__________________X"), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 33);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 254);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 32 * 4);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 48);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
+	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_classic);
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
+	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 0);
 
 	// Channels
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumChannels(), 4);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].nPan, 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[0].dwFlags, ChannelFlags(0));
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 4);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nPan, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].dwFlags, ChannelFlags(0));
 
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].nPan, 256);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[1].dwFlags, CHN_MUTE);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nPan, 256);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].dwFlags, CHN_MUTE);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].nPan, 85);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[2].dwFlags, ChannelFlags(0));
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[2].nPan, 85);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[2].dwFlags, ChannelFlags(0));
 
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[3].nPan, 171);
-	VERIFY_EQUAL_NONCONT(pSndFile->ChnSettings[3].dwFlags, CHN_MUTE);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[3].nPan, 171);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[3].dwFlags, CHN_MUTE);
 
 	// Samples
-	VERIFY_EQUAL_NONCONT(pSndFile->GetNumSamples(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
 	{
-		const ModSample &sample = pSndFile->GetSample(1);
-		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[1], "Sample_1__________________X"), 0);
+		const ModSample &sample = sndFile.GetSample(1);
+		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[1], "Sample_1__________________X"), 0);
 		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "Filename_1_X"), 0);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
@@ -821,26 +822,27 @@ void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 60);
 
 		// Sample Data
+		const int8 *p8 = static_cast<const int8 *>(sample.pSample);
 		for(size_t i = 0; i < 30; i++)
 		{
-			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], 127);
+			VERIFY_EQUAL_NONCONT(p8[i], 127);
 		}
 		for(size_t i = 31; i < 60; i++)
 		{
-			VERIFY_EQUAL_NONCONT(static_cast<int8*>(sample.pSample)[i], -128);
+			VERIFY_EQUAL_NONCONT(p8[i], -128);
 		}
 	}
 
 	{
-		const ModSample &sample = pSndFile->GetSample(2);
-		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[2], "Empty"), 0);
+		const ModSample &sample = sndFile.GetSample(2);
+		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Empty"), 0);
 		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 16384);
 		VERIFY_EQUAL_NONCONT(sample.nVolume, 2 * 4);
 	}
 
 	{
-		const ModSample &sample = pSndFile->GetSample(3);
-		VERIFY_EQUAL_NONCONT(strcmp(pSndFile->m_szNames[3], "Stereo / 16-Bit"), 0);
+		const ModSample &sample = sndFile.GetSample(3);
+		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[3], "Stereo / 16-Bit"), 0);
 		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "Filename_3_X"), 0);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
@@ -861,35 +863,35 @@ void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 	}
 
 	// Orders
-	VERIFY_EQUAL_NONCONT(pSndFile->Order.GetLengthTailTrimmed(), 5);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[0], 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[1], pSndFile->Order.GetIgnoreIndex());
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[2], pSndFile->Order.GetInvalidPatIndex());
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[3], 1);
-	VERIFY_EQUAL_NONCONT(pSndFile->Order[4], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetLengthTailTrimmed(), 5);
+	VERIFY_EQUAL_NONCONT(sndFile.Order[0], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order[1], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order[2], sndFile.Order.GetInvalidPatIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order[3], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order[4], 0);
 
 	// Patterns
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.GetNumPatterns(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumRows(), 64);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetNumChannels(), 4);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetOverrideSignature(), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 0)->note, NOTE_MIN + 12);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(1, 0)->note, NOTE_MIN + 107);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 1)->volcmd, VOLCMD_VOLUME);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 1)->vol, 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(1, 1)->volcmd, VOLCMD_VOLUME);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(1, 1)->vol, 64);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(2, 1)->volcmd, VOLCMD_PANNING);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(2, 1)->vol, 0);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(3, 1)->volcmd, VOLCMD_PANNING);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(3, 1)->vol, 64);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 3)->command, CMD_SPEED);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[0].GetpModCommand(0, 3)->param, 0x11);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetNumChannels(), 4);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetOverrideSignature(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(0, 0)->note, NOTE_MIN + 12);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(1, 0)->note, NOTE_MIN + 107);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(0, 1)->volcmd, VOLCMD_VOLUME);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(0, 1)->vol, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(1, 1)->volcmd, VOLCMD_VOLUME);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(1, 1)->vol, 64);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(2, 1)->volcmd, VOLCMD_PANNING);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(2, 1)->vol, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(3, 1)->volcmd, VOLCMD_PANNING);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(3, 1)->vol, 64);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(0, 3)->command, CMD_SPEED);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(0, 3)->param, 0x11);
 
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetNumRows(), 64);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns.IsPatternEmpty(1), false);
-	VERIFY_EQUAL_NONCONT(pSndFile->Patterns[1].GetpModCommand(63, 3)->param, 0x04);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(1), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(63, 3)->param, 0x04);
 }
 
 
@@ -1012,25 +1014,23 @@ void TestPCnoteSerialization()
 	if(pModDoc == nullptr)
 		throw(std::runtime_error("pModdoc is nullptr"));
 
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr)
-		throw(std::runtime_error("pSndFile is nullptr"));
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	// Set maximum number of channels.
 	pModDoc->ReArrangeChannels(std::vector<CHANNELINDEX>(ModSpecs::mptm.channelsMax , 0));
 
-	pSndFile->Patterns.Remove(0);
-	pSndFile->Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
-	pSndFile->Patterns.Insert(1, 64);
-	GenerateCommands(pSndFile->Patterns[1], 0.3, 0.3);
-	pSndFile->Patterns.Insert(2, ModSpecs::mptm.patternRowsMax);
-	GenerateCommands(pSndFile->Patterns[2], 0.5, 0.5);
+	sndFile.Patterns.Remove(0);
+	sndFile.Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
+	sndFile.Patterns.Insert(1, 64);
+	GenerateCommands(sndFile.Patterns[1], 0.3, 0.3);
+	sndFile.Patterns.Insert(2, ModSpecs::mptm.patternRowsMax);
+	GenerateCommands(sndFile.Patterns[2], 0.5, 0.5);
 
 	//
 	vector<ModCommand> pat[3];
-	const size_t numCommands[] = {	pSndFile->GetNumChannels() * pSndFile->Patterns[0].GetNumRows(),
-									pSndFile->GetNumChannels() * pSndFile->Patterns[1].GetNumRows(),
-									pSndFile->GetNumChannels() * pSndFile->Patterns[2].GetNumRows()
+	const size_t numCommands[] = {	sndFile.GetNumChannels() * sndFile.Patterns[0].GetNumRows(),
+									sndFile.GetNumChannels() * sndFile.Patterns[1].GetNumRows(),
+									sndFile.GetNumChannels() * sndFile.Patterns[2].GetNumRows()
 								 };
 	pat[0].resize(numCommands[0]);
 	pat[1].resize(numCommands[1]);
@@ -1038,31 +1038,31 @@ void TestPCnoteSerialization()
 
 	for(size_t i = 0; i < 3; i++) // Copy pattern data for comparison.
 	{
-		CPattern::const_iterator iter = pSndFile->Patterns[i].Begin();
+		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
 	}
 
 	std::strstream mem;
-	WriteModPatterns(mem, pSndFile->Patterns);
+	WriteModPatterns(mem, sndFile.Patterns);
 
 	VERIFY_EQUAL_NONCONT( mem.good(), true );
 
 	// Clear patterns.
-	pSndFile->Patterns[0].ClearCommands();
-	pSndFile->Patterns[1].ClearCommands();
-	pSndFile->Patterns[2].ClearCommands();
+	sndFile.Patterns[0].ClearCommands();
+	sndFile.Patterns[1].ClearCommands();
+	sndFile.Patterns[2].ClearCommands();
 
 	// Read data back.
-	ReadModPatterns(mem, pSndFile->Patterns);
+	ReadModPatterns(mem, sndFile.Patterns);
 
 	// Compare.
-	VERIFY_EQUAL_NONCONT( pSndFile->Patterns[0].GetNumRows(), ModSpecs::mptm.patternRowsMin);
-	VERIFY_EQUAL_NONCONT( pSndFile->Patterns[1].GetNumRows(), 64);
-	VERIFY_EQUAL_NONCONT( pSndFile->Patterns[2].GetNumRows(), ModSpecs::mptm.patternRowsMax);
+	VERIFY_EQUAL_NONCONT( sndFile.Patterns[0].GetNumRows(), ModSpecs::mptm.patternRowsMin);
+	VERIFY_EQUAL_NONCONT( sndFile.Patterns[1].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT( sndFile.Patterns[2].GetNumRows(), ModSpecs::mptm.patternRowsMax);
 	for(size_t i = 0; i < 3; i++)
 	{
 		bool bPatternDataMatch = true;
-		CPattern::const_iterator iter = pSndFile->Patterns[i].Begin();
+		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++)
 		{
 			if(pat[i][j] != *iter)

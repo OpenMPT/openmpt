@@ -147,9 +147,6 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 {
 	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
 
-/*		if (keyEventType == kKeyEventUp)
-			keyEventType=kKeyEventUp;
-*/
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
 
