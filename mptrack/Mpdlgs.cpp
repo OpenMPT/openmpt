@@ -467,14 +467,6 @@ void COptionsSoundcard::OnOK()
 		wsprintf(s, "%d ms", m_UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
-	// Soft Panning
-	if (m_dwSoundSetup & SNDMIX_SOFTPANNING)
-	{
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING;
-	} else
-	{
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
-	}
 	CMainFrame::GetMainFrame()->SetupSoundCard(m_dwSoundSetup, m_dwRate, m_SampleFormat, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
 	UpdateStatistics();
 	CPropertyPage::OnOK();

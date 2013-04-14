@@ -1705,6 +1705,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD q, DWORD rate, SampleFormat sampleformat, 
 		UpdateWindow();
 	} else
 	{
+		TrackerSettings::Instance().m_MixerSettings.MixerFlags = q;
 		// No need to restart playback
 		CriticalSection cs;
 		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying(), FALSE);
