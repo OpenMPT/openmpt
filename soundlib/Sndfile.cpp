@@ -908,9 +908,8 @@ void CSoundFile::FreeSample(void *p)
 
 
 void CSoundFile::SetDspEffects(DWORD DSPMask)
-//----------------------------------------------------------------------------------------------------
+//-------------------------------------------
 {
-	CriticalSection cs;
 	if(!(GetSysInfo() & PROCSUPPORT_MMX)) DSPMask &= ~SNDDSP_REVERB;
 	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(FALSE);
