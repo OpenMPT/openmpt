@@ -23,10 +23,15 @@
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
 #include "PatternClipboard.h"
+#include "../sounddev/SoundDevice.h"
 
 
 #define OLD_SNDDEV_MINBUFFERLEN			1    // 1ms
 #define OLD_SNDDEV_MAXBUFFERLEN			1000 // 1sec
+
+#define OLD_SOUNDSETUP_REVERSESTEREO         0x20
+#define OLD_SOUNDSETUP_SECONDARY             0x40
+#define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
 
 
 TrackerSettings TrackerSettings::settings;
@@ -66,6 +71,8 @@ TrackerSettings::TrackerSettings()
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
 	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
+	m_SoundDeviceExclusiveMode = false;
+	m_SoundDeviceBoostThreadPriority = true;
 
 #ifndef NO_EQ
 	// Default EQ settings
@@ -143,6 +150,21 @@ TrackerSettings::TrackerSettings()
 	gnPlugWindowHeight = 332;
 	gnPlugWindowLast = 0;
 
+}
+
+
+DWORD TrackerSettings::GetSoundDeviceFlags() const
+//------------------------------------------------
+{
+	return (m_SoundDeviceExclusiveMode ? SNDDEV_OPTIONS_EXCLUSIVE : 0) | (m_SoundDeviceBoostThreadPriority ? SNDDEV_OPTIONS_BOOSTTHREADPRIORITY : 0);
+}
+
+
+void TrackerSettings::SetSoundDeviceFlags(DWORD flags)
+//----------------------------------------------------
+{
+	m_SoundDeviceExclusiveMode = (flags & SNDDEV_OPTIONS_EXCLUSIVE) ? true : false;
+	m_SoundDeviceBoostThreadPriority = (flags & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY) ? true : false;
 }
 
 
@@ -255,7 +277,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	}
 
 	// GUI Stuff
-	m_ShowSplashScreen = !!CMainFrame::GetPrivateProfileLong("Display", "ShowSplashScreen", m_ShowSplashScreen, iniFile);
+	m_ShowSplashScreen = CMainFrame::GetPrivateProfileBool("Display", "ShowSplashScreen", m_ShowSplashScreen, iniFile);
 	gbMdiMaximize = CMainFrame::GetPrivateProfileLong("Display", "MDIMaximize", gbMdiMaximize, iniFile);
 	glTreeWindowWidth = CMainFrame::GetPrivateProfileLong("Display", "MDITreeWidth", glTreeWindowWidth, iniFile);
 	glTreeSplitRatio = CMainFrame::GetPrivateProfileLong("Display", "MDITreeRatio", glTreeSplitRatio, iniFile);
@@ -315,9 +337,18 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 03)) m_MixerSettings.MixerFlags |= OLD_SOUNDSETUP_SECONDARY;
 	m_MixerSettings.MixerFlags = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26))
-		m_MixerSettings.MixerFlags &= ~0x20;	// Reverse stereo
+	m_SoundDeviceExclusiveMode = CMainFrame::GetPrivateProfileBool("Sound Settings", "ExclusiveMode", m_SoundDeviceExclusiveMode, iniFile);
+	m_SoundDeviceBoostThreadPriority = CMainFrame::GetPrivateProfileBool("Sound Settings", "BoostThreadPriority", m_SoundDeviceBoostThreadPriority, iniFile);
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26)) m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 03))
+	{
+		m_SoundDeviceExclusiveMode = ((m_MixerSettings.MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
+		m_SoundDeviceBoostThreadPriority = ((m_MixerSettings.MixerFlags & OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY) == 0);
+		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
+		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY;
+	}
 	m_MixerSettings.DSPMask = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_MixerSettings.DSPMask, iniFile);
 	m_ResamplerSettings.SrcMode = (ResamplingMode)CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
 	m_MixerSettings.gdwMixingFreq = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
@@ -580,7 +611,9 @@ bool TrackerSettings::LoadRegistrySettings()
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.MixerFlags, &dwDWORDSize);
-		m_MixerSettings.MixerFlags &= ~0x20;	// Reverse stereo
+		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;
+		m_SoundDeviceExclusiveMode = ((m_MixerSettings.MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
+		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.DSPMask, &dwDWORDSize);
 		DWORD dummysrcmode = m_ResamplerSettings.SrcMode;
 		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&dummysrcmode, &dwDWORDSize);
@@ -791,6 +824,8 @@ void TrackerSettings::SaveSettings()
 
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
+	CMainFrame::WritePrivateProfileBool("Sound Settings", "ExclusiveMode", m_SoundDeviceExclusiveMode, iniFile);
+	CMainFrame::WritePrivateProfileBool("Sound Settings", "BoostThreadPriority", m_SoundDeviceBoostThreadPriority, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Quality", m_MixerSettings.DSPMask, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_MixerSettings.gdwMixingFreq, iniFile);

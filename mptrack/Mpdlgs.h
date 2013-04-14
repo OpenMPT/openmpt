@@ -24,7 +24,7 @@ protected:
 	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnQuality;
 	CSliderCtrl m_SliderStereoSep, m_SliderPreAmp;
 	CEdit m_EditStatistics;
-	DWORD m_dwRate, m_dwSoundSetup;
+	DWORD m_dwRate, m_SoundDeviceFlags;
 	SampleFormat m_SampleFormat;
 	DWORD m_nChannels;
 	DWORD m_LatencyMS;
@@ -33,14 +33,15 @@ protected:
 	bool m_PreAmpNoteShowed;
 
 public:
-	COptionsSoundcard(DWORD rate, DWORD q, SampleFormat sampleformat, DWORD chns, DWORD latency_ms, DWORD updateinterval_ms, DWORD sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
-		{ m_dwRate = rate; m_dwSoundSetup = q; m_SampleFormat = sampleformat; m_nChannels = chns;
+	COptionsSoundcard(DWORD rate, DWORD flags, SampleFormat sampleformat, DWORD chns, DWORD latency_ms, DWORD updateinterval_ms, DWORD sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
+		{ m_dwRate = rate; m_SoundDeviceFlags = flags; m_SampleFormat = sampleformat; m_nChannels = chns;
 		  m_LatencyMS = latency_ms; m_UpdateIntervalMS = updateinterval_ms; m_nSoundDevice = sd; m_PreAmpNoteShowed = false; }
 
 	void UpdateStatistics();
 
 private:
 	void UpdateSampleRates(int dev);
+	void UpdateControls(int dev);
 	void SetPreAmpSliderPosition();
 
 protected:
