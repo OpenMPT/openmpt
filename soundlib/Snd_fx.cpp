@@ -502,7 +502,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
-					if (memory.chnSettings[nChn].chnVol > (param & 0x0F)) param = memory.chnSettings[nChn].chnVol - (param & 0x0F);
+					if (memory.chnSettings[nChn].chnVol > (UINT)(param & 0x0F)) param = memory.chnSettings[nChn].chnVol - (param & 0x0F);
 					else param = 0;
 				} else
 				if (param & 0x0F)

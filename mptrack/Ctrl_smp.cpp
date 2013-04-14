@@ -373,9 +373,9 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		if (m_sndFile.GetNumInstruments())
 		{
 			INSTRUMENTINDEX k = m_parent.GetInstrumentChange();
-			if (!m_modDoc.IsChildSample(k, lParam))
+			if (!m_modDoc.IsChildSample(k, (SAMPLEINDEX)lParam))
 			{
-				INSTRUMENTINDEX nins = m_modDoc.FindSampleParent(lParam);
+				INSTRUMENTINDEX nins = m_modDoc.FindSampleParent((SAMPLEINDEX)lParam);
 				if(nins != INSTRUMENTINDEX_INVALID)
 				{
 					m_parent.InstrumentChanged(nins);
