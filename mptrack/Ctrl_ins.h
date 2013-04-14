@@ -20,34 +20,32 @@ class CNoteMapWnd: public CStatic
 //===============================
 {
 protected:
-	CModDoc *m_pModDoc;
-	CCtrlInstruments *m_pParent;
-	UINT m_nInstrument, m_nNote, m_nOldNote, m_nOldIns;
-	bool m_bIns;
-	int m_nPlayingNote;
+	CModDoc &m_modDoc;
+	CCtrlInstruments &m_pParent;
 	HFONT m_hFont;
+	UINT m_nNote, m_nOldNote, m_nOldIns;
+	INSTRUMENTINDEX m_nInstrument;
+	int m_nPlayingNote;
 	int m_cxFont, m_cyFont;
 	COLORREF colorText, colorTextSel;
+	bool m_bIns;
 
 private:
 	void MapTranspose(int nAmount);
 
 public:
-	CNoteMapWnd()
+	CNoteMapWnd(CCtrlInstruments &parent, CModDoc &document) : m_pParent(parent), m_modDoc(document)
 	{
 		m_nPlayingNote = -1;
 		m_nNote = NOTE_MIDDLEC - 1;
-		m_pModDoc = nullptr;
 		m_nInstrument = 0;
 		m_bIns = false;
 		m_cxFont = m_cyFont = 0;
 		m_hFont = NULL;
 		m_nOldNote = m_nOldIns = 0;
-		m_pParent = NULL;
 	}
-	BOOL SetCurrentInstrument(CModDoc *pModDoc, UINT nIns);
+	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns);
 	BOOL SetCurrentNote(UINT nNote);
-	VOID Init(CCtrlInstruments *pParent) { m_pParent = pParent; }
 	void EnterNote(UINT note); //rewbs.customKeys - handle notes separately from other input.
 	bool HandleChar(WPARAM c); //rewbs.customKeys
 	bool HandleNav(WPARAM k);  //rewbs.customKeys
@@ -120,7 +118,7 @@ protected:
 
 	
 public:
-	CCtrlInstruments();
+	CCtrlInstruments(CModControlView &parent, CModDoc &document);
 	virtual ~CCtrlInstruments();
 
 public:

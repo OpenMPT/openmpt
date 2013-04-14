@@ -31,7 +31,8 @@ protected:
 	DECLARE_MESSAGE_MAP();
 };
 
-enum {
+enum
+{
 	MAX_SLIDER_GLOBAL_VOL=256,
 	MAX_SLIDER_VSTI_VOL=255,
 	MAX_SLIDER_SAMPLE_VOL=255
@@ -43,7 +44,7 @@ class CCtrlGeneral: public CModControlDlg
 //=======================================
 {
 public:
-	CCtrlGeneral();
+	CCtrlGeneral(CModControlView &parent, CModDoc &document);
 	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
 
 private:
@@ -53,7 +54,7 @@ private:
 	// Display range for XM / S3M should be 0...64, for other formats it's 0...256.
 	UINT GetGlobalVolumeFactor()
 	{
-		return (m_pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? UINT(MAX_SLIDER_GLOBAL_VOL / 64) : UINT(MAX_SLIDER_GLOBAL_VOL / 128);
+		return (m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? UINT(MAX_SLIDER_GLOBAL_VOL / 64) : UINT(MAX_SLIDER_GLOBAL_VOL / 128);
 	}
 
 public:

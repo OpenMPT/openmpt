@@ -745,14 +745,14 @@ void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 		m_dwStatus |= FXVSTATUS_LDRAGGING;
 	}
 
-	CModControlDlg::OnLButtonDown(nFlags, point);
+	CDialog::OnLButtonDown(nFlags, point);
 }
 
 void CEffectVis::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	ReleaseCapture();
 	m_dwStatus = 0x00;
-	CModControlDlg::OnLButtonUp(nFlags, point);
+	CDialog::OnLButtonUp(nFlags, point);
 	m_nLastDrawnRow = -1;
 }
 
@@ -767,7 +767,7 @@ void CEffectVis::OnEditUndo()
 BOOL CEffectVis::OnInitDialog()
 //-----------------------------
 {
-	CModControlDlg::OnInitDialog();
+	CDialog::OnInitDialog();
 	if (m_pModDoc->GetModType() == MOD_TYPE_MPT && IsPcNote(m_startRow))
 	{
 		// If first selected row is a PC Note, default to PC note overwrite mode

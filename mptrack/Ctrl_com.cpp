@@ -34,8 +34,8 @@ void CCtrlComments::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CCtrlComments::CCtrlComments()
-//----------------------------
+CCtrlComments::CCtrlComments(CModControlView &parent, CModDoc &document) : CModControlDlg(parent, document)
+//---------------------------------------------------------------------------------------------------------
 {
 	m_nLockCount = 0;
 	m_hFont = NULL;
@@ -52,13 +52,9 @@ CRuntimeClass *CCtrlComments::GetAssociatedViewClass()
 void CCtrlComments::OnActivatePage(LPARAM)
 //----------------------------------------
 {
-	CModDoc *modDoc = GetDocument();
-	if(modDoc)
-	{
-		// Don't stop generating VU meter messages
-		modDoc->SetNotifications(Notification::Default);
-		modDoc->SetFollowWnd(m_hWnd);
-	}
+	// Don't stop generating VU meter messages
+	m_modDoc.SetNotifications(Notification::Default);
+	m_modDoc.SetFollowWnd(m_hWnd);
 }
 
 
@@ -110,7 +106,7 @@ void CCtrlComments::RecalcLayout()
 void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 //----------------------------------------------------------
 {
-	if ((pHint == this) || (!m_pSndFile) || (!(dwHint & (HINT_MODCOMMENTS|HINT_MPTOPTIONS|HINT_MODTYPE)))) return;
+	if ((pHint == this) || (!(dwHint & (HINT_MODCOMMENTS|HINT_MPTOPTIONS|HINT_MODTYPE)))) return;
 	if (m_nLockCount) return;
 	m_nLockCount++;
 	HFONT newfont;
@@ -127,10 +123,10 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	m_EditComments.SetRedraw(FALSE);
 	m_EditComments.SetSel(0, -1, TRUE);
 	m_EditComments.ReplaceSel("");
-	if(!m_pSndFile->songMessage.empty())
+	if(!m_sndFile.songMessage.empty())
 	{
 		CHAR s[256], c;
-		const char *p = m_pSndFile->songMessage.c_str();
+		const char *p = m_sndFile.songMessage.c_str();
 		UINT ln = 0;
 		while ((c = *p++) != NULL)
 		{
@@ -158,7 +154,7 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	}
 	if (dwHint & HINT_MODTYPE)
 	{
-		m_EditComments.SetReadOnly(!m_pSndFile->GetModSpecifications().hasComments);
+		m_EditComments.SetReadOnly(!m_sndFile.GetModSpecifications().hasComments);
 	}
 
 	m_EditComments.SetRedraw(TRUE);
@@ -168,8 +164,8 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 void CCtrlComments::OnCommentsChanged()
 //-------------------------------------
 {
-	if ((m_nLockCount) || (!m_pSndFile)
-		|| !m_pSndFile->GetModSpecifications().hasComments) return;
+	if ((m_nLockCount)
+		|| !m_sndFile.GetModSpecifications().hasComments) return;
 	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
 
 	CHAR s[LINE_LENGTH + 2];
@@ -207,15 +203,11 @@ void CCtrlComments::OnCommentsChanged()
 		}
 
 		m_EditComments.SetModify(FALSE);
-		if(p != m_pSndFile->songMessage)
+		if(p != m_sndFile.songMessage)
 		{
-			m_pSndFile->songMessage.assign(p);
-
-			if(m_pModDoc)
-			{
-				m_pModDoc->SetModified();
-				m_pModDoc->UpdateAllViews(NULL, HINT_MODCOMMENTS, this);
-			}
+			m_sndFile.songMessage.assign(p);
+			m_modDoc.SetModified();
+			m_modDoc.UpdateAllViews(NULL, HINT_MODCOMMENTS, this);
 		}
 
 		delete[] p;
