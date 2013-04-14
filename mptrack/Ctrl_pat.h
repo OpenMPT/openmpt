@@ -42,16 +42,16 @@ protected:
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
 	int m_nOrderlistMargins;
-	CModDoc *m_pModDoc;
-	CCtrlPatterns *m_pParent;
+	CModDoc &m_pModDoc;
+	CCtrlPatterns &m_pParent;
 	bool m_bScrolling, m_bDragging;
 
 public:
-	COrderList();
+	COrderList(CCtrlPatterns &parent, CModDoc &document);
 	virtual ~COrderList() {}
 
 public:
-	BOOL Init(const CRect&, CCtrlPatterns *pParent, CModDoc *, HFONT hFont);
+	BOOL Init(const CRect&, HFONT hFont);
 	void InvalidateSelection() const;
 	UINT GetCurrentPattern() const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
@@ -192,7 +192,7 @@ protected:
 	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
 
 public:
-	CCtrlPatterns();
+	CCtrlPatterns(CModControlView &parent, CModDoc &document);
 	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
 
 public:

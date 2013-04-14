@@ -20,7 +20,7 @@ protected:
 	UINT m_nLockCount;
 
 public:
-	CCtrlComments();
+	CCtrlComments(CModControlView &parent, CModDoc &document);
 	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
 
 public:

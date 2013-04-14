@@ -63,7 +63,7 @@ protected:
 	void PropagateAutoVibratoChanges() const;
 
 public:
-	CCtrlSamples();
+	CCtrlSamples(CModControlView &parent, CModDoc &document);
 	~CCtrlSamples();
 
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);

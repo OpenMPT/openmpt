@@ -41,12 +41,9 @@ BEGIN_MESSAGE_MAP(CModControlDlg, CDialog)
 END_MESSAGE_MAP()
 
 
-CModControlDlg::CModControlDlg()
-//------------------------------
+CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_modDoc(document), m_sndFile(document.GetrSoundFile()), m_parent(parent)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	m_pParent = NULL;
-	m_pModDoc = NULL;
-	m_pSndFile = NULL;
 	m_bInitialized = FALSE;
 	m_hWndView = NULL;
 	m_nLockCount = 0;
@@ -357,6 +354,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 		pDlg = m_Pages[nIndex];
 	} else //Ctrl window is not created yet - creating one.
 	{
+		ALWAYS_ASSERT(GetDocument() != nullptr);
 		switch(nID)
 		{
 		//rewbs.graph
@@ -365,25 +363,24 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 			break;
 		//end rewbs.graph
 		case IDD_CONTROL_COMMENTS:
-			pDlg = new CCtrlComments();
+			pDlg = new CCtrlComments(*this, *GetDocument());
 			break;
 		case IDD_CONTROL_GLOBALS:
-			pDlg = new CCtrlGeneral();
+			pDlg = new CCtrlGeneral(*this, *GetDocument());
 			break;
 		case IDD_CONTROL_PATTERNS:
-			pDlg = new CCtrlPatterns();
+			pDlg = new CCtrlPatterns(*this, *GetDocument());
 			break;
 		case IDD_CONTROL_SAMPLES:
-			pDlg = new CCtrlSamples();
+			pDlg = new CCtrlSamples(*this, *GetDocument());
 			break;
 		case IDD_CONTROL_INSTRUMENTS:
-			pDlg = new CCtrlInstruments();
+			pDlg = new CCtrlInstruments(*this, *GetDocument());
 			break;
 		default:
 			return FALSE;
 		}
 		if (!pDlg) return FALSE;
-		pDlg->SetDocument(GetDocument(), this);
 		pDlg->SetViewWnd(m_hWndView);
 		BOOL bStatus = pDlg->Create(nID, this);
 		if(bStatus == 0) // Creation failed.

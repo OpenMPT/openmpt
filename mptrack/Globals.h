@@ -48,29 +48,26 @@ class CModControlDlg: public CDialog
 //==================================
 {
 protected:
-	BOOL m_bInitialized;
-	CModDoc *m_pModDoc;
-	CModControlView *m_pParent;
-	CSoundFile *m_pSndFile;
+	CModDoc &m_modDoc;
+	CSoundFile &m_sndFile;
+	CModControlView &m_parent;
 	HWND m_hWndView;
 	LONG m_nLockCount;
+	BOOL m_bInitialized;
 
 public:
-	CModControlDlg();
+	CModControlDlg(CModControlView &parent, CModDoc &document);
 	virtual ~CModControlDlg();
 	
 public:
-	VOID SetDocument(CModDoc *pModDoc, CModControlView *parent) { m_pParent = parent; m_pModDoc = pModDoc; m_pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL; }
-	VOID SetViewWnd(HWND hwndView) { m_hWndView = hwndView; }
-	CModDoc *GetDocument() const { return m_pModDoc; }
-	CSoundFile *GetSoundFile() const { return m_pSndFile; }
+	void SetViewWnd(HWND hwndView) { m_hWndView = hwndView; }
 	HWND GetViewWnd() const { return m_hWndView; }
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam=0) const;
 	BOOL PostViewMessage(UINT uMsg, LPARAM lParam=0) const;
 	LRESULT SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
-    BOOL IsLocked() const { return (m_nLockCount > 0); }
+	bool IsLocked() const { return (m_nLockCount > 0); }
 	virtual LONG* GetSplitPosRef() = 0; 	//rewbs.varWindowSize
 
 protected:

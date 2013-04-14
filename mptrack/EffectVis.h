@@ -21,7 +21,7 @@ class CViewPattern;
 //#define INSSTATUS_SPLITCURSOR	0x04
 
 // EffectVis dialog
-class CEffectVis : public CModControlDlg
+class CEffectVis : public CDialog
 {
 	DECLARE_DYNAMIC(CEffectVis)
 
