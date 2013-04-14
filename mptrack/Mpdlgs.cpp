@@ -354,7 +354,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 
 	vector<bool> supportedRates;
 	vector<UINT> samplerates;
-	for(size_t i = 0; i < NUMMIXRATE; i++)
+	for(size_t i = 0; i < CountOf(nMixingRates); i++)
 	{
 		samplerates.push_back(nMixingRates[i]);
 	}
@@ -392,7 +392,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 		supportedRates.assign(samplerates.size(), true);
 	}
 	int n = 1;
-	for(size_t i = 0; i < NUMMIXRATE; i++)
+	for(size_t i = 0; i < CountOf(nMixingRates); i++)
 	{
 		if(supportedRates[i])
 		{
@@ -503,6 +503,7 @@ void COptionsSoundcard::UpdateStatistics()
 		}
 	}
 }
+
 
 //////////////////////////////////////////////////////////
 // COptionsPlayer
@@ -806,8 +807,6 @@ void COptionsPlayer::OnOK()
 		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
-	// Notify CMainFrame
-	CMainFrame *pParent = CMainFrame::GetMainFrame();
 	//rewbs.resamplerConf
 	CString s;
 	m_CEditWFIRCutoff.GetWindowText(s);

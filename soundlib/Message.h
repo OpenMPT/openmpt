@@ -34,7 +34,7 @@ public:
 
 	enum
 	{
-		INTERNAL_LINEENDING	= '\r',	// The character that represents line endings internally
+		InternalLineEnding	= '\r',	// The character that represents line endings internally
 	};
 
 	// Read song message from a mapped file.

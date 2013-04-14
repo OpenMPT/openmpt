@@ -108,7 +108,7 @@ BOOL COptionsColors::OnInitDialog()
 }
 
 
-BOOL COptionsColors::OnKillActive() 
+BOOL COptionsColors::OnKillActive()
 //---------------------------------
 {
 	int temp_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
@@ -260,8 +260,8 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 						PREVIEWBMP_HEIGHT,
 						m_pPreviewDib->lpDibBits,
 						(LPBITMAPINFO)m_pPreviewDib,
-					   DIB_RGB_COLORS,
-					   SRCCOPY);
+						DIB_RGB_COLORS,
+						SRCCOPY);
 	}
 }
 
@@ -332,7 +332,7 @@ void COptionsColors::OnColorSelChanged()
 void COptionsColors::OnSettingsChanged()
 //--------------------------------------
 {
-	SetModified(TRUE); 
+	SetModified(TRUE);
 }
 
 void COptionsColors::OnUpdateDialog()

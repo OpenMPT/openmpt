@@ -51,50 +51,44 @@ END_MESSAGE_MAP()
 
 // CPatternGotoDialog message handlers
 
-void CPatternGotoDialog::UpdatePos(UINT row, UINT chan, UINT pat, UINT ord, CSoundFile* pSndFile)
+void CPatternGotoDialog::UpdatePos(ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, CSoundFile &sndFile)
 {
 	m_nRow = row;
 	m_nChannel = chan;
-	m_nPattern = static_cast<PATTERNINDEX>(pat);
+	m_nPattern = pat;
 	m_nActiveOrder = ord;
 	m_nOrder = ord;
-	m_pSndFile = pSndFile;
+	m_pSndFile = &sndFile;
 }
 
 void CPatternGotoDialog::OnOK()
 {
 	UpdateData();
 	
-	bool validated=true;
+	bool validated = true;
 	
-	//is pattern number sensible?
-	if(m_nPattern>=m_pSndFile->Patterns.Size())
+	// Does pattern exist?
+	if(validated && !m_pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		validated=false;
-	}
-
-	//Does pattern exist?
-	if(validated && !(m_pSndFile->Patterns[m_nPattern]))
-	{
-		validated=false;
+		validated = false;
 	}
 	
-	//Does order match pattern?
+	// Does order match pattern?
 	if(validated && m_pSndFile->Order[m_nOrder] != m_nPattern)
 	{
-		validated=false;
+		validated = false;
 	}
 
-	//Does pattern have enough rows?
+	// Does pattern have enough rows?
 	if(validated && m_pSndFile->Patterns[m_nPattern].GetNumRows() <= m_nRow)
 	{
-		validated=false;
+		validated = false;
 	}
 	
-	//Does track have enough channels?
+	// Does track have enough channels?
 	if(validated && m_pSndFile->m_nChannels < m_nChannel)
 	{
-		validated=false;
+		validated = false;
 	}
 
 
@@ -122,7 +116,7 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 
 	if(m_nOrder == ORDERINDEX_INVALID)
 	{
-		m_nOrder=0;
+		m_nOrder = 0;
 	}
 
 	LockControls();
@@ -141,8 +135,8 @@ void CPatternGotoDialog::OnEnChangeGotoOrd()
 
 	if(m_nOrder<m_pSndFile->Order.size())
 	{
-		UINT candidatePattern = m_pSndFile->Order[m_nOrder];
-		if(candidatePattern<m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern])
+		PATTERNINDEX candidatePattern = m_pSndFile->Order[m_nOrder];
+		if(candidatePattern < m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern])
 		{
 			m_nPattern = candidatePattern;
 		} 

@@ -44,7 +44,7 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krCheckModifiers]				= true;
 	enforceRule[krPropagateSampleManipulation]  = true;
 //	enforceRule[krCheckContextHierarchy]		= true;
-	
+
 	commands.SetSize(kcNumCommands);
 	SetupCommands();
 	SetupContextHierarchy();
@@ -690,16 +690,16 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 //---------------------------------------------------------------------------------
 {
 	CString report= "";
-	
+
 	KeyCombination curKc;
 	//Avoid duplicate
-	for (int k=0; k<commands[cmd].kcList.GetSize(); k++) 
+	for (int k=0; k<commands[cmd].kcList.GetSize(); k++)
 	{
 		curKc=commands[cmd].kcList[k];
 		if (curKc==kc)
 		{
 			//cm'ed out for perf
-			//Log("Not adding key:%d; ctx:%d; mod:%d event %d - Duplicate!\n", kc.code, kc.ctx, kc.mod, kc.event); 
+			//Log("Not adding key:%d; ctx:%d; mod:%d event %d - Duplicate!\n", kc.code, kc.ctx, kc.mod, kc.event);
 			return "";
 		}
 	}
@@ -725,7 +725,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 				else
 				{
 					if (crossContext)
-					{ 
+					{
 						report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n   >" + GetCommandText((CommandID)cmd) + " in " + GetContextText(kc.ctx) + "\r\n\r\n";
 						Log("%s", report);
 					} else
@@ -738,7 +738,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 			}
 		}
 	}
-	
+
 	if (pos>=0)
 		commands[cmd].kcList.InsertAt(pos, kc);
 	else
@@ -753,7 +753,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 bool CCommandSet::IsDummyCommand(CommandID cmd)
 //---------------------------------------------
 {
-	// e.g. Chord modifier is a dummy command, which serves only to automatically 
+	// e.g. Chord modifier is a dummy command, which serves only to automatically
 	// generate a set of keycombinations for chords (I'm not proud of this design).
 	return commands[cmd].isDummy;
 }
@@ -767,7 +767,7 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 		return Remove(commands[cmd].kcList[pos], cmd);
 	}
 
-	Log("Failed to remove a key: keychoice out of range.\n"); 
+	Log("Failed to remove a key: keychoice out of range.\n");
 	return "";
 }
 
@@ -790,7 +790,7 @@ CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 	}
 	else
 	{
-		Log("Failed to remove a key as it was not found\n"); 
+		Log("Failed to remove a key as it was not found\n");
 		return "";
 	}
 
@@ -808,7 +808,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 	if(enforceRule[krAllowNavigationWithSelection])
 	{
-		// When we get a new navigation command key, we need to 
+		// When we get a new navigation command key, we need to
 		// make sure this navigation will work when any selection key is pressed
 		if(inCmd >= kcStartPatNavigation && inCmd <= kcEndPatNavigation)
 		{//Check that it is a nav cmd
@@ -824,7 +824,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					Add(newKc, cmdNavSelection, false);
 				} else
 				{
-					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection); 
+					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection);
 					Remove(newKc, cmdNavSelection);
 				}
 			}
@@ -844,12 +844,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					Add(newKc, cmdNavSelection, false);
 				} else
 				{
-					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection); 
+					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection);
 					Remove(newKc, cmdNavSelection);
 				}
 			}
 		}
-		// When we get a new selection key, we need to make sure that 
+		// When we get a new selection key, we need to make sure that
 		// all navigation commands will work with this selection key pressed
 		else if(inCmd == kcSelect)
 		{
@@ -869,7 +869,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 						Add(newKc, cmdNavSelection, false);
 					} else
 					{
-						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);				
+						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);
 						Remove(newKc, cmdNavSelection);
 					}
 				}
@@ -887,7 +887,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 						Add(newKc, cmdNavSelection, false);
 					} else
 					{
-						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);				
+						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);
 						Remove(newKc, cmdNavSelection);
 					}
 				}
@@ -898,7 +898,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	if(enforceRule[krAllowSelectionWithNavigation])
 	{
 		KeyCombination newKcSel;
-		
+
 		// When we get a new navigation command key, we need to ensure
 		// all selection keys will work even when this new selection key is pressed
 		if(inCmd >= kcStartPatNavigation && inCmd <= kcEndPatNavigation)
@@ -909,11 +909,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.mod |= inKc.mod;					// add modifiers from the new nav command
 				if(adding)
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n"); 
+					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n");
 					Add(newKcSel, kcSelectWithNav, false);
 				} else
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n"); 				
+					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n");
 					Remove(newKcSel, kcSelectWithNav);
 				}
 			}
@@ -927,11 +927,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.mod|=inKc.mod;						// add modifiers from the new nav command
 				if(adding)
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n"); 
+					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n");
 					Add(newKcSel, kcSelectWithNav, false);
 				} else
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n"); 				
+					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n");
 					Remove(newKcSel, kcSelectWithNav);
 				}
 			}
@@ -952,7 +952,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 						Add(newKcSel, kcSelectWithNav, false);
 					} else
 					{
-						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);				
+						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
@@ -970,15 +970,15 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 						Add(newKcSel, kcSelectWithNav, false);
 					} else
 					{
-						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);				
+						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
 			} // end all nav commands
-		}		
+		}
 
 	}
-	
+
 	// if we add a selector or a copy selector, we need it to switch off when we release the key.
 	if (enforceRule[krAutoSelectOff])
 	{
@@ -997,7 +997,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 			default: ruleApplies = false;
 		}
-	
+
 		if(ruleApplies)
 		{
 			newKcDeSel = inKc;
@@ -1016,7 +1016,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					Remove(newKcDeSel, cmdOff);
 			}
 		}
-	
+
 	}
 	// Allow combinations of copyselect and select
 	if(enforceRule[krAllowSelectCopySelectCombos])
@@ -1032,7 +1032,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.mod|=commands[kcCopySelect].kcList[k].mod;
 				newKcCopySel=commands[kcCopySelect].kcList[k];
 				newKcCopySel.mod|=inKc.mod;
-				Log("Enforcing rule krAllowSelectCopySelectCombos\n"); 
+				Log("Enforcing rule krAllowSelectCopySelectCombos\n");
 				if(adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
@@ -1045,7 +1045,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 		}
 		if(inCmd == kcCopySelect)
-		{ 
+		{
 			// On getting a new copyselection key, make this copyselection key work with all selects' modifiers
 			// On getting a new copyselection key, make all selects work with this key's modifiers
 			for(int k = 0; k < commands[kcSelect].kcList.GetSize(); k++)
@@ -1054,7 +1054,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.mod |= inKc.mod;
 				newKcCopySel=inKc;
 				newKcCopySel.mod|=commands[kcSelect].kcList[k].mod;
-				Log("Enforcing rule krAllowSelectCopySelectCombos\n"); 
+				Log("Enforcing rule krAllowSelectCopySelectCombos\n");
 				if(adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
@@ -1068,10 +1068,10 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 	}
 
-	
+
 	//# Lock Notes to Chords
 	if (enforceRule[krLockNotesToChords])
-	{	
+	{
 		if (inCmd>=kcVPStartNotes && inCmd<=kcVPEndNotes)
 		{
 			int noteOffset = inCmd - kcVPStartNotes;
@@ -1081,12 +1081,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKc.mod|=commands[kcChordModifier].kcList[k].mod;
 				if (adding)
 				{
-					Log("Enforcing rule krLockNotesToChords: auto adding in a chord command\n"); 
+					Log("Enforcing rule krLockNotesToChords: auto adding in a chord command\n");
 					Add(newKc, (CommandID)(kcVPStartChords+noteOffset), false);
 				}
 				else
 				{
-					Log("Enforcing rule krLockNotesToChords: auto removing a chord command\n"); 
+					Log("Enforcing rule krLockNotesToChords: auto removing a chord command\n");
 					Remove(newKc, (CommandID)(kcVPStartChords+noteOffset));
 				}
 			}
@@ -1103,12 +1103,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKc.mod|=inKc.mod;
 					if (adding)
 					{
-						Log("Enforcing rule krLockNotesToChords: auto adding in a chord command\n"); 
+						Log("Enforcing rule krLockNotesToChords: auto adding in a chord command\n");
 						Add(newKc, (CommandID)(kcVPStartChords+noteOffset), false);
 					}
 					else
 					{
-						Log("Enforcing rule krLockNotesToChords: auto removing a chord command\n"); 
+						Log("Enforcing rule krLockNotesToChords: auto removing a chord command\n");
 						Remove(newKc, (CommandID)(kcVPStartChords+noteOffset));
 					}
 				}
@@ -1116,7 +1116,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 	}
 
-	
+
 	//# Auto set note off on release
 	if (enforceRule[krNoteOffOnKeyRelease])
 	{
@@ -1127,12 +1127,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.event=kKeyEventUp;
 			if (adding)
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: adding note off command\n"); 
+				Log("Enforcing rule krNoteOffOnKeyRelease: adding note off command\n");
 				Add(newKc, (CommandID)(kcVPStartNoteStops+noteOffset), false);
 			}
 			else
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: removing note off command\n"); 
+				Log("Enforcing rule krNoteOffOnKeyRelease: removing note off command\n");
 				Remove(newKc, (CommandID)(kcVPStartNoteStops+noteOffset));
 			}
 		}
@@ -1143,12 +1143,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.event=kKeyEventUp;
 			if (adding)
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n"); 
+				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n");
 				Add(newKc, (CommandID)(kcVPStartChordStops+noteOffset), false);
 			}
 			else
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n"); 
+				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n");
 				Remove(newKc, (CommandID)(kcVPStartChordStops+noteOffset));
 			}
 		}
@@ -1159,23 +1159,23 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.event=kKeyEventUp;
 			if (adding)
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n"); 
+				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n");
 				Add(newKc, (CommandID)(kcSetOctaveStop0+noteOffset), false);
 			}
 			else
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n"); 
+				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n");
 				Remove(newKc, (CommandID)(kcSetOctaveStop0+noteOffset));
 			}
 		}
 	}
-	
+
 	//# Reassign freed number keys to octaves
 	if (enforceRule[krReassignDigitsToOctaves] && !adding)
-	{  
+	{
 		  if ( (inKc.mod == 0) &&	//no modifier
 			 ( (inKc.ctx == kCtxViewPatternsNote) || (inKc.ctx == kCtxViewPatterns) ) && //note scope or pattern scope
-			 ( ('0'<=inKc.code && inKc.code<='9') || (VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9) ) ) {  //is number key 
+			 ( ('0'<=inKc.code && inKc.code<='9') || (VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9) ) ) {  //is number key
 				newKc.ctx=kCtxViewPatternsNote;
 				newKc.mod=0;
 				newKc.event= kKeyEventDown;
@@ -1219,7 +1219,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 						Add(newKc, (CommandID)(kcSetSpacing0 + inKc.code - VK_NUMPAD0), false);
 				}
 			}
-			
+
 		}
 	}
 	if (enforceRule[krPropagateNotes])
@@ -1244,7 +1244,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			noteOffset = inCmd - kcVPStartNotes;
 			if (adding)
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: adding Note on in samp ctx\n"); 
+				Log("Enforcing rule krPropagateNotesToSampAndIns: adding Note on in samp ctx\n");
 				Add(newKcSamp, (CommandID)(kcSampStartNotes+noteOffset), false);
 				Add(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset), false);
@@ -1253,7 +1253,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 			else
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: removing Note on in samp ctx\n"); 
+				Log("Enforcing rule krPropagateNotesToSampAndIns: removing Note on in samp ctx\n");
 				Remove(newKcSamp, (CommandID)(kcSampStartNotes+noteOffset));
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset));
@@ -1278,7 +1278,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			noteOffset = inCmd - kcVPStartNoteStops;
 			if (adding)
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: adding Note stop on in samp ctx\n"); 
+				Log("Enforcing rule krPropagateNotesToSampAndIns: adding Note stop on in samp ctx\n");
 				Add(newKcSamp, (CommandID)(kcSampStartNoteStops+noteOffset), false);
 				Add(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset), false);
@@ -1287,7 +1287,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 			else
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: removing Note stop on in samp ctx\n"); 
+				Log("Enforcing rule krPropagateNotesToSampAndIns: removing Note stop on in samp ctx\n");
 				Remove(newKcSamp, (CommandID)(kcSampStartNoteStops+noteOffset));
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset));
@@ -1305,7 +1305,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		for (int i = 0; i < CountOf(forcedModifiers); i++)
 		{
 			CommandID curCmd = forcedModifiers[i];
-			
+
 			//for all of this command's key combinations
 			for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 			{
@@ -1321,7 +1321,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					//commands[curCmd].kcList[k].ctx;
 				}
 			}
-		
+
 		}
 	}
 	if (enforceRule[krPropagateSampleManipulation])
@@ -1350,7 +1350,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		if (inKc.ctx == kCtxViewPatternsFX) {
 			KeyCombination newKc = inKc;
 			newKc.ctx = kCtxViewPatternsFXparam;
-			if (adding)	{            
+			if (adding)	{
 				Add(newKc, inCmd, false);
 			} else {
 				Remove(newKc, inCmd);
@@ -1359,12 +1359,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		if (inKc.ctx == kCtxViewPatternsFXparam) {
 			KeyCombination newKc = inKc;
 			newKc.ctx = kCtxViewPatternsFX;
-			if (adding)	{            
+			if (adding)	{
 				Add(newKc, inCmd, false);
 			} else {
 				Remove(newKc, inCmd);
 			}
-		} 
+		}
 	}
 */
 	return report;
@@ -1382,7 +1382,7 @@ UINT CCommandSet::CodeToModifier(UINT code)
 		case VK_LWIN: case VK_RWIN: return HOTKEYF_EXT; // Feature: use Windows keys as modifier keys
 		default:		 /*DEBUG: ASSERT(false);*/ return 0;		//can only get modifier for modifier key
 	}
-	
+
 }
 
 
@@ -1396,13 +1396,13 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	KeyCombination curKc;
 	CArray<KeyEventType, KeyEventType> eventTypes;
 	CArray<InputTargetContext, InputTargetContext> contexts;
-	
+
 	//Clear map
 	memset(km, kcNull, sizeof(KeyMap));
 
 	//Copy commandlist content into map:
 	for(UINT cmd=0; cmd<kcNumCommands; cmd++)
-	{	
+	{
 		if(IsDummyCommand((CommandID)cmd))
 			continue;
 
@@ -1411,7 +1411,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			contexts.RemoveAll();
 			eventTypes.RemoveAll();
 			curKc = commands[cmd].kcList[k];
-			
+
 			//Handle keyEventType mask.
 			if (curKc.event & kKeyEventDown)
 				eventTypes.Add(kKeyEventDown);
@@ -1504,7 +1504,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);
 		return false;
 	}
-	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 
+	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n");
 	fprintf(outStream, "//-Format is:                                                          -\n");
 	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n");
 	fprintf(outStream, "//----------------------------------------------------------------------\n");
@@ -1512,22 +1512,22 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 	for (int ctx=0; ctx<kCtxMaxInputContexts; ctx++)
 	{
-		fprintf(outStream, "\n//----( %s (%d) )------------\n", GetContextText((InputTargetContext)ctx), ctx); 
+		fprintf(outStream, "\n//----( %s (%d) )------------\n", GetContextText((InputTargetContext)ctx), ctx);
 
 		for (int cmd=0; cmd<kcNumCommands; cmd++)
 		{
 			for (int k=0; k<GetKeyListSize((CommandID)cmd); k++)
 			{
 				kc = GetKey((CommandID)cmd, k);
-				
+
 				if (kc.ctx != ctx)
 					continue;		//sort by context
-				
+
 				if (!commands[cmd].isHidden)
 				{
-					fprintf(outStream, "%d:%d:%d:%d:%d\t\t//%s: %s (%s)\n", 
-							ctx, commands[cmd].UID,	kc.mod, kc.code, kc.event, 
-							GetCommandText((CommandID)cmd), GetKeyText(kc.mod,kc.code), GetKeyEventText(kc.event)); 
+					fprintf(outStream, "%d:%d:%d:%d:%d\t\t//%s: %s (%s)\n",
+							ctx, commands[cmd].UID,	kc.mod, kc.code, kc.event,
+							GetCommandText((CommandID)cmd), GetKeyText(kc.mod,kc.code), GetKeyEventText(kc.event));
 				}
 
 			}
@@ -1560,18 +1560,18 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 	while(iStrm.getline(s, sizeof(s)))
 	{
 		curLine = s;
-		
-		
+
+
 		//Cut everything after a //
 		commentStart = curLine.Find("//");
 		if (commentStart>=0)
 			curLine = curLine.Left(commentStart);
 		curLine.Trim();	//remove whitespace
-		
+
 		if (!curLine.IsEmpty() && curLine.Compare("\n") !=0)
 		{
 			bool ignoreLine = false;
-			
+
 			//ctx:UID:Description:Modifier:Key:EventMask
 			int spos = 0;
 
@@ -1803,7 +1803,7 @@ CString CCommandSet::GetContextText(InputTargetContext ctx)
 {
 	switch(ctx)
 	{
-	
+
 		case kCtxAllContexts:			return "Global Context";
 		case kCtxViewGeneral:			return "General Context [bottom]";
 		case kCtxViewPatterns:			return "Pattern Context [bottom]";
@@ -1892,7 +1892,7 @@ CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 {
 	if ( static_cast<INT_PTR>(key) < commands[c].kcList.GetSize())
 		return GetKeyText(commands[c].kcList[0].mod, commands[c].kcList[0].code);
-	else 
+	else
 		return "";
 }
 
@@ -1908,7 +1908,7 @@ bool CCommandSet::isHidden(UINT c)
 //-------------------------------------------------------
 // Quick Changes - modify many commands with one call.
 //-------------------------------------------------------
-	
+
 bool CCommandSet::QuickChange_NotesRepeat()
 //-----------------------------------------
 {
@@ -1965,7 +1965,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 		{
 			Remove(p, cmd);
 		}
-		
+
 		char effect = modSpecs.GetEffectLetter(static_cast<ModCommand::COMMAND>(cmd - kcSetFXStart + 1));
 		if(effect >= 'A' && effect <= 'Z')
 		{
@@ -1980,10 +1980,10 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 		if(effect != '?')
 		{
 			SHORT codeNmod = VkKeyScanEx(effect, GetKeyboardLayout(0));
-			kc.code = LOBYTE(codeNmod);			
+			kc.code = LOBYTE(codeNmod);
 			kc.mod = HIBYTE(codeNmod) & 0x07;	//We're only interest in the bottom 3 bits.
 			Add(kc, cmd, true);
-			
+
 			if (kc.code >= '0' && kc.code <= '9')		//for numbers, ensure numpad works too
 			{
 				kc.code = VK_NUMPAD0 + (kc.code-'0');
@@ -1991,11 +1991,12 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 			}
 		}
 	}
+
 	return true;
 }
 
 // Stupid MFC crap: for some reason VK code isn't enough to get correct string with GetKeyName.
-// We also need to figure out the correct "extended" bit. 
+// We also need to figure out the correct "extended" bit.
 bool CCommandSet::IsExtended(UINT code)
 {
 	if (code==VK_SNAPSHOT)	//print screen
@@ -2003,7 +2004,7 @@ bool CCommandSet::IsExtended(UINT code)
 	if (code>=VK_PRIOR && code<=VK_DOWN) //pgup, pg down, home, end,  cursor keys,
 		return true;
 	if (code>=VK_INSERT && code<=VK_DELETE) // ins, del
-		return true;				
+		return true;
 	if (code>=VK_LWIN && code<=VK_APPS) //winkeys & application key
 		return true;
 	if (code==VK_DIVIDE)	//Numpad '/'
@@ -2017,42 +2018,17 @@ bool CCommandSet::IsExtended(UINT code)
 }
 
 
-void CCommandSet::GetParentContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> parentList)
-{
-	UNREFERENCED_PARAMETER(child);
-	//parentList.RemoveAll();
-
-	//for (InputTargetContext parent; parent<kCtxMaxInputContexts; parent++) {
-	//	if (m_isParentContext[child][parent]) {
-	//		parentList.Add(parent);
-	//	}
-	//}
-}
-
-void CCommandSet::GetChildContexts(InputTargetContext parent, CArray<InputTargetContext, InputTargetContext> childList)
-{
-	UNREFERENCED_PARAMETER(parent);
-	//childList.RemoveAll();
-
-	//for (InputTargetContext child; child<kCtxMaxInputContexts; child++) {
-	//	if (m_isParentContext[child][parent]) {
-	//		childList.Add(child);
-	//	}
-	//}
-}
-
-
-void CCommandSet::SetupContextHierarchy() 
+void CCommandSet::SetupContextHierarchy()
 {
 //	m_isParentContext.SetSize(kCtxMaxInputContexts);
-	
+
 	for (UINT nCtx=0; nCtx<kCtxMaxInputContexts; nCtx++) {
 //		m_isParentContext[nCtx].SetSize(kCtxMaxInputContexts);
 		for (UINT nCtx2=0; nCtx2<kCtxMaxInputContexts; nCtx2++) {
 			m_isParentContext[nCtx][nCtx2] = false;
 		}//InputTargetContext
 	}
-	
+
 	//For now much be fully expanded (i.e. don't rely on grandparent relationships).
 	m_isParentContext[kCtxViewGeneral][kCtxAllContexts] = true;
 	m_isParentContext[kCtxViewPatterns][kCtxAllContexts] = true;
@@ -2085,16 +2061,16 @@ void CCommandSet::SetupContextHierarchy()
 
 }
 
-bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict) 
+bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict)
 {
 	bool modConflict     = (kc1.mod==kc2.mod);
 	bool codeConflict    = (kc1.code==kc2.code);
 	bool eventConflict   = ((kc1.event&kc2.event)!=0);
 	bool ctxConflict     = (kc1.ctx == kc2.ctx);
 	crossCxtConflict     = m_isParentContext[kc1.ctx][kc2.ctx] || m_isParentContext[kc2.ctx][kc1.ctx];
-		
 
-	bool conflict = modConflict && codeConflict && eventConflict && 
+
+	bool conflict = modConflict && codeConflict && eventConflict &&
 		(ctxConflict || crossCxtConflict);
 
     return conflict;

@@ -27,7 +27,7 @@ public:
 
 public:
 	UINT m_nRow, m_nChannel, m_nPattern, m_nOrder, m_nActiveOrder;
-	void UpdatePos(UINT row, UINT chan, UINT pat, UINT ord, CSoundFile* pSndFile);
+	void UpdatePos(ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, CSoundFile &sndFile);
 
 protected:
 	bool m_bControlLock;

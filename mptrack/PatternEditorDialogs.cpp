@@ -185,7 +185,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetItemData(combo->AddString("ins -1"), replaceInstrumentMinusOne);
 			combo->SetItemData(combo->AddString("ins +1"), replaceInstrumentPlusOne);
 		}
-		for (UINT n=1; n<MAX_INSTRUMENTS; n++)
+		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
 		{
 			if(sndFile.GetNumInstruments())
 			{

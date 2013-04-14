@@ -1121,9 +1121,9 @@ void COrderList::OnInsertOrder()
 		CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
 
 		const OrdSelection selection = GetCurSel(false);
-		const ORDERINDEX nInsertCount = selection.lastOrd - selection.firstOrd, nInsertEnd = selection.lastOrd;
+		const ORDERINDEX insertCount = selection.lastOrd - selection.firstOrd, insertEnd = selection.lastOrd;
 
-		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
+		for(ORDERINDEX i = 0; i <= insertCount; i++)
 		{
 			// Checking whether there is some pattern at the end of orderlist.
 			if (sndFile.Order.GetLength() < 1 || sndFile.Order.Last() < sndFile.Patterns.Size())
@@ -1131,20 +1131,21 @@ void COrderList::OnInsertOrder()
 				if(sndFile.Order.GetLength() < sndFile.GetModSpecifications().ordersMax)
 					sndFile.Order.Append();
 			}
-			for(int j = sndFile.Order.GetLastIndex(); j > nInsertEnd; j--)
+			for(int j = sndFile.Order.GetLastIndex(); j > insertEnd; j--)
 				sndFile.Order[j] = sndFile.Order[j - 1];
 		}
 		// now that there is enough space in the order list, overwrite the orders
-		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
+		for(ORDERINDEX i = 0; i <= insertCount; i++)
 		{
-			if(nInsertEnd + i + 1 < sndFile.GetModSpecifications().ordersMax
-			   && 
-			   nInsertEnd + i + 1 < sndFile.Order.GetLength())
-				sndFile.Order[nInsertEnd + i + 1] = sndFile.Order[nInsertEnd - nInsertCount + i];
+			if(insertEnd + i + 1 < sndFile.GetModSpecifications().ordersMax
+				&& insertEnd + i + 1 < sndFile.Order.GetLength())
+			{
+				sndFile.Order[insertEnd + i + 1] = sndFile.Order[insertEnd - insertCount + i];
+			}
 		}
-		m_nScrollPos = MIN(nInsertEnd + 1, sndFile.Order.GetLastIndex());
-		if(nInsertCount > 0)
-			m_nScrollPos2nd = MIN(m_nScrollPos + nInsertCount, sndFile.Order.GetLastIndex());
+		m_nScrollPos = std::min(ORDERINDEX(insertEnd + 1), sndFile.Order.GetLastIndex());
+		if(insertCount > 0)
+			m_nScrollPos2nd = std::min(ORDERINDEX(m_nScrollPos + insertCount), sndFile.Order.GetLastIndex());
 		else
 			m_nScrollPos2nd = ORDERINDEX_INVALID;
 

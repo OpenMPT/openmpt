@@ -27,6 +27,7 @@
 #endif
 
 #include <deque>
+#include "../common/mutex.h"
 
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
@@ -52,7 +53,7 @@ protected:
 	std::deque<BiggestVstEvent> eventQueue;
 	// Since plugins can also add events to the queue (even from a different thread than the processing thread),
 	// we need to ensure that reading and writing is never done in parallel.
-	CRITICAL_SECTION criticalSection;
+	Util::mutex criticalSection;
 
 public:
 
@@ -61,13 +62,6 @@ public:
 		numEvents = 0;
 		reserved = 0;
 		MemsetZero(events);
-		MemsetZero(criticalSection);
-		InitializeCriticalSection(&criticalSection);
-	}
-
-	~PluginEventQueue()
-	{
-		DeleteCriticalSection(&criticalSection);
 	}
 
 	// Get the number of events that are currently in the output buffer.
@@ -93,7 +87,7 @@ public:
 		BiggestVstEvent copyEvent;
 		memcpy(&copyEvent, event, std::min(size_t(event->byteSize), sizeof(copyEvent)));
 
-		EnterCriticalSection(&criticalSection);
+		Util::lock_guard<Util::mutex> lock(criticalSection);
 		if(insertFront)
 		{
 			eventQueue.push_front(copyEvent);
@@ -101,33 +95,30 @@ public:
 		{
 			eventQueue.push_back(copyEvent);
 		}
-		LeaveCriticalSection(&criticalSection);
 		return true;
 	}
 
 	// Set up the queue for transmitting to the plugin. Returns number of elements that are going to be transmitted.
 	VstInt32 Finalise()
 	{
-		EnterCriticalSection(&criticalSection);
-		numEvents = MIN(eventQueue.size(), N);
+		Util::lock_guard<Util::mutex> lock(criticalSection);
+		numEvents = std::min(eventQueue.size(), N);
 		for(VstInt32 i = 0; i < numEvents; i++)
 		{
 			events[i] = reinterpret_cast<VstEvent *>(&eventQueue[i]);
 		}
-		LeaveCriticalSection(&criticalSection);
 		return numEvents;
 	}
 
 	// Remove transmitted events from the queue
 	void Clear()
 	{
-		EnterCriticalSection(&criticalSection);
+		Util::lock_guard<Util::mutex> lock(criticalSection);
 		if(numEvents)
 		{
 			eventQueue.erase(eventQueue.begin(), eventQueue.begin() + numEvents);
 			numEvents = 0;
 		}
-		LeaveCriticalSection(&criticalSection);
 	}
 
 };

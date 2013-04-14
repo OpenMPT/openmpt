@@ -144,7 +144,6 @@ void CCtrlGeneral::RecalcLayout()
 void CCtrlGeneral::OnActivatePage(LPARAM)
 //---------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (m_pModDoc) m_pModDoc->SetNotifications(Notification::Default);
 	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd);
 	PostViewMessage(VIEWMSG_SETACTIVE, NULL);
@@ -629,8 +628,8 @@ VOID CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
 }
 
 
-VOID CVuMeter::DrawVuMeter(CDC &dc, bool redraw)
-//----------------------------------------------
+VOID CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
+//--------------------------------------------------
 {
 	LONG vu;
 	LONG lastvu;

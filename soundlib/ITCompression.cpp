@@ -69,9 +69,9 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, FILE *f) : mpt
 			byteVal = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Compress<IT16BitParams>(static_cast<int16 *>(sample.pSample) + chn, offset, remain);
+				Compress<IT16BitParams>(static_cast<const int16 *>(sample.pSample) + chn, offset, remain);
 			else
-				Compress<IT8BitParams>(static_cast<int8 *>(sample.pSample) + chn, offset, remain);
+				Compress<IT8BitParams>(static_cast<const int8 *>(sample.pSample) + chn, offset, remain);
 
 			if(file) fwrite(&packedData[0], packedLength, 1, file);
 			packedTotalLength += packedLength;

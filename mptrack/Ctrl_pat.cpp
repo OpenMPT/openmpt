@@ -838,15 +838,15 @@ void CCtrlPatterns::OnPatternDuplicate()
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
 		OrdSelection selection = m_OrderList.GetCurSel(false);
-		ORDERINDEX nInsertCount = selection.lastOrd - selection.firstOrd;
-		ORDERINDEX nInsertWhere = selection.firstOrd + nInsertCount + 1;
-		if (nInsertWhere >= pSndFile->GetModSpecifications().ordersMax)
+		const ORDERINDEX insertCount = selection.lastOrd - selection.firstOrd;
+		const ORDERINDEX insertWhere = selection.firstOrd + insertCount + 1;
+		if (insertWhere >= pSndFile->GetModSpecifications().ordersMax)
 			return;
 		bool success = false;
 		// Has this pattern been duplicated already? (for multiselect)
 		vector<PATTERNINDEX> patReplaceIndex(pSndFile->Patterns.Size(), PATTERNINDEX_INVALID);
 
-		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
+		for(ORDERINDEX i = 0; i <= insertCount; i++)
 		{
 			PATTERNINDEX nCurPat = pSndFile->Order[selection.firstOrd + i];
 			if (pSndFile->Patterns.IsValidIndex(nCurPat) && patReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
@@ -854,7 +854,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 				ROWINDEX rows = pSndFile->Patterns[nCurPat].GetNumRows();
 				Limit(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 
-				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
+				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(insertWhere + i, rows);
 				if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nCurPat] != nullptr))
 				{
 					// Update time signature and pattern name
@@ -882,7 +882,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			} else
 			{
 				// Invalid pattern, or it has been duplicated before (multiselect)
-				for (int j = pSndFile->Order.size() - 1; j > selection.firstOrd + i + nInsertCount + 1; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
+				for (int j = pSndFile->Order.size() - 1; j > selection.firstOrd + i + insertCount + 1; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
 
 				PATTERNINDEX nNewPat;
 				if(nCurPat < pSndFile->Patterns.Size() && patReplaceIndex[nCurPat] != PATTERNINDEX_INVALID)
@@ -894,9 +894,9 @@ void CCtrlPatterns::OnPatternDuplicate()
 					nNewPat = pSndFile->Order[selection.firstOrd + i];
 				}
 
-				if (selection.firstOrd + i + nInsertCount + 1 < pSndFile->Order.GetLength())
+				if (selection.firstOrd + i + insertCount + 1 < pSndFile->Order.GetLength())
 				{
-					pSndFile->Order[selection.firstOrd + i + nInsertCount + 1] = nNewPat;
+					pSndFile->Order[selection.firstOrd + i + insertCount + 1] = nNewPat;
 				}
 
 				success = true;
@@ -906,10 +906,10 @@ void CCtrlPatterns::OnPatternDuplicate()
 		if(success)
 		{
 			m_OrderList.InvalidateRect(NULL, FALSE);
-			m_OrderList.SetCurSel(nInsertWhere);
+			m_OrderList.SetCurSel(insertWhere);
 
 			// If the first duplicated order is e.g. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
-			ORDERINDEX showPattern = MIN(nInsertWhere, pSndFile->Order.GetLastIndex());
+			ORDERINDEX showPattern = std::min(insertWhere, pSndFile->Order.GetLastIndex());
 			while(!pSndFile->Patterns.IsValidPat(pSndFile->Order[showPattern]) && showPattern < pSndFile->Order.GetLastIndex())
 			{
 				showPattern++;
@@ -918,7 +918,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 
 			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATNAMES, this);
-			if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;
+			if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = insertWhere + insertCount;
 		}
 	}
 	SwitchToView();
@@ -1244,35 +1244,17 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 void CCtrlPatterns::TogglePluginEditor()
 //--------------------------------------
 {
-	if(m_nInstrument && m_pModDoc && m_pSndFile && m_pSndFile->Instruments[m_nInstrument] != nullptr)
+	if(m_pModDoc && m_pSndFile && m_pSndFile->GetInstrumentPlugin(m_nInstrument) != nullptr)
 	{
-		PLUGINDEX nPlug = m_pSndFile->Instruments[m_nInstrument]->nMixPlug;
-		if(nPlug)
-		{
-			// Has a plugin assigned
-			if(m_pSndFile->m_MixPlugins[nPlug - 1].pMixPlugin != nullptr)
-			{
-				// Has a valid plugin assigned
-				m_pModDoc->TogglePluginEditor(nPlug - 1);
-			}
-		}
+		m_pModDoc->TogglePluginEditor(m_pSndFile->Instruments[m_nInstrument]->nMixPlug - 1);
 	}
 }
 
 
-bool CCtrlPatterns::HasValidPlug(UINT instr)
-//------------------------------------------
+bool CCtrlPatterns::HasValidPlug(INSTRUMENTINDEX instr)
+//-----------------------------------------------------
 {
-	if ((instr) && (instr < MAX_INSTRUMENTS) && (m_pSndFile) && m_pSndFile->Instruments[instr] != nullptr)
-	{
-		PLUGINDEX nPlug = m_pSndFile->Instruments[instr]->nMixPlug;
-		if(nPlug)
-		{
-			// Has a plugin assigned
-			return (m_pSndFile->m_MixPlugins[nPlug - 1].pMixPlugin != nullptr);
-		}
-	}
-	return false;
+	return m_pSndFile != nullptr && m_pSndFile->GetInstrumentPlugin(instr) != nullptr;
 }
 
 
