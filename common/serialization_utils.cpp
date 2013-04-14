@@ -727,7 +727,7 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 	if (GetFlag(RwfRwHasMap))
 	{
 		ReadAdaptive1248(iStrm, tempU64);
-		if(tempU64 > std::numeric_limits<Offtype>::max())
+		if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 			{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 	}
 
@@ -787,7 +787,7 @@ void Ssb::CacheMap()
 			{
 				uint64 tempU64;
 				ReadAdaptive1248(iStrm, tempU64);
-				if(tempU64 > std::numeric_limits<Offtype>::max())
+				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].rposStart = static_cast<RposType>(tempU64);
 			}
@@ -799,7 +799,7 @@ void Ssb::CacheMap()
 			{
 				uint64 tempU64;
 				ReadAdaptive1248(iStrm, tempU64);
-				if(tempU64 > std::numeric_limits<Offtype>::max())
+				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].nSize = static_cast<DataSize>(tempU64);
 			}
