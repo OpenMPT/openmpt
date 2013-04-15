@@ -338,7 +338,7 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLDVOLSWING), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_modern);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
@@ -533,7 +533,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLDVOLSWING), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_modern);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
@@ -784,7 +784,7 @@ void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 48);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nMixLevels, mixLevels_compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevels_compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_classic);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 0);

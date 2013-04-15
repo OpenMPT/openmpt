@@ -1635,19 +1635,18 @@ void CMainFrame::InitPreview()
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(NULL, 0);
 	// Avoid global volume ramping when trying samples in the treeview.
-	m_WaveFile.m_PlayConfig.setGlobalVolumeAppliesToMaster(false);
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_WaveFile.m_nSamplePreAmp = 48;
+	m_WaveFile.SetMixLevels(mixLevels_117RC3);
+	m_WaveFile.m_nSamplePreAmp = m_WaveFile.GetPlayConfig().getNormalSamplePreAmp();
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
-	m_WaveFile.m_nChannels = 4;
+	m_WaveFile.m_nChannels = 2;
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = tempo_mode_classic;
-	m_WaveFile.m_nMixLevels = mixLevels_compatible;
 	m_WaveFile.Order.resize(1);
 	m_WaveFile.Order[0] = 0;
-	m_WaveFile.Patterns.Insert(0, 64);
+	m_WaveFile.Patterns.Insert(0, 80);
 }
 
 
@@ -1663,19 +1662,15 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 	{
 		m[0].note = note;
 		m[0].instr = 1;
-		m[1].note = note;
-		m[1].instr = 1;
 
 		if(m_WaveFile.m_nSamples > 1 || m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
 		{
-			m[32 * 4].note = NOTE_KEYOFF;
-			m[32 * 4 + 1].note = NOTE_KEYOFF;
-			m[63 * 4].note = NOTE_NOTECUT;
-			m[63 * 4 + 1].note = NOTE_NOTECUT;
+			m[48 * 2].note = NOTE_KEYOFF;
+			m[79 * 2].note = NOTE_NOTECUT;
 		}
-		m[63 * 4 + 2].command = CMD_POSITIONJUMP;
-		m[63 * 4 + 3].command = CMD_PATTERNBREAK;
-		m[63 * 4 + 3].param = 63;
+		m[79 * 2].command = CMD_POSITIONJUMP;
+		m[79 * 2 + 1].command = CMD_PATTERNBREAK;
+		m[79 * 2 + 1].param = 63;
 	}
 }
 

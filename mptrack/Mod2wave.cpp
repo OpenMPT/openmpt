@@ -1117,7 +1117,7 @@ void CDoAcmConvert::OnButton1()
 	m_pSndFile->InitPlayer(TRUE);
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 
-	m_pSndFile->visitedSongRows.Initialize(true);
+	m_pSndFile->InitializeVisitedRows();
 
 	// Setting up file limits and progress range
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 512000)) m_dwFileLimit = 512000;
@@ -1208,7 +1208,7 @@ void CDoAcmConvert::OnButton1()
 	m_pSndFile->m_MixerSettings.MixerFlags = oldsndcfg;
 	m_pSndFile->SetRepeatCount(oldrepeat);
 	m_pSndFile->m_nMaxOrderPosition = 0;
-	m_pSndFile->visitedSongRows.Initialize(true);
+	m_pSndFile->InitializeVisitedRows();
 	CMainFrame::UpdateAudioParameters(*m_pSndFile, TRUE);
 
 	// Success

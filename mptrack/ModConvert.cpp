@@ -489,10 +489,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)
 	{
-		m_SndFile.m_nMixLevels = mixLevels_compatible;
-		m_SndFile.m_PlayConfig.SetMixLevels(mixLevels_compatible);
+		m_SndFile.SetMixLevels(mixLevels_compatible);
 	}
-	if(oldTypeIsMPT && m_SndFile.m_nMixLevels != mixLevels_compatible)
+	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevels_compatible)
 	{
 		CHANGEMODTYPE_WARNING(wMixmode);
 	}

@@ -49,39 +49,39 @@ public:
 	void SetMixLevels(int mixLevelType);
 
 //getters/setters
-	float getIntToFloat();
+	float getIntToFloat() const;
 	void setIntToFloat(float);
-	float getFloatToInt();
+	float getFloatToInt() const;
 	void setFloatToInt(float);
 
 	// default VSTi gain factor, different depending on the MPT version we're "emulating"
 	void setVSTiAttenuation(float);
-	float getVSTiAttenuation();
+	float getVSTiAttenuation() const;
 
 	// user-controllable VSTi gain factor.
 	void setVSTiVolume(float);
-	float getVSTiVolume();
+	float getVSTiVolume() const;
 
 	void setGlobalVolumeAppliesToMaster(bool);
-	bool getGlobalVolumeAppliesToMaster();
+	bool getGlobalVolumeAppliesToMaster() const;
 	
 	void setUseGlobalPreAmp(bool);
-	bool getUseGlobalPreAmp();
+	bool getUseGlobalPreAmp() const;
 
 	void setForcePanningMode(forcePanningMode);
-	forcePanningMode getForcePanningMode();
+	forcePanningMode getForcePanningMode() const;
 
 	void setDisplayDBValues(bool);
-	bool getDisplayDBValues();
+	bool getDisplayDBValues() const;
 
 	// Extra sample attenuation in bits
 	void setExtraSampleAttenuation(int);
-	int getExtraSampleAttenuation();
+	int getExtraSampleAttenuation() const;
 
 	//Values at which volumes are unchanged
-	double getNormalSamplePreAmp();
-	double getNormalVSTiVol();
-	double getNormalGlobalVol();
+	double getNormalSamplePreAmp() const;
+	double getNormalVSTiVol() const;
+	double getNormalGlobalVol() const;
 	void setNormalSamplePreAmp(double);
 	void setNormalVSTiVol(double);
 	void setNormalGlobalVol(double);
@@ -89,7 +89,7 @@ public:
 private:
 
 //calculated internally (getters only):
-	float getVSTiGainFactor();
+	float getVSTiGainFactor() const;
 
 	float m_IntToFloat;
 	float m_FloatToInt;

@@ -212,8 +212,8 @@ private: //'Controllers'
 #endif // MODPLUG_TRACKER
 
 private: //Misc data
+	const CModSpecifications *m_pModSpecs;
 	FlagSet<ModSpecificFlag, uint16> m_ModFlags;
-	const CModSpecifications* m_pModSpecs;
 
 private:
 	DWORD gdwSysInfo;
@@ -264,7 +264,6 @@ public:	// for Editing
 	INSTRUMENTINDEX m_nInstruments;
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	FlagSet<SongFlags> m_SongFlags;
-	bool m_bIsRendering;
 	UINT m_nMixChannels, m_nMixStat;
 	samplecount_t m_nBufferCount;
 	double m_dBufferDiff;
@@ -276,7 +275,6 @@ public:	// for Editing
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
 	ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
 	BYTE m_nTempoMode;			// rewbs.betterBPM
-	BYTE m_nMixLevels;
 	UINT m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
 	ROWINDEX m_nNextRow, m_nRow;
 	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
@@ -288,7 +286,6 @@ public:	// for Editing
 	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
 #endif // MODPLUG_TRACKER
 
-	bool m_bPatternTransitionOccurred;
 	UINT m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
@@ -311,7 +308,6 @@ public:
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
-	CSoundFilePlayConfig m_PlayConfig;
 	DWORD m_dwCreatedWithVersion;
 	DWORD m_dwLastSavedWithVersion;
 
@@ -319,9 +315,15 @@ public:
 	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)
 #endif // MODPLUG_TRACKER
 
+protected:
+	// Mix level stuff
+	CSoundFilePlayConfig m_PlayConfig;
+	mixLevels m_nMixLevels;
+
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 	RowVisitor visitedSongRows;
 
+public:
 	// Song message
 	SongMessage songMessage;
 
@@ -329,6 +331,9 @@ public:
 // -> DESC="IT project files (.itp)"
 	mpt::String m_szInstrumentPath[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
+
+	bool m_bIsRendering;
+	bool m_bPatternTransitionOccurred;
 
 public:
 	CSoundFile();
@@ -356,6 +361,10 @@ public:
 	void SetPreAmp(UINT vol);
 	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
+	void SetMixLevels(mixLevels levels);
+	mixLevels GetMixLevels() const { return m_nMixLevels; }
+	const CSoundFilePlayConfig &GetPlayConfig() const { return m_PlayConfig; }
+
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
@@ -382,6 +391,8 @@ public:
 	//Get modlength in various cases: total length, length to
 	//specific order&row etc. Return value is in seconds.
 	GetLengthType GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX ord = ORDERINDEX_INVALID, ROWINDEX row = ROWINDEX_INVALID);
+
+	void InitializeVisitedRows() { visitedSongRows.Initialize(true); }
 
 public:
 	//Returns song length in seconds.
