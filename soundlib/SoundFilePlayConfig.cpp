@@ -121,8 +121,8 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 
 
 //getters and setters.
-bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster()
-//---------------------------------------------------------
+bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster() const
+//---------------------------------------------------------------
 {
 	return m_globalVolumeAppliesToMaster;
 }
@@ -134,14 +134,14 @@ void CSoundFilePlayConfig::setGlobalVolumeAppliesToMaster(bool inGlobalVolumeApp
 	m_globalVolumeAppliesToMaster=inGlobalVolumeAppliesToMaster;
 }
 
-float CSoundFilePlayConfig::getVSTiGainFactor()
-//---------------------------------------------
+float CSoundFilePlayConfig::getVSTiGainFactor() const
+//---------------------------------------------------
 {
 	return m_VSTiVolume;
 }
 
-float CSoundFilePlayConfig::getVSTiVolume()
-//-----------------------------------------
+float CSoundFilePlayConfig::getVSTiVolume() const
+//-----------------------------------------------
 {
 	return m_VSTiVolume;
 }
@@ -152,8 +152,8 @@ void  CSoundFilePlayConfig::setVSTiVolume(float inVSTiVolume)
 	m_VSTiVolume = inVSTiVolume;
 }
 
-float CSoundFilePlayConfig::getVSTiAttenuation()
-//----------------------------------------------
+float CSoundFilePlayConfig::getVSTiAttenuation() const
+//----------------------------------------------------
 {
 	return m_VSTiAttenuation;
 }
@@ -164,8 +164,8 @@ void  CSoundFilePlayConfig::setVSTiAttenuation(float inVSTiAttenuation)
 	m_VSTiAttenuation = inVSTiAttenuation;
 }
 
-float CSoundFilePlayConfig::getIntToFloat()
-//-----------------------------------------
+float CSoundFilePlayConfig::getIntToFloat() const
+//-----------------------------------------------
 {
 	return m_IntToFloat;
 }
@@ -177,8 +177,8 @@ void  CSoundFilePlayConfig::setIntToFloat(float inIntToFloat)
 }
 
 
-float CSoundFilePlayConfig::getFloatToInt()
-//-----------------------------------------
+float CSoundFilePlayConfig::getFloatToInt() const
+//-----------------------------------------------
 {
 	return m_FloatToInt;
 }
@@ -190,8 +190,8 @@ void  CSoundFilePlayConfig::setFloatToInt(float inFloatToInt)
 	m_FloatToInt = inFloatToInt;
 }
 
-bool CSoundFilePlayConfig::getUseGlobalPreAmp()
-//---------------------------------------------
+bool CSoundFilePlayConfig::getUseGlobalPreAmp() const
+//---------------------------------------------------
 {
 	return m_ignorePreAmp;
 }
@@ -203,8 +203,8 @@ void CSoundFilePlayConfig::setUseGlobalPreAmp(bool inUseGlobalPreAmp)
 }
 
 
-forcePanningMode CSoundFilePlayConfig::getForcePanningMode()
-//----------------------------------------------------------
+forcePanningMode CSoundFilePlayConfig::getForcePanningMode() const
+//----------------------------------------------------------------
 {
 	return m_forceSoftPanning;
 }
@@ -239,26 +239,26 @@ void CSoundFilePlayConfig::setNormalGlobalVol(double in)
 	m_normalGlobalVol = in;
 }
 
-bool CSoundFilePlayConfig::getDisplayDBValues()
-//---------------------------------------------
+bool CSoundFilePlayConfig::getDisplayDBValues() const
+//---------------------------------------------------
 {
 	return m_displayDBValues;
 }
 
-double CSoundFilePlayConfig::getNormalSamplePreAmp()
-//--------------------------------------------------
+double CSoundFilePlayConfig::getNormalSamplePreAmp() const
+//--------------------------------------------------------
 {
 	return m_normalSamplePreAmp;
 }
 
-double CSoundFilePlayConfig::getNormalVSTiVol()
-//---------------------------------------------
+double CSoundFilePlayConfig::getNormalVSTiVol() const
+//---------------------------------------------------
 {
 	return m_normalVSTiVol;
 }
 
-double CSoundFilePlayConfig::getNormalGlobalVol()
-//-----------------------------------------------
+double CSoundFilePlayConfig::getNormalGlobalVol() const
+//-----------------------------------------------------
 {
 	return m_normalGlobalVol;
 }
@@ -269,8 +269,8 @@ void CSoundFilePlayConfig::setExtraSampleAttenuation(int attn)
 	m_extraAttenuation = attn;
 }
 
-int CSoundFilePlayConfig::getExtraSampleAttenuation()
-//---------------------------------------------------
+int CSoundFilePlayConfig::getExtraSampleAttenuation() const
+//---------------------------------------------------------
 {
 	return m_extraAttenuation;
 }

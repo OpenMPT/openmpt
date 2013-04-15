@@ -690,8 +690,7 @@ BOOL CModDoc::InitializeMod()
 		}
 
 		// Refresh mix levels now that the correct mod type has been set
-		m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
-		m_SndFile.m_PlayConfig.SetMixLevels(m_SndFile.m_nMixLevels);
+		m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
 		// ...and the order length
 		m_SndFile.Order.resize(MIN(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 
@@ -1714,7 +1713,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		thisName += fileExt;
 
 		// Render song (or current channel, or current sample/instrument)
-		m_SndFile.visitedSongRows.Initialize(true);
+		m_SndFile.InitializeVisitedRows();
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
 		if(wsdlg.m_bSelectPlay)

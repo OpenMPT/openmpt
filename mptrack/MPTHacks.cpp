@@ -523,12 +523,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if(m_SndFile.m_nMixLevels != mixLevels_compatible)
+	if(m_SndFile.GetMixLevels() != mixLevels_compatible)
 	{
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nMixLevels = mixLevels_compatible;
+			m_SndFile.SetMixLevels(mixLevels_compatible);
 	}
 
 	if(autofix && foundHacks)

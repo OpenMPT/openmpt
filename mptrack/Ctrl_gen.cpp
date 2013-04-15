@@ -301,7 +301,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			}
 		}
 
-		else if (pSlider==&m_SliderVSTiVol) {
+		else if (pSlider==&m_SliderVSTiVol)
+		{
 			const UINT vv = MAX_SLIDER_VSTI_VOL - m_SliderVSTiVol.GetPos();
 			if ((vv >= 0) && (vv <= MAX_SLIDER_VSTI_VOL) && (vv != m_sndFile.m_nVSTiVolume))
 			{
@@ -528,20 +529,20 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 	const char moreRecentMixModeNote[] = "Use a more recent mixmode to see dB offsets.";
 	if ((pszText) && (uId))
 	{
-		const bool displayDBValues = m_sndFile.m_PlayConfig.getDisplayDBValues();
+		const bool displayDBValues = m_sndFile.GetPlayConfig().getDisplayDBValues();
 
 		switch(uId)
 		{
 			case IDC_SLIDER_SAMPLEPREAMP:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nSamplePreAmp, m_sndFile.m_PlayConfig.getNormalSamplePreAmp()) : wsprintf(pszText, moreRecentMixModeNote);
+				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 			case IDC_SLIDER_VSTIVOL:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nVSTiVolume, m_sndFile.m_PlayConfig.getNormalVSTiVol()) : wsprintf(pszText, moreRecentMixModeNote);
+				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 			case IDC_SLIDER_GLOBALVOL:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nGlobalVolume, m_sndFile.m_PlayConfig.getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
+				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 		}

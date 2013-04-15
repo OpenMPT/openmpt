@@ -805,8 +805,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #endif // NO_VST
 
 	// Set up mix levels
-	m_PlayConfig.SetMixLevels(m_nMixLevels);
-	RecalculateGainForAllPlugs();
+	SetMixLevels(m_nMixLevels);
 
 	if(GetType() != MOD_TYPE_NONE)
 	{
@@ -1126,6 +1125,15 @@ void CSoundFile::StopAllVsti()
 			pPlugin->HardAllNotesOff();
 		}
 	}
+}
+
+
+void CSoundFile::SetMixLevels(mixLevels levels)
+//---------------------------------------------
+{
+	m_nMixLevels = levels;
+	m_PlayConfig.SetMixLevels(m_nMixLevels);
+	RecalculateGainForAllPlugs();
 }
 
 

@@ -114,9 +114,9 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Mix levels
 
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
-	if(sndFile.m_nMixLevels == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
+	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
-	if(sndFile.m_nMixLevels == mixLevels_117RC1)	// Dito
+	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Dito
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
@@ -124,7 +124,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_PlugMixBox.SetCurSel(0);
 	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
 	{
-		if(m_PlugMixBox.GetItemData(i) == sndFile.m_nMixLevels)
+		if(m_PlugMixBox.GetItemData(i) == sndFile.GetMixLevels())
 		{
 			m_PlugMixBox.SetCurSel(i);
 			break;
@@ -359,11 +359,9 @@ void CModTypeDlg::OnOK()
 	}
 
 	sel = m_PlugMixBox.GetCurSel();
-	if (sel >= 0)
+	if(sel >= 0)
 	{
-		sndFile.m_nMixLevels = m_PlugMixBox.GetItemData(sel);
-		sndFile.m_PlayConfig.SetMixLevels(sndFile.m_nMixLevels);
-		sndFile.RecalculateGainForAllPlugs();
+		sndFile.SetMixLevels(static_cast<mixLevels>(m_PlugMixBox.GetItemData(sel)));
 	}
 
 	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
