@@ -33,7 +33,7 @@
 #endif
 
 #if defined(_MSC_VER)
-//#define USE_PRAGMA_PACK
+#define USE_PRAGMA_PACK
 #define PACKED __declspec(align(1))
 #elif defined(__GNUC__)
 #define PACKED __attribute__((packed))) __attribute__((aligned(1))))
@@ -54,14 +54,10 @@
 #endif
 
 // Compile time assert.
-#ifndef C_ASSERT
-#define C_ASSERT(expr)				typedef char __C_ASSERT__[(expr)?1:-1]
-#endif
-#define STATIC_ASSERT(expr)			C_ASSERT(expr)
-
 #if (_MSC_VER < MSVC_VER_2010)
-	#define static_assert(expr, msg)	C_ASSERT(expr)
+	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
 #endif
+#define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
 
 void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
 #ifdef NDEBUG
