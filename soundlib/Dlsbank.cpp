@@ -652,7 +652,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pvchunk
 				}
 				if (p->cbSize+p->cConnectionBlocks*sizeof(CONNECTIONBLOCK) > p->len) break;
 				DLSENVELOPE *pDlsEnv = &m_Envelopes[m_nEnvelopes];
-				memset(pDlsEnv, 0, sizeof(DLSENVELOPE));
+				MemsetZero(*pDlsEnv);
 				pDlsEnv->nDefPan = 128;
 				pDlsEnv->nVolSustainLevel = 128;
 				//Log("  art1 (%3d bytes): cbSize=%d cConnectionBlocks=%d\n", p->len, p->cbSize, p->cConnectionBlocks);
@@ -1505,7 +1505,6 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 			sample.nC5Speed = p->dwSampleRate;
 			sample.RelativeTone = p->byOriginalPitch;
 			sample.nFineTune = p->chPitchCorrection;
-			sample.Convert(MOD_TYPE_IT, sndFile.GetType());
 
 			FileReader chunk(pWaveForm, dwLen);
 			SampleIO(
@@ -1525,15 +1524,15 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 	{
 		ModSample &sample = sndFile.GetSample(nSample);
 		DLSREGION *pRgn = &pDlsIns->Regions[nRgn];
-		sample.uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) sample.uFlags |= CHN_LOOP;
-		if (pRgn->fuOptions & DLSREGION_SUSTAINLOOP) sample.uFlags |= CHN_SUSTAINLOOP;
-		if (pRgn->fuOptions & DLSREGION_PINGPONGLOOP) sample.uFlags |= CHN_PINGPONGLOOP;
-		if (sample.uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
+		sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) sample.uFlags.set(CHN_LOOP);
+		if (pRgn->fuOptions & DLSREGION_SUSTAINLOOP) sample.uFlags.set(CHN_SUSTAINLOOP);
+		if (pRgn->fuOptions & DLSREGION_PINGPONGLOOP) sample.uFlags.set(CHN_PINGPONGLOOP);
+		if (sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP])
 		{
 			if (pRgn->ulLoopEnd > pRgn->ulLoopStart)
 			{
-				if (sample.uFlags & CHN_SUSTAINLOOP)
+				if (sample.uFlags[CHN_SUSTAINLOOP])
 				{
 					sample.nSustainStart = pRgn->ulLoopStart;
 					sample.nSustainEnd = pRgn->ulLoopEnd;
@@ -1544,7 +1543,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 				}
 			} else
 			{
-				sample.uFlags &= ~(CHN_LOOP|CHN_SUSTAINLOOP);
+				sample.uFlags.reset(CHN_LOOP|CHN_SUSTAINLOOP);
 			}
 		}
 		// WSMP chunk
@@ -1566,7 +1565,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 					wsmpChunk.Read(loop);
 					if(loop.ulLoopLength > 3)
 					{
-						sample.uFlags |= CHN_LOOP;
+						sample.uFlags.set(CHN_LOOP);
 						//if (loop.ulLoopType) sample.uFlags |= CHN_PINGPONGLOOP;
 						sample.nLoopStart = loop.ulLoopStart;
 						sample.nLoopEnd = loop.ulLoopStart + loop.ulLoopLength;
@@ -1597,14 +1596,12 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 			if ((pRgn->uPercEnv) && (pRgn->uPercEnv <= m_nEnvelopes))
 			{
 				sample.nPan = m_Envelopes[pRgn->uPercEnv-1].nDefPan;
-				if (sndFile.m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
 			}
 		} else
 		{
 			if ((pDlsIns->nMelodicEnv) && (pDlsIns->nMelodicEnv <= m_nEnvelopes))
 			{
 				sample.nPan = m_Envelopes[pDlsIns->nMelodicEnv-1].nDefPan;
-				if (sndFile.m_nType & MOD_TYPE_XM) sample.uFlags |= CHN_PANNING;
 			}
 		}
 		if (pDlsIns->szName[0]) memcpy(sndFile.m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
@@ -1694,15 +1691,16 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 	{
 		for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
 		{
-			if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
+			if(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
 			{
+				// Formate has instrument note mapping
 				if (iNoteMap < pDlsIns->Regions[nDrumRgn].uKeyMin) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMin + 1);
 				if (iNoteMap > pDlsIns->Regions[nDrumRgn].uKeyMax) pIns->NoteMap[iNoteMap] = (BYTE)(pDlsIns->Regions[nDrumRgn].uKeyMax + 1);
 			} else
 			{
 				if (iNoteMap == pDlsIns->Regions[nDrumRgn].uKeyMin)
 				{
-					nTranspose = pDlsIns->Regions[nDrumRgn].uKeyMin - 60;
+					nTranspose = (pDlsIns->Regions[nDrumRgn].uKeyMin + (pDlsIns->Regions[nDrumRgn].uKeyMax - pDlsIns->Regions[nDrumRgn].uKeyMin) / 2) - 60;
 				}
 			}
 		}
