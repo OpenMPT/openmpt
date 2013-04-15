@@ -13,7 +13,6 @@
 #include "patternContainer.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
-#include "../common/AudioCriticalSection.h"
 #include "ITTools.h"
 #include "Sndfile.h"
 
@@ -86,7 +85,6 @@ bool CPattern::Resize(const ROWINDEX newRowCount)
 	// Copy over pattern data
 	memcpy(newPattern, m_ModCommands, GetNumChannels() * std::min(m_Rows, newRowCount) * sizeof(ModCommand));
 
-	CriticalSection cs;
 	FreePattern(m_ModCommands);
 	m_ModCommands = newPattern;
 	m_Rows = newRowCount;
@@ -156,7 +154,6 @@ bool CPattern::Expand()
 		memcpy(newPattern + y * 2 * nChns, m_ModCommands + y * nChns, nChns * sizeof(ModCommand));
 	}
 
-	CriticalSection cs;
 	FreePattern(m_ModCommands);
 	m_ModCommands = newPattern;
 	m_Rows = newRows;

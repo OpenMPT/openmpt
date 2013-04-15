@@ -889,8 +889,10 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 	}
 
 	BeginWaitCursor();
+	CriticalSection cs;
 	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows);
 	bool success = m_SndFile.Patterns[nPattern].Expand();
+	cs.Leave();
 	EndWaitCursor();
 
 	if(success)
@@ -917,8 +919,10 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 	}
 
 	BeginWaitCursor();
+	CriticalSection cs;
 	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows);
 	bool success = m_SndFile.Patterns[nPattern].Shrink();
+	cs.Leave();
 	EndWaitCursor();
 
 	if(success)
