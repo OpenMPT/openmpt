@@ -67,6 +67,7 @@
     <ClCompile Include="unlha\SLIDE.CPP">
       <Filter>unlha</Filter>
     </ClCompile>
+    <ClCompile Include="unarchiver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ungzip.h" />
@@ -82,5 +83,6 @@
     <ClInclude Include="unlha\SLIDEHUF.H">
       <Filter>unlha</Filter>
     </ClInclude>
+    <ClInclude Include="unarchiver.h" />
   </ItemGroup>
 </Project>

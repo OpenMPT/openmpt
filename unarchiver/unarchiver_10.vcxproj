@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="unarchiver.cpp" />
     <ClCompile Include="ungzip.cpp" />
     <ClCompile Include="unlha.cpp" />
     <ClCompile Include="unlha\DHUF.CPP">
@@ -89,6 +90,7 @@
     <ClCompile Include="unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="unarchiver.h" />
     <ClInclude Include="ungzip.h" />
     <ClInclude Include="unlha.h" />
     <ClInclude Include="unlha\LHARC.H">
