@@ -82,7 +82,7 @@ struct PACKED _669Sample
 
 STATIC_ASSERT(sizeof(_669Sample) == 25);
 
-#ifdef USER_PRAGMA_PACK
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
 
