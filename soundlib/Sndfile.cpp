@@ -21,7 +21,6 @@
 #include "../common/StringFixer.h"
 #include "FileReader.h"
 
-#ifndef NO_COPYRIGHT
 #ifndef NO_MMCMP_SUPPORT
 #define MMCMP_SUPPORT
 #endif // NO_MMCMP_SUPPORT
@@ -31,9 +30,6 @@
 #define UNGZIP_SUPPORT
 #define ZIPPED_MOD_SUPPORT
 #endif // NO_ARCHIVE_SUPPORT
-#else // NO_COPYRIGHT: EarSaver only loads mod/s3m/xm/it/wav
-#define MODPLUG_BASIC_SUPPORT
-#endif
 
 #ifdef ZIPPED_MOD_SUPPORT
 #include "../unzip/unzip.h"
@@ -609,7 +605,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		 /*&& !ReadMPT(lpStream, dwMemLength)*/
 		 && !ReadS3M(file)
 		 && !ReadWav(file)
-#ifndef MODPLUG_BASIC_SUPPORT
 		 && !ReadSTM(file)
 		 && !ReadMed(lpStream, dwMemLength)
 		 && !ReadMTM(file)
@@ -633,7 +628,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 		 && !ReadMID(lpStream, dwMemLength)
 #endif // MODPLUG_TRACKER
-#endif // MODPLUG_BASIC_SUPPORT
 		 && !ReadGDM(file)
 		 && !ReadIMF(file)
 		 && !ReadAM(file)

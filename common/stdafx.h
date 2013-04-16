@@ -73,6 +73,9 @@
 
 #endif // ENABLE_ASM
 
+// Disable unarchiving support
+//#define NO_ARCHIVE_SUPPORT
+
 // Disable the built-in reverb effect
 //#define NO_REVERB
 
