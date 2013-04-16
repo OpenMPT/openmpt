@@ -24,28 +24,10 @@
 #ifndef NO_MMCMP_SUPPORT
 #define MMCMP_SUPPORT
 #endif // NO_MMCMP_SUPPORT
+
 #ifndef NO_ARCHIVE_SUPPORT
-#define UNRAR_SUPPORT
-#define UNLHA_SUPPORT
-#define UNGZIP_SUPPORT
-#define ZIPPED_MOD_SUPPORT
+#include "../unarchiver/unarchiver.h"
 #endif // NO_ARCHIVE_SUPPORT
-
-#ifdef ZIPPED_MOD_SUPPORT
-#include "../unarchiver/unzip.h"
-#endif
-
-#ifdef UNRAR_SUPPORT
-#include "../unarchiver/unrar.h"
-#endif
-
-#ifdef UNLHA_SUPPORT
-#include "../unarchiver/unlha.h"
-#endif
-
-#ifdef UNGZIP_SUPPORT
-#include "../unarchiver/ungzip.h"
-#endif
 
 #ifdef MMCMP_SUPPORT
 extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
@@ -543,46 +525,11 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	{
 		FileReader file(lpStream, dwMemLength);
 
-		const std::vector<const char *> modExtensions = GetSupportedExtensions(true);
-
-#ifdef ZIPPED_MOD_SUPPORT
-		CZipArchive unzip(file, modExtensions);
-		if(unzip.IsArchive() && unzip.ExtractFile())
+#ifndef NO_ARCHIVE_SUPPORT
+		CUnarchiver unarchiver(file, GetSupportedExtensions(true));
+		if(unarchiver.IsArchive() && unarchiver.ExtractFile())
 		{
-			file = unzip.GetOutputFile();
-			lpStream = (LPCBYTE)file.GetRawData();
-			dwMemLength = file.GetLength();
-		}
-#endif
-#ifdef UNRAR_SUPPORT
-		CRarArchive unrar((LPBYTE)lpStream, dwMemLength);
-		if(unrar.IsArchive())
-		{
-			if(unrar.ExtrFile() && unrar.GetOutputFile())
-			{
-				lpStream = unrar.GetOutputFile();
-				dwMemLength = unrar.GetOutputFileLength();
-				file = FileReader(lpStream, dwMemLength);
-			}
-		}
-#endif
-#ifdef UNLHA_SUPPORT
-		CLhaArchive unlha((LPBYTE)lpStream, dwMemLength);
-		if(unlha.IsArchive())
-		{
-			if(unlha.ExtractFile() && unlha.GetOutputFile())
-			{
-				lpStream = unlha.GetOutputFile();
-				dwMemLength = unlha.GetOutputFileLength();
-				file = FileReader(lpStream, dwMemLength);
-			}
-		}
-#endif
-#ifdef UNGZIP_SUPPORT
-		CGzipArchive ungzip(file);
-		if(ungzip.IsArchive() && ungzip.ExtractFile())
-		{
-			file = ungzip.GetOutputFile();
+			file = unarchiver.GetOutputFile();
 			lpStream = (LPCBYTE)file.GetRawData();
 			dwMemLength = file.GetLength();
 		}
@@ -639,11 +586,11 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 			m_nType = MOD_TYPE_NONE;
 		}
 
-#ifdef ZIPPED_MOD_SUPPORT
+#ifndef NO_ARCHIVE_SUPPORT
 		// Read archive comment if there is no song comment
-		if(!songMessage.empty() && unzip.GetComments(false))
+		if(!songMessage.empty() && unarchiver.GetComments(false))
 		{
-			songMessage.assign(unzip.GetComments(true));
+			songMessage.assign(unarchiver.GetComments(true));
 		}
 #endif
 #ifdef MMCMP_SUPPORT
