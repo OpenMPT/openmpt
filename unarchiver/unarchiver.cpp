@@ -7,10 +7,9 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "../common/stdafx.h"
+#include <Windows.h>
 
 #include "unarchiver.h"
-
 #include "../soundlib/FileReader.h"
 
 CUnarchiver::CUnarchiver(FileReader &file, const std::vector<const char *> &extensions) :
