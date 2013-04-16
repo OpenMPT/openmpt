@@ -10,10 +10,13 @@
 
 #pragma once
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // XM File Header
-struct XMFileHeader
+struct PACKED XMFileHeader
 {
 	enum XMHeaderFlags
 	{
@@ -44,7 +47,7 @@ STATIC_ASSERT(sizeof(XMFileHeader) == 80);
 
 
 // XM Instrument Data
-struct XMInstrument
+struct PACKED XMInstrument
 {
 	// Envelope Flags
 	enum XMEnvelopeFlags
@@ -104,7 +107,7 @@ STATIC_ASSERT(sizeof(XMInstrument) == 230);
 
 
 // XM Instrument Header
-struct XMInstrumentHeader
+struct PACKED XMInstrumentHeader
 {
 	uint32 size;				// Size of XMInstrumentHeader + XMInstrument
 	char   name[22];			// Instrument Name, not null-terminated (any nulls are treated as spaces)
@@ -129,7 +132,7 @@ STATIC_ASSERT(sizeof(XMInstrumentHeader) == 263);
 
 
 // XI Instrument Header
-struct XIInstrumentHeader
+struct PACKED XIInstrumentHeader
 {
 	enum
 	{
@@ -157,7 +160,7 @@ STATIC_ASSERT(sizeof(XIInstrumentHeader) == 298);
 
 
 // XM Sample Header
-struct XMSample
+struct PACKED XMSample
 {
 	enum XMSampleFlags
 	{
@@ -193,4 +196,7 @@ struct XMSample
 
 STATIC_ASSERT(sizeof(XMSample) == 40);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif

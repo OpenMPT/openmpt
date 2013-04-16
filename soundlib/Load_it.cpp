@@ -1135,7 +1135,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	{
 		itHeader.flags |= ITFileHeader::reqEmbeddedMIDIConfig;
 		itHeader.special |= ITFileHeader::embedMIDIConfiguration;
-		dwExtra += sizeof(MIDIMacroConfig);
+		dwExtra += sizeof(MIDIMacroConfigData);
 	}
 
 	// Pattern Names
@@ -1180,7 +1180,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	// Writing midi cfg
 	if(itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig)
 	{
-		fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
+		fwrite(static_cast<MIDIMacroConfigData*>(&m_MidiCfg), 1, sizeof(MIDIMacroConfigData), f);
 	}
 
 	// Writing pattern names

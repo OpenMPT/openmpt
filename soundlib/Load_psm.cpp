@@ -27,7 +27,9 @@
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 ////////////////////////////////////////////////////////////
 //
@@ -35,7 +37,7 @@
 //
 
 // PSM File Header
-struct PSMFileHeader
+struct PACKED PSMFileHeader
 {
 	// Magic Bytes
 	enum PSMMagic
@@ -57,8 +59,10 @@ struct PSMFileHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(PSMFileHeader) == 12);
+
 // RIFF-style Chunk
-struct PSMChunk
+struct PACKED PSMChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -93,8 +97,10 @@ struct PSMChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(PSMChunk) == 8);
+
 // Song Information
-struct PSMSongHeader
+struct PACKED PSMSongHeader
 {
 	char  songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
 	uint8 compression;		// 1 - uncompressed
@@ -102,8 +108,10 @@ struct PSMSongHeader
 
 };
 
+STATIC_ASSERT(sizeof(PSMSongHeader) == 11);
+
 // Regular sample header
-struct PSMOldSampleHeader
+struct PACKED PSMOldSampleHeader
 {
 	uint8  flags;
 	char   fileName[8];		// Filename of the original module (without extension)
@@ -159,9 +167,10 @@ struct PSMOldSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(PSMOldSampleHeader) == 96);
 
 // Sinaria sample header (and possibly other games)
-struct PSMNewSampleHeader
+struct PACKED PSMNewSampleHeader
 {
 	uint8  flags;
 	char   fileName[8];		// Filename of the original module (without extension)
@@ -216,7 +225,12 @@ struct PSMNewSampleHeader
 			SampleIO::deltaPCM);
 	}
 };
+
+STATIC_ASSERT(sizeof(PSMNewSampleHeader) == 96);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 struct PSMSubSong // For internal use (pattern conversion)
@@ -937,9 +951,11 @@ bool CSoundFile::ReadPSM(FileReader &file)
 //  PSM16 support starts here.
 //
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct PSM16FileHeader
+struct PACKED PSM16FileHeader
 {
 	// 32-Bit chunk identifiers
 	enum PSM16Magic
@@ -994,7 +1010,9 @@ struct PSM16FileHeader
 	}
 };
 
-struct PSM16SampleHeader
+STATIC_ASSERT(sizeof(PSM16FileHeader) == 146);
+
+struct PACKED PSM16SampleHeader
 {
 	enum SampleFlags
 	{
@@ -1086,7 +1104,9 @@ struct PSM16SampleHeader
 	}
 };
 
-struct PSM16PatternHeader
+STATIC_ASSERT(sizeof(PSM16SampleHeader) == 64);
+
+struct PACKED PSM16PatternHeader
 {
 	uint16 size;		// includes header bytes
 	uint8  numRows;		// 1 ... 64
@@ -1098,7 +1118,11 @@ struct PSM16PatternHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(PSM16PatternHeader) == 4);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadPSM16(FileReader &file)

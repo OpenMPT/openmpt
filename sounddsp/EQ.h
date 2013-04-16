@@ -15,19 +15,23 @@
 #include "../soundlib/SoundFilePlayConfig.h"
 
 
-#define REAL			float
 #define MAX_EQ_BANDS	6
 
-#pragma pack(push, 4)
-typedef struct _EQBANDSTRUCT
+typedef struct ALIGN(4) _EQBANDSTRUCT
 {
-	REAL a0, a1, a2, b1, b2;
-	REAL x1, x2, y1, y2;
-	REAL Gain, CenterFrequency;
-	BOOL bEnable;
-} EQBANDSTRUCT, *PEQBANDSTRUCT;
-#pragma pack(pop)
-
+	float32 a0;
+	float32 a1;
+	float32 a2;
+	float32 b1;
+	float32 b2;
+	float32 x1;
+	float32 x2;
+	float32 y1;
+	float32 y2;
+	float32 Gain;
+	float32 CenterFrequency;
+	bool bEnable;
+} EQBANDSTRUCT;
 
 //=======
 class CEQ

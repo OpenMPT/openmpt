@@ -12,10 +12,12 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // UMX File Header
-struct UMXFileHeader
+struct PACKED UMXFileHeader
 {
 	// Magic Bytes
 	enum UMXMagic
@@ -49,7 +51,11 @@ struct UMXFileHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(UMXFileHeader) == 36);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 // Read compressed unreal integers - similar to MIDI integers, but signed values are possible.

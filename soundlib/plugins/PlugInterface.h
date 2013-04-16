@@ -96,7 +96,11 @@ struct SNDMIXPLUGINSTATE
 };
 
 
-struct SNDMIXPLUGININFO
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
+
+struct PACKED SNDMIXPLUGININFO
 {
 	// dwInputRouting flags
 	enum RoutingFlags
@@ -135,7 +139,12 @@ struct SNDMIXPLUGININFO
 
 };
 
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
+
 STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to files, so the size must be correct!
+
 
 struct SNDMIXPLUGIN
 {

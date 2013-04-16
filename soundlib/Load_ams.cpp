@@ -283,10 +283,12 @@ void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk
 /////////////////////////////////////////////////////////////////////
 // AMS (Extreme's Tracker) 1.x loader
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // AMS File Header
-struct AMSFileHeader
+struct PACKED AMSFileHeader
 {
 	uint8  versionLow;
 	uint8  versionHigh;
@@ -306,9 +308,11 @@ struct AMSFileHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AMSFileHeader) == 11);
+
 
 // AMS Sample Header
-struct AMSSampleHeader
+struct PACKED AMSSampleHeader
 {
 	enum SampleFlags
 	{
@@ -365,8 +369,12 @@ struct AMSSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AMSSampleHeader) == 17);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadAMS(FileReader &file)
@@ -490,10 +498,13 @@ bool CSoundFile::ReadAMS(FileReader &file)
 /////////////////////////////////////////////////////////////////////
 // AMS (Velvet Studio) 2.1 / 2.2 loader
 
-#pragma pack(1)
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
 
 // AMS2 File Header
-struct AMS2FileHeader
+struct PACKED AMS2FileHeader
 {
 	enum FileFlags
 	{
@@ -515,9 +526,11 @@ struct AMS2FileHeader
 	};
 };
 
+STATIC_ASSERT(sizeof(AMS2FileHeader) == 7);
+
 
 // AMS2 Instument Envelope 
-struct AMS2Envelope
+struct PACKED AMS2Envelope
 {
 	uint8 speed;		// Envelope speed
 	uint8 sustainPoint;	// Envelope sustain point
@@ -557,9 +570,11 @@ struct AMS2Envelope
 	}
 };
 
+STATIC_ASSERT(sizeof(AMS2Envelope) == 5);
+
 
 // AMS2 Instrument Data
-struct AMS2Instrument
+struct PACKED AMS2Instrument
 {
 	enum EnvelopeFlags
 	{
@@ -607,9 +622,11 @@ struct AMS2Instrument
 
 };
 
+STATIC_ASSERT(sizeof(AMS2Instrument) == 5);
+
 
 // AMS2 Sample Header
-struct AMS2SampleHeader
+struct PACKED AMS2SampleHeader
 {
 	enum SampleFlags
 	{
@@ -679,9 +696,11 @@ struct AMS2SampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AMS2SampleHeader) == 20);
+
 
 // AMS2 Song Description Header
-struct AMS2Description
+struct PACKED AMS2Description
 {
 	uint32 packedLen;		// Including header
 	uint32 unpackedLen;
@@ -697,8 +716,12 @@ struct AMS2Description
 	}
 };
 
+STATIC_ASSERT(sizeof(AMS2Description) == 11);
 
-#pragma pack()
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadAMS2(FileReader &file)

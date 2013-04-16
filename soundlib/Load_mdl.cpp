@@ -16,16 +16,20 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct MDLFileHeader
+struct PACKED MDLFileHeader
 {
 	DWORD id;	// "DMDL" = 0x4C444D44
 	BYTE version;
 };
 
+STATIC_ASSERT(sizeof(MDLFileHeader) == 5);
 
-struct MDLInfoBlock
+
+struct PACKED MDLInfoBlock
 {
 	char   songname[32];
 	char   composer[20];
@@ -38,8 +42,10 @@ struct MDLInfoBlock
 	uint8  seq[256];
 };
 
+STATIC_ASSERT(sizeof(MDLInfoBlock) == 347);
 
-struct MDLPatternHeader
+
+struct PACKED MDLPatternHeader
 {
 	uint8  channels;
 	uint8  lastrow;	// nrows = lastrow+1
@@ -47,16 +53,20 @@ struct MDLPatternHeader
 	uint16 data[1];
 };
 
+STATIC_ASSERT(sizeof(MDLPatternHeader) == 20);
 
-struct MDLSampleHeaderCommon
+
+struct PACKED MDLSampleHeaderCommon
 {
 	uint8 sampleIndex;
 	char  name[32];
 	char  filename[8];
 };
 
+STATIC_ASSERT(sizeof(MDLSampleHeaderCommon) == 41);
 
-struct MDLSampleHeader
+
+struct PACKED MDLSampleHeader
 {
 	MDLSampleHeaderCommon info;
 	uint32 c4Speed;
@@ -70,7 +80,7 @@ struct MDLSampleHeader
 STATIC_ASSERT(sizeof(MDLSampleHeader) == 59);
 
 
-struct MDLSampleHeaderv0
+struct PACKED MDLSampleHeaderv0
 {
 	MDLSampleHeaderCommon info;
 	uint16 c4Speed;
@@ -84,7 +94,9 @@ struct MDLSampleHeaderv0
 STATIC_ASSERT(sizeof(MDLSampleHeaderv0) == 57);
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)

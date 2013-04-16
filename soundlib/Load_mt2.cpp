@@ -14,9 +14,11 @@
 
 //#define MT2DEBUG
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct _MT2FILEHEADER
+typedef struct PACKED _MT2FILEHEADER
 {
 	DWORD dwMT20;	// 0x3032544D "MT20"
 	DWORD dwSpecial;
@@ -36,13 +38,17 @@ typedef struct _MT2FILEHEADER
 	BYTE Orders[256];
 } MT2FILEHEADER;
 
-typedef struct _MT2PATTERN
+STATIC_ASSERT(sizeof(MT2FILEHEADER) == 382);
+
+typedef struct PACKED _MT2PATTERN
 {
 	WORD wLines;
 	DWORD wDataLen;
 } MT2PATTERN;
 
-typedef struct _MT2COMMAND
+STATIC_ASSERT(sizeof(MT2PATTERN) == 6);
+
+typedef struct PACKED _MT2COMMAND
 {
 	BYTE note;	// 0=nothing, 97=note off
 	BYTE instr;
@@ -53,21 +59,27 @@ typedef struct _MT2COMMAND
 	BYTE fxparam2;
 } MT2COMMAND;
 
-typedef struct _MT2DRUMSDATA
+STATIC_ASSERT(sizeof(MT2COMMAND) == 7);
+
+typedef struct PACKED _MT2DRUMSDATA
 {
 	WORD wDrumPatterns;
 	WORD wDrumSamples[8];
 	BYTE DrumPatternOrder[256];
 } MT2DRUMSDATA;
 
-typedef struct _MT2AUTOMATION
+STATIC_ASSERT(sizeof(MT2DRUMSDATA) == 274);
+
+typedef struct PACKED _MT2AUTOMATION
 {
 	DWORD dwFlags;
 	DWORD dwEffectId;
 	DWORD nEnvPoints;
 } MT2AUTOMATION;
 
-typedef struct _MT2INSTRUMENT
+STATIC_ASSERT(sizeof(MT2AUTOMATION) == 12);
+
+typedef struct PACKED _MT2INSTRUMENT
 {
 	CHAR szName[32];
 	DWORD dwDataLen;
@@ -84,7 +96,9 @@ typedef struct _MT2INSTRUMENT
 	WORD wEnvFlags2;
 } MT2INSTRUMENT;
 
-typedef struct _MT2ENVELOPE
+STATIC_ASSERT(sizeof(MT2INSTRUMENT) == 148);
+
+typedef struct PACKED _MT2ENVELOPE
 {
 	BYTE nFlags;
 	BYTE nPoints;
@@ -95,7 +109,9 @@ typedef struct _MT2ENVELOPE
 	BYTE EnvData[64];
 } MT2ENVELOPE;
 
-typedef struct _MT2SYNTH
+STATIC_ASSERT(sizeof(MT2ENVELOPE) == 72);
+
+typedef struct PACKED _MT2SYNTH
 {
 	BYTE nSynthId;
 	BYTE nFxId;
@@ -106,7 +122,9 @@ typedef struct _MT2SYNTH
 	BYTE bReserved[25];
 } MT2SYNTH;
 
-typedef struct _MT2SAMPLE
+STATIC_ASSERT(sizeof(MT2SYNTH) == 32);
+
+typedef struct PACKED _MT2SAMPLE
 {
 	CHAR szName[32];
 	DWORD dwDataLen;
@@ -124,7 +142,9 @@ typedef struct _MT2SAMPLE
 	WORD wSamplesPerBeat;
 } MT2SAMPLE;
 
-typedef struct _MT2GROUP
+STATIC_ASSERT(sizeof(MT2SAMPLE) == 62);
+
+typedef struct PACKED _MT2GROUP
 {
 	BYTE nSmpNo;
 	BYTE nVolume;	// 0-128
@@ -132,7 +152,11 @@ typedef struct _MT2GROUP
 	BYTE Reserved[5];
 } MT2GROUP;
 
+STATIC_ASSERT(sizeof(MT2GROUP) == 8);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)

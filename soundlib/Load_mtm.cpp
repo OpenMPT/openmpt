@@ -12,10 +12,12 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // File Header
-struct MTMFileHeader
+struct PACKED MTMFileHeader
 {
 	char   id[3];			// MTM file marker
 	uint8  version;			// Tracker version
@@ -42,7 +44,7 @@ STATIC_ASSERT(sizeof(MTMFileHeader) == 66);
 
 
 // Sample Header
-struct MTMSampleHeader
+struct PACKED MTMSampleHeader
 {
 	char   samplename[22];
 	uint32 length;
@@ -89,7 +91,10 @@ struct MTMSampleHeader
 
 STATIC_ASSERT(sizeof(MTMSampleHeader) == 37);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadMTM(FileReader &file)

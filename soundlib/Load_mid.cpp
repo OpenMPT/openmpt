@@ -31,9 +31,11 @@ extern void Log(LPCSTR, ...);
 //UINT gnMidiImportSpeed = 3;
 //UINT gnMidiPatternLen = 128;
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct MIDIFILEHEADER
+typedef struct PACKED MIDIFILEHEADER
 {
 	DWORD id;		// "MThd" = 0x6468544D
 	DWORD len;		// 6
@@ -42,12 +44,19 @@ typedef struct MIDIFILEHEADER
 	WORD wDivision;	// F0
 } MIDIFILEHEADER;
 
+STATIC_ASSERT(sizeof(MIDIFILEHEADER) == 14);
 
-typedef struct MIDITRACKHEADER
+typedef struct PACKED MIDITRACKHEADER
 {
 	DWORD id;	// "MTrk" = 0x6B72544D
 	DWORD len;
 } MIDITRACKHEADER;
+
+STATIC_ASSERT(sizeof(MIDITRACKHEADER) == 8);
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // Midi Loader Internal Structures
@@ -87,9 +96,6 @@ typedef struct MIDITRACK
 	DWORD status;
 	LONG nexteventtime;
 } MIDITRACK;
-
-#pragma pack(pop)
-
 
 
 extern const LPCSTR szMidiGroupNames[17] =

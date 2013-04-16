@@ -15,10 +15,12 @@
 #include "Loaders.h"
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // ASYLUM AMF File Header
-struct AsylumFileHeader
+struct PACKED AsylumFileHeader
 {
 	char  signature[32];
 	uint8 defaultSpeed;
@@ -33,7 +35,7 @@ STATIC_ASSERT(sizeof(AsylumFileHeader) == 38);
 
 
 // ASYLUM AMF Sample Header
-struct AsylumSampleHeader
+struct PACKED AsylumSampleHeader
 {
 	char   name[22];
 	uint8  finetune;
@@ -71,7 +73,31 @@ struct AsylumSampleHeader
 
 STATIC_ASSERT(sizeof(AsylumSampleHeader) == 37);
 
+
+// DSMI AMF File Header
+struct PACKED AMFFileHeader
+{
+	char   amf[3];
+	uint8  version;
+	char   title[32];
+	uint8  numSamples;
+	uint8  numOrders;
+	uint16 numTracks;
+	uint8  numChannels;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(numTracks);
+	}
+};
+
+STATIC_ASSERT(sizeof(AMFFileHeader) == 41);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadAMF_Asylum(FileReader &file)
@@ -157,31 +183,6 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file)
 	return true;
 
 }
-
-
-#pragma pack(push, 1)
-
-// DSMI AMF File Header
-struct AMFFileHeader
-{
-	char   amf[3];
-	uint8  version;
-	char   title[32];
-	uint8  numSamples;
-	uint8  numOrders;
-	uint16 numTracks;
-	uint8  numChannels;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numTracks);
-	}
-};
-
-STATIC_ASSERT(sizeof(AMFFileHeader) == 41);
-
-#pragma pack(pop)
 
 
 // Read a single AMF track (channel) into a pattern.

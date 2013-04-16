@@ -190,10 +190,13 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 }
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
+
 
 // File Header
-struct MODFileHeader
+struct PACKED MODFileHeader
 {
 	uint8 numOrders;
 	uint8 restartPos;
@@ -204,7 +207,7 @@ STATIC_ASSERT(sizeof(MODFileHeader) == 130);
 
 
 // Sample Header
-struct MODSampleHeader
+struct PACKED MODSampleHeader
 {
 	char   name[22];
 	uint16 length;
@@ -326,7 +329,9 @@ struct MODSampleHeader
 STATIC_ASSERT(sizeof(MODSampleHeader) == 30);
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 // Functor for fixing VBlank MODs and MODs with 7-bit panning

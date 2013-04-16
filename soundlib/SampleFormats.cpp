@@ -560,9 +560,12 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 /////////////////////////////////////////////////////////////
 // GUS Patches
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct GF1PATCHFILEHEADER
+
+typedef struct PACKED GF1PATCHFILEHEADER
 {
 	DWORD gf1p;				// "GF1P"
 	DWORD atch;				// "ATCH"
@@ -578,8 +581,10 @@ typedef struct GF1PATCHFILEHEADER
 	BYTE reserved2[36];
 } GF1PATCHFILEHEADER;
 
+STATIC_ASSERT(sizeof(GF1PATCHFILEHEADER) == 129);
 
-typedef struct GF1INSTRUMENT
+
+typedef struct PACKED GF1INSTRUMENT
 {
 	WORD id;				// Instrument id: 0-65535
 	CHAR name[16];			// Name of instrument. Gravis doesn't seem to use it
@@ -588,8 +593,10 @@ typedef struct GF1INSTRUMENT
 	BYTE reserved[40];
 } GF1INSTRUMENT;
 
+STATIC_ASSERT(sizeof(GF1INSTRUMENT) == 63);
 
-typedef struct GF1SAMPLEHEADER
+
+typedef struct PACKED GF1SAMPLEHEADER
 {
 	CHAR name[7];			// null terminated string. name of the wave.
 	BYTE fractions;			// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
@@ -609,6 +616,8 @@ typedef struct GF1SAMPLEHEADER
 	WORD scale_factor;
 	BYTE reserved[36];
 } GF1SAMPLEHEADER;
+
+STATIC_ASSERT(sizeof(GF1SAMPLEHEADER) == 96);
 
 // -- GF1 Envelopes --
 //
@@ -640,7 +649,8 @@ typedef struct GF1SAMPLEHEADER
 // bit 6: off/on envelopes
 // bit 7: off/on clamped release (6th point, env)
 
-typedef struct GF1LAYER
+
+typedef struct PACKED GF1LAYER
 {
 	BYTE previous;			// If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
 	BYTE id;				// Layer id: 0-3
@@ -649,7 +659,12 @@ typedef struct GF1LAYER
 	BYTE reserved[40];
 } GF1LAYER;
 
+STATIC_ASSERT(sizeof(GF1LAYER) == 47);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 // returns 12*Log2(nFreq/2044)
 LONG PatchFreqToNote(ULONG nFreq)
@@ -1156,10 +1171,13 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 // AIFF File I/O
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
+
 
 // AIFF header
-struct AIFFHeader
+struct PACKED AIFFHeader
 {
 	// 32-Bit chunk identifiers
 	enum AIFFMagic
@@ -1181,9 +1199,11 @@ struct AIFFHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AIFFHeader) == 12);
+
 
 // General IFF Chunk header
-struct AIFFChunk
+struct PACKED AIFFChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -1213,9 +1233,11 @@ struct AIFFChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(AIFFChunk) == 8);
+
 
 // "Common" chunk (in AIFC, a compression ID and compression name follows this header, but apart from that it's identical)
-struct AIFFCommonChunk
+struct PACKED AIFFCommonChunk
 {
 	uint16 numChannels;
 	uint32 numSampleFrames;
@@ -1247,9 +1269,11 @@ struct AIFFCommonChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(AIFFCommonChunk) == 18);
+
 
 // Sound chunk
-struct AIFFSoundChunk
+struct PACKED AIFFSoundChunk
 {
 	uint32 offset;
 	uint32 blockSize;
@@ -1262,9 +1286,11 @@ struct AIFFSoundChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(AIFFSoundChunk) == 8);
+
 
 // Marker
-struct AIFFMarker
+struct PACKED AIFFMarker
 {
 	uint16 id;
 	uint32 position;		// Position in sample
@@ -1277,9 +1303,11 @@ struct AIFFMarker
 		SwapBytesBE(position);
 	}};
 
+STATIC_ASSERT(sizeof(AIFFMarker) == 7);
+
 
 // Instrument loop
-struct AIFFInstrumentLoop
+struct PACKED AIFFInstrumentLoop
 {
 	enum PlayModes
 	{
@@ -1301,8 +1329,10 @@ struct AIFFInstrumentLoop
 	}
 };
 
+STATIC_ASSERT(sizeof(AIFFInstrumentLoop) == 6);
 
-struct AIFFInstrumentChunk
+
+struct PACKED AIFFInstrumentChunk
 {
 	uint8  baseNote;
 	uint8  detune;
@@ -1322,7 +1352,12 @@ struct AIFFInstrumentChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(AIFFInstrumentChunk) == 20);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
@@ -1745,16 +1780,20 @@ void ConvertReadExtendedFlags(ModInstrument *pIns)
 #define IFFID_NAME	0x454d414e
 #define IFFID_ANNO	0x4f4e4e41
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct IFF8SVXFILEHEADER
+typedef struct PACKED IFF8SVXFILEHEADER
 {
 	DWORD dwFORM;	// "FORM"
 	DWORD dwSize;
 	DWORD dw8SVX;	// "8SVX"
 } IFF8SVXFILEHEADER;
 
-typedef struct IFFVHDR
+STATIC_ASSERT(sizeof(IFF8SVXFILEHEADER) == 12);
+
+typedef struct PACKED IFFVHDR
 {
 	DWORD dwVHDR;	// "VHDR"
 	DWORD dwSize;
@@ -1767,14 +1806,19 @@ typedef struct IFFVHDR
 	DWORD Volume;
 } IFFVHDR;
 
-typedef struct IFFBODY
+STATIC_ASSERT(sizeof(IFFVHDR) == 28);
+
+typedef struct PACKED IFFBODY
 {
 	DWORD dwBody;
 	DWORD dwSize;
 } IFFBODY;
 
+STATIC_ASSERT(sizeof(IFFBODY) == 8);
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 

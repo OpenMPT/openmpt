@@ -351,7 +351,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Song midi config
 
 	// midi cfg data length
-	id = m_SongFlags[SONG_EMBEDMIDICFG] ? sizeof(MIDIMacroConfig) : 0;
+	id = m_SongFlags[SONG_EMBEDMIDICFG] ? sizeof(MIDIMacroConfigData) : 0;
 	fwrite(&id, 1, sizeof(id), f);
 
 	// midi cfg

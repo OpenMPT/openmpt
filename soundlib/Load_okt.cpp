@@ -12,9 +12,11 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct OktIffChunk
+struct PACKED OktIffChunk
 {
 	// IFF chunk names
 	enum ChunkIdentifiers
@@ -40,7 +42,9 @@ struct OktIffChunk
 	}
 };
 
-struct OktSample
+STATIC_ASSERT(sizeof(OktIffChunk) == 8);
+
+struct PACKED OktSample
 {
 	char   name[20];
 	uint32 length;		// length in bytes
@@ -62,7 +66,9 @@ struct OktSample
 
 STATIC_ASSERT(sizeof(OktSample) == 32);
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 // Parse the sample header block
 void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSndFile)

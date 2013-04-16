@@ -60,9 +60,12 @@ extern void Log(LPCSTR s, ...);
 #define	MMDTAG_FX_GROUPNAME	(MMDTAG_PTR|5)	// the Global Effects group shouldn't have name saved!
 #define	MMDTAG_FX_GRPNAMELEN 6	// namelen includes zero term.
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct tagMEDMODULEHEADER
+
+typedef struct PACKED tagMEDMODULEHEADER
 {
 	DWORD id;		// MMD1-MMD3
 	DWORD modlen;	// Size of file
@@ -84,8 +87,10 @@ typedef struct tagMEDMODULEHEADER
 	BYTE extra_songs;	// # of songs - 1
 } MEDMODULEHEADER;
 
+STATIC_ASSERT(sizeof(MEDMODULEHEADER) == 52);
 
-typedef struct tagMMD0SAMPLE
+
+typedef struct PACKED tagMMD0SAMPLE
 {
 	WORD rep, replen;
 	BYTE midich;
@@ -94,9 +99,11 @@ typedef struct tagMMD0SAMPLE
 	signed char strans;
 } MMD0SAMPLE;
 
+STATIC_ASSERT(sizeof(MMD0SAMPLE) == 8);
+
 
 // Sample header is immediately followed by sample data...
-typedef struct tagMMDSAMPLEHEADER
+typedef struct PACKED tagMMDSAMPLEHEADER
 {
 	DWORD length;     // length of *one* *unpacked* channel in *bytes*
 	WORD type;
@@ -122,9 +129,11 @@ typedef struct tagMMDSAMPLEHEADER
 	BYTE SampleData[1];	// Sample Data
 } MMDSAMPLEHEADER;
 
+STATIC_ASSERT(sizeof(MMDSAMPLEHEADER) == 21);
+
 
 // MMD0/MMD1 song header
-typedef struct tagMMD0SONGHEADER
+typedef struct PACKED tagMMD0SONGHEADER
 {
 	MMD0SAMPLE sample[63];
 	WORD numblocks;		// # of blocks
@@ -140,9 +149,11 @@ typedef struct tagMMD0SONGHEADER
 	BYTE numsamples;	// # of samples (max=63)
 } MMD0SONGHEADER;
 
+STATIC_ASSERT(sizeof(MMD0SONGHEADER) == 788);
+
 
 // MMD2/MMD3 song header
-typedef struct tagMMD2SONGHEADER
+typedef struct PACKED tagMMD2SONGHEADER
 {
 	MMD0SAMPLE sample[63];
 	WORD numblocks;		// # of blocks
@@ -171,6 +182,9 @@ typedef struct tagMMD2SONGHEADER
 	BYTE numsamples;	// # of samples (max 63)
 } MMD2SONGHEADER;
 
+STATIC_ASSERT(sizeof(MMD2SONGHEADER) == 788);
+
+
 // For MMD0 the note information is held in 3 bytes, byte0, byte1, byte2.  For reference we
 // number the bits in each byte 0..7, where 0 is the low bit.
 // The note is held as bits 5..0 of byte0
@@ -178,11 +192,13 @@ typedef struct tagMMD2SONGHEADER
 // The command number is bits 3,2,1,0 of byte1, command data is in byte2:
 // For command 0, byte2 represents the second data byte, otherwise byte2
 // represents the first data byte.
-typedef struct tagMMD0BLOCK
+typedef struct PACKED tagMMD0BLOCK
 {
 	BYTE numtracks;
 	BYTE lines;		// File value is 1 less than actual, so 0 -> 1 line
 } MMD0BLOCK;		// BYTE data[lines+1][tracks][3];
+
+STATIC_ASSERT(sizeof(MMD0BLOCK) == 2);
 
 
 // For MMD1,MMD2,MMD3 the note information is carried in 4 bytes, byte0, byte1,
@@ -192,15 +208,17 @@ typedef struct tagMMD0BLOCK
 // The command number is held as byte2, command data is in byte3
 // For commands 0 and 0x19 byte3 represents the second data byte,
 // otherwise byte2 represents the first data byte.
-typedef struct tagMMD1BLOCK
+typedef struct PACKED tagMMD1BLOCK
 {
 	WORD numtracks;	// Number of tracks, may be > 64, but then that data is skipped.
 	WORD lines;		// Stored value is 1 less than actual, so 0 -> 1 line
 	DWORD info;		// Offset of BlockInfo (if 0, no block_info is present)
 } MMD1BLOCK;
 
+STATIC_ASSERT(sizeof(MMD1BLOCK) == 8);
 
-typedef struct tagMMD1BLOCKINFO
+
+typedef struct PACKED tagMMD1BLOCKINFO
 {
 	DWORD hlmask;		// Unimplemented - ignore
 	DWORD blockname;	// file offset of block name
@@ -210,10 +228,12 @@ typedef struct tagMMD1BLOCKINFO
 	DWORD reserved[4];	// future expansion
 } MMD1BLOCKINFO;
 
+STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
+
 
 // A set of play sequences is stored as an array of ULONG files offsets
 // Each offset points to the play sequence itself.
-typedef struct tagMMD2PLAYSEQ
+typedef struct PACKED tagMMD2PLAYSEQ
 {
 	CHAR name[32];
 	DWORD command_offs;	// filepos of command table
@@ -222,11 +242,13 @@ typedef struct tagMMD2PLAYSEQ
 	WORD seq[512];	// skip if > 0x8000
 } MMD2PLAYSEQ;
 
+STATIC_ASSERT(sizeof(MMD2PLAYSEQ) == 1066);
+
 
 // A command table contains commands that effect a particular play sequence
 // entry.  The only commands read in are STOP or POSJUMP, all others are ignored
 // POSJUMP is presumed to have extra bytes containing a WORD for the position
-typedef struct tagMMDCOMMAND
+typedef struct PACKED tagMMDCOMMAND
 {
 	WORD offset;		// Offset within current sequence entry
 	BYTE cmdnumber;		// STOP (537) or POSJUMP (538) (others skipped)
@@ -234,8 +256,10 @@ typedef struct tagMMDCOMMAND
 	BYTE extra_bytes[4];// [extra_count];
 } MMDCOMMAND;  // Last entry has offset == 0xFFFF, cmd_number == 0 and 0 extrabytes
 
+STATIC_ASSERT(sizeof(MMDCOMMAND) == 8);
 
-typedef struct tagMMD0EXP
+
+typedef struct PACKED tagMMD0EXP
 {
 	DWORD nextmod;			// File offset of next Hdr
 	DWORD exp_smp;			// Pointer to extra instrument data
@@ -261,7 +285,12 @@ typedef struct tagMMD0EXP
 	DWORD tag_end;
 } MMD0EXP;
 
+STATIC_ASSERT(sizeof(MMD0EXP) == 80);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 

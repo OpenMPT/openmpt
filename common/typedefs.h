@@ -33,8 +33,8 @@
 #endif
 
 #if defined(_MSC_VER)
-#define USE_PRAGMA_PACK
 #define PACKED __declspec(align(1))
+#define NEEDS_PRAGMA_PACK
 #elif defined(__GNUC__)
 #define PACKED __attribute__((packed))) __attribute__((aligned(1))))
 #endif

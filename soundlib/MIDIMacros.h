@@ -69,16 +69,24 @@ enum
 #define NUM_MACROS 16	// number of parametered macros
 #define MACRO_LENGTH 32	// max number of chars per macro
 
-//===================
-class MIDIMacroConfig
-//===================
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
+
+struct PACKED MIDIMacroConfigData
 {
-
-public:
-
 	char szMidiGlb[9][MACRO_LENGTH];		// Global MIDI macros
 	char szMidiSFXExt[16][MACRO_LENGTH];	// Parametric MIDI macros
 	char szMidiZXXExt[128][MACRO_LENGTH];	// Fixed MIDI macros
+};
+
+STATIC_ASSERT(sizeof(MIDIMacroConfigData) == 4896); // this is directly written to files, so the size must be correct!
+
+//=======================================================
+class PACKED MIDIMacroConfig : public MIDIMacroConfigData
+//=======================================================
+{
 
 public:
 
@@ -149,4 +157,8 @@ protected:
 
 };
 
-STATIC_ASSERT(sizeof(MIDIMacroConfig) == 4896); // this is directly written to files, so the size must be correct!
+STATIC_ASSERT(sizeof(MIDIMacroConfig) == sizeof(MIDIMacroConfigData)); // this is directly written to files, so the size must be correct!
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
