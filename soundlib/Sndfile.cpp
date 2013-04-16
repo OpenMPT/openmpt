@@ -1490,13 +1490,6 @@ bool CSoundFile::SaveStaticTunings()
 #endif
 
 
-void SimpleMessageBox(const char* message, const char* title)
-//-----------------------------------------------------------
-{
-	Reporting::Information(message, title);
-}
-
-
 #ifdef MODPLUG_TRACKER
 bool CSoundFile::LoadStaticTunings()
 //----------------------------------
@@ -1504,8 +1497,6 @@ bool CSoundFile::LoadStaticTunings()
 	if(s_pTuningsSharedLocal || s_pTuningsSharedBuiltIn) return true;
 	//For now not allowing to reload tunings(one should be careful when reloading them
 	//since various parts may use addresses of the tuningobjects).
-
-	CTuning::MessageHandler = &SimpleMessageBox;
 
 	s_pTuningsSharedBuiltIn = new CTuningCollection;
 	s_pTuningsSharedLocal = new CTuningCollection("Local tunings");

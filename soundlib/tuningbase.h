@@ -311,8 +311,6 @@ public:
 	static const char* s_TuningTypeStrGroupGeometric;
 	static const char* s_TuningTypeStrGeometric;
 
-	static MESSAGEHANDLER MessageHandler;
-
 private:
 	static void DefaultMessageHandler(const char*, const char*) {}
 };

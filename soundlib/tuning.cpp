@@ -12,6 +12,7 @@
 
 #include "tuning.h"
 #include "../common/serialization_utils.h"
+#include "../common/Reporting.h"
 #include <string>
 
 typedef CTuningRTI::RATIOTYPE RATIOTYPE;
@@ -398,7 +399,7 @@ CTuningBase* CTuningRTI::Deserialize(istream& iStrm)
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
 		if (pTuning->ProProcessUnserializationdata())
 		{
-			MessageHandler(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
+			Reporting::Error(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
 			delete pTuning; pTuning = nullptr;
 		}
 		else
