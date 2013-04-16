@@ -559,20 +559,8 @@
       <Project>{cf3c2ca5-5d45-4635-bba4-c1f435e10896}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\ungzip\ungzip_10.vcxproj">
+    <ProjectReference Include="..\unarchiver\unarchiver_10.vcxproj">
       <Project>{94cd7910-649a-4075-9f33-7ebee614fd45}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\unlha\unlha_10.vcxproj">
-      <Project>{fae39936-1dc7-40bb-ad3f-3b5b9e9ab0e8}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\unrar\unrar_10.vcxproj">
-      <Project>{ff541ce2-daa1-4f84-9883-0a0f111baa0b}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\unzip\unzip_10.vcxproj">
-      <Project>{f23cc68d-1d58-4eb1-9425-a28f5058eb31}</Project>
     </ProjectReference>
     <ProjectReference Include="..\xsoundlib\xsoundlib_10.vcxproj">
       <Project>{dcc2bb2f-6778-4fd3-9c00-d6cd8dc917b8}</Project>

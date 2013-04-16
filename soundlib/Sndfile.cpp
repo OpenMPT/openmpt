@@ -32,19 +32,19 @@
 #endif // NO_ARCHIVE_SUPPORT
 
 #ifdef ZIPPED_MOD_SUPPORT
-#include "../unzip/unzip.h"
+#include "../unarchiver/unzip.h"
 #endif
 
 #ifdef UNRAR_SUPPORT
-#include "../unrar/unrar32.h"
+#include "../unarchiver/unrar.h"
 #endif
 
 #ifdef UNLHA_SUPPORT
-#include "../unlha/unlha32.h"
+#include "../unarchiver/unlha.h"
 #endif
 
 #ifdef UNGZIP_SUPPORT
-#include "../ungzip/ungzip.h"
+#include "../unarchiver/ungzip.h"
 #endif
 
 #ifdef MMCMP_SUPPORT

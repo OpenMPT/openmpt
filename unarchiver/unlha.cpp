@@ -39,24 +39,24 @@
 
 #include "windows.h"
 #include "windowsx.h"
-#include "unlha32.h"
+#include "unlha.h"
 
 #ifdef _DEBUG
 #define LHADEBUG
 extern void Log(LPCSTR, ...);
 #endif
 
-#include "lharc.h"
-#include "slidehuf.h"
-#include "header.cpp"
-#include "lhext.cpp"
-#include "extract.cpp"
-#include "slide.cpp"
-#include "maketbl.cpp"
-#include "dhuf.cpp"
-#include "huf.cpp"
-#include "shuf.cpp"
-#include "larc.cpp"
+#include "unlha/lharc.h"
+#include "unlha/slidehuf.h"
+#include "unlha/header.cpp"
+#include "unlha/lhext.cpp"
+#include "unlha/extract.cpp"
+#include "unlha/slide.cpp"
+#include "unlha/maketbl.cpp"
+#include "unlha/dhuf.cpp"
+#include "unlha/huf.cpp"
+#include "unlha/shuf.cpp"
+#include "unlha/larc.cpp"
 
 CLhaArchive::CLhaArchive(LPBYTE lpStream, DWORD dwMemLength)
 //----------------------------------------------------------

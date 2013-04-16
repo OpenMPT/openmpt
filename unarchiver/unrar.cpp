@@ -40,8 +40,7 @@
 
 #include "windows.h"
 #include "windowsx.h"
-#include "unrar32.h"
-#include "const.h"
+#include "unrar.h"
 
 #define SEEK_SET	0
 #define SEEK_CUR	1
@@ -49,12 +48,13 @@
 
 static inline long abs(long x) { return (x<0)?-x:x; }
 
-#include "global.cpp"
-#include "rdwrfn.cpp"
-#include "smallfn.cpp"
-#include "block.cpp"
-#include "extract.cpp"
-#include "compr.cpp"
+#include "unrar/const.h"
+#include "unrar/global.cpp"
+#include "unrar/rdwrfn.cpp"
+#include "unrar/smallfn.cpp"
+#include "unrar/block.cpp"
+#include "unrar/extract.cpp"
+#include "unrar/compr.cpp"
 
 
 
