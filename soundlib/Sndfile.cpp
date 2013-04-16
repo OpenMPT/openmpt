@@ -21,17 +21,11 @@
 #include "../common/StringFixer.h"
 #include "FileReader.h"
 
-#ifndef NO_MMCMP_SUPPORT
-#define MMCMP_SUPPORT
-#endif // NO_MMCMP_SUPPORT
-
 #ifndef NO_ARCHIVE_SUPPORT
 #include "../unarchiver/unarchiver.h"
 #endif // NO_ARCHIVE_SUPPORT
 
-#ifdef MMCMP_SUPPORT
 extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
-#endif
 
 
 // -> CODE#0027
@@ -535,13 +529,11 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		}
 #endif
 
-#ifdef MMCMP_SUPPORT
 		BOOL bMMCmp = MMCMP_Unpack(&lpStream, &dwMemLength);
 		if(bMMCmp)
 		{
 			file = FileReader(lpStream, dwMemLength);
 		}
-#endif
 
 		if(!ReadXM(file)
 // -> CODE#0023
@@ -593,13 +585,13 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 			songMessage.assign(unarchiver.GetComments(true));
 		}
 #endif
-#ifdef MMCMP_SUPPORT
+
 		if(bMMCmp)
 		{
 			GlobalFreePtr(lpStream);
 			lpStream = NULL;
 		}
-#endif
+
 	} else
 	{
 		// New song
