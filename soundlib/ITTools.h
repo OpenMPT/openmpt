@@ -14,9 +14,11 @@
 #include "../soundlib/ModSample.h"
 #include "../soundlib/SampleIO.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct ITFileHeader
+struct PACKED ITFileHeader
 {
 	// Magic Bytes
 	enum Magic
@@ -81,7 +83,7 @@ struct ITFileHeader
 STATIC_ASSERT(sizeof(ITFileHeader) == 192);
 
 
-struct ITEnvelope
+struct PACKED ITEnvelope
 {
 	// Envelope Flags
 	enum ITEnvelopeFlags
@@ -112,7 +114,7 @@ STATIC_ASSERT(sizeof(ITEnvelope) == 82);
 
 
 // Old Impulse Instrument Format (cmwt < 0x200)
-struct ITOldInstrument
+struct PACKED ITOldInstrument
 {
 	// Magic Bytes
 	enum Magic
@@ -158,7 +160,7 @@ STATIC_ASSERT(sizeof(ITOldInstrument) == 554);
 
 
 // Impulse Instrument Format
-struct ITInstrument
+struct PACKED ITInstrument
 {
 	// Magic Bytes
 	enum Magic
@@ -213,7 +215,7 @@ STATIC_ASSERT(sizeof(ITInstrument) == 554);
 
 
 // MPT IT Instrument Extension
-struct ITInstrumentEx
+struct PACKED ITInstrumentEx
 {
 	enum Magic
 	{
@@ -236,7 +238,7 @@ STATIC_ASSERT(sizeof(ITInstrumentEx) == sizeof(ITInstrument) + 120);
 
 
 // IT Sample Format
-struct ITSample
+struct PACKED ITSample
 {
 	// Magic Bytes
 	enum Magic
@@ -305,7 +307,7 @@ struct FileHistory;
 #endif // MODPLUG_TRACKER
 
 // IT Header extension: Save history
-struct ITHistoryStruct
+struct PACKED ITHistoryStruct
 {
 	uint16 fatdate;	// DOS / FAT date when the file was opened / created in the editor. For details, read http://msdn.microsoft.com/en-us/library/ms724247(VS.85).aspx
 	uint16 fattime;	// DOS / FAT time when the file was opened / created in the editor.
@@ -327,7 +329,9 @@ struct ITHistoryStruct
 
 STATIC_ASSERT(sizeof(ITHistoryStruct) == 8);
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 enum IT_ReaderBitMasks
 {

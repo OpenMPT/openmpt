@@ -15,9 +15,11 @@
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct IMFChannel
+struct PACKED IMFChannel
 {
 	char  name[12];	// Channel name (ASCIIZ-String, max 11 chars)
 	uint8 chorus;	// Default chorus
@@ -26,7 +28,9 @@ struct IMFChannel
 	uint8 status;	// Channel status: 0 = enabled, 1 = mute, 2 = disabled (ignore effects!)
 };
 
-struct IMFFileHeader
+STATIC_ASSERT(sizeof(IMFChannel) == 16);
+
+struct PACKED IMFFileHeader
 {
 	enum SongFlags
 	{
@@ -59,7 +63,9 @@ struct IMFFileHeader
 	}
 };
 
-struct IMFEnvelope
+STATIC_ASSERT(sizeof(IMFFileHeader) == 832);
+
+struct PACKED IMFEnvelope
 {
 	enum EnvFlags
 	{
@@ -76,13 +82,17 @@ struct IMFEnvelope
 	uint8 unused[3];
 };
 
-struct IMFEnvNode
+STATIC_ASSERT(sizeof(IMFEnvelope) == 8);
+
+struct PACKED IMFEnvNode
 {
 	uint16 tick;
 	uint16 value;
 };
 
-struct IMFInstrument
+STATIC_ASSERT(sizeof(IMFEnvNode) == 4);
+
+struct PACKED IMFInstrument
 {
 	enum EnvTypes
 	{
@@ -166,7 +176,9 @@ struct IMFInstrument
 	}
 };
 
-struct IMFSample
+STATIC_ASSERT(sizeof(IMFInstrument) == 384);
+
+struct PACKED IMFSample
 {
 	enum SampleFlags
 	{
@@ -228,7 +240,11 @@ struct IMFSample
 	}
 };
 
+STATIC_ASSERT(sizeof(IMFSample) == 64);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 static const uint8 imfEffects[] =
 {

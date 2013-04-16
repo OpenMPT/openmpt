@@ -14,10 +14,13 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
+
 
 // STM sample header struct
-struct STMSampleHeader
+struct PACKED STMSampleHeader
 {
 	char   filename[12];	// Can't have long comments - just filename comments :)
 	uint8  zero;
@@ -69,9 +72,11 @@ struct STMSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(STMSampleHeader) == 32);
+
 
 // STM file header
-struct STMFileHeader
+struct PACKED STMFileHeader
 {
 	char  songname[20];
 	char  trackername[8];			// !SCREAM! for ST 2.xx
@@ -87,9 +92,11 @@ struct STMFileHeader
 	uint8 order[128];				// Order list
 };
 
+STATIC_ASSERT(sizeof(STMFileHeader) == 1168);
+
 
 // Pattern note entry
-struct STMPatternEntry
+struct PACKED STMPatternEntry
 {
 	uint8 note;
 	uint8 insvol;
@@ -97,9 +104,12 @@ struct STMPatternEntry
 	uint8 cmdinf;
 };
 
+STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
-
+#endif
 
 
 bool CSoundFile::ReadSTM(FileReader &file)

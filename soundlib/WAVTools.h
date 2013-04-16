@@ -12,10 +12,12 @@
 
 #include "ChunkReader.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // RIFF header
-struct RIFFHeader
+struct PACKED RIFFHeader
 {
 	// 32-Bit chunk identifiers
 	enum RIFFMagic
@@ -39,9 +41,11 @@ struct RIFFHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(RIFFHeader) == 12);
+
 
 // General RIFF Chunk header
-struct RIFFChunk
+struct PACKED RIFFChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -87,9 +91,11 @@ struct RIFFChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(RIFFChunk) == 8);
+
 
 // Format Chunk
-struct WAVFormatChunk
+struct PACKED WAVFormatChunk
 {
 	// Sample formats
 	enum SampleFormats
@@ -120,9 +126,11 @@ struct WAVFormatChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(WAVFormatChunk) == 16);
+
 
 // Extension of the WAVFormatChunk structure, used if format == formatExtensible
-struct WAVFormatChunkExtension
+struct PACKED WAVFormatChunkExtension
 {
 	uint16 size;
 	uint16 validBitsPerSample;
@@ -140,9 +148,11 @@ struct WAVFormatChunkExtension
 	}
 };
 
+STATIC_ASSERT(sizeof(WAVFormatChunkExtension) == 24);
+
 
 // Sample information chunk
-struct WAVSampleInfoChunk
+struct PACKED WAVSampleInfoChunk
 {
 	uint32 manufacturer;
 	uint32 product;
@@ -183,9 +193,11 @@ struct WAVSampleInfoChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(WAVSampleInfoChunk) == 36);
+
 
 // Sample loop information chunk (found after WAVSampleInfoChunk in "smpl" chunk)
-struct WAVSampleLoop
+struct PACKED WAVSampleLoop
 {
 	// Sample Loop Types
 	enum LoopType
@@ -220,9 +232,11 @@ struct WAVSampleLoop
 	void ConvertToWAV(SmpLength start, SmpLength end, bool bidi);
 };
 
+STATIC_ASSERT(sizeof(RIFFHeader) == 12);
+
 
 // MPT-specific "xtra" chunk
-struct WAVExtraChunk
+struct PACKED WAVExtraChunk
 {
 	enum Flags
 	{
@@ -275,9 +289,11 @@ struct WAVExtraChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(WAVExtraChunk) == 16);
+
 
 // Sample cue point structure for the "cue " chunk
-struct WAVCuePoint
+struct PACKED WAVCuePoint
 {
 	uint32 id;			// Unique identification value
 	uint32 position;	// Play order position
@@ -298,8 +314,12 @@ struct WAVCuePoint
 	}
 };
 
+STATIC_ASSERT(sizeof(WAVCuePoint) == 24);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 //=============

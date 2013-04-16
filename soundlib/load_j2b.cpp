@@ -26,10 +26,12 @@ static const uint8 j2bAutoVibratoTrans[] =
 	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
 };
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // header for compressed j2b files
-struct J2BFileHeader
+struct PACKED J2BFileHeader
 {
 	// Magic Bytes
 	enum J2BMagic
@@ -59,9 +61,12 @@ struct J2BFileHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(J2BFileHeader) == 24);
+
+
 // AM(FF) stuff
 
-struct AMFFRiffChunk
+struct PACKED AMFFRiffChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -104,9 +109,11 @@ struct AMFFRiffChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(AMFFRiffChunk) == 8);
+
 
 // This header is used for both AM's "INIT" as well as AMFF's "MAIN" chunk
-struct AMFFMainChunk
+struct PACKED AMFFMainChunk
 {
 	// Main Chunk flags
 	enum MainFlags
@@ -123,9 +130,11 @@ struct AMFFMainChunk
 	uint8  globalvolume;
 };
 
+STATIC_ASSERT(sizeof(AMFFMainChunk) == 73);
+
 
 // AMFF instrument envelope point (old format)
-struct AMFFEnvelopePoint
+struct PACKED AMFFEnvelopePoint
 {
 	uint16 tick;
 	uint8  value;	// 0...64
@@ -137,9 +146,11 @@ struct AMFFEnvelopePoint
 	}
 };
 
+STATIC_ASSERT(sizeof(AMFFEnvelopePoint) == 3);
+
 
 // AMFF instrument envelope (old format)
-struct AMFFEnvelope
+struct PACKED AMFFEnvelope
 {
 	// Envelope flags (also used for RIFF AM)
 	enum EnvelopeFlags
@@ -206,9 +217,11 @@ struct AMFFEnvelope
 	}
 };
 
+STATIC_ASSERT(sizeof(AMFFEnvelope) == 65);
+
 
 // AMFF instrument header (old format)
-struct AMFFInstrumentHeader
+struct PACKED AMFFInstrumentHeader
 {
 	uint8  unknown;				// 0x00
 	uint8  index;				// actual instrument number
@@ -249,9 +262,11 @@ struct AMFFInstrumentHeader
 
 };
 
+STATIC_ASSERT(sizeof(AMFFInstrumentHeader) == 225);
+
 
 // AMFF sample header (old format)
-struct AMFFSampleHeader
+struct PACKED AMFFSampleHeader
 {
 	// Sample flags (also used for RIFF AM)
 	enum SampleFlags
@@ -333,9 +348,11 @@ struct AMFFSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AMFFSampleHeader) == 64);
+
 
 // AM instrument envelope point (new format)
-struct AMEnvelopePoint
+struct PACKED AMEnvelopePoint
 {
 	uint16 tick;
 	uint16 value;
@@ -348,9 +365,11 @@ struct AMEnvelopePoint
 	}
 };
 
+STATIC_ASSERT(sizeof(AMEnvelopePoint) == 4);
+
 
 // AM instrument envelope (new format)
-struct AMEnvelope
+struct PACKED AMEnvelope
 {
 	uint16 flags;
 	uint8  numPoints;	// actually, it's num. points - 1, and 0xFF if there is no envelope
@@ -414,9 +433,11 @@ struct AMEnvelope
 	}
 };
 
+STATIC_ASSERT(sizeof(AMEnvelope) == 48);
+
 
 // AM instrument header (new format)
-struct AMInstrumentHeader
+struct PACKED AMInstrumentHeader
 {
 	uint32 headSize;	// Header size (i.e. the size of this struct)
 	uint8  unknown1;	// 0x00
@@ -470,9 +491,11 @@ struct AMInstrumentHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AMInstrumentHeader) == 326);
+
 
 // AM sample header (new format)
-struct AMSampleHeader
+struct PACKED AMSampleHeader
 {
 	uint32 headSize;	// Header size (i.e. the size of this struct), apparently not including headSize.
 	char   name[32];
@@ -542,7 +565,12 @@ struct AMSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(AMSampleHeader) == 60);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 // Convert RIFF AM(FF) pattern data to MPT pattern data.

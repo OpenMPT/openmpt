@@ -16,9 +16,11 @@ class CGzipArchive
 protected:
 	FileReader inFile, outFile;
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-	struct GZheader
+	struct PACKED GZheader
 	{
 		uint8  magic1;	// 0x1F
 		uint8  magic2;	// 0x8B
@@ -29,7 +31,9 @@ protected:
 		uint8  os;		// Which OS was used to compress the file? We also ignore this.
 	};
 
-	struct GZtrailer
+	STATIC_ASSERT(sizeof(GZheader) == 10);
+
+	struct PACKED GZtrailer
 	{
 		uint32 crc32;	// CRC32 of decompressed data
 		uint32 isize;	// Size of decompressed data
@@ -41,7 +45,11 @@ protected:
 		}
 	};
 
+	STATIC_ASSERT(sizeof(GZtrailer) == 8);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 	enum MagicBytes
 	{

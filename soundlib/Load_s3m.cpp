@@ -149,10 +149,12 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 }
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // S3M File Header
-struct S3MFileHeader
+struct PACKED S3MFileHeader
 {
 	// Magic Bytes
 	enum S3MMagic
@@ -233,7 +235,7 @@ STATIC_ASSERT(sizeof(S3MFileHeader) == 96);
 
 
 // S3M Sample Header
-struct S3MSampleHeader
+struct PACKED S3MSampleHeader
 {
 	enum SampleMagic
 	{
@@ -401,7 +403,10 @@ enum S3MPattern
 
 STATIC_ASSERT(sizeof(S3MSampleHeader) == 80);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 // Functor for fixing PixPlay 4-Bit Zxx panning commands

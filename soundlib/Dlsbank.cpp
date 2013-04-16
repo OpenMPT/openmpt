@@ -108,7 +108,9 @@
 #define ART_DEFAULTPAN		MAKE_ART	(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_PAN)
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 //////////////////////////////////////////////////////////
 // DLS IFF Chunk IDs
@@ -134,47 +136,59 @@
 //////////////////////////////////////////////////////////
 // DLS Structures definitions
 
-typedef struct IFFCHUNK
+typedef struct PACKED IFFCHUNK
 {
 	DWORD id;
 	DWORD len;
 } IFFCHUNK, *LPIFFCHUNK;
 
-typedef struct RIFFCHUNKID
+STATIC_ASSERT(sizeof(IFFCHUNK) == 8);
+
+typedef struct PACKED RIFFCHUNKID
 {
 	DWORD id_RIFF;
 	DWORD riff_len;
 	DWORD id_DLS;
 } RIFFCHUNKID;
 
-typedef struct LISTCHUNK
+STATIC_ASSERT(sizeof(RIFFCHUNKID) == 12);
+
+typedef struct PACKED LISTCHUNK
 {
 	DWORD id;
 	DWORD len;
 	DWORD listid;
 } LISTCHUNK;
 
-typedef struct DLSRGNRANGE
+STATIC_ASSERT(sizeof(LISTCHUNK) == 12);
+
+typedef struct PACKED DLSRGNRANGE
 {
 	WORD usLow;
 	WORD usHigh;
 } DLSRGNRANGE;
 
-typedef struct COLHCHUNK
+STATIC_ASSERT(sizeof(DLSRGNRANGE) == 4);
+
+typedef struct PACKED COLHCHUNK
 {
 	DWORD id;
 	DWORD len;
 	DWORD ulInstruments;
 } COLHCHUNK;
 
-typedef struct VERSCHUNK
+STATIC_ASSERT(sizeof(COLHCHUNK) == 12);
+
+typedef struct PACKED VERSCHUNK
 {
 	DWORD id;
 	DWORD len;
 	WORD version[4];
 } VERSCHUNK;
 
-typedef struct PTBLCHUNK
+STATIC_ASSERT(sizeof(VERSCHUNK) == 16);
+
+typedef struct PACKED PTBLCHUNK
 {
 	DWORD id;
 	DWORD len;
@@ -183,7 +197,9 @@ typedef struct PTBLCHUNK
 	DWORD ulOffsets[1];
 } PTBLCHUNK;
 
-typedef struct INSHCHUNK
+STATIC_ASSERT(sizeof(PTBLCHUNK) == 20);
+
+typedef struct PACKED INSHCHUNK
 {
 	DWORD id;
 	DWORD len;
@@ -192,7 +208,9 @@ typedef struct INSHCHUNK
 	DWORD ulInstrument;
 } INSHCHUNK;
 
-typedef struct RGNHCHUNK
+STATIC_ASSERT(sizeof(INSHCHUNK) == 20);
+
+typedef struct PACKED RGNHCHUNK
 {
 	DWORD id;
 	DWORD len;
@@ -202,7 +220,9 @@ typedef struct RGNHCHUNK
 	WORD usKeyGroup;
 } RGNHCHUNK;
 
-typedef struct WLNKCHUNK
+STATIC_ASSERT(sizeof(RGNHCHUNK) == 20);
+
+typedef struct PACKED WLNKCHUNK
 {
 	DWORD id;
 	DWORD len;
@@ -212,7 +232,9 @@ typedef struct WLNKCHUNK
 	DWORD ulTableIndex;
 } WLNKCHUNK;
 
-typedef struct ART1CHUNK
+STATIC_ASSERT(sizeof(WLNKCHUNK) == 20);
+
+typedef struct PACKED ART1CHUNK
 {
 	DWORD id;
 	DWORD len;
@@ -220,7 +242,9 @@ typedef struct ART1CHUNK
 	DWORD cConnectionBlocks;
 } ART1CHUNK;
 
-typedef struct CONNECTIONBLOCK
+STATIC_ASSERT(sizeof(ART1CHUNK) == 16);
+
+typedef struct PACKED CONNECTIONBLOCK
 {
 	WORD usSource;
 	WORD usControl;
@@ -229,25 +253,31 @@ typedef struct CONNECTIONBLOCK
 	LONG lScale;
 } CONNECTIONBLOCK;
 
-typedef struct WSMPCHUNK
+STATIC_ASSERT(sizeof(CONNECTIONBLOCK) == 12);
+
+typedef struct PACKED WSMPCHUNK
 {
 	DWORD id;
 	DWORD len;
 	DWORD cbSize;
 	WORD usUnityNote;
-	signed short sFineTune;
+	SHORT sFineTune;
 	LONG lAttenuation;
 	DWORD fulOptions;
 	DWORD cSampleLoops;
 } WSMPCHUNK;
 
-typedef struct WSMPSAMPLELOOP
+STATIC_ASSERT(sizeof(WSMPCHUNK) == 28);
+
+typedef struct PACKED WSMPSAMPLELOOP
 {
 	DWORD cbSize;
 	DWORD ulLoopType;
 	DWORD ulLoopStart;
 	DWORD ulLoopLength;
 } WSMPSAMPLELOOP;
+
+STATIC_ASSERT(sizeof(WSMPSAMPLELOOP) == 16);
 
 
 /////////////////////////////////////////////////////////////////////
@@ -285,7 +315,7 @@ typedef struct WSMPSAMPLELOOP
 /////////////////////////////////////////////////////////////////////
 // SF2 Structures Definitions
 
-typedef struct SFPRESETHEADER
+typedef struct PACKED SFPRESETHEADER
 {
 	CHAR achPresetName[20];
 	WORD wPreset;
@@ -296,37 +326,49 @@ typedef struct SFPRESETHEADER
 	DWORD dwMorphology;
 } SFPRESETHEADER;
 
-typedef struct SFPRESETBAG
+STATIC_ASSERT(sizeof(SFPRESETHEADER) == 38);
+
+typedef struct PACKED SFPRESETBAG
 {
 	WORD wGenNdx;
 	WORD wModNdx;
 } SFPRESETBAG;
 
-typedef struct SFGENLIST
+STATIC_ASSERT(sizeof(SFPRESETBAG) == 4);
+
+typedef struct PACKED SFGENLIST
 {
 	WORD sfGenOper;
 	WORD genAmount;
 } SFGENLIST;
 
-typedef struct SFINST
+STATIC_ASSERT(sizeof(SFGENLIST) == 4);
+
+typedef struct PACKED SFINST
 {
 	CHAR achInstName[20];
 	WORD wInstBagNdx;
 } SFINST;
 
-typedef struct SFINSTBAG
+STATIC_ASSERT(sizeof(SFINST) == 22);
+
+typedef struct PACKED SFINSTBAG
 {
 	WORD wGenNdx;
 	WORD wModNdx;
 } SFINSTBAG;
 
-typedef struct SFINSTGENLIST
+STATIC_ASSERT(sizeof(SFINSTBAG) == 4);
+
+typedef struct PACKED SFINSTGENLIST
 {
 	WORD sfGenOper;
 	WORD genAmount;
 } SFINSTGENLIST;
 
-typedef struct SFSAMPLE
+STATIC_ASSERT(sizeof(SFINSTGENLIST) == 4);
+
+typedef struct PACKED SFSAMPLE
 {
 	CHAR achSampleName[20];
 	DWORD dwStart;
@@ -339,6 +381,15 @@ typedef struct SFSAMPLE
 	WORD wSampleLink;
 	WORD sfSampleType;
 } SFSAMPLE;
+
+STATIC_ASSERT(sizeof(SFSAMPLE) == 46);
+
+// End of structures definitions
+/////////////////////////////////////////////////////////////////////
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 
 typedef struct SF2LOADERINFO
@@ -355,11 +406,6 @@ typedef struct SF2LOADERINFO
 	SFINSTGENLIST *pInstGens;
 } SF2LOADERINFO;
 
-
-// End of structures definitions
-/////////////////////////////////////////////////////////////////////
-
-#pragma pack(pop)
 
 /////////////////////////////////////////////////////////////////////
 // Unit conversion

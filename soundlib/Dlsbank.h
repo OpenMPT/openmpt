@@ -14,7 +14,9 @@
 class CSoundFile;
 #include "Snd_defs.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 #define DLSMAXREGIONS		128
 #define DLSMAXENVELOPES		2048
@@ -27,8 +29,7 @@ class CSoundFile;
 #define DLSREGION_SELFNONEXCLUSIVE	0x80
 #define DLSREGION_SUSTAINLOOP		0x100
 
-
-typedef struct DLSREGION
+typedef struct PACKED DLSREGION
 {
 	DWORD ulLoopStart;
 	DWORD ulLoopEnd;
@@ -42,7 +43,9 @@ typedef struct DLSREGION
 	BYTE uUnityNote;
 } DLSREGION;
 
-typedef struct DLSENVELOPE
+STATIC_ASSERT(sizeof(DLSREGION) == 21);
+
+typedef struct PACKED DLSENVELOPE
 {
 	// Volume Envelope
 	WORD wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
@@ -53,10 +56,12 @@ typedef struct DLSENVELOPE
 	BYTE nDefPan;
 } DLSENVELOPE;
 
+STATIC_ASSERT(sizeof(DLSENVELOPE) == 8);
+
 // Special Bank bits
 #define F_INSTRUMENT_DRUMS		0x80000000
 
-typedef struct DLSINSTRUMENT
+typedef struct PACKED DLSINSTRUMENT
 {
 	DWORD ulBank, ulInstrument;
 	UINT nRegions, nMelodicEnv;
@@ -66,7 +71,9 @@ typedef struct DLSINSTRUMENT
 	WORD wPresetBagNdx, wPresetBagNum;
 } DLSINSTRUMENT;
 
-typedef struct DLSSAMPLEEX
+STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
+
+typedef struct PACKED DLSSAMPLEEX
 {
 	CHAR szName[20];
 	DWORD dwLen;
@@ -76,6 +83,8 @@ typedef struct DLSSAMPLEEX
 	BYTE byOriginalPitch;
 	CHAR chPitchCorrection;
 } DLSSAMPLEEX;
+
+STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
 
 #pragma pack(pop)
 

@@ -879,9 +879,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		{
 			DWORD d = 0x4944494D;
 			fwrite(&d, 1, 4, f);
-			d = sizeof(MIDIMacroConfig);
+			d = sizeof(MIDIMacroConfigData);
 			fwrite(&d, 1, 4, f);
-			fwrite(&m_MidiCfg, 1, sizeof(MIDIMacroConfig), f);
+			fwrite(static_cast<MIDIMacroConfigData*>(&m_MidiCfg), 1, sizeof(MIDIMacroConfigData), f);
 		}
 		// Writing Pattern Names
 		const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();

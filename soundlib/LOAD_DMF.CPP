@@ -20,10 +20,12 @@
 #include "../mptrack/Moddoc.h"
 #endif // MODPLUG_TRACKER
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // DMF header
-struct DMFFileHeader
+struct PACKED DMFFileHeader
 {
 	char   signature[4];	// "DDMF"
 	uint8  version;			// 1 - 7 are beta versions, 8 is the official thing, 10 is xtracker32
@@ -35,7 +37,9 @@ struct DMFFileHeader
 	uint8  creationYear;
 };
 
-struct DMFChunk
+STATIC_ASSERT(sizeof(DMFFileHeader) == 66);
+
+struct PACKED DMFChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -68,8 +72,10 @@ struct DMFChunk
 	}
 };
 
+STATIC_ASSERT(sizeof(DMFChunk) == 8);
+
 // Order list
-struct DMFSequence
+struct PACKED DMFSequence
 {
 	uint16 loopStart;
 	uint16 loopEnd;
@@ -83,8 +89,10 @@ struct DMFSequence
 	}
 };
 
+STATIC_ASSERT(sizeof(DMFSequence) == 4);
+
 // Pattern header (global)
-struct DMFPatterns
+struct PACKED DMFPatterns
 {
 	uint16 numPatterns;	// 1..1024 patterns
 	uint8  numTracks;	// 1..32 channels
@@ -96,8 +104,10 @@ struct DMFPatterns
 	}
 };
 
+STATIC_ASSERT(sizeof(DMFPatterns) == 3);
+
 // Pattern header (for each pattern)
-struct DMFPatternHeader
+struct PACKED DMFPatternHeader
 {
 	uint8  numTracks;	// 1..32 channels
 	uint8  beat;		// [hi|lo] -> hi = rows per beat, lo = reserved
@@ -113,8 +123,10 @@ struct DMFPatternHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(DMFPatternHeader) == 8);
+
 // Sample header
-struct DMFSampleHeader
+struct PACKED DMFSampleHeader
 {
 	enum SampleFlags
 	{
@@ -181,14 +193,20 @@ struct DMFSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(DMFSampleHeader) == 16);
+
 // Sample header tail (between head and tail, there might be the library name of the sample, depending on the DMF version)
-struct DMFSampleHeaderTail
+struct PACKED DMFSampleHeaderTail
 {
 	uint16 filler;
 	uint32 crc32;
 };
 
+STATIC_ASSERT(sizeof(DMFSampleHeaderTail) == 6);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 // Pattern translation memory
 struct DMFPatternSettings

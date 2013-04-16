@@ -304,9 +304,11 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 // XPK unpacker
 //
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct _XPKFILEHEADER
+typedef struct PACKED _XPKFILEHEADER
 {
 	DWORD dwXPKF;
 	DWORD dwSrcLen;
@@ -316,7 +318,11 @@ typedef struct _XPKFILEHEADER
 	DWORD dwReserved;
 } XPKFILEHEADER, *PXPKFILEHEADER;
 
+STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 static int bfextu(const BYTE *p,int bo,int bc)

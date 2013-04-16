@@ -18,9 +18,11 @@ using std::string;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v2.4 Tags
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct ID3v2Header
+struct PACKED ID3v2Header
 {
 	uint8 signature[3];
 	uint8 version[2];
@@ -29,7 +31,9 @@ struct ID3v2Header
 	// Total: 10 bytes
 };
 
-struct ID3v2Frame
+STATIC_ASSERT(sizeof(ID3v2Header) == 10);
+
+struct PACKED ID3v2Frame
 {
 	uint32 frameid;
 	uint32 size;
@@ -37,7 +41,11 @@ struct ID3v2Frame
 	// Total: 10 bytes
 };
 
+STATIC_ASSERT(sizeof(ID3v2Frame) == 10);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 // we will add some padding bytes to our id3v2 tag (extending tags will be easier this way)
 #define ID3v2_PADDING 512

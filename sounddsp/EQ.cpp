@@ -43,24 +43,24 @@ static const UINT gEqLinearToDB[33] =
 };
 
 
-static const REAL f2ic = (REAL)(1 << 28);
-static const REAL i2fc = (REAL)(1.0 / (1 << 28));
+static const float32 f2ic = (float32)(1 << 28);
+static const float32 i2fc = (float32)(1.0 / (1 << 28));
 
 static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 {
 	// Default: Flat EQ
-	{0,0,0,0,0, 0,0,0,0, 1,   120, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,   600, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,  1200, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,  3000, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,  6000, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1, 10000, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,   120, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,   600, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,  1200, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,  3000, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1,  6000, FALSE},
-	{0,0,0,0,0, 0,0,0,0, 1, 10000, FALSE},
+	{0,0,0,0,0, 0,0,0,0, 1,   120, false},
+	{0,0,0,0,0, 0,0,0,0, 1,   600, false},
+	{0,0,0,0,0, 0,0,0,0, 1,  1200, false},
+	{0,0,0,0,0, 0,0,0,0, 1,  3000, false},
+	{0,0,0,0,0, 0,0,0,0, 1,  6000, false},
+	{0,0,0,0,0, 0,0,0,0, 1, 10000, false},
+	{0,0,0,0,0, 0,0,0,0, 1,   120, false},
+	{0,0,0,0,0, 0,0,0,0, 1,   600, false},
+	{0,0,0,0,0, 0,0,0,0, 1,  1200, false},
+	{0,0,0,0,0, 0,0,0,0, 1,  3000, false},
+	{0,0,0,0,0, 0,0,0,0, 1,  6000, false},
+	{0,0,0,0,0, 0,0,0,0, 1, 10000, false},
 };
 
 #ifdef ENABLE_X86
@@ -77,8 +77,8 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 #define PBS_Y1	DWORD PTR [eax+28]
 #define PBS_Y2	DWORD PTR [eax+32]
 
-static void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
-//-------------------------------------------------------------------------
+static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
+//--------------------------------------------------------------------
 {
 	_asm {
 	mov eax, pbs		// eax = pbs
@@ -124,8 +124,8 @@ EQ_Loop:
 }
 
 
-static void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
-//----------------------------------------------------------------------------------------
+static void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
+//-------------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_3DNOW
 	float tmp[16];
@@ -208,8 +208,8 @@ mainloop:
 }
 
 
-static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, REAL *pbuffer, UINT nCount)
-//----------------------------------------------------------------------------------------
+static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
+//-------------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_SSE
 	static const float gk1 = 1.0f;
@@ -306,13 +306,13 @@ done:;
 
 #else
 
-static void EQFilter(EQBANDSTRUCT *pbs, REAL *pbuffer, UINT nCount)
-//-----------------------------------------------------------------
+static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
+//--------------------------------------------------------------------
 {
 	for (UINT i=0; i<nCount; i++)
 	{
-		REAL x = pbuffer[i];
-		REAL y = pbs->a1 * pbs->x1 + pbs->a2 * pbs->x2 + pbs->a0 * x + pbs->b1 * pbs->y1 + pbs->b2 * pbs->y2;
+		float32 x = pbuffer[i];
+		float32 y = pbs->a1 * pbs->x1 + pbs->a2 * pbs->x2 + pbs->a0 * x + pbs->b1 * pbs->y1 + pbs->b2 * pbs->y2;
 		pbs->x2 = pbs->x1;
 		pbs->y2 = pbs->y1;
 		pbs->x1 = x;
@@ -407,6 +407,10 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSound
 CEQ::CEQ()
 //--------
 {
+	#if defined(ENABLE_MMX) || defined(ENABLE_SSE)
+		ALWAYS_ASSERT(((uintptr_t)&(gEQ[0])) % 4 == 0);
+		ALWAYS_ASSERT(((uintptr_t)&(gEQ[1])) % 4 == 0);
+	#endif
 	memcpy(gEQ, gEQDefaults, sizeof(gEQ));
 }
 
@@ -414,12 +418,12 @@ CEQ::CEQ()
 void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
 //-------------------------------------------------
 {
-	REAL fMixingFreq = (REAL)MixingFreq;
+	float32 fMixingFreq = (float32)MixingFreq;
 	// Gain = 0.5 (-6dB) .. 2 (+6dB)
 	for (UINT band=0; band<MAX_EQ_BANDS*2; band++) if (gEQ[band].bEnable)
 	{
-		REAL k, k2, r, f;
-		REAL v0, v1;
+		float32 k, k2, r, f;
+		float32 v0, v1;
 		BOOL b = bReset;
 
 		f = gEQ[band].CenterFrequency / fMixingFreq;
@@ -428,7 +432,7 @@ void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
 		// k = tan(PI*f);
 		k = f * 3.141592654f;
 		k = k + k*f;
-//		if (k > (REAL)0.707) k = (REAL)0.707;
+//		if (k > (float32)0.707) k = (float32)0.707;
 		k2 = k*k;
 		v0 = gEQ[band].Gain;
 		v1 = 1;
@@ -445,31 +449,31 @@ void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
 		if (r != gEQ[band].a0)
 		{
 			gEQ[band].a0 = r;
-			b = TRUE;
+			b = true;
 		}
 		r = 2 * (k2 - 1) / (1 + v1*k + k2);
 		if (r != gEQ[band].a1)
 		{
 			gEQ[band].a1 = r;
-			b = TRUE;
+			b = true;
 		}
 		r = (1 - v0*k + k2) / (1 + v1*k + k2);
 		if (r != gEQ[band].a2)
 		{
 			gEQ[band].a2 = r;
-			b = TRUE;
+			b = true;
 		}
 		r = - 2 * (k2 - 1) / (1 + v1*k + k2);
 		if (r != gEQ[band].b1)
 		{
 			gEQ[band].b1 = r;
-			b = TRUE;
+			b = true;
 		}
 		r = - (1 - v1*k + k2) / (1 + v1*k + k2);
 		if (r != gEQ[band].b2)
 		{
 			gEQ[band].b2 = r;
-			b = TRUE;
+			b = true;
 		}
 		if (b)
 		{
@@ -498,13 +502,13 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL b
 {
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
-		REAL g, f = 0;
+		float32 g, f = 0;
 		if (i < nGains)
 		{
 			UINT n = pGains[i];
 			if (n > 32) n = 32;
-			g = ((REAL)gEqLinearToDB[n]) / 64.0f;
-			if (pFreqs) f = (REAL)(int)pFreqs[i];
+			g = ((float32)gEqLinearToDB[n]) / 64.0f;
+			if (pFreqs) f = (float32)(int)pFreqs[i];
 		} else
 		{
 			g = 1;
@@ -515,12 +519,12 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL b
 		gEQ[i+MAX_EQ_BANDS].CenterFrequency = f;
 		if (f > 20.0f)
 		{
-			gEQ[i].bEnable = TRUE;
-			gEQ[i+MAX_EQ_BANDS].bEnable = TRUE;
+			gEQ[i].bEnable = true;
+			gEQ[i+MAX_EQ_BANDS].bEnable = true;
 		} else
 		{
-			gEQ[i].bEnable = FALSE;
-			gEQ[i+MAX_EQ_BANDS].bEnable = FALSE;
+			gEQ[i].bEnable = false;
+			gEQ[i+MAX_EQ_BANDS].bEnable = false;
 		}
 	}
 	Initialize(bReset, MixingFreq);

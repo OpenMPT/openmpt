@@ -12,9 +12,11 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct UltFileHeader
+struct PACKED UltFileHeader
 {
 	char  signature[14];		// "MAS_UTrack_V00"
 	uint8 version;				// '1'...'4'
@@ -25,7 +27,7 @@ struct UltFileHeader
 STATIC_ASSERT(sizeof(UltFileHeader) == 48);
 
 
-struct UltSample
+struct PACKED UltSample
 {
 	enum UltSampleFlags
 	{
@@ -97,7 +99,9 @@ struct UltSample
 
 STATIC_ASSERT(sizeof(UltSample) == 66);
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 /* Unhandled effects:
 5x1 - do not loop sample (x is unused)

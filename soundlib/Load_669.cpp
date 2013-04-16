@@ -13,9 +13,11 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct _669FileHeader
+struct PACKED _669FileHeader
 {
 	enum MagicBytes
 	{
@@ -42,7 +44,7 @@ struct _669FileHeader
 STATIC_ASSERT(sizeof(_669FileHeader) == 497);
 
 
-struct _669Sample
+struct PACKED _669Sample
 {
 	char   filename[13];
 	uint32 length;
@@ -80,7 +82,9 @@ struct _669Sample
 
 STATIC_ASSERT(sizeof(_669Sample) == 25);
 
+#ifdef USER_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::Read669(FileReader &file)

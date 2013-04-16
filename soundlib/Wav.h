@@ -40,17 +40,22 @@
 #define IFFID_cue		0x20657563
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct WAVEFILEHEADER
+
+typedef struct PACKED WAVEFILEHEADER
 {
 	DWORD id_RIFF;		// "RIFF"
 	DWORD filesize;		// file length-8
 	DWORD id_WAVE;
 } WAVEFILEHEADER;
 
+STATIC_ASSERT(sizeof(WAVEFILEHEADER) == 12);
 
-typedef struct WAVEFORMATHEADER
+
+typedef struct PACKED WAVEFORMATHEADER
 {
 	DWORD id_fmt;		// "fmt "
 	DWORD hdrlen;		// 16
@@ -62,15 +67,19 @@ typedef struct WAVEFORMATHEADER
 	WORD bitspersample;	// bits per sample (8/16)
 } WAVEFORMATHEADER;
 
+STATIC_ASSERT(sizeof(WAVEFORMATHEADER) == 24);
 
-typedef struct WAVEDATAHEADER
+
+typedef struct PACKED WAVEDATAHEADER
 {
 	DWORD id_data;		// "data"
 	DWORD length;		// length of data
 } WAVEDATAHEADER;
 
+STATIC_ASSERT(sizeof(WAVEDATAHEADER) == 8);
 
-typedef struct WAVESMPLHEADER
+
+typedef struct PACKED WAVESMPLHEADER
 {
 	// SMPL
 	DWORD smpl_id;		// "smpl"	-> 0x6C706D73
@@ -86,8 +95,10 @@ typedef struct WAVESMPLHEADER
 	DWORD cbSamplerData;
 } WAVESMPLHEADER;
 
+STATIC_ASSERT(sizeof(WAVESMPLHEADER) == 44);
 
-typedef struct SAMPLELOOPSTRUCT
+
+typedef struct PACKED SAMPLELOOPSTRUCT
 {
 	DWORD dwIdentifier;
 	DWORD dwLoopType;		// 0=normal, 1=bidi
@@ -116,23 +127,29 @@ typedef struct SAMPLELOOPSTRUCT
 
 } SAMPLELOOPSTRUCT;
 
+STATIC_ASSERT(sizeof(SAMPLELOOPSTRUCT) == 24);
 
-typedef struct WAVESAMPLERINFO
+
+typedef struct PACKED WAVESAMPLERINFO
 {
 	WAVESMPLHEADER wsiHdr;
 	SAMPLELOOPSTRUCT wsiLoops[2];
 } WAVESAMPLERINFO;
 
+STATIC_ASSERT(sizeof(WAVESAMPLERINFO) == 92);
 
-typedef struct WAVELISTHEADER
+
+typedef struct PACKED WAVELISTHEADER
 {
 	DWORD list_id;	// "LIST" -> 0x5453494C
 	DWORD list_len;
 	DWORD info;		// "INFO"
 } WAVELISTHEADER;
 
+STATIC_ASSERT(sizeof(WAVELISTHEADER) == 12);
 
-typedef struct WAVEEXTRAHEADER
+
+typedef struct PACKED WAVEEXTRAHEADER
 {
 	DWORD xtra_id;	// "xtra"	-> 0x61727478
 	DWORD xtra_len;
@@ -147,8 +164,10 @@ typedef struct WAVEEXTRAHEADER
 	BYTE nVibRate;
 } WAVEEXTRAHEADER;
 
+STATIC_ASSERT(sizeof(WAVEEXTRAHEADER) == 24);
 
-struct WavCueHeader
+
+struct PACKED WavCueHeader
 {
 	uint32 id;	// "cue "	-> 0x20657563
 	uint32 length;
@@ -163,8 +182,10 @@ struct WavCueHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(WavCueHeader) == 12);
 
-struct WavCuePoint
+
+struct PACKED WavCuePoint
 {
 	uint32 id;			// Unique identification value
 	uint32 pos;			// Play order position
@@ -185,5 +206,9 @@ struct WavCuePoint
 	}
 };
 
+STATIC_ASSERT(sizeof(WavCuePoint) == 24);
 
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif

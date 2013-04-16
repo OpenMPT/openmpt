@@ -15,9 +15,11 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct PTMFILEHEADER
+typedef struct PACKED PTMFILEHEADER
 {
 	CHAR songname[28];		// name of song, asciiz string
 	CHAR eof;				// 26
@@ -37,8 +39,9 @@ typedef struct PTMFILEHEADER
 	WORD patseg[128];		// pattern offsets (*16)
 } PTMFILEHEADER, *LPPTMFILEHEADER;
 
+STATIC_ASSERT(sizeof(PTMFILEHEADER) == 608);
 
-typedef struct PTMSAMPLE
+typedef struct PACKED PTMSAMPLE
 {
 	BYTE sampletype;		// sample type (bit array)
 	CHAR filename[12];		// name of external sample file
@@ -54,7 +57,11 @@ typedef struct PTMSAMPLE
 	DWORD ptms_id;			// sample identification, 'PTMS' or 0x534d5450
 } PTMSAMPLE;
 
+STATIC_ASSERT(sizeof(PTMSAMPLE) == 80);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)

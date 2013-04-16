@@ -15,9 +15,11 @@
 #include "mod2midi.h"
 #include "Wav.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-typedef struct _RMIDDATACHUNK
+typedef struct PACKED _RMIDDATACHUNK
 {
 	DWORD id_RIFF;	// "RIFF"
 	DWORD filelen;
@@ -26,7 +28,9 @@ typedef struct _RMIDDATACHUNK
 	DWORD datalen;
 } RMIDDATACHUNK, *PRMIDDATACHUNK;
 
-typedef struct _MTHDCHUNK	// (big endian)
+STATIC_ASSERT(sizeof(RMIDDATACHUNK) == 20);
+
+typedef struct PACKED _MTHDCHUNK	// (big endian)
 {
 	DWORD id;		// "MThd" = 0x6468544D
 	DWORD len;		// 6
@@ -35,11 +39,19 @@ typedef struct _MTHDCHUNK	// (big endian)
 	WORD wDivision;	// PPQN
 } MTHDCHUNK, *PMTHDCHUNK;
 
-typedef struct _MTRKCHUNK	// (big endian)
+STATIC_ASSERT(sizeof(MTHDCHUNK) == 14);
+
+typedef struct PACKED _MTRKCHUNK	// (big endian)
 {
 	DWORD id;		// "MTrk" = 0x6B72544D
 	DWORD len;
 } MTRKCHUNK, *PMTRKCHUNK;
+
+STATIC_ASSERT(sizeof(MTRKCHUNK) == 8);
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 typedef struct _DYNMIDITRACK
 {
@@ -55,8 +67,6 @@ typedef struct _DYNMIDITRACK
 	void Write(const void *, unsigned long nBytes);
 	void WriteLen(unsigned long len);
 } DYNMIDITRACK, *PDYNMIDITRACK;
-
-#pragma pack(pop)
 
 
 void DYNMIDITRACK::Write(const void *pBuffer, unsigned long nBytes)

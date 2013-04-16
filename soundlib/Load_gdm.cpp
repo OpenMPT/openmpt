@@ -16,10 +16,13 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
+
 
 // GDM File Header
-struct GDMFileHeader
+struct PACKED GDMFileHeader
 {
 	// Header magic bytes
 	enum HeaderMagic
@@ -82,8 +85,11 @@ struct GDMFileHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(GDMFileHeader) == 157);
+
+
 // GDM Sample Header
-struct GDMSampleHeader
+struct PACKED GDMSampleHeader
 {
 	enum SampleFlags
 	{
@@ -116,7 +122,13 @@ struct GDMSampleHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(GDMSampleHeader) == 62);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
+
 
 bool CSoundFile::ReadGDM(FileReader &file)
 //----------------------------------------

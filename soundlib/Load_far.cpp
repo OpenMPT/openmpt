@@ -12,10 +12,12 @@
 #include "Loaders.h"
 
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 // FAR File Header
-struct FARFileHeader
+struct PACKED FARFileHeader
 {
 	uint8  magic[4];
 	char   songName[40];
@@ -40,7 +42,7 @@ struct FARFileHeader
 STATIC_ASSERT(sizeof(FARFileHeader) == 98);
 
 
-struct FAROrderHeader
+struct PACKED FAROrderHeader
 {
 	uint8  orders[256];
 	uint8  numPatterns;	// supposed to be "number of patterns stored in the file"; apparently that's wrong
@@ -62,7 +64,7 @@ STATIC_ASSERT(sizeof(FAROrderHeader) == 771);
 
 
 // FAR Sample header
-struct FARSampleHeader
+struct PACKED FARSampleHeader
 {
 	// Sample flags
 	enum SampleFlags
@@ -125,7 +127,9 @@ struct FARSampleHeader
 
 STATIC_ASSERT(sizeof(FARSampleHeader) == 48);
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadFAR(FileReader &file)

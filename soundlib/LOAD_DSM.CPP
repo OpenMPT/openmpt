@@ -12,7 +12,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
 #define DSMID_RIFF	0x46464952	// "RIFF"
 #define DSMID_DSMF	0x464d5344	// "DSMF"
@@ -21,13 +23,15 @@
 #define DSMID_PATT	0x54544150	// "PATT"
 
 
-typedef struct DSMNOTE
+typedef struct PACKED DSMNOTE
 {
 	BYTE note,ins,vol,cmd,inf;
 } DSMNOTE;
 
+STATIC_ASSERT(sizeof(DSMNOTE) == 5);
 
-typedef struct DSMSAMPLE
+
+typedef struct PACKED DSMSAMPLE
 {
 	DWORD id_INST;
 	DWORD inst_len;
@@ -44,8 +48,10 @@ typedef struct DSMSAMPLE
 	CHAR samplename[28];
 } DSMSAMPLE;
 
+STATIC_ASSERT(sizeof(DSMSAMPLE) == 72);
 
-typedef struct DSMFILEHEADER
+
+typedef struct PACKED DSMFILEHEADER
 {
 	DWORD id_RIFF;	// "RIFF"
 	DWORD riff_len;
@@ -54,8 +60,10 @@ typedef struct DSMFILEHEADER
 	DWORD song_len;
 } DSMFILEHEADER;
 
+STATIC_ASSERT(sizeof(DSMFILEHEADER) == 20);
 
-typedef struct DSMSONG
+
+typedef struct PACKED DSMSONG
 {
 	CHAR songname[28];
 	WORD reserved1;
@@ -73,7 +81,10 @@ typedef struct DSMSONG
 	BYTE orders[128];
 } DSMSONG;
 
-typedef struct DSMPATT
+STATIC_ASSERT(sizeof(DSMSONG) == 192);
+
+
+typedef struct PACKED DSMPATT
 {
 	DWORD id_PATT;
 	DWORD patt_len;
@@ -81,7 +92,12 @@ typedef struct DSMPATT
 	BYTE dummy2;
 } DSMPATT;
 
+STATIC_ASSERT(sizeof(DSMPATT) == 10);
+
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)

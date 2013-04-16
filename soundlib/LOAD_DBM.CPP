@@ -24,9 +24,11 @@
 #define DBM_ID_PATT		0x54544150
 #define DBM_ID_SMPL		0x4c504d53
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
+#endif
 
-struct DBMFileHeader
+struct PACKED DBMFileHeader
 {
 	uint32 dbm_id;		// "DBM0" = 0x304d4244
 	uint16 trkver;		// Tracker version: 02.15
@@ -48,7 +50,9 @@ struct DBMFileHeader
 //	uint16 orderlist[0];	// orderlist[orders] in words
 };
 
-struct DBMInstrument
+STATIC_ASSERT(sizeof(DBMFileHeader) == 132);
+
+struct PACKED DBMInstrument
 {
 	char   name[30];
 	uint16 sampleno;
@@ -60,7 +64,9 @@ struct DBMInstrument
 	uint16 flags;
 };
 
-struct DBMEnvelope
+STATIC_ASSERT(sizeof(DBMInstrument) == 50);
+
+struct PACKED DBMEnvelope
 {
 	uint16 instrument;
 	uint8  flags;
@@ -72,21 +78,29 @@ struct DBMEnvelope
 	uint16 volenv[2 * 32];
 };
 
-struct DBMPattern
+STATIC_ASSERT(sizeof(DBMEnvelope) == 136);
+
+struct PACKED DBMPattern
 {
 	uint16 rows;
 	uint32 packedsize;
 	uint8  patterndata[2];	// [packedsize]
 };
 
-struct DBMSample
+STATIC_ASSERT(sizeof(DBMPattern) == 8);
+
+struct PACKED DBMSample
 {
 	uint32 flags;
 	uint32 samplesize;
 	uint8  sampledata[2];		// [samplesize]
 };
 
+STATIC_ASSERT(sizeof(DBMSample) == 10);
+
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 static const ModCommand::COMMAND dbmEffects[23] =

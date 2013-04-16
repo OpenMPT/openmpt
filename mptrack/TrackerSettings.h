@@ -118,12 +118,19 @@ enum
 
 
 // EQ
-struct EQPreset
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
+struct PACKED EQPreset
 {
 	char szName[12];
 	UINT Gains[MAX_EQ_BANDS];
 	UINT Freqs[MAX_EQ_BANDS];
 };
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
+STATIC_ASSERT(sizeof(EQPreset) == 60);
 
 
 // Chords
