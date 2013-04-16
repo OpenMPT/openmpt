@@ -709,9 +709,8 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	srlztn::Binaryread<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
-		// Hack: Show message here if trying to load longer sequence than what is supported.
 		mpt::String str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
-		Reporting::Warning(str);
+		seq.m_pSndFile->AddToLog(str);
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq.resize(MAX(size, MAX_ORDERS));
