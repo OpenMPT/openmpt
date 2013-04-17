@@ -1650,9 +1650,10 @@ BOOL CSoundFile::ProcessEffects()
 					// Additional test case: tickdelay.it
 					if(instr)
 					{
-						if(GetNumInstruments() < 1 && instr < MAX_SAMPLES)
+						if(GetNumInstruments() == 0)
 						{
-							pChn->pModSample = &Samples[instr];
+							if(instr < MAX_SAMPLES)
+								pChn->pModSample = &Samples[instr];
 						} else
 						{
 							if(instr < MAX_INSTRUMENTS)
@@ -1761,6 +1762,16 @@ BOOL CSoundFile::ProcessEffects()
 				if((computedNote < NOTE_MIN + 11 || computedNote > NOTE_MIN + 130))
 				{
 					note = NOTE_NONE;
+				}
+			} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(note))
+			{
+				// IT compatibility: Invalid instrument numbers do nothing, but they are remembered for upcoming notes and do not trigger a note in that case.
+				// Test case: InstrumentNumberChange.it
+				INSTRUMENTINDEX instrToCheck = (instr != 0 ? instr : pChn->nOldIns);
+				if(instrToCheck != 0 && (instrToCheck > GetNumInstruments() || Instruments[instrToCheck] == nullptr))
+				{
+					note = NOTE_NONE;
+					instr = 0;
 				}
 			}
 
@@ -1928,7 +1939,7 @@ BOOL CSoundFile::ProcessEffects()
 			if(instr)
 			{
 				const ModSample *oldSample = pChn->pModSample;
-				const ModInstrument *oldInstrument = pChn->pModInstrument;
+				//const ModInstrument *oldInstrument = pChn->pModInstrument;
 
 				InstrumentChange(pChn, instr, bPorta, true);
 				pChn->nNewIns = 0;
@@ -2548,6 +2559,12 @@ BOOL CSoundFile::ProcessEffects()
 		if(GetType() == MOD_TYPE_S3M && param != 0)
 		{
 			UpdateS3MEffectMemory(pChn, param);
+		}
+
+		if(pChn->rowCommand.instr)
+		{
+			// Not necessarily consistent with actually playing instrument for IT compatibility
+			pChn->nOldIns = pChn->rowCommand.instr;
 		}
 
 	} // for(...) end
