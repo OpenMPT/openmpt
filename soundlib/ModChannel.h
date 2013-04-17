@@ -83,7 +83,7 @@ struct ALIGN(32) ModChannel
 	uint8 nRestoreCutoffOnNewNote; //Like above
 	uint8 nNote, nNNA;
 	uint8 nLastNote;				// Last note, ignoring note offs and cuts - for MIDI macros
-	uint8 nNewNote, nNewIns, nCommand, nArpeggio;
+	uint8 nNewNote, nNewIns, nOldIns, nCommand, nArpeggio;
 	uint8 nOldVolumeSlide, nOldFineVolUpDown;
 	uint8 nOldPortaUpDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
 	uint8 nOldPanSlide, nOldChnVolSlide;

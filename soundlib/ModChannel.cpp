@@ -17,7 +17,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 {
 	if(resetMask & resetSetPosBasic)
 	{
-		nNote = nNewNote = nNewIns = 0;
+		nNote = nNewNote = nNewIns = nOldIns = 0;
 		pModSample = nullptr;
 		pModInstrument = nullptr;
 		nPortamentoDest = 0;
