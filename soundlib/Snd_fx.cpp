@@ -1728,7 +1728,7 @@ BOOL CSoundFile::ProcessEffects()
 		if(triggerNote)
 		{
 			UINT note = pChn->rowCommand.note;
-			if (instr) pChn->nNewIns = instr;
+			if(instr) pChn->nNewIns = instr;
 
 			if(ModCommand::IsNote(note) && IsCompatibleMode(TRK_FASTTRACKER2))
 			{
@@ -1763,7 +1763,7 @@ BOOL CSoundFile::ProcessEffects()
 				{
 					note = NOTE_NONE;
 				}
-			} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(note))
+			} else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(note))
 			{
 				// IT compatibility: Invalid instrument numbers do nothing, but they are remembered for upcoming notes and do not trigger a note in that case.
 				// Test case: InstrumentNumberChange.it

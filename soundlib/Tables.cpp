@@ -116,14 +116,14 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 
 ///////////////////////////////////////////////////////////////////////
 
-const BYTE ImpulseTrackerPortaVolCmd[16] =
+const uint8 ImpulseTrackerPortaVolCmd[16] =
 {
 	0x00, 0x01, 0x04, 0x08, 0x10, 0x20, 0x40, 0x60,
 	0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
 // Period table for Protracker octaves 0-5:
-const WORD ProTrackerPeriodTable[6*12] =
+const uint16 ProTrackerPeriodTable[6*12] =
 {
 	1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907,
 	856,808,762,720,678,640,604,570,538,508,480,453,
@@ -134,7 +134,7 @@ const WORD ProTrackerPeriodTable[6*12] =
 };
 
 
-const WORD ProTrackerTunedPeriods[16*12] = 
+const uint16 ProTrackerTunedPeriods[16*12] = 
 {
 	1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907,
 	1700,1604,1514,1430,1348,1274,1202,1134,1070,1010,954,900,
@@ -155,14 +155,14 @@ const WORD ProTrackerTunedPeriods[16*12] =
 };
 
 // Table for Invert Loop and Funk Repeat effects (EFx, .MOD only)
-const BYTE ModEFxTable[16] =
+const uint8 ModEFxTable[16] =
 {
 	 0,  5,  6,  7,  8, 10, 11, 13,
 	16, 19, 22, 26, 32, 43, 64, 128
 }; 
 
 // S3M C-4 periods
-const WORD FreqS3MTable[16] = 
+const uint16 FreqS3MTable[16] = 
 {
 	1712,1616,1524,1440,1356,1280,
 	1208,1140,1076,1016,960,907,
@@ -170,7 +170,7 @@ const WORD FreqS3MTable[16] =
 };
 
 // S3M FineTune frequencies
-const WORD S3MFineTuneTable[16] = 
+const uint16 S3MFineTuneTable[16] = 
 {
 	7895,7941,7985,8046,8107,8169,8232,8280,
 	8363,8413,8463,8529,8581,8651,8723,8757,	// 8363*2^((i-8)/(12*8))
@@ -178,7 +178,7 @@ const WORD S3MFineTuneTable[16] =
 
 
 // Sinus table
-const short int ModSinusTable[64] =
+const int8 ModSinusTable[64] =
 {
 	0,12,25,37,49,60,71,81,90,98,106,112,117,122,125,126,
 	127,126,125,122,117,112,106,98,90,81,71,60,49,37,25,12,
@@ -187,7 +187,7 @@ const short int ModSinusTable[64] =
 };
 
 // Triangle wave table (ramp down)
-const short int ModRampDownTable[64] =
+const int8 ModRampDownTable[64] =
 {
 	0,-4,-8,-12,-16,-20,-24,-28,-32,-36,-40,-44,-48,-52,-56,-60,
 	-64,-68,-72,-76,-80,-84,-88,-92,-96,-100,-104,-108,-112,-116,-120,-124,
@@ -196,7 +196,7 @@ const short int ModRampDownTable[64] =
 };
 
 // Square wave table
-const short int ModSquareTable[64] =
+const int8 ModSquareTable[64] =
 {
 	127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,
 	127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,
@@ -205,7 +205,7 @@ const short int ModSquareTable[64] =
 };
 
 // Random wave table
-short int ModRandomTable[64] =
+const int8 ModRandomTable[64] =
 {
 	98,-127,-43,88,102,41,-65,-94,125,20,-71,-86,-70,-32,-16,-96,
 	17,72,107,-5,116,-69,-62,-40,10,-61,65,109,-18,-38,-13,-76,
@@ -216,7 +216,7 @@ short int ModRandomTable[64] =
 // Impulse Tracker tables (ITTECH.TXT)
 
 // Sinus table
-const short int ITSinusTable[256] =
+const int8 ITSinusTable[256] =
 {
 	  0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
 	 24, 26, 27, 29, 30, 32, 33, 34, 36, 37, 38, 39, 41, 42, 43, 44,
@@ -237,7 +237,7 @@ const short int ITSinusTable[256] =
 };
 
 // Triangle wave table (ramp down)
-const short int ITRampDownTable[256] =
+const int8 ITRampDownTable[256] =
 {
 	 64, 63, 63, 62, 62, 61, 61, 60, 60, 59, 59, 58, 58, 57, 57, 56,
 	 56, 55, 55, 54, 54, 53, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48,
@@ -258,7 +258,7 @@ const short int ITRampDownTable[256] =
 };
 
 // Square wave table
-const short int ITSquareTable[256] =
+const int8 ITSquareTable[256] =
 {
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
@@ -279,16 +279,16 @@ const short int ITSquareTable[256] =
 };
 
 // volume fade tables for Retrig Note:
-const signed char retrigTable1[16] =
+const int8 retrigTable1[16] =
 { 0, 0, 0, 0, 0, 0, 10, 8, 0, 0, 0, 0, 0, 0, 24, 32 };
 
-const signed char retrigTable2[16] =
+const int8 retrigTable2[16] =
 { 0, -1, -2, -4, -8, -16, 0, 0, 0, 1, 2, 4, 8, 16, 0, 0 };
 
 
 
 
-const WORD XMPeriodTable[104] = 
+const uint16 XMPeriodTable[104] = 
 {
 	907,900,894,887,881,875,868,862,856,850,844,838,832,826,820,814,
 	808,802,796,791,785,779,774,768,762,757,752,746,741,736,730,725,
@@ -300,7 +300,7 @@ const WORD XMPeriodTable[104] =
 };
 
 
-const UINT XMLinearTable[768] = 
+const uint32 XMLinearTable[768] = 
 {
 	535232,534749,534266,533784,533303,532822,532341,531861,
 	531381,530902,530423,529944,529466,528988,528511,528034,
@@ -401,7 +401,7 @@ const UINT XMLinearTable[768] =
 };
 
 
-const signed char ft2VibratoTable[256] = 
+const int8 ft2VibratoTable[256] = 
 {
 	0,-2,-3,-5,-6,-8,-9,-11,-12,-14,-16,-17,-19,-20,-22,-23,
 	-24,-26,-27,-29,-30,-32,-33,-34,-36,-37,-38,-39,-41,-42,
@@ -423,21 +423,21 @@ const signed char ft2VibratoTable[256] =
 
 
 
-const DWORD FineLinearSlideUpTable[16] =
+const uint32 FineLinearSlideUpTable[16] =
 {
 	65536, 65595, 65654, 65714,	65773, 65832, 65892, 65951,
 	66011, 66071, 66130, 66190, 66250, 66309, 66369, 66429
 };
 
 
-const DWORD FineLinearSlideDownTable[16] =
+const uint32 FineLinearSlideDownTable[16] =
 {
 	65535, 65477, 65418, 65359, 65300, 65241, 65182, 65123,
 	65065, 65006, 64947, 64888, 64830, 64772, 64713, 64645
 };
 
 
-const DWORD LinearSlideUpTable[256] = 
+const uint32 LinearSlideUpTable[256] = 
 {
 	65536, 65773, 66010, 66249, 66489, 66729, 66971, 67213, 
 	67456, 67700, 67945, 68190, 68437, 68685, 68933, 69182, 
@@ -475,7 +475,7 @@ const DWORD LinearSlideUpTable[256] =
 
 
 
-const DWORD LinearSlideDownTable[256] = 
+const uint32 LinearSlideDownTable[256] = 
 {
 	65536, 65299, 65064, 64830, 64596, 64363, 64131, 63900, 
 	63670, 63440, 63212, 62984, 62757, 62531, 62305, 62081, 
@@ -552,7 +552,7 @@ const float ITResonanceTable[128] =
 
 // Reversed sinc coefficients
 
-const short int CResampler::FastSincTable[256*4] =
+const int16 CResampler::FastSincTable[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 
  -124, 16374,   135,    -1,  -153, 16368,   172,    -3,  -183, 16361,   209,    -4,  -211, 16353,   247,    -5, 
@@ -694,8 +694,8 @@ static void getdownsample2x(short int *psinc)
 
 #ifdef MODPLUG_TRACKER
 bool CResampler::StaticTablesInitialized = false;
-short int CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-short int CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+int16 CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+int16 CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #endif
 
 
