@@ -1892,24 +1892,20 @@ void CSoundFile::UpgradeModFlags()
 struct UpgradePatternData
 //=======================
 {
-	UpgradePatternData(CSoundFile *pSndFile)
-	{
-		this->pSndFile = pSndFile;
-		chn = 0;
-	}
+	UpgradePatternData(CSoundFile &sf) : sndFile(sf), chn(0) { }
 
 	void operator()(ModCommand& m)
 	{
-		if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
-			(!pSndFile->IsCompatibleMode(TRK_ALLTRACKERS) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+		if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
+			(!sndFile.IsCompatibleMode(TRK_ALLTRACKERS) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 		{
 			if(m.command == CMD_GLOBALVOLUME)
 			{
 				// Out-of-range global volume commands should be ignored.
 				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
 				// So for tracks made with older versions than OpenMPT 1.17.03.02 or tracks made with 1.17.03.02 <= version < 1.20, we limit invalid global volume commands.
-				LimitMax(m.param, (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? BYTE(128): BYTE(64));
-			} else if(m.command == CMD_S3MCMDEX && (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+				LimitMax(m.param, (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? BYTE(128): BYTE(64));
+			} else if(m.command == CMD_S3MCMDEX && (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
 				// SC0 and SD0 should be interpreted as SC1 and SD1 in IT files.
 				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
@@ -1924,19 +1920,19 @@ struct UpgradePatternData
 			}
 		}
 
-		if((pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		{
 			// In the IT format, slide commands with both nibbles set should be ignored.
 			// For note volume slides, OpenMPT 1.18 fixes this in compatible mode, OpenMPT 1.20 fixes this in normal mode as well.
 			const bool noteVolSlide =
-				(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
-				(!pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
+				(!sndFile.IsCompatibleMode(TRK_IMPULSETRACKER) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 				&&
 				(m.command == CMD_VOLUMESLIDE || m.command == CMD_VIBRATOVOL || m.command == CMD_TONEPORTAVOL || m.command == CMD_PANNINGSLIDE);
 
 			// OpenMPT 1.20 also fixes this for global volume and channel volume slides.
 			const bool chanVolSlide =
-				(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+				(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
 				&&
 				(m.command == CMD_GLOBALVOLSLIDE || m.command == CMD_CHANNELVOLSLIDE);
 
@@ -1947,9 +1943,19 @@ struct UpgradePatternData
 					m.param &= 0x0F;
 				}
 			}
+
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 04) && sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))
+			{
+				// OpenMPT 1.22.01.04 fixes illegal (out of range) instrument numbers; they should do nothing. In previous versions, they stopped the playing sample.
+				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments())
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = 0;
+				}
+			}
 		}
 
-		if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+		if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
 		{
 			// Pattern Delay fixes
 
@@ -1957,7 +1963,7 @@ struct UpgradePatternData
 			// We also fix X6x commands in hacked XM files, since they are treated identically to the S6x command in IT/S3M files.
 			// We don't treat them in files made with OpenMPT 1.18+ that have compatible play enabled, though, since they are ignored there anyway.
 			const bool fixX6x = (m.command == CMD_XFINEPORTAUPDOWN && (m.param & 0xF0) == 0x60
-				&& (!pSndFile->IsCompatibleMode(TRK_FASTTRACKER2) || pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
+				&& (!sndFile.IsCompatibleMode(TRK_FASTTRACKER2) || sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
 
 			if(fixS6x || fixX6x)
 			{
@@ -1989,10 +1995,10 @@ struct UpgradePatternData
 			}
 		}
 
-		if(pSndFile->GetType() == MOD_TYPE_XM)
+		if(sndFile.GetType() == MOD_TYPE_XM)
 		{
-			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
-				|| (!pSndFile->IsCompatibleMode(TRK_FASTTRACKER2) && pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
+				|| (!sndFile.IsCompatibleMode(TRK_FASTTRACKER2) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
@@ -2002,10 +2008,10 @@ struct UpgradePatternData
 				}
 			}
 
-			if(pSndFile->m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
-				&& pSndFile->m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)	// Ignore compatibility export
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
+				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)	// Ignore compatibility export
 				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
-				&& (m.vol != 0 || pSndFile->IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
+				&& (m.vol != 0 || sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
 			{
 				// Mx and 3xx on the same row does weird things in FT2: 3xx is completely ignored and the Mx parameter is doubled. Fixed in revision 1312 / OpenMPT 1.20.01.10
 				// Previously the values were just added up, so let's fix this!
@@ -2016,14 +2022,14 @@ struct UpgradePatternData
 		}
 
 		chn++;
-		if(chn >= pSndFile->GetNumChannels())
+		if(chn >= sndFile.GetNumChannels())
 		{
 			chn = 0;
 		}
 
 	}
 
-	CSoundFile *pSndFile;
+	CSoundFile &sndFile;
 	CHANNELINDEX chn;
 };
 
@@ -2089,5 +2095,5 @@ void CSoundFile::UpgradeSong()
 		}
 	}
 
-	Patterns.ForEachModCommand(UpgradePatternData(this));
+	Patterns.ForEachModCommand(UpgradePatternData(*this));
 }

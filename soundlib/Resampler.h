@@ -47,16 +47,16 @@ class CResampler
 public:
 	CResamplerSettings m_Settings;
 	CWindowedFIR m_WindowedFIR;
-	static const short int FastSincTable[256*4];
-	short int gKaiserSinc[SINC_PHASES*8];		// Upsampling
+	static const int16 FastSincTable[256*4];
+	int16 gKaiserSinc[SINC_PHASES*8];		// Upsampling
 #ifdef MODPLUG_TRACKER
 	static bool StaticTablesInitialized;
-	static short int gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-	static short int gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+	static int16 gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+	static int16 gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #else
 	// no global data which has to be initialized by hand in the library
-	short int gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-	short int gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+	int16 gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+	int16 gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #endif
 private:
 	CResamplerSettings m_OldSettings;

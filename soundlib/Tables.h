@@ -12,26 +12,26 @@
 #pragma once
 
 
-extern const BYTE ImpulseTrackerPortaVolCmd[16];
-extern const WORD ProTrackerPeriodTable[6*12];
-extern const WORD ProTrackerTunedPeriods[16*12];
-extern const BYTE ModEFxTable[16];
-extern const WORD FreqS3MTable[16];
-extern const WORD S3MFineTuneTable[16];
-extern const short int ModSinusTable[64];
-extern const short int ModRampDownTable[64];
-extern const short int ModSquareTable[64];
-extern short int ModRandomTable[64];
-extern const short int ITSinusTable[256];
-extern const short int ITRampDownTable[256];
-extern const short int ITSquareTable[256];
-extern const signed char retrigTable1[16];
-extern const signed char retrigTable2[16];
-extern const WORD XMPeriodTable[104];
-extern const UINT XMLinearTable[768];
-extern const signed char ft2VibratoTable[256];
-extern const DWORD FineLinearSlideUpTable[16];
-extern const DWORD FineLinearSlideDownTable[16];
-extern const DWORD LinearSlideUpTable[256];
-extern const DWORD LinearSlideDownTable[256];
+extern const uint8 ImpulseTrackerPortaVolCmd[16];
+extern const uint16 ProTrackerPeriodTable[6*12];
+extern const uint16 ProTrackerTunedPeriods[16*12];
+extern const uint8 ModEFxTable[16];
+extern const uint16 FreqS3MTable[16];
+extern const uint16 S3MFineTuneTable[16];
+extern const int8 ModSinusTable[64];
+extern const int8 ModRampDownTable[64];
+extern const int8 ModSquareTable[64];
+extern const int8 ModRandomTable[64];
+extern const int8 ITSinusTable[256];
+extern const int8 ITRampDownTable[256];
+extern const int8 ITSquareTable[256];
+extern const int8 retrigTable1[16];
+extern const int8 retrigTable2[16];
+extern const uint16 XMPeriodTable[104];
+extern const uint32 XMLinearTable[768];
+extern const int8 ft2VibratoTable[256];
+extern const uint32 FineLinearSlideUpTable[16];
+extern const uint32 FineLinearSlideDownTable[16];
+extern const uint32 LinearSlideUpTable[256];
+extern const uint32 LinearSlideDownTable[256];
 extern const float ITResonanceTable[128];
