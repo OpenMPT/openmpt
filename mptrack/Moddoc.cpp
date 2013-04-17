@@ -224,7 +224,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	if (GetLog().size() > 0)
 	{
 		CString sTemp;
-		sTemp.Format("File: %s\nLast saved with: %s, your version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLogString());
+		sTemp.Format("File: %s\nLast saved with: %s, your version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLogString().c_str());
 		Reporting::Information(sTemp);
 		ClearLog();
 	}
