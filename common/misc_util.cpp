@@ -65,8 +65,10 @@ std::string GetErrorMessage(DWORD nErrorCode)
 #endif // MODPLUG_TRACKER
 
 
+
+#ifdef MODPLUG_TRACKER
 time_t Util::sdTime::MakeGmTime(tm& timeUtc)
 {
 	return _mkgmtime(&timeUtc);
 }
-
+#endif // MODPLUG_TRACKER
