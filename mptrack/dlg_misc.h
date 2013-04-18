@@ -220,7 +220,6 @@ protected:
 
 public:
 	CEditHistoryDlg(CWnd *parent, CModDoc *pModDoc) : CDialog(IDD_EDITHISTORY, parent) { m_pModDoc = pModDoc; }
-	UINT ShowLog(LPCSTR pszLog, LPCSTR lpszTitle=NULL);
 
 protected:
 	virtual BOOL OnInitDialog();
