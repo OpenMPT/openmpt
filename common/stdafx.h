@@ -123,8 +123,6 @@ typedef CMemoryException * MPTMemoryException;
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 
-#pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
-
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
