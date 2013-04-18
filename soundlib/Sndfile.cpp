@@ -1195,7 +1195,7 @@ LPCTSTR CSoundFile::GetSampleName(UINT nSample) const
 		return m_szNames[nSample];
 	} else
 	{
-		return gszEmpty;
+		return "";
 	}
 }
 

@@ -356,7 +356,6 @@ STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNa
 STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNames)); 
 
 const LPCSTR szHexChar = "0123456789ABCDEF";
-const TCHAR gszEmpty[] = TEXT("");
 
 // Defined in load_mid.cpp
 extern const LPCSTR szMidiProgramNames[128];
