@@ -2278,31 +2278,6 @@ bool CTrackApp::OpenURL(const LPCSTR lpszURL)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////
-// Debug
-
-void Log(LPCSTR format,...)
-//-------------------------
-{
-	#ifdef _DEBUG
-		CHAR cBuf[1024];
-		va_list va;
-		va_start(va, format);
-		wvsprintf(cBuf, format, va);
-		OutputDebugString(cBuf);
-		#ifdef LOG_TO_FILE
-			FILE *f = fopen("c:\\mptrack.log", "a");
-			if (f)
-			{
-				fwrite(cBuf, 1, strlen(cBuf), f);
-				fclose(f);
-			}
-		#endif //LOG_TO_FILE
-		va_end(va);
-	#endif //_DEBUG
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////
 // Localized strings
 

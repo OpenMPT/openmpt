@@ -430,6 +430,12 @@
     <ClCompile Include="Vstplug.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\mptString.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\typedefs.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

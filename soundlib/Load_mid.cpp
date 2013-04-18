@@ -23,7 +23,6 @@
 
 #ifdef MIDI_LOG
 //#define MIDI_DETAILED_LOG
-extern void Log(LPCSTR, ...);
 #endif
 
 #define MIDI_DRUMCHANNEL	10

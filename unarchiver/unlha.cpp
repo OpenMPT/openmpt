@@ -43,7 +43,7 @@
 
 #ifdef _DEBUG
 #define LHADEBUG
-extern void Log(LPCSTR, ...);
+extern void Log(const char *, ...);
 #endif
 
 #include "unlha/lharc.h"

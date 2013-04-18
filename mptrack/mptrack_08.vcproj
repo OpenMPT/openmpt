@@ -381,6 +381,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptString.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\typedefs.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\MixerSettings.cpp"
 				>
 			</File>

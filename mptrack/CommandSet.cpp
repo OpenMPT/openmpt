@@ -23,6 +23,7 @@
 #if(ENABLE_LOGGING)
 	//
 #else
+	#undef Log
 	#define Log
 #endif
 

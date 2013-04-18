@@ -33,7 +33,6 @@
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT	1
 #define _SCL_SECURE_NO_WARNINGS
 
-
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxcmn.h>			// MFC support for Windows Common Controls
@@ -46,7 +45,6 @@
 #include <mmreg.h>
 #include <msacm.h>
 #include <afxdlgs.h>
-//#include <afxdhtml.h>
 #pragma warning(default:4201)
 
 #include <string>
@@ -72,6 +70,9 @@
 #define ENABLE_SSE
 
 #endif // ENABLE_ASM
+
+// Disable any debug logging
+//#define NO_LOGGING
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
@@ -109,20 +110,11 @@
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
-
-void Log(LPCSTR format,...);
-
 #include "../common/typedefs.h"
-
-#include "../common/mptString.h"
 
 // Exception type that is used to catch "operator new" exceptions.
 //typedef std::bad_alloc & MPTMemoryException;
 typedef CMemoryException * MPTMemoryException;
-
-//To mark string that should be translated in case of multilingual version.
-#define GetStrI18N(x)	(x)
-
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
