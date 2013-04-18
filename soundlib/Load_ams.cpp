@@ -982,7 +982,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 /////////////////////////////////////////////////////////////////////
 // AMS Sample unpacking
 
-void AMSUnpack(const char * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
+void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
 //------------------------------------------------------------------------------------------------------------------------
 {
 	int8 *tempBuf = new (std::nothrow) int8[destSize];
