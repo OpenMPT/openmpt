@@ -64,9 +64,7 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 			m_Patterns.push_back(MODPATTERN(*this));
 		else
 		{
-#ifdef MODPLUG_TRACKER
-			ErrorBox(IDS_ERR_TOOMANYPAT, CMainFrame::GetMainFrame());
-#endif // MODPLUG_TRACKER
+			GetSoundFile().AddToLog(LogError, "Too many patterns!");
 			return true;
 		}
 	}

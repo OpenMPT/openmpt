@@ -14,7 +14,7 @@
 #include "SoundDevice.h"
 #include "SoundDevices.h"
 #include "../common/misc_util.h"
-#include "../common/Reporting.h"
+#include "../mptrack/Reporting.h"
 #include "../common/StringFixer.h"
 
 

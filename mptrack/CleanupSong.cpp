@@ -120,13 +120,13 @@ BOOL CModCleanupDlg::OnInitDialog()
 void CModCleanupDlg::OnOK()
 //-------------------------
 {
+	ScopedLogCapturer logcapturer(modDoc, "cleanup", this);
 	for(int i = 0; i < CU_MAX_CLEANUP_OPTIONS; i++)
 	{
 		m_bCheckBoxes[i] = IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) != BST_UNCHECKED;
 	}
 
 	bool bModified = false;
-	modDoc.ClearLog();
 
 	// Orders
 	if(m_bCheckBoxes[CU_MERGE_SEQUENCES]) bModified |= MergeSequences();
@@ -162,7 +162,7 @@ void CModCleanupDlg::OnOK()
 
 	if(bModified) modDoc.SetModified();
 	modDoc.UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODSEQUENCE | HINT_MODGENERAL | HINT_SMPNAMES | HINT_INSNAMES);
-	modDoc.ShowLog("Cleanup", this);
+	logcapturer.ShowLog(true);
 	CDialog::OnOK();
 }
 

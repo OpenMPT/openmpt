@@ -481,7 +481,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\Reporting.cpp"
+				RelativePath="..\mptrack\Reporting.cpp"
 				>
 			</File>
 			<File
@@ -1023,7 +1023,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\Reporting.h"
+				RelativePath="..\common\Logging.h"
+				>
+			</File>
+			<File
+				RelativePath="..\mptrack\Reporting.h"
 				>
 			</File>
 			<File

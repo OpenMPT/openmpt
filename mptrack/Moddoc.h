@@ -14,6 +14,7 @@
 #include "../common/misc_util.h"
 #include "Undo.h"
 #include "Notification.h"
+#include "../common/Logging.h"
 #include <time.h>
 
 
@@ -139,12 +140,46 @@ struct SplitKeyboardSettings
 
 enum InputTargetContext;
 
+
+struct LogEntry
+{
+	LogLevel level;
+	std::string message;
+	LogEntry() : level(LogInformation) {}
+	LogEntry(LogLevel l, const std::string &m) : level(l), message(m) {}
+};
+
+
+enum LogMode
+{
+	LogModeInstantReporting,
+	LogModeGather,
+};
+
+
+class ScopedLogCapturer
+{
+private:
+	CModDoc &m_modDoc;
+	LogMode m_oldLogMode;
+	std::string m_title;
+	CWnd *m_pParent;
+public:
+	ScopedLogCapturer(CModDoc &modDoc, const std::string &title = "", CWnd *parent = nullptr);
+	~ScopedLogCapturer();
+	void ShowLog(bool force = false);
+	void ShowLog(const std::string &preamble, bool force = false);
+};
+
+
 //=============================
 class CModDoc: public CDocument
 //=============================
 {
 protected:
-	std::vector<std::string> m_Log;
+	friend ScopedLogCapturer;
+	mutable std::vector<LogEntry> m_Log;
+	LogMode m_LogMode;
 	CSoundFile m_SndFile;
 
 	HWND m_hWndFollow;
@@ -190,11 +225,21 @@ public:
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
 
 	// Logging for general progress and error events.
-	void AddToLog(const std::string &text);
-	const std::vector<std::string> & GetLog() const { return m_Log; }
+	void AddToLog(LogLevel level, const std::string &text) const;
+	void AddToLog(const std::string &text) const { AddToLog(LogInformation, text); }
+
+	const std::vector<LogEntry> & GetLog() const { return m_Log; }
 	std::string GetLogString() const;
+	LogLevel GetMaxLogLevel() const;
+protected:
+	LogMode GetLogMode() const { return m_LogMode; }
+	void SetLogMode(LogMode mode) { m_LogMode = mode; }
 	void ClearLog();
-	UINT ShowLog(LPCSTR lpszTitle=NULL, CWnd *parent=NULL);
+	UINT ShowLog(const std::string &preamble, const std::string &title = "", CWnd *parent = nullptr);
+	UINT ShowLog(const std::string &title = "", CWnd *parent = nullptr) { return ShowLog("", title, parent); }
+
+public:
+
 	void ClearFilePath() { m_strPathName.Empty(); }
 
 	void ViewPattern(UINT nPat, UINT nOrd);

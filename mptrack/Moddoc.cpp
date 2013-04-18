@@ -118,8 +118,8 @@ void CModDoc::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc construction/destruction
 
-CModDoc::CModDoc() : m_PatternUndo(*this), m_SampleUndo(*this)
-//------------------------------------------------------------
+CModDoc::CModDoc() : m_LogMode(LogModeInstantReporting), m_PatternUndo(*this), m_SampleUndo(*this)
+//------------------------------------------------------------------------------------------------
 {
 	m_bHasValidPath = false;
 	m_hWndFollow = NULL;
@@ -201,6 +201,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	BOOL bModified = TRUE;
 	CMappedFile f;
 
+	ScopedLogCapturer logcapturer(*this);
+
 	if (!lpszPathName) return OnNewDocument();
 	BeginWaitCursor();
 	if (f.Open(lpszPathName))
@@ -220,14 +222,12 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	EndWaitCursor();
 
-	// Show log messages from loaders.
-	if (GetLog().size() > 0)
-	{
-		CString sTemp;
-		sTemp.Format("File: %s\nLast saved with: %s, your version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLogString().c_str());
-		Reporting::Information(sTemp);
-		ClearLog();
-	}
+	std::ostringstream str;
+	str
+		<< "File: " << lpszPathName << std::endl
+		<< "Last saved with: " << MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion) << ", your version is " << MptVersion::str << std::endl
+		<< std::endl;
+	logcapturer.ShowLog(str.str());
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
 	// Midi Import
@@ -428,6 +428,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 //--------------------------------------------------------------------------
 {
+	ScopedLogCapturer logcapturer(*this);
 	static int greccount = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
@@ -443,7 +444,6 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 		return bOk;
 	}
 	BeginWaitCursor();
-	ClearLog();
 	FixNullStrings();
 	switch(type)
 	{
@@ -461,7 +461,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 			// Set new path for this file, unless we are saving a template, in which case we want to keep the old file path.
 			SetPathName(lpszPathName);
 		}
-		ShowLog();
+		logcapturer.ShowLog(true);
 		if (bTemplateFile)
 		{
 			// Update template menu.
@@ -808,10 +808,61 @@ void CModDoc::ViewInstrument(UINT nIns)
 }
 
 
-void CModDoc::AddToLog(const std::string &text)
-//---------------------------------------------
+ScopedLogCapturer::ScopedLogCapturer(CModDoc &modDoc, const std::string &title, CWnd *parent) :
+m_modDoc(modDoc), m_oldLogMode(m_modDoc.GetLogMode()), m_title(title), m_pParent(parent)
+//---------------------------------------------------------------------------------------------
 {
-	m_Log.push_back(text);
+	m_modDoc.SetLogMode(LogModeGather);
+}
+
+
+void ScopedLogCapturer::ShowLog(bool force)
+//----------------------------------------
+{
+	if(force || m_oldLogMode == LogModeInstantReporting)
+	{
+		m_modDoc.ShowLog(m_title, m_pParent);
+		m_modDoc.ClearLog();
+	}
+}
+
+
+void ScopedLogCapturer::ShowLog(const std::string &preamble, bool force)
+//----------------------------------------------------------------------
+{
+	if(force || m_oldLogMode == LogModeInstantReporting)
+	{
+		m_modDoc.ShowLog(preamble, m_title, m_pParent);
+		m_modDoc.ClearLog();
+	}
+}
+
+
+ScopedLogCapturer::~ScopedLogCapturer()
+//-------------------------------------
+{
+	ShowLog();
+	m_modDoc.SetLogMode(m_oldLogMode);
+}
+
+
+void CModDoc::AddToLog(LogLevel level, const std::string &text) const
+//-------------------------------------------------------------------
+{
+	if(m_LogMode == LogModeGather)
+	{
+		m_Log.push_back(LogEntry(level, text));
+	} else
+	{
+		switch(level)
+		{
+		case LogError:        Reporting::Error(text.c_str());        break;
+		case LogWarning:      Reporting::Warning(text.c_str());      break;
+		case LogInformation:  Reporting::Information(text.c_str());  break;
+		case LogNotification: Reporting::Notification(text.c_str()); break;
+		default:              Reporting::Information(text.c_str());  break;
+		}
+	}
 }
 
 
@@ -819,11 +870,23 @@ std::string CModDoc::GetLogString() const
 //---------------------------------------
 {
 	std::ostringstream ret;
-	for(std::vector<std::string>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
+	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
 	{
-		ret << *i << std::endl;
+		ret << (*i).message << "\r\n";//std::endl;
 	}
 	return ret.str();
+}
+
+
+LogLevel CModDoc::GetMaxLogLevel() const
+//--------------------------------------
+{
+	LogLevel retval = LogNotification;
+	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
+	{
+		retval = std::max(retval, i->level);
+	}
+	return retval;
 }
 
 
@@ -834,13 +897,22 @@ void CModDoc::ClearLog()
 }
 
 
-UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
-//---------------------------------------------------
+UINT CModDoc::ShowLog(const std::string &preamble, const std::string &title, CWnd *parent)
+//----------------------------------------------------------------------------------------
 {
-	if(!lpszTitle) lpszTitle = MAINFRAME_TITLE;
+	if(!parent) parent = CMainFrame::GetMainFrame();
 	if(GetLog().size() > 0)
 	{
-		Reporting::Information(GetLogString().c_str(), lpszTitle, parent);
+		std::string text = preamble + GetLogString();
+		std::string actualTitle = (title.length() == 0) ? std::string(MAINFRAME_TITLE) : title;
+		switch(GetMaxLogLevel())
+		{
+		case LogError:        Reporting::Error(text.c_str(), actualTitle.c_str(), parent); break;
+		case LogWarning:      Reporting::Warning(text.c_str(), actualTitle.c_str(), parent); break;
+		case LogInformation:  Reporting::Information(text.c_str(), actualTitle.c_str(), parent); break;
+		case LogNotification: Reporting::Notification(text.c_str(), actualTitle.c_str(), parent); break;
+		default:              Reporting::Information(text.c_str(), actualTitle.c_str(), parent); break;
+		}
 		return IDOK;
 	}
 	return IDCANCEL;
@@ -1899,7 +1971,7 @@ void CModDoc::OnFileCompatibilitySave()
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
 	if(files.abort) return;
 
-	ClearLog();
+	ScopedLogCapturer logcapturer(*this);
 	FixNullStrings();
 	switch (type)
 	{
@@ -1910,7 +1982,6 @@ void CModDoc::OnFileCompatibilitySave()
 			m_SndFile.SaveIT(files.first_file.c_str(), true);
 			break;
 	}
-	ShowLog();
 }
 
 
@@ -2480,12 +2551,11 @@ void CModDoc::OnViewEditHistory()
 void CModDoc::OnViewMPTHacks()
 //----------------------------
 {
+	ScopedLogCapturer logcapturer(*this);
 	if(!HasMPTHacks())
 	{
 		AddToLog("No hacks found.");
 	}
-	ShowLog();
-	ClearLog();
 }
 
 
@@ -2676,8 +2746,8 @@ void CModDoc::SongProperties()
 	CModTypeDlg dlg(m_SndFile, CMainFrame::GetMainFrame());
 	if (dlg.DoModal() == IDOK)
 	{	
+		ScopedLogCapturer logcapturer(*this, "Conversion Status");
 		bool bShowLog = false;
-		ClearLog();
 		if(dlg.m_nType)
 		{
 			if (!ChangeModType(dlg.m_nType)) return;
@@ -2697,7 +2767,6 @@ void CModDoc::SongProperties()
 
 		SetModified();
 
-		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());
 	}
 }
 

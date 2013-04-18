@@ -248,7 +248,6 @@
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\mptString.cpp" />
     <ClCompile Include="..\common\Profiler.cpp" />
-    <ClCompile Include="..\common\Reporting.cpp" />
     <ClCompile Include="..\common\serialization_utils.cpp" />
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\sounddev\SoundDevice.cpp" />
@@ -338,6 +337,7 @@
     <ClCompile Include="PatternEditorDialogs.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
+    <ClCompile Include="Reporting.cpp" />
     <ClCompile Include="SampleEditorDialogs.cpp" />
     <ClCompile Include="ScaleEnvPointsDlg.cpp" />
     <ClCompile Include="..\common\stdafx.cpp">
@@ -402,11 +402,11 @@
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h" />
     <ClInclude Include="..\common\FlagSet.h" />
+    <ClInclude Include="..\common\Logging.h" />
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptString.h" />
     <ClInclude Include="..\common\mutex.h" />
     <ClInclude Include="..\common\Profiler.h" />
-    <ClInclude Include="..\common\Reporting.h" />
     <ClInclude Include="..\common\serialization_utils.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\typedefs.h" />
@@ -484,6 +484,7 @@
     <ClInclude Include="Notification.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
+    <ClInclude Include="Reporting.h" />
     <ClInclude Include="SelectPluginDialog.h" />
     <ClInclude Include="ChannelManagerDlg.h" />
     <ClInclude Include="CloseMainDialog.h" />

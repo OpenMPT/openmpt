@@ -13,6 +13,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mainfrm.h"
 #include "../mptrack/moddoc.h"
+#include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
@@ -20,6 +21,7 @@
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
 #include "FileReader.h"
+#include <iostream>
 
 #ifndef NO_ARCHIVE_SUPPORT
 #include "../unarchiver/unarchiver.h"
@@ -386,7 +388,8 @@ CSoundFile::CSoundFile() :
 	Order(*this),
 	m_pModSpecs(&ModSpecs::itEx),
 	m_MIDIMapper(*this),
-	visitedSongRows(*this)
+	visitedSongRows(*this),
+	m_pCustomLog(nullptr)
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
 //----------------------
 {
@@ -452,14 +455,16 @@ CSoundFile::~CSoundFile()
 }
 
 
-void CSoundFile::AddToLog(const std::string &text) const
-//------------------------------------------------------
+void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
+//----------------------------------------------------------------------
 {
-#ifdef MODPLUG_TRACKER
-	if(GetpModDoc()) GetpModDoc()->AddToLog(text);
-#else
-	Reporting::Warning(text.c_str());
-#endif
+	if(m_pCustomLog)
+		return m_pCustomLog->AddToLog(level, text);
+	#ifdef MODPLUG_TRACKER
+		if(GetpModDoc()) GetpModDoc()->AddToLog(level, text);
+	#else
+		std::clog << "openmpt: " << LogLevelToString(level) << ": " << text << std::endl;
+	#endif
 }
 
 
@@ -1480,12 +1485,12 @@ void CSoundFile::DeleteStaticdata()
 bool CSoundFile::SaveStaticTunings()
 //----------------------------------
 {
-	if(s_pTuningsSharedLocal->Serialize())
+	if(s_pTuningsSharedLocal->Serialize() != CTuningCollection::SERIALIZATION_SUCCESS)
 	{
-		ErrorBox(IDS_ERR_TUNING_SERIALISATION, NULL);
-		return true;
+		AddToLog(LogError, "Static tuning serialisation failed");
+		return false;
 	}
-	return false;
+	return true;
 }
 #endif
 

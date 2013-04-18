@@ -14,6 +14,7 @@
 #include "../soundlib/SoundFilePlayConfig.h"
 #include "../soundlib/MixerSettings.h"
 #include "../common/misc_util.h"
+#include "../common/Logging.h"
 #include "mod_specifications.h"
 #include <vector>
 #include <bitset>
@@ -130,6 +131,7 @@ class CTuningCollection;
 class CModDoc;
 #endif // MODPLUG_TRACKER
 
+
 //==============
 class CSoundFile
 //==============
@@ -173,7 +175,7 @@ public: //Misc
 public:
 #ifdef MODPLUG_TRACKER
 	static bool LoadStaticTunings();
-	static bool SaveStaticTunings();
+	bool SaveStaticTunings();
 	static void DeleteStaticdata();
 	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
@@ -335,13 +337,21 @@ public:
 	bool m_bIsRendering;
 	bool m_bPatternTransitionOccurred;
 
+private:
+	// logging and user interaction
+	ILog *m_pCustomLog;
+
 public:
 	CSoundFile();
 	~CSoundFile();
 
 public:
+	// logging and user interaction
+	void SetCustomLog(ILog *pLog) { m_pCustomLog = pLog; }
+	void AddToLog(LogLevel level, const std::string &text) const;
+	void AddToLog(const std::string &text) const { AddToLog(LogInformation, text); }
 
-	void AddToLog(const std::string &text) const;
+public:
 
 #ifdef MODPLUG_TRACKER
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);

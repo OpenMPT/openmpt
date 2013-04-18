@@ -12,7 +12,9 @@
 
 #include "tuning.h"
 #include "../common/serialization_utils.h"
-#include "../common/Reporting.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/Reporting.h"
+#endif
 #include <string>
 
 typedef CTuningRTI::RATIOTYPE RATIOTYPE;
@@ -399,7 +401,13 @@ CTuningBase* CTuningRTI::Deserialize(istream& iStrm)
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
 		if (pTuning->ProProcessUnserializationdata())
 		{
-			Reporting::Error(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
+#ifdef MODPLUG_TRACKER
+			Reporting::Error(
+#else
+			Log("%s (%s)\n",
+#endif
+				("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure"
+				);
 			delete pTuning; pTuning = nullptr;
 		}
 		else

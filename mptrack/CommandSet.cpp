@@ -13,7 +13,7 @@
 #include "resource.h"
 #include "Mptrack.h"	// For MsgBox
 #include "../soundlib/mod_specifications.h"
-#include "../common/Reporting.h"
+#include "../mptrack/Reporting.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
