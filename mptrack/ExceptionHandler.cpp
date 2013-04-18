@@ -144,10 +144,22 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 }
 
 
+#ifdef NDEBUG
 void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr)
 //------------------------------------------------------------------------------------------
 {
-	CString errorMessage;
-	errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
-	GenerateDump(errorMessage);
+	if(IsDebuggerPresent())
+	{
+		OutputDebugString("ASSERT(");
+		OutputDebugString(expr);
+		OutputDebugString(") failed\n");
+		DebugBreak();
+	} else
+	{
+		CString errorMessage;
+		errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
+		GenerateDump(errorMessage);
+	}
 }
+#endif
+
