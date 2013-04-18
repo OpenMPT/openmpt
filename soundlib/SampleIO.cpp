@@ -18,7 +18,7 @@
 
 
 // External decompressors
-extern void AMSUnpack(const char * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
+extern void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
 extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
 extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
@@ -299,7 +299,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			LimitMax(sourceSize, file.BytesLeft());
 			bytesRead = 9 + sourceSize;
 
-			AMSUnpack(reinterpret_cast<const char *>(sourceBuf) + 9, sourceSize, sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
+			AMSUnpack(reinterpret_cast<const int8 *>(sourceBuf) + 9, sourceSize, sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
 		}
 	} else if(GetEncoding() == PTM8Dto16 && GetChannelFormat() == mono && GetBitDepth() == 16)
 	{

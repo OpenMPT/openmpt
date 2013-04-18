@@ -86,11 +86,13 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 #define DEPRECATED
 #endif
 
+
+#if defined(_MSC_VER) && (_MSC_VER <= MSVC_VER_2008)
+
 typedef __int8 int8;
 typedef __int16 int16;
 typedef __int32 int32;
 typedef __int64 int64;
-
 typedef unsigned __int8 uint8;
 typedef unsigned __int16 uint16;
 typedef unsigned __int32 uint32;
@@ -110,6 +112,37 @@ const uint8 uint8_max   = 255;
 const uint16 uint16_max = 65535;
 const uint32 uint32_max = 4294967295;
 const uint64 uint64_max = 18446744073709551615;
+
+#else
+
+#include <cstdint>
+
+typedef std::int8_t   int8;
+typedef std::int16_t  int16;
+typedef std::int32_t  int32;
+typedef std::int64_t  int64;
+typedef std::uint8_t  uint8;
+typedef std::uint16_t uint16;
+typedef std::uint32_t uint32;
+typedef std::uint64_t uint64;
+
+const int8 int8_min	    = INT8_MIN;
+const int16 int16_min   = INT16_MIN;
+const int32 int32_min   = INT32_MIN;
+const int64 int64_min   = INT64_MIN;
+
+const int8 int8_max     = INT8_MAX;
+const int16 int16_max   = INT16_MAX;
+const int32 int32_max   = INT32_MAX;
+const int64 int64_max   = INT64_MAX;
+
+const uint8 uint8_max   = UINT8_MAX;
+const uint16 uint16_max = UINT16_MAX;
+const uint32 uint32_max = UINT32_MAX;
+const uint64 uint64_max = UINT64_MAX;
+
+#endif
+
 
 typedef float float32;
 
