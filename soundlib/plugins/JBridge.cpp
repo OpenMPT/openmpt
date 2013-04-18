@@ -11,10 +11,11 @@
 
 #include "stdafx.h"
 
-#include <pluginterfaces/vst2.x/aeffectx.h>
 #include "JBridge.h"
 
 #ifdef ENABLE_JBRIDGE
+
+#include <pluginterfaces/vst2.x/aeffectx.h>
 
 namespace JBridge
 {
