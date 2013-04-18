@@ -1,7 +1,7 @@
 /*
  * typedefs.h
  * ----------
- * Purpose: Basic data type definitions.
+ * Purpose: Basic data type definitions and assorted compiler-related helpers.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -10,6 +10,7 @@
 
 #pragma once
 
+
 // Definitions for MSVC versions to write more understandable conditional-compilation,
 // e.g. #if (_MSC_VER > MSVC_VER_2008) instead of #if (_MSC_VER > 1500) 
 #define MSVC_VER_VC9		1500
@@ -17,13 +18,20 @@
 #define MSVC_VER_VC10		1600
 #define MSVC_VER_2010		MSVC_VER_VC10
 
-#if (_MSC_VER < MSVC_VER_2010)
+#if defined(_MSC_VER)
+#pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
+#endif
+
+
+#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
 	#define nullptr		0
 #endif
 
-#if (_MSC_VER >= MSVC_VER_2010)
+
+#if defined(_MSC_VER) && (_MSC_VER >= MSVC_VER_2010)
 #define HAS_TYPE_TRAITS
 #endif
+
 
 //  CountOf macro computes the number of elements in a statically-allocated array.
 #ifdef _MSC_VER
@@ -31,6 +39,7 @@
 #else
 	#define CountOf(x) (sizeof((x))/sizeof((x)[0]))
 #endif
+
 
 #if defined(_MSC_VER)
 #define PACKED __declspec(align(1))
@@ -45,6 +54,7 @@
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
+
 #ifndef MAX
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
@@ -53,11 +63,13 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
+
 // Compile time assert.
-#if (_MSC_VER < MSVC_VER_2010)
+#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
 	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
 #endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
+
 
 #ifdef NDEBUG
 void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
@@ -83,6 +95,8 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 // Tag them with "DEPRECATED".
 #if defined(_MSC_VER)
 #define DEPRECATED __declspec(deprecated)
+#elif defined(__GNUC__)
+#define DEPRECATED __attribute__((deprecated))
 #else
 #define DEPRECATED
 #endif
@@ -127,7 +141,7 @@ typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
 
-const int8 int8_min	    = INT8_MIN;
+const int8 int8_min     = INT8_MIN;
 const int16 int16_min   = INT16_MIN;
 const int32 int32_min   = INT32_MIN;
 const int64 int64_min   = INT64_MIN;
