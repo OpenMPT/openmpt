@@ -59,12 +59,13 @@
 #endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
 
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
 #ifdef NDEBUG
-#define ALWAYS_ASSERT(expr) do { if(!(expr)) { if(IsDebuggerPresent()) { OutputDebugString("assert failed: " #expr); DebugBreak(); } else { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } } while(0)
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
+#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
 #else
 #define ALWAYS_ASSERT(expr) ASSERT(expr)
 #endif
+
 
 // Advanced inline attributes
 #if defined(_MSC_VER)
