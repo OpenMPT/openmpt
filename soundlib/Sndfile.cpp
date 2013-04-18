@@ -1947,7 +1947,7 @@ struct UpgradePatternData
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 04) && sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))
 			{
 				// OpenMPT 1.22.01.04 fixes illegal (out of range) instrument numbers; they should do nothing. In previous versions, they stopped the playing sample.
-				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments())
+				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !sndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = 0;
