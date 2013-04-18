@@ -64,21 +64,7 @@ namespace mpt
 		}
 
 		// Formats this string, like CString::Format.
-		void Format(const CharT* pszFormat, ...)
-		{
-			va_list argList;
-			va_start( argList, pszFormat );
-
-			// Count the needed array size.
-			const size_t nCount = _vscprintf(pszFormat, argList); // null character not included.
-			resize(nCount + 1); // + 1 is for null terminator.
-
-			// Hack: directly modify the std::string's string.
-			// In C++11 std::string is guaranteed to be contiguous.
-			const int nCount2 = vsprintf_s(&*begin(), size(), pszFormat, argList);
-			resize(nCount2); // Removes the null character that vsprintf_s adds.
-
-			va_end( argList );
-		}
+		void Format(const CharT* pszFormat, ...);
 	};
 }
+

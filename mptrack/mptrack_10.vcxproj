@@ -246,9 +246,11 @@
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\common\misc_util.cpp" />
+    <ClCompile Include="..\common\mptString.cpp" />
     <ClCompile Include="..\common\Profiler.cpp" />
     <ClCompile Include="..\common\Reporting.cpp" />
     <ClCompile Include="..\common\serialization_utils.cpp" />
+    <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\sounddsp\DSP.cpp" />

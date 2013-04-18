@@ -234,7 +234,7 @@ public:
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 	// Write given string to log if log func is defined.
-	void Log(LPCTSTR psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
+	void AddToLog(LPCTSTR psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
 
 	SsbStatus m_Status;
 	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.

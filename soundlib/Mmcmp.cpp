@@ -14,10 +14,6 @@
 
 //#define MMCMP_LOG
 
-#ifdef MMCMP_LOG
-extern void Log(LPCSTR s, ...);
-#endif
-
 
 BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
 BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);

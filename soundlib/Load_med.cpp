@@ -14,10 +14,6 @@
 
 //#define MED_LOG
 
-#ifdef MED_LOG
-extern void Log(LPCSTR s, ...);
-#endif
-
 #define MED_MAX_COMMENT_LENGTH 5*1024 //: Is 5 kB enough?
 
 // flags

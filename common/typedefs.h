@@ -166,3 +166,48 @@ union FloatInt32
 	float32 f;
 	uint32 i;
 };
+
+
+#include <cstdarg>
+#ifdef _MSC_VER
+#ifndef va_copy
+#define va_copy(dst, src) do { (dst) = (src); } while (0)
+#endif
+#endif
+
+
+#include "../common/mptString.h"
+
+//To mark string that should be translated in case of multilingual version.
+#define GetStrI18N(x)	(x)
+
+
+#ifndef NO_LOGGING
+void Log(const char *format, ...);
+class Logger
+{
+private:
+	const char * const file;
+	int const line;
+	const char * const function;
+public:
+	Logger(const char *file_, int line_, const char *function_) : file(file_), line(line_), function(function_) {}
+	void operator () (const char *format, ...);
+};
+#define Log Logger(__FILE__, __LINE__, __FUNCTION__)
+#else // !NO_LOGGING
+inline void Log(const char *format, ...) {}
+class Logger { public: void operator () (const char *format, ...) {} };
+#define Log if(true) {} else Logger() // completely compile out arguments to Log() so that they do not even get evaluated
+#endif // NO_LOGGING
+
+// just #undef Log in files, where this Log redefinition causes problems
+//#undef Log
+
+
+#include <stdio.h>
+#ifdef _MSC_VER
+int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
+int c99_snprintf(char *str, size_t size, const char *format, ...);
+#define snprintf c99_snprintf
+#endif
