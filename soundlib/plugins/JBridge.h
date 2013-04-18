@@ -12,6 +12,7 @@
 
 #if !defined(NO_VST) && (defined(WIN32) || (defined(WINDOWS) && WINDOWS == 1))
 #define ENABLE_JBRIDGE
+#include <pluginterfaces/vst2.x/aeffectx.h>
 #endif
 
 namespace JBridge
