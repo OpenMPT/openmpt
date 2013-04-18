@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "../common/Reporting.h"
+#include "../mptrack/Reporting.h"
 #include "../common/StringFixer.h"
 #include "Mainfrm.h"
 #include "mptrack.h"

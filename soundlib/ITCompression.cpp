@@ -12,6 +12,9 @@
 #include <stdafx.h>
 #include "ITCompression.h"
 #include "../common/misc_util.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/Reporting.h"
+#endif
 
 // Algorithm parameters for 16-Bit samples
 struct IT16BitParams

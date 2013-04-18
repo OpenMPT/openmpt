@@ -13,10 +13,10 @@
 #include "ModSequence.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
+#include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
-#include "../common/Reporting.h"
 #include "FileReader.h"
 #include <functional>
 
@@ -444,8 +444,13 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	bool modified = false;
 
 	if(hasSepPatterns &&
+#ifdef MODPLUG_TRACKER
 		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
-		"Order list conversion", false, true) == cnfYes)
+		"Order list conversion", false, true) == cnfYes
+#else
+		false
+#endif
+		)
 	{
 
 		SetSequence(0);

@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "modsmp_ctrl.h"
 #include "../common/AudioCriticalSection.h"
-#include "../common/Reporting.h"
 #include "Sndfile.h"
 
 #define new DEBUG_NEW
@@ -55,7 +54,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 #if 0
 	if( GetSampleCapacity(smp) >= nNewSmpBytes ) // If sample has room to expand.
 	{
-		Reporting::Notification("Not implemented: GetSampleCapacity(smp) >= nNewSmpBytes");
+		sndFile.AddToLog(LogNotification, "Not implemented: GetSampleCapacity(smp) >= nNewSmpBytes");
 		// Not implemented, GetSampleCapacity() currently always returns length based value
 		// even if there is unused space in the sample.
 	}
@@ -74,7 +73,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 			memcpy(pNewSmp, smp.pSample, nOldBytes);
 		}
 		else
-			Reporting::Notification(TEXT("Unsupported start position in InsertSilence."));
+			sndFile.AddToLog(LogNotification, TEXT("Unsupported start position in InsertSilence."));
 	}
 
 	// Set loop points automatically

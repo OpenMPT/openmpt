@@ -14,13 +14,13 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Mainfrm.h"	// For ini settings
+#include "../mptrack/Reporting.h"
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
 #include "Wav.h"
 #include "ITTools.h"
 #include "XMTools.h"
 #include "WAVTools.h"
-#include "../common/Reporting.h"
 #include "../common/version.h"
 #include "ChunkReader.h"
 

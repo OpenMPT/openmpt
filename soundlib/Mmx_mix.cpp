@@ -22,7 +22,6 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
-#include "../common/Reporting.h"
 
 
 DWORD CSoundFile::GetSysInfo()
