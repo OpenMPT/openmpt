@@ -1398,12 +1398,26 @@ void CASIODevice::FillAudioBuffer()
 }
 
 
+void CASIODevice::BufferSwitch(long doubleBufferIndex)
+//----------------------------------------------------
+{
+	g_dwBuffer = doubleBufferIndex;
+	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
+	if(rendersilence)
+	{
+		FillAudioBuffer();
+	} else if(m_Source)
+	{
+		m_Source->FillAudioBufferLocked(*this, *this);
+	}
+}
+
+
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
 	UNREFERENCED_PARAMETER(directProcess);
-	g_dwBuffer = doubleBufferIndex;
-	if (gpCurrentAsio && gpCurrentAsio->m_Source) gpCurrentAsio->m_Source->FillAudioBufferLocked(*gpCurrentAsio, *gpCurrentAsio);
+	if(gpCurrentAsio) gpCurrentAsio->BufferSwitch(doubleBufferIndex);
 }
 
 
