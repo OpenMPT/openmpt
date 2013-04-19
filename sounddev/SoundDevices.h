@@ -224,6 +224,8 @@ protected:
 	void CloseDevice();
 
 protected:
+	void BufferSwitch(long doubleBufferIndex);
+
 	static CASIODevice *gpCurrentAsio;
 	static LONG gnFillBuffers;
 	static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
