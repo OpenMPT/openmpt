@@ -15,6 +15,7 @@
 #include <shlwapi.h>
 #include "ExceptionHandler.h"
 #include "dbghelp.h"
+#include "../common/version.h"
 
 
 typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
@@ -108,6 +109,11 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 		errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), (numFiles == 1 ? "it is" : "they are"));
 	}
 	
+	errorMessage.AppendFormat("\n\nOpenMPT %s %s (%s)\n",
+		MptVersion::GetVersionStringExtended().c_str(),
+		MptVersion::GetVersionUrlString()
+		);
+
 	Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
 
 }
@@ -144,7 +150,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 }
 
 
-#ifdef NDEBUG
+#ifndef _DEBUG
 void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr)
 //------------------------------------------------------------------------------------------
 {

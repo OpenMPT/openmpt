@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <string>
+
 //STRINGIZE makes a string of given argument. If used with #defined value,
 //the string is made of the contents of the defined value.
 #define HELPER_STRINGIZE(x)			#x
@@ -44,12 +46,12 @@ namespace MptVersion
 		int v1, v2, v3, v4; 
 		sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);
 		return ((v1 << 24) |  (v2 << 16) | (v3 << 8) | v4);
-	};
+	}
 
 	// Returns version string from given numerical version value.
-	static CString ToStr(const VersionNum v)
+	static mpt::String ToStr(const VersionNum v)
 	{
-		CString strVersion;
+		mpt::String strVersion;
 		if(v == 0)
 		{
 			// Unknown version
@@ -64,7 +66,7 @@ namespace MptVersion
 			strVersion.Format("%X.%02X.%02X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, (v) & 0xFF);
 		}
 		return strVersion;
-	};
+	}
 
 	// Return a version without build number (the last number in the version).
 	// The current versioning scheme uses this number only for test builds, and it should be 00 for official builds,
@@ -72,11 +74,26 @@ namespace MptVersion
 	static VersionNum RemoveBuildNumber(const VersionNum num)
 	{
 		return (num & 0xFFFFFF00);
-	};
+	}
 
 	// Returns true if a given version number is from a test build, false if it's a release build.
-	static bool IsTestBuild(const VersionNum num)
+	static bool IsTestBuild(const VersionNum num = MPT_VERSION_NUMERIC)
 	{
 		return ((num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00) && num != MAKE_VERSION_NUMERIC(1,18,00,00)) || (num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num));
 	}
+
+	bool IsDebugBuild();
+
+	std::string GetUrl();
+	int GetRevision();
+	bool IsDirty();
+	bool HasMixedRevisions();
+	std::string GetStateString();
+	std::string GetBuildDateString();
+
+	std::string GetBuildFlagsString();
+	std::string GetRevisionString();
+	std::string GetVersionStringExtended();
+	std::string GetVersionUrlString();
+
 }; //namespace MptVersion

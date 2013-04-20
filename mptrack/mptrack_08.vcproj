@@ -27,6 +27,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -48,7 +49,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;..\common\svn_version;..\common\svn_version_default"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -134,6 +135,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -156,7 +158,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;..\common\svn_version;..\common\svn_version_default"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -245,6 +247,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\AGC.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\AudioCriticalSection.cpp"
 				>
 			</File>
@@ -313,7 +319,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\DSP.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\EffectVis.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddsp\EQ.cpp"
 				>
 			</File>
 			<File
@@ -378,14 +392,6 @@
 			</File>
 			<File
 				RelativePath="..\common\misc_util.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\common\mptString.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\common\typedefs.cpp"
 				>
 			</File>
 			<File
@@ -465,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptString.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\pattern.cpp"
 				>
 			</File>
@@ -485,6 +495,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\Reverb.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\RowVisitor.cpp"
 				>
 			</File>
@@ -501,18 +515,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddsp\AGC.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\sounddsp\DSP.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\sounddsp\EQ.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\snd_flt.cpp"
 				>
 			</File>
@@ -521,19 +523,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddsp\Reverb.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\sounddev\SoundDevice.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\Sndfile.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\soundlib\Sndmix.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDevice.cpp"
 				>
 			</File>
 			<File
@@ -573,11 +571,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\typedefs.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Undo.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\UpdateCheck.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\version.cpp"
 				>
 			</File>
 			<File
@@ -815,6 +821,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\AGC.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\AudioCriticalSection.h"
 				>
 			</File>
@@ -875,11 +885,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddsp\DSP.h"
+				>
+			</File>
+			<File
 				RelativePath=".\EffectInfo.h"
 				>
 			</File>
 			<File
 				RelativePath="..\soundlib\Endianness.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddsp\EQ.h"
 				>
 			</File>
 			<File
@@ -904,6 +922,10 @@
 			</File>
 			<File
 				RelativePath=".\soundlib\plugins\JBridge.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\Logging.h"
 				>
 			</File>
 			<File
@@ -983,6 +1005,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptString.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\mutex.h"
 				>
 			</File>
@@ -1007,10 +1033,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\Profiler.h"
-				>
-			</File>
-			<File
 				RelativePath=".\soundlib\plugins\PluginEventQueue.h"
 				>
 			</File>
@@ -1023,7 +1045,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\Logging.h"
+				RelativePath="..\common\Profiler.h"
 				>
 			</File>
 			<File
@@ -1035,11 +1057,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddsp\Reverb.h"
+				RelativePath=".\Resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource.h"
+				RelativePath="..\sounddsp\Reverb.h"
 				>
 			</File>
 			<File
@@ -1067,27 +1089,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Soundlib\Sndfile.h"
+				>
+			</File>
+			<File
 				RelativePath="..\sounddev\SoundDevice.h"
 				>
 			</File>
 			<File
 				RelativePath="..\sounddev\SoundDevices.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Soundlib\Sndfile.h"
-				>
-			</File>
-			<File
-				RelativePath="..\sounddsp\AGC.h"
-				>
-			</File>
-			<File
-				RelativePath="..\sounddsp\DSP.h"
-				>
-			</File>
-			<File
-				RelativePath="..\sounddsp\EQ.h"
 				>
 			</File>
 			<File
@@ -1100,6 +1110,14 @@
 			</File>
 			<File
 				RelativePath="..\common\StringFixer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\svn_version_default\svn_version.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\svn_version\svn_version.template.h"
 				>
 			</File>
 			<File
@@ -1116,10 +1134,6 @@
 			</File>
 			<File
 				RelativePath="..\common\typedefs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\mptString.h"
 				>
 			</File>
 			<File
@@ -1303,10 +1317,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\Message.h"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\Load_669.cpp"
 				>
 			</File>
@@ -1420,6 +1430,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Loaders.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\Message.h"
 				>
 			</File>
 			<File
