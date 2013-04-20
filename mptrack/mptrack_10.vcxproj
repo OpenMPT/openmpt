@@ -77,7 +77,7 @@
     <ClCompile>
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;..\common\svn_version;..\common\svn_version_default;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -121,6 +121,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res/rt_manif.bin;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -133,7 +136,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;..\common\svn_version;..\common\svn_version_default;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -181,6 +184,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res/rt_manif.bin;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
     <Midl>
@@ -193,7 +199,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\;..\common\svn_version;..\common\svn_version_default;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -242,6 +248,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res/rt_manif.bin;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp" />
@@ -250,6 +259,7 @@
     <ClCompile Include="..\common\Profiler.cpp" />
     <ClCompile Include="..\common\serialization_utils.cpp" />
     <ClCompile Include="..\common\typedefs.cpp" />
+    <ClCompile Include="..\common\version.cpp" />
     <ClCompile Include="..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\sounddsp\DSP.cpp" />
@@ -409,6 +419,8 @@
     <ClInclude Include="..\common\Profiler.h" />
     <ClInclude Include="..\common\serialization_utils.h" />
     <ClInclude Include="..\common\StringFixer.h" />
+    <ClInclude Include="..\common\svn_version\svn_version.template.h" />
+    <ClInclude Include="..\common\svn_version_default\svn_version.h" />
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\sounddev\SoundDevice.h" />

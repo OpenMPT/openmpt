@@ -161,7 +161,7 @@ BOOL CModTypeDlg::OnInitDialog()
 CString CModTypeDlg::FormatVersionNumber(DWORD version)
 //-----------------------------------------------------
 {
-	return MptVersion::ToStr(version) + (MptVersion::IsTestBuild(version) ? " (Test Build)" : "");
+	return CString(MptVersion::ToStr(version)) + (MptVersion::IsTestBuild(version) ? " (Test Build)" : "");
 }
 
 

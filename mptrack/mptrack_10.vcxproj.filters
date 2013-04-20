@@ -436,6 +436,9 @@
     <ClCompile Include="Reporting.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\version.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -800,6 +803,12 @@
     </ClInclude>
     <ClInclude Include="Reporting.h">
       <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\svn_version\svn_version.template.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\svn_version_default\svn_version.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

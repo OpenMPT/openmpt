@@ -1538,16 +1538,11 @@ void CAboutDlg::OnCancel()
 BOOL CAboutDlg::OnInitDialog()
 //----------------------------
 {
-	const char * const s = "Build Date: " __DATE__ " " __TIME__;
 	CDialog::OnInitDialog();
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
-	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str
-#if (MPT_VERSION_NUMERIC & 0xFF) != 0
-		+ CString(" (Test Build)")
-#endif
-		);
+	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
+	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
 
 	m_heContact.SetWindowText(
 		"Contact / Discussion:\r\n"
