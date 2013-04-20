@@ -1843,12 +1843,12 @@ void CViewPattern::DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX
 			}
 		}
 	}
-	//rewbs.customKeys
+	PatternRect sel = m_Selection;
 	PatternCursor finalPos(m_Selection.GetStartRow(), m_Selection.GetLowerRight());
-	SetCurSel(finalPos);
+	//SetCurSel(finalPos);
 	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
 	SetCursorPosition(finalPos);
-	//end rewbs.customKeys
+	SetCurSel(sel);
 	SetModified();
 	InvalidatePattern(false);
 }
@@ -2466,12 +2466,12 @@ void CViewPattern::PatternStep(ROWINDEX row)
 
 		cs.Leave();
 
-		if (pMainFrm->GetModPlaying() != pModDoc)
+		if(pMainFrm->GetModPlaying() != pModDoc)
 		{
-			pModDoc->SetNotifications(Notification::Position | Notification::VUMeters);
 			pModDoc->SetFollowWnd(m_hWnd);
 			pMainFrm->PlayMod(pModDoc);
 		}
+		pModDoc->SetNotifications(Notification::Position | Notification::VUMeters);
 		if(row == ROWINDEX_INVALID)
 		{
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
@@ -3523,46 +3523,46 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		}
 		m_nLastPlayedRow = nRow;
 
-		if(pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP]) return 0;
-
-
-		if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat)
+		if(!pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP])
 		{
-			//order doesn't correlate with pattern, so mark it as invalid
-			nOrd = ORDERINDEX_INVALID;
-		}
-
-		if (m_pEffectVis && m_pEffectVis->m_hWnd)
-		{
-			m_pEffectVis->SetPlayCursor(nPat, nRow);
-		}
-
-		// Don't follow song if user drags selections or scrollbars.
-		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
-		{
-			if (nPat < pSndFile->Patterns.Size())
+			if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat)
 			{
-				if (nPat != m_nPattern || updateOrderList)
+				//order doesn't correlate with pattern, so mark it as invalid
+				nOrd = ORDERINDEX_INVALID;
+			}
+
+			if (m_pEffectVis && m_pEffectVis->m_hWnd)
+			{
+				m_pEffectVis->SetPlayCursor(nPat, nRow);
+			}
+
+			// Don't follow song if user drags selections or scrollbars.
+			if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
+			{
+				if (nPat < pSndFile->Patterns.Size())
 				{
-					if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
-					if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+					if (nPat != m_nPattern || updateOrderList)
+					{
+						if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
+						if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+						updateOrderList = false;
+					}
+					if (nRow != GetCurrentRow())
+					{
+						SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
+					}
+				}
+			} else
+			{
+				if(updateOrderList)
+				{
+					SendCtrlMessage(CTRLMSG_FORCEREFRESH); //force orderlist refresh
 					updateOrderList = false;
 				}
-				if (nRow != GetCurrentRow())
-				{
-					SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
-				}
 			}
-		} else
-		{
-			if(updateOrderList)
-			{
-				SendCtrlMessage(CTRLMSG_FORCEREFRESH); //force orderlist refresh
-				updateOrderList = false;
-			}
+			SetPlayCursor(nPat, nRow);
+			m_nPlayTick = pnotify->tick;
 		}
-		SetPlayCursor(nPat, nRow);
-		m_nPlayTick = pnotify->tick;
 	}
 
 	if(pnotify->type[Notification::VUMeters | Notification::Stop] && m_Status[psShowVUMeters])
@@ -3730,8 +3730,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	if(pModDoc == nullptr || pMainFrm == nullptr) return 0;
 
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr) return 0;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 //Midi message from our perspective:
 //     +---------------------------+---------------------------+-------------+-------------+
@@ -3765,7 +3764,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	// Handle MIDI mapping.
 	uint8 mappedIndex = uint8_max, paramValue = uint8_max;
 	uint32 paramIndex = 0;
-	bool captured = pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue); 
+	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue); 
 
 
 	// Handle MIDI messages assigned to shortcuts
@@ -3778,13 +3777,13 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	}
 
 	// Write parameter control commands if needed.
-	if(paramValue != uint8_max && IsEditingEnabled() && pSndFile->GetType() == MOD_TYPE_MPT)
+	if(paramValue != uint8_max && IsEditingEnabled() && sndFile.GetType() == MOD_TYPE_MPT)
 	{
 		const bool liveRecord = IsLiveRecord();
 
-		ModCommandPos editpos = GetEditPos(*pSndFile, liveRecord);
-		ModCommand &m = GetModCommand(*pSndFile, editpos);
-		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1);
+		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
+		ModCommand &m = GetModCommand(sndFile, editpos);
+		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 127));
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
@@ -3813,7 +3812,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			TempEnterNote(nNote, true, nVol, true);
 
 			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
-			if(pSndFile->IsPaused() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
+			if(sndFile.IsPaused() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 				pModDoc->OnPatternPlayNoLoop();
 
 		break;
@@ -3836,12 +3835,12 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 			// Checking whether to record MIDI controller change as MIDI macro change.
 			// Don't write this if command was already written by MIDI mapping.
-			if((paramValue == uint8_max || pSndFile->GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
+			if((paramValue == uint8_max || sndFile.GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
 			{
 				const bool liveRecord = IsLiveRecord();
 
-				ModCommandPos editpos = GetEditPos(*pSndFile, liveRecord);
-				ModCommand &m = GetModCommand(*pSndFile, editpos);
+				ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
+				ModCommand &m = GetModCommand(sndFile, editpos);
 
 				if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
 				{
@@ -3884,7 +3883,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				&& pMainFrm->GetModPlaying() == pModDoc)
 			{
 				const UINT instr = GetCurrentInstrument();
-				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
+				IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
 				if(plug)
 				{	
 					plug->MidiSend(dwMidiData);
