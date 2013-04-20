@@ -877,9 +877,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		if(pVstPlugin != nullptr)
 		{
 			vector<CVstPlugin *> list;
-			pVstPlugin->GetInputPlugList(list);
-			// We don't assign plugins to pins...
-			return ToVstPtr(list[0]);
+			if(pVstPlugin->GetInputPlugList(list) != 0)
+			{
+				// We don't assign plugins to pins...
+				return ToVstPtr(&list[0]->m_Effect);
+			}
 		}
 		break;
 
@@ -888,9 +890,11 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		if(pVstPlugin != nullptr)
 		{
 			vector<CVstPlugin *> list;
-			pVstPlugin->GetOutputPlugList(list);
-			// We don't assign plugins to pins...
-			return ToVstPtr(list[0]);
+			if(pVstPlugin->GetOutputPlugList(list) != 0)
+			{
+				// We don't assign plugins to pins...
+				return ToVstPtr(&list[0]->m_Effect);
+			}
 		}
 		break;
 
