@@ -25,6 +25,45 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.22.02.00 (20 April 2013, revision 1917)
+------------------------------------------
+Instrument tab
+   [Mod] <js> When importing DLS drum samples into an XM instrument, pick the center of the sample's assigned note range as a transpose amount instead of the lowest note of the note range (http://bugs.openmpt.org/view.php?id=376).
+   
+VST / DMO Plugins
+   [Imp] <js> If a plugin editor is focussed, MIDI is now always routed to that plugin.
+   [Mod] <js> effBeginSetProgram and effEndSetProgram opcodes are sent when performing a program change.
+   [Fix] <js> audioMasterGetPreviousPlug / audioMasterGetNextPlug opcodes were not doing anything that made sense.
+
+VST::Specific Plugin Fixes
+   [Fix] <js> OpenMPT could possibly freeze when starting WASAPI output of a module that uses the Sytrus plugin (and possibly other plugins).
+
+IT::Compatible Playback Mode
+   [Fix] <js> Fixed a rather rare envelope carry bug introduced in OpenMPT 1.22.01.00.
+   [Fix] <js> Instrument numbers higher than the last instrument act like empty instruments.
+
+MOD::Loading and Saving
+   [Imp] SoundTracker Loader: Made file rejection heuristics a bit more strict.
+   [Fix] SoundTracker Loader: Fixed possible division by zero.
+   [Fix] Saving: Maximum sample length was off by a few bytes.
+   [Fix] Saving: It was still possible for samples to misalign if the saved sample was originally larger than 128 KiB and had an odd sample count.
+
+Other formats
+   [Fix] <js> PSM16 loader: Master volume was not loaded properly.
+
+Misc
+   [New] <js> Added global, always active VU meter in the main toolbar.
+   [Imp] <js> MIDI CC shortcuts should now work in pretty much all places.
+   [Imp] <jh> Boosting of audio thread priority can now be disabled in the Sound Card settings. On Windows Vista and later, MMCSS is now used for boosting.
+   [Imp] <js> When changing MIDI input devices, the change is applied instantly. Previously the old MIDI device was kept open.
+   [Imp] <jh> Support for exclusive device access has been added for WASAPI devices.
+   [Mod] <jh> Renamed "Use secondary buffers" option to the negated form "Use primary buffer".
+   [Mod] <js> Instrument previews in the tree view are now played at 0dB.
+   [Fix] <jh> Fixed a possible crash when stopping a Wave Out device and possible freezes with ASIO / WASAPI devices.
+   [Fix] <js> Time display was not updated anymore in OpenMPT 1.22.01.00 when jumping around in the order list without actually playing the module.
+   [Fix] <js> Options dialog: Pre-amp warning was also shown when changing stereo separation.
+
+
 v1.22.01.00 (6 April 2013, revision 1749)
 -----------------------------------------
 Pattern tab
@@ -1251,11 +1290,11 @@ MPTM
 Other formats
    [Imp] <js> MT2 Loader (MadTracker): Make use of the "lines per beat" header field. Release node is not set anymore for each and every instrument envelope. MT2 files are now loaded as IT files by default (instead of XM) because of their extended instrument properties (NNAs, filters, etc) - I wonder what this breaks, but I don't bother much because MT2 support was already 100% broken before this. :) Some MT example tunes sound a bit better now at least.
    [Fix] <js> PTM Loader: Fixed an unhandled null pointer exception that occured when loading some unsupported RAR files.
-   [Fix] <js> PSM16 Loader: Fix for note cut on tick 0 (warbot tune from Silverball)
+   [Fix] <js> PSM16 Loader: Fix for note cut on tick 0 (warbot tune from Silverball).
    [Fix] <js> Threw out the old ULT loader in favor of Storlek's loader from SchismTracker (used with permission from the author himself). This is a lot more accurate than MPT's old loader.
-   [Fix] <js> DBM Loader: Various fixes to increase import precision and an endianness fix
+   [Fix] <js> DBM Loader: Various fixes to increase import precision and an endianness fix.
    [Fix] <js> AMF DSM Loader: Made some changes to the pattern reader, which eliminate the strange "vC7" commands in the pattern. I have found no hints on whether my fix is correct or not, apart from the fact that those AMF files that I have play a lot better now. And it makes kind of sense...
-   [Fix] <js> IMF Loader: Some fixes copied from Schism (copied from MikMod)
+   [Fix] <js> IMF Loader: Some fixes copied from Schism (copied from MikMod).
 
 Module cleanup
    [Imp] <js> In the cleanup dialog, mutually exclusive items are now automatically unchecked, to avoid confusion.
@@ -1311,7 +1350,7 @@ Pattern tab::Pattern editing
    [New] <js> New paste mode "paste flood" pastes the clipboard content again and again until it hits the bottom of the pattern (overflow paste will be disabled automatically if paste flood is used, for obvious reasons).
    [Imp] <js> When using the MPTM format, plugin param changes are written to the pattern as Parameter Control Events (instead of smooth MIDI macros).
    [Imp] <js> Assume that the clipboard pattern format is IT (instead of MOD) if no information about the format is available.
-   [Imp] <js> Pattern C&P: Pasted Commands are converted if necessary, and commands that are invalied in the current format are removed.
+   [Imp] <js> Pasted Commands are converted if necessary, and commands that are invalid in the current format are removed.
    [Imp] <js> If "record note off" is enabled and Note Off commands are not supported by the current format, try Note Cut and volume commands.
    [Mod] <js> It is impossible to enter something into the volume column in MOD format now.
    [Mod] <js> When interpolating Parameter Control Events, the plugin number and note type won't get overridden if the note type is already PC or PCs.
@@ -1368,7 +1407,7 @@ Instrument tab::Envelope editor
 
 Comments tab
    [Imp] <js> If sample size is < 1 KB, amount of bytes is shown instead of "0 KB".
-   [Fix] <js> The lower part of the tab was receiving update messages that were not even meaningful to this tab (e.g. speed changes), so it was updating quite often modules that have alternating speed and the toolbar was "blinking"... Only letting in important update messages now.
+   [Fix] <js> The lower part of the tab was receiving update messages that were not even meaningful to this tab (e.g. speed changes), so it was updating quite often with modules that have alternating speed and the toolbar was "blinking".
 
 Tree view
    [New] <js> Show sequences in song tree view. Sequences can be inserted, duplicated and deleted by right-clicking the sequence items.
@@ -1829,10 +1868,9 @@ Sample tab
    [Mod] <al> Disabled pitch shifting / time stretching of 8-bit samples (didn't seem to work). (rev. 228)
 
 Instrument tab
-   [Fix] <js> Envelope view: Middle line will now be drawn in panning and pitch/filter envelopes even if row guidelines are enabled. (rev. 254)
-
-   [Mod] <js> Instrument tab: Sample map can now map "No sample". (rev. 236)
+   [Mod] <js> Sample map can now map "No sample". (rev. 236)
    [Mod] <al> Changed default instrument plug volume command handling from Dry/Wet to none. Also added INI setting with which one can set the default value used for new instruments. INI setting is "DefaultPlugVolumeHandling" in [Misc], possible values are 0,1,2. (rev. 238)
+   [Fix] <js> Envelope view: Middle line will now be drawn in panning and pitch/filter envelopes even if row guidelines are enabled. (rev. 254)
 
 MPTM
    [Fix] <al> Pattern cleanup: In some cases sequence wasn't cleaned properly for mptm. (rev. 239)
@@ -1840,16 +1878,16 @@ MPTM
 
 MPTM Instrument tuning
    [New] <al> Added letter 'b' to drawable letters. (rev. 217)
+   [Mod] <al> Notes should now be drawn more clearly when using custom tunings. (rev. 217)
    [Fix] <al> Creating 'group geometric' was broken (perhaps since v. 1.17.02.49) (rev. 252)
    [Fix] <al> Loading certain old tuning objects didn't work. (rev. 238)
-   [Mod] <al> Notes should now be drawn more clearly when using custom tunings. (rev. 217)
 
 IT
    [Fix] <al, js> Macro config should now be loaded correctly also when loading IT files not made with MPT. (rev. 257)
    [Fix] <al> When file was saved with compatibility export, the last order was not shown in Impulse Tracker. (rev. 257)
 
 IT::Compatible Playback Mode
-   [Fix] <al, js> Playback fix to vibrato with ramp down waveform in IT compatibility play. (rev. 257)
+   [Fix] <al, js> Playback fix to vibrato with ramp down waveform. (rev. 257)
 
 XM
    [Fix] <js> Dxx effects that are to the left of a Bxx effect are now ignored. (http://forum.openmpt.org/index.php?topic=2769.0) (rev. 241)
