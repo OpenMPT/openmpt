@@ -1202,8 +1202,10 @@ void CASIODevice::InternalStart()
 			{
 				CASIODevice::ReportASIOException("ASIO crash in start()\n");
 			}
+		} else
+		{
+			WaitForRenderSilenceUpdated(false);
 		}
-		WaitForRenderSilenceUpdated(false);
 }
 
 
