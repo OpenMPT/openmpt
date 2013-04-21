@@ -4104,9 +4104,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 {
 	// Retrig: bit 8 is set if it's the new XM retrig
 	ModChannel &chn = Chn[nChn];
-	int nRetrigSpeed = param & 0x0F;
-	int nRetrigCount = chn.nRetrigCount;
-	bool bDoRetrig = false;
+	int retrigSpeed = param & 0x0F;
+	int retrigCount = chn.nRetrigCount;
+	bool doRetrig = false;
 
 	// IT compatibility 15. Retrigger
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -4114,11 +4114,10 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		if(m_nTickCount == 0 && chn.rowCommand.note)
 		{
 			chn.nRetrigCount = param & 0xf;
-		}
-		else if(!chn.nRetrigCount || !--chn.nRetrigCount)
+		} else if(!chn.nRetrigCount || !--chn.nRetrigCount)
 		{
 			chn.nRetrigCount = param & 0xf;
-			bDoRetrig = true;
+			doRetrig = true;
 		}
 	} else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
 	{
@@ -4128,15 +4127,19 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		{
 			// Here are some really stupid things FT2 does on the first tick.
 			// Test case: RetrigTick0.xm
-			if(chn.rowCommand.volcmd == VOLCMD_VOLUME) return;
-			if(chn.rowCommand.instr > 0 && chn.rowCommand.IsNoteOrEmpty()) nRetrigCount = 1;
+			if(chn.rowCommand.instr > 0 && chn.rowCommand.IsNoteOrEmpty()) retrigCount = 1;
+			if(chn.rowCommand.volcmd == VOLCMD_VOLUME)
+			{
+				chn.nRetrigCount = retrigCount;
+				return;
+			}
 		}
-		if(nRetrigCount >= nRetrigSpeed)
+		if(retrigCount >= retrigSpeed)
 		{
 			if(!m_SongFlags[SONG_FIRSTTICK] || !chn.rowCommand.IsNote())
 			{
-				bDoRetrig = true;
-				nRetrigCount = 0;
+				doRetrig = true;
+				retrigCount = 0;
 			}
 		}
 	} else
@@ -4144,23 +4147,23 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		// old routines
 		if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			if (!nRetrigSpeed) nRetrigSpeed = 1;
-			if ((nRetrigCount) && (!(nRetrigCount % nRetrigSpeed))) bDoRetrig = true;
-			nRetrigCount++;
+			if (!retrigSpeed) retrigSpeed = 1;
+			if ((retrigCount) && (!(retrigCount % retrigSpeed))) doRetrig = true;
+			retrigCount++;
 		} else
 		{
-			int realspeed = nRetrigSpeed;
+			int realspeed = retrigSpeed;
 			// FT2 bug: if a retrig (Rxy) occours together with a volume command, the first retrig interval is increased by one tick
 			if ((param & 0x100) && (chn.rowCommand.volcmd == VOLCMD_VOLUME) && (chn.rowCommand.param & 0xF0)) realspeed++;
 			if(!m_SongFlags[SONG_FIRSTTICK] || (param & 0x100))
 			{
 				if (!realspeed) realspeed = 1;
-				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = true;
-				nRetrigCount++;
-			} else if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
-			if (nRetrigCount >= realspeed)
+				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) doRetrig = true;
+				retrigCount++;
+			} else if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) retrigCount = 0;
+			if (retrigCount >= realspeed)
 			{
-				if ((m_nTickCount) || ((param & 0x100) && (!chn.rowCommand.note))) bDoRetrig = true;
+				if ((m_nTickCount) || ((param & 0x100) && (!chn.rowCommand.note))) doRetrig = true;
 			}
 		}
 	}
@@ -4172,7 +4175,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		return;
 	}
 
-	if (bDoRetrig)
+	if(doRetrig)
 	{
 		UINT dv = (param >> 4) & 0x0F;
 		if (dv)
@@ -4193,46 +4196,46 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			chn.nVolume = vol;
 			chn.dwFlags.set(CHN_FASTVOLRAMP);
 		}
-		UINT nNote = chn.nNewNote;
-		int32 nOldPeriod = chn.nPeriod;
-		if ((nNote) && (nNote <= NOTE_MAX) && (chn.nLength)) CheckNNA(nChn, 0, nNote, true);
-		bool bResetEnv = false;
-		if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
+		UINT note = chn.nNewNote;
+		int32 oldPeriod = chn.nPeriod;
+		if ((note) && (note <= NOTE_MAX) && (chn.nLength)) CheckNNA(nChn, 0, note, true);
+		bool resetEnv = false;
+		if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
-			if ((chn.rowCommand.instr) && (param < 0x100))
+			if((chn.rowCommand.instr) && (param < 0x100))
 			{
 				InstrumentChange(&chn, chn.rowCommand.instr, false, false);
-				bResetEnv = true;
+				resetEnv = true;
 			}
-			if (param < 0x100) bResetEnv = true;
+			if (param < 0x100) resetEnv = true;
 		}
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		// Test case: retrig.it
-		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER), bResetEnv);
+		NoteChange(nChn, note, IsCompatibleMode(TRK_IMPULSETRACKER), resetEnv);
 		if(m_nInstruments)
 		{
-			chn.rowCommand.note = nNote;	// No retrig without note...
+			chn.rowCommand.note = note;	// No retrig without note...
 			ProcessMidiOut(nChn);	//Send retrig to Midi
 		}
-		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!chn.rowCommand.note) && (nOldPeriod)) chn.nPeriod = nOldPeriod;
-		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
+		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!chn.rowCommand.note) && (oldPeriod)) chn.nPeriod = oldPeriod;
+		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) retrigCount = 0;
 		// IT compatibility: see previous IT compatibility comment =)
 		if(IsCompatibleMode(TRK_IMPULSETRACKER)) chn.nPos = chn.nPosLo = 0;
 
-		if (offset)									//rewbs.volOffset: apply offset on retrig
+		if(offset)	//rewbs.volOffset: apply offset on retrig
 		{
-			if (chn.pModSample)
+			if(chn.pModSample)
 				chn.nLength = chn.pModSample->nLength;
 			SampleOffset(nChn, offset);
 		}
 	}
 
 	// buggy-like-hell FT2 Rxy retrig!
-	if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100)) nRetrigCount++;
+	if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100)) retrigCount++;
 
 	// Now we can also store the retrig value for IT...
 	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-		chn.nRetrigCount = nRetrigCount;
+		chn.nRetrigCount = retrigCount;
 }
 
 
