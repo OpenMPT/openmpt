@@ -127,10 +127,9 @@ public:
 
 // Get mod length in various cases. Parameters:
 // [in]  adjustMode: See enmGetLengthResetMode for possible adjust modes.
-// [in]  endOrder: Order which should be reached (ORDERINDEX_INVALID means whole song)
-// [in]  endRow: Row in that order that should be reached
+// [in]  target: Time or position target which should be reached, or no target to get length of the first sub song.
 // [out] duration: total time in seconds
-// [out] targetReached: true if the specified order/row combination has been reached while going through the module.
+// [out] targetReached: true if the specified target has been reached while going through the module.
 // [out] lastOrder: last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
 // [out] lastRow: last parsed row (dito)
 // [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
@@ -4109,7 +4108,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 	int nRetrigCount = chn.nRetrigCount;
 	bool bDoRetrig = false;
 
-	//IT compatibility 15. Retrigger
+	// IT compatibility 15. Retrigger
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
 		if(m_nTickCount == 0 && chn.rowCommand.note)
@@ -4123,13 +4122,13 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		}
 	} else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
 	{
-		// buggy-like-hell FT2 Rxy retrig!
+		// Buggy-like-hell FT2 Rxy retrig!
 		if(m_SongFlags[SONG_FIRSTTICK])
 		{
-			// here are some really stupid things FT2 does
+			// Here are some really stupid things FT2 does.
 			if(chn.rowCommand.volcmd == VOLCMD_VOLUME) return;
 			if(chn.rowCommand.instr > 0 && chn.rowCommand.note == NOTE_NONE) nRetrigCount = 1;
-			if(chn.rowCommand.note != NOTE_NONE && chn.rowCommand.note <= GetModSpecifications().noteMax) nRetrigCount++;
+			if(chn.rowCommand.IsNote()) nRetrigCount = 1;
 		}
 		if (nRetrigCount >= nRetrigSpeed)
 		{

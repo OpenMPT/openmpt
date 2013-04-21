@@ -1637,7 +1637,7 @@ void CMainFrame::InitPreview()
 	// Avoid global volume ramping when trying samples in the treeview.
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.SetMixLevels(mixLevels_117RC3);
-	m_WaveFile.m_nSamplePreAmp = m_WaveFile.GetPlayConfig().getNormalSamplePreAmp();
+	m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
