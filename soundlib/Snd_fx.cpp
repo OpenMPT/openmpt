@@ -4128,8 +4128,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			// Here are some really stupid things FT2 does on the first tick.
 			// Test case: RetrigTick0.xm
 			if(chn.rowCommand.instr > 0 && chn.rowCommand.IsNoteOrEmpty()) retrigCount = 1;
-			if(chn.rowCommand.volcmd == VOLCMD_VOLUME)
+			if(chn.rowCommand.volcmd == VOLCMD_VOLUME && chn.rowCommand.vol != 0)
 			{
+				// I guess this condition simply checked if the volume byte was != 0 in FT2.
 				chn.nRetrigCount = retrigCount;
 				return;
 			}
