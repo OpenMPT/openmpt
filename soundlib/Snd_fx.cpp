@@ -4123,12 +4123,13 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 	} else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
 	{
 		// Buggy-like-hell FT2 Rxy retrig!
+		// Test case: retrig.xm
 		if(m_SongFlags[SONG_FIRSTTICK])
 		{
 			// Here are some really stupid things FT2 does.
+			// Test case: RetrigTick0.xm
 			if(chn.rowCommand.volcmd == VOLCMD_VOLUME) return;
-			if(chn.rowCommand.instr > 0 && chn.rowCommand.note == NOTE_NONE) nRetrigCount = 1;
-			if(chn.rowCommand.IsNote()) nRetrigCount = 1;
+			if(chn.rowCommand.instr > 0 && chn.rowCommand.IsNoteOrEmpty()) nRetrigCount = 1;
 		}
 		if (nRetrigCount >= nRetrigSpeed)
 		{
