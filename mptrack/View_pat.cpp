@@ -3570,6 +3570,11 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		UpdateAllVUMeters(pnotify);
 	}
 
+	if(pnotify->type[Notification::Stop] && ((m_Status & (psFollowSong | psDragActive)) == psFollowSong))
+	{
+		SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID);
+	}
+
 	UpdateIndicator();
 
 	return 0;
