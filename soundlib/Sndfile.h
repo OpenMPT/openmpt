@@ -92,6 +92,57 @@ struct GetLengthType
 };
 
 
+// Target seek mode for GetLength()
+struct GetLengthTarget
+{
+	union
+	{
+		double time;
+		struct
+		{
+			ROWINDEX row;
+			ORDERINDEX order;
+		} pos;
+	};
+
+	enum Mode
+	{
+		NoTarget,		// Don't seek, i.e. return complete module length.
+		SeekPosition,	// Seek to given pattern position.
+		SeekSeconds,	// Seek to given time.
+	} mode;
+
+	// Don't seek, i.e. return complete module length.
+	GetLengthTarget()
+	{
+		mode = NoTarget;
+	}
+
+	// Seek to given pattern position if position is valid.
+	GetLengthTarget(ORDERINDEX order, ROWINDEX row)
+	{
+		mode = NoTarget;
+		if(order != ORDERINDEX_INVALID && row != ROWINDEX_INVALID)
+		{
+			mode = SeekPosition;
+			pos.row = row;
+			pos.order = order;
+		}
+	}
+
+	// Seek to given time if t is valid (i.e. not negative).
+	GetLengthTarget(double t)
+	{
+		mode = NoTarget;
+		if(t >= 0.0)
+		{
+			mode = SeekSeconds;
+			time = t;
+		}
+	}
+};
+
+
 // Reset mode for GetLength()
 enum enmGetLengthResetMode
 {
@@ -400,7 +451,7 @@ public:
 
 	//Get modlength in various cases: total length, length to
 	//specific order&row etc. Return value is in seconds.
-	GetLengthType GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX ord = ORDERINDEX_INVALID, ROWINDEX row = ROWINDEX_INVALID);
+	GetLengthType GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
 
 	void InitializeVisitedRows() { visitedSongRows.Initialize(true); }
 

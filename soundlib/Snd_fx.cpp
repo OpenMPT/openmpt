@@ -94,6 +94,7 @@ public:
 	};
 
 	double elapsedTime;
+	CSoundFile::samplecount_t renderedSamples;
 	UINT musicSpeed, musicTempo;
 	LONG glbVol;
 	vector<ChnSettings> chnSettings;
@@ -111,6 +112,7 @@ public:
 	void Reset()
 	{
 		elapsedTime = 0.0;
+		renderedSamples = 0;
 		musicSpeed = sndFile.m_nDefaultSpeed;
 		musicTempo = sndFile.m_nDefaultTempo;
 		glbVol = sndFile.m_nDefaultGlobalVolume;
@@ -133,8 +135,8 @@ public:
 // [out] lastRow: last parsed row (dito)
 // [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
 // [out] endRow: last row before module loops (dito)
-GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX endOrder, ROWINDEX endRow)
-//---------------------------------------------------------------------------------------------------------
+GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target)
+//-------------------------------------------------------------------------------------------
 {
 	GetLengthType retval;
 	retval.duration = 0.0;
@@ -143,7 +145,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	retval.lastRow = retval.endRow = ROWINDEX_INVALID;
 
 	// Are we trying to reach a certain pattern position?
-	const bool hasSearchTarget = (endOrder != ORDERINDEX_INVALID && endRow != ROWINDEX_INVALID);
+	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
 
 	ROWINDEX nRow = 0, nNextRow = 0;
 	ROWINDEX nNextPatStartRow = 0; // FT2 E60 bug
@@ -153,8 +155,6 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	GetLengthMemory memory(*this);
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this);
-
-	samplecount_t renderedSamples = 0;
 
 	for (;;)
 	{
@@ -203,7 +203,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			}
 		}
 		// Skip non-existing patterns
-		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern]))
+		if((nPattern >= Patterns.Size()) || (!Patterns[nPattern]))
 		{
 			// If there isn't even a tune, we should probably stop here.
 			if(nCurrentOrder == m_nRestartPos)
@@ -223,11 +223,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 			continue;
 		}
 		// Should never happen
-		if (nRow >= Patterns[nPattern].GetNumRows())
+		if(nRow >= Patterns[nPattern].GetNumRows())
 			nRow = 0;
 
-		//Check whether target reached.
-		if(nCurrentOrder == endOrder && nRow == endRow)
+		// Check whether target was reached.
+		if((target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order && nRow == target.pos.row)
+			|| (target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time))
 		{
 			retval.targetReached = true;
 			break;
@@ -534,10 +535,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
 
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
-		renderedSamples += rowDuration;
+		memory.renderedSamples += rowDuration;
 	}
 
-	if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
+	if(retval.targetReached || target.mode == GetLengthTarget::NoTarget)
 	{
 		retval.lastOrder = nCurrentOrder;
 		retval.lastRow = nRow;
@@ -547,11 +548,11 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, ORDERINDEX
 	// Store final variables
 	if((adjustMode & eAdjust))
 	{
-		if(retval.targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
+		if(retval.targetReached || target.mode == GetLengthTarget::NoTarget)
 		{
 			// Target found, or there is no target (i.e. play whole song)...
 			m_nGlobalVolume = memory.glbVol;
-			m_lTotalSampleCount = renderedSamples;
+			m_lTotalSampleCount = memory.renderedSamples;
 			m_bPositionChanged = true;
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{

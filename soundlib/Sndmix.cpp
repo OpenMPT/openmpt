@@ -177,7 +177,7 @@ BOOL CSoundFile::GlobalFadeSong(UINT msec)
 
 
 UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
-//-------------------------------------------------------
+//----------------------------------------------------
 {
 	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
 	LPCONVERTPROC pCvt = nullptr;
@@ -436,7 +436,7 @@ BOOL CSoundFile::ProcessRow()
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
-						for (UINT i=0; i<MAX_CHANNELS; i++)
+						for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 						{
 							Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 							Chn[i].nFadeOutVol = 0;
@@ -546,7 +546,7 @@ BOOL CSoundFile::ProcessRow()
 				} else
 				{
 					// Ok, this is really dirty, but we have to update the visited rows vector...
-					GetLength(eAdjustOnSuccess, m_nCurrentOrder, m_nRow);
+					GetLength(eAdjustOnSuccess, GetLengthTarget(m_nCurrentOrder, m_nRow));
 				}
 			}
 		}
@@ -1365,7 +1365,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			else
 				chn.nVibratoPos = (vibpos + chn.nVibratoSpeed) & 0x3F;
 		}
-	} else if(chn.dwOldFlags & CHN_VIBRATO)
+	} else if(chn.dwOldFlags[CHN_VIBRATO])
 	{
 		// Stop MIDI vibrato for plugins:
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
@@ -1961,7 +1961,7 @@ BOOL CSoundFile::ReadNote()
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 				
-				const forcePanningMode panningMode = m_PlayConfig.getForcePanningMode(); 				
+				const forcePanningMode panningMode = m_PlayConfig.getForcePanningMode();
 				if (panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
 				{
 					if (pan < 128)
