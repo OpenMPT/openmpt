@@ -189,10 +189,15 @@ protected:
 	UINT m_nCurrentDevice;
 	ULONG m_nSamplesPerSec;
 	LONG m_RenderSilence;
+	LONG m_RenderingSilence;
 	ASIOCallbacks m_Callbacks;
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
 	int m_FrameBuffer[ASIO_BLOCK_LEN];
+
+private:
+	void WaitForRenderSilenceUpdated(bool on);
+
 public:
 	static int baseChannel;
 
