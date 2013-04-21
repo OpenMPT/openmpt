@@ -4126,14 +4126,14 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		// Test case: retrig.xm
 		if(m_SongFlags[SONG_FIRSTTICK])
 		{
-			// Here are some really stupid things FT2 does.
+			// Here are some really stupid things FT2 does on the first tick.
 			// Test case: RetrigTick0.xm
 			if(chn.rowCommand.volcmd == VOLCMD_VOLUME) return;
 			if(chn.rowCommand.instr > 0 && chn.rowCommand.IsNoteOrEmpty()) nRetrigCount = 1;
 		}
-		if (nRetrigCount >= nRetrigSpeed)
+		if(nRetrigCount >= nRetrigSpeed)
 		{
-			if(!m_SongFlags[SONG_FIRSTTICK] || chn.rowCommand.note == NOTE_NONE)
+			if(!m_SongFlags[SONG_FIRSTTICK] || !chn.rowCommand.IsNote())
 			{
 				bDoRetrig = true;
 				nRetrigCount = 0;
