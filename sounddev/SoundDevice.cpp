@@ -1006,6 +1006,7 @@ CASIODevice::CASIODevice()
 	m_nSamplesPerSec = 0;
 	m_bMixRunning = FALSE;
 	InterlockedExchange(&m_RenderSilence, 0);
+	InterlockedExchange(&m_RenderingSilence, 0);
 }
 
 
@@ -1168,6 +1169,22 @@ abort:
 }
 
 
+void CASIODevice::WaitForRenderSilenceUpdated(bool on)
+//----------------------------------------------------
+{
+	DWORD pollingstart = GetTickCount();
+	while(InterlockedExchangeAdd(&m_RenderingSilence, 0) != (on?1:0))
+	{
+		Sleep(1);
+		if(GetTickCount() - pollingstart > 250)
+		{
+			ALWAYS_ASSERT(false && "waiting for asio failed");
+			break;
+		}
+	}
+}
+
+
 void CASIODevice::InternalStart()
 //-------------------------------
 {
@@ -1186,6 +1203,7 @@ void CASIODevice::InternalStart()
 				CASIODevice::ReportASIOException("ASIO crash in start()\n");
 			}
 		}
+		WaitForRenderSilenceUpdated(false);
 }
 
 
@@ -1193,6 +1211,7 @@ void CASIODevice::InternalStop()
 //------------------------------
 {
 		InterlockedExchange(&m_RenderSilence, 1);
+		WaitForRenderSilenceUpdated(true);
 		g_asio_startcount--;
 		ALWAYS_ASSERT(g_asio_startcount==0);
 }
@@ -1403,6 +1422,7 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex)
 {
 	g_dwBuffer = doubleBufferIndex;
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
+	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
 	if(rendersilence)
 	{
 		FillAudioBuffer();
