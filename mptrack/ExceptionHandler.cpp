@@ -109,9 +109,9 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 		errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), (numFiles == 1 ? "it is" : "they are"));
 	}
 	
-	errorMessage.AppendFormat("\n\nOpenMPT %s %s (%s)\n",
+	errorMessage.AppendFormat("\n\nOpenMPT %s (%s)\n",
 		MptVersion::GetVersionStringExtended().c_str(),
-		MptVersion::GetVersionUrlString()
+		MptVersion::GetVersionUrlString().c_str()
 		);
 
 	Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
