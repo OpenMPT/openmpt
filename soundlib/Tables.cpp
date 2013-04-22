@@ -118,6 +118,34 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 }
 
 
+const char * CSoundFile::ModTypeToString(MODTYPE modtype)
+//-------------------------------------------------------
+{
+	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
+	{
+		if(modFormatInfo[i].format & modtype)
+		{
+			return modFormatInfo[i].extension;
+		}
+	}
+	return "";
+}
+
+
+const char * CSoundFile::ModTypeToTracker(MODTYPE modtype)
+//--------------------------------------------------------
+{
+	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
+	{
+		if(modFormatInfo[i].format & modtype)
+		{
+			return modFormatInfo[i].name;
+		}
+	}
+	return "";
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 
 const uint8 ImpulseTrackerPortaVolCmd[16] =

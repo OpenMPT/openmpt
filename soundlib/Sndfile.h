@@ -507,6 +507,8 @@ public:
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
+	static const char * ModTypeToString(MODTYPE modtype);
+	static const char * ModTypeToTracker(MODTYPE modtype);
 
 	void UpgradeModFlags();
 	void UpgradeSong();
