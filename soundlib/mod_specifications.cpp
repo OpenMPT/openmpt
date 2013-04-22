@@ -11,7 +11,7 @@
 #include <stdafx.h>
 #include "mod_specifications.h"
 #include "../common/misc_util.h"
-
+#include <algorithm>
 
 namespace ModSpecs
 {
@@ -368,36 +368,32 @@ const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx
 } // namespace ModSpecs
 
 
-MODTYPE CModSpecifications::ExtensionToType(LPCTSTR pszExt)
-//---------------------------------------------------------
+MODTYPE CModSpecifications::ExtensionToType(const std::string &ext_)
+//------------------------------------------------------------------
 {
-	if (pszExt == nullptr)
-		return MOD_TYPE_NONE;
-	if (pszExt[0] == '.')
-		pszExt++;
-	char szExtA[CountOf(ModSpecs::mod.fileExtension)];
-	MemsetZero(szExtA);
-	const size_t nLength = _tcslen(pszExt);
-	if (nLength >= CountOf(szExtA))
-		return MOD_TYPE_NONE;
-	for(size_t i = 0; i < nLength; i++)
-		szExtA[i] = static_cast<char>(pszExt[i]);
-
-	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
+	std::string ext = ext_;
+	if(ext == "")
 	{
-		if (!lstrcmpiA(szExtA, ModSpecs::Collection[i]->fileExtension))
+		return MOD_TYPE_NONE;
+	}
+	if(ext.length() > 0 && ext[0] == '.')
+	{
+		ext = ext.substr(1);
+	}
+	std::transform( ext.begin(), ext.end(), ext.begin(), tolower );
+	for(std::size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
+	{
+		if(ext == ModSpecs::Collection[i]->fileExtension)
 		{
 			return ModSpecs::Collection[i]->internalType;
 		}
 	}
 	// Special case: ITP files...
-	if(!lstrcmpi(szExtA, _T("itp")))
+	if(ext == "itp")
 	{
 		return MOD_TYPE_IT;
 	}
-
 	return MOD_TYPE_NONE;
-
 }
 
 

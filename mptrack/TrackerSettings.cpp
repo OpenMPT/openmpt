@@ -530,7 +530,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 	// Default mod type when using the "New" button
 	const MODTYPE oldDefault = defaultModType;
-	defaultModType = CModSpecifications::ExtensionToType(CMainFrame::GetPrivateProfileCString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile));
+	defaultModType = CModSpecifications::ExtensionToType(mpt::String(CMainFrame::GetPrivateProfileCString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile)));
 	if(defaultModType == MOD_TYPE_NONE)
 	{
 		defaultModType = oldDefault;
