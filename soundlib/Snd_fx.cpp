@@ -4216,7 +4216,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 		if(m_nInstruments)
 		{
 			chn.rowCommand.note = note;	// No retrig without note...
+#ifdef MODPLUG_TRACKER
 			ProcessMidiOut(nChn);	//Send retrig to Midi
+#endif // MODPLUG_TRACKER
 		}
 		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!chn.rowCommand.note) && (oldPeriod)) chn.nPeriod = oldPeriod;
 		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) retrigCount = 0;
