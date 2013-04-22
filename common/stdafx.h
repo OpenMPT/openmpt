@@ -13,6 +13,8 @@
 
 #include "BuildSettings.h"
 
+#if defined(MODPLUG_TRACKER)
+
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxcmn.h>			// MFC support for Windows Common Controls
@@ -31,15 +33,30 @@
 #pragma warning(default:4201)
 #endif
 
+#else // !MODPLUG_TRACKER
+
+#if defined(WIN32) || defined(_WIN32)
+#include <windows.h>
+#endif
+
+#endif // MODPLUG_TRACKER
+
 #include <string>
 #include <fstream>
 #include <strstream>
 
+
+
 #include "../common/typedefs.h"
 
+
 // Exception type that is used to catch "operator new" exceptions.
-//typedef std::bad_alloc & MPTMemoryException;
+#if defined(_MFC_VER)
 typedef CMemoryException * MPTMemoryException;
+#else
+typedef std::bad_alloc & MPTMemoryException;
+#endif
+
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
