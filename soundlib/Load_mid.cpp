@@ -17,6 +17,7 @@
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 
+#ifdef MODPLUG_TRACKER
 
 #pragma warning(disable:4244)
 //#define MIDI_LOG
@@ -1207,4 +1208,11 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	return true;
 }
 
+#else // !MODPLUG_TRACKER
 
+bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
+{
+	return false;
+}
+
+#endif

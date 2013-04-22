@@ -14,7 +14,9 @@
 
 
 #include "stdafx.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
+#endif
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ITTools.h"
@@ -36,6 +38,11 @@ bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
 bool CSoundFile::ReadITProject(FileReader &file)
 //----------------------------------------------
 {
+#ifndef MODPLUG_TRACKER
+	return false;
+#endif
+#ifdef MODPLUG_TRACKER
+	
 	uint32 version;
 	FileReader::off_t size;
 
@@ -252,6 +259,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 	UpgradeModFlags();
 
 	return true;
+#endif
 }
 
 
