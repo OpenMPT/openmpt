@@ -737,6 +737,10 @@ public:
 #endif // MODPLUG_TRACKER
 	void ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount);
 
+#ifndef MODPLUG_TRACKER
+	void ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long lCount); // lCount meaning the number of frames, totally independet from the numer of channels
+#endif
+
 	// System-Dependant functions
 public:
 	static void *AllocateSample(UINT nbytes);

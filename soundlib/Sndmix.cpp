@@ -319,6 +319,10 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 
 		nStat++;
 
+#ifndef MODPLUG_TRACKER
+		ApplyFinalOutputGain(MixSoundBuffer, MixRearBuffer, lCount);
+#endif
+
 #ifndef NO_AGC
 		// Automatic Gain Control
 		if (m_MixerSettings.DSPMask & SNDDSP_AGC) m_AGC.Process(MixSoundBuffer, lSampleCount, m_MixerSettings.gdwMixingFreq, m_MixerSettings.gnChannels);
@@ -2274,3 +2278,43 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 		}
 	}
 }
+
+
+#ifndef MODPLUG_TRACKER
+void CSoundFile::ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long lCount) {
+	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
+	{
+		// nothing to do, gain == +/- 0dB
+		return; 
+	}
+	// no clipping prevention is done here
+	int32 factor = m_MixerSettings.m_FinalOutputGain;
+	int * buf = SoundBuffer;
+	int * rbuf = RearBuffer;
+	if(m_MixerSettings.gnChannels == 1)
+	{
+		for(int i=0; i<lCount; ++i)
+		{
+			*buf = Util::muldiv(*buf, factor, 1<<16);
+			buf++;
+		}
+	} else if(m_MixerSettings.gnChannels == 2)
+	{
+		for(int i=0; i<lCount*2; ++i)
+		{
+			*buf = Util::muldiv(*buf, factor, 1<<16);
+			buf++;
+		}
+	} else if(m_MixerSettings.gnChannels == 4)
+	{
+		for(int i=0; i<lCount*2; ++i)
+		{
+			*buf = Util::muldiv(*buf, factor, 1<<16);
+			*rbuf = Util::muldiv(*rbuf, factor, 1<<16);
+			buf++;
+			rbuf++;
+		}
+	}
+}
+#endif
+
