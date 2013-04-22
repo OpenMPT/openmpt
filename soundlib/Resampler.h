@@ -30,7 +30,7 @@ public:
 	{
 		SrcMode = SRCMODE_FIRFILTER;
 		gdWFIRCutoff = 0.97;
-		gbWFIRType = 7; //WFIR_KAISER4T;
+		gbWFIRType = WFIR_KAISER4T;
 	}
 	bool operator == (const CResamplerSettings &cmp) const
 	{
