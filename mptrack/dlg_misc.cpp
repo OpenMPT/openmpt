@@ -459,32 +459,11 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 //////////////////////////////////////////////////////////////////////////////
 // CShowLogDlg
 
-BEGIN_MESSAGE_MAP(CShowLogDlg, CDialog)
-	//{{AFX_MSG_MAP(CShowLogDlg)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-
-void CShowLogDlg::DoDataExchange(CDataExchange* pDX)
-//--------------------------------------------------
-{
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CShowLogDlg)
-	DDX_Control(pDX, IDC_EDIT_LOG,		m_EditLog);
-	//}}AFX_DATA_MAP
-}
-
-
 BOOL CShowLogDlg::OnInitDialog()
 //------------------------------
 {
 	CDialog::OnInitDialog();
 	if (m_lpszTitle) SetWindowText(m_lpszTitle);
-	m_EditLog.SetSel(0, -1);
-	m_EditLog.ReplaceSel(m_lpszLog);
-	m_EditLog.SetFocus();
-	m_EditLog.SetSel(0, 0);
 	return FALSE;
 }
 

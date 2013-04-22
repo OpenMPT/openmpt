@@ -151,8 +151,8 @@ void CMIDIMappingDialog::OnLbnSelchangeList1()
 	m_ChannelCBox.SetCurSel(activeSetting.GetChannel());
 
 	if(m_Setting.GetEvent() == MIDIEvents::evControllerChange)
-		m_EventCBox.SetCurSel(0); 
-	else 
+		m_EventCBox.SetCurSel(0);
+	else
 		m_EventCBox.SetCurSel(-1);
 
 

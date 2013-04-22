@@ -118,7 +118,6 @@
 #define IDB_VISPCNODE                   437
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
-#define IDD_SOUNDBANK_INFO1             441
 #define IDD_PITCHSHIFT                  442
 #define IDD_OPTIONS_AUTOSAVE            443
 #define IDD_EDIT_GOTO                   444
@@ -133,7 +132,6 @@
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
-#define IDD_MODLOADING_WARNINGS         518
 #define IDR_DEFAULT_KEYBINDINGS         519
 #define IDR_BUILTIN_TUNINGS             520
 #define IDD_CLEANUP_SONG                521
@@ -882,7 +880,6 @@
 #define IDC_RADIO_ADDSILENCE_END        2381
 #define IDC_SPIN_ADDSILENCE             2382
 #define IDC_RADIO_RESIZETO              2384
-#define IDC_EDIT_MODLOADING_WARNINGS    2385
 #define IDC_CHECK_PATRECORD             2386
 #define IDC_LOAD_COLORSCHEME            2387
 #define IDC_SAVE_COLORSCHEME            2388

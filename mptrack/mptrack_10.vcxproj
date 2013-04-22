@@ -497,6 +497,7 @@
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
     <ClInclude Include="Reporting.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SelectPluginDialog.h" />
     <ClInclude Include="ChannelManagerDlg.h" />
     <ClInclude Include="CloseMainDialog.h" />

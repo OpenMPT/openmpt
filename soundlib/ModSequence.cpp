@@ -793,7 +793,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 
 
 void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
-//-------------------------------------------------------------------------
+//----------------------------------------------------------------------
 {
 	const uint16 size = seq.GetLength();
 	srlztn::Binarywrite<uint16>(oStrm, size);

@@ -59,18 +59,13 @@ class CShowLogDlg: public CDialog
 {
 public:
 	LPCSTR m_lpszLog, m_lpszTitle;
-	CEdit m_EditLog;
 
 public:
-	CShowLogDlg(CWnd *parent=NULL):CDialog(IDD_SHOWLOG, parent) { m_lpszLog = NULL; m_lpszTitle = NULL; }
+	CShowLogDlg(CWnd *parent = nullptr):CDialog(IDD_SHOWLOG, parent) { m_lpszLog = NULL; m_lpszTitle = NULL; }
 	UINT ShowLog(LPCSTR pszLog, LPCSTR lpszTitle=NULL);
 
 protected:
-	//{{AFX_VIRTUAL(CShowLogDlg)
-	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
-	DECLARE_MESSAGE_MAP()
 };
 
 
