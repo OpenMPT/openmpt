@@ -11,12 +11,16 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
+#endif
 #include "dlsbank.h"
 #include "Wav.h"
 #include "../common/StringFixer.h"
 #include "../soundlib/FileReader.h"
 #include "SampleIO.h"
+
+#ifdef MODPLUG_TRACKER
 
 //#define DLSBANK_LOG
 //#define DLSINSTR_LOG
@@ -1975,3 +1979,6 @@ const CHAR *CDLSBank::GetRegionName(UINT nIns, UINT nRgn) const
 	}
 	return nullptr;
 }
+
+
+#endif // MODPLUG_TRACKER

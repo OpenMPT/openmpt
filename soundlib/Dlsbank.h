@@ -88,6 +88,10 @@ STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
 
 #pragma pack(pop)
 
+
+#ifdef MODPLUG_TRACKER
+
+
 #define SOUNDBANK_TYPE_INVALID	0
 #define SOUNDBANK_TYPE_DLS		0x01
 #define SOUNDBANK_TYPE_SF2		0x02
@@ -158,3 +162,7 @@ public:
 	static LONG DLS32BitRelativeLinearToGain(LONG lGain);		// 0dB = 0x10000
 	static LONG DLSMidiVolumeToLinear(UINT nMidiVolume);		// [0-127] -> [0-0x10000]
 };
+
+
+#endif // MODPLUG_TRACKER
+

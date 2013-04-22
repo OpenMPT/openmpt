@@ -36,7 +36,9 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_S3M,		"ScreamTracker III",		"s3m" },
 	{ MOD_TYPE_XM,		"FastTracker II",			"xm" },
 	{ MOD_TYPE_IT,		"Impulse Tracker",			"it" },
+#ifdef MODPLUG_TRACKER
 	{ MOD_TYPE_IT,		"Impulse Tracker Project",	"itp" },
+#endif
 	{ MOD_TYPE_MPT,		"OpenMPT",					"mptm" },
 	{ MOD_TYPE_STM,		"ScreamTracker II",			"stm" },
 	{ MOD_TYPE_MOD,		"NoiseTracker",				"nst" },
@@ -84,9 +86,11 @@ static const ModFormatInfo otherFormatInfo[] =
 {
 	// Other stuff
 	{ MOD_TYPE_WAV,		"Wave",						"wav" },
+#ifdef MODPLUG_TRACKER
 	{ MOD_TYPE_MID,		"MIDI",						"mid" },
 	{ MOD_TYPE_MID,		"MIDI",						"rmi" },
 	{ MOD_TYPE_MID,		"MIDI",						"smf" },
+#endif
 };
 
 
