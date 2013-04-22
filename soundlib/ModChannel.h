@@ -10,11 +10,11 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4324) //structure was padded due to __declspec(align())
-#endif
-
 class CSoundFile;
+
+#ifdef _MSC_VER
+#pragma warning(disable:4324) //structure was padded due to __declspec(align())
+#endif
 
 // Mix Channel Struct
 struct ALIGN(32) ModChannel
@@ -201,3 +201,7 @@ struct ALIGN(32) ModChannelSettings
 		szName[0] = '\0';
 	}
 };
+
+#ifdef _MSC_VER
+#pragma warning(default:4324) //structure was padded due to __declspec(align())
+#endif
