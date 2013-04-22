@@ -1155,11 +1155,11 @@ void CTrackApp::OnFileOpen()
 		"All Modules|" + exts +
 		"|"
 		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
-#ifndef NO_MO3_SUPPORT
+#ifndef NO_MO3
 		";*.mo3"
 #endif
 		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.gz"
-#ifndef NO_MO3_SUPPORT
+#ifndef NO_MO3
 		";*.mo3"
 #endif
 		"|"
