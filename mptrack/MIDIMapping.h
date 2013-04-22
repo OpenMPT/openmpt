@@ -14,8 +14,6 @@
 #include <algorithm>
 using std::vector;
 
-namespace mpt { class String; }
-
 
 //=========================
 class CMIDIMappingDirective
@@ -59,7 +57,7 @@ public:
 
 	bool operator==(const CMIDIMappingDirective& d) const {return memcmp(this, &d, sizeof(CMIDIMappingDirective)) == 0;}
 
-	mpt::String ToString() const;
+	const char *ToString() const;
 
 	BYTE GetChnEvent() const {return m_ChnEvent;}
 
