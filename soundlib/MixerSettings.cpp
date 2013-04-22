@@ -30,4 +30,9 @@ MixerSettings::MixerSettings()
 
 	glVolumeRampUpSamples = 16;
 	glVolumeRampDownSamples = 42;
+
+#ifndef MODPLUG_TRACKER
+	m_FinalOutputGain = 1 << 16; // +/- 0dB
+#endif
+
 }

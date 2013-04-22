@@ -36,6 +36,10 @@ struct MixerSettings
 	long glVolumeRampUpSamples, glVolumeRampDownSamples;
 	//end rewbs.resamplerConf
 
+#ifndef MODPLUG_TRACKER
+	DWORD m_FinalOutputGain; // factor multiplied to the final mixer output just before clipping and dithering, fixed point 16.16
+#endif
+
 	bool IsUnsignedSampleFormat() const
 	{
 		return m_SampleFormat == SampleFormatUnsigned8;
