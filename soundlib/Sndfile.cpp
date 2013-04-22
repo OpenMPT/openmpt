@@ -16,6 +16,7 @@
 #include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
+#include "../common/AudioCriticalSection.h"
 #include "../common/serialization_utils.h"
 #include "Sndfile.h"
 #include "tuningcollection.h"
@@ -387,7 +388,10 @@ CSoundFile::CSoundFile() :
 	Patterns(*this),
 	Order(*this),
 	m_pModSpecs(&ModSpecs::itEx),
+	m_pTuningsTuneSpecific(nullptr),
+#ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
+#endif
 	visitedSongRows(*this),
 	m_pCustomLog(nullptr)
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
