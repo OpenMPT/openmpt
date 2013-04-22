@@ -698,9 +698,11 @@ public:
 	bool Read8SVXSample(SAMPLEINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file);
+#ifndef MODPLUG_NO_FILESAVE
 	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
 	bool SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
 	bool SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
+#endif
 
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
@@ -708,8 +710,10 @@ public:
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+#ifndef MODPLUG_NO_FILESAVE
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const;
 	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const;
+#endif
 
 	// I/O from another sound file
 	bool ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile &srcSong, INSTRUMENTINDEX sourceInstr);
