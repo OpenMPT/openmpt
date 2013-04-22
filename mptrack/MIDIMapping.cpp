@@ -14,7 +14,7 @@
 #include "Mainfrm.h"
 
 
-const char *CMIDIMappingDirective::ToString() const
+std::string CMIDIMappingDirective::ToString() const
 //-------------------------------------------------
 {
 	mpt::String str;
@@ -23,7 +23,7 @@ const char *CMIDIMappingDirective::ToString() const
 	if(m_CaptureMIDI) flags[1] = '1';
 	if(m_AllowPatternEdit) flags[2] = '1';
 	str.Format("%s:%d:%x:%d:%d:%d", flags, (int)GetChannel(), (int)GetEvent(), (int)GetController(), (int)m_PluginIndex, m_Parameter);
-	return str.c_str();
+	return str;
 }
 
 

@@ -159,7 +159,7 @@ void CMIDIMappingDialog::OnLbnSelchangeList1()
 	m_ControllerCBox.SetCurSel(activeSetting.GetController());
 	m_PluginCBox.SetCurSel(activeSetting.GetPlugIndex()-1);
 	m_PlugParamCBox.SetCurSel(activeSetting.GetParamIndex());
-	SetDlgItemText(IDC_EDIT1, activeSetting.ToString());
+	SetDlgItemText(IDC_EDIT1, activeSetting.ToString().c_str());
 
 	OnCbnSelchangeComboPlugin();
 	OnCbnSelchangeComboEvent();
@@ -196,7 +196,7 @@ void CMIDIMappingDialog::OnBnClickedCheckPatRecord()
 void CMIDIMappingDialog::UpdateString()
 //-------------------------------------
 {
-	SetDlgItemText(IDC_EDIT1, m_Setting.ToString());
+	SetDlgItemText(IDC_EDIT1, m_Setting.ToString().c_str());
 }
 
 
@@ -323,7 +323,7 @@ CString CMIDIMappingDialog::CreateListString(const CMIDIMappingDirective& s)
 {
 	CString str;
 	str.Preallocate(100);
-	str = s.ToString();
+	str = s.ToString().c_str();
 	const BYTE plugindex = s.GetPlugIndex();
 
 	//Short ID name
