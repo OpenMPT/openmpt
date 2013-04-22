@@ -14,7 +14,9 @@
 #include "SoundDevice.h"
 #include "SoundDevices.h"
 #include "../common/misc_util.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/Reporting.h"
+#endif
 #include "../common/StringFixer.h"
 
 
@@ -345,7 +347,6 @@ CWaveDevice::CWaveDevice()
 	m_nPreparedHeaders = 0;
 	m_nBytesPerSec = 0;
 	m_BytesPerSample = 0;
-	MemsetZero(m_WaveBuffers);
 }
 
 
@@ -379,19 +380,16 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	ULONG NumBuffers = m_LatencyMS * pwfx->nAvgBytesPerSec / ( m_nWaveBufferSize * 1000 );
 	NumBuffers = CLAMP(NumBuffers, 3, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
+	m_WaveBuffers.resize(NumBuffers);
+	m_WaveBuffersData.resize(NumBuffers);
 	for(UINT iBuf=0; iBuf<NumBuffers; iBuf++)
 	{
-		if (iBuf >= WAVEOUT_MAXBUFFERS) break;
-		if (!m_WaveBuffers[iBuf])
-		{
-			m_WaveBuffers[iBuf] = (LPWAVEHDR)GlobalAllocPtr(GMEM_FIXED, sizeof(WAVEHDR)+m_nWaveBufferSize);
-			if (!m_WaveBuffers[iBuf]) break;
-		}
-		RtlZeroMemory(m_WaveBuffers[iBuf], sizeof(WAVEHDR));
-		m_WaveBuffers[iBuf]->dwFlags = WHDR_DONE;
-		m_WaveBuffers[iBuf]->lpData = ((char *)(m_WaveBuffers[iBuf])) + sizeof(WAVEHDR);
-		m_WaveBuffers[iBuf]->dwBufferLength = m_nWaveBufferSize;
-		if (waveOutPrepareHeader(m_hWaveOut, m_WaveBuffers[iBuf], sizeof(WAVEHDR)) != 0)
+		MemsetZero(m_WaveBuffers[iBuf]);
+		m_WaveBuffersData[iBuf].resize(m_nWaveBufferSize);
+		m_WaveBuffers[iBuf].dwFlags = WHDR_DONE;
+		m_WaveBuffers[iBuf].lpData = &m_WaveBuffersData[iBuf][0];
+		m_WaveBuffers[iBuf].dwBufferLength = m_nWaveBufferSize;
+		if (waveOutPrepareHeader(m_hWaveOut, &m_WaveBuffers[iBuf], sizeof(WAVEHDR)) != 0)
 		{
 			break;
 		}
@@ -419,9 +417,7 @@ BOOL CWaveDevice::Close()
 		while (m_nPreparedHeaders > 0)
 		{
 			m_nPreparedHeaders--;
-			waveOutUnprepareHeader(m_hWaveOut, m_WaveBuffers[m_nPreparedHeaders], sizeof(WAVEHDR));
-			GlobalFreePtr(m_WaveBuffers[m_nPreparedHeaders]);
-			m_WaveBuffers[m_nPreparedHeaders] = NULL;
+			waveOutUnprepareHeader(m_hWaveOut, &m_WaveBuffers[m_nPreparedHeaders], sizeof(WAVEHDR));
 		}
 		MMRESULT err = waveOutClose(m_hWaveOut);
 		ALWAYS_ASSERT(err == MMSYSERR_NOERROR);
@@ -485,17 +481,17 @@ void CWaveDevice::FillAudioBuffer()
 
 	while((ULONG)oldBuffersPending < m_nPreparedHeaders)
 	{
-		ULONG len = m_BytesPerSample * pSource->AudioRead(*this, m_WaveBuffers[m_nWriteBuffer]->lpData, m_nWaveBufferSize/m_BytesPerSample);
+		ULONG len = m_BytesPerSample * pSource->AudioRead(*this, m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/m_BytesPerSample);
 		if(len < m_nWaveBufferSize)
 		{
 			eos = true;
 		}
 		nLatency += m_nWaveBufferSize;
 		nBytesWritten += m_nWaveBufferSize;
-		m_WaveBuffers[m_nWriteBuffer]->dwBufferLength = m_nWaveBufferSize;
+		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
-		waveOutWrite(m_hWaveOut, m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
+		waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
 		pSource->AudioDone(*this, m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample, eos);
