@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <vector>
 
 class CSoundFile;
