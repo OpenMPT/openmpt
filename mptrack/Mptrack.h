@@ -345,8 +345,6 @@ LPCTSTR GetNoteStr(const ModCommand::NOTE);
 ///////////////////////////////////////////////////
 // Tables
 
-extern const LPCSTR szNoteNames[12];
-extern const LPCTSTR szDefaultNoteNames[NOTE_MAX];
 //const LPCTSTR szSpecialNoteNames[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~"), TEXT("^^"), TEXT("==")};
 const LPCTSTR szSpecialNoteNames[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note Fade)"), TEXT("^^ (Note Cut)"), TEXT("== (Note Off)")};
 const LPCTSTR szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
