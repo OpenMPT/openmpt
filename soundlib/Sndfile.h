@@ -769,6 +769,10 @@ public:
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())
 
 
+extern const LPCSTR szNoteNames[12];
+extern const LPCTSTR szDefaultNoteNames[NOTE_MAX];
+
+
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 //-----------------------------------------------------------------------
 {
