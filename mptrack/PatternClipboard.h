@@ -116,6 +116,7 @@ protected:
 
 	CSpinButtonCtrl numClipboardsSpin;
 	CListBox clipList;
+	CEdit editNameBox;
 	int posX, posY;
 	bool isLocked, isCreated;
 
@@ -132,7 +133,13 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	DECLARE_MESSAGE_MAP();
 
-	afx_msg void OnCancel();
+	virtual void OnOK();
+	virtual void OnCancel();
+	
 	afx_msg void OnNumClipboardsChanged();
 	afx_msg void OnSelectClipboard();
+
+	// Edit clipboard name
+	afx_msg void OnEditName();
+	void OnEndEdit(bool apply = true);
 };
