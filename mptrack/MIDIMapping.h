@@ -57,7 +57,7 @@ public:
 
 	bool operator==(const CMIDIMappingDirective& d) const {return memcmp(this, &d, sizeof(CMIDIMappingDirective)) == 0;}
 
-	const char *ToString() const;
+	std::string ToString() const;
 
 	BYTE GetChnEvent() const {return m_ChnEvent;}
 
