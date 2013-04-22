@@ -1410,7 +1410,7 @@ UINT CDLSBank::GetRegionFromKey(UINT nIns, UINT nKey)
 BOOL CDLSBank::FreeWaveForm(LPBYTE p)
 //-----------------------------------
 {
-	if (p) GlobalFreePtr(p);
+	if (p) free(p);
 	return TRUE;
 }
 
@@ -1461,7 +1461,7 @@ BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 				if (fseek(f, 8, SEEK_CUR) == 0)
 				{
 					*pLen = m_pSamplesEx[nWaveLink].dwLen;
-					*ppWave = (LPBYTE)GlobalAllocPtr(GHND, *pLen + 8);
+					*ppWave = (LPBYTE)calloc(1, *pLen + 8);
 					fread((*ppWave), 1, *pLen, f);
 					bOk = TRUE;
 				}
@@ -1474,7 +1474,7 @@ BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 				if ((chunk.id == IFFID_LIST) && (chunk.listid == IFFID_wave) && (chunk.len > 4))
 				{
 					*pLen = chunk.len + 8;
-					*ppWave = (LPBYTE)GlobalAllocPtr(GHND, chunk.len + 8);
+					*ppWave = (LPBYTE)calloc(1, chunk.len + 8);
 					if (*ppWave)
 					{
 						memcpy((*ppWave), &chunk, 12);

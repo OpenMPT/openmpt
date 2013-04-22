@@ -593,7 +593,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 
 		if(bMMCmp)
 		{
-			GlobalFreePtr(lpStream);
+			free((void*)lpStream);
 			lpStream = NULL;
 		}
 
