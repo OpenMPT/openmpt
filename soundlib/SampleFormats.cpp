@@ -393,6 +393,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 // Save WAV
 
 
+#ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
 //----------------------------------------------------------------------------------
 {
@@ -536,6 +537,11 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	return true;
 }
 
+#endif // MODPLUG_NO_FILESAVE
+
+
+#ifndef MODPLUG_NO_FILESAVE
+
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
@@ -556,6 +562,8 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	fclose(f);
 	return true;
 }
+
+#endif // MODPLUG_NO_FILESAVE
 
 /////////////////////////////////////////////////////////////
 // GUS Patches
@@ -1049,6 +1057,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const
 //----------------------------------------------------------------------------------------
 {
@@ -1115,6 +1125,8 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 	fclose(f);
 	return true;
 }
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 // Read first sample from XI file into a sample slot
@@ -1628,6 +1640,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const
 //--------------------------------------------------------------------------------------------------------
 {
@@ -1697,6 +1711,8 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	fclose(f);
 	return true;
 }
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file)
@@ -2108,6 +2124,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 }
 
 
+#ifndef NO_FLAC
 // Helper function for copying OpenMPT's sample data to FLAC's int32 buffer.
 template<typename T>
 inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSamples)
@@ -2118,8 +2135,10 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength n
 		dst[i] = in[i];
 	}
 };
+#endif
 
 
+#ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
 //-----------------------------------------------------------------------------------
 {
@@ -2263,6 +2282,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) 
 	return false;
 #endif // NO_FLAC
 }
+#endif // MODPLUG_NO_FILESAVE
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
