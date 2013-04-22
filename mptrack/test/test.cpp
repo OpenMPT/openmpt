@@ -239,7 +239,6 @@ void TestMisc()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("ita")), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("s2m")), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(_T("")), MOD_TYPE_NONE);
-	VERIFY_EQUAL(CModSpecifications::ExtensionToType(LPCTSTR(nullptr)), MOD_TYPE_NONE);
 
 	VERIFY_EQUAL( Util::Round(1.99), 2.0 );
 	VERIFY_EQUAL( Util::Round(1.5), 2.0 );
