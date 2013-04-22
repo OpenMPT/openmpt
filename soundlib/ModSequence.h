@@ -59,6 +59,9 @@ public:
 	// Removes orders from range [nPosBegin, nPosEnd].
 	void Remove(ORDERINDEX nPosBegin, ORDERINDEX nPosEnd);
 
+	// Remove all references to a given pattern index from the order list. Jump commands are updated accordingly.
+	void RemovePattern(PATTERNINDEX which);
+
 	void clear();
 	void resize(ORDERINDEX nNewSize) {resize(nNewSize, GetInvalidPatIndex());}
 	void resize(ORDERINDEX nNewSize, PATTERNINDEX nFill);
@@ -91,7 +94,7 @@ public:
 
 	// Find an order item that contains a given pattern number.
 	ORDERINDEX FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder = 0, bool searchForward = true) const;
-	
+
 	ModSequence& operator=(const ModSequence& seq);
 
 	// Read/write.
@@ -124,18 +127,18 @@ public:
 	mpt::String m_sName;				// Sequence name.
 
 protected:
-	PATTERNINDEX* m_pArray;			// Pointer to sequence array.
+	PATTERNINDEX *m_pArray;			// Pointer to sequence array.
 	ORDERINDEX m_nSize;				// Sequence length.
 	ORDERINDEX m_nCapacity;			// Capacity in m_pArray.
 	PATTERNINDEX m_nInvalidIndex;	// Invalid pat index.
 	PATTERNINDEX m_nIgnoreIndex;	// Ignore pat index.
 	bool m_bDeletableArray;			// True if m_pArray points the deletable(with delete[]) array.
-	CSoundFile* m_pSndFile;			// Pointer to associated CSoundFile.
+	CSoundFile &m_sndFile;			// Pointer to associated CSoundFile.
 };
 
 
-inline PATTERNINDEX ModSequence::GetInvalidPatIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ?  uint16_max : 0xFF;}
-inline PATTERNINDEX ModSequence::GetIgnoreIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ? uint16_max - 1 : 0xFE;}
+inline PATTERNINDEX ModSequence::GetInvalidPatIndex(const MODTYPE type) {return (type & (MOD_TYPE_MPT | MOD_TYPE_XM)) ?  uint16_max : 0xFF;}
+inline PATTERNINDEX ModSequence::GetIgnoreIndex(const MODTYPE type) {return (type & (MOD_TYPE_MPT | MOD_TYPE_XM)) ? uint16_max - 1 : 0xFE;}
 
 
 template<typename T, size_t arraySize>
@@ -145,7 +148,7 @@ bool ModSequence::ReadFromArray(const T (&orders)[arraySize], size_t howMany)
 	LimitMax(howMany, arraySize);
 
 	ORDERINDEX readEntries = static_cast<ORDERINDEX>(howMany);
-	if(!(m_pSndFile->GetType() & MOD_TYPE_MPT))
+	if(!(m_sndFile.GetType() & MOD_TYPE_MPT))
 	{
 		LimitMax(readEntries, MAX_ORDERS);
 	}

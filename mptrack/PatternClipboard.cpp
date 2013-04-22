@@ -408,7 +408,9 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			// Next order item, please
 			pos = data.Find(",", pos + 1) + 1;
 
-			if((insertPat == sndFile.Order.GetIgnoreIndex() && !sndFile.GetModSpecifications().hasIgnoreIndex) || insertPat == PATTERNINDEX_INVALID)
+			if((insertPat == sndFile.Order.GetIgnoreIndex() && !sndFile.GetModSpecifications().hasIgnoreIndex)
+				|| (insertPat == sndFile.Order.GetInvalidPatIndex() && !sndFile.GetModSpecifications().hasStopIndex)
+				|| insertPat == PATTERNINDEX_INVALID)
 			{
 				continue;
 			}

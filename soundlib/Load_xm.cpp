@@ -19,12 +19,12 @@
 
 
 // Allocate samples for an instrument
-vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
-//--------------------------------------------------------------------------------
+static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
+//--------------------------------------------------------------------------------------------
 {
 	LimitMax(numSamples, SAMPLEINDEX(32));
 
-	vector<SAMPLEINDEX> foundSlots;
+	std::vector<SAMPLEINDEX> foundSlots;
 
 	for(SAMPLEINDEX i = 0; i < numSamples; i++)
 	{
@@ -68,7 +68,7 @@ vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSample
 		if(candidateSlot >= MAX_SAMPLES)
 		{
 			// Still couldn't find any empty sample slots, so look out for existing but unused samples.
-			vector<bool> usedSamples;
+			std::vector<bool> usedSamples;
 			SAMPLEINDEX unusedSampleCount = sndFile.DetectUnusedSamples(usedSamples);
 
 			if(unusedSampleCount > 0)
@@ -275,6 +275,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
 
+	m_nType = MOD_TYPE_NONE;	// Ensure that order list items FE and FF are not converted.
 	ChangeModTypeTo(MOD_TYPE_XM);
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
@@ -299,7 +300,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 	}
 
 	// In case of XM versions < 1.04, we need to memorize the sample flags for all samples, as they are not stored immediately after the sample headers.
-	vector<SampleIO> sampleFlags;
+	std::vector<SampleIO> sampleFlags;
 	uint8 sampleReserved = 0;
 
 	// Reading instruments
@@ -358,7 +359,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 			}
 
 			// Read sample headers
-			vector<SAMPLEINDEX> sampleSlots = AllocateXMSamples(*this, instrHeader.numSamples);
+			std::vector<SAMPLEINDEX> sampleSlots = AllocateXMSamples(*this, instrHeader.numSamples);
 
 			// Update sample assignment map
 			for(size_t k = 0 + 12; k < 96 + 12; k++)
@@ -374,7 +375,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 				sampleFlags.clear();
 			}
 			// Need to memorize those if we're going to skip any samples...
-			vector<uint32> sampleSize(instrHeader.numSamples);
+			std::vector<uint32> sampleSize(instrHeader.numSamples);
 
 			// Early versions of Sk@le Tracker didn't set sampleHeaderSize (this fixes IFULOVE.XM)
 			const size_t copyBytes = (instrHeader.sampleHeaderSize > 0) ? instrHeader.sampleHeaderSize : sizeof(XMSample);
@@ -537,12 +538,20 @@ bool CSoundFile::ReadXM(FileReader &file)
 		}
 	}
 
+	// We no longer allow any --- or +++ items in the order list now.
+	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 02, 02))
+	{
+		if(!Patterns.IsValidPat(0xFE))
+			Order.RemovePattern(0xFE);
+		if(!Patterns.IsValidPat(0xFF))
+			Order.RemovePattern(0xFF);
+	}
+
 	return true;
 }
 
 
 #ifndef MODPLUG_NO_FILESAVE
-#include "../mptrack/Moddoc.h"	// for logging errors
 
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
@@ -551,24 +560,12 @@ bool CSoundFile::ReadXM(FileReader &file)
 bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 //--------------------------------------------------------------------
 {
-	#define ASSERT_CAN_WRITE(x) \
-	if(len > s.size() - x) /*Buffer running out? Make it larger.*/ \
-		s.resize(s.size() + 10*1024, 0); \
-	\
-	if((len > uint16_max - (UINT)x) && GetpModDoc()) /*Reaching the limits of file format?*/ \
-	{ \
- 		mpt::String str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat); \
-		AddToLog(str); \
-		break; \
-	}
-
 	FILE *f;
 	if(lpszFileName == nullptr || (f = fopen(lpszFileName, "wb")) == nullptr)
 	{
 		return false;
 	}
 
-	vector<uint8> s(64 * 64 * 5, 0);
 	bool addChannel = false; // avoid odd channel count for FT2 compatibility
 
 	XMFileHeader fileHeader;
@@ -585,7 +582,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	fileHeader.restartPos = m_nRestartPos;
 
 	fileHeader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
-	if((m_nChannels & 1) && m_nChannels < MAX_BASECHANNELS) addChannel = true;
+	if((m_nChannels % 2u) && m_nChannels < MAX_BASECHANNELS) addChannel = true;
 	if(compatibilityExport && fileHeader.channels > 32)
 		fileHeader.channels = 32;
 	if(fileHeader.channels > MAX_BASECHANNELS) fileHeader.channels = MAX_BASECHANNELS;
@@ -593,21 +590,28 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
-	ORDERINDEX nMaxOrds = 0;
-	PATTERNINDEX nPatterns = 0;
+	ORDERINDEX maxOrders = 0;
+	PATTERNINDEX numPatterns = Patterns.GetNumPatterns();
+	bool changeOrderList = false;
 	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
 	{
-		if(Patterns.IsValidIndex(Order[ord]))
+		if(Order[ord] == Order.GetIgnoreIndex() || Order[ord] == Order.GetInvalidPatIndex())
 		{
-			nMaxOrds++;
-			if(Order[ord] >= nPatterns) nPatterns = Order[ord] + 1;
+			changeOrderList = true;
+		} else
+		{
+			maxOrders++;
+			if(Order[ord] >= numPatterns) numPatterns = Order[ord] + 1;
 		}
 	}
-	if(!compatibilityExport) nMaxOrds = Order.GetLengthTailTrimmed(); // should really be removed at some point
+	if(changeOrderList)
+	{
+		AddToLog("Skip and stop order list items (+++ and ---) are not saved in XM files.");
+	}
 
-	fileHeader.orders = nMaxOrds;
-	fileHeader.patterns = nPatterns;
-	fileHeader.size = fileHeader.size + nMaxOrds;
+	fileHeader.orders = maxOrders;
+	fileHeader.patterns = numPatterns;
+	fileHeader.size = fileHeader.size + maxOrders;
 
 	uint16 writeInstruments;
 	if(m_nInstruments > 0)
@@ -619,9 +623,6 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) fileHeader.flags |= XMFileHeader::extendedFilterRange;
 	fileHeader.flags = fileHeader.flags;
 
-// 	if(compatibilityExport)
-// 		xmheader.tempo = static_cast<uint16>(Clamp(m_nDefaultTempo, 32u, 255u));
-// 	else
 	// Fasttracker 2 will happily accept any tempo faster than 255 BPM. XMPlay does also support this, great!
 	fileHeader.tempo = static_cast<uint16>(Clamp(m_nDefaultTempo, 32u, 512u));
 	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
@@ -632,7 +633,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	// write order list (without +++ and ---, explained above)
 	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
 	{
-		if(Patterns.IsValidIndex(Order[ord]) || !compatibilityExport)
+		if(Order[ord] != Order.GetIgnoreIndex() && Order[ord] != Order.GetInvalidPatIndex())
 		{
 			uint8 ordItem = static_cast<uint8>(Order[ord]);
 			fwrite(&ordItem, 1, 1, f);
@@ -640,7 +641,13 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	}
 
 	// Writing patterns
-	for(PATTERNINDEX pat = 0; pat < nPatterns; pat++)
+
+#define ASSERT_CAN_WRITE(x) \
+	if(len > s.size() - x) /*Buffer running out? Make it larger.*/ \
+		s.resize(s.size() + 10 * 1024, 0);
+	std::vector<uint8> s(64 * 64 * 5, 0);
+
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		uint8 patHead[9];
 		MemsetZero(patHead);
@@ -757,14 +764,24 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			len = 0;
 		}
 
+		// Reaching the limits of file format?
+		if(len > uint16_max)
+		{
+			mpt::String str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat);
+			AddToLog(str);
+			len = uint16_max;
+		}
+
 		patHead[7] = static_cast<uint8>(len & 0xFF);
 		patHead[8] = static_cast<uint8>(len >> 8);
 		fwrite(patHead, 1, 9, f);
-		if(len) fwrite(&s[0], 1, len, f);
+		if(len) fwrite(&s[0], len, 1, f);
 	}
 
+#undef ASSERT_CAN_WRITE
+
 	// Check which samples are referenced by which instruments (for assigning unreferenced samples to instruments)
-	vector<bool> sampleAssigned(GetNumSamples() + 1, false);
+	std::vector<bool> sampleAssigned(GetNumSamples() + 1, false);
 	for(INSTRUMENTINDEX ins = 1; ins <= GetNumInstruments(); ins++)
 	{
 		if(Instruments[ins] != nullptr)
@@ -777,7 +794,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	for(INSTRUMENTINDEX ins = 1; ins <= writeInstruments; ins++)
 	{
 		XMInstrumentHeader insHeader;
-		vector<SAMPLEINDEX> samples;
+		std::vector<SAMPLEINDEX> samples;
 
 		if(GetNumInstruments())
 		{
@@ -793,14 +810,14 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 					insHeader.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 				}
 
-				vector<SAMPLEINDEX> additionalSamples;
+				std::vector<SAMPLEINDEX> additionalSamples;
 
 				// Try to save "instrument-less" samples as well by adding those after the "normal" samples of our sample.
 				// We look for unassigned samples directly after the samples assigned to our current instrument, so if
 				// e.g. sample 1 is assigned to instrument 1 and samples 2 to 10 aren't assigned to any instrument,
 				// we will assign those to sample 1. Any samples before the first referenced sample are going to be lost,
 				// but hey, I wrote this mostly for preserving instrument texts in existing modules, where we shouldn't encounter this situation...
-				for(vector<SAMPLEINDEX>::const_iterator sample = samples.begin(); sample != samples.end(); sample++)
+				for(std::vector<SAMPLEINDEX>::const_iterator sample = samples.begin(); sample != samples.end(); sample++)
 				{
 					SAMPLEINDEX smp = *sample;
 					while(++smp <= GetNumSamples()
@@ -832,7 +849,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		insHeader.ConvertEndianness();
 		fwrite(&insHeader, 1, insHeaderSize, f);
 
-		vector<SampleIO> sampleFlags(samples.size());
+		std::vector<SampleIO> sampleFlags(samples.size());
 
 		// Write Sample Headers
 		for(SAMPLEINDEX smp = 0; smp < samples.size(); smp++)
@@ -866,57 +883,70 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	if(!compatibilityExport)
 	{
 		// Writing song comments
+		char magic[4];
+		int32 size;
 		if(!songMessage.empty())
 		{
-			DWORD d = 0x74786574;
-			fwrite(&d, 1, 4, f);
-			d = songMessage.length();
-			fwrite(&d, 1, 4, f);
-			fwrite(songMessage.c_str(), 1, d, f);
+			memcpy(magic, "text", 4);
+			fwrite(magic, 1, 4, f);
+
+			size = songMessage.length();
+			SwapBytesLE(size);
+			fwrite(&size, 1, 4, f);
+
+			fwrite(songMessage.c_str(), 1, songMessage.length(), f);
 		}
 		// Writing midi cfg
-		if (m_SongFlags[SONG_EMBEDMIDICFG])
+		if(m_SongFlags[SONG_EMBEDMIDICFG])
 		{
-			DWORD d = 0x4944494D;
-			fwrite(&d, 1, 4, f);
-			d = sizeof(MIDIMacroConfigData);
-			fwrite(&d, 1, 4, f);
+			memcpy(magic, "MIDI", 4);
+			fwrite(magic, 1, 4, f);
+
+			size = sizeof(MIDIMacroConfigData);
+			SwapBytesLE(size);
+			fwrite(&size, 1, 4, f);
+
 			fwrite(static_cast<MIDIMacroConfigData*>(&m_MidiCfg), 1, sizeof(MIDIMacroConfigData), f);
 		}
 		// Writing Pattern Names
 		const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
-		if (numNamedPats > 0)
+		if(numNamedPats > 0)
 		{
-			DWORD dwLen = numNamedPats * MAX_PATTERNNAME;
-			DWORD d = 0x4d414e50;
-			fwrite(&d, 1, 4, f);
-			fwrite(&dwLen, 1, 4, f);
+			memcpy(magic, "PNAM", 4);
+			fwrite(magic, 1, 4, f);
 
-			for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
+			size = numNamedPats * MAX_PATTERNNAME;
+			SwapBytesLE(size);
+			fwrite(&size, 1, 4, f);
+
+			for(PATTERNINDEX pat = 0; pat < numNamedPats; pat++)
 			{
 				char name[MAX_PATTERNNAME];
 				MemsetZero(name);
-				Patterns[nPat].GetName(name);
+				Patterns[pat].GetName(name);
 				fwrite(name, 1, MAX_PATTERNNAME, f);
 			}
 		}
 		// Writing Channel Names
 		{
-			UINT nChnNames = 0;
-			for (UINT inam=0; inam<m_nChannels; inam++)
+			CHANNELINDEX numNamedChannels = 0;
+			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 			{
-				if (ChnSettings[inam].szName[0]) nChnNames = inam+1;
+				if (ChnSettings[chn].szName[0]) numNamedChannels = chn + 1;
 			}
 			// Do it!
-			if (nChnNames)
+			if(numNamedChannels)
 			{
-				DWORD dwLen = nChnNames * MAX_CHANNELNAME;
-				DWORD d = 0x4d414e43;
-				fwrite(&d, 1, 4, f);
-				fwrite(&dwLen, 1, 4, f);
-				for (UINT inam=0; inam<nChnNames; inam++)
+				memcpy(magic, "CNAM", 4);
+				fwrite(magic, 1, 4, f);
+
+				size = numNamedChannels * MAX_CHANNELNAME;
+				SwapBytesLE(size);
+				fwrite(&size, 1, 4, f);
+
+				for(CHANNELINDEX chn = 0; chn < numNamedChannels; chn++)
 				{
-					fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
+					fwrite(ChnSettings[chn].szName, 1, MAX_CHANNELNAME, f);
 				}
 			}
 		}
