@@ -64,19 +64,29 @@
 #endif
 
 
+#if !defined(_MFC_VER)
+void AssertHandler(const char *file, int line, const char *function, const char *expr);
+#if defined(_DEBUG)
+#define ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#else
+#define ASSERT(expr) do { } while(0)
+#endif
+#endif
+
+
+#if defined(_DEBUG)
+#define ALWAYS_ASSERT(expr) ASSERT(expr)
+#else
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
+#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#endif
+
+
 // Compile time assert.
 #if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
 	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
 #endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
-
-
-#ifdef NDEBUG
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
-#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#else
-#define ALWAYS_ASSERT(expr) ASSERT(expr)
-#endif
 
 
 // Advanced inline attributes
@@ -211,3 +221,4 @@ int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
 int c99_snprintf(char *str, size_t size, const char *format, ...);
 #define snprintf c99_snprintf
 #endif
+
