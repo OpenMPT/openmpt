@@ -28,6 +28,21 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 #endif
 
 
+#if !defined(_MFC_VER)
+void AssertHandler(const char *file, int line, const char *function, const char *expr)
+//------------------------------------------------------------------------------------
+{
+	std::cerr
+		<< "openmpt: ASSERTION FAILED: "
+		<< file << "(" << line << ")" << ": "
+		<< std::string(expr)
+		<< " [" << function << "]"
+		<< std::endl
+		;
+}
+#endif
+
+
 #ifdef _MSC_VER
 
 int c99_vsnprintf(char *str, size_t size, const char *format, va_list args)
