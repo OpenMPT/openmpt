@@ -221,6 +221,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 
 			if (ReadNote())
 			{
+#ifdef MODPLUG_TRACKER
 				// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
 				if(IsRenderingToDisc() && (m_PatternCuePoints.empty() || m_nCurrentOrder != m_PatternCuePoints.back().order))
 				{
@@ -230,6 +231,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 					cue.processed = false;	// We don't know the base offset in the file here. It has to be added in the main conversion loop.
 					m_PatternCuePoints.push_back(cue);
 				}
+#endif
 			} else 
 			{
 #ifdef MODPLUG_TRACKER
