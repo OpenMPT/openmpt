@@ -22,11 +22,13 @@
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
 
+#if defined(MODPLUG_TRACKER)
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+#endif // MODPLUG_TRACKER
 
 ModSequence::ModSequence(CSoundFile &rSf,
 						 PATTERNINDEX* pArray,
