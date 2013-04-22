@@ -903,6 +903,7 @@ bool PatternClipboard::FromSystemClipboard(CString &data)
 BEGIN_MESSAGE_MAP(PatternClipboardDialog, CDialog)
 	ON_EN_UPDATE(IDC_EDIT1,		OnNumClipboardsChanged)
 	ON_LBN_SELCHANGE(IDC_LIST1,	OnSelectClipboard)
+	ON_LBN_DBLCLK(IDC_LIST1,	OnEditName)
 END_MESSAGE_MAP()
 
 PatternClipboardDialog PatternClipboardDialog::instance;
@@ -946,6 +947,7 @@ void PatternClipboardDialog::OnNumClipboardsChanged()
 	{
 		return;
 	}
+	OnEndEdit();
 	PatternClipboard::SetClipboardSize(GetDlgItemInt(IDC_EDIT1, nullptr, FALSE));
 	UpdateList();
 }
@@ -981,12 +983,41 @@ void PatternClipboardDialog::OnSelectClipboard()
 	}
 	PatternClipboard::clipindex_t item = reinterpret_cast<PatternClipboard::clipindex_t>(clipList.GetItemDataPtr(clipList.GetCurSel()));
 	PatternClipboard::SelectClipboard(item);
+	OnEndEdit();
+}
+
+
+void PatternClipboardDialog::OnOK()
+//---------------------------------
+{
+	const CWnd *focus = GetFocus();
+	if(focus == &editNameBox)
+	{
+		// User pressed enter in clipboard name edit box => cancel editing
+		OnEndEdit();
+	} else if(focus == &clipList)
+	{
+		// User pressed enter in the clipboard name list => start editing
+		OnEditName();
+	} else
+	{
+		CDialog::OnOK();
+	}
 }
 
 
 void PatternClipboardDialog::OnCancel()
 //-------------------------------------
 {
+	if(GetFocus() == &editNameBox)
+	{
+		// User pressed enter in clipboard name edit box => just cancel editing
+		editNameBox.DestroyWindow();
+		return;
+	}
+
+	OnEndEdit(false);
+
 	isCreated = false;
 	isLocked = true;
 
@@ -996,4 +1027,59 @@ void PatternClipboardDialog::OnCancel()
 	posY = rect.top;
 
 	DestroyWindow();
+}
+
+
+void PatternClipboardDialog::OnEditName()
+//---------------------------------------
+{
+	OnEndEdit();
+
+	const int sel = clipList.GetCurSel();
+	if(sel == LB_ERR)
+	{
+		return;
+	}
+
+	CRect rect;
+	clipList.GetItemRect(sel, rect);
+	rect.InflateRect(0, 2, 0, 2);
+
+	// Create the edit control
+	editNameBox.Create(WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL, rect, &clipList, 1);
+	editNameBox.SetFont(clipList.GetFont());
+	editNameBox.SetWindowText(PatternClipboard::instance.clipboards[sel].description);
+	editNameBox.SetSel(0, -1, TRUE);
+	editNameBox.SetFocus();
+	SetWindowLongPtr(editNameBox.m_hWnd, GWLP_USERDATA, (LONG_PTR)clipList.GetItemDataPtr(sel));
+}
+
+
+void PatternClipboardDialog::OnEndEdit(bool apply)
+//------------------------------------------------
+{
+	if(editNameBox.GetSafeHwnd() == NULL)
+	{
+		return;
+	}
+
+	if(apply)
+	{
+		size_t sel = GetWindowLongPtr(editNameBox.m_hWnd, GWLP_USERDATA);
+		if(sel >= PatternClipboard::instance.clipboards.size())
+		{
+			// What happened?
+			return;
+		}
+
+		CString newName;
+		editNameBox.GetWindowText(newName);
+
+		PatternClipboard::instance.clipboards[sel].description = newName;
+	}
+
+	SetWindowLongPtr(editNameBox.m_hWnd, GWLP_USERDATA, LONG_PTR(-1));
+	editNameBox.DestroyWindow();
+
+	UpdateList();
 }

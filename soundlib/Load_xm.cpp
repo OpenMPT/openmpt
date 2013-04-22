@@ -544,7 +544,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 		if(!Patterns.IsValidPat(0xFE))
 			Order.RemovePattern(0xFE);
 		if(!Patterns.IsValidPat(0xFF))
-			Order.RemovePattern(0xFF);
+			Order.Replace(0xFF, Order.GetInvalidPatIndex());
 	}
 
 	return true;
