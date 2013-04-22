@@ -11,6 +11,8 @@
 
 #include "../common/AudioCriticalSection.h"
 
+#ifdef MODPLUG_TRACKER
 CRITICAL_SECTION g_csAudio;
 int g_csAudioLockCount = 0;
+#endif
 
