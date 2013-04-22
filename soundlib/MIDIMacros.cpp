@@ -12,6 +12,7 @@
 #include "../soundlib/MIDIEvents.h"
 #include "MIDIMacros.h"
 #include "../common/StringFixer.h"
+#include "../common/misc_util.h"
 
 #ifdef MODPLUG_TRACKER
 #include "Sndfile.h"
