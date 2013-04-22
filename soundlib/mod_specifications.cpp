@@ -55,6 +55,7 @@ const CModSpecifications mptm =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
+	true,										// Has "---" pattern
 	true,										// Has restart position (order)
 	true,										// Supports plugins
 	true,										// Custom pattern time signatures
@@ -99,6 +100,7 @@ const CModSpecifications mod =
 	" 0123456789ABCD?FF?E?????????????????",	// Supported Effects
 	" ???????????????",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
+	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
@@ -141,6 +143,7 @@ const CModSpecifications xm =
 	" 0123456789ABCDRFFTE???GHK??XPL??????",	// Supported Effects
 	" vpcdabuhlrg????",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
+	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
@@ -183,6 +186,7 @@ const CModSpecifications xmEx =
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#??",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
+	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures
@@ -224,6 +228,7 @@ const CModSpecifications s3m =
 	" JFEGHLKRXODB?CQATI?SMNVW?U??????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
+	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
@@ -266,6 +271,7 @@ const CModSpecifications s3mEx =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
+	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
@@ -307,6 +313,7 @@ const CModSpecifications it =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
+	true,										// Has "--" pattern
 	false,										// Doesn't have restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
@@ -348,6 +355,7 @@ const CModSpecifications itEx =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#??",	// Supported Effects
 	" vpcdab?h??gfe?o",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
+	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures

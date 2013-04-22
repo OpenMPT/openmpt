@@ -53,20 +53,14 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 //---------------------------------------------------------------------------
 {
 	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
-	if(index >= specs.patternsMax || index > m_Patterns.size() || rows > specs.patternRowsMax || rows == 0)
+	if(index >= specs.patternsMax || rows > specs.patternRowsMax || rows == 0)
 		return true;
 	if(index < m_Patterns.size() && m_Patterns[index])
 		return true;
 
-	if(index == m_Patterns.size())
+	if(index >= m_Patterns.size())
 	{
-		if(index < specs.patternsMax)
-			m_Patterns.push_back(MODPATTERN(*this));
-		else
-		{
-			GetSoundFile().AddToLog(LogError, "Too many patterns!");
-			return true;
-		}
+		m_Patterns.resize(index + 1, MODPATTERN(*this));
 	}
 
 	m_Patterns[index].AllocatePattern(rows);

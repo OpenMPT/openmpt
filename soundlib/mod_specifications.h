@@ -64,6 +64,7 @@ struct CModSpecifications
 	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1];	// dito, but for volume column
 	bool hasIgnoreIndex;				// Does "+++" pattern exist?
+	bool hasStopIndex;					// Does "---" pattern exist?
 	bool hasRestartPos;					// Format has an automatic restart order position
 	bool supportsPlugins;				// Format can store plugins
 	bool hasPatternSignatures;			// Can patterns have a custom time signature?
