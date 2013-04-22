@@ -837,6 +837,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\BuildSettings.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ChildFrm.h"
 				>
 			</File>

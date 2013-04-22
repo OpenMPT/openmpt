@@ -411,6 +411,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h" />
+    <ClInclude Include="..\common\BuildSettings.h" />
     <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\Logging.h" />
     <ClInclude Include="..\common\misc_util.h" />
