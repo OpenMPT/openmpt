@@ -9,6 +9,8 @@
 
 #pragma once
 
+#ifdef MODPLUG_TRACKER
+
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
@@ -64,3 +66,17 @@ public:
 		}
 	}
 };
+
+#else // !MODPLUG_TRACKER
+
+class CriticalSection
+{
+public:
+	CriticalSection() {}
+	void Enter() {}
+	void Leave() {}
+	~CriticalSection() {}
+	static void AssertUnlocked() {}
+};
+
+#endif // MODPLUG_TRACKER
