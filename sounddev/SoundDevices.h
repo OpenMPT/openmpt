@@ -92,7 +92,8 @@ protected:
 	LONG m_nBuffersPending;
 	ULONG m_nBytesPerSec;
 	ULONG m_BytesPerSample;
-	LPWAVEHDR m_WaveBuffers[WAVEOUT_MAXBUFFERS];
+	std::vector<WAVEHDR> m_WaveBuffers;
+	std::vector<std::vector<char> > m_WaveBuffersData;
 
 public:
 	CWaveDevice();
