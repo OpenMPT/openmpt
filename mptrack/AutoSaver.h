@@ -42,9 +42,9 @@ public:
 
 //internal implementation
 private: 
-	bool SaveSingleFile(CModDoc *pModDoc);
-	CString BuildFileName(CModDoc *pModDoc);
-	void CleanUpBackups(CModDoc *pModDoc);
+	bool SaveSingleFile(CModDoc &modDoc);
+	CString BuildFileName(CModDoc &modDoc);
+	void CleanUpBackups(CModDoc &modDoc);
 	bool CheckTimer(DWORD curTime);
 	
 //internal implementation members

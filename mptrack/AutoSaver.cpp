@@ -59,48 +59,34 @@ bool CAutoSaver::DoSave(DWORD curTime)
 //------------------------------------
 {
 	bool success = true;
-    
+
 	//If time to save and not already having save in progress.
 	if (CheckTimer(curTime) && !m_bSaveInProgress)
 	{ 
 		m_bSaveInProgress = true;
-		CDocTemplate *pDocTemplate;
-		CModDoc *pModDoc;
-		POSITION posTemplate,posDocument;
-		CTrackApp *pTrackApp=(CTrackApp*)::AfxGetApp();
-		if (!pTrackApp)
+
+		theApp.BeginWaitCursor(); //display hour glass
+
+		std::vector<CModDoc *> docs = theApp.GetOpenDocuments();
+		for(std::vector<CModDoc *>::iterator doc = docs.begin(); doc != docs.end(); doc++)
 		{
-			m_bSaveInProgress = false;
-			return false;
+			CModDoc &modDoc = **doc;
+			if(modDoc.ModifiedSinceLastAutosave())
+			{
+				if(SaveSingleFile(modDoc))
+				{
+					CleanUpBackups(modDoc);
+				} else
+				{
+					m_bEnabled = false;
+					Reporting::Warning("Warning: Autosave failed and has been disabled. Please:\n- Review your autosave paths\n- Check available diskspace & filesystem access rights\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
+					success = false;
+				}
+			}
 		}
 
-		pTrackApp->BeginWaitCursor(); //display hour glass
-
-		posTemplate = pTrackApp->GetFirstDocTemplatePosition();
-		while (posTemplate) { //for all "templates" (we should have just 1)
-			pDocTemplate = pTrackApp->GetNextDocTemplate(posTemplate);
-			posDocument = pDocTemplate->GetFirstDocPosition();
-
-			while (posDocument)	//for all open documents
-			{
-				pModDoc = (CModDoc*)(pDocTemplate->GetNextDoc(posDocument));
-				if(pModDoc && pModDoc->ModifiedSinceLastAutosave())
-				{
-					if (SaveSingleFile(pModDoc))
-					{
-						CleanUpBackups(pModDoc);
-					} else
-					{
-						m_bEnabled = false;
-						Reporting::Warning("Warning: Autosave failed and has been disabled. Please:\n- Review your autosave paths\n- Check available diskspace & filesystem access rights\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
-						success = false;
-					}
-				}
-			} //end all open documents
-
-		} //end pointless template loop (we have just 1 template)
 		m_nLastSave = timeGetTime();
-		pTrackApp->EndWaitCursor(); //end display hour glass
+		theApp.EndWaitCursor(); //end display hour glass
 		m_bSaveInProgress = false;
 	}
 	
@@ -220,56 +206,57 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 }
 
 
-CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
-//-------------------------------------------------
+CString CAutoSaver::BuildFileName(CModDoc &modDoc)
+//------------------------------------------------
 {
 	CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
 	CString name;
 	
-	if (m_bUseOriginalPath)
+	if(m_bUseOriginalPath)
 	{
-		if (pModDoc->m_bHasValidPath)
+		if(modDoc.m_bHasValidPath)
 		{
 			// Check that the file has a user-chosen path
-			name = pModDoc->GetPathName(); 
+			name = modDoc.GetPathName(); 
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + pModDoc->GetTitle();
+			name = theApp.GetConfigPath() + modDoc.GetTitle();
 		}
-	
 	} else
 	{
-		name = m_csPath+pModDoc->GetTitle();
+		name = m_csPath+modDoc.GetTitle();
 	}
-	
 	
 	name.Append(".AutoSave.");					//append backup tag
 	name.Append(timeStamp);						//append timestamp
 	name.Append(".");							//append extension
-	if(pModDoc->GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
+	if(modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
 	{
 		name.Append("itp");
 	} else
 	{
-		name.Append(pModDoc->GetrSoundFile().GetModSpecifications().fileExtension);
+		name.Append(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
 	}
 
 	return name;
 }
 
 
-bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc) 
-//-----------------------------------------------
+bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
+//----------------------------------------------
 {
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
-	bool success = false;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile(); 
+	CSoundFile &sndFile = modDoc.GetrSoundFile(); 
 	
-	CString fileName = BuildFileName(pModDoc);
+	CString fileName = BuildFileName(modDoc);
 
-	switch (pModDoc->GetModType())
+	// We are acutally not going to show the log for autosaved files.
+	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
+
+	bool success = false;
+	switch(modDoc.GetModType())
 	{
 	case MOD_TYPE_MOD:
 		success = sndFile.SaveMod(fileName);
@@ -293,24 +280,23 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 		//Using IT save function also for MPT.
 		success = sndFile.SaveIT(fileName);
 		break;
-		//default:
-		//Do nothing
 	}
+
 	return success;
 }
 
 
-void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
-//-----------------------------------------------
+void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
+//----------------------------------------------
 {
 	CString path;
 	
 	if (m_bUseOriginalPath)
 	{
-		if (pModDoc->m_bHasValidPath)	// Check that the file has a user-chosen path
+		if (modDoc.m_bHasValidPath)	// Check that the file has a user-chosen path
 		{
-			CString fullPath = pModDoc->GetPathName();
-			path = fullPath.Left(fullPath.GetLength() - pModDoc->GetTitle().GetLength()); //remove file name if necessary
+			CString fullPath = modDoc.GetPathName();
+			path = fullPath.Left(fullPath.GetLength() - modDoc.GetTitle().GetLength()); //remove file name if necessary
 		} else
 		{
 			path = theApp.GetConfigPath();
@@ -320,7 +306,7 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 		path = m_csPath;
 	}
 
-	CString searchPattern = path + pModDoc->GetTitle() + ".AutoSave.*";
+	CString searchPattern = path + modDoc.GetTitle() + ".AutoSave.*";
 
 	CFileFind finder;
 	BOOL bResult = finder.FindFile(searchPattern);

@@ -808,9 +808,9 @@ void CModDoc::ViewInstrument(UINT nIns)
 }
 
 
-ScopedLogCapturer::ScopedLogCapturer(CModDoc &modDoc, const std::string &title, CWnd *parent) :
-m_modDoc(modDoc), m_oldLogMode(m_modDoc.GetLogMode()), m_title(title), m_pParent(parent)
-//---------------------------------------------------------------------------------------------
+ScopedLogCapturer::ScopedLogCapturer(CModDoc &modDoc, const std::string &title, CWnd *parent, bool showLog) :
+m_modDoc(modDoc), m_oldLogMode(m_modDoc.GetLogMode()), m_title(title), m_pParent(parent), m_showLog(showLog)
+//-----------------------------------------------------------------------------------------------------------
 {
 	m_modDoc.SetLogMode(LogModeGather);
 }
@@ -841,7 +841,10 @@ void ScopedLogCapturer::ShowLog(const std::string &preamble, bool force)
 ScopedLogCapturer::~ScopedLogCapturer()
 //-------------------------------------
 {
-	ShowLog();
+	if(m_showLog)
+		ShowLog();
+	else
+		m_modDoc.ClearLog();
 	m_modDoc.SetLogMode(m_oldLogMode);
 }
 
