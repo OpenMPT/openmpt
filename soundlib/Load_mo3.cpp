@@ -29,7 +29,7 @@ bool CSoundFile::ReadMO3(FileReader &file)
 		return false;
 	}
 
-#ifdef NO_MO3_SUPPORT
+#ifdef NO_MO3
 	// As of April 2012, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
 	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
 	// (avoid log entry with .MOD files that have a song name starting with "MO3".
@@ -93,5 +93,5 @@ bool CSoundFile::ReadMO3(FileReader &file)
 		FreeLibrary(unmo3);
 	}
 	return result;
-#endif // NO_MO3_SUPPORT
+#endif // NO_MO3
 }
