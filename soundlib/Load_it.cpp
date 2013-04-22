@@ -12,7 +12,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "tuningcollection.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
+#endif
 #include "../common/serialization_utils.h"
 #include <fstream>
 #include <strstream>
@@ -2058,7 +2060,9 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			CASE('DGV.', m_nDefaultGlobalVolume);
 			CASE_NOTXM('RP..', m_nRestartPos);
 			CASE('MSF.', m_ModFlags);
+#ifdef MODPLUG_TRACKER
 			case 'MIMA': GetMIDIMapper().Deserialize(chunk.GetRawData(), size); break;
+#endif
 			case 'ChnS':
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
