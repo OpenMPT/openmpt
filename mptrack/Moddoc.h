@@ -164,8 +164,9 @@ private:
 	LogMode m_oldLogMode;
 	std::string m_title;
 	CWnd *m_pParent;
+	bool m_showLog;
 public:
-	ScopedLogCapturer(CModDoc &modDoc, const std::string &title = "", CWnd *parent = nullptr);
+	ScopedLogCapturer(CModDoc &modDoc, const std::string &title = "", CWnd *parent = nullptr, bool showLog = true);
 	~ScopedLogCapturer();
 	void ShowLog(bool force = false);
 	void ShowLog(const std::string &preamble, bool force = false);
