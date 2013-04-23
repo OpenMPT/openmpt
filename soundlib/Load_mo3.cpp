@@ -38,7 +38,7 @@ bool CSoundFile::ReadMO3(FileReader &file)
 		return false;
 	}
 
-	AddToLog(GetStrI18N(_TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
+	AddToLog(GetStrI18N(MPT_TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
 	return false;
 
 #else
@@ -49,14 +49,14 @@ bool CSoundFile::ReadMO3(FileReader &file)
 #ifdef MODPLUG_TRACKER
 	CHAR szPath[MAX_PATH];
 	strcpy(szPath, theApp.GetAppDirPath());
-	_tcsncat(szPath, _TEXT("unmo3.dll"), MAX_PATH - (_tcslen(szPath) + 1));
+	_tcsncat(szPath, MPT_TEXT("unmo3.dll"), MAX_PATH - (_tcslen(szPath) + 1));
 	HMODULE unmo3 = LoadLibrary(szPath);
 #else
-	HMODULE unmo3 = LoadLibrary(_TEXT("unmo3.dll"));
+	HMODULE unmo3 = LoadLibrary(MPT_TEXT("unmo3.dll"));
 #endif // MODPLUG_TRACKER
 	if(unmo3 == nullptr) // Didn't succeed.
 	{
-		AddToLog(GetStrI18N(_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")));
+		AddToLog(GetStrI18N(MPT_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")));
 	}
 	else // case: dll loaded succesfully.
 	{

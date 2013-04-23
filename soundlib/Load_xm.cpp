@@ -553,8 +553,8 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-#define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
-#define str_pattern				(GetStrI18N((_TEXT("pattern"))))
+#define str_tooMuchPatternData	(GetStrI18N((MPT_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
+#define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
 
 
 bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)

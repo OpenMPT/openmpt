@@ -1208,7 +1208,7 @@ const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
 //---------------------------------------------------------------------
 {
 	if((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
-		return TEXT("");
+		return MPT_TEXT("");
 
 	ASSERT(nInstr <= GetNumInstruments());
 	return Instruments[nInstr]->name;
@@ -1514,7 +1514,7 @@ bool CSoundFile::LoadStaticTunings()
 	const char* pData = nullptr;
 	HGLOBAL hglob = nullptr;
 	size_t nSize = 0;
-	if (LoadResource(MAKEINTRESOURCE(IDR_BUILTIN_TUNINGS), TEXT("TUNING"), pData, nSize, hglob) != nullptr)
+	if (LoadResource(MAKEINTRESOURCE(IDR_BUILTIN_TUNINGS), MPT_TEXT("TUNING"), pData, nSize, hglob) != nullptr)
 	{
 		std::istrstream iStrm(pData, nSize);
 		s_pTuningsSharedBuiltIn->Deserialize(iStrm);

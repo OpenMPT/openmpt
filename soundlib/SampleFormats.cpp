@@ -2389,7 +2389,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		const CString path = CString(theApp.GetAppDirPath()) + "libmpg123-0.dll";
 		mp3lib = LoadLibrary(path);
 #else
-		mp3lib = LoadLibrary(_TEXT("libmpg123-0.dll"));
+		mp3lib = LoadLibrary(MPT_TEXT("libmpg123-0.dll"));
 #endif // MODPLUG_TRACKER
 	}
 	if(!mp3lib) return false;

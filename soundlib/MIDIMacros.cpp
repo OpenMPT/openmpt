@@ -188,23 +188,23 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 				}
 				if (paramName.IsEmpty())
 				{
-					return _T("N/A");
+					return MPT_TEXT("N/A");
 				}
 
 				CString formattedName;
-				formattedName.Format(_T("Param %d (%s)"), param, paramName);
+				formattedName.Format(MPT_TEXT("Param %d (%s)"), param, paramName);
 				return formattedName;
 			} else
 #endif // NO_VST
 			{
-				return _T("N/A - No Plugin");
+				return MPT_TEXT("N/A - No Plugin");
 			}
 		}
 
 	case sfx_cc:
 		{
 			CString formattedCC;
-			formattedCC.Format(_T("MIDI CC %d"), MacroToMidiCC(macroIndex));
+			formattedCC.Format(MPT_TEXT("MIDI CC %d"), MacroToMidiCC(macroIndex));
 			return formattedCC;
 		}
 
@@ -221,26 +221,26 @@ CString MIDIMacroConfig::GetParameteredMacroName(parameteredMacroType macroType)
 	switch(macroType)
 	{
 	case sfx_unused:
-		return _T("Unused");
+		return MPT_TEXT("Unused");
 	case sfx_cutoff:
-		return _T("Set Filter Cutoff");
+		return MPT_TEXT("Set Filter Cutoff");
 	case sfx_reso:
-		return _T("Set Filter Resonance");
+		return MPT_TEXT("Set Filter Resonance");
 	case sfx_mode:
-		return _T("Set Filter Mode");
+		return MPT_TEXT("Set Filter Mode");
 	case sfx_drywet:
-		return _T("Set Plugin Dry/Wet Ratio");
+		return MPT_TEXT("Set Plugin Dry/Wet Ratio");
 	case sfx_plug:
-		return _T("Control Plugin Parameter...");
+		return MPT_TEXT("Control Plugin Parameter...");
 	case sfx_cc:
-		return _T("MIDI CC...");
+		return MPT_TEXT("MIDI CC...");
 	case sfx_channelAT:
-		return _T("Channel Aftertouch");
+		return MPT_TEXT("Channel Aftertouch");
 	case sfx_polyAT:
-		return _T("Polyphonic Aftertouch");
+		return MPT_TEXT("Polyphonic Aftertouch");
 	case sfx_custom:
 	default:
-		return _T("Custom");
+		return MPT_TEXT("Custom");
 	}
 }
 
@@ -252,24 +252,24 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 	switch(macroType)
 	{
 	case zxx_unused:
-		return _T("Unused");
+		return MPT_TEXT("Unused");
 	case zxx_reso4Bit:
-		return _T("Z80 - Z8F controls Resonant Filter Resonance");
+		return MPT_TEXT("Z80 - Z8F controls Resonant Filter Resonance");
 	case zxx_reso7Bit:
-		return _T("Z80 - ZFF controls Resonant Filter Resonance");
+		return MPT_TEXT("Z80 - ZFF controls Resonant Filter Resonance");
 	case zxx_cutoff:
-		return _T("Z80 - ZFF controls Resonant Filter Cutoff");
+		return MPT_TEXT("Z80 - ZFF controls Resonant Filter Cutoff");
 	case zxx_mode:
-		return _T("Z80 - ZFF controls Resonant Filter Mode");
+		return MPT_TEXT("Z80 - ZFF controls Resonant Filter Mode");
 	case zxx_resomode:
-		return _T("Z80 - Z9F controls Resonance + Filter Mode");
+		return MPT_TEXT("Z80 - Z9F controls Resonance + Filter Mode");
 	case zxx_channelAT:
-		return _T("Z80 - ZFF controls Channel Aftertouch");
+		return MPT_TEXT("Z80 - ZFF controls Channel Aftertouch");
 	case zxx_polyAT:
-		return _T("Z80 - ZFF controls Polyphonic Aftertouch");
+		return MPT_TEXT("Z80 - ZFF controls Polyphonic Aftertouch");
 	case zxx_custom:
 	default:
-		return _T("Custom");
+		return MPT_TEXT("Custom");
 	}
 }
 

@@ -200,23 +200,23 @@ int32 Ssb::s_DefaultReadLogMask = SNT_DEFAULT_MASK;
 int32 Ssb::s_DefaultWriteLogMask = SNT_DEFAULT_MASK;
 Ssb::fpLogFunc_t Ssb::s_DefaultLogFunc = nullptr;
 
-const TCHAR tstrWriteHeader[] = TEXT("Write header with ID = %s\n");
-const TCHAR tstrWriteProgress[] = TEXT("Wrote entry: {num, id, rpos, size} = {%u, %s, %u, %u}\n");
-const TCHAR tstrWritingMap[] = TEXT("Writing map to rpos: %u\n");
-const TCHAR tstrMapEntryWrite[] = TEXT("Writing map entry: id=%s, rpos=%u, size=%u\n");
-const TCHAR strWriteNote[] = TEXT("Write note: ");
-const TCHAR tstrEndOfStream[] = TEXT("End of stream(rpos): %u\n");
+const TCHAR tstrWriteHeader[] = MPT_TEXT("Write header with ID = %s\n");
+const TCHAR tstrWriteProgress[] = MPT_TEXT("Wrote entry: {num, id, rpos, size} = {%u, %s, %u, %u}\n");
+const TCHAR tstrWritingMap[] = MPT_TEXT("Writing map to rpos: %u\n");
+const TCHAR tstrMapEntryWrite[] = MPT_TEXT("Writing map entry: id=%s, rpos=%u, size=%u\n");
+const TCHAR strWriteNote[] = MPT_TEXT("Write note: ");
+const TCHAR tstrEndOfStream[] = MPT_TEXT("End of stream(rpos): %u\n");
 
-const TCHAR tstrReadingHeader[] = TEXT("Read header with expected ID = %s\n");
-const TCHAR strNoMapInFile[] = TEXT("No map in the file.\n");
-const TCHAR strIdMismatch[] = TEXT("ID mismatch, terminating read.\n");
-const TCHAR strIdMatch[] = TEXT("ID match, continuing reading.\n");
-const TCHAR tstrReadingMap[] = TEXT("Reading map from rpos: %u\n");
-const TCHAR tstrEndOfMap[] = TEXT("End of map(rpos): %u\n");
-const TCHAR tstrReadProgress[] = TEXT("Read entry: {num, id, rpos, size, desc} = {%u, %s, %u, %s, %s}\n");
-const TCHAR tstrNoEntryFound[] = TEXT("No entry with id %s found.\n");
-const TCHAR tstrCantFindSubEntry[] = TEXT("Unable to find subentry with id=%s\n");
-const TCHAR strReadNote[] = TEXT("Read note: ");
+const TCHAR tstrReadingHeader[] = MPT_TEXT("Read header with expected ID = %s\n");
+const TCHAR strNoMapInFile[] = MPT_TEXT("No map in the file.\n");
+const TCHAR strIdMismatch[] = MPT_TEXT("ID mismatch, terminating read.\n");
+const TCHAR strIdMatch[] = MPT_TEXT("ID match, continuing reading.\n");
+const TCHAR tstrReadingMap[] = MPT_TEXT("Reading map from rpos: %u\n");
+const TCHAR tstrEndOfMap[] = MPT_TEXT("End of map(rpos): %u\n");
+const TCHAR tstrReadProgress[] = MPT_TEXT("Read entry: {num, id, rpos, size, desc} = {%u, %s, %u, %s, %s}\n");
+const TCHAR tstrNoEntryFound[] = MPT_TEXT("No entry with id %s found.\n");
+const TCHAR tstrCantFindSubEntry[] = MPT_TEXT("Unable to find subentry with id=%s\n");
+const TCHAR strReadNote[] = MPT_TEXT("Read note: ");
 
 
 #define SSB_INITIALIZATION_LIST					\

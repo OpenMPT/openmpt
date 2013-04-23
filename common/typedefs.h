@@ -221,6 +221,12 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 
+#if defined(WIN32) || defined(_WIN32)
+#define MPT_TEXT(x) _T(x)
+#else
+#define MPT_TEXT(x) x
+#endif
+
 
 #ifndef NO_LOGGING
 void Log(const char *format, ...);
