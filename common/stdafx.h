@@ -33,12 +33,6 @@
 #pragma warning(default:4201)
 #endif
 
-#else // !MODPLUG_TRACKER
-
-#if defined(WIN32) || defined(_WIN32)
-#include <windows.h>
-#endif
-
 #endif // MODPLUG_TRACKER
 
 #include <string>
