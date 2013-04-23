@@ -28,7 +28,7 @@ TODOS:
 
 using namespace std;
 
-const TCHAR CTuningCollection::s_FileExtension[4] = TEXT(".tc");
+const TCHAR CTuningCollection::s_FileExtension[4] = MPT_TEXT(".tc");
 
 namespace CTuningS11n
 {
