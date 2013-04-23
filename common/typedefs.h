@@ -169,13 +169,43 @@ const uint64 uint64_max = UINT64_MAX;
 #endif
 
 
+#if defined(WIN32) || defined(_WIN32)
+#include <wtypes.h>
+#else // !WIN32
+// openmpt assumes these type have exact WIN32 semantics
+#define VOID void
+typedef std::uint8_t  BYTE;
+typedef std::uint16_t WORD;
+typedef std::uint32_t DWORD;
+typedef std::uint64_t QWORD;
+typedef std::int8_t   CHAR;
+typedef std::int16_t  SHORT;
+typedef std::int32_t  INT;
+typedef std::int32_t  LONG;
+typedef std::uint8_t  UCHAR;
+typedef std::uint16_t USHORT;
+typedef std::uint32_t UINT;
+typedef std::uint32_t ULONG;
+typedef VOID *        LPVOID;
+typedef VOID *        PVOID;
+typedef std::int8_t   CHAR;
+typedef char          TCHAR;
+typedef const char *  LPCSTR;
+typedef char *        LPSTR;
+typedef const char *  LPCTSTR;
+typedef char *        LPTSTR;
+#endif // WIN32
+
+
 typedef float float32;
+STATIC_ASSERT(sizeof(float32) == 4);
 
 union FloatInt32
 {
 	float32 f;
 	uint32 i;
 };
+STATIC_ASSERT(sizeof(FloatInt32) == 4);
 
 
 #include <cstdarg>
