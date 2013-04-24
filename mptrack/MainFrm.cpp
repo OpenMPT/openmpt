@@ -534,7 +534,7 @@ long CMainFrame::GetPrivateProfileLong(const CString section, const CString key,
 	CHAR valueBuffer[INIBUFFERSIZE];
 	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
 
-	return atol(valueBuffer);
+	return ConvertStrTo<long>(valueBuffer);
 }
 
 
@@ -552,7 +552,7 @@ DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString ke
 
 	CHAR valueBuffer[INIBUFFERSIZE];
 	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-	return static_cast<DWORD>(atol(valueBuffer));
+	return ConvertStrTo<DWORD>(valueBuffer);
 }
 
 bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile)
