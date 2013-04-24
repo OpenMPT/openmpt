@@ -96,4 +96,7 @@ namespace MptVersion
 	std::string GetVersionStringExtended();
 	std::string GetVersionUrlString();
 
+	std::string GetFullCreditsString();
+	std::string GetContactString();
+
 }; //namespace MptVersion
