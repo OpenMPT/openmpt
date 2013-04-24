@@ -1520,75 +1520,9 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
 	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
-
-	m_heContact.SetWindowText(
-		"Contact / Discussion:\r\n"
-		"http://forum.openmpt.org/\r\n"
-		"\r\nUpdates:\r\n"
-		"http://openmpt.org/download");
-
-	static const char* const pArrCredit =
-	{
-		"OpenMPT / ModPlug Tracker|"
-		"Copyright © 2004-2013 Contributors|"
-		"Copyright © 1997-2003 Olivier Lapicque|"
-		"|"
-		"Contributors:|"
-		"Johannes Schultz (2008-2013)|"
-		"Ahti Leppänen (2005-2011, 2013)|"
-		"Joern Heusipp (2012-2013)|"
-		"Robin Fernandes (2004-2007)|"
-		"Sergiy Pylypenko (2007)|"
-		"Eric Chavanon (2004-2005)|"
-		"Trevor Nunes (2004)|"
-		"Olivier Lapicque (1997-2003)|"
-		"|"
-		"Additional patch submitters:|"
-		"coda (http://coda.s3m.us/)|"
-		"kode54 (http://kode54.foobar2000.org/)|"
-		"xaimus (http://xaimus.com/)|"
-		"|"
-		"Thanks to:||"
-		"Konstanty for the XMMS-ModPlug resampling implementation |"
-		"http://modplug-xmms.sourceforge.net/|"
-		"Stephan M. Bernsee for pitch shifting source code|"
-		"http://www.dspdimension.com/|"
-		"Olli Parviainen for SoundTouch Library (time stretching)|"
-		"http://www.surina.net/soundtouch/|"
-		"Hermann Seib for his example VST Host implementation|"
-		"http://www.hermannseib.com/english/vsthost.htm|"
-		"Ian Luck for UNMO3|"
-		"http://www.un4seen.com/mo3.html|"
-		"Ben \"GreaseMonkey\" Russell for IT sample compression code|"
-		"https://github.com/iamgreaser/it2everything/|"
-		"Jean-loup Gailly and Mark Adler for zlib|"
-		"http://zlib.net/|"
-		"PortAudio|"
-		"http://www.portaudio.com/|"
-		"Josh Coalson for libFLAC|"
-		"http://flac.sourceforge.net/|"
-		"The mpg123 project for libmpg123|"
-		"http://mpg123.de/|"
-		"Storlek for all the IT compatibility hints and testcases|"
-		"as well as the IMF, OKT and ULT loaders|"
-		"http://schismtracker.org/|"
-		"Pel K. Txnder for the scrolling credits control :)|"
-		"http://tinyurl.com/4yze8|"
-		"|The people at ModPlug forums for crucial contribution|"
-		"in the form of ideas, testing and support; thanks|"
-		"particularly to:|"
-		"33, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn|"
-		"christofori, Diamond, Ganja, Georg, Goor00, jmkz,|"
-		"KrazyKatz, LPChip, Nofold, Rakib, Sam Zen|"
-		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead|"
-		"|||||||"
-		"VST PlugIn Technology by Steinberg Media Technologies GmbH|"
-		"ASIO Technology by Steinberg Media Technologies GmbH|"
-		"||||||"
-	};
-
+	m_heContact.SetWindowText( string_replace(MptVersion::GetContactString(), "\n", "\r\n" ).c_str());
 	m_static.SubclassDlgItem(IDC_CREDITS,this);
-	m_static.SetCredits(pArrCredit);
+	m_static.SetCredits((string_replace(MptVersion::GetFullCreditsString(), "\n", "|") + "||||||").c_str());
 	m_static.SetSpeed(DISPLAY_SLOW);
 	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
 	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
