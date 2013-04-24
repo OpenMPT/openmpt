@@ -13,6 +13,7 @@
 #include "TuningDialog.h"
 #include "TrackerSettings.h"
 #include <algorithm>
+#include <fstream>
 #include "../common/misc_util.h"
 #include "tuningdialog.h"
 

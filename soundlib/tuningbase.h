@@ -23,7 +23,8 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <fstream>
+#include <istream>
+#include <ostream>
 #include <map>
 #include <limits>
 #include "../common/misc_util.h"

@@ -36,7 +36,8 @@
 #endif // MODPLUG_TRACKER
 
 #include <string>
-#include <fstream>
+#include <istream>
+#include <ostream>
 #include <sstream>
 
 
