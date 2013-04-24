@@ -552,7 +552,7 @@ DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString ke
 
 	CHAR valueBuffer[INIBUFFERSIZE];
 	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-	return ConvertStrTo<DWORD>(valueBuffer);
+	return ConvertStrTo<uint32>(valueBuffer);
 }
 
 bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile)
