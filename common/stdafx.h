@@ -22,6 +22,7 @@
 #include <afxext.h>         // MFC extensions
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #include <afxcview.h>
+#include <afxdlgs.h>
 #include <afxole.h>
 
 #include <windowsx.h>
@@ -32,7 +33,6 @@
 #include <mmsystem.h>
 #include <mmreg.h>
 #include <msacm.h>
-#include <afxdlgs.h>
 #ifdef _MSC_VER
 #pragma warning(default:4201)
 #endif
@@ -47,15 +47,17 @@
 #include <vector>
 
 
+// this will be available everywhere
 #include "../common/typedefs.h"
-
-
-// Exception type that is used to catch "operator new" exceptions.
-#if defined(_MFC_VER)
-typedef CMemoryException * MPTMemoryException;
-#else
-typedef std::bad_alloc & MPTMemoryException;
-#endif
+// this adds:
+// <new>
+// <string>
+// <vector>
+// <cstdarg>
+// <cstdint>
+// <cstdio>
+// <stdio.h>
+// <windows.h> or just basic typedefs found in there
 
 
 //{{AFX_INSERT_LOCATION}}

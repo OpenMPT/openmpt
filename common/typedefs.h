@@ -11,6 +11,7 @@
 #pragma once
 
 
+
 // Definitions for MSVC versions to write more understandable conditional-compilation,
 // e.g. #if (_MSC_VER > MSVC_VER_2008) instead of #if (_MSC_VER > 1500) 
 #define MSVC_VER_VC9		1500
@@ -23,14 +24,17 @@
 #endif
 
 
-#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
-	#define nullptr		0
-#endif
-
 
 #if defined(_MSC_VER) && (_MSC_VER >= MSVC_VER_2010)
 #define HAS_TYPE_TRAITS
 #endif
+
+
+
+#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
+	#define nullptr		0
+#endif
+
 
 
 //  CountOf macro computes the number of elements in a statically-allocated array.
@@ -41,6 +45,7 @@
 #endif
 
 
+
 #if defined(_MSC_VER)
 #define PACKED __declspec(align(1))
 #define NEEDS_PRAGMA_PACK
@@ -48,45 +53,14 @@
 #define PACKED __attribute__((packed))) __attribute__((aligned(1))))
 #endif
 
+
+
 #if defined(_MSC_VER)
 #define ALIGN(n) __declspec(align(n))
 #elif defined(__GNUC__)
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
-
-#ifndef MAX
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-
-#if !defined(_MFC_VER)
-void AssertHandler(const char *file, int line, const char *function, const char *expr);
-#if defined(_DEBUG)
-#define ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#else
-#define ASSERT(expr) do { } while(0)
-#endif
-#endif
-
-
-#if defined(_DEBUG)
-#define ALWAYS_ASSERT(expr) ASSERT(expr)
-#else
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
-#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#endif
-
-
-// Compile time assert.
-#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
-	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
-#endif
-#define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
 
 
 // Advanced inline attributes
@@ -101,6 +75,8 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 #define noinline
 #endif
 
+
+
 // Some functions might be deprecated although they are still in use.
 // Tag them with "DEPRECATED".
 #if defined(_MSC_VER)
@@ -110,6 +86,50 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 #else
 #define DEPRECATED
 #endif
+
+
+
+// Exception type that is used to catch "operator new" exceptions.
+#if defined(_MFC_VER)
+typedef CMemoryException * MPTMemoryException;
+#else
+#include <new>
+typedef std::bad_alloc & MPTMemoryException;
+#endif
+
+
+
+#if !defined(_MFC_VER)
+void AssertHandler(const char *file, int line, const char *function, const char *expr);
+#if defined(_DEBUG)
+#define ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#else
+#define ASSERT(expr) do { } while(0)
+#endif
+#endif
+
+#if defined(_DEBUG)
+#define ALWAYS_ASSERT(expr) ASSERT(expr)
+#else
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
+#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#endif
+
+// Compile time assert.
+#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
+	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
+#endif
+#define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
+
+
+
+#include <cstdarg>
+#ifdef _MSC_VER
+#ifndef va_copy
+#define va_copy(dst, src) do { (dst) = (src); } while (0)
+#endif
+#endif
+
 
 
 #if defined(_MSC_VER) && (_MSC_VER <= MSVC_VER_2008)
@@ -168,11 +188,31 @@ const uint64 uint64_max = UINT64_MAX;
 
 #endif
 
+typedef float float32;
+STATIC_ASSERT(sizeof(float32) == 4);
 
-#if defined(WIN32) || defined(_WIN32)
-#include <wtypes.h>
-#else // !WIN32
+union FloatInt32
+{
+	float32 f;
+	uint32 i;
+};
+STATIC_ASSERT(sizeof(FloatInt32) == 4);
+
+
+
+#if defined(_WIN32)
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h> // defines WIN32
+
+#define MPT_TEXT(x) TEXT(x)
+
+#else // !_WIN32
+
 // openmpt assumes these type have exact WIN32 semantics
+
 #define VOID void
 typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
@@ -188,32 +228,17 @@ typedef std::uint32_t UINT;
 typedef std::uint32_t ULONG;
 typedef VOID *        LPVOID;
 typedef VOID *        PVOID;
+
 typedef std::int8_t   CHAR;
 typedef char          TCHAR;
 typedef const char *  LPCSTR;
 typedef char *        LPSTR;
 typedef const char *  LPCTSTR;
 typedef char *        LPTSTR;
-#endif // WIN32
+#define MPT_TEXT(x) x
 
+#endif // _WIN32
 
-typedef float float32;
-STATIC_ASSERT(sizeof(float32) == 4);
-
-union FloatInt32
-{
-	float32 f;
-	uint32 i;
-};
-STATIC_ASSERT(sizeof(FloatInt32) == 4);
-
-
-#include <cstdarg>
-#ifdef _MSC_VER
-#ifndef va_copy
-#define va_copy(dst, src) do { (dst) = (src); } while (0)
-#endif
-#endif
 
 
 #include "../common/mptString.h"
@@ -221,11 +246,24 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 
-#if defined(WIN32) || defined(_WIN32)
-#define MPT_TEXT(x) _T(x)
-#else
-#define MPT_TEXT(x) x
+#include <cstdio>
+#include <stdio.h>
+#ifdef _MSC_VER
+int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
+int c99_snprintf(char *str, size_t size, const char *format, ...);
+#define snprintf c99_snprintf
 #endif
+
+
+
+#ifndef MAX
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 
 
 #ifndef NO_LOGGING
@@ -249,12 +287,3 @@ class Logger { public: void operator () (const char *format, ...) {} };
 
 // just #undef Log in files, where this Log redefinition causes problems
 //#undef Log
-
-
-#include <stdio.h>
-#ifdef _MSC_VER
-int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
-int c99_snprintf(char *str, size_t size, const char *format, ...);
-#define snprintf c99_snprintf
-#endif
-
