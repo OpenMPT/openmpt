@@ -11,7 +11,10 @@
 
 #pragma once
 
+
+// has to be first
 #include "BuildSettings.h"
+
 
 #if defined(MODPLUG_TRACKER)
 
@@ -20,6 +23,7 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #include <afxcview.h>
 #include <afxole.h>
+
 #include <windowsx.h>
 
 #ifdef _MSC_VER
@@ -35,11 +39,12 @@
 
 #endif // MODPLUG_TRACKER
 
-#include <string>
+
 #include <istream>
 #include <ostream>
 #include <sstream>
-
+#include <string>
+#include <vector>
 
 
 #include "../common/typedefs.h"
