@@ -1516,7 +1516,7 @@ bool CSoundFile::LoadStaticTunings()
 	size_t nSize = 0;
 	if (LoadResource(MAKEINTRESOURCE(IDR_BUILTIN_TUNINGS), MPT_TEXT("TUNING"), pData, nSize, hglob) != nullptr)
 	{
-		std::istrstream iStrm(pData, nSize);
+		std::istringstream iStrm(std::string(pData, nSize));
 		s_pTuningsSharedBuiltIn->Deserialize(iStrm);
 		FreeResource(hglob);
 	}

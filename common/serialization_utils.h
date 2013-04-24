@@ -11,7 +11,7 @@
 #pragma once
 
 #include <string>
-#include <strstream>
+#include <sstream>
 #include <vector>
 #include <bitset>
 #include "../common/misc_util.h"
@@ -28,8 +28,8 @@ namespace srlztn //SeRiaLiZaTioN
 typedef std::ostream OutStream;
 typedef std::istream InStream;
 typedef std::iostream IoStream;
-typedef std::istrstream IstrStream;
-typedef std::ostrstream OstrStream;
+typedef std::istringstream IstrStream;
+typedef std::ostringstream OstrStream;
 typedef OutStream::off_type Offtype;
 typedef Offtype Postype;
 typedef std::streamsize Streamsize;

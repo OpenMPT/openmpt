@@ -27,7 +27,7 @@
 #include "../../soundlib/SampleFormatConverters.h"
 #include <limits>
 #include <fstream>
-#include <strstream>
+#include <sstream>
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -1041,7 +1041,7 @@ void TestPCnoteSerialization()
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
 	}
 
-	std::strstream mem;
+	std::stringstream mem;
 	WriteModPatterns(mem, sndFile.Patterns);
 
 	VERIFY_EQUAL_NONCONT( mem.good(), true );

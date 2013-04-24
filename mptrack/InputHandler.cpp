@@ -17,7 +17,6 @@
 #include "mainfrm.h"
 #include <direct.h>
 #include ".\inputhandler.h"
-#include <strstream>
 #include <Shlwapi.h>
 
 #define TRANSITIONBIT 0x8000
