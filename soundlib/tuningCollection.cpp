@@ -13,6 +13,7 @@
 #include "../common/serialization_utils.h"
 #include <algorithm>
 #include <bitset>
+#include <fstream>
 
 /*
 Version history:

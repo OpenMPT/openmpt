@@ -26,7 +26,8 @@
 #include "../../common/serialization_utils.h"
 #include "../../soundlib/SampleFormatConverters.h"
 #include <limits>
-#include <fstream>
+#include <istream>
+#include <ostream>
 #include <sstream>
 
 #ifdef _DEBUG
