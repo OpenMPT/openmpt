@@ -65,7 +65,7 @@ public:
 	virtual void DoClose() = 0;
 	virtual void UpdateParamDisplays() = 0;
 	virtual afx_msg void OnClose() = 0;
-	void OnSetFocus(CWnd *oldWnd);
+	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
