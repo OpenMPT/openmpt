@@ -17,7 +17,7 @@
 #endif
 #include "../common/serialization_utils.h"
 #include <fstream>
-#include <strstream>
+#include <sstream>
 #include <list>
 #include "../common/version.h"
 #include "ITTools.h"
@@ -913,7 +913,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 		const uint16 version = fileHeader.cwtv;
 		if(version > 0x889 && file.Seek(mptStartPos))
 		{
-			std::istrstream iStrm(file.GetRawData(), file.BytesLeft());
+			std::istringstream iStrm(std::string(file.GetRawData(), file.BytesLeft()));
 
 			if(version >= 0x88D)
 			{

@@ -875,7 +875,8 @@ void Ssb::FinishWrite()
 {
 	OutStream& oStrm = *m_pOstrm;
 	const Postype posDataEnd = oStrm.tellp();
-	if (m_posMapStart != Postype(0) && ((uint32)m_MapStream.pcount() > m_nMapReserveSize))
+	std::string mapStreamStr = m_MapStream.str();
+	if (m_posMapStart != Postype(0) && ((uint32)mapStreamStr.length() > m_nMapReserveSize))
 		{ AddWriteNote(SNW_INSUFFICIENT_MAPSIZE); return; }
 		
 	if (m_posMapStart < 1)
@@ -888,8 +889,7 @@ void Ssb::FinishWrite()
 
 	if (GetFlag(RwfRwHasMap)) //Write map
 	{
-		oStrm.write(m_MapStream.str(), m_MapStream.pcount());
-		m_MapStream.freeze(false);
+		oStrm.write(mapStreamStr.c_str(), mapStreamStr.length());
 	}
 
 	const Postype posMapEnd = oStrm.tellp();

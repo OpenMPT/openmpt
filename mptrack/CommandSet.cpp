@@ -1700,7 +1700,7 @@ bool CCommandSet::LoadDefaultKeymap()
 	size_t nSize = 0;
 	if (LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
 	{
-		std::istrstream iStrm(pData, nSize);
+		std::istringstream iStrm(std::string(pData, nSize));
 		success = LoadFile(iStrm, TEXT("\"executable resource\""));
 		FreeResource(hglob);
 	}

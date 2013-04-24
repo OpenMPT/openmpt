@@ -1492,7 +1492,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(LPCTSTR pszPath, LPCTSTR psz
 	nSize = file.Read(&data[0], nSize);
 	file.Close();
 
-    std::istrstream iStrm(&data[0], nSize);
+    std::istringstream iStrm(std::string(&data[0], nSize));
 	return ImportScl(iStrm, pszName);
 }
 
