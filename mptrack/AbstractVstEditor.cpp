@@ -29,7 +29,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
 	ON_WM_MENUSELECT()
-	ON_WM_SETFOCUS()
+	ON_WM_ACTIVATE()
 	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
 	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
@@ -88,10 +88,10 @@ CAbstractVstEditor::~CAbstractVstEditor()
 }
 
 
-void CAbstractVstEditor::OnSetFocus(CWnd *oldWnd)
-//-----------------------------------------------
+void CAbstractVstEditor::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
+//--------------------------------------------------------------------------------
 {
-	CDialog::OnSetFocus(oldWnd);
+	CDialog::OnActivate(nState, pWndOther, bMinimized);
 	CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
 }
 
