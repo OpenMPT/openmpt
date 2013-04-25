@@ -13,8 +13,9 @@
 #include "../soundlib/FileReader.h"
 
 CUnarchiver::CUnarchiver(FileReader &file, const std::vector<const char *> &extensions) :
+ext(extensions),
 inFile(file),
-zipArchive(inFile, extensions),
+zipArchive(inFile, ext),
 rarArchive((LPBYTE)inFile.GetRawData(), inFile.GetLength()),
 lhaArchive((LPBYTE)inFile.GetRawData(), inFile.GetLength()),
 gzipArchive(inFile)
