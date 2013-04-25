@@ -10,12 +10,17 @@
 
 #pragma once
 
+#include <limits>
 #include <sstream>
 #include <string>
-#include <limits>
-#include <limits.h>
+
+#include <cstdlib>
+
 #include "typedefs.h"
+
+#ifdef MODPLUG_TRACKER
 #include <io.h> // for _taccess
+#endif
 
 #if defined(HAS_TYPE_TRAITS)
 #include <type_traits>
@@ -45,9 +50,19 @@ inline T ConvertStrTo(const char *str)
 		return static_cast<T>(atof(str));
 }
 
-template<> inline uint32 ConvertStrTo(const char *str) {return strtoul(str, nullptr, 10);}
-template<> inline int64 ConvertStrTo(const char *str) {return _strtoi64(str, nullptr, 10);}
-template<> inline uint64 ConvertStrTo(const char *str) {return _strtoui64(str, nullptr, 10);}
+#ifdef _MSC_VER
+#define cxx11_strtoll  _strtoi64
+#define cxx11_strtoull _strtoui64
+#else
+#define cxx11_strtoll  std::strtoll
+#define cxx11_strtoull std::strtoull
+#endif
+template<> inline signed int       ConvertStrTo(const char *str) {return (signed int)std::strtol(str, nullptr, 10);}
+template<> inline signed long      ConvertStrTo(const char *str) {return std::strtol(str, nullptr, 10);}
+template<> inline signed long long ConvertStrTo(const char *str) {return cxx11_strtoll(str, nullptr, 10);}
+template<> inline unsigned int       ConvertStrTo(const char *str) {return (unsigned int)std::strtoul(str, nullptr, 10);}
+template<> inline unsigned long      ConvertStrTo(const char *str) {return std::strtoul(str, nullptr, 10);}
+template<> inline unsigned long long ConvertStrTo(const char *str) {return cxx11_strtoull(str, nullptr, 10);}
 
 
 // Memset given object to zero.
