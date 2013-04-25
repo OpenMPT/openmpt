@@ -35,6 +35,7 @@ class CUnarchiver
 {
 protected:
 	FileReader inFile;
+	const std::vector<const char *> ext;
 
 private:
 	CZipArchive zipArchive;
@@ -52,6 +53,6 @@ public:
 	bool ExtractFile();
 	const char *GetComments(bool get);
 
-	CUnarchiver(FileReader &file, const std::vector<const char *> & extensions);
+	CUnarchiver(FileReader &file, const std::vector<const char *> &extensions);
 	~CUnarchiver();
 };

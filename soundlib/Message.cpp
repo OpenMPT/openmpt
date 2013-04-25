@@ -143,7 +143,7 @@ bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, con
 	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
 	{
 		append(str + fpos, std::min(lineLength, length - fpos));
-		at(cpos + lineLength) = InternalLineEnding;
+		append(1, InternalLineEnding);
 
 		// fix weird chars
 		for(size_t lpos = 0; lpos < lineLength; lpos++)

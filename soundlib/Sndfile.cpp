@@ -607,12 +607,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
-	// Adjust song / sample names
-	for(SAMPLEINDEX iSmp = 0; iSmp <= GetNumSamples(); iSmp++)
-	{
-		StringFixer::SetNullTerminator(m_szNames[iSmp]);
-	}
-
 	// Adjust channels
 	for(CHANNELINDEX ich = 0; ich < MAX_BASECHANNELS; ich++)
 	{
@@ -634,6 +628,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	ModSample *pSmp = Samples;
 	for(SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
 	{
+		// Adjust song / sample names
+		StringFixer::SetNullTerminator(m_szNames[nSmp]);
+
 		if(pSmp->pSample)
 		{
 			pSmp->SanitizeLoops();
@@ -1110,7 +1107,7 @@ void CSoundFile::ResetChannels()
 
 
 void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------
 {
 	if(chnIndex >= m_nChannels)
 		return;
@@ -1124,7 +1121,7 @@ void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
 
 
 void CSoundFile::PatternTransitionChnUnmuteAll()
-//----------------------------------------------------
+//----------------------------------------------
 {
 	for(CHANNELINDEX i = 0; i<m_nChannels; i++)
 	{
