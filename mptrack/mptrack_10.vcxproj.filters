@@ -439,6 +439,9 @@
     <ClCompile Include="..\common\version.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\Load_digi.cpp">
+      <Filter>Source Files\soundlib\Module Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

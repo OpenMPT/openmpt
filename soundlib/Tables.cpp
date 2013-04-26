@@ -85,6 +85,7 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_PSM,		"Epic Megagames MASI",		"psm" },
 	{ MOD_TYPE_MT2,		"MadTracker 2",				"mt2" },
 	{ MOD_TYPE_DBM,		"DigiBooster Pro",			"dbm" },
+	{ MOD_TYPE_DIGI,	"DigiBooster",				"digi" },
 	{ MOD_TYPE_IMF,		"Imago Orpheus",			"imf" },
 	{ MOD_TYPE_J2B,		"Galaxy Sound System",		"j2b" },
 

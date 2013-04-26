@@ -101,6 +101,7 @@ FLAGSET(MODTYPE)
 	MOD_TYPE_MPT	= 0x1000000,
 	MOD_TYPE_IMF	= 0x2000000,
 	MOD_TYPE_AMS2	= 0x4000000,
+	MOD_TYPE_DIGI	= 0x8000000,
 	// Container formats (not used at the moment)
 	MOD_TYPE_MO3	= 0x20000000,
 	MOD_TYPE_GDM	= 0x40000000,
@@ -135,17 +136,17 @@ FLAGSET(ChannelFlags)
 	CHN_SURROUND		= 0x800,		// use surround channel
 	CHN_NOIDO			= 0x1000,		// (IDO = Interpolation Do?) Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
 	CHN_HQSRC			= 0x2000,		// High quality sample rate conversion (i.e. apply interpolation)
-	CHN_FILTER			= 0x4000,		// filtered output
-	CHN_VOLUMERAMP		= 0x8000,		// ramp volume
-	CHN_VIBRATO			= 0x10000,		// apply vibrato
-	CHN_TREMOLO			= 0x20000,		// apply tremolo
-	CHN_PANBRELLO		= 0x40000,		// apply panbrello
-	CHN_PORTAMENTO		= 0x80000,		// apply portamento
-	CHN_GLISSANDO		= 0x100000,		// glissando mode
-	CHN_FASTVOLRAMP		= 0x200000,		// ramp volume very fast
-	CHN_EXTRALOUD		= 0x400000,		// force master volume to = 0x100
-	CHN_REVERB			= 0x800000,		// apply reverb
-	CHN_NOREVERB		= 0x1000000,	// forbid reverb
+	CHN_FILTER			= 0x4000,		// Apply resonant filter on sample
+	CHN_VOLUMERAMP		= 0x8000,		// Apply volume ramping
+	CHN_VIBRATO			= 0x10000,		// Apply vibrato
+	CHN_TREMOLO			= 0x20000,		// Apply tremolo
+	CHN_PANBRELLO		= 0x40000,		// Apply panbrello
+	CHN_PORTAMENTO		= 0x80000,		// Apply portamento
+	CHN_GLISSANDO		= 0x100000,		// Glissando mode
+	CHN_FASTVOLRAMP		= 0x200000,		// Force usage of global ramping settings instead of ramping over the complete render buffer length
+	CHN_EXTRALOUD		= 0x400000,		// Force sample to play at 0dB
+	CHN_REVERB			= 0x800000,		// Apply reverb on this channel
+	CHN_NOREVERB		= 0x1000000,	// Disable reverb on this channel
 	CHN_SOLO			= 0x2000000,	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
 	CHN_NOFX			= 0x4000000,	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
 	CHN_SYNCMUTE		= 0x8000000,	// keep sample sync on mute
