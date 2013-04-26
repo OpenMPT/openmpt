@@ -1553,9 +1553,9 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 	if(pChn->dwFlags[CHN_VOLUMERAMP] && (pChn->leftVol != pChn->newLeftVol || pChn->rightVol != pChn->newRightVol))
 	{
 		const bool rampUp = (pChn->newLeftVol > pChn->leftVol) || (pChn->newRightVol > pChn->rightVol);
-		LONG rampLength, globalRampLength, instrRampLength = 0;
+		int32 rampLength, globalRampLength, instrRampLength = 0;
 		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamplesActual : m_MixerSettings.glVolumeRampDownSamples);
-		//XXXih: add real support for bidi ramping here	
+		//XXXih: add real support for bidi ramping here
 		
 		if(pChn->pModInstrument != nullptr && rampUp)
 		{
@@ -1569,23 +1569,15 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 			rampLength = 1;
 		}
 
-		LONG leftDelta = ((pChn->newLeftVol - pChn->leftVol) << VOLUMERAMPPRECISION);
-		LONG rightDelta = ((pChn->newRightVol - pChn->rightVol) << VOLUMERAMPPRECISION);
-//		if (IsRenderingToDisc()
-//			|| m_Resampler.IsHQ())
-		if(IsRenderingToDisc() || (m_Resampler.IsHQ() && !enableCustomRamp))
+		int32 leftDelta = ((pChn->newLeftVol - pChn->leftVol) << VOLUMERAMPPRECISION);
+		int32 rightDelta = ((pChn->newRightVol - pChn->rightVol) << VOLUMERAMPPRECISION);
+		if(!enableCustomRamp)
 		{
+			// Extra-smooth ramping, unless we're forced to use the default values
 			if((pChn->leftVol | pChn->rightVol) && (pChn->newLeftVol | pChn->newRightVol) && !pChn->dwFlags[CHN_FASTVOLRAMP])
 			{
 				rampLength = m_nBufferCount;
-				if(rampLength > (1 << (VOLUMERAMPPRECISION-1)))
-				{
-					rampLength = (1 << (VOLUMERAMPPRECISION-1));
-				}
-				if(rampLength < globalRampLength)
-				{
-					rampLength = globalRampLength;
-				}
+				Limit(rampLength, globalRampLength, 1 << (VOLUMERAMPPRECISION - 1));
 			}
 		}
 

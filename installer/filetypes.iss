@@ -22,7 +22,8 @@ Name: "associate_exotic";     Description: "Associate OpenMPT with less common m
 Name: "associate_exotic\669"; Description: "Composer 669 / UNIS 669 (669)";
 Name: "associate_exotic\amf"; Description: "ASYLUM Music Format / Advanced Music Format (AMF)";
 Name: "associate_exotic\ams"; Description: "Extreme's Tracker / Velvet Studio (AMS)";
-Name: "associate_exotic\dbm"; Description: "DigiBooster (DBM)";
+Name: "associate_exotic\dbm"; Description: "Digi Booster Pro (DBM)";
+Name: "associate_exotic\digi"; Description: "Digi Booster (DIGI)";
 Name: "associate_exotic\dmf"; Description: "X-Tracker (DMF)";
 Name: "associate_exotic\dsm"; Description: "DSIK (DSM)";
 Name: "associate_exotic\far"; Description: "Farandole Composer (FAR)";
@@ -63,6 +64,7 @@ Root: HKCR; Subkey: ".669"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".amf"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\amf
 Root: HKCR; Subkey: ".ams"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ams
 Root: HKCR; Subkey: ".dbm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\dbm
+Root: HKCR; Subkey: ".digi"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\digi
 Root: HKCR; Subkey: ".dmf"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\dmf
 Root: HKCR; Subkey: ".dsm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\dsm
 Root: HKCR; Subkey: ".far"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\far
