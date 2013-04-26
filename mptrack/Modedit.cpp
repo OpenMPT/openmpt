@@ -394,7 +394,6 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &new
 	CriticalSection cs;
 
 	const INSTRUMENTINDEX oldNumInstruments = m_SndFile.GetNumInstruments(), newNumInstruments = static_cast<INSTRUMENTINDEX>(newOrder.size());
-	m_SndFile.m_nInstruments = static_cast<INSTRUMENTINDEX>(newOrder.size());
 
 	vector<ModInstrument> instrumentHeaders(oldNumInstruments + 1);
 	vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);	// One of the new indexes for the old instrument
@@ -417,6 +416,8 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &new
 			m_SndFile.DestroyInstrument(i, removeSamples);
 		}
 	}
+
+	m_SndFile.m_nInstruments = newNumInstruments;
 
 	// Now, create new instrument list.
 	for(INSTRUMENTINDEX i = 0; i < newNumInstruments; i++)

@@ -345,17 +345,18 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 
 struct OrigPatSettings
 {
-	bool isPatUsed;				// Is pattern used in sequence?
-	PATTERNINDEX newIndex;		// map old pattern index <-> new pattern index
 	// This stuff is needed for copying the old pattern properties to the new pattern number
+	CString name;				// original pattern name
 	ModCommand *data;			// original pattern data
 	ROWINDEX numRows;			// original pattern sizes
 	ROWINDEX rowsPerBeat;		// original pattern highlight
 	ROWINDEX rowsPerMeasure;	// original pattern highlight
-	CString name;				// original pattern name
+
+	PATTERNINDEX newIndex;		// map old pattern index <-> new pattern index
+	bool isPatUsed;				// Is pattern used in sequence?
 };
 
-const OrigPatSettings defaultSettings = { false, 0, nullptr, 0, 0, 0, "" };
+const OrigPatSettings defaultSettings = { "", nullptr, 0, 0, 0, 0, false };
 
 // Remove unused patterns / rearrange patterns
 // If argument bRemove is true, unused patterns are removed. Else, patterns are only rearranged.
