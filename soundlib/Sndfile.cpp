@@ -578,6 +578,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 		 && !ReadGDM(file)
 		 && !ReadIMF(file)
+		 && !ReadDIGI(file)
 		 && !ReadAM(file)
 		 && !ReadJ2B(file)
 		 && !ReadMO3(file)
@@ -1175,7 +1176,7 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 //-------------------------------------------
 {
 	if ((!m_nSamples) || (!m_nChannels) || GetType() == MOD_TYPE_NONE) return MOD_TYPE_NONE;
-	if (GetType() & (MOD_TYPE_MOD/*|MOD_TYPE_OKT*/))
+	if (GetType() & (MOD_TYPE_MOD|MOD_TYPE_DIGI))
 		return MOD_TYPE_MOD;
 	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_ULT|MOD_TYPE_FAR|MOD_TYPE_PTM|MOD_TYPE_MTM))
 		return MOD_TYPE_S3M;

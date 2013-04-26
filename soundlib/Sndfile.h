@@ -504,6 +504,7 @@ public:
 	bool ReadIMF(FileReader &file);
 	bool ReadAM(FileReader &file);
 	bool ReadJ2B(FileReader &file);
+	bool ReadDIGI(FileReader &file);
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
@@ -540,6 +541,7 @@ public:
 	void S3MConvert(ModCommand &m, bool fromIT) const;
 	void S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport = false) const;
 	void ModSaveCommand(uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
+	void ReadMODPatternEntry(FileReader &file, ModCommand &m);
 
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 

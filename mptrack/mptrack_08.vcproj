@@ -1337,6 +1337,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\load_digi.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\load_dmf.cpp"
 				>
 			</File>

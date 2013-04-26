@@ -454,8 +454,8 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 }
 
 
-static void ReadPatternEntry(FileReader &file, ModCommand &m, const CSoundFile &sf)
-//---------------------------------------------------------------------------------
+void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
+//-------------------------------------------------------------------
 {
 	uint8 data[4];
 	file.ReadArray(data);
@@ -464,7 +464,7 @@ static void ReadPatternEntry(FileReader &file, ModCommand &m, const CSoundFile &
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
 	if(period > 0 && period != 0xFFF)
 	{
-		m.note = static_cast<ModCommand::NOTE>(sf.GetNoteFromPeriod(period * 4));
+		m.note = static_cast<ModCommand::NOTE>(GetNoteFromPeriod(period * 4));
 	}
 	// Read Instrument
 	m.instr = (data[2] >> 4) | (data[0] & 0x10);
@@ -650,7 +650,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 				for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 				{
 					ModCommand &m = rowBase[chn];
-					ReadPatternEntry(file, m, *this);
+					ReadMODPatternEntry(file, m);
 
 					if(m.command || m.param)
 					{
@@ -942,7 +942,7 @@ bool CSoundFile::ReadM15(FileReader &file)
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-				ReadPatternEntry(file, m, *this);
+				ReadMODPatternEntry(file, m);
 
 				if(m.command || m.param)
 				{

@@ -269,6 +269,7 @@
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
+    <ClCompile Include="..\soundlib\Load_digi.cpp" />
     <ClCompile Include="..\soundlib\Message.cpp" />
     <ClCompile Include="..\soundlib\MIDIEvents.cpp" />
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
