@@ -743,14 +743,14 @@ bool ModSequence::ReadAsByte(const BYTE* pFrom, const int howMany, const int mem
 }
 
 
-bool ModSequence::ReadAsByte(FileReader &file, size_t howMany)
-//------------------------------------------------------------
+bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries)
+//--------------------------------------------------------------------------------
 {
 	if(!file.CanRead(howMany))
 	{
 		return false;
 	}
-	ORDERINDEX readEntries = static_cast<ORDERINDEX>(howMany);
+	LimitMax(readEntries, howMany);
 	if(!(m_sndFile.GetType() & MOD_TYPE_MPT))
 	{
 		LimitMax(readEntries, MAX_ORDERS);

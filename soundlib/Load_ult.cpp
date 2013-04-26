@@ -389,6 +389,7 @@ bool CSoundFile::ReadUlt(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 
 	m_nType = MOD_TYPE_ULT;
@@ -435,12 +436,14 @@ bool CSoundFile::ReadUlt(FileReader &file)
 	{
 		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
+			ChnSettings[chn].Reset();
 			ChnSettings[chn].nPan = ((file.ReadUint8() & 0x0F) << 4) + 8;
 		}
 	} else
 	{
 		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
+			ChnSettings[chn].Reset();
 			ChnSettings[chn].nPan = (chn & 1) ? 192 : 64;
 		}
 	}

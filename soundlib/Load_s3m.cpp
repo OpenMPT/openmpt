@@ -443,6 +443,8 @@ bool CSoundFile::ReadS3M(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
@@ -519,7 +521,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	m_nChannels = 4;
 	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
-		ChnSettings[i].nVolume = 64;
+		ChnSettings[i].Reset();
 
 		if(fileHeader.channels[i] == 0xFF)
 		{

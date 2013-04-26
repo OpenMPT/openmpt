@@ -112,8 +112,8 @@ void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSn
 
 
 // Parse a pattern block
-void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile *pSndFile)
-//-----------------------------------------------------------------------------
+void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
+//----------------------------------------------------------------------------
 {
 	if(!chunk.CanRead(2))
 	{
@@ -122,16 +122,16 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile *pSndFile)
 
 	ROWINDEX rows = Clamp(static_cast<ROWINDEX>(chunk.ReadUint16BE()), ROWINDEX(1), MAX_PATTERN_ROWS);
 
-	if(pSndFile->Patterns.Insert(nPat, rows))
+	if(sndFile.Patterns.Insert(nPat, rows))
 	{
 		return;
 	}
 
-	const CHANNELINDEX chns = pSndFile->GetNumChannels();
+	const CHANNELINDEX chns = sndFile.GetNumChannels();
 
 	for(ROWINDEX row = 0; row < rows; row++)
 	{
-		ModCommand *m = pSndFile->Patterns[nPat].GetRow(row);
+		ModCommand *m = sndFile.Patterns[nPat].GetRow(row);
 		for(CHANNELINDEX chn = 0; chn < chns; chn++, m++)
 		{
 			uint8 note = chunk.ReadUint8();
@@ -294,9 +294,8 @@ bool CSoundFile::ReadOKT(FileReader &file)
 	vector<bool> sample7bit;	// 7-/8-bit sample
 	ORDERINDEX nOrders = 0;
 
-	MemsetZero(m_szNames);
-	m_nChannels = 0;
-	m_nSamples = 0;
+	InitializeGlobals();
+	m_szNames[0][0] = '\0';
 
 	// Go through IFF chunks...
 	while(file.BytesLeft())
@@ -327,8 +326,10 @@ bool CSoundFile::ReadOKT(FileReader &file)
 				uint8 ch1 = chunk.ReadUint8(), ch2 = chunk.ReadUint8();
 				if(ch1 || ch2)
 				{
+					ChnSettings[m_nChannels].Reset();
 					ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
 				}
+				ChnSettings[m_nChannels].Reset();
 				ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
 			}
 			break;
@@ -406,7 +407,7 @@ bool CSoundFile::ReadOKT(FileReader &file)
 	for(PATTERNINDEX nPat = 0; nPat < patternChunks.size(); nPat++)
 	{
 		if(patternChunks[nPat].GetLength() > 0)
-			ReadOKTPattern(patternChunks[nPat], nPat, this);
+			ReadOKTPattern(patternChunks[nPat], nPat, *this);
 		else
 			Patterns.Insert(nPat, 64);	// invent empty pattern
 	}

@@ -966,6 +966,7 @@ bool CSoundFile::ReadDMF(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songname);
 
 #ifdef MODPLUG_TRACKER
@@ -1086,6 +1087,7 @@ bool CSoundFile::ReadDMF(FileReader &file)
 		}
 	}
 
+	InitializeChannels();
 	m_nType = MOD_TYPE_DMF;
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX;	// this will be converted to IT format by MPT. SONG_ITOLDEFFECTS is not set because of tremor and vibrato.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);

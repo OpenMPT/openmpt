@@ -541,8 +541,11 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	Log("  extra_songs = %d\n", pmmh->extra_songs);
 	Log("\n");
 #endif
+
+	InitializeGlobals();
+	InitializeChannels();
 	m_nType = MOD_TYPE_MED;
-	m_nSamplePreAmp = 0x20;
+	m_nSamplePreAmp = 32;
 	dwBlockArr = BigEndian(pmmh->blockarr);
 	dwSmplArr = BigEndian(pmmh->smplarr);
 	dwExpData = BigEndian(pmmh->expdata);

@@ -231,6 +231,9 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	 || (pfh->wVersion < 0x0200) || (pfh->wVersion >= 0x0300)
 	 || (pfh->wChannels < 1) || (pfh->wChannels > MAX_BASECHANNELS)) return false;
 	pdd = NULL;
+
+	InitializeGlobals();
+	InitializeChannels();
 	m_nType = MOD_TYPE_MT2;
 	m_nChannels = pfh->wChannels;
 	m_nRestartPos = pfh->wRestart;

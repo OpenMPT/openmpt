@@ -392,9 +392,10 @@ bool CSoundFile::ReadAMS(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+
 	m_nType = MOD_TYPE_AMS;
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
-	m_nInstruments = 0;
 	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
 	m_nSamples = fileHeader.numSamps;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
@@ -423,6 +424,7 @@ bool CSoundFile::ReadAMS(FileReader &file)
 	// Read channel names
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
+		ChnSettings[chn].Reset();
 		ReadAMSString(ChnSettings[chn].szName, file);
 	}
 
@@ -754,10 +756,10 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+
 	m_nType = MOD_TYPE_AMS2;
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS | ((headerFlags & AMS2FileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0));
-	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
@@ -857,6 +859,7 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 	// Channel names
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
+		ChnSettings[chn].Reset();
 		ReadAMSString(ChnSettings[chn].szName, file);
 	}
 

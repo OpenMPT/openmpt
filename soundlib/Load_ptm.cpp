@@ -95,6 +95,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh.songname);
 
+	InitializeGlobals();
 	m_nType = MOD_TYPE_PTM;
 	m_nChannels = pfh.nchannels;
 	m_nSamples = MIN(pfh.nsamples, MAX_SAMPLES - 1);
@@ -104,7 +105,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 
 	for (CHANNELINDEX ipan = 0; ipan < m_nChannels; ipan++)
 	{
-		ChnSettings[ipan].nVolume = 64;
+		ChnSettings[ipan].Reset();
 		ChnSettings[ipan].nPan = ((pfh.chnpan[ipan] & 0x0F) << 4) + 4;
 	}
 	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += sizeof(PTMSAMPLE))

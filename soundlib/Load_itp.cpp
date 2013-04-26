@@ -57,6 +57,8 @@ bool CSoundFile::ReadITProject(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+
 	// Song comments
 	songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
 

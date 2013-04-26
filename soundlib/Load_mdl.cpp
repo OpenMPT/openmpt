@@ -314,7 +314,9 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 	dwTrackPos = 0;
 	pvolenv = ppanenv = ppitchenv = NULL;
 	nvolenv = npanenv = npitchenv = 0;
-	m_nSamples = m_nInstruments = 0;
+
+	InitializeGlobals();
+
 	while (dwMemPos+6 < dwMemLength)
 	{
 		block = *((WORD *)(lpStream+dwMemPos));
@@ -344,7 +346,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 			m_nChannels = 4;
 			for (i=0; i<32; i++)
 			{
-				ChnSettings[i].nVolume = 64;
+				ChnSettings[i].Reset();
 				ChnSettings[i].nPan = (pmib->channelinfo[i] & 0x7F) << 1;
 				if (pmib->channelinfo[i] & 0x80)
 					ChnSettings[i].dwFlags.set(CHN_MUTE);

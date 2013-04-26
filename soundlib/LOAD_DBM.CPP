@@ -210,6 +210,10 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 	dwMemPos = sizeof(DBMFileHeader);
 	nOrders = BigEndianW(pfh->orders);
 	if (dwMemPos + 2 * nOrders + 8*3 >= dwMemLength) return false;
+
+	InitializeGlobals();
+	InitializeChannels();
+
 	nInstruments = BigEndianW(pfh->instruments);
 	nSamples = BigEndianW(pfh->samples);
 	nPatterns = BigEndianW(pfh->patterns);

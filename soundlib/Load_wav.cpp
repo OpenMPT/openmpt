@@ -55,6 +55,7 @@ bool CSoundFile::ReadWav(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
 	m_nChannels = std::max(wavFile.GetNumChannels(), uint16(2));
 	if(Patterns.Insert(0, 64) || Patterns.Insert(1, 64))
 	{
@@ -92,9 +93,8 @@ bool CSoundFile::ReadWav(FileReader &file)
 
 	for(CHANNELINDEX channel = 0; channel < wavFile.GetNumChannels(); channel++)
 	{
+		ChnSettings[channel].Reset();
 		ChnSettings[channel].nPan = (channel % 2u) ? 256 : 0;
-		ChnSettings[channel].nVolume = 64;
-		ChnSettings[channel].dwFlags.reset();
 	}
 
 	// Setting up pattern

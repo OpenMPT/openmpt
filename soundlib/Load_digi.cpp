@@ -67,17 +67,16 @@ bool CSoundFile::ReadDIGI(FileReader &file)
 		return false;
 	}
 
-	Order.ReadFromArray(fileHeader.orders, fileHeader.lastOrdIndex + 1);
-
 	// Globals
+	InitializeGlobals();
+	InitializeChannels();
+
 	m_nType = MOD_TYPE_DIGI;
 	m_nChannels = fileHeader.numChannels;
-	m_nInstruments = 0;
 	m_nSamples = 31;
 	m_nSamplePreAmp = 256 / m_nChannels;
-	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
-	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+
+	Order.ReadFromArray(fileHeader.orders, fileHeader.lastOrdIndex + 1);
 
 	// Read sample headers
 	for(SAMPLEINDEX smp = 0; smp < 31; smp++)

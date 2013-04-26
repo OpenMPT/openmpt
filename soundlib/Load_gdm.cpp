@@ -134,44 +134,39 @@ bool CSoundFile::ReadGDM(FileReader &file)
 //----------------------------------------
 {
 	file.Rewind();
-	GDMFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader))
-	{
-		return false;
-	}
-
-	// Is it a valid GDM file?
-	if(fileHeader.magic != GDMFileHeader::magicGDM_
-		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
-		|| fileHeader.magic2 != GDMFileHeader::magicGMFS
-		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0)
-	{
-		return false;
-	}
 
 	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
-	static const MODTYPE gdmFormatOrigin[] =
+	const MODTYPE gdmFormatOrigin[] =
 	{
 		MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
 	};
 
-	m_nType = gdmFormatOrigin[fileHeader.originalFormat % CountOf(gdmFormatOrigin)];
-	if(m_nType == MOD_TYPE_NONE)
+	GDMFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| fileHeader.magic != GDMFileHeader::magicGDM_
+		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
+		|| fileHeader.magic2 != GDMFileHeader::magicGMFS
+		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0
+		|| fileHeader.originalFormat >= CountOf(gdmFormatOrigin)
+		|| fileHeader.originalFormat == 0)
 	{
 		return false;
 	}
 
+	InitializeGlobals();
+	m_nType = gdmFormatOrigin[fileHeader.originalFormat];
+
 	// Song name
-	MemsetZero(m_szNames);
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songTitle);
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
 	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
+		ChnSettings[i].Reset();
 		if(fileHeader.panMap[i] < 16)
 		{
-			ChnSettings[i].nPan = MIN((fileHeader.panMap[i] * 16) + 8, 256);
+			ChnSettings[i].nPan = std::min((fileHeader.panMap[i] * 16) + 8, 256);
 		} else if(fileHeader.panMap[i] == 16)
 		{
 			ChnSettings[i].nPan = 128;
@@ -186,9 +181,6 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	m_nDefaultGlobalVolume = MIN(fileHeader.masterVol * 4, 256);
 	m_nDefaultSpeed = fileHeader.tempo;
 	m_nDefaultTempo = fileHeader.bpm;
-	m_nRestartPos = 0; // Not supported in this format, so use the default value
-	m_nSamplePreAmp = 48; // Dito
-	m_nVSTiVolume = 48; // Dito
 
 	// Read orders
 	if(file.Seek(fileHeader.orderOffset))
