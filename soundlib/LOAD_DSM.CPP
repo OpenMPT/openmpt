@@ -115,6 +115,8 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	 || (pfh->song_len > dwMemLength)) return false;
 	psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADER));
 	dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
+
+	InitializeGlobals();
 	m_nType = MOD_TYPE_DSM;
 	m_nChannels = psong->numtrk;
 	if (m_nChannels < 1) m_nChannels = 1;
@@ -130,6 +132,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	for (UINT iPan=0; iPan<16; iPan++)
 	{
+		ChnSettings[iPan].Reset();
 		ChnSettings[iPan].nPan = 0x80;
 		if (psong->panpos[iPan] <= 0x80)
 		{

@@ -532,11 +532,10 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	miditracks.resize(tracks);
 
 	// Reading File...
+	InitializeGlobals();
 	m_nType = MOD_TYPE_MID;
 	m_nChannels = 32;
-	m_nSamples = 0;
-	m_nInstruments = 0;
-	m_SongFlags.set(SONG_LINEARSLIDES);
+	m_SongFlags = SONG_LINEARSLIDES;
 	m_szNames[0][0] = 0;
 
 	// MIDI->MOD Tempo Conversion
@@ -571,9 +570,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	for (UINT ics=0; ics<MAX_BASECHANNELS; ics++)
 	{
 		// Channel settings
-		ChnSettings[ics].nPan = 128;
-		ChnSettings[ics].nVolume = 64;
-		ChnSettings[ics].dwFlags.reset();
+		ChnSettings[ics].Reset();
 		// Channels state
 		chnstate[ics].pan = 128;
 		chnstate[ics].pitchsrc = 0x2000;

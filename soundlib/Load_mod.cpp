@@ -483,6 +483,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
 	m_nChannels = 4;
 
 	// Check MOD Magic
@@ -752,6 +753,8 @@ bool CSoundFile::ReadM15(FileReader &file)
 	{
 		return false;
 	}
+
+	InitializeGlobals();
 
 	// We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
 	// or if it was made with the newer Soundtracker versions.

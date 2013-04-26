@@ -749,10 +749,6 @@ bool CSoundFile::ReadAM(FileReader &file)
 	else
 		return false;
 
-	m_nChannels = 0;
-	m_nSamples = 0;
-	m_nInstruments = 0;
-
 	ChunkReader chunkFile(file);
 	// RIFF AM has a padding byte so that all chunks have an even size.
 	ChunkReader::ChunkList<AMFFRiffChunk> chunks = chunkFile.ReadChunks<AMFFRiffChunk>(isAM ? 2 : 1);
@@ -761,17 +757,15 @@ bool CSoundFile::ReadAM(FileReader &file)
 	// "INIT" - Song info (AM)
 	FileReader chunk(chunks.GetChunk(isAM ? AMFFRiffChunk::idINIT : AMFFRiffChunk::idMAIN));
 	AMFFMainChunk mainChunk;
-	if(!chunk.IsValid() || !chunk.Read(mainChunk))
+	if(!chunk.IsValid() 
+		|| !chunk.Read(mainChunk)
+		|| mainChunk.channels < 1
+		|| !chunk.CanRead(mainChunk.channels))
 	{
 		return false;
 	}
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
-
-	if(mainChunk.channels < 1 || !chunk.CanRead(mainChunk.channels))
-	{
-		return false;
-	}
+	InitializeGlobals();
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 	m_SongFlags.set(SONG_LINEARSLIDES, !(mainChunk.flags & AMFFMainChunk::amigaSlides));
 
@@ -779,21 +773,20 @@ bool CSoundFile::ReadAM(FileReader &file)
 	m_nDefaultSpeed = mainChunk.speed;
 	m_nDefaultTempo = mainChunk.tempo;
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
-	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nType = MOD_TYPE_J2B;
 
 	ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
+
+	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
 	// Muted and Surround channels (they're all 0xA0) - might
 	// be a limitation in mod2j2b.
 	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 	{
-		ChnSettings[nChn].nVolume = 64;
-		ChnSettings[nChn].nPan = 128;
+		ChnSettings[nChn].Reset();
 
 		uint8 pan = chunk.ReadUint8();
-
 		if(isAM)
 		{
 			if(pan > 128)
@@ -805,7 +798,7 @@ bool CSoundFile::ReadAM(FileReader &file)
 			if(pan >= 128)
 				ChnSettings[nChn].dwFlags = CHN_MUTE;
 			else
-				ChnSettings[nChn].nPan = pan * 4;
+				ChnSettings[nChn].nPan = std::min(pan * 4, 256);
 		}
 	}
 

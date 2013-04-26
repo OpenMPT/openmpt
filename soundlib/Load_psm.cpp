@@ -287,14 +287,10 @@ bool CSoundFile::ReadPSM(FileReader &file)
 	}
 
 	// Yep, this seems to be a valid file.
+	InitializeGlobals();
 	m_nType = MOD_TYPE_PSM;
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
-	m_nChannels = 0;
-
-	MemsetZero(m_szNames);
-
-	m_nVSTiVolume = m_nSamplePreAmp = 48; // not supported in this format, so use a good default value
 
 	// pattern offset and identifier
 	PATTERNINDEX numPatterns = 0;		// used for setting up the orderlist - final pattern count
@@ -643,6 +639,7 @@ bool CSoundFile::ReadPSM(FileReader &file)
 	m_nRestartPos = subsongs[0].restartPos;
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
+		ChnSettings[chn].Reset();
 		ChnSettings[chn].nVolume = subsongs[0].channelVolume[chn];
 		ChnSettings[chn].nPan = subsongs[0].channelPanning[chn];
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
@@ -1141,22 +1138,21 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
 		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
 		|| (fileHeader.songType & 3) != 0
-		|| MAX(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
+		|| std::max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
 	{
 		return false;
 	}
 
 	// Seems to be valid!
-
+	InitializeGlobals();
 	m_nType = MOD_TYPE_S3M;
-	m_nChannels = MIN(MAX(fileHeader.numChannelsPlay, fileHeader.numChannelsReal), MAX_BASECHANNELS);
+	m_nChannels = Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;
 	if(m_nSamplePreAmp == 255)
 	{
 		// Most of the time, the master volume value makes sense... Just not when it's 255.
 		m_nSamplePreAmp = 48;
 	}
-	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo = fileHeader.songTempo;
 
@@ -1174,6 +1170,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 	{
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
+			ChnSettings[i].Reset();
 			ChnSettings[i].nPan = ((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
 			ChnSettings[i].nVolume = 64;
 			ChnSettings[i].dwFlags.reset(); // (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M

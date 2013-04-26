@@ -471,6 +471,10 @@ public:
 
 	bool InitChannel(CHANNELINDEX nChn);
 
+	// Global variable initializer for loader functions
+	void InitializeGlobals();
+	void InitializeChannels();
+
 	// Module Loaders
 	bool ReadXM(FileReader &file);
 	bool ReadS3M(FileReader &file);

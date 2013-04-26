@@ -293,6 +293,8 @@ bool CSoundFile::ReadIT(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+
 	bool interpretModPlugMade = false;
 
 	// OpenMPT crap at the end of file
@@ -411,6 +413,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	// Reading Channels Pan Positions
 	for(CHANNELINDEX i = 0; i < 64; i++) if(fileHeader.chnpan[i] != 0xFF)
 	{
+		ChnSettings[i].Reset();
 		ChnSettings[i].nVolume = Clamp(fileHeader.chnvol[i], uint8(0), uint8(64));
 		ChnSettings[i].nPan = 128;
 		ChnSettings[i].dwFlags.reset();

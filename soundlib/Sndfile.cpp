@@ -472,6 +472,45 @@ void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
 }
 
 
+// Global variable initializer for loader functions
+void CSoundFile::InitializeGlobals()
+//---------------------------
+{
+	// Do not add or change any of these values! And if you do, review each and every loader to check if they require these defaults!
+	m_nType = MOD_TYPE_NONE;
+	m_nChannels = 0;
+	m_nInstruments = 0;
+	m_nSamples = 0;
+	m_nSamplePreAmp = 48;
+	m_nVSTiVolume = 48;
+	m_nDefaultSpeed = 6;
+	m_nDefaultTempo = 125;
+	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_nRestartPos = 0;
+	m_SongFlags.reset();
+	m_nMinPeriod = 16;
+	m_nMaxPeriod = 32767;
+	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
+
+	SetMixLevels(mixLevels_compatible);
+	SetModFlags(0);
+
+	Order.resize(1);
+	Patterns.ClearPatterns();
+	songMessage.clear();
+}
+
+
+void CSoundFile::InitializeChannels()
+//-----------------------------------
+{
+	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	{
+		InitChannel(nChn);
+	}
+}
+
+
 #ifdef MODPLUG_TRACKER
 BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 //----------------------------------------------------------------------------
@@ -483,18 +522,14 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 {
 #endif // MODPLUG_TRACKER
 
-	m_nType = MOD_TYPE_NONE;
-	m_SongFlags.reset();
-	m_nChannels = 0;
 	m_nMixChannels = 0;
-	m_nSamples = 0;
-	m_nInstruments = 0;
 	m_nFreqFactor = m_nTempoFactor = 128;
-	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nOldGlbVolSlide = 0;
-	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
+
+	InitializeGlobals();
+
+	// Playback
 	m_nPatternDelay = 0;
 	m_nFrameDelay = 0;
 	m_nNextRow = 0;
@@ -504,27 +539,14 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	m_nNextOrder = 0;
 	m_nNextPatStartRow = 0;
 	m_nSeqOverride = ORDERINDEX_INVALID;
-	m_nRestartPos = 0;
-	m_nMinPeriod = 16;
-	m_nMaxPeriod = 32767;
-	m_nSamplePreAmp = 48;
-	m_nVSTiVolume = 48;
+
 	m_nMaxOrderPosition = 0;
-	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
 	MemsetZero(ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
-	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
-	Order.resize(1);
-	Patterns.ClearPatterns();
-	songMessage.clear();
 
-	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
-	{
-		InitChannel(nChn);
-	}
-	if (lpStream)
+	if(lpStream)
 	{
 		FileReader file(lpStream, dwMemLength);
 

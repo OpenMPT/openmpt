@@ -404,6 +404,8 @@ bool CSoundFile::ReadIMF(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+
 	// Read channel configuration
 	std::bitset<32> ignoreChannels; // bit set for each channel that's completely disabled
 	m_nChannels = 0;

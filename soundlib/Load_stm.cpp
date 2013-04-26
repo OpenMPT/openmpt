@@ -130,11 +130,10 @@ bool CSoundFile::ReadSTM(FileReader &file)
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songname);
 
 	// Read STM header
+	InitializeGlobals();
 	m_nType = MOD_TYPE_STM;
-	m_SongFlags.reset();
 	m_nSamples = 31;
 	m_nChannels = 4;
-	m_nInstruments = 0;
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 0x7FFF;
 	m_nDefaultSpeed = fileHeader.initTempo >> 4;
@@ -146,8 +145,7 @@ bool CSoundFile::ReadSTM(FileReader &file)
 	// Setting up channels
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)
 	{
-		ChnSettings[chn].dwFlags.reset();
-		ChnSettings[chn].nVolume = 64;
+		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = (chn & 1) ? 0x40 : 0xC0;
 	}
 

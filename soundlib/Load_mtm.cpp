@@ -115,6 +115,7 @@ bool CSoundFile::ReadMTM(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
@@ -132,14 +133,13 @@ bool CSoundFile::ReadMTM(FileReader &file)
 	// Setting Channel Pan Position
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
+		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = ((fileHeader.panPos[chn] & 0x0F) << 4) + 8;
-		ChnSettings[chn].nVolume = 64;
 	}
 
 	// Reading pattern order
 	const ORDERINDEX readOrders = fileHeader.lastOrder + 1;
-	Order.ReadAsByte(file, readOrders);
-	file.Skip(128 - readOrders);
+	Order.ReadAsByte(file, 128, readOrders);
 
 	// Reading Patterns
 	const ROWINDEX rowsPerPat = std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);

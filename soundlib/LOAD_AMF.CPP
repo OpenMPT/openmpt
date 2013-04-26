@@ -114,22 +114,20 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+	InitializeChannels();
 	m_nType = MOD_TYPE_AMF0;
 	m_nChannels = 8;
-	m_nInstruments = 0;
-	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nDefaultSpeed = fileHeader.defaultSpeed;
 	m_nDefaultTempo = fileHeader.defaultTempo;
 	m_nSamples = fileHeader.numSamples;
-	m_nRestartPos = 0;
 	if(fileHeader.restartPos < fileHeader.numOrders)
 	{
 		m_nRestartPos = fileHeader.restartPos;
 	}
 	m_szNames[0][0] = '\0';
 
-	Order.ReadAsByte(file, fileHeader.numOrders);
-	file.Skip(256 - fileHeader.numOrders);
+	Order.ReadAsByte(file, 256, fileHeader.numOrders);
 
 	// Read Sample Headers
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -371,6 +369,13 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+	InitializeChannels();
+
+	m_nType = MOD_TYPE_AMF;
+	m_nChannels = fileHeader.numChannels;
+	m_nSamples = fileHeader.numSamples;
+
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.title);
 
 	if(fileHeader.version < 10)
@@ -380,11 +385,6 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 		file.SkipBack(1);
 		SetupMODPanning(true);
 	}
-
-	m_nType = MOD_TYPE_AMF;
-	m_nChannels = fileHeader.numChannels;
-	m_nSamples = fileHeader.numSamples;
-	m_nInstruments = 0;
 
 	// Setup Channel Pan Positions
 	if(fileHeader.version >= 11)

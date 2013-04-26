@@ -263,6 +263,10 @@ bool CSoundFile::ReadXM(FileReader &file)
 		return false;
 	}
 
+	InitializeGlobals();
+	InitializeChannels();
+	ChangeModTypeTo(MOD_TYPE_XM);
+
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 
 	if(!memcmp(fileHeader.trackerName, "FastTracker v 2.00  ", 20))
@@ -275,15 +279,12 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
 
-	m_nType = MOD_TYPE_NONE;	// Ensure that order list items FE and FF are not converted.
-	ChangeModTypeTo(MOD_TYPE_XM);
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
 
 	m_nRestartPos = fileHeader.restartPos;
 	m_nChannels = fileHeader.channels;
 	m_nInstruments = std::min(fileHeader.instruments, uint16(MAX_INSTRUMENTS - 1));
-	m_nSamples = 0;
 	m_nDefaultSpeed = Clamp(fileHeader.speed, uint16(1), uint16(31));
 	m_nDefaultTempo = Clamp(fileHeader.tempo, uint16(32), uint16(512));
 

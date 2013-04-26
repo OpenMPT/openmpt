@@ -93,23 +93,18 @@ bool CSoundFile::Read669(FileReader &file)
 	_669FileHeader fileHeader;
 
 	file.Rewind();
-	if(!file.ReadConvertEndianness(fileHeader))
-	{
-		return false;
-	}
-
-	if(fileHeader.sig != _669FileHeader::magic669 && fileHeader.sig != _669FileHeader::magic669Ext)
-	{
-		return false;
-	}
-
-	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
-	if(fileHeader.samples > 64 || fileHeader.restartPos >= 128
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| (fileHeader.sig != _669FileHeader::magic669 && fileHeader.sig != _669FileHeader::magic669Ext)
+		|| fileHeader.samples > 64
+		|| fileHeader.restartPos >= 128
 		|| fileHeader.patterns > 128)
 	{
 		return false;
 	}
 
+	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
+
+	InitializeGlobals();
 	m_nType = MOD_TYPE_669;
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nMinPeriod = 28 << 2;
@@ -143,9 +138,8 @@ bool CSoundFile::Read669(FileReader &file)
 	// Set up panning
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)
 	{
+		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = (chn & 1) ? 0xD0 : 0x30;
-		ChnSettings[chn].nVolume = 64;
-		ChnSettings[chn].dwFlags.reset();
 	}
 
 	// Reading Patterns
