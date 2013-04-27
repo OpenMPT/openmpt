@@ -405,11 +405,11 @@ public:
 public:
 
 #ifdef MODPLUG_TRACKER
-	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
+	BOOL Create(FileReader filereader, CModDoc *pModDoc);
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
 	CModDoc *GetpModDoc() const { return m_pModDoc; }
 #else
-	BOOL Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength=0);
+	BOOL Create(FileReader filereader, void *pModDoc=nullptr);
 	void *GetpModDoc() const { return nullptr; }
 #endif // MODPLUG_TRACKER
 

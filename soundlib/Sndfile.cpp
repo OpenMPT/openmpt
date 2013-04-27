@@ -509,13 +509,13 @@ void CSoundFile::InitializeChannels()
 
 
 #ifdef MODPLUG_TRACKER
-BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
-//----------------------------------------------------------------------------
+BOOL CSoundFile::Create(FileReader filereader, CModDoc *pModDoc)
+//--------------------------------------------------------------
 {
 	m_pModDoc = pModDoc;
 #else
-BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
-//-------------------------------------------------------------------------
+BOOL CSoundFile::Create(FileReader filereader, void*)
+//---------------------------------------------------
 {
 #endif // MODPLUG_TRACKER
 
@@ -544,9 +544,12 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
 
-	if(lpStream)
+	if(filereader.IsValid())
 	{
-		FileReader file(lpStream, dwMemLength);
+		FileReader file(filereader);
+
+		LPCBYTE lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
+		DWORD dwMemLength = file.GetLength();
 
 #ifndef NO_ARCHIVE_SUPPORT
 		CUnarchiver unarchiver(file, GetSupportedExtensions(true));
