@@ -1634,7 +1634,7 @@ void CMainFrame::InitPreview()
 //----------------------------
 {
 	m_WaveFile.Destroy();
-	m_WaveFile.Create(FileReader(), nullptr);
+	m_WaveFile.Create(FileReader());
 	// Avoid global volume ramping when trying samples in the treeview.
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.SetMixLevels(mixLevels_117RC3);

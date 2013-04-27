@@ -40,8 +40,8 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 }
 
 
-bool CSoundFile::ReadWav(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	WAVReader wavFile(file);
 
@@ -53,6 +53,9 @@ bool CSoundFile::ReadWav(FileReader &file)
 		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();

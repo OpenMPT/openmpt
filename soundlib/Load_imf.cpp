@@ -393,8 +393,8 @@ static void ImportIMFEffect(ModCommand &m)
 	}
 }
 
-bool CSoundFile::ReadIMF(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	IMFFileHeader fileHeader;
 	file.Rewind();
@@ -404,12 +404,11 @@ bool CSoundFile::ReadIMF(FileReader &file)
 		return false;
 	}
 
-	InitializeGlobals();
 
 	// Read channel configuration
 	std::bitset<32> ignoreChannels; // bit set for each channel that's completely disabled
-	m_nChannels = 0;
-	for(CHANNELINDEX chn = 0; chn < 32; chn++)
+	uint8 detectedChannels = 0;
+	for(uint8 chn = 0; chn < 32; chn++)
 	{
 		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = fileHeader.channels[chn].panning * 256 / 255;
@@ -420,11 +419,11 @@ bool CSoundFile::ReadIMF(FileReader &file)
 		switch(fileHeader.channels[chn].status)
 		{
 		case 0: // enabled; don't worry about it
-			m_nChannels = chn + 1;
+			detectedChannels = chn + 1;
 			break;
 		case 1: // mute
 			ChnSettings[chn].dwFlags = CHN_MUTE;
-			m_nChannels = chn + 1;
+			detectedChannels = chn + 1;
 			break;
 		case 2: // disabled
 			ChnSettings[chn].dwFlags = CHN_MUTE;
@@ -435,7 +434,16 @@ bool CSoundFile::ReadIMF(FileReader &file)
 			return false;
 		}
 	}
-	if(!m_nChannels) return false;
+	if(!detectedChannels)
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
+
+	InitializeGlobals();
+	m_nChannels = detectedChannels;
 
 	//From mikmod: work around an Orpheus bug
 	if(fileHeader.channels[0].status == 0)
@@ -474,7 +482,7 @@ bool CSoundFile::ReadIMF(FileReader &file)
 		const uint16 length = file.ReadUint16LE(), numRows = file.ReadUint16LE();
 		FileReader patternChunk = file.GetChunk(length - 4);
 
-		if(Patterns.Insert(pat, numRows))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, numRows))
 		{
 			continue;
 		}
@@ -602,12 +610,15 @@ bool CSoundFile::ReadIMF(FileReader &file)
 			if(sampleHeader.length)
 			{
 				FileReader sampleChunk = file.GetChunk(sampleHeader.length);
-				SampleIO(
-					sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
-					SampleIO::mono,
-					SampleIO::littleEndian,
-					SampleIO::signedPCM)
-					.ReadSample(sample, sampleChunk);
+				if(loadFlags & loadSampleData)
+				{
+					SampleIO(
+						sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
+						SampleIO::mono,
+						SampleIO::littleEndian,
+						SampleIO::signedPCM)
+						.ReadSample(sample, sampleChunk);
+				}
 			}
 		}
 		firstSample += instrumentHeader.smpNum;

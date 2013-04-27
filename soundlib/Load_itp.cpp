@@ -35,8 +35,8 @@ bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
 }
 
 
-bool CSoundFile::ReadITProject(FileReader &file)
-//----------------------------------------------
+bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------
 {
 #ifndef MODPLUG_TRACKER
 	return false;
@@ -55,6 +55,9 @@ bool CSoundFile::ReadITProject(FileReader &file)
 		|| !ReadITPString(m_szNames[0], file))				// Song name
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -147,7 +150,7 @@ bool CSoundFile::ReadITProject(FileReader &file)
 		FileReader patternChunk = file.GetChunk(numRows * size * GetNumChannels());
 
 		// Allocate pattern
-		if(numRows == 0 || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
+		if(!(loadFlags & loadPatternData) || numRows == 0 || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
 		{
 			pattNames.Skip(patNameLen);
 			continue;

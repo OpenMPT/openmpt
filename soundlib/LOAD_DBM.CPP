@@ -196,8 +196,8 @@ void ConvertDBMEffect(uint8 &command, uint8 &param)
 }
 
 
-bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
-//---------------------------------------------------------------------
+bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------
 {
 	const DBMFileHeader *pfh = (DBMFileHeader *)lpStream;
 	DWORD dwMemPos;
@@ -209,7 +209,10 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (pfh->info_id != DBM_ID_INFO) || (pfh->info_len != DBM_INFOLEN)) return false;
 	dwMemPos = sizeof(DBMFileHeader);
 	nOrders = BigEndianW(pfh->orders);
-	if (dwMemPos + 2 * nOrders + 8*3 >= dwMemLength) return false;
+	if (dwMemPos + 2 * nOrders + 8*3 >= dwMemLength)
+		return false;
+	else if(loadFlags == onlyVerifyHeader)
+		return true;
 
 	InitializeGlobals();
 	InitializeChannels();
@@ -340,7 +343,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		} else
 		// Packed Pattern Data
-		if (chunk_id == DBM_ID_PATT)
+		if (chunk_id == DBM_ID_PATT && (loadFlags & loadPatternData))
 		{
 			if (nPatterns > MAX_PATTERNS) nPatterns = MAX_PATTERNS;
 			for(PATTERNINDEX iPat = 0; iPat < nPatterns; iPat++)
@@ -456,7 +459,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		} else
 		// Reading Sample Data
-		if (chunk_id == DBM_ID_SMPL)
+		if (chunk_id == DBM_ID_SMPL && (loadFlags & loadSampleData))
 		{
 			if (nSamples >= MAX_SAMPLES) nSamples = MAX_SAMPLES-1;
 			m_nSamples = nSamples;

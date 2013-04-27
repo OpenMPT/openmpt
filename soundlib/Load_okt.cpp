@@ -279,8 +279,8 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
 }
 
 
-bool CSoundFile::ReadOKT(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	if(!file.ReadMagic("OKTASONG"))
@@ -331,6 +331,11 @@ bool CSoundFile::ReadOKT(FileReader &file)
 				}
 				ChnSettings[m_nChannels].Reset();
 				ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+			}
+
+			if(loadFlags == onlyVerifyHeader)
+			{
+				return true;
 			}
 			break;
 
@@ -404,19 +409,22 @@ bool CSoundFile::ReadOKT(FileReader &file)
 	}
 
 	// Read patterns
-	for(PATTERNINDEX nPat = 0; nPat < patternChunks.size(); nPat++)
+	if(loadFlags & loadPatternData)
 	{
-		if(patternChunks[nPat].GetLength() > 0)
-			ReadOKTPattern(patternChunks[nPat], nPat, *this);
-		else
-			Patterns.Insert(nPat, 64);	// invent empty pattern
+		for(PATTERNINDEX nPat = 0; nPat < patternChunks.size(); nPat++)
+		{
+			if(patternChunks[nPat].GetLength() > 0)
+				ReadOKTPattern(patternChunks[nPat], nPat, *this);
+			else
+				Patterns.Insert(nPat, 64);	// invent empty pattern
+		}
 	}
 
 	// Read samples
 	size_t nFileSmp = 0;
 	for(SAMPLEINDEX nSmp = 1; nSmp < m_nSamples; nSmp++)
 	{
-		if(nFileSmp >= sampleChunks.size())
+		if(nFileSmp >= sampleChunks.size() || !(loadFlags & loadSampleData))
 			break;
 
 		ModSample &mptSample = Samples[nSmp];

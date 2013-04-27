@@ -473,8 +473,8 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 #define MIDIGLOBAL_XGSYSTEMON		0x0200
 
 
-bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------
 {
 	const MIDIFILEHEADER *pmfh = (const MIDIFILEHEADER *)lpStream;
 	const MIDITRACKHEADER *pmth;
@@ -529,6 +529,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
 	tracks = BigEndianW(pmfh->wTrks);
 	if ((pmth->id != 0x6B72544D) || (!tracks)) return false;
+	else if(loadFlags == onlyVerifyHeader) return true;
 	miditracks.resize(tracks);
 
 	// Reading File...

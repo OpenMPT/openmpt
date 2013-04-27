@@ -499,8 +499,8 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 }
 
 
-bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
-//---------------------------------------------------------------------
+bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------
 {
 	const MEDMODULEHEADER *pmmh;
 	const MMD0SONGHEADER *pmsh;
@@ -520,6 +520,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 	if ((dwSong >= dwMemLength) || (dwSong + sizeof(MMD0SONGHEADER) >= dwMemLength)) return false;
 	version = (signed char)((pmmh->id >> 24) & 0xFF);
 	if ((version < '0') || (version > '3')) return false;
+	else if(loadFlags == onlyVerifyHeader) return true;
 #ifdef MED_LOG
 	Log("\nLoading MMD%c module (flags=0x%02X)...\n", version, BigEndian(pmmh->mmdflags));
 	Log("  modlen   = %d\n", BigEndian(pmmh->modlen));
@@ -544,6 +545,9 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 
 	InitializeGlobals();
 	InitializeChannels();
+	// Setup channel pan positions and volume
+	SetupMODPanning(true);
+
 	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;
 	dwBlockArr = BigEndian(pmmh->blockarr);
@@ -652,7 +656,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 		sample.RelativeTone = pmsh->sample[iSHdr].strans;
 		sample.nPan = 128;
 		if (sample.nLoopEnd <= 2) sample.nLoopEnd = 0;
-		if (sample.nLoopEnd) sample.uFlags |= CHN_LOOP;
+		if (sample.nLoopEnd) sample.uFlags.set(CHN_LOOP);
 	}
 	// Common Flags
 	m_SongFlags.set(SONG_FASTVOLSLIDES, !(pmsh->flags & 0x20));
@@ -830,10 +834,17 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		}
 		Samples[iSmp + 1].nLength = len;
-		FileReader chunk(psdata, dwMemLength - dwPos - 6);
-		sampleIO.ReadSample(Samples[iSmp + 1], chunk);
+		if(loadFlags & loadSampleData)
+		{
+			FileReader chunk(psdata, dwMemLength - dwPos - 6);
+			sampleIO.ReadSample(Samples[iSmp + 1], chunk);
+		}
 	}
 	// Reading patterns (blocks)
+	if(!(loadFlags & loadPatternData))
+	{
+		return true;
+	}
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
 	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return true;
 	pdwTable = (LPDWORD)(lpStream + dwBlockArr);
@@ -942,8 +953,6 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
 			}
 		}
 	}
-	// Setup channel pan positions and volume
-	SetupMODPanning(true);
 	return true;
 }
 

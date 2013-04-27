@@ -132,8 +132,8 @@ STATIC_ASSERT(sizeof(FARSampleHeader) == 48);
 #endif
 
 
-bool CSoundFile::ReadFAR(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -144,6 +144,9 @@ bool CSoundFile::ReadFAR(FileReader &file)
 		|| file.GetLength() < static_cast<size_t>(fileHeader.headerLength))
 	{
 		return false;
+	} else
+	{
+		return true;
 	}
 
 	// Globals
@@ -215,7 +218,7 @@ bool CSoundFile::ReadFAR(FileReader &file)
 
 		// Calculate pattern length in rows (every event is 4 bytes, and we have 16 channels)
 		ROWINDEX numRows = (orderHeader.patternSize[pat] - 2) / (16 * 4);
-		if(!numRows || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
+		if(!(loadFlags & loadPatternData) || !numRows || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
 		{
 			continue;
 		}
@@ -284,6 +287,11 @@ bool CSoundFile::ReadFAR(FileReader &file)
 		Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(breakRow).Retry(EffectWriter::rmTryNextRow));
 	}
 	
+	if(!(loadFlags & loadSampleData))
+	{
+		return true;
+	}
+
 	// Read samples
 	uint8 sampleMap[8];	// Sample usage bitset
 	file.ReadArray(sampleMap);

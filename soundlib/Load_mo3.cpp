@@ -16,21 +16,24 @@
 #endif // MODPLUG_TRACKER
 
 
-bool CSoundFile::ReadMO3(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	const void *stream = file.GetRawData();
 	int length = file.GetLength();
 
 	// No valid MO3 file (magic bytes: "MO3")
-	if(file.GetLength() < 8 || !file.ReadMagic("MO3"))
+	if(!file.CanRead(8) || !file.ReadMagic("MO3"))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 #ifdef NO_MO3
-	// As of April 2012, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
+	// As of April 2013, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
 	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
 	// (avoid log entry with .MOD files that have a song name starting with "MO3".
 	if(file.ReadUint8() > 31)
@@ -79,12 +82,12 @@ bool CSoundFile::ReadMO3(FileReader &file)
 				{
 					FileReader unpackedFile(stream, length);
 
-					result = ReadXM(unpackedFile)
-						|| ReadIT(unpackedFile)
-						|| ReadS3M(unpackedFile)
-						|| ReadMTM(unpackedFile)
-						|| ReadMod(unpackedFile)
-						|| ReadM15(unpackedFile);
+					result = ReadXM(unpackedFile, loadFlags)
+						|| ReadIT(unpackedFile, loadFlags)
+						|| ReadS3M(unpackedFile, loadFlags)
+						|| ReadMTM(unpackedFile, loadFlags)
+						|| ReadMod(unpackedFile, loadFlags)
+						|| ReadM15(unpackedFile, loadFlags);
 				}
 
 				UNMO3_Free(stream);

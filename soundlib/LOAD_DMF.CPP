@@ -954,8 +954,8 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 }
 
 
-bool CSoundFile::ReadDMF(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	DMFFileHeader fileHeader;
 	file.Rewind();
@@ -964,6 +964,9 @@ bool CSoundFile::ReadDMF(FileReader &file)
 		|| !fileHeader.version || fileHeader.version > 10)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -1004,7 +1007,7 @@ bool CSoundFile::ReadDMF(FileReader &file)
 
 	// Read patterns
 	chunk = chunks.GetChunk(DMFChunk::idPATT);
-	if(chunk.IsValid())
+	if(chunk.IsValid() && (loadFlags & loadPatternData))
 	{
 		DMFPatterns patHeader;
 		chunk.ReadConvertEndianness(patHeader);
@@ -1076,7 +1079,7 @@ bool CSoundFile::ReadDMF(FileReader &file)
 
 		// Now read the sample data from the data chunk
 		FileReader sampleData = sampleDataChunk.GetChunk(sampleDataChunk.ReadUint32LE());
-		if(sampleData.IsValid())
+		if(sampleData.IsValid() && (loadFlags & loadSampleData))
 		{
 			SampleIO(
 				sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,

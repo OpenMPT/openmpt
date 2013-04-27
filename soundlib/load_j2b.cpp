@@ -724,8 +724,8 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 }
 
 
-bool CSoundFile::ReadAM(FileReader &file)
-//---------------------------------------
+bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------
 {
 	file.Rewind();
 	AMFFRiffChunk fileHeader;
@@ -763,6 +763,9 @@ bool CSoundFile::ReadAM(FileReader &file)
 		|| !chunk.CanRead(mainChunk.channels))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -811,13 +814,16 @@ bool CSoundFile::ReadAM(FileReader &file)
 	}
 
 	// "PATT" - Pattern data for one pattern
-	vector<FileReader> pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
-	for(vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+	if(loadFlags & loadPatternData)
 	{
-		FileReader chunk(*patternIter);
-		PATTERNINDEX pat = chunk.ReadUint8();
-		size_t patternSize = chunk.ReadUint32LE();
-		ConvertAMPattern(chunk.GetChunk(patternSize), pat, isAM, *this);
+		vector<FileReader> pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
+		for(vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+		{
+			FileReader chunk(*patternIter);
+			PATTERNINDEX pat = chunk.ReadUint8();
+			size_t patternSize = chunk.ReadUint32LE();
+			ConvertAMPattern(chunk.GetChunk(patternSize), pat, isAM, *this);
+		}
 	}
 
 	if(!isAM)
@@ -948,8 +954,11 @@ bool CSoundFile::ReadAM(FileReader &file)
 
 				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
 
-				sampleFileChunk.Seek(sampleHeader.headSize + 4);
-				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], sampleFileChunk);
+				if(loadFlags & loadSampleData)
+				{
+					sampleFileChunk.Seek(sampleHeader.headSize + 4);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], sampleFileChunk);
+				}
 			}
 		
 		}
@@ -958,8 +967,8 @@ bool CSoundFile::ReadAM(FileReader &file)
 	return true;
 }
 
-bool CSoundFile::ReadJ2B(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	J2BFileHeader fileHeader;
@@ -978,6 +987,9 @@ bool CSoundFile::ReadJ2B(FileReader &file)
 		)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	// Header is valid, now unpack the RIFF AM file using inflate
@@ -999,7 +1011,7 @@ bool CSoundFile::ReadJ2B(FileReader &file)
 	{
 		// Success, now load the RIFF AM(FF) module.
 		FileReader amFile(reinterpret_cast<const char *>(amFile), destSize);
-		result = ReadAM(amFile);
+		result = ReadAM(amFile, loadFlags);
 	}
 	delete[] amFile;
 

@@ -266,8 +266,8 @@ uint8 ConvertPSMPorta(uint8 param, bool newFormat)
 }
 
 
-bool CSoundFile::ReadPSM(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	PSMFileHeader fileHeader;
@@ -284,6 +284,9 @@ bool CSoundFile::ReadPSM(FileReader &file)
 		|| fileHeader.fileInfoID != PSMFileHeader::magicFILE) // "FILE"
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	// Yep, this seems to be a valid file.
@@ -589,46 +592,49 @@ bool CSoundFile::ReadPSM(FileReader &file)
 		subsongs.push_back(subsong);
 	}
 
-	// // DSMP - Samples
-	vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
-	for(vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
+	// DSMP - Samples
+	if(loadFlags & loadSampleData)
 	{
-		FileReader chunk(*sampleIter);
-		if(!newFormat)
+		vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
+		for(vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
 		{
-			// Original header
-			PSMOldSampleHeader sampleHeader;
-			if(!chunk.ReadConvertEndianness(sampleHeader))
+			FileReader chunk(*sampleIter);
+			if(!newFormat)
 			{
-				continue;
-			}
+				// Original header
+				PSMOldSampleHeader sampleHeader;
+				if(!chunk.ReadConvertEndianness(sampleHeader))
+				{
+					continue;
+				}
 
-			SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
-			if(smp < MAX_SAMPLES)
+				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+				if(smp < MAX_SAMPLES)
+				{
+					m_nSamples = MAX(m_nSamples, smp);
+					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+
+					sampleHeader.ConvertToMPT(Samples[smp]);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+				}
+			} else
 			{
-				m_nSamples = MAX(m_nSamples, smp);
-				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+				// Sinaria uses a slightly different sample header
+				PSMNewSampleHeader sampleHeader;
+				if(!chunk.ReadConvertEndianness(sampleHeader))
+				{
+					continue;
+				}
 
-				sampleHeader.ConvertToMPT(Samples[smp]);
-				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
-			}
-		} else
-		{
-			// Sinaria uses a slightly different sample header
-			PSMNewSampleHeader sampleHeader;
-			if(!chunk.ReadConvertEndianness(sampleHeader))
-			{
-				continue;
-			}
+				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+				if(smp < MAX_SAMPLES)
+				{
+					m_nSamples = MAX(m_nSamples, smp);
+					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
-			SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
-			if(smp < MAX_SAMPLES)
-			{
-				m_nSamples = MAX(m_nSamples, smp);
-				StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
-
-				sampleHeader.ConvertToMPT(Samples[smp]);
-				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+					sampleHeader.ConvertToMPT(Samples[smp]);
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+				}
 			}
 		}
 	}
@@ -643,6 +649,11 @@ bool CSoundFile::ReadPSM(FileReader &file)
 		ChnSettings[chn].nVolume = subsongs[0].channelVolume[chn];
 		ChnSettings[chn].nPan = subsongs[0].channelPanning[chn];
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
+	}
+
+	if(!(loadFlags & loadPatternData))
+	{
+		return true;
 	}
 
 	// Now that we know the number of channels, we can go through all the patterns.
@@ -1122,18 +1133,15 @@ STATIC_ASSERT(sizeof(PSM16PatternHeader) == 4);
 #endif
 
 
-bool CSoundFile::ReadPSM16(FileReader &file)
-//------------------------------------------
+bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
+//---------------------------------------------------------------------
 {
 	file.Rewind();
-	PSM16FileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader))
-	{
-		return false;
-	}
 
-	// Check header
-	if(fileHeader.formatID != PSM16FileHeader::magicPSM_ // "PSMþ"
+	// Is it a valid PSM16 file?
+	PSM16FileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| fileHeader.formatID != PSM16FileHeader::magicPSM_ // "PSMþ"
 		|| fileHeader.lineEnd != 0x1A
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
 		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
@@ -1141,6 +1149,9 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 		|| std::max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	// Seems to be valid!
@@ -1200,6 +1211,10 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 	}
 
 	// Read patterns
+	if(!(loadFlags & loadPatternData))
+	{
+		return true;
+	}
 	if(fileHeader.patOffset > 4 && file.Seek(fileHeader.patOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPPAT)
 	{
 		for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)

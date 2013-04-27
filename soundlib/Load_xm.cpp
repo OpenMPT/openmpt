@@ -247,8 +247,8 @@ FLAGSET(TrackerVersions)
 };
 
 
-bool CSoundFile::ReadXM(FileReader &file)
-//---------------------------------------
+bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -260,6 +260,9 @@ bool CSoundFile::ReadXM(FileReader &file)
 		|| !file.CanRead(fileHeader.orders))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();

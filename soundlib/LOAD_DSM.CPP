@@ -1,7 +1,7 @@
 /*
  * Load_dsm.cpp
  * ------------
- * Purpose: DSIK Internal Format (DSM) module loader
+ * Purpose: Digisound Interface Kit (DSIK) Internal Format (DSM) module loader
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -100,8 +100,8 @@ STATIC_ASSERT(sizeof(DSMPATT) == 10);
 #endif
 
 
-bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------------
+bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------------------------------------
 {
 	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
 	DSMSONG *psong;
@@ -112,7 +112,13 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength < 1024) || (pfh->id_RIFF != DSMID_RIFF)
 	 || (pfh->riff_len + 8 > dwMemLength) || (pfh->riff_len < 1024)
 	 || (pfh->id_DSMF != DSMID_DSMF) || (pfh->id_SONG != DSMID_SONG)
-	 || (pfh->song_len > dwMemLength)) return false;
+	 || (pfh->song_len > dwMemLength))
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
 	psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADER));
 	dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
 
@@ -149,7 +155,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		DSMPATT *ppatt = (DSMPATT *)(lpStream + dwMemPos);
 		DSMSAMPLE *pSmp = (DSMSAMPLE *)(lpStream+dwMemPos);
 		// Reading Patterns
-		if (ppatt->id_PATT == DSMID_PATT)
+		if (ppatt->id_PATT == DSMID_PATT && (loadFlags & loadPatternData))
 		{
 			dwMemPos += 8;
 			if (dwMemPos + ppatt->patt_len >= dwMemLength) break;
@@ -249,13 +255,16 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			sample.nVolume = (WORD)(pSmp->volume << 2);
 			if (sample.nVolume > 256) sample.nVolume = 256;
 
-			FileReader chunk(lpStream + dwPos, dwMemLength - dwPos);
-			SampleIO(
-				SampleIO::_8bit,
-				SampleIO::mono,
-				SampleIO::littleEndian,
-				(pSmp->flags & 2) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
-				.ReadSample(sample, chunk);
+			if(loadFlags & loadSampleData)
+			{
+				FileReader chunk(lpStream + dwPos, dwMemLength - dwPos);
+				SampleIO(
+					SampleIO::_8bit,
+					SampleIO::mono,
+					SampleIO::littleEndian,
+					(pSmp->flags & 2) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
+					.ReadSample(sample, chunk);
+			}
 
 			nSmp++;
 		} else

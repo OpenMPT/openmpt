@@ -216,8 +216,8 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 }
 
 
-bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
-//-----------------------------------------------------------
+bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------------------------
 {
 	MT2FILEHEADER *pfh = (MT2FILEHEADER *)lpStream;
 	DWORD dwMemPos, dwDrumDataPos, dwExtraDataPos;
@@ -229,7 +229,13 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength < sizeof(MT2FILEHEADER))
 	 || (pfh->dwMT20 != 0x3032544D)
 	 || (pfh->wVersion < 0x0200) || (pfh->wVersion >= 0x0300)
-	 || (pfh->wChannels < 1) || (pfh->wChannels > MAX_BASECHANNELS)) return false;
+	 || (pfh->wChannels < 1) || (pfh->wChannels > MAX_BASECHANNELS))
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
 	pdd = NULL;
 
 	InitializeGlobals();
@@ -314,7 +320,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += 6;
 		if (dwMemPos + wDataLen > dwMemLength) break;
 		UINT nLines = pmp->wLines;
-		if ((iPat < MAX_PATTERNS) && (nLines > 0) && (nLines <= MAX_PATTERN_ROWS))
+		if ((iPat < MAX_PATTERNS) && (nLines > 0) && (nLines <= MAX_PATTERN_ROWS) && (loadFlags & loadPatternData))
 		{
 	#ifdef MT2DEBUG
 			Log("Pattern #%d @%04X: %d lines, %d bytes\n", iPat, dwMemPos-6, nLines, pmp->wDataLen);
@@ -614,6 +620,10 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 #ifdef MT2DEBUG
 	Log("Loading sample data at offset 0x%08X\n", dwMemPos);
 #endif
+	if(!(loadFlags & loadSampleData))
+	{
+		return true;
+	}
 	for (UINT iData=0; iData<256; iData++) if ((iData < m_nSamples) && (SampleMap[iData]))
 	{
 		MT2SAMPLE *pms = SampleMap[iData];

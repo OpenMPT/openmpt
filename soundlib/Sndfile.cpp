@@ -509,13 +509,13 @@ void CSoundFile::InitializeChannels()
 
 
 #ifdef MODPLUG_TRACKER
-BOOL CSoundFile::Create(FileReader filereader, CModDoc *pModDoc)
-//--------------------------------------------------------------
+BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pModDoc)
+//-----------------------------------------------------------------------------------
 {
 	m_pModDoc = pModDoc;
 #else
-BOOL CSoundFile::Create(FileReader filereader)
-//--------------------------------------------
+BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
+//-----------------------------------------------------------------
 {
 #endif // MODPLUG_TRACKER
 
@@ -544,10 +544,8 @@ BOOL CSoundFile::Create(FileReader filereader)
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
 
-	if(filereader.IsValid())
+	if(file.IsValid())
 	{
-		FileReader file(filereader);
-
 		LPCBYTE lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
 		DWORD dwMemLength = file.GetLength();
 
@@ -567,46 +565,45 @@ BOOL CSoundFile::Create(FileReader filereader)
 			file = FileReader(lpStream, dwMemLength);
 		}
 
-		if(!ReadXM(file)
+		if(!ReadXM(file, loadFlags)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		 && !ReadITProject(file)
+		 && !ReadITProject(file, loadFlags)
 // -! NEW_FEATURE#0023
-		 && !ReadIT(file)
-		 /*&& !ReadMPT(lpStream, dwMemLength)*/
-		 && !ReadS3M(file)
-		 && !ReadWav(file)
-		 && !ReadSTM(file)
-		 && !ReadMed(lpStream, dwMemLength)
-		 && !ReadMTM(file)
-		 && !ReadMDL(lpStream, dwMemLength)
-		 && !ReadDBM(lpStream, dwMemLength)
-		 && !Read669(file)
-		 && !ReadFAR(file)
-		 && !ReadAMS(file)
-		 && !ReadAMS2(file)
-		 && !ReadOKT(file)
-		 && !ReadPTM(lpStream, dwMemLength)
-		 && !ReadUlt(file)
-		 && !ReadDMF(file)
-		 && !ReadDSM(lpStream, dwMemLength)
-		 && !ReadUMX(file)
-		 && !ReadAMF_Asylum(file)
-		 && !ReadAMF_DSMI(file)
-		 && !ReadPSM(file)
-		 && !ReadPSM16(file)
-		 && !ReadMT2(lpStream, dwMemLength)
+		 && !ReadIT(file, loadFlags)
+		 && !ReadS3M(file, loadFlags)
+		 && !ReadWav(file, loadFlags)
+		 && !ReadSTM(file, loadFlags)
+		 && !ReadMed(lpStream, dwMemLength, loadFlags)
+		 && !ReadMTM(file, loadFlags)
+		 && !ReadMDL(lpStream, dwMemLength, loadFlags)
+		 && !ReadDBM(lpStream, dwMemLength, loadFlags)
+		 && !Read669(file, loadFlags)
+		 && !ReadFAR(file, loadFlags)
+		 && !ReadAMS(file, loadFlags)
+		 && !ReadAMS2(file, loadFlags)
+		 && !ReadOKT(file, loadFlags)
+		 && !ReadPTM(lpStream, dwMemLength, loadFlags)
+		 && !ReadUlt(file, loadFlags)
+		 && !ReadDMF(file, loadFlags)
+		 && !ReadDSM(lpStream, dwMemLength, loadFlags)
+		 && !ReadUMX(file, loadFlags)
+		 && !ReadAMF_Asylum(file, loadFlags)
+		 && !ReadAMF_DSMI(file, loadFlags)
+		 && !ReadPSM(file, loadFlags)
+		 && !ReadPSM16(file, loadFlags)
+		 && !ReadMT2(lpStream, dwMemLength, loadFlags)
 #ifdef MODPLUG_TRACKER
-		 && !ReadMID(lpStream, dwMemLength)
+		 && !ReadMID(lpStream, dwMemLength, loadFlags)
 #endif // MODPLUG_TRACKER
-		 && !ReadGDM(file)
-		 && !ReadIMF(file)
-		 && !ReadDIGI(file)
-		 && !ReadAM(file)
-		 && !ReadJ2B(file)
-		 && !ReadMO3(file)
-		 && !ReadMod(file)
-		 && !ReadM15(file))
+		 && !ReadGDM(file, loadFlags)
+		 && !ReadIMF(file, loadFlags)
+		 && !ReadDIGI(file, loadFlags)
+		 && !ReadAM(file, loadFlags)
+		 && !ReadJ2B(file, loadFlags)
+		 && !ReadMO3(file, loadFlags)
+		 && !ReadMod(file, loadFlags)
+		 && !ReadM15(file, loadFlags))
 		{
 			m_nType = MOD_TYPE_NONE;
 		}

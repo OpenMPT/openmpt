@@ -474,8 +474,8 @@ void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
 }
 
 
-bool CSoundFile::ReadMod(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	char magic[4];
 	if(!file.Seek(1080) || !file.ReadArray(magic))
@@ -519,6 +519,10 @@ bool CSoundFile::ReadMod(FileReader &file)
 	} else
 	{
 		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	LimitMax(m_nChannels, MAX_BASECHANNELS);
@@ -625,17 +629,19 @@ bool CSoundFile::ReadMod(FileReader &file)
 				if((pat % 2u) == 0)
 				{
 					// Only create "even" patterns for FLT8 files
-					if(Patterns.Insert(pat / 2, 64))
+					if(!(loadFlags & loadPatternData) || Patterns.Insert(pat / 2, 64))
 					{
-						break;
+						file.Skip(readChannels * 64 * 4);
+						continue;
 					}
 				}
 				actualPattern /= 2;
 			} else
 			{
-				if(Patterns.Insert(pat, 64))
+				if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
 				{
-					break;
+					file.Skip(readChannels * 64 * 4);
+					continue;
 				}
 			}
 
@@ -689,9 +695,12 @@ bool CSoundFile::ReadMod(FileReader &file)
 	}
 
 	// Reading samples
-	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+	if(loadFlags & loadSampleData)
 	{
-		MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+		{
+			MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
+		}
 	}
 
 	// Fix VBlank MODs. Arbitrary threshold: 10 minutes.
@@ -741,8 +750,8 @@ static bool IsValidName(const char *s, size_t length, char minChar)
 }
 
 
-bool CSoundFile::ReadM15(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -840,6 +849,11 @@ bool CSoundFile::ReadM15(FileReader &file)
 		return false;
 	}
 
+	if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
+
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
 	m_nType = MOD_TYPE_MOD;
 	m_nChannels = 4;
@@ -934,9 +948,10 @@ bool CSoundFile::ReadM15(FileReader &file)
 	// Reading patterns
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		if(Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
 		{
-			break;
+			file.Skip(64 * 4 * 4);
+			continue;
 		}
 
 		for(ROWINDEX row = 0; row < 64; row++)
@@ -1016,15 +1031,18 @@ bool CSoundFile::ReadM15(FileReader &file)
 	}
 
 	// Reading samples
-	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
+	if(loadFlags & loadSampleData)
 	{
-		// Looped samples in (Ultimate) Soundtracker seem to ignore all sample data before the actual loop start.
-		// This avoids the clicks in the first sample of pretend.mod by Karsten Obarski.
-		file.Skip(Samples[smp].nLoopStart);
-		Samples[smp].nLength -= Samples[smp].nLoopStart;
-		Samples[smp].nLoopEnd -= Samples[smp].nLoopStart;
-		Samples[smp].nLoopStart = 0;
-		MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
+		for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
+		{
+			// Looped samples in (Ultimate) Soundtracker seem to ignore all sample data before the actual loop start.
+			// This avoids the clicks in the first sample of pretend.mod by Karsten Obarski.
+			file.Skip(Samples[smp].nLoopStart);
+			Samples[smp].nLength -= Samples[smp].nLoopStart;
+			Samples[smp].nLoopEnd -= Samples[smp].nLoopStart;
+			Samples[smp].nLoopStart = 0;
+			MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
+		}
 	}
 
 	return true;
