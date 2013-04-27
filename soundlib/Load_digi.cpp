@@ -171,7 +171,6 @@ bool CSoundFile::ReadDIGI(FileReader &file)
 		} else
 		{
 			// ...but uncompressed patterns are stored in column-major order. WTF!
-			ASSERT(false);
 			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
 				for(ROWINDEX row = 0; row < 64; row++)

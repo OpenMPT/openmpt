@@ -195,6 +195,7 @@ struct ALIGN(32) ModChannelSettings
 
 	void Reset()
 	{
+		dwFlags.reset();
 		nPan = 128;
 		nVolume = 64;
 		nMixPlugin = 0;

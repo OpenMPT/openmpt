@@ -1238,12 +1238,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 {
 	if(nChn >= MAX_BASECHANNELS) return true;
 
-	ChnSettings[nChn].nPan = 128;
-	ChnSettings[nChn].nVolume = 64;
-	ChnSettings[nChn].dwFlags.reset();
-	ChnSettings[nChn].nMixPlugin = 0;
-	strcpy(ChnSettings[nChn].szName, "");
-
+	ChnSettings[nChn].Reset();
 	Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
 
 #ifdef MODPLUG_TRACKER

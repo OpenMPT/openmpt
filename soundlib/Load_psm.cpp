@@ -1171,8 +1171,7 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 		{
 			ChnSettings[i].Reset();
 			ChnSettings[i].nPan = ((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
-			ChnSettings[i].nVolume = 64;
-			ChnSettings[i].dwFlags.reset(); // (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
+			// ChnSettings[i].dwFlags = (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}
 	}
 
