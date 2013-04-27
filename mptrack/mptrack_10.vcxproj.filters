@@ -442,6 +442,75 @@
     <ClCompile Include="..\soundlib\Load_digi.cpp">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\unarchiver\unarchiver.cpp">
+      <Filter>Source Files\unarchiver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\ungzip.cpp">
+      <Filter>Source Files\unarchiver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha.cpp">
+      <Filter>Source Files\unarchiver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar.cpp">
+      <Filter>Source Files\unarchiver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unzip.cpp">
+      <Filter>Source Files\unarchiver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\DHUF.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\EXTRACT.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\Header.cpp">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\HUF.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\LARC.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\LHEXT.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\MAKETBL.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\SHUF.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unlha\SLIDE.CPP">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\BLOCK.CPP">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\COMPR.CPP">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\CRCCRYPT.CPP">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\Extract.cpp">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\Global.cpp">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\Rdwrfn.cpp">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\Smallfn.cpp">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\Unpack.cpp">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\unarchiver\unrar\UNPOLD.CPP">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -819,6 +888,30 @@
     <ClInclude Include="..\common\BuildSettings.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\unarchiver\unarchiver.h">
+      <Filter>Header Files\unarchiver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\ungzip.h">
+      <Filter>Header Files\unarchiver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\unlha.h">
+      <Filter>Header Files\unarchiver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\unrar.h">
+      <Filter>Header Files\unarchiver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\unzip.h">
+      <Filter>Header Files\unarchiver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\unlha\LHARC.H">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\unlha\SLIDEHUF.H">
+      <Filter>Source Files\unarchiver\unlha</Filter>
+    </ClInclude>
+    <ClInclude Include="..\unarchiver\unrar\CONST.H">
+      <Filter>Source Files\unarchiver\unrar</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -966,6 +1059,18 @@
     </Filter>
     <Filter Include="Header Files\mptrack\Dialogs">
       <UniqueIdentifier>{7526c521-5a42-4ad4-9d39-76f5871e5771}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\unarchiver">
+      <UniqueIdentifier>{4d964e85-7434-4182-9392-bdfa71c6d1cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\unarchiver">
+      <UniqueIdentifier>{2e5a8242-6eec-48cd-93b3-5880bee8b740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\unarchiver\unrar">
+      <UniqueIdentifier>{ffd114ee-74f6-4d3e-87af-44e29e79b71f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\unarchiver\unlha">
+      <UniqueIdentifier>{b35a6890-84c2-43ed-8e0f-b28d5afcbb6a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

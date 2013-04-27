@@ -1,41 +1,5 @@
-#define WINVER	0x0401
-#define WIN32_LEAN_AND_MEAN
 
-#define NOGDICAPMASKS
-#define NOVIRTUALKEYCODES
-#define NOWINMESSAGES
-#define NOWINSTYLES
-#define NOSYSMETRICS
-#define NOMENUS
-#define NOICONS
-#define NOKEYSTATES
-#define NOSYSCOMMANDS
-#define NORASTEROPS
-#define OEMRESOURCE
-#define NOATOM
-#define NOCLIPBOARD
-#define NOCTLMGR
-#define NODRAWTEXT
-#define NOGDI
-#define NOKERNEL
-#define NOUSER
-#define NONLS
-#define NOMETAFILE
-#define NOMINMAX
-#define NOMSG
-#define NOOPENFILE
-#define NOSCROLL
-#define NOSERVICE
-#define NOSOUND
-#define NOTEXTMETRIC
-#define NOWH
-#define NOWINOFFSETS
-#define NOCOMM
-#define NOKANJI
-#define NOHELP
-#define NOPROFILER
-#define NODEFERWINDOWPOS
-#define NOMCX
+#include "stdafx.h"
 
 #include "windows.h"
 #include "windowsx.h"
@@ -43,8 +7,13 @@
 
 #ifdef _DEBUG
 #define LHADEBUG
+#undef Log
 extern void Log(const char *, ...);
 #endif
+
+#undef UCHAR_MAX
+#undef USHRT_MAX
+#undef SHRT_MIN
 
 #include "unlha/lharc.h"
 #include "unlha/slidehuf.h"

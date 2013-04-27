@@ -7,6 +7,8 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+#include "stdafx.h"
+
 #include <Windows.h>
 
 #include "unarchiver.h"
