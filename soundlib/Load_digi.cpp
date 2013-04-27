@@ -52,6 +52,44 @@ STATIC_ASSERT(sizeof(DIGIFileHeader) == 610);
 #endif
 
 
+static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m, CSoundFile &sndFile)
+//------------------------------------------------------------------------------------
+{
+	sndFile.ReadMODPatternEntry(file, m);
+	sndFile.ConvertModCommand(m);
+	if(m.command == CMD_MODCMDEX)
+	{
+		switch(m.param & 0xF0)
+		{
+		case 0x30:
+			// E30 / E31: Play sample backwards (with some weird parameters that we won't support for now)
+			if(m.param <= 0x31)
+			{
+				m.command = CMD_S3MCMDEX;
+				m.param = 0x9F;
+			}
+			break;
+		case 0x40:
+			// E40: Stop playing sample
+			if(m.param == 0x40)
+			{
+				m.note = NOTE_NOTECUT;
+				m.command = CMD_NONE;
+			}
+			break;
+		case 0x80:
+			// E8x: High sample offset
+			m.command = CMD_S3MCMDEX;
+			m.param = 0xA0 | (m.param & 0x0F);
+		}
+	} else if(m.command == CMD_PANNING8)
+	{
+		// 8xx "Robot" effect (not supported)
+		m.command = CMD_NONE;
+	}
+}
+
+
 bool CSoundFile::ReadDIGI(FileReader &file)
 //-----------------------------------------
 {
@@ -110,61 +148,35 @@ bool CSoundFile::ReadDIGI(FileReader &file)
 			break;
 		}
 
-		vector<uint8> eventMask(64, 0xFF);
-		FileReader patternChunk;
-
 		if(fileHeader.packEnable)
 		{
-			patternChunk = file.GetChunk(file.ReadUint16BE());
+			FileReader patternChunk = file.GetChunk(file.ReadUint16BE());
+			std::vector<uint8> eventMask;
 			patternChunk.ReadVector(eventMask, 64);
+
+			// Compressed patterns are stored in row-major order...
+			for(ROWINDEX row = 0; row < 64; row++)
+			{
+				PatternRow patRow = Patterns[pat].GetRow(row);
+				uint8 bit = 0x80;
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, bit >>= 1)
+				{
+					if(eventMask[row] & bit)
+					{
+						ModCommand &m = patRow[chn];
+						ReadDIGIPatternEntry(patternChunk, m, *this);
+					}
+				}
+			}
 		} else
 		{
-			patternChunk = file.GetChunk(4 * 64 * GetNumChannels());
-		}
-
-		size_t i = 0;
-		for(ROWINDEX row = 0; row < 64; row++)
-		{
-			PatternRow patRow = Patterns[pat].GetRow(row);
-			uint8 bit = 0x80;
-			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, bit >>= 1)
+			// ...but uncompressed patterns are stored in column-major order. WTF!
+			ASSERT(false);
+			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
-				ModCommand &m = patRow[chn];
-				if(eventMask[row] & bit)
+				for(ROWINDEX row = 0; row < 64; row++)
 				{
-					ReadMODPatternEntry(patternChunk, m);
-					ConvertModCommand(m);
-					if(m.command == CMD_MODCMDEX)
-					{
-						switch(m.param & 0xF0)
-						{
-						case 0x30:
-							// E30 / E31: Play sample backwards (with some weird parameters that we won't support for now)
-							if(m.param <= 0x31)
-							{
-								m.command = CMD_S3MCMDEX;
-								m.param = 0x9F;
-							}
-							break;
-						case 0x40:
-							// E40: Stop playing sample
-							if(m.param == 0x40)
-							{
-								m.note = NOTE_NOTECUT;
-								m.command = CMD_NONE;
-							}
-							break;
-						case 0x80:
-							// E8x: High sample offset
-							m.command = CMD_S3MCMDEX;
-							m.param = 0xA0 | (m.param & 0x0F);
-						}
-					} else if(m.command == CMD_PANNING8)
-					{
-						// 8xx "Robot" effect (not supported)
-						m.command = CMD_NONE;
-					}
-					i += 4;
+					ReadDIGIPatternEntry(file, *Patterns[pat].GetpModCommand(row, chn), *this);
 				}
 			}
 		}
