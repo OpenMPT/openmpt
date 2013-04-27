@@ -2134,7 +2134,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 					}
 				}
 				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_INSNAMES, NULL);
 			} else
 			{
 				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
