@@ -432,20 +432,13 @@ bool CSoundFile::ReadUlt(FileReader &file)
 	if(GetNumChannels() > MAX_BASECHANNELS || numPats > MAX_PATTERNS)
 		return false;
 
-	if(fileHeader.version >= '3')
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
-		{
-			ChnSettings[chn].Reset();
+		ChnSettings[chn].Reset();
+		if(fileHeader.version >= '3')
 			ChnSettings[chn].nPan = ((file.ReadUint8() & 0x0F) << 4) + 8;
-		}
-	} else
-	{
-		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
-		{
-			ChnSettings[chn].Reset();
+		else
 			ChnSettings[chn].nPan = (chn & 1) ? 192 : 64;
-		}
 	}
 
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)

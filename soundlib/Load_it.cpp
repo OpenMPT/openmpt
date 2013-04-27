@@ -415,8 +415,6 @@ bool CSoundFile::ReadIT(FileReader &file)
 	{
 		ChnSettings[i].Reset();
 		ChnSettings[i].nVolume = Clamp(fileHeader.chnvol[i], uint8(0), uint8(64));
-		ChnSettings[i].nPan = 128;
-		ChnSettings[i].dwFlags.reset();
 		if(fileHeader.chnpan[i] & 0x80) ChnSettings[i].dwFlags.set(CHN_MUTE);
 		uint8 n = fileHeader.chnpan[i] & 0x7F;
 		if(n <= 64) ChnSettings[i].nPan = n * 4;

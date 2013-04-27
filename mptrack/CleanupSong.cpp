@@ -845,10 +845,7 @@ bool CModCleanupDlg::ResetVariables()
 		sndFile.Instruments[i]->nResSwing = 0;
 	}
 
-	for(CHANNELINDEX i = 0; i <= sndFile.GetNumChannels(); i++)
-	{
-		sndFile.ChnSettings[i].Reset();
-	}
+	sndFile.InitializeChannels();
 
 	// reset samples
 	ctrlSmp::ResetSamples(sndFile, ctrlSmp::SmpResetCompo);
