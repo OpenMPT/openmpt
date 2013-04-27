@@ -514,8 +514,8 @@ BOOL CSoundFile::Create(FileReader filereader, CModDoc *pModDoc)
 {
 	m_pModDoc = pModDoc;
 #else
-BOOL CSoundFile::Create(FileReader filereader, void*)
-//---------------------------------------------------
+BOOL CSoundFile::Create(FileReader filereader)
+//--------------------------------------------
 {
 #endif // MODPLUG_TRACKER
 

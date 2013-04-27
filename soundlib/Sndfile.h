@@ -406,11 +406,13 @@ public:
 
 #ifdef MODPLUG_TRACKER
 	BOOL Create(FileReader filereader, CModDoc *pModDoc);
+#else
+	BOOL Create(FileReader filereader);
+#endif // MODPLUG_TRACKER
+
+#ifdef MODPLUG_TRACKER
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
 	CModDoc *GetpModDoc() const { return m_pModDoc; }
-#else
-	BOOL Create(FileReader filereader, void *pModDoc=nullptr);
-	void *GetpModDoc() const { return nullptr; }
 #endif // MODPLUG_TRACKER
 
 	BOOL Destroy();
@@ -747,6 +749,7 @@ public:
 
 #ifndef MODPLUG_TRACKER
 	void ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long lCount); // lCount meaning the number of frames, totally independet from the numer of channels
+	void ApplyFinalOutputGainFloat(float *beg, float *end);
 #endif
 
 	// System-Dependant functions
