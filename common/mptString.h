@@ -36,10 +36,10 @@ namespace mpt
 
 		String& operator=(const CharT* psz) {BaseClass::operator=(psz); return *this;}
 
-	#ifdef MODPLUG_TRACKER
+	#ifdef _MFC_VER
 		String(const CString& str) {(*this) = str.GetString();}
 		String& operator=(const CString& str) {return operator=(str.GetString());}
-	#endif // MODPLUG_TRACKER
+	#endif // _MFC_VER
 
 		// To allow easy assignment to CString in GUI side.
 		operator const CharT*() const {return c_str();}
