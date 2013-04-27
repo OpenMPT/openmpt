@@ -663,7 +663,7 @@ bool CSoundFile::ReadMod(FileReader &file)
 						hasTempoCommands = true;
 					if(m.command == CMD_PANNING8 && m.param < 0x80)
 						leftPanning = true;
-					if(m.command == CMD_PANNING8 && m.param > 0x80 && m.param != 0xA4)
+					if(m.command == CMD_PANNING8 && m.param > 0x8F && m.param != 0xA4)
 						extendedPanning = true;
 					if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
 					{
