@@ -23,6 +23,7 @@
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
+#include "soundlib/FileReader.h"
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -168,7 +169,7 @@ BOOL CModDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument()) return FALSE;
 
-	m_SndFile.Create(NULL, this, 0);
+	m_SndFile.Create(FileReader(), this);
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
 	if(CTrackApp::IsProject())
@@ -213,7 +214,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			LPBYTE lpStream = f.Lock();
 			if (lpStream)
 			{
-				m_SndFile.Create(lpStream, this, dwLen);
+				m_SndFile.Create(FileReader(lpStream, dwLen), this);
 				f.Unlock();
 			}
 		}
