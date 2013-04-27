@@ -320,7 +320,11 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		nStat++;
 
 #ifndef MODPLUG_TRACKER
-		ApplyFinalOutputGain(MixSoundBuffer, MixRearBuffer, lCount);
+		if(!m_MixerSettings.IsFloatSampleFormat())
+		{
+			// Apply final output gain for non floating point output
+			ApplyFinalOutputGain(MixSoundBuffer, MixRearBuffer, lCount);
+		}
 #endif
 
 #ifndef NO_AGC
@@ -355,8 +359,21 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		}
 #endif
 
-		// Perform clipping
+		#ifndef MODPLUG_TRACKER
+			LPBYTE buf_beg = lpBuffer;
+		#endif
+
+		// Convert to output sample format and optionally perform lipping if needed
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
+
+		#ifndef MODPLUG_TRACKER
+			LPBYTE buf_end = lpBuffer;
+			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+			if(m_MixerSettings.IsFloatSampleFormat())
+			{
+				ApplyFinalOutputGainFloat(reinterpret_cast<float*>(buf_beg), reinterpret_cast<float*>(buf_end));
+			}
+		#endif
 
 		// Buffer ready
 		lRead -= lCount;
@@ -2306,6 +2323,19 @@ void CSoundFile::ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long 
 			buf++;
 			rbuf++;
 		}
+	}
+}
+void CSoundFile::ApplyFinalOutputGainFloat(float *beg, float *end) {
+	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
+	{
+		// nothing to do, gain == +/- 0dB
+		return; 
+	}
+	// no clipping prevention is done here
+	float factor = static_cast<float>(m_MixerSettings.m_FinalOutputGain) * (1.0f / static_cast<float>(1<<16));
+	for(float *i = beg; i != end; ++i)
+	{
+		*i *= factor;
 	}
 }
 #endif
