@@ -363,7 +363,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			LPBYTE buf_beg = lpBuffer;
 		#endif
 
-		// Convert to output sample format and optionally perform lipping if needed
+		// Convert to output sample format and optionally perform clipping if needed
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
 
 		#ifndef MODPLUG_TRACKER
