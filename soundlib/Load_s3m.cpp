@@ -424,23 +424,23 @@ struct FixPixPlayPanning
 };
 
 
-bool CSoundFile::ReadS3M(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 
-	S3MFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader) || !file.CanRead(fileHeader.ordNum + (fileHeader.smpNum + fileHeader.patNum) * 2))
-	{
-		return false;
-	}
-
 	// Is it a valid S3M file?
-	if(fileHeader.magic != S3MFileHeader::idSCRM
+	S3MFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| !file.CanRead(fileHeader.ordNum + (fileHeader.smpNum + fileHeader.patNum) * 2) 
+		|| fileHeader.magic != S3MFileHeader::idSCRM
 		|| fileHeader.fileType != S3MFileHeader::idS3MType
 		|| (fileHeader.formatVersion != S3MFileHeader::oldVersion && fileHeader.formatVersion != S3MFileHeader::newVersion))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -598,7 +598,7 @@ bool CSoundFile::ReadS3M(FileReader &file)
 
 		const uint32 sampleOffset = (sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20);
 
-		if(sampleHeader.length != 0 && file.Seek(sampleOffset))
+		if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
 		{
 			sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
 		}
@@ -620,6 +620,10 @@ bool CSoundFile::ReadS3M(FileReader &file)
 	int zxxCountRight = 0, zxxCountLeft = 0;
 
 	// Reading patterns
+	if(!(loadFlags & loadPatternData))
+	{
+		return true;
+	}
 	const PATTERNINDEX readPatterns = MIN(fileHeader.patNum, MAX_PATTERNS);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{

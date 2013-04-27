@@ -130,8 +130,8 @@ STATIC_ASSERT(sizeof(GDMSampleHeader) == 62);
 #endif
 
 
-bool CSoundFile::ReadGDM(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -151,6 +151,9 @@ bool CSoundFile::ReadGDM(FileReader &file)
 		|| fileHeader.originalFormat == 0)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -267,7 +270,7 @@ bool CSoundFile::ReadGDM(FileReader &file)
 	}
 
 	// Read sample data
-	if(file.Seek(fileHeader.sampleDataOffset))
+	if((loadFlags & loadSampleData) && file.Seek(fileHeader.sampleDataOffset))
 	{
 		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 		{
@@ -304,9 +307,9 @@ bool CSoundFile::ReadGDM(FileReader &file)
 		}
 		FileReader chunk = file.GetChunk(patternLength - 2);
 
-		if(!chunk.IsValid() || Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || !chunk.IsValid() || Patterns.Insert(pat, 64))
 		{
-			break;
+			continue;
 		}
 
 		enum

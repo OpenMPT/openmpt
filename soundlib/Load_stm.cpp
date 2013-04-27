@@ -112,8 +112,8 @@ STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
 #endif
 
 
-bool CSoundFile::ReadSTM(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -125,6 +125,9 @@ bool CSoundFile::ReadSTM(FileReader &file)
 			&& _strnicmp(fileHeader.trackername, "BMOD2STM", 8)))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songname);
@@ -171,8 +174,9 @@ bool CSoundFile::ReadSTM(FileReader &file)
 	{
 		STMPatternEntry patternData[64 * 4];
 
-		if(Patterns.Insert(pat, 64) || !file.ReadArray(patternData))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64) || !file.ReadArray(patternData))
 		{
+			file.Skip(sizeof(patternData));
 			continue;
 		}
 
@@ -272,27 +276,31 @@ bool CSoundFile::ReadSTM(FileReader &file)
 	}
 
 	// Reading Samples
-	const SampleIO sampleIO(
-		SampleIO::_8bit,
-		SampleIO::mono,
-		SampleIO::littleEndian,
-		SampleIO::signedPCM);
-
-	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+	if(loadFlags & loadSampleData)
 	{
-		ModSample &sample = Samples[smp];
-		if(sample.nLength)
+		const SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
+
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 		{
-			//size_t sampleOffset = fileHeader.samples[smp - 1].offset << 4;
-			//if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
-			//{
-			//	file.Seek(sampleOffset);
-			//} else
+			ModSample &sample = Samples[smp];
+			if(sample.nLength)
 			{
-				file.Seek((file.GetPosition() + 15) & (~15));
+				//size_t sampleOffset = fileHeader.samples[smp - 1].offset << 4;
+				//if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
+				//{
+				//	file.Seek(sampleOffset);
+				//} else
+				{
+					file.Seek((file.GetPosition() + 15) & (~15));
+				}
+				sampleIO.ReadSample(sample, file);
 			}
-			sampleIO.ReadSample(sample, file);
 		}
 	}
+
 	return true;
 }

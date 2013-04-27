@@ -87,8 +87,8 @@ STATIC_ASSERT(sizeof(_669Sample) == 25);
 #endif
 
 
-bool CSoundFile::Read669(FileReader &file)
-//----------------------------------------
+bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	_669FileHeader fileHeader;
 
@@ -100,6 +100,9 @@ bool CSoundFile::Read669(FileReader &file)
 		|| fileHeader.patterns > 128)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
@@ -145,7 +148,7 @@ bool CSoundFile::Read669(FileReader &file)
 	// Reading Patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
-		if(Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
 		{
 			file.Skip(64 * 8 * 3);
 			continue;
@@ -265,16 +268,20 @@ bool CSoundFile::Read669(FileReader &file)
 		Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, fileHeader.tempoList[pat]).Retry(EffectWriter::rmTryNextRow));
 	}
 
-	// Reading Samples
-	const SampleIO sampleIO(
-		SampleIO::_8bit,
-		SampleIO::mono,
-		SampleIO::littleEndian,
-		SampleIO::unsignedPCM);
-
-	for(SAMPLEINDEX n = 1; n <= m_nSamples; n++)
+	if(loadFlags & loadSampleData)
 	{
-		sampleIO.ReadSample(Samples[n], file);
+		// Reading Samples
+		const SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::unsignedPCM);
+
+		for(SAMPLEINDEX n = 1; n <= m_nSamples; n++)
+		{
+			sampleIO.ReadSample(Samples[n], file);
+		}
 	}
+
 	return true;
 }

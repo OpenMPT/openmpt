@@ -404,15 +404,23 @@ public:
 
 public:
 
-#ifdef MODPLUG_TRACKER
-	BOOL Create(FileReader filereader, CModDoc *pModDoc);
-#else
-	BOOL Create(FileReader filereader);
-#endif // MODPLUG_TRACKER
+	enum ModLoadingFlags
+	{
+		onlyVerifyHeader	= 0x00,
+		loadPatternData		= 0x01,	// Advise loaders to not process any pattern data (if possible)
+		loadSampleData		= 0x02,	// Advise loaders to not process any sample data (if possible)
+		// Shortcuts
+		loadCompleteModule	= loadSampleData | loadPatternData,
+		loadNoPatternData	= loadSampleData,
+	};
 
 #ifdef MODPLUG_TRACKER
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
 	CModDoc *GetpModDoc() const { return m_pModDoc; }
+
+	BOOL Create(FileReader file, ModLoadingFlags loadFlags = loadCompleteModule, CModDoc *pModDoc = nullptr);
+#else
+	BOOL Create(FileReader file, ModLoadingFlags loadFlags);
 #endif // MODPLUG_TRACKER
 
 	BOOL Destroy();
@@ -478,40 +486,40 @@ public:
 	void InitializeChannels();
 
 	// Module Loaders
-	bool ReadXM(FileReader &file);
-	bool ReadS3M(FileReader &file);
-	bool ReadMod(FileReader &file);
-	bool ReadM15(FileReader &file);
-	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadMTM(FileReader &file);
-	bool ReadSTM(FileReader &file);
-	bool ReadIT(FileReader &file);
-	bool ReadITProject(FileReader &file);
-	bool Read669(FileReader &file);
-	bool ReadUlt(FileReader &file);
-	bool ReadWav(FileReader &file);
-	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadFAR(FileReader &file);
-	bool ReadAMS(FileReader &file);
-	bool ReadAMS2(FileReader &file);
-	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadOKT(FileReader &file);
-	bool ReadDMF(FileReader &file);
-	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadAMF_Asylum(FileReader &file);
-	bool ReadAMF_DSMI(FileReader &file);
-	bool ReadMT2(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadPSM(FileReader &file);
-	bool ReadPSM16(FileReader &file);
-	bool ReadUMX(FileReader &file);
-	bool ReadMO3(FileReader &file);
-	bool ReadGDM(FileReader &file);
-	bool ReadIMF(FileReader &file);
-	bool ReadAM(FileReader &file);
-	bool ReadJ2B(FileReader &file);
-	bool ReadDIGI(FileReader &file);
-	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadS3M(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMod(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadM15(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadSTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadIT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadITProject(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool Read669(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadUlt(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadWav(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAMS2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadOKT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMT2(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPSM16(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadUMX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMO3(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadGDM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadIMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static const char * ModTypeToString(MODTYPE modtype);

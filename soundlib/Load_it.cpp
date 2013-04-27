@@ -278,8 +278,8 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 }
 
 
-bool CSoundFile::ReadIT(FileReader &file)
-//---------------------------------------
+bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -291,6 +291,9 @@ bool CSoundFile::ReadIT(FileReader &file)
 		|| !file.CanRead(fileHeader.ordnum + (fileHeader.insnum + fileHeader.smpnum + fileHeader.patnum) * 4))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -629,7 +632,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 
 				StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[i + 1], sampleHeader.name);
 
-				if(file.Seek(sampleOffset))
+				if((loadFlags & loadSampleData) && file.Seek(sampleOffset))
 				{
 					sampleHeader.GetSampleFormat(fileHeader.cwtv).ReadSample(Samples[i + 1], file);
 					lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
@@ -669,7 +672,7 @@ bool CSoundFile::ReadIT(FileReader &file)
 	// Checking for number of used channels, which is not explicitely specified in the file.
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
-		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
+		if(!(loadFlags & loadPatternData) || patPos[pat] == 0 || !file.Seek(patPos[pat]))
 			continue;
 
 		uint16 len = file.ReadUint16LE();

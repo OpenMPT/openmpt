@@ -275,7 +275,7 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 					}
 					if(m_SongFile != nullptr)
 					{
-						m_SongFile->Create(FileReader(lpStream, dwLen), nullptr);
+						m_SongFile->Create(FileReader(lpStream, dwLen), CSoundFile::loadNoPatternData, nullptr);
 						// Destroy some stuff that we're not going to use anyway.
 						m_SongFile->Patterns.DestroyPatterns();
 						m_SongFile->songMessage.clear();

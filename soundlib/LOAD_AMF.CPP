@@ -100,8 +100,8 @@ STATIC_ASSERT(sizeof(AMFFileHeader) == 41);
 #endif
 
 
-bool CSoundFile::ReadAMF_Asylum(FileReader &file)
-//-----------------------------------------------
+bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -112,6 +112,9 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file)
 		|| file.BytesLeft() < 256 + 64 * sizeof(AsylumSampleHeader) + 64 * 4 * 8 * fileHeader.numPatterns)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -143,7 +146,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file)
 	// Read Patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
-		if(Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
 		{
 			file.Skip(64 * 4 * 8);
 			continue;
@@ -167,19 +170,22 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file)
 		}
 	}
 
-	// Read Sample Data
-	const SampleIO sampleIO(
-		SampleIO::_8bit,
-		SampleIO::mono,
-		SampleIO::littleEndian,
-		SampleIO::signedPCM);
-
-	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	if(loadFlags & loadSampleData)
 	{
-		sampleIO.ReadSample(Samples[smp], file);
-	}
-	return true;
+		// Read Sample Data
+		const SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::signedPCM);
 
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			sampleIO.ReadSample(Samples[smp], file);
+		}
+	}
+
+	return true;
 }
 
 
@@ -355,8 +361,8 @@ void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
 }
 
 
-bool CSoundFile::ReadAMF_DSMI(FileReader &file)
-//---------------------------------------------
+bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -367,6 +373,9 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 		|| ((fileHeader.numChannels < 1 || fileHeader.numChannels > 32) && fileHeader.version >= 10))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -520,29 +529,37 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file)
 		trackData[i] = file.GetChunk(trackSize * 3);
 	}
 
-	// Read Sample Data
-	const SampleIO sampleIO(
-		SampleIO::_8bit,
-		SampleIO::mono,
-		SampleIO::littleEndian,
-		SampleIO::unsignedPCM);
-
-	// Why is all of this sample loading business so dumb in AMF?
-	// Surely there must be some great idea behind it which isn't handled here (re-using the same sample data for different sample slots maybe?)
-	for(uint32 seekPos = 1; seekPos <= maxSamplePos; seekPos++)
+	if(loadFlags & loadSampleData)
 	{
-		for(SAMPLEINDEX smp = 0; smp < GetNumSamples(); smp++)
+		// Read Sample Data
+		const SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::unsignedPCM);
+
+		// Why is all of this sample loading business so dumb in AMF?
+		// Surely there must be some great idea behind it which isn't handled here (re-using the same sample data for different sample slots maybe?)
+		for(uint32 seekPos = 1; seekPos <= maxSamplePos; seekPos++)
 		{
-			if(seekPos == samplePos[smp])
+			for(SAMPLEINDEX smp = 0; smp < GetNumSamples(); smp++)
 			{
-				sampleIO.ReadSample(Samples[smp + 1], file);
+				if(seekPos == samplePos[smp])
+				{
+					sampleIO.ReadSample(Samples[smp + 1], file);
+					break;
+				}
+			}
+			if(!file.BytesLeft())
+			{
 				break;
 			}
 		}
-		if(!file.BytesLeft())
-		{
-			break;
-		}
+	}
+
+	if(!(loadFlags & loadPatternData))
+	{
+		return true;
 	}
 
 	// Create the patterns from the list of tracks

@@ -374,8 +374,8 @@ struct PostFixUltCommands
 };
 
 
-bool CSoundFile::ReadUlt(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	UltFileHeader fileHeader;
@@ -387,6 +387,9 @@ bool CSoundFile::ReadUlt(FileReader &file)
 		|| memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature)) != 0)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -476,14 +479,17 @@ bool CSoundFile::ReadUlt(FileReader &file)
 	// Post-fix some effects.
 	Patterns.ForEachModCommand(PostFixUltCommands(GetNumChannels()));
 
-	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	if(loadFlags & loadSampleData)
 	{
-		SampleIO(
-			Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
-			SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::signedPCM)
-			.ReadSample(Samples[smp], file);
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			SampleIO(
+				Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::signedPCM)
+				.ReadSample(Samples[smp], file);
+		}
 	}
 	return true;
 }

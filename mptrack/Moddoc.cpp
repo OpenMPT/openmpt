@@ -169,7 +169,7 @@ BOOL CModDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument()) return FALSE;
 
-	m_SndFile.Create(FileReader(), this);
+	m_SndFile.Create(FileReader(), CSoundFile::loadCompleteModule, this);
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
 	if(CTrackApp::IsProject())
@@ -214,7 +214,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			LPBYTE lpStream = f.Lock();
 			if (lpStream)
 			{
-				m_SndFile.Create(FileReader(lpStream, dwLen), this);
+				m_SndFile.Create(FileReader(lpStream, dwLen), CSoundFile::loadCompleteModule, this);
 				f.Unlock();
 			}
 		}

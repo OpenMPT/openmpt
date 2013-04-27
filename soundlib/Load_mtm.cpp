@@ -97,8 +97,8 @@ STATIC_ASSERT(sizeof(MTMSampleHeader) == 37);
 #endif
 
 
-bool CSoundFile::ReadMTM(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	MTMFileHeader fileHeader;
@@ -113,6 +113,9 @@ bool CSoundFile::ReadMTM(FileReader &file)
 		|| file.BytesLeft() < sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -147,7 +150,7 @@ bool CSoundFile::ReadMTM(FileReader &file)
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
-		if(Patterns.Insert(pat, rowsPerPat))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, rowsPerPat))
 		{
 			break;
 		}
@@ -195,14 +198,17 @@ bool CSoundFile::ReadMTM(FileReader &file)
 	}
 
 	// Reading Samples
-	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	if(loadFlags & loadSampleData)
 	{
-		SampleIO(
-			Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
-			SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::unsignedPCM)
-			.ReadSample(Samples[smp], file);
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			SampleIO(
+				Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::unsignedPCM)
+				.ReadSample(Samples[smp], file);
+		}
 	}
 
 	m_nMinPeriod = 64;

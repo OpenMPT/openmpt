@@ -159,8 +159,8 @@ void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &objOffse
 }
 
 
-bool CSoundFile::ReadUMX(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 	UMXFileHeader fileHeader;
@@ -229,6 +229,9 @@ bool CSoundFile::ReadUMX(FileReader &file)
 		if(!isMusic && !isSound)
 		{
 			continue;
+		} else if(loadFlags == onlyVerifyHeader)
+		{
+			return true;
 		}
 
 		FileReader chunk = file.GetChunk(objOffset, objSize);
@@ -275,15 +278,15 @@ bool CSoundFile::ReadUMX(FileReader &file)
 			if(isMusic)
 			{
 				// Read as module
-				if(ReadIT(fileChunk)
-					|| ReadXM(fileChunk)
-					|| ReadS3M(fileChunk)
-					|| ReadWav(fileChunk)
-					|| ReadSTM(fileChunk)
-					|| Read669(fileChunk)
-					|| ReadFAR(fileChunk)
-					|| ReadMod(fileChunk)
-					|| ReadM15(fileChunk))
+				if(ReadIT(fileChunk, loadFlags)
+					|| ReadXM(fileChunk, loadFlags)
+					|| ReadS3M(fileChunk, loadFlags)
+					|| ReadWav(fileChunk, loadFlags)
+					|| ReadSTM(fileChunk, loadFlags)
+					|| Read669(fileChunk, loadFlags)
+					|| ReadFAR(fileChunk, loadFlags)
+					|| ReadMod(fileChunk, loadFlags)
+					|| ReadM15(fileChunk, loadFlags))
 				{
 					return true;
 				}

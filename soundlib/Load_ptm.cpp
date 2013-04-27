@@ -64,8 +64,8 @@ STATIC_ASSERT(sizeof(PTMSAMPLE) == 80);
 #endif
 
 
-bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
-//---------------------------------------------------------------------
+bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------
 {
 	if(lpStream == nullptr || dwMemLength < sizeof(PTMFILEHEADER))
 		return false;
@@ -91,7 +91,13 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (pfh.norders > 256) || (!pfh.norders)
 	 || (!pfh.nsamples) || (pfh.nsamples > 255)
 	 || (!pfh.npatterns) || (pfh.npatterns > 128)
-	 || (sizeof(PTMFILEHEADER) + pfh.nsamples * sizeof(PTMSAMPLE) >= dwMemLength)) return false;
+	 || (sizeof(PTMFILEHEADER) + pfh.nsamples * sizeof(PTMSAMPLE) >= dwMemLength))
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
 
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh.songname);
 
@@ -144,7 +150,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 				sample.nLoopStart /= 2;
 				sample.nLoopEnd /= 2;
 			}
-			if(sample.nLength && samplepos && samplepos < dwMemLength)
+			if(sample.nLength && samplepos && samplepos < dwMemLength && (loadFlags & loadSampleData))
 			{
 				FileReader chunk(lpStream + samplepos, dwMemLength - samplepos);
 				sampleIO.ReadSample(sample, chunk);
@@ -152,6 +158,10 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 	}
 	// Reading Patterns
+	if(!(loadFlags && loadPatternData))
+	{
+		return true;
+	}
 	for (UINT ipat=0; ipat<pfh.npatterns; ipat++)
 	{
 		dwMemPos = ((UINT)pfh.patseg[ipat]) << 4;

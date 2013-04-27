@@ -90,8 +90,8 @@ static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m, CSoundFile &sn
 }
 
 
-bool CSoundFile::ReadDIGI(FileReader &file)
-//-----------------------------------------
+bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -103,6 +103,9 @@ bool CSoundFile::ReadDIGI(FileReader &file)
 		|| fileHeader.lastOrdIndex > 127)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	// Globals
@@ -143,14 +146,22 @@ bool CSoundFile::ReadDIGI(FileReader &file)
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPatIndex; pat++)
 	{
-		if(Patterns.Insert(pat, 64))
+		FileReader patternChunk;
+		if(fileHeader.packEnable)
 		{
-			break;
+			patternChunk = file.GetChunk(file.ReadUint16BE());
+		} else
+		{
+			patternChunk = file.GetChunk(4 * 64 * GetNumChannels());
+		}
+
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
+		{
+			continue;
 		}
 
 		if(fileHeader.packEnable)
 		{
-			FileReader patternChunk = file.GetChunk(file.ReadUint16BE());
 			std::vector<uint8> eventMask;
 			patternChunk.ReadVector(eventMask, 64);
 
@@ -175,22 +186,25 @@ bool CSoundFile::ReadDIGI(FileReader &file)
 			{
 				for(ROWINDEX row = 0; row < 64; row++)
 				{
-					ReadDIGIPatternEntry(file, *Patterns[pat].GetpModCommand(row, chn), *this);
+					ReadDIGIPatternEntry(patternChunk, *Patterns[pat].GetpModCommand(row, chn), *this);
 				}
 			}
 		}
 	}
 
-	// Reading Samples
-	const SampleIO sampleIO(
-		SampleIO::_8bit,
-		SampleIO::mono,
-		SampleIO::bigEndian,
-		SampleIO::signedPCM);
-
-	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+	if(loadFlags & loadSampleData)
 	{
-		sampleIO.ReadSample(Samples[smp], file);
+		// Reading Samples
+		const SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::bigEndian,
+			SampleIO::signedPCM);
+
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+		{
+			sampleIO.ReadSample(Samples[smp], file);
+		}
 	}
 
 	return true;

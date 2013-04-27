@@ -377,8 +377,8 @@ STATIC_ASSERT(sizeof(AMSSampleHeader) == 17);
 #endif
 
 
-bool CSoundFile::ReadAMS(FileReader &file)
-//----------------------------------------
+bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -390,6 +390,9 @@ bool CSoundFile::ReadAMS(FileReader &file)
 		|| fileHeader.versionHigh != 0x01)
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	InitializeGlobals();
@@ -480,19 +483,26 @@ bool CSoundFile::ReadAMS(FileReader &file)
 		uint32 patLength = file.ReadUint32LE();
 		FileReader patternChunk = file.GetChunk(patLength);
 
-		ReadAMSPattern(Patterns[pat], false, patternChunk, *this);
+		if(loadFlags & loadPatternData)
+		{
+			ReadAMSPattern(Patterns[pat], false, patternChunk, *this);
+		}
 	}
 
-	// Read Samples
-	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	if(loadFlags & loadSampleData)
 	{
-		SampleIO(
-			(Samples[smp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
-			SampleIO::mono,
-			SampleIO::littleEndian,
-			packSample[smp - 1] ? SampleIO::AMS : SampleIO::signedPCM)
-			.ReadSample(Samples[smp], file);
+		// Read Samples
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			SampleIO(
+				(Samples[smp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				packSample[smp - 1] ? SampleIO::AMS : SampleIO::signedPCM)
+				.ReadSample(Samples[smp], file);
+		}
 	}
+
 	return true;
 }
 
@@ -726,8 +736,8 @@ STATIC_ASSERT(sizeof(AMS2Description) == 11);
 #endif
 
 
-bool CSoundFile::ReadAMS2(FileReader &file)
-//-----------------------------------------
+bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -737,6 +747,9 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		|| !file.ReadConvertEndianness(fileHeader))
 	{
 		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 	
 	uint16 headerFlags;
@@ -913,20 +926,28 @@ bool CSoundFile::ReadAMS2(FileReader &file)
 		uint32 patLength = file.ReadUint32LE();
 		FileReader patternChunk = file.GetChunk(patLength);
 
-		const ROWINDEX numRows = patternChunk.ReadUint8() + 1;
-		// We don't need to know the number of channels or commands.
-		patternChunk.Skip(1);
-
-		if(Patterns.Insert(pat, numRows))
+		if(loadFlags & loadPatternData)
 		{
-			continue;
+			const ROWINDEX numRows = patternChunk.ReadUint8() + 1;
+			// We don't need to know the number of channels or commands.
+			patternChunk.Skip(1);
+
+			if(Patterns.Insert(pat, numRows))
+			{
+				continue;
+			}
+
+			char patternName[11];
+			ReadAMSString(patternName, patternChunk);
+			Patterns[pat].SetName(patternName);
+
+			ReadAMSPattern(Patterns[pat], true, patternChunk, *this);
 		}
+	}
 
-		char patternName[11];
-		ReadAMSString(patternName, patternChunk);
-		Patterns[pat].SetName(patternName);
-
-		ReadAMSPattern(Patterns[pat], true, patternChunk, *this);
+	if(!(loadFlags & loadSampleData))
+	{
+		return true;
 	}
 
 	// Read Samples

@@ -284,8 +284,8 @@ void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, co
 
 
 
-bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
-//---------------------------------------------------------------------
+bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
 	const MDLFileHeader *pmsh = (const MDLFileHeader *)lpStream;
@@ -303,6 +303,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 
 	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pmsh->id != 0x4C444D44) || ((pmsh->version & 0xF0) > 0x10)) return false;
+	else if(loadFlags == onlyVerifyHeader) return true;
 #ifdef MDL_LOG
 	Log("MDL v%d.%d\n", pmsh->version>>4, pmsh->version&0x0f);
 #endif
@@ -595,6 +596,10 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 		#ifdef MDL_LOG
 			Log("sample data: %d bytes\n", blocklen);
 		#endif
+			if(!(loadFlags & loadSampleData))
+			{
+				break;
+			}
 			dwPos = dwMemPos;
 			for (i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
 			{
@@ -631,7 +636,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 		dwMemPos += blocklen;
 	}
 	// Unpack Patterns
-	if ((dwTrackPos) && (npatterns) && (m_nChannels) && (ntracks))
+	if((loadFlags & loadPatternData) && (dwTrackPos) && (npatterns) && (m_nChannels) && (ntracks))
 	{
 		for (UINT ipat=0; ipat<npatterns; ipat++)
 		{
