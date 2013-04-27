@@ -432,8 +432,6 @@ CSoundFile::CSoundFile() :
 	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = 16;
 #endif // MODPLUG_TRACKER
 
-	m_ModFlags.reset();
-
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
 	m_bChannelMuteTogglePending.reset();
@@ -495,7 +493,6 @@ void CSoundFile::InitializeGlobals()
 	SetMixLevels(mixLevels_compatible);
 	SetModFlags(0);
 
-	Order.resize(1);
 	Patterns.ClearPatterns();
 	songMessage.clear();
 }
@@ -528,6 +525,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, void *pModDoc, DWORD dwMemLength)
 	m_nOldGlbVolSlide = 0;
 
 	InitializeGlobals();
+	Order.resize(1);
 
 	// Playback
 	m_nPatternDelay = 0;

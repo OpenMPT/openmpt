@@ -1156,7 +1156,6 @@ bool CSoundFile::ReadPSM16(FileReader &file)
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo = fileHeader.songTempo;
 
-	MemsetZero(m_szNames);
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
 
 	// Read orders

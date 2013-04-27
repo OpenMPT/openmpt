@@ -728,21 +728,6 @@ size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
 }
 
 
-bool ModSequence::ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength)
-//-------------------------------------------------------------------------------------
-{
-	if(howMany < 0 || howMany > memLength) return false;
-	if(m_sndFile.GetType() != MOD_TYPE_MPT && howMany > MAX_ORDERS) return false;
-	
-	if(GetLength() < static_cast<size_t>(howMany))
-		resize(ORDERINDEX(howMany));
-	
-	for(int i = 0; i<howMany; i++, pFrom++)
-		(*this)[i] = *pFrom;
-	return true;
-}
-
-
 bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries)
 //--------------------------------------------------------------------------------
 {
@@ -751,17 +736,14 @@ bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntrie
 		return false;
 	}
 	LimitMax(readEntries, howMany);
-	if(!(m_sndFile.GetType() & MOD_TYPE_MPT))
-	{
-		LimitMax(readEntries, MAX_ORDERS);
-	}
+	LimitMax(readEntries, ORDERINDEX_MAX);
 
 	if(GetLength() < readEntries)
 	{
-		resize(readEntries);
+		resize((ORDERINDEX)readEntries);
 	}
 
-	for(int i = 0; i < readEntries; i++)
+	for(size_t i = 0; i < readEntries; i++)
 	{
 		(*this)[i] = file.ReadUint8();
 	}
