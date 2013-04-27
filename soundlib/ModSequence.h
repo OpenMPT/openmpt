@@ -100,8 +100,7 @@ public:
 
 	// Read/write.
 	size_t WriteAsByte(FILE* f, const uint16 count) const;
-	bool ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength);
-	bool ReadAsByte(FileReader &file, size_t howMany, size_t readEntries = SIZE_MAX);
+	bool ReadAsByte(FileReader &file, size_t howMany, size_t readEntries = ORDERINDEX_MAX);
 	template<typename T, size_t arraySize>
 	bool ReadFromArray(const T (&orders)[arraySize], size_t howMany = arraySize);
 

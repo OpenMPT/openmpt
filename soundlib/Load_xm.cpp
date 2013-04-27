@@ -257,8 +257,7 @@ bool CSoundFile::ReadXM(FileReader &file)
 		|| fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
 		|| _strnicmp(fileHeader.signature, "Extended Module: ", 17)
-		|| !Order.ReadAsByte(file, std::min(ORDERINDEX(fileHeader.orders), MAX_ORDERS))
-		|| !file.Seek(fileHeader.size + 60))
+		|| !file.CanRead(fileHeader.orders))
 	{
 		return false;
 	}
@@ -294,6 +293,9 @@ bool CSoundFile::ReadXM(FileReader &file)
 
 	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+
+	Order.ReadAsByte(file, fileHeader.orders);
+	file.Seek(fileHeader.size + 60);
 
 	if(fileHeader.version >= 0x0104)
 	{
