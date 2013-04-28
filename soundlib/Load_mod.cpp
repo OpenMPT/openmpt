@@ -577,6 +577,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Get number of patterns (including some order list sanity checks)
 	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, realOrders, totalSampleLen, m_nChannels, isMdKd);
+	if(isMdKd && GetNumChannels() == 8)
+	{
+		// M.K. with 8 channels = Grave Composer
+		madeWithTracker = "Mod's Grave";
+	}
 
 	if(isFLT8)
 	{
@@ -1034,6 +1039,32 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
+	}
+
+	switch(minVersion)
+	{
+	case UST1_00:
+		madeWithTracker = "Ultimate Soundtracker 1.0-1.21";
+		break;
+	case UST1_80:
+		madeWithTracker = "Ultimate Soundtracker 1.8-2.0";
+		break;
+	case ST2_00_Exterminator:
+		madeWithTracker = "SoundTracker 2.0 / D.O.C. Sountracker II";
+		break;
+	case ST_III:
+		madeWithTracker = "Defjam Soundtracker III / Alpha Flight SoundTracker IV / D.O.C. SoundTracker IV / VI";
+		break;
+	case ST_IX:
+		madeWithTracker = "D.O.C. SoundTracker IX";
+		break;
+	case MST1_00:
+		madeWithTracker = "Master Soundtracker 1.0";
+		break;
+	case ST2_00:
+	case ST2_00_with_Bxx:
+		madeWithTracker = "SoundTracker 2.0 / 2.1 / 2.2";
+		break;
 	}
 
 	// Reading samples
