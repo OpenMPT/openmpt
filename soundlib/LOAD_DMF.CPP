@@ -680,6 +680,11 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 							}
 						}
 						effect1 = CMD_OFFSET;
+						if(m->note == NOTE_NONE)
+						{
+							// Offset without note does also work in DMF.
+							m->note = settings.channels[chn].lastNote;
+						}
 						settings.channels[chn].playDir = false;
 						break;
 					case 10:	// Invert Sample play direction ("Tekkno Invert")

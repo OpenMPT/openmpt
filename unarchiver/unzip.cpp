@@ -158,7 +158,7 @@ bool CZipArchive::ExtractFile()
 		while(ext > name)
 		{
 			ext--;
-			*ext = tolower(*ext);
+			*ext = static_cast<char>(tolower(*ext));
 			if(*ext == '.')
 			{
 				ext++;

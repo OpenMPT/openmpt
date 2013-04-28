@@ -169,7 +169,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[i].Reset();
 		if(fileHeader.panMap[i] < 16)
 		{
-			ChnSettings[i].nPan = std::min((fileHeader.panMap[i] * 16) + 8, 256);
+			ChnSettings[i].nPan = static_cast<uint16>(std::min((fileHeader.panMap[i] * 16) + 8, 256));
 		} else if(fileHeader.panMap[i] == 16)
 		{
 			ChnSettings[i].nPan = 128;
