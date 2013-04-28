@@ -2163,16 +2163,17 @@ noiseloop:
 #endif
 
 
-void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples)
-//-------------------------------------------------------------------------
+void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
+//------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	_asm {
-	mov ecx, nSamples	// ecx = samplecount
+	mov ecx, nFrames	// ecx = framecount
 	mov esi, pFrontBuf	// esi = front buffer
 	mov edi, pRearBuf	// edi = rear buffer
-	lea esi, [esi+ecx*4]	// esi = &front[N]
-	lea edi, [edi+ecx*4]	// edi = &rear[N]
-	lea ebx, [esi+ecx*4]	// ebx = &front[N*2]
+	lea esi, [esi+ecx*8]	// esi = &front[N*2]
+	lea edi, [edi+ecx*8]	// edi = &rear[N*2]
+	lea ebx, [esi+ecx*8]	// ebx = &front[N*4]
 	push ebp
 interleaveloop:
 	mov eax, dword ptr [esi-8]
@@ -2190,6 +2191,16 @@ interleaveloop:
 	jnz interleaveloop
 	pop ebp
 	}
+#else
+	// copy backwards as we are writing back into FrontBuf
+	for(int i=nFrames-1; i>=0; i--)
+	{
+		pFrontBuf[i*4+3] = pRearBuf[i*2+1];
+		pFrontBuf[i*4+2] = pRearBuf[i*2+0];
+		pFrontBuf[i*4+1] = pFrontBuf[i*2+1];
+		pFrontBuf[i*4+0] = pFrontBuf[i*2+0];
+	}
+#endif
 }
 
 
