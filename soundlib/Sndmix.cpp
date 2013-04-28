@@ -43,7 +43,7 @@ extern DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCoun
 #ifdef ENABLE_X86
 extern VOID X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 #endif
-extern VOID X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples);
+extern VOID X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
 extern VOID X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern VOID X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
 
@@ -265,7 +265,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 #endif // NO_REVERB
 
 		// Resetting sound buffer
-		X86_StereoFill(MixSoundBuffer, lSampleCount, &gnDryROfsVol, &gnDryLOfsVol);
+		X86_StereoFill(MixSoundBuffer, lCount, &gnDryROfsVol, &gnDryLOfsVol);
 		
 		ASSERT(lCount<=MIXBUFFERSIZE);		// ensure MIXBUFFERSIZE really is our max buffer size
 		if (m_MixerSettings.gnChannels >= 2)
@@ -337,7 +337,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		// Multichannel
 		if (m_MixerSettings.gnChannels > 2)
 		{
-			X86_InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lSampleCount);
+			X86_InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lCount);
 			lTotalSampleCount *= 2;
 		}
 
