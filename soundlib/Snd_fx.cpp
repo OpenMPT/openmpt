@@ -1804,8 +1804,9 @@ BOOL CSoundFile::ProcessEffects()
 			{
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
+				// Test case: NoteOffVolume.xm
 				if(note == NOTE_KEYOFF
-					&& ((!instr && volcmd == VOLCMD_NONE && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2))
+					&& ((!instr && volcmd != VOLCMD_VOLUME && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2))
 					&& (pChn->pModInstrument == nullptr || !pChn->pModInstrument->VolEnv.dwFlags[ENV_ENABLED]))
 				{
 					pChn->dwFlags.set(CHN_FASTVOLRAMP);
