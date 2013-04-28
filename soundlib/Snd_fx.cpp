@@ -327,14 +327,14 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			case CMD_SPEED:
 				if (!param) break;
 				// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
-				if ((param <= GetModSpecifications().speedMax) || (m_nType & MOD_TYPE_MOD))
+				if ((param <= GetModSpecifications().speedMax) || GetType() == MOD_TYPE_MOD)
 				{
 					memory.musicSpeed = param;
 				}
 				break;
 			// Set Tempo
 			case CMD_TEMPO:
-				if ((adjustMode & eAdjust) && (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
+				if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
 				}
@@ -447,7 +447,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 // 					break;
 // 				}
 
-				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
 				// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
 				if(param <= 128)
 				{
@@ -467,25 +467,25 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
 					param >>= 4;
-					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
 					memory.glbVol += param << 1;
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
 					param = (param & 0x0F) << 1;
-					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
 					memory.glbVol -= param;
 				} else
 				if (param & 0xF0)
 				{
 					param >>= 4;
 					param <<= 1;
-					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
 					memory.glbVol += param * memory.musicSpeed;
 				} else
 				{
 					param = (param & 0x0F) << 1;
-					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
 					memory.glbVol -= param * memory.musicSpeed;
 				}
 				memory.glbVol = CLAMP(memory.glbVol, 0, 256);
@@ -2241,7 +2241,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
 			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))) break;
-			if ((!param) && (!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))) break;
+			if ((!param) && (!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))) break;	// Only important when editing MOD/XM files
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
 			break;
@@ -2322,7 +2322,7 @@ BOOL CSoundFile::ProcessEffects()
 				break;
 			}
 
-			if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param *= 2;
+			if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param *= 2;
 
 			// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values.
 			// Test case: globalvol-invalid.it
@@ -2353,18 +2353,21 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->dwFlags.reset(CHN_SURROUND);
 			}
-			if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD | MOD_TYPE_MT2))
+			if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_PTM | MOD_TYPE_DSM | MOD_TYPE_AMF | MOD_TYPE_MTM)))
 			{
+				// Real 8-bit panning
 				pChn->nPan = param;
 			} else
-			if (param <= 0x80)
 			{
-				pChn->nPan = param << 1;
-			} else
-			if (param == 0xA4)
-			{
-				pChn->dwFlags.set(CHN_SURROUND);
-				pChn->nPan = 0x80;
+				// 7-bit panning + surround
+				if(param <= 0x80)
+				{
+					pChn->nPan = param << 1;
+				} else if(param == 0xA4)
+				{
+					pChn->dwFlags.set(CHN_SURROUND);
+					pChn->nPan = 0x80;
+				}
 			}
 			pChn->dwFlags.set(CHN_FASTVOLRAMP);
 			pChn->nRestorePanOnNewNote = 0;
@@ -2652,7 +2655,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 	else
 		param = pChn->nOldPortaUpDown;
 
-	const bool doFineSlides = !doFinePortamentoAsRegular && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_STM));
+	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI));
 
 	// Process MIDI pitch bend for instrument plugins
 	MidiPortamento(nChn, param, doFineSlides);
@@ -2700,7 +2703,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 	else
 		param = pChn->nOldPortaUpDown;
 
-	const bool doFineSlides = !doFinePortamentoAsRegular && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_STM));
+	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI));
 
 	// Process MIDI pitch bend for instrument plugins
 	MidiPortamento(nChn, -static_cast<int>(param), doFineSlides);
@@ -2964,7 +2967,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 		pChn->nOldPortaUpDown = param;
 	}
 
-	if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
+	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).
@@ -3089,7 +3092,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 	else
 		param = pChn->nOldVolumeSlide;
 
-	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2)))
+	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_DIGI | MOD_TYPE_DBM)))
 	{
 		// MOD / XM nibble priority
 		if((param & 0xF0) != 0)
@@ -3102,7 +3105,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 	}
 
 	int newvolume = pChn->nVolume;
-	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
+	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED)))
 	{
 		if ((param & 0x0F) == 0x0F) //Fine upslide or slide -15
 		{
@@ -3145,7 +3148,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 		{
 			newvolume += (int)((param & 0xF0) >> 2);
 		}
-		if (m_nType == MOD_TYPE_MOD) pChn->dwFlags.set(CHN_FASTVOLRAMP);
+		if (GetType() == MOD_TYPE_MOD) pChn->dwFlags.set(CHN_FASTVOLRAMP);
 	}
 	newvolume = Clamp(newvolume, 0, 256);
 
@@ -3180,7 +3183,7 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
 
 	int32 nPanSlide = 0;
 
-	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM))
+	if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
 	{
 		if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 		{
@@ -3315,7 +3318,7 @@ void CSoundFile::ChannelVolSlide(ModChannel *pChn, UINT param)
 		{
 			if (param & 0x0F)
 			{
-				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_J2B | MOD_TYPE_DBM)) || (param & 0xF0) == 0)
 					nChnSlide = -(int)(param & 0x0F);
 			} else
 			{
@@ -3342,9 +3345,9 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 	{
 	// E0x: Set Filter
 	// E1x: Fine Portamento Up
-	case 0x10:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoUp(pChn, param); break;
+	case 0x10:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoUp(pChn, param); break;
 	// E2x: Fine Portamento Down
-	case 0x20:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoDown(pChn, param); break;
+	case 0x20:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoDown(pChn, param); break;
 	// E3x: Set Glissando Control
 	case 0x30:	pChn->dwFlags.set(CHN_GLISSANDO, param != 0); break;
 	// E4x: Set Vibrato WaveForm
@@ -3354,7 +3357,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 				{
 					break;
 				}
-				if(GetType() == MOD_TYPE_MOD)
+				if(GetType() & (MOD_TYPE_MOD | MOD_TYPE_DIGI | MOD_TYPE_AMF0 | MOD_TYPE_MED))
 				{
 					pChn->nFineTune = MOD2XMFineTune(param);
 					if(pChn->nPeriod && pChn->rowCommand.IsNote()) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
@@ -3384,9 +3387,9 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 	// E9x: Retrig
 	case 0x90:	RetrigNote(nChn, param); break;
 	// EAx: Fine Volume Up
-	case 0xA0:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeUp(pChn, param, false); break;
+	case 0xA0:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeUp(pChn, param, false); break;
 	// EBx: Fine Volume Down
-	case 0xB0:	if ((param) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param, false); break;
+	case 0xB0:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param, false); break;
 	// ECx: Note Cut
 	case 0xC0:	NoteCut(nChn, param); break;
 	// EDx: Note Delay
@@ -4054,7 +4057,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 	}
 // -! NEW_FEATURE#0010
 
-	if ((pChn->rowCommand.note >= NOTE_MIN) && (pChn->rowCommand.note <= NOTE_MAX))
+	if(pChn->rowCommand.IsNote())
 	{
 		pChn->nPos = param;
 		pChn->nPosLo = 0;
@@ -4515,7 +4518,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 			if (param & 0xF0)
 			{
 				// IT compatibility: Ignore slide commands with both nibbles set.
-				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0x0F) == 0)
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM)) || (param & 0x0F) == 0)
 					nGlbSlide = (int)((param & 0xF0) >> 4) * 2;
 			} else
 			{
@@ -4525,7 +4528,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 	}
 	if (nGlbSlide)
 	{
-		if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) nGlbSlide *= 2;
+		if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) nGlbSlide *= 2;
 		nGlbSlide += m_nGlobalVolume;
 		Limit(nGlbSlide, 0, 256);
 		m_nGlobalVolume = nGlbSlide;
@@ -4577,7 +4580,7 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 //---------------------------------------------------
 {
 	if (!period) return 0;
-	if (m_nType & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
+	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
 	{
 		period >>= 2;
 		for (UINT i=0; i<6*12; i++)
@@ -4612,7 +4615,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 {
 	if ((!note) || (note >= NOTE_MIN_SPECIAL)) return 0;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV
-				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DIGI|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
+				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
 	{
 		note--;
 		if(m_SongFlags[SONG_LINEARSLIDES])
@@ -4674,11 +4677,11 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 //-----------------------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
+	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_AMF0))
 	{
 		return (3546895L*4) / period;
 	} else
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
+	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES])
 			return XMLinearTable[period % 768] >> (period / 768);

@@ -199,7 +199,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 		CMD_VOLUMESLIDE,	// down
 		CMD_VIBRATO,		// sustained (?)
 		CMD_NONE,			// actually slide-to-volume
-		CMD_PANNING8,
+		CMD_S3MCMDEX,		// panning
 		CMD_S3MCMDEX,		// note offset => note delay?
 		CMD_NONE,			// fine tempo down
 		CMD_NONE,			// fine tempo up
@@ -269,15 +269,17 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				case 0x06:	// Vibrato speed
 				case 0x07:	// Volume slide up
-				case 0x0B:	// Panning
 					m.param *= 8;
 					break;
 				case 0x0A:	// Volume-portamento (what!)
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = (m.param << 2) + 4;
 					break;
+				case 0x0B:	// Panning
+					m.param |= 0x80;
+					break;
 				case 0x0C:	// Note offset
-					m.param = 6 / (1 + (m.param & 0x0F)) + 1;
+					m.param = 6 / (1 + m.param) + 1;
 					m.param |= 0x0D;
 				}
 				m.command = farEffects[data[3] >> 4];
