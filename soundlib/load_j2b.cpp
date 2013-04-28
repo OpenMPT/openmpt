@@ -801,7 +801,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			if(pan >= 128)
 				ChnSettings[nChn].dwFlags = CHN_MUTE;
 			else
-				ChnSettings[nChn].nPan = std::min(pan * 4, 256);
+				ChnSettings[nChn].nPan = static_cast<uint16>(std::min(pan * 4, 256));
 		}
 	}
 
