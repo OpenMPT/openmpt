@@ -144,7 +144,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 		|| file.GetLength() < static_cast<size_t>(fileHeader.headerLength))
 	{
 		return false;
-	} else
+	} else if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

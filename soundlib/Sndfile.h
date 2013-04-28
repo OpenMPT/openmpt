@@ -379,6 +379,7 @@ protected:
 public:
 	// Song message
 	SongMessage songMessage;
+	mpt::String madeWithTracker;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -555,7 +556,7 @@ public:
 	void S3MConvert(ModCommand &m, bool fromIT) const;
 	void S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport = false) const;
 	void ModSaveCommand(uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
-	void ReadMODPatternEntry(FileReader &file, ModCommand &m);
+	void ReadMODPatternEntry(FileReader &file, ModCommand &m) const;
 
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 

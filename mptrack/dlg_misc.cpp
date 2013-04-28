@@ -124,7 +124,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_PlugMixBox.SetCurSel(0);
 	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
 	{
-		if(m_PlugMixBox.GetItemData(i) == sndFile.GetMixLevels())
+		if(static_cast<mixLevels>(m_PlugMixBox.GetItemData(i)) == sndFile.GetMixLevels())
 		{
 			m_PlugMixBox.SetCurSel(i);
 			break;
@@ -149,8 +149,10 @@ BOOL CModTypeDlg::OnInitDialog()
 	SetDlgItemText(IDC_TEXT_SAVEDWITH, "Last saved with:");
 
 	SetDlgItemText(IDC_EDIT_CREATEDWITH, FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT_SAVEDWITH, FormatVersionNumber(sndFile.m_dwLastSavedWithVersion));
-
+// 	if(sndFile.m_dwLastSavedWithVersion)
+// 		SetDlgItemText(IDC_EDIT_SAVEDWITH, FormatVersionNumber(sndFile.m_dwLastSavedWithVersion));
+// 	else
+	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.madeWithTracker.c_str());
 	UpdateDialog();
 
 	EnableToolTips(TRUE);
@@ -161,7 +163,7 @@ BOOL CModTypeDlg::OnInitDialog()
 CString CModTypeDlg::FormatVersionNumber(DWORD version)
 //-----------------------------------------------------
 {
-	return CString(MptVersion::ToStr(version)) + (MptVersion::IsTestBuild(version) ? " (Test Build)" : "");
+	return CString(MptVersion::ToStr(version)) + (MptVersion::IsTestBuild(version) ? " (test build)" : "");
 }
 
 

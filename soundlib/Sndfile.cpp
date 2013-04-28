@@ -489,6 +489,7 @@ void CSoundFile::InitializeGlobals()
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
 	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
+	madeWithTracker.clear();
 
 	SetMixLevels(mixLevels_compatible);
 	SetModFlags(0);
@@ -606,6 +607,11 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadM15(file, loadFlags))
 		{
 			m_nType = MOD_TYPE_NONE;
+		}
+
+		if(madeWithTracker.empty())
+		{
+			madeWithTracker = ModTypeToTracker(GetType());
 		}
 
 #ifndef NO_ARCHIVE_SUPPORT

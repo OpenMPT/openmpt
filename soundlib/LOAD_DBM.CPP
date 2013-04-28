@@ -222,6 +222,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	nPatterns = BigEndianW(pfh->patterns);
 	m_nType = MOD_TYPE_DBM;
 	m_nChannels = CLAMP(BigEndianW(pfh->channels), 1, MAX_BASECHANNELS);	// note: MAX_BASECHANNELS is currently 127, but DBM supports up to 128 channels.
+	madeWithTracker.Format("Digi Booster %x.%x", pfh->trkver >> 8, pfh->trkver & 0xFF);
 
 	if(pfh->songname[0])
 	{

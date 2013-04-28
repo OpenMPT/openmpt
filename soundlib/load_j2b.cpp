@@ -778,6 +778,12 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 	m_nType = MOD_TYPE_J2B;
 
+	madeWithTracker = "Galaxy Sound System (";
+	if(isAM)
+		madeWithTracker += "new version)";
+	else
+		madeWithTracker += "old version)";
+
 	ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
 
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
@@ -849,7 +855,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 				continue;
 			}
 
-			m_nInstruments = MAX(m_nInstruments, instr);
+			m_nInstruments = std::max(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
@@ -909,7 +915,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				continue;
 			}
-			m_nInstruments = MAX(m_nInstruments, instr);
+			m_nInstruments = std::max(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
