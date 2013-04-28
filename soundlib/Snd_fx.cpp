@@ -1163,16 +1163,11 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		// IT compatibility 15. Retrigger is reset in RetrigNote (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			// FT2 compatibility: Retrigger is reset in RetrigNote
+			// FT2 compatibility: Retrigger is reset in RetrigNote, tremor in ProcessEffects
 			if(!IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				pChn->nRetrigCount = 0;
 				pChn->nTremorCount = 0;
-			} else
-			{
-				// FT2 Compatibility: Weird XM tremor.
-				// Test case: Tremor.xm
-				pChn->nTremorCount = 0x20;
 			}
 		}
 
@@ -1845,7 +1840,6 @@ BOOL CSoundFile::ProcessEffects()
 						reloadSampleSettings = true;
 					}
 				}
-
 			}
 
 			if((retrigEnv && !IsCompatibleMode(TRK_FASTTRACKER2)) || reloadSampleSettings)
@@ -1869,18 +1863,18 @@ BOOL CSoundFile::ProcessEffects()
 					{
 						// Also reload panning
 						pChn->nPan = oldSample->nPan;
-						
-						// FT2 compatibility: Instrument number disables tremor effect
-						// Test case: TremorRecover.xm
-						if(IsCompatibleMode(TRK_FASTTRACKER2))
-						{
-							pChn->nTremorCount &= ~0x80;
-						}
 					}
 				}
 			}
 
-			if (retrigEnv) //Case: instrument with no note data.
+			// FT2 compatibility: Instrument number disables tremor effect
+			// Test case: TremorInstr.xm, TremoRecover.xm
+			if(IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0)
+			{
+				pChn->nTremorCount = 0x20;
+			}
+
+			if(retrigEnv) //Case: instrument with no note data.
 			{
 				//IT compatibility: Instrument with no note.
 				if(IsCompatibleMode(TRK_IMPULSETRACKER) || m_SongFlags[SONG_PT1XMODE])
