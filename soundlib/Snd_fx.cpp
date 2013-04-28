@@ -551,6 +551,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		{
 			// Target found, or there is no target (i.e. play whole song)...
 			m_nGlobalVolume = memory.glbVol;
+			m_nFrameDelay = m_nPatternDelay = 0;
 			m_lTotalSampleCount = memory.renderedSamples;
 			m_bPositionChanged = true;
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
@@ -655,12 +656,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 
 	// instrumentChanged is used for IT carry-on env option
 	bool instrumentChanged = (pIns != pChn->pModInstrument);
+	const bool sampleChanged = (pChn->pModSample != nullptr) && (pSmp != pChn->pModSample);
 
 	if(!instrumentChanged)
 	{
 		// Special XM hack
 		if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (pIns)
-		&& (pChn->pModSample) && (pSmp != pChn->pModSample))
+			&& sampleChanged)
 		{
 			// FT2 doesn't change the sample in this case,
 			// but still uses the sample info from the old one (bug?)
@@ -887,8 +889,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		pChn->nC5Speed = pSmp->nC5Speed;
 		pChn->m_CalculateFreq = true;
 		pChn->nFineTune = 0;
-	} else if(!bPorta || !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
+	} else if(!bPorta || sampleChanged || !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 	{
+		// Don't reset finetune changed by "set finetune" command.
+		// Test case: finetune.xm, finetune.mod
+		// But *do* change the finetune if we switch to a different sample, to fix
+		// Miranda`s axe by Jamson (jam007.xm) - this file doesn't use compatible play mode,
+		// so we may want to use IsCompatibleMode instead if further problems arise.
 		pChn->nC5Speed = pSmp->nC5Speed;
 		pChn->nFineTune = pSmp->nFineTune;
 	}
@@ -1150,10 +1157,10 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		pChn->dwFlags.reset(CHN_FILTER);
 		pChn->dwFlags.set(CHN_FASTVOLRAMP);
 
-		// IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
+		// IT compatibility 15. Retrigger is reset in RetrigNote (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			// FT2 compatibility: FT2 also doesn't reset retrigger
+			// FT2 compatibility: Retrigger is reset in RetrigNote
 			if(!IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				pChn->nRetrigCount = 0;
@@ -2026,7 +2033,7 @@ BOOL CSoundFile::ProcessEffects()
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
 				UINT param = 0;
-				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 				{
 					param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
 				} else
@@ -3624,9 +3631,9 @@ void CSoundFile::ExtendedChannelEffect(ModChannel *pChn, UINT param)
 	case 0x0E:
 		pChn->dwFlags.reset(CHN_PINGPONGFLAG);
 		break;
-	// S9F: Go backward (set position at the end for non-looping samples)
+	// S9F: Go backward (and set playback position to the end if sample just started)
 	case 0x0F:
-		if(!pChn->dwFlags[CHN_LOOP] && !pChn->nPos && pChn->nLength)
+		if(!pChn->nPos && pChn->nLength && !pChn->rowCommand.IsNote())
 		{
 			pChn->nPos = pChn->nLength - 1;
 			pChn->nPosLo = 0xFFFF;
@@ -4093,7 +4100,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 		}
 	} else if ((param < pChn->nLength) && (GetType() & (MOD_TYPE_MTM|MOD_TYPE_DMF)))
 	{
-		// XXX what's this?
+		// Some trackers can also call offset effects without notes next to them...
 		pChn->nPos = param;
 		pChn->nPosLo = 0;
 	}
