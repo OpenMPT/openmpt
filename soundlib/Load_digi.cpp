@@ -116,6 +116,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = 31;
 	m_nSamplePreAmp = 256 / m_nChannels;
+	madeWithTracker.Format("Digi Booster %d.%d", fileHeader.versionInt >> 4, fileHeader.versionInt & 0x0F);
 
 	Order.ReadFromArray(fileHeader.orders, fileHeader.lastOrdIndex + 1);
 

@@ -651,6 +651,12 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
+	madeWithTracker = "Epic MegaGames MASI (";
+	if(newFormat)
+		madeWithTracker = "New Version / Sinaria)";
+	else
+		madeWithTracker = "New Version)";
+
 	if(!(loadFlags & loadPatternData))
 	{
 		return true;
@@ -1156,6 +1162,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Seems to be valid!
 	InitializeGlobals();
+	madeWithTracker = "Epic MegaGames MASI (Old Version)";
 	m_nType = MOD_TYPE_S3M;
 	m_nChannels = Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;

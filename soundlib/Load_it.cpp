@@ -344,23 +344,27 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+					madeWithTracker = "ModPlug tracker 1.09 - 1.16";
 				} else
 				{
 					// OpenMPT 1.17 disguised as this in compatible mode,
 					// but never writes 0xFF in the pan map for unused channels (which is an invalid value).
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
+					madeWithTracker = "OpenMPT 1.17 (compatibility export)";
 				}
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
+				madeWithTracker = "ModPlug tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
 			}
 			else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
+				madeWithTracker = "ModPlug tracker 1.00a5";
 				interpretModPlugMade = true;
 			}
 		} else // case: type == MOD_TYPE_MPT
@@ -534,6 +538,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// These were not zero bytes -> We're in the wrong place!
 			file.SkipBack(2);
+			madeWithTracker = "UNMO3";
 		}
 	}
 
@@ -549,6 +554,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		MemsetZero(m_MidiCfg.szMidiSFXExt);
 		MemsetZero(m_MidiCfg.szMidiZXXExt);
 		m_SongFlags.set(SONG_EMBEDMIDICFG);
+	}
+
+	if(file.ReadMagic("MODU"))
+	{
+		madeWithTracker = "BeRoTracker";
 	}
 
 	// Read pattern names: "PNAM"
@@ -900,6 +910,84 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	UpgradeModFlags();
+
+	if(m_dwLastSavedWithVersion && madeWithTracker.empty())
+	{
+		madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+		if(fileHeader.reserved != ITFileHeader::omptMagic && (fileHeader.cwtv & 0xF000) == 0x5000)
+		{
+			madeWithTracker += " (compatibility export)";
+		} else if(MptVersion::IsTestBuild(m_dwLastSavedWithVersion))
+		{
+			madeWithTracker += " (test build)";
+		}
+	} else
+	{
+		switch(fileHeader.cwtv >> 12)
+		{
+		case 0:
+			if(!madeWithTracker.empty())
+			{
+				// BeRoTracker has been detected above.
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.flags == 9 && fileHeader.special == 0
+				&& fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0
+				&& fileHeader.insnum == 0 && fileHeader.patnum + 1 == fileHeader.ordnum
+				&& fileHeader.globalvol == 128 && fileHeader.mv == 100 && fileHeader.speed == 1 && fileHeader.sep == 128 && fileHeader.pwd == 0
+				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
+			{
+				madeWithTracker = "OpenSPC conversion";
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.reserved == ITFileHeader::chibiMagic)
+			{
+				madeWithTracker = "ChibiTracker";
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && fileHeader.reserved == 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+			{
+				madeWithTracker = "CheeseTracker";
+			} else
+			{
+				if(fileHeader.cmwt > 0x0214)
+				{
+					madeWithTracker = "Impulse Tracker 2.15";
+				} else if(fileHeader.cwtv > 0x0214)
+				{
+					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
+					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
+					// anything as far as file saving is concerned.
+					madeWithTracker.Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - 0x0214);
+				} else
+				{
+					madeWithTracker.Format("Impulse Tracker %d.%02x", (fileHeader.cwtv & 0x0F00) >> 8, (fileHeader.cwtv & 0xFF));
+				}
+			}
+			break;
+		case 1:
+			madeWithTracker = "Schism Tracker ";
+			if(fileHeader.cwtv > 0x1050)
+			{
+				mpt::String version;
+				tm epoch;
+				MemsetZero(epoch);
+				epoch.tm_year = 109, epoch.tm_mon = 9; epoch.tm_mday = 31;
+				//int32 versionSec = ((fileHeader.cwtv - 0x050) * 86400) + mktime(&epoch);
+				// TODO what's the difference between localtime and localtime_r?
+// 				if(localtime_r(&versionSec, &epoch)) {
+// 					sprintf(buf, "%04d-%02d-%02d",
+// 						version.tm_year + 1900, version.tm_mon + 1, version.tm_mday);
+// 					return;
+			} else
+			{
+				mpt::String version;
+				version.Format("0.%x", fileHeader.cwtv & 0xFF);
+				madeWithTracker += version;
+			}
+			break;
+		case 6:
+			madeWithTracker.Format("BeRoTracker %x.%x");
+			break;
+		case 7:
+			madeWithTracker.Format("ITMCK %d.%d.%d", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			break;
+		}
+	}
 
 	if(GetType() == MOD_TYPE_IT)
 	{

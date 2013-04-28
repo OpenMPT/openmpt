@@ -263,6 +263,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	UpgradeModFlags();
 
+	madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+
 	return true;
 #endif
 }

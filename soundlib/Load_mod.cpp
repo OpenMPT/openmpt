@@ -454,8 +454,8 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 }
 
 
-void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
-//-------------------------------------------------------------------
+void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m) const
+//-------------------------------------------------------------------------
 {
 	uint8 data[4];
 	file.ReadArray(data);
@@ -494,15 +494,20 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		|| IsMagic(magic, "FEST"))	// jobbig.mod by Mahoney
 	{
 		m_nChannels = 4;
-	} else if(IsMagic(magic, "CD81")	// Falcon
-		|| IsMagic(magic, "OKTA")		// Oktalyzer
+	} else if(IsMagic(magic, "CD81"))	// Falcon
+	{
+		m_nChannels = 8;
+		madeWithTracker = "Falcon";
+	} else if(IsMagic(magic, "OKTA")	// Oktalyzer
 		|| IsMagic(magic, "OCTA"))		// Oktalyzer
 	{
 		m_nChannels = 8;
+		madeWithTracker = "Oktalyzer";
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
 		m_nChannels = magic[3] - '0';
+		madeWithTracker = "Startrekker";
 	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
@@ -516,6 +521,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// TDZx - TakeTracker
 		m_nChannels = magic[3] - '0';
+		madeWithTracker = "TakeTracker";
 	} else
 	{
 		return false;

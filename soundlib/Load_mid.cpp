@@ -1,5 +1,5 @@
 /*
- * Load_med.cpp
+ * Load_mid.cpp
  * ------------
  * Purpose: MIDI file loader
  * Notes  : MIDI import is pretty crappy.
@@ -333,13 +333,6 @@ extern const LPCSTR szMidiPercussionNames[61] =
 	"Shaker",
 	"Jingle Bell",
 	"Bell Tree",
-};
-
-
-const WORD kMidiChannelPriority[16] =
-{
-	0xFFFE, 0xFFFC, 0xFFF8, 0xFFF0,	0xFFE0, 0xFFC0, 0xFF80, 0xFF00,
-	0xFE00, 0xFDFF, 0xF800, 0xF000,	0xE000, 0xC000, 0x8000, 0x0000,
 };
 
 

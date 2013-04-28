@@ -123,6 +123,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
 	m_nChannels = fileHeader.numChannels;
+	madeWithTracker.Format("MultiTracker %d.%d", fileHeader.version >> 4, fileHeader.version & 0x0F);
 
 	// Reading instruments
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)

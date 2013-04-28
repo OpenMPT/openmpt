@@ -116,6 +116,11 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = 4;
 	m_nChannels = 8;
 
+	if(fileHeader.sig == _669FileHeader::magic669)
+		madeWithTracker = "Composer 669";
+	else
+		madeWithTracker = "UNIS 669";
+
 	m_nSamples = fileHeader.samples;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
