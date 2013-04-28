@@ -735,9 +735,12 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 
 		// Default sample panning
-		if(pSmp->uFlags[CHN_PANNING] || (GetType() & MOD_TYPE_XM))
+		if(pSmp->uFlags[CHN_PANNING] && (bUpdVol || GetType() != MOD_TYPE_XM))
 		{
+			// FT2 compatibility: Only reset panning on instrument numbers, not notes (bUpdVol condition)
+			// Test case: PanMemory.xm
 			pChn->nPan = pSmp->nPan;
+
 			// IT compatibility: Sample and instrument panning overrides channel surround status.
 			// Test case: SmpInsPanSurround.it
 			if(IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_SURROUNDPAN])
@@ -2321,13 +2324,14 @@ BOOL CSoundFile::ProcessEffects()
 // 				break;
 // 			}
 
-			// FT2 compatibility: Global volume is applied *after* the first tick.
-			// This is not emulated quite correctly for speed 1 (because there is no second tick), but it should be close enough.
+			// FT2 compatibility: On channels that are "left" of the global volume command, the new global volume is not applied
+			// until the second tick of the row. Since we apply global volume on the mix buffer rather than note volumes, this
+			// cannot be fixed for now.
 			// Test case: GlobalVolume.xm
-			if(IsCompatibleMode(TRK_FASTTRACKER2) && m_SongFlags[SONG_FIRSTTICK] && m_nMusicSpeed > 1)
-			{
-				break;
-			}
+// 			if(IsCompatibleMode(TRK_FASTTRACKER2) && m_SongFlags[SONG_FIRSTTICK] && m_nMusicSpeed > 1)
+// 			{
+// 				break;
+// 			}
 
 			if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param *= 2;
 
