@@ -461,12 +461,12 @@ typedef VOID (* LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
 //
 extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
-extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
-extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
+extern void C_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+extern void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
 
-void X86_InitMixBuffer(int *pBuffer, UINT nSamples);
-void X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
-void X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+void InitMixBuffer(int *pBuffer, UINT nSamples);
+void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
+void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 
 #ifdef ENABLE_3DNOW
@@ -1452,7 +1452,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 	if (!count) return 0;
 	BOOL bSurround;
 	bool ITPingPongMode = IsITPingPongMode();
-	if (m_MixerSettings.gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
+	if (m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
 	nchused = nchmixed = 0;
 	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
 	{
@@ -1524,7 +1524,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 				pOfsL = &pPlugin->nVolDecayL;
 				if (!(pPlugin->dwFlags & SNDMIXPLUGINSTATE::psfMixReady))
 				{
-					X86_StereoFill(pbuffer, count, pOfsR, pOfsL);
+					StereoFill(pbuffer, count, pOfsR, pOfsL);
 					pPlugin->dwFlags |= SNDMIXPLUGINSTATE::psfMixReady;
 				}
 			}
@@ -1534,7 +1534,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		{
 			if (!m_Reverb.gnReverbSend)
 			{
-				X86_StereoFill(MixReverbBuffer, count, &m_Reverb.gnRvbROfsVol, &m_Reverb.gnRvbLOfsVol);
+				StereoFill(MixReverbBuffer, count, &m_Reverb.gnRvbROfsVol, &m_Reverb.gnRvbLOfsVol);
 			}
 			m_Reverb.gnReverbSend += count;
 			pOfsR = &m_Reverb.gnRvbROfsVol;
@@ -1558,7 +1558,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pChannel->nPos = 0;
 			pChannel->nPosLo = 0;
 			pChannel->nRampLength = 0;
-			X86_EndChannelOfs(pChannel, pbuffer, nsamples);
+			EndChannelOfs(pChannel, pbuffer, nsamples);
 			*pOfsR += pChannel->nROfs;
 			*pOfsL += pChannel->nLOfs;
 			pChannel->nROfs = pChannel->nLOfs = 0;
@@ -1677,7 +1677,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			} else
 			if (pState->nVolDecayR|pState->nVolDecayL)
 			{
-				X86_StereoFill(pState->pMixBuffer, nCount, &pState->nVolDecayR, &pState->nVolDecayL);
+				StereoFill(pState->pMixBuffer, nCount, &pState->nVolDecayR, &pState->nVolDecayL);
 				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount);
 			} else
 			{
@@ -1786,7 +1786,6 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
 //-----------------------------------------------------------------------------------------
 {
-
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
@@ -1804,9 +1803,11 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 		}
 #endif // ENABLE_3DNOW
 	}
-
+#ifdef ENABLE_X86
 	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-
+#else
+	C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
+#endif
 }
 
 
@@ -1823,59 +1824,21 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 		}
 #endif // ENABLE_3DNOW
 	}
+#ifdef ENABLE_X86
 	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-}
-
-
-VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
-//------------------------------------------------------------------------
-{
-	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
-	{
-#ifdef ENABLE_SSE
-		if(gdwSysInfo & PROCSUPPORT_SSE)
-		{
- 			SSE_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
-			return;
-		}
-#endif // ENABLE_SSE
-#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
-		{
-			AMD_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
-			return;
-		}
-#endif // ENABLE_3DNOW
-	}
-	X86_MonoMixToFloat(pSrc, pOut, nCount, m_PlayConfig.getIntToFloat());
-
-}
-
-
-VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
-//-----------------------------------------------------------------------
-{
-	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
-	{
-#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
-		{
-			AMD_FloatToMonoMix(pIn, pOut, nCount, m_PlayConfig.getFloatToInt());
-			return;
-		}
-#endif // ENABLE_3DNOW
-	}
-	X86_FloatToMonoMix(pIn, pOut, nCount, m_PlayConfig.getFloatToInt());
+#else
+	C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
+#endif
 }
 
 
 #pragma warning (disable:4100)
 
-// Clip and convert to 8 bit
-DWORD X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------
-{
+
 #ifdef ENABLE_X86
+static DWORD X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------------
+{
 	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 8-bit buffer
@@ -1908,7 +1871,12 @@ done:
 	mov result, eax
 	}
 	return result;
-#else
+}
+#endif
+
+static DWORD C_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//------------------------------------------------------------------------
+{
 	uint8 * p = (uint8*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
 	{
@@ -1918,15 +1886,24 @@ done:
 		p[i] = (uint8)((v >> (24-MIXING_ATTENUATION))+0x80); // unsigned
 	}
 	return lSampleCount * 1;
-#endif
+}
+
+// Clip and convert to 8 bit
+DWORD Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_Convert32To8(lp16, pBuffer, lSampleCount);
+	#else
+		C_Convert32To8(lp16, pBuffer, lSampleCount);
+	#endif
 }
 
 
-// Clip and convert to 16 bit
-DWORD X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------
-{
 #ifdef ENABLE_X86
+static DWORD X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------------------
+{
 	DWORD result;
 	_asm {
 	mov ebx, lp16				// ebx = 16-bit buffer
@@ -1959,7 +1936,12 @@ done:
 	mov result, eax
 	}
 	return result;
-#else
+}
+#endif
+
+static DWORD C_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//-------------------------------------------------------------------------
+{
 	int16 * p = (int16*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
 	{
@@ -1969,15 +1951,24 @@ done:
 		p[i] = (int16)(v >> (16-MIXING_ATTENUATION));
 	}
 	return lSampleCount * 2;
-#endif
+}
+
+// Clip and convert to 16 bit
+DWORD Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//----------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_Convert32To16(lp16, pBuffer, lSampleCount);
+	#else
+		C_Convert32To16(lp16, pBuffer, lSampleCount);
+	#endif
 }
 
 
-// Clip and convert to 24 bit
-DWORD X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------
-{
 #ifdef ENABLE_X86
+static DWORD X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------------------
+{
 	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 8-bit buffer
@@ -2012,7 +2003,12 @@ done:
 	mov result, eax
 	}
 	return result;
-#else
+}
+#endif
+
+static DWORD C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//-------------------------------------------------------------------------
+{
 	uint8 * p = (uint8*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
 	{
@@ -2031,15 +2027,24 @@ done:
 #endif
 	}
 	return lSampleCount * 3;
-#endif
+}
+
+// Clip and convert to 24 bit
+DWORD Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+{
+	#ifdef ENABLE_X86
+		X86_Convert32To24(lp16, pBuffer, lSampleCount);
+	#else
+		C_Convert32To24(lp16, pBuffer, lSampleCount);
+	#endif
 }
 
 
-// Clip and convert to 32 bit
-DWORD X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------
-{
+
 #ifdef ENABLE_X86
+static DWORD X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------------------
+{
 	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 32-bit buffer
@@ -2071,7 +2076,12 @@ done:
 	mov result, eax
 	}
 	return result;
-#else
+}
+#endif
+
+static DWORD C_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//-------------------------------------------------------------------------
+{
 	int32 * p = (int32*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
 	{
@@ -2081,7 +2091,17 @@ done:
 		p[i] = v << MIXING_ATTENUATION;
 	}
 	return lSampleCount * 4;
-#endif
+}
+
+// Clip and convert to 32 bit
+DWORD Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//----------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_Convert32To32(lp16, pBuffer, lSampleCount);
+	#else
+		C_Convert32To32(lp16, pBuffer, lSampleCount);
+	#endif
 }
 
 
@@ -2099,8 +2119,8 @@ DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
 }
 
 
-void X86_InitMixBuffer(int *pBuffer, UINT nSamples)
-//-------------------------------------------------
+void InitMixBuffer(int *pBuffer, UINT nSamples)
+//---------------------------------------------
 {
 	memset(pBuffer, 0, nSamples * sizeof(int));
 }
@@ -2163,10 +2183,10 @@ noiseloop:
 #endif
 
 
-void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
-//------------------------------------------------------------------------
-{
 #ifdef ENABLE_X86
+static void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
+//-------------------------------------------------------------------------------
+{
 	_asm {
 	mov ecx, nFrames	// ecx = framecount
 	mov esi, pFrontBuf	// esi = front buffer
@@ -2191,7 +2211,12 @@ interleaveloop:
 	jnz interleaveloop
 	pop ebp
 	}
-#else
+}
+#endif
+
+static void C_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
+//-----------------------------------------------------------------------------
+{
 	// copy backwards as we are writing back into FrontBuf
 	for(int i=nFrames-1; i>=0; i--)
 	{
@@ -2200,12 +2225,22 @@ interleaveloop:
 		pFrontBuf[i*4+1] = pFrontBuf[i*2+1];
 		pFrontBuf[i*4+0] = pFrontBuf[i*2+0];
 	}
-#endif
+}
+
+void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
+//--------------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
+	#else
+		C_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
+	#endif
 }
 
 
-VOID X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
-//--------------------------------------------------
+#ifdef ENABLE_X86
+static void X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
+//---------------------------------------------------------
 {
 	_asm {
 	mov ecx, nSamples
@@ -2223,15 +2258,36 @@ stloop:
 	jnz stloop
 	}
 }
+#endif
+
+static void C_MonoFromStereo(int *pMixBuf, UINT nSamples)
+//-------------------------------------------------------
+{
+	for(UINT i=0; i<nSamples; ++i)
+	{
+		pMixBuf[i] = (pMixBuf[i*2] + pMixBuf[i*2+1]) / 2;
+	}
+}
+
+void MonoFromStereo(int *pMixBuf, UINT nSamples)
+//----------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_MonoFromStereo(pMixBuf, nSamples);
+	#else
+		C_MonoFromStereo(pMixBuf, nSamples);
+	#endif
+}
+
 
 #define OFSDECAYSHIFT	8
 #define OFSDECAYMASK	0xFF
 
 
-void X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
-//----------------------------------------------------------------------------
-{
 #ifdef ENABLE_X86
+static void X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+//-----------------------------------------------------------------------------------
+{
 	_asm {
 	mov edi, pBuffer
 	mov ecx, nSamples
@@ -2299,13 +2355,19 @@ done:
 	mov [esi], eax
 	mov [edi], edx
 	}
-#else // c implementation taken from libmodplug
+}
+#endif
+
+// c implementation taken from libmodplug
+static void C_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+//---------------------------------------------------------------------------------
+{
 	int rofs = *lpROfs;
 	int lofs = *lpLOfs;
 
 	if ((!rofs) && (!lofs))
 	{
-		X86_InitMixBuffer(pBuffer, nSamples*2);
+		InitMixBuffer(pBuffer, nSamples*2);
 		return;
 	}
 	for (UINT i=0; i<nSamples; i++)
@@ -2319,16 +2381,24 @@ done:
 	}
 	*lpROfs = rofs;
 	*lpLOfs = lofs;
-#endif
+}
+
+void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+//------------------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_StereoFill(pBuffer, nSamples, lpROfs, lpLOfs);
+	#else
+		C_StereoFill(pBuffer, nSamples, lpROfs, lpLOfs);
+	#endif
 }
 
 
-typedef struct ModChannel ModChannel_;
-
-void X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
-//-----------------------------------------------------------------------
-{
 #ifdef ENABLE_X86
+typedef ModChannel ModChannel_;
+static void X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
+//------------------------------------------------------------------------------
+{
 	_asm {
 	mov esi, pChannel
 	mov edi, pBuffer
@@ -2365,7 +2435,14 @@ brkloop:
 	mov dword ptr [esi+ModChannel_.nROfs], eax
 	mov dword ptr [esi+ModChannel_.nLOfs], edx
 	}
-#else // c implementation taken from libmodplug
+}
+#endif
+
+// c implementation taken from libmodplug
+static void C_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
+//----------------------------------------------------------------------------
+{
+
 	int rofs = pChannel->nROfs;
 	int lofs = pChannel->nLOfs;
 
@@ -2381,6 +2458,14 @@ brkloop:
 	}
 	pChannel->nROfs = rofs;
 	pChannel->nLOfs = lofs;
-#endif
 }
 
+void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
+//-------------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_EndChannelOfs(pChannel, pBuffer, nSamples);
+	#else
+		C_EndChannelOfs(pChannel, pBuffer, nSamples);
+	#endif
+}
