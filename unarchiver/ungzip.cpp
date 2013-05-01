@@ -87,7 +87,7 @@ bool CGzipArchive::ExtractFile()
 	}
 
 	// Well, this is a bit small when inflated / deflated.
-	if(trailer.isize == 0 || inFile.BytesLeft() < sizeof(GZtrailer))
+	if(trailer.isize == 0 || !inFile.CanRead(sizeof(GZtrailer)))
 	{
 		return false;
 	}

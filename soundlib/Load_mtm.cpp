@@ -110,7 +110,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.numSamples >= MAX_SAMPLES
 		|| fileHeader.lastPattern >= MAX_PATTERNS
 		|| fileHeader.beatsPerTrack == 0
-		|| file.BytesLeft() < sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize)
+		|| !file.CanRead(sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)

@@ -678,7 +678,7 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position)
 bool ModSequence::Deserialize(FileReader &file)
 //---------------------------------------------
 {
-	if(file.BytesLeft() < 2 + 4) return false;
+	if(!file.CanRead(2 + 4)) return false;
 
 	uint16 version = file.ReadUint16LE();
 	if(version != 0) return false;

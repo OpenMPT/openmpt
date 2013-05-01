@@ -486,7 +486,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read mix plugins information
-	if(file.BytesLeft() >= 8)
+	if(file.CanRead(8))
 	{
 		FileReader::off_t oldPos = file.GetPosition();
 		LoadMixPlugins(file);
@@ -524,7 +524,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Leave if no extra instrument settings are available (end of file reached)
-	if(!file.BytesLeft()) return true;
+	if(file.NoBytesLeft()) return true;
 
 	bool interpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
 	if(GetNumInstruments())

@@ -357,7 +357,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 					m.command = CMD_NONE;
 					m.volcmd = VOLCMD_NONE;
 
-					while(chunk.BytesLeft())
+					while(chunk.AreBytesLeft())
 					{
 						uint8 effByte = chunk.ReadUint8();
 						uint8 paramByte = chunk.ReadUint8();

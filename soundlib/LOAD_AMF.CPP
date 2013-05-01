@@ -109,7 +109,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.Read(fileHeader)
 		|| strncmp(fileHeader.signature, "ASYLUM Music Format V1.0", 25)
 		|| fileHeader.numSamples > 64
-		|| file.BytesLeft() < 256 + 64 * sizeof(AsylumSampleHeader) + 64 * 4 * 8 * fileHeader.numPatterns)
+		|| !file.CanRead(256 + 64 * sizeof(AsylumSampleHeader) + 64 * 4 * 8 * fileHeader.numPatterns))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -195,7 +195,7 @@ void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
 {
 	fileChunk.Rewind();
 	ModCommand::INSTR lastInstr = 0;
-	while(fileChunk.BytesLeft())
+	while(fileChunk.AreBytesLeft())
 	{
 		const uint8 row = fileChunk.ReadUint8();
 		const uint8 command = fileChunk.ReadUint8();
@@ -550,7 +550,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				}
 			}
-			if(!file.BytesLeft())
+			if(file.NoBytesLeft())
 			{
 				break;
 			}

@@ -10,38 +10,421 @@
 
 #pragma once
 
+
 #include "../common/typedefs.h"
 #include "../common/StringFixer.h"
 #include "Endianness.h"
-#include <vector>
 #include <algorithm>
+#ifndef NO_FILEREADER_STD_ISTREAM
+#include <ios>
+#include <istream>
+#endif
 #include <limits>
+#include <vector>
+
+
+// change to show warnings for functions which trigger pre-caching the whole file for unseekable streams
+//#define FILEREADER_DEPRECATED DEPRECATED
+#define FILEREADER_DEPRECATED
+
+
+#ifndef NO_FILEREADER_STD_ISTREAM
+
+class IFileDataContainer {
+public:
+	typedef std::size_t off_t;
+protected:
+	IFileDataContainer() { }
+public:
+	virtual ~IFileDataContainer() { }
+public:
+	virtual bool IsValid() const = 0;
+	virtual const char *GetRawData() const = 0;
+	virtual off_t GetLength() const = 0;
+	virtual off_t Read(char *dst, off_t pos, off_t count) const = 0;
+
+	virtual const char *GetPartialRawData(off_t pos, off_t length) const // DO NOT USE!!! this is just for ReadMagic ... the pointer returned may be invalid after the next Read()
+	{
+		if(pos + length > GetLength())
+		{
+			return nullptr;
+		}
+		return GetRawData() + pos;
+	}
+
+	virtual bool CanRead(off_t pos, off_t length) const
+	{
+		return pos + length <= GetLength();
+	}
+
+	virtual off_t GetReadableLength(off_t pos, off_t length) const
+	{
+		if(pos >= GetLength())
+		{
+			return 0;
+		}
+		return std::min<off_t>(length, GetLength() - pos);
+	}
+};
+
+
+class FileDataContainerDummy : public IFileDataContainer {
+public:
+	FileDataContainerDummy() { }
+	virtual ~FileDataContainerDummy() { }
+public:
+	bool IsValid() const
+	{
+		return false;
+	}
+
+	const char *GetRawData() const
+	{
+		return nullptr;
+	}
+
+	off_t GetLength() const
+	{
+		return 0;
+	}
+	off_t Read(char *dst, off_t pos, off_t count) const
+	{
+		return 0;
+	}
+};
+
+
+class FileDataContainerWindow : public IFileDataContainer
+{
+private:
+	MPT_SHARED_PTR<IFileDataContainer> data;
+	off_t dataOffset;
+	off_t dataLength;
+public:
+	FileDataContainerWindow(MPT_SHARED_PTR<IFileDataContainer> src, off_t off, off_t len) : data(src), dataOffset(off), dataLength(len) { }
+	virtual ~FileDataContainerWindow() { }
+
+	bool IsValid() const
+	{
+		return data->IsValid();
+	}
+	const char *GetRawData() const {
+		return data->GetRawData() + dataOffset;
+	}
+	off_t GetLength() const {
+		return dataLength;
+	}
+	off_t Read(char *dst, off_t pos, off_t count) const
+	{
+		return data->Read(dst, dataOffset + pos, count);
+	}
+	const char *GetPartialRawData(off_t pos, off_t length) const
+	{
+		if(pos + length > dataLength)
+		{
+			return nullptr;
+		}
+		return data->GetPartialRawData(dataOffset + pos, length);
+	}
+	bool CanRead(off_t pos, off_t length) const {
+		return pos + length <= dataLength;
+	}
+	off_t GetReadableLength(off_t pos, off_t length) const
+	{
+		if(pos >= dataLength)
+		{
+			return 0;
+		}
+		return std::min<off_t>(length, dataLength - pos);
+	}
+};
+
+
+class FileDataContainerStdStream : public IFileDataContainer {
+private:
+	mutable std::vector<char> cache;
+	mutable bool streamFullyCached;
+
+	std::istream *stream;
+
+public:
+	FileDataContainerStdStream(std::istream *s) : stream(s), streamFullyCached(false) { }
+	virtual ~FileDataContainerStdStream() { }
+
+private:
+	static const std::size_t buffer_size = 65536;
+	void CacheStream() const
+	{
+		if(streamFullyCached)
+		{
+			return;
+		}
+		while(*stream)
+		{
+			cache.resize(cache.size() + buffer_size);
+			stream->read(&cache[cache.size() - buffer_size], buffer_size);
+			std::size_t readcount = static_cast<std::size_t>(stream->gcount());
+			cache.resize(cache.size() - buffer_size + readcount);
+		}
+		streamFullyCached = true;
+	}
+	void CacheStreamUpTo(std::streampos pos) const
+	{
+		if(streamFullyCached)
+		{
+			return;
+		}
+		if(pos <= std::streampos(cache.size()))
+		{
+			return;
+		}
+		std::size_t needcount = static_cast<std::size_t>(pos - std::streampos(cache.size()));
+		cache.resize(static_cast<std::size_t>(pos));
+		stream->read(&cache[cache.size() - needcount], needcount);
+		std::size_t readcount = static_cast<std::size_t>(stream->gcount());
+		cache.resize(cache.size() - buffer_size + readcount);
+		if(*stream)
+		{
+			// can read further
+			return;
+		}
+		streamFullyCached = true;
+	}
+private:
+	void ReadCached(char *dst, off_t pos, off_t count) const
+	{
+		std::copy(cache.begin() + pos, cache.begin() + pos + count, dst);
+	}
+
+public:
+
+	bool IsValid() const
+	{
+		return true;
+	}
+
+	const char *GetRawData() const
+	{
+		CacheStream();
+		return &cache[0];
+	}
+
+	off_t GetLength() const
+	{
+		if(streamFullyCached)
+		{
+			return cache.size();
+		} else
+		{
+			stream->clear();
+			std::streampos oldpos = stream->tellg();
+			if(!stream->fail() && oldpos != std::streampos(-1))
+			{
+				stream->seekg(0, std::ios::end);
+				if(!stream->fail())
+				{
+					std::streampos length = stream->tellg();
+					if(!stream->fail() && length != std::streampos(-1))
+					{
+						stream->seekg(oldpos);
+						stream->clear();
+						return static_cast<off_t>(length);
+					}
+				}
+				stream->clear();
+				stream->seekg(oldpos);
+			}
+			// not seekable
+			stream->clear();
+			CacheStream();
+			return cache.size();
+		}
+	}
+
+	off_t Read(char *dst, off_t pos, off_t count) const
+	{
+		CacheStreamUpTo(pos + count);
+		if(pos >= off_t(cache.size()))
+		{
+			return 0;
+		}
+		off_t cache_avail = std::min<off_t>(off_t(cache.size()) - pos, count);
+		ReadCached(dst, pos, cache_avail);
+		return cache_avail;
+	}
+
+	const char *GetPartialRawData(off_t pos, off_t length) const
+	{
+		CacheStreamUpTo(pos + length);
+		if(pos + length > off_t(cache.size()))
+		{
+			return nullptr;
+		}
+		return &cache[pos];
+	}
+
+	bool CanRead(off_t pos, off_t length) const
+	{
+		CacheStreamUpTo(pos + length);
+		return pos + length <= off_t(cache.size());
+	}
+
+	off_t GetReadableLength(off_t pos, off_t length) const
+	{
+		CacheStreamUpTo(pos + length);
+		return std::min<off_t>(cache.size() - pos, length);
+	}
+
+};
+
+#endif 
+
+
+class FileDataContainerMemory
+#ifndef NO_FILEREADER_STD_ISTREAM
+	: public IFileDataContainer
+#endif
+{
+
+#ifdef NO_FILEREADER_STD_ISTREAM
+public:
+	typedef std::size_t off_t;
+#endif
+
+private:
+
+	const char *streamData;	// Pointer to memory-mapped file
+	off_t streamLength;		// Size of memory-mapped file in bytes
+
+public:
+	FileDataContainerMemory() : streamData(nullptr), streamLength(0) { }
+	FileDataContainerMemory(const char *data, off_t length) : streamData(data), streamLength(length) { }
+#ifndef NO_FILEREADER_STD_ISTREAM
+	virtual
+#endif
+		~FileDataContainerMemory() { }
+
+public:
+
+	bool IsValid() const
+	{
+		return streamData != nullptr;
+	}
+
+	const char *GetRawData() const
+	{
+		return streamData;
+	}
+
+	off_t GetLength() const
+	{
+		return streamLength;
+	}
+
+	off_t Read(char *dst, off_t pos, off_t count) const
+	{
+		if(pos >= streamLength)
+		{
+			return 0;
+		}
+		off_t avail = std::min<off_t>(streamLength - pos, count);
+		std::copy(streamData + pos, streamData + pos + avail, dst);
+		return avail;
+	}
+
+	const char *GetPartialRawData(off_t pos, off_t length) const
+	{
+		if(pos + length > streamLength)
+		{
+			return nullptr;
+		}
+		return streamData + pos;
+	}
+
+	bool CanRead(off_t pos, off_t length) const
+	{
+		return pos + length <= streamLength;
+	}
+
+	off_t GetReadableLength(off_t pos, off_t length) const
+	{
+		if(pos >= streamLength)
+		{
+			return 0;
+		}
+		return std::min<off_t>(length, streamLength - pos);
+	}
+
+};
 
 
 //==============
 class FileReader
 //==============
 {
+
 public:
-	typedef size_t off_t;	// Type for file offsets and sizes
+
+#ifndef NO_FILEREADER_STD_ISTREAM
+	typedef IFileDataContainer::off_t off_t;
+#else
+	typedef FileDataContainerMemory::off_t off_t;
+#endif
 
 private:
-	const char *streamData;	// Pointer to memory-mapped file
-	off_t streamLength;		// Size of memory-mapped file in bytes
+
+#ifndef NO_FILEREADER_STD_ISTREAM
+	const IFileDataContainer & DataContainer() const { return *data; }
+	IFileDataContainer & DataContainer() { return *data; }
+	MPT_SHARED_PTR<IFileDataContainer> data;
+#else
+	const FileDataContainerMemory & DataContainer() const { return data; }
+	FileDataContainerMemory & DataContainer() { return data; }
+	FileDataContainerMemory data;
+#endif
+
 	off_t streamPos;		// Cursor location in the file
 
 public:
+
+#ifndef NO_FILEREADER_STD_ISTREAM
+
 	// Initialize invalid file reader object.
-	FileReader() : streamData(nullptr), streamLength(0), streamPos(0) { }
+	FileReader() : data(new FileDataContainerDummy()), streamPos(0) { }
+
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const void *data, off_t length) : streamData(static_cast<const char *>(data)), streamLength(length), streamPos(0) { }
+	FileReader(const void *voiddata, off_t length) : data(new FileDataContainerMemory(static_cast<const char *>(voiddata), length)), streamPos(0) { }
+	FileReader(const char *chardata, off_t length) : data(new FileDataContainerMemory(chardata, length)), streamPos(0) { }
+	FileReader(const uint8 *uint8data, off_t length) : data(new FileDataContainerMemory(reinterpret_cast<const char *>(uint8data), length)), streamPos(0) { }
+
+	// Initialize file reader object with a std::istream.
+	FileReader(std::istream *s) : data(new FileDataContainerStdStream(s)), streamPos(0) { }
+
+	// Initialize file reader object based on an existing file reader object window.
+	FileReader(MPT_SHARED_PTR<IFileDataContainer> other) : data(other), streamPos(0) { }
+
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
-	FileReader(const FileReader &other) : streamData(other.streamData), streamLength(other.streamLength), streamPos(other.streamPos) { }
+	FileReader(const FileReader &other) : data(other.data), streamPos(other.streamPos) { }
+
+#else
+
+	// Initialize invalid file reader object.
+	FileReader() : data(nullptr, 0), streamPos(0) { }
+
+	// Initialize file reader object with pointer to data and data length.
+	FileReader(const void *voiddata, off_t length) : data(static_cast<const char *>(voiddata), length), streamPos(0) { }
+	FileReader(const char *chardata, off_t length) : data(chardata, length), streamPos(0) { }
+	FileReader(const uint8 *uint8data, off_t length) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0) { }
+
+	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
+	FileReader(const FileReader &other) : data(other.data), streamPos(other.streamPos) { }
+
+#endif
 
 	// Returns true if the object points to a valid stream.
 	bool IsValid() const
 	{
-		return streamData != nullptr;
+		return DataContainer().IsValid();
 	}
 
 	// Reset cursor to first byte in file.
@@ -54,7 +437,12 @@ public:
 	// Returns false if position is invalid.
 	bool Seek(off_t position)
 	{
-		if(position <= streamLength)
+		if(position <= streamPos)
+		{
+			streamPos = position;
+			return true;
+		}
+		if(position <= DataContainer().GetLength())
 		{
 			streamPos = position;
 			return true;
@@ -68,13 +456,13 @@ public:
 	// Returns true if skipBytes could be skipped or false if the file end was reached earlier.
 	bool Skip(off_t skipBytes)
 	{
-		if(BytesLeft() >= skipBytes)
+		if(CanRead(skipBytes))
 		{
 			streamPos += skipBytes;
 			return true;
 		} else
 		{
-			streamPos = streamLength;
+			streamPos = DataContainer().GetLength();
 			return false;
 		}
 	}
@@ -101,34 +489,49 @@ public:
 	}
 
 	// Returns size of the mapped file in bytes.
-	off_t GetLength() const
+	FILEREADER_DEPRECATED off_t GetLength() const
 	{
-		return streamLength;
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		return DataContainer().GetLength();
 	}
 
 	// Return byte count between cursor position and end of file, i.e. how many bytes can still be read.
-	off_t BytesLeft() const
+	FILEREADER_DEPRECATED off_t BytesLeft() const
 	{
-		return streamLength - streamPos;
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		return DataContainer().GetLength() - streamPos;
+	}
+
+	bool AreBytesLeft() const
+	{
+		return CanRead(1);
+	}
+
+	bool NoBytesLeft() const
+	{
+		return !CanRead(1);
 	}
 
 	// Check if "amount" bytes can be read from the current position in the stream.
 	bool CanRead(off_t amount) const
 	{
-		return (amount <= BytesLeft());
+		return DataContainer().CanRead(streamPos, amount);
 	}
 
 	// Create a new FileReader object for parsing a sub chunk at a given position with a given length.
 	// The file cursor is not modified.
 	FileReader GetChunk(off_t position, off_t length) const
 	{
-		if(position < streamLength)
-		{
-			return FileReader(streamData + position, (std::min)(length, streamLength - position));
-		} else
+		off_t readableLength = DataContainer().GetReadableLength(position, length);
+		if(readableLength == 0)
 		{
 			return FileReader();
 		}
+		#ifndef NO_FILEREADER_STD_ISTREAM
+			return FileReader(MPT_SHARED_PTR<IFileDataContainer>(new FileDataContainerWindow(data, position, (std::min)(length, DataContainer().GetLength() - position))));
+		#else
+			return FileReader(DataContainer().GetRawData() + position, (std::min)(length, DataContainer().GetLength() - position));
+		#endif
 	}
 
 	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
@@ -142,9 +545,10 @@ public:
 
 	// Returns raw stream data at cursor position.
 	// Should only be used if absolutely necessary, for example for sample reading.
-	const char *GetRawData() const
+	FILEREADER_DEPRECATED const char *GetRawData() const
 	{
-		return streamData + streamPos;
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		return DataContainer().GetRawData() + streamPos;
 	}
 
 	// Read a "T" object from the stream.
@@ -153,15 +557,12 @@ public:
 	template <typename T>
 	bool Read(T &target)
 	{
-		if(CanRead(sizeof(T)))
-		{
-			target = *reinterpret_cast<const T *>(streamData + streamPos);
-			streamPos += sizeof(T);
-			return true;
-		} else
+		if(sizeof(T) != DataContainer().Read(reinterpret_cast<char*>(&target), streamPos, sizeof(T)))
 		{
 			return false;
 		}
+		streamPos += sizeof(T);
+		return true;
 	}
 
 protected:
@@ -331,9 +732,7 @@ public:
 	template <typename T>
 	bool ReadStructPartial(T &target, off_t partialSize = sizeof(T))
 	{
-		const off_t copyBytes = Util::Min(partialSize, sizeof(target), BytesLeft());
-
-		memcpy(&target, streamData + streamPos, copyBytes);
+		const off_t copyBytes = DataContainer().Read(reinterpret_cast<char *>(&target), streamPos, partialSize);
 		memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
 
@@ -363,7 +762,7 @@ public:
 	{
 		if(CanRead(srcSize))
 		{
-			StringFixer::ReadString<mode, destSize>(destBuffer, streamData + streamPos, srcSize);
+			StringFixer::ReadString<mode, destSize>(destBuffer, DataContainer().GetPartialRawData(streamPos, srcSize), srcSize);
 			streamPos += srcSize;
 			return true;
 		} else
@@ -380,8 +779,10 @@ public:
 	{
 		if(CanRead(sizeof(destArray)))
 		{
-			memcpy(destArray, streamData  + streamPos, sizeof(destArray));
-			streamPos += sizeof(destArray);
+			for(std::size_t i = 0; i < destSize; ++i)
+			{
+				Read(destArray[i]);
+			}
 			return true;
 		} else
 		{
@@ -400,10 +801,9 @@ public:
 		destVector.resize(destSize);
 		if(CanRead(readSize))
 		{
-			if(readSize)
+			for(std::size_t i = 0; i < destSize; ++i)
 			{
-				memcpy(&destVector[0], streamData  + streamPos, readSize);
-				streamPos += readSize;
+				Read(destVector[i]);
 			}
 			return true;
 		} else
@@ -418,10 +818,16 @@ public:
 	bool ReadMagic(const char *const magic)
 	{
 		const off_t magicLength = strlen(magic);
-		if(CanRead(magicLength) && !memcmp(streamData + streamPos, magic, magicLength))
+		if(CanRead(magicLength))
 		{
-			streamPos += magicLength;
-			return true;
+			if(!memcmp(DataContainer().GetPartialRawData(streamPos, magicLength), magic, magicLength))
+			{
+				streamPos += magicLength;
+				return true;
+			} else
+			{
+				return false;
+			}
 		} else
 		{
 			return false;
@@ -439,7 +845,7 @@ public:
 			&& std::numeric_limits<T>::is_signed == false,
 			"Target type is a not an unsigned integer");
 
-		if(!BytesLeft())
+		if(NoBytesLeft())
 		{
 			target = 0;
 			return false;
@@ -458,7 +864,7 @@ public:
 			}
 		}
 
-		while(BytesLeft() && (b & 0x80) != 0)
+		while(AreBytesLeft() && (b & 0x80) != 0)
 		{
 			b = ReadUint8();
 			target <<= 7;

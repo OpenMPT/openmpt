@@ -169,7 +169,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		sample.nVibDepth = mptInfo.vibratoDepth;
 		sample.nVibRate = mptInfo.vibratoRate;
 
-		if(xtraChunk.BytesLeft() >= MAX_SAMPLENAME)
+		if(xtraChunk.CanRead(MAX_SAMPLENAME))
 		{
 			// Name present (clipboard only)
 			xtraChunk.ReadString<StringFixer::nullTerminated>(sampleName, MAX_SAMPLENAME);

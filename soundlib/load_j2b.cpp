@@ -599,7 +599,7 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 		dataFlag	= 0xE0,		// Channel data present
 	};
 
-	if(!chunk.BytesLeft())
+	if(chunk.NoBytesLeft())
 	{
 		return false;
 	}
@@ -616,7 +616,7 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 	PatternRow rowBase = sndFile.Patterns[pat].GetRow(0);
 	ROWINDEX row = 0;
 
-	while(row < numRows && chunk.BytesLeft())
+	while(row < numRows && chunk.AreBytesLeft())
 	{
 		const uint8 flags = chunk.ReadUint8();
 

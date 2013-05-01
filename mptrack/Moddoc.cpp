@@ -24,6 +24,7 @@
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 #include "soundlib/FileReader.h"
+#include <fstream>
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -200,27 +201,34 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 //------------------------------------------------
 {
 	BOOL bModified = TRUE;
-	CMappedFile f;
 
 	ScopedLogCapturer logcapturer(*this);
 
 	if (!lpszPathName) return OnNewDocument();
-	BeginWaitCursor();
-	if (f.Open(lpszPathName))
-	{
-		DWORD dwLen = f.GetLength();
-		if (dwLen)
-		{
-			LPBYTE lpStream = f.Lock();
-			if (lpStream)
-			{
-				m_SndFile.Create(FileReader(lpStream, dwLen), CSoundFile::loadCompleteModule, this);
-				f.Unlock();
-			}
-		}
-		f.Close();
-	}
 
+	BeginWaitCursor();
+	#ifndef NO_FILEREADER_STD_ISTREAM
+		std::ifstream f(lpszPathName, std::ios_base::binary);
+		m_SndFile.Create(FileReader(&f), CSoundFile::loadCompleteModule, this);
+	#else
+	{
+		CMappedFile f;
+		if (f.Open(lpszPathName))
+		{
+			DWORD dwLen = f.GetLength();
+			if (dwLen)
+			{
+				LPBYTE lpStream = f.Lock();
+				if (lpStream)
+				{
+					m_SndFile.Create(FileReader(lpStream, dwLen), CSoundFile::loadCompleteModule, this);
+					f.Unlock();
+				}
+			}
+			f.Close();
+		}
+	}
+	#endif
 	EndWaitCursor();
 
 	std::ostringstream str;
