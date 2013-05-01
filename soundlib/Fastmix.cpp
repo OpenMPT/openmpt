@@ -1893,9 +1893,9 @@ DWORD Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //---------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		X86_Convert32To8(lp16, pBuffer, lSampleCount);
+		return X86_Convert32To8(lp16, pBuffer, lSampleCount);
 	#else
-		C_Convert32To8(lp16, pBuffer, lSampleCount);
+		return C_Convert32To8(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -1958,9 +1958,9 @@ DWORD Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //----------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		X86_Convert32To16(lp16, pBuffer, lSampleCount);
+		return X86_Convert32To16(lp16, pBuffer, lSampleCount);
 	#else
-		C_Convert32To16(lp16, pBuffer, lSampleCount);
+		return C_Convert32To16(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -2033,9 +2033,9 @@ static DWORD C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 DWORD Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 {
 	#ifdef ENABLE_X86
-		X86_Convert32To24(lp16, pBuffer, lSampleCount);
+		return X86_Convert32To24(lp16, pBuffer, lSampleCount);
 	#else
-		C_Convert32To24(lp16, pBuffer, lSampleCount);
+		return C_Convert32To24(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -2098,9 +2098,9 @@ DWORD Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //----------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		X86_Convert32To32(lp16, pBuffer, lSampleCount);
+		return X86_Convert32To32(lp16, pBuffer, lSampleCount);
 	#else
-		C_Convert32To32(lp16, pBuffer, lSampleCount);
+		return C_Convert32To32(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
